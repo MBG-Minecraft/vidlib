@@ -1,0 +1,20 @@
+{
+	"net/minecraft/server/MinecraftServer": [
+		"dev/beast/mods/shimmer/core/ShimmerMinecraftServer"
+	],
+	"net/minecraft/world/level/Level": [
+		"dev/beast/mods/shimmer/core/ShimmerLevel"
+	],
+	"net/minecraft/server/level/ServerLevel": [
+		"dev/beast/mods/shimmer/core/ShimmerServerLevel"
+	],
+	"net/minecraft/world/entity/Entity": [
+		"dev/beast/mods/shimmer/core/ShimmerEntity"
+	],
+	"net/minecraft/world/entity/player/Player": [
+		"dev/beast/mods/shimmer/core/ShimmerPlayer"
+	],
+	"net/minecraft/server/level/ServerPlayer": [
+		"dev/beast/mods/shimmer/core/ShimmerServerPlayer"
+	]
+}

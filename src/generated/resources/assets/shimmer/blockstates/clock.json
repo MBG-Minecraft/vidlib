@@ -1,0 +1,7 @@
+{
+	"variants": {
+		"": {
+			"model": "shimmer:block/clock"
+		}
+	}
+}

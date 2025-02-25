@@ -1,0 +1,82 @@
+package dev.beast.mods.shimmer.core.mixin;
+
+import dev.beast.mods.shimmer.core.ShimmerEntity;
+import dev.beast.mods.shimmer.feature.entity.EntityOverride;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.Entity;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.IdentityHashMap;
+import java.util.Map;
+
+@Mixin(Entity.class)
+public abstract class EntityMixin implements ShimmerEntity {
+	@Unique
+	private Map<EntityOverride<?>, Object> shimmer$overrides = null;
+
+	@Unique
+	private boolean shimmer$isSaving = false;
+
+	@Override
+	@Nullable
+	public <T> T shimmer$getDirectOverride(EntityOverride<T> override) {
+		return shimmer$overrides == null ? null : (T) shimmer$overrides.get(override);
+	}
+
+	@Override
+	public <T> void shimmer$setDirectOverride(EntityOverride<T> override, @Nullable T value) {
+		if (value == null) {
+			if (shimmer$overrides != null) {
+				shimmer$overrides.remove(override);
+
+				if (shimmer$overrides.isEmpty()) {
+					shimmer$overrides = null;
+				}
+			}
+		} else {
+			if (shimmer$overrides == null) {
+				shimmer$overrides = new IdentityHashMap<>(1);
+			}
+
+			shimmer$overrides.put(override, value);
+		}
+	}
+
+	@Override
+	public boolean shimmer$isSaving() {
+		return shimmer$isSaving;
+	}
+
+	@Inject(method = "isCurrentlyGlowing", at = @At("HEAD"), cancellable = true)
+	private void shimmer$isCurrentlyGlowing(CallbackInfoReturnable<Boolean> cir) {
+		var override = EntityOverride.GLOWING.get(this);
+
+		if (override != null) {
+			cir.setReturnValue(override);
+		}
+	}
+
+	@Inject(method = "getTeamColor", at = @At("HEAD"), cancellable = true)
+	private void shimmer$getTeamColor(CallbackInfoReturnable<Integer> cir) {
+		var override = EntityOverride.TEAM_COLOR.get(this);
+
+		if (override != null) {
+			cir.setReturnValue(override & 0xFFFFFF);
+		}
+	}
+
+	@Inject(method = "saveWithoutId", at = @At("HEAD"))
+	private void shimmer$beforeSave(CompoundTag compound, CallbackInfoReturnable<CompoundTag> cir) {
+		shimmer$isSaving = true;
+	}
+
+	@Inject(method = "saveWithoutId", at = @At("RETURN"))
+	private void shimmer$afterSave(CompoundTag compound, CallbackInfoReturnable<CompoundTag> cir) {
+		shimmer$isSaving = false;
+	}
+}

@@ -1,0 +1,13 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "dev.beast.mods.shimmer.core.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": ["EntityMixin", "LevelMixin", "LivingEntityMixin", "MinecraftServerMixin", "MobMixin", "PlayerMixin", "ServerLevelMixin", "ServerPlayerMixin"],
+	"client": [
+	],
+	"injectors": {
+		"defaultRequire": 1,
+		"maxShiftBy": 2
+	}
+}

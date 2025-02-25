@@ -1,0 +1,175 @@
+import java.time.Instant
+
+plugins {
+	id 'base'
+	id 'java'
+	id 'idea'
+	id 'maven-publish'
+	id 'net.neoforged.moddev' version "2.0.75"
+}
+
+ext.ENV = System.getenv()
+def isLocal = !ENV.containsKey("GITHUB_RUN_NUMBER")
+
+version = "${mod_version}-${isLocal ? "local.${Instant.now().epochSecond}" : "build.${ENV.GITHUB_RUN_NUMBER}"}"
+group = project.maven_group
+base.archivesBaseName = project.archives_base_name
+
+println("Building version: ${version}")
+
+neoForge {
+	version = project.neoforge_version
+	accessTransformers {
+		publish(project.file('src/main/resources/META-INF/accesstransformer.cfg'))
+	}
+
+	interfaceInjectionData {
+		from(file('interfaces.json'))
+		publish(file('interfaces.json'))
+	}
+
+	runs {
+		configureEach {
+			logLevel = org.slf4j.event.Level.INFO
+		}
+
+		client {
+			client()
+			systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+
+			if (ENV.MC_CLIENT_ARGS) {
+				programArguments.addAll(ENV.MC_CLIENT_ARGS.split(' '))
+			}
+
+			jvmArguments.addAll("-XX:+IgnoreUnrecognizedVMOptions", "-XX:+AllowEnhancedClassRedefinition")
+			gameDirectory = file 'run'
+		}
+
+		clientTwo {
+			client()
+			systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+
+			if (ENV.MC_CLIENT_2_ARGS) {
+				programArguments.addAll(ENV.MC_CLIENT_2_ARGS.split(' '))
+			}
+
+			jvmArguments.addAll("-XX:+IgnoreUnrecognizedVMOptions", "-XX:+AllowEnhancedClassRedefinition")
+			gameDirectory = file 'run_2'
+		}
+
+		server {
+			server()
+			programArgument("--nogui")
+			gameDirectory = file 'run_server'
+		}
+
+		data {
+			data()
+
+			programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+		}
+	}
+
+	mods {
+		shimmer {
+			sourceSet sourceSets.main
+		}
+	}
+
+	parchment {
+		minecraftVersion = parchment_mc_version
+		mappingsVersion = parchment_mapping_version
+	}
+}
+
+compileJava {
+	options.encoding = "UTF-8"
+	options.release.set(21)
+	options.compilerArgs << '-parameters' << '-Xmaxerrs' << '1000'
+}
+
+java {
+	sourceCompatibility = targetCompatibility = '21'
+	withSourcesJar()
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+configurations {
+	runtimeClasspath.extendsFrom localRuntime
+}
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+
+	maven {
+		url "https://maven.neoforged.net/releases"
+	}
+
+	maven {
+		name = 'ParchmentMC'
+		url = 'https://maven.parchmentmc.org'
+		content {
+			includeGroup "org.parchmentmc.data"
+		}
+	}
+}
+
+dependencies {
+}
+
+processResources {
+	def toReplace = [
+			"version": project.version
+	]
+
+	println("[Process Resources] Replacing properties in resources: " + toReplace)
+
+	inputs.properties toReplace
+	filesMatching("META-INF/neoforge.mods.toml") {
+		expand toReplace
+	}
+}
+
+jar {
+	manifest {
+		attributes([
+				"Specification-Title"     : project.mod_id,
+				"Specification-Vendor"    : project.mod_author,
+				"Specification-Version"   : "1",
+				"Implementation-Title"    : project.name,
+				"Implementation-Version"  : version,
+				"Implementation-Vendor"   : project.mod_author,
+				"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
+	}
+}
+
+publishing {
+	publications {
+		mavenNeoForge(MavenPublication) {
+			artifactId = archives_base_name
+			from components.java
+		}
+	}
+
+	repositories {
+		if (ENV.MAVEN_URL && ENV.MAVEN_USERNAME && ENV.MAVEN_TOKEN) {
+			maven {
+				url = ENV.MAVEN_URL
+				credentials {
+					username = ENV.MAVEN_USERNAME
+					password = ENV.MAVEN_TOKEN
+				}
+			}
+		}
+	}
+}
+
+idea {
+	module {
+		downloadSources = true
+		downloadJavadoc = true
+	}
+}

@@ -1,0 +1,21 @@
+modLoader = "javafml"
+loaderVersion = "[2,)"
+license = "ARR"
+
+[[mods]]
+modId = "shimmer"
+version = "${version}"
+displayName = "Shimmer"
+authors = "latvian.dev"
+logoFile = "shimmer_logo.png"
+logoBlur = true
+
+[[dependencies.shimmer]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1.122,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[mixins]]
+config = "shimmer.mixins.json"
