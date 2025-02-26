@@ -6,21 +6,22 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public class UniverseZone implements Zone {
-	public static final UniverseZone INSTANCE = new UniverseZone();
-	public static final ZoneType<UniverseZone> TYPE = new ZoneType<>("universe", MapCodec.unit(INSTANCE), StreamCodec.unit(INSTANCE));
+public class EmptyZoneShape implements ZoneShape {
+	private static final AABB BOX = new AABB(0D, 0D, 0D, 0D, 0D, 0D);
+	public static final EmptyZoneShape INSTANCE = new EmptyZoneShape();
+	public static final ZoneShapeType<EmptyZoneShape> TYPE = new ZoneShapeType<>("empty", MapCodec.unit(INSTANCE), StreamCodec.unit(INSTANCE));
 
-	private UniverseZone() {
+	private EmptyZoneShape() {
 	}
 
 	@Override
-	public ZoneType<?> type() {
+	public ZoneShapeType<?> type() {
 		return TYPE;
 	}
 
 	@Override
 	public AABB getBoundingBox() {
-		return AABB.INFINITE;
+		return BOX;
 	}
 
 	@Override
@@ -31,11 +32,11 @@ public class UniverseZone implements Zone {
 
 	@Override
 	public boolean contains(Vec3 pos) {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean contains(AABB box) {
-		return true;
+		return false;
 	}
 }

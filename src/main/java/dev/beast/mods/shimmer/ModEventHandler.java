@@ -1,11 +1,11 @@
 package dev.beast.mods.shimmer;
 
-import dev.beast.mods.shimmer.feature.zone.BlockZone;
-import dev.beast.mods.shimmer.feature.zone.BoxZone;
-import dev.beast.mods.shimmer.feature.zone.EmptyZone;
-import dev.beast.mods.shimmer.feature.zone.UniverseZone;
-import dev.beast.mods.shimmer.feature.zone.ZoneGroup;
-import dev.beast.mods.shimmer.feature.zone.ZoneType;
+import dev.beast.mods.shimmer.feature.zone.BlockZoneShape;
+import dev.beast.mods.shimmer.feature.zone.BoxZoneShape;
+import dev.beast.mods.shimmer.feature.zone.EmptyZoneShape;
+import dev.beast.mods.shimmer.feature.zone.UniverseZoneShape;
+import dev.beast.mods.shimmer.feature.zone.ZoneShapeGroup;
+import dev.beast.mods.shimmer.feature.zone.ZoneShapeType;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
@@ -14,10 +14,10 @@ import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 public class ModEventHandler {
 	@SubscribeEvent
 	public static void afterLoad(FMLLoadCompleteEvent event) {
-		ZoneType.register(EmptyZone.TYPE);
-		ZoneType.register(UniverseZone.TYPE);
-		ZoneType.register(ZoneGroup.TYPE);
-		ZoneType.register(BlockZone.TYPE);
-		ZoneType.register(BoxZone.TYPE);
+		ZoneShapeType.register(EmptyZoneShape.TYPE);
+		ZoneShapeType.register(UniverseZoneShape.TYPE);
+		ZoneShapeType.register(ZoneShapeGroup.TYPE);
+		ZoneShapeType.register(BlockZoneShape.TYPE);
+		ZoneShapeType.register(BoxZoneShape.TYPE);
 	}
 }

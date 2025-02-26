@@ -8,12 +8,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public record ZoneGroup(List<Zone> zones, @Nullable AABB box) implements Zone {
-	public static final ZoneType<ZoneGroup> TYPE = new ZoneType<>("group", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		Zone.CODEC.listOf().fieldOf("zones").forGetter(ZoneGroup::zones)
-	).apply(instance, ZoneGroup::create)), Zone.STREAM_CODEC.apply(ByteBufCodecs.list()).map(ZoneGroup::create, ZoneGroup::zones));
+public record ZoneShapeGroup(List<ZoneShape> zoneShapes, @Nullable AABB box) implements ZoneShape {
+	public static final ZoneShapeType<ZoneShapeGroup> TYPE = new ZoneShapeType<>("group", RecordCodecBuilder.mapCodec(instance -> instance.group(
+		ZoneShape.CODEC.codec().listOf().fieldOf("zones").forGetter(ZoneShapeGroup::zoneShapes)
+	).apply(instance, ZoneShapeGroup::create)), ZoneShape.STREAM_CODEC.apply(ByteBufCodecs.list()).map(ZoneShapeGroup::create, ZoneShapeGroup::zoneShapes));
 
-	public static ZoneGroup create(List<Zone> zones) {
+	public static ZoneShapeGroup create(List<ZoneShape> zoneShapes) {
 		double minX = Double.POSITIVE_INFINITY;
 		double minY = Double.POSITIVE_INFINITY;
 		double minZ = Double.POSITIVE_INFINITY;
@@ -21,9 +21,9 @@ public record ZoneGroup(List<Zone> zones, @Nullable AABB box) implements Zone {
 		double maxY = Double.NEGATIVE_INFINITY;
 		double maxZ = Double.NEGATIVE_INFINITY;
 
-		for (var zone : zones) {
+		for (var zone : zoneShapes) {
 			if (zone.canMove()) {
-				return new ZoneGroup(zones, null);
+				return new ZoneShapeGroup(zoneShapes, null);
 			}
 
 			var box = zone.getBoundingBox();
@@ -35,11 +35,11 @@ public record ZoneGroup(List<Zone> zones, @Nullable AABB box) implements Zone {
 			maxZ = Math.max(maxZ, box.maxZ);
 		}
 
-		return new ZoneGroup(zones, new AABB(minX, minY, minZ, maxX, maxY, maxZ));
+		return new ZoneShapeGroup(zoneShapes, new AABB(minX, minY, minZ, maxX, maxY, maxZ));
 	}
 
 	@Override
-	public ZoneType<?> type() {
+	public ZoneShapeType<?> type() {
 		return TYPE;
 	}
 
@@ -52,8 +52,8 @@ public record ZoneGroup(List<Zone> zones, @Nullable AABB box) implements Zone {
 	public AABB getBoundingBox() {
 		if (box != null) {
 			return box;
-		} else if (zones.size() == 1) {
-			return zones.getFirst().getBoundingBox();
+		} else if (zoneShapes.size() == 1) {
+			return zoneShapes.getFirst().getBoundingBox();
 		}
 
 		double minX = Double.POSITIVE_INFINITY;
@@ -63,7 +63,7 @@ public record ZoneGroup(List<Zone> zones, @Nullable AABB box) implements Zone {
 		double maxY = Double.NEGATIVE_INFINITY;
 		double maxZ = Double.NEGATIVE_INFINITY;
 
-		for (var zone : zones) {
+		for (var zone : zoneShapes) {
 			var box = zone.getBoundingBox();
 			minX = Math.min(minX, box.minX);
 			minY = Math.min(minY, box.minY);
@@ -81,7 +81,7 @@ public record ZoneGroup(List<Zone> zones, @Nullable AABB box) implements Zone {
 	public ZoneClipResult clip(Vec3 start, Vec3 end) {
 		ZoneClipResult result = null;
 
-		for (var zone : zones) {
+		for (var zone : zoneShapes) {
 			var clip = zone.clip(start, end);
 
 			if (clip != null) {
@@ -100,7 +100,7 @@ public record ZoneGroup(List<Zone> zones, @Nullable AABB box) implements Zone {
 			return false;
 		}
 
-		for (var zone : zones) {
+		for (var zone : zoneShapes) {
 			if (zone.contains(pos)) {
 				return true;
 			}
@@ -115,7 +115,7 @@ public record ZoneGroup(List<Zone> zones, @Nullable AABB box) implements Zone {
 			return false;
 		}
 
-		for (var zone : zones) {
+		for (var zone : zoneShapes) {
 			if (zone.contains(box)) {
 				return true;
 			}

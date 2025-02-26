@@ -1,18 +1,18 @@
 package dev.beast.mods.shimmer.feature.zone.renderer;
 
-import dev.beast.mods.shimmer.feature.zone.Zone;
 import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
+import dev.beast.mods.shimmer.feature.zone.ZoneShape;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
-public class BoxZoneRenderer implements ZoneRenderer<Zone> {
+public class BoxZoneRenderer implements ZoneRenderer<ZoneShape> {
 	public static final BoxZoneRenderer INSTANCE = new BoxZoneRenderer();
 
 	@Override
-	public void render(Zone zone, ZoneInstance instance, Minecraft mc, RenderLevelStageEvent event) {
-		var box = zone.getBoundingBox();
+	public void render(ZoneShape shape, ZoneInstance instance, Minecraft mc, RenderLevelStageEvent event) {
+		var box = shape.getBoundingBox();
 		var cameraPos = event.getCamera().getPosition();
 		double minX = box.minX - cameraPos.x;
 		double minY = box.minY - cameraPos.y;

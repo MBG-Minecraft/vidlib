@@ -1,46 +1,48 @@
 package dev.beast.mods.shimmer.feature.zone;
 
 import com.mojang.serialization.Codec;
-import dev.beast.mods.shimmer.util.Cast;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.core.BlockPos;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.beast.mods.shimmer.feature.entity.EntityOverride;
+import dev.beast.mods.shimmer.util.EmptyCompoundTag;
+import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 
-import java.util.List;
+import java.util.Map;
 
-public interface Zone {
-	Codec<Zone> CODEC = ZoneType.CODEC.dispatch("type", Zone::type, ZoneType::codec);
-	StreamCodec<ByteBuf, Zone> STREAM_CODEC = ZoneType.STREAM_CODEC.dispatch(Zone::type, type -> Cast.to(type.streamCodec()));
+public record Zone(ResourceKey<Level> dimension, ZoneShape shape, CompoundTag data, Map<EntityOverride<?>, Object> playerOverrides) {
+	public static final Codec<Zone> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+		Level.RESOURCE_KEY_CODEC.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(Zone::dimension),
+		ZoneShape.CODEC.forGetter(Zone::shape),
+		CompoundTag.CODEC.optionalFieldOf("data", EmptyCompoundTag.INSTANCE).forGetter(Zone::data),
+		EntityOverride.OVERRIDE_MAP_CODEC.optionalFieldOf("player_overrides", Map.of()).forGetter(Zone::playerOverrides)
+	).apply(instance, Zone::new));
 
-	ZoneType<?> type();
+	public static final StreamCodec<RegistryFriendlyByteBuf, Zone> STREAM_CODEC = StreamCodec.composite(
+		ResourceKey.streamCodec(Registries.DIMENSION),
+		Zone::dimension,
+		ZoneShape.STREAM_CODEC,
+		Zone::shape,
+		ShimmerStreamCodecs.optional(ShimmerStreamCodecs.COMPOUND_TAG, EmptyCompoundTag.INSTANCE),
+		Zone::data,
+		EntityOverride.OVERRIDE_MAP_STREAM_CODEC,
+		Zone::playerOverrides,
+		Zone::new
+	);
 
-	default boolean canMove() {
-		return false;
+	public Zone(ResourceKey<Level> dimension, ZoneShape shape) {
+		this(dimension, shape, EmptyCompoundTag.INSTANCE, Map.of());
 	}
 
-	AABB getBoundingBox();
-
-	@Nullable
-	default ZoneClipResult clip(Vec3 start, Vec3 end) {
-		var result = AABB.clip(List.of(getBoundingBox()), start, end, BlockPos.ZERO);
-
-		if (result != null && result.getType() == HitResult.Type.BLOCK) {
-			var pos = result.getLocation();
-			return new ZoneClipResult(this, pos.distanceToSqr(start), pos, result);
-		}
-
-		return null;
+	public Zone(ZoneShape shape, CompoundTag data) {
+		this(Level.OVERWORLD, shape, data, Map.of());
 	}
 
-	default boolean contains(Vec3 pos) {
-		return getBoundingBox().contains(pos);
-	}
-
-	default boolean contains(AABB box) {
-		return getBoundingBox().intersects(box);
+	public Zone(ZoneShape shape) {
+		this(Level.OVERWORLD, shape, EmptyCompoundTag.INSTANCE, Map.of());
 	}
 }

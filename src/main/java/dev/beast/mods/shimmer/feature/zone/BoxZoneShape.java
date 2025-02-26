@@ -6,11 +6,11 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-public record BoxZone(AABB box) implements Zone {
-	public static final ZoneType<BoxZone> TYPE = new ZoneType<>("box", RecordCodecBuilder.mapCodec(instance -> instance.group(
+public record BoxZoneShape(AABB box) implements ZoneShape {
+	public static final ZoneShapeType<BoxZoneShape> TYPE = new ZoneShapeType<>("box", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Vec3.CODEC.fieldOf("start").forGetter(z -> z.box.getMinPosition()),
 		Vec3.CODEC.fieldOf("end").forGetter(z -> z.box.getMaxPosition())
-	).apply(instance, (start, end) -> new BoxZone(new AABB(start, end)))), StreamCodec.composite(
+	).apply(instance, (start, end) -> new BoxZoneShape(new AABB(start, end)))), StreamCodec.composite(
 		ByteBufCodecs.DOUBLE,
 		z -> z.box.minX,
 		ByteBufCodecs.DOUBLE,
@@ -23,11 +23,11 @@ public record BoxZone(AABB box) implements Zone {
 		z -> z.box.maxY,
 		ByteBufCodecs.DOUBLE,
 		z -> z.box.maxZ,
-		(minX, minY, minZ, maxX, maxY, maxZ) -> new BoxZone(new AABB(minX, minY, minZ, maxX, maxY, maxZ))
+		(minX, minY, minZ, maxX, maxY, maxZ) -> new BoxZoneShape(new AABB(minX, minY, minZ, maxX, maxY, maxZ))
 	));
 
 	@Override
-	public ZoneType<?> type() {
+	public ZoneShapeType<?> type() {
 		return TYPE;
 	}
 

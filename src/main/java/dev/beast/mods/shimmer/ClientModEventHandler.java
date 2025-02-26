@@ -2,8 +2,8 @@ package dev.beast.mods.shimmer;
 
 import dev.beast.mods.shimmer.content.clock.ClockBlockEntityRenderer;
 import dev.beast.mods.shimmer.content.clock.ClockContent;
-import dev.beast.mods.shimmer.feature.zone.EmptyZone;
-import dev.beast.mods.shimmer.feature.zone.UniverseZone;
+import dev.beast.mods.shimmer.feature.zone.EmptyZoneShape;
+import dev.beast.mods.shimmer.feature.zone.UniverseZoneShape;
 import dev.beast.mods.shimmer.feature.zone.renderer.EmptyZoneRenderer;
 import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
 import net.neoforged.api.distmarker.Dist;
@@ -16,8 +16,8 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 public class ClientModEventHandler {
 	@SubscribeEvent
 	public static void clientSetup(FMLClientSetupEvent event) {
-		ZoneRenderer.register(EmptyZone.TYPE, instance -> EmptyZoneRenderer.INSTANCE);
-		ZoneRenderer.register(UniverseZone.TYPE, instance -> EmptyZoneRenderer.INSTANCE);
+		ZoneRenderer.register(EmptyZoneShape.TYPE, instance -> EmptyZoneRenderer.INSTANCE);
+		ZoneRenderer.register(UniverseZoneShape.TYPE, instance -> EmptyZoneRenderer.INSTANCE);
 	}
 
 	@SubscribeEvent
