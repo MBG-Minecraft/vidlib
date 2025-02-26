@@ -2,6 +2,7 @@ package dev.beast.mods.shimmer.core.mixin;
 
 import dev.beast.mods.shimmer.core.ShimmerEntity;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
+import dev.beast.mods.shimmer.feature.entity.EntityOverrideValue;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
@@ -17,19 +18,21 @@ import java.util.Map;
 @Mixin(Entity.class)
 public abstract class EntityMixin implements ShimmerEntity {
 	@Unique
-	private Map<EntityOverride<?>, Object> shimmer$overrides = null;
+	private Map<EntityOverride<?>, EntityOverrideValue<?>> shimmer$overrides = null;
 
 	@Unique
 	private boolean shimmer$isSaving = false;
 
 	@Override
 	@Nullable
+	@SuppressWarnings("unchecked")
 	public <T> T shimmer$getDirectOverride(EntityOverride<T> override) {
-		return shimmer$overrides == null ? null : (T) shimmer$overrides.get(override);
+		var v = shimmer$overrides == null ? null : (EntityOverrideValue<T>) shimmer$overrides.get(override);
+		return v == null ? null : v.get((Entity) (Object) this);
 	}
 
 	@Override
-	public <T> void shimmer$setDirectOverride(EntityOverride<T> override, @Nullable T value) {
+	public <T> void shimmer$setDirectOverride(EntityOverride<T> override, @Nullable EntityOverrideValue<T> value) {
 		if (value == null) {
 			if (shimmer$overrides != null) {
 				shimmer$overrides.remove(override);
