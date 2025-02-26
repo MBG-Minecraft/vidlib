@@ -1,21 +1,31 @@
 package dev.beast.mods.shimmer.core;
 
 import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
-import dev.beast.mods.shimmer.util.CustomPacketHandler;
+import dev.beast.mods.shimmer.util.EntityContainer;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
-public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment, CustomPacketHandler {
+import java.util.List;
+
+public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment, EntityContainer {
+	@Nullable
 	ZoneContainer shimmer$getZoneContainer();
 
 	void refreshZones();
 
 	@ApiStatus.Internal
 	void shimmer$playerJoined(ServerPlayer player);
+
+	@Override
+	default List<? extends Player> shimmer$getPlayers() {
+		return ((MinecraftServer) this).getPlayerList().getPlayers();
+	}
 
 	@Override
 	default void send(CustomPacketPayload packet) {

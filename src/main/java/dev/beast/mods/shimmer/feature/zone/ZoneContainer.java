@@ -1,7 +1,9 @@
 package dev.beast.mods.shimmer.feature.zone;
 
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -13,14 +15,15 @@ import java.util.List;
 import java.util.Map;
 
 public class ZoneContainer {
-	public static ZoneContainer EMPTY = new ZoneContainer(ResourceLocation.withDefaultNamespace("empty"));
-	public static ZoneContainer CLIENT = EMPTY;
+	public static ZoneContainer CLIENT = null;
 	public static Map<ResourceLocation, ZoneContainer> SERVER = Map.of();
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ZoneContainer> STREAM_CODEC = new StreamCodec<>() {
 		@Override
 		public ZoneContainer decode(RegistryFriendlyByteBuf buf) {
-			var container = new ZoneContainer(ResourceLocation.STREAM_CODEC.decode(buf));
+			var id = ResourceLocation.STREAM_CODEC.decode(buf);
+			var dimension = buf.readResourceKey(Registries.DIMENSION);
+			var container = new ZoneContainer(id, dimension);
 			int count = buf.readVarInt();
 
 			for (int i = 0; i < count; i++) {
@@ -33,6 +36,7 @@ public class ZoneContainer {
 		@Override
 		public void encode(RegistryFriendlyByteBuf buf, ZoneContainer value) {
 			ResourceLocation.STREAM_CODEC.encode(buf, value.id);
+			buf.writeResourceKey(value.dimension);
 			buf.writeVarInt(value.zones.size());
 
 			for (var zone : value.zones) {
@@ -42,11 +46,13 @@ public class ZoneContainer {
 	};
 
 	public final ResourceLocation id;
+	public final ResourceKey<Level> dimension;
 	public final List<ZoneInstance> zones;
 	public boolean hasPlayerOverrides;
 
-	public ZoneContainer(ResourceLocation id) {
+	public ZoneContainer(ResourceLocation id, ResourceKey<Level> dimension) {
 		this.id = id;
+		this.dimension = dimension;
 		this.zones = new ArrayList<>();
 		this.hasPlayerOverrides = false;
 	}
@@ -77,7 +83,7 @@ public class ZoneContainer {
 		}
 	}
 
-	public void tick(Level level) {
+	public void tick(@Nullable Level level) {
 		for (var instance : zones) {
 			instance.tick(level);
 		}

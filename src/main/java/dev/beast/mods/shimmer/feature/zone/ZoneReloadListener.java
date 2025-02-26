@@ -4,10 +4,13 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.util.JsonUtils;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,17 +42,12 @@ public class ZoneReloadListener extends SimplePreparableReloadListener<Map<Resou
 			try {
 				var id = entry.getKey();
 				var json = entry.getValue();
-				var container = new ZoneContainer(id);
-				var dimension = json.has("dimension") ? json.get("dimension") : null;
+				var dimension = json.has("dimension") ? ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(json.get("dimension").getAsString())) : Level.OVERWORLD;
+				var container = new ZoneContainer(id, dimension);
 
 				for (var element : json.getAsJsonArray("zones")) {
 					if (element.isJsonObject()) {
 						var zoneJson = element.getAsJsonObject();
-
-						if (dimension != null && !zoneJson.has("dimension")) {
-							zoneJson.add("dimension", dimension);
-						}
-
 						container.add(Zone.CODEC.decode(JsonOps.INSTANCE, zoneJson).result().orElseThrow().getFirst());
 					}
 				}

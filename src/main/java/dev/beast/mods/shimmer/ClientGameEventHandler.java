@@ -18,7 +18,10 @@ public class ClientGameEventHandler {
 
 		if (mc.level != null) {
 			ClockBlockEntity.tick();
-			ZoneContainer.CLIENT.tick(mc.level);
+
+			if (ZoneContainer.CLIENT != null && ZoneContainer.CLIENT.dimension == mc.level.dimension()) {
+				ZoneContainer.CLIENT.tick(mc.level);
+			}
 		}
 	}
 

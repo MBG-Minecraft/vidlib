@@ -43,5 +43,11 @@ public class GameEventHandler {
 	@SubscribeEvent
 	public static void serverPostTick(ServerTickEvent.Post event) {
 		event.getServer().shimmer$getScheduledTaskHandler().tick();
+
+		var zones = event.getServer().shimmer$getZoneContainer();
+
+		if (zones != null) {
+			zones.tick(event.getServer().getLevel(zones.dimension));
+		}
 	}
 }

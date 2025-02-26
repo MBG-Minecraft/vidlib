@@ -150,12 +150,14 @@ public final class EntityOverride<T> {
 		if (e instanceof Player) {
 			var zoneContainer = e.level().isClientSide ? ZoneContainer.CLIENT : e.level().getServer().shimmer$getZoneContainer();
 
-			for (var instance : zoneContainer.zones) {
-				if (instance.contains(e)) {
-					var v1 = instance.zone.playerOverrides().get(this);
+			if (zoneContainer != null && zoneContainer.dimension == e.level().dimension()) {
+				for (var instance : zoneContainer.zones) {
+					if (instance.contains(e)) {
+						var v1 = instance.zone.playerOverrides().get(this);
 
-					if (v1 != null) {
-						return Cast.to(v1);
+						if (v1 != null) {
+							return Cast.to(v1);
+						}
 					}
 				}
 			}

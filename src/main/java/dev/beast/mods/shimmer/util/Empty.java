@@ -1,0 +1,9 @@
+package dev.beast.mods.shimmer.util;
+
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+
+public interface Empty {
+	ResourceLocation ID = ResourceLocation.withDefaultNamespace("empty");
+	Entity[] ENTITY_ARRAY = new Entity[0];
+}

@@ -2,11 +2,13 @@ package dev.beast.mods.shimmer.core;
 
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.entity.EntityOverrideValue;
-import dev.beast.mods.shimmer.util.CustomPacketHandler;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import dev.beast.mods.shimmer.util.EntityContainer;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
-public interface ShimmerEntity extends CustomPacketHandler {
+import java.util.List;
+
+public interface ShimmerEntity extends EntityContainer {
 	<T> T shimmer$getDirectOverride(EntityOverride<T> override);
 
 	<T> void shimmer$setDirectOverride(EntityOverride<T> override, @Nullable EntityOverrideValue<T> value);
@@ -14,6 +16,7 @@ public interface ShimmerEntity extends CustomPacketHandler {
 	boolean shimmer$isSaving();
 
 	@Override
-	default void send(CustomPacketPayload packet) {
+	default List<Entity> shimmer$getEntities() {
+		return List.of((Entity) this);
 	}
 }
