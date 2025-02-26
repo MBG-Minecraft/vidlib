@@ -7,6 +7,7 @@ import dev.beast.mods.shimmer.feature.zone.ZoneShapeType;
 import dev.beast.mods.shimmer.util.Cast;
 import net.minecraft.client.Minecraft;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -24,12 +25,14 @@ public interface ZoneRenderer<T extends ZoneShape> {
 		return func == null ? BoxZoneRenderer.INSTANCE : func.apply(instance);
 	}
 
-	static void renderAll(ZoneContainer container, Minecraft mc, RenderLevelStageEvent event) {
-		for (var instance : container.zones) {
-			var renderer = get(instance);
+	static void renderAll(@Nullable ZoneContainer container, Minecraft mc, RenderLevelStageEvent event) {
+		if (container != null && mc.getEntityRenderDispatcher().shouldRenderHitBoxes()) {
+			for (var instance : container.zones) {
+				var renderer = get(instance);
 
-			if (renderer != EmptyZoneRenderer.INSTANCE) {
-				renderer.render(Cast.to(instance.zone.shape()), instance, mc, event);
+				if (renderer != EmptyZoneRenderer.INSTANCE) {
+					renderer.render(Cast.to(instance.zone.shape()), instance, mc, event);
+				}
 			}
 		}
 	}
