@@ -2,6 +2,7 @@ package dev.beast.mods.shimmer;
 
 import dev.beast.mods.shimmer.content.clock.ClockBlockEntityRenderer;
 import dev.beast.mods.shimmer.content.clock.ClockContent;
+import dev.beast.mods.shimmer.feature.structure.ClientStructureStorage;
 import dev.beast.mods.shimmer.feature.zone.EmptyZoneShape;
 import dev.beast.mods.shimmer.feature.zone.UniverseZoneShape;
 import dev.beast.mods.shimmer.feature.zone.renderer.EmptyZoneRenderer;
@@ -11,6 +12,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientModEventHandler {
@@ -18,6 +20,11 @@ public class ClientModEventHandler {
 	public static void clientSetup(FMLClientSetupEvent event) {
 		ZoneRenderer.register(EmptyZoneShape.TYPE, instance -> EmptyZoneRenderer.INSTANCE);
 		ZoneRenderer.register(UniverseZoneShape.TYPE, instance -> EmptyZoneRenderer.INSTANCE);
+	}
+
+	@SubscribeEvent
+	public static void addReloadListeners(RegisterClientReloadListenersEvent event) {
+		event.registerReloadListener(ClientStructureStorage.CLIENT);
 	}
 
 	@SubscribeEvent

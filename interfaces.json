@@ -1,4 +1,7 @@
 {
+	"net/minecraft/client/Minecraft": [
+		"dev/beast/mods/shimmer/core/ShimmerMinecraftClient"
+	],
 	"net/minecraft/server/MinecraftServer": [
 		"dev/beast/mods/shimmer/core/ShimmerMinecraftServer"
 	],

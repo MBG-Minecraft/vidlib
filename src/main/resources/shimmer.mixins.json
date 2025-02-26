@@ -5,6 +5,7 @@
 	"compatibilityLevel": "JAVA_21",
 	"mixins": ["EntityMixin", "LevelMixin", "LivingEntityMixin", "MinecraftServerMixin", "MobMixin", "PlayerMixin", "ServerLevelMixin", "ServerPlayerMixin"],
 	"client": [
+		"MinecraftClientMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1,

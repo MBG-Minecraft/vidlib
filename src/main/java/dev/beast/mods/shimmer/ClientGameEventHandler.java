@@ -13,12 +13,21 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
 public class ClientGameEventHandler {
 	@SubscribeEvent
-	public static void clientTick(ClientTickEvent.Pre event) {
+	public static void clientPreTick(ClientTickEvent.Pre event) {
 		var mc = Minecraft.getInstance();
 
 		if (mc.level != null) {
 			ClockBlockEntity.tick();
 			ZoneContainer.CLIENT.tick(mc.level);
+		}
+	}
+
+	@SubscribeEvent
+	public static void clientPostTick(ClientTickEvent.Post event) {
+		var mc = Minecraft.getInstance();
+
+		if (mc.level != null) {
+			mc.shimmer$getScheduledTaskHandler().tick();
 		}
 	}
 

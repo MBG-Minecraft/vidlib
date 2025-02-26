@@ -10,10 +10,15 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @Mod(Shimmer.ID)
 public class Shimmer {
@@ -24,6 +29,8 @@ public class Shimmer {
 	public static ResourceLocation id(String path) {
 		return ResourceLocation.fromNamespaceAndPath(ID, path);
 	}
+
+	public static final Path PATH = FMLPaths.GAMEDIR.get().resolve("shimmer");
 
 	public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(ID);
 	public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(ID);
@@ -44,8 +51,13 @@ public class Shimmer {
 	);
 
 	public static boolean defaultGameRules = true;
+	public static boolean loadVanillaStructures = false;
 
-	public Shimmer(IEventBus bus, Dist dist) {
+	public Shimmer(IEventBus bus, Dist dist) throws IOException {
+		if (Files.notExists(PATH)) {
+			Files.createDirectories(PATH);
+		}
+
 		ITEMS.register(bus);
 		BLOCKS.register(bus);
 		BLOCK_ENTITIES.register(bus);

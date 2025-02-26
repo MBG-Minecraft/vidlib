@@ -9,10 +9,10 @@ import net.minecraft.world.level.GameRules;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.ApiStatus;
 
-public interface ShimmerMinecraftServer extends CustomPacketHandler {
+public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment, CustomPacketHandler {
 	ZoneContainer shimmer$getZoneContainer();
 
-	void shimmer$refreshZones();
+	void refreshZones();
 
 	@ApiStatus.Internal
 	void shimmer$playerJoined(ServerPlayer player);

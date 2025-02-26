@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer;
 
+import dev.beast.mods.shimmer.feature.structure.StructureStorage;
 import dev.beast.mods.shimmer.feature.zone.ZoneReloadListener;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -8,6 +9,7 @@ import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.GAME)
 public class GameEventHandler {
@@ -17,8 +19,9 @@ public class GameEventHandler {
 	}
 
 	@SubscribeEvent
-	public static void addReloadListener(AddReloadListenerEvent event) {
+	public static void addReloadListeners(AddReloadListenerEvent event) {
 		event.addListener(new ZoneReloadListener());
+		event.addListener(StructureStorage.SERVER);
 	}
 
 	@SubscribeEvent
@@ -34,6 +37,11 @@ public class GameEventHandler {
 			event.getServer().defaultGameRules();
 		}
 
-		event.getServer().shimmer$refreshZones();
+		event.getServer().refreshZones();
+	}
+
+	@SubscribeEvent
+	public static void serverPostTick(ServerTickEvent.Post event) {
+		event.getServer().shimmer$getScheduledTaskHandler().tick();
 	}
 }
