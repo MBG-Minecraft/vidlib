@@ -9,11 +9,16 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public interface ShimmerEntity extends EntityContainer {
-	<T> T shimmer$getDirectOverride(EntityOverride<T> override);
+	default <T> T shimmer$getDirectOverride(EntityOverride<T> override) {
+		throw new IllegalStateException();
+	}
 
-	<T> void shimmer$setDirectOverride(EntityOverride<T> override, @Nullable EntityOverrideValue<T> value);
+	default <T> void shimmer$setDirectOverride(EntityOverride<T> override, @Nullable EntityOverrideValue<T> value) {
+	}
 
-	boolean shimmer$isSaving();
+	default boolean shimmer$isSaving() {
+		return false;
+	}
 
 	@Override
 	default List<Entity> shimmer$getEntities() {

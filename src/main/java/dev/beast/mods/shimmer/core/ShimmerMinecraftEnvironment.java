@@ -3,7 +3,9 @@ package dev.beast.mods.shimmer.core;
 import dev.beast.mods.shimmer.util.ScheduledTask;
 
 public interface ShimmerMinecraftEnvironment {
-	ScheduledTask.Handler shimmer$getScheduledTaskHandler();
+	default ScheduledTask.Handler shimmer$getScheduledTaskHandler() {
+		throw new IllegalStateException();
+	}
 
 	default void schedule(int ticks, Runnable task) {
 		shimmer$getScheduledTaskHandler().run(ticks, task, false);

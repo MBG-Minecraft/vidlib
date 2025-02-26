@@ -15,12 +15,16 @@ import java.util.List;
 
 public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment, EntityContainer {
 	@Nullable
-	ZoneContainer shimmer$getZoneContainer();
+	default ZoneContainer shimmer$getZoneContainer() {
+		throw new IllegalStateException();
+	}
 
-	void refreshZones();
+	default void refreshZones() {
+	}
 
 	@ApiStatus.Internal
-	void shimmer$playerJoined(ServerPlayer player);
+	default void shimmer$playerJoined(ServerPlayer player) {
+	}
 
 	@Override
 	default List<? extends Player> shimmer$getPlayers() {
