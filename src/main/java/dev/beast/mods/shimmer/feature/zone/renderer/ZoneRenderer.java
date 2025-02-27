@@ -30,7 +30,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 				var renderer = get(instance.zone.shape().type());
 
 				if (renderer != EmptyZoneRenderer.INSTANCE) {
-					renderer.render(Cast.to(instance.zone.shape()), mc, event, instance.zone.color().withAlpha(0.2F), Color.WHITE);
+					renderer.render(Cast.to(instance.zone.shape()), mc, event, instance.zone.color().withAlpha(0.2F), instance.entities.isEmpty() ? Color.WHITE : Color.GREEN);
 				}
 			}
 		}

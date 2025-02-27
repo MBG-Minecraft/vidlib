@@ -2,6 +2,7 @@ package dev.beast.mods.shimmer.core;
 
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.entity.EntityOverrideValue;
+import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,5 +28,9 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 	@Override
 	default List<Entity> shimmer$getEntities() {
 		return List.of((Entity) this);
+	}
+
+	default List<ZoneInstance> getZones() {
+		return shimmer$getEnvironment().shimmer$getActiveZones().entityZones.getOrDefault(((Entity) this).getId(), List.of());
 	}
 }

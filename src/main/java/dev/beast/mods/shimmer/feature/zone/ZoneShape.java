@@ -5,12 +5,16 @@ import dev.beast.mods.shimmer.util.Cast;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public interface ZoneShape {
 	MapCodec<ZoneShape> CODEC = ZoneShapeType.CODEC.dispatchMap("type", ZoneShape::type, ZoneShapeType::codec);
@@ -48,7 +52,15 @@ public interface ZoneShape {
 		return getBoundingBox().contains(pos);
 	}
 
-	default boolean contains(AABB box) {
+	default boolean intersects(AABB box) {
 		return getBoundingBox().intersects(box);
+	}
+
+	default Stream<BlockPos> getBlocks() {
+		return BlockPos.betweenClosedStream(getBoundingBox());
+	}
+
+	default List<Entity> collectEntities(Level level, Predicate<? super Entity> predicate) {
+		return level.getEntities((Entity) null, getBoundingBox(), predicate);
 	}
 }

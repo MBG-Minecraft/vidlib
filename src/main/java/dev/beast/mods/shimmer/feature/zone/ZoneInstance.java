@@ -3,10 +3,11 @@ package dev.beast.mods.shimmer.feature.zone;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
 
 public class ZoneInstance {
 	public final ZoneContainer container;
@@ -23,7 +24,7 @@ public class ZoneInstance {
 		this.renderer = null;
 	}
 
-	public boolean contains(Entity entity) {
+	public boolean has(Entity entity) {
 		return entities.containsKey(entity.getId());
 	}
 
@@ -32,9 +33,18 @@ public class ZoneInstance {
 		entities.clear();
 
 		if (level != null) {
-			for (var entity : level.getEntities((Entity) null, zone.shape().getBoundingBox(), EntitySelector.ENTITY_STILL_ALIVE)) {
-				if (zone.shape().contains(entity.getBoundingBox())) {
+			for (var entity : zone.shape().collectEntities(level, zone.entityFilter())) {
+				if (entity.isAlive() && zone.shape().intersects(entity.getBoundingBox())) {
 					entities.put(entity.getId(), entity);
+
+					var list = container.entityZones.get(entity.getId());
+
+					if (list == null) {
+						list = new ArrayList<>(1);
+						container.entityZones.put(entity.getId(), list);
+					}
+
+					list.add(this);
 
 					if (!oldEntities.containsKey(entity.getId())) {
 						entityEntered(level, entity);

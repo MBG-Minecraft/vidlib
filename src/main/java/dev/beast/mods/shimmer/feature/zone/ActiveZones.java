@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.feature.zone;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -8,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ActiveZones implements Iterable<ZoneContainer> {
@@ -39,9 +41,11 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 	};
 
 	public final Map<ResourceLocation, ZoneContainer> containers;
+	public final Int2ObjectOpenHashMap<List<ZoneInstance>> entityZones;
 
 	public ActiveZones() {
 		this.containers = new LinkedHashMap<>();
+		this.entityZones = new Int2ObjectOpenHashMap<>();
 	}
 
 	public void update(Collection<ZoneContainer> zones) {
@@ -53,7 +57,8 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 	}
 
 	@Override
-	public @NotNull Iterator<ZoneContainer> iterator() {
+	@NotNull
+	public Iterator<ZoneContainer> iterator() {
 		return containers.values().iterator();
 	}
 }

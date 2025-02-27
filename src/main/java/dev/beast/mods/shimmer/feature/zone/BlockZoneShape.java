@@ -5,6 +5,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.AABB;
 
+import java.util.stream.Stream;
+
 public record BlockZoneShape(BlockPos start, BlockPos end, AABB box) implements ZoneShape {
 	public static final ZoneShapeType<BlockZoneShape> TYPE = new ZoneShapeType<>("block", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		BlockPos.CODEC.fieldOf("start").forGetter(BlockZoneShape::start),
@@ -29,5 +31,10 @@ public record BlockZoneShape(BlockPos start, BlockPos end, AABB box) implements 
 	@Override
 	public AABB getBoundingBox() {
 		return box;
+	}
+
+	@Override
+	public Stream<BlockPos> getBlocks() {
+		return BlockPos.betweenClosedStream(start, end);
 	}
 }

@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.feature.zone;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -45,12 +46,14 @@ public class ZoneContainer {
 	public final ResourceKey<Level> dimension;
 	public final List<ZoneInstance> zones;
 	public boolean hasPlayerOverrides;
+	public final Int2ObjectOpenHashMap<List<ZoneInstance>> entityZones;
 
 	public ZoneContainer(ResourceLocation id, ResourceKey<Level> dimension) {
 		this.id = id;
 		this.dimension = dimension;
 		this.zones = new ArrayList<>();
 		this.hasPlayerOverrides = false;
+		this.entityZones = new Int2ObjectOpenHashMap<>();
 	}
 
 	public ZoneContainer add(Zone zone) {
@@ -79,9 +82,22 @@ public class ZoneContainer {
 		}
 	}
 
-	public void tick(@Nullable Level level) {
+	public void tick(ActiveZones activeZones, @Nullable Level level) {
+		entityZones.clear();
+
 		for (var instance : zones) {
 			instance.tick(level);
+		}
+
+		for (var entry : entityZones.int2ObjectEntrySet()) {
+			var list = activeZones.entityZones.get(entry.getIntKey());
+
+			if (list == null) {
+				list = new ArrayList<>(entry.getValue().size());
+				activeZones.entityZones.put(entry.getIntKey(), list);
+			}
+
+			list.addAll(entry.getValue());
 		}
 	}
 
@@ -128,7 +144,7 @@ public class ZoneContainer {
 	@Nullable
 	public ZoneInstance getFirst(AABB box) {
 		for (var instance : zones) {
-			if (instance.zone.shape().contains(box)) {
+			if (instance.zone.shape().intersects(box)) {
 				return instance;
 			}
 		}
@@ -140,7 +156,7 @@ public class ZoneContainer {
 		var list = new ArrayList<ZoneInstance>(1);
 
 		for (var instance : zones) {
-			if (instance.zone.shape().contains(box)) {
+			if (instance.zone.shape().intersects(box)) {
 				list.add(instance);
 			}
 		}

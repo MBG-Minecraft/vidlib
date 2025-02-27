@@ -19,9 +19,11 @@ public class ClientGameEventHandler {
 		if (mc.level != null) {
 			ClockBlockEntity.tick();
 
+			ActiveZones.CLIENT.entityZones.clear();
+
 			for (var container : ActiveZones.CLIENT) {
 				if (container.dimension == mc.level.dimension()) {
-					container.tick(mc.level);
+					container.tick(ActiveZones.CLIENT, mc.level);
 				}
 			}
 		}

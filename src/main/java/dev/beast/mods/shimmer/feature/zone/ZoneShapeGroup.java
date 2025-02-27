@@ -1,12 +1,14 @@
 package dev.beast.mods.shimmer.feature.zone;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public record ZoneShapeGroup(List<ZoneShape> zoneShapes, @Nullable AABB box) implements ZoneShape {
 	public static final ZoneShapeType<ZoneShapeGroup> TYPE = new ZoneShapeType<>("group", RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -110,17 +112,28 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, @Nullable AABB box) imp
 	}
 
 	@Override
-	public boolean contains(AABB box) {
+	public boolean intersects(AABB box) {
 		if (box != null && !box.intersects(box)) {
 			return false;
 		}
 
 		for (var zone : zoneShapes) {
-			if (zone.contains(box)) {
+			if (zone.intersects(box)) {
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	@Override
+	public Stream<BlockPos> getBlocks() {
+		var stream = Stream.<BlockPos>empty();
+
+		for (var zone : zoneShapes) {
+			stream = Stream.concat(stream, zone.getBlocks());
+		}
+
+		return stream.distinct();
 	}
 }

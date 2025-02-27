@@ -37,8 +37,10 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 			shimmer$scheduledTaskHandler.tick();
 		}
 
+		ActiveZones.SERVER.entityZones.clear();
+
 		for (var container : ActiveZones.SERVER) {
-			container.tick(shimmer$self().getLevel(container.dimension));
+			container.tick(ActiveZones.SERVER, shimmer$self().getLevel(container.dimension));
 		}
 	}
 }
