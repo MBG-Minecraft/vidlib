@@ -21,9 +21,9 @@ public enum EntityFilter implements StringRepresentable, Predicate<Entity> {
 	LIVING("living", entity -> entity instanceof LivingEntity),
 	PLAYER("player", entity -> entity instanceof Player),
 	SURVIVAL_PLAYER("survival_player", entity -> entity instanceof Player player && !player.isCreative() && !player.isSpectator()),
-	SPECTATOR("spectator", entity -> entity instanceof Player player && !player.isCreative() && !player.isSpectator()),
-	CREATIVE("creative", entity -> entity instanceof Player player && !player.isCreative() && !player.isSpectator()),
-	SPECTATOR_OR_CREATIVE("spectator_or_creative", entity -> entity instanceof Player player && !player.isCreative() && !player.isSpectator()),
+	SPECTATOR("spectator", Entity::isSpectator),
+	CREATIVE("creative", entity -> entity instanceof Player player && player.isCreative()),
+	SPECTATOR_OR_CREATIVE("spectator_or_creative", entity -> entity.isSpectator() || entity instanceof Player player && player.isCreative()),
 	ITEMS("item", entity -> entity instanceof ItemEntity),
 	PROJECTILES("projectile", entity -> entity instanceof Projectile),
 
