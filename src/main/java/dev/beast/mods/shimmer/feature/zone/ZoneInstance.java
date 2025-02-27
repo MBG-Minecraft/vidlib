@@ -9,12 +9,14 @@ import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
 
 public class ZoneInstance {
+	public final ZoneContainer container;
 	public int index;
 	public Zone zone;
 	public final Int2ObjectMap<Entity> entities;
 	public Object renderer;
 
-	public ZoneInstance(Zone zone) {
+	public ZoneInstance(ZoneContainer container, Zone zone) {
+		this.container = container;
 		this.index = -1;
 		this.zone = zone;
 		this.entities = new Int2ObjectOpenHashMap<>();

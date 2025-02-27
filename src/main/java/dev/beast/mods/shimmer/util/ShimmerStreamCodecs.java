@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -17,9 +18,9 @@ public interface ShimmerStreamCodecs {
 		}
 
 		@Override
-		public void encode(ByteBuf buf, UUID uuid) {
-			buf.writeLong(uuid.getMostSignificantBits());
-			buf.writeLong(uuid.getLeastSignificantBits());
+		public void encode(ByteBuf buf, UUID value) {
+			buf.writeLong(value.getMostSignificantBits());
+			buf.writeLong(value.getLeastSignificantBits());
 		}
 	};
 
@@ -30,8 +31,22 @@ public interface ShimmerStreamCodecs {
 		}
 
 		@Override
-		public void encode(FriendlyByteBuf buf, CompoundTag tag) {
-			buf.writeNbt(tag);
+		public void encode(FriendlyByteBuf buf, CompoundTag value) {
+			buf.writeNbt(value);
+		}
+	};
+
+	StreamCodec<ByteBuf, Vec3> VEC_3 = new StreamCodec<>() {
+		@Override
+		public Vec3 decode(ByteBuf buf) {
+			return new Vec3(buf.readDouble(), buf.readDouble(), buf.readDouble());
+		}
+
+		@Override
+		public void encode(ByteBuf buf, Vec3 value) {
+			buf.writeDouble(value.x());
+			buf.writeDouble(value.y());
+			buf.writeDouble(value.z());
 		}
 	};
 

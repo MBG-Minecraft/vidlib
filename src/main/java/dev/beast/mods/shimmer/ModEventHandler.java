@@ -3,6 +3,7 @@ package dev.beast.mods.shimmer;
 import dev.beast.mods.shimmer.feature.zone.BlockZoneShape;
 import dev.beast.mods.shimmer.feature.zone.BoxZoneShape;
 import dev.beast.mods.shimmer.feature.zone.EmptyZoneShape;
+import dev.beast.mods.shimmer.feature.zone.SphereZoneShape;
 import dev.beast.mods.shimmer.feature.zone.UniverseZoneShape;
 import dev.beast.mods.shimmer.feature.zone.ZoneShapeGroup;
 import dev.beast.mods.shimmer.feature.zone.ZoneShapeType;
@@ -19,5 +20,6 @@ public class ModEventHandler {
 		ZoneShapeType.register(ZoneShapeGroup.TYPE);
 		ZoneShapeType.register(BlockZoneShape.TYPE);
 		ZoneShapeType.register(BoxZoneShape.TYPE);
+		ZoneShapeType.register(SphereZoneShape.TYPE);
 	}
 }

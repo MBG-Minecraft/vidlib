@@ -1,17 +1,17 @@
 package dev.beast.mods.shimmer.core;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.server.level.ServerLevel;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-public interface ShimmerServerLevel extends ShimmerLevel {
+public interface ShimmerClientLevel extends ShimmerLevel {
 	@Override
 	default ShimmerMinecraftEnvironment shimmer$getEnvironment() {
-		return ((ServerLevel) this).getServer();
+		return Minecraft.getInstance();
 	}
 
 	@Override
 	default void send(CustomPacketPayload packet) {
-		PacketDistributor.sendToPlayersInDimension((ServerLevel) this, packet);
+		PacketDistributor.sendToServer(packet);
 	}
 }

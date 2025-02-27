@@ -3,7 +3,6 @@ package dev.beast.mods.shimmer.feature.entity;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.core.ShimmerEntity;
-import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
 import dev.beast.mods.shimmer.util.Cast;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -148,15 +147,15 @@ public final class EntityOverride<T> {
 		var e = (Entity) entity;
 
 		if (e instanceof Player) {
-			var zoneContainer = e.level().isClientSide ? ZoneContainer.CLIENT : e.level().getServer().shimmer$getZoneContainer();
+			for (var container : e.shimmer$getEnvironment().shimmer$getActiveZones()) {
+				if (container.dimension == e.level().dimension()) {
+					for (var instance : container.zones) {
+						if (instance.contains(e)) {
+							var v1 = instance.zone.playerOverrides().get(this);
 
-			if (zoneContainer != null && zoneContainer.dimension == e.level().dimension()) {
-				for (var instance : zoneContainer.zones) {
-					if (instance.contains(e)) {
-						var v1 = instance.zone.playerOverrides().get(this);
-
-						if (v1 != null) {
-							return Cast.to(v1);
+							if (v1 != null) {
+								return Cast.to(v1);
+							}
 						}
 					}
 				}
@@ -195,6 +194,7 @@ public final class EntityOverride<T> {
 	public void set(ShimmerEntity entity, T value) {
 		set(entity, EntityOverrideValue.fixed(value));
 	}
+
 
 	public void setGlobal(Predicate<Entity> predicate, EntityOverrideValue<T> value) {
 		if (predicates == null) {

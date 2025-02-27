@@ -12,12 +12,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class ZoneContainer {
-	public static ZoneContainer CLIENT = null;
-	public static Map<ResourceLocation, ZoneContainer> SERVER = Map.of();
-
 	public static final StreamCodec<RegistryFriendlyByteBuf, ZoneContainer> STREAM_CODEC = new StreamCodec<>() {
 		@Override
 		public ZoneContainer decode(RegistryFriendlyByteBuf buf) {
@@ -58,7 +54,7 @@ public class ZoneContainer {
 	}
 
 	public ZoneContainer add(Zone zone) {
-		var instance = zone.shape().createInstance(zone);
+		var instance = zone.shape().createInstance(this, zone);
 		instance.index = zones.size();
 		zones.add(instance);
 

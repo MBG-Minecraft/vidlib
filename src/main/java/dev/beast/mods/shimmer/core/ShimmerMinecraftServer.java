@@ -1,7 +1,5 @@
 package dev.beast.mods.shimmer.core;
 
-import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
-import dev.beast.mods.shimmer.util.EntityContainer;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -9,17 +7,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment, EntityContainer {
-	@Nullable
-	default ZoneContainer shimmer$getZoneContainer() {
-		throw new IllegalStateException();
-	}
-
-	default void refreshZones() {
+public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
+	default MinecraftServer shimmer$self() {
+		return (MinecraftServer) this;
 	}
 
 	@ApiStatus.Internal
@@ -28,7 +21,7 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment, Ent
 
 	@Override
 	default List<? extends Player> shimmer$getPlayers() {
-		return ((MinecraftServer) this).getPlayerList().getPlayers();
+		return shimmer$self().getPlayerList().getPlayers();
 	}
 
 	@Override
@@ -37,7 +30,7 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment, Ent
 	}
 
 	default void defaultGameRules() {
-		var server = (MinecraftServer) this;
+		var server = shimmer$self();
 		server.overworld().setDayTime(6000L);
 		server.overworld().setWeatherParameters(20000000, 20000000, false, false);
 

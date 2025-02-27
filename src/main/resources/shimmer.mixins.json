@@ -4,9 +4,7 @@
 	"package": "dev.beast.mods.shimmer.core.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": ["EntityMixin", "LevelMixin", "LivingEntityMixin", "MinecraftServerMixin", "MobMixin", "PlayerMixin", "ServerLevelMixin", "ServerPlayerMixin"],
-	"client": [
-		"MinecraftClientMixin"
-	],
+	"client": ["ClientLevelMixin", "LocalPlayerMixin", "MinecraftClientMixin", "MouseHandlerMixin"],
 	"injectors": {
 		"defaultRequire": 1,
 		"maxShiftBy": 2

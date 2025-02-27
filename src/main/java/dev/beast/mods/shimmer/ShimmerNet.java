@@ -1,7 +1,7 @@
 package dev.beast.mods.shimmer;
 
 import dev.beast.mods.shimmer.content.clock.ClockPayload;
-import dev.beast.mods.shimmer.feature.zone.UpdateZoneContainerPayload;
+import dev.beast.mods.shimmer.feature.zone.UpdateZonesPayload;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -18,6 +18,6 @@ public interface ShimmerNet {
 		var reg = event.registrar("1").optional();
 
 		reg.playToClient(ClockPayload.TYPE, ClockPayload.STREAM_CODEC, ClockPayload::handle);
-		reg.playToClient(UpdateZoneContainerPayload.TYPE, UpdateZoneContainerPayload.STREAM_CODEC, UpdateZoneContainerPayload::handle);
+		reg.playToClient(UpdateZonesPayload.TYPE, UpdateZonesPayload.STREAM_CODEC, UpdateZonesPayload::handle);
 	}
 }

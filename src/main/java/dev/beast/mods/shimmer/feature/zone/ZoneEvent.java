@@ -1,14 +1,10 @@
 package dev.beast.mods.shimmer.feature.zone;
 
+import dev.beast.mods.shimmer.util.Side;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.Event;
-
-import java.util.Objects;
-import java.util.function.Consumer;
 
 public class ZoneEvent extends Event {
 	public static class EntityEvent extends ZoneEvent {
@@ -51,31 +47,21 @@ public class ZoneEvent extends Event {
 		}
 	}
 
-	public static class Refresh extends ZoneEvent {
-		private final MinecraftServer server;
-		private final Consumer<ZoneContainer> zones;
+	public static class Updated extends ZoneEvent {
+		private final ActiveZones zones;
+		private final Side side;
 
-		public Refresh(MinecraftServer server, Consumer<ZoneContainer> zones) {
-			this.server = server;
+		public Updated(ActiveZones zones, Side side) {
 			this.zones = zones;
+			this.side = side;
 		}
 
-		public MinecraftServer getServer() {
-			return server;
+		public ActiveZones getZones() {
+			return zones;
 		}
 
-		public void set(ZoneContainer zones) {
-			this.zones.accept(Objects.requireNonNull(zones));
-		}
-
-		public void set(ResourceLocation dataId) {
-			var container = ZoneContainer.SERVER.get(dataId);
-
-			if (container == null) {
-				throw new IllegalArgumentException("Zone container file with ID '" + dataId + "' not found!");
-			} else {
-				zones.accept(container);
-			}
+		public Side getSide() {
+			return side;
 		}
 	}
 }

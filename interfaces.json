@@ -8,14 +8,23 @@
 	"net/minecraft/world/level/Level": [
 		"dev/beast/mods/shimmer/core/ShimmerLevel"
 	],
+	"net/minecraft/client/multiplayer/ClientLevel": [
+		"dev/beast/mods/shimmer/core/ShimmerClientLevel"
+	],
 	"net/minecraft/server/level/ServerLevel": [
 		"dev/beast/mods/shimmer/core/ShimmerServerLevel"
 	],
 	"net/minecraft/world/entity/Entity": [
 		"dev/beast/mods/shimmer/core/ShimmerEntity"
 	],
+	"net/minecraft/world/entity/LivingEntity": [
+		"dev/beast/mods/shimmer/core/ShimmerLivingEntity"
+	],
 	"net/minecraft/world/entity/player/Player": [
 		"dev/beast/mods/shimmer/core/ShimmerPlayer"
+	],
+	"net/minecraft/client/player/LocalPlayer": [
+		"dev/beast/mods/shimmer/core/ShimmerLocalPlayer"
 	],
 	"net/minecraft/server/level/ServerPlayer": [
 		"dev/beast/mods/shimmer/core/ShimmerServerPlayer"

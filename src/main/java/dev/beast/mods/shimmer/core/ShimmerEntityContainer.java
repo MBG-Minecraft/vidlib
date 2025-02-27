@@ -1,4 +1,4 @@
-package dev.beast.mods.shimmer.util;
+package dev.beast.mods.shimmer.core;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
@@ -9,7 +9,11 @@ import net.minecraft.world.entity.player.Player;
 
 import java.util.List;
 
-public interface EntityContainer {
+public interface ShimmerEntityContainer {
+	default ShimmerMinecraftEnvironment shimmer$getEnvironment() {
+		throw new NoMixinException();
+	}
+
 	default List<Entity> shimmer$getEntities() {
 		return List.of();
 	}

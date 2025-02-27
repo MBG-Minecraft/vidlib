@@ -1,10 +1,25 @@
 package dev.beast.mods.shimmer.core;
 
+import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.util.ScheduledTask;
+import org.jetbrains.annotations.ApiStatus;
 
-public interface ShimmerMinecraftEnvironment {
+public interface ShimmerMinecraftEnvironment extends ShimmerEntityContainer {
+	@Override
+	default ShimmerMinecraftEnvironment shimmer$getEnvironment() {
+		return this;
+	}
+
+	@ApiStatus.Internal
+	default void shimmer$postTick() {
+	}
+
 	default ScheduledTask.Handler shimmer$getScheduledTaskHandler() {
-		throw new IllegalStateException();
+		throw new NoMixinException();
+	}
+
+	default ActiveZones shimmer$getActiveZones() {
+		throw new NoMixinException();
 	}
 
 	default void schedule(int ticks, Runnable task) {

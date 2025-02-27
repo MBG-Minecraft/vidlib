@@ -1,7 +1,7 @@
 package dev.beast.mods.shimmer;
 
 import dev.beast.mods.shimmer.content.clock.ClockBlockEntity;
-import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
+import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
@@ -19,27 +19,33 @@ public class ClientGameEventHandler {
 		if (mc.level != null) {
 			ClockBlockEntity.tick();
 
-			if (ZoneContainer.CLIENT != null && ZoneContainer.CLIENT.dimension == mc.level.dimension()) {
-				ZoneContainer.CLIENT.tick(mc.level);
+			for (var container : ActiveZones.CLIENT) {
+				if (container.dimension == mc.level.dimension()) {
+					container.tick(mc.level);
+				}
 			}
 		}
 	}
 
 	@SubscribeEvent
 	public static void clientPostTick(ClientTickEvent.Post event) {
-		var mc = Minecraft.getInstance();
-
-		if (mc.level != null) {
-			mc.shimmer$getScheduledTaskHandler().tick();
-		}
+		Minecraft.getInstance().shimmer$postTick();
 	}
 
 	@SubscribeEvent
 	public static void renderWorld(RenderLevelStageEvent event) {
 		var mc = Minecraft.getInstance();
 
+		if (mc.level == null) {
+			return;
+		}
+
 		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
-			ZoneRenderer.renderAll(ZoneContainer.CLIENT, mc, event);
+			for (var container : ActiveZones.CLIENT) {
+				if (container.dimension == mc.level.dimension()) {
+					ZoneRenderer.renderAll(container, mc, event);
+				}
+			}
 		}
 	}
 }

@@ -1,6 +1,5 @@
 package dev.beast.mods.shimmer.core;
 
-import dev.beast.mods.shimmer.util.EntityContainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.player.Player;
@@ -9,7 +8,7 @@ import net.minecraft.world.phys.AABB;
 
 import java.util.List;
 
-public interface ShimmerLevel extends EntityContainer {
+public interface ShimmerLevel extends ShimmerEntityContainer {
 	@Override
 	default List<Entity> shimmer$getEntities() {
 		return ((Level) this).getEntities((Entity) null, AABB.INFINITE, EntitySelector.ENTITY_STILL_ALIVE);

@@ -18,8 +18,8 @@ public interface ZoneShape {
 
 	ZoneShapeType<?> type();
 
-	default ZoneInstance createInstance(Zone zone) {
-		return new ZoneInstance(zone);
+	default ZoneInstance createInstance(ZoneContainer container, Zone zone) {
+		return new ZoneInstance(container, zone);
 	}
 
 	default boolean canMove() {
@@ -30,6 +30,10 @@ public interface ZoneShape {
 
 	@Nullable
 	default ZoneClipResult clip(Vec3 start, Vec3 end) {
+		if (contains(start)) {
+			return null;
+		}
+
 		var result = AABB.clip(List.of(getBoundingBox()), start, end, BlockPos.ZERO);
 
 		if (result != null && result.getType() == HitResult.Type.BLOCK) {
