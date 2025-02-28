@@ -47,12 +47,20 @@ public class ZoneReloadListener extends SimplePreparableReloadListener<Map<Resou
 				var json = entry.getValue();
 				var dimension = json.has("dimension") ? ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(json.get("dimension").getAsString())) : Level.OVERWORLD;
 				var container = new ZoneContainer(id, dimension);
+				int index = 0;
 
 				for (var element : json.getAsJsonArray("zones")) {
 					if (element.isJsonObject()) {
 						var zoneJson = element.getAsJsonObject();
-						container.add(Zone.CODEC.decode(JsonOps.INSTANCE, zoneJson).result().orElseThrow().getFirst());
+						var decoded = Zone.CODEC.decode(JsonOps.INSTANCE, zoneJson);
+
+						if (decoded.error().isPresent()) {
+							Shimmer.LOGGER.error("Error while parsing zone " + id + "[" + index + "]: " + decoded.error().get());
+						} else {
+							container.add(decoded.result().orElseThrow().getFirst());
+						}
 					}
+					index++;
 				}
 
 				list.add(container);

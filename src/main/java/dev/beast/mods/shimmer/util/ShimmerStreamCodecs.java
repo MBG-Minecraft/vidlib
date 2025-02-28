@@ -1,10 +1,12 @@
 package dev.beast.mods.shimmer.util;
 
+import dev.beast.mods.shimmer.Shimmer;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtAccounter;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Objects;
@@ -24,17 +26,32 @@ public interface ShimmerStreamCodecs {
 		}
 	};
 
-	StreamCodec<FriendlyByteBuf, CompoundTag> COMPOUND_TAG = new StreamCodec<>() {
+	StreamCodec<RegistryFriendlyByteBuf, String> REGISTRY_STRING = new StreamCodec<>() {
 		@Override
-		public CompoundTag decode(FriendlyByteBuf buf) {
-			return (CompoundTag) buf.readNbt(NbtAccounter.unlimitedHeap());
+		public String decode(RegistryFriendlyByteBuf buf) {
+			return buf.readUtf();
 		}
 
 		@Override
-		public void encode(FriendlyByteBuf buf, CompoundTag value) {
-			buf.writeNbt(value);
+		public void encode(RegistryFriendlyByteBuf buf, String value) {
+			buf.writeUtf(value);
 		}
 	};
+
+	StreamCodec<RegistryFriendlyByteBuf, ResourceLocation> SHIMMER_ID = new StreamCodec<>() {
+		@Override
+		public ResourceLocation decode(RegistryFriendlyByteBuf buf) {
+			var s = buf.readUtf();
+			return s.indexOf(':') == -1 ? Shimmer.id(s) : ResourceLocation.parse(s);
+		}
+
+		@Override
+		public void encode(RegistryFriendlyByteBuf buf, ResourceLocation value) {
+			buf.writeUtf(value.getNamespace().equals(Shimmer.ID) ? value.getPath() : value.toString());
+		}
+	};
+
+	StreamCodec<ByteBuf, CompoundTag> COMPOUND_TAG = ByteBufCodecs.TRUSTED_COMPOUND_TAG;
 
 	StreamCodec<ByteBuf, Vec3> VEC_3 = new StreamCodec<>() {
 		@Override

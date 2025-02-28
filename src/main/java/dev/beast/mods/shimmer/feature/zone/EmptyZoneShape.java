@@ -1,8 +1,8 @@
 package dev.beast.mods.shimmer.feature.zone;
 
-import com.mojang.serialization.MapCodec;
+import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -15,14 +15,13 @@ import java.util.stream.Stream;
 
 public class EmptyZoneShape implements ZoneShape {
 	private static final AABB BOX = new AABB(0D, 0D, 0D, 0D, 0D, 0D);
-	public static final EmptyZoneShape INSTANCE = new EmptyZoneShape();
-	public static final ZoneShapeType<EmptyZoneShape> TYPE = new ZoneShapeType<>("empty", MapCodec.unit(INSTANCE), StreamCodec.unit(INSTANCE));
+	public static final SimpleRegistryType.Unit<EmptyZoneShape> TYPE = SimpleRegistryType.unit(Shimmer.id("empty"), new EmptyZoneShape());
 
 	private EmptyZoneShape() {
 	}
 
 	@Override
-	public ZoneShapeType<?> type() {
+	public SimpleRegistryType<?> type() {
 		return TYPE;
 	}
 

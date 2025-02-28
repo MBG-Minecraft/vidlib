@@ -23,6 +23,9 @@
 	"net/minecraft/world/entity/player/Player": [
 		"dev/beast/mods/shimmer/core/ShimmerPlayer"
 	],
+	"net/minecraft/client/player/AbstractClientPlayer": [
+		"dev/beast/mods/shimmer/core/ShimmerClientPlayer"
+	],
 	"net/minecraft/client/player/LocalPlayer": [
 		"dev/beast/mods/shimmer/core/ShimmerLocalPlayer"
 	],

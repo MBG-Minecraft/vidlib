@@ -2,9 +2,9 @@ package dev.beast.mods.shimmer.feature.zone.renderer;
 
 import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
 import dev.beast.mods.shimmer.feature.zone.ZoneShape;
-import dev.beast.mods.shimmer.feature.zone.ZoneShapeType;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.util.Cast;
+import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.client.Minecraft;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.Nullable;
@@ -13,13 +13,13 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 
 public interface ZoneRenderer<T extends ZoneShape> {
-	Map<ZoneShapeType<?>, ZoneRenderer<?>> RENDERERS = new IdentityHashMap<>();
+	Map<SimpleRegistryType<?>, ZoneRenderer<?>> RENDERERS = new IdentityHashMap<>();
 
-	static void register(ZoneShapeType<?> type, ZoneRenderer<?> renderer) {
+	static void register(SimpleRegistryType<?> type, ZoneRenderer<?> renderer) {
 		RENDERERS.put(type, renderer);
 	}
 
-	static ZoneRenderer<?> get(ZoneShapeType<?> type) {
+	static ZoneRenderer<?> get(SimpleRegistryType<?> type) {
 		var renderer = RENDERERS.get(type);
 		return renderer == null ? BoxZoneRenderer.INSTANCE : renderer;
 	}

@@ -1,10 +1,8 @@
 package dev.beast.mods.shimmer.feature.zone;
 
-import com.mojang.serialization.MapCodec;
-import dev.beast.mods.shimmer.util.Cast;
-import io.netty.buffer.ByteBuf;
+import dev.beast.mods.shimmer.util.registry.SimpleRegistry;
+import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -17,10 +15,11 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public interface ZoneShape {
-	MapCodec<ZoneShape> CODEC = ZoneShapeType.CODEC.dispatchMap("type", ZoneShape::type, ZoneShapeType::codec);
-	StreamCodec<ByteBuf, ZoneShape> STREAM_CODEC = ZoneShapeType.STREAM_CODEC.dispatch(ZoneShape::type, type -> Cast.to(type.streamCodec()));
+	SimpleRegistry<ZoneShape> REGISTRY = SimpleRegistry.create(ZoneShape::type);
 
-	ZoneShapeType<?> type();
+	default SimpleRegistryType<?> type() {
+		return REGISTRY.getType(this);
+	}
 
 	default ZoneInstance createInstance(ZoneContainer container, Zone zone) {
 		return new ZoneInstance(container, zone);

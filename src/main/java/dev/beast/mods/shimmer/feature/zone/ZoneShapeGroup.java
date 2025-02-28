@@ -1,6 +1,8 @@
 package dev.beast.mods.shimmer.feature.zone;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.AABB;
@@ -11,9 +13,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public record ZoneShapeGroup(List<ZoneShape> zoneShapes, @Nullable AABB box) implements ZoneShape {
-	public static final ZoneShapeType<ZoneShapeGroup> TYPE = new ZoneShapeType<>("group", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		ZoneShape.CODEC.codec().listOf().fieldOf("zones").forGetter(ZoneShapeGroup::zoneShapes)
-	).apply(instance, ZoneShapeGroup::create)), ZoneShape.STREAM_CODEC.apply(ByteBufCodecs.list()).map(ZoneShapeGroup::create, ZoneShapeGroup::zoneShapes));
+	public static final SimpleRegistryType<ZoneShapeGroup> TYPE = SimpleRegistryType.dynamic(Shimmer.id("group"), RecordCodecBuilder.mapCodec(instance -> instance.group(
+		ZoneShape.REGISTRY.valueCodec().listOf().fieldOf("zones").forGetter(ZoneShapeGroup::zoneShapes)
+	).apply(instance, ZoneShapeGroup::create)), ZoneShape.REGISTRY.valueStreamCodec().apply(ByteBufCodecs.list()).map(ZoneShapeGroup::create, ZoneShapeGroup::zoneShapes));
 
 	public static ZoneShapeGroup create(List<ZoneShape> zoneShapes) {
 		double minX = Double.POSITIVE_INFINITY;
@@ -41,7 +43,7 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, @Nullable AABB box) imp
 	}
 
 	@Override
-	public ZoneShapeType<?> type() {
+	public SimpleRegistryType<?> type() {
 		return TYPE;
 	}
 
