@@ -2,6 +2,7 @@ package dev.beast.mods.shimmer;
 
 import dev.beast.mods.shimmer.content.clock.ClockBlockEntityRenderer;
 import dev.beast.mods.shimmer.content.clock.ClockContent;
+import dev.beast.mods.shimmer.feature.multiverse.VoidSpecialEffects;
 import dev.beast.mods.shimmer.feature.structure.ClientStructureStorage;
 import dev.beast.mods.shimmer.feature.zone.EmptyZoneShape;
 import dev.beast.mods.shimmer.feature.zone.SphereZoneShape;
@@ -17,6 +18,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
 
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientModEventHandler {
@@ -36,5 +38,10 @@ public class ClientModEventHandler {
 	@SubscribeEvent
 	public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
 		event.registerBlockEntityRenderer(ClockContent.BLOCK_ENTITY.get(), ClockBlockEntityRenderer::new);
+	}
+
+	@SubscribeEvent
+	public static void registerDimensionSpecialEffects(RegisterDimensionSpecialEffectsEvent event) {
+		event.register(Shimmer.id("void"), new VoidSpecialEffects());
 	}
 }

@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Mob.class)
-public class MobMixin {
+public abstract class MobMixin {
 	@Inject(method = "isNoAi", at = @At("HEAD"), cancellable = true)
 	private void shimmer$isNoAi(CallbackInfoReturnable<Boolean> cir) {
 		var override = EntityOverride.AI.get((Mob) (Object) this);

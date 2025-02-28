@@ -7,11 +7,8 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 @Mixin(MouseHandler.class)
 public abstract class MouseHandlerMixin {
-	@ModifyConstant(
-		method = "onScroll",
-		constant = @Constant(floatValue = 0.2f)
-	)
+	@ModifyConstant(method = "onScroll", constant = @Constant(floatValue = 0.2F))
 	private float shimmer$maxFlySpeed(float constant) {
-		return 3f;
+		return 3F;
 	}
 }

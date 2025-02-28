@@ -4,8 +4,10 @@ import dev.beast.mods.shimmer.content.clock.ClockContent;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -50,10 +52,14 @@ public class Shimmer {
 		.build()
 	);
 
+	public static final ResourceKey<Level> LOBBY_DIMENSION = ResourceKey.create(Registries.DIMENSION, id("lobby"));
+
 	public static boolean defaultGameRules = true;
 	public static boolean loadVanillaStructures = false;
 
 	public Shimmer(IEventBus bus, Dist dist) throws IOException {
+		Shimmer.LOGGER.info("Shimmer loaded");
+
 		if (Files.notExists(PATH)) {
 			Files.createDirectories(PATH);
 		}
