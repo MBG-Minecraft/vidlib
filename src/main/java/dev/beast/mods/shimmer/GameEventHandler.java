@@ -21,7 +21,7 @@ import java.util.List;
 public class GameEventHandler {
 	@SubscribeEvent
 	public static void registerCommands(RegisterCommandsEvent event) {
-		ShimmerCommands.register(event.getDispatcher());
+		ShimmerCommands.register(event.getDispatcher(), event.getBuildContext());
 	}
 
 	@SubscribeEvent

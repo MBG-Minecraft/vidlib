@@ -7,6 +7,8 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Objects;
@@ -66,6 +68,8 @@ public interface ShimmerStreamCodecs {
 			buf.writeDouble(value.z());
 		}
 	};
+
+	StreamCodec<ByteBuf, BlockState> BLOCK_STATE = ByteBufCodecs.VAR_INT.map(Block::stateById, Block::getId);
 
 	static <B extends ByteBuf, V> StreamCodec<B, V> optional(StreamCodec<B, V> codec, V defaultValue) {
 		return new StreamCodec<>() {
