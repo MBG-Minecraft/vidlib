@@ -3,37 +3,22 @@ package dev.beast.mods.shimmer.feature.zone;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import dev.beast.mods.shimmer.Shimmer;
-import dev.beast.mods.shimmer.util.JsonUtils;
+import dev.beast.mods.shimmer.util.JsonReloadListener;
 import dev.beast.mods.shimmer.util.Side;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
-public class ZoneReloadListener extends SimplePreparableReloadListener<Map<ResourceLocation, JsonObject>> {
-	@Override
-	protected Map<ResourceLocation, JsonObject> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
-		var map = new HashMap<ResourceLocation, JsonObject>();
-
-		for (var entry : resourceManager.listResources("shimmer/zones", id -> id.getPath().endsWith(".json")).entrySet()) {
-			try (var reader = entry.getValue().openAsReader()) {
-				var id = entry.getKey().withPath(s -> s.substring(14, s.length() - 5));
-				var json = JsonUtils.read(reader);
-				map.put(id, json.getAsJsonObject());
-			} catch (Exception ex) {
-				Shimmer.LOGGER.error("Error while reading zone container from " + entry.getKey(), ex);
-			}
-		}
-
-		return map;
+public class ZoneReloadListener extends JsonReloadListener {
+	public ZoneReloadListener() {
+		super("shimmer/zones");
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer;
 
+import dev.beast.mods.shimmer.feature.cutscene.CutsceneReloadListener;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.feature.zone.UpdateZonesPayload;
@@ -28,6 +29,7 @@ public class GameEventHandler {
 	public static void addReloadListeners(AddReloadListenerEvent event) {
 		event.addListener(new ZoneReloadListener());
 		event.addListener(StructureStorage.SERVER);
+		event.addListener(new CutsceneReloadListener());
 	}
 
 	@SubscribeEvent

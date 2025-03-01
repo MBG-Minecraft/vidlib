@@ -66,6 +66,11 @@ public interface ShimmerEntityContainer {
 	}
 
 	default void playCutscene(ResourceLocation id) {
+		var cutscene = Cutscene.SERVER.get(id);
+
+		if (cutscene != null) {
+			playCutscene(cutscene);
+		}
 	}
 
 	default void stopCutscene() {
