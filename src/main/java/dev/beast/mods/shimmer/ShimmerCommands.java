@@ -2,6 +2,8 @@ package dev.beast.mods.shimmer;
 
 import com.mojang.brigadier.CommandDispatcher;
 import dev.beast.mods.shimmer.content.clock.ClockContent;
+import dev.beast.mods.shimmer.feature.camerashake.CameraShakeCommands;
+import dev.beast.mods.shimmer.feature.cutscene.CutsceneCommands;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -13,6 +15,8 @@ public class ShimmerCommands {
 		dispatcher.register(Commands.literal("shimmer")
 			.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
 			.then(ClockContent.createCommand())
+			.then(CutsceneCommands.createCommand(buildContext))
+			.then(CameraShakeCommands.createCommand(buildContext))
 			.then(Commands.literal("set-fake-block")
 				.then(Commands.argument("pos", BlockPosArgument.blockPos())
 					.then(Commands.argument("state", BlockStateArgument.block(buildContext))

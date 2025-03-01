@@ -12,7 +12,7 @@ public class SphereZoneRenderer implements ZoneRenderer<SphereZoneShape> {
 	public static final SphereZoneRenderer INSTANCE = new SphereZoneRenderer();
 
 	@Override
-	public void render(SphereZoneShape shape, Minecraft mc, RenderLevelStageEvent event, Color color, Color outlineColor) {
+	public void render(SphereZoneShape shape, Minecraft mc, RenderLevelStageEvent event, float delta, Color color, Color outlineColor) {
 		var cameraPos = event.getCamera().getPosition();
 		var ms = event.getPoseStack();
 		ms.pushPose();

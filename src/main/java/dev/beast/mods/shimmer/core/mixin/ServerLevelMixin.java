@@ -6,4 +6,5 @@ import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin implements ShimmerServerLevel {
+
 }

@@ -31,5 +31,17 @@
 	],
 	"net/minecraft/server/level/ServerPlayer": [
 		"dev/beast/mods/shimmer/core/ShimmerServerPlayer"
+	],
+	"net/minecraft/client/gui/screens/Screen": [
+		"dev/beast/mods/shimmer/core/ShimmerScreen"
+	],
+	"net/minecraft/client/renderer/GameRenderer": [
+		"dev/beast/mods/shimmer/core/ShimmerGameRenderer"
+	],
+	"net/minecraft/client/Camera": [
+		"dev/beast/mods/shimmer/core/ShimmerCamera"
+	],
+	"net/minecraft/world/item/Item": [
+		"dev/beast/mods/shimmer/core/ShimmerItem"
 	]
 }

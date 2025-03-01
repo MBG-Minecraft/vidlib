@@ -1,6 +1,10 @@
 package dev.beast.mods.shimmer;
 
 import dev.beast.mods.shimmer.content.clock.ClockPayload;
+import dev.beast.mods.shimmer.feature.camerashake.ShakeCameraPayload;
+import dev.beast.mods.shimmer.feature.camerashake.StopCameraShakingPayload;
+import dev.beast.mods.shimmer.feature.cutscene.PlayCutscenePayload;
+import dev.beast.mods.shimmer.feature.cutscene.StopCutscenePayload;
 import dev.beast.mods.shimmer.feature.misc.FakeBlockPayload;
 import dev.beast.mods.shimmer.feature.zone.UpdateZonesPayload;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -21,5 +25,9 @@ public interface ShimmerNet {
 		reg.playToClient(ClockPayload.TYPE, ClockPayload.STREAM_CODEC, ClockPayload::handle);
 		reg.playToClient(UpdateZonesPayload.TYPE, UpdateZonesPayload.STREAM_CODEC, UpdateZonesPayload::handle);
 		reg.playToClient(FakeBlockPayload.TYPE, FakeBlockPayload.STREAM_CODEC, FakeBlockPayload::handle);
+		reg.playToClient(PlayCutscenePayload.TYPE, PlayCutscenePayload.STREAM_CODEC, PlayCutscenePayload::handle);
+		reg.playToClient(StopCutscenePayload.TYPE, StopCutscenePayload.STREAM_CODEC, StopCutscenePayload::handle);
+		reg.playToClient(ShakeCameraPayload.TYPE, ShakeCameraPayload.STREAM_CODEC, ShakeCameraPayload::handle);
+		reg.playToClient(StopCameraShakingPayload.TYPE, StopCameraShakingPayload.STREAM_CODEC, StopCameraShakingPayload::handle);
 	}
 }

@@ -54,4 +54,12 @@ public class EasingGroup {
 	public String toString() {
 		return id;
 	}
+
+	public double easeMirrored(double x, EasingGroup end) {
+		return x < 0.5D ? out.ease(x * 2D) : 1D - end.out.ease((x - 0.5D) * 2D);
+	}
+
+	public double easeMirrored(double x) {
+		return easeMirrored(x, this);
+	}
 }

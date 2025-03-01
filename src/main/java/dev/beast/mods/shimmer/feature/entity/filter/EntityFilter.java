@@ -29,6 +29,31 @@ public interface EntityFilter extends Predicate<Entity> {
 	SimpleRegistryType.Unit<EntityFilter> ITEM = SimpleRegistryType.unit(Shimmer.id("item"), entity -> entity instanceof ItemEntity);
 	SimpleRegistryType.Unit<EntityFilter> PROJECTILE = SimpleRegistryType.unit(Shimmer.id("projectile"), entity -> entity instanceof Projectile);
 
+	static void bootstrap() {
+		REGISTRY.register(EntityNotFilter.TYPE);
+		REGISTRY.register(EntityAndFilter.TYPE);
+		REGISTRY.register(EntityOrFilter.TYPE);
+		REGISTRY.register(EntityXorFilter.TYPE);
+
+		REGISTRY.register(NONE);
+		REGISTRY.register(ALL);
+		REGISTRY.register(ALIVE);
+		REGISTRY.register(DEAD);
+		REGISTRY.register(LIVING);
+		REGISTRY.register(PLAYER);
+		REGISTRY.register(SURVIVAL_PLAYER);
+		REGISTRY.register(SURVIVAL_LIKE_PLAYER);
+		REGISTRY.register(SPECTATOR);
+		REGISTRY.register(CREATIVE);
+		REGISTRY.register(SPECTATOR_OR_CREATIVE);
+		REGISTRY.register(ITEM);
+		REGISTRY.register(PROJECTILE);
+
+		REGISTRY.register(EntityTagFilter.TYPE);
+		REGISTRY.register(EntityTypeFilter.TYPE);
+		REGISTRY.register(EntityTypeTagFilter.TYPE);
+	}
+
 	default SimpleRegistryType<?> type() {
 		return REGISTRY.getType(this);
 	}

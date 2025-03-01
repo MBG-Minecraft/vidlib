@@ -9,6 +9,6 @@ public class EmptyZoneRenderer implements ZoneRenderer<ZoneShape> {
 	public static final EmptyZoneRenderer INSTANCE = new EmptyZoneRenderer();
 
 	@Override
-	public void render(ZoneShape shape, Minecraft mc, RenderLevelStageEvent event, Color color, Color outlineColor) {
+	public void render(ZoneShape shape, Minecraft mc, RenderLevelStageEvent event, float delta, Color color, Color outlineColor) {
 	}
 }

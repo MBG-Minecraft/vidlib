@@ -1,8 +1,15 @@
 package dev.beast.mods.shimmer.core;
 
+import dev.beast.mods.shimmer.feature.camerashake.CameraShake;
+import dev.beast.mods.shimmer.feature.camerashake.ShakeCameraPayload;
+import dev.beast.mods.shimmer.feature.camerashake.StopCameraShakingPayload;
+import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
+import dev.beast.mods.shimmer.feature.cutscene.PlayCutscenePayload;
+import dev.beast.mods.shimmer.feature.cutscene.StopCutscenePayload;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -50,5 +57,26 @@ public interface ShimmerEntityContainer {
 
 	default void status(String message) {
 		status(Component.literal(message));
+	}
+
+	default void playCutscene(Cutscene cutscene) {
+		if (!cutscene.steps.isEmpty()) {
+			send(new PlayCutscenePayload(cutscene));
+		}
+	}
+
+	default void playCutscene(ResourceLocation id) {
+	}
+
+	default void stopCutscene() {
+		send(StopCutscenePayload.INSTANCE);
+	}
+
+	default void shakeCamera(CameraShake shake) {
+		send(new ShakeCameraPayload(shake));
+	}
+
+	default void stopCameraShaking() {
+		send(StopCameraShakingPayload.INSTANCE);
 	}
 }

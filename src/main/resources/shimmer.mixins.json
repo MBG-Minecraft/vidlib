@@ -3,8 +3,8 @@
 	"minVersion": "0.8",
 	"package": "dev.beast.mods.shimmer.core.mixin",
 	"compatibilityLevel": "JAVA_21",
-	"mixins": ["EntityMixin", "LevelMixin", "LivingEntityMixin", "MinecraftServerMixin", "MobMixin", "PlayerMixin", "ServerLevelMixin", "ServerPlayerMixin"],
-	"client": ["AbstractClientPlayerMixin", "ClientLevelMixin", "ClientPacketListenerMixin", "LocalPlayerMixin", "MinecraftClientMixin", "MouseHandlerMixin"],
+	"mixins": ["EntityMixin", "ItemMixin", "LevelMixin", "LivingEntityMixin", "MinecraftServerMixin", "MobMixin", "PlayerMixin", "ServerLevelMixin", "ServerPlayerMixin"],
+	"client": ["AbstractClientPlayerMixin", "CameraMixin", "ClientLevelMixin", "ClientPacketListenerMixin", "GameRendererMixin", "LevelRendererMixin", "LocalPlayerMixin", "MinecraftClientMixin", "MouseHandlerMixin", "ScreenMixin"],
 	"injectors": {
 		"defaultRequire": 1,
 		"maxShiftBy": 2

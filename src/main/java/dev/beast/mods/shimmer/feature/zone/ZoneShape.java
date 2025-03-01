@@ -17,6 +17,15 @@ import java.util.stream.Stream;
 public interface ZoneShape {
 	SimpleRegistry<ZoneShape> REGISTRY = SimpleRegistry.create(ZoneShape::type);
 
+	static void bootstrap() {
+		REGISTRY.register(EmptyZoneShape.TYPE);
+		REGISTRY.register(UniverseZoneShape.TYPE);
+		REGISTRY.register(ZoneShapeGroup.TYPE);
+		REGISTRY.register(BlockZoneShape.TYPE);
+		REGISTRY.register(BoxZoneShape.TYPE);
+		REGISTRY.register(SphereZoneShape.TYPE);
+	}
+
 	default SimpleRegistryType<?> type() {
 		return REGISTRY.getType(this);
 	}

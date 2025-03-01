@@ -11,7 +11,7 @@ public class BoxZoneRenderer implements ZoneRenderer<ZoneShape> {
 	public static final BoxZoneRenderer INSTANCE = new BoxZoneRenderer();
 
 	@Override
-	public void render(ZoneShape shape, Minecraft mc, RenderLevelStageEvent event, Color color, Color outlineColor) {
+	public void render(ZoneShape shape, Minecraft mc, RenderLevelStageEvent event, float delta, Color color, Color outlineColor) {
 		var box = shape.getBoundingBox();
 		var cameraPos = event.getCamera().getPosition();
 		float minX = (float) (box.minX - cameraPos.x);
