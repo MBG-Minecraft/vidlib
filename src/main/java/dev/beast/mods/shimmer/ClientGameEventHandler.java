@@ -9,10 +9,12 @@ import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.KMath;
 import dev.beast.mods.shimmer.util.Cast;
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 
@@ -99,5 +101,14 @@ public class ClientGameEventHandler {
 			event.setFOV(event.getFOV() * mc.player.getVehicle().adjustFOV(camera, event.getPartialTick(), changingFov));
 		}
 		 */
+	}
+
+	@SubscribeEvent
+	public static void renderBlockHighlight(RenderHighlightEvent.Block event) {
+		var mc = Minecraft.getInstance();
+
+		if (mc.player != null && mc.level != null && !mc.player.isSpectatorOrCreative() && mc.level.getBlockState(event.getTarget().getBlockPos()).is(Blocks.BARRIER)) {
+			event.setCanceled(true);
+		}
 	}
 }
