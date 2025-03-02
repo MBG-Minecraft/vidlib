@@ -6,6 +6,7 @@ import dev.beast.mods.shimmer.feature.camerashake.StopCameraShakingPayload;
 import dev.beast.mods.shimmer.feature.cutscene.PlayCutscenePayload;
 import dev.beast.mods.shimmer.feature.cutscene.StopCutscenePayload;
 import dev.beast.mods.shimmer.feature.misc.FakeBlockPayload;
+import dev.beast.mods.shimmer.feature.misc.SetPostEffectPayload;
 import dev.beast.mods.shimmer.feature.zone.UpdateZonesPayload;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -29,5 +30,6 @@ public interface ShimmerNet {
 		reg.playToClient(StopCutscenePayload.TYPE, StopCutscenePayload.STREAM_CODEC, StopCutscenePayload::handle);
 		reg.playToClient(ShakeCameraPayload.TYPE, ShakeCameraPayload.STREAM_CODEC, ShakeCameraPayload::handle);
 		reg.playToClient(StopCameraShakingPayload.TYPE, StopCameraShakingPayload.STREAM_CODEC, StopCameraShakingPayload::handle);
+		reg.playToClient(SetPostEffectPayload.TYPE, SetPostEffectPayload.STREAM_CODEC, SetPostEffectPayload::handle);
 	}
 }

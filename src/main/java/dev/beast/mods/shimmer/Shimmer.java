@@ -1,19 +1,15 @@
 package dev.beast.mods.shimmer;
 
 import dev.beast.mods.shimmer.content.clock.ClockContent;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLPaths;
-import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,20 +33,6 @@ public class Shimmer {
 	public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(ID);
 	public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(ID);
 	public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, ID);
-	public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, ID);
-
-	public static final DeferredHolder<CreativeModeTab, CreativeModeTab> CREATIVE_TAB = CREATIVE_TABS.register("shimmer", () -> CreativeModeTab.builder()
-		.title(Component.translatable("itemGroup." + ID))
-		.icon(ClockContent.ITEM::toStack)
-		.displayItems((params, output) -> {
-			for (var item : BuiltInRegistries.ITEM) {
-				if (item.builtInRegistryHolder().getKey().location().getNamespace().equals(ID)) {
-					output.accept(item);
-				}
-			}
-		})
-		.build()
-	);
 
 	public static final ResourceKey<Level> LOBBY_DIMENSION = ResourceKey.create(Registries.DIMENSION, id("lobby"));
 
@@ -67,7 +49,6 @@ public class Shimmer {
 		ITEMS.register(bus);
 		BLOCKS.register(bus);
 		BLOCK_ENTITIES.register(bus);
-		CREATIVE_TABS.register(bus);
 
 		ClockContent.init();
 	}

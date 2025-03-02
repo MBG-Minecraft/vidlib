@@ -6,13 +6,14 @@ import dev.beast.mods.shimmer.feature.camerashake.CameraShakeInstance;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.cutscene.CutsceneScreen;
-import dev.beast.mods.shimmer.feature.cutscene.CutsceneStep;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.math.Vec2d;
+import dev.beast.mods.shimmer.util.Empty;
 import dev.beast.mods.shimmer.util.ScheduledTask;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -135,5 +136,14 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 	@Override
 	public void stopCameraShaking() {
 		shimmer$cameraShakeInstances.clear();
+	}
+
+	@Override
+	public void setPostEffect(ResourceLocation id) {
+		if (id.equals(Empty.ID)) {
+			shimmer$self().gameRenderer.shutdownEffect();
+		} else {
+			shimmer$self().gameRenderer.loadEffect(id);
+		}
 	}
 }

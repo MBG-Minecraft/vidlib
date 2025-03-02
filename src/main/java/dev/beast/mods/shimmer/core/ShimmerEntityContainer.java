@@ -6,6 +6,7 @@ import dev.beast.mods.shimmer.feature.camerashake.StopCameraShakingPayload;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.cutscene.PlayCutscenePayload;
 import dev.beast.mods.shimmer.feature.cutscene.StopCutscenePayload;
+import dev.beast.mods.shimmer.feature.misc.SetPostEffectPayload;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -83,5 +84,9 @@ public interface ShimmerEntityContainer {
 
 	default void stopCameraShaking() {
 		send(StopCameraShakingPayload.INSTANCE);
+	}
+
+	default void setPostEffect(ResourceLocation id) {
+		send(new SetPostEffectPayload(id));
 	}
 }

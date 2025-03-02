@@ -33,7 +33,6 @@ public class ShimmerDataGen {
 
 		@Override
 		protected void addTranslations() {
-			add("itemGroup.shimmer", "Shimmer");
 			addBlock(ClockContent.BLOCK, "Clock");
 		}
 	}

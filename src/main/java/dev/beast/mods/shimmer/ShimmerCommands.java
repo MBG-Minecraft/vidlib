@@ -7,6 +7,7 @@ import dev.beast.mods.shimmer.feature.cutscene.CutsceneCommands;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 
@@ -27,6 +28,14 @@ public class ShimmerCommands {
 							return 1;
 						})
 					)
+				)
+			)
+			.then(Commands.literal("post-effect")
+				.then(Commands.argument("id", ResourceLocationArgument.id())
+					.executes(ctx -> {
+						ctx.getSource().getPlayerOrException().setPostEffect(ResourceLocationArgument.getId(ctx, "id"));
+						return 1;
+					})
 				)
 			)
 		);

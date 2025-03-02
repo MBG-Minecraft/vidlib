@@ -3,6 +3,7 @@ package dev.beast.mods.shimmer.core;
 import dev.beast.mods.shimmer.feature.camerashake.CameraShake;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 public interface ShimmerLocalPlayer extends ShimmerClientPlayer {
@@ -29,5 +30,10 @@ public interface ShimmerLocalPlayer extends ShimmerClientPlayer {
 	@Override
 	default void stopCameraShaking() {
 		shimmer$getEnvironment().stopCameraShaking();
+	}
+
+	@Override
+	default void setPostEffect(ResourceLocation id) {
+		shimmer$getEnvironment().setPostEffect(id);
 	}
 }
