@@ -82,11 +82,11 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, @Nullable AABB box) imp
 
 	@Override
 	@Nullable
-	public ZoneClipResult clip(Vec3 start, Vec3 end) {
+	public ZoneClipResult clip(ZoneInstance instance, Vec3 start, Vec3 end) {
 		ZoneClipResult result = null;
 
 		for (var zone : zoneShapes) {
-			var clip = zone.clip(start, end);
+			var clip = zone.clip(instance, start, end);
 
 			if (clip != null) {
 				if (result == null || clip.distanceSq() < result.distanceSq()) {

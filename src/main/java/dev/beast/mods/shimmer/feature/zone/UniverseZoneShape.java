@@ -27,7 +27,7 @@ public class UniverseZoneShape implements ZoneShape {
 
 	@Override
 	@Nullable
-	public ZoneClipResult clip(Vec3 start, Vec3 end) {
+	public ZoneClipResult clip(ZoneInstance instance, Vec3 start, Vec3 end) {
 		return null;
 	}
 

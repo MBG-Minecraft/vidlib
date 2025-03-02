@@ -17,7 +17,7 @@ public class CutsceneScreen extends Screen {
 	public CutsceneScreen(ClientCutscene clientCutscene, @Nullable Screen previousScreen) {
 		super(Component.empty());
 		this.clientCutscene = clientCutscene;
-		this.previousScreen = null;
+		this.previousScreen = previousScreen;
 	}
 
 	@Override

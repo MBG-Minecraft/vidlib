@@ -8,6 +8,11 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 public interface ShimmerLocalPlayer extends ShimmerClientPlayer {
 	@Override
+	default ShimmerClientSessionData shimmer$sessionData() {
+		throw new NoMixinException();
+	}
+
+	@Override
 	default void send(CustomPacketPayload packet) {
 		PacketDistributor.sendToServer(packet);
 	}

@@ -1,11 +1,12 @@
 package dev.beast.mods.shimmer;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import dev.beast.mods.shimmer.content.clock.ClockBlockEntity;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
-import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.feature.zone.renderer.EmptyZoneRenderer;
 import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
 import dev.beast.mods.shimmer.math.Color;
+import dev.beast.mods.shimmer.math.EasingGroup;
 import dev.beast.mods.shimmer.math.KMath;
 import dev.beast.mods.shimmer.util.Cast;
 import net.minecraft.client.Minecraft;
@@ -24,15 +25,15 @@ public class ClientGameEventHandler {
 	public static void clientPreTick(ClientTickEvent.Pre event) {
 		var mc = Minecraft.getInstance();
 
-		if (mc.level != null) {
+		if (mc.level != null && mc.player != null) {
 			ClockBlockEntity.tick();
 
-			ActiveZones.CLIENT.entityZones.clear();
+			var session = mc.player.shimmer$sessionData();
 
-			for (var container : ActiveZones.CLIENT) {
-				if (container.dimension == mc.level.dimension()) {
-					container.tick(ActiveZones.CLIENT, mc.level);
-				}
+			session.filteredZones.entityZones.clear();
+
+			for (var container : session.filteredZones) {
+				container.tick(session.filteredZones, mc.level);
 			}
 		}
 	}
@@ -46,22 +47,30 @@ public class ClientGameEventHandler {
 	public static void renderWorld(RenderLevelStageEvent event) {
 		var mc = Minecraft.getInstance();
 
-		if (mc.level == null) {
+		if (mc.level == null || mc.player == null) {
 			return;
 		}
 
+		var session = mc.player.shimmer$sessionData();
 		float delta = event.getPartialTick().getGameTimeDeltaPartialTick(true);
 
-		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
-			if (mc.getEntityRenderDispatcher().shouldRenderHitBoxes()) {
-				for (var container : ActiveZones.CLIENT) {
-					if (container.dimension == mc.level.dimension()) {
-						for (var instance : container.zones) {
-							var renderer = ZoneRenderer.get(instance.zone.shape().type());
+		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL) {
+			var start = mc.player.getEyePosition();
+			var end = start.add(mc.player.getLookAngle().scale(500D));
 
-							if (renderer != EmptyZoneRenderer.INSTANCE) {
-								renderer.render(Cast.to(instance.zone.shape()), mc, event, delta, instance.zone.color().withAlpha(0.2F), instance.entities.isEmpty() ? Color.WHITE : Color.GREEN);
-							}
+			session.zoneClip = session.filteredZones.clip(start, end);
+		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
+			if (mc.getEntityRenderDispatcher().shouldRenderHitBoxes()) {
+				for (var container : session.filteredZones) {
+					for (var instance : container.zones) {
+						var renderer = ZoneRenderer.get(instance.zone.shape().type());
+
+						if (renderer != EmptyZoneRenderer.INSTANCE) {
+							boolean hovered = session.zoneClip != null && session.zoneClip.instance() == instance;
+							var baseColor = instance.zone.color().withAlpha(50);
+							var color = hovered ? baseColor.lerp((float) EasingGroup.SMOOTHSTEP.easeMirrored((RenderSystem.getShaderGameTime() * 800D) % 1D), Color.WHITE.withAlpha(100)) : baseColor;
+							var outlineColor = instance.entities.isEmpty() ? Color.WHITE : Color.GREEN;
+							renderer.render(Cast.to(instance.zone.shape()), mc, event, delta, color, outlineColor);
 						}
 					}
 				}

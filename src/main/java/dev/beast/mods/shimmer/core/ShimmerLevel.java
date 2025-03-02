@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer.core;
 
 import com.mojang.datafixers.util.Either;
+import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
@@ -22,6 +23,11 @@ public interface ShimmerLevel extends ShimmerEntityContainer {
 	@Override
 	default List<? extends Player> shimmer$getPlayers() {
 		return ((Level) this).players();
+	}
+
+	@Nullable
+	default ActiveZones shimmer$getActiveZones() {
+		throw new NoMixinException();
 	}
 
 	default void setFakeBlock(BlockPos pos, BlockState state) {

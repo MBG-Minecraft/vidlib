@@ -4,12 +4,12 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
 import dev.beast.mods.shimmer.util.ShimmerCodecs;
 import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.UUID;
@@ -35,8 +35,8 @@ public record FollowingEntityWorldPosition(Either<Integer, UUID> entityId, World
 	}
 
 	@Override
-	public Vec3 get(Level level, float progress) {
-		var entity = level.getEntityByEither(entityId);
-		return entity == null ? fallback.get(level, progress) : positionType.getPosition(entity);
+	public Vec3 get(WorldNumberContext ctx) {
+		var entity = ctx.level.getEntityByEither(entityId);
+		return entity == null ? fallback.get(ctx) : positionType.getPosition(entity);
 	}
 }

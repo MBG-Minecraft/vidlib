@@ -11,6 +11,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.MOD)
 public class ModEventHandler {
@@ -21,6 +22,13 @@ public class ModEventHandler {
 		EntityFilter.bootstrap();
 		ZoneShape.bootstrap();
 		CameraShakeType.bootstrap();
+	}
+
+	@SubscribeEvent
+	static void registerPayloadHandlers(RegisterPayloadHandlersEvent event) {
+		var reg = event.registrar("1").optional();
+
+		// reg.playToServer
 	}
 
 	@SubscribeEvent

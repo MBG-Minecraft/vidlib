@@ -5,6 +5,7 @@ import com.mojang.serialization.DataResult;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.Mth;
 
 import java.util.Map;
 
@@ -127,5 +128,18 @@ public record Color(int argb) {
 	@Override
 	public String toString() {
 		return toARGBString();
+	}
+
+	public Color lerp(float delta, Color other, int alpha) {
+		return new Color(
+			alpha,
+			Mth.lerpInt(delta, red(), other.red()),
+			Mth.lerpInt(delta, green(), other.green()),
+			Mth.lerpInt(delta, blue(), other.blue())
+		);
+	}
+
+	public Color lerp(float delta, Color other) {
+		return lerp(delta, other, Mth.lerpInt(delta, alpha(), other.alpha()));
 	}
 }

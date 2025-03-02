@@ -8,7 +8,6 @@ import dev.beast.mods.shimmer.math.KMath;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.level.Level;
 
 public record InterpolatedWorldNumber(Easing easing, float start, float end, WorldNumber a, WorldNumber b) implements WorldNumber {
 	public static final SimpleRegistryType<InterpolatedWorldNumber> TYPE = SimpleRegistryType.dynamic(Shimmer.id("interpolated"), RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -55,19 +54,19 @@ public record InterpolatedWorldNumber(Easing easing, float start, float end, Wor
 	}
 
 	@Override
-	public double get(Level level, float progress) {
-		var a = this.a.get(level, progress);
+	public double get(WorldNumberContext ctx) {
+		var a = this.a.get(ctx);
 
-		if (progress <= start) {
+		if (ctx.progress <= start) {
 			return a;
 		}
 
-		var b = this.b.get(level, progress);
+		var b = this.b.get(ctx);
 
-		if (progress >= end) {
+		if (ctx.progress >= end) {
 			return b;
 		}
 
-		return KMath.lerp(easing.easeClamped(KMath.map(progress, start, end, 0D, 1D)), a, b);
+		return KMath.lerp(easing.easeClamped(KMath.map(ctx.progress, start, end, 0D, 1D)), a, b);
 	}
 }

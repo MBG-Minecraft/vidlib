@@ -32,7 +32,8 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 	}
 
 	default List<ZoneInstance> getZones() {
-		return shimmer$getEnvironment().shimmer$getActiveZones().entityZones.getOrDefault(((Entity) this).getId(), List.of());
+		var zones = ((Entity) this).level().shimmer$getActiveZones();
+		return zones == null ? List.of() : zones.entityZones.getOrDefault(((Entity) this).getId(), List.of());
 	}
 
 	@Nullable

@@ -3,6 +3,7 @@ package dev.beast.mods.shimmer.feature.camerashake;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.math.EasingGroup;
+import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -14,7 +15,8 @@ public record CameraShake(
 	float speed,
 	float intensity,
 	EasingGroup start,
-	EasingGroup end
+	EasingGroup end,
+	boolean motionBlur
 ) {
 	public static final Codec<CameraShake> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		CameraShakeType.REGISTRY.valueCodec().optionalFieldOf("type", LemniscateCameraShakeType.DEFAULT.instance()).forGetter(CameraShake::type),
@@ -22,10 +24,11 @@ public record CameraShake(
 		Codec.FLOAT.optionalFieldOf("speed", 5F).forGetter(CameraShake::speed),
 		Codec.FLOAT.optionalFieldOf("intensity", 0.3F).forGetter(CameraShake::intensity),
 		EasingGroup.CODEC.optionalFieldOf("start", EasingGroup.QUINT).forGetter(CameraShake::start),
-		EasingGroup.CODEC.optionalFieldOf("end", EasingGroup.CUBIC).forGetter(CameraShake::end)
+		EasingGroup.CODEC.optionalFieldOf("end", EasingGroup.CUBIC).forGetter(CameraShake::end),
+		Codec.BOOL.optionalFieldOf("motion_blur", false).forGetter(CameraShake::motionBlur)
 	).apply(instance, CameraShake::new));
 
-	public static final StreamCodec<RegistryFriendlyByteBuf, CameraShake> STREAM_CODEC = StreamCodec.composite(
+	public static final StreamCodec<RegistryFriendlyByteBuf, CameraShake> STREAM_CODEC = ShimmerStreamCodecs.composite(
 		CameraShakeType.REGISTRY.valueStreamCodec(),
 		CameraShake::type,
 		ByteBufCodecs.VAR_INT,
@@ -38,6 +41,8 @@ public record CameraShake(
 		CameraShake::start,
 		EasingGroup.STREAM_CODEC,
 		CameraShake::end,
+		ByteBufCodecs.BOOL,
+		CameraShake::motionBlur,
 		CameraShake::new
 	);
 

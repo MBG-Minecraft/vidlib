@@ -13,26 +13,31 @@ import java.util.Map;
 
 public class Cutscene {
 	public static final Codec<Cutscene> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		CutsceneStep.CODEC.listOf().optionalFieldOf("steps", List.of()).forGetter(Cutscene::steps)
+		CutsceneStep.CODEC.listOf().optionalFieldOf("steps", List.of()).forGetter(c -> c.steps),
+		Codec.BOOL.optionalFieldOf("open_previous_screen", false).forGetter(c -> c.openPreviousScreen)
 	).apply(instance, Cutscene::new));
 
-	public static final StreamCodec<RegistryFriendlyByteBuf, Cutscene> STREAM_CODEC = CutsceneStep.STREAM_CODEC.apply(ByteBufCodecs.list()).map(Cutscene::new, Cutscene::steps);
+	public static final StreamCodec<RegistryFriendlyByteBuf, Cutscene> STREAM_CODEC = StreamCodec.composite(
+		CutsceneStep.STREAM_CODEC.apply(ByteBufCodecs.list()),
+		c -> c.steps,
+		ByteBufCodecs.BOOL,
+		c -> c.openPreviousScreen,
+		Cutscene::new
+	);
 
 	public static Map<ResourceLocation, Cutscene> SERVER = Map.of();
 
 	public final List<CutsceneStep> steps;
+	public boolean openPreviousScreen;
 	public List<CutsceneTick> tick;
 
 	public static Cutscene create() {
-		return new Cutscene();
+		return new Cutscene(new ArrayList<>(2), false);
 	}
 
-	private Cutscene(List<CutsceneStep> steps) {
+	private Cutscene(List<CutsceneStep> steps, boolean openPreviousScreen) {
 		this.steps = steps;
-	}
-
-	private Cutscene() {
-		this(new ArrayList<>(2));
+		this.openPreviousScreen = openPreviousScreen;
 	}
 
 	public List<CutsceneStep> steps() {

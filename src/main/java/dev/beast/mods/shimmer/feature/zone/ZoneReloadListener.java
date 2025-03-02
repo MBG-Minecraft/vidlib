@@ -14,9 +14,13 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.Map;
 
 public class ZoneReloadListener extends JsonReloadListener {
+	public static final ActiveZones ALL = new ActiveZones();
+	public static final Map<ResourceKey<Level>, ActiveZones> BY_DIMENSION = new IdentityHashMap<>();
+
 	public ZoneReloadListener() {
 		super("shimmer/zones");
 	}
@@ -54,7 +58,24 @@ public class ZoneReloadListener extends JsonReloadListener {
 			}
 		}
 
-		ActiveZones.SERVER.update(list);
-		NeoForge.EVENT_BUS.post(new ZoneEvent.Updated(ActiveZones.SERVER, Side.SERVER));
+		ALL.update(list);
+		BY_DIMENSION.clear();
+
+		for (var container : list) {
+			var zones = BY_DIMENSION.get(container.dimension);
+
+			if (zones == null) {
+				zones = new ActiveZones();
+				BY_DIMENSION.put(container.dimension, zones);
+			}
+
+			zones.containers.put(container.id, container);
+		}
+
+		NeoForge.EVENT_BUS.post(new ZoneEvent.AllUpdated(ALL, Side.SERVER));
+
+		for (var entry : BY_DIMENSION.entrySet()) {
+			NeoForge.EVENT_BUS.post(new ZoneEvent.Updated(entry.getKey(), entry.getValue(), Side.SERVER));
+		}
 	}
 }

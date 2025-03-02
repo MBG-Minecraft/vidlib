@@ -147,8 +147,10 @@ public final class EntityOverride<T> {
 		var e = (Entity) entity;
 
 		if (e instanceof Player) {
-			for (var container : e.shimmer$getEnvironment().shimmer$getActiveZones()) {
-				if (container.dimension == e.level().dimension()) {
+			var zones = e.level().shimmer$getActiveZones();
+
+			if (zones != null) {
+				for (var container : zones) {
 					for (var instance : container.zones) {
 						if (instance.has(e)) {
 							var v1 = instance.zone.playerOverrides().get(this);

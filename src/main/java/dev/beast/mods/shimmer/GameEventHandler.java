@@ -2,7 +2,6 @@ package dev.beast.mods.shimmer;
 
 import dev.beast.mods.shimmer.feature.cutscene.CutsceneReloadListener;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
-import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.feature.zone.UpdateZonesPayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneReloadListener;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
@@ -34,7 +33,7 @@ public class GameEventHandler {
 
 	@SubscribeEvent
 	public static void syncReload(OnDatapackSyncEvent event) {
-		var packet = new ClientboundCustomPayloadPacket(new UpdateZonesPayload(List.copyOf(ActiveZones.SERVER.containers.values())));
+		var packet = new ClientboundCustomPayloadPacket(new UpdateZonesPayload(List.copyOf(ZoneReloadListener.ALL.containers.values())));
 		event.getRelevantPlayers().forEach(player -> player.connection.send(packet));
 	}
 

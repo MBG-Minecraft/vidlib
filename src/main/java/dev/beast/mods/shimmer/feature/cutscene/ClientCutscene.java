@@ -1,7 +1,7 @@
 package dev.beast.mods.shimmer.feature.cutscene;
 
+import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.phys.Vec3;
 
@@ -13,6 +13,7 @@ public class ClientCutscene {
 	public final Minecraft mc;
 	public final Cutscene cutscene;
 	public final CutsceneStep[] steps;
+	public final Vec3 sourcePos;
 	public int prevTotalTick;
 	public int totalTick;
 	public int totalLength;
@@ -21,25 +22,26 @@ public class ClientCutscene {
 	public double prevZoom, zoom;
 	public List<FormattedCharSequence> topBar, bottomBar;
 
-	public ClientCutscene(Minecraft mc, Cutscene cutscene) {
+	public ClientCutscene(Minecraft mc, Cutscene cutscene, Vec3 sourcePos) {
 		this.mc = mc;
 		this.cutscene = cutscene;
 		this.steps = cutscene.steps.toArray(new CutsceneStep[0]);
+		this.sourcePos = sourcePos;
+
 		this.prevTotalTick = 0;
 		this.totalTick = 0;
 		this.totalLength = 0;
 		this.zoom = 1D;
 
+		var ctx = new WorldNumberContext(mc.level, 0F);
+		ctx.sourcePos = sourcePos;
+
 		for (var step : steps) {
 			this.totalLength = Math.max(totalLength, step.start + step.length);
 
 			if (step.start == 0) {
-				if (origin == null && step.origin != null) {
-					origin = step.origin.get(mc.level, 0F);
-				}
-
-				if (step.target != null) {
-					var t = step.target.get(mc.level, 0F);
+				if (step.target.isPresent()) {
+					var t = step.target.get().get(ctx);
 
 					if (target == null) {
 						target = t;
@@ -47,8 +49,14 @@ public class ClientCutscene {
 					}
 				}
 
-				if (step.zoom != null) {
-					zoom = step.zoom.get(mc.level, 0F);
+				ctx.targetPos = target;
+
+				if (origin == null && step.origin.isPresent()) {
+					origin = step.origin.get().get(ctx);
+				}
+
+				if (step.zoom.isPresent()) {
+					zoom = step.zoom.get().get(ctx);
 				}
 			}
 		}
@@ -76,69 +84,76 @@ public class ClientCutscene {
 		prevTarget = target;
 		prevZoom = zoom;
 
-		float totalProgress = totalTick / (float) totalLength;
+		var rootCtx = new WorldNumberContext(mc.level, totalTick / (float) totalLength);
+		rootCtx.sourcePos = sourcePos;
 
 		if (cutscene.tick != null) {
 			for (var tick : cutscene.tick) {
-				tick.tick(mc.level, totalProgress);
+				tick.tick(rootCtx);
 			}
 		}
 
 		for (var step : steps) {
 			if (step.start == totalTick) {
-				if ((step.flags & CutsceneStep.STATUS) != 0) {
-					mc.gui.setOverlayMessage(step.status == null ? Component.empty() : step.status, false);
+				if (step.status.isPresent()) {
+					mc.gui.setOverlayMessage(step.status.get(), false);
 				}
 
-				if ((step.flags & CutsceneStep.TOP_BAR) != 0 && mc.screen != null) {
-					topBar = step.topBar == null ? null : mc.font.split(step.topBar, mc.screen.width - 60);
+				if (mc.screen != null) {
+					if (step.topBar.isPresent()) {
+						topBar = mc.font.split(step.topBar.get(), mc.screen.width - 60);
+					}
+
+					if (step.bottomBar.isPresent()) {
+						bottomBar = mc.font.split(step.bottomBar.get(), mc.screen.width - 60);
+					}
 				}
 
-				if ((step.flags & CutsceneStep.BOTTOM_BAR) != 0 && mc.screen != null) {
-					bottomBar = step.bottomBar == null ? null : mc.font.split(step.bottomBar, mc.screen.width - 60);
-				}
-
-				if ((step.flags & CutsceneStep.SHADER) != 0) {
-					// FIXME: MonochromeClient.loadPostProcessor(mc, step.shader);
+				if (step.shader.isPresent()) {
+					mc.setPostEffect(step.shader.get());
 				}
 			}
 
 			if (totalTick >= step.start && totalTick < step.start + step.length) {
 				float progress = (totalTick - step.start) / (float) step.length;
+				var ctx = new WorldNumberContext(mc.level, progress);
+				ctx.sourcePos = sourcePos;
 
 				if (step.tick != null) {
 					for (var tick : step.tick) {
-						tick.tick(mc.level, progress);
-					}
-				}
-
-				if (step.origin != null) {
-					origin = step.origin.get(mc.level, progress);
-
-					if (step.start == totalTick && (step.flags & CutsceneStep.SNAP_ORIGIN) != 0) {
-						prevOrigin = origin;
+						tick.tick(ctx);
 					}
 				}
 
 				step.prevRenderTarget = step.renderTarget;
 
-				if (step.target != null) {
-					target = step.target.get(mc.level, progress);
+				if (step.target.isPresent()) {
+					target = step.target.get().get(ctx);
 					step.renderTarget = target;
 
 					if (step.prevRenderTarget == null) {
 						step.prevRenderTarget = target;
 					}
 
-					if (step.start == totalTick && (step.flags & CutsceneStep.SNAP_TARGET) != 0) {
+					if (step.start == totalTick && step.snap.target()) {
 						prevTarget = target;
 					}
 				}
 
-				if (step.zoom != null) {
-					zoom = step.zoom.get(mc.level, progress);
+				ctx.targetPos = target;
 
-					if (step.start == totalTick && (step.flags & CutsceneStep.SNAP_ZOOM) != 0) {
+				if (step.origin.isPresent()) {
+					origin = step.origin.get().get(ctx);
+
+					if (step.start == totalTick && step.snap.origin()) {
+						prevOrigin = origin;
+					}
+				}
+
+				if (step.zoom.isPresent()) {
+					zoom = step.zoom.get().get(ctx);
+
+					if (step.start == totalTick && step.snap.zoom()) {
 						prevZoom = zoom;
 					}
 				}
@@ -146,8 +161,6 @@ public class ClientCutscene {
 		}
 
 		totalTick++;
-
-		// mc.setScreen(previousScreen);
 		return totalTick >= totalLength;
 	}
 }

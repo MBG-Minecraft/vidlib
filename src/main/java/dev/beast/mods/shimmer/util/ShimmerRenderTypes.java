@@ -26,7 +26,8 @@ public class ShimmerRenderTypes extends RenderType {
 			.setShaderState(POSITION_COLOR_SHADER)
 			.setLineState(new RenderStateShard.LineStateShard(OptionalDouble.empty()))
 			.setTransparencyState(NO_TRANSPARENCY)
-			.setCullState(NO_CULL)
+			.setCullState(CULL)
+			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
 			.createCompositeState(false)
 	);
 
@@ -39,6 +40,9 @@ public class ShimmerRenderTypes extends RenderType {
 			.setShaderState(POSITION_COLOR_SHADER)
 			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 			.setCullState(CULL)
+			.setDepthTestState(LEQUAL_DEPTH_TEST)
+			.setWriteMaskState(COLOR_WRITE)
+			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
 			.createCompositeState(false)
 	);
 

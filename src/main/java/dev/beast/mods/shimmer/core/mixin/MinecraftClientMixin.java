@@ -6,7 +6,6 @@ import dev.beast.mods.shimmer.feature.camerashake.CameraShakeInstance;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.cutscene.CutsceneScreen;
-import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.math.Vec2d;
 import dev.beast.mods.shimmer.util.Empty;
 import dev.beast.mods.shimmer.util.ScheduledTask;
@@ -73,7 +72,7 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 			ClientCutscene.instance = null;
 
 			if (screen instanceof CutsceneScreen s) {
-				setScreen(s.previousScreen);
+				setScreen(cc.cutscene.openPreviousScreen ? null : s.previousScreen);
 			}
 		}
 
@@ -97,23 +96,22 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 					shakeIt.remove();
 				}
 			}
+
+			if (shimmer$cameraShakeInstances.isEmpty()) {
+				shimmer$self().gameRenderer.shutdownEffect();
+			}
 		}
 
 		shimmer$cameraShake = Math.abs(shakeX) <= 0.0001D && Math.abs(shakeY) <= 0.0001D ? Vec2d.ZERO : new Vec2d(shakeX, shakeY);
 	}
 
 	@Override
-	public ActiveZones shimmer$getActiveZones() {
-		return ActiveZones.CLIENT;
-	}
-
-	@Override
 	public void playCutscene(Cutscene cutscene) {
 		if (!cutscene.steps.isEmpty() && player != null) {
-			var inst = new ClientCutscene(shimmer$self(), cutscene);
+			var inst = new ClientCutscene(shimmer$self(), cutscene, player.getEyePosition());
 			ClientCutscene.instance = inst;
 
-			if (player.getClass() == LocalPlayer.class && (cutscene.steps.getFirst().flags & CutsceneStep.NO_SCREEN) == 0) {
+			if (player.getClass() == LocalPlayer.class && !cutscene.steps.getFirst().noScreen) {
 				setScreen(new CutsceneScreen(inst, screen));
 			}
 		}
@@ -131,6 +129,10 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 	@Override
 	public void shakeCamera(CameraShake shake) {
 		shimmer$cameraShakeInstances.add(new CameraShakeInstance(shake));
+
+		if (shake.motionBlur()) {
+			shimmer$self().gameRenderer.loadEffect(ResourceLocation.withDefaultNamespace("shaders/post/phosphor.json"));
+		}
 	}
 
 	@Override

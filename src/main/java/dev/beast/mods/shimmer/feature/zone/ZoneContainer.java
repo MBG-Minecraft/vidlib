@@ -106,7 +106,7 @@ public class ZoneContainer {
 		ZoneClipResult result = null;
 
 		for (var instance : zones) {
-			var clip = instance.zone.shape().clip(start, end);
+			var clip = instance.zone.shape().clip(instance, start, end);
 
 			if (clip != null) {
 				if (result == null || clip.distanceSq() < result.distanceSq()) {

@@ -8,7 +8,6 @@ import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.level.Level;
 
 import java.util.function.Function;
 
@@ -34,7 +33,7 @@ public interface WorldNumber {
 		return REGISTRY.getType(this);
 	}
 
-	double get(Level level, float progress);
+	double get(WorldNumberContext ctx);
 
 	default WorldNumber offset(WorldNumber other) {
 		return new OffsetWorldNumber(this, other);

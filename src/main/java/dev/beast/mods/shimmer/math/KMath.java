@@ -84,12 +84,12 @@ public interface KMath {
 		return value < min ? min : value <= max ? value : max;
 	}
 
-	static double lerp(double value, double min, double max) {
-		return min + value * (max - min);
+	static double lerp(double delta, double min, double max) {
+		return min + delta * (max - min);
 	}
 
-	static float lerp(float value, float min, float max) {
-		return min + value * (max - min);
+	static float lerp(float delta, float min, float max) {
+		return min + delta * (max - min);
 	}
 
 	static double clerp(double value, double min, double max) {

@@ -1,12 +1,16 @@
 package dev.beast.mods.shimmer.feature.cutscene;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumber;
 import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
+import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
@@ -15,83 +19,83 @@ import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 public class CutsceneStep {
-	public static final int ORIGIN = 1 << 0;
-	public static final int TARGET = 1 << 1;
-	public static final int SNAP_ORIGIN = 1 << 2;
-	public static final int SNAP_TARGET = 1 << 3;
-	public static final int STATUS = 1 << 4;
-	public static final int TOP_BAR = 1 << 5;
-	public static final int BOTTOM_BAR = 1 << 6;
-	public static final int SHADER = 1 << 7;
-	public static final int ZOOM = 1 << 8;
-	public static final int SNAP_ZOOM = 1 << 9;
-	public static final int NO_SCREEN = 1 << 10;
+	public record Snap(boolean origin, boolean target, boolean zoom) {
+		public static final Snap NONE = new Snap(false);
+		public static final Snap ALL = new Snap(true);
+
+		public static final Codec<Snap> OBJECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+			Codec.BOOL.optionalFieldOf("origin", false).forGetter(Snap::origin),
+			Codec.BOOL.optionalFieldOf("target", false).forGetter(Snap::target),
+			Codec.BOOL.optionalFieldOf("zoom", false).forGetter(Snap::zoom)
+		).apply(instance, Snap::new));
+
+		public static final StreamCodec<ByteBuf, Snap> STREAM_CODEC = new StreamCodec<>() {
+			@Override
+			public Snap decode(ByteBuf buf) {
+				int flags = buf.readByte() & 0xFF;
+				return flags == 0 ? NONE : new Snap(
+					(flags & 1) != 0,
+					(flags & 2) != 0,
+					(flags & 4) != 0
+				);
+			}
+
+			@Override
+			public void encode(ByteBuf buf, Snap value) {
+				buf.writeByte((value.origin() ? 1 : 0) | (value.target() ? 2 : 0) | (value.zoom() ? 4 : 0));
+			}
+		};
+
+		public static final Codec<Snap> CODEC = Codec.either(Codec.BOOL, OBJECT_CODEC).xmap(either -> either.map(v -> v ? ALL : NONE, Function.identity()), Either::right);
+
+		private Snap(boolean value) {
+			this(value, value, value);
+		}
+	}
 
 	public static final Codec<CutsceneStep> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		Codec.INT.optionalFieldOf("start", 0).forGetter(step -> step.start),
-		Codec.INT.fieldOf("length").forGetter(step -> step.length)
+		Codec.INT.optionalFieldOf("start", 0).forGetter(s -> s.start),
+		Codec.INT.fieldOf("length").forGetter(s -> s.length),
+		WorldPosition.CODEC.optionalFieldOf("origin").forGetter(s -> s.origin),
+		WorldPosition.CODEC.optionalFieldOf("target").forGetter(s -> s.target),
+		WorldNumber.CODEC.optionalFieldOf("zoom").forGetter(s -> s.zoom),
+		ComponentSerialization.CODEC.optionalFieldOf("status").forGetter(s -> s.status),
+		ComponentSerialization.CODEC.optionalFieldOf("top_bar").forGetter(s -> s.topBar),
+		ComponentSerialization.CODEC.optionalFieldOf("bottom_bar").forGetter(s -> s.bottomBar),
+		ResourceLocation.CODEC.optionalFieldOf("shader").forGetter(s -> s.shader),
+		Snap.CODEC.optionalFieldOf("snap", Snap.NONE).forGetter(s -> s.snap),
+		Codec.BOOL.optionalFieldOf("no_screen", false).forGetter(s -> s.noScreen)
 	).apply(instance, CutsceneStep::new));
 
-	public static final StreamCodec<RegistryFriendlyByteBuf, CutsceneStep> STREAM_CODEC = new StreamCodec<>() {
-		@Override
-		public CutsceneStep decode(RegistryFriendlyByteBuf buf) {
-			var step = new CutsceneStep(buf.readVarInt(), buf.readVarInt());
-			step.flags = buf.readVarInt();
-			step.origin = ((step.flags & ORIGIN) != 0) ? WorldPosition.STREAM_CODEC.decode(buf) : null;
-			step.target = ((step.flags & TARGET) != 0) ? WorldPosition.STREAM_CODEC.decode(buf) : null;
-			step.zoom = ((step.flags & ZOOM) != 0) ? WorldNumber.STREAM_CODEC.decode(buf) : null;
-			step.status = ((step.flags & STATUS) != 0) ? ComponentSerialization.STREAM_CODEC.decode(buf) : null;
-			step.topBar = ((step.flags & TOP_BAR) != 0) ? ComponentSerialization.STREAM_CODEC.decode(buf) : null;
-			step.bottomBar = ((step.flags & BOTTOM_BAR) != 0) ? ComponentSerialization.STREAM_CODEC.decode(buf) : null;
-
-			if ((step.flags & SHADER) != 0) {
-				var s = buf.readUtf();
-				step.shader = s.isEmpty() ? null : ResourceLocation.parse(s);
-			} else {
-				step.shader = null;
-			}
-
-			return step;
-		}
-
-		@Override
-		public void encode(RegistryFriendlyByteBuf buf, CutsceneStep step) {
-			buf.writeVarInt(step.start);
-			buf.writeVarInt(step.length);
-			buf.writeVarInt(step.flags);
-
-			if ((step.flags & ORIGIN) != 0) {
-				WorldPosition.STREAM_CODEC.encode(buf, step.origin);
-			}
-
-			if ((step.flags & TARGET) != 0) {
-				WorldPosition.STREAM_CODEC.encode(buf, step.target);
-			}
-
-			if ((step.flags & ZOOM) != 0) {
-				WorldNumber.STREAM_CODEC.encode(buf, step.zoom);
-			}
-
-			if ((step.flags & STATUS) != 0) {
-				ComponentSerialization.STREAM_CODEC.encode(buf, step.status);
-			}
-
-			if ((step.flags & TOP_BAR) != 0) {
-				ComponentSerialization.STREAM_CODEC.encode(buf, step.topBar);
-			}
-
-			if ((step.flags & BOTTOM_BAR) != 0) {
-				ComponentSerialization.STREAM_CODEC.encode(buf, step.bottomBar);
-			}
-
-			if ((step.flags & SHADER) != 0) {
-				var s = step.shader == null ? "" : step.shader.toString();
-				buf.writeUtf(s);
-			}
-		}
-	};
+	public static final StreamCodec<RegistryFriendlyByteBuf, CutsceneStep> STREAM_CODEC = ShimmerStreamCodecs.composite(
+		ByteBufCodecs.VAR_INT,
+		s -> s.start,
+		ByteBufCodecs.VAR_INT,
+		s -> s.length,
+		ByteBufCodecs.optional(WorldPosition.STREAM_CODEC),
+		s -> s.origin,
+		ByteBufCodecs.optional(WorldPosition.STREAM_CODEC),
+		s -> s.target,
+		ByteBufCodecs.optional(WorldNumber.STREAM_CODEC),
+		s -> s.zoom,
+		ByteBufCodecs.optional(ComponentSerialization.STREAM_CODEC),
+		s -> s.status,
+		ByteBufCodecs.optional(ComponentSerialization.STREAM_CODEC),
+		s -> s.topBar,
+		ByteBufCodecs.optional(ComponentSerialization.STREAM_CODEC),
+		s -> s.bottomBar,
+		ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC),
+		s -> s.shader,
+		Snap.STREAM_CODEC,
+		s -> s.snap,
+		ByteBufCodecs.BOOL,
+		s -> s.noScreen,
+		CutsceneStep::new
+	);
 
 	public static CutsceneStep create(int start, int length) {
 		return new CutsceneStep(start, Math.max(1, length));
@@ -107,15 +111,43 @@ public class CutsceneStep {
 
 	public final int start;
 	public final int length;
-	public int flags;
-	public WorldPosition origin;
-	public WorldPosition target;
-	public WorldNumber zoom;
-	public Component status;
-	public Component topBar;
-	public Component bottomBar;
-	public ResourceLocation shader;
+	public Optional<WorldPosition> origin = Optional.empty();
+	public Optional<WorldPosition> target = Optional.empty();
+	public Optional<WorldNumber> zoom = Optional.empty();
+	public Optional<Component> status = Optional.empty();
+	public Optional<Component> topBar = Optional.empty();
+	public Optional<Component> bottomBar = Optional.empty();
+	public Optional<ResourceLocation> shader = Optional.empty();
+	public Snap snap = Snap.NONE;
+	public boolean noScreen = false;
+
 	public List<CutsceneTick> tick;
+
+	private CutsceneStep(
+		int start,
+		int length,
+		Optional<WorldPosition> origin,
+		Optional<WorldPosition> target,
+		Optional<WorldNumber> zoom,
+		Optional<Component> status,
+		Optional<Component> topBar,
+		Optional<Component> bottomBar,
+		Optional<ResourceLocation> shader,
+		Snap snap,
+		boolean noScreen
+	) {
+		this.start = start;
+		this.length = length;
+		this.origin = origin;
+		this.target = target;
+		this.zoom = zoom;
+		this.status = status;
+		this.topBar = topBar;
+		this.bottomBar = bottomBar;
+		this.shader = shader;
+		this.snap = snap;
+		this.noScreen = noScreen;
+	}
 
 	public Vec3 prevRenderTarget, renderTarget;
 
@@ -128,14 +160,12 @@ public class CutsceneStep {
 	}
 
 	public CutsceneStep origin(WorldPosition origin) {
-		this.origin = origin;
-		this.flags |= ORIGIN;
+		this.origin = Optional.of(origin);
 		return this;
 	}
 
 	public CutsceneStep target(WorldPosition target) {
-		this.target = target;
-		this.flags |= TARGET;
+		this.target = Optional.of(target);
 		return this;
 	}
 
@@ -144,39 +174,37 @@ public class CutsceneStep {
 	}
 
 	public CutsceneStep zoom(WorldNumber zoom) {
-		this.zoom = zoom;
-		this.flags |= ZOOM;
+		this.zoom = Optional.of(zoom);
 		return this;
 	}
 
 	public CutsceneStep snapOrigin() {
-		this.flags |= SNAP_ORIGIN;
+		this.snap = new Snap(true, snap.target, snap.zoom);
 		return this;
 	}
 
 	public CutsceneStep snapTarget() {
-		this.flags |= SNAP_TARGET;
+		this.snap = new Snap(snap.origin, true, snap.zoom);
 		return this;
 	}
 
 	public CutsceneStep snapZoom() {
-		this.flags |= SNAP_ZOOM;
+		this.snap = new Snap(snap.origin, snap.target, true);
 		return this;
 	}
 
 	public CutsceneStep snap() {
-		return snapOrigin().snapTarget().snapZoom();
+		this.snap = Snap.ALL;
+		return this;
 	}
 
 	public CutsceneStep status(Component status) {
-		this.status = status;
-		this.flags |= STATUS;
+		this.status = Optional.of(status);
 		return this;
 	}
 
 	public CutsceneStep shader(ResourceLocation shader) {
-		this.shader = shader;
-		this.flags |= SHADER;
+		this.shader = Optional.of(shader);
 		return this;
 	}
 
@@ -185,14 +213,12 @@ public class CutsceneStep {
 	}
 
 	public CutsceneStep topBar(Component topBar) {
-		this.topBar = topBar;
-		this.flags |= TOP_BAR;
+		this.topBar = Optional.of(topBar);
 		return this;
 	}
 
 	public CutsceneStep bottomBar(Component bottomBar) {
-		this.bottomBar = bottomBar;
-		this.flags |= BOTTOM_BAR;
+		this.bottomBar = Optional.of(bottomBar);
 		return this;
 	}
 
@@ -206,10 +232,7 @@ public class CutsceneStep {
 	}
 
 	public CutsceneStep noScreen(boolean noScreen) {
-		if (noScreen) {
-			this.flags |= NO_SCREEN;
-		}
-
+		this.noScreen = noScreen;
 		return this;
 	}
 

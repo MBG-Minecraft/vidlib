@@ -10,6 +10,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.stream.Stream;
 
@@ -37,6 +38,40 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 	@Override
 	public AABB getBoundingBox() {
 		return box;
+	}
+
+	@Override
+	@Nullable
+	public ZoneClipResult clip(ZoneInstance instance, Vec3 start, Vec3 end) {
+		double dx = end.x - start.x;
+		double dy = end.y - start.y;
+		double dz = end.z - start.z;
+
+		double fx = start.x - pos.x;
+		double fy = start.y - pos.y;
+		double fz = start.z - pos.z;
+
+		double a = dx * dx + dy * dy + dz * dz;
+		double b = 2 * (fx * dx + fy * dy + fz * dz);
+		double c = (fx * fx + fy * fy + fz * fz) - (radius * radius);
+
+		double discriminant = b * b - 4 * a * c;
+
+		if (discriminant < 0) {
+			return null;
+		}
+
+		// Compute the two possible intersection points
+		double t1 = (-b - Math.sqrt(discriminant)) / (2 * a);
+		double t2 = (-b + Math.sqrt(discriminant)) / (2 * a);
+
+		// Check if either intersection is within the segment range [0, 1]
+		if (t1 >= 0 && t1 <= 1 || t2 >= 0 && t2 <= 1) {
+			// FIXME: Get actual intersection point
+			return new ZoneClipResult(instance, this, pos.distanceToSqr(start), pos, null);
+		}
+
+		return null;
 	}
 
 	@Override

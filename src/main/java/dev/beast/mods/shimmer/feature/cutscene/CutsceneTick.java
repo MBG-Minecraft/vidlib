@@ -1,8 +1,8 @@
 package dev.beast.mods.shimmer.feature.cutscene;
 
-import net.minecraft.world.level.Level;
+import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
 
 @FunctionalInterface
 public interface CutsceneTick {
-	void tick(Level level, float progress);
+	void tick(WorldNumberContext ctx);
 }

@@ -9,6 +9,7 @@ import dev.beast.mods.shimmer.util.Empty;
 import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 import java.util.Map;
@@ -18,14 +19,16 @@ public record Zone(
 	Color color,
 	EntityFilter entityFilter,
 	CompoundTag data,
-	Map<EntityOverride<?>, Object> playerOverrides
+	Map<EntityOverride<?>, Object> playerOverrides,
+	boolean solid
 ) {
 	public static final Codec<Zone> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		ZoneShape.REGISTRY.valueMapCodec().forGetter(Zone::shape),
 		Color.CODEC_RGB.optionalFieldOf("color", Color.CYAN).forGetter(Zone::color),
 		EntityFilter.REGISTRY.valueCodec().optionalFieldOf("entity_filter", EntityFilter.PLAYER.instance()).forGetter(Zone::entityFilter),
 		net.minecraft.nbt.CompoundTag.CODEC.optionalFieldOf("data", Empty.COMPOUND_TAG).forGetter(Zone::data),
-		EntityOverride.OVERRIDE_MAP_CODEC.optionalFieldOf("player_overrides", Map.of()).forGetter(Zone::playerOverrides)
+		EntityOverride.OVERRIDE_MAP_CODEC.optionalFieldOf("player_overrides", Map.of()).forGetter(Zone::playerOverrides),
+		Codec.BOOL.optionalFieldOf("solid", false).forGetter(Zone::solid)
 	).apply(instance, Zone::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, Zone> STREAM_CODEC = StreamCodec.composite(
@@ -39,6 +42,8 @@ public record Zone(
 		Zone::data,
 		EntityOverride.OVERRIDE_MAP_STREAM_CODEC,
 		Zone::playerOverrides,
+		ByteBufCodecs.BOOL,
+		Zone::solid,
 		Zone::new
 	);
 }

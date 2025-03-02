@@ -18,7 +18,6 @@ public interface ZoneShape {
 	SimpleRegistry<ZoneShape> REGISTRY = SimpleRegistry.create(ZoneShape::type);
 
 	static void bootstrap() {
-		REGISTRY.register(EmptyZoneShape.TYPE);
 		REGISTRY.register(UniverseZoneShape.TYPE);
 		REGISTRY.register(ZoneShapeGroup.TYPE);
 		REGISTRY.register(BlockZoneShape.TYPE);
@@ -41,7 +40,7 @@ public interface ZoneShape {
 	AABB getBoundingBox();
 
 	@Nullable
-	default ZoneClipResult clip(Vec3 start, Vec3 end) {
+	default ZoneClipResult clip(ZoneInstance instance, Vec3 start, Vec3 end) {
 		if (contains(start)) {
 			return null;
 		}
@@ -50,7 +49,7 @@ public interface ZoneShape {
 
 		if (result != null && result.getType() == HitResult.Type.BLOCK) {
 			var pos = result.getLocation();
-			return new ZoneClipResult(this, pos.distanceToSqr(start), pos, result);
+			return new ZoneClipResult(instance, this, pos.distanceToSqr(start), pos, result);
 		}
 
 		return null;

@@ -3,6 +3,7 @@ package dev.beast.mods.shimmer.math.worldposition;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.math.Easing;
+import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
 import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistry;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
@@ -11,7 +12,6 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.function.Function;
@@ -28,6 +28,9 @@ public interface WorldPosition {
 		REGISTRY.register(ScaledWorldPosition.TYPE);
 		REGISTRY.register(InterpolatedWorldPosition.TYPE);
 		REGISTRY.register(FollowingEntityWorldPosition.TYPE);
+		REGISTRY.register(SourceWorldPosition.TYPE);
+		REGISTRY.register(TargetWorldPosition.TYPE);
+		REGISTRY.register(PivotingWorldPosition.TYPE);
 	}
 
 	static WorldPosition fixed(Vec3 position) {
@@ -78,7 +81,7 @@ public interface WorldPosition {
 		return REGISTRY.getType(this);
 	}
 
-	Vec3 get(Level level, float progress);
+	Vec3 get(WorldNumberContext ctx);
 
 	default WorldPosition offset(WorldPosition other) {
 		return new OffsetWorldPosition(this, other);

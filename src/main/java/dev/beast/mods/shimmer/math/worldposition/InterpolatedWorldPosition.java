@@ -5,10 +5,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.math.Easing;
 import dev.beast.mods.shimmer.math.KMath;
+import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public record InterpolatedWorldPosition(Easing easing, float start, float end, WorldPosition a, WorldPosition b) implements WorldPosition {
@@ -56,19 +56,19 @@ public record InterpolatedWorldPosition(Easing easing, float start, float end, W
 	}
 
 	@Override
-	public Vec3 get(Level level, float progress) {
-		var a = this.a.get(level, progress);
+	public Vec3 get(WorldNumberContext ctx) {
+		var a = this.a.get(ctx);
 
-		if (progress <= start) {
+		if (ctx.progress <= start) {
 			return a;
 		}
 
-		var b = this.b.get(level, progress);
+		var b = this.b.get(ctx);
 
-		if (progress >= end) {
+		if (ctx.progress >= end) {
 			return b;
 		}
 
-		return a.lerp(b, easing.easeClamped(KMath.map(progress, start, end, 0D, 1D)));
+		return a.lerp(b, easing.easeClamped(KMath.map(ctx.progress, start, end, 0F, 1F)));
 	}
 }

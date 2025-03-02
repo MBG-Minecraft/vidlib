@@ -2,6 +2,7 @@ package dev.beast.mods.shimmer.feature.zone;
 
 import dev.beast.mods.shimmer.util.Side;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.Event;
@@ -47,13 +48,37 @@ public class ZoneEvent extends Event {
 		}
 	}
 
-	public static class Updated extends ZoneEvent {
+	public static class AllUpdated extends ZoneEvent {
 		private final ActiveZones zones;
 		private final Side side;
 
-		public Updated(ActiveZones zones, Side side) {
+		public AllUpdated(ActiveZones zones, Side side) {
 			this.zones = zones;
 			this.side = side;
+		}
+
+		public ActiveZones getZones() {
+			return zones;
+		}
+
+		public Side getSide() {
+			return side;
+		}
+	}
+
+	public static class Updated extends ZoneEvent {
+		private final ResourceKey<Level> dimension;
+		private final ActiveZones zones;
+		private final Side side;
+
+		public Updated(ResourceKey<Level> dimension, ActiveZones zones, Side side) {
+			this.dimension = dimension;
+			this.zones = zones;
+			this.side = side;
+		}
+
+		public ResourceKey<Level> getDimension() {
+			return dimension;
 		}
 
 		public ActiveZones getZones() {

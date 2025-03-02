@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer.core;
 
 import dev.beast.mods.shimmer.feature.misc.FakeBlockPayload;
+import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
@@ -16,6 +17,9 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 	@Override
 	default void send(CustomPacketPayload packet) {
 		PacketDistributor.sendToPlayersInDimension((ServerLevel) this, packet);
+	}
+
+	default void shimmer$setActiveZones(ActiveZones zones) {
 	}
 
 	@Override

@@ -28,7 +28,7 @@ public class StructureRenderer {
 	private record BuildingLayer(RenderType type, ByteBufferBuilder memory, BufferBuilder builder) {
 	}
 
-	private record CachedLayer(RenderType type, VertexBuffer buffer) {
+	private record CachedLayer(RenderType type, VertexBuffer buffer, @Nullable ByteBufferBuilder memory, @Nullable BufferBuilder builder) {
 		private static final CachedLayer[] EMPTY = new CachedLayer[0];
 	}
 
@@ -53,7 +53,7 @@ public class StructureRenderer {
 		this.centerY = false;
 		this.centerZ = true;
 		this.cull = true;
-		this.removeInnerBlocks = true;
+		this.removeInnerBlocks = false;
 		this.origin = BlockPos.ZERO;
 	}
 
@@ -154,17 +154,24 @@ public class StructureRenderer {
 				var list = new ArrayList<CachedLayer>(layerMap.size());
 
 				for (var layer : layerMap.values()) {
-					var built = layer.builder.build();
+					var meshData = layer.builder.build();
 
-					if (built != null) {
+					if (meshData != null) {
 						var vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
-						vertexBuffer.bind();
-						vertexBuffer.upload(built);
-						VertexBuffer.unbind();
-						list.add(new CachedLayer(layer.type, vertexBuffer));
+
+						if (layer.type.sortOnUpload()) {
+							list.add(new CachedLayer(layer.type, vertexBuffer, layer.memory, layer.builder));
+						} else {
+							vertexBuffer.bind();
+							vertexBuffer.upload(meshData);
+							VertexBuffer.unbind();
+							list.add(new CachedLayer(layer.type, vertexBuffer, null, null));
+						}
 					}
 
-					layer.memory.close();
+					if (meshData == null || !layer.type.sortOnUpload()) {
+						layer.memory.close();
+					}
 				}
 
 				layers = list.toArray(CachedLayer.EMPTY);
@@ -176,6 +183,10 @@ public class StructureRenderer {
 		if (layers != null) {
 			for (var layer : layers) {
 				layer.buffer.close();
+
+				if (layer.memory != null) {
+					layer.memory.close();
+				}
 			}
 
 			layers = null;
@@ -208,9 +219,25 @@ public class StructureRenderer {
 		var model = new Matrix4f(RenderSystem.getModelViewMatrix()).mul(ms.last().pose());
 		var projection = RenderSystem.getProjectionMatrix();
 
+		ByteBufferBuilder tempMemory = null;
+
 		for (var layer : layers) {
 			layer.type.setupRenderState();
 			layer.buffer.bind();
+
+			if (layer.builder != null) {
+				var meshData = layer.builder.build();
+
+				if (meshData != null) {
+					if (tempMemory == null) {
+						tempMemory = new ByteBufferBuilder(layer.type.bufferSize());
+					}
+
+					meshData.sortQuads(tempMemory, RenderSystem.getVertexSorting());
+					layer.buffer.upload(meshData);
+				}
+			}
+
 			layer.buffer.drawWithShader(model, projection, shader);
 			VertexBuffer.unbind();
 			layer.type.clearRenderState();
@@ -218,6 +245,10 @@ public class StructureRenderer {
 
 		if (centerX || centerY || centerZ) {
 			ms.popPose();
+		}
+
+		if (tempMemory != null) {
+			tempMemory.close();
 		}
 	}
 }

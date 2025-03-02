@@ -9,4 +9,8 @@ public interface ShimmerPlayer extends ShimmerLivingEntity {
 	default List<? extends Player> shimmer$getPlayers() {
 		return List.of((Player) this);
 	}
+
+	default ShimmerSessionData shimmer$sessionData() {
+		throw new NoMixinException();
+	}
 }

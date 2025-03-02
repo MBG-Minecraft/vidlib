@@ -5,7 +5,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.world.level.Level;
 
 public record FixedWorldNumber(double number) implements WorldNumber {
 	public static final SimpleRegistryType.Unit<FixedWorldNumber> ZERO = SimpleRegistryType.unit(Shimmer.id("zero"), new FixedWorldNumber(0D));
@@ -31,7 +30,7 @@ public record FixedWorldNumber(double number) implements WorldNumber {
 	}
 
 	@Override
-	public double get(Level level, float progress) {
+	public double get(WorldNumberContext ctx) {
 		return number;
 	}
 }
