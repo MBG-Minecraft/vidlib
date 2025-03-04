@@ -12,6 +12,7 @@ import dev.beast.mods.shimmer.feature.misc.CreateFireworksPayload;
 import dev.beast.mods.shimmer.feature.misc.FakeBlockPayload;
 import dev.beast.mods.shimmer.feature.misc.SetPostEffectPayload;
 import dev.beast.mods.shimmer.feature.multiverse.VoidSpecialEffects;
+import dev.beast.mods.shimmer.feature.particle.ShimmerClientParticles;
 import dev.beast.mods.shimmer.feature.structure.ClientStructureStorage;
 import dev.beast.mods.shimmer.feature.zone.SphereZoneShape;
 import dev.beast.mods.shimmer.feature.zone.SyncZonesPayload;
@@ -27,6 +28,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
+import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -59,6 +61,11 @@ public class ClientModEventHandler {
 		reg.s2c(SetPostEffectPayload.TYPE);
 		reg.s2c(SyncClockInstancePayload.TYPE);
 		reg.s2c(CreateFireworksPayload.TYPE);
+	}
+
+	@SubscribeEvent
+	public static void registerParticleProviders(RegisterParticleProvidersEvent event) {
+		ShimmerClientParticles.register(event);
 	}
 
 	@SubscribeEvent

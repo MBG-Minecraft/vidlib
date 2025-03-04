@@ -2,16 +2,15 @@ package dev.beast.mods.shimmer;
 
 import dev.beast.mods.shimmer.feature.clock.ClockRenderer;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
+import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
 import dev.beast.mods.shimmer.feature.zone.renderer.EmptyZoneRenderer;
 import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.KMath;
 import dev.beast.mods.shimmer.util.Cast;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -20,6 +19,8 @@ import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
+
+import java.util.ArrayList;
 
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
 public class ClientGameEventHandler {
@@ -119,18 +120,24 @@ public class ClientGameEventHandler {
 	public static void debugText(CustomizeGuiOverlayEvent.DebugText event) {
 		var mc = Minecraft.getInstance();
 
-		// event.getLeft().add(mc.fpsString);
-
 		// event.getLeft().clear();
 		// event.getRight().clear();
+		// event.getLeft().add(mc.fpsString);
 
-		if (mc.player != null && mc.player.getMainHandItem().has(DataComponents.CUSTOM_DATA)) {
-			var toolType = mc.player.getMainHandItem().get(DataComponents.CUSTOM_DATA).getUnsafe().getString("shimmer:tool");
+		var item = mc.player.getMainHandItem();
+		var tool = ToolItem.of(item);
 
-			if (toolType.equals("pos")) {
-				if (mc.hitResult != null && mc.hitResult.getType() == HitResult.Type.BLOCK && mc.hitResult instanceof BlockHitResult hit) {
-					event.getRight().add("%d, %d, %d".formatted(hit.getBlockPos().getX(), hit.getBlockPos().getY(), hit.getBlockPos().getZ()));
-				}
+		if (tool != null) {
+			var left = new ArrayList<Component>(0);
+			var right = new ArrayList<Component>(0);
+			tool.addDebugText(item, mc.player, mc.hitResult, left, right);
+
+			for (var component : left) {
+				event.getLeft().add(component.getString());
+			}
+
+			for (var component : right) {
+				event.getRight().add(component.getString());
 			}
 		}
 	}

@@ -26,8 +26,12 @@ public abstract class BarrierBlockMixin extends Block {
 
 	@Override
 	protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-		if (context instanceof EntityCollisionContext ctx && ctx.getEntity() != null && EntityOverride.PASS_THROUGH_BARRIERS.get(ctx.getEntity())) {
-			return Shapes.empty();
+		if (context instanceof EntityCollisionContext ctx && ctx.getEntity() != null) {
+			var v = EntityOverride.PASS_THROUGH_BARRIERS.get(ctx.getEntity());
+
+			if (v == null ? ctx.getEntity().shimmer$isCreative() : v) {
+				return Shapes.empty();
+			}
 		}
 
 		return Shapes.block();

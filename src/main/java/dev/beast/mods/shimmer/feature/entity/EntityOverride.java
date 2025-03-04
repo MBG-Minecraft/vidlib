@@ -100,8 +100,12 @@ public final class EntityOverride<T> {
 	public static final EntityOverride<Boolean> GLOWING = createBooleanKey("glowing");
 	public static final EntityOverride<Integer> TEAM_COLOR = createIntKey("team_color");
 	public static final EntityOverride<Boolean> AI = createBooleanKey("ai");
-	public static final EntityOverride<Boolean> SUSPENDED = createBooleanKey("suspended");
+	// public static final EntityOverride<Boolean> SUSPENDED = createBooleanKey("suspended");
+	// public static final EntityOverride<Double> SPEED = createDoubleKey("speed");
+	// public static final EntityOverride<Boolean> PVP = createBooleanKey("pvp");
 	public static final EntityOverride<Boolean> PASS_THROUGH_BARRIERS = createBooleanKey("pass_through_barriers");
+	public static final EntityOverride<Integer> REGENERATE = createIntKey("regenerate");
+	public static final EntityOverride<Boolean> INVULNERABLE = createBooleanKey("invulnerable");
 
 	public final String id;
 	private final Codec<T> codec;

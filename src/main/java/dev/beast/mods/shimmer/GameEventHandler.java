@@ -1,33 +1,30 @@
 package dev.beast.mods.shimmer;
 
 import dev.beast.mods.shimmer.feature.clock.Clock;
-import dev.beast.mods.shimmer.feature.clock.ClockEvent;
 import dev.beast.mods.shimmer.feature.clock.ClockFont;
 import dev.beast.mods.shimmer.feature.clock.SyncClockFontsPayload;
 import dev.beast.mods.shimmer.feature.clock.SyncClocksPayload;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
+import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
+import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
 import dev.beast.mods.shimmer.feature.zone.SyncZonesPayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
-import dev.beast.mods.shimmer.math.KMath;
-import dev.beast.mods.shimmer.util.FireworkColors;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.Style;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
-import net.minecraft.world.item.component.FireworkExplosion;
+import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.EntityInvulnerabilityCheckEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -91,34 +88,35 @@ public class GameEventHandler {
 	}
 
 	@SubscribeEvent
-	public static void itemRightClicked(UseItemOnBlockEvent event) {
-		if (event.getPlayer() != null && event.getItemStack().has(DataComponents.CUSTOM_DATA)) {
-			var toolType = event.getItemStack().get(DataComponents.CUSTOM_DATA).getUnsafe().getString("shimmer:tool");
+	public static void useItemOnBlock(UseItemOnBlockEvent event) {
+		if (event.getPlayer() != null) {
+			var tool = ToolItem.of(event.getItemStack());
 
-			if (!toolType.isEmpty()) {
-				if (toolType.equals("pos")) {
-					if (event.getLevel().isClientSide()) {
-						var str = event.getPlayer().isShiftKeyDown() ? KMath.formatVec3(event.getPos().getCenter()) : KMath.formatBlockPos(event.getPos());
-						event.getPlayer().tell(Component.literal(str).withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, str)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to Copy")))));
-					}
-				}
-
+			if (tool != null && tool.useOnBlock(event.getPlayer(), event)) {
 				event.cancelWithResult(ItemInteractionResult.SUCCESS);
 			}
 		}
 	}
 
 	@SubscribeEvent
-	public static void clockEvent(ClockEvent event) {
-		if (event.getEventName().equals("fireworks") && !event.getLevel().isClientSide()) {
-			var list = List.of(
-				new FireworkExplosion(FireworkExplosion.Shape.LARGE_BALL, FireworkColors.SUCCESS, FireworkColors.NONE, false, true),
-				new FireworkExplosion(FireworkExplosion.Shape.SMALL_BALL, FireworkColors.SUCCESS, FireworkColors.NONE, false, true)
-			);
+	public static void useItemInAir(PlayerInteractEvent.RightClickItem event) {
+		if (event.getEntity() instanceof Player player) {
+			var tool = ToolItem.of(event.getItemStack());
 
-			for (int i = 0; i < 4; i++) {
-				event.getLevel().createFireworks(-232.5, 87.5 + i * 4D, -233.5, 0D, 0D, 0D, list);
-				event.getLevel().createFireworks(-260.5, 87.5 + i * 4D, -233.5, 0D, 0D, 0D, list);
+			if (tool != null && tool.use(player, event)) {
+				event.setCancellationResult(InteractionResult.SUCCESS);
+				event.setCanceled(true);
+			}
+		}
+	}
+
+	@SubscribeEvent
+	public static void entityInvulnerabilityCheck(EntityInvulnerabilityCheckEvent event) {
+		if (!event.getOriginalInvulnerability() && !event.isInvulnerable()) {
+			var v = EntityOverride.INVULNERABLE.get(event.getEntity());
+
+			if (v != null && v) {
+				event.setInvulnerable(true);
 			}
 		}
 	}

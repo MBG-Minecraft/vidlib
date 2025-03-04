@@ -9,6 +9,7 @@ import net.minecraft.commands.arguments.ResourceLocationArgument;
 public interface ClockCommands {
 	static LiteralArgumentBuilder<CommandSourceStack> createCommand() {
 		return Commands.literal("clock")
+			.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
 			.then(Commands.literal("start")
 				.then(Commands.argument("id", ResourceLocationArgument.id())
 					.executes(ctx -> Clock.forCommand(ctx, ClockInstance::start))
@@ -22,6 +23,11 @@ public interface ClockCommands {
 			.then(Commands.literal("reset")
 				.then(Commands.argument("id", ResourceLocationArgument.id())
 					.executes(ctx -> Clock.forCommand(ctx, ClockInstance::reset))
+				)
+			)
+			.then(Commands.literal("restart")
+				.then(Commands.argument("id", ResourceLocationArgument.id())
+					.executes(ctx -> Clock.forCommand(ctx, ClockInstance::restart))
 				)
 			)
 			.then(Commands.literal("set")

@@ -9,6 +9,7 @@ import dev.beast.mods.shimmer.feature.cutscene.CutsceneScreen;
 import dev.beast.mods.shimmer.math.Vec2d;
 import dev.beast.mods.shimmer.util.Empty;
 import dev.beast.mods.shimmer.util.ScheduledTask;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -87,7 +88,7 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 		var start = player.getEyePosition(delta);
 		var end = start.add(player.getViewVector(delta).scale(500D));
 
-		if (shimmer$self().getEntityRenderDispatcher().shouldRenderHitBoxes()) {
+		if (shimmer$self().getEntityRenderDispatcher().shouldRenderHitBoxes() && shimmer$self().options.getCameraType() == CameraType.FIRST_PERSON) {
 			session.zoneClip = session.filteredZones.clip(start, end);
 		} else {
 			session.zoneClip = null;

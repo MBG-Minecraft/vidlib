@@ -11,7 +11,7 @@ import java.util.Collection;
 public class AdvancementTreeMixin {
 	/**
 	 * @author Lat
-	 * @reason Yeet
+	 * @reason Shimmer
 	 */
 	@Overwrite
 	public void addAll(Collection<AdvancementHolder> advancements) {

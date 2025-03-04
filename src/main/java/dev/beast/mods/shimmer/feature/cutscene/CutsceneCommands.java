@@ -11,6 +11,7 @@ import net.minecraft.nbt.NbtOps;
 public interface CutsceneCommands {
 	static LiteralArgumentBuilder<CommandSourceStack> createCommand(CommandBuildContext buildContext) {
 		return Commands.literal("cutscene")
+			.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
 			.then(Commands.literal("play")
 				.then(Commands.argument("id", ResourceLocationArgument.id())
 					.executes(ctx -> {

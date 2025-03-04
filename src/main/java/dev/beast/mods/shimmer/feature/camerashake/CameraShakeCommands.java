@@ -10,6 +10,7 @@ import net.minecraft.nbt.NbtOps;
 public interface CameraShakeCommands {
 	static LiteralArgumentBuilder<CommandSourceStack> createCommand(CommandBuildContext buildContext) {
 		return Commands.literal("camera-shake")
+			.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
 			.then(Commands.literal("add")
 				.then(Commands.argument("data", CompoundTagArgument.compoundTag())
 					.executes(ctx -> {

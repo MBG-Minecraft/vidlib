@@ -1,15 +1,14 @@
 package dev.beast.mods.shimmer;
 
+import dev.beast.mods.shimmer.feature.particle.ShimmerParticles;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLPaths;
-import net.neoforged.neoforge.registries.DeferredRegister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,10 +36,6 @@ public class Shimmer {
 
 	public static final Path PATH = FMLPaths.GAMEDIR.get().resolve("shimmer");
 
-	public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(ID);
-	public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(ID);
-	public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, ID);
-
 	public static final ResourceKey<Level> LOBBY_DIMENSION = ResourceKey.create(Registries.DIMENSION, id("lobby"));
 
 	public static boolean defaultGameRules = true;
@@ -53,8 +48,6 @@ public class Shimmer {
 			Files.createDirectories(PATH);
 		}
 
-		ITEMS.register(bus);
-		BLOCKS.register(bus);
-		BLOCK_ENTITIES.register(bus);
+		ShimmerParticles.REGISTRY.register(bus);
 	}
 }

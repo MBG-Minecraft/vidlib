@@ -103,6 +103,12 @@ public class ClockInstance {
 		sync(server);
 	}
 
+	public void restart(MinecraftServer server) {
+		this.tick = 0;
+		this.ticking = true;
+		sync(server);
+	}
+
 	public void setTick(MinecraftServer server, int tick) {
 		this.tick = tick;
 		sync(server);
