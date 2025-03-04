@@ -30,8 +30,8 @@ public record SimpleRegistry<V>(
 		var typeMap = new HashMap<ResourceLocation, SimpleRegistryType<V>>();
 		var unitTypeMap = new IdentityHashMap<V, SimpleRegistryType.Unit<V>>();
 
-		var typeCodec = ShimmerCodecs.SHIMMER_ID.xmap(typeMap::get, SimpleRegistryType::id);
-		var typeStreamCodec = ShimmerStreamCodecs.SHIMMER_ID.map(typeMap::get, SimpleRegistryType::id);
+		var typeCodec = ShimmerCodecs.map(typeMap, ShimmerCodecs.SHIMMER_ID, SimpleRegistryType::id);
+		var typeStreamCodec = ShimmerStreamCodecs.map(typeMap, ShimmerStreamCodecs.REGISTRY_SHIMMER_ID, SimpleRegistryType::id);
 
 		Codec<V> unitCodec = ShimmerCodecs.SHIMMER_ID.flatXmap(s -> {
 			var value = typeMap.get(s);

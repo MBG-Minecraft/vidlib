@@ -17,12 +17,12 @@ import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-public class ZoneReloadListener extends JsonReloadListener {
+public class ZoneLoader extends JsonReloadListener {
 	public static final ActiveZones ALL = new ActiveZones();
 	public static final Map<ResourceKey<Level>, ActiveZones> BY_DIMENSION = new IdentityHashMap<>();
 
-	public ZoneReloadListener() {
-		super("shimmer/zones");
+	public ZoneLoader() {
+		super("shimmer/zone");
 	}
 
 	@Override

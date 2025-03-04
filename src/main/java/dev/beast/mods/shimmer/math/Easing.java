@@ -1,6 +1,8 @@
 package dev.beast.mods.shimmer.math;
 
 import com.mojang.serialization.Codec;
+import dev.beast.mods.shimmer.util.ShimmerCodecs;
+import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.doubles.Double2DoubleFunction;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -15,8 +17,8 @@ import java.util.Map;
  */
 public final class Easing {
 	public static final Map<String, Easing> FUNCTIONS = new LinkedHashMap<>();
-	public static final Codec<Easing> CODEC = Codec.STRING.xmap(FUNCTIONS::get, Easing::toString);
-	public static final StreamCodec<ByteBuf, Easing> STREAM_CODEC = ByteBufCodecs.STRING_UTF8.map(FUNCTIONS::get, Easing::toString);
+	public static final Codec<Easing> CODEC = ShimmerCodecs.map(FUNCTIONS, Codec.STRING, Easing::toString);
+	public static final StreamCodec<ByteBuf, Easing> STREAM_CODEC = ShimmerStreamCodecs.map(FUNCTIONS, ByteBufCodecs.STRING_UTF8, Easing::toString);
 
 	public static Easing add(String id, Double2DoubleFunction function) {
 		var easing = new Easing(id, function);

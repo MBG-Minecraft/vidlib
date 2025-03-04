@@ -3,19 +3,23 @@ package dev.beast.mods.shimmer.core;
 import dev.beast.mods.shimmer.math.Vec2d;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import org.jetbrains.annotations.ApiStatus;
 import org.joml.Vector4f;
 
 import java.util.List;
 
-public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
+public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment, ShimmerClientEntityContainer {
 	default Minecraft shimmer$self() {
 		return (Minecraft) this;
 	}
 
-	default Vec2d shimmer$getCameraShakeOffset(float delta) {
+	@ApiStatus.Internal
+	default void shimmer$renderSetup(RenderLevelStageEvent event, float delta) {
+	}
+
+	default Vec2d shimmer$getCameraShakeOffset() {
 		return Vec2d.ZERO;
 	}
 
@@ -25,13 +29,8 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 		return player == null ? List.of() : List.of(player);
 	}
 
-	@Override
-	default void send(CustomPacketPayload packet) {
-		PacketDistributor.sendToServer(packet);
-	}
-
 	default void shimmer$applyCameraShake(Camera camera, float delta) {
-		var shake = shimmer$getCameraShakeOffset(delta);
+		var shake = shimmer$getCameraShakeOffset();
 
 		if (shake != Vec2d.ZERO) {
 			var vec = new Vector4f((float) shake.x, (float) shake.y, 0F, 1F).rotate(camera.rotation());

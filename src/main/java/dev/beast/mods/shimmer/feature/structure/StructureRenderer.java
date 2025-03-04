@@ -7,7 +7,9 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import dev.beast.mods.shimmer.math.Color;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -23,12 +25,14 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 
 public class StructureRenderer {
 	private record BuildingLayer(RenderType type, ByteBufferBuilder memory, BufferBuilder builder) {
 	}
 
-	private record CachedLayer(RenderType type, VertexBuffer buffer, @Nullable ByteBufferBuilder memory, @Nullable BufferBuilder builder) {
+	private record CachedLayer(RenderType type, VertexBuffer buffer, int sort, @Nullable ByteBufferBuilder memory, @Nullable BufferBuilder builder) {
 		private static final CachedLayer[] EMPTY = new CachedLayer[0];
 	}
 
@@ -41,6 +45,8 @@ public class StructureRenderer {
 	public boolean cull;
 	public boolean removeInnerBlocks;
 	public BlockPos origin;
+	public Color glowing;
+	public boolean noVertexSorting;
 
 	private Vec3i size = null;
 	private CachedLayer[] layers = null;
@@ -55,6 +61,8 @@ public class StructureRenderer {
 		this.cull = true;
 		this.removeInnerBlocks = false;
 		this.origin = BlockPos.ZERO;
+		this.glowing = Color.TRANSPARENT;
+		this.noVertexSorting = false;
 	}
 
 	public Vec3i getSize() {
@@ -124,7 +132,15 @@ public class StructureRenderer {
 				var phantomWorld = new StructureRendererLevel(mc.level, mirrorLevel, blocks, false);
 				var random = RandomSource.create();
 
-				var layerMap = new Reference2ObjectOpenHashMap<RenderType, BuildingLayer>(RenderType.chunkBufferLayers().size());
+				var allLayers = RenderType.chunkBufferLayers();
+
+				var layerMap = new Reference2ObjectOpenHashMap<RenderType, BuildingLayer>(allLayers.size());
+				var layerSorting = new Reference2IntOpenHashMap<RenderType>(allLayers.size());
+
+				for (int i = 0; i < allLayers.size(); i++) {
+					layerSorting.put(allLayers.get(i), i);
+				}
+
 				var localMatrixStack = new PoseStack();
 
 				for (var entry : blocks.long2ObjectEntrySet()) {
@@ -154,27 +170,31 @@ public class StructureRenderer {
 				var list = new ArrayList<CachedLayer>(layerMap.size());
 
 				for (var layer : layerMap.values()) {
+					int sort = layerSorting.getOrDefault(layer.type, 9999);
 					var meshData = layer.builder.build();
+					boolean closeMemory = true;
 
 					if (meshData != null) {
 						var vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
 
-						if (layer.type.sortOnUpload()) {
-							list.add(new CachedLayer(layer.type, vertexBuffer, layer.memory, layer.builder));
+						if (!noVertexSorting && layer.type.sortOnUpload()) {
+							list.add(new CachedLayer(layer.type, vertexBuffer, sort, layer.memory, layer.builder));
 						} else {
 							vertexBuffer.bind();
 							vertexBuffer.upload(meshData);
 							VertexBuffer.unbind();
-							list.add(new CachedLayer(layer.type, vertexBuffer, null, null));
+							list.add(new CachedLayer(layer.type, vertexBuffer, sort, null, null));
+							closeMemory = false;
 						}
 					}
 
-					if (meshData == null || !layer.type.sortOnUpload()) {
+					if (closeMemory) {
 						layer.memory.close();
 					}
 				}
 
 				layers = list.toArray(CachedLayer.EMPTY);
+				Arrays.sort(layers, Comparator.comparingInt(CachedLayer::sort));
 			}
 		}
 	}

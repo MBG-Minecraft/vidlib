@@ -1,21 +1,19 @@
 package dev.beast.mods.shimmer.feature.cutscene;
 
-import dev.beast.mods.shimmer.ShimmerNet;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
+import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record PlayCutscenePayload(Cutscene cutscene) implements CustomPacketPayload {
-	public static final Type<PlayCutscenePayload> TYPE = ShimmerNet.type("play_cutscene");
-	public static final StreamCodec<RegistryFriendlyByteBuf, PlayCutscenePayload> STREAM_CODEC = Cutscene.STREAM_CODEC.map(PlayCutscenePayload::new, PlayCutscenePayload::cutscene);
+public record PlayCutscenePayload(Cutscene cutscene) implements ShimmerPacketPayload {
+	public static final ShimmerPacketType<PlayCutscenePayload> TYPE = ShimmerPacketType.internal("play_cutscene", Cutscene.STREAM_CODEC.map(PlayCutscenePayload::new, PlayCutscenePayload::cutscene));
 
 	@Override
-	public Type<? extends CustomPacketPayload> type() {
+	public ShimmerPacketType<?> getType() {
 		return TYPE;
 	}
 
+	@Override
 	public void handle(IPayloadContext ctx) {
-		ctx.enqueueWork(() -> ctx.player().playCutscene(cutscene));
+		ctx.player().playCutscene(cutscene);
 	}
 }

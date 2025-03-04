@@ -52,21 +52,22 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 		double fz = start.z - pos.z;
 
 		double a = dx * dx + dy * dy + dz * dz;
-		double b = 2 * (fx * dx + fy * dy + fz * dz);
+		double b = 2D * (fx * dx + fy * dy + fz * dz);
 		double c = (fx * fx + fy * fy + fz * fz) - (radius * radius);
 
-		double discriminant = b * b - 4 * a * c;
+		double discriminant = b * b - 4D * a * c;
 
-		if (discriminant < 0) {
+		if (discriminant < 0D) {
 			return null;
 		}
 
+		var dsq = Math.sqrt(discriminant);
 		// Compute the two possible intersection points
-		double t1 = (-b - Math.sqrt(discriminant)) / (2 * a);
-		double t2 = (-b + Math.sqrt(discriminant)) / (2 * a);
+		double t1 = (-b - dsq) / (2D * a);
+		double t2 = (-b + dsq) / (2D * a);
 
 		// Check if either intersection is within the segment range [0, 1]
-		if (t1 >= 0 && t1 <= 1 || t2 >= 0 && t2 <= 1) {
+		if (t1 >= 0D && t1 <= 1D || t2 >= 0D && t2 <= 1D) {
 			// FIXME: Get actual intersection point
 			return new ZoneClipResult(instance, this, pos.distanceToSqr(start), pos, null);
 		}

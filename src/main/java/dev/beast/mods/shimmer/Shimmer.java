@@ -1,6 +1,5 @@
 package dev.beast.mods.shimmer;
 
-import dev.beast.mods.shimmer.content.clock.ClockContent;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -28,6 +27,14 @@ public class Shimmer {
 		return ResourceLocation.fromNamespaceAndPath(ID, path);
 	}
 
+	public static ResourceLocation idFromString(String string) {
+		return string.indexOf(':') == -1 ? Shimmer.id(string) : ResourceLocation.parse(string);
+	}
+
+	public static String idToString(ResourceLocation rl) {
+		return rl.getNamespace().equals(Shimmer.ID) ? rl.getPath() : rl.toString();
+	}
+
 	public static final Path PATH = FMLPaths.GAMEDIR.get().resolve("shimmer");
 
 	public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(ID);
@@ -49,7 +56,5 @@ public class Shimmer {
 		ITEMS.register(bus);
 		BLOCKS.register(bus);
 		BLOCK_ENTITIES.register(bus);
-
-		ClockContent.init();
 	}
 }

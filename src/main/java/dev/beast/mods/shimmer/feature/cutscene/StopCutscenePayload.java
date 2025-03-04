@@ -1,22 +1,21 @@
 package dev.beast.mods.shimmer.feature.cutscene;
 
-import dev.beast.mods.shimmer.ShimmerNet;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
+import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public class StopCutscenePayload implements CustomPacketPayload {
-	public static final Type<StopCutscenePayload> TYPE = ShimmerNet.type("stop_cutscene");
+public class StopCutscenePayload implements ShimmerPacketPayload {
 	public static final StopCutscenePayload INSTANCE = new StopCutscenePayload();
-	public static final StreamCodec<RegistryFriendlyByteBuf, StopCutscenePayload> STREAM_CODEC = StreamCodec.unit(INSTANCE);
+	public static final ShimmerPacketType<StopCutscenePayload> TYPE = ShimmerPacketType.internal("stop_cutscene", StreamCodec.unit(INSTANCE));
 
 	@Override
-	public Type<? extends CustomPacketPayload> type() {
+	public ShimmerPacketType<?> getType() {
 		return TYPE;
 	}
 
+	@Override
 	public void handle(IPayloadContext ctx) {
-		ctx.enqueueWork(() -> ctx.player().stopCutscene());
+		ctx.player().stopCutscene();
 	}
 }

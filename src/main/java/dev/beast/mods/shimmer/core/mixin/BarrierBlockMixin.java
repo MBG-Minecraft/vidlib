@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.core.mixin;
 
+import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.BarrierBlock;
@@ -25,7 +26,7 @@ public abstract class BarrierBlockMixin extends Block {
 
 	@Override
 	protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-		if (context instanceof EntityCollisionContext ctx && ctx.getEntity() != null && ctx.getEntity().isSpectatorOrCreative()) {
+		if (context instanceof EntityCollisionContext ctx && ctx.getEntity() != null && EntityOverride.PASS_THROUGH_BARRIERS.get(ctx.getEntity())) {
 			return Shapes.empty();
 		}
 

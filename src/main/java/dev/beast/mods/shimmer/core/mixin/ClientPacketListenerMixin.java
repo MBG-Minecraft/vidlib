@@ -3,7 +3,7 @@ package dev.beast.mods.shimmer.core.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.beast.mods.shimmer.core.ShimmerClientPacketListener;
-import dev.beast.mods.shimmer.core.ShimmerClientSessionData;
+import dev.beast.mods.shimmer.feature.session.ShimmerClientSessionData;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.CommonPlayerSpawnInfo;
@@ -32,9 +32,14 @@ public abstract class ClientPacketListenerMixin implements ShimmerClientPacketLi
 		return shimmer$sessionData;
 	}
 
-	@Inject(method = {"handleRespawn", "handleLogin"}, at = @At("RETURN"))
-	private void shimmer$levelChanged(CallbackInfo ci) {
-		shimmer$sessionData.respawned(level);
+	@Inject(method = "handleLogin", at = @At("RETURN"))
+	private void shimmer$handleLogin(CallbackInfo ci) {
+		shimmer$sessionData.respawned(level, true);
+	}
+
+	@Inject(method = "handleRespawn", at = @At("RETURN"))
+	private void shimmer$handleRespawn(CallbackInfo ci) {
+		shimmer$sessionData.respawned(level, false);
 	}
 
 	@Inject(method = "close", at = @At("RETURN"))

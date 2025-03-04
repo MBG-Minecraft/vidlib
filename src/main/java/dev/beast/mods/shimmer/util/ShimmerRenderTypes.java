@@ -3,10 +3,8 @@ package dev.beast.mods.shimmer.util;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
-
-import java.util.OptionalDouble;
+import org.lwjgl.opengl.GL11;
 
 public class ShimmerRenderTypes extends RenderType {
 	public static final RenderType WHITE_ENTITY = entitySolid(Empty.TEXTURE);
@@ -17,6 +15,14 @@ public class ShimmerRenderTypes extends RenderType {
 		return Math.max(2.5D, (float) mc.getWindow().getWidth() / 1920.0D * 2.5D);
 	}
 
+	public static void setupLines() {
+		GL11.glEnable(GL11.GL_LINE_SMOOTH);
+	}
+
+	public static void clearLines() {
+		GL11.glDisable(GL11.GL_LINE_SMOOTH);
+	}
+
 	public static final RenderType DEBUG_LINES = create(
 		"shimmer:debug_lines",
 		DefaultVertexFormat.POSITION_COLOR,
@@ -24,7 +30,8 @@ public class ShimmerRenderTypes extends RenderType {
 		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(POSITION_COLOR_SHADER)
-			.setLineState(new RenderStateShard.LineStateShard(OptionalDouble.empty()))
+			// .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.empty()))
+			.setTextureState(new EmptyTextureStateShard(ShimmerRenderTypes::setupLines, ShimmerRenderTypes::clearLines))
 			.setTransparencyState(NO_TRANSPARENCY)
 			.setCullState(CULL)
 			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
@@ -55,6 +62,9 @@ public class ShimmerRenderTypes extends RenderType {
 			.setShaderState(POSITION_COLOR_SHADER)
 			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 			.setCullState(NO_CULL)
+			.setDepthTestState(LEQUAL_DEPTH_TEST)
+			.setWriteMaskState(COLOR_WRITE)
+			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
 			.createCompositeState(false)
 	);
 

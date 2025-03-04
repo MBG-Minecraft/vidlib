@@ -1,8 +1,8 @@
 package dev.beast.mods.shimmer.core.mixin;
 
 import dev.beast.mods.shimmer.core.ShimmerClientPacketListener;
-import dev.beast.mods.shimmer.core.ShimmerClientSessionData;
 import dev.beast.mods.shimmer.core.ShimmerLocalPlayer;
+import dev.beast.mods.shimmer.feature.session.ShimmerClientSessionData;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import org.spongepowered.asm.mixin.Final;

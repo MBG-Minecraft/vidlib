@@ -2,6 +2,7 @@ package dev.beast.mods.shimmer.feature.zone;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.math.AAIBB;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.StreamCodec;
@@ -38,5 +39,9 @@ public record BlockZoneShape(BlockPos start, BlockPos end, AABB box) implements 
 	@Override
 	public Stream<BlockPos> getBlocks() {
 		return BlockPos.betweenClosedStream(start, end);
+	}
+
+	public AAIBB toAAIBB() {
+		return new AAIBB(start, end);
 	}
 }

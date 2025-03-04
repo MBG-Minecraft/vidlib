@@ -3,7 +3,9 @@ package dev.beast.mods.shimmer.feature.entity;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.core.ShimmerEntity;
+import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
 import dev.beast.mods.shimmer.util.Cast;
+import dev.beast.mods.shimmer.util.ShimmerCodecs;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -20,12 +22,11 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Predicate;
 
 public final class EntityOverride<T> {
 	private static final Map<String, EntityOverride<?>> MAP = new HashMap<>();
 
-	public static final Codec<EntityOverride<?>> CODEC = Codec.STRING.xmap(MAP::get, EntityOverride::id);
+	public static final Codec<EntityOverride<?>> CODEC = ShimmerCodecs.map(() -> MAP, Codec.STRING, EntityOverride::id);
 	public static final Codec<Map<EntityOverride<?>, Object>> OVERRIDE_MAP_CODEC = Codec.dispatchedMap(CODEC, EntityOverride::codec);
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, Map<EntityOverride<?>, Object>> OVERRIDE_MAP_STREAM_CODEC = new StreamCodec<>() {
@@ -100,6 +101,7 @@ public final class EntityOverride<T> {
 	public static final EntityOverride<Integer> TEAM_COLOR = createIntKey("team_color");
 	public static final EntityOverride<Boolean> AI = createBooleanKey("ai");
 	public static final EntityOverride<Boolean> SUSPENDED = createBooleanKey("suspended");
+	public static final EntityOverride<Boolean> PASS_THROUGH_BARRIERS = createBooleanKey("pass_through_barriers");
 
 	public final String id;
 	private final Codec<T> codec;
@@ -107,7 +109,7 @@ public final class EntityOverride<T> {
 
 	private EntityOverrideValue<T> all;
 	private Map<EntityType<?>, EntityOverrideValue<T>> types;
-	private List<Pair<Predicate<Entity>, EntityOverrideValue<T>>> predicates;
+	private List<Pair<EntityFilter, EntityOverrideValue<T>>> filtered;
 
 	private EntityOverride(String id, Codec<T> codec, StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec) {
 		this.id = id;
@@ -133,8 +135,8 @@ public final class EntityOverride<T> {
 	}
 
 	@Nullable
-	public T get(ShimmerEntity entity) {
-		if (entity.shimmer$isSaving()) {
+	public T get(@Nullable ShimmerEntity entity) {
+		if (entity == null || entity.shimmer$isSaving()) {
 			return null;
 		}
 
@@ -164,8 +166,8 @@ public final class EntityOverride<T> {
 			}
 		}
 
-		if (predicates != null) {
-			for (var pair : predicates) {
+		if (filtered != null) {
+			for (var pair : filtered) {
 				if (pair.getFirst().test(e)) {
 					var v1 = pair.getSecond().get(e);
 
@@ -198,16 +200,16 @@ public final class EntityOverride<T> {
 	}
 
 
-	public void setGlobal(Predicate<Entity> predicate, EntityOverrideValue<T> value) {
-		if (predicates == null) {
-			predicates = new ArrayList<>(1);
+	public void setGlobal(EntityFilter filter, EntityOverrideValue<T> value) {
+		if (filtered == null) {
+			filtered = new ArrayList<>(1);
 		}
 
-		predicates.add(Pair.of(predicate, Objects.requireNonNull(value)));
+		filtered.add(Pair.of(filter, Objects.requireNonNull(value)));
 	}
 
-	public void setGlobal(Predicate<Entity> predicate, T value) {
-		setGlobal(predicate, EntityOverrideValue.fixed(value));
+	public void setGlobal(EntityFilter filter, T value) {
+		setGlobal(filter, EntityOverrideValue.fixed(value));
 	}
 
 	public void setGlobal(EntityType<?> type, @Nullable EntityOverrideValue<T> value) {

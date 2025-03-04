@@ -1,11 +1,9 @@
 package dev.beast.mods.shimmer.core;
 
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -22,11 +20,6 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 	@Override
 	default List<? extends Player> shimmer$getPlayers() {
 		return shimmer$self().getPlayerList().getPlayers();
-	}
-
-	@Override
-	default void send(CustomPacketPayload packet) {
-		PacketDistributor.sendToAllPlayers(packet);
 	}
 
 	default void defaultGameRules() {

@@ -1,22 +1,21 @@
 package dev.beast.mods.shimmer.feature.camerashake;
 
-import dev.beast.mods.shimmer.ShimmerNet;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
+import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public class StopCameraShakingPayload implements CustomPacketPayload {
-	public static final Type<StopCameraShakingPayload> TYPE = ShimmerNet.type("stop_camera_shaking");
+public class StopCameraShakingPayload implements ShimmerPacketPayload {
 	public static final StopCameraShakingPayload INSTANCE = new StopCameraShakingPayload();
-	public static final StreamCodec<RegistryFriendlyByteBuf, StopCameraShakingPayload> STREAM_CODEC = StreamCodec.unit(INSTANCE);
+	public static final ShimmerPacketType<StopCameraShakingPayload> TYPE = ShimmerPacketType.internal("stop_camera_shaking", StreamCodec.unit(INSTANCE));
 
 	@Override
-	public Type<? extends CustomPacketPayload> type() {
+	public ShimmerPacketType<?> getType() {
 		return TYPE;
 	}
 
+	@Override
 	public void handle(IPayloadContext ctx) {
-		ctx.enqueueWork(() -> ctx.player().stopCameraShaking());
+		ctx.player().stopCameraShaking();
 	}
 }

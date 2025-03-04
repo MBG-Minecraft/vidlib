@@ -11,8 +11,11 @@ import dev.beast.mods.shimmer.util.Empty;
 import dev.beast.mods.shimmer.util.ScheduledTask;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -29,6 +32,10 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 
 	@Shadow
 	@Nullable
+	public ClientLevel level;
+
+	@Shadow
+	@Nullable
 	public Screen screen;
 
 	@Shadow
@@ -39,9 +46,6 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 
 	@Unique
 	private final List<CameraShakeInstance> shimmer$cameraShakeInstances = new ArrayList<>();
-
-	@Unique
-	private Vec2d shimmer$prevCameraShake = Vec2d.ZERO;
 
 	@Unique
 	private Vec2d shimmer$cameraShake = Vec2d.ZERO;
@@ -56,8 +60,64 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 	}
 
 	@Override
-	public Vec2d shimmer$getCameraShakeOffset(float delta) {
-		return shimmer$prevCameraShake.lerp(shimmer$cameraShake, delta);
+	public void shimmer$renderSetup(RenderLevelStageEvent event, float delta) {
+		if (player == null) {
+			return;
+		}
+
+		var session = player.shimmer$sessionData();
+
+		double shakeX = 0D;
+		double shakeY = 0D;
+
+		if (!shimmer$cameraShakeInstances.isEmpty()) {
+			for (var instance : shimmer$cameraShakeInstances) {
+				float ticks = Mth.lerp(delta, instance.prevTicks, instance.ticks);
+				float relTicks = ticks / (float) instance.shake.duration();
+				var vec = instance.shake.type().get(instance.ticks * instance.shake.speed());
+				var intensity = instance.shake.intensity();
+				var intensityScale = instance.shake.start().easeMirrored(relTicks, instance.shake.end());
+				shakeX += vec.x * intensity * intensityScale;
+				shakeY += vec.y * intensity * intensityScale;
+			}
+		}
+
+		shimmer$cameraShake = Math.abs(shakeX) <= 0.0001D && Math.abs(shakeY) <= 0.0001D ? Vec2d.ZERO : new Vec2d(shakeX, shakeY);
+
+		var start = player.getEyePosition(delta);
+		var end = start.add(player.getViewVector(delta).scale(500D));
+
+		if (shimmer$self().getEntityRenderDispatcher().shouldRenderHitBoxes()) {
+			session.zoneClip = session.filteredZones.clip(start, end);
+		} else {
+			session.zoneClip = null;
+		}
+	}
+
+	@Override
+	public Vec2d shimmer$getCameraShakeOffset() {
+		return shimmer$cameraShake;
+	}
+
+	@Override
+	public void shimmer$preTick() {
+		if (level == null || player == null) {
+			return;
+		}
+
+		var session = player.shimmer$sessionData();
+
+		session.filteredZones.entityZones.clear();
+
+		for (var container : session.filteredZones) {
+			container.tick(session.filteredZones, level);
+		}
+
+		for (var instance : session.clocks.values()) {
+			if (instance.clock.dimension() == level.dimension()) {
+				instance.tick(level);
+			}
+		}
 	}
 
 	@Override
@@ -76,21 +136,12 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 			}
 		}
 
-		shimmer$prevCameraShake = shimmer$cameraShake;
-		double shakeX = 0D;
-		double shakeY = 0D;
-
 		if (!shimmer$cameraShakeInstances.isEmpty()) {
 			var shakeIt = shimmer$cameraShakeInstances.iterator();
 
 			while (shakeIt.hasNext()) {
 				var instance = shakeIt.next();
-				float relTicks = (float) instance.ticks / (float) instance.shake.duration();
-				var vec = instance.shake.type().get(instance.ticks * instance.shake.speed());
-				var intensity = instance.shake.intensity();
-				var intensityScale = instance.shake.start().easeMirrored(relTicks, instance.shake.end());
-				shakeX += vec.x * intensity * intensityScale;
-				shakeY += vec.y * intensity * intensityScale;
+				instance.prevTicks = instance.ticks;
 
 				if (++instance.ticks >= instance.shake.duration()) {
 					shakeIt.remove();
@@ -101,8 +152,6 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 				shimmer$self().gameRenderer.shutdownEffect();
 			}
 		}
-
-		shimmer$cameraShake = Math.abs(shakeX) <= 0.0001D && Math.abs(shakeY) <= 0.0001D ? Vec2d.ZERO : new Vec2d(shakeX, shakeY);
 	}
 
 	@Override

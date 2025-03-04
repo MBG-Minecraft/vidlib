@@ -46,6 +46,10 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 		return type == GameType.SPECTATOR || type == GameType.CREATIVE;
 	}
 
+	default boolean shimmer$isCreative() {
+		return getGameMode() == GameType.CREATIVE;
+	}
+
 	default boolean isSurvival() {
 		return getGameMode() == GameType.SURVIVAL;
 	}

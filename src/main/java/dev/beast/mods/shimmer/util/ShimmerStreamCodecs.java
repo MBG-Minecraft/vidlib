@@ -8,19 +8,29 @@ import com.mojang.datafixers.util.Function8;
 import com.mojang.datafixers.util.Function9;
 import dev.beast.mods.shimmer.Shimmer;
 import io.netty.buffer.ByteBuf;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntLists;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.Utf8String;
+import net.minecraft.network.VarInt;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public interface ShimmerStreamCodecs {
 	StreamCodec<ByteBuf, UUID> UUID = new StreamCodec<>() {
@@ -48,7 +58,20 @@ public interface ShimmerStreamCodecs {
 		}
 	};
 
-	StreamCodec<RegistryFriendlyByteBuf, ResourceLocation> SHIMMER_ID = new StreamCodec<>() {
+	StreamCodec<ByteBuf, ResourceLocation> SHIMMER_ID = new StreamCodec<>() {
+		@Override
+		public ResourceLocation decode(ByteBuf buf) {
+			var s = Utf8String.read(buf, Short.MAX_VALUE);
+			return s.indexOf(':') == -1 ? Shimmer.id(s) : ResourceLocation.parse(s);
+		}
+
+		@Override
+		public void encode(ByteBuf buf, ResourceLocation value) {
+			Utf8String.write(buf, value.getNamespace().equals(Shimmer.ID) ? value.getPath() : value.toString(), Short.MAX_VALUE);
+		}
+	};
+
+	StreamCodec<RegistryFriendlyByteBuf, ResourceLocation> REGISTRY_SHIMMER_ID = new StreamCodec<>() {
 		@Override
 		public ResourceLocation decode(RegistryFriendlyByteBuf buf) {
 			var s = buf.readUtf();
@@ -78,6 +101,38 @@ public interface ShimmerStreamCodecs {
 	};
 
 	StreamCodec<ByteBuf, BlockState> BLOCK_STATE = ByteBufCodecs.VAR_INT.map(Block::stateById, Block::getId);
+
+	StreamCodec<ByteBuf, ResourceKey<Level>> DIMENSION = ResourceLocation.STREAM_CODEC.map(id -> ResourceKey.create(Registries.DIMENSION, id), ResourceKey::location);
+
+	StreamCodec<ByteBuf, IntList> VAR_INT_LIST = new StreamCodec<>() {
+		@Override
+		public IntList decode(ByteBuf buf) {
+			int size = VarInt.read(buf);
+
+			if (size == 0) {
+				return IntLists.emptyList();
+			} else if (size == 1) {
+				return IntLists.singleton(VarInt.read(buf));
+			} else {
+				var list = new IntArrayList(size);
+
+				for (int i = 0; i < size; i++) {
+					list.add(VarInt.read(buf));
+				}
+
+				return list;
+			}
+		}
+
+		@Override
+		public void encode(ByteBuf buf, IntList value) {
+			VarInt.write(buf, value.size());
+
+			for (int i = 0; i < value.size(); i++) {
+				VarInt.write(buf, value.getInt(i));
+			}
+		}
+	};
 
 	static <B extends ByteBuf, V> StreamCodec<B, V> optional(StreamCodec<B, V> codec, @Nullable V defaultValue) {
 		return new StreamCodec<>() {
@@ -418,5 +473,53 @@ public interface ShimmerStreamCodecs {
 				codec12.encode(buf, getter12.apply(value));
 			}
 		};
+	}
+
+	static <B extends ByteBuf, K, V> StreamCodec<B, V> map(Supplier<Map<K, V>> mapGetter, StreamCodec<B, K> keyCodec, Function<V, K> keyGetter) {
+		return keyCodec.map(key -> mapGetter.get().get(key), keyGetter);
+	}
+
+	static <B extends ByteBuf, K, V> StreamCodec<B, V> map(Map<K, V> map, StreamCodec<B, K> keyCodec, Function<V, K> keyGetter) {
+		Objects.requireNonNull(map, "Map is null");
+		return keyCodec.map(map::get, keyGetter);
+	}
+
+	static <B extends ByteBuf, K, V> StreamCodec<B, Map<K, V>> unboundedMap(StreamCodec<B, K> keyCodec, StreamCodec<B, V> valueCodec, boolean ordered, boolean identity) {
+		return new StreamCodec<>() {
+			@Override
+			public Map<K, V> decode(B buf) {
+				int size = VarInt.read(buf);
+
+				if (size == 0) {
+					return Map.of();
+				} else if (size == 1) {
+					return Map.of(keyCodec.decode(buf), valueCodec.decode(buf));
+				} else {
+					var map = MiscUtils.<K, V>createMap(size, ordered, identity);
+
+					for (int i = 0; i < size; i++) {
+						map.put(keyCodec.decode(buf), valueCodec.decode(buf));
+					}
+
+					return map;
+				}
+			}
+
+			@Override
+			public void encode(B buf, Map<K, V> value) {
+				VarInt.write(buf, value.size());
+
+				if (!value.isEmpty()) {
+					for (var entry : value.entrySet()) {
+						keyCodec.encode(buf, entry.getKey());
+						valueCodec.encode(buf, entry.getValue());
+					}
+				}
+			}
+		};
+	}
+
+	static <B extends ByteBuf, K, V> StreamCodec<B, Map<K, V>> unboundedMap(StreamCodec<B, K> keyCodec, StreamCodec<B, V> valueCodec) {
+		return unboundedMap(keyCodec, valueCodec, false, false);
 	}
 }

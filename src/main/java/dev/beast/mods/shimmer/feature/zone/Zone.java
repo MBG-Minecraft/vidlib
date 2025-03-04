@@ -23,10 +23,10 @@ public record Zone(
 	boolean solid
 ) {
 	public static final Codec<Zone> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		ZoneShape.REGISTRY.valueMapCodec().forGetter(Zone::shape),
+		ZoneShape.CODEC.fieldOf("shape").forGetter(Zone::shape),
 		Color.CODEC_RGB.optionalFieldOf("color", Color.CYAN).forGetter(Zone::color),
 		EntityFilter.REGISTRY.valueCodec().optionalFieldOf("entity_filter", EntityFilter.PLAYER.instance()).forGetter(Zone::entityFilter),
-		net.minecraft.nbt.CompoundTag.CODEC.optionalFieldOf("data", Empty.COMPOUND_TAG).forGetter(Zone::data),
+		CompoundTag.CODEC.optionalFieldOf("data", Empty.COMPOUND_TAG).forGetter(Zone::data),
 		EntityOverride.OVERRIDE_MAP_CODEC.optionalFieldOf("player_overrides", Map.of()).forGetter(Zone::playerOverrides),
 		Codec.BOOL.optionalFieldOf("solid", false).forGetter(Zone::solid)
 	).apply(instance, Zone::new));

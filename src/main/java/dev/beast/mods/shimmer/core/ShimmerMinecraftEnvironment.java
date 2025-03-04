@@ -10,6 +10,10 @@ public interface ShimmerMinecraftEnvironment extends ShimmerEntityContainer {
 	}
 
 	@ApiStatus.Internal
+	default void shimmer$preTick() {
+	}
+
+	@ApiStatus.Internal
 	default void shimmer$postTick() {
 	}
 

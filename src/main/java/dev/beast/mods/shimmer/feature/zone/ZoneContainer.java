@@ -1,7 +1,7 @@
 package dev.beast.mods.shimmer.feature.zone;
 
+import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
@@ -19,7 +19,7 @@ public class ZoneContainer {
 		@Override
 		public ZoneContainer decode(RegistryFriendlyByteBuf buf) {
 			var id = ResourceLocation.STREAM_CODEC.decode(buf);
-			var dimension = buf.readResourceKey(Registries.DIMENSION);
+			var dimension = ShimmerStreamCodecs.DIMENSION.decode(buf);
 			var container = new ZoneContainer(id, dimension);
 			int count = buf.readVarInt();
 
@@ -33,7 +33,7 @@ public class ZoneContainer {
 		@Override
 		public void encode(RegistryFriendlyByteBuf buf, ZoneContainer value) {
 			ResourceLocation.STREAM_CODEC.encode(buf, value.id);
-			buf.writeResourceKey(value.dimension);
+			ShimmerStreamCodecs.DIMENSION.encode(buf, value.dimension);
 			buf.writeVarInt(value.zones.size());
 
 			for (var zone : value.zones) {

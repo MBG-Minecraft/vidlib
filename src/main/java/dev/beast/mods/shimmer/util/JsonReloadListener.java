@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class JsonReloadListener extends SimplePreparableReloadListener<Map<ResourceLocation, JsonObject>> {
-	private final String rootPath;
-	private final int rootPathOffset;
+	public final String rootPath;
+	public final int rootPathOffset;
 
 	public JsonReloadListener(String rootPath) {
 		this.rootPath = rootPath;

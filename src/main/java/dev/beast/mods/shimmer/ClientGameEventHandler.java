@@ -1,20 +1,22 @@
 package dev.beast.mods.shimmer;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import dev.beast.mods.shimmer.content.clock.ClockBlockEntity;
+import dev.beast.mods.shimmer.feature.clock.ClockRenderer;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
 import dev.beast.mods.shimmer.feature.zone.renderer.EmptyZoneRenderer;
 import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
 import dev.beast.mods.shimmer.math.Color;
-import dev.beast.mods.shimmer.math.EasingGroup;
 import dev.beast.mods.shimmer.math.KMath;
 import dev.beast.mods.shimmer.util.Cast;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
@@ -23,19 +25,7 @@ import net.neoforged.neoforge.client.event.ViewportEvent;
 public class ClientGameEventHandler {
 	@SubscribeEvent
 	public static void clientPreTick(ClientTickEvent.Pre event) {
-		var mc = Minecraft.getInstance();
-
-		if (mc.level != null && mc.player != null) {
-			ClockBlockEntity.tick();
-
-			var session = mc.player.shimmer$sessionData();
-
-			session.filteredZones.entityZones.clear();
-
-			for (var container : session.filteredZones) {
-				container.tick(session.filteredZones, mc.level);
-			}
-		}
+		Minecraft.getInstance().shimmer$preTick();
 	}
 
 	@SubscribeEvent
@@ -54,11 +44,8 @@ public class ClientGameEventHandler {
 		var session = mc.player.shimmer$sessionData();
 		float delta = event.getPartialTick().getGameTimeDeltaPartialTick(true);
 
-		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL) {
-			var start = mc.player.getEyePosition();
-			var end = start.add(mc.player.getLookAngle().scale(500D));
-
-			session.zoneClip = session.filteredZones.clip(start, end);
+		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SKY) {
+			Minecraft.getInstance().shimmer$renderSetup(event, delta);
 		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
 			if (mc.getEntityRenderDispatcher().shouldRenderHitBoxes()) {
 				for (var container : session.filteredZones) {
@@ -68,10 +55,17 @@ public class ClientGameEventHandler {
 						if (renderer != EmptyZoneRenderer.INSTANCE) {
 							boolean hovered = session.zoneClip != null && session.zoneClip.instance() == instance;
 							var baseColor = instance.zone.color().withAlpha(50);
-							var color = hovered ? baseColor.lerp((float) EasingGroup.SMOOTHSTEP.easeMirrored((RenderSystem.getShaderGameTime() * 800D) % 1D), Color.WHITE.withAlpha(100)) : baseColor;
-							var outlineColor = instance.entities.isEmpty() ? Color.WHITE : Color.GREEN;
-							renderer.render(Cast.to(instance.zone.shape()), mc, event, delta, color, outlineColor);
+							var outlineColor = hovered ? Color.WHITE : instance.entities.isEmpty() ? baseColor : Color.GREEN;
+							renderer.render(Cast.to(instance.zone.shape()), mc, event, delta, baseColor, outlineColor);
 						}
+					}
+				}
+			}
+
+			for (var instance : session.clocks.values()) {
+				if (instance.clock.dimension() == mc.level.dimension()) {
+					for (var location : instance.clock.locations()) {
+						ClockRenderer.render(mc, instance, location, event, delta);
 					}
 				}
 			}
@@ -118,6 +112,26 @@ public class ClientGameEventHandler {
 
 		if (mc.player != null && mc.level != null && !mc.player.isSpectatorOrCreative() && mc.level.getBlockState(event.getTarget().getBlockPos()).is(Blocks.BARRIER)) {
 			event.setCanceled(true);
+		}
+	}
+
+	@SubscribeEvent
+	public static void debugText(CustomizeGuiOverlayEvent.DebugText event) {
+		var mc = Minecraft.getInstance();
+
+		// event.getLeft().add(mc.fpsString);
+
+		// event.getLeft().clear();
+		// event.getRight().clear();
+
+		if (mc.player != null && mc.player.getMainHandItem().has(DataComponents.CUSTOM_DATA)) {
+			var toolType = mc.player.getMainHandItem().get(DataComponents.CUSTOM_DATA).getUnsafe().getString("shimmer:tool");
+
+			if (toolType.equals("pos")) {
+				if (mc.hitResult != null && mc.hitResult.getType() == HitResult.Type.BLOCK && mc.hitResult instanceof BlockHitResult hit) {
+					event.getRight().add("%d, %d, %d".formatted(hit.getBlockPos().getX(), hit.getBlockPos().getY(), hit.getBlockPos().getZ()));
+				}
+			}
 		}
 	}
 }

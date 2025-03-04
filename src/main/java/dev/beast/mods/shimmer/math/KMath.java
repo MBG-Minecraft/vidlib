@@ -1,10 +1,12 @@
 package dev.beast.mods.shimmer.math;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.ShortTag;
+import net.minecraft.world.phys.Vec3;
 
 @SuppressWarnings("ManualMinMaxCalculation")
 public interface KMath {
@@ -14,6 +16,22 @@ public interface KMath {
 		}
 
 		return Float.toString(value);
+	}
+
+	static String format(double value) {
+		if (value == (long) value) {
+			return Long.toString((long) value);
+		}
+
+		return Double.toString(value);
+	}
+
+	static String formatBlockPos(BlockPos pos) {
+		return String.format("%d, %d, %d", pos.getX(), pos.getY(), pos.getZ());
+	}
+
+	static String formatVec3(Vec3 pos) {
+		return String.format("%s, %s, %s", format(pos.x), format(pos.y), format(pos.z));
 	}
 
 	static NumericTag efficient(float num) {

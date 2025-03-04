@@ -22,6 +22,6 @@ public class BoxZoneRenderer implements ZoneRenderer<ZoneShape> {
 		float maxZ = (float) (box.maxZ - cameraPos.z);
 
 		BoxRenderer.renderDebugLines(minX, minY, minZ, maxX, maxY, maxZ, event.getPoseStack(), mc.renderBuffers().bufferSource().getBuffer(ShimmerRenderTypes.DEBUG_LINES), outlineColor);
-		BoxRenderer.renderDebugQuads(minX, minY, minZ, maxX, maxY, maxZ, event.getPoseStack(), mc.renderBuffers().bufferSource().getBuffer(ShimmerRenderTypes.DEBUG_QUADS), color);
+		BoxRenderer.renderDebugQuads(minX, minY, minZ, maxX, maxY, maxZ, event.getPoseStack(), mc.renderBuffers().bufferSource().getBuffer(ShimmerRenderTypes.DEBUG_QUADS_NO_CULL), color);
 	}
 }

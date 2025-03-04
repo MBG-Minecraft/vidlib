@@ -1,6 +1,8 @@
 package dev.beast.mods.shimmer.math;
 
 import com.mojang.serialization.Codec;
+import dev.beast.mods.shimmer.util.ShimmerCodecs;
+import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -10,8 +12,8 @@ import java.util.Map;
 
 public class EasingGroup {
 	public static final Map<String, EasingGroup> GROUPS = new LinkedHashMap<>();
-	public static final Codec<EasingGroup> CODEC = Codec.STRING.xmap(GROUPS::get, EasingGroup::toString);
-	public static final StreamCodec<ByteBuf, EasingGroup> STREAM_CODEC = ByteBufCodecs.STRING_UTF8.map(GROUPS::get, EasingGroup::toString);
+	public static final Codec<EasingGroup> CODEC = ShimmerCodecs.map(GROUPS, Codec.STRING, EasingGroup::toString);
+	public static final StreamCodec<ByteBuf, EasingGroup> STREAM_CODEC = ShimmerStreamCodecs.map(GROUPS, ByteBufCodecs.STRING_UTF8, EasingGroup::toString);
 
 	public static EasingGroup add(String id, Easing in, Easing out, Easing inOut) {
 		var group = new EasingGroup(id, in, out, inOut);

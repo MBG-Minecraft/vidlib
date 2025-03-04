@@ -1,7 +1,8 @@
 package dev.beast.mods.shimmer.core.mixin;
 
 import dev.beast.mods.shimmer.core.ShimmerMinecraftServer;
-import dev.beast.mods.shimmer.feature.zone.ZoneReloadListener;
+import dev.beast.mods.shimmer.feature.clock.Clock;
+import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
 import dev.beast.mods.shimmer.util.ScheduledTask;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -34,13 +35,9 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 	}
 
 	@Override
-	public void shimmer$postTick() {
-		if (shimmer$scheduledTaskHandler != null) {
-			shimmer$scheduledTaskHandler.tick();
-		}
-
+	public void shimmer$preTick() {
 		for (var level : shimmer$self().getAllLevels()) {
-			var zones = ZoneReloadListener.BY_DIMENSION.get(level.dimension());
+			var zones = ZoneLoader.BY_DIMENSION.get(level.dimension());
 			level.shimmer$setActiveZones(zones);
 
 			if (zones != null) {
@@ -50,6 +47,17 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 					container.tick(zones, level);
 				}
 			}
+		}
+
+		for (var instance : Clock.SERVER_INSTANCES.values()) {
+			instance.tick(shimmer$self().getLevel(instance.clock.dimension()));
+		}
+	}
+
+	@Override
+	public void shimmer$postTick() {
+		if (shimmer$scheduledTaskHandler != null) {
+			shimmer$scheduledTaskHandler.tick();
 		}
 	}
 }

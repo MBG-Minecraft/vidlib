@@ -3,10 +3,8 @@ package dev.beast.mods.shimmer.core;
 import dev.beast.mods.shimmer.feature.misc.FakeBlockPayload;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 public interface ShimmerServerLevel extends ShimmerLevel {
 	@Override
@@ -14,16 +12,11 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 		return ((ServerLevel) this).getServer();
 	}
 
-	@Override
-	default void send(CustomPacketPayload packet) {
-		PacketDistributor.sendToPlayersInDimension((ServerLevel) this, packet);
-	}
-
 	default void shimmer$setActiveZones(ActiveZones zones) {
 	}
 
 	@Override
 	default void setFakeBlock(BlockPos pos, BlockState state) {
-		send(new FakeBlockPayload(pos, state));
+		s2c(new FakeBlockPayload(pos, state));
 	}
 }

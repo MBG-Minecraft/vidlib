@@ -1,5 +1,8 @@
 package dev.beast.mods.shimmer.feature.zone;
 
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import dev.beast.mods.shimmer.math.AAIBB;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistry;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
@@ -11,11 +14,13 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public interface ZoneShape {
 	SimpleRegistry<ZoneShape> REGISTRY = SimpleRegistry.create(ZoneShape::type);
+	Codec<ZoneShape> CODEC = Codec.either(AAIBB.CODEC, REGISTRY.valueCodec()).xmap(either -> either.map(box -> new BlockZoneShape(box.min(), box.max()), Function.identity()), shape -> shape instanceof BlockZoneShape b ? Either.left(b.toAAIBB()) : Either.right(shape));
 
 	static void bootstrap() {
 		REGISTRY.register(UniverseZoneShape.TYPE);
