@@ -38,9 +38,6 @@ public class Shimmer {
 
 	public static final ResourceKey<Level> LOBBY_DIMENSION = ResourceKey.create(Registries.DIMENSION, id("lobby"));
 
-	public static boolean defaultGameRules = true;
-	public static boolean loadVanillaStructures = false;
-
 	public Shimmer(IEventBus bus, Dist dist) throws IOException {
 		Shimmer.LOGGER.info("Shimmer loaded");
 

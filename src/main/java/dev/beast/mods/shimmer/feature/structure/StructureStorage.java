@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer.feature.structure;
 
 import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.ShimmerConfig;
 import dev.beast.mods.shimmer.util.Lazy;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtAccounter;
@@ -50,7 +51,7 @@ public class StructureStorage extends SimplePreparableReloadListener<Map<Resourc
 	protected Map<ResourceLocation, Resource> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
 		var map = new HashMap<ResourceLocation, Resource>();
 
-		for (var entry : resourceManager.listResources("structure", p -> (Shimmer.loadVanillaStructures || !p.getNamespace().equals("minecraft")) && p.getPath().endsWith(".nbt")).entrySet()) {
+		for (var entry : resourceManager.listResources("structure", p -> (ShimmerConfig.loadVanillaStructures || !p.getNamespace().equals("minecraft")) && p.getPath().endsWith(".nbt")).entrySet()) {
 			map.put(entry.getKey().withPath(p -> p.substring(10, p.length() - 4)), entry.getValue());
 		}
 

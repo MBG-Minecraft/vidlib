@@ -72,7 +72,7 @@ public class GameEventHandler {
 
 	@SubscribeEvent
 	public static void serverStarted(ServerStartedEvent event) {
-		if (Shimmer.defaultGameRules) {
+		if (ShimmerConfig.defaultGameRules) {
 			event.getServer().defaultGameRules();
 		}
 	}

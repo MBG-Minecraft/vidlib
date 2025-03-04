@@ -4,11 +4,21 @@ import dev.beast.mods.shimmer.core.ShimmerMinecraftServer;
 import dev.beast.mods.shimmer.feature.clock.Clock;
 import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
 import dev.beast.mods.shimmer.util.ScheduledTask;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Map;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
@@ -18,8 +28,14 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 	@Shadow
 	public abstract boolean enforceSecureProfile();
 
+	@Shadow
+	@Final
+	private Map<ResourceKey<Level>, ServerLevel> levels;
 	@Unique
 	private ScheduledTask.Handler shimmer$scheduledTaskHandler;
+
+	@Unique
+	private ServerLevel shimmer$overworld;
 
 	@Override
 	public ScheduledTask.Handler shimmer$getScheduledTaskHandler() {
@@ -59,5 +75,19 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 		if (shimmer$scheduledTaskHandler != null) {
 			shimmer$scheduledTaskHandler.tick();
 		}
+	}
+
+	@Inject(method = "createLevels", at = @At("RETURN"))
+	private void shimmer$createLevels(CallbackInfo ci) {
+		shimmer$overworld = levels.get(Level.OVERWORLD);
+	}
+
+	/**
+	 * @author Lat
+	 * @reason Optimization
+	 */
+	@Overwrite
+	public final ServerLevel overworld() {
+		return shimmer$overworld;
 	}
 }
