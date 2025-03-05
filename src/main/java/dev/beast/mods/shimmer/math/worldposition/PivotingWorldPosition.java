@@ -45,6 +45,6 @@ public record PivotingWorldPosition(WorldPosition target, WorldNumber distance, 
 		double start = startAngle.get(ctx);
 		double angle = Math.toRadians(Mth.rotLerp(easing.ease(ctx.progress), start, start + addedAngle.get(ctx)));
 		double dist = distance.get(ctx);
-		return target.get(ctx).add(Math.cos(angle) * dist, 0D, Math.sin(angle) * dist);
+		return target.get(ctx).add(Math.cos(angle) * dist, height.get(ctx), Math.sin(angle) * dist);
 	}
 }
