@@ -20,6 +20,7 @@ import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.Registries;
@@ -38,11 +39,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 public class StructureRenderer {
-	private record BuildingLayer(RenderType type, BufferBuilder builder, int sort) {
+	private record StateModel(BlockPos pos, BlockState state, BakedModel model, long seed) {
+	}
+
+	private record BuildingLayer(RenderType type, List<StateModel> blocks, BufferBuilder builder, int sort) {
 		private static final BuildingLayer[] EMPTY = new BuildingLayer[0];
 	}
 
@@ -75,7 +80,8 @@ public class StructureRenderer {
 		boolean cull,
 		boolean removeInnerBlocks,
 		Color glowing,
-		int lightLevel
+		int skyLight,
+		int blockLight
 	) {
 		var renderer = new StructureRenderer(ClientStructureStorage.CLIENT.structures.reference(structure));
 		renderer.centerX = centerX;
@@ -84,7 +90,8 @@ public class StructureRenderer {
 		renderer.cull = cull;
 		renderer.removeInnerBlocks = removeInnerBlocks;
 		renderer.glowing = glowing;
-		renderer.lightLevel = lightLevel;
+		renderer.skyLight = skyLight;
+		renderer.blockLight = blockLight;
 		return renderer;
 	}
 
@@ -106,7 +113,8 @@ public class StructureRenderer {
 		Codec.BOOL.optionalFieldOf("cull", true).forGetter(r -> r.cull),
 		Codec.BOOL.optionalFieldOf("remove_inner_blocks", false).forGetter(r -> r.removeInnerBlocks),
 		Color.CODEC.optionalFieldOf("glowing", Color.TRANSPARENT).forGetter(r -> r.glowing),
-		Codec.INT.optionalFieldOf("light_level", 15).forGetter(r -> r.lightLevel)
+		Codec.INT.optionalFieldOf("sky_level", 15).forGetter(r -> r.skyLight),
+		Codec.INT.optionalFieldOf("block_level", 15).forGetter(r -> r.blockLight)
 	).apply(instance, StructureRenderer::createGhost));
 
 	public static final Codec<StructureRenderer> GHOST_CODEC = Codec.either(ResourceLocation.CODEC, RECORD_CODEC).xmap(either -> either.map(StructureRenderer::create, Function.identity()), Either::right);
@@ -118,7 +126,8 @@ public class StructureRenderer {
 	public boolean cull;
 	public boolean removeInnerBlocks;
 	public Color glowing;
-	public int lightLevel;
+	public int skyLight;
+	public int blockLight;
 
 	private CachedLayer[] layers = null;
 
@@ -130,7 +139,8 @@ public class StructureRenderer {
 		this.cull = true;
 		this.removeInnerBlocks = false;
 		this.glowing = Color.TRANSPARENT;
-		this.lightLevel = 15;
+		this.skyLight = 15;
+		this.blockLight = 15;
 	}
 
 	private static boolean isTransparent(@Nullable BlockState state) {
@@ -190,18 +200,17 @@ public class StructureRenderer {
 		}
 
 		try (var tempMemory = new ByteBufferBuilder(65536)) {
-			buildLayers(mc, blocks, tempMemory);
+			buildLayers(mc, blocks, tempMemory, structure.getSize());
 		}
 	}
 
-	private void buildLayers(Minecraft mc, Long2ObjectMap<BlockState> blocks, ByteBufferBuilder tempMemory) {
+	private void buildLayers(Minecraft mc, Long2ObjectMap<BlockState> blocks, ByteBufferBuilder tempMemory, Vec3i size) {
 		var blockRenderer = mc.getBlockRenderer();
 
-		var level = new StructureRendererLevel(blocks, lightLevel, mc.level.registryAccess().registry(Registries.BIOME).get().get(Biomes.PLAINS));
+		var level = new StructureRendererLevel(blocks, skyLight, blockLight, mc.level.registryAccess().registry(Registries.BIOME).get().get(Biomes.PLAINS));
 		var random = RandomSource.create();
 
 		var allTypes = RenderType.chunkBufferLayers();
-
 		var layerMap = new Reference2ObjectOpenHashMap<RenderType, BuildingLayer>(allTypes.size());
 		var layerSorting = new Reference2IntOpenHashMap<RenderType>(allTypes.size());
 
@@ -209,43 +218,55 @@ public class StructureRenderer {
 			layerSorting.put(allTypes.get(i), i);
 		}
 
-		var poseStack = new PoseStack();
-
 		for (var entry : blocks.long2ObjectEntrySet()) {
 			var pos = BlockPos.of(entry.getLongKey());
 			var state = entry.getValue();
 
-			var model = blockRenderer.getBlockModel(state);
+			var stateModel = new StateModel(pos, state, blockRenderer.getBlockModel(state), state.getSeed(pos));
+			random.setSeed(stateModel.seed);
 
-			random.setSeed(state.getSeed(pos));
-
-			for (var type : model.getRenderTypes(state, random, ModelData.EMPTY)) {
+			for (var type : stateModel.model.getRenderTypes(state, random, ModelData.EMPTY)) {
 				var layer = layerMap.get(type);
 
 				if (layer == null) {
-					layer = new BuildingLayer(type, new BufferBuilder(tempMemory, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK), layerSorting.getOrDefault(type, 9999));
+					var builder = new BufferBuilder(tempMemory, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+					layer = new BuildingLayer(type, new ArrayList<>(), builder, layerSorting.getOrDefault(type, 9999));
 					layerMap.put(type, layer);
 				}
 
-				poseStack.pushPose();
-				poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
-
-				try {
-					blockRenderer.renderBatched(state, pos, level, poseStack, layer.builder, cull, random, ModelData.EMPTY, type);
-				} catch (Throwable ex) {
-					Shimmer.LOGGER.info("Error rendering structure block at " + pos, ex);
-				}
-
-				poseStack.popPose();
+				layer.blocks.add(stateModel);
 			}
 		}
 
 		var buildingLayerArray = layerMap.values().toArray(BuildingLayer.EMPTY);
 		Arrays.sort(buildingLayerArray, Comparator.comparingInt(BuildingLayer::sort));
-
 		var list = new ArrayList<CachedLayer>(buildingLayerArray.length);
 
+		var poseStack = new PoseStack();
+
+		if (centerX || centerY || centerZ) {
+			var x = centerX ? -size.getX() / 2D : 0D;
+			var y = centerY ? -size.getY() / 2D : 0D;
+			var z = centerZ ? -size.getZ() / 2D : 0D;
+			poseStack.translate(x, y, z);
+		}
+
 		for (var layer : buildingLayerArray) {
+			for (var entry : layer.blocks) {
+				random.setSeed(entry.seed);
+
+				poseStack.pushPose();
+				poseStack.translate(entry.pos.getX(), entry.pos.getY(), entry.pos.getZ());
+
+				try {
+					blockRenderer.renderBatched(entry.state, entry.pos, level, poseStack, layer.builder, cull, random, ModelData.EMPTY, layer.type);
+				} catch (Throwable ex) {
+					Shimmer.LOGGER.info("Error rendering " + entry.state.getBlock().getName().getString() + " structure block at " + entry.pos, ex);
+				}
+
+				poseStack.popPose();
+			}
+
 			var meshData = layer.builder.build();
 
 			if (meshData != null) {
@@ -284,16 +305,6 @@ public class StructureRenderer {
 			return;
 		}
 
-		if (centerX || centerY || centerZ) {
-			var structure = structureRef == null ? null : structureRef.get().get();
-			var size = structure == null ? Vec3i.ZERO : structure.getSize();
-			ms.pushPose();
-			var x = centerX ? -size.getX() / 2D : 0D;
-			var y = centerY ? -size.getY() / 2D : 0D;
-			var z = centerZ ? -size.getZ() / 2D : 0D;
-			ms.translate(x, y, z);
-		}
-
 		var model = new Matrix4f(RenderSystem.getModelViewMatrix()).mul(ms.last().pose());
 		var projection = RenderSystem.getProjectionMatrix();
 
@@ -303,10 +314,6 @@ public class StructureRenderer {
 			layer.buffer.drawWithShader(model, projection, RenderSystem.getShader());
 			VertexBuffer.unbind();
 			layer.type.clearRenderState();
-		}
-
-		if (centerX || centerY || centerZ) {
-			ms.popPose();
 		}
 	}
 }

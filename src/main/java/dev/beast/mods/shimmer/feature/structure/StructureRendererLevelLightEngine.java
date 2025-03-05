@@ -10,6 +10,6 @@ public class StructureRendererLevelLightEngine extends LevelLightEngine {
 
 	@Override
 	public int getRawBrightness(BlockPos pos, int amount) {
-		return ((StructureRendererLevel) levelHeightAccessor).lightLevel;
+		return ((StructureRendererLevel) levelHeightAccessor).getRawBrightness(pos, amount);
 	}
 }

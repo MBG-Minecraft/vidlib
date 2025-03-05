@@ -24,14 +24,16 @@ import java.util.Optional;
 public class StructureRendererLevel implements BlockAndTintGetter, LightChunkGetter {
 	public final Long2ObjectMap<BlockState> blocks;
 	private StructureRendererLevelLightEngine lightEngine;
-	public final int lightLevel;
+	public final int skyLight;
+	public final int blockLight;
 	private final BlockState airBlock;
 	private final FluidState emptyFluid;
 	private final Biome biome;
 
-	public StructureRendererLevel(Long2ObjectMap<BlockState> blocks, int lightLevel, Biome biome) {
+	public StructureRendererLevel(Long2ObjectMap<BlockState> blocks, int skyLight, int blockLight, Biome biome) {
 		this.blocks = blocks;
-		this.lightLevel = lightLevel;
+		this.skyLight = skyLight;
+		this.blockLight = blockLight;
 		this.airBlock = Blocks.AIR.defaultBlockState();
 		this.emptyFluid = Fluids.EMPTY.defaultFluidState();
 		this.biome = biome;
@@ -94,12 +96,12 @@ public class StructureRendererLevel implements BlockAndTintGetter, LightChunkGet
 
 	@Override
 	public int getBrightness(LightLayer layer, BlockPos pos) {
-		return lightLevel;
+		return layer == LightLayer.SKY ? skyLight : blockLight;
 	}
 
 	@Override
 	public int getRawBrightness(BlockPos pos, int darkness) {
-		return lightLevel;
+		return Math.max(blockLight, skyLight - darkness);
 	}
 
 	@Override
