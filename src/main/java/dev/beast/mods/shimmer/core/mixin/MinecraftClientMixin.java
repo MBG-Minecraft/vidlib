@@ -132,11 +132,7 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 		var cc = ClientCutscene.instance;
 
 		if (cc != null && cc.tick()) {
-			ClientCutscene.instance = null;
-
-			if (screen instanceof CutsceneScreen s) {
-				setScreen(cc.cutscene.openPreviousScreen ? null : s.previousScreen);
-			}
+			stopCutscene();
 		}
 
 		if (!shimmer$cameraShakeInstances.isEmpty()) {
@@ -160,12 +156,14 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 	@Override
 	public void playCutscene(Cutscene cutscene, WorldNumberVariables variables) {
 		if (!cutscene.steps.isEmpty() && player != null) {
-			var inst = new ClientCutscene(shimmer$self(), cutscene, variables, player.getEyePosition());
+			var inst = new ClientCutscene(shimmer$self(), cutscene, variables, player::getEyePosition);
 			ClientCutscene.instance = inst;
 
-			if (player.getClass() == LocalPlayer.class && !cutscene.steps.getFirst().noScreen) {
+			if (player.getClass() == LocalPlayer.class && !cutscene.allowMovement) {
 				setScreen(new CutsceneScreen(inst, screen));
 			}
+
+			shimmer$self().options.hideGui = true;
 		}
 	}
 
@@ -176,6 +174,9 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 		if (screen instanceof CutsceneScreen screen) {
 			setScreen(screen.previousScreen);
 		}
+
+		shimmer$self().options.hideGui = false;
+		shimmer$self().gameRenderer.shutdownEffect();
 	}
 
 	@Override

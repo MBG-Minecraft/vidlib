@@ -9,13 +9,13 @@ import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
-public record InterpolatedWorldNumber(Easing easing, float start, float end, WorldNumber a, WorldNumber b) implements WorldNumber {
+public record InterpolatedWorldNumber(Easing easing, float start, float end, WorldNumber from, WorldNumber to) implements WorldNumber {
 	public static final SimpleRegistryType<InterpolatedWorldNumber> TYPE = SimpleRegistryType.dynamic(Shimmer.id("interpolated"), RecordCodecBuilder.mapCodec(instance -> instance.group(
-		Easing.CODEC.fieldOf("easing").forGetter(InterpolatedWorldNumber::easing),
-		Codec.FLOAT.fieldOf("start").forGetter(InterpolatedWorldNumber::start),
-		Codec.FLOAT.fieldOf("end").forGetter(InterpolatedWorldNumber::end),
-		WorldNumber.CODEC.fieldOf("a").forGetter(InterpolatedWorldNumber::a),
-		WorldNumber.CODEC.fieldOf("b").forGetter(InterpolatedWorldNumber::b)
+		Easing.CODEC.optionalFieldOf("easing", Easing.LINEAR).forGetter(InterpolatedWorldNumber::easing),
+		Codec.FLOAT.optionalFieldOf("start", 0F).forGetter(InterpolatedWorldNumber::start),
+		Codec.FLOAT.optionalFieldOf("end", 1F).forGetter(InterpolatedWorldNumber::end),
+		WorldNumber.CODEC.fieldOf("from").forGetter(InterpolatedWorldNumber::from),
+		WorldNumber.CODEC.fieldOf("to").forGetter(InterpolatedWorldNumber::to)
 	).apply(instance, InterpolatedWorldNumber::new)), StreamCodec.composite(
 		Easing.STREAM_CODEC,
 		InterpolatedWorldNumber::easing,
@@ -24,23 +24,9 @@ public record InterpolatedWorldNumber(Easing easing, float start, float end, Wor
 		ByteBufCodecs.FLOAT,
 		InterpolatedWorldNumber::end,
 		WorldNumber.STREAM_CODEC,
-		InterpolatedWorldNumber::a,
+		InterpolatedWorldNumber::from,
 		WorldNumber.STREAM_CODEC,
-		InterpolatedWorldNumber::b,
-		InterpolatedWorldNumber::new
-	));
-
-	public static final SimpleRegistryType<InterpolatedWorldNumber> SIMPLE_TYPE = SimpleRegistryType.dynamic(Shimmer.id("simple_interpolated"), RecordCodecBuilder.mapCodec(instance -> instance.group(
-		Easing.CODEC.fieldOf("easing").forGetter(InterpolatedWorldNumber::easing),
-		WorldNumber.CODEC.fieldOf("a").forGetter(InterpolatedWorldNumber::a),
-		WorldNumber.CODEC.fieldOf("b").forGetter(InterpolatedWorldNumber::b)
-	).apply(instance, InterpolatedWorldNumber::new)), StreamCodec.composite(
-		Easing.STREAM_CODEC,
-		InterpolatedWorldNumber::easing,
-		WorldNumber.STREAM_CODEC,
-		InterpolatedWorldNumber::a,
-		WorldNumber.STREAM_CODEC,
-		InterpolatedWorldNumber::b,
+		InterpolatedWorldNumber::to,
 		InterpolatedWorldNumber::new
 	));
 
@@ -50,18 +36,18 @@ public record InterpolatedWorldNumber(Easing easing, float start, float end, Wor
 
 	@Override
 	public SimpleRegistryType<?> type() {
-		return start == 0F && end == 1F ? SIMPLE_TYPE : TYPE;
+		return TYPE;
 	}
 
 	@Override
 	public double get(WorldNumberContext ctx) {
-		var a = this.a.get(ctx);
+		var a = this.from.get(ctx);
 
 		if (ctx.progress <= start) {
 			return a;
 		}
 
-		var b = this.b.get(ctx);
+		var b = this.to.get(ctx);
 
 		if (ctx.progress >= end) {
 			return b;

@@ -3,6 +3,7 @@ package dev.beast.mods.shimmer;
 import com.mojang.math.Axis;
 import dev.beast.mods.shimmer.feature.clock.ClockRenderer;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
+import dev.beast.mods.shimmer.feature.misc.CameraOverride;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.structure.GhostStructure;
 import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
@@ -150,9 +151,10 @@ public class ClientGameEventHandler {
 	@SubscribeEvent
 	public static void adjustFOV(ViewportEvent.ComputeFov event) {
 		var mc = Minecraft.getInstance();
+		var override = CameraOverride.get(mc);
 
-		if (mc.screen != null) {
-			event.setFOV(event.getFOV() * mc.screen.getZoom(event.getPartialTick()));
+		if (override != null) {
+			event.setFOV(event.getFOV() * override.getZoom(event.getPartialTick()));
 		}
 
 		/*

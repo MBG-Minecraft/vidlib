@@ -11,13 +11,13 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.Vec3;
 
-public record InterpolatedWorldPosition(Easing easing, float start, float end, WorldPosition a, WorldPosition b) implements WorldPosition {
+public record InterpolatedWorldPosition(Easing easing, float start, float end, WorldPosition from, WorldPosition to) implements WorldPosition {
 	public static final SimpleRegistryType<InterpolatedWorldPosition> TYPE = SimpleRegistryType.dynamic(Shimmer.id("interpolated"), RecordCodecBuilder.mapCodec(instance -> instance.group(
-		Easing.CODEC.fieldOf("easing").forGetter(InterpolatedWorldPosition::easing),
-		Codec.FLOAT.fieldOf("start").forGetter(InterpolatedWorldPosition::start),
-		Codec.FLOAT.fieldOf("end").forGetter(InterpolatedWorldPosition::end),
-		WorldPosition.CODEC.fieldOf("a").forGetter(InterpolatedWorldPosition::a),
-		WorldPosition.CODEC.fieldOf("b").forGetter(InterpolatedWorldPosition::b)
+		Easing.CODEC.optionalFieldOf("easing", Easing.LINEAR).forGetter(InterpolatedWorldPosition::easing),
+		Codec.FLOAT.optionalFieldOf("start", 0F).forGetter(InterpolatedWorldPosition::start),
+		Codec.FLOAT.optionalFieldOf("end", 1F).forGetter(InterpolatedWorldPosition::end),
+		WorldPosition.CODEC.fieldOf("from").forGetter(InterpolatedWorldPosition::from),
+		WorldPosition.CODEC.fieldOf("to").forGetter(InterpolatedWorldPosition::to)
 	).apply(instance, InterpolatedWorldPosition::new)), StreamCodec.composite(
 		Easing.STREAM_CODEC,
 		InterpolatedWorldPosition::easing,
@@ -26,23 +26,9 @@ public record InterpolatedWorldPosition(Easing easing, float start, float end, W
 		ByteBufCodecs.FLOAT,
 		InterpolatedWorldPosition::end,
 		WorldPosition.STREAM_CODEC,
-		InterpolatedWorldPosition::a,
+		InterpolatedWorldPosition::from,
 		WorldPosition.STREAM_CODEC,
-		InterpolatedWorldPosition::b,
-		InterpolatedWorldPosition::new
-	));
-
-	public static final SimpleRegistryType<InterpolatedWorldPosition> SIMPLE_TYPE = SimpleRegistryType.dynamic(Shimmer.id("simple_interpolated"), RecordCodecBuilder.mapCodec(instance -> instance.group(
-		Easing.CODEC.fieldOf("easing").forGetter(InterpolatedWorldPosition::easing),
-		WorldPosition.CODEC.fieldOf("a").forGetter(InterpolatedWorldPosition::a),
-		WorldPosition.CODEC.fieldOf("b").forGetter(InterpolatedWorldPosition::b)
-	).apply(instance, InterpolatedWorldPosition::new)), StreamCodec.composite(
-		Easing.STREAM_CODEC,
-		InterpolatedWorldPosition::easing,
-		WorldPosition.STREAM_CODEC,
-		InterpolatedWorldPosition::a,
-		WorldPosition.STREAM_CODEC,
-		InterpolatedWorldPosition::b,
+		InterpolatedWorldPosition::to,
 		InterpolatedWorldPosition::new
 	));
 
@@ -52,18 +38,18 @@ public record InterpolatedWorldPosition(Easing easing, float start, float end, W
 
 	@Override
 	public SimpleRegistryType<?> type() {
-		return start == 0F && end == 1F ? SIMPLE_TYPE : TYPE;
+		return TYPE;
 	}
 
 	@Override
 	public Vec3 get(WorldNumberContext ctx) {
-		var a = this.a.get(ctx);
+		var a = this.from.get(ctx);
 
 		if (ctx.progress <= start) {
 			return a;
 		}
 
-		var b = this.b.get(ctx);
+		var b = this.to.get(ctx);
 
 		if (ctx.progress >= end) {
 			return b;

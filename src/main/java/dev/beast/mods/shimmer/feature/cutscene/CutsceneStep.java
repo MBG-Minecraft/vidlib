@@ -67,8 +67,7 @@ public class CutsceneStep {
 		ComponentSerialization.CODEC.optionalFieldOf("top_bar").forGetter(s -> s.topBar),
 		ComponentSerialization.CODEC.optionalFieldOf("bottom_bar").forGetter(s -> s.bottomBar),
 		ResourceLocation.CODEC.optionalFieldOf("shader").forGetter(s -> s.shader),
-		Snap.CODEC.optionalFieldOf("snap", Snap.NONE).forGetter(s -> s.snap),
-		Codec.BOOL.optionalFieldOf("no_screen", false).forGetter(s -> s.noScreen)
+		Snap.CODEC.optionalFieldOf("snap", Snap.NONE).forGetter(s -> s.snap)
 	).apply(instance, CutsceneStep::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, CutsceneStep> STREAM_CODEC = ShimmerStreamCodecs.composite(
@@ -92,8 +91,6 @@ public class CutsceneStep {
 		s -> s.shader,
 		Snap.STREAM_CODEC,
 		s -> s.snap,
-		ByteBufCodecs.BOOL,
-		s -> s.noScreen,
 		CutsceneStep::new
 	);
 
@@ -119,7 +116,6 @@ public class CutsceneStep {
 	public Optional<Component> bottomBar = Optional.empty();
 	public Optional<ResourceLocation> shader = Optional.empty();
 	public Snap snap = Snap.NONE;
-	public boolean noScreen = false;
 
 	public List<CutsceneTick> tick;
 
@@ -133,8 +129,7 @@ public class CutsceneStep {
 		Optional<Component> topBar,
 		Optional<Component> bottomBar,
 		Optional<ResourceLocation> shader,
-		Snap snap,
-		boolean noScreen
+		Snap snap
 	) {
 		this.start = start;
 		this.length = length;
@@ -146,7 +141,6 @@ public class CutsceneStep {
 		this.bottomBar = bottomBar;
 		this.shader = shader;
 		this.snap = snap;
-		this.noScreen = noScreen;
 	}
 
 	public Vec3 prevRenderTarget, renderTarget;
@@ -228,11 +222,6 @@ public class CutsceneStep {
 		}
 
 		this.tick.add(tick);
-		return this;
-	}
-
-	public CutsceneStep noScreen(boolean noScreen) {
-		this.noScreen = noScreen;
 		return this;
 	}
 

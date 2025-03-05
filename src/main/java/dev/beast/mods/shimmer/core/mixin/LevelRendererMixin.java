@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.core.mixin;
 
+import dev.beast.mods.shimmer.feature.misc.CameraOverride;
 import dev.beast.mods.shimmer.feature.structure.StructureRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -22,12 +23,14 @@ public abstract class LevelRendererMixin {
 
 	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;getEntity()Lnet/minecraft/world/entity/Entity;", ordinal = 0))
 	private Entity shimmer$getFocusedEntity0(Camera camera) {
-		return minecraft.screen != null && minecraft.screen.renderPlayer() ? null : camera.getEntity();
+		var override = CameraOverride.get(minecraft);
+		return override != null && override.renderPlayer() ? null : camera.getEntity();
 	}
 
 	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;getEntity()Lnet/minecraft/world/entity/Entity;", ordinal = 3))
 	private Entity shimmer$getFocusedEntity3(Camera camera) {
-		return minecraft.screen != null && minecraft.screen.renderPlayer() ? minecraft.player : camera.getEntity();
+		var override = CameraOverride.get(minecraft);
+		return override != null && override.renderPlayer() ? minecraft.player : camera.getEntity();
 	}
 
 	/**

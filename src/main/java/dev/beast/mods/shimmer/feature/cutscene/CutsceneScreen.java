@@ -1,14 +1,13 @@
 package dev.beast.mods.shimmer.feature.cutscene;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.beast.mods.shimmer.math.KMath;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
+import org.lwjgl.glfw.GLFW;
 
 public class CutsceneScreen extends Screen {
 	public final Screen previousScreen;
@@ -28,14 +27,12 @@ public class CutsceneScreen extends Screen {
 		{
 			var x = (double) (this.minecraft.getWindow().getWidth() / 2);
 			var y = (double) (this.minecraft.getWindow().getHeight() / 2);
-			InputConstants.grabOrReleaseMouse(this.minecraft.getWindow().getWindow(), 212995, x, y);
+			InputConstants.grabOrReleaseMouse(this.minecraft.getWindow().getWindow(), GLFW.GLFW_CURSOR_DISABLED, x, y);
 		}
 	}
 
 	@Override
 	public void removed() {
-		minecraft.options.hideGui = false;
-		minecraft.gameRenderer.shutdownEffect();
 	}
 
 	@Override
@@ -79,7 +76,7 @@ public class CutsceneScreen extends Screen {
 
 	@Override
 	public double getZoom(double delta) {
-		return KMath.lerp(delta, clientCutscene.prevZoom, clientCutscene.zoom);
+		return clientCutscene.getZoom(delta);
 	}
 
 	@Override
@@ -94,18 +91,11 @@ public class CutsceneScreen extends Screen {
 
 	@Override
 	public Vec3 getCameraPosition(float delta) {
-		return clientCutscene.prevOrigin.lerp(clientCutscene.origin, delta);
+		return clientCutscene.getCameraPosition(delta);
 	}
 
 	@Override
 	public Vector3f getCameraRotation(float delta, Vec3 cameraPos) {
-		var target = clientCutscene.prevTarget.lerp(clientCutscene.target, delta);
-
-		double dx = target.x - cameraPos.x;
-		double dy = target.y - cameraPos.y;
-		double dz = target.z - cameraPos.z;
-		double hl = Math.sqrt(dx * dx + dz * dz);
-
-		return new Vector3f(Mth.wrapDegrees((float) (Math.toDegrees(Mth.atan2(dz, dx)) - 90F)), Mth.wrapDegrees((float) (-(Math.toDegrees(Mth.atan2(dy, hl))))), 0F);
+		return clientCutscene.getCameraRotation(delta, cameraPos);
 	}
 }

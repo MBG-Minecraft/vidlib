@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer.core.mixin;
 
 import dev.beast.mods.shimmer.core.ShimmerCamera;
+import dev.beast.mods.shimmer.feature.misc.CameraOverride;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
@@ -40,15 +41,16 @@ public abstract class CameraMixin implements ShimmerCamera {
 	@Inject(method = "setup", at = @At("HEAD"), cancellable = true)
 	private void shimmer$setupHead(BlockGetter area, Entity entity, boolean detached, boolean inverseView, float delta, CallbackInfo ci) {
 		var mc = Minecraft.getInstance();
+		var override = CameraOverride.get(mc);
 
-		if (mc.screen != null && mc.screen.overrideCamera()) {
+		if (override != null && override.overrideCamera()) {
 			this.initialized = true;
 			this.level = area;
 			this.entity = entity;
 			this.detached = false;
-			var pos = mc.screen.getCameraPosition(delta);
+			var pos = override.getCameraPosition(delta);
 			setPosition(pos);
-			var rot = mc.screen.getCameraRotation(delta, pos);
+			var rot = override.getCameraRotation(delta, pos);
 			setRotation(rot.x, rot.y, rot.z);
 			mc.shimmer$applyCameraShake((Camera) (Object) this, delta);
 			ci.cancel();
