@@ -2,11 +2,13 @@ package dev.beast.mods.shimmer.core.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.authlib.GameProfile;
 import dev.beast.mods.shimmer.core.ShimmerClientPacketListener;
-import dev.beast.mods.shimmer.feature.session.ShimmerClientSessionData;
+import dev.beast.mods.shimmer.feature.session.ShimmerLocalClientSessionData;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.CommonPlayerSpawnInfo;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -19,8 +21,12 @@ public abstract class ClientPacketListenerMixin implements ShimmerClientPacketLi
 	@Shadow
 	private ClientLevel level;
 
+	@Shadow
+	@Final
+	private GameProfile localGameProfile;
+
 	@Unique
-	private final ShimmerClientSessionData shimmer$sessionData = new ShimmerClientSessionData();
+	private ShimmerLocalClientSessionData shimmer$sessionData;
 
 	@ModifyExpressionValue(method = {"handleRespawn", "handleLogin"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/CommonPlayerSpawnInfo;isFlat()Z"))
 	private boolean shimmer$isFlat(boolean original, @Local CommonPlayerSpawnInfo info) {
@@ -28,22 +34,26 @@ public abstract class ClientPacketListenerMixin implements ShimmerClientPacketLi
 	}
 
 	@Override
-	public ShimmerClientSessionData shimmer$sessionData() {
+	public ShimmerLocalClientSessionData shimmer$sessionData() {
+		if (shimmer$sessionData == null) {
+			shimmer$sessionData = new ShimmerLocalClientSessionData(localGameProfile.getId());
+		}
+
 		return shimmer$sessionData;
 	}
 
 	@Inject(method = "handleLogin", at = @At("RETURN"))
 	private void shimmer$handleLogin(CallbackInfo ci) {
-		shimmer$sessionData.respawned(level, true);
+		shimmer$sessionData().respawned(level, true);
 	}
 
 	@Inject(method = "handleRespawn", at = @At("RETURN"))
 	private void shimmer$handleRespawn(CallbackInfo ci) {
-		shimmer$sessionData.respawned(level, false);
+		shimmer$sessionData().respawned(level, false);
 	}
 
 	@Inject(method = "close", at = @At("RETURN"))
 	private void shimmer$close(CallbackInfo ci) {
-		shimmer$sessionData.closed();
+		shimmer$sessionData().closed();
 	}
 }

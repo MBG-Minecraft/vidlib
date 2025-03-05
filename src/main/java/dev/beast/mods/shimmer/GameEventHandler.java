@@ -2,21 +2,23 @@ package dev.beast.mods.shimmer;
 
 import dev.beast.mods.shimmer.feature.clock.Clock;
 import dev.beast.mods.shimmer.feature.clock.ClockFont;
+import dev.beast.mods.shimmer.feature.clock.ClockInstance;
 import dev.beast.mods.shimmer.feature.clock.SyncClockFontsPayload;
 import dev.beast.mods.shimmer.feature.clock.SyncClocksPayload;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
+import dev.beast.mods.shimmer.feature.session.RemovePlayerDataPayload;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
 import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
 import dev.beast.mods.shimmer.feature.zone.SyncZonesPayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
+import dev.beast.mods.shimmer.util.registry.RegistryReference;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
-import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
@@ -27,6 +29,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.ArrayList;
@@ -53,8 +56,8 @@ public class GameEventHandler {
 		var list = new ArrayList<Packet<? super ClientGamePacketListener>>();
 
 		list.add(new SyncZonesPayload(List.copyOf(ZoneLoader.ALL.containers.values())).toS2C());
-		list.add(new SyncClockFontsPayload(List.copyOf(ClockFont.SERVER.values())).toS2C());
-		list.add(new SyncClocksPayload(List.copyOf(Clock.SERVER_INSTANCES.values())).toS2C());
+		list.add(new SyncClockFontsPayload(List.copyOf(ClockFont.SERVER.getMap().values())).toS2C());
+		list.add(new SyncClocksPayload(List.copyOf(ClockInstance.SERVER.getMap().values())).toS2C());
 
 		var packet = new ClientboundBundlePacket(list);
 
@@ -71,10 +74,29 @@ public class GameEventHandler {
 	}
 
 	@SubscribeEvent
-	public static void serverStarted(ServerStartedEvent event) {
-		if (ShimmerConfig.defaultGameRules) {
-			event.getServer().defaultGameRules();
+	public static void playerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+		if (event.getEntity() instanceof ServerPlayer player) {
+			player.server.s2c(new RemovePlayerDataPayload(player.getUUID()));
 		}
+	}
+
+	@SubscribeEvent
+	public static void playerSaved(PlayerEvent.SaveToFile event) {
+		if (event.getEntity() instanceof ServerPlayer player) {
+			player.shimmer$sessionData().savePlayerData(player.server);
+		}
+	}
+
+	@SubscribeEvent
+	public static void serverStarted(ServerStartedEvent event) {
+		if (ShimmerConfig.betterDefaultGameRules) {
+			event.getServer().betterDefaultGameRules();
+		}
+	}
+
+	@SubscribeEvent
+	public static void serverStopped(ServerStoppedEvent event) {
+		RegistryReference.releaseServerHolders();
 	}
 
 	@SubscribeEvent
@@ -100,13 +122,21 @@ public class GameEventHandler {
 
 	@SubscribeEvent
 	public static void useItemInAir(PlayerInteractEvent.RightClickItem event) {
-		if (event.getEntity() instanceof Player player) {
-			var tool = ToolItem.of(event.getItemStack());
+		var tool = ToolItem.of(event.getItemStack());
 
-			if (tool != null && tool.use(player, event)) {
-				event.setCancellationResult(InteractionResult.SUCCESS);
-				event.setCanceled(true);
-			}
+		if (tool != null && tool.use(event.getEntity(), event)) {
+			event.setCancellationResult(InteractionResult.SUCCESS);
+			event.setCanceled(true);
+		}
+	}
+
+	@SubscribeEvent
+	public static void useItemOnEntity(PlayerInteractEvent.EntityInteract event) {
+		var tool = ToolItem.of(event.getItemStack());
+
+		if (tool != null && tool.useOnEntity(event.getEntity(), event)) {
+			event.setCancellationResult(InteractionResult.SUCCESS);
+			event.setCanceled(true);
 		}
 	}
 

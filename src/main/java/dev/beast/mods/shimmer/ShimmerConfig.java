@@ -1,7 +1,7 @@
 package dev.beast.mods.shimmer;
 
 public class ShimmerConfig {
-	public static boolean defaultGameRules = true;
+	public static boolean betterDefaultGameRules = true;
 	public static boolean loadVanillaStructures = false;
 	public static boolean preventBlockFalling = true;
 	public static boolean limitHeldItemRendering = true;

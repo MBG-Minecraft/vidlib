@@ -2,6 +2,7 @@ package dev.beast.mods.shimmer;
 
 import dev.beast.mods.shimmer.feature.camerashake.CameraShakeType;
 import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
+import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.toolitem.PositionToolItem;
 import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
 import dev.beast.mods.shimmer.feature.zone.ZoneShape;
@@ -26,6 +27,7 @@ public class ModEventHandler {
 		EntityFilter.bootstrap();
 		ZoneShape.bootstrap();
 		CameraShakeType.bootstrap();
+		InternalPlayerData.bootstrap();
 
 		ToolItem.REGISTRY.put("pos", new PositionToolItem());
 	}

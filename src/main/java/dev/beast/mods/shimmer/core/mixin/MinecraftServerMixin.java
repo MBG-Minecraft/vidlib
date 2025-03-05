@@ -1,7 +1,7 @@
 package dev.beast.mods.shimmer.core.mixin;
 
 import dev.beast.mods.shimmer.core.ShimmerMinecraftServer;
-import dev.beast.mods.shimmer.feature.clock.Clock;
+import dev.beast.mods.shimmer.feature.clock.ClockInstance;
 import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
 import dev.beast.mods.shimmer.util.ScheduledTask;
 import net.minecraft.resources.ResourceKey;
@@ -23,12 +23,6 @@ import java.util.Map;
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 	@Shadow
-	public abstract void endMetricsRecordingTick();
-
-	@Shadow
-	public abstract boolean enforceSecureProfile();
-
-	@Shadow
 	@Final
 	private Map<ResourceKey<Level>, ServerLevel> levels;
 	@Unique
@@ -48,6 +42,7 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 
 	@Override
 	public void shimmer$playerJoined(ServerPlayer player) {
+		player.shimmer$sessionData().loadPlayerData(shimmer$self());
 	}
 
 	@Override
@@ -65,7 +60,7 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 			}
 		}
 
-		for (var instance : Clock.SERVER_INSTANCES.values()) {
+		for (var instance : ClockInstance.SERVER.getMap().values()) {
 			instance.tick(shimmer$self().getLevel(instance.clock.dimension()));
 		}
 	}
@@ -74,6 +69,10 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 	public void shimmer$postTick() {
 		if (shimmer$scheduledTaskHandler != null) {
 			shimmer$scheduledTaskHandler.tick();
+		}
+
+		for (var player : shimmer$self().getPlayerList().getPlayers()) {
+			player.shimmer$sessionData().syncPlayerData(player);
 		}
 	}
 

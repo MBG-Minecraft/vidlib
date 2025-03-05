@@ -13,6 +13,10 @@ public class ClientStructureStorage extends StructureStorage {
 
 	private final Map<ResourceLocation, StructureRenderer> renderers = new HashMap<>();
 
+	public ClientStructureStorage() {
+		super(false);
+	}
+
 	public StructureRenderer getRenderer(ResourceLocation id) {
 		return renderers.computeIfAbsent(id, k -> new StructureRenderer(this, k));
 	}

@@ -29,6 +29,9 @@
 	"net/minecraft/client/player/LocalPlayer": [
 		"dev/beast/mods/shimmer/core/ShimmerLocalPlayer"
 	],
+	"net/minecraft/client/player/RemotePlayer": [
+		"dev/beast/mods/shimmer/core/ShimmerRemotePlayer"
+	],
 	"net/minecraft/server/level/ServerPlayer": [
 		"dev/beast/mods/shimmer/core/ShimmerServerPlayer"
 	],

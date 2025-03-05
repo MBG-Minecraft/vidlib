@@ -3,6 +3,7 @@ package dev.beast.mods.shimmer.feature.cutscene;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.util.JsonCodecReloadListener;
+import dev.beast.mods.shimmer.util.registry.RegistryReference;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -26,7 +27,7 @@ public class Cutscene {
 		Cutscene::new
 	);
 
-	public static Map<ResourceLocation, Cutscene> SERVER = Map.of();
+	public static final RegistryReference.Holder<ResourceLocation, Cutscene> SERVER = RegistryReference.createServerHolder();
 
 	public static class Loader extends JsonCodecReloadListener<Cutscene> {
 		public Loader() {
@@ -35,7 +36,7 @@ public class Cutscene {
 
 		@Override
 		protected void apply(Map<ResourceLocation, Cutscene> from) {
-			SERVER = Map.copyOf(from);
+			SERVER.update(Map.copyOf(from));
 		}
 	}
 

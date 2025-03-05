@@ -12,15 +12,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ServerGamePacketListenerImpl.class)
 public class ServerGamePacketListenerImplMixin implements ShimmerServerPacketListener {
 	@Unique
-	private final ShimmerServerSessionData shimmer$sessionData = new ShimmerServerSessionData();
+	private ShimmerServerSessionData shimmer$sessionData;
 
 	@Override
 	public ShimmerServerSessionData shimmer$sessionData() {
+		if (shimmer$sessionData == null) {
+			shimmer$sessionData = new ShimmerServerSessionData(((ServerGamePacketListenerImpl) (Object) this).player.getUUID());
+		}
+
 		return shimmer$sessionData;
 	}
 
 	@Inject(method = "onDisconnect", at = @At("RETURN"))
 	private void shimmer$close(CallbackInfo ci) {
-		shimmer$sessionData.closed();
+		shimmer$sessionData().closed();
 	}
 }

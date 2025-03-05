@@ -5,16 +5,61 @@ import dev.beast.mods.shimmer.feature.clock.SyncClockInstancePayload;
 import dev.beast.mods.shimmer.feature.clock.SyncClocksPayload;
 import dev.beast.mods.shimmer.feature.zone.SyncZonesPayload;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class ShimmerSessionData {
-	private CookieMap cookies;
+	public final UUID uuid;
+	Map<PlayerDataType<?>, PlayerDataMapValue> playerDataMap;
 
-	public CookieMap getCookies() {
-		if (cookies == null) {
-			cookies = new CookieMap();
+	public ShimmerSessionData(UUID uuid) {
+		this.uuid = uuid;
+	}
+
+	PlayerDataMapValue init(PlayerDataType<?> type) {
+		if (playerDataMap == null) {
+			playerDataMap = new IdentityHashMap<>(1);
 		}
 
-		return cookies;
+		var v = playerDataMap.get(type);
+
+		if (v == null) {
+			v = new PlayerDataMapValue();
+			v.playerData = type.factory().get();
+			playerDataMap.put(type, v);
+		}
+
+		return v;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends PlayerData> T get(PlayerDataType<T> type) {
+		return (T) init(type).playerData;
+	}
+
+	@Nullable
+	@SuppressWarnings("unchecked")
+	public <T extends PlayerData> T getOrNull(PlayerDataType<T> type) {
+		if (playerDataMap == null) {
+			return null;
+		}
+
+		var v = playerDataMap.get(type);
+
+		if (v == null) {
+			return null;
+		}
+
+		return (T) v.playerData;
+	}
+
+	public void respawned(Level level, boolean loggedIn) {
+	}
+
+	public void closed() {
 	}
 
 	public void updateZones(Level level, SyncZonesPayload payload) {
@@ -29,9 +74,14 @@ public class ShimmerSessionData {
 	public void updateClockInstance(SyncClockInstancePayload payload) {
 	}
 
-	public void respawned(Level level, boolean loggedIn) {
+	public void updateSessionData(UUID ownId, SyncPlayerDataPayload payload) {
 	}
 
-	public void closed() {
+	public void removeSessionData(UUID id) {
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[" + uuid + "]";
 	}
 }

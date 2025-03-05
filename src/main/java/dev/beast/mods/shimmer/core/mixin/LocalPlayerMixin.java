@@ -2,7 +2,7 @@ package dev.beast.mods.shimmer.core.mixin;
 
 import dev.beast.mods.shimmer.core.ShimmerClientPacketListener;
 import dev.beast.mods.shimmer.core.ShimmerLocalPlayer;
-import dev.beast.mods.shimmer.feature.session.ShimmerClientSessionData;
+import dev.beast.mods.shimmer.feature.session.ShimmerLocalClientSessionData;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import org.spongepowered.asm.mixin.Final;
@@ -16,7 +16,7 @@ public abstract class LocalPlayerMixin implements ShimmerLocalPlayer {
 	public ClientPacketListener connection;
 
 	@Override
-	public ShimmerClientSessionData shimmer$sessionData() {
+	public ShimmerLocalClientSessionData shimmer$sessionData() {
 		return ((ShimmerClientPacketListener) connection).shimmer$sessionData();
 	}
 }

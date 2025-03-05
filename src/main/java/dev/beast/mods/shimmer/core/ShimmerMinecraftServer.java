@@ -22,7 +22,7 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 		return shimmer$self().getPlayerList().getPlayers();
 	}
 
-	default void defaultGameRules() {
+	default void betterDefaultGameRules() {
 		var server = shimmer$self();
 		server.overworld().setDayTime(6000L);
 		server.overworld().setWeatherParameters(20000000, 20000000, false, false);

@@ -2,7 +2,7 @@ package dev.beast.mods.shimmer.core.mixin;
 
 import dev.beast.mods.shimmer.core.ShimmerServerPacketListener;
 import dev.beast.mods.shimmer.core.ShimmerServerPlayer;
-import dev.beast.mods.shimmer.feature.session.ShimmerSessionData;
+import dev.beast.mods.shimmer.feature.session.ShimmerServerSessionData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,7 +14,7 @@ public abstract class ServerPlayerMixin implements ShimmerServerPlayer {
 	public ServerGamePacketListenerImpl connection;
 
 	@Override
-	public ShimmerSessionData shimmer$sessionData() {
+	public ShimmerServerSessionData shimmer$sessionData() {
 		return ((ShimmerServerPacketListener) connection).shimmer$sessionData();
 	}
 }

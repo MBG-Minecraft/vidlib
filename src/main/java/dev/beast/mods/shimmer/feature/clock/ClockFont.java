@@ -6,6 +6,7 @@ import dev.beast.mods.shimmer.math.Size2;
 import dev.beast.mods.shimmer.math.UV;
 import dev.beast.mods.shimmer.util.JsonCodecReloadListener;
 import dev.beast.mods.shimmer.util.ShimmerCodecs;
+import dev.beast.mods.shimmer.util.registry.RegistryReference;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -72,10 +73,10 @@ public record ClockFont(
 		ClockFont::create
 	);
 
-	public static Map<ResourceLocation, ClockFont> SERVER = Map.of();
+	public static final RegistryReference.Holder<ResourceLocation, ClockFont> SERVER = RegistryReference.createServerHolder();
 	public static Supplier<Map<ResourceLocation, ClockFont>> CLIENT_SUPPLIER = Map::of;
 
-	public static final Codec<ClockFont> CODEC = ShimmerCodecs.map(() -> SERVER, ShimmerCodecs.SHIMMER_ID, ClockFont::id);
+	public static final Codec<ClockFont> CODEC = ShimmerCodecs.map(SERVER::getMap, ShimmerCodecs.SHIMMER_ID, ClockFont::id);
 
 	public static class Loader extends JsonCodecReloadListener<ClockFont> {
 		public Loader() {
@@ -84,7 +85,7 @@ public record ClockFont(
 
 		@Override
 		protected void apply(Map<ResourceLocation, ClockFont> from) {
-			SERVER = Map.copyOf(from);
+			SERVER.update(Map.copyOf(from));
 		}
 	}
 

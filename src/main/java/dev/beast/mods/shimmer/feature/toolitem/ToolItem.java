@@ -1,7 +1,9 @@
 package dev.beast.mods.shimmer.feature.toolitem;
 
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -30,6 +32,25 @@ public interface ToolItem {
 		return null;
 	}
 
+	@Nullable
+	static Pair<ItemStack, ToolItem> of(LivingEntity entity) {
+		var stack = entity.getMainHandItem();
+		var tool = of(stack);
+
+		if (tool != null) {
+			return Pair.of(stack, tool);
+		}
+
+		stack = entity.getOffhandItem();
+		tool = of(stack);
+
+		if (tool != null) {
+			return Pair.of(stack, tool);
+		}
+
+		return null;
+	}
+
 	Component getName();
 
 	default ItemStack createItem() {
@@ -40,10 +61,14 @@ public interface ToolItem {
 		return false;
 	}
 
+	default boolean useOnEntity(Player player, PlayerInteractEvent.EntityInteract event) {
+		return false;
+	}
+
 	default boolean use(Player player, PlayerInteractEvent.RightClickItem event) {
 		return false;
 	}
 
-	default void addDebugText(ItemStack item, Player player, @Nullable HitResult result, List<Component> left, List<Component> right) {
+	default void drawText(ItemStack item, Player player, @Nullable HitResult result, List<Component> left, List<Component> right) {
 	}
 }

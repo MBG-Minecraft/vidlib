@@ -84,6 +84,19 @@ public interface ShimmerStreamCodecs {
 		}
 	};
 
+	StreamCodec<RegistryFriendlyByteBuf, ResourceLocation> REGISTRY_ID = new StreamCodec<>() {
+		@Override
+		public ResourceLocation decode(RegistryFriendlyByteBuf buf) {
+			var s = buf.readUtf();
+			return s.indexOf(':') == -1 ? ResourceLocation.withDefaultNamespace(s) : ResourceLocation.parse(s);
+		}
+
+		@Override
+		public void encode(RegistryFriendlyByteBuf buf, ResourceLocation value) {
+			buf.writeUtf(value.getNamespace().equals("minecraft") ? value.getPath() : value.toString());
+		}
+	};
+
 	StreamCodec<ByteBuf, CompoundTag> COMPOUND_TAG = ByteBufCodecs.TRUSTED_COMPOUND_TAG;
 
 	StreamCodec<ByteBuf, Vec3> VEC_3 = new StreamCodec<>() {

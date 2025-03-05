@@ -3,8 +3,8 @@
 	"minVersion": "0.8",
 	"package": "dev.beast.mods.shimmer.core.mixin",
 	"compatibilityLevel": "JAVA_21",
-	"mixins": ["AdvancementTreeMixin", "BarrierBlockMixin", "EntityMixin", "FallingBlockMixin", "FoodDataMixin", "ItemMixin", "LevelMixin", "LivingEntityMixin", "MinecraftServerMixin", "MobMixin", "PayloadRegistrarMixin", "PlayerListMixin", "PlayerMixin", "PoiSectionMixin", "ServerboundSetStructureBlockPacketMixin", "ServerGamePacketListenerImplMixin", "ServerLevelMixin", "ServerPlayerMixin", "StructureBlockEntityMixin", "UUIDUtilMixin", "WaterFluidMixin"],
-	"client": ["AbstractClientPlayerMixin", "CameraMixin", "ClientLevelMixin", "ClientPacketListenerMixin", "DefaultPlayerSkinMixin", "FireworkParticlesStarterMixin", "GameNarratorMixin", "GameRendererMixin", "ItemInHandLayerMixin", "KeyboardHandlerMixin", "KeyMappingMixin", "LevelRendererMixin", "LocalPlayerMixin", "MinecraftClientMixin", "MouseHandlerMixin", "OptionsMixin", "PlayerModelMixin", "RenderSystemMixin", "ScreenMixin", "StructureBlockRendererMixin", "ToastComponentMixin"],
+	"mixins": ["AdvancementTreeMixin", "BarrierBlockMixin", "EntityMixin", "FallingBlockMixin", "FoodDataMixin", "ItemMixin", "LevelMixin", "LivingEntityMixin", "MinecraftServerMixin", "MobMixin", "PayloadRegistrarMixin", "PlayerListMixin", "PlayerMixin", "PoiSectionMixin", "ScoreboardMixin", "ServerboundSetStructureBlockPacketMixin", "ServerGamePacketListenerImplMixin", "ServerLevelMixin", "ServerPlayerMixin", "ServerScoreboardMixin", "StructureBlockEntityMixin", "UUIDUtilMixin", "WaterFluidMixin"],
+	"client": ["AbstractClientPlayerMixin", "CameraMixin", "ClientLevelMixin", "ClientPacketListenerMixin", "DefaultPlayerSkinMixin", "FireworkParticlesStarterMixin", "GameNarratorMixin", "GameRendererMixin", "ItemInHandLayerMixin", "KeyboardHandlerMixin", "KeyMappingMixin", "LevelRendererMixin", "LocalPlayerMixin", "MinecraftClientMixin", "MouseHandlerMixin", "OptionsMixin", "PlayerModelMixin", "RemotePlayerMixin", "RenderSystemMixin", "ScreenMixin", "StructureBlockRendererMixin", "ToastComponentMixin"],
 	"injectors": {
 		"defaultRequire": 1,
 		"maxShiftBy": 2

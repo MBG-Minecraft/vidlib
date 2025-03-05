@@ -3,6 +3,7 @@ package dev.beast.mods.shimmer.feature.structure;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.ShimmerConfig;
 import dev.beast.mods.shimmer.util.Lazy;
+import dev.beast.mods.shimmer.util.registry.RegistryReference;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
@@ -19,7 +20,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class StructureStorage extends SimplePreparableReloadListener<Map<ResourceLocation, Resource>> {
-	public static final StructureStorage SERVER = new StructureStorage();
+	public static final StructureStorage SERVER = new StructureStorage(true);
 
 	private record StructureSupplier(ResourceLocation id, Resource resource) implements Supplier<StructureTemplate> {
 		@Override
@@ -35,10 +36,10 @@ public class StructureStorage extends SimplePreparableReloadListener<Map<Resourc
 		}
 	}
 
-	public final Map<ResourceLocation, Lazy<StructureTemplate>> structures;
+	public final RegistryReference.Holder<ResourceLocation, Lazy<StructureTemplate>> structures;
 
-	public StructureStorage() {
-		this.structures = new HashMap<>();
+	public StructureStorage(boolean server) {
+		this.structures = server ? RegistryReference.createServerHolder() : RegistryReference.createRuntimeHolder();
 	}
 
 	@Nullable
@@ -60,10 +61,12 @@ public class StructureStorage extends SimplePreparableReloadListener<Map<Resourc
 
 	@Override
 	protected void apply(Map<ResourceLocation, Resource> map, ResourceManager resourceManager, ProfilerFiller profiler) {
-		structures.clear();
+		var map2 = new HashMap<ResourceLocation, Lazy<StructureTemplate>>();
 
 		for (var entry : map.entrySet()) {
-			structures.put(entry.getKey(), Lazy.of(new StructureSupplier(entry.getKey(), entry.getValue())));
+			map2.put(entry.getKey(), Lazy.of(new StructureSupplier(entry.getKey(), entry.getValue())));
 		}
+
+		structures.update(map2);
 	}
 }

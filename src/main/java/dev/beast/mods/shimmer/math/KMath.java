@@ -8,14 +8,19 @@ import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.ShortTag;
 import net.minecraft.world.phys.Vec3;
 
+import java.text.DecimalFormat;
+
 @SuppressWarnings("ManualMinMaxCalculation")
 public interface KMath {
+	DecimalFormat SHORT_DECIMAL_FORMAT = new DecimalFormat("#.##");
+	DecimalFormat LONG_DECIMAL_FORMAT = new DecimalFormat("#.####");
+
 	static String format(float value) {
 		if (value == (int) value) {
 			return Integer.toString((int) value);
 		}
 
-		return Float.toString(value);
+		return LONG_DECIMAL_FORMAT.format(value);
 	}
 
 	static String format(double value) {
@@ -23,7 +28,7 @@ public interface KMath {
 			return Long.toString((long) value);
 		}
 
-		return Double.toString(value);
+		return LONG_DECIMAL_FORMAT.format(value);
 	}
 
 	static String formatBlockPos(BlockPos pos) {

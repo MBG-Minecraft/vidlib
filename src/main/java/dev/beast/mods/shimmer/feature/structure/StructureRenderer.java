@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.math.Color;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
@@ -20,6 +21,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -38,7 +40,6 @@ public class StructureRenderer {
 
 	private final ClientStructureStorage storage;
 	private final ResourceLocation id;
-	public boolean mirrorLevel;
 	public boolean centerX;
 	public boolean centerY;
 	public boolean centerZ;
@@ -47,6 +48,7 @@ public class StructureRenderer {
 	public BlockPos origin;
 	public Color glowing;
 	public boolean noVertexSorting;
+	public int lightLevel;
 
 	private Vec3i size = null;
 	private CachedLayer[] layers = null;
@@ -54,7 +56,6 @@ public class StructureRenderer {
 	StructureRenderer(ClientStructureStorage storage, ResourceLocation id) {
 		this.storage = storage;
 		this.id = id;
-		this.mirrorLevel = false;
 		this.centerX = true;
 		this.centerY = false;
 		this.centerZ = true;
@@ -63,6 +64,7 @@ public class StructureRenderer {
 		this.origin = BlockPos.ZERO;
 		this.glowing = Color.TRANSPARENT;
 		this.noVertexSorting = false;
+		this.lightLevel = 15;
 	}
 
 	public Vec3i getSize() {
@@ -95,108 +97,121 @@ public class StructureRenderer {
 
 			if (structure != null) {
 				size = structure.getSize();
-				var blockRenderer = mc.getBlockRenderer();
-				var blocks = new Long2ObjectOpenHashMap<BlockState>();
-
-				for (var palette : structure.palettes) {
-					for (var info : palette.blocks()) {
-						if (!info.state().isAir() && info.state().getRenderShape() != RenderShape.INVISIBLE) {
-							blocks.put(info.pos().offset(origin).asLong(), info.state());
-						}
-					}
-				}
-
-				if (removeInnerBlocks) {
-					var newBlocks = new Long2ObjectOpenHashMap<BlockState>();
-
-					for (var entry : blocks.long2ObjectEntrySet()) {
-						var pos = BlockPos.of(entry.getLongKey());
-						int x = pos.getX();
-						int y = pos.getY();
-						int z = pos.getZ();
-
-						if (isTransparent(blocks.get(BlockPos.asLong(x - 1, y, z)))
-							|| isTransparent(blocks.get(BlockPos.asLong(x + 1, y, z)))
-							|| isTransparent(blocks.get(BlockPos.asLong(x, y - 1, z)))
-							|| isTransparent(blocks.get(BlockPos.asLong(x, y + 1, z)))
-							|| isTransparent(blocks.get(BlockPos.asLong(x, y, z - 1)))
-							|| isTransparent(blocks.get(BlockPos.asLong(x, y, z + 1)))
-						) {
-							newBlocks.put(pos.asLong(), entry.getValue());
-						}
-					}
-
-					blocks = newBlocks;
-				}
-
-				var phantomWorld = new StructureRendererLevel(mc.level, mirrorLevel, blocks, false);
-				var random = RandomSource.create();
-
-				var allLayers = RenderType.chunkBufferLayers();
-
-				var layerMap = new Reference2ObjectOpenHashMap<RenderType, BuildingLayer>(allLayers.size());
-				var layerSorting = new Reference2IntOpenHashMap<RenderType>(allLayers.size());
-
-				for (int i = 0; i < allLayers.size(); i++) {
-					layerSorting.put(allLayers.get(i), i);
-				}
-
-				var localMatrixStack = new PoseStack();
-
-				for (var entry : blocks.long2ObjectEntrySet()) {
-					var pos = BlockPos.of(entry.getLongKey());
-					var relPos = pos.subtract(origin);
-					var state = entry.getValue();
-
-					var model = blockRenderer.getBlockModel(state);
-
-					random.setSeed(state.getSeed(pos));
-
-					for (var type : model.getRenderTypes(state, random, ModelData.EMPTY)) {
-						var layer = layerMap.get(type);
-
-						if (layer == null) {
-							var memory = new ByteBufferBuilder(type.bufferSize());
-							layer = new BuildingLayer(type, memory, new BufferBuilder(memory, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK));
-							layerMap.put(type, layer);
-						}
-
-						localMatrixStack.setIdentity();
-						localMatrixStack.translate(relPos.getX(), relPos.getY(), relPos.getZ());
-						blockRenderer.renderBatched(state, pos, phantomWorld, localMatrixStack, layer.builder, cull, random, ModelData.EMPTY, type);
-					}
-				}
-
-				var list = new ArrayList<CachedLayer>(layerMap.size());
-
-				for (var layer : layerMap.values()) {
-					int sort = layerSorting.getOrDefault(layer.type, 9999);
-					var meshData = layer.builder.build();
-					boolean closeMemory = true;
-
-					if (meshData != null) {
-						var vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
-
-						if (!noVertexSorting && layer.type.sortOnUpload()) {
-							list.add(new CachedLayer(layer.type, vertexBuffer, sort, layer.memory, layer.builder));
-						} else {
-							vertexBuffer.bind();
-							vertexBuffer.upload(meshData);
-							VertexBuffer.unbind();
-							list.add(new CachedLayer(layer.type, vertexBuffer, sort, null, null));
-							closeMemory = false;
-						}
-					}
-
-					if (closeMemory) {
-						layer.memory.close();
-					}
-				}
-
-				layers = list.toArray(CachedLayer.EMPTY);
-				Arrays.sort(layers, Comparator.comparingInt(CachedLayer::sort));
+				Thread.startVirtualThread(() -> buildWorld(mc, structure));
 			}
 		}
+	}
+
+	private void buildWorld(Minecraft mc, StructureTemplate structure) {
+		var blockRenderer = mc.getBlockRenderer();
+		var blocks = new Long2ObjectOpenHashMap<BlockState>();
+
+		for (var palette : structure.palettes) {
+			for (var info : palette.blocks()) {
+				if (!info.state().isAir() && info.state().getRenderShape() != RenderShape.INVISIBLE) {
+					blocks.put(info.pos().offset(origin).asLong(), info.state());
+				}
+			}
+		}
+
+		if (removeInnerBlocks) {
+			var newBlocks = new Long2ObjectOpenHashMap<BlockState>();
+
+			for (var entry : blocks.long2ObjectEntrySet()) {
+				var pos = BlockPos.of(entry.getLongKey());
+				int x = pos.getX();
+				int y = pos.getY();
+				int z = pos.getZ();
+
+				if (isTransparent(blocks.get(BlockPos.asLong(x - 1, y, z)))
+					|| isTransparent(blocks.get(BlockPos.asLong(x + 1, y, z)))
+					|| isTransparent(blocks.get(BlockPos.asLong(x, y - 1, z)))
+					|| isTransparent(blocks.get(BlockPos.asLong(x, y + 1, z)))
+					|| isTransparent(blocks.get(BlockPos.asLong(x, y, z - 1)))
+					|| isTransparent(blocks.get(BlockPos.asLong(x, y, z + 1)))
+				) {
+					newBlocks.put(pos.asLong(), entry.getValue());
+				}
+			}
+
+			blocks = newBlocks;
+		}
+
+		var level = new StructureRendererLevel(mc.level, blocks, lightLevel);
+		var random = RandomSource.create();
+
+		var allLayers = RenderType.chunkBufferLayers();
+
+		var layerMap = new Reference2ObjectOpenHashMap<RenderType, BuildingLayer>(allLayers.size());
+		var layerSorting = new Reference2IntOpenHashMap<RenderType>(allLayers.size());
+
+		for (int i = 0; i < allLayers.size(); i++) {
+			layerSorting.put(allLayers.get(i), i);
+		}
+
+		var localMatrixStack = new PoseStack();
+
+		for (var entry : blocks.long2ObjectEntrySet()) {
+			var pos = BlockPos.of(entry.getLongKey());
+			var relPos = pos.subtract(origin);
+			var state = entry.getValue();
+
+			var model = blockRenderer.getBlockModel(state);
+
+			random.setSeed(state.getSeed(pos));
+
+			for (var type : model.getRenderTypes(state, random, ModelData.EMPTY)) {
+				var layer = layerMap.get(type);
+
+				if (layer == null) {
+					var memory = new ByteBufferBuilder(type.bufferSize());
+					layer = new BuildingLayer(type, memory, new BufferBuilder(memory, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK));
+					layerMap.put(type, layer);
+				}
+
+				localMatrixStack.setIdentity();
+				localMatrixStack.translate(relPos.getX(), relPos.getY(), relPos.getZ());
+
+				try {
+					blockRenderer.renderBatched(state, pos, level, localMatrixStack, layer.builder, cull, random, ModelData.EMPTY, type);
+				} catch (Throwable ex) {
+					Shimmer.LOGGER.info("Error rendering structure block at " + pos, ex);
+				}
+			}
+		}
+
+		mc.execute(() -> buildLayers(layerSorting, layerMap));
+	}
+
+	private void buildLayers(Reference2IntOpenHashMap<RenderType> layerSorting, Reference2ObjectOpenHashMap<RenderType, BuildingLayer> layerMap) {
+		var list = new ArrayList<CachedLayer>(layerMap.size());
+
+		for (var layer : layerMap.values()) {
+			int sort = layerSorting.getOrDefault(layer.type, 9999);
+			var meshData = layer.builder.build();
+			boolean closeMemory = true;
+
+			if (meshData != null) {
+				var vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
+
+				if (!noVertexSorting && layer.type.sortOnUpload()) {
+					list.add(new CachedLayer(layer.type, vertexBuffer, sort, layer.memory, layer.builder));
+				} else {
+					vertexBuffer.bind();
+					vertexBuffer.upload(meshData);
+					VertexBuffer.unbind();
+					list.add(new CachedLayer(layer.type, vertexBuffer, sort, null, null));
+					closeMemory = false;
+				}
+			}
+
+			if (closeMemory) {
+				layer.memory.close();
+			}
+		}
+
+		layers = list.toArray(CachedLayer.EMPTY);
+		Arrays.sort(layers, Comparator.comparingInt(CachedLayer::sort));
 	}
 
 	public void close() {
@@ -229,6 +244,7 @@ public class StructureRenderer {
 		}
 
 		if (centerX || centerY || centerZ) {
+			size = getSize();
 			ms.pushPose();
 			var x = centerX ? -size.getX() / 2D : 0D;
 			var y = centerY ? -size.getY() / 2D : 0D;

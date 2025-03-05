@@ -2,6 +2,7 @@ package dev.beast.mods.shimmer;
 
 import dev.beast.mods.shimmer.feature.clock.ClockRenderer;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
+import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
 import dev.beast.mods.shimmer.feature.zone.renderer.EmptyZoneRenderer;
 import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
@@ -16,6 +17,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
+import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
@@ -48,7 +50,7 @@ public class ClientGameEventHandler {
 		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SKY) {
 			Minecraft.getInstance().shimmer$renderSetup(event, delta);
 		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
-			if (mc.getEntityRenderDispatcher().shouldRenderHitBoxes()) {
+			if (mc.player.get(InternalPlayerData.LOCAL).renderZones) {
 				for (var container : session.filteredZones) {
 					for (var instance : container.zones) {
 						var renderer = ZoneRenderer.get(instance.zone.shape().type());
@@ -93,6 +95,39 @@ public class ClientGameEventHandler {
 	}
 
 	@SubscribeEvent
+	public static void renderHUD(RenderGuiEvent.Post event) {
+		var mc = Minecraft.getInstance();
+
+		if (mc.level == null || mc.player == null) {
+			return;
+		}
+
+		var tool = ToolItem.of(mc.player);
+
+		if (tool != null) {
+			var left = new ArrayList<Component>();
+			var right = new ArrayList<Component>();
+			tool.getSecond().drawText(tool.getFirst(), mc.player, mc.hitResult, left, right);
+
+			for (int i = 0; i < left.size(); i++) {
+				int w = mc.font.width(left.get(i));
+				int x = 2;
+				int y = 2 + i * 12;
+				event.getGuiGraphics().fill(x, y, x + w + 6, y + 12, 0xA0000000);
+				event.getGuiGraphics().drawString(mc.font, left.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
+			}
+
+			for (int i = 0; i < right.size(); i++) {
+				int w = mc.font.width(right.get(i));
+				int x = event.getGuiGraphics().guiWidth() - w - 8;
+				int y = 2 + i * 12;
+				event.getGuiGraphics().fill(x, y, x + w + 6, y + 12, 0xA0000000);
+				event.getGuiGraphics().drawString(mc.font, right.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
+			}
+		}
+	}
+
+	@SubscribeEvent
 	public static void adjustFOV(ViewportEvent.ComputeFov event) {
 		var mc = Minecraft.getInstance();
 
@@ -123,22 +158,5 @@ public class ClientGameEventHandler {
 		// event.getLeft().clear();
 		// event.getRight().clear();
 		// event.getLeft().add(mc.fpsString);
-
-		var item = mc.player.getMainHandItem();
-		var tool = ToolItem.of(item);
-
-		if (tool != null) {
-			var left = new ArrayList<Component>(0);
-			var right = new ArrayList<Component>(0);
-			tool.addDebugText(item, mc.player, mc.hitResult, left, right);
-
-			for (var component : left) {
-				event.getLeft().add(component.getString());
-			}
-
-			for (var component : right) {
-				event.getRight().add(component.getString());
-			}
-		}
 	}
 }

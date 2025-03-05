@@ -4,27 +4,36 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LightChunk;
+import net.minecraft.world.level.chunk.LightChunkGetter;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.Nullable;
 
-public class StructureRendererLevel implements BlockAndTintGetter {
-	public final BlockAndTintGetter fallback;
-	public final boolean mirror;
-	public final boolean mirrorBlocks;
-	public final Long2ObjectMap<BlockState> blocks;
+import java.util.Optional;
 
-	public StructureRendererLevel(BlockAndTintGetter fallback, boolean mirror, Long2ObjectMap<BlockState> blocks, boolean noBlocks) {
+public class StructureRendererLevel implements BlockAndTintGetter, LightChunkGetter {
+	public final BlockAndTintGetter fallback;
+	public final Long2ObjectMap<BlockState> blocks;
+	private StructureRendererLevelLightEngine lightEngine;
+	public final int lightLevel;
+	private final BlockState airBlock;
+	private final FluidState emptyFluid;
+
+	public StructureRendererLevel(BlockAndTintGetter fallback, Long2ObjectMap<BlockState> blocks, int lightLevel) {
 		this.fallback = fallback;
-		this.mirror = mirror;
-		this.mirrorBlocks = mirror && !noBlocks;
 		this.blocks = blocks;
+		this.lightLevel = lightLevel;
+		this.airBlock = Blocks.AIR.defaultBlockState();
+		this.emptyFluid = Fluids.EMPTY.defaultFluidState();
 	}
 
 	@Override
@@ -34,48 +43,67 @@ public class StructureRendererLevel implements BlockAndTintGetter {
 
 	@Override
 	public LevelLightEngine getLightEngine() {
-		return fallback.getLightEngine();
+		if (lightEngine == null) {
+			lightEngine = new StructureRendererLevelLightEngine(this, false, false);
+		}
+
+		return lightEngine;
 	}
 
 	@Override
 	public int getBlockTint(BlockPos pos, ColorResolver colorResolver) {
-		return mirror ? fallback.getBlockTint(pos, colorResolver) : 0xFFFFFFFF;
+		return fallback.getBlockTint(pos, colorResolver);
 	}
 
 	@Override
 	@Nullable
 	public BlockEntity getBlockEntity(BlockPos pos) {
-		return mirrorBlocks ? fallback.getBlockEntity(pos) : null;
+		return null;
+	}
+
+	@Override
+	public <T extends BlockEntity> Optional<T> getBlockEntity(BlockPos pos, BlockEntityType<T> blockEntityType) {
+		return Optional.empty();
 	}
 
 	@Override
 	public BlockState getBlockState(BlockPos pos) {
-		var state = blocks.get(pos.asLong());
-		return state == null ? mirrorBlocks ? fallback.getBlockState(pos) : Blocks.AIR.defaultBlockState() : state;
+		return blocks.getOrDefault(pos.asLong(), airBlock);
 	}
 
 	@Override
 	public FluidState getFluidState(BlockPos pos) {
-		return mirrorBlocks ? fallback.getFluidState(pos) : Fluids.EMPTY.defaultFluidState();
+		return emptyFluid;
 	}
 
 	@Override
 	public int getHeight() {
-		return mirror ? fallback.getHeight() : 256;
+		return 256;
 	}
 
 	@Override
 	public int getMinBuildHeight() {
-		return mirror ? fallback.getMinBuildHeight() : -128;
+		return 0;
 	}
 
 	@Override
 	public int getBrightness(LightLayer layer, BlockPos pos) {
-		return mirror ? fallback.getBrightness(layer, pos) : 15;
+		return lightLevel;
 	}
 
 	@Override
 	public int getRawBrightness(BlockPos pos, int darkness) {
-		return mirror ? fallback.getRawBrightness(pos, darkness) : 15;
+		return lightLevel;
+	}
+
+	@Override
+	public BlockGetter getLevel() {
+		return this;
+	}
+
+	@Override
+	@Nullable
+	public LightChunk getChunkForLighting(int chunkX, int chunkZ) {
+		return null;
 	}
 }

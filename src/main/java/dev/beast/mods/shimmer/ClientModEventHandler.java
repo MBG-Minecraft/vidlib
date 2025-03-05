@@ -13,6 +13,8 @@ import dev.beast.mods.shimmer.feature.misc.FakeBlockPayload;
 import dev.beast.mods.shimmer.feature.misc.SetPostEffectPayload;
 import dev.beast.mods.shimmer.feature.multiverse.VoidSpecialEffects;
 import dev.beast.mods.shimmer.feature.particle.ShimmerClientParticles;
+import dev.beast.mods.shimmer.feature.session.RemovePlayerDataPayload;
+import dev.beast.mods.shimmer.feature.session.SyncPlayerDataPayload;
 import dev.beast.mods.shimmer.feature.structure.ClientStructureStorage;
 import dev.beast.mods.shimmer.feature.zone.SphereZoneShape;
 import dev.beast.mods.shimmer.feature.zone.SyncZonesPayload;
@@ -49,10 +51,12 @@ public class ClientModEventHandler {
 	static void registerPayloadHandlers(RegisterPayloadHandlersEvent event) {
 		var reg = ShimmerPayloadRegistrar.of(event);
 
+		reg.s2c(SyncPlayerDataPayload.TYPE);
 		reg.s2c(SyncZonesPayload.TYPE);
 		reg.s2c(SyncClockFontsPayload.TYPE);
 		reg.s2c(SyncClocksPayload.TYPE);
 
+		reg.s2c(RemovePlayerDataPayload.TYPE);
 		reg.s2c(FakeBlockPayload.TYPE);
 		reg.s2c(PlayCutscenePayload.TYPE);
 		reg.s2c(StopCutscenePayload.TYPE);
