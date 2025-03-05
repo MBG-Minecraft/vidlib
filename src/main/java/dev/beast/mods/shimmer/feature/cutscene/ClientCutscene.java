@@ -36,7 +36,7 @@ public class ClientCutscene {
 		this.totalLength = 0;
 		this.zoom = 1D;
 
-		var ctx = new WorldNumberContext(mc.level, 0F);
+		var ctx = new WorldNumberContext(mc.level, 0F, variables);
 		ctx.sourcePos = sourcePos;
 
 		for (var step : steps) {
@@ -87,7 +87,7 @@ public class ClientCutscene {
 		prevTarget = target;
 		prevZoom = zoom;
 
-		var rootCtx = new WorldNumberContext(mc.level, totalTick / (float) totalLength);
+		var rootCtx = new WorldNumberContext(mc.level, totalTick / (float) totalLength, variables);
 		rootCtx.sourcePos = sourcePos;
 
 		if (cutscene.tick != null) {
@@ -119,7 +119,7 @@ public class ClientCutscene {
 
 			if (totalTick >= step.start && totalTick < step.start + step.length) {
 				float progress = (totalTick - step.start) / (float) step.length;
-				var ctx = new WorldNumberContext(mc.level, progress);
+				var ctx = new WorldNumberContext(mc.level, progress, variables);
 				ctx.sourcePos = sourcePos;
 
 				if (step.tick != null) {

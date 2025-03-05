@@ -22,6 +22,7 @@ public interface WorldNumber {
 		REGISTRY.register(FixedWorldNumber.TYPE);
 		REGISTRY.register(OffsetWorldNumber.TYPE);
 		REGISTRY.register(ScaledWorldNumber.TYPE);
+		REGISTRY.register(VariableWorldNumber.TYPE);
 		REGISTRY.register(InterpolatedWorldNumber.TYPE);
 	}
 

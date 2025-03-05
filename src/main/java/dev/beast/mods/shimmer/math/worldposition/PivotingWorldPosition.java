@@ -43,8 +43,8 @@ public record PivotingWorldPosition(WorldPosition target, WorldNumber distance, 
 	@Override
 	public Vec3 get(WorldNumberContext ctx) {
 		double start = startAngle.get(ctx);
-		double angle = Mth.rotLerp(easing.ease(ctx.progress), start, start + addedAngle.get(ctx));
-
-		return Vec3.ZERO;
+		double angle = Math.toRadians(Mth.rotLerp(easing.ease(ctx.progress), start, start + addedAngle.get(ctx)));
+		double dist = distance.get(ctx);
+		return target.get(ctx).add(Math.cos(angle) * dist, 0D, Math.sin(angle) * dist);
 	}
 }

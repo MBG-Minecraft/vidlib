@@ -30,6 +30,7 @@ public interface WorldPosition {
 		REGISTRY.register(FollowingEntityWorldPosition.TYPE);
 		REGISTRY.register(SourceWorldPosition.TYPE);
 		REGISTRY.register(TargetWorldPosition.TYPE);
+		REGISTRY.register(VariableWorldPosition.TYPE);
 		REGISTRY.register(PivotingWorldPosition.TYPE);
 	}
 

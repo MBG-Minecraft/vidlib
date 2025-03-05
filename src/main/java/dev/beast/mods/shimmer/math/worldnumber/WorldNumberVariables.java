@@ -8,6 +8,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public record WorldNumberVariables(Map<String, WorldNumber> numbers, Map<String, WorldPosition> positions) {
@@ -25,4 +26,12 @@ public record WorldNumberVariables(Map<String, WorldNumber> numbers, Map<String,
 		WorldNumberVariables::positions,
 		WorldNumberVariables::new
 	);
+
+	public WorldNumberVariables merge(WorldNumberVariables other) {
+		var numbers = new HashMap<>(numbers());
+		numbers.putAll(other.numbers());
+		var positions = new HashMap<>(positions());
+		positions.putAll(other.positions());
+		return new WorldNumberVariables(numbers, positions);
+	}
 }
