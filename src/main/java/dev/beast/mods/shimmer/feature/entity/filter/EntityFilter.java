@@ -1,9 +1,12 @@
 package dev.beast.mods.shimmer.feature.entity.filter;
 
+import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.core.ShimmerEntity;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistry;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -14,6 +17,8 @@ import java.util.function.Predicate;
 
 public interface EntityFilter extends Predicate<Entity> {
 	SimpleRegistry<EntityFilter> REGISTRY = SimpleRegistry.create(EntityFilter::type);
+	Codec<EntityFilter> CODEC = REGISTRY.valueCodec();
+	StreamCodec<RegistryFriendlyByteBuf, EntityFilter> STREAM_CODEC = REGISTRY.valueStreamCodec();
 
 	SimpleRegistryType.Unit<EntityFilter> NONE = SimpleRegistryType.unit(Shimmer.id("none"), entity -> false);
 	SimpleRegistryType.Unit<EntityFilter> ALL = SimpleRegistryType.unit(Shimmer.id("all"), entity -> true);
@@ -28,6 +33,8 @@ public interface EntityFilter extends Predicate<Entity> {
 	SimpleRegistryType.Unit<EntityFilter> SPECTATOR_OR_CREATIVE = SimpleRegistryType.unit(Shimmer.id("spectator_or_creative"), ShimmerEntity::isSpectatorOrCreative);
 	SimpleRegistryType.Unit<EntityFilter> ITEM = SimpleRegistryType.unit(Shimmer.id("item"), entity -> entity instanceof ItemEntity);
 	SimpleRegistryType.Unit<EntityFilter> PROJECTILE = SimpleRegistryType.unit(Shimmer.id("projectile"), entity -> entity instanceof Projectile);
+	SimpleRegistryType.Unit<EntityFilter> VISIBLE = SimpleRegistryType.unit(Shimmer.id("visible"), entity -> !entity.isInvisible());
+	SimpleRegistryType.Unit<EntityFilter> INVISIBLE = SimpleRegistryType.unit(Shimmer.id("invisible"), Entity::isInvisible);
 
 	static void bootstrap() {
 		REGISTRY.register(EntityNotFilter.TYPE);
@@ -48,6 +55,8 @@ public interface EntityFilter extends Predicate<Entity> {
 		REGISTRY.register(SPECTATOR_OR_CREATIVE);
 		REGISTRY.register(ITEM);
 		REGISTRY.register(PROJECTILE);
+		REGISTRY.register(VISIBLE);
+		REGISTRY.register(INVISIBLE);
 
 		REGISTRY.register(EntityTagFilter.TYPE);
 		REGISTRY.register(EntityTypeFilter.TYPE);

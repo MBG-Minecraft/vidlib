@@ -25,7 +25,7 @@ public record Zone(
 	public static final Codec<Zone> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		ZoneShape.CODEC.fieldOf("shape").forGetter(Zone::shape),
 		Color.CODEC_RGB.optionalFieldOf("color", Color.CYAN).forGetter(Zone::color),
-		EntityFilter.REGISTRY.valueCodec().optionalFieldOf("entity_filter", EntityFilter.PLAYER.instance()).forGetter(Zone::entityFilter),
+		EntityFilter.CODEC.optionalFieldOf("entity_filter", EntityFilter.PLAYER.instance()).forGetter(Zone::entityFilter),
 		CompoundTag.CODEC.optionalFieldOf("data", Empty.COMPOUND_TAG).forGetter(Zone::data),
 		EntityOverride.OVERRIDE_MAP_CODEC.optionalFieldOf("player_overrides", Map.of()).forGetter(Zone::playerOverrides),
 		Codec.BOOL.optionalFieldOf("solid", false).forGetter(Zone::solid)
@@ -36,7 +36,7 @@ public record Zone(
 		Zone::shape,
 		Color.STREAM_CODEC,
 		Zone::color,
-		EntityFilter.REGISTRY.valueStreamCodec(),
+		EntityFilter.STREAM_CODEC,
 		Zone::entityFilter,
 		ShimmerStreamCodecs.optional(ShimmerStreamCodecs.COMPOUND_TAG, Empty.COMPOUND_TAG),
 		Zone::data,

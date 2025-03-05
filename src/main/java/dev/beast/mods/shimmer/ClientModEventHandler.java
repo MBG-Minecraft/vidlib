@@ -10,12 +10,14 @@ import dev.beast.mods.shimmer.feature.cutscene.PlayCutscenePayload;
 import dev.beast.mods.shimmer.feature.cutscene.StopCutscenePayload;
 import dev.beast.mods.shimmer.feature.misc.CreateFireworksPayload;
 import dev.beast.mods.shimmer.feature.misc.FakeBlockPayload;
+import dev.beast.mods.shimmer.feature.misc.RefreshNamePayload;
 import dev.beast.mods.shimmer.feature.misc.SetPostEffectPayload;
 import dev.beast.mods.shimmer.feature.multiverse.VoidSpecialEffects;
 import dev.beast.mods.shimmer.feature.particle.ShimmerClientParticles;
 import dev.beast.mods.shimmer.feature.session.RemovePlayerDataPayload;
 import dev.beast.mods.shimmer.feature.session.SyncPlayerDataPayload;
 import dev.beast.mods.shimmer.feature.structure.ClientStructureStorage;
+import dev.beast.mods.shimmer.feature.structure.GhostStructure;
 import dev.beast.mods.shimmer.feature.zone.SphereZoneShape;
 import dev.beast.mods.shimmer.feature.zone.SyncZonesPayload;
 import dev.beast.mods.shimmer.feature.zone.UniverseZoneShape;
@@ -45,6 +47,7 @@ public class ClientModEventHandler {
 	@SubscribeEvent
 	public static void addReloadListeners(RegisterClientReloadListenersEvent event) {
 		event.registerReloadListener(ClientStructureStorage.CLIENT);
+		event.registerReloadListener(new GhostStructure.Loader());
 	}
 
 	@SubscribeEvent
@@ -65,6 +68,7 @@ public class ClientModEventHandler {
 		reg.s2c(SetPostEffectPayload.TYPE);
 		reg.s2c(SyncClockInstancePayload.TYPE);
 		reg.s2c(CreateFireworksPayload.TYPE);
+		reg.s2c(RefreshNamePayload.TYPE);
 	}
 
 	@SubscribeEvent

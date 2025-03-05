@@ -7,6 +7,7 @@ import dev.beast.mods.shimmer.feature.clock.SyncClockFontsPayload;
 import dev.beast.mods.shimmer.feature.clock.SyncClocksPayload;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
+import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.session.RemovePlayerDataPayload;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
 import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
@@ -148,6 +149,15 @@ public class GameEventHandler {
 			if (v != null && v) {
 				event.setInvulnerable(true);
 			}
+		}
+	}
+
+	@SubscribeEvent
+	public static void name(PlayerEvent.NameFormat event) {
+		var data = event.getEntity().get(InternalPlayerData.GLOBAL);
+
+		if (data.nickname.isPresent()) {
+			event.setDisplayname(data.nickname.get());
 		}
 	}
 }

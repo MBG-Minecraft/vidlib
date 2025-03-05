@@ -1,8 +1,10 @@
 package dev.beast.mods.shimmer;
 
+import com.mojang.math.Axis;
 import dev.beast.mods.shimmer.feature.clock.ClockRenderer;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
+import dev.beast.mods.shimmer.feature.structure.GhostStructure;
 import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
 import dev.beast.mods.shimmer.feature.zone.renderer.EmptyZoneRenderer;
 import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
@@ -50,6 +52,9 @@ public class ClientGameEventHandler {
 		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SKY) {
 			Minecraft.getInstance().shimmer$renderSetup(event, delta);
 		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
+			var cameraPos = event.getCamera().getPosition();
+			var ms = event.getPoseStack();
+
 			if (mc.player.get(InternalPlayerData.LOCAL).renderZones) {
 				for (var container : session.filteredZones) {
 					for (var instance : container.zones) {
@@ -59,7 +64,7 @@ public class ClientGameEventHandler {
 							boolean hovered = session.zoneClip != null && session.zoneClip.instance() == instance;
 							var baseColor = instance.zone.color().withAlpha(50);
 							var outlineColor = hovered ? Color.WHITE : instance.entities.isEmpty() ? baseColor : Color.GREEN;
-							renderer.render(Cast.to(instance.zone.shape()), mc, event, delta, baseColor, outlineColor);
+							renderer.render(Cast.to(instance.zone.shape()), new ZoneRenderer.Context(mc, ms, cameraPos, delta, baseColor, outlineColor));
 						}
 					}
 				}
@@ -68,7 +73,22 @@ public class ClientGameEventHandler {
 			for (var instance : session.clocks.values()) {
 				if (instance.clock.dimension() == mc.level.dimension()) {
 					for (var location : instance.clock.locations()) {
-						ClockRenderer.render(mc, instance, location, event, delta);
+						ClockRenderer.render(mc, instance, location, ms, cameraPos, delta);
+					}
+				}
+			}
+
+			if (!GhostStructure.LIST.isEmpty()) {
+				for (var gs : GhostStructure.LIST) {
+					if (gs.visibleTo().test(mc.player)) {
+						ms.pushPose();
+						ms.translate(gs.pos().x - cameraPos.x, gs.pos().y - cameraPos.y, gs.pos().z - cameraPos.z);
+						ms.scale((float) gs.scale().x, (float) gs.scale().y, (float) gs.scale().z);
+						ms.mulPose(Axis.YP.rotationDegrees((float) gs.rotation().y));
+						ms.mulPose(Axis.XP.rotationDegrees((float) gs.rotation().x));
+						ms.mulPose(Axis.ZP.rotationDegrees((float) gs.rotation().z));
+						gs.structure().render(ms);
+						ms.popPose();
 					}
 				}
 			}

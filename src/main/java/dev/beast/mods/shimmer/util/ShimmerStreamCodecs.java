@@ -497,7 +497,7 @@ public interface ShimmerStreamCodecs {
 		return keyCodec.map(map::get, keyGetter);
 	}
 
-	static <B extends ByteBuf, K, V> StreamCodec<B, Map<K, V>> unboundedMap(StreamCodec<B, K> keyCodec, StreamCodec<B, V> valueCodec, boolean ordered, boolean identity) {
+	static <B extends ByteBuf, K, V> StreamCodec<B, Map<K, V>> unboundedMap(StreamCodec<? super B, K> keyCodec, StreamCodec<? super B, V> valueCodec, boolean ordered, boolean identity) {
 		return new StreamCodec<>() {
 			@Override
 			public Map<K, V> decode(B buf) {
@@ -532,7 +532,7 @@ public interface ShimmerStreamCodecs {
 		};
 	}
 
-	static <B extends ByteBuf, K, V> StreamCodec<B, Map<K, V>> unboundedMap(StreamCodec<B, K> keyCodec, StreamCodec<B, V> valueCodec) {
+	static <B extends ByteBuf, K, V> StreamCodec<B, Map<K, V>> unboundedMap(StreamCodec<? super B, K> keyCodec, StreamCodec<? super B, V> valueCodec) {
 		return unboundedMap(keyCodec, valueCodec, false, false);
 	}
 }

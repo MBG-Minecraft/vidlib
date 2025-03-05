@@ -8,12 +8,12 @@ import net.minecraft.world.entity.Entity;
 
 public record EntityXorFilter(EntityFilter a, EntityFilter b) implements EntityFilter {
 	public static SimpleRegistryType<EntityXorFilter> TYPE = SimpleRegistryType.dynamic(Shimmer.id("xor"), RecordCodecBuilder.mapCodec(instance -> instance.group(
-		EntityFilter.REGISTRY.valueCodec().fieldOf("a").forGetter(EntityXorFilter::a),
-		EntityFilter.REGISTRY.valueCodec().fieldOf("b").forGetter(EntityXorFilter::b)
+		EntityFilter.CODEC.fieldOf("a").forGetter(EntityXorFilter::a),
+		EntityFilter.CODEC.fieldOf("b").forGetter(EntityXorFilter::b)
 	).apply(instance, EntityXorFilter::new)), StreamCodec.composite(
-		EntityFilter.REGISTRY.valueStreamCodec(),
+		EntityFilter.STREAM_CODEC,
 		EntityXorFilter::a,
-		EntityFilter.REGISTRY.valueStreamCodec(),
+		EntityFilter.STREAM_CODEC,
 		EntityXorFilter::b,
 		EntityXorFilter::new
 	));

@@ -6,7 +6,9 @@ import dev.beast.mods.shimmer.feature.camerashake.CameraShakeInstance;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.cutscene.CutsceneScreen;
+import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.math.Vec2d;
+import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.util.Empty;
 import dev.beast.mods.shimmer.util.ScheduledTask;
 import net.minecraft.client.CameraType;
@@ -88,7 +90,7 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 		var start = player.getEyePosition(delta);
 		var end = start.add(player.getViewVector(delta).scale(500D));
 
-		if (shimmer$self().getEntityRenderDispatcher().shouldRenderHitBoxes() && shimmer$self().options.getCameraType() == CameraType.FIRST_PERSON) {
+		if (shimmer$self().options.getCameraType() == CameraType.FIRST_PERSON && player.get(InternalPlayerData.LOCAL).renderZones) {
 			session.zoneClip = session.filteredZones.clip(start, end);
 		} else {
 			session.zoneClip = null;
@@ -156,9 +158,9 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 	}
 
 	@Override
-	public void playCutscene(Cutscene cutscene) {
+	public void playCutscene(Cutscene cutscene, WorldNumberVariables variables) {
 		if (!cutscene.steps.isEmpty() && player != null) {
-			var inst = new ClientCutscene(shimmer$self(), cutscene, player.getEyePosition());
+			var inst = new ClientCutscene(shimmer$self(), cutscene, variables, player.getEyePosition());
 			ClientCutscene.instance = inst;
 
 			if (player.getClass() == LocalPlayer.class && !cutscene.steps.getFirst().noScreen) {

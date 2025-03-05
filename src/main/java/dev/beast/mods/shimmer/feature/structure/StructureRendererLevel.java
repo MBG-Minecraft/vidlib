@@ -7,6 +7,7 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -21,24 +22,29 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public class StructureRendererLevel implements BlockAndTintGetter, LightChunkGetter {
-	public final BlockAndTintGetter fallback;
 	public final Long2ObjectMap<BlockState> blocks;
 	private StructureRendererLevelLightEngine lightEngine;
 	public final int lightLevel;
 	private final BlockState airBlock;
 	private final FluidState emptyFluid;
+	private final Biome biome;
 
-	public StructureRendererLevel(BlockAndTintGetter fallback, Long2ObjectMap<BlockState> blocks, int lightLevel) {
-		this.fallback = fallback;
+	public StructureRendererLevel(Long2ObjectMap<BlockState> blocks, int lightLevel, Biome biome) {
 		this.blocks = blocks;
 		this.lightLevel = lightLevel;
 		this.airBlock = Blocks.AIR.defaultBlockState();
 		this.emptyFluid = Fluids.EMPTY.defaultFluidState();
+		this.biome = biome;
 	}
 
 	@Override
 	public float getShade(Direction direction, boolean shade) {
-		return fallback.getShade(direction, shade);
+		return shade ? switch (direction) {
+			case DOWN -> 0.5F;
+			case NORTH, SOUTH -> 0.8F;
+			case WEST, EAST -> 0.6F;
+			default -> 1F;
+		} : 1F;
 	}
 
 	@Override
@@ -52,7 +58,7 @@ public class StructureRendererLevel implements BlockAndTintGetter, LightChunkGet
 
 	@Override
 	public int getBlockTint(BlockPos pos, ColorResolver colorResolver) {
-		return fallback.getBlockTint(pos, colorResolver);
+		return colorResolver.getColor(biome, pos.getX(), pos.getZ());
 	}
 
 	@Override

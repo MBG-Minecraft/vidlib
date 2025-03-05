@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.feature.clock;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.beast.mods.shimmer.math.Color;
 import net.minecraft.client.Minecraft;
@@ -8,14 +9,13 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LightLayer;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
 public class ClockRenderer {
 	private static final Color RED = new Color(1F, 1F, 0.3F, 0.3F);
 
-	public static void render(Minecraft mc, ClockInstance instance, ClockLocation location, RenderLevelStageEvent event, float delta) {
-		var ms = event.getPoseStack();
+	public static void render(Minecraft mc, ClockInstance instance, ClockLocation location, PoseStack ms, Vec3 cameraPos, float delta) {
 		var font = location.font();
 
 		var time = Mth.lerp(delta, instance.prevTick, instance.tick);
@@ -30,8 +30,6 @@ public class ClockRenderer {
 		}
 
 		var light = location.fullbright() ? LightTexture.FULL_BRIGHT : LightTexture.pack(mc.level.getBrightness(LightLayer.BLOCK, location.pos()), mc.level.getBrightness(LightLayer.SKY, location.pos()));
-
-		var cameraPos = event.getCamera().getPosition();
 
 		ms.pushPose();
 		ms.translate(location.pos().getX() + 0.5D - cameraPos.x, location.pos().getY() + 0.5D - cameraPos.y, location.pos().getZ() + 0.5D - cameraPos.z);

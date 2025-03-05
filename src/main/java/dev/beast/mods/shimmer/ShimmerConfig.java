@@ -1,6 +1,8 @@
 package dev.beast.mods.shimmer;
 
 public class ShimmerConfig {
+	public static int cycleShadersKey = 83; // GLFW.GLFW_KEY_S;
+	public static int reloadShadersKey = 88; // GLFW.GLFW_KEY_X;
 	public static boolean betterDefaultGameRules = true;
 	public static boolean loadVanillaStructures = false;
 	public static boolean preventBlockFalling = true;

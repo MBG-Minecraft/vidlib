@@ -1,27 +1,46 @@
 package dev.beast.mods.shimmer.feature.misc;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.feature.session.PlayerData;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;
 
 public class InternalGlobalPlayerData extends PlayerData {
-	public Optional<Component> displayName;
-	public ItemStack hat;
+	public static final Codec<InternalGlobalPlayerData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+		ComponentSerialization.CODEC.optionalFieldOf("nickname").forGetter(d -> d.nickname),
+		ItemStack.OPTIONAL_CODEC.optionalFieldOf("plumbob", ItemStack.EMPTY).forGetter(d -> d.plumbob)
+	).apply(instance, InternalGlobalPlayerData::new));
+
+	public static final StreamCodec<RegistryFriendlyByteBuf, InternalGlobalPlayerData> STREAM_CODEC = StreamCodec.composite(
+		ByteBufCodecs.optional(ComponentSerialization.STREAM_CODEC),
+		d -> d.nickname,
+		ItemStack.OPTIONAL_STREAM_CODEC,
+		d -> d.plumbob,
+		InternalGlobalPlayerData::new
+	);
+
+	public Optional<Component> nickname;
+	public ItemStack plumbob;
 
 	InternalGlobalPlayerData() {
 		super(InternalPlayerData.GLOBAL);
-		this.displayName = Optional.empty();
-		this.hat = ItemStack.EMPTY;
+		this.nickname = Optional.empty();
+		this.plumbob = ItemStack.EMPTY;
 	}
 
-	InternalGlobalPlayerData(
-		Optional<Component> displayName,
-		ItemStack hat
+	private InternalGlobalPlayerData(
+		Optional<Component> nickname,
+		ItemStack plumbob
 	) {
 		super(InternalPlayerData.GLOBAL);
-		this.displayName = displayName;
-		this.hat = hat;
+		this.nickname = nickname;
+		this.plumbob = plumbob;
 	}
 }

@@ -7,6 +7,7 @@ import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.cutscene.PlayCutscenePayload;
 import dev.beast.mods.shimmer.feature.cutscene.StopCutscenePayload;
 import dev.beast.mods.shimmer.feature.misc.SetPostEffectPayload;
+import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
@@ -71,17 +72,17 @@ public interface ShimmerEntityContainer {
 		status(Component.literal(message));
 	}
 
-	default void playCutscene(Cutscene cutscene) {
+	default void playCutscene(Cutscene cutscene, WorldNumberVariables variables) {
 		if (!cutscene.steps.isEmpty()) {
-			s2c(new PlayCutscenePayload(cutscene));
+			s2c(new PlayCutscenePayload(cutscene, variables));
 		}
 	}
 
-	default void playCutscene(ResourceLocation id) {
+	default void playCutscene(ResourceLocation id, WorldNumberVariables variables) {
 		var cutscene = Cutscene.SERVER.get(id);
 
 		if (cutscene != null) {
-			playCutscene(cutscene);
+			playCutscene(cutscene, variables);
 		}
 	}
 

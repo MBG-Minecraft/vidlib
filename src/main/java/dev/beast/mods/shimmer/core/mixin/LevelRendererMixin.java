@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.core.mixin;
 
+import dev.beast.mods.shimmer.feature.structure.StructureRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -37,5 +38,10 @@ public abstract class LevelRendererMixin {
 		if (eventId == 1032) {
 			ci.cancel();
 		}
+	}
+
+	@Inject(method = "allChanged", at = @At("RETURN"))
+	private void shimmer$allChanged(CallbackInfo ci) {
+		StructureRenderer.redrawAll();
 	}
 }

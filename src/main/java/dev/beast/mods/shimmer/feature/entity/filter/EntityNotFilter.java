@@ -7,8 +7,8 @@ import net.minecraft.world.entity.Entity;
 
 public record EntityNotFilter(EntityFilter filter) implements EntityFilter {
 	public static SimpleRegistryType<EntityNotFilter> TYPE = SimpleRegistryType.dynamic(Shimmer.id("not"), RecordCodecBuilder.mapCodec(instance -> instance.group(
-		EntityFilter.REGISTRY.valueCodec().fieldOf("filter").forGetter(EntityNotFilter::filter)
-	).apply(instance, EntityNotFilter::new)), EntityFilter.REGISTRY.valueStreamCodec().map(EntityNotFilter::new, EntityNotFilter::filter));
+		EntityFilter.CODEC.fieldOf("filter").forGetter(EntityNotFilter::filter)
+	).apply(instance, EntityNotFilter::new)), EntityFilter.STREAM_CODEC.map(EntityNotFilter::new, EntityNotFilter::filter));
 
 	@Override
 	public SimpleRegistryType<?> type() {

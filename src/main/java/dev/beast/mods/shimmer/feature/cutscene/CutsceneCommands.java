@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer.feature.cutscene;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -15,7 +16,7 @@ public interface CutsceneCommands {
 			.then(Commands.literal("play")
 				.then(Commands.argument("id", ResourceLocationArgument.id())
 					.executes(ctx -> {
-						ctx.getSource().getPlayerOrException().playCutscene(ResourceLocationArgument.getId(ctx, "id"));
+						ctx.getSource().getPlayerOrException().playCutscene(ResourceLocationArgument.getId(ctx, "id"), WorldNumberVariables.EMPTY);
 						return 1;
 					})
 				)
@@ -25,7 +26,7 @@ public interface CutsceneCommands {
 					.executes(ctx -> {
 						var tag = CompoundTagArgument.getCompoundTag(ctx, "data");
 						var ops = buildContext.createSerializationContext(NbtOps.INSTANCE);
-						ctx.getSource().getPlayerOrException().playCutscene(Cutscene.CODEC.decode(ops, tag).getOrThrow().getFirst());
+						ctx.getSource().getPlayerOrException().playCutscene(Cutscene.CODEC.decode(ops, tag).getOrThrow().getFirst(), WorldNumberVariables.EMPTY);
 						return 1;
 					})
 				)

@@ -10,8 +10,8 @@ import java.util.List;
 
 public record EntityAndFilter(List<EntityFilter> filters) implements EntityFilter {
 	public static SimpleRegistryType<EntityAndFilter> TYPE = SimpleRegistryType.dynamic(Shimmer.id("and"), RecordCodecBuilder.mapCodec(instance -> instance.group(
-		EntityFilter.REGISTRY.valueCodec().listOf().fieldOf("filters").forGetter(EntityAndFilter::filters)
-	).apply(instance, EntityAndFilter::new)), EntityFilter.REGISTRY.valueStreamCodec().apply(ByteBufCodecs.list()).map(EntityAndFilter::new, EntityAndFilter::filters));
+		EntityFilter.CODEC.listOf().fieldOf("filters").forGetter(EntityAndFilter::filters)
+	).apply(instance, EntityAndFilter::new)), EntityFilter.STREAM_CODEC.apply(ByteBufCodecs.list()).map(EntityAndFilter::new, EntityAndFilter::filters));
 
 	@Override
 	public SimpleRegistryType<?> type() {

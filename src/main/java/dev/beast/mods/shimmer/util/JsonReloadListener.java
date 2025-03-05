@@ -23,7 +23,7 @@ public abstract class JsonReloadListener extends SimplePreparableReloadListener<
 	protected Map<ResourceLocation, JsonObject> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
 		var map = new HashMap<ResourceLocation, JsonObject>();
 
-		for (var entry : resourceManager.listResources(rootPath, id -> id.getPath().endsWith(".json")).entrySet()) {
+		for (var entry : resourceManager.listResources(rootPath, id -> !id.getPath().startsWith("_") && id.getPath().endsWith(".json")).entrySet()) {
 			try (var reader = entry.getValue().openAsReader()) {
 				var id = entry.getKey().withPath(s -> s.substring(rootPathOffset, s.length() - 5));
 				var json = JsonUtils.read(reader);

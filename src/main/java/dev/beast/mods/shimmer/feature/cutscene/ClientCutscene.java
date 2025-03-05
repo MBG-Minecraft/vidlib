@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer.feature.cutscene;
 
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
+import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.phys.Vec3;
@@ -12,6 +13,7 @@ public class ClientCutscene {
 
 	public final Minecraft mc;
 	public final Cutscene cutscene;
+	public final WorldNumberVariables variables;
 	public final CutsceneStep[] steps;
 	public final Vec3 sourcePos;
 	public int prevTotalTick;
@@ -22,9 +24,10 @@ public class ClientCutscene {
 	public double prevZoom, zoom;
 	public List<FormattedCharSequence> topBar, bottomBar;
 
-	public ClientCutscene(Minecraft mc, Cutscene cutscene, Vec3 sourcePos) {
+	public ClientCutscene(Minecraft mc, Cutscene cutscene, WorldNumberVariables variables, Vec3 sourcePos) {
 		this.mc = mc;
 		this.cutscene = cutscene;
+		this.variables = variables;
 		this.steps = cutscene.steps.toArray(new CutsceneStep[0]);
 		this.sourcePos = sourcePos;
 

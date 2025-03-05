@@ -6,16 +6,19 @@ import dev.beast.mods.shimmer.feature.camerashake.CameraShakeCommands;
 import dev.beast.mods.shimmer.feature.clock.ClockCommands;
 import dev.beast.mods.shimmer.feature.cutscene.CutsceneCommands;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
+import dev.beast.mods.shimmer.feature.misc.RefreshNamePayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneCommands;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -23,6 +26,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public class ShimmerCommands {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext buildContext) {
@@ -55,15 +59,27 @@ public class ShimmerCommands {
 			.executes(ctx -> heal(List.of(ctx.getSource().getPlayerOrException())))
 		);
 
-		dispatcher.register(Commands.literal("hat")
+		dispatcher.register(Commands.literal("plumbob")
 			.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
 			.then(Commands.argument("player", EntityArgument.players())
-				.then(Commands.argument("hat", ItemArgument.item(buildContext))
-					.executes(ctx -> hat(EntityArgument.getOptionalPlayers(ctx, "player"), ItemArgument.getItem(ctx, "hat").createItemStack(1, true)))
+				.then(Commands.argument("item", ItemArgument.item(buildContext))
+					.executes(ctx -> plumbob(EntityArgument.getOptionalPlayers(ctx, "player"), ItemArgument.getItem(ctx, "item").createItemStack(1, true)))
 				)
 			)
-			.then(Commands.argument("hat", ItemArgument.item(buildContext))
-				.executes(ctx -> hat(List.of(ctx.getSource().getPlayerOrException()), ItemArgument.getItem(ctx, "hat").createItemStack(1, true)))
+			.then(Commands.argument("item", ItemArgument.item(buildContext))
+				.executes(ctx -> plumbob(List.of(ctx.getSource().getPlayerOrException()), ItemArgument.getItem(ctx, "item").createItemStack(1, true)))
+			)
+		);
+
+		dispatcher.register(Commands.literal("nickname")
+			.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
+			.then(Commands.argument("player", EntityArgument.players())
+				.then(Commands.argument("nickname", ComponentArgument.textComponent(buildContext))
+					.executes(ctx -> nickname(EntityArgument.getOptionalPlayers(ctx, "player"), ComponentArgument.getComponent(ctx, "nickname")))
+				)
+			)
+			.then(Commands.argument("nickname", ComponentArgument.textComponent(buildContext))
+				.executes(ctx -> nickname(List.of(ctx.getSource().getPlayerOrException()), ComponentArgument.getComponent(ctx, "nickname")))
 			)
 		);
 	}
@@ -86,13 +102,25 @@ public class ShimmerCommands {
 		return 1;
 	}
 
-	private static int hat(Collection<ServerPlayer> players, ItemStack hat) {
+	private static int plumbob(Collection<ServerPlayer> players, ItemStack hat) {
 		hat = hat.copyWithCount(1);
 
 		for (var player : players) {
 			var data = player.get(InternalPlayerData.GLOBAL);
-			data.hat = hat;
+			data.plumbob = hat;
 			data.setChanged();
+		}
+
+		return 1;
+	}
+
+	private static int nickname(Collection<ServerPlayer> players, Component name) {
+		for (var player : players) {
+			var data = player.get(InternalPlayerData.GLOBAL);
+			data.nickname = name.getString().isEmpty() ? Optional.empty() : Optional.of(name);
+			data.setChanged();
+			player.refreshDisplayName();
+			player.level().s2c(new RefreshNamePayload(player.getUUID()));
 		}
 
 		return 1;
