@@ -17,6 +17,6 @@ public record SyncClockFontsPayload(List<ClockFont> update) implements ShimmerPa
 
 	@Override
 	public void handle(IPayloadContext ctx) {
-		ctx.player().shimmer$sessionData().updateClockFonts(this);
+		ctx.player().shimmer$sessionData().updateClockFonts(update);
 	}
 }

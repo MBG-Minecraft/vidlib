@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.core;
 
+import dev.beast.mods.shimmer.feature.serverdata.ServerDataMap;
 import dev.beast.mods.shimmer.util.ScheduledTask;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -7,6 +8,10 @@ public interface ShimmerMinecraftEnvironment extends ShimmerEntityContainer {
 	@Override
 	default ShimmerMinecraftEnvironment shimmer$getEnvironment() {
 		return this;
+	}
+
+	default ServerDataMap getServerData() {
+		throw new NoMixinException();
 	}
 
 	@ApiStatus.Internal

@@ -15,6 +15,7 @@ import dev.beast.mods.shimmer.feature.misc.SetPostEffectPayload;
 import dev.beast.mods.shimmer.feature.misc.SyncPlayerTagsPayload;
 import dev.beast.mods.shimmer.feature.multiverse.VoidSpecialEffects;
 import dev.beast.mods.shimmer.feature.particle.ShimmerClientParticles;
+import dev.beast.mods.shimmer.feature.serverdata.SyncServerDataPayload;
 import dev.beast.mods.shimmer.feature.session.RemovePlayerDataPayload;
 import dev.beast.mods.shimmer.feature.session.SyncPlayerDataPayload;
 import dev.beast.mods.shimmer.feature.structure.ClientStructureStorage;
@@ -56,6 +57,7 @@ public class ClientModEventHandler {
 		var reg = ShimmerPayloadRegistrar.of(event);
 
 		reg.s2c(SyncPlayerDataPayload.TYPE);
+		reg.s2c(SyncServerDataPayload.TYPE);
 		reg.s2c(SyncZonesPayload.TYPE);
 		reg.s2c(SyncClockFontsPayload.TYPE);
 		reg.s2c(SyncClocksPayload.TYPE);

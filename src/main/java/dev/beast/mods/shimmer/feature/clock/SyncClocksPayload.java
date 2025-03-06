@@ -17,6 +17,6 @@ public record SyncClocksPayload(List<ClockInstance> update) implements ShimmerPa
 
 	@Override
 	public void handle(IPayloadContext ctx) {
-		ctx.player().shimmer$sessionData().updateClocks(ctx.player().level(), this);
+		ctx.player().shimmer$sessionData().updateClocks(ctx.player().level(), update);
 	}
 }

@@ -25,6 +25,6 @@ public record SyncClockInstancePayload(ResourceLocation id, int tick, boolean ti
 
 	@Override
 	public void handle(IPayloadContext ctx) {
-		ctx.player().shimmer$sessionData().updateClockInstance(this);
+		ctx.player().shimmer$sessionData().updateClockInstance(id, tick, ticking);
 	}
 }

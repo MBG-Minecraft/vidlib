@@ -17,6 +17,6 @@ public record SyncZonesPayload(List<ZoneContainer> update) implements ShimmerPac
 
 	@Override
 	public void handle(IPayloadContext ctx) {
-		ctx.player().shimmer$sessionData().updateZones(ctx.player().level(), this);
+		ctx.player().shimmer$sessionData().updateZones(ctx.player().level(), update);
 	}
 }

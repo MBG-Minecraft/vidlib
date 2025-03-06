@@ -7,6 +7,7 @@ import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.cutscene.CutsceneScreen;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
+import dev.beast.mods.shimmer.feature.serverdata.ServerDataMap;
 import dev.beast.mods.shimmer.math.Vec2d;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.util.Empty;
@@ -60,6 +61,11 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 		}
 
 		return shimmer$scheduledTaskHandler;
+	}
+
+	@Override
+	public ServerDataMap getServerData() {
+		return player.shimmer$sessionData().serverDataMap;
 	}
 
 	@Override

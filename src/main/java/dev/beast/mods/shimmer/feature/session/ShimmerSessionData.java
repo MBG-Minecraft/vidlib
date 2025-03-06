@@ -1,9 +1,10 @@
 package dev.beast.mods.shimmer.feature.session;
 
-import dev.beast.mods.shimmer.feature.clock.SyncClockFontsPayload;
-import dev.beast.mods.shimmer.feature.clock.SyncClockInstancePayload;
-import dev.beast.mods.shimmer.feature.clock.SyncClocksPayload;
-import dev.beast.mods.shimmer.feature.zone.SyncZonesPayload;
+import dev.beast.mods.shimmer.feature.clock.ClockFont;
+import dev.beast.mods.shimmer.feature.clock.ClockInstance;
+import dev.beast.mods.shimmer.feature.serverdata.ServerData;
+import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
@@ -63,25 +64,28 @@ public class ShimmerSessionData {
 	public void closed() {
 	}
 
-	public void updateZones(Level level, SyncZonesPayload payload) {
+	public void updateZones(Level level, List<ZoneContainer> update) {
 	}
 
-	public void updateClockFonts(SyncClockFontsPayload payload) {
+	public void updateClockFonts(List<ClockFont> update) {
 	}
 
-	public void updateClocks(Level level, SyncClocksPayload payload) {
+	public void updateClocks(Level level, List<ClockInstance> update) {
 	}
 
-	public void updateClockInstance(SyncClockInstancePayload payload) {
+	public void updateClockInstance(ResourceLocation id, int tick, boolean ticking) {
 	}
 
-	public void updateSessionData(UUID ownId, SyncPlayerDataPayload payload) {
+	public void updateSessionData(UUID ownId, UUID player, List<PlayerData> playerData) {
 	}
 
 	public void removeSessionData(UUID id) {
 	}
 
 	public void updatePlayerTags(UUID ownId, UUID uuid, List<String> tags) {
+	}
+
+	public void updateServerData(List<ServerData> serverData) {
 	}
 
 	@Override

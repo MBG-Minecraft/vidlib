@@ -3,12 +3,11 @@ package dev.beast.mods.shimmer.feature.session;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.clock.ClockFont;
 import dev.beast.mods.shimmer.feature.clock.ClockInstance;
-import dev.beast.mods.shimmer.feature.clock.SyncClockFontsPayload;
-import dev.beast.mods.shimmer.feature.clock.SyncClockInstancePayload;
-import dev.beast.mods.shimmer.feature.clock.SyncClocksPayload;
+import dev.beast.mods.shimmer.feature.serverdata.ServerData;
+import dev.beast.mods.shimmer.feature.serverdata.ServerDataMap;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
-import dev.beast.mods.shimmer.feature.zone.SyncZonesPayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneClipResult;
+import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
 import dev.beast.mods.shimmer.feature.zone.ZoneEvent;
 import dev.beast.mods.shimmer.util.Side;
 import net.minecraft.resources.ResourceKey;
@@ -31,6 +30,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	public ZoneClipResult zoneClip;
 	public Map<ResourceLocation, ClockFont> clockFonts;
 	public Map<ResourceLocation, ClockInstance> clocks;
+	public final ServerDataMap serverDataMap;
 
 	public ShimmerLocalClientSessionData(UUID uuid) {
 		super(uuid);
@@ -41,6 +41,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 		this.tags = new HashSet<>(0);
 		this.clockFonts = Map.of();
 		this.clocks = Map.of();
+		this.serverDataMap = new ServerDataMap();
 	}
 
 	public ShimmerRemoteClientSessionData getRemoteSessionData(UUID id) {
@@ -70,17 +71,17 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	}
 
 	@Override
-	public void updateZones(Level level, SyncZonesPayload payload) {
-		serverZones.update(payload.update());
+	public void updateZones(Level level, List<ZoneContainer> update) {
+		serverZones.update(update);
 		NeoForge.EVENT_BUS.post(new ZoneEvent.AllUpdated(serverZones, Side.SERVER));
 		refreshZones(level.dimension());
 	}
 
 	@Override
-	public void updateClockFonts(SyncClockFontsPayload payload) {
+	public void updateClockFonts(List<ClockFont> update) {
 		var map = new HashMap<ResourceLocation, ClockFont>();
 
-		for (var font : payload.update()) {
+		for (var font : update) {
 			map.put(font.id(), font);
 		}
 
@@ -89,10 +90,10 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	}
 
 	@Override
-	public void updateClocks(Level level, SyncClocksPayload payload) {
+	public void updateClocks(Level level, List<ClockInstance> update) {
 		var map = new HashMap<ResourceLocation, ClockInstance>();
 
-		for (var clock : payload.update()) {
+		for (var clock : update) {
 			map.put(clock.clock.id(), clock);
 		}
 
@@ -100,21 +101,21 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	}
 
 	@Override
-	public void updateClockInstance(SyncClockInstancePayload payload) {
-		var instance = clocks.get(payload.id());
+	public void updateClockInstance(ResourceLocation id, int tick, boolean ticking) {
+		var instance = clocks.get(id);
 
 		if (instance != null) {
-			instance.tick = instance.prevTick = payload.tick();
-			instance.ticking = payload.ticking();
+			instance.tick = instance.prevTick = tick;
+			instance.ticking = ticking;
 		}
 	}
 
 	@Override
-	public void updateSessionData(UUID ownId, SyncPlayerDataPayload payload) {
-		if (ownId.equals(payload.player())) {
-			updateSessionData(payload.playerData());
+	public void updateSessionData(UUID ownId, UUID player, List<PlayerData> playerData) {
+		if (ownId.equals(player)) {
+			updateSessionData(playerData);
 		} else {
-			getRemoteSessionData(payload.player()).updateSessionData(payload.playerData());
+			getRemoteSessionData(player).updateSessionData(playerData);
 		}
 	}
 
@@ -128,5 +129,10 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 		var t = ownId.equals(uuid) ? tags : getRemoteSessionData(uuid).tags;
 		t.clear();
 		t.addAll(update);
+	}
+
+	@Override
+	public void updateServerData(List<ServerData> serverData) {
+		serverDataMap.update(serverData);
 	}
 }
