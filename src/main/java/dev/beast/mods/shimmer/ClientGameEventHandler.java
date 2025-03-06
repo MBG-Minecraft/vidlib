@@ -4,6 +4,7 @@ import com.mojang.math.Axis;
 import dev.beast.mods.shimmer.feature.clock.ClockRenderer;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
 import dev.beast.mods.shimmer.feature.misc.CameraOverride;
+import dev.beast.mods.shimmer.feature.misc.DebugTextEvent;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.structure.GhostStructure;
 import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
@@ -12,6 +13,7 @@ import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.KMath;
 import dev.beast.mods.shimmer.util.Cast;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Blocks;
@@ -24,6 +26,7 @@ import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.ArrayList;
 
@@ -123,28 +126,40 @@ public class ClientGameEventHandler {
 			return;
 		}
 
+		var left = new ArrayList<Component>();
+		var right = new ArrayList<Component>();
+
 		var tool = ToolItem.of(mc.player);
 
 		if (tool != null) {
-			var left = new ArrayList<Component>();
-			var right = new ArrayList<Component>();
 			tool.getSecond().drawText(tool.getFirst(), mc.player, mc.hitResult, left, right);
+		}
 
-			for (int i = 0; i < left.size(); i++) {
-				int w = mc.font.width(left.get(i));
-				int x = 2;
-				int y = 2 + i * 12;
-				event.getGuiGraphics().fill(x, y, x + w + 6, y + 12, 0xA0000000);
-				event.getGuiGraphics().drawString(mc.font, left.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
-			}
+		NeoForge.EVENT_BUS.post(new DebugTextEvent(left, right));
 
-			for (int i = 0; i < right.size(); i++) {
-				int w = mc.font.width(right.get(i));
-				int x = event.getGuiGraphics().guiWidth() - w - 8;
-				int y = 2 + i * 12;
-				event.getGuiGraphics().fill(x, y, x + w + 6, y + 12, 0xA0000000);
-				event.getGuiGraphics().drawString(mc.font, right.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
-			}
+		var zoneClip = mc.player.shimmer$sessionData().zoneClip;
+
+		if (zoneClip != null) {
+			left.add(Component.literal("Zone: ")
+				.append(Component.literal(zoneClip.instance().container.id.toString()).withStyle(ChatFormatting.AQUA))
+				.append(Component.literal("[" + zoneClip.instance().index + "]").withStyle(ChatFormatting.GREEN))
+			);
+		}
+
+		for (int i = 0; i < left.size(); i++) {
+			int w = mc.font.width(left.get(i));
+			int x = 2;
+			int y = 2 + i * 12;
+			event.getGuiGraphics().fill(x, y, x + w + 6, y + 12, 0xA0000000);
+			event.getGuiGraphics().drawString(mc.font, left.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
+		}
+
+		for (int i = 0; i < right.size(); i++) {
+			int w = mc.font.width(right.get(i));
+			int x = event.getGuiGraphics().guiWidth() - w - 8;
+			int y = 2 + i * 12;
+			event.getGuiGraphics().fill(x, y, x + w + 6, y + 12, 0xA0000000);
+			event.getGuiGraphics().drawString(mc.font, right.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
 		}
 	}
 
