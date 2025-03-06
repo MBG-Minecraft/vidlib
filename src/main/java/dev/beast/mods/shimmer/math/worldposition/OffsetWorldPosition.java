@@ -6,6 +6,7 @@ import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 public record OffsetWorldPosition(WorldPosition a, WorldPosition b) implements WorldPosition {
 	public static final SimpleRegistryType<OffsetWorldPosition> TYPE = SimpleRegistryType.dynamic(Shimmer.id("offset"), RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -25,9 +26,10 @@ public record OffsetWorldPosition(WorldPosition a, WorldPosition b) implements W
 	}
 
 	@Override
+	@Nullable
 	public Vec3 get(WorldNumberContext ctx) {
 		var a = this.a.get(ctx);
 		var b = this.b.get(ctx);
-		return new Vec3(a.x + b.x, a.y + b.y, a.z + b.z);
+		return a == null || b == null ? null : new Vec3(a.x + b.x, a.y + b.y, a.z + b.z);
 	}
 }

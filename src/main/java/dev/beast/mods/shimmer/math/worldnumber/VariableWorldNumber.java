@@ -18,6 +18,7 @@ public record VariableWorldNumber(String name) implements WorldNumber {
 
 	@Override
 	public double get(WorldNumberContext ctx) {
-		return ctx.variables.numbers().get(name).get(ctx);
+		var num = ctx.variables.numbers().get(name);
+		return num == null ? Double.NaN : num.get(ctx);
 	}
 }

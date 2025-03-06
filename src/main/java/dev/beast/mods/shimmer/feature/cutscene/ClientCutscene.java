@@ -69,16 +69,12 @@ public class ClientCutscene implements CameraOverride {
 			}
 		}
 
-		if (origin == null || target == null) {
-			var eye = ctx.sourcePos;
+		if (origin == null) {
+			origin = ctx.sourcePos;
+		}
 
-			if (origin == null) {
-				origin = eye;
-			}
-
-			if (target == null) {
-				target = eye.add(mc.player.getLookAngle()); // 1F
-			}
+		if (target == null) {
+			target = ctx.sourcePos.add(mc.player.getLookAngle()); // 1F
 		}
 
 		this.prevOrigin = this.origin;
@@ -136,25 +132,32 @@ public class ClientCutscene implements CameraOverride {
 				step.prevRenderTarget = step.renderTarget;
 
 				if (step.target.isPresent()) {
-					target = step.target.get().get(ctx);
-					step.renderTarget = target;
+					var newTarget = step.target.get().get(ctx);
 
-					if (step.prevRenderTarget == null) {
-						step.prevRenderTarget = target;
-					}
+					if (newTarget != null) {
+						step.renderTarget = target = newTarget;
 
-					if (step.start == totalTick && step.snap.target()) {
-						prevTarget = target;
+						if (step.prevRenderTarget == null) {
+							step.prevRenderTarget = target;
+						}
+
+						if (step.start == totalTick && step.snap.target()) {
+							prevTarget = target;
+						}
 					}
 				}
 
 				ctx.targetPos = target;
 
 				if (step.origin.isPresent()) {
-					origin = step.origin.get().get(ctx);
+					var newOrigin = step.origin.get().get(ctx);
 
-					if (step.start == totalTick && step.snap.origin()) {
-						prevOrigin = origin;
+					if (newOrigin != null) {
+						origin = newOrigin;
+
+						if (step.start == totalTick && step.snap.origin()) {
+							prevOrigin = origin;
+						}
 					}
 				}
 

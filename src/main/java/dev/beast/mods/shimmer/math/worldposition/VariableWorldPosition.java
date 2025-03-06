@@ -7,8 +7,7 @@ import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.Vec3;
-
-import java.util.Objects;
+import org.jetbrains.annotations.Nullable;
 
 public record VariableWorldPosition(String name) implements WorldPosition {
 	public static final SimpleRegistryType<VariableWorldPosition> TYPE = SimpleRegistryType.dynamic(Shimmer.id("variable"), RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -21,7 +20,8 @@ public record VariableWorldPosition(String name) implements WorldPosition {
 	}
 
 	@Override
+	@Nullable
 	public Vec3 get(WorldNumberContext ctx) {
-		return Objects.requireNonNull(ctx.variables.positions().get(name).get(ctx));
+		return ctx.variables.positions().get(name).get(ctx);
 	}
 }

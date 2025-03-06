@@ -4,8 +4,7 @@ import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.world.phys.Vec3;
-
-import java.util.Objects;
+import org.jetbrains.annotations.Nullable;
 
 public class SourceWorldPosition implements WorldPosition {
 	public static final SimpleRegistryType.Unit<SourceWorldPosition> TYPE = SimpleRegistryType.unit(Shimmer.id("source"), new SourceWorldPosition());
@@ -16,7 +15,8 @@ public class SourceWorldPosition implements WorldPosition {
 	}
 
 	@Override
+	@Nullable
 	public Vec3 get(WorldNumberContext ctx) {
-		return Objects.requireNonNull(ctx.sourcePos);
+		return ctx.sourcePos;
 	}
 }

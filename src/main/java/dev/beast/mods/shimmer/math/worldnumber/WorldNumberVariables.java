@@ -27,6 +27,14 @@ public record WorldNumberVariables(Map<String, WorldNumber> numbers, Map<String,
 		WorldNumberVariables::new
 	);
 
+	public static WorldNumberVariables pos(String name, WorldPosition pos) {
+		return new WorldNumberVariables(Map.of(), Map.of(name, pos));
+	}
+
+	public static WorldNumberVariables num(String name, WorldNumber num) {
+		return new WorldNumberVariables(Map.of(name, num), Map.of());
+	}
+
 	public WorldNumberVariables merge(WorldNumberVariables other) {
 		var numbers = new HashMap<>(numbers());
 		numbers.putAll(other.numbers());

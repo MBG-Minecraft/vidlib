@@ -10,6 +10,7 @@ import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 public record InterpolatedWorldPosition(Easing easing, float start, float end, WorldPosition from, WorldPosition to) implements WorldPosition {
 	public static final SimpleRegistryType<InterpolatedWorldPosition> TYPE = SimpleRegistryType.dynamic(Shimmer.id("interpolated"), RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -42,19 +43,20 @@ public record InterpolatedWorldPosition(Easing easing, float start, float end, W
 	}
 
 	@Override
+	@Nullable
 	public Vec3 get(WorldNumberContext ctx) {
-		var a = this.from.get(ctx);
+		var a = from.get(ctx);
 
 		if (ctx.progress <= start) {
 			return a;
 		}
 
-		var b = this.to.get(ctx);
+		var b = to.get(ctx);
 
 		if (ctx.progress >= end) {
 			return b;
 		}
 
-		return a.lerp(b, easing.easeClamped(KMath.map(ctx.progress, start, end, 0F, 1F)));
+		return a == null || b == null ? null : a.lerp(b, easing.easeClamped(KMath.map(ctx.progress, start, end, 0F, 1F)));
 	}
 }

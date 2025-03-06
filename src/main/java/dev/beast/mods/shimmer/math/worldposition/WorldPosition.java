@@ -13,6 +13,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
@@ -55,7 +56,7 @@ public interface WorldPosition {
 	}
 
 	static WorldPosition following(Entity entity, EntityPositionType type) {
-		return new FollowingEntityWorldPosition(Either.left(entity.getId()), fixed(type.getPosition(entity)), type);
+		return new FollowingEntityWorldPosition(Either.left(entity.getId()), type);
 	}
 
 	static WorldPosition followingBottomOf(Entity entity) {
@@ -82,6 +83,7 @@ public interface WorldPosition {
 		return REGISTRY.getType(this);
 	}
 
+	@Nullable
 	Vec3 get(WorldNumberContext ctx);
 
 	default WorldPosition offset(WorldPosition other) {
