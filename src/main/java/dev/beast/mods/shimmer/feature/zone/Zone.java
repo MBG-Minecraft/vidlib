@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
 import dev.beast.mods.shimmer.math.Color;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import dev.beast.mods.shimmer.util.Empty;
 import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
 import net.minecraft.nbt.CompoundTag;
@@ -31,14 +32,14 @@ public record Zone(
 		Codec.BOOL.optionalFieldOf("solid", false).forGetter(Zone::solid)
 	).apply(instance, Zone::new));
 
-	public static final StreamCodec<RegistryFriendlyByteBuf, Zone> STREAM_CODEC = StreamCodec.composite(
+	public static final StreamCodec<RegistryFriendlyByteBuf, Zone> STREAM_CODEC = CompositeStreamCodec.of(
 		ZoneShape.REGISTRY.valueStreamCodec(),
 		Zone::shape,
 		Color.STREAM_CODEC,
 		Zone::color,
 		EntityFilter.STREAM_CODEC,
 		Zone::entityFilter,
-		ShimmerStreamCodecs.optional(ShimmerStreamCodecs.COMPOUND_TAG, Empty.COMPOUND_TAG),
+		ShimmerStreamCodecs.COMPOUND_TAG.optional(Empty.COMPOUND_TAG),
 		Zone::data,
 		EntityOverride.OVERRIDE_MAP_STREAM_CODEC,
 		Zone::playerOverrides,

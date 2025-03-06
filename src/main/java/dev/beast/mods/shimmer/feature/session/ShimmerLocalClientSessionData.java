@@ -17,13 +17,17 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	public final ActiveZones serverZones;
 	public final ActiveZones filteredZones;
 	private final Map<UUID, ShimmerRemoteClientSessionData> remoteSessionData;
+	public final Set<String> tags;
 	public ZoneClipResult zoneClip;
 	public Map<ResourceLocation, ClockFont> clockFonts;
 	public Map<ResourceLocation, ClockInstance> clocks;
@@ -34,6 +38,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 		this.serverZones = new ActiveZones();
 		this.filteredZones = new ActiveZones();
 		this.remoteSessionData = new HashMap<>();
+		this.tags = new HashSet<>(0);
 		this.clockFonts = Map.of();
 		this.clocks = Map.of();
 	}
@@ -116,5 +121,12 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	@Override
 	public void removeSessionData(UUID id) {
 		remoteSessionData.remove(id);
+	}
+
+	@Override
+	public void updatePlayerTags(UUID ownId, UUID uuid, List<String> update) {
+		var t = ownId.equals(uuid) ? tags : getRemoteSessionData(uuid).tags;
+		t.clear();
+		t.addAll(update);
 	}
 }

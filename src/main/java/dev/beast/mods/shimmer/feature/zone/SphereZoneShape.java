@@ -3,11 +3,11 @@ package dev.beast.mods.shimmer.feature.zone;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -18,7 +18,7 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 	public static final SimpleRegistryType<SphereZoneShape> TYPE = SimpleRegistryType.dynamic(Shimmer.id("sphere"), RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Vec3.CODEC.fieldOf("pos").forGetter(SphereZoneShape::pos),
 		Codec.doubleRange(0D, Double.POSITIVE_INFINITY).fieldOf("radius").forGetter(SphereZoneShape::radius)
-	).apply(instance, SphereZoneShape::new)), StreamCodec.composite(
+	).apply(instance, SphereZoneShape::new)), CompositeStreamCodec.of(
 		ShimmerStreamCodecs.VEC_3,
 		SphereZoneShape::pos,
 		ByteBufCodecs.DOUBLE,

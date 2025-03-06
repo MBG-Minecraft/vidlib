@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer.feature.clock;
 
 import com.mojang.brigadier.context.CommandContext;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import dev.beast.mods.shimmer.util.registry.RegistryReference;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 public class ClockInstance {
-	public static final StreamCodec<ByteBuf, ClockInstance> STREAM_CODEC = StreamCodec.composite(
+	public static final StreamCodec<ByteBuf, ClockInstance> STREAM_CODEC = CompositeStreamCodec.of(
 		Clock.STREAM_CODEC,
 		i -> i.clock,
 		ByteBufCodecs.VAR_INT,

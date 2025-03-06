@@ -8,6 +8,7 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -78,6 +79,9 @@ public class ShimmerSessionData {
 	}
 
 	public void removeSessionData(UUID id) {
+	}
+
+	public void updatePlayerTags(UUID ownId, UUID uuid, List<String> tags) {
 	}
 
 	@Override

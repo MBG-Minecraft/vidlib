@@ -5,11 +5,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import dev.beast.mods.shimmer.util.ShimmerCodecs;
 import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +19,7 @@ public record FollowingEntityWorldPosition(Either<Integer, UUID> entityId, Entit
 	public static final SimpleRegistryType<FollowingEntityWorldPosition> TYPE = SimpleRegistryType.dynamic(Shimmer.id("following_entity"), RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.either(Codec.INT, ShimmerCodecs.UUID).fieldOf("entity_id").forGetter(FollowingEntityWorldPosition::entityId),
 		EntityPositionType.CODEC.optionalFieldOf("position_type", EntityPositionType.CENTER).forGetter(FollowingEntityWorldPosition::positionType)
-	).apply(instance, FollowingEntityWorldPosition::new)), StreamCodec.composite(
+	).apply(instance, FollowingEntityWorldPosition::new)), CompositeStreamCodec.of(
 		ByteBufCodecs.either(ByteBufCodecs.VAR_INT, ShimmerStreamCodecs.UUID),
 		FollowingEntityWorldPosition::entityId,
 		EntityPositionType.STREAM_CODEC,

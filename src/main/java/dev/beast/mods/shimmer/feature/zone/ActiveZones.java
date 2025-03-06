@@ -5,18 +5,26 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class ActiveZones implements Iterable<ZoneContainer> {
+	public record SolidZone(Zone zone, Supplier<VoxelShape> shape) {
+	}
+
 	public static final StreamCodec<RegistryFriendlyByteBuf, ActiveZones> STREAM_CODEC = new StreamCodec<>() {
 		@Override
 		public ActiveZones decode(RegistryFriendlyByteBuf buf) {
@@ -43,10 +51,12 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 
 	public final Map<ResourceLocation, ZoneContainer> containers;
 	public final Int2ObjectOpenHashMap<List<ZoneInstance>> entityZones;
+	List<SolidZone> solidZones;
 
 	public ActiveZones() {
 		this.containers = new LinkedHashMap<>();
 		this.entityZones = new Int2ObjectOpenHashMap<>();
+		this.solidZones = null;
 	}
 
 	@Nullable
@@ -63,14 +73,19 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 				containers.put(container.id, container);
 			}
 		}
+
+		solidZones = null;
 	}
 
 	public void update(Collection<ZoneContainer> zones) {
 		containers.clear();
 
 		for (var zone : zones) {
+			zone.parent = this;
 			containers.put(zone.id, zone);
 		}
+
+		solidZones = null;
 	}
 
 	@Override
@@ -94,5 +109,74 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 		}
 
 		return result;
+	}
+
+	public List<SolidZone> getSolidZones() {
+		if (solidZones == null) {
+			solidZones = new ArrayList<>(0);
+
+			for (var container : containers.values()) {
+				for (var zone : container.zones) {
+					if (zone.zone.solid()) {
+						if (zone.zone.shape().canMove()) {
+							solidZones.add(new SolidZone(zone.zone, () -> zone.zone.shape().createVoxelShape()));
+						} else {
+							var voxelShape = zone.zone.shape().createVoxelShape();
+							solidZones.add(new SolidZone(zone.zone, () -> voxelShape));
+						}
+					}
+				}
+			}
+
+			solidZones = List.copyOf(solidZones);
+		}
+
+		return solidZones;
+	}
+
+	public boolean intersectsSolid(@Nullable Entity entity, AABB collisionBox) {
+		if (entity == null) {
+			return false;
+		}
+
+		var solidZones = getSolidZones();
+
+		if (solidZones.isEmpty()) {
+			return false;
+		}
+
+		for (var sz : solidZones) {
+			if (sz.zone.entityFilter().test(entity) && sz.zone.shape().intersects(collisionBox)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public List<VoxelShape> getShapesIntersecting(@Nullable Entity entity, AABB collisionBox) {
+		if (entity == null) {
+			return List.of();
+		}
+
+		var solidZones = getSolidZones();
+
+		if (solidZones.isEmpty()) {
+			return List.of();
+		}
+
+		var shapes = new ArrayList<VoxelShape>(0);
+
+		for (var sz : solidZones) {
+			if (sz.zone.entityFilter().test(entity) && sz.zone.shape().intersects(collisionBox)) {
+				var shape = sz.shape.get();
+
+				if (!shape.isEmpty()) {
+					shapes.add(shape);
+				}
+			}
+		}
+
+		return shapes;
 	}
 }

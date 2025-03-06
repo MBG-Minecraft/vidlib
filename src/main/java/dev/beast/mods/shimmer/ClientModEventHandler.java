@@ -12,6 +12,7 @@ import dev.beast.mods.shimmer.feature.misc.CreateFireworksPayload;
 import dev.beast.mods.shimmer.feature.misc.FakeBlockPayload;
 import dev.beast.mods.shimmer.feature.misc.RefreshNamePayload;
 import dev.beast.mods.shimmer.feature.misc.SetPostEffectPayload;
+import dev.beast.mods.shimmer.feature.misc.SyncPlayerTagsPayload;
 import dev.beast.mods.shimmer.feature.multiverse.VoidSpecialEffects;
 import dev.beast.mods.shimmer.feature.particle.ShimmerClientParticles;
 import dev.beast.mods.shimmer.feature.session.RemovePlayerDataPayload;
@@ -69,6 +70,7 @@ public class ClientModEventHandler {
 		reg.s2c(SyncClockInstancePayload.TYPE);
 		reg.s2c(CreateFireworksPayload.TYPE);
 		reg.s2c(RefreshNamePayload.TYPE);
+		reg.s2c(SyncPlayerTagsPayload.TYPE);
 	}
 
 	@SubscribeEvent

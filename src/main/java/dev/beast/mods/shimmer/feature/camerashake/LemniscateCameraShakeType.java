@@ -4,9 +4,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.math.Vec2d;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 
 public record LemniscateCameraShakeType(float xScale, float yScale) implements CameraShakeType {
 	public static final SimpleRegistryType.Unit<LemniscateCameraShakeType> DEFAULT = SimpleRegistryType.unit(Shimmer.id("default_lemniscate"), new LemniscateCameraShakeType(1F, 1F));
@@ -16,7 +16,7 @@ public record LemniscateCameraShakeType(float xScale, float yScale) implements C
 	public static final SimpleRegistryType<LemniscateCameraShakeType> TYPE = SimpleRegistryType.dynamic(Shimmer.id("lemniscate"), RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.FLOAT.optionalFieldOf("x_scale", 1F).forGetter(LemniscateCameraShakeType::xScale),
 		Codec.FLOAT.optionalFieldOf("y_scale", 1F).forGetter(LemniscateCameraShakeType::yScale)
-	).apply(instance, LemniscateCameraShakeType::new)), StreamCodec.composite(
+	).apply(instance, LemniscateCameraShakeType::new)), CompositeStreamCodec.of(
 		ByteBufCodecs.FLOAT,
 		LemniscateCameraShakeType::xScale,
 		ByteBufCodecs.FLOAT,

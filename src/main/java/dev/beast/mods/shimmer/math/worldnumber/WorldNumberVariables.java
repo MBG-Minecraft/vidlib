@@ -3,7 +3,7 @@ package dev.beast.mods.shimmer.math.worldnumber;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
-import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -19,10 +19,10 @@ public record WorldNumberVariables(Map<String, WorldNumber> numbers, Map<String,
 		Codec.unboundedMap(Codec.STRING, WorldPosition.CODEC).optionalFieldOf("positions", Map.of()).forGetter(WorldNumberVariables::positions)
 	).apply(instance, WorldNumberVariables::new));
 
-	public static final StreamCodec<RegistryFriendlyByteBuf, WorldNumberVariables> STREAM_CODEC = StreamCodec.composite(
-		ShimmerStreamCodecs.unboundedMap(ByteBufCodecs.STRING_UTF8, WorldNumber.STREAM_CODEC),
+	public static final StreamCodec<RegistryFriendlyByteBuf, WorldNumberVariables> STREAM_CODEC = CompositeStreamCodec.of(
+		ByteBufCodecs.STRING_UTF8.unboundedMap(WorldNumber.STREAM_CODEC),
 		WorldNumberVariables::numbers,
-		ShimmerStreamCodecs.unboundedMap(ByteBufCodecs.STRING_UTF8, WorldPosition.STREAM_CODEC),
+		ByteBufCodecs.STRING_UTF8.unboundedMap(WorldPosition.STREAM_CODEC),
 		WorldNumberVariables::positions,
 		WorldNumberVariables::new
 	);

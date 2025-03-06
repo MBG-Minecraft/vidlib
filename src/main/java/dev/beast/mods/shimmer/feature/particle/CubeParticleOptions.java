@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.math.Color;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -17,7 +18,7 @@ public record CubeParticleOptions(Color color, Color lineColor, int lifetime) im
 		Codec.INT.optionalFieldOf("lifetime", 40).forGetter(CubeParticleOptions::lifetime)
 	).apply(instance, CubeParticleOptions::new));
 
-	public static final StreamCodec<RegistryFriendlyByteBuf, CubeParticleOptions> STREAM_CODEC = StreamCodec.composite(
+	public static final StreamCodec<RegistryFriendlyByteBuf, CubeParticleOptions> STREAM_CODEC = CompositeStreamCodec.of(
 		Color.STREAM_CODEC,
 		CubeParticleOptions::color,
 		Color.STREAM_CODEC,

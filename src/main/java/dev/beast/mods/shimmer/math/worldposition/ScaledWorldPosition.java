@@ -3,8 +3,8 @@ package dev.beast.mods.shimmer.math.worldposition;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,7 +12,7 @@ public record ScaledWorldPosition(WorldPosition a, WorldPosition b) implements W
 	public static final SimpleRegistryType<ScaledWorldPosition> TYPE = SimpleRegistryType.dynamic(Shimmer.id("scaled"), RecordCodecBuilder.mapCodec(instance -> instance.group(
 		WorldPosition.CODEC.fieldOf("a").forGetter(ScaledWorldPosition::a),
 		WorldPosition.CODEC.fieldOf("b").forGetter(ScaledWorldPosition::b)
-	).apply(instance, ScaledWorldPosition::new)), StreamCodec.composite(
+	).apply(instance, ScaledWorldPosition::new)), CompositeStreamCodec.of(
 		WorldPosition.STREAM_CODEC,
 		ScaledWorldPosition::a,
 		WorldPosition.STREAM_CODEC,

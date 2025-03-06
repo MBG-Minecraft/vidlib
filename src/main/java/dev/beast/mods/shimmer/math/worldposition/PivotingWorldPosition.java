@@ -6,8 +6,8 @@ import dev.beast.mods.shimmer.math.Easing;
 import dev.beast.mods.shimmer.math.worldnumber.FixedWorldNumber;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumber;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -20,7 +20,7 @@ public record PivotingWorldPosition(WorldPosition target, WorldNumber distance, 
 		WorldNumber.CODEC.fieldOf("start_angle").forGetter(PivotingWorldPosition::startAngle),
 		WorldNumber.CODEC.optionalFieldOf("added_angle", FixedWorldNumber.ZERO.instance()).forGetter(PivotingWorldPosition::addedAngle),
 		WorldNumber.CODEC.optionalFieldOf("height", FixedWorldNumber.ZERO.instance()).forGetter(PivotingWorldPosition::height)
-	).apply(instance, PivotingWorldPosition::new)), StreamCodec.composite(
+	).apply(instance, PivotingWorldPosition::new)), CompositeStreamCodec.of(
 		WorldPosition.STREAM_CODEC,
 		PivotingWorldPosition::target,
 		WorldNumber.STREAM_CODEC,

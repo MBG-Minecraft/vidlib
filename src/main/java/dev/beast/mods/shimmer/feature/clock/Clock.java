@@ -2,6 +2,7 @@ package dev.beast.mods.shimmer.feature.clock;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import dev.beast.mods.shimmer.util.JsonCodecReloadListener;
 import dev.beast.mods.shimmer.util.ShimmerCodecs;
 import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
@@ -38,10 +39,10 @@ public record Clock(
 		ClockLocation.CODEC.listOf().optionalFieldOf("locations", List.of()).forGetter(Clock::locations)
 	).apply(instance, Clock::new));
 
-	public static final StreamCodec<ByteBuf, Clock> STREAM_CODEC = ShimmerStreamCodecs.composite(
+	public static final StreamCodec<ByteBuf, Clock> STREAM_CODEC = CompositeStreamCodec.of(
 		ResourceLocation.STREAM_CODEC,
 		Clock::id,
-		ShimmerStreamCodecs.optional(ShimmerStreamCodecs.DIMENSION, Level.OVERWORLD),
+		ShimmerStreamCodecs.DIMENSION.optional(Level.OVERWORLD),
 		Clock::dimension,
 		ByteBufCodecs.VAR_INT,
 		Clock::maxTicks,
@@ -49,9 +50,9 @@ public record Clock(
 		Clock::countDown,
 		ByteBufCodecs.VAR_INT,
 		Clock::flash,
-		ShimmerStreamCodecs.unboundedMap(ByteBufCodecs.STRING_UTF8, ShimmerStreamCodecs.VAR_INT_LIST),
+		ByteBufCodecs.STRING_UTF8.unboundedMap(ShimmerStreamCodecs.VAR_INT_LIST),
 		Clock::events,
-		ClockLocation.STREAM_CODEC.apply(ByteBufCodecs.list()),
+		ClockLocation.STREAM_CODEC.list(),
 		Clock::locations,
 		Clock::new
 	);

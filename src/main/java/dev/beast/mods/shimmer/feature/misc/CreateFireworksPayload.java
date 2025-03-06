@@ -2,7 +2,7 @@ package dev.beast.mods.shimmer.feature.misc;
 
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
-import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.item.component.FireworkExplosion;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -10,7 +10,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import java.util.List;
 
 public record CreateFireworksPayload(double x, double y, double z, double vx, double vy, double vz, List<FireworkExplosion> explosions) implements ShimmerPacketPayload {
-	public static final ShimmerPacketType<CreateFireworksPayload> TYPE = ShimmerPacketType.internal("create_fireworks", ShimmerStreamCodecs.composite(
+	public static final ShimmerPacketType<CreateFireworksPayload> TYPE = ShimmerPacketType.internal("create_fireworks", CompositeStreamCodec.of(
 		ByteBufCodecs.DOUBLE,
 		CreateFireworksPayload::x,
 		ByteBufCodecs.DOUBLE,

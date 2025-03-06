@@ -6,9 +6,9 @@ import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.math.Easing;
 import dev.beast.mods.shimmer.math.KMath;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +19,7 @@ public record InterpolatedWorldPosition(Easing easing, float start, float end, W
 		Codec.FLOAT.optionalFieldOf("end", 1F).forGetter(InterpolatedWorldPosition::end),
 		WorldPosition.CODEC.fieldOf("from").forGetter(InterpolatedWorldPosition::from),
 		WorldPosition.CODEC.fieldOf("to").forGetter(InterpolatedWorldPosition::to)
-	).apply(instance, InterpolatedWorldPosition::new)), StreamCodec.composite(
+	).apply(instance, InterpolatedWorldPosition::new)), CompositeStreamCodec.of(
 		Easing.STREAM_CODEC,
 		InterpolatedWorldPosition::easing,
 		ByteBufCodecs.FLOAT,

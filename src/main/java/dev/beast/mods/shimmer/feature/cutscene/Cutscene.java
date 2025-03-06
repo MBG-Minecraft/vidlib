@@ -2,6 +2,7 @@ package dev.beast.mods.shimmer.feature.cutscene;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import dev.beast.mods.shimmer.util.JsonCodecReloadListener;
 import dev.beast.mods.shimmer.util.registry.RegistryReference;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -17,16 +18,19 @@ public class Cutscene {
 	public static final Codec<Cutscene> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		CutsceneStep.CODEC.listOf().optionalFieldOf("steps", List.of()).forGetter(c -> c.steps),
 		Codec.BOOL.optionalFieldOf("allow_movement", false).forGetter(c -> c.allowMovement),
-		Codec.BOOL.optionalFieldOf("open_previous_screen", false).forGetter(c -> c.openPreviousScreen)
+		Codec.BOOL.optionalFieldOf("open_previous_screen", false).forGetter(c -> c.openPreviousScreen),
+		Codec.BOOL.optionalFieldOf("hide_player", false).forGetter(c -> c.hidePlayer)
 	).apply(instance, Cutscene::new));
 
-	public static final StreamCodec<RegistryFriendlyByteBuf, Cutscene> STREAM_CODEC = StreamCodec.composite(
+	public static final StreamCodec<RegistryFriendlyByteBuf, Cutscene> STREAM_CODEC = CompositeStreamCodec.of(
 		CutsceneStep.STREAM_CODEC.apply(ByteBufCodecs.list()),
 		c -> c.steps,
 		ByteBufCodecs.BOOL,
 		c -> c.allowMovement,
 		ByteBufCodecs.BOOL,
 		c -> c.openPreviousScreen,
+		ByteBufCodecs.BOOL,
+		c -> c.hidePlayer,
 		Cutscene::new
 	);
 
@@ -46,16 +50,17 @@ public class Cutscene {
 	public final List<CutsceneStep> steps;
 	public boolean allowMovement;
 	public boolean openPreviousScreen;
-	public List<CutsceneTick> tick;
+	public boolean hidePlayer;
 
 	public static Cutscene create() {
-		return new Cutscene(new ArrayList<>(2), false, false);
+		return new Cutscene(new ArrayList<>(2), false, false, false);
 	}
 
-	private Cutscene(List<CutsceneStep> steps, boolean allowMovement, boolean openPreviousScreen) {
+	private Cutscene(List<CutsceneStep> steps, boolean allowMovement, boolean openPreviousScreen, boolean hidePlayer) {
 		this.steps = steps;
 		this.allowMovement = allowMovement;
 		this.openPreviousScreen = openPreviousScreen;
+		this.hidePlayer = hidePlayer;
 	}
 
 	public List<CutsceneStep> steps() {
@@ -77,12 +82,8 @@ public class Cutscene {
 		return this;
 	}
 
-	public Cutscene tick(CutsceneTick tick) {
-		if (this.tick == null) {
-			this.tick = new ArrayList<>(1);
-		}
-
-		this.tick.add(tick);
+	public Cutscene hidePlayer() {
+		this.hidePlayer = true;
 		return this;
 	}
 }

@@ -3,7 +3,7 @@ package dev.beast.mods.shimmer.feature.camerashake;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.math.EasingGroup;
-import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -28,7 +28,7 @@ public record CameraShake(
 		Codec.BOOL.optionalFieldOf("motion_blur", false).forGetter(CameraShake::motionBlur)
 	).apply(instance, CameraShake::new));
 
-	public static final StreamCodec<RegistryFriendlyByteBuf, CameraShake> STREAM_CODEC = ShimmerStreamCodecs.composite(
+	public static final StreamCodec<RegistryFriendlyByteBuf, CameraShake> STREAM_CODEC = CompositeStreamCodec.of(
 		CameraShakeType.REGISTRY.valueStreamCodec(),
 		CameraShake::type,
 		ByteBufCodecs.VAR_INT,

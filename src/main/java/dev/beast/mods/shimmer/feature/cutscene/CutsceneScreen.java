@@ -33,6 +33,9 @@ public class CutsceneScreen extends Screen {
 
 	@Override
 	public void removed() {
+		var x = (double) (this.minecraft.getWindow().getWidth() / 2);
+		var y = (double) (this.minecraft.getWindow().getHeight() / 2);
+		InputConstants.grabOrReleaseMouse(this.minecraft.getWindow().getWindow(), GLFW.GLFW_CURSOR_NORMAL, x, y);
 	}
 
 	@Override
@@ -81,12 +84,12 @@ public class CutsceneScreen extends Screen {
 
 	@Override
 	public boolean renderPlayer() {
-		return true;
+		return clientCutscene.renderPlayer();
 	}
 
 	@Override
 	public boolean overrideCamera() {
-		return true;
+		return clientCutscene.overrideCamera();
 	}
 
 	@Override

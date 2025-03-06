@@ -3,6 +3,7 @@ package dev.beast.mods.shimmer.feature.misc;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.feature.session.PlayerData;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
@@ -18,7 +19,7 @@ public class InternalGlobalPlayerData extends PlayerData {
 		ItemStack.OPTIONAL_CODEC.optionalFieldOf("plumbob", ItemStack.EMPTY).forGetter(d -> d.plumbob)
 	).apply(instance, InternalGlobalPlayerData::new));
 
-	public static final StreamCodec<RegistryFriendlyByteBuf, InternalGlobalPlayerData> STREAM_CODEC = StreamCodec.composite(
+	public static final StreamCodec<RegistryFriendlyByteBuf, InternalGlobalPlayerData> STREAM_CODEC = CompositeStreamCodec.of(
 		ByteBufCodecs.optional(ComponentSerialization.STREAM_CODEC),
 		d -> d.nickname,
 		ItemStack.OPTIONAL_STREAM_CODEC,

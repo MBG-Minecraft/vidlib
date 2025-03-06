@@ -3,7 +3,7 @@ package dev.beast.mods.shimmer.feature.clock;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.math.Color;
-import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -27,14 +27,14 @@ public record ClockLocation(
 		Codec.BOOL.optionalFieldOf("fullbright", false).forGetter(ClockLocation::fullbright)
 	).apply(instance, ClockLocation::new));
 
-	public static final StreamCodec<ByteBuf, ClockLocation> STREAM_CODEC = StreamCodec.composite(
+	public static final StreamCodec<ByteBuf, ClockLocation> STREAM_CODEC = CompositeStreamCodec.of(
 		ClockFont.DIRECT_STREAM_CODEC,
 		ClockLocation::font,
 		BlockPos.STREAM_CODEC,
 		ClockLocation::pos,
 		Direction.STREAM_CODEC,
 		ClockLocation::rotation,
-		ShimmerStreamCodecs.optional(ByteBufCodecs.STRING_UTF8, "%02d:%02d"),
+		ByteBufCodecs.STRING_UTF8.optional("%02d:%02d"),
 		ClockLocation::format,
 		Color.STREAM_CODEC,
 		ClockLocation::color,

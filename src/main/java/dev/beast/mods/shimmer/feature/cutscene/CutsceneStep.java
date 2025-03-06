@@ -3,9 +3,10 @@ package dev.beast.mods.shimmer.feature.cutscene;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.beast.mods.shimmer.feature.cutscene.event.CutsceneEvent;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumber;
 import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
-import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -67,10 +68,11 @@ public class CutsceneStep {
 		ComponentSerialization.CODEC.optionalFieldOf("top_bar").forGetter(s -> s.topBar),
 		ComponentSerialization.CODEC.optionalFieldOf("bottom_bar").forGetter(s -> s.bottomBar),
 		ResourceLocation.CODEC.optionalFieldOf("shader").forGetter(s -> s.shader),
-		Snap.CODEC.optionalFieldOf("snap", Snap.NONE).forGetter(s -> s.snap)
+		Snap.CODEC.optionalFieldOf("snap", Snap.NONE).forGetter(s -> s.snap),
+		CutsceneEvent.CODEC.listOf().optionalFieldOf("events", List.of()).forGetter(s -> s.events)
 	).apply(instance, CutsceneStep::new));
 
-	public static final StreamCodec<RegistryFriendlyByteBuf, CutsceneStep> STREAM_CODEC = ShimmerStreamCodecs.composite(
+	public static final StreamCodec<RegistryFriendlyByteBuf, CutsceneStep> STREAM_CODEC = CompositeStreamCodec.of(
 		ByteBufCodecs.VAR_INT,
 		s -> s.start,
 		ByteBufCodecs.VAR_INT,
@@ -91,6 +93,8 @@ public class CutsceneStep {
 		s -> s.shader,
 		Snap.STREAM_CODEC,
 		s -> s.snap,
+		CutsceneEvent.REGISTRY.valueStreamCodec().apply(ByteBufCodecs.list()),
+		s -> s.events,
 		CutsceneStep::new
 	);
 
@@ -116,8 +120,7 @@ public class CutsceneStep {
 	public Optional<Component> bottomBar = Optional.empty();
 	public Optional<ResourceLocation> shader = Optional.empty();
 	public Snap snap = Snap.NONE;
-
-	public List<CutsceneTick> tick;
+	public List<CutsceneEvent> events = List.of();
 
 	private CutsceneStep(
 		int start,
@@ -129,7 +132,8 @@ public class CutsceneStep {
 		Optional<Component> topBar,
 		Optional<Component> bottomBar,
 		Optional<ResourceLocation> shader,
-		Snap snap
+		Snap snap,
+		List<CutsceneEvent> events
 	) {
 		this.start = start;
 		this.length = length;
@@ -213,15 +217,6 @@ public class CutsceneStep {
 
 	public CutsceneStep bottomBar(Component bottomBar) {
 		this.bottomBar = Optional.of(bottomBar);
-		return this;
-	}
-
-	public CutsceneStep tick(CutsceneTick tick) {
-		if (this.tick == null) {
-			this.tick = new ArrayList<>(1);
-		}
-
-		this.tick.add(tick);
 		return this;
 	}
 

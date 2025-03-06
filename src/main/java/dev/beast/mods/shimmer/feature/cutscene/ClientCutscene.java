@@ -88,15 +88,6 @@ public class ClientCutscene implements CameraOverride {
 		prevTarget = target;
 		prevZoom = zoom;
 
-		var rootCtx = new WorldNumberContext(mc.level, totalTick / (float) totalLength, variables);
-		rootCtx.sourcePos = sourcePos.get();
-
-		if (cutscene.tick != null) {
-			for (var tick : cutscene.tick) {
-				tick.tick(rootCtx);
-			}
-		}
-
 		for (var step : steps) {
 			if (step.start == totalTick) {
 				if (step.status.isPresent()) {
@@ -122,12 +113,6 @@ public class ClientCutscene implements CameraOverride {
 				float progress = (totalTick - step.start) / (float) step.length;
 				var ctx = new WorldNumberContext(mc.level, progress, variables);
 				ctx.sourcePos = sourcePos.get();
-
-				if (step.tick != null) {
-					for (var tick : step.tick) {
-						tick.tick(ctx);
-					}
-				}
 
 				step.prevRenderTarget = step.renderTarget;
 
@@ -168,6 +153,12 @@ public class ClientCutscene implements CameraOverride {
 						prevZoom = zoom;
 					}
 				}
+
+				if (step.start == totalTick) {
+					for (var event : step.events) {
+						event.run(mc.level, ctx);
+					}
+				}
 			}
 		}
 
@@ -182,7 +173,7 @@ public class ClientCutscene implements CameraOverride {
 
 	@Override
 	public boolean renderPlayer() {
-		return true;
+		return !cutscene.hidePlayer;
 	}
 
 	@Override

@@ -1,10 +1,15 @@
 package dev.beast.mods.shimmer.core.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import dev.beast.mods.shimmer.core.ShimmerEntity;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.entity.EntityOverrideValue;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -12,11 +17,33 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.ArrayList;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin implements ShimmerEntity {
+	@ModifyReturnValue(method = "collectColliders", at = @At("RETURN"))
+	private static List<VoxelShape> shimmer$collectColliders(List<VoxelShape> parent, @Local(argsOnly = true) Level level, @Local(argsOnly = true) @Nullable Entity entity, @Local(argsOnly = true) AABB collisionBox) {
+		var zones = level.shimmer$getActiveZones();
+
+		if (zones != null) {
+			var list = zones.getShapesIntersecting(entity, collisionBox);
+
+			if (parent.isEmpty()) {
+				return list;
+			} else if (!list.isEmpty()) {
+				var list2 = new ArrayList<VoxelShape>(parent.size() + list.size());
+				list2.addAll(parent);
+				list2.addAll(list);
+				return list2;
+			}
+		}
+
+		return parent;
+	}
+
 	@Unique
 	private Map<EntityOverride<?>, EntityOverrideValue<?>> shimmer$overrides = null;
 

@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.math.Size2;
 import dev.beast.mods.shimmer.math.UV;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import dev.beast.mods.shimmer.util.JsonCodecReloadListener;
 import dev.beast.mods.shimmer.util.ShimmerCodecs;
 import dev.beast.mods.shimmer.util.registry.RegistryReference;
@@ -59,7 +60,7 @@ public record ClockFont(
 		Codec.INT.optionalFieldOf("separator_width", 0).forGetter(ClockFont::separatorWidth)
 	).apply(instance, ClockFont::create));
 
-	public static final StreamCodec<ByteBuf, ClockFont> DIRECT_STREAM_CODEC = StreamCodec.composite(
+	public static final StreamCodec<ByteBuf, ClockFont> DIRECT_STREAM_CODEC = CompositeStreamCodec.of(
 		ResourceLocation.STREAM_CODEC,
 		ClockFont::id,
 		ResourceLocation.STREAM_CODEC,

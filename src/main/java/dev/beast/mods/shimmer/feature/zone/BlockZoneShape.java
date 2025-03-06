@@ -3,9 +3,9 @@ package dev.beast.mods.shimmer.feature.zone;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.math.AAIBB;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.AABB;
 
 import java.util.stream.Stream;
@@ -14,7 +14,7 @@ public record BlockZoneShape(BlockPos start, BlockPos end, AABB box) implements 
 	public static final SimpleRegistryType<BlockZoneShape> TYPE = SimpleRegistryType.dynamic(Shimmer.id("block"), RecordCodecBuilder.mapCodec(instance -> instance.group(
 		BlockPos.CODEC.fieldOf("start").forGetter(BlockZoneShape::start),
 		BlockPos.CODEC.fieldOf("end").forGetter(BlockZoneShape::end)
-	).apply(instance, BlockZoneShape::new)), StreamCodec.composite(
+	).apply(instance, BlockZoneShape::new)), CompositeStreamCodec.of(
 		BlockPos.STREAM_CODEC,
 		BlockZoneShape::start,
 		BlockPos.STREAM_CODEC,

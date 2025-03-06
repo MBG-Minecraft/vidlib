@@ -62,12 +62,6 @@ neoForge {
 			programArgument("--nogui")
 			gameDirectory = file 'run_server'
 		}
-
-		data {
-			data()
-
-			programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
-		}
 	}
 
 	mods {
@@ -92,8 +86,6 @@ java {
 	sourceCompatibility = targetCompatibility = '21'
 	withSourcesJar()
 }
-
-sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 configurations {
 	runtimeClasspath.extendsFrom localRuntime

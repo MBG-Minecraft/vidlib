@@ -42,6 +42,7 @@ public class ZoneContainer {
 		}
 	};
 
+	ActiveZones parent;
 	public final ResourceLocation id;
 	public final ResourceKey<Level> dimension;
 	public final List<ZoneInstance> zones;
@@ -63,6 +64,10 @@ public class ZoneContainer {
 
 		if (!zone.playerOverrides().isEmpty()) {
 			hasPlayerOverrides = true;
+		}
+
+		if (parent != null) {
+			parent.solidZones = null;
 		}
 
 		return this;

@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer.math;
 
 import com.mojang.serialization.Codec;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -14,7 +15,7 @@ import java.util.stream.IntStream;
 public record AAIBB(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
 	public static final Codec<AAIBB> CODEC = Codec.INT_STREAM.comapFlatMap(r -> Util.fixedSize(r, 6).map(AAIBB::new), AAIBB::toIntStream).stable();
 
-	public static final StreamCodec<ByteBuf, AAIBB> STREAM_CODEC = StreamCodec.composite(
+	public static final StreamCodec<ByteBuf, AAIBB> STREAM_CODEC = CompositeStreamCodec.of(
 		ByteBufCodecs.VAR_INT,
 		AAIBB::minX,
 		ByteBufCodecs.VAR_INT,

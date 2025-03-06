@@ -11,6 +11,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -74,5 +76,9 @@ public interface ZoneShape {
 
 	default List<Entity> collectEntities(Level level, Predicate<? super Entity> predicate) {
 		return level.getEntities((Entity) null, getBoundingBox(), predicate);
+	}
+
+	default VoxelShape createVoxelShape() {
+		return Shapes.create(getBoundingBox());
 	}
 }

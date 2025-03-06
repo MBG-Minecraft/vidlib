@@ -5,9 +5,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.math.Easing;
 import dev.beast.mods.shimmer.math.KMath;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 
 public record InterpolatedWorldNumber(Easing easing, float start, float end, WorldNumber from, WorldNumber to) implements WorldNumber {
 	public static final SimpleRegistryType<InterpolatedWorldNumber> TYPE = SimpleRegistryType.dynamic(Shimmer.id("interpolated"), RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -16,7 +16,7 @@ public record InterpolatedWorldNumber(Easing easing, float start, float end, Wor
 		Codec.FLOAT.optionalFieldOf("end", 1F).forGetter(InterpolatedWorldNumber::end),
 		WorldNumber.CODEC.fieldOf("from").forGetter(InterpolatedWorldNumber::from),
 		WorldNumber.CODEC.fieldOf("to").forGetter(InterpolatedWorldNumber::to)
-	).apply(instance, InterpolatedWorldNumber::new)), StreamCodec.composite(
+	).apply(instance, InterpolatedWorldNumber::new)), CompositeStreamCodec.of(
 		Easing.STREAM_CODEC,
 		InterpolatedWorldNumber::easing,
 		ByteBufCodecs.FLOAT,

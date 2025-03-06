@@ -2,14 +2,14 @@ package dev.beast.mods.shimmer.math.worldnumber;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
-import net.minecraft.network.codec.StreamCodec;
 
 public record OffsetWorldNumber(WorldNumber a, WorldNumber b) implements WorldNumber {
 	public static final SimpleRegistryType<OffsetWorldNumber> TYPE = SimpleRegistryType.dynamic(Shimmer.id("offset"), RecordCodecBuilder.mapCodec(instance -> instance.group(
 		WorldNumber.CODEC.fieldOf("a").forGetter(OffsetWorldNumber::a),
 		WorldNumber.CODEC.fieldOf("b").forGetter(OffsetWorldNumber::b)
-	).apply(instance, OffsetWorldNumber::new)), StreamCodec.composite(
+	).apply(instance, OffsetWorldNumber::new)), CompositeStreamCodec.of(
 		WorldNumber.STREAM_CODEC,
 		OffsetWorldNumber::a,
 		WorldNumber.STREAM_CODEC,
