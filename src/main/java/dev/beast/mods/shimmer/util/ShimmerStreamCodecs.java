@@ -148,4 +148,9 @@ public interface ShimmerStreamCodecs {
 		Objects.requireNonNull(map, "Map is null");
 		return keyCodec.map(map::get, keyGetter);
 	}
+
+	static <E extends Enum<E>> StreamCodec<ByteBuf, E> enumValue(Class<E> enumClass) {
+		E[] values = enumClass.getEnumConstants();
+		return ByteBufCodecs.VAR_INT.map(i -> values[i], Enum::ordinal);
+	}
 }
