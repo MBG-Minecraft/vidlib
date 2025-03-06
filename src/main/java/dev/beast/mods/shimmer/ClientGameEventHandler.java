@@ -122,44 +122,46 @@ public class ClientGameEventHandler {
 	public static void renderHUD(RenderGuiEvent.Post event) {
 		var mc = Minecraft.getInstance();
 
-		if (mc.level == null || mc.player == null) {
+		if (mc.level == null || mc.player == null || mc.options.hideGui) {
 			return;
 		}
 
-		var left = new ArrayList<Component>();
-		var right = new ArrayList<Component>();
+		if (mc.isLocalServer() || mc.player.hasPermissions(2)) {
+			var left = new ArrayList<Component>();
+			var right = new ArrayList<Component>();
 
-		var tool = ToolItem.of(mc.player);
+			var tool = ToolItem.of(mc.player);
 
-		if (tool != null) {
-			tool.getSecond().drawText(tool.getFirst(), mc.player, mc.hitResult, left, right);
-		}
+			if (tool != null) {
+				tool.getSecond().drawText(tool.getFirst(), mc.player, mc.hitResult, left, right);
+			}
 
-		NeoForge.EVENT_BUS.post(new DebugTextEvent(left, right));
+			NeoForge.EVENT_BUS.post(new DebugTextEvent(left, right));
 
-		var zoneClip = mc.player.shimmer$sessionData().zoneClip;
+			var zoneClip = mc.player.shimmer$sessionData().zoneClip;
 
-		if (zoneClip != null) {
-			left.add(Component.literal("Zone: ")
-				.append(Component.literal(zoneClip.instance().container.id.toString()).withStyle(ChatFormatting.AQUA))
-				.append(Component.literal("[" + zoneClip.instance().index + "]").withStyle(ChatFormatting.GREEN))
-			);
-		}
+			if (zoneClip != null) {
+				left.add(Component.literal("Zone: ")
+					.append(Component.literal(zoneClip.instance().container.id.toString()).withStyle(ChatFormatting.AQUA))
+					.append(Component.literal("[" + zoneClip.instance().index + "]").withStyle(ChatFormatting.GREEN))
+				);
+			}
 
-		for (int i = 0; i < left.size(); i++) {
-			int w = mc.font.width(left.get(i));
-			int x = 2;
-			int y = 2 + i * 12;
-			event.getGuiGraphics().fill(x, y, x + w + 6, y + 12, 0xA0000000);
-			event.getGuiGraphics().drawString(mc.font, left.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
-		}
+			for (int i = 0; i < left.size(); i++) {
+				int w = mc.font.width(left.get(i));
+				int x = 2;
+				int y = 2 + i * 12;
+				event.getGuiGraphics().fill(x, y, x + w + 6, y + 12, 0xA0000000);
+				event.getGuiGraphics().drawString(mc.font, left.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
+			}
 
-		for (int i = 0; i < right.size(); i++) {
-			int w = mc.font.width(right.get(i));
-			int x = event.getGuiGraphics().guiWidth() - w - 8;
-			int y = 2 + i * 12;
-			event.getGuiGraphics().fill(x, y, x + w + 6, y + 12, 0xA0000000);
-			event.getGuiGraphics().drawString(mc.font, right.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
+			for (int i = 0; i < right.size(); i++) {
+				int w = mc.font.width(right.get(i));
+				int x = event.getGuiGraphics().guiWidth() - w - 8;
+				int y = 2 + i * 12;
+				event.getGuiGraphics().fill(x, y, x + w + 6, y + 12, 0xA0000000);
+				event.getGuiGraphics().drawString(mc.font, right.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
+			}
 		}
 	}
 
