@@ -3,6 +3,7 @@ package dev.beast.mods.shimmer.core;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.entity.EntityOverrideValue;
 import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
+import dev.beast.mods.shimmer.math.Line;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.Nullable;
@@ -57,5 +58,15 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 	default boolean isSurvivalLike() {
 		var type = getGameMode();
 		return type != null && type.isSurvival();
+	}
+
+	default Line ray(double distance, float delta) {
+		var start = ((Entity) this).getEyePosition(delta);
+		var end = start.add(((Entity) this).getViewVector(delta).scale(distance));
+		return new Line(start, end);
+	}
+
+	default Line ray(float delta) {
+		return ray(4.5D, delta);
 	}
 }

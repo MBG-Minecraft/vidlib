@@ -2,20 +2,23 @@ package dev.beast.mods.shimmer.feature.zone;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.math.Line;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public record ZoneShapeGroup(List<ZoneShape> zoneShapes, @Nullable AABB box) implements ZoneShape {
+public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box) implements ZoneShape {
 	public static final SimpleRegistryType<ZoneShapeGroup> TYPE = SimpleRegistryType.dynamic(Shimmer.id("group"), RecordCodecBuilder.mapCodec(instance -> instance.group(
 		ZoneShape.REGISTRY.valueCodec().listOf().fieldOf("zones").forGetter(ZoneShapeGroup::zoneShapes)
-	).apply(instance, ZoneShapeGroup::create)), ZoneShape.REGISTRY.valueStreamCodec().apply(ByteBufCodecs.list()).map(ZoneShapeGroup::create, ZoneShapeGroup::zoneShapes));
+	).apply(instance, ZoneShapeGroup::create)), ZoneShape.REGISTRY.valueStreamCodec().list().map(ZoneShapeGroup::create, ZoneShapeGroup::zoneShapes));
 
 	public static ZoneShapeGroup create(List<ZoneShape> zoneShapes) {
 		double minX = Double.POSITIVE_INFINITY;
@@ -26,10 +29,6 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, @Nullable AABB box) imp
 		double maxZ = Double.NEGATIVE_INFINITY;
 
 		for (var zone : zoneShapes) {
-			if (zone.canMove()) {
-				return new ZoneShapeGroup(zoneShapes, null);
-			}
-
 			var box = zone.getBoundingBox();
 			minX = Math.min(minX, box.minX);
 			minY = Math.min(minY, box.minY);
@@ -48,45 +47,17 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, @Nullable AABB box) imp
 	}
 
 	@Override
-	public boolean canMove() {
-		return box == null;
-	}
-
-	@Override
 	public AABB getBoundingBox() {
-		if (box != null) {
-			return box;
-		} else if (zoneShapes.size() == 1) {
-			return zoneShapes.getFirst().getBoundingBox();
-		}
-
-		double minX = Double.POSITIVE_INFINITY;
-		double minY = Double.POSITIVE_INFINITY;
-		double minZ = Double.POSITIVE_INFINITY;
-		double maxX = Double.NEGATIVE_INFINITY;
-		double maxY = Double.NEGATIVE_INFINITY;
-		double maxZ = Double.NEGATIVE_INFINITY;
-
-		for (var zone : zoneShapes) {
-			var box = zone.getBoundingBox();
-			minX = Math.min(minX, box.minX);
-			minY = Math.min(minY, box.minY);
-			minZ = Math.min(minZ, box.minZ);
-			maxX = Math.max(maxX, box.maxX);
-			maxY = Math.max(maxY, box.maxY);
-			maxZ = Math.max(maxZ, box.maxZ);
-		}
-
-		return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
+		return box;
 	}
 
 	@Override
 	@Nullable
-	public ZoneClipResult clip(ZoneInstance instance, Vec3 start, Vec3 end) {
+	public ZoneClipResult clip(ZoneInstance instance, Line ray) {
 		ZoneClipResult result = null;
 
 		for (var zone : zoneShapes) {
-			var clip = zone.clip(instance, start, end);
+			var clip = zone.clip(instance, ray);
 
 			if (clip != null) {
 				if (result == null || clip.distanceSq() < result.distanceSq()) {
@@ -136,6 +107,36 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, @Nullable AABB box) imp
 			stream = Stream.concat(stream, zone.getBlocks());
 		}
 
-		return stream.distinct();
+		return stream;
+	}
+
+	@Override
+	public VoxelShape createVoxelShape() {
+		if (zoneShapes.isEmpty()) {
+			return Shapes.empty();
+		}
+
+		var shape = zoneShapes.getFirst().createVoxelShape();
+
+		for (int i = 1; i < zoneShapes.size(); i++) {
+			shape = Shapes.or(shape, zoneShapes.get(i).createVoxelShape());
+		}
+
+		return shape;
+	}
+
+	@Override
+	public VoxelShape createBlockRenderingShape(Predicate<BlockPos> predicate) {
+		if (zoneShapes.isEmpty()) {
+			return Shapes.empty();
+		}
+
+		var shape = zoneShapes.getFirst().createBlockRenderingShape(predicate);
+
+		for (int i = 1; i < zoneShapes.size(); i++) {
+			shape = Shapes.or(shape, zoneShapes.get(i).createBlockRenderingShape(predicate));
+		}
+
+		return shape;
 	}
 }

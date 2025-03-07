@@ -5,6 +5,7 @@ import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntLists;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -14,9 +15,11 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
@@ -140,6 +143,26 @@ public interface ShimmerStreamCodecs {
 		}
 	};
 
+	StreamCodec<ByteBuf, AABB> AABB = StreamCodec.composite(
+		ByteBufCodecs.DOUBLE,
+		b -> b.minX,
+		ByteBufCodecs.DOUBLE,
+		b -> b.minY,
+		ByteBufCodecs.DOUBLE,
+		b -> b.minZ,
+		ByteBufCodecs.DOUBLE,
+		b -> b.maxX,
+		ByteBufCodecs.DOUBLE,
+		b -> b.maxY,
+		ByteBufCodecs.DOUBLE,
+		b -> b.maxZ,
+		AABB::new
+	);
+
+	static <T> StreamCodec<ByteBuf, TagKey<T>> tagKey(ResourceKey<? extends Registry<T>> registry) {
+		return ResourceLocation.STREAM_CODEC.map(id -> TagKey.create(registry, id), TagKey::location);
+	}
+
 	static <B extends ByteBuf, K, V> StreamCodec<B, V> map(Supplier<Map<K, V>> mapGetter, StreamCodec<B, K> keyCodec, Function<V, K> keyGetter) {
 		return keyCodec.map(key -> mapGetter.get().get(key), keyGetter);
 	}
@@ -150,7 +173,14 @@ public interface ShimmerStreamCodecs {
 	}
 
 	static <E extends Enum<E>> StreamCodec<ByteBuf, E> enumValue(Class<E> enumClass) {
-		E[] values = enumClass.getEnumConstants();
-		return ByteBufCodecs.VAR_INT.map(i -> values[i], Enum::ordinal);
+		return enumValue(enumClass.getEnumConstants());
+	}
+
+	static <E extends Enum<E>> StreamCodec<ByteBuf, E> enumValue(E[] values) {
+		return ByteBufCodecs.idMapper(i -> values[i], Enum::ordinal);
+	}
+
+	static <T> StreamCodec<ByteBuf, T> registry(Registry<T> registry) {
+		return ByteBufCodecs.VAR_INT.map(registry::byIdOrThrow, registry::getId);
 	}
 }

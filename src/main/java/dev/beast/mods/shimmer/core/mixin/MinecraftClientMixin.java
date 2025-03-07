@@ -93,11 +93,10 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 
 		shimmer$cameraShake = Math.abs(shakeX) <= 0.0001D && Math.abs(shakeY) <= 0.0001D ? Vec2d.ZERO : new Vec2d(shakeX, shakeY);
 
-		var start = player.getEyePosition(delta);
-		var end = start.add(player.getViewVector(delta).scale(500D));
+		var ray = player.ray(500D, delta);
 
 		if (shimmer$self().options.getCameraType() == CameraType.FIRST_PERSON && player.get(InternalPlayerData.LOCAL).renderZones) {
-			session.zoneClip = session.filteredZones.clip(start, end);
+			session.zoneClip = session.filteredZones.clip(ray);
 		} else {
 			session.zoneClip = null;
 		}

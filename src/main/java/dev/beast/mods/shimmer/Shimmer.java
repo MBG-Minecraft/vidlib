@@ -45,6 +45,7 @@ public class Shimmer {
 			Files.createDirectories(PATH);
 		}
 
+		ShimmerArgumentTypes.REGISTRY.register(bus);
 		ShimmerParticles.REGISTRY.register(bus);
 	}
 }

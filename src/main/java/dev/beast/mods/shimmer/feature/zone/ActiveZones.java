@@ -1,5 +1,8 @@
 package dev.beast.mods.shimmer.feature.zone;
 
+import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
+import dev.beast.mods.shimmer.math.Line;
+import dev.beast.mods.shimmer.math.VoxelShapeBox;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -8,7 +11,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,10 +21,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 public class ActiveZones implements Iterable<ZoneContainer> {
-	public record SolidZone(Zone zone, Supplier<VoxelShape> shape) {
+	public record SolidZone(ZoneInstance instance, VoxelShape shape, VoxelShapeBox shapeBox) {
 	}
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ActiveZones> STREAM_CODEC = new StreamCodec<>() {
@@ -95,11 +96,11 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 	}
 
 	@Nullable
-	public ZoneClipResult clip(Vec3 start, Vec3 end) {
+	public ZoneClipResult clip(Line ray) {
 		ZoneClipResult result = null;
 
 		for (var container : this) {
-			var clip = container.clip(start, end);
+			var clip = container.clip(ray);
 
 			if (clip != null) {
 				if (result == null || clip.distanceSq() < result.distanceSq()) {
@@ -117,12 +118,11 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 
 			for (var container : containers.values()) {
 				for (var zone : container.zones) {
-					if (zone.zone.solid()) {
-						if (zone.zone.shape().canMove()) {
-							solidZones.add(new SolidZone(zone.zone, () -> zone.zone.shape().createVoxelShape()));
-						} else {
-							var voxelShape = zone.zone.shape().createVoxelShape();
-							solidZones.add(new SolidZone(zone.zone, () -> voxelShape));
+					if (zone.zone.solid() != EntityFilter.NONE.instance()) {
+						var shape = zone.zone.shape().createVoxelShape().optimize();
+
+						if (!shape.isEmpty()) {
+							solidZones.add(new SolidZone(zone, shape, VoxelShapeBox.of(shape)));
 						}
 					}
 				}
@@ -146,8 +146,12 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 		}
 
 		for (var sz : solidZones) {
-			if (sz.zone.entityFilter().test(entity) && sz.zone.shape().intersects(collisionBox)) {
-				return true;
+			if (sz.instance.zone.solid().test(entity)) {
+				for (var box : sz.shapeBox.boxes()) {
+					if (box.intersects(collisionBox)) {
+						return true;
+					}
+				}
 			}
 		}
 
@@ -168,11 +172,12 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 		var shapes = new ArrayList<VoxelShape>(0);
 
 		for (var sz : solidZones) {
-			if (sz.zone.entityFilter().test(entity) && sz.zone.shape().intersects(collisionBox)) {
-				var shape = sz.shape.get();
-
-				if (!shape.isEmpty()) {
-					shapes.add(shape);
+			if (sz.instance.zone.solid().test(entity)) {
+				for (var box : sz.shapeBox.boxes()) {
+					if (box.intersects(collisionBox)) {
+						shapes.add(sz.shape);
+						break;
+					}
 				}
 			}
 		}

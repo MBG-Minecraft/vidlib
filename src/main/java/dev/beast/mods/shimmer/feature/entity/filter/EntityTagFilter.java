@@ -12,7 +12,7 @@ import java.util.List;
 public record EntityTagFilter(List<String> tags) implements EntityFilter {
 	public static SimpleRegistryType<EntityTagFilter> TYPE = SimpleRegistryType.dynamic(Shimmer.id("tags"), RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.STRING.listOf().fieldOf("tags").forGetter(EntityTagFilter::tags)
-	).apply(instance, EntityTagFilter::new)), ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()).map(EntityTagFilter::new, EntityTagFilter::tags));
+	).apply(instance, EntityTagFilter::new)), ByteBufCodecs.STRING_UTF8.list().map(EntityTagFilter::new, EntityTagFilter::tags));
 
 	@Override
 	public SimpleRegistryType<?> type() {

@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
 import dev.beast.mods.shimmer.util.JsonCodecReloadListener;
+import dev.beast.mods.shimmer.util.ShimmerCodecs;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 
@@ -19,10 +20,10 @@ public record GhostStructure(
 ) {
 	public static final Codec<GhostStructure> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		StructureRenderer.GHOST_CODEC.fieldOf("structure").forGetter(GhostStructure::structure),
-		EntityFilter.CODEC.optionalFieldOf("visible_to", EntityFilter.ALL.instance()).forGetter(GhostStructure::visibleTo),
-		Vec3.CODEC.fieldOf("pos").forGetter(GhostStructure::pos),
-		Vec3.CODEC.optionalFieldOf("scale", new Vec3(1D, 1D, 1D)).forGetter(GhostStructure::scale),
-		Vec3.CODEC.optionalFieldOf("rotation", Vec3.ZERO).forGetter(GhostStructure::rotation)
+		EntityFilter.CODEC.optionalFieldOf("visible_to", EntityFilter.ANY.instance()).forGetter(GhostStructure::visibleTo),
+		ShimmerCodecs.VEC_3D.fieldOf("pos").forGetter(GhostStructure::pos),
+		ShimmerCodecs.VEC_3D.optionalFieldOf("scale", new Vec3(1D, 1D, 1D)).forGetter(GhostStructure::scale),
+		ShimmerCodecs.VEC_3D.optionalFieldOf("rotation", Vec3.ZERO).forGetter(GhostStructure::rotation)
 	).apply(instance, GhostStructure::new));
 
 	public static List<GhostStructure> LIST = List.of();

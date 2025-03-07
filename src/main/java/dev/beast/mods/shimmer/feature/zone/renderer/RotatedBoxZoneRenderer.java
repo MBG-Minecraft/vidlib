@@ -1,16 +1,13 @@
 package dev.beast.mods.shimmer.feature.zone.renderer;
 
-import dev.beast.mods.shimmer.feature.zone.SphereZoneShape;
+import com.mojang.math.Axis;
+import dev.beast.mods.shimmer.feature.zone.RotatedBoxZoneShape;
 import dev.beast.mods.shimmer.math.BoxRenderer;
 import dev.beast.mods.shimmer.math.Color;
-import dev.beast.mods.shimmer.math.SpherePoints;
-import dev.beast.mods.shimmer.math.SphereRenderer;
 
-public class SphereZoneRenderer implements ZoneRenderer<SphereZoneShape> {
-	public static final SphereZoneRenderer INSTANCE = new SphereZoneRenderer();
-
+public class RotatedBoxZoneRenderer implements ZoneRenderer<RotatedBoxZoneShape> {
 	@Override
-	public void render(SphereZoneShape shape, Context ctx) {
+	public void render(RotatedBoxZoneShape shape, Context ctx) {
 		var ms = ctx.poseStack();
 
 		var box = shape.getBoundingBox();
@@ -24,10 +21,10 @@ public class SphereZoneRenderer implements ZoneRenderer<SphereZoneShape> {
 
 		ms.pushPose();
 		ms.translate(shape.pos().x - ctx.cameraPos().x, shape.pos().y - ctx.cameraPos().y, shape.pos().z - ctx.cameraPos().z);
-		float scale = (float) (shape.radius() * 2D);
-		ms.scale(scale, scale, scale);
-		SphereRenderer.renderDebugLines(SpherePoints.M, ms, ctx.buffers(), ctx.outlineColor());
-		SphereRenderer.renderDebugQuads(SpherePoints.M, ms, ctx.buffers(), false, ctx.color());
+		ms.mulPose(Axis.YN.rotationDegrees((float) shape.rotation()));
+		ms.scale((float) shape.size().x, (float) shape.size().y, (float) shape.size().z);
+		BoxRenderer.renderDebugLines(-0.5F, -0.5F, -0.5F, 0.5F, 0.5F, 0.5F, ms, ctx.buffers(), ctx.outlineColor());
+		BoxRenderer.renderDebugQuads(-0.5F, -0.5F, -0.5F, 0.5F, 0.5F, 0.5F, ms, ctx.buffers(), false, ctx.color());
 		ms.popPose();
 	}
 }

@@ -3,22 +3,18 @@ package dev.beast.mods.shimmer.feature.misc;
 import net.minecraft.network.chat.Component;
 import net.neoforged.bus.api.Event;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DebugTextEvent extends Event {
-	private final List<Component> left;
-	private final List<Component> right;
-
-	public DebugTextEvent(List<Component> left, List<Component> right) {
-		this.left = left;
-		this.right = right;
-	}
+	public static final List<Component> LEFT = new ArrayList<>();
+	public static final List<Component> RIGHT = new ArrayList<>();
 
 	public List<Component> getLeft() {
-		return left;
+		return LEFT;
 	}
 
 	public List<Component> getRight() {
-		return right;
+		return RIGHT;
 	}
 }

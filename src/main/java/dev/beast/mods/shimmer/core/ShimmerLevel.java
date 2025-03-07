@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer.core;
 
 import com.mojang.datafixers.util.Either;
+import dev.beast.mods.shimmer.feature.serverdata.ServerDataMap;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
@@ -18,6 +19,10 @@ public interface ShimmerLevel extends ShimmerEntityContainer {
 	@Override
 	default List<Entity> shimmer$getEntities() {
 		return ((Level) this).getEntities((Entity) null, AABB.INFINITE, EntitySelector.ENTITY_STILL_ALIVE);
+	}
+
+	default ServerDataMap getServerData() {
+		return shimmer$getEnvironment().getServerData();
 	}
 
 	@Override

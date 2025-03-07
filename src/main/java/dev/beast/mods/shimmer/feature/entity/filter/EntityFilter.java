@@ -1,11 +1,13 @@
 package dev.beast.mods.shimmer.feature.entity.filter;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.core.ShimmerEntity;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistry;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -13,15 +15,14 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public interface EntityFilter extends Predicate<Entity> {
 	SimpleRegistry<EntityFilter> REGISTRY = SimpleRegistry.create(EntityFilter::type);
-	Codec<EntityFilter> CODEC = REGISTRY.valueCodec();
-	StreamCodec<RegistryFriendlyByteBuf, EntityFilter> STREAM_CODEC = REGISTRY.valueStreamCodec();
 
 	SimpleRegistryType.Unit<EntityFilter> NONE = SimpleRegistryType.unit(Shimmer.id("none"), entity -> false);
-	SimpleRegistryType.Unit<EntityFilter> ALL = SimpleRegistryType.unit(Shimmer.id("all"), entity -> true);
+	SimpleRegistryType.Unit<EntityFilter> ANY = SimpleRegistryType.unit(Shimmer.id("any"), entity -> true);
 	SimpleRegistryType.Unit<EntityFilter> ALIVE = SimpleRegistryType.unit(Shimmer.id("alive"), Entity::isAlive);
 	SimpleRegistryType.Unit<EntityFilter> DEAD = SimpleRegistryType.unit(Shimmer.id("dead"), entity -> !entity.isAlive());
 	SimpleRegistryType.Unit<EntityFilter> LIVING = SimpleRegistryType.unit(Shimmer.id("living"), entity -> entity instanceof LivingEntity);
@@ -36,6 +37,13 @@ public interface EntityFilter extends Predicate<Entity> {
 	SimpleRegistryType.Unit<EntityFilter> VISIBLE = SimpleRegistryType.unit(Shimmer.id("visible"), entity -> !entity.isInvisible());
 	SimpleRegistryType.Unit<EntityFilter> INVISIBLE = SimpleRegistryType.unit(Shimmer.id("invisible"), Entity::isInvisible);
 
+	static EntityFilter of(boolean value) {
+		return value ? ANY.instance() : NONE.instance();
+	}
+
+	Codec<EntityFilter> CODEC = Codec.either(Codec.BOOL, REGISTRY.valueCodec()).xmap(either -> either.map(EntityFilter::of, Function.identity()), filter -> filter == ANY.instance() ? Either.left(true) : filter == NONE.instance() ? Either.left(false) : Either.right(filter));
+	StreamCodec<RegistryFriendlyByteBuf, EntityFilter> STREAM_CODEC = ByteBufCodecs.either(ByteBufCodecs.BOOL, REGISTRY.valueStreamCodec()).map(either -> either.map(EntityFilter::of, Function.identity()), filter -> filter == ANY.instance() ? Either.left(true) : filter == NONE.instance() ? Either.left(false) : Either.right(filter));
+
 	static void bootstrap() {
 		REGISTRY.register(EntityNotFilter.TYPE);
 		REGISTRY.register(EntityAndFilter.TYPE);
@@ -43,7 +51,7 @@ public interface EntityFilter extends Predicate<Entity> {
 		REGISTRY.register(EntityXorFilter.TYPE);
 
 		REGISTRY.register(NONE);
-		REGISTRY.register(ALL);
+		REGISTRY.register(ANY);
 		REGISTRY.register(ALIVE);
 		REGISTRY.register(DEAD);
 		REGISTRY.register(LIVING);

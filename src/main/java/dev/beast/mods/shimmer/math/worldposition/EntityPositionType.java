@@ -1,8 +1,8 @@
 package dev.beast.mods.shimmer.math.worldposition;
 
 import com.mojang.serialization.Codec;
+import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.Entity;
@@ -17,7 +17,7 @@ public enum EntityPositionType implements StringRepresentable {
 
 	public static final EntityPositionType[] VALUES = values();
 	public static final Codec<EntityPositionType> CODEC = StringRepresentable.fromEnum(() -> VALUES);
-	public static final StreamCodec<ByteBuf, EntityPositionType> STREAM_CODEC = ByteBufCodecs.VAR_INT.map(i -> VALUES[i], EntityPositionType::ordinal);
+	public static final StreamCodec<ByteBuf, EntityPositionType> STREAM_CODEC = ShimmerStreamCodecs.enumValue(VALUES);
 
 	private final String name;
 

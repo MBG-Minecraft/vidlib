@@ -20,12 +20,14 @@ import dev.beast.mods.shimmer.feature.session.RemovePlayerDataPayload;
 import dev.beast.mods.shimmer.feature.session.SyncPlayerDataPayload;
 import dev.beast.mods.shimmer.feature.structure.ClientStructureStorage;
 import dev.beast.mods.shimmer.feature.structure.GhostStructure;
+import dev.beast.mods.shimmer.feature.zone.RotatedBoxZoneShape;
 import dev.beast.mods.shimmer.feature.zone.SphereZoneShape;
 import dev.beast.mods.shimmer.feature.zone.SyncZonesPayload;
 import dev.beast.mods.shimmer.feature.zone.UniverseZoneShape;
 import dev.beast.mods.shimmer.feature.zone.ZoneShapeGroup;
 import dev.beast.mods.shimmer.feature.zone.renderer.EmptyZoneRenderer;
 import dev.beast.mods.shimmer.feature.zone.renderer.GroupZoneRenderer;
+import dev.beast.mods.shimmer.feature.zone.renderer.RotatedBoxZoneRenderer;
 import dev.beast.mods.shimmer.feature.zone.renderer.SphereZoneRenderer;
 import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
 import net.neoforged.api.distmarker.Dist;
@@ -44,6 +46,7 @@ public class ClientModEventHandler {
 		ZoneRenderer.register(UniverseZoneShape.TYPE, EmptyZoneRenderer.INSTANCE);
 		ZoneRenderer.register(ZoneShapeGroup.TYPE, new GroupZoneRenderer());
 		ZoneRenderer.register(SphereZoneShape.TYPE, new SphereZoneRenderer());
+		ZoneRenderer.register(RotatedBoxZoneShape.TYPE, new RotatedBoxZoneRenderer());
 	}
 
 	@SubscribeEvent

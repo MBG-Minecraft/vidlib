@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.beast.mods.shimmer.math.BoxRenderer;
 import dev.beast.mods.shimmer.math.KMath;
-import dev.beast.mods.shimmer.util.ShimmerRenderTypes;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -45,10 +44,10 @@ public class CubeParticle extends Particle {
 		int alpha = time > (options.lifetime() - 20) ? Mth.lerpInt(1F - (options.lifetime() - time) / 20F, 50, 0) : 50;
 
 		if (options.lineColor().argb() != 0) {
-			BoxRenderer.renderDebugLines(minX, minY, minZ, maxX, maxY, maxZ, ms, mc.renderBuffers().bufferSource().getBuffer(ShimmerRenderTypes.DEBUG_LINES), options.lineColor());
+			BoxRenderer.renderDebugLines(minX, minY, minZ, maxX, maxY, maxZ, ms, mc.renderBuffers().bufferSource(), options.lineColor());
 		}
 
-		BoxRenderer.renderDebugQuads(minX, minY, minZ, maxX, maxY, maxZ, ms, mc.renderBuffers().bufferSource().getBuffer(ShimmerRenderTypes.DEBUG_QUADS_NO_CULL), options.color().withAlpha(alpha));
+		BoxRenderer.renderDebugQuads(minX, minY, minZ, maxX, maxY, maxZ, ms, mc.renderBuffers().bufferSource(), false, options.color().withAlpha(alpha));
 	}
 
 	@Override

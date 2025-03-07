@@ -6,6 +6,7 @@ import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.IdentityHashMap;
@@ -14,8 +15,8 @@ import java.util.Map;
 public interface ZoneRenderer<T extends ZoneShape> {
 	Map<SimpleRegistryType<?>, ZoneRenderer<?>> RENDERERS = new IdentityHashMap<>();
 
-	record Context(Minecraft mc, PoseStack poseStack, Vec3 cameraPos, float delta, Color color, Color outlineColor) {
-		public MultiBufferSource.BufferSource buffers() {
+	record Context(Minecraft mc, PoseStack poseStack, Vec3 cameraPos, Frustum frustum, float delta, Color color, Color outlineColor) {
+		public MultiBufferSource buffers() {
 			return mc.renderBuffers().bufferSource();
 		}
 	}

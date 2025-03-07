@@ -3,14 +3,13 @@ package dev.beast.mods.shimmer.core;
 import dev.beast.mods.shimmer.feature.session.PlayerData;
 import dev.beast.mods.shimmer.feature.session.PlayerDataType;
 import dev.beast.mods.shimmer.feature.session.ShimmerSessionData;
+import dev.beast.mods.shimmer.math.Line;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public interface ShimmerPlayer extends ShimmerLivingEntity {
-
-
 	@Override
 	default List<? extends Player> shimmer$getPlayers() {
 		return List.of((Player) this);
@@ -32,5 +31,10 @@ public interface ShimmerPlayer extends ShimmerLivingEntity {
 	@Nullable
 	default <T extends PlayerData> T getOrNull(PlayerDataType<T> type) {
 		return shimmer$sessionData().getOrNull(type);
+	}
+
+	@Override
+	default Line ray(float delta) {
+		return ray(((Player) this).blockInteractionRange(), delta);
 	}
 }

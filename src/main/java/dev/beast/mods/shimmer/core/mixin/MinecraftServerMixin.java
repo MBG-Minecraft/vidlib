@@ -2,6 +2,7 @@ package dev.beast.mods.shimmer.core.mixin;
 
 import dev.beast.mods.shimmer.core.ShimmerMinecraftServer;
 import dev.beast.mods.shimmer.feature.clock.ClockInstance;
+import dev.beast.mods.shimmer.feature.misc.RefreshNamePayload;
 import dev.beast.mods.shimmer.feature.serverdata.ServerDataMap;
 import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
 import dev.beast.mods.shimmer.util.ScheduledTask;
@@ -62,7 +63,10 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 	@Override
 	public void shimmer$playerJoined(ServerPlayer player) {
 		player.shimmer$sessionData().loadPlayerData(shimmer$self());
+		player.refreshDisplayName();
+		player.refreshTabListName();
 		getServerData().syncAll(player);
+		s2c(new RefreshNamePayload(player.getUUID()));
 	}
 
 	@Override

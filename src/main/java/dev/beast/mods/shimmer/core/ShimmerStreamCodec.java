@@ -10,10 +10,32 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public interface ShimmerStreamCodec<B, V> {
 	default StreamCodec<B, V> shimmer$self() {
 		return (StreamCodec) this;
+	}
+
+	default StreamCodec<B, Optional<V>> optional() {
+		var self = shimmer$self();
+
+		return new StreamCodec<>() {
+			@Override
+			public Optional<V> decode(B buf) {
+				return ((ByteBuf) buf).readBoolean() ? Optional.of(self.decode(buf)) : Optional.empty();
+			}
+
+			@Override
+			public void encode(B buf, Optional<V> value) {
+				if (value.isPresent()) {
+					((ByteBuf) buf).writeBoolean(true);
+					self.encode(buf, value.get());
+				} else {
+					((ByteBuf) buf).writeBoolean(false);
+				}
+			}
+		};
 	}
 
 	default StreamCodec<B, V> optional(@Nullable V defaultValue) {

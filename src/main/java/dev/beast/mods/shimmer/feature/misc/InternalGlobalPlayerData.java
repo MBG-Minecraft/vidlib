@@ -7,8 +7,8 @@ import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;
@@ -20,7 +20,7 @@ public class InternalGlobalPlayerData extends PlayerData {
 	).apply(instance, InternalGlobalPlayerData::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, InternalGlobalPlayerData> STREAM_CODEC = CompositeStreamCodec.of(
-		ByteBufCodecs.optional(ComponentSerialization.STREAM_CODEC),
+		ComponentSerialization.STREAM_CODEC.optional(),
 		d -> d.nickname,
 		ItemStack.OPTIONAL_STREAM_CODEC,
 		d -> d.plumbob,
@@ -43,5 +43,10 @@ public class InternalGlobalPlayerData extends PlayerData {
 		super(InternalPlayerData.GLOBAL);
 		this.nickname = nickname;
 		this.plumbob = plumbob;
+	}
+
+	@Override
+	public void onDataReceived(Player player) {
+		player.refreshDisplayName();
 	}
 }

@@ -171,4 +171,13 @@ public class GameEventHandler {
 			event.setDisplayname(data.nickname.get());
 		}
 	}
+
+	@SubscribeEvent
+	public static void tabName(PlayerEvent.TabListNameFormat event) {
+		var data = event.getEntity().get(InternalPlayerData.GLOBAL);
+
+		if (data.nickname.isPresent()) {
+			event.setDisplayName(data.nickname.get());
+		}
+	}
 }

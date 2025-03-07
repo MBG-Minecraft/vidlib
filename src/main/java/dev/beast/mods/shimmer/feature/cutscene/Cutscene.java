@@ -23,7 +23,7 @@ public class Cutscene {
 	).apply(instance, Cutscene::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, Cutscene> STREAM_CODEC = CompositeStreamCodec.of(
-		CutsceneStep.STREAM_CODEC.apply(ByteBufCodecs.list()),
+		CutsceneStep.STREAM_CODEC.list(),
 		c -> c.steps,
 		ByteBufCodecs.BOOL,
 		c -> c.allowMovement,

@@ -30,7 +30,7 @@ import java.util.Optional;
 
 public class ShimmerCommands {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext buildContext) {
-		dispatcher.register(ZoneCommands.createCommand());
+		dispatcher.register(ZoneCommands.createCommand(buildContext));
 		dispatcher.register(ClockCommands.createCommand());
 		dispatcher.register(CutsceneCommands.createCommand(buildContext));
 		dispatcher.register(CameraShakeCommands.createCommand(buildContext));
@@ -120,6 +120,7 @@ public class ShimmerCommands {
 			data.nickname = name.getString().isEmpty() ? Optional.empty() : Optional.of(name);
 			data.setChanged();
 			player.refreshDisplayName();
+			player.refreshTabListName();
 			player.level().s2c(new RefreshNamePayload(player.getUUID()));
 		}
 

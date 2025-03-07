@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer;
 
+import dev.beast.mods.shimmer.feature.block.filter.BlockFilter;
 import dev.beast.mods.shimmer.feature.camerashake.CameraShakeType;
 import dev.beast.mods.shimmer.feature.cutscene.event.CutsceneEvent;
 import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
@@ -9,6 +10,7 @@ import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
 import dev.beast.mods.shimmer.feature.zone.ZoneShape;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumber;
 import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
+import dev.beast.mods.shimmer.util.KnownCodec;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -23,9 +25,11 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 public class ModEventHandler {
 	@SubscribeEvent
 	public static void afterLoad(FMLLoadCompleteEvent event) {
+		KnownCodec.bootstrap();
 		WorldNumber.bootstrap();
 		WorldPosition.bootstrap();
 		EntityFilter.bootstrap();
+		BlockFilter.bootstrap();
 		ZoneShape.bootstrap();
 		CameraShakeType.bootstrap();
 		InternalPlayerData.bootstrap();

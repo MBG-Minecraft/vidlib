@@ -8,6 +8,7 @@ import dev.beast.mods.shimmer.Shimmer;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,8 @@ public interface ShimmerCodecs {
 	static <T> Codec<List<T>> listOrSelf(Codec<T> elementCodec) {
 		return Codec.either(elementCodec, elementCodec.listOf()).xmap(either -> either.map(List::of, Function.identity()), list -> list.size() == 1 ? Either.left(list.getFirst()) : Either.right(list));
 	}
+
+	Codec<Vec3> VEC_3D = Codec.either(Codec.DOUBLE, Vec3.CODEC).xmap(either -> either.map(d -> new Vec3(d, d, d), Function.identity()), v -> v.x == v.y && v.x == v.z ? Either.left(v.x) : Either.right(v));
 
 	static <K, V> Codec<V> map(Supplier<Map<K, V>> mapGetter, Codec<K> keyCodec, Function<V, K> keyGetter) {
 		return keyCodec.flatXmap(k -> {

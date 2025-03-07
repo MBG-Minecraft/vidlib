@@ -3,7 +3,6 @@ package dev.beast.mods.shimmer.util;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
 
@@ -22,7 +21,7 @@ public enum Tristate implements StringRepresentable {
 		t -> t == DEFAULT ? Either.right("default") : Either.left(t == TRUE)
 	);
 
-	public static final StreamCodec<ByteBuf, Tristate> STREAM_CODEC = ByteBufCodecs.idMapper(i -> VALUES[i], Enum::ordinal);
+	public static final StreamCodec<ByteBuf, Tristate> STREAM_CODEC = ShimmerStreamCodecs.enumValue(VALUES);
 
 	public static Tristate wrap(Object from) {
 		return switch (from) {

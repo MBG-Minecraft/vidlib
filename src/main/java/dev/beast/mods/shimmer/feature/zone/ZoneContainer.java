@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.feature.zone;
 
+import dev.beast.mods.shimmer.math.Line;
 import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -107,11 +108,11 @@ public class ZoneContainer {
 	}
 
 	@Nullable
-	public ZoneClipResult clip(Vec3 start, Vec3 end) {
+	public ZoneClipResult clip(Line ray) {
 		ZoneClipResult result = null;
 
 		for (var instance : zones) {
-			var clip = instance.zone.shape().clip(instance, start, end);
+			var clip = instance.zone.shape().clip(instance, ray);
 
 			if (clip != null) {
 				if (result == null || clip.distanceSq() < result.distanceSq()) {

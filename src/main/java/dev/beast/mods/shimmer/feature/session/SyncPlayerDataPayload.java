@@ -25,6 +25,6 @@ public record SyncPlayerDataPayload(UUID player, List<PlayerData> playerData) im
 
 	@Override
 	public void handle(IPayloadContext ctx) {
-		ctx.player().shimmer$sessionData().updateSessionData(ctx.player().getUUID(), player, playerData);
+		ctx.player().shimmer$sessionData().updateSessionData(ctx.player(), player, playerData);
 	}
 }

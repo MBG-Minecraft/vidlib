@@ -2,12 +2,11 @@ package dev.beast.mods.shimmer.feature.cutscene;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
+import dev.beast.mods.shimmer.util.KnownCodec;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
-import net.minecraft.nbt.NbtOps;
 
 public interface CutsceneCommands {
 	static LiteralArgumentBuilder<CommandSourceStack> createCommand(CommandBuildContext buildContext) {
@@ -22,11 +21,9 @@ public interface CutsceneCommands {
 				)
 			)
 			.then(Commands.literal("create")
-				.then(Commands.argument("data", CompoundTagArgument.compoundTag())
+				.then(Commands.argument("data", KnownCodec.CUTSCENE.argument(buildContext))
 					.executes(ctx -> {
-						var tag = CompoundTagArgument.getCompoundTag(ctx, "data");
-						var ops = buildContext.createSerializationContext(NbtOps.INSTANCE);
-						ctx.getSource().getPlayerOrException().playCutscene(Cutscene.CODEC.decode(ops, tag).getOrThrow().getFirst(), WorldNumberVariables.EMPTY);
+						ctx.getSource().getPlayerOrException().playCutscene(KnownCodec.CUTSCENE.get(ctx, "data"), WorldNumberVariables.EMPTY);
 						return 1;
 					})
 				)

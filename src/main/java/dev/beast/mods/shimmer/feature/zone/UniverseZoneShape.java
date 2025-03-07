@@ -1,12 +1,16 @@
 package dev.beast.mods.shimmer.feature.zone;
 
 import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.math.Line;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class UniverseZoneShape implements ZoneShape {
@@ -26,8 +30,13 @@ public class UniverseZoneShape implements ZoneShape {
 	}
 
 	@Override
+	public Vec3 getCenterPos() {
+		return Vec3.ZERO;
+	}
+
+	@Override
 	@Nullable
-	public ZoneClipResult clip(ZoneInstance instance, Vec3 start, Vec3 end) {
+	public ZoneClipResult clip(ZoneInstance instance, Line ray) {
 		return null;
 	}
 
@@ -44,5 +53,15 @@ public class UniverseZoneShape implements ZoneShape {
 	@Override
 	public Stream<BlockPos> getBlocks() {
 		return Stream.empty();
+	}
+
+	@Override
+	public VoxelShape createVoxelShape() {
+		return Shapes.empty();
+	}
+
+	@Override
+	public VoxelShape createBlockRenderingShape(Predicate<BlockPos> predicate) {
+		return Shapes.empty();
 	}
 }

@@ -2,6 +2,8 @@ package dev.beast.mods.shimmer.math;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import dev.beast.mods.shimmer.util.ShimmerRenderTypes;
+import net.minecraft.client.renderer.MultiBufferSource;
 import org.joml.Vector3f;
 
 public class SphereRenderer {
@@ -53,9 +55,10 @@ public class SphereRenderer {
 	}
 
 	// POSITION_COLOR
-	public static void renderDebugQuads(SpherePoints points, PoseStack ms, VertexConsumer buffer, Color color) {
+	public static void renderDebugQuads(SpherePoints points, PoseStack ms, MultiBufferSource buffers, boolean cull, Color color) {
 		var e = ms.last();
 		var m = e.pose();
+		var buffer = buffers.getBuffer(cull ? ShimmerRenderTypes.DEBUG_QUADS : ShimmerRenderTypes.DEBUG_QUADS_NO_CULL);
 
 		float colR = color.redf();
 		float colG = color.greenf();
@@ -78,9 +81,10 @@ public class SphereRenderer {
 	}
 
 	// POSITION_COLOR
-	public static void renderDebugLines(SpherePoints points, PoseStack ms, VertexConsumer buffer, Color color) {
+	public static void renderDebugLines(SpherePoints points, PoseStack ms, MultiBufferSource buffers, Color color) {
 		var e = ms.last();
 		var m = e.pose();
+		var buffer = buffers.getBuffer(ShimmerRenderTypes.DEBUG_LINES);
 
 		float colR = color.redf();
 		float colG = color.greenf();

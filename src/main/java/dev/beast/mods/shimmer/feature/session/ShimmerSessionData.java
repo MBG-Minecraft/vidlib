@@ -5,6 +5,7 @@ import dev.beast.mods.shimmer.feature.clock.ClockInstance;
 import dev.beast.mods.shimmer.feature.serverdata.ServerData;
 import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
@@ -76,7 +77,7 @@ public class ShimmerSessionData {
 	public void updateClockInstance(ResourceLocation id, int tick, boolean ticking) {
 	}
 
-	public void updateSessionData(UUID ownId, UUID player, List<PlayerData> playerData) {
+	public void updateSessionData(Player self, UUID player, List<PlayerData> playerData) {
 	}
 
 	public void removeSessionData(UUID id) {

@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer;
 
 import com.mojang.math.Axis;
+import dev.beast.mods.shimmer.feature.block.filter.BlockFilter;
 import dev.beast.mods.shimmer.feature.clock.ClockRenderer;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
 import dev.beast.mods.shimmer.feature.misc.CameraOverride;
@@ -10,13 +11,16 @@ import dev.beast.mods.shimmer.feature.structure.GhostStructure;
 import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
 import dev.beast.mods.shimmer.feature.zone.renderer.EmptyZoneRenderer;
 import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
+import dev.beast.mods.shimmer.math.BoxRenderer;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.KMath;
+import dev.beast.mods.shimmer.math.VoxelShapeBox;
 import dev.beast.mods.shimmer.util.Cast;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -28,7 +32,7 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
-import java.util.ArrayList;
+import java.util.IdentityHashMap;
 
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
 public class ClientGameEventHandler {
@@ -58,17 +62,55 @@ public class ClientGameEventHandler {
 		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
 			var cameraPos = event.getCamera().getPosition();
 			var ms = event.getPoseStack();
+			var frustum = event.getFrustum();
+			var localData = mc.player.get(InternalPlayerData.LOCAL);
 
-			if (mc.player.get(InternalPlayerData.LOCAL).renderZones) {
-				for (var container : session.filteredZones) {
-					for (var instance : container.zones) {
-						var renderer = ZoneRenderer.get(instance.zone.shape().type());
+			if (localData.renderZones) {
+				if (localData.zoneRenderType == 1) {
+					for (var sz : session.filteredZones.getSolidZones()) {
+						if (cameraPos.closerThan(sz.instance().zone.shape().getCenterPos(), 512D) && frustum.isVisible(sz.instance().zone.shape().getBoundingBox())) {
+							boolean hovered = session.zoneClip != null && session.zoneClip.instance() == sz.instance();
+							var baseColor = sz.instance().zone.color().withAlpha(50);
+							var outlineColor = hovered ? Color.WHITE : sz.instance().entities.isEmpty() ? baseColor : Color.GREEN;
+							BoxRenderer.renderVoxelShape(ms, mc.renderBuffers().bufferSource(), sz.shapeBox(), cameraPos.reverse(), false, baseColor, outlineColor);
+						}
+					}
+				} else {
+					for (var container : session.filteredZones) {
+						for (var instance : container.zones) {
+							if (cameraPos.closerThan(instance.zone.shape().getCenterPos(), 512D) && frustum.isVisible(instance.zone.shape().getBoundingBox())) {
+								var renderer = ZoneRenderer.get(instance.zone.shape().type());
 
-						if (renderer != EmptyZoneRenderer.INSTANCE) {
-							boolean hovered = session.zoneClip != null && session.zoneClip.instance() == instance;
-							var baseColor = instance.zone.color().withAlpha(50);
-							var outlineColor = hovered ? Color.WHITE : instance.entities.isEmpty() ? baseColor : Color.GREEN;
-							renderer.render(Cast.to(instance.zone.shape()), new ZoneRenderer.Context(mc, ms, cameraPos, delta, baseColor, outlineColor));
+								if (renderer != EmptyZoneRenderer.INSTANCE) {
+									boolean hovered = session.zoneClip != null && session.zoneClip.instance() == instance;
+									var baseColor = instance.zone.color().withAlpha(50);
+									var outlineColor = hovered ? Color.WHITE : instance.entities.isEmpty() ? baseColor : Color.GREEN;
+
+									if (localData.zoneRenderType == 0) {
+										renderer.render(Cast.to(instance.zone.shape()), new ZoneRenderer.Context(mc, ms, cameraPos, frustum, delta, baseColor, outlineColor));
+									} else if (localData.zoneRenderType == 2) {
+										if (localData.cachedZoneShapes == null) {
+											localData.cachedZoneShapes = new IdentityHashMap<>();
+										}
+
+										var voxelShape = localData.cachedZoneShapes.get(instance.zone.shape());
+
+										if (voxelShape == null) {
+											voxelShape = VoxelShapeBox.EMPTY;
+											localData.cachedZoneShapes.put(instance.zone.shape(), voxelShape);
+
+											Thread.startVirtualThread(() -> {
+												localData.cachedZoneShapes.put(instance.zone.shape(), VoxelShapeBox.of(instance.zone.shape().createBlockRenderingShape(pos -> {
+													var block = new BlockInWorld(mc.level, pos, true);
+													return !block.getState().isAir() && (localData.zoneBlockFilter == BlockFilter.NONE.instance() || localData.zoneBlockFilter.test(block));
+												}).optimize()));
+											});
+										}
+
+										BoxRenderer.renderVoxelShape(ms, mc.renderBuffers().bufferSource(), voxelShape, cameraPos.reverse(), true, baseColor, outlineColor);
+									}
+								}
+							}
 						}
 					}
 				}
@@ -127,41 +169,44 @@ public class ClientGameEventHandler {
 		}
 
 		if (mc.isLocalServer() || mc.player.hasPermissions(2)) {
-			var left = new ArrayList<Component>();
-			var right = new ArrayList<Component>();
-
 			var tool = ToolItem.of(mc.player);
 
 			if (tool != null) {
-				tool.getSecond().drawText(tool.getFirst(), mc.player, mc.hitResult, left, right);
+				tool.getSecond().drawText(tool.getFirst(), mc.player, mc.hitResult, DebugTextEvent.LEFT, DebugTextEvent.RIGHT);
 			}
 
-			NeoForge.EVENT_BUS.post(new DebugTextEvent(left, right));
+			NeoForge.EVENT_BUS.post(new DebugTextEvent());
 
 			var zoneClip = mc.player.shimmer$sessionData().zoneClip;
 
 			if (zoneClip != null) {
-				left.add(Component.literal("Zone: ")
-					.append(Component.literal(zoneClip.instance().container.id.toString()).withStyle(ChatFormatting.AQUA))
-					.append(Component.literal("[" + zoneClip.instance().index + "]").withStyle(ChatFormatting.GREEN))
-				);
+				var component = Component.literal("Zone: ").append(Component.literal(zoneClip.instance().container.id.toString()).withStyle(ChatFormatting.AQUA));
+
+				if (zoneClip.instance().container.zones.size() > 1) {
+					component.append(Component.literal("[" + zoneClip.instance().index + "]").withStyle(ChatFormatting.GREEN));
+				}
+
+				DebugTextEvent.LEFT.add(component);
 			}
 
-			for (int i = 0; i < left.size(); i++) {
-				int w = mc.font.width(left.get(i));
+			for (int i = 0; i < DebugTextEvent.LEFT.size(); i++) {
+				int w = mc.font.width(DebugTextEvent.LEFT.get(i));
 				int x = 2;
 				int y = 2 + i * 12;
 				event.getGuiGraphics().fill(x, y, x + w + 6, y + 12, 0xA0000000);
-				event.getGuiGraphics().drawString(mc.font, left.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
+				event.getGuiGraphics().drawString(mc.font, DebugTextEvent.LEFT.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
 			}
 
-			for (int i = 0; i < right.size(); i++) {
-				int w = mc.font.width(right.get(i));
+			for (int i = 0; i < DebugTextEvent.RIGHT.size(); i++) {
+				int w = mc.font.width(DebugTextEvent.RIGHT.get(i));
 				int x = event.getGuiGraphics().guiWidth() - w - 8;
 				int y = 2 + i * 12;
 				event.getGuiGraphics().fill(x, y, x + w + 6, y + 12, 0xA0000000);
-				event.getGuiGraphics().drawString(mc.font, right.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
+				event.getGuiGraphics().drawString(mc.font, DebugTextEvent.RIGHT.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
 			}
+
+			DebugTextEvent.LEFT.clear();
+			DebugTextEvent.RIGHT.clear();
 		}
 	}
 

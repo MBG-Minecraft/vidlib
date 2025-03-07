@@ -3,6 +3,7 @@ package dev.beast.mods.shimmer.feature.session;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.clock.ClockFont;
 import dev.beast.mods.shimmer.feature.clock.ClockInstance;
+import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.serverdata.ServerData;
 import dev.beast.mods.shimmer.feature.serverdata.ServerDataMap;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
@@ -12,6 +13,7 @@ import dev.beast.mods.shimmer.feature.zone.ZoneEvent;
 import dev.beast.mods.shimmer.util.Side;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -67,6 +69,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 
 	public void refreshZones(ResourceKey<Level> dimension) {
 		filteredZones.filter(dimension, serverZones);
+		get(InternalPlayerData.LOCAL).cachedZoneShapes = null;
 		NeoForge.EVENT_BUS.post(new ZoneEvent.Updated(dimension, filteredZones, Side.CLIENT));
 	}
 
@@ -111,11 +114,11 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	}
 
 	@Override
-	public void updateSessionData(UUID ownId, UUID player, List<PlayerData> playerData) {
-		if (ownId.equals(player)) {
-			updateSessionData(playerData);
+	public void updateSessionData(Player self, UUID player, List<PlayerData> playerData) {
+		if (self.getUUID().equals(player)) {
+			updateSessionData(self, playerData);
 		} else {
-			getRemoteSessionData(player).updateSessionData(playerData);
+			getRemoteSessionData(player).updateSessionData(self.level().getPlayerByUUID(player), playerData);
 		}
 	}
 
