@@ -1,12 +1,29 @@
 package dev.beast.mods.shimmer;
 
+import dev.beast.mods.shimmer.core.ShimmerPayloadRegistrar;
 import dev.beast.mods.shimmer.feature.block.filter.BlockFilter;
 import dev.beast.mods.shimmer.feature.camerashake.CameraShakeType;
+import dev.beast.mods.shimmer.feature.camerashake.ShakeCameraPayload;
+import dev.beast.mods.shimmer.feature.camerashake.StopCameraShakingPayload;
+import dev.beast.mods.shimmer.feature.clock.SyncClockFontsPayload;
+import dev.beast.mods.shimmer.feature.clock.SyncClockInstancePayload;
+import dev.beast.mods.shimmer.feature.clock.SyncClocksPayload;
+import dev.beast.mods.shimmer.feature.cutscene.PlayCutscenePayload;
+import dev.beast.mods.shimmer.feature.cutscene.StopCutscenePayload;
 import dev.beast.mods.shimmer.feature.cutscene.event.CutsceneEvent;
 import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
+import dev.beast.mods.shimmer.feature.misc.CreateFireworksPayload;
+import dev.beast.mods.shimmer.feature.misc.FakeBlockPayload;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
+import dev.beast.mods.shimmer.feature.misc.RefreshNamePayload;
+import dev.beast.mods.shimmer.feature.misc.SetPostEffectPayload;
+import dev.beast.mods.shimmer.feature.misc.SyncPlayerTagsPayload;
+import dev.beast.mods.shimmer.feature.serverdata.SyncServerDataPayload;
+import dev.beast.mods.shimmer.feature.session.RemovePlayerDataPayload;
+import dev.beast.mods.shimmer.feature.session.SyncPlayerDataPayload;
 import dev.beast.mods.shimmer.feature.toolitem.PositionToolItem;
 import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
+import dev.beast.mods.shimmer.feature.zone.SyncZonesPayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneShape;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumber;
 import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
@@ -39,10 +56,26 @@ public class ModEventHandler {
 	}
 
 	@SubscribeEvent
-	static void registerPayloadHandlers(RegisterPayloadHandlersEvent event) {
-		var reg = event.registrar("1").optional();
+	public static void registerPayloadHandlers(RegisterPayloadHandlersEvent event) {
+		var reg = ShimmerPayloadRegistrar.of(event);
 
-		// reg.playToServer
+		reg.s2c(SyncPlayerDataPayload.TYPE);
+		reg.s2c(SyncServerDataPayload.TYPE);
+		reg.s2c(SyncZonesPayload.TYPE);
+		reg.s2c(SyncClockFontsPayload.TYPE);
+		reg.s2c(SyncClocksPayload.TYPE);
+
+		reg.s2c(RemovePlayerDataPayload.TYPE);
+		reg.s2c(FakeBlockPayload.TYPE);
+		reg.s2c(PlayCutscenePayload.TYPE);
+		reg.s2c(StopCutscenePayload.TYPE);
+		reg.s2c(ShakeCameraPayload.TYPE);
+		reg.s2c(StopCameraShakingPayload.TYPE);
+		reg.s2c(SetPostEffectPayload.TYPE);
+		reg.s2c(SyncClockInstancePayload.TYPE);
+		reg.s2c(CreateFireworksPayload.TYPE);
+		reg.s2c(RefreshNamePayload.TYPE);
+		reg.s2c(SyncPlayerTagsPayload.TYPE);
 	}
 
 	@SubscribeEvent
