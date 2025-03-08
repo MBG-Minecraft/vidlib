@@ -1,20 +1,23 @@
 package dev.beast.mods.shimmer.feature.misc;
 
-import net.minecraft.network.chat.Component;
 import net.neoforged.bus.api.Event;
 
-import java.util.ArrayList;
-import java.util.List;
+public abstract class DebugTextEvent extends Event {
+	public final DebugText text;
 
-public class DebugTextEvent extends Event {
-	public static final List<Component> LEFT = new ArrayList<>();
-	public static final List<Component> RIGHT = new ArrayList<>();
-
-	public List<Component> getLeft() {
-		return LEFT;
+	public DebugTextEvent(DebugText text) {
+		this.text = text;
 	}
 
-	public List<Component> getRight() {
-		return RIGHT;
+	public static class Render extends DebugTextEvent {
+		public Render(DebugText text) {
+			super(text);
+		}
+	}
+
+	public static class ClientTick extends DebugTextEvent {
+		public ClientTick(DebugText text) {
+			super(text);
+		}
 	}
 }

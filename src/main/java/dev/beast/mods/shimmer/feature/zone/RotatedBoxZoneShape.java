@@ -11,16 +11,19 @@ import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3d;
 import org.joml.Vector3d;
 
+import java.util.List;
 import java.util.stream.Stream;
 
-public record RotatedBoxZoneShape(Vec3 pos, Vec3 size, double rotation, Matrix3d matrix, AABB box) implements ZoneShape {
+public record RotatedBoxZoneShape(Vec3 pos, Vec3 size, double rotation, Matrix3d matrix, Matrix3d imatrix, AABB box, AABB ibox) implements ZoneShape {
 	public static RotatedBoxZoneShape of(Vec3 pos, Vec3 size, double rotation) {
 		var matrix = new Matrix3d().rotateY(Math.toRadians(rotation));
+		var imatrix = new Matrix3d(matrix).invert();
 
 		var hsx = size.x() / 2D;
 		var hsy = size.y() / 2D;
@@ -45,7 +48,9 @@ public record RotatedBoxZoneShape(Vec3 pos, Vec3 size, double rotation, Matrix3d
 			pos.z() + maxZ
 		);
 
-		return new RotatedBoxZoneShape(pos, size, rotation, matrix, box);
+		var ibox = new AABB(-hsx, -hsy, -hsz, hsx, hsy, hsz);
+
+		return new RotatedBoxZoneShape(pos, size, rotation, matrix, imatrix, box, ibox);
 	}
 
 	public static final SimpleRegistryType<RotatedBoxZoneShape> TYPE = SimpleRegistryType.dynamic(Shimmer.id("rotated_box"), RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -82,6 +87,18 @@ public record RotatedBoxZoneShape(Vec3 pos, Vec3 size, double rotation, Matrix3d
 	public ZoneClipResult clip(ZoneInstance instance, Line ray) {
 		if (contains(ray.start())) {
 			return null;
+		}
+
+		var rstart = new Vector3d(ray.start().x - pos.x, ray.start().y - pos.y, ray.start().z - pos.z).mul(matrix);
+		var rend = new Vector3d(ray.end().x - pos.x, ray.end().y - pos.y, ray.end().z - pos.z).mul(matrix);
+
+		var result = AABB.clip(List.of(ibox), new Vec3(rstart.x, rstart.y, rstart.z), new Vec3(rend.x, rend.y, rend.z), BlockPos.ZERO);
+
+		if (result != null && result.getType() == HitResult.Type.BLOCK) {
+			var l = result.getLocation();
+			var vec = new Vector3d(l.x, l.y, l.z).mul(imatrix);
+			var apos = new Vec3(vec.x + pos.x, vec.y + pos.y, vec.z + pos.z);
+			return ZoneClipResult.of(instance, this, ray, apos);
 		}
 
 		return null;

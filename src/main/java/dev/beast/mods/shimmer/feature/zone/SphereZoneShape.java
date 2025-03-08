@@ -77,7 +77,7 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 		// Check if either intersection is within the segment range [0, 1]
 		if (t1 >= 0D && t1 <= 1D || t2 >= 0D && t2 <= 1D) {
 			// FIXME: Get actual intersection point
-			return ZoneClipResult.of(instance, this, pos.distanceToSqr(ray.start()));
+			return ZoneClipResult.of(instance, this, ray, pos);
 		}
 
 		return null;

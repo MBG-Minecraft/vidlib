@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer.feature.toolitem;
 
 import com.mojang.datafixers.util.Pair;
+import dev.beast.mods.shimmer.feature.misc.DebugText;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
@@ -13,7 +14,6 @@ import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public interface ToolItem {
@@ -69,6 +69,6 @@ public interface ToolItem {
 		return false;
 	}
 
-	default void drawText(ItemStack item, Player player, @Nullable HitResult result, List<Component> left, List<Component> right) {
+	default void debugText(ItemStack item, Player player, @Nullable HitResult result, DebugText debugText) {
 	}
 }

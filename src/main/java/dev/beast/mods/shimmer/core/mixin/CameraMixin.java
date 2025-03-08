@@ -2,11 +2,14 @@ package dev.beast.mods.shimmer.core.mixin;
 
 import dev.beast.mods.shimmer.core.ShimmerCamera;
 import dev.beast.mods.shimmer.feature.misc.CameraOverride;
+import dev.beast.mods.shimmer.math.Line;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -33,6 +36,13 @@ public abstract class CameraMixin implements ShimmerCamera {
 
 	@Shadow
 	protected abstract void setRotation(float yaw, float pitch, float roll);
+
+	@Shadow
+	public abstract Vec3 getPosition();
+
+	@Shadow
+	@Final
+	private Vector3f forwards;
 
 	@Override
 	@Invoker("setPosition")
@@ -64,5 +74,12 @@ public abstract class CameraMixin implements ShimmerCamera {
 		if (mc.screen == null || !mc.screen.overrideCamera()) {
 			mc.shimmer$applyCameraShake((Camera) (Object) this, delta);
 		}
+	}
+
+	@Override
+	public Line ray(double distance) {
+		var start = getPosition();
+		var end = start.add(forwards.x * distance, forwards.y * distance, forwards.z * distance);
+		return new Line(start, end);
 	}
 }

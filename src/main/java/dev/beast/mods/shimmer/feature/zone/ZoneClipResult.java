@@ -10,7 +10,7 @@ public record ZoneClipResult(ZoneInstance instance, ZoneShape shape, double dist
 		return new ZoneClipResult(instance, shape, hit.getLocation().distanceToSqr(ray.start()), hit.getLocation(), hit);
 	}
 
-	public static ZoneClipResult of(ZoneInstance instance, ZoneShape shape, double distanceSq) {
-		return new ZoneClipResult(instance, shape, distanceSq, null, null);
+	public static ZoneClipResult of(ZoneInstance instance, ZoneShape shape, Line ray, Vec3 pos) {
+		return new ZoneClipResult(instance, shape, pos.distanceToSqr(ray.start()), pos, null);
 	}
 }

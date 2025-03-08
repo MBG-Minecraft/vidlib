@@ -1,27 +1,21 @@
 package dev.beast.mods.shimmer;
 
 import com.mojang.math.Axis;
-import dev.beast.mods.shimmer.feature.block.filter.BlockFilter;
 import dev.beast.mods.shimmer.feature.clock.ClockRenderer;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
 import dev.beast.mods.shimmer.feature.misc.CameraOverride;
+import dev.beast.mods.shimmer.feature.misc.DebugText;
 import dev.beast.mods.shimmer.feature.misc.DebugTextEvent;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.structure.GhostStructure;
 import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
-import dev.beast.mods.shimmer.feature.zone.ZoneRenderType;
-import dev.beast.mods.shimmer.feature.zone.renderer.EmptyZoneRenderer;
 import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
-import dev.beast.mods.shimmer.math.BoxRenderer;
-import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.KMath;
-import dev.beast.mods.shimmer.math.VoxelShapeBox;
-import dev.beast.mods.shimmer.util.Cast;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -33,18 +27,18 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
-import java.util.IdentityHashMap;
-
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
 public class ClientGameEventHandler {
 	@SubscribeEvent
 	public static void clientPreTick(ClientTickEvent.Pre event) {
+		DebugText.CLIENT_TICK.clear();
 		Minecraft.getInstance().shimmer$preTick();
 	}
 
 	@SubscribeEvent
 	public static void clientPostTick(ClientTickEvent.Post event) {
 		Minecraft.getInstance().shimmer$postTick();
+		NeoForge.EVENT_BUS.post(new DebugTextEvent.ClientTick(DebugText.CLIENT_TICK));
 	}
 
 	@SubscribeEvent
@@ -61,63 +55,12 @@ public class ClientGameEventHandler {
 		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SKY) {
 			Minecraft.getInstance().shimmer$renderSetup(event, delta);
 		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
-			var cameraPos = event.getCamera().getPosition();
 			var ms = event.getPoseStack();
+			var cameraPos = event.getCamera().getPosition();
 			var frustum = event.getFrustum();
 
 			if (mc.player.get(InternalPlayerData.SHOW_ZONES)) {
-				var renderType = mc.player.get(InternalPlayerData.ZONE_RENDER_TYPE);
-
-				if (renderType == ZoneRenderType.COLLISIONS) {
-					for (var sz : session.filteredZones.getSolidZones()) {
-						if (cameraPos.closerThan(sz.instance().zone.shape().getCenterPos(), 512D) && frustum.isVisible(sz.instance().zone.shape().getBoundingBox())) {
-							boolean hovered = session.zoneClip != null && session.zoneClip.instance() == sz.instance();
-							var baseColor = sz.instance().zone.color().withAlpha(50);
-							var outlineColor = hovered ? Color.WHITE : sz.instance().entities.isEmpty() ? baseColor : Color.GREEN;
-							BoxRenderer.renderVoxelShape(ms, mc.renderBuffers().bufferSource(), sz.shapeBox(), cameraPos.reverse(), false, baseColor, outlineColor);
-						}
-					}
-				} else {
-					for (var container : session.filteredZones) {
-						for (var instance : container.zones) {
-							if (cameraPos.closerThan(instance.zone.shape().getCenterPos(), 512D) && frustum.isVisible(instance.zone.shape().getBoundingBox())) {
-								var renderer = ZoneRenderer.get(instance.zone.shape().type());
-
-								if (renderer != EmptyZoneRenderer.INSTANCE) {
-									boolean hovered = session.zoneClip != null && session.zoneClip.instance() == instance;
-									var baseColor = instance.zone.color().withAlpha(50);
-									var outlineColor = hovered ? Color.WHITE : instance.entities.isEmpty() ? baseColor : Color.GREEN;
-
-									if (renderType == ZoneRenderType.NORMAL) {
-										renderer.render(Cast.to(instance.zone.shape()), new ZoneRenderer.Context(mc, ms, cameraPos, frustum, delta, baseColor, outlineColor));
-									} else if (renderType == ZoneRenderType.BLOCKS) {
-										if (session.cachedZoneShapes == null) {
-											session.cachedZoneShapes = new IdentityHashMap<>();
-										}
-
-										var voxelShape = session.cachedZoneShapes.get(instance.zone.shape());
-
-										if (voxelShape == null) {
-											voxelShape = VoxelShapeBox.EMPTY;
-											session.cachedZoneShapes.put(instance.zone.shape(), voxelShape);
-
-											Thread.startVirtualThread(() -> {
-												var filter = mc.player.get(InternalPlayerData.ZONE_BLOCK_FILTER);
-
-												session.cachedZoneShapes.put(instance.zone.shape(), VoxelShapeBox.of(instance.zone.shape().createBlockRenderingShape(pos -> {
-													var block = new BlockInWorld(mc.level, pos, true);
-													return !block.getState().isAir() && (filter == BlockFilter.NONE.instance() || filter.test(block));
-												}).optimize()));
-											});
-										}
-
-										BoxRenderer.renderVoxelShape(ms, mc.renderBuffers().bufferSource(), voxelShape, cameraPos.reverse(), true, baseColor, outlineColor);
-									}
-								}
-							}
-						}
-					}
-				}
+				ZoneRenderer.renderAll(mc, session, delta, ms, cameraPos, frustum);
 			}
 
 			for (var instance : session.clocks.values()) {
@@ -172,14 +115,16 @@ public class ClientGameEventHandler {
 			return;
 		}
 
+		var graphics = event.getGuiGraphics();
+
 		if (mc.isLocalServer() || mc.player.hasPermissions(2)) {
 			var tool = ToolItem.of(mc.player);
 
 			if (tool != null) {
-				tool.getSecond().drawText(tool.getFirst(), mc.player, mc.hitResult, DebugTextEvent.LEFT, DebugTextEvent.RIGHT);
+				tool.getSecond().debugText(tool.getFirst(), mc.player, mc.hitResult, DebugText.RENDER);
 			}
 
-			NeoForge.EVENT_BUS.post(new DebugTextEvent());
+			NeoForge.EVENT_BUS.post(new DebugTextEvent.Render(DebugText.RENDER));
 
 			var zoneClip = mc.player.shimmer$sessionData().zoneClip;
 
@@ -190,28 +135,56 @@ public class ClientGameEventHandler {
 					component.append(Component.literal("[" + zoneClip.instance().index + "]").withStyle(ChatFormatting.GREEN));
 				}
 
-				DebugTextEvent.LEFT.add(component);
+				DebugText.RENDER.topLeft.add(component);
+
+				var zoneTag = zoneClip.instance().zone.data();
+
+				if (!zoneTag.isEmpty()) {
+					for (var key : zoneTag.getAllKeys()) {
+						DebugText.RENDER.topRight.add(Component.literal(key + ": ").append(NbtUtils.toPrettyComponent(zoneTag.get(key))));
+					}
+				}
 			}
 
-			for (int i = 0; i < DebugTextEvent.LEFT.size(); i++) {
-				int w = mc.font.width(DebugTextEvent.LEFT.get(i));
+			graphics.pose().pushPose();
+			graphics.pose().translate(0F, 0F, 800F);
+
+			for (int i = 0; i < DebugText.RENDER.topLeft.list.size(); i++) {
+				int w = mc.font.width(DebugText.RENDER.topLeft.list.get(i));
 				int x = 2;
 				int y = 2 + i * 12;
-				event.getGuiGraphics().fill(x, y, x + w + 6, y + 12, 0xA0000000);
-				event.getGuiGraphics().drawString(mc.font, DebugTextEvent.LEFT.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
+				graphics.fill(x, y, x + w + 6, y + 12, 0xA0000000);
+				graphics.drawString(mc.font, DebugText.RENDER.topLeft.list.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
 			}
 
-			for (int i = 0; i < DebugTextEvent.RIGHT.size(); i++) {
-				int w = mc.font.width(DebugTextEvent.RIGHT.get(i));
+			for (int i = 0; i < DebugText.RENDER.topRight.list.size(); i++) {
+				int w = mc.font.width(DebugText.RENDER.topRight.list.get(i));
 				int x = event.getGuiGraphics().guiWidth() - w - 8;
 				int y = 2 + i * 12;
-				event.getGuiGraphics().fill(x, y, x + w + 6, y + 12, 0xA0000000);
-				event.getGuiGraphics().drawString(mc.font, DebugTextEvent.RIGHT.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
+				graphics.fill(x, y, x + w + 6, y + 12, 0xA0000000);
+				graphics.drawString(mc.font, DebugText.RENDER.topRight.list.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
 			}
 
-			DebugTextEvent.LEFT.clear();
-			DebugTextEvent.RIGHT.clear();
+			for (int i = 0; i < DebugText.RENDER.bottomLeft.list.size(); i++) {
+				int w = mc.font.width(DebugText.RENDER.bottomLeft.list.get(i));
+				int x = 2;
+				int y = i * 12 + event.getGuiGraphics().guiHeight() - DebugText.RENDER.bottomLeft.list.size() * 12 - 2;
+				graphics.fill(x, y, x + w + 6, y + 12, 0xA0000000);
+				graphics.drawString(mc.font, DebugText.RENDER.bottomLeft.list.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
+			}
+
+			for (int i = 0; i < DebugText.RENDER.bottomRight.list.size(); i++) {
+				int w = mc.font.width(DebugText.RENDER.bottomRight.list.get(i));
+				int x = event.getGuiGraphics().guiWidth() - w - 8;
+				int y = i * 12 + event.getGuiGraphics().guiHeight() - DebugText.RENDER.bottomRight.list.size() * 12 - 2;
+				graphics.fill(x, y, x + w + 6, y + 12, 0xA0000000);
+				graphics.drawString(mc.font, DebugText.RENDER.bottomRight.list.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
+			}
+
+			graphics.pose().popPose();
 		}
+
+		DebugText.RENDER.clear();
 	}
 
 	@SubscribeEvent

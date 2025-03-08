@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.feature.toolitem;
 
+import dev.beast.mods.shimmer.feature.misc.DebugText;
 import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.KMath;
@@ -16,8 +17,6 @@ import net.minecraft.world.phys.HitResult;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class PositionToolItem implements ToolItem {
 	@Override
@@ -61,13 +60,13 @@ public class PositionToolItem implements ToolItem {
 	}
 
 	@Override
-	public void drawText(ItemStack item, Player player, @Nullable HitResult hit, List<Component> left, List<Component> right) {
+	public void debugText(ItemStack item, Player player, @Nullable HitResult hit, DebugText debugText) {
 		if (hit != null && hit.getType() == HitResult.Type.BLOCK && hit instanceof BlockHitResult bhit) {
 			var pos = bhit.getBlockPos();
 			var str = player.isShiftKeyDown() ? KMath.formatVec3(pos.getCenter()) : KMath.formatBlockPos(pos);
-			right.add(Component.literal(str));
+			debugText.topRight.add(Component.literal(str));
 		} else if (hit instanceof EntityHitResult ehit) {
-			right.add(Component.literal(KMath.formatVec3(ehit.getEntity().position())));
+			debugText.topRight.add(Component.literal(KMath.formatVec3(ehit.getEntity().position())));
 		}
 	}
 }

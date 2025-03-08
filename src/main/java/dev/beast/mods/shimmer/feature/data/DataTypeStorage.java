@@ -5,6 +5,7 @@ import dev.beast.mods.shimmer.util.Cast;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +50,7 @@ public class DataTypeStorage {
 		return new DataType.Builder<>(this, id, defaultValue);
 	}
 
+	@ApiStatus.Internal
 	public <T> DataType.Builder<T> internal(String id, T defaultValue) {
 		return builder(Shimmer.id(id), defaultValue);
 	}
