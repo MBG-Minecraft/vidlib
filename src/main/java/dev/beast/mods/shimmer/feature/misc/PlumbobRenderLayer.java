@@ -20,7 +20,7 @@ public class PlumbobRenderLayer extends RenderLayer<AbstractClientPlayer, Player
 	@Override
 	public void render(PoseStack ms, MultiBufferSource source, int light, AbstractClientPlayer entity, float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
 		if (!entity.isInvisible()) {
-			var item = entity.get(InternalPlayerData.GLOBAL).plumbob;
+			var item = entity.get(InternalPlayerData.PLUMBOB);
 
 			if (!item.isEmpty()) {
 				var mc = Minecraft.getInstance();

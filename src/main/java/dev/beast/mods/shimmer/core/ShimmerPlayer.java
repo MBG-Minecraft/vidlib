@@ -1,7 +1,6 @@
 package dev.beast.mods.shimmer.core;
 
-import dev.beast.mods.shimmer.feature.session.PlayerData;
-import dev.beast.mods.shimmer.feature.session.PlayerDataType;
+import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.session.ShimmerSessionData;
 import dev.beast.mods.shimmer.math.Line;
 import net.minecraft.world.entity.player.Player;
@@ -24,13 +23,17 @@ public interface ShimmerPlayer extends ShimmerLivingEntity {
 		return ((Player) this).isCreative();
 	}
 
-	default <T extends PlayerData> T get(PlayerDataType<T> type) {
-		return shimmer$sessionData().get(type);
+	default <T> T get(DataType<T> type) {
+		return shimmer$sessionData().dataMap.get(type);
 	}
 
 	@Nullable
-	default <T extends PlayerData> T getOrNull(PlayerDataType<T> type) {
-		return shimmer$sessionData().getOrNull(type);
+	default <T> T getOrNull(DataType<T> type) {
+		return shimmer$sessionData().dataMap.getOrNull(type);
+	}
+
+	default <T> void set(DataType<T> type, T value) {
+		shimmer$sessionData().dataMap.set(type, value);
 	}
 
 	@Override

@@ -3,13 +3,15 @@ package dev.beast.mods.shimmer.feature.session;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.clock.ClockFont;
 import dev.beast.mods.shimmer.feature.clock.ClockInstance;
-import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
-import dev.beast.mods.shimmer.feature.serverdata.ServerData;
-import dev.beast.mods.shimmer.feature.serverdata.ServerDataMap;
+import dev.beast.mods.shimmer.feature.data.DataMap;
+import dev.beast.mods.shimmer.feature.data.DataMapValue;
+import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.feature.zone.ZoneClipResult;
 import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
 import dev.beast.mods.shimmer.feature.zone.ZoneEvent;
+import dev.beast.mods.shimmer.feature.zone.ZoneShape;
+import dev.beast.mods.shimmer.math.VoxelShapeBox;
 import dev.beast.mods.shimmer.util.Side;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -32,7 +34,8 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	public ZoneClipResult zoneClip;
 	public Map<ResourceLocation, ClockFont> clockFonts;
 	public Map<ResourceLocation, ClockInstance> clocks;
-	public final ServerDataMap serverDataMap;
+	public final DataMap serverDataMap;
+	public Map<ZoneShape, VoxelShapeBox> cachedZoneShapes;
 
 	public ShimmerLocalClientSessionData(UUID uuid) {
 		super(uuid);
@@ -43,7 +46,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 		this.tags = new HashSet<>(0);
 		this.clockFonts = Map.of();
 		this.clocks = Map.of();
-		this.serverDataMap = new ServerDataMap();
+		this.serverDataMap = new DataMap(DataType.SERVER);
 	}
 
 	public ShimmerRemoteClientSessionData getRemoteSessionData(UUID id) {
@@ -69,7 +72,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 
 	public void refreshZones(ResourceKey<Level> dimension) {
 		filteredZones.filter(dimension, serverZones);
-		get(InternalPlayerData.LOCAL).cachedZoneShapes = null;
+		cachedZoneShapes = null;
 		NeoForge.EVENT_BUS.post(new ZoneEvent.Updated(dimension, filteredZones, Side.CLIENT));
 	}
 
@@ -114,11 +117,11 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	}
 
 	@Override
-	public void updateSessionData(Player self, UUID player, List<PlayerData> playerData) {
+	public void updateSessionData(Player self, UUID player, List<DataMapValue> playerData) {
 		if (self.getUUID().equals(player)) {
-			updateSessionData(self, playerData);
+			dataMap.update(self, playerData);
 		} else {
-			getRemoteSessionData(player).updateSessionData(self.level().getPlayerByUUID(player), playerData);
+			getRemoteSessionData(player).dataMap.update(self.level().getPlayerByUUID(player), playerData);
 		}
 	}
 
@@ -135,7 +138,12 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	}
 
 	@Override
-	public void updateServerData(List<ServerData> serverData) {
-		serverDataMap.update(serverData);
+	public void updateServerData(List<DataMapValue> serverData) {
+		serverDataMap.update(null, serverData);
+	}
+
+	@Override
+	public void refreshBlockZones() {
+		cachedZoneShapes = null;
 	}
 }

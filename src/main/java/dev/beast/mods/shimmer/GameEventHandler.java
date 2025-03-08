@@ -88,7 +88,7 @@ public class GameEventHandler {
 	@SubscribeEvent
 	public static void playerSaved(PlayerEvent.SaveToFile event) {
 		if (event.getEntity() instanceof ServerPlayer player) {
-			player.shimmer$sessionData().savePlayerData(player.server);
+			player.shimmer$sessionData().dataMap.save(player.server, player.server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("shimmer").resolve(player.getUUID() + ".nbt"));
 		}
 	}
 
@@ -165,19 +165,19 @@ public class GameEventHandler {
 
 	@SubscribeEvent
 	public static void name(PlayerEvent.NameFormat event) {
-		var data = event.getEntity().get(InternalPlayerData.GLOBAL);
+		var data = event.getEntity().get(InternalPlayerData.NICKNAME);
 
-		if (data.nickname.isPresent()) {
-			event.setDisplayname(data.nickname.get());
+		if (!data.getString().isEmpty()) {
+			event.setDisplayname(data);
 		}
 	}
 
 	@SubscribeEvent
 	public static void tabName(PlayerEvent.TabListNameFormat event) {
-		var data = event.getEntity().get(InternalPlayerData.GLOBAL);
+		var data = event.getEntity().get(InternalPlayerData.NICKNAME);
 
-		if (data.nickname.isPresent()) {
-			event.setDisplayName(data.nickname.get());
+		if (!data.getString().isEmpty()) {
+			event.setDisplayName(data);
 		}
 	}
 }

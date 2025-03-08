@@ -9,6 +9,7 @@ import dev.beast.mods.shimmer.feature.misc.DebugTextEvent;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.structure.GhostStructure;
 import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
+import dev.beast.mods.shimmer.feature.zone.ZoneRenderType;
 import dev.beast.mods.shimmer.feature.zone.renderer.EmptyZoneRenderer;
 import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
 import dev.beast.mods.shimmer.math.BoxRenderer;
@@ -63,10 +64,11 @@ public class ClientGameEventHandler {
 			var cameraPos = event.getCamera().getPosition();
 			var ms = event.getPoseStack();
 			var frustum = event.getFrustum();
-			var localData = mc.player.get(InternalPlayerData.LOCAL);
 
-			if (localData.renderZones) {
-				if (localData.zoneRenderType == 1) {
+			if (mc.player.get(InternalPlayerData.SHOW_ZONES)) {
+				var renderType = mc.player.get(InternalPlayerData.ZONE_RENDER_TYPE);
+
+				if (renderType == ZoneRenderType.COLLISIONS) {
 					for (var sz : session.filteredZones.getSolidZones()) {
 						if (cameraPos.closerThan(sz.instance().zone.shape().getCenterPos(), 512D) && frustum.isVisible(sz.instance().zone.shape().getBoundingBox())) {
 							boolean hovered = session.zoneClip != null && session.zoneClip.instance() == sz.instance();
@@ -86,23 +88,25 @@ public class ClientGameEventHandler {
 									var baseColor = instance.zone.color().withAlpha(50);
 									var outlineColor = hovered ? Color.WHITE : instance.entities.isEmpty() ? baseColor : Color.GREEN;
 
-									if (localData.zoneRenderType == 0) {
+									if (renderType == ZoneRenderType.NORMAL) {
 										renderer.render(Cast.to(instance.zone.shape()), new ZoneRenderer.Context(mc, ms, cameraPos, frustum, delta, baseColor, outlineColor));
-									} else if (localData.zoneRenderType == 2) {
-										if (localData.cachedZoneShapes == null) {
-											localData.cachedZoneShapes = new IdentityHashMap<>();
+									} else if (renderType == ZoneRenderType.BLOCKS) {
+										if (session.cachedZoneShapes == null) {
+											session.cachedZoneShapes = new IdentityHashMap<>();
 										}
 
-										var voxelShape = localData.cachedZoneShapes.get(instance.zone.shape());
+										var voxelShape = session.cachedZoneShapes.get(instance.zone.shape());
 
 										if (voxelShape == null) {
 											voxelShape = VoxelShapeBox.EMPTY;
-											localData.cachedZoneShapes.put(instance.zone.shape(), voxelShape);
+											session.cachedZoneShapes.put(instance.zone.shape(), voxelShape);
 
 											Thread.startVirtualThread(() -> {
-												localData.cachedZoneShapes.put(instance.zone.shape(), VoxelShapeBox.of(instance.zone.shape().createBlockRenderingShape(pos -> {
+												var filter = mc.player.get(InternalPlayerData.ZONE_BLOCK_FILTER);
+
+												session.cachedZoneShapes.put(instance.zone.shape(), VoxelShapeBox.of(instance.zone.shape().createBlockRenderingShape(pos -> {
 													var block = new BlockInWorld(mc.level, pos, true);
-													return !block.getState().isAir() && (localData.zoneBlockFilter == BlockFilter.NONE.instance() || localData.zoneBlockFilter.test(block));
+													return !block.getState().isAir() && (filter == BlockFilter.NONE.instance() || filter.test(block));
 												}).optimize()));
 											});
 										}

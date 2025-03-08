@@ -6,8 +6,8 @@ import dev.beast.mods.shimmer.feature.camerashake.CameraShakeInstance;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.cutscene.CutsceneScreen;
+import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
-import dev.beast.mods.shimmer.feature.serverdata.ServerDataMap;
 import dev.beast.mods.shimmer.math.Vec2d;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.util.Empty;
@@ -64,7 +64,7 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 	}
 
 	@Override
-	public ServerDataMap getServerData() {
+	public DataMap getServerData() {
 		return player.shimmer$sessionData().serverDataMap;
 	}
 
@@ -95,7 +95,7 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 
 		var ray = player.ray(500D, delta);
 
-		if (shimmer$self().options.getCameraType() == CameraType.FIRST_PERSON && player.get(InternalPlayerData.LOCAL).renderZones) {
+		if (shimmer$self().options.getCameraType() == CameraType.FIRST_PERSON && player.get(InternalPlayerData.SHOW_ZONES)) {
 			session.zoneClip = session.filteredZones.clip(ray);
 		} else {
 			session.zoneClip = null;

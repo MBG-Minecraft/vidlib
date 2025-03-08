@@ -1,4 +1,4 @@
-package dev.beast.mods.shimmer.feature.session;
+package dev.beast.mods.shimmer.feature.data;
 
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
@@ -9,12 +9,12 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import java.util.List;
 import java.util.UUID;
 
-public record SyncPlayerDataPayload(UUID player, List<PlayerData> playerData) implements ShimmerPacketPayload {
+public record SyncPlayerDataPayload(UUID player, List<DataMapValue> update) implements ShimmerPacketPayload {
 	public static final ShimmerPacketType<SyncPlayerDataPayload> TYPE = ShimmerPacketType.internal("sync_player_data", CompositeStreamCodec.of(
 		ShimmerStreamCodecs.UUID,
 		SyncPlayerDataPayload::player,
-		PlayerData.LIST_STREAM_CODEC,
-		SyncPlayerDataPayload::playerData,
+		DataType.PLAYER.valueListStreamCodec,
+		SyncPlayerDataPayload::update,
 		SyncPlayerDataPayload::new
 	));
 
@@ -25,6 +25,6 @@ public record SyncPlayerDataPayload(UUID player, List<PlayerData> playerData) im
 
 	@Override
 	public void handle(IPayloadContext ctx) {
-		ctx.player().shimmer$sessionData().updateSessionData(ctx.player(), player, playerData);
+		ctx.player().shimmer$sessionData().updateSessionData(ctx.player(), player, update);
 	}
 }

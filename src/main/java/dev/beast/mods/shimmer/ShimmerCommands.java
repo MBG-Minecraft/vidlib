@@ -26,7 +26,6 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 public class ShimmerCommands {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext buildContext) {
@@ -54,7 +53,7 @@ public class ShimmerCommands {
 		dispatcher.register(Commands.literal("heal")
 			.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
 			.then(Commands.argument("player", EntityArgument.players())
-				.executes(ctx -> heal(EntityArgument.getOptionalPlayers(ctx, "player")))
+				.executes(ctx -> heal(EntityArgument.getPlayers(ctx, "player")))
 			)
 			.executes(ctx -> heal(List.of(ctx.getSource().getPlayerOrException())))
 		);
@@ -63,7 +62,7 @@ public class ShimmerCommands {
 			.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
 			.then(Commands.argument("player", EntityArgument.players())
 				.then(Commands.argument("item", ItemArgument.item(buildContext))
-					.executes(ctx -> plumbob(EntityArgument.getOptionalPlayers(ctx, "player"), ItemArgument.getItem(ctx, "item").createItemStack(1, true)))
+					.executes(ctx -> plumbob(EntityArgument.getPlayers(ctx, "player"), ItemArgument.getItem(ctx, "item").createItemStack(1, true)))
 				)
 			)
 			.then(Commands.argument("item", ItemArgument.item(buildContext))
@@ -81,6 +80,14 @@ public class ShimmerCommands {
 			.then(Commands.argument("nickname", ComponentArgument.textComponent(buildContext))
 				.executes(ctx -> nickname(List.of(ctx.getSource().getPlayerOrException()), ComponentArgument.getComponent(ctx, "nickname")))
 			)
+		);
+
+		dispatcher.register(Commands.literal("invisible")
+			.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
+			.then(Commands.argument("player", EntityArgument.players())
+				.executes(ctx -> invisible(EntityArgument.getPlayers(ctx, "player")))
+			)
+			.executes(ctx -> invisible(List.of(ctx.getSource().getPlayerOrException())))
 		);
 	}
 
@@ -102,13 +109,11 @@ public class ShimmerCommands {
 		return 1;
 	}
 
-	private static int plumbob(Collection<ServerPlayer> players, ItemStack hat) {
-		hat = hat.copyWithCount(1);
+	private static int plumbob(Collection<ServerPlayer> players, ItemStack item) {
+		item = item.copyWithCount(1);
 
 		for (var player : players) {
-			var data = player.get(InternalPlayerData.GLOBAL);
-			data.plumbob = hat;
-			data.setChanged();
+			player.set(InternalPlayerData.PLUMBOB, item);
 		}
 
 		return 1;
@@ -116,12 +121,18 @@ public class ShimmerCommands {
 
 	private static int nickname(Collection<ServerPlayer> players, Component name) {
 		for (var player : players) {
-			var data = player.get(InternalPlayerData.GLOBAL);
-			data.nickname = name.getString().isEmpty() ? Optional.empty() : Optional.of(name);
-			data.setChanged();
+			player.set(InternalPlayerData.NICKNAME, name);
 			player.refreshDisplayName();
 			player.refreshTabListName();
 			player.level().s2c(new RefreshNamePayload(player.getUUID()));
+		}
+
+		return 1;
+	}
+
+	private static int invisible(Collection<ServerPlayer> players) {
+		for (var player : players) {
+			player.heal();
 		}
 
 		return 1;

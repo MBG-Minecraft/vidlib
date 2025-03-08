@@ -19,15 +19,15 @@ public interface ZoneCommands {
 			)
 			.then(Commands.literal("render-type")
 				.then(Commands.literal("normal")
-					.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), 0, null))
+					.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), ZoneRenderType.NORMAL, null))
 				)
 				.then(Commands.literal("collisions")
-					.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), 1, null))
+					.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), ZoneRenderType.COLLISIONS, null))
 				)
 				.then(Commands.literal("blocks")
-					.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), 2, BlockFilter.NONE.instance()))
+					.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), ZoneRenderType.BLOCKS, BlockFilter.NONE.instance()))
 					.then(Commands.argument("filter", KnownCodec.BLOCK_FILTER.argument(buildContext))
-						.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), 2, KnownCodec.BLOCK_FILTER.get(ctx, "filter")))
+						.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), ZoneRenderType.BLOCKS, KnownCodec.BLOCK_FILTER.get(ctx, "filter")))
 
 					)
 				)
@@ -35,21 +35,17 @@ public interface ZoneCommands {
 	}
 
 	private static int show(ServerPlayer player) {
-		var data = player.get(InternalPlayerData.LOCAL);
-		data.renderZones = !data.renderZones;
-		data.setChanged();
+		player.set(InternalPlayerData.SHOW_ZONES, !player.get(InternalPlayerData.SHOW_ZONES));
 		return 1;
 	}
 
-	private static int renderType(ServerPlayer player, int type, @Nullable BlockFilter filter) {
-		var data = player.get(InternalPlayerData.LOCAL);
-		data.zoneRenderType = type;
+	private static int renderType(ServerPlayer player, ZoneRenderType type, @Nullable BlockFilter filter) {
+		player.set(InternalPlayerData.ZONE_RENDER_TYPE, type);
 
 		if (filter != null) {
-			data.zoneBlockFilter = filter;
+			player.set(InternalPlayerData.ZONE_BLOCK_FILTER, filter);
 		}
 
-		data.setChanged();
 		return 1;
 	}
 }

@@ -2,8 +2,11 @@ package dev.beast.mods.shimmer.core.mixin;
 
 import dev.beast.mods.shimmer.core.ShimmerMinecraftServer;
 import dev.beast.mods.shimmer.feature.clock.ClockInstance;
+import dev.beast.mods.shimmer.feature.data.DataMap;
+import dev.beast.mods.shimmer.feature.data.DataType;
+import dev.beast.mods.shimmer.feature.data.SyncPlayerDataPayload;
+import dev.beast.mods.shimmer.feature.data.SyncServerDataPayload;
 import dev.beast.mods.shimmer.feature.misc.RefreshNamePayload;
-import dev.beast.mods.shimmer.feature.serverdata.ServerDataMap;
 import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
 import dev.beast.mods.shimmer.util.ScheduledTask;
 import net.minecraft.resources.ResourceKey;
@@ -32,6 +35,9 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 	@Shadow
 	public abstract boolean shouldInformAdmins();
 
+	@Shadow
+	public abstract boolean acceptsFailure();
+
 	@Unique
 	private ScheduledTask.Handler shimmer$scheduledTaskHandler;
 
@@ -39,7 +45,7 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 	private ServerLevel shimmer$overworld;
 
 	@Unique
-	private ServerDataMap shimmer$serverDataMap;
+	private DataMap shimmer$serverDataMap;
 
 	@Override
 	public ScheduledTask.Handler shimmer$getScheduledTaskHandler() {
@@ -51,9 +57,9 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 	}
 
 	@Override
-	public ServerDataMap getServerData() {
+	public DataMap getServerData() {
 		if (shimmer$serverDataMap == null) {
-			shimmer$serverDataMap = new ServerDataMap();
+			shimmer$serverDataMap = new DataMap(DataType.SERVER);
 			shimmer$serverDataMap.load(shimmer$self(), shimmer$self().getWorldPath(LevelResource.ROOT).resolve("shimmer.nbt"));
 		}
 
@@ -62,10 +68,10 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 
 	@Override
 	public void shimmer$playerJoined(ServerPlayer player) {
-		player.shimmer$sessionData().loadPlayerData(shimmer$self());
+		player.shimmer$sessionData().dataMap.load(shimmer$self(), shimmer$self().getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("shimmer").resolve(player.getUUID() + ".nbt"));
 		player.refreshDisplayName();
 		player.refreshTabListName();
-		getServerData().syncAll(player);
+		getServerData().syncAll(player, SyncServerDataPayload::new);
 		s2c(new RefreshNamePayload(player.getUUID()));
 	}
 
@@ -95,10 +101,10 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 			shimmer$scheduledTaskHandler.tick();
 		}
 
-		getServerData().tick(shimmer$self());
+		getServerData().sync(shimmer$self(), null, (playerId, update) -> new SyncServerDataPayload(update));
 
 		for (var player : shimmer$self().getPlayerList().getPlayers()) {
-			player.shimmer$sessionData().syncPlayerData(player);
+			player.shimmer$sessionData().dataMap.sync(player.server, player, SyncPlayerDataPayload::new);
 		}
 	}
 
