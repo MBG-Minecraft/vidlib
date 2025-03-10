@@ -21,18 +21,12 @@ public record PivotingWorldPosition(WorldPosition target, WorldNumber distance, 
 		WorldNumber.CODEC.optionalFieldOf("added_angle", FixedWorldNumber.ZERO.instance()).forGetter(PivotingWorldPosition::addedAngle),
 		WorldNumber.CODEC.optionalFieldOf("height", FixedWorldNumber.ZERO.instance()).forGetter(PivotingWorldPosition::height)
 	).apply(instance, PivotingWorldPosition::new)), CompositeStreamCodec.of(
-		WorldPosition.STREAM_CODEC,
-		PivotingWorldPosition::target,
-		WorldNumber.STREAM_CODEC,
-		PivotingWorldPosition::distance,
-		Easing.STREAM_CODEC,
-		PivotingWorldPosition::easing,
-		WorldNumber.STREAM_CODEC,
-		PivotingWorldPosition::startAngle,
-		WorldNumber.STREAM_CODEC,
-		PivotingWorldPosition::addedAngle,
-		WorldNumber.STREAM_CODEC,
-		PivotingWorldPosition::height,
+		WorldPosition.STREAM_CODEC, PivotingWorldPosition::target,
+		WorldNumber.STREAM_CODEC, PivotingWorldPosition::distance,
+		Easing.STREAM_CODEC, PivotingWorldPosition::easing,
+		WorldNumber.STREAM_CODEC, PivotingWorldPosition::startAngle,
+		WorldNumber.STREAM_CODEC, PivotingWorldPosition::addedAngle,
+		WorldNumber.STREAM_CODEC, PivotingWorldPosition::height,
 		PivotingWorldPosition::new
 	));
 

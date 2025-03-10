@@ -10,10 +10,8 @@ public record ScaledWorldNumber(WorldNumber a, WorldNumber b) implements WorldNu
 		WorldNumber.CODEC.fieldOf("a").forGetter(ScaledWorldNumber::a),
 		WorldNumber.CODEC.fieldOf("b").forGetter(ScaledWorldNumber::b)
 	).apply(instance, ScaledWorldNumber::new)), CompositeStreamCodec.of(
-		WorldNumber.STREAM_CODEC,
-		ScaledWorldNumber::a,
-		WorldNumber.STREAM_CODEC,
-		ScaledWorldNumber::b,
+		WorldNumber.STREAM_CODEC, ScaledWorldNumber::a,
+		WorldNumber.STREAM_CODEC, ScaledWorldNumber::b,
 		ScaledWorldNumber::new
 	));
 

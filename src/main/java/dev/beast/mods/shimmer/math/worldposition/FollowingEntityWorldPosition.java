@@ -20,10 +20,8 @@ public record FollowingEntityWorldPosition(Either<Integer, UUID> entityId, Entit
 		Codec.either(Codec.INT, ShimmerCodecs.UUID).fieldOf("entity_id").forGetter(FollowingEntityWorldPosition::entityId),
 		EntityPositionType.CODEC.optionalFieldOf("position_type", EntityPositionType.CENTER).forGetter(FollowingEntityWorldPosition::positionType)
 	).apply(instance, FollowingEntityWorldPosition::new)), CompositeStreamCodec.of(
-		ByteBufCodecs.either(ByteBufCodecs.VAR_INT, ShimmerStreamCodecs.UUID),
-		FollowingEntityWorldPosition::entityId,
-		EntityPositionType.STREAM_CODEC,
-		FollowingEntityWorldPosition::positionType,
+		ByteBufCodecs.either(ByteBufCodecs.VAR_INT, ShimmerStreamCodecs.UUID), FollowingEntityWorldPosition::entityId,
+		EntityPositionType.STREAM_CODEC, FollowingEntityWorldPosition::positionType,
 		FollowingEntityWorldPosition::new
 	));
 

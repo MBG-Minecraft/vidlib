@@ -10,10 +10,8 @@ public record OffsetWorldNumber(WorldNumber a, WorldNumber b) implements WorldNu
 		WorldNumber.CODEC.fieldOf("a").forGetter(OffsetWorldNumber::a),
 		WorldNumber.CODEC.fieldOf("b").forGetter(OffsetWorldNumber::b)
 	).apply(instance, OffsetWorldNumber::new)), CompositeStreamCodec.of(
-		WorldNumber.STREAM_CODEC,
-		OffsetWorldNumber::a,
-		WorldNumber.STREAM_CODEC,
-		OffsetWorldNumber::b,
+		WorldNumber.STREAM_CODEC, OffsetWorldNumber::a,
+		WorldNumber.STREAM_CODEC, OffsetWorldNumber::b,
 		OffsetWorldNumber::new
 	));
 

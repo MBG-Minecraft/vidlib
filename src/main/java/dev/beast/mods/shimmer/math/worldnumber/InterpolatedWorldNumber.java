@@ -17,16 +17,11 @@ public record InterpolatedWorldNumber(Easing easing, float start, float end, Wor
 		WorldNumber.CODEC.fieldOf("from").forGetter(InterpolatedWorldNumber::from),
 		WorldNumber.CODEC.fieldOf("to").forGetter(InterpolatedWorldNumber::to)
 	).apply(instance, InterpolatedWorldNumber::new)), CompositeStreamCodec.of(
-		Easing.STREAM_CODEC,
-		InterpolatedWorldNumber::easing,
-		ByteBufCodecs.FLOAT,
-		InterpolatedWorldNumber::start,
-		ByteBufCodecs.FLOAT,
-		InterpolatedWorldNumber::end,
-		WorldNumber.STREAM_CODEC,
-		InterpolatedWorldNumber::from,
-		WorldNumber.STREAM_CODEC,
-		InterpolatedWorldNumber::to,
+		Easing.STREAM_CODEC, InterpolatedWorldNumber::easing,
+		ByteBufCodecs.FLOAT, InterpolatedWorldNumber::start,
+		ByteBufCodecs.FLOAT, InterpolatedWorldNumber::end,
+		WorldNumber.STREAM_CODEC, InterpolatedWorldNumber::from,
+		WorldNumber.STREAM_CODEC, InterpolatedWorldNumber::to,
 		InterpolatedWorldNumber::new
 	));
 

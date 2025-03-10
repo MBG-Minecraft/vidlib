@@ -61,16 +61,11 @@ public record ClockFont(
 	).apply(instance, ClockFont::create));
 
 	public static final StreamCodec<ByteBuf, ClockFont> DIRECT_STREAM_CODEC = CompositeStreamCodec.of(
-		ResourceLocation.STREAM_CODEC,
-		ClockFont::id,
-		ResourceLocation.STREAM_CODEC,
-		ClockFont::texture,
-		Size2.STREAM_CODEC,
-		ClockFont::size,
-		Size2.STREAM_CODEC,
-		ClockFont::textureSize,
-		ByteBufCodecs.VAR_INT,
-		ClockFont::separatorWidth,
+		ResourceLocation.STREAM_CODEC, ClockFont::id,
+		ResourceLocation.STREAM_CODEC, ClockFont::texture,
+		Size2.STREAM_CODEC, ClockFont::size,
+		Size2.STREAM_CODEC, ClockFont::textureSize,
+		ByteBufCodecs.VAR_INT, ClockFont::separatorWidth,
 		ClockFont::create
 	);
 

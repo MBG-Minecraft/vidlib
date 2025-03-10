@@ -60,12 +60,9 @@ public record RotatedBoxZoneShape(Vec3 pos, Size3f size, Rotation rotation, Matr
 		Size3f.CODEC.fieldOf("size").forGetter(RotatedBoxZoneShape::size),
 		Rotation.CODEC.fieldOf("rotation").forGetter(RotatedBoxZoneShape::rotation)
 	).apply(instance, RotatedBoxZoneShape::of)), CompositeStreamCodec.of(
-		ShimmerStreamCodecs.VEC_3,
-		RotatedBoxZoneShape::pos,
-		Size3f.STREAM_CODEC,
-		RotatedBoxZoneShape::size,
-		Rotation.STREAM_CODEC,
-		RotatedBoxZoneShape::rotation,
+		ShimmerStreamCodecs.VEC_3, RotatedBoxZoneShape::pos,
+		Size3f.STREAM_CODEC, RotatedBoxZoneShape::size,
+		Rotation.STREAM_CODEC, RotatedBoxZoneShape::rotation,
 		RotatedBoxZoneShape::of
 	));
 

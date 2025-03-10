@@ -13,10 +13,8 @@ public record OffsetWorldPosition(WorldPosition a, WorldPosition b) implements W
 		WorldPosition.CODEC.fieldOf("a").forGetter(OffsetWorldPosition::a),
 		WorldPosition.CODEC.fieldOf("b").forGetter(OffsetWorldPosition::b)
 	).apply(instance, OffsetWorldPosition::new)), CompositeStreamCodec.of(
-		WorldPosition.STREAM_CODEC,
-		OffsetWorldPosition::a,
-		WorldPosition.STREAM_CODEC,
-		OffsetWorldPosition::b,
+		WorldPosition.STREAM_CODEC, OffsetWorldPosition::a,
+		WorldPosition.STREAM_CODEC, OffsetWorldPosition::b,
 		OffsetWorldPosition::new
 	));
 

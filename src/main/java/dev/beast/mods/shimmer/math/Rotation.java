@@ -64,12 +64,9 @@ public record Rotation(float yaw, float pitch, float roll, Type type) {
 	);
 
 	public static final StreamCodec<ByteBuf, Rotation> STREAM_CODEC = CompositeStreamCodec.of(
-		ByteBufCodecs.FLOAT,
-		Rotation::yawDeg,
-		ByteBufCodecs.FLOAT,
-		Rotation::pitchDeg,
-		ByteBufCodecs.FLOAT,
-		Rotation::rollDeg,
+		ByteBufCodecs.FLOAT, Rotation::yawDeg,
+		ByteBufCodecs.FLOAT, Rotation::pitchDeg,
+		ByteBufCodecs.FLOAT, Rotation::rollDeg,
 		Rotation::deg
 	);
 

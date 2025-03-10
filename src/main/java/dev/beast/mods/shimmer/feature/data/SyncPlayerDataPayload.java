@@ -11,10 +11,8 @@ import java.util.UUID;
 
 public record SyncPlayerDataPayload(UUID player, List<DataMapValue> update) implements ShimmerPacketPayload {
 	public static final ShimmerPacketType<SyncPlayerDataPayload> TYPE = ShimmerPacketType.internal("sync_player_data", CompositeStreamCodec.of(
-		ShimmerStreamCodecs.UUID,
-		SyncPlayerDataPayload::player,
-		DataType.PLAYER.valueListStreamCodec,
-		SyncPlayerDataPayload::update,
+		ShimmerStreamCodecs.UUID, SyncPlayerDataPayload::player,
+		DataType.PLAYER.valueListStreamCodec, SyncPlayerDataPayload::update,
 		SyncPlayerDataPayload::new
 	));
 

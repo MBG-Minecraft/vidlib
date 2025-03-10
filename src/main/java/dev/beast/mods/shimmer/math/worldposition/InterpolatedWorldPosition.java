@@ -20,16 +20,11 @@ public record InterpolatedWorldPosition(Easing easing, float start, float end, W
 		WorldPosition.CODEC.fieldOf("from").forGetter(InterpolatedWorldPosition::from),
 		WorldPosition.CODEC.fieldOf("to").forGetter(InterpolatedWorldPosition::to)
 	).apply(instance, InterpolatedWorldPosition::new)), CompositeStreamCodec.of(
-		Easing.STREAM_CODEC,
-		InterpolatedWorldPosition::easing,
-		ByteBufCodecs.FLOAT,
-		InterpolatedWorldPosition::start,
-		ByteBufCodecs.FLOAT,
-		InterpolatedWorldPosition::end,
-		WorldPosition.STREAM_CODEC,
-		InterpolatedWorldPosition::from,
-		WorldPosition.STREAM_CODEC,
-		InterpolatedWorldPosition::to,
+		Easing.STREAM_CODEC, InterpolatedWorldPosition::easing,
+		ByteBufCodecs.FLOAT, InterpolatedWorldPosition::start,
+		ByteBufCodecs.FLOAT, InterpolatedWorldPosition::end,
+		WorldPosition.STREAM_CODEC, InterpolatedWorldPosition::from,
+		WorldPosition.STREAM_CODEC, InterpolatedWorldPosition::to,
 		InterpolatedWorldPosition::new
 	));
 

@@ -33,18 +33,12 @@ public record Zone(
 	).apply(instance, Zone::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, Zone> STREAM_CODEC = CompositeStreamCodec.of(
-		ZoneShape.REGISTRY.valueStreamCodec(),
-		Zone::shape,
-		Color.STREAM_CODEC,
-		Zone::color,
-		EntityFilter.STREAM_CODEC,
-		Zone::entityFilter,
-		ShimmerStreamCodecs.COMPOUND_TAG.optional(Empty.COMPOUND_TAG),
-		Zone::data,
-		EntityOverride.OVERRIDE_MAP_STREAM_CODEC,
-		Zone::playerOverrides,
-		EntityFilter.STREAM_CODEC,
-		Zone::solid,
+		ZoneShape.REGISTRY.valueStreamCodec(), Zone::shape,
+		Color.STREAM_CODEC, Zone::color,
+		EntityFilter.STREAM_CODEC, Zone::entityFilter,
+		ShimmerStreamCodecs.COMPOUND_TAG.optional(Empty.COMPOUND_TAG), Zone::data,
+		EntityOverride.OVERRIDE_MAP_STREAM_CODEC, Zone::playerOverrides,
+		EntityFilter.STREAM_CODEC, Zone::solid,
 		Zone::new
 	);
 }

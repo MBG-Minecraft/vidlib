@@ -10,10 +10,8 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record FakeBlockPayload(BlockPos pos, BlockState state) implements ShimmerPacketPayload {
 	public static final ShimmerPacketType<FakeBlockPayload> TYPE = ShimmerPacketType.internal("fake_block", CompositeStreamCodec.of(
-		BlockPos.STREAM_CODEC,
-		FakeBlockPayload::pos,
-		ShimmerStreamCodecs.BLOCK_STATE,
-		FakeBlockPayload::state,
+		BlockPos.STREAM_CODEC, FakeBlockPayload::pos,
+		ShimmerStreamCodecs.BLOCK_STATE, FakeBlockPayload::state,
 		FakeBlockPayload::new
 	));
 

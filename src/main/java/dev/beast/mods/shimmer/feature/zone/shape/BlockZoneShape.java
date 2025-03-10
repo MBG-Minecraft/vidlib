@@ -15,10 +15,8 @@ public record BlockZoneShape(BlockPos start, BlockPos end, AABB box) implements 
 		BlockPos.CODEC.fieldOf("start").forGetter(BlockZoneShape::start),
 		BlockPos.CODEC.fieldOf("end").forGetter(BlockZoneShape::end)
 	).apply(instance, BlockZoneShape::new)), CompositeStreamCodec.of(
-		BlockPos.STREAM_CODEC,
-		BlockZoneShape::start,
-		BlockPos.STREAM_CODEC,
-		BlockZoneShape::end,
+		BlockPos.STREAM_CODEC, BlockZoneShape::start,
+		BlockPos.STREAM_CODEC, BlockZoneShape::end,
 		BlockZoneShape::new
 	));
 

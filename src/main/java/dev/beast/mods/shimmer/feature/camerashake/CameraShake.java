@@ -29,20 +29,13 @@ public record CameraShake(
 	).apply(instance, CameraShake::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, CameraShake> STREAM_CODEC = CompositeStreamCodec.of(
-		CameraShakeType.REGISTRY.valueStreamCodec(),
-		CameraShake::type,
-		ByteBufCodecs.VAR_INT,
-		CameraShake::duration,
-		ByteBufCodecs.FLOAT,
-		CameraShake::speed,
-		ByteBufCodecs.FLOAT,
-		CameraShake::intensity,
-		EasingGroup.STREAM_CODEC,
-		CameraShake::start,
-		EasingGroup.STREAM_CODEC,
-		CameraShake::end,
-		ByteBufCodecs.BOOL,
-		CameraShake::motionBlur,
+		CameraShakeType.REGISTRY.valueStreamCodec(), CameraShake::type,
+		ByteBufCodecs.VAR_INT, CameraShake::duration,
+		ByteBufCodecs.FLOAT, CameraShake::speed,
+		ByteBufCodecs.FLOAT, CameraShake::intensity,
+		EasingGroup.STREAM_CODEC, CameraShake::start,
+		EasingGroup.STREAM_CODEC, CameraShake::end,
+		ByteBufCodecs.BOOL, CameraShake::motionBlur,
 		CameraShake::new
 	);
 

@@ -40,20 +40,13 @@ public record Clock(
 	).apply(instance, Clock::new));
 
 	public static final StreamCodec<ByteBuf, Clock> STREAM_CODEC = CompositeStreamCodec.of(
-		ResourceLocation.STREAM_CODEC,
-		Clock::id,
-		ShimmerStreamCodecs.DIMENSION.optional(Level.OVERWORLD),
-		Clock::dimension,
-		ByteBufCodecs.VAR_INT,
-		Clock::maxTicks,
-		ByteBufCodecs.BOOL,
-		Clock::countDown,
-		ByteBufCodecs.VAR_INT,
-		Clock::flash,
-		ByteBufCodecs.STRING_UTF8.unboundedMap(ShimmerStreamCodecs.VAR_INT_LIST),
-		Clock::events,
-		ClockLocation.STREAM_CODEC.list(),
-		Clock::locations,
+		ResourceLocation.STREAM_CODEC, Clock::id,
+		ShimmerStreamCodecs.DIMENSION.optional(Level.OVERWORLD), Clock::dimension,
+		ByteBufCodecs.VAR_INT, Clock::maxTicks,
+		ByteBufCodecs.BOOL, Clock::countDown,
+		ByteBufCodecs.VAR_INT, Clock::flash,
+		ByteBufCodecs.STRING_UTF8.unboundedMap(ShimmerStreamCodecs.VAR_INT_LIST), Clock::events,
+		ClockLocation.STREAM_CODEC.list(), Clock::locations,
 		Clock::new
 	);
 

@@ -17,10 +17,8 @@ public record LemniscateCameraShakeType(float xScale, float yScale) implements C
 		Codec.FLOAT.optionalFieldOf("x_scale", 1F).forGetter(LemniscateCameraShakeType::xScale),
 		Codec.FLOAT.optionalFieldOf("y_scale", 1F).forGetter(LemniscateCameraShakeType::yScale)
 	).apply(instance, LemniscateCameraShakeType::new)), CompositeStreamCodec.of(
-		ByteBufCodecs.FLOAT,
-		LemniscateCameraShakeType::xScale,
-		ByteBufCodecs.FLOAT,
-		LemniscateCameraShakeType::yScale,
+		ByteBufCodecs.FLOAT, LemniscateCameraShakeType::xScale,
+		ByteBufCodecs.FLOAT, LemniscateCameraShakeType::yScale,
 		LemniscateCameraShakeType::new
 	));
 

@@ -16,18 +16,12 @@ public record AAIBB(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) 
 	public static final Codec<AAIBB> CODEC = Codec.INT_STREAM.comapFlatMap(r -> Util.fixedSize(r, 6).map(AAIBB::new), AAIBB::toIntStream).stable();
 
 	public static final StreamCodec<ByteBuf, AAIBB> STREAM_CODEC = CompositeStreamCodec.of(
-		ByteBufCodecs.VAR_INT,
-		AAIBB::minX,
-		ByteBufCodecs.VAR_INT,
-		AAIBB::minY,
-		ByteBufCodecs.VAR_INT,
-		AAIBB::minZ,
-		ByteBufCodecs.VAR_INT,
-		AAIBB::maxX,
-		ByteBufCodecs.VAR_INT,
-		AAIBB::maxY,
-		ByteBufCodecs.VAR_INT,
-		AAIBB::maxZ,
+		ByteBufCodecs.VAR_INT, AAIBB::minX,
+		ByteBufCodecs.VAR_INT, AAIBB::minY,
+		ByteBufCodecs.VAR_INT, AAIBB::minZ,
+		ByteBufCodecs.VAR_INT, AAIBB::maxX,
+		ByteBufCodecs.VAR_INT, AAIBB::maxY,
+		ByteBufCodecs.VAR_INT, AAIBB::maxZ,
 		AAIBB::new
 	);
 

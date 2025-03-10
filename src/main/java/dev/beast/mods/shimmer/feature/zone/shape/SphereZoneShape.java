@@ -21,10 +21,8 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 		ShimmerCodecs.VEC_3D.fieldOf("pos").forGetter(SphereZoneShape::pos),
 		Codec.doubleRange(0D, Double.POSITIVE_INFINITY).fieldOf("radius").forGetter(SphereZoneShape::radius)
 	).apply(instance, SphereZoneShape::new)), CompositeStreamCodec.of(
-		ShimmerStreamCodecs.VEC_3,
-		SphereZoneShape::pos,
-		ByteBufCodecs.DOUBLE,
-		SphereZoneShape::radius,
+		ShimmerStreamCodecs.VEC_3, SphereZoneShape::pos,
+		ByteBufCodecs.DOUBLE, SphereZoneShape::radius,
 		SphereZoneShape::new
 	));
 

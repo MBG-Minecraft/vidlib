@@ -11,10 +11,8 @@ public record EntityXorFilter(EntityFilter a, EntityFilter b) implements EntityF
 		EntityFilter.CODEC.fieldOf("a").forGetter(EntityXorFilter::a),
 		EntityFilter.CODEC.fieldOf("b").forGetter(EntityXorFilter::b)
 	).apply(instance, EntityXorFilter::new)), CompositeStreamCodec.of(
-		EntityFilter.STREAM_CODEC,
-		EntityXorFilter::a,
-		EntityFilter.STREAM_CODEC,
-		EntityXorFilter::b,
+		EntityFilter.STREAM_CODEC, EntityXorFilter::a,
+		EntityFilter.STREAM_CODEC, EntityXorFilter::b,
 		EntityXorFilter::new
 	));
 

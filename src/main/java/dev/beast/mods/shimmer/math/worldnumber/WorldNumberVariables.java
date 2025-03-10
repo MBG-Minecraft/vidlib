@@ -20,10 +20,8 @@ public record WorldNumberVariables(Map<String, WorldNumber> numbers, Map<String,
 	).apply(instance, WorldNumberVariables::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, WorldNumberVariables> STREAM_CODEC = CompositeStreamCodec.of(
-		ByteBufCodecs.STRING_UTF8.unboundedMap(WorldNumber.STREAM_CODEC),
-		WorldNumberVariables::numbers,
-		ByteBufCodecs.STRING_UTF8.unboundedMap(WorldPosition.STREAM_CODEC),
-		WorldNumberVariables::positions,
+		ByteBufCodecs.STRING_UTF8.unboundedMap(WorldNumber.STREAM_CODEC), WorldNumberVariables::numbers,
+		ByteBufCodecs.STRING_UTF8.unboundedMap(WorldPosition.STREAM_CODEC), WorldNumberVariables::positions,
 		WorldNumberVariables::new
 	);
 

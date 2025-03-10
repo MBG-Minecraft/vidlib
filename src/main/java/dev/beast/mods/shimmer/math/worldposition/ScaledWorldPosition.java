@@ -13,10 +13,8 @@ public record ScaledWorldPosition(WorldPosition a, WorldPosition b) implements W
 		WorldPosition.CODEC.fieldOf("a").forGetter(ScaledWorldPosition::a),
 		WorldPosition.CODEC.fieldOf("b").forGetter(ScaledWorldPosition::b)
 	).apply(instance, ScaledWorldPosition::new)), CompositeStreamCodec.of(
-		WorldPosition.STREAM_CODEC,
-		ScaledWorldPosition::a,
-		WorldPosition.STREAM_CODEC,
-		ScaledWorldPosition::b,
+		WorldPosition.STREAM_CODEC, ScaledWorldPosition::a,
+		WorldPosition.STREAM_CODEC, ScaledWorldPosition::b,
 		ScaledWorldPosition::new
 	));
 

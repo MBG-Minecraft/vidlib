@@ -19,12 +19,9 @@ public record CubeParticleOptions(Color color, Color lineColor, int lifetime) im
 	).apply(instance, CubeParticleOptions::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, CubeParticleOptions> STREAM_CODEC = CompositeStreamCodec.of(
-		Color.STREAM_CODEC,
-		CubeParticleOptions::color,
-		Color.STREAM_CODEC,
-		CubeParticleOptions::lineColor,
-		ByteBufCodecs.VAR_INT,
-		CubeParticleOptions::lifetime,
+		Color.STREAM_CODEC, CubeParticleOptions::color,
+		Color.STREAM_CODEC, CubeParticleOptions::lineColor,
+		ByteBufCodecs.VAR_INT, CubeParticleOptions::lifetime,
 		CubeParticleOptions::new
 	);
 

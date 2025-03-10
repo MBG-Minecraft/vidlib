@@ -11,20 +11,13 @@ import java.util.List;
 
 public record CreateFireworksPayload(double x, double y, double z, double vx, double vy, double vz, List<FireworkExplosion> explosions) implements ShimmerPacketPayload {
 	public static final ShimmerPacketType<CreateFireworksPayload> TYPE = ShimmerPacketType.internal("create_fireworks", CompositeStreamCodec.of(
-		ByteBufCodecs.DOUBLE,
-		CreateFireworksPayload::x,
-		ByteBufCodecs.DOUBLE,
-		CreateFireworksPayload::y,
-		ByteBufCodecs.DOUBLE,
-		CreateFireworksPayload::z,
-		ByteBufCodecs.DOUBLE,
-		CreateFireworksPayload::vx,
-		ByteBufCodecs.DOUBLE,
-		CreateFireworksPayload::vy,
-		ByteBufCodecs.DOUBLE,
-		CreateFireworksPayload::vz,
-		FireworkExplosion.STREAM_CODEC.list(),
-		CreateFireworksPayload::explosions,
+		ByteBufCodecs.DOUBLE, CreateFireworksPayload::x,
+		ByteBufCodecs.DOUBLE, CreateFireworksPayload::y,
+		ByteBufCodecs.DOUBLE, CreateFireworksPayload::z,
+		ByteBufCodecs.DOUBLE, CreateFireworksPayload::vx,
+		ByteBufCodecs.DOUBLE, CreateFireworksPayload::vy,
+		ByteBufCodecs.DOUBLE, CreateFireworksPayload::vz,
+		FireworkExplosion.STREAM_CODEC.list(), CreateFireworksPayload::explosions,
 		CreateFireworksPayload::new
 	));
 

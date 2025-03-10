@@ -37,12 +37,9 @@ public record Size3f(float x, float y, float z) {
 	);
 
 	public static final StreamCodec<ByteBuf, Size3f> STREAM_CODEC = CompositeStreamCodec.of(
-		ByteBufCodecs.FLOAT,
-		Size3f::x,
-		ByteBufCodecs.FLOAT,
-		Size3f::y,
-		ByteBufCodecs.FLOAT,
-		Size3f::z,
+		ByteBufCodecs.FLOAT, Size3f::x,
+		ByteBufCodecs.FLOAT, Size3f::y,
+		ByteBufCodecs.FLOAT, Size3f::z,
 		Size3f::of
 	);
 
