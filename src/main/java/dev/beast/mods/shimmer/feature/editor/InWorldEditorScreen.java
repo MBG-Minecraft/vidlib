@@ -1,10 +1,10 @@
 package dev.beast.mods.shimmer.feature.editor;
 
+import dev.beast.mods.shimmer.math.Rotation;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 public class InWorldEditorScreen extends Screen {
 	public Vec3 prevCameraPosition = Vec3.ZERO;
@@ -34,7 +34,7 @@ public class InWorldEditorScreen extends Screen {
 	}
 
 	@Override
-	public Vector3f getCameraRotation(float delta, Vec3 cameraPos) {
-		return new Vector3f((float) Mth.rotLerp(delta, prevCameraYaw, cameraYaw), (float) Mth.rotLerp(delta, prevCameraPitch, cameraPitch), 0F);
+	public Rotation getCameraRotation(float delta, Vec3 cameraPos) {
+		return Rotation.deg((float) Mth.rotLerp(delta, prevCameraYaw, cameraYaw), (float) Mth.rotLerp(delta, prevCameraPitch, cameraPitch));
 	}
 }

@@ -96,6 +96,21 @@ public record Rotation(float yaw, float pitch, float roll, Type type) {
 		return yaw == 0F ? NONE : new Rotation(yaw, 0F, 0F, Type.RAD);
 	}
 
+	public static Rotation compute(Vec3 source, Vec3 target, float roll) {
+		double dx = target.x() - source.x();
+		double dy = target.y() - source.y();
+		double dz = target.z() - source.z();
+
+		double yaw = Math.atan2(dz, dx) - Math.PI / 2D;
+		double pitch = -Math.atan2(dy, Math.sqrt(dx * dx + dz * dz));
+
+		return rad((float) yaw, (float) pitch, roll);
+	}
+
+	public static Rotation compute(Vec3 source, Vec3 target) {
+		return compute(source, target, 0F);
+	}
+
 	public float yawDeg() {
 		return type == Type.DEG ? yaw : yaw * DEG;
 	}
@@ -128,18 +143,19 @@ public record Rotation(float yaw, float pitch, float roll, Type type) {
 		return this == NONE || type == Type.RAD ? this : new Rotation(yaw * RAD, pitch * RAD, roll * RAD, Type.RAD);
 	}
 
-	public static Rotation compute(Vec3 source, Vec3 target, float roll) {
-		double dx = target.x() - source.x();
-		double dy = target.y() - source.y();
-		double dz = target.z() - source.z();
-
-		double yaw = Math.atan2(dz, dx) - Math.PI / 2D;
-		double pitch = -Math.atan2(dy, Math.sqrt(dx * dx + dz * dz));
-
-		return rad((float) yaw, (float) pitch, roll);
-	}
-
-	public static Rotation compute(Vec3 source, Vec3 target) {
-		return compute(source, target, 0F);
+	public Rotation lerp(float delta, Rotation to) {
+		if (type == to.type) {
+			return type.of(
+				KMath.lerp(delta, yaw, to.yaw),
+				KMath.lerp(delta, pitch, to.pitch),
+				KMath.lerp(delta, roll, to.roll)
+			);
+		} else {
+			return deg(
+				KMath.lerp(delta, yawDeg(), to.yawDeg()),
+				KMath.lerp(delta, pitchDeg(), to.pitchDeg()),
+				KMath.lerp(delta, rollDeg(), to.rollDeg())
+			);
+		}
 	}
 }

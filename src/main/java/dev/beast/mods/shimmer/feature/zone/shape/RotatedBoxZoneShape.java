@@ -30,9 +30,9 @@ public record RotatedBoxZoneShape(Vec3 pos, Size3f size, Rotation rotation, Matr
 		matrix.rotateY(rotation.yawRad());
 		var imatrix = new Matrix3f(matrix).invert();
 
-		var hsx = (float) (size.x() / 2D);
-		var hsy = (float) (size.y() / 2D);
-		var hsz = (float) (size.z() / 2D);
+		var hsx = size.x() / 2F;
+		var hsy = size.y() / 2F;
+		var hsz = size.z() / 2F;
 
 		var cnnn = new Vector3f(-hsx, -hsy, -hsz).mul(matrix);
 		var cpnn = new Vector3f(+hsx, -hsy, -hsz).mul(matrix);
