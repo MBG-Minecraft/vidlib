@@ -4,14 +4,6 @@ import dev.beast.mods.shimmer.feature.multiverse.VoidSpecialEffects;
 import dev.beast.mods.shimmer.feature.particle.ShimmerClientParticles;
 import dev.beast.mods.shimmer.feature.structure.ClientStructureStorage;
 import dev.beast.mods.shimmer.feature.structure.GhostStructure;
-import dev.beast.mods.shimmer.feature.zone.RotatedBoxZoneShape;
-import dev.beast.mods.shimmer.feature.zone.SphereZoneShape;
-import dev.beast.mods.shimmer.feature.zone.UniverseZoneShape;
-import dev.beast.mods.shimmer.feature.zone.ZoneShapeGroup;
-import dev.beast.mods.shimmer.feature.zone.renderer.EmptyZoneRenderer;
-import dev.beast.mods.shimmer.feature.zone.renderer.GroupZoneRenderer;
-import dev.beast.mods.shimmer.feature.zone.renderer.RotatedBoxZoneRenderer;
-import dev.beast.mods.shimmer.feature.zone.renderer.SphereZoneRenderer;
 import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -25,10 +17,7 @@ import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 public class ClientModEventHandler {
 	@SubscribeEvent
 	public static void clientSetup(FMLClientSetupEvent event) {
-		ZoneRenderer.register(UniverseZoneShape.TYPE, EmptyZoneRenderer.INSTANCE);
-		ZoneRenderer.register(ZoneShapeGroup.TYPE, new GroupZoneRenderer());
-		ZoneRenderer.register(SphereZoneShape.TYPE, new SphereZoneRenderer());
-		ZoneRenderer.register(RotatedBoxZoneShape.TYPE, new RotatedBoxZoneRenderer());
+		ZoneRenderer.bootstrap();
 	}
 
 	@SubscribeEvent

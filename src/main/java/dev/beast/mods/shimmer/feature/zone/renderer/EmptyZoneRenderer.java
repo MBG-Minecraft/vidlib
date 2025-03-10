@@ -1,6 +1,6 @@
 package dev.beast.mods.shimmer.feature.zone.renderer;
 
-import dev.beast.mods.shimmer.feature.zone.ZoneShape;
+import dev.beast.mods.shimmer.feature.zone.shape.ZoneShape;
 
 public class EmptyZoneRenderer implements ZoneRenderer<ZoneShape> {
 	public static final EmptyZoneRenderer INSTANCE = new EmptyZoneRenderer();

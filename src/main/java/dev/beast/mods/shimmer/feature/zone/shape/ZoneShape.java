@@ -1,7 +1,11 @@
-package dev.beast.mods.shimmer.feature.zone;
+package dev.beast.mods.shimmer.feature.zone.shape;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import dev.beast.mods.shimmer.feature.zone.Zone;
+import dev.beast.mods.shimmer.feature.zone.ZoneClipResult;
+import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
+import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
 import dev.beast.mods.shimmer.math.AAIBB;
 import dev.beast.mods.shimmer.math.Line;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistry;
@@ -73,7 +77,7 @@ public interface ZoneShape {
 	}
 
 	default Stream<BlockPos> getBlocks() {
-		return BlockPos.betweenClosedStream(getBoundingBox());
+		return BlockPos.betweenClosedStream(getBoundingBox().inflate(0.5D)).filter(p -> contains(new Vec3(p.getX() + 0.5D, p.getY() + 0.5D, p.getZ() + 0.5D)));
 	}
 
 	default List<Entity> collectEntities(Level level, Predicate<? super Entity> predicate) {

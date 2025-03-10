@@ -2,13 +2,12 @@ package dev.beast.mods.shimmer.feature.cutscene;
 
 import dev.beast.mods.shimmer.feature.misc.CameraOverride;
 import dev.beast.mods.shimmer.math.KMath;
+import dev.beast.mods.shimmer.math.Rotation;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -182,14 +181,7 @@ public class ClientCutscene implements CameraOverride {
 	}
 
 	@Override
-	public Vector3f getCameraRotation(float delta, Vec3 cameraPos) {
-		var t = prevTarget.lerp(target, delta);
-
-		double dx = t.x - cameraPos.x;
-		double dy = t.y - cameraPos.y;
-		double dz = t.z - cameraPos.z;
-		double hl = Math.sqrt(dx * dx + dz * dz);
-
-		return new Vector3f(Mth.wrapDegrees((float) (Math.toDegrees(Mth.atan2(dz, dx)) - 90F)), Mth.wrapDegrees((float) (-(Math.toDegrees(Mth.atan2(dy, hl))))), 0F);
+	public Rotation getCameraRotation(float delta, Vec3 cameraPos) {
+		return Rotation.compute(cameraPos, prevTarget.lerp(target, delta));
 	}
 }

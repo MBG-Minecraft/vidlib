@@ -1,21 +1,20 @@
-package dev.beast.mods.shimmer.feature.zone;
+package dev.beast.mods.shimmer.feature.zone.shape;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.feature.zone.ZoneClipResult;
+import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
 import dev.beast.mods.shimmer.math.Line;
 import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import dev.beast.mods.shimmer.util.ShimmerCodecs;
 import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.stream.Stream;
 
 public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements ZoneShape {
 	public static final SimpleRegistryType<SphereZoneShape> TYPE = SimpleRegistryType.dynamic(Shimmer.id("sphere"), RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -94,11 +93,6 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 		double dy = pos.y() - Math.clamp(pos.y, box.minY, box.maxY);
 		double dz = pos.z() - Math.clamp(pos.z, box.minZ, box.maxZ);
 		return dx * dx + dy * dy + dz * dz < radius * radius;
-	}
-
-	@Override
-	public Stream<BlockPos> getBlocks() {
-		return BlockPos.betweenClosedStream(box).filter(p -> pos.distanceToSqr(p.getX() + 0.5D, p.getY() + 0.5D, p.getZ() + 0.5D) <= radius * radius);
 	}
 
 	@Override

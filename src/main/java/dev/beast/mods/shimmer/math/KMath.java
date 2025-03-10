@@ -6,14 +6,17 @@ import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.ShortTag;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import java.text.DecimalFormat;
+import java.util.List;
 
 @SuppressWarnings("ManualMinMaxCalculation")
 public interface KMath {
 	DecimalFormat SHORT_DECIMAL_FORMAT = new DecimalFormat("#.##");
 	DecimalFormat LONG_DECIMAL_FORMAT = new DecimalFormat("#.####");
+	List<AABB> CLIP_BOX_LIST = List.of(new AABB(-0.5D, -0.5D, -0.5D, 0.5D, 0.5D, 0.5D));
 
 	static String format(float value) {
 		if (value == (int) value) {
@@ -159,5 +162,21 @@ public interface KMath {
 		double t1 = 1D - t;
 		double v = -(p1x - 8D * p2x + p3x) / 6D;
 		return t1 * t1 * t1 * p1x + 3D * t * t1 * t1 * v + 3D * t * t * t1 * v + t * t * t * p3x;
+	}
+
+	static double min8(double a, double b, double c, double d, double e, double f, double g, double h) {
+		return Math.min(Math.min(Math.min(Math.min(Math.min(Math.min(a, b), c), d), e), f), Math.min(g, h));
+	}
+
+	static double max8(double a, double b, double c, double d, double e, double f, double g, double h) {
+		return Math.max(Math.max(Math.max(Math.max(Math.max(Math.max(a, b), c), d), e), f), Math.max(g, h));
+	}
+
+	static float min8(float a, float b, float c, float d, float e, float f, float g, float h) {
+		return Math.min(Math.min(Math.min(Math.min(Math.min(Math.min(a, b), c), d), e), f), Math.min(g, h));
+	}
+
+	static float max8(float a, float b, float c, float d, float e, float f, float g, float h) {
+		return Math.max(Math.max(Math.max(Math.max(Math.max(Math.max(a, b), c), d), e), f), Math.max(g, h));
 	}
 }

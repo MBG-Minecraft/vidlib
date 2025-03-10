@@ -24,7 +24,7 @@ import dev.beast.mods.shimmer.feature.session.RemovePlayerDataPayload;
 import dev.beast.mods.shimmer.feature.toolitem.PositionToolItem;
 import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
 import dev.beast.mods.shimmer.feature.zone.SyncZonesPayload;
-import dev.beast.mods.shimmer.feature.zone.ZoneShape;
+import dev.beast.mods.shimmer.feature.zone.shape.ZoneShape;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumber;
 import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
 import dev.beast.mods.shimmer.util.KnownCodec;

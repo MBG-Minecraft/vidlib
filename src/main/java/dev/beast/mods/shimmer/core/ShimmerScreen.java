@@ -1,8 +1,8 @@
 package dev.beast.mods.shimmer.core;
 
 import dev.beast.mods.shimmer.feature.misc.CameraOverride;
+import dev.beast.mods.shimmer.math.Rotation;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 public interface ShimmerScreen extends CameraOverride {
 	@Override
@@ -16,7 +16,7 @@ public interface ShimmerScreen extends CameraOverride {
 	}
 
 	@Override
-	default Vector3f getCameraRotation(float delta, Vec3 cameraPos) {
-		return new Vector3f();
+	default Rotation getCameraRotation(float delta, Vec3 cameraPos) {
+		return Rotation.NONE;
 	}
 }

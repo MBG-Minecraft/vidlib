@@ -1,4 +1,4 @@
-package dev.beast.mods.shimmer.feature.zone;
+package dev.beast.mods.shimmer.feature.zone.shape;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;

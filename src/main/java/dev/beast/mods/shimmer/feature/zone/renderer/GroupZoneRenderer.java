@@ -1,6 +1,6 @@
 package dev.beast.mods.shimmer.feature.zone.renderer;
 
-import dev.beast.mods.shimmer.feature.zone.ZoneShapeGroup;
+import dev.beast.mods.shimmer.feature.zone.shape.ZoneShapeGroup;
 import dev.beast.mods.shimmer.util.Cast;
 
 public class GroupZoneRenderer implements ZoneRenderer<ZoneShapeGroup> {

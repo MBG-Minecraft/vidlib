@@ -1,10 +1,10 @@
 package dev.beast.mods.shimmer.feature.misc;
 
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
+import dev.beast.mods.shimmer.math.Rotation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
 
 public interface CameraOverride {
 	@Nullable
@@ -32,5 +32,5 @@ public interface CameraOverride {
 
 	Vec3 getCameraPosition(float delta);
 
-	Vector3f getCameraRotation(float delta, Vec3 cameraPos);
+	Rotation getCameraRotation(float delta, Vec3 cameraPos);
 }

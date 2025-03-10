@@ -61,7 +61,7 @@ public abstract class CameraMixin implements ShimmerCamera {
 			var pos = override.getCameraPosition(delta);
 			setPosition(pos);
 			var rot = override.getCameraRotation(delta, pos);
-			setRotation(rot.x, rot.y, rot.z);
+			setRotation(rot.yawDeg(), rot.pitchDeg(), rot.rollDeg());
 			mc.shimmer$applyCameraShake((Camera) (Object) this, delta);
 			ci.cancel();
 		}

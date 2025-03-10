@@ -5,7 +5,11 @@ import dev.beast.mods.shimmer.feature.block.filter.BlockFilter;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.session.ShimmerLocalClientSessionData;
 import dev.beast.mods.shimmer.feature.zone.ZoneRenderType;
-import dev.beast.mods.shimmer.feature.zone.ZoneShape;
+import dev.beast.mods.shimmer.feature.zone.shape.RotatedBoxZoneShape;
+import dev.beast.mods.shimmer.feature.zone.shape.SphereZoneShape;
+import dev.beast.mods.shimmer.feature.zone.shape.UniverseZoneShape;
+import dev.beast.mods.shimmer.feature.zone.shape.ZoneShape;
+import dev.beast.mods.shimmer.feature.zone.shape.ZoneShapeGroup;
 import dev.beast.mods.shimmer.math.BoxRenderer;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.SpherePoints;
@@ -33,6 +37,13 @@ public interface ZoneRenderer<T extends ZoneShape> {
 
 	static void register(SimpleRegistryType<?> type, ZoneRenderer<?> renderer) {
 		RENDERERS.put(type, renderer);
+	}
+
+	static void bootstrap() {
+		ZoneRenderer.register(UniverseZoneShape.TYPE, EmptyZoneRenderer.INSTANCE);
+		ZoneRenderer.register(ZoneShapeGroup.TYPE, new GroupZoneRenderer());
+		ZoneRenderer.register(SphereZoneShape.TYPE, new SphereZoneRenderer());
+		ZoneRenderer.register(RotatedBoxZoneShape.TYPE, new RotatedBoxZoneRenderer());
 	}
 
 	static ZoneRenderer<?> get(SimpleRegistryType<?> type) {

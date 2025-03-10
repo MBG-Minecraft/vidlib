@@ -10,7 +10,7 @@ import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.feature.zone.ZoneClipResult;
 import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
 import dev.beast.mods.shimmer.feature.zone.ZoneEvent;
-import dev.beast.mods.shimmer.feature.zone.ZoneShape;
+import dev.beast.mods.shimmer.feature.zone.shape.ZoneShape;
 import dev.beast.mods.shimmer.math.VoxelShapeBox;
 import dev.beast.mods.shimmer.util.Side;
 import net.minecraft.resources.ResourceKey;

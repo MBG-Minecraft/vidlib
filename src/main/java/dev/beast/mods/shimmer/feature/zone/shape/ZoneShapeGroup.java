@@ -1,7 +1,9 @@
-package dev.beast.mods.shimmer.feature.zone;
+package dev.beast.mods.shimmer.feature.zone.shape;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.feature.zone.ZoneClipResult;
+import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
 import dev.beast.mods.shimmer.math.Line;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;

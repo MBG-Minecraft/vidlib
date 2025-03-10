@@ -1,12 +1,12 @@
 package dev.beast.mods.shimmer.feature.cutscene;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.beast.mods.shimmer.math.Rotation;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
 public class CutsceneScreen extends Screen {
@@ -98,7 +98,7 @@ public class CutsceneScreen extends Screen {
 	}
 
 	@Override
-	public Vector3f getCameraRotation(float delta, Vec3 cameraPos) {
+	public Rotation getCameraRotation(float delta, Vec3 cameraPos) {
 		return clientCutscene.getCameraRotation(delta, cameraPos);
 	}
 }

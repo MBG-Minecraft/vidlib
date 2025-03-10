@@ -1,6 +1,6 @@
 package dev.beast.mods.shimmer.feature.zone.renderer;
 
-import dev.beast.mods.shimmer.feature.zone.SphereZoneShape;
+import dev.beast.mods.shimmer.feature.zone.shape.SphereZoneShape;
 import dev.beast.mods.shimmer.math.BoxRenderer;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.SpherePoints;
