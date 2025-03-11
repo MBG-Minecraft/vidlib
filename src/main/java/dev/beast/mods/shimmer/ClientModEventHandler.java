@@ -44,10 +44,10 @@ public class ClientModEventHandler {
 	@SubscribeEvent
 	public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
 		for (var s : AutoRegister.SCANNED.get()) {
-			if (s.value() instanceof EntityRendererHolder<?>(java.util.function.Supplier<net.minecraft.world.entity.EntityType<?>> type, net.minecraft.client.renderer.entity.EntityRendererProvider<?> renderer)) {
-				event.registerEntityRenderer(Cast.to(type.get()), renderer);
-			} else if (s.value() instanceof BlockEntityRendererHolder<?>(java.util.function.Supplier<net.minecraft.world.level.block.entity.BlockEntityType<?>> type, net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider<?> renderer)) {
-				event.registerBlockEntityRenderer(Cast.to(type.get()), renderer);
+			if (s.value() instanceof EntityRendererHolder<?> holder) {
+				event.registerEntityRenderer(Cast.to(holder.type().get()), Cast.to(holder));
+			} else if (s.value() instanceof BlockEntityRendererHolder<?> holder) {
+				event.registerBlockEntityRenderer(Cast.to(holder.type().get()), Cast.to(holder));
 			}
 		}
 	}
