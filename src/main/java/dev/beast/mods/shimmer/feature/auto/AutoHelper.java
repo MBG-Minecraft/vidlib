@@ -11,6 +11,7 @@ import org.objectweb.asm.Type;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -105,5 +106,16 @@ public class AutoHelper {
 		}
 
 		return clazz.getDeclaredMethod(ad.memberName().substring(0, ad.memberName().indexOf('(')), argTypes);
+	}
+
+	public static Object getFieldValue(Class<?> clazz, ModFileScanData.AnnotationData ad) throws Exception {
+		var field = clazz.getDeclaredField(ad.memberName());
+
+		if (Modifier.isPublic(field.getModifiers())) {
+			return field.get(null);
+		} else {
+			var method = clazz.getDeclaredMethod("get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1));
+			return method.invoke(null);
+		}
 	}
 }

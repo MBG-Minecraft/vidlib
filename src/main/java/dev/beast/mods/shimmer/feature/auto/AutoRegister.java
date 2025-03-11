@@ -40,9 +40,9 @@ public @interface AutoRegister {
 			}
 
 			var clazz = Class.forName(ad.clazz().getClassName(), true, classLoader);
-			var field = clazz.getDeclaredField(ad.memberName());
-			Shimmer.LOGGER.info("Found @AutoRegister field " + clazz.getName() + "." + field.getName());
-			list.add(new ScanData(mod, field.get(null)));
+			var value = AutoHelper.getFieldValue(clazz, ad);
+			Shimmer.LOGGER.info("Found @AutoRegister field " + clazz.getName() + "." + ad.memberName());
+			list.add(new ScanData(mod, value));
 		});
 
 		return list;
