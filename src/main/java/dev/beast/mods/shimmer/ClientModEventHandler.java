@@ -8,7 +8,6 @@ import dev.beast.mods.shimmer.feature.multiverse.VoidSpecialEffects;
 import dev.beast.mods.shimmer.feature.particle.ShimmerClientParticles;
 import dev.beast.mods.shimmer.feature.structure.ClientStructureStorage;
 import dev.beast.mods.shimmer.feature.structure.GhostStructure;
-import dev.beast.mods.shimmer.util.Cast;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -45,9 +44,9 @@ public class ClientModEventHandler {
 	public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
 		for (var s : AutoRegister.SCANNED.get()) {
 			if (s.value() instanceof EntityRendererHolder<?> holder) {
-				event.registerEntityRenderer(Cast.to(holder.type().get()), Cast.to(holder));
+				holder.register(event);
 			} else if (s.value() instanceof BlockEntityRendererHolder<?> holder) {
-				event.registerBlockEntityRenderer(Cast.to(holder.type().get()), Cast.to(holder));
+				holder.register(event);
 			}
 		}
 	}
