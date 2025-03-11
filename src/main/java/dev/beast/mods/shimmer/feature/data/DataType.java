@@ -55,7 +55,6 @@ public record DataType<T>(
 
 		public Builder<T> sync(StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec) {
 			this.streamCodec = streamCodec;
-			this.syncToAllClients = false;
 			return this;
 		}
 

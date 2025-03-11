@@ -20,6 +20,7 @@ import dev.beast.mods.shimmer.math.VoxelShapeBox;
 import dev.beast.mods.shimmer.util.Side;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.resources.ResourceKey;
@@ -37,6 +38,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
+	public final ClientPacketListener connection;
 	public final ActiveZones serverZones;
 	public final ActiveZones filteredZones;
 	private final Map<UUID, ShimmerRemoteClientSessionData> remoteSessionData;
@@ -47,8 +49,9 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	public final DataMap serverDataMap;
 	public Map<ZoneShape, VoxelShapeBox> cachedZoneShapes;
 
-	public ShimmerLocalClientSessionData(UUID uuid) {
+	public ShimmerLocalClientSessionData(UUID uuid, ClientPacketListener connection) {
 		super(uuid);
+		this.connection = connection;
 		Shimmer.LOGGER.info("Client Session Data Initialized");
 		this.serverZones = new ActiveZones();
 		this.filteredZones = new ActiveZones();

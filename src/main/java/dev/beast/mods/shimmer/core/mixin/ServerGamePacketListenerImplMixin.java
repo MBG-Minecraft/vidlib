@@ -17,7 +17,7 @@ public class ServerGamePacketListenerImplMixin implements ShimmerServerPacketLis
 	@Override
 	public ShimmerServerSessionData shimmer$sessionData() {
 		if (shimmer$sessionData == null) {
-			shimmer$sessionData = new ShimmerServerSessionData(((ServerGamePacketListenerImpl) (Object) this).player.getUUID());
+			shimmer$sessionData = new ShimmerServerSessionData((ServerGamePacketListenerImpl) (Object) this);
 		}
 
 		return shimmer$sessionData;

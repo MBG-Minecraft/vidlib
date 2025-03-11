@@ -28,14 +28,16 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 
 	@ApiStatus.Internal
 	default void shimmer$playerJoined(ServerPlayer player) {
-		player.shimmer$sessionData().dataMap.load(shimmer$self(), shimmer$self().getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("shimmer").resolve(player.getUUID() + ".nbt"));
+		var session = player.shimmer$sessionData();
+		session.dataMap.load(shimmer$self(), shimmer$self().getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("shimmer").resolve(player.getUUID() + ".nbt"));
 		player.refreshDisplayName();
 		player.refreshTabListName();
-		player.shimmer$sessionData().updateOverrides(player);
+		session.updateOverrides(player);
 
 		var toNewPlayer = new S2CPacketBundleBuilder();
 
 		getServerData().syncAll(toNewPlayer, null, (uuid, updates) -> new SyncServerDataPayload(updates));
+		session.dataMap.syncAll(toNewPlayer, player, SyncPlayerDataPayload::new);
 		toNewPlayer.s2c(new RefreshNamePayload(player.getUUID()));
 
 		for (var p : shimmer$self().getPlayerList().getPlayers()) {
@@ -43,7 +45,7 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 				var s = p.shimmer$sessionData();
 
 				toNewPlayer.s2c(new SyncPlayerInputToClient(p.getUUID(), s.input));
-				s.dataMap.syncAll(toNewPlayer, player, SyncPlayerDataPayload::new);
+				s.dataMap.syncAll(toNewPlayer, null, SyncPlayerDataPayload::new);
 			}
 		}
 

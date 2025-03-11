@@ -15,11 +15,9 @@ import dev.beast.mods.shimmer.feature.structure.StructureStorage;
 import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
 import dev.beast.mods.shimmer.feature.zone.SyncZonesPayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
+import dev.beast.mods.shimmer.util.S2CPacketBundleBuilder;
 import dev.beast.mods.shimmer.util.registry.RegistryReference;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -40,7 +38,6 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.GAME)
@@ -67,17 +64,13 @@ public class GameEventHandler {
 
 	@SubscribeEvent
 	public static void syncReload(OnDatapackSyncEvent event) {
-		var list = new ArrayList<Packet<? super ClientGamePacketListener>>();
+		var list = new S2CPacketBundleBuilder();
 
-		list.add(new SyncZonesPayload(List.copyOf(ZoneLoader.ALL.containers.values())).toS2C());
-		list.add(new SyncClockFontsPayload(List.copyOf(ClockFont.SERVER.getMap().values())).toS2C());
-		list.add(new SyncClocksPayload(List.copyOf(ClockInstance.SERVER.getMap().values())).toS2C());
+		list.s2c(new SyncZonesPayload(List.copyOf(ZoneLoader.ALL.containers.values())).toS2C());
+		list.s2c(new SyncClockFontsPayload(List.copyOf(ClockFont.SERVER.getMap().values())).toS2C());
+		list.s2c(new SyncClocksPayload(List.copyOf(ClockInstance.SERVER.getMap().values())).toS2C());
 
-		var packet = new ClientboundBundlePacket(list);
-
-		for (var player : event.getRelevantPlayers().toList()) {
-			player.s2c(packet);
-		}
+		event.getRelevantPlayers().forEach(list::send);
 	}
 
 	@SubscribeEvent

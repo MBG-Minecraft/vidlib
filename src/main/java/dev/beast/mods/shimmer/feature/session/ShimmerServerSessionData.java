@@ -5,13 +5,15 @@ import dev.beast.mods.shimmer.feature.data.SyncPlayerDataPayload;
 import dev.beast.mods.shimmer.feature.input.PlayerInputChanged;
 import dev.beast.mods.shimmer.feature.input.SyncPlayerInputToClient;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.neoforged.neoforge.common.NeoForge;
 
-import java.util.UUID;
-
 public class ShimmerServerSessionData extends ShimmerSessionData {
-	public ShimmerServerSessionData(UUID uuid) {
-		super(uuid);
+	public final ServerGamePacketListenerImpl connection;
+
+	public ShimmerServerSessionData(ServerGamePacketListenerImpl connection) {
+		super(connection.player.getUUID());
+		this.connection = connection;
 	}
 
 	public void shimmer$preTick(ServerPlayer player) {

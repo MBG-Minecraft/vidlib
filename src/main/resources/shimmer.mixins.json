@@ -41,6 +41,7 @@
 		"ClientLevelMixin",
 		"ClientPacketListenerMixin",
 		"DefaultPlayerSkinMixin",
+		"EntityRendererMixin",
 		"FireworkParticlesStarterMixin",
 		"GameNarratorMixin",
 		"GameRendererMixin",

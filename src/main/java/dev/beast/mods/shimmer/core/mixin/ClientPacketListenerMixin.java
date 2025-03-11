@@ -36,7 +36,7 @@ public abstract class ClientPacketListenerMixin implements ShimmerClientPacketLi
 	@Override
 	public ShimmerLocalClientSessionData shimmer$sessionData() {
 		if (shimmer$sessionData == null) {
-			shimmer$sessionData = new ShimmerLocalClientSessionData(localGameProfile.getId());
+			shimmer$sessionData = new ShimmerLocalClientSessionData(localGameProfile.getId(), (ClientPacketListener) (Object) this);
 		}
 
 		return shimmer$sessionData;

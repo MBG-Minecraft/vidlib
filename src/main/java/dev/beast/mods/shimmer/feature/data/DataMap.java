@@ -164,7 +164,9 @@ public class DataMap {
 			}
 		}
 
-		target.s2c(factory.apply(null, list));
+		if (!list.isEmpty()) {
+			target.s2c(factory.apply(owner, list));
+		}
 	}
 
 	public void sync(ShimmerS2CPacketConsumer packetsToEveryone, @Nullable ServerPlayer selfPlayer, BiFunction<UUID, List<DataMapValue>, CustomPacketPayload> factory) {
@@ -184,7 +186,7 @@ public class DataMap {
 					}
 
 					syncAll.add(new DataMapValue(v.type, v.data));
-				} else {
+				} else if (selfPlayer != null) {
 					if (syncSelf == null) {
 						syncSelf = new ArrayList<>();
 					}
@@ -194,12 +196,12 @@ public class DataMap {
 			}
 		}
 
-		if (syncSelf != null && selfPlayer != null) {
+		if (syncSelf != null) {
 			selfPlayer.s2c(factory.apply(selfPlayer.getUUID(), syncSelf));
 		}
 
 		if (syncAll != null) {
-			packetsToEveryone.s2c(factory.apply(selfPlayer == null ? null : selfPlayer.getUUID(), syncAll));
+			packetsToEveryone.s2c(factory.apply(owner, syncAll));
 		}
 	}
 }
