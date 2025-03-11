@@ -40,7 +40,7 @@ public @interface AutoRegister {
 			}
 
 			var clazz = Class.forName(ad.clazz().getClassName(), true, classLoader);
-			var value = AutoHelper.getFieldValue(clazz, ad);
+			var value = AutoHelper.getStaticFieldValue(clazz, ad);
 			Shimmer.LOGGER.info("Found @AutoRegister field " + clazz.getName() + "." + ad.memberName());
 			list.add(new ScanData(mod, value));
 		});

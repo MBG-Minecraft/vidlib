@@ -15,6 +15,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 public class AutoHelper {
@@ -108,14 +109,21 @@ public class AutoHelper {
 		return clazz.getDeclaredMethod(ad.memberName().substring(0, ad.memberName().indexOf('(')), argTypes);
 	}
 
-	public static Object getFieldValue(Class<?> clazz, ModFileScanData.AnnotationData ad) throws Exception {
-		var field = clazz.getDeclaredField(ad.memberName());
+	public static Object getStaticFieldValue(Class<?> clazz, ModFileScanData.AnnotationData ad) throws Exception {
+		var name = ad.memberName();
+		var field = clazz.getDeclaredField(name);
 
 		if (Modifier.isPublic(field.getModifiers())) {
 			return field.get(null);
 		} else {
-			var method = clazz.getDeclaredMethod("get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1));
-			return method.invoke(null);
+			// Kotlin Patch
+			var method = clazz.getDeclaredMethod("get" + name.substring(0, 1).toUpperCase(Locale.ROOT) + name.substring(1));
+
+			try {
+				return method.invoke(clazz.getDeclaredField("INSTANCE").get(null));
+			} catch (Exception ex) {
+				return method.invoke(null);
+			}
 		}
 	}
 }
