@@ -8,46 +8,17 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.component.CustomData;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
-import net.neoforged.fml.loading.FMLLoader;
-import net.neoforged.fml.loading.modscan.ModAnnotation;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-
-import java.lang.annotation.ElementType;
-import java.util.List;
 
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.MOD)
 public class ModEventHandler {
 	@SubscribeEvent
 	public static void afterLoad(FMLLoadCompleteEvent event) {
-		var classLoader = AutoInit.class.getModule().getClassLoader();
-
-		for (var scan : ModList.get().getAllScanData()) {
-			scan.getAnnotatedBy(AutoInit.class, ElementType.TYPE).forEach(ad -> {
-				var distData = ad.annotationData().get("value");
-
-				if (distData != null) {
-					var list = (List<ModAnnotation.EnumHolder>) distData;
-
-					if (!list.stream().map(h -> Dist.valueOf(h.value())).toList().contains(FMLLoader.getDist())) {
-						Shimmer.LOGGER.info("Skipped @AutoInit class " + ad.clazz().getClassName());
-						return;
-					}
-				}
-
-				try {
-					var type = Class.forName(ad.clazz().getClassName(), true, classLoader);
-					Shimmer.LOGGER.info("Initialized @AutoInit class " + type.getName());
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
-		}
+		AutoInit.Type.LOAD_COMPLETE.invoke();
 	}
 
 	@SubscribeEvent

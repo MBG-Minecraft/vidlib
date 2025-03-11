@@ -3,8 +3,6 @@ package dev.beast.mods.shimmer.feature.auto;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
 import dev.beast.mods.shimmer.util.Lazy;
-import net.neoforged.fml.ModList;
-import net.neoforged.fml.loading.modscan.ModAnnotation;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.annotation.ElementType;
@@ -22,7 +20,9 @@ public @interface AutoPacket {
 		CLIENT,
 		SERVER,
 		CLIENT_CONFIG,
-		SERVER_CONFIG
+		SERVER_CONFIG;
+
+		public static final EnumSet<To> DEFAULT = EnumSet.of(CLIENT);
 	}
 
 	To[] value() default To.CLIENT;
@@ -33,35 +33,15 @@ public @interface AutoPacket {
 	@ApiStatus.Internal
 	Lazy<List<ScanData>> SCANNED = Lazy.of(() -> {
 		var list = new ArrayList<ScanData>();
-		var classLoader = AutoPacket.class.getModule().getClassLoader();
 
-		for (var scan : ModList.get().getAllScanData()) {
-			scan.getAnnotatedBy(AutoPacket.class, ElementType.FIELD).forEach(ad -> {
-				try {
-					var clazz = Class.forName(ad.clazz().getClassName(), true, classLoader);
-					var field = clazz.getDeclaredField(ad.memberName());
-					var type = (ShimmerPacketType<?>) field.get(null);
-					var toData = ad.annotationData().get("value");
-					var toList = new ArrayList<To>(2);
-
-					if (toData == null) {
-						toList.add(To.CLIENT);
-					} else {
-						@SuppressWarnings("unchecked")
-						var toListData = (List<ModAnnotation.EnumHolder>) toData;
-
-						for (var holder : toListData) {
-							toList.add(To.valueOf(holder.value()));
-						}
-					}
-
-					Shimmer.LOGGER.info("Found @AutoPacket " + clazz.getName() + "." + ad.memberName() + " to " + String.join(", ", toList.stream().map(p -> p.name().toLowerCase()).toList()));
-					list.add(new ScanData(type, EnumSet.copyOf(toList)));
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
-		}
+		AutoHelper.load(AutoPacket.class, EnumSet.of(ElementType.FIELD), (mod, classLoader, ad) -> {
+			var clazz = Class.forName(ad.clazz().getClassName(), true, classLoader);
+			var field = clazz.getDeclaredField(ad.memberName());
+			var type = (ShimmerPacketType<?>) field.get(null);
+			var toList = AutoHelper.getEnumValues(ad, To.class, "value", To.DEFAULT);
+			Shimmer.LOGGER.info("Found @AutoPacket " + clazz.getName() + "." + ad.memberName() + " to " + String.join(", ", toList.stream().map(p -> p.name().toLowerCase()).toList()));
+			list.add(new ScanData(type, toList));
+		});
 
 		return list;
 	});

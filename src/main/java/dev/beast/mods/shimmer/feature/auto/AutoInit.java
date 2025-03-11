@@ -2,9 +2,7 @@ package dev.beast.mods.shimmer.feature.auto;
 
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.util.Lazy;
-import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
-import net.neoforged.fml.loading.modscan.ModAnnotation;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.annotation.ElementType;
@@ -13,15 +11,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface AutoInit {
 	enum Type {
-		REGISTRY(false, false),
-		CLIENT_SETUP(true, false),
-		AFTER_SETUP(false, false),
+		REGISTRY(false, false), // (IEventBus)
+		CLIENT_SETUP(true, false), // ()
+		LOAD_COMPLETE(false, false), // ()
 
 		;
 
@@ -50,7 +49,7 @@ public @interface AutoInit {
 		}
 	}
 
-	Type value() default Type.AFTER_SETUP;
+	Type value() default Type.LOAD_COMPLETE;
 
 	record AutoMethod(Type type, Method method) {
 	}
@@ -58,52 +57,30 @@ public @interface AutoInit {
 	@ApiStatus.Internal
 	Lazy<List<AutoMethod>> SCANNED = Lazy.of(() -> {
 		var list = new ArrayList<AutoMethod>();
-		var classLoader = AutoInit.class.getModule().getClassLoader();
 
-		for (var scan : ModList.get().getAllScanData()) {
-			scan.getAnnotatedBy(AutoInit.class, ElementType.TYPE).forEach(ad -> {
-				try {
-					var typeData = ad.annotationData().get("value");
-					var type = typeData == null ? Type.REGISTRY : Type.valueOf(((ModAnnotation.EnumHolder) typeData).value());
+		AutoHelper.load(AutoInit.class, EnumSet.of(ElementType.TYPE, ElementType.METHOD), (mod, classLoader, ad) -> {
+			var type = AutoHelper.getEnumValue(ad, Type.class, "value", Type.REGISTRY);
 
-					if (type.clientOnly && !FMLLoader.getDist().isClient() || type.methodOnly) {
-						Shimmer.LOGGER.info("Skipped @AutoInit class " + ad.clazz().getClassName());
-						return;
-					}
+			if (type.clientOnly && !FMLLoader.getDist().isClient()) {
+				Shimmer.LOGGER.info("Skipped @AutoInit class " + ad.clazz().getClassName());
+				return;
+			}
 
-					var clazz = Class.forName(ad.clazz().getClassName(), true, classLoader);
-					Shimmer.LOGGER.info("Found @AutoInit class " + clazz.getName());
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
+			if (type.methodOnly && ad.targetType() != ElementType.METHOD) {
+				Shimmer.LOGGER.info("Skipped @AutoInit class " + ad.clazz().getClassName());
+				return;
+			}
 
-			scan.getAnnotatedBy(AutoInit.class, ElementType.METHOD).forEach(ad -> {
-				try {
-					var typeData = ad.annotationData().get("value");
-					var type = typeData == null ? Type.REGISTRY : Type.valueOf(((ModAnnotation.EnumHolder) typeData).value());
+			var clazz = Class.forName(ad.clazz().getClassName(), true, classLoader);
 
-					if (type.clientOnly && !FMLLoader.getDist().isClient()) {
-						Shimmer.LOGGER.info("Skipped @AutoInit method " + ad.clazz().getClassName() + "#" + ad.memberName());
-						return;
-					}
-
-					var clazz = Class.forName(ad.clazz().getClassName(), true, classLoader);
-					var argData = org.objectweb.asm.Type.getArgumentTypes(ad.memberName().substring(ad.memberName().indexOf('(')));
-					var argTypes = new Class[argData.length];
-
-					for (var i = 0; i < argData.length; i++) {
-						argTypes[i] = Class.forName(argData[i].getClassName(), true, classLoader);
-					}
-
-					var method = clazz.getDeclaredMethod(ad.memberName().substring(0, ad.memberName().indexOf('(')), argTypes);
-					Shimmer.LOGGER.info("Found @AutoInit method " + clazz.getName() + "#" + method.getName());
-					list.add(new AutoMethod(type, method));
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
-		}
+			if (ad.targetType() == ElementType.METHOD) {
+				var method = AutoHelper.getMethod(clazz, ad, classLoader);
+				Shimmer.LOGGER.info("Found @AutoInit method " + clazz.getName() + "#" + method.getName());
+				list.add(new AutoMethod(type, method));
+			} else {
+				Shimmer.LOGGER.info("Found @AutoInit class " + clazz.getName());
+			}
+		});
 
 		return list;
 	});
