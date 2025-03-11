@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer.feature.zone.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.block.filter.BlockFilter;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.session.ShimmerLocalClientSessionData;
@@ -39,6 +40,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 		RENDERERS.put(type, renderer);
 	}
 
+	@AutoInit(AutoInit.Type.CLIENT_SETUP)
 	static void bootstrap() {
 		ZoneRenderer.register(UniverseZoneShape.TYPE, EmptyZoneRenderer.INSTANCE);
 		ZoneRenderer.register(ZoneShapeGroup.TYPE, new GroupZoneRenderer());

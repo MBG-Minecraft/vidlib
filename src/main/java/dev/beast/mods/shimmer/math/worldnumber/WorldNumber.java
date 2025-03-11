@@ -2,6 +2,7 @@ package dev.beast.mods.shimmer.math.worldnumber;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.math.Easing;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistry;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
@@ -16,6 +17,7 @@ public interface WorldNumber {
 	Codec<WorldNumber> CODEC = Codec.either(Codec.DOUBLE, REGISTRY.valueCodec()).xmap(either -> either.map(FixedWorldNumber::of, Function.identity()), num -> num instanceof FixedWorldNumber(double number) ? Either.left(number) : Either.right(num));
 	StreamCodec<RegistryFriendlyByteBuf, WorldNumber> STREAM_CODEC = ByteBufCodecs.either(ByteBufCodecs.DOUBLE, REGISTRY.valueStreamCodec()).map(either -> either.map(FixedWorldNumber::of, Function.identity()), num -> num instanceof FixedWorldNumber(double number) ? Either.left(number) : Either.right(num));
 
+	@AutoInit
 	static void bootstrap() {
 		REGISTRY.register(FixedWorldNumber.ZERO);
 		REGISTRY.register(FixedWorldNumber.ONE);

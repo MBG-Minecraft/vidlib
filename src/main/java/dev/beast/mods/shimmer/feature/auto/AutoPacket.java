@@ -38,8 +38,8 @@ public @interface AutoPacket {
 		for (var scan : ModList.get().getAllScanData()) {
 			scan.getAnnotatedBy(AutoPacket.class, ElementType.FIELD).forEach(ad -> {
 				try {
-					var payloadClass = Class.forName(ad.clazz().getClassName(), true, classLoader);
-					var field = payloadClass.getDeclaredField(ad.memberName());
+					var clazz = Class.forName(ad.clazz().getClassName(), true, classLoader);
+					var field = clazz.getDeclaredField(ad.memberName());
 					var type = (ShimmerPacketType<?>) field.get(null);
 					var toData = ad.annotationData().get("value");
 					var toList = new ArrayList<To>(2);
@@ -55,7 +55,7 @@ public @interface AutoPacket {
 						}
 					}
 
-					Shimmer.LOGGER.info("Found @AutoPacket " + payloadClass.getName() + "." + ad.memberName() + " to " + String.join(", ", toList.stream().map(p -> p.name().toLowerCase()).toList()));
+					Shimmer.LOGGER.info("Found @AutoPacket " + clazz.getName() + "." + ad.memberName() + " to " + String.join(", ", toList.stream().map(p -> p.name().toLowerCase()).toList()));
 					list.add(new ScanData(type, EnumSet.copyOf(toList)));
 				} catch (Exception e) {
 					throw new RuntimeException(e);

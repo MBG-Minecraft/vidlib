@@ -1,43 +1,53 @@
 package dev.beast.mods.shimmer;
 
 import dev.beast.mods.shimmer.core.ShimmerPayloadRegistrar;
+import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.auto.AutoPacket;
-import dev.beast.mods.shimmer.feature.block.filter.BlockFilter;
-import dev.beast.mods.shimmer.feature.camerashake.CameraShakeType;
-import dev.beast.mods.shimmer.feature.cutscene.event.CutsceneEvent;
-import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
-import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
-import dev.beast.mods.shimmer.feature.toolitem.PositionToolItem;
 import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
-import dev.beast.mods.shimmer.feature.zone.shape.ZoneShape;
-import dev.beast.mods.shimmer.math.worldnumber.WorldNumber;
-import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
-import dev.beast.mods.shimmer.util.KnownCodec;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.component.CustomData;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.modscan.ModAnnotation;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+
+import java.lang.annotation.ElementType;
+import java.util.List;
 
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.MOD)
 public class ModEventHandler {
 	@SubscribeEvent
 	public static void afterLoad(FMLLoadCompleteEvent event) {
-		KnownCodec.bootstrap();
-		WorldNumber.bootstrap();
-		WorldPosition.bootstrap();
-		EntityFilter.bootstrap();
-		BlockFilter.bootstrap();
-		ZoneShape.bootstrap();
-		CameraShakeType.bootstrap();
-		InternalPlayerData.bootstrap();
-		CutsceneEvent.bootstrap();
+		var classLoader = AutoInit.class.getModule().getClassLoader();
 
-		ToolItem.REGISTRY.put("pos", new PositionToolItem());
+		for (var scan : ModList.get().getAllScanData()) {
+			scan.getAnnotatedBy(AutoInit.class, ElementType.TYPE).forEach(ad -> {
+				var distData = ad.annotationData().get("value");
+
+				if (distData != null) {
+					var list = (List<ModAnnotation.EnumHolder>) distData;
+
+					if (!list.stream().map(h -> Dist.valueOf(h.value())).toList().contains(FMLLoader.getDist())) {
+						Shimmer.LOGGER.info("Skipped @AutoInit class " + ad.clazz().getClassName());
+						return;
+					}
+				}
+
+				try {
+					var type = Class.forName(ad.clazz().getClassName(), true, classLoader);
+					Shimmer.LOGGER.info("Initialized @AutoInit class " + type.getName());
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			});
+		}
 	}
 
 	@SubscribeEvent

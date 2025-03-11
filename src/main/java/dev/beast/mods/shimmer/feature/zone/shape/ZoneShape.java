@@ -2,6 +2,7 @@ package dev.beast.mods.shimmer.feature.zone.shape;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.zone.Zone;
 import dev.beast.mods.shimmer.feature.zone.ZoneClipResult;
 import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
@@ -29,6 +30,7 @@ public interface ZoneShape {
 	SimpleRegistry<ZoneShape> REGISTRY = SimpleRegistry.create(ZoneShape::type);
 	Codec<ZoneShape> CODEC = Codec.either(AAIBB.CODEC, REGISTRY.valueCodec()).xmap(either -> either.map(box -> new BlockZoneShape(box.min(), box.max()), Function.identity()), shape -> shape instanceof BlockZoneShape b ? Either.left(b.toAAIBB()) : Either.right(shape));
 
+	@AutoInit
 	static void bootstrap() {
 		REGISTRY.register(UniverseZoneShape.TYPE);
 		REGISTRY.register(ZoneShapeGroup.TYPE);

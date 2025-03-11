@@ -1,10 +1,10 @@
 package dev.beast.mods.shimmer;
 
+import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.multiverse.VoidSpecialEffects;
 import dev.beast.mods.shimmer.feature.particle.ShimmerClientParticles;
 import dev.beast.mods.shimmer.feature.structure.ClientStructureStorage;
 import dev.beast.mods.shimmer.feature.structure.GhostStructure;
-import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -17,7 +17,7 @@ import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 public class ClientModEventHandler {
 	@SubscribeEvent
 	public static void clientSetup(FMLClientSetupEvent event) {
-		ZoneRenderer.bootstrap();
+		AutoInit.Type.CLIENT_SETUP.invoke();
 	}
 
 	@SubscribeEvent

@@ -14,5 +14,4 @@ public class ShimmerConfig {
 	public static boolean hideWaterParticles = false;
 	public static boolean fetchOfflinePlayerData = true;
 	public static int structureBlockRange = 200;
-	public static int particleLimit = Integer.MAX_VALUE; // 16384
 }

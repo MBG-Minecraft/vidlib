@@ -52,6 +52,7 @@
 		"MinecraftClientMixin",
 		"MouseHandlerMixin",
 		"OptionsMixin",
+		"ParticleEngineMixin",
 		"PlayerModelMixin",
 		"PlayerRendererMixin",
 		"RemotePlayerMixin",

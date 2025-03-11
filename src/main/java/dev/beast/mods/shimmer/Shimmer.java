@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer;
 
+import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.particle.ShimmerParticles;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -47,5 +48,7 @@ public class Shimmer {
 
 		ShimmerArgumentTypes.REGISTRY.register(bus);
 		ShimmerParticles.REGISTRY.register(bus);
+
+		AutoInit.Type.REGISTRY.invoke(bus);
 	}
 }

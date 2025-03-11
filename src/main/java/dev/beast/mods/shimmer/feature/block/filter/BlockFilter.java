@@ -3,6 +3,7 @@ package dev.beast.mods.shimmer.feature.block.filter;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistry;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -26,6 +27,7 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 	Codec<BlockFilter> CODEC = Codec.either(Codec.BOOL, REGISTRY.valueCodec()).xmap(either -> either.map(BlockFilter::of, Function.identity()), filter -> filter == ANY.instance() ? Either.left(true) : filter == NONE.instance() ? Either.left(false) : Either.right(filter));
 	StreamCodec<RegistryFriendlyByteBuf, BlockFilter> STREAM_CODEC = ByteBufCodecs.either(ByteBufCodecs.BOOL, REGISTRY.valueStreamCodec()).map(either -> either.map(BlockFilter::of, Function.identity()), filter -> filter == ANY.instance() ? Either.left(true) : filter == NONE.instance() ? Either.left(false) : Either.right(filter));
 
+	@AutoInit
 	static void bootstrap() {
 		REGISTRY.register(NONE);
 		REGISTRY.register(ANY);

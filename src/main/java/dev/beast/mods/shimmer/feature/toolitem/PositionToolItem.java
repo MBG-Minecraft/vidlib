@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.feature.toolitem;
 
+import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.misc.DebugText;
 import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
 import dev.beast.mods.shimmer.math.Color;
@@ -19,6 +20,11 @@ import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
 import org.jetbrains.annotations.Nullable;
 
 public class PositionToolItem implements ToolItem {
+	@AutoInit
+	public static void bootstrap() {
+		ToolItem.REGISTRY.put("pos", new PositionToolItem());
+	}
+
 	@Override
 	public Component getName() {
 		return Component.literal("Position Tool");
