@@ -46,6 +46,7 @@
 		"GuiMixin",
 		"ItemInHandLayerMixin",
 		"KeyboardHandlerMixin",
+		"KeyboardMixinInput",
 		"KeyMappingMixin",
 		"LevelRendererMixin",
 		"LocalPlayerMixin",

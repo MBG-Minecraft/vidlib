@@ -36,7 +36,7 @@ public class PlumbobRenderLayer extends RenderLayer<AbstractClientPlayer, Player
 
 				ms.pushPose();
 				ms.scale(-1F, -1F, 1F);
-				ms.translate(0F, entity.isCrouching() ? 0.5F : 0.8F, 0F);
+				ms.translate(0F, entity.isCrouching() ? 0.8F : 1.1F, 0F);
 				ms.mulPose(Axis.YP.rotationDegrees(entity.getPreciseBodyRotation(partialTick)));
 				ms.mulPose(Axis.YP.rotation((float) (-Math.atan2(pos.z - cam.z, pos.x - cam.x) + Math.PI / 2D)));
 				mc.getItemRenderer().render(item, ItemDisplayContext.GROUND, false, ms, source, light, OverlayTexture.NO_OVERLAY, model);

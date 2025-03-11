@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.core.ShimmerEntity;
 import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
+import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.util.Cast;
 import dev.beast.mods.shimmer.util.ShimmerCodecs;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -77,6 +78,10 @@ public final class EntityOverride<T> {
 		return createKey(id, Codec.INT, ByteBufCodecs.INT);
 	}
 
+	public static EntityOverride<Color> createColorKey(String id) {
+		return createKey(id, Color.CODEC, Color.STREAM_CODEC);
+	}
+
 	public static EntityOverride<Integer> createVarIntKey(String id) {
 		return createKey(id, Codec.INT, ByteBufCodecs.VAR_INT);
 	}
@@ -98,11 +103,10 @@ public final class EntityOverride<T> {
 	}
 
 	public static final EntityOverride<Boolean> GLOWING = createBooleanKey("glowing");
-	public static final EntityOverride<Integer> TEAM_COLOR = createIntKey("team_color");
-	public static final EntityOverride<Boolean> AI = createBooleanKey("ai");
-	// public static final EntityOverride<Boolean> SUSPENDED = createBooleanKey("suspended");
+	public static final EntityOverride<Color> TEAM_COLOR = createColorKey("team_color");
+	public static final EntityOverride<Boolean> SUSPENDED = createBooleanKey("suspended");
 	// public static final EntityOverride<Double> SPEED = createDoubleKey("speed");
-	// public static final EntityOverride<Boolean> PVP = createBooleanKey("pvp");
+	public static final EntityOverride<Boolean> PVP = createBooleanKey("pvp");
 	public static final EntityOverride<Boolean> PASS_THROUGH_BARRIERS = createBooleanKey("pass_through_barriers");
 	public static final EntityOverride<Integer> REGENERATE = createIntKey("regenerate");
 	public static final EntityOverride<Boolean> INVULNERABLE = createBooleanKey("invulnerable");
@@ -193,6 +197,11 @@ public final class EntityOverride<T> {
 		}
 
 		return all == null ? null : all.get(e);
+	}
+
+	public T get(@Nullable ShimmerEntity entity, T def) {
+		var v = get(entity);
+		return v == null ? def : v;
 	}
 
 	public void set(ShimmerEntity entity, @Nullable EntityOverrideValue<T> value) {

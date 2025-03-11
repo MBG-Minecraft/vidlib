@@ -5,6 +5,7 @@ import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.component.CustomData;
@@ -47,6 +48,14 @@ public class ModEventHandler {
 				stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
 				stack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
 				event.accept(stack);
+			}
+
+			for (var item : BuiltInRegistries.ITEM) {
+				var mod = item.builtInRegistryHolder().getKey().location().getNamespace();
+
+				if (mod.equals("video") || mod.equals(Shimmer.ID)) {
+					event.accept(item.getDefaultInstance());
+				}
 			}
 		}
 	}

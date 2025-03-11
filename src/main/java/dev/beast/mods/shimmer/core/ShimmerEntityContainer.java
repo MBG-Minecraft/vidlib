@@ -10,9 +10,8 @@ import dev.beast.mods.shimmer.feature.misc.SetPostEffectPayload;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -20,7 +19,7 @@ import net.minecraft.world.entity.player.Player;
 
 import java.util.List;
 
-public interface ShimmerEntityContainer {
+public interface ShimmerEntityContainer extends ShimmerS2CPacketConsumer, ShimmerC2SPacketConsumer {
 	default ShimmerMinecraftEnvironment shimmer$getEnvironment() {
 		throw new NoMixinException();
 	}
@@ -33,7 +32,8 @@ public interface ShimmerEntityContainer {
 		return List.of();
 	}
 
-	default void s2c(Packet<?> packet) {
+	@Override
+	default void s2c(Packet<? super ClientGamePacketListener> packet) {
 		for (var player : shimmer$getPlayers()) {
 			if (player instanceof ServerPlayer serverPlayer) {
 				serverPlayer.connection.send(packet);
@@ -41,15 +41,8 @@ public interface ShimmerEntityContainer {
 		}
 	}
 
-	default void s2c(CustomPacketPayload packet) {
-		s2c(new ClientboundCustomPayloadPacket(packet));
-	}
-
-	default void c2s(Packet<?> packet) {
-	}
-
-	default void c2s(CustomPacketPayload packet) {
-		c2s(new ServerboundCustomPayloadPacket(packet));
+	@Override
+	default void c2s(Packet<? super ServerGamePacketListener> packet) {
 	}
 
 	default void tell(Component message) {

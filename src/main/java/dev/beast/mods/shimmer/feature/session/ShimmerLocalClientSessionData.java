@@ -1,12 +1,16 @@
 package dev.beast.mods.shimmer.feature.session;
 
+import com.mojang.blaze3d.platform.Window;
 import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.core.ShimmerLocalPlayer;
 import dev.beast.mods.shimmer.feature.clock.ClockFont;
 import dev.beast.mods.shimmer.feature.clock.ClockInstance;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.data.DataMapValue;
 import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.input.PlayerInput;
+import dev.beast.mods.shimmer.feature.input.PlayerInputChanged;
+import dev.beast.mods.shimmer.feature.input.SyncPlayerInputToServer;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.feature.zone.ZoneClipResult;
 import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
@@ -14,11 +18,16 @@ import dev.beast.mods.shimmer.feature.zone.ZoneEvent;
 import dev.beast.mods.shimmer.feature.zone.shape.ZoneShape;
 import dev.beast.mods.shimmer.math.VoxelShapeBox;
 import dev.beast.mods.shimmer.util.Side;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForge;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,7 +56,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 		this.tags = new HashSet<>(0);
 		this.clockFonts = Map.of();
 		this.clocks = Map.of();
-		this.serverDataMap = new DataMap(DataType.SERVER);
+		this.serverDataMap = new DataMap(uuid, DataType.SERVER);
 	}
 
 	public ShimmerRemoteClientSessionData getRemoteSessionData(UUID id) {
@@ -69,6 +78,36 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	@Override
 	public void closed() {
 		ClockFont.CLIENT_SUPPLIER = Map::of;
+	}
+
+	@ApiStatus.Internal
+	public void preTick(Minecraft mc, ClientLevel level, LocalPlayer player, Window window) {
+		filteredZones.entityZones.clear();
+
+		for (var container : filteredZones) {
+			container.tick(filteredZones, level);
+		}
+
+		for (var instance : clocks.values()) {
+			if (instance.clock.dimension() == level.dimension()) {
+				instance.tick(level);
+			}
+		}
+
+		updateOverrides(player);
+		input = ShimmerLocalPlayer.fromInput(window.getWindow(), player.input, mc.screen == null && mc.isWindowActive());
+
+		if (!prevInput.equals(input)) {
+			NeoForge.EVENT_BUS.post(new PlayerInputChanged(player, prevInput, input));
+			prevInput = input;
+			mc.c2s(new SyncPlayerInputToServer(input));
+		}
+
+		for (var otherPlayer : level.players()) {
+			if (otherPlayer instanceof RemotePlayer p) {
+				p.shimmer$sessionData().preTick(mc, level, p);
+			}
+		}
 	}
 
 	public void refreshZones(ResourceKey<Level> dimension) {

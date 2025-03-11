@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.util;
 
+import com.mojang.datafixers.util.Unit;
 import dev.beast.mods.shimmer.Shimmer;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -158,6 +159,8 @@ public interface ShimmerStreamCodecs {
 		b -> b.maxZ,
 		AABB::new
 	);
+
+	StreamCodec<ByteBuf, Unit> UNIT = StreamCodec.unit(Unit.INSTANCE);
 
 	static <T> StreamCodec<ByteBuf, TagKey<T>> tagKey(ResourceKey<? extends Registry<T>> registry) {
 		return ResourceLocation.STREAM_CODEC.map(id -> TagKey.create(registry, id), TagKey::location);

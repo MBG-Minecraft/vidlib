@@ -163,12 +163,8 @@ public class GameEventHandler {
 
 	@SubscribeEvent
 	public static void entityInvulnerabilityCheck(EntityInvulnerabilityCheckEvent event) {
-		if (!event.getOriginalInvulnerability() && !event.isInvulnerable()) {
-			var v = EntityOverride.INVULNERABLE.get(event.getEntity());
-
-			if (v != null && v) {
-				event.setInvulnerable(true);
-			}
+		if (!event.getOriginalInvulnerability() && !event.isInvulnerable() && EntityOverride.INVULNERABLE.get(event.getEntity(), false)) {
+			event.setInvulnerable(true);
 		}
 	}
 

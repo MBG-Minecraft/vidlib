@@ -1,23 +1,15 @@
 package dev.beast.mods.shimmer.core.mixin;
 
 import dev.beast.mods.shimmer.core.ShimmerMinecraftServer;
-import dev.beast.mods.shimmer.feature.clock.ClockInstance;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.data.DataType;
-import dev.beast.mods.shimmer.feature.data.SyncPlayerDataPayload;
-import dev.beast.mods.shimmer.feature.data.SyncServerDataPayload;
-import dev.beast.mods.shimmer.feature.input.PlayerInputChanged;
-import dev.beast.mods.shimmer.feature.input.SyncPlayerInputToClient;
-import dev.beast.mods.shimmer.feature.misc.RefreshNamePayload;
-import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
 import dev.beast.mods.shimmer.util.ScheduledTask;
+import net.minecraft.Util;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
-import net.neoforged.neoforge.common.NeoForge;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -34,12 +26,6 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 	@Shadow
 	@Final
 	private Map<ResourceKey<Level>, ServerLevel> levels;
-
-	@Shadow
-	public abstract boolean shouldInformAdmins();
-
-	@Shadow
-	public abstract boolean acceptsFailure();
 
 	@Unique
 	private ScheduledTask.Handler shimmer$scheduledTaskHandler;
@@ -62,40 +48,11 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 	@Override
 	public DataMap getServerData() {
 		if (shimmer$serverDataMap == null) {
-			shimmer$serverDataMap = new DataMap(DataType.SERVER);
+			shimmer$serverDataMap = new DataMap(Util.NIL_UUID, DataType.SERVER);
 			shimmer$serverDataMap.load(shimmer$self(), shimmer$self().getWorldPath(LevelResource.ROOT).resolve("shimmer.nbt"));
 		}
 
 		return shimmer$serverDataMap;
-	}
-
-	@Override
-	public void shimmer$playerJoined(ServerPlayer player) {
-		player.shimmer$sessionData().dataMap.load(shimmer$self(), shimmer$self().getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("shimmer").resolve(player.getUUID() + ".nbt"));
-		player.refreshDisplayName();
-		player.refreshTabListName();
-		getServerData().syncAll(player, SyncServerDataPayload::new);
-		s2c(new RefreshNamePayload(player.getUUID()));
-	}
-
-	@Override
-	public void shimmer$preTick() {
-		for (var level : shimmer$self().getAllLevels()) {
-			var zones = ZoneLoader.BY_DIMENSION.get(level.dimension());
-			level.shimmer$setActiveZones(zones);
-
-			if (zones != null) {
-				zones.entityZones.clear();
-
-				for (var container : zones) {
-					container.tick(zones, level);
-				}
-			}
-		}
-
-		for (var instance : ClockInstance.SERVER.getMap().values()) {
-			instance.tick(shimmer$self().getLevel(instance.clock.dimension()));
-		}
 	}
 
 	@Override
@@ -104,19 +61,7 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 			shimmer$scheduledTaskHandler.tick();
 		}
 
-		getServerData().sync(shimmer$self(), null, (playerId, update) -> new SyncServerDataPayload(update));
-
-		for (var player : shimmer$self().getPlayerList().getPlayers()) {
-			var session = player.shimmer$sessionData();
-
-			if (!session.prevInput.equals(session.input)) {
-				NeoForge.EVENT_BUS.post(new PlayerInputChanged(player, session.prevInput, session.input));
-				session.prevInput = session.input;
-				s2c(new SyncPlayerInputToClient(player.getUUID(), session.input));
-			}
-
-			session.dataMap.sync(player.server, player, SyncPlayerDataPayload::new);
-		}
+		ShimmerMinecraftServer.super.shimmer$postTick();
 	}
 
 	@Inject(method = "createLevels", at = @At("RETURN"))

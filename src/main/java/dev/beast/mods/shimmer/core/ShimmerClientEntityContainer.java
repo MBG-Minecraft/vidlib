@@ -5,15 +5,17 @@ import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 
 public interface ShimmerClientEntityContainer extends ShimmerEntityContainer {
 	@Override
-	default void s2c(Packet<?> packet) {
+	default void s2c(Packet<? super ClientGamePacketListener> packet) {
 	}
 
 	@Override
-	default void c2s(Packet<?> packet) {
+	default void c2s(Packet<? super ServerGamePacketListener> packet) {
 		Minecraft.getInstance().getConnection().send(packet);
 	}
 

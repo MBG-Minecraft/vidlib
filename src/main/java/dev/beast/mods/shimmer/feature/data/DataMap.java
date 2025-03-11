@@ -1,7 +1,7 @@
 package dev.beast.mods.shimmer.feature.data;
 
 import dev.beast.mods.shimmer.Shimmer;
-import dev.beast.mods.shimmer.core.ShimmerEntityContainer;
+import dev.beast.mods.shimmer.core.ShimmerS2CPacketConsumer;
 import dev.beast.mods.shimmer.util.Cast;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
@@ -21,13 +21,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public class DataMap {
+	public final UUID owner;
 	private final DataTypeStorage storage;
 	private Map<DataType<?>, TrackedDataMapValue> map;
 
-	public DataMap(DataTypeStorage storage) {
+	public DataMap(UUID owner, DataTypeStorage storage) {
+		this.owner = owner;
 		this.storage = storage;
 	}
 
@@ -152,21 +153,21 @@ public class DataMap {
 		}
 	}
 
-	public void syncAll(ShimmerEntityContainer target, Function<List<DataMapValue>, CustomPacketPayload> factory) {
+	public void syncAll(ShimmerS2CPacketConsumer target, @Nullable ServerPlayer selfPlayer, BiFunction<UUID, List<DataMapValue>, CustomPacketPayload> factory) {
 		var list = new ArrayList<DataMapValue>();
 
 		if (map != null) {
 			for (var v : map.values()) {
-				if (v.type.streamCodec() != null) {
+				if (v.type.streamCodec() != null && (v.type.syncToAllClients() || selfPlayer != null && owner.equals(selfPlayer.getUUID()))) {
 					list.add(new DataMapValue(v.type, v.data));
 				}
 			}
 		}
 
-		target.s2c(factory.apply(list));
+		target.s2c(factory.apply(null, list));
 	}
 
-	public void sync(MinecraftServer server, @Nullable ServerPlayer selfPlayer, BiFunction<UUID, List<DataMapValue>, CustomPacketPayload> factory) {
+	public void sync(ShimmerS2CPacketConsumer packetsToEveryone, @Nullable ServerPlayer selfPlayer, BiFunction<UUID, List<DataMapValue>, CustomPacketPayload> factory) {
 		if (map == null) {
 			return;
 		}
@@ -198,7 +199,7 @@ public class DataMap {
 		}
 
 		if (syncAll != null) {
-			server.s2c(factory.apply(selfPlayer == null ? null : selfPlayer.getUUID(), syncAll));
+			packetsToEveryone.s2c(factory.apply(selfPlayer == null ? null : selfPlayer.getUUID(), syncAll));
 		}
 	}
 }

@@ -37,6 +37,22 @@ public interface ShimmerPlayer extends ShimmerLivingEntity {
 	}
 
 	@Override
+	@Nullable
+	default Boolean shimmer$glowingOverride() {
+		return shimmer$sessionData().glowingOverride;
+	}
+
+	@Override
+	@Nullable
+	default Integer shimmer$teamColorOverride() {
+		return shimmer$sessionData().teamColorOverride;
+	}
+
+	default boolean shimmer$pvp(Player other) {
+		return shimmer$sessionData().pvp && other.shimmer$sessionData().pvp;
+	}
+
+	@Override
 	default Line ray(float delta) {
 		return ray(((Player) this).blockInteractionRange(), delta);
 	}

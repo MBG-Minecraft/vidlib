@@ -60,6 +60,17 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 		return type != null && type.isSurvival();
 	}
 
+	@Nullable
+	default Boolean shimmer$glowingOverride() {
+		return EntityOverride.GLOWING.get(this);
+	}
+
+	@Nullable
+	default Integer shimmer$teamColorOverride() {
+		var col = EntityOverride.TEAM_COLOR.get(this);
+		return col == null ? null : col.rgb();
+	}
+
 	default Line ray(double distance, float delta) {
 		var start = ((Entity) this).getEyePosition(delta);
 		var end = start.add(((Entity) this).getViewVector(delta).scale(distance));

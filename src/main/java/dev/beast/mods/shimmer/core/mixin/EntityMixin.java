@@ -12,6 +12,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -24,6 +25,9 @@ import java.util.Map;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin implements ShimmerEntity {
+	@Shadow
+	private Level level;
+
 	@ModifyReturnValue(method = "collectColliders", at = @At("RETURN"))
 	private static List<VoxelShape> shimmer$collectColliders(List<VoxelShape> parent, @Local(argsOnly = true) Level level, @Local(argsOnly = true) @Nullable Entity entity, @Local(argsOnly = true) AABB collisionBox) {
 		var zones = level.shimmer$getActiveZones();
@@ -84,7 +88,7 @@ public abstract class EntityMixin implements ShimmerEntity {
 
 	@Inject(method = "isCurrentlyGlowing", at = @At("HEAD"), cancellable = true)
 	private void shimmer$isCurrentlyGlowing(CallbackInfoReturnable<Boolean> cir) {
-		var override = EntityOverride.GLOWING.get(this);
+		var override = level == null || !level.isClientSide ? null : shimmer$glowingOverride();
 
 		if (override != null) {
 			cir.setReturnValue(override);
@@ -93,10 +97,10 @@ public abstract class EntityMixin implements ShimmerEntity {
 
 	@Inject(method = "getTeamColor", at = @At("HEAD"), cancellable = true)
 	private void shimmer$getTeamColor(CallbackInfoReturnable<Integer> cir) {
-		var override = EntityOverride.TEAM_COLOR.get(this);
+		var override = shimmer$teamColorOverride();
 
 		if (override != null) {
-			cir.setReturnValue(override & 0xFFFFFF);
+			cir.setReturnValue(override);
 		}
 	}
 

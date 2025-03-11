@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer.util;
 
 import com.mojang.datafixers.util.Either;
+import com.mojang.datafixers.util.Unit;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.util.UndashedUuid;
@@ -13,6 +14,7 @@ import net.minecraft.world.phys.Vec3;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -30,6 +32,8 @@ public interface ShimmerCodecs {
 	}
 
 	Codec<Vec3> VEC_3D = Codec.either(Codec.DOUBLE, Vec3.CODEC).xmap(either -> either.map(d -> new Vec3(d, d, d), Function.identity()), v -> v.x == v.y && v.x == v.z ? Either.left(v.x) : Either.right(v));
+
+	Codec<Unit> UNIT = Codec.unit(Unit.INSTANCE);
 
 	static <K, V> Codec<V> map(Supplier<Map<K, V>> mapGetter, Codec<K> keyCodec, Function<V, K> keyGetter) {
 		return keyCodec.flatXmap(k -> {
@@ -57,5 +61,9 @@ public interface ShimmerCodecs {
 				return value == null ? DataResult.error(() -> "No value for key " + k) : DataResult.success(value);
 			}
 		}, v -> DataResult.success(keyGetter.apply(v)));
+	}
+
+	static <V> Codec<Optional<V>> optional(Codec<V> codec) {
+		return Codec.either(UNIT, codec).xmap(either -> either.map(u -> Optional.empty(), Optional::of), opt -> opt.isPresent() ? Either.right(opt.get()) : Either.left(Unit.INSTANCE));
 	}
 }

@@ -49,9 +49,7 @@ public abstract class LivingEntityMixin implements ShimmerLivingEntity {
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;aiStep()V"))
 	private void shimmer$ai(LivingEntity instance) {
-		var v = EntityOverride.AI.get(instance);
-
-		if (v == null || v) {
+		if (!EntityOverride.SUSPENDED.get(instance, false)) {
 			instance.aiStep();
 		}
 	}

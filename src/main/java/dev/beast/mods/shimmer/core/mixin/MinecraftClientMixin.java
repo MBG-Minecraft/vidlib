@@ -1,7 +1,6 @@
 package dev.beast.mods.shimmer.core.mixin;
 
 import com.mojang.blaze3d.platform.Window;
-import dev.beast.mods.shimmer.core.ShimmerLocalPlayer;
 import dev.beast.mods.shimmer.core.ShimmerMinecraftClient;
 import dev.beast.mods.shimmer.feature.camerashake.CameraShake;
 import dev.beast.mods.shimmer.feature.camerashake.CameraShakeInstance;
@@ -9,8 +8,6 @@ import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.cutscene.CutsceneScreen;
 import dev.beast.mods.shimmer.feature.data.DataMap;
-import dev.beast.mods.shimmer.feature.input.PlayerInputChanged;
-import dev.beast.mods.shimmer.feature.input.SyncPlayerInputToServer;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.math.Vec2d;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
@@ -24,7 +21,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -54,6 +50,9 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 	@Shadow
 	@Final
 	private Window window;
+
+	@Shadow
+	public abstract boolean isNameBanned();
 
 	@Unique
 	private ScheduledTask.Handler shimmer$scheduledTaskHandler;
@@ -123,26 +122,7 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 			return;
 		}
 
-		var session = player.shimmer$sessionData();
-		session.input = ShimmerLocalPlayer.fromInput(window.getWindow(), player.input, screen == null && shimmer$self().isWindowActive());
-
-		if (!session.prevInput.equals(session.input)) {
-			NeoForge.EVENT_BUS.post(new PlayerInputChanged(player, session.prevInput, session.input));
-			session.prevInput = session.input;
-			c2s(new SyncPlayerInputToServer(session.input));
-		}
-
-		session.filteredZones.entityZones.clear();
-
-		for (var container : session.filteredZones) {
-			container.tick(session.filteredZones, level);
-		}
-
-		for (var instance : session.clocks.values()) {
-			if (instance.clock.dimension() == level.dimension()) {
-				instance.tick(level);
-			}
-		}
+		player.shimmer$sessionData().preTick(shimmer$self(), level, player, window);
 	}
 
 	@Override
