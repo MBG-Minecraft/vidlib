@@ -7,6 +7,7 @@
 		"AdvancementTreeMixin",
 		"BarrierBlockMixin",
 		"CollisionGetterMixin",
+		"CoralBlockMixin",
 		"EntityMixin",
 		"FallingBlockMixin",
 		"FireworkRocketEntityMixin",

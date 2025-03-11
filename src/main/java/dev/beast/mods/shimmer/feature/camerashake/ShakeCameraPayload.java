@@ -1,10 +1,12 @@
 package dev.beast.mods.shimmer.feature.camerashake;
 
+import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record ShakeCameraPayload(CameraShake shake) implements ShimmerPacketPayload {
+	@AutoPacket
 	public static final ShimmerPacketType<ShakeCameraPayload> TYPE = ShimmerPacketType.internal("shake_camera", CameraShake.STREAM_CODEC.map(ShakeCameraPayload::new, ShakeCameraPayload::shake));
 
 	@Override

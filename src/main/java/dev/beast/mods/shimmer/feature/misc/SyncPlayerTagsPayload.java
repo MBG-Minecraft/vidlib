@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.feature.misc;
 
+import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
 import dev.beast.mods.shimmer.util.CompositeStreamCodec;
@@ -10,9 +11,10 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import java.util.List;
 import java.util.UUID;
 
-public record SyncPlayerTagsPayload(UUID uuid, List<String> tags) implements ShimmerPacketPayload {
+public record SyncPlayerTagsPayload(UUID player, List<String> tags) implements ShimmerPacketPayload {
+	@AutoPacket
 	public static final ShimmerPacketType<SyncPlayerTagsPayload> TYPE = ShimmerPacketType.internal("sync_player_tags", CompositeStreamCodec.of(
-		ShimmerStreamCodecs.UUID, SyncPlayerTagsPayload::uuid,
+		ShimmerStreamCodecs.UUID, SyncPlayerTagsPayload::player,
 		ByteBufCodecs.STRING_UTF8.list(), SyncPlayerTagsPayload::tags,
 		SyncPlayerTagsPayload::new
 	));
@@ -24,6 +26,6 @@ public record SyncPlayerTagsPayload(UUID uuid, List<String> tags) implements Shi
 
 	@Override
 	public void handle(IPayloadContext ctx) {
-		ctx.player().shimmer$sessionData().updatePlayerTags(ctx.player().getUUID(), uuid, tags);
+		ctx.player().shimmer$sessionData().updatePlayerTags(player, tags);
 	}
 }

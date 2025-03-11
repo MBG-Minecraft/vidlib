@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class FallingBlockMixin {
 	@Inject(method = "isFree", at = @At("HEAD"), cancellable = true)
 	private static void shimmer$isFree(BlockState state, CallbackInfoReturnable<Boolean> cir) {
-		if (ShimmerConfig.preventBlockFalling) {
+		if (ShimmerConfig.disableFallingBlocks) {
 			cir.setReturnValue(false);
 		}
 	}

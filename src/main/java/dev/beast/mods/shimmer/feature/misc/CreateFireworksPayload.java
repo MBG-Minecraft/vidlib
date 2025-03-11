@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.feature.misc;
 
+import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
 import dev.beast.mods.shimmer.util.CompositeStreamCodec;
@@ -10,6 +11,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import java.util.List;
 
 public record CreateFireworksPayload(double x, double y, double z, double vx, double vy, double vz, List<FireworkExplosion> explosions) implements ShimmerPacketPayload {
+	@AutoPacket
 	public static final ShimmerPacketType<CreateFireworksPayload> TYPE = ShimmerPacketType.internal("create_fireworks", CompositeStreamCodec.of(
 		ByteBufCodecs.DOUBLE, CreateFireworksPayload::x,
 		ByteBufCodecs.DOUBLE, CreateFireworksPayload::y,

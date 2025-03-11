@@ -6,6 +6,7 @@ import dev.beast.mods.shimmer.feature.clock.ClockInstance;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.data.DataMapValue;
 import dev.beast.mods.shimmer.feature.data.DataType;
+import dev.beast.mods.shimmer.feature.input.PlayerInput;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.feature.zone.ZoneClipResult;
 import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
@@ -131,8 +132,8 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	}
 
 	@Override
-	public void updatePlayerTags(UUID ownId, UUID uuid, List<String> update) {
-		var t = ownId.equals(uuid) ? tags : getRemoteSessionData(uuid).tags;
+	public void updatePlayerTags(UUID player, List<String> update) {
+		var t = uuid.equals(player) ? tags : getRemoteSessionData(player).tags;
 		t.clear();
 		t.addAll(update);
 	}
@@ -145,5 +146,11 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	@Override
 	public void refreshBlockZones() {
 		cachedZoneShapes = null;
+	}
+
+	@Override
+	public void updateInput(UUID player, PlayerInput input) {
+		var data = getRemoteSessionData(player);
+		data.prevInput = data.input = input;
 	}
 }

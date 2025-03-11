@@ -6,6 +6,8 @@ import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.data.SyncPlayerDataPayload;
 import dev.beast.mods.shimmer.feature.data.SyncServerDataPayload;
+import dev.beast.mods.shimmer.feature.input.PlayerInputChanged;
+import dev.beast.mods.shimmer.feature.input.SyncPlayerInputToClient;
 import dev.beast.mods.shimmer.feature.misc.RefreshNamePayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
 import dev.beast.mods.shimmer.util.ScheduledTask;
@@ -15,6 +17,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
+import net.neoforged.neoforge.common.NeoForge;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -104,7 +107,15 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 		getServerData().sync(shimmer$self(), null, (playerId, update) -> new SyncServerDataPayload(update));
 
 		for (var player : shimmer$self().getPlayerList().getPlayers()) {
-			player.shimmer$sessionData().dataMap.sync(player.server, player, SyncPlayerDataPayload::new);
+			var session = player.shimmer$sessionData();
+
+			if (!session.prevInput.equals(session.input)) {
+				NeoForge.EVENT_BUS.post(new PlayerInputChanged(player, session.prevInput, session.input));
+				session.prevInput = session.input;
+				s2c(new SyncPlayerInputToClient(player.getUUID(), session.input));
+			}
+
+			session.dataMap.sync(player.server, player, SyncPlayerDataPayload::new);
 		}
 	}
 

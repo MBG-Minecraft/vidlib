@@ -203,7 +203,6 @@ public final class EntityOverride<T> {
 		set(entity, EntityOverrideValue.fixed(value));
 	}
 
-
 	public void setGlobal(EntityFilter filter, EntityOverrideValue<T> value) {
 		if (filtered == null) {
 			filtered = new ArrayList<>(1);
