@@ -1,38 +1,37 @@
 package dev.beast.mods.shimmer.feature.cutscene;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import dev.beast.mods.shimmer.feature.auto.AutoRegister;
+import dev.beast.mods.shimmer.feature.auto.ServerCommandHolder;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.util.KnownCodec;
-import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 
 public interface CutsceneCommands {
-	static LiteralArgumentBuilder<CommandSourceStack> createCommand(CommandBuildContext buildContext) {
-		return Commands.literal("cutscene")
-			.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
-			.then(Commands.literal("play")
-				.then(Commands.argument("id", ResourceLocationArgument.id())
-					.executes(ctx -> {
-						ctx.getSource().getPlayerOrException().playCutscene(ResourceLocationArgument.getId(ctx, "id"), WorldNumberVariables.EMPTY);
-						return 1;
-					})
-				)
-			)
-			.then(Commands.literal("create")
-				.then(Commands.argument("data", KnownCodec.CUTSCENE.argument(buildContext))
-					.executes(ctx -> {
-						ctx.getSource().getPlayerOrException().playCutscene(KnownCodec.CUTSCENE.get(ctx, "data"), WorldNumberVariables.EMPTY);
-						return 1;
-					})
-				)
-			)
-			.then(Commands.literal("stop")
+	@AutoRegister
+	ServerCommandHolder HOLDER = new ServerCommandHolder("cutscene", (command, buildContext) -> command
+		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
+		.then(Commands.literal("play")
+			.then(Commands.argument("id", ResourceLocationArgument.id())
 				.executes(ctx -> {
-					ctx.getSource().getPlayerOrException().stopCutscene();
+					ctx.getSource().getPlayerOrException().playCutscene(ResourceLocationArgument.getId(ctx, "id"), WorldNumberVariables.EMPTY);
 					return 1;
 				})
-			);
-	}
+			)
+		)
+		.then(Commands.literal("create")
+			.then(Commands.argument("data", KnownCodec.CUTSCENE.argument(buildContext))
+				.executes(ctx -> {
+					ctx.getSource().getPlayerOrException().playCutscene(KnownCodec.CUTSCENE.get(ctx, "data"), WorldNumberVariables.EMPTY);
+					return 1;
+				})
+			)
+		)
+		.then(Commands.literal("stop")
+			.executes(ctx -> {
+				ctx.getSource().getPlayerOrException().stopCutscene();
+				return 1;
+			})
+		)
+	);
 }

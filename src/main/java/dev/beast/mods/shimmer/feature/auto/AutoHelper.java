@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.feature.auto;
 
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.modscan.ModAnnotation;
@@ -49,6 +50,8 @@ public class AutoHelper {
 			}
 		}
 	}
+
+	public static final EnumSet<Dist> BOTH_SIDES = EnumSet.of(Dist.CLIENT, Dist.DEDICATED_SERVER);
 
 	public static <E extends Enum<E>> E getEnumValue(ModFileScanData.AnnotationData ad, Class<E> enumClass, String name, E defaultValue) {
 		var typeData = ad.annotationData().get(name);

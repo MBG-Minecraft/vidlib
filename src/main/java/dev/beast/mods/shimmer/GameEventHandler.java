@@ -1,5 +1,7 @@
 package dev.beast.mods.shimmer;
 
+import dev.beast.mods.shimmer.feature.auto.AutoRegister;
+import dev.beast.mods.shimmer.feature.auto.ServerCommandHolder;
 import dev.beast.mods.shimmer.feature.clock.Clock;
 import dev.beast.mods.shimmer.feature.clock.ClockFont;
 import dev.beast.mods.shimmer.feature.clock.ClockInstance;
@@ -14,6 +16,7 @@ import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
 import dev.beast.mods.shimmer.feature.zone.SyncZonesPayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
 import dev.beast.mods.shimmer.util.registry.RegistryReference;
+import net.minecraft.commands.Commands;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
@@ -44,7 +47,13 @@ import java.util.List;
 public class GameEventHandler {
 	@SubscribeEvent
 	public static void registerCommands(RegisterCommandsEvent event) {
-		ShimmerCommands.register(event.getDispatcher(), event.getBuildContext());
+		for (var s : AutoRegister.SCANNED.get()) {
+			if (s.value() instanceof ServerCommandHolder(String name, ServerCommandHolder.Callback callback)) {
+				var command = Commands.literal(name);
+				callback.register(command, event.getBuildContext());
+				event.getDispatcher().register(command);
+			}
+		}
 	}
 
 	@SubscribeEvent

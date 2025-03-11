@@ -1,38 +1,37 @@
 package dev.beast.mods.shimmer.feature.zone;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import dev.beast.mods.shimmer.feature.auto.AutoRegister;
+import dev.beast.mods.shimmer.feature.auto.ServerCommandHolder;
 import dev.beast.mods.shimmer.feature.block.filter.BlockFilter;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.util.KnownCodec;
-import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 public interface ZoneCommands {
-	static LiteralArgumentBuilder<CommandSourceStack> createCommand(CommandBuildContext buildContext) {
-		return Commands.literal("zones")
-			.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
-			.then(Commands.literal("show")
-				.executes(ctx -> show(ctx.getSource().getPlayerOrException()))
+	@AutoRegister
+	ServerCommandHolder HOLDER = new ServerCommandHolder("zones", (command, buildContext) -> command
+		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
+		.then(Commands.literal("show")
+			.executes(ctx -> show(ctx.getSource().getPlayerOrException()))
+		)
+		.then(Commands.literal("render-type")
+			.then(Commands.literal("normal")
+				.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), ZoneRenderType.NORMAL, null))
 			)
-			.then(Commands.literal("render-type")
-				.then(Commands.literal("normal")
-					.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), ZoneRenderType.NORMAL, null))
-				)
-				.then(Commands.literal("collisions")
-					.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), ZoneRenderType.COLLISIONS, null))
-				)
-				.then(Commands.literal("blocks")
-					.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), ZoneRenderType.BLOCKS, BlockFilter.NONE.instance()))
-					.then(Commands.argument("filter", KnownCodec.BLOCK_FILTER.argument(buildContext))
-						.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), ZoneRenderType.BLOCKS, KnownCodec.BLOCK_FILTER.get(ctx, "filter")))
+			.then(Commands.literal("collisions")
+				.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), ZoneRenderType.COLLISIONS, null))
+			)
+			.then(Commands.literal("blocks")
+				.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), ZoneRenderType.BLOCKS, BlockFilter.NONE.instance()))
+				.then(Commands.argument("filter", KnownCodec.BLOCK_FILTER.argument(buildContext))
+					.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), ZoneRenderType.BLOCKS, KnownCodec.BLOCK_FILTER.get(ctx, "filter")))
 
-					)
 				)
-			);
-	}
+			)
+		)
+	);
 
 	private static int show(ServerPlayer player) {
 		player.set(InternalPlayerData.SHOW_ZONES, !player.get(InternalPlayerData.SHOW_ZONES));

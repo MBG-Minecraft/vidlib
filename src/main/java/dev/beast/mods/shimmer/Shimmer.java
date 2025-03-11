@@ -1,15 +1,16 @@
 package dev.beast.mods.shimmer;
 
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
-import dev.beast.mods.shimmer.feature.particle.ShimmerParticles;
+import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.registries.DeferredRegister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,15 +40,30 @@ public class Shimmer {
 
 	public static final ResourceKey<Level> LOBBY_DIMENSION = ResourceKey.create(Registries.DIMENSION, id("lobby"));
 
-	public Shimmer(IEventBus bus, Dist dist) throws IOException {
+	public Shimmer(IEventBus bus) throws IOException {
 		Shimmer.LOGGER.info("Shimmer loaded");
 
 		if (Files.notExists(PATH)) {
 			Files.createDirectories(PATH);
 		}
 
-		ShimmerArgumentTypes.REGISTRY.register(bus);
-		ShimmerParticles.REGISTRY.register(bus);
+		for (var s : AutoRegister.SCANNED.get()) {
+			if (s.value() instanceof DeferredRegister<?> reg) {
+				var container = ModList.get().getModContainerById(s.mod().getModId());
+
+				if (container.isPresent()) {
+					var bus1 = container.get().getEventBus();
+
+					if (bus1 != null) {
+						reg.register(bus1);
+					} else {
+						Shimmer.LOGGER.error("Failed to find @AutoRegister mod event bus for " + s.mod().getModId());
+					}
+				} else {
+					Shimmer.LOGGER.error("Failed to find @AutoRegister mod container for " + s.mod().getModId());
+				}
+			}
+		}
 
 		AutoInit.Type.REGISTRY.invoke(bus);
 	}
