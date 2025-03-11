@@ -1,11 +1,13 @@
 package dev.beast.mods.shimmer.feature.auto;
 
+import dev.beast.mods.shimmer.Shimmer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.modscan.ModAnnotation;
 import net.neoforged.neoforgespi.language.IModInfo;
 import net.neoforged.neoforgespi.language.ModFileScanData;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
 
 import java.lang.annotation.Annotation;
@@ -109,21 +111,34 @@ public class AutoHelper {
 		return clazz.getDeclaredMethod(ad.memberName().substring(0, ad.memberName().indexOf('(')), argTypes);
 	}
 
+	@Nullable
 	public static Object getStaticFieldValue(Class<?> clazz, ModFileScanData.AnnotationData ad) throws Exception {
 		var name = ad.memberName();
-		var field = clazz.getDeclaredField(name);
 
-		if (Modifier.isPublic(field.getModifiers())) {
-			return field.get(null);
-		} else {
-			// Kotlin Patch
-			var method = clazz.getDeclaredMethod("get" + name.substring(0, 1).toUpperCase(Locale.ROOT) + name.substring(1));
+		try {
+			var field = clazz.getDeclaredField(name);
+
+			if (!Modifier.isPublic(field.getModifiers())) {
+				try {
+					field.trySetAccessible();
+				} catch (Exception ex) {
+				}
+			}
 
 			try {
-				return method.invoke(clazz.getDeclaredField("INSTANCE").get(null));
+				return field.get(null);
 			} catch (Exception ex) {
-				return method.invoke(null);
+				var method = clazz.getDeclaredMethod("get" + name.substring(0, 1).toUpperCase(Locale.ROOT) + name.substring(1));
+
+				try {
+					return method.invoke(null);
+				} catch (Exception ex2) {
+					return method.invoke(clazz.getDeclaredField("INSTANCE").get(null));
+				}
 			}
+		} catch (Exception ex) {
+			Shimmer.LOGGER.error("Unable to access field " + clazz.getName() + "." + ad.memberName(), ex.getCause());
+			return null;
 		}
 	}
 }

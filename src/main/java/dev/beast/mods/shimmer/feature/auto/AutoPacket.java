@@ -35,12 +35,16 @@ public @interface AutoPacket {
 		var list = new ArrayList<ScanData>();
 
 		AutoHelper.load(AutoPacket.class, EnumSet.of(ElementType.FIELD), (mod, classLoader, ad) -> {
-			var clazz = Class.forName(ad.clazz().getClassName(), true, classLoader);
-			var type = (ShimmerPacketType<?>) AutoHelper.getStaticFieldValue(clazz, ad);
-			var toList = AutoHelper.getEnumValues(ad, To.class, "value", To.DEFAULT);
-			Shimmer.LOGGER.info("Found @AutoPacket " + clazz.getName() + "." + ad.memberName() + " to " + String.join(", ", toList.stream().map(p -> p.name().toLowerCase()).toList()));
-			list.add(new ScanData(type, toList));
-		});
+				var clazz = Class.forName(ad.clazz().getClassName(), true, classLoader);
+				var type = AutoHelper.getStaticFieldValue(clazz, ad);
+
+				if (type instanceof ShimmerPacketType<?> t) {
+					var toList = AutoHelper.getEnumValues(ad, To.class, "value", To.DEFAULT);
+					Shimmer.LOGGER.info("Found @AutoPacket " + clazz.getName() + "." + ad.memberName() + " to " + String.join(", ", toList.stream().map(p -> p.name().toLowerCase()).toList()));
+					list.add(new ScanData(t, toList));
+				}
+			}
+		);
 
 		return list;
 	});
