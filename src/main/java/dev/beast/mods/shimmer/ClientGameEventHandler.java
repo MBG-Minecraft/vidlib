@@ -3,6 +3,7 @@ package dev.beast.mods.shimmer;
 import com.mojang.math.Axis;
 import dev.beast.mods.shimmer.feature.clock.ClockRenderer;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
+import dev.beast.mods.shimmer.feature.icon.renderer.IconRenderer;
 import dev.beast.mods.shimmer.feature.misc.CameraOverride;
 import dev.beast.mods.shimmer.feature.misc.DebugText;
 import dev.beast.mods.shimmer.feature.misc.DebugTextEvent;
@@ -13,8 +14,12 @@ import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
 import dev.beast.mods.shimmer.math.KMath;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -53,7 +58,7 @@ public class ClientGameEventHandler {
 		float delta = event.getPartialTick().getGameTimeDeltaPartialTick(true);
 
 		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SKY) {
-			Minecraft.getInstance().shimmer$renderSetup(event, delta);
+			mc.shimmer$renderSetup(event, delta);
 		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
 			var ms = event.getPoseStack();
 			var cameraPos = event.getCamera().getPosition();
@@ -103,6 +108,42 @@ public class ClientGameEventHandler {
 						}
 					}
 				}
+			}
+
+			for (var player : mc.level.players()) {
+				if (player.isInvisible()) {
+					continue;
+				}
+
+				var h = player.shimmer$sessionData().plumbobIcon;
+
+				if (h == null) {
+					continue;
+				}
+
+				var source = mc.renderBuffers().bufferSource();
+				var blockpos = BlockPos.containing(player.getLightProbePosition(delta));
+				int light = LightTexture.pack(mc.level.getBrightness(LightLayer.BLOCK, blockpos), mc.level.getBrightness(LightLayer.SKY, blockpos));
+
+				var cam = mc.gameRenderer.getMainCamera().getPosition();
+				var pos = player.getPosition(delta);
+
+				if (KMath.sq(pos.x - cam.x) + KMath.sq(pos.z - cam.z) <= 0.01D * 0.01D) {
+					continue;
+				}
+
+				ms.pushPose();
+				ms.translate(pos.x - cameraPos.x, pos.y - cameraPos.y, pos.z - cameraPos.z);
+				ms.translate(0F, player.isCrouching() ? 2.3F : 2.6F, 0F);
+				ms.mulPose(mc.gameRenderer.getMainCamera().rotation());
+				ms.scale(0.4F, 0.4F, 0.4F);
+
+				if (h.renderer == null) {
+					h.renderer = IconRenderer.create(h.icon);
+				}
+
+				((IconRenderer) h.renderer).render3D(mc, ms, delta, source, light, OverlayTexture.NO_OVERLAY);
+				ms.popPose();
 			}
 		}
 	}

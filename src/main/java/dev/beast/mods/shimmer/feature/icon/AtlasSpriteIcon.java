@@ -25,9 +25,6 @@ public record AtlasSpriteIcon(Optional<ResourceLocation> atlas, ResourceLocation
 		AtlasSpriteIcon::new
 	));
 
-	public static final SimpleRegistryType.Unit<AtlasSpriteIcon> YES = SimpleRegistryType.unit(Shimmer.id("yes"), new AtlasSpriteIcon(Optional.empty(), Shimmer.id("item/yes"), false, Color.WHITE));
-	public static final SimpleRegistryType.Unit<AtlasSpriteIcon> NO = SimpleRegistryType.unit(Shimmer.id("no"), new AtlasSpriteIcon(Optional.empty(), Shimmer.id("item/no"), false, Color.WHITE));
-
 	@Override
 	public SimpleRegistryType<?> type() {
 		return TYPE;

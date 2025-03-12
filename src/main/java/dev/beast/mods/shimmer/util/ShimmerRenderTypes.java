@@ -1,18 +1,44 @@
 package dev.beast.mods.shimmer.util;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.client.Minecraft;
+import net.minecraft.Util;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.opengl.GL11;
+
+import java.util.Optional;
+import java.util.function.Function;
 
 public class ShimmerRenderTypes extends RenderType {
 	public static final RenderType WHITE_ENTITY = entitySolid(Empty.TEXTURE);
 	public static final RenderType WHITE_TRANSLUCENT_ENTITY = entityTranslucentCull(Empty.TEXTURE);
 	public static final RenderType WHITE_TRANSLUCENT_NO_CULL_ENTITY = entityTranslucent(Empty.TEXTURE);
 
-	public static double lineWidth(Minecraft mc) {
-		return Math.max(2.5D, (float) mc.getWindow().getWidth() / 1920.0D * 2.5D);
+	public static class AutoTextureStateShard extends RenderStateShard.EmptyTextureStateShard {
+		private final Optional<ResourceLocation> texture;
+
+		public AutoTextureStateShard(ResourceLocation texture) {
+			super(() -> {
+				// var texturemanager = Minecraft.getInstance().getTextureManager();
+				// texturemanager.getTexture(texture).setFilter(true, false);
+				RenderSystem.setShaderTexture(0, texture);
+			}, () -> {
+			});
+			this.texture = Optional.of(texture);
+		}
+
+		@Override
+		public String toString() {
+			return this.name + "[" + this.texture + "]";
+		}
+
+		@Override
+		protected Optional<ResourceLocation> cutoutTexture() {
+			return this.texture;
+		}
 	}
 
 	public static void setupLines() {
@@ -68,7 +94,29 @@ public class ShimmerRenderTypes extends RenderType {
 			.createCompositeState(false)
 	);
 
+	public static final Function<ResourceLocation, RenderType> SHIMMER_ENTITY_CUTOUT = Util.memoize(texture -> create("shimmer:entity_cutout", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, true, false, CompositeState.builder()
+		.setShaderState(RENDERTYPE_ENTITY_CUTOUT_SHADER)
+		.setTextureState(new AutoTextureStateShard(texture))
+		.setTransparencyState(NO_TRANSPARENCY)
+		.setLightmapState(LIGHTMAP)
+		.setOverlayState(OVERLAY)
+		.createCompositeState(true))
+	);
+
+	public static final Function<ResourceLocation, RenderType> SHIMMER_ENTITY_TRANSLUCENT_CULL = Util.memoize(texture -> create("shimmer:entity_translucent_cull", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, true, true, CompositeState.builder()
+		.setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_CULL_SHADER)
+		.setTextureState(new AutoTextureStateShard(texture))
+		.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+		.setLightmapState(LIGHTMAP)
+		.setOverlayState(OVERLAY)
+		.createCompositeState(true))
+	);
+
 	private ShimmerRenderTypes(String name, VertexFormat format, VertexFormat.Mode mode, int bufferSize, boolean affectsCrumbling, boolean sortOnUpload, Runnable setupState, Runnable clearState) {
 		super(name, format, mode, bufferSize, affectsCrumbling, sortOnUpload, setupState, clearState);
+	}
+
+	public static RenderType entityTextureCull(ResourceLocation texture, boolean translucent) {
+		return translucent ? SHIMMER_ENTITY_TRANSLUCENT_CULL.apply(texture) : SHIMMER_ENTITY_CUTOUT.apply(texture);
 	}
 }

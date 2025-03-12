@@ -47,6 +47,7 @@
 		"GameRendererMixin",
 		"GuiMixin",
 		"ItemInHandLayerMixin",
+		"ItemInHandRendererMixin",
 		"ItemModelShaperMixin",
 		"KeyboardHandlerMixin",
 		"KeyboardMixinInput",

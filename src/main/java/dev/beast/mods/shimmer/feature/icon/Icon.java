@@ -4,6 +4,8 @@ import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.codec.KnownCodec;
+import dev.beast.mods.shimmer.math.Color;
+import dev.beast.mods.shimmer.math.UV;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistry;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -15,6 +17,9 @@ public interface Icon {
 	StreamCodec<RegistryFriendlyByteBuf, Icon> STREAM_CODEC = REGISTRY.valueStreamCodec();
 	KnownCodec<Icon> KNOWN_CODEC = KnownCodec.register(Shimmer.id("icon"), CODEC, Icon.class);
 
+	SimpleRegistryType.Unit<Icon> YES = SimpleRegistryType.unit(Shimmer.id("yes"), new TextureIcon(Shimmer.id("textures/misc/yes.png"), UV.FULL, true, Color.WHITE));
+	SimpleRegistryType.Unit<Icon> NO = SimpleRegistryType.unit(Shimmer.id("no"), new TextureIcon(Shimmer.id("textures/misc/no.png"), UV.FULL, true, Color.WHITE));
+
 	@AutoInit
 	static void bootstrap() {
 		REGISTRY.register(EmptyIcon.TYPE);
@@ -23,8 +28,8 @@ public interface Icon {
 		REGISTRY.register(ItemIcon.TYPE);
 		REGISTRY.register(AtlasSpriteIcon.TYPE);
 
-		REGISTRY.register(AtlasSpriteIcon.YES);
-		REGISTRY.register(AtlasSpriteIcon.NO);
+		REGISTRY.register(YES);
+		REGISTRY.register(NO);
 	}
 
 	default SimpleRegistryType<?> type() {
