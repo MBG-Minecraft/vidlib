@@ -19,8 +19,8 @@ public record DataType<T>(
 	boolean syncToAllClients,
 	@Nullable Consumer<Player> onReceived
 ) {
-	public static final DataTypeStorage SERVER = new DataTypeStorage(true);
-	public static final DataTypeStorage PLAYER = new DataTypeStorage(false);
+	public static final DataTypeStorage SERVER = new DataTypeStorage("server", true);
+	public static final DataTypeStorage PLAYER = new DataTypeStorage("player", false);
 
 	public static class Builder<T> {
 		private final DataTypeStorage storage;
@@ -81,5 +81,10 @@ public record DataType<T>(
 
 			return type;
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "DataType[storage=" + storage + ", id=" + id + "]";
 	}
 }

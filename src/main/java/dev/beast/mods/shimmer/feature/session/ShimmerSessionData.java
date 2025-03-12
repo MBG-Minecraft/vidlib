@@ -6,7 +6,9 @@ import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.data.DataMapValue;
 import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
+import dev.beast.mods.shimmer.feature.icon.IconHolder;
 import dev.beast.mods.shimmer.feature.input.PlayerInput;
+import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -24,6 +26,7 @@ public class ShimmerSessionData {
 	public Integer teamColorOverride;
 	public boolean suspended;
 	public boolean pvp;
+	public IconHolder plumbobIcon;
 
 	public ShimmerSessionData(UUID uuid) {
 		this.uuid = uuid;
@@ -44,6 +47,11 @@ public class ShimmerSessionData {
 		teamColorOverride = teamColorOverrideCol == null ? null : teamColorOverrideCol.rgb();
 		suspended = EntityOverride.SUSPENDED.get(player, false);
 		pvp = EntityOverride.PVP.get(player, true);
+		plumbobIcon = EntityOverride.PLUMBOB.get(player, IconHolder.EMPTY);
+
+		if (plumbobIcon == IconHolder.EMPTY) {
+			plumbobIcon = dataMap.get(InternalPlayerData.PLUMBOB);
+		}
 	}
 
 	public void updateZones(Level level, List<ZoneContainer> update) {

@@ -1,4 +1,4 @@
-package dev.beast.mods.shimmer.feature.misc;
+package dev.beast.mods.shimmer.feature.codec;
 
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.StringReader;
@@ -6,7 +6,6 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.serialization.DynamicOps;
-import dev.beast.mods.shimmer.util.KnownCodec;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.nbt.Tag;

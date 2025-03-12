@@ -3,7 +3,6 @@ package dev.beast.mods.shimmer.feature.cutscene;
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.ServerCommandHolder;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
-import dev.beast.mods.shimmer.util.KnownCodec;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 
@@ -20,9 +19,9 @@ public interface CutsceneCommands {
 			)
 		)
 		.then(Commands.literal("create")
-			.then(Commands.argument("data", KnownCodec.CUTSCENE.argument(buildContext))
+			.then(Commands.argument("data", Cutscene.KNOWN_CODEC.argument(buildContext))
 				.executes(ctx -> {
-					ctx.getSource().getPlayerOrException().playCutscene(KnownCodec.CUTSCENE.get(ctx, "data"), WorldNumberVariables.EMPTY);
+					ctx.getSource().getPlayerOrException().playCutscene(Cutscene.KNOWN_CODEC.get(ctx, "data"), WorldNumberVariables.EMPTY);
 					return 1;
 				})
 			)

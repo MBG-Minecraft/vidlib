@@ -1,0 +1,35 @@
+package dev.beast.mods.shimmer.feature.icon;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
+import dev.beast.mods.shimmer.math.Color;
+import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.resources.ResourceLocation;
+
+import java.util.Optional;
+
+public record AtlasSpriteIcon(Optional<ResourceLocation> atlas, ResourceLocation sprite, boolean translucent, Color tint) implements Icon {
+	public static final SimpleRegistryType<AtlasSpriteIcon> TYPE = SimpleRegistryType.dynamic(Shimmer.id("atlas_sprite"), RecordCodecBuilder.mapCodec(instance -> instance.group(
+		ResourceLocation.CODEC.optionalFieldOf("atlas").forGetter(AtlasSpriteIcon::atlas),
+		ResourceLocation.CODEC.fieldOf("sprite").forGetter(AtlasSpriteIcon::sprite),
+		Codec.BOOL.optionalFieldOf("translucent", false).forGetter(AtlasSpriteIcon::translucent),
+		Color.CODEC.optionalFieldOf("tint", Color.WHITE).forGetter(AtlasSpriteIcon::tint)
+	).apply(instance, AtlasSpriteIcon::new)), CompositeStreamCodec.of(
+		ResourceLocation.STREAM_CODEC.optional(), AtlasSpriteIcon::atlas,
+		ResourceLocation.STREAM_CODEC, AtlasSpriteIcon::sprite,
+		ByteBufCodecs.BOOL, AtlasSpriteIcon::translucent,
+		Color.STREAM_CODEC.optional(Color.WHITE), AtlasSpriteIcon::tint,
+		AtlasSpriteIcon::new
+	));
+
+	public static final SimpleRegistryType.Unit<AtlasSpriteIcon> YES = SimpleRegistryType.unit(Shimmer.id("yes"), new AtlasSpriteIcon(Optional.empty(), Shimmer.id("item/yes"), false, Color.WHITE));
+	public static final SimpleRegistryType.Unit<AtlasSpriteIcon> NO = SimpleRegistryType.unit(Shimmer.id("no"), new AtlasSpriteIcon(Optional.empty(), Shimmer.id("item/no"), false, Color.WHITE));
+
+	@Override
+	public SimpleRegistryType<?> type() {
+		return TYPE;
+	}
+}

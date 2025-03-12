@@ -69,7 +69,7 @@ public class DataMap {
 		return (T) value.data;
 	}
 
-	public <T> void set(DataType<T> type, T value) {
+	public <T> void set(DataType<T> type, @Nullable T value) {
 		var v = init(type);
 		v.data = value;
 		v.setChanged();

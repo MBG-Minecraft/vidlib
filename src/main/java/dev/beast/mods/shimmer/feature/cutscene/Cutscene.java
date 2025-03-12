@@ -2,7 +2,9 @@ package dev.beast.mods.shimmer.feature.cutscene;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.beast.mods.shimmer.util.CompositeStreamCodec;
+import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
+import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.util.JsonCodecReloadListener;
 import dev.beast.mods.shimmer.util.registry.RegistryReference;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -33,6 +35,8 @@ public class Cutscene {
 		c -> c.hidePlayer,
 		Cutscene::new
 	);
+
+	public static final KnownCodec<Cutscene> KNOWN_CODEC = KnownCodec.register(Shimmer.id("cutscene"), CODEC, Cutscene.class);
 
 	public static final RegistryReference.Holder<ResourceLocation, Cutscene> SERVER = RegistryReference.createServerHolder();
 

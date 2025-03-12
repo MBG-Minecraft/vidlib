@@ -1,7 +1,7 @@
 package dev.beast.mods.shimmer.feature.clock;
 
 import com.mojang.brigadier.context.CommandContext;
-import dev.beast.mods.shimmer.util.CompositeStreamCodec;
+import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.util.registry.RegistryReference;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;

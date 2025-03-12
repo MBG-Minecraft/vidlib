@@ -1,8 +1,8 @@
 package dev.beast.mods.shimmer.math;
 
 import com.mojang.serialization.Codec;
-import dev.beast.mods.shimmer.util.ShimmerCodecs;
-import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
+import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
+import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;

@@ -1,4 +1,4 @@
-package dev.beast.mods.shimmer.util;
+package dev.beast.mods.shimmer.feature.codec;
 
 import com.mojang.datafixers.util.Function10;
 import com.mojang.datafixers.util.Function11;

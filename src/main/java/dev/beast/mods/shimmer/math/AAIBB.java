@@ -1,7 +1,7 @@
 package dev.beast.mods.shimmer.math;
 
 import com.mojang.serialization.Codec;
-import dev.beast.mods.shimmer.util.CompositeStreamCodec;
+import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;

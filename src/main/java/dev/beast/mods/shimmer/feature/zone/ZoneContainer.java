@@ -1,7 +1,7 @@
 package dev.beast.mods.shimmer.feature.zone;
 
+import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.math.Line;
-import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;

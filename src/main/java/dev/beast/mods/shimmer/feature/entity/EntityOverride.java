@@ -3,10 +3,11 @@ package dev.beast.mods.shimmer.feature.entity;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.core.ShimmerEntity;
+import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
 import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
+import dev.beast.mods.shimmer.feature.icon.IconHolder;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.util.Cast;
-import dev.beast.mods.shimmer.util.ShimmerCodecs;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -110,6 +111,7 @@ public final class EntityOverride<T> {
 	public static final EntityOverride<Boolean> PASS_THROUGH_BARRIERS = createBooleanKey("pass_through_barriers");
 	public static final EntityOverride<Integer> REGENERATE = createIntKey("regenerate");
 	public static final EntityOverride<Boolean> INVULNERABLE = createBooleanKey("invulnerable");
+	public static final EntityOverride<IconHolder> PLUMBOB = createKey("plumbob", IconHolder.CODEC, IconHolder.STREAM_CODEC);
 
 	public final String id;
 	private final Codec<T> codec;

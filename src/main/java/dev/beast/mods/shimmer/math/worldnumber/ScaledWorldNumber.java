@@ -2,7 +2,7 @@ package dev.beast.mods.shimmer.math.worldnumber;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
-import dev.beast.mods.shimmer.util.CompositeStreamCodec;
+import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 
 public record ScaledWorldNumber(WorldNumber a, WorldNumber b) implements WorldNumber {

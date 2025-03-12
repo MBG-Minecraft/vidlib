@@ -4,12 +4,12 @@ import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.block.filter.BlockFilter;
 import dev.beast.mods.shimmer.feature.data.DataType;
+import dev.beast.mods.shimmer.feature.icon.IconHolder;
 import dev.beast.mods.shimmer.feature.zone.ZoneRenderType;
 import dev.beast.mods.shimmer.util.Empty;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.world.item.ItemStack;
 
 @AutoInit
 public interface InternalPlayerData {
@@ -19,9 +19,9 @@ public interface InternalPlayerData {
 		.syncToAllClients()
 		.build();
 
-	DataType<ItemStack> PLUMBOB = DataType.PLAYER.internal("plumbob", ItemStack.EMPTY)
-		.save(ItemStack.OPTIONAL_CODEC)
-		.sync(ItemStack.OPTIONAL_STREAM_CODEC)
+	DataType<IconHolder> PLUMBOB = DataType.PLAYER.internal("plumbob", IconHolder.EMPTY)
+		.save(IconHolder.CODEC)
+		.sync(IconHolder.STREAM_CODEC)
 		.syncToAllClients()
 		.build();
 

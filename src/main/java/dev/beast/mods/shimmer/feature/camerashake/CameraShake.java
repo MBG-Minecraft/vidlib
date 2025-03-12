@@ -2,13 +2,17 @@ package dev.beast.mods.shimmer.feature.camerashake;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.feature.auto.AutoInit;
+import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
+import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.math.EasingGroup;
-import dev.beast.mods.shimmer.util.CompositeStreamCodec;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.Vec3;
 
+@AutoInit
 public record CameraShake(
 	CameraShakeType type,
 	int duration,
@@ -38,6 +42,8 @@ public record CameraShake(
 		ByteBufCodecs.BOOL, CameraShake::motionBlur,
 		CameraShake::new
 	);
+
+	public static final KnownCodec<CameraShake> KNOWN_CODEC = KnownCodec.register(Shimmer.id("camera_shake"), CODEC, CameraShake.class);
 
 	public static float intensity(float intensityMod, Vec3 cameraPos, Vec3 shakeSourcePos) {
 		return 1F;

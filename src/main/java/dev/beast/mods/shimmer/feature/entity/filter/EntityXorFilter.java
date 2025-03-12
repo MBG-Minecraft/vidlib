@@ -2,7 +2,7 @@ package dev.beast.mods.shimmer.feature.entity.filter;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
-import dev.beast.mods.shimmer.util.CompositeStreamCodec;
+import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.world.entity.Entity;
 

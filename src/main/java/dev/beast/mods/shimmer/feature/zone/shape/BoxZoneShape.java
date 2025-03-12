@@ -2,9 +2,9 @@ package dev.beast.mods.shimmer.feature.zone.shape;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
-import dev.beast.mods.shimmer.util.CompositeStreamCodec;
-import dev.beast.mods.shimmer.util.ShimmerCodecs;
-import dev.beast.mods.shimmer.util.ShimmerStreamCodecs;
+import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
+import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
+import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;

@@ -4,7 +4,6 @@ import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.ServerCommandHolder;
 import dev.beast.mods.shimmer.feature.block.filter.BlockFilter;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
-import dev.beast.mods.shimmer.util.KnownCodec;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
@@ -25,8 +24,8 @@ public interface ZoneCommands {
 			)
 			.then(Commands.literal("blocks")
 				.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), ZoneRenderType.BLOCKS, BlockFilter.NONE.instance()))
-				.then(Commands.argument("filter", KnownCodec.BLOCK_FILTER.argument(buildContext))
-					.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), ZoneRenderType.BLOCKS, KnownCodec.BLOCK_FILTER.get(ctx, "filter")))
+				.then(Commands.argument("filter", BlockFilter.KNOWN_CODEC.argument(buildContext))
+					.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), ZoneRenderType.BLOCKS, BlockFilter.KNOWN_CODEC.get(ctx, "filter")))
 
 				)
 			)

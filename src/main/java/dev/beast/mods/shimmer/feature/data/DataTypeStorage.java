@@ -12,13 +12,15 @@ import java.util.List;
 import java.util.Map;
 
 public class DataTypeStorage {
+	public final String name;
 	public final boolean alwaysSyncToAllClients;
 	public final Map<ResourceLocation, DataType<?>> saved;
 	final Map<ResourceLocation, DataType<?>> synced;
 	public final StreamCodec<RegistryFriendlyByteBuf, DataMapValue> valueStreamCodec;
 	public final StreamCodec<RegistryFriendlyByteBuf, List<DataMapValue>> valueListStreamCodec;
 
-	public DataTypeStorage(boolean alwaysSyncToAllClients) {
+	public DataTypeStorage(String name, boolean alwaysSyncToAllClients) {
+		this.name = name;
 		this.alwaysSyncToAllClients = alwaysSyncToAllClients;
 		this.saved = new HashMap<>();
 		this.synced = new HashMap<>();
@@ -57,5 +59,10 @@ public class DataTypeStorage {
 
 	public <T> DataType.Builder<T> video(String id, T defaultValue) {
 		return builder(ResourceLocation.fromNamespaceAndPath("video", id), defaultValue);
+	}
+
+	@Override
+	public String toString() {
+		return name;
 	}
 }
