@@ -24,6 +24,8 @@ public class ShimmerSessionData {
 	public PlayerInput input;
 	public Boolean glowingOverride;
 	public Integer teamColorOverride;
+	public double gravityMod;
+	public float speedMod;
 	public boolean suspended;
 	public boolean pvp;
 	public IconHolder plumbobIcon;
@@ -33,6 +35,14 @@ public class ShimmerSessionData {
 		this.dataMap = new DataMap(uuid, DataType.PLAYER);
 		this.prevInput = PlayerInput.NONE;
 		this.input = PlayerInput.NONE;
+
+		this.glowingOverride = null;
+		this.teamColorOverride = null;
+		this.gravityMod = 1D;
+		this.speedMod = 1F;
+		this.suspended = false;
+		this.pvp = true;
+		this.plumbobIcon = IconHolder.EMPTY;
 	}
 
 	public void respawned(Level level, boolean loggedIn) {
@@ -45,6 +55,8 @@ public class ShimmerSessionData {
 		glowingOverride = EntityOverride.GLOWING.get(player);
 		var teamColorOverrideCol = EntityOverride.TEAM_COLOR.get(player);
 		teamColorOverride = teamColorOverrideCol == null ? null : teamColorOverrideCol.rgb();
+		gravityMod = EntityOverride.GRAVITY.get(player, 1D);
+		speedMod = EntityOverride.SPEED.get(player, 1F);
 		suspended = EntityOverride.SUSPENDED.get(player, false);
 		pvp = EntityOverride.PVP.get(player, true);
 		plumbobIcon = EntityOverride.PLUMBOB.get(player, IconHolder.EMPTY);
@@ -52,6 +64,14 @@ public class ShimmerSessionData {
 		if (plumbobIcon == IconHolder.EMPTY) {
 			plumbobIcon = dataMap.get(InternalPlayerData.PLUMBOB);
 		}
+
+		if (gravityMod <= 0D) {
+			player.resetFallDistance();
+		}
+	}
+
+	public boolean pvp() {
+		return pvp && !suspended;
 	}
 
 	public void updateZones(Level level, List<ZoneContainer> update) {

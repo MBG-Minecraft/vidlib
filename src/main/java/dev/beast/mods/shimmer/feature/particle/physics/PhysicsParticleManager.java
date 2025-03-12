@@ -172,16 +172,13 @@ public class PhysicsParticleManager implements Consumer<ShaderHolder> {
 		program.apply();
 
 		var matrix = new Matrix4f();
-		var frustum = ctx.frustum();
-		var camera = ctx.camera();
-		var delta = ctx.delta();
 
 		prevTintR = prevTintG = prevTintB = prevTintA = 1F;
 		pTint.set(1F, 1F, 1F, 1F);
 		pTint.upload();
 
 		for (var p : particles) {
-			p.render(matrix, frustum, camera, delta);
+			p.render(matrix, ctx);
 		}
 
 		program.clear();

@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.core.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import dev.beast.mods.shimmer.core.ShimmerPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -29,5 +30,10 @@ public abstract class PlayerMixin implements ShimmerPlayer {
 		if (cir.getReturnValueZ() && !shimmer$pvp(other)) {
 			cir.setReturnValue(false);
 		}
+	}
+
+	@ModifyReturnValue(method = "getSpeed", at = @At("RETURN"))
+	private float shimmer$getSpeed(float original) {
+		return original * shimmer$speedMod();
 	}
 }

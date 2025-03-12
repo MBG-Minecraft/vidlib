@@ -16,6 +16,7 @@ import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
 import dev.beast.mods.shimmer.math.KMath;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
@@ -152,6 +153,7 @@ public class ClientGameEventHandler {
 		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
 			PhysicsParticleManager.renderAll(new PhysicsParticleRenderContext(
 				mc,
+				mc.player.getClass() == LocalPlayer.class,
 				event.getPoseStack(),
 				event.getProjectionMatrix(),
 				delta,

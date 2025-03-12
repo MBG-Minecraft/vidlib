@@ -3,10 +3,7 @@ package dev.beast.mods.shimmer.feature.particle.physics;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import dev.beast.mods.shimmer.math.KMath;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.RandomSource;
@@ -39,7 +36,10 @@ public class PhysicsParticle {
 	public int prevBlockStateType = -1;
 	public int blockStateType = -1;
 
-	public void render(Matrix4f matrix, Frustum frustum, Camera camera, float delta) {
+	public void render(Matrix4f matrix, PhysicsParticleRenderContext ctx) {
+		float delta = ctx.delta();
+		var camera = ctx.camera();
+		var frustum = ctx.frustum();
 		float dScale = KMath.lerp(delta, prevScale, scale);
 
 		if (dScale < 0.001F) {
@@ -56,7 +56,7 @@ public class PhysicsParticle {
 		}
 
 		double fastDist = 64D;
-		boolean fast = Minecraft.getInstance().player.getClass() == LocalPlayer.class && camera.getPosition().distanceToSqr(rx, ry, rz) > fastDist * fastDist;
+		boolean fast = ctx.lod() && camera.getPosition().distanceToSqr(rx, ry, rz) > fastDist * fastDist;
 		var particleBuffer = fast ? shape.getFastBuffer() : shape.getBuffer();
 
 		float ox = (float) (rx - camera.getPosition().x);

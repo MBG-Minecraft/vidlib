@@ -104,6 +104,11 @@ public abstract class EntityMixin implements ShimmerEntity {
 		}
 	}
 
+	@ModifyReturnValue(method = "getGravity", at = @At("RETURN"))
+	private double shimmer$getGravity(double original) {
+		return original * shimmer$gravityMod();
+	}
+
 	@Inject(method = "saveWithoutId", at = @At("HEAD"))
 	private void shimmer$beforeSave(CompoundTag compound, CallbackInfoReturnable<CompoundTag> cir) {
 		shimmer$isSaving = true;

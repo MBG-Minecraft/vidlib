@@ -48,8 +48,18 @@ public interface ShimmerPlayer extends ShimmerLivingEntity {
 		return shimmer$sessionData().teamColorOverride;
 	}
 
+	@Override
+	default double shimmer$gravityMod() {
+		return shimmer$sessionData().gravityMod;
+	}
+
+	@Override
+	default float shimmer$speedMod() {
+		return shimmer$sessionData().speedMod;
+	}
+
 	default boolean shimmer$pvp(Player other) {
-		return shimmer$sessionData().pvp && other.shimmer$sessionData().pvp;
+		return shimmer$sessionData().pvp() && other.shimmer$sessionData().pvp();
 	}
 
 	@Override

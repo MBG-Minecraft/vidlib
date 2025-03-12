@@ -30,6 +30,7 @@ import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityInvulnerabilityCheckEvent;
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
@@ -176,6 +177,17 @@ public class GameEventHandler {
 
 		if (!data.getString().isEmpty()) {
 			event.setDisplayName(data);
+		}
+	}
+
+	@SubscribeEvent
+	public static void livingFall(LivingFallEvent event) {
+		var mod = Math.pow(event.getEntity().shimmer$gravityMod(), 2D);
+
+		if (mod <= 0D) {
+			event.setCanceled(true);
+		} else {
+			event.setDamageMultiplier((float) (event.getDamageMultiplier() * mod));
 		}
 	}
 }

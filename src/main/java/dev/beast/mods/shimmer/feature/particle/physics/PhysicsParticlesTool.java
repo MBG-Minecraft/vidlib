@@ -3,6 +3,7 @@ package dev.beast.mods.shimmer.feature.particle.physics;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.toolitem.ShimmerTool;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -40,14 +41,18 @@ public class PhysicsParticlesTool implements ShimmerTool {
 
 		if (ray != null) {
 			var mc = Minecraft.getInstance();
-			var pos = ray.getBlockPos();
-			var state = player.level().getBlockState(pos);
 
-			var particles = new PhysicsParticles(player.level().random);
-			particles.at = pos;
-			particles.state = state;
-			particles.tint(mc.getBlockColors().getColor(state, player.level(), pos, 0));
-			particles.spawn();
+			for (var pos : BlockPos.betweenClosed(ray.getBlockPos().offset(-4, -4, -4), ray.getBlockPos().offset(4, 1, 4))) {
+				var state = player.level().getBlockState(pos);
+
+				if (!state.isAir()) {
+					var particles = new PhysicsParticles(player.level().random);
+					particles.at = pos;
+					particles.state = state;
+					particles.tint(mc.getBlockColors().getColor(state, player.level(), pos, 0));
+					particles.spawn();
+				}
+			}
 		}
 	}
 }

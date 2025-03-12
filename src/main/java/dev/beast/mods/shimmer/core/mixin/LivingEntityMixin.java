@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.core.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import dev.beast.mods.shimmer.core.ShimmerLivingEntity;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import net.minecraft.world.entity.LivingEntity;
@@ -52,5 +53,10 @@ public abstract class LivingEntityMixin implements ShimmerLivingEntity {
 		if (!EntityOverride.SUSPENDED.get(instance, false)) {
 			instance.aiStep();
 		}
+	}
+
+	@ModifyReturnValue(method = "getSpeed", at = @At("RETURN"))
+	private float shimmer$getSpeed(float original) {
+		return original * shimmer$speedMod();
 	}
 }

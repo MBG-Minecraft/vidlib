@@ -106,7 +106,8 @@ public final class EntityOverride<T> {
 	public static final EntityOverride<Boolean> GLOWING = createBooleanKey("glowing");
 	public static final EntityOverride<Color> TEAM_COLOR = createColorKey("team_color");
 	public static final EntityOverride<Boolean> SUSPENDED = createBooleanKey("suspended");
-	// public static final EntityOverride<Double> SPEED = createDoubleKey("speed");
+	public static final EntityOverride<Double> GRAVITY = createDoubleKey("gravity");
+	public static final EntityOverride<Float> SPEED = createFloatKey("speed");
 	public static final EntityOverride<Boolean> PVP = createBooleanKey("pvp");
 	public static final EntityOverride<Boolean> PASS_THROUGH_BARRIERS = createBooleanKey("pass_through_barriers");
 	public static final EntityOverride<Integer> REGENERATE = createIntKey("regenerate");

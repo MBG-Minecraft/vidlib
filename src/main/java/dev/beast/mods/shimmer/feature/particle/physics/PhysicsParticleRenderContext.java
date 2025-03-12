@@ -8,6 +8,7 @@ import org.joml.Matrix4f;
 
 public record PhysicsParticleRenderContext(
 	Minecraft mc,
+	boolean lod,
 	PoseStack poseStack,
 	Matrix4f projectionMatrix,
 	float delta,

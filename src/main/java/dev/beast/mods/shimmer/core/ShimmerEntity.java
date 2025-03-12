@@ -4,8 +4,11 @@ import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.entity.EntityOverrideValue;
 import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
 import dev.beast.mods.shimmer.math.Line;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -71,6 +74,14 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 		return col == null ? null : col.rgb();
 	}
 
+	default double shimmer$gravityMod() {
+		return EntityOverride.GRAVITY.get(this, 1D);
+	}
+
+	default float shimmer$speedMod() {
+		return EntityOverride.SPEED.get(this, 1F);
+	}
+
 	default Line ray(double distance, float delta) {
 		var start = ((Entity) this).getEyePosition(delta);
 		var end = start.add(((Entity) this).getViewVector(delta).scale(distance));
@@ -79,5 +90,22 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 
 	default Line ray(float delta) {
 		return ray(4.5D, delta);
+	}
+
+	default void teleport(ServerLevel to, Vec3 pos) {
+		var entity = (Entity) this;
+		entity.changeDimension(new DimensionTransition(
+			to,
+			pos,
+			entity.getDeltaMovement(),
+			entity.getYRot(),
+			entity.getXRot(),
+			false,
+			DimensionTransition.DO_NOTHING
+		));
+	}
+
+	default void teleport(Vec3 pos) {
+		teleport((ServerLevel) ((Entity) this).level(), pos);
 	}
 }
