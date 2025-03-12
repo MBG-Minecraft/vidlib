@@ -21,6 +21,7 @@ public @interface AutoInit {
 		REGISTRY(false, false), // (IEventBus)
 		CLIENT_SETUP(true, false), // ()
 		LOAD_COMPLETE(false, false), // ()
+		ASSET_RELOAD(true, false), // ()
 
 		;
 

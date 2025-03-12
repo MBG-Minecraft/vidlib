@@ -8,8 +8,10 @@ import dev.beast.mods.shimmer.feature.misc.CameraOverride;
 import dev.beast.mods.shimmer.feature.misc.DebugText;
 import dev.beast.mods.shimmer.feature.misc.DebugTextEvent;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
+import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleManager;
+import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleRenderContext;
 import dev.beast.mods.shimmer.feature.structure.GhostStructure;
-import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
+import dev.beast.mods.shimmer.feature.toolitem.ShimmerTool;
 import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
 import dev.beast.mods.shimmer.math.KMath;
 import net.minecraft.ChatFormatting;
@@ -42,7 +44,9 @@ public class ClientGameEventHandler {
 
 	@SubscribeEvent
 	public static void clientPostTick(ClientTickEvent.Post event) {
-		Minecraft.getInstance().shimmer$postTick();
+		var mc = Minecraft.getInstance();
+		mc.shimmer$postTick();
+		PhysicsParticleManager.tickAll();
 		NeoForge.EVENT_BUS.post(new DebugTextEvent.ClientTick(DebugText.CLIENT_TICK));
 	}
 
@@ -145,6 +149,15 @@ public class ClientGameEventHandler {
 				((IconRenderer) h.renderer).render3D(mc, ms, delta, source, light, OverlayTexture.NO_OVERLAY);
 				ms.popPose();
 			}
+		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
+			PhysicsParticleManager.renderAll(new PhysicsParticleRenderContext(
+				mc,
+				event.getPoseStack(),
+				event.getProjectionMatrix(),
+				delta,
+				event.getCamera(),
+				event.getFrustum()
+			));
 		}
 	}
 
@@ -159,7 +172,7 @@ public class ClientGameEventHandler {
 		var graphics = event.getGuiGraphics();
 
 		if (mc.isLocalServer() || mc.player.hasPermissions(2)) {
-			var tool = ToolItem.of(mc.player);
+			var tool = ShimmerTool.of(mc.player);
 
 			if (tool != null) {
 				tool.getSecond().debugText(tool.getFirst(), mc.player, mc.hitResult, DebugText.RENDER);

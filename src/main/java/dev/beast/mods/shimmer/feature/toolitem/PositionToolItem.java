@@ -19,10 +19,10 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
 import org.jetbrains.annotations.Nullable;
 
-public class PositionToolItem implements ToolItem {
+public class PositionToolItem implements ShimmerTool {
 	@AutoInit
 	public static void bootstrap() {
-		ToolItem.REGISTRY.put("pos", new PositionToolItem());
+		ShimmerTool.REGISTRY.put("pos", new PositionToolItem());
 	}
 
 	@Override

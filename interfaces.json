@@ -47,6 +47,9 @@
 	"net/minecraft/world/item/Item": [
 		"dev/beast/mods/shimmer/core/ShimmerItem"
 	],
+	"net/minecraft/world/level/block/state/BlockState": [
+		"dev/beast/mods/shimmer/core/ShimmerBlockState"
+	],
 	"net/minecraft/network/codec/StreamCodec": [
 		"dev/beast/mods/shimmer/core/ShimmerStreamCodec<B, V>"
 	]

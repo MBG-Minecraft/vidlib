@@ -3,7 +3,7 @@ package dev.beast.mods.shimmer;
 import dev.beast.mods.shimmer.core.ShimmerPayloadRegistrar;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.auto.AutoPacket;
-import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
+import dev.beast.mods.shimmer.feature.toolitem.ShimmerTool;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -40,7 +40,7 @@ public class ModEventHandler {
 	@SubscribeEvent
 	public static void buildCreativeModeTabContents(BuildCreativeModeTabContentsEvent event) {
 		if (event.getTabKey() == CreativeModeTabs.OP_BLOCKS) {
-			for (var entry : ToolItem.REGISTRY.entrySet()) {
+			for (var entry : ShimmerTool.REGISTRY.entrySet()) {
 				var stack = entry.getValue().createItem();
 				stack.set(DataComponents.ITEM_NAME, entry.getValue().getName());
 				var tag = new CompoundTag();

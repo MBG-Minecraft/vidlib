@@ -6,6 +6,8 @@
 	"mixins": [
 		"AdvancementTreeMixin",
 		"BarrierBlockMixin",
+		"BlockInWorldMixin",
+		"BlockStateMixin",
 		"CollisionGetterMixin",
 		"CoralBlockMixin",
 		"EntityMixin",

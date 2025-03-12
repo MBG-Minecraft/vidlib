@@ -8,6 +8,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
@@ -37,6 +38,14 @@ public interface ShimmerLevel extends ShimmerEntityContainer {
 
 	default void setFakeBlock(BlockPos pos, BlockState state) {
 		((Level) this).setBlock(pos, state, 0, 0);
+	}
+
+	default void setBlockFast(BlockPos pos, BlockState state) {
+		((Level) this).setBlock(pos, state, Block.UPDATE_CLIENTS, 0);
+	}
+
+	default void setBlockFast(BlockPos pos, Block block) {
+		setBlockFast(pos, block.defaultBlockState());
 	}
 
 	@Nullable

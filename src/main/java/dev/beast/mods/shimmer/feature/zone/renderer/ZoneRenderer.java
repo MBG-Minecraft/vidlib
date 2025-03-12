@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer.feature.zone.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.beast.mods.shimmer.core.ShimmerBlockInWorld;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.block.filter.BlockFilter;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
@@ -21,7 +22,6 @@ import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.IdentityHashMap;
@@ -101,8 +101,13 @@ public interface ZoneRenderer<T extends ZoneShape> {
 										var filter = mc.player.get(InternalPlayerData.ZONE_BLOCK_FILTER);
 
 										session.cachedZoneShapes.put(instance.zone.shape(), VoxelShapeBox.of(instance.zone.shape().createBlockRenderingShape(pos -> {
-											var block = new BlockInWorld(mc.level, pos, true);
-											return !block.getState().isAir() && (filter == BlockFilter.NONE.instance() || filter.test(block));
+											var state = mc.level.getBlockState(pos);
+
+											if (state.isAir()) {
+												return false;
+											}
+
+											return filter == BlockFilter.ANY.instance() || filter.test(ShimmerBlockInWorld.of(mc.level, pos, state));
 										}).optimize()));
 									});
 								}

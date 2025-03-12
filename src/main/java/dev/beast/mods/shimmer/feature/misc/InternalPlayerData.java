@@ -37,7 +37,7 @@ public interface InternalPlayerData {
 		.sync(ZoneRenderType.STREAM_CODEC)
 		.build();
 
-	DataType<BlockFilter> ZONE_BLOCK_FILTER = DataType.PLAYER.internal("zone_block_filter", BlockFilter.NONE.instance())
+	DataType<BlockFilter> ZONE_BLOCK_FILTER = DataType.PLAYER.internal("zone_block_filter", BlockFilter.ANY.instance())
 		.save(BlockFilter.CODEC)
 		.sync(BlockFilter.STREAM_CODEC)
 		.onReceived(player -> player.shimmer$sessionData().refreshBlockZones())

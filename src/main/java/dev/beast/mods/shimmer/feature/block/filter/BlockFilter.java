@@ -3,13 +3,17 @@ package dev.beast.mods.shimmer.feature.block.filter;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.core.ShimmerBlockInWorld;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistry;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 
 import java.util.function.Function;
@@ -41,5 +45,15 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 
 	default SimpleRegistryType<?> type() {
 		return REGISTRY.getType(this);
+	}
+
+	default boolean test(Level level, BlockPos pos, BlockState state) {
+		if (this == NONE.instance()) {
+			return false;
+		} else if (this == ANY.instance()) {
+			return true;
+		} else {
+			return test(ShimmerBlockInWorld.of(level, pos, state));
+		}
 	}
 }

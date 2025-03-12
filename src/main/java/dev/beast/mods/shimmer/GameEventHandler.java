@@ -12,7 +12,7 @@ import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.session.RemovePlayerDataPayload;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
-import dev.beast.mods.shimmer.feature.toolitem.ToolItem;
+import dev.beast.mods.shimmer.feature.toolitem.ShimmerTool;
 import dev.beast.mods.shimmer.feature.zone.SyncZonesPayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
 import dev.beast.mods.shimmer.util.S2CPacketBundleBuilder;
@@ -126,7 +126,7 @@ public class GameEventHandler {
 	@SubscribeEvent
 	public static void useItemOnBlock(UseItemOnBlockEvent event) {
 		if (event.getPlayer() != null) {
-			var tool = ToolItem.of(event.getItemStack());
+			var tool = ShimmerTool.of(event.getItemStack());
 
 			if (tool != null && tool.useOnBlock(event.getPlayer(), event)) {
 				event.cancelWithResult(ItemInteractionResult.SUCCESS);
@@ -136,7 +136,7 @@ public class GameEventHandler {
 
 	@SubscribeEvent
 	public static void useItemInAir(PlayerInteractEvent.RightClickItem event) {
-		var tool = ToolItem.of(event.getItemStack());
+		var tool = ShimmerTool.of(event.getItemStack());
 
 		if (tool != null && tool.use(event.getEntity(), event)) {
 			event.setCancellationResult(InteractionResult.SUCCESS);
@@ -146,7 +146,7 @@ public class GameEventHandler {
 
 	@SubscribeEvent
 	public static void useItemOnEntity(PlayerInteractEvent.EntityInteract event) {
-		var tool = ToolItem.of(event.getItemStack());
+		var tool = ShimmerTool.of(event.getItemStack());
 
 		if (tool != null && tool.useOnEntity(event.getEntity(), event)) {
 			event.setCancellationResult(InteractionResult.SUCCESS);

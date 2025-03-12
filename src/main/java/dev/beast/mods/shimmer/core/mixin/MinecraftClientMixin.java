@@ -2,6 +2,7 @@ package dev.beast.mods.shimmer.core.mixin;
 
 import com.mojang.blaze3d.platform.Window;
 import dev.beast.mods.shimmer.core.ShimmerMinecraftClient;
+import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.camerashake.CameraShake;
 import dev.beast.mods.shimmer.feature.camerashake.CameraShakeInstance;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
@@ -26,9 +27,13 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
@@ -75,6 +80,11 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 	@Override
 	public DataMap getServerData() {
 		return player.shimmer$sessionData().serverDataMap;
+	}
+
+	@Inject(method = "reloadResourcePacks()Ljava/util/concurrent/CompletableFuture;", at = @At("HEAD"))
+	private void shimmer$reloadResourcePacks(CallbackInfoReturnable<CompletableFuture<Void>> cir) {
+		AutoInit.Type.ASSET_RELOAD.invoke();
 	}
 
 	@Override
