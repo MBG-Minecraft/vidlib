@@ -1,7 +1,9 @@
 package dev.beast.mods.shimmer.feature.particle.physics;
 
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
+import dev.beast.mods.shimmer.feature.misc.DebugText;
 import dev.beast.mods.shimmer.feature.toolitem.ShimmerTool;
+import dev.beast.mods.shimmer.math.Range;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -9,7 +11,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.HitResult;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import org.jetbrains.annotations.Nullable;
 
 public class PhysicsParticlesTool implements ShimmerTool {
 	@AutoInit
@@ -37,7 +41,7 @@ public class PhysicsParticlesTool implements ShimmerTool {
 	}
 
 	private void explode(Player player) {
-		var ray = player.ray(200D, 1F).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY);
+		var ray = player.ray(400D, 1F).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY);
 
 		if (ray != null) {
 			var mc = Minecraft.getInstance();
@@ -50,9 +54,22 @@ public class PhysicsParticlesTool implements ShimmerTool {
 					particles.at = pos;
 					particles.state = state;
 					particles.tint(mc.getBlockColors().getColor(state, player.level(), pos, 0));
+					particles.vvel = Range.of(0F, 6F);
+					particles.ttl = Range.of(40F, 200F);
 					particles.spawn();
 				}
 			}
 		}
+	}
+
+	@Override
+	public void debugText(ItemStack item, Player player, @Nullable HitResult result, DebugText debugText) {
+		int solid = PhysicsParticleManager.SOLID.particles.size();
+		int cutout = PhysicsParticleManager.CUTOUT.particles.size();
+		int translucent = PhysicsParticleManager.TRANSLUCENT.particles.size();
+		debugText.topLeft.add("%,d Solid".formatted(solid));
+		debugText.topLeft.add("%,d Cutout".formatted(cutout));
+		debugText.topLeft.add("%,d Translucent".formatted(translucent));
+		debugText.topLeft.add("%,d Total".formatted(solid + cutout + translucent));
 	}
 }

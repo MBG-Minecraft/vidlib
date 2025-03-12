@@ -84,7 +84,11 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	}
 
 	@ApiStatus.Internal
-	public void preTick(Minecraft mc, ClientLevel level, LocalPlayer player, Window window) {
+	public void preTick(Minecraft mc, ClientLevel level, LocalPlayer player, Window window, boolean paused) {
+		if (paused) {
+			return;
+		}
+
 		filteredZones.entityZones.clear();
 
 		for (var container : filteredZones) {

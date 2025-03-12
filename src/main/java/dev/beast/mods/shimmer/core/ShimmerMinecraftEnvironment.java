@@ -15,11 +15,11 @@ public interface ShimmerMinecraftEnvironment extends ShimmerEntityContainer {
 	}
 
 	@ApiStatus.Internal
-	default void shimmer$preTick() {
+	default void shimmer$preTick(boolean paused) {
 	}
 
 	@ApiStatus.Internal
-	default void shimmer$postTick() {
+	default void shimmer$postTick(boolean paused) {
 	}
 
 	default ScheduledTask.Handler shimmer$getScheduledTaskHandler() {

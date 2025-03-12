@@ -11,10 +11,6 @@ out vec4 vertexColor;
 out vec2 texCoord0;
 
 vec4 normal_light(vec3 normal) {
-	//float light0 = max(0.0, dot(vec3(-0.2225, 0.1715, 0.9597), normal));
-	//float light1 = max(0.0, dot(vec3(-0.2150, 0.9718, 0.09657), normal));
-	//float lightAccum = min(1.0, (light0 + light1) * 0.6 + 0.7);
-	//return vec4(lightAccum, lightAccum, lightAccum, 1.0);
 	float light0 = max(0.0, dot(normalize(vec3(0.3, 1.8, -1.8)), normal));
 	float light1 = max(0.0, dot(normalize(vec3(-0.3, 1.8, 1.8)), normal));
 	float diffuse = min(1.0, (light0 + light1) * 0.4 + 0.7);

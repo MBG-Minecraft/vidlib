@@ -32,7 +32,7 @@ public class DataTypeStorage {
 				var type = synced.get(id);
 
 				if (type == null) {
-					throw new NullPointerException("Data type with id " + id + " not found");
+					throw new NullPointerException("Data type with id " + id + " not found. Available types in '" + DataTypeStorage.this.name + "': " + synced.keySet());
 				}
 
 				return new DataMapValue(type, type.streamCodec().decode(buf));

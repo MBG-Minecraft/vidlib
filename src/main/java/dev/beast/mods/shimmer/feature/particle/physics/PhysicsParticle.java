@@ -1,14 +1,13 @@
 package dev.beast.mods.shimmer.feature.particle.physics;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import dev.beast.mods.shimmer.math.KMath;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 
 public class PhysicsParticle {
 	public static final double SQRT_2 = Math.sqrt(2);
@@ -36,7 +35,7 @@ public class PhysicsParticle {
 	public int prevBlockStateType = -1;
 	public int blockStateType = -1;
 
-	public void render(Matrix4f matrix, PhysicsParticleRenderContext ctx) {
+	public void render(Matrix4fStack matrix, PhysicsParticleRenderContext ctx) {
 		float delta = ctx.delta();
 		var camera = ctx.camera();
 		var frustum = ctx.frustum();
@@ -55,15 +54,14 @@ public class PhysicsParticle {
 			return;
 		}
 
-		double fastDist = 64D;
-		boolean fast = ctx.lod() && camera.getPosition().distanceToSqr(rx, ry, rz) > fastDist * fastDist;
+		boolean fast = ctx.lod() && camera.getPosition().distanceToSqr(rx, ry, rz) > ctx.fastDistSq();
 		var particleBuffer = fast ? shape.getFastBuffer() : shape.getBuffer();
 
 		float ox = (float) (rx - camera.getPosition().x);
 		float oy = (float) (ry - camera.getPosition().y);
 		float oz = (float) (rz - camera.getPosition().z);
 
-		matrix.set(RenderSystem.getModelViewMatrix());
+		matrix.pushMatrix();
 		matrix.translate(ox, oy, oz);
 
 		if (fast) {
@@ -86,6 +84,7 @@ public class PhysicsParticle {
 		}
 
 		manager.setModelMatrix(matrix);
+		matrix.popMatrix();
 
 		if (fast) {
 			var m = KMath.lerp(flatColorMod, 0.85F, 1F);
@@ -99,7 +98,7 @@ public class PhysicsParticle {
 		VertexBuffer.unbind();
 	}
 
-	public boolean tick() {
+	public boolean tick(Level level) {
 		prevX = x;
 		prevY = y;
 		prevZ = z;
@@ -117,7 +116,6 @@ public class PhysicsParticle {
 			velocityZ *= velocityMultiplier;
 
 			if (velocityY <= 0D) {
-				var level = Minecraft.getInstance().level;
 				prevBlockStateType = blockStateType;
 
 				if (blockStateType == -1 || KMath.floor(prevY - scale * 0.5F) != KMath.floor(y - scale * 0.5F) || KMath.floor(prevX) != KMath.floor(x) || KMath.floor(prevZ) != KMath.floor(z)) {

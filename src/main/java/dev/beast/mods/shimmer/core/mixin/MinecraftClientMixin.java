@@ -10,6 +10,7 @@ import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.cutscene.CutsceneScreen;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
+import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleManager;
 import dev.beast.mods.shimmer.math.Vec2d;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.util.Empty;
@@ -55,9 +56,6 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 	@Shadow
 	@Final
 	private Window window;
-
-	@Shadow
-	public abstract boolean isNameBanned();
 
 	@Unique
 	private ScheduledTask.Handler shimmer$scheduledTaskHandler;
@@ -127,16 +125,20 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 	}
 
 	@Override
-	public void shimmer$preTick() {
+	public void shimmer$preTick(boolean paused) {
 		if (level == null || player == null) {
 			return;
 		}
 
-		player.shimmer$sessionData().preTick(shimmer$self(), level, player, window);
+		player.shimmer$sessionData().preTick(shimmer$self(), level, player, window, paused);
 	}
 
 	@Override
-	public void shimmer$postTick() {
+	public void shimmer$postTick(boolean paused) {
+		if (paused) {
+			return;
+		}
+
 		if (shimmer$scheduledTaskHandler != null) {
 			shimmer$scheduledTaskHandler.tick();
 		}
@@ -162,6 +164,10 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 			if (shimmer$cameraShakeInstances.isEmpty()) {
 				shimmer$self().gameRenderer.shutdownEffect();
 			}
+		}
+
+		if (level != null) {
+			PhysicsParticleManager.tickAll(level);
 		}
 	}
 

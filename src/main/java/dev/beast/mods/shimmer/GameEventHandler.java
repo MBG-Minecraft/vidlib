@@ -109,12 +109,12 @@ public class GameEventHandler {
 
 	@SubscribeEvent
 	public static void serverPreTick(ServerTickEvent.Pre event) {
-		event.getServer().shimmer$preTick();
+		event.getServer().shimmer$preTick(event.getServer().isPaused());
 	}
 
 	@SubscribeEvent
 	public static void serverPostTick(ServerTickEvent.Post event) {
-		event.getServer().shimmer$postTick();
+		event.getServer().shimmer$postTick(event.getServer().isPaused());
 	}
 
 	@SubscribeEvent

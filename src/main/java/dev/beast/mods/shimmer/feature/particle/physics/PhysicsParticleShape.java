@@ -15,14 +15,12 @@ import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.GrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 public class PhysicsParticleShape {
 	public final BlockState state;
 	public final SplitBox box;
-	private Object vertexBuffer;
-	private Object fastVertexBuffer;
+	private VertexBuffer vertexBuffer;
+	private VertexBuffer fastVertexBuffer;
 
 	public PhysicsParticleShape(BlockState state, SplitBox box) {
 		this.state = state;
@@ -34,7 +32,6 @@ public class PhysicsParticleShape {
 		return BlockStateParser.serialize(state) + " " + box.split().id + " " + box.index();
 	}
 
-	@OnlyIn(Dist.CLIENT)
 	public VertexBuffer getBuffer() {
 		if (vertexBuffer == null) {
 			var mc = Minecraft.getInstance();
@@ -49,10 +46,10 @@ public class PhysicsParticleShape {
 				var uv = suv.mul(box.uvs()[i]);
 				var n = Split.NORMALS[i];
 
-				buffer.addVertex(f[0].x(), f[0].y(), 0F).setUv(uv.u0(), uv.v0()).setNormal(n.x, n.y, n.z);
-				buffer.addVertex(f[1].x(), f[1].y(), 0F).setUv(uv.u0(), uv.v1()).setNormal(n.x, n.y, n.z);
-				buffer.addVertex(f[2].x(), f[2].y(), 0F).setUv(uv.u1(), uv.v1()).setNormal(n.x, n.y, n.z);
-				buffer.addVertex(f[3].x(), f[3].y(), 0F).setUv(uv.u1(), uv.v0()).setNormal(n.x, n.y, n.z);
+				buffer.addVertex(f[0].x(), f[0].y(), f[0].z()).setUv(uv.u0(), uv.v0()).setNormal(n.x, n.y, n.z);
+				buffer.addVertex(f[1].x(), f[1].y(), f[1].z()).setUv(uv.u0(), uv.v1()).setNormal(n.x, n.y, n.z);
+				buffer.addVertex(f[2].x(), f[2].y(), f[2].z()).setUv(uv.u1(), uv.v1()).setNormal(n.x, n.y, n.z);
+				buffer.addVertex(f[3].x(), f[3].y(), f[3].z()).setUv(uv.u1(), uv.v0()).setNormal(n.x, n.y, n.z);
 			}
 
 			var vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
@@ -64,10 +61,9 @@ public class PhysicsParticleShape {
 			this.vertexBuffer = vertexBuffer;
 		}
 
-		return (VertexBuffer) vertexBuffer;
+		return vertexBuffer;
 	}
 
-	@OnlyIn(Dist.CLIENT)
 	public VertexBuffer getFastBuffer() {
 		if (fastVertexBuffer == null) {
 			var mc = Minecraft.getInstance();
@@ -77,7 +73,7 @@ public class PhysicsParticleShape {
 			var memory = new ByteBufferBuilder(PhysicsParticleManager.FORMAT.getVertexSize() * 4);
 			var buffer = new BufferBuilder(memory, VertexFormat.Mode.QUADS, PhysicsParticleManager.FORMAT);
 
-			int i = Direction.NORTH.ordinal();
+			int i = Direction.SOUTH.ordinal();
 
 			var f = box.facePos()[i];
 			var uv = suv.mul(box.uvs()[i]);
@@ -97,18 +93,17 @@ public class PhysicsParticleShape {
 			this.fastVertexBuffer = vertexBuffer;
 		}
 
-		return (VertexBuffer) fastVertexBuffer;
+		return fastVertexBuffer;
 	}
 
-	@OnlyIn(Dist.CLIENT)
 	public void clearCache() {
 		if (vertexBuffer != null) {
-			((VertexBuffer) vertexBuffer).close();
+			vertexBuffer.close();
 			vertexBuffer = null;
 		}
 
 		if (fastVertexBuffer != null) {
-			((VertexBuffer) fastVertexBuffer).close();
+			fastVertexBuffer.close();
 			fastVertexBuffer = null;
 		}
 	}

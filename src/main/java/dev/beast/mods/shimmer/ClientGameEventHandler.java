@@ -40,14 +40,14 @@ public class ClientGameEventHandler {
 	@SubscribeEvent
 	public static void clientPreTick(ClientTickEvent.Pre event) {
 		DebugText.CLIENT_TICK.clear();
-		Minecraft.getInstance().shimmer$preTick();
+		var mc = Minecraft.getInstance();
+		mc.shimmer$preTick(mc.isPaused());
 	}
 
 	@SubscribeEvent
 	public static void clientPostTick(ClientTickEvent.Post event) {
 		var mc = Minecraft.getInstance();
-		mc.shimmer$postTick();
-		PhysicsParticleManager.tickAll();
+		mc.shimmer$postTick(mc.isPaused());
 		NeoForge.EVENT_BUS.post(new DebugTextEvent.ClientTick(DebugText.CLIENT_TICK));
 	}
 
@@ -158,7 +158,8 @@ public class ClientGameEventHandler {
 				event.getProjectionMatrix(),
 				delta,
 				event.getCamera(),
-				event.getFrustum()
+				event.getFrustum(),
+				ShimmerConfig.physicsParticleRenderLOD * ShimmerConfig.physicsParticleRenderLOD
 			));
 		}
 	}

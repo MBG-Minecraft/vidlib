@@ -56,12 +56,12 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 	}
 
 	@Override
-	public void shimmer$postTick() {
+	public void shimmer$postTick(boolean paused) {
 		if (shimmer$scheduledTaskHandler != null) {
 			shimmer$scheduledTaskHandler.tick();
 		}
 
-		ShimmerMinecraftServer.super.shimmer$postTick();
+		ShimmerMinecraftServer.super.shimmer$postTick(paused);
 	}
 
 	@Inject(method = "createLevels", at = @At("RETURN"))

@@ -14,10 +14,12 @@ import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,26 +41,24 @@ public class PhysicsParticleManager implements Consumer<ShaderHolder> {
 		var lightmapTextureManager = ctx.mc().gameRenderer.lightTexture();
 		lightmapTextureManager.turnOnLightLayer();
 		RenderSystem.enableDepthTest();
-		var matrixStack = RenderSystem.getModelViewStack();
-		matrixStack.pushMatrix();
-		matrixStack.mul(ctx.poseStack().last().pose());
-		RenderSystem.applyModelViewMatrix();
+		var matrix = RenderSystem.getModelViewStack();
+		matrix.pushMatrix();
+		matrix.mul(ctx.poseStack().last().pose());
 
-		SOLID.render(ctx);
-		CUTOUT.render(ctx);
-		TRANSLUCENT.render(ctx);
+		SOLID.render(matrix, ctx);
+		CUTOUT.render(matrix, ctx);
+		TRANSLUCENT.render(matrix, ctx);
 
-		matrixStack.popMatrix();
-		RenderSystem.applyModelViewMatrix();
+		matrix.popMatrix();
 		RenderSystem.depthMask(true);
 		RenderSystem.disableBlend();
 		lightmapTextureManager.turnOffLightLayer();
 	}
 
-	public static void tickAll() {
-		SOLID.tick();
-		CUTOUT.tick();
-		TRANSLUCENT.tick();
+	public static void tickAll(Level level) {
+		SOLID.tick(level);
+		CUTOUT.tick(level);
+		TRANSLUCENT.tick(level);
 	}
 
 	@AutoInit(AutoInit.Type.ASSET_RELOAD)
@@ -135,7 +135,7 @@ public class PhysicsParticleManager implements Consumer<ShaderHolder> {
 		pModel.upload();
 	}
 
-	public void render(PhysicsParticleRenderContext ctx) {
+	public void render(Matrix4fStack matrix, PhysicsParticleRenderContext ctx) {
 		if (particles.isEmpty()) {
 			return;
 		}
@@ -171,8 +171,6 @@ public class PhysicsParticleManager implements Consumer<ShaderHolder> {
 		program.setSampler("Sampler0", RenderSystem.getShaderTexture(0));
 		program.apply();
 
-		var matrix = new Matrix4f();
-
 		prevTintR = prevTintG = prevTintB = prevTintA = 1F;
 		pTint.set(1F, 1F, 1F, 1F);
 		pTint.upload();
@@ -195,10 +193,19 @@ public class PhysicsParticleManager implements Consumer<ShaderHolder> {
 		RenderSystem.setShaderTexture(0, tex.getId());
 	}
 
-	public void tick() {
+	public void tick(Level level) {
 		particles.addAll(queue);
 		queue.clear();
-		particles.removeIf(PhysicsParticle::tick);
+
+		var it = particles.iterator();
+
+		while (it.hasNext()) {
+			var p = it.next();
+
+			if (p.tick(level)) {
+				it.remove();
+			}
+		}
 	}
 
 	public String toString() {

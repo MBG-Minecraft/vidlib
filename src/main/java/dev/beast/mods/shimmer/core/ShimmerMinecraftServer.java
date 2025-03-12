@@ -54,7 +54,7 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 
 	@Override
 	@ApiStatus.Internal
-	default void shimmer$preTick() {
+	default void shimmer$preTick(boolean paused) {
 		for (var level : shimmer$self().getAllLevels()) {
 			var zones = ZoneLoader.BY_DIMENSION.get(level.dimension());
 			level.shimmer$setActiveZones(zones);
@@ -79,7 +79,7 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 
 	@Override
 	@ApiStatus.Internal
-	default void shimmer$postTick() {
+	default void shimmer$postTick(boolean paused) {
 		var packetsToEveryone = new S2CPacketBundleBuilder();
 
 		getServerData().sync(packetsToEveryone, null, (playerId, update) -> new SyncServerDataPayload(update));
