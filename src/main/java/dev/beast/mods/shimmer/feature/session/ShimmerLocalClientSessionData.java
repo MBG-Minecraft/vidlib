@@ -105,7 +105,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 		}
 
 		updateOverrides(player);
-		input = ShimmerLocalPlayer.fromInput(window.getWindow(), player.input, mc.screen == null && mc.isWindowActive());
+		input = ShimmerLocalPlayer.fromInput(window.getWindow(), player, mc.screen == null && mc.isWindowActive());
 
 		if (!prevInput.equals(input)) {
 			NeoForge.EVENT_BUS.post(new PlayerInputChanged(player, prevInput, input));

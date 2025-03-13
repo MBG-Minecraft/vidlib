@@ -11,7 +11,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LivingEntity.class)
@@ -45,13 +44,6 @@ public abstract class LivingEntityMixin implements ShimmerLivingEntity {
 					entity.heal(1F);
 				}
 			}
-		}
-	}
-
-	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;aiStep()V"))
-	private void shimmer$ai(LivingEntity instance) {
-		if (!EntityOverride.SUSPENDED.get(instance, false)) {
-			instance.aiStep();
 		}
 	}
 
