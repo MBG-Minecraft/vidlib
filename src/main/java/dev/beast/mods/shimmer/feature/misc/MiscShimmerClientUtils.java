@@ -2,10 +2,14 @@ package dev.beast.mods.shimmer.feature.misc;
 
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.ShimmerConfig;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.context.ContextKey;
+
+import java.util.concurrent.CompletableFuture;
 
 public interface MiscShimmerClientUtils {
 	ContextKey<Boolean> CREATIVE = new ContextKey<>(Shimmer.id("creative"));
@@ -28,26 +32,11 @@ public interface MiscShimmerClientUtils {
 	}
 
 	static void reloadShaders(Minecraft mc) {
-		/* FIXME
-		Util.backgroundExecutor().execute(() -> {
-			try {
-				mc.gameRenderer.createReloadListener().reload(CompletableFuture::completedFuture, mc.getResourceManager(), InactiveProfiler.INSTANCE, InactiveProfiler.INSTANCE, Util.backgroundExecutor(), mc).get();
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-
-			mc.submit(() -> {
-				mc.levelRenderer.onResourceManagerReload(mc.getResourceManager());
-				CompiledShader.Type.FRAGMENT.getPrograms().clear();
-				CompiledShader.Type.VERTEX.getPrograms().clear();
-				mc.player.displayClientMessage(Component.literal("Shaders reloaded!").withStyle(ChatFormatting.GREEN), true);
-			});
-		});
-		 */
-	}
-
-	static boolean canSeeSpectators(AbstractClientPlayer player) {
-		// TODO
-		return false;
+		mc.getShaderManager().reload(CompletableFuture::completedFuture, mc.getResourceManager(), Util.backgroundExecutor(), mc).thenRunAsync(() -> {
+			mc.levelRenderer.onResourceManagerReload(mc.getResourceManager());
+			// CompiledShader.Type.FRAGMENT.getPrograms().clear();
+			// CompiledShader.Type.VERTEX.getPrograms().clear();
+			mc.player.displayClientMessage(Component.literal("Shaders reloaded!").withStyle(ChatFormatting.GREEN), true);
+		}, mc);
 	}
 }

@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer.feature.shader;
 
 import com.mojang.blaze3d.vertex.VertexFormat;
+import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.util.WithCache;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.CompiledShaderProgram;
@@ -16,6 +17,15 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class ShaderHolder implements WithCache, Supplier<CompiledShaderProgram> {
+	private static final List<ShaderHolder> ALL = new ArrayList<>();
+
+	@AutoInit(AutoInit.Type.SHADERS_RELOADED)
+	public static void reloadShaders() {
+		for (var holder : ALL) {
+			holder.clearCache();
+		}
+	}
+
 	public final ShaderProgram program;
 	public final List<Consumer<CompiledShaderProgram>> reloadListeners;
 	public CompiledShaderProgram compiled;
@@ -31,6 +41,7 @@ public class ShaderHolder implements WithCache, Supplier<CompiledShaderProgram> 
 
 	public void register(RegisterShadersEvent event) throws IOException {
 		event.registerShader(program);
+		ALL.add(this);
 	}
 
 	public void addListener(Consumer<CompiledShaderProgram> listener) {

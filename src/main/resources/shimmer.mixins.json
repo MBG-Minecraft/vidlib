@@ -65,6 +65,7 @@
 		"RemotePlayerMixin",
 		"RenderSystemMixin",
 		"ScreenMixin",
+		"ShaderManagerMixin",
 		"StructureBlockRendererMixin"
 	],
 	"injectors": {

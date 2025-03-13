@@ -21,6 +21,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.AdvancementToast;
 import net.minecraft.client.gui.components.toasts.RecipeToast;
+import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LightTexture;
@@ -305,6 +306,12 @@ public class ClientGameEventHandler {
 
 		if (toast instanceof TutorialToast || toast instanceof AdvancementToast || toast instanceof RecipeToast) {
 			event.setCanceled(true);
+		} else if (toast instanceof SystemToast systemToast) {
+			var t = systemToast.getToken();
+
+			if (t == SystemToast.SystemToastId.UNSECURE_SERVER_WARNING) {
+				event.setCanceled(true);
+			}
 		}
 	}
 

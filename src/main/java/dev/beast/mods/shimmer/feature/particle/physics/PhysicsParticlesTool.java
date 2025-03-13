@@ -54,8 +54,10 @@ public class PhysicsParticlesTool implements ShimmerTool {
 					particles.at = pos;
 					particles.state = state;
 					particles.tint(mc.getBlockColors().getColor(state, player.level(), pos, 0));
-					particles.vvel = Range.of(0F, 6F);
+					particles.vvel = Range.of(0F, 1F);
+					particles.hvel = Range.of(3F, 4F);
 					particles.ttl = Range.of(40F, 200F);
+					particles.density = 20F;
 					particles.spawn();
 				}
 			}

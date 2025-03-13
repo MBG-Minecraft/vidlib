@@ -24,6 +24,7 @@ public @interface AutoInit {
 		LOAD_COMPLETE(false, false), // ()
 		ASSET_RELOAD(true, false), // ()
 		CHUNKS_RELOADED(true, false), // ()
+		SHADERS_RELOADED(true, false), // ()
 
 		;
 
