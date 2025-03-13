@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class Lazy<T> implements Supplier<T> {
@@ -91,5 +92,9 @@ public class Lazy<T> implements Supplier<T> {
 		value = null;
 		cached = false;
 		expires = 0L;
+	}
+
+	public <A> Lazy<A> map(Function<T, A> mapper) {
+		return of(() -> mapper.apply(get()));
 	}
 }

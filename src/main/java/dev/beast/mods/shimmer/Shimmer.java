@@ -2,6 +2,8 @@ package dev.beast.mods.shimmer;
 
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
+import dev.beast.mods.shimmer.util.Lazy;
+import dev.beast.mods.shimmer.util.MiscUtils;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -37,6 +39,8 @@ public class Shimmer {
 	}
 
 	public static final Path PATH = FMLPaths.GAMEDIR.get().resolve("shimmer");
+	public static final Lazy<Path> WORLD_SYNC_PATH = Lazy.of(() -> MiscUtils.createDir(PATH.resolve("world-sync")));
+	public static final Lazy<Path> HOME_DIR = Lazy.of(() -> MiscUtils.createDir(Path.of(System.getenv().getOrDefault("SHIMMER_HOME", System.getProperty("user.home") + "/.shimmer"))));
 
 	public static final ResourceKey<Level> LOBBY_DIMENSION = ResourceKey.create(Registries.DIMENSION, id("lobby"));
 

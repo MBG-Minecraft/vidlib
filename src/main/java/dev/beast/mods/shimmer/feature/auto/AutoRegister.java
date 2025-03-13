@@ -20,6 +20,7 @@ import java.util.List;
  * @see EntityRendererHolder
  * @see BlockEntityRendererHolder
  * @see ServerCommandHolder
+ * @see ClientCommandHolder
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

@@ -1,6 +1,8 @@
 package dev.beast.mods.shimmer;
 
 import com.mojang.math.Axis;
+import dev.beast.mods.shimmer.feature.auto.AutoRegister;
+import dev.beast.mods.shimmer.feature.auto.ClientCommandHolder;
 import dev.beast.mods.shimmer.feature.clock.ClockRenderer;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
 import dev.beast.mods.shimmer.feature.icon.renderer.IconRenderer;
@@ -19,6 +21,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
@@ -29,6 +32,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
@@ -276,5 +280,16 @@ public class ClientGameEventHandler {
 		// event.getLeft().clear();
 		// event.getRight().clear();
 		// event.getLeft().add(mc.fpsString);
+	}
+
+	@SubscribeEvent
+	public static void registerClientCommands(RegisterClientCommandsEvent event) {
+		for (var s : AutoRegister.SCANNED.get()) {
+			if (s.value() instanceof ClientCommandHolder(String name, ClientCommandHolder.Callback callback)) {
+				var command = Commands.literal(name);
+				callback.register(command, event.getBuildContext());
+				event.getDispatcher().register(command);
+			}
+		}
 	}
 }
