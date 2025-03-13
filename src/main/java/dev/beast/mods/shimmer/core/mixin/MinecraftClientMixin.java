@@ -202,7 +202,7 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 		shimmer$cameraShakeInstances.add(new CameraShakeInstance(shake));
 
 		if (shake.motionBlur()) {
-			shimmer$self().gameRenderer.loadEffect(ResourceLocation.withDefaultNamespace("shaders/post/phosphor.json"));
+			shimmer$self().gameRenderer.loadEffect(CameraShake.MOTION_BLUR_EFFECT);
 		}
 	}
 

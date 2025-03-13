@@ -10,6 +10,7 @@ import dev.beast.mods.shimmer.math.EasingGroup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 
 @AutoInit
@@ -44,6 +45,8 @@ public record CameraShake(
 	);
 
 	public static final KnownCodec<CameraShake> KNOWN_CODEC = KnownCodec.register(Shimmer.id("camera_shake"), CODEC, CameraShake.class);
+
+	public static final ResourceLocation MOTION_BLUR_EFFECT = ResourceLocation.withDefaultNamespace("shaders/post/phosphor.json");
 
 	public static float intensity(float intensityMod, Vec3 cameraPos, Vec3 shakeSourcePos) {
 		return 1F;

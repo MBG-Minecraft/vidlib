@@ -19,6 +19,8 @@ println("Building version: ${version}")
 
 neoForge {
 	version = project.neoforge_version
+	// validateAccessTransformers = true // See https://github.com/neoforged/ModDevGradle/issues/236
+
 	accessTransformers {
 		publish(project.file('src/main/resources/META-INF/accesstransformer.cfg'))
 	}
@@ -34,6 +36,7 @@ neoForge {
 		}
 
 		client {
+			ideName = 'Client'
 			client()
 			systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
 
@@ -45,7 +48,8 @@ neoForge {
 			gameDirectory = file 'run'
 		}
 
-		clientTwo {
+		client2 {
+			ideName = 'Client 2'
 			client()
 			systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
 
@@ -58,6 +62,7 @@ neoForge {
 		}
 
 		server {
+			ideName = 'Server'
 			server()
 			programArgument("--nogui")
 			gameDirectory = file 'run_server'
@@ -68,11 +73,6 @@ neoForge {
 		shimmer {
 			sourceSet sourceSets.main
 		}
-	}
-
-	parchment {
-		minecraftVersion = parchment_mc_version
-		mappingsVersion = parchment_mapping_version
 	}
 }
 

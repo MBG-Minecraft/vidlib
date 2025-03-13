@@ -21,6 +21,7 @@
 		"LivingEntityMixin",
 		"MinecraftServerMixin",
 		"MobMixin",
+		"NetworkRegistryMixin",
 		"PayloadRegistrarMixin",
 		"PlayerListMixin",
 		"PlayerMixin",
@@ -40,7 +41,6 @@
 	"client": [
 		"AbstractClientPlayerMixin",
 		"CameraMixin",
-		"ChatComponentMixin",
 		"ClientLevelMixin",
 		"ClientPacketListenerMixin",
 		"DefaultPlayerSkinMixin",
@@ -62,12 +62,10 @@
 		"OptionsMixin",
 		"ParticleEngineMixin",
 		"PlayerModelMixin",
-		"PlayerRendererMixin",
 		"RemotePlayerMixin",
 		"RenderSystemMixin",
 		"ScreenMixin",
-		"StructureBlockRendererMixin",
-		"ToastComponentMixin"
+		"StructureBlockRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1,

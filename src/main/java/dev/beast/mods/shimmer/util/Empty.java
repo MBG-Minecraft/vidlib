@@ -5,6 +5,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 
 public interface Empty {
+	Object[] OBJECT_ARRAY = new Object[0];
+	String[] STRING_ARRAY = new String[0];
 	ResourceLocation ID = ResourceLocation.withDefaultNamespace("empty");
 	ResourceLocation TEXTURE = ResourceLocation.withDefaultNamespace("textures/misc/white.png");
 	Entity[] ENTITY_ARRAY = new Entity[0];

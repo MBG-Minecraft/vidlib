@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.feature.worldsync;
 
+import dev.beast.mods.shimmer.util.MessageConsumer;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -52,8 +53,7 @@ public class WorldSyncScreen extends Screen {
 
 	private void done(Button button) {
 		try {
-			var player = minecraft.player;
-			WorldSyncCommands.createSyncedWorld(player::sendSystemMessage, player::sendSystemMessage, thread.serverPath, thread.serverName);
+			WorldSyncCommands.create(MessageConsumer.ofPlayer(minecraft.player), thread.serverPath, thread.serverName);
 			onClose();
 
 		} catch (Exception ex) {

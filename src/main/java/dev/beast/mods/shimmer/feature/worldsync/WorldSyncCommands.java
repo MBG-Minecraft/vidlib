@@ -4,7 +4,9 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.ClientCommandHolder;
+import dev.beast.mods.shimmer.util.MessageConsumer;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.NbtAccounter;
@@ -19,46 +21,43 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.function.Consumer;
 
 public class WorldSyncCommands {
 	@AutoRegister(Dist.CLIENT)
 	public static final ClientCommandHolder HOLDER = new ClientCommandHolder("world-sync", (command, buildContext) -> command
+		.then(Commands.literal("pull")
+			.executes(ctx -> pull())
+		)
 		.then(Commands.literal("create")
 			.then(Commands.argument("name", StringArgumentType.word())
-				.executes(ctx -> {
-					try {
-						return createSyncedWorld(ctx.getSource(), StringArgumentType.getString(ctx, "name"), StringArgumentType.getString(ctx, "name"));
-					} catch (Exception ex) {
-						ex.printStackTrace();
-						return 0;
-					}
-				})
+				.executes(ctx -> create(ctx.getSource(), StringArgumentType.getString(ctx, "name"), ""))
 				.then(Commands.argument("display-name", StringArgumentType.word())
-					.executes(ctx -> {
-						try {
-							return createSyncedWorld(ctx.getSource(), StringArgumentType.getString(ctx, "name"), StringArgumentType.getString(ctx, "display-name"));
-						} catch (Exception ex) {
-							ex.printStackTrace();
-							return 0;
-						}
-					})
-
+					.executes(ctx -> create(ctx.getSource(), StringArgumentType.getString(ctx, "name"), StringArgumentType.getString(ctx, "display-name")))
 				)
 			)
 		)
 	);
 
-	public static int createSyncedWorld(CommandSourceStack source, String name, String displayName) throws Exception {
-		return createSyncedWorld(source::sendSystemMessage, source::sendFailure, name, displayName);
+	public static int pull() {
+		Minecraft.getInstance().c2s(PullWorldSyncPayload.INSTANCE);
+		return 1;
 	}
 
-	public static int createSyncedWorld(Consumer<Component> success, Consumer<Component> failure, String name, String displayName) throws Exception {
+	public static int create(CommandSourceStack source, String name, String displayName) {
+		try {
+			return create(MessageConsumer.ofCommandSource(source), name, displayName.isEmpty() ? name : displayName);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return 0;
+		}
+	}
+
+	public static int create(MessageConsumer messageConsumer, String name, String displayName) throws Exception {
 		var localPath = Shimmer.WORLD_SYNC_PATH.get().resolve(name);
 		var worldIndex = WorldIndex.load(localPath);
 
 		if (Files.notExists(localPath) || !worldIndex.found()) {
-			failure.accept(Component.literal("Synced world '" + name + "' not found!"));
+			messageConsumer.error(Component.literal("Synced world '" + name + "' not found!"));
 			return 0;
 		}
 
@@ -95,7 +94,7 @@ public class WorldSyncCommands {
 			} else if (Files.exists(file.file())) {
 				Files.copy(file.file(), path);
 			} else {
-				failure.accept(Component.literal("Couldn't find " + file.checksum() + " - " + file.path() + " file!"));
+				messageConsumer.error(Component.literal("Couldn't find " + file.checksum() + " - " + file.path() + " file!"));
 			}
 		}
 
@@ -113,7 +112,7 @@ public class WorldSyncCommands {
 			}
 		}
 
-		success.accept(Component.literal("Created world '" + displayName + "'!").withStyle(ChatFormatting.GREEN));
+		messageConsumer.success(Component.literal("Created world '" + displayName + "'!").withStyle(ChatFormatting.GREEN));
 		return 1;
 	}
 }

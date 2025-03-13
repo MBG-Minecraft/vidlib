@@ -18,6 +18,9 @@ import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
 import dev.beast.mods.shimmer.math.KMath;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.toasts.AdvancementToast;
+import net.minecraft.client.gui.components.toasts.RecipeToast;
+import net.minecraft.client.gui.components.toasts.TutorialToast;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -36,6 +39,8 @@ import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.RenderPlayerEvent;
+import net.neoforged.neoforge.client.event.ToastAddEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -254,7 +259,7 @@ public class ClientGameEventHandler {
 		var override = CameraOverride.get(mc);
 
 		if (override != null) {
-			event.setFOV(event.getFOV() * override.getZoom(event.getPartialTick()));
+			event.setFOV((float) (event.getFOV() * override.getZoom(event.getPartialTick())));
 		}
 
 		/*
@@ -291,5 +296,43 @@ public class ClientGameEventHandler {
 				event.getDispatcher().register(command);
 			}
 		}
+	}
+
+	@SubscribeEvent
+	public static void addToast(ToastAddEvent event) {
+		var toast = event.getToast();
+
+		if (toast instanceof TutorialToast || toast instanceof AdvancementToast || toast instanceof RecipeToast) {
+			event.setCanceled(true);
+		}
+	}
+
+	@SubscribeEvent
+	public static void renderPlayerPre(RenderPlayerEvent.Pre event) {
+		var player = event.getEntity();
+
+		if (player.isSpectator()) {
+			event.setCanceled(true);
+			return;
+		}
+
+		if (player.isInvisible() && player.isCreative()) {
+			event.setCanceled(true);
+		}
+
+		/* 1.21.4
+		if (event.getRenderState().isSpectator) {
+			event.setCanceled(true);
+			return;
+		}
+
+		if (event.getRenderState().isInvisible) {
+			var d = event.getRenderState().getRenderData(MiscShimmerClientUtils.CREATIVE);
+
+			if (d != null && d) {
+				event.setCanceled(true);
+			}
+		}
+		 */
 	}
 }

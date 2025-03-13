@@ -11,6 +11,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.util.Lazy;
 import dev.beast.mods.shimmer.util.registry.RegistryReference;
@@ -95,6 +96,7 @@ public class StructureRenderer {
 		return renderer;
 	}
 
+	@AutoInit(AutoInit.Type.CHUNKS_RELOADED)
 	public static void redrawAll() {
 		for (var renderer : RUNTIME_RENDERERS.values()) {
 			renderer.close();

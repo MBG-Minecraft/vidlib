@@ -11,6 +11,9 @@ import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.input.PlayerInput;
 import dev.beast.mods.shimmer.feature.input.PlayerInputChanged;
 import dev.beast.mods.shimmer.feature.input.SyncPlayerInputToServer;
+import dev.beast.mods.shimmer.feature.worldsync.ProgressingText;
+import dev.beast.mods.shimmer.feature.worldsync.WorldSyncReadThread;
+import dev.beast.mods.shimmer.feature.worldsync.WorldSyncScreen;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.feature.zone.ZoneClipResult;
 import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
@@ -198,5 +201,32 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	public void updateInput(UUID player, PlayerInput input) {
 		var data = getRemoteSessionData(player);
 		data.prevInput = data.input = input;
+	}
+
+	@Override
+	public void prepareWorldSyncScreen(String ip, int port) {
+		var mc = Minecraft.getInstance();
+
+		if (ip.equals("${ip}")) {
+			var info = mc.getCurrentServer();
+			ip = info == null ? "localhost" : info.ip;
+			int ipp = ip.indexOf(':');
+
+			if (ipp != -1) {
+				ip = ip.substring(0, ipp);
+			}
+		}
+
+		var screen = new WorldSyncScreen();
+		screen.text.add(new ProgressingText().setText("Indexing files..."));
+		screen.thread = new WorldSyncReadThread(mc, screen, ip, port);
+		mc.setScreen(screen);
+	}
+
+	@Override
+	public void startWorldSync() {
+		if (Minecraft.getInstance().screen instanceof WorldSyncScreen screen) {
+			screen.startThread();
+		}
 	}
 }

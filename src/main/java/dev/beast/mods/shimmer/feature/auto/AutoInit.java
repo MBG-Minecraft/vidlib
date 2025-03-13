@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer.feature.auto;
 
 import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.util.Empty;
 import dev.beast.mods.shimmer.util.Lazy;
 import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.ApiStatus;
@@ -22,6 +23,7 @@ public @interface AutoInit {
 		CLIENT_SETUP(true, false), // ()
 		LOAD_COMPLETE(false, false), // ()
 		ASSET_RELOAD(true, false), // ()
+		CHUNKS_RELOADED(true, false), // ()
 
 		;
 
@@ -47,6 +49,10 @@ public @interface AutoInit {
 					}
 				}
 			}
+		}
+
+		public void invoke() {
+			invoke(Empty.OBJECT_ARRAY);
 		}
 	}
 

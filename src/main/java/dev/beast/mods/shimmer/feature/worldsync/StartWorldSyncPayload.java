@@ -1,4 +1,4 @@
-package dev.beast.mods.shimmer.feature.cutscene;
+package dev.beast.mods.shimmer.feature.worldsync;
 
 import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
@@ -6,11 +6,11 @@ import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
 import net.minecraft.network.codec.StreamCodec;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public enum StopCutscenePayload implements ShimmerPacketPayload {
+public enum StartWorldSyncPayload implements ShimmerPacketPayload {
 	INSTANCE;
 
 	@AutoPacket
-	public static final ShimmerPacketType<StopCutscenePayload> TYPE = ShimmerPacketType.internal("stop_cutscene", StreamCodec.unit(INSTANCE));
+	public static final ShimmerPacketType<StartWorldSyncPayload> TYPE = ShimmerPacketType.create(WorldSync.id("start"), StreamCodec.unit(INSTANCE));
 
 	@Override
 	public ShimmerPacketType<?> getType() {
@@ -19,6 +19,6 @@ public enum StopCutscenePayload implements ShimmerPacketPayload {
 
 	@Override
 	public void handle(IPayloadContext ctx) {
-		ctx.player().stopCutscene();
+		ctx.player().shimmer$sessionData().startWorldSync();
 	}
 }

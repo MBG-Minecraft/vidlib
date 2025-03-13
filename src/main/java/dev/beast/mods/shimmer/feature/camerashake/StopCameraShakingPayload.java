@@ -6,8 +6,8 @@ import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
 import net.minecraft.network.codec.StreamCodec;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public class StopCameraShakingPayload implements ShimmerPacketPayload {
-	public static final StopCameraShakingPayload INSTANCE = new StopCameraShakingPayload();
+public enum StopCameraShakingPayload implements ShimmerPacketPayload {
+	INSTANCE;
 
 	@AutoPacket
 	public static final ShimmerPacketType<StopCameraShakingPayload> TYPE = ShimmerPacketType.internal("stop_camera_shaking", StreamCodec.unit(INSTANCE));

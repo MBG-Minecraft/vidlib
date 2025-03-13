@@ -108,4 +108,10 @@ public class ShimmerSessionData {
 
 	public void updateInput(UUID player, PlayerInput input) {
 	}
+
+	public void prepareWorldSyncScreen(String ip, int port) {
+	}
+
+	public void startWorldSync() {
+	}
 }
