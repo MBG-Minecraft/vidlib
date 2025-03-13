@@ -10,6 +10,7 @@ import dev.beast.mods.shimmer.core.ShimmerBlockState;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.shader.ShaderHolder;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.CompiledShaderProgram;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -26,7 +27,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 @AutoInit(AutoInit.Type.CLIENT_SETUP)
-public class PhysicsParticleManager implements Consumer<ShaderHolder> {
+public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
 	public static final VertexFormat FORMAT = VertexFormat.builder()
 		.add("Position", VertexFormatElement.POSITION)
 		.add("UV0", VertexFormatElement.UV0)
@@ -109,14 +110,10 @@ public class PhysicsParticleManager implements Consumer<ShaderHolder> {
 	}
 
 	@Override
-	public void accept(ShaderHolder shaderProgram) {
-		var s = shaderProgram.get();
-
-		if (s != null) {
-			pProjection = s.PROJECTION_MATRIX;
-			pModel = s.MODEL_VIEW_MATRIX;
-			pTint = s.COLOR_MODULATOR;
-		}
+	public void accept(CompiledShaderProgram program) {
+		pProjection = program.PROJECTION_MATRIX;
+		pModel = program.MODEL_VIEW_MATRIX;
+		pTint = program.COLOR_MODULATOR;
 	}
 
 	public void setTint(float r, float g, float b, float a) {
@@ -146,7 +143,7 @@ public class PhysicsParticleManager implements Consumer<ShaderHolder> {
 			return;
 		}
 
-		RenderSystem.setShader(shader);
+		RenderSystem.setShader(program);
 
 		if (blend == 2) {
 			RenderSystem.enableBlend();
@@ -168,7 +165,7 @@ public class PhysicsParticleManager implements Consumer<ShaderHolder> {
 		RenderSystem.setShaderTexture(0, tex.getId());
 
 		pProjection.set(ctx.projectionMatrix());
-		program.setSampler("Sampler0", RenderSystem.getShaderTexture(0));
+		program.bindSampler("Sampler0", RenderSystem.getShaderTexture(0));
 		program.apply();
 
 		prevTintR = prevTintG = prevTintB = prevTintA = 1F;

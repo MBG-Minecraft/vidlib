@@ -5,7 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(PlayerModel.class)
-public class PlayerModelMixin extends HumanoidModel<LivingEntity> {
+public class PlayerModelMixin extends HumanoidModel<PlayerRenderState> {
 	@Shadow
 	@Final
 	public ModelPart leftSleeve;
@@ -39,10 +39,10 @@ public class PlayerModelMixin extends HumanoidModel<LivingEntity> {
 		super(root);
 	}
 
-	@Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At("RETURN"))
-	private void shimmer$setupAnim(LivingEntity entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch, CallbackInfo ci) {
+	@Inject(method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/PlayerRenderState;)V", at = @At("RETURN"))
+	private void shimmer$setupAnim(PlayerRenderState state, CallbackInfo ci) {
 		if (ShimmerConfig.limitClothingRendering) {
-			var visible = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition().distanceToSqr(entity.position()) <= ShimmerConfig.clothingRenderDistance * ShimmerConfig.clothingRenderDistance;
+			var visible = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition().distanceToSqr(state.x, state.y, state.z) <= ShimmerConfig.clothingRenderDistance * ShimmerConfig.clothingRenderDistance;
 
 			leftSleeve.visible = visible;
 			rightSleeve.visible = visible;

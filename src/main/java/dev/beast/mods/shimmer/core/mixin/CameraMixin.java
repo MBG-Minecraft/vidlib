@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.core.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import dev.beast.mods.shimmer.core.ShimmerCamera;
 import dev.beast.mods.shimmer.feature.misc.CameraOverride;
 import dev.beast.mods.shimmer.math.Line;
@@ -81,5 +82,15 @@ public abstract class CameraMixin implements ShimmerCamera {
 		var start = getPosition();
 		var end = start.add(forwards.x * distance, forwards.y * distance, forwards.z * distance);
 		return new Line(start, end);
+	}
+
+	@ModifyReturnValue(method = "isDetached", at = @At("RETURN"))
+	private boolean shimmer$isDetached(boolean original) {
+		if (!original) {
+			var override = CameraOverride.get(Minecraft.getInstance());
+			return override != null && override.renderPlayer();
+		}
+
+		return true;
 	}
 }

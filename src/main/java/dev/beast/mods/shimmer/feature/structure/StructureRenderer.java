@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.feature.structure;
 
+import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
@@ -24,7 +25,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.biome.Biomes;
@@ -209,7 +209,7 @@ public class StructureRenderer {
 	private void buildLayers(Minecraft mc, Long2ObjectMap<BlockState> blocks, ByteBufferBuilder tempMemory, Vec3i size) {
 		var blockRenderer = mc.getBlockRenderer();
 
-		var level = new StructureRendererLevel(blocks, skyLight, blockLight, mc.level.registryAccess().registry(Registries.BIOME).get().get(Biomes.PLAINS));
+		var level = new StructureRendererLevel(blocks, skyLight, blockLight, mc.level.registryAccess().get(Biomes.PLAINS).get().value());
 		var random = RandomSource.create();
 
 		var allTypes = RenderType.chunkBufferLayers();
@@ -272,10 +272,10 @@ public class StructureRenderer {
 			var meshData = layer.builder.build();
 
 			if (meshData != null) {
-				var vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
+				var vertexBuffer = new VertexBuffer(BufferUsage.STATIC_WRITE);
 
 				if (layer.type.sortOnUpload()) {
-					meshData.sortQuads(tempMemory, RenderSystem.getVertexSorting());
+					meshData.sortQuads(tempMemory, RenderSystem.getProjectionType().vertexSorting());
 				}
 
 				vertexBuffer.bind();

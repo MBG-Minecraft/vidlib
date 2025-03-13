@@ -1,16 +1,6 @@
 {
-	"blend": {
-		"func": "add",
-		"srcrgb": "srcalpha",
-		"dstrgb": "1-srcalpha"
-	},
 	"vertex": "shimmer:physics_particle/vertex",
-	"fragment": "shimmer:physics_particle/translucent",
-	"attributes": [
-		"Position",
-		"UV0",
-		"Normal"
-	],
+	"fragment": "shimmer:physics_particle/cutout",
 	"samplers": [
 		{
 			"name": "Sampler0"

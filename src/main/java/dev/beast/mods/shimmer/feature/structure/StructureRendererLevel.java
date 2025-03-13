@@ -90,7 +90,7 @@ public class StructureRendererLevel implements BlockAndTintGetter, LightChunkGet
 	}
 
 	@Override
-	public int getMinBuildHeight() {
+	public int getMinY() {
 		return 0;
 	}
 

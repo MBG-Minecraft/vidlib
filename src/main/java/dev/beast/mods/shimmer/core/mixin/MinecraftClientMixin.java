@@ -162,7 +162,7 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 			}
 
 			if (shimmer$cameraShakeInstances.isEmpty()) {
-				shimmer$self().gameRenderer.shutdownEffect();
+				shimmer$self().gameRenderer.clearPostEffect();
 			}
 		}
 
@@ -194,7 +194,7 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 		}
 
 		shimmer$self().options.hideGui = false;
-		shimmer$self().gameRenderer.shutdownEffect();
+		shimmer$self().gameRenderer.clearPostEffect();
 	}
 
 	@Override
@@ -202,7 +202,7 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 		shimmer$cameraShakeInstances.add(new CameraShakeInstance(shake));
 
 		if (shake.motionBlur()) {
-			shimmer$self().gameRenderer.loadEffect(CameraShake.MOTION_BLUR_EFFECT);
+			shimmer$self().gameRenderer.setPostEffect(CameraShake.MOTION_BLUR_EFFECT);
 		}
 	}
 
@@ -214,9 +214,9 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 	@Override
 	public void setPostEffect(ResourceLocation id) {
 		if (id.equals(Empty.ID)) {
-			shimmer$self().gameRenderer.shutdownEffect();
+			shimmer$self().gameRenderer.clearPostEffect();
 		} else {
-			shimmer$self().gameRenderer.loadEffect(id);
+			shimmer$self().gameRenderer.setPostEffect(id);
 		}
 	}
 }

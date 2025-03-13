@@ -1,6 +1,6 @@
 #version 150
 
-uniform sampler2D DiffuseSampler;
+uniform sampler2D InSampler;
 
 in vec2 texCoord;
 in vec2 oneTexel;
@@ -13,7 +13,7 @@ void main() {
 
 	for (float x = -1.0; x <= 1.0; x += 1.0) {
 		for (float y = -1.0; y <= 1.0; y += 1.0) {
-			vec4 c = texture(DiffuseSampler, texCoord + oneTexel * vec2(x, y));
+			vec4 c = texture(InSampler, texCoord + oneTexel * vec2(x, y));
 
 			if (c.a >= 0.01) {
 				result += c.rgb;

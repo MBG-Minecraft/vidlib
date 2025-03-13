@@ -7,6 +7,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import org.joml.FrustumIntersection;
 import org.joml.Matrix4fStack;
 
 public class PhysicsParticle {
@@ -49,8 +50,9 @@ public class PhysicsParticle {
 		double ry = KMath.lerp(delta, prevY, y);
 		double rz = KMath.lerp(delta, prevZ, z);
 		var ro = dScale * SQRT_2;
+		int cubeInFrustum = frustum.cubeInFrustum(rx - ro, ry - ro, rz - ro, rx + ro, ry + ro, rz + ro);
 
-		if (!frustum.cubeInFrustum(rx - ro, ry - ro, rz - ro, rx + ro, ry + ro, rz + ro)) {
+		if (cubeInFrustum != FrustumIntersection.INSIDE && cubeInFrustum != FrustumIntersection.INTERSECT) {
 			return;
 		}
 

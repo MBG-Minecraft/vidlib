@@ -1,6 +1,6 @@
 package dev.beast.mods.shimmer.core.mixin;
 
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.food.FoodData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -18,9 +18,6 @@ public class FoodDataMixin {
 	private float exhaustionLevel;
 
 	@Shadow
-	private int lastFoodLevel;
-
-	@Shadow
 	private int tickTimer;
 
 	/**
@@ -28,11 +25,10 @@ public class FoodDataMixin {
 	 * @reason Shimmer
 	 */
 	@Overwrite
-	public void tick(Player player) {
+	public void tick(ServerPlayer player) {
 		foodLevel = 20;
 		saturationLevel = 20F;
 		exhaustionLevel = 0F;
-		lastFoodLevel = 20;
 		tickTimer = 0;
 	}
 }

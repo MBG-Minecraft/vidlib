@@ -4,18 +4,21 @@ import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.BlockEntityRendererHolder;
 import dev.beast.mods.shimmer.feature.auto.EntityRendererHolder;
+import dev.beast.mods.shimmer.feature.misc.MiscShimmerClientUtils;
 import dev.beast.mods.shimmer.feature.multiverse.VoidSpecialEffects;
 import dev.beast.mods.shimmer.feature.particle.ShimmerClientParticles;
 import dev.beast.mods.shimmer.feature.structure.ClientStructureStorage;
 import dev.beast.mods.shimmer.feature.structure.GhostStructure;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
+import net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent;
 
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientModEventHandler {
@@ -25,9 +28,9 @@ public class ClientModEventHandler {
 	}
 
 	@SubscribeEvent
-	public static void addReloadListeners(RegisterClientReloadListenersEvent event) {
-		event.registerReloadListener(ClientStructureStorage.CLIENT);
-		event.registerReloadListener(new GhostStructure.Loader());
+	public static void addReloadListeners(AddClientReloadListenersEvent event) {
+		event.addListener(Shimmer.id("structure"), ClientStructureStorage.CLIENT);
+		event.addListener(Shimmer.id("ghost_structure"), new GhostStructure.Loader());
 	}
 
 	@SubscribeEvent
@@ -53,5 +56,14 @@ public class ClientModEventHandler {
 
 	@SubscribeEvent
 	public static void addLayers(EntityRenderersEvent.AddLayers event) {
+	}
+
+	@SubscribeEvent
+	public static void registerRenderStateModifiers(RegisterRenderStateModifiersEvent event) {
+		event.registerEntityModifier(PlayerRenderer.class, (player, state) -> {
+			if (player.isCreative()) {
+				state.setRenderData(MiscShimmerClientUtils.CREATIVE, Boolean.TRUE);
+			}
+		});
 	}
 }

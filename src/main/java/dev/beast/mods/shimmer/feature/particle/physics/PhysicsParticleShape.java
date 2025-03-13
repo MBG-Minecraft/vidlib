@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer.feature.particle.physics;
 
 
+import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.VertexBuffer;
@@ -52,7 +53,7 @@ public class PhysicsParticleShape {
 				buffer.addVertex(f[3].x(), f[3].y(), f[3].z()).setUv(uv.u1(), uv.v0()).setNormal(n.x, n.y, n.z);
 			}
 
-			var vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
+			var vertexBuffer = new VertexBuffer(BufferUsage.STATIC_WRITE);
 			vertexBuffer.bind();
 			vertexBuffer.upload(buffer.buildOrThrow());
 			VertexBuffer.unbind();
@@ -84,7 +85,7 @@ public class PhysicsParticleShape {
 			buffer.addVertex(f[2].x(), f[2].y(), 0F).setUv(uv.u1(), uv.v1()).setNormal(n.x, n.y, n.z);
 			buffer.addVertex(f[3].x(), f[3].y(), 0F).setUv(uv.u1(), uv.v0()).setNormal(n.x, n.y, n.z);
 
-			var vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
+			var vertexBuffer = new VertexBuffer(BufferUsage.STATIC_WRITE);
 			vertexBuffer.bind();
 			vertexBuffer.upload(buffer.buildOrThrow());
 			VertexBuffer.unbind();

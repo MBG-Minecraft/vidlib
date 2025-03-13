@@ -14,7 +14,7 @@ import java.util.function.Function;
 
 public class ShimmerRenderTypes extends RenderType {
 	public static final RenderType WHITE_ENTITY = entitySolid(Empty.TEXTURE);
-	public static final RenderType WHITE_TRANSLUCENT_ENTITY = entityTranslucentCull(Empty.TEXTURE);
+	public static final RenderType WHITE_TRANSLUCENT_ENTITY = itemEntityTranslucentCull(Empty.TEXTURE);
 	public static final RenderType WHITE_TRANSLUCENT_NO_CULL_ENTITY = entityTranslucent(Empty.TEXTURE);
 
 	public static class AutoTextureStateShard extends RenderStateShard.EmptyTextureStateShard {
@@ -104,7 +104,7 @@ public class ShimmerRenderTypes extends RenderType {
 	);
 
 	public static final Function<ResourceLocation, RenderType> SHIMMER_ENTITY_TRANSLUCENT_CULL = Util.memoize(texture -> create("shimmer:entity_translucent_cull", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, true, true, CompositeState.builder()
-		.setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_CULL_SHADER)
+		.setShaderState(RENDERTYPE_ITEM_ENTITY_TRANSLUCENT_CULL_SHADER)
 		.setTextureState(new AutoTextureStateShard(texture))
 		.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 		.setLightmapState(LIGHTMAP)

@@ -5,6 +5,7 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.TrackingEmitter;
+import net.minecraft.util.profiling.Profiler;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -46,9 +47,9 @@ public abstract class ParticleEngineMixin {
 		}
 
 		for (var entry : particles.entrySet()) {
-			level.getProfiler().push(entry.getKey().toString());
+			Profiler.get().push(entry.getKey().toString());
 			tickParticleList(entry.getValue());
-			level.getProfiler().pop();
+			Profiler.get().pop();
 		}
 
 		if (!trackingEmitters.isEmpty()) {

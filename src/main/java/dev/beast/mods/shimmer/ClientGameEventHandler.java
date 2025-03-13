@@ -10,6 +10,7 @@ import dev.beast.mods.shimmer.feature.misc.CameraOverride;
 import dev.beast.mods.shimmer.feature.misc.DebugText;
 import dev.beast.mods.shimmer.feature.misc.DebugTextEvent;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
+import dev.beast.mods.shimmer.feature.misc.MiscShimmerClientUtils;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleManager;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleRenderContext;
 import dev.beast.mods.shimmer.feature.structure.GhostStructure;
@@ -309,18 +310,6 @@ public class ClientGameEventHandler {
 
 	@SubscribeEvent
 	public static void renderPlayerPre(RenderPlayerEvent.Pre event) {
-		var player = event.getEntity();
-
-		if (player.isSpectator()) {
-			event.setCanceled(true);
-			return;
-		}
-
-		if (player.isInvisible() && player.isCreative()) {
-			event.setCanceled(true);
-		}
-
-		/* 1.21.4
 		if (event.getRenderState().isSpectator) {
 			event.setCanceled(true);
 			return;
@@ -333,6 +322,5 @@ public class ClientGameEventHandler {
 				event.setCanceled(true);
 			}
 		}
-		 */
 	}
 }

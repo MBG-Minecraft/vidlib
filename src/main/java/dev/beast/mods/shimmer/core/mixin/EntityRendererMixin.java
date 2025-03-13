@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(EntityRenderer.class)
 public class EntityRendererMixin {
-	@ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderer;shouldShowName(Lnet/minecraft/world/entity/Entity;)Z"))
+	@ModifyExpressionValue(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderer;shouldShowName(Lnet/minecraft/world/entity/Entity;D)Z"))
 	private boolean shimmer$shouldShowName(boolean original, @Local(argsOnly = true) Entity entity) {
 		if (!original && entity instanceof LocalPlayer && Minecraft.getInstance().isLocalServer() && !Minecraft.getInstance().options.getCameraType().isFirstPerson()) {
 			return true;

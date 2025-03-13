@@ -47,7 +47,7 @@ public interface ShimmerEntityContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void tell(Component message) {
 		for (var player : shimmer$getPlayers()) {
-			player.sendSystemMessage(message);
+			player.displayClientMessage(message, false);
 		}
 	}
 

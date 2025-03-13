@@ -7,7 +7,7 @@ import dev.beast.mods.shimmer.math.Line;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -94,14 +94,13 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 
 	default void teleport(ServerLevel to, Vec3 pos) {
 		var entity = (Entity) this;
-		entity.changeDimension(new DimensionTransition(
+		entity.teleport(new TeleportTransition(
 			to,
 			pos,
 			entity.getDeltaMovement(),
 			entity.getYRot(),
 			entity.getXRot(),
-			false,
-			DimensionTransition.DO_NOTHING
+			TeleportTransition.DO_NOTHING
 		));
 	}
 

@@ -21,12 +21,11 @@ import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityInvulnerabilityCheckEvent;
@@ -55,12 +54,14 @@ public class GameEventHandler {
 	}
 
 	@SubscribeEvent
-	public static void addReloadListeners(AddReloadListenerEvent event) {
-		event.addListener(new ZoneLoader());
-		event.addListener(StructureStorage.SERVER);
-		event.addListener(new Cutscene.Loader());
-		event.addListener(new ClockFont.Loader());
-		event.addListener(new Clock.Loader());
+	public static void addReloadListeners(AddServerReloadListenersEvent event) {
+		event.addListener(Shimmer.id("zone"), new ZoneLoader());
+		event.addListener(Shimmer.id("structure"), StructureStorage.SERVER);
+		event.addListener(Shimmer.id("cutscene"), new Cutscene.Loader());
+		event.addListener(Shimmer.id("clock_font"), new ClockFont.Loader());
+		event.addListener(Shimmer.id("clock"), new Clock.Loader());
+
+		event.addDependency(Shimmer.id("clock_font"), Shimmer.id("clock"));
 	}
 
 	@SubscribeEvent
@@ -130,7 +131,7 @@ public class GameEventHandler {
 			var tool = ShimmerTool.of(event.getItemStack());
 
 			if (tool != null && tool.useOnBlock(event.getPlayer(), event)) {
-				event.cancelWithResult(ItemInteractionResult.SUCCESS);
+				event.cancelWithResult(InteractionResult.SUCCESS);
 			}
 		}
 	}

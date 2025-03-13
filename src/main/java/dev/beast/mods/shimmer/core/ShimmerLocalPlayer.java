@@ -2,7 +2,6 @@ package dev.beast.mods.shimmer.core;
 
 import dev.beast.mods.shimmer.feature.input.PlayerInput;
 import dev.beast.mods.shimmer.feature.session.ShimmerLocalClientSessionData;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import org.lwjgl.glfw.GLFW;
@@ -14,8 +13,7 @@ public interface ShimmerLocalPlayer extends ShimmerClientPlayer, ShimmerClientEn
 	}
 
 	static PlayerInput fromInput(long windowId, LocalPlayer player, boolean mouse) {
-		var in = player.input;
-		boolean sprinting = Minecraft.getInstance().options.keySprint.isDown();
+		var in = player.input.keyPresses;
 		// Modifiers
 		boolean shift = Screen.hasShiftDown();
 		boolean control = Screen.hasControlDown();
@@ -31,14 +29,14 @@ public interface ShimmerLocalPlayer extends ShimmerClientPlayer, ShimmerClientEn
 		return new PlayerInput(
 			PlayerInput.getFlags(
 				// Movement
-				in.up, in.down, in.left, in.right, in.jumping, in.shiftKeyDown, sprinting,
+				in.forward(), in.backward(), in.left(), in.right(), in.jump(), in.shift(), in.sprint(),
 				// Modifiers
 				shift, control, alt, tab,
 				// Mouse
 				mouseLeft, mouseRight, mouseMiddle, mouseBack, mouseNext
 			),
 			// Movement
-			in.up, in.down, in.left, in.right, in.jumping, in.shiftKeyDown, sprinting,
+			in.forward(), in.backward(), in.left(), in.right(), in.jump(), in.shift(), in.sprint(),
 			// Modifiers
 			shift, control, alt, tab,
 			// Mouse

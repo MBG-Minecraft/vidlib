@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class VoidSpecialEffects extends DimensionSpecialEffects {
 	public VoidSpecialEffects() {
-		super(Float.NaN, false, SkyType.NORMAL, false, false);
+		super(Float.NaN, false, SkyType.OVERWORLD, false, false);
 	}
 
 	@Override

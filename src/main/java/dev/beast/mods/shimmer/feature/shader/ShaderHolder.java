@@ -1,8 +1,11 @@
 package dev.beast.mods.shimmer.feature.shader;
 
-import com.mojang.blaze3d.shaders.AbstractUniform;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.client.renderer.ShaderInstance;
+import dev.beast.mods.shimmer.util.WithCache;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.CompiledShaderProgram;
+import net.minecraft.client.renderer.ShaderDefines;
+import net.minecraft.client.renderer.ShaderProgram;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.client.event.RegisterShadersEvent;
 
@@ -12,41 +15,45 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class ShaderHolder implements Consumer<ShaderInstance>, Supplier<ShaderInstance> {
-	public final ResourceLocation id;
-	public final VertexFormat format;
-	public final List<Consumer<ShaderHolder>> reloadListeners;
-	public ShaderInstance instance;
+public class ShaderHolder implements WithCache, Supplier<CompiledShaderProgram> {
+	public final ShaderProgram program;
+	public final List<Consumer<CompiledShaderProgram>> reloadListeners;
+	public CompiledShaderProgram compiled;
 
-	public ShaderHolder(ResourceLocation id, VertexFormat format) {
-		this.id = id;
-		this.format = format;
+	public ShaderHolder(ShaderProgram program) {
+		this.program = program;
 		this.reloadListeners = new ArrayList<>(0);
 	}
 
-	public void register(RegisterShadersEvent event) throws IOException {
-		event.registerShader(new ShaderInstance(event.getResourceProvider(), id, format), this);
+	public ShaderHolder(ResourceLocation id, VertexFormat format) {
+		this(new ShaderProgram(id, format, ShaderDefines.EMPTY));
 	}
 
-	public void addListener(Consumer<ShaderHolder> listener) {
+	public void register(RegisterShadersEvent event) throws IOException {
+		event.registerShader(program);
+	}
+
+	public void addListener(Consumer<CompiledShaderProgram> listener) {
 		reloadListeners.add(listener);
 	}
 
 	@Override
-	public void accept(ShaderInstance newInstance) {
-		instance = newInstance;
-
-		for (var listener : reloadListeners) {
-			listener.accept(this);
-		}
+	public void clearCache() {
+		compiled = null;
 	}
 
 	@Override
-	public ShaderInstance get() {
-		return instance;
-	}
+	public CompiledShaderProgram get() {
+		if (compiled == null) {
+			compiled = Minecraft.getInstance().getShaderManager().getProgram(program);
 
-	public AbstractUniform get(String name) {
-		return instance.safeGetUniform(name);
+			if (compiled != null) {
+				for (var listener : reloadListeners) {
+					listener.accept(compiled);
+				}
+			}
+		}
+
+		return compiled;
 	}
 }

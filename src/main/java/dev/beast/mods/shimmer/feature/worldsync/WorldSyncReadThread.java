@@ -185,7 +185,7 @@ public class WorldSyncReadThread extends Thread {
 			for (LocalFile localFile : worldIndex.files().values()) {
 				if (!remoteFiles.containsKey(localFile.path())) {
 					ProgressingText text = sendMessage("Deleting " + localFile.path() + "...");
-					Util.backgroundExecutor().submit(new DeleteFileTask(text, localFile));
+					Util.backgroundExecutor().execute(new DeleteFileTask(text, localFile));
 				}
 			}
 

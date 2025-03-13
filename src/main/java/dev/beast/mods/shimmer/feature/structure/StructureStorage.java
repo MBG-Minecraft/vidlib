@@ -27,7 +27,7 @@ public class StructureStorage extends SimplePreparableReloadListener<Map<Resourc
 		public StructureTemplate get() {
 			try (var in = resource.open()) {
 				var template = new StructureTemplate();
-				template.load(BuiltInRegistries.BLOCK.asLookup(), NbtIo.readCompressed(in, NbtAccounter.unlimitedHeap()));
+				template.load(BuiltInRegistries.BLOCK, NbtIo.readCompressed(in, NbtAccounter.unlimitedHeap()));
 				return template;
 			} catch (Exception ex) {
 				Shimmer.LOGGER.error("Error while loading structure " + id, ex);

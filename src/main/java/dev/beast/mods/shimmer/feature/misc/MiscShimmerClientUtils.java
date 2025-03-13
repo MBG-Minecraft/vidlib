@@ -1,22 +1,19 @@
 package dev.beast.mods.shimmer.feature.misc;
 
-import com.mojang.blaze3d.shaders.Program;
+import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.ShimmerConfig;
-import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.network.chat.Component;
-import net.minecraft.util.profiling.InactiveProfiler;
+import net.minecraft.util.context.ContextKey;
 
-import java.util.concurrent.CompletableFuture;
+public interface MiscShimmerClientUtils {
+	ContextKey<Boolean> CREATIVE = new ContextKey<>(Shimmer.id("creative"));
 
-public class MiscShimmerClientUtils {
-	public static boolean handleDebugKeys(Minecraft mc, int key) {
+	static boolean handleDebugKeys(Minecraft mc, int key) {
 		if (key == ShimmerConfig.cycleShadersKey) {
 			if (Screen.hasShiftDown()) {
-				mc.execute(mc.gameRenderer::shutdownEffect);
+				mc.execute(mc.gameRenderer::clearPostEffect);
 			} else {
 				// minecraft.submit(minecraft.gameRenderer::cycleSuperSecretSetting);
 			}
@@ -30,8 +27,9 @@ public class MiscShimmerClientUtils {
 		return false;
 	}
 
-	public static void reloadShaders(Minecraft mc) {
-		Util.backgroundExecutor().submit(() -> {
+	static void reloadShaders(Minecraft mc) {
+		/* FIXME
+		Util.backgroundExecutor().execute(() -> {
 			try {
 				mc.gameRenderer.createReloadListener().reload(CompletableFuture::completedFuture, mc.getResourceManager(), InactiveProfiler.INSTANCE, InactiveProfiler.INSTANCE, Util.backgroundExecutor(), mc).get();
 			} catch (Exception e) {
@@ -40,14 +38,15 @@ public class MiscShimmerClientUtils {
 
 			mc.submit(() -> {
 				mc.levelRenderer.onResourceManagerReload(mc.getResourceManager());
-				Program.Type.FRAGMENT.getPrograms().clear();
-				Program.Type.VERTEX.getPrograms().clear();
+				CompiledShader.Type.FRAGMENT.getPrograms().clear();
+				CompiledShader.Type.VERTEX.getPrograms().clear();
 				mc.player.displayClientMessage(Component.literal("Shaders reloaded!").withStyle(ChatFormatting.GREEN), true);
 			});
 		});
+		 */
 	}
 
-	public static boolean canSeeSpectators(AbstractClientPlayer player) {
+	static boolean canSeeSpectators(AbstractClientPlayer player) {
 		// TODO
 		return false;
 	}

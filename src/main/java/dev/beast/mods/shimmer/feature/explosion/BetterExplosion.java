@@ -11,6 +11,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.ServerExplosion;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
@@ -21,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BetterExplosion implements Runnable {
-	public final ServerLevel world;
+	public final ServerLevel level;
 	public final BlockPos at;
 	public RandomSource random;
 	public float hradius, vradiusd, vradiusu;
@@ -36,10 +37,10 @@ public class BetterExplosion implements Runnable {
 	public BlockFilter blockFilter;
 	public EntityFilter invincibleEntities;
 
-	public BetterExplosion(ServerLevel world, BlockPos at) {
-		this.world = world;
+	public BetterExplosion(ServerLevel level, BlockPos at) {
+		this.level = level;
 		this.at = at;
-		this.random = world.random;
+		this.random = level.random;
 		this.hradius = 4F;
 		this.vradiusd = 4F;
 		this.vradiusu = 4F;
@@ -84,10 +85,10 @@ public class BetterExplosion implements Runnable {
 
 					if (d <= 1F) {
 						pos.set(atx + x, aty + y, atz + z);
-						var state = world.getBlockState(pos);
+						var state = level.getBlockState(pos);
 
-						if ((state.shimmer$getDensity() > 0F && state.getDestroySpeed(world, pos) >= 0F || state.getBlock() instanceof BaseFireBlock) && blockFilter.test(world, pos, state)) {
-							blocks.add(new DestroyedBlock(world, pos.immutable(), state, x, y, z, d, new MutableBoolean(false)));
+						if ((state.shimmer$getDensity() > 0F && state.getDestroySpeed(level, pos) >= 0F || state.getBlock() instanceof BaseFireBlock) && blockFilter.test(level, pos, state)) {
+							blocks.add(new DestroyedBlock(level, pos.immutable(), state, x, y, z, d, new MutableBoolean(false)));
 						}
 					}
 				}
@@ -106,7 +107,7 @@ public class BetterExplosion implements Runnable {
 
 		double exp = 0.5D;
 
-		for (var entity : world.getEntities(null, new AABB(atx - hradius - exp, aty - vradiusd - exp, atz - hradius - exp, atx + hradius + exp, aty + vradiusu + exp, atz + hradius + exp))) {
+		for (var entity : level.getEntities(null, new AABB(atx - hradius - exp, aty - vradiusd - exp, atz - hradius - exp, atx + hradius + exp, aty + vradiusu + exp, atz + hradius + exp))) {
 			if (!entity.isAlive()) {
 				continue;
 			}
@@ -173,21 +174,21 @@ public class BetterExplosion implements Runnable {
 					double dist = Math.sqrt(block.dx() * block.dx() + block.dz() * block.dz()) / hradius * KMath.lerp(r, 0.25D, 1D);
 
 					if (dist < 0.15D) {
-						world.setBlockFast(pos, Blocks.MAGMA_BLOCK);
+						level.setBlockFast(pos, Blocks.MAGMA_BLOCK);
 					} else if (dist < 0.35D) {
-						world.setBlockFast(pos, Blocks.COAL_BLOCK);
+						level.setBlockFast(pos, Blocks.COAL_BLOCK);
 					} else if (dist < 0.6D) {
-						world.setBlockFast(pos, Blocks.BLACKSTONE);
+						level.setBlockFast(pos, Blocks.BLACKSTONE);
 					} else {
-						world.setBlockFast(pos, Blocks.BASALT);
+						level.setBlockFast(pos, Blocks.BASALT);
 					}
 				} else {
-					var state = world.getBlockState(pos);
+					var state = level.getBlockState(pos);
 
 					if (state.getBlock() == Blocks.STONE) {
-						world.setBlockFast(pos, Blocks.COBBLESTONE);
+						level.setBlockFast(pos, Blocks.COBBLESTONE);
 					} else if (state.getBlock() == Blocks.STONE_BRICKS) {
-						world.setBlockFast(pos, Blocks.CRACKED_STONE_BRICKS);
+						level.setBlockFast(pos, Blocks.CRACKED_STONE_BRICKS);
 					}
 				}
 			}
@@ -200,8 +201,8 @@ public class BetterExplosion implements Runnable {
 				if (random.nextFloat() < fire) {
 					var pos = block.pos();
 
-					if (Blocks.FIRE.defaultBlockState().canSurvive(world, pos)) {
-						world.setBlockFast(pos, random.nextFloat() < 0.05F ? Blocks.CAMPFIRE.defaultBlockState() : BaseFireBlock.getState(world, pos));
+					if (Blocks.FIRE.defaultBlockState().canSurvive(level, pos)) {
+						level.setBlockFast(pos, random.nextFloat() < 0.05F ? Blocks.CAMPFIRE.defaultBlockState() : BaseFireBlock.getState(level, pos));
 					}
 				}
 			}
@@ -213,11 +214,11 @@ public class BetterExplosion implements Runnable {
 			return;
 		}
 
-		var source = world.damageSources().explosion(null, null);
+		var source = level.damageSources().explosion(null, null);
 		double atx = at.getX() + 0.5D;
 		double aty = at.getY() + 0.5D;
 		double atz = at.getZ() + 0.5D;
-		var fakeExplosion = new Explosion(world, null, atx, aty, atz, 0F, false, Explosion.BlockInteraction.DESTROY);
+		var fakeExplosion = new ServerExplosion(level, null, level.damageSources().explosion(null, null), null, new Vec3(atx, aty, atz), 0F, false, Explosion.BlockInteraction.DESTROY);
 
 		for (var e : entities) {
 			if (entityDamage > 0F && !e.ignoreExplosion(fakeExplosion)) {
