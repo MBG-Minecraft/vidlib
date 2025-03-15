@@ -82,7 +82,7 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 
 	@Inject(method = "reloadResourcePacks()Ljava/util/concurrent/CompletableFuture;", at = @At("HEAD"))
 	private void shimmer$reloadResourcePacks(CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-		AutoInit.Type.ASSET_RELOAD.invoke();
+		AutoInit.Type.ASSETS_RELOADED.invoke();
 	}
 
 	@Override

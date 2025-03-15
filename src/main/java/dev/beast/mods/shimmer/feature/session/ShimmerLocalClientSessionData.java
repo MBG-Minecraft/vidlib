@@ -12,7 +12,10 @@ import dev.beast.mods.shimmer.feature.input.PlayerInput;
 import dev.beast.mods.shimmer.feature.input.PlayerInputChanged;
 import dev.beast.mods.shimmer.feature.input.SyncPlayerInputToServer;
 import dev.beast.mods.shimmer.feature.worldsync.ProgressingText;
+import dev.beast.mods.shimmer.feature.worldsync.WorldSync;
+import dev.beast.mods.shimmer.feature.worldsync.WorldSyncAuthResponsePayload;
 import dev.beast.mods.shimmer.feature.worldsync.WorldSyncReadThread;
+import dev.beast.mods.shimmer.feature.worldsync.WorldSyncRepo;
 import dev.beast.mods.shimmer.feature.worldsync.WorldSyncScreen;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.feature.zone.ZoneClipResult;
@@ -21,11 +24,15 @@ import dev.beast.mods.shimmer.feature.zone.ZoneEvent;
 import dev.beast.mods.shimmer.feature.zone.shape.ZoneShape;
 import dev.beast.mods.shimmer.math.VoxelShapeBox;
 import dev.beast.mods.shimmer.util.Side;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -33,6 +40,10 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.net.URI;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -204,6 +215,70 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	}
 
 	@Override
+	public void worldSyncAuthResponse(WorldSyncAuthResponsePayload payload) {
+		var mc = Minecraft.getInstance();
+
+		if (payload.token().isEmpty()) {
+			mc.player.displayClientMessage(Component.literal("Failed to auth on WorldSync!").withStyle(ChatFormatting.RED), false);
+			return;
+		}
+
+		var ip = payload.address();
+
+		if (ip.equals("${ip}")) {
+			var info = mc.getCurrentServer();
+			ip = info == null ? "localhost" : info.ip;
+			int ipp = ip.indexOf(':');
+
+			if (ipp != -1) {
+				ip = ip.substring(0, ipp);
+			}
+		}
+
+		var ip0 = ip;
+
+		Thread.startVirtualThread(() -> {
+			mc.execute(() -> mc.player.displayClientMessage(Component.literal("Connecting to WorldSync repository ").append(Component.literal(payload.id()).withStyle(ChatFormatting.YELLOW)).append("..."), false));
+
+			boolean https = false;
+
+			try {
+				if (WorldSync.HTTP_CLIENT.send(HttpRequest.newBuilder().uri(URI.create("https://" + ip0 + ":" + payload.port()))
+					.GET()
+					.timeout(Duration.ofSeconds(5L))
+					.build(), HttpResponse.BodyHandlers.discarding()).statusCode() / 100 == 2) {
+					https = true;
+				}
+			} catch (Exception ignore) {
+			}
+
+			if (!https) {
+				boolean ok = false;
+
+				try {
+					if (WorldSync.HTTP_CLIENT.send(HttpRequest.newBuilder().uri(URI.create("http://" + ip0 + ":" + payload.port()))
+						.GET()
+						.timeout(Duration.ofSeconds(5L))
+						.build(), HttpResponse.BodyHandlers.discarding()).statusCode() / 100 == 2) {
+						ok = true;
+					}
+				} catch (Exception ignore) {
+				}
+
+				if (!ok) {
+					mc.execute(() -> mc.player.displayClientMessage(Component.literal("Failed to connect to WorldSync repository ").append(Component.literal(payload.id()).withStyle(ChatFormatting.RED)), false));
+					return;
+				}
+			}
+
+			var repo = new WorldSyncRepo(payload.id(), payload.displayName(), (https ? "https://" : "http://") + ip0 + ":" + payload.port(), payload.token());
+			WorldSyncRepo.MAP.get().values().removeIf(repo::replaces);
+			WorldSyncRepo.MAP.get().put(repo.id(), repo);
+			WorldSyncRepo.save();
+			mc.execute(() -> mc.player.displayClientMessage(Component.literal("Added WorldSync repository ").append(Component.literal(repo.id()).withStyle(ChatFormatting.GREEN)).withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/world-sync browse " + repo.id()))), false));
+		});
+	}
+
 	public void prepareWorldSyncScreen(String ip, int port) {
 		var mc = Minecraft.getInstance();
 
@@ -223,7 +298,6 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 		mc.setScreen(screen);
 	}
 
-	@Override
 	public void startWorldSync() {
 		if (Minecraft.getInstance().screen instanceof WorldSyncScreen screen) {
 			screen.startThread();

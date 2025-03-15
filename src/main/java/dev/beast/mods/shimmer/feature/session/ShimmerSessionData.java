@@ -9,6 +9,7 @@ import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.icon.IconHolder;
 import dev.beast.mods.shimmer.feature.input.PlayerInput;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
+import dev.beast.mods.shimmer.feature.worldsync.WorldSyncAuthResponsePayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -109,9 +110,6 @@ public class ShimmerSessionData {
 	public void updateInput(UUID player, PlayerInput input) {
 	}
 
-	public void prepareWorldSyncScreen(String ip, int port) {
-	}
-
-	public void startWorldSync() {
+	public void worldSyncAuthResponse(WorldSyncAuthResponsePayload payload) {
 	}
 }

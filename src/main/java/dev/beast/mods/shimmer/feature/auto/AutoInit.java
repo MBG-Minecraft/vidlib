@@ -22,9 +22,10 @@ public @interface AutoInit {
 		REGISTRY(false, false), // (IEventBus)
 		CLIENT_SETUP(true, false), // ()
 		LOAD_COMPLETE(false, false), // ()
-		ASSET_RELOAD(true, false), // ()
+		ASSETS_RELOADED(true, false), // ()
 		CHUNKS_RELOADED(true, false), // ()
 		SHADERS_RELOADED(true, false), // ()
+		CLIENT_OPTIONS_SAVED(true, false), // (Options)
 
 		;
 

@@ -1,6 +1,5 @@
 package dev.beast.mods.shimmer.feature.worldsync;
 
-import dev.beast.mods.shimmer.Shimmer;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 
@@ -11,7 +10,7 @@ public class ProgressingText {
 	public int color = 0xFFFFFF;
 
 	public ProgressingText setText(String text) {
-		Shimmer.LOGGER.info("[World Sync] " + text);
+		WorldSync.LOGGER.info(text);
 		this.text = FormattedCharSequence.forward(text, Style.EMPTY);
 		return this;
 	}

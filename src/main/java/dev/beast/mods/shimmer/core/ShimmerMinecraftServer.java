@@ -1,17 +1,14 @@
 package dev.beast.mods.shimmer.core;
 
+import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.clock.ClockInstance;
-import dev.beast.mods.shimmer.feature.data.SyncPlayerDataPayload;
 import dev.beast.mods.shimmer.feature.data.SyncServerDataPayload;
-import dev.beast.mods.shimmer.feature.input.SyncPlayerInputToClient;
-import dev.beast.mods.shimmer.feature.misc.RefreshNamePayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
 import dev.beast.mods.shimmer.util.S2CPacketBundleBuilder;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -28,28 +25,7 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 
 	@ApiStatus.Internal
 	default void shimmer$playerJoined(ServerPlayer player) {
-		var session = player.shimmer$sessionData();
-		session.dataMap.load(shimmer$self(), shimmer$self().getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("shimmer").resolve(player.getUUID() + ".nbt"));
-		player.refreshDisplayName();
-		player.refreshTabListName();
-		session.updateOverrides(player);
-
-		var toNewPlayer = new S2CPacketBundleBuilder();
-
-		getServerData().syncAll(toNewPlayer, null, (uuid, updates) -> new SyncServerDataPayload(updates));
-		session.dataMap.syncAll(toNewPlayer, player, SyncPlayerDataPayload::new);
-		toNewPlayer.s2c(new RefreshNamePayload(player.getUUID()));
-
-		for (var p : shimmer$self().getPlayerList().getPlayers()) {
-			if (!p.getUUID().equals(player.getUUID())) {
-				var s = p.shimmer$sessionData();
-
-				toNewPlayer.s2c(new SyncPlayerInputToClient(p.getUUID(), s.input));
-				s.dataMap.syncAll(toNewPlayer, null, SyncPlayerDataPayload::new);
-			}
-		}
-
-		toNewPlayer.send(player);
+		Shimmer.sync(player, true);
 	}
 
 	@Override

@@ -62,7 +62,7 @@ public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
 		TRANSLUCENT.tick(level);
 	}
 
-	@AutoInit(AutoInit.Type.ASSET_RELOAD)
+	@AutoInit(AutoInit.Type.ASSETS_RELOADED)
 	public static void clearAll() {
 		ShimmerBlockState.shimmer$clearAllCache();
 		SOLID.clear();

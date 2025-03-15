@@ -8,7 +8,10 @@ import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
+import java.util.SequencedCollection;
 
 public interface MiscUtils {
 	static <K, V> Map<K, V> createMap(int size, boolean ordered, boolean identity) {
@@ -32,5 +35,41 @@ public interface MiscUtils {
 		}
 
 		return path;
+	}
+
+	static <T> SequencedCollection<T> toSequencedCollection(Iterable<T> collection) {
+		if (collection instanceof SequencedCollection) {
+			return (SequencedCollection<T>) collection;
+		}
+
+		var list = new ArrayList<T>();
+
+		for (var element : collection) {
+			list.add(element);
+		}
+
+		return list;
+	}
+
+	static int size(Iterable<?> iterable) {
+		if (iterable instanceof Collection) {
+			return ((Collection<?>) iterable).size();
+		}
+
+		int size = 0;
+
+		for (var ignored : iterable) {
+			size++;
+		}
+
+		return size;
+	}
+
+	static boolean isEmpty(Iterable<?> iterable) {
+		if (iterable instanceof Collection) {
+			return ((Collection<?>) iterable).isEmpty();
+		}
+
+		return iterable.iterator().hasNext();
 	}
 }

@@ -4,18 +4,13 @@ import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.ServerCommandHolder;
 import dev.beast.mods.shimmer.feature.clock.Clock;
 import dev.beast.mods.shimmer.feature.clock.ClockFont;
-import dev.beast.mods.shimmer.feature.clock.ClockInstance;
-import dev.beast.mods.shimmer.feature.clock.SyncClockFontsPayload;
-import dev.beast.mods.shimmer.feature.clock.SyncClocksPayload;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.session.RemovePlayerDataPayload;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
 import dev.beast.mods.shimmer.feature.toolitem.ShimmerTool;
-import dev.beast.mods.shimmer.feature.zone.SyncZonesPayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
-import dev.beast.mods.shimmer.util.S2CPacketBundleBuilder;
 import dev.beast.mods.shimmer.util.registry.RegistryReference;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerLevel;
@@ -37,8 +32,6 @@ import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
-
-import java.util.List;
 
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.GAME)
 public class GameEventHandler {
@@ -66,13 +59,11 @@ public class GameEventHandler {
 
 	@SubscribeEvent
 	public static void syncReload(OnDatapackSyncEvent event) {
-		var list = new S2CPacketBundleBuilder();
-
-		list.s2c(new SyncZonesPayload(List.copyOf(ZoneLoader.ALL.containers.values())).toS2C());
-		list.s2c(new SyncClockFontsPayload(List.copyOf(ClockFont.SERVER.getMap().values())).toS2C());
-		list.s2c(new SyncClocksPayload(List.copyOf(ClockInstance.SERVER.getMap().values())).toS2C());
-
-		event.getRelevantPlayers().forEach(list::send);
+		if (event.getPlayer() == null) {
+			for (var player : event.getPlayerList().getPlayers()) {
+				Shimmer.sync(player, false);
+			}
+		}
 	}
 
 	@SubscribeEvent

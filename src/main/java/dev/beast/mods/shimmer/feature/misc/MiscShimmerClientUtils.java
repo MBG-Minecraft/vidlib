@@ -1,18 +1,54 @@
 package dev.beast.mods.shimmer.feature.misc;
 
+import com.google.gson.JsonObject;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.ShimmerConfig;
+import dev.beast.mods.shimmer.feature.auto.AutoInit;
+import dev.beast.mods.shimmer.util.JsonUtils;
+import dev.beast.mods.shimmer.util.Lazy;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.Options;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.context.ContextKey;
+import net.neoforged.neoforge.client.settings.KeyModifier;
 
+import java.nio.file.Files;
 import java.util.concurrent.CompletableFuture;
 
 public interface MiscShimmerClientUtils {
 	ContextKey<Boolean> CREATIVE = new ContextKey<>(Shimmer.id("creative"));
+
+	Lazy<JsonObject> KEYBINDS = Lazy.of(() -> {
+		var path = Shimmer.HOME_DIR.get().resolve("keybinds.json");
+
+		if (Files.exists(path)) {
+			try (var reader = Files.newBufferedReader(Shimmer.HOME_DIR.get().resolve("keybinds.json"))) {
+				return JsonUtils.read(reader).getAsJsonObject();
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+
+		return new JsonObject();
+	});
+
+	@AutoInit(AutoInit.Type.CLIENT_OPTIONS_SAVED)
+	static void saveKeybinds(Options options) {
+		var json = KEYBINDS.get();
+
+		for (var key : options.keyMappings) {
+			json.addProperty(key.getName(), key.saveString() + (key.getKeyModifier() != KeyModifier.NONE ? ":" + key.getKeyModifier() : ""));
+		}
+
+		try (var writer = Files.newBufferedWriter(Shimmer.HOME_DIR.get().resolve("keybinds.json"))) {
+			JsonUtils.write(writer, json, true);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
 
 	static boolean handleDebugKeys(Minecraft mc, int key) {
 		if (key == ShimmerConfig.cycleShadersKey) {

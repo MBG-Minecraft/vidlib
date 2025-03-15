@@ -13,9 +13,9 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -33,16 +33,14 @@ public interface ShimmerEntityContainer extends ShimmerS2CPacketConsumer, Shimme
 	}
 
 	@Override
-	default void s2c(Packet<? super ClientGamePacketListener> packet) {
+	default void s2c(@Nullable Packet<? super ClientGamePacketListener> packet) {
 		for (var player : shimmer$getPlayers()) {
-			if (player instanceof ServerPlayer serverPlayer) {
-				serverPlayer.connection.send(packet);
-			}
+			player.s2c(packet);
 		}
 	}
 
 	@Override
-	default void c2s(Packet<? super ServerGamePacketListener> packet) {
+	default void c2s(@Nullable Packet<? super ServerGamePacketListener> packet) {
 	}
 
 	default void tell(Component message) {

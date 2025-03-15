@@ -1,5 +1,7 @@
 package dev.beast.mods.shimmer.core.mixin;
 
+import dev.beast.mods.shimmer.feature.auto.AutoInit;
+import dev.beast.mods.shimmer.feature.misc.MiscShimmerClientUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
@@ -10,6 +12,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Options.class)
@@ -32,5 +36,16 @@ public abstract class OptionsMixin {
 		if (source == SoundSource.MUSIC) {
 			cir.setReturnValue(new OptionInstance<>(text, OptionInstance.noTooltip(), (prefix, value) -> value == 0.0 ? genericValueLabel(prefix, CommonComponents.OPTION_OFF) : percentValueLabel(prefix, value), OptionInstance.UnitDouble.INSTANCE, 0.0, (value) -> minecraft.getSoundManager().updateSourceVolume(source, value.floatValue())));
 		}
+	}
+
+	@Redirect(method = "processOptionsForge", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Options$FieldAccess;process(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;"))
+	private String shimmer$processOptionsForge(Options.FieldAccess fieldAccess, String key, String fallback) {
+		var json = MiscShimmerClientUtils.KEYBINDS.get().get(key.substring(4));
+		return json == null ? fallback : json.getAsString();
+	}
+
+	@Inject(method = "save", at = @At("HEAD"))
+	private void shimmer$save(CallbackInfo ci) {
+		AutoInit.Type.CLIENT_OPTIONS_SAVED.invoke(this);
 	}
 }

@@ -1,6 +1,5 @@
 package dev.beast.mods.shimmer.feature.worldsync;
 
-import dev.beast.mods.shimmer.Shimmer;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.CommonComponents;
@@ -96,7 +95,7 @@ public class WorldSyncReadThread extends Thread {
 			sendMessage("Server Path: " + serverPath);
 			sendMessage("Buffer size: " + bufferSize);
 
-			localPath = Shimmer.WORLD_SYNC_PATH.get().resolve(serverPath);
+			localPath = WorldSync.SYNC_DIR.get().resolve(serverPath);
 
 			if (Files.notExists(localPath)) {
 				Files.createDirectories(localPath);

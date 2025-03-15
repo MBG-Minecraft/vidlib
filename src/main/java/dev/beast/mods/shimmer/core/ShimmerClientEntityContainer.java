@@ -8,15 +8,18 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 public interface ShimmerClientEntityContainer extends ShimmerEntityContainer {
 	@Override
-	default void s2c(Packet<? super ClientGamePacketListener> packet) {
+	default void s2c(@Nullable Packet<? super ClientGamePacketListener> packet) {
 	}
 
 	@Override
-	default void c2s(Packet<? super ServerGamePacketListener> packet) {
-		Minecraft.getInstance().getConnection().send(packet);
+	default void c2s(@Nullable Packet<? super ServerGamePacketListener> packet) {
+		if (packet != null) {
+			Minecraft.getInstance().getConnection().send(packet);
+		}
 	}
 
 	@Override

@@ -1,0 +1,18 @@
+package dev.beast.mods.shimmer.feature.worldsync;
+
+import dev.beast.mods.shimmer.feature.auto.AutoPacket;
+import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
+import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
+import net.minecraft.network.codec.StreamCodec;
+
+public enum WorldSyncDeAuthRequestPayload implements ShimmerPacketPayload {
+	INSTANCE;
+
+	@AutoPacket(AutoPacket.To.SERVER)
+	public static final ShimmerPacketType<WorldSyncDeAuthRequestPayload> TYPE = ShimmerPacketType.create(WorldSync.id("deauth_request"), StreamCodec.unit(INSTANCE));
+
+	@Override
+	public ShimmerPacketType<?> getType() {
+		return TYPE;
+	}
+}

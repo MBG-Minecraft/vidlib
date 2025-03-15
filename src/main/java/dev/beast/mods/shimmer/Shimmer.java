@@ -4,9 +4,11 @@ import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.util.Lazy;
 import dev.beast.mods.shimmer.util.MiscUtils;
+import dev.beast.mods.shimmer.util.S2CPacketBundleBuilder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
@@ -39,7 +41,6 @@ public class Shimmer {
 	}
 
 	public static final Path PATH = FMLPaths.GAMEDIR.get().resolve("shimmer");
-	public static final Lazy<Path> WORLD_SYNC_PATH = Lazy.of(() -> MiscUtils.createDir(PATH.resolve("world-sync")));
 	public static final Lazy<Path> HOME_DIR = Lazy.of(() -> MiscUtils.createDir(Path.of(System.getenv().getOrDefault("SHIMMER_HOME", System.getProperty("user.home") + "/.shimmer"))));
 
 	public static final ResourceKey<Level> LOBBY_DIMENSION = ResourceKey.create(Registries.DIMENSION, id("lobby"));
@@ -70,5 +71,11 @@ public class Shimmer {
 		}
 
 		AutoInit.Type.REGISTRY.invoke(bus);
+	}
+
+	public static void sync(ServerPlayer player, boolean login) {
+		var packets = new S2CPacketBundleBuilder();
+		player.shimmer$sessionData().sync(packets, player, login);
+		packets.send(player);
 	}
 }

@@ -1,13 +1,11 @@
 package dev.beast.mods.shimmer.feature.worldsync;
 
-import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.ClientCommandHolder;
 import dev.beast.mods.shimmer.util.MessageConsumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
@@ -25,35 +23,26 @@ import java.nio.file.attribute.BasicFileAttributes;
 public class WorldSyncCommands {
 	@AutoRegister(Dist.CLIENT)
 	public static final ClientCommandHolder HOLDER = new ClientCommandHolder("world-sync", (command, buildContext) -> command
-		.then(Commands.literal("pull")
-			.executes(ctx -> pull())
+		.then(Commands.literal("auth")
+			.executes(ctx -> auth())
 		)
-		.then(Commands.literal("create")
-			.then(Commands.argument("name", StringArgumentType.word())
-				.executes(ctx -> create(ctx.getSource(), StringArgumentType.getString(ctx, "name"), ""))
-				.then(Commands.argument("display-name", StringArgumentType.word())
-					.executes(ctx -> create(ctx.getSource(), StringArgumentType.getString(ctx, "name"), StringArgumentType.getString(ctx, "display-name")))
-				)
-			)
+		.then(Commands.literal("deauth")
+			.executes(ctx -> deauth())
 		)
 	);
 
-	public static int pull() {
-		Minecraft.getInstance().c2s(PullWorldSyncPayload.INSTANCE);
+	public static int auth() {
+		Minecraft.getInstance().c2s(WorldSyncAuthRequestPayload.INSTANCE);
 		return 1;
 	}
 
-	public static int create(CommandSourceStack source, String name, String displayName) {
-		try {
-			return create(MessageConsumer.ofCommandSource(source), name, displayName.isEmpty() ? name : displayName);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			return 0;
-		}
+	public static int deauth() {
+		Minecraft.getInstance().c2s(WorldSyncDeAuthRequestPayload.INSTANCE);
+		return 1;
 	}
 
 	public static int create(MessageConsumer messageConsumer, String name, String displayName) throws Exception {
-		var localPath = Shimmer.WORLD_SYNC_PATH.get().resolve(name);
+		var localPath = WorldSync.SYNC_DIR.get().resolve(name);
 		var worldIndex = WorldIndex.load(localPath);
 
 		if (Files.notExists(localPath) || !worldIndex.found()) {
