@@ -41,6 +41,7 @@
 	],
 	"client": [
 		"AbstractClientPlayerMixin",
+		"BiomeAmbientSoundsHandlerMixin",
 		"CameraMixin",
 		"ClientLevelMixin",
 		"ClientPacketListenerMixin",
