@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.ShimmerConfig;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
+import dev.beast.mods.shimmer.feature.clothing.Clothing;
 import dev.beast.mods.shimmer.util.JsonUtils;
 import dev.beast.mods.shimmer.util.Lazy;
 import net.minecraft.ChatFormatting;
@@ -20,6 +21,7 @@ import java.util.concurrent.CompletableFuture;
 
 public interface MiscShimmerClientUtils {
 	ContextKey<Boolean> CREATIVE = new ContextKey<>(Shimmer.id("creative"));
+	ContextKey<Clothing> CLOTHING = new ContextKey<>(Shimmer.id("clothing"));
 
 	Lazy<JsonObject> KEYBINDS = Lazy.of(() -> {
 		var path = Shimmer.HOME_DIR.get().resolve("keybinds.json");

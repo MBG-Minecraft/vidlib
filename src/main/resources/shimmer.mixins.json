@@ -50,6 +50,7 @@
 		"GameNarratorMixin",
 		"GameRendererMixin",
 		"GuiMixin",
+		"HumanoidArmorLayerMixin",
 		"ItemInHandLayerMixin",
 		"ItemInHandRendererMixin",
 		"KeyboardHandlerMixin",

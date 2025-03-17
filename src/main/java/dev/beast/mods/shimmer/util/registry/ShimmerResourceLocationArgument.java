@@ -1,0 +1,66 @@
+package dev.beast.mods.shimmer.util.registry;
+
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
+import dev.beast.mods.shimmer.Shimmer;
+import net.minecraft.ResourceLocationException;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.resources.ResourceLocation;
+
+import java.util.Locale;
+import java.util.function.Supplier;
+
+public class ShimmerResourceLocationArgument implements ArgumentType<ResourceLocation> {
+	public static ShimmerResourceLocationArgument id() {
+		return new ShimmerResourceLocationArgument();
+	}
+
+	public static ResourceLocation getId(CommandContext<CommandSourceStack> context, String name) {
+		return context.getArgument(name, ResourceLocation.class);
+	}
+
+	public static SuggestionProvider<CommandSourceStack> registerSuggestionProvider(ResourceLocation registryId, Supplier<Iterable<ResourceLocation>> allIds) {
+		return SuggestionProviders.register(registryId, (ctx, builder) -> {
+			var input = builder.getRemaining().toLowerCase(Locale.ROOT);
+			boolean col = input.indexOf(':') > -1;
+
+			for (var id : allIds.get()) {
+				var ids = Shimmer.idToString(id);
+
+				if (col) {
+					if (SharedSuggestionProvider.matchesSubStr(input, ids)) {
+						builder.suggest(ids);
+					}
+				} else if (SharedSuggestionProvider.matchesSubStr(input, id.getNamespace()) || id.getNamespace().equals(Shimmer.ID) && SharedSuggestionProvider.matchesSubStr(input, id.getPath())) {
+					builder.suggest(ids);
+				}
+			}
+
+			return builder.buildFuture();
+		});
+	}
+
+	@Override
+	public ResourceLocation parse(StringReader reader) throws CommandSyntaxException {
+		int i = reader.getCursor();
+
+		while (reader.canRead() && ResourceLocation.isAllowedInResourceLocation(reader.peek())) {
+			reader.skip();
+		}
+
+		var s = reader.getString().substring(i, reader.getCursor());
+
+		try {
+			return Shimmer.idFromString(s);
+		} catch (ResourceLocationException resourcelocationexception) {
+			reader.setCursor(i);
+			throw ResourceLocation.ERROR_INVALID.createWithContext(reader);
+		}
+	}
+}
+

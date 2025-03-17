@@ -2,6 +2,7 @@ package dev.beast.mods.shimmer.feature.session;
 
 import dev.beast.mods.shimmer.feature.clock.ClockFont;
 import dev.beast.mods.shimmer.feature.clock.ClockInstance;
+import dev.beast.mods.shimmer.feature.clothing.Clothing;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.data.DataMapValue;
 import dev.beast.mods.shimmer.feature.data.DataType;
@@ -36,6 +37,7 @@ public class ShimmerSessionData {
 	public float attackDamageMod;
 	public boolean pvp;
 	public IconHolder plumbobIcon;
+	public Clothing clothing;
 
 	public ShimmerSessionData(UUID uuid) {
 		this.uuid = uuid;
@@ -53,6 +55,7 @@ public class ShimmerSessionData {
 		this.attackDamageMod = 1F;
 		this.pvp = true;
 		this.plumbobIcon = IconHolder.EMPTY;
+		this.clothing = Clothing.NONE;
 	}
 
 	public void respawned(Level level, boolean loggedIn) {
@@ -70,10 +73,17 @@ public class ShimmerSessionData {
 		speedMod = suspended ? 0F : EntityOverride.SPEED.get(player, 1F);
 		attackDamageMod = suspended ? 0F : EntityOverride.ATTACK_DAMAGE.get(player, 1F);
 		pvp = !suspended && EntityOverride.PVP.get(player, true);
+
 		plumbobIcon = EntityOverride.PLUMBOB.get(player, IconHolder.EMPTY);
 
 		if (plumbobIcon == IconHolder.EMPTY) {
 			plumbobIcon = dataMap.get(InternalPlayerData.PLUMBOB);
+		}
+
+		clothing = EntityOverride.CLOTHING.get(player, Clothing.NONE);
+
+		if (clothing == Clothing.NONE) {
+			clothing = dataMap.get(InternalPlayerData.CLOTHING);
 		}
 
 		if (gravityMod <= 0D) {

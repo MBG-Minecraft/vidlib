@@ -4,12 +4,15 @@ import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.BlockEntityRendererHolder;
 import dev.beast.mods.shimmer.feature.auto.EntityRendererHolder;
+import dev.beast.mods.shimmer.feature.clothing.Clothing;
 import dev.beast.mods.shimmer.feature.misc.MiscShimmerClientUtils;
 import dev.beast.mods.shimmer.feature.multiverse.VoidSpecialEffects;
 import dev.beast.mods.shimmer.feature.particle.ShimmerClientParticles;
 import dev.beast.mods.shimmer.feature.structure.ClientStructureStorage;
 import dev.beast.mods.shimmer.feature.structure.GhostStructure;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -60,10 +63,20 @@ public class ClientModEventHandler {
 
 	@SubscribeEvent
 	public static void registerRenderStateModifiers(RegisterRenderStateModifiersEvent event) {
-		event.registerEntityModifier(PlayerRenderer.class, (player, state) -> {
-			if (player.isCreative()) {
-				state.setRenderData(MiscShimmerClientUtils.CREATIVE, Boolean.TRUE);
+		event.registerEntityModifier(PlayerRenderer.class, ClientModEventHandler::modifyPlayerRenderState);
+	}
+
+	private static void modifyPlayerRenderState(AbstractClientPlayer player, PlayerRenderState state) {
+		if (player.isCreative()) {
+			state.setRenderData(MiscShimmerClientUtils.CREATIVE, Boolean.TRUE);
+		}
+
+		if (!player.isInvisible()) {
+			var clothing = player.shimmer$sessionData().clothing;
+
+			if (clothing != Clothing.NONE) {
+				state.setRenderData(MiscShimmerClientUtils.CLOTHING, clothing);
 			}
-		});
+		}
 	}
 }

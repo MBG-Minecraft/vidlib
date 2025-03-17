@@ -3,11 +3,11 @@ package dev.beast.mods.shimmer.feature.clock;
 import com.mojang.brigadier.context.CommandContext;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.util.registry.RegistryReference;
+import dev.beast.mods.shimmer.util.registry.VideoResourceLocationArgument;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -33,7 +33,7 @@ public class ClockInstance {
 	public static final RegistryReference.Holder<ResourceLocation, ClockInstance> SERVER = RegistryReference.createServerHolder();
 
 	public static int command(CommandContext<CommandSourceStack> ctx, BiConsumer<ClockInstance, MinecraftServer> callback) {
-		var instance = SERVER.get(ResourceLocationArgument.getId(ctx, "id"));
+		var instance = SERVER.get(VideoResourceLocationArgument.getId(ctx, "id"));
 
 		if (instance != null) {
 			callback.accept(instance, ctx.getSource().getServer());

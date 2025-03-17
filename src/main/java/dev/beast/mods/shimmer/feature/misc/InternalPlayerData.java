@@ -3,6 +3,7 @@ package dev.beast.mods.shimmer.feature.misc;
 import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.block.filter.BlockFilter;
+import dev.beast.mods.shimmer.feature.clothing.Clothing;
 import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.icon.IconHolder;
 import dev.beast.mods.shimmer.feature.zone.ZoneRenderType;
@@ -22,6 +23,12 @@ public interface InternalPlayerData {
 	DataType<IconHolder> PLUMBOB = DataType.PLAYER.internal("plumbob", IconHolder.EMPTY)
 		.save(IconHolder.CODEC)
 		.sync(IconHolder.STREAM_CODEC)
+		.syncToAllClients()
+		.build();
+
+	DataType<Clothing> CLOTHING = DataType.PLAYER.internal("clothing", Clothing.NONE)
+		.save(Clothing.CODEC)
+		.sync(Clothing.STREAM_CODEC)
 		.syncToAllClients()
 		.build();
 

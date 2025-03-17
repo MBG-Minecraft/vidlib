@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer;
 
+import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.ServerCommandHolder;
 import dev.beast.mods.shimmer.feature.clock.Clock;
@@ -61,6 +62,8 @@ public class GameEventHandler {
 	@SubscribeEvent
 	public static void syncReload(OnDatapackSyncEvent event) {
 		if (event.getPlayer() == null) {
+			AutoInit.Type.DATA_RELOADED.invoke();
+
 			for (var player : event.getPlayerList().getPlayers()) {
 				Shimmer.sync(player, false);
 			}

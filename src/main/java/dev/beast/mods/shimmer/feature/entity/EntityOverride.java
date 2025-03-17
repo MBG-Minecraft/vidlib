@@ -3,6 +3,7 @@ package dev.beast.mods.shimmer.feature.entity;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.core.ShimmerEntity;
+import dev.beast.mods.shimmer.feature.clothing.Clothing;
 import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
 import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
 import dev.beast.mods.shimmer.feature.icon.IconHolder;
@@ -17,13 +18,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public final class EntityOverride<T> {
 	private static final Map<String, EntityOverride<?>> MAP = new HashMap<>();
@@ -114,14 +112,15 @@ public final class EntityOverride<T> {
 	public static final EntityOverride<Boolean> INVULNERABLE = createBooleanKey("invulnerable");
 	public static final EntityOverride<IconHolder> PLUMBOB = createKey("plumbob", IconHolder.CODEC, IconHolder.STREAM_CODEC);
 	public static final EntityOverride<Float> ATTACK_DAMAGE = createFloatKey("attack_damage");
+	public static final EntityOverride<Clothing> CLOTHING = createKey("clothing", Clothing.CODEC, Clothing.STREAM_CODEC);
 
 	public final String id;
 	private final Codec<T> codec;
 	private final StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec;
 
-	private EntityOverrideValue<T> all;
-	private Map<EntityType<?>, EntityOverrideValue<T>> types;
-	private List<Pair<EntityFilter, EntityOverrideValue<T>>> filtered;
+	EntityOverrideValue<T> all;
+	Map<EntityType<?>, EntityOverrideValue<T>> types;
+	List<Pair<EntityFilter, EntityOverrideValue<T>>> filtered;
 
 	private EntityOverride(String id, Codec<T> codec, StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec) {
 		this.id = id;
@@ -206,45 +205,5 @@ public final class EntityOverride<T> {
 
 	public void set(ShimmerEntity entity, T value) {
 		set(entity, EntityOverrideValue.fixed(value));
-	}
-
-	public void setGlobal(EntityFilter filter, EntityOverrideValue<T> value) {
-		if (filtered == null) {
-			filtered = new ArrayList<>(1);
-		}
-
-		filtered.add(Pair.of(filter, Objects.requireNonNull(value)));
-	}
-
-	public void setGlobal(EntityFilter filter, T value) {
-		setGlobal(filter, EntityOverrideValue.fixed(value));
-	}
-
-	public void setGlobal(EntityType<?> type, @Nullable EntityOverrideValue<T> value) {
-		if (value != null) {
-			if (types == null) {
-				types = new IdentityHashMap<>(1);
-			}
-
-			types.put(type, value);
-		} else if (types != null) {
-			types.remove(type);
-
-			if (types.isEmpty()) {
-				types = null;
-			}
-		}
-	}
-
-	public void setGlobal(EntityType<?> type, T value) {
-		setGlobal(type, EntityOverrideValue.fixed(value));
-	}
-
-	public void setGlobal(@Nullable EntityOverrideValue<T> value) {
-		all = value;
-	}
-
-	public void setGlobal(T value) {
-		setGlobal(EntityOverrideValue.fixed(value));
 	}
 }
