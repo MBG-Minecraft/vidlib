@@ -14,7 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 public class ExplosionTestToolScreen extends ConfigScreen<ExplosionData> {
-	@AutoInit(AutoInit.Type.CLIENT_SETUP)
+	@AutoInit(AutoInit.Type.CLIENT_LOADED)
 	public static void registerScreen() {
 		ItemScreen.TOOLS.put("explosion_test", (player, stack, hand) -> new ExplosionTestToolScreen(player.level(), stack, hand));
 	}

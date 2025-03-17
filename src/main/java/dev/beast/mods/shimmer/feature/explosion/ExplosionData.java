@@ -45,7 +45,8 @@ public class ExplosionData {
 		Codec.INT.optionalFieldOf("ceiling", 1000).forGetter(v -> v.ceiling),
 		BlockFilter.CODEC.optionalFieldOf("block_filter", BlockFilter.ANY.instance()).forGetter(v -> v.blockFilter),
 		EntityFilter.CODEC.optionalFieldOf("ignored_entities", EntityFilter.CREATIVE.instance()).forGetter(v -> v.ignoredEntities),
-		EntityFilter.CODEC.optionalFieldOf("invincible_entities", EntityFilter.NONE.instance()).forGetter(v -> v.invincibleEntities)
+		EntityFilter.CODEC.optionalFieldOf("invincible_entities", EntityFilter.NONE.instance()).forGetter(v -> v.invincibleEntities),
+		Codec.BOOL.optionalFieldOf("bypass_unbreakable", false).forGetter(v -> v.bypassUnbreakable)
 	).apply(instance, ExplosionData::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ExplosionData> STREAM_CODEC = CompositeStreamCodec.of(
@@ -63,6 +64,7 @@ public class ExplosionData {
 		BlockFilter.STREAM_CODEC.optional(BlockFilter.ANY.instance()), v -> v.blockFilter,
 		EntityFilter.STREAM_CODEC.optional(EntityFilter.CREATIVE.instance()), v -> v.ignoredEntities,
 		EntityFilter.STREAM_CODEC.optional(EntityFilter.NONE.instance()), v -> v.invincibleEntities,
+		ByteBufCodecs.BOOL, v -> v.bypassUnbreakable,
 		ExplosionData::new
 	);
 
@@ -80,7 +82,8 @@ public class ExplosionData {
 		new IntConfigValue<>("Ceiling", IntRange.range(-1000, 1000), false, data -> data.ceiling, (data, v) -> data.ceiling = v),
 		new ConfigValue<>("Block Filter", BlockFilter.CODEC, data -> data.blockFilter, (data, v) -> data.blockFilter = v),
 		new ConfigValue<>("Ignored Entities", EntityFilter.CODEC, data -> data.ignoredEntities, (data, v) -> data.ignoredEntities = v),
-		new ConfigValue<>("Invincible Entities", EntityFilter.CODEC, data -> data.invincibleEntities, (data, v) -> data.invincibleEntities = v)
+		new ConfigValue<>("Invincible Entities", EntityFilter.CODEC, data -> data.invincibleEntities, (data, v) -> data.invincibleEntities = v),
+		new BooleanConfigValue<>("Bypass Unbreakable", data -> data.bypassUnbreakable, (data, v) -> data.bypassUnbreakable = v)
 	);
 
 	public float radius;
@@ -97,6 +100,7 @@ public class ExplosionData {
 	public BlockFilter blockFilter;
 	public EntityFilter ignoredEntities;
 	public EntityFilter invincibleEntities;
+	public boolean bypassUnbreakable;
 
 	public ExplosionData() {
 		this.radius = 4F;
@@ -113,6 +117,7 @@ public class ExplosionData {
 		this.blockFilter = BlockFilter.ANY.instance();
 		this.ignoredEntities = EntityFilter.CREATIVE.instance();
 		this.invincibleEntities = EntityFilter.NONE.instance();
+		this.bypassUnbreakable = false;
 	}
 
 	private ExplosionData(
@@ -129,7 +134,8 @@ public class ExplosionData {
 		int ceiling,
 		BlockFilter blockFilter,
 		EntityFilter ignoredEntities,
-		EntityFilter invincibleEntities
+		EntityFilter invincibleEntities,
+		boolean bypassUnbreakable
 	) {
 		this.radius = radius;
 		this.depth = depth;
@@ -145,6 +151,7 @@ public class ExplosionData {
 		this.blockFilter = blockFilter;
 		this.ignoredEntities = ignoredEntities;
 		this.invincibleEntities = invincibleEntities;
+		this.bypassUnbreakable = bypassUnbreakable;
 	}
 
 	public void setSize(float size) {
@@ -195,7 +202,7 @@ public class ExplosionData {
 						pos.setZ(atz + z);
 						var state = level.getBlockState(pos);
 
-						if (state.shimmer$getDensity() > 0F && state.getDestroySpeed(level, pos) >= 0F || state.getBlock() instanceof BaseFireBlock) {
+						if (state.shimmer$getDensity() > 0F && (bypassUnbreakable || state.getDestroySpeed(level, pos) >= 0F) || state.getBlock() instanceof BaseFireBlock) {
 							if (blockFilter.test(level, pos, state)) {
 								blocks.add(new DestroyedBlock(pos.immutable(), state, x, y, z, d, new MutableBoolean(false)));
 							}

@@ -23,7 +23,7 @@ public class PhysicsParticles {
 		};
 	}
 
-	@AutoInit(AutoInit.Type.CLIENT_SETUP)
+	@AutoInit(AutoInit.Type.CLIENT_LOADED)
 	public static void calculateUV() {
 		for (var split : SPLIT) {
 			split.calculateUV(split.id, 0.4F);

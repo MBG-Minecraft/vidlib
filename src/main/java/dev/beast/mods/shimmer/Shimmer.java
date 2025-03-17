@@ -1,6 +1,5 @@
 package dev.beast.mods.shimmer;
 
-import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.util.Lazy;
 import dev.beast.mods.shimmer.util.MiscUtils;
@@ -10,7 +9,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLPaths;
@@ -45,7 +43,7 @@ public class Shimmer {
 
 	public static final ResourceKey<Level> LOBBY_DIMENSION = ResourceKey.create(Registries.DIMENSION, id("lobby"));
 
-	public Shimmer(IEventBus bus) throws IOException {
+	public Shimmer() throws IOException {
 		Shimmer.LOGGER.info("Shimmer loaded");
 
 		if (Files.notExists(PATH)) {
@@ -69,8 +67,6 @@ public class Shimmer {
 				}
 			}
 		}
-
-		AutoInit.Type.REGISTRY.invoke(bus);
 	}
 
 	public static void sync(ServerPlayer player, boolean login) {

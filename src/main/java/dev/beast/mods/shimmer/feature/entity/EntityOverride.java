@@ -5,13 +5,17 @@ import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.core.ShimmerEntity;
 import dev.beast.mods.shimmer.feature.clothing.Clothing;
 import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
+import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
 import dev.beast.mods.shimmer.feature.icon.IconHolder;
+import dev.beast.mods.shimmer.feature.skybox.FogOverride;
 import dev.beast.mods.shimmer.math.Color;
+import dev.beast.mods.shimmer.math.Range;
 import dev.beast.mods.shimmer.util.Cast;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -113,6 +117,9 @@ public final class EntityOverride<T> {
 	public static final EntityOverride<IconHolder> PLUMBOB = createKey("plumbob", IconHolder.CODEC, IconHolder.STREAM_CODEC);
 	public static final EntityOverride<Float> ATTACK_DAMAGE = createFloatKey("attack_damage");
 	public static final EntityOverride<Clothing> CLOTHING = createKey("clothing", Clothing.CODEC, Clothing.STREAM_CODEC);
+	public static final EntityOverride<ResourceLocation> SKYBOX = createKey("skybox", ShimmerCodecs.SHIMMER_ID, ShimmerStreamCodecs.SHIMMER_ID);
+	public static final EntityOverride<Range> AMBIENT_LIGHT = createKey("ambient_light", Range.CODEC, Range.STREAM_CODEC);
+	public static final EntityOverride<FogOverride> FOG = createKey("fog", FogOverride.CODEC, FogOverride.STREAM_CODEC);
 
 	public final String id;
 	private final Codec<T> codec;

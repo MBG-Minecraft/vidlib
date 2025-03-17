@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-@AutoInit(AutoInit.Type.CLIENT_SETUP)
+@AutoInit(AutoInit.Type.CLIENT_LOADED)
 public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
 	public static final VertexFormat FORMAT = VertexFormat.builder()
 		.add("Position", VertexFormatElement.POSITION)

@@ -29,7 +29,7 @@ public interface IconRenderer {
 		return rr == null ? EmptyIconRenderer.INSTANCE : rr;
 	}
 
-	@AutoInit(AutoInit.Type.CLIENT_SETUP)
+	@AutoInit(AutoInit.Type.CLIENT_LOADED)
 	static void bootstrap() {
 		register(ColorIcon.TYPE, ColorIconRenderer::new);
 		register(TextureIcon.TYPE, TextureIconRenderer::new);

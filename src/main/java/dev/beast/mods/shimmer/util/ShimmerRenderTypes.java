@@ -7,6 +7,7 @@ import net.minecraft.Util;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.TriState;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Optional;
@@ -109,6 +110,12 @@ public class ShimmerRenderTypes extends RenderType {
 		.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 		.setLightmapState(LIGHTMAP)
 		.setOverlayState(OVERLAY)
+		.createCompositeState(true))
+	);
+
+	public static final Function<ResourceLocation, RenderType> SKYBOX = Util.memoize(texture -> create("shimmer:skybox", DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS, 1536, true, true, CompositeState.builder()
+		.setShaderState(POSITION_TEXTURE_COLOR_SHADER)
+		.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
 		.createCompositeState(true))
 	);
 

@@ -1,6 +1,5 @@
 package dev.beast.mods.shimmer;
 
-import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.BlockEntityRendererHolder;
 import dev.beast.mods.shimmer.feature.auto.EntityRendererHolder;
@@ -16,7 +15,6 @@ import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
@@ -25,11 +23,6 @@ import net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEve
 
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientModEventHandler {
-	@SubscribeEvent
-	public static void clientSetup(FMLClientSetupEvent event) {
-		AutoInit.Type.CLIENT_SETUP.invoke();
-	}
-
 	@SubscribeEvent
 	public static void addReloadListeners(AddClientReloadListenersEvent event) {
 		event.addListener(Shimmer.id("structure"), ClientStructureStorage.CLIENT);

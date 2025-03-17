@@ -1,6 +1,8 @@
 package dev.beast.mods.shimmer.feature.session;
 
 import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.shaders.FogShape;
+import dev.beast.mods.shimmer.GameEventHandler;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.core.ShimmerLocalPlayer;
 import dev.beast.mods.shimmer.feature.clock.ClockFont;
@@ -8,10 +10,16 @@ import dev.beast.mods.shimmer.feature.clock.ClockInstance;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.data.DataMapValue;
 import dev.beast.mods.shimmer.feature.data.DataType;
+import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.input.PlayerInput;
 import dev.beast.mods.shimmer.feature.input.PlayerInputChanged;
 import dev.beast.mods.shimmer.feature.input.SyncPlayerInputToServer;
+import dev.beast.mods.shimmer.feature.misc.InternalData;
+import dev.beast.mods.shimmer.feature.misc.MiscShimmerClientUtils;
 import dev.beast.mods.shimmer.feature.misc.PauseType;
+import dev.beast.mods.shimmer.feature.skybox.Skybox;
+import dev.beast.mods.shimmer.feature.skybox.SkyboxData;
+import dev.beast.mods.shimmer.feature.skybox.Skyboxes;
 import dev.beast.mods.shimmer.feature.worldsync.ProgressingText;
 import dev.beast.mods.shimmer.feature.worldsync.WorldSync;
 import dev.beast.mods.shimmer.feature.worldsync.WorldSyncAuthResponsePayload;
@@ -23,6 +31,7 @@ import dev.beast.mods.shimmer.feature.zone.ZoneClipResult;
 import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
 import dev.beast.mods.shimmer.feature.zone.ZoneEvent;
 import dev.beast.mods.shimmer.feature.zone.shape.ZoneShape;
+import dev.beast.mods.shimmer.math.Range;
 import dev.beast.mods.shimmer.math.VoxelShapeBox;
 import dev.beast.mods.shimmer.util.Side;
 import net.minecraft.ChatFormatting;
@@ -31,6 +40,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
+import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -61,7 +71,9 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	public ZoneClipResult zoneClip;
 	public Map<ResourceLocation, ClockFont> clockFonts;
 	public Map<ResourceLocation, ClockInstance> clocks;
+	public Map<ResourceLocation, Skybox> skyboxes;
 	public final DataMap serverDataMap;
+	public Skybox skybox;
 	public Map<ZoneShape, VoxelShapeBox> cachedZoneShapes;
 
 	public ShimmerLocalClientSessionData(UUID uuid, ClientPacketListener connection) {
@@ -74,7 +86,9 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 		this.tags = new HashSet<>(0);
 		this.clockFonts = Map.of();
 		this.clocks = Map.of();
+		this.skyboxes = Map.of();
 		this.serverDataMap = new DataMap(uuid, DataType.SERVER);
+		this.skybox = null;
 	}
 
 	public ShimmerRemoteClientSessionData getRemoteSessionData(UUID id) {
@@ -86,6 +100,35 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 		}
 
 		return data;
+	}
+
+	@Override
+	public void updateOverrides(Player player) {
+		super.updateOverrides(player);
+		var skyboxId = EntityOverride.SKYBOX.get(player);
+
+		if (skyboxId == null) {
+			skyboxId = player.level().getServerData().get(InternalData.SKYBOX);
+		}
+
+		skybox = skyboxId == null || skyboxId.equals(Skyboxes.DEFAULT) ? null : skyboxes.get(skyboxId);
+		GameEventHandler.ambientLight = EntityOverride.AMBIENT_LIGHT.get(player, Range.FULL);
+
+		var f = EntityOverride.FOG.get(player);
+
+		if (f == null) {
+			MiscShimmerClientUtils.fogOverride = FogParameters.NO_FOG;
+		} else if (f.color().argb() == 0) {
+			if (f.shape() == 0) {
+				MiscShimmerClientUtils.fogOverride = FogParameters.NO_FOG;
+			} else {
+				MiscShimmerClientUtils.fogOverride = null;
+			}
+		} else {
+			var shape = f.shape() == 0 ? FogShape.SPHERE : FogShape.CYLINDER;
+			var c = f.color();
+			MiscShimmerClientUtils.fogOverride = new FogParameters(f.range().min(), f.range().max(), shape, c.redf(), c.greenf(), c.bluef(), c.alphaf());
+		}
 	}
 
 	@Override
@@ -299,5 +342,17 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 		if (Minecraft.getInstance().screen instanceof WorldSyncScreen screen) {
 			screen.startThread();
 		}
+	}
+
+	@Override
+	public void updateSkyboxes(List<SkyboxData> update) {
+		var map = new HashMap<ResourceLocation, Skybox>();
+
+		for (var skyboxData : update) {
+			map.put(skyboxData.id(), new Skybox(skyboxData));
+		}
+
+		skyboxes = Map.copyOf(map);
+		skybox = skybox == null ? null : skyboxes.get(skybox.data.id());
 	}
 }

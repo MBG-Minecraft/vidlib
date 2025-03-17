@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.beast.mods.shimmer.core.ShimmerBlockInWorld;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.block.filter.BlockFilter;
-import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
+import dev.beast.mods.shimmer.feature.misc.InternalData;
 import dev.beast.mods.shimmer.feature.session.ShimmerLocalClientSessionData;
 import dev.beast.mods.shimmer.feature.zone.ZoneRenderType;
 import dev.beast.mods.shimmer.feature.zone.shape.RotatedBoxZoneShape;
@@ -40,7 +40,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 		RENDERERS.put(type, renderer);
 	}
 
-	@AutoInit(AutoInit.Type.CLIENT_SETUP)
+	@AutoInit(AutoInit.Type.CLIENT_LOADED)
 	static void bootstrap() {
 		ZoneRenderer.register(UniverseZoneShape.TYPE, EmptyZoneRenderer.INSTANCE);
 		ZoneRenderer.register(ZoneShapeGroup.TYPE, new GroupZoneRenderer());
@@ -54,7 +54,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 	}
 
 	static void renderAll(Minecraft mc, ShimmerLocalClientSessionData session, float delta, PoseStack ms, Vec3 cameraPos, Frustum frustum) {
-		var renderType = mc.player.get(InternalPlayerData.ZONE_RENDER_TYPE);
+		var renderType = mc.player.get(InternalData.ZONE_RENDER_TYPE);
 
 		if (session.zoneClip != null && session.zoneClip.pos() != null) {
 			ms.pushPose();
@@ -98,7 +98,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 									session.cachedZoneShapes.put(instance.zone.shape(), voxelShape);
 
 									Thread.startVirtualThread(() -> {
-										var filter = mc.player.get(InternalPlayerData.ZONE_BLOCK_FILTER);
+										var filter = mc.player.get(InternalData.ZONE_BLOCK_FILTER);
 
 										session.cachedZoneShapes.put(instance.zone.shape(), VoxelShapeBox.of(instance.zone.shape().createBlockRenderingShape(pos -> {
 											var state = mc.level.getBlockState(pos);

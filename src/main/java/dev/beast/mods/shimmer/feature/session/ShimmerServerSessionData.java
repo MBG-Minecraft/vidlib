@@ -11,6 +11,8 @@ import dev.beast.mods.shimmer.feature.input.PlayerInputChanged;
 import dev.beast.mods.shimmer.feature.input.SyncPlayerInputToClient;
 import dev.beast.mods.shimmer.feature.misc.RefreshNamePayload;
 import dev.beast.mods.shimmer.feature.misc.SyncPlayerTagsPayload;
+import dev.beast.mods.shimmer.feature.skybox.SkyboxData;
+import dev.beast.mods.shimmer.feature.skybox.SyncSkyboxesPayload;
 import dev.beast.mods.shimmer.feature.zone.SyncZonesPayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
 import dev.beast.mods.shimmer.util.S2CPacketBundleBuilder;
@@ -51,6 +53,7 @@ public class ShimmerServerSessionData extends ShimmerSessionData {
 		packets.s2c(new SyncZonesPayload(List.copyOf(ZoneLoader.ALL.containers.values())).toS2C());
 		packets.s2c(new SyncClockFontsPayload(List.copyOf(ClockFont.SERVER.getMap().values())).toS2C());
 		packets.s2c(new SyncClocksPayload(List.copyOf(ClockInstance.SERVER.getMap().values())).toS2C());
+		packets.s2c(new SyncSkyboxesPayload(List.copyOf(SkyboxData.SERVER.getMap().values())).toS2C());
 
 		dataMap.load(player.server, player.server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("shimmer").resolve(player.getUUID() + ".nbt"));
 

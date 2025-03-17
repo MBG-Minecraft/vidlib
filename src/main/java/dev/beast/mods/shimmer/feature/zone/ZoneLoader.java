@@ -45,6 +45,10 @@ public class ZoneLoader extends JsonReloadListener {
 					}
 				}
 
+				if (json.has("priority")) {
+					container.priority = json.get("priority").getAsInt();
+				}
+
 				for (var element : json.getAsJsonArray("zones")) {
 					if (element.isJsonObject()) {
 						var zoneJson = element.getAsJsonObject();
@@ -65,6 +69,7 @@ public class ZoneLoader extends JsonReloadListener {
 			}
 		}
 
+		list.sort(null);
 		ALL.update(list);
 		BY_DIMENSION.clear();
 

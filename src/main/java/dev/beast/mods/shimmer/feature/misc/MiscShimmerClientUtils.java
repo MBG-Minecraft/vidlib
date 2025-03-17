@@ -12,6 +12,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.context.ContextKey;
 import net.neoforged.neoforge.client.settings.KeyModifier;
@@ -19,11 +20,13 @@ import net.neoforged.neoforge.client.settings.KeyModifier;
 import java.nio.file.Files;
 import java.util.concurrent.CompletableFuture;
 
-public interface MiscShimmerClientUtils {
-	ContextKey<Boolean> CREATIVE = new ContextKey<>(Shimmer.id("creative"));
-	ContextKey<Clothing> CLOTHING = new ContextKey<>(Shimmer.id("clothing"));
+public class MiscShimmerClientUtils {
+	public static final ContextKey<Boolean> CREATIVE = new ContextKey<>(Shimmer.id("creative"));
+	public static final ContextKey<Clothing> CLOTHING = new ContextKey<>(Shimmer.id("clothing"));
 
-	Lazy<JsonObject> KEYBINDS = Lazy.of(() -> {
+	public static FogParameters fogOverride = FogParameters.NO_FOG;
+
+	public static final Lazy<JsonObject> KEYBINDS = Lazy.of(() -> {
 		var path = Shimmer.HOME_DIR.get().resolve("keybinds.json");
 
 		if (Files.exists(path)) {
@@ -38,7 +41,7 @@ public interface MiscShimmerClientUtils {
 	});
 
 	@AutoInit(AutoInit.Type.CLIENT_OPTIONS_SAVED)
-	static void saveKeybinds(Options options) {
+	public static void saveKeybinds(Options options) {
 		var json = KEYBINDS.get();
 
 		for (var key : options.keyMappings) {
@@ -52,7 +55,7 @@ public interface MiscShimmerClientUtils {
 		}
 	}
 
-	static boolean handleDebugKeys(Minecraft mc, int key) {
+	public static boolean handleDebugKeys(Minecraft mc, int key) {
 		if (key == ShimmerConfig.cycleShadersKey) {
 			if (Screen.hasShiftDown()) {
 				mc.execute(mc.gameRenderer::clearPostEffect);
@@ -69,7 +72,7 @@ public interface MiscShimmerClientUtils {
 		return false;
 	}
 
-	static void reloadShaders(Minecraft mc) {
+	public static void reloadShaders(Minecraft mc) {
 		mc.getShaderManager().reload(CompletableFuture::completedFuture, mc.getResourceManager(), Util.backgroundExecutor(), mc).thenRunAsync(() -> {
 			mc.levelRenderer.onResourceManagerReload(mc.getResourceManager());
 			// CompiledShader.Type.FRAGMENT.getPrograms().clear();

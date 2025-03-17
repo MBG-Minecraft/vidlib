@@ -19,9 +19,8 @@ import java.util.List;
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface AutoInit {
 	enum Type {
-		REGISTRY(false, false), // (IEventBus)
-		CLIENT_SETUP(true, false), // ()
-		LOAD_COMPLETE(false, false), // ()
+		GAME_LOADED(false, false), // ()
+		CLIENT_LOADED(true, false), // ()
 		ASSETS_RELOADED(true, false), // ()
 		DATA_RELOADED(true, false), // ()
 		CHUNKS_RELOADED(true, false), // ()
@@ -59,7 +58,7 @@ public @interface AutoInit {
 		}
 	}
 
-	Type value() default Type.LOAD_COMPLETE;
+	Type value() default Type.GAME_LOADED;
 
 	record AutoMethod(Type type, Method method) {
 	}
@@ -69,7 +68,7 @@ public @interface AutoInit {
 		var list = new ArrayList<AutoMethod>();
 
 		AutoHelper.load(AutoInit.class, EnumSet.of(ElementType.TYPE, ElementType.METHOD), (mod, classLoader, ad) -> {
-			var type = AutoHelper.getEnumValue(ad, Type.class, "value", Type.REGISTRY);
+			var type = AutoHelper.getEnumValue(ad, Type.class, "value", Type.GAME_LOADED);
 
 			if (type.clientOnly && !FMLLoader.getDist().isClient()) {
 				Shimmer.LOGGER.info("Skipped @AutoInit class " + ad.clazz().getClassName());

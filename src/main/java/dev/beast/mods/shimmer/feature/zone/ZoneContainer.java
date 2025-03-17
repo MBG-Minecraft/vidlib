@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ZoneContainer {
+public class ZoneContainer implements Comparable<ZoneContainer> {
 	public static final StreamCodec<RegistryFriendlyByteBuf, ZoneContainer> STREAM_CODEC = new StreamCodec<>() {
 		@Override
 		public ZoneContainer decode(RegistryFriendlyByteBuf buf) {
@@ -65,6 +66,7 @@ public class ZoneContainer {
 	public final List<ZoneInstance> zones;
 	public boolean hasPlayerOverrides;
 	public final Set<String> tags;
+	public int priority;
 	public final Int2ObjectOpenHashMap<List<ZoneInstance>> entityZones;
 
 	public ZoneContainer(ResourceLocation id, ResourceKey<Level> dimension) {
@@ -73,6 +75,7 @@ public class ZoneContainer {
 		this.zones = new ArrayList<>();
 		this.hasPlayerOverrides = false;
 		this.tags = new LinkedHashSet<>();
+		this.priority = 0;
 		this.entityZones = new Int2ObjectOpenHashMap<>();
 	}
 
@@ -191,5 +194,11 @@ public class ZoneContainer {
 		}
 
 		return list;
+	}
+
+	@Override
+	public int compareTo(@NotNull ZoneContainer container) {
+		int i = Integer.compare(container.priority, priority);
+		return i == 0 ? id.compareTo(container.id) : i;
 	}
 }

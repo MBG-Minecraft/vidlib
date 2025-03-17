@@ -5,7 +5,7 @@ import dev.beast.mods.shimmer.feature.auto.ServerCommandHolder;
 import dev.beast.mods.shimmer.feature.icon.EmptyIcon;
 import dev.beast.mods.shimmer.feature.icon.Icon;
 import dev.beast.mods.shimmer.feature.icon.ItemIcon;
-import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
+import dev.beast.mods.shimmer.feature.misc.InternalData;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.item.ItemArgument;
@@ -49,7 +49,7 @@ public interface PlumbobCommand {
 
 	private static int plumbob(Collection<ServerPlayer> players, Optional<Icon> icon) {
 		for (var player : players) {
-			player.set(InternalPlayerData.PLUMBOB, icon.orElse(EmptyIcon.INSTANCE).holder());
+			player.set(InternalData.PLUMBOB, icon.orElse(EmptyIcon.INSTANCE).holder());
 		}
 
 		return 1;

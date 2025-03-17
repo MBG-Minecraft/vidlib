@@ -8,10 +8,12 @@ import dev.beast.mods.shimmer.feature.clock.ClockFont;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.item.ShimmerTool;
-import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
+import dev.beast.mods.shimmer.feature.misc.InternalData;
 import dev.beast.mods.shimmer.feature.session.RemovePlayerDataPayload;
+import dev.beast.mods.shimmer.feature.skybox.SkyboxData;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
 import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
+import dev.beast.mods.shimmer.math.Range;
 import dev.beast.mods.shimmer.util.registry.RegistryReference;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerLevel;
@@ -32,11 +34,22 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.GAME)
 public class GameEventHandler {
+	public static Range ambientLight = Range.FULL;
+	public static boolean gameLoaded = false;
+
+	public static void gameLoaded() {
+		if (!gameLoaded) {
+			gameLoaded = true;
+			AutoInit.Type.GAME_LOADED.invoke();
+		}
+	}
+
 	@SubscribeEvent
 	public static void registerCommands(RegisterCommandsEvent event) {
 		for (var s : AutoRegister.SCANNED.get()) {
@@ -55,6 +68,7 @@ public class GameEventHandler {
 		event.addListener(Shimmer.id("cutscene"), new Cutscene.Loader());
 		event.addListener(Shimmer.id("clock_font"), new ClockFont.Loader());
 		event.addListener(Shimmer.id("clock"), new Clock.Loader());
+		event.addListener(Shimmer.id("skybox"), new SkyboxData.Loader());
 
 		event.addDependency(Shimmer.id("clock_font"), Shimmer.id("clock"));
 	}
@@ -89,6 +103,11 @@ public class GameEventHandler {
 		if (event.getEntity() instanceof ServerPlayer player) {
 			player.shimmer$sessionData().dataMap.save(player.server, player.server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("shimmer").resolve(player.getUUID() + ".nbt"));
 		}
+	}
+
+	@SubscribeEvent
+	public static void serverStarting(ServerStartingEvent event) {
+		gameLoaded();
 	}
 
 	@SubscribeEvent
@@ -163,7 +182,7 @@ public class GameEventHandler {
 
 	@SubscribeEvent
 	public static void name(PlayerEvent.NameFormat event) {
-		var data = event.getEntity().get(InternalPlayerData.NICKNAME);
+		var data = event.getEntity().get(InternalData.NICKNAME);
 
 		if (!data.getString().isEmpty()) {
 			event.setDisplayname(data);
@@ -172,7 +191,7 @@ public class GameEventHandler {
 
 	@SubscribeEvent
 	public static void tabName(PlayerEvent.TabListNameFormat event) {
-		var data = event.getEntity().get(InternalPlayerData.NICKNAME);
+		var data = event.getEntity().get(InternalData.NICKNAME);
 
 		if (!data.getString().isEmpty()) {
 			event.setDisplayName(data);

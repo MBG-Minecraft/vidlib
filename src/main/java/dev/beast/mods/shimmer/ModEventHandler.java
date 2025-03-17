@@ -19,7 +19,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 public class ModEventHandler {
 	@SubscribeEvent
 	public static void afterLoad(FMLLoadCompleteEvent event) {
-		AutoInit.Type.LOAD_COMPLETE.invoke();
+		AutoInit.Type.GAME_LOADED.invoke();
 	}
 
 	@SubscribeEvent
