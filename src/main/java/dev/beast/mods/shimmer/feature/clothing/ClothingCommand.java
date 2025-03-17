@@ -2,7 +2,7 @@ package dev.beast.mods.shimmer.feature.clothing;
 
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.ServerCommandHolder;
-import dev.beast.mods.shimmer.feature.misc.InternalData;
+import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.util.registry.ShimmerResourceLocationArgument;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -38,7 +38,7 @@ public interface ClothingCommand {
 
 	private static int clothing(Collection<ServerPlayer> players, @Nullable Clothing clothing) {
 		for (var player : players) {
-			player.set(InternalData.CLOTHING, clothing == null ? Clothing.NONE : clothing);
+			player.set(InternalPlayerData.CLOTHING, clothing == null ? Clothing.NONE : clothing);
 		}
 
 		return 1;

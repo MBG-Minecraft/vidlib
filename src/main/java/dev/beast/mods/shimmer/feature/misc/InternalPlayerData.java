@@ -4,20 +4,16 @@ import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.block.filter.BlockFilter;
 import dev.beast.mods.shimmer.feature.clothing.Clothing;
-import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
-import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.icon.IconHolder;
-import dev.beast.mods.shimmer.feature.skybox.Skyboxes;
 import dev.beast.mods.shimmer.feature.zone.ZoneRenderType;
 import dev.beast.mods.shimmer.util.Empty;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.resources.ResourceLocation;
 
 @AutoInit
-public interface InternalData {
+public interface InternalPlayerData {
 	DataType<Component> NICKNAME = DataType.PLAYER.internal("nickname", Empty.COMPONENT)
 		.save(ComponentSerialization.CODEC)
 		.sync(ComponentSerialization.STREAM_CODEC)
@@ -52,10 +48,5 @@ public interface InternalData {
 		.save(BlockFilter.CODEC)
 		.sync(BlockFilter.STREAM_CODEC)
 		.onReceived(player -> player.shimmer$sessionData().refreshBlockZones())
-		.build();
-
-	DataType<ResourceLocation> SKYBOX = DataType.SERVER.internal("skybox", Skyboxes.DEFAULT)
-		.save(ShimmerCodecs.SHIMMER_ID)
-		.sync(ShimmerStreamCodecs.SHIMMER_ID)
 		.build();
 }

@@ -8,7 +8,7 @@ import dev.beast.mods.shimmer.feature.clock.ClockFont;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.item.ShimmerTool;
-import dev.beast.mods.shimmer.feature.misc.InternalData;
+import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.session.RemovePlayerDataPayload;
 import dev.beast.mods.shimmer.feature.skybox.SkyboxData;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
@@ -184,7 +184,7 @@ public class GameEventHandler {
 
 	@SubscribeEvent
 	public static void name(PlayerEvent.NameFormat event) {
-		var data = event.getEntity().get(InternalData.NICKNAME);
+		var data = event.getEntity().get(InternalPlayerData.NICKNAME);
 
 		if (!data.getString().isEmpty()) {
 			event.setDisplayname(data);
@@ -193,7 +193,7 @@ public class GameEventHandler {
 
 	@SubscribeEvent
 	public static void tabName(PlayerEvent.TabListNameFormat event) {
-		var data = event.getEntity().get(InternalData.NICKNAME);
+		var data = event.getEntity().get(InternalPlayerData.NICKNAME);
 
 		if (!data.getString().isEmpty()) {
 			event.setDisplayName(data);

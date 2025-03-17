@@ -12,7 +12,7 @@ import dev.beast.mods.shimmer.feature.item.ShimmerTool;
 import dev.beast.mods.shimmer.feature.misc.CameraOverride;
 import dev.beast.mods.shimmer.feature.misc.DebugText;
 import dev.beast.mods.shimmer.feature.misc.DebugTextEvent;
-import dev.beast.mods.shimmer.feature.misc.InternalData;
+import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.misc.MiscShimmerClientUtils;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleManager;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleRenderContext;
@@ -99,7 +99,7 @@ public class ClientGameEventHandler {
 			var cameraPos = event.getCamera().getPosition();
 			var frustum = event.getFrustum();
 
-			if (mc.player.get(InternalData.SHOW_ZONES)) {
+			if (mc.player.get(InternalPlayerData.SHOW_ZONES)) {
 				ZoneRenderer.renderAll(mc, session, delta, ms, cameraPos, frustum);
 			}
 

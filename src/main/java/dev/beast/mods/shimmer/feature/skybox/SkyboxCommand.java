@@ -2,7 +2,7 @@ package dev.beast.mods.shimmer.feature.skybox;
 
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.ServerCommandHolder;
-import dev.beast.mods.shimmer.feature.misc.InternalData;
+import dev.beast.mods.shimmer.feature.misc.InternalServerData;
 import dev.beast.mods.shimmer.util.registry.ShimmerResourceLocationArgument;
 import net.minecraft.commands.Commands;
 import net.minecraft.resources.ResourceLocation;
@@ -25,7 +25,7 @@ public interface SkyboxCommand {
 	);
 
 	private static int skybox(MinecraftServer server, @Nullable ResourceLocation skybox) {
-		server.getServerData().set(InternalData.SKYBOX, skybox == null ? Skyboxes.DEFAULT : skybox);
+		server.getServerData().set(InternalServerData.SKYBOX, skybox == null ? Skyboxes.DEFAULT : skybox);
 		return 1;
 	}
 }

@@ -9,7 +9,7 @@ import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.icon.IconHolder;
 import dev.beast.mods.shimmer.feature.input.PlayerInput;
-import dev.beast.mods.shimmer.feature.misc.InternalData;
+import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.skybox.SkyboxData;
 import dev.beast.mods.shimmer.feature.worldsync.WorldSyncAuthResponsePayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
@@ -78,13 +78,13 @@ public class ShimmerSessionData {
 		plumbobIcon = EntityOverride.PLUMBOB.get(player, IconHolder.EMPTY);
 
 		if (plumbobIcon == IconHolder.EMPTY) {
-			plumbobIcon = dataMap.get(InternalData.PLUMBOB);
+			plumbobIcon = dataMap.get(InternalPlayerData.PLUMBOB);
 		}
 
 		clothing = EntityOverride.CLOTHING.get(player, Clothing.NONE);
 
 		if (clothing == Clothing.NONE) {
-			clothing = dataMap.get(InternalData.CLOTHING);
+			clothing = dataMap.get(InternalPlayerData.CLOTHING);
 		}
 
 		if (gravityMod <= 0D) {
