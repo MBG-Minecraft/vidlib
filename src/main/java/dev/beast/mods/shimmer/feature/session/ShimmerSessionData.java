@@ -11,6 +11,7 @@ import dev.beast.mods.shimmer.feature.input.PlayerInput;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.worldsync.WorldSyncAuthResponsePayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
+import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -23,6 +24,8 @@ public class ShimmerSessionData {
 	public final DataMap dataMap;
 	public PlayerInput prevInput;
 	public PlayerInput input;
+	public List<ZoneInstance> zonesIn;
+
 	public Boolean glowingOverride;
 	public Integer teamColorOverride;
 	public double gravityMod;
@@ -36,6 +39,7 @@ public class ShimmerSessionData {
 		this.dataMap = new DataMap(uuid, DataType.PLAYER);
 		this.prevInput = PlayerInput.NONE;
 		this.input = PlayerInput.NONE;
+		this.zonesIn = List.of();
 
 		this.glowingOverride = null;
 		this.teamColorOverride = null;

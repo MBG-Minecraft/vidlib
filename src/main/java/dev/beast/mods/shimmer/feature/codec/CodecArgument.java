@@ -19,13 +19,13 @@ public record CodecArgument<T>(DynamicOps<Tag> ops, KnownCodec<T> knownCodec) im
 	@Override
 	public T parse(StringReader reader) throws CommandSyntaxException {
 		var tag = new TagParser(reader).readValue();
-		var decoded = knownCodec.codec().decode(ops, tag);
+		var decoded = knownCodec.codec().parse(ops, tag);
 
 		if (decoded.isError()) {
 			throw ERROR_PARSING.create(decoded.error().get().message());
 		}
 
-		return decoded.getOrThrow().getFirst();
+		return decoded.getOrThrow();
 	}
 
 	public static class Info implements ArgumentTypeInfo<CodecArgument<?>, CodecTemplate> {

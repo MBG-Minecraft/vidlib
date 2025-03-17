@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer.core;
 
 import dev.beast.mods.shimmer.feature.data.DataMap;
+import dev.beast.mods.shimmer.feature.structure.StructureStorage;
 import dev.beast.mods.shimmer.util.ScheduledTask;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -11,6 +12,10 @@ public interface ShimmerMinecraftEnvironment extends ShimmerEntityContainer {
 	}
 
 	default DataMap getServerData() {
+		throw new NoMixinException();
+	}
+
+	default StructureStorage shimmer$structureStorage() {
 		throw new NoMixinException();
 	}
 

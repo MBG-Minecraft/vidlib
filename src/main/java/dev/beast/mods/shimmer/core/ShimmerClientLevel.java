@@ -16,4 +16,9 @@ public interface ShimmerClientLevel extends ShimmerLevel, ShimmerClientEntityCon
 		var player = Minecraft.getInstance().player;
 		return player == null ? null : player.shimmer$sessionData().filteredZones;
 	}
+
+	@Override
+	default void redrawSection(int sectionX, int sectionY, int sectionZ, boolean mainThread) {
+		Minecraft.getInstance().levelRenderer.setSectionDirty(sectionX, sectionY, sectionZ, mainThread);
+	}
 }

@@ -35,12 +35,12 @@ public abstract class JsonCodecReloadListener<T> extends JsonReloadListener {
 					json.addProperty("id", id.toString());
 				}
 
-				var decoded = codec.decode(JsonOps.INSTANCE, json);
+				var decoded = codec.parse(JsonOps.INSTANCE, json);
 
 				if (decoded.error().isPresent()) {
 					Shimmer.LOGGER.error("Error while parsing " + id.withPath(p -> rootPath + "/" + p) + ": " + decoded.error().get());
 				} else {
-					map.put(id, decoded.result().orElseThrow().getFirst());
+					map.put(id, decoded.result().orElseThrow());
 				}
 			} catch (Exception ex) {
 				Shimmer.LOGGER.error("Error while parsing " + id.withPath(p -> rootPath + "/" + p), ex);

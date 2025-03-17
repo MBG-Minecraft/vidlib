@@ -105,6 +105,10 @@ public class ZoneContainer {
 
 			list.addAll(entry.getValue());
 		}
+
+		for (var player : level.players()) {
+			player.shimmer$sessionData().zonesIn = entityZones.getOrDefault(player.getId(), List.of());
+		}
 	}
 
 	@Nullable

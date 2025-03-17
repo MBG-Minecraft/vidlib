@@ -6,6 +6,7 @@ import net.minecraft.util.RandomSource;
 public record Range(float min, float max) {
 	public static final Range ZERO = new Range(0F, 0F);
 	public static final Range ONE = new Range(1F, 1F);
+	public static final Range FULL = new Range(0F, 1F);
 
 	public static Range of(float min, float max) {
 		return min == 0F && max == 0F ? ZERO : min == 1F && max == 1F ? ONE : Math.abs(max - min) < 0.0001F ? new Range(min, min) : new Range(Math.min(min, max), Math.max(min, max));

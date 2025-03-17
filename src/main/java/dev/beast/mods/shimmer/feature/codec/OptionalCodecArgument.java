@@ -27,13 +27,13 @@ public record OptionalCodecArgument<T>(DynamicOps<Tag> ops, KnownCodec<T> knownC
 			return Optional.empty();
 		}
 
-		var decoded = knownCodec.codec().decode(ops, tag);
+		var decoded = knownCodec.codec().parse(ops, tag);
 
 		if (decoded.isError()) {
 			throw ERROR_PARSING.create(decoded.error().get().message());
 		}
 
-		return Optional.of(decoded.getOrThrow().getFirst());
+		return Optional.of(decoded.getOrThrow());
 	}
 
 	public static class Info implements ArgumentTypeInfo<OptionalCodecArgument<?>, CodecTemplate> {

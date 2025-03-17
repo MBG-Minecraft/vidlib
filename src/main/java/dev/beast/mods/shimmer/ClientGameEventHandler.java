@@ -6,6 +6,7 @@ import dev.beast.mods.shimmer.feature.auto.ClientCommandHolder;
 import dev.beast.mods.shimmer.feature.clock.ClockRenderer;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
 import dev.beast.mods.shimmer.feature.icon.renderer.IconRenderer;
+import dev.beast.mods.shimmer.feature.item.ShimmerTool;
 import dev.beast.mods.shimmer.feature.misc.CameraOverride;
 import dev.beast.mods.shimmer.feature.misc.DebugText;
 import dev.beast.mods.shimmer.feature.misc.DebugTextEvent;
@@ -14,7 +15,6 @@ import dev.beast.mods.shimmer.feature.misc.MiscShimmerClientUtils;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleManager;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleRenderContext;
 import dev.beast.mods.shimmer.feature.structure.GhostStructure;
-import dev.beast.mods.shimmer.feature.toolitem.ShimmerTool;
 import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
 import dev.beast.mods.shimmer.math.KMath;
 import net.minecraft.ChatFormatting;
@@ -23,6 +23,7 @@ import net.minecraft.client.gui.components.toasts.AdvancementToast;
 import net.minecraft.client.gui.components.toasts.RecipeToast;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
+import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -37,6 +38,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
@@ -185,11 +187,11 @@ public class ClientGameEventHandler {
 
 		var graphics = event.getGuiGraphics();
 
-		if (mc.isLocalServer() || mc.player.hasPermissions(2)) {
+		if ((mc.isLocalServer() || mc.player.hasPermissions(2)) && (mc.screen == null || mc.screen instanceof ChatScreen)) {
 			var tool = ShimmerTool.of(mc.player);
 
 			if (tool != null) {
-				tool.getSecond().debugText(tool.getFirst(), mc.player, mc.hitResult, DebugText.RENDER);
+				tool.getSecond().debugText(mc.player, tool.getFirst(), mc.hitResult, DebugText.RENDER);
 			}
 
 			NeoForge.EVENT_BUS.post(new DebugTextEvent.Render(DebugText.RENDER));
@@ -326,6 +328,21 @@ public class ClientGameEventHandler {
 			var d = event.getRenderState().getRenderData(MiscShimmerClientUtils.CREATIVE);
 
 			if (d != null && d) {
+				event.setCanceled(true);
+			}
+		}
+	}
+
+	@SubscribeEvent
+	public static void interactionKeyMappingTriggered(InputEvent.InteractionKeyMappingTriggered event) {
+		var mc = Minecraft.getInstance();
+
+		if (mc.player != null && event.isAttack()) {
+			var item = mc.player.getItemInHand(event.getHand());
+			var tool = ShimmerTool.of(item);
+
+			if (tool != null && tool.leftClick(mc.player, item)) {
+				event.setSwingHand(true);
 				event.setCanceled(true);
 			}
 		}

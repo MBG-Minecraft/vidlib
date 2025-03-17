@@ -11,6 +11,8 @@ import dev.beast.mods.shimmer.feature.cutscene.CutsceneScreen;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleManager;
+import dev.beast.mods.shimmer.feature.structure.ClientStructureStorage;
+import dev.beast.mods.shimmer.feature.structure.StructureStorage;
 import dev.beast.mods.shimmer.math.Vec2d;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.util.Empty;
@@ -78,6 +80,11 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 	@Override
 	public DataMap getServerData() {
 		return player.shimmer$sessionData().serverDataMap;
+	}
+
+	@Override
+	public StructureStorage shimmer$structureStorage() {
+		return ClientStructureStorage.CLIENT;
 	}
 
 	@Inject(method = "reloadResourcePacks()Ljava/util/concurrent/CompletableFuture;", at = @At("HEAD"))

@@ -8,6 +8,10 @@ import com.mojang.util.UndashedUuid;
 import dev.beast.mods.shimmer.Shimmer;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.shorts.ShortArrayList;
+import it.unimi.dsi.fastutil.shorts.ShortList;
+import net.minecraft.Util;
+import net.minecraft.core.SectionPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 
@@ -18,6 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 public interface ShimmerCodecs {
 	Codec<UUID> UUID = Codec.STRING.xmap(UndashedUuid::fromStringLenient, UndashedUuid::toString);
@@ -34,6 +39,10 @@ public interface ShimmerCodecs {
 	Codec<Vec3> VEC_3D = Codec.either(Codec.DOUBLE, Vec3.CODEC).xmap(either -> either.map(d -> new Vec3(d, d, d), Function.identity()), v -> v.x == v.y && v.x == v.z ? Either.left(v.x) : Either.right(v));
 
 	Codec<Unit> UNIT = Codec.unit(Unit.INSTANCE);
+
+	Codec<SectionPos> SECTION_POS = Codec.INT_STREAM.comapFlatMap(intStream -> Util.fixedSize(intStream, 3).map(ints -> SectionPos.of(ints[0], ints[1], ints[2])), pos -> IntStream.of(pos.x(), pos.y(), pos.z()));
+
+	Codec<ShortList> SHORT_LIST = Codec.SHORT.listOf().xmap(ShortArrayList::new, Function.identity());
 
 	static <K, V> Codec<V> map(Supplier<Map<K, V>> mapGetter, Codec<K> keyCodec, Function<V, K> keyGetter) {
 		return keyCodec.flatXmap(k -> {

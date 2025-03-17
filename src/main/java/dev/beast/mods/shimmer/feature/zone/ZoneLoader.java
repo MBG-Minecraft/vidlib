@@ -41,12 +41,12 @@ public class ZoneLoader extends JsonReloadListener {
 				for (var element : json.getAsJsonArray("zones")) {
 					if (element.isJsonObject()) {
 						var zoneJson = element.getAsJsonObject();
-						var decoded = Zone.CODEC.decode(JsonOps.INSTANCE, zoneJson);
+						var decoded = Zone.CODEC.parse(JsonOps.INSTANCE, zoneJson);
 
 						if (decoded.error().isPresent()) {
 							Shimmer.LOGGER.error("Error while parsing zone " + id + "[" + index + "]: " + decoded.error().get());
 						} else {
-							container.add(decoded.result().orElseThrow().getFirst());
+							container.add(decoded.result().orElseThrow());
 						}
 					}
 					index++;

@@ -2,6 +2,7 @@ package dev.beast.mods.shimmer.core;
 
 import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.session.ShimmerSessionData;
+import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
 import dev.beast.mods.shimmer.math.Line;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
@@ -65,5 +66,10 @@ public interface ShimmerPlayer extends ShimmerLivingEntity {
 	@Override
 	default Line ray(float delta) {
 		return ray(((Player) this).blockInteractionRange(), delta);
+	}
+
+	@Override
+	default List<ZoneInstance> getZones() {
+		return shimmer$sessionData().zonesIn;
 	}
 }

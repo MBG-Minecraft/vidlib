@@ -1,8 +1,8 @@
 package dev.beast.mods.shimmer.feature.particle.physics;
 
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
+import dev.beast.mods.shimmer.feature.item.ShimmerTool;
 import dev.beast.mods.shimmer.feature.misc.DebugText;
-import dev.beast.mods.shimmer.feature.toolitem.ShimmerTool;
 import dev.beast.mods.shimmer.math.Range;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -12,13 +12,17 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import org.jetbrains.annotations.Nullable;
 
 public class PhysicsParticlesTool implements ShimmerTool {
 	@AutoInit
 	public static void bootstrap() {
-		ShimmerTool.REGISTRY.put("physics_particles", new PhysicsParticlesTool());
+		ShimmerTool.register(new PhysicsParticlesTool());
+	}
+
+	@Override
+	public String getId() {
+		return "physics_particles";
 	}
 
 	@Override
@@ -32,15 +36,15 @@ public class PhysicsParticlesTool implements ShimmerTool {
 	}
 
 	@Override
-	public boolean use(Player player, PlayerInteractEvent.RightClickItem event) {
-		if (event.getLevel().isClientSide()) {
-			explode(player);
+	public boolean use(Player player, ItemStack item) {
+		if (player.level().isClientSide()) {
+			explode(player, item);
 		}
 
 		return true;
 	}
 
-	private void explode(Player player) {
+	private void explode(Player player, ItemStack item) {
 		var ray = player.ray(400D, 1F).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY);
 
 		if (ray != null) {
@@ -65,7 +69,7 @@ public class PhysicsParticlesTool implements ShimmerTool {
 	}
 
 	@Override
-	public void debugText(ItemStack item, Player player, @Nullable HitResult result, DebugText debugText) {
+	public void debugText(Player player, ItemStack item, @Nullable HitResult result, DebugText debugText) {
 		int solid = PhysicsParticleManager.SOLID.particles.size();
 		int cutout = PhysicsParticleManager.CUTOUT.particles.size();
 		int translucent = PhysicsParticleManager.TRANSLUCENT.particles.size();

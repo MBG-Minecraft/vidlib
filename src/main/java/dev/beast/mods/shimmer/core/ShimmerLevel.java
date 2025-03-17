@@ -1,6 +1,9 @@
 package dev.beast.mods.shimmer.core;
 
 import com.mojang.datafixers.util.Either;
+import dev.beast.mods.shimmer.feature.bulk.BulkLevelModification;
+import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationHolder;
+import dev.beast.mods.shimmer.feature.bulk.BulkLevelModifications;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import net.minecraft.core.BlockPos;
@@ -13,8 +16,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public interface ShimmerLevel extends ShimmerEntityContainer {
 	@Override
@@ -56,5 +61,18 @@ public interface ShimmerLevel extends ShimmerEntityContainer {
 	@Nullable
 	default Entity getEntityByEither(Either<Integer, UUID> id) {
 		return id.map(((Level) this)::getEntity, this::getEntityByUUID);
+	}
+
+	default int bulkModify(BulkLevelModification modification) {
+		return new BulkLevelModificationHolder().apply((Level) this, modification);
+	}
+
+	default int bulkModify(Consumer<BulkLevelModifications> modifications) {
+		var m = new BulkLevelModifications(new ArrayList<>());
+		modifications.accept(m);
+		return bulkModify(BulkLevelModification.allOf(m.modifications()));
+	}
+
+	default void redrawSection(int sectionX, int sectionY, int sectionZ, boolean mainThread) {
 	}
 }

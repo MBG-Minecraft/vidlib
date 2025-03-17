@@ -6,7 +6,11 @@ import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntLists;
+import it.unimi.dsi.fastutil.shorts.ShortArrayList;
+import it.unimi.dsi.fastutil.shorts.ShortList;
+import it.unimi.dsi.fastutil.shorts.ShortLists;
 import net.minecraft.core.Registry;
+import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -17,9 +21,13 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -161,6 +169,41 @@ public interface ShimmerStreamCodecs {
 	);
 
 	StreamCodec<ByteBuf, Unit> UNIT = StreamCodec.unit(Unit.INSTANCE);
+	StreamCodec<ByteBuf, SectionPos> SECTION_POS = ByteBufCodecs.LONG.map(SectionPos::of, SectionPos::asLong);
+	StreamCodec<ByteBuf, Mirror> MIRROR = enumValue(Mirror.values());
+	StreamCodec<ByteBuf, Rotation> ROTATION = enumValue(Rotation.values());
+	StreamCodec<ByteBuf, LiquidSettings> LIQUID_SETTINGS = enumValue(LiquidSettings.values());
+	StreamCodec<ByteBuf, InteractionHand> HAND = enumValue(InteractionHand.values());
+
+	StreamCodec<ByteBuf, ShortList> SHORT_LIST = new StreamCodec<>() {
+		@Override
+		public ShortList decode(ByteBuf buf) {
+			int size = VarInt.read(buf);
+
+			if (size == 0) {
+				return ShortLists.emptyList();
+			} else if (size == 1) {
+				return ShortLists.singleton((short) VarInt.read(buf));
+			} else {
+				var list = new ShortArrayList(size);
+
+				for (int i = 0; i < size; i++) {
+					list.add((short) VarInt.read(buf));
+				}
+
+				return list;
+			}
+		}
+
+		@Override
+		public void encode(ByteBuf buf, ShortList value) {
+			VarInt.write(buf, value.size());
+
+			for (int i = 0; i < value.size(); i++) {
+				VarInt.write(buf, value.getShort(i));
+			}
+		}
+	};
 
 	static <T> StreamCodec<ByteBuf, TagKey<T>> tagKey(ResourceKey<? extends Registry<T>> registry) {
 		return ResourceLocation.STREAM_CODEC.map(id -> TagKey.create(registry, id), TagKey::location);

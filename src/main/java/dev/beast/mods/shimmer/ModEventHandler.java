@@ -3,7 +3,7 @@ package dev.beast.mods.shimmer;
 import dev.beast.mods.shimmer.core.ShimmerPayloadRegistrar;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.auto.AutoPacket;
-import dev.beast.mods.shimmer.feature.toolitem.ShimmerTool;
+import dev.beast.mods.shimmer.feature.item.ShimmerTool;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;

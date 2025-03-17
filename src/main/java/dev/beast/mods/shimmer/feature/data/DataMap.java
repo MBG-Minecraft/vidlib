@@ -87,7 +87,7 @@ public class DataMap {
 					var tag = data.get(type.id().toString());
 
 					if (tag != null) {
-						var playerData = type.codec().decode(ops, tag).getOrThrow().getFirst();
+						var playerData = type.codec().parse(ops, tag).getOrThrow();
 
 						if (playerData != null) {
 							init(type).data = playerData;

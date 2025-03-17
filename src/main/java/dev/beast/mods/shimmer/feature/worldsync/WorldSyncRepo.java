@@ -21,7 +21,7 @@ public record WorldSyncRepo(String id, String displayName, String address, Strin
 		if (Files.exists(path)) {
 			try (var reader = Files.newBufferedReader(path)) {
 				var json = JsonUtils.read(reader);
-				var list = WorldSyncRepo.CODEC.listOf().decode(JsonOps.INSTANCE, json).getOrThrow().getFirst();
+				var list = WorldSyncRepo.CODEC.listOf().parse(JsonOps.INSTANCE, json).getOrThrow();
 
 				for (var repo : list) {
 					map.put(repo.id(), repo);
