@@ -1,7 +1,10 @@
 package dev.beast.mods.shimmer.core;
 
+import dev.beast.mods.shimmer.feature.sound.SoundData;
+import dev.beast.mods.shimmer.feature.sound.TrackingSound;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
 public interface ShimmerClientLevel extends ShimmerLevel, ShimmerClientEntityContainer {
@@ -20,5 +23,10 @@ public interface ShimmerClientLevel extends ShimmerLevel, ShimmerClientEntityCon
 	@Override
 	default void redrawSection(int sectionX, int sectionY, int sectionZ, boolean mainThread) {
 		Minecraft.getInstance().levelRenderer.setSectionDirty(sectionX, sectionY, sectionZ, mainThread);
+	}
+
+	@Override
+	default void playTrackingSound(Entity entity, SoundData data, boolean looping) {
+		Minecraft.getInstance().getSoundManager().play(new TrackingSound(entity, data, looping));
 	}
 }

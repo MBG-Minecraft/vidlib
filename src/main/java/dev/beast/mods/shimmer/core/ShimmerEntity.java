@@ -2,6 +2,8 @@ package dev.beast.mods.shimmer.core;
 
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.entity.EntityOverrideValue;
+import dev.beast.mods.shimmer.feature.entity.ForceEntityVelocityPayload;
+import dev.beast.mods.shimmer.feature.sound.SoundData;
 import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
 import dev.beast.mods.shimmer.math.Line;
 import net.minecraft.server.level.ServerLevel;
@@ -114,5 +116,23 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 
 	default void teleport(Vec3 pos) {
 		teleport((ServerLevel) ((Entity) this).level(), pos);
+	}
+
+	default void forceSetVelocity(Vec3 velocity) {
+		var e = (Entity) this;
+		e.setDeltaMovement(velocity);
+
+		if (!e.level().isClientSide()) {
+			e.level().s2c(new ForceEntityVelocityPayload(e.getId(), velocity));
+		}
+	}
+
+	default void forceAddVelocity(Vec3 velocity) {
+		forceSetVelocity(((Entity) this).getDeltaMovement().add(velocity));
+	}
+
+	default void playTrackingSound(SoundData data, boolean looping) {
+		var e = (Entity) this;
+		e.level().playTrackingSound(e, data, looping);
 	}
 }

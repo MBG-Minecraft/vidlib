@@ -13,9 +13,11 @@ import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.minecraft.Util;
 import net.minecraft.core.SectionPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -47,6 +49,26 @@ public interface ShimmerCodecs {
 	Codec<SectionPos> SECTION_POS = Codec.INT_STREAM.comapFlatMap(intStream -> Util.fixedSize(intStream, 3).map(ints -> SectionPos.of(ints[0], ints[1], ints[2])), pos -> IntStream.of(pos.x(), pos.y(), pos.z()));
 
 	Codec<ShortList> SHORT_LIST = Codec.SHORT.listOf().xmap(ShortArrayList::new, Function.identity());
+
+	Codec<SoundSource> SOUND_SOURCE = anyEnumCodec(SoundSource.values(), SoundSource::getName);
+
+	static <E> Codec<E> anyEnumCodec(E[] enumValues, Function<E, String> nameGetter) {
+		var map = new HashMap<String, E>(enumValues.length);
+
+		for (var value : enumValues) {
+			map.put(nameGetter.apply(value), value);
+		}
+
+		return Codec.STRING.comapFlatMap(s -> {
+			var e = map.get(s);
+
+			if (e != null) {
+				return DataResult.success(e);
+			}
+
+			return DataResult.error(() -> "Unknown enum value: " + s);
+		}, nameGetter);
+	}
 
 	static <K, V> Codec<V> map(Supplier<Map<K, V>> mapGetter, Codec<K> keyCodec, Function<V, K> keyGetter) {
 		return keyCodec.flatXmap(k -> {

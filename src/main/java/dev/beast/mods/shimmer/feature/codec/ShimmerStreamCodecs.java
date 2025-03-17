@@ -20,6 +20,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.Level;
@@ -174,6 +175,7 @@ public interface ShimmerStreamCodecs {
 	StreamCodec<ByteBuf, Rotation> ROTATION = enumValue(Rotation.values());
 	StreamCodec<ByteBuf, LiquidSettings> LIQUID_SETTINGS = enumValue(LiquidSettings.values());
 	StreamCodec<ByteBuf, InteractionHand> HAND = enumValue(InteractionHand.values());
+	StreamCodec<ByteBuf, SoundSource> SOUND_SOURCE = enumValue(SoundSource.values());
 
 	StreamCodec<ByteBuf, ShortList> SHORT_LIST = new StreamCodec<>() {
 		@Override

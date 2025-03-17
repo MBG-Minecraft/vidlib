@@ -5,9 +5,12 @@ import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationBundle;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationPayload;
 import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
 import dev.beast.mods.shimmer.feature.misc.FakeBlockPayload;
+import dev.beast.mods.shimmer.feature.sound.SoundData;
+import dev.beast.mods.shimmer.feature.sound.TrackingSoundPayload;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
 
 public interface ShimmerServerLevel extends ShimmerLevel {
@@ -40,5 +43,10 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 
 		s2c(new BulkLevelModificationPayload(optimized));
 		return ShimmerLevel.super.bulkModify(optimized);
+	}
+
+	@Override
+	default void playTrackingSound(Entity entity, SoundData data, boolean looping) {
+		s2c(new TrackingSoundPayload(entity.getId(), data, looping));
 	}
 }

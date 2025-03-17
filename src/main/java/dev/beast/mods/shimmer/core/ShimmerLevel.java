@@ -7,6 +7,7 @@ import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationBundle;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationHolder;
 import dev.beast.mods.shimmer.feature.bulk.UndoableModification;
 import dev.beast.mods.shimmer.feature.data.DataMap;
+import dev.beast.mods.shimmer.feature.sound.SoundData;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
@@ -84,5 +85,8 @@ public interface ShimmerLevel extends ShimmerEntityContainer {
 	}
 
 	default void redrawSection(int sectionX, int sectionY, int sectionZ, boolean mainThread) {
+	}
+
+	default void playTrackingSound(Entity entity, SoundData data, boolean looping) {
 	}
 }
