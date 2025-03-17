@@ -25,7 +25,6 @@ import net.minecraft.client.gui.components.toasts.RecipeToast;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
 import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.commands.Commands;
@@ -174,7 +173,7 @@ public class ClientGameEventHandler {
 		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
 			PhysicsParticleManager.renderAll(new PhysicsParticleRenderContext(
 				mc,
-				mc.player.getClass() == LocalPlayer.class,
+				!mc.player.isReplayCamera(),
 				event.getPoseStack(),
 				event.getProjectionMatrix(),
 				delta,

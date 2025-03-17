@@ -182,10 +182,11 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 	@Override
 	public void playCutscene(Cutscene cutscene, WorldNumberVariables variables) {
 		if (!cutscene.steps.isEmpty() && player != null) {
-			var inst = new ClientCutscene(shimmer$self(), cutscene, variables, player::getEyePosition);
+			var overrideCamera = !player.isReplayCamera();
+			var inst = new ClientCutscene(shimmer$self(), overrideCamera, cutscene, variables, player::getEyePosition);
 			ClientCutscene.instance = inst;
 
-			if (player.getClass() == LocalPlayer.class && !cutscene.allowMovement) {
+			if (overrideCamera && !cutscene.allowMovement) {
 				setScreen(new CutsceneScreen(inst, screen));
 			}
 

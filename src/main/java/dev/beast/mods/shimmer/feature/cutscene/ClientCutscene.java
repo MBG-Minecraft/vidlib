@@ -16,6 +16,7 @@ public class ClientCutscene implements CameraOverride {
 	public static ClientCutscene instance = null;
 
 	public final Minecraft mc;
+	public final boolean overrideCamera;
 	public final Cutscene cutscene;
 	public final WorldNumberVariables variables;
 	public final CutsceneStep[] steps;
@@ -28,8 +29,9 @@ public class ClientCutscene implements CameraOverride {
 	public double prevZoom, zoom;
 	public List<FormattedCharSequence> topBar, bottomBar;
 
-	public ClientCutscene(Minecraft mc, Cutscene cutscene, WorldNumberVariables variables, Supplier<Vec3> sourcePos) {
+	public ClientCutscene(Minecraft mc, boolean overrideCamera, Cutscene cutscene, WorldNumberVariables variables, Supplier<Vec3> sourcePos) {
 		this.mc = mc;
+		this.overrideCamera = overrideCamera;
 		this.cutscene = cutscene;
 		this.variables = variables;
 		this.steps = cutscene.steps.toArray(new CutsceneStep[0]);
@@ -163,6 +165,11 @@ public class ClientCutscene implements CameraOverride {
 
 		totalTick++;
 		return totalTick >= totalLength;
+	}
+
+	@Override
+	public boolean overrideCamera() {
+		return overrideCamera;
 	}
 
 	@Override

@@ -15,6 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -31,8 +32,12 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements S
 	@Final
 	protected Minecraft minecraft;
 
+	@Unique
+	private final boolean shimmer$isReplayCamera;
+
 	public LocalPlayerMixin(ClientLevel clientLevel, GameProfile gameProfile) {
 		super(clientLevel, gameProfile);
+		this.shimmer$isReplayCamera = ((Object) this).getClass() != LocalPlayer.class || gameProfile.getName().equals("Replay Viewer");
 	}
 
 	@Override
@@ -53,5 +58,10 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements S
 			minecraft.setScreen(s);
 			ci.cancel();
 		}
+	}
+
+	@Override
+	public boolean isReplayCamera() {
+		return shimmer$isReplayCamera;
 	}
 }

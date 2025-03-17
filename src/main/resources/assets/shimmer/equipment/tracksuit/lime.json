@@ -1,0 +1,14 @@
+{
+	"layers": {
+		"humanoid": [
+			{
+				"texture": "shimmer:tracksuit/lime"
+			}
+		],
+		"humanoid_leggings": [
+			{
+				"texture": "shimmer:tracksuit/lime"
+			}
+		]
+	}
+}

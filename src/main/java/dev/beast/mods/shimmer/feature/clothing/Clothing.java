@@ -32,12 +32,28 @@ public class Clothing {
 	public static final Clothing NONE = register(Shimmer.id("none"));
 
 	public static final Clothing RED_TRACKSUIT = register(Shimmer.id("tracksuit/red"));
-	public static final Clothing GREEN_TRACKSUIT = register(Shimmer.id("tracksuit/green"));
+	public static final Clothing PINK_TRACKSUIT = register(Shimmer.id("tracksuit/pink"));
+	public static final Clothing MAGENTA_TRACKSUIT = register(Shimmer.id("tracksuit/magenta"));
+	public static final Clothing PURPLE_TRACKSUIT = register(Shimmer.id("tracksuit/purple"));
 	public static final Clothing BLUE_TRACKSUIT = register(Shimmer.id("tracksuit/blue"));
 	public static final Clothing CYAN_TRACKSUIT = register(Shimmer.id("tracksuit/cyan"));
-	public static final Clothing MAGENTA_TRACKSUIT = register(Shimmer.id("tracksuit/magenta"));
+	public static final Clothing GREEN_TRACKSUIT = register(Shimmer.id("tracksuit/green"));
+	public static final Clothing LIME_TRACKSUIT = register(Shimmer.id("tracksuit/lime"));
 	public static final Clothing YELLOW_TRACKSUIT = register(Shimmer.id("tracksuit/yellow"));
 	public static final Clothing ORANGE_TRACKSUIT = register(Shimmer.id("tracksuit/orange"));
+
+	public static final Clothing[] COLORED_TRACKSUITS = {
+		RED_TRACKSUIT,
+		PINK_TRACKSUIT,
+		MAGENTA_TRACKSUIT,
+		PURPLE_TRACKSUIT,
+		BLUE_TRACKSUIT,
+		CYAN_TRACKSUIT,
+		GREEN_TRACKSUIT,
+		LIME_TRACKSUIT,
+		YELLOW_TRACKSUIT,
+		ORANGE_TRACKSUIT
+	};
 
 	public static final Clothing SQUID_TRACKSUIT = register(Shimmer.id("tracksuit/squid"));
 
