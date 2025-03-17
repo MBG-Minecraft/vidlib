@@ -55,7 +55,7 @@ public record ReplaceCuboidBlocks(BlockPos start, BlockPos end, BlockState state
 	@Override
 	public BulkLevelModification optimize() {
 		if (start.equals(end)) {
-			return new ReplaceSingleBlock(start, state);
+			return new PositionedBlock(start, state);
 		}
 
 		return this;

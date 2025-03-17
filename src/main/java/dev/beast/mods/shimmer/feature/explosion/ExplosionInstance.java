@@ -1,7 +1,9 @@
 package dev.beast.mods.shimmer.feature.explosion;
 
 import dev.beast.mods.shimmer.feature.bulk.BlockModificationConsumer;
-import dev.beast.mods.shimmer.feature.bulk.ReplaceSectionBlocks;
+import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
+import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
+import dev.beast.mods.shimmer.feature.bulk.UndoableModification;
 import dev.beast.mods.shimmer.feature.misc.DebugColorBlocks;
 import dev.beast.mods.shimmer.math.KMath;
 import net.minecraft.core.BlockPos;
@@ -12,9 +14,19 @@ import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ExplosionInstance {
+	public record UndoableExplosion(List<PositionedBlock> blocks) implements UndoableModification {
+		@Override
+		public void undo(Level level, BlockModificationConsumer consumer) {
+			for (var block : blocks) {
+				consumer.add(block);
+			}
+		}
+	}
+
 	public final Level level;
 	public final BlockPos at;
 	public final ExplosionData data;
@@ -22,6 +34,7 @@ public class ExplosionInstance {
 	public List<DestroyedBlock> blocks;
 	public List<Entity> entities;
 	public DebugColorBlocks debug;
+	public boolean undoable;
 
 	public ExplosionInstance(Level level, BlockPos at, ExplosionData data) {
 		this.level = level;
@@ -31,6 +44,7 @@ public class ExplosionInstance {
 		this.blocks = List.of();
 		this.entities = List.of();
 		this.debug = DebugColorBlocks.NONE;
+		this.undoable = false;
 	}
 
 	public void debug() {
@@ -156,23 +170,20 @@ public class ExplosionInstance {
 	}
 
 	public int create() {
-		var m = new ReplaceSectionBlocks.Builder();
+		var m = new OptimizedModificationBuilder();
 		create(m);
 		return level.bulkModify(m.build());
 	}
 
-	public void restore(BlockModificationConsumer modifications) {
+	public UndoableExplosion createUndoableModification() {
+		var list = new ArrayList<PositionedBlock>(blocks.size() / 2);
+
 		for (var block : blocks) {
 			if (block.destroyed().isTrue()) {
-				modifications.set(block.pos(), block.state());
-				block.destroyed().setFalse();
+				list.add(new PositionedBlock(block.pos(), block.state()));
 			}
 		}
-	}
 
-	public int restore() {
-		var m = new ReplaceSectionBlocks.Builder();
-		restore(m);
-		return level.bulkModify(m.build());
+		return new UndoableExplosion(list);
 	}
 }

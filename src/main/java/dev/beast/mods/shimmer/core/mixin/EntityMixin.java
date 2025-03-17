@@ -9,9 +9,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -117,5 +119,23 @@ public abstract class EntityMixin implements ShimmerEntity {
 	@Inject(method = "saveWithoutId", at = @At("RETURN"))
 	private void shimmer$afterSave(CompoundTag compound, CallbackInfoReturnable<CompoundTag> cir) {
 		shimmer$isSaving = false;
+	}
+
+	/**
+	 * @author Lat
+	 * @reason Fix forever falling
+	 */
+	@Overwrite
+	protected void applyGravity() {
+		var entity = (Entity) (Object) this;
+		double gravity = entity.getGravity();
+		var delta = entity.getDeltaMovement();
+
+		if (gravity != 0D) {
+			entity.setDeltaMovement(delta.add(0D, -gravity, 0D));
+		} else {
+			entity.setDeltaMovement(new Vec3(delta.x, 0D, delta.z));
+			entity.resetFallDistance();
+		}
 	}
 }

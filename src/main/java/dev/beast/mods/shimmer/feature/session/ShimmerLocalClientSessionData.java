@@ -11,6 +11,7 @@ import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.input.PlayerInput;
 import dev.beast.mods.shimmer.feature.input.PlayerInputChanged;
 import dev.beast.mods.shimmer.feature.input.SyncPlayerInputToServer;
+import dev.beast.mods.shimmer.feature.misc.PauseType;
 import dev.beast.mods.shimmer.feature.worldsync.ProgressingText;
 import dev.beast.mods.shimmer.feature.worldsync.WorldSync;
 import dev.beast.mods.shimmer.feature.worldsync.WorldSyncAuthResponsePayload;
@@ -98,16 +99,12 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	}
 
 	@ApiStatus.Internal
-	public void preTick(Minecraft mc, ClientLevel level, LocalPlayer player, Window window, boolean paused) {
-		if (paused) {
+	public void preTick(Minecraft mc, ClientLevel level, LocalPlayer player, Window window, PauseType paused) {
+		if (!paused.tick()) {
 			return;
 		}
 
-		filteredZones.entityZones.clear();
-
-		for (var container : filteredZones) {
-			container.tick(filteredZones, level);
-		}
+		filteredZones.tick(level);
 
 		for (var instance : clocks.values()) {
 			if (instance.clock.dimension() == level.dimension()) {

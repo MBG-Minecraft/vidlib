@@ -38,6 +38,8 @@ public interface EntityFilter extends Predicate<Entity> {
 	SimpleRegistryType.Unit<EntityFilter> PROJECTILE = SimpleRegistryType.unit(Shimmer.id("projectile"), entity -> entity instanceof Projectile);
 	SimpleRegistryType.Unit<EntityFilter> VISIBLE = SimpleRegistryType.unit(Shimmer.id("visible"), entity -> !entity.isInvisible());
 	SimpleRegistryType.Unit<EntityFilter> INVISIBLE = SimpleRegistryType.unit(Shimmer.id("invisible"), Entity::isInvisible);
+	SimpleRegistryType.Unit<EntityFilter> SUSPENDED = SimpleRegistryType.unit(Shimmer.id("suspended"), ShimmerEntity::isSuspended);
+	SimpleRegistryType.Unit<EntityFilter> GLOWING = SimpleRegistryType.unit(Shimmer.id("glowing"), Entity::isCurrentlyGlowing);
 
 	static EntityFilter of(boolean value) {
 		return value ? ANY.instance() : NONE.instance();
@@ -69,6 +71,8 @@ public interface EntityFilter extends Predicate<Entity> {
 		REGISTRY.register(PROJECTILE);
 		REGISTRY.register(VISIBLE);
 		REGISTRY.register(INVISIBLE);
+		REGISTRY.register(SUSPENDED);
+		REGISTRY.register(GLOWING);
 
 		REGISTRY.register(EntityTagFilter.TYPE);
 		REGISTRY.register(EntityTypeFilter.TYPE);

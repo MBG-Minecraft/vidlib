@@ -8,7 +8,7 @@ import net.minecraft.commands.arguments.ResourceLocationArgument;
 
 public interface ClockCommands {
 	@AutoRegister
-	ServerCommandHolder HOLDER = new ServerCommandHolder("clock", (command, buildContext) -> command
+	ServerCommandHolder COMMAND = new ServerCommandHolder("clock", (command, buildContext) -> command
 		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
 		.then(Commands.literal("start")
 			.then(Commands.argument("id", ResourceLocationArgument.id())

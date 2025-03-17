@@ -13,7 +13,9 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ZoneContainer {
 	public static final StreamCodec<RegistryFriendlyByteBuf, ZoneContainer> STREAM_CODEC = new StreamCodec<>() {
@@ -22,6 +24,13 @@ public class ZoneContainer {
 			var id = ResourceLocation.STREAM_CODEC.decode(buf);
 			var dimension = ShimmerStreamCodecs.DIMENSION.decode(buf);
 			var container = new ZoneContainer(id, dimension);
+
+			int tags = buf.readVarInt();
+
+			for (int i = 0; i < tags; i++) {
+				container.tags.add(buf.readUtf());
+			}
+
 			int count = buf.readVarInt();
 
 			for (int i = 0; i < count; i++) {
@@ -35,6 +44,13 @@ public class ZoneContainer {
 		public void encode(RegistryFriendlyByteBuf buf, ZoneContainer value) {
 			ResourceLocation.STREAM_CODEC.encode(buf, value.id);
 			ShimmerStreamCodecs.DIMENSION.encode(buf, value.dimension);
+
+			buf.writeVarInt(value.tags.size());
+
+			for (var tag : value.tags) {
+				buf.writeUtf(tag);
+			}
+
 			buf.writeVarInt(value.zones.size());
 
 			for (var zone : value.zones) {
@@ -48,6 +64,7 @@ public class ZoneContainer {
 	public final ResourceKey<Level> dimension;
 	public final List<ZoneInstance> zones;
 	public boolean hasPlayerOverrides;
+	public final Set<String> tags;
 	public final Int2ObjectOpenHashMap<List<ZoneInstance>> entityZones;
 
 	public ZoneContainer(ResourceLocation id, ResourceKey<Level> dimension) {
@@ -55,12 +72,18 @@ public class ZoneContainer {
 		this.dimension = dimension;
 		this.zones = new ArrayList<>();
 		this.hasPlayerOverrides = false;
+		this.tags = new LinkedHashSet<>();
 		this.entityZones = new Int2ObjectOpenHashMap<>();
 	}
 
 	public ZoneContainer add(Zone zone) {
 		var instance = zone.shape().createInstance(this, zone);
 		instance.index = zones.size();
+
+		instance.tags.add(id.toString());
+		instance.tags.addAll(tags);
+		instance.tags.addAll(zone.tags());
+
 		zones.add(instance);
 
 		if (!zone.playerOverrides().isEmpty()) {
@@ -104,10 +127,6 @@ public class ZoneContainer {
 			}
 
 			list.addAll(entry.getValue());
-		}
-
-		for (var player : level.players()) {
-			player.shimmer$sessionData().zonesIn = entityZones.getOrDefault(player.getId(), List.of());
 		}
 	}
 

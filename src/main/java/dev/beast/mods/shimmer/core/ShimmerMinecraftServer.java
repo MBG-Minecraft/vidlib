@@ -3,6 +3,7 @@ package dev.beast.mods.shimmer.core;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.clock.ClockInstance;
 import dev.beast.mods.shimmer.feature.data.SyncServerDataPayload;
+import dev.beast.mods.shimmer.feature.misc.PauseType;
 import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
 import dev.beast.mods.shimmer.util.S2CPacketBundleBuilder;
 import net.minecraft.server.MinecraftServer;
@@ -19,6 +20,12 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 	}
 
 	@Override
+	default PauseType getPauseType() {
+		var server = shimmer$self();
+		return server.isPaused() ? PauseType.GAME : server.tickRateManager().isFrozen() ? PauseType.TICK : PauseType.NONE;
+	}
+
+	@Override
 	default List<? extends Player> shimmer$getPlayers() {
 		return shimmer$self().getPlayerList().getPlayers();
 	}
@@ -30,17 +37,13 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 
 	@Override
 	@ApiStatus.Internal
-	default void shimmer$preTick(boolean paused) {
+	default void shimmer$preTick(PauseType paused) {
 		for (var level : shimmer$self().getAllLevels()) {
 			var zones = ZoneLoader.BY_DIMENSION.get(level.dimension());
 			level.shimmer$setActiveZones(zones);
 
 			if (zones != null) {
-				zones.entityZones.clear();
-
-				for (var container : zones) {
-					container.tick(zones, level);
-				}
+				zones.tick(level);
 			}
 		}
 
@@ -55,7 +58,7 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 
 	@Override
 	@ApiStatus.Internal
-	default void shimmer$postTick(boolean paused) {
+	default void shimmer$postTick(PauseType paused) {
 		var packetsToEveryone = new S2CPacketBundleBuilder();
 
 		getServerData().sync(packetsToEveryone, null, (playerId, update) -> new SyncServerDataPayload(update));

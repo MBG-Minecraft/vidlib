@@ -63,6 +63,10 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 		return type != null && type.isSurvival();
 	}
 
+	default boolean isSuspended() {
+		return EntityOverride.SUSPENDED.get(this, false);
+	}
+
 	@Nullable
 	default Boolean shimmer$glowingOverride() {
 		return EntityOverride.GLOWING.get(this);
@@ -80,6 +84,10 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 
 	default float shimmer$speedMod() {
 		return EntityOverride.SPEED.get(this, 1F);
+	}
+
+	default float shimmer$attackDamageMod() {
+		return EntityOverride.ATTACK_DAMAGE.get(this, 1F);
 	}
 
 	default Line ray(double distance, float delta) {

@@ -1,9 +1,11 @@
 package dev.beast.mods.shimmer.core;
 
 import com.mojang.datafixers.util.Either;
+import dev.beast.mods.shimmer.feature.bulk.BlockModificationConsumer;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModification;
+import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationBundle;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationHolder;
-import dev.beast.mods.shimmer.feature.bulk.BulkLevelModifications;
+import dev.beast.mods.shimmer.feature.bulk.UndoableModification;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import net.minecraft.core.BlockPos;
@@ -41,6 +43,14 @@ public interface ShimmerLevel extends ShimmerEntityContainer {
 		throw new NoMixinException();
 	}
 
+	default List<UndoableModification> shimmer$getUndoableModifications() {
+		throw new NoMixinException();
+	}
+
+	default void addUndoable(UndoableModification modification) {
+		shimmer$getUndoableModifications().add(modification);
+	}
+
 	default void setFakeBlock(BlockPos pos, BlockState state) {
 		((Level) this).setBlock(pos, state, 0, 0);
 	}
@@ -67,10 +77,10 @@ public interface ShimmerLevel extends ShimmerEntityContainer {
 		return new BulkLevelModificationHolder().apply((Level) this, modification);
 	}
 
-	default int bulkModify(Consumer<BulkLevelModifications> modifications) {
-		var m = new BulkLevelModifications(new ArrayList<>());
+	default int bulkModify(Consumer<BlockModificationConsumer> modifications) {
+		var m = new BulkLevelModificationBundle(new ArrayList<>());
 		modifications.accept(m);
-		return bulkModify(BulkLevelModification.allOf(m.modifications()));
+		return bulkModify(m);
 	}
 
 	default void redrawSection(int sectionX, int sectionY, int sectionZ, boolean mainThread) {

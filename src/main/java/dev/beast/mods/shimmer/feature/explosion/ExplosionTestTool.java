@@ -1,12 +1,8 @@
 package dev.beast.mods.shimmer.feature.explosion;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.item.ShimmerTool;
 import dev.beast.mods.shimmer.feature.misc.DebugText;
-import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
@@ -20,12 +16,8 @@ import net.minecraft.world.phys.HitResult;
 import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ExplosionTestTool implements ShimmerTool {
 	public static final ExplosionData DEFAULT_DATA = new ExplosionData();
-	public static final List<ExplosionInstance> EXPLOSIONS = new ArrayList<>();
 
 	@AutoInit
 	public static void bootstrap() {
@@ -45,34 +37,6 @@ public class ExplosionTestTool implements ShimmerTool {
 	@Override
 	public ItemStack createItem() {
 		return new ItemStack(Items.TNT);
-	}
-
-	@Override
-	public void registerCommands(LiteralArgumentBuilder<CommandSourceStack> command, CommandBuildContext buildContext) {
-		command.then(Commands.literal("undo")
-			.then(Commands.literal("all")
-				.executes(ctx -> {
-					int count = 0;
-
-					for (int i = EXPLOSIONS.size() - 1; i >= 0; i--) {
-						count += EXPLOSIONS.get(i).restore();
-					}
-
-					EXPLOSIONS.clear();
-					ctx.getSource().getEntity().status("Restored %,d blocks".formatted(count));
-					return 1;
-				})
-			)
-			.executes(ctx -> {
-				if (!EXPLOSIONS.isEmpty()) {
-					int count = EXPLOSIONS.getLast().restore();
-					EXPLOSIONS.removeLast();
-					ctx.getSource().getEntity().status("Restored %,d blocks".formatted(count));
-				}
-
-				return 1;
-			})
-		);
 	}
 
 	@Override
@@ -110,7 +74,7 @@ public class ExplosionTestTool implements ShimmerTool {
 		if (ray != null) {
 			var instance = getData(item, false).instance(level, ray.getBlockPos());
 			int count = instance.create();
-			EXPLOSIONS.add(instance);
+			level.addUndoable(instance.createUndoableModification());
 			player.status("Modified %,d blocks".formatted(count));
 		}
 	}

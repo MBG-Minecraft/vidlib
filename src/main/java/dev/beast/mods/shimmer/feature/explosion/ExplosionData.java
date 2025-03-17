@@ -7,6 +7,7 @@ import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.config.BooleanConfigValue;
 import dev.beast.mods.shimmer.feature.config.ConfigValue;
 import dev.beast.mods.shimmer.feature.config.FloatConfigValue;
+import dev.beast.mods.shimmer.feature.config.IntConfigValue;
 import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
 import dev.beast.mods.shimmer.feature.misc.DebugText;
 import dev.beast.mods.shimmer.math.KMath;
@@ -21,6 +22,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
+import net.minecraft.world.level.storage.loot.IntRange;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.mutable.MutableBoolean;
@@ -74,8 +76,8 @@ public class ExplosionData {
 		new BooleanConfigValue<>("Smolder", data -> data.smolder, (data, v) -> data.smolder = v),
 		new FloatConfigValue<>("Entity Damage", Range.of(0F, 100F), false, data -> data.entityDamage, (data, v) -> data.entityDamage = v),
 		new FloatConfigValue<>("Entity Knockback", Range.of(0F, 100F), false, data -> data.entityKnockback, (data, v) -> data.entityKnockback = v),
-		new ConfigValue<>("Floor", Codec.INT, data -> data.floor, (data, v) -> data.floor = v),
-		new ConfigValue<>("Ceiling", Codec.INT, data -> data.ceiling, (data, v) -> data.ceiling = v),
+		new IntConfigValue<>("Floor", IntRange.range(-1000, 1000), false, data -> data.floor, (data, v) -> data.floor = v),
+		new IntConfigValue<>("Ceiling", IntRange.range(-1000, 1000), false, data -> data.ceiling, (data, v) -> data.ceiling = v),
 		new ConfigValue<>("Block Filter", BlockFilter.CODEC, data -> data.blockFilter, (data, v) -> data.blockFilter = v),
 		new ConfigValue<>("Ignored Entities", EntityFilter.CODEC, data -> data.ignoredEntities, (data, v) -> data.ignoredEntities = v),
 		new ConfigValue<>("Invincible Entities", EntityFilter.CODEC, data -> data.invincibleEntities, (data, v) -> data.invincibleEntities = v)

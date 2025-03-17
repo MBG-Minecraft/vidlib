@@ -19,8 +19,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ActiveZones implements Iterable<ZoneContainer> {
 	public record SolidZone(ZoneInstance instance, VoxelShape shape, VoxelShapeBox shapeBox) {
@@ -93,6 +95,28 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 	@NotNull
 	public Iterator<ZoneContainer> iterator() {
 		return containers.values().iterator();
+	}
+
+	public void tick(Level level) {
+		entityZones.clear();
+
+		for (var container : this) {
+			container.tick(this, level);
+		}
+
+		for (var player : level.players()) {
+			var session = player.shimmer$sessionData();
+			session.zonesIn = entityZones.getOrDefault(player.getId(), List.of());
+			session.zonesTagsIn = Set.of();
+
+			if (!session.zonesIn.isEmpty()) {
+				session.zonesTagsIn = new LinkedHashSet<>(session.zonesIn.size());
+
+				for (var zone : session.zonesIn) {
+					session.zonesTagsIn.addAll(zone.tags);
+				}
+			}
+		}
 	}
 
 	@Nullable

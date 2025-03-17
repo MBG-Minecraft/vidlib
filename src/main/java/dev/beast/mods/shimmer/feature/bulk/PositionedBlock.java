@@ -12,14 +12,14 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Set;
 
-public record ReplaceSingleBlock(BlockPos pos, BlockState state) implements BulkLevelModification {
-	public static final SimpleRegistryType<ReplaceSingleBlock> TYPE = SimpleRegistryType.dynamic(Shimmer.id("block"), RecordCodecBuilder.mapCodec(instance -> instance.group(
-		BlockPos.CODEC.fieldOf("pos").forGetter(ReplaceSingleBlock::pos),
-		BlockState.CODEC.fieldOf("state").forGetter(ReplaceSingleBlock::state)
-	).apply(instance, ReplaceSingleBlock::new)), CompositeStreamCodec.of(
-		BlockPos.STREAM_CODEC, ReplaceSingleBlock::pos,
-		ShimmerStreamCodecs.BLOCK_STATE, ReplaceSingleBlock::state,
-		ReplaceSingleBlock::new
+public record PositionedBlock(BlockPos pos, BlockState state) implements BulkLevelModification {
+	public static final SimpleRegistryType<PositionedBlock> TYPE = SimpleRegistryType.dynamic(Shimmer.id("block"), RecordCodecBuilder.mapCodec(instance -> instance.group(
+		BlockPos.CODEC.fieldOf("pos").forGetter(PositionedBlock::pos),
+		BlockState.CODEC.fieldOf("state").forGetter(PositionedBlock::state)
+	).apply(instance, PositionedBlock::new)), CompositeStreamCodec.of(
+		BlockPos.STREAM_CODEC, PositionedBlock::pos,
+		ShimmerStreamCodecs.BLOCK_STATE, PositionedBlock::state,
+		PositionedBlock::new
 	));
 
 	@Override

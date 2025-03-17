@@ -8,6 +8,8 @@ import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class ZoneInstance {
 	public final ZoneContainer container;
@@ -15,6 +17,7 @@ public class ZoneInstance {
 	public Zone zone;
 	public final Int2ObjectMap<Entity> entities;
 	public Object renderer;
+	public final Set<String> tags;
 
 	public ZoneInstance(ZoneContainer container, Zone zone) {
 		this.container = container;
@@ -22,10 +25,15 @@ public class ZoneInstance {
 		this.zone = zone;
 		this.entities = new Int2ObjectOpenHashMap<>();
 		this.renderer = null;
+		this.tags = new LinkedHashSet<>();
 	}
 
 	public boolean has(Entity entity) {
 		return entities.containsKey(entity.getId());
+	}
+
+	public boolean hasTag(String tag) {
+		return tags.contains(tag);
 	}
 
 	public void tick(@Nullable Level level) {

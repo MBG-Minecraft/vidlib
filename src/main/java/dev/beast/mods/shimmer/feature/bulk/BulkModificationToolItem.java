@@ -51,7 +51,7 @@ public class BulkModificationToolItem implements ShimmerTool {
 		return true;
 	}
 
-	private void modify(ServerLevel level, BulkLevelModifications modifications, BlockPos pos, BlockState state) {
+	private void modify(ServerLevel level, BlockModificationConsumer modifications, BlockPos pos, BlockState state) {
 		modifications.fill(pos.offset(-5, -5, -5), pos.offset(5, 5, 5), Blocks.AIR);
 		modifications.set(pos, state);
 		modifications.add(BulkLevelModification.structure(

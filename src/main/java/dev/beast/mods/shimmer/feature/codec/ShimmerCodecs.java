@@ -15,10 +15,14 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -74,5 +78,13 @@ public interface ShimmerCodecs {
 
 	static <V> Codec<Optional<V>> optional(Codec<V> codec) {
 		return Codec.either(UNIT, codec).xmap(either -> either.map(u -> Optional.empty(), Optional::of), opt -> opt.isPresent() ? Either.right(opt.get()) : Either.left(Unit.INSTANCE));
+	}
+
+	static <V> Codec<Set<V>> set(Codec<V> codec) {
+		return Codec.list(codec).xmap(HashSet::new, ArrayList::new);
+	}
+
+	static <V> Codec<Set<V>> linkedSet(Codec<V> codec) {
+		return Codec.list(codec).xmap(LinkedHashSet::new, ArrayList::new);
 	}
 }

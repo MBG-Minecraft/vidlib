@@ -2,9 +2,8 @@ package dev.beast.mods.shimmer.feature.config;
 
 import com.google.gson.JsonElement;
 import com.mojang.serialization.DynamicOps;
-import dev.beast.mods.shimmer.math.KMath;
+import dev.beast.mods.shimmer.math.Range;
 import dev.beast.mods.shimmer.util.JsonUtils;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
@@ -29,7 +28,7 @@ public class ConfigScreen<C> extends Screen {
 		}
 
 		public String encode() {
-			return config.encode(instance, ops).toString();
+			return config.encode(ops, instance).toString();
 		}
 
 		public abstract void addWidget(ConfigScreen<C> screen, int x, int y, int w, int h);
@@ -59,7 +58,7 @@ public class ConfigScreen<C> extends Screen {
 		public void accept(String s) {
 			try {
 				var tag = JsonUtils.GSON.fromJson(s, JsonElement.class);
-				config.decode(instance, ops, tag);
+				config.decode(ops, instance, tag);
 				editBox.setTextColor(0xFFFFFFFF);
 			} catch (Exception ex) {
 				editBox.setTextColor(0xFFFF0000);
@@ -68,21 +67,18 @@ public class ConfigScreen<C> extends Screen {
 	}
 
 	public static class ConfigToggleButton<C> extends ConfigContainer<C, Boolean> {
-		private static final Component TRUE = Component.literal("True").withStyle(ChatFormatting.GREEN);
-		private static final Component FALSE = Component.literal("False").withStyle(ChatFormatting.RED);
-
 		public Button button;
 
-		public ConfigToggleButton(DynamicOps<JsonElement> ops, C instance, ConfigValue<C, Boolean> config) {
+		public ConfigToggleButton(DynamicOps<JsonElement> ops, C instance, BooleanConfigValue<C> config) {
 			super(ops, instance, config);
 		}
 
 		@Override
 		public void addWidget(ConfigScreen<C> screen, int x, int y, int w, int h) {
-			button = new Button.Builder(config.getter.apply(instance) ? TRUE : FALSE, b -> {
+			button = new Button.Builder(config.valueComponent(ops, config.getter.apply(instance)), b -> {
 				boolean v = !config.getter.apply(instance);
 				config.setter.accept(instance, v);
-				button.setMessage(v ? TRUE : FALSE);
+				button.setMessage(config.valueComponent(ops, v));
 			}).bounds(x, y, w, h).build();
 
 			screen.addRenderableWidget(button);
@@ -91,22 +87,25 @@ public class ConfigScreen<C> extends Screen {
 
 	public static class ConfigFloatSlider<C> extends ConfigContainer<C, Float> {
 		public AbstractSliderButton slider;
+		public final Range range;
 
-		public ConfigFloatSlider(DynamicOps<JsonElement> ops, C instance, ConfigValue<C, Float> config) {
+		public ConfigFloatSlider(DynamicOps<JsonElement> ops, C instance, FloatConfigValue<C> config) {
 			super(ops, instance, config);
+			this.range = config.range;
 		}
 
 		@Override
 		public void addWidget(ConfigScreen<C> screen, int x, int y, int w, int h) {
-			slider = new AbstractSliderButton(x, y, w, h, Component.literal(KMath.format(config.getter.apply(instance))), config.getter.apply(instance)) {
+			var value = config.getter.apply(instance);
+			slider = new AbstractSliderButton(x, y, w, h, config.valueComponent(ops, value), range.delta(value)) {
 				@Override
 				protected void updateMessage() {
-					setMessage(Component.literal(KMath.format(config.getter.apply(instance))));
+					setMessage(config.valueComponent(ops, range.get((float) value)));
 				}
 
 				@Override
 				protected void applyValue() {
-					config.setter.accept(instance, (float) value);
+					config.setter.accept(instance, range.get((float) value));
 				}
 			};
 
@@ -127,7 +126,7 @@ public class ConfigScreen<C> extends Screen {
 		for (var value : config) {
 			if (value instanceof BooleanConfigValue b) {
 				configWidgets.add(new ConfigToggleButton<>(ops, instance, b));
-			} else if (value instanceof FloatConfigValue b && b.slider) {
+			} else if (value instanceof FloatConfigValue b && b.slider && b.range != null) {
 				configWidgets.add(new ConfigFloatSlider<>(ops, instance, b));
 			} else {
 				configWidgets.add(new ConfigEditBox<>(ops, instance, value));

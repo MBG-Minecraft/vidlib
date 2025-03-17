@@ -6,7 +6,7 @@ import net.minecraft.commands.Commands;
 
 public interface CameraShakeCommands {
 	@AutoRegister
-	ServerCommandHolder HOLDER = new ServerCommandHolder("camera-shape", (command, buildContext) -> command
+	ServerCommandHolder COMMAND = new ServerCommandHolder("camera-shape", (command, buildContext) -> command
 		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
 		.then(Commands.literal("add")
 			.then(Commands.argument("data", CameraShake.KNOWN_CODEC.argument(buildContext))

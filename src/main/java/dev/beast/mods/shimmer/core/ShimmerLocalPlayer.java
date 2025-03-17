@@ -43,4 +43,9 @@ public interface ShimmerLocalPlayer extends ShimmerClientPlayer, ShimmerClientEn
 			mouseLeft, mouseRight, mouseMiddle, mouseBack, mouseNext
 		);
 	}
+
+	@Override
+	default boolean isReplayCamera() {
+		return getClass() != LocalPlayer.class;
+	}
 }

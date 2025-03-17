@@ -17,6 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class ShimmerSessionData {
@@ -25,12 +26,14 @@ public class ShimmerSessionData {
 	public PlayerInput prevInput;
 	public PlayerInput input;
 	public List<ZoneInstance> zonesIn;
+	public Set<String> zonesTagsIn;
 
 	public Boolean glowingOverride;
 	public Integer teamColorOverride;
+	public boolean suspended;
 	public double gravityMod;
 	public float speedMod;
-	public boolean suspended;
+	public float attackDamageMod;
 	public boolean pvp;
 	public IconHolder plumbobIcon;
 
@@ -40,12 +43,14 @@ public class ShimmerSessionData {
 		this.prevInput = PlayerInput.NONE;
 		this.input = PlayerInput.NONE;
 		this.zonesIn = List.of();
+		this.zonesTagsIn = Set.of();
 
 		this.glowingOverride = null;
 		this.teamColorOverride = null;
+		this.suspended = false;
 		this.gravityMod = 1D;
 		this.speedMod = 1F;
-		this.suspended = false;
+		this.attackDamageMod = 1F;
 		this.pvp = true;
 		this.plumbobIcon = IconHolder.EMPTY;
 	}
@@ -60,10 +65,11 @@ public class ShimmerSessionData {
 		glowingOverride = EntityOverride.GLOWING.get(player);
 		var teamColorOverrideCol = EntityOverride.TEAM_COLOR.get(player);
 		teamColorOverride = teamColorOverrideCol == null ? null : teamColorOverrideCol.rgb();
-		gravityMod = EntityOverride.GRAVITY.get(player, 1D);
-		speedMod = EntityOverride.SPEED.get(player, 1F);
 		suspended = EntityOverride.SUSPENDED.get(player, false);
-		pvp = EntityOverride.PVP.get(player, true);
+		gravityMod = suspended ? 0F : EntityOverride.GRAVITY.get(player, 1D);
+		speedMod = suspended ? 0F : EntityOverride.SPEED.get(player, 1F);
+		attackDamageMod = suspended ? 0F : EntityOverride.ATTACK_DAMAGE.get(player, 1F);
+		pvp = !suspended && EntityOverride.PVP.get(player, true);
 		plumbobIcon = EntityOverride.PLUMBOB.get(player, IconHolder.EMPTY);
 
 		if (plumbobIcon == IconHolder.EMPTY) {
@@ -73,10 +79,6 @@ public class ShimmerSessionData {
 		if (gravityMod <= 0D) {
 			player.resetFallDistance();
 		}
-	}
-
-	public boolean pvp() {
-		return pvp && !suspended;
 	}
 
 	public void updateZones(Level level, List<ZoneContainer> update) {

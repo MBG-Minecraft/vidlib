@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer;
 
 import com.mojang.math.Axis;
+import com.mojang.serialization.JsonOps;
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.ClientCommandHolder;
 import dev.beast.mods.shimmer.feature.clock.ClockRenderer;
@@ -54,13 +55,20 @@ public class ClientGameEventHandler {
 	public static void clientPreTick(ClientTickEvent.Pre event) {
 		DebugText.CLIENT_TICK.clear();
 		var mc = Minecraft.getInstance();
-		mc.shimmer$preTick(mc.isPaused());
+
+		if (mc.level != null) {
+			DebugText.CLIENT_TICK.ops = mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
+		} else {
+			DebugText.CLIENT_TICK.ops = JsonOps.INSTANCE;
+		}
+
+		mc.shimmer$preTick(mc.getPauseType());
 	}
 
 	@SubscribeEvent
 	public static void clientPostTick(ClientTickEvent.Post event) {
 		var mc = Minecraft.getInstance();
-		mc.shimmer$postTick(mc.isPaused());
+		mc.shimmer$postTick(mc.getPauseType());
 		NeoForge.EVENT_BUS.post(new DebugTextEvent.ClientTick(DebugText.CLIENT_TICK));
 	}
 
@@ -185,6 +193,10 @@ public class ClientGameEventHandler {
 			return;
 		}
 
+		DebugText.RENDER.ops = mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
+
+		var session = mc.player.shimmer$sessionData();
+
 		var graphics = event.getGuiGraphics();
 
 		if ((mc.isLocalServer() || mc.player.hasPermissions(2)) && (mc.screen == null || mc.screen instanceof ChatScreen)) {
@@ -196,7 +208,7 @@ public class ClientGameEventHandler {
 
 			NeoForge.EVENT_BUS.post(new DebugTextEvent.Render(DebugText.RENDER));
 
-			var zoneClip = mc.player.shimmer$sessionData().zoneClip;
+			var zoneClip = session.zoneClip;
 
 			if (zoneClip != null) {
 				var component = Component.literal("Zone: ").append(Component.literal(zoneClip.instance().container.id.toString()).withStyle(ChatFormatting.AQUA));
@@ -211,8 +223,16 @@ public class ClientGameEventHandler {
 
 				if (!zoneTag.isEmpty()) {
 					for (var key : zoneTag.getAllKeys()) {
-						DebugText.RENDER.topRight.add(Component.literal(key + ": ").append(NbtUtils.toPrettyComponent(zoneTag.get(key))));
+						DebugText.RENDER.topLeft.add(Component.literal(key + ": ").append(NbtUtils.toPrettyComponent(zoneTag.get(key))));
 					}
+				}
+			}
+
+			if (!session.zonesTagsIn.isEmpty()) {
+				DebugText.RENDER.topRight.add("Zones in:");
+
+				for (var tag : session.zonesTagsIn) {
+					DebugText.RENDER.topRight.add(tag);
 				}
 			}
 
@@ -221,34 +241,34 @@ public class ClientGameEventHandler {
 
 			for (int i = 0; i < DebugText.RENDER.topLeft.list.size(); i++) {
 				int w = mc.font.width(DebugText.RENDER.topLeft.list.get(i));
-				int x = 2;
-				int y = 2 + i * 12;
-				graphics.fill(x, y, x + w + 6, y + 12, 0xA0000000);
-				graphics.drawString(mc.font, DebugText.RENDER.topLeft.list.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
+				int x = 1;
+				int y = 2 + i * 11;
+				graphics.fill(x, y, x + w + 3, y + 11, 0xA0000000);
+				graphics.drawString(mc.font, DebugText.RENDER.topLeft.list.get(i), x + 2, y + 2, 0xFFFFFFFF, true);
 			}
 
 			for (int i = 0; i < DebugText.RENDER.topRight.list.size(); i++) {
 				int w = mc.font.width(DebugText.RENDER.topRight.list.get(i));
-				int x = event.getGuiGraphics().guiWidth() - w - 8;
-				int y = 2 + i * 12;
-				graphics.fill(x, y, x + w + 6, y + 12, 0xA0000000);
-				graphics.drawString(mc.font, DebugText.RENDER.topRight.list.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
+				int x = event.getGuiGraphics().guiWidth() - w - 4;
+				int y = 2 + i * 11;
+				graphics.fill(x, y, x + w + 3, y + 11, 0xA0000000);
+				graphics.drawString(mc.font, DebugText.RENDER.topRight.list.get(i), x + 2, y + 2, 0xFFFFFFFF, true);
 			}
 
 			for (int i = 0; i < DebugText.RENDER.bottomLeft.list.size(); i++) {
 				int w = mc.font.width(DebugText.RENDER.bottomLeft.list.get(i));
-				int x = 2;
-				int y = i * 12 + event.getGuiGraphics().guiHeight() - DebugText.RENDER.bottomLeft.list.size() * 12 - 2;
-				graphics.fill(x, y, x + w + 6, y + 12, 0xA0000000);
-				graphics.drawString(mc.font, DebugText.RENDER.bottomLeft.list.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
+				int x = 1;
+				int y = i * 11 + event.getGuiGraphics().guiHeight() - DebugText.RENDER.bottomLeft.list.size() * 11 - 2;
+				graphics.fill(x, y, x + w + 3, y + 11, 0xA0000000);
+				graphics.drawString(mc.font, DebugText.RENDER.bottomLeft.list.get(i), x + 2, y + 2, 0xFFFFFFFF, true);
 			}
 
 			for (int i = 0; i < DebugText.RENDER.bottomRight.list.size(); i++) {
 				int w = mc.font.width(DebugText.RENDER.bottomRight.list.get(i));
-				int x = event.getGuiGraphics().guiWidth() - w - 8;
-				int y = i * 12 + event.getGuiGraphics().guiHeight() - DebugText.RENDER.bottomRight.list.size() * 12 - 2;
-				graphics.fill(x, y, x + w + 6, y + 12, 0xA0000000);
-				graphics.drawString(mc.font, DebugText.RENDER.bottomRight.list.get(i), x + 3, y + 2, 0xFFFFFFFF, true);
+				int x = event.getGuiGraphics().guiWidth() - w - 4;
+				int y = i * 11 + event.getGuiGraphics().guiHeight() - DebugText.RENDER.bottomRight.list.size() * 11 - 2;
+				graphics.fill(x, y, x + w + 3, y + 11, 0xA0000000);
+				graphics.drawString(mc.font, DebugText.RENDER.bottomRight.list.get(i), x + 2, y + 2, 0xFFFFFFFF, true);
 			}
 
 			graphics.pose().popPose();

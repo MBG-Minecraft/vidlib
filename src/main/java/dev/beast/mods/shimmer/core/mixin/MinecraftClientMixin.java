@@ -10,6 +10,7 @@ import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.cutscene.CutsceneScreen;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
+import dev.beast.mods.shimmer.feature.misc.PauseType;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleManager;
 import dev.beast.mods.shimmer.feature.structure.ClientStructureStorage;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
@@ -132,7 +133,7 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 	}
 
 	@Override
-	public void shimmer$preTick(boolean paused) {
+	public void shimmer$preTick(PauseType paused) {
 		if (level == null || player == null) {
 			return;
 		}
@@ -141,8 +142,8 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 	}
 
 	@Override
-	public void shimmer$postTick(boolean paused) {
-		if (paused) {
+	public void shimmer$postTick(PauseType paused) {
+		if (!paused.tick()) {
 			return;
 		}
 

@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public interface SetFakeBlockCommand {
 	@AutoRegister
-	ServerCommandHolder HOLDER = new ServerCommandHolder("set-fake-block", (command, buildContext) -> command
+	ServerCommandHolder COMMAND = new ServerCommandHolder("set-fake-block", (command, buildContext) -> command
 		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
 		.then(Commands.argument("pos", BlockPosArgument.blockPos())
 			.then(Commands.argument("state", BlockStateArgument.block(buildContext))

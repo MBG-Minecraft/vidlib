@@ -24,6 +24,7 @@ import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityInvulnerabilityCheckEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -101,12 +102,12 @@ public class GameEventHandler {
 
 	@SubscribeEvent
 	public static void serverPreTick(ServerTickEvent.Pre event) {
-		event.getServer().shimmer$preTick(event.getServer().isPaused());
+		event.getServer().shimmer$preTick(event.getServer().getPauseType());
 	}
 
 	@SubscribeEvent
 	public static void serverPostTick(ServerTickEvent.Post event) {
-		event.getServer().shimmer$postTick(event.getServer().isPaused());
+		event.getServer().shimmer$postTick(event.getServer().getPauseType());
 	}
 
 	@SubscribeEvent
@@ -183,6 +184,15 @@ public class GameEventHandler {
 			event.setCanceled(true);
 		} else {
 			event.setDamageMultiplier((float) (event.getDamageMultiplier() * mod));
+		}
+	}
+
+	@SubscribeEvent
+	public static void livingDamagePre(LivingDamageEvent.Pre event) {
+		var mod = event.getEntity().shimmer$attackDamageMod();
+
+		if (mod != 1F) {
+			event.setNewDamage(event.getNewDamage() * mod);
 		}
 	}
 }

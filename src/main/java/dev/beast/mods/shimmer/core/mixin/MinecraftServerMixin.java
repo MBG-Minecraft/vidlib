@@ -3,6 +3,7 @@ package dev.beast.mods.shimmer.core.mixin;
 import dev.beast.mods.shimmer.core.ShimmerMinecraftServer;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.data.DataType;
+import dev.beast.mods.shimmer.feature.misc.PauseType;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
 import dev.beast.mods.shimmer.util.ScheduledTask;
 import net.minecraft.Util;
@@ -65,8 +66,8 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 	}
 
 	@Override
-	public void shimmer$postTick(boolean paused) {
-		if (shimmer$scheduledTaskHandler != null) {
+	public void shimmer$postTick(PauseType paused) {
+		if (shimmer$scheduledTaskHandler != null && paused.tick()) {
 			shimmer$scheduledTaskHandler.tick();
 		}
 

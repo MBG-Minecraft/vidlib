@@ -23,7 +23,7 @@ public interface BulkLevelModification {
 	@AutoInit
 	static void bootstrap() {
 		REGISTRY.register(BulkLevelModificationBundle.TYPE);
-		REGISTRY.register(ReplaceSingleBlock.TYPE);
+		REGISTRY.register(PositionedBlock.TYPE);
 		REGISTRY.register(ReplaceCuboidBlocks.TYPE);
 		REGISTRY.register(ReplaceSphereBlocks.TYPE);
 		REGISTRY.register(ReplaceSectionBlocks.TYPE);
@@ -50,7 +50,7 @@ public interface BulkLevelModification {
 		var random = RandomSource.create(randomSeed == 0L ? Mth.getSeed(pos) : randomSeed);
 		var palette = template.palettes.size() == 1 ? template.palettes.getFirst() : template.palettes.get(random.nextInt(template.palettes.size()));
 		var list = palette.blocks();
-		var sections = new ReplaceSectionBlocks.Builder();
+		var builder = new OptimizedModificationBuilder();
 
 		for (var info : list) {
 			if (info.state().is(Blocks.STRUCTURE_VOID)) {
@@ -59,10 +59,10 @@ public interface BulkLevelModification {
 
 			var blockPos = StructureTemplate.transform(info.pos().offset(offset), mirror, rotation, rotationPivot).offset(pos);
 			var state = info.state().mirror(mirror).rotate(rotation);
-			sections.set(blockPos, state);
+			builder.set(blockPos, state);
 		}
 
-		return sections.build();
+		return builder.build();
 	}
 
 	default SimpleRegistryType<?> type() {

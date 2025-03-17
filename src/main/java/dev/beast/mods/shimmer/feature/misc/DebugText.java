@@ -1,11 +1,17 @@
 package dev.beast.mods.shimmer.feature.misc;
 
+import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.JsonOps;
+import dev.beast.mods.shimmer.feature.config.BooleanConfigValue;
 import dev.beast.mods.shimmer.feature.config.ConfigValue;
+import dev.beast.mods.shimmer.feature.config.FloatConfigValue;
+import dev.beast.mods.shimmer.feature.config.IntConfigValue;
+import dev.beast.mods.shimmer.math.KMath;
+import dev.beast.mods.shimmer.math.Range;
 import dev.beast.mods.shimmer.util.Cast;
 import net.minecraft.ChatFormatting;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -35,7 +41,7 @@ public class DebugText {
 		}
 
 		public <T> void addValue(String name, T value, Codec<T> codec) {
-			addValue(name, codec.encodeStart(parent.ops, value).getOrThrow());
+			add(name + ": " + codec.encodeStart(parent.ops, value).getOrThrow());
 		}
 
 		public void addValue(String name, Object value, ChatFormatting color) {
@@ -46,11 +52,7 @@ public class DebugText {
 			addValue(name, value, value ? ChatFormatting.GREEN : ChatFormatting.RED);
 		}
 
-		public void addValue(String name, float value) {
-			addValue(name, value, ChatFormatting.GOLD);
-		}
-
-		public void addValue(String name, double value) {
+		public void addValue(String name, Number value) {
 			addValue(name, value, ChatFormatting.GOLD);
 		}
 
@@ -60,7 +62,17 @@ public class DebugText {
 
 		public <T> void addConfig(T instance, List<ConfigValue<T, ?>> config) {
 			for (var value : config) {
-				addValue(value.name, Cast.to(value.getter.apply(instance)), value.codec);
+				if (value instanceof BooleanConfigValue c) {
+					addValue(value.name, (boolean) c.getter.apply(instance));
+				} else if (value instanceof FloatConfigValue c && c.slider && c.range == Range.FULL) {
+					addValue(value.name, KMath.format(((float) c.getter.apply(instance)) * 100F) + "%", ChatFormatting.GOLD);
+				} else if (value instanceof FloatConfigValue c) {
+					addValue(value.name, (float) c.getter.apply(instance));
+				} else if (value instanceof IntConfigValue c) {
+					addValue(value.name, (int) c.getter.apply(instance));
+				} else {
+					addValue(value.name, Cast.to(value.getter.apply(instance)), value.codec);
+				}
 			}
 		}
 	}
@@ -68,7 +80,7 @@ public class DebugText {
 	public static final DebugText RENDER = new DebugText();
 	public static final DebugText CLIENT_TICK = new DebugText();
 
-	public DynamicOps<Tag> ops = NbtOps.INSTANCE;
+	public DynamicOps<JsonElement> ops = JsonOps.INSTANCE;
 	public final DebugTextList topLeft = new DebugTextList(this);
 	public final DebugTextList topRight = new DebugTextList(this);
 	public final DebugTextList bottomLeft = new DebugTextList(this);

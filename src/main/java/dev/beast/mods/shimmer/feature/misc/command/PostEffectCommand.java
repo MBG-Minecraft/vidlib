@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public interface PostEffectCommand {
 	@AutoRegister
-	ServerCommandHolder HOLDER = new ServerCommandHolder("post-effect", (command, buildContext) -> command
+	ServerCommandHolder COMMAND = new ServerCommandHolder("post-effect", (command, buildContext) -> command
 		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
 		.then(Commands.argument("id", ResourceLocationArgument.id())
 			.executes(ctx -> setPostEffect(ctx.getSource(), ResourceLocationArgument.getId(ctx, "id")))

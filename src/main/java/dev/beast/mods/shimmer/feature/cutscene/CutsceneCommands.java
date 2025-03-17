@@ -8,7 +8,7 @@ import net.minecraft.commands.arguments.ResourceLocationArgument;
 
 public interface CutsceneCommands {
 	@AutoRegister
-	ServerCommandHolder HOLDER = new ServerCommandHolder("cutscene", (command, buildContext) -> command
+	ServerCommandHolder COMMAND = new ServerCommandHolder("cutscene", (command, buildContext) -> command
 		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
 		.then(Commands.literal("play")
 			.then(Commands.argument("id", ResourceLocationArgument.id())

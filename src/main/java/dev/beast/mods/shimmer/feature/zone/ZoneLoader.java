@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.feature.zone;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import dev.beast.mods.shimmer.Shimmer;
@@ -37,6 +38,12 @@ public class ZoneLoader extends JsonReloadListener {
 				var dimension = json.has("dimension") ? ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(json.get("dimension").getAsString())) : Level.OVERWORLD;
 				var container = new ZoneContainer(id, dimension);
 				int index = 0;
+
+				if (json.get("tags") instanceof JsonArray array) {
+					for (var element : array) {
+						container.tags.add(element.getAsString());
+					}
+				}
 
 				for (var element : json.getAsJsonArray("zones")) {
 					if (element.isJsonObject()) {

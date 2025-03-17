@@ -8,6 +8,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 public interface ShimmerPlayer extends ShimmerLivingEntity {
 	@Override
@@ -38,6 +39,11 @@ public interface ShimmerPlayer extends ShimmerLivingEntity {
 	}
 
 	@Override
+	default boolean isSuspended() {
+		return shimmer$sessionData().suspended;
+	}
+
+	@Override
 	@Nullable
 	default Boolean shimmer$glowingOverride() {
 		return shimmer$sessionData().glowingOverride;
@@ -59,8 +65,13 @@ public interface ShimmerPlayer extends ShimmerLivingEntity {
 		return shimmer$sessionData().speedMod;
 	}
 
+	@Override
+	default float shimmer$attackDamageMod() {
+		return shimmer$sessionData().attackDamageMod;
+	}
+
 	default boolean shimmer$pvp(Player other) {
-		return shimmer$sessionData().pvp() && other.shimmer$sessionData().pvp();
+		return shimmer$sessionData().pvp && other.shimmer$sessionData().pvp;
 	}
 
 	@Override
@@ -71,5 +82,13 @@ public interface ShimmerPlayer extends ShimmerLivingEntity {
 	@Override
 	default List<ZoneInstance> getZones() {
 		return shimmer$sessionData().zonesIn;
+	}
+
+	default Set<String> getZoneTags() {
+		return shimmer$sessionData().zonesTagsIn;
+	}
+
+	default boolean isReplayCamera() {
+		return false;
 	}
 }

@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.core;
 
+import dev.beast.mods.shimmer.feature.misc.PauseType;
 import dev.beast.mods.shimmer.math.Vec2d;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -13,6 +14,12 @@ import java.util.List;
 public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment, ShimmerClientEntityContainer {
 	default Minecraft shimmer$self() {
 		return (Minecraft) this;
+	}
+
+	@Override
+	default PauseType getPauseType() {
+		var mc = shimmer$self();
+		return mc.isPaused() ? PauseType.GAME : mc.level != null && mc.level.tickRateManager().isFrozen() ? PauseType.TICK : PauseType.NONE;
 	}
 
 	@ApiStatus.Internal

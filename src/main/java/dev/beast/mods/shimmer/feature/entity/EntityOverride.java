@@ -113,6 +113,7 @@ public final class EntityOverride<T> {
 	public static final EntityOverride<Integer> REGENERATE = createIntKey("regenerate");
 	public static final EntityOverride<Boolean> INVULNERABLE = createBooleanKey("invulnerable");
 	public static final EntityOverride<IconHolder> PLUMBOB = createKey("plumbob", IconHolder.CODEC, IconHolder.STREAM_CODEC);
+	public static final EntityOverride<Float> ATTACK_DAMAGE = createFloatKey("attack_damage");
 
 	public final String id;
 	private final Codec<T> codec;

@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface SyncCommand {
 	@AutoRegister
-	ServerCommandHolder HOLDER = new ServerCommandHolder("sync", (command, buildContext) -> command
+	ServerCommandHolder COMMAND = new ServerCommandHolder("sync", (command, buildContext) -> command
 		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
 		.then(Commands.argument("player", EntityArgument.players())
 			.executes(ctx -> sync(EntityArgument.getPlayers(ctx, "player")))

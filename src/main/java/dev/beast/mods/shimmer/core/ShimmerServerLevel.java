@@ -3,7 +3,7 @@ package dev.beast.mods.shimmer.core;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModification;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationBundle;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationPayload;
-import dev.beast.mods.shimmer.feature.bulk.ReplaceSectionBlocks;
+import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
 import dev.beast.mods.shimmer.feature.misc.FakeBlockPayload;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import net.minecraft.core.BlockPos;
@@ -29,13 +29,13 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 		var optimized = modification.optimize();
 
 		if (optimized instanceof BulkLevelModificationBundle bundle) {
-			var sections = new ReplaceSectionBlocks.Builder();
+			var builder = new OptimizedModificationBuilder();
 
 			for (var m : bundle.list()) {
-				m.apply(sections);
+				m.apply(builder);
 			}
 
-			optimized = sections.build();
+			optimized = builder.build();
 		}
 
 		s2c(new BulkLevelModificationPayload(optimized));

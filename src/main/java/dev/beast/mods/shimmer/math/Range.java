@@ -33,6 +33,10 @@ public record Range(float min, float max) {
 		return min == max ? min : random.nextFloat() * (max - min) + min;
 	}
 
+	public float delta(float value) {
+		return (value - min) / (max - min);
+	}
+
 	@Override
 	public String toString() {
 		return min == max ? KMath.format(min) : (KMath.format(min) + " - " + KMath.format(max));
