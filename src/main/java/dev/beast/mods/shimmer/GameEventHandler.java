@@ -115,6 +115,8 @@ public class GameEventHandler {
 		if (ShimmerConfig.betterDefaultGameRules) {
 			event.getServer().betterDefaultGameRules();
 		}
+
+		AutoInit.Type.SERVER_STARTED.invoke(event.getServer());
 	}
 
 	@SubscribeEvent

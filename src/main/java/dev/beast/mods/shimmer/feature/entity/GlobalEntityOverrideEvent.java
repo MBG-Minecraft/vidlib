@@ -13,7 +13,8 @@ import java.util.IdentityHashMap;
 import java.util.Objects;
 
 public class GlobalEntityOverrideEvent extends Event {
-	private static void fireEvent() {
+	@AutoInit({AutoInit.Type.GAME_LOADED, AutoInit.Type.DATA_RELOADED})
+	public static void fireEvent() {
 		for (var override : EntityOverride.getAllKeys()) {
 			override.all = null;
 			override.types = null;
@@ -21,16 +22,6 @@ public class GlobalEntityOverrideEvent extends Event {
 		}
 
 		NeoForge.EVENT_BUS.post(new GlobalEntityOverrideEvent());
-	}
-
-	@AutoInit
-	public static void fireLoadComplete() {
-		fireEvent();
-	}
-
-	@AutoInit(AutoInit.Type.DATA_RELOADED)
-	public static void fireDataReloaded() {
-		fireEvent();
 	}
 
 	private GlobalEntityOverrideEvent() {

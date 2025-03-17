@@ -22,7 +22,8 @@ public @interface AutoInit {
 		GAME_LOADED(false, false), // ()
 		CLIENT_LOADED(true, false), // ()
 		ASSETS_RELOADED(true, false), // ()
-		DATA_RELOADED(true, false), // ()
+		SERVER_STARTED(false, false), // (MinecraftServer)
+		DATA_RELOADED(false, false), // ()
 		CHUNKS_RELOADED(true, false), // ()
 		SHADERS_RELOADED(true, false), // ()
 		CLIENT_OPTIONS_SAVED(true, false), // (Options)
@@ -58,7 +59,7 @@ public @interface AutoInit {
 		}
 	}
 
-	Type value() default Type.GAME_LOADED;
+	Type[] value() default Type.GAME_LOADED;
 
 	record AutoMethod(Type type, Method method) {
 	}
@@ -68,16 +69,18 @@ public @interface AutoInit {
 		var list = new ArrayList<AutoMethod>();
 
 		AutoHelper.load(AutoInit.class, EnumSet.of(ElementType.TYPE, ElementType.METHOD), (mod, classLoader, ad) -> {
-			var type = AutoHelper.getEnumValue(ad, Type.class, "value", Type.GAME_LOADED);
+			var types = AutoHelper.getEnumValues(ad, Type.class, "value", EnumSet.of(Type.GAME_LOADED));
 
-			if (type.clientOnly && !FMLLoader.getDist().isClient()) {
-				Shimmer.LOGGER.info("Skipped @AutoInit class " + ad.clazz().getClassName());
-				return;
-			}
+			for (var type : types) {
+				if (type.clientOnly && !FMLLoader.getDist().isClient()) {
+					Shimmer.LOGGER.info("Skipped @AutoInit class " + ad.clazz().getClassName());
+					return;
+				}
 
-			if (type.methodOnly && ad.targetType() != ElementType.METHOD) {
-				Shimmer.LOGGER.info("Skipped @AutoInit class " + ad.clazz().getClassName());
-				return;
+				if (type.methodOnly && ad.targetType() != ElementType.METHOD) {
+					Shimmer.LOGGER.info("Skipped @AutoInit class " + ad.clazz().getClassName());
+					return;
+				}
 			}
 
 			var clazz = Class.forName(ad.clazz().getClassName(), true, classLoader);
@@ -85,7 +88,10 @@ public @interface AutoInit {
 			if (ad.targetType() == ElementType.METHOD) {
 				var method = AutoHelper.getMethod(clazz, ad, classLoader);
 				Shimmer.LOGGER.info("Found @AutoInit method " + clazz.getName() + "#" + method.getName());
-				list.add(new AutoMethod(type, method));
+
+				for (var type : types) {
+					list.add(new AutoMethod(type, method));
+				}
 			} else {
 				Shimmer.LOGGER.info("Found @AutoInit class " + clazz.getName());
 			}
