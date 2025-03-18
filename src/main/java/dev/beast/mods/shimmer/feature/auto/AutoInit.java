@@ -19,6 +19,7 @@ import java.util.List;
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface AutoInit {
 	enum Type {
+		DEFAULT(false, false), // ()
 		GAME_LOADED(false, false), // ()
 		CLIENT_LOADED(true, false), // ()
 		ASSETS_RELOADED(true, false), // ()
@@ -27,6 +28,8 @@ public @interface AutoInit {
 		CHUNKS_RELOADED(true, false), // ()
 		SHADERS_RELOADED(true, false), // ()
 		CLIENT_OPTIONS_SAVED(true, false), // (Options)
+		SERVER_STRUCTURES_LOADED(false, false), // (StructureStorage)
+		CLIENT_STRUCTURES_LOADED(true, false), // (StructureStorage)
 
 		;
 
@@ -59,7 +62,7 @@ public @interface AutoInit {
 		}
 	}
 
-	Type[] value() default Type.GAME_LOADED;
+	Type[] value() default Type.DEFAULT;
 
 	record AutoMethod(Type type, Method method) {
 	}
@@ -69,9 +72,13 @@ public @interface AutoInit {
 		var list = new ArrayList<AutoMethod>();
 
 		AutoHelper.load(AutoInit.class, EnumSet.of(ElementType.TYPE, ElementType.METHOD), (mod, classLoader, ad) -> {
-			var types = AutoHelper.getEnumValues(ad, Type.class, "value", EnumSet.of(Type.GAME_LOADED));
+			var types = AutoHelper.getEnumValues(ad, Type.class, "value", EnumSet.of(Type.DEFAULT));
 
 			for (var type : types) {
+				if (type == Type.DEFAULT) {
+					type = Type.GAME_LOADED;
+				}
+
 				if (type.clientOnly && !FMLLoader.getDist().isClient()) {
 					Shimmer.LOGGER.info("Skipped @AutoInit class " + ad.clazz().getClassName());
 					return;
@@ -90,7 +97,7 @@ public @interface AutoInit {
 				Shimmer.LOGGER.info("Found @AutoInit method " + clazz.getName() + "#" + method.getName());
 
 				for (var type : types) {
-					list.add(new AutoMethod(type, method));
+					list.add(new AutoMethod(type == Type.DEFAULT ? Type.GAME_LOADED : type, method));
 				}
 			} else {
 				Shimmer.LOGGER.info("Found @AutoInit class " + clazz.getName());

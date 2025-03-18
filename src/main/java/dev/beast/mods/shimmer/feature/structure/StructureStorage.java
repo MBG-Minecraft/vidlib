@@ -2,7 +2,9 @@ package dev.beast.mods.shimmer.feature.structure;
 
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.ShimmerConfig;
+import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.util.Lazy;
+import dev.beast.mods.shimmer.util.Side;
 import dev.beast.mods.shimmer.util.registry.RegistryReference;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtAccounter;
@@ -20,7 +22,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class StructureStorage extends SimplePreparableReloadListener<Map<ResourceLocation, Resource>> {
-	public static final StructureStorage SERVER = new StructureStorage(true);
+	public static final StructureStorage SERVER = new StructureStorage(Side.SERVER);
 
 	private record StructureSupplier(ResourceLocation id, Resource resource) implements Supplier<StructureTemplate> {
 		@Override
@@ -36,10 +38,12 @@ public class StructureStorage extends SimplePreparableReloadListener<Map<Resourc
 		}
 	}
 
+	public final Side side;
 	public final RegistryReference.Holder<ResourceLocation, Lazy<StructureTemplate>> structures;
 
-	public StructureStorage(boolean server) {
-		this.structures = server ? RegistryReference.createServerHolder() : RegistryReference.createRuntimeHolder();
+	public StructureStorage(Side side) {
+		this.side = side;
+		this.structures = side.isServer() ? RegistryReference.createServerHolder() : RegistryReference.createRuntimeHolder();
 	}
 
 	@Nullable
@@ -68,5 +72,7 @@ public class StructureStorage extends SimplePreparableReloadListener<Map<Resourc
 		}
 
 		structures.update(map2);
+
+		(side.isServer() ? AutoInit.Type.SERVER_STRUCTURES_LOADED : AutoInit.Type.CLIENT_STRUCTURES_LOADED).invoke(this);
 	}
 }
