@@ -23,6 +23,7 @@ import java.util.Optional;
 public record SkyboxData(
 	ResourceLocation id,
 	Optional<ResourceLocation> texture,
+	float rotation,
 	float rotating,
 	Color tint,
 	boolean celestials
@@ -30,6 +31,7 @@ public record SkyboxData(
 	public static final Codec<SkyboxData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		ShimmerCodecs.SHIMMER_ID.fieldOf("id").forGetter(SkyboxData::id),
 		ShimmerCodecs.SHIMMER_ID.optionalFieldOf("texture").forGetter(SkyboxData::texture),
+		Codec.FLOAT.optionalFieldOf("rotation", 0F).forGetter(SkyboxData::rotation),
 		Codec.FLOAT.optionalFieldOf("rotating", 0F).forGetter(SkyboxData::rotating),
 		Color.CODEC.optionalFieldOf("tint", Color.WHITE).forGetter(SkyboxData::tint),
 		Codec.BOOL.optionalFieldOf("celestials", false).forGetter(SkyboxData::celestials)
@@ -38,6 +40,7 @@ public record SkyboxData(
 	public static final StreamCodec<ByteBuf, SkyboxData> STREAM_CODEC = CompositeStreamCodec.of(
 		ShimmerStreamCodecs.SHIMMER_ID, SkyboxData::id,
 		ShimmerStreamCodecs.SHIMMER_ID.optional(), SkyboxData::texture,
+		ByteBufCodecs.FLOAT, SkyboxData::rotation,
 		ByteBufCodecs.FLOAT, SkyboxData::rotating,
 		Color.STREAM_CODEC, SkyboxData::tint,
 		ByteBufCodecs.BOOL, SkyboxData::celestials,

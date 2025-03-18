@@ -237,7 +237,7 @@ public class ClientGameEventHandler {
 				}
 			}
 
-			if (!session.zonesTagsIn.isEmpty()) {
+			if (!session.zonesTagsIn.isEmpty() && mc.player.get(InternalPlayerData.SHOW_ZONES)) {
 				DebugText.RENDER.topRight.add("Zones in:");
 
 				for (var tag : session.zonesTagsIn) {

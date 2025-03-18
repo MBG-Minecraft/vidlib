@@ -19,7 +19,7 @@ public class SkyboxRenderer {
 		ms.pushPose();
 
 		if (skybox.data.rotating() != 0F) {
-			ms.mulPose(Axis.YP.rotationDegrees(360F * RenderSystem.getShaderGameTime() * skybox.data.rotating()));
+			ms.mulPose(Axis.YP.rotationDegrees(skybox.data.rotation() + 360F * RenderSystem.getShaderGameTime() * skybox.data.rotating()));
 		}
 
 		var buffer = mc.renderBuffers().bufferSource().getBuffer(ShimmerRenderTypes.SKYBOX.apply(texture.resourceId()));
