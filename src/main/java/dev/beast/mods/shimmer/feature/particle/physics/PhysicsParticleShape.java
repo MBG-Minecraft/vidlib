@@ -39,8 +39,8 @@ public class PhysicsParticleShape {
 			var s = state.getBlock() instanceof GrassBlock ? mc.getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(Shimmer.id("block/grass")) : mc.getBlockRenderer().getBlockModel(state).getParticleIcon();
 			var suv = new UV(s.getU0(), s.getV0(), s.getU1(), s.getV1());
 
-			var memory = new ByteBufferBuilder(PhysicsParticleManager.FORMAT.getVertexSize() * 4 * 6);
-			var buffer = new BufferBuilder(memory, VertexFormat.Mode.QUADS, PhysicsParticleManager.FORMAT);
+			var memory = new ByteBufferBuilder(PhysicsParticlesRenderTypes.FORMAT.getVertexSize() * 4 * 6);
+			var buffer = new BufferBuilder(memory, VertexFormat.Mode.QUADS, PhysicsParticlesRenderTypes.FORMAT);
 
 			for (int i = 0; i < 6; i++) {
 				var f = box.facePos()[i];
@@ -71,8 +71,8 @@ public class PhysicsParticleShape {
 			var s = state.getBlock() instanceof GrassBlock ? mc.getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(Shimmer.id("block/grass")) : mc.getBlockRenderer().getBlockModel(state).getParticleIcon();
 			var suv = new UV(s.getU0(), s.getV0(), s.getU1(), s.getV1());
 
-			var memory = new ByteBufferBuilder(PhysicsParticleManager.FORMAT.getVertexSize() * 4);
-			var buffer = new BufferBuilder(memory, VertexFormat.Mode.QUADS, PhysicsParticleManager.FORMAT);
+			var memory = new ByteBufferBuilder(PhysicsParticlesRenderTypes.FORMAT.getVertexSize() * 4);
+			var buffer = new BufferBuilder(memory, VertexFormat.Mode.QUADS, PhysicsParticlesRenderTypes.FORMAT);
 
 			int i = Direction.SOUTH.ordinal();
 

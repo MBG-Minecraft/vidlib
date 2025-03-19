@@ -73,9 +73,12 @@ public class PhysicsParticlesTool implements ShimmerTool {
 		int solid = PhysicsParticleManager.SOLID.particles.size();
 		int cutout = PhysicsParticleManager.CUTOUT.particles.size();
 		int translucent = PhysicsParticleManager.TRANSLUCENT.particles.size();
-		debugText.topLeft.add("%,d Solid".formatted(solid));
-		debugText.topLeft.add("%,d Cutout".formatted(cutout));
-		debugText.topLeft.add("%,d Translucent".formatted(translucent));
-		debugText.topLeft.add("%,d Total".formatted(solid + cutout + translucent));
+		int solidRendered = PhysicsParticleManager.SOLID.rendered;
+		int cutoutRendered = PhysicsParticleManager.CUTOUT.rendered;
+		int translucentRendered = PhysicsParticleManager.TRANSLUCENT.rendered;
+		debugText.topLeft.add("%,d/%,d Solid".formatted(solidRendered, solid));
+		debugText.topLeft.add("%,d/%,d Cutout".formatted(cutoutRendered, cutout));
+		debugText.topLeft.add("%,d/%,d Translucent".formatted(translucentRendered, translucent));
+		debugText.topRight.add("%,d/%,d Total".formatted(solidRendered + cutoutRendered + translucentRendered, solid + cutout + translucent));
 	}
 }

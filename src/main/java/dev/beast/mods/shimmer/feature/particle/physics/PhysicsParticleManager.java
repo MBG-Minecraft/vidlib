@@ -1,15 +1,11 @@
 package dev.beast.mods.shimmer.feature.particle.physics;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormatElement;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.core.ShimmerBlockState;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.shader.ShaderHolder;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.CompiledShaderProgram;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -28,15 +24,9 @@ import java.util.function.Consumer;
 
 @AutoInit(AutoInit.Type.CLIENT_LOADED)
 public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
-	public static final VertexFormat FORMAT = VertexFormat.builder()
-		.add("Position", VertexFormatElement.POSITION)
-		.add("UV0", VertexFormatElement.UV0)
-		.add("Normal", VertexFormatElement.NORMAL)
-		.build();
-
-	public static final PhysicsParticleManager SOLID = new PhysicsParticleManager(Shimmer.id("physics_particle/solid"), 0, true);
-	public static final PhysicsParticleManager CUTOUT = new PhysicsParticleManager(Shimmer.id("physics_particle/cutout"), 1, false);
-	public static final PhysicsParticleManager TRANSLUCENT = new PhysicsParticleManager(Shimmer.id("physics_particle/translucent"), 2, false);
+	public static final PhysicsParticleManager SOLID = new PhysicsParticleManager(Shimmer.id("physics_particle/solid"), PhysicsParticlesRenderTypes.PHYSICS_SOLID, true);
+	public static final PhysicsParticleManager CUTOUT = new PhysicsParticleManager(Shimmer.id("physics_particle/cutout"), PhysicsParticlesRenderTypes.PHYSICS_CUTOUT, false);
+	public static final PhysicsParticleManager TRANSLUCENT = new PhysicsParticleManager(Shimmer.id("physics_particle/translucent"), PhysicsParticlesRenderTypes.PHYSICS_TRANSLUCENT, false);
 
 	public static void renderAll(PhysicsParticleRenderContext ctx) {
 		var lightmapTextureManager = ctx.mc().gameRenderer.lightTexture();
@@ -87,19 +77,20 @@ public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
 
 	public final ResourceLocation id;
 	public final ShaderHolder shader;
-	public final int blend;
+	public final RenderType renderType;
 	public final boolean mipmaps;
 	public final List<PhysicsParticle> particles;
 	public final List<PhysicsParticle> queue;
+	public int rendered;
 
 	private Uniform pProjection, pModel, pTint;
 	private float prevTintR, prevTintG, prevTintB, prevTintA;
 
-	public PhysicsParticleManager(ResourceLocation id, int blend, boolean mipmaps) {
+	public PhysicsParticleManager(ResourceLocation id, RenderType renderType, boolean mipmaps) {
 		this.id = id;
-		this.shader = new ShaderHolder(id, FORMAT);
+		this.shader = new ShaderHolder(id, PhysicsParticlesRenderTypes.FORMAT);
 		this.shader.addListener(this);
-		this.blend = blend;
+		this.renderType = renderType;
 		this.mipmaps = mipmaps;
 		this.particles = new ArrayList<>();
 		this.queue = new ArrayList<>();
@@ -130,6 +121,8 @@ public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
 	}
 
 	public void render(Matrix4fStack matrix, PhysicsParticleRenderContext ctx) {
+		rendered = 0;
+
 		if (particles.isEmpty()) {
 			return;
 		}
@@ -142,18 +135,7 @@ public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
 
 		RenderSystem.setShader(program);
 
-		if (blend == 2) {
-			RenderSystem.enableBlend();
-			RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-
-			if (Minecraft.useShaderTransparency()) {
-				ctx.mc().levelRenderer.getTranslucentTarget().bindWrite(false);
-			}
-
-		} else {
-			RenderSystem.disableBlend();
-			RenderSystem.defaultBlendFunc();
-		}
+		renderType.setupRenderState();
 
 		RenderSystem.depthMask(true);
 
@@ -174,14 +156,7 @@ public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
 		}
 
 		program.clear();
-
-		if (blend == 2) {
-			if (Minecraft.useShaderTransparency()) {
-				ctx.mc().getMainRenderTarget().bindWrite(false);
-			}
-		}
-
-		RenderSystem.defaultBlendFunc();
+		renderType.clearRenderState();
 
 		tex.setFilter(false, false);
 		RenderSystem.setShaderTexture(0, tex.getId());

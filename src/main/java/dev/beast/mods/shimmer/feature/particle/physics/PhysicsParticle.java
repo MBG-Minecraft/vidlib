@@ -98,6 +98,7 @@ public class PhysicsParticle {
 		particleBuffer.bind();
 		particleBuffer.draw();
 		VertexBuffer.unbind();
+		manager.rendered++;
 	}
 
 	public boolean tick(Level level) {
