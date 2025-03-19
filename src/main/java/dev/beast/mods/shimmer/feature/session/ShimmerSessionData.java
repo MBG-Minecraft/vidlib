@@ -17,6 +17,7 @@ import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 import java.util.Set;
@@ -39,6 +40,7 @@ public class ShimmerSessionData {
 	public boolean pvp;
 	public IconHolder plumbobIcon;
 	public Clothing clothing;
+	public boolean unpushable;
 
 	public ShimmerSessionData(UUID uuid) {
 		this.uuid = uuid;
@@ -69,26 +71,21 @@ public class ShimmerSessionData {
 		glowingOverride = EntityOverride.GLOWING.get(player);
 		var teamColorOverrideCol = EntityOverride.TEAM_COLOR.get(player);
 		teamColorOverride = teamColorOverrideCol == null ? null : teamColorOverrideCol.rgb();
-		suspended = EntityOverride.SUSPENDED.get(player, false);
+		suspended = EntityOverride.SUSPENDED.get(player, null, InternalPlayerData.SUSPENDED);
 		gravityMod = suspended ? 0F : EntityOverride.GRAVITY.get(player, 1D);
 		speedMod = suspended ? 0F : EntityOverride.SPEED.get(player, 1F);
 		attackDamageMod = suspended ? 0F : EntityOverride.ATTACK_DAMAGE.get(player, 1F);
 		pvp = !suspended && EntityOverride.PVP.get(player, true);
-
-		plumbobIcon = EntityOverride.PLUMBOB.get(player, IconHolder.EMPTY);
-
-		if (plumbobIcon == IconHolder.EMPTY) {
-			plumbobIcon = dataMap.get(InternalPlayerData.PLUMBOB);
-		}
-
-		clothing = EntityOverride.CLOTHING.get(player, Clothing.NONE);
-
-		if (clothing == Clothing.NONE) {
-			clothing = dataMap.get(InternalPlayerData.CLOTHING);
-		}
+		plumbobIcon = EntityOverride.PLUMBOB.get(player, IconHolder.EMPTY, InternalPlayerData.PLUMBOB);
+		clothing = EntityOverride.CLOTHING.get(player, Clothing.NONE, InternalPlayerData.CLOTHING);
+		unpushable = suspended || EntityOverride.UNPUSHABLE.get(player, false);
 
 		if (gravityMod <= 0D) {
 			player.resetFallDistance();
+		}
+
+		if (suspended) {
+			player.setDeltaMovement(Vec3.ZERO);
 		}
 	}
 

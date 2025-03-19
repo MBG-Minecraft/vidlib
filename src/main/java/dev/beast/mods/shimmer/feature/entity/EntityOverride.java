@@ -3,9 +3,11 @@ package dev.beast.mods.shimmer.feature.entity;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.core.ShimmerEntity;
+import dev.beast.mods.shimmer.core.ShimmerPlayer;
 import dev.beast.mods.shimmer.feature.clothing.Clothing;
 import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
+import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
 import dev.beast.mods.shimmer.feature.icon.IconHolder;
 import dev.beast.mods.shimmer.feature.skybox.FogOverride;
@@ -120,6 +122,7 @@ public final class EntityOverride<T> {
 	public static final EntityOverride<ResourceLocation> SKYBOX = createKey("skybox", ShimmerCodecs.SHIMMER_ID, ShimmerStreamCodecs.SHIMMER_ID);
 	public static final EntityOverride<Range> AMBIENT_LIGHT = createKey("ambient_light", Range.CODEC, Range.STREAM_CODEC);
 	public static final EntityOverride<FogOverride> FOG = createKey("fog", FogOverride.CODEC, FogOverride.STREAM_CODEC);
+	public static final EntityOverride<Boolean> UNPUSHABLE = createBooleanKey("unpushable");
 
 	public final String id;
 	private final Codec<T> codec;
@@ -204,6 +207,11 @@ public final class EntityOverride<T> {
 	public T get(@Nullable ShimmerEntity entity, T def) {
 		var v = get(entity);
 		return v == null ? def : v;
+	}
+
+	public T get(ShimmerPlayer player, @Nullable T def, DataType<T> playerDataFallback) {
+		var v = get(player);
+		return v == null || v.equals(def) ? player.get(playerDataFallback) : v;
 	}
 
 	public void set(ShimmerEntity entity, @Nullable EntityOverrideValue<T> value) {

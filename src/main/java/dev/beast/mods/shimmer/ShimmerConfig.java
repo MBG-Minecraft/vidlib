@@ -15,4 +15,5 @@ public class ShimmerConfig {
 	public static boolean fetchOfflinePlayerData = true;
 	public static int structureBlockRange = 200;
 	public static double physicsParticleRenderLOD = 64D;
+	public static boolean renderSuspendedOverlay = false;
 }

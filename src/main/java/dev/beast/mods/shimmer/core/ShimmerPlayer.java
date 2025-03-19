@@ -91,4 +91,9 @@ public interface ShimmerPlayer extends ShimmerLivingEntity {
 	default boolean isReplayCamera() {
 		return false;
 	}
+
+	@Override
+	default boolean shimmer$unpushable() {
+		return shimmer$sessionData().unpushable;
+	}
 }

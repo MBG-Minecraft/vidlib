@@ -12,4 +12,8 @@ public interface ShimmerLivingEntity extends ShimmerEntity {
 
 		entity.extinguishFire();
 	}
+
+	default boolean shimmer$unpushable() {
+		return false;
+	}
 }

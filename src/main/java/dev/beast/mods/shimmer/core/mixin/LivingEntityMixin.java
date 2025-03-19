@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin implements ShimmerLivingEntity {
@@ -50,5 +51,12 @@ public abstract class LivingEntityMixin implements ShimmerLivingEntity {
 	@ModifyReturnValue(method = "getSpeed", at = @At("RETURN"))
 	private float shimmer$getSpeed(float original) {
 		return original * shimmer$speedMod();
+	}
+
+	@Inject(method = "isPushable", at = @At("HEAD"), cancellable = true)
+	private void shimmer$isPushable(CallbackInfoReturnable<Boolean> cir) {
+		if (shimmer$unpushable()) {
+			cir.setReturnValue(false);
+		}
 	}
 }

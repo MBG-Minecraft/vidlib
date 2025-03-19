@@ -14,6 +14,12 @@ import net.minecraft.network.codec.ByteBufCodecs;
 
 @AutoInit
 public interface InternalPlayerData {
+	DataType<Boolean> SUSPENDED = DataType.PLAYER.internal("suspended", false)
+		.save(Codec.BOOL)
+		.sync(ByteBufCodecs.BOOL)
+		.syncToAllClients()
+		.build();
+
 	DataType<Component> NICKNAME = DataType.PLAYER.internal("nickname", Empty.COMPONENT)
 		.save(ComponentSerialization.CODEC)
 		.sync(ComponentSerialization.STREAM_CODEC)
