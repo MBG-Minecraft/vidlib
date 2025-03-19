@@ -42,7 +42,11 @@ public class ExplosionTestTool implements ShimmerTool {
 	@Override
 	public boolean use(Player player, ItemStack item) {
 		if (player.level() instanceof ServerLevel level) {
-			explode(level, player, item);
+			if (player.isShiftKeyDown()) {
+				player.status("Modified %,d blocks".formatted(player.level().undoLastModification()));
+			} else {
+				explode(level, player, item);
+			}
 		}
 
 		return true;

@@ -5,6 +5,7 @@ import dev.beast.mods.shimmer.feature.bulk.BlockModificationConsumer;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModification;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationBundle;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationHolder;
+import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
 import dev.beast.mods.shimmer.feature.bulk.UndoableModification;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.sound.SoundData;
@@ -50,6 +51,31 @@ public interface ShimmerLevel extends ShimmerEntityContainer {
 
 	default void addUndoable(UndoableModification modification) {
 		shimmer$getUndoableModifications().add(modification);
+	}
+
+	default int undoLastModification() {
+		var undoable = shimmer$getUndoableModifications();
+
+		if (!undoable.isEmpty()) {
+			var builder = new OptimizedModificationBuilder();
+			undoable.getLast().undo((Level) this, builder);
+			undoable.removeLast();
+			return bulkModify(builder.build());
+		}
+
+		return 0;
+	}
+
+	default int undoAllModifications() {
+		var builder = new OptimizedModificationBuilder();
+		var undoable = shimmer$getUndoableModifications();
+
+		for (int i = undoable.size() - 1; i >= 0; i--) {
+			undoable.get(i).undo((Level) this, builder);
+		}
+
+		undoable.clear();
+		return bulkModify(builder.build());
 	}
 
 	default void setFakeBlock(BlockPos pos, BlockState state) {

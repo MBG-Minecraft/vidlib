@@ -41,7 +41,6 @@ public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
 	public static void renderAll(PhysicsParticleRenderContext ctx) {
 		var lightmapTextureManager = ctx.mc().gameRenderer.lightTexture();
 		lightmapTextureManager.turnOnLightLayer();
-		RenderSystem.enableDepthTest();
 		var matrix = RenderSystem.getModelViewStack();
 		matrix.pushMatrix();
 		matrix.mul(ctx.poseStack().last().pose());
@@ -51,8 +50,6 @@ public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
 		TRANSLUCENT.render(matrix, ctx);
 
 		matrix.popMatrix();
-		RenderSystem.depthMask(true);
-		RenderSystem.disableBlend();
 		lightmapTextureManager.turnOffLightLayer();
 	}
 
