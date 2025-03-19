@@ -1,12 +1,16 @@
 package dev.beast.mods.shimmer.core;
 
+import dev.beast.mods.shimmer.feature.entity.C2SEntityEventPayload;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.entity.EntityOverrideValue;
 import dev.beast.mods.shimmer.feature.entity.ForceEntityVelocityPayload;
+import dev.beast.mods.shimmer.feature.entity.S2CEntityEventPayload;
 import dev.beast.mods.shimmer.feature.sound.SoundData;
 import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
 import dev.beast.mods.shimmer.math.Line;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.portal.TeleportTransition;
@@ -134,5 +138,29 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 	default void playTrackingSound(SoundData data, boolean looping) {
 		var e = (Entity) this;
 		e.level().playTrackingSound(e, data, looping);
+	}
+
+	default void sendS2CEvent(String event, CompoundTag data) {
+		var e = (Entity) this;
+		e.level().s2c(new S2CEntityEventPayload(e.getId(), event, data, e.level().getGameTime()));
+	}
+
+	default void sendS2CEvent(String event) {
+		sendS2CEvent(event, new CompoundTag());
+	}
+
+	default void onS2CEvent(String event, CompoundTag data) {
+	}
+
+	default void sendC2SEvent(String event, CompoundTag data) {
+		var e = (Entity) this;
+		e.level().c2s(new C2SEntityEventPayload(e.getId(), event, data));
+	}
+
+	default void sendC2SEvent(String event) {
+		sendC2SEvent(event, new CompoundTag());
+	}
+
+	default void onC2SEvent(String event, CompoundTag data, ServerPlayer from) {
 	}
 }

@@ -12,6 +12,7 @@ import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
 import dev.beast.mods.shimmer.feature.misc.DebugText;
 import dev.beast.mods.shimmer.math.KMath;
 import dev.beast.mods.shimmer.math.Range;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -31,6 +32,106 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ExplosionData {
+	public static class EntityData {
+		public static final EntityData DEFAULT = new EntityData();
+
+		public static final Codec<EntityData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+			Codec.FLOAT.optionalFieldOf("damage", 4F).forGetter(v -> v.damage),
+			Codec.FLOAT.optionalFieldOf("horizontal_knockback", 1F).forGetter(v -> v.horizontalKnockback),
+			Codec.FLOAT.optionalFieldOf("vertical_knockback", 0F).forGetter(v -> v.verticalKnockback)
+		).apply(instance, EntityData::new));
+
+		public static final StreamCodec<ByteBuf, EntityData> STREAM_CODEC = CompositeStreamCodec.of(
+			ByteBufCodecs.FLOAT, v -> v.damage,
+			ByteBufCodecs.FLOAT, v -> v.horizontalKnockback,
+			ByteBufCodecs.FLOAT, v -> v.verticalKnockback,
+			EntityData::new
+		);
+
+		public float damage;
+		public float horizontalKnockback;
+		public float verticalKnockback;
+
+		public EntityData() {
+			this.damage = 4F;
+			this.horizontalKnockback = 1F;
+			this.verticalKnockback = 0F;
+		}
+
+		private EntityData(
+			float damage,
+			float horizontalKnockback,
+			float verticalKnockback
+		) {
+			this.damage = damage;
+			this.horizontalKnockback = horizontalKnockback;
+			this.verticalKnockback = verticalKnockback;
+		}
+
+		private EntityData copy() {
+			return new EntityData(damage, horizontalKnockback, verticalKnockback);
+		}
+	}
+
+	public static class FilterData {
+		public static final FilterData DEFAULT = new FilterData();
+
+		public static final Codec<FilterData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+			Codec.INT.optionalFieldOf("floor", -1000).forGetter(v -> v.floor),
+			Codec.INT.optionalFieldOf("ceiling", 1000).forGetter(v -> v.ceiling),
+			BlockFilter.CODEC.optionalFieldOf("blocks", BlockFilter.ANY.instance()).forGetter(v -> v.blocks),
+			EntityFilter.CODEC.optionalFieldOf("ignored", EntityFilter.CREATIVE.instance()).forGetter(v -> v.ignored),
+			EntityFilter.CODEC.optionalFieldOf("invincible", EntityFilter.NONE.instance()).forGetter(v -> v.invincible),
+			Codec.BOOL.optionalFieldOf("bypass_unbreakable", false).forGetter(v -> v.bypassUnbreakable)
+		).apply(instance, FilterData::new));
+
+		public static final StreamCodec<RegistryFriendlyByteBuf, FilterData> STREAM_CODEC = CompositeStreamCodec.of(
+			ByteBufCodecs.INT, v -> v.floor,
+			ByteBufCodecs.INT, v -> v.ceiling,
+			BlockFilter.STREAM_CODEC.optional(BlockFilter.ANY.instance()), v -> v.blocks,
+			EntityFilter.STREAM_CODEC.optional(EntityFilter.CREATIVE.instance()), v -> v.ignored,
+			EntityFilter.STREAM_CODEC.optional(EntityFilter.NONE.instance()), v -> v.invincible,
+			ByteBufCodecs.BOOL, v -> v.bypassUnbreakable,
+			FilterData::new
+		);
+
+		public int floor;
+		public int ceiling;
+		public BlockFilter blocks;
+		public EntityFilter ignored;
+		public EntityFilter invincible;
+		public boolean bypassUnbreakable;
+
+		public FilterData() {
+			this.floor = -1000;
+			this.ceiling = 1000;
+			this.blocks = BlockFilter.ANY.instance();
+			this.ignored = EntityFilter.CREATIVE.instance();
+			this.invincible = EntityFilter.NONE.instance();
+			this.bypassUnbreakable = false;
+		}
+
+		private FilterData(
+			int floor,
+			int ceiling,
+			BlockFilter blocks,
+			EntityFilter ignored,
+			EntityFilter invincible,
+			boolean bypassUnbreakable
+		) {
+			this.floor = -1000;
+			this.ceiling = 1000;
+			this.blocks = BlockFilter.ANY.instance();
+			this.ignored = EntityFilter.CREATIVE.instance();
+			this.invincible = EntityFilter.NONE.instance();
+			this.bypassUnbreakable = false;
+		}
+
+		private FilterData copy() {
+			return new FilterData(floor, ceiling, blocks, ignored, invincible, bypassUnbreakable);
+		}
+	}
+
 	public static final Codec<ExplosionData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Codec.FLOAT.optionalFieldOf("radius", 4F).forGetter(v -> v.radius),
 		Codec.FLOAT.optionalFieldOf("depth", 4F).forGetter(v -> v.height),
@@ -39,14 +140,8 @@ public class ExplosionData {
 		Codec.FLOAT.optionalFieldOf("decay", 1F).forGetter(v -> v.decay),
 		Codec.FLOAT.optionalFieldOf("fire", 0F).forGetter(v -> v.fire),
 		Codec.BOOL.optionalFieldOf("smolder", false).forGetter(v -> v.smolder),
-		Codec.FLOAT.optionalFieldOf("entity_damage", 4F).forGetter(v -> v.entityDamage),
-		Codec.FLOAT.optionalFieldOf("entity_knockback", 1F).forGetter(v -> v.entityKnockback),
-		Codec.INT.optionalFieldOf("floor", -1000).forGetter(v -> v.floor),
-		Codec.INT.optionalFieldOf("ceiling", 1000).forGetter(v -> v.ceiling),
-		BlockFilter.CODEC.optionalFieldOf("block_filter", BlockFilter.ANY.instance()).forGetter(v -> v.blockFilter),
-		EntityFilter.CODEC.optionalFieldOf("ignored_entities", EntityFilter.CREATIVE.instance()).forGetter(v -> v.ignoredEntities),
-		EntityFilter.CODEC.optionalFieldOf("invincible_entities", EntityFilter.NONE.instance()).forGetter(v -> v.invincibleEntities),
-		Codec.BOOL.optionalFieldOf("bypass_unbreakable", false).forGetter(v -> v.bypassUnbreakable)
+		EntityData.CODEC.optionalFieldOf("entity", EntityData.DEFAULT).forGetter(v -> v.entity),
+		FilterData.CODEC.optionalFieldOf("filter", FilterData.DEFAULT).forGetter(v -> v.filter)
 	).apply(instance, ExplosionData::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ExplosionData> STREAM_CODEC = CompositeStreamCodec.of(
@@ -57,14 +152,8 @@ public class ExplosionData {
 		ByteBufCodecs.FLOAT, v -> v.decay,
 		ByteBufCodecs.FLOAT, v -> v.fire,
 		ByteBufCodecs.BOOL, v -> v.smolder,
-		ByteBufCodecs.FLOAT, v -> v.entityDamage,
-		ByteBufCodecs.FLOAT, v -> v.entityKnockback,
-		ByteBufCodecs.INT, v -> v.floor,
-		ByteBufCodecs.INT, v -> v.ceiling,
-		BlockFilter.STREAM_CODEC.optional(BlockFilter.ANY.instance()), v -> v.blockFilter,
-		EntityFilter.STREAM_CODEC.optional(EntityFilter.CREATIVE.instance()), v -> v.ignoredEntities,
-		EntityFilter.STREAM_CODEC.optional(EntityFilter.NONE.instance()), v -> v.invincibleEntities,
-		ByteBufCodecs.BOOL, v -> v.bypassUnbreakable,
+		EntityData.STREAM_CODEC.optional(EntityData.DEFAULT), v -> v.entity,
+		FilterData.STREAM_CODEC.optional(FilterData.DEFAULT), v -> v.filter,
 		ExplosionData::new
 	);
 
@@ -76,14 +165,15 @@ public class ExplosionData {
 		new FloatConfigValue<>("Decay", Range.FULL, true, data -> data.decay, (data, v) -> data.decay = v),
 		new FloatConfigValue<>("Fire", Range.FULL, true, data -> data.fire, (data, v) -> data.fire = v),
 		new BooleanConfigValue<>("Smolder", data -> data.smolder, (data, v) -> data.smolder = v),
-		new FloatConfigValue<>("Entity Damage", Range.of(0F, 100F), false, data -> data.entityDamage, (data, v) -> data.entityDamage = v),
-		new FloatConfigValue<>("Entity Knockback", Range.of(0F, 100F), false, data -> data.entityKnockback, (data, v) -> data.entityKnockback = v),
-		new IntConfigValue<>("Floor", IntRange.range(-1000, 1000), false, data -> data.floor, (data, v) -> data.floor = v),
-		new IntConfigValue<>("Ceiling", IntRange.range(-1000, 1000), false, data -> data.ceiling, (data, v) -> data.ceiling = v),
-		new ConfigValue<>("Block Filter", BlockFilter.CODEC, data -> data.blockFilter, (data, v) -> data.blockFilter = v),
-		new ConfigValue<>("Ignored Entities", EntityFilter.CODEC, data -> data.ignoredEntities, (data, v) -> data.ignoredEntities = v),
-		new ConfigValue<>("Invincible Entities", EntityFilter.CODEC, data -> data.invincibleEntities, (data, v) -> data.invincibleEntities = v),
-		new BooleanConfigValue<>("Bypass Unbreakable", data -> data.bypassUnbreakable, (data, v) -> data.bypassUnbreakable = v)
+		new FloatConfigValue<>("Entity Damage", Range.of(0F, 100F), false, data -> data.entity.damage, (data, v) -> data.entity.damage = v),
+		new FloatConfigValue<>("Entity Horizontal Knockback", Range.of(0F, 100F), false, data -> data.entity.horizontalKnockback, (data, v) -> data.entity.horizontalKnockback = v),
+		new FloatConfigValue<>("Entity Vertical Knockback", Range.of(0F, 100F), false, data -> data.entity.verticalKnockback, (data, v) -> data.entity.verticalKnockback = v),
+		new IntConfigValue<>("Floor", IntRange.range(-1000, 1000), false, data -> data.filter.floor, (data, v) -> data.filter.floor = v),
+		new IntConfigValue<>("Ceiling", IntRange.range(-1000, 1000), false, data -> data.filter.ceiling, (data, v) -> data.filter.ceiling = v),
+		new ConfigValue<>("Block Filter", BlockFilter.CODEC, data -> data.filter.blocks, (data, v) -> data.filter.blocks = v),
+		new ConfigValue<>("Ignored Entities", EntityFilter.CODEC, data -> data.filter.ignored, (data, v) -> data.filter.ignored = v),
+		new ConfigValue<>("Invincible Entities", EntityFilter.CODEC, data -> data.filter.invincible, (data, v) -> data.filter.invincible = v),
+		new BooleanConfigValue<>("Bypass Unbreakable", data -> data.filter.bypassUnbreakable, (data, v) -> data.filter.bypassUnbreakable = v)
 	);
 
 	public float radius;
@@ -93,14 +183,8 @@ public class ExplosionData {
 	public float decay;
 	public float fire;
 	public boolean smolder;
-	public float entityDamage;
-	public float entityKnockback;
-	public int floor;
-	public int ceiling;
-	public BlockFilter blockFilter;
-	public EntityFilter ignoredEntities;
-	public EntityFilter invincibleEntities;
-	public boolean bypassUnbreakable;
+	public EntityData entity;
+	public FilterData filter;
 
 	public ExplosionData() {
 		this.radius = 4F;
@@ -110,14 +194,8 @@ public class ExplosionData {
 		this.decay = 1F;
 		this.fire = 0F;
 		this.smolder = false;
-		this.entityDamage = 4F;
-		this.entityKnockback = 1F;
-		this.floor = -1000;
-		this.ceiling = 1000;
-		this.blockFilter = BlockFilter.ANY.instance();
-		this.ignoredEntities = EntityFilter.CREATIVE.instance();
-		this.invincibleEntities = EntityFilter.NONE.instance();
-		this.bypassUnbreakable = false;
+		this.entity = new EntityData();
+		this.filter = new FilterData();
 	}
 
 	private ExplosionData(
@@ -128,14 +206,8 @@ public class ExplosionData {
 		float decay,
 		float fire,
 		boolean smolder,
-		float entityDamage,
-		float entityKnockback,
-		int floor,
-		int ceiling,
-		BlockFilter blockFilter,
-		EntityFilter ignoredEntities,
-		EntityFilter invincibleEntities,
-		boolean bypassUnbreakable
+		EntityData entity,
+		FilterData filter
 	) {
 		this.radius = radius;
 		this.depth = depth;
@@ -144,14 +216,8 @@ public class ExplosionData {
 		this.decay = decay;
 		this.fire = fire;
 		this.smolder = smolder;
-		this.entityDamage = entityDamage;
-		this.entityKnockback = entityKnockback;
-		this.floor = floor;
-		this.ceiling = ceiling;
-		this.blockFilter = blockFilter;
-		this.ignoredEntities = ignoredEntities;
-		this.invincibleEntities = invincibleEntities;
-		this.bypassUnbreakable = bypassUnbreakable;
+		this.entity = entity.copy();
+		this.filter = filter.copy();
 	}
 
 	public void setSize(float size) {
@@ -184,8 +250,8 @@ public class ExplosionData {
 		int ihradius = KMath.ceil(radius);
 		int ivradiusd = KMath.ceil(depth);
 		int ivradiusu = KMath.ceil(height);
-		int starty = Math.max(aty - ivradiusd, floor);
-		int endy = Math.min(aty + ivradiusu, ceiling);
+		int starty = Math.max(aty - ivradiusd, filter.floor);
+		int endy = Math.min(aty + ivradiusu, filter.ceiling);
 
 		for (int ay = starty; ay <= endy; ay++) {
 			int y = ay - aty;
@@ -202,8 +268,8 @@ public class ExplosionData {
 						pos.setZ(atz + z);
 						var state = level.getBlockState(pos);
 
-						if (state.shimmer$getDensity() > 0F && (bypassUnbreakable || state.getDestroySpeed(level, pos) >= 0F) || state.getBlock() instanceof BaseFireBlock) {
-							if (blockFilter.test(level, pos, state)) {
+						if (state.shimmer$getDensity() > 0F && (filter.bypassUnbreakable || state.getDestroySpeed(level, pos) >= 0F) || state.getBlock() instanceof BaseFireBlock) {
+							if (filter.blocks.test(level, pos, state)) {
 								blocks.add(new DestroyedBlock(pos.immutable(), state, x, y, z, d, new MutableBoolean(false)));
 							}
 						}
@@ -217,7 +283,7 @@ public class ExplosionData {
 	}
 
 	public boolean includeEntity(Entity entity) {
-		return entity.isAlive() && !entity.isSpectator() && !ignoredEntities.test(entity);
+		return entity.isAlive() && !entity.isSpectator() && !filter.ignored.test(entity);
 	}
 
 	public List<Entity> collectEntities(Level level, Vec3 at) {
@@ -250,7 +316,7 @@ public class ExplosionData {
 		double atz = at.z;
 
 		for (var e : entities) {
-			if (entityDamage > 0F) {
+			if (entity.damage > 0F) {
 				double x = e.getX() - atx;
 				double y = (e instanceof PrimedTnt ? e.getY() : e.getEyeY()) - aty;
 				double z = e.getZ() - atz;
@@ -264,9 +330,9 @@ public class ExplosionData {
 					z /= aa;
 					double ac = 1D - q;
 
-					var ed = KMath.lerp(q, entityDamage, entityDamage / 3D);
+					var ed = KMath.lerp(q, entity.damage, entity.damage / 3D);
 
-					if (e instanceof LivingEntity l && invincibleEntities.test(l)) {
+					if (e instanceof LivingEntity l && filter.invincible.test(l)) {
 						var h = l.getHealth();
 						var hp = Math.max(1D, h - ed);
 						float f = (float) (h - hp);
@@ -283,10 +349,10 @@ public class ExplosionData {
 						ad = ac;
 					}
 
-					x *= ad * entityKnockback;
-					y *= ad * entityKnockback;
-					z *= ad * entityKnockback;
-					y += 0.1D * entityDamage;
+					x *= ad * entity.horizontalKnockback;
+					y *= ad * entity.horizontalKnockback;
+					z *= ad * entity.horizontalKnockback;
+					y += entity.verticalKnockback;
 
 					e.setDeltaMovement(e.getDeltaMovement().add(new Vec3(x, y, z)));
 				}

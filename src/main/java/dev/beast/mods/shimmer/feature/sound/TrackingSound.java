@@ -1,33 +1,45 @@
 package dev.beast.mods.shimmer.feature.sound;
 
+import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
+import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
+import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 
 public class TrackingSound extends AbstractTickableSoundInstance {
-	public final Entity entity;
+	public final Level level;
+	public final WorldPosition position;
+	public final WorldNumberVariables variables;
 
-	public TrackingSound(Entity entity, SoundData data, boolean looping) {
+	public TrackingSound(Level level, WorldPosition position, WorldNumberVariables variables, SoundData data, boolean looping) {
 		super(data.sound().value(), data.source(), SoundInstance.createUnseededRandom());
-		this.entity = entity;
+		this.level = level;
+		this.position = position;
+		this.variables = variables;
 		this.looping = looping;
 		this.delay = 0;
 		this.volume = data.volume();
 		this.pitch = data.pitch();
-		this.x = entity.getX();
-		this.y = entity.getY();
-		this.z = entity.getZ();
+		var pos = position.get(new WorldNumberContext(level, 1F, variables));
+
+		if (pos != null) {
+			this.x = pos.x;
+			this.y = pos.y;
+			this.z = pos.z;
+		}
 	}
 
 	@Override
 	public void tick() {
-		if (entity.isRemoved()) {
-			stop();
-			return;
-		}
+		var pos = position.get(new WorldNumberContext(level, 1F, variables));
 
-		x = entity.getX();
-		y = entity.getY();
-		z = entity.getZ();
+		if (pos != null) {
+			x = pos.x;
+			y = pos.y;
+			z = pos.z;
+		} else {
+			stop();
+		}
 	}
 }

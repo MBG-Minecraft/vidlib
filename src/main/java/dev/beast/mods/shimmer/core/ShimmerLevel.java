@@ -10,6 +10,10 @@ import dev.beast.mods.shimmer.feature.bulk.UndoableModification;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.sound.SoundData;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
+import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
+import dev.beast.mods.shimmer.math.worldposition.EntityPositionType;
+import dev.beast.mods.shimmer.math.worldposition.FollowingEntityWorldPosition;
+import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
@@ -18,6 +22,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -78,10 +83,6 @@ public interface ShimmerLevel extends ShimmerEntityContainer {
 		return bulkModify(builder.build());
 	}
 
-	default void setFakeBlock(BlockPos pos, BlockState state) {
-		((Level) this).setBlock(pos, state, 0, 0);
-	}
-
 	default void setBlockFast(BlockPos pos, BlockState state) {
 		((Level) this).setBlock(pos, state, Block.UPDATE_CLIENTS, 0);
 	}
@@ -113,6 +114,13 @@ public interface ShimmerLevel extends ShimmerEntityContainer {
 	default void redrawSection(int sectionX, int sectionY, int sectionZ, boolean mainThread) {
 	}
 
+	default void playSound(Vec3 pos, SoundData sound) {
+	}
+
+	default void playTrackingSound(WorldPosition position, WorldNumberVariables variables, SoundData data, boolean looping) {
+	}
+
 	default void playTrackingSound(Entity entity, SoundData data, boolean looping) {
+		playTrackingSound(new FollowingEntityWorldPosition(Either.left(entity.getId()), EntityPositionType.EYES), WorldNumberVariables.EMPTY, data, looping);
 	}
 }

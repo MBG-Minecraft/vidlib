@@ -3,8 +3,12 @@ package dev.beast.mods.shimmer.core;
 import dev.beast.mods.shimmer.feature.sound.SoundData;
 import dev.beast.mods.shimmer.feature.sound.TrackingSound;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
+import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
+import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public interface ShimmerClientLevel extends ShimmerLevel, ShimmerClientEntityContainer {
@@ -26,7 +30,13 @@ public interface ShimmerClientLevel extends ShimmerLevel, ShimmerClientEntityCon
 	}
 
 	@Override
-	default void playTrackingSound(Entity entity, SoundData data, boolean looping) {
-		Minecraft.getInstance().getSoundManager().play(new TrackingSound(entity, data, looping));
+	default void playSound(Vec3 pos, SoundData sound) {
+		var mc = Minecraft.getInstance();
+		mc.getSoundManager().play(new SimpleSoundInstance(sound.sound().value(), sound.source(), sound.volume(), sound.pitch(), ((Level) this).random, pos.x, pos.y, pos.z));
+	}
+
+	@Override
+	default void playTrackingSound(WorldPosition position, WorldNumberVariables variables, SoundData data, boolean looping) {
+		Minecraft.getInstance().getSoundManager().play(new TrackingSound((Level) this, position, variables, data, looping));
 	}
 }

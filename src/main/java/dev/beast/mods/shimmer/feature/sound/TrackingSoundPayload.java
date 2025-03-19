@@ -4,15 +4,19 @@ import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
+import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
+import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record TrackingSoundPayload(int entity, SoundData data, boolean looping) implements ShimmerPacketPayload {
+public record TrackingSoundPayload(WorldPosition position, WorldNumberVariables variables, SoundData data, boolean looping, long gameTime) implements ShimmerPacketPayload {
 	@AutoPacket
-	public static final ShimmerPacketType<TrackingSoundPayload> TYPE = ShimmerPacketType.internal("repeating_tracking_sound", CompositeStreamCodec.of(
-		ByteBufCodecs.VAR_INT, TrackingSoundPayload::entity,
+	public static final ShimmerPacketType<TrackingSoundPayload> TYPE = ShimmerPacketType.internal("tracking_sound", CompositeStreamCodec.of(
+		WorldPosition.STREAM_CODEC, TrackingSoundPayload::position,
+		WorldNumberVariables.STREAM_CODEC, TrackingSoundPayload::variables,
 		SoundData.STREAM_CODEC, TrackingSoundPayload::data,
 		ByteBufCodecs.BOOL, TrackingSoundPayload::looping,
+		ByteBufCodecs.LONG, TrackingSoundPayload::gameTime,
 		TrackingSoundPayload::new
 	));
 
@@ -23,10 +27,6 @@ public record TrackingSoundPayload(int entity, SoundData data, boolean looping) 
 
 	@Override
 	public void handle(IPayloadContext ctx) {
-		var e = ctx.player().level().getEntity(entity);
-
-		if (e != null) {
-			ctx.player().level().playTrackingSound(e, data, looping);
-		}
+		ctx.player().level().playTrackingSound(position, variables, data, looping);
 	}
 }
