@@ -7,6 +7,8 @@ import dev.beast.mods.shimmer.core.ShimmerClientPacketListener;
 import dev.beast.mods.shimmer.feature.session.ShimmerLocalClientSessionData;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.CommonPlayerSpawnInfo;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -55,5 +57,12 @@ public abstract class ClientPacketListenerMixin implements ShimmerClientPacketLi
 	@Inject(method = "close", at = @At("RETURN"))
 	private void shimmer$close(CallbackInfo ci) {
 		shimmer$sessionData().closed();
+	}
+
+	@Inject(method = "applyPlayerInfoUpdate", at = @At("RETURN"))
+	private void shimmer$applyPlayerInfoUpdate(ClientboundPlayerInfoUpdatePacket.Action action, ClientboundPlayerInfoUpdatePacket.Entry entry, PlayerInfo playerInfo, CallbackInfo ci) {
+		if (action == ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED) {
+			shimmer$sessionData().refreshListedPlayers();
+		}
 	}
 }

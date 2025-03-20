@@ -1,8 +1,8 @@
 package dev.beast.mods.shimmer.core;
 
 import dev.beast.mods.shimmer.feature.data.DataMap;
-import dev.beast.mods.shimmer.feature.misc.PauseType;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
+import dev.beast.mods.shimmer.util.PauseType;
 import dev.beast.mods.shimmer.util.ScheduledTask;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import org.jetbrains.annotations.ApiStatus;

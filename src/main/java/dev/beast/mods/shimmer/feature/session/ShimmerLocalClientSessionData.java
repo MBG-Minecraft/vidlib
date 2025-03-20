@@ -16,7 +16,6 @@ import dev.beast.mods.shimmer.feature.input.PlayerInputChanged;
 import dev.beast.mods.shimmer.feature.input.SyncPlayerInputToServer;
 import dev.beast.mods.shimmer.feature.misc.InternalServerData;
 import dev.beast.mods.shimmer.feature.misc.MiscShimmerClientUtils;
-import dev.beast.mods.shimmer.feature.misc.PauseType;
 import dev.beast.mods.shimmer.feature.skybox.Skybox;
 import dev.beast.mods.shimmer.feature.skybox.SkyboxData;
 import dev.beast.mods.shimmer.feature.skybox.Skyboxes;
@@ -33,11 +32,14 @@ import dev.beast.mods.shimmer.feature.zone.ZoneEvent;
 import dev.beast.mods.shimmer.feature.zone.shape.ZoneShape;
 import dev.beast.mods.shimmer.math.Range;
 import dev.beast.mods.shimmer.math.VoxelShapeBox;
+import dev.beast.mods.shimmer.util.PauseType;
 import dev.beast.mods.shimmer.util.Side;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.client.renderer.FogParameters;
@@ -55,11 +57,10 @@ import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
@@ -67,7 +68,6 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	public final ActiveZones serverZones;
 	public final ActiveZones filteredZones;
 	private final Map<UUID, ShimmerRemoteClientSessionData> remoteSessionData;
-	public final Set<String> tags;
 	public ZoneClipResult zoneClip;
 	public Map<ResourceLocation, ClockFont> clockFonts;
 	public Map<ResourceLocation, ClockInstance> clocks;
@@ -75,6 +75,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	public final DataMap serverDataMap;
 	public Skybox skybox;
 	public Map<ZoneShape, VoxelShapeBox> cachedZoneShapes;
+	public List<PlayerInfo> originalListedPlayers;
 
 	public ShimmerLocalClientSessionData(UUID uuid, ClientPacketListener connection) {
 		super(uuid);
@@ -83,7 +84,6 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 		this.serverZones = new ActiveZones();
 		this.filteredZones = new ActiveZones();
 		this.remoteSessionData = new HashMap<>();
-		this.tags = new HashSet<>(0);
 		this.clockFonts = Map.of();
 		this.clocks = Map.of();
 		this.skyboxes = Map.of();
@@ -100,6 +100,10 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 		}
 
 		return data;
+	}
+
+	public ShimmerClientSessionData getClientSessionData(UUID id) {
+		return id.equals(uuid) ? this : getRemoteSessionData(id);
 	}
 
 	@Override
@@ -233,9 +237,10 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 
 	@Override
 	public void updatePlayerTags(UUID player, List<String> update) {
-		var t = uuid.equals(player) ? tags : getRemoteSessionData(player).tags;
+		var t = getClientSessionData(player).tags;
 		t.clear();
 		t.addAll(update);
+		refreshListedPlayers();
 	}
 
 	@Override
@@ -354,5 +359,41 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 
 		skyboxes = Map.copyOf(map);
 		skybox = skybox == null ? null : skyboxes.get(skybox.data.id());
+	}
+
+	@Override
+	public void refreshListedPlayers() {
+		originalListedPlayers = null;
+	}
+
+	public List<PlayerInfo> getListedPlayers(Minecraft mc) {
+		if (originalListedPlayers == null) {
+			var original = mc.player.connection.getListedOnlinePlayers().stream().sorted(PlayerTabOverlay.PLAYER_COMPARATOR).limit(80L).toList();
+			originalListedPlayers = new ArrayList<>(original);
+
+			return originalListedPlayers;
+		}
+
+		var listedPlayers = new ArrayList<PlayerInfo>(originalListedPlayers.size());
+
+		for (var player : originalListedPlayers) {
+			var data = getClientSessionData(player.getProfile().getId());
+
+			if (!data.nameHidden) {
+				listedPlayers.add(player);
+			}
+		}
+
+		return listedPlayers;
+	}
+
+	public Component modifyPlayerName(UUID id, Component original) {
+		var prefix = getClientSessionData(id).namePrefix;
+
+		if (prefix != null) {
+			return Component.empty().append(prefix).append(original);
+		}
+
+		return original;
 	}
 }

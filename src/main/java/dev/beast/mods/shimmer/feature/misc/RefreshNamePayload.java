@@ -23,6 +23,7 @@ public record RefreshNamePayload(UUID player) implements ShimmerPacketPayload {
 
 		if (p != null) {
 			p.refreshDisplayName();
+			p.shimmer$sessionData().refreshListedPlayers();
 		}
 	}
 }

@@ -184,19 +184,19 @@ public class GameEventHandler {
 
 	@SubscribeEvent
 	public static void name(PlayerEvent.NameFormat event) {
-		var data = event.getEntity().get(InternalPlayerData.NICKNAME);
+		var nickname = event.getEntity().get(InternalPlayerData.NICKNAME);
 
-		if (!data.getString().isEmpty()) {
-			event.setDisplayname(data);
+		if (!nickname.getString().isEmpty()) {
+			event.setDisplayname(nickname);
 		}
 	}
 
 	@SubscribeEvent
 	public static void tabName(PlayerEvent.TabListNameFormat event) {
-		var data = event.getEntity().get(InternalPlayerData.NICKNAME);
+		var nickname = event.getEntity().get(InternalPlayerData.NICKNAME);
 
-		if (!data.getString().isEmpty()) {
-			event.setDisplayName(data);
+		if (!nickname.getString().isEmpty()) {
+			event.setDisplayName(nickname);
 		}
 	}
 

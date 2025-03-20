@@ -14,6 +14,7 @@ import dev.beast.mods.shimmer.feature.skybox.SkyboxData;
 import dev.beast.mods.shimmer.feature.worldsync.WorldSyncAuthResponsePayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
 import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -41,6 +42,8 @@ public class ShimmerSessionData {
 	public IconHolder plumbobIcon;
 	public Clothing clothing;
 	public boolean unpushable;
+	public Component namePrefix;
+	public boolean nameHidden;
 
 	public ShimmerSessionData(UUID uuid) {
 		this.uuid = uuid;
@@ -59,6 +62,9 @@ public class ShimmerSessionData {
 		this.pvp = true;
 		this.plumbobIcon = IconHolder.EMPTY;
 		this.clothing = Clothing.NONE;
+		this.unpushable = false;
+		this.namePrefix = null;
+		this.nameHidden = false;
 	}
 
 	public void respawned(Level level, boolean loggedIn) {
@@ -79,6 +85,8 @@ public class ShimmerSessionData {
 		plumbobIcon = EntityOverride.PLUMBOB.get(player, IconHolder.EMPTY, InternalPlayerData.PLUMBOB);
 		clothing = EntityOverride.CLOTHING.get(player, Clothing.NONE, InternalPlayerData.CLOTHING);
 		unpushable = suspended || EntityOverride.UNPUSHABLE.get(player, false);
+		namePrefix = EntityOverride.NAME_PREFIX.get(player);
+		nameHidden = EntityOverride.NAME_HIDDEN.get(player, false);
 
 		if (gravityMod <= 0D) {
 			player.resetFallDistance();
@@ -128,5 +136,8 @@ public class ShimmerSessionData {
 	}
 
 	public void updateSkyboxes(List<SkyboxData> update) {
+	}
+
+	public void refreshListedPlayers() {
 	}
 }

@@ -7,7 +7,9 @@ public interface Skyboxes {
 	ResourceLocation DEFAULT = Shimmer.id("default");
 
 	ResourceLocation DAY = Shimmer.id("day");
+	ResourceLocation DAY_WITH_CELESTIALS = Shimmer.id("day_with_celestials");
 	ResourceLocation NIGHT = Shimmer.id("night");
+	ResourceLocation NIGHT_WITH_CELESTIALS = Shimmer.id("night_with_celestials");
 	ResourceLocation STORM = Shimmer.id("storm");
 	ResourceLocation DOOM = Shimmer.id("doom");
 

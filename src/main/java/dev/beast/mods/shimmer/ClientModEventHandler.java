@@ -71,5 +71,9 @@ public class ClientModEventHandler {
 				state.setRenderData(MiscShimmerClientUtils.CLOTHING, clothing);
 			}
 		}
+
+		if (state.nameTag != null) {
+			state.nameTag = player.shimmer$sessionData().modifyPlayerName(state.nameTag);
+		}
 	}
 }

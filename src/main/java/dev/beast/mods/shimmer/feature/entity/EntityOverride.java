@@ -15,6 +15,8 @@ import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.Range;
 import dev.beast.mods.shimmer.util.Cast;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -123,6 +125,8 @@ public final class EntityOverride<T> {
 	public static final EntityOverride<Range> AMBIENT_LIGHT = createKey("ambient_light", Range.CODEC, Range.STREAM_CODEC);
 	public static final EntityOverride<FogOverride> FOG = createKey("fog", FogOverride.CODEC, FogOverride.STREAM_CODEC);
 	public static final EntityOverride<Boolean> UNPUSHABLE = createBooleanKey("unpushable");
+	public static final EntityOverride<Component> NAME_PREFIX = createKey("name_prefix", ComponentSerialization.CODEC, ComponentSerialization.STREAM_CODEC);
+	public static final EntityOverride<Boolean> NAME_HIDDEN = createBooleanKey("name_hidden");
 
 	public final String id;
 	private final Codec<T> codec;

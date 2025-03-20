@@ -1,4 +1,4 @@
-package dev.beast.mods.shimmer.feature.misc;
+package dev.beast.mods.shimmer.util;
 
 import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;

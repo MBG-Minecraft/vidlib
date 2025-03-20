@@ -1,7 +1,7 @@
 package dev.beast.mods.shimmer.core;
 
-import dev.beast.mods.shimmer.feature.misc.PauseType;
 import dev.beast.mods.shimmer.math.Vec2d;
+import dev.beast.mods.shimmer.util.PauseType;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;

@@ -66,6 +66,7 @@
 		"OptionsMixin",
 		"ParticleEngineMixin",
 		"PlayerModelMixin",
+		"PlayerTabOverlayMixin",
 		"RemotePlayerMixin",
 		"RenderSystemMixin",
 		"ScreenMixin",

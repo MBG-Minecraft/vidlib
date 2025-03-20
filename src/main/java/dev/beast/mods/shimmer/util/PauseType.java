@@ -1,4 +1,4 @@
-package dev.beast.mods.shimmer.feature.misc;
+package dev.beast.mods.shimmer.util;
 
 public enum PauseType {
 	NONE,
