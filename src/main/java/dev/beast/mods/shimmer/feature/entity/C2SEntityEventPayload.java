@@ -8,7 +8,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record C2SEntityEventPayload(EntityData event) implements ShimmerPacketPayload {
 	@AutoPacket(AutoPacket.To.SERVER)
-	public static final ShimmerPacketType<C2SEntityEventPayload> TYPE = ShimmerPacketType.internal("c2s_entity_event", EntityData.STREAM_CODEC.map(C2SEntityEventPayload::new, C2SEntityEventPayload::event));
+	public static final ShimmerPacketType<C2SEntityEventPayload> TYPE = ShimmerPacketType.internal("c2s_ee", EntityData.STREAM_CODEC.map(C2SEntityEventPayload::new, C2SEntityEventPayload::event));
 
 	@Override
 	public ShimmerPacketType<?> getType() {
