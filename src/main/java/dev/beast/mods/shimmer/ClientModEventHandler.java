@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.BlockEntityRendererHolder;
 import dev.beast.mods.shimmer.feature.auto.EntityRendererHolder;
@@ -9,6 +10,7 @@ import dev.beast.mods.shimmer.feature.multiverse.VoidSpecialEffects;
 import dev.beast.mods.shimmer.feature.particle.ShimmerClientParticles;
 import dev.beast.mods.shimmer.feature.structure.ClientStructureStorage;
 import dev.beast.mods.shimmer.feature.structure.GhostStructure;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.entity.state.PlayerRenderState;
@@ -18,8 +20,12 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent;
+import net.neoforged.neoforge.client.settings.KeyConflictContext;
+import net.neoforged.neoforge.client.settings.KeyModifier;
+import org.lwjgl.glfw.GLFW;
 
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientModEventHandler {
@@ -75,5 +81,10 @@ public class ClientModEventHandler {
 		if (state.nameTag != null) {
 			state.nameTag = player.shimmer$sessionData().modifyPlayerName(state.nameTag);
 		}
+	}
+
+	@SubscribeEvent
+	public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
+		event.register(MiscShimmerClientUtils.freezeTickKeyMapping = new KeyMapping("key.shimmer.freeze_tick", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_P, "key.categories.shimmer"));
 	}
 }

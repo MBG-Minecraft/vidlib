@@ -9,6 +9,7 @@ import dev.beast.mods.shimmer.util.JsonUtils;
 import dev.beast.mods.shimmer.util.Lazy;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.screens.Screen;
@@ -23,6 +24,8 @@ import java.util.concurrent.CompletableFuture;
 public class MiscShimmerClientUtils {
 	public static final ContextKey<Boolean> CREATIVE = new ContextKey<>(Shimmer.id("creative"));
 	public static final ContextKey<Clothing> CLOTHING = new ContextKey<>(Shimmer.id("clothing"));
+
+	public static KeyMapping freezeTickKeyMapping;
 
 	public static FogParameters fogOverride = FogParameters.NO_FOG;
 

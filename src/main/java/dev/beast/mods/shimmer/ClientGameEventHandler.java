@@ -71,6 +71,16 @@ public class ClientGameEventHandler {
 		}
 
 		mc.shimmer$preTick(mc.getPauseType());
+
+		while (mc.level != null && MiscShimmerClientUtils.freezeTickKeyMapping.consumeClick()) {
+			if (!mc.player.isReplayCamera()) {
+				if (mc.level.tickRateManager().isFrozen()) {
+					mc.player.connection.sendCommand("tick unfreeze");
+				} else {
+					mc.player.connection.sendCommand("tick freeze");
+				}
+			}
+		}
 	}
 
 	@SubscribeEvent
