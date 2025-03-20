@@ -2,6 +2,7 @@ package dev.beast.mods.shimmer.feature.codec;
 
 import com.mojang.datafixers.util.Unit;
 import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.util.Empty;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
@@ -98,7 +99,36 @@ public interface ShimmerStreamCodecs {
 		}
 	};
 
-	StreamCodec<ByteBuf, CompoundTag> COMPOUND_TAG = ByteBufCodecs.TRUSTED_COMPOUND_TAG;
+	StreamCodec<ByteBuf, CompoundTag> COMPOUND_TAG = new StreamCodec<>() {
+		@Override
+		public CompoundTag decode(ByteBuf buf) {
+			var size = VarInt.read(buf);
+
+			if (size == 0) {
+				return Empty.COMPOUND_TAG;
+			}
+
+			var tag = new CompoundTag();
+
+			for (int i = 0; i < size; i++) {
+				tag.put(ByteBufCodecs.STRING_UTF8.decode(buf), ByteBufCodecs.TAG.decode(buf));
+			}
+
+			return tag;
+		}
+
+		@Override
+		public void encode(ByteBuf buf, CompoundTag value) {
+			VarInt.write(buf, value.size());
+
+			if (!value.isEmpty()) {
+				for (var key : value.getAllKeys()) {
+					ByteBufCodecs.STRING_UTF8.encode(buf, key);
+					ByteBufCodecs.TAG.encode(buf, value.get(key));
+				}
+			}
+		}
+	};
 
 	StreamCodec<ByteBuf, Vec3> VEC_3 = new StreamCodec<>() {
 		@Override

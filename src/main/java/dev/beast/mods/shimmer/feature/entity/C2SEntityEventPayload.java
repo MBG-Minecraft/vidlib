@@ -1,23 +1,14 @@
 package dev.beast.mods.shimmer.feature.entity;
 
 import dev.beast.mods.shimmer.feature.auto.AutoPacket;
-import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
-import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record C2SEntityEventPayload(int entity, String event, CompoundTag data) implements ShimmerPacketPayload {
+public record C2SEntityEventPayload(EntityData event) implements ShimmerPacketPayload {
 	@AutoPacket(AutoPacket.To.SERVER)
-	public static final ShimmerPacketType<C2SEntityEventPayload> TYPE = ShimmerPacketType.internal("c2s_entity_event", CompositeStreamCodec.of(
-		ByteBufCodecs.VAR_INT, C2SEntityEventPayload::entity,
-		ByteBufCodecs.STRING_UTF8, C2SEntityEventPayload::event,
-		ShimmerStreamCodecs.COMPOUND_TAG, C2SEntityEventPayload::data,
-		C2SEntityEventPayload::new
-	));
+	public static final ShimmerPacketType<C2SEntityEventPayload> TYPE = ShimmerPacketType.internal("c2s_entity_event", EntityData.STREAM_CODEC.map(C2SEntityEventPayload::new, C2SEntityEventPayload::event));
 
 	@Override
 	public ShimmerPacketType<?> getType() {
@@ -26,10 +17,10 @@ public record C2SEntityEventPayload(int entity, String event, CompoundTag data) 
 
 	@Override
 	public void handle(IPayloadContext ctx) {
-		var e = ctx.player().level().getEntity(entity);
+		var e = ctx.player().level().getEntity(event.entityId());
 
 		if (e != null && ctx.player() instanceof ServerPlayer player) {
-			e.onC2SEvent(event, data, player);
+			e.c2sReceived(event, player);
 		}
 	}
 }
