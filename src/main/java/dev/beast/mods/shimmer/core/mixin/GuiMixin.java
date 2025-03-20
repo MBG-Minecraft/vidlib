@@ -8,6 +8,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -37,5 +38,13 @@ public abstract class GuiMixin {
 		if (ShimmerConfig.renderSuspendedOverlay && minecraft.player.shimmer$sessionData().suspended) {
 			renderTextureOverlay(graphics, POWDER_SNOW_OUTLINE_LOCATION, 1F);
 		}
+	}
+
+	/**
+	 * @author Lat
+	 * @reason Yeet
+	 */
+	@Overwrite
+	protected void renderSpyglassOverlay(GuiGraphics guiGraphics, float scopeScale) {
 	}
 }
