@@ -1,19 +1,17 @@
 package dev.beast.mods.shimmer.feature.zone;
 
-import com.mojang.serialization.Codec;
-import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.StreamCodec;
+import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.feature.auto.AutoInit;
+import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import net.minecraft.util.StringRepresentable;
 
+@AutoInit
 public enum ZoneRenderType implements StringRepresentable {
 	NORMAL("normal"),
 	COLLISIONS("collisions"),
 	BLOCKS("blocks");
 
-	public static final ZoneRenderType[] VALUES = values();
-	public static final Codec<ZoneRenderType> CODEC = StringRepresentable.fromEnum(() -> VALUES);
-	public static final StreamCodec<ByteBuf, ZoneRenderType> STREAM_CODEC = ShimmerStreamCodecs.enumValue(VALUES);
+	public static final KnownCodec<ZoneRenderType> KNOWN_CODEC = KnownCodec.registerEnum(Shimmer.id("zone_render_type"), values());
 
 	private final String name;
 

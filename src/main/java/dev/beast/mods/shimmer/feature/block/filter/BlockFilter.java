@@ -31,7 +31,7 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 
 	Codec<BlockFilter> CODEC = Codec.either(Codec.BOOL, REGISTRY.valueCodec()).xmap(either -> either.map(BlockFilter::of, Function.identity()), filter -> filter == ANY.instance() ? Either.left(true) : filter == NONE.instance() ? Either.left(false) : Either.right(filter));
 	StreamCodec<RegistryFriendlyByteBuf, BlockFilter> STREAM_CODEC = ByteBufCodecs.either(ByteBufCodecs.BOOL, REGISTRY.valueStreamCodec()).map(either -> either.map(BlockFilter::of, Function.identity()), filter -> filter == ANY.instance() ? Either.left(true) : filter == NONE.instance() ? Either.left(false) : Either.right(filter));
-	KnownCodec<BlockFilter> KNOWN_CODEC = KnownCodec.register(Shimmer.id("block_filter"), CODEC, BlockFilter.class);
+	KnownCodec<BlockFilter> KNOWN_CODEC = KnownCodec.register(Shimmer.id("block_filter"), CODEC, STREAM_CODEC, BlockFilter.class);
 
 	@AutoInit
 	static void bootstrap() {

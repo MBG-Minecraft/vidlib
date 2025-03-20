@@ -14,7 +14,6 @@ import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.input.PlayerInput;
 import dev.beast.mods.shimmer.feature.input.PlayerInputChanged;
 import dev.beast.mods.shimmer.feature.input.SyncPlayerInputToServer;
-import dev.beast.mods.shimmer.feature.misc.InternalServerData;
 import dev.beast.mods.shimmer.feature.misc.MiscShimmerClientUtils;
 import dev.beast.mods.shimmer.feature.skybox.Skybox;
 import dev.beast.mods.shimmer.feature.skybox.SkyboxData;
@@ -112,7 +111,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 		var skyboxId = EntityOverride.SKYBOX.get(player);
 
 		if (skyboxId == null) {
-			skyboxId = player.level().getServerData().get(InternalServerData.SKYBOX);
+			skyboxId = player.level().getSkybox();
 		}
 
 		skybox = skyboxId == null || skyboxId.equals(Skyboxes.DEFAULT) ? null : skyboxes.get(skyboxId);

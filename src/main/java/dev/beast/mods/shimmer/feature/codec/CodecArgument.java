@@ -53,7 +53,7 @@ public record CodecArgument<T>(DynamicOps<Tag> ops, KnownCodec<T> knownCodec) im
 	public record CodecTemplate(ArgumentTypeInfo<CodecArgument<?>, ?> type, KnownCodec<?> knownCodec) implements ArgumentTypeInfo.Template<CodecArgument<?>> {
 		@Override
 		public CodecArgument<?> instantiate(CommandBuildContext ctx) {
-			return knownCodec.argument(ctx);
+			return (CodecArgument<?>) knownCodec.argument(ctx);
 		}
 	}
 }

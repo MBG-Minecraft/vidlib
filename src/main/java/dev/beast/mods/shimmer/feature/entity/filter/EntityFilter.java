@@ -47,7 +47,7 @@ public interface EntityFilter extends Predicate<Entity> {
 
 	Codec<EntityFilter> CODEC = Codec.either(Codec.BOOL, REGISTRY.valueCodec()).xmap(either -> either.map(EntityFilter::of, Function.identity()), filter -> filter == ANY.instance() ? Either.left(true) : filter == NONE.instance() ? Either.left(false) : Either.right(filter));
 	StreamCodec<RegistryFriendlyByteBuf, EntityFilter> STREAM_CODEC = ByteBufCodecs.either(ByteBufCodecs.BOOL, REGISTRY.valueStreamCodec()).map(either -> either.map(EntityFilter::of, Function.identity()), filter -> filter == ANY.instance() ? Either.left(true) : filter == NONE.instance() ? Either.left(false) : Either.right(filter));
-	KnownCodec<EntityFilter> KNOWN_CODEC = KnownCodec.register(Shimmer.id("entity_filter"), CODEC, EntityFilter.class);
+	KnownCodec<EntityFilter> KNOWN_CODEC = KnownCodec.register(Shimmer.id("entity_filter"), CODEC, STREAM_CODEC, EntityFilter.class);
 
 	@AutoInit
 	static void bootstrap() {

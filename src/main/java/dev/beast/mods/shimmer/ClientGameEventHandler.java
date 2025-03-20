@@ -12,7 +12,6 @@ import dev.beast.mods.shimmer.feature.item.ShimmerTool;
 import dev.beast.mods.shimmer.feature.misc.CameraOverride;
 import dev.beast.mods.shimmer.feature.misc.DebugText;
 import dev.beast.mods.shimmer.feature.misc.DebugTextEvent;
-import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.misc.MiscShimmerClientUtils;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleManager;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleRenderContext;
@@ -99,7 +98,7 @@ public class ClientGameEventHandler {
 			var cameraPos = event.getCamera().getPosition();
 			var frustum = event.getFrustum();
 
-			if (mc.player.get(InternalPlayerData.SHOW_ZONES)) {
+			if (mc.player.getShowZones()) {
 				ZoneRenderer.renderAll(mc, session, delta, ms, cameraPos, frustum);
 			}
 
@@ -150,7 +149,7 @@ public class ClientGameEventHandler {
 					continue;
 				}
 
-				var h = player.shimmer$sessionData().plumbobIcon;
+				var h = player.getPlumbobHolder();
 
 				if (h == null) {
 					continue;
@@ -237,7 +236,7 @@ public class ClientGameEventHandler {
 				}
 			}
 
-			if (!session.zonesTagsIn.isEmpty() && mc.player.get(InternalPlayerData.SHOW_ZONES)) {
+			if (!session.zonesTagsIn.isEmpty() && mc.player.getShowZones()) {
 				DebugText.RENDER.topRight.add("Zones in:");
 
 				for (var tag : session.zonesTagsIn) {

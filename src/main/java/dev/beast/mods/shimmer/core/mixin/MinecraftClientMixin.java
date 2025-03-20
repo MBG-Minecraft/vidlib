@@ -9,7 +9,6 @@ import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.cutscene.CutsceneScreen;
 import dev.beast.mods.shimmer.feature.data.DataMap;
-import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleManager;
 import dev.beast.mods.shimmer.feature.structure.ClientStructureStorage;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
@@ -120,7 +119,7 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 
 		var ray = shimmer$self().gameRenderer.getMainCamera().ray(512D);
 
-		if (shimmer$self().options.getCameraType() == CameraType.FIRST_PERSON && player.get(InternalPlayerData.SHOW_ZONES)) {
+		if (shimmer$self().options.getCameraType() == CameraType.FIRST_PERSON && player.getShowZones()) {
 			session.zoneClip = session.filteredZones.clip(ray);
 		} else {
 			session.zoneClip = null;

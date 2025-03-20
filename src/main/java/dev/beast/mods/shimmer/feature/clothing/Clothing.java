@@ -4,6 +4,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
+import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistry;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.commands.CommandSourceStack;
@@ -21,6 +22,7 @@ public class Clothing {
 	public static final SuggestionProvider<CommandSourceStack> SUGGESTION_PROVIDER = REGISTRY.registerUnitSuggestionProvider(Shimmer.id("clothing"));
 	public static final Codec<Clothing> CODEC = REGISTRY.valueCodec();
 	public static final StreamCodec<RegistryFriendlyByteBuf, Clothing> STREAM_CODEC = REGISTRY.valueStreamCodec();
+	public static final KnownCodec<Clothing> KNOWN_CODEC = KnownCodec.register(Shimmer.id("clothing"), CODEC, STREAM_CODEC, Clothing.class);
 
 	public static Clothing register(ResourceLocation id) {
 		var clothing = new Clothing(id);

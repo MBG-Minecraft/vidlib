@@ -36,7 +36,7 @@ public class Cutscene {
 		Cutscene::new
 	);
 
-	public static final KnownCodec<Cutscene> KNOWN_CODEC = KnownCodec.register(Shimmer.id("cutscene"), CODEC, Cutscene.class);
+	public static final KnownCodec<Cutscene> KNOWN_CODEC = KnownCodec.register(Shimmer.id("cutscene"), CODEC, STREAM_CODEC, Cutscene.class);
 
 	public static final RegistryReference.Holder<ResourceLocation, Cutscene> SERVER = RegistryReference.createServerHolder();
 

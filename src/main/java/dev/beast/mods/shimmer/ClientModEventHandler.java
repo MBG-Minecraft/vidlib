@@ -65,7 +65,7 @@ public class ClientModEventHandler {
 		}
 
 		if (!player.isInvisible()) {
-			var clothing = player.shimmer$sessionData().clothing;
+			var clothing = player.getClothing();
 
 			if (clothing != Clothing.NONE) {
 				state.setRenderData(MiscShimmerClientUtils.CLOTHING, clothing);

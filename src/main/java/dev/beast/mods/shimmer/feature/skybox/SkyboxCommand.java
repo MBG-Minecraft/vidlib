@@ -2,12 +2,10 @@ package dev.beast.mods.shimmer.feature.skybox;
 
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.ServerCommandHolder;
-import dev.beast.mods.shimmer.feature.misc.InternalServerData;
 import dev.beast.mods.shimmer.util.registry.ShimmerResourceLocationArgument;
 import net.minecraft.commands.Commands;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import org.jetbrains.annotations.Nullable;
 
 public interface SkyboxCommand {
 	@AutoRegister
@@ -20,12 +18,12 @@ public interface SkyboxCommand {
 			)
 		)
 		.then(Commands.literal("remove")
-			.executes(ctx -> skybox(ctx.getSource().getServer(), null))
+			.executes(ctx -> skybox(ctx.getSource().getServer(), Skyboxes.DEFAULT))
 		)
 	);
 
-	private static int skybox(MinecraftServer server, @Nullable ResourceLocation skybox) {
-		server.getServerData().set(InternalServerData.SKYBOX, skybox == null ? Skyboxes.DEFAULT : skybox);
+	private static int skybox(MinecraftServer server, ResourceLocation skybox) {
+		server.setSkybox(skybox);
 		return 1;
 	}
 }

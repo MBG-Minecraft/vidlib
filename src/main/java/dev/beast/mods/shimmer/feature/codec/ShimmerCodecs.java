@@ -14,6 +14,7 @@ import net.minecraft.Util;
 import net.minecraft.core.SectionPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -51,6 +53,8 @@ public interface ShimmerCodecs {
 	Codec<ShortList> SHORT_LIST = Codec.SHORT.listOf().xmap(ShortArrayList::new, Function.identity());
 
 	Codec<SoundSource> SOUND_SOURCE = anyEnumCodec(SoundSource.values(), SoundSource::getName);
+
+	Function<?, String> DEFAULT_NAME_GETTER = o -> o instanceof StringRepresentable s ? s.getSerializedName() : o instanceof Enum<?> e ? e.name().toLowerCase(Locale.ROOT) : o.toString().toLowerCase(Locale.ROOT);
 
 	static <E> Codec<E> anyEnumCodec(E[] enumValues, Function<E, String> nameGetter) {
 		var map = new HashMap<String, E>(enumValues.length);

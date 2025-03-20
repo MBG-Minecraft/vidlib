@@ -2,7 +2,6 @@ package dev.beast.mods.shimmer.feature.misc.command;
 
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.ServerCommandHolder;
-import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.misc.RefreshNamePayload;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ComponentArgument;
@@ -29,7 +28,7 @@ public interface NicknameCommand {
 
 	private static int nickname(Collection<ServerPlayer> players, Component name) {
 		for (var player : players) {
-			player.set(InternalPlayerData.NICKNAME, name);
+			player.setNickname(name);
 			player.refreshDisplayName();
 			player.refreshTabListName();
 			player.level().s2c(new RefreshNamePayload(player.getUUID()));

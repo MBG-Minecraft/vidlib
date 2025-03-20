@@ -2,7 +2,6 @@ package dev.beast.mods.shimmer.feature.misc.command;
 
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.ServerCommandHolder;
-import dev.beast.mods.shimmer.feature.misc.InternalPlayerData;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,7 +27,7 @@ public interface SuspensionCommands {
 
 	private static int suspend(Collection<ServerPlayer> players, boolean suspend) {
 		for (var player : players) {
-			player.set(InternalPlayerData.SUSPENDED, suspend);
+			player.setSuspended(suspend);
 		}
 
 		return 1;

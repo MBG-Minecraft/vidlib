@@ -1,6 +1,5 @@
 package dev.beast.mods.shimmer.core;
 
-import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
 import dev.beast.mods.shimmer.util.PauseType;
 import dev.beast.mods.shimmer.util.ScheduledTask;
@@ -10,7 +9,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
-public interface ShimmerMinecraftEnvironment extends ShimmerEntityContainer {
+public interface ShimmerMinecraftEnvironment extends ShimmerEntityContainer, ShimmerMinecraftEnvironmentDataHolder {
 	@Override
 	default ShimmerMinecraftEnvironment shimmer$getEnvironment() {
 		return this;
@@ -34,10 +33,6 @@ public interface ShimmerMinecraftEnvironment extends ShimmerEntityContainer {
 
 	default <T> CompletableFuture<T> shimmer$submit(Supplier<T> future) {
 		return ((ReentrantBlockableEventLoop<Runnable>) this).submit(future);
-	}
-
-	default DataMap getServerData() {
-		throw new NoMixinException();
 	}
 
 	default StructureStorage shimmer$structureStorage() {

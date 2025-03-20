@@ -1,9 +1,16 @@
 package dev.beast.mods.shimmer.core;
 
+import dev.beast.mods.shimmer.feature.block.filter.BlockFilter;
+import dev.beast.mods.shimmer.feature.clothing.Clothing;
 import dev.beast.mods.shimmer.feature.data.DataType;
+import dev.beast.mods.shimmer.feature.data.InternalPlayerData;
+import dev.beast.mods.shimmer.feature.icon.Icon;
+import dev.beast.mods.shimmer.feature.icon.IconHolder;
 import dev.beast.mods.shimmer.feature.session.ShimmerSessionData;
 import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
+import dev.beast.mods.shimmer.feature.zone.ZoneRenderType;
 import dev.beast.mods.shimmer.math.Line;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,6 +48,59 @@ public interface ShimmerPlayer extends ShimmerLivingEntity {
 	@Override
 	default boolean isSuspended() {
 		return shimmer$sessionData().suspended;
+	}
+
+	default void setSuspended(boolean value) {
+		set(InternalPlayerData.SUSPENDED, value);
+	}
+
+	default Component getNickname() {
+		return get(InternalPlayerData.NICKNAME);
+	}
+
+	default void setNickname(Component nickname) {
+		set(InternalPlayerData.NICKNAME, nickname);
+	}
+
+	@Nullable
+	default IconHolder getPlumbobHolder() {
+		return shimmer$sessionData().plumbobIcon;
+	}
+
+	default void setPlumbob(Icon icon) {
+		set(InternalPlayerData.PLUMBOB, icon.holder());
+	}
+
+	default Clothing getClothing() {
+		return shimmer$sessionData().clothing;
+	}
+
+	default void setClothing(Clothing clothing) {
+		set(InternalPlayerData.CLOTHING, clothing);
+	}
+
+	default boolean getShowZones() {
+		return get(InternalPlayerData.SHOW_ZONES);
+	}
+
+	default void setShowZones(boolean show) {
+		set(InternalPlayerData.SHOW_ZONES, show);
+	}
+
+	default ZoneRenderType getZoneRenderType() {
+		return get(InternalPlayerData.ZONE_RENDER_TYPE);
+	}
+
+	default void setZoneRenderType(ZoneRenderType type) {
+		set(InternalPlayerData.ZONE_RENDER_TYPE, type);
+	}
+
+	default BlockFilter getZoneBlockFilter() {
+		return get(InternalPlayerData.ZONE_BLOCK_FILTER);
+	}
+
+	default void setZoneBlockFilter(BlockFilter filter) {
+		set(InternalPlayerData.ZONE_BLOCK_FILTER, filter);
 	}
 
 	@Override

@@ -87,7 +87,7 @@ public class DataMap {
 					var tag = data.get(type.id().toString());
 
 					if (tag != null) {
-						var playerData = type.codec().parse(ops, tag).getOrThrow();
+						var playerData = type.type().codec().parse(ops, tag).getOrThrow();
 
 						if (playerData != null) {
 							init(type).data = playerData;
@@ -105,7 +105,7 @@ public class DataMap {
 
 		if (map != null) {
 			for (var v : map.values()) {
-				if (v.save != v.changeCount && v.type.codec() != null) {
+				if (v.save != v.changeCount && v.type.type() != null && v.type.save()) {
 					needsSave = true;
 					break;
 				}
@@ -125,8 +125,8 @@ public class DataMap {
 			var ops = server.registryAccess().createSerializationContext(NbtOps.INSTANCE);
 
 			for (var v : map.values()) {
-				if (v.type.codec() != null) {
-					data.put(v.type.id().toString(), v.type.codec().encodeStart(ops, Cast.to(v.data)).getOrThrow());
+				if (v.type.type() != null && v.type.save()) {
+					data.put(v.type.id().toString(), v.type.type().codec().encodeStart(ops, Cast.to(v.data)).getOrThrow());
 				}
 			}
 
@@ -158,7 +158,7 @@ public class DataMap {
 
 		if (map != null) {
 			for (var v : map.values()) {
-				if (v.type.streamCodec() != null && (v.type.syncToAllClients() || selfPlayer != null && owner.equals(selfPlayer.getUUID()))) {
+				if (v.type.type() != null && v.type.sync() && (v.type.syncToAllClients() || selfPlayer != null && owner.equals(selfPlayer.getUUID()))) {
 					list.add(new DataMapValue(v.type, v.data));
 				}
 			}
@@ -177,7 +177,7 @@ public class DataMap {
 		List<DataMapValue> syncSelf = null, syncAll = null;
 
 		for (var v : map.values()) {
-			if (v.sync != v.changeCount && v.type.streamCodec() != null) {
+			if (v.sync != v.changeCount && v.type.type() != null && v.type.sync()) {
 				v.sync = v.changeCount;
 
 				if (v.type.syncToAllClients()) {

@@ -30,12 +30,13 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public interface ShimmerLevel extends ShimmerEntityContainer {
+public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEnvironmentDataHolder {
 	@Override
 	default List<Entity> shimmer$getEntities() {
 		return ((Level) this).getEntities((Entity) null, AABB.INFINITE, EntitySelector.ENTITY_STILL_ALIVE);
 	}
 
+	@Override
 	default DataMap getServerData() {
 		return shimmer$getEnvironment().getServerData();
 	}

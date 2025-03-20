@@ -15,7 +15,7 @@ public interface Icon {
 	SimpleRegistry<Icon> REGISTRY = SimpleRegistry.create(Icon::type);
 	Codec<Icon> CODEC = REGISTRY.valueCodec();
 	StreamCodec<RegistryFriendlyByteBuf, Icon> STREAM_CODEC = REGISTRY.valueStreamCodec();
-	KnownCodec<Icon> KNOWN_CODEC = KnownCodec.register(Shimmer.id("icon"), CODEC, Icon.class);
+	KnownCodec<Icon> KNOWN_CODEC = KnownCodec.register(Shimmer.id("icon"), CODEC, STREAM_CODEC, Icon.class);
 
 	SimpleRegistryType.Unit<Icon> YES = SimpleRegistryType.unit(Shimmer.id("yes"), new TextureIcon(Shimmer.id("textures/misc/yes.png"), UV.FULL, true, Color.WHITE));
 	SimpleRegistryType.Unit<Icon> NO = SimpleRegistryType.unit(Shimmer.id("no"), new TextureIcon(Shimmer.id("textures/misc/no.png"), UV.FULL, true, Color.WHITE));

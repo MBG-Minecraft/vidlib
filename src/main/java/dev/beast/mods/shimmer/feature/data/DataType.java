@@ -1,8 +1,6 @@
 package dev.beast.mods.shimmer.feature.data;
 
-import com.mojang.serialization.Codec;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
+import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
@@ -14,8 +12,9 @@ public record DataType<T>(
 	ResourceLocation id,
 	T defaultValue,
 	boolean identity,
-	@Nullable Codec<T> codec,
-	@Nullable StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec,
+	@Nullable KnownCodec<T> type,
+	boolean save,
+	boolean sync,
 	boolean syncToAllClients,
 	@Nullable Consumer<Player> onReceived
 ) {
@@ -25,20 +24,22 @@ public record DataType<T>(
 	public static class Builder<T> {
 		private final DataTypeStorage storage;
 		private final ResourceLocation id;
+		private final KnownCodec<T> type;
 		private final T defaultValue;
 		private boolean identity;
-		private Codec<T> codec;
-		private StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec;
+		private boolean save;
+		private boolean sync;
 		private boolean syncToAllClients;
 		private Consumer<Player> onReceived;
 
-		Builder(DataTypeStorage storage, ResourceLocation id, T defaultValue) {
+		Builder(DataTypeStorage storage, ResourceLocation id, @Nullable KnownCodec<T> type, T defaultValue) {
 			this.storage = storage;
 			this.id = id;
+			this.type = type;
 			this.defaultValue = defaultValue;
 			this.identity = false;
-			this.codec = null;
-			this.streamCodec = null;
+			this.save = false;
+			this.sync = false;
 			this.syncToAllClients = storage.alwaysSyncToAllClients;
 			this.onReceived = null;
 		}
@@ -48,13 +49,13 @@ public record DataType<T>(
 			return this;
 		}
 
-		public Builder<T> save(Codec<T> codec) {
-			this.codec = codec;
+		public Builder<T> save() {
+			this.save = true;
 			return this;
 		}
 
-		public Builder<T> sync(StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec) {
-			this.streamCodec = streamCodec;
+		public Builder<T> sync() {
+			this.sync = true;
 			return this;
 		}
 
@@ -69,17 +70,21 @@ public record DataType<T>(
 		}
 
 		public DataType<T> build() {
-			var type = new DataType<>(storage, id, defaultValue, identity, codec, streamCodec, syncToAllClients, onReceived);
+			var dataType = new DataType<>(storage, id, defaultValue, identity, type, save, sync, syncToAllClients, onReceived);
 
-			if (codec != null) {
-				storage.saved.put(id, type);
+			if (type != null) {
+				storage.all.put(id, dataType);
+
+				if (save) {
+					storage.saved.put(id, dataType);
+				}
+
+				if (sync) {
+					storage.synced.put(id, dataType);
+				}
 			}
 
-			if (streamCodec != null) {
-				storage.synced.put(id, type);
-			}
-
-			return type;
+			return dataType;
 		}
 	}
 

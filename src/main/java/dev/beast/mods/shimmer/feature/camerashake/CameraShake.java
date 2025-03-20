@@ -44,7 +44,7 @@ public record CameraShake(
 		CameraShake::new
 	);
 
-	public static final KnownCodec<CameraShake> KNOWN_CODEC = KnownCodec.register(Shimmer.id("camera_shake"), CODEC, CameraShake.class);
+	public static final KnownCodec<CameraShake> KNOWN_CODEC = KnownCodec.register(Shimmer.id("camera_shake"), CODEC, STREAM_CODEC, CameraShake.class);
 
 	public static final ResourceLocation MOTION_BLUR_EFFECT = ResourceLocation.withDefaultNamespace("shaders/post/phosphor.json");
 
