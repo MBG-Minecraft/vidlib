@@ -103,6 +103,14 @@ public interface ShimmerPlayer extends ShimmerLivingEntity {
 		set(InternalPlayerData.ZONE_BLOCK_FILTER, filter);
 	}
 
+	default float getFlightSpeedMod() {
+		return shimmer$sessionData().flightSpeedMod;
+	}
+
+	default void setFlightSpeedMod(float value) {
+		set(InternalPlayerData.FLIGHT_SPEED, value);
+	}
+
 	@Override
 	@Nullable
 	default Boolean shimmer$glowingOverride() {

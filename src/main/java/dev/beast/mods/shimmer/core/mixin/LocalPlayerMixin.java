@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.core.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.authlib.GameProfile;
 import dev.beast.mods.shimmer.core.ShimmerClientPacketListener;
 import dev.beast.mods.shimmer.core.ShimmerLocalPlayer;
@@ -63,5 +64,10 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements S
 	@Override
 	public boolean isReplayCamera() {
 		return shimmer$isReplayCamera;
+	}
+
+	@ModifyExpressionValue(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Abilities;getFlyingSpeed()F"))
+	private float shimmer$getFlyingSpeed(float original) {
+		return original * getFlightSpeedMod();
 	}
 }

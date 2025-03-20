@@ -36,13 +36,11 @@ public interface InternalPlayerData {
 		.build();
 
 	DataType<Boolean> SHOW_ZONES = DataType.PLAYER.internal("show_zones", KnownCodec.BOOL, false)
-		.identity()
 		.save()
 		.sync()
 		.build();
 
 	DataType<ZoneRenderType> ZONE_RENDER_TYPE = DataType.PLAYER.internal("zone_render_type", ZoneRenderType.KNOWN_CODEC, ZoneRenderType.NORMAL)
-		.identity()
 		.save()
 		.sync()
 		.build();
@@ -51,5 +49,10 @@ public interface InternalPlayerData {
 		.save()
 		.sync()
 		.onReceived(player -> player.shimmer$sessionData().refreshBlockZones())
+		.build();
+
+	DataType<Float> FLIGHT_SPEED = DataType.PLAYER.internal("flight_speed", KnownCodec.FLOAT, 1F)
+		.save()
+		.sync()
 		.build();
 }

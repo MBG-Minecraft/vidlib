@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.core.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import dev.beast.mods.shimmer.core.ShimmerPlayer;
 import net.minecraft.network.chat.Component;
@@ -35,5 +36,10 @@ public abstract class PlayerMixin implements ShimmerPlayer {
 	@ModifyReturnValue(method = "getSpeed", at = @At("RETURN"))
 	private float shimmer$getSpeed(float original) {
 		return original * shimmer$speedMod();
+	}
+
+	@ModifyExpressionValue(method = "getFlyingSpeed", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Abilities;getFlyingSpeed()F"))
+	private float shimmer$getFlyingSpeed(float original) {
+		return original * getFlightSpeedMod();
 	}
 }

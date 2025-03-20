@@ -11,7 +11,6 @@ public record DataType<T>(
 	DataTypeStorage storage,
 	ResourceLocation id,
 	T defaultValue,
-	boolean identity,
 	@Nullable KnownCodec<T> type,
 	boolean save,
 	boolean sync,
@@ -26,7 +25,6 @@ public record DataType<T>(
 		private final ResourceLocation id;
 		private final KnownCodec<T> type;
 		private final T defaultValue;
-		private boolean identity;
 		private boolean save;
 		private boolean sync;
 		private boolean syncToAllClients;
@@ -37,16 +35,10 @@ public record DataType<T>(
 			this.id = id;
 			this.type = type;
 			this.defaultValue = defaultValue;
-			this.identity = false;
 			this.save = false;
 			this.sync = false;
 			this.syncToAllClients = storage.alwaysSyncToAllClients;
 			this.onReceived = null;
-		}
-
-		public Builder<T> identity() {
-			this.identity = true;
-			return this;
 		}
 
 		public Builder<T> save() {
@@ -70,7 +62,7 @@ public record DataType<T>(
 		}
 
 		public DataType<T> build() {
-			var dataType = new DataType<>(storage, id, defaultValue, identity, type, save, sync, syncToAllClients, onReceived);
+			var dataType = new DataType<>(storage, id, defaultValue, type, save, sync, syncToAllClients, onReceived);
 
 			if (type != null) {
 				storage.all.put(id, dataType);

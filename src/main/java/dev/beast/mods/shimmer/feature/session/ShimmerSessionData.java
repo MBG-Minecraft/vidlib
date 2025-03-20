@@ -44,6 +44,7 @@ public class ShimmerSessionData {
 	public boolean unpushable;
 	public Component namePrefix;
 	public boolean nameHidden;
+	public float flightSpeedMod;
 
 	public ShimmerSessionData(UUID uuid) {
 		this.uuid = uuid;
@@ -65,6 +66,7 @@ public class ShimmerSessionData {
 		this.unpushable = false;
 		this.namePrefix = null;
 		this.nameHidden = false;
+		this.flightSpeedMod = 1F;
 	}
 
 	public void respawned(Level level, boolean loggedIn) {
@@ -87,6 +89,7 @@ public class ShimmerSessionData {
 		unpushable = suspended || EntityOverride.UNPUSHABLE.get(player, false);
 		namePrefix = EntityOverride.NAME_PREFIX.get(player);
 		nameHidden = EntityOverride.NAME_HIDDEN.get(player, false);
+		flightSpeedMod = dataMap.get(InternalPlayerData.FLIGHT_SPEED);
 
 		if (gravityMod <= 0D) {
 			player.resetFallDistance();
