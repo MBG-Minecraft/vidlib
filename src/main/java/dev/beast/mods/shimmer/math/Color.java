@@ -2,6 +2,9 @@ package dev.beast.mods.shimmer.math;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.feature.auto.AutoInit;
+import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -9,6 +12,7 @@ import net.minecraft.util.Mth;
 
 import java.util.Map;
 
+@AutoInit
 public record Color(int argb) {
 	public static final Color TRANSPARENT = new Color(0x00000000);
 	public static final Color WHITE = new Color(0xFFFFFFFF);
@@ -55,6 +59,7 @@ public record Color(int argb) {
 	public static final Codec<Color> CODEC_RGB = codecWithAlpha(255);
 
 	public static final StreamCodec<ByteBuf, Color> STREAM_CODEC = ByteBufCodecs.INT.map(Color::new, Color::argb);
+	public static final KnownCodec<Color> KNOWN_CODEC = KnownCodec.register(Shimmer.id("color"), CODEC, STREAM_CODEC, Color.class);
 
 	public Color(int a, int r, int g, int b) {
 		this(((a & 0xFF) << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF));

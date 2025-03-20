@@ -3,8 +3,8 @@ package dev.beast.mods.shimmer.feature.sound;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
+import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
-import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -27,7 +27,7 @@ public record SoundData(
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, SoundData> STREAM_CODEC = CompositeStreamCodec.of(
 		SoundEvent.STREAM_CODEC, SoundData::sound,
-		ShimmerStreamCodecs.SOUND_SOURCE, SoundData::source,
+		KnownCodec.SOUND_SOURCE.streamCodec(), SoundData::source,
 		ByteBufCodecs.FLOAT, SoundData::volume,
 		ByteBufCodecs.FLOAT, SoundData::pitch,
 		SoundData::new

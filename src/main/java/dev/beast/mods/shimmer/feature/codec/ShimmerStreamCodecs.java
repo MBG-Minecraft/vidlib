@@ -20,15 +20,10 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -171,11 +166,6 @@ public interface ShimmerStreamCodecs {
 
 	StreamCodec<ByteBuf, Unit> UNIT = StreamCodec.unit(Unit.INSTANCE);
 	StreamCodec<ByteBuf, SectionPos> SECTION_POS = ByteBufCodecs.LONG.map(SectionPos::of, SectionPos::asLong);
-	StreamCodec<ByteBuf, Mirror> MIRROR = enumValue(Mirror.values());
-	StreamCodec<ByteBuf, Rotation> ROTATION = enumValue(Rotation.values());
-	StreamCodec<ByteBuf, LiquidSettings> LIQUID_SETTINGS = enumValue(LiquidSettings.values());
-	StreamCodec<ByteBuf, InteractionHand> HAND = enumValue(InteractionHand.values());
-	StreamCodec<ByteBuf, SoundSource> SOUND_SOURCE = enumValue(SoundSource.values());
 
 	StreamCodec<ByteBuf, ShortList> SHORT_LIST = new StreamCodec<>() {
 		@Override
