@@ -2,6 +2,8 @@ package dev.beast.mods.shimmer.feature.particle.physics;
 
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
+import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.feature.shader.ShaderHolder;
 import net.minecraft.client.renderer.RenderType;
 
 public class PhysicsParticlesRenderTypes extends RenderType {
@@ -10,6 +12,10 @@ public class PhysicsParticlesRenderTypes extends RenderType {
 		.add("UV0", VertexFormatElement.UV0)
 		.add("Normal", VertexFormatElement.NORMAL)
 		.build();
+
+	public static final ShaderHolder PHYSICS_SOLID_SHADER = new ShaderHolder(Shimmer.id("physics_particle/solid"), FORMAT);
+	public static final ShaderHolder PHYSICS_CUTOUT_SHADER = new ShaderHolder(Shimmer.id("physics_particle/cutout"), FORMAT);
+	public static final ShaderHolder PHYSICS_TRANSLUCENT_SHADER = new ShaderHolder(Shimmer.id("physics_particle/translucent"), FORMAT);
 
 	public static final RenderType PHYSICS_SOLID = create(
 		"shimmer:physics_solid",

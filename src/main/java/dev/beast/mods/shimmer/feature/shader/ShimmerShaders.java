@@ -13,8 +13,8 @@ import java.io.IOException;
 public class ShimmerShaders {
 	@SubscribeEvent
 	public static void registerShaders(RegisterShadersEvent event) throws IOException {
-		PhysicsParticleManager.SOLID.shader.register(event);
-		PhysicsParticleManager.CUTOUT.shader.register(event);
-		PhysicsParticleManager.TRANSLUCENT.shader.register(event);
+		for (var manager : PhysicsParticleManager.ALL) {
+			manager.shader.register(event);
+		}
 	}
 }

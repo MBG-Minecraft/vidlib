@@ -99,7 +99,7 @@ public class ClientGameEventHandler {
 		}
 
 		var session = mc.player.shimmer$sessionData();
-		float delta = event.getPartialTick().getGameTimeDeltaPartialTick(true);
+		float delta = event.getPartialTick().getGameTimeDeltaPartialTick(false);
 
 		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SKY) {
 			mc.shimmer$renderSetup(event, delta);

@@ -32,7 +32,7 @@ public abstract class ClientPacketListenerMixin implements ShimmerClientPacketLi
 
 	@ModifyExpressionValue(method = {"handleRespawn", "handleLogin"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/CommonPlayerSpawnInfo;isFlat()Z"))
 	private boolean shimmer$isFlat(boolean original, @Local CommonPlayerSpawnInfo info) {
-		return original || !info.dimensionType().getKey().location().getNamespace().equals("minecraft");
+		return true;
 	}
 
 	@Override

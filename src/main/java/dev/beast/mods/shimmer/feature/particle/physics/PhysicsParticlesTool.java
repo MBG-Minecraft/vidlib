@@ -70,15 +70,15 @@ public class PhysicsParticlesTool implements ShimmerTool {
 
 	@Override
 	public void debugText(Player player, ItemStack item, @Nullable HitResult result, DebugText debugText) {
-		int solid = PhysicsParticleManager.SOLID.particles.size();
-		int cutout = PhysicsParticleManager.CUTOUT.particles.size();
-		int translucent = PhysicsParticleManager.TRANSLUCENT.particles.size();
-		int solidRendered = PhysicsParticleManager.SOLID.rendered;
-		int cutoutRendered = PhysicsParticleManager.CUTOUT.rendered;
-		int translucentRendered = PhysicsParticleManager.TRANSLUCENT.rendered;
-		debugText.topLeft.add("%,d/%,d Solid".formatted(solidRendered, solid));
-		debugText.topLeft.add("%,d/%,d Cutout".formatted(cutoutRendered, cutout));
-		debugText.topLeft.add("%,d/%,d Translucent".formatted(translucentRendered, translucent));
-		debugText.topRight.add("%,d/%,d Total".formatted(solidRendered + cutoutRendered + translucentRendered, solid + cutout + translucent));
+		int total = 0;
+		int totalRendered = 0;
+
+		for (var manager : PhysicsParticleManager.ALL) {
+			total += manager.particles.size();
+			totalRendered += manager.rendered;
+			debugText.topLeft.add("%,d/%,d %s".formatted(manager.rendered, manager.particles.size(), manager.displayName));
+		}
+
+		debugText.topRight.add("%,d/%,d Total".formatted(totalRendered, total));
 	}
 }
