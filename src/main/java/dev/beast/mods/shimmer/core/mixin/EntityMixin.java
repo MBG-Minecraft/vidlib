@@ -21,7 +21,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,36 +50,20 @@ public abstract class EntityMixin implements ShimmerEntity {
 	}
 
 	@Unique
-	private Map<EntityOverride<?>, EntityOverrideValue<?>> shimmer$overrides = null;
+	private Map<EntityOverride<?>, EntityOverrideValue<?>> shimmer$entityOverridesMap;
 
 	@Unique
 	private boolean shimmer$isSaving = false;
 
-	@Override
 	@Nullable
-	@SuppressWarnings("unchecked")
-	public <T> T shimmer$getDirectOverride(EntityOverride<T> override) {
-		var v = shimmer$overrides == null ? null : (EntityOverrideValue<T>) shimmer$overrides.get(override);
-		return v == null ? null : v.get((Entity) (Object) this);
+	@Override
+	public Map<EntityOverride<?>, EntityOverrideValue<?>> shimmer$getEntityOverridesMap() {
+		return shimmer$entityOverridesMap;
 	}
 
 	@Override
-	public <T> void shimmer$setDirectOverride(EntityOverride<T> override, @Nullable EntityOverrideValue<T> value) {
-		if (value == null) {
-			if (shimmer$overrides != null) {
-				shimmer$overrides.remove(override);
-
-				if (shimmer$overrides.isEmpty()) {
-					shimmer$overrides = null;
-				}
-			}
-		} else {
-			if (shimmer$overrides == null) {
-				shimmer$overrides = new IdentityHashMap<>(1);
-			}
-
-			shimmer$overrides.put(override, value);
-		}
+	public void shimmer$setEntityOverridesMap(@Nullable Map<EntityOverride<?>, EntityOverrideValue<?>> map) {
+		shimmer$entityOverridesMap = map;
 	}
 
 	@Override

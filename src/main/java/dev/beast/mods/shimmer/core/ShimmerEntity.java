@@ -17,7 +17,9 @@ import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 
 public interface ShimmerEntity extends ShimmerEntityContainer {
 	@Override
@@ -25,11 +27,41 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 		return ((Entity) this).level().shimmer$getEnvironment();
 	}
 
-	default <T> T shimmer$getDirectOverride(EntityOverride<T> override) {
+	@Nullable
+	default Map<EntityOverride<?>, EntityOverrideValue<?>> shimmer$getEntityOverridesMap() {
 		throw new NoMixinException();
 	}
 
+	default void shimmer$setEntityOverridesMap(@Nullable Map<EntityOverride<?>, EntityOverrideValue<?>> map) {
+		throw new NoMixinException();
+	}
+
+	@SuppressWarnings("unchecked")
+	default <T> T shimmer$getDirectOverride(EntityOverride<T> override) {
+		var map = shimmer$getEntityOverridesMap();
+		var v = map == null ? null : (EntityOverrideValue<T>) map.get(override);
+		return v == null ? null : v.get((Entity) this);
+	}
+
 	default <T> void shimmer$setDirectOverride(EntityOverride<T> override, @Nullable EntityOverrideValue<T> value) {
+		var map = shimmer$getEntityOverridesMap();
+
+		if (value == null) {
+			if (map != null) {
+				map.remove(override);
+
+				if (map.isEmpty()) {
+					shimmer$setEntityOverridesMap(null);
+				}
+			}
+		} else {
+			if (map == null) {
+				map = new IdentityHashMap<>(1);
+				shimmer$setEntityOverridesMap(map);
+			}
+
+			map.put(override, value);
+		}
 	}
 
 	default boolean shimmer$isSaving() {

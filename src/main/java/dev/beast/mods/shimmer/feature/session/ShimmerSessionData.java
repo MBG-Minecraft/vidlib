@@ -8,6 +8,7 @@ import dev.beast.mods.shimmer.feature.data.DataMapValue;
 import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.data.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
+import dev.beast.mods.shimmer.feature.entity.EntityOverrideValue;
 import dev.beast.mods.shimmer.feature.icon.IconHolder;
 import dev.beast.mods.shimmer.feature.input.PlayerInput;
 import dev.beast.mods.shimmer.feature.skybox.SkyboxData;
@@ -21,6 +22,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -31,6 +33,7 @@ public class ShimmerSessionData {
 	public PlayerInput input;
 	public List<ZoneInstance> zonesIn;
 	public Set<String> zonesTagsIn;
+	public Map<EntityOverride<?>, EntityOverrideValue<?>> entityOverridesMap;
 
 	public Boolean glowingOverride;
 	public Integer teamColorOverride;
