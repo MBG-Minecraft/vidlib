@@ -13,6 +13,7 @@ import dev.beast.mods.shimmer.math.Line;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.portal.TeleportTransition;
@@ -187,7 +188,7 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 		shimmer$level().s2c(new S2CEntityEventPayload(data));
 	}
 
-	default void s2cReceived(EntityData event) {
+	default void s2cReceived(EntityData event, Player player) {
 	}
 
 	default void c2s(EntityData data) {

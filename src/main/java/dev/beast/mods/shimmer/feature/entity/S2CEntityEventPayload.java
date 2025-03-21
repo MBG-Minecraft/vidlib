@@ -19,7 +19,7 @@ public record S2CEntityEventPayload(EntityData event) implements ShimmerPacketPa
 		var e = ctx.level().getEntity(event.entityId());
 
 		if (e != null) {
-			e.s2cReceived(event);
+			e.s2cReceived(event, ctx.player());
 		}
 	}
 }
