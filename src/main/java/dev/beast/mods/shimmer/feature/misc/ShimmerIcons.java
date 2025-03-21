@@ -14,18 +14,27 @@ public interface ShimmerIcons {
 	String MINUS = "-";
 	String TILDE = "~";
 	String COPY = "C";
+	String ELIMINATED = "E";
 	String INFO = "I";
 	String CAMERA = "M";
 	String NO = "N";
+	String PVP = "P";
 	String SWORD = "S";
+	String STAR = "T";
 	String WARN = "W";
 	String YES = "Y";
 
-	static Component icons(String text) {
+	static Component coloredIcons(String text) {
 		return Component.literal(text).withStyle(Style.EMPTY.withFont(FONT).withColor(ChatFormatting.WHITE));
 	}
 
-	Component CAMERA_PREFIX = icons(CAMERA + SMALL_SPACE);
-	Component STAFF_PREFIX = icons(SWORD + SMALL_SPACE);
-	Component ELIMINATED_PREFIX = icons("☠" + SMALL_SPACE);
+	static Component icons(String text) {
+		return Component.literal(text).withStyle(Style.EMPTY.withFont(FONT));
+	}
+
+	Component CAMERA_PREFIX = coloredIcons(CAMERA + SMALL_SPACE);
+	Component STAFF_PREFIX = coloredIcons(SWORD + SMALL_SPACE);
+	Component ELIMINATED_PREFIX = icons(ELIMINATED + SMALL_SPACE);
+	Component STAR_PREFIX = icons(STAR + SMALL_SPACE);
+	Component PVP_PREFIX = icons(PVP + SMALL_SPACE);
 }

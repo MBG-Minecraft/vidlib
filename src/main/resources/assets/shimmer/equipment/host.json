@@ -1,0 +1,14 @@
+{
+	"layers": {
+		"humanoid": [
+			{
+				"texture": "shimmer:host"
+			}
+		],
+		"humanoid_leggings": [
+			{
+				"texture": "shimmer:host"
+			}
+		]
+	}
+}

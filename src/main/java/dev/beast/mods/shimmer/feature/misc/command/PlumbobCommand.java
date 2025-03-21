@@ -11,7 +11,6 @@ import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 public interface PlumbobCommand {
@@ -24,9 +23,6 @@ public interface PlumbobCommand {
 					.executes(ctx -> plumbob(EntityArgument.getPlayers(ctx, "player"), Optional.of(Icon.KNOWN_CODEC.get(ctx, "icon"))))
 				)
 			)
-			.then(Commands.argument("icon", Icon.KNOWN_CODEC.argument(buildContext))
-				.executes(ctx -> plumbob(List.of(ctx.getSource().getPlayerOrException()), Optional.of(Icon.KNOWN_CODEC.get(ctx, "icon"))))
-			)
 		)
 		.then(Commands.literal("item")
 			.then(Commands.argument("player", EntityArgument.players())
@@ -34,15 +30,11 @@ public interface PlumbobCommand {
 					.executes(ctx -> plumbob(EntityArgument.getPlayers(ctx, "player"), Optional.of(new ItemIcon(ItemArgument.getItem(ctx, "item").createItemStack(1, true).copyWithCount(1)))))
 				)
 			)
-			.then(Commands.argument("item", ItemArgument.item(buildContext))
-				.executes(ctx -> plumbob(List.of(ctx.getSource().getPlayerOrException()), Optional.of(new ItemIcon(ItemArgument.getItem(ctx, "item").createItemStack(1, true).copyWithCount(1)))))
-			)
 		)
 		.then(Commands.literal("remove")
 			.then(Commands.argument("player", EntityArgument.players())
 				.executes(ctx -> plumbob(EntityArgument.getPlayers(ctx, "player"), Optional.empty()))
 			)
-			.executes(ctx -> plumbob(List.of(ctx.getSource().getPlayerOrException()), Optional.empty()))
 		)
 	);
 

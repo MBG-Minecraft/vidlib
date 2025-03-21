@@ -32,7 +32,11 @@ public class Clothing {
 	}
 
 	public static final Clothing NONE = register(Shimmer.id("none"));
+	public static final Clothing HOST = register(Shimmer.id("host"));
+	public static final Clothing HOST_WITH_MASK = register(Shimmer.id("host_with_mask"));
 
+	public static final Clothing BLACK_TRACKSUIT = register(Shimmer.id("tracksuit/black"));
+	public static final Clothing WHITE_TRACKSUIT = register(Shimmer.id("tracksuit/white"));
 	public static final Clothing RED_TRACKSUIT = register(Shimmer.id("tracksuit/red"));
 	public static final Clothing PINK_TRACKSUIT = register(Shimmer.id("tracksuit/pink"));
 	public static final Clothing MAGENTA_TRACKSUIT = register(Shimmer.id("tracksuit/magenta"));

@@ -9,7 +9,6 @@ import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.List;
 
 public interface ClothingCommand {
 	@AutoRegister
@@ -22,16 +21,11 @@ public interface ClothingCommand {
 					.executes(ctx -> clothing(EntityArgument.getPlayers(ctx, "player"), Clothing.REGISTRY.unitValueMap().get(ShimmerResourceLocationArgument.getId(ctx, "clothing"))))
 				)
 			)
-			.then(Commands.argument("clothing", ShimmerResourceLocationArgument.id())
-				.suggests(Clothing.SUGGESTION_PROVIDER)
-				.executes(ctx -> clothing(List.of(ctx.getSource().getPlayerOrException()), Clothing.REGISTRY.unitValueMap().get(ShimmerResourceLocationArgument.getId(ctx, "clothing"))))
-			)
 		)
 		.then(Commands.literal("remove")
 			.then(Commands.argument("player", EntityArgument.players())
 				.executes(ctx -> clothing(EntityArgument.getPlayers(ctx, "player"), null))
 			)
-			.executes(ctx -> clothing(List.of(ctx.getSource().getPlayerOrException()), null))
 		)
 	);
 

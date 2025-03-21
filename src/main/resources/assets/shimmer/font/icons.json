@@ -38,6 +38,12 @@
 		},
 		{
 			"type": "bitmap",
+			"file": "shimmer:font/icons/eliminated.png",
+			"ascent": 7,
+			"chars": ["E"]
+		},
+		{
+			"type": "bitmap",
 			"file": "shimmer:font/icons/info.png",
 			"ascent": 7,
 			"chars": ["I"]
@@ -56,9 +62,21 @@
 		},
 		{
 			"type": "bitmap",
+			"file": "shimmer:font/icons/pvp.png",
+			"ascent": 7,
+			"chars": ["P"]
+		},
+		{
+			"type": "bitmap",
 			"file": "shimmer:font/icons/sword.png",
 			"ascent": 7,
 			"chars": ["S"]
+		},
+		{
+			"type": "bitmap",
+			"file": "shimmer:font/icons/star.png",
+			"ascent": 7,
+			"chars": ["T"]
 		},
 		{
 			"type": "bitmap",

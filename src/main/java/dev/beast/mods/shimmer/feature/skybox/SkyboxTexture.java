@@ -2,7 +2,6 @@ package dev.beast.mods.shimmer.feature.skybox;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
-import com.mojang.blaze3d.systems.RenderSystem;
 import dev.beast.mods.shimmer.Shimmer;
 import net.minecraft.client.renderer.texture.Dumpable;
 import net.minecraft.client.renderer.texture.ReloadableTexture;
@@ -29,17 +28,6 @@ public class SkyboxTexture extends ReloadableTexture implements Dumpable {
 			var src = NativeImage.read(in);
 			var image = process(original, src, src.getWidth(), src.getHeight());
 			resolution = image.getHeight() / 2;
-
-			if (!RenderSystem.isOnRenderThreadOrInit()) {
-				RenderSystem.recordRenderCall(() -> {
-					TextureUtil.prepareImage(getId(), 0, image.getWidth(), image.getHeight());
-					image.upload(0, 0, 0, false);
-				});
-			} else {
-				TextureUtil.prepareImage(getId(), 0, image.getWidth(), image.getHeight());
-				image.upload(0, 0, 0, false);
-			}
-
 			return new TextureContents(image, new TextureMetadataSection(false, false));
 		}
 	}
