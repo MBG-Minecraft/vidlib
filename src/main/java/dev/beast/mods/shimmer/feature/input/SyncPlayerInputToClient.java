@@ -5,7 +5,7 @@ import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import dev.beast.mods.shimmer.feature.net.ShimmerPayloadContext;
 
 import java.util.UUID;
 
@@ -23,7 +23,12 @@ public record SyncPlayerInputToClient(UUID player, PlayerInput input) implements
 	}
 
 	@Override
-	public void handle(IPayloadContext ctx) {
+	public boolean allowDebugLogging() {
+		return false;
+	}
+
+	@Override
+	public void handle(ShimmerPayloadContext ctx) {
 		ctx.player().shimmer$sessionData().updateInput(player, input);
 	}
 }

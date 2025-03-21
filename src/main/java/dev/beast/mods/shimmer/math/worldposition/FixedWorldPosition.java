@@ -12,7 +12,7 @@ public record FixedWorldPosition(Vec3 pos) implements WorldPosition {
 	public static final SimpleRegistryType.Unit<FixedWorldPosition> ZERO = SimpleRegistryType.unit(Shimmer.id("zero"), new FixedWorldPosition(Vec3.ZERO));
 
 	public static final SimpleRegistryType<FixedWorldPosition> TYPE = SimpleRegistryType.dynamic(Shimmer.id("fixed"), RecordCodecBuilder.mapCodec(instance -> instance.group(
-		ShimmerCodecs.VEC_3D.fieldOf("pos").forGetter(FixedWorldPosition::pos)
+		ShimmerCodecs.VEC_3.fieldOf("pos").forGetter(FixedWorldPosition::pos)
 	).apply(instance, FixedWorldPosition::new)), ShimmerStreamCodecs.VEC_3.map(FixedWorldPosition::new, FixedWorldPosition::pos));
 
 	@Override

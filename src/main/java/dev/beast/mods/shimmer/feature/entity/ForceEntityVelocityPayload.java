@@ -5,9 +5,9 @@ import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
+import dev.beast.mods.shimmer.feature.net.ShimmerPayloadContext;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record ForceEntityVelocityPayload(int entity, Vec3 velocity) implements ShimmerPacketPayload {
 	@AutoPacket
@@ -23,8 +23,8 @@ public record ForceEntityVelocityPayload(int entity, Vec3 velocity) implements S
 	}
 
 	@Override
-	public void handle(IPayloadContext ctx) {
-		var e = ctx.player().level().getEntity(entity);
+	public void handle(ShimmerPayloadContext ctx) {
+		var e = ctx.level().getEntity(entity);
 
 		if (e != null) {
 			e.forceSetVelocity(velocity);

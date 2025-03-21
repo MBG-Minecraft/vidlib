@@ -4,9 +4,9 @@ import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
+import dev.beast.mods.shimmer.feature.net.ShimmerPayloadContext;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record SyncClockInstancePayload(ResourceLocation id, int tick, boolean ticking) implements ShimmerPacketPayload {
 	@AutoPacket
@@ -26,7 +26,7 @@ public record SyncClockInstancePayload(ResourceLocation id, int tick, boolean ti
 	}
 
 	@Override
-	public void handle(IPayloadContext ctx) {
+	public void handle(ShimmerPayloadContext ctx) {
 		ctx.player().shimmer$sessionData().updateClockInstance(id, tick, ticking);
 	}
 }

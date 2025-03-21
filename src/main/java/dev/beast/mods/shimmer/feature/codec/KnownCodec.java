@@ -11,19 +11,24 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
+import dev.beast.mods.shimmer.util.registry.RegistryReference;
 import dev.beast.mods.shimmer.util.registry.ShimmerResourceLocationArgument;
+import dev.beast.mods.shimmer.util.registry.VideoResourceLocationArgument;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
@@ -63,6 +68,24 @@ public record KnownCodec<T>(
 		return registerEnum(id, values, (Function<E, String>) ShimmerCodecs.DEFAULT_NAME_GETTER);
 	}
 
+	public static <T> KnownCodec<T> register(RegistryReference.IdHolder<T> registry, Class<T> type) {
+		return register(
+			registry.id,
+			ShimmerCodecs.map(registry::getMap, registry.keyCodec, registry::getId),
+			ShimmerStreamCodecs.map(registry::getMap, registry.keyStreamCodec, registry::getId),
+			type
+		);
+	}
+
+	public static <T> KnownCodec<ResourceKey<T>> register(ResourceKey<? extends Registry<T>> registry) {
+		return register(
+			registry.location(),
+			ResourceKey.codec(registry),
+			ShimmerStreamCodecs.resourceKey(registry),
+			(Class) ResourceKey.class
+		);
+	}
+
 	public static final KnownCodec<Boolean> BOOL = register(ResourceLocation.fromNamespaceAndPath("java", "bool"), Codec.BOOL, ByteBufCodecs.BOOL, Boolean.class, (self, ctx) -> BoolArgumentType.bool());
 	public static final KnownCodec<Integer> INT = register(ResourceLocation.fromNamespaceAndPath("java", "int"), Codec.INT, ByteBufCodecs.INT, Integer.class, (self, ctx) -> IntegerArgumentType.integer());
 	public static final KnownCodec<Integer> VAR_INT = register(ResourceLocation.fromNamespaceAndPath("java", "var_int"), Codec.INT, ByteBufCodecs.VAR_INT, Integer.class, (self, ctx) -> IntegerArgumentType.integer());
@@ -78,8 +101,10 @@ public record KnownCodec<T>(
 	public static final KnownCodec<LiquidSettings> LIQUID_SETTINGS = registerEnum(ResourceLocation.withDefaultNamespace("liquid_settings"), LiquidSettings.values());
 	public static final KnownCodec<InteractionHand> HAND = registerEnum(ResourceLocation.withDefaultNamespace("hand"), InteractionHand.values());
 	public static final KnownCodec<SoundSource> SOUND_SOURCE = registerEnum(ResourceLocation.withDefaultNamespace("sound_source"), SoundSource.values());
+	public static final KnownCodec<ItemStack> OPTIONAL_ITEM = register(ResourceLocation.withDefaultNamespace("optional_item"), ItemStack.OPTIONAL_CODEC, ItemStack.OPTIONAL_STREAM_CODEC, ItemStack.class);
 
 	public static final KnownCodec<ResourceLocation> SHIMMER_ID = register(Shimmer.id("shimmer_id"), ShimmerCodecs.SHIMMER_ID, ShimmerStreamCodecs.SHIMMER_ID, ResourceLocation.class, (self, ctx) -> ShimmerResourceLocationArgument.id());
+	public static final KnownCodec<ResourceLocation> VIDEO_ID = register(Shimmer.id("video_id"), ShimmerCodecs.VIDEO_ID, ShimmerStreamCodecs.VIDEO_ID, ResourceLocation.class, (self, ctx) -> VideoResourceLocationArgument.id());
 
 	public ArgumentType<T> argument(CommandBuildContext commandBuildContext) {
 		return argumentType.apply(this, commandBuildContext);

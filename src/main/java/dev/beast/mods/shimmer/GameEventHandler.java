@@ -8,6 +8,7 @@ import dev.beast.mods.shimmer.feature.clock.ClockFont;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.item.ShimmerTool;
+import dev.beast.mods.shimmer.feature.location.Location;
 import dev.beast.mods.shimmer.feature.session.RemovePlayerDataPayload;
 import dev.beast.mods.shimmer.feature.skybox.SkyboxData;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
@@ -62,6 +63,7 @@ public class GameEventHandler {
 
 	@SubscribeEvent
 	public static void addReloadListeners(AddServerReloadListenersEvent event) {
+		event.addListener(Shimmer.id("location"), new Location.Loader());
 		event.addListener(Shimmer.id("zone"), new ZoneLoader());
 		event.addListener(Shimmer.id("structure"), StructureStorage.SERVER);
 		event.addListener(Shimmer.id("cutscene"), new Cutscene.Loader());

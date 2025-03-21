@@ -3,7 +3,7 @@ package dev.beast.mods.shimmer.feature.clock;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
-import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
+import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.math.Size2;
 import dev.beast.mods.shimmer.math.UV;
 import dev.beast.mods.shimmer.util.JsonCodecReloadListener;
@@ -14,7 +14,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Map;
-import java.util.function.Supplier;
 
 public record ClockFont(
 	ResourceLocation id,
@@ -69,10 +68,8 @@ public record ClockFont(
 		ClockFont::create
 	);
 
-	public static final RegistryReference.Holder<ResourceLocation, ClockFont> SERVER = RegistryReference.createServerHolder();
-	public static Supplier<Map<ResourceLocation, ClockFont>> CLIENT_SUPPLIER = Map::of;
-
-	public static final Codec<ClockFont> CODEC = ShimmerCodecs.map(SERVER::getMap, ShimmerCodecs.SHIMMER_ID, ClockFont::id);
+	public static final RegistryReference.IdHolder<ClockFont> REGISTRY = RegistryReference.createServerIdHolder("clock_font", true);
+	public static final KnownCodec<ClockFont> KNOWN_CODEC = KnownCodec.register(REGISTRY, ClockFont.class);
 
 	public static class Loader extends JsonCodecReloadListener<ClockFont> {
 		public Loader() {
@@ -81,7 +78,7 @@ public record ClockFont(
 
 		@Override
 		protected void apply(Map<ResourceLocation, ClockFont> from) {
-			SERVER.update(Map.copyOf(from));
+			REGISTRY.update(Map.copyOf(from));
 		}
 	}
 

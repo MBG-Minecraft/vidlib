@@ -3,8 +3,8 @@ package dev.beast.mods.shimmer.feature.cutscene;
 import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
+import dev.beast.mods.shimmer.feature.net.ShimmerPayloadContext;
 import net.minecraft.network.codec.StreamCodec;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public enum StopCutscenePayload implements ShimmerPacketPayload {
 	INSTANCE;
@@ -18,7 +18,7 @@ public enum StopCutscenePayload implements ShimmerPacketPayload {
 	}
 
 	@Override
-	public void handle(IPayloadContext ctx) {
+	public void handle(ShimmerPayloadContext ctx) {
 		ctx.player().stopCutscene();
 	}
 }

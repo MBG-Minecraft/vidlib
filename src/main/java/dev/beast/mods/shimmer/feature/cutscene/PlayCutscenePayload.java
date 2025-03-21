@@ -4,8 +4,8 @@ import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
+import dev.beast.mods.shimmer.feature.net.ShimmerPayloadContext;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record PlayCutscenePayload(Cutscene cutscene, WorldNumberVariables variables) implements ShimmerPacketPayload {
 	@AutoPacket
@@ -21,7 +21,7 @@ public record PlayCutscenePayload(Cutscene cutscene, WorldNumberVariables variab
 	}
 
 	@Override
-	public void handle(IPayloadContext ctx) {
+	public void handle(ShimmerPayloadContext ctx) {
 		ctx.player().playCutscene(cutscene, variables);
 	}
 }

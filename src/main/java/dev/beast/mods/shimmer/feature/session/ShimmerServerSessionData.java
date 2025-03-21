@@ -1,21 +1,17 @@
 package dev.beast.mods.shimmer.feature.session;
 
 import dev.beast.mods.shimmer.core.ShimmerS2CPacketConsumer;
-import dev.beast.mods.shimmer.feature.clock.ClockFont;
-import dev.beast.mods.shimmer.feature.clock.ClockInstance;
-import dev.beast.mods.shimmer.feature.clock.SyncClockFontsPayload;
-import dev.beast.mods.shimmer.feature.clock.SyncClocksPayload;
 import dev.beast.mods.shimmer.feature.data.SyncPlayerDataPayload;
 import dev.beast.mods.shimmer.feature.data.SyncServerDataPayload;
 import dev.beast.mods.shimmer.feature.input.PlayerInputChanged;
 import dev.beast.mods.shimmer.feature.input.SyncPlayerInputToClient;
 import dev.beast.mods.shimmer.feature.misc.RefreshNamePayload;
 import dev.beast.mods.shimmer.feature.misc.SyncPlayerTagsPayload;
-import dev.beast.mods.shimmer.feature.skybox.SkyboxData;
-import dev.beast.mods.shimmer.feature.skybox.SyncSkyboxesPayload;
 import dev.beast.mods.shimmer.feature.zone.SyncZonesPayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
 import dev.beast.mods.shimmer.util.S2CPacketBundleBuilder;
+import dev.beast.mods.shimmer.util.registry.SyncRegistryPayload;
+import dev.beast.mods.shimmer.util.registry.SyncedRegistry;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -24,6 +20,7 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.List;
+import java.util.Map;
 
 public class ShimmerServerSessionData extends ShimmerSessionData {
 	public final ServerGamePacketListenerImpl connection;
@@ -50,10 +47,12 @@ public class ShimmerServerSessionData extends ShimmerSessionData {
 	public void sync(S2CPacketBundleBuilder packets, ServerPlayer player, boolean login) {
 		var level = player.serverLevel();
 		packets.s2c(new ClientboundSetTimePacket(level.getGameTime(), level.getDayTime(), level.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)));
-		packets.s2c(new SyncZonesPayload(List.copyOf(ZoneLoader.ALL.containers.values())).toS2C());
-		packets.s2c(new SyncClockFontsPayload(List.copyOf(ClockFont.SERVER.getMap().values())).toS2C());
-		packets.s2c(new SyncClocksPayload(List.copyOf(ClockInstance.SERVER.getMap().values())).toS2C());
-		packets.s2c(new SyncSkyboxesPayload(List.copyOf(SkyboxData.SERVER.getMap().values())).toS2C());
+
+		for (var reg : SyncedRegistry.ALL.values()) {
+			packets.s2c(new SyncRegistryPayload(reg, Map.copyOf(reg.registry().getMap())));
+		}
+
+		packets.s2c(new SyncZonesPayload(List.copyOf(ZoneLoader.ALL.containers.values())));
 
 		dataMap.load(player.server, player.server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("shimmer").resolve(player.getUUID() + ".nbt"));
 

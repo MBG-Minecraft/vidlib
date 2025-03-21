@@ -2,12 +2,12 @@ package dev.beast.mods.shimmer.feature.data;
 
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.core.ShimmerS2CPacketConsumer;
+import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.util.Cast;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -153,7 +153,7 @@ public class DataMap {
 		}
 	}
 
-	public void syncAll(ShimmerS2CPacketConsumer target, @Nullable ServerPlayer selfPlayer, BiFunction<UUID, List<DataMapValue>, CustomPacketPayload> factory) {
+	public void syncAll(ShimmerS2CPacketConsumer target, @Nullable ServerPlayer selfPlayer, BiFunction<UUID, List<DataMapValue>, ShimmerPacketPayload> factory) {
 		var list = new ArrayList<DataMapValue>();
 
 		if (map != null) {
@@ -169,7 +169,7 @@ public class DataMap {
 		}
 	}
 
-	public void sync(ShimmerS2CPacketConsumer packetsToEveryone, @Nullable ServerPlayer selfPlayer, BiFunction<UUID, List<DataMapValue>, CustomPacketPayload> factory) {
+	public void sync(ShimmerS2CPacketConsumer packetsToEveryone, @Nullable ServerPlayer selfPlayer, BiFunction<UUID, List<DataMapValue>, ShimmerPacketPayload> factory) {
 		if (map == null) {
 			return;
 		}

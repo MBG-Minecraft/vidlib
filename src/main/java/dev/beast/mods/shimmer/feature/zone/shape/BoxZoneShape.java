@@ -13,8 +13,8 @@ import java.util.stream.Stream;
 
 public record BoxZoneShape(AABB box) implements ZoneShape {
 	public static final SimpleRegistryType<BoxZoneShape> TYPE = SimpleRegistryType.dynamic(Shimmer.id("box"), RecordCodecBuilder.mapCodec(instance -> instance.group(
-		ShimmerCodecs.VEC_3D.fieldOf("start").forGetter(z -> z.box.getMinPosition()),
-		ShimmerCodecs.VEC_3D.fieldOf("end").forGetter(z -> z.box.getMaxPosition())
+		ShimmerCodecs.VEC_3.fieldOf("start").forGetter(z -> z.box.getMinPosition()),
+		ShimmerCodecs.VEC_3.fieldOf("end").forGetter(z -> z.box.getMaxPosition())
 	).apply(instance, (start, end) -> new BoxZoneShape(new AABB(start, end)))), CompositeStreamCodec.of(
 		ShimmerStreamCodecs.AABB,
 		BoxZoneShape::box,

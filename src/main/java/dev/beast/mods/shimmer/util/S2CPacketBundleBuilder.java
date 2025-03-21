@@ -4,13 +4,24 @@ import dev.beast.mods.shimmer.core.ShimmerS2CPacketConsumer;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class S2CPacketBundleBuilder implements ShimmerS2CPacketConsumer {
+	public final Level level;
 	private List<Packet<? super ClientGamePacketListener>> list;
+
+	public S2CPacketBundleBuilder(Level level) {
+		this.level = level;
+	}
+
+	@Override
+	public Level shimmer$level() {
+		return level;
+	}
 
 	@Override
 	public void s2c(@Nullable Packet<? super ClientGamePacketListener> packet) {

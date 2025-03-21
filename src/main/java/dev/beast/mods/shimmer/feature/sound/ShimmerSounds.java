@@ -20,4 +20,6 @@ public interface ShimmerSounds {
 
 	DeferredHolder<SoundEvent, SoundEvent> SPLAT = register("splat", null);
 	DeferredHolder<SoundEvent, SoundEvent> WOOSH = register("woosh", null);
+	DeferredHolder<SoundEvent, SoundEvent> FAR_WOOSH = register("far_woosh", null);
+	DeferredHolder<SoundEvent, SoundEvent> FAR_EXPLOSION = register("far_explosion", null);
 }

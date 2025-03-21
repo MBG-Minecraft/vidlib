@@ -1,18 +1,14 @@
 package dev.beast.mods.shimmer.feature.skybox;
 
-import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.util.JsonCodecReloadListener;
 import dev.beast.mods.shimmer.util.registry.RegistryReference;
-import dev.beast.mods.shimmer.util.registry.ShimmerResourceLocationArgument;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -37,7 +33,7 @@ public record SkyboxData(
 		Codec.BOOL.optionalFieldOf("celestials", false).forGetter(SkyboxData::celestials)
 	).apply(instance, SkyboxData::new));
 
-	public static final StreamCodec<ByteBuf, SkyboxData> STREAM_CODEC = CompositeStreamCodec.of(
+	public static final StreamCodec<ByteBuf, SkyboxData> DIRECT_STREAM_CODEC = CompositeStreamCodec.of(
 		ShimmerStreamCodecs.SHIMMER_ID, SkyboxData::id,
 		ShimmerStreamCodecs.SHIMMER_ID.optional(), SkyboxData::texture,
 		ByteBufCodecs.FLOAT, SkyboxData::rotation,
@@ -47,8 +43,7 @@ public record SkyboxData(
 		SkyboxData::new
 	);
 
-	public static final RegistryReference.Holder<ResourceLocation, SkyboxData> SERVER = RegistryReference.createServerHolder();
-	public static final SuggestionProvider<CommandSourceStack> SUGGESTION_PROVIDER = ShimmerResourceLocationArgument.registerSuggestionProvider(Shimmer.id("skybox"), () -> SERVER.getMap().keySet());
+	public static final RegistryReference.IdHolder<SkyboxData> REGISTRY = RegistryReference.createServerIdHolder("skybox", true);
 
 	public static class Loader extends JsonCodecReloadListener<SkyboxData> {
 		public Loader() {
@@ -57,7 +52,7 @@ public record SkyboxData(
 
 		@Override
 		protected void apply(Map<ResourceLocation, SkyboxData> from) {
-			SERVER.update(Map.copyOf(from));
+			REGISTRY.update(Map.copyOf(from));
 		}
 	}
 }

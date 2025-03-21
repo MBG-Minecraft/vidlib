@@ -21,7 +21,7 @@ import java.util.function.Function;
 
 public interface WorldPosition {
 	SimpleRegistry<WorldPosition> REGISTRY = SimpleRegistry.create(WorldPosition::type);
-	Codec<WorldPosition> CODEC = Codec.either(ShimmerCodecs.VEC_3D, REGISTRY.valueCodec()).xmap(either -> either.map(WorldPosition::fixed, Function.identity()), p -> p instanceof FixedWorldPosition(Vec3 pos) ? Either.left(pos) : Either.right(p));
+	Codec<WorldPosition> CODEC = Codec.either(ShimmerCodecs.VEC_3, REGISTRY.valueCodec()).xmap(either -> either.map(WorldPosition::fixed, Function.identity()), p -> p instanceof FixedWorldPosition(Vec3 pos) ? Either.left(pos) : Either.right(p));
 	StreamCodec<RegistryFriendlyByteBuf, WorldPosition> STREAM_CODEC = ByteBufCodecs.either(ShimmerStreamCodecs.VEC_3, REGISTRY.valueStreamCodec()).map(either -> either.map(WorldPosition::fixed, Function.identity()), p -> p instanceof FixedWorldPosition(Vec3 pos) ? Either.left(pos) : Either.right(p));
 
 	@AutoInit

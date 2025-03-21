@@ -22,7 +22,7 @@ public class Skybox {
 				return skyboxTexture;
 			}
 
-			skyboxTexture = new SkyboxTexture(id, texture);
+			skyboxTexture = new SkyboxTexture(this, id);
 			mc.getTextureManager().registerAndLoad(skyboxTexture.resourceId(), skyboxTexture);
 		}
 

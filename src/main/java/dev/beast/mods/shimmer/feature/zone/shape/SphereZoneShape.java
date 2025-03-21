@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements ZoneShape {
 	public static final SimpleRegistryType<SphereZoneShape> TYPE = SimpleRegistryType.dynamic(Shimmer.id("sphere"), RecordCodecBuilder.mapCodec(instance -> instance.group(
-		ShimmerCodecs.VEC_3D.fieldOf("pos").forGetter(SphereZoneShape::pos),
+		ShimmerCodecs.VEC_3.fieldOf("pos").forGetter(SphereZoneShape::pos),
 		Codec.doubleRange(0D, Double.POSITIVE_INFINITY).fieldOf("radius").forGetter(SphereZoneShape::radius)
 	).apply(instance, SphereZoneShape::new)), CompositeStreamCodec.of(
 		ShimmerStreamCodecs.VEC_3, SphereZoneShape::pos,

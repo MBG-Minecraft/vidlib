@@ -11,8 +11,11 @@ import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.UUID;
 
 public interface ShimmerServerLevel extends ShimmerLevel {
 	@Override
@@ -21,6 +24,12 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 	}
 
 	default void shimmer$setActiveZones(ActiveZones zones) {
+	}
+
+	@Override
+	@Nullable
+	default Entity getEntityByUUID(UUID uuid) {
+		return ((ServerLevel) this).getEntity(uuid);
 	}
 
 	@Override
@@ -37,17 +46,17 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 			optimized = builder.build();
 		}
 
-		s2c(new BulkLevelModificationPayload(optimized, ((Level) this).getGameTime()));
+		s2c(new BulkLevelModificationPayload(optimized));
 		return ShimmerLevel.super.bulkModify(optimized);
 	}
 
 	@Override
 	default void playSound(Vec3 pos, SoundData sound) {
-		s2c(new SoundPayload(pos, sound, ((Level) this).getGameTime()));
+		s2c(new SoundPayload(pos, sound));
 	}
 
 	@Override
 	default void playTrackingSound(WorldPosition position, WorldNumberVariables variables, SoundData data, boolean looping) {
-		s2c(new TrackingSoundPayload(position, variables, data, looping, ((Level) this).getGameTime()));
+		s2c(new TrackingSoundPayload(position, variables, data, looping));
 	}
 }

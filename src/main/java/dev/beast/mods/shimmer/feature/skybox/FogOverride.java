@@ -3,7 +3,9 @@ package dev.beast.mods.shimmer.feature.skybox;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
+import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.Range;
 import io.netty.buffer.ByteBuf;
@@ -30,4 +32,6 @@ public record FogOverride(Range range, int shape, Color color) {
 		Color.STREAM_CODEC, FogOverride::color,
 		FogOverride::new
 	);
+
+	public static final KnownCodec<FogOverride> KNOWN_CODEC = KnownCodec.register(Shimmer.id("fog_override"), CODEC, STREAM_CODEC, FogOverride.class);
 }

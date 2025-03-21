@@ -3,13 +3,13 @@ package dev.beast.mods.shimmer.feature.clock;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
+import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.util.JsonCodecReloadListener;
 import dev.beast.mods.shimmer.util.registry.RegistryReference;
-import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
@@ -29,9 +29,9 @@ public record Clock(
 	Map<String, IntList> events,
 	List<ClockLocation> locations
 ) {
-	public static final Codec<Clock> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final Codec<Clock> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		ResourceLocation.CODEC.fieldOf("id").forGetter(Clock::id),
-		ResourceKey.codec(Registries.DIMENSION).optionalFieldOf("dimension", Level.OVERWORLD).forGetter(Clock::dimension),
+		ShimmerCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(Clock::dimension),
 		Codec.INT.optionalFieldOf("max_ticks", 12000).forGetter(Clock::maxTicks),
 		Codec.BOOL.optionalFieldOf("count_down", true).forGetter(Clock::countDown),
 		Codec.INT.optionalFieldOf("flash", 200).forGetter(Clock::flash),
@@ -39,7 +39,7 @@ public record Clock(
 		ClockLocation.CODEC.listOf().optionalFieldOf("locations", List.of()).forGetter(Clock::locations)
 	).apply(instance, Clock::new));
 
-	public static final StreamCodec<ByteBuf, Clock> STREAM_CODEC = CompositeStreamCodec.of(
+	public static final StreamCodec<RegistryFriendlyByteBuf, Clock> DIRECT_STREAM_CODEC = CompositeStreamCodec.of(
 		ResourceLocation.STREAM_CODEC, Clock::id,
 		ShimmerStreamCodecs.DIMENSION.optional(Level.OVERWORLD), Clock::dimension,
 		ByteBufCodecs.VAR_INT, Clock::maxTicks,
@@ -50,22 +50,23 @@ public record Clock(
 		Clock::new
 	);
 
-	public static final RegistryReference.Holder<ResourceLocation, Clock> SERVER = RegistryReference.createServerHolder();
+	public static final RegistryReference.IdHolder<Clock> REGISTRY = RegistryReference.createServerIdHolder("clock", false);
+	public static final KnownCodec<Clock> KNOWN_CODEC = KnownCodec.register(REGISTRY, Clock.class);
 
 	public static class Loader extends JsonCodecReloadListener<Clock> {
 		public Loader() {
-			super("shimmer/clock", CODEC, true);
+			super("shimmer/clock", DIRECT_CODEC, true);
 		}
 
 		@Override
 		protected void apply(Map<ResourceLocation, Clock> from) {
 			var newInstances = new HashMap<ResourceLocation, ClockInstance>();
 
-			SERVER.update(Map.copyOf(from));
+			REGISTRY.update(Map.copyOf(from));
 
 			for (var entry : from.entrySet()) {
 				var instance = new ClockInstance(entry.getValue(), 0, false);
-				var old = ClockInstance.SERVER.get(entry.getKey());
+				var old = ClockInstance.REGISTRY.get(entry.getKey());
 
 				if (old != null) {
 					instance.prevTick = old.prevTick;
@@ -76,7 +77,7 @@ public record Clock(
 				newInstances.put(entry.getKey(), instance);
 			}
 
-			ClockInstance.SERVER.update(newInstances);
+			ClockInstance.REGISTRY.update(newInstances);
 		}
 	}
 }

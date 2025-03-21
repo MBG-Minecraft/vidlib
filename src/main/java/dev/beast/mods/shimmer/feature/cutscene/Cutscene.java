@@ -17,14 +17,14 @@ import java.util.List;
 import java.util.Map;
 
 public class Cutscene {
-	public static final Codec<Cutscene> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final Codec<Cutscene> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		CutsceneStep.CODEC.listOf().optionalFieldOf("steps", List.of()).forGetter(c -> c.steps),
 		Codec.BOOL.optionalFieldOf("allow_movement", false).forGetter(c -> c.allowMovement),
 		Codec.BOOL.optionalFieldOf("open_previous_screen", false).forGetter(c -> c.openPreviousScreen),
 		Codec.BOOL.optionalFieldOf("hide_player", false).forGetter(c -> c.hidePlayer)
 	).apply(instance, Cutscene::new));
 
-	public static final StreamCodec<RegistryFriendlyByteBuf, Cutscene> STREAM_CODEC = CompositeStreamCodec.of(
+	public static final StreamCodec<RegistryFriendlyByteBuf, Cutscene> DIRECT_STREAM_CODEC = CompositeStreamCodec.of(
 		CutsceneStep.STREAM_CODEC.list(),
 		c -> c.steps,
 		ByteBufCodecs.BOOL,
@@ -36,18 +36,19 @@ public class Cutscene {
 		Cutscene::new
 	);
 
-	public static final KnownCodec<Cutscene> KNOWN_CODEC = KnownCodec.register(Shimmer.id("cutscene"), CODEC, STREAM_CODEC, Cutscene.class);
-
-	public static final RegistryReference.Holder<ResourceLocation, Cutscene> SERVER = RegistryReference.createServerHolder();
+	public static final KnownCodec<Cutscene> DIRECT_KNOWN_CODEC = KnownCodec.register(Shimmer.id("direct_cutscene"), DIRECT_CODEC, DIRECT_STREAM_CODEC, Cutscene.class);
+	public static final RegistryReference.IdHolder<Cutscene> REGISTRY = RegistryReference.createServerIdHolder("cutscene", false);
+	public static final KnownCodec<Cutscene> KNOWN_CODEC = KnownCodec.register(REGISTRY, Cutscene.class);
+	public static final StreamCodec<? super RegistryFriendlyByteBuf, Cutscene> STREAM_CODEC = REGISTRY.streamCodecOrDirect(KNOWN_CODEC, DIRECT_STREAM_CODEC);
 
 	public static class Loader extends JsonCodecReloadListener<Cutscene> {
 		public Loader() {
-			super("shimmer/cutscene", CODEC, false);
+			super("shimmer/cutscene", DIRECT_CODEC, false);
 		}
 
 		@Override
 		protected void apply(Map<ResourceLocation, Cutscene> from) {
-			SERVER.update(Map.copyOf(from));
+			REGISTRY.update(Map.copyOf(from));
 		}
 	}
 

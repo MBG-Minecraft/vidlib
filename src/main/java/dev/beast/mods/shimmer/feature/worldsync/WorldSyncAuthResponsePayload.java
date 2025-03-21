@@ -4,8 +4,8 @@ import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
+import dev.beast.mods.shimmer.feature.net.ShimmerPayloadContext;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record WorldSyncAuthResponsePayload(String id, String displayName, String address, int port, String token) implements ShimmerPacketPayload {
 	@AutoPacket
@@ -24,7 +24,7 @@ public record WorldSyncAuthResponsePayload(String id, String displayName, String
 	}
 
 	@Override
-	public void handle(IPayloadContext ctx) {
+	public void handle(ShimmerPayloadContext ctx) {
 		ctx.player().shimmer$sessionData().worldSyncAuthResponse(this);
 	}
 }

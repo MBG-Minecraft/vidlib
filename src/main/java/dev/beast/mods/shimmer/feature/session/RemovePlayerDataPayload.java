@@ -4,7 +4,7 @@ import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import dev.beast.mods.shimmer.feature.net.ShimmerPayloadContext;
 
 import java.util.UUID;
 
@@ -18,7 +18,7 @@ public record RemovePlayerDataPayload(UUID player) implements ShimmerPacketPaylo
 	}
 
 	@Override
-	public void handle(IPayloadContext ctx) {
+	public void handle(ShimmerPayloadContext ctx) {
 		ctx.player().shimmer$sessionData().removeSessionData(player);
 	}
 }

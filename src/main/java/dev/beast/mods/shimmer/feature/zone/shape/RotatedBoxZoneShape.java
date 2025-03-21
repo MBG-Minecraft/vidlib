@@ -56,7 +56,7 @@ public record RotatedBoxZoneShape(Vec3 pos, Size3f size, Rotation rotation, Matr
 	}
 
 	public static final SimpleRegistryType<RotatedBoxZoneShape> TYPE = SimpleRegistryType.dynamic(Shimmer.id("rotated_box"), RecordCodecBuilder.mapCodec(instance -> instance.group(
-		ShimmerCodecs.VEC_3D.fieldOf("pos").forGetter(RotatedBoxZoneShape::pos),
+		ShimmerCodecs.VEC_3.fieldOf("pos").forGetter(RotatedBoxZoneShape::pos),
 		Size3f.CODEC.fieldOf("size").forGetter(RotatedBoxZoneShape::size),
 		Rotation.CODEC.fieldOf("rotation").forGetter(RotatedBoxZoneShape::rotation)
 	).apply(instance, RotatedBoxZoneShape::of)), CompositeStreamCodec.of(

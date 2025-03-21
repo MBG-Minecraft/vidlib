@@ -24,7 +24,7 @@ public interface ShimmerPlayer extends ShimmerLivingEntity {
 	}
 
 	default ShimmerSessionData shimmer$sessionData() {
-		throw new NoMixinException();
+		throw new NoMixinException(this);
 	}
 
 	@Override

@@ -5,7 +5,7 @@ import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import dev.beast.mods.shimmer.feature.net.ShimmerPayloadContext;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,7 +24,7 @@ public record SyncPlayerDataPayload(UUID player, List<DataMapValue> update) impl
 	}
 
 	@Override
-	public void handle(IPayloadContext ctx) {
+	public void handle(ShimmerPayloadContext ctx) {
 		ctx.player().shimmer$sessionData().updateSessionData(ctx.player(), player, update);
 	}
 }

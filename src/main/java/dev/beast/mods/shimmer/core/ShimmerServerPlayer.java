@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.core;
 
+import dev.beast.mods.shimmer.feature.misc.SyncPlayerTagsPayload;
 import dev.beast.mods.shimmer.feature.session.ShimmerServerSessionData;
 import dev.beast.mods.shimmer.util.MiscUtils;
 import net.minecraft.network.protocol.Packet;
@@ -7,12 +8,15 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
+import net.neoforged.neoforge.network.bundle.PacketAndPayloadAcceptor;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public interface ShimmerServerPlayer extends ShimmerPlayer {
 	@Override
 	default ShimmerServerSessionData shimmer$sessionData() {
-		throw new NoMixinException();
+		throw new NoMixinException(this);
 	}
 
 	@Override
@@ -36,5 +40,10 @@ public interface ShimmerServerPlayer extends ShimmerPlayer {
 	@Override
 	default GameType getGameMode() {
 		return ((ServerPlayer) this).gameMode.getGameModeForPlayer();
+	}
+
+	default void shimmer$initialSync(PacketAndPayloadAcceptor<ClientGamePacketListener> callback) {
+		var p = (ServerPlayer) this;
+		callback.accept(new SyncPlayerTagsPayload(p.getUUID(), List.copyOf(p.getTags())).toS2C(p.level()));
 	}
 }

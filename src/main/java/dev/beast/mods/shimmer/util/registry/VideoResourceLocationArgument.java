@@ -15,6 +15,14 @@ import java.util.Locale;
 import java.util.function.Supplier;
 
 public class VideoResourceLocationArgument implements ArgumentType<ResourceLocation> {
+	public static ResourceLocation idFromString(String string) {
+		return string.indexOf(':') == -1 ? ResourceLocation.fromNamespaceAndPath("video", string) : ResourceLocation.parse(string);
+	}
+
+	public static String idToString(ResourceLocation rl) {
+		return rl.getNamespace().equals("video") ? rl.getPath() : rl.toString();
+	}
+
 	public static VideoResourceLocationArgument id() {
 		return new VideoResourceLocationArgument();
 	}
@@ -29,7 +37,7 @@ public class VideoResourceLocationArgument implements ArgumentType<ResourceLocat
 			boolean col = input.indexOf(':') > -1;
 
 			for (var id : allIds.get()) {
-				var ids = id.getNamespace().equals("video") ? id.getPath() : id.toString();
+				var ids = idToString(id);
 
 				if (col) {
 					if (SharedSuggestionProvider.matchesSubStr(input, ids)) {
@@ -55,7 +63,7 @@ public class VideoResourceLocationArgument implements ArgumentType<ResourceLocat
 		var s = reader.getString().substring(i, reader.getCursor());
 
 		try {
-			return s.indexOf(':') == -1 ? ResourceLocation.fromNamespaceAndPath("video", s) : ResourceLocation.parse(s);
+			return idFromString(s);
 		} catch (ResourceLocationException resourcelocationexception) {
 			reader.setCursor(i);
 			throw ResourceLocation.ERROR_INVALID.createWithContext(reader);

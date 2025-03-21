@@ -37,6 +37,15 @@ public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEn
 	}
 
 	@Override
+	default Level shimmer$level() {
+		return (Level) this;
+	}
+
+	default long shimmer$nextPacketId() {
+		throw new NoMixinException(this);
+	}
+
+	@Override
 	default DataMap getServerData() {
 		return shimmer$getEnvironment().getServerData();
 	}
@@ -48,11 +57,11 @@ public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEn
 
 	@Nullable
 	default ActiveZones shimmer$getActiveZones() {
-		throw new NoMixinException();
+		throw new NoMixinException(this);
 	}
 
 	default List<UndoableModification> shimmer$getUndoableModifications() {
-		throw new NoMixinException();
+		throw new NoMixinException(this);
 	}
 
 	default void addUndoable(UndoableModification modification) {
@@ -94,7 +103,7 @@ public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEn
 
 	@Nullable
 	default Entity getEntityByUUID(UUID uuid) {
-		return null;
+		throw new NoMixinException(this);
 	}
 
 	@Nullable

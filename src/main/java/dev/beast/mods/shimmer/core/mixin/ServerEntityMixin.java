@@ -28,8 +28,8 @@ public class ServerEntityMixin {
 
 	@Inject(method = "sendPairingData", at = @At("RETURN"))
 	private void shimmer$sendPairingData(ServerPlayer to, PacketAndPayloadAcceptor<ClientGamePacketListener> callback, CallbackInfo ci) {
-		if (entity instanceof ServerPlayer) {
-			callback.accept(new SyncPlayerTagsPayload(entity.getUUID(), List.copyOf(entity.getTags())).toS2C());
+		if (entity instanceof ServerPlayer p) {
+			p.shimmer$initialSync(callback);
 		}
 	}
 
@@ -40,7 +40,7 @@ public class ServerEntityMixin {
 
 			if (shimmer$prevTags == null || !shimmer$prevTags.equals(tags)) {
 				shimmer$prevTags = Set.copyOf(tags);
-				entity.getServer().s2c(new SyncPlayerTagsPayload(entity.getUUID(), List.copyOf(tags)).toS2C());
+				entity.getServer().s2c(new SyncPlayerTagsPayload(entity.getUUID(), List.copyOf(tags)).toS2C(entity.level()));
 			}
 		}
 	}

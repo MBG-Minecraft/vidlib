@@ -3,7 +3,7 @@ package dev.beast.mods.shimmer.feature.zone;
 import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import dev.beast.mods.shimmer.feature.net.ShimmerPayloadContext;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public record SyncZonesPayload(List<ZoneContainer> update) implements ShimmerPac
 	}
 
 	@Override
-	public void handle(IPayloadContext ctx) {
+	public void handle(ShimmerPayloadContext ctx) {
 		ctx.player().shimmer$sessionData().updateZones(ctx.player().level(), update);
 	}
 }

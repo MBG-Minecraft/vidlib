@@ -3,8 +3,8 @@ package dev.beast.mods.shimmer.feature.entity;
 import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
+import dev.beast.mods.shimmer.feature.net.ShimmerPayloadContext;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record C2SEntityEventPayload(EntityData event) implements ShimmerPacketPayload {
 	@AutoPacket(AutoPacket.To.SERVER)
@@ -16,8 +16,8 @@ public record C2SEntityEventPayload(EntityData event) implements ShimmerPacketPa
 	}
 
 	@Override
-	public void handle(IPayloadContext ctx) {
-		var e = ctx.player().level().getEntity(event.entityId());
+	public void handle(ShimmerPayloadContext ctx) {
+		var e = ctx.level().getEntity(event.entityId());
 
 		if (e != null && ctx.player() instanceof ServerPlayer player) {
 			e.c2sReceived(event, player);

@@ -39,11 +39,11 @@ public class StructureStorage extends SimplePreparableReloadListener<Map<Resourc
 	}
 
 	public final Side side;
-	public final RegistryReference.Holder<ResourceLocation, Lazy<StructureTemplate>> structures;
+	public final RegistryReference.IdHolder<Lazy<StructureTemplate>> structures;
 
 	public StructureStorage(Side side) {
 		this.side = side;
-		this.structures = side.isServer() ? RegistryReference.createServerHolder() : RegistryReference.createRuntimeHolder();
+		this.structures = side.isServer() ? RegistryReference.createServerIdHolder("server_structure", false) : RegistryReference.createClientIdHolder("client_structure", false);
 	}
 
 	@Nullable

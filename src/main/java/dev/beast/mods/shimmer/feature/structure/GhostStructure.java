@@ -21,9 +21,9 @@ public record GhostStructure(
 	public static final Codec<GhostStructure> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		StructureRenderer.GHOST_CODEC.fieldOf("structure").forGetter(GhostStructure::structure),
 		EntityFilter.CODEC.optionalFieldOf("visible_to", EntityFilter.ANY.instance()).forGetter(GhostStructure::visibleTo),
-		ShimmerCodecs.VEC_3D.fieldOf("pos").forGetter(GhostStructure::pos),
-		ShimmerCodecs.VEC_3D.optionalFieldOf("scale", new Vec3(1D, 1D, 1D)).forGetter(GhostStructure::scale),
-		ShimmerCodecs.VEC_3D.optionalFieldOf("rotation", Vec3.ZERO).forGetter(GhostStructure::rotation)
+		ShimmerCodecs.VEC_3.fieldOf("pos").forGetter(GhostStructure::pos),
+		ShimmerCodecs.VEC_3.optionalFieldOf("scale", new Vec3(1D, 1D, 1D)).forGetter(GhostStructure::scale),
+		ShimmerCodecs.VEC_3.optionalFieldOf("rotation", Vec3.ZERO).forGetter(GhostStructure::rotation)
 	).apply(instance, GhostStructure::new));
 
 	public static List<GhostStructure> LIST = List.of();

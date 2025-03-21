@@ -9,7 +9,7 @@ import org.lwjgl.glfw.GLFW;
 public interface ShimmerLocalPlayer extends ShimmerClientPlayer, ShimmerClientEntityContainer {
 	@Override
 	default ShimmerLocalClientSessionData shimmer$sessionData() {
-		throw new NoMixinException();
+		throw new NoMixinException(this);
 	}
 
 	static PlayerInput fromInput(long windowId, LocalPlayer player, boolean mouse) {

@@ -16,6 +16,14 @@ import java.util.Locale;
 import java.util.function.Supplier;
 
 public class ShimmerResourceLocationArgument implements ArgumentType<ResourceLocation> {
+	public static ResourceLocation idFromString(String string) {
+		return string.indexOf(':') == -1 ? Shimmer.id(string) : ResourceLocation.parse(string);
+	}
+
+	public static String idToString(ResourceLocation rl) {
+		return rl.getNamespace().equals(Shimmer.ID) ? rl.getPath() : rl.toString();
+	}
+
 	public static ShimmerResourceLocationArgument id() {
 		return new ShimmerResourceLocationArgument();
 	}
@@ -30,7 +38,7 @@ public class ShimmerResourceLocationArgument implements ArgumentType<ResourceLoc
 			boolean col = input.indexOf(':') > -1;
 
 			for (var id : allIds.get()) {
-				var ids = Shimmer.idToString(id);
+				var ids = idToString(id);
 
 				if (col) {
 					if (SharedSuggestionProvider.matchesSubStr(input, ids)) {
@@ -56,7 +64,7 @@ public class ShimmerResourceLocationArgument implements ArgumentType<ResourceLoc
 		var s = reader.getString().substring(i, reader.getCursor());
 
 		try {
-			return Shimmer.idFromString(s);
+			return idFromString(s);
 		} catch (ResourceLocationException resourcelocationexception) {
 			reader.setCursor(i);
 			throw ResourceLocation.ERROR_INVALID.createWithContext(reader);

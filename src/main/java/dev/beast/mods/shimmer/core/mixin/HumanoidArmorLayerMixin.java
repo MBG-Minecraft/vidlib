@@ -15,7 +15,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -44,19 +43,17 @@ public abstract class HumanoidArmorLayerMixin<S extends HumanoidRenderState, M e
 		var clothing = state.getRenderData(MiscShimmerClientUtils.CLOTHING);
 
 		if (clothing != null) {
-			shimmer$renderArmorPiece(ms, buffers, light, state, clothing, EquipmentSlot.CHEST);
-			shimmer$renderArmorPiece(ms, buffers, light, state, clothing, EquipmentSlot.LEGS);
-			shimmer$renderArmorPiece(ms, buffers, light, state, clothing, EquipmentSlot.FEET);
-			shimmer$renderArmorPiece(ms, buffers, light, state, clothing, EquipmentSlot.HEAD);
-		}
-	}
+			var item = clothing.parts().getItem();
 
-	@Unique
-	private void shimmer$renderArmorPiece(PoseStack ms, MultiBufferSource buffers, int light, S state, Clothing clothing, EquipmentSlot slot) {
-		var model = getArmorModel(state, slot);
-		getParentModel().copyPropertiesTo(model);
-		setPartVisibility(model, slot);
-		var layer = usesInnerModel(slot) ? EquipmentClientInfo.LayerType.HUMANOID_LEGGINGS : EquipmentClientInfo.LayerType.HUMANOID;
-		this.equipmentRenderer.renderLayers(layer, clothing.equipmentAsset, model, clothing.item, ms, buffers, light);
+			for (var slot : Clothing.ORDERED_SLOTS) {
+				if (clothing.parts().visible(slot)) {
+					var model = getArmorModel(state, slot);
+					getParentModel().copyPropertiesTo(model);
+					setPartVisibility(model, slot);
+					var layer = usesInnerModel(slot) ? EquipmentClientInfo.LayerType.HUMANOID_LEGGINGS : EquipmentClientInfo.LayerType.HUMANOID;
+					this.equipmentRenderer.renderLayers(layer, clothing.id(), model, item, ms, buffers, light);
+				}
+			}
+		}
 	}
 }

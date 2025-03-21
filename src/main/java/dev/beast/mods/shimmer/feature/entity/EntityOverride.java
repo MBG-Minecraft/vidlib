@@ -5,8 +5,8 @@ import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.core.ShimmerEntity;
 import dev.beast.mods.shimmer.core.ShimmerPlayer;
 import dev.beast.mods.shimmer.feature.clothing.Clothing;
+import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
-import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
 import dev.beast.mods.shimmer.feature.icon.IconHolder;
@@ -16,8 +16,6 @@ import dev.beast.mods.shimmer.math.Range;
 import dev.beast.mods.shimmer.util.Cast;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -35,7 +33,7 @@ public final class EntityOverride<T> {
 	private static final Map<String, EntityOverride<?>> MAP = new HashMap<>();
 
 	public static final Codec<EntityOverride<?>> CODEC = ShimmerCodecs.map(() -> MAP, Codec.STRING, EntityOverride::id);
-	public static final Codec<Map<EntityOverride<?>, Object>> OVERRIDE_MAP_CODEC = Codec.dispatchedMap(CODEC, EntityOverride::codec);
+	public static final Codec<Map<EntityOverride<?>, Object>> OVERRIDE_MAP_CODEC = Codec.dispatchedMap(CODEC, o -> o.type.codec());
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, Map<EntityOverride<?>, Object>> OVERRIDE_MAP_STREAM_CODEC = new StreamCodec<>() {
 		@Override
@@ -50,7 +48,7 @@ public final class EntityOverride<T> {
 
 			for (int i = 0; i < count; i++) {
 				var key = MAP.get(buf.readUtf());
-				var value = key.streamCodec().decode(buf);
+				var value = key.type.streamCodec().decode(buf);
 				map.put(key, value);
 			}
 
@@ -63,46 +61,42 @@ public final class EntityOverride<T> {
 
 			for (var entry : map.entrySet()) {
 				buf.writeUtf(entry.getKey().id());
-				entry.getKey().streamCodec().encode(buf, Cast.to(entry.getValue()));
+				entry.getKey().type.streamCodec().encode(buf, Cast.to(entry.getValue()));
 			}
 		}
 	};
 
 	@SuppressWarnings("unchecked")
-	public static <T> EntityOverride<T> createKey(String id, Codec<T> codec, StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec) {
-		return (EntityOverride<T>) MAP.computeIfAbsent(id, k -> new EntityOverride<>(k, codec, streamCodec));
-	}
-
-	public static <T> EntityOverride<T> createKey(String id, Codec<T> codec) {
-		return createKey(id, codec, ByteBufCodecs.fromCodecWithRegistries(codec));
+	public static <T> EntityOverride<T> createKey(String id, KnownCodec<T> type) {
+		return (EntityOverride<T>) MAP.computeIfAbsent(id, k -> new EntityOverride<>(k, type));
 	}
 
 	public static EntityOverride<Boolean> createBooleanKey(String id) {
-		return createKey(id, Codec.BOOL, ByteBufCodecs.BOOL);
+		return createKey(id, KnownCodec.BOOL);
 	}
 
 	public static EntityOverride<Integer> createIntKey(String id) {
-		return createKey(id, Codec.INT, ByteBufCodecs.INT);
+		return createKey(id, KnownCodec.INT);
 	}
 
 	public static EntityOverride<Color> createColorKey(String id) {
-		return createKey(id, Color.CODEC, Color.STREAM_CODEC);
+		return createKey(id, Color.KNOWN_CODEC);
 	}
 
 	public static EntityOverride<Integer> createVarIntKey(String id) {
-		return createKey(id, Codec.INT, ByteBufCodecs.VAR_INT);
+		return createKey(id, KnownCodec.VAR_INT);
 	}
 
 	public static EntityOverride<Float> createFloatKey(String id) {
-		return createKey(id, Codec.FLOAT, ByteBufCodecs.FLOAT);
+		return createKey(id, KnownCodec.FLOAT);
 	}
 
 	public static EntityOverride<Double> createDoubleKey(String id) {
-		return createKey(id, Codec.DOUBLE, ByteBufCodecs.DOUBLE);
+		return createKey(id, KnownCodec.DOUBLE);
 	}
 
 	public static EntityOverride<ItemStack> createItemKey(String id) {
-		return createKey(id, ItemStack.OPTIONAL_CODEC, ItemStack.OPTIONAL_STREAM_CODEC);
+		return createKey(id, KnownCodec.OPTIONAL_ITEM);
 	}
 
 	public static Collection<EntityOverride<?>> getAllKeys() {
@@ -118,40 +112,34 @@ public final class EntityOverride<T> {
 	public static final EntityOverride<Boolean> PASS_THROUGH_BARRIERS = createBooleanKey("pass_through_barriers");
 	public static final EntityOverride<Integer> REGENERATE = createIntKey("regenerate");
 	public static final EntityOverride<Boolean> INVULNERABLE = createBooleanKey("invulnerable");
-	public static final EntityOverride<IconHolder> PLUMBOB = createKey("plumbob", IconHolder.CODEC, IconHolder.STREAM_CODEC);
+	public static final EntityOverride<IconHolder> PLUMBOB = createKey("plumbob", IconHolder.KNOWN_CODEC);
 	public static final EntityOverride<Float> ATTACK_DAMAGE = createFloatKey("attack_damage");
-	public static final EntityOverride<Clothing> CLOTHING = createKey("clothing", Clothing.CODEC, Clothing.STREAM_CODEC);
-	public static final EntityOverride<ResourceLocation> SKYBOX = createKey("skybox", ShimmerCodecs.SHIMMER_ID, ShimmerStreamCodecs.SHIMMER_ID);
-	public static final EntityOverride<Range> AMBIENT_LIGHT = createKey("ambient_light", Range.CODEC, Range.STREAM_CODEC);
-	public static final EntityOverride<FogOverride> FOG = createKey("fog", FogOverride.CODEC, FogOverride.STREAM_CODEC);
+	public static final EntityOverride<Clothing> CLOTHING = createKey("clothing", Clothing.KNOWN_CODEC);
+	public static final EntityOverride<ResourceLocation> SKYBOX = createKey("skybox", KnownCodec.SHIMMER_ID);
+	public static final EntityOverride<Range> AMBIENT_LIGHT = createKey("ambient_light", Range.KNOWN_CODEC);
+	public static final EntityOverride<FogOverride> FOG = createKey("fog", FogOverride.KNOWN_CODEC);
 	public static final EntityOverride<Boolean> UNPUSHABLE = createBooleanKey("unpushable");
-	public static final EntityOverride<Component> NAME_PREFIX = createKey("name_prefix", ComponentSerialization.CODEC, ComponentSerialization.STREAM_CODEC);
+	public static final EntityOverride<Component> NAME_PREFIX = createKey("name_prefix", KnownCodec.TEXT_COMPONENT);
 	public static final EntityOverride<Boolean> NAME_HIDDEN = createBooleanKey("name_hidden");
 
 	public final String id;
-	private final Codec<T> codec;
-	private final StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec;
+	private final KnownCodec<T> type;
 
 	EntityOverrideValue<T> all;
 	Map<EntityType<?>, EntityOverrideValue<T>> types;
 	List<Pair<EntityFilter, EntityOverrideValue<T>>> filtered;
 
-	private EntityOverride(String id, Codec<T> codec, StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec) {
+	private EntityOverride(String id, KnownCodec<T> type) {
 		this.id = id;
-		this.codec = codec;
-		this.streamCodec = streamCodec;
+		this.type = type;
 	}
 
 	public String id() {
 		return id;
 	}
 
-	public Codec<T> codec() {
-		return codec;
-	}
-
-	public StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec() {
-		return streamCodec;
+	public KnownCodec<T> type() {
+		return type;
 	}
 
 	@Override

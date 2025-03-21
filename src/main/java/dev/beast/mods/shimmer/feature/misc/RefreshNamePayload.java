@@ -4,7 +4,7 @@ import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import dev.beast.mods.shimmer.feature.net.ShimmerPayloadContext;
 
 import java.util.UUID;
 
@@ -18,8 +18,8 @@ public record RefreshNamePayload(UUID player) implements ShimmerPacketPayload {
 	}
 
 	@Override
-	public void handle(IPayloadContext ctx) {
-		var p = ctx.player().level().getPlayerByUUID(player);
+	public void handle(ShimmerPayloadContext ctx) {
+		var p = ctx.level().getPlayerByUUID(player);
 
 		if (p != null) {
 			p.refreshDisplayName();

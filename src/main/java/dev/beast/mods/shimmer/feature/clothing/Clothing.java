@@ -1,54 +1,79 @@
 package dev.beast.mods.shimmer.feature.clothing;
 
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
+import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.codec.KnownCodec;
-import dev.beast.mods.shimmer.util.registry.SimpleRegistry;
-import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
+import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
+import dev.beast.mods.shimmer.util.registry.ShimmerResourceLocationArgument;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.equipment.EquipmentAsset;
 import net.minecraft.world.item.equipment.EquipmentAssets;
 
-@AutoInit
-public class Clothing {
-	public static final SimpleRegistry<Clothing> REGISTRY = SimpleRegistry.create(Clothing::type);
-	public static final SuggestionProvider<CommandSourceStack> SUGGESTION_PROVIDER = REGISTRY.registerUnitSuggestionProvider(Shimmer.id("clothing"));
-	public static final Codec<Clothing> CODEC = REGISTRY.valueCodec();
-	public static final StreamCodec<RegistryFriendlyByteBuf, Clothing> STREAM_CODEC = REGISTRY.valueStreamCodec();
-	public static final KnownCodec<Clothing> KNOWN_CODEC = KnownCodec.register(Shimmer.id("clothing"), CODEC, STREAM_CODEC, Clothing.class);
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 
-	public static Clothing register(ResourceLocation id) {
-		var clothing = new Clothing(id);
-		clothing.type = SimpleRegistryType.unit(id, clothing);
-		REGISTRY.register(clothing.type);
-		return clothing;
+@AutoInit
+public record Clothing(ResourceKey<EquipmentAsset> id, ClothingParts parts) {
+	public static final List<ResourceLocation> CLOTHING_IDS = new ArrayList<>();
+	public static final SuggestionProvider<CommandSourceStack> SUGGESTION_PROVIDER = ShimmerResourceLocationArgument.registerSuggestionProvider(Shimmer.id("clothing"), () -> CLOTHING_IDS);
+
+	public static ResourceKey<EquipmentAsset> createKey(ResourceLocation id) {
+		return ResourceKey.create(EquipmentAssets.ROOT_ID, id);
 	}
 
-	public static final Clothing NONE = register(Shimmer.id("none"));
-	public static final Clothing HOST = register(Shimmer.id("host"));
-	public static final Clothing HOST_WITH_MASK = register(Shimmer.id("host_with_mask"));
+	public static ResourceKey<EquipmentAsset> internal(String key) {
+		return createKey(Shimmer.id(key));
+	}
 
-	public static final Clothing BLACK_TRACKSUIT = register(Shimmer.id("tracksuit/black"));
-	public static final Clothing WHITE_TRACKSUIT = register(Shimmer.id("tracksuit/white"));
-	public static final Clothing RED_TRACKSUIT = register(Shimmer.id("tracksuit/red"));
-	public static final Clothing PINK_TRACKSUIT = register(Shimmer.id("tracksuit/pink"));
-	public static final Clothing MAGENTA_TRACKSUIT = register(Shimmer.id("tracksuit/magenta"));
-	public static final Clothing PURPLE_TRACKSUIT = register(Shimmer.id("tracksuit/purple"));
-	public static final Clothing BLUE_TRACKSUIT = register(Shimmer.id("tracksuit/blue"));
-	public static final Clothing CYAN_TRACKSUIT = register(Shimmer.id("tracksuit/cyan"));
-	public static final Clothing GREEN_TRACKSUIT = register(Shimmer.id("tracksuit/green"));
-	public static final Clothing LIME_TRACKSUIT = register(Shimmer.id("tracksuit/lime"));
-	public static final Clothing YELLOW_TRACKSUIT = register(Shimmer.id("tracksuit/yellow"));
-	public static final Clothing ORANGE_TRACKSUIT = register(Shimmer.id("tracksuit/orange"));
+	public static ResourceKey<EquipmentAsset> video(String key) {
+		return createKey(ResourceLocation.fromNamespaceAndPath("video", key));
+	}
 
-	public static final Clothing[] COLORED_TRACKSUITS = {
+	public static final Clothing NONE = new Clothing(internal("none"), ClothingParts.NONE);
+
+	public static final Codec<Clothing> MAP_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+		ResourceKey.codec(EquipmentAssets.ROOT_ID).fieldOf("id").forGetter(Clothing::id),
+		ClothingParts.CODEC.optionalFieldOf("parts", ClothingParts.ALL).forGetter(Clothing::parts)
+	).apply(instance, Clothing::new));
+
+	public static final KnownCodec<Clothing> KNOWN_CODEC = KnownCodec.register(Shimmer.id("clothing"), Codec.either(ResourceKey.codec(EquipmentAssets.ROOT_ID), MAP_CODEC).xmap(either -> either.map(Clothing::new, Function.identity()), c -> c.parts.equals(ClothingParts.ALL) ? Either.left(c.id) : Either.right(c)), CompositeStreamCodec.of(
+		ShimmerStreamCodecs.resourceKey(EquipmentAssets.ROOT_ID), Clothing::id,
+		ClothingParts.STREAM_CODEC, Clothing::parts,
+		Clothing::new), Clothing.class);
+
+	public static final EquipmentSlot[] ORDERED_SLOTS = {
+		EquipmentSlot.CHEST,
+		EquipmentSlot.LEGS,
+		EquipmentSlot.FEET,
+		EquipmentSlot.HEAD
+	};
+
+	public static final ResourceKey<EquipmentAsset> HOST = internal("host");
+	public static final ResourceKey<EquipmentAsset> HOST_WITH_MASK = internal("host_with_mask");
+
+	public static final ResourceKey<EquipmentAsset> BLACK_TRACKSUIT = internal("tracksuit/black");
+	public static final ResourceKey<EquipmentAsset> WHITE_TRACKSUIT = internal("tracksuit/white");
+	public static final ResourceKey<EquipmentAsset> RED_TRACKSUIT = internal("tracksuit/red");
+	public static final ResourceKey<EquipmentAsset> PINK_TRACKSUIT = internal("tracksuit/pink");
+	public static final ResourceKey<EquipmentAsset> MAGENTA_TRACKSUIT = internal("tracksuit/magenta");
+	public static final ResourceKey<EquipmentAsset> PURPLE_TRACKSUIT = internal("tracksuit/purple");
+	public static final ResourceKey<EquipmentAsset> BLUE_TRACKSUIT = internal("tracksuit/blue");
+	public static final ResourceKey<EquipmentAsset> CYAN_TRACKSUIT = internal("tracksuit/cyan");
+	public static final ResourceKey<EquipmentAsset> GREEN_TRACKSUIT = internal("tracksuit/green");
+	public static final ResourceKey<EquipmentAsset> LIME_TRACKSUIT = internal("tracksuit/lime");
+	public static final ResourceKey<EquipmentAsset> YELLOW_TRACKSUIT = internal("tracksuit/yellow");
+	public static final ResourceKey<EquipmentAsset> ORANGE_TRACKSUIT = internal("tracksuit/orange");
+
+	public static final List<ResourceKey<EquipmentAsset>> COLORED_TRACKSUITS = List.of(
 		RED_TRACKSUIT,
 		PINK_TRACKSUIT,
 		MAGENTA_TRACKSUIT,
@@ -59,27 +84,11 @@ public class Clothing {
 		LIME_TRACKSUIT,
 		YELLOW_TRACKSUIT,
 		ORANGE_TRACKSUIT
-	};
+	);
 
-	public static final Clothing SQUID_TRACKSUIT = register(Shimmer.id("tracksuit/squid"));
+	public static final ResourceKey<EquipmentAsset> SQUID_TRACKSUIT = internal("tracksuit/squid");
 
-	public final ResourceLocation id;
-	public final ResourceKey<EquipmentAsset> equipmentAsset;
-	private SimpleRegistryType<Clothing> type;
-	public ItemStack item;
-
-	private Clothing(ResourceLocation id) {
-		this.id = id;
-		this.equipmentAsset = ResourceKey.create(EquipmentAssets.ROOT_ID, id);
-		this.item = ItemStack.EMPTY;
-	}
-
-	public SimpleRegistryType<Clothing> type() {
-		return type;
-	}
-
-	public Clothing item(ItemStack item) {
-		this.item = item;
-		return this;
+	public Clothing(ResourceKey<EquipmentAsset> id) {
+		this(id, ClothingParts.ALL);
 	}
 }

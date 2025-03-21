@@ -14,19 +14,25 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 public class SkyboxTexture extends ReloadableTexture implements Dumpable {
-	private final ResourceLocation original;
+	public final Skybox skybox;
 	private int resolution;
 
-	public SkyboxTexture(ResourceLocation id, ResourceLocation original) {
+	public SkyboxTexture(Skybox skybox, ResourceLocation id) {
 		super(id);
-		this.original = original;
+		this.skybox = skybox;
+	}
+
+	@Override
+	public void close() {
+		super.close();
+		skybox.skyboxTexture = null;
 	}
 
 	@Override
 	public TextureContents loadContents(ResourceManager manager) throws IOException {
-		try (var in = manager.getResource(original).orElseThrow().open()) {
+		try (var in = manager.getResource(skybox.texture).orElseThrow().open()) {
 			var src = NativeImage.read(in);
-			var image = process(original, src, src.getWidth(), src.getHeight());
+			var image = process(skybox.texture, src, src.getWidth(), src.getHeight());
 			resolution = image.getHeight() / 2;
 			return new TextureContents(image, new TextureMetadataSection(false, false));
 		}

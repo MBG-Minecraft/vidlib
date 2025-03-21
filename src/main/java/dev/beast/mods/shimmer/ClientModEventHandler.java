@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.BlockEntityRendererHolder;
 import dev.beast.mods.shimmer.feature.auto.EntityRendererHolder;
+import dev.beast.mods.shimmer.feature.clothing.ClientClothingLoader;
 import dev.beast.mods.shimmer.feature.clothing.Clothing;
 import dev.beast.mods.shimmer.feature.misc.MiscShimmerClientUtils;
 import dev.beast.mods.shimmer.feature.multiverse.VoidSpecialEffects;
@@ -33,6 +34,7 @@ public class ClientModEventHandler {
 	public static void addReloadListeners(AddClientReloadListenersEvent event) {
 		event.addListener(Shimmer.id("structure"), ClientStructureStorage.CLIENT);
 		event.addListener(Shimmer.id("ghost_structure"), new GhostStructure.Loader());
+		event.addListener(Shimmer.id("clothing"), new ClientClothingLoader());
 	}
 
 	@SubscribeEvent

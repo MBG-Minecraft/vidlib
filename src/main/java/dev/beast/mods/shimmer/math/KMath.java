@@ -17,6 +17,7 @@ public interface KMath {
 	DecimalFormat SHORT_DECIMAL_FORMAT = new DecimalFormat("#.##");
 	DecimalFormat LONG_DECIMAL_FORMAT = new DecimalFormat("#.####");
 	List<AABB> CLIP_BOX_LIST = List.of(new AABB(-0.5D, -0.5D, -0.5D, 0.5D, 0.5D, 0.5D));
+	Vec3 CENTER = new Vec3(0.5D, 0.5D, 0.5D);
 
 	static String format(float value) {
 		if (value == (int) value) {

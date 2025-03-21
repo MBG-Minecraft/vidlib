@@ -2,15 +2,14 @@ package dev.beast.mods.shimmer.feature.clock;
 
 import com.mojang.brigadier.context.CommandContext;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
+import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.util.registry.RegistryReference;
-import dev.beast.mods.shimmer.util.registry.VideoResourceLocationArgument;
-import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForge;
@@ -20,8 +19,8 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 public class ClockInstance {
-	public static final StreamCodec<ByteBuf, ClockInstance> STREAM_CODEC = CompositeStreamCodec.of(
-		Clock.STREAM_CODEC,
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClockInstance> DIRECT_STREAM_CODEC = CompositeStreamCodec.of(
+		Clock.KNOWN_CODEC.streamCodec(),
 		i -> i.clock,
 		ByteBufCodecs.VAR_INT,
 		i -> i.tick,
@@ -30,10 +29,11 @@ public class ClockInstance {
 		ClockInstance::new
 	);
 
-	public static final RegistryReference.Holder<ResourceLocation, ClockInstance> SERVER = RegistryReference.createServerHolder();
+	public static final RegistryReference.IdHolder<ClockInstance> REGISTRY = RegistryReference.createServerIdHolder("clock_instance", false);
+	public static final KnownCodec<ClockInstance> KNOWN_CODEC = KnownCodec.register(REGISTRY, ClockInstance.class);
 
 	public static int command(CommandContext<CommandSourceStack> ctx, BiConsumer<ClockInstance, MinecraftServer> callback) {
-		var instance = SERVER.get(VideoResourceLocationArgument.getId(ctx, "id"));
+		var instance = KNOWN_CODEC.get(ctx, "id");
 
 		if (instance != null) {
 			callback.accept(instance, ctx.getSource().getServer());

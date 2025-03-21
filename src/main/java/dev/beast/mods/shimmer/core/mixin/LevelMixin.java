@@ -8,14 +8,23 @@ import org.spongepowered.asm.mixin.Unique;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Mixin(Level.class)
 public abstract class LevelMixin implements ShimmerLevel {
 	@Unique
 	private final List<UndoableModification> shimmer$undoable = new ArrayList<>();
 
+	@Unique
+	private final AtomicLong shimmer$nextPacketId = new AtomicLong(0L);
+
 	@Override
 	public List<UndoableModification> shimmer$getUndoableModifications() {
 		return shimmer$undoable;
+	}
+
+	@Override
+	public long shimmer$nextPacketId() {
+		return shimmer$nextPacketId.incrementAndGet();
 	}
 }

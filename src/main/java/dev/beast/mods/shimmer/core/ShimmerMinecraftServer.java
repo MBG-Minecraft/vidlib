@@ -7,6 +7,7 @@ import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
 import dev.beast.mods.shimmer.util.PauseType;
 import dev.beast.mods.shimmer.util.S2CPacketBundleBuilder;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
@@ -17,6 +18,11 @@ import java.util.List;
 public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 	default MinecraftServer shimmer$self() {
 		return (MinecraftServer) this;
+	}
+
+	@Override
+	default ServerLevel shimmer$level() {
+		return shimmer$self().overworld();
 	}
 
 	@Override
@@ -47,7 +53,7 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 			}
 		}
 
-		for (var instance : ClockInstance.SERVER.getMap().values()) {
+		for (var instance : ClockInstance.REGISTRY.getMap().values()) {
 			instance.tick(shimmer$self().getLevel(instance.clock.dimension()));
 		}
 
@@ -59,7 +65,7 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 	@Override
 	@ApiStatus.Internal
 	default void shimmer$postTick(PauseType paused) {
-		var packetsToEveryone = new S2CPacketBundleBuilder();
+		var packetsToEveryone = new S2CPacketBundleBuilder(shimmer$level());
 
 		getServerData().sync(packetsToEveryone, null, (playerId, update) -> new SyncServerDataPayload(update));
 

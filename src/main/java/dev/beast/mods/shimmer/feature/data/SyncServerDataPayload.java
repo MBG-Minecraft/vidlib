@@ -3,7 +3,7 @@ package dev.beast.mods.shimmer.feature.data;
 import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import dev.beast.mods.shimmer.feature.net.ShimmerPayloadContext;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public record SyncServerDataPayload(List<DataMapValue> serverData) implements Sh
 	}
 
 	@Override
-	public void handle(IPayloadContext ctx) {
+	public void handle(ShimmerPayloadContext ctx) {
 		ctx.player().shimmer$sessionData().updateServerData(serverData);
 	}
 }

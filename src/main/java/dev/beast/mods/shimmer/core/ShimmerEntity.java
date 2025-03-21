@@ -6,6 +6,7 @@ import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.entity.EntityOverrideValue;
 import dev.beast.mods.shimmer.feature.entity.ForceEntityVelocityPayload;
 import dev.beast.mods.shimmer.feature.entity.S2CEntityEventPayload;
+import dev.beast.mods.shimmer.feature.location.Location;
 import dev.beast.mods.shimmer.feature.sound.SoundData;
 import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
 import dev.beast.mods.shimmer.math.Line;
@@ -13,6 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -23,17 +25,22 @@ import java.util.Map;
 
 public interface ShimmerEntity extends ShimmerEntityContainer {
 	@Override
+	default Level shimmer$level() {
+		return ((Entity) this).level();
+	}
+
+	@Override
 	default ShimmerMinecraftEnvironment shimmer$getEnvironment() {
-		return ((Entity) this).level().shimmer$getEnvironment();
+		return shimmer$level().shimmer$getEnvironment();
 	}
 
 	@Nullable
 	default Map<EntityOverride<?>, EntityOverrideValue<?>> shimmer$getEntityOverridesMap() {
-		throw new NoMixinException();
+		throw new NoMixinException(this);
 	}
 
 	default void shimmer$setEntityOverridesMap(@Nullable Map<EntityOverride<?>, EntityOverrideValue<?>> map) {
-		throw new NoMixinException();
+		throw new NoMixinException(this);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -74,7 +81,7 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 	}
 
 	default List<ZoneInstance> getZones() {
-		var zones = ((Entity) this).level().shimmer$getActiveZones();
+		var zones = shimmer$level().shimmer$getActiveZones();
 		return zones == null ? List.of() : zones.entityZones.getOrDefault(((Entity) this).getId(), List.of());
 	}
 
@@ -154,6 +161,10 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 		teleport((ServerLevel) ((Entity) this).level(), pos);
 	}
 
+	default void teleport(Location location) {
+		teleport(((Entity) this).getServer().getLevel(location.dimension()), location.get());
+	}
+
 	default void forceSetVelocity(Vec3 velocity) {
 		var e = (Entity) this;
 		e.setDeltaMovement(velocity);
@@ -173,14 +184,14 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 	}
 
 	default void s2c(EntityData data) {
-		((Entity) this).level().s2c(new S2CEntityEventPayload(data));
+		shimmer$level().s2c(new S2CEntityEventPayload(data));
 	}
 
 	default void s2cReceived(EntityData event) {
 	}
 
 	default void c2s(EntityData data) {
-		((Entity) this).level().c2s(new C2SEntityEventPayload(data));
+		shimmer$level().c2s(new C2SEntityEventPayload(data));
 	}
 
 	default void c2sReceived(EntityData event, ServerPlayer from) {

@@ -5,7 +5,6 @@ import com.mojang.blaze3d.shaders.FogShape;
 import dev.beast.mods.shimmer.GameEventHandler;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.core.ShimmerLocalPlayer;
-import dev.beast.mods.shimmer.feature.clock.ClockFont;
 import dev.beast.mods.shimmer.feature.clock.ClockInstance;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.data.DataMapValue;
@@ -29,10 +28,12 @@ import dev.beast.mods.shimmer.feature.zone.ZoneClipResult;
 import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
 import dev.beast.mods.shimmer.feature.zone.ZoneEvent;
 import dev.beast.mods.shimmer.feature.zone.shape.ZoneShape;
+import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.Range;
 import dev.beast.mods.shimmer.math.VoxelShapeBox;
 import dev.beast.mods.shimmer.util.PauseType;
 import dev.beast.mods.shimmer.util.Side;
+import dev.beast.mods.shimmer.util.registry.SyncedRegistry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
@@ -60,6 +61,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
@@ -68,7 +70,6 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	public final ActiveZones filteredZones;
 	private final Map<UUID, ShimmerRemoteClientSessionData> remoteSessionData;
 	public ZoneClipResult zoneClip;
-	public Map<ResourceLocation, ClockFont> clockFonts;
 	public Map<ResourceLocation, ClockInstance> clocks;
 	public Map<ResourceLocation, Skybox> skyboxes;
 	public final DataMap serverDataMap;
@@ -83,9 +84,8 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 		this.serverZones = new ActiveZones();
 		this.filteredZones = new ActiveZones();
 		this.remoteSessionData = new HashMap<>();
-		this.clockFonts = Map.of();
 		this.clocks = Map.of();
-		this.skyboxes = Map.of();
+		this.skyboxes = new HashMap<>();
 		this.serverDataMap = new DataMap(uuid, DataType.SERVER);
 		this.skybox = null;
 	}
@@ -114,7 +114,23 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 			skyboxId = player.level().getSkybox();
 		}
 
-		skybox = skyboxId == null || skyboxId.equals(Skyboxes.DEFAULT) ? null : skyboxes.get(skyboxId);
+		if (skyboxId == null || skyboxId.equals(Skyboxes.DEFAULT)) {
+			skybox = null;
+		} else {
+			skybox = skyboxes.get(skyboxId);
+
+			if (skybox == null) {
+				var skyboxData = SkyboxData.REGISTRY.get(skyboxId);
+
+				if (skyboxData == null) {
+					skyboxData = new SkyboxData(skyboxId, Optional.empty(), 0F, 0F, Color.WHITE, false);
+				}
+
+				skybox = new Skybox(skyboxData);
+				skyboxes.put(skyboxId, skybox);
+			}
+		}
+
 		GameEventHandler.ambientLight = EntityOverride.AMBIENT_LIGHT.get(player, Range.FULL);
 
 		var f = EntityOverride.FOG.get(player);
@@ -141,7 +157,6 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 
 	@Override
 	public void closed() {
-		ClockFont.CLIENT_SUPPLIER = Map::of;
 	}
 
 	@ApiStatus.Internal
@@ -181,33 +196,19 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	}
 
 	@Override
+	public <V> void syncRegistry(Player player, SyncedRegistry<V> registry, Map<ResourceLocation, V> map) {
+		registry.registry().update(map);
+
+		if (registry.callback() != null) {
+			registry.callback().run(player);
+		}
+	}
+
+	@Override
 	public void updateZones(Level level, List<ZoneContainer> update) {
 		serverZones.update(update);
 		NeoForge.EVENT_BUS.post(new ZoneEvent.AllUpdated(serverZones, Side.SERVER));
 		refreshZones(level.dimension());
-	}
-
-	@Override
-	public void updateClockFonts(List<ClockFont> update) {
-		var map = new HashMap<ResourceLocation, ClockFont>();
-
-		for (var font : update) {
-			map.put(font.id(), font);
-		}
-
-		clockFonts = Map.copyOf(map);
-		ClockFont.CLIENT_SUPPLIER = () -> clockFonts;
-	}
-
-	@Override
-	public void updateClocks(Level level, List<ClockInstance> update) {
-		var map = new HashMap<ResourceLocation, ClockInstance>();
-
-		for (var clock : update) {
-			map.put(clock.clock.id(), clock);
-		}
-
-		clocks = Map.copyOf(map);
 	}
 
 	@Override
@@ -349,15 +350,8 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	}
 
 	@Override
-	public void updateSkyboxes(List<SkyboxData> update) {
-		var map = new HashMap<ResourceLocation, Skybox>();
-
-		for (var skyboxData : update) {
-			map.put(skyboxData.id(), new Skybox(skyboxData));
-		}
-
-		skyboxes = Map.copyOf(map);
-		skybox = skybox == null ? null : skyboxes.get(skybox.data.id());
+	public void updateSkyboxes() {
+		skyboxes.clear();
 	}
 
 	@Override

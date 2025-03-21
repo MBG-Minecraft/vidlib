@@ -5,16 +5,20 @@ import com.mojang.datafixers.util.Unit;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.util.UndashedUuid;
-import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.util.registry.ShimmerResourceLocationArgument;
+import dev.beast.mods.shimmer.util.registry.VideoResourceLocationArgument;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.minecraft.Util;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
@@ -35,7 +39,8 @@ import java.util.stream.IntStream;
 public interface ShimmerCodecs {
 	Codec<UUID> UUID = Codec.STRING.xmap(UndashedUuid::fromStringLenient, UndashedUuid::toString);
 
-	Codec<ResourceLocation> SHIMMER_ID = Codec.STRING.xmap(Shimmer::idFromString, Shimmer::idToString);
+	Codec<ResourceLocation> SHIMMER_ID = Codec.STRING.xmap(ShimmerResourceLocationArgument::idFromString, ShimmerResourceLocationArgument::idToString);
+	Codec<ResourceLocation> VIDEO_ID = Codec.STRING.xmap(VideoResourceLocationArgument::idFromString, VideoResourceLocationArgument::idToString);
 
 	Codec<IntList> INT_LIST = Codec.INT.listOf().xmap(IntArrayList::new, Function.identity());
 	Codec<IntList> INT_LIST_OR_SELF = Codec.either(Codec.INT, INT_LIST).xmap(either -> either.map(IntArrayList::of, Function.identity()), list -> list.size() == 1 ? Either.left(list.getFirst()) : Either.right(list));
@@ -44,7 +49,9 @@ public interface ShimmerCodecs {
 		return Codec.either(elementCodec, elementCodec.listOf()).xmap(either -> either.map(List::of, Function.identity()), list -> list.size() == 1 ? Either.left(list.getFirst()) : Either.right(list));
 	}
 
-	Codec<Vec3> VEC_3D = Codec.either(Codec.DOUBLE, Vec3.CODEC).xmap(either -> either.map(d -> new Vec3(d, d, d), Function.identity()), v -> v.x == v.y && v.x == v.z ? Either.left(v.x) : Either.right(v));
+	Codec<Vec3> VEC_3 = Codec.either(Codec.DOUBLE, Vec3.CODEC).xmap(either -> either.map(d -> new Vec3(d, d, d), Function.identity()), v -> v.x == v.y && v.x == v.z ? Either.left(v.x) : Either.right(v));
+
+	Codec<ResourceKey<Level>> DIMENSION = ResourceKey.codec(Registries.DIMENSION);
 
 	Codec<Unit> UNIT = Codec.unit(Unit.INSTANCE);
 

@@ -4,6 +4,7 @@ import dev.beast.mods.shimmer.math.Vec2d;
 import dev.beast.mods.shimmer.util.PauseType;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.ApiStatus;
@@ -14,6 +15,11 @@ import java.util.List;
 public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment, ShimmerClientEntityContainer {
 	default Minecraft shimmer$self() {
 		return (Minecraft) this;
+	}
+
+	@Override
+	default ClientLevel shimmer$level() {
+		return shimmer$self().level;
 	}
 
 	@Override

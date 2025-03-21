@@ -21,7 +21,7 @@ import java.util.List;
 
 public interface ShimmerEntityContainer extends ShimmerS2CPacketConsumer, ShimmerC2SPacketConsumer {
 	default ShimmerMinecraftEnvironment shimmer$getEnvironment() {
-		throw new NoMixinException();
+		throw new NoMixinException(this);
 	}
 
 	default List<Entity> shimmer$getEntities() {
@@ -66,14 +66,6 @@ public interface ShimmerEntityContainer extends ShimmerS2CPacketConsumer, Shimme
 	default void playCutscene(Cutscene cutscene, WorldNumberVariables variables) {
 		if (!cutscene.steps.isEmpty()) {
 			s2c(new PlayCutscenePayload(cutscene, variables));
-		}
-	}
-
-	default void playCutscene(ResourceLocation id, WorldNumberVariables variables) {
-		var cutscene = Cutscene.SERVER.get(id);
-
-		if (cutscene != null) {
-			playCutscene(cutscene, variables);
 		}
 	}
 

@@ -5,6 +5,6 @@ import dev.beast.mods.shimmer.feature.session.ShimmerClientSessionData;
 public interface ShimmerClientPlayer extends ShimmerPlayer {
 	@Override
 	default ShimmerClientSessionData shimmer$sessionData() {
-		throw new NoMixinException();
+		throw new NoMixinException(this);
 	}
 }

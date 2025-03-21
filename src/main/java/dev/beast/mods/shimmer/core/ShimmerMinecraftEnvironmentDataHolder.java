@@ -6,7 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public interface ShimmerMinecraftEnvironmentDataHolder {
 	default DataMap getServerData() {
-		throw new NoMixinException();
+		throw new NoMixinException(this);
 	}
 
 	default ResourceLocation getSkybox() {

@@ -7,9 +7,9 @@ import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
+import dev.beast.mods.shimmer.feature.net.ShimmerPayloadContext;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record UpdateItemDataPayload(InteractionHand hand, CompoundTag tag) implements ShimmerPacketPayload {
 	@AutoPacket(AutoPacket.To.SERVER)
@@ -25,7 +25,7 @@ public record UpdateItemDataPayload(InteractionHand hand, CompoundTag tag) imple
 	}
 
 	@Override
-	public void handle(IPayloadContext ctx) {
+	public void handle(ShimmerPayloadContext ctx) {
 		if (ctx.player().getServer().isSingleplayer() || ctx.player().hasPermissions(2)) {
 			ShimmerItem.partiallyMergeCustomData(ctx.player().getItemInHand(hand), tag);
 		}

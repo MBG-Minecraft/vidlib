@@ -36,7 +36,7 @@ public interface ShimmerMinecraftEnvironment extends ShimmerEntityContainer, Shi
 	}
 
 	default StructureStorage shimmer$structureStorage() {
-		throw new NoMixinException();
+		throw new NoMixinException(this);
 	}
 
 	@ApiStatus.Internal
@@ -48,7 +48,7 @@ public interface ShimmerMinecraftEnvironment extends ShimmerEntityContainer, Shi
 	}
 
 	default ScheduledTask.Handler shimmer$getScheduledTaskHandler() {
-		throw new NoMixinException();
+		throw new NoMixinException(this);
 	}
 
 	default void schedule(int ticks, Runnable task) {

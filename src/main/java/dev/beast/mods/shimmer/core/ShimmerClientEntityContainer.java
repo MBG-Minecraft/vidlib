@@ -28,10 +28,6 @@ public interface ShimmerClientEntityContainer extends ShimmerEntityContainer {
 	}
 
 	@Override
-	default void playCutscene(ResourceLocation id, WorldNumberVariables variables) {
-	}
-
-	@Override
 	default void stopCutscene() {
 		shimmer$getEnvironment().stopCutscene();
 	}

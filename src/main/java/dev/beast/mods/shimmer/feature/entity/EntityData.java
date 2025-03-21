@@ -11,17 +11,16 @@ import net.minecraft.world.entity.Entity;
 
 import java.util.function.Consumer;
 
-public record EntityData(int entityId, int id, CompoundTag data, long remoteGameTime) {
+public record EntityData(int entityId, int id, CompoundTag data) {
 	public static final StreamCodec<ByteBuf, EntityData> STREAM_CODEC = CompositeStreamCodec.of(
 		ByteBufCodecs.VAR_INT, EntityData::entityId,
 		ByteBufCodecs.VAR_INT, EntityData::id,
 		ShimmerStreamCodecs.COMPOUND_TAG, EntityData::data,
-		ByteBufCodecs.VAR_LONG, EntityData::remoteGameTime,
 		EntityData::new
 	);
 
 	public static EntityData of(Entity entity, int id, CompoundTag data) {
-		return new EntityData(entity.getId(), id, data, entity.level().getGameTime());
+		return new EntityData(entity.getId(), id, data);
 	}
 
 	public static EntityData of(Entity entity, int id) {

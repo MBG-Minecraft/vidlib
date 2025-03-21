@@ -12,13 +12,13 @@ public interface ShimmerBlockState {
 	}
 
 	default Object shimmer$clientProperties() {
-		throw new NoMixinException();
+		throw new NoMixinException(this);
 	}
 
 	default void shimmer$clearCache() {
 	}
 
 	default float shimmer$getDensity() {
-		throw new NoMixinException();
+		throw new NoMixinException(this);
 	}
 }

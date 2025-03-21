@@ -2,7 +2,10 @@ package dev.beast.mods.shimmer.math;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
+import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -11,6 +14,7 @@ import net.minecraft.util.RandomSource;
 
 import java.util.List;
 
+@AutoInit
 public record Range(float min, float max) {
 	public static final Range ZERO = new Range(0F, 0F);
 	public static final Range ONE = new Range(1F, 1F);
@@ -23,6 +27,8 @@ public record Range(float min, float max) {
 		ByteBufCodecs.FLOAT, Range::max,
 		Range::new
 	);
+
+	public static final KnownCodec<Range> KNOWN_CODEC = KnownCodec.register(Shimmer.id("range"), CODEC, STREAM_CODEC, Range.class);
 
 	public static Range of(float min, float max) {
 		return min == 0F && max == 0F ? ZERO : min == 1F && max == 1F ? ONE : Math.abs(max - min) < 0.0001F ? new Range(min, min) : new Range(Math.min(min, max), Math.max(min, max));

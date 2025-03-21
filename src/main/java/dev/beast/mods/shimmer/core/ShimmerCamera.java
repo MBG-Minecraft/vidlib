@@ -8,6 +8,6 @@ public interface ShimmerCamera {
 	}
 
 	default Line ray(double distance) {
-		throw new NoMixinException();
+		throw new NoMixinException(this);
 	}
 }

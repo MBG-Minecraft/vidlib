@@ -30,14 +30,6 @@ public class Shimmer {
 		return ResourceLocation.fromNamespaceAndPath(ID, path);
 	}
 
-	public static ResourceLocation idFromString(String string) {
-		return string.indexOf(':') == -1 ? Shimmer.id(string) : ResourceLocation.parse(string);
-	}
-
-	public static String idToString(ResourceLocation rl) {
-		return rl.getNamespace().equals(Shimmer.ID) ? rl.getPath() : rl.toString();
-	}
-
 	public static final Path PATH = FMLPaths.GAMEDIR.get().resolve("shimmer");
 	public static final Lazy<Path> HOME_DIR = Lazy.of(() -> MiscUtils.createDir(Path.of(System.getenv().getOrDefault("SHIMMER_HOME", System.getProperty("user.home") + "/.shimmer"))));
 
@@ -70,7 +62,7 @@ public class Shimmer {
 	}
 
 	public static void sync(ServerPlayer player, boolean login) {
-		var packets = new S2CPacketBundleBuilder();
+		var packets = new S2CPacketBundleBuilder(player.level());
 		player.shimmer$sessionData().sync(packets, player, login);
 		packets.send(player);
 	}

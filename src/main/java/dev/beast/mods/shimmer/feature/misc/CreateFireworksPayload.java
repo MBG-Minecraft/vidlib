@@ -4,9 +4,9 @@ import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
+import dev.beast.mods.shimmer.feature.net.ShimmerPayloadContext;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.item.component.FireworkExplosion;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ public record CreateFireworksPayload(double x, double y, double z, double vx, do
 	}
 
 	@Override
-	public void handle(IPayloadContext ctx) {
-		ctx.player().level().createFireworks(x, y, z, vx, vy, vz, explosions);
+	public void handle(ShimmerPayloadContext ctx) {
+		ctx.level().createFireworks(x, y, z, vx, vy, vz, explosions);
 	}
 }

@@ -13,7 +13,7 @@ public interface SkyboxCommand {
 		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
 		.then(Commands.literal("set")
 			.then(Commands.argument("skybox", ShimmerResourceLocationArgument.id())
-				.suggests(SkyboxData.SUGGESTION_PROVIDER)
+				.suggests(SkyboxData.REGISTRY.suggestionProvider)
 				.executes(ctx -> skybox(ctx.getSource().getServer(), ShimmerResourceLocationArgument.getId(ctx, "skybox")))
 			)
 		)

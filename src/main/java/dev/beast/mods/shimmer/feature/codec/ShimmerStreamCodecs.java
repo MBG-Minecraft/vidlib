@@ -3,6 +3,8 @@ package dev.beast.mods.shimmer.feature.codec;
 import com.mojang.datafixers.util.Unit;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.util.Empty;
+import dev.beast.mods.shimmer.util.registry.ShimmerResourceLocationArgument;
+import dev.beast.mods.shimmer.util.registry.VideoResourceLocationArgument;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
@@ -63,13 +65,24 @@ public interface ShimmerStreamCodecs {
 	StreamCodec<ByteBuf, ResourceLocation> SHIMMER_ID = new StreamCodec<>() {
 		@Override
 		public ResourceLocation decode(ByteBuf buf) {
-			var s = Utf8String.read(buf, Short.MAX_VALUE);
-			return s.indexOf(':') == -1 ? Shimmer.id(s) : ResourceLocation.parse(s);
+			return ShimmerResourceLocationArgument.idFromString(Utf8String.read(buf, Short.MAX_VALUE));
 		}
 
 		@Override
 		public void encode(ByteBuf buf, ResourceLocation value) {
-			Utf8String.write(buf, value.getNamespace().equals(Shimmer.ID) ? value.getPath() : value.toString(), Short.MAX_VALUE);
+			Utf8String.write(buf, ShimmerResourceLocationArgument.idToString(value), Short.MAX_VALUE);
+		}
+	};
+
+	StreamCodec<ByteBuf, ResourceLocation> VIDEO_ID = new StreamCodec<>() {
+		@Override
+		public ResourceLocation decode(ByteBuf buf) {
+			return VideoResourceLocationArgument.idFromString(Utf8String.read(buf, Short.MAX_VALUE));
+		}
+
+		@Override
+		public void encode(ByteBuf buf, ResourceLocation value) {
+			Utf8String.write(buf, VideoResourceLocationArgument.idToString(value), Short.MAX_VALUE);
 		}
 	};
 
@@ -146,7 +159,7 @@ public interface ShimmerStreamCodecs {
 
 	StreamCodec<ByteBuf, BlockState> BLOCK_STATE = ByteBufCodecs.VAR_INT.map(Block::stateById, Block::getId);
 
-	StreamCodec<ByteBuf, ResourceKey<Level>> DIMENSION = ResourceLocation.STREAM_CODEC.map(id -> ResourceKey.create(Registries.DIMENSION, id), ResourceKey::location);
+	StreamCodec<ByteBuf, ResourceKey<Level>> DIMENSION = resourceKey(Registries.DIMENSION);
 
 	StreamCodec<ByteBuf, IntList> VAR_INT_LIST = new StreamCodec<>() {
 		@Override
@@ -226,6 +239,10 @@ public interface ShimmerStreamCodecs {
 			}
 		}
 	};
+
+	static <T> StreamCodec<ByteBuf, ResourceKey<T>> resourceKey(ResourceKey<? extends Registry<T>> registry) {
+		return ResourceLocation.STREAM_CODEC.map(id -> ResourceKey.create(registry, id), ResourceKey::location);
+	}
 
 	static <T> StreamCodec<ByteBuf, TagKey<T>> tagKey(ResourceKey<? extends Registry<T>> registry) {
 		return ResourceLocation.STREAM_CODEC.map(id -> TagKey.create(registry, id), TagKey::location);

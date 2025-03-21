@@ -1,7 +1,5 @@
 package dev.beast.mods.shimmer.feature.session;
 
-import dev.beast.mods.shimmer.feature.clock.ClockFont;
-import dev.beast.mods.shimmer.feature.clock.ClockInstance;
 import dev.beast.mods.shimmer.feature.clothing.Clothing;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.data.DataMapValue;
@@ -11,10 +9,10 @@ import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.entity.EntityOverrideValue;
 import dev.beast.mods.shimmer.feature.icon.IconHolder;
 import dev.beast.mods.shimmer.feature.input.PlayerInput;
-import dev.beast.mods.shimmer.feature.skybox.SkyboxData;
 import dev.beast.mods.shimmer.feature.worldsync.WorldSyncAuthResponsePayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
 import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
+import dev.beast.mods.shimmer.util.registry.SyncedRegistry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -65,7 +63,7 @@ public class ShimmerSessionData {
 		this.attackDamageMod = 1F;
 		this.pvp = true;
 		this.plumbobIcon = IconHolder.EMPTY;
-		this.clothing = Clothing.NONE;
+		this.clothing = null;
 		this.unpushable = false;
 		this.namePrefix = null;
 		this.nameHidden = false;
@@ -103,13 +101,10 @@ public class ShimmerSessionData {
 		}
 	}
 
+	public <V> void syncRegistry(Player player, SyncedRegistry<V> registry, Map<ResourceLocation, V> map) {
+	}
+
 	public void updateZones(Level level, List<ZoneContainer> update) {
-	}
-
-	public void updateClockFonts(List<ClockFont> update) {
-	}
-
-	public void updateClocks(Level level, List<ClockInstance> update) {
 	}
 
 	public void updateClockInstance(ResourceLocation id, int tick, boolean ticking) {
@@ -141,7 +136,7 @@ public class ShimmerSessionData {
 	public void worldSyncAuthResponse(WorldSyncAuthResponsePayload payload) {
 	}
 
-	public void updateSkyboxes(List<SkyboxData> update) {
+	public void updateSkyboxes() {
 	}
 
 	public void refreshListedPlayers() {

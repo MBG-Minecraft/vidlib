@@ -3,7 +3,7 @@ package dev.beast.mods.shimmer.feature.input;
 import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import dev.beast.mods.shimmer.feature.net.ShimmerPayloadContext;
 
 public record SyncPlayerInputToServer(PlayerInput input) implements ShimmerPacketPayload {
 	@AutoPacket(AutoPacket.To.SERVER)
@@ -15,7 +15,12 @@ public record SyncPlayerInputToServer(PlayerInput input) implements ShimmerPacke
 	}
 
 	@Override
-	public void handle(IPayloadContext ctx) {
+	public boolean allowDebugLogging() {
+		return false;
+	}
+
+	@Override
+	public void handle(ShimmerPayloadContext ctx) {
 		ctx.player().shimmer$sessionData().input = input;
 	}
 }
