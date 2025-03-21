@@ -63,10 +63,11 @@ public class ClockRenderer {
 
 		for (var c : text) {
 			int index = c >= '0' && c <= '9' ? (c - '0') : 10;
-			float u0 = font.uvs()[index].u0();
-			float v0 = font.uvs()[index].v0();
-			float u1 = font.uvs()[index].u1();
-			float v1 = font.uvs()[index].v1();
+			var uv = font.uvs().get(index);
+			float u0 = uv.u0();
+			float v0 = uv.v0();
+			float u1 = uv.u1();
+			float v1 = uv.v1();
 			float cw = index == 10 ? font.actualSeparatorWidth() : font.size().w();
 			float ch = font.size().h();
 

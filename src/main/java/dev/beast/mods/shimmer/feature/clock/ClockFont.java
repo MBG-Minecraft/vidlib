@@ -13,6 +13,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.List;
 import java.util.Map;
 
 public record ClockFont(
@@ -22,7 +23,7 @@ public record ClockFont(
 	Size2 textureSize,
 	int separatorWidth,
 	int actualSeparatorWidth,
-	UV[] uvs
+	List<UV> uvs
 ) {
 	public static ClockFont create(ResourceLocation id,
 								   ResourceLocation texture,
@@ -48,7 +49,7 @@ public record ClockFont(
 			);
 		}
 
-		return new ClockFont(id, texture, size, textureSize, separatorWidth, actualSeparatorWidth, uvs);
+		return new ClockFont(id, texture, size, textureSize, separatorWidth, actualSeparatorWidth, List.of(uvs));
 	}
 
 	public static final Codec<ClockFont> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
