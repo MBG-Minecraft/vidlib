@@ -30,7 +30,7 @@ public class ClockInstance {
 	);
 
 	public static final RegistryReference.IdHolder<ClockInstance> REGISTRY = RegistryReference.createServerIdHolder("clock_instance", false);
-	public static final KnownCodec<ClockInstance> KNOWN_CODEC = KnownCodec.register(REGISTRY, ClockInstance.class);
+	public static final KnownCodec<ClockInstance> KNOWN_CODEC = KnownCodec.of(REGISTRY, ClockInstance.class);
 
 	public static int command(CommandContext<CommandSourceStack> ctx, BiConsumer<ClockInstance, MinecraftServer> callback) {
 		var instance = KNOWN_CODEC.get(ctx, "id");

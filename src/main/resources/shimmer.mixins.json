@@ -37,6 +37,7 @@
 		"ServerScoreboardMixin",
 		"StreamCodecMixin",
 		"StructureBlockEntityMixin",
+		"StructureTemplateMixin",
 		"UUIDUtilMixin",
 		"WaterFluidMixin"
 	],

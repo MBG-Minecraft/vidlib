@@ -70,7 +70,7 @@ public record ClockFont(
 	);
 
 	public static final RegistryReference.IdHolder<ClockFont> REGISTRY = RegistryReference.createServerIdHolder("clock_font", true);
-	public static final KnownCodec<ClockFont> KNOWN_CODEC = KnownCodec.register(REGISTRY, ClockFont.class);
+	public static final KnownCodec<ClockFont> KNOWN_CODEC = KnownCodec.of(REGISTRY, ClockFont.class);
 
 	public static class Loader extends JsonCodecReloadListener<ClockFont> {
 		public Loader() {

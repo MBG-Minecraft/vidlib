@@ -51,7 +51,7 @@ public record Clock(
 	);
 
 	public static final RegistryReference.IdHolder<Clock> REGISTRY = RegistryReference.createServerIdHolder("clock", false);
-	public static final KnownCodec<Clock> KNOWN_CODEC = KnownCodec.register(REGISTRY, Clock.class);
+	public static final KnownCodec<Clock> KNOWN_CODEC = KnownCodec.of(REGISTRY, Clock.class);
 
 	public static class Loader extends JsonCodecReloadListener<Clock> {
 		public Loader() {

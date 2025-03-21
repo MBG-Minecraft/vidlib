@@ -35,7 +35,7 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 			var active = new ActiveZones();
 
 			for (int i = 0; i < count; i++) {
-				var container = ZoneContainer.STREAM_CODEC.decode(buf);
+				var container = ZoneContainer.DIRECT_STREAM_CODEC.decode(buf);
 				active.containers.put(container.id, container);
 			}
 
@@ -47,7 +47,7 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 			buf.writeVarInt(value.containers.size());
 
 			for (var container : value) {
-				ZoneContainer.STREAM_CODEC.encode(buf, container);
+				ZoneContainer.DIRECT_STREAM_CODEC.encode(buf, container);
 			}
 		}
 	};

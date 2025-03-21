@@ -48,24 +48,6 @@ public class ZoneEvent extends Event {
 		}
 	}
 
-	public static class AllUpdated extends ZoneEvent {
-		private final ActiveZones zones;
-		private final Side side;
-
-		public AllUpdated(ActiveZones zones, Side side) {
-			this.zones = zones;
-			this.side = side;
-		}
-
-		public ActiveZones getZones() {
-			return zones;
-		}
-
-		public Side getSide() {
-			return side;
-		}
-	}
-
 	public static class Updated extends ZoneEvent {
 		private final ResourceKey<Level> dimension;
 		private final ActiveZones zones;

@@ -68,12 +68,13 @@ public record KnownCodec<T>(
 		return registerEnum(id, values, (Function<E, String>) ShimmerCodecs.DEFAULT_NAME_GETTER);
 	}
 
-	public static <T> KnownCodec<T> register(RegistryReference.IdHolder<T> registry, Class<T> type) {
+	public static <T> KnownCodec<T> of(RegistryReference.IdHolder<T> registry, Class<T> type) {
 		return register(
 			registry.id,
 			ShimmerCodecs.map(registry::getMap, registry.keyCodec, registry::getId),
 			ShimmerStreamCodecs.map(registry::getMap, registry.keyStreamCodec, registry::getId),
-			type
+			type,
+			registry
 		);
 	}
 

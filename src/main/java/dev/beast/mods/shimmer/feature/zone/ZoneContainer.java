@@ -1,7 +1,9 @@
 package dev.beast.mods.shimmer.feature.zone;
 
+import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.math.Line;
+import dev.beast.mods.shimmer.util.registry.RegistryReference;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -19,7 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 public class ZoneContainer implements Comparable<ZoneContainer> {
-	public static final StreamCodec<RegistryFriendlyByteBuf, ZoneContainer> STREAM_CODEC = new StreamCodec<>() {
+	public static final StreamCodec<RegistryFriendlyByteBuf, ZoneContainer> DIRECT_STREAM_CODEC = new StreamCodec<>() {
 		@Override
 		public ZoneContainer decode(RegistryFriendlyByteBuf buf) {
 			var id = ResourceLocation.STREAM_CODEC.decode(buf);
@@ -59,6 +61,9 @@ public class ZoneContainer implements Comparable<ZoneContainer> {
 			}
 		}
 	};
+
+	public static final RegistryReference.IdHolder<ZoneContainer> REGISTRY = RegistryReference.createServerIdHolder("zone_container", false);
+	public static final KnownCodec<ZoneContainer> KNOWN_CODEC = KnownCodec.of(REGISTRY, ZoneContainer.class);
 
 	ActiveZones parent;
 	public final ResourceLocation id;

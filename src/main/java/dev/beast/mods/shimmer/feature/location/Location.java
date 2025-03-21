@@ -51,7 +51,7 @@ public record Location(
 	);
 
 	public static final RegistryReference.IdHolder<Location> REGISTRY = RegistryReference.createServerIdHolder("location", false);
-	public static final KnownCodec<Location> KNOWN_CODEC = KnownCodec.register(REGISTRY, Location.class);
+	public static final KnownCodec<Location> KNOWN_CODEC = KnownCodec.of(REGISTRY, Location.class);
 
 	public static class Loader extends JsonCodecReloadListener<Location> {
 		public Loader() {

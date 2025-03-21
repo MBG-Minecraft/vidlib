@@ -15,11 +15,11 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
 public class ZoneLoader extends JsonReloadListener {
-	public static final ActiveZones ALL = new ActiveZones();
 	public static final Map<ResourceKey<Level>, ActiveZones> BY_DIMENSION = new IdentityHashMap<>();
 
 	public ZoneLoader() {
@@ -70,7 +70,6 @@ public class ZoneLoader extends JsonReloadListener {
 		}
 
 		list.sort(null);
-		ALL.update(list);
 		BY_DIMENSION.clear();
 
 		for (var container : list) {
@@ -84,7 +83,13 @@ public class ZoneLoader extends JsonReloadListener {
 			zones.containers.put(container.id, container);
 		}
 
-		NeoForge.EVENT_BUS.post(new ZoneEvent.AllUpdated(ALL, Side.SERVER));
+		var map = new HashMap<ResourceLocation, ZoneContainer>();
+
+		for (var container : list) {
+			map.put(container.id, container);
+		}
+
+		ZoneContainer.REGISTRY.update(map);
 
 		for (var entry : BY_DIMENSION.entrySet()) {
 			NeoForge.EVENT_BUS.post(new ZoneEvent.Updated(entry.getKey(), entry.getValue(), Side.SERVER));

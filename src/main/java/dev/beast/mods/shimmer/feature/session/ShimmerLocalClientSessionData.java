@@ -205,9 +205,8 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	}
 
 	@Override
-	public void updateZones(Level level, List<ZoneContainer> update) {
-		serverZones.update(update);
-		NeoForge.EVENT_BUS.post(new ZoneEvent.AllUpdated(serverZones, Side.SERVER));
+	public void updateZones(Level level) {
+		serverZones.update(ZoneContainer.REGISTRY.getMap().values());
 		refreshZones(level.dimension());
 	}
 

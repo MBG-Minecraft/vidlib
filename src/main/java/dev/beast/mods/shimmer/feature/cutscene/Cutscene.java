@@ -38,7 +38,7 @@ public class Cutscene {
 
 	public static final KnownCodec<Cutscene> DIRECT_KNOWN_CODEC = KnownCodec.register(Shimmer.id("direct_cutscene"), DIRECT_CODEC, DIRECT_STREAM_CODEC, Cutscene.class);
 	public static final RegistryReference.IdHolder<Cutscene> REGISTRY = RegistryReference.createServerIdHolder("cutscene", false);
-	public static final KnownCodec<Cutscene> KNOWN_CODEC = KnownCodec.register(REGISTRY, Cutscene.class);
+	public static final KnownCodec<Cutscene> KNOWN_CODEC = KnownCodec.of(REGISTRY, Cutscene.class);
 	public static final StreamCodec<? super RegistryFriendlyByteBuf, Cutscene> STREAM_CODEC = REGISTRY.streamCodecOrDirect(KNOWN_CODEC, DIRECT_STREAM_CODEC);
 
 	public static class Loader extends JsonCodecReloadListener<Cutscene> {

@@ -55,6 +55,10 @@ public class ShimmerResourceLocationArgument implements ArgumentType<ResourceLoc
 
 	@Override
 	public ResourceLocation parse(StringReader reader) throws CommandSyntaxException {
+		return parse0(reader);
+	}
+
+	public static ResourceLocation parse0(StringReader reader) throws CommandSyntaxException {
 		int i = reader.getCursor();
 
 		while (reader.canRead() && ResourceLocation.isAllowedInResourceLocation(reader.peek())) {

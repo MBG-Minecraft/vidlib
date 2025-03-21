@@ -25,6 +25,7 @@ public interface EntityFilter extends Predicate<Entity> {
 
 	SimpleRegistryType.Unit<EntityFilter> NONE = SimpleRegistryType.unit(Shimmer.id("none"), entity -> false);
 	SimpleRegistryType.Unit<EntityFilter> ANY = SimpleRegistryType.unit(Shimmer.id("any"), entity -> true);
+
 	SimpleRegistryType.Unit<EntityFilter> ALIVE = SimpleRegistryType.unit(Shimmer.id("alive"), Entity::isAlive);
 	SimpleRegistryType.Unit<EntityFilter> DEAD = SimpleRegistryType.unit(Shimmer.id("dead"), entity -> !entity.isAlive());
 	SimpleRegistryType.Unit<EntityFilter> LIVING = SimpleRegistryType.unit(Shimmer.id("living"), entity -> entity instanceof LivingEntity);
@@ -51,13 +52,14 @@ public interface EntityFilter extends Predicate<Entity> {
 
 	@AutoInit
 	static void bootstrap() {
+		REGISTRY.register(NONE);
+		REGISTRY.register(ANY);
+
 		REGISTRY.register(EntityNotFilter.TYPE);
 		REGISTRY.register(EntityAndFilter.TYPE);
 		REGISTRY.register(EntityOrFilter.TYPE);
 		REGISTRY.register(EntityXorFilter.TYPE);
 
-		REGISTRY.register(NONE);
-		REGISTRY.register(ANY);
 		REGISTRY.register(ALIVE);
 		REGISTRY.register(DEAD);
 		REGISTRY.register(LIVING);

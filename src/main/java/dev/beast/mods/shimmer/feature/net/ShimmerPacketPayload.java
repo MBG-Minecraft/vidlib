@@ -12,9 +12,7 @@ public interface ShimmerPacketPayload {
 	}
 
 	default void handleAsync(ShimmerPayloadContext ctx) {
-		ctx.parent().enqueueWork(() -> {
-			handle(ctx);
-		});
+		ctx.parent().enqueueWork(() -> handle(ctx));
 	}
 
 	default void handle(ShimmerPayloadContext ctx) {

@@ -7,8 +7,6 @@ import dev.beast.mods.shimmer.feature.input.PlayerInputChanged;
 import dev.beast.mods.shimmer.feature.input.SyncPlayerInputToClient;
 import dev.beast.mods.shimmer.feature.misc.RefreshNamePayload;
 import dev.beast.mods.shimmer.feature.misc.SyncPlayerTagsPayload;
-import dev.beast.mods.shimmer.feature.zone.SyncZonesPayload;
-import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
 import dev.beast.mods.shimmer.util.S2CPacketBundleBuilder;
 import dev.beast.mods.shimmer.util.registry.SyncRegistryPayload;
 import dev.beast.mods.shimmer.util.registry.SyncedRegistry;
@@ -51,8 +49,6 @@ public class ShimmerServerSessionData extends ShimmerSessionData {
 		for (var reg : SyncedRegistry.ALL.values()) {
 			packets.s2c(new SyncRegistryPayload(reg, Map.copyOf(reg.registry().getMap())));
 		}
-
-		packets.s2c(new SyncZonesPayload(List.copyOf(ZoneLoader.ALL.containers.values())));
 
 		dataMap.load(player.server, player.server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("shimmer").resolve(player.getUUID() + ".nbt"));
 

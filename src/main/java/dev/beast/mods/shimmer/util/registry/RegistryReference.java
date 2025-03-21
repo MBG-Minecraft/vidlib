@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.util.registry;
 
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
@@ -10,6 +11,7 @@ import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.util.Side;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -24,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -40,14 +43,14 @@ public class RegistryReference<K, V> implements Supplier<V> {
 		return new Holder<>(Side.CLIENT);
 	}
 
-	public static <V> IdHolder<V> createServerIdHolder(String id, boolean internal) {
-		var holder = new IdHolder<V>(id, internal, Side.SERVER);
+	public static <V> IdHolder<V> createServerIdHolder(String id, boolean preferInternal) {
+		var holder = new IdHolder<V>(id, preferInternal, Side.SERVER);
 		DATA_PACK_HOLDERS.add(holder);
 		return holder;
 	}
 
-	public static <V> IdHolder<V> createClientIdHolder(String id, boolean internal) {
-		return new IdHolder<>(id, internal, Side.CLIENT);
+	public static <V> IdHolder<V> createClientIdHolder(String id, boolean preferInternal) {
+		return new IdHolder<>(id, preferInternal, Side.CLIENT);
 	}
 
 	public static void releaseServerHolders() {
@@ -127,18 +130,20 @@ public class RegistryReference<K, V> implements Supplier<V> {
 		}
 	}
 
-	public static class IdHolder<V> extends Holder<ResourceLocation, V> implements Supplier<Iterable<ResourceLocation>> {
+	public static class IdHolder<V> extends Holder<ResourceLocation, V> implements Supplier<Iterable<ResourceLocation>>, BiFunction<KnownCodec<V>, CommandBuildContext, ArgumentType<V>> {
 		public final ResourceLocation id;
+		public final boolean preferInternal;
 		public final Codec<ResourceLocation> keyCodec;
 		public final StreamCodec<ByteBuf, ResourceLocation> keyStreamCodec;
 		public final SuggestionProvider<CommandSourceStack> suggestionProvider;
 
-		private IdHolder(String _id, boolean internal, Side side) {
+		private IdHolder(String _id, boolean preferInternal, Side side) {
 			super(side);
 			this.id = Shimmer.id(_id);
-			this.keyCodec = internal ? ShimmerCodecs.SHIMMER_ID : ShimmerCodecs.VIDEO_ID;
-			this.keyStreamCodec = internal ? ShimmerStreamCodecs.SHIMMER_ID : ShimmerStreamCodecs.VIDEO_ID;
-			this.suggestionProvider = internal ? ShimmerResourceLocationArgument.registerSuggestionProvider(id, this) : VideoResourceLocationArgument.registerSuggestionProvider(id, this);
+			this.preferInternal = preferInternal;
+			this.keyCodec = preferInternal ? ShimmerCodecs.SHIMMER_ID : ShimmerCodecs.VIDEO_ID;
+			this.keyStreamCodec = preferInternal ? ShimmerStreamCodecs.SHIMMER_ID : ShimmerStreamCodecs.VIDEO_ID;
+			this.suggestionProvider = preferInternal ? ShimmerResourceLocationArgument.registerSuggestionProvider(id, this) : VideoResourceLocationArgument.registerSuggestionProvider(id, this);
 		}
 
 		@Override
@@ -153,6 +158,11 @@ public class RegistryReference<K, V> implements Supplier<V> {
 		@Override
 		public String toString() {
 			return id.toString();
+		}
+
+		@Override
+		public ArgumentType<V> apply(KnownCodec<V> knownCodec, CommandBuildContext commandBuildContext) {
+			return new RefHolderArgument<>(this, knownCodec);
 		}
 	}
 

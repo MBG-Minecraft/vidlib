@@ -9,6 +9,7 @@ public interface WarpCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("warp", (command, buildContext) -> command
 		.then(Commands.argument("warp", Location.KNOWN_CODEC.argument(buildContext))
+			.suggests(Location.REGISTRY.suggestionProvider)
 			.executes(ctx -> warp(ctx.getSource().getPlayerOrException(), Location.KNOWN_CODEC.get(ctx, "warp")))
 		)
 	);

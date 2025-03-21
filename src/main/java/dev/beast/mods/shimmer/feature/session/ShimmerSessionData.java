@@ -10,7 +10,6 @@ import dev.beast.mods.shimmer.feature.entity.EntityOverrideValue;
 import dev.beast.mods.shimmer.feature.icon.IconHolder;
 import dev.beast.mods.shimmer.feature.input.PlayerInput;
 import dev.beast.mods.shimmer.feature.worldsync.WorldSyncAuthResponsePayload;
-import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
 import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
 import dev.beast.mods.shimmer.util.registry.SyncedRegistry;
 import net.minecraft.network.chat.Component;
@@ -104,7 +103,7 @@ public class ShimmerSessionData {
 	public <V> void syncRegistry(Player player, SyncedRegistry<V> registry, Map<ResourceLocation, V> map) {
 	}
 
-	public void updateZones(Level level, List<ZoneContainer> update) {
+	public void updateZones(Level level) {
 	}
 
 	public void updateClockInstance(ResourceLocation id, int tick, boolean ticking) {

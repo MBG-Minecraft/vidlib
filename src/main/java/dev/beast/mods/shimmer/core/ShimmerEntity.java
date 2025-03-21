@@ -162,7 +162,7 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 	}
 
 	default void teleport(Location location) {
-		teleport(((Entity) this).getServer().getLevel(location.dimension()), location.get());
+		teleport(((Entity) this).getServer().getLevel(location.dimension()), new Vec3(location.position().getX() + 0.5D, location.position().getY() + 0.1D, location.position().getZ() + 0.5D));
 	}
 
 	default void forceSetVelocity(Vec3 velocity) {

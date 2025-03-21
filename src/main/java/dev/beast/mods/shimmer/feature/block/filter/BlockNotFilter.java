@@ -2,17 +2,16 @@ package dev.beast.mods.shimmer.feature.block.filter;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
-import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 
-public record BlockStateFilter(BlockState blockState) implements BlockFilter {
-	public static final SimpleRegistryType<BlockStateFilter> TYPE = SimpleRegistryType.dynamic(Shimmer.id("block_state"), RecordCodecBuilder.mapCodec(instance -> instance.group(
-		BlockState.CODEC.fieldOf("block_state").forGetter(BlockStateFilter::blockState)
-	).apply(instance, BlockStateFilter::new)), ShimmerStreamCodecs.BLOCK_STATE.map(BlockStateFilter::new, BlockStateFilter::blockState));
+public record BlockNotFilter(BlockFilter filter) implements BlockFilter {
+	public static SimpleRegistryType<BlockNotFilter> TYPE = SimpleRegistryType.dynamic(Shimmer.id("not"), RecordCodecBuilder.mapCodec(instance -> instance.group(
+		BlockFilter.CODEC.fieldOf("filter").forGetter(BlockNotFilter::filter)
+	).apply(instance, BlockNotFilter::new)), BlockFilter.STREAM_CODEC.map(BlockNotFilter::new, BlockNotFilter::filter));
 
 	@Override
 	public SimpleRegistryType<?> type() {
@@ -21,11 +20,11 @@ public record BlockStateFilter(BlockState blockState) implements BlockFilter {
 
 	@Override
 	public boolean test(BlockInWorld block) {
-		return block.getState() == blockState;
+		return !filter.test(block);
 	}
 
 	@Override
 	public boolean test(Level level, BlockPos pos, BlockState state) {
-		return state == blockState;
+		return !filter.test(level, pos, state);
 	}
 }
