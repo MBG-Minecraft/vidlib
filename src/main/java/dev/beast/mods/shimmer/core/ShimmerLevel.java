@@ -6,8 +6,11 @@ import dev.beast.mods.shimmer.feature.bulk.BulkLevelModification;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationBundle;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationHolder;
 import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
+import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
 import dev.beast.mods.shimmer.feature.bulk.UndoableModification;
 import dev.beast.mods.shimmer.feature.data.DataMap;
+import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
+import dev.beast.mods.shimmer.feature.prop.PropList;
 import dev.beast.mods.shimmer.feature.sound.SoundData;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
@@ -15,6 +18,7 @@ import dev.beast.mods.shimmer.math.worldposition.EntityPositionType;
 import dev.beast.mods.shimmer.math.worldposition.FollowingEntityWorldPosition;
 import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.player.Player;
@@ -42,6 +46,10 @@ public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEn
 	}
 
 	default long shimmer$nextPacketId() {
+		throw new NoMixinException(this);
+	}
+
+	default PropList<?> getProps() {
 		throw new NoMixinException(this);
 	}
 
@@ -132,5 +140,19 @@ public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEn
 
 	default void playTrackingSound(Entity entity, SoundData data, boolean looping) {
 		playTrackingSound(new FollowingEntityWorldPosition(Either.left(entity.getId()), EntityPositionType.EYES), WorldNumberVariables.EMPTY, data, looping);
+	}
+
+	default void physicsParticles(PhysicsParticleData data, List<PositionedBlock> blocks, long seed) {
+	}
+
+	default void physicsParticles(ResourceLocation id, List<PositionedBlock> blocks, long seed) {
+	}
+
+	default void physicsParticles(PhysicsParticleData data, List<PositionedBlock> blocks) {
+		physicsParticles(data, blocks, shimmer$level().shimmer$level().random.nextLong());
+	}
+
+	default void physicsParticles(ResourceLocation id, List<PositionedBlock> blocks) {
+		physicsParticles(id, blocks, shimmer$level().shimmer$level().random.nextLong());
 	}
 }

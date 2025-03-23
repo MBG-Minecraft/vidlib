@@ -4,7 +4,9 @@ import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.block.filter.BlockFilter;
 import dev.beast.mods.shimmer.feature.clothing.Clothing;
 import dev.beast.mods.shimmer.feature.codec.KnownCodec;
+import dev.beast.mods.shimmer.feature.explosion.ExplosionData;
 import dev.beast.mods.shimmer.feature.icon.IconHolder;
+import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
 import dev.beast.mods.shimmer.feature.zone.ZoneRenderType;
 import dev.beast.mods.shimmer.util.Empty;
 import net.minecraft.network.chat.Component;
@@ -52,6 +54,16 @@ public interface InternalPlayerData {
 		.build();
 
 	DataType<Float> FLIGHT_SPEED = DataType.PLAYER.internal("flight_speed", KnownCodec.FLOAT, 1F)
+		.save()
+		.sync()
+		.build();
+
+	DataType<ExplosionData> TEST_EXPLOSION = DataType.PLAYER.internal("test_explosion", ExplosionData.KNOWN_CODEC, ExplosionData.DEFAULT)
+		.save()
+		.sync()
+		.build();
+
+	DataType<PhysicsParticleData> TEST_PARTICLES = DataType.PLAYER.internal("test_physics_particles", PhysicsParticleData.KNOWN_CODEC, PhysicsParticleData.DEFAULT)
 		.save()
 		.sync()
 		.build();

@@ -13,7 +13,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
 public class ClockRenderer {
-	private static final Color RED = new Color(1F, 1F, 0.3F, 0.3F);
+	private static final Color RED = Color.of(1F, 1F, 0.3F, 0.3F);
 
 	public static void render(Minecraft mc, ClockInstance instance, ClockLocation location, PoseStack ms, Vec3 cameraPos, float delta) {
 		var font = location.font();

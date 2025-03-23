@@ -57,9 +57,8 @@ public class ShimmerRenderTypes extends RenderType {
 		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(POSITION_COLOR_SHADER)
-			// .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.empty()))
 			.setTextureState(new EmptyTextureStateShard(ShimmerRenderTypes::setupLines, ShimmerRenderTypes::clearLines))
-			.setTransparencyState(NO_TRANSPARENCY)
+			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 			.setCullState(CULL)
 			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
 			.createCompositeState(false)

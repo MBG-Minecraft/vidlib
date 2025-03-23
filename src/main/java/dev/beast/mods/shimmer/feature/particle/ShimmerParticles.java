@@ -32,4 +32,5 @@ public interface ShimmerParticles {
 	}
 
 	DeferredHolder<ParticleType<?>, ParticleType<CubeParticleOptions>> CUBE = register("cube", true, () -> CubeParticleOptions.CODEC, () -> CubeParticleOptions.STREAM_CODEC);
+	DeferredHolder<ParticleType<?>, ParticleType<LineParticleOptions>> LINE = register("line", true, () -> LineParticleOptions.CODEC, () -> LineParticleOptions.STREAM_CODEC);
 }

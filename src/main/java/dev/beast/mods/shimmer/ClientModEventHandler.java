@@ -9,6 +9,7 @@ import dev.beast.mods.shimmer.feature.clothing.Clothing;
 import dev.beast.mods.shimmer.feature.misc.MiscShimmerClientUtils;
 import dev.beast.mods.shimmer.feature.multiverse.VoidSpecialEffects;
 import dev.beast.mods.shimmer.feature.particle.ShimmerClientParticles;
+import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
 import dev.beast.mods.shimmer.feature.structure.ClientStructureStorage;
 import dev.beast.mods.shimmer.feature.structure.GhostStructure;
 import net.minecraft.client.KeyMapping;
@@ -35,6 +36,7 @@ public class ClientModEventHandler {
 		event.addListener(Shimmer.id("structure"), ClientStructureStorage.CLIENT);
 		event.addListener(Shimmer.id("ghost_structure"), new GhostStructure.Loader());
 		event.addListener(Shimmer.id("clothing"), new ClientClothingLoader());
+		event.addListener(Shimmer.id("physics_particle_data"), new PhysicsParticleData.Loader());
 	}
 
 	@SubscribeEvent

@@ -5,5 +5,6 @@ import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 public class ShimmerClientParticles {
 	public static void register(RegisterParticleProvidersEvent event) {
 		event.registerSpecial(ShimmerParticles.CUBE.get(), CubeParticle::new);
+		event.registerSpecial(ShimmerParticles.LINE.get(), LineParticle::new);
 	}
 }

@@ -174,7 +174,7 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 		}
 
 		if (level != null) {
-			PhysicsParticleManager.tickAll(level);
+			PhysicsParticleManager.tickAll(level, level.getGameTime());
 		}
 	}
 

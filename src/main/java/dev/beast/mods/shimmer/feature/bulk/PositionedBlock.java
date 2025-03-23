@@ -14,6 +14,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.List;
 import java.util.Set;
 
 public record PositionedBlock(BlockPos pos, BlockState state) implements BulkLevelModification {
@@ -29,6 +30,8 @@ public record PositionedBlock(BlockPos pos, BlockState state) implements BulkLev
 		ShimmerStreamCodecs.BLOCK_STATE, PositionedBlock::state,
 		PositionedBlock::new
 	);
+
+	public static final StreamCodec<RegistryFriendlyByteBuf, List<PositionedBlock>> LIST_STREAM_CODEC = STREAM_CODEC.list();
 
 	public static final SimpleRegistryType<PositionedBlock> TYPE = SimpleRegistryType.dynamic(Shimmer.id("block"), MAP_CODEC, STREAM_CODEC);
 

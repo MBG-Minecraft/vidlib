@@ -70,6 +70,12 @@ public record Rotation(float yaw, float pitch, float roll, Type type) {
 		Rotation::deg
 	);
 
+	public static final StreamCodec<ByteBuf, Rotation> STREAM_CODEC_NO_ROLL = CompositeStreamCodec.of(
+		ByteBufCodecs.FLOAT, Rotation::yawDeg,
+		ByteBufCodecs.FLOAT, Rotation::pitchDeg,
+		Rotation::deg
+	);
+
 	public static final Rotation NONE = new Rotation(0F, 0F, 0F, Type.RAD);
 
 	public static Rotation deg(float yaw, float pitch, float roll) {
@@ -157,5 +163,18 @@ public record Rotation(float yaw, float pitch, float roll, Type type) {
 				KMath.lerp(delta, rollDeg(), to.rollDeg())
 			);
 		}
+	}
+
+	@Override
+	public String toString() {
+		if (roll == 0F) {
+			if (pitch == 0F) {
+				return "Rotation[" + yawDeg() + "]";
+			}
+
+			return "Rotation[" + yawDeg() + ", " + pitchDeg() + "]";
+		}
+
+		return "Rotation[" + yawDeg() + ", " + pitchDeg() + ", " + rollDeg() + "]";
 	}
 }

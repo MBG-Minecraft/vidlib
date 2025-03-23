@@ -11,11 +11,12 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.valueproviders.SampledFloat;
 
 import java.util.List;
 
 @AutoInit
-public record Range(float min, float max) {
+public record Range(float min, float max) implements SampledFloat {
 	public static final Range ZERO = new Range(0F, 0F);
 	public static final Range ONE = new Range(1F, 1F);
 	public static final Range FULL = new Range(0F, 1F);
@@ -51,7 +52,8 @@ public record Range(float min, float max) {
 		return min == max ? min : delta * (max - min) + min;
 	}
 
-	public float get(RandomSource random) {
+	@Override
+	public float sample(RandomSource random) {
 		return min == max ? min : random.nextFloat() * (max - min) + min;
 	}
 

@@ -68,7 +68,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 				if (cameraPos.closerThan(sz.instance().zone.shape().getCenterPos(), 512D) && frustum.isVisible(sz.instance().zone.shape().getBoundingBox())) {
 					boolean hovered = session.zoneClip != null && session.zoneClip.instance() == sz.instance();
 					var baseColor = sz.instance().zone.color().withAlpha(50);
-					var outlineColor = hovered ? Color.WHITE : sz.instance().entities.isEmpty() ? baseColor : Color.GREEN;
+					var outlineColor = hovered ? Color.WHITE : sz.instance().entities.isEmpty() ? sz.instance().zone.color() : Color.GREEN;
 					BoxRenderer.renderVoxelShape(ms, mc.renderBuffers().bufferSource(), sz.shapeBox(), cameraPos.reverse(), false, baseColor, outlineColor);
 				}
 			}
@@ -81,7 +81,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 						if (renderer != EmptyZoneRenderer.INSTANCE) {
 							boolean hovered = session.zoneClip != null && session.zoneClip.instance() == instance;
 							var baseColor = instance.zone.color().withAlpha(50);
-							var outlineColor = hovered ? Color.WHITE : instance.entities.isEmpty() ? baseColor : Color.GREEN;
+							var outlineColor = hovered ? Color.WHITE : instance.entities.isEmpty() ? instance.zone.color() : Color.GREEN;
 
 							if (renderType == ZoneRenderType.NORMAL) {
 								renderer.render(Cast.to(instance.zone.shape()), new ZoneRenderer.Context(mc, ms, cameraPos, frustum, delta, baseColor, outlineColor));

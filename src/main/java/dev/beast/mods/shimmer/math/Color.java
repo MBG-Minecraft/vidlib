@@ -24,6 +24,33 @@ public record Color(int argb) {
 	public static final Color MAGENTA = new Color(0xFFFF00FF);
 	public static final Color CYAN = new Color(0xFF00FFFF);
 
+	public static Color of(int argb) {
+		return switch (argb) {
+			case 0x00000000 -> TRANSPARENT;
+			case 0xFFFFFFFF -> WHITE;
+			case 0xFF000000 -> BLACK;
+			case 0xFFFF0000 -> RED;
+			case 0xFF00FF00 -> GREEN;
+			case 0xFF0000FF -> BLUE;
+			case 0xFFFFFF00 -> YELLOW;
+			case 0xFFFF00FF -> MAGENTA;
+			case 0xFF00FFFF -> CYAN;
+			default -> new Color(argb);
+		};
+	}
+
+	public static Color of(int a, int r, int g, int b) {
+		return of(((a & 0xFF) << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF));
+	}
+
+	public static Color of(int r, int g, int b) {
+		return of(255, r, g, b);
+	}
+
+	public static Color of(float a, float r, float g, float b) {
+		return of((int) (a * 255F), (int) (r * 255F), (int) (g * 255F), (int) (b * 255F));
+	}
+
 	private static final Map<String, Color> NAMED_COLORS = Map.of(
 		"transparent", TRANSPARENT,
 		"white", WHITE,
@@ -42,7 +69,7 @@ public record Color(int argb) {
 		if (col != null) {
 			return DataResult.success(col);
 		} else if ((s.length() == 7 || s.length() == 9) && s.charAt(0) == '#') {
-			return DataResult.success(new Color((s.length() == 7 ? 0xFF000000 : 0) | Integer.parseUnsignedInt(s.substring(1), 16)));
+			return DataResult.success(of((s.length() == 7 ? 0xFF000000 : 0) | Integer.parseUnsignedInt(s.substring(1), 16)));
 		} else {
 			return DataResult.error(() -> "Invalid color format, expected #RRGGBB or #AARRGGBB: " + s);
 		}
@@ -58,20 +85,8 @@ public record Color(int argb) {
 
 	public static final Codec<Color> CODEC_RGB = codecWithAlpha(255);
 
-	public static final StreamCodec<ByteBuf, Color> STREAM_CODEC = ByteBufCodecs.INT.map(Color::new, Color::argb);
+	public static final StreamCodec<ByteBuf, Color> STREAM_CODEC = ByteBufCodecs.INT.map(Color::of, Color::argb);
 	public static final KnownCodec<Color> KNOWN_CODEC = KnownCodec.register(Shimmer.id("color"), CODEC, STREAM_CODEC, Color.class);
-
-	public Color(int a, int r, int g, int b) {
-		this(((a & 0xFF) << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF));
-	}
-
-	public Color(int r, int g, int b) {
-		this(255, r, g, b);
-	}
-
-	public Color(float a, float r, float g, float b) {
-		this((int) (a * 255F), (int) (r * 255F), (int) (g * 255F), (int) (b * 255F));
-	}
 
 	public int rgb() {
 		return argb & 0xFFFFFF;
@@ -110,11 +125,11 @@ public record Color(int argb) {
 	}
 
 	public Color withAlpha(int alpha) {
-		return new Color(alpha, red(), green(), blue());
+		return of(alpha, red(), green(), blue());
 	}
 
 	public Color withAlpha(float alpha) {
-		return new Color((int) (alpha * 255F), red(), green(), blue());
+		return of((int) (alpha * 255F), red(), green(), blue());
 	}
 
 	@Override
@@ -136,7 +151,7 @@ public record Color(int argb) {
 	}
 
 	public Color lerp(float delta, Color other, int alpha) {
-		return new Color(
+		return of(
 			alpha,
 			Mth.lerpInt(delta, red(), other.red()),
 			Mth.lerpInt(delta, green(), other.green()),

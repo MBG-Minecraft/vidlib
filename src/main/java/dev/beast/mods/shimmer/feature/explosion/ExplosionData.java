@@ -2,8 +2,10 @@ package dev.beast.mods.shimmer.feature.explosion;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.block.filter.BlockFilter;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
+import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.feature.config.BooleanConfigValue;
 import dev.beast.mods.shimmer.feature.config.ConfigValue;
 import dev.beast.mods.shimmer.feature.config.FloatConfigValue;
@@ -32,6 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ExplosionData {
+	public static final ExplosionData DEFAULT = new ExplosionData();
+
 	public static class EntityData {
 		public static final EntityData DEFAULT = new EntityData();
 
@@ -156,6 +160,8 @@ public class ExplosionData {
 		FilterData.STREAM_CODEC.optional(FilterData.DEFAULT), v -> v.filter,
 		ExplosionData::new
 	);
+
+	public static final KnownCodec<ExplosionData> KNOWN_CODEC = KnownCodec.register(Shimmer.id("explosion_data"), CODEC, STREAM_CODEC, ExplosionData.class);
 
 	public static final List<ConfigValue<ExplosionData, ?>> CONFIG = List.of(
 		new FloatConfigValue<>("Radius", Range.of(0F, 500F), false, data -> data.radius, (data, v) -> data.radius = v),

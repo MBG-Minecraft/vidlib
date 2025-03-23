@@ -4,23 +4,40 @@ import dev.beast.mods.shimmer.feature.bulk.BulkLevelModification;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationBundle;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationPayload;
 import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
+import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
+import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
+import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticlesIdPayload;
+import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticlesPayload;
+import dev.beast.mods.shimmer.feature.prop.ServerPropList;
 import dev.beast.mods.shimmer.feature.sound.SoundData;
 import dev.beast.mods.shimmer.feature.sound.SoundPayload;
 import dev.beast.mods.shimmer.feature.sound.TrackingSoundPayload;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ShimmerServerLevel extends ShimmerLevel {
 	@Override
 	default ShimmerMinecraftEnvironment shimmer$getEnvironment() {
-		return ((ServerLevel) this).getServer();
+		return shimmer$level().getServer();
+	}
+
+	@Override
+	default ServerLevel shimmer$level() {
+		return (ServerLevel) this;
+	}
+
+	@Override
+	default ServerPropList getProps() {
+		throw new NoMixinException(this);
 	}
 
 	default void shimmer$setActiveZones(ActiveZones zones) {
@@ -29,7 +46,7 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 	@Override
 	@Nullable
 	default Entity getEntityByUUID(UUID uuid) {
-		return ((ServerLevel) this).getEntity(uuid);
+		return shimmer$level().getEntity(uuid);
 	}
 
 	@Override
@@ -58,5 +75,15 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 	@Override
 	default void playTrackingSound(WorldPosition position, WorldNumberVariables variables, SoundData data, boolean looping) {
 		s2c(new TrackingSoundPayload(position, variables, data, looping));
+	}
+
+	@Override
+	default void physicsParticles(PhysicsParticleData data, List<PositionedBlock> blocks, long seed) {
+		s2c(new PhysicsParticlesPayload(data, blocks, seed));
+	}
+
+	@Override
+	default void physicsParticles(ResourceLocation id, List<PositionedBlock> blocks, long seed) {
+		s2c(new PhysicsParticlesIdPayload(id, blocks, seed));
 	}
 }

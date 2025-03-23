@@ -1,20 +1,38 @@
 package dev.beast.mods.shimmer.core;
 
+import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
+import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
+import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticles;
+import dev.beast.mods.shimmer.feature.prop.ClientPropList;
 import dev.beast.mods.shimmer.feature.sound.SoundData;
 import dev.beast.mods.shimmer.feature.sound.TrackingSound;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public interface ShimmerClientLevel extends ShimmerLevel, ShimmerClientEntityContainer {
 	@Override
 	default ShimmerMinecraftEnvironment shimmer$getEnvironment() {
 		return Minecraft.getInstance();
+	}
+
+	@Override
+	default ClientLevel shimmer$level() {
+		return (ClientLevel) this;
+	}
+
+	@Override
+	default ClientPropList getProps() {
+		throw new NoMixinException(this);
 	}
 
 	@Override
@@ -38,5 +56,25 @@ public interface ShimmerClientLevel extends ShimmerLevel, ShimmerClientEntityCon
 	@Override
 	default void playTrackingSound(WorldPosition position, WorldNumberVariables variables, SoundData data, boolean looping) {
 		Minecraft.getInstance().getSoundManager().play(new TrackingSound((Level) this, position, variables, data, looping));
+	}
+
+	@Override
+	default void physicsParticles(PhysicsParticleData data, List<PositionedBlock> blocks, long seed) {
+		var particles = new PhysicsParticles(data, shimmer$level(), shimmer$level().getGameTime(), seed);
+
+		for (var block : blocks) {
+			particles.at = block.pos();
+			particles.state = block.state();
+			particles.spawn();
+		}
+	}
+
+	@Override
+	default void physicsParticles(ResourceLocation id, List<PositionedBlock> blocks, long seed) {
+		var data = PhysicsParticleData.REGISTRY.get(id);
+
+		if (data != null) {
+			physicsParticles(data, blocks, seed);
+		}
 	}
 }

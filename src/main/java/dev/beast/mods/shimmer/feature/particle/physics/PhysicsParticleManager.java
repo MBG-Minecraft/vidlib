@@ -48,9 +48,9 @@ public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
 		lightmapTextureManager.turnOffLightLayer();
 	}
 
-	public static void tickAll(Level level) {
+	public static void tickAll(Level level, long gameTime) {
 		for (var manager : ALL) {
-			manager.tick(level);
+			manager.tick(level, gameTime);
 		}
 	}
 
@@ -166,7 +166,7 @@ public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
 		RenderSystem.setShaderTexture(0, tex.getId());
 	}
 
-	public void tick(Level level) {
+	public void tick(Level level, long gameTime) {
 		particles.addAll(queue);
 		queue.clear();
 
@@ -175,7 +175,7 @@ public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
 		while (it.hasNext()) {
 			var p = it.next();
 
-			if (p.tick(level)) {
+			if (p.tick(level, gameTime)) {
 				it.remove();
 			}
 		}

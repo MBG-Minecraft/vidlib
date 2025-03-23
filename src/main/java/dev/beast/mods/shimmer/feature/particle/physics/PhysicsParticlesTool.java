@@ -1,18 +1,21 @@
 package dev.beast.mods.shimmer.feature.particle.physics;
 
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
+import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
+import dev.beast.mods.shimmer.feature.data.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.item.ShimmerTool;
 import dev.beast.mods.shimmer.feature.misc.DebugText;
-import dev.beast.mods.shimmer.math.Range;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
 
 public class PhysicsParticlesTool implements ShimmerTool {
 	@AutoInit
@@ -37,35 +40,35 @@ public class PhysicsParticlesTool implements ShimmerTool {
 
 	@Override
 	public boolean use(Player player, ItemStack item) {
-		if (player.level().isClientSide()) {
-			explode(player, item);
+		if (!player.level().isClientSide()) {
+			explode(player);
 		}
 
 		return true;
 	}
 
-	private void explode(Player player, ItemStack item) {
+	private void explode(Player player) {
 		var ray = player.ray(400D, 1F).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY);
 
 		if (ray != null) {
-			var mc = Minecraft.getInstance();
+			var blocks = new ArrayList<PositionedBlock>();
 
-			for (var pos : BlockPos.betweenClosed(ray.getBlockPos().offset(-4, -4, -4), ray.getBlockPos().offset(4, 1, 4))) {
+			for (var pos : BlockPos.betweenClosed(ray.getBlockPos().offset(-4, -1, -4), ray.getBlockPos().offset(4, 1, 4))) {
 				var state = player.level().getBlockState(pos);
 
 				if (!state.isAir()) {
-					var particles = new PhysicsParticles(player.level().random);
-					particles.at = pos;
-					particles.state = state;
-					particles.tint(mc.getBlockColors().getColor(state, player.level(), pos, 0));
-					particles.vvel = Range.of(0F, 1F);
-					particles.hvel = Range.of(3F, 4F);
-					particles.ttl = Range.of(40F, 200F);
-					particles.density = 20F;
-					particles.spawn();
+					blocks.add(new PositionedBlock(pos.immutable(), state));
 				}
 			}
+
+			player.level().physicsParticles(player.get(InternalPlayerData.TEST_PARTICLES), blocks);
 		}
+	}
+
+	@Override
+	public boolean leftClick(Player player, ItemStack item) {
+		player.openItemGui(item, InteractionHand.MAIN_HAND);
+		return true;
 	}
 
 	@Override

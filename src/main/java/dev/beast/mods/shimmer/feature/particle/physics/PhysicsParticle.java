@@ -16,11 +16,14 @@ public class PhysicsParticle {
 	public PhysicsParticleManager manager;
 	public RandomSource random;
 	public PhysicsParticleShape shape;
+	public long gameTimeSpawned;
 	public double x, y, z;
 	public double prevX, prevY, prevZ;
 	public double velocityX, velocityY, velocityZ;
 	public float rotationAngle, rotationSpeed, rotationRoll;
 	public int age;
+	public float tick;
+	public float speed;
 	public int ttl;
 	public float scaleMul;
 	public float scale;
@@ -101,95 +104,107 @@ public class PhysicsParticle {
 		manager.rendered++;
 	}
 
-	public boolean tick(Level level) {
+	public boolean tick(Level level, long gameTime) {
 		prevX = x;
 		prevY = y;
 		prevZ = z;
 		prevSpin = spin;
 		prevScale = scale;
 
-		if (age >= ttl) {
+		if (age >= ttl || gameTimeSpawned > gameTime) {
 			return true;
-		} else {
-			x += velocityX;
-			y += velocityY;
-			z += velocityZ;
-
-			velocityX *= velocityMultiplier;
-			velocityZ *= velocityMultiplier;
-
-			if (velocityY <= 0D) {
-				prevBlockStateType = blockStateType;
-
-				if (blockStateType == -1 || KMath.floor(prevY - scale * 0.5F) != KMath.floor(y - scale * 0.5F) || KMath.floor(prevX) != KMath.floor(x) || KMath.floor(prevZ) != KMath.floor(z)) {
-					var state = level.getBlockState(BlockPos.containing(x, y - scale * 0.5F, z));
-
-					if (state.getBlock() == Blocks.WATER) {
-						blockStateType = 2;
-					} else if (state.shimmer$getDensity() > 0F) {
-						blockStateType = 1;
-					} else {
-						blockStateType = 0;
-					}
-
-					if (prevBlockStateType == -1) {
-						prevBlockStateType = blockStateType;
-					}
-				}
-
-				if (blockStateType == 2) {
-					if (random.nextFloat() <= scale * 0.3F) {
-						level.addParticle(ParticleTypes.BUBBLE, x - scale + random.nextFloat() * scale * 2D, y - scale * 0.5D, z - scale + random.nextFloat() * scale * 2D, 0D, 0D, 0D);
-					}
-
-					if (prevBlockStateType == 0) {
-						if (velocityY < -0.3D) {
-							velocityY = 0.3D;
-						}
-
-						if (rotationSpeed > 0.3F) {
-							rotationSpeed = 0.3F;
-						}
-					}
-
-					velocityX *= 0.92D;
-					velocityZ *= 0.92D;
-					velocityY *= 0.4D;
-					rotationSpeed *= 0.86F;
-				} else if (prevBlockStateType == 1) {
-					velocityX *= 0.85D;
-					velocityZ *= 0.85D;
-					rotationSpeed *= 0.45F;
-
-					if (velocityY < -0.2D) {
-						velocityY *= -0.2D * bounce;
-					} else {
-						velocityY = 0D;
-					}
-
-					if (velocityY == 0D && age < ttl - 8) {
-						age = ttl - 8;
-					}
-				} else {
-					rotationSpeed *= 0.97F;
-				}
-			}
-
-			velocityY -= gravityStrength;
-
-			// spin += (float) Math.abs(velocityY);
-			spin += rotationSpeed;
-
-			scale = 1F;
-
-			if (age > ttl - 10) {
-				scale = 1F - (age - (ttl - 10F)) / 10F;
-			}
-
-			scale *= scaleMul;
 		}
 
+		/*
+		tick += speed;
+
+		while (tick >= 1F) {
+			tick0(level);
+			tick -= 1F;
+		}
+		 */
+
+		tick0(level);
 		age++;
 		return false;
+	}
+
+	public void tick0(Level level) {
+		x += velocityX;
+		y += velocityY;
+		z += velocityZ;
+
+		velocityX *= velocityMultiplier;
+		velocityZ *= velocityMultiplier;
+
+		if (velocityY <= 0D) {
+			prevBlockStateType = blockStateType;
+
+			if (blockStateType == -1 || KMath.floor(prevY - scale * 0.5F) != KMath.floor(y - scale * 0.5F) || KMath.floor(prevX) != KMath.floor(x) || KMath.floor(prevZ) != KMath.floor(z)) {
+				var state = level.getBlockState(BlockPos.containing(x, y - scale * 0.5F, z));
+
+				if (state.getBlock() == Blocks.WATER) {
+					blockStateType = 2;
+				} else if (state.shimmer$getDensity() > 0F) {
+					blockStateType = 1;
+				} else {
+					blockStateType = 0;
+				}
+
+				if (prevBlockStateType == -1) {
+					prevBlockStateType = blockStateType;
+				}
+			}
+
+			if (blockStateType == 2) {
+				if (random.nextFloat() <= scale * 0.3F) {
+					level.addParticle(ParticleTypes.BUBBLE, x - scale + random.nextFloat() * scale * 2D, y - scale * 0.5D, z - scale + random.nextFloat() * scale * 2D, 0D, 0D, 0D);
+				}
+
+				if (prevBlockStateType == 0) {
+					if (velocityY < -0.3D) {
+						velocityY = 0.3D;
+					}
+
+					if (rotationSpeed > 0.3F) {
+						rotationSpeed = 0.3F;
+					}
+				}
+
+				velocityX *= 0.92D;
+				velocityZ *= 0.92D;
+				velocityY *= 0.4D;
+				rotationSpeed *= 0.86F;
+			} else if (prevBlockStateType == 1) {
+				velocityX *= 0.85D;
+				velocityZ *= 0.85D;
+				rotationSpeed *= 0.45F;
+
+				if (velocityY < -0.2D) {
+					velocityY *= -0.2D * bounce;
+				} else {
+					velocityY = 0D;
+				}
+
+				if (velocityY == 0D && age < ttl - 8) {
+					age = ttl - 8;
+				}
+			} else {
+				rotationSpeed *= 0.97F;
+			}
+		}
+
+		velocityY -= gravityStrength;
+
+		// spin += (float) Math.abs(velocityY);
+		spin += rotationSpeed;
+
+		scale = 1F;
+
+		if (age > ttl - 10) {
+			scale = 1F - (age - (ttl - 10F)) / 10F;
+		}
+
+		scale *= scaleMul;
 	}
 }

@@ -3,14 +3,20 @@ package dev.beast.mods.shimmer.feature.particle.physics;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.block.ShimmerBlockStateClientProperties;
+import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.KMath;
-import dev.beast.mods.shimmer.math.Range;
 import dev.beast.mods.shimmer.math.Split;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
+import org.joml.Vector4f;
 
 public class PhysicsParticles {
 	public static final Split[] SPLIT = {new Split(0), new Split(1), new Split(2)};
@@ -31,40 +37,28 @@ public class PhysicsParticles {
 		}
 	}
 
-	public RandomSource random;
-	public BlockPos at = BlockPos.ZERO;
-	public BlockState state = Blocks.AIR.defaultBlockState();
-	public float density = 4F;
-	public float tintRed = 1F;
-	public float tintGreen = 1F;
-	public float tintBlue = 1F;
-	public float tintAlpha = 1F;
+	public final PhysicsParticleData data;
+	public final BlockAndTintGetter level;
+	public final long gameTime;
+	public final RandomSource random;
+	private final BlockColors blockColors;
+	public BlockPos at;
+	public BlockState state;
 
-	public Range angle = Range.of(0F, 360F);
-	public Range ttl = Range.of(80F);
-	public Range scale = Range.ONE;
-	public float largeChance = 1F;
-	public float speed = 0.5F;
-	public Range hvel = Range.of(0F, 0.2F);
-	public Range vvel = Range.of(0.3F, 1F);
-	public float velocityMultiplier = 0.96F;
-	public float gravityStrength = 0.036F;
-
-	public PhysicsParticles(RandomSource random) {
-		this.random = random;
-	}
-
-	public void tint(int col) {
-		tintRed = (col >> 16 & 0xFF) / 255F;
-		tintGreen = (col >> 8 & 0xFF) / 255F;
-		tintBlue = (col & 0xFF) / 255F;
-		tintAlpha = (col >> 24 & 0xFF) / 255F;
+	public PhysicsParticles(PhysicsParticleData data, @Nullable BlockAndTintGetter level, long gameTime, long seed) {
+		this.data = data;
+		this.level = level;
+		this.gameTime = gameTime;
+		this.random = new XoroshiroRandomSource(seed);
+		this.blockColors = Minecraft.getInstance().getBlockColors();
+		this.at = BlockPos.ZERO;
+		this.state = Blocks.AIR.defaultBlockState();
 	}
 
 	public void spawn() {
 		var clientProperties = ShimmerBlockStateClientProperties.of(state);
 		var manager = clientProperties.getManager();
-		float density1 = density * state.shimmer$getDensity();
+		float density1 = data.density * state.shimmer$getDensity();
 		int count = (int) density1;
 
 		if (density1 - count > 0) {
@@ -73,64 +67,73 @@ public class PhysicsParticles {
 			}
 		}
 
-		for (int i = 0; i < count; i++) {
-			spawnOne(clientProperties, manager, getSplit(1 + random.nextInt(2)));
+		if (count > 0) {
+			var tint = Color.of(blockColors.getColor(state, level, at, 0));
+			var identity = new Matrix4f();
+			identity.rotateY((float) Math.toRadians(data.direction));
+			identity.rotateX((float) Math.toRadians(-data.tilt));
+			var matrix = new Matrix4f();
+
+			for (int i = 0; i < count; i++) {
+				spawnOne(identity, matrix, clientProperties, manager, getSplit(1 + random.nextInt(2)), tint);
+			}
 		}
 	}
 
-	public void spawnOne(ShimmerBlockStateClientProperties clientProperties, PhysicsParticleManager manager, Split split) {
-		var angle0 = angle.get(random);
-		var angle1 = Math.toRadians(angle0 + 90D);
-		var dist = random.nextFloat();
-
-		var pspeed = KMath.clamp(speed, 0.01F, 100F);
-
+	public void spawnOne(Matrix4f identity, Matrix4f matrix, ShimmerBlockStateClientProperties clientProperties, PhysicsParticleManager manager, Split split, Color tint) {
 		var p = new PhysicsParticle();
 		p.manager = manager;
 		p.random = new XoroshiroRandomSource(random.nextLong());
-		p.shape = clientProperties.getPhysicsBlockParticleShape(split.boxes[p.random.nextInt(split.count)]);
+		p.shape = clientProperties.getPhysicsBlockParticleShape(split.boxes[random.nextInt(split.count)]);
+		p.gameTimeSpawned = gameTime;
+		p.speed = data.speed.sample(random);
 		p.prevX = p.x = at.getX() + random.nextFloat();
 		p.prevY = p.y = at.getY() + random.nextFloat();
 		p.prevZ = p.z = at.getZ() + random.nextFloat();
 
-		var hvelrv = p.random.nextFloat();
-		var hvelr = hvel.get(hvelrv * hvelrv);
-		var vvelrv = p.random.nextFloat();
-		var vvelr = vvel.get(vvelrv * vvelrv * vvelrv * KMath.lerp(dist, 0.4F, 1F));
+		var power3 = random.nextFloat();
+		var power = data.power.get(power3 * power3 * power3 * random.nextFloat());
+		var spreadInput = random.nextFloat();
+		var spread = data.spread.get(spreadInput * spreadInput);
 
-		p.velocityX = Math.cos(angle1) * hvelr;
-		p.velocityY = vvelr;
-		p.velocityZ = Math.sin(angle1) * hvelr;
-		p.rotationRoll = KMath.lerp(p.random.nextFloat(), -1.3F, 1.3F);
-		p.rotationAngle = -(float) Math.toRadians(angle0) + p.rotationRoll;
-		p.ttl = (int) ttl.get(p.random);
-		p.scaleMul = split.scale * scale.get(p.random);
-		p.rotationSpeed = (KMath.lerp(p.random.nextFloat(), 0.25F, 0.4F)) / p.scaleMul * (float) Math.atan2(hvelr, vvelr);
-		p.red = tintRed;
-		p.green = tintGreen;
-		p.blue = tintBlue;
-		p.alpha = tintAlpha;
+		var angle = data.section.sample(random);
+
+		matrix.set(identity);
+		matrix.rotateY((float) Math.toRadians(angle));
+		// matrix.rotateX((float) (spread * Math.PI / 2D));
+
+		var velocityVector = new Vector4f(0F, power, -spread, 1F).mul(matrix);
+		p.velocityX = velocityVector.x;
+		p.velocityY = velocityVector.y;
+		p.velocityZ = velocityVector.z;
+		p.rotationRoll = KMath.lerp(random.nextFloat(), -1.3F, 1.3F);
+		p.rotationAngle = -(float) Math.toRadians(angle) + p.rotationRoll;
+		p.ttl = (int) data.lifespan.sample(random);
+		p.scaleMul = split.scale * data.scale.sample(random);
+		p.rotationSpeed = (KMath.lerp(random.nextFloat(), 0.25F, 0.4F)) / p.scaleMul * (float) Math.atan2(spread, power);
+		p.red = tint.redf();
+		p.green = tint.greenf();
+		p.blue = tint.bluef();
+		p.alpha = tint.alphaf();
 
 		if (p.alpha < 0.1F) {
 			p.alpha = 1F;
 		}
 
-		p.velocityMultiplier = velocityMultiplier;
-		p.gravityStrength = gravityStrength;
-		p.spin = p.prevSpin = p.random.nextFloat() * (float) (Math.PI * 2D);
-
-		if (largeChance >= 1F || largeChance > 0F && p.random.nextFloat() < largeChance) {
-			p.scaleMul *= 2F;
-		}
+		p.velocityMultiplier = data.inertia;
+		p.gravityStrength = data.gravity;
+		p.spin = p.prevSpin = random.nextFloat() * (float) (Math.PI * 2D);
 
 		p.scale = p.prevScale = p.scaleMul;
-		p.bounce = p.random.nextFloat();
+		p.bounce = random.nextFloat();
 
-		if (p.random.nextInt(10) == 0) {
+		if (random.nextInt(10) == 0) {
 			p.bounce *= 2F;
 		}
 
-		p.flatColorMod = (int) (p.random.nextFloat() * 8F) / 8F;
+		p.flatColorMod = (int) (random.nextFloat() * 8F) / 8F;
 		p.manager.queue.add(p);
+
+		// Minecraft.getInstance().level.addParticle(new LineParticleOptions(Color.WHITE, Color.CYAN, p.ttl), true, true, p.x, p.y, p.z, p.velocityX, p.velocityY, p.velocityZ);
 	}
 }

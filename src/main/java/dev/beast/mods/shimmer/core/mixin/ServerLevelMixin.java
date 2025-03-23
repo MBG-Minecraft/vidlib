@@ -2,6 +2,7 @@ package dev.beast.mods.shimmer.core.mixin;
 
 import dev.beast.mods.shimmer.core.ShimmerServerLevel;
 import dev.beast.mods.shimmer.feature.misc.CreateFireworksPayload;
+import dev.beast.mods.shimmer.feature.prop.ServerPropList;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -22,6 +23,9 @@ public abstract class ServerLevelMixin extends Level implements ShimmerServerLev
 	@Unique
 	private ActiveZones shimmer$activeZones;
 
+	@Unique
+	private ServerPropList shimmer$props;
+
 	protected ServerLevelMixin(WritableLevelData levelData, ResourceKey<Level> dimension, RegistryAccess registryAccess, Holder<DimensionType> dimensionTypeRegistration, boolean isClientSide, boolean isDebug, long biomeZoomSeed, int maxChainedNeighborUpdates) {
 		super(levelData, dimension, registryAccess, dimensionTypeRegistration, isClientSide, isDebug, biomeZoomSeed, maxChainedNeighborUpdates);
 	}
@@ -35,6 +39,15 @@ public abstract class ServerLevelMixin extends Level implements ShimmerServerLev
 	@Override
 	public void shimmer$setActiveZones(ActiveZones zones) {
 		shimmer$activeZones = zones;
+	}
+
+	@Override
+	public ServerPropList getProps() {
+		if (shimmer$props == null) {
+			shimmer$props = new ServerPropList(shimmer$level());
+		}
+
+		return shimmer$props;
 	}
 
 	@Override
