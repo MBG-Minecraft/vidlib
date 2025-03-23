@@ -72,9 +72,6 @@ public interface ShimmerClientLevel extends ShimmerLevel, ShimmerClientEntityCon
 	@Override
 	default void physicsParticles(ResourceLocation id, List<PositionedBlock> blocks, long seed) {
 		var data = PhysicsParticleData.REGISTRY.get(id);
-
-		if (data != null) {
-			physicsParticles(data, blocks, seed);
-		}
+		physicsParticles(data == null ? PhysicsParticleData.DEFAULT : data, blocks, seed);
 	}
 }

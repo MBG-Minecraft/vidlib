@@ -186,4 +186,16 @@ public class ExplosionInstance {
 
 		return new UndoableExplosion(list);
 	}
+
+	public List<PositionedBlock> getDestroyedBlocks() {
+		var list = new ArrayList<PositionedBlock>(blocks.size());
+
+		for (var block : blocks) {
+			if (block.destroyed().isTrue()) {
+				list.add(block.toPositionedBlock());
+			}
+		}
+
+		return list;
+	}
 }

@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 public class PhysicsParticleData {
-	public static final float DEFAULT_DENSITY = 12F;
+	public static final float DEFAULT_DENSITY = 4F;
 	public static final Range DEFAULT_LIFESPAN = Range.of(80F, 120F);
 	public static final Range DEFAULT_SCALE = Range.of(1F, 2F);
 	public static final Range DEFAULT_POWER = Range.of(0.2F, 2F);

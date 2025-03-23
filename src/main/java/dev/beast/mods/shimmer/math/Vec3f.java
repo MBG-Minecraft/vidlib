@@ -8,7 +8,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3fc;
 import org.joml.Vector4f;
+import org.joml.Vector4fc;
 
 import java.util.List;
 import java.util.function.Function;
@@ -48,6 +50,14 @@ public record Vec3f(float x, float y, float z) {
 
 	public static Vec3f of(Vec3 v) {
 		return of((float) v.x, (float) v.y, (float) v.z);
+	}
+
+	public static Vec3f of(Vector3fc v) {
+		return of(v.x(), v.y(), v.z());
+	}
+
+	public static Vec3f of(Vector4fc v) {
+		return of(v.x(), v.y(), v.z());
 	}
 
 	public static final Codec<Vec3f> DIRECT_CODEC = Codec.FLOAT.listOf(3, 3).xmap(f -> of(f.get(0), f.get(1), f.get(2)), v -> List.of(v.x, v.y, v.z));

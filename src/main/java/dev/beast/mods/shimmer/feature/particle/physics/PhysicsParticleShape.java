@@ -47,10 +47,10 @@ public class PhysicsParticleShape {
 				var uv = suv.mul(box.uvs()[i]);
 				var n = Split.NORMALS[i];
 
-				buffer.addVertex(f[0].x(), f[0].y(), f[0].z()).setUv(uv.u0(), uv.v0()).setNormal(n.x, n.y, n.z);
-				buffer.addVertex(f[1].x(), f[1].y(), f[1].z()).setUv(uv.u0(), uv.v1()).setNormal(n.x, n.y, n.z);
-				buffer.addVertex(f[2].x(), f[2].y(), f[2].z()).setUv(uv.u1(), uv.v1()).setNormal(n.x, n.y, n.z);
-				buffer.addVertex(f[3].x(), f[3].y(), f[3].z()).setUv(uv.u1(), uv.v0()).setNormal(n.x, n.y, n.z);
+				buffer.addVertex(f[0].x(), f[0].y(), f[0].z()).setUv(uv.u0(), uv.v0()).setNormal(n.x(), n.y(), n.z());
+				buffer.addVertex(f[1].x(), f[1].y(), f[1].z()).setUv(uv.u0(), uv.v1()).setNormal(n.x(), n.y(), n.z());
+				buffer.addVertex(f[2].x(), f[2].y(), f[2].z()).setUv(uv.u1(), uv.v1()).setNormal(n.x(), n.y(), n.z());
+				buffer.addVertex(f[3].x(), f[3].y(), f[3].z()).setUv(uv.u1(), uv.v0()).setNormal(n.x(), n.y(), n.z());
 			}
 
 			var vertexBuffer = new VertexBuffer(BufferUsage.STATIC_WRITE);
@@ -80,10 +80,10 @@ public class PhysicsParticleShape {
 			var uv = suv.mul(box.uvs()[i]);
 			var n = Split.NORMALS[i];
 
-			buffer.addVertex(f[0].x(), f[0].y(), 0F).setUv(uv.u0(), uv.v0()).setNormal(n.x, n.y, n.z);
-			buffer.addVertex(f[1].x(), f[1].y(), 0F).setUv(uv.u0(), uv.v1()).setNormal(n.x, n.y, n.z);
-			buffer.addVertex(f[2].x(), f[2].y(), 0F).setUv(uv.u1(), uv.v1()).setNormal(n.x, n.y, n.z);
-			buffer.addVertex(f[3].x(), f[3].y(), 0F).setUv(uv.u1(), uv.v0()).setNormal(n.x, n.y, n.z);
+			buffer.addVertex(f[0].x(), f[0].y(), 0F).setUv(uv.u0(), uv.v0()).setNormal(n.x(), n.y(), n.z());
+			buffer.addVertex(f[1].x(), f[1].y(), 0F).setUv(uv.u0(), uv.v1()).setNormal(n.x(), n.y(), n.z());
+			buffer.addVertex(f[2].x(), f[2].y(), 0F).setUv(uv.u1(), uv.v1()).setNormal(n.x(), n.y(), n.z());
+			buffer.addVertex(f[3].x(), f[3].y(), 0F).setUv(uv.u1(), uv.v0()).setNormal(n.x(), n.y(), n.z());
 
 			var vertexBuffer = new VertexBuffer(BufferUsage.STATIC_WRITE);
 			vertexBuffer.bind();

@@ -27,4 +27,9 @@ public record BlockNotFilter(BlockFilter filter) implements BlockFilter {
 	public boolean test(Level level, BlockPos pos, BlockState state) {
 		return !filter.test(level, pos, state);
 	}
+
+	@Override
+	public BlockFilter not() {
+		return filter;
+	}
 }

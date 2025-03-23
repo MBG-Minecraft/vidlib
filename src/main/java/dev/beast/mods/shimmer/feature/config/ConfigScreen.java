@@ -1,7 +1,9 @@
 package dev.beast.mods.shimmer.feature.config;
 
 import com.google.gson.JsonElement;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.JsonOps;
 import dev.beast.mods.shimmer.math.Range;
 import dev.beast.mods.shimmer.util.JsonUtils;
 import net.minecraft.client.gui.GuiGraphics;
@@ -114,12 +116,14 @@ public class ConfigScreen<C> extends Screen {
 	}
 
 	public final C instance;
+	public final C defaultInstance;
 	public final List<ConfigContainer<C, ?>> configWidgets;
 	public final Consumer<C> update;
 
-	public ConfigScreen(DynamicOps<JsonElement> ops, C instance, List<ConfigValue<C, ?>> config, Consumer<C> update) {
+	public ConfigScreen(DynamicOps<JsonElement> ops, C instance, C defaultInstance, List<ConfigValue<C, ?>> config, Consumer<C> update) {
 		super(Component.empty());
 		this.instance = instance;
+		this.defaultInstance = defaultInstance;
 		this.configWidgets = new ArrayList<>(config.size());
 		this.update = update;
 
@@ -132,6 +136,16 @@ public class ConfigScreen<C> extends Screen {
 				configWidgets.add(new ConfigEditBox<>(ops, instance, value));
 			}
 		}
+	}
+
+	public void addCopyJsonButton(Codec<C> fullCodec) {
+		addRenderableWidget(Button.builder(Component.literal("Copy"), button -> {
+			try {
+				minecraft.keyboardHandler.setClipboard(JsonUtils.GSON.toJson(fullCodec.encodeStart(minecraft.level.registryAccess().createSerializationContext(JsonOps.INSTANCE), instance).getOrThrow()));
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}).bounds(4, 4, 40, 14).build());
 	}
 
 	@Override

@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 
@@ -36,5 +37,11 @@ public interface JsonUtils {
 
 	static void write(OutputStream stream, JsonElement json, boolean pretty) {
 		write(new OutputStreamWriter(stream, StandardCharsets.UTF_8), json, pretty);
+	}
+
+	static String prettyString(JsonElement json) {
+		var writer = new StringWriter();
+		write(writer, json, true);
+		return writer.toString();
 	}
 }

@@ -3,12 +3,12 @@ package dev.beast.mods.shimmer.feature.particle.physics;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.block.ShimmerBlockStateClientProperties;
-import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.KMath;
 import dev.beast.mods.shimmer.math.Split;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Blocks;
@@ -68,7 +68,7 @@ public class PhysicsParticles {
 		}
 
 		if (count > 0) {
-			var tint = Color.of(blockColors.getColor(state, level, at, 0));
+			var tint = blockColors.getColor(state, level, at, 0);
 			var identity = new Matrix4f();
 			identity.rotateY((float) Math.toRadians(data.direction));
 			identity.rotateX((float) Math.toRadians(-data.tilt));
@@ -80,7 +80,7 @@ public class PhysicsParticles {
 		}
 	}
 
-	public void spawnOne(Matrix4f identity, Matrix4f matrix, ShimmerBlockStateClientProperties clientProperties, PhysicsParticleManager manager, Split split, Color tint) {
+	public void spawnOne(Matrix4f identity, Matrix4f matrix, ShimmerBlockStateClientProperties clientProperties, PhysicsParticleManager manager, Split split, int tint) {
 		var p = new PhysicsParticle();
 		p.manager = manager;
 		p.random = new XoroshiroRandomSource(random.nextLong());
@@ -111,10 +111,10 @@ public class PhysicsParticles {
 		p.ttl = (int) data.lifespan.sample(random);
 		p.scaleMul = split.scale * data.scale.sample(random);
 		p.rotationSpeed = (KMath.lerp(random.nextFloat(), 0.25F, 0.4F)) / p.scaleMul * (float) Math.atan2(spread, power);
-		p.red = tint.redf();
-		p.green = tint.greenf();
-		p.blue = tint.bluef();
-		p.alpha = tint.alphaf();
+		p.red = ARGB.redFloat(tint);
+		p.green = ARGB.greenFloat(tint);
+		p.blue = ARGB.blueFloat(tint);
+		p.alpha = ARGB.alphaFloat(tint);
 
 		if (p.alpha < 0.1F) {
 			p.alpha = 1F;

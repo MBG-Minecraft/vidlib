@@ -82,4 +82,8 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 			return test(ShimmerBlockInWorld.of(level, pos, state));
 		}
 	}
+
+	default BlockFilter not() {
+		return new BlockNotFilter(this);
+	}
 }
