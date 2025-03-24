@@ -120,6 +120,10 @@ public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEn
 	}
 
 	default int bulkModify(BulkLevelModification modification) {
+		if (modification == BulkLevelModification.NONE) {
+			return 0;
+		}
+
 		return new BulkLevelModificationHolder().apply((Level) this, modification);
 	}
 

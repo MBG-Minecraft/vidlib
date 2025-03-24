@@ -53,6 +53,10 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 	default int bulkModify(BulkLevelModification modification) {
 		var optimized = modification.optimize();
 
+		if (modification == BulkLevelModification.NONE) {
+			return 0;
+		}
+
 		if (optimized instanceof BulkLevelModificationBundle bundle) {
 			var builder = new OptimizedModificationBuilder();
 

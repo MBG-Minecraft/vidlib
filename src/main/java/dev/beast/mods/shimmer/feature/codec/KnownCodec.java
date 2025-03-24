@@ -17,6 +17,7 @@ import dev.beast.mods.shimmer.util.registry.VideoResourceLocationArgument;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -36,6 +37,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSetting
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -95,6 +97,8 @@ public record KnownCodec<T>(
 	public static final KnownCodec<Float> FLOAT = register(ResourceLocation.fromNamespaceAndPath("java", "float"), Codec.FLOAT, ByteBufCodecs.FLOAT, Float.class, (self, ctx) -> FloatArgumentType.floatArg());
 	public static final KnownCodec<Double> DOUBLE = register(ResourceLocation.fromNamespaceAndPath("java", "double"), Codec.DOUBLE, ByteBufCodecs.DOUBLE, Double.class, (self, ctx) -> DoubleArgumentType.doubleArg());
 	public static final KnownCodec<String> STRING = register(ResourceLocation.fromNamespaceAndPath("java", "string"), Codec.STRING, ByteBufCodecs.STRING_UTF8, String.class, (self, ctx) -> StringArgumentType.string());
+	public static final KnownCodec<UUID> UUID = register(ResourceLocation.fromNamespaceAndPath("java", "uuid"), ShimmerCodecs.UUID, ShimmerStreamCodecs.UUID, UUID.class, (self, ctx) -> UuidArgument.uuid());
+
 	public static final KnownCodec<ResourceLocation> ID = register(ResourceLocation.withDefaultNamespace("id"), ResourceLocation.CODEC, ResourceLocation.STREAM_CODEC, ResourceLocation.class, (self, ctx) -> ResourceLocationArgument.id());
 	public static final KnownCodec<Component> TEXT_COMPONENT = register(ResourceLocation.withDefaultNamespace("text_component"), ComponentSerialization.CODEC, ComponentSerialization.STREAM_CODEC, Component.class, (self, ctx) -> ComponentArgument.textComponent(ctx));
 	public static final KnownCodec<Mirror> MIRROR = registerEnum(ResourceLocation.withDefaultNamespace("mirror"), Mirror.values());

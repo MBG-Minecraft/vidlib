@@ -66,7 +66,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 
 		if (renderType == ZoneRenderType.COLLISIONS) {
 			for (var sz : session.filteredZones.getSolidZones()) {
-				if (sz.instance().zone.shape().closestDistanceTo(cameraPos) <= 512D && frustum.isVisible(sz.instance().zone.shape().getBoundingBox())) {
+				if (sz.instance().zone.shape().closestDistanceTo(cameraPos) <= 2000D && frustum.isVisible(sz.instance().zone.shape().getBoundingBox())) {
 					boolean hovered = session.zoneClip != null && session.zoneClip.instance() == sz.instance();
 					var baseColor = sz.instance().zone.color().withAlpha(50);
 					var outlineColor = hovered ? Color.WHITE : sz.instance().entities.isEmpty() ? sz.instance().zone.color() : Color.GREEN;
@@ -76,7 +76,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 		} else {
 			for (var container : session.filteredZones) {
 				for (var instance : container.zones) {
-					if (instance.zone.shape().closestDistanceTo(cameraPos) <= 512D && frustum.isVisible(instance.zone.shape().getBoundingBox())) {
+					if (instance.zone.shape().closestDistanceTo(cameraPos) <= 2000D && frustum.isVisible(instance.zone.shape().getBoundingBox())) {
 						var renderer = ZoneRenderer.get(instance.zone.shape().type());
 
 						if (renderer != EmptyZoneRenderer.INSTANCE) {

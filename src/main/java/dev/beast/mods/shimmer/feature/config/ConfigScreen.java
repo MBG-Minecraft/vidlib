@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
+import dev.beast.mods.shimmer.feature.misc.ShimmerIcons;
 import dev.beast.mods.shimmer.math.Range;
 import dev.beast.mods.shimmer.util.JsonUtils;
 import net.minecraft.client.gui.GuiGraphics;
@@ -139,7 +140,7 @@ public class ConfigScreen<C> extends Screen {
 	}
 
 	public void addCopyJsonButton(Codec<C> fullCodec) {
-		addRenderableWidget(Button.builder(Component.literal("Copy"), button -> {
+		addRenderableWidget(Button.builder(Component.empty().append(ShimmerIcons.icons(ShimmerIcons.COPY + ShimmerIcons.SMALL_SPACE)).append("Copy"), button -> {
 			try {
 				minecraft.keyboardHandler.setClipboard(JsonUtils.GSON.toJson(fullCodec.encodeStart(minecraft.level.registryAccess().createSerializationContext(JsonOps.INSTANCE), instance).getOrThrow()));
 			} catch (Exception ex) {
