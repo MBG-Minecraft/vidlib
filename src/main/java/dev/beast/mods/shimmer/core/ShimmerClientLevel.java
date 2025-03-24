@@ -60,6 +60,10 @@ public interface ShimmerClientLevel extends ShimmerLevel, ShimmerClientEntityCon
 
 	@Override
 	default void physicsParticles(PhysicsParticleData data, List<PositionedBlock> blocks, long seed) {
+		if (blocks.isEmpty()) {
+			return;
+		}
+
 		var particles = new PhysicsParticles(data, shimmer$level(), shimmer$level().getGameTime(), seed);
 
 		for (var block : blocks) {
@@ -71,6 +75,10 @@ public interface ShimmerClientLevel extends ShimmerLevel, ShimmerClientEntityCon
 
 	@Override
 	default void physicsParticles(ResourceLocation id, List<PositionedBlock> blocks, long seed) {
+		if (blocks.isEmpty()) {
+			return;
+		}
+
 		var data = PhysicsParticleData.REGISTRY.get(id);
 		physicsParticles(data == null ? PhysicsParticleData.DEFAULT : data, blocks, seed);
 	}

@@ -79,12 +79,16 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 
 	@Override
 	default void physicsParticles(PhysicsParticleData data, List<PositionedBlock> blocks, long seed) {
-		s2c(new PhysicsParticlesPayload(data, blocks, seed));
+		if (!blocks.isEmpty()) {
+			s2c(new PhysicsParticlesPayload(data, blocks, seed));
+		}
 	}
 
 	@Override
 	default void physicsParticles(ResourceLocation id, List<PositionedBlock> blocks, long seed) {
-		s2c(new PhysicsParticlesIdPayload(id, blocks, seed));
+		if (!blocks.isEmpty()) {
+			s2c(new PhysicsParticlesIdPayload(id, blocks, seed));
+		}
 	}
 
 	default boolean shimmer$cancelWrite() {
