@@ -11,4 +11,8 @@ public interface InternalServerData {
 		.save()
 		.sync()
 		.build();
+
+	DataType<Boolean> IMMUTABLE_WORLD = DataType.SERVER.internal("immutable_world", KnownCodec.BOOL, false)
+		.save()
+		.build();
 }

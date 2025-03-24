@@ -118,4 +118,9 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 		return shape == null ? Shapes.empty() : shape;
 		 */
 	}
+
+	@Override
+	public double closestDistanceTo(Vec3 pos) {
+		return Math.max(0D, this.pos.distanceTo(pos) - radius);
+	}
 }

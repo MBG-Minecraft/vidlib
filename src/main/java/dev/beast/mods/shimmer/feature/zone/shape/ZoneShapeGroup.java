@@ -141,4 +141,19 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box) implements Zo
 
 		return shape;
 	}
+
+	@Override
+	public double closestDistanceTo(Vec3 pos) {
+		var dist = Double.POSITIVE_INFINITY;
+
+		for (var shape : zoneShapes) {
+			dist = Math.min(dist, shape.closestDistanceTo(pos));
+
+			if (dist <= 0D) {
+				return 0D;
+			}
+		}
+
+		return dist;
+	}
 }

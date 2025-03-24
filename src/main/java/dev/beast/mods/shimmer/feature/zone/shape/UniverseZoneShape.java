@@ -66,4 +66,9 @@ public class UniverseZoneShape implements ZoneShape {
 	public VoxelShape createBlockRenderingShape(Predicate<BlockPos> predicate) {
 		return Shapes.empty();
 	}
+
+	@Override
+	public double closestDistanceTo(Vec3 pos) {
+		return Double.POSITIVE_INFINITY;
+	}
 }

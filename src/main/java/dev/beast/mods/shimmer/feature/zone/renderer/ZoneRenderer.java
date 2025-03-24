@@ -21,6 +21,7 @@ import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.IdentityHashMap;
@@ -65,7 +66,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 
 		if (renderType == ZoneRenderType.COLLISIONS) {
 			for (var sz : session.filteredZones.getSolidZones()) {
-				if (cameraPos.closerThan(sz.instance().zone.shape().getCenterPos(), 512D) && frustum.isVisible(sz.instance().zone.shape().getBoundingBox())) {
+				if (sz.instance().zone.shape().closestDistanceTo(cameraPos) <= 512D && frustum.isVisible(sz.instance().zone.shape().getBoundingBox())) {
 					boolean hovered = session.zoneClip != null && session.zoneClip.instance() == sz.instance();
 					var baseColor = sz.instance().zone.color().withAlpha(50);
 					var outlineColor = hovered ? Color.WHITE : sz.instance().entities.isEmpty() ? sz.instance().zone.color() : Color.GREEN;
@@ -75,7 +76,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 		} else {
 			for (var container : session.filteredZones) {
 				for (var instance : container.zones) {
-					if (cameraPos.closerThan(instance.zone.shape().getCenterPos(), 512D) && frustum.isVisible(instance.zone.shape().getBoundingBox())) {
+					if (instance.zone.shape().closestDistanceTo(cameraPos) <= 512D && frustum.isVisible(instance.zone.shape().getBoundingBox())) {
 						var renderer = ZoneRenderer.get(instance.zone.shape().type());
 
 						if (renderer != EmptyZoneRenderer.INSTANCE) {
@@ -115,6 +116,21 @@ public interface ZoneRenderer<T extends ZoneShape> {
 							}
 						}
 					}
+				}
+			}
+		}
+	}
+
+	static void renderSolid(Minecraft mc, ShimmerLocalClientSessionData session, float delta, PoseStack ms, Vec3 cameraPos, Frustum frustum) {
+		for (var sz : session.filteredZones.getSolidZones()) {
+			double dist = sz.instance().zone.shape().closestDistanceTo(cameraPos);
+
+			if (dist <= 10D && frustum.isVisible(sz.instance().zone.shape().getBoundingBox())) {
+				var renderer = ZoneRenderer.get(sz.instance().zone.shape().type());
+
+				if (renderer != null) {
+					var baseColor = sz.instance().zone.color().withAlpha(Mth.lerpInt((float) (dist / 10D), 100, 0));
+					renderer.render(Cast.to(sz.instance().zone.shape()), new ZoneRenderer.Context(mc, ms, cameraPos, frustum, delta, baseColor, Color.TRANSPARENT));
 				}
 			}
 		}

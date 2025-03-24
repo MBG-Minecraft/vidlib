@@ -1,25 +1,36 @@
 package dev.beast.mods.shimmer.core.mixin;
 
+import dev.beast.mods.shimmer.core.ShimmerChunkMap;
 import dev.beast.mods.shimmer.core.ShimmerServerLevel;
+import dev.beast.mods.shimmer.feature.data.InternalServerData;
 import dev.beast.mods.shimmer.feature.misc.CreateFireworksPayload;
 import dev.beast.mods.shimmer.feature.prop.ServerPropList;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.WritableLevelData;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
 import java.util.List;
 
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin extends Level implements ShimmerServerLevel {
+	@Shadow
+	@Final
+	@Mutable
+	private ServerChunkCache chunkSource;
+
 	@Unique
 	private ActiveZones shimmer$activeZones;
 
@@ -53,5 +64,15 @@ public abstract class ServerLevelMixin extends Level implements ShimmerServerLev
 	@Override
 	public void createFireworks(double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, List<FireworkExplosion> explosions) {
 		s2c(new CreateFireworksPayload(x, y, z, xSpeed, ySpeed, zSpeed, explosions));
+	}
+
+	@Override
+	public boolean shimmer$cancelWrite() {
+		return getServer().getServerData().get(InternalServerData.IMMUTABLE_WORLD);
+	}
+
+	@Override
+	public void shimmer$reloadChunks() {
+		((ShimmerChunkMap) chunkSource.chunkMap).shimmer$reloadChunks();
 	}
 }

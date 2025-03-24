@@ -110,6 +110,8 @@ public class ClientGameEventHandler {
 
 			if (mc.player.getShowZones()) {
 				ZoneRenderer.renderAll(mc, session, delta, ms, cameraPos, frustum);
+			} else if (!session.filteredZones.getSolidZones().isEmpty()) {
+				ZoneRenderer.renderSolid(mc, session, delta, ms, cameraPos, frustum);
 			}
 
 			for (var instance : session.clocks.values()) {

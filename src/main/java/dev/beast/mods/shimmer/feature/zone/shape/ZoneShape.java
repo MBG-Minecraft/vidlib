@@ -103,4 +103,17 @@ public interface ZoneShape {
 
 		return voxelShape[0] == null ? Shapes.empty() : voxelShape[0];
 	}
+
+	default double closestDistanceTo(Vec3 pos) {
+		var box = getBoundingBox();
+
+		if (box.contains(pos)) {
+			return 0D;
+		}
+
+		double dx = pos.x() - Math.clamp(pos.x, box.minX, box.maxX);
+		double dy = pos.y() - Math.clamp(pos.y, box.minY, box.maxY);
+		double dz = pos.z() - Math.clamp(pos.z, box.minZ, box.maxZ);
+		return Math.sqrt(dx * dx + dy * dy + dz * dz);
+	}
 }

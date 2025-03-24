@@ -86,4 +86,12 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 	default void physicsParticles(ResourceLocation id, List<PositionedBlock> blocks, long seed) {
 		s2c(new PhysicsParticlesIdPayload(id, blocks, seed));
 	}
+
+	default boolean shimmer$cancelWrite() {
+		throw new NoMixinException(this);
+	}
+
+	default void shimmer$reloadChunks() {
+		throw new NoMixinException(this);
+	}
 }
