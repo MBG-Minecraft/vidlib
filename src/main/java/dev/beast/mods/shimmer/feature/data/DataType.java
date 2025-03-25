@@ -15,7 +15,8 @@ public record DataType<T>(
 	boolean save,
 	boolean sync,
 	boolean syncToAllClients,
-	@Nullable Consumer<Player> onReceived
+	@Nullable Consumer<Player> onReceived,
+	boolean allowClientUpdates
 ) {
 	public static final DataTypeStorage SERVER = new DataTypeStorage("server", true);
 	public static final DataTypeStorage PLAYER = new DataTypeStorage("player", false);
@@ -29,6 +30,7 @@ public record DataType<T>(
 		private boolean sync;
 		private boolean syncToAllClients;
 		private Consumer<Player> onReceived;
+		private boolean allowClientUpdates;
 
 		Builder(DataTypeStorage storage, ResourceLocation id, @Nullable KnownCodec<T> type, T defaultValue) {
 			this.storage = storage;
@@ -39,6 +41,7 @@ public record DataType<T>(
 			this.sync = false;
 			this.syncToAllClients = storage.alwaysSyncToAllClients;
 			this.onReceived = null;
+			this.allowClientUpdates = false;
 		}
 
 		public Builder<T> save() {
@@ -61,8 +64,23 @@ public record DataType<T>(
 			return this;
 		}
 
+		public Builder<T> allowClientUpdates() {
+			this.allowClientUpdates = true;
+			return this;
+		}
+
 		public DataType<T> build() {
-			var dataType = new DataType<>(storage, id, defaultValue, type, save, sync, syncToAllClients, onReceived);
+			var dataType = new DataType<>(
+				storage,
+				id,
+				defaultValue,
+				type,
+				save,
+				sync,
+				syncToAllClients,
+				onReceived,
+				allowClientUpdates
+			);
 
 			if (type != null) {
 				storage.all.put(id, dataType);

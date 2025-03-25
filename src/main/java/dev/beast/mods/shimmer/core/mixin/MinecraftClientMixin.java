@@ -12,7 +12,6 @@ import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleManager;
 import dev.beast.mods.shimmer.feature.structure.ClientStructureStorage;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
-import dev.beast.mods.shimmer.math.Vec2d;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.util.Empty;
 import dev.beast.mods.shimmer.util.PauseType;
@@ -23,7 +22,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -84,23 +82,6 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 
 		var session = player.shimmer$sessionData();
 
-		double shakeX = 0D;
-		double shakeY = 0D;
-
-		if (!session.cameraShakeInstances.isEmpty()) {
-			for (var instance : session.cameraShakeInstances) {
-				float ticks = Mth.lerp(delta, instance.prevTicks, instance.ticks);
-				float relTicks = ticks / (float) instance.shake.duration();
-				var vec = instance.shake.type().get(instance.ticks * instance.shake.speed());
-				var intensity = instance.shake.intensity();
-				var intensityScale = instance.shake.start().easeMirrored(relTicks, instance.shake.end());
-				shakeX += vec.x * intensity * intensityScale;
-				shakeY += vec.y * intensity * intensityScale;
-			}
-		}
-
-		session.cameraShake = Math.abs(shakeX) <= 0.0001D && Math.abs(shakeY) <= 0.0001D ? Vec2d.ZERO : new Vec2d(shakeX, shakeY);
-
 		var ray = shimmer$self().gameRenderer.getMainCamera().ray(512D);
 
 		if (shimmer$self().options.getCameraType() == CameraType.FIRST_PERSON && player.getShowZones()) {
@@ -108,11 +89,6 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 		} else {
 			session.zoneClip = null;
 		}
-	}
-
-	@Override
-	public Vec2d shimmer$getCameraShakeOffset() {
-		return player.shimmer$sessionData().cameraShake;
 	}
 
 	@Override
@@ -168,6 +144,10 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 
 	@Override
 	public void shakeCamera(CameraShake shake) {
+		if (shake.skip()) {
+			return;
+		}
+
 		player.shimmer$sessionData().cameraShakeInstances.add(new CameraShakeInstance(shake));
 
 		if (shake.motionBlur()) {

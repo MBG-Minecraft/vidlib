@@ -20,13 +20,19 @@ public class ExplosionTestToolScreen extends ConfigScreen<ExplosionData> {
 	}
 
 	private ExplosionTestToolScreen(Level level, ItemStack stack, InteractionHand hand) {
-		super(level.registryAccess().createSerializationContext(JsonOps.INSTANCE), ExplosionTestTool.getData(stack, true), ExplosionData.DEFAULT, ExplosionData.CONFIG, data -> {
-			var mc = Minecraft.getInstance();
-			var tag = new CompoundTag();
-			tag.put("explosion_data", ExplosionData.CODEC.encodeStart(mc.level.registryAccess().createSerializationContext(NbtOps.INSTANCE), data).getOrThrow());
-			ShimmerItem.partiallyMergeCustomData(stack, tag);
-			mc.c2s(new UpdateItemDataPayload(hand, tag));
-		});
+		super(
+			level.registryAccess().createSerializationContext(JsonOps.INSTANCE),
+			ExplosionTestTool.getData(stack, true),
+			ExplosionData.DEFAULT,
+			ExplosionData.CONFIG,
+			data -> {
+				var mc = Minecraft.getInstance();
+				var tag = new CompoundTag();
+				tag.put("explosion_data", ExplosionData.CODEC.encodeStart(mc.level.registryAccess().createSerializationContext(NbtOps.INSTANCE), data).getOrThrow());
+				ShimmerItem.partiallyMergeCustomData(stack, tag);
+				mc.c2s(new UpdateItemDataPayload(hand, tag));
+			}
+		);
 	}
 
 	@Override

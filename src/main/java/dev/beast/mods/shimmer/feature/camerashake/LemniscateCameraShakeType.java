@@ -9,7 +9,7 @@ import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.network.codec.ByteBufCodecs;
 
 public record LemniscateCameraShakeType(float xScale, float yScale) implements CameraShakeType {
-	public static final SimpleRegistryType.Unit<LemniscateCameraShakeType> DEFAULT = SimpleRegistryType.unit(Shimmer.id("default_lemniscate"), new LemniscateCameraShakeType(1F, 1F));
+	public static final SimpleRegistryType.Unit<LemniscateCameraShakeType> DEFAULT = SimpleRegistryType.unit(Shimmer.id("default_lemniscate"), new LemniscateCameraShakeType(0.6F, 1F));
 	public static final SimpleRegistryType.Unit<LemniscateCameraShakeType> HORIZONTAL = SimpleRegistryType.unit(Shimmer.id("horizontal"), new LemniscateCameraShakeType(1F, 0F));
 	public static final SimpleRegistryType.Unit<LemniscateCameraShakeType> VERTICAL = SimpleRegistryType.unit(Shimmer.id("vertical"), new LemniscateCameraShakeType(0F, 1F));
 

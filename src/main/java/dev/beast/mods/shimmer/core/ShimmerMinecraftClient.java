@@ -1,5 +1,8 @@
 package dev.beast.mods.shimmer.core;
 
+import dev.beast.mods.shimmer.feature.data.DataMapValue;
+import dev.beast.mods.shimmer.feature.data.DataType;
+import dev.beast.mods.shimmer.feature.data.UpdatePlayerDataValuePayload;
 import dev.beast.mods.shimmer.math.Vec2d;
 import dev.beast.mods.shimmer.util.PauseType;
 import net.minecraft.client.Camera;
@@ -32,7 +35,14 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment, Shi
 	default void shimmer$renderSetup(RenderLevelStageEvent event, float delta) {
 	}
 
-	default Vec2d shimmer$getCameraShakeOffset() {
+	default Vec2d shimmer$getCameraShakeOffset(float delta) {
+		var player = shimmer$self().player;
+
+		if (player != null) {
+			var s = player.shimmer$sessionData();
+			return s.prevCameraShake.lerp(s.cameraShake, delta);
+		}
+
 		return Vec2d.ZERO;
 	}
 
@@ -43,11 +53,19 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment, Shi
 	}
 
 	default void shimmer$applyCameraShake(Camera camera, float delta) {
-		var shake = shimmer$getCameraShakeOffset();
+		var shake = shimmer$getCameraShakeOffset(delta);
 
 		if (shake != Vec2d.ZERO) {
 			var vec = new Vector4f((float) shake.x, (float) shake.y, 0F, 1F).rotate(camera.rotation());
 			camera.shimmer$setPosition(camera.getPosition().add(vec.x(), vec.y(), vec.z()));
 		}
+	}
+
+	default void updatePlayerData(List<DataMapValue> update) {
+		c2s(new UpdatePlayerDataValuePayload(update));
+	}
+
+	default <T> void updatePlayerData(DataType<T> type, T value) {
+		updatePlayerData(List.of(new DataMapValue(type, value)));
 	}
 }

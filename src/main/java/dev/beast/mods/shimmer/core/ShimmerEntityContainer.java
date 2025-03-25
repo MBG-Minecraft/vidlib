@@ -15,6 +15,7 @@ import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -74,7 +75,15 @@ public interface ShimmerEntityContainer extends ShimmerS2CPacketConsumer, Shimme
 	}
 
 	default void shakeCamera(CameraShake shake) {
-		s2c(new ShakeCameraPayload(shake));
+		if (!shake.skip()) {
+			s2c(new ShakeCameraPayload(shake));
+		}
+	}
+
+	default void shakeCamera(CameraShake shake, Vec3 source, double maxDistance) {
+		for (var player : shimmer$getPlayers()) {
+			shakeCamera(shake.atDistance(player.position(), source, maxDistance));
+		}
 	}
 
 	default void stopCameraShaking() {

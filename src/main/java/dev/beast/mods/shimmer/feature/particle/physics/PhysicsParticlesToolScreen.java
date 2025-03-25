@@ -17,7 +17,13 @@ public class PhysicsParticlesToolScreen extends ConfigScreen<PhysicsParticleData
 	}
 
 	private PhysicsParticlesToolScreen(Player player, ItemStack stack, InteractionHand hand) {
-		super(player.level().registryAccess().createSerializationContext(JsonOps.INSTANCE), player.get(InternalPlayerData.TEST_PARTICLES), PhysicsParticleData.DEFAULT, PhysicsParticleData.CONFIG, data -> Minecraft.getInstance().c2s(new UpdateTestPhysicsParticlesPayload(data)));
+		super(
+			player.level().registryAccess().createSerializationContext(JsonOps.INSTANCE),
+			player.get(InternalPlayerData.TEST_PARTICLES),
+			PhysicsParticleData.DEFAULT,
+			PhysicsParticleData.CONFIG,
+			data -> Minecraft.getInstance().updatePlayerData(InternalPlayerData.TEST_PARTICLES, data)
+		);
 	}
 
 	@Override

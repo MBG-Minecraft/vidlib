@@ -23,24 +23,24 @@ import java.util.function.Predicate;
 public interface EntityFilter extends Predicate<Entity> {
 	SimpleRegistry<EntityFilter> REGISTRY = SimpleRegistry.create(EntityFilter::type);
 
-	SimpleRegistryType.Unit<EntityFilter> NONE = SimpleRegistryType.unit(Shimmer.id("none"), entity -> false);
-	SimpleRegistryType.Unit<EntityFilter> ANY = SimpleRegistryType.unit(Shimmer.id("any"), entity -> true);
+	SimpleRegistryType.Unit<EntityFilter> NONE = SimpleRegistryType.unit(Shimmer.id("none"), new BasicEntityFilter(entity -> false));
+	SimpleRegistryType.Unit<EntityFilter> ANY = SimpleRegistryType.unit(Shimmer.id("any"), new BasicEntityFilter(entity -> true));
 
-	SimpleRegistryType.Unit<EntityFilter> ALIVE = SimpleRegistryType.unit(Shimmer.id("alive"), Entity::isAlive);
-	SimpleRegistryType.Unit<EntityFilter> DEAD = SimpleRegistryType.unit(Shimmer.id("dead"), entity -> !entity.isAlive());
-	SimpleRegistryType.Unit<EntityFilter> LIVING = SimpleRegistryType.unit(Shimmer.id("living"), entity -> entity instanceof LivingEntity);
-	SimpleRegistryType.Unit<EntityFilter> PLAYER = SimpleRegistryType.unit(Shimmer.id("player"), entity -> entity instanceof Player);
-	SimpleRegistryType.Unit<EntityFilter> SURVIVAL_PLAYER = SimpleRegistryType.unit(Shimmer.id("survival_player"), ShimmerEntity::isSurvival);
-	SimpleRegistryType.Unit<EntityFilter> SURVIVAL_LIKE_PLAYER = SimpleRegistryType.unit(Shimmer.id("survival_like_player"), ShimmerEntity::isSurvivalLike);
-	SimpleRegistryType.Unit<EntityFilter> SPECTATOR = SimpleRegistryType.unit(Shimmer.id("spectator"), Entity::isSpectator);
-	SimpleRegistryType.Unit<EntityFilter> CREATIVE = SimpleRegistryType.unit(Shimmer.id("creative"), entity -> entity instanceof Player player && player.isCreative());
-	SimpleRegistryType.Unit<EntityFilter> SPECTATOR_OR_CREATIVE = SimpleRegistryType.unit(Shimmer.id("spectator_or_creative"), ShimmerEntity::isSpectatorOrCreative);
-	SimpleRegistryType.Unit<EntityFilter> ITEM = SimpleRegistryType.unit(Shimmer.id("item"), entity -> entity instanceof ItemEntity);
-	SimpleRegistryType.Unit<EntityFilter> PROJECTILE = SimpleRegistryType.unit(Shimmer.id("projectile"), entity -> entity instanceof Projectile);
-	SimpleRegistryType.Unit<EntityFilter> VISIBLE = SimpleRegistryType.unit(Shimmer.id("visible"), entity -> !entity.isInvisible());
-	SimpleRegistryType.Unit<EntityFilter> INVISIBLE = SimpleRegistryType.unit(Shimmer.id("invisible"), Entity::isInvisible);
-	SimpleRegistryType.Unit<EntityFilter> SUSPENDED = SimpleRegistryType.unit(Shimmer.id("suspended"), ShimmerEntity::isSuspended);
-	SimpleRegistryType.Unit<EntityFilter> GLOWING = SimpleRegistryType.unit(Shimmer.id("glowing"), Entity::isCurrentlyGlowing);
+	SimpleRegistryType.Unit<EntityFilter> ALIVE = SimpleRegistryType.unit(Shimmer.id("alive"), new BasicEntityFilter(Entity::isAlive));
+	SimpleRegistryType.Unit<EntityFilter> DEAD = SimpleRegistryType.unit(Shimmer.id("dead"), new BasicEntityFilter(entity -> !entity.isAlive()));
+	SimpleRegistryType.Unit<EntityFilter> LIVING = SimpleRegistryType.unit(Shimmer.id("living"), new BasicEntityFilter(entity -> entity instanceof LivingEntity));
+	SimpleRegistryType.Unit<EntityFilter> PLAYER = SimpleRegistryType.unit(Shimmer.id("player"), new BasicEntityFilter(entity -> entity instanceof Player));
+	SimpleRegistryType.Unit<EntityFilter> SURVIVAL_PLAYER = SimpleRegistryType.unit(Shimmer.id("survival_player"), new BasicEntityFilter(ShimmerEntity::isSurvival));
+	SimpleRegistryType.Unit<EntityFilter> SURVIVAL_LIKE_PLAYER = SimpleRegistryType.unit(Shimmer.id("survival_like_player"), new BasicEntityFilter(ShimmerEntity::isSurvivalLike));
+	SimpleRegistryType.Unit<EntityFilter> SPECTATOR = SimpleRegistryType.unit(Shimmer.id("spectator"), new BasicEntityFilter(Entity::isSpectator));
+	SimpleRegistryType.Unit<EntityFilter> CREATIVE = SimpleRegistryType.unit(Shimmer.id("creative"), new BasicEntityFilter(entity -> entity instanceof Player player && player.isCreative()));
+	SimpleRegistryType.Unit<EntityFilter> SPECTATOR_OR_CREATIVE = SimpleRegistryType.unit(Shimmer.id("spectator_or_creative"), new BasicEntityFilter(ShimmerEntity::isSpectatorOrCreative));
+	SimpleRegistryType.Unit<EntityFilter> ITEM = SimpleRegistryType.unit(Shimmer.id("item"), new BasicEntityFilter(entity -> entity instanceof ItemEntity));
+	SimpleRegistryType.Unit<EntityFilter> PROJECTILE = SimpleRegistryType.unit(Shimmer.id("projectile"), new BasicEntityFilter(entity -> entity instanceof Projectile));
+	SimpleRegistryType.Unit<EntityFilter> VISIBLE = SimpleRegistryType.unit(Shimmer.id("visible"), new BasicEntityFilter(entity -> !entity.isInvisible()));
+	SimpleRegistryType.Unit<EntityFilter> INVISIBLE = SimpleRegistryType.unit(Shimmer.id("invisible"), new BasicEntityFilter(Entity::isInvisible));
+	SimpleRegistryType.Unit<EntityFilter> SUSPENDED = SimpleRegistryType.unit(Shimmer.id("suspended"), new BasicEntityFilter(ShimmerEntity::isSuspended));
+	SimpleRegistryType.Unit<EntityFilter> GLOWING = SimpleRegistryType.unit(Shimmer.id("glowing"), new BasicEntityFilter(Entity::isCurrentlyGlowing));
 
 	static EntityFilter of(boolean value) {
 		return value ? ANY.instance() : NONE.instance();

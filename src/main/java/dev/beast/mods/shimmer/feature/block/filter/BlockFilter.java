@@ -32,6 +32,11 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 		public boolean test(Level level, BlockPos pos, BlockState state) {
 			return false;
 		}
+
+		@Override
+		public String toString() {
+			return "shimmer:none";
+		}
 	});
 
 	SimpleRegistryType.Unit<BlockFilter> ANY = SimpleRegistryType.unit(Shimmer.id("any"), new BlockFilter() {
@@ -43,6 +48,11 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 		@Override
 		public boolean test(Level level, BlockPos pos, BlockState state) {
 			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "shimmer:any";
 		}
 	});
 

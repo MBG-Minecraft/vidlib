@@ -78,6 +78,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	public final ActiveZones filteredZones;
 	public ZoneClipResult zoneClip;
 	public final List<CameraShakeInstance> cameraShakeInstances;
+	public Vec2d prevCameraShake;
 	public Vec2d cameraShake;
 	public Map<ResourceLocation, ClockValue> clocks;
 	public Map<ResourceLocation, Skybox> skyboxes;
@@ -97,7 +98,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 		this.filteredZones = new ActiveZones();
 		this.zoneClip = null;
 		this.cameraShakeInstances = new ArrayList<>();
-		this.cameraShake = Vec2d.ZERO;
+		this.prevCameraShake = this.cameraShake = Vec2d.ZERO;
 		this.clocks = new HashMap<>();
 		this.skyboxes = new HashMap<>();
 		this.serverDataMap = new DataMap(uuid, DataType.SERVER);
@@ -216,22 +217,30 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 			mc.stopCutscene();
 		}
 
+		prevCameraShake = cameraShake;
+		double shakeX = 0D;
+		double shakeY = 0D;
+
 		if (!cameraShakeInstances.isEmpty()) {
 			var shakeIt = cameraShakeInstances.iterator();
 
 			while (shakeIt.hasNext()) {
 				var instance = shakeIt.next();
-				instance.prevTicks = instance.ticks;
+				var vec = instance.shake.type().get(instance.progress);
+				var intensity = instance.shake.intensity();
+				var intensityScale = instance.shake.start().easeMirrored(instance.ticks / (float) instance.shake.duration(), instance.shake.end());
+				shakeX += vec.x * intensity * intensityScale;
+				shakeY += vec.y * intensity * intensityScale;
+
+				instance.progress += instance.shake.speed();
 
 				if (++instance.ticks >= instance.shake.duration()) {
 					shakeIt.remove();
 				}
 			}
-
-			if (cameraShakeInstances.isEmpty()) {
-				mc.gameRenderer.clearPostEffect();
-			}
 		}
+
+		cameraShake = Math.abs(shakeX) <= 0.0001D && Math.abs(shakeY) <= 0.0001D ? Vec2d.ZERO : new Vec2d(shakeX, shakeY);
 
 		tick++;
 

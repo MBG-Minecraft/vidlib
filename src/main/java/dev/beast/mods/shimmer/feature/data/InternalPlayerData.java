@@ -61,10 +61,18 @@ public interface InternalPlayerData {
 	DataType<ExplosionData> TEST_EXPLOSION = DataType.PLAYER.internal("test_explosion", ExplosionData.KNOWN_CODEC, ExplosionData.DEFAULT)
 		.save()
 		.sync()
+		.allowClientUpdates()
 		.build();
 
 	DataType<PhysicsParticleData> TEST_PARTICLES = DataType.PLAYER.internal("test_physics_particles", PhysicsParticleData.KNOWN_CODEC, PhysicsParticleData.DEFAULT)
 		.save()
 		.sync()
+		.allowClientUpdates()
+		.build();
+
+	DataType<Double> TEST_CAMERA_SHAKE = DataType.PLAYER.internal("test_camera_shake", KnownCodec.DOUBLE, 30D)
+		.save()
+		.sync()
+		.allowClientUpdates()
 		.build();
 }
