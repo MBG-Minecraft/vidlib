@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.feature.session;
 
+import dev.beast.mods.shimmer.feature.clock.ClockValue;
 import dev.beast.mods.shimmer.feature.clothing.Clothing;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.data.DataMapValue;
@@ -26,6 +27,7 @@ import java.util.UUID;
 public class ShimmerSessionData {
 	public final UUID uuid;
 	public final DataMap dataMap;
+	public int tick;
 	public PlayerInput prevInput;
 	public PlayerInput input;
 	public List<ZoneInstance> zonesIn;
@@ -106,7 +108,7 @@ public class ShimmerSessionData {
 	public void updateZones(Level level) {
 	}
 
-	public void updateClockInstance(ResourceLocation id, int tick, boolean ticking) {
+	public void updateClocks(Map<ResourceLocation, ClockValue> map) {
 	}
 
 	public void updateSessionData(Player self, UUID player, List<DataMapValue> playerData) {

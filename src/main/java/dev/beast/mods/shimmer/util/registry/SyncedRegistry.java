@@ -3,7 +3,6 @@ package dev.beast.mods.shimmer.util.registry;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.clock.Clock;
 import dev.beast.mods.shimmer.feature.clock.ClockFont;
-import dev.beast.mods.shimmer.feature.clock.ClockInstance;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.location.Location;
 import dev.beast.mods.shimmer.feature.skybox.SkyboxData;
@@ -36,7 +35,6 @@ public record SyncedRegistry<V>(RegistryReference.IdHolder<V> registry, StreamCo
 		add(Location.REGISTRY, Location.DIRECT_STREAM_CODEC);
 		add(ClockFont.REGISTRY, ClockFont.DIRECT_STREAM_CODEC);
 		add(Clock.REGISTRY, Clock.DIRECT_STREAM_CODEC);
-		add(ClockInstance.REGISTRY, ClockInstance.DIRECT_STREAM_CODEC);
 		add(SkyboxData.REGISTRY, SkyboxData.DIRECT_STREAM_CODEC, player -> player.shimmer$sessionData().updateSkyboxes());
 		add(Cutscene.REGISTRY, Cutscene.DIRECT_STREAM_CODEC);
 		add(ZoneContainer.REGISTRY, ZoneContainer.DIRECT_STREAM_CODEC, player -> player.shimmer$sessionData().updateZones(player.level()));

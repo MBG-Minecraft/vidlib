@@ -3,6 +3,7 @@ package dev.beast.mods.shimmer.math;
 import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.core.Direction;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
@@ -20,6 +21,17 @@ public record UV(float u0, float v0, float u1, float v1) {
 		ByteBufCodecs.FLOAT, UV::v1,
 		UV::new
 	);
+
+	public UV uvsByFace(Vec3f from, Vec3f to, Direction face) {
+		return switch (face) {
+			case DOWN -> new UV(from.x(), 1F - to.z(), to.x(), 1F - from.z());
+			case UP -> new UV(from.x(), from.z(), to.x(), to.z());
+			case NORTH -> new UV(1F - to.x(), 1F - to.y(), 1F - from.x(), 1F - from.y());
+			case SOUTH -> new UV(from.x(), 1F - to.y(), to.x(), 1F - from.y());
+			case WEST -> new UV(from.z(), 1F - to.y(), to.z(), 1F - from.y());
+			case EAST -> new UV(1F - to.z(), 1F - to.y(), 1F - from.z(), 1F - from.y());
+		};
+	}
 
 	public UV mul(UV uv) {
 		return new UV(

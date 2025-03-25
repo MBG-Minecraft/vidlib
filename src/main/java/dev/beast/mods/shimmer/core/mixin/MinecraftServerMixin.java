@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer.core.mixin;
 
 import dev.beast.mods.shimmer.core.ShimmerMinecraftServer;
+import dev.beast.mods.shimmer.feature.clock.ClockValue;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
@@ -8,6 +9,7 @@ import dev.beast.mods.shimmer.util.PauseType;
 import dev.beast.mods.shimmer.util.ScheduledTask;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -21,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Mixin(MinecraftServer.class)
@@ -28,9 +31,6 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 	@Shadow
 	@Final
 	private Map<ResourceKey<Level>, ServerLevel> levels;
-
-	@Shadow
-	public abstract boolean repliesToStatus();
 
 	@Unique
 	private ScheduledTask.Handler shimmer$scheduledTaskHandler;
@@ -40,6 +40,9 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 
 	@Unique
 	private DataMap shimmer$serverDataMap;
+
+	@Unique
+	private final Map<ResourceLocation, ClockValue> shimmer$clocks = new HashMap<>();
 
 	@Override
 	public ScheduledTask.Handler shimmer$getScheduledTaskHandler() {
@@ -86,5 +89,10 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 	@Overwrite
 	public final ServerLevel overworld() {
 		return shimmer$overworld;
+	}
+
+	@Override
+	public Map<ResourceLocation, ClockValue> shimmer$getClocks() {
+		return shimmer$clocks;
 	}
 }

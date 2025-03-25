@@ -29,7 +29,7 @@ public class PlayerTabOverlayMixin {
 	 */
 	@Overwrite
 	private List<PlayerInfo> getPlayerInfos() {
-		return minecraft.player.shimmer$sessionData().getListedPlayers(minecraft);
+		return minecraft.player.shimmer$sessionData().getListedPlayers();
 	}
 
 	@ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/PlayerTabOverlay;getNameForDisplay(Lnet/minecraft/client/multiplayer/PlayerInfo;)Lnet/minecraft/network/chat/Component;"))

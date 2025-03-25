@@ -2,7 +2,7 @@ package dev.beast.mods.shimmer.feature.explosion;
 
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.item.ShimmerTool;
-import dev.beast.mods.shimmer.feature.misc.DebugText;
+import dev.beast.mods.shimmer.feature.misc.ScreenText;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
@@ -90,7 +90,7 @@ public class ExplosionTestTool implements ShimmerTool {
 	}
 
 	@Override
-	public void debugText(Player player, ItemStack item, @Nullable HitResult result, DebugText debugText) {
-		getData(item, false).debugText(debugText.topLeft);
+	public void debugText(Player player, ItemStack item, @Nullable HitResult result, ScreenText screenText) {
+		getData(item, false).debugText(screenText.topLeft);
 	}
 }

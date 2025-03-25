@@ -2,7 +2,6 @@ package dev.beast.mods.shimmer.feature.session;
 
 import dev.beast.mods.shimmer.core.ShimmerS2CPacketConsumer;
 import dev.beast.mods.shimmer.feature.data.SyncPlayerDataPayload;
-import dev.beast.mods.shimmer.feature.data.SyncServerDataPayload;
 import dev.beast.mods.shimmer.feature.input.PlayerInputChanged;
 import dev.beast.mods.shimmer.feature.input.SyncPlayerInputToClient;
 import dev.beast.mods.shimmer.feature.misc.RefreshNamePayload;
@@ -40,6 +39,7 @@ public class ShimmerServerSessionData extends ShimmerSessionData {
 		}
 
 		dataMap.sync(packetsToEveryone, player, SyncPlayerDataPayload::new);
+		tick++;
 	}
 
 	public void sync(S2CPacketBundleBuilder packets, ServerPlayer player, boolean login) {
@@ -59,7 +59,7 @@ public class ShimmerServerSessionData extends ShimmerSessionData {
 
 		updateOverrides(player);
 
-		player.server.getServerData().syncAll(packets, null, (uuid, updates) -> new SyncServerDataPayload(updates));
+		player.server.sync(packets, player);
 		dataMap.syncAll(packets, player, SyncPlayerDataPayload::new);
 
 		if (login) {

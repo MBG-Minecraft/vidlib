@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.authlib.GameProfile;
 import dev.beast.mods.shimmer.core.ShimmerClientPacketListener;
 import dev.beast.mods.shimmer.feature.session.ShimmerLocalClientSessionData;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -38,7 +39,7 @@ public abstract class ClientPacketListenerMixin implements ShimmerClientPacketLi
 	@Override
 	public ShimmerLocalClientSessionData shimmer$sessionData() {
 		if (shimmer$sessionData == null) {
-			shimmer$sessionData = new ShimmerLocalClientSessionData(localGameProfile.getId(), (ClientPacketListener) (Object) this);
+			shimmer$sessionData = new ShimmerLocalClientSessionData(Minecraft.getInstance(), localGameProfile.getId(), (ClientPacketListener) (Object) this);
 		}
 
 		return shimmer$sessionData;

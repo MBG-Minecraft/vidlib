@@ -151,15 +151,32 @@ public record Color(int argb) {
 	}
 
 	public Color lerp(float delta, Color other, int alpha) {
-		return of(
-			alpha,
-			Mth.lerpInt(delta, red(), other.red()),
-			Mth.lerpInt(delta, green(), other.green()),
-			Mth.lerpInt(delta, blue(), other.blue())
-		);
+		if (delta <= 0F && alpha == alpha()) {
+			return this;
+		} else if (delta >= 1F && alpha == other.alpha()) {
+			return other;
+		} else {
+			return of(
+				alpha,
+				Mth.lerpInt(delta, red(), other.red()),
+				Mth.lerpInt(delta, green(), other.green()),
+				Mth.lerpInt(delta, blue(), other.blue())
+			);
+		}
 	}
 
 	public Color lerp(float delta, Color other) {
-		return lerp(delta, other, Mth.lerpInt(delta, alpha(), other.alpha()));
+		if (delta <= 0F) {
+			return this;
+		} else if (delta >= 1F) {
+			return other;
+		} else {
+			return of(
+				Mth.lerpInt(delta, alpha(), other.alpha()),
+				Mth.lerpInt(delta, red(), other.red()),
+				Mth.lerpInt(delta, green(), other.green()),
+				Mth.lerpInt(delta, blue(), other.blue())
+			);
+		}
 	}
 }

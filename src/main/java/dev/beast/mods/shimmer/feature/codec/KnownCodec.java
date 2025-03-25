@@ -33,6 +33,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
+import net.neoforged.neoforge.server.command.EnumArgument;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -63,7 +64,8 @@ public record KnownCodec<T>(
 	}
 
 	public static <E extends Enum<E>> KnownCodec<E> registerEnum(ResourceLocation id, E[] values, Function<E, String> nameGetter) {
-		return register(id, ShimmerCodecs.anyEnumCodec(values, nameGetter), ShimmerStreamCodecs.enumValue(values), (Class<E>) values.getClass().getComponentType());
+		Class<E> enumClass = (Class<E>) values.getClass().getComponentType();
+		return register(id, ShimmerCodecs.anyEnumCodec(values, nameGetter), ShimmerStreamCodecs.enumValue(values), enumClass, (self, ctx) -> EnumArgument.enumArgument(enumClass));
 	}
 
 	public static <E extends Enum<E>> KnownCodec<E> registerEnum(ResourceLocation id, E[] values) {

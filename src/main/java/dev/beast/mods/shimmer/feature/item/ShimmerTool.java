@@ -4,7 +4,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.datafixers.util.Pair;
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.ServerCommandHolder;
-import dev.beast.mods.shimmer.feature.misc.DebugText;
+import dev.beast.mods.shimmer.feature.misc.ScreenText;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -99,6 +99,6 @@ public interface ShimmerTool {
 		return false;
 	}
 
-	default void debugText(Player player, ItemStack item, @Nullable HitResult result, DebugText debugText) {
+	default void debugText(Player player, ItemStack item, @Nullable HitResult result, ScreenText screenText) {
 	}
 }

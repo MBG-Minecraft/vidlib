@@ -4,7 +4,7 @@ import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
 import dev.beast.mods.shimmer.feature.data.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.item.ShimmerTool;
-import dev.beast.mods.shimmer.feature.misc.DebugText;
+import dev.beast.mods.shimmer.feature.misc.ScreenText;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -72,16 +72,16 @@ public class PhysicsParticlesTool implements ShimmerTool {
 	}
 
 	@Override
-	public void debugText(Player player, ItemStack item, @Nullable HitResult result, DebugText debugText) {
+	public void debugText(Player player, ItemStack item, @Nullable HitResult result, ScreenText screenText) {
 		int total = 0;
 		int totalRendered = 0;
 
 		for (var manager : PhysicsParticleManager.ALL) {
 			total += manager.particles.size();
 			totalRendered += manager.rendered;
-			debugText.topLeft.add("%,d/%,d %s".formatted(manager.rendered, manager.particles.size(), manager.displayName));
+			screenText.topLeft.add("%,d/%,d %s".formatted(manager.rendered, manager.particles.size(), manager.displayName));
 		}
 
-		debugText.topRight.add("%,d/%,d Total".formatted(totalRendered, total));
+		screenText.topRight.add("%,d/%,d Total".formatted(totalRendered, total));
 	}
 }

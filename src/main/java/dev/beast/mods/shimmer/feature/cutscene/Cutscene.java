@@ -5,16 +5,14 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.codec.KnownCodec;
-import dev.beast.mods.shimmer.util.JsonCodecReloadListener;
+import dev.beast.mods.shimmer.util.JsonRegistryReloadListener;
 import dev.beast.mods.shimmer.util.registry.RegistryReference;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Cutscene {
 	public static final Codec<Cutscene> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -41,14 +39,9 @@ public class Cutscene {
 	public static final KnownCodec<Cutscene> KNOWN_CODEC = KnownCodec.of(REGISTRY, Cutscene.class);
 	public static final StreamCodec<? super RegistryFriendlyByteBuf, Cutscene> STREAM_CODEC = REGISTRY.streamCodecOrDirect(KNOWN_CODEC, DIRECT_STREAM_CODEC);
 
-	public static class Loader extends JsonCodecReloadListener<Cutscene> {
+	public static class Loader extends JsonRegistryReloadListener<Cutscene> {
 		public Loader() {
-			super("shimmer/cutscene", DIRECT_CODEC, false);
-		}
-
-		@Override
-		protected void apply(Map<ResourceLocation, Cutscene> from) {
-			REGISTRY.update(Map.copyOf(from));
+			super("shimmer/cutscene", DIRECT_CODEC, false, REGISTRY);
 		}
 	}
 

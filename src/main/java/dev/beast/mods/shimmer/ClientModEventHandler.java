@@ -6,6 +6,7 @@ import dev.beast.mods.shimmer.feature.auto.BlockEntityRendererHolder;
 import dev.beast.mods.shimmer.feature.auto.EntityRendererHolder;
 import dev.beast.mods.shimmer.feature.clothing.ClientClothingLoader;
 import dev.beast.mods.shimmer.feature.clothing.Clothing;
+import dev.beast.mods.shimmer.feature.gradient.ClientGradients;
 import dev.beast.mods.shimmer.feature.misc.MiscShimmerClientUtils;
 import dev.beast.mods.shimmer.feature.multiverse.VoidSpecialEffects;
 import dev.beast.mods.shimmer.feature.particle.ShimmerClientParticles;
@@ -37,6 +38,7 @@ public class ClientModEventHandler {
 		event.addListener(Shimmer.id("ghost_structure"), new GhostStructure.Loader());
 		event.addListener(Shimmer.id("clothing"), new ClientClothingLoader());
 		event.addListener(Shimmer.id("physics_particle_data"), new PhysicsParticleData.Loader());
+		event.addListener(Shimmer.id("gradient"), new ClientGradients());
 	}
 
 	@SubscribeEvent

@@ -8,7 +8,7 @@ import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.math.KMath;
-import dev.beast.mods.shimmer.util.JsonCodecReloadListener;
+import dev.beast.mods.shimmer.util.JsonRegistryReloadListener;
 import dev.beast.mods.shimmer.util.registry.RegistryReference;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -19,7 +19,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.Map;
 import java.util.function.Supplier;
 
 @AutoInit
@@ -53,14 +52,9 @@ public record Location(
 	public static final RegistryReference.IdHolder<Location> REGISTRY = RegistryReference.createServerIdHolder("location", false);
 	public static final KnownCodec<Location> KNOWN_CODEC = KnownCodec.of(REGISTRY, Location.class);
 
-	public static class Loader extends JsonCodecReloadListener<Location> {
+	public static class Loader extends JsonRegistryReloadListener<Location> {
 		public Loader() {
-			super("shimmer/location", DIRECT_CODEC, true);
-		}
-
-		@Override
-		protected void apply(Map<ResourceLocation, Location> from) {
-			REGISTRY.update(Map.copyOf(from));
+			super("shimmer/location", DIRECT_CODEC, true, REGISTRY);
 		}
 	}
 

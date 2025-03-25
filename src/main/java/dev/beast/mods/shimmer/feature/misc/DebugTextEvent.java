@@ -3,20 +3,20 @@ package dev.beast.mods.shimmer.feature.misc;
 import net.neoforged.bus.api.Event;
 
 public abstract class DebugTextEvent extends Event {
-	public final DebugText text;
+	public final ScreenText text;
 
-	public DebugTextEvent(DebugText text) {
+	public DebugTextEvent(ScreenText text) {
 		this.text = text;
 	}
 
 	public static class Render extends DebugTextEvent {
-		public Render(DebugText text) {
+		public Render(ScreenText text) {
 			super(text);
 		}
 	}
 
 	public static class ClientTick extends DebugTextEvent {
-		public ClientTick(DebugText text) {
+		public ClientTick(ScreenText text) {
 			super(text);
 		}
 	}

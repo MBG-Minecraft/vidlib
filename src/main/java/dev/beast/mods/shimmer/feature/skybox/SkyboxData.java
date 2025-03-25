@@ -6,14 +6,13 @@ import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.math.Color;
-import dev.beast.mods.shimmer.util.JsonCodecReloadListener;
+import dev.beast.mods.shimmer.util.JsonRegistryReloadListener;
 import dev.beast.mods.shimmer.util.registry.RegistryReference;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.Map;
 import java.util.Optional;
 
 public record SkyboxData(
@@ -45,14 +44,9 @@ public record SkyboxData(
 
 	public static final RegistryReference.IdHolder<SkyboxData> REGISTRY = RegistryReference.createServerIdHolder("skybox", true);
 
-	public static class Loader extends JsonCodecReloadListener<SkyboxData> {
+	public static class Loader extends JsonRegistryReloadListener<SkyboxData> {
 		public Loader() {
-			super("shimmer/skybox", CODEC, true);
-		}
-
-		@Override
-		protected void apply(Map<ResourceLocation, SkyboxData> from) {
-			REGISTRY.update(Map.copyOf(from));
+			super("shimmer/skybox", CODEC, true, REGISTRY);
 		}
 	}
 }

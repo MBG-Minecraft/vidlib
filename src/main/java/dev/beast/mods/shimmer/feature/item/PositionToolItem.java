@@ -1,7 +1,7 @@
 package dev.beast.mods.shimmer.feature.item;
 
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
-import dev.beast.mods.shimmer.feature.misc.DebugText;
+import dev.beast.mods.shimmer.feature.misc.ScreenText;
 import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.KMath;
@@ -77,13 +77,13 @@ public class PositionToolItem implements ShimmerTool {
 	}
 
 	@Override
-	public void debugText(Player player, ItemStack item, @Nullable HitResult hit, DebugText debugText) {
+	public void debugText(Player player, ItemStack item, @Nullable HitResult hit, ScreenText screenText) {
 		if (hit != null && hit.getType() == HitResult.Type.BLOCK && hit instanceof BlockHitResult bhit) {
 			var pos = bhit.getBlockPos();
 			var str = player.isShiftKeyDown() ? KMath.formatVec3(pos.getCenter()) : KMath.formatBlockPos(pos);
-			debugText.topRight.add(Component.literal(str));
+			screenText.topRight.add(Component.literal(str));
 		} else if (hit instanceof EntityHitResult ehit) {
-			debugText.topRight.add(Component.literal(KMath.formatVec3(ehit.getEntity().position())));
+			screenText.topRight.add(Component.literal(KMath.formatVec3(ehit.getEntity().position())));
 		}
 	}
 }

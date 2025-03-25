@@ -5,7 +5,9 @@ import com.mojang.blaze3d.shaders.FogShape;
 import dev.beast.mods.shimmer.GameEventHandler;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.core.ShimmerLocalPlayer;
-import dev.beast.mods.shimmer.feature.clock.ClockInstance;
+import dev.beast.mods.shimmer.feature.camerashake.CameraShakeInstance;
+import dev.beast.mods.shimmer.feature.clock.ClockValue;
+import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.data.DataMapValue;
 import dev.beast.mods.shimmer.feature.data.DataType;
@@ -30,8 +32,10 @@ import dev.beast.mods.shimmer.feature.zone.ZoneEvent;
 import dev.beast.mods.shimmer.feature.zone.shape.ZoneShape;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.Range;
+import dev.beast.mods.shimmer.math.Vec2d;
 import dev.beast.mods.shimmer.math.VoxelShapeBox;
 import dev.beast.mods.shimmer.util.PauseType;
+import dev.beast.mods.shimmer.util.ScheduledTask;
 import dev.beast.mods.shimmer.util.Side;
 import dev.beast.mods.shimmer.util.registry.SyncedRegistry;
 import net.minecraft.ChatFormatting;
@@ -52,6 +56,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
 import java.net.http.HttpRequest;
@@ -65,29 +70,39 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
+	public final Minecraft mc;
 	public final ClientPacketListener connection;
+	private final Map<UUID, ShimmerRemoteClientSessionData> remoteSessionData;
+	private ScheduledTask.Handler scheduledTaskHandler;
 	public final ActiveZones serverZones;
 	public final ActiveZones filteredZones;
-	private final Map<UUID, ShimmerRemoteClientSessionData> remoteSessionData;
 	public ZoneClipResult zoneClip;
-	public Map<ResourceLocation, ClockInstance> clocks;
+	public final List<CameraShakeInstance> cameraShakeInstances;
+	public Vec2d cameraShake;
+	public Map<ResourceLocation, ClockValue> clocks;
 	public Map<ResourceLocation, Skybox> skyboxes;
 	public final DataMap serverDataMap;
 	public Skybox skybox;
 	public Map<ZoneShape, VoxelShapeBox> cachedZoneShapes;
 	public List<PlayerInfo> originalListedPlayers;
+	public ClientCutscene cutscene;
 
-	public ShimmerLocalClientSessionData(UUID uuid, ClientPacketListener connection) {
+	public ShimmerLocalClientSessionData(Minecraft mc, UUID uuid, ClientPacketListener connection) {
 		super(uuid);
+		this.mc = mc;
 		this.connection = connection;
-		Shimmer.LOGGER.info("Client Session Data Initialized");
+		this.remoteSessionData = new HashMap<>();
+
 		this.serverZones = new ActiveZones();
 		this.filteredZones = new ActiveZones();
-		this.remoteSessionData = new HashMap<>();
-		this.clocks = Map.of();
+		this.zoneClip = null;
+		this.cameraShakeInstances = new ArrayList<>();
+		this.cameraShake = Vec2d.ZERO;
+		this.clocks = new HashMap<>();
 		this.skyboxes = new HashMap<>();
 		this.serverDataMap = new DataMap(uuid, DataType.SERVER);
 		this.skybox = null;
+		Shimmer.LOGGER.info("Client Session Data Initialized");
 	}
 
 	public ShimmerRemoteClientSessionData getRemoteSessionData(UUID id) {
@@ -103,6 +118,14 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 
 	public ShimmerClientSessionData getClientSessionData(UUID id) {
 		return id.equals(uuid) ? this : getRemoteSessionData(id);
+	}
+
+	public ScheduledTask.Handler getScheduledTaskHandler() {
+		if (scheduledTaskHandler == null) {
+			scheduledTaskHandler = new ScheduledTask.Handler(mc, () -> mc.level);
+		}
+
+		return scheduledTaskHandler;
 	}
 
 	@Override
@@ -160,18 +183,12 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	}
 
 	@ApiStatus.Internal
-	public void preTick(Minecraft mc, ClientLevel level, LocalPlayer player, Window window, PauseType paused) {
+	public void preTick(ClientLevel level, LocalPlayer player, Window window, PauseType paused) {
 		if (!paused.tick()) {
 			return;
 		}
 
 		filteredZones.tick(level);
-
-		for (var instance : clocks.values()) {
-			if (instance.clock.dimension() == level.dimension()) {
-				instance.tick(level);
-			}
-		}
 
 		updateOverrides(player);
 		input = ShimmerLocalPlayer.fromInput(window.getWindow(), player, mc.screen == null && mc.isWindowActive());
@@ -186,6 +203,40 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 			if (otherPlayer instanceof RemotePlayer p) {
 				p.shimmer$sessionData().preTick(mc, level, p);
 			}
+		}
+	}
+
+	@ApiStatus.Internal
+	public void postTick(ClientLevel level, @Nullable LocalPlayer player) {
+		if (scheduledTaskHandler != null) {
+			scheduledTaskHandler.tick();
+		}
+
+		if (cutscene != null && cutscene.tick()) {
+			mc.stopCutscene();
+		}
+
+		if (!cameraShakeInstances.isEmpty()) {
+			var shakeIt = cameraShakeInstances.iterator();
+
+			while (shakeIt.hasNext()) {
+				var instance = shakeIt.next();
+				instance.prevTicks = instance.ticks;
+
+				if (++instance.ticks >= instance.shake.duration()) {
+					shakeIt.remove();
+				}
+			}
+
+			if (cameraShakeInstances.isEmpty()) {
+				mc.gameRenderer.clearPostEffect();
+			}
+		}
+
+		tick++;
+
+		for (var session : remoteSessionData.values()) {
+			session.tick++;
 		}
 	}
 
@@ -211,13 +262,9 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	}
 
 	@Override
-	public void updateClockInstance(ResourceLocation id, int tick, boolean ticking) {
-		var instance = clocks.get(id);
-
-		if (instance != null) {
-			instance.tick = instance.prevTick = tick;
-			instance.ticking = ticking;
-		}
+	public void updateClocks(Map<ResourceLocation, ClockValue> map) {
+		clocks.clear();
+		clocks.putAll(map);
 	}
 
 	@Override
@@ -260,8 +307,6 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 
 	@Override
 	public void worldSyncAuthResponse(WorldSyncAuthResponsePayload payload) {
-		var mc = Minecraft.getInstance();
-
 		if (payload.token().isEmpty()) {
 			mc.player.displayClientMessage(Component.literal("Failed to auth on WorldSync!").withStyle(ChatFormatting.RED), false);
 			return;
@@ -324,8 +369,6 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	}
 
 	public void prepareWorldSyncScreen(String ip, int port) {
-		var mc = Minecraft.getInstance();
-
 		if (ip.equals("${ip}")) {
 			var info = mc.getCurrentServer();
 			ip = info == null ? "localhost" : info.ip;
@@ -343,7 +386,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	}
 
 	public void startWorldSync() {
-		if (Minecraft.getInstance().screen instanceof WorldSyncScreen screen) {
+		if (mc.screen instanceof WorldSyncScreen screen) {
 			screen.startThread();
 		}
 	}
@@ -358,7 +401,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 		originalListedPlayers = null;
 	}
 
-	public List<PlayerInfo> getListedPlayers(Minecraft mc) {
+	public List<PlayerInfo> getListedPlayers() {
 		if (originalListedPlayers == null) {
 			var original = mc.player.connection.getListedOnlinePlayers().stream().sorted(PlayerTabOverlay.PLAYER_COMPARATOR).limit(80L).toList();
 			originalListedPlayers = new ArrayList<>(original);

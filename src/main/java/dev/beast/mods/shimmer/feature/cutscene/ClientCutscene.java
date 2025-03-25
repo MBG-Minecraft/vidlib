@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class ClientCutscene implements CameraOverride {
-	public static ClientCutscene instance = null;
-
 	public final Minecraft mc;
 	public final boolean overrideCamera;
 	public final Cutscene cutscene;

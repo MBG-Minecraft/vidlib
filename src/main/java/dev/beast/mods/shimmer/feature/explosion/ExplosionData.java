@@ -11,7 +11,7 @@ import dev.beast.mods.shimmer.feature.config.ConfigValue;
 import dev.beast.mods.shimmer.feature.config.FloatConfigValue;
 import dev.beast.mods.shimmer.feature.config.IntConfigValue;
 import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
-import dev.beast.mods.shimmer.feature.misc.DebugText;
+import dev.beast.mods.shimmer.feature.misc.ScreenText;
 import dev.beast.mods.shimmer.math.KMath;
 import dev.beast.mods.shimmer.math.Range;
 import io.netty.buffer.ByteBuf;
@@ -232,7 +232,7 @@ public class ExplosionData {
 		this.height = size;
 	}
 
-	public void debugText(DebugText.DebugTextList list) {
+	public void debugText(ScreenText.ScreenTextList list) {
 		list.addConfig(this, CONFIG);
 	}
 
