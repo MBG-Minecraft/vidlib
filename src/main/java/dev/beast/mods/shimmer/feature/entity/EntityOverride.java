@@ -4,12 +4,14 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.core.ShimmerEntity;
 import dev.beast.mods.shimmer.core.ShimmerPlayer;
+import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.clothing.Clothing;
 import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
 import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
 import dev.beast.mods.shimmer.feature.icon.IconHolder;
+import dev.beast.mods.shimmer.feature.particle.ChancedParticle;
 import dev.beast.mods.shimmer.feature.skybox.FogOverride;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.Range;
@@ -29,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@AutoInit
 public final class EntityOverride<T> {
 	private static final Map<String, EntityOverride<?>> MAP = new HashMap<>();
 
@@ -120,7 +123,9 @@ public final class EntityOverride<T> {
 	public static final EntityOverride<FogOverride> FOG = createKey("fog", FogOverride.KNOWN_CODEC);
 	public static final EntityOverride<Boolean> UNPUSHABLE = createBooleanKey("unpushable");
 	public static final EntityOverride<Component> NAME_PREFIX = createKey("name_prefix", KnownCodec.TEXT_COMPONENT);
+	public static final EntityOverride<Component> NAME_SUFFIX = createKey("name_suffix", KnownCodec.TEXT_COMPONENT);
 	public static final EntityOverride<Boolean> NAME_HIDDEN = createBooleanKey("name_hidden");
+	public static final EntityOverride<List<ChancedParticle>> ENVIRONMENT_EFFECTS = createKey("environment_effects", ChancedParticle.LIST_KNOWN_CODEC);
 
 	public final String id;
 	private final KnownCodec<T> type;

@@ -15,8 +15,20 @@ public class ShimmerClientSessionData extends ShimmerSessionData {
 	}
 
 	public Component modifyPlayerName(Component original) {
-		if (namePrefix != null) {
-			return Component.empty().append(namePrefix).append(original);
+		if (namePrefix != null || nameSuffix != null) {
+			var name = Component.empty();
+
+			if (namePrefix != null) {
+				name.append(namePrefix);
+			}
+
+			name.append(original);
+
+			if (nameSuffix != null) {
+				name.append(nameSuffix);
+			}
+
+			return name;
 		}
 
 		return original;

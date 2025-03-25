@@ -44,6 +44,12 @@
 		},
 		{
 			"type": "bitmap",
+			"file": "shimmer:font/icons/flower.png",
+			"ascent": 7,
+			"chars": ["F"]
+		},
+		{
+			"type": "bitmap",
 			"file": "shimmer:font/icons/info.png",
 			"ascent": 7,
 			"chars": ["I"]

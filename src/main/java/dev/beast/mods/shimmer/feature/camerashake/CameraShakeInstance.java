@@ -8,5 +8,6 @@ public class CameraShakeInstance {
 	public CameraShakeInstance(CameraShake shake) {
 		this.shake = shake;
 		this.ticks = 0;
+		this.progress = (float) (Math.random() * shake.speed());
 	}
 }

@@ -430,14 +430,4 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 
 		return listedPlayers;
 	}
-
-	public Component modifyPlayerName(UUID id, Component original) {
-		var prefix = getClientSessionData(id).namePrefix;
-
-		if (prefix != null) {
-			return Component.empty().append(prefix).append(original);
-		}
-
-		return original;
-	}
 }

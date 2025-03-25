@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.util.registry;
 
+import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
@@ -28,9 +29,13 @@ public record SyncRegistryPayload(SyncedRegistry<?> registry, Map<?, ?> values) 
 			var map = new HashMap<ResourceLocation, Object>(size);
 
 			for (int i = 0; i < size; i++) {
-				var id = registry.registry().keyStreamCodec.decode(buf);
-				var value = registry.value().decode(buf);
-				map.put(id, value);
+				try {
+					var id = registry.registry().keyStreamCodec.decode(buf);
+					var value = registry.value().decode(buf);
+					map.put(id, value);
+				} catch (Exception ex) {
+					Shimmer.LOGGER.error("Failed to decode registry value #" + i, ex);
+				}
 			}
 
 			return new SyncRegistryPayload(registry, map);
@@ -43,8 +48,15 @@ public record SyncRegistryPayload(SyncedRegistry<?> registry, Map<?, ?> values) 
 			buf.writeVarInt(value.values.size());
 
 			for (var entry : value.values.entrySet()) {
-				value.registry.registry().keyStreamCodec.encode(buf, Cast.to(entry.getKey()));
-				value.registry.value().encode(buf, Cast.to(entry.getValue()));
+				Object key = null;
+
+				try {
+					key = entry.getKey();
+					value.registry.registry().keyStreamCodec.encode(buf, Cast.to(key));
+					value.registry.value().encode(buf, Cast.to(entry.getValue()));
+				} catch (Exception ex) {
+					Shimmer.LOGGER.error("Failed to encode registry value '" + key + "': " + entry, ex);
+				}
 			}
 		}
 	});

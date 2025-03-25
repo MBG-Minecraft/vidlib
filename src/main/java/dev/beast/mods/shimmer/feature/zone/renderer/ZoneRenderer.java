@@ -125,7 +125,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 		for (var sz : session.filteredZones.getSolidZones()) {
 			double dist = sz.instance().zone.shape().closestDistanceTo(cameraPos);
 
-			if (dist <= 10D && frustum.isVisible(sz.instance().zone.shape().getBoundingBox())) {
+			if (dist <= 10D && sz.instance().zone.color().alpha() > 0 && frustum.isVisible(sz.instance().zone.shape().getBoundingBox())) {
 				var renderer = ZoneRenderer.get(sz.instance().zone.shape().type());
 
 				if (renderer != null) {

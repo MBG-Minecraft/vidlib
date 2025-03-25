@@ -19,6 +19,8 @@ import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -109,6 +111,7 @@ public record KnownCodec<T>(
 	public static final KnownCodec<InteractionHand> HAND = registerEnum(ResourceLocation.withDefaultNamespace("hand"), InteractionHand.values());
 	public static final KnownCodec<SoundSource> SOUND_SOURCE = registerEnum(ResourceLocation.withDefaultNamespace("sound_source"), SoundSource.values());
 	public static final KnownCodec<ItemStack> OPTIONAL_ITEM = register(ResourceLocation.withDefaultNamespace("optional_item"), ItemStack.OPTIONAL_CODEC, ItemStack.OPTIONAL_STREAM_CODEC, ItemStack.class);
+	public static final KnownCodec<ParticleOptions> PARTICLE_OPTIONS = register(ResourceLocation.withDefaultNamespace("particle_options"), ParticleTypes.CODEC, ParticleTypes.STREAM_CODEC, ParticleOptions.class);
 
 	public static final KnownCodec<ResourceLocation> SHIMMER_ID = register(Shimmer.id("shimmer_id"), ShimmerCodecs.SHIMMER_ID, ShimmerStreamCodecs.SHIMMER_ID, ResourceLocation.class, (self, ctx) -> ShimmerResourceLocationArgument.id());
 	public static final KnownCodec<ResourceLocation> VIDEO_ID = register(Shimmer.id("video_id"), ShimmerCodecs.VIDEO_ID, ShimmerStreamCodecs.VIDEO_ID, ResourceLocation.class, (self, ctx) -> VideoResourceLocationArgument.id());

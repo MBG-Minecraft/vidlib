@@ -10,6 +10,7 @@ import dev.beast.mods.shimmer.feature.gradient.ClientGradients;
 import dev.beast.mods.shimmer.feature.misc.MiscShimmerClientUtils;
 import dev.beast.mods.shimmer.feature.multiverse.VoidSpecialEffects;
 import dev.beast.mods.shimmer.feature.particle.ShimmerClientParticles;
+import dev.beast.mods.shimmer.feature.particle.ShimmerParticleRenderTypes;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
 import dev.beast.mods.shimmer.feature.structure.ClientStructureStorage;
 import dev.beast.mods.shimmer.feature.structure.GhostStructure;
@@ -30,6 +31,8 @@ import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.client.settings.KeyModifier;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
+
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientModEventHandler {
 	@SubscribeEvent
@@ -44,6 +47,8 @@ public class ClientModEventHandler {
 	@SubscribeEvent
 	public static void registerParticleProviders(RegisterParticleProvidersEvent event) {
 		ShimmerClientParticles.register(event);
+
+		ShimmerParticleRenderTypes.TEMP_LIST.put(ShimmerParticleRenderTypes.TRUE_TRANSLUCENT, new ArrayList<>());
 	}
 
 	@SubscribeEvent

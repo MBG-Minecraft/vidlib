@@ -45,6 +45,7 @@ public class ShimmerSessionData {
 	public Clothing clothing;
 	public boolean unpushable;
 	public Component namePrefix;
+	public Component nameSuffix;
 	public boolean nameHidden;
 	public float flightSpeedMod;
 
@@ -67,6 +68,7 @@ public class ShimmerSessionData {
 		this.clothing = null;
 		this.unpushable = false;
 		this.namePrefix = null;
+		this.nameSuffix = null;
 		this.nameHidden = false;
 		this.flightSpeedMod = 1F;
 	}
@@ -90,6 +92,7 @@ public class ShimmerSessionData {
 		clothing = EntityOverride.CLOTHING.get(player, Clothing.NONE, InternalPlayerData.CLOTHING);
 		unpushable = suspended || EntityOverride.UNPUSHABLE.get(player, false);
 		namePrefix = EntityOverride.NAME_PREFIX.get(player);
+		nameSuffix = EntityOverride.NAME_SUFFIX.get(player);
 		nameHidden = EntityOverride.NAME_HIDDEN.get(player, false);
 		flightSpeedMod = dataMap.get(InternalPlayerData.FLIGHT_SPEED);
 

@@ -41,7 +41,7 @@ public record ClockLocation(
 	).apply(instance, ClockLocation::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ClockLocation> STREAM_CODEC = CompositeStreamCodec.of(
-		ClockFont.KNOWN_CODEC.streamCodec(), ClockLocation::font,
+		ClockFont.DIRECT_STREAM_CODEC, ClockLocation::font,
 		EntityFilter.STREAM_CODEC.optional(EntityFilter.ANY.instance()), ClockLocation::visible,
 		ShimmerStreamCodecs.DIMENSION.optional(Level.OVERWORLD), ClockLocation::dimension,
 		BlockPos.STREAM_CODEC, ClockLocation::pos,

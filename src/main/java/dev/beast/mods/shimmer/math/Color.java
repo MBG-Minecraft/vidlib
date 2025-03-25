@@ -5,6 +5,7 @@ import com.mojang.serialization.DataResult;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.codec.KnownCodec;
+import dev.beast.mods.shimmer.feature.gradient.Gradient;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -13,7 +14,7 @@ import net.minecraft.util.Mth;
 import java.util.Map;
 
 @AutoInit
-public record Color(int argb) {
+public record Color(int argb) implements Gradient {
 	public static final Color TRANSPARENT = new Color(0x00000000);
 	public static final Color WHITE = new Color(0xFFFFFFFF);
 	public static final Color BLACK = new Color(0xFF000000);
@@ -178,5 +179,10 @@ public record Color(int argb) {
 				Mth.lerpInt(delta, blue(), other.blue())
 			);
 		}
+	}
+
+	@Override
+	public Color get(float delta) {
+		return this;
 	}
 }
