@@ -3,6 +3,7 @@ package dev.beast.mods.shimmer.feature.bulk;
 import dev.beast.mods.shimmer.Shimmer;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.Level;
@@ -63,45 +64,72 @@ public class BulkLevelModificationHolder implements BlockModificationConsumer {
 		var blockPos = new BlockPos.MutableBlockPos();
 		int count = 0;
 
-		for (var sectionData : sections.values()) {
-			if (!sectionData.modified) {
+		var rerender = new LongOpenHashSet();
+
+		for (var sd : sections.values()) {
+			if (!sd.modified) {
 				if (debug) {
-					Shimmer.LOGGER.info("Skipped unmodified bulk edit section @ %d, %d, %d".formatted(sectionData.pos.x(), sectionData.pos.y(), sectionData.pos.z()));
+					Shimmer.LOGGER.info("Skipped unmodified bulk edit section @ %d, %d, %d".formatted(sd.pos.x(), sd.pos.y(), sd.pos.z()));
 				}
 
 				continue;
 			}
 
-			if (sectionData.levelChunk == null || sectionData.levelChunkSection == null) {
+			if (sd.levelChunk == null || sd.levelChunkSection == null) {
 				if (debug) {
-					Shimmer.LOGGER.info("Skipped invalid bulk edit section @ %d, %d, %d".formatted(sectionData.pos.x(), sectionData.pos.y(), sectionData.pos.z()));
+					Shimmer.LOGGER.info("Skipped invalid bulk edit section @ %d, %d, %d".formatted(sd.pos.x(), sd.pos.y(), sd.pos.z()));
 				}
 
 				continue;
 			}
 
-			if (sectionData.hasOnlyAir && sectionData.levelChunkSection.hasOnlyAir()) {
+			if (sd.hasOnlyAir && sd.levelChunkSection.hasOnlyAir()) {
 				if (debug) {
-					Shimmer.LOGGER.info("Skipped empty bulk edit section @ %d, %d, %d".formatted(sectionData.pos.x(), sectionData.pos.y(), sectionData.pos.z()));
+					Shimmer.LOGGER.info("Skipped empty bulk edit section @ %d, %d, %d".formatted(sd.pos.x(), sd.pos.y(), sd.pos.z()));
 				}
 
 				continue;
 			}
+
+			boolean rwest = false;
+			boolean reast = false;
+			boolean rdown = false;
+			boolean rup = false;
+			boolean rnorth = false;
+			boolean rsouth = false;
 
 			for (int y = 0; y < 16; y++) {
 				for (int x = 0; x < 16; x++) {
 					for (int z = 0; z < 16; z++) {
-						var state = sectionData.getBlock(x, y, z);
+						var state = sd.getBlock(x, y, z);
 
 						if (state != null) {
-							blockPos.setX(sectionData.pos.minBlockX() + x);
-							blockPos.setY(sectionData.pos.minBlockY() + y);
-							blockPos.setZ(sectionData.pos.minBlockZ() + z);
+							blockPos.setX(sd.pos.minBlockX() + x);
+							blockPos.setY(sd.pos.minBlockY() + y);
+							blockPos.setZ(sd.pos.minBlockZ() + z);
 
 							try {
-								if (sectionData.levelChunk.getBlockState(blockPos) != state) {
-									sectionData.levelChunk.setBlockState(blockPos, state, false);
+								if (sd.levelChunk.getBlockState(blockPos) != state) {
+									sd.levelChunk.setBlockState(blockPos, state, false);
 									count++;
+
+									if (x == 0) {
+										rwest = true;
+									} else if (x == 15) {
+										reast = true;
+									}
+
+									if (y == 0) {
+										rdown = true;
+									} else if (y == 15) {
+										rup = true;
+									}
+
+									if (z == 0) {
+										rnorth = true;
+									} else if (z == 15) {
+										rsouth = true;
+									}
 								}
 							} catch (Exception ex) {
 								ex.printStackTrace();
@@ -111,8 +139,38 @@ public class BulkLevelModificationHolder implements BlockModificationConsumer {
 				}
 			}
 
-			sectionData.levelChunk.markUnsaved();
-			level.redrawSection(sectionData.pos.x(), sectionData.pos.y(), sectionData.pos.z(), false);
+			sd.levelChunk.markUnsaved();
+
+			rerender.add(sd.pos.asLong());
+
+			if (rwest) {
+				rerender.add(SectionPos.of(sd.pos.x() - 1, sd.pos.y(), sd.pos.z()).asLong());
+			}
+
+			if (reast) {
+				rerender.add(SectionPos.of(sd.pos.x() + 1, sd.pos.y(), sd.pos.z()).asLong());
+			}
+
+			if (rdown) {
+				rerender.add(SectionPos.of(sd.pos.x(), sd.pos.y() - 1, sd.pos.z()).asLong());
+			}
+
+			if (rup) {
+				rerender.add(SectionPos.of(sd.pos.x(), sd.pos.y() + 1, sd.pos.z()).asLong());
+			}
+
+			if (rnorth) {
+				rerender.add(SectionPos.of(sd.pos.x(), sd.pos.y(), sd.pos.z() - 1).asLong());
+			}
+
+			if (rsouth) {
+				rerender.add(SectionPos.of(sd.pos.x(), sd.pos.y(), sd.pos.z() + 1).asLong());
+			}
+		}
+
+		for (long pos : rerender) {
+			var spos = SectionPos.of(pos);
+			level.redrawSection(spos.x(), spos.y(), spos.z(), false);
 		}
 
 		if (debug) {
