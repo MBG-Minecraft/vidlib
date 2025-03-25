@@ -1,13 +1,26 @@
 package dev.beast.mods.shimmer.core;
 
+import dev.beast.mods.shimmer.feature.camerashake.CameraShake;
+import dev.beast.mods.shimmer.feature.camerashake.CameraShakeInstance;
+import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
+import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
+import dev.beast.mods.shimmer.feature.cutscene.CutsceneScreen;
 import dev.beast.mods.shimmer.feature.data.DataMapValue;
 import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.data.UpdatePlayerDataValuePayload;
+import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleManager;
+import dev.beast.mods.shimmer.feature.vote.VoteScreen;
 import dev.beast.mods.shimmer.math.Vec2d;
+import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
+import dev.beast.mods.shimmer.util.Empty;
 import dev.beast.mods.shimmer.util.PauseType;
 import net.minecraft.client.Camera;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.ApiStatus;
@@ -15,6 +28,7 @@ import org.joml.Vector4f;
 
 import java.util.List;
 
+@SuppressWarnings("resource")
 public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment, ShimmerClientEntityContainer {
 	default Minecraft shimmer$self() {
 		return (Minecraft) this;
@@ -33,6 +47,21 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment, Shi
 
 	@ApiStatus.Internal
 	default void shimmer$renderSetup(RenderLevelStageEvent event, float delta) {
+		var player = shimmer$self().player;
+
+		if (player == null) {
+			return;
+		}
+
+		var session = player.shimmer$sessionData();
+
+		var ray = shimmer$self().gameRenderer.getMainCamera().ray(512D);
+
+		if (shimmer$self().options.getCameraType() == CameraType.FIRST_PERSON && player.getShowZones()) {
+			session.zoneClip = session.filteredZones.clip(ray);
+		} else {
+			session.zoneClip = null;
+		}
 	}
 
 	default Vec2d shimmer$getCameraShakeOffset(float delta) {
@@ -67,5 +96,109 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment, Shi
 
 	default <T> void updatePlayerData(DataType<T> type, T value) {
 		updatePlayerData(List.of(new DataMapValue(type, value)));
+	}
+
+	@Override
+	default void shimmer$preTick(PauseType paused) {
+		var level = shimmer$self().level;
+		var player = shimmer$self().player;
+
+		if (level == null || player == null) {
+			return;
+		}
+
+		player.shimmer$sessionData().preTick(level, player, shimmer$self().getWindow(), paused);
+	}
+
+	@Override
+	default void shimmer$postTick(PauseType paused) {
+		if (!paused.tick()) {
+			return;
+		}
+
+		var level = shimmer$self().level;
+		var player = shimmer$self().player;
+
+		if (player != null && level != null) {
+			player.shimmer$sessionData().postTick(level, player);
+		}
+
+		if (level != null) {
+			PhysicsParticleManager.tickAll(level, level.getGameTime());
+		}
+	}
+
+	@Override
+	default void playCutscene(Cutscene cutscene, WorldNumberVariables variables) {
+		var level = shimmer$self().level;
+		var player = shimmer$self().player;
+
+		if (!cutscene.steps.isEmpty() && player != null) {
+			var overrideCamera = !player.isReplayCamera();
+			var inst = new ClientCutscene(shimmer$self(), overrideCamera, cutscene, variables, player::getEyePosition);
+			player.shimmer$sessionData().cutscene = inst;
+
+			if (overrideCamera && !cutscene.allowMovement) {
+				shimmer$self().setScreen(new CutsceneScreen(inst, shimmer$self().screen));
+			}
+
+			shimmer$self().options.hideGui = true;
+		}
+	}
+
+	@Override
+	default void stopCutscene() {
+		shimmer$self().player.shimmer$sessionData().cutscene = null;
+
+		if (shimmer$self().screen instanceof CutsceneScreen screen) {
+			shimmer$self().setScreen(screen.previousScreen);
+		}
+
+		shimmer$self().options.hideGui = false;
+		shimmer$self().gameRenderer.clearPostEffect();
+	}
+
+	@Override
+	default void shakeCamera(CameraShake shake) {
+		if (shake.skip()) {
+			return;
+		}
+
+		shimmer$self().player.shimmer$sessionData().cameraShakeInstances.add(new CameraShakeInstance(shake));
+
+		if (shake.motionBlur()) {
+			shimmer$self().gameRenderer.setPostEffect(CameraShake.MOTION_BLUR_EFFECT);
+		}
+	}
+
+	@Override
+	default void stopCameraShaking() {
+		shimmer$self().player.shimmer$sessionData().cameraShakeInstances.clear();
+	}
+
+	@Override
+	default void setPostEffect(ResourceLocation id) {
+		if (id.equals(Empty.ID)) {
+			shimmer$self().gameRenderer.clearPostEffect();
+		} else {
+			shimmer$self().gameRenderer.setPostEffect(id);
+		}
+	}
+
+	@Override
+	default void shimmer$closeScreen() {
+		shimmer$self().popGuiLayer();
+	}
+
+	@Override
+	default void openVoteScreen(CompoundTag data, Component title, Component subtitle, Component yesLabel, Component noLabel) {
+		shimmer$self().setScreen(new VoteScreen(data, title, subtitle, yesLabel, noLabel));
+	}
+
+	@Override
+	default void endVote() {
+		if (shimmer$self().screen instanceof VoteScreen) {
+			shimmer$self().popGuiLayer();
+		}
 	}
 }

@@ -7,7 +7,10 @@ import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.cutscene.PlayCutscenePayload;
 import dev.beast.mods.shimmer.feature.cutscene.StopCutscenePayload;
 import dev.beast.mods.shimmer.feature.misc.SetPostEffectPayload;
+import dev.beast.mods.shimmer.feature.vote.EndVotePayload;
+import dev.beast.mods.shimmer.feature.vote.StartVotePayload;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -92,5 +95,19 @@ public interface ShimmerEntityContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void setPostEffect(ResourceLocation id) {
 		s2c(new SetPostEffectPayload(id));
+	}
+
+	default void shimmer$closeScreen() {
+		for (var player : shimmer$getPlayers()) {
+			player.shimmer$closeScreen();
+		}
+	}
+
+	default void openVoteScreen(CompoundTag data, Component title, Component subtitle, Component yesLabel, Component noLabel) {
+		s2c(new StartVotePayload(data, title, subtitle, yesLabel, noLabel));
+	}
+
+	default void endVote() {
+		s2c(EndVotePayload.INSTANCE);
 	}
 }

@@ -1,30 +1,16 @@
 package dev.beast.mods.shimmer.core.mixin;
 
-import com.mojang.blaze3d.platform.Window;
 import dev.beast.mods.shimmer.core.ShimmerMinecraftClient;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
-import dev.beast.mods.shimmer.feature.camerashake.CameraShake;
-import dev.beast.mods.shimmer.feature.camerashake.CameraShakeInstance;
-import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
-import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
-import dev.beast.mods.shimmer.feature.cutscene.CutsceneScreen;
 import dev.beast.mods.shimmer.feature.data.DataMap;
-import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleManager;
 import dev.beast.mods.shimmer.feature.structure.ClientStructureStorage;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
-import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
-import dev.beast.mods.shimmer.util.Empty;
-import dev.beast.mods.shimmer.util.PauseType;
 import dev.beast.mods.shimmer.util.ScheduledTask;
-import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -50,10 +36,6 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 	@Shadow
 	public abstract void setScreen(@Nullable Screen guiScreen);
 
-	@Shadow
-	@Final
-	private Window window;
-
 	@Override
 	public ScheduledTask.Handler shimmer$getScheduledTaskHandler() {
 		return player.shimmer$sessionData().getScheduledTaskHandler();
@@ -72,100 +54,5 @@ public abstract class MinecraftClientMixin implements ShimmerMinecraftClient {
 	@Inject(method = "reloadResourcePacks()Ljava/util/concurrent/CompletableFuture;", at = @At("HEAD"))
 	private void shimmer$reloadResourcePacks(CallbackInfoReturnable<CompletableFuture<Void>> cir) {
 		AutoInit.Type.ASSETS_RELOADED.invoke();
-	}
-
-	@Override
-	public void shimmer$renderSetup(RenderLevelStageEvent event, float delta) {
-		if (player == null) {
-			return;
-		}
-
-		var session = player.shimmer$sessionData();
-
-		var ray = shimmer$self().gameRenderer.getMainCamera().ray(512D);
-
-		if (shimmer$self().options.getCameraType() == CameraType.FIRST_PERSON && player.getShowZones()) {
-			session.zoneClip = session.filteredZones.clip(ray);
-		} else {
-			session.zoneClip = null;
-		}
-	}
-
-	@Override
-	public void shimmer$preTick(PauseType paused) {
-		if (level == null || player == null) {
-			return;
-		}
-
-		player.shimmer$sessionData().preTick(level, player, window, paused);
-	}
-
-	@Override
-	public void shimmer$postTick(PauseType paused) {
-		if (!paused.tick()) {
-			return;
-		}
-
-		if (player != null && level != null) {
-			player.shimmer$sessionData().postTick(level, player);
-		}
-
-		if (level != null) {
-			PhysicsParticleManager.tickAll(level, level.getGameTime());
-		}
-	}
-
-	@Override
-	public void playCutscene(Cutscene cutscene, WorldNumberVariables variables) {
-		if (!cutscene.steps.isEmpty() && player != null) {
-			var overrideCamera = !player.isReplayCamera();
-			var inst = new ClientCutscene(shimmer$self(), overrideCamera, cutscene, variables, player::getEyePosition);
-			player.shimmer$sessionData().cutscene = inst;
-
-			if (overrideCamera && !cutscene.allowMovement) {
-				setScreen(new CutsceneScreen(inst, screen));
-			}
-
-			shimmer$self().options.hideGui = true;
-		}
-	}
-
-	@Override
-	public void stopCutscene() {
-		player.shimmer$sessionData().cutscene = null;
-
-		if (screen instanceof CutsceneScreen screen) {
-			setScreen(screen.previousScreen);
-		}
-
-		shimmer$self().options.hideGui = false;
-		shimmer$self().gameRenderer.clearPostEffect();
-	}
-
-	@Override
-	public void shakeCamera(CameraShake shake) {
-		if (shake.skip()) {
-			return;
-		}
-
-		player.shimmer$sessionData().cameraShakeInstances.add(new CameraShakeInstance(shake));
-
-		if (shake.motionBlur()) {
-			shimmer$self().gameRenderer.setPostEffect(CameraShake.MOTION_BLUR_EFFECT);
-		}
-	}
-
-	@Override
-	public void stopCameraShaking() {
-		player.shimmer$sessionData().cameraShakeInstances.clear();
-	}
-
-	@Override
-	public void setPostEffect(ResourceLocation id) {
-		if (id.equals(Empty.ID)) {
-			shimmer$self().gameRenderer.clearPostEffect();
-		} else {
-			shimmer$self().gameRenderer.setPostEffect(id);
-		}
 	}
 }
