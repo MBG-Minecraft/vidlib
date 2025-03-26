@@ -7,7 +7,7 @@ import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.math.Size2;
 import dev.beast.mods.shimmer.math.UV;
 import dev.beast.mods.shimmer.util.JsonRegistryReloadListener;
-import dev.beast.mods.shimmer.util.registry.RegistryReference;
+import dev.beast.mods.shimmer.util.registry.ShimmerRegistry;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -68,7 +68,7 @@ public record ClockFont(
 		ClockFont::create
 	);
 
-	public static final RegistryReference.IdHolder<ClockFont> REGISTRY = RegistryReference.createServerIdHolder("clock_font", true);
+	public static final ShimmerRegistry<ClockFont> REGISTRY = ShimmerRegistry.createServer("clock_font", true);
 	public static final KnownCodec<ClockFont> KNOWN_CODEC = KnownCodec.of(REGISTRY, ClockFont.class);
 
 	public static class Loader extends JsonRegistryReloadListener<ClockFont> {

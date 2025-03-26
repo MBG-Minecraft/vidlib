@@ -9,7 +9,7 @@ import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.math.KMath;
 import dev.beast.mods.shimmer.util.JsonRegistryReloadListener;
-import dev.beast.mods.shimmer.util.registry.RegistryReference;
+import dev.beast.mods.shimmer.util.registry.ShimmerRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -49,7 +49,7 @@ public record Location(
 		Location::new
 	);
 
-	public static final RegistryReference.IdHolder<Location> REGISTRY = RegistryReference.createServerIdHolder("location", false);
+	public static final ShimmerRegistry<Location> REGISTRY = ShimmerRegistry.createServer("location", false);
 	public static final KnownCodec<Location> KNOWN_CODEC = KnownCodec.of(REGISTRY, Location.class);
 
 	public static class Loader extends JsonRegistryReloadListener<Location> {

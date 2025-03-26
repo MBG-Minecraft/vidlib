@@ -11,7 +11,7 @@ import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 
-public record RefHolderArgument<T>(RegistryReference.IdHolder<T> idHolder, KnownCodec<T> knownCodec) implements ArgumentType<T> {
+public record RefHolderArgument<T>(ShimmerRegistry<T> idHolder, KnownCodec<T> knownCodec) implements ArgumentType<T> {
 	public static final SimpleCommandExceptionType VALUE_NOT_FOUND = new SimpleCommandExceptionType(Component.literal("Value not found"));
 
 	@Override

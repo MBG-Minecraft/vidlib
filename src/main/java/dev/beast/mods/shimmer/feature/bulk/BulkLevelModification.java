@@ -1,10 +1,13 @@
 package dev.beast.mods.shimmer.feature.bulk;
 
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
+import dev.beast.mods.shimmer.util.Lazy;
+import dev.beast.mods.shimmer.util.registry.BasicRegistryRef;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistry;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
@@ -32,6 +35,36 @@ public interface BulkLevelModification {
 
 	static BulkLevelModification allOf(List<BulkLevelModification> list) {
 		return list.isEmpty() ? NONE : list.size() == 1 ? list.getFirst() : new BulkLevelModificationBundle(list);
+	}
+
+	static BulkLevelModification structure(
+		BasicRegistryRef<ResourceLocation, Lazy<StructureTemplate>> templateRef,
+		BlockPos pos,
+		BlockPos offset,
+		Mirror mirror,
+		Rotation rotation,
+		BlockPos rotationPivot,
+		long randomSeed
+	) {
+		try {
+			var template = templateRef.get().get();
+
+			if (template != null) {
+				return structure(
+					template,
+					pos,
+					offset,
+					mirror,
+					rotation,
+					rotationPivot,
+					randomSeed
+				);
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+		return NONE;
 	}
 
 	static BulkLevelModification structure(

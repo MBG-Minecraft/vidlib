@@ -2,6 +2,9 @@ package dev.beast.mods.shimmer.feature.bulk;
 
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.item.ShimmerTool;
+import dev.beast.mods.shimmer.feature.structure.StructureStorage;
+import dev.beast.mods.shimmer.util.Lazy;
+import dev.beast.mods.shimmer.util.registry.RegistryRef;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -14,8 +17,11 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 public class BulkModificationToolItem implements ShimmerTool {
+	private static final RegistryRef<Lazy<StructureTemplate>> SHIP = StructureStorage.SERVER.ref(ResourceLocation.parse("video:ship"));
+
 	@AutoInit
 	public static void bootstrap() {
 		ShimmerTool.register(new BulkModificationToolItem());
@@ -55,7 +61,7 @@ public class BulkModificationToolItem implements ShimmerTool {
 		modifications.fill(pos.offset(-5, -5, -5), pos.offset(5, 5, 5), Blocks.AIR);
 		modifications.set(pos, state);
 		modifications.add(BulkLevelModification.structure(
-			level.shimmer$getEnvironment().shimmer$structureStorage().get(ResourceLocation.parse("video:ship")),
+			SHIP,
 			pos.offset(0, 3, 0),
 			new BlockPos(-4, 0, -14),
 			Mirror.NONE,

@@ -7,7 +7,7 @@ import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.util.JsonRegistryReloadListener;
-import dev.beast.mods.shimmer.util.registry.RegistryReference;
+import dev.beast.mods.shimmer.util.registry.ShimmerRegistry;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -42,7 +42,7 @@ public record SkyboxData(
 		SkyboxData::new
 	);
 
-	public static final RegistryReference.IdHolder<SkyboxData> REGISTRY = RegistryReference.createServerIdHolder("skybox", true);
+	public static final ShimmerRegistry<SkyboxData> REGISTRY = ShimmerRegistry.createServer("skybox", true);
 
 	public static class Loader extends JsonRegistryReloadListener<SkyboxData> {
 		public Loader() {

@@ -3,7 +3,7 @@ package dev.beast.mods.shimmer.feature.zone;
 import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.math.Line;
-import dev.beast.mods.shimmer.util.registry.RegistryReference;
+import dev.beast.mods.shimmer.util.registry.ShimmerRegistry;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -62,7 +62,7 @@ public class ZoneContainer implements Comparable<ZoneContainer> {
 		}
 	};
 
-	public static final RegistryReference.IdHolder<ZoneContainer> REGISTRY = RegistryReference.createServerIdHolder("zone_container", false);
+	public static final ShimmerRegistry<ZoneContainer> REGISTRY = ShimmerRegistry.createServer("zone_container", false);
 	public static final KnownCodec<ZoneContainer> KNOWN_CODEC = KnownCodec.of(REGISTRY, ZoneContainer.class);
 
 	ActiveZones parent;

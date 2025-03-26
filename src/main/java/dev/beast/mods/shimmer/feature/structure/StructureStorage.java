@@ -4,8 +4,7 @@ import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.ShimmerConfig;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.util.Lazy;
-import dev.beast.mods.shimmer.util.Side;
-import dev.beast.mods.shimmer.util.registry.RegistryReference;
+import dev.beast.mods.shimmer.util.registry.ShimmerRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
@@ -22,7 +21,8 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class StructureStorage extends SimplePreparableReloadListener<Map<ResourceLocation, Resource>> {
-	public static final StructureStorage SERVER = new StructureStorage(Side.SERVER);
+	public static final ShimmerRegistry<Lazy<StructureTemplate>> SERVER = ShimmerRegistry.createServer("server_structure", false);
+	public static final ShimmerRegistry<Lazy<StructureTemplate>> CLIENT = ShimmerRegistry.createClient("client_structure", false);
 
 	private record StructureSupplier(ResourceLocation id, Resource resource) implements Supplier<StructureTemplate> {
 		@Override
@@ -38,17 +38,15 @@ public class StructureStorage extends SimplePreparableReloadListener<Map<Resourc
 		}
 	}
 
-	public final Side side;
-	public final RegistryReference.IdHolder<Lazy<StructureTemplate>> structures;
+	public final ShimmerRegistry<Lazy<StructureTemplate>> registry;
 
-	public StructureStorage(Side side) {
-		this.side = side;
-		this.structures = side.isServer() ? RegistryReference.createServerIdHolder("server_structure", false) : RegistryReference.createClientIdHolder("client_structure", false);
+	public StructureStorage(ShimmerRegistry<Lazy<StructureTemplate>> registry) {
+		this.registry = registry;
 	}
 
 	@Nullable
 	public StructureTemplate get(ResourceLocation id) {
-		var lazy = structures.get(id);
+		var lazy = registry.get(id);
 		return lazy != null ? lazy.get() : null;
 	}
 
@@ -71,8 +69,8 @@ public class StructureStorage extends SimplePreparableReloadListener<Map<Resourc
 			map2.put(entry.getKey(), Lazy.of(new StructureSupplier(entry.getKey(), entry.getValue())));
 		}
 
-		structures.update(map2);
+		registry.update(map2);
 
-		(side.isServer() ? AutoInit.Type.SERVER_STRUCTURES_LOADED : AutoInit.Type.CLIENT_STRUCTURES_LOADED).invoke(this);
+		(registry.getSide().isServer() ? AutoInit.Type.SERVER_STRUCTURES_LOADED : AutoInit.Type.CLIENT_STRUCTURES_LOADED).invoke(this);
 	}
 }

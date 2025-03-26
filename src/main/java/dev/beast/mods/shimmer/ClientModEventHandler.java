@@ -12,8 +12,8 @@ import dev.beast.mods.shimmer.feature.multiverse.VoidSpecialEffects;
 import dev.beast.mods.shimmer.feature.particle.ShimmerClientParticles;
 import dev.beast.mods.shimmer.feature.particle.ShimmerParticleRenderTypes;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
-import dev.beast.mods.shimmer.feature.structure.ClientStructureStorage;
 import dev.beast.mods.shimmer.feature.structure.GhostStructure;
+import dev.beast.mods.shimmer.feature.structure.StructureStorage;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
@@ -37,7 +37,7 @@ import java.util.ArrayList;
 public class ClientModEventHandler {
 	@SubscribeEvent
 	public static void addReloadListeners(AddClientReloadListenersEvent event) {
-		event.addListener(Shimmer.id("structure"), ClientStructureStorage.CLIENT);
+		event.addListener(Shimmer.id("structure"), new StructureStorage(StructureStorage.CLIENT));
 		event.addListener(Shimmer.id("ghost_structure"), new GhostStructure.Loader());
 		event.addListener(Shimmer.id("clothing"), new ClientClothingLoader());
 		event.addListener(Shimmer.id("physics_particle_data"), new PhysicsParticleData.Loader());

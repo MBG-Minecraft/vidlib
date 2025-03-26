@@ -14,7 +14,7 @@ import dev.beast.mods.shimmer.feature.skybox.SkyboxData;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
 import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
 import dev.beast.mods.shimmer.math.Range;
-import dev.beast.mods.shimmer.util.registry.RegistryReference;
+import dev.beast.mods.shimmer.util.registry.BasicShimmerRegistry;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -65,7 +65,7 @@ public class GameEventHandler {
 	public static void addReloadListeners(AddServerReloadListenersEvent event) {
 		event.addListener(Shimmer.id("location"), new Location.Loader());
 		event.addListener(Shimmer.id("zone"), new ZoneLoader());
-		event.addListener(Shimmer.id("structure"), StructureStorage.SERVER);
+		event.addListener(Shimmer.id("structure"), new StructureStorage(StructureStorage.SERVER));
 		event.addListener(Shimmer.id("cutscene"), new Cutscene.Loader());
 		event.addListener(Shimmer.id("clock_font"), new ClockFont.Loader());
 		event.addListener(Shimmer.id("clock"), new Clock.Loader());
@@ -122,7 +122,7 @@ public class GameEventHandler {
 
 	@SubscribeEvent
 	public static void serverStopped(ServerStoppedEvent event) {
-		RegistryReference.releaseServerHolders();
+		BasicShimmerRegistry.releaseServerHolders();
 	}
 
 	@SubscribeEvent

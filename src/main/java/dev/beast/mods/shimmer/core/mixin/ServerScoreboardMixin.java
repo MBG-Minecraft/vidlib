@@ -12,6 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ServerScoreboardMixin {
 	@Inject(method = {"onTeamAdded", "onTeamRemoved"}, at = @At("RETURN"))
 	private void shimmer$onTeamAddedOrRemoved(CallbackInfo ci) {
-		ServerTeams.HOLDER.update(((ShimmerScoreboard) this).shimmer$getTeams());
+		ServerTeams.REGISTRY.update(((ShimmerScoreboard) this).shimmer$getTeams());
 	}
 }

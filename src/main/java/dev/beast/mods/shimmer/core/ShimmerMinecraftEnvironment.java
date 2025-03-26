@@ -1,6 +1,5 @@
 package dev.beast.mods.shimmer.core;
 
-import dev.beast.mods.shimmer.feature.structure.StructureStorage;
 import dev.beast.mods.shimmer.util.PauseType;
 import dev.beast.mods.shimmer.util.ScheduledTask;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
@@ -33,10 +32,6 @@ public interface ShimmerMinecraftEnvironment extends ShimmerEntityContainer, Shi
 
 	default <T> CompletableFuture<T> shimmer$submit(Supplier<T> future) {
 		return ((ReentrantBlockableEventLoop<Runnable>) this).submit(future);
-	}
-
-	default StructureStorage shimmer$structureStorage() {
-		throw new NoMixinException(this);
 	}
 
 	@ApiStatus.Internal

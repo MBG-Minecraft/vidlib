@@ -10,7 +10,7 @@ import dev.beast.mods.shimmer.feature.config.FloatConfigValue;
 import dev.beast.mods.shimmer.feature.config.RangeConfigValue;
 import dev.beast.mods.shimmer.math.Range;
 import dev.beast.mods.shimmer.util.JsonCodecReloadListener;
-import dev.beast.mods.shimmer.util.registry.RegistryReference;
+import dev.beast.mods.shimmer.util.registry.ShimmerRegistry;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -79,7 +79,7 @@ public class PhysicsParticleData {
 		new RangeConfigValue<>("Section", Range.of(-360F, 360F), false, data -> data.section, (data, v) -> data.section = v)
 	);
 
-	public static final RegistryReference.IdHolder<PhysicsParticleData> REGISTRY = RegistryReference.createClientIdHolder("physics_particle_data", false);
+	public static final ShimmerRegistry<PhysicsParticleData> REGISTRY = ShimmerRegistry.createClient("physics_particle_data", false);
 
 	public static class Loader extends JsonCodecReloadListener<PhysicsParticleData> {
 		public Loader() {

@@ -6,7 +6,7 @@ import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.util.JsonRegistryReloadListener;
-import dev.beast.mods.shimmer.util.registry.RegistryReference;
+import dev.beast.mods.shimmer.util.registry.ShimmerRegistry;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -35,7 +35,7 @@ public class Cutscene {
 	);
 
 	public static final KnownCodec<Cutscene> DIRECT_KNOWN_CODEC = KnownCodec.register(Shimmer.id("direct_cutscene"), DIRECT_CODEC, DIRECT_STREAM_CODEC, Cutscene.class);
-	public static final RegistryReference.IdHolder<Cutscene> REGISTRY = RegistryReference.createServerIdHolder("cutscene", false);
+	public static final ShimmerRegistry<Cutscene> REGISTRY = ShimmerRegistry.createServer("cutscene", false);
 	public static final KnownCodec<Cutscene> KNOWN_CODEC = KnownCodec.of(REGISTRY, Cutscene.class);
 	public static final StreamCodec<? super RegistryFriendlyByteBuf, Cutscene> STREAM_CODEC = REGISTRY.streamCodecOrDirect(KNOWN_CODEC, DIRECT_STREAM_CODEC);
 

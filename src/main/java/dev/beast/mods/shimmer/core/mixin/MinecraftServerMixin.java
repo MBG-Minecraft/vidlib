@@ -4,7 +4,6 @@ import dev.beast.mods.shimmer.core.ShimmerMinecraftServer;
 import dev.beast.mods.shimmer.feature.clock.ClockValue;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.data.DataType;
-import dev.beast.mods.shimmer.feature.structure.StructureStorage;
 import dev.beast.mods.shimmer.util.PauseType;
 import dev.beast.mods.shimmer.util.ScheduledTask;
 import net.minecraft.Util;
@@ -61,11 +60,6 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 		}
 
 		return shimmer$serverDataMap;
-	}
-
-	@Override
-	public StructureStorage shimmer$structureStorage() {
-		return StructureStorage.SERVER;
 	}
 
 	@Override

@@ -11,7 +11,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
-import dev.beast.mods.shimmer.util.registry.RegistryReference;
+import dev.beast.mods.shimmer.util.registry.ShimmerRegistry;
 import dev.beast.mods.shimmer.util.registry.ShimmerResourceLocationArgument;
 import dev.beast.mods.shimmer.util.registry.VideoResourceLocationArgument;
 import net.minecraft.commands.CommandBuildContext;
@@ -74,7 +74,7 @@ public record KnownCodec<T>(
 		return registerEnum(id, values, (Function<E, String>) ShimmerCodecs.DEFAULT_NAME_GETTER);
 	}
 
-	public static <T> KnownCodec<T> of(RegistryReference.IdHolder<T> registry, Class<T> type) {
+	public static <T> KnownCodec<T> of(ShimmerRegistry<T> registry, Class<T> type) {
 		return register(
 			registry.id,
 			ShimmerCodecs.map(registry::getMap, registry.keyCodec, registry::getId),

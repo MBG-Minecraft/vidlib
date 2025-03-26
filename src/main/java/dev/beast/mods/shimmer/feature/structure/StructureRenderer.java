@@ -15,7 +15,7 @@ import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.util.Lazy;
-import dev.beast.mods.shimmer.util.registry.RegistryReference;
+import dev.beast.mods.shimmer.util.registry.RegistryRef;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
@@ -62,7 +62,7 @@ public class StructureRenderer {
 		var renderer = RUNTIME_RENDERERS.get(id);
 
 		if (renderer == null) {
-			renderer = new StructureRenderer(ClientStructureStorage.CLIENT.structures.reference(structure));
+			renderer = new StructureRenderer(StructureStorage.CLIENT.ref(structure));
 			RUNTIME_RENDERERS.put(id, renderer);
 		}
 
@@ -84,7 +84,7 @@ public class StructureRenderer {
 		int skyLight,
 		int blockLight
 	) {
-		var renderer = new StructureRenderer(ClientStructureStorage.CLIENT.structures.reference(structure));
+		var renderer = new StructureRenderer(StructureStorage.CLIENT.ref(structure));
 		renderer.centerX = centerX;
 		renderer.centerY = centerY;
 		renderer.centerZ = centerZ;
@@ -121,7 +121,7 @@ public class StructureRenderer {
 
 	public static final Codec<StructureRenderer> GHOST_CODEC = Codec.either(ResourceLocation.CODEC, RECORD_CODEC).xmap(either -> either.map(StructureRenderer::create, Function.identity()), Either::right);
 
-	private final RegistryReference<ResourceLocation, Lazy<StructureTemplate>> structureRef;
+	private final RegistryRef<Lazy<StructureTemplate>> structureRef;
 	public boolean centerX;
 	public boolean centerY;
 	public boolean centerZ;
@@ -133,7 +133,7 @@ public class StructureRenderer {
 
 	private CachedLayer[] layers = null;
 
-	private StructureRenderer(@Nullable RegistryReference<ResourceLocation, Lazy<StructureTemplate>> structureRef) {
+	private StructureRenderer(@Nullable RegistryRef<Lazy<StructureTemplate>> structureRef) {
 		this.structureRef = structureRef;
 		this.centerX = true;
 		this.centerY = false;

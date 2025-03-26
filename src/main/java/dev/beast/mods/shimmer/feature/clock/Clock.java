@@ -6,7 +6,7 @@ import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.util.JsonRegistryReloadListener;
-import dev.beast.mods.shimmer.util.registry.RegistryReference;
+import dev.beast.mods.shimmer.util.registry.ShimmerRegistry;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -32,7 +32,7 @@ public record Clock(
 		Clock::new
 	);
 
-	public static final RegistryReference.IdHolder<Clock> REGISTRY = RegistryReference.createServerIdHolder("clock", false);
+	public static final ShimmerRegistry<Clock> REGISTRY = ShimmerRegistry.createServer("clock", false);
 	public static final KnownCodec<Clock> KNOWN_CODEC = KnownCodec.of(REGISTRY, Clock.class);
 
 	public static final Color RED = Color.of(1F, 1F, 0.3F, 0.3F);

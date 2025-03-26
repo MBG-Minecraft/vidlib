@@ -3,7 +3,8 @@ package dev.beast.mods.shimmer.feature.gradient;
 import com.mojang.blaze3d.platform.NativeImage;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.math.Color;
-import dev.beast.mods.shimmer.util.registry.RegistryReference;
+import dev.beast.mods.shimmer.util.registry.RegistryRef;
+import dev.beast.mods.shimmer.util.registry.ShimmerRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
@@ -13,11 +14,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ClientGradients extends SimplePreparableReloadListener<Map<ResourceLocation, Gradient>> {
-	public static final RegistryReference.IdHolder<Gradient> REGISTRY = RegistryReference.createClientIdHolder("gradient", true);
+	public static final ShimmerRegistry<Gradient> REGISTRY = ShimmerRegistry.createClient("gradient", true);
 
-	public static final RegistryReference<ResourceLocation, Gradient> FIRE_A = REGISTRY.reference(Shimmer.id("fire_a"));
-	public static final RegistryReference<ResourceLocation, Gradient> FIRE_B = REGISTRY.reference(Shimmer.id("fire_b"));
-	public static final RegistryReference<ResourceLocation, Gradient> SPARK = REGISTRY.reference(Shimmer.id("spark"));
+	public static final RegistryRef<Gradient> FIRE_A = REGISTRY.ref(Shimmer.id("fire_a"));
+	public static final RegistryRef<Gradient> FIRE_B = REGISTRY.ref(Shimmer.id("fire_b"));
+	public static final RegistryRef<Gradient> SPARK = REGISTRY.ref(Shimmer.id("spark"));
 
 	@Override
 	protected Map<ResourceLocation, Gradient> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {

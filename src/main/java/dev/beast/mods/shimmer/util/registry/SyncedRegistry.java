@@ -15,18 +15,18 @@ import net.minecraft.world.entity.player.Player;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public record SyncedRegistry<V>(RegistryReference.IdHolder<V> registry, StreamCodec<? super RegistryFriendlyByteBuf, V> value, Callback callback) {
+public record SyncedRegistry<V>(ShimmerRegistry<V> registry, StreamCodec<? super RegistryFriendlyByteBuf, V> value, Callback callback) {
 	public interface Callback {
 		void run(Player player);
 	}
 
 	public static final Map<ResourceLocation, SyncedRegistry<?>> ALL = new LinkedHashMap<>();
 
-	public static <V> void add(RegistryReference.IdHolder<V> registry, StreamCodec<? super RegistryFriendlyByteBuf, V> value, Callback callback) {
+	public static <V> void add(ShimmerRegistry<V> registry, StreamCodec<? super RegistryFriendlyByteBuf, V> value, Callback callback) {
 		ALL.put(registry.id, new SyncedRegistry<>(registry, value, callback));
 	}
 
-	public static <V> void add(RegistryReference.IdHolder<V> registry, StreamCodec<? super RegistryFriendlyByteBuf, V> value) {
+	public static <V> void add(ShimmerRegistry<V> registry, StreamCodec<? super RegistryFriendlyByteBuf, V> value) {
 		add(registry, value, null);
 	}
 

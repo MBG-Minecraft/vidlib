@@ -5,6 +5,7 @@ import dev.beast.mods.shimmer.feature.camerashake.CameraShakeInstance;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.cutscene.CutsceneScreen;
+import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.data.DataMapValue;
 import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.data.UpdatePlayerDataValuePayload;
@@ -14,6 +15,7 @@ import dev.beast.mods.shimmer.math.Vec2d;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.util.Empty;
 import dev.beast.mods.shimmer.util.PauseType;
+import dev.beast.mods.shimmer.util.ScheduledTask;
 import net.minecraft.client.Camera;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
@@ -37,6 +39,16 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment, Shi
 	@Override
 	default ClientLevel shimmer$level() {
 		return shimmer$self().level;
+	}
+
+	@Override
+	default ScheduledTask.Handler shimmer$getScheduledTaskHandler() {
+		return shimmer$self().player.shimmer$sessionData().getScheduledTaskHandler();
+	}
+
+	@Override
+	default DataMap getServerData() {
+		return shimmer$self().player.shimmer$sessionData().serverDataMap;
 	}
 
 	@Override
