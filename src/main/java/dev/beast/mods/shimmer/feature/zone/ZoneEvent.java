@@ -48,6 +48,19 @@ public class ZoneEvent extends Event {
 		}
 	}
 
+	public static class ClickedOn extends EntityEvent {
+		private final ZoneClipResult clip;
+
+		public ClickedOn(ZoneClipResult clip, Level level, Entity entity) {
+			super(clip.instance(), level, entity);
+			this.clip = clip;
+		}
+
+		public ZoneClipResult getClip() {
+			return clip;
+		}
+	}
+
 	public static class Updated extends ZoneEvent {
 		private final ResourceKey<Level> dimension;
 		private final ActiveZones zones;

@@ -74,6 +74,10 @@ public interface ShimmerTool {
 		return null;
 	}
 
+	static boolean isHolding(LivingEntity entity, Class<?> toolClass) {
+		return toolClass.isInstance(of(entity.getMainHandItem())) || toolClass.isInstance(of(entity.getOffhandItem()));
+	}
+
 	String getId();
 
 	Component getName();
