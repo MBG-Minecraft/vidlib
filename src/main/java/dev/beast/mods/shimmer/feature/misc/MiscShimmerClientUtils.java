@@ -13,6 +13,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.context.ContextKey;
@@ -88,6 +89,6 @@ public class MiscShimmerClientUtils {
 	public static boolean shouldShowName(Entity entity) {
 		// var mc = Minecraft.getInstance();
 		// return entity instanceof LocalPlayer && mc.isLocalServer() && !mc.options.getCameraType().isFirstPerson() || entity.hasCustomName();
-		return !entity.isInvisible();
+		return !entity.isInvisible() && (entity instanceof LocalPlayer || entity.hasCustomName());
 	}
 }
