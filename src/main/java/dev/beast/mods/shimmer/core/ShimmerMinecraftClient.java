@@ -12,6 +12,7 @@ import dev.beast.mods.shimmer.feature.data.UpdatePlayerDataValuePayload;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleManager;
 import dev.beast.mods.shimmer.feature.vote.VoteScreen;
 import dev.beast.mods.shimmer.math.Vec2d;
+import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.util.Empty;
 import dev.beast.mods.shimmer.util.PauseType;
@@ -146,6 +147,13 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment, Shi
 		var player = shimmer$self().player;
 
 		if (!cutscene.steps.isEmpty() && player != null) {
+			var ctx = new WorldNumberContext(level, 0F, variables);
+
+			for (var step : cutscene.steps) {
+				step.resolvedStart = (int) step.start.get(ctx);
+				step.resolvedLength = (int) step.length.get(ctx);
+			}
+
 			var overrideCamera = !player.isReplayCamera();
 			var inst = new ClientCutscene(shimmer$self(), overrideCamera, cutscene, variables, player::getEyePosition);
 			player.shimmer$sessionData().cutscene = inst;

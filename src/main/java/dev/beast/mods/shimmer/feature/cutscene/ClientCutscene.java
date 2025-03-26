@@ -44,9 +44,9 @@ public class ClientCutscene implements CameraOverride {
 		ctx.sourcePos = sourcePos.get();
 
 		for (var step : steps) {
-			this.totalLength = Math.max(totalLength, step.start + step.length);
+			this.totalLength = Math.max(totalLength, step.resolvedStart + step.resolvedLength);
 
-			if (step.start == 0) {
+			if (step.resolvedStart == 0) {
 				if (step.target.isPresent()) {
 					var t = step.target.get().get(ctx);
 
@@ -88,7 +88,7 @@ public class ClientCutscene implements CameraOverride {
 		prevZoom = zoom;
 
 		for (var step : steps) {
-			if (step.start == totalTick) {
+			if (step.resolvedStart == totalTick) {
 				if (step.status.isPresent()) {
 					mc.gui.setOverlayMessage(step.status.get(), false);
 				}
@@ -108,8 +108,8 @@ public class ClientCutscene implements CameraOverride {
 				}
 			}
 
-			if (totalTick >= step.start && totalTick < step.start + step.length) {
-				float progress = (totalTick - step.start) / (float) step.length;
+			if (totalTick >= step.resolvedStart && totalTick < step.resolvedStart + step.resolvedLength) {
+				float progress = (totalTick - step.resolvedStart) / (float) step.resolvedLength;
 				var ctx = new WorldNumberContext(mc.level, progress, variables);
 				ctx.sourcePos = sourcePos.get();
 
@@ -125,7 +125,7 @@ public class ClientCutscene implements CameraOverride {
 							step.prevRenderTarget = target;
 						}
 
-						if (step.start == totalTick && step.snap.target()) {
+						if (step.resolvedStart == totalTick && step.snap.target()) {
 							prevTarget = target;
 						}
 					}
@@ -139,7 +139,7 @@ public class ClientCutscene implements CameraOverride {
 					if (newOrigin != null) {
 						origin = newOrigin;
 
-						if (step.start == totalTick && step.snap.origin()) {
+						if (step.resolvedStart == totalTick && step.snap.origin()) {
 							prevOrigin = origin;
 						}
 					}
@@ -148,12 +148,12 @@ public class ClientCutscene implements CameraOverride {
 				if (step.zoom.isPresent()) {
 					zoom = step.zoom.get().get(ctx);
 
-					if (step.start == totalTick && step.snap.zoom()) {
+					if (step.resolvedStart == totalTick && step.snap.zoom()) {
 						prevZoom = zoom;
 					}
 				}
 
-				if (step.start == totalTick) {
+				if (step.resolvedStart == totalTick) {
 					for (var event : step.events) {
 						event.run(mc.level, ctx);
 					}

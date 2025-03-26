@@ -167,9 +167,12 @@ public class ClientGameEventHandler {
 
 			if (cc != null) {
 				for (var task : cc.steps) {
-					if (task.render != null && cc.totalTick >= task.start && cc.totalTick <= task.start + task.length) {
+					int start = task.resolvedStart;
+					int length = task.resolvedLength;
+
+					if (task.render != null && cc.totalTick >= start && cc.totalTick <= start + length) {
 						float tick = Math.max(cc.totalTick - 1 + delta, 0F);
-						var progress = KMath.clamp((tick - task.start) / (float) task.length, 0F, 1F);
+						var progress = KMath.clamp((tick - start) / (float) length, 0F, 1F);
 
 						if (progress < 1F) {
 							var target = task.prevRenderTarget == null || task.renderTarget == null ? cc.prevTarget.lerp(cc.target, delta) : task.prevRenderTarget.lerp(task.renderTarget, delta);

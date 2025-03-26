@@ -16,6 +16,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.context.ContextKey;
+import net.minecraft.world.entity.Entity;
 import net.neoforged.neoforge.client.settings.KeyModifier;
 
 import java.nio.file.Files;
@@ -82,5 +83,11 @@ public class MiscShimmerClientUtils {
 			// CompiledShader.Type.VERTEX.getPrograms().clear();
 			mc.player.displayClientMessage(Component.literal("Shaders reloaded!").withStyle(ChatFormatting.GREEN), true);
 		}, mc);
+	}
+
+	public static boolean shouldShowName(Entity entity) {
+		// var mc = Minecraft.getInstance();
+		// return entity instanceof LocalPlayer && mc.isLocalServer() && !mc.options.getCameraType().isFirstPerson() || entity.hasCustomName();
+		return !entity.isInvisible();
 	}
 }

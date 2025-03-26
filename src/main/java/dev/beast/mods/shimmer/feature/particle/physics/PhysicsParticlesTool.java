@@ -5,6 +5,7 @@ import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
 import dev.beast.mods.shimmer.feature.data.InternalPlayerData;
 import dev.beast.mods.shimmer.feature.item.ShimmerTool;
 import dev.beast.mods.shimmer.feature.misc.ScreenText;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -82,6 +83,7 @@ public class PhysicsParticlesTool implements ShimmerTool {
 			screenText.topLeft.add("%,d/%,d %s".formatted(manager.rendered, manager.particles.size(), manager.displayName));
 		}
 
+		screenText.topRight.add(Minecraft.getInstance().fpsString.split(" ", 2)[0] + " FPS");
 		screenText.topRight.add("%,d/%,d Total".formatted(totalRendered, total));
 	}
 }

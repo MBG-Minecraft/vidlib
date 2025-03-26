@@ -5,13 +5,13 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.cutscene.event.CutsceneEvent;
+import dev.beast.mods.shimmer.math.worldnumber.FixedWorldNumber;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumber;
 import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
@@ -59,8 +59,8 @@ public class CutsceneStep {
 	}
 
 	public static final Codec<CutsceneStep> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		Codec.INT.optionalFieldOf("start", 0).forGetter(s -> s.start),
-		Codec.INT.fieldOf("length").forGetter(s -> s.length),
+		WorldNumber.CODEC.optionalFieldOf("start", FixedWorldNumber.ZERO.instance()).forGetter(s -> s.start),
+		WorldNumber.CODEC.fieldOf("length").forGetter(s -> s.length),
 		WorldPosition.CODEC.optionalFieldOf("origin").forGetter(s -> s.origin),
 		WorldPosition.CODEC.optionalFieldOf("target").forGetter(s -> s.target),
 		WorldNumber.CODEC.optionalFieldOf("zoom").forGetter(s -> s.zoom),
@@ -73,8 +73,8 @@ public class CutsceneStep {
 	).apply(instance, CutsceneStep::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, CutsceneStep> STREAM_CODEC = CompositeStreamCodec.of(
-		ByteBufCodecs.VAR_INT, s -> s.start,
-		ByteBufCodecs.VAR_INT, s -> s.length,
+		WorldNumber.STREAM_CODEC, s -> s.start,
+		WorldNumber.STREAM_CODEC, s -> s.length,
 		WorldPosition.STREAM_CODEC.optional(), s -> s.origin,
 		WorldPosition.STREAM_CODEC.optional(), s -> s.target,
 		WorldNumber.STREAM_CODEC.optional(), s -> s.zoom,
@@ -87,8 +87,12 @@ public class CutsceneStep {
 		CutsceneStep::new
 	);
 
+	public static CutsceneStep create(WorldNumber start, WorldNumber length) {
+		return new CutsceneStep(start, length);
+	}
+
 	public static CutsceneStep create(int start, int length) {
-		return new CutsceneStep(start, Math.max(1, length));
+		return create(WorldNumber.fixed(start), WorldNumber.fixed(length));
 	}
 
 	public static CutsceneStep first(int length) {
@@ -99,8 +103,10 @@ public class CutsceneStep {
 		return create(start, 1);
 	}
 
-	public final int start;
-	public final int length;
+	public final WorldNumber start;
+	public final WorldNumber length;
+	public int resolvedStart;
+	public int resolvedLength;
 	public Optional<WorldPosition> origin = Optional.empty();
 	public Optional<WorldPosition> target = Optional.empty();
 	public Optional<WorldNumber> zoom = Optional.empty();
@@ -112,8 +118,8 @@ public class CutsceneStep {
 	public List<CutsceneEvent> events = List.of();
 
 	private CutsceneStep(
-		int start,
-		int length,
+		WorldNumber start,
+		WorldNumber length,
 		Optional<WorldPosition> origin,
 		Optional<WorldPosition> target,
 		Optional<WorldNumber> zoom,
@@ -141,7 +147,7 @@ public class CutsceneStep {
 	@OnlyIn(Dist.CLIENT)
 	public List<CutsceneRender> render;
 
-	private CutsceneStep(int start, int length) {
+	private CutsceneStep(WorldNumber start, WorldNumber length) {
 		this.start = start;
 		this.length = length;
 	}
