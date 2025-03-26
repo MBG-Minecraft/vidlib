@@ -423,7 +423,7 @@ public class ExplosionData {
 				z *= ad * entity.horizontalKnockback;
 				y += entity.verticalKnockback;
 
-				e.setDeltaMovement(e.getDeltaMovement().add(new Vec3(x, y, z)));
+				e.forceAddVelocity(new Vec3(x, y, z));
 			}
 		}
 	}

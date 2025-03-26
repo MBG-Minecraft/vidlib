@@ -36,6 +36,12 @@ public class ExplosionInstance {
 	public List<Entity> entities;
 	public DebugColorBlocks debug;
 	public boolean undoable;
+	public boolean destroyBlocks;
+	public boolean decayBlocks;
+	public boolean igniteBlocks;
+	public boolean damageEntities;
+	public boolean knockBackEntities;
+	public boolean igniteEntities;
 
 	public ExplosionInstance(Level level, BlockPos at, ExplosionData data) {
 		this.level = level;
@@ -45,7 +51,13 @@ public class ExplosionInstance {
 		this.blocks = List.of();
 		this.entities = List.of();
 		this.debug = DebugColorBlocks.NONE;
-		this.undoable = false;
+		this.undoable = true;
+		this.destroyBlocks = true;
+		this.decayBlocks = true;
+		this.igniteBlocks = true;
+		this.damageEntities = true;
+		this.knockBackEntities = true;
+		this.igniteEntities = true;
 	}
 
 	public void debug() {
@@ -157,40 +169,52 @@ public class ExplosionInstance {
 		}
 	}
 
-	public void damageEntities() {
-		if (level instanceof ServerLevel serverLevel) {
-			var pos = Vec3.atCenterOf(at);
-			data.damageEntities(serverLevel, pos, entities);
-			data.knockBackEntities(pos, entities);
-			data.igniteEntities(entities);
-		}
-	}
-
 	public void create(BlockModificationConsumer modifications) {
 		collectBlocks();
 		collectEntities();
-		destroy(modifications);
-		decay(modifications);
-		ignite(modifications);
-		damageEntities();
+
+		if (destroyBlocks) {
+			destroy(modifications);
+		}
+
+		if (decayBlocks) {
+			decay(modifications);
+		}
+
+		if (igniteBlocks) {
+			ignite(modifications);
+		}
+
+		if (level instanceof ServerLevel serverLevel) {
+			var pos = Vec3.atCenterOf(at);
+
+			if (damageEntities) {
+				data.damageEntities(serverLevel, pos, entities);
+			}
+
+			if (knockBackEntities) {
+				data.knockBackEntities(pos, entities);
+			}
+
+			if (igniteEntities) {
+				data.igniteEntities(entities);
+			}
+		}
 	}
 
 	public int create() {
 		var m = new OptimizedModificationBuilder();
 		create(m);
-		return level.bulkModify(m.build());
-	}
 
-	public UndoableExplosion createUndoableModification() {
-		var list = new ArrayList<PositionedBlock>(blocks.size() / 2);
+		if (undoable) {
+			var destroyedBlocks = getDestroyedBlocks();
 
-		for (var block : blocks) {
-			if (block.destroyed().isTrue()) {
-				list.add(new PositionedBlock(block.pos(), block.state()));
+			if (!destroyedBlocks.isEmpty()) {
+				level.addUndoable(new UndoableExplosion(destroyedBlocks));
 			}
 		}
 
-		return new UndoableExplosion(list);
+		return level.bulkModify(m.build());
 	}
 
 	public List<PositionedBlock> getDestroyedBlocks() {
@@ -203,5 +227,20 @@ public class ExplosionInstance {
 		}
 
 		return list;
+	}
+
+	@Override
+	public String toString() {
+		return "ExplosionInstance[" +
+			"at=" + at +
+			", data=" + data +
+			", undoable=" + undoable +
+			", destroyBlocks=" + destroyBlocks +
+			", decayBlocks=" + decayBlocks +
+			", igniteBlocks=" + igniteBlocks +
+			", damageEntities=" + damageEntities +
+			", knockBackEntities=" + knockBackEntities +
+			", igniteEntities=" + igniteEntities +
+			']';
 	}
 }
