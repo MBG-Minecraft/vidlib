@@ -61,7 +61,7 @@ public interface ShimmerClientLevel extends ShimmerLevel, ShimmerClientEntityCon
 	}
 
 	@Override
-	default void physicsParticles(PhysicsParticleData data, List<PositionedBlock> blocks, long seed) {
+	default void physicsParticles(PhysicsParticleData data, long seed, List<PositionedBlock> blocks) {
 		if (blocks.isEmpty()) {
 			return;
 		}
@@ -76,13 +76,13 @@ public interface ShimmerClientLevel extends ShimmerLevel, ShimmerClientEntityCon
 	}
 
 	@Override
-	default void physicsParticles(ResourceLocation id, List<PositionedBlock> blocks, long seed) {
+	default void physicsParticles(ResourceLocation id, long seed, List<PositionedBlock> blocks) {
 		if (blocks.isEmpty()) {
 			return;
 		}
 
 		var data = PhysicsParticleData.REGISTRY.get(id);
-		physicsParticles(data == null ? PhysicsParticleData.DEFAULT : data, blocks, seed);
+		physicsParticles(data == null ? PhysicsParticleData.DEFAULT : data, seed, blocks);
 	}
 
 	default void environmentEffects(Minecraft mc, BlockPos pos) {

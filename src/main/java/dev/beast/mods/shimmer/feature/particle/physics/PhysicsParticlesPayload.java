@@ -10,12 +10,12 @@ import net.minecraft.network.codec.ByteBufCodecs;
 
 import java.util.List;
 
-public record PhysicsParticlesPayload(PhysicsParticleData data, List<PositionedBlock> blocks, long seed) implements ShimmerPacketPayload {
+public record PhysicsParticlesPayload(PhysicsParticleData data, long seed, List<PositionedBlock> blocks) implements ShimmerPacketPayload {
 	@AutoPacket
 	public static final ShimmerPacketType<PhysicsParticlesPayload> TYPE = ShimmerPacketType.internal("physics_particles", CompositeStreamCodec.of(
 		PhysicsParticleData.STREAM_CODEC, PhysicsParticlesPayload::data,
-		PositionedBlock.LIST_STREAM_CODEC, PhysicsParticlesPayload::blocks,
 		ByteBufCodecs.LONG, PhysicsParticlesPayload::seed,
+		PositionedBlock.LIST_STREAM_CODEC, PhysicsParticlesPayload::blocks,
 		PhysicsParticlesPayload::new
 	));
 
@@ -26,6 +26,6 @@ public record PhysicsParticlesPayload(PhysicsParticleData data, List<PositionedB
 
 	@Override
 	public void handle(ShimmerPayloadContext ctx) {
-		ctx.level().physicsParticles(data, blocks, seed);
+		ctx.level().physicsParticles(data, seed, blocks);
 	}
 }

@@ -75,6 +75,15 @@ public class ExplosionData {
 		private EntityData copy() {
 			return new EntityData(damage, horizontalKnockback, verticalKnockback);
 		}
+
+		@Override
+		public String toString() {
+			return "EntityData[" +
+				"damage=" + damage +
+				", horizontalKnockback=" + horizontalKnockback +
+				", verticalKnockback=" + verticalKnockback +
+				']';
+		}
 	}
 
 	public static class FilterData {
@@ -133,6 +142,18 @@ public class ExplosionData {
 
 		private FilterData copy() {
 			return new FilterData(floor, ceiling, blocks, ignored, invincible, bypassUnbreakable);
+		}
+
+		@Override
+		public String toString() {
+			return "FilterData[" +
+				"floor=" + floor +
+				", ceiling=" + ceiling +
+				", blocks=" + blocks +
+				", ignored=" + ignored +
+				", invincible=" + invincible +
+				", bypassUnbreakable=" + bypassUnbreakable +
+				']';
 		}
 	}
 
@@ -368,5 +389,20 @@ public class ExplosionData {
 				e.igniteForTicks((int) (fire * 10));
 			}
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "ExplosionData[" +
+			"radius=" + radius +
+			", depth=" + depth +
+			", height=" + height +
+			", destroy=" + destroy +
+			", decay=" + decay +
+			", fire=" + fire +
+			", smolder=" + smolder +
+			", entity=" + entity +
+			", filter=" + filter +
+			']';
 	}
 }

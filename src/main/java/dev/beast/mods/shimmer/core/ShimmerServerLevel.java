@@ -82,16 +82,16 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 	}
 
 	@Override
-	default void physicsParticles(PhysicsParticleData data, List<PositionedBlock> blocks, long seed) {
+	default void physicsParticles(PhysicsParticleData data, long seed, List<PositionedBlock> blocks) {
 		if (!blocks.isEmpty()) {
-			s2c(new PhysicsParticlesPayload(data, blocks, seed));
+			s2c(new PhysicsParticlesPayload(data, seed, blocks));
 		}
 	}
 
 	@Override
-	default void physicsParticles(ResourceLocation id, List<PositionedBlock> blocks, long seed) {
+	default void physicsParticles(ResourceLocation id, long seed, List<PositionedBlock> blocks) {
 		if (!blocks.isEmpty()) {
-			s2c(new PhysicsParticlesIdPayload(id, blocks, seed));
+			s2c(new PhysicsParticlesIdPayload(id, seed, blocks));
 		}
 	}
 

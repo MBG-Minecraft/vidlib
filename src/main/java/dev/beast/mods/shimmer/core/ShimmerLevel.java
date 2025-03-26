@@ -146,17 +146,17 @@ public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEn
 		playTrackingSound(new FollowingEntityWorldPosition(Either.left(entity.getId()), EntityPositionType.EYES), WorldNumberVariables.EMPTY, data, looping);
 	}
 
-	default void physicsParticles(PhysicsParticleData data, List<PositionedBlock> blocks, long seed) {
+	default void physicsParticles(PhysicsParticleData data, long seed, List<PositionedBlock> blocks) {
 	}
 
-	default void physicsParticles(ResourceLocation id, List<PositionedBlock> blocks, long seed) {
+	default void physicsParticles(ResourceLocation id, long seed, List<PositionedBlock> blocks) {
 	}
 
 	default void physicsParticles(PhysicsParticleData data, List<PositionedBlock> blocks) {
-		physicsParticles(data, blocks, shimmer$level().shimmer$level().random.nextLong());
+		physicsParticles(data, shimmer$level().shimmer$level().random.nextLong(), blocks);
 	}
 
 	default void physicsParticles(ResourceLocation id, List<PositionedBlock> blocks) {
-		physicsParticles(id, blocks, shimmer$level().shimmer$level().random.nextLong());
+		physicsParticles(id, shimmer$level().shimmer$level().random.nextLong(), blocks);
 	}
 }

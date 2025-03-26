@@ -63,7 +63,7 @@ public record Range(float min, float max) implements SampledFloat {
 
 	@Override
 	public String toString() {
-		return min == max ? KMath.format(min) : (KMath.format(min) + " - " + KMath.format(max));
+		return min == max ? KMath.format(min) : "[" + (KMath.format(min) + "," + KMath.format(max)) + "]";
 	}
 
 	public float clamp(float value) {

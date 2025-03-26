@@ -12,12 +12,12 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 
-public record PhysicsParticlesIdPayload(ResourceLocation id, List<PositionedBlock> blocks, long seed) implements ShimmerPacketPayload {
+public record PhysicsParticlesIdPayload(ResourceLocation id, long seed, List<PositionedBlock> blocks) implements ShimmerPacketPayload {
 	@AutoPacket
 	public static final ShimmerPacketType<PhysicsParticlesIdPayload> TYPE = ShimmerPacketType.internal("physics_particles_id", CompositeStreamCodec.of(
 		ShimmerStreamCodecs.VIDEO_ID, PhysicsParticlesIdPayload::id,
-		PositionedBlock.LIST_STREAM_CODEC, PhysicsParticlesIdPayload::blocks,
 		ByteBufCodecs.LONG, PhysicsParticlesIdPayload::seed,
+		PositionedBlock.LIST_STREAM_CODEC, PhysicsParticlesIdPayload::blocks,
 		PhysicsParticlesIdPayload::new
 	));
 
@@ -28,6 +28,6 @@ public record PhysicsParticlesIdPayload(ResourceLocation id, List<PositionedBloc
 
 	@Override
 	public void handle(ShimmerPayloadContext ctx) {
-		ctx.level().physicsParticles(id, blocks, seed);
+		ctx.level().physicsParticles(id, seed, blocks);
 	}
 }

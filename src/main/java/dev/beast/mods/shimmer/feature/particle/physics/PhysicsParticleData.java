@@ -132,4 +132,21 @@ public class PhysicsParticleData {
 		this.tilt = tilt;
 		this.section = section;
 	}
+
+	@Override
+	public String toString() {
+		return "PhysicsParticleData[" +
+			"density=" + density +
+			", lifespan=" + lifespan +
+			", scale=" + scale +
+			", power=" + power +
+			", spread=" + spread +
+			", inertia=" + inertia +
+			", gravity=" + gravity +
+			", speed=" + speed +
+			", direction=" + direction +
+			", tilt=" + tilt +
+			", section=" + section +
+			']';
+	}
 }

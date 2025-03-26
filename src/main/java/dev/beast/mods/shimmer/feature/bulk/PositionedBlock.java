@@ -49,4 +49,9 @@ public record PositionedBlock(BlockPos pos, BlockState state) implements BulkLev
 	public void apply(BlockModificationConsumer blocks) {
 		blocks.set(pos, state);
 	}
+
+	@Override
+	public String toString() {
+		return "PositionedBlock[%d,%d,%d,%s]".formatted(pos.getX(), pos.getY(), pos.getZ(), state.shimmer$toString());
+	}
 }
