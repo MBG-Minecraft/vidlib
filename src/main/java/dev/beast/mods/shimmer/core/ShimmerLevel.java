@@ -9,6 +9,7 @@ import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
 import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
 import dev.beast.mods.shimmer.feature.bulk.UndoableModification;
 import dev.beast.mods.shimmer.feature.data.DataMap;
+import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
 import dev.beast.mods.shimmer.feature.prop.PropList;
 import dev.beast.mods.shimmer.feature.sound.SoundData;
@@ -31,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -158,5 +160,8 @@ public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEn
 
 	default void physicsParticles(ResourceLocation id, List<PositionedBlock> blocks) {
 		physicsParticles(id, shimmer$level().shimmer$level().random.nextLong(), blocks);
+	}
+
+	default void spawnCubeParticles(Map<CubeParticleOptions, List<BlockPos>> map) {
 	}
 }

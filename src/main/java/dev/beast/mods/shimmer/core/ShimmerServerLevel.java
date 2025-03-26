@@ -5,6 +5,8 @@ import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationBundle;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationPayload;
 import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
 import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
+import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
+import dev.beast.mods.shimmer.feature.particle.SpawnCubeParticlesPayload;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticlesIdPayload;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticlesPayload;
@@ -15,6 +17,7 @@ import dev.beast.mods.shimmer.feature.sound.TrackingSoundPayload;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -22,6 +25,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public interface ShimmerServerLevel extends ShimmerLevel {
@@ -93,6 +97,11 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 		if (!blocks.isEmpty()) {
 			s2c(new PhysicsParticlesIdPayload(id, seed, blocks));
 		}
+	}
+
+	@Override
+	default void spawnCubeParticles(Map<CubeParticleOptions, List<BlockPos>> map) {
+		s2c(new SpawnCubeParticlesPayload(map));
 	}
 
 	default boolean shimmer$cancelWrite() {

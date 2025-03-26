@@ -29,7 +29,7 @@ public record Zone(
 ) {
 	public static final Codec<Zone> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		ZoneShape.CODEC.fieldOf("shape").forGetter(Zone::shape),
-		Color.CODEC_RGB.optionalFieldOf("color", Color.CYAN).forGetter(Zone::color),
+		Color.CODEC.optionalFieldOf("color", Color.CYAN).forGetter(Zone::color),
 		EntityFilter.CODEC.optionalFieldOf("entity_filter", EntityFilter.PLAYER.instance()).forGetter(Zone::entityFilter),
 		CompoundTag.CODEC.optionalFieldOf("data", Empty.COMPOUND_TAG).forGetter(Zone::data),
 		EntityOverride.OVERRIDE_MAP_CODEC.optionalFieldOf("player_overrides", Map.of()).forGetter(Zone::playerOverrides),

@@ -12,6 +12,7 @@ import dev.beast.mods.shimmer.feature.config.FloatConfigValue;
 import dev.beast.mods.shimmer.feature.config.IntConfigValue;
 import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
 import dev.beast.mods.shimmer.feature.misc.ScreenText;
+import dev.beast.mods.shimmer.math.Easing;
 import dev.beast.mods.shimmer.math.KMath;
 import dev.beast.mods.shimmer.math.Range;
 import io.netty.buffer.ByteBuf;
@@ -19,6 +20,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -40,49 +42,67 @@ public class ExplosionData {
 		public static final EntityData DEFAULT = new EntityData();
 
 		public static final Codec<EntityData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			Codec.FLOAT.optionalFieldOf("damage", 4F).forGetter(v -> v.damage),
+			Codec.FLOAT.optionalFieldOf("min_damage", 0F).forGetter(v -> v.minDamage),
+			Codec.FLOAT.optionalFieldOf("max_damage", 4F).forGetter(v -> v.maxDamage),
+			Easing.CODEC.optionalFieldOf("damage_easing", Easing.CUBIC_IN).forGetter(v -> v.damageEasing),
 			Codec.FLOAT.optionalFieldOf("horizontal_knockback", 1F).forGetter(v -> v.horizontalKnockback),
 			Codec.FLOAT.optionalFieldOf("vertical_knockback", 0F).forGetter(v -> v.verticalKnockback)
 		).apply(instance, EntityData::new));
 
 		public static final StreamCodec<ByteBuf, EntityData> STREAM_CODEC = CompositeStreamCodec.of(
-			ByteBufCodecs.FLOAT, v -> v.damage,
+			ByteBufCodecs.FLOAT, v -> v.minDamage,
+			ByteBufCodecs.FLOAT, v -> v.maxDamage,
+			Easing.STREAM_CODEC, v -> v.damageEasing,
 			ByteBufCodecs.FLOAT, v -> v.horizontalKnockback,
 			ByteBufCodecs.FLOAT, v -> v.verticalKnockback,
 			EntityData::new
 		);
 
-		public float damage;
+		public float minDamage;
+		public float maxDamage;
+		public Easing damageEasing;
 		public float horizontalKnockback;
 		public float verticalKnockback;
 
 		public EntityData() {
-			this.damage = 4F;
+			this.minDamage = 0F;
+			this.maxDamage = 4F;
+			this.damageEasing = Easing.CUBIC_IN;
 			this.horizontalKnockback = 1F;
 			this.verticalKnockback = 0F;
 		}
 
 		private EntityData(
-			float damage,
+			float minDamage,
+			float maxDamage,
+			Easing damageEasing,
 			float horizontalKnockback,
 			float verticalKnockback
 		) {
-			this.damage = damage;
+			this.minDamage = minDamage;
+			this.maxDamage = maxDamage;
+			this.damageEasing = damageEasing;
 			this.horizontalKnockback = horizontalKnockback;
 			this.verticalKnockback = verticalKnockback;
 		}
 
 		private EntityData copy() {
-			return new EntityData(damage, horizontalKnockback, verticalKnockback);
+			return new EntityData(minDamage, maxDamage, damageEasing, horizontalKnockback, verticalKnockback);
 		}
 
 		@Override
 		public String toString() {
 			return "EntityData[" +
-				"damage=" + damage +
+				"minDamage=" + minDamage +
+				", maxDamage=" + maxDamage +
+				", damageEasing=" + damageEasing +
 				", horizontalKnockback=" + horizontalKnockback +
 				", verticalKnockback=" + verticalKnockback +
 				']';
+		}
+
+		public float damage(float relativeDistance) {
+			return KMath.lerp(damageEasing.easeClamped(relativeDistance), maxDamage, minDamage);
 		}
 	}
 
@@ -192,7 +212,9 @@ public class ExplosionData {
 		new FloatConfigValue<>("Decay", Range.FULL, true, data -> data.decay, (data, v) -> data.decay = v),
 		new FloatConfigValue<>("Fire", Range.FULL, true, data -> data.fire, (data, v) -> data.fire = v),
 		new BooleanConfigValue<>("Smolder", data -> data.smolder, (data, v) -> data.smolder = v),
-		new FloatConfigValue<>("Entity Damage", Range.of(0F, 100F), false, data -> data.entity.damage, (data, v) -> data.entity.damage = v),
+		new FloatConfigValue<>("Max Entity Damage", Range.of(0F, 100F), false, data -> data.entity.maxDamage, (data, v) -> data.entity.maxDamage = v),
+		new FloatConfigValue<>("Min Entity Damage", Range.of(0F, 100F), false, data -> data.entity.minDamage, (data, v) -> data.entity.minDamage = v),
+		new ConfigValue<>("Entity Damage Easing", Easing.CODEC, data -> data.entity.damageEasing, (data, v) -> data.entity.damageEasing = v),
 		new FloatConfigValue<>("Entity Horizontal Knockback", Range.of(0F, 100F), false, data -> data.entity.horizontalKnockback, (data, v) -> data.entity.horizontalKnockback = v),
 		new FloatConfigValue<>("Entity Vertical Knockback", Range.of(0F, 100F), false, data -> data.entity.verticalKnockback, (data, v) -> data.entity.verticalKnockback = v),
 		new IntConfigValue<>("Floor", IntRange.range(-1000, 1000), false, data -> data.filter.floor, (data, v) -> data.filter.floor = v),
@@ -259,6 +281,10 @@ public class ExplosionData {
 
 	public ExplosionInstance instance(Level level, BlockPos at) {
 		return new ExplosionInstance(level, at, this);
+	}
+
+	public AABB getBounds(Vec3 at) {
+		return new AABB(at.x - radius, at.y - depth, at.z - radius, at.x + radius, at.y + height, at.z + radius);
 	}
 
 	public float inside(float rx, float ry, float rz) {
@@ -336,55 +362,74 @@ public class ExplosionData {
 		return entities;
 	}
 
-	public void damageEntities(Level level, Vec3 at, List<Entity> entities) {
+	public void damageEntities(ServerLevel level, Vec3 at, List<Entity> entities) {
 		var source = level.damageSources().explosion(null, null);
 		double atx = at.x;
 		double aty = at.y;
 		double atz = at.z;
 
 		for (var e : entities) {
-			if (entity.damage > 0F) {
+			if (entity.maxDamage > 0F) {
 				double x = e.getX() - atx;
 				double y = (e instanceof PrimedTnt ? e.getY() : e.getEyeY()) - aty;
 				double z = e.getZ() - atz;
 
-				double q = Math.min(inside((float) x, (float) y, (float) z), 1D);
-				double aa = Math.sqrt(x * x + y * y + z * z);
+				double inside = Math.min(inside((float) x, (float) y, (float) z), 1D);
 
-				if (aa > 0D) {
-					x /= aa;
-					y /= aa;
-					z /= aa;
-					double ac = 1D - q;
-
-					var ed = KMath.lerp(q, entity.damage, entity.damage / 3D);
+				if (inside <= 1D) {
+					var damage = entity.damage((float) inside);
 
 					if (e instanceof LivingEntity l && filter.invincible.test(l)) {
 						var h = l.getHealth();
-						var hp = Math.max(1D, h - ed);
-						float f = (float) (h - hp);
-						e.hurt(source, f <= 0F ? 0.001F : f);
+						var hp = Math.max(1F, h - damage);
+						float f = h - hp;
+						e.hurtServer(level, source, f <= 0F ? 0.001F : f);
 					} else {
-						e.hurt(source, (float) ed);
+						e.hurtServer(level, source, damage);
 					}
-
-					double ad;
-
-					if (e instanceof LivingEntity livingEntity) {
-						ad = ac * (1D - livingEntity.getAttributeValue(Attributes.EXPLOSION_KNOCKBACK_RESISTANCE));
-					} else {
-						ad = ac;
-					}
-
-					x *= ad * entity.horizontalKnockback;
-					y *= ad * entity.horizontalKnockback;
-					z *= ad * entity.horizontalKnockback;
-					y += entity.verticalKnockback;
-
-					e.setDeltaMovement(e.getDeltaMovement().add(new Vec3(x, y, z)));
 				}
 			}
+		}
+	}
 
+	public void knockBackEntities(Vec3 at, List<Entity> entities) {
+		double atx = at.x;
+		double aty = at.y;
+		double atz = at.z;
+
+		for (var e : entities) {
+			double x = e.getX() - atx;
+			double y = (e instanceof PrimedTnt ? e.getY() : e.getEyeY()) - aty;
+			double z = e.getZ() - atz;
+
+			double q = Math.min(inside((float) x, (float) y, (float) z), 1D);
+			double aa = Math.sqrt(x * x + y * y + z * z);
+
+			if (aa > 0D) {
+				x /= aa;
+				y /= aa;
+				z /= aa;
+				double ac = 1D - q;
+				double ad;
+
+				if (e instanceof LivingEntity livingEntity) {
+					ad = ac * (1D - livingEntity.getAttributeValue(Attributes.EXPLOSION_KNOCKBACK_RESISTANCE));
+				} else {
+					ad = ac;
+				}
+
+				x *= ad * entity.horizontalKnockback;
+				y *= ad * entity.horizontalKnockback;
+				z *= ad * entity.horizontalKnockback;
+				y += entity.verticalKnockback;
+
+				e.setDeltaMovement(e.getDeltaMovement().add(new Vec3(x, y, z)));
+			}
+		}
+	}
+
+	public void igniteEntities(List<Entity> entities) {
+		for (var e : entities) {
 			if (fire > 0F && !e.fireImmune()) {
 				e.igniteForTicks((int) (fire * 10));
 			}

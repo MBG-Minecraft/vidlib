@@ -7,6 +7,7 @@ import dev.beast.mods.shimmer.feature.bulk.UndoableModification;
 import dev.beast.mods.shimmer.math.KMath;
 import dev.beast.mods.shimmer.util.DebugColorBlocks;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -157,7 +158,12 @@ public class ExplosionInstance {
 	}
 
 	public void damageEntities() {
-		data.damageEntities(level, Vec3.atCenterOf(at), entities);
+		if (level instanceof ServerLevel serverLevel) {
+			var pos = Vec3.atCenterOf(at);
+			data.damageEntities(serverLevel, pos, entities);
+			data.knockBackEntities(pos, entities);
+			data.igniteEntities(entities);
+		}
 	}
 
 	public void create(BlockModificationConsumer modifications) {

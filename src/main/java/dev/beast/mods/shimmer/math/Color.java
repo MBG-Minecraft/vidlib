@@ -89,6 +89,10 @@ public record Color(int argb) implements Gradient {
 	public static final StreamCodec<ByteBuf, Color> STREAM_CODEC = ByteBufCodecs.INT.map(Color::of, Color::argb);
 	public static final KnownCodec<Color> KNOWN_CODEC = KnownCodec.register(Shimmer.id("color"), CODEC, STREAM_CODEC, Color.class);
 
+	public static Color hsb(float hue, float saturation, float brightness, int alpha) {
+		return of(Mth.hsvToArgb(hue, saturation, brightness, alpha));
+	}
+
 	public int rgb() {
 		return argb & 0xFFFFFF;
 	}

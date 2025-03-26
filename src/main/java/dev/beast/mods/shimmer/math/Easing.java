@@ -97,17 +97,34 @@ public final class Easing {
 		return function.get(x);
 	}
 
+	public float ease(float x) {
+		return (float) function.get(x);
+	}
+
 	public double easeClamped(double x) {
 		return function.get(KMath.clamp(x, 0D, 1D));
+	}
+
+	public float easeClamped(float x) {
+		return (float) function.get(KMath.clamp(x, 0D, 1D));
 	}
 
 	public double lerp(double t, double a, double b) {
 		return KMath.lerp(function.get(t), a, b);
 	}
 
+	public float lerp(float t, float a, float b) {
+		return KMath.lerp((float) function.get(t), a, b);
+	}
+
 	public Vec3 lerp(double t, Vec3 a, Vec3 b) {
 		var e = function.get(t);
 		return new Vec3(KMath.lerp(e, a.x, b.x), KMath.lerp(e, a.y, b.y), KMath.lerp(e, a.z, b.z));
+	}
+
+	public Vec3f lerp(float t, Vec3f a, Vec3f b) {
+		var e = function.get(t);
+		return Vec3f.of(KMath.lerp(e, a.x(), b.x()), KMath.lerp(e, a.y(), b.y()), KMath.lerp(e, a.z(), b.z()));
 	}
 
 	@Override

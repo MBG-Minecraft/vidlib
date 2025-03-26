@@ -2,6 +2,7 @@ package dev.beast.mods.shimmer.core;
 
 import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
+import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticles;
 import dev.beast.mods.shimmer.feature.prop.ClientPropList;
@@ -20,6 +21,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ShimmerClientLevel extends ShimmerLevel, ShimmerClientEntityContainer {
 	@Override
@@ -100,6 +102,15 @@ public interface ShimmerClientLevel extends ShimmerLevel, ShimmerClientEntityCon
 						0.0, 0.0, 0.0
 					);
 				}
+			}
+		}
+	}
+
+	@Override
+	default void spawnCubeParticles(Map<CubeParticleOptions, List<BlockPos>> map) {
+		for (var entry : map.entrySet()) {
+			for (var pos : entry.getValue()) {
+				shimmer$level().addParticle(entry.getKey(), pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, 0D, 0D, 0D);
 			}
 		}
 	}

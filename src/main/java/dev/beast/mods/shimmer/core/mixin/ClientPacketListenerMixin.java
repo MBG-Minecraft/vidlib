@@ -3,14 +3,21 @@ package dev.beast.mods.shimmer.core.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.authlib.GameProfile;
+import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.core.ShimmerClientPacketListener;
+import dev.beast.mods.shimmer.feature.entity.ExactEntitySpawnPayload;
+import dev.beast.mods.shimmer.feature.net.ShimmerPayloadContext;
 import dev.beast.mods.shimmer.feature.session.ShimmerLocalClientSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.CommonPlayerSpawnInfo;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -18,6 +25,10 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import javax.annotation.Nullable;
+import java.util.OptionalInt;
+import java.util.UUID;
 
 @Mixin(ClientPacketListener.class)
 public abstract class ClientPacketListenerMixin implements ShimmerClientPacketListener {
@@ -27,6 +38,13 @@ public abstract class ClientPacketListenerMixin implements ShimmerClientPacketLi
 	@Shadow
 	@Final
 	private GameProfile localGameProfile;
+
+	@Shadow
+	private OptionalInt removedPlayerVehicleId;
+
+	@Shadow
+	@Nullable
+	public abstract PlayerInfo getPlayerInfo(UUID uniqueId);
 
 	@Unique
 	private ShimmerLocalClientSessionData shimmer$sessionData;
@@ -43,6 +61,35 @@ public abstract class ClientPacketListenerMixin implements ShimmerClientPacketLi
 		}
 
 		return shimmer$sessionData;
+	}
+
+	@Override
+	public void shimmer$addEntity(ShimmerPayloadContext ctx, ExactEntitySpawnPayload payload) {
+		if (removedPlayerVehicleId.isPresent() && removedPlayerVehicleId.getAsInt() == payload.id()) {
+			removedPlayerVehicleId = OptionalInt.empty();
+		}
+
+		Entity entity;
+
+		if (payload.type() == EntityType.PLAYER) {
+			var playerinfo = getPlayerInfo(payload.uuid());
+
+			if (playerinfo == null) {
+				Shimmer.LOGGER.warn("Server attempted to add player prior to sending player info (Player id {})", payload.uuid());
+				return;
+			} else {
+				entity = new RemotePlayer(level, playerinfo.getProfile());
+			}
+		} else {
+			entity = payload.type().create(ctx.level(), EntitySpawnReason.LOAD);
+		}
+
+		if (entity != null) {
+			payload.update(entity);
+			level.addEntity(entity);
+		} else {
+			Shimmer.LOGGER.warn("Skipping Entity with id {}", payload.type());
+		}
 	}
 
 	@Inject(method = "handleLogin", at = @At("RETURN"))

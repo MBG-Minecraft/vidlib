@@ -5,7 +5,11 @@ import com.llamalad7.mixinextras.sugar.Local;
 import dev.beast.mods.shimmer.core.ShimmerEntity;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.entity.EntityOverrideValue;
+import dev.beast.mods.shimmer.feature.entity.ExactEntitySpawnPayload;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -69,6 +73,15 @@ public abstract class EntityMixin implements ShimmerEntity {
 	@Override
 	public boolean shimmer$isSaving() {
 		return shimmer$isSaving;
+	}
+
+	@Inject(method = "getAddEntityPacket", at = @At("HEAD"), cancellable = true)
+	public void shimmer$getAddEntityPacket(ServerEntity serverEntity, CallbackInfoReturnable<Packet<ClientGamePacketListener>> cir) {
+		var e = (Entity) (Object) this;
+
+		if (!e.getType().builtInRegistryHolder().getKey().location().getNamespace().equals("minecraft")) {
+			cir.setReturnValue((Packet) new ExactEntitySpawnPayload(e, serverEntity, 0).toS2C(e.level()));
+		}
 	}
 
 	@Inject(method = "isCurrentlyGlowing", at = @At("HEAD"), cancellable = true)

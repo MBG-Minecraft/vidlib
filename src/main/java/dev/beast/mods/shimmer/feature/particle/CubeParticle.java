@@ -19,7 +19,7 @@ public class CubeParticle extends Particle {
 		super(level, x, y, z);
 		this.options = options;
 		setSize(1F, 1F);
-		setLifetime(options.ttl());
+		setLifetime(Math.abs(options.ttl()));
 	}
 
 	@Override
@@ -31,21 +31,24 @@ public class CubeParticle extends Particle {
 		var rz = KMath.lerp(time, zo, z);
 
 		var cameraPos = camera.getPosition();
-		float minX = (float) (rx - 0.505D - cameraPos.x);
-		float minY = (float) (ry - 0.505D - cameraPos.y);
-		float minZ = (float) (rz - 0.505D - cameraPos.z);
-		float maxX = (float) (rx + 0.505D - cameraPos.x);
-		float maxY = (float) (ry + 0.505D - cameraPos.y);
-		float maxZ = (float) (rz + 0.505D - cameraPos.z);
+		double size = options.ttl() > 0 ? 0.505D : 0.2505D;
 
-		int alpha = time > (options.ttl() - 20) ? Mth.lerpInt(1F - (options.ttl() - time) / 20F, 50, 0) : 50;
+		float minX = (float) (rx - size - cameraPos.x);
+		float minY = (float) (ry - size - cameraPos.y);
+		float minZ = (float) (rz - size - cameraPos.z);
+		float maxX = (float) (rx + size - cameraPos.x);
+		float maxY = (float) (ry + size - cameraPos.y);
+		float maxZ = (float) (rz + size - cameraPos.z);
 
-		if (options.lineColor().argb() != 0) {
-			int lalpha = time > (options.ttl() - 20) ? Mth.lerpInt(1F - (options.ttl() - time) / 20F, 255, 0) : 255;
-			BoxRenderer.renderDebugLines(minX, minY, minZ, maxX, maxY, maxZ, ms, buffers, options.lineColor().withAlpha(lalpha));
+		if (options.lineColor().alpha() > 0) {
+			int alpha = time > (lifetime - 20) ? Mth.lerpInt(1F - (lifetime - time) / 20F, 255, 0) : 255;
+			BoxRenderer.renderDebugLines(minX, minY, minZ, maxX, maxY, maxZ, ms, buffers, options.lineColor().withAlpha(alpha));
 		}
 
-		BoxRenderer.renderDebugQuads(minX, minY, minZ, maxX, maxY, maxZ, ms, buffers, false, options.color().withAlpha(alpha));
+		if (options.color().alpha() > 0) {
+			int alpha = time > (lifetime - 20) ? Mth.lerpInt(1F - (lifetime - time) / 20F, 50, 0) : 50;
+			BoxRenderer.renderDebugQuads(minX, minY, minZ, maxX, maxY, maxZ, ms, buffers, false, options.color().withAlpha(alpha));
+		}
 	}
 
 	@Override
