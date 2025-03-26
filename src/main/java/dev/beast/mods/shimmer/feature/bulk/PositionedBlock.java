@@ -5,6 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
+import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
@@ -34,6 +35,9 @@ public record PositionedBlock(BlockPos pos, BlockState state) implements BulkLev
 	public static final StreamCodec<RegistryFriendlyByteBuf, List<PositionedBlock>> LIST_STREAM_CODEC = STREAM_CODEC.list();
 
 	public static final SimpleRegistryType<PositionedBlock> TYPE = SimpleRegistryType.dynamic(Shimmer.id("block"), MAP_CODEC, STREAM_CODEC);
+
+	public static final KnownCodec<PositionedBlock> KNOWN_CODEC = KnownCodec.register(Shimmer.id("positioned_block"), CODEC, STREAM_CODEC, PositionedBlock.class);
+	public static final KnownCodec<List<PositionedBlock>> LIST_KNOWN_CODEC = KNOWN_CODEC.listOf();
 
 	@Override
 	public SimpleRegistryType<?> type() {

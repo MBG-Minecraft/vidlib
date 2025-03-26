@@ -5,7 +5,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.codec.KnownCodec;
-import dev.beast.mods.shimmer.util.Cast;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -27,5 +26,5 @@ public record ChancedParticle(ParticleOptions particle, float chance) {
 	);
 
 	public static final KnownCodec<ChancedParticle> KNOWN_CODEC = KnownCodec.register(Shimmer.id("chanced_particle"), CODEC, STREAM_CODEC, ChancedParticle.class);
-	public static final KnownCodec<List<ChancedParticle>> LIST_KNOWN_CODEC = KnownCodec.register(Shimmer.id("chanced_particle_list"), CODEC.listOf(), STREAM_CODEC.list(), Cast.to(List.class));
+	public static final KnownCodec<List<ChancedParticle>> LIST_KNOWN_CODEC = KNOWN_CODEC.listOf();
 }

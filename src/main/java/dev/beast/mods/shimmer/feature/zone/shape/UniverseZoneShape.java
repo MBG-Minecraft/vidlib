@@ -48,6 +48,11 @@ public class UniverseZoneShape implements ZoneShape {
 	}
 
 	@Override
+	public boolean contains(BlockPos pos) {
+		return true;
+	}
+
+	@Override
 	public boolean intersects(AABB box) {
 		return true;
 	}

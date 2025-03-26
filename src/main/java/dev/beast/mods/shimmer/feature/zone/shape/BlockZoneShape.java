@@ -35,6 +35,16 @@ public record BlockZoneShape(BlockPos start, BlockPos end, AABB box) implements 
 	}
 
 	@Override
+	public boolean contains(BlockPos pos) {
+		return pos.getX() >= Math.min(start.getX(), end.getX())
+			&& pos.getX() <= Math.max(start.getX(), end.getX())
+			&& pos.getY() >= Math.min(start.getY(), end.getY())
+			&& pos.getY() <= Math.max(start.getY(), end.getY())
+			&& pos.getZ() >= Math.min(start.getZ(), end.getZ())
+			&& pos.getZ() <= Math.max(start.getZ(), end.getZ());
+	}
+
+	@Override
 	public Stream<BlockPos> getBlocks() {
 		return BlockPos.betweenClosedStream(start, end);
 	}

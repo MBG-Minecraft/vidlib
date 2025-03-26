@@ -87,6 +87,17 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box) implements Zo
 	}
 
 	@Override
+	public boolean contains(BlockPos pos) {
+		for (var zone : zoneShapes) {
+			if (zone.contains(pos)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
 	public boolean intersects(AABB box) {
 		if (box != null && !box.intersects(box)) {
 			return false;

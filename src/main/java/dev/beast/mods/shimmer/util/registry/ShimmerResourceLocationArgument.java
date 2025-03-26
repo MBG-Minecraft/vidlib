@@ -28,7 +28,7 @@ public class ShimmerResourceLocationArgument implements ArgumentType<ResourceLoc
 		return new ShimmerResourceLocationArgument();
 	}
 
-	public static ResourceLocation getId(CommandContext<CommandSourceStack> context, String name) {
+	public static ResourceLocation getId(CommandContext<?> context, String name) {
 		return context.getArgument(name, ResourceLocation.class);
 	}
 

@@ -74,12 +74,16 @@ public interface ZoneShape {
 		return getBoundingBox().contains(pos);
 	}
 
+	default boolean contains(BlockPos pos) {
+		return contains(Vec3.atCenterOf(pos));
+	}
+
 	default boolean intersects(AABB box) {
 		return getBoundingBox().intersects(box);
 	}
 
 	default Stream<BlockPos> getBlocks() {
-		return BlockPos.betweenClosedStream(getBoundingBox().inflate(0.5D)).filter(p -> contains(new Vec3(p.getX() + 0.5D, p.getY() + 0.5D, p.getZ() + 0.5D)));
+		return BlockPos.betweenClosedStream(getBoundingBox().inflate(0.5D)).filter(this::contains);
 	}
 
 	default List<Entity> collectEntities(Level level, Predicate<? super Entity> predicate) {

@@ -11,11 +11,13 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
+import dev.beast.mods.shimmer.util.Cast;
 import dev.beast.mods.shimmer.util.registry.ShimmerRegistry;
 import dev.beast.mods.shimmer.util.registry.ShimmerResourceLocationArgument;
 import dev.beast.mods.shimmer.util.registry.VideoResourceLocationArgument;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.arguments.ComponentArgument;
+import net.minecraft.commands.arguments.ResourceKeyArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.core.Registry;
@@ -38,6 +40,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSetting
 import net.neoforged.neoforge.server.command.EnumArgument;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,24 +53,43 @@ public record KnownCodec<T>(
 	Codec<T> codec,
 	Codec<Optional<T>> optionalCodec,
 	StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec,
-	Class<T> type,
-	BiFunction<KnownCodec<T>, CommandBuildContext, ArgumentType<T>> argumentType
+	BiFunction<KnownCodec<T>, CommandBuildContext, ArgumentType<T>> argumentType,
+	BiFunction<CommandContext<?>, String, T> argumentGetter
 ) {
 	public static final Map<ResourceLocation, KnownCodec<?>> MAP = new HashMap<>();
 
-	public static <T> KnownCodec<T> register(ResourceLocation id, Codec<T> codec, StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec, Class<T> type, BiFunction<KnownCodec<T>, CommandBuildContext, ArgumentType<T>> command) {
-		var knownCodec = new KnownCodec<>(id, codec, ShimmerCodecs.optional(codec), streamCodec, type, command);
+	public static <T> KnownCodec<T> register(ResourceLocation id, Codec<T> codec, StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec, BiFunction<KnownCodec<T>, CommandBuildContext, ArgumentType<T>> command, BiFunction<CommandContext<?>, String, T> argumentGetter) {
+		var old = MAP.get(id);
+
+		if (old != null) {
+			return (KnownCodec<T>) old;
+		}
+
+		var knownCodec = new KnownCodec<>(id, codec, ShimmerCodecs.optional(codec), streamCodec, command, argumentGetter);
 		MAP.put(id, knownCodec);
 		return knownCodec;
 	}
 
 	public static <T> KnownCodec<T> register(ResourceLocation id, Codec<T> codec, StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec, Class<T> type) {
-		return register(id, codec, streamCodec, type, (self, ctx) -> new CodecArgument<>(ctx.createSerializationContext(NbtOps.INSTANCE), self));
+		return register(
+			id,
+			codec,
+			streamCodec,
+			(self, ctx) -> new CodecArgument<>(ctx.createSerializationContext(NbtOps.INSTANCE), self),
+			(ctx, name) -> ctx.getArgument(name, type)
+		);
 	}
 
 	public static <E extends Enum<E>> KnownCodec<E> registerEnum(ResourceLocation id, E[] values, Function<E, String> nameGetter) {
 		Class<E> enumClass = (Class<E>) values.getClass().getComponentType();
-		return register(id, ShimmerCodecs.anyEnumCodec(values, nameGetter), ShimmerStreamCodecs.enumValue(values), enumClass, (self, ctx) -> EnumArgument.enumArgument(enumClass));
+
+		return register(
+			id,
+			ShimmerCodecs.anyEnumCodec(values, nameGetter),
+			ShimmerStreamCodecs.enumValue(values),
+			(self, ctx) -> EnumArgument.enumArgument(enumClass),
+			(ctx, name) -> ctx.getArgument(name, enumClass)
+		);
 	}
 
 	public static <E extends Enum<E>> KnownCodec<E> registerEnum(ResourceLocation id, E[] values) {
@@ -79,8 +101,8 @@ public record KnownCodec<T>(
 			registry.id,
 			ShimmerCodecs.map(registry::getMap, registry.keyCodec, registry::getId),
 			ShimmerStreamCodecs.map(registry::getMap, registry.keyStreamCodec, registry::getId),
-			type,
-			registry
+			registry,
+			(ctx, name) -> ctx.getArgument(name, type)
 		);
 	}
 
@@ -89,22 +111,23 @@ public record KnownCodec<T>(
 			registry.location(),
 			ResourceKey.codec(registry),
 			ShimmerStreamCodecs.resourceKey(registry),
-			(Class) ResourceKey.class
+			(self, ctx) -> ResourceKeyArgument.key(registry),
+			(ctx, name) -> Cast.to(ctx.getArgument(name, ResourceKey.class))
 		);
 	}
 
-	public static final KnownCodec<Boolean> BOOL = register(ResourceLocation.fromNamespaceAndPath("java", "bool"), Codec.BOOL, ByteBufCodecs.BOOL, Boolean.class, (self, ctx) -> BoolArgumentType.bool());
-	public static final KnownCodec<Integer> INT = register(ResourceLocation.fromNamespaceAndPath("java", "int"), Codec.INT, ByteBufCodecs.INT, Integer.class, (self, ctx) -> IntegerArgumentType.integer());
-	public static final KnownCodec<Integer> VAR_INT = register(ResourceLocation.fromNamespaceAndPath("java", "var_int"), Codec.INT, ByteBufCodecs.VAR_INT, Integer.class, (self, ctx) -> IntegerArgumentType.integer());
-	public static final KnownCodec<Long> LONG = register(ResourceLocation.fromNamespaceAndPath("java", "long"), Codec.LONG, ByteBufCodecs.LONG, Long.class, (self, ctx) -> LongArgumentType.longArg());
-	public static final KnownCodec<Long> VAR_LONG = register(ResourceLocation.fromNamespaceAndPath("java", "var_long"), Codec.LONG, ByteBufCodecs.VAR_LONG, Long.class, (self, ctx) -> LongArgumentType.longArg());
-	public static final KnownCodec<Float> FLOAT = register(ResourceLocation.fromNamespaceAndPath("java", "float"), Codec.FLOAT, ByteBufCodecs.FLOAT, Float.class, (self, ctx) -> FloatArgumentType.floatArg());
-	public static final KnownCodec<Double> DOUBLE = register(ResourceLocation.fromNamespaceAndPath("java", "double"), Codec.DOUBLE, ByteBufCodecs.DOUBLE, Double.class, (self, ctx) -> DoubleArgumentType.doubleArg());
-	public static final KnownCodec<String> STRING = register(ResourceLocation.fromNamespaceAndPath("java", "string"), Codec.STRING, ByteBufCodecs.STRING_UTF8, String.class, (self, ctx) -> StringArgumentType.string());
-	public static final KnownCodec<UUID> UUID = register(ResourceLocation.fromNamespaceAndPath("java", "uuid"), ShimmerCodecs.UUID, ShimmerStreamCodecs.UUID, UUID.class, (self, ctx) -> UuidArgument.uuid());
+	public static final KnownCodec<Boolean> BOOL = register(ResourceLocation.fromNamespaceAndPath("java", "bool"), Codec.BOOL, ByteBufCodecs.BOOL, (self, ctx) -> BoolArgumentType.bool(), BoolArgumentType::getBool);
+	public static final KnownCodec<Integer> INT = register(ResourceLocation.fromNamespaceAndPath("java", "int"), Codec.INT, ByteBufCodecs.INT, (self, ctx) -> IntegerArgumentType.integer(), IntegerArgumentType::getInteger);
+	public static final KnownCodec<Integer> VAR_INT = register(ResourceLocation.fromNamespaceAndPath("java", "var_int"), Codec.INT, ByteBufCodecs.VAR_INT, (self, ctx) -> IntegerArgumentType.integer(), IntegerArgumentType::getInteger);
+	public static final KnownCodec<Long> LONG = register(ResourceLocation.fromNamespaceAndPath("java", "long"), Codec.LONG, ByteBufCodecs.LONG, (self, ctx) -> LongArgumentType.longArg(), LongArgumentType::getLong);
+	public static final KnownCodec<Long> VAR_LONG = register(ResourceLocation.fromNamespaceAndPath("java", "var_long"), Codec.LONG, ByteBufCodecs.VAR_LONG, (self, ctx) -> LongArgumentType.longArg(), LongArgumentType::getLong);
+	public static final KnownCodec<Float> FLOAT = register(ResourceLocation.fromNamespaceAndPath("java", "float"), Codec.FLOAT, ByteBufCodecs.FLOAT, (self, ctx) -> FloatArgumentType.floatArg(), FloatArgumentType::getFloat);
+	public static final KnownCodec<Double> DOUBLE = register(ResourceLocation.fromNamespaceAndPath("java", "double"), Codec.DOUBLE, ByteBufCodecs.DOUBLE, (self, ctx) -> DoubleArgumentType.doubleArg(), DoubleArgumentType::getDouble);
+	public static final KnownCodec<String> STRING = register(ResourceLocation.fromNamespaceAndPath("java", "string"), Codec.STRING, ByteBufCodecs.STRING_UTF8, (self, ctx) -> StringArgumentType.string(), StringArgumentType::getString);
+	public static final KnownCodec<UUID> UUID = register(ResourceLocation.fromNamespaceAndPath("java", "uuid"), ShimmerCodecs.UUID, ShimmerStreamCodecs.UUID, (self, ctx) -> UuidArgument.uuid(), (ctx, name) -> ctx.getArgument(name, UUID.class));
 
-	public static final KnownCodec<ResourceLocation> ID = register(ResourceLocation.withDefaultNamespace("id"), ResourceLocation.CODEC, ResourceLocation.STREAM_CODEC, ResourceLocation.class, (self, ctx) -> ResourceLocationArgument.id());
-	public static final KnownCodec<Component> TEXT_COMPONENT = register(ResourceLocation.withDefaultNamespace("text_component"), ComponentSerialization.CODEC, ComponentSerialization.STREAM_CODEC, Component.class, (self, ctx) -> ComponentArgument.textComponent(ctx));
+	public static final KnownCodec<ResourceLocation> ID = register(ResourceLocation.withDefaultNamespace("id"), ResourceLocation.CODEC, ResourceLocation.STREAM_CODEC, (self, ctx) -> ResourceLocationArgument.id(), (ctx, name) -> ctx.getArgument(name, ResourceLocation.class));
+	public static final KnownCodec<Component> TEXT_COMPONENT = register(ResourceLocation.withDefaultNamespace("text_component"), ComponentSerialization.CODEC, ComponentSerialization.STREAM_CODEC, (self, ctx) -> ComponentArgument.textComponent(ctx), (ctx, name) -> ctx.getArgument(name, Component.class));
 	public static final KnownCodec<Mirror> MIRROR = registerEnum(ResourceLocation.withDefaultNamespace("mirror"), Mirror.values());
 	public static final KnownCodec<Rotation> ROTATION = registerEnum(ResourceLocation.withDefaultNamespace("rotation"), Rotation.values());
 	public static final KnownCodec<LiquidSettings> LIQUID_SETTINGS = registerEnum(ResourceLocation.withDefaultNamespace("liquid_settings"), LiquidSettings.values());
@@ -113,14 +136,18 @@ public record KnownCodec<T>(
 	public static final KnownCodec<ItemStack> OPTIONAL_ITEM = register(ResourceLocation.withDefaultNamespace("optional_item"), ItemStack.OPTIONAL_CODEC, ItemStack.OPTIONAL_STREAM_CODEC, ItemStack.class);
 	public static final KnownCodec<ParticleOptions> PARTICLE_OPTIONS = register(ResourceLocation.withDefaultNamespace("particle_options"), ParticleTypes.CODEC, ParticleTypes.STREAM_CODEC, ParticleOptions.class);
 
-	public static final KnownCodec<ResourceLocation> SHIMMER_ID = register(Shimmer.id("shimmer_id"), ShimmerCodecs.SHIMMER_ID, ShimmerStreamCodecs.SHIMMER_ID, ResourceLocation.class, (self, ctx) -> ShimmerResourceLocationArgument.id());
-	public static final KnownCodec<ResourceLocation> VIDEO_ID = register(Shimmer.id("video_id"), ShimmerCodecs.VIDEO_ID, ShimmerStreamCodecs.VIDEO_ID, ResourceLocation.class, (self, ctx) -> VideoResourceLocationArgument.id());
+	public static final KnownCodec<ResourceLocation> SHIMMER_ID = register(Shimmer.id("shimmer_id"), ShimmerCodecs.SHIMMER_ID, ShimmerStreamCodecs.SHIMMER_ID, (self, ctx) -> ShimmerResourceLocationArgument.id(), ShimmerResourceLocationArgument::getId);
+	public static final KnownCodec<ResourceLocation> VIDEO_ID = register(Shimmer.id("video_id"), ShimmerCodecs.VIDEO_ID, ShimmerStreamCodecs.VIDEO_ID, (self, ctx) -> VideoResourceLocationArgument.id(), VideoResourceLocationArgument::getId);
 
 	public ArgumentType<T> argument(CommandBuildContext commandBuildContext) {
 		return argumentType.apply(this, commandBuildContext);
 	}
 
-	public <S> T get(CommandContext<S> context, String name) {
-		return context.getArgument(name, type);
+	public T get(CommandContext<?> ctx, String name) {
+		return argumentGetter.apply(ctx, name);
+	}
+
+	public KnownCodec<List<T>> listOf() {
+		return register(id.withPath(p -> p + "_list"), codec.listOf(), streamCodec.list(), (Class) List.class);
 	}
 }

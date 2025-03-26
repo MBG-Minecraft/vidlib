@@ -27,7 +27,7 @@ public class VideoResourceLocationArgument implements ArgumentType<ResourceLocat
 		return new VideoResourceLocationArgument();
 	}
 
-	public static ResourceLocation getId(CommandContext<CommandSourceStack> context, String name) {
+	public static ResourceLocation getId(CommandContext<?> context, String name) {
 		return context.getArgument(name, ResourceLocation.class);
 	}
 

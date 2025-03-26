@@ -204,9 +204,19 @@ public class ClientGameEventHandler {
 					continue;
 				}
 
+				float y = 2.6F;
+
+				if (player.isCrouching()) {
+					y -= 0.4F;
+				}
+
+				if (player.shimmer$sessionData().scoreText != null) {
+					y += 0.3F;
+				}
+
 				ms.pushPose();
 				ms.translate(pos.x - cameraPos.x, pos.y - cameraPos.y, pos.z - cameraPos.z);
-				ms.translate(0F, player.isCrouching() ? 2.3F : 2.6F, 0F);
+				ms.translate(0F, y, 0F);
 				ms.mulPose(mc.gameRenderer.getMainCamera().rotation());
 				ms.scale(0.4F, 0.4F, 0.4F);
 

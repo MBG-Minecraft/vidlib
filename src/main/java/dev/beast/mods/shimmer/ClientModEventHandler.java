@@ -81,6 +81,8 @@ public class ClientModEventHandler {
 			state.setRenderData(MiscShimmerClientUtils.CREATIVE, Boolean.TRUE);
 		}
 
+		var session = player.shimmer$sessionData();
+
 		if (!player.isInvisible()) {
 			var clothing = player.getClothing();
 
@@ -90,7 +92,11 @@ public class ClientModEventHandler {
 		}
 
 		if (state.nameTag != null) {
-			state.nameTag = player.shimmer$sessionData().modifyPlayerName(state.nameTag);
+			state.nameTag = session.modifyPlayerName(state.nameTag);
+		}
+
+		if (session.scoreText != null) {
+			state.scoreText = session.scoreText;
 		}
 	}
 

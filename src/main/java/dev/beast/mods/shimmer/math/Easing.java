@@ -26,6 +26,9 @@ public final class Easing {
 		return easing;
 	}
 
+	public static final Easing MIN = add("min", x -> 0D);
+	public static final Easing MAX = add("max", x -> 1D);
+	public static final Easing HALF = add("half", x -> 0.5D);
 	public static final Easing LINEAR = add("linear", x -> x);
 	public static final Easing SMOOTHSTEP = add("smoothstep", KMath::smoothstep);
 	public static final Easing ISMOOTHSTEP = add("ismoothstep", KMath::ismoothstep);
