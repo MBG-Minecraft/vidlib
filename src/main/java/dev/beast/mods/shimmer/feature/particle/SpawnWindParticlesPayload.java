@@ -4,14 +4,10 @@ import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
 import dev.beast.mods.shimmer.feature.net.ShimmerPayloadContext;
-import net.minecraft.core.BlockPos;
 
-import java.util.List;
-import java.util.Map;
-
-public record SpawnCubeParticlesPayload(Map<CubeParticleOptions, List<BlockPos>> map) implements ShimmerPacketPayload {
+public record SpawnWindParticlesPayload(WindData data) implements ShimmerPacketPayload {
 	@AutoPacket
-	public static final ShimmerPacketType<SpawnCubeParticlesPayload> TYPE = ShimmerPacketType.internal("spawn_cube_particles", CubeParticleOptions.STREAM_CODEC.unboundedMap(BlockPos.STREAM_CODEC.list()).map(SpawnCubeParticlesPayload::new, SpawnCubeParticlesPayload::map));
+	public static final ShimmerPacketType<SpawnWindParticlesPayload> TYPE = ShimmerPacketType.internal("spawn_wind_particles", WindData.STREAM_CODEC.map(SpawnWindParticlesPayload::new, SpawnWindParticlesPayload::data));
 
 	@Override
 	public ShimmerPacketType<?> getType() {
@@ -25,6 +21,6 @@ public record SpawnCubeParticlesPayload(Map<CubeParticleOptions, List<BlockPos>>
 
 	@Override
 	public void handle(ShimmerPayloadContext ctx) {
-		ctx.level().spawnCubeParticles(map);
+		ctx.level().spawnWindParticles(ctx.createRandom(), data);
 	}
 }

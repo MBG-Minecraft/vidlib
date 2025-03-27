@@ -10,6 +10,7 @@ import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
 import dev.beast.mods.shimmer.feature.bulk.UndoableModification;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
+import dev.beast.mods.shimmer.feature.particle.WindData;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
 import dev.beast.mods.shimmer.feature.prop.PropList;
 import dev.beast.mods.shimmer.feature.sound.SoundData;
@@ -20,6 +21,7 @@ import dev.beast.mods.shimmer.math.worldposition.FollowingEntityWorldPosition;
 import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.player.Player;
@@ -163,5 +165,8 @@ public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEn
 	}
 
 	default void spawnCubeParticles(Map<CubeParticleOptions, List<BlockPos>> map) {
+	}
+
+	default void spawnWindParticles(RandomSource random, WindData data) {
 	}
 }

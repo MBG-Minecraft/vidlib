@@ -1,4 +1,4 @@
-package dev.beast.mods.shimmer.util;
+package dev.beast.mods.shimmer.feature.net;
 
 import dev.beast.mods.shimmer.core.ShimmerS2CPacketConsumer;
 import net.minecraft.network.protocol.Packet;

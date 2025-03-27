@@ -1,9 +1,9 @@
 package dev.beast.mods.shimmer;
 
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
+import dev.beast.mods.shimmer.feature.net.S2CPacketBundleBuilder;
 import dev.beast.mods.shimmer.util.Lazy;
 import dev.beast.mods.shimmer.util.MiscUtils;
-import dev.beast.mods.shimmer.util.S2CPacketBundleBuilder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;

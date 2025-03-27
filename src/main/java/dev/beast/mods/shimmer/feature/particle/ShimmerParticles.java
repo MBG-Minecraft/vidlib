@@ -40,6 +40,5 @@ public interface ShimmerParticles {
 	DeferredHolder<ParticleType<?>, ParticleType<LineParticleOptions>> LINE = register("line", () -> LineParticleOptions.CODEC, () -> LineParticleOptions.STREAM_CODEC);
 	DeferredHolder<ParticleType<?>, SimpleParticleType> BURN_SMOKE = register("burn_smoke");
 	DeferredHolder<ParticleType<?>, SimpleParticleType> SPARK = register("spark");
-	DeferredHolder<ParticleType<?>, SimpleParticleType> WIND = register("wind");
-	DeferredHolder<ParticleType<?>, SimpleParticleType> GROUND_WIND = register("ground_wind");
+	DeferredHolder<ParticleType<?>, ParticleType<WindParticleOptions>> WIND = register("wind", () -> WindParticleOptions.CODEC, () -> WindParticleOptions.STREAM_CODEC);
 }

@@ -125,18 +125,14 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment, Shi
 
 	@Override
 	default void shimmer$postTick(PauseType paused) {
-		if (!paused.tick()) {
-			return;
-		}
-
 		var level = shimmer$self().level;
 		var player = shimmer$self().player;
 
 		if (player != null && level != null) {
-			player.shimmer$sessionData().postTick(level, player);
+			player.shimmer$sessionData().postTick(level, player, paused);
 		}
 
-		if (level != null) {
+		if (level != null && paused.tick()) {
 			PhysicsParticleManager.tickAll(level, level.getGameTime());
 		}
 	}

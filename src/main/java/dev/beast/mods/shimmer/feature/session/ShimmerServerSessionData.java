@@ -6,7 +6,7 @@ import dev.beast.mods.shimmer.feature.input.PlayerInputChanged;
 import dev.beast.mods.shimmer.feature.input.SyncPlayerInputToClient;
 import dev.beast.mods.shimmer.feature.misc.RefreshNamePayload;
 import dev.beast.mods.shimmer.feature.misc.SyncPlayerTagsPayload;
-import dev.beast.mods.shimmer.util.S2CPacketBundleBuilder;
+import dev.beast.mods.shimmer.feature.net.S2CPacketBundleBuilder;
 import dev.beast.mods.shimmer.util.registry.SyncRegistryPayload;
 import dev.beast.mods.shimmer.util.registry.SyncedRegistry;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;

@@ -363,36 +363,42 @@ public class ExplosionData {
 	}
 
 	public void damageEntities(ServerLevel level, Vec3 at, List<Entity> entities) {
+		if (entity.minDamage <= 0F && entity.maxDamage <= 0F) {
+			return;
+		}
+
 		var source = level.damageSources().explosion(null, null);
 		double atx = at.x;
 		double aty = at.y;
 		double atz = at.z;
 
 		for (var e : entities) {
-			if (entity.maxDamage > 0F) {
-				double x = e.getX() - atx;
-				double y = (e instanceof PrimedTnt ? e.getY() : e.getEyeY()) - aty;
-				double z = e.getZ() - atz;
+			double x = e.getX() - atx;
+			double y = (e instanceof PrimedTnt ? e.getY() : e.getEyeY()) - aty;
+			double z = e.getZ() - atz;
 
-				double inside = Math.min(inside((float) x, (float) y, (float) z), 1D);
+			double inside = Math.min(inside((float) x, (float) y, (float) z), 1D);
 
-				if (inside <= 1D) {
-					var damage = entity.damage((float) inside);
+			if (inside <= 1D) {
+				var damage = entity.damage((float) inside);
 
-					if (e instanceof LivingEntity l && filter.invincible.test(l)) {
-						var h = l.getHealth();
-						var hp = Math.max(1F, h - damage);
-						float f = h - hp;
-						e.hurtServer(level, source, f <= 0F ? 0.001F : f);
-					} else {
-						e.hurtServer(level, source, damage);
-					}
+				if (e instanceof LivingEntity l && filter.invincible.test(l)) {
+					var h = l.getHealth();
+					var hp = Math.max(1F, h - damage);
+					float f = h - hp;
+					e.hurtServer(level, source, f <= 0F ? 0.001F : f);
+				} else {
+					e.hurtServer(level, source, damage);
 				}
 			}
 		}
 	}
 
 	public void knockBackEntities(Vec3 at, List<Entity> entities) {
+		if (entity.horizontalKnockback <= 0F && entity.verticalKnockback <= 0F) {
+			return;
+		}
+
 		double atx = at.x;
 		double aty = at.y;
 		double atz = at.z;
@@ -429,8 +435,12 @@ public class ExplosionData {
 	}
 
 	public void igniteEntities(List<Entity> entities) {
+		if (fire <= 0F) {
+			return;
+		}
+
 		for (var e : entities) {
-			if (fire > 0F && !e.fireImmune()) {
+			if (!e.fireImmune()) {
 				e.igniteForTicks((int) (fire * 10));
 			}
 		}

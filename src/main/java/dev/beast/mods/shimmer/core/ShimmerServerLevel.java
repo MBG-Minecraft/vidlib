@@ -7,6 +7,8 @@ import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
 import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
 import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
 import dev.beast.mods.shimmer.feature.particle.SpawnCubeParticlesPayload;
+import dev.beast.mods.shimmer.feature.particle.SpawnWindParticlesPayload;
+import dev.beast.mods.shimmer.feature.particle.WindData;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticlesIdPayload;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticlesPayload;
@@ -20,6 +22,7 @@ import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -102,6 +105,11 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 	@Override
 	default void spawnCubeParticles(Map<CubeParticleOptions, List<BlockPos>> map) {
 		s2c(new SpawnCubeParticlesPayload(map));
+	}
+
+	@Override
+	default void spawnWindParticles(RandomSource random, WindData data) {
+		s2c(new SpawnWindParticlesPayload(data));
 	}
 
 	default boolean shimmer$cancelWrite() {

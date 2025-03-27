@@ -120,6 +120,7 @@ public class ClientGameEventHandler {
 
 		var session = mc.player.shimmer$sessionData();
 		float delta = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+		float timerDelta = event.getPartialTick().getGameTimeDeltaPartialTick(true);
 
 		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SKY) {
 			mc.shimmer$renderSetup(event, delta);
@@ -192,16 +193,16 @@ public class ClientGameEventHandler {
 
 				var h = player.getPlumbobHolder();
 
-				if (h == null) {
+				if (h == null || player == mc.player && mc.options.getCameraType().isFirstPerson()) {
 					continue;
 				}
 
 				var source = mc.renderBuffers().bufferSource();
-				var blockpos = BlockPos.containing(player.getLightProbePosition(delta));
+				var blockpos = BlockPos.containing(player.getLightProbePosition(timerDelta));
 				int light = LightTexture.pack(mc.level.getBrightness(LightLayer.BLOCK, blockpos), mc.level.getBrightness(LightLayer.SKY, blockpos));
 
 				var cam = mc.gameRenderer.getMainCamera().getPosition();
-				var pos = player.getPosition(delta);
+				var pos = player.getPosition(timerDelta);
 
 				if (KMath.sq(pos.x - cam.x) + KMath.sq(pos.z - cam.z) <= 0.01D * 0.01D) {
 					continue;

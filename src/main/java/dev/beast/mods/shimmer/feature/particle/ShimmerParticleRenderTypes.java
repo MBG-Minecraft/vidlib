@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.feature.particle;
 
+import dev.beast.mods.shimmer.math.DistanceComparator;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -50,11 +51,7 @@ public class ShimmerParticleRenderTypes {
 	public static void shimmer$renderParticleTypePost(Camera camera, float partialTick, MultiBufferSource.BufferSource bufferSource, ParticleRenderType particleType) {
 		if (shimmer$sortedParticleList != null && !shimmer$sortedParticleList.isEmpty()) {
 			if (shimmer$sortedParticleList.size() >= 2) {
-				shimmer$sortedParticleList.sort((a, b) -> {
-					var aDist = camera.getPosition().distanceToSqr(a.getPos());
-					var bDist = camera.getPosition().distanceToSqr(b.getPos());
-					return Double.compare(bDist, aDist);
-				});
+				shimmer$sortedParticleList.sort(new DistanceComparator<>(camera.getPosition(), Particle::getPos));
 			}
 
 			var buffer = bufferSource.getBuffer(Objects.requireNonNull(particleType.renderType()));

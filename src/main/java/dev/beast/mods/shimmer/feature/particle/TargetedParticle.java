@@ -1,16 +1,20 @@
 package dev.beast.mods.shimmer.feature.particle;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.beast.mods.shimmer.math.Easing;
+import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
 
 public class TargetedParticle extends TextureSheetParticle {
 	public final Vec3 origin;
 	public final Vec3 target;
 	public final Easing easing;
+	public int oAge;
 	public float oAlpha;
 	public float oQuadSizeMod;
 	public float quadSizeMod;
@@ -30,6 +34,7 @@ public class TargetedParticle extends TextureSheetParticle {
 		this.rCol = this.gCol = this.bCol = 1F;
 		this.oQuadSizeMod = this.quadSizeMod = 0F;
 		this.oAlpha = this.alpha = 0F;
+		this.oAge = 0;
 	}
 
 	@Override
@@ -38,31 +43,51 @@ public class TargetedParticle extends TextureSheetParticle {
 	}
 
 	@Override
+	protected void renderRotatedQuad(VertexConsumer buffer, Camera camera, Quaternionf quaternion, float delta) {
+		var cam = camera.getPosition();
+		double a = easing.ease(Mth.lerp(delta, oAge, age) / (double) lifetime);
+		float rx = (float) (Mth.lerp(a, origin.x, target.x) - cam.x);
+		float ry = (float) (Mth.lerp(a, origin.y, target.y) - cam.y);
+		float rz = (float) (Mth.lerp(a, origin.z, target.z) - cam.z);
+		renderRotatedQuad(buffer, quaternion, rx, ry, rz, delta);
+	}
+
+	@Override
 	public void tick() {
+		oAge = age;
 		oQuadSizeMod = quadSizeMod;
 		oRoll = roll;
 		oAlpha = alpha;
 		hasPhysics = yd < 0D;
-		super.tick();
+		xd = 0D;
+		yd = 0D;
+		zd = 0D;
+		xo = x;
+		yo = y;
+		zo = z;
+
 		double a = easing.ease(age / (double) lifetime);
-		// xd = Mth.lerp(a, origin.x, target.y) - x;
-		// yd = Mth.lerp(a, origin.y, target.y) - y;
-		// zd = Mth.lerp(a, origin.z, target.z) - z;
-		x = Mth.lerp(a, origin.x, target.x);
-		y = Mth.lerp(a, origin.y, target.y);
-		z = Mth.lerp(a, origin.z, target.z);
-		oRoll = roll;
+
+		setPos(
+			Mth.lerp(a, origin.x, target.x),
+			Mth.lerp(a, origin.y, target.y),
+			Mth.lerp(a, origin.z, target.z)
+		);
 
 		if (a >= 0.8D) {
 			alpha = (float) (1D - (a - 0.8D) / 0.2D) * 0.8F;
 		} else {
-			alpha = 0.8F;
+			alpha = 0.2F;
 		}
 
 		if (a >= 0.8D) {
 			quadSizeMod = (float) Mth.lerp((a - 0.8D) / 0.2D, 1D, 2D);
 		} else {
 			quadSizeMod = 1F;
+		}
+
+		if (age++ >= lifetime) {
+			remove();
 		}
 	}
 

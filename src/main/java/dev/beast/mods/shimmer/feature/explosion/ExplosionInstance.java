@@ -4,10 +4,13 @@ import dev.beast.mods.shimmer.feature.bulk.BlockModificationConsumer;
 import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
 import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
 import dev.beast.mods.shimmer.feature.bulk.UndoableModification;
+import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
+import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.KMath;
 import dev.beast.mods.shimmer.util.DebugColorBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -16,6 +19,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class ExplosionInstance {
@@ -227,6 +231,40 @@ public class ExplosionInstance {
 		}
 
 		return list;
+	}
+
+	public void displayEntityDamage(int duration) {
+		var center = Vec3.atCenterOf(at);
+		var blocks = new ArrayList<List<BlockPos>>();
+		var maxBlocks = Mth.ceil(data.radius + 1F);
+
+		for (int i = 0; i < maxBlocks; i++) {
+			blocks.add(new ArrayList<>());
+		}
+
+		for (var bpos : BlockPos.betweenClosed(data.getBounds(center).inflate(0.5D))) {
+			var inside = data.inside(
+				(float) (bpos.getX() + 0.5D - center.x),
+				(float) (bpos.getY() + 0.5D - center.y),
+				(float) (bpos.getZ() + 0.5D - center.z)
+			);
+
+			if (inside >= 0D && inside <= 1D && level.getBlockState(bpos).isAir() && !level.getBlockState(bpos.below()).isAir()) {
+				blocks.get(Math.clamp((int) (data.entity.damageEasing.easeClamped(inside) * (blocks.size() - 1D)), 0, blocks.size() - 1)).add(bpos.immutable());
+			}
+		}
+
+		var map = new HashMap<CubeParticleOptions, List<BlockPos>>();
+
+		for (int i = 0; i < blocks.size(); i++) {
+			var list = blocks.get(i);
+
+			if (!list.isEmpty()) {
+				map.put(new CubeParticleOptions(Color.hsb(KMath.lerp(i / (float) blocks.size(), 0F, 0.5F), 1F, 1F, 255), Color.TRANSPARENT, -duration), list);
+			}
+		}
+
+		level.spawnCubeParticles(map);
 	}
 
 	@Override

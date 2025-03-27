@@ -185,10 +185,6 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 
 	@ApiStatus.Internal
 	public void preTick(ClientLevel level, LocalPlayer player, Window window, PauseType paused) {
-		if (!paused.tick()) {
-			return;
-		}
-
 		filteredZones.tick(level);
 
 		updateOverrides(player);
@@ -208,8 +204,8 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	}
 
 	@ApiStatus.Internal
-	public void postTick(ClientLevel level, @Nullable LocalPlayer player) {
-		if (scheduledTaskHandler != null) {
+	public void postTick(ClientLevel level, @Nullable LocalPlayer player, PauseType paused) {
+		if (scheduledTaskHandler != null && paused.tick()) {
 			scheduledTaskHandler.tick();
 		}
 
@@ -242,10 +238,12 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 
 		cameraShake = Math.abs(shakeX) <= 0.0001D && Math.abs(shakeY) <= 0.0001D ? Vec2d.ZERO : new Vec2d(shakeX, shakeY);
 
-		tick++;
+		if (paused.tick()) {
+			tick++;
 
-		for (var session : remoteSessionData.values()) {
-			session.tick++;
+			for (var session : remoteSessionData.values()) {
+				session.tick++;
+			}
 		}
 	}
 

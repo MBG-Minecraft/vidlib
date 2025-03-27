@@ -3,6 +3,8 @@ package dev.beast.mods.shimmer.core;
 import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
+import dev.beast.mods.shimmer.feature.particle.WindData;
+import dev.beast.mods.shimmer.feature.particle.WindType;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticles;
 import dev.beast.mods.shimmer.feature.prop.ClientPropList;
@@ -16,6 +18,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -111,6 +114,27 @@ public interface ShimmerClientLevel extends ShimmerLevel, ShimmerClientEntityCon
 		for (var entry : map.entrySet()) {
 			for (var pos : entry.getValue()) {
 				shimmer$level().addParticle(entry.getKey(), pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, 0D, 0D, 0D);
+			}
+		}
+	}
+
+	@Override
+	default void spawnWindParticles(RandomSource random, WindData data) {
+		var particles = Minecraft.getInstance().particleEngine;
+
+		for (int i = 0; i < data.count(); i++) {
+			double x = data.position().getX() + random.nextFloat();
+			double y = data.position().getY() + random.nextFloat() * (data.options().ground() ? 0.12D : 1D);
+			double z = data.position().getZ() + random.nextFloat();
+			double angle = data.type() == WindType.ANGLED ? Math.toRadians(-data.yaw()) : random.nextDouble() * Math.PI * 2D;
+			double vx = Math.cos(angle) * data.radius();
+			double vy = 0D;
+			double vz = Math.sin(angle) * data.radius();
+
+			var p = particles.createParticle(data.options(), x, y, z, vx, vy, vz);
+
+			if (p != null) {
+				particles.add(p);
 			}
 		}
 	}
