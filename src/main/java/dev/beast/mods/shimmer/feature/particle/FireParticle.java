@@ -24,7 +24,7 @@ public class FireParticle extends TargetedParticle {
 		this.spriteSet = spriteSet;
 		this.gradient = options.resolveGradient();
 		this.lifetime = (int) (options.lifespan() * (1F + random.nextFloat() * 0.2F - 0.1F));
-		this.setSpriteFromAge(spriteSet);
+		this.pickSprite(spriteSet);
 		this.quadSize *= 2F;
 		this.randomOffset = 0.8F + random.nextFloat() * 0.4F;
 		var color = (gradient == null ? Color.WHITE : gradient).get(0F);
@@ -39,8 +39,15 @@ public class FireParticle extends TargetedParticle {
 	@Override
 	public void tick() {
 		super.tick();
-		setSpriteFromAge(spriteSet);
-		quadSizeMod = KMath.lerp(easing.ease(age / (float) lifetime), 0.25F, 1F) * options.scale();
+
+		if (age > lifetime - 3) {
+			alpha = 1F - (age - lifetime + 3) / 3F;
+			quadSizeMod = KMath.lerp(easing.ease(age / (float) lifetime), 0.25F, 1F) * options.scale() * alpha;
+		} else {
+			alpha = 1F;
+			quadSizeMod = KMath.lerp(easing.ease(age / (float) lifetime), 0.25F, 1F) * options.scale();
+		}
+
 		var color = (gradient == null ? Color.WHITE : gradient).get(age * randomOffset / (float) lifetime);
 		setColor(color.redf(), color.greenf(), color.bluef());
 	}

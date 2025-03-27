@@ -6,6 +6,7 @@ import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
@@ -163,6 +164,26 @@ public record Rotation(float yaw, float pitch, float roll, Type type) {
 				KMath.lerp(delta, rollDeg(), to.rollDeg())
 			);
 		}
+	}
+
+	public Vec3 lookVec3(double dist) {
+		float p = pitchRad();
+		float y = -yawRad();
+		float yc = Mth.cos(y);
+		float ys = Mth.sin(y);
+		float pc = Mth.cos(p);
+		float ps = Mth.sin(p);
+		return new Vec3(ys * pc * dist, -ps * dist, yc * pc * dist);
+	}
+
+	public Vec3f lookVec3f(float dist) {
+		float p = pitchRad();
+		float y = -yawRad();
+		float yc = Mth.cos(y);
+		float ys = Mth.sin(y);
+		float pc = Mth.cos(p);
+		float ps = Mth.sin(p);
+		return new Vec3f(ys * pc * dist, -ps * dist, yc * pc * dist);
 	}
 
 	@Override

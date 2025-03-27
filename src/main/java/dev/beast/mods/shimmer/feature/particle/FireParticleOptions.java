@@ -42,7 +42,7 @@ public record FireParticleOptions(Either<ResourceLocation, Gradient> gradient, i
 
 	@Override
 	public ParticleType<?> getType() {
-		return ShimmerParticles.WIND.get();
+		return ShimmerParticles.FIRE.get();
 	}
 
 	public FireParticleOptions withResolvedGradient() {
