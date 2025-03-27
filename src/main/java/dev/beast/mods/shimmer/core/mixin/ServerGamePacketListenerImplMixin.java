@@ -4,6 +4,7 @@ import dev.beast.mods.shimmer.core.ShimmerServerPacketListener;
 import dev.beast.mods.shimmer.feature.session.ShimmerServerSessionData;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -26,5 +27,13 @@ public class ServerGamePacketListenerImplMixin implements ShimmerServerPacketLis
 	@Inject(method = "onDisconnect", at = @At("RETURN"))
 	private void shimmer$close(CallbackInfo ci) {
 		shimmer$sessionData().closed();
+	}
+
+	/**
+	 * @author Lat
+	 * @reason Yeet
+	 */
+	@Overwrite
+	private void detectRateSpam() {
 	}
 }
