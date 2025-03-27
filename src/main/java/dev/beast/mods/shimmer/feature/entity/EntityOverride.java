@@ -127,6 +127,7 @@ public final class EntityOverride<T> {
 	public static final EntityOverride<Component> SCORE_TEXT = createKey("score_text", KnownCodec.TEXT_COMPONENT);
 	public static final EntityOverride<Boolean> NAME_HIDDEN = createBooleanKey("name_hidden");
 	public static final EntityOverride<List<ChancedParticle>> ENVIRONMENT_EFFECTS = createKey("environment_effects", ChancedParticle.LIST_KNOWN_CODEC);
+	public static final EntityOverride<Boolean> SCALE_DAMAGE_WITH_DIFFICULTY = createBooleanKey("scale_damage_with_difficulty");
 
 	public final String id;
 	private final KnownCodec<T> type;
