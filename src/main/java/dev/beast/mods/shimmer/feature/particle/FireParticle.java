@@ -1,6 +1,5 @@
 package dev.beast.mods.shimmer.feature.particle;
 
-import dev.beast.mods.shimmer.feature.gradient.ClientGradients;
 import dev.beast.mods.shimmer.feature.gradient.Gradient;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.KMath;
@@ -23,7 +22,7 @@ public class FireParticle extends TargetedParticle {
 		this.hasPhysics = false;
 		this.options = options;
 		this.spriteSet = spriteSet;
-		this.gradient = ClientGradients.REGISTRY.get(options.gradient());
+		this.gradient = options.resolveGradient();
 		this.lifetime = (int) (options.lifespan() * (1F + random.nextFloat() * 0.2F - 0.1F));
 		this.setSpriteFromAge(spriteSet);
 		this.quadSize *= 2F;

@@ -73,6 +73,10 @@ public class BasicShimmerRegistry<K, V> implements Iterable<V> {
 		return map.get(id);
 	}
 
+	public V get(K id, V def) {
+		return map.getOrDefault(id, def);
+	}
+
 	public K getId(V value) {
 		return reverseMap.get(value);
 	}

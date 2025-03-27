@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
@@ -37,6 +38,8 @@ public class ShimmerRegistry<V> extends BasicShimmerRegistry<ResourceLocation, V
 	public final Codec<ResourceLocation> keyCodec;
 	public final StreamCodec<ByteBuf, ResourceLocation> keyStreamCodec;
 	public final SuggestionProvider<CommandSourceStack> suggestionProvider;
+	public final Codec<V> valueCodec;
+	public final StreamCodec<ByteBuf, V> valueStreamCodec;
 
 	private ShimmerRegistry(String _id, boolean preferInternal, Side side) {
 		super(side);
@@ -45,6 +48,16 @@ public class ShimmerRegistry<V> extends BasicShimmerRegistry<ResourceLocation, V
 		this.keyCodec = preferInternal ? ShimmerCodecs.SHIMMER_ID : ShimmerCodecs.VIDEO_ID;
 		this.keyStreamCodec = preferInternal ? ShimmerStreamCodecs.SHIMMER_ID : ShimmerStreamCodecs.VIDEO_ID;
 		this.suggestionProvider = preferInternal ? ShimmerResourceLocationArgument.registerSuggestionProvider(id, this) : VideoResourceLocationArgument.registerSuggestionProvider(id, this);
+
+		this.valueCodec = keyCodec.flatXmap(id -> {
+			var value = get(id);
+			return value == null ? DataResult.error(() -> "Not found") : DataResult.success(value);
+		}, value -> {
+			var id = getId(value);
+			return id == null ? DataResult.error(() -> "Not found") : DataResult.success(id);
+		});
+
+		this.valueStreamCodec = keyStreamCodec.map(this::get, this::getId);
 	}
 
 	@Override

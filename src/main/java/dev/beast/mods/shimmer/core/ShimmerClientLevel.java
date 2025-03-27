@@ -138,13 +138,14 @@ public interface ShimmerClientLevel extends ShimmerLevel, ShimmerClientEntityCon
 	@Override
 	default void spawnFireParticles(RandomSource random, FireData data) {
 		var particles = Minecraft.getInstance().particleEngine;
+		var options = data.options().withResolvedGradient();
 
 		for (int i = 0; i < data.data().count(); i++) {
 			var x = data.data().position().getX() + random.nextFloat();
 			var y = data.data().position().getY() + random.nextFloat();
 			var z = data.data().position().getZ() + random.nextFloat();
 			var v = data.data().type().velocity(random, data.data().radius(), data.data().yaw());
-			var p = particles.createParticle(data.options(), x, y, z, v.x, v.y, v.z);
+			var p = particles.createParticle(options, x, y, z, v.x, v.y, v.z);
 
 			if (p != null) {
 				particles.add(p);

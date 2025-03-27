@@ -18,6 +18,8 @@ public class ClientGradients extends SimplePreparableReloadListener<Map<Resource
 
 	public static final RegistryRef<Gradient> FIRE_A = REGISTRY.ref(Shimmer.id("fire_a"));
 	public static final RegistryRef<Gradient> FIRE_B = REGISTRY.ref(Shimmer.id("fire_b"));
+	public static final RegistryRef<Gradient> FIRE_C = REGISTRY.ref(Shimmer.id("fire_c"));
+	public static final RegistryRef<Gradient> FIRE_D = REGISTRY.ref(Shimmer.id("fire_d"));
 	public static final RegistryRef<Gradient> SPARK = REGISTRY.ref(Shimmer.id("spark"));
 
 	@Override
