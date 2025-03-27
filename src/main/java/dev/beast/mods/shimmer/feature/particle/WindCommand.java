@@ -5,7 +5,6 @@ import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.ServerCommandHolder;
-import dev.beast.mods.shimmer.math.Easing;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.AngleArgument;
@@ -22,15 +21,13 @@ public interface WindCommand {
 					.then(Commands.argument("count", IntegerArgumentType.integer(1))
 						.then(Commands.argument("radius", FloatArgumentType.floatArg(0.1F))
 							.then(Commands.argument("ground", BoolArgumentType.bool())
-								.then(Commands.argument("air", BoolArgumentType.bool())
-									.executes(ctx -> angledWind(ctx.getSource(),
-										BlockPosArgument.getBlockPos(ctx, "position"),
-										IntegerArgumentType.getInteger(ctx, "count"),
-										FloatArgumentType.getFloat(ctx, "radius"),
-										AngleArgument.getAngle(ctx, "yaw"),
-										BoolArgumentType.getBool(ctx, "ground")
-									))
-								)
+								.executes(ctx -> angledWind(ctx.getSource(),
+									BlockPosArgument.getBlockPos(ctx, "position"),
+									IntegerArgumentType.getInteger(ctx, "count"),
+									FloatArgumentType.getFloat(ctx, "radius"),
+									AngleArgument.getAngle(ctx, "yaw"),
+									BoolArgumentType.getBool(ctx, "ground")
+								))
 							)
 						)
 					)
@@ -42,14 +39,12 @@ public interface WindCommand {
 				.then(Commands.argument("count", IntegerArgumentType.integer(1))
 					.then(Commands.argument("radius", FloatArgumentType.floatArg(0.1F))
 						.then(Commands.argument("ground", BoolArgumentType.bool())
-							.then(Commands.argument("air", BoolArgumentType.bool())
-								.executes(ctx -> circularWind(ctx.getSource(),
-									BlockPosArgument.getBlockPos(ctx, "position"),
-									IntegerArgumentType.getInteger(ctx, "count"),
-									FloatArgumentType.getFloat(ctx, "radius"),
-									BoolArgumentType.getBool(ctx, "ground")
-								))
-							)
+							.executes(ctx -> circularWind(ctx.getSource(),
+								BlockPosArgument.getBlockPos(ctx, "position"),
+								IntegerArgumentType.getInteger(ctx, "count"),
+								FloatArgumentType.getFloat(ctx, "radius"),
+								BoolArgumentType.getBool(ctx, "ground")
+							))
 						)
 					)
 				)
@@ -74,17 +69,17 @@ public interface WindCommand {
 	);
 
 	static int angledWind(CommandSourceStack source, BlockPos position, int count, float radius, float yaw, boolean ground) {
-		source.getLevel().spawnWindParticles(source.getLevel().random, new WindData(new WindParticleOptions(100, ground, Easing.SINE_OUT), WindType.ANGLED, position, count, radius, yaw));
+		source.getLevel().spawnWindParticles(source.getLevel().random, new WindData(new WindParticleOptions(100, ground, 1F), new ParticleMovementData(ParticleMovementType.ANGLED, position, count, radius, yaw)));
 		return 1;
 	}
 
 	static int circularWind(CommandSourceStack source, BlockPos position, int count, float radius, boolean ground) {
-		source.getLevel().spawnWindParticles(source.getLevel().random, new WindData(new WindParticleOptions(100, ground, Easing.SINE_OUT), WindType.CIRCULAR, position, count, radius, 0F));
+		source.getLevel().spawnWindParticles(source.getLevel().random, new WindData(new WindParticleOptions(100, ground, 1F), new ParticleMovementData(ParticleMovementType.CIRCULAR, position, count, radius, 0F)));
 		return 1;
 	}
 
 	static int squareWind(CommandSourceStack source, BlockPos position, int count, float radius, boolean ground) {
-		source.getLevel().spawnWindParticles(source.getLevel().random, new WindData(new WindParticleOptions(100, ground, Easing.SINE_OUT), WindType.SQUARE, position, count, radius, 0F));
+		source.getLevel().spawnWindParticles(source.getLevel().random, new WindData(new WindParticleOptions(100, ground, 1F), new ParticleMovementData(ParticleMovementType.SQUARE, position, count, radius, 0F)));
 		return 1;
 	}
 }

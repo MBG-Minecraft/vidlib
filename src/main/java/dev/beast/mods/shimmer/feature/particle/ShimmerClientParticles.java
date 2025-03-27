@@ -9,5 +9,6 @@ public class ShimmerClientParticles {
 		event.registerSpriteSet(ShimmerParticles.BURN_SMOKE.get(), BurnSmokeParticle::create);
 		event.registerSpriteSet(ShimmerParticles.SPARK.get(), SparkParticle::create);
 		event.registerSpriteSet(ShimmerParticles.WIND.get(), WindParticle::create);
+		event.registerSpriteSet(ShimmerParticles.FIRE.get(), FireParticle::create);
 	}
 }

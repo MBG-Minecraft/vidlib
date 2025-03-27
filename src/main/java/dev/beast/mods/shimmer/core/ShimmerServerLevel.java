@@ -6,7 +6,9 @@ import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationPayload;
 import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
 import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
 import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
+import dev.beast.mods.shimmer.feature.particle.FireData;
 import dev.beast.mods.shimmer.feature.particle.SpawnCubeParticlesPayload;
+import dev.beast.mods.shimmer.feature.particle.SpawnFireParticlesPayload;
 import dev.beast.mods.shimmer.feature.particle.SpawnWindParticlesPayload;
 import dev.beast.mods.shimmer.feature.particle.WindData;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
@@ -110,6 +112,11 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 	@Override
 	default void spawnWindParticles(RandomSource random, WindData data) {
 		s2c(new SpawnWindParticlesPayload(data));
+	}
+
+	@Override
+	default void spawnFireParticles(RandomSource random, FireData data) {
+		s2c(new SpawnFireParticlesPayload(data));
 	}
 
 	default boolean shimmer$cancelWrite() {

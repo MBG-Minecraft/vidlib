@@ -43,6 +43,6 @@ public class WindParticle extends TargetedParticle {
 	public void tick() {
 		super.tick();
 		setSpriteFromAge(spriteSet);
-		quadSizeMod = KMath.lerp(easing.ease(age / (float) lifetime), 0.25F, 1F);
+		quadSizeMod = KMath.lerp(easing.ease(age / (float) lifetime), 0.25F, 1F) * options.scale();
 	}
 }
