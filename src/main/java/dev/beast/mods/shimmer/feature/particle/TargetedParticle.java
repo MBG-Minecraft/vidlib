@@ -44,12 +44,7 @@ public class TargetedParticle extends TextureSheetParticle {
 
 	@Override
 	protected void renderRotatedQuad(VertexConsumer buffer, Camera camera, Quaternionf quaternion, float delta) {
-		var cam = camera.getPosition();
-		double a = easing.ease(Mth.lerp(delta, oAge, age) / (double) lifetime);
-		float rx = (float) (Mth.lerp(a, origin.x, target.x) - cam.x);
-		float ry = (float) (Mth.lerp(a, origin.y, target.y) - cam.y);
-		float rz = (float) (Mth.lerp(a, origin.z, target.z) - cam.z);
-		renderRotatedQuad(buffer, quaternion, rx, ry, rz, delta);
+		super.renderRotatedQuad(buffer, camera, quaternion, delta);
 	}
 
 	@Override
@@ -58,21 +53,14 @@ public class TargetedParticle extends TextureSheetParticle {
 		oQuadSizeMod = quadSizeMod;
 		oRoll = roll;
 		oAlpha = alpha;
-		hasPhysics = yd < 0D;
-		xd = 0D;
-		yd = 0D;
-		zd = 0D;
 		xo = x;
 		yo = y;
 		zo = z;
 
 		double a = easing.ease(age / (double) lifetime);
-
-		setPos(
-			Mth.lerp(a, origin.x, target.x),
-			Mth.lerp(a, origin.y, target.y),
-			Mth.lerp(a, origin.z, target.z)
-		);
+		xd = Mth.lerp(a, origin.x, target.x) - x;
+		yd = Mth.lerp(a, origin.y, target.y) - y;
+		zd = Mth.lerp(a, origin.z, target.z) - z;
 
 		if (a >= 0.8D) {
 			alpha = (float) (1D - (a - 0.8D) / 0.2D) * 0.8F;
@@ -80,15 +68,15 @@ public class TargetedParticle extends TextureSheetParticle {
 			alpha = 0.2F;
 		}
 
-		if (a >= 0.8D) {
+		if (a == 0D) {
+			quadSizeMod = 0F;
+		} else if (a >= 0.8D) {
 			quadSizeMod = (float) Mth.lerp((a - 0.8D) / 0.2D, 1D, 2D);
 		} else {
 			quadSizeMod = 1F;
 		}
 
-		if (age++ >= lifetime) {
-			remove();
-		}
+		super.tick();
 	}
 
 	@Override

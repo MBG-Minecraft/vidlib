@@ -6,7 +6,6 @@ import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.phys.Vec3;
 
 @AutoInit
 public enum MovementType implements StringRepresentable {
@@ -29,22 +28,7 @@ public enum MovementType implements StringRepresentable {
 		return name;
 	}
 
-	public Vec3 delta(RandomSource random, double radius, Rotation rotation) {
-		if (this == SQUARE || this == CUBIC) {
-			return new Vec3(
-				Mth.lerp(random.nextFloat(), -radius, radius),
-				this == SQUARE ? 0D : Mth.lerp(random.nextFloat(), -radius, radius),
-				Mth.lerp(random.nextFloat(), -radius, radius)
-			);
-		}
-
-		var yaw = this == ANGLED ? rotation.yaw() : random.nextFloat() * 360F;
-		var pitch = this == ANGLED ? rotation.pitch() : this == SPHERICAL ? (random.nextFloat() * 180F - 90F) : 0F;
-
-		return Rotation.deg(yaw, pitch).lookVec3(radius);
-	}
-
-	public Vec3f delta3f(RandomSource random, float radius, Rotation rotation) {
+	public Vec3f delta(RandomSource random, float radius, float deviate, Rotation rotation) {
 		if (this == SQUARE || this == CUBIC) {
 			return new Vec3f(
 				Mth.lerp(random.nextFloat(), -radius, radius),
@@ -55,6 +39,11 @@ public enum MovementType implements StringRepresentable {
 
 		var yaw = this == ANGLED ? rotation.yaw() : random.nextFloat() * 360F;
 		var pitch = this == ANGLED ? rotation.pitch() : this == SPHERICAL ? (random.nextFloat() * 180F - 90F) : 0F;
+
+		if (deviate != 0F) {
+			yaw += random.nextFloat() * deviate - deviate / 2F;
+			pitch += random.nextFloat() * deviate - deviate / 2F;
+		}
 
 		return Rotation.deg(yaw, pitch).lookVec3f(radius);
 	}

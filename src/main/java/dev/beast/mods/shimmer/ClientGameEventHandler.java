@@ -300,36 +300,46 @@ public class ClientGameEventHandler {
 			graphics.pose().pushPose();
 			graphics.pose().translate(0F, 0F, 800F);
 
+			int height = event.getGuiGraphics().guiHeight();
+			int bgColor = 0xA0000000;
+			int color = 0xFFFFFFFF;
+
+			if (mc.screen instanceof ChatScreen) {
+				height -= 14;
+				bgColor = 0x40000000;
+				color = 0x70FFFFFF;
+			}
+
 			for (int i = 0; i < ScreenText.RENDER.topLeft.list.size(); i++) {
 				int w = mc.font.width(ScreenText.RENDER.topLeft.list.get(i));
 				int x = 1;
 				int y = 2 + i * 11;
-				graphics.fill(x, y, x + w + 3, y + 11, 0xA0000000);
-				graphics.drawString(mc.font, ScreenText.RENDER.topLeft.list.get(i), x + 2, y + 2, 0xFFFFFFFF, true);
+				graphics.fill(x, y, x + w + 3, y + 11, bgColor);
+				graphics.drawString(mc.font, ScreenText.RENDER.topLeft.list.get(i), x + 2, y + 2, color, true);
 			}
 
 			for (int i = 0; i < ScreenText.RENDER.topRight.list.size(); i++) {
 				int w = mc.font.width(ScreenText.RENDER.topRight.list.get(i));
 				int x = event.getGuiGraphics().guiWidth() - w - 4;
 				int y = 2 + i * 11;
-				graphics.fill(x, y, x + w + 3, y + 11, 0xA0000000);
-				graphics.drawString(mc.font, ScreenText.RENDER.topRight.list.get(i), x + 2, y + 2, 0xFFFFFFFF, true);
+				graphics.fill(x, y, x + w + 3, y + 11, bgColor);
+				graphics.drawString(mc.font, ScreenText.RENDER.topRight.list.get(i), x + 2, y + 2, color, true);
 			}
 
 			for (int i = 0; i < ScreenText.RENDER.bottomLeft.list.size(); i++) {
 				int w = mc.font.width(ScreenText.RENDER.bottomLeft.list.get(i));
 				int x = 1;
-				int y = i * 11 + event.getGuiGraphics().guiHeight() - ScreenText.RENDER.bottomLeft.list.size() * 11 - 2;
-				graphics.fill(x, y, x + w + 3, y + 11, 0xA0000000);
-				graphics.drawString(mc.font, ScreenText.RENDER.bottomLeft.list.get(i), x + 2, y + 2, 0xFFFFFFFF, true);
+				int y = i * 11 + height - ScreenText.RENDER.bottomLeft.list.size() * 11 - 2;
+				graphics.fill(x, y, x + w + 3, y + 11, bgColor);
+				graphics.drawString(mc.font, ScreenText.RENDER.bottomLeft.list.get(i), x + 2, y + 2, color, true);
 			}
 
 			for (int i = 0; i < ScreenText.RENDER.bottomRight.list.size(); i++) {
 				int w = mc.font.width(ScreenText.RENDER.bottomRight.list.get(i));
 				int x = event.getGuiGraphics().guiWidth() - w - 4;
-				int y = i * 11 + event.getGuiGraphics().guiHeight() - ScreenText.RENDER.bottomRight.list.size() * 11 - 2;
-				graphics.fill(x, y, x + w + 3, y + 11, 0xA0000000);
-				graphics.drawString(mc.font, ScreenText.RENDER.bottomRight.list.get(i), x + 2, y + 2, 0xFFFFFFFF, true);
+				int y = i * 11 + height - ScreenText.RENDER.bottomRight.list.size() * 11 - 2;
+				graphics.fill(x, y, x + w + 3, y + 11, bgColor);
+				graphics.drawString(mc.font, ScreenText.RENDER.bottomRight.list.get(i), x + 2, y + 2, color, true);
 			}
 
 			graphics.pose().popPose();

@@ -126,7 +126,7 @@ public interface ShimmerClientLevel extends ShimmerLevel, ShimmerClientEntityCon
 			var x = data.data().position().getX() + random.nextFloat();
 			var y = data.data().position().getY() + random.nextFloat() * (data.options().ground() ? 0.12D : 1D);
 			var z = data.data().position().getZ() + random.nextFloat();
-			var v = data.data().type().delta3f(random, data.data().radius(), data.data().rotation());
+			var v = data.data().delta(random);
 			var p = particles.createParticle(data.options(), x, y, z, v.x(), v.y(), v.z());
 
 			if (p != null) {
@@ -144,7 +144,7 @@ public interface ShimmerClientLevel extends ShimmerLevel, ShimmerClientEntityCon
 			var x = data.data().position().getX() + random.nextFloat();
 			var y = data.data().position().getY() + random.nextFloat();
 			var z = data.data().position().getZ() + random.nextFloat();
-			var v = data.data().type().delta3f(random, data.data().radius(), data.data().rotation());
+			var v = data.data().delta(random);
 			var p = particles.createParticle(options, x, y, z, v.x(), v.y(), v.z());
 
 			if (p != null) {

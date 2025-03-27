@@ -16,10 +16,10 @@ import java.util.Map;
 public class ClientGradients extends SimplePreparableReloadListener<Map<ResourceLocation, Gradient>> {
 	public static final ShimmerRegistry<Gradient> REGISTRY = ShimmerRegistry.createClient("gradient", true);
 
-	public static final RegistryRef<Gradient> FIRE_A = REGISTRY.ref(Shimmer.id("fire_a"));
-	public static final RegistryRef<Gradient> FIRE_B = REGISTRY.ref(Shimmer.id("fire_b"));
-	public static final RegistryRef<Gradient> FIRE_C = REGISTRY.ref(Shimmer.id("fire_c"));
-	public static final RegistryRef<Gradient> FIRE_D = REGISTRY.ref(Shimmer.id("fire_d"));
+	public static final RegistryRef<Gradient> FIRE_1 = REGISTRY.ref(Shimmer.id("fire/1"));
+	public static final RegistryRef<Gradient> FIRE_2 = REGISTRY.ref(Shimmer.id("fire/2"));
+	public static final RegistryRef<Gradient> FIRE_3 = REGISTRY.ref(Shimmer.id("fire/3"));
+	public static final RegistryRef<Gradient> FIRE_4 = REGISTRY.ref(Shimmer.id("fire/4"));
 	public static final RegistryRef<Gradient> SPARK = REGISTRY.ref(Shimmer.id("spark"));
 
 	@Override
