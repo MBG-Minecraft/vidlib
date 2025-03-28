@@ -123,14 +123,15 @@ public interface ZoneRenderer<T extends ZoneShape> {
 
 	static void renderSolid(Minecraft mc, ShimmerLocalClientSessionData session, float delta, PoseStack ms, Vec3 cameraPos, Frustum frustum) {
 		for (var sz : session.filteredZones.getSolidZones()) {
-			double dist = sz.instance().zone.shape().closestDistanceTo(cameraPos);
+			var zone = sz.instance().zone;
+			double dist = zone.shape().closestDistanceTo(cameraPos);
 
-			if (dist <= 10D && sz.instance().zone.color().alpha() > 0 && frustum.isVisible(sz.instance().zone.shape().getBoundingBox())) {
-				var renderer = ZoneRenderer.get(sz.instance().zone.shape().type());
+			if (dist <= 10D && zone.color().alpha() > 0 && frustum.isVisible(zone.shape().getBoundingBox()) && zone.solid().test(mc.player)) {
+				var renderer = ZoneRenderer.get(zone.shape().type());
 
 				if (renderer != null) {
-					var baseColor = sz.instance().zone.color().withAlpha(Mth.lerpInt((float) (dist / 10D), 100, 0));
-					renderer.render(Cast.to(sz.instance().zone.shape()), new ZoneRenderer.Context(mc, ms, cameraPos, frustum, delta, baseColor, Color.TRANSPARENT));
+					var baseColor = zone.color().withAlpha(Mth.lerpInt((float) (dist / 10D), 100, 0));
+					renderer.render(Cast.to(zone.shape()), new ZoneRenderer.Context(mc, ms, cameraPos, frustum, delta, baseColor, Color.TRANSPARENT));
 				}
 			}
 		}
