@@ -13,6 +13,7 @@ import dev.beast.mods.shimmer.math.Rotation;
 import dev.beast.mods.shimmer.math.Size3f;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -124,5 +125,19 @@ public record RotatedBoxZoneShape(Vec3 pos, Size3f size, Rotation rotation, Matr
 
 		var vec = new Vector3f((float) (cx - pos.x), (float) (cy - pos.y), (float) (cz - pos.z)).mul(matrix);
 		return vec.x >= -hsx && vec.x <= hsx && vec.y >= -hsy && vec.y <= hsy && vec.z >= -hsz && vec.z <= hsz;
+	}
+
+	@Override
+	public void writeUUID(FriendlyByteBuf buf) {
+		buf.writeUtf(type().id().toString());
+		buf.writeDouble(pos.x());
+		buf.writeDouble(pos.y());
+		buf.writeDouble(pos.z());
+		buf.writeFloat(size.x());
+		buf.writeFloat(size.y());
+		buf.writeFloat(size.z());
+		buf.writeFloat(rotation.roll());
+		buf.writeFloat(rotation.pitch());
+		buf.writeFloat(rotation.yaw());
 	}
 }

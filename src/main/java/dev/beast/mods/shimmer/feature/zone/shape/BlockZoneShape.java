@@ -6,6 +6,7 @@ import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.math.AAIBB;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.phys.AABB;
 
 import java.util.stream.Stream;
@@ -51,5 +52,12 @@ public record BlockZoneShape(BlockPos start, BlockPos end, AABB box) implements 
 
 	public AAIBB toAAIBB() {
 		return new AAIBB(start, end);
+	}
+
+	@Override
+	public void writeUUID(FriendlyByteBuf buf) {
+		buf.writeUtf(type().id().toString());
+		buf.writeBlockPos(start);
+		buf.writeBlockPos(end);
 	}
 }

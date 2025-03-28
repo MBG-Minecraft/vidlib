@@ -10,6 +10,7 @@ import dev.beast.mods.shimmer.feature.zone.ZoneClipResult;
 import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
 import dev.beast.mods.shimmer.math.Line;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -122,5 +123,14 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 	@Override
 	public double closestDistanceTo(Vec3 pos) {
 		return Math.max(0D, this.pos.distanceTo(pos) - radius);
+	}
+
+	@Override
+	public void writeUUID(FriendlyByteBuf buf) {
+		buf.writeUtf(type().id().toString());
+		buf.writeDouble(pos.x());
+		buf.writeDouble(pos.y());
+		buf.writeDouble(pos.z());
+		buf.writeDouble(radius);
 	}
 }

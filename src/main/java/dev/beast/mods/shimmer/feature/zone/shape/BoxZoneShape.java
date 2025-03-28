@@ -7,6 +7,7 @@ import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.phys.AABB;
 
 import java.util.stream.Stream;
@@ -34,5 +35,16 @@ public record BoxZoneShape(AABB box) implements ZoneShape {
 	@Override
 	public Stream<BlockPos> getBlocks() {
 		return BlockPos.betweenClosedStream(box);
+	}
+
+	@Override
+	public void writeUUID(FriendlyByteBuf buf) {
+		buf.writeUtf(type().id().toString());
+		buf.writeDouble(box.minX);
+		buf.writeDouble(box.minY);
+		buf.writeDouble(box.minZ);
+		buf.writeDouble(box.maxX);
+		buf.writeDouble(box.maxY);
+		buf.writeDouble(box.maxZ);
 	}
 }

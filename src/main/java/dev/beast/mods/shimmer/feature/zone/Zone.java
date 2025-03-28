@@ -10,13 +10,17 @@ import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
 import dev.beast.mods.shimmer.feature.zone.shape.ZoneShape;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.util.Empty;
+import io.netty.buffer.Unpooled;
+import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 public record Zone(
 	ZoneShape shape,
@@ -47,4 +51,23 @@ public record Zone(
 		ByteBufCodecs.STRING_UTF8.linkedSet(), Zone::tags,
 		Zone::new
 	);
+
+	public void writeUUID(FriendlyByteBuf buf) {
+		shape.writeUUID(buf);
+		buf.writeInt(color.argb());
+		entityFilter.writeUUID(buf);
+		ShimmerStreamCodecs.COMPOUND_TAG.encode(buf, data);
+		solid.writeUUID(buf);
+	}
+
+	public UUID computeUUID() {
+		var buf = new FriendlyByteBuf(Unpooled.buffer());
+		writeUUID(buf);
+
+		try {
+			return UUID.nameUUIDFromBytes(buf.array());
+		} catch (Exception e) {
+			return Util.NIL_UUID;
+		}
+	}
 }

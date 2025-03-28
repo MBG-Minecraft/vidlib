@@ -5,6 +5,8 @@ import dev.beast.mods.shimmer.feature.clock.ClockValue;
 import dev.beast.mods.shimmer.feature.clock.SyncClocksPayload;
 import dev.beast.mods.shimmer.feature.data.SyncServerDataPayload;
 import dev.beast.mods.shimmer.feature.net.S2CPacketBundleBuilder;
+import dev.beast.mods.shimmer.feature.zone.RemoveZonePayload;
+import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
 import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
 import dev.beast.mods.shimmer.util.PauseType;
 import net.minecraft.resources.ResourceLocation;
@@ -18,6 +20,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 	default MinecraftServer shimmer$self() {
@@ -149,5 +152,18 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 
 	default void setClock(ResourceLocation id, int second, int maxSecond) {
 		setClock(id, new ClockValue(second, second >= maxSecond ? ClockValue.Type.FINISHED : second >= (maxSecond - 10) ? ClockValue.Type.FLASH : ClockValue.Type.NORMAL));
+	}
+
+	@Override
+	default void removeZone(UUID uuid) {
+		for (var container : ZoneContainer.REGISTRY.getMap().values()) {
+			container.remove(uuid);
+		}
+
+		for (var dim : ZoneLoader.BY_DIMENSION.values()) {
+			dim.remove(uuid);
+		}
+
+		s2c(new RemoveZonePayload(uuid));
 	}
 }

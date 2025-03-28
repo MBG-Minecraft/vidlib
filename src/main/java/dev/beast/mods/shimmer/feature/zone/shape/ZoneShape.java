@@ -12,6 +12,7 @@ import dev.beast.mods.shimmer.math.Line;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistry;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -119,5 +120,10 @@ public interface ZoneShape {
 		double dy = pos.y() - Math.clamp(pos.y, box.minY, box.maxY);
 		double dz = pos.z() - Math.clamp(pos.z, box.minZ, box.maxZ);
 		return Math.sqrt(dx * dx + dy * dy + dz * dz);
+	}
+
+	default void writeUUID(FriendlyByteBuf buf) {
+		buf.writeUtf(type().id().toString());
+		buf.writeUtf(toString());
 	}
 }

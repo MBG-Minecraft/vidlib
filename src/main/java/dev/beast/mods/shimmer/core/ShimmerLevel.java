@@ -168,6 +168,10 @@ public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEn
 	default void spawnCubeParticles(Map<CubeParticleOptions, List<BlockPos>> map) {
 	}
 
+	default void spawnCubeParticles(CubeParticleOptions options, List<BlockPos> blocks) {
+		spawnCubeParticles(Map.of(options, blocks));
+	}
+
 	default void spawnWindParticles(RandomSource random, WindData data) {
 	}
 

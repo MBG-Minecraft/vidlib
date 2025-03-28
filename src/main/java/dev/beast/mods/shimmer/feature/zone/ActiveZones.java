@@ -23,6 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 public class ActiveZones implements Iterable<ZoneContainer> {
 	public record SolidZone(ZoneInstance instance, VoxelShape shape, VoxelShapeBox shapeBox) {
@@ -207,5 +208,11 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 		}
 
 		return shapes;
+	}
+
+	public void remove(UUID uuid) {
+		for (var container : containers.values()) {
+			container.remove(uuid);
+		}
 	}
 }

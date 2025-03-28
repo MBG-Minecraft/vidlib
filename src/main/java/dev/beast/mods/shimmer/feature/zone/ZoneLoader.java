@@ -57,7 +57,8 @@ public class ZoneLoader extends JsonReloadListener {
 						if (decoded.error().isPresent()) {
 							Shimmer.LOGGER.error("Error while parsing zone " + id + "[" + index + "]: " + decoded.error().get());
 						} else {
-							container.add(decoded.result().orElseThrow());
+							var zone = decoded.result().orElseThrow();
+							container.add(zone, zone.computeUUID());
 						}
 					}
 					index++;

@@ -6,6 +6,7 @@ import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
 import dev.beast.mods.shimmer.math.Line;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -75,5 +76,11 @@ public class UniverseZoneShape implements ZoneShape {
 	@Override
 	public double closestDistanceTo(Vec3 pos) {
 		return Double.POSITIVE_INFINITY;
+	}
+
+	@Override
+	public void writeUUID(FriendlyByteBuf buf) {
+		buf.writeUtf(type().id().toString());
+		buf.writeVarInt(42);
 	}
 }

@@ -31,6 +31,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.joml.Vector4f;
 
 import java.util.List;
+import java.util.UUID;
 
 @SuppressWarnings("resource")
 public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment, ShimmerClientEntityContainer {
@@ -222,5 +223,12 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment, Shi
 		if (shimmer$self().screen instanceof VoteScreen) {
 			shimmer$self().popGuiLayer();
 		}
+	}
+
+	@Override
+	default void removeZone(UUID uuid) {
+		var session = shimmer$self().player.shimmer$sessionData();
+		session.serverZones.remove(uuid);
+		session.filteredZones.remove(uuid);
 	}
 }

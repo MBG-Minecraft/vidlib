@@ -5,6 +5,7 @@ import dev.beast.mods.shimmer.util.ScheduledTask;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
@@ -52,5 +53,9 @@ public interface ShimmerMinecraftEnvironment extends ShimmerEntityContainer, Shi
 
 	default void scheduleSafely(int ticks, Runnable task) {
 		shimmer$getScheduledTaskHandler().run(ticks, task, true);
+	}
+
+	default void removeZone(UUID uuid) {
+		throw new NoMixinException(this);
 	}
 }

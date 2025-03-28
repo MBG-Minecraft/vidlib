@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 public class ZoneContainer implements Comparable<ZoneContainer> {
 	public static final StreamCodec<RegistryFriendlyByteBuf, ZoneContainer> DIRECT_STREAM_CODEC = new StreamCodec<>() {
@@ -37,7 +38,8 @@ public class ZoneContainer implements Comparable<ZoneContainer> {
 			int count = buf.readVarInt();
 
 			for (int i = 0; i < count; i++) {
-				container.add(Zone.STREAM_CODEC.decode(buf));
+				var uuid = ShimmerStreamCodecs.UUID.decode(buf);
+				container.add(Zone.STREAM_CODEC.decode(buf), uuid);
 			}
 
 			return container;
@@ -57,6 +59,7 @@ public class ZoneContainer implements Comparable<ZoneContainer> {
 			buf.writeVarInt(value.zones.size());
 
 			for (var zone : value.zones) {
+				ShimmerStreamCodecs.UUID.encode(buf, zone.uuid);
 				Zone.STREAM_CODEC.encode(buf, zone.zone);
 			}
 		}
@@ -84,8 +87,9 @@ public class ZoneContainer implements Comparable<ZoneContainer> {
 		this.entityZones = new Int2ObjectOpenHashMap<>();
 	}
 
-	public ZoneContainer add(Zone zone) {
+	public ZoneContainer add(Zone zone, UUID uuid) {
 		var instance = zone.shape().createInstance(this, zone);
+		instance.uuid = uuid;
 		instance.index = zones.size();
 
 		instance.tags.add(id.toString());
@@ -103,20 +107,6 @@ public class ZoneContainer implements Comparable<ZoneContainer> {
 		}
 
 		return this;
-	}
-
-	public void remove(int index) {
-		zones.remove(index);
-		hasPlayerOverrides = false;
-
-		for (int i = index; i < zones.size(); i++) {
-			var zone = zones.get(i);
-			zone.index = i;
-
-			if (!zone.zone.playerOverrides().isEmpty()) {
-				hasPlayerOverrides = true;
-			}
-		}
 	}
 
 	public void tick(ActiveZones activeZones, @Nullable Level level) {
@@ -205,5 +195,22 @@ public class ZoneContainer implements Comparable<ZoneContainer> {
 	public int compareTo(@NotNull ZoneContainer container) {
 		int i = Integer.compare(container.priority, priority);
 		return i == 0 ? id.compareTo(container.id) : i;
+	}
+
+	public void remove(UUID uuid) {
+		if (!zones.removeIf(z -> z.uuid.equals(uuid))) {
+			return;
+		}
+
+		hasPlayerOverrides = false;
+
+		for (int i = 0; i < zones.size(); i++) {
+			var zone = zones.get(i);
+			zone.index = i;
+
+			if (!zone.zone.playerOverrides().isEmpty()) {
+				hasPlayerOverrides = true;
+			}
+		}
 	}
 }
