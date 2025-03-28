@@ -39,6 +39,10 @@ public record ParticleMovementData(
 		ParticleMovementData::new
 	);
 
+	public ParticleMovementData(MovementType type, BlockPos position, int count, float radius) {
+		this(type, position, count, radius, 0F, Rotation.NONE);
+	}
+
 	public Vec3f delta(RandomSource random) {
 		return type.delta(random, radius, deviate, rotation);
 	}

@@ -2,7 +2,10 @@ package dev.beast.mods.shimmer.math;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
+import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -11,6 +14,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
+@AutoInit
 public record Rotation(float yaw, float pitch, float roll, Type type) {
 	public enum Type {
 		DEG(180D / Math.PI, 360D),
@@ -76,6 +80,8 @@ public record Rotation(float yaw, float pitch, float roll, Type type) {
 		ByteBufCodecs.FLOAT, Rotation::pitchDeg,
 		Rotation::deg
 	);
+
+	public static final KnownCodec<Rotation> KNOWN_CODEC = KnownCodec.register(Shimmer.id("rotation"), CODEC, STREAM_CODEC, Rotation.class);
 
 	public static final Rotation NONE = new Rotation(0F, 0F, 0F, Type.RAD);
 

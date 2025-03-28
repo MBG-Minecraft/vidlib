@@ -76,6 +76,7 @@
 		"RenderSystemMixin",
 		"ScreenMixin",
 		"ShaderManagerMixin",
+		"SkyRendererMixin",
 		"StructureBlockRendererMixin"
 	],
 	"injectors": {
