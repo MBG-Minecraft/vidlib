@@ -17,6 +17,7 @@ public interface ServerDataCommand {
 
 		var get = Commands.literal("get");
 		var set = Commands.literal("set");
+		var reset = Commands.literal("reset");
 
 		for (var data : DataType.SERVER.all.values()) {
 			get.then(Commands.literal(data.id().toString())
@@ -39,9 +40,17 @@ public interface ServerDataCommand {
 					})
 				)
 			);
+
+			reset.then(Commands.literal(data.id().toString())
+				.executes(ctx -> {
+					ctx.getSource().getServer().getServerData().set(data, Cast.to(data.defaultValue()));
+					return 1;
+				})
+			);
 		}
 
-		command.then(set);
 		command.then(get);
+		command.then(set);
+		command.then(reset);
 	});
 }

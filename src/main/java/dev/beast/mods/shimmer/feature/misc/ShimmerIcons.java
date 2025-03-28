@@ -37,4 +37,5 @@ public interface ShimmerIcons {
 	Component ELIMINATED_PREFIX = icons(ELIMINATED + SMALL_SPACE);
 	Component STAR_PREFIX = icons(STAR + SMALL_SPACE);
 	Component PVP_PREFIX = icons(PVP + SMALL_SPACE);
+	Component WARN_PREFIX = coloredIcons(WARN + SMALL_SPACE);
 }

@@ -18,6 +18,7 @@ public interface PlayerDataCommand {
 
 		var get = Commands.argument("player", EntityArgument.players());
 		var set = Commands.argument("player", EntityArgument.players());
+		var reset = Commands.argument("player", EntityArgument.players());
 
 		for (var data : DataType.PLAYER.all.values()) {
 			get.then(Commands.literal(data.id().toString())
@@ -47,9 +48,20 @@ public interface PlayerDataCommand {
 					})
 				)
 			);
+
+			reset.then(Commands.literal(data.id().toString())
+				.executes(ctx -> {
+					for (var player : EntityArgument.getPlayers(ctx, "player")) {
+						player.set(data, Cast.to(data.defaultValue()));
+					}
+
+					return 1;
+				})
+			);
 		}
 
-		command.then(Commands.literal("set").then(set));
 		command.then(Commands.literal("get").then(get));
+		command.then(Commands.literal("set").then(set));
+		command.then(Commands.literal("reset").then(reset));
 	});
 }
