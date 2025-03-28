@@ -6,6 +6,7 @@ import dev.beast.mods.shimmer.util.Lazy;
 import dev.beast.mods.shimmer.util.registry.RegistryRef;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -22,6 +23,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Supplier;
 
 public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
+	public static final StructureHolder EMPTY = new StructureHolder(Long2ObjectMaps.emptyMap(), Vec3i.ZERO);
+
 	public static final StreamCodec<ByteBuf, StructureHolder> STREAM_CODEC = new StreamCodec<>() {
 		@Override
 		public StructureHolder decode(ByteBuf buf) {

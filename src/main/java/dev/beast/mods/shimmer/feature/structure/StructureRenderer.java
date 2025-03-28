@@ -14,6 +14,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.math.Color;
+import dev.beast.mods.shimmer.util.WithCache;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
@@ -40,7 +41,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class StructureRenderer {
+public class StructureRenderer implements WithCache {
 	private record StateModel(BlockPos pos, BlockState state, BakedModel model, long seed) {
 	}
 
@@ -58,7 +59,7 @@ public class StructureRenderer {
 		var oldRenderer = RUNTIME_RENDERERS.get(id);
 
 		if (oldRenderer != null) {
-			oldRenderer.close();
+			oldRenderer.clearCache();
 		}
 
 		var renderer = new StructureRenderer(id, structure);
@@ -100,11 +101,11 @@ public class StructureRenderer {
 	@AutoInit(AutoInit.Type.CHUNKS_RELOADED)
 	public static void redrawAll() {
 		for (var renderer : RUNTIME_RENDERERS.values()) {
-			renderer.close();
+			renderer.clearCache();
 		}
 
 		for (var gs : GhostStructure.LIST) {
-			gs.structure().close();
+			gs.structure().clearCache();
 		}
 	}
 
@@ -283,7 +284,8 @@ public class StructureRenderer {
 		layers = list.toArray(CachedLayer.EMPTY);
 	}
 
-	public void close() {
+	@Override
+	public void clearCache() {
 		if (layers != null) {
 			for (var layer : layers) {
 				layer.buffer.close();

@@ -12,12 +12,14 @@ public record ScheduledTask(Handler handler, Runnable task, long at, boolean saf
 		private final BlockableEventLoop<? extends Runnable> blockableEventLoop;
 		private final Supplier<Level> level;
 		private final List<ScheduledTask> tasks;
+		private final List<ScheduledTask> newTasks;
 		private long time;
 
 		public Handler(BlockableEventLoop<? extends Runnable> blockableEventLoop, Supplier<Level> level) {
 			this.blockableEventLoop = blockableEventLoop;
 			this.level = level;
 			this.tasks = new ArrayList<>();
+			this.newTasks = new ArrayList<>();
 		}
 
 		public void run(long ticks, Runnable task, boolean safely) {
@@ -25,12 +27,18 @@ public record ScheduledTask(Handler handler, Runnable task, long at, boolean saf
 				task.run();
 			} else {
 				var level = this.level.get();
-				tasks.add(new ScheduledTask(this, task, level.getGameTime() + ticks, safely));
+				newTasks.add(new ScheduledTask(this, task, level.getGameTime() + ticks, safely));
 			}
 		}
 
 		public void tick() {
 			time = level.get().getGameTime();
+
+			if (!newTasks.isEmpty()) {
+				tasks.addAll(newTasks);
+				newTasks.clear();
+			}
+
 			tasks.removeIf(ScheduledTask::tick);
 		}
 	}
