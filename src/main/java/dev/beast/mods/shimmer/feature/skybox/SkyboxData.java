@@ -6,6 +6,7 @@ import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.math.Color;
+import dev.beast.mods.shimmer.math.Rotation;
 import dev.beast.mods.shimmer.util.JsonRegistryReloadListener;
 import dev.beast.mods.shimmer.util.registry.ShimmerRegistry;
 import io.netty.buffer.ByteBuf;
@@ -21,7 +22,9 @@ public record SkyboxData(
 	float rotation,
 	float rotating,
 	Color tint,
-	boolean celestials
+	boolean celestials,
+	Optional<Float> stars,
+	Optional<Rotation> celestialRotation
 ) {
 	public static final Codec<SkyboxData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		ShimmerCodecs.SHIMMER_ID.fieldOf("id").forGetter(SkyboxData::id),
@@ -29,7 +32,9 @@ public record SkyboxData(
 		Codec.FLOAT.optionalFieldOf("rotation", 0F).forGetter(SkyboxData::rotation),
 		Codec.FLOAT.optionalFieldOf("rotating", 0F).forGetter(SkyboxData::rotating),
 		Color.CODEC.optionalFieldOf("tint", Color.WHITE).forGetter(SkyboxData::tint),
-		Codec.BOOL.optionalFieldOf("celestials", false).forGetter(SkyboxData::celestials)
+		Codec.BOOL.optionalFieldOf("celestials", false).forGetter(SkyboxData::celestials),
+		Codec.FLOAT.optionalFieldOf("stars").forGetter(SkyboxData::stars),
+		Rotation.CODEC.optionalFieldOf("celestial_rotation").forGetter(SkyboxData::celestialRotation)
 	).apply(instance, SkyboxData::new));
 
 	public static final StreamCodec<ByteBuf, SkyboxData> DIRECT_STREAM_CODEC = CompositeStreamCodec.of(
@@ -39,6 +44,8 @@ public record SkyboxData(
 		ByteBufCodecs.FLOAT, SkyboxData::rotating,
 		Color.STREAM_CODEC, SkyboxData::tint,
 		ByteBufCodecs.BOOL, SkyboxData::celestials,
+		ByteBufCodecs.FLOAT.optional(), SkyboxData::stars,
+		Rotation.STREAM_CODEC.optional(), SkyboxData::celestialRotation,
 		SkyboxData::new
 	);
 

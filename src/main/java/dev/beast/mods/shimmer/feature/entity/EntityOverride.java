@@ -15,7 +15,6 @@ import dev.beast.mods.shimmer.feature.particle.ChancedParticle;
 import dev.beast.mods.shimmer.feature.skybox.FogOverride;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.Range;
-import dev.beast.mods.shimmer.math.Rotation;
 import dev.beast.mods.shimmer.util.Cast;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -120,7 +119,6 @@ public final class EntityOverride<T> {
 	public static final EntityOverride<Float> ATTACK_DAMAGE = createFloatKey("attack_damage");
 	public static final EntityOverride<Clothing> CLOTHING = createKey("clothing", Clothing.KNOWN_CODEC);
 	public static final EntityOverride<ResourceLocation> SKYBOX = createKey("skybox", KnownCodec.SHIMMER_ID);
-	public static final EntityOverride<Rotation> SKY_ROTATION = createKey("sky_rotation", Rotation.KNOWN_CODEC);
 	public static final EntityOverride<Range> AMBIENT_LIGHT = createKey("ambient_light", Range.KNOWN_CODEC);
 	public static final EntityOverride<FogOverride> FOG = createKey("fog", FogOverride.KNOWN_CODEC);
 	public static final EntityOverride<Boolean> UNPUSHABLE = createBooleanKey("unpushable");

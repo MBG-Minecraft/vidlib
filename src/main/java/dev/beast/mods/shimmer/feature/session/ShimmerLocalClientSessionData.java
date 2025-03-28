@@ -32,7 +32,6 @@ import dev.beast.mods.shimmer.feature.zone.ZoneEvent;
 import dev.beast.mods.shimmer.feature.zone.shape.ZoneShape;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.Range;
-import dev.beast.mods.shimmer.math.Rotation;
 import dev.beast.mods.shimmer.math.Vec2d;
 import dev.beast.mods.shimmer.math.VoxelShapeBox;
 import dev.beast.mods.shimmer.util.PauseType;
@@ -85,7 +84,6 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	public Map<ResourceLocation, Skybox> skyboxes;
 	public final DataMap serverDataMap;
 	public Skybox skybox;
-	public Rotation skyRotation;
 	public Map<ZoneShape, VoxelShapeBox> cachedZoneShapes;
 	public List<PlayerInfo> originalListedPlayers;
 	public ClientCutscene cutscene;
@@ -105,7 +103,6 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 		this.skyboxes = new HashMap<>();
 		this.serverDataMap = new DataMap(uuid, DataType.SERVER);
 		this.skybox = null;
-		this.skyRotation = null;
 		Shimmer.LOGGER.info("Client Session Data Initialized");
 	}
 
@@ -150,7 +147,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 				var skyboxData = SkyboxData.REGISTRY.get(skyboxId);
 
 				if (skyboxData == null) {
-					skyboxData = new SkyboxData(skyboxId, Optional.empty(), 0F, 0F, Color.WHITE, false);
+					skyboxData = new SkyboxData(skyboxId, Optional.empty(), 0F, 0F, Color.WHITE, false, Optional.empty(), Optional.empty());
 				}
 
 				skybox = new Skybox(skyboxData);
@@ -158,7 +155,6 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 			}
 		}
 
-		skyRotation = EntityOverride.SKY_ROTATION.get(player);
 		GameEventHandler.ambientLight = EntityOverride.AMBIENT_LIGHT.get(player, Range.FULL);
 
 		var f = EntityOverride.FOG.get(player);
