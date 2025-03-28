@@ -14,9 +14,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.math.Color;
-import dev.beast.mods.shimmer.util.Lazy;
-import dev.beast.mods.shimmer.util.registry.RegistryRef;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
@@ -24,14 +21,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -43,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class StructureRenderer {
 	private record StateModel(BlockPos pos, BlockState state, BakedModel model, long seed) {
@@ -58,15 +54,20 @@ public class StructureRenderer {
 
 	private static final Map<ResourceLocation, StructureRenderer> RUNTIME_RENDERERS = new HashMap<>();
 
-	public static StructureRenderer create(ResourceLocation id, ResourceLocation structure) {
-		var renderer = RUNTIME_RENDERERS.get(id);
+	public static StructureRenderer create(ResourceLocation id, Supplier<StructureHolder> structure) {
+		var oldRenderer = RUNTIME_RENDERERS.get(id);
 
-		if (renderer == null) {
-			renderer = new StructureRenderer(StructureStorage.CLIENT.ref(structure));
-			RUNTIME_RENDERERS.put(id, renderer);
+		if (oldRenderer != null) {
+			oldRenderer.close();
 		}
 
+		var renderer = new StructureRenderer(id, structure);
+		RUNTIME_RENDERERS.put(id, renderer);
 		return renderer;
+	}
+
+	public static StructureRenderer create(ResourceLocation id, ResourceLocation structure) {
+		return create(id, StructureHolder.refSupplier(StructureStorage.CLIENT.ref(structure)));
 	}
 
 	public static StructureRenderer create(ResourceLocation id) {
@@ -84,7 +85,7 @@ public class StructureRenderer {
 		int skyLight,
 		int blockLight
 	) {
-		var renderer = new StructureRenderer(StructureStorage.CLIENT.ref(structure));
+		var renderer = new StructureRenderer(structure, StructureHolder.refSupplier(StructureStorage.CLIENT.ref(structure)));
 		renderer.centerX = centerX;
 		renderer.centerY = centerY;
 		renderer.centerZ = centerZ;
@@ -108,7 +109,7 @@ public class StructureRenderer {
 	}
 
 	private static final Codec<StructureRenderer> RECORD_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		ResourceLocation.CODEC.fieldOf("id").forGetter(r -> r.structureRef.id()),
+		ResourceLocation.CODEC.fieldOf("id").forGetter(r -> r.id),
 		Codec.BOOL.optionalFieldOf("center_x", true).forGetter(r -> r.centerX),
 		Codec.BOOL.optionalFieldOf("center_y", false).forGetter(r -> r.centerY),
 		Codec.BOOL.optionalFieldOf("center_z", true).forGetter(r -> r.centerZ),
@@ -121,7 +122,8 @@ public class StructureRenderer {
 
 	public static final Codec<StructureRenderer> GHOST_CODEC = Codec.either(ResourceLocation.CODEC, RECORD_CODEC).xmap(either -> either.map(StructureRenderer::create, Function.identity()), Either::right);
 
-	private final RegistryRef<Lazy<StructureTemplate>> structureRef;
+	public final ResourceLocation id;
+	private final Supplier<StructureHolder> structureProvider;
 	public boolean centerX;
 	public boolean centerY;
 	public boolean centerZ;
@@ -133,8 +135,9 @@ public class StructureRenderer {
 
 	private CachedLayer[] layers = null;
 
-	private StructureRenderer(@Nullable RegistryRef<Lazy<StructureTemplate>> structureRef) {
-		this.structureRef = structureRef;
+	private StructureRenderer(ResourceLocation id, Supplier<StructureHolder> structureProvider) {
+		this.id = id;
+		this.structureProvider = structureProvider;
 		this.centerX = true;
 		this.centerY = false;
 		this.centerZ = true;
@@ -159,26 +162,17 @@ public class StructureRenderer {
 		if (layers == null) {
 			layers = CachedLayer.EMPTY;
 
-			var structure = structureRef == null ? null : structureRef.get().get();
+			var structure = structureProvider.get();
 
 			if (structure != null) {
-				buildWorld(mc, structure);
+				buildLevel(mc, structure);
 			}
 		}
 	}
 
-	private void buildWorld(Minecraft mc, StructureTemplate structure) {
-		var blocks = new Long2ObjectOpenHashMap<BlockState>();
-
-		for (var palette : structure.palettes) {
-			for (var info : palette.blocks()) {
-				if (!info.state().isAir() && info.state().getRenderShape() != RenderShape.INVISIBLE) {
-					blocks.put(info.pos().asLong(), info.state());
-				}
-			}
-		}
-
+	private void buildLevel(Minecraft mc, StructureHolder structure) {
 		if (removeInnerBlocks) {
+			var blocks = structure.blocks();
 			var newBlocks = new Long2ObjectOpenHashMap<BlockState>();
 
 			for (var entry : blocks.long2ObjectEntrySet()) {
@@ -198,18 +192,19 @@ public class StructureRenderer {
 				}
 			}
 
-			blocks = newBlocks;
+			structure = new StructureHolder(newBlocks, structure.size());
 		}
 
 		try (var tempMemory = new ByteBufferBuilder(65536)) {
-			buildLayers(mc, blocks, tempMemory, structure.getSize());
+			buildLayers(mc, structure, tempMemory);
 		}
 	}
 
-	private void buildLayers(Minecraft mc, Long2ObjectMap<BlockState> blocks, ByteBufferBuilder tempMemory, Vec3i size) {
+	private void buildLayers(Minecraft mc, StructureHolder structure, ByteBufferBuilder tempMemory) {
 		var blockRenderer = mc.getBlockRenderer();
 
-		var level = new StructureRendererLevel(blocks, skyLight, blockLight, mc.level.registryAccess().get(Biomes.PLAINS).get().value());
+		var level = new StructureRendererLevel(structure.blocks(), skyLight, blockLight, mc.level.registryAccess().get(Biomes.PLAINS).get().value());
+
 		var random = RandomSource.create();
 
 		var allTypes = RenderType.chunkBufferLayers();
@@ -220,7 +215,7 @@ public class StructureRenderer {
 			layerSorting.put(allTypes.get(i), i);
 		}
 
-		for (var entry : blocks.long2ObjectEntrySet()) {
+		for (var entry : structure.blocks().long2ObjectEntrySet()) {
 			var pos = BlockPos.of(entry.getLongKey());
 			var state = entry.getValue();
 
@@ -247,9 +242,9 @@ public class StructureRenderer {
 		var poseStack = new PoseStack();
 
 		if (centerX || centerY || centerZ) {
-			var x = centerX ? -size.getX() / 2D : 0D;
-			var y = centerY ? -size.getY() / 2D : 0D;
-			var z = centerZ ? -size.getZ() / 2D : 0D;
+			var x = centerX ? -structure.size().getX() / 2D : 0D;
+			var y = centerY ? -structure.size().getY() / 2D : 0D;
+			var z = centerZ ? -structure.size().getZ() / 2D : 0D;
 			poseStack.translate(x, y, z);
 		}
 
