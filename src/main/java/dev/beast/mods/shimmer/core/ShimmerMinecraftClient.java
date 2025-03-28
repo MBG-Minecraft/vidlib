@@ -25,6 +25,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.Vector4f;
@@ -185,6 +186,11 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment, Shi
 		if (shake.motionBlur()) {
 			shimmer$self().gameRenderer.setPostEffect(CameraShake.MOTION_BLUR_EFFECT);
 		}
+	}
+
+	@Override
+	default void shakeCamera(CameraShake shake, Vec3 source, double maxDistance) {
+		shakeCamera(shake.atDistance(shimmer$self().gameRenderer.getMainCamera().getPosition(), source, maxDistance));
 	}
 
 	@Override
