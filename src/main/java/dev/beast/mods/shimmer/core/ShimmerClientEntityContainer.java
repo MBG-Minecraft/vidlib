@@ -10,6 +10,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public interface ShimmerClientEntityContainer extends ShimmerEntityContainer {
@@ -37,6 +38,11 @@ public interface ShimmerClientEntityContainer extends ShimmerEntityContainer {
 	@Override
 	default void shakeCamera(CameraShake shake) {
 		shimmer$getEnvironment().shakeCamera(shake);
+	}
+
+	@Override
+	default void shakeCamera(CameraShake shake, Vec3 source, double maxDistance) {
+		shimmer$getEnvironment().shakeCamera(shake, source, maxDistance);
 	}
 
 	@Override

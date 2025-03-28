@@ -64,7 +64,7 @@ public abstract class ClientPacketListenerMixin implements ShimmerClientPacketLi
 	}
 
 	@Override
-	public void shimmer$addEntity(ShimmerPayloadContext ctx, ExactEntitySpawnPayload payload) {
+	public Entity shimmer$addEntity(ShimmerPayloadContext ctx, ExactEntitySpawnPayload payload) {
 		if (removedPlayerVehicleId.isPresent() && removedPlayerVehicleId.getAsInt() == payload.id()) {
 			removedPlayerVehicleId = OptionalInt.empty();
 		}
@@ -76,7 +76,7 @@ public abstract class ClientPacketListenerMixin implements ShimmerClientPacketLi
 
 			if (playerinfo == null) {
 				Shimmer.LOGGER.warn("Server attempted to add player prior to sending player info (Player id {})", payload.uuid());
-				return;
+				return null;
 			} else {
 				entity = new RemotePlayer(level, playerinfo.getProfile());
 			}
@@ -87,8 +87,10 @@ public abstract class ClientPacketListenerMixin implements ShimmerClientPacketLi
 		if (entity != null) {
 			payload.update(entity);
 			level.addEntity(entity);
+			return entity;
 		} else {
 			Shimmer.LOGGER.warn("Skipping Entity with id {}", payload.type());
+			return null;
 		}
 	}
 

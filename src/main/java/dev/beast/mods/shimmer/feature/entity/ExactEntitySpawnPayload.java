@@ -15,6 +15,7 @@ import net.minecraft.server.level.ServerEntity;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -71,10 +72,17 @@ public record ExactEntitySpawnPayload(
 		entity.setUUID(uuid);
 	}
 
+	@Nullable
+	public Entity spawnEntity(ShimmerPayloadContext ctx) {
+		if (ctx.parent().listener() instanceof ShimmerClientPacketListener listener) {
+			return listener.shimmer$addEntity(ctx, this);
+		}
+
+		return null;
+	}
+
 	@Override
 	public void handle(ShimmerPayloadContext ctx) {
-		if (ctx.parent().listener() instanceof ShimmerClientPacketListener listener) {
-			listener.shimmer$addEntity(ctx, this);
-		}
+		spawnEntity(ctx);
 	}
 }
