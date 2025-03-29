@@ -11,9 +11,11 @@ import dev.beast.mods.shimmer.math.AAIBB;
 import dev.beast.mods.shimmer.math.Line;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistry;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
@@ -125,5 +127,19 @@ public interface ZoneShape {
 	default void writeUUID(FriendlyByteBuf buf) {
 		buf.writeUtf(type().id().toString());
 		buf.writeUtf(toString());
+	}
+
+	default void collectChunkPositions(LongSet chunks) {
+		var box = getBoundingBox();
+		int minX = (int) Math.floor(box.minX) >> 4;
+		int minZ = (int) Math.floor(box.minZ) >> 4;
+		int maxX = (int) Math.floor(box.maxX) >> 4;
+		int maxZ = (int) Math.floor(box.maxZ) >> 4;
+
+		for (int x = minX; x <= maxX; x++) {
+			for (int z = minZ; z <= maxZ; z++) {
+				chunks.add(ChunkPos.asLong(x, z));
+			}
+		}
 	}
 }

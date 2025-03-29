@@ -11,7 +11,9 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.Ticket;
 import net.minecraft.world.item.component.FireworkExplosion;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.WritableLevelData;
@@ -22,6 +24,7 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(ServerLevel.class)
@@ -33,6 +36,9 @@ public abstract class ServerLevelMixin extends Level implements ShimmerServerLev
 
 	@Unique
 	private ActiveZones shimmer$activeZones;
+
+	@Unique
+	private final List<Ticket<ChunkPos>> shimmer$tickets = new ArrayList<>();
 
 	@Unique
 	private ServerPropList shimmer$props;
@@ -49,7 +55,10 @@ public abstract class ServerLevelMixin extends Level implements ShimmerServerLev
 
 	@Override
 	public void shimmer$setActiveZones(ActiveZones zones) {
-		shimmer$activeZones = zones;
+		if (shimmer$activeZones != zones) {
+			shimmer$activeZones = zones;
+			shimmer$updateLoadedChunks(shimmer$tickets);
+		}
 	}
 
 	@Override

@@ -140,6 +140,10 @@ public class GameEventHandler {
 	}
 
 	@SubscribeEvent
+	public static void levelLoaded(LevelEvent.Load event) {
+	}
+
+	@SubscribeEvent
 	public static void levelSaved(LevelEvent.Save event) {
 		if (event.getLevel() instanceof ServerLevel level && level.dimension() == Level.OVERWORLD) {
 			level.getServer().getServerData().save(level.getServer(), level.getServer().getWorldPath(LevelResource.ROOT).resolve("shimmer.nbt"));

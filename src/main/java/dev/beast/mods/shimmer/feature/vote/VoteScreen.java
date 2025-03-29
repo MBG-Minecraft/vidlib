@@ -107,6 +107,6 @@ public class VoteScreen extends Screen {
 
 	@Override
 	public boolean shouldCloseOnEsc() {
-		return hasShiftDown();
+		return hasShiftDown() && minecraft.isLocalServer();
 	}
 }

@@ -13,6 +13,7 @@
 		"ComponentMixin",
 		"CoralBlockMixin",
 		"DimensionTypeMixin",
+		"DistanceManagerMixin",
 		"EntityMixin",
 		"FallingBlockMixin",
 		"FillCommandMixin",

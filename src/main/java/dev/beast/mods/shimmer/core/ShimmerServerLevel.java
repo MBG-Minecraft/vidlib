@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.core;
 
+import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModification;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationBundle;
 import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
@@ -19,14 +20,19 @@ import dev.beast.mods.shimmer.feature.sound.SoundData;
 import dev.beast.mods.shimmer.feature.sound.SoundPayload;
 import dev.beast.mods.shimmer.feature.sound.TrackingSoundPayload;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
+import dev.beast.mods.shimmer.feature.zone.Zone;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
 import it.unimi.dsi.fastutil.longs.LongList;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.Ticket;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -130,5 +136,39 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 
 	default void shimmer$reloadChunks() {
 		throw new NoMixinException(this);
+	}
+
+	default void shimmer$updateLoadedChunks(List<Ticket<ChunkPos>> tickets) {
+		var level = shimmer$level();
+
+		if (!tickets.isEmpty()) {
+			for (var ticket : tickets) {
+				((ShimmerDistanceManager) level.getChunkSource().distanceManager).shimmer$setLoaded(ticket, false);
+			}
+
+			Shimmer.LOGGER.info("Unloaded " + tickets.size() + " chunks");
+			tickets.clear();
+		}
+
+		var loadedChunks = new LongOpenHashSet();
+
+		for (var container : shimmer$getActiveZones()) {
+			for (var zone : container.zones) {
+				if (zone.zone.forceLoaded()) {
+					zone.zone.shape().collectChunkPositions(loadedChunks);
+				}
+			}
+		}
+
+		if (!loadedChunks.isEmpty()) {
+			for (var pos : loadedChunks) {
+				var chunkPos = new ChunkPos(pos);
+				var ticket = new Ticket<>(Zone.TICKET_TYPE, ChunkMap.FORCED_TICKET_LEVEL, chunkPos, false);
+				((ShimmerDistanceManager) level.getChunkSource().distanceManager).shimmer$setLoaded(ticket, true);
+				tickets.add(ticket);
+			}
+
+			Shimmer.LOGGER.info("Loaded " + loadedChunks.size() + " chunks");
+		}
 	}
 }
