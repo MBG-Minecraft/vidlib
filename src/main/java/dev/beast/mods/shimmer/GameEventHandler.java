@@ -19,14 +19,18 @@ import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.phys.EntityHitResult;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityInvulnerabilityCheckEvent;
+import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -218,6 +222,13 @@ public class GameEventHandler {
 
 		if (mod != 1F) {
 			event.setNewDamage(event.getNewDamage() * mod);
+		}
+	}
+
+	@SubscribeEvent
+	public static void projectileImpact(ProjectileImpactEvent event) {
+		if (event.getProjectile() instanceof Projectile && event.getRayTraceResult() instanceof EntityHitResult hit && hit.getEntity() instanceof Player player && player.isCreative()) {
+			event.setCanceled(true);
 		}
 	}
 }
