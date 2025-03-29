@@ -55,5 +55,8 @@
 	],
 	"net/minecraft/network/chat/Style": [
 		"dev/beast/mods/shimmer/core/ShimmerStyle"
+	],
+	"net/minecraft/network/chat/Component": [
+		"dev/beast/mods/shimmer/core/ShimmerComponent"
 	]
 }

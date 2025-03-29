@@ -10,6 +10,7 @@
 		"BlockStateMixin",
 		"ChunkMapMixin",
 		"CollisionGetterMixin",
+		"ComponentMixin",
 		"CoralBlockMixin",
 		"DimensionTypeMixin",
 		"EntityMixin",
