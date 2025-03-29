@@ -1,9 +1,12 @@
 package dev.beast.mods.shimmer.feature.bulk;
 
 import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.feature.net.S2CPacketBundleBuilder;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.Level;
@@ -15,6 +18,20 @@ import java.util.List;
 
 public class BulkLevelModificationHolder implements BlockModificationConsumer {
 	public static boolean debug = false;
+
+	public record UndoableBulkModification(Reference2ObjectOpenHashMap<BlockState, LongArrayList> undo) implements UndoableModification {
+		@Override
+		public void undo(Level level, BlockModificationConsumer consumer) {
+			for (var entry : undo.entrySet()) {
+				var state = entry.getKey();
+				var positions = entry.getValue();
+
+				for (long pos : positions) {
+					consumer.set(BlockPos.of(pos), state);
+				}
+			}
+		}
+	}
 
 	private final Long2ObjectMap<SectionData> sections = new Long2ObjectOpenHashMap<>();
 
@@ -43,7 +60,7 @@ public class BulkLevelModificationHolder implements BlockModificationConsumer {
 		}
 	}
 
-	public int apply(Level level, BulkLevelModification modification) {
+	public int apply(Level level, BulkLevelModification modification, boolean undoable) {
 		var sectionSet = new HashSet<SectionPos>();
 		modification.collectSections(level, sectionSet);
 
@@ -65,6 +82,9 @@ public class BulkLevelModificationHolder implements BlockModificationConsumer {
 		int count = 0;
 
 		var rerender = new LongOpenHashSet();
+		var undo = new Reference2ObjectOpenHashMap<BlockState, LongArrayList>();
+		var server = !level.isClientSide();
+		var packets = server ? new S2CPacketBundleBuilder(level) : null;
 
 		for (var sd : sections.values()) {
 			if (!sd.modified) {
@@ -97,6 +117,7 @@ public class BulkLevelModificationHolder implements BlockModificationConsumer {
 			boolean rup = false;
 			boolean rnorth = false;
 			boolean rsouth = false;
+			var toClient = server ? new OptimizedModificationBuilder() : null;
 
 			for (int y = 0; y < 16; y++) {
 				for (int x = 0; x < 16; x++) {
@@ -109,9 +130,20 @@ public class BulkLevelModificationHolder implements BlockModificationConsumer {
 							blockPos.setZ(sd.pos.minBlockZ() + z);
 
 							try {
-								if (sd.levelChunk.getBlockState(blockPos) != state) {
+								var prevState = sd.levelChunk.getBlockState(blockPos);
+
+								if (prevState != state) {
 									sd.levelChunk.setBlockState(blockPos, state, false);
+
+									if (server) {
+										toClient.set(blockPos, state);
+									}
+
 									count++;
+
+									if (undoable && server) {
+										undo.computeIfAbsent(prevState, o -> new LongArrayList()).add(blockPos.asLong());
+									}
 
 									if (x == 0) {
 										rwest = true;
@@ -139,38 +171,53 @@ public class BulkLevelModificationHolder implements BlockModificationConsumer {
 				}
 			}
 
+			if (server) {
+				var mod = toClient.build();
+
+				if (mod != BulkLevelModification.NONE) {
+					packets.s2c(new SectionModifiedPayload(undoable, sd.pos, mod));
+				}
+			}
+
 			sd.levelChunk.markUnsaved();
 
 			rerender.add(sd.pos.asLong());
 
-			if (rwest) {
-				rerender.add(SectionPos.of(sd.pos.x() - 1, sd.pos.y(), sd.pos.z()).asLong());
-			}
+			if (server) {
+				if (rwest) {
+					rerender.add(SectionPos.of(sd.pos.x() - 1, sd.pos.y(), sd.pos.z()).asLong());
+				}
 
-			if (reast) {
-				rerender.add(SectionPos.of(sd.pos.x() + 1, sd.pos.y(), sd.pos.z()).asLong());
-			}
+				if (reast) {
+					rerender.add(SectionPos.of(sd.pos.x() + 1, sd.pos.y(), sd.pos.z()).asLong());
+				}
 
-			if (rdown) {
-				rerender.add(SectionPos.of(sd.pos.x(), sd.pos.y() - 1, sd.pos.z()).asLong());
-			}
+				if (rdown) {
+					rerender.add(SectionPos.of(sd.pos.x(), sd.pos.y() - 1, sd.pos.z()).asLong());
+				}
 
-			if (rup) {
-				rerender.add(SectionPos.of(sd.pos.x(), sd.pos.y() + 1, sd.pos.z()).asLong());
-			}
+				if (rup) {
+					rerender.add(SectionPos.of(sd.pos.x(), sd.pos.y() + 1, sd.pos.z()).asLong());
+				}
 
-			if (rnorth) {
-				rerender.add(SectionPos.of(sd.pos.x(), sd.pos.y(), sd.pos.z() - 1).asLong());
-			}
+				if (rnorth) {
+					rerender.add(SectionPos.of(sd.pos.x(), sd.pos.y(), sd.pos.z() - 1).asLong());
+				}
 
-			if (rsouth) {
-				rerender.add(SectionPos.of(sd.pos.x(), sd.pos.y(), sd.pos.z() + 1).asLong());
+				if (rsouth) {
+					rerender.add(SectionPos.of(sd.pos.x(), sd.pos.y(), sd.pos.z() + 1).asLong());
+				}
 			}
 		}
 
-		for (long pos : rerender) {
-			var spos = SectionPos.of(pos);
-			level.redrawSection(spos.x(), spos.y(), spos.z(), false);
+		if (server) {
+			packets.s2c(new RedrawChunkSectionsPayload(new LongArrayList(rerender), false));
+
+			if (undoable) {
+				level.addUndoable(new UndoableBulkModification(undo));
+			}
+
+			packets.send(level);
 		}
 
 		if (debug) {

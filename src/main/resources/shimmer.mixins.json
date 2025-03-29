@@ -42,6 +42,7 @@
 		"StreamCodecMixin",
 		"StructureBlockEntityMixin",
 		"StructureTemplateMixin",
+		"StyleMixin",
 		"UUIDUtilMixin",
 		"WaterFluidMixin"
 	],

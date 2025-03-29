@@ -41,12 +41,12 @@ public class CubeParticle extends Particle {
 		float maxZ = (float) (rz + size - cameraPos.z);
 
 		if (options.lineColor().alpha() > 0) {
-			int alpha = time > (lifetime - 20) ? Mth.lerpInt(1F - (lifetime - time) / 20F, 255, 0) : 255;
+			int alpha = lifetime == 1 ? 255 : time > (lifetime - 20) ? Mth.lerpInt(1F - (lifetime - time) / 20F, 255, 0) : 255;
 			BoxRenderer.renderDebugLines(minX, minY, minZ, maxX, maxY, maxZ, ms, buffers, options.lineColor().withAlpha(alpha));
 		}
 
 		if (options.color().alpha() > 0) {
-			int alpha = time > (lifetime - 20) ? Mth.lerpInt(1F - (lifetime - time) / 20F, 50, 0) : 50;
+			int alpha = lifetime == 1 ? 50 : time > (lifetime - 20) ? Mth.lerpInt(1F - (lifetime - time) / 20F, 50, 0) : 50;
 			BoxRenderer.renderDebugQuads(minX, minY, minZ, maxX, maxY, maxZ, ms, buffers, false, options.color().withAlpha(alpha));
 		}
 	}

@@ -13,10 +13,9 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
 import org.jetbrains.annotations.Nullable;
 
 public class ExplosionTestTool implements ShimmerTool {
@@ -43,37 +42,6 @@ public class ExplosionTestTool implements ShimmerTool {
 		return new ItemStack(Items.TNT);
 	}
 
-	@Override
-	public boolean use(Player player, ItemStack item) {
-		if (player.level() instanceof ServerLevel && player.isShiftKeyDown()) {
-			player.status("Modified %,d blocks".formatted(player.level().undoLastModification()));
-		} else {
-			var ray = player.ray(400D, 1F).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY);
-			lastClickPos = ray != null ? ray.getBlockPos() : null;
-
-			if (ray != null && player.level() instanceof ServerLevel level) {
-				explode(level, player, item, ray.getBlockPos());
-			}
-		}
-
-		return true;
-	}
-
-	@Override
-	public boolean useOnBlock(Player player, ItemStack item, UseItemOnBlockEvent event) {
-		if (player.level() instanceof ServerLevel && player.isShiftKeyDown()) {
-			player.status("Modified %,d blocks".formatted(player.level().undoLastModification()));
-		} else {
-			lastClickPos = event.getPos();
-
-			if (player.level() instanceof ServerLevel level) {
-				explode(level, player, item, event.getPos());
-			}
-		}
-
-		return true;
-	}
-
 	public static ExplosionData getData(ItemStack item, boolean newData) {
 		ExplosionData explosionData = null;
 		var tag = item.get(DataComponents.CUSTOM_DATA);
@@ -85,16 +53,28 @@ public class ExplosionTestTool implements ShimmerTool {
 		return explosionData == null ? newData ? new ExplosionData() : DEFAULT_DATA : explosionData;
 	}
 
-	public void explode(ServerLevel level, Player player, ItemStack item, BlockPos pos) {
-		var instance = getData(item, false).instance(level, pos);
-		int count = instance.create();
-
-		if (count > 0) {
-			player.status("Modified %,d blocks".formatted(count));
-		} else {
-			player.status("Displaying Entity Damage");
-			instance.displayEntityDamage(120);
+	@Override
+	public boolean rightClick(Player player, ItemStack item, @Nullable BlockHitResult hit) {
+		if (player.level() instanceof ServerLevel && player.isShiftKeyDown()) {
+			player.status("Modified %,d blocks".formatted(player.level().undoLastModification()));
+			return true;
 		}
+
+		lastClickPos = hit != null ? hit.getBlockPos() : null;
+
+		if (hit != null && player.level() instanceof ServerLevel level) {
+			var instance = getData(item, false).instance(level, hit.getBlockPos());
+			int count = instance.create();
+
+			if (count > 0) {
+				player.status("Modified %,d blocks".formatted(count));
+			} else {
+				player.status("Displaying Entity Damage");
+				instance.displayEntityDamage(120);
+			}
+		}
+
+		return true;
 	}
 
 	@Override
@@ -104,7 +84,7 @@ public class ExplosionTestTool implements ShimmerTool {
 	}
 
 	@Override
-	public void debugText(Player player, ItemStack item, @Nullable HitResult result, ScreenText screenText) {
+	public void debugText(Player player, ItemStack item, @Nullable HitResult hit, ScreenText screenText) {
 		var data = getData(item, false);
 		data.debugText(screenText.topLeft);
 

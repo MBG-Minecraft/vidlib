@@ -14,6 +14,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
 import org.jetbrains.annotations.Nullable;
@@ -88,21 +90,25 @@ public interface ShimmerTool {
 	}
 
 	default boolean useOnBlock(Player player, ItemStack item, UseItemOnBlockEvent event) {
-		return false;
+		return rightClick(player, item, event.getUseOnContext().getHitResult().getType() == HitResult.Type.BLOCK ? event.getUseOnContext().getHitResult() : null);
+	}
+
+	default boolean use(Player player, ItemStack item) {
+		return rightClick(player, item, player.ray(500D, 1F).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY));
 	}
 
 	default boolean useOnEntity(Player player, ItemStack item, Entity target) {
 		return false;
 	}
 
-	default boolean use(Player player, ItemStack item) {
-		return false;
+	default boolean rightClick(Player player, ItemStack item, @Nullable BlockHitResult hit) {
+		return true;
 	}
 
 	default boolean leftClick(Player player, ItemStack item) {
-		return false;
+		return true;
 	}
 
-	default void debugText(Player player, ItemStack item, @Nullable HitResult result, ScreenText screenText) {
+	default void debugText(Player player, ItemStack item, @Nullable HitResult hit, ScreenText screenText) {
 	}
 }

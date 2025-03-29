@@ -2,8 +2,8 @@ package dev.beast.mods.shimmer.feature.bulk;
 
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.item.ShimmerTool;
+import dev.beast.mods.shimmer.feature.structure.LazyStructures;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
-import dev.beast.mods.shimmer.util.Lazy;
 import dev.beast.mods.shimmer.util.registry.RegistryRef;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -12,15 +12,15 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.phys.BlockHitResult;
+import org.jetbrains.annotations.Nullable;
 
 public class BulkModificationToolItem implements ShimmerTool {
-	private static final RegistryRef<Lazy<StructureTemplate>> SHIP = StructureStorage.SERVER.ref(ResourceLocation.parse("video:ship"));
+	private static final RegistryRef<LazyStructures> SHIP = StructureStorage.SERVER.ref(ResourceLocation.parse("video:ship"));
 
 	@AutoInit
 	public static void bootstrap() {
@@ -43,15 +43,11 @@ public class BulkModificationToolItem implements ShimmerTool {
 	}
 
 	@Override
-	public boolean use(Player player, ItemStack item) {
-		if (player.level() instanceof ServerLevel level) {
-			var ray = player.ray(400D, 1F).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY);
-
-			if (ray != null) {
-				var pos = ray.getBlockPos();
-				var state = level.getBlockState(pos);
-				level.bulkModify(modifications -> modify(level, modifications, pos, state));
-			}
+	public boolean rightClick(Player player, ItemStack item, @Nullable BlockHitResult hit) {
+		if (hit != null && player.level() instanceof ServerLevel level) {
+			var pos = hit.getBlockPos();
+			var state = level.getBlockState(pos);
+			level.bulkModify(true, modifications -> modify(level, modifications, pos, state));
 		}
 
 		return true;

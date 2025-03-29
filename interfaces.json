@@ -52,5 +52,8 @@
 	],
 	"net/minecraft/network/codec/StreamCodec": [
 		"dev/beast/mods/shimmer/core/ShimmerStreamCodec<B, V>"
+	],
+	"net/minecraft/network/chat/Style": [
+		"dev/beast/mods/shimmer/core/ShimmerStyle"
 	]
 }

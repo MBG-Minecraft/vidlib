@@ -7,7 +7,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.common.NeoForge;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -33,7 +35,7 @@ public class ZoneToolItem implements ShimmerTool {
 	}
 
 	@Override
-	public boolean use(Player player, ItemStack item) {
+	public boolean rightClick(Player player, ItemStack item, @Nullable BlockHitResult hit) {
 		if (player.level().isClientSide()) {
 			clickedOnZone(player);
 		}

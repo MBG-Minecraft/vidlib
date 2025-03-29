@@ -12,7 +12,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,21 +40,11 @@ public class PhysicsParticlesTool implements ShimmerTool {
 	}
 
 	@Override
-	public boolean use(Player player, ItemStack item) {
-		if (!player.level().isClientSide()) {
-			explode(player);
-		}
-
-		return true;
-	}
-
-	private void explode(Player player) {
-		var ray = player.ray(400D, 1F).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY);
-
-		if (ray != null) {
+	public boolean rightClick(Player player, ItemStack item, @Nullable BlockHitResult hit) {
+		if (hit != null) {
 			var blocks = new ArrayList<PositionedBlock>();
 
-			for (var pos : BlockPos.betweenClosed(ray.getBlockPos().offset(-4, -1, -4), ray.getBlockPos().offset(4, 1, 4))) {
+			for (var pos : BlockPos.betweenClosed(hit.getBlockPos().offset(-4, -1, -4), hit.getBlockPos().offset(4, 1, 4))) {
 				var state = player.level().getBlockState(pos);
 
 				if (!state.isAir()) {
@@ -64,6 +54,8 @@ public class PhysicsParticlesTool implements ShimmerTool {
 
 			player.level().physicsParticles(player.get(InternalPlayerData.TEST_PARTICLES), blocks);
 		}
+
+		return true;
 	}
 
 	@Override
@@ -73,7 +65,7 @@ public class PhysicsParticlesTool implements ShimmerTool {
 	}
 
 	@Override
-	public void debugText(Player player, ItemStack item, @Nullable HitResult result, ScreenText screenText) {
+	public void debugText(Player player, ItemStack item, @Nullable HitResult hit, ScreenText screenText) {
 		int total = 0;
 		int totalRendered = 0;
 

@@ -2,9 +2,9 @@ package dev.beast.mods.shimmer.core;
 
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModification;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationBundle;
-import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationPayload;
 import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
 import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
+import dev.beast.mods.shimmer.feature.bulk.RedrawChunkSectionsPayload;
 import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
 import dev.beast.mods.shimmer.feature.particle.FireData;
 import dev.beast.mods.shimmer.feature.particle.SpawnCubeParticlesPayload;
@@ -21,6 +21,7 @@ import dev.beast.mods.shimmer.feature.sound.TrackingSoundPayload;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
+import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -59,7 +60,7 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 	}
 
 	@Override
-	default int bulkModify(BulkLevelModification modification) {
+	default int bulkModify(boolean undoable, BulkLevelModification modification) {
 		var optimized = modification.optimize();
 
 		if (modification == BulkLevelModification.NONE) {
@@ -76,8 +77,12 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 			optimized = builder.build();
 		}
 
-		s2c(new BulkLevelModificationPayload(optimized));
-		return ShimmerLevel.super.bulkModify(optimized);
+		return ShimmerLevel.super.bulkModify(undoable, optimized);
+	}
+
+	@Override
+	default void redrawSections(LongList sections, boolean mainThread) {
+		s2c(new RedrawChunkSectionsPayload(sections, mainThread));
 	}
 
 	@Override

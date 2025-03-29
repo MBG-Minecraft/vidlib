@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer.core;
 
 import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
+import dev.beast.mods.shimmer.feature.bulk.UndoableModification;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
 import dev.beast.mods.shimmer.feature.particle.FireData;
@@ -13,10 +14,12 @@ import dev.beast.mods.shimmer.feature.sound.TrackingSound;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
+import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
@@ -50,8 +53,19 @@ public interface ShimmerClientLevel extends ShimmerLevel, ShimmerClientEntityCon
 	}
 
 	@Override
-	default void redrawSection(int sectionX, int sectionY, int sectionZ, boolean mainThread) {
-		Minecraft.getInstance().levelRenderer.setSectionDirty(sectionX, sectionY, sectionZ, mainThread);
+	default void addUndoable(UndoableModification modification) {
+	}
+
+	@Override
+	default void redrawSections(LongList sections, boolean mainThread) {
+		var levelRenderer = Minecraft.getInstance().levelRenderer;
+
+		for (long section : sections) {
+			int x = SectionPos.x(section);
+			int y = SectionPos.y(section);
+			int z = SectionPos.z(section);
+			levelRenderer.setSectionDirty(x, y, z, mainThread);
+		}
 	}
 
 	@Override

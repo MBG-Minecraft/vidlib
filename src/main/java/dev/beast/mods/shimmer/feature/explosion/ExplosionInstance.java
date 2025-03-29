@@ -3,7 +3,6 @@ package dev.beast.mods.shimmer.feature.explosion;
 import dev.beast.mods.shimmer.feature.bulk.BlockModificationConsumer;
 import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
 import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
-import dev.beast.mods.shimmer.feature.bulk.UndoableModification;
 import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.KMath;
@@ -23,15 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 
 public class ExplosionInstance {
-	public record UndoableExplosion(List<PositionedBlock> blocks) implements UndoableModification {
-		@Override
-		public void undo(Level level, BlockModificationConsumer consumer) {
-			for (var block : blocks) {
-				consumer.add(block);
-			}
-		}
-	}
-
 	public final Level level;
 	public final BlockPos at;
 	public final ExplosionData data;
@@ -209,16 +199,7 @@ public class ExplosionInstance {
 	public int create() {
 		var m = new OptimizedModificationBuilder();
 		create(m);
-
-		if (undoable) {
-			var destroyedBlocks = getDestroyedBlocks();
-
-			if (!destroyedBlocks.isEmpty()) {
-				level.addUndoable(new UndoableExplosion(destroyedBlocks));
-			}
-		}
-
-		return level.bulkModify(m.build());
+		return level.bulkModify(undoable, m.build());
 	}
 
 	public List<PositionedBlock> getDestroyedBlocks() {

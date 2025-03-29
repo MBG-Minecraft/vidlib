@@ -72,6 +72,12 @@ public class ClientGameEventHandler {
 
 		ScreenText.CLIENT_TICK.ops = mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
 
+		var tool = ShimmerTool.of(mc.player);
+
+		if (tool != null) {
+			tool.getSecond().debugText(mc.player, tool.getFirst(), mc.hitResult, ScreenText.CLIENT_TICK);
+		}
+
 		for (var clock : Clock.REGISTRY) {
 			if (clock.screen().isPresent()) {
 				var screen = clock.screen().get();
@@ -261,12 +267,6 @@ public class ClientGameEventHandler {
 		var graphics = event.getGuiGraphics();
 
 		if ((mc.isLocalServer() || mc.player.hasPermissions(2)) && (mc.screen == null || mc.screen instanceof ChatScreen)) {
-			var tool = ShimmerTool.of(mc.player);
-
-			if (tool != null) {
-				tool.getSecond().debugText(mc.player, tool.getFirst(), mc.hitResult, ScreenText.RENDER);
-			}
-
 			NeoForge.EVENT_BUS.post(new DebugTextEvent.Render(ScreenText.RENDER));
 
 			var zoneClip = session.zoneClip;

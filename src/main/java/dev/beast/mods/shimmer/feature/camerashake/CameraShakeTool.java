@@ -9,8 +9,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class CameraShakeTool implements ShimmerTool {
 	@AutoInit
@@ -34,26 +37,14 @@ public class CameraShakeTool implements ShimmerTool {
 	}
 
 	@Override
-	public boolean use(Player player, ItemStack item) {
-		var ray = player.ray(400D, 1F).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY);
-
-		if (ray != null) {
+	public boolean rightClick(Player player, ItemStack item, @Nullable BlockHitResult hit) {
+		if (hit != null && !player.level().isClientSide) {
 			var maxDistance = player.get(InternalPlayerData.TEST_CAMERA_SHAKE);
-			var pos = ray.getBlockPos().relative(ray.getDirection());
-
-			if (player.level().isClientSide) {
-				player.level().addParticle(new CubeParticleOptions(Color.CYAN, Color.WHITE, CameraShake.DEFAULT.duration()), true, true, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, 0D, 0D, 0D);
-			} else {
-				for (var to : player.level().players()) {
-					to.shakeCamera(CameraShake.DEFAULT.atDistance(to.position(), Vec3.atCenterOf(pos), maxDistance));
-				}
-			}
+			var pos = hit.getBlockPos().relative(hit.getDirection());
+			player.level().spawnCubeParticles(new CubeParticleOptions(Color.CYAN, Color.WHITE, CameraShake.DEFAULT.duration()), List.of(pos));
+			player.level().shakeCamera(CameraShake.DEFAULT, Vec3.atCenterOf(pos), maxDistance);
 		}
 
 		return true;
-	}
-
-	private void shake(Player player) {
-
 	}
 }

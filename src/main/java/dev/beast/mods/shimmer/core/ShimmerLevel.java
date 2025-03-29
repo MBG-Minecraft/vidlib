@@ -20,6 +20,7 @@ import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.math.worldposition.EntityPositionType;
 import dev.beast.mods.shimmer.math.worldposition.FollowingEntityWorldPosition;
 import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
+import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -88,7 +89,7 @@ public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEn
 			var builder = new OptimizedModificationBuilder();
 			undoable.getLast().undo((Level) this, builder);
 			undoable.removeLast();
-			return bulkModify(builder.build());
+			return bulkModify(false, builder.build());
 		}
 
 		return 0;
@@ -103,7 +104,7 @@ public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEn
 		}
 
 		undoable.clear();
-		return bulkModify(builder.build());
+		return bulkModify(false, builder.build());
 	}
 
 	default void setBlockFast(BlockPos pos, BlockState state) {
@@ -124,21 +125,21 @@ public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEn
 		return id.map(((Level) this)::getEntity, this::getEntityByUUID);
 	}
 
-	default int bulkModify(BulkLevelModification modification) {
+	default int bulkModify(boolean undoable, BulkLevelModification modification) {
 		if (modification == BulkLevelModification.NONE) {
 			return 0;
 		}
 
-		return new BulkLevelModificationHolder().apply((Level) this, modification);
+		return new BulkLevelModificationHolder().apply((Level) this, modification, undoable);
 	}
 
-	default int bulkModify(Consumer<BlockModificationConsumer> modifications) {
+	default int bulkModify(boolean undoable, Consumer<BlockModificationConsumer> modifications) {
 		var m = new BulkLevelModificationBundle(new ArrayList<>());
 		modifications.accept(m);
-		return bulkModify(m);
+		return bulkModify(undoable, m);
 	}
 
-	default void redrawSection(int sectionX, int sectionY, int sectionZ, boolean mainThread) {
+	default void redrawSections(LongList sections, boolean mainThread) {
 	}
 
 	default void playSound(Vec3 pos, SoundData sound) {
