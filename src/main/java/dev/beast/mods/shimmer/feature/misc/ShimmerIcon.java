@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 
 public enum ShimmerIcon {
+	SMALL_SPACE(".", false),
 	ERROR("!", true),
 	PLUS("+", true),
 	MINUS("-", true),
@@ -25,7 +26,6 @@ public enum ShimmerIcon {
 	;
 
 	public static final ResourceLocation FONT = Shimmer.id("icons");
-	public static final String SMALL_SPACE = ".";
 
 	public static Component icons(String text, boolean hasColor) {
 		if (hasColor) {
@@ -48,10 +48,10 @@ public enum ShimmerIcon {
 	}
 
 	public Component prefix() {
-		return icons(character + SMALL_SPACE, hasColor);
+		return icons(character + ".", hasColor);
 	}
 
 	public Component suffix() {
-		return icons(SMALL_SPACE + character, hasColor);
+		return icons("." + character, hasColor);
 	}
 }

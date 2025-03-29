@@ -5,5 +5,5 @@ import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(Component.class)
-public class ComponentMixin implements ShimmerComponent {
+public interface ComponentMixin extends ShimmerComponent {
 }
