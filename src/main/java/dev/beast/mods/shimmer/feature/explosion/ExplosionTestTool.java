@@ -70,6 +70,7 @@ public class ExplosionTestTool implements ShimmerTool {
 				player.status("Modified %,d blocks".formatted(count));
 			} else {
 				player.status("Displaying Entity Damage");
+				level.removeAllParticles();
 				instance.displayEntityDamage(120);
 			}
 		}

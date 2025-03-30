@@ -7,6 +7,7 @@ import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.cutscene.PlayCutscenePayload;
 import dev.beast.mods.shimmer.feature.cutscene.StopCutscenePayload;
 import dev.beast.mods.shimmer.feature.misc.SetPostEffectPayload;
+import dev.beast.mods.shimmer.feature.particle.RemoveAllParticlesPayload;
 import dev.beast.mods.shimmer.feature.vote.EndVotePayload;
 import dev.beast.mods.shimmer.feature.vote.StartNumberVotingPayload;
 import dev.beast.mods.shimmer.feature.vote.StartYesNoVotingPayload;
@@ -115,5 +116,9 @@ public interface ShimmerEntityContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void endVote() {
 		s2c(EndVotePayload.INSTANCE);
+	}
+
+	default void removeAllParticles() {
+		s2c(RemoveAllParticlesPayload.INSTANCE);
 	}
 }

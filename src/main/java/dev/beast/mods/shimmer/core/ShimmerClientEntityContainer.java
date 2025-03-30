@@ -75,4 +75,9 @@ public interface ShimmerClientEntityContainer extends ShimmerEntityContainer {
 	default void endVote() {
 		shimmer$getEnvironment().endVote();
 	}
+
+	@Override
+	default void removeAllParticles() {
+		shimmer$getEnvironment().removeAllParticles();
+	}
 }

@@ -233,6 +233,15 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment, Shi
 	}
 
 	@Override
+	default void removeAllParticles() {
+		shimmer$self().particleEngine.setLevel(shimmer$self().level);
+
+		for (var manager : PhysicsParticleManager.ALL) {
+			manager.clear();
+		}
+	}
+
+	@Override
 	default void removeZone(UUID uuid) {
 		var session = shimmer$self().player.shimmer$sessionData();
 		session.serverZones.remove(uuid);

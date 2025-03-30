@@ -34,6 +34,7 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ExplosionData {
 	public static final ExplosionData DEFAULT = new ExplosionData();
@@ -46,15 +47,19 @@ public class ExplosionData {
 			Codec.FLOAT.optionalFieldOf("max_damage", 4F).forGetter(v -> v.maxDamage),
 			Easing.CODEC.optionalFieldOf("damage_easing", Easing.CUBIC_IN).forGetter(v -> v.damageEasing),
 			Codec.FLOAT.optionalFieldOf("horizontal_knockback", 1F).forGetter(v -> v.horizontalKnockback),
-			Codec.FLOAT.optionalFieldOf("vertical_knockback", 0F).forGetter(v -> v.verticalKnockback)
+			Codec.FLOAT.optionalFieldOf("vertical_knockback", 0F).forGetter(v -> v.verticalKnockback),
+			Codec.BOOL.optionalFieldOf("spherical", false).forGetter(v -> v.spherical),
+			Codec.FLOAT.optionalFieldOf("radius_mod", 1.05F).forGetter(v -> v.radiusMod)
 		).apply(instance, EntityData::new));
 
 		public static final StreamCodec<ByteBuf, EntityData> STREAM_CODEC = CompositeStreamCodec.of(
-			ByteBufCodecs.FLOAT, v -> v.minDamage,
+			ByteBufCodecs.FLOAT.optional(0F), v -> v.minDamage,
 			ByteBufCodecs.FLOAT, v -> v.maxDamage,
-			Easing.STREAM_CODEC, v -> v.damageEasing,
-			ByteBufCodecs.FLOAT, v -> v.horizontalKnockback,
-			ByteBufCodecs.FLOAT, v -> v.verticalKnockback,
+			Easing.STREAM_CODEC.optional(Easing.CUBIC_IN), v -> v.damageEasing,
+			ByteBufCodecs.FLOAT.optional(1F), v -> v.horizontalKnockback,
+			ByteBufCodecs.FLOAT.optional(0F), v -> v.verticalKnockback,
+			ByteBufCodecs.BOOL, v -> v.spherical,
+			ByteBufCodecs.FLOAT.optional(1.05F), v -> v.radiusMod,
 			EntityData::new
 		);
 
@@ -63,6 +68,8 @@ public class ExplosionData {
 		public Easing damageEasing;
 		public float horizontalKnockback;
 		public float verticalKnockback;
+		public boolean spherical;
+		public float radiusMod;
 
 		public EntityData() {
 			this.minDamage = 0F;
@@ -70,6 +77,8 @@ public class ExplosionData {
 			this.damageEasing = Easing.CUBIC_IN;
 			this.horizontalKnockback = 1F;
 			this.verticalKnockback = 0F;
+			this.spherical = false;
+			this.radiusMod = 1.05F;
 		}
 
 		private EntityData(
@@ -77,17 +86,21 @@ public class ExplosionData {
 			float maxDamage,
 			Easing damageEasing,
 			float horizontalKnockback,
-			float verticalKnockback
+			float verticalKnockback,
+			boolean spherical,
+			float radiusMod
 		) {
 			this.minDamage = minDamage;
 			this.maxDamage = maxDamage;
 			this.damageEasing = damageEasing;
 			this.horizontalKnockback = horizontalKnockback;
 			this.verticalKnockback = verticalKnockback;
+			this.spherical = spherical;
+			this.radiusMod = radiusMod;
 		}
 
 		private EntityData copy() {
-			return new EntityData(minDamage, maxDamage, damageEasing, horizontalKnockback, verticalKnockback);
+			return new EntityData(minDamage, maxDamage, damageEasing, horizontalKnockback, verticalKnockback, spherical, radiusMod);
 		}
 
 		@Override
@@ -99,6 +112,36 @@ public class ExplosionData {
 				", horizontalKnockback=" + horizontalKnockback +
 				", verticalKnockback=" + verticalKnockback +
 				']';
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(
+				minDamage,
+				maxDamage,
+				damageEasing,
+				horizontalKnockback,
+				verticalKnockback,
+				spherical,
+				radiusMod
+			);
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (o == this) {
+				return true;
+			} else if (o instanceof EntityData d) {
+				return minDamage == d.minDamage
+					&& maxDamage == d.maxDamage
+					&& damageEasing == d.damageEasing
+					&& horizontalKnockback == d.horizontalKnockback
+					&& verticalKnockback == d.verticalKnockback
+					&& spherical == d.spherical
+					&& radiusMod == d.radiusMod;
+			} else {
+				return false;
+			}
 		}
 
 		public float damage(float relativeDistance) {
@@ -119,8 +162,8 @@ public class ExplosionData {
 		).apply(instance, FilterData::new));
 
 		public static final StreamCodec<RegistryFriendlyByteBuf, FilterData> STREAM_CODEC = CompositeStreamCodec.of(
-			ByteBufCodecs.INT, v -> v.floor,
-			ByteBufCodecs.INT, v -> v.ceiling,
+			ByteBufCodecs.VAR_INT.optional(-1000), v -> v.floor,
+			ByteBufCodecs.VAR_INT.optional(1000), v -> v.ceiling,
 			BlockFilter.STREAM_CODEC.optional(BlockFilter.ANY.instance()), v -> v.blocks,
 			EntityFilter.STREAM_CODEC.optional(EntityFilter.CREATIVE.instance()), v -> v.ignored,
 			EntityFilter.STREAM_CODEC.optional(EntityFilter.NONE.instance()), v -> v.invincible,
@@ -175,6 +218,34 @@ public class ExplosionData {
 				", bypassUnbreakable=" + bypassUnbreakable +
 				']';
 		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(
+				floor,
+				ceiling,
+				blocks,
+				ignored,
+				invincible,
+				bypassUnbreakable
+			);
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (o == this) {
+				return true;
+			} else if (o instanceof FilterData d) {
+				return floor == d.floor
+					&& ceiling == d.ceiling
+					&& blocks.equals(d.blocks)
+					&& ignored.equals(d.ignored)
+					&& invincible.equals(d.invincible)
+					&& bypassUnbreakable == d.bypassUnbreakable;
+			} else {
+				return false;
+			}
+		}
 	}
 
 	public static final Codec<ExplosionData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -182,7 +253,7 @@ public class ExplosionData {
 		Codec.FLOAT.optionalFieldOf("depth", 4F).forGetter(v -> v.height),
 		Codec.FLOAT.optionalFieldOf("height", 4F).forGetter(v -> v.depth),
 		Codec.FLOAT.optionalFieldOf("destroy", 1F).forGetter(v -> v.destroy),
-		Codec.FLOAT.optionalFieldOf("decay", 1F).forGetter(v -> v.decay),
+		Codec.FLOAT.optionalFieldOf("decay", 0.3F).forGetter(v -> v.decay),
 		Codec.FLOAT.optionalFieldOf("fire", 0F).forGetter(v -> v.fire),
 		Codec.BOOL.optionalFieldOf("smolder", false).forGetter(v -> v.smolder),
 		EntityData.CODEC.optionalFieldOf("entity", EntityData.DEFAULT).forGetter(v -> v.entity),
@@ -193,9 +264,9 @@ public class ExplosionData {
 		ByteBufCodecs.FLOAT, v -> v.radius,
 		ByteBufCodecs.FLOAT, v -> v.depth,
 		ByteBufCodecs.FLOAT, v -> v.height,
-		ByteBufCodecs.FLOAT, v -> v.destroy,
-		ByteBufCodecs.FLOAT, v -> v.decay,
-		ByteBufCodecs.FLOAT, v -> v.fire,
+		ByteBufCodecs.FLOAT.optional(1F), v -> v.destroy,
+		ByteBufCodecs.FLOAT.optional(0.3F), v -> v.decay,
+		ByteBufCodecs.FLOAT.optional(0F), v -> v.fire,
 		ByteBufCodecs.BOOL, v -> v.smolder,
 		EntityData.STREAM_CODEC.optional(EntityData.DEFAULT), v -> v.entity,
 		FilterData.STREAM_CODEC.optional(FilterData.DEFAULT), v -> v.filter,
@@ -240,7 +311,7 @@ public class ExplosionData {
 		this.depth = 4F;
 		this.height = 4F;
 		this.destroy = 1F;
-		this.decay = 1F;
+		this.decay = 0.3F;
 		this.fire = 0F;
 		this.smolder = false;
 		this.entity = new EntityData();
@@ -314,16 +385,16 @@ public class ExplosionData {
 				for (int z = -ihradius; z <= ihradius; z++) {
 					// https://en.wikipedia.org/wiki/Ellipsoid
 
-					var d = inside(x, y, z);
+					var inside = inside(x, y, z);
 
-					if (d <= 1F) {
+					if (inside <= 1F) {
 						pos.setX(atx + x);
 						pos.setZ(atz + z);
 						var state = level.getBlockState(pos);
 
 						if (state.shimmer$getDensity() > 0F && (filter.bypassUnbreakable || state.getDestroySpeed(level, pos) >= 0F) || state.getBlock() instanceof BaseFireBlock) {
 							if (filter.blocks.test(level, pos, state)) {
-								blocks.add(new DestroyedBlock(pos.immutable(), state, x, y, z, d, new MutableBoolean(false)));
+								blocks.add(new DestroyedBlock(pos.immutable(), state, x, y, z, inside, new MutableBoolean(false)));
 							}
 						}
 					}
@@ -339,6 +410,10 @@ public class ExplosionData {
 		return entity.isAlive() && !entity.isSpectator() && !filter.ignored.test(entity);
 	}
 
+	public double entityRangeInflation() {
+		return 0.5D; // Math.max(radius, Math.max(depth, height)) * 2D;
+	}
+
 	public List<Entity> collectEntities(Level level, Vec3 at) {
 		var entities = new ArrayList<Entity>();
 
@@ -346,16 +421,16 @@ public class ExplosionData {
 		double aty = at.y;
 		double atz = at.z;
 
-		double exp = 0.5D;
+		double exp = entityRangeInflation();
 
-		for (var entity : level.getEntities((Entity) null, new AABB(atx - radius - exp, aty - depth - exp, atz - radius - exp, atx + radius + exp, aty + height + exp, atz + radius + exp), this::includeEntity)) {
-			double x = entity.getX() - atx;
-			double y = entity.getY() - aty;
-			double z = entity.getZ() - atz;
-			var d = KMath.sq(x / radius) + (y == 0 ? 0 : y > 0 ? KMath.sq(y / height) : KMath.sq(y / depth)) + KMath.sq(z / radius);
+		for (var e : level.getEntities((Entity) null, new AABB(atx - radius - exp, aty - depth - exp, atz - radius - exp, atx + radius + exp, aty + height + exp, atz + radius + exp), this::includeEntity)) {
+			float x = (float) (e.getX() - atx);
+			float y = entity.spherical ? (float) (e.getY() - aty) : 0F;
+			float z = (float) (e.getZ() - atz);
+			var d = KMath.sq(x / radius) + (y == 0F ? 0F : y > 0 ? KMath.sq(y / height) : KMath.sq(y / depth)) + KMath.sq(z / radius);
 
-			if (d <= 1.05F) {
-				entities.add(entity);
+			if (d <= entity.radiusMod) {
+				entities.add(e);
 			}
 		}
 
@@ -374,13 +449,13 @@ public class ExplosionData {
 
 		for (var e : entities) {
 			double x = e.getX() - atx;
-			double y = (e instanceof PrimedTnt ? e.getY() : e.getEyeY()) - aty;
+			double y = entity.spherical ? ((e instanceof PrimedTnt ? e.getY() : e.getEyeY()) - aty) : 0D;
 			double z = e.getZ() - atz;
 
-			double inside = Math.min(inside((float) x, (float) y, (float) z), 1D);
+			double inside = Math.min(inside((float) x, (float) y, (float) z), entity.radiusMod);
 
-			if (inside <= 1D) {
-				var damage = entity.damage((float) inside);
+			if (inside <= entity.radiusMod) {
+				var damage = entity.damage((float) inside / entity.radiusMod);
 
 				if (e instanceof LivingEntity l && filter.invincible.test(l)) {
 					var h = l.getHealth();

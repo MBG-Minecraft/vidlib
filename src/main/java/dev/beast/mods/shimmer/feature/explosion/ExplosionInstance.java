@@ -72,7 +72,7 @@ public class ExplosionInstance {
 		}
 
 		for (var block : blocks) {
-			var d = Math.cbrt(block.d()) / data.destroy;
+			var d = Math.cbrt(block.inside()) / data.destroy;
 			block.destroyed().setTrue();
 
 			if (d > 0.98D) {
@@ -102,11 +102,11 @@ public class ExplosionInstance {
 	}
 
 	public void decay(BlockModificationConsumer modifications) {
-		if (data.decay <= 1F) {
+		if (data.decay <= 0F) {
 			return;
 		}
 
-		int lowestY = 1000;
+		int lowestY = Integer.MAX_VALUE - 1;
 
 		if (data.smolder) {
 			for (var block : blocks) {
@@ -117,7 +117,7 @@ public class ExplosionInstance {
 		}
 
 		for (var block : blocks) {
-			if (data.smolder ? (block.dy() <= lowestY + 1) : random.nextInt(3) == 0) {
+			if (data.smolder ? (block.dy() <= lowestY + 1) : block.inside() >= 0.95F) {
 				var pos = block.pos();
 
 				if (data.smolder) {
@@ -134,7 +134,7 @@ public class ExplosionInstance {
 					} else {
 						modifications.set(pos, Blocks.BASALT);
 					}
-				} else {
+				} else if (random.nextFloat() < data.decay) {
 					var state = level.getBlockState(pos);
 
 					if (state.getBlock() == Blocks.STONE) {
@@ -217,32 +217,44 @@ public class ExplosionInstance {
 	public void displayEntityDamage(int duration) {
 		var center = Vec3.atCenterOf(at);
 		var blocks = new ArrayList<List<BlockPos>>();
+		var instantDeathBlocks = new ArrayList<BlockPos>();
 		var maxBlocks = Mth.ceil(data.radius + 1F);
 
 		for (int i = 0; i < maxBlocks; i++) {
 			blocks.add(new ArrayList<>());
 		}
 
-		for (var bpos : BlockPos.betweenClosed(data.getBounds(center).inflate(0.5D))) {
+		for (var bpos : BlockPos.betweenClosed(data.getBounds(center).inflate(data.entityRangeInflation()))) {
 			var inside = data.inside(
 				(float) (bpos.getX() + 0.5D - center.x),
 				(float) (bpos.getY() + 0.5D - center.y),
 				(float) (bpos.getZ() + 0.5D - center.z)
 			);
 
-			if (inside >= 0D && inside <= 1D && level.getBlockState(bpos).isAir() && !level.getBlockState(bpos.below()).isAir()) {
-				blocks.get(Math.clamp((int) (data.entity.damageEasing.easeClamped(inside) * (blocks.size() - 1D)), 0, blocks.size() - 1)).add(bpos.immutable());
+			if (inside >= 0D && inside <= data.entity.radiusMod && level.getBlockState(bpos).isAir() && !level.getBlockState(bpos.below()).isAir()) {
+				var damage = data.entity.damage(inside / data.entity.radiusMod);
+				var relDamage = 1F - (damage - data.entity.minDamage) / (data.entity.maxDamage - data.entity.minDamage);
+
+				if (damage >= 20F) {
+					instantDeathBlocks.add(bpos.immutable());
+				} else {
+					blocks.get(Math.clamp((int) (relDamage * (maxBlocks - 1D)), 0, maxBlocks - 1)).add(bpos.immutable());
+				}
 			}
 		}
 
 		var map = new HashMap<CubeParticleOptions, List<BlockPos>>();
 
-		for (int i = 0; i < blocks.size(); i++) {
+		for (int i = 0; i < maxBlocks; i++) {
 			var list = blocks.get(i);
 
 			if (!list.isEmpty()) {
-				map.put(new CubeParticleOptions(Color.hsb(KMath.lerp(i / (float) blocks.size(), 0F, 0.5F), 1F, 1F, 255), Color.TRANSPARENT, -duration), list);
+				map.put(new CubeParticleOptions(Color.hsb(KMath.lerp(i / (float) maxBlocks, 0F, 0.3F), 1F, 1F, 255), Color.TRANSPARENT, -duration), list);
 			}
+		}
+
+		if (!instantDeathBlocks.isEmpty()) {
+			map.put(new CubeParticleOptions(Color.MAGENTA, Color.TRANSPARENT, -duration), instantDeathBlocks);
 		}
 
 		level.spawnCubeParticles(map);
