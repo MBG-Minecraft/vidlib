@@ -12,6 +12,7 @@ import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.Ticket;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,6 +28,11 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 	@Override
 	default ServerLevel shimmer$level() {
 		return (ServerLevel) this;
+	}
+
+	@Override
+	default List<? extends Player> shimmer$getS2CPlayers() {
+		return shimmer$level().players();
 	}
 
 	@Override

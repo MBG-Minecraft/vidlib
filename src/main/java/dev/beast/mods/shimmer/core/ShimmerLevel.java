@@ -10,9 +10,11 @@ import dev.beast.mods.shimmer.feature.bulk.UndoableModification;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.prop.PropList;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -37,11 +39,6 @@ public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEn
 	@Override
 	default DataMap getServerData() {
 		return shimmer$getEnvironment().getServerData();
-	}
-
-	@Override
-	default List<? extends Player> shimmer$getS2CPlayers() {
-		return ((Level) this).players();
 	}
 
 	@Nullable
@@ -82,6 +79,14 @@ public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEn
 
 		undoable.clear();
 		return bulkModify(false, builder.build());
+	}
+
+	default void setBlockFast(BlockPos pos, BlockState state) {
+		((Level) this).setBlock(pos, state, Block.UPDATE_CLIENTS, 0);
+	}
+
+	default void setBlockFast(BlockPos pos, Block block) {
+		setBlockFast(pos, block.defaultBlockState());
 	}
 
 	@Nullable

@@ -6,6 +6,7 @@ import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -43,5 +44,21 @@ public record SoundData(
 
 	public SoundData(Holder<SoundEvent> sound) {
 		this(sound, 1F);
+	}
+
+	public SoundData(SoundEvent sound, SoundSource source, float volume, float pitch) {
+		this(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound), source, volume, pitch);
+	}
+
+	public SoundData(SoundEvent sound, float volume, float pitch) {
+		this(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound), volume, pitch);
+	}
+
+	public SoundData(SoundEvent sound, float volume) {
+		this(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound), volume);
+	}
+
+	public SoundData(SoundEvent sound) {
+		this(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound));
 	}
 }

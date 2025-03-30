@@ -43,7 +43,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.ApiStatus;
@@ -167,6 +166,16 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 	}
 
 	@Override
+	default void tell(Component message) {
+		shimmer$self().player.displayClientMessage(message, false);
+	}
+
+	@Override
+	default void status(Component message) {
+		shimmer$self().player.displayClientMessage(message, true);
+	}
+
+	@Override
 	default void playCutscene(Cutscene cutscene, WorldNumberVariables variables) {
 		var level = shimmer$self().level;
 		var player = shimmer$self().player;
@@ -281,12 +290,12 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 	@Override
 	default void playSound(Vec3 pos, SoundData sound) {
 		var mc = shimmer$self();
-		mc.getSoundManager().play(new SimpleSoundInstance(sound.sound().value(), sound.source(), sound.volume(), sound.pitch(), ((Level) this).random, pos.x, pos.y, pos.z));
+		mc.getSoundManager().play(new SimpleSoundInstance(sound.sound().value(), sound.source(), sound.volume(), sound.pitch(), shimmer$level().random, pos.x, pos.y, pos.z));
 	}
 
 	@Override
 	default void playTrackingSound(WorldPosition position, WorldNumberVariables variables, SoundData data, boolean looping) {
-		shimmer$self().getSoundManager().play(new TrackingSound((Level) this, position, variables, data, looping));
+		shimmer$self().getSoundManager().play(new TrackingSound(shimmer$level(), position, variables, data, looping));
 	}
 
 	@Override

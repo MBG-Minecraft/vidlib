@@ -69,8 +69,12 @@ public interface ShimmerEntityContainer extends ShimmerS2CPacketConsumer, Shimme
 	}
 
 	default void tell(Component message) {
-		for (var player : shimmer$getS2CPlayers()) {
-			player.displayClientMessage(message, false);
+		if (shimmer$isClient()) {
+			shimmer$getEnvironment().tell(message);
+		} else {
+			for (var player : shimmer$getS2CPlayers()) {
+				player.displayClientMessage(message, false);
+			}
 		}
 	}
 
@@ -79,8 +83,12 @@ public interface ShimmerEntityContainer extends ShimmerS2CPacketConsumer, Shimme
 	}
 
 	default void status(Component message) {
-		for (var player : shimmer$getS2CPlayers()) {
-			player.displayClientMessage(message, true);
+		if (shimmer$isClient()) {
+			shimmer$getEnvironment().status(message);
+		} else {
+			for (var player : shimmer$getS2CPlayers()) {
+				player.displayClientMessage(message, true);
+			}
 		}
 	}
 
