@@ -1,9 +1,14 @@
 package dev.beast.mods.shimmer.feature.bulk;
 
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
+import dev.beast.mods.shimmer.feature.block.ConnectedBlock;
+import dev.beast.mods.shimmer.feature.block.filter.BlockIdFilter;
 import dev.beast.mods.shimmer.feature.item.ShimmerTool;
+import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
+import dev.beast.mods.shimmer.feature.particle.TextParticleOptions;
 import dev.beast.mods.shimmer.feature.structure.LazyStructures;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
+import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.util.registry.RegistryRef;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -17,7 +22,11 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BulkModificationToolItem implements ShimmerTool {
 	private static final RegistryRef<LazyStructures> SHIP = StructureStorage.SERVER.ref(ResourceLocation.parse("video:ship"));
@@ -47,7 +56,22 @@ public class BulkModificationToolItem implements ShimmerTool {
 		if (hit != null && player.level() instanceof ServerLevel level) {
 			var pos = hit.getBlockPos();
 			var state = level.getBlockState(pos);
-			level.bulkModify(true, modifications -> modify(level, modifications, pos, state));
+
+			if (player.isShiftKeyDown()) {
+				var blocks = player.level().walkBlocks(ConnectedBlock.WalkType.DIAGONAL, pos, new BlockIdFilter(state.getBlock()), 1024, 1024);
+				player.status("Blocks: " + blocks.size());
+
+				var list = new ArrayList<BlockPos>();
+
+				for (var block : blocks) {
+					list.add(block.block().pos().above());
+					player.level().textParticles(new TextParticleOptions(Component.literal(String.valueOf(block.distance())), 60), List.of(Vec3.atCenterOf(block.block().pos().above())));
+				}
+
+				player.level().cubeParticles(new CubeParticleOptions(Color.CYAN, -60), list);
+			} else {
+				level.bulkModify(true, modifications -> modify(level, modifications, pos, state));
+			}
 		}
 
 		return true;

@@ -25,6 +25,10 @@ public record CubeParticleOptions(Color color, Color lineColor, int ttl) impleme
 		CubeParticleOptions::new
 	);
 
+	public CubeParticleOptions(Color color, int ttl) {
+		this(color, Color.TRANSPARENT, ttl);
+	}
+
 	@Override
 	public ParticleType<?> getType() {
 		return ShimmerParticles.CUBE.get();

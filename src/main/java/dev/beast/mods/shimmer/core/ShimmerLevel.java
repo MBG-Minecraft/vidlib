@@ -1,15 +1,20 @@
 package dev.beast.mods.shimmer.core;
 
 import com.mojang.datafixers.util.Either;
+import dev.beast.mods.shimmer.feature.block.ConnectedBlock;
+import dev.beast.mods.shimmer.feature.block.filter.BlockFilter;
 import dev.beast.mods.shimmer.feature.bulk.BlockModificationConsumer;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModification;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationBundle;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationHolder;
 import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
+import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
 import dev.beast.mods.shimmer.feature.bulk.UndoableModification;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.prop.PropList;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -17,6 +22,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -111,5 +117,42 @@ public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEn
 		var m = new BulkLevelModificationBundle(new ArrayList<>());
 		modifications.accept(m);
 		return bulkModify(undoable, m);
+	}
+
+	default List<ConnectedBlock> walkBlocks(ConnectedBlock.WalkType walkType, BlockPos start, BlockFilter filter, int maxDistance, int maxTotalBlocks) {
+		var result = new Long2ObjectOpenHashMap<ConnectedBlock>();
+		var traversed = new LongOpenHashSet();
+		var queue = new ArrayDeque<ConnectedBlock>();
+
+		queue.add(new ConnectedBlock(new PositionedBlock(start, shimmer$level().getBlockState(start)), 0));
+		traversed.add(start.asLong());
+		var level = shimmer$level();
+
+		while (!queue.isEmpty()) {
+			var c = queue.pop();
+
+			if (c.distance() == 0 || filter.test(level, c.block().pos(), c.block().state())) {
+				result.put(c.block().pos().asLong(), c);
+
+				if (result.size() >= maxTotalBlocks) {
+					break;
+				}
+
+				if (c.distance() + 1 > maxDistance) {
+					continue;
+				}
+
+				for (var o : walkType.offsets) {
+					var offset = c.block().pos().offset(o);
+					var state = level.getBlockState(offset);
+
+					if (!state.isAir() && traversed.add(offset.asLong())) {
+						queue.add(new ConnectedBlock(new PositionedBlock(offset, state), c.distance() + 1));
+					}
+				}
+			}
+		}
+
+		return List.copyOf(result.values());
 	}
 }

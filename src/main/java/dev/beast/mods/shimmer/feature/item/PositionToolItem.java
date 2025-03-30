@@ -103,7 +103,6 @@ public class PositionToolItem implements ShimmerTool {
 			var strBlock = KMath.formatBlockPos(blockPos);
 			var strVec = KMath.formatVec3(pos);
 			var strDist = KMath.format(lastClick.distanceTo(pos));
-			var state = player.level().getBlockState(blockPos);
 
 			lastClick = pos;
 
