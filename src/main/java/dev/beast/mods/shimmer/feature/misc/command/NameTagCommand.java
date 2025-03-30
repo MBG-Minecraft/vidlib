@@ -15,7 +15,7 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
 public interface NameTagCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("name-tag", (command, buildContext) -> command
-		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
+		.requires(source -> source.hasPermission(2))
 		.then(Commands.argument("name", ComponentArgument.textComponent(buildContext))
 			.executes(ctx -> nameTag(ctx.getSource(), ComponentArgument.getComponent(ctx, "name")))
 		)

@@ -17,7 +17,7 @@ import java.util.Collection;
 public class VoteCommands {
 	@AutoRegister
 	public static final ServerCommandHolder YES_NO_COMMAND = new ServerCommandHolder("voting-screen", (command, buildContext) -> command
-		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
+		.requires(source -> source.hasPermission(2))
 		.then(Commands.argument("player", EntityArgument.players())
 			.then(Commands.literal("yes-no")
 				.then(Commands.argument("extra-data", CompoundTagArgument.compoundTag())

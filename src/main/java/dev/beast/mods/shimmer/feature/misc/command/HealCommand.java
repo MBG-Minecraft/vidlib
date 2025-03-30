@@ -12,7 +12,7 @@ import java.util.List;
 public interface HealCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("heal", (command, buildContext) -> command
-		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
+		.requires(source -> source.hasPermission(2))
 		.then(Commands.argument("player", EntityArgument.players())
 			.executes(ctx -> heal(EntityArgument.getPlayers(ctx, "player")))
 		)

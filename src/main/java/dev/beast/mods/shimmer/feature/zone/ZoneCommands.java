@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 public interface ZoneCommands {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("zones", (command, buildContext) -> command
-		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
+		.requires(source -> source.hasPermission(2))
 		.then(Commands.literal("show")
 			.executes(ctx -> show(ctx.getSource().getPlayerOrException()))
 		)

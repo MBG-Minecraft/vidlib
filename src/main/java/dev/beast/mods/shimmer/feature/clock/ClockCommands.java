@@ -9,7 +9,7 @@ import net.minecraft.commands.Commands;
 public interface ClockCommands {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("clock", (command, buildContext) -> command
-		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
+		.requires(source -> source.hasPermission(2))
 		.then(Commands.literal("set")
 			.then(Commands.argument("id", Clock.KNOWN_CODEC.argument(buildContext))
 				.suggests(Clock.REGISTRY.suggestionProvider)

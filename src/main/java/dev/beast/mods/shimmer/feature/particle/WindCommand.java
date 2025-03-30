@@ -17,7 +17,7 @@ import net.neoforged.neoforge.server.command.EnumArgument;
 public interface WindCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("wind", (command, buildContext) -> command
-		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
+		.requires(source -> source.hasPermission(2))
 		.then(Commands.argument("type", EnumArgument.enumArgument(MovementType.class))
 			.then(Commands.argument("position", BlockPosArgument.blockPos())
 				.then(Commands.argument("count", IntegerArgumentType.integer(1))

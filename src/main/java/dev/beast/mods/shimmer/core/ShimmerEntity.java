@@ -10,6 +10,7 @@ import dev.beast.mods.shimmer.feature.location.Location;
 import dev.beast.mods.shimmer.feature.sound.SoundData;
 import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
 import dev.beast.mods.shimmer.math.Line;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -152,8 +153,17 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 		teleport((ServerLevel) ((Entity) this).level(), pos);
 	}
 
+	default void teleport(ServerLevel to, BlockPos pos) {
+		teleport(to, new Vec3(pos.getX() + 0.5D, pos.getY() + 0.1D, pos.getZ() + 0.5D));
+	}
+
+	default void teleport(BlockPos pos) {
+		teleport(new Vec3(pos.getX() + 0.5D, pos.getY() + 0.1D, pos.getZ() + 0.5D));
+	}
+
 	default void teleport(Location location) {
-		teleport(((Entity) this).getServer().getLevel(location.dimension()), new Vec3(location.position().getX() + 0.5D, location.position().getY() + 0.1D, location.position().getZ() + 0.5D));
+		var entity = (Entity) this;
+		teleport(entity.getServer().getLevel(location.dimension()), location.random(entity.getRandom(), new Vec3(0.5D, 0.1D, 0.5D)));
 	}
 
 	default void forceSetVelocity(Vec3 velocity) {

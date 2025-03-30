@@ -14,7 +14,7 @@ import java.util.Collection;
 public interface CameraShakeCommands {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("camera-shake", (command, buildContext) -> command
-		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
+		.requires(source -> source.hasPermission(2))
 		.then(Commands.literal("add")
 			.then(Commands.literal("basic")
 				.then(Commands.argument("player", EntityArgument.players())

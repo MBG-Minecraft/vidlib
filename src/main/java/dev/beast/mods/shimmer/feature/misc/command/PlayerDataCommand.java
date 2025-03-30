@@ -13,7 +13,7 @@ import net.minecraft.network.chat.Component;
 public interface PlayerDataCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("player-data", (command, buildContext) -> {
-		command.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2));
+		command.requires(source -> source.hasPermission(2));
 		var nbtOps = buildContext.createSerializationContext(NbtOps.INSTANCE);
 
 		var get = Commands.argument("player", EntityArgument.players());

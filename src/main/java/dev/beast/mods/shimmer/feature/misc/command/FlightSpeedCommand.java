@@ -13,7 +13,7 @@ import java.util.List;
 public interface FlightSpeedCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("flight-speed", (command, buildContext) -> command
-		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
+		.requires(source -> source.hasPermission(2))
 		.then(Commands.argument("modifier", FloatArgumentType.floatArg(0F, 100F))
 			.executes(ctx -> flightSpeed(List.of(ctx.getSource().getPlayerOrException()), FloatArgumentType.getFloat(ctx, "modifier")))
 			.then(Commands.argument("player", EntityArgument.players())

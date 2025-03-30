@@ -16,7 +16,7 @@ import java.util.Optional;
 public interface PlumbobCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("plumbob", (command, buildContext) -> command
-		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
+		.requires(source -> source.hasPermission(2))
 		.then(Commands.literal("set")
 			.then(Commands.argument("player", EntityArgument.players())
 				.then(Commands.argument("icon", Icon.KNOWN_CODEC.argument(buildContext))

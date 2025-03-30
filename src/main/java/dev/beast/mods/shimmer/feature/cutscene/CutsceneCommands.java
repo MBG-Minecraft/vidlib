@@ -9,7 +9,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 public interface CutsceneCommands {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("cutscene", (command, buildContext) -> command
-		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
+		.requires(source -> source.hasPermission(2))
 		.then(Commands.literal("play")
 			.then(Commands.argument("player", EntityArgument.players())
 				.then(Commands.argument("id", Cutscene.KNOWN_CODEC.argument(buildContext))

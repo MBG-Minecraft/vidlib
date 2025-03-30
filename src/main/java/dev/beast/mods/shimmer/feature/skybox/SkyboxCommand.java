@@ -10,7 +10,7 @@ import net.minecraft.server.MinecraftServer;
 public interface SkyboxCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("skybox", (command, buildContext) -> command
-		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
+		.requires(source -> source.hasPermission(2))
 		.then(Commands.literal("set")
 			.then(Commands.argument("skybox", ShimmerResourceLocationArgument.id())
 				.suggests(SkyboxData.REGISTRY.suggestionProvider)

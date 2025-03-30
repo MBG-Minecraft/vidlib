@@ -7,7 +7,7 @@ import net.minecraft.commands.Commands;
 public class BulkCommands {
 	@AutoRegister
 	public static final ServerCommandHolder COMMAND = new ServerCommandHolder("bulk", (command, buildContext) -> command
-		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
+		.requires(source -> source.hasPermission(2))
 		.then(Commands.literal("undo")
 			.then(Commands.literal("last")
 				.executes(ctx -> {

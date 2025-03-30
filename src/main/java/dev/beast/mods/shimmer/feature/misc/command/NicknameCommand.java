@@ -15,7 +15,7 @@ import java.util.List;
 public interface NicknameCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("nickname", (command, buildContext) -> command
-		.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
+		.requires(source -> source.hasPermission(2))
 		.then(Commands.argument("player", EntityArgument.players())
 			.then(Commands.argument("nickname", ComponentArgument.textComponent(buildContext))
 				.executes(ctx -> nickname(EntityArgument.getOptionalPlayers(ctx, "player"), ComponentArgument.getComponent(ctx, "nickname")))

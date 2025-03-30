@@ -32,7 +32,7 @@ public interface ShimmerTool {
 
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("shimmer-tool", (command, buildContext) -> {
-		command.requires(stack -> stack.getServer().isSingleplayer() || stack.hasPermission(2));
+		command.requires(source -> source.hasPermission(2));
 
 		for (var tool : REGISTRY.values()) {
 			var cmd = Commands.literal(tool.getId().replace('_', '-'));
