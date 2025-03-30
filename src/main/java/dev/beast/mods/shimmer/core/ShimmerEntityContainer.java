@@ -8,8 +8,10 @@ import dev.beast.mods.shimmer.feature.cutscene.PlayCutscenePayload;
 import dev.beast.mods.shimmer.feature.cutscene.StopCutscenePayload;
 import dev.beast.mods.shimmer.feature.misc.SetPostEffectPayload;
 import dev.beast.mods.shimmer.feature.vote.EndVotePayload;
-import dev.beast.mods.shimmer.feature.vote.StartVotePayload;
+import dev.beast.mods.shimmer.feature.vote.StartNumberVotingPayload;
+import dev.beast.mods.shimmer.feature.vote.StartYesNoVotingPayload;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -103,8 +105,12 @@ public interface ShimmerEntityContainer extends ShimmerS2CPacketConsumer, Shimme
 		}
 	}
 
-	default void openVoteScreen(CompoundTag data, Component title, Component subtitle, Component yesLabel, Component noLabel) {
-		s2c(new StartVotePayload(data, title, subtitle, yesLabel, noLabel));
+	default void openYesNoVotingScreen(CompoundTag extraData, Component title, Component subtitle, Component yesLabel, Component noLabel) {
+		s2c(new StartYesNoVotingPayload(extraData, title, subtitle, yesLabel, noLabel));
+	}
+
+	default void openNumberVotingScreen(CompoundTag extraData, Component title, Component subtitle, int max, IntList unavailable) {
+		s2c(new StartNumberVotingPayload(extraData, title, subtitle, max, unavailable));
 	}
 
 	default void endVote() {

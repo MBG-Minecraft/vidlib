@@ -10,12 +10,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.neoforged.neoforge.common.NeoForge;
 
-public record VotePayload(CompoundTag data, boolean yes) implements ShimmerPacketPayload {
+public record PlayerVotedPayload(CompoundTag extraData, int number) implements ShimmerPacketPayload {
 	@AutoPacket(AutoPacket.To.SERVER)
-	public static final ShimmerPacketType<VotePayload> TYPE = ShimmerPacketType.internal("vote", CompositeStreamCodec.of(
-		ShimmerStreamCodecs.COMPOUND_TAG, VotePayload::data,
-		ByteBufCodecs.BOOL, VotePayload::yes,
-		VotePayload::new
+	public static final ShimmerPacketType<PlayerVotedPayload> TYPE = ShimmerPacketType.internal("player_voted", CompositeStreamCodec.of(
+		ShimmerStreamCodecs.COMPOUND_TAG, PlayerVotedPayload::extraData,
+		ByteBufCodecs.VAR_INT, PlayerVotedPayload::number,
+		PlayerVotedPayload::new
 	));
 
 	@Override
@@ -25,7 +25,7 @@ public record VotePayload(CompoundTag data, boolean yes) implements ShimmerPacke
 
 	@Override
 	public void handle(ShimmerPayloadContext ctx) {
-		if (NeoForge.EVENT_BUS.post(new VoteEvent(ctx.player(), data, yes)).isCanceled()) {
+		if (NeoForge.EVENT_BUS.post(new PlayerVotedEvent(ctx.player(), extraData, number)).isCanceled()) {
 			ctx.player().endVote();
 		}
 	}

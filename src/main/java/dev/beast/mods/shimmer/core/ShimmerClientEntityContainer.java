@@ -3,6 +3,7 @@ package dev.beast.mods.shimmer.core;
 import dev.beast.mods.shimmer.feature.camerashake.CameraShake;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -61,8 +62,13 @@ public interface ShimmerClientEntityContainer extends ShimmerEntityContainer {
 	}
 
 	@Override
-	default void openVoteScreen(CompoundTag data, Component title, Component subtitle, Component yesLabel, Component noLabel) {
-		shimmer$getEnvironment().openVoteScreen(data, title, subtitle, yesLabel, noLabel);
+	default void openYesNoVotingScreen(CompoundTag extraData, Component title, Component subtitle, Component yesLabel, Component noLabel) {
+		shimmer$getEnvironment().openYesNoVotingScreen(extraData, title, subtitle, yesLabel, noLabel);
+	}
+
+	@Override
+	default void openNumberVotingScreen(CompoundTag extraData, Component title, Component subtitle, int max, IntList unavailable) {
+		shimmer$getEnvironment().openNumberVotingScreen(extraData, title, subtitle, max, unavailable);
 	}
 
 	@Override

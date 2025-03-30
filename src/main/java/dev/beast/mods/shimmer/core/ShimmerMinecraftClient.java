@@ -10,13 +10,15 @@ import dev.beast.mods.shimmer.feature.data.DataMapValue;
 import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.data.UpdatePlayerDataValuePayload;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleManager;
-import dev.beast.mods.shimmer.feature.vote.VoteScreen;
+import dev.beast.mods.shimmer.feature.vote.NumberVotingScreen;
+import dev.beast.mods.shimmer.feature.vote.YesNoVotingScreen;
 import dev.beast.mods.shimmer.math.Vec2d;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.util.Empty;
 import dev.beast.mods.shimmer.util.PauseType;
 import dev.beast.mods.shimmer.util.ScheduledTask;
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.client.Camera;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
@@ -214,13 +216,18 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment, Shi
 	}
 
 	@Override
-	default void openVoteScreen(CompoundTag data, Component title, Component subtitle, Component yesLabel, Component noLabel) {
-		shimmer$self().setScreen(new VoteScreen(data, title, subtitle, yesLabel, noLabel));
+	default void openYesNoVotingScreen(CompoundTag extraData, Component title, Component subtitle, Component yesLabel, Component noLabel) {
+		shimmer$self().setScreen(new YesNoVotingScreen(extraData, title, subtitle, yesLabel, noLabel));
+	}
+
+	@Override
+	default void openNumberVotingScreen(CompoundTag extraData, Component title, Component subtitle, int max, IntList unavailable) {
+		shimmer$self().setScreen(new NumberVotingScreen(extraData, title, subtitle, max, unavailable));
 	}
 
 	@Override
 	default void endVote() {
-		if (shimmer$self().screen instanceof VoteScreen) {
+		if (shimmer$self().screen instanceof YesNoVotingScreen) {
 			shimmer$self().popGuiLayer();
 		}
 	}
