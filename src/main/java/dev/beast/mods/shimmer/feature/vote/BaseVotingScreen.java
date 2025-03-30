@@ -29,7 +29,7 @@ public abstract class BaseVotingScreen extends Screen {
 			waiting = true;
 
 			if (postEvent()) {
-				minecraft.player.endVote();
+				minecraft.player.shimmer$closeScreen();
 			} else {
 				sendPayload();
 				button.setMessage(Component.literal("Submitted!"));

@@ -4,40 +4,18 @@ import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModification;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationBundle;
 import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
-import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
-import dev.beast.mods.shimmer.feature.bulk.RedrawChunkSectionsPayload;
-import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
-import dev.beast.mods.shimmer.feature.particle.FireData;
-import dev.beast.mods.shimmer.feature.particle.SpawnCubeParticlesPayload;
-import dev.beast.mods.shimmer.feature.particle.SpawnFireParticlesPayload;
-import dev.beast.mods.shimmer.feature.particle.SpawnWindParticlesPayload;
-import dev.beast.mods.shimmer.feature.particle.WindData;
-import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
-import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticlesIdPayload;
-import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticlesPayload;
 import dev.beast.mods.shimmer.feature.prop.ServerPropList;
-import dev.beast.mods.shimmer.feature.sound.SoundData;
-import dev.beast.mods.shimmer.feature.sound.SoundPayload;
-import dev.beast.mods.shimmer.feature.sound.TrackingSoundPayload;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.feature.zone.Zone;
-import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
-import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
-import it.unimi.dsi.fastutil.longs.LongList;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.Ticket;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public interface ShimmerServerLevel extends ShimmerLevel {
@@ -84,50 +62,6 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 		}
 
 		return ShimmerLevel.super.bulkModify(undoable, optimized);
-	}
-
-	@Override
-	default void redrawSections(LongList sections, boolean mainThread) {
-		s2c(new RedrawChunkSectionsPayload(sections, mainThread));
-	}
-
-	@Override
-	default void playSound(Vec3 pos, SoundData sound) {
-		s2c(new SoundPayload(pos, sound));
-	}
-
-	@Override
-	default void playTrackingSound(WorldPosition position, WorldNumberVariables variables, SoundData data, boolean looping) {
-		s2c(new TrackingSoundPayload(position, variables, data, looping));
-	}
-
-	@Override
-	default void physicsParticles(PhysicsParticleData data, long seed, List<PositionedBlock> blocks) {
-		if (!blocks.isEmpty()) {
-			s2c(new PhysicsParticlesPayload(data, seed, blocks));
-		}
-	}
-
-	@Override
-	default void physicsParticles(ResourceLocation id, long seed, List<PositionedBlock> blocks) {
-		if (!blocks.isEmpty()) {
-			s2c(new PhysicsParticlesIdPayload(id, seed, blocks));
-		}
-	}
-
-	@Override
-	default void spawnCubeParticles(Map<CubeParticleOptions, List<BlockPos>> map) {
-		s2c(new SpawnCubeParticlesPayload(map));
-	}
-
-	@Override
-	default void spawnWindParticles(RandomSource random, WindData data) {
-		s2c(new SpawnWindParticlesPayload(data));
-	}
-
-	@Override
-	default void spawnFireParticles(RandomSource random, FireData data) {
-		s2c(new SpawnFireParticlesPayload(data));
 	}
 
 	default boolean shimmer$cancelWrite() {

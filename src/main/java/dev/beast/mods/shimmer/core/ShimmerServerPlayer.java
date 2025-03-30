@@ -7,6 +7,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
 import net.neoforged.neoforge.network.bundle.PacketAndPayloadAcceptor;
 import org.jetbrains.annotations.Nullable;
@@ -14,6 +15,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public interface ShimmerServerPlayer extends ShimmerPlayer {
+	@Override
+	default List<? extends Player> shimmer$getS2CPlayers() {
+		return List.of((Player) this);
+	}
+
 	@Override
 	default ShimmerServerSessionData shimmer$sessionData() {
 		throw new NoMixinException(this);

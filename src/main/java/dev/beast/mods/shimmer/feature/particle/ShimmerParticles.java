@@ -38,6 +38,7 @@ public interface ShimmerParticles {
 
 	DeferredHolder<ParticleType<?>, ParticleType<CubeParticleOptions>> CUBE = register("cube", () -> CubeParticleOptions.CODEC, () -> CubeParticleOptions.STREAM_CODEC);
 	DeferredHolder<ParticleType<?>, ParticleType<LineParticleOptions>> LINE = register("line", () -> LineParticleOptions.CODEC, () -> LineParticleOptions.STREAM_CODEC);
+	DeferredHolder<ParticleType<?>, ParticleType<TextParticleOptions>> TEXT = register("text", () -> TextParticleOptions.CODEC, () -> TextParticleOptions.STREAM_CODEC);
 	DeferredHolder<ParticleType<?>, SimpleParticleType> BURN_SMOKE = register("burn_smoke");
 	DeferredHolder<ParticleType<?>, SimpleParticleType> SPARK = register("spark");
 	DeferredHolder<ParticleType<?>, ParticleType<WindParticleOptions>> WIND = register("wind", () -> WindParticleOptions.CODEC, () -> WindParticleOptions.STREAM_CODEC);

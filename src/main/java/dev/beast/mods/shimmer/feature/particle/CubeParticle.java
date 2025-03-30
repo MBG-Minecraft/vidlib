@@ -9,7 +9,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.util.Mth;
 
 public class CubeParticle extends Particle {
 	private int prevAge;
@@ -41,13 +40,11 @@ public class CubeParticle extends Particle {
 		float maxZ = (float) (rz + size - cameraPos.z);
 
 		if (options.lineColor().alpha() > 0) {
-			int alpha = lifetime == 1 ? 255 : time > (lifetime - 20) ? Mth.lerpInt(1F - (lifetime - time) / 20F, 255, 0) : 255;
-			BoxRenderer.renderDebugLines(minX, minY, minZ, maxX, maxY, maxZ, ms, buffers, options.lineColor().withAlpha(alpha));
+			BoxRenderer.renderDebugLines(minX, minY, minZ, maxX, maxY, maxZ, ms, buffers, options.lineColor().fadeOut(time, lifetime, 20F));
 		}
 
 		if (options.color().alpha() > 0) {
-			int alpha = lifetime == 1 ? 50 : time > (lifetime - 20) ? Mth.lerpInt(1F - (lifetime - time) / 20F, 50, 0) : 50;
-			BoxRenderer.renderDebugQuads(minX, minY, minZ, maxX, maxY, maxZ, ms, buffers, false, options.color().withAlpha(alpha));
+			BoxRenderer.renderDebugQuads(minX, minY, minZ, maxX, maxY, maxZ, ms, buffers, false, options.color().withAlpha(50).fadeOut(time, lifetime, 20F));
 		}
 	}
 

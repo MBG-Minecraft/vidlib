@@ -26,7 +26,7 @@ public record PlayerVotedPayload(CompoundTag extraData, int number) implements S
 	@Override
 	public void handle(ShimmerPayloadContext ctx) {
 		if (NeoForge.EVENT_BUS.post(new PlayerVotedEvent(ctx.player(), extraData, number)).isCanceled()) {
-			ctx.player().endVote();
+			ctx.player().shimmer$closeScreen();
 		}
 	}
 }

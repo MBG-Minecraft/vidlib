@@ -6,7 +6,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import org.lwjgl.glfw.GLFW;
 
-public interface ShimmerLocalPlayer extends ShimmerClientPlayer, ShimmerClientEntityContainer {
+public interface ShimmerLocalPlayer extends ShimmerClientPlayer {
 	@Override
 	default ShimmerLocalClientSessionData shimmer$sessionData() {
 		throw new NoMixinException(this);

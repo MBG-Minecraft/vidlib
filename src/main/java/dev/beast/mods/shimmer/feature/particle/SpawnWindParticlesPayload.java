@@ -21,6 +21,6 @@ public record SpawnWindParticlesPayload(WindData data) implements ShimmerPacketP
 
 	@Override
 	public void handle(ShimmerPayloadContext ctx) {
-		ctx.level().spawnWindParticles(ctx.createRandom(), data);
+		ctx.level().windParticles(ctx.createRandom(), data);
 	}
 }

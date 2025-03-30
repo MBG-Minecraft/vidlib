@@ -1,4 +1,4 @@
-package dev.beast.mods.shimmer.feature.vote;
+package dev.beast.mods.shimmer.feature.misc;
 
 import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
@@ -6,11 +6,11 @@ import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
 import dev.beast.mods.shimmer.feature.net.ShimmerPayloadContext;
 import net.minecraft.network.codec.StreamCodec;
 
-public enum EndVotePayload implements ShimmerPacketPayload {
+public enum CloseScreenPayload implements ShimmerPacketPayload {
 	INSTANCE;
 
 	@AutoPacket
-	public static final ShimmerPacketType<EndVotePayload> TYPE = ShimmerPacketType.internal("end_vote", StreamCodec.unit(INSTANCE));
+	public static final ShimmerPacketType<CloseScreenPayload> TYPE = ShimmerPacketType.internal("close_screen", StreamCodec.unit(INSTANCE));
 
 	@Override
 	public ShimmerPacketType<?> getType() {

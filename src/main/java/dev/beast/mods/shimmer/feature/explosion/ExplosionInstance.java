@@ -4,10 +4,12 @@ import dev.beast.mods.shimmer.feature.bulk.BlockModificationConsumer;
 import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
 import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
 import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
+import dev.beast.mods.shimmer.feature.particle.TextParticleOptions;
 import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.math.KMath;
 import dev.beast.mods.shimmer.util.DebugColorBlocks;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -215,21 +217,21 @@ public class ExplosionInstance {
 	}
 
 	public void displayEntityDamage(int duration) {
-		var center = Vec3.atCenterOf(at);
 		var blocks = new ArrayList<List<BlockPos>>();
 		var instantDeathBlocks = new ArrayList<BlockPos>();
 		var maxBlocks = Mth.ceil(data.radius + 1F);
+		var damageText = new HashMap<String, List<Vec3>>();
 
 		for (int i = 0; i < maxBlocks; i++) {
 			blocks.add(new ArrayList<>());
 		}
 
-		for (var bpos : BlockPos.betweenClosed(data.getBounds(center).inflate(data.entityRangeInflation()))) {
-			var inside = data.inside(
-				(float) (bpos.getX() + 0.5D - center.x),
-				(float) (bpos.getY() + 0.5D - center.y),
-				(float) (bpos.getZ() + 0.5D - center.z)
-			);
+		for (var bpos : BlockPos.betweenClosed(data.getBounds(Vec3.atCenterOf(at)).inflate(data.entityRangeInflation()))) {
+			int bx = bpos.getX() - at.getX();
+			int by = bpos.getY() - at.getY();
+			int bz = bpos.getZ() - at.getZ();
+
+			var inside = data.inside(bx + 0.5F, by + 0.5F, bz + 0.5F);
 
 			if (inside >= 0D && inside <= data.entity.radiusMod && level.getBlockState(bpos).isAir() && !level.getBlockState(bpos.below()).isAir()) {
 				var damage = data.entity.damage(inside / data.entity.radiusMod);
@@ -240,6 +242,8 @@ public class ExplosionInstance {
 				} else {
 					blocks.get(Math.clamp((int) (relDamage * (maxBlocks - 1D)), 0, maxBlocks - 1)).add(bpos.immutable());
 				}
+
+				damageText.computeIfAbsent(KMath.veryShortFormat(damage), k -> new ArrayList<>()).add(Vec3.atCenterOf(bpos));
 			}
 		}
 
@@ -257,7 +261,11 @@ public class ExplosionInstance {
 			map.put(new CubeParticleOptions(Color.MAGENTA, Color.TRANSPARENT, -duration), instantDeathBlocks);
 		}
 
-		level.spawnCubeParticles(map);
+		for (var entry : damageText.entrySet()) {
+			level.textParticles(new TextParticleOptions(Component.literal(entry.getKey()), duration), entry.getValue());
+		}
+
+		level.cubeParticles(map);
 	}
 
 	@Override

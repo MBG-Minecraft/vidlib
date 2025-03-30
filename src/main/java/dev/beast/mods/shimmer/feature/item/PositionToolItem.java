@@ -160,7 +160,7 @@ public class PositionToolItem implements ShimmerTool {
 		}
 
 		var blockPos = BlockPos.containing(pos);
-		player.level().spawnCubeParticles(new CubeParticleOptions(Color.CYAN, Color.WHITE, 1), List.of(blockPos));
+		player.level().cubeParticles(new CubeParticleOptions(Color.CYAN, Color.WHITE, 1), List.of(blockPos));
 
 		screenText.topRight.add(player.level().getBlockState(blockPos).getBlock().getName());
 		screenText.topRight.add(KMath.formatBlockPos(blockPos));

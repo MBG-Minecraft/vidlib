@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.core;
 
+import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
 import dev.beast.mods.shimmer.feature.camerashake.CameraShake;
 import dev.beast.mods.shimmer.feature.camerashake.CameraShakeInstance;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
@@ -9,36 +10,66 @@ import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.data.DataMapValue;
 import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.data.UpdatePlayerDataValuePayload;
+import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
+import dev.beast.mods.shimmer.feature.particle.FireData;
+import dev.beast.mods.shimmer.feature.particle.TextParticleOptions;
+import dev.beast.mods.shimmer.feature.particle.WindData;
+import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleManager;
+import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticles;
+import dev.beast.mods.shimmer.feature.sound.SoundData;
+import dev.beast.mods.shimmer.feature.sound.TrackingSound;
 import dev.beast.mods.shimmer.feature.vote.NumberVotingScreen;
 import dev.beast.mods.shimmer.feature.vote.YesNoVotingScreen;
 import dev.beast.mods.shimmer.math.Vec2d;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
+import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
 import dev.beast.mods.shimmer.util.Empty;
 import dev.beast.mods.shimmer.util.PauseType;
 import dev.beast.mods.shimmer.util.ScheduledTask;
 import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.client.Camera;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @SuppressWarnings("resource")
-public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment, ShimmerClientEntityContainer {
+public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 	default Minecraft shimmer$self() {
 		return (Minecraft) this;
+	}
+
+	@Override
+	default boolean shimmer$isClient() {
+		return true;
+	}
+
+	@Override
+	default void c2s(@Nullable Packet<? super ServerGamePacketListener> packet) {
+		if (packet != null) {
+			shimmer$self().getConnection().send(packet);
+		}
 	}
 
 	@Override
@@ -90,12 +121,6 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment, Shi
 		}
 
 		return Vec2d.ZERO;
-	}
-
-	@Override
-	default List<? extends Player> shimmer$getPlayers() {
-		var player = shimmer$self().player;
-		return player == null ? List.of() : List.of(player);
 	}
 
 	default void shimmer$applyCameraShake(Camera camera, float delta) {
@@ -226,13 +251,6 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment, Shi
 	}
 
 	@Override
-	default void endVote() {
-		if (shimmer$self().screen instanceof YesNoVotingScreen) {
-			shimmer$self().popGuiLayer();
-		}
-	}
-
-	@Override
 	default void removeAllParticles() {
 		shimmer$self().particleEngine.setLevel(shimmer$self().level);
 
@@ -246,5 +264,104 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment, Shi
 		var session = shimmer$self().player.shimmer$sessionData();
 		session.serverZones.remove(uuid);
 		session.filteredZones.remove(uuid);
+	}
+
+	@Override
+	default void redrawSections(LongList sections, boolean mainThread) {
+		var levelRenderer = shimmer$self().levelRenderer;
+
+		for (long section : sections) {
+			int x = SectionPos.x(section);
+			int y = SectionPos.y(section);
+			int z = SectionPos.z(section);
+			levelRenderer.setSectionDirty(x, y, z, mainThread);
+		}
+	}
+
+	@Override
+	default void playSound(Vec3 pos, SoundData sound) {
+		var mc = shimmer$self();
+		mc.getSoundManager().play(new SimpleSoundInstance(sound.sound().value(), sound.source(), sound.volume(), sound.pitch(), ((Level) this).random, pos.x, pos.y, pos.z));
+	}
+
+	@Override
+	default void playTrackingSound(WorldPosition position, WorldNumberVariables variables, SoundData data, boolean looping) {
+		shimmer$self().getSoundManager().play(new TrackingSound((Level) this, position, variables, data, looping));
+	}
+
+	@Override
+	default void physicsParticles(PhysicsParticleData data, long seed, List<PositionedBlock> blocks) {
+		if (blocks.isEmpty()) {
+			return;
+		}
+
+		var particles = new PhysicsParticles(data, shimmer$level(), shimmer$level().getGameTime(), seed);
+
+		for (var block : blocks) {
+			particles.at = block.pos();
+			particles.state = block.state();
+			particles.spawn();
+		}
+	}
+
+	@Override
+	default void physicsParticles(ResourceLocation id, long seed, List<PositionedBlock> blocks) {
+		if (blocks.isEmpty()) {
+			return;
+		}
+
+		var data = PhysicsParticleData.REGISTRY.get(id);
+		physicsParticles(data == null ? PhysicsParticleData.DEFAULT : data, seed, blocks);
+	}
+
+	@Override
+	default void cubeParticles(Map<CubeParticleOptions, List<BlockPos>> map) {
+		for (var entry : map.entrySet()) {
+			for (var pos : entry.getValue()) {
+				shimmer$level().addParticle(entry.getKey(), pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, 0D, 0D, 0D);
+			}
+		}
+	}
+
+	@Override
+	default void textParticles(TextParticleOptions options, List<Vec3> positions) {
+		for (var pos : positions) {
+			shimmer$level().addParticle(options, pos.x, pos.y, pos.z, 0D, 0D, 0D);
+		}
+	}
+
+	@Override
+	default void windParticles(RandomSource random, WindData data) {
+		var particles = shimmer$self().particleEngine;
+
+		for (int i = 0; i < data.data().count(); i++) {
+			var x = data.data().position().getX() + random.nextFloat();
+			var y = data.data().position().getY() + random.nextFloat() * (data.options().ground() ? 0.12D : 1D);
+			var z = data.data().position().getZ() + random.nextFloat();
+			var v = data.data().delta(random);
+			var p = particles.createParticle(data.options(), x, y, z, v.x(), v.y(), v.z());
+
+			if (p != null) {
+				particles.add(p);
+			}
+		}
+	}
+
+	@Override
+	default void fireParticles(RandomSource random, FireData data) {
+		var particles = shimmer$self().particleEngine;
+		var options = data.options().withResolvedGradient();
+
+		for (int i = 0; i < data.data().count(); i++) {
+			var x = data.data().position().getX() + random.nextFloat();
+			var y = data.data().position().getY() + random.nextFloat();
+			var z = data.data().position().getZ() + random.nextFloat();
+			var v = data.data().delta(random);
+			var p = particles.createParticle(options, x, y, z, v.x(), v.y(), v.z());
+
+			if (p != null) {
+				particles.add(p);
+			}
+		}
 	}
 }

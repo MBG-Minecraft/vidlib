@@ -28,6 +28,11 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 	}
 
 	@Override
+	default boolean shimmer$isClient() {
+		return false;
+	}
+
+	@Override
 	default ServerLevel shimmer$level() {
 		return shimmer$self().overworld();
 	}
@@ -39,7 +44,7 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 	}
 
 	@Override
-	default List<? extends Player> shimmer$getPlayers() {
+	default List<? extends Player> shimmer$getS2CPlayers() {
 		return shimmer$self().getPlayerList().getPlayers();
 	}
 

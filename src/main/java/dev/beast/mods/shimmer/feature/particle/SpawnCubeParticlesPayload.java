@@ -25,6 +25,6 @@ public record SpawnCubeParticlesPayload(Map<CubeParticleOptions, List<BlockPos>>
 
 	@Override
 	public void handle(ShimmerPayloadContext ctx) {
-		ctx.level().spawnCubeParticles(map);
+		ctx.level().cubeParticles(map);
 	}
 }

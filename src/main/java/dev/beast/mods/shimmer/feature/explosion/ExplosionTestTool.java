@@ -64,10 +64,9 @@ public class ExplosionTestTool implements ShimmerTool {
 
 		if (hit != null && player.level() instanceof ServerLevel level) {
 			var instance = getData(item, false).instance(level, hit.getBlockPos());
-			int count = instance.create();
 
-			if (count > 0) {
-				player.status("Modified %,d blocks".formatted(count));
+			if (instance.data.destroy > 0F) {
+				player.status("Modified %,d blocks".formatted(instance.create()));
 			} else {
 				player.status("Displaying Entity Damage");
 				level.removeAllParticles();

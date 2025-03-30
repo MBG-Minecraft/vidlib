@@ -41,7 +41,7 @@ public class CameraShakeTool implements ShimmerTool {
 		if (hit != null && !player.level().isClientSide) {
 			var maxDistance = player.get(InternalPlayerData.TEST_CAMERA_SHAKE);
 			var pos = hit.getBlockPos().relative(hit.getDirection());
-			player.level().spawnCubeParticles(new CubeParticleOptions(Color.CYAN, Color.WHITE, CameraShake.DEFAULT.duration()), List.of(pos));
+			player.level().cubeParticles(new CubeParticleOptions(Color.CYAN, Color.WHITE, CameraShake.DEFAULT.duration()), List.of(pos));
 			player.level().shakeCamera(CameraShake.DEFAULT, Vec3.atCenterOf(pos), maxDistance);
 		}
 

@@ -9,30 +9,74 @@ import net.minecraft.nbt.ShortTag;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.List;
 
 @SuppressWarnings("ManualMinMaxCalculation")
 public interface KMath {
-	DecimalFormat SHORT_DECIMAL_FORMAT = new DecimalFormat("#.##");
-	DecimalFormat LONG_DECIMAL_FORMAT = new DecimalFormat("#.####");
+	enum NumberFormat {
+		VERY_SHORT("#.#"),
+		SHORT("#.##"),
+		LONG("#.####");
+
+		private final DecimalFormat format;
+
+		NumberFormat(String format) {
+			this.format = new DecimalFormat(format);
+			this.format.setRoundingMode(RoundingMode.FLOOR);
+		}
+
+		public String format(float value) {
+			if (value == (int) value) {
+				return Integer.toString((int) value);
+			}
+
+			return format.format(value);
+		}
+
+		public String format(double value) {
+			if (value == (long) value) {
+				return Long.toString((long) value);
+			}
+
+			return format.format(value);
+		}
+
+		public String format(Vec3 pos) {
+			return String.format("%s, %s, %s", format(pos.x), format(pos.y), format(pos.z));
+		}
+
+		public String format(Vec3f pos) {
+			return String.format("%s, %s, %s", format(pos.x()), format(pos.y()), format(pos.z()));
+		}
+	}
+
 	List<AABB> CLIP_BOX_LIST = List.of(new AABB(-0.5D, -0.5D, -0.5D, 0.5D, 0.5D, 0.5D));
 	Vec3 CENTER = new Vec3(0.5D, 0.5D, 0.5D);
 
-	static String format(float value) {
-		if (value == (int) value) {
-			return Integer.toString((int) value);
-		}
+	static String veryShortFormat(float value) {
+		return NumberFormat.VERY_SHORT.format(value);
+	}
 
-		return LONG_DECIMAL_FORMAT.format(value);
+	static String veryShortFormat(double value) {
+		return NumberFormat.VERY_SHORT.format(value);
+	}
+
+	static String shortFormat(float value) {
+		return NumberFormat.SHORT.format(value);
+	}
+
+	static String shortFormat(double value) {
+		return NumberFormat.SHORT.format(value);
+	}
+
+	static String format(float value) {
+		return NumberFormat.LONG.format(value);
 	}
 
 	static String format(double value) {
-		if (value == (long) value) {
-			return Long.toString((long) value);
-		}
-
-		return LONG_DECIMAL_FORMAT.format(value);
+		return NumberFormat.LONG.format(value);
 	}
 
 	static String formatBlockPos(BlockPos pos) {
@@ -40,7 +84,7 @@ public interface KMath {
 	}
 
 	static String formatVec3(Vec3 pos) {
-		return String.format("%s, %s, %s", format(pos.x), format(pos.y), format(pos.z));
+		return NumberFormat.LONG.format(pos);
 	}
 
 	static NumericTag efficient(float num) {

@@ -137,6 +137,18 @@ public record Color(int argb) implements Gradient {
 		return of((int) (alpha * 255F), red(), green(), blue());
 	}
 
+	public Color fadeOut(float time, float maxTime, float fadeOut) {
+		if (maxTime < fadeOut) {
+			return this;
+		} else if (time >= maxTime) {
+			return withAlpha(0);
+		} else if (time >= maxTime - fadeOut) {
+			return withAlpha(Mth.lerp((maxTime - time) / fadeOut, 0F, alphaf()));
+		} else {
+			return this;
+		}
+	}
+
 	@Override
 	public int hashCode() {
 		return argb;

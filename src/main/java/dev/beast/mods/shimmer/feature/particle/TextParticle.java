@@ -2,21 +2,24 @@ package dev.beast.mods.shimmer.feature.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import dev.beast.mods.shimmer.math.KMath;
 import dev.beast.mods.shimmer.math.Vec3f;
-import dev.beast.mods.shimmer.util.ShimmerRenderTypes;
 import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 
-public class LineParticle extends Particle {
+public class TextParticle extends Particle {
 	private int prevAge;
-	private final LineParticleOptions options;
+	private final TextParticleOptions options;
 	private final Vec3f vector;
 
-	protected LineParticle(LineParticleOptions options, ClientLevel level, double x, double y, double z, double vx, double vy, double vz) {
+	protected TextParticle(TextParticleOptions options, ClientLevel level, double x, double y, double z, double vx, double vy, double vz) {
 		super(level, x, y, z);
 		this.options = options;
 		setLifetime(options.ttl());
@@ -28,15 +31,44 @@ public class LineParticle extends Particle {
 	public void renderCustom(PoseStack ms, MultiBufferSource buffers, Camera camera, float delta) {
 		float time = KMath.lerp(delta, prevAge, age);
 
+		if (time >= lifetime - 1F) {
+			return;
+		}
+
+		var color = options.color().fadeOut(time, lifetime, 20F);
+
+		if (color.alpha() == 0) {
+			return;
+		}
+
 		var cameraPos = camera.getPosition();
 		var rx = (float) (KMath.lerp(time, xo, x) - cameraPos.x);
 		var ry = (float) (KMath.lerp(time, yo, y) - cameraPos.y);
 		var rz = (float) (KMath.lerp(time, zo, z) - cameraPos.z);
 
+		ms.pushPose();
+		ms.translate(rx, ry, rz);
+		ms.scale(-0.025F, -0.025F, -0.025F);
+		ms.mulPose(camera.rotation());
+		ms.mulPose(Axis.YP.rotationDegrees(180F));
+
 		var m = ms.last().pose();
-		var buffer = buffers.getBuffer(ShimmerRenderTypes.DEBUG_LINES);
-		buffer.addVertex(m, rx, ry, rz).setColor(options.startColor().fadeOut(time, lifetime, 20F).argb());
-		buffer.addVertex(m, rx + vector.x(), ry + vector.y(), rz + vector.z()).setColor(options.endColor().fadeOut(time, lifetime, 20F).argb());
+		var font = Minecraft.getInstance().font;
+
+		font.drawInBatch(
+			options.text(),
+			-font.width(options.text()) / 2F,
+			-font.lineHeight / 2F,
+			color.argb(),
+			true,
+			m,
+			buffers,
+			options.seeThrough() ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.POLYGON_OFFSET,
+			0, // Background color
+			LightTexture.FULL_BRIGHT
+		);
+
+		ms.popPose();
 	}
 
 	@Override

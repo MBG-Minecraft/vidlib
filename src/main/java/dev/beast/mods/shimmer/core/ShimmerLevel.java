@@ -6,46 +6,21 @@ import dev.beast.mods.shimmer.feature.bulk.BulkLevelModification;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationBundle;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationHolder;
 import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
-import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
 import dev.beast.mods.shimmer.feature.bulk.UndoableModification;
 import dev.beast.mods.shimmer.feature.data.DataMap;
-import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
-import dev.beast.mods.shimmer.feature.particle.FireData;
-import dev.beast.mods.shimmer.feature.particle.WindData;
-import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
 import dev.beast.mods.shimmer.feature.prop.PropList;
-import dev.beast.mods.shimmer.feature.sound.SoundData;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
-import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
-import dev.beast.mods.shimmer.math.worldposition.EntityPositionType;
-import dev.beast.mods.shimmer.math.worldposition.FollowingEntityWorldPosition;
-import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
-import it.unimi.dsi.fastutil.longs.LongList;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
 public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEnvironmentDataHolder {
-	@Override
-	default List<Entity> shimmer$getEntities() {
-		return ((Level) this).getEntities((Entity) null, AABB.INFINITE, EntitySelector.ENTITY_STILL_ALIVE);
-	}
-
 	@Override
 	default Level shimmer$level() {
 		return (Level) this;
@@ -65,7 +40,7 @@ public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEn
 	}
 
 	@Override
-	default List<? extends Player> shimmer$getPlayers() {
+	default List<? extends Player> shimmer$getS2CPlayers() {
 		return ((Level) this).players();
 	}
 
@@ -79,7 +54,9 @@ public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEn
 	}
 
 	default void addUndoable(UndoableModification modification) {
-		shimmer$getUndoableModifications().add(modification);
+		if (!shimmer$isClient()) {
+			shimmer$getUndoableModifications().add(modification);
+		}
 	}
 
 	default int undoLastModification() {
@@ -107,14 +84,6 @@ public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEn
 		return bulkModify(false, builder.build());
 	}
 
-	default void setBlockFast(BlockPos pos, BlockState state) {
-		((Level) this).setBlock(pos, state, Block.UPDATE_CLIENTS, 0);
-	}
-
-	default void setBlockFast(BlockPos pos, Block block) {
-		setBlockFast(pos, block.defaultBlockState());
-	}
-
 	@Nullable
 	default Entity getEntityByUUID(UUID uuid) {
 		throw new NoMixinException(this);
@@ -137,45 +106,5 @@ public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEn
 		var m = new BulkLevelModificationBundle(new ArrayList<>());
 		modifications.accept(m);
 		return bulkModify(undoable, m);
-	}
-
-	default void redrawSections(LongList sections, boolean mainThread) {
-	}
-
-	default void playSound(Vec3 pos, SoundData sound) {
-	}
-
-	default void playTrackingSound(WorldPosition position, WorldNumberVariables variables, SoundData data, boolean looping) {
-	}
-
-	default void playTrackingSound(Entity entity, SoundData data, boolean looping) {
-		playTrackingSound(new FollowingEntityWorldPosition(Either.left(entity.getId()), EntityPositionType.EYES), WorldNumberVariables.EMPTY, data, looping);
-	}
-
-	default void physicsParticles(PhysicsParticleData data, long seed, List<PositionedBlock> blocks) {
-	}
-
-	default void physicsParticles(ResourceLocation id, long seed, List<PositionedBlock> blocks) {
-	}
-
-	default void physicsParticles(PhysicsParticleData data, List<PositionedBlock> blocks) {
-		physicsParticles(data, shimmer$level().shimmer$level().random.nextLong(), blocks);
-	}
-
-	default void physicsParticles(ResourceLocation id, List<PositionedBlock> blocks) {
-		physicsParticles(id, shimmer$level().shimmer$level().random.nextLong(), blocks);
-	}
-
-	default void spawnCubeParticles(Map<CubeParticleOptions, List<BlockPos>> map) {
-	}
-
-	default void spawnCubeParticles(CubeParticleOptions options, List<BlockPos> blocks) {
-		spawnCubeParticles(Map.of(options, blocks));
-	}
-
-	default void spawnWindParticles(RandomSource random, WindData data) {
-	}
-
-	default void spawnFireParticles(RandomSource random, FireData data) {
 	}
 }

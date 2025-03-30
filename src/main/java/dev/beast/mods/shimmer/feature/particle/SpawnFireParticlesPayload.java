@@ -21,6 +21,6 @@ public record SpawnFireParticlesPayload(FireData data) implements ShimmerPacketP
 
 	@Override
 	public void handle(ShimmerPayloadContext ctx) {
-		ctx.level().spawnFireParticles(ctx.createRandom(), data);
+		ctx.level().fireParticles(ctx.createRandom(), data);
 	}
 }

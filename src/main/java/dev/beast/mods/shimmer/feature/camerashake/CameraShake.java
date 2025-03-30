@@ -71,6 +71,18 @@ public record CameraShake(
 		);
 	}
 
+	public CameraShake withDuration(int duration) {
+		return new CameraShake(
+			type,
+			duration,
+			speed,
+			intensity,
+			start,
+			end,
+			motionBlur
+		);
+	}
+
 	public CameraShake atDistance(Vec3 camera, Vec3 source, double maxDistance) {
 		return withIntensityMod((float) Easing.QUINT_IN.ease(1D - Math.clamp(camera.distanceTo(source) / maxDistance, 0D, 1D)));
 	}

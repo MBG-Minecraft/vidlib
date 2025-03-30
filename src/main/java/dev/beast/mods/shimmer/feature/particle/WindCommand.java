@@ -44,7 +44,7 @@ public interface WindCommand {
 	);
 
 	static int spawn(CommandSourceStack source, MovementType type, BlockPos position, int count, float radius, float yaw, float pitch, boolean ground) {
-		source.getLevel().spawnWindParticles(source.getLevel().random, new WindData(new WindParticleOptions(100, ground, 1F), new ParticleMovementData(type, position, count, radius, 0F, Rotation.deg(yaw, pitch))));
+		source.getLevel().windParticles(source.getLevel().random, new WindData(new WindParticleOptions(100, ground, 1F), new ParticleMovementData(type, position, count, radius, 0F, Rotation.deg(yaw, pitch))));
 		return 1;
 	}
 }

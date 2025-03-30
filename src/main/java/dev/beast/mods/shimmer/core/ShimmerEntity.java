@@ -30,11 +30,6 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 		return ((Entity) this).level();
 	}
 
-	@Override
-	default ShimmerMinecraftEnvironment shimmer$getEnvironment() {
-		return shimmer$level().shimmer$getEnvironment();
-	}
-
 	@Nullable
 	default Map<EntityOverride<?>, EntityOverrideValue<?>> shimmer$getEntityOverridesMap() {
 		throw new NoMixinException(this);
@@ -74,11 +69,6 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 
 	default boolean shimmer$isSaving() {
 		return false;
-	}
-
-	@Override
-	default List<Entity> shimmer$getEntities() {
-		return List.of((Entity) this);
 	}
 
 	default List<ZoneInstance> getZones() {

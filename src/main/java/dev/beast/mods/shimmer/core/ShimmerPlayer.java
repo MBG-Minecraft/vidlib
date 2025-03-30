@@ -18,11 +18,6 @@ import java.util.List;
 import java.util.Set;
 
 public interface ShimmerPlayer extends ShimmerLivingEntity {
-	@Override
-	default List<? extends Player> shimmer$getPlayers() {
-		return List.of((Player) this);
-	}
-
 	default ShimmerSessionData shimmer$sessionData() {
 		throw new NoMixinException(this);
 	}
