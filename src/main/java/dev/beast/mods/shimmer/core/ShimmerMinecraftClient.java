@@ -10,6 +10,8 @@ import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.data.DataMapValue;
 import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.data.UpdatePlayerDataValuePayload;
+import dev.beast.mods.shimmer.feature.fade.Fade;
+import dev.beast.mods.shimmer.feature.fade.ScreenFadeInstance;
 import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
 import dev.beast.mods.shimmer.feature.particle.FireData;
 import dev.beast.mods.shimmer.feature.particle.TextParticleOptions;
@@ -372,5 +374,10 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 				particles.add(p);
 			}
 		}
+	}
+
+	@Override
+	default void setScreenFade(Fade fade) {
+		shimmer$self().player.shimmer$sessionData().screenFade = new ScreenFadeInstance(fade);
 	}
 }

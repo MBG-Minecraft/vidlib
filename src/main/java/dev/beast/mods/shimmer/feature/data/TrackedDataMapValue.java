@@ -1,5 +1,9 @@
 package dev.beast.mods.shimmer.feature.data;
 
+import dev.beast.mods.shimmer.util.Cast;
+import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
+
 public class TrackedDataMapValue {
 	public final DataType<?> type;
 	public Object data = null;
@@ -16,6 +20,14 @@ public class TrackedDataMapValue {
 			changeCount = 0;
 		} else {
 			changeCount++;
+		}
+	}
+
+	public void update(@Nullable Player player, Object update) {
+		data = update;
+
+		if (player != null && type.onReceived() != null) {
+			type.onReceived().accept(player, Cast.to(data));
 		}
 	}
 }

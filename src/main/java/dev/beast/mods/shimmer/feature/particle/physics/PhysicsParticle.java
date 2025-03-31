@@ -10,8 +10,11 @@ import net.minecraft.world.level.block.Blocks;
 import org.joml.FrustumIntersection;
 import org.joml.Matrix4fStack;
 
+import java.util.Comparator;
+
 public class PhysicsParticle {
 	public static final double SQRT_2 = Math.sqrt(2);
+	public static final Comparator<PhysicsParticle> COMPARATOR = Comparator.comparingInt(PhysicsParticle::order);
 
 	public PhysicsParticleManager manager;
 	public RandomSource random;
@@ -39,15 +42,16 @@ public class PhysicsParticle {
 	public int prevBlockStateType = -1;
 	public int blockStateType = -1;
 
-	public void render(Matrix4fStack matrix, PhysicsParticleRenderContext ctx) {
+	public void render(Matrix4fStack matrix, PhysicsParticleRenderContext ctx, VertexBuffer[] buffer) {
 		float delta = ctx.delta();
-		var camera = ctx.camera();
-		var frustum = ctx.frustum();
 		float dScale = KMath.lerp(delta, prevScale, scale);
 
 		if (dScale < 0.001F) {
 			return;
 		}
+
+		var camera = ctx.camera();
+		var frustum = ctx.frustum();
 
 		double rx = KMath.lerp(delta, prevX, x);
 		double ry = KMath.lerp(delta, prevY, y);
@@ -59,8 +63,7 @@ public class PhysicsParticle {
 			return;
 		}
 
-		boolean fast = ctx.lod() && camera.getPosition().distanceToSqr(rx, ry, rz) > ctx.fastDistSq();
-		var particleBuffer = fast ? shape.getFastBuffer() : shape.getBuffer();
+		var particleBuffer = shape.getBuffer();
 
 		float ox = (float) (rx - camera.getPosition().x);
 		float oy = (float) (ry - camera.getPosition().y);
@@ -69,19 +72,18 @@ public class PhysicsParticle {
 		matrix.pushMatrix();
 		matrix.translate(ox, oy, oz);
 
-		if (fast) {
-			matrix.rotate(camera.rotation());
-			matrix.rotateZ(rotationAngle + KMath.lerp(delta, prevSpin, spin) + rotationRoll);
-		} else {
-			if (rotationAngle != 0F) {
-				matrix.rotateY(rotationAngle);
-			}
+		if (rotationAngle != 0F) {
+			matrix.rotateY(rotationAngle);
+		}
 
-			matrix.rotateX(KMath.lerp(delta, prevSpin, spin));
+		float dSpin = KMath.lerp(delta, prevSpin, spin);
 
-			if (rotationRoll != 0F) {
-				matrix.rotateZ(rotationRoll);
-			}
+		if (dSpin != 0F) {
+			matrix.rotateX(dSpin);
+		}
+
+		if (rotationRoll != 0F) {
+			matrix.rotateZ(rotationRoll);
 		}
 
 		if (dScale != 1F) {
@@ -90,17 +92,19 @@ public class PhysicsParticle {
 
 		manager.setModelMatrix(matrix);
 		matrix.popMatrix();
+		manager.setTint(red, green, blue, alpha);
 
-		if (fast) {
-			var m = KMath.lerp(flatColorMod, 0.85F, 1F);
-			manager.setTint(red * m, green * m, blue * m, alpha);
-		} else {
-			manager.setTint(red, green, blue, alpha);
+		if (buffer[0] != particleBuffer) {
+			if (buffer[0] != null) {
+				VertexBuffer.unbind();
+			}
+
+			buffer[0] = particleBuffer;
+			particleBuffer.bind();
+			manager.buffersSwitched++;
 		}
 
-		particleBuffer.bind();
 		particleBuffer.draw();
-		VertexBuffer.unbind();
 		manager.rendered++;
 	}
 
@@ -206,5 +210,9 @@ public class PhysicsParticle {
 		}
 
 		scale *= scaleMul;
+	}
+
+	public int order() {
+		return shape.hashCode();
 	}
 }

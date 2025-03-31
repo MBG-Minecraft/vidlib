@@ -14,7 +14,7 @@ public class ShimmerConfig {
 	public static boolean hideWaterParticles = false;
 	public static boolean fetchOfflinePlayerData = true;
 	public static int structureBlockRange = 200;
-	public static double physicsParticleRenderLOD = 64D;
 	public static boolean renderSuspendedOverlay = false;
 	public static boolean debugS2CPackets = System.getenv().getOrDefault("SHIMMER_DEBUG_S2C_PACKETS", "0").equals("1");
+	public static int maxChunkDistance = 64;
 }

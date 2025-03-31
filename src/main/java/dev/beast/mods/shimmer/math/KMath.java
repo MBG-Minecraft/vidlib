@@ -224,4 +224,12 @@ public interface KMath {
 	static float max8(float a, float b, float c, float d, float e, float f, float g, float h) {
 		return Math.max(Math.max(Math.max(Math.max(Math.max(Math.max(a, b), c), d), e), f), Math.max(g, h));
 	}
+
+	static BlockPos min(BlockPos a, BlockPos b) {
+		return new BlockPos(Math.min(a.getX(), b.getX()), Math.min(a.getY(), b.getY()), Math.min(a.getZ(), b.getZ()));
+	}
+
+	static BlockPos max(BlockPos a, BlockPos b) {
+		return new BlockPos(Math.max(a.getX(), b.getX()), Math.max(a.getY(), b.getY()), Math.max(a.getZ(), b.getZ()));
+	}
 }

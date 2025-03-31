@@ -20,8 +20,8 @@ import java.util.stream.Stream;
 
 public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box) implements ZoneShape {
 	public static final SimpleRegistryType<ZoneShapeGroup> TYPE = SimpleRegistryType.dynamic(Shimmer.id("group"), RecordCodecBuilder.mapCodec(instance -> instance.group(
-		ZoneShape.REGISTRY.valueCodec().listOf().fieldOf("zones").forGetter(ZoneShapeGroup::zoneShapes)
-	).apply(instance, ZoneShapeGroup::create)), ZoneShape.REGISTRY.valueStreamCodec().list().map(ZoneShapeGroup::create, ZoneShapeGroup::zoneShapes));
+		ZoneShape.CODEC.listOf().fieldOf("zones").forGetter(ZoneShapeGroup::zoneShapes)
+	).apply(instance, ZoneShapeGroup::create)), ZoneShape.STREAM_CODEC.list().map(ZoneShapeGroup::create, ZoneShapeGroup::zoneShapes));
 
 	public static ZoneShapeGroup create(List<ZoneShape> zoneShapes) {
 		double minX = Double.POSITIVE_INFINITY;

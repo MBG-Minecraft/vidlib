@@ -10,6 +10,8 @@ import dev.beast.mods.shimmer.feature.camerashake.StopCameraShakingPayload;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.cutscene.PlayCutscenePayload;
 import dev.beast.mods.shimmer.feature.cutscene.StopCutscenePayload;
+import dev.beast.mods.shimmer.feature.fade.Fade;
+import dev.beast.mods.shimmer.feature.fade.ScreenFadePayload;
 import dev.beast.mods.shimmer.feature.misc.CloseScreenPayload;
 import dev.beast.mods.shimmer.feature.misc.SetPostEffectPayload;
 import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
@@ -261,6 +263,14 @@ public interface ShimmerEntityContainer extends ShimmerS2CPacketConsumer, Shimme
 			shimmer$getEnvironment().fireParticles(random, data);
 		} else {
 			s2c(new SpawnFireParticlesPayload(data));
+		}
+	}
+
+	default void setScreenFade(Fade fade) {
+		if (shimmer$isClient()) {
+			shimmer$getEnvironment().setScreenFade(fade);
+		} else {
+			s2c(new ScreenFadePayload(fade));
 		}
 	}
 }

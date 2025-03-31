@@ -152,7 +152,7 @@ public class PositionToolItem implements ShimmerTool {
 			hit = player.ray(500D, 1F).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY);
 		}
 
-		var pos = hit instanceof BlockHitResult blockHit ? mode.position(player, blockHit) : null;
+		var pos = hit instanceof BlockHitResult blockHit ? mode.position(player, blockHit) : mode.position(player, null);
 
 		if (pos == null) {
 			return;

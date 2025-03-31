@@ -13,7 +13,6 @@ public record PhysicsParticleRenderContext(
 	Matrix4f projectionMatrix,
 	float delta,
 	Camera camera,
-	Frustum frustum,
-	double fastDistSq
+	Frustum frustum
 ) {
 }

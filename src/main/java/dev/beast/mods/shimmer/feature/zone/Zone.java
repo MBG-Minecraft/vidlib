@@ -47,7 +47,7 @@ public record Zone(
 	).apply(instance, Zone::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, Zone> STREAM_CODEC = CompositeStreamCodec.of(
-		ZoneShape.REGISTRY.valueStreamCodec(), Zone::shape,
+		ZoneShape.STREAM_CODEC, Zone::shape,
 		Color.STREAM_CODEC, Zone::color,
 		EntityFilter.STREAM_CODEC, Zone::entityFilter,
 		ShimmerStreamCodecs.COMPOUND_TAG.optional(Empty.COMPOUND_TAG), Zone::data,

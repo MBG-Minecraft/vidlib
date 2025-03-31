@@ -50,7 +50,7 @@ public interface InternalPlayerData {
 	DataType<BlockFilter> ZONE_BLOCK_FILTER = DataType.PLAYER.internal("zone_block_filter", BlockFilter.KNOWN_CODEC, BlockFilter.ANY.instance())
 		.save()
 		.sync()
-		.onReceived(player -> player.shimmer$sessionData().refreshBlockZones())
+		.onReceived((player, value) -> player.shimmer$sessionData().refreshBlockZones())
 		.build();
 
 	DataType<Float> FLIGHT_SPEED = DataType.PLAYER.internal("flight_speed", KnownCodec.FLOAT, 1F)

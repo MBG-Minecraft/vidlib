@@ -11,9 +11,13 @@ import dev.beast.mods.shimmer.math.AAIBB;
 import dev.beast.mods.shimmer.math.Line;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistry;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -32,6 +36,7 @@ import java.util.stream.Stream;
 public interface ZoneShape {
 	SimpleRegistry<ZoneShape> REGISTRY = SimpleRegistry.create(ZoneShape::type);
 	Codec<ZoneShape> CODEC = Codec.either(AAIBB.CODEC, REGISTRY.valueCodec()).xmap(either -> either.map(box -> new BlockZoneShape(box.min(), box.max()), Function.identity()), shape -> shape instanceof BlockZoneShape b ? Either.left(b.toAAIBB()) : Either.right(shape));
+	StreamCodec<RegistryFriendlyByteBuf, ZoneShape> STREAM_CODEC = ByteBufCodecs.either(AAIBB.STREAM_CODEC, REGISTRY.valueStreamCodec()).map(either -> either.map(box -> new BlockZoneShape(box.min(), box.max()), Function.identity()), shape -> shape instanceof BlockZoneShape b ? Either.left(b.toAAIBB()) : Either.right(shape));
 
 	@AutoInit
 	static void bootstrap() {
@@ -141,5 +146,11 @@ public interface ZoneShape {
 				chunks.add(ChunkPos.asLong(x, z));
 			}
 		}
+	}
+
+	default LongSet collectChunkPositions() {
+		var chunks = new LongOpenHashSet();
+		collectChunkPositions(chunks);
+		return chunks;
 	}
 }

@@ -2,6 +2,7 @@ package dev.beast.mods.shimmer.feature.particle.physics;
 
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.VertexBuffer;
 import dev.beast.mods.shimmer.core.ShimmerBlockState;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.shader.ShaderHolder;
@@ -88,6 +89,7 @@ public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
 	public final List<PhysicsParticle> particles;
 	public final List<PhysicsParticle> queue;
 	public int rendered;
+	public int buffersSwitched;
 
 	private Uniform pProjection, pModel, pTint;
 	private float prevTintR, prevTintG, prevTintB, prevTintA;
@@ -128,6 +130,7 @@ public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
 
 	public void render(Matrix4fStack matrix, PhysicsParticleRenderContext ctx) {
 		rendered = 0;
+		buffersSwitched = 0;
 
 		if (particles.isEmpty()) {
 			return;
@@ -154,11 +157,13 @@ public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
 		prevTintR = prevTintG = prevTintB = prevTintA = 1F;
 		pTint.set(1F, 1F, 1F, 1F);
 		pTint.upload();
+		var buffer = new VertexBuffer[1];
 
 		for (var p : particles) {
-			p.render(matrix, ctx);
+			p.render(matrix, ctx, buffer);
 		}
 
+		VertexBuffer.unbind();
 		program.clear();
 		renderType.clearRenderState();
 
@@ -167,8 +172,11 @@ public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
 	}
 
 	public void tick(Level level, long gameTime) {
-		particles.addAll(queue);
-		queue.clear();
+		if (!queue.isEmpty()) {
+			particles.addAll(queue);
+			queue.clear();
+			particles.sort(PhysicsParticle.COMPARATOR);
+		}
 
 		var it = particles.iterator();
 

@@ -5,7 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public record DataType<T>(
 	DataTypeStorage storage,
@@ -15,7 +15,7 @@ public record DataType<T>(
 	boolean save,
 	boolean sync,
 	boolean syncToAllClients,
-	@Nullable Consumer<Player> onReceived,
+	@Nullable BiConsumer<Player, T> onReceived,
 	boolean allowClientUpdates
 ) {
 	public static final DataTypeStorage SERVER = new DataTypeStorage("server", true);
@@ -29,7 +29,7 @@ public record DataType<T>(
 		private boolean save;
 		private boolean sync;
 		private boolean syncToAllClients;
-		private Consumer<Player> onReceived;
+		private BiConsumer<Player, T> onReceived;
 		private boolean allowClientUpdates;
 
 		Builder(DataTypeStorage storage, ResourceLocation id, @Nullable KnownCodec<T> type, T defaultValue) {
@@ -59,7 +59,7 @@ public record DataType<T>(
 			return this;
 		}
 
-		public Builder<T> onReceived(Consumer<Player> onReceived) {
+		public Builder<T> onReceived(BiConsumer<Player, T> onReceived) {
 			this.onReceived = onReceived;
 			return this;
 		}

@@ -57,8 +57,13 @@ public abstract class ServerLevelMixin extends Level implements ShimmerServerLev
 	public void shimmer$setActiveZones(ActiveZones zones) {
 		if (shimmer$activeZones != zones) {
 			shimmer$activeZones = zones;
-			shimmer$updateLoadedChunks(shimmer$tickets);
+			shimmer$updateLoadedChunks();
 		}
+	}
+
+	@Override
+	public void shimmer$updateLoadedChunks() {
+		shimmer$updateLoadedChunks(shimmer$tickets);
 	}
 
 	@Override

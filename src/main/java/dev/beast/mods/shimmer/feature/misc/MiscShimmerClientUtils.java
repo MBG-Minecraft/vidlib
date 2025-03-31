@@ -91,4 +91,8 @@ public class MiscShimmerClientUtils {
 		// return entity instanceof LocalPlayer && mc.isLocalServer() && !mc.options.getCameraType().isFirstPerson() || entity.hasCustomName();
 		return !entity.isInvisible() && (entity instanceof LocalPlayer || entity.hasCustomName());
 	}
+
+	public static int overrideRenderDistance(int original) {
+		return original;
+	}
 }

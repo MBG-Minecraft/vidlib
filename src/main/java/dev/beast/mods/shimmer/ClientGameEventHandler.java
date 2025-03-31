@@ -245,8 +245,7 @@ public class ClientGameEventHandler {
 				event.getProjectionMatrix(),
 				delta,
 				event.getCamera(),
-				event.getFrustum(),
-				ShimmerConfig.physicsParticleRenderLOD * ShimmerConfig.physicsParticleRenderLOD
+				event.getFrustum()
 			));
 		}
 	}
@@ -263,8 +262,10 @@ public class ClientGameEventHandler {
 		ScreenText.RENDER.ops = mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
 
 		var session = mc.player.shimmer$sessionData();
-
 		var graphics = event.getGuiGraphics();
+		var delta = event.getPartialTick().getGameTimeDeltaPartialTick(true);
+		int width = event.getGuiGraphics().guiWidth();
+		int height = event.getGuiGraphics().guiHeight();
 
 		if ((mc.isLocalServer() || mc.player.hasPermissions(2)) && (mc.screen == null || mc.screen instanceof ChatScreen)) {
 			NeoForge.EVENT_BUS.post(new DebugTextEvent.Render(ScreenText.RENDER));
@@ -300,12 +301,12 @@ public class ClientGameEventHandler {
 			graphics.pose().pushPose();
 			graphics.pose().translate(0F, 0F, 800F);
 
-			int height = event.getGuiGraphics().guiHeight();
+			int textHeight = height;
 			int bgColor = 0xA0000000;
 			int color = 0xFFFFFFFF;
 
 			if (mc.screen instanceof ChatScreen) {
-				height -= 14;
+				textHeight -= 14;
 				bgColor = 0x40000000;
 				color = 0x70FFFFFF;
 			}
@@ -320,7 +321,7 @@ public class ClientGameEventHandler {
 
 			for (int i = 0; i < ScreenText.RENDER.topRight.list.size(); i++) {
 				int w = mc.font.width(ScreenText.RENDER.topRight.list.get(i));
-				int x = event.getGuiGraphics().guiWidth() - w - 4;
+				int x = width - w - 4;
 				int y = 2 + i * 11;
 				graphics.fill(x, y, x + w + 3, y + 11, bgColor);
 				graphics.drawString(mc.font, ScreenText.RENDER.topRight.list.get(i), x + 2, y + 2, color, true);
@@ -329,15 +330,15 @@ public class ClientGameEventHandler {
 			for (int i = 0; i < ScreenText.RENDER.bottomLeft.list.size(); i++) {
 				int w = mc.font.width(ScreenText.RENDER.bottomLeft.list.get(i));
 				int x = 1;
-				int y = i * 11 + height - ScreenText.RENDER.bottomLeft.list.size() * 11 - 2;
+				int y = i * 11 + textHeight - ScreenText.RENDER.bottomLeft.list.size() * 11 - 2;
 				graphics.fill(x, y, x + w + 3, y + 11, bgColor);
 				graphics.drawString(mc.font, ScreenText.RENDER.bottomLeft.list.get(i), x + 2, y + 2, color, true);
 			}
 
 			for (int i = 0; i < ScreenText.RENDER.bottomRight.list.size(); i++) {
 				int w = mc.font.width(ScreenText.RENDER.bottomRight.list.get(i));
-				int x = event.getGuiGraphics().guiWidth() - w - 4;
-				int y = i * 11 + height - ScreenText.RENDER.bottomRight.list.size() * 11 - 2;
+				int x = width - w - 4;
+				int y = i * 11 + textHeight - ScreenText.RENDER.bottomRight.list.size() * 11 - 2;
 				graphics.fill(x, y, x + w + 3, y + 11, bgColor);
 				graphics.drawString(mc.font, ScreenText.RENDER.bottomRight.list.get(i), x + 2, y + 2, color, true);
 			}
@@ -346,6 +347,14 @@ public class ClientGameEventHandler {
 		}
 
 		ScreenText.RENDER.clear();
+
+		if (session.screenFade != null) {
+			float a = Math.clamp(Mth.lerp(delta, session.screenFade.prevAlpha, session.screenFade.alpha), 0F, 1F);
+
+			if (a > 0F) {
+				graphics.fill(0, 0, width, height, 1000, session.screenFade.data.color().withAlpha(a).argb());
+			}
+		}
 	}
 
 	@SubscribeEvent

@@ -4,8 +4,10 @@ import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModification;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationBundle;
 import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
+import dev.beast.mods.shimmer.feature.data.InternalServerData;
 import dev.beast.mods.shimmer.feature.prop.ServerPropList;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
+import dev.beast.mods.shimmer.feature.zone.Anchor;
 import dev.beast.mods.shimmer.feature.zone.Zone;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.server.level.ChunkMap;
@@ -78,6 +80,9 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 		throw new NoMixinException(this);
 	}
 
+	default void shimmer$updateLoadedChunks() {
+	}
+
 	default void shimmer$updateLoadedChunks(List<Ticket<ChunkPos>> tickets) {
 		var level = shimmer$level();
 
@@ -86,29 +91,51 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 				((ShimmerDistanceManager) level.getChunkSource().distanceManager).shimmer$setLoaded(ticket, false);
 			}
 
-			Shimmer.LOGGER.info("Unloaded " + tickets.size() + " chunks");
+			Shimmer.LOGGER.info("Unloaded " + tickets.size() + " tickets");
 			tickets.clear();
 		}
 
-		var loadedChunks = new LongOpenHashSet();
+		var activeZones = shimmer$getActiveZones();
 
-		for (var container : shimmer$getActiveZones()) {
-			for (var zone : container.zones) {
-				if (zone.zone.forceLoaded()) {
-					zone.zone.shape().collectChunkPositions(loadedChunks);
+		if (activeZones != null) {
+			var loaded = new LongOpenHashSet();
+
+			for (var container : activeZones) {
+				for (var zone : container.zones) {
+					if (zone.zone.forceLoaded()) {
+						zone.zone.shape().collectChunkPositions(loaded);
+					}
 				}
+			}
+
+			for (var pos : loaded) {
+				var chunkPos = new ChunkPos(pos);
+				tickets.add(new Ticket<>(Zone.TICKET_TYPE, ChunkMap.FORCED_TICKET_LEVEL, chunkPos, false));
 			}
 		}
 
-		if (!loadedChunks.isEmpty()) {
-			for (var pos : loadedChunks) {
-				var chunkPos = new ChunkPos(pos);
-				var ticket = new Ticket<>(Zone.TICKET_TYPE, ChunkMap.FORCED_TICKET_LEVEL, chunkPos, false);
-				((ShimmerDistanceManager) level.getChunkSource().distanceManager).shimmer$setLoaded(ticket, true);
-				tickets.add(ticket);
+		// /server-data set shimmer:anchor {areas:[{shape:[29647, 63, 79647, 30352, 63, 80352]}]}
+		var anchored = getServerData().get(InternalServerData.ANCHOR).shapes().get(level.dimension());
+
+		if (anchored != null) {
+			var loaded = new LongOpenHashSet();
+
+			for (var area : anchored) {
+				area.collectChunkPositions(loaded);
 			}
 
-			Shimmer.LOGGER.info("Loaded " + loadedChunks.size() + " chunks");
+			for (var pos : loaded) {
+				var chunkPos = new ChunkPos(pos);
+				tickets.add(new Ticket<>(Anchor.TICKET_TYPE, ChunkMap.FORCED_TICKET_LEVEL, chunkPos, false));
+			}
+		}
+
+		if (!tickets.isEmpty()) {
+			for (var ticket : tickets) {
+				((ShimmerDistanceManager) level.getChunkSource().distanceManager).shimmer$setLoaded(ticket, true);
+			}
+
+			Shimmer.LOGGER.info("Loaded " + tickets.size() + " tickets");
 		}
 	}
 }

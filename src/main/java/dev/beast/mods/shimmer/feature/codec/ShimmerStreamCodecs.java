@@ -224,19 +224,25 @@ public interface ShimmerStreamCodecs {
 		}
 	};
 
+	StreamCodec<ByteBuf, Double> DOUBLE_AS_FLOAT = new StreamCodec<>() {
+		@Override
+		public Double decode(ByteBuf buf) {
+			return (double) buf.readFloat();
+		}
+
+		@Override
+		public void encode(ByteBuf buf, Double value) {
+			buf.writeFloat(value.floatValue());
+		}
+	};
+
 	StreamCodec<ByteBuf, AABB> AABB = StreamCodec.composite(
-		ByteBufCodecs.DOUBLE,
-		b -> b.minX,
-		ByteBufCodecs.DOUBLE,
-		b -> b.minY,
-		ByteBufCodecs.DOUBLE,
-		b -> b.minZ,
-		ByteBufCodecs.DOUBLE,
-		b -> b.maxX,
-		ByteBufCodecs.DOUBLE,
-		b -> b.maxY,
-		ByteBufCodecs.DOUBLE,
-		b -> b.maxZ,
+		ByteBufCodecs.DOUBLE, b -> b.minX,
+		ByteBufCodecs.DOUBLE, b -> b.minY,
+		ByteBufCodecs.DOUBLE, b -> b.minZ,
+		ByteBufCodecs.DOUBLE, b -> b.maxX,
+		ByteBufCodecs.DOUBLE, b -> b.maxY,
+		ByteBufCodecs.DOUBLE, b -> b.maxZ,
 		AABB::new
 	);
 

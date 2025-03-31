@@ -20,7 +20,7 @@ public record ZoneClickedPayload(ResourceLocation id, int index, ZoneShape shape
 	public static final ShimmerPacketType<ZoneClickedPayload> TYPE = ShimmerPacketType.internal("zone_clicked", CompositeStreamCodec.of(
 		ShimmerStreamCodecs.VIDEO_ID, ZoneClickedPayload::id,
 		ByteBufCodecs.VAR_INT, ZoneClickedPayload::index,
-		dev.beast.mods.shimmer.feature.zone.shape.ZoneShape.REGISTRY.valueStreamCodec(), ZoneClickedPayload::shape,
+		ZoneShape.STREAM_CODEC, ZoneClickedPayload::shape,
 		ByteBufCodecs.DOUBLE, ZoneClickedPayload::distanceSq,
 		ShimmerStreamCodecs.VEC_3.optional(), ZoneClickedPayload::pos,
 		ZoneClickedPayload::new

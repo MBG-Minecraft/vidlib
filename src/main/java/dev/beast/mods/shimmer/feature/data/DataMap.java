@@ -4,6 +4,7 @@ import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.core.ShimmerS2CPacketConsumer;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.util.Cast;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
@@ -16,7 +17,6 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -34,7 +34,7 @@ public class DataMap {
 
 	TrackedDataMapValue init(DataType<?> type) {
 		if (map == null) {
-			map = new IdentityHashMap<>();
+			map = new Reference2ObjectOpenHashMap<>();
 		}
 
 		var value = map.get(type);
@@ -144,12 +144,7 @@ public class DataMap {
 
 	public void update(@Nullable Player player, List<DataMapValue> update) {
 		for (var data : update) {
-			var v = init(data.type());
-			v.data = data.value();
-
-			if (player != null && data.type().onReceived() != null) {
-				data.type().onReceived().accept(player);
-			}
+			init(data.type()).update(player, data.value());
 		}
 	}
 

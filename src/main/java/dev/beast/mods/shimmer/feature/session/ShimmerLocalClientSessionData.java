@@ -12,6 +12,7 @@ import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.data.DataMapValue;
 import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
+import dev.beast.mods.shimmer.feature.fade.ScreenFadeInstance;
 import dev.beast.mods.shimmer.feature.input.PlayerInput;
 import dev.beast.mods.shimmer.feature.input.PlayerInputChanged;
 import dev.beast.mods.shimmer.feature.input.SyncPlayerInputToServer;
@@ -87,6 +88,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	public Map<ZoneShape, VoxelShapeBox> cachedZoneShapes;
 	public List<PlayerInfo> originalListedPlayers;
 	public ClientCutscene cutscene;
+	public ScreenFadeInstance screenFade;
 
 	public ShimmerLocalClientSessionData(Minecraft mc, UUID uuid, ClientPacketListener connection) {
 		super(uuid);
@@ -213,6 +215,10 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 			mc.stopCutscene();
 		}
 
+		if (screenFade != null && screenFade.tick()) {
+			screenFade = null;
+		}
+
 		prevCameraShake = cameraShake;
 		double shakeX = 0D;
 		double shakeY = 0D;
@@ -298,7 +304,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 
 	@Override
 	public void updateServerData(List<DataMapValue> serverData) {
-		serverDataMap.update(null, serverData);
+		serverDataMap.update(mc.player, serverData);
 	}
 
 	@Override

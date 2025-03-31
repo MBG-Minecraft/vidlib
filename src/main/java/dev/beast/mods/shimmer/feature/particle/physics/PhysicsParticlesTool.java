@@ -68,14 +68,16 @@ public class PhysicsParticlesTool implements ShimmerTool {
 	public void debugText(Player player, ItemStack item, @Nullable HitResult hit, ScreenText screenText) {
 		int total = 0;
 		int totalRendered = 0;
+		int totalBuffersSwitched = 0;
 
 		for (var manager : PhysicsParticleManager.ALL) {
 			total += manager.particles.size();
 			totalRendered += manager.rendered;
-			screenText.topLeft.add("%,d/%,d %s".formatted(manager.rendered, manager.particles.size(), manager.displayName));
+			totalBuffersSwitched += manager.buffersSwitched;
+			screenText.topLeft.add("%,d/%,d [%dx] %s".formatted(manager.rendered, manager.particles.size(), manager.buffersSwitched, manager.displayName));
 		}
 
 		screenText.topRight.add(Minecraft.getInstance().fpsString.split(" ", 2)[0] + " FPS");
-		screenText.topRight.add("%,d/%,d Total".formatted(totalRendered, total));
+		screenText.topRight.add("%,d/%,d [%dx] Total".formatted(totalRendered, total, totalBuffersSwitched));
 	}
 }

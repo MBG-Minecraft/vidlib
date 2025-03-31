@@ -78,6 +78,7 @@
 		"RemotePlayerMixin",
 		"RenderSystemMixin",
 		"ScreenMixin",
+		"SectionOcclusionGraphMixin",
 		"ShaderManagerMixin",
 		"SkyRendererMixin",
 		"StructureBlockRendererMixin"
