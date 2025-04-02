@@ -255,12 +255,9 @@ public class ClientGameEventHandler {
 	public static void renderHUD(RenderGuiEvent.Post event) {
 		var mc = Minecraft.getInstance();
 
-		if (mc.level == null || mc.player == null || mc.options.hideGui) {
+		if (mc.level == null || mc.player == null) {
 			return;
 		}
-
-		ScreenText.RENDER.addAll(ScreenText.CLIENT_TICK);
-		ScreenText.RENDER.ops = mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
 
 		var session = mc.player.shimmer$sessionData();
 		var graphics = event.getGuiGraphics();
@@ -268,83 +265,88 @@ public class ClientGameEventHandler {
 		int width = event.getGuiGraphics().guiWidth();
 		int height = event.getGuiGraphics().guiHeight();
 
-		if ((mc.isLocalServer() || mc.player.hasPermissions(2)) && (mc.screen == null || mc.screen instanceof ChatScreen)) {
-			NeoForge.EVENT_BUS.post(new DebugTextEvent.Render(ScreenText.RENDER));
+		if (!mc.options.hideGui) {
+			ScreenText.RENDER.addAll(ScreenText.CLIENT_TICK);
+			ScreenText.RENDER.ops = mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
 
-			var zoneClip = session.zoneClip;
+			if (mc.screen == null || mc.screen instanceof ChatScreen) {
+				NeoForge.EVENT_BUS.post(new DebugTextEvent.Render(ScreenText.RENDER));
 
-			if (zoneClip != null) {
-				var component = Component.literal("Zone: ").append(Component.literal(zoneClip.instance().container.id.toString()).withStyle(ChatFormatting.AQUA));
+				var zoneClip = session.zoneClip;
 
-				if (zoneClip.instance().container.zones.size() > 1) {
-					component.append(Component.literal("[" + zoneClip.instance().index + "]").withStyle(ChatFormatting.GREEN));
-				}
+				if (zoneClip != null) {
+					var component = Component.literal("Zone: ").append(Component.literal(zoneClip.instance().container.id.toString()).withStyle(ChatFormatting.AQUA));
 
-				ScreenText.RENDER.topLeft.add(component);
+					if (zoneClip.instance().container.zones.size() > 1) {
+						component.append(Component.literal("[" + zoneClip.instance().index + "]").withStyle(ChatFormatting.GREEN));
+					}
 
-				var zoneTag = zoneClip.instance().zone.data();
+					ScreenText.RENDER.topLeft.add(component);
 
-				if (!zoneTag.isEmpty()) {
-					for (var key : zoneTag.getAllKeys()) {
-						ScreenText.RENDER.topLeft.add(Component.literal(key + ": ").append(NbtUtils.toPrettyComponent(zoneTag.get(key))));
+					var zoneTag = zoneClip.instance().zone.data();
+
+					if (!zoneTag.isEmpty()) {
+						for (var key : zoneTag.getAllKeys()) {
+							ScreenText.RENDER.topLeft.add(Component.literal(key + ": ").append(NbtUtils.toPrettyComponent(zoneTag.get(key))));
+						}
 					}
 				}
-			}
 
-			if (!session.zonesTagsIn.isEmpty() && mc.player.getShowZones()) {
-				ScreenText.RENDER.topRight.add("Zones in:");
+				if (!session.zonesTagsIn.isEmpty() && mc.player.getShowZones()) {
+					ScreenText.RENDER.topRight.add("Zones in:");
 
-				for (var tag : session.zonesTagsIn) {
-					ScreenText.RENDER.topRight.add(tag);
+					for (var tag : session.zonesTagsIn) {
+						ScreenText.RENDER.topRight.add(tag);
+					}
 				}
+
+				graphics.pose().pushPose();
+				graphics.pose().translate(0F, 0F, 800F);
+
+				int textHeight = height;
+				int bgColor = 0xA0000000;
+				int color = 0xFFFFFFFF;
+
+				if (mc.screen instanceof ChatScreen) {
+					textHeight -= 14;
+					bgColor = 0x40000000;
+					color = 0x70FFFFFF;
+				}
+
+				for (int i = 0; i < ScreenText.RENDER.topLeft.list.size(); i++) {
+					int w = mc.font.width(ScreenText.RENDER.topLeft.list.get(i));
+					int x = 1;
+					int y = 2 + i * 11;
+					graphics.fill(x, y, x + w + 3, y + 11, bgColor);
+					graphics.drawString(mc.font, ScreenText.RENDER.topLeft.list.get(i), x + 2, y + 2, color, true);
+				}
+
+				for (int i = 0; i < ScreenText.RENDER.topRight.list.size(); i++) {
+					int w = mc.font.width(ScreenText.RENDER.topRight.list.get(i));
+					int x = width - w - 4;
+					int y = 2 + i * 11;
+					graphics.fill(x, y, x + w + 3, y + 11, bgColor);
+					graphics.drawString(mc.font, ScreenText.RENDER.topRight.list.get(i), x + 2, y + 2, color, true);
+				}
+
+				for (int i = 0; i < ScreenText.RENDER.bottomLeft.list.size(); i++) {
+					int w = mc.font.width(ScreenText.RENDER.bottomLeft.list.get(i));
+					int x = 1;
+					int y = i * 11 + textHeight - ScreenText.RENDER.bottomLeft.list.size() * 11 - 2;
+					graphics.fill(x, y, x + w + 3, y + 11, bgColor);
+					graphics.drawString(mc.font, ScreenText.RENDER.bottomLeft.list.get(i), x + 2, y + 2, color, true);
+				}
+
+				for (int i = 0; i < ScreenText.RENDER.bottomRight.list.size(); i++) {
+					int w = mc.font.width(ScreenText.RENDER.bottomRight.list.get(i));
+					int x = width - w - 4;
+					int y = i * 11 + textHeight - ScreenText.RENDER.bottomRight.list.size() * 11 - 2;
+					graphics.fill(x, y, x + w + 3, y + 11, bgColor);
+					graphics.drawString(mc.font, ScreenText.RENDER.bottomRight.list.get(i), x + 2, y + 2, color, true);
+				}
+
+				graphics.pose().popPose();
 			}
-
-			graphics.pose().pushPose();
-			graphics.pose().translate(0F, 0F, 800F);
-
-			int textHeight = height;
-			int bgColor = 0xA0000000;
-			int color = 0xFFFFFFFF;
-
-			if (mc.screen instanceof ChatScreen) {
-				textHeight -= 14;
-				bgColor = 0x40000000;
-				color = 0x70FFFFFF;
-			}
-
-			for (int i = 0; i < ScreenText.RENDER.topLeft.list.size(); i++) {
-				int w = mc.font.width(ScreenText.RENDER.topLeft.list.get(i));
-				int x = 1;
-				int y = 2 + i * 11;
-				graphics.fill(x, y, x + w + 3, y + 11, bgColor);
-				graphics.drawString(mc.font, ScreenText.RENDER.topLeft.list.get(i), x + 2, y + 2, color, true);
-			}
-
-			for (int i = 0; i < ScreenText.RENDER.topRight.list.size(); i++) {
-				int w = mc.font.width(ScreenText.RENDER.topRight.list.get(i));
-				int x = width - w - 4;
-				int y = 2 + i * 11;
-				graphics.fill(x, y, x + w + 3, y + 11, bgColor);
-				graphics.drawString(mc.font, ScreenText.RENDER.topRight.list.get(i), x + 2, y + 2, color, true);
-			}
-
-			for (int i = 0; i < ScreenText.RENDER.bottomLeft.list.size(); i++) {
-				int w = mc.font.width(ScreenText.RENDER.bottomLeft.list.get(i));
-				int x = 1;
-				int y = i * 11 + textHeight - ScreenText.RENDER.bottomLeft.list.size() * 11 - 2;
-				graphics.fill(x, y, x + w + 3, y + 11, bgColor);
-				graphics.drawString(mc.font, ScreenText.RENDER.bottomLeft.list.get(i), x + 2, y + 2, color, true);
-			}
-
-			for (int i = 0; i < ScreenText.RENDER.bottomRight.list.size(); i++) {
-				int w = mc.font.width(ScreenText.RENDER.bottomRight.list.get(i));
-				int x = width - w - 4;
-				int y = i * 11 + textHeight - ScreenText.RENDER.bottomRight.list.size() * 11 - 2;
-				graphics.fill(x, y, x + w + 3, y + 11, bgColor);
-				graphics.drawString(mc.font, ScreenText.RENDER.bottomRight.list.get(i), x + 2, y + 2, color, true);
-			}
-
-			graphics.pose().popPose();
 		}
 
 		ScreenText.RENDER.clear();
