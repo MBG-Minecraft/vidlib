@@ -16,6 +16,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
@@ -74,7 +75,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 		var palette = random == null ? template.palettes.getFirst() : template.palettes.get(random.nextInt(template.palettes.size()));
 
 		for (var info : palette.blocks()) {
-			if (!info.state().isAir() && info.state().getRenderShape() != RenderShape.INVISIBLE) {
+			if (!info.state().is(Blocks.STRUCTURE_VOID)) {
 				blocks.put(info.pos().asLong(), info.state());
 			}
 		}
@@ -99,7 +100,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 			var blocks = new Long2ObjectOpenHashMap<BlockState>();
 
 			for (var info : palette.blocks()) {
-				if (!info.state().isAir() && info.state().getRenderShape() != RenderShape.INVISIBLE) {
+				if (!info.state().is(Blocks.STRUCTURE_VOID)) {
 					blocks.put(info.pos().asLong(), info.state());
 				}
 			}
@@ -164,6 +165,40 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 
 	public boolean empty() {
 		return this == EMPTY || blocks.isEmpty() || size.getX() < 1 || size.getY() < 1 || size.getZ() < 1;
+	}
+
+	public boolean hasInvisibleBlocks() {
+		if (empty()) {
+			return false;
+		}
+
+		for (var entry : blocks.long2ObjectEntrySet()) {
+			var state = entry.getValue();
+
+			if (state.isAir() || state.getRenderShape() == RenderShape.INVISIBLE) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public StructureHolder withoutInvisibleBlocks() {
+		if (empty() || !hasInvisibleBlocks()) {
+			return this;
+		}
+
+		var newBlocks = new Long2ObjectOpenHashMap<BlockState>(blocks.size());
+
+		for (var entry : blocks.long2ObjectEntrySet()) {
+			var state = entry.getValue();
+
+			if (!state.isAir() && state.getRenderShape() != RenderShape.INVISIBLE) {
+				newBlocks.put(entry.getLongKey(), state);
+			}
+		}
+
+		return new StructureHolder(newBlocks, size);
 	}
 
 	public StructureHolder offset(BlockPos offset) {

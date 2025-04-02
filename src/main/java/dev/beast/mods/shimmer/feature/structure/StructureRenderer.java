@@ -166,7 +166,7 @@ public class StructureRenderer implements WithCache {
 			var structure = structureProvider.get();
 
 			if (structure != null) {
-				buildLevel(mc, structure);
+				buildLevel(mc, structure.withoutInvisibleBlocks());
 			}
 		}
 	}

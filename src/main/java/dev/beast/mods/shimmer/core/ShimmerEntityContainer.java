@@ -52,6 +52,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface ShimmerEntityContainer extends ShimmerS2CPacketConsumer, ShimmerC2SPacketConsumer {
 	default List<? extends Player> shimmer$getS2CPlayers() {
@@ -186,12 +187,16 @@ public interface ShimmerEntityContainer extends ShimmerS2CPacketConsumer, Shimme
 		}
 	}
 
-	default void playSound(Vec3 pos, SoundData sound) {
+	default void playSound(Optional<Vec3> pos, SoundData sound) {
 		if (shimmer$isClient()) {
 			shimmer$getEnvironment().playSound(pos, sound);
 		} else {
 			s2c(new SoundPayload(pos, sound));
 		}
+	}
+
+	default void playSound(Vec3 pos, SoundData sound) {
+		playSound(Optional.of(pos), sound);
 	}
 
 	default void playTrackingSound(WorldPosition position, WorldNumberVariables variables, SoundData data, boolean looping) {

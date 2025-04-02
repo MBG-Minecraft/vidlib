@@ -110,6 +110,7 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 		rules.getRule(GameRules.RULE_DAYLIGHT).set(false, server);
 		rules.getRule(GameRules.RULE_RANDOMTICKING).set(0, server);
 		rules.getRule(GameRules.RULE_SPAWN_RADIUS).set(0, server);
+		rules.getRule(GameRules.RULE_DISABLE_PLAYER_MOVEMENT_CHECK).set(true, server);
 		rules.getRule(GameRules.RULE_DISABLE_ELYTRA_MOVEMENT_CHECK).set(true, server);
 		rules.getRule(GameRules.RULE_WEATHER_CYCLE).set(false, server);
 		rules.getRule(GameRules.RULE_ANNOUNCE_ADVANCEMENTS).set(false, server);

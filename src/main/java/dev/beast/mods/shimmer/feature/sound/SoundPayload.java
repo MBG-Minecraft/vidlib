@@ -8,10 +8,12 @@ import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
 import dev.beast.mods.shimmer.feature.net.ShimmerPayloadContext;
 import net.minecraft.world.phys.Vec3;
 
-public record SoundPayload(Vec3 pos, SoundData data) implements ShimmerPacketPayload {
+import java.util.Optional;
+
+public record SoundPayload(Optional<Vec3> pos, SoundData data) implements ShimmerPacketPayload {
 	@AutoPacket
 	public static final ShimmerPacketType<SoundPayload> TYPE = ShimmerPacketType.internal("sound", CompositeStreamCodec.of(
-		ShimmerStreamCodecs.VEC_3, SoundPayload::pos,
+		ShimmerStreamCodecs.VEC_3.optional(), SoundPayload::pos,
 		SoundData.STREAM_CODEC, SoundPayload::data,
 		SoundPayload::new
 	));

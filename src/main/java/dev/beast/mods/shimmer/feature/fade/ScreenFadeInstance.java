@@ -1,25 +1,38 @@
 package dev.beast.mods.shimmer.feature.fade;
 
+import dev.beast.mods.shimmer.math.Color;
+import dev.beast.mods.shimmer.math.Easing;
+
 public class ScreenFadeInstance {
-	public final Fade data;
+	public final Color color;
+	public final int fadeInTicks;
+	public final int pauseTicks;
+	public final int fadeOutTicks;
+	public final Easing fadeInEase;
+	public final Easing fadeOutEase;
 	public final int totalTicks;
 	public float prevAlpha, alpha;
 	public int tick;
 
 	public ScreenFadeInstance(Fade data) {
-		this.data = data;
-		this.totalTicks = data.fadeInTicks() + data.pauseTicks() + data.fadeOutTicks();
+		this.color = data.color();
+		this.fadeInTicks = data.fadeInTicks();
+		this.pauseTicks = data.pauseTicks();
+		this.fadeOutTicks = data.fadeOutTicks().orElse(data.fadeInTicks());
+		this.fadeInEase = data.fadeInEase();
+		this.fadeOutEase = data.fadeOutEase().orElse(data.fadeInEase());
+		this.totalTicks = fadeInTicks + pauseTicks + fadeOutTicks;
 	}
 
 	public boolean tick() {
 		prevAlpha = alpha;
 
-		if (tick < data.fadeInTicks()) {
-			alpha = data.fadeInEase().ease(tick / (float) data.fadeInTicks());
-		} else if (tick < data.fadeInTicks() + data.pauseTicks()) {
+		if (tick < fadeInTicks) {
+			alpha = fadeInEase.ease(tick / (float) fadeInTicks);
+		} else if (tick < fadeInTicks + pauseTicks) {
 			alpha = 1F;
 		} else if (tick < totalTicks) {
-			alpha = 1F - data.fadeOutEase().ease((tick - data.fadeInTicks() - data.pauseTicks()) / (float) data.fadeOutTicks());
+			alpha = 1F - fadeOutEase.ease((tick - fadeInTicks - pauseTicks) / (float) fadeOutTicks);
 		} else {
 			alpha = 0F;
 		}

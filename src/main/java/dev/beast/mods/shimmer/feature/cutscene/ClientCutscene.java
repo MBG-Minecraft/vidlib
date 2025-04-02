@@ -1,14 +1,18 @@
 package dev.beast.mods.shimmer.feature.cutscene;
 
 import dev.beast.mods.shimmer.feature.misc.CameraOverride;
+import dev.beast.mods.shimmer.feature.sound.TrackingSound;
 import dev.beast.mods.shimmer.math.KMath;
 import dev.beast.mods.shimmer.math.Rotation;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -26,6 +30,7 @@ public class ClientCutscene implements CameraOverride {
 	public Vec3 prevOrigin, origin, prevTarget, target;
 	public double prevZoom, zoom;
 	public List<FormattedCharSequence> topBar, bottomBar;
+	public final List<SoundInstance> playingSounds;
 
 	public ClientCutscene(Minecraft mc, boolean overrideCamera, Cutscene cutscene, WorldNumberVariables variables, Supplier<Vec3> sourcePos) {
 		this.mc = mc;
@@ -39,6 +44,7 @@ public class ClientCutscene implements CameraOverride {
 		this.totalTick = 0;
 		this.totalLength = 0;
 		this.zoom = 1D;
+		this.playingSounds = new ArrayList<>();
 
 		var ctx = new WorldNumberContext(mc.level, 0F, variables);
 		ctx.sourcePos = sourcePos.get();
@@ -105,6 +111,24 @@ public class ClientCutscene implements CameraOverride {
 
 				if (step.shader.isPresent()) {
 					mc.setPostEffect(step.shader.get());
+				}
+
+				if (step.fade.isPresent()) {
+					mc.setScreenFade(step.fade.get());
+				}
+
+				if (!step.sounds.isEmpty()) {
+					for (var sound : step.sounds) {
+						if (sound.position().isPresent()) {
+							var instance = new TrackingSound(mc.level, sound.position().get(), variables, sound.data(), sound.looping());
+							playingSounds.add(instance);
+							mc.getSoundManager().play(instance);
+						} else {
+							var instance = SimpleSoundInstance.forUI(sound.data().sound().value(), sound.data().pitch(), sound.data().volume());
+							playingSounds.add(instance);
+							mc.getSoundManager().play(instance);
+						}
+					}
 				}
 			}
 
@@ -188,5 +212,14 @@ public class ClientCutscene implements CameraOverride {
 	@Override
 	public Rotation getCameraRotation(float delta, Vec3 cameraPos) {
 		return Rotation.compute(cameraPos, prevTarget.lerp(target, delta));
+	}
+
+	public void stopped() {
+		for (var sound : playingSounds) {
+			mc.getSoundManager().stop(sound);
+		}
+
+		playingSounds.clear();
+		mc.gameRenderer.clearPostEffect();
 	}
 }

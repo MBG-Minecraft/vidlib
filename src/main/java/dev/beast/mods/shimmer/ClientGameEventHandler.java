@@ -355,7 +355,7 @@ public class ClientGameEventHandler {
 			float a = Math.clamp(Mth.lerp(delta, session.screenFade.prevAlpha, session.screenFade.alpha), 0F, 1F);
 
 			if (a > 0F) {
-				graphics.fill(0, 0, width, height, 1000, session.screenFade.data.color().withAlpha(a).argb());
+				graphics.fill(0, 0, width, height, 1000, session.screenFade.color.withAlpha(a).argb());
 			}
 		}
 	}

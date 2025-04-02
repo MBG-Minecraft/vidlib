@@ -5,6 +5,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.cutscene.event.CutsceneEvent;
+import dev.beast.mods.shimmer.feature.fade.Fade;
+import dev.beast.mods.shimmer.feature.sound.PositionedSound;
 import dev.beast.mods.shimmer.math.worldnumber.FixedWorldNumber;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumber;
 import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
@@ -68,6 +70,8 @@ public class CutsceneStep {
 		ComponentSerialization.CODEC.optionalFieldOf("top_bar").forGetter(s -> s.topBar),
 		ComponentSerialization.CODEC.optionalFieldOf("bottom_bar").forGetter(s -> s.bottomBar),
 		ResourceLocation.CODEC.optionalFieldOf("shader").forGetter(s -> s.shader),
+		Fade.CODEC.optionalFieldOf("fade").forGetter(s -> s.fade),
+		PositionedSound.CODEC.listOf().optionalFieldOf("sounds", List.of()).forGetter(s -> s.sounds),
 		Snap.CODEC.optionalFieldOf("snap", Snap.NONE).forGetter(s -> s.snap),
 		CutsceneEvent.CODEC.listOf().optionalFieldOf("events", List.of()).forGetter(s -> s.events)
 	).apply(instance, CutsceneStep::new));
@@ -82,6 +86,8 @@ public class CutsceneStep {
 		ComponentSerialization.STREAM_CODEC.optional(), s -> s.topBar,
 		ComponentSerialization.STREAM_CODEC.optional(), s -> s.bottomBar,
 		ResourceLocation.STREAM_CODEC.optional(), s -> s.shader,
+		Fade.STREAM_CODEC.optional(), s -> s.fade,
+		PositionedSound.STREAM_CODEC.list(), s -> s.sounds,
 		Snap.STREAM_CODEC, s -> s.snap,
 		CutsceneEvent.REGISTRY.valueStreamCodec().list(), s -> s.events,
 		CutsceneStep::new
@@ -114,6 +120,8 @@ public class CutsceneStep {
 	public Optional<Component> topBar = Optional.empty();
 	public Optional<Component> bottomBar = Optional.empty();
 	public Optional<ResourceLocation> shader = Optional.empty();
+	public Optional<Fade> fade = Optional.empty();
+	public List<PositionedSound> sounds = List.of();
 	public Snap snap = Snap.NONE;
 	public List<CutsceneEvent> events = List.of();
 
@@ -127,6 +135,8 @@ public class CutsceneStep {
 		Optional<Component> topBar,
 		Optional<Component> bottomBar,
 		Optional<ResourceLocation> shader,
+		Optional<Fade> fade,
+		List<PositionedSound> sounds,
 		Snap snap,
 		List<CutsceneEvent> events
 	) {
@@ -139,6 +149,8 @@ public class CutsceneStep {
 		this.topBar = topBar;
 		this.bottomBar = bottomBar;
 		this.shader = shader;
+		this.fade = fade;
+		this.sounds = sounds;
 		this.snap = snap;
 	}
 
@@ -203,6 +215,20 @@ public class CutsceneStep {
 
 	public CutsceneStep shader(String name) {
 		return shader(ResourceLocation.withDefaultNamespace("shaders/post/" + name + ".json"));
+	}
+
+	public CutsceneStep fade(Fade fade) {
+		this.fade = Optional.of(fade);
+		return this;
+	}
+
+	public CutsceneStep sound(PositionedSound sound) {
+		if (this.sounds == null) {
+			this.sounds = new ArrayList<>(1);
+		}
+
+		this.sounds.add(sound);
+		return this;
 	}
 
 	public CutsceneStep topBar(Component topBar) {

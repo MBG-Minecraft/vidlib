@@ -37,6 +37,7 @@ import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
@@ -53,6 +54,7 @@ import org.joml.Vector4f;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @SuppressWarnings("resource")
@@ -204,14 +206,18 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 
 	@Override
 	default void stopCutscene() {
-		shimmer$self().player.shimmer$sessionData().cutscene = null;
+		var data = shimmer$self().player.shimmer$sessionData();
+
+		if (data.cutscene != null) {
+			data.cutscene.stopped();
+			data.cutscene = null;
+		}
 
 		if (shimmer$self().screen instanceof CutsceneScreen screen) {
 			shimmer$self().setScreen(screen.previousScreen);
 		}
 
 		shimmer$self().options.hideGui = false;
-		shimmer$self().gameRenderer.clearPostEffect();
 	}
 
 	@Override
@@ -290,9 +296,16 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 	}
 
 	@Override
-	default void playSound(Vec3 pos, SoundData sound) {
+	default void playSound(Optional<Vec3> pos, SoundData sound) {
 		var mc = shimmer$self();
-		mc.getSoundManager().play(new SimpleSoundInstance(sound.sound().value(), sound.source(), sound.volume(), sound.pitch(), shimmer$level().random, pos.x, pos.y, pos.z));
+		var p = pos.orElse(null);
+		SoundInstance instance;
+
+		if (p != null) {
+			mc.getSoundManager().play(new SimpleSoundInstance(sound.sound().value(), sound.source(), sound.volume(), sound.pitch(), shimmer$level().random, p.x, p.y, p.z));
+		} else {
+			mc.getSoundManager().play(SimpleSoundInstance.forUI(sound.sound().value(), sound.pitch(), sound.volume()));
+		}
 	}
 
 	@Override

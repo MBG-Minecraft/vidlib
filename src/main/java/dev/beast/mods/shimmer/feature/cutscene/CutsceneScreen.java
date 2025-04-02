@@ -40,7 +40,7 @@ public class CutsceneScreen extends Screen {
 
 	@Override
 	public boolean shouldCloseOnEsc() {
-		return Screen.hasShiftDown();
+		return Screen.hasShiftDown() && minecraft.isLocalServer();
 	}
 
 	@Override
