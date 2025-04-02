@@ -1,4 +1,5 @@
 {
 	"texture": "shimmer:textures/skybox/day.png",
-	"celestials": true
+	"celestials": true,
+	"moon": false
 }

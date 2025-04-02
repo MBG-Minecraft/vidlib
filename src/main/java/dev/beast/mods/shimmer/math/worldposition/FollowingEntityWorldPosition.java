@@ -34,6 +34,6 @@ public record FollowingEntityWorldPosition(Either<Integer, UUID> entityId, Entit
 	@Nullable
 	public Vec3 get(WorldNumberContext ctx) {
 		var entity = ctx.level.getEntityByEither(entityId);
-		return entity == null ? null : positionType.getPosition(entity);
+		return entity == null ? null : entity.getPosition(positionType);
 	}
 }

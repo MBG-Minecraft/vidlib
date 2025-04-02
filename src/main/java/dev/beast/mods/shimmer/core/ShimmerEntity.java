@@ -10,6 +10,7 @@ import dev.beast.mods.shimmer.feature.location.Location;
 import dev.beast.mods.shimmer.feature.sound.SoundData;
 import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
 import dev.beast.mods.shimmer.math.Line;
+import dev.beast.mods.shimmer.math.worldposition.EntityPositionType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -196,5 +197,47 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 	}
 
 	default void c2sReceived(EntityData event, ServerPlayer from) {
+	}
+
+	default Vec3 getSoundSource(float delta) {
+		return ((Entity) this).getEyePosition(delta);
+	}
+
+	default Vec3 getLookTarget(float delta) {
+		var e = (Entity) this;
+
+		if (delta == 1F) {
+			return e.position().add(e.getViewVector(1F));
+		} else {
+			return e.getPosition(delta).add(e.getViewVector(delta));
+		}
+	}
+
+	default Vec3 getPosition(EntityPositionType type) {
+		var e = (Entity) this;
+
+		return switch (type) {
+			case CENTER -> new Vec3(e.getX(), e.getY() + e.getBbHeight() / 2D, e.getZ());
+			case TOP -> new Vec3(e.getX(), e.getY() + e.getBbHeight(), e.getZ());
+			case EYES -> e.getEyePosition();
+			case LEASH -> e.position().add(e.getLeashOffset(1F));
+			case SOUND_SOURCE -> getSoundSource(1F);
+			case LOOK_TARGET -> getLookTarget(1F);
+			default -> e.position();
+		};
+	}
+
+	default Vec3 getPosition(EntityPositionType type, float delta) {
+		var e = (Entity) this;
+
+		return switch (type) {
+			case CENTER -> e.getPosition(delta).add(0D, e.getBbHeight() / 2D, 0D);
+			case TOP -> e.getPosition(delta).add(0D, e.getBbHeight(), 0D);
+			case EYES -> e.getEyePosition(delta);
+			case LEASH -> e.getPosition(delta).add(e.getLeashOffset(delta));
+			case SOUND_SOURCE -> getSoundSource(delta);
+			case LOOK_TARGET -> getLookTarget(delta);
+			default -> delta == 1F ? e.position() : e.getPosition(delta);
+		};
 	}
 }

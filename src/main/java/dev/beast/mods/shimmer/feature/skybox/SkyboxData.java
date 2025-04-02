@@ -23,6 +23,8 @@ public record SkyboxData(
 	float rotating,
 	Color tint,
 	boolean celestials,
+	boolean sun,
+	boolean moon,
 	Optional<Float> stars,
 	Optional<Rotation> celestialRotation
 ) {
@@ -33,6 +35,8 @@ public record SkyboxData(
 		Codec.FLOAT.optionalFieldOf("rotating", 0F).forGetter(SkyboxData::rotating),
 		Color.CODEC.optionalFieldOf("tint", Color.WHITE).forGetter(SkyboxData::tint),
 		Codec.BOOL.optionalFieldOf("celestials", false).forGetter(SkyboxData::celestials),
+		Codec.BOOL.optionalFieldOf("sun", true).forGetter(SkyboxData::sun),
+		Codec.BOOL.optionalFieldOf("moon", true).forGetter(SkyboxData::moon),
 		Codec.FLOAT.optionalFieldOf("stars").forGetter(SkyboxData::stars),
 		Rotation.CODEC.optionalFieldOf("celestial_rotation").forGetter(SkyboxData::celestialRotation)
 	).apply(instance, SkyboxData::new));
@@ -44,6 +48,8 @@ public record SkyboxData(
 		ByteBufCodecs.FLOAT, SkyboxData::rotating,
 		Color.STREAM_CODEC, SkyboxData::tint,
 		ByteBufCodecs.BOOL, SkyboxData::celestials,
+		ByteBufCodecs.BOOL, SkyboxData::sun,
+		ByteBufCodecs.BOOL, SkyboxData::moon,
 		ByteBufCodecs.FLOAT.optional(), SkyboxData::stars,
 		Rotation.STREAM_CODEC.optional(), SkyboxData::celestialRotation,
 		SkyboxData::new

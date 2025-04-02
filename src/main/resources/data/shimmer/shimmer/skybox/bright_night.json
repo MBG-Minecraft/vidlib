@@ -1,5 +1,6 @@
 {
 	"celestials": true,
 	"stars": 0.5,
-	"celestial_rotation": [0, 127]
+	"sun": false,
+	"celestial_rotation": [0, 140]
 }

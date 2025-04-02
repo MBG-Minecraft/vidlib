@@ -19,6 +19,12 @@ public abstract class SkyRendererMixin {
 	@Shadow
 	protected abstract void renderStars(FogParameters fog, float starBrightness, PoseStack poseStack);
 
+	@Shadow
+	protected abstract void renderMoon(int phase, float alpha, MultiBufferSource bufferSource, PoseStack poseStack);
+
+	@Shadow
+	protected abstract void renderSun(float alpha, MultiBufferSource bufferSource, PoseStack poseStack);
+
 	@Redirect(method = "renderSunMoonAndStars", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionf;)V", ordinal = 1))
 	private void shimmer$renderSunMoonAndStars(PoseStack ms, Quaternionf quaternion) {
 		var player = Minecraft.getInstance().player;
@@ -29,6 +35,26 @@ public abstract class SkyRendererMixin {
 			ms.mulPose(Axis.XP.rotation(override.data.celestialRotation().get().pitchRad()));
 		} else {
 			ms.mulPose(quaternion);
+		}
+	}
+
+	@Redirect(method = "renderSunMoonAndStars", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SkyRenderer;renderSun(FLnet/minecraft/client/renderer/MultiBufferSource;Lcom/mojang/blaze3d/vertex/PoseStack;)V"))
+	private void shimmer$renderSun(SkyRenderer instance, float alpha, MultiBufferSource bufferSource, PoseStack poseStack) {
+		var player = Minecraft.getInstance().player;
+		var override = player != null ? player.shimmer$sessionData().skybox : null;
+
+		if (override == null || override.data.sun()) {
+			renderSun(alpha, bufferSource, poseStack);
+		}
+	}
+
+	@Redirect(method = "renderSunMoonAndStars", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SkyRenderer;renderMoon(IFLnet/minecraft/client/renderer/MultiBufferSource;Lcom/mojang/blaze3d/vertex/PoseStack;)V"))
+	private void shimmer$renderMoon(SkyRenderer instance, int phase, float alpha, MultiBufferSource bufferSource, PoseStack poseStack) {
+		var player = Minecraft.getInstance().player;
+		var override = player != null ? player.shimmer$sessionData().skybox : null;
+
+		if (override == null || override.data.moon()) {
+			renderMoon(phase, alpha, bufferSource, poseStack);
 		}
 	}
 

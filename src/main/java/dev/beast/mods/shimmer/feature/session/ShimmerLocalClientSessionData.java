@@ -149,7 +149,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 				var skyboxData = SkyboxData.REGISTRY.get(skyboxId);
 
 				if (skyboxData == null) {
-					skyboxData = new SkyboxData(skyboxId, Optional.empty(), 0F, 0F, Color.WHITE, false, Optional.empty(), Optional.empty());
+					skyboxData = new SkyboxData(skyboxId, Optional.empty(), 0F, 0F, Color.WHITE, false, true, true, Optional.empty(), Optional.empty());
 				}
 
 				skybox = new Skybox(skyboxData);

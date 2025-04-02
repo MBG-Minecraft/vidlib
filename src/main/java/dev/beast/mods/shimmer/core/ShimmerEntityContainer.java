@@ -203,7 +203,7 @@ public interface ShimmerEntityContainer extends ShimmerS2CPacketConsumer, Shimme
 	}
 
 	default void playTrackingSound(Entity entity, SoundData data, boolean looping) {
-		playTrackingSound(new FollowingEntityWorldPosition(Either.left(entity.getId()), EntityPositionType.EYES), WorldNumberVariables.EMPTY, data, looping);
+		playTrackingSound(new FollowingEntityWorldPosition(Either.left(entity.getId()), EntityPositionType.SOUND_SOURCE), WorldNumberVariables.EMPTY, data, looping);
 	}
 
 	default void physicsParticles(PhysicsParticleData data, long seed, List<PositionedBlock> blocks) {
