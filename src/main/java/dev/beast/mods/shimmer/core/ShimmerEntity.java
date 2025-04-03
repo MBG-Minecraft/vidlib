@@ -7,9 +7,11 @@ import dev.beast.mods.shimmer.feature.entity.EntityOverrideValue;
 import dev.beast.mods.shimmer.feature.entity.ForceEntityVelocityPayload;
 import dev.beast.mods.shimmer.feature.entity.S2CEntityEventPayload;
 import dev.beast.mods.shimmer.feature.location.Location;
+import dev.beast.mods.shimmer.feature.sound.PositionedSoundData;
 import dev.beast.mods.shimmer.feature.sound.SoundData;
 import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
 import dev.beast.mods.shimmer.math.Line;
+import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.math.worldposition.EntityPositionType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -26,7 +28,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
-public interface ShimmerEntity extends ShimmerEntityContainer {
+public interface ShimmerEntity extends ShimmerLevelContainer {
 	@Override
 	default Level shimmer$level() {
 		return ((Entity) this).level();
@@ -180,16 +182,20 @@ public interface ShimmerEntity extends ShimmerEntityContainer {
 		forceSetVelocity(((Entity) this).getDeltaMovement().add(velocity));
 	}
 
-	default void playTrackingSound(SoundData data, boolean looping) {
+	default void playSound(SoundData data, boolean looping, boolean stopImmediately) {
 		var e = (Entity) this;
-		e.level().playTrackingSound(e, data, looping);
+		e.level().playGlobalSound(new PositionedSoundData(data, e, looping, stopImmediately), WorldNumberVariables.EMPTY);
+	}
+
+	default void playSound(SoundData data) {
+		playSound(data, false, true);
 	}
 
 	default void s2c(EntityData data) {
 		shimmer$level().s2c(new S2CEntityEventPayload(data));
 	}
 
-	default void s2cReceived(EntityData event, Player player) {
+	default void s2cReceived(EntityData event, Player clientPlayer) {
 	}
 
 	default void c2s(EntityData data) {

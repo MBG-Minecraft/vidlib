@@ -3,6 +3,7 @@ package dev.beast.mods.shimmer.feature.multiverse;
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.ServerCommandHolder;
 import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
 
 public class MultiverseCommands {
 	@AutoRegister
@@ -11,7 +12,7 @@ public class MultiverseCommands {
 		.then(Commands.literal("reload")
 			.executes(ctx -> {
 				// ctx.getSource().getLevel().shimmer$reloadChunks();
-				ctx.getSource().getEntity().status("WIP");
+				ctx.getSource().sendFailure(Component.literal("WIP"));
 				return 1;
 			})
 		)

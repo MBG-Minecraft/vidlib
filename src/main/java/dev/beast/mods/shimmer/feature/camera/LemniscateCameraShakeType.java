@@ -1,4 +1,4 @@
-package dev.beast.mods.shimmer.feature.camerashake;
+package dev.beast.mods.shimmer.feature.camera;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

@@ -5,7 +5,8 @@ import com.mojang.blaze3d.shaders.FogShape;
 import dev.beast.mods.shimmer.GameEventHandler;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.core.ShimmerLocalPlayer;
-import dev.beast.mods.shimmer.feature.camerashake.CameraShakeInstance;
+import dev.beast.mods.shimmer.feature.camera.CameraShakeInstance;
+import dev.beast.mods.shimmer.feature.camera.ControlledCameraOverride;
 import dev.beast.mods.shimmer.feature.clock.ClockValue;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
 import dev.beast.mods.shimmer.feature.data.DataMap;
@@ -16,6 +17,7 @@ import dev.beast.mods.shimmer.feature.fade.ScreenFadeInstance;
 import dev.beast.mods.shimmer.feature.input.PlayerInput;
 import dev.beast.mods.shimmer.feature.input.PlayerInputChanged;
 import dev.beast.mods.shimmer.feature.input.SyncPlayerInputToServer;
+import dev.beast.mods.shimmer.feature.misc.CameraOverride;
 import dev.beast.mods.shimmer.feature.misc.MiscShimmerClientUtils;
 import dev.beast.mods.shimmer.feature.skybox.Skybox;
 import dev.beast.mods.shimmer.feature.skybox.SkyboxData;
@@ -87,7 +89,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	public Skybox skybox;
 	public Map<ZoneShape, VoxelShapeBox> cachedZoneShapes;
 	public List<PlayerInfo> originalListedPlayers;
-	public ClientCutscene cutscene;
+	public CameraOverride cameraOverride;
 	public ScreenFadeInstance screenFade;
 
 	public ShimmerLocalClientSessionData(Minecraft mc, UUID uuid, ClientPacketListener connection) {
@@ -211,8 +213,12 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 			scheduledTaskHandler.tick();
 		}
 
-		if (cutscene != null && cutscene.tick()) {
+		if (cameraOverride instanceof ClientCutscene cutscene && cutscene.tick()) {
 			mc.stopCutscene();
+		}
+
+		if (cameraOverride instanceof ControlledCameraOverride c && c.tick()) {
+			cameraOverride = null;
 		}
 
 		if (screenFade != null && screenFade.tick()) {

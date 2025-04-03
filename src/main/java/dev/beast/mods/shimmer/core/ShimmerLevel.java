@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public interface ShimmerLevel extends ShimmerEntityContainer, ShimmerMinecraftEnvironmentDataHolder {
+public interface ShimmerLevel extends ShimmerPlayerContainer, ShimmerMinecraftEnvironmentDataHolder {
 	@Override
 	default Level shimmer$level() {
 		return (Level) this;

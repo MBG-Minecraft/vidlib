@@ -1,13 +1,11 @@
 package dev.beast.mods.shimmer.feature.cutscene;
 
 import dev.beast.mods.shimmer.feature.misc.CameraOverride;
-import dev.beast.mods.shimmer.feature.sound.TrackingSound;
 import dev.beast.mods.shimmer.math.KMath;
 import dev.beast.mods.shimmer.math.Rotation;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.phys.Vec3;
@@ -119,15 +117,9 @@ public class ClientCutscene implements CameraOverride {
 
 				if (!step.sounds.isEmpty()) {
 					for (var sound : step.sounds) {
-						if (sound.position().isPresent()) {
-							var instance = new TrackingSound(mc.level, sound.position().get(), variables, sound.data(), sound.looping());
-							playingSounds.add(instance);
-							mc.getSoundManager().play(instance);
-						} else {
-							var instance = SimpleSoundInstance.forUI(sound.data().sound().value(), sound.data().pitch(), sound.data().volume());
-							playingSounds.add(instance);
-							mc.getSoundManager().play(instance);
-						}
+						var instance = mc.createGlobalSound(sound, variables);
+						playingSounds.add(instance);
+						mc.getSoundManager().play(instance);
 					}
 				}
 			}

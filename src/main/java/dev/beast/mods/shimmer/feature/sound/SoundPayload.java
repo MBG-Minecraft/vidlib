@@ -2,19 +2,16 @@ package dev.beast.mods.shimmer.feature.sound;
 
 import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
-import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketPayload;
 import dev.beast.mods.shimmer.feature.net.ShimmerPacketType;
 import dev.beast.mods.shimmer.feature.net.ShimmerPayloadContext;
-import net.minecraft.world.phys.Vec3;
+import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 
-import java.util.Optional;
-
-public record SoundPayload(Optional<Vec3> pos, SoundData data) implements ShimmerPacketPayload {
+public record SoundPayload(PositionedSoundData data, WorldNumberVariables variables) implements ShimmerPacketPayload {
 	@AutoPacket
 	public static final ShimmerPacketType<SoundPayload> TYPE = ShimmerPacketType.internal("sound", CompositeStreamCodec.of(
-		ShimmerStreamCodecs.VEC_3.optional(), SoundPayload::pos,
-		SoundData.STREAM_CODEC, SoundPayload::data,
+		PositionedSoundData.STREAM_CODEC, SoundPayload::data,
+		WorldNumberVariables.STREAM_CODEC, SoundPayload::variables,
 		SoundPayload::new
 	));
 
@@ -25,6 +22,6 @@ public record SoundPayload(Optional<Vec3> pos, SoundData data) implements Shimme
 
 	@Override
 	public void handle(ShimmerPayloadContext ctx) {
-		ctx.level().playSound(pos, data);
+		ctx.level().playGlobalSound(data, variables);
 	}
 }

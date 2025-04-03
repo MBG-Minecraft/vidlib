@@ -1,12 +1,12 @@
 package dev.beast.mods.shimmer.core;
 
-import com.mojang.datafixers.util.Either;
 import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
 import dev.beast.mods.shimmer.feature.bulk.RedrawChunkSectionsPayload;
-import dev.beast.mods.shimmer.feature.camerashake.CameraShake;
-import dev.beast.mods.shimmer.feature.camerashake.ShakeCameraAtPositionPayload;
-import dev.beast.mods.shimmer.feature.camerashake.ShakeCameraPayload;
-import dev.beast.mods.shimmer.feature.camerashake.StopCameraShakingPayload;
+import dev.beast.mods.shimmer.feature.camera.CameraShake;
+import dev.beast.mods.shimmer.feature.camera.SetCameraModePayload;
+import dev.beast.mods.shimmer.feature.camera.ShakeCameraAtPositionPayload;
+import dev.beast.mods.shimmer.feature.camera.ShakeCameraPayload;
+import dev.beast.mods.shimmer.feature.camera.StopCameraShakingPayload;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.cutscene.PlayCutscenePayload;
 import dev.beast.mods.shimmer.feature.cutscene.StopCutscenePayload;
@@ -26,14 +26,12 @@ import dev.beast.mods.shimmer.feature.particle.WindData;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticlesIdPayload;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticlesPayload;
+import dev.beast.mods.shimmer.feature.sound.PositionedSoundData;
 import dev.beast.mods.shimmer.feature.sound.SoundData;
 import dev.beast.mods.shimmer.feature.sound.SoundPayload;
-import dev.beast.mods.shimmer.feature.sound.TrackingSoundPayload;
 import dev.beast.mods.shimmer.feature.vote.StartNumberVotingPayload;
 import dev.beast.mods.shimmer.feature.vote.StartYesNoVotingPayload;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
-import dev.beast.mods.shimmer.math.worldposition.EntityPositionType;
-import dev.beast.mods.shimmer.math.worldposition.FollowingEntityWorldPosition;
 import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.LongList;
@@ -45,16 +43,14 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-public interface ShimmerEntityContainer extends ShimmerS2CPacketConsumer, ShimmerC2SPacketConsumer {
+public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, ShimmerC2SPacketConsumer {
 	default List<? extends Player> shimmer$getS2CPlayers() {
 		return List.of();
 	}
@@ -139,6 +135,14 @@ public interface ShimmerEntityContainer extends ShimmerS2CPacketConsumer, Shimme
 		}
 	}
 
+	default void setCameraMode(int mode) {
+		if (shimmer$isClient()) {
+			shimmer$getEnvironment().setCameraMode(mode);
+		} else {
+			s2c(new SetCameraModePayload(mode));
+		}
+	}
+
 	default void setPostEffect(ResourceLocation id) {
 		if (shimmer$isClient()) {
 			shimmer$getEnvironment().setPostEffect(id);
@@ -187,28 +191,20 @@ public interface ShimmerEntityContainer extends ShimmerS2CPacketConsumer, Shimme
 		}
 	}
 
-	default void playSound(Optional<Vec3> pos, SoundData sound) {
+	default void playGlobalSound(PositionedSoundData data, WorldNumberVariables variables) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().playSound(pos, sound);
+			shimmer$getEnvironment().playGlobalSound(data, variables);
 		} else {
-			s2c(new SoundPayload(pos, sound));
+			s2c(new SoundPayload(data, variables));
 		}
 	}
 
-	default void playSound(Vec3 pos, SoundData sound) {
-		playSound(Optional.of(pos), sound);
+	default void playGlobalSound(Vec3 pos, SoundData sound) {
+		playGlobalSound(new PositionedSoundData(sound, WorldPosition.fixed(pos), false, false), WorldNumberVariables.EMPTY);
 	}
 
-	default void playTrackingSound(WorldPosition position, WorldNumberVariables variables, SoundData data, boolean looping) {
-		if (shimmer$isClient()) {
-			shimmer$getEnvironment().playTrackingSound(position, variables, data, looping);
-		} else {
-			s2c(new TrackingSoundPayload(position, variables, data, looping));
-		}
-	}
-
-	default void playTrackingSound(Entity entity, SoundData data, boolean looping) {
-		playTrackingSound(new FollowingEntityWorldPosition(Either.left(entity.getId()), EntityPositionType.SOUND_SOURCE), WorldNumberVariables.EMPTY, data, looping);
+	default void playGlobalSound(SoundData sound) {
+		playGlobalSound(new PositionedSoundData(sound), WorldNumberVariables.EMPTY);
 	}
 
 	default void physicsParticles(PhysicsParticleData data, long seed, List<PositionedBlock> blocks) {

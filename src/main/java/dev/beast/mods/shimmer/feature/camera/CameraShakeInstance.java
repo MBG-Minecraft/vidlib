@@ -1,4 +1,4 @@
-package dev.beast.mods.shimmer.feature.camerashake;
+package dev.beast.mods.shimmer.feature.camera;
 
 public class CameraShakeInstance {
 	public final CameraShake shake;

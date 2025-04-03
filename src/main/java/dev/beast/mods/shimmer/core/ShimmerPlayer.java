@@ -17,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Set;
 
-public interface ShimmerPlayer extends ShimmerLivingEntity {
+public interface ShimmerPlayer extends ShimmerLivingEntity, ShimmerPlayerContainer {
 	default ShimmerSessionData shimmer$sessionData() {
 		throw new NoMixinException(this);
 	}

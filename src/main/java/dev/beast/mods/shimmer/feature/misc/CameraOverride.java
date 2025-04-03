@@ -10,8 +10,8 @@ public interface CameraOverride {
 	static CameraOverride get(Minecraft mc) {
 		if (mc.screen != null && mc.screen.overrideCamera()) {
 			return mc.screen;
-		} else if (mc.player != null && mc.player.shimmer$sessionData().cutscene != null) {
-			return mc.player.shimmer$sessionData().cutscene;
+		} else if (mc.player != null && mc.player.shimmer$sessionData().cameraOverride != null) {
+			return mc.player.shimmer$sessionData().cameraOverride;
 		} else {
 			return null;
 		}

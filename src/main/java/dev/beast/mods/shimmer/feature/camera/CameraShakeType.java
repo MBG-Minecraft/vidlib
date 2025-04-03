@@ -1,4 +1,4 @@
-package dev.beast.mods.shimmer.feature.camerashake;
+package dev.beast.mods.shimmer.feature.camera;
 
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.math.Vec2d;

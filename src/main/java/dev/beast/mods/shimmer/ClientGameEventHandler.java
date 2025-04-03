@@ -7,6 +7,7 @@ import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.ClientCommandHolder;
 import dev.beast.mods.shimmer.feature.clock.Clock;
 import dev.beast.mods.shimmer.feature.clock.ClockRenderer;
+import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
 import dev.beast.mods.shimmer.feature.icon.renderer.IconRenderer;
 import dev.beast.mods.shimmer.feature.item.ShimmerTool;
 import dev.beast.mods.shimmer.feature.misc.CameraOverride;
@@ -171,9 +172,7 @@ public class ClientGameEventHandler {
 				}
 			}
 
-			var cc = session.cutscene;
-
-			if (cc != null) {
+			if (session.cameraOverride instanceof ClientCutscene cc) {
 				for (var task : cc.steps) {
 					int start = task.resolvedStart;
 					int length = task.resolvedLength;

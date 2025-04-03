@@ -1,8 +1,10 @@
 package dev.beast.mods.shimmer.core;
 
 import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
-import dev.beast.mods.shimmer.feature.camerashake.CameraShake;
-import dev.beast.mods.shimmer.feature.camerashake.CameraShakeInstance;
+import dev.beast.mods.shimmer.feature.camera.CameraShake;
+import dev.beast.mods.shimmer.feature.camera.CameraShakeInstance;
+import dev.beast.mods.shimmer.feature.camera.DetachedCamera;
+import dev.beast.mods.shimmer.feature.camera.FreeCamera;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
 import dev.beast.mods.shimmer.feature.cutscene.Cutscene;
 import dev.beast.mods.shimmer.feature.cutscene.CutsceneScreen;
@@ -19,14 +21,14 @@ import dev.beast.mods.shimmer.feature.particle.WindData;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleManager;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticles;
-import dev.beast.mods.shimmer.feature.sound.SoundData;
-import dev.beast.mods.shimmer.feature.sound.TrackingSound;
+import dev.beast.mods.shimmer.feature.sound.PositionedSoundData;
+import dev.beast.mods.shimmer.feature.sound.ShimmerSoundInstance;
 import dev.beast.mods.shimmer.feature.vote.NumberVotingScreen;
 import dev.beast.mods.shimmer.feature.vote.YesNoVotingScreen;
+import dev.beast.mods.shimmer.math.Rotation;
 import dev.beast.mods.shimmer.math.Vec2d;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
-import dev.beast.mods.shimmer.math.worldposition.WorldPosition;
 import dev.beast.mods.shimmer.util.Empty;
 import dev.beast.mods.shimmer.util.PauseType;
 import dev.beast.mods.shimmer.util.ScheduledTask;
@@ -54,7 +56,6 @@ import org.joml.Vector4f;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 @SuppressWarnings("resource")
@@ -194,7 +195,7 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 
 			var overrideCamera = !player.isReplayCamera();
 			var inst = new ClientCutscene(shimmer$self(), overrideCamera, cutscene, variables, player::getEyePosition);
-			player.shimmer$sessionData().cutscene = inst;
+			player.shimmer$sessionData().cameraOverride = inst;
 
 			if (overrideCamera && !cutscene.allowMovement) {
 				shimmer$self().setScreen(new CutsceneScreen(inst, shimmer$self().screen));
@@ -208,10 +209,11 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 	default void stopCutscene() {
 		var data = shimmer$self().player.shimmer$sessionData();
 
-		if (data.cutscene != null) {
-			data.cutscene.stopped();
-			data.cutscene = null;
+		if (data.cameraOverride instanceof ClientCutscene cc) {
+			cc.stopped();
 		}
+
+		data.cameraOverride = null;
 
 		if (shimmer$self().screen instanceof CutsceneScreen screen) {
 			shimmer$self().setScreen(screen.previousScreen);
@@ -241,6 +243,35 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 	@Override
 	default void stopCameraShaking() {
 		shimmer$self().player.shimmer$sessionData().cameraShakeInstances.clear();
+	}
+
+	@Override
+	default void setCameraMode(int mode) {
+		var player = shimmer$self().player;
+
+		var session = player.shimmer$sessionData();
+
+		if (session.cameraOverride instanceof ClientCutscene) {
+			stopCutscene();
+		}
+
+		switch (mode) {
+			case 1 -> {
+				if (session.cameraOverride instanceof FreeCamera c) {
+					session.cameraOverride = new DetachedCamera(c.position, c.rotation);
+				} else {
+					session.cameraOverride = new DetachedCamera(player.getEyePosition(), Rotation.of(player, 1F));
+				}
+			}
+			case 2 -> {
+				if (session.cameraOverride instanceof DetachedCamera c) {
+					session.cameraOverride = new FreeCamera(c.position(), c.rotation());
+				} else {
+					session.cameraOverride = new FreeCamera(player.getEyePosition(), Rotation.of(player, 1F));
+				}
+			}
+			default -> stopCutscene();
+		}
 	}
 
 	@Override
@@ -296,21 +327,18 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 	}
 
 	@Override
-	default void playSound(Optional<Vec3> pos, SoundData sound) {
-		var mc = shimmer$self();
-		var p = pos.orElse(null);
-		SoundInstance instance;
-
-		if (p != null) {
-			mc.getSoundManager().play(new SimpleSoundInstance(sound.sound().value(), sound.source(), sound.volume(), sound.pitch(), shimmer$level().random, p.x, p.y, p.z));
-		} else {
-			mc.getSoundManager().play(SimpleSoundInstance.forUI(sound.sound().value(), sound.pitch(), sound.volume()));
-		}
+	default void playGlobalSound(PositionedSoundData data, WorldNumberVariables variables) {
+		shimmer$self().getSoundManager().play(createGlobalSound(data, variables));
 	}
 
-	@Override
-	default void playTrackingSound(WorldPosition position, WorldNumberVariables variables, SoundData data, boolean looping) {
-		shimmer$self().getSoundManager().play(new TrackingSound(shimmer$level(), position, variables, data, looping));
+	default SoundInstance createGlobalSound(PositionedSoundData data, WorldNumberVariables variables) {
+		var mc = shimmer$self();
+
+		if (data.position().isPresent()) {
+			return new ShimmerSoundInstance(mc.level, data, variables);
+		} else {
+			return SimpleSoundInstance.forUI(data.data().sound().value(), data.data().pitch(), data.data().volume());
+		}
 	}
 
 	@Override

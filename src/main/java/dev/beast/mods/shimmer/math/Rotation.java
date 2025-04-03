@@ -10,7 +10,9 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -107,6 +109,10 @@ public record Rotation(float yaw, float pitch, float roll, Type type) {
 
 	public static Rotation rad(float yaw) {
 		return yaw == 0F ? NONE : new Rotation(yaw, 0F, 0F, Type.RAD);
+	}
+
+	public static Rotation of(@Nullable Entity entity, float delta) {
+		return entity == null ? NONE : deg(entity.getViewYRot(delta), entity.getViewXRot(delta));
 	}
 
 	public static Rotation compute(Vec3 source, Vec3 target, float roll) {

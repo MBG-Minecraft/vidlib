@@ -9,7 +9,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
-public interface ShimmerMinecraftEnvironment extends ShimmerEntityContainer, ShimmerMinecraftEnvironmentDataHolder {
+public interface ShimmerMinecraftEnvironment extends ShimmerPlayerContainer, ShimmerMinecraftEnvironmentDataHolder {
 	@Override
 	default ShimmerMinecraftEnvironment shimmer$getEnvironment() {
 		return this;
