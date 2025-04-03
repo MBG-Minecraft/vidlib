@@ -98,6 +98,6 @@ public class MiscShimmerClientUtils {
 	}
 
 	public static float outlineSize(Minecraft mc) {
-		return Math.max(1F, Mth.ceil((float) mc.getWindow().getWidth() / 1920F));
+		return Math.max(0.5F, Mth.ceil(mc.getWindow().getWidth() * 1920F * ShimmerConfig.glowLineThickness));
 	}
 }

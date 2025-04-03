@@ -7,6 +7,7 @@ public class ShimmerClientParticles {
 		event.registerSpecial(ShimmerParticles.CUBE.get(), CubeParticle::new);
 		event.registerSpecial(ShimmerParticles.LINE.get(), LineParticle::new);
 		event.registerSpecial(ShimmerParticles.TEXT.get(), TextParticle::new);
+		event.registerSpecial(ShimmerParticles.ITEM.get(), ItemParticle::new);
 		event.registerSpriteSet(ShimmerParticles.BURN_SMOKE.get(), BurnSmokeParticle::create);
 		event.registerSpriteSet(ShimmerParticles.SPARK.get(), SparkParticle::create);
 		event.registerSpriteSet(ShimmerParticles.WIND.get(), WindParticle::create);

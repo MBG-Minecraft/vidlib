@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.core;
 
+import com.mojang.datafixers.util.Pair;
 import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
 import dev.beast.mods.shimmer.feature.bulk.RedrawChunkSectionsPayload;
 import dev.beast.mods.shimmer.feature.camera.CameraShake;
@@ -16,14 +17,19 @@ import dev.beast.mods.shimmer.feature.misc.CloseScreenPayload;
 import dev.beast.mods.shimmer.feature.misc.SetPostEffectPayload;
 import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
 import dev.beast.mods.shimmer.feature.particle.FireData;
+import dev.beast.mods.shimmer.feature.particle.ItemParticleOptions;
+import dev.beast.mods.shimmer.feature.particle.LineParticleOptions;
 import dev.beast.mods.shimmer.feature.particle.RemoveAllParticlesPayload;
 import dev.beast.mods.shimmer.feature.particle.SpawnCubeParticlesPayload;
 import dev.beast.mods.shimmer.feature.particle.SpawnFireParticlesPayload;
+import dev.beast.mods.shimmer.feature.particle.SpawnItemParticlePayload;
+import dev.beast.mods.shimmer.feature.particle.SpawnLineParticlesPayload;
 import dev.beast.mods.shimmer.feature.particle.SpawnTextParticlePayload;
 import dev.beast.mods.shimmer.feature.particle.SpawnWindParticlesPayload;
 import dev.beast.mods.shimmer.feature.particle.TextParticleOptions;
 import dev.beast.mods.shimmer.feature.particle.WindData;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
+import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticlesIdData;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticlesIdPayload;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticlesPayload;
 import dev.beast.mods.shimmer.feature.sound.PositionedSoundData;
@@ -44,6 +50,7 @@ import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -215,12 +222,16 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 		}
 	}
 
-	default void physicsParticles(ResourceLocation id, long seed, List<PositionedBlock> blocks) {
+	default void physicsParticles(PhysicsParticlesIdData data) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().physicsParticles(id, seed, blocks);
-		} else if (!blocks.isEmpty()) {
-			s2c(new PhysicsParticlesIdPayload(id, seed, blocks));
+			shimmer$getEnvironment().physicsParticles(data);
+		} else if (!data.blocks().isEmpty()) {
+			s2c(new PhysicsParticlesIdPayload(data));
 		}
+	}
+
+	default void physicsParticles(ResourceLocation id, long seed, List<PositionedBlock> blocks) {
+		physicsParticles(new PhysicsParticlesIdData(id, seed, blocks));
 	}
 
 	default void physicsParticles(PhysicsParticleData data, List<PositionedBlock> blocks) {
@@ -243,12 +254,36 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 		cubeParticles(Map.of(options, blocks));
 	}
 
+	default void lineParticles(Map<LineParticleOptions, List<AABB>> map) {
+		if (shimmer$isClient()) {
+			shimmer$getEnvironment().lineParticles(map);
+		} else {
+			s2c(new SpawnLineParticlesPayload(map));
+		}
+	}
+
+	default void lineParticles(LineParticleOptions options, List<AABB> blocks) {
+		lineParticles(Map.of(options, blocks));
+	}
+
 	default void textParticles(TextParticleOptions options, List<Vec3> positions) {
 		if (shimmer$isClient()) {
 			shimmer$getEnvironment().textParticles(options, positions);
 		} else {
 			s2c(new SpawnTextParticlePayload(options, positions));
 		}
+	}
+
+	default void itemParticles(ItemParticleOptions options, List<Pair<Vec3, Vec3>> positions) {
+		if (shimmer$isClient()) {
+			shimmer$getEnvironment().itemParticles(options, positions);
+		} else {
+			s2c(new SpawnItemParticlePayload(options, positions));
+		}
+	}
+
+	default void itemParticles(ItemParticleOptions options, Vec3 pos, Vec3 vel) {
+		itemParticles(options, List.of(Pair.of(pos, vel)));
 	}
 
 	default void windParticles(RandomSource random, WindData data) {

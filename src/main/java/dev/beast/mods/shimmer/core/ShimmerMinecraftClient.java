@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.core;
 
+import com.mojang.datafixers.util.Pair;
 import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
 import dev.beast.mods.shimmer.feature.camera.CameraShake;
 import dev.beast.mods.shimmer.feature.camera.CameraShakeInstance;
@@ -16,11 +17,14 @@ import dev.beast.mods.shimmer.feature.fade.Fade;
 import dev.beast.mods.shimmer.feature.fade.ScreenFadeInstance;
 import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
 import dev.beast.mods.shimmer.feature.particle.FireData;
+import dev.beast.mods.shimmer.feature.particle.ItemParticleOptions;
+import dev.beast.mods.shimmer.feature.particle.LineParticleOptions;
 import dev.beast.mods.shimmer.feature.particle.TextParticleOptions;
 import dev.beast.mods.shimmer.feature.particle.WindData;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleManager;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticles;
+import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticlesIdData;
 import dev.beast.mods.shimmer.feature.sound.PositionedSoundData;
 import dev.beast.mods.shimmer.feature.sound.ShimmerSoundInstance;
 import dev.beast.mods.shimmer.feature.vote.NumberVotingScreen;
@@ -48,6 +52,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.ApiStatus;
@@ -347,7 +352,7 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 			return;
 		}
 
-		var particles = new PhysicsParticles(data, shimmer$level(), shimmer$level().getGameTime(), seed);
+		var particles = new PhysicsParticles(data, shimmer$level(), shimmer$level().getGameTime(), seed == 0L ? shimmer$self().level.getRandom().nextLong() : seed);
 
 		for (var block : blocks) {
 			particles.at = block.pos();
@@ -357,13 +362,11 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 	}
 
 	@Override
-	default void physicsParticles(ResourceLocation id, long seed, List<PositionedBlock> blocks) {
-		if (blocks.isEmpty()) {
-			return;
+	default void physicsParticles(PhysicsParticlesIdData data) {
+		if (!data.blocks().isEmpty()) {
+			var p = PhysicsParticleData.REGISTRY.get(data.id());
+			physicsParticles(p == null ? PhysicsParticleData.DEFAULT : p, data.seed(), data.blocks());
 		}
-
-		var data = PhysicsParticleData.REGISTRY.get(id);
-		physicsParticles(data == null ? PhysicsParticleData.DEFAULT : data, seed, blocks);
 	}
 
 	@Override
@@ -376,9 +379,27 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 	}
 
 	@Override
+	default void lineParticles(Map<LineParticleOptions, List<AABB>> map) {
+		for (var entry : map.entrySet()) {
+			for (var box : entry.getValue()) {
+				shimmer$level().addParticle(entry.getKey(), box.minX, box.minY, box.minZ, box.maxX - box.minX, box.maxY - box.minY, box.maxZ - box.minZ);
+			}
+		}
+	}
+
+	@Override
 	default void textParticles(TextParticleOptions options, List<Vec3> positions) {
 		for (var pos : positions) {
 			shimmer$level().addParticle(options, pos.x, pos.y, pos.z, 0D, 0D, 0D);
+		}
+	}
+
+	@Override
+	default void itemParticles(ItemParticleOptions options, List<Pair<Vec3, Vec3>> positions) {
+		for (var pair : positions) {
+			var pos = pair.getFirst();
+			var vel = pair.getSecond();
+			shimmer$level().addParticle(options, pos.x, pos.y, pos.z, vel.x, vel.y, vel.z);
 		}
 	}
 

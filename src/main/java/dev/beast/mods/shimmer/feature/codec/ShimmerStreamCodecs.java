@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.feature.codec;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.datafixers.util.Unit;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.util.Empty;
@@ -306,5 +307,9 @@ public interface ShimmerStreamCodecs {
 
 	static <T> StreamCodec<ByteBuf, T> registry(Registry<T> registry) {
 		return ByteBufCodecs.VAR_INT.map(registry::byIdOrThrow, registry::getId);
+	}
+
+	static <B extends ByteBuf, L, R> StreamCodec<B, Pair<L, R>> pair(StreamCodec<? super B, L> left, StreamCodec<? super B, R> right) {
+		return StreamCodec.composite(left, Pair::getFirst, right, Pair::getSecond, Pair::of);
 	}
 }

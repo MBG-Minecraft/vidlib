@@ -16,4 +16,5 @@ public class ShimmerConfig {
 	public static int structureBlockRange = 200;
 	public static boolean renderSuspendedOverlay = false;
 	public static boolean debugS2CPackets = System.getenv().getOrDefault("SHIMMER_DEBUG_S2C_PACKETS", "0").equals("1");
+	public static float glowLineThickness = 0.75F;
 }

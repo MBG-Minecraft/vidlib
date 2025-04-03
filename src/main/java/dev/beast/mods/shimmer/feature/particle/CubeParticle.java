@@ -1,23 +1,18 @@
 package dev.beast.mods.shimmer.feature.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.beast.mods.shimmer.math.BoxRenderer;
 import dev.beast.mods.shimmer.math.KMath;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.MultiBufferSource;
 
-public class CubeParticle extends Particle {
-	private int prevAge;
+public class CubeParticle extends CustomParticle {
 	private final CubeParticleOptions options;
 
 	protected CubeParticle(CubeParticleOptions options, ClientLevel level, double x, double y, double z, double vx, double vy, double vz) {
-		super(level, x, y, z);
+		super(level, x, y, z, 0D, 0D, 0D);
 		this.options = options;
-		setSize(1F, 1F);
 		setLifetime(Math.abs(options.ttl()));
 	}
 
@@ -46,20 +41,5 @@ public class CubeParticle extends Particle {
 		if (options.color().alpha() > 0) {
 			BoxRenderer.renderDebugQuads(minX, minY, minZ, maxX, maxY, maxZ, ms, buffers, false, options.color().withAlpha(50).fadeOut(time, lifetime, 20F));
 		}
-	}
-
-	@Override
-	public void render(VertexConsumer buffer, Camera camera, float delta) {
-	}
-
-	@Override
-	public void tick() {
-		prevAge = age;
-		super.tick();
-	}
-
-	@Override
-	public ParticleRenderType getRenderType() {
-		return ParticleRenderType.CUSTOM;
 	}
 }

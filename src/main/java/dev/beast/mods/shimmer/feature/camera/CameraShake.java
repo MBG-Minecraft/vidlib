@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.feature.camera;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
@@ -14,6 +15,8 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.function.Function;
+
 @AutoInit
 public record CameraShake(
 	CameraShakeType type,
@@ -24,6 +27,16 @@ public record CameraShake(
 	EasingGroup end,
 	boolean motionBlur
 ) {
+	public static final CameraShake NONE = new CameraShake(
+		LemniscateCameraShakeType.DEFAULT.instance(),
+		0,
+		0F,
+		0F,
+		EasingGroup.LINEAR,
+		EasingGroup.LINEAR,
+		false
+	);
+
 	public static final CameraShake DEFAULT = new CameraShake(
 		LemniscateCameraShakeType.DEFAULT.instance(),
 		25,
@@ -34,7 +47,7 @@ public record CameraShake(
 		false
 	);
 
-	public static final Codec<CameraShake> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final Codec<CameraShake> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		CameraShakeType.REGISTRY.valueCodec().optionalFieldOf("type", DEFAULT.type).forGetter(CameraShake::type),
 		Codec.INT.optionalFieldOf("duration", DEFAULT.duration).forGetter(CameraShake::duration),
 		Codec.FLOAT.optionalFieldOf("speed", DEFAULT.speed).forGetter(CameraShake::speed),
@@ -43,6 +56,8 @@ public record CameraShake(
 		EasingGroup.CODEC.optionalFieldOf("end", DEFAULT.end).forGetter(CameraShake::end),
 		Codec.BOOL.optionalFieldOf("motion_blur", DEFAULT.motionBlur).forGetter(CameraShake::motionBlur)
 	).apply(instance, CameraShake::new));
+
+	public static final Codec<CameraShake> CODEC = Codec.either(Codec.BOOL, DIRECT_CODEC).xmap(either -> either.map(b -> b ? DEFAULT : NONE, Function.identity()), shake -> shake.equals(NONE) ? Either.left(false) : shake.equals(DEFAULT) ? Either.left(true) : Either.right(shake));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, CameraShake> STREAM_CODEC = CompositeStreamCodec.of(
 		CameraShakeType.REGISTRY.valueStreamCodec().optional(DEFAULT.type), CameraShake::type,
@@ -65,6 +80,18 @@ public record CameraShake(
 			duration,
 			speed,
 			intensity * intensityMod,
+			start,
+			end,
+			motionBlur
+		);
+	}
+
+	public CameraShake withSpeed(float speed) {
+		return new CameraShake(
+			type,
+			duration,
+			speed,
+			intensity,
 			start,
 			end,
 			motionBlur

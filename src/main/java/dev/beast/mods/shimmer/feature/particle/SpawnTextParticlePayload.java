@@ -11,7 +11,7 @@ import java.util.List;
 
 public record SpawnTextParticlePayload(TextParticleOptions options, List<Vec3> positions) implements ShimmerPacketPayload {
 	@AutoPacket
-	public static final ShimmerPacketType<SpawnTextParticlePayload> TYPE = ShimmerPacketType.internal("spawn_text_particle", CompositeStreamCodec.of(
+	public static final ShimmerPacketType<SpawnTextParticlePayload> TYPE = ShimmerPacketType.internal("spawn_text_particles", CompositeStreamCodec.of(
 		TextParticleOptions.STREAM_CODEC, SpawnTextParticlePayload::options,
 		Vec3.STREAM_CODEC.list(), SpawnTextParticlePayload::positions,
 		SpawnTextParticlePayload::new

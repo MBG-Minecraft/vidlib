@@ -1,27 +1,22 @@
 package dev.beast.mods.shimmer.feature.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.beast.mods.shimmer.math.KMath;
 import dev.beast.mods.shimmer.math.Vec3f;
 import dev.beast.mods.shimmer.util.ShimmerRenderTypes;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.MultiBufferSource;
 
-public class LineParticle extends Particle {
-	private int prevAge;
+public class LineParticle extends CustomParticle {
 	private final LineParticleOptions options;
 	private final Vec3f vector;
 
 	protected LineParticle(LineParticleOptions options, ClientLevel level, double x, double y, double z, double vx, double vy, double vz) {
-		super(level, x, y, z);
+		super(level, x, y, z, 0D, 0D, 0D);
 		this.options = options;
 		setLifetime(options.ttl());
 		vector = Vec3f.of(vx, vy, vz);
-		setSize(1F, 1F);
 	}
 
 	@Override
@@ -37,20 +32,5 @@ public class LineParticle extends Particle {
 		var buffer = buffers.getBuffer(ShimmerRenderTypes.DEBUG_LINES);
 		buffer.addVertex(m, rx, ry, rz).setColor(options.startColor().fadeOut(time, lifetime, 20F).argb());
 		buffer.addVertex(m, rx + vector.x(), ry + vector.y(), rz + vector.z()).setColor(options.endColor().fadeOut(time, lifetime, 20F).argb());
-	}
-
-	@Override
-	public void render(VertexConsumer buffer, Camera camera, float delta) {
-	}
-
-	@Override
-	public void tick() {
-		prevAge = age;
-		super.tick();
-	}
-
-	@Override
-	public ParticleRenderType getRenderType() {
-		return ParticleRenderType.CUSTOM;
 	}
 }
