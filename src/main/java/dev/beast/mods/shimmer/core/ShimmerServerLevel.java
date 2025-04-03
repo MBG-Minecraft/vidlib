@@ -4,7 +4,6 @@ import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModification;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationBundle;
 import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
-import dev.beast.mods.shimmer.feature.data.InternalServerData;
 import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
 import dev.beast.mods.shimmer.feature.prop.ServerPropList;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
@@ -109,6 +108,10 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 				}
 			}
 
+			if (!loaded.isEmpty()) {
+				Shimmer.LOGGER.info(loaded.size() + " zone loaded chunks");
+			}
+
 			for (var pos : loaded) {
 				var chunkPos = new ChunkPos(pos);
 				tickets.add(new Ticket<>(Zone.TICKET_TYPE, ChunkMap.FORCED_TICKET_LEVEL, chunkPos, false));
@@ -116,13 +119,17 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 		}
 
 		// /server-data set shimmer:anchor {areas:[{shape:[29647, 63, 79647, 30352, 63, 80352]}]}
-		var anchored = getServerData().get(InternalServerData.ANCHOR).shapes().get(level.dimension());
+		var anchored = getAnchor().shapes().get(level.dimension());
 
 		if (anchored != null) {
 			var loaded = new LongOpenHashSet();
 
 			for (var area : anchored) {
 				area.collectChunkPositions(loaded);
+			}
+
+			if (!loaded.isEmpty()) {
+				Shimmer.LOGGER.info(loaded.size() + " anchored chunks");
 			}
 
 			for (var pos : loaded) {

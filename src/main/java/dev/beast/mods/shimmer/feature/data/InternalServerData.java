@@ -17,7 +17,7 @@ public interface InternalServerData {
 		.save()
 		.build();
 
-	DataType<Anchor> ANCHOR = DataType.SERVER.internal("anchor", Anchor.KNOWN_CODEC, Anchor.DEFAULT)
+	DataType<Anchor> ANCHOR = DataType.SERVER.internal("anchor", Anchor.KNOWN_CODEC, Anchor.NONE)
 		.save()
 		.sync()
 		.onReceived((player, anchor) -> Anchor.client = anchor)

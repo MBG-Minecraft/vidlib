@@ -15,7 +15,7 @@ public class TextParticle extends CustomParticle {
 	private final TextParticleOptions options;
 
 	protected TextParticle(TextParticleOptions options, ClientLevel level, double x, double y, double z, double vx, double vy, double vz) {
-		super(level, x, y, z, 0D, 0D, 0D);
+		super(level, x, y, z);
 		this.options = options;
 		setLifetime(Math.abs(options.ttl()));
 	}

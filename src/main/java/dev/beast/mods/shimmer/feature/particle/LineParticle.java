@@ -13,7 +13,7 @@ public class LineParticle extends CustomParticle {
 	private final Vec3f vector;
 
 	protected LineParticle(LineParticleOptions options, ClientLevel level, double x, double y, double z, double vx, double vy, double vz) {
-		super(level, x, y, z, 0D, 0D, 0D);
+		super(level, x, y, z);
 		this.options = options;
 		setLifetime(options.ttl());
 		vector = Vec3f.of(vx, vy, vz);

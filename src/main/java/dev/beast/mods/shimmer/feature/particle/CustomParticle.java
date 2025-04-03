@@ -14,6 +14,11 @@ public class CustomParticle extends Particle {
 		setSize(1F, 1F);
 	}
 
+	public CustomParticle(ClientLevel level, double x, double y, double z) {
+		super(level, x, y, z);
+		setSize(1F, 1F);
+	}
+
 	@Override
 	public void render(VertexConsumer buffer, Camera camera, float delta) {
 	}

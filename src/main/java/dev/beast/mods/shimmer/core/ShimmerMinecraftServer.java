@@ -5,6 +5,7 @@ import dev.beast.mods.shimmer.feature.clock.ClockValue;
 import dev.beast.mods.shimmer.feature.clock.SyncClocksPayload;
 import dev.beast.mods.shimmer.feature.data.SyncServerDataPayload;
 import dev.beast.mods.shimmer.feature.net.S2CPacketBundleBuilder;
+import dev.beast.mods.shimmer.feature.zone.Anchor;
 import dev.beast.mods.shimmer.feature.zone.RemoveZonePayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
 import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
@@ -171,5 +172,14 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 		}
 
 		s2c(new RemoveZonePayload(uuid));
+	}
+
+	@Override
+	default void setAnchor(Anchor anchor) {
+		ShimmerMinecraftEnvironment.super.setAnchor(anchor);
+
+		for (var level : shimmer$self().getAllLevels()) {
+			level.shimmer$updateLoadedChunks();
+		}
 	}
 }
