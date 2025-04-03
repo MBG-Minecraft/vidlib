@@ -16,6 +16,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.neoforge.client.settings.KeyModifier;
@@ -97,6 +98,6 @@ public class MiscShimmerClientUtils {
 	}
 
 	public static float outlineSize(Minecraft mc) {
-		return Math.max(1F, (float) mc.getWindow().getWidth() * 2F / 1920F);
+		return Math.max(1F, Mth.ceil((float) mc.getWindow().getWidth() / 1920F));
 	}
 }

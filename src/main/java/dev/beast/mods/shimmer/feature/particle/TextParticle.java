@@ -22,7 +22,7 @@ public class TextParticle extends Particle {
 	protected TextParticle(TextParticleOptions options, ClientLevel level, double x, double y, double z, double vx, double vy, double vz) {
 		super(level, x, y, z);
 		this.options = options;
-		setLifetime(options.ttl());
+		setLifetime(Math.abs(options.ttl()));
 		vector = Vec3f.of(vx, vy, vz);
 		setSize(1F, 1F);
 	}
@@ -35,7 +35,7 @@ public class TextParticle extends Particle {
 			return;
 		}
 
-		var color = options.color().fadeOut(time, lifetime, 20F);
+		var color = options.ttl() < 0 ? options.color() : options.color().fadeOut(time, lifetime, 20F);
 
 		if (color.alpha() == 0) {
 			return;
@@ -48,7 +48,8 @@ public class TextParticle extends Particle {
 
 		ms.pushPose();
 		ms.translate(rx, ry, rz);
-		ms.scale(-0.025F, -0.025F, -0.025F);
+		float scale = 0.025F * options.scale();
+		ms.scale(-scale, -scale, -scale);
 		ms.mulPose(camera.rotation());
 		ms.mulPose(Axis.YP.rotationDegrees(180F));
 

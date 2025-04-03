@@ -1,0 +1,12 @@
+{
+	"parent": "block/cube",
+	"textures": {
+		"particle": "shimmer:block/money/top",
+		"down": "shimmer:block/money/bottom",
+		"up": "shimmer:block/money/top",
+		"north": "shimmer:block/money/side_ns",
+		"east": "shimmer:block/money/side_we",
+		"south": "shimmer:block/money/side_ns",
+		"west": "shimmer:block/money/side_we"
+	}
+}

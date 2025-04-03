@@ -1,4 +1,8 @@
 {
 	"key.categories.shimmer": "Shimmer",
-	"key.shimmer.freeze_tick": "Freeze Tick"
+	"key.shimmer.freeze_tick": "Freeze Tick",
+	"block.shimmer.money_block": "Money Block",
+	"block.shimmer.banded_money_block": "Banded Money Block",
+	"item.shimmer.money": "Money",
+	"item.shimmer.banded_money": "Banded Money"
 }
