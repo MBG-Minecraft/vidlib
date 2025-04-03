@@ -11,12 +11,15 @@ import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
 import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
 import dev.beast.mods.shimmer.feature.bulk.UndoableModification;
 import dev.beast.mods.shimmer.feature.data.DataMap;
+import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
+import dev.beast.mods.shimmer.feature.entity.filter.EntityTypeFilter;
 import dev.beast.mods.shimmer.feature.prop.PropList;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -154,5 +157,19 @@ public interface ShimmerLevel extends ShimmerPlayerContainer, ShimmerMinecraftEn
 		}
 
 		return List.copyOf(result.values());
+	}
+
+	default void discardAll(EntityFilter filter) {
+	}
+
+	default void discardAll(EntityType<?> type) {
+		discardAll(new EntityTypeFilter(type));
+	}
+
+	default void killAll(EntityFilter filter) {
+	}
+
+	default void killAll(EntityType<?> type) {
+		killAll(new EntityTypeFilter(type));
 	}
 }

@@ -95,4 +95,8 @@ public class MiscShimmerClientUtils {
 	public static int overrideRenderDistance(int original) {
 		return original;
 	}
+
+	public static float outlineSize(Minecraft mc) {
+		return Math.max(1F, (float) mc.getWindow().getWidth() * 2F / 1920F);
+	}
 }

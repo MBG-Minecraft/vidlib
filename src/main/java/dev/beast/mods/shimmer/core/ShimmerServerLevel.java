@@ -5,6 +5,7 @@ import dev.beast.mods.shimmer.feature.bulk.BulkLevelModification;
 import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationBundle;
 import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
 import dev.beast.mods.shimmer.feature.data.InternalServerData;
+import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
 import dev.beast.mods.shimmer.feature.prop.ServerPropList;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import dev.beast.mods.shimmer.feature.zone.Anchor;
@@ -136,6 +137,24 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 			}
 
 			Shimmer.LOGGER.info("Loaded " + tickets.size() + " tickets");
+		}
+	}
+
+	@Override
+	default void discardAll(EntityFilter filter) {
+		for (var entity : shimmer$level().getAllEntities()) {
+			if (filter.test(entity)) {
+				entity.discard();
+			}
+		}
+	}
+
+	@Override
+	default void killAll(EntityFilter filter) {
+		for (var entity : shimmer$level().getAllEntities()) {
+			if (filter.test(entity)) {
+				entity.kill(shimmer$level());
+			}
 		}
 	}
 }
