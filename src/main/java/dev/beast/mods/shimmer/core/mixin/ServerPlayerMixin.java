@@ -15,6 +15,10 @@ public abstract class ServerPlayerMixin implements ShimmerServerPlayer {
 
 	@Override
 	public ShimmerServerSessionData shimmer$sessionData() {
-		return ((ShimmerServerPacketListener) connection).shimmer$sessionData();
+		if (connection instanceof ShimmerServerPacketListener listener) {
+			return listener.shimmer$sessionData();
+		}
+
+		return null;
 	}
 }

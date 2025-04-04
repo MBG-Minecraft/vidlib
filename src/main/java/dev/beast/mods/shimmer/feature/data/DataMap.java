@@ -53,22 +53,6 @@ public class DataMap {
 		return (T) init(type).data;
 	}
 
-	@Nullable
-	@SuppressWarnings("unchecked")
-	public <T> T getOrNull(DataType<T> type) {
-		if (map == null) {
-			return null;
-		}
-
-		var value = map.get(type);
-
-		if (value == null) {
-			return null;
-		}
-
-		return (T) value.data;
-	}
-
 	public <T> void set(DataType<T> type, @Nullable T value) {
 		var v = init(type);
 		v.data = value;

@@ -15,4 +15,8 @@ public interface Empty {
 	EmptyCompoundTag COMPOUND_TAG = new EmptyCompoundTag();
 	Component COMPONENT = Component.empty();
 	CompletableFuture<?>[] COMPLETABLE_FUTURES = new CompletableFuture[0];
+
+	static boolean isEmpty(Component component) {
+		return component == null || component == COMPONENT || component.getString().isEmpty();
+	}
 }

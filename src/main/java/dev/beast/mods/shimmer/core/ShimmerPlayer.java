@@ -10,6 +10,7 @@ import dev.beast.mods.shimmer.feature.session.ShimmerSessionData;
 import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
 import dev.beast.mods.shimmer.feature.zone.ZoneRenderType;
 import dev.beast.mods.shimmer.math.Line;
+import dev.beast.mods.shimmer.util.Empty;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
@@ -22,6 +23,10 @@ public interface ShimmerPlayer extends ShimmerLivingEntity, ShimmerPlayerContain
 		throw new NoMixinException(this);
 	}
 
+	default void shimmer$sessionData(ShimmerSessionData data) {
+		throw new NoMixinException(this);
+	}
+
 	@Override
 	default boolean shimmer$isCreative() {
 		return ((Player) this).isCreative();
@@ -29,11 +34,6 @@ public interface ShimmerPlayer extends ShimmerLivingEntity, ShimmerPlayerContain
 
 	default <T> T get(DataType<T> type) {
 		return shimmer$sessionData().dataMap.get(type);
-	}
-
-	@Nullable
-	default <T> T getOrNull(DataType<T> type) {
-		return shimmer$sessionData().dataMap.getOrNull(type);
 	}
 
 	default <T> void set(DataType<T> type, T value) {
@@ -54,7 +54,7 @@ public interface ShimmerPlayer extends ShimmerLivingEntity, ShimmerPlayerContain
 	}
 
 	default void setNickname(Component nickname) {
-		set(InternalPlayerData.NICKNAME, nickname);
+		set(InternalPlayerData.NICKNAME, Empty.isEmpty(nickname) ? Empty.COMPONENT : nickname);
 	}
 
 	@Nullable

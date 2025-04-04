@@ -19,7 +19,7 @@ public class SectionStorageMixin {
 
 	@Inject(method = "writeChunk(Lnet/minecraft/world/level/ChunkPos;)V", at = @At("HEAD"), cancellable = true)
 	private void shimmer$writeChunk(ChunkPos pos, CallbackInfo ci) {
-		if (levelHeightAccessor instanceof ShimmerServerLevel level && level.shimmer$cancelWrite()) {
+		if (levelHeightAccessor instanceof ShimmerServerLevel level && level.isImmutableWorld()) {
 			ci.cancel();
 		}
 	}

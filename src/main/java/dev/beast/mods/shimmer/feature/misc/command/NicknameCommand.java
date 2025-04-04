@@ -31,7 +31,7 @@ public interface NicknameCommand {
 			player.setNickname(name);
 			player.refreshDisplayName();
 			player.refreshTabListName();
-			player.level().s2c(new RefreshNamePayload(player.getUUID()));
+			player.level().s2c(new RefreshNamePayload(player.getUUID(), player.getNickname()));
 		}
 
 		return 1;

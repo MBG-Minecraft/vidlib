@@ -17,16 +17,19 @@ public class ServerGamePacketListenerImplMixin implements ShimmerServerPacketLis
 
 	@Override
 	public ShimmerServerSessionData shimmer$sessionData() {
-		if (shimmer$sessionData == null) {
-			shimmer$sessionData = new ShimmerServerSessionData((ServerGamePacketListenerImpl) (Object) this);
-		}
-
 		return shimmer$sessionData;
+	}
+
+	@Override
+	public void shimmer$sessionData(ShimmerServerSessionData data) {
+		shimmer$sessionData = data;
 	}
 
 	@Inject(method = "onDisconnect", at = @At("RETURN"))
 	private void shimmer$close(CallbackInfo ci) {
-		shimmer$sessionData().closed();
+		if (shimmer$sessionData != null) {
+			shimmer$sessionData.closed();
+		}
 	}
 
 	/**

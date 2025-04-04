@@ -35,7 +35,7 @@ public abstract class ClientLevelMixin implements ShimmerClientLevel {
 	@Override
 	public ClientPropList getProps() {
 		if (shimmer$props == null) {
-			shimmer$props = new ClientPropList(shimmer$level());
+			shimmer$props = new ClientPropList(this.shimmer$level());
 		}
 
 		return shimmer$props;

@@ -43,7 +43,11 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements S
 
 	@Override
 	public ShimmerLocalClientSessionData shimmer$sessionData() {
-		return ((ShimmerClientPacketListener) connection).shimmer$sessionData();
+		if (connection instanceof ShimmerClientPacketListener listener) {
+			return listener.shimmer$sessionData();
+		}
+
+		return null;
 	}
 
 	@Override

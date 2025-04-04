@@ -1,7 +1,6 @@
 package dev.beast.mods.shimmer.util.registry;
 
 import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -12,7 +11,6 @@ import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.util.Side;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -37,7 +35,6 @@ public class ShimmerRegistry<V> extends BasicShimmerRegistry<ResourceLocation, V
 	public final boolean preferInternal;
 	public final Codec<ResourceLocation> keyCodec;
 	public final StreamCodec<ByteBuf, ResourceLocation> keyStreamCodec;
-	public final SuggestionProvider<CommandSourceStack> suggestionProvider;
 	public final Codec<V> valueCodec;
 	public final StreamCodec<ByteBuf, V> valueStreamCodec;
 
@@ -47,7 +44,6 @@ public class ShimmerRegistry<V> extends BasicShimmerRegistry<ResourceLocation, V
 		this.preferInternal = preferInternal;
 		this.keyCodec = preferInternal ? ShimmerCodecs.SHIMMER_ID : ShimmerCodecs.VIDEO_ID;
 		this.keyStreamCodec = preferInternal ? ShimmerStreamCodecs.SHIMMER_ID : ShimmerStreamCodecs.VIDEO_ID;
-		this.suggestionProvider = preferInternal ? ShimmerResourceLocationArgument.registerSuggestionProvider(id, this) : VideoResourceLocationArgument.registerSuggestionProvider(id, this);
 
 		this.valueCodec = keyCodec.flatXmap(id -> {
 			var value = get(id);

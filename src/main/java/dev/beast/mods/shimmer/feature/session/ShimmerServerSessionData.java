@@ -11,20 +11,17 @@ import dev.beast.mods.shimmer.util.registry.SyncRegistryPayload;
 import dev.beast.mods.shimmer.util.registry.SyncedRegistry;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.storage.LevelResource;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class ShimmerServerSessionData extends ShimmerSessionData {
-	public final ServerGamePacketListenerImpl connection;
-
-	public ShimmerServerSessionData(ServerGamePacketListenerImpl connection) {
-		super(connection.player.getUUID());
-		this.connection = connection;
+	public ShimmerServerSessionData(UUID uuid) {
+		super(uuid);
 	}
 
 	public void shimmer$preTick(ServerPlayer player) {
@@ -42,6 +39,10 @@ public class ShimmerServerSessionData extends ShimmerSessionData {
 		tick++;
 	}
 
+	public void load(ServerPlayer player) {
+		dataMap.load(player.server, player.server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("shimmer").resolve(player.getUUID() + ".nbt"));
+	}
+
 	public void sync(S2CPacketBundleBuilder packets, ServerPlayer player, boolean login) {
 		var level = player.serverLevel();
 		packets.s2c(new ClientboundSetTimePacket(level.getGameTime(), level.getDayTime(), level.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)));
@@ -49,8 +50,6 @@ public class ShimmerServerSessionData extends ShimmerSessionData {
 		for (var reg : SyncedRegistry.ALL.values()) {
 			packets.s2c(new SyncRegistryPayload(reg, Map.copyOf(reg.registry().getMap())));
 		}
-
-		dataMap.load(player.server, player.server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("shimmer").resolve(player.getUUID() + ".nbt"));
 
 		if (login) {
 			player.refreshDisplayName();
@@ -63,7 +62,7 @@ public class ShimmerServerSessionData extends ShimmerSessionData {
 		dataMap.syncAll(packets, player, SyncPlayerDataPayload::new);
 
 		if (login) {
-			packets.s2c(new RefreshNamePayload(player.getUUID()));
+			packets.s2c(new RefreshNamePayload(player.getUUID(), player.getNickname()));
 		}
 
 		for (var p : player.server.getPlayerList().getPlayers()) {

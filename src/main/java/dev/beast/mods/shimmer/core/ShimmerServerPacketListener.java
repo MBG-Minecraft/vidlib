@@ -6,4 +6,8 @@ public interface ShimmerServerPacketListener {
 	default ShimmerServerSessionData shimmer$sessionData() {
 		throw new NoMixinException(this);
 	}
+
+	default void shimmer$sessionData(ShimmerServerSessionData data) {
+		throw new NoMixinException(this);
+	}
 }

@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import dev.beast.mods.shimmer.core.ShimmerPlayer;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.entity.EntityOverrideValue;
+import dev.beast.mods.shimmer.util.Empty;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
@@ -44,6 +45,15 @@ public abstract class PlayerMixin implements ShimmerPlayer {
 	@Overwrite
 	public void refreshDisplayName() {
 		displayname = null;
+	}
+
+	@Inject(method = "getName", at = @At("HEAD"), cancellable = true)
+	public void shimmer$getName(CallbackInfoReturnable<Component> cir) {
+		var nickname = getNickname();
+
+		if (!Empty.isEmpty(nickname)) {
+			cir.setReturnValue(nickname.copy());
+		}
 	}
 
 	@Inject(method = "canHarmPlayer", at = @At("RETURN"), cancellable = true)

@@ -3,7 +3,6 @@ package dev.beast.mods.shimmer.feature.zone;
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.ServerCommandHolder;
 import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
-import dev.beast.mods.shimmer.math.AAIBB;
 import dev.beast.mods.shimmer.math.Color;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -50,7 +49,7 @@ public interface AnchorCommands {
 	private static int set(CommandSourceStack source, BlockPos start, BlockPos end) {
 		var list = new ArrayList<>(source.getServer().getAnchor().areas());
 		list.removeIf(area -> area.dimension() == source.getLevel().dimension());
-		list.add(new Anchor.Area(source.getLevel().dimension(), new AAIBB(start, end)));
+		list.add(new Area(source.getLevel().dimension(), start, end));
 		source.getServer().setAnchor(Anchor.create(list));
 		source.getLevel().shimmer$updateLoadedChunks();
 		return 1;

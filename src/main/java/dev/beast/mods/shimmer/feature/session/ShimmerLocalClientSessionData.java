@@ -183,10 +183,6 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 		refreshZones(level.dimension());
 	}
 
-	@Override
-	public void closed() {
-	}
-
 	@ApiStatus.Internal
 	public void preTick(ClientLevel level, LocalPlayer player, Window window, PauseType paused) {
 		filteredZones.tick(level);

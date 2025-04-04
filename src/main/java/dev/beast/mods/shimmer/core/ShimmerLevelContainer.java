@@ -8,7 +8,7 @@ public interface ShimmerLevelContainer extends ShimmerEnvironmentContainer {
 	}
 
 	@Override
-	default ShimmerMinecraftEnvironment shimmer$getEnvironment() {
-		return shimmer$level().shimmer$getEnvironment();
+	default ShimmerMinecraftEnvironment getEnvironment() {
+		return shimmer$level().getEnvironment();
 	}
 }

@@ -14,6 +14,7 @@ import dev.beast.mods.shimmer.feature.skybox.SkyboxData;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
 import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
 import dev.beast.mods.shimmer.math.Range;
+import dev.beast.mods.shimmer.util.Empty;
 import dev.beast.mods.shimmer.util.registry.BasicShimmerRegistry;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerLevel;
@@ -192,19 +193,10 @@ public class GameEventHandler {
 	}
 
 	@SubscribeEvent
-	public static void name(PlayerEvent.NameFormat event) {
-		var nickname = event.getEntity().getNickname();
-
-		if (!nickname.getString().isEmpty()) {
-			event.setDisplayname(nickname);
-		}
-	}
-
-	@SubscribeEvent
 	public static void tabName(PlayerEvent.TabListNameFormat event) {
 		var nickname = event.getEntity().getNickname();
 
-		if (!nickname.getString().isEmpty()) {
+		if (!Empty.isEmpty(nickname)) {
 			event.setDisplayName(nickname);
 		}
 	}

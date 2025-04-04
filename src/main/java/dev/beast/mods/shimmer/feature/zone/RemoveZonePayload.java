@@ -19,6 +19,6 @@ public record RemoveZonePayload(UUID uuid) implements ShimmerPacketPayload {
 
 	@Override
 	public void handle(ShimmerPayloadContext ctx) {
-		ctx.level().shimmer$getEnvironment().removeZone(uuid);
+		ctx.level().getEnvironment().removeZone(uuid);
 	}
 }

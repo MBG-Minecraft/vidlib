@@ -30,7 +30,7 @@ public class IOWorkerMixin implements ShimmerIOWorker {
 
 	@Inject(method = "tellStorePending", at = @At("HEAD"), cancellable = true)
 	private void shimmer$tellStorePending(CallbackInfo ci) {
-		if (shimmer$level != null && shimmer$level.shimmer$cancelWrite()) {
+		if (shimmer$level != null && shimmer$level.isImmutableWorld()) {
 			pendingWrites.clear();
 			ci.cancel();
 		}

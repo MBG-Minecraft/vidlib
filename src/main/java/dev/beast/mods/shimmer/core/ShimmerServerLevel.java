@@ -23,8 +23,8 @@ import java.util.UUID;
 
 public interface ShimmerServerLevel extends ShimmerLevel {
 	@Override
-	default ShimmerMinecraftEnvironment shimmer$getEnvironment() {
-		return shimmer$level().getServer();
+	default ShimmerMinecraftEnvironment getEnvironment() {
+		return this.shimmer$level().getServer();
 	}
 
 	@Override
@@ -34,7 +34,7 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 
 	@Override
 	default List<? extends Player> shimmer$getS2CPlayers() {
-		return shimmer$level().players();
+		return this.shimmer$level().players();
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 	@Override
 	@Nullable
 	default Entity getEntityByUUID(UUID uuid) {
-		return shimmer$level().getEntity(uuid);
+		return this.shimmer$level().getEntity(uuid);
 	}
 
 	@Override
@@ -72,10 +72,6 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 		return ShimmerLevel.super.bulkModify(undoable, optimized);
 	}
 
-	default boolean shimmer$cancelWrite() {
-		throw new NoMixinException(this);
-	}
-
 	default void shimmer$reloadChunks() {
 		throw new NoMixinException(this);
 	}
@@ -84,7 +80,7 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 	}
 
 	default void shimmer$updateLoadedChunks(List<Ticket<ChunkPos>> tickets) {
-		var level = shimmer$level();
+		var level = this.shimmer$level();
 
 		if (!tickets.isEmpty()) {
 			for (var ticket : tickets) {
@@ -118,7 +114,6 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 			}
 		}
 
-		// /server-data set shimmer:anchor {areas:[{shape:[29647, 63, 79647, 30352, 63, 80352]}]}
 		var anchored = getAnchor().shapes().get(level.dimension());
 
 		if (anchored != null) {
@@ -149,7 +144,7 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 
 	@Override
 	default void discardAll(EntityFilter filter) {
-		for (var entity : shimmer$level().getAllEntities()) {
+		for (var entity : this.shimmer$level().getAllEntities()) {
 			if (filter.test(entity)) {
 				entity.discard();
 			}
@@ -158,9 +153,9 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 
 	@Override
 	default void killAll(EntityFilter filter) {
-		for (var entity : shimmer$level().getAllEntities()) {
+		for (var entity : this.shimmer$level().getAllEntities()) {
 			if (filter.test(entity)) {
-				entity.kill(shimmer$level());
+				entity.kill(this.shimmer$level());
 			}
 		}
 	}

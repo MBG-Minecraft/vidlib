@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 
 public interface ShimmerMinecraftEnvironment extends ShimmerPlayerContainer, ShimmerMinecraftEnvironmentDataHolder {
 	@Override
-	default ShimmerMinecraftEnvironment shimmer$getEnvironment() {
+	default ShimmerMinecraftEnvironment getEnvironment() {
 		return this;
 	}
 

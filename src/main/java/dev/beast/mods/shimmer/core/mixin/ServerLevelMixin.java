@@ -2,7 +2,6 @@ package dev.beast.mods.shimmer.core.mixin;
 
 import dev.beast.mods.shimmer.core.ShimmerChunkMap;
 import dev.beast.mods.shimmer.core.ShimmerServerLevel;
-import dev.beast.mods.shimmer.feature.data.InternalServerData;
 import dev.beast.mods.shimmer.feature.misc.CreateFireworksPayload;
 import dev.beast.mods.shimmer.feature.prop.ServerPropList;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
@@ -69,7 +68,7 @@ public abstract class ServerLevelMixin extends Level implements ShimmerServerLev
 	@Override
 	public ServerPropList getProps() {
 		if (shimmer$props == null) {
-			shimmer$props = new ServerPropList(shimmer$level());
+			shimmer$props = new ServerPropList(this.shimmer$level());
 		}
 
 		return shimmer$props;
@@ -78,11 +77,6 @@ public abstract class ServerLevelMixin extends Level implements ShimmerServerLev
 	@Override
 	public void createFireworks(double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, List<FireworkExplosion> explosions) {
 		s2c(new CreateFireworksPayload(x, y, z, xSpeed, ySpeed, zSpeed, explosions));
-	}
-
-	@Override
-	public boolean shimmer$cancelWrite() {
-		return getServer().getServerData().get(InternalServerData.IMMUTABLE_WORLD);
 	}
 
 	@Override

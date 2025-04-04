@@ -1,6 +1,5 @@
 package dev.beast.mods.shimmer.util.registry;
 
-import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -8,7 +7,6 @@ import com.mojang.serialization.MapCodec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.util.Cast;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -75,9 +73,5 @@ public record SimpleRegistry<V>(
 	@Nullable
 	public SimpleRegistryType.Unit<V> getType(V value) {
 		return unitTypeMap.get(value);
-	}
-
-	public SuggestionProvider<CommandSourceStack> registerUnitSuggestionProvider(ResourceLocation registryId) {
-		return ShimmerResourceLocationArgument.registerSuggestionProvider(registryId, unitValueMap::keySet);
 	}
 }

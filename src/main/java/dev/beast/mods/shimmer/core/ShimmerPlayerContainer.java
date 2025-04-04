@@ -71,12 +71,12 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	@Override
 	default void c2s(@Nullable Packet<? super ServerGamePacketListener> packet) {
-		shimmer$getEnvironment().c2s(packet);
+		getEnvironment().c2s(packet);
 	}
 
 	default void tell(Component message) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().tell(message);
+			getEnvironment().tell(message);
 		} else {
 			for (var player : shimmer$getS2CPlayers()) {
 				player.displayClientMessage(message, false);
@@ -90,7 +90,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void status(Component message) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().status(message);
+			getEnvironment().status(message);
 		} else {
 			for (var player : shimmer$getS2CPlayers()) {
 				player.displayClientMessage(message, true);
@@ -104,7 +104,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void playCutscene(Cutscene cutscene, WorldNumberVariables variables) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().playCutscene(cutscene, variables);
+			getEnvironment().playCutscene(cutscene, variables);
 		} else if (!cutscene.steps.isEmpty()) {
 			s2c(new PlayCutscenePayload(cutscene, variables));
 		}
@@ -112,7 +112,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void stopCutscene() {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().stopCutscene();
+			getEnvironment().stopCutscene();
 		} else {
 			s2c(StopCutscenePayload.INSTANCE);
 		}
@@ -120,7 +120,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void shakeCamera(CameraShake shake) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().shakeCamera(shake);
+			getEnvironment().shakeCamera(shake);
 		} else if (!shake.skip()) {
 			s2c(new ShakeCameraPayload(shake));
 		}
@@ -128,7 +128,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void shakeCamera(CameraShake shake, Vec3 source, double maxDistance) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().shakeCamera(shake, source, maxDistance);
+			getEnvironment().shakeCamera(shake, source, maxDistance);
 		} else {
 			s2c(new ShakeCameraAtPositionPayload(shake, source, maxDistance));
 		}
@@ -136,7 +136,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void stopCameraShaking() {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().stopCameraShaking();
+			getEnvironment().stopCameraShaking();
 		} else {
 			s2c(StopCameraShakingPayload.INSTANCE);
 		}
@@ -144,7 +144,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void setCameraMode(int mode) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().setCameraMode(mode);
+			getEnvironment().setCameraMode(mode);
 		} else {
 			s2c(new SetCameraModePayload(mode));
 		}
@@ -152,7 +152,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void setPostEffect(ResourceLocation id) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().setPostEffect(id);
+			getEnvironment().setPostEffect(id);
 		} else {
 			s2c(new SetPostEffectPayload(id));
 		}
@@ -160,7 +160,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void shimmer$closeScreen() {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().shimmer$closeScreen();
+			getEnvironment().shimmer$closeScreen();
 		} else {
 			s2c(CloseScreenPayload.INSTANCE);
 		}
@@ -168,7 +168,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void openYesNoVotingScreen(CompoundTag extraData, Component title, Component subtitle, Component yesLabel, Component noLabel) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().openYesNoVotingScreen(extraData, title, subtitle, yesLabel, noLabel);
+			getEnvironment().openYesNoVotingScreen(extraData, title, subtitle, yesLabel, noLabel);
 		} else {
 			s2c(new StartYesNoVotingPayload(extraData, title, subtitle, yesLabel, noLabel));
 		}
@@ -176,7 +176,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void openNumberVotingScreen(CompoundTag extraData, Component title, Component subtitle, int max, IntList unavailable) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().openNumberVotingScreen(extraData, title, subtitle, max, unavailable);
+			getEnvironment().openNumberVotingScreen(extraData, title, subtitle, max, unavailable);
 		} else {
 			s2c(new StartNumberVotingPayload(extraData, title, subtitle, max, unavailable));
 		}
@@ -184,7 +184,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void removeAllParticles() {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().removeAllParticles();
+			getEnvironment().removeAllParticles();
 		} else {
 			s2c(RemoveAllParticlesPayload.INSTANCE);
 		}
@@ -192,7 +192,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void redrawSections(LongList sections, boolean mainThread) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().redrawSections(sections, mainThread);
+			getEnvironment().redrawSections(sections, mainThread);
 		} else {
 			s2c(new RedrawChunkSectionsPayload(sections, mainThread));
 		}
@@ -200,7 +200,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void playGlobalSound(PositionedSoundData data, WorldNumberVariables variables) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().playGlobalSound(data, variables);
+			getEnvironment().playGlobalSound(data, variables);
 		} else {
 			s2c(new SoundPayload(data, variables));
 		}
@@ -216,7 +216,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void physicsParticles(PhysicsParticleData data, long seed, List<PositionedBlock> blocks) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().physicsParticles(data, seed, blocks);
+			getEnvironment().physicsParticles(data, seed, blocks);
 		} else if (!blocks.isEmpty()) {
 			s2c(new PhysicsParticlesPayload(data, seed, blocks));
 		}
@@ -224,7 +224,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void physicsParticles(PhysicsParticlesIdData data) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().physicsParticles(data);
+			getEnvironment().physicsParticles(data);
 		} else if (!data.blocks().isEmpty()) {
 			s2c(new PhysicsParticlesIdPayload(data));
 		}
@@ -244,7 +244,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void cubeParticles(Map<CubeParticleOptions, List<BlockPos>> map) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().cubeParticles(map);
+			getEnvironment().cubeParticles(map);
 		} else {
 			s2c(new SpawnCubeParticlesPayload(map));
 		}
@@ -256,7 +256,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void lineParticles(Map<LineParticleOptions, List<AABB>> map) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().lineParticles(map);
+			getEnvironment().lineParticles(map);
 		} else {
 			s2c(new SpawnLineParticlesPayload(map));
 		}
@@ -268,7 +268,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void textParticles(TextParticleOptions options, List<Vec3> positions) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().textParticles(options, positions);
+			getEnvironment().textParticles(options, positions);
 		} else {
 			s2c(new SpawnTextParticlePayload(options, positions));
 		}
@@ -276,7 +276,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void itemParticles(ItemParticleOptions options, List<Pair<Vec3, Vec3>> positions) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().itemParticles(options, positions);
+			getEnvironment().itemParticles(options, positions);
 		} else {
 			s2c(new SpawnItemParticlePayload(options, positions));
 		}
@@ -288,7 +288,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void windParticles(RandomSource random, WindData data) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().windParticles(random, data);
+			getEnvironment().windParticles(random, data);
 		} else {
 			s2c(new SpawnWindParticlesPayload(data));
 		}
@@ -296,7 +296,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void fireParticles(RandomSource random, FireData data) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().fireParticles(random, data);
+			getEnvironment().fireParticles(random, data);
 		} else {
 			s2c(new SpawnFireParticlesPayload(data));
 		}
@@ -304,7 +304,7 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 
 	default void setScreenFade(Fade fade) {
 		if (shimmer$isClient()) {
-			shimmer$getEnvironment().setScreenFade(fade);
+			getEnvironment().setScreenFade(fade);
 		} else {
 			s2c(new ScreenFadePayload(fade));
 		}

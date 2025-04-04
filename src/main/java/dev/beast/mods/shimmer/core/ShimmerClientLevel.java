@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 public interface ShimmerClientLevel extends ShimmerLevel {
 	@Override
-	default ShimmerMinecraftEnvironment shimmer$getEnvironment() {
+	default ShimmerMinecraftEnvironment getEnvironment() {
 		return Minecraft.getInstance();
 	}
 
@@ -33,7 +33,7 @@ public interface ShimmerClientLevel extends ShimmerLevel {
 
 	default void environmentEffects(Minecraft mc, BlockPos pos) {
 		var override = EntityOverride.ENVIRONMENT_EFFECTS.get(mc.player);
-		var level = shimmer$level();
+		var level = this.shimmer$level();
 
 		if (override != null && !override.isEmpty()) {
 			for (var effect : override) {

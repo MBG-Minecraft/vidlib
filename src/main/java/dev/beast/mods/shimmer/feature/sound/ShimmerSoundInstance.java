@@ -35,7 +35,7 @@ public class ShimmerSoundInstance extends AbstractTickableSoundInstance {
 
 	@Override
 	public void tick() {
-		volume = level.shimmer$getEnvironment().getPauseType().tick() ? targetVolume : 0F;
+		volume = level.getEnvironment().getPauseType().tick() ? targetVolume : 0F;
 
 		var pos = position == null ? null : position.get(new WorldNumberContext(level, 1F, variables));
 

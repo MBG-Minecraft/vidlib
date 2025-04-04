@@ -13,7 +13,6 @@ public interface CutsceneCommands {
 		.then(Commands.literal("play")
 			.then(Commands.argument("player", EntityArgument.players())
 				.then(Commands.argument("id", Cutscene.KNOWN_CODEC.argument(buildContext))
-					.suggests(Cutscene.REGISTRY.suggestionProvider)
 					.executes(ctx -> {
 						var cutscene = Cutscene.KNOWN_CODEC.get(ctx, "id");
 

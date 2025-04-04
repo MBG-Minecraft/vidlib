@@ -47,7 +47,7 @@ public interface ShimmerLevel extends ShimmerPlayerContainer, ShimmerMinecraftEn
 
 	@Override
 	default DataMap getServerData() {
-		return shimmer$getEnvironment().getServerData();
+		return getEnvironment().getServerData();
 	}
 
 	@Nullable
