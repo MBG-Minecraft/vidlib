@@ -4,6 +4,7 @@ import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.clock.ClockValue;
 import dev.beast.mods.shimmer.feature.clock.SyncClocksPayload;
 import dev.beast.mods.shimmer.feature.data.SyncServerDataPayload;
+import dev.beast.mods.shimmer.feature.misc.MarkerData;
 import dev.beast.mods.shimmer.feature.net.S2CPacketBundleBuilder;
 import dev.beast.mods.shimmer.feature.zone.Anchor;
 import dev.beast.mods.shimmer.feature.zone.RemoveZonePayload;
@@ -58,6 +59,7 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 	@ApiStatus.Internal
 	default void shimmer$playerJoined(ServerPlayer player) {
 		Shimmer.sync(player, true);
+		player.server.marker(new MarkerData("player/logged_in", player));
 	}
 
 	@Override

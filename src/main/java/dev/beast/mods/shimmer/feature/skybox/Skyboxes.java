@@ -15,6 +15,4 @@ public interface Skyboxes {
 	ResourceLocation BRIGHT_NIGHT = Shimmer.id("bright_night");
 	ResourceLocation BLACK_VOID = Shimmer.id("black_void");
 	ResourceLocation WHITE_VOID = Shimmer.id("white_void");
-
-	ResourceLocation PURPLE_SPACE = Shimmer.id("purple_space");
 }

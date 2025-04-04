@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class S2CPacketBundleBuilder implements ShimmerS2CPacketConsumer {
+	private static final int MAX_PER_BUNDLE = 4095;
+
 	public final Level level;
 	private List<Packet<? super ClientGamePacketListener>> list;
 
@@ -36,22 +38,25 @@ public class S2CPacketBundleBuilder implements ShimmerS2CPacketConsumer {
 		list.add(packet);
 	}
 
-	@Nullable
-	public Packet<? super ClientGamePacketListener> createPacket() {
-		if (list == null || list.isEmpty()) {
-			return null;
-		} else if (list.size() == 1) {
-			return list.getFirst();
-		} else {
-			return new ClientboundBundlePacket(list);
-		}
-	}
-
 	public void send(ShimmerS2CPacketConsumer other) {
-		var packet = createPacket();
+		var list1 = list;
 
-		if (packet != null) {
-			other.s2c(packet);
+		if (list1 == null) {
+			return;
+		}
+
+		while (!list1.isEmpty()) {
+			if (list1.size() == 1) {
+				other.s2c(list1.getFirst());
+				return;
+			} else if (list1.size() <= MAX_PER_BUNDLE) {
+				other.s2c(new ClientboundBundlePacket(list1));
+				return;
+			} else {
+				var packet = new ClientboundBundlePacket(list1.subList(0, MAX_PER_BUNDLE));
+				other.s2c(packet);
+				list1 = list1.subList(MAX_PER_BUNDLE, list1.size());
+			}
 		}
 	}
 }

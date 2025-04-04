@@ -1,6 +1,8 @@
 package dev.beast.mods.shimmer;
 
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
+import dev.beast.mods.shimmer.feature.misc.MarkerData;
+import dev.beast.mods.shimmer.feature.misc.MarkerPayload;
 import dev.beast.mods.shimmer.feature.net.S2CPacketBundleBuilder;
 import dev.beast.mods.shimmer.util.Lazy;
 import dev.beast.mods.shimmer.util.MiscUtils;
@@ -63,6 +65,7 @@ public class Shimmer {
 
 	public static void sync(ServerPlayer player, boolean login) {
 		var packets = new S2CPacketBundleBuilder(player.level());
+		packets.s2c(new MarkerPayload(new MarkerData("sync", player)).toS2C(player.level()));
 		player.shimmer$sessionData().sync(packets, player, login);
 		packets.send(player);
 	}

@@ -15,6 +15,7 @@ import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.data.UpdatePlayerDataValuePayload;
 import dev.beast.mods.shimmer.feature.fade.Fade;
 import dev.beast.mods.shimmer.feature.fade.ScreenFadeInstance;
+import dev.beast.mods.shimmer.feature.misc.MarkerData;
 import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
 import dev.beast.mods.shimmer.feature.particle.FireData;
 import dev.beast.mods.shimmer.feature.particle.ItemParticleOptions;
@@ -441,5 +442,10 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 	@Override
 	default void setScreenFade(Fade fade) {
 		shimmer$self().player.shimmer$sessionData().screenFade = new ScreenFadeInstance(fade);
+	}
+
+	@Override
+	default void marker(MarkerData data) {
+		// Shimmer.LOGGER.info("Marker " + data.event() + "/" + data.name() + " (" + data.uuid() + ") @ ");
 	}
 }

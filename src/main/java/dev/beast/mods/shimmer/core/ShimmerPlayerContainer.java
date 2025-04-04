@@ -14,6 +14,8 @@ import dev.beast.mods.shimmer.feature.cutscene.StopCutscenePayload;
 import dev.beast.mods.shimmer.feature.fade.Fade;
 import dev.beast.mods.shimmer.feature.fade.ScreenFadePayload;
 import dev.beast.mods.shimmer.feature.misc.CloseScreenPayload;
+import dev.beast.mods.shimmer.feature.misc.MarkerData;
+import dev.beast.mods.shimmer.feature.misc.MarkerPayload;
 import dev.beast.mods.shimmer.feature.misc.SetPostEffectPayload;
 import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
 import dev.beast.mods.shimmer.feature.particle.FireData;
@@ -307,6 +309,14 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 			getEnvironment().setScreenFade(fade);
 		} else {
 			s2c(new ScreenFadePayload(fade));
+		}
+	}
+
+	default void marker(MarkerData data) {
+		if (shimmer$isClient()) {
+			getEnvironment().marker(data);
+		} else {
+			s2c(new MarkerPayload(data));
 		}
 	}
 }
