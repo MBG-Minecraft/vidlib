@@ -105,9 +105,17 @@ repositories {
 			includeGroup "org.parchmentmc.data"
 		}
 	}
+
+	maven {
+		url = 'https://api.modrinth.com/maven'
+		content {
+			includeGroup("maven.modrinth")
+		}
+	}
 }
 
 dependencies {
+	compileOnly "maven.modrinth:simple-voice-chat:QOjXGg4I"
 }
 
 processResources {
