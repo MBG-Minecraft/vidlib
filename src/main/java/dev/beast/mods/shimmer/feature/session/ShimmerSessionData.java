@@ -10,7 +10,6 @@ import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.entity.EntityOverrideValue;
 import dev.beast.mods.shimmer.feature.icon.IconHolder;
 import dev.beast.mods.shimmer.feature.input.PlayerInput;
-import dev.beast.mods.shimmer.feature.worldsync.WorldSyncAuthResponsePayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
 import dev.beast.mods.shimmer.util.registry.SyncedRegistry;
 import net.minecraft.network.chat.Component;
@@ -138,9 +137,6 @@ public class ShimmerSessionData {
 	}
 
 	public void updateInput(UUID player, PlayerInput input) {
-	}
-
-	public void worldSyncAuthResponse(WorldSyncAuthResponsePayload payload) {
 	}
 
 	public void updateSkyboxes() {
