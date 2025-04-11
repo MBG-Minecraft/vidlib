@@ -1,8 +1,8 @@
 package dev.beast.mods.shimmer.feature.particle;
 
-import dev.beast.mods.shimmer.feature.gradient.Gradient;
-import dev.beast.mods.shimmer.math.Color;
-import dev.beast.mods.shimmer.math.KMath;
+import dev.latvian.mods.kmath.KMath;
+import dev.latvian.mods.kmath.color.Color;
+import dev.latvian.mods.kmath.color.Gradient;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;

@@ -1,9 +1,9 @@
 package dev.beast.mods.shimmer.feature.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.beast.mods.shimmer.math.KMath;
-import dev.beast.mods.shimmer.math.Vec3f;
-import dev.beast.mods.shimmer.util.ShimmerRenderTypes;
+import dev.latvian.mods.kmath.KMath;
+import dev.latvian.mods.kmath.Vec3f;
+import dev.latvian.mods.kmath.render.DebugRenderTypes;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -29,7 +29,7 @@ public class LineParticle extends CustomParticle {
 		var rz = (float) (KMath.lerp(time, zo, z) - cameraPos.z);
 
 		var m = ms.last().pose();
-		var buffer = buffers.getBuffer(ShimmerRenderTypes.DEBUG_LINES);
+		var buffer = buffers.getBuffer(DebugRenderTypes.LINES);
 		buffer.addVertex(m, rx, ry, rz).setColor(options.startColor().fadeOut(time, lifetime, 20F).argb());
 		buffer.addVertex(m, rx + vector.x(), ry + vector.y(), rz + vector.z()).setColor(options.endColor().fadeOut(time, lifetime, 20F).argb());
 	}

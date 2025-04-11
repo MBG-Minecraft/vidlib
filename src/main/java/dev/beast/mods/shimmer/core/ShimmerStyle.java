@@ -1,6 +1,6 @@
 package dev.beast.mods.shimmer.core;
 
-import dev.beast.mods.shimmer.math.Color;
+import dev.latvian.mods.kmath.color.Color;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;

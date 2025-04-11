@@ -1,6 +1,6 @@
 package dev.beast.mods.shimmer.core;
 
-import dev.beast.mods.shimmer.math.Line;
+import dev.latvian.mods.kmath.Line;
 import net.minecraft.world.phys.Vec3;
 
 public interface ShimmerCamera {

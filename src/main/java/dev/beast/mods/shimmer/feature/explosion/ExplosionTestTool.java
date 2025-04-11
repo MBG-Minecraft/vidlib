@@ -3,7 +3,7 @@ package dev.beast.mods.shimmer.feature.explosion;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.item.ShimmerTool;
 import dev.beast.mods.shimmer.feature.misc.ScreenText;
-import dev.beast.mods.shimmer.math.KMath;
+import dev.latvian.mods.kmath.KMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.NbtOps;

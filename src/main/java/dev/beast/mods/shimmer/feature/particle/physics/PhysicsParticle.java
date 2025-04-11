@@ -1,7 +1,8 @@
 package dev.beast.mods.shimmer.feature.particle.physics;
 
 import com.mojang.blaze3d.vertex.VertexBuffer;
-import dev.beast.mods.shimmer.math.KMath;
+import dev.beast.mods.shimmer.util.FrameInfo;
+import dev.latvian.mods.kmath.KMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.RandomSource;
@@ -42,16 +43,16 @@ public class PhysicsParticle {
 	public int prevBlockStateType = -1;
 	public int blockStateType = -1;
 
-	public void render(Matrix4fStack matrix, PhysicsParticleRenderContext ctx, VertexBuffer[] buffer) {
-		float delta = ctx.delta();
+	public void render(Matrix4fStack matrix, FrameInfo frame, VertexBuffer[] buffer) {
+		float delta = frame.worldDelta();
 		float dScale = KMath.lerp(delta, prevScale, scale);
 
 		if (dScale < 0.001F) {
 			return;
 		}
 
-		var camera = ctx.camera();
-		var frustum = ctx.frustum();
+		var camera = frame.camera();
+		var frustum = frame.frustum();
 
 		double rx = KMath.lerp(delta, prevX, x);
 		double ry = KMath.lerp(delta, prevY, y);

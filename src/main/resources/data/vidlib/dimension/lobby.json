@@ -1,0 +1,11 @@
+{
+	"type": "vidlib:void_128",
+	"generator": {
+		"type": "minecraft:noise",
+		"settings": "vidlib:void",
+		"biome_source": {
+			"type": "minecraft:fixed",
+			"biome": "vidlib:void"
+		}
+	}
+}

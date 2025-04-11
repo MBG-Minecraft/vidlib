@@ -1,7 +1,7 @@
 package dev.beast.mods.shimmer.feature.block;
 
 import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
-import dev.beast.mods.shimmer.math.Directions;
+import dev.latvian.mods.kmath.Directions;
 import net.minecraft.core.BlockPos;
 
 import java.util.ArrayList;

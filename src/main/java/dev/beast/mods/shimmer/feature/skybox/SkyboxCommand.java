@@ -17,7 +17,7 @@ public interface SkyboxCommand {
 			)
 		)
 		.then(Commands.literal("remove")
-			.executes(ctx -> skybox(ctx.getSource().getServer(), Skyboxes.DEFAULT))
+			.executes(ctx -> skybox(ctx.getSource().getServer(), Skyboxes.DAY_WITH_CELESTIALS))
 		)
 	);
 

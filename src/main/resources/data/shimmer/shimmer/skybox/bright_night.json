@@ -2,5 +2,5 @@
 	"celestials": true,
 	"stars": 0.5,
 	"sun": false,
-	"celestial_rotation": [0, 140]
+	"celestial_rotation": [45, 140]
 }

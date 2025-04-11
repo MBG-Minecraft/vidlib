@@ -13,9 +13,9 @@ import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
 import dev.beast.mods.shimmer.feature.icon.IconHolder;
 import dev.beast.mods.shimmer.feature.particle.ChancedParticle;
 import dev.beast.mods.shimmer.feature.skybox.FogOverride;
-import dev.beast.mods.shimmer.math.Color;
-import dev.beast.mods.shimmer.math.Range;
 import dev.beast.mods.shimmer.util.Cast;
+import dev.latvian.mods.kmath.Range;
+import dev.latvian.mods.kmath.color.Color;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
@@ -83,7 +83,7 @@ public final class EntityOverride<T> {
 	}
 
 	public static EntityOverride<Color> createColorKey(String id) {
-		return createKey(id, Color.KNOWN_CODEC);
+		return createKey(id, KnownCodec.COLOR);
 	}
 
 	public static EntityOverride<Integer> createVarIntKey(String id) {
@@ -119,7 +119,7 @@ public final class EntityOverride<T> {
 	public static final EntityOverride<Float> ATTACK_DAMAGE = createFloatKey("attack_damage");
 	public static final EntityOverride<Clothing> CLOTHING = createKey("clothing", Clothing.KNOWN_CODEC);
 	public static final EntityOverride<ResourceLocation> SKYBOX = createKey("skybox", KnownCodec.SHIMMER_ID);
-	public static final EntityOverride<Range> AMBIENT_LIGHT = createKey("ambient_light", Range.KNOWN_CODEC);
+	public static final EntityOverride<Range> AMBIENT_LIGHT = createKey("ambient_light", KnownCodec.RANGE);
 	public static final EntityOverride<FogOverride> FOG = createKey("fog", FogOverride.KNOWN_CODEC);
 	public static final EntityOverride<Boolean> UNPUSHABLE = createBooleanKey("unpushable");
 	public static final EntityOverride<Component> NAME_PREFIX = createKey("name_prefix", KnownCodec.TEXT_COMPONENT);

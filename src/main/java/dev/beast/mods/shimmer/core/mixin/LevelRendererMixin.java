@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.PostChain;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -53,5 +54,14 @@ public abstract class LevelRendererMixin {
 		}
 
 		return original;
+	}
+
+	/**
+	 * @author Lat
+	 * @reason Yeet
+	 */
+	@Overwrite
+	private boolean shouldRenderDarkDisc(float partialTick) {
+		return false;
 	}
 }

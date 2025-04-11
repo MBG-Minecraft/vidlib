@@ -15,6 +15,9 @@ import dev.beast.mods.shimmer.util.Cast;
 import dev.beast.mods.shimmer.util.registry.ShimmerRegistry;
 import dev.beast.mods.shimmer.util.registry.ShimmerResourceLocationArgument;
 import dev.beast.mods.shimmer.util.registry.VideoResourceLocationArgument;
+import dev.latvian.mods.kmath.MovementType;
+import dev.latvian.mods.kmath.Range;
+import dev.latvian.mods.kmath.color.Color;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.ResourceKeyArgument;
@@ -129,7 +132,7 @@ public record KnownCodec<T>(
 	public static final KnownCodec<ResourceLocation> ID = register(ResourceLocation.withDefaultNamespace("id"), ResourceLocation.CODEC, ResourceLocation.STREAM_CODEC, (self, ctx) -> ResourceLocationArgument.id(), (ctx, name) -> ctx.getArgument(name, ResourceLocation.class));
 	public static final KnownCodec<Component> TEXT_COMPONENT = register(ResourceLocation.withDefaultNamespace("text_component"), ComponentSerialization.CODEC, ComponentSerialization.STREAM_CODEC, (self, ctx) -> ComponentArgument.textComponent(ctx), (ctx, name) -> ctx.getArgument(name, Component.class));
 	public static final KnownCodec<Mirror> MIRROR = registerEnum(ResourceLocation.withDefaultNamespace("mirror"), Mirror.values());
-	public static final KnownCodec<Rotation> ROTATION = registerEnum(ResourceLocation.withDefaultNamespace("rotation"), Rotation.values());
+	public static final KnownCodec<Rotation> BLOCK_ROTATION = registerEnum(ResourceLocation.withDefaultNamespace("rotation"), Rotation.values());
 	public static final KnownCodec<LiquidSettings> LIQUID_SETTINGS = registerEnum(ResourceLocation.withDefaultNamespace("liquid_settings"), LiquidSettings.values());
 	public static final KnownCodec<InteractionHand> HAND = registerEnum(ResourceLocation.withDefaultNamespace("hand"), InteractionHand.values());
 	public static final KnownCodec<SoundSource> SOUND_SOURCE = registerEnum(ResourceLocation.withDefaultNamespace("sound_source"), SoundSource.values());
@@ -138,6 +141,11 @@ public record KnownCodec<T>(
 
 	public static final KnownCodec<ResourceLocation> SHIMMER_ID = register(Shimmer.id("shimmer_id"), ShimmerCodecs.SHIMMER_ID, ShimmerStreamCodecs.SHIMMER_ID, (self, ctx) -> ShimmerResourceLocationArgument.id(), ShimmerResourceLocationArgument::getId);
 	public static final KnownCodec<ResourceLocation> VIDEO_ID = register(Shimmer.id("video_id"), ShimmerCodecs.VIDEO_ID, ShimmerStreamCodecs.VIDEO_ID, (self, ctx) -> VideoResourceLocationArgument.id(), VideoResourceLocationArgument::getId);
+
+	public static final KnownCodec<Color> COLOR = register(Shimmer.id("color"), Color.CODEC, Color.STREAM_CODEC, Color.class);
+	public static final KnownCodec<dev.latvian.mods.kmath.Rotation> ROTATION = register(Shimmer.id("rotation"), dev.latvian.mods.kmath.Rotation.CODEC, dev.latvian.mods.kmath.Rotation.STREAM_CODEC, dev.latvian.mods.kmath.Rotation.class);
+	public static final KnownCodec<MovementType> MOVEMENT_TYPE = registerEnum(Shimmer.id("movement_type"), MovementType.values());
+	public static final KnownCodec<Range> RANGE = register(Shimmer.id("range"), Range.CODEC, Range.STREAM_CODEC, Range.class);
 
 	public ArgumentType<T> argument(CommandBuildContext commandBuildContext) {
 		return argumentType.apply(this, commandBuildContext);

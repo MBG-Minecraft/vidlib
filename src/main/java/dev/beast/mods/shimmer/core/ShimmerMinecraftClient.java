@@ -30,13 +30,15 @@ import dev.beast.mods.shimmer.feature.sound.PositionedSoundData;
 import dev.beast.mods.shimmer.feature.sound.ShimmerSoundInstance;
 import dev.beast.mods.shimmer.feature.vote.NumberVotingScreen;
 import dev.beast.mods.shimmer.feature.vote.YesNoVotingScreen;
-import dev.beast.mods.shimmer.math.Rotation;
-import dev.beast.mods.shimmer.math.Vec2d;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.util.Empty;
+import dev.beast.mods.shimmer.util.FrameInfo;
 import dev.beast.mods.shimmer.util.PauseType;
 import dev.beast.mods.shimmer.util.ScheduledTask;
+import dev.latvian.mods.kmath.Rotation;
+import dev.latvian.mods.kmath.Vec2d;
+import dev.latvian.mods.kmath.WorldMouse;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.client.Camera;
@@ -55,7 +57,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;
@@ -103,8 +104,18 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 		return mc.isPaused() ? PauseType.GAME : mc.level != null && mc.level.tickRateManager().isFrozen() ? PauseType.TICK : PauseType.NONE;
 	}
 
+	default WorldMouse getWorldMouse() {
+		var session = shimmer$self().player.shimmer$sessionData();
+
+		if (session.worldMouse == null) {
+			session.worldMouse = WorldMouse.clip(shimmer$self(), session.currentFrameInfo.camera().getPosition(), session.currentFrameInfo.worldMatrix());
+		}
+
+		return session.worldMouse;
+	}
+
 	@ApiStatus.Internal
-	default void shimmer$renderSetup(RenderLevelStageEvent event, float delta) {
+	default void shimmer$renderSetup(FrameInfo frame) {
 		var player = shimmer$self().player;
 
 		if (player == null) {
@@ -112,7 +123,6 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 		}
 
 		var session = player.shimmer$sessionData();
-
 		var ray = shimmer$self().gameRenderer.getMainCamera().ray(512D);
 
 		if (shimmer$self().options.getCameraType() == CameraType.FIRST_PERSON && player.getShowZones()) {
@@ -137,7 +147,7 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 		var shake = shimmer$getCameraShakeOffset(delta);
 
 		if (shake != Vec2d.ZERO) {
-			var vec = new Vector4f((float) shake.x, (float) shake.y, 0F, 1F).rotate(camera.rotation());
+			var vec = new Vector4f((float) shake.x(), (float) shake.y(), 0F, 1F).rotate(camera.rotation());
 			camera.shimmer$setPosition(camera.getPosition().add(vec.x(), vec.y(), vec.z()));
 		}
 	}

@@ -34,11 +34,10 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements S
 	protected Minecraft minecraft;
 
 	@Unique
-	private final boolean shimmer$isReplayCamera;
+	private Boolean shimmer$isReplayCamera;
 
 	public LocalPlayerMixin(ClientLevel clientLevel, GameProfile gameProfile) {
 		super(clientLevel, gameProfile);
-		this.shimmer$isReplayCamera = ((Object) this).getClass() != LocalPlayer.class || gameProfile.getName().equals("Replay Viewer");
 	}
 
 	@Override
@@ -67,6 +66,10 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements S
 
 	@Override
 	public boolean isReplayCamera() {
+		if (shimmer$isReplayCamera == null) {
+			shimmer$isReplayCamera = ((Object) this).getClass() != LocalPlayer.class || getScoreboardName().equals("Replay Viewer");
+		}
+
 		return shimmer$isReplayCamera;
 	}
 

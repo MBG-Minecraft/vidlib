@@ -1,7 +1,7 @@
 package dev.beast.mods.shimmer.feature.zone;
 
 import dev.beast.mods.shimmer.feature.zone.shape.ZoneShape;
-import dev.beast.mods.shimmer.math.Line;
+import dev.latvian.mods.kmath.Line;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;

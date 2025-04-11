@@ -1,7 +1,7 @@
 package dev.beast.mods.shimmer.feature.particle;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import dev.beast.mods.shimmer.math.Easing;
+import dev.latvian.mods.kmath.easing.Easing;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleRenderType;

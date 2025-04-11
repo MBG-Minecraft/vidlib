@@ -107,15 +107,31 @@ repositories {
 	}
 
 	maven {
+		url = 'https://maven.latvian.dev/releases'
+		content {
+			includeGroup "dev.latvian.mods"
+		}
+	}
+
+	maven {
 		url = 'https://api.modrinth.com/maven'
 		content {
-			includeGroup("maven.modrinth")
+			includeGroup "maven.modrinth"
 		}
 	}
 }
 
 dependencies {
-	compileOnly "maven.modrinth:simple-voice-chat:QOjXGg4I"
+	jarJar(implementation('dev.latvian.mods:kmath')) {
+		version {
+			strictly "[$kmath_version,)"
+			prefer "$kmath_version"
+		}
+	}
+
+	interfaceInjectionData("dev.latvian.mods:kmath:$kmath_version")
+
+	compileOnly("maven.modrinth:simple-voice-chat:QOjXGg4I")
 }
 
 processResources {

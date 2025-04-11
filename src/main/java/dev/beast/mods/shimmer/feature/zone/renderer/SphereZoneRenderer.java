@@ -1,10 +1,10 @@
 package dev.beast.mods.shimmer.feature.zone.renderer;
 
 import dev.beast.mods.shimmer.feature.zone.shape.SphereZoneShape;
-import dev.beast.mods.shimmer.math.BoxRenderer;
-import dev.beast.mods.shimmer.math.Color;
-import dev.beast.mods.shimmer.math.SpherePoints;
-import dev.beast.mods.shimmer.math.SphereRenderer;
+import dev.latvian.mods.kmath.SpherePoints;
+import dev.latvian.mods.kmath.color.Color;
+import dev.latvian.mods.kmath.render.BoxRenderer;
+import dev.latvian.mods.kmath.render.SphereRenderer;
 
 public class SphereZoneRenderer implements ZoneRenderer<SphereZoneShape> {
 	public static final SphereZoneRenderer INSTANCE = new SphereZoneRenderer();

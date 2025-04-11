@@ -1,10 +1,10 @@
 package dev.beast.mods.shimmer.feature.cutscene;
 
 import dev.beast.mods.shimmer.feature.misc.CameraOverride;
-import dev.beast.mods.shimmer.math.KMath;
-import dev.beast.mods.shimmer.math.Rotation;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
+import dev.latvian.mods.kmath.KMath;
+import dev.latvian.mods.kmath.Rotation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.util.FormattedCharSequence;

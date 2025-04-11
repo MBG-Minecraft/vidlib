@@ -10,9 +10,9 @@ import dev.beast.mods.shimmer.feature.location.Location;
 import dev.beast.mods.shimmer.feature.sound.PositionedSoundData;
 import dev.beast.mods.shimmer.feature.sound.SoundData;
 import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
-import dev.beast.mods.shimmer.math.Line;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.math.worldposition.EntityPositionType;
+import dev.latvian.mods.kmath.Line;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -245,5 +245,9 @@ public interface ShimmerEntity extends ShimmerLevelContainer {
 			case LOOK_TARGET -> getLookTarget(delta);
 			default -> delta == 1F ? e.position() : e.getPosition(delta);
 		};
+	}
+
+	default float getRelativeHealth(float delta) {
+		return 1F;
 	}
 }

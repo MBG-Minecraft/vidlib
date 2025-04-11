@@ -15,10 +15,10 @@ import dev.beast.mods.shimmer.feature.misc.DebugTextEvent;
 import dev.beast.mods.shimmer.feature.misc.MiscShimmerClientUtils;
 import dev.beast.mods.shimmer.feature.misc.ScreenText;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleManager;
-import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleRenderContext;
 import dev.beast.mods.shimmer.feature.structure.GhostStructure;
 import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
-import dev.beast.mods.shimmer.math.KMath;
+import dev.beast.mods.shimmer.util.FrameInfo;
+import dev.latvian.mods.kmath.KMath;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.AdvancementToast;
@@ -37,6 +37,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
@@ -118,7 +119,7 @@ public class ClientGameEventHandler {
 		NeoForge.EVENT_BUS.post(new DebugTextEvent.ClientTick(ScreenText.CLIENT_TICK));
 	}
 
-	@SubscribeEvent
+	@SubscribeEvent(priority = EventPriority.HIGH)
 	public static void renderWorld(RenderLevelStageEvent event) {
 		var mc = Minecraft.getInstance();
 
@@ -127,15 +128,18 @@ public class ClientGameEventHandler {
 		}
 
 		var session = mc.player.shimmer$sessionData();
-		float delta = event.getPartialTick().getGameTimeDeltaPartialTick(false);
-		float timerDelta = event.getPartialTick().getGameTimeDeltaPartialTick(true);
+		var frame = new FrameInfo(mc, event);
+		session.currentFrameInfo = frame;
+		session.worldMouse = null;
+		float delta = frame.worldDelta();
+		float screenDelta = frame.screenDelta();
 
 		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SKY) {
-			mc.shimmer$renderSetup(event, delta);
+			mc.shimmer$renderSetup(frame);
 		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
-			var ms = event.getPoseStack();
-			var cameraPos = event.getCamera().getPosition();
-			var frustum = event.getFrustum();
+			var ms = frame.poseStack();
+			var cameraPos = frame.camera().getPosition();
+			var frustum = frame.frustum();
 
 			if (mc.player.getShowZones()) {
 				ZoneRenderer.renderAll(mc, session, delta, ms, cameraPos, frustum);
@@ -185,7 +189,7 @@ public class ClientGameEventHandler {
 							var target = task.prevRenderTarget == null || task.renderTarget == null ? cc.prevTarget.lerp(cc.target, delta) : task.prevRenderTarget.lerp(task.renderTarget, delta);
 
 							for (var render : task.render) {
-								render.render(mc, event, delta, progress, target);
+								render.render(mc, frame, delta, progress, target);
 							}
 						}
 					}
@@ -204,11 +208,11 @@ public class ClientGameEventHandler {
 				}
 
 				var source = mc.renderBuffers().bufferSource();
-				var blockpos = BlockPos.containing(player.getLightProbePosition(timerDelta));
+				var blockpos = BlockPos.containing(player.getLightProbePosition(screenDelta));
 				int light = LightTexture.pack(mc.level.getBrightness(LightLayer.BLOCK, blockpos), mc.level.getBrightness(LightLayer.SKY, blockpos));
 
 				var cam = mc.gameRenderer.getMainCamera().getPosition();
-				var pos = player.getPosition(timerDelta);
+				var pos = player.getPosition(screenDelta);
 
 				if (KMath.sq(pos.x - cam.x) + KMath.sq(pos.z - cam.z) <= 0.01D * 0.01D) {
 					continue;
@@ -238,15 +242,7 @@ public class ClientGameEventHandler {
 				ms.popPose();
 			}
 		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
-			PhysicsParticleManager.renderAll(new PhysicsParticleRenderContext(
-				mc,
-				!mc.player.isReplayCamera(),
-				event.getPoseStack(),
-				event.getProjectionMatrix(),
-				delta,
-				event.getCamera(),
-				event.getFrustum()
-			));
+			PhysicsParticleManager.renderAll(frame);
 		}
 	}
 

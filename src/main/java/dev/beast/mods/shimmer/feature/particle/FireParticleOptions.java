@@ -8,9 +8,9 @@ import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.feature.gradient.ClientGradients;
-import dev.beast.mods.shimmer.feature.gradient.Gradient;
-import dev.beast.mods.shimmer.math.Color;
-import dev.beast.mods.shimmer.math.Easing;
+import dev.latvian.mods.kmath.color.Color;
+import dev.latvian.mods.kmath.color.Gradient;
+import dev.latvian.mods.kmath.easing.Easing;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -22,14 +22,14 @@ import java.util.function.Function;
 
 public record FireParticleOptions(Either<ResourceLocation, Gradient> gradient, int lifespan, float scale, Easing easing) implements ParticleOptions {
 	public static final MapCodec<FireParticleOptions> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-		Codec.either(ShimmerCodecs.SHIMMER_ID, Gradient.CODEC).fieldOf("gradient").forGetter(FireParticleOptions::gradient),
+		Codec.either(ShimmerCodecs.SHIMMER_ID, ClientGradients.CODEC).fieldOf("gradient").forGetter(FireParticleOptions::gradient),
 		Codec.INT.optionalFieldOf("lifespan", 100).forGetter(FireParticleOptions::lifespan),
 		Codec.FLOAT.optionalFieldOf("scale", 1F).forGetter(FireParticleOptions::scale),
 		Easing.CODEC.optionalFieldOf("easing", Easing.SINE_OUT).forGetter(FireParticleOptions::easing)
 	).apply(instance, FireParticleOptions::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, FireParticleOptions> STREAM_CODEC = CompositeStreamCodec.of(
-		ByteBufCodecs.either(ShimmerStreamCodecs.VIDEO_ID, Gradient.STREAM_CODEC), FireParticleOptions::gradient,
+		ByteBufCodecs.either(ShimmerStreamCodecs.VIDEO_ID, ClientGradients.STREAM_CODEC), FireParticleOptions::gradient,
 		ByteBufCodecs.VAR_INT, FireParticleOptions::lifespan,
 		ByteBufCodecs.FLOAT, FireParticleOptions::scale,
 		Easing.STREAM_CODEC.optional(Easing.SINE_OUT), FireParticleOptions::easing,

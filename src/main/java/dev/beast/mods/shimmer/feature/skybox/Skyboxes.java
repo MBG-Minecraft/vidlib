@@ -4,7 +4,7 @@ import dev.beast.mods.shimmer.Shimmer;
 import net.minecraft.resources.ResourceLocation;
 
 public interface Skyboxes {
-	ResourceLocation DEFAULT = Shimmer.id("default");
+	ResourceLocation VANILLA = Shimmer.id("vanilla");
 
 	ResourceLocation DAY = Shimmer.id("day");
 	ResourceLocation DAY_WITH_CELESTIALS = Shimmer.id("day_with_celestials");

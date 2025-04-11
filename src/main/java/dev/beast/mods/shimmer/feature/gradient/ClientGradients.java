@@ -1,10 +1,17 @@
 package dev.beast.mods.shimmer.feature.gradient;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.Shimmer;
-import dev.beast.mods.shimmer.math.Color;
 import dev.beast.mods.shimmer.util.registry.RegistryRef;
 import dev.beast.mods.shimmer.util.registry.ShimmerRegistry;
+import dev.latvian.mods.kmath.color.Color;
+import dev.latvian.mods.kmath.color.Gradient;
+import dev.latvian.mods.kmath.color.PixelGradient;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
@@ -12,9 +19,13 @@ import net.minecraft.util.profiling.ProfilerFiller;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public class ClientGradients extends SimplePreparableReloadListener<Map<ResourceLocation, Gradient>> {
 	public static final ShimmerRegistry<Gradient> REGISTRY = ShimmerRegistry.createClient("gradient", true);
+
+	public static final Codec<Gradient> CODEC = Codec.either(REGISTRY.valueCodec, Color.CODEC).xmap(either -> either.map(Function.identity(), Function.identity()), gradient -> gradient instanceof Color color ? Either.right(color) : Either.left(gradient));
+	public static final StreamCodec<ByteBuf, Gradient> STREAM_CODEC = ByteBufCodecs.either(REGISTRY.valueStreamCodec, Color.STREAM_CODEC).map(either -> either.map(Function.identity(), Function.identity()), gradient -> gradient instanceof Color color ? Either.right(color) : Either.left(gradient));
 
 	public static final RegistryRef<Gradient> FIRE_1 = REGISTRY.ref(Shimmer.id("fire/1"));
 	public static final RegistryRef<Gradient> FIRE_2 = REGISTRY.ref(Shimmer.id("fire/2"));

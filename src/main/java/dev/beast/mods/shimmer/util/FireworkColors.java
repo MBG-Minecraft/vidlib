@@ -1,6 +1,6 @@
 package dev.beast.mods.shimmer.util;
 
-import dev.beast.mods.shimmer.math.Color;
+import dev.latvian.mods.kmath.color.Color;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntLists;

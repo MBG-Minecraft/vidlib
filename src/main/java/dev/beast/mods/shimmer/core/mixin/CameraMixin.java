@@ -3,7 +3,7 @@ package dev.beast.mods.shimmer.core.mixin;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import dev.beast.mods.shimmer.core.ShimmerCamera;
 import dev.beast.mods.shimmer.feature.misc.CameraOverride;
-import dev.beast.mods.shimmer.math.Line;
+import dev.latvian.mods.kmath.Line;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;

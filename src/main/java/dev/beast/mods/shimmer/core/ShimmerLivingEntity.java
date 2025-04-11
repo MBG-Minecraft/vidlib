@@ -16,4 +16,10 @@ public interface ShimmerLivingEntity extends ShimmerEntity {
 	default boolean shimmer$unpushable() {
 		return false;
 	}
+
+	@Override
+	default float getRelativeHealth(float delta) {
+		var e = (LivingEntity) this;
+		return Math.clamp(e.getHealth() / e.getMaxHealth(), 0F, 1F);
+	}
 }

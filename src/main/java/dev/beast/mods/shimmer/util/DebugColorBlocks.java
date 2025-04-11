@@ -2,7 +2,7 @@ package dev.beast.mods.shimmer.util;
 
 import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
-import dev.beast.mods.shimmer.math.KMath;
+import dev.latvian.mods.kmath.KMath;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;

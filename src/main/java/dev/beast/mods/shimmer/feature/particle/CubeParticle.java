@@ -1,8 +1,8 @@
 package dev.beast.mods.shimmer.feature.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.beast.mods.shimmer.math.BoxRenderer;
-import dev.beast.mods.shimmer.math.KMath;
+import dev.latvian.mods.kmath.KMath;
+import dev.latvian.mods.kmath.render.BoxRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;

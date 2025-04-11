@@ -1,7 +1,7 @@
 package dev.beast.mods.shimmer.feature.fade;
 
-import dev.beast.mods.shimmer.math.Color;
-import dev.beast.mods.shimmer.math.Easing;
+import dev.latvian.mods.kmath.color.Color;
+import dev.latvian.mods.kmath.easing.Easing;
 
 public class ScreenFadeInstance {
 	public final Color color;

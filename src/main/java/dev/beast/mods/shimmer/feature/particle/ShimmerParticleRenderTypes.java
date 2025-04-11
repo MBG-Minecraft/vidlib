@@ -1,6 +1,6 @@
 package dev.beast.mods.shimmer.feature.particle;
 
-import dev.beast.mods.shimmer.math.DistanceComparator;
+import dev.latvian.mods.kmath.DistanceComparator;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;

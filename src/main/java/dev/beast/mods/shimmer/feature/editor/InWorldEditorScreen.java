@@ -1,6 +1,6 @@
 package dev.beast.mods.shimmer.feature.editor;
 
-import dev.beast.mods.shimmer.math.Rotation;
+import dev.latvian.mods.kmath.Rotation;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;

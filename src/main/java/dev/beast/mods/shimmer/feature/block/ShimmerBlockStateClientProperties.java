@@ -2,8 +2,8 @@ package dev.beast.mods.shimmer.feature.block;
 
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleManager;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleShape;
-import dev.beast.mods.shimmer.math.SplitBox;
 import dev.beast.mods.shimmer.util.WithCache;
+import dev.latvian.mods.kmath.SplitBox;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.world.level.block.state.BlockState;

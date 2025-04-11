@@ -2,8 +2,8 @@ package dev.beast.mods.shimmer.feature.zone.renderer;
 
 import com.mojang.math.Axis;
 import dev.beast.mods.shimmer.feature.zone.shape.RotatedBoxZoneShape;
-import dev.beast.mods.shimmer.math.BoxRenderer;
-import dev.beast.mods.shimmer.math.Color;
+import dev.latvian.mods.kmath.color.Color;
+import dev.latvian.mods.kmath.render.BoxRenderer;
 
 public class RotatedBoxZoneRenderer implements ZoneRenderer<RotatedBoxZoneShape> {
 	@Override

@@ -4,9 +4,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
-import dev.beast.mods.shimmer.math.Easing;
-import dev.beast.mods.shimmer.math.KMath;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
+import dev.latvian.mods.kmath.KMath;
+import dev.latvian.mods.kmath.easing.Easing;
 import net.minecraft.network.codec.ByteBufCodecs;
 
 public record InterpolatedWorldNumber(Easing easing, float start, float end, WorldNumber from, WorldNumber to) implements WorldNumber {

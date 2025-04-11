@@ -8,7 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 
 @AutoInit
 public interface InternalServerData {
-	DataType<ResourceLocation> SKYBOX = DataType.SERVER.internal("skybox", KnownCodec.SHIMMER_ID, Skyboxes.DEFAULT)
+	DataType<ResourceLocation> SKYBOX = DataType.SERVER.internal("skybox", KnownCodec.SHIMMER_ID, Skyboxes.DAY_WITH_CELESTIALS)
 		.save()
 		.sync()
 		.build();

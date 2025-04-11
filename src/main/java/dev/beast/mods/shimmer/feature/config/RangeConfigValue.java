@@ -1,8 +1,8 @@
 package dev.beast.mods.shimmer.feature.config;
 
 import com.mojang.serialization.DynamicOps;
-import dev.beast.mods.shimmer.math.KMath;
-import dev.beast.mods.shimmer.math.Range;
+import dev.latvian.mods.kmath.KMath;
+import dev.latvian.mods.kmath.Range;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;

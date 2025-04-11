@@ -3,7 +3,7 @@ package dev.beast.mods.shimmer.feature.zone;
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.ServerCommandHolder;
 import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
-import dev.beast.mods.shimmer.math.Color;
+import dev.latvian.mods.kmath.color.Color;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;

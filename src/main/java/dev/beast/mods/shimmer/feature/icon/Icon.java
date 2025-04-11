@@ -4,10 +4,10 @@ import com.mojang.serialization.Codec;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.codec.KnownCodec;
-import dev.beast.mods.shimmer.math.Color;
-import dev.beast.mods.shimmer.math.UV;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistry;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
+import dev.latvian.mods.kmath.color.Color;
+import dev.latvian.mods.kmath.texture.UV;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 

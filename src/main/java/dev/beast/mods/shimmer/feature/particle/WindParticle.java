@@ -1,6 +1,6 @@
 package dev.beast.mods.shimmer.feature.particle;
 
-import dev.beast.mods.shimmer.math.KMath;
+import dev.latvian.mods.kmath.KMath;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SingleQuadParticle;

@@ -1,8 +1,8 @@
 package dev.beast.mods.shimmer.feature.zone;
 
 import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
-import dev.beast.mods.shimmer.math.Line;
-import dev.beast.mods.shimmer.math.VoxelShapeBox;
+import dev.latvian.mods.kmath.Line;
+import dev.latvian.mods.kmath.VoxelShapeBox;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;

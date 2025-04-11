@@ -1,7 +1,7 @@
 package dev.beast.mods.shimmer.feature.zone.renderer;
 
 import dev.beast.mods.shimmer.feature.zone.shape.ZoneShape;
-import dev.beast.mods.shimmer.math.BoxRenderer;
+import dev.latvian.mods.kmath.render.BoxRenderer;
 
 public class BoxZoneRenderer implements ZoneRenderer<ZoneShape> {
 	public static final BoxZoneRenderer INSTANCE = new BoxZoneRenderer();

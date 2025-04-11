@@ -14,6 +14,7 @@ import dev.beast.mods.shimmer.feature.particle.ShimmerParticleRenderTypes;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleData;
 import dev.beast.mods.shimmer.feature.structure.GhostStructure;
 import dev.beast.mods.shimmer.feature.structure.StructureStorage;
+import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
@@ -53,7 +54,7 @@ public class ClientModEventHandler {
 
 	@SubscribeEvent
 	public static void registerDimensionSpecialEffects(RegisterDimensionSpecialEffectsEvent event) {
-		event.register(Shimmer.id("void"), new VoidSpecialEffects());
+		event.register(VidLib.id("void"), new VoidSpecialEffects());
 	}
 
 	@SubscribeEvent

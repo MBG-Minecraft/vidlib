@@ -27,14 +27,16 @@ import dev.beast.mods.shimmer.feature.zone.ZoneClipResult;
 import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
 import dev.beast.mods.shimmer.feature.zone.ZoneEvent;
 import dev.beast.mods.shimmer.feature.zone.shape.ZoneShape;
-import dev.beast.mods.shimmer.math.Color;
-import dev.beast.mods.shimmer.math.Range;
-import dev.beast.mods.shimmer.math.Vec2d;
-import dev.beast.mods.shimmer.math.VoxelShapeBox;
+import dev.beast.mods.shimmer.util.FrameInfo;
 import dev.beast.mods.shimmer.util.PauseType;
 import dev.beast.mods.shimmer.util.ScheduledTask;
 import dev.beast.mods.shimmer.util.Side;
 import dev.beast.mods.shimmer.util.registry.SyncedRegistry;
+import dev.latvian.mods.kmath.Range;
+import dev.latvian.mods.kmath.Vec2d;
+import dev.latvian.mods.kmath.VoxelShapeBox;
+import dev.latvian.mods.kmath.WorldMouse;
+import dev.latvian.mods.kmath.color.Color;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -77,6 +79,8 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	public List<PlayerInfo> originalListedPlayers;
 	public CameraOverride cameraOverride;
 	public ScreenFadeInstance screenFade;
+	public FrameInfo currentFrameInfo;
+	public WorldMouse worldMouse;
 
 	public ShimmerLocalClientSessionData(Minecraft mc, UUID uuid, ClientPacketListener connection) {
 		super(uuid);
@@ -128,7 +132,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 			skyboxId = player.level().getSkybox();
 		}
 
-		if (skyboxId == null || skyboxId.equals(Skyboxes.DEFAULT)) {
+		if (skyboxId == null || skyboxId.equals(Skyboxes.VANILLA)) {
 			skybox = null;
 		} else {
 			skybox = skyboxes.get(skyboxId);
@@ -219,8 +223,8 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 				var vec = instance.shake.type().get(instance.progress);
 				var intensity = instance.shake.intensity();
 				var intensityScale = instance.shake.start().easeMirrored(instance.ticks / (float) instance.shake.duration(), instance.shake.end());
-				shakeX += vec.x * intensity * intensityScale;
-				shakeY += vec.y * intensity * intensityScale;
+				shakeX += vec.x() * intensity * intensityScale;
+				shakeY += vec.y() * intensity * intensityScale;
 
 				instance.progress += instance.shake.speed();
 

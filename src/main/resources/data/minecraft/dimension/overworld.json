@@ -1,11 +1,11 @@
 {
-	"type": "shimmer:void_128",
+	"type": "vidlib:void_128",
 	"generator": {
 		"type": "minecraft:noise",
-		"settings": "shimmer:void",
+		"settings": "vidlib:void",
 		"biome_source": {
 			"type": "minecraft:fixed",
-			"biome": "shimmer:void"
+			"biome": "vidlib:overworld"
 		}
 	}
 }

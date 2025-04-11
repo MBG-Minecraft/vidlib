@@ -4,9 +4,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
-import dev.beast.mods.shimmer.math.Color;
-import dev.beast.mods.shimmer.math.UV;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
+import dev.latvian.mods.kmath.color.Color;
+import dev.latvian.mods.kmath.texture.UV;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceLocation;
 

@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.VertexBuffer;
 import dev.beast.mods.shimmer.core.ShimmerBlockState;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.shader.ShaderHolder;
+import dev.beast.mods.shimmer.util.FrameInfo;
 import net.minecraft.client.renderer.CompiledShaderProgram;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -34,15 +35,15 @@ public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
 		ALL.add(TRANSLUCENT);
 	}
 
-	public static void renderAll(PhysicsParticleRenderContext ctx) {
-		var lightmapTextureManager = ctx.mc().gameRenderer.lightTexture();
+	public static void renderAll(FrameInfo frame) {
+		var lightmapTextureManager = frame.mc().gameRenderer.lightTexture();
 		lightmapTextureManager.turnOnLightLayer();
 		var matrix = RenderSystem.getModelViewStack();
 		matrix.pushMatrix();
-		matrix.mul(ctx.poseStack().last().pose());
+		matrix.mul(frame.poseStack().last().pose());
 
 		for (var manager : ALL) {
-			manager.render(matrix, ctx);
+			manager.render(matrix, frame);
 		}
 
 		matrix.popMatrix();
@@ -128,7 +129,7 @@ public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
 		pModel.upload();
 	}
 
-	public void render(Matrix4fStack matrix, PhysicsParticleRenderContext ctx) {
+	public void render(Matrix4fStack matrix, FrameInfo frame) {
 		rendered = 0;
 		buffersSwitched = 0;
 
@@ -146,11 +147,11 @@ public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
 
 		renderType.setupRenderState();
 
-		var tex = ctx.mc().getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS);
+		var tex = frame.mc().getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS);
 		tex.setFilter(false, mipmaps);
 		RenderSystem.setShaderTexture(0, tex.getId());
 
-		pProjection.set(ctx.projectionMatrix());
+		pProjection.set(frame.projectionMatrix());
 		program.bindSampler("Sampler0", RenderSystem.getShaderTexture(0));
 		program.apply();
 
@@ -160,7 +161,7 @@ public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
 		var buffer = new VertexBuffer[1];
 
 		for (var p : particles) {
-			p.render(matrix, ctx, buffer);
+			p.render(matrix, frame, buffer);
 		}
 
 		VertexBuffer.unbind();
