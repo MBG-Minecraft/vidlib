@@ -8,7 +8,7 @@ version = "${version}"
 displayName = "Shimmer"
 authors = "latvian.dev"
 logoFile = "shimmer_logo.png"
-logoBlur = true
+logoBlur = false
 
 [[dependencies.shimmer]]
 modId = "neoforge"
