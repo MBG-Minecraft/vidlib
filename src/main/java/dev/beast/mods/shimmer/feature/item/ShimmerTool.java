@@ -111,4 +111,8 @@ public interface ShimmerTool {
 
 	default void debugText(Player player, ItemStack item, @Nullable HitResult hit, ScreenText screenText) {
 	}
+
+	default ToolVisuals visuals(Player player, ItemStack item, float delta) {
+		return ToolVisuals.NONE;
+	}
 }

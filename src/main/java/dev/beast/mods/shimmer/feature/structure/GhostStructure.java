@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
 import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
 import dev.beast.mods.shimmer.util.JsonCodecReloadListener;
+import dev.latvian.mods.kmath.Rotation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 
@@ -16,14 +17,14 @@ public record GhostStructure(
 	EntityFilter visibleTo,
 	Vec3 pos,
 	Vec3 scale,
-	Vec3 rotation
+	Rotation rotation
 ) {
 	public static final Codec<GhostStructure> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		StructureRenderer.GHOST_CODEC.fieldOf("structure").forGetter(GhostStructure::structure),
 		EntityFilter.CODEC.optionalFieldOf("visible_to", EntityFilter.ANY.instance()).forGetter(GhostStructure::visibleTo),
 		ShimmerCodecs.VEC_3.fieldOf("pos").forGetter(GhostStructure::pos),
 		ShimmerCodecs.VEC_3.optionalFieldOf("scale", new Vec3(1D, 1D, 1D)).forGetter(GhostStructure::scale),
-		ShimmerCodecs.VEC_3.optionalFieldOf("rotation", Vec3.ZERO).forGetter(GhostStructure::rotation)
+		Rotation.CODEC.optionalFieldOf("rotation", Rotation.NONE).forGetter(GhostStructure::rotation)
 	).apply(instance, GhostStructure::new));
 
 	public static List<GhostStructure> LIST = List.of();

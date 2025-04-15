@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.feature.session;
 
+import dev.beast.mods.shimmer.util.Empty;
 import net.minecraft.network.chat.Component;
 
 import java.util.HashSet;
@@ -15,14 +16,18 @@ public class ShimmerClientSessionData extends ShimmerSessionData {
 	}
 
 	public Component modifyPlayerName(Component original) {
-		if (namePrefix != null || nameSuffix != null) {
+		if (namePrefix != null || nameSuffix != null || !Empty.isEmpty(nickname)) {
 			var name = Component.empty();
 
 			if (namePrefix != null) {
 				name.append(namePrefix);
 			}
 
-			name.append(original);
+			if (Empty.isEmpty(nickname)) {
+				name.append(original);
+			} else {
+				name.append(nickname);
+			}
 
 			if (nameSuffix != null) {
 				name.append(nameSuffix);

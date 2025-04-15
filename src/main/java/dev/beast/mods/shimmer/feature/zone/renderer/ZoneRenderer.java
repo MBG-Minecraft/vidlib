@@ -1,10 +1,8 @@
 package dev.beast.mods.shimmer.feature.zone.renderer;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.beast.mods.shimmer.core.ShimmerBlockInWorld;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.block.filter.BlockFilter;
-import dev.beast.mods.shimmer.feature.session.ShimmerLocalClientSessionData;
 import dev.beast.mods.shimmer.feature.zone.ZoneRenderType;
 import dev.beast.mods.shimmer.feature.zone.shape.RotatedBoxZoneShape;
 import dev.beast.mods.shimmer.feature.zone.shape.SphereZoneShape;
@@ -12,17 +10,15 @@ import dev.beast.mods.shimmer.feature.zone.shape.UniverseZoneShape;
 import dev.beast.mods.shimmer.feature.zone.shape.ZoneShape;
 import dev.beast.mods.shimmer.feature.zone.shape.ZoneShapeGroup;
 import dev.beast.mods.shimmer.util.Cast;
+import dev.beast.mods.shimmer.util.FrameInfo;
 import dev.beast.mods.shimmer.util.registry.SimpleRegistryType;
 import dev.latvian.mods.kmath.SpherePoints;
 import dev.latvian.mods.kmath.VoxelShapeBox;
 import dev.latvian.mods.kmath.color.Color;
 import dev.latvian.mods.kmath.render.BoxRenderer;
 import dev.latvian.mods.kmath.render.SphereRenderer;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.util.Mth;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -30,9 +26,9 @@ import java.util.Map;
 public interface ZoneRenderer<T extends ZoneShape> {
 	Map<SimpleRegistryType<?>, ZoneRenderer<?>> RENDERERS = new IdentityHashMap<>();
 
-	record Context(Minecraft mc, PoseStack poseStack, Vec3 cameraPos, Frustum frustum, float delta, Color color, Color outlineColor) {
+	record Context(FrameInfo frame, Color color, Color outlineColor) {
 		public MultiBufferSource buffers() {
-			return mc.renderBuffers().bufferSource();
+			return frame.buffers();
 		}
 	}
 
@@ -53,24 +49,31 @@ public interface ZoneRenderer<T extends ZoneShape> {
 		return renderer == null ? BoxZoneRenderer.INSTANCE : renderer;
 	}
 
-	static void renderAll(Minecraft mc, ShimmerLocalClientSessionData session, float delta, PoseStack ms, Vec3 cameraPos, Frustum frustum) {
+	static void renderAll(FrameInfo frame) {
+		var mc = frame.mc();
+		var ms = frame.poseStack();
+		var cameraPos = frame.camera().getPosition();
+		var frustum = frame.frustum();
 		var renderType = mc.player.getZoneRenderType();
+		var buffers = frame.buffers();
+		var session = frame.session();
+		var clip = session.zoneClip;
 
-		if (session.zoneClip != null && session.zoneClip.pos() != null) {
+		if (clip != null && clip.pos() != null) {
 			ms.pushPose();
-			ms.translate(session.zoneClip.pos().x - cameraPos.x, session.zoneClip.pos().y - cameraPos.y, session.zoneClip.pos().z - cameraPos.z);
+			frame.translate(clip.pos());
 			ms.scale(0.25F, 0.25F, 0.25F);
-			SphereRenderer.renderDebugLines(SpherePoints.L, ms, mc.renderBuffers().bufferSource(), Color.BLACK);
+			SphereRenderer.renderDebugLines(SpherePoints.L, ms, buffers, Color.BLACK);
 			ms.popPose();
 		}
 
 		if (renderType == ZoneRenderType.COLLISIONS) {
 			for (var sz : session.filteredZones.getSolidZones()) {
 				if (sz.instance().zone.shape().closestDistanceTo(cameraPos) <= 2000D && frustum.isVisible(sz.instance().zone.shape().getBoundingBox())) {
-					boolean hovered = session.zoneClip != null && session.zoneClip.instance() == sz.instance();
+					boolean hovered = clip != null && clip.instance() == sz.instance();
 					var baseColor = sz.instance().zone.color().withAlpha(50);
 					var outlineColor = hovered ? Color.WHITE : sz.instance().entities.isEmpty() ? sz.instance().zone.color() : Color.GREEN;
-					BoxRenderer.renderVoxelShape(ms, mc.renderBuffers().bufferSource(), sz.shapeBox(), cameraPos.reverse(), false, baseColor, outlineColor);
+					BoxRenderer.renderVoxelShape(ms, buffers, sz.shapeBox(), cameraPos.reverse(), false, baseColor, outlineColor);
 				}
 			}
 		} else {
@@ -80,12 +83,12 @@ public interface ZoneRenderer<T extends ZoneShape> {
 						var renderer = ZoneRenderer.get(instance.zone.shape().type());
 
 						if (renderer != EmptyZoneRenderer.INSTANCE) {
-							boolean hovered = session.zoneClip != null && session.zoneClip.instance() == instance;
+							boolean hovered = clip != null && clip.instance() == instance;
 							var baseColor = instance.zone.color().withAlpha(50);
 							var outlineColor = hovered ? Color.WHITE : instance.entities.isEmpty() ? instance.zone.color() : Color.GREEN;
 
 							if (renderType == ZoneRenderType.NORMAL) {
-								renderer.render(Cast.to(instance.zone.shape()), new ZoneRenderer.Context(mc, ms, cameraPos, frustum, delta, baseColor, outlineColor));
+								renderer.render(Cast.to(instance.zone.shape()), new ZoneRenderer.Context(frame, baseColor, outlineColor));
 							} else if (renderType == ZoneRenderType.BLOCKS) {
 								if (session.cachedZoneShapes == null) {
 									session.cachedZoneShapes = new IdentityHashMap<>();
@@ -112,7 +115,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 									});
 								}
 
-								BoxRenderer.renderVoxelShape(ms, mc.renderBuffers().bufferSource(), voxelShape, cameraPos.reverse(), true, baseColor, outlineColor);
+								BoxRenderer.renderVoxelShape(ms, buffers, voxelShape, cameraPos.reverse(), true, baseColor, outlineColor);
 							}
 						}
 					}
@@ -121,17 +124,17 @@ public interface ZoneRenderer<T extends ZoneShape> {
 		}
 	}
 
-	static void renderSolid(Minecraft mc, ShimmerLocalClientSessionData session, float delta, PoseStack ms, Vec3 cameraPos, Frustum frustum) {
-		for (var sz : session.filteredZones.getSolidZones()) {
+	static void renderSolid(FrameInfo frame) {
+		for (var sz : frame.session().filteredZones.getSolidZones()) {
 			var zone = sz.instance().zone;
-			double dist = zone.shape().closestDistanceTo(cameraPos);
+			double dist = zone.shape().closestDistanceTo(frame.camera().getPosition());
 
-			if (dist <= 10D && zone.color().alpha() > 0 && frustum.isVisible(zone.shape().getBoundingBox()) && zone.solid().test(mc.player)) {
+			if (dist <= 10D && zone.color().alpha() > 0 && frame.frustum().isVisible(zone.shape().getBoundingBox()) && zone.solid().test(frame.mc().player)) {
 				var renderer = ZoneRenderer.get(zone.shape().type());
 
 				if (renderer != null) {
 					var baseColor = zone.color().withAlpha(Mth.lerpInt((float) (dist / 10D), 100, 0));
-					renderer.render(Cast.to(zone.shape()), new ZoneRenderer.Context(mc, ms, cameraPos, frustum, delta, baseColor, Color.TRANSPARENT));
+					renderer.render(Cast.to(zone.shape()), new ZoneRenderer.Context(frame, baseColor, Color.TRANSPARENT));
 				}
 			}
 		}

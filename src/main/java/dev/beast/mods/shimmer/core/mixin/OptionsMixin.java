@@ -1,7 +1,7 @@
 package dev.beast.mods.shimmer.core.mixin;
 
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
-import dev.beast.mods.shimmer.feature.misc.MiscShimmerClientUtils;
+import dev.beast.mods.shimmer.feature.misc.GlobalKeybinds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
@@ -40,8 +40,8 @@ public abstract class OptionsMixin {
 
 	@Redirect(method = "processOptionsForge", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Options$FieldAccess;process(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;"))
 	private String shimmer$processOptionsForge(Options.FieldAccess fieldAccess, String key, String fallback) {
-		var json = MiscShimmerClientUtils.KEYBINDS.get().get(key.substring(4));
-		return json == null ? fallback : json.getAsString();
+		var override = key.startsWith("key_") ? GlobalKeybinds.get(key.substring(4)) : null;
+		return override == null ? fallback : override;
 	}
 
 	@Inject(method = "save", at = @At("HEAD"))

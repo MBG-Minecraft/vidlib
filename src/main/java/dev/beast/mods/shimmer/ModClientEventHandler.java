@@ -35,7 +35,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-public class ClientModEventHandler {
+public class ModClientEventHandler {
 	@SubscribeEvent
 	public static void addReloadListeners(AddClientReloadListenersEvent event) {
 		event.addListener(Shimmer.id("structure"), new StructureStorage(StructureStorage.CLIENT));
@@ -74,7 +74,7 @@ public class ClientModEventHandler {
 
 	@SubscribeEvent
 	public static void registerRenderStateModifiers(RegisterRenderStateModifiersEvent event) {
-		event.registerEntityModifier(PlayerRenderer.class, ClientModEventHandler::modifyPlayerRenderState);
+		event.registerEntityModifier(PlayerRenderer.class, ModClientEventHandler::modifyPlayerRenderState);
 	}
 
 	private static void modifyPlayerRenderState(AbstractClientPlayer player, PlayerRenderState state) {
@@ -103,6 +103,7 @@ public class ClientModEventHandler {
 
 	@SubscribeEvent
 	public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
-		event.register(MiscShimmerClientUtils.freezeTickKeyMapping = new KeyMapping("key.shimmer.freeze_tick", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_P, "key.categories.shimmer"));
+		event.register(MiscShimmerClientUtils.freezeTickKeyMapping = new KeyMapping("key.vidlib.freeze_tick", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_P, "key.categories.vidlib"));
+		event.register(MiscShimmerClientUtils.clearParticlesKeyMapping = new KeyMapping("key.vidlib.clear_particles", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_L, "key.categories.vidlib"));
 	}
 }

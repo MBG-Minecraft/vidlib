@@ -23,8 +23,6 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-
 public class PositionToolItem implements ShimmerTool {
 	public enum Type {
 		BLOCK("Block"),
@@ -51,7 +49,8 @@ public class PositionToolItem implements ShimmerTool {
 		}
 	}
 
-	public static Vec3 lastClick = null;
+	public Vec3 lastClick = null;
+	public Vec3 clientPos = null;
 
 	@AutoInit
 	public static void bootstrap() {
@@ -153,13 +152,13 @@ public class PositionToolItem implements ShimmerTool {
 		}
 
 		var pos = hit instanceof BlockHitResult blockHit ? mode.position(player, blockHit) : mode.position(player, null);
+		clientPos = pos == null ? null : pos.subtract(0.5D, 0.5D, 0.5D);
 
 		if (pos == null) {
 			return;
 		}
 
 		var blockPos = BlockPos.containing(pos);
-		player.level().cubeParticles(new CubeParticleOptions(Color.CYAN, Color.WHITE, 1), List.of(blockPos));
 
 		screenText.topRight.add(player.level().getBlockState(blockPos).getBlock().getName());
 		screenText.topRight.add(KMath.formatBlockPos(blockPos));
@@ -168,5 +167,14 @@ public class PositionToolItem implements ShimmerTool {
 		if (lastClick != null) {
 			screenText.topRight.add(KMath.format(lastClick.distanceTo(pos)) + " m");
 		}
+	}
+
+	@Override
+	public ToolVisuals visuals(Player player, ItemStack item, float delta) {
+		if (clientPos != null) {
+			return ToolVisuals.cube(clientPos);
+		}
+
+		return ToolVisuals.NONE;
 	}
 }

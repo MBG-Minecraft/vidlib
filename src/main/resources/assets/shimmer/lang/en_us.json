@@ -1,6 +1,7 @@
 {
-	"key.categories.shimmer": "Shimmer",
-	"key.shimmer.freeze_tick": "Freeze Tick",
+	"key.categories.vidlib": "VidLib",
+	"key.vidlib.freeze_tick": "Freeze Tick",
+	"key.vidlib.clear_particles": "Clear Particles",
 	"block.shimmer.money_block": "Money Block",
 	"block.shimmer.banded_money_block": "Banded Money Block",
 	"item.shimmer.money": "Money",

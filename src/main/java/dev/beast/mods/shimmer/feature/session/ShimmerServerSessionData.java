@@ -51,12 +51,12 @@ public class ShimmerServerSessionData extends ShimmerSessionData {
 			packets.s2c(new SyncRegistryPayload(reg, Map.copyOf(reg.registry().getMap())));
 		}
 
+		updateOverrides(player);
+
 		if (login) {
 			player.refreshDisplayName();
 			player.refreshTabListName();
 		}
-
-		updateOverrides(player);
 
 		player.server.sync(packets, player);
 		dataMap.syncAll(packets, player, SyncPlayerDataPayload::new);

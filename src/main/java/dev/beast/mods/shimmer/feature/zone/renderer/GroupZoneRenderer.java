@@ -7,7 +7,7 @@ public class GroupZoneRenderer implements ZoneRenderer<ZoneShapeGroup> {
 	@Override
 	public void render(ZoneShapeGroup group, Context ctx) {
 		for (var shape : group.zoneShapes()) {
-			if (ctx.frustum().isVisible(shape.getBoundingBox())) {
+			if (ctx.frame().frustum().isVisible(shape.getBoundingBox())) {
 				var renderer = ZoneRenderer.get(shape.type());
 
 				if (renderer != EmptyZoneRenderer.INSTANCE) {

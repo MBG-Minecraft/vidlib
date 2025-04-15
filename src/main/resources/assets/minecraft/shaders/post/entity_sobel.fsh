@@ -1,7 +1,7 @@
 #version 150
 
 uniform sampler2D InSampler;
-uniform float Size;
+uniform vec2 OutSize;
 
 in vec2 texCoord;
 in vec2 oneTexel;
@@ -11,12 +11,13 @@ out vec4 fragColor;
 void main() {
 	vec3 result = vec3(0.0);
 	float count = 0.0;
-	float max = 0.0;
-	float size = ceil(Size);
-	float maxDist = Size * Size;
+	float maxCount = 0.0;
+	float size = max(1.0, OutSize.x / 1920.0 * 2.0);
+	float csize = ceil(size);
+	float maxDist = size * size;
 
-	for (float x = -size; x <= size; x += 1.0) {
-		for (float y = -size; y <= size; y += 1.0) {
+	for (float x = -csize; x <= csize; x += 1.0) {
+		for (float y = -csize; y <= csize; y += 1.0) {
 			float dist = x * x + y * y;
 
 			if (dist <= maxDist) {
@@ -27,14 +28,14 @@ void main() {
 					count += 1.0;
 				}
 
-				max += 1.0;
+				maxCount += 1.0;
 			}
 		}
 	}
 
-	if (count == 0.0 || count == max) {
+	if (count == 0.0 || maxCount == 0.0 || count == maxCount) {
 		discard;
 	}
 
-	fragColor = vec4(result / count, 1.0);
+	fragColor = vec4(result / count, clamp((count + 1.0) / maxCount, 0.0, 1.0));
 }
