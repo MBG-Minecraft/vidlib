@@ -12,8 +12,8 @@
 		"CollisionGetterMixin",
 		"ComponentMixin",
 		"CoralBlockMixin",
+		"DataResultMixin",
 		"DimensionTypeMixin",
-		"DistanceManagerMixin",
 		"EntityMixin",
 		"FallingBlockMixin",
 		"FillCommandMixin",
@@ -51,9 +51,11 @@
 	"client": [
 		"AbstractClientPlayerMixin",
 		"BiomeAmbientSoundsHandlerMixin",
+		"BlockEntityWithBoundingBoxRendererMixin",
 		"CameraMixin",
 		"ClientLevelMixin",
 		"ClientPacketListenerMixin",
+		"CreativeModeInventoryScreenMixin",
 		"DefaultPlayerSkinMixin",
 		"EntityRendererMixin",
 		"FireworkParticlesStarterMixin",
@@ -80,8 +82,7 @@
 		"ScreenMixin",
 		"SectionOcclusionGraphMixin",
 		"ShaderManagerMixin",
-		"SkyRendererMixin",
-		"StructureBlockRendererMixin"
+		"SkyRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1,

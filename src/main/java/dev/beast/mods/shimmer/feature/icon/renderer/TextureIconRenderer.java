@@ -2,7 +2,7 @@ package dev.beast.mods.shimmer.feature.icon.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.beast.mods.shimmer.feature.icon.TextureIcon;
-import dev.beast.mods.shimmer.util.ShimmerRenderTypes;
+import dev.beast.mods.shimmer.util.client.ShimmerRenderTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import org.joml.Vector3f;

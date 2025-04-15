@@ -6,17 +6,16 @@ import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.latvian.mods.kmath.AAIBB;
+import dev.latvian.mods.vidlib.VidLib;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.TicketType;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.world.chunk.TicketController;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -48,5 +47,5 @@ public record Anchor(List<Area> areas, Map<ResourceKey<Level>, List<AAIBB>> shap
 	);
 
 	public static final KnownCodec<Anchor> KNOWN_CODEC = KnownCodec.register(Shimmer.id("anchor"), CODEC, STREAM_CODEC, Anchor.class);
-	public static final TicketType<ChunkPos> TICKET_TYPE = TicketType.create("shimmer:anchor", Comparator.comparingLong(ChunkPos::toLong));
+	public static final TicketController TICKET_CONTROLLER = new TicketController(VidLib.id("anchor"));
 }

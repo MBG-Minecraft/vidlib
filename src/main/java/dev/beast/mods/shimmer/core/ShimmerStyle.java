@@ -12,7 +12,7 @@ public interface ShimmerStyle {
 	}
 
 	default Style withHoverText(Component component) {
-		return shimmer$self().withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component));
+		return shimmer$self().withHoverEvent(new HoverEvent.ShowText(component));
 	}
 
 	default Style withHoverText(String text) {
@@ -20,15 +20,15 @@ public interface ShimmerStyle {
 	}
 
 	default Style withClickToRunCommand(String string) {
-		return shimmer$self().withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, string));
+		return shimmer$self().withClickEvent(new ClickEvent.RunCommand(string));
 	}
 
 	default Style withClickToSuggestCommand(String string) {
-		return shimmer$self().withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, string));
+		return shimmer$self().withClickEvent(new ClickEvent.SuggestCommand(string));
 	}
 
 	default Style withClickToCopyToClipboard(String string) {
-		return shimmer$self().withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, string));
+		return shimmer$self().withClickEvent(new ClickEvent.CopyToClipboard(string));
 	}
 
 	default Style withCopyString(String string) {

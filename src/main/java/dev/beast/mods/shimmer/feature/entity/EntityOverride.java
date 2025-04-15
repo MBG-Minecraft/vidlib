@@ -122,6 +122,7 @@ public final class EntityOverride<T> {
 	public static final EntityOverride<Range> AMBIENT_LIGHT = createKey("ambient_light", KnownCodec.RANGE);
 	public static final EntityOverride<FogOverride> FOG = createKey("fog", FogOverride.KNOWN_CODEC);
 	public static final EntityOverride<Boolean> UNPUSHABLE = createBooleanKey("unpushable");
+	public static final EntityOverride<Component> NICKNAME = createKey("nickname", KnownCodec.TEXT_COMPONENT);
 	public static final EntityOverride<Component> NAME_PREFIX = createKey("name_prefix", KnownCodec.TEXT_COMPONENT);
 	public static final EntityOverride<Component> NAME_SUFFIX = createKey("name_suffix", KnownCodec.TEXT_COMPONENT);
 	public static final EntityOverride<Component> SCORE_TEXT = createKey("score_text", KnownCodec.TEXT_COMPONENT);
@@ -169,6 +170,16 @@ public final class EntityOverride<T> {
 		var e = (Entity) entity;
 
 		if (e instanceof Player) {
+			var f = ForcedPlayerOverrides.MAP.get(e.getUUID());
+
+			if (f != null) {
+				var fo = f.get(this);
+
+				if (fo != null) {
+					return Cast.to(fo);
+				}
+			}
+
 			for (var instance : e.getZones()) {
 				var v1 = instance.zone.playerOverrides().get(this);
 

@@ -50,7 +50,7 @@ public interface ShimmerPlayer extends ShimmerLivingEntity, ShimmerPlayerContain
 	}
 
 	default Component getNickname() {
-		return get(InternalPlayerData.NICKNAME);
+		return shimmer$sessionData().nickname;
 	}
 
 	default void setNickname(Component nickname) {

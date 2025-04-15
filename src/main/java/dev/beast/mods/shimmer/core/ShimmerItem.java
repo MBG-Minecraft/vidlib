@@ -14,7 +14,7 @@ public interface ShimmerItem {
 		} else {
 			var newTag = data.copyTag();
 
-			for (var key : tag.getAllKeys()) {
+			for (var key : tag.keySet()) {
 				newTag.put(key, tag.get(key));
 			}
 

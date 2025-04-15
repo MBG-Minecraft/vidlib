@@ -139,7 +139,7 @@ public interface ShimmerStreamCodecs {
 			VarInt.write(buf, value.size());
 
 			if (!value.isEmpty()) {
-				for (var key : value.getAllKeys()) {
+				for (var key : value.keySet()) {
 					ByteBufCodecs.STRING_UTF8.encode(buf, key);
 					ByteBufCodecs.TAG.encode(buf, value.get(key));
 				}

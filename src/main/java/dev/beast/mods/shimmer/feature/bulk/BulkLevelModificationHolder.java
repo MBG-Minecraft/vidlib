@@ -133,7 +133,7 @@ public class BulkLevelModificationHolder implements BlockModificationConsumer {
 								var prevState = sd.levelChunk.getBlockState(blockPos);
 
 								if (prevState != state) {
-									sd.levelChunk.setBlockState(blockPos, state, false);
+									sd.levelChunk.setBlockState(blockPos, state, 0);
 
 									if (server) {
 										toClient.set(blockPos, state);

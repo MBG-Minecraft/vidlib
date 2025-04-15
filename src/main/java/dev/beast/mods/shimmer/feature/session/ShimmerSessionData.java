@@ -11,6 +11,7 @@ import dev.beast.mods.shimmer.feature.entity.EntityOverrideValue;
 import dev.beast.mods.shimmer.feature.icon.IconHolder;
 import dev.beast.mods.shimmer.feature.input.PlayerInput;
 import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
+import dev.beast.mods.shimmer.util.Empty;
 import dev.beast.mods.shimmer.util.registry.SyncedRegistry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -43,6 +44,7 @@ public class ShimmerSessionData {
 	public IconHolder plumbobIcon;
 	public Clothing clothing;
 	public boolean unpushable;
+	public Component nickname;
 	public Component namePrefix;
 	public Component nameSuffix;
 	public Component scoreText;
@@ -67,6 +69,7 @@ public class ShimmerSessionData {
 		this.plumbobIcon = IconHolder.EMPTY;
 		this.clothing = null;
 		this.unpushable = false;
+		this.nickname = null;
 		this.namePrefix = null;
 		this.nameSuffix = null;
 		this.scoreText = null;
@@ -92,6 +95,7 @@ public class ShimmerSessionData {
 		plumbobIcon = EntityOverride.PLUMBOB.get(player, IconHolder.EMPTY, InternalPlayerData.PLUMBOB);
 		clothing = EntityOverride.CLOTHING.get(player, Clothing.NONE, InternalPlayerData.CLOTHING);
 		unpushable = suspended || EntityOverride.UNPUSHABLE.get(player, false);
+		nickname = EntityOverride.NICKNAME.get(player, Empty.COMPONENT, InternalPlayerData.NICKNAME);
 		namePrefix = EntityOverride.NAME_PREFIX.get(player);
 		nameSuffix = EntityOverride.NAME_SUFFIX.get(player);
 		scoreText = EntityOverride.SCORE_TEXT.get(player);

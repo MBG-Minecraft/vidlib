@@ -1,6 +1,6 @@
 package dev.beast.mods.shimmer.feature.particle.physics;
 
-import com.mojang.blaze3d.vertex.VertexBuffer;
+import com.mojang.blaze3d.systems.RenderSystem;
 import dev.beast.mods.shimmer.util.FrameInfo;
 import dev.latvian.mods.kmath.KMath;
 import net.minecraft.core.BlockPos;
@@ -8,14 +8,15 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import org.jetbrains.annotations.NotNull;
 import org.joml.FrustumIntersection;
 import org.joml.Matrix4fStack;
 
 import java.util.Comparator;
 
-public class PhysicsParticle {
+public class PhysicsParticle implements Comparable<PhysicsParticle> {
 	public static final double SQRT_2 = Math.sqrt(2);
-	public static final Comparator<PhysicsParticle> COMPARATOR = Comparator.comparingInt(PhysicsParticle::order);
+	public static final Comparator<PhysicsParticle> COMPARATOR = Comparable::compareTo;
 
 	public PhysicsParticleManager manager;
 	public RandomSource random;
@@ -34,6 +35,7 @@ public class PhysicsParticle {
 	public float velocityMultiplier;
 	public float gravityStrength;
 	public float spin;
+	public int tint;
 	public float red, green, blue, alpha;
 
 	public float flatColorMod;
@@ -43,7 +45,7 @@ public class PhysicsParticle {
 	public int prevBlockStateType = -1;
 	public int blockStateType = -1;
 
-	public void render(Matrix4fStack matrix, FrameInfo frame, VertexBuffer[] buffer) {
+	public void render(Matrix4fStack matrix, FrameInfo frame, PhysicsParticleRenderPass pass) {
 		float delta = frame.worldDelta();
 		float dScale = KMath.lerp(delta, prevScale, scale);
 
@@ -51,7 +53,6 @@ public class PhysicsParticle {
 			return;
 		}
 
-		var camera = frame.camera();
 		var frustum = frame.frustum();
 
 		double rx = KMath.lerp(delta, prevX, x);
@@ -64,11 +65,9 @@ public class PhysicsParticle {
 			return;
 		}
 
-		var particleBuffer = shape.getBuffer();
-
-		float ox = (float) (rx - camera.getPosition().x);
-		float oy = (float) (ry - camera.getPosition().y);
-		float oz = (float) (rz - camera.getPosition().z);
+		float ox = frame.x(rx);
+		float oy = frame.y(ry);
+		float oz = frame.z(rz);
 
 		matrix.pushMatrix();
 		matrix.translate(ox, oy, oz);
@@ -91,21 +90,25 @@ public class PhysicsParticle {
 			matrix.scale(dScale);
 		}
 
-		manager.setModelMatrix(matrix);
-		matrix.popMatrix();
-		manager.setTint(red, green, blue, alpha);
+		RenderSystem.setShaderColor(red, green, blue, alpha);
 
-		if (buffer[0] != particleBuffer) {
-			if (buffer[0] != null) {
-				VertexBuffer.unbind();
+		var buffers = shape.getBuffers();
+
+		if (pass.lastBuffers != buffers) {
+			pass.lastBuffers = buffers;
+
+			if (buffers != null) {
+				pass.renderPass.setVertexBuffer(0, buffers.vertexBuffer());
 			}
 
-			buffer[0] = particleBuffer;
-			particleBuffer.bind();
 			manager.buffersSwitched++;
 		}
 
-		particleBuffer.draw();
+		if (buffers != null) {
+			pass.renderPass.drawIndexed(0, buffers.indexCount());
+		}
+
+		matrix.popMatrix();
 		manager.rendered++;
 	}
 
@@ -213,7 +216,14 @@ public class PhysicsParticle {
 		scale *= scaleMul;
 	}
 
-	public int order() {
-		return shape.hashCode();
+	@Override
+	public int compareTo(@NotNull PhysicsParticle o) {
+		int i = Integer.compare(shape.hashCode(), o.shape.hashCode());
+
+		if (i == 0) {
+			i = Integer.compare(tint, o.tint);
+		}
+
+		return i;
 	}
 }

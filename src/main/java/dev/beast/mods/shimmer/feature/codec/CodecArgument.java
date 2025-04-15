@@ -18,7 +18,7 @@ public record CodecArgument<T>(DynamicOps<Tag> ops, KnownCodec<T> knownCodec) im
 
 	@Override
 	public T parse(StringReader reader) throws CommandSyntaxException {
-		var tag = new TagParser(reader).readValue();
+		var tag = TagParser.parseCompoundAsArgument(reader);
 		var decoded = knownCodec.codec().parse(ops, tag);
 
 		if (decoded.isError()) {

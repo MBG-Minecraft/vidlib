@@ -63,8 +63,8 @@ public class FreeCamera implements ControlledCameraOverride {
 			my += 1D;
 		}
 
-		if (in.forwardImpulse != 0F || in.leftImpulse != 0F) {
-			var vec = new Vector3f(-in.leftImpulse, 0F, -in.forwardImpulse);
+		if (in.moveVector.lengthSquared() > 0F) {
+			var vec = new Vector3f(-in.moveVector.x, 0F, -in.moveVector.y);
 			vec.rotateY((float) Math.toRadians(180F - rotation.yawDeg()));
 			mx += vec.x;
 			mz += vec.z;

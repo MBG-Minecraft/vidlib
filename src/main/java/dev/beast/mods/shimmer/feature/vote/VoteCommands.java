@@ -28,18 +28,18 @@ public class VoteCommands {
 									.executes(ctx -> yesNoScreen(
 										EntityArgument.getPlayers(ctx, "player"),
 										CompoundTagArgument.getCompoundTag(ctx, "extra-data"),
-										ComponentArgument.getComponent(ctx, "title"),
-										ComponentArgument.getComponent(ctx, "subtitle"),
-										ComponentArgument.getComponent(ctx, "yes-label"),
-										ComponentArgument.getComponent(ctx, "no-label")
+										ComponentArgument.getResolvedComponent(ctx, "title"),
+										ComponentArgument.getResolvedComponent(ctx, "subtitle"),
+										ComponentArgument.getResolvedComponent(ctx, "yes-label"),
+										ComponentArgument.getResolvedComponent(ctx, "no-label")
 									))
 								)
 							)
 							.executes(ctx -> yesNoScreen(
 								EntityArgument.getPlayers(ctx, "player"),
 								CompoundTagArgument.getCompoundTag(ctx, "extra-data"),
-								ComponentArgument.getComponent(ctx, "title"),
-								ComponentArgument.getComponent(ctx, "subtitle"),
+								ComponentArgument.getResolvedComponent(ctx, "title"),
+								ComponentArgument.getResolvedComponent(ctx, "subtitle"),
 								CommonComponents.GUI_YES,
 								CommonComponents.GUI_NO
 							))
@@ -47,7 +47,7 @@ public class VoteCommands {
 						.executes(ctx -> yesNoScreen(
 							EntityArgument.getPlayers(ctx, "player"),
 							CompoundTagArgument.getCompoundTag(ctx, "extra-data"),
-							ComponentArgument.getComponent(ctx, "title"),
+							ComponentArgument.getResolvedComponent(ctx, "title"),
 							Component.empty(),
 							CommonComponents.GUI_YES,
 							CommonComponents.GUI_NO
@@ -62,14 +62,14 @@ public class VoteCommands {
 							.executes(ctx -> numberScreen(
 								EntityArgument.getPlayers(ctx, "player"),
 								CompoundTagArgument.getCompoundTag(ctx, "extra-data"),
-								ComponentArgument.getComponent(ctx, "title"),
-								ComponentArgument.getComponent(ctx, "subtitle")
+								ComponentArgument.getResolvedComponent(ctx, "title"),
+								ComponentArgument.getResolvedComponent(ctx, "subtitle")
 							))
 						)
 						.executes(ctx -> numberScreen(
 							EntityArgument.getPlayers(ctx, "player"),
 							CompoundTagArgument.getCompoundTag(ctx, "extra-data"),
-							ComponentArgument.getComponent(ctx, "title"),
+							ComponentArgument.getResolvedComponent(ctx, "title"),
 							Component.empty()
 						))
 					)

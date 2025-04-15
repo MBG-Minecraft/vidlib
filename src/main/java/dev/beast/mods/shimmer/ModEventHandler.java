@@ -4,6 +4,8 @@ import dev.beast.mods.shimmer.core.ShimmerPayloadRegistrar;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.item.ShimmerTool;
+import dev.beast.mods.shimmer.feature.zone.Anchor;
+import dev.beast.mods.shimmer.feature.zone.Zone;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -12,6 +14,7 @@ import net.minecraft.world.item.component.CustomData;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.neoforged.neoforge.common.world.chunk.RegisterTicketControllersEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
@@ -58,5 +61,11 @@ public class ModEventHandler {
 				}
 			}
 		}
+	}
+
+	@SubscribeEvent
+	public static void registerTicketControllers(RegisterTicketControllersEvent event) {
+		event.register(Anchor.TICKET_CONTROLLER);
+		event.register(Zone.TICKET_CONTROLLER);
 	}
 }

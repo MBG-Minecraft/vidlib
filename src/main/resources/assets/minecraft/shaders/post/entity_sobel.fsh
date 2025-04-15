@@ -37,5 +37,5 @@ void main() {
 		discard;
 	}
 
-	fragColor = vec4(result / count, min(1.0, (count + 1.0) / maxCount));
+	fragColor = vec4(result / count, clamp((count + 1.0) / maxCount, 0.0, 1.0));
 }

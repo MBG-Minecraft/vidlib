@@ -47,7 +47,7 @@ public interface ShimmerTool {
 	@Nullable
 	static ShimmerTool of(ItemStack stack) {
 		if (stack.has(DataComponents.CUSTOM_DATA)) {
-			var toolType = stack.get(DataComponents.CUSTOM_DATA).getUnsafe().getString("shimmer:tool");
+			var toolType = stack.get(DataComponents.CUSTOM_DATA).getUnsafe().getStringOr("shimmer:tool", "");
 
 			if (!toolType.isEmpty()) {
 				return ShimmerTool.REGISTRY.get(toolType);
@@ -110,5 +110,9 @@ public interface ShimmerTool {
 	}
 
 	default void debugText(Player player, ItemStack item, @Nullable HitResult hit, ScreenText screenText) {
+	}
+
+	default ToolVisuals visuals(Player player, ItemStack item, float delta) {
+		return ToolVisuals.NONE;
 	}
 }

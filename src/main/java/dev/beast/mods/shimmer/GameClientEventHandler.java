@@ -19,6 +19,8 @@ import dev.beast.mods.shimmer.feature.structure.GhostStructure;
 import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
 import dev.beast.mods.shimmer.util.FrameInfo;
 import dev.latvian.mods.kmath.KMath;
+import dev.latvian.mods.kmath.render.BoxRenderer;
+import dev.latvian.mods.kmath.render.DebugRenderTypes;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.AdvancementToast;
@@ -54,7 +56,7 @@ import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
-public class ClientGameEventHandler {
+public class GameClientEventHandler {
 	public static boolean clientLoaded = false;
 
 	@SubscribeEvent
@@ -101,7 +103,7 @@ public class ClientGameEventHandler {
 
 		mc.shimmer$preTick(mc.getPauseType());
 
-		while (mc.level != null && MiscShimmerClientUtils.freezeTickKeyMapping.consumeClick()) {
+		while (MiscShimmerClientUtils.freezeTickKeyMapping.consumeClick()) {
 			if (!mc.player.isReplayCamera()) {
 				if (mc.level.tickRateManager().isFrozen()) {
 					mc.player.connection.sendCommand("tick unfreeze");
@@ -109,6 +111,10 @@ public class ClientGameEventHandler {
 					mc.player.connection.sendCommand("tick freeze");
 				}
 			}
+		}
+
+		while (MiscShimmerClientUtils.clearParticlesKeyMapping.consumeClick()) {
+			mc.level.removeAllParticles();
 		}
 	}
 
@@ -128,7 +134,7 @@ public class ClientGameEventHandler {
 		}
 
 		var session = mc.player.shimmer$sessionData();
-		var frame = new FrameInfo(mc, event);
+		var frame = new FrameInfo(mc, session, event);
 		session.currentFrameInfo = frame;
 		session.worldMouse = null;
 		float delta = frame.worldDelta();
@@ -139,12 +145,11 @@ public class ClientGameEventHandler {
 		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
 			var ms = frame.poseStack();
 			var cameraPos = frame.camera().getPosition();
-			var frustum = frame.frustum();
 
 			if (mc.player.getShowZones()) {
-				ZoneRenderer.renderAll(mc, session, delta, ms, cameraPos, frustum);
+				ZoneRenderer.renderAll(frame);
 			} else if (!session.filteredZones.getSolidZones().isEmpty()) {
-				ZoneRenderer.renderSolid(mc, session, delta, ms, cameraPos, frustum);
+				ZoneRenderer.renderSolid(frame);
 			}
 
 			for (var clock : Clock.REGISTRY) {
@@ -167,9 +172,9 @@ public class ClientGameEventHandler {
 						ms.pushPose();
 						ms.translate(gs.pos().x - cameraPos.x, gs.pos().y - cameraPos.y, gs.pos().z - cameraPos.z);
 						ms.scale((float) gs.scale().x, (float) gs.scale().y, (float) gs.scale().z);
-						ms.mulPose(Axis.YP.rotationDegrees((float) gs.rotation().y));
-						ms.mulPose(Axis.XP.rotationDegrees((float) gs.rotation().x));
-						ms.mulPose(Axis.ZP.rotationDegrees((float) gs.rotation().z));
+						ms.mulPose(Axis.YP.rotation(gs.rotation().yawRad()));
+						ms.mulPose(Axis.XP.rotation(gs.rotation().pitchRad()));
+						ms.mulPose(Axis.ZP.rotation(gs.rotation().rollRad()));
 						gs.structure().render(ms);
 						ms.popPose();
 					}
@@ -241,6 +246,27 @@ public class ClientGameEventHandler {
 				((IconRenderer) h.renderer).render3D(mc, ms, delta, source, light, OverlayTexture.NO_OVERLAY);
 				ms.popPose();
 			}
+
+			var tool = ShimmerTool.of(mc.player);
+
+			if (tool != null) {
+				var visuals = tool.getSecond().visuals(mc.player, tool.getFirst(), screenDelta);
+
+				for (var cube : visuals.cubes()) {
+					BoxRenderer.renderVoxelShape(ms, frame.buffers(), cube.shape(), cube.pos().subtract(frame.camera().getPosition()), false, cube.color().withAlpha(50), cube.lineColor());
+				}
+
+				for (var line : visuals.lines()) {
+					var rx = frame.x(line.line().start().x);
+					var ry = frame.y(line.line().start().y);
+					var rz = frame.z(line.line().start().z);
+
+					var m = ms.last().pose();
+					var buffer = frame.buffers().getBuffer(DebugRenderTypes.LINES);
+					buffer.addVertex(m, rx, ry, rz).setColor(line.startColor().argb());
+					buffer.addVertex(m, rx + (float) line.line().dx(), ry + (float) line.line().dy(), rz + (float) line.line().dz()).setColor(line.endColor().argb());
+				}
+			}
 		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
 			PhysicsParticleManager.renderAll(frame);
 		}
@@ -260,7 +286,7 @@ public class ClientGameEventHandler {
 		int width = event.getGuiGraphics().guiWidth();
 		int height = event.getGuiGraphics().guiHeight();
 
-		if (!mc.options.hideGui) {
+		if (!mc.options.hideGui && !mc.player.isReplayCamera()) {
 			ScreenText.RENDER.addAll(ScreenText.CLIENT_TICK);
 			ScreenText.RENDER.ops = mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
 
@@ -281,7 +307,7 @@ public class ClientGameEventHandler {
 					var zoneTag = zoneClip.instance().zone.data();
 
 					if (!zoneTag.isEmpty()) {
-						for (var key : zoneTag.getAllKeys()) {
+						for (var key : zoneTag.keySet()) {
 							ScreenText.RENDER.topLeft.add(Component.literal(key + ": ").append(NbtUtils.toPrettyComponent(zoneTag.get(key))));
 						}
 					}
@@ -375,8 +401,17 @@ public class ClientGameEventHandler {
 	public static void renderBlockHighlight(RenderHighlightEvent.Block event) {
 		var mc = Minecraft.getInstance();
 
-		if (mc.player != null && mc.level != null && !mc.player.isSpectatorOrCreative() && mc.level.getBlockState(event.getTarget().getBlockPos()).is(Blocks.BARRIER)) {
-			event.setCanceled(true);
+		if (mc.player != null && mc.level != null) {
+			if (!mc.player.isSpectatorOrCreative() && mc.level.getBlockState(event.getTarget().getBlockPos()).is(Blocks.BARRIER)) {
+				event.setCanceled(true);
+				return;
+			}
+
+			var tool = ShimmerTool.of(mc.player);
+
+			if (tool != null && tool.getSecond().visuals(mc.player, tool.getFirst(), event.getDeltaTracker().getGameTimeDeltaPartialTick(true)).contains(event.getTarget().getBlockPos())) {
+				event.setCanceled(true);
+			}
 		}
 	}
 

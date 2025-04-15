@@ -111,6 +111,7 @@ public class PhysicsParticles {
 		p.ttl = (int) data.lifespan.sample(random);
 		p.scaleMul = split.scale * data.scale.sample(random);
 		p.rotationSpeed = (KMath.lerp(random.nextFloat(), 0.25F, 0.4F)) / p.scaleMul * (float) Math.atan2(spread, power);
+		p.tint = tint;
 		p.red = ARGB.redFloat(tint);
 		p.green = ARGB.greenFloat(tint);
 		p.blue = ARGB.blueFloat(tint);

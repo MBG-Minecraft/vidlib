@@ -1,15 +1,12 @@
 package dev.beast.mods.shimmer.core.mixin;
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
-import dev.beast.mods.shimmer.feature.misc.MiscShimmerClientUtils;
 import dev.beast.mods.shimmer.feature.skybox.SkyboxRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.PostChain;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,7 +33,7 @@ public abstract class LevelRendererMixin {
 	//	return new ShimmerViewArea(sectionRenderDispatcher, level, viewDistance, levelRenderer);
 	//}
 
-	@Redirect(method = "lambda$addSkyPass$12", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/DimensionSpecialEffects;renderSky(Lnet/minecraft/client/multiplayer/ClientLevel;IFLorg/joml/Matrix4f;Lnet/minecraft/client/Camera;Lorg/joml/Matrix4f;Ljava/lang/Runnable;)Z"))
+	@Redirect(method = "lambda$addSkyPass$13", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/DimensionSpecialEffects;renderSky(Lnet/minecraft/client/multiplayer/ClientLevel;IFLorg/joml/Matrix4f;Lnet/minecraft/client/Camera;Lorg/joml/Matrix4f;Ljava/lang/Runnable;)Z"))
 	private boolean shimmer$renderSkybox(DimensionSpecialEffects instance, ClientLevel level, int ticks, float partialTick, Matrix4f modelViewMatrix, Camera camera, Matrix4f projectionMatrix, Runnable setupFog) {
 		var skybox = minecraft.player != null ? minecraft.player.shimmer$sessionData().skybox : null;
 
@@ -45,15 +42,6 @@ public abstract class LevelRendererMixin {
 		} else {
 			return instance.renderSky(level, ticks, partialTick, modelViewMatrix, camera, projectionMatrix, setupFog);
 		}
-	}
-
-	@ModifyExpressionValue(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ShaderManager;getPostChain(Lnet/minecraft/resources/ResourceLocation;Ljava/util/Set;)Lnet/minecraft/client/renderer/PostChain;"))
-	private PostChain shimmer$outlinePostChain(PostChain original) {
-		if (original != null) {
-			original.setUniform("Size", MiscShimmerClientUtils.outlineSize(minecraft));
-		}
-
-		return original;
 	}
 
 	/**

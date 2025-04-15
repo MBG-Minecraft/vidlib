@@ -67,7 +67,7 @@ public record ExactEntitySpawnPayload(
 
 	public void update(Entity entity) {
 		entity.syncPacketPositionCodec(pos.x, pos.y, pos.z);
-		entity.moveTo(pos.x, pos.y, pos.z, yRot, xRot);
+		entity.snapTo(pos, yRot, xRot);
 		entity.setId(id);
 		entity.setUUID(uuid);
 	}

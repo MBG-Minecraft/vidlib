@@ -4,6 +4,7 @@ import dev.beast.mods.shimmer.feature.camera.ControlledCameraOverride;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.world.entity.player.Input;
+import net.minecraft.world.phys.Vec2;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,8 +19,7 @@ public class KeyboardMixinInput {
 
 		if (player != null && player.shimmer$sessionData().cameraOverride instanceof ControlledCameraOverride c && c.move(in)) {
 			in.keyPresses = Input.EMPTY;
-			in.forwardImpulse = 0F;
-			in.leftImpulse = 0F;
+			in.moveVector = Vec2.ZERO;
 		} else if (player != null && player.shimmer$sessionData().suspended) {
 			in.keyPresses = in.keyPresses.shift() ? new Input(
 				false,
@@ -31,8 +31,7 @@ public class KeyboardMixinInput {
 				false
 			) : Input.EMPTY;
 
-			in.forwardImpulse = 0F;
-			in.leftImpulse = 0F;
+			in.moveVector = Vec2.ZERO;
 		}
 	}
 }

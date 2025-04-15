@@ -5,14 +5,14 @@ import dev.beast.mods.shimmer.core.ShimmerServerLevel;
 import dev.beast.mods.shimmer.feature.misc.CreateFireworksPayload;
 import dev.beast.mods.shimmer.feature.prop.ServerPropList;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.Ticket;
 import net.minecraft.world.item.component.FireworkExplosion;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.WritableLevelData;
@@ -23,7 +23,6 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(ServerLevel.class)
@@ -37,7 +36,7 @@ public abstract class ServerLevelMixin extends Level implements ShimmerServerLev
 	private ActiveZones shimmer$activeZones;
 
 	@Unique
-	private final List<Ticket<ChunkPos>> shimmer$tickets = new ArrayList<>();
+	private final LongSet shimmer$anchoredChunks = new LongOpenHashSet();
 
 	@Unique
 	private ServerPropList shimmer$props;
@@ -62,7 +61,7 @@ public abstract class ServerLevelMixin extends Level implements ShimmerServerLev
 
 	@Override
 	public void shimmer$updateLoadedChunks() {
-		shimmer$updateLoadedChunks(shimmer$tickets);
+		shimmer$updateLoadedChunks(shimmer$anchoredChunks);
 	}
 
 	@Override

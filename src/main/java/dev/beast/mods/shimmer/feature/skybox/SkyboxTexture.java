@@ -12,6 +12,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.function.IntUnaryOperator;
 
 public class SkyboxTexture extends ReloadableTexture implements Dumpable {
 	public final Skybox skybox;
@@ -125,6 +126,6 @@ public class SkyboxTexture extends ReloadableTexture implements Dumpable {
 
 	@Override
 	public void dumpContents(ResourceLocation id, Path path) {
-		TextureUtil.writeAsPNG(path, id.toDebugFileName(), getId(), 0, resolution * 4, resolution * 2);
+		TextureUtil.writeAsPNG(path, id.toDebugFileName(), getTexture(), 0, IntUnaryOperator.identity());
 	}
 }

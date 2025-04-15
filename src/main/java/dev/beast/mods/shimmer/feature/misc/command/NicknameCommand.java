@@ -18,11 +18,11 @@ public interface NicknameCommand {
 		.requires(source -> source.hasPermission(2))
 		.then(Commands.argument("player", EntityArgument.players())
 			.then(Commands.argument("nickname", ComponentArgument.textComponent(buildContext))
-				.executes(ctx -> nickname(EntityArgument.getOptionalPlayers(ctx, "player"), ComponentArgument.getComponent(ctx, "nickname")))
+				.executes(ctx -> nickname(EntityArgument.getOptionalPlayers(ctx, "player"), ComponentArgument.getResolvedComponent(ctx, "nickname")))
 			)
 		)
 		.then(Commands.argument("nickname", ComponentArgument.textComponent(buildContext))
-			.executes(ctx -> nickname(List.of(ctx.getSource().getPlayerOrException()), ComponentArgument.getComponent(ctx, "nickname")))
+			.executes(ctx -> nickname(List.of(ctx.getSource().getPlayerOrException()), ComponentArgument.getResolvedComponent(ctx, "nickname")))
 		)
 	);
 

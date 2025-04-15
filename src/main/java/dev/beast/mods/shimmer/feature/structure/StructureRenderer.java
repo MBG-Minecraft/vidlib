@@ -1,12 +1,10 @@
 package dev.beast.mods.shimmer.feature.structure;
 
-import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
@@ -14,13 +12,16 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.util.WithCache;
+import dev.beast.mods.shimmer.util.client.StaticBuffers;
 import dev.latvian.mods.kmath.color.Color;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.block.model.BlockModelPart;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -28,9 +29,7 @@ import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,18 +37,20 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class StructureRenderer implements WithCache {
-	private record StateModel(BlockPos pos, BlockState state, BakedModel model, long seed) {
+	private record StateModel(BlockPos pos, BlockState state, BlockStateModel model, long seed) {
 	}
 
-	private record BuildingLayer(RenderType type, List<StateModel> blocks, BufferBuilder builder, int sort) {
+	private record BuildingLayer(RenderType type, Map<StateModel, List<BlockModelPart>> parts, int sort) {
 		private static final BuildingLayer[] EMPTY = new BuildingLayer[0];
 	}
 
-	private record CachedLayer(RenderType type, VertexBuffer buffer) {
+	private record CachedLayer(RenderType type, StaticBuffers buffer) {
 		private static final CachedLayer[] EMPTY = new CachedLayer[0];
 	}
 
@@ -223,16 +224,16 @@ public class StructureRenderer implements WithCache {
 			var stateModel = new StateModel(pos, state, blockRenderer.getBlockModel(state), state.getSeed(pos));
 			random.setSeed(stateModel.seed);
 
-			for (var type : stateModel.model.getRenderTypes(state, random, ModelData.EMPTY)) {
+			for (var part : stateModel.model.collectParts(random)) {
+				var type = part.getRenderType(state);
 				var layer = layerMap.get(type);
 
 				if (layer == null) {
-					var builder = new BufferBuilder(tempMemory, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-					layer = new BuildingLayer(type, new ArrayList<>(), builder, layerSorting.getOrDefault(type, 9999));
+					layer = new BuildingLayer(type, new Reference2ObjectArrayMap<>(1), layerSorting.getOrDefault(type, 9999));
 					layerMap.put(type, layer);
 				}
 
-				layer.blocks.add(stateModel);
+				layer.parts.computeIfAbsent(stateModel, k -> new ArrayList<>(1)).add(part);
 			}
 		}
 
@@ -250,34 +251,35 @@ public class StructureRenderer implements WithCache {
 		}
 
 		for (var layer : buildingLayerArray) {
-			for (var entry : layer.blocks) {
-				random.setSeed(entry.seed);
+			var bufferBuilder = new BufferBuilder(tempMemory, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+
+			for (var entry : layer.parts.entrySet()) {
+				var model = entry.getKey();
+				var parts = entry.getValue();
 
 				poseStack.pushPose();
-				poseStack.translate(entry.pos.getX(), entry.pos.getY(), entry.pos.getZ());
+				poseStack.translate(model.pos.getX(), model.pos.getY(), model.pos.getZ());
 
 				try {
-					blockRenderer.renderBatched(entry.state, entry.pos, level, poseStack, layer.builder, cull, random, ModelData.EMPTY, layer.type);
+					blockRenderer.renderBatched(model.state, model.pos, level, poseStack, bufferBuilder, cull, parts);
 				} catch (Throwable ex) {
-					Shimmer.LOGGER.info("Error rendering " + entry.state.getBlock().getName().getString() + " structure block at " + entry.pos, ex);
+					Shimmer.LOGGER.info("Error rendering " + model.state.getBlock().getName().getString() + " structure block at " + model.pos, ex);
 				}
 
 				poseStack.popPose();
 			}
 
-			var meshData = layer.builder.build();
+			try (var meshData = bufferBuilder.build()) {
+				if (meshData != null) {
+					if (layer.type.sortOnUpload()) {
+						meshData.sortQuads(tempMemory, RenderSystem.getProjectionType().vertexSorting());
+					}
 
-			if (meshData != null) {
-				var vertexBuffer = new VertexBuffer(BufferUsage.STATIC_WRITE);
-
-				if (layer.type.sortOnUpload()) {
-					meshData.sortQuads(tempMemory, RenderSystem.getProjectionType().vertexSorting());
+					var cachedBuffers = StaticBuffers.of(meshData, () -> "StructureRenderer");
+					list.add(new CachedLayer(layer.type, cachedBuffers));
 				}
 
-				vertexBuffer.bind();
-				vertexBuffer.upload(meshData);
-				VertexBuffer.unbind();
-				list.add(new CachedLayer(layer.type, vertexBuffer));
+				// tempMemory.discard();
 			}
 		}
 
@@ -304,15 +306,38 @@ public class StructureRenderer implements WithCache {
 			return;
 		}
 
-		var model = new Matrix4f(RenderSystem.getModelViewMatrix()).mul(ms.last().pose());
-		var projection = RenderSystem.getProjectionMatrix();
+		var modelViewMatrix = RenderSystem.getModelViewStack();
+		modelViewMatrix.pushMatrix();
+		modelViewMatrix.mul(ms.last().pose());
 
 		for (var layer : layers) {
 			layer.type.setupRenderState();
-			layer.buffer.bind();
-			layer.buffer.drawWithShader(model, projection, RenderSystem.getShader());
-			VertexBuffer.unbind();
+
+			var renderTarget = layer.type.getRenderTarget();
+
+			try (var renderPass = RenderSystem.getDevice()
+				.createCommandEncoder()
+				.createRenderPass(
+					renderTarget.getColorTexture(),
+					OptionalInt.empty(),
+					renderTarget.useDepth ? renderTarget.getDepthTexture() : null,
+					OptionalDouble.empty()
+				)
+			) {
+				renderPass.setPipeline(layer.type.getRenderPipeline());
+				renderPass.bindSampler("Sampler0", RenderSystem.getShaderTexture(0));
+				renderPass.bindSampler("Sampler2", RenderSystem.getShaderTexture(2));
+				renderPass.setIndexBuffer(layer.buffer.indexBuffer().buffer(), layer.buffer.indexBuffer().type());
+				renderPass.setVertexBuffer(0, layer.buffer.vertexBuffer());
+				renderPass.drawIndexed(0, layer.buffer.indexCount());
+			}
+
+			// layer.buffer.bind();
+			// layer.buffer.drawWithShader(model, projection, RenderSystem.getShader());
+			// VertexBuffer.unbind();
 			layer.type.clearRenderState();
 		}
+
+		modelViewMatrix.popMatrix();
 	}
 }

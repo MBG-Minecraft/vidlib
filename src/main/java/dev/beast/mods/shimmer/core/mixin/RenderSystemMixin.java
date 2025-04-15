@@ -26,23 +26,6 @@ public class RenderSystemMixin {
 	 * @reason Yeet
 	 */
 	@Overwrite
-	public static boolean isOnRenderThreadOrInit() {
-		return true;
-	}
-
-	/**
-	 * @author Lat
-	 * @reason Yeet
-	 */
-	@Overwrite
-	public static void assertOnRenderThreadOrInit() {
-	}
-
-	/**
-	 * @author Lat
-	 * @reason Yeet
-	 */
-	@Overwrite
 	public static void assertOnRenderThread() {
 	}
 

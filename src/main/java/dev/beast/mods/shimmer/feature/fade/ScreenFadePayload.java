@@ -16,6 +16,8 @@ public record ScreenFadePayload(Fade fade) implements ShimmerPacketPayload {
 
 	@Override
 	public void handle(ShimmerPayloadContext ctx) {
-		ctx.level().setScreenFade(fade);
+		if (!ctx.player().isReplayCamera()) {
+			ctx.level().setScreenFade(fade);
+		}
 	}
 }

@@ -1,12 +1,12 @@
 package dev.beast.mods.shimmer.core.mixin;
 
 import dev.beast.mods.shimmer.ShimmerConfig;
-import net.minecraft.client.renderer.blockentity.StructureBlockRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityWithBoundingBoxRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
-@Mixin(StructureBlockRenderer.class)
-public class StructureBlockRendererMixin {
+@Mixin(BlockEntityWithBoundingBoxRenderer.class)
+public class BlockEntityWithBoundingBoxRendererMixin {
 	/**
 	 * @author Lat
 	 * @reason Yeet

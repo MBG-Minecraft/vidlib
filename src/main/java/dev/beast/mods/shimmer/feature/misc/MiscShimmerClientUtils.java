@@ -1,27 +1,19 @@
 package dev.beast.mods.shimmer.feature.misc;
 
-import com.google.gson.JsonObject;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.ShimmerConfig;
-import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.clothing.Clothing;
-import dev.beast.mods.shimmer.util.JsonUtils;
-import dev.beast.mods.shimmer.util.Lazy;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Options;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.entity.Entity;
-import net.neoforged.neoforge.client.settings.KeyModifier;
 
-import java.nio.file.Files;
 import java.util.concurrent.CompletableFuture;
 
 public class MiscShimmerClientUtils {
@@ -29,37 +21,9 @@ public class MiscShimmerClientUtils {
 	public static final ContextKey<Clothing> CLOTHING = new ContextKey<>(Shimmer.id("clothing"));
 
 	public static KeyMapping freezeTickKeyMapping;
+	public static KeyMapping clearParticlesKeyMapping;
 
 	public static FogParameters fogOverride = FogParameters.NO_FOG;
-
-	public static final Lazy<JsonObject> KEYBINDS = Lazy.of(() -> {
-		var path = Shimmer.HOME_DIR.get().resolve("keybinds.json");
-
-		if (Files.exists(path)) {
-			try (var reader = Files.newBufferedReader(Shimmer.HOME_DIR.get().resolve("keybinds.json"))) {
-				return JsonUtils.read(reader).getAsJsonObject();
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-		}
-
-		return new JsonObject();
-	});
-
-	@AutoInit(AutoInit.Type.CLIENT_OPTIONS_SAVED)
-	public static void saveKeybinds(Options options) {
-		var json = KEYBINDS.get();
-
-		for (var key : options.keyMappings) {
-			json.addProperty(key.getName(), key.saveString() + (key.getKeyModifier() != KeyModifier.NONE ? ":" + key.getKeyModifier() : ""));
-		}
-
-		try (var writer = Files.newBufferedWriter(Shimmer.HOME_DIR.get().resolve("keybinds.json"))) {
-			JsonUtils.write(writer, json, true);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-	}
 
 	public static boolean handleDebugKeys(Minecraft mc, int key) {
 		if (key == ShimmerConfig.cycleShadersKey) {
@@ -95,9 +59,5 @@ public class MiscShimmerClientUtils {
 
 	public static int overrideRenderDistance(int original) {
 		return original;
-	}
-
-	public static float outlineSize(Minecraft mc) {
-		return Math.max(0.5F, Mth.ceil(mc.getWindow().getWidth() / 1920F * ShimmerConfig.glowLineThickness));
 	}
 }

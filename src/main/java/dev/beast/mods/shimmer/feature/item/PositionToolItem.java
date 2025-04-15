@@ -8,9 +8,7 @@ import dev.latvian.mods.kmath.KMath;
 import dev.latvian.mods.kmath.color.Color;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -22,8 +20,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class PositionToolItem implements ShimmerTool {
 	public enum Type {
@@ -51,7 +47,9 @@ public class PositionToolItem implements ShimmerTool {
 		}
 	}
 
-	public static Vec3 lastClick = null;
+	public Vec3 lastClick = null;
+	public Vec3 lastClientPos = null;
+	public Vec3 clientPos = null;
 
 	@AutoInit
 	public static void bootstrap() {
@@ -78,7 +76,7 @@ public class PositionToolItem implements ShimmerTool {
 		if (player.shimmer$sessionData().input.alt()) {
 			if (!player.level().isClientSide()) {
 				var tag = item.get(DataComponents.CUSTOM_DATA).copyTag();
-				var mode = Type.VALUES[(tag.getByte("position_tool_mode") + 1) % Type.VALUES.length];
+				var mode = Type.VALUES[(tag.getByteOr("position_tool_mode", (byte) 0) + 1) % Type.VALUES.length];
 				tag.putByte("position_tool_mode", (byte) mode.ordinal());
 				item.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
 			}
@@ -88,7 +86,7 @@ public class PositionToolItem implements ShimmerTool {
 
 		if (player.level().isClientSide()) {
 			var tag = item.get(DataComponents.CUSTOM_DATA).getUnsafe();
-			var mode = Type.VALUES[tag.getByte("position_tool_mode")];
+			var mode = Type.VALUES[tag.getByteOr("position_tool_mode", (byte) 0)];
 			var pos = mode.position(player, hit);
 
 			if (pos == null) {
@@ -136,7 +134,7 @@ public class PositionToolItem implements ShimmerTool {
 	public boolean useOnEntity(Player player, ItemStack item, Entity target) {
 		if (player.level().isClientSide()) {
 			var str = KMath.formatVec3(target.position());
-			player.tell(Component.empty().append(target.getName()).append(": " + str).withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, str)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to Copy")))));
+			player.tell(Component.empty().append(target.getName()).append(": " + str).withStyle(Style.EMPTY.withCopyString(str)));
 		}
 
 		return true;
@@ -145,7 +143,7 @@ public class PositionToolItem implements ShimmerTool {
 	@Override
 	public void debugText(Player player, ItemStack item, @Nullable HitResult hit, ScreenText screenText) {
 		var tag = item.get(DataComponents.CUSTOM_DATA).getUnsafe();
-		var mode = Type.VALUES[tag.getByte("position_tool_mode")];
+		var mode = Type.VALUES[tag.getByteOr("position_tool_mode", (byte) 0)];
 		screenText.topRight.add("Mode: " + mode.name);
 
 		if (hit == null || hit.getType() != HitResult.Type.BLOCK) {
@@ -153,13 +151,15 @@ public class PositionToolItem implements ShimmerTool {
 		}
 
 		var pos = hit instanceof BlockHitResult blockHit ? mode.position(player, blockHit) : mode.position(player, null);
+		lastClientPos = clientPos;
+		clientPos = pos == null ? null : pos.subtract(0.5D, 0.5D, 0.5D);
 
 		if (pos == null) {
 			return;
 		}
 
 		var blockPos = BlockPos.containing(pos);
-		player.level().cubeParticles(new CubeParticleOptions(Color.CYAN, Color.WHITE, 1), List.of(blockPos));
+		// player.level().cubeParticles(new CubeParticleOptions(Color.CYAN, Color.WHITE, 1), List.of(blockPos));
 
 		screenText.topRight.add(player.level().getBlockState(blockPos).getBlock().getName());
 		screenText.topRight.add(KMath.formatBlockPos(blockPos));
@@ -168,5 +168,14 @@ public class PositionToolItem implements ShimmerTool {
 		if (lastClick != null) {
 			screenText.topRight.add(KMath.format(lastClick.distanceTo(pos)) + " m");
 		}
+	}
+
+	@Override
+	public ToolVisuals visuals(Player player, ItemStack item, float delta) {
+		if (lastClientPos != null && clientPos != null) {
+			return ToolVisuals.cube(lastClientPos.lerp(clientPos, delta));
+		}
+
+		return ToolVisuals.NONE;
 	}
 }
