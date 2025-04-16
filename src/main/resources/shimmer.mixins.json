@@ -19,7 +19,6 @@
 		"FillCommandMixin",
 		"FireworkRocketEntityMixin",
 		"FoodDataMixin",
-		"ForcedChunkManagerOwnedChunksMixin",
 		"IdDispatchCodecMixin",
 		"IOWorkerMixin",
 		"ItemMixin",
@@ -47,7 +46,9 @@
 		"StructureTemplateMixin",
 		"StyleMixin",
 		"UUIDUtilMixin",
-		"WaterFluidMixin"
+		"WaterFluidMixin",
+		"neo.EnumArgumentMixin",
+		"neo.ForcedChunkManagerOwnedChunksMixin"
 	],
 	"client": [
 		"AbstractClientPlayerMixin",

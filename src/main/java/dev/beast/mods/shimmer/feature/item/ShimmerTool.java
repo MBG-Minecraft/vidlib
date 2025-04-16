@@ -95,6 +95,7 @@ public interface ShimmerTool {
 		tag.putString("vidlib:tool", getId());
 		stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
 		stack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
+		stack.set(DataComponents.MAX_STACK_SIZE, 1);
 		return stack;
 	}
 

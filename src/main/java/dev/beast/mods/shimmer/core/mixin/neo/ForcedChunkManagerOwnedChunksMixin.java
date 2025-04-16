@@ -1,4 +1,4 @@
-package dev.beast.mods.shimmer.core.mixin;
+package dev.beast.mods.shimmer.core.mixin.neo;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.UnboundedMapCodec;
