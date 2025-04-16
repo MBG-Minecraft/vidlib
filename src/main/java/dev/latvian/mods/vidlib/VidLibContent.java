@@ -10,14 +10,14 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 public interface VidLibContent {
 	interface Blocks {
-		DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(VidLib.ID);
+		DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks("minecraft");
 
 		DeferredBlock<Block> MONEY_BLOCK = BLOCKS.registerSimpleBlock("money_block");
 		DeferredBlock<Block> BANDED_MONEY_BLOCK = BLOCKS.registerSimpleBlock("banded_money_block");
 	}
 
 	interface Items {
-		DeferredRegister.Items ITEMS = DeferredRegister.createItems(VidLib.ID);
+		DeferredRegister.Items ITEMS = DeferredRegister.createItems("minecraft");
 
 		DeferredItem<BlockItem> MONEY_BLOCK = ITEMS.registerSimpleBlockItem(Blocks.MONEY_BLOCK);
 		DeferredItem<BlockItem> BANDED_MONEY_BLOCK = ITEMS.registerSimpleBlockItem(Blocks.BANDED_MONEY_BLOCK);

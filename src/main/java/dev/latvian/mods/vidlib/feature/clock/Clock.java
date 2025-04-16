@@ -8,6 +8,7 @@ import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public record Clock(
@@ -28,6 +29,13 @@ public record Clock(
 	public static class Loader extends JsonRegistryReloadListener<Clock> {
 		public Loader() {
 			super("vidlib/clock", DIRECT_CODEC, true, REGISTRY);
+		}
+
+		@Override
+		protected void apply(Map<ResourceLocation, Clock> map) {
+			super.apply(map);
+			ClockCommands.CLOCK_IDS.clear();
+			ClockCommands.CLOCK_IDS.addAll(map.keySet());
 		}
 	}
 }
