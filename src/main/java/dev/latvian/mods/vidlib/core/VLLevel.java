@@ -1,0 +1,175 @@
+package dev.latvian.mods.vidlib.core;
+
+import com.mojang.datafixers.util.Either;
+import dev.latvian.mods.vidlib.feature.block.ConnectedBlock;
+import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
+import dev.latvian.mods.vidlib.feature.bulk.BlockModificationConsumer;
+import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
+import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModificationBundle;
+import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModificationHolder;
+import dev.latvian.mods.vidlib.feature.bulk.OptimizedModificationBuilder;
+import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
+import dev.latvian.mods.vidlib.feature.bulk.UndoableModification;
+import dev.latvian.mods.vidlib.feature.data.DataMap;
+import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
+import dev.latvian.mods.vidlib.feature.entity.filter.EntityTypeFilter;
+import dev.latvian.mods.vidlib.feature.prop.PropList;
+import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Consumer;
+
+public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHolder {
+	@Override
+	default Level vl$level() {
+		return (Level) this;
+	}
+
+	default long vl$nextPacketId() {
+		throw new NoMixinException(this);
+	}
+
+	default PropList<?> getProps() {
+		throw new NoMixinException(this);
+	}
+
+	@Override
+	default DataMap getServerData() {
+		return getEnvironment().getServerData();
+	}
+
+	@Nullable
+	default ActiveZones vl$getActiveZones() {
+		throw new NoMixinException(this);
+	}
+
+	default List<UndoableModification> vl$getUndoableModifications() {
+		throw new NoMixinException(this);
+	}
+
+	default void addUndoable(UndoableModification modification) {
+		if (!vl$isClient()) {
+			vl$getUndoableModifications().add(modification);
+		}
+	}
+
+	default int undoLastModification() {
+		var undoable = vl$getUndoableModifications();
+
+		if (!undoable.isEmpty()) {
+			var builder = new OptimizedModificationBuilder();
+			undoable.getLast().undo((Level) this, builder);
+			undoable.removeLast();
+			return bulkModify(false, builder.build());
+		}
+
+		return 0;
+	}
+
+	default int undoAllModifications() {
+		var builder = new OptimizedModificationBuilder();
+		var undoable = vl$getUndoableModifications();
+
+		for (int i = undoable.size() - 1; i >= 0; i--) {
+			undoable.get(i).undo((Level) this, builder);
+		}
+
+		undoable.clear();
+		return bulkModify(false, builder.build());
+	}
+
+	default void setBlockFast(BlockPos pos, BlockState state) {
+		((Level) this).setBlock(pos, state, Block.UPDATE_CLIENTS, 0);
+	}
+
+	default void setBlockFast(BlockPos pos, Block block) {
+		setBlockFast(pos, block.defaultBlockState());
+	}
+
+	@Nullable
+	default Entity getEntityByUUID(UUID uuid) {
+		throw new NoMixinException(this);
+	}
+
+	@Nullable
+	default Entity getEntityByEither(Either<Integer, UUID> id) {
+		return id.map(((Level) this)::getEntity, this::getEntityByUUID);
+	}
+
+	default int bulkModify(boolean undoable, BulkLevelModification modification) {
+		if (modification == BulkLevelModification.NONE) {
+			return 0;
+		}
+
+		return new BulkLevelModificationHolder().apply((Level) this, modification, undoable);
+	}
+
+	default int bulkModify(boolean undoable, Consumer<BlockModificationConsumer> modifications) {
+		var m = new BulkLevelModificationBundle(new ArrayList<>());
+		modifications.accept(m);
+		return bulkModify(undoable, m);
+	}
+
+	default List<ConnectedBlock> walkBlocks(ConnectedBlock.WalkType walkType, BlockPos start, BlockFilter filter, int maxDistance, int maxTotalBlocks) {
+		var result = new Long2ObjectOpenHashMap<ConnectedBlock>();
+		var traversed = new LongOpenHashSet();
+		var queue = new ArrayDeque<ConnectedBlock>();
+
+		queue.add(new ConnectedBlock(new PositionedBlock(start, vl$level().getBlockState(start)), 0));
+		traversed.add(start.asLong());
+		var level = vl$level();
+
+		while (!queue.isEmpty()) {
+			var c = queue.pop();
+
+			if (c.distance() == 0 || filter.test(level, c.block().pos(), c.block().state())) {
+				result.put(c.block().pos().asLong(), c);
+
+				if (result.size() >= maxTotalBlocks) {
+					break;
+				}
+
+				if (c.distance() + 1 > maxDistance) {
+					continue;
+				}
+
+				for (var o : walkType.offsets) {
+					var offset = c.block().pos().offset(o);
+					var state = level.getBlockState(offset);
+
+					if (!state.isAir() && traversed.add(offset.asLong())) {
+						queue.add(new ConnectedBlock(new PositionedBlock(offset, state), c.distance() + 1));
+					}
+				}
+			}
+		}
+
+		return List.copyOf(result.values());
+	}
+
+	default void discardAll(EntityFilter filter) {
+	}
+
+	default void discardAll(EntityType<?> type) {
+		discardAll(new EntityTypeFilter(type));
+	}
+
+	default void killAll(EntityFilter filter) {
+	}
+
+	default void killAll(EntityType<?> type) {
+		killAll(new EntityTypeFilter(type));
+	}
+}

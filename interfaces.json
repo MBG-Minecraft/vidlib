@@ -1,62 +1,62 @@
 {
 	"net/minecraft/client/Minecraft": [
-		"dev/beast/mods/shimmer/core/ShimmerMinecraftClient"
+		"dev/latvian/mods/vidlib/core/VLMinecraftClient"
 	],
 	"net/minecraft/server/MinecraftServer": [
-		"dev/beast/mods/shimmer/core/ShimmerMinecraftServer"
+		"dev/latvian/mods/vidlib/core/VLMinecraftServer"
 	],
 	"net/minecraft/world/level/Level": [
-		"dev/beast/mods/shimmer/core/ShimmerLevel"
+		"dev/latvian/mods/vidlib/core/VLLevel"
 	],
 	"net/minecraft/client/multiplayer/ClientLevel": [
-		"dev/beast/mods/shimmer/core/ShimmerClientLevel"
+		"dev/latvian/mods/vidlib/core/VLClientLevel"
 	],
 	"net/minecraft/server/level/ServerLevel": [
-		"dev/beast/mods/shimmer/core/ShimmerServerLevel"
+		"dev/latvian/mods/vidlib/core/VLServerLevel"
 	],
 	"net/minecraft/world/entity/Entity": [
-		"dev/beast/mods/shimmer/core/ShimmerEntity"
+		"dev/latvian/mods/vidlib/core/VLEntity"
 	],
 	"net/minecraft/world/entity/LivingEntity": [
-		"dev/beast/mods/shimmer/core/ShimmerLivingEntity"
+		"dev/latvian/mods/vidlib/core/VLLivingEntity"
 	],
 	"net/minecraft/world/entity/player/Player": [
-		"dev/beast/mods/shimmer/core/ShimmerPlayer"
+		"dev/latvian/mods/vidlib/core/VLPlayer"
 	],
 	"net/minecraft/client/player/AbstractClientPlayer": [
-		"dev/beast/mods/shimmer/core/ShimmerClientPlayer"
+		"dev/latvian/mods/vidlib/core/VLClientPlayer"
 	],
 	"net/minecraft/client/player/LocalPlayer": [
-		"dev/beast/mods/shimmer/core/ShimmerLocalPlayer"
+		"dev/latvian/mods/vidlib/core/VLLocalPlayer"
 	],
 	"net/minecraft/client/player/RemotePlayer": [
-		"dev/beast/mods/shimmer/core/ShimmerRemotePlayer"
+		"dev/latvian/mods/vidlib/core/VLRemotePlayer"
 	],
 	"net/minecraft/server/level/ServerPlayer": [
-		"dev/beast/mods/shimmer/core/ShimmerServerPlayer"
+		"dev/latvian/mods/vidlib/core/VLServerPlayer"
 	],
 	"net/minecraft/client/gui/screens/Screen": [
-		"dev/beast/mods/shimmer/core/ShimmerScreen"
+		"dev/latvian/mods/vidlib/core/VLScreen"
 	],
 	"net/minecraft/client/renderer/GameRenderer": [
-		"dev/beast/mods/shimmer/core/ShimmerGameRenderer"
+		"dev/latvian/mods/vidlib/core/VLGameRenderer"
 	],
 	"net/minecraft/client/Camera": [
-		"dev/beast/mods/shimmer/core/ShimmerCamera"
+		"dev/latvian/mods/vidlib/core/VLCamera"
 	],
 	"net/minecraft/world/item/Item": [
-		"dev/beast/mods/shimmer/core/ShimmerItem"
+		"dev/latvian/mods/vidlib/core/VLItem"
 	],
 	"net/minecraft/world/level/block/state/BlockState": [
-		"dev/beast/mods/shimmer/core/ShimmerBlockState"
+		"dev/latvian/mods/vidlib/core/VLBlockState"
 	],
 	"net/minecraft/network/codec/StreamCodec": [
-		"dev/beast/mods/shimmer/core/ShimmerStreamCodec<B, V>"
+		"dev/latvian/mods/vidlib/core/VLStreamCodec<B, V>"
 	],
 	"net/minecraft/network/chat/Style": [
-		"dev/beast/mods/shimmer/core/ShimmerStyle"
+		"dev/latvian/mods/vidlib/core/VLStyle"
 	],
 	"net/minecraft/network/chat/Component": [
-		"dev/beast/mods/shimmer/core/ShimmerComponent"
+		"dev/latvian/mods/vidlib/core/VLComponent"
 	]
 }

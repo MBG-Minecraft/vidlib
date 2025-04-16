@@ -1,0 +1,12 @@
+{
+	"parent": "block/cube",
+	"textures": {
+		"particle": "vidlib:block/money/top",
+		"down": "vidlib:block/money/bottom",
+		"up": "vidlib:block/money/top",
+		"north": "vidlib:block/money/side_ns",
+		"east": "vidlib:block/money/side_we",
+		"south": "vidlib:block/money/side_ns",
+		"west": "vidlib:block/money/side_we"
+	}
+}

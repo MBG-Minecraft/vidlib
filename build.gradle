@@ -44,7 +44,7 @@ neoForge {
 			}
 
 			jvmArguments.addAll("-XX:+IgnoreUnrecognizedVMOptions", "-XX:+AllowEnhancedClassRedefinition")
-			gameDirectory = file 'run'
+			gameDirectory = file 'runs/client'
 		}
 
 		client2 {
@@ -57,19 +57,19 @@ neoForge {
 			}
 
 			jvmArguments.addAll("-XX:+IgnoreUnrecognizedVMOptions", "-XX:+AllowEnhancedClassRedefinition")
-			gameDirectory = file 'run_2'
+			gameDirectory = file 'runs/client_2'
 		}
 
 		server {
 			ideName = 'Server'
 			server()
 			programArgument("--nogui")
-			gameDirectory = file 'run_server'
+			gameDirectory = file 'runs/server'
 		}
 	}
 
 	mods {
-		shimmer {
+		vidlib {
 			sourceSet sourceSets.main
 		}
 	}

@@ -1,0 +1,44 @@
+package dev.latvian.mods.vidlib.feature.sound;
+
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
+import dev.latvian.mods.vidlib.math.worldposition.EntityPositionType;
+import dev.latvian.mods.vidlib.math.worldposition.FollowingEntityWorldPosition;
+import dev.latvian.mods.vidlib.math.worldposition.WorldPosition;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.entity.Entity;
+
+import java.util.Optional;
+
+public record PositionedSoundData(SoundData data, Optional<WorldPosition> position, boolean looping, boolean stopImmediately) {
+	public static final Codec<PositionedSoundData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+		SoundData.CODEC.fieldOf("data").forGetter(PositionedSoundData::data),
+		WorldPosition.CODEC.optionalFieldOf("position").forGetter(PositionedSoundData::position),
+		Codec.BOOL.optionalFieldOf("looping", false).forGetter(PositionedSoundData::looping),
+		Codec.BOOL.optionalFieldOf("stop_immediately", false).forGetter(PositionedSoundData::stopImmediately)
+	).apply(instance, PositionedSoundData::new));
+
+	public static final StreamCodec<RegistryFriendlyByteBuf, PositionedSoundData> STREAM_CODEC = CompositeStreamCodec.of(
+		SoundData.STREAM_CODEC, PositionedSoundData::data,
+		WorldPosition.STREAM_CODEC.optional(), PositionedSoundData::position,
+		ByteBufCodecs.BOOL, PositionedSoundData::looping,
+		ByteBufCodecs.BOOL, PositionedSoundData::stopImmediately,
+		PositionedSoundData::new
+	);
+
+	public PositionedSoundData(SoundData data) {
+		this(data, Optional.empty(), false, false);
+	}
+
+	public PositionedSoundData(SoundData data, WorldPosition position, boolean looping, boolean stopImmediately) {
+		this(data, Optional.of(position), looping, stopImmediately);
+	}
+
+	public PositionedSoundData(SoundData data, Entity entity, boolean looping, boolean stopImmediately) {
+		this(data, new FollowingEntityWorldPosition(Either.left(entity.getId()), EntityPositionType.SOUND_SOURCE), looping, stopImmediately);
+	}
+}

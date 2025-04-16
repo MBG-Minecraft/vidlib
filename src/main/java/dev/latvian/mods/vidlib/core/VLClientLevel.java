@@ -1,0 +1,52 @@
+package dev.latvian.mods.vidlib.core;
+
+import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
+import dev.latvian.mods.vidlib.feature.prop.ClientPropList;
+import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
+import org.jetbrains.annotations.Nullable;
+
+public interface VLClientLevel extends VLLevel {
+	@Override
+	default VLMinecraftEnvironment getEnvironment() {
+		return Minecraft.getInstance();
+	}
+
+	@Override
+	default ClientLevel vl$level() {
+		return (ClientLevel) this;
+	}
+
+	@Override
+	default ClientPropList getProps() {
+		throw new NoMixinException(this);
+	}
+
+	@Override
+	@Nullable
+	default ActiveZones vl$getActiveZones() {
+		var player = Minecraft.getInstance().player;
+		return player == null ? null : player.vl$sessionData().filteredZones;
+	}
+
+	default void environmentEffects(Minecraft mc, BlockPos pos) {
+		var override = EntityOverride.ENVIRONMENT_EFFECTS.get(mc.player);
+		var level = this.vl$level();
+
+		if (override != null && !override.isEmpty()) {
+			for (var effect : override) {
+				if (level.random.nextFloat() <= effect.chance()) {
+					level.addParticle(
+						effect.particle(),
+						pos.getX() + level.random.nextDouble(),
+						pos.getY() + level.random.nextDouble(),
+						pos.getZ() + level.random.nextDouble(),
+						0.0, 0.0, 0.0
+					);
+				}
+			}
+		}
+	}
+}

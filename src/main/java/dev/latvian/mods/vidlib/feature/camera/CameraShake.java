@@ -1,0 +1,120 @@
+package dev.latvian.mods.vidlib.feature.camera;
+
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.kmath.easing.Easing;
+import dev.latvian.mods.kmath.easing.EasingGroup;
+import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
+import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
+
+import java.util.function.Function;
+
+@AutoInit
+public record CameraShake(
+	CameraShakeType type,
+	int duration,
+	float speed,
+	float intensity,
+	EasingGroup start,
+	EasingGroup end,
+	boolean motionBlur
+) {
+	public static final CameraShake NONE = new CameraShake(
+		LemniscateCameraShakeType.DEFAULT.instance(),
+		0,
+		0F,
+		0F,
+		EasingGroup.LINEAR,
+		EasingGroup.LINEAR,
+		false
+	);
+
+	public static final CameraShake DEFAULT = new CameraShake(
+		LemniscateCameraShakeType.DEFAULT.instance(),
+		25,
+		4F,
+		0.6F,
+		EasingGroup.QUINT,
+		EasingGroup.CUBIC,
+		false
+	);
+
+	public static final Codec<CameraShake> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+		CameraShakeType.REGISTRY.valueCodec().optionalFieldOf("type", DEFAULT.type).forGetter(CameraShake::type),
+		Codec.INT.optionalFieldOf("duration", DEFAULT.duration).forGetter(CameraShake::duration),
+		Codec.FLOAT.optionalFieldOf("speed", DEFAULT.speed).forGetter(CameraShake::speed),
+		Codec.FLOAT.optionalFieldOf("intensity", DEFAULT.intensity).forGetter(CameraShake::intensity),
+		EasingGroup.CODEC.optionalFieldOf("start", DEFAULT.start).forGetter(CameraShake::start),
+		EasingGroup.CODEC.optionalFieldOf("end", DEFAULT.end).forGetter(CameraShake::end),
+		Codec.BOOL.optionalFieldOf("motion_blur", DEFAULT.motionBlur).forGetter(CameraShake::motionBlur)
+	).apply(instance, CameraShake::new));
+
+	public static final Codec<CameraShake> CODEC = Codec.either(Codec.BOOL, DIRECT_CODEC).xmap(either -> either.map(b -> b ? DEFAULT : NONE, Function.identity()), shake -> shake.equals(NONE) ? Either.left(false) : shake.equals(DEFAULT) ? Either.left(true) : Either.right(shake));
+
+	public static final StreamCodec<RegistryFriendlyByteBuf, CameraShake> STREAM_CODEC = CompositeStreamCodec.of(
+		CameraShakeType.REGISTRY.valueStreamCodec().optional(DEFAULT.type), CameraShake::type,
+		ByteBufCodecs.VAR_INT, CameraShake::duration,
+		ByteBufCodecs.FLOAT, CameraShake::speed,
+		ByteBufCodecs.FLOAT, CameraShake::intensity,
+		EasingGroup.STREAM_CODEC.optional(DEFAULT.start), CameraShake::start,
+		EasingGroup.STREAM_CODEC.optional(DEFAULT.end), CameraShake::end,
+		ByteBufCodecs.BOOL, CameraShake::motionBlur,
+		CameraShake::new
+	);
+
+	public static final KnownCodec<CameraShake> KNOWN_CODEC = KnownCodec.register(VidLib.id("camera_shake"), CODEC, STREAM_CODEC, CameraShake.class);
+
+	public static final ResourceLocation MOTION_BLUR_EFFECT = ResourceLocation.withDefaultNamespace("shaders/post/phosphor.json");
+
+	public CameraShake withIntensityMod(float intensityMod) {
+		return new CameraShake(
+			type,
+			duration,
+			speed,
+			intensity * intensityMod,
+			start,
+			end,
+			motionBlur
+		);
+	}
+
+	public CameraShake withSpeed(float speed) {
+		return new CameraShake(
+			type,
+			duration,
+			speed,
+			intensity,
+			start,
+			end,
+			motionBlur
+		);
+	}
+
+	public CameraShake withDuration(int duration) {
+		return new CameraShake(
+			type,
+			duration,
+			speed,
+			intensity,
+			start,
+			end,
+			motionBlur
+		);
+	}
+
+	public CameraShake atDistance(Vec3 camera, Vec3 source, double maxDistance) {
+		return withIntensityMod((float) Easing.QUINT_IN.ease(1D - Math.clamp(camera.distanceTo(source) / maxDistance, 0D, 1D)));
+	}
+
+	public boolean skip() {
+		return intensity <= 0F || speed <= 0F || duration <= 0;
+	}
+}

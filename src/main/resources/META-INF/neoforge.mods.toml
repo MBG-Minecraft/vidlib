@@ -3,14 +3,14 @@ loaderVersion = "[2,)"
 license = "ARR"
 
 [[mods]]
-modId = "shimmer"
+modId = "vidlib"
 version = "${version}"
-displayName = "Shimmer"
+displayName = "VidLib"
 authors = "latvian.dev"
-logoFile = "shimmer_logo.png"
+logoFile = "vidlib_logo.png"
 logoBlur = false
 
-[[dependencies.shimmer]]
+[[dependencies.vidlib]]
 modId = "neoforge"
 type = "required"
 versionRange = "[21.1.122,)"
@@ -18,4 +18,4 @@ ordering = "NONE"
 side = "BOTH"
 
 [[mixins]]
-config = "shimmer.mixins.json"
+config = "vidlib.mixins.json"

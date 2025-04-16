@@ -1,0 +1,94 @@
+{
+	"providers": [
+		{
+			"type": "bitmap",
+			"file": "vidlib:font/icons/small_space.png",
+			"ascent": 7,
+			"chars": ["."]
+		},
+		{
+			"type": "bitmap",
+			"file": "vidlib:font/icons/error.png",
+			"ascent": 7,
+			"chars": ["!"]
+		},
+		{
+			"type": "bitmap",
+			"file": "vidlib:font/icons/plus.png",
+			"ascent": 7,
+			"chars": ["+"]
+		},
+		{
+			"type": "bitmap",
+			"file": "vidlib:font/icons/minus.png",
+			"ascent": 7,
+			"chars": ["-"]
+		},
+		{
+			"type": "bitmap",
+			"file": "vidlib:font/icons/tilde.png",
+			"ascent": 7,
+			"chars": ["~"]
+		},
+		{
+			"type": "bitmap",
+			"file": "vidlib:font/icons/copy.png",
+			"ascent": 7,
+			"chars": ["C"]
+		},
+		{
+			"type": "bitmap",
+			"file": "vidlib:font/icons/eliminated.png",
+			"ascent": 7,
+			"chars": ["E"]
+		},
+		{
+			"type": "bitmap",
+			"file": "vidlib:font/icons/info.png",
+			"ascent": 7,
+			"chars": ["I"]
+		},
+		{
+			"type": "bitmap",
+			"file": "vidlib:font/icons/camera.png",
+			"ascent": 7,
+			"chars": ["M"]
+		},
+		{
+			"type": "bitmap",
+			"file": "vidlib:font/icons/no.png",
+			"ascent": 7,
+			"chars": ["N"]
+		},
+		{
+			"type": "bitmap",
+			"file": "vidlib:font/icons/pvp.png",
+			"ascent": 7,
+			"chars": ["P"]
+		},
+		{
+			"type": "bitmap",
+			"file": "vidlib:font/icons/sword.png",
+			"ascent": 7,
+			"chars": ["S"]
+		},
+		{
+			"type": "bitmap",
+			"file": "vidlib:font/icons/star.png",
+			"ascent": 7,
+			"chars": ["T"]
+		},
+		{
+			"type": "bitmap",
+			"file": "vidlib:font/icons/warn.png",
+			"ascent": 7,
+			"chars": ["W"]
+		},
+		{
+			"type": "bitmap",
+			"file": "vidlib:font/icons/yes.png",
+			"ascent": 7,
+			"chars": ["Y"]
+		}
+	]
+}
