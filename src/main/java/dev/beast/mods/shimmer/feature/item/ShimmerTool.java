@@ -9,11 +9,13 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -31,7 +33,7 @@ public interface ShimmerTool {
 	}
 
 	@AutoRegister
-	ServerCommandHolder COMMAND = new ServerCommandHolder("shimmer-tool", (command, buildContext) -> {
+	ServerCommandHolder COMMAND = new ServerCommandHolder("vidlib-tool", (command, buildContext) -> {
 		command.requires(source -> source.hasPermission(2));
 
 		for (var tool : REGISTRY.values()) {
@@ -47,7 +49,7 @@ public interface ShimmerTool {
 	@Nullable
 	static ShimmerTool of(ItemStack stack) {
 		if (stack.has(DataComponents.CUSTOM_DATA)) {
-			var toolType = stack.get(DataComponents.CUSTOM_DATA).getUnsafe().getStringOr("shimmer:tool", "");
+			var toolType = stack.get(DataComponents.CUSTOM_DATA).getUnsafe().getStringOr("vidlib:tool", "");
 
 			if (!toolType.isEmpty()) {
 				return ShimmerTool.REGISTRY.get(toolType);
@@ -85,6 +87,16 @@ public interface ShimmerTool {
 	Component getName();
 
 	ItemStack createItem();
+
+	default ItemStack createFullItem() {
+		var stack = createItem();
+		stack.set(DataComponents.ITEM_NAME, getName());
+		var tag = new CompoundTag();
+		tag.putString("vidlib:tool", getId());
+		stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+		stack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
+		return stack;
+	}
 
 	default void registerCommands(LiteralArgumentBuilder<CommandSourceStack> command, CommandBuildContext buildContext) {
 	}

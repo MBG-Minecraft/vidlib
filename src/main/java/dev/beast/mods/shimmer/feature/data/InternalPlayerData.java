@@ -53,6 +53,11 @@ public interface InternalPlayerData {
 		.onReceived((player, value) -> player.shimmer$sessionData().refreshBlockZones())
 		.build();
 
+	DataType<Boolean> SHOW_ANCHOR = DataType.PLAYER.internal("show_anchor", KnownCodec.BOOL, false)
+		.save()
+		.sync()
+		.build();
+
 	DataType<Float> FLIGHT_SPEED = DataType.PLAYER.internal("flight_speed", KnownCodec.FLOAT, 1F)
 		.save()
 		.sync()

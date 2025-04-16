@@ -5,12 +5,9 @@ import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.auto.AutoPacket;
 import dev.beast.mods.shimmer.feature.item.ShimmerTool;
 import dev.beast.mods.shimmer.feature.zone.Anchor;
-import dev.beast.mods.shimmer.feature.zone.Zone;
-import net.minecraft.core.component.DataComponents;
+import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.component.CustomData;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
@@ -44,19 +41,13 @@ public class ModEventHandler {
 	public static void buildCreativeModeTabContents(BuildCreativeModeTabContentsEvent event) {
 		if (event.getTabKey() == CreativeModeTabs.OP_BLOCKS) {
 			for (var entry : ShimmerTool.REGISTRY.entrySet()) {
-				var stack = entry.getValue().createItem();
-				stack.set(DataComponents.ITEM_NAME, entry.getValue().getName());
-				var tag = new CompoundTag();
-				tag.putString("shimmer:tool", entry.getKey());
-				stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
-				stack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
-				event.accept(stack);
+				event.accept(entry.getValue().createFullItem());
 			}
 
 			for (var item : BuiltInRegistries.ITEM) {
 				var mod = item.builtInRegistryHolder().getKey().location().getNamespace();
 
-				if (mod.equals("video") || mod.equals(Shimmer.ID)) {
+				if (mod.equals("video") || mod.equals(VidLib.ID) || mod.equals(Shimmer.ID)) {
 					event.accept(item.getDefaultInstance());
 				}
 			}
@@ -66,6 +57,5 @@ public class ModEventHandler {
 	@SubscribeEvent
 	public static void registerTicketControllers(RegisterTicketControllersEvent event) {
 		event.register(Anchor.TICKET_CONTROLLER);
-		event.register(Zone.TICKET_CONTROLLER);
 	}
 }

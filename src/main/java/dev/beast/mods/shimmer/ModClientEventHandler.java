@@ -82,15 +82,16 @@ public class ModClientEventHandler {
 			state.setRenderData(MiscShimmerClientUtils.CREATIVE, Boolean.TRUE);
 		}
 
+		var vehicle = player.getVehicle();
+
+		if (vehicle != null && vehicle.hidePassenger(player)) {
+			state.isInvisible = true;
+		}
+
 		var session = player.shimmer$sessionData();
 
-		if (!player.isInvisible()) {
-			var clothing = player.getClothing();
-
-			if (clothing != Clothing.NONE) {
-				state.setRenderData(MiscShimmerClientUtils.CLOTHING, clothing);
-			}
-		}
+		var clothing = state.isInvisible ? null : player.getClothing();
+		state.setRenderData(MiscShimmerClientUtils.CLOTHING, clothing == Clothing.NONE ? null : clothing);
 
 		if (state.nameTag != null) {
 			state.nameTag = session.modifyPlayerName(state.nameTag);

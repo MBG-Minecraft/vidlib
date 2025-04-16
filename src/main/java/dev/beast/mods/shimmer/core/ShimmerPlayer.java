@@ -98,6 +98,14 @@ public interface ShimmerPlayer extends ShimmerLivingEntity, ShimmerPlayerContain
 		set(InternalPlayerData.ZONE_BLOCK_FILTER, filter);
 	}
 
+	default boolean getShowAnchor() {
+		return get(InternalPlayerData.SHOW_ANCHOR);
+	}
+
+	default void setShowAnchor(boolean show) {
+		set(InternalPlayerData.SHOW_ANCHOR, show);
+	}
+
 	default float getFlightSpeedMod() {
 		return shimmer$sessionData().flightSpeedMod;
 	}

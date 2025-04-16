@@ -250,4 +250,12 @@ public interface ShimmerEntity extends ShimmerLevelContainer {
 	default float getRelativeHealth(float delta) {
 		return 1F;
 	}
+
+	default float getVehicleCameraDistance(Player passenger, float original) {
+		return original;
+	}
+
+	default boolean hidePassenger(Player passenger) {
+		return false;
+	}
 }

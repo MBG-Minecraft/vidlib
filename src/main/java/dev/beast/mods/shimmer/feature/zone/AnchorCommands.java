@@ -2,12 +2,11 @@ package dev.beast.mods.shimmer.feature.zone;
 
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.ServerCommandHolder;
-import dev.beast.mods.shimmer.feature.particle.CubeParticleOptions;
-import dev.latvian.mods.kmath.color.Color;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
 
@@ -16,7 +15,7 @@ public interface AnchorCommands {
 	ServerCommandHolder COMMAND = new ServerCommandHolder("anchor", (command, buildContext) -> command
 		.requires(source -> source.hasPermission(2))
 		.then(Commands.literal("show")
-			.executes(ctx -> show(ctx.getSource()))
+			.executes(ctx -> show(ctx.getSource().getPlayerOrException()))
 		)
 		.then(Commands.literal("set")
 			.then(Commands.argument("start", BlockPosArgument.blockPos())
@@ -30,19 +29,8 @@ public interface AnchorCommands {
 		)
 	);
 
-	private static int show(CommandSourceStack source) {
-		var areas = source.getServer().getAnchor().shapes().get(source.getLevel().dimension());
-
-		if (areas != null) {
-			var positions = new ArrayList<BlockPos>();
-
-			for (var area : areas) {
-				area.forEveryEdgePosition(p -> positions.add(p.immutable()));
-			}
-
-			source.getLevel().cubeParticles(new CubeParticleOptions(Color.YELLOW, 200), positions);
-		}
-
+	private static int show(ServerPlayer player) {
+		player.setShowAnchor(!player.getShowAnchor());
 		return 1;
 	}
 

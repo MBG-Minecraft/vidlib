@@ -19,6 +19,7 @@ import dev.beast.mods.shimmer.feature.structure.GhostStructure;
 import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
 import dev.beast.mods.shimmer.util.FrameInfo;
 import dev.latvian.mods.kmath.KMath;
+import dev.latvian.mods.kmath.color.Color;
 import dev.latvian.mods.kmath.render.BoxRenderer;
 import dev.latvian.mods.kmath.render.DebugRenderTypes;
 import net.minecraft.ChatFormatting;
@@ -42,6 +43,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.CalculateDetachedCameraDistanceEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
@@ -150,6 +152,27 @@ public class GameClientEventHandler {
 				ZoneRenderer.renderAll(frame);
 			} else if (!session.filteredZones.getSolidZones().isEmpty()) {
 				ZoneRenderer.renderSolid(frame);
+			}
+
+			if (mc.player.getShowAnchor()) {
+				var areas = mc.getAnchor().shapes().get(mc.level.dimension());
+
+				if (areas != null && !areas.isEmpty()) {
+					var color = Color.YELLOW.withAlpha(80);
+					var buffers = frame.buffers();
+					var cull = true;
+
+					for (var a : areas) {
+						float minX = frame.x(a.minX() + 0.5D);
+						float minY = frame.y(a.minY() + 0.5D);
+						float minZ = frame.z(a.minZ() + 0.5D);
+						float maxX = frame.x(a.maxX() + 0.5D);
+						float maxY = frame.y(a.maxY() + 0.5D);
+						float maxZ = frame.z(a.maxZ() + 0.5D);
+
+						BoxRenderer.renderDebugFrame(minX, minY, minZ, maxX, maxY, maxZ, ms, buffers, cull, color, Color.YELLOW, 1F, 1F);
+					}
+				}
 			}
 
 			for (var clock : Clock.REGISTRY) {
@@ -484,5 +507,15 @@ public class GameClientEventHandler {
 	@SubscribeEvent
 	public static void renderInventoryMobEffects(ScreenEvent.RenderInventoryMobEffects event) {
 		event.setCompact(true);
+	}
+
+	@SubscribeEvent
+	public static void calculateDetachedCameraDistance(CalculateDetachedCameraDistanceEvent event) {
+		var mc = Minecraft.getInstance();
+		var vehicle = mc.player != null ? mc.player.getVehicle() : null;
+
+		if (vehicle != null) {
+			event.setDistance(vehicle.getVehicleCameraDistance(mc.player, event.getDistance()));
+		}
 	}
 }

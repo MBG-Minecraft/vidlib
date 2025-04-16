@@ -19,6 +19,7 @@
 		"FillCommandMixin",
 		"FireworkRocketEntityMixin",
 		"FoodDataMixin",
+		"ForcedChunkManagerOwnedChunksMixin",
 		"IdDispatchCodecMixin",
 		"IOWorkerMixin",
 		"ItemMixin",

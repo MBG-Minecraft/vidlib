@@ -2,7 +2,6 @@ package dev.beast.mods.shimmer.feature.zone;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerCodecs;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
@@ -18,7 +17,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.neoforged.neoforge.common.world.chunk.TicketController;
 
 import java.util.Map;
 import java.util.Set;
@@ -56,8 +54,6 @@ public record Zone(
 		ByteBufCodecs.BOOL, Zone::forceLoaded,
 		Zone::new
 	);
-
-	public static final TicketController TICKET_CONTROLLER = new TicketController(Shimmer.id("zone"));
 
 	public void writeUUID(FriendlyByteBuf buf) {
 		shape.writeUUID(buf);

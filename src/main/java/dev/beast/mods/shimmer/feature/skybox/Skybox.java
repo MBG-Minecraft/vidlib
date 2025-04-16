@@ -17,7 +17,7 @@ public class Skybox {
 		if (skyboxTexture == null) {
 			var id = data.id().withPath(p -> "textures/generated/skybox/" + p + ".png");
 
-			if (mc.getTextureManager().getTexture(id) instanceof SkyboxTexture tex) {
+			if (mc.getTextureManager().byPath.get(id) instanceof SkyboxTexture tex) {
 				skyboxTexture = tex;
 				return skyboxTexture;
 			}
