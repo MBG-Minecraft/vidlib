@@ -116,7 +116,7 @@ public class PhysicsParticle {
 		prevSpin = spin;
 		prevScale = scale;
 
-		if (age >= ttl || gameTimeSpawned > gameTime) {
+		if (age >= ttl || gameTimeSpawned > gameTime || gameTimeSpawned + ttl < gameTime) {
 			return true;
 		}
 

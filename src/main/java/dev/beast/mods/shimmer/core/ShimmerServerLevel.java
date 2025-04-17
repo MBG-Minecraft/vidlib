@@ -159,4 +159,9 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 			}
 		}
 	}
+
+	@Override
+	default boolean isReplayLevel() {
+		return shimmer$level().getServer().getClass().getName().equals("com.moulberry.flashback.playback.ReplayServer");
+	}
 }

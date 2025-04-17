@@ -14,9 +14,13 @@ import java.util.IdentityHashMap;
 import java.util.List;
 
 public class OptimizedModificationBuilder implements BlockModificationConsumer {
-	public final Long2ObjectMap<Short2ObjectMap<BlockState>> sections = new Long2ObjectOpenHashMap<>();
+	private Long2ObjectMap<Short2ObjectMap<BlockState>> sections;
 
 	private Short2ObjectMap<BlockState> getSection(SectionPos pos) {
+		if (sections == null) {
+			sections = new Long2ObjectOpenHashMap<>(8);
+		}
+
 		return sections.computeIfAbsent(pos.asLong(), k -> new Short2ObjectOpenHashMap<>());
 	}
 
@@ -67,7 +71,7 @@ public class OptimizedModificationBuilder implements BlockModificationConsumer {
 	}
 
 	public BulkLevelModification build() {
-		if (sections.isEmpty()) {
+		if (sections == null || sections.isEmpty()) {
 			return BulkLevelModification.NONE;
 		} else if (sections.size() == 1) {
 			var entry = sections.long2ObjectEntrySet().iterator().next();

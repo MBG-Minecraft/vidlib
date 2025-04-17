@@ -1,6 +1,7 @@
 package dev.beast.mods.shimmer.core;
 
 import com.mojang.datafixers.util.Pair;
+import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
 import dev.beast.mods.shimmer.feature.camera.CameraShake;
 import dev.beast.mods.shimmer.feature.camera.CameraShakeInstance;
@@ -358,12 +359,19 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 	}
 
 	@Override
-	default void physicsParticles(PhysicsParticleData data, long seed, List<PositionedBlock> blocks) {
+	default void physicsParticles(PhysicsParticleData data, long spawnTime, long seed, List<PositionedBlock> blocks) {
 		if (blocks.isEmpty()) {
 			return;
 		}
 
-		var particles = new PhysicsParticles(data, shimmer$level(), shimmer$level().getGameTime(), seed == 0L ? shimmer$self().level.getRandom().nextLong() : seed);
+		var realTime = shimmer$level().getGameTime();
+
+		if (spawnTime < realTime - 60L || spawnTime > realTime + 60L + (long) data.lifespan.max()) {
+			Shimmer.LOGGER.info("Discarded physics particles packet @ " + realTime + " from " + spawnTime);
+			return;
+		}
+
+		var particles = new PhysicsParticles(data, shimmer$level(), spawnTime, seed == 0L ? shimmer$self().level.getRandom().nextLong() : seed);
 
 		for (var block : blocks) {
 			particles.at = block.pos();
@@ -373,10 +381,10 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 	}
 
 	@Override
-	default void physicsParticles(PhysicsParticlesIdData data) {
+	default void physicsParticles(PhysicsParticlesIdData data, long spawnTime) {
 		if (!data.blocks().isEmpty()) {
 			var p = PhysicsParticleData.REGISTRY.get(data.id());
-			physicsParticles(p == null ? PhysicsParticleData.DEFAULT : p, data.seed(), data.blocks());
+			physicsParticles(p == null ? PhysicsParticleData.DEFAULT : p, spawnTime, data.seed(), data.blocks());
 		}
 	}
 

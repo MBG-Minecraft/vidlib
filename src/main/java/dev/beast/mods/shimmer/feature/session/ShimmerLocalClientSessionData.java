@@ -243,6 +243,12 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 				session.tick++;
 			}
 		}
+
+		int undo = level.undoAllFutureModifications();
+
+		if (undo > 0) {
+			Shimmer.LOGGER.info("Undone " + undo + " future modifications");
+		}
 	}
 
 	public void refreshZones(ResourceKey<Level> dimension) {

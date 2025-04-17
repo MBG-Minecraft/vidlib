@@ -49,4 +49,10 @@ public interface ShimmerClientLevel extends ShimmerLevel {
 			}
 		}
 	}
+
+	@Override
+	default boolean isReplayLevel() {
+		var mc = Minecraft.getInstance();
+		return mc.player != null && mc.player.isReplayCamera();
+	}
 }

@@ -86,6 +86,8 @@ public class BulkLevelModificationHolder implements BlockModificationConsumer {
 		var server = !level.isClientSide();
 		var packets = server ? new S2CPacketBundleBuilder(level) : null;
 
+		boolean collectUndoable = (undoable && server) || (!server && level.isReplayLevel());
+
 		for (var sd : sections.values()) {
 			if (!sd.modified) {
 				if (debug) {
@@ -141,7 +143,7 @@ public class BulkLevelModificationHolder implements BlockModificationConsumer {
 
 									count++;
 
-									if (undoable && server) {
+									if (collectUndoable) {
 										undo.computeIfAbsent(prevState, o -> new LongArrayList()).add(blockPos.asLong());
 									}
 
@@ -212,12 +214,11 @@ public class BulkLevelModificationHolder implements BlockModificationConsumer {
 
 		if (server) {
 			packets.s2c(new RedrawChunkSectionsPayload(new LongArrayList(rerender), false));
-
-			if (undoable) {
-				level.addUndoable(new UndoableBulkModification(undo));
-			}
-
 			packets.send(level);
+		}
+
+		if (collectUndoable) {
+			level.addUndoable(new UndoableBulkModification(undo));
 		}
 
 		if (debug) {

@@ -10,6 +10,7 @@ import dev.beast.mods.shimmer.feature.bulk.BulkLevelModificationHolder;
 import dev.beast.mods.shimmer.feature.bulk.OptimizedModificationBuilder;
 import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
 import dev.beast.mods.shimmer.feature.bulk.UndoableModification;
+import dev.beast.mods.shimmer.feature.bulk.UndoableModificationHolder;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.entity.filter.EntityFilter;
 import dev.beast.mods.shimmer.feature.entity.filter.EntityTypeFilter;
@@ -55,14 +56,12 @@ public interface ShimmerLevel extends ShimmerPlayerContainer, ShimmerMinecraftEn
 		throw new NoMixinException(this);
 	}
 
-	default List<UndoableModification> shimmer$getUndoableModifications() {
+	default List<UndoableModificationHolder> shimmer$getUndoableModifications() {
 		throw new NoMixinException(this);
 	}
 
 	default void addUndoable(UndoableModification modification) {
-		if (!shimmer$isClient()) {
-			shimmer$getUndoableModifications().add(modification);
-		}
+		shimmer$getUndoableModifications().add(new UndoableModificationHolder(shimmer$level().getGameTime(), modification));
 	}
 
 	default int undoLastModification() {
@@ -70,7 +69,7 @@ public interface ShimmerLevel extends ShimmerPlayerContainer, ShimmerMinecraftEn
 
 		if (!undoable.isEmpty()) {
 			var builder = new OptimizedModificationBuilder();
-			undoable.getLast().undo((Level) this, builder);
+			undoable.getLast().modification().undo((Level) this, builder);
 			undoable.removeLast();
 			return bulkModify(false, builder.build());
 		}
@@ -83,10 +82,27 @@ public interface ShimmerLevel extends ShimmerPlayerContainer, ShimmerMinecraftEn
 		var undoable = shimmer$getUndoableModifications();
 
 		for (int i = undoable.size() - 1; i >= 0; i--) {
-			undoable.get(i).undo((Level) this, builder);
+			undoable.get(i).modification().undo((Level) this, builder);
 		}
 
 		undoable.clear();
+		return bulkModify(false, builder.build());
+	}
+
+	default int undoAllFutureModifications() {
+		var builder = new OptimizedModificationBuilder();
+		var undoable = shimmer$getUndoableModifications();
+		var gameTime = shimmer$level().getGameTime();
+
+		for (int i = undoable.size() - 1; i >= 0; i--) {
+			var u = undoable.get(i);
+
+			if (u.gameTime() > gameTime) {
+				u.modification().undo((Level) this, builder);
+				undoable.remove(i);
+			}
+		}
+
 		return bulkModify(false, builder.build());
 	}
 
@@ -171,5 +187,9 @@ public interface ShimmerLevel extends ShimmerPlayerContainer, ShimmerMinecraftEn
 
 	default void killAll(EntityType<?> type) {
 		killAll(new EntityTypeFilter(type));
+	}
+
+	default boolean isReplayLevel() {
+		return false;
 	}
 }

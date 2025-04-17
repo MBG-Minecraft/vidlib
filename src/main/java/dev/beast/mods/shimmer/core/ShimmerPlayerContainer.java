@@ -216,28 +216,28 @@ public interface ShimmerPlayerContainer extends ShimmerS2CPacketConsumer, Shimme
 		playGlobalSound(new PositionedSoundData(sound), WorldNumberVariables.EMPTY);
 	}
 
-	default void physicsParticles(PhysicsParticleData data, long seed, List<PositionedBlock> blocks) {
+	default void physicsParticles(PhysicsParticleData data, long spawnTime, long seed, List<PositionedBlock> blocks) {
 		if (shimmer$isClient()) {
-			getEnvironment().physicsParticles(data, seed, blocks);
+			getEnvironment().physicsParticles(data, spawnTime, seed, blocks);
 		} else if (!blocks.isEmpty()) {
 			s2c(new PhysicsParticlesPayload(data, seed, blocks));
 		}
 	}
 
-	default void physicsParticles(PhysicsParticlesIdData data) {
+	default void physicsParticles(PhysicsParticlesIdData data, long spawnTime) {
 		if (shimmer$isClient()) {
-			getEnvironment().physicsParticles(data);
+			getEnvironment().physicsParticles(data, spawnTime);
 		} else if (!data.blocks().isEmpty()) {
 			s2c(new PhysicsParticlesIdPayload(data));
 		}
 	}
 
 	default void physicsParticles(ResourceLocation id, long seed, List<PositionedBlock> blocks) {
-		physicsParticles(new PhysicsParticlesIdData(id, seed, blocks));
+		physicsParticles(new PhysicsParticlesIdData(id, seed, blocks), shimmer$level().getGameTime());
 	}
 
 	default void physicsParticles(PhysicsParticleData data, List<PositionedBlock> blocks) {
-		physicsParticles(data, shimmer$level().shimmer$level().random.nextLong(), blocks);
+		physicsParticles(data, shimmer$level().getGameTime(), shimmer$level().shimmer$level().random.nextLong(), blocks);
 	}
 
 	default void physicsParticles(ResourceLocation id, List<PositionedBlock> blocks) {

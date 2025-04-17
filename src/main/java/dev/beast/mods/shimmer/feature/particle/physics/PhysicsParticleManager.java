@@ -7,6 +7,7 @@ import dev.beast.mods.shimmer.core.ShimmerBlockState;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.shader.ShaderHolder;
 import dev.beast.mods.shimmer.util.FrameInfo;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.CompiledShaderProgram;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -33,6 +34,22 @@ public class PhysicsParticleManager implements Consumer<CompiledShaderProgram> {
 		ALL.add(SOLID);
 		ALL.add(CUTOUT);
 		ALL.add(TRANSLUCENT);
+	}
+
+	public static void debugInfo(Consumer<String> left, Consumer<String> right) {
+		int total = 0;
+		int totalRendered = 0;
+		int totalBuffersSwitched = 0;
+
+		for (var manager : PhysicsParticleManager.ALL) {
+			total += manager.particles.size();
+			totalRendered += manager.rendered;
+			totalBuffersSwitched += manager.buffersSwitched;
+			left.accept("%,d/%,d [%dx] %s".formatted(manager.rendered, manager.particles.size(), manager.buffersSwitched, manager.displayName));
+		}
+
+		right.accept(Minecraft.getInstance().fpsString.split(" ", 2)[0] + " FPS");
+		right.accept("%,d/%,d [%dx] Total".formatted(totalRendered, total, totalBuffersSwitched));
 	}
 
 	public static void renderAll(FrameInfo frame) {

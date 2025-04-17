@@ -42,6 +42,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
@@ -54,6 +55,8 @@ import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.client.event.ToastAddEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.common.NeoForge;
+
+import java.util.List;
 
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
 public class GameClientEventHandler {
@@ -287,6 +290,10 @@ public class GameClientEventHandler {
 		int width = event.getGuiGraphics().guiWidth();
 		int height = event.getGuiGraphics().guiHeight();
 
+		if (mc.player.isReplayCamera() && !FMLLoader.isProduction()) {
+			graphics.drawString(mc.font, "Time: " + mc.level.getGameTime(), 3, 3, 0xFFFFFFFF, true);
+		}
+
 		if (!mc.options.hideGui && !mc.player.isReplayCamera()) {
 			ScreenText.RENDER.addAll(ScreenText.CLIENT_TICK);
 			ScreenText.RENDER.ops = mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
@@ -416,13 +423,34 @@ public class GameClientEventHandler {
 		}
 	}
 
+	private static final List<String> REMOVE_RIGHT = List.of(
+		"CPU: ",
+		"Display: ",
+		"Sodium Renderer ",
+		"Geometry Pool: ",
+		"Transfer Queue: ",
+		"Chunk Builder: ",
+		"Chunk Queues: "
+	);
+
 	@SubscribeEvent
 	public static void debugText(CustomizeGuiOverlayEvent.DebugText event) {
 		var mc = Minecraft.getInstance();
 
-		// event.getLeft().clear();
-		// event.getRight().clear();
-		// event.getLeft().add(mc.fpsString);
+		var left = event.getLeft();
+		var right = event.getRight();
+
+		right.removeIf(s -> {
+			for (var r : REMOVE_RIGHT) {
+				if (ChatFormatting.stripFormatting(s).startsWith(r)) {
+					return true;
+				}
+			}
+
+			return false;
+		});
+
+		PhysicsParticleManager.debugInfo(left::add, right::add);
 	}
 
 	@SubscribeEvent
