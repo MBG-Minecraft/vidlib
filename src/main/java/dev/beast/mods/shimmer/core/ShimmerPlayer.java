@@ -33,7 +33,7 @@ public interface ShimmerPlayer extends ShimmerLivingEntity, ShimmerPlayerContain
 	}
 
 	default <T> T get(DataType<T> type) {
-		return shimmer$sessionData().dataMap.get(type);
+		return shimmer$sessionData().dataMap.get(type, shimmer$level().getGameTime());
 	}
 
 	default <T> void set(DataType<T> type, T value) {

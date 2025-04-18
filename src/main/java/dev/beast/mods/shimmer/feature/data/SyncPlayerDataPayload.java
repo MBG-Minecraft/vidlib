@@ -24,7 +24,18 @@ public record SyncPlayerDataPayload(UUID player, List<DataMapValue> update) impl
 	}
 
 	@Override
+	public boolean allowDebugLogging() {
+		for (var u : update) {
+			if (!u.type().skipLogging()) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
 	public void handle(ShimmerPayloadContext ctx) {
-		ctx.player().shimmer$sessionData().updateSessionData(ctx.player(), player, update);
+		ctx.player().shimmer$sessionData().updatePlayerData(ctx.remoteGameTime(), ctx.player(), player, update);
 	}
 }

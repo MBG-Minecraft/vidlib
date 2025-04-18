@@ -6,13 +6,13 @@ import dev.beast.mods.shimmer.feature.data.InternalServerData;
 import dev.beast.mods.shimmer.feature.zone.Anchor;
 import net.minecraft.resources.ResourceLocation;
 
-public interface ShimmerMinecraftEnvironmentDataHolder {
+public interface ShimmerMinecraftEnvironmentDataHolder extends ShimmerLevelContainer {
 	default DataMap getServerData() {
 		throw new NoMixinException(this);
 	}
 
 	default <T> T get(DataType<T> type) {
-		return getServerData().get(type);
+		return getServerData().get(type, shimmer$level().getGameTime());
 	}
 
 	default <T> void set(DataType<T> type, T value) {

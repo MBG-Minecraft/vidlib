@@ -82,6 +82,10 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 	@Override
 	@ApiStatus.Internal
 	default void shimmer$postTick(PauseType paused) {
+		if (shimmer$level().isReplayLevel()) {
+			return;
+		}
+
 		var packetsToEveryone = new S2CPacketBundleBuilder(shimmer$level());
 
 		getServerData().sync(packetsToEveryone, null, (playerId, update) -> new SyncServerDataPayload(update));

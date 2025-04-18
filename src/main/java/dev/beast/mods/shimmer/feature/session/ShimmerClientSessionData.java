@@ -1,5 +1,7 @@
 package dev.beast.mods.shimmer.feature.session;
 
+import dev.beast.mods.shimmer.core.ShimmerEntity;
+import dev.beast.mods.shimmer.feature.data.DataRecorder;
 import dev.beast.mods.shimmer.util.Empty;
 import net.minecraft.network.chat.Component;
 
@@ -13,6 +15,18 @@ public class ShimmerClientSessionData extends ShimmerSessionData {
 	public ShimmerClientSessionData(UUID uuid) {
 		super(uuid);
 		this.tags = new HashSet<>(0);
+	}
+
+	public Set<String> getTags(ShimmerEntity entity) {
+		if (dataMap.override != null) {
+			var v = dataMap.override.getOverride(DataRecorder.PLAYER_TAGS, entity.shimmer$level().getGameTime());
+
+			if (v != null) {
+				return v;
+			}
+		}
+
+		return tags;
 	}
 
 	public Component modifyPlayerName(Component original) {

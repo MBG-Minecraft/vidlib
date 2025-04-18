@@ -51,7 +51,7 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements S
 
 	@Override
 	public Set<String> getTags() {
-		return shimmer$sessionData().tags;
+		return shimmer$sessionData().getTags(this);
 	}
 
 	@Inject(method = "openItemGui", at = @At("HEAD"), cancellable = true)
@@ -67,7 +67,7 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements S
 	@Override
 	public boolean isReplayCamera() {
 		if (shimmer$isReplayCamera == null) {
-			shimmer$isReplayCamera = ((Object) this).getClass() != LocalPlayer.class || getScoreboardName().equals("Replay Viewer");
+			shimmer$isReplayCamera = ((Object) this).getClass() != LocalPlayer.class || getScoreboardName().equals("Replay Viewer") || getGameProfile().getProperties().containsKey("IsReplayViewer");
 		}
 
 		return shimmer$isReplayCamera;

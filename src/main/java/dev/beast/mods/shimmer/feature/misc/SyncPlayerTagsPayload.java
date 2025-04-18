@@ -26,6 +26,6 @@ public record SyncPlayerTagsPayload(UUID player, List<String> tags) implements S
 
 	@Override
 	public void handle(ShimmerPayloadContext ctx) {
-		ctx.player().shimmer$sessionData().updatePlayerTags(player, tags);
+		ctx.player().shimmer$sessionData().updatePlayerTags(ctx.remoteGameTime(), ctx.player(), player, tags);
 	}
 }

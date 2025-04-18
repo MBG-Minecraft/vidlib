@@ -2,8 +2,10 @@ package dev.beast.mods.shimmer.feature.session;
 
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.shaders.FogShape;
+import com.mojang.serialization.JsonOps;
 import dev.beast.mods.shimmer.GameEventHandler;
 import dev.beast.mods.shimmer.Shimmer;
+import dev.beast.mods.shimmer.ShimmerConfig;
 import dev.beast.mods.shimmer.core.ShimmerLocalPlayer;
 import dev.beast.mods.shimmer.feature.camera.CameraShakeInstance;
 import dev.beast.mods.shimmer.feature.camera.ControlledCameraOverride;
@@ -11,6 +13,7 @@ import dev.beast.mods.shimmer.feature.clock.ClockValue;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
 import dev.beast.mods.shimmer.feature.data.DataMap;
 import dev.beast.mods.shimmer.feature.data.DataMapValue;
+import dev.beast.mods.shimmer.feature.data.DataRecorder;
 import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.fade.ScreenFadeInstance;
@@ -49,6 +52,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -58,6 +62,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
@@ -81,6 +86,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	public ScreenFadeInstance screenFade;
 	public FrameInfo currentFrameInfo;
 	public WorldMouse worldMouse;
+	public DataRecorder dataRecorder;
 
 	public ShimmerLocalClientSessionData(Minecraft mc, UUID uuid, ClientPacketListener connection) {
 		super(uuid);
@@ -175,6 +181,19 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 
 	@ApiStatus.Internal
 	public void preTick(ClientLevel level, LocalPlayer player, Window window, PauseType paused) {
+		if (dataRecorder == null && !ShimmerConfig.debugS2CPackets && player.isReplayCamera()) {
+			dataRecorder = initDataRecorder(player, -1L);
+			Shimmer.LOGGER.info("Loaded data overrides");
+		}
+
+		if (dataRecorder != null && dataRecorder.start == -1L) {
+			serverDataMap.override = dataRecorder.serverData;
+
+			for (var entry : dataRecorder.playerData.entrySet()) {
+				getClientSessionData(entry.getKey()).dataMap.override = entry.getValue();
+			}
+		}
+
 		filteredZones.tick(level);
 
 		updateOverrides(player);
@@ -278,31 +297,76 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 		clocks.putAll(map);
 	}
 
+	public DataRecorder initDataRecorder(Player player, long start) {
+		if (dataRecorder == null) {
+			dataRecorder = new DataRecorder(start != -1L, start);
+
+			dataRecorder.load(
+				player.level().registryAccess().createSerializationContext(JsonOps.INSTANCE),
+				FMLPaths.GAMEDIR.get().resolve(start == -1L ? "replay_data_overrides.json" : ("replay_data_" + Long.toUnsignedString(start) + ".json"))
+			);
+		}
+
+		return dataRecorder;
+	}
+
 	@Override
-	public void updateSessionData(Player self, UUID player, List<DataMapValue> playerData) {
+	public void updateServerData(long gameTime, Player self, List<DataMapValue> update) {
+		serverDataMap.update(mc.player, update);
+
+		if (ShimmerConfig.debugS2CPackets) {
+			var r = initDataRecorder(self, gameTime);
+
+			if (r.record) {
+				for (var u : update) {
+					if (!u.type().skipLogging()) {
+						r.setServer(gameTime, u.type(), u.value());
+					}
+				}
+			}
+		}
+	}
+
+	@Override
+	public void updatePlayerData(long gameTime, Player self, UUID player, List<DataMapValue> update) {
 		if (self.getUUID().equals(player)) {
-			dataMap.update(self, playerData);
+			dataMap.update(self, update);
 		} else {
-			getRemoteSessionData(player).dataMap.update(self.level().getPlayerByUUID(player), playerData);
+			getRemoteSessionData(player).dataMap.update(self.level().getPlayerByUUID(player), update);
+		}
+
+		if (ShimmerConfig.debugS2CPackets) {
+			var r = initDataRecorder(self, gameTime);
+
+			if (r.record) {
+				for (var u : update) {
+					if (!u.type().skipLogging()) {
+						r.setPlayer(gameTime, player, u.type(), u.value());
+					}
+				}
+			}
 		}
 	}
 
 	@Override
 	public void removeSessionData(UUID id) {
-		remoteSessionData.remove(id);
+		// remoteSessionData.remove(id);
 	}
 
 	@Override
-	public void updatePlayerTags(UUID player, List<String> update) {
+	public void updatePlayerTags(long gameTime, Player self, UUID player, List<String> update) {
 		var t = getClientSessionData(player).tags;
 		t.clear();
 		t.addAll(update);
 		refreshListedPlayers();
-	}
 
-	@Override
-	public void updateServerData(List<DataMapValue> serverData) {
-		serverDataMap.update(mc.player, serverData);
+		if (ShimmerConfig.debugS2CPackets) {
+			var r = initDataRecorder(self, gameTime);
+
+			if (r.record) {
+				r.setPlayer(gameTime, player, DataRecorder.PLAYER_TAGS, Set.copyOf(update));
+			}
+		}
 	}
 
 	@Override

@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -157,5 +158,9 @@ public record KnownCodec<T>(
 
 	public KnownCodec<List<T>> listOf() {
 		return register(id.withPath(p -> p + "_list"), codec.listOf(), streamCodec.list(), (Class) List.class);
+	}
+
+	public KnownCodec<Set<T>> setOf() {
+		return register(id.withPath(p -> p + "_set"), ShimmerCodecs.set(codec), streamCodec.set(), (Class) Set.class);
 	}
 }

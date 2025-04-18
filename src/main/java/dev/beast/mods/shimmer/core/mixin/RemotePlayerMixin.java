@@ -32,6 +32,6 @@ public class RemotePlayerMixin extends AbstractClientPlayer implements ShimmerRe
 
 	@Override
 	public Set<String> getTags() {
-		return shimmer$sessionData().tags;
+		return shimmer$sessionData().getTags(this);
 	}
 }

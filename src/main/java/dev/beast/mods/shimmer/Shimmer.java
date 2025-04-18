@@ -64,6 +64,10 @@ public class Shimmer {
 	}
 
 	public static void sync(ServerPlayer player, boolean login) {
+		if (player.level().isReplayLevel()) {
+			return;
+		}
+
 		var packets = new S2CPacketBundleBuilder(player.level());
 		packets.s2c(new MarkerPayload(new MarkerData("sync", player)).toS2C(player.level()));
 		player.shimmer$sessionData().sync(packets, player, login);

@@ -18,6 +18,7 @@ import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleManager;
 import dev.beast.mods.shimmer.feature.structure.GhostStructure;
 import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
 import dev.beast.mods.shimmer.util.FrameInfo;
+import dev.beast.mods.shimmer.util.JsonUtils;
 import dev.latvian.mods.kmath.KMath;
 import dev.latvian.mods.kmath.render.BoxRenderer;
 import dev.latvian.mods.kmath.render.DebugRenderTypes;
@@ -42,7 +43,8 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
@@ -56,6 +58,7 @@ import net.neoforged.neoforge.client.event.ToastAddEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
+import java.nio.file.Files;
 import java.util.List;
 
 @EventBusSubscriber(modid = Shimmer.ID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
@@ -290,10 +293,6 @@ public class GameClientEventHandler {
 		int width = event.getGuiGraphics().guiWidth();
 		int height = event.getGuiGraphics().guiHeight();
 
-		if (mc.player.isReplayCamera() && !FMLLoader.isProduction()) {
-			graphics.drawString(mc.font, "Time: " + mc.level.getGameTime(), 3, 3, 0xFFFFFFFF, true);
-		}
-
 		if (!mc.options.hideGui && !mc.player.isReplayCamera()) {
 			ScreenText.RENDER.addAll(ScreenText.CLIENT_TICK);
 			ScreenText.RENDER.ops = mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
@@ -513,5 +512,22 @@ public class GameClientEventHandler {
 	@SubscribeEvent
 	public static void renderInventoryMobEffects(ScreenEvent.RenderInventoryMobEffects event) {
 		event.setCompact(true);
+	}
+
+	@SubscribeEvent
+	public static void loggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
+		var player = event.getPlayer();
+
+		if (player != null) {
+			var session = player.shimmer$sessionData();
+
+			if (session.dataRecorder != null && session.dataRecorder.record) {
+				try (var writer = Files.newBufferedWriter(FMLPaths.GAMEDIR.get().resolve("replay-data-" + Long.toUnsignedString(session.dataRecorder.start) + ".json"))) {
+					JsonUtils.write(writer, session.dataRecorder.save(player.level().registryAccess().createSerializationContext(JsonOps.INSTANCE)), false);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		}
 	}
 }
