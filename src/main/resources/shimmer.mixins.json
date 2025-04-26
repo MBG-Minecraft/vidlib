@@ -15,6 +15,7 @@
 		"DimensionTypeMixin",
 		"DistanceManagerMixin",
 		"EntityMixin",
+		"EntitySelectorMixin",
 		"FallingBlockMixin",
 		"FillCommandMixin",
 		"FireworkRocketEntityMixin",
@@ -46,7 +47,8 @@
 		"StructureTemplateMixin",
 		"StyleMixin",
 		"UUIDUtilMixin",
-		"WaterFluidMixin"
+		"WaterFluidMixin",
+		"neo.EnumArgumentMixin"
 	],
 	"client": [
 		"AbstractClientPlayerMixin",
@@ -54,6 +56,7 @@
 		"CameraMixin",
 		"ClientLevelMixin",
 		"ClientPacketListenerMixin",
+		"CreativeModeInventoryScreenMixin",
 		"DefaultPlayerSkinMixin",
 		"EntityRendererMixin",
 		"FireworkParticlesStarterMixin",
@@ -68,6 +71,7 @@
 		"KeyMappingMixin",
 		"LevelEventHandlerMixin",
 		"LevelRendererMixin",
+		"LiquidBlockRendererMixin",
 		"LocalPlayerMixin",
 		"MinecraftClientMixin",
 		"MouseHandlerMixin",
@@ -80,6 +84,7 @@
 		"ScreenMixin",
 		"SectionOcclusionGraphMixin",
 		"ShaderManagerMixin",
+		"SkinManagerMixin",
 		"SkyRendererMixin",
 		"StructureBlockRendererMixin"
 	],

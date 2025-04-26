@@ -187,10 +187,10 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 		}
 
 		if (dataRecorder != null && dataRecorder.start == -1L) {
-			serverDataMap.override = dataRecorder.serverData;
+			serverDataMap.overrides = dataRecorder.serverData;
 
 			for (var entry : dataRecorder.playerData.entrySet()) {
-				getClientSessionData(entry.getKey()).dataMap.override = entry.getValue();
+				getClientSessionData(entry.getKey()).dataMap.overrides = entry.getValue();
 			}
 		}
 

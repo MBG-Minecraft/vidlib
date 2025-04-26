@@ -66,7 +66,7 @@ public class ShimmerRegistry<V> extends BasicShimmerRegistry<ResourceLocation, V
 	}
 
 	@Override
-	public RegistryRef<V> ref(ResourceLocation id) {
+	public synchronized RegistryRef<V> ref(ResourceLocation id) {
 		var ref = refMap.get(id);
 
 		if (ref == null) {

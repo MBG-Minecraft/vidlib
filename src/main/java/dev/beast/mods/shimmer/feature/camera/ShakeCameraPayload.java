@@ -16,8 +16,6 @@ public record ShakeCameraPayload(CameraShake shake) implements ShimmerPacketPayl
 
 	@Override
 	public void handle(ShimmerPayloadContext ctx) {
-		if (!ctx.player().isReplayCamera()) {
-			ctx.player().shakeCamera(shake);
-		}
+		ctx.player().shakeCamera(shake);
 	}
 }

@@ -8,6 +8,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public record BlockAndFilter(List<BlockFilter> filters) implements BlockFilter {
@@ -40,5 +41,12 @@ public record BlockAndFilter(List<BlockFilter> filters) implements BlockFilter {
 		}
 
 		return true;
+	}
+
+	@Override
+	public BlockFilter and(BlockFilter filter) {
+		var list = new ArrayList<>(filters);
+		list.add(filter);
+		return new BlockAndFilter(List.copyOf(list));
 	}
 }

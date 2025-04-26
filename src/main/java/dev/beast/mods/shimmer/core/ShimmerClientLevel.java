@@ -1,12 +1,16 @@
 package dev.beast.mods.shimmer.core;
 
+import dev.beast.mods.shimmer.feature.data.InternalServerData;
 import dev.beast.mods.shimmer.feature.entity.EntityOverride;
 import dev.beast.mods.shimmer.feature.prop.ClientPropList;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public interface ShimmerClientLevel extends ShimmerLevel {
 	@Override
@@ -32,8 +36,8 @@ public interface ShimmerClientLevel extends ShimmerLevel {
 	}
 
 	default void environmentEffects(Minecraft mc, BlockPos pos) {
-		var override = EntityOverride.ENVIRONMENT_EFFECTS.get(mc.player);
-		var level = this.shimmer$level();
+		var override = EntityOverride.ENVIRONMENT_EFFECTS.get(mc.player, List.of(), InternalServerData.ENVIRONMENT_EFFECTS);
+		var level = shimmer$level();
 
 		if (override != null && !override.isEmpty()) {
 			for (var effect : override) {
@@ -54,5 +58,10 @@ public interface ShimmerClientLevel extends ShimmerLevel {
 	default boolean isReplayLevel() {
 		var mc = Minecraft.getInstance();
 		return mc.player != null && mc.player.isReplayCamera();
+	}
+
+	@Override
+	default Iterable<Entity> allEntities() {
+		return shimmer$level().entitiesForRendering();
 	}
 }

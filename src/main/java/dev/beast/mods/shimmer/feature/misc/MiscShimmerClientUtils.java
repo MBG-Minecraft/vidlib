@@ -15,6 +15,7 @@ import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.entity.Entity;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class MiscShimmerClientUtils {
 	public static final ContextKey<Boolean> CREATIVE = new ContextKey<>(Shimmer.id("creative"));
@@ -22,8 +23,14 @@ public class MiscShimmerClientUtils {
 
 	public static KeyMapping freezeTickKeyMapping;
 	public static KeyMapping clearParticlesKeyMapping;
+	public static KeyMapping tpNKeyMapping;
+	public static KeyMapping tpSKeyMapping;
+	public static KeyMapping tpWKeyMapping;
+	public static KeyMapping tpEKeyMapping;
 
 	public static FogParameters fogOverride = FogParameters.NO_FOG;
+
+	public static final ConcurrentLinkedDeque<AutoCloseable> CLIENT_CLOSEABLE = new ConcurrentLinkedDeque<>();
 
 	public static boolean handleDebugKeys(Minecraft mc, int key) {
 		if (key == ShimmerConfig.cycleShadersKey) {

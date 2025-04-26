@@ -1,6 +1,5 @@
 package dev.beast.mods.shimmer;
 
-import com.mojang.math.Axis;
 import com.mojang.serialization.JsonOps;
 import dev.beast.mods.shimmer.feature.auto.AutoInit;
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
@@ -8,14 +7,17 @@ import dev.beast.mods.shimmer.feature.auto.ClientCommandHolder;
 import dev.beast.mods.shimmer.feature.clock.Clock;
 import dev.beast.mods.shimmer.feature.clock.ClockRenderer;
 import dev.beast.mods.shimmer.feature.cutscene.ClientCutscene;
-import dev.beast.mods.shimmer.feature.icon.renderer.IconRenderer;
+import dev.beast.mods.shimmer.feature.data.InternalServerData;
+import dev.beast.mods.shimmer.feature.icon.PlumbobRenderer;
 import dev.beast.mods.shimmer.feature.item.ShimmerTool;
 import dev.beast.mods.shimmer.feature.misc.CameraOverride;
 import dev.beast.mods.shimmer.feature.misc.DebugTextEvent;
 import dev.beast.mods.shimmer.feature.misc.MiscShimmerClientUtils;
 import dev.beast.mods.shimmer.feature.misc.ScreenText;
+import dev.beast.mods.shimmer.feature.misc.ShimmerIcon;
 import dev.beast.mods.shimmer.feature.particle.physics.PhysicsParticleManager;
 import dev.beast.mods.shimmer.feature.structure.GhostStructure;
+import dev.beast.mods.shimmer.feature.structure.StructureRenderer;
 import dev.beast.mods.shimmer.feature.zone.renderer.ZoneRenderer;
 import dev.beast.mods.shimmer.util.FrameInfo;
 import dev.beast.mods.shimmer.util.JsonUtils;
@@ -29,15 +31,11 @@ import net.minecraft.client.gui.components.toasts.RecipeToast;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
 import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
@@ -122,6 +120,22 @@ public class GameClientEventHandler {
 		while (MiscShimmerClientUtils.clearParticlesKeyMapping.consumeClick()) {
 			mc.level.removeAllParticles();
 		}
+
+		while (MiscShimmerClientUtils.tpNKeyMapping.consumeClick()) {
+			mc.player.connection.sendCommand("tp ~ ~ ~-10000");
+		}
+
+		while (MiscShimmerClientUtils.tpSKeyMapping.consumeClick()) {
+			mc.player.connection.sendCommand("tp ~ ~ ~10000");
+		}
+
+		while (MiscShimmerClientUtils.tpWKeyMapping.consumeClick()) {
+			mc.player.connection.sendCommand("tp ~-10000 ~ ~");
+		}
+
+		while (MiscShimmerClientUtils.tpEKeyMapping.consumeClick()) {
+			mc.player.connection.sendCommand("tp ~10000 ~ ~");
+		}
 	}
 
 	@SubscribeEvent
@@ -129,6 +143,17 @@ public class GameClientEventHandler {
 		var mc = Minecraft.getInstance();
 		mc.shimmer$postTick(mc.getPauseType());
 		NeoForge.EVENT_BUS.post(new DebugTextEvent.ClientTick(ScreenText.CLIENT_TICK));
+
+		if (!MiscShimmerClientUtils.CLIENT_CLOSEABLE.isEmpty()) {
+			for (var c : MiscShimmerClientUtils.CLIENT_CLOSEABLE) {
+				try {
+					c.close();
+				} catch (Exception ignored) {
+				}
+			}
+
+			MiscShimmerClientUtils.CLIENT_CLOSEABLE.clear();
+		}
 	}
 
 	@SubscribeEvent(priority = EventPriority.HIGH)
@@ -144,14 +169,11 @@ public class GameClientEventHandler {
 		session.currentFrameInfo = frame;
 		session.worldMouse = null;
 		float delta = frame.worldDelta();
-		float screenDelta = frame.screenDelta();
 
 		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SKY) {
 			mc.shimmer$renderSetup(frame);
 		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
 			var ms = frame.poseStack();
-			var cameraPos = frame.camera().getPosition();
-			var frustum = frame.frustum();
 
 			if (mc.player.getShowZones()) {
 				ZoneRenderer.renderAll(frame);
@@ -166,27 +188,14 @@ public class GameClientEventHandler {
 					if (value != null) {
 						for (var location : clock.locations()) {
 							if (location.dimension() == mc.level.dimension() && location.visible().test(mc.player)) {
-								ClockRenderer.render(mc, value, location, ms, cameraPos, delta);
+								ClockRenderer.render(frame, value, location);
 							}
 						}
 					}
 				}
 			}
 
-			if (!GhostStructure.LIST.isEmpty()) {
-				for (var gs : GhostStructure.LIST) {
-					if (gs.visibleTo().test(mc.player)) {
-						ms.pushPose();
-						ms.translate(gs.pos().x - cameraPos.x, gs.pos().y - cameraPos.y, gs.pos().z - cameraPos.z);
-						ms.scale((float) gs.scale().x, (float) gs.scale().y, (float) gs.scale().z);
-						ms.mulPose(Axis.YP.rotation(gs.rotation().yawRad()));
-						ms.mulPose(Axis.XP.rotation(gs.rotation().pitchRad()));
-						ms.mulPose(Axis.ZP.rotation(gs.rotation().rollRad()));
-						gs.structure().render(ms);
-						ms.popPose();
-					}
-				}
-			}
+			GhostStructure.render(frame);
 
 			if (session.cameraOverride instanceof ClientCutscene cc) {
 				for (var task : cc.steps) {
@@ -208,56 +217,14 @@ public class GameClientEventHandler {
 				}
 			}
 
-			for (var player : mc.level.players()) {
-				if (player.isInvisible()) {
-					continue;
-				}
-
-				var h = player.getPlumbobHolder();
-
-				if (h == null || player == mc.player && mc.options.getCameraType().isFirstPerson()) {
-					continue;
-				}
-
-				var source = mc.renderBuffers().bufferSource();
-				var blockpos = BlockPos.containing(player.getLightProbePosition(screenDelta));
-				int light = LightTexture.pack(mc.level.getBrightness(LightLayer.BLOCK, blockpos), mc.level.getBrightness(LightLayer.SKY, blockpos));
-
-				var cam = mc.gameRenderer.getMainCamera().getPosition();
-				var pos = player.getPosition(screenDelta);
-
-				if (KMath.sq(pos.x - cam.x) + KMath.sq(pos.z - cam.z) <= 0.01D * 0.01D) {
-					continue;
-				}
-
-				float y = 2.6F;
-
-				if (player.isCrouching()) {
-					y -= 0.4F;
-				}
-
-				if (player.shimmer$sessionData().scoreText != null) {
-					y += 0.3F;
-				}
-
-				ms.pushPose();
-				ms.translate(pos.x - cameraPos.x, pos.y - cameraPos.y, pos.z - cameraPos.z);
-				ms.translate(0F, y, 0F);
-				ms.mulPose(mc.gameRenderer.getMainCamera().rotation());
-				ms.scale(0.4F, 0.4F, 0.4F);
-
-				if (h.renderer == null) {
-					h.renderer = IconRenderer.create(h.icon);
-				}
-
-				((IconRenderer) h.renderer).render3D(mc, ms, delta, source, light, OverlayTexture.NO_OVERLAY);
-				ms.popPose();
+			if (!session.serverDataMap.get(InternalServerData.HIDE_PLUMBOBS, mc.level.getGameTime())) {
+				PlumbobRenderer.render(mc, frame);
 			}
 
 			var tool = ShimmerTool.of(mc.player);
 
 			if (tool != null) {
-				var visuals = tool.getSecond().visuals(mc.player, tool.getFirst(), screenDelta);
+				var visuals = tool.getSecond().visuals(mc.player, tool.getFirst(), frame.screenDelta());
 
 				for (var cube : visuals.cubes()) {
 					BoxRenderer.renderVoxelShape(ms, frame.buffers(), cube.shape(), cube.pos().subtract(frame.camera().getPosition()), false, cube.color().withAlpha(50), cube.lineColor());
@@ -281,6 +248,11 @@ public class GameClientEventHandler {
 
 	@SubscribeEvent
 	public static void renderHUD(RenderGuiEvent.Post event) {
+		renderHUD0(event);
+		ScreenText.RENDER.clear();
+	}
+
+	public static void renderHUD0(RenderGuiEvent.Post event) {
 		var mc = Minecraft.getInstance();
 
 		if (mc.level == null || mc.player == null) {
@@ -292,6 +264,21 @@ public class GameClientEventHandler {
 		var delta = event.getPartialTick().getGameTimeDeltaPartialTick(true);
 		int width = event.getGuiGraphics().guiWidth();
 		int height = event.getGuiGraphics().guiHeight();
+
+		int renderingStructures = StructureRenderer.getRenderingAll();
+
+		if (renderingStructures != 0) {
+			var component = Component.empty().append(ShimmerIcon.ERROR.prefix()).append("Rendering " + renderingStructures + " structures...");
+
+			if (mc.player.isReplayCamera()) {
+				int x = 1;
+				int y = 2;
+				graphics.fill(x, y, x + mc.font.width(component) + 3, y + 11, 0xA0000000);
+				graphics.drawString(mc.font, component, x + 2, y + 2, 0xFFFFFFFF, true);
+			} else {
+				ScreenText.RENDER.topLeft.add(component);
+			}
+		}
 
 		if (!mc.options.hideGui && !mc.player.isReplayCamera()) {
 			ScreenText.RENDER.addAll(ScreenText.CLIENT_TICK);
@@ -376,8 +363,6 @@ public class GameClientEventHandler {
 				graphics.pose().popPose();
 			}
 		}
-
-		ScreenText.RENDER.clear();
 
 		if (session.screenFade != null) {
 			float a = Math.clamp(Mth.lerp(delta, session.screenFade.prevAlpha, session.screenFade.alpha), 0F, 1F);

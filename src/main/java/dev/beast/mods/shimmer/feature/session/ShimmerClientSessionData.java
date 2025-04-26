@@ -18,8 +18,8 @@ public class ShimmerClientSessionData extends ShimmerSessionData {
 	}
 
 	public Set<String> getTags(ShimmerEntity entity) {
-		if (dataMap.override != null) {
-			var v = dataMap.override.getOverride(DataRecorder.PLAYER_TAGS, entity.shimmer$level().getGameTime());
+		if (dataMap.overrides != null) {
+			var v = dataMap.overrides.getOverride(DataRecorder.PLAYER_TAGS, entity.shimmer$level().getGameTime());
 
 			if (v != null) {
 				return v;

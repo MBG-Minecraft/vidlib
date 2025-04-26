@@ -241,7 +241,7 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 
 	@Override
 	default void shakeCamera(CameraShake shake) {
-		if (shake.skip()) {
+		if (shake.skip() || shimmer$self().player.isReplayCamera()) {
 			return;
 		}
 
@@ -459,6 +459,10 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 
 	@Override
 	default void setScreenFade(Fade fade) {
+		if (shimmer$self().player.isReplayCamera()) {
+			return;
+		}
+
 		shimmer$self().player.shimmer$sessionData().screenFade = new ScreenFadeInstance(fade);
 	}
 

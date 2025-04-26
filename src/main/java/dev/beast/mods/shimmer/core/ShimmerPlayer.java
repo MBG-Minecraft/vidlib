@@ -50,7 +50,8 @@ public interface ShimmerPlayer extends ShimmerLivingEntity, ShimmerPlayerContain
 	}
 
 	default Component getNickname() {
-		return shimmer$sessionData().nickname;
+		var s = shimmer$sessionData();
+		return s == null ? Empty.COMPONENT : s.nickname;
 	}
 
 	default void setNickname(Component nickname) {

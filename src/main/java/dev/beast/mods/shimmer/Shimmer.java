@@ -4,23 +4,15 @@ import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.misc.MarkerData;
 import dev.beast.mods.shimmer.feature.misc.MarkerPayload;
 import dev.beast.mods.shimmer.feature.net.S2CPacketBundleBuilder;
-import dev.beast.mods.shimmer.util.Lazy;
-import dev.beast.mods.shimmer.util.MiscUtils;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 @Mod(Shimmer.ID)
 public class Shimmer {
@@ -32,17 +24,8 @@ public class Shimmer {
 		return ResourceLocation.fromNamespaceAndPath(ID, path);
 	}
 
-	public static final Path PATH = FMLPaths.GAMEDIR.get().resolve("shimmer");
-	public static final Lazy<Path> HOME_DIR = Lazy.of(() -> MiscUtils.createDir(Path.of(System.getenv().getOrDefault("SHIMMER_HOME", System.getProperty("user.home") + "/.shimmer"))));
-
-	public static final ResourceKey<Level> LOBBY_DIMENSION = ResourceKey.create(Registries.DIMENSION, id("lobby"));
-
 	public Shimmer() throws IOException {
 		Shimmer.LOGGER.info("Shimmer loaded");
-
-		if (Files.notExists(PATH)) {
-			Files.createDirectories(PATH);
-		}
 
 		for (var s : AutoRegister.SCANNED.get()) {
 			if (s.value() instanceof DeferredRegister<?> reg) {

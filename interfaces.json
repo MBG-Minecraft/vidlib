@@ -58,5 +58,8 @@
 	],
 	"net/minecraft/network/chat/Component": [
 		"dev/beast/mods/shimmer/core/ShimmerComponent"
+	],
+	"net/minecraft/commands/arguments/selector/EntitySelector": [
+		"dev/beast/mods/shimmer/core/ShimmerEntitySelector"
 	]
 }

@@ -164,4 +164,9 @@ public interface ShimmerServerLevel extends ShimmerLevel {
 	default boolean isReplayLevel() {
 		return shimmer$level().getServer().getClass().getName().equals("com.moulberry.flashback.playback.ReplayServer");
 	}
+
+	@Override
+	default Iterable<Entity> allEntities() {
+		return shimmer$level().getEntities().getAll();
+	}
 }

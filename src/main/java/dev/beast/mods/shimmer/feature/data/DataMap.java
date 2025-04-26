@@ -26,7 +26,8 @@ public class DataMap {
 	public final UUID owner;
 	private final DataTypeStorage storage;
 	private Map<DataType<?>, TrackedDataMapValue> map;
-	public DataRecorder.DataMap override;
+	public DataRecorder.DataMap overrides;
+	public Map<DataType<?>, Object> superOverrides;
 
 	public DataMap(UUID owner, DataTypeStorage storage) {
 		this.owner = owner;
@@ -55,8 +56,16 @@ public class DataMap {
 	}
 
 	public <T> T get(DataType<T> type, long gameTime) {
-		if (override != null) {
-			var v = override.getOverride(type, gameTime);
+		if (superOverrides != null) {
+			var v = superOverrides.get(type);
+
+			if (v != null) {
+				return Cast.to(v);
+			}
+		}
+
+		if (overrides != null) {
+			var v = overrides.getOverride(type, gameTime);
 
 			if (v != null) {
 				return v;

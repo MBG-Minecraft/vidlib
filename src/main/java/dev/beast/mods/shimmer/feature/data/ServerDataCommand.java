@@ -1,8 +1,7 @@
-package dev.beast.mods.shimmer.feature.misc.command;
+package dev.beast.mods.shimmer.feature.data;
 
 import dev.beast.mods.shimmer.feature.auto.AutoRegister;
 import dev.beast.mods.shimmer.feature.auto.ServerCommandHolder;
-import dev.beast.mods.shimmer.feature.data.DataType;
 import dev.beast.mods.shimmer.util.Cast;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.NbtOps;

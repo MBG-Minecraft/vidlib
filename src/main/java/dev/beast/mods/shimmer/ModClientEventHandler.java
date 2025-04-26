@@ -43,6 +43,8 @@ public class ModClientEventHandler {
 		event.addListener(Shimmer.id("clothing"), new ClientClothingLoader());
 		event.addListener(Shimmer.id("physics_particle_data"), new PhysicsParticleData.Loader());
 		event.addListener(Shimmer.id("gradient"), new ClientGradients());
+
+		event.addDependency(Shimmer.id("structure"), Shimmer.id("ghost_structure"));
 	}
 
 	@SubscribeEvent
@@ -105,5 +107,9 @@ public class ModClientEventHandler {
 	public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
 		event.register(MiscShimmerClientUtils.freezeTickKeyMapping = new KeyMapping("key.vidlib.freeze_tick", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_P, "key.categories.vidlib"));
 		event.register(MiscShimmerClientUtils.clearParticlesKeyMapping = new KeyMapping("key.vidlib.clear_particles", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_L, "key.categories.vidlib"));
+		event.register(MiscShimmerClientUtils.tpNKeyMapping = new KeyMapping("key.vidlib.tp.n", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UP, "key.categories.vidlib"));
+		event.register(MiscShimmerClientUtils.tpSKeyMapping = new KeyMapping("key.vidlib.tp.s", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_DOWN, "key.categories.vidlib"));
+		event.register(MiscShimmerClientUtils.tpWKeyMapping = new KeyMapping("key.vidlib.tp.w", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT, "key.categories.vidlib"));
+		event.register(MiscShimmerClientUtils.tpEKeyMapping = new KeyMapping("key.vidlib.tp.e", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT, "key.categories.vidlib"));
 	}
 }

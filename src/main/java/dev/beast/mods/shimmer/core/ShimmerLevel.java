@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.core;
 
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.datafixers.util.Either;
 import dev.beast.mods.shimmer.feature.block.ConnectedBlock;
 import dev.beast.mods.shimmer.feature.block.filter.BlockFilter;
@@ -18,12 +19,15 @@ import dev.beast.mods.shimmer.feature.prop.PropList;
 import dev.beast.mods.shimmer.feature.zone.ActiveZones;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
@@ -191,5 +195,41 @@ public interface ShimmerLevel extends ShimmerPlayerContainer, ShimmerMinecraftEn
 
 	default boolean isReplayLevel() {
 		return false;
+	}
+
+	default Iterable<Entity> allEntities() {
+		return shimmer$level().getEntities((Entity) null, AABB.INFINITE, Entity::isAlive);
+	}
+
+	default List<Entity> selectEntities(EntitySelector selector) {
+		var list = new ArrayList<Entity>(1);
+
+		for (var entity : allEntities()) {
+			if (selector.test(entity)) {
+				list.add(entity);
+			}
+		}
+
+		return list;
+	}
+
+	default List<Entity> selectEntities(CommandContext<?> ctx, String name) {
+		return selectEntities(ctx.getArgument(name, EntitySelector.class));
+	}
+
+	default List<Player> selectPlayers(EntitySelector selector) {
+		var list = new ArrayList<Player>(1);
+
+		for (var player : shimmer$level().players()) {
+			if (selector.test(player)) {
+				list.add(player);
+			}
+		}
+
+		return list;
+	}
+
+	default List<Player> selectPlayers(CommandContext<?> ctx, String name) {
+		return selectPlayers(ctx.getArgument(name, EntitySelector.class));
 	}
 }
