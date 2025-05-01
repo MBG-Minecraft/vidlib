@@ -42,7 +42,7 @@ public abstract class HumanoidArmorLayerMixin<S extends HumanoidRenderState, M e
 	private void shimmer$render(PoseStack ms, MultiBufferSource buffers, int light, S state, float yRot, float xRot, CallbackInfo ci) {
 		var clothing = state.getRenderData(MiscShimmerClientUtils.CLOTHING);
 
-		if (clothing != null) {
+		if (clothing != null && clothing != Clothing.NONE) {
 			var item = clothing.parts().getItem();
 
 			for (var slot : Clothing.ORDERED_SLOTS) {

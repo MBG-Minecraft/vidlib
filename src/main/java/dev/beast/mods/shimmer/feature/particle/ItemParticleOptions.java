@@ -33,6 +33,6 @@ public record ItemParticleOptions(ItemStack item, float gravity, float scale, in
 
 	@Override
 	public ParticleType<?> getType() {
-		return ShimmerParticles.CUBE.get();
+		return ShimmerParticles.ITEM.get();
 	}
 }

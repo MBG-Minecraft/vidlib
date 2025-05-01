@@ -10,7 +10,9 @@ import dev.beast.mods.shimmer.feature.codec.CompositeStreamCodec;
 import dev.beast.mods.shimmer.feature.codec.KnownCodec;
 import dev.beast.mods.shimmer.feature.codec.ShimmerStreamCodecs;
 import dev.beast.mods.shimmer.util.registry.ShimmerResourceLocationArgument;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -79,10 +81,13 @@ public record Clothing(ResourceKey<EquipmentAsset> id, ClothingParts parts) {
 
 	public static final Codec<Clothing> CODEC = Codec.either(Codec.BOOL, FULL_CODEC).xmap(either -> either.map(b -> b ? BLUE_TRACKSUIT : NONE, Function.identity()), c -> c.equals(NONE) ? Either.left(false) : c.equals(BLUE_TRACKSUIT) ? Either.left(true) : Either.right(c));
 
-	public static final KnownCodec<Clothing> KNOWN_CODEC = KnownCodec.register(Shimmer.id("clothing"), CODEC, CompositeStreamCodec.of(
+	public static final StreamCodec<ByteBuf, Clothing> STREAM_CODEC = CompositeStreamCodec.of(
 		ShimmerStreamCodecs.resourceKey(EquipmentAssets.ROOT_ID), Clothing::id,
 		ClothingParts.STREAM_CODEC, Clothing::parts,
-		Clothing::new), Clothing.class);
+		Clothing::new
+	);
+
+	public static final KnownCodec<Clothing> KNOWN_CODEC = KnownCodec.register(Shimmer.id("clothing"), CODEC, STREAM_CODEC, Clothing.class);
 
 	public static final EquipmentSlot[] ORDERED_SLOTS = {
 		EquipmentSlot.CHEST,

@@ -64,4 +64,9 @@ public interface ShimmerClientLevel extends ShimmerLevel {
 	default Iterable<Entity> allEntities() {
 		return shimmer$level().entitiesForRendering();
 	}
+
+	@Override
+	default float shimmer$getDelta() {
+		return Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
+	}
 }

@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.feature.session;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.shaders.FogShape;
 import com.mojang.serialization.JsonOps;
@@ -22,6 +23,8 @@ import dev.beast.mods.shimmer.feature.input.PlayerInputChanged;
 import dev.beast.mods.shimmer.feature.input.SyncPlayerInputToServer;
 import dev.beast.mods.shimmer.feature.misc.CameraOverride;
 import dev.beast.mods.shimmer.feature.misc.MiscShimmerClientUtils;
+import dev.beast.mods.shimmer.feature.npc.NPCParticleOptions;
+import dev.beast.mods.shimmer.feature.npc.NPCRecording;
 import dev.beast.mods.shimmer.feature.skybox.Skybox;
 import dev.beast.mods.shimmer.feature.skybox.SkyboxData;
 import dev.beast.mods.shimmer.feature.skybox.Skyboxes;
@@ -40,6 +43,7 @@ import dev.latvian.mods.kmath.Vec2d;
 import dev.latvian.mods.kmath.VoxelShapeBox;
 import dev.latvian.mods.kmath.WorldMouse;
 import dev.latvian.mods.kmath.color.Color;
+import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -48,18 +52,23 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.client.renderer.FogParameters;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.network.connection.ConnectionType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.BufferedOutputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -87,6 +96,7 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 	public FrameInfo currentFrameInfo;
 	public WorldMouse worldMouse;
 	public DataRecorder dataRecorder;
+	public NPCRecording npcRecording;
 
 	public ShimmerLocalClientSessionData(Minecraft mc, UUID uuid, ClientPacketListener connection) {
 		super(uuid);
@@ -409,5 +419,53 @@ public class ShimmerLocalClientSessionData extends ShimmerClientSessionData {
 		}
 
 		return listedPlayers;
+	}
+
+	public void startNPCRecording(Minecraft mc, GameProfile profile) {
+		if (npcRecording == null) {
+			npcRecording = new NPCRecording(profile);
+			npcRecording.record(npcRecording.start, mc.getDeltaTracker().getGameTimeDeltaPartialTick(true), mc.player);
+		} else {
+			mc.tell("Already recording NPC '" + profile.getName() + "'!");
+		}
+	}
+
+	public void stopNPCRecording(Minecraft mc) {
+		if (npcRecording != null) {
+			npcRecording.length = System.currentTimeMillis() - npcRecording.start;
+
+			var buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), mc.level.registryAccess(), ConnectionType.NEOFORGE);
+			var path = FMLPaths.GAMEDIR.get().resolve("vidlib/npc/" + npcRecording.start + "_" + npcRecording.profile.getName().toLowerCase(Locale.ROOT) + ".npcrec");
+
+			if (Files.notExists(path.getParent())) {
+				try {
+					Files.createDirectories(path.getParent());
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+
+			try (var out = new BufferedOutputStream(Files.newOutputStream(path))) {
+				npcRecording.write(buf);
+				buf.readBytes(out, buf.readableBytes());
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+
+			npcRecording = null;
+			NPCRecording.REPLAY = null;
+			mc.tell("NPC recording '" + path.getFileName() + "' saved!");
+		}
+	}
+
+	public void replayNPCRecording(Minecraft mc) {
+		var map = NPCRecording.getReplay(mc.level.registryAccess());
+
+		if (map.isEmpty()) {
+			return;
+		}
+
+		var last = map.lastEntry();
+		mc.level.addParticle(new NPCParticleOptions(last.getKey(), false, 0, Optional.empty()), true, true, mc.player.getX(), mc.player.getY(), mc.player.getZ(), 0D, 0D, 0D);
 	}
 }

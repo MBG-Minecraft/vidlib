@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.core.mixin;
 
+import com.mojang.authlib.GameProfile;
 import dev.beast.mods.shimmer.core.ShimmerMinecraftServer;
 import dev.beast.mods.shimmer.feature.clock.ClockValue;
 import dev.beast.mods.shimmer.feature.data.DataMap;
@@ -24,6 +25,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
@@ -42,6 +44,15 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 
 	@Unique
 	private final Map<ResourceLocation, ClockValue> shimmer$clocks = new HashMap<>();
+
+	@Unique
+	private Map<UUID, GameProfile> shimmer$reroutedPlayers;
+
+	@Unique
+	private final Map<String, GameProfile> shimmer$profileByNameCache = new HashMap<>();
+
+	@Unique
+	private final Map<UUID, GameProfile> shimmer$profileByUUIDCache = new HashMap<>();
 
 	@Override
 	public ScheduledTask.Handler shimmer$getScheduledTaskHandler() {
@@ -88,5 +99,30 @@ public abstract class MinecraftServerMixin implements ShimmerMinecraftServer {
 	@Override
 	public Map<ResourceLocation, ClockValue> shimmer$getClocks() {
 		return shimmer$clocks;
+	}
+
+	@Override
+	public Map<UUID, GameProfile> shimmer$getReroutedPlayers() {
+		if (shimmer$reroutedPlayers == null) {
+			shimmer$reroutedPlayers = ShimmerMinecraftServer.super.shimmer$getReroutedPlayers();
+		}
+
+		return shimmer$reroutedPlayers;
+	}
+
+	@Override
+	public GameProfile retrieveGameProfile(UUID uuid) {
+		return shimmer$profileByUUIDCache.computeIfAbsent(uuid, ShimmerMinecraftServer.super::retrieveGameProfile);
+	}
+
+	@Override
+	public GameProfile retrieveGameProfile(String name) {
+		return shimmer$profileByNameCache.computeIfAbsent(name, ShimmerMinecraftServer.super::retrieveGameProfile);
+	}
+
+	@Override
+	public void shimmer$clearProfileCache() {
+		shimmer$profileByUUIDCache.clear();
+		shimmer$profileByNameCache.clear();
 	}
 }

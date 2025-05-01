@@ -232,4 +232,8 @@ public interface ShimmerLevel extends ShimmerPlayerContainer, ShimmerMinecraftEn
 	default List<Player> selectPlayers(CommandContext<?> ctx, String name) {
 		return selectPlayers(ctx.getArgument(name, EntitySelector.class));
 	}
+
+	default float shimmer$getDelta() {
+		return 1F;
+	}
 }

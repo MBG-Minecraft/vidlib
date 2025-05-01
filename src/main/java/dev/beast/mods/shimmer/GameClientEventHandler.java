@@ -243,6 +243,10 @@ public class GameClientEventHandler {
 			}
 		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
 			PhysicsParticleManager.renderAll(frame);
+
+			if (session.npcRecording != null) {
+				session.npcRecording.record(System.currentTimeMillis(), frame.screenDelta(), mc.player);
+			}
 		}
 	}
 

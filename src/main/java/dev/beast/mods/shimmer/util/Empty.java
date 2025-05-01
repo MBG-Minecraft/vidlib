@@ -1,5 +1,7 @@
 package dev.beast.mods.shimmer.util;
 
+import com.mojang.authlib.GameProfile;
+import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -15,6 +17,7 @@ public interface Empty {
 	EmptyCompoundTag COMPOUND_TAG = new EmptyCompoundTag();
 	Component COMPONENT = Component.empty();
 	CompletableFuture<?>[] COMPLETABLE_FUTURES = new CompletableFuture[0];
+	GameProfile PROFILE = new GameProfile(Util.NIL_UUID, "");
 
 	static boolean isEmpty(Component component) {
 		return component == null || component == COMPONENT || component.getString().isEmpty();

@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.core;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Pair;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.bulk.PositionedBlock;
@@ -35,6 +36,7 @@ import dev.beast.mods.shimmer.math.worldnumber.WorldNumberContext;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.util.Empty;
 import dev.beast.mods.shimmer.util.FrameInfo;
+import dev.beast.mods.shimmer.util.MiscUtils;
 import dev.beast.mods.shimmer.util.PauseType;
 import dev.beast.mods.shimmer.util.ScheduledTask;
 import dev.latvian.mods.kmath.Rotation;
@@ -469,5 +471,24 @@ public interface ShimmerMinecraftClient extends ShimmerMinecraftEnvironment {
 	@Override
 	default void marker(MarkerData data) {
 		// Shimmer.LOGGER.info("Marker " + data.event() + "/" + data.name() + " (" + data.uuid() + ") @ ");
+	}
+
+	@Override
+	default GameProfile retrieveGameProfile(UUID uuid) {
+		try {
+			var profile = shimmer$self().getMinecraftSessionService().fetchProfile(uuid, true).profile();
+			return profile == null ? Empty.PROFILE : profile;
+		} catch (Exception ex) {
+			return Empty.PROFILE;
+		}
+	}
+
+	@Override
+	default GameProfile retrieveGameProfile(String name) {
+		try {
+			return MiscUtils.fetchProfile(name);
+		} catch (Exception ex) {
+			return Empty.PROFILE;
+		}
 	}
 }

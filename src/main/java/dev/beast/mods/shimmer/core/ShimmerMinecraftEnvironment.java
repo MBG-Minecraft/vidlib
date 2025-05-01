@@ -1,5 +1,6 @@
 package dev.beast.mods.shimmer.core;
 
+import com.mojang.authlib.GameProfile;
 import dev.beast.mods.shimmer.util.PauseType;
 import dev.beast.mods.shimmer.util.ScheduledTask;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
@@ -57,5 +58,16 @@ public interface ShimmerMinecraftEnvironment extends ShimmerPlayerContainer, Shi
 
 	default void removeZone(UUID uuid) {
 		throw new NoMixinException(this);
+	}
+
+	default GameProfile retrieveGameProfile(UUID uuid) {
+		throw new NoMixinException(this);
+	}
+
+	default GameProfile retrieveGameProfile(String name) {
+		throw new NoMixinException(this);
+	}
+
+	default void shimmer$clearProfileCache() {
 	}
 }

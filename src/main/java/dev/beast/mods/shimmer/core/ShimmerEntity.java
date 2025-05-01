@@ -13,6 +13,7 @@ import dev.beast.mods.shimmer.feature.zone.ZoneInstance;
 import dev.beast.mods.shimmer.math.worldnumber.WorldNumberVariables;
 import dev.beast.mods.shimmer.math.worldposition.EntityPositionType;
 import dev.latvian.mods.kmath.Line;
+import dev.latvian.mods.kmath.Rotation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -249,5 +250,15 @@ public interface ShimmerEntity extends ShimmerLevelContainer {
 
 	default float getRelativeHealth(float delta) {
 		return 1F;
+	}
+
+	default Rotation rotation(float delta) {
+		var e = (Entity) this;
+		return Rotation.deg(e.getYRot(delta), e.getXRot(delta));
+	}
+
+	default Rotation viewRotation(float delta) {
+		var e = (Entity) this;
+		return Rotation.deg(e.getViewYRot(delta), e.getViewXRot(delta));
 	}
 }

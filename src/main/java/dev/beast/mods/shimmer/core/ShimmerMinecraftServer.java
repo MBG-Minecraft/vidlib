@@ -1,5 +1,7 @@
 package dev.beast.mods.shimmer.core;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.util.UndashedUuid;
 import dev.beast.mods.shimmer.Shimmer;
 import dev.beast.mods.shimmer.feature.clock.ClockValue;
 import dev.beast.mods.shimmer.feature.clock.SyncClocksPayload;
@@ -10,6 +12,8 @@ import dev.beast.mods.shimmer.feature.zone.Anchor;
 import dev.beast.mods.shimmer.feature.zone.RemoveZonePayload;
 import dev.beast.mods.shimmer.feature.zone.ZoneContainer;
 import dev.beast.mods.shimmer.feature.zone.ZoneLoader;
+import dev.beast.mods.shimmer.util.Empty;
+import dev.beast.mods.shimmer.util.JsonUtils;
 import dev.beast.mods.shimmer.util.PauseType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -17,12 +21,16 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
+import net.neoforged.fml.loading.FMLPaths;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 	default MinecraftServer shimmer$self() {
@@ -186,6 +194,51 @@ public interface ShimmerMinecraftServer extends ShimmerMinecraftEnvironment {
 
 		for (var level : shimmer$self().getAllLevels()) {
 			level.shimmer$updateLoadedChunks();
+		}
+	}
+
+	default Map<UUID, GameProfile> shimmer$getReroutedPlayers() {
+		var map = new HashMap<UUID, GameProfile>();
+		var path = FMLPaths.GAMEDIR.get().resolve("vidlib/rerouted-players.json");
+
+		if (Files.exists(path)) {
+			try (var reader = Files.newBufferedReader(path)) {
+				for (var entry : JsonUtils.read(reader).getAsJsonObject().entrySet()) {
+					try {
+						var from = retrieveGameProfile(entry.getKey());
+						var to = retrieveGameProfile(UndashedUuid.fromString(entry.getValue().getAsString()));
+
+						if (from != null && to != null) {
+							map.put(from.getId(), to);
+						}
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+
+		return map;
+	}
+
+	@Override
+	default GameProfile retrieveGameProfile(UUID uuid) {
+		try {
+			var profile = shimmer$self().getSessionService().fetchProfile(uuid, true).profile();
+			return profile == null ? Empty.PROFILE : profile;
+		} catch (Exception ex) {
+			return Empty.PROFILE;
+		}
+	}
+
+	@Override
+	default GameProfile retrieveGameProfile(String name) {
+		try {
+			return shimmer$self().getProfileCache().getAsync(name).get(5L, TimeUnit.SECONDS).orElse(Empty.PROFILE);
+		} catch (Exception ex) {
+			return Empty.PROFILE;
 		}
 	}
 }
