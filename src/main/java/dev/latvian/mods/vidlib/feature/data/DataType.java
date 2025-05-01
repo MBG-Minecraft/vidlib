@@ -15,7 +15,8 @@ public record DataType<T>(
 	boolean sync,
 	boolean syncToAllClients,
 	@Nullable BiConsumer<Player, T> onReceived,
-	boolean allowClientUpdates
+	boolean allowClientUpdates,
+	boolean skipLogging
 ) {
 	public static final DataTypeStorage SERVER = new DataTypeStorage("server", true);
 	public static final DataTypeStorage PLAYER = new DataTypeStorage("player", false);
@@ -30,6 +31,7 @@ public record DataType<T>(
 		private boolean syncToAllClients;
 		private BiConsumer<Player, T> onReceived;
 		private boolean allowClientUpdates;
+		private boolean skipLogging;
 
 		Builder(DataTypeStorage storage, String id, @Nullable KnownCodec<T> type, T defaultValue) {
 			this.storage = storage;
@@ -41,6 +43,7 @@ public record DataType<T>(
 			this.syncToAllClients = storage.alwaysSyncToAllClients;
 			this.onReceived = null;
 			this.allowClientUpdates = false;
+			this.skipLogging = false;
 		}
 
 		public Builder<T> save() {
@@ -68,8 +71,13 @@ public record DataType<T>(
 			return this;
 		}
 
-		public DataType<T> build() {
-			var dataType = new DataType<>(
+		public Builder<T> skipLogging() {
+			this.skipLogging = true;
+			return this;
+		}
+
+		public DataType<T> buildDummy() {
+			return new DataType<>(
 				storage,
 				id,
 				defaultValue,
@@ -78,8 +86,13 @@ public record DataType<T>(
 				sync,
 				syncToAllClients,
 				onReceived,
-				allowClientUpdates
+				allowClientUpdates,
+				skipLogging
 			);
+		}
+
+		public DataType<T> build() {
+			var dataType = buildDummy();
 
 			if (type != null) {
 				storage.all.put(id, dataType);

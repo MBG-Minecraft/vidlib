@@ -26,6 +26,6 @@ public record PhysicsParticlesPayload(PhysicsParticleData data, long seed, List<
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.level().physicsParticles(data, seed, blocks);
+		ctx.level().physicsParticles(data, ctx.remoteGameTime(), seed, blocks);
 	}
 }

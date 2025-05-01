@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.util;
 
+import com.mojang.authlib.GameProfile;
+import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -17,6 +19,7 @@ public interface Empty {
 	CompoundTag COMPOUND_TAG = new CompoundTag(Map.of());
 	Component COMPONENT = Component.empty();
 	CompletableFuture<?>[] COMPLETABLE_FUTURES = new CompletableFuture[0];
+	GameProfile PROFILE = new GameProfile(Util.NIL_UUID, "");
 
 	static boolean isEmpty(Component component) {
 		return component == null || component == COMPONENT || component.getString().isEmpty();

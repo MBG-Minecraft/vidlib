@@ -53,25 +53,4 @@ public record PlayerSkinOverrides(Map<UUID, Map<MinecraftProfileTexture.Type, Mi
 		var m = INSTANCE.map.get(uuid);
 		return m == null ? null : m.get(type);
 	}
-
-	@Nullable
-	public static MinecraftProfileTexture getTexture(UUID uuid, String type) {
-		var path = FMLPaths.GAMEDIR.get().resolve("vidlib/" + type + "-" + UndashedUuid.toString(uuid) + ".png");
-
-		if (Files.exists(path)) {
-			return new MinecraftProfileTexture(path.toUri().toString(), Map.of());
-		}
-
-		return null;
-	}
-
-	@Nullable
-	public static MinecraftProfileTexture getSkinTexture(UUID uuid) {
-		return getTexture(uuid, "skin");
-	}
-
-	@Nullable
-	public static MinecraftProfileTexture getCapeTexture(UUID uuid) {
-		return getTexture(uuid, "cape");
-	}
 }

@@ -16,8 +16,6 @@ public record ShakeCameraPayload(CameraShake shake) implements SimplePacketPaylo
 
 	@Override
 	public void handle(Context ctx) {
-		if (!ctx.player().isReplayCamera()) {
-			ctx.player().shakeCamera(shake);
-		}
+		ctx.player().shakeCamera(shake);
 	}
 }

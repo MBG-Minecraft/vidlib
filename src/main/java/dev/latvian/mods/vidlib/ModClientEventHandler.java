@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.BlockEntityRendererHolder;
 import dev.latvian.mods.vidlib.feature.auto.EntityRendererHolder;
+import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockFont;
 import dev.latvian.mods.vidlib.feature.clothing.ClientClothingLoader;
@@ -17,7 +17,6 @@ import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.entity.state.PlayerRenderState;
@@ -30,9 +29,6 @@ import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent;
-import net.neoforged.neoforge.client.settings.KeyConflictContext;
-import net.neoforged.neoforge.client.settings.KeyModifier;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 
@@ -49,6 +45,7 @@ public class ModClientEventHandler {
 		event.addListener(VidLib.id("clock"), new Clock.Loader());
 		event.addListener(VidLib.id("skybox"), new SkyboxData.Loader());
 
+		event.addDependency(VidLib.id("structure"), VidLib.id("ghost_structure"));
 		event.addDependency(VidLib.id("clock_font"), VidLib.id("clock"));
 	}
 
@@ -91,8 +88,14 @@ public class ModClientEventHandler {
 
 		var vehicle = player.getVehicle();
 
-		if (vehicle != null && vehicle.hidePassenger(player)) {
-			state.isInvisible = true;
+		if (vehicle != null) {
+			var s = vehicle.getPassengerScale(player);
+
+			if (s <= 0F) {
+				state.isInvisible = true;
+			} else {
+				state.scale *= s;
+			}
 		}
 
 		var session = player.vl$sessionData();
@@ -111,7 +114,6 @@ public class ModClientEventHandler {
 
 	@SubscribeEvent
 	public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
-		event.register(MiscClientUtils.freezeTickKeyMapping = new KeyMapping("key.vidlib.freeze_tick", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_P, "key.categories.vidlib"));
-		event.register(MiscClientUtils.clearParticlesKeyMapping = new KeyMapping("key.vidlib.clear_particles", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_L, "key.categories.vidlib"));
+		VidLibKeys.register(event);
 	}
 }

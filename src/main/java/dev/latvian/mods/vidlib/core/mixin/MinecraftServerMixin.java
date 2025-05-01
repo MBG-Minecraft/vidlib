@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.vidlib.core.VLMinecraftServer;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
@@ -24,6 +25,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin implements VLMinecraftServer {
@@ -42,6 +44,15 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 
 	@Unique
 	private final Map<ResourceLocation, ClockValue> vl$clocks = new HashMap<>();
+
+	@Unique
+	private Map<UUID, GameProfile> vl$reroutedPlayers;
+
+	@Unique
+	private final Map<String, GameProfile> vl$profileByNameCache = new HashMap<>();
+
+	@Unique
+	private final Map<UUID, GameProfile> vl$profileByUUIDCache = new HashMap<>();
 
 	@Override
 	public ScheduledTask.Handler vl$getScheduledTaskHandler() {
@@ -88,5 +99,30 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	@Override
 	public Map<ResourceLocation, ClockValue> vl$getClocks() {
 		return vl$clocks;
+	}
+
+	@Override
+	public Map<UUID, GameProfile> vl$getReroutedPlayers() {
+		if (vl$reroutedPlayers == null) {
+			vl$reroutedPlayers = VLMinecraftServer.super.vl$getReroutedPlayers();
+		}
+
+		return vl$reroutedPlayers;
+	}
+
+	@Override
+	public GameProfile retrieveGameProfile(UUID uuid) {
+		return vl$profileByUUIDCache.computeIfAbsent(uuid, VLMinecraftServer.super::retrieveGameProfile);
+	}
+
+	@Override
+	public GameProfile retrieveGameProfile(String name) {
+		return vl$profileByNameCache.computeIfAbsent(name, VLMinecraftServer.super::retrieveGameProfile);
+	}
+
+	@Override
+	public void vl$clearProfileCache() {
+		vl$profileByUUIDCache.clear();
+		vl$profileByNameCache.clear();
 	}
 }

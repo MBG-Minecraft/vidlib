@@ -33,7 +33,7 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
 	}
 
 	default <T> T get(DataType<T> type) {
-		return vl$sessionData().dataMap.get(type);
+		return vl$sessionData().dataMap.get(type, vl$level().getGameTime());
 	}
 
 	default <T> void set(DataType<T> type, T value) {
@@ -50,7 +50,8 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
 	}
 
 	default Component getNickname() {
-		return vl$sessionData().nickname;
+		var s = vl$sessionData();
+		return s == null ? Empty.COMPONENT : s.nickname;
 	}
 
 	default void setNickname(Component nickname) {

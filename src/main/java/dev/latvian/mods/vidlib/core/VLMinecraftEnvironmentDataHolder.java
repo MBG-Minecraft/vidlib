@@ -6,13 +6,13 @@ import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import net.minecraft.resources.ResourceLocation;
 
-public interface VLMinecraftEnvironmentDataHolder {
+public interface VLMinecraftEnvironmentDataHolder extends VLLevelContainer {
 	default DataMap getServerData() {
 		throw new NoMixinException(this);
 	}
 
 	default <T> T get(DataType<T> type) {
-		return getServerData().get(type);
+		return getServerData().get(type, vl$level().getGameTime());
 	}
 
 	default <T> void set(DataType<T> type, T value) {

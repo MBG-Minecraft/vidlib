@@ -100,7 +100,7 @@ public class SessionData {
 		nameSuffix = EntityOverride.NAME_SUFFIX.get(player);
 		scoreText = EntityOverride.SCORE_TEXT.get(player);
 		nameHidden = EntityOverride.NAME_HIDDEN.get(player, false);
-		flightSpeedMod = dataMap.get(InternalPlayerData.FLIGHT_SPEED);
+		flightSpeedMod = player.get(InternalPlayerData.FLIGHT_SPEED);
 
 		if (gravityMod <= 0D) {
 			player.resetFallDistance();
@@ -120,16 +120,16 @@ public class SessionData {
 	public void updateClocks(Map<ResourceLocation, ClockValue> map) {
 	}
 
-	public void updateSessionData(Player self, UUID player, List<DataMapValue> playerData) {
+	public void updateServerData(long gameTime, Player self, List<DataMapValue> update) {
+	}
+
+	public void updatePlayerData(long gameTime, Player self, UUID player, List<DataMapValue> update) {
+	}
+
+	public void updatePlayerTags(long gameTime, Player self, UUID player, List<String> tags) {
 	}
 
 	public void removeSessionData(UUID id) {
-	}
-
-	public void updatePlayerTags(UUID player, List<String> tags) {
-	}
-
-	public void updateServerData(List<DataMapValue> serverData) {
 	}
 
 	@Override
@@ -140,7 +140,7 @@ public class SessionData {
 	public void refreshBlockZones() {
 	}
 
-	public void updateInput(UUID player, PlayerInput input) {
+	public void updateInput(Level level, UUID player, PlayerInput input) {
 	}
 
 	public void updateSkyboxes() {

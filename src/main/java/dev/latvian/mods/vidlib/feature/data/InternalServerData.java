@@ -2,9 +2,12 @@ package dev.latvian.mods.vidlib.feature.data;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.List;
 
 @AutoInit
 public interface InternalServerData {
@@ -21,5 +24,15 @@ public interface InternalServerData {
 		.save()
 		.sync()
 		.onReceived((player, anchor) -> Anchor.client = anchor)
+		.build();
+
+	DataType<Boolean> HIDE_PLUMBOBS = DataType.SERVER.builder("hide_plumbobs", KnownCodec.BOOL, false)
+		.save()
+		.sync()
+		.build();
+
+	DataType<List<ChancedParticle>> ENVIRONMENT_EFFECTS = DataType.SERVER.builder("environment_effects", ChancedParticle.LIST_KNOWN_CODEC, List.of())
+		.save()
+		.sync()
 		.build();
 }

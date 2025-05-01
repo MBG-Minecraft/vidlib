@@ -29,7 +29,7 @@ public record ClothingParts(boolean head, boolean body, boolean legs, boolean fe
 		Codec.BOOL.optionalFieldOf("enchanted", false).forGetter(ClothingParts::enchanted)
 	).apply(instance, ClothingParts::new));
 
-	public static final Codec<ClothingParts> CODEC = Codec.either(Codec.BOOL, DIRECT_CODEC).xmap(either -> either.map(b -> b ? ALL : NONE, Function.identity()), p -> p.equals(ALL) ? Either.left(true) : Either.right(p));
+	public static final Codec<ClothingParts> CODEC = Codec.either(Codec.BOOL, DIRECT_CODEC).xmap(either -> either.map(b -> b ? ALL : NONE, Function.identity()), p -> p.equals(ALL) ? Either.left(true) : p.equals(NONE) ? Either.left(false) : Either.right(p));
 
 	public static final StreamCodec<ByteBuf, ClothingParts> STREAM_CODEC = new StreamCodec<>() {
 		@Override
@@ -83,5 +83,22 @@ public record ClothingParts(boolean head, boolean body, boolean legs, boolean fe
 
 	public ItemStack getItem() {
 		return enchanted ? ENCHANTED_ITEM.get() : ItemStack.EMPTY;
+	}
+
+	@Override
+	public String toString() {
+		if (head && body && legs && feet && !enchanted) {
+			return "ClothingParts[all]";
+		} else if (!head && !body && !legs && !feet && !enchanted) {
+			return "ClothingParts[none]";
+		} else {
+			return "ClothingParts[" +
+				(head ? "head" : "") +
+				(body ? ",body" : "") +
+				(legs ? ",legs" : "") +
+				(feet ? ",feet" : "") +
+				(enchanted ? ",enchanted" : "") +
+				"]";
+		}
 	}
 }

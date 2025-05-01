@@ -16,8 +16,6 @@ public record ScreenFadePayload(Fade fade) implements SimplePacketPayload {
 
 	@Override
 	public void handle(Context ctx) {
-		if (!ctx.player().isReplayCamera()) {
-			ctx.level().setScreenFade(fade);
-		}
+		ctx.level().setScreenFade(fade);
 	}
 }

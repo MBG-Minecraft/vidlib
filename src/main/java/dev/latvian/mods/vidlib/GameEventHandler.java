@@ -40,6 +40,7 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 @EventBusSubscriber(modid = VidLib.ID, bus = EventBusSubscriber.Bus.GAME)
 public class GameEventHandler {
@@ -75,6 +76,10 @@ public class GameEventHandler {
 	@SubscribeEvent
 	public static void syncReload(OnDatapackSyncEvent event) {
 		if (event.getPlayer() == null) {
+			if (ServerLifecycleHooks.getCurrentServer() != null) {
+				ServerLifecycleHooks.getCurrentServer().vl$clearProfileCache();
+			}
+
 			AutoInit.Type.DATA_RELOADED.invoke();
 
 			for (var player : event.getPlayerList().getPlayers()) {

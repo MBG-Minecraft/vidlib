@@ -16,6 +16,6 @@ public record PhysicsParticlesIdPayload(PhysicsParticlesIdData data) implements 
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.level().physicsParticles(data);
+		ctx.level().physicsParticles(data, ctx.remoteGameTime());
 	}
 }

@@ -4,6 +4,8 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.vidlib.core.VLClientPacketListener;
 import dev.latvian.mods.vidlib.core.VLLocalPlayer;
+import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
+import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.item.ItemScreen;
 import dev.latvian.mods.vidlib.feature.session.LocalClientSessionData;
 import net.minecraft.client.Minecraft;
@@ -20,6 +22,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Set;
 
@@ -51,7 +54,7 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements V
 
 	@Override
 	public Set<String> getTags() {
-		return this.vl$sessionData().tags;
+		return vl$sessionData().getTags(this);
 	}
 
 	@Inject(method = "openItemGui", at = @At("HEAD"), cancellable = true)
@@ -67,7 +70,7 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements V
 	@Override
 	public boolean isReplayCamera() {
 		if (vl$isReplayCamera == null) {
-			vl$isReplayCamera = ((Object) this).getClass() != LocalPlayer.class || getScoreboardName().equals("Replay Viewer");
+			vl$isReplayCamera = ((Object) this).getClass() != LocalPlayer.class || getScoreboardName().equals("Replay Viewer") || getGameProfile().getProperties().containsKey("IsReplayViewer");
 		}
 
 		return vl$isReplayCamera;
@@ -76,5 +79,12 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements V
 	@ModifyExpressionValue(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Abilities;getFlyingSpeed()F"))
 	private float vl$getFlyingSpeed(float original) {
 		return original * getFlightSpeedMod();
+	}
+
+	@Inject(method = "drop", at = @At("HEAD"), cancellable = true)
+	private void vl$drop(boolean fullStack, CallbackInfoReturnable<Boolean> cir) {
+		if (PlayerActionHandler.handle(this, PlayerActionType.DROP, true)) {
+			cir.setReturnValue(false);
+		}
 	}
 }

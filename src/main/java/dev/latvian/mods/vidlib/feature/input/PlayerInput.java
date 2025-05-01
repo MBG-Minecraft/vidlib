@@ -1,8 +1,11 @@
 package dev.latvian.mods.vidlib.feature.input;
 
+import dev.latvian.mods.kmath.Rotation;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3d;
 
 public record PlayerInput(
 	int flags,
@@ -15,7 +18,7 @@ public record PlayerInput(
 ) {
 	public static final PlayerInput NONE = new PlayerInput(0);
 
-	public static final StreamCodec<ByteBuf, PlayerInput> STREAM_CODEC = ByteBufCodecs.UNSIGNED_SHORT.map(flags -> flags == 0 ? NONE : new PlayerInput(flags), PlayerInput::hashCode);
+	public static final StreamCodec<ByteBuf, PlayerInput> STREAM_CODEC = ByteBufCodecs.VAR_INT.map(flags -> flags == 0 ? NONE : new PlayerInput(flags), PlayerInput::hashCode);
 
 	public PlayerInput(int flags) {
 		this(
@@ -64,5 +67,63 @@ public record PlayerInput(
 	@Override
 	public int hashCode() {
 		return flags;
+	}
+
+	public int movementX() {
+		return (right ? 1 : 0) - (left ? 1 : 0);
+	}
+
+	public int movementY() {
+		return (jumping ? 1 : 0) - (sneaking ? 1 : 0);
+	}
+
+	public int movementZ() {
+		return (back ? 1 : 0) - (forward ? 1 : 0);
+	}
+
+	public Vec3 movement() {
+		return isMoving() ? new Vec3(movementX(), movementY(), movementZ()) : Vec3.ZERO;
+	}
+
+	public Vec3 travelVector() {
+		return isMoving() ? new Vec3(-movementX(), movementY(), -movementZ()) : Vec3.ZERO;
+	}
+
+	public Vec3 movement(double yawDegrees, double pitchDegrees, boolean spherical) {
+		if (!isMoving()) {
+			return Vec3.ZERO;
+		}
+
+		var v = new Vector3d(movementX(), movementY(), movementZ());
+
+		if (spherical) {
+			v.normalize();
+		} else {
+			var len = Math.sqrt(v.x * v.x + v.z * v.z);
+			v.x /= len;
+			v.z /= len;
+		}
+
+		if (yawDegrees != 0D) {
+			v.rotateY(Math.toRadians(yawDegrees));
+		}
+
+		if (pitchDegrees != 0D) {
+			v.rotateX(Math.toRadians(pitchDegrees));
+		}
+
+		return new Vec3(v.x, v.y, v.z);
+	}
+
+	public Vec3 movement(Rotation rotation, boolean spherical) {
+		return movement(rotation.yawDeg(), rotation.pitchDeg(), spherical);
+	}
+
+	public boolean isMoving() {
+		return forward || back || left || right || jumping || sneaking;
+	}
+
+	public boolean isAnyMouseButtonDown() {
+		return mouseLeft || mouseRight || mouseMiddle || mouseBack || mouseNext;
 	}
 }

@@ -1,11 +1,20 @@
 package dev.latvian.mods.vidlib.util;
 
+import com.google.gson.JsonObject;
+import com.mojang.authlib.GameProfile;
+import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.vidlib.VidLib;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
+import net.minecraft.util.ExtraCodecs;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -71,5 +80,24 @@ public interface MiscUtils {
 		}
 
 		return iterable.iterator().hasNext();
+	}
+
+	static GameProfile fetchProfile(String name) throws IOException {
+		var connection = (HttpURLConnection) new URL("https://api.mojang.com/users/profiles/minecraft/" + name).openConnection();
+		connection.setRequestMethod("GET");
+		connection.setDoInput(true);
+		connection.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+		connection.setRequestProperty("User-Agent", "Shimmer/1.0");
+		connection.setConnectTimeout(3000);
+		connection.setReadTimeout(3000);
+
+		if (connection.getResponseCode() == 200) {
+			try (var reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+				var json = JsonUtils.GSON.fromJson(reader, JsonObject.class);
+				return ExtraCodecs.GAME_PROFILE.parse(JsonOps.INSTANCE, json).getOrThrow();
+			}
+		}
+
+		throw new IOException(connection.getResponseMessage());
 	}
 }

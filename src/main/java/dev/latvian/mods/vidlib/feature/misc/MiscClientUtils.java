@@ -5,7 +5,6 @@ import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
@@ -15,15 +14,15 @@ import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.entity.Entity;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class MiscClientUtils {
 	public static final ContextKey<Boolean> CREATIVE = new ContextKey<>(VidLib.id("creative"));
 	public static final ContextKey<Clothing> CLOTHING = new ContextKey<>(VidLib.id("clothing"));
 
-	public static KeyMapping freezeTickKeyMapping;
-	public static KeyMapping clearParticlesKeyMapping;
-
 	public static FogParameters fogOverride = FogParameters.NO_FOG;
+
+	public static final ConcurrentLinkedDeque<AutoCloseable> CLIENT_CLOSEABLE = new ConcurrentLinkedDeque<>();
 
 	public static boolean handleDebugKeys(Minecraft mc, int key) {
 		if (key == VidLibConfig.cycleShadersKey) {
@@ -33,7 +32,7 @@ public class MiscClientUtils {
 				// minecraft.submit(minecraft.gameRenderer::cycleSuperSecretSetting);
 			}
 
-			return true;
+			return false;
 		} else if (key == VidLibConfig.reloadShadersKey) {
 			reloadShaders(mc);
 			return true;

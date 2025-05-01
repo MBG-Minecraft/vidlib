@@ -26,6 +26,6 @@ public record SyncPlayerTagsPayload(UUID player, List<String> tags) implements S
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.player().vl$sessionData().updatePlayerTags(player, tags);
+		ctx.player().vl$sessionData().updatePlayerTags(ctx.remoteGameTime(), ctx.player(), player, tags);
 	}
 }

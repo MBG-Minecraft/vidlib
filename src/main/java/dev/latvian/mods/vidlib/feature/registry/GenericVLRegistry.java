@@ -56,7 +56,7 @@ public class GenericVLRegistry<K, V> implements Iterable<V> {
 		return map;
 	}
 
-	public BasicRegistryRef<K, V> ref(K id) {
+	public synchronized BasicRegistryRef<K, V> ref(K id) {
 		var ref = refMap.get(id);
 
 		if (ref == null) {
@@ -81,7 +81,7 @@ public class GenericVLRegistry<K, V> implements Iterable<V> {
 		return reverseMap.get(value);
 	}
 
-	public void update(Map<K, V> values) {
+	public synchronized void update(Map<K, V> values) {
 		map = values;
 
 		for (var ref : refMap.values()) {

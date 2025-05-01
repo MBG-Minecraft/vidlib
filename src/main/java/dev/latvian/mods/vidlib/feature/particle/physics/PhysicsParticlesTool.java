@@ -5,7 +5,6 @@ import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -66,18 +65,6 @@ public class PhysicsParticlesTool implements VidLibTool {
 
 	@Override
 	public void debugText(Player player, ItemStack item, @Nullable HitResult hit, ScreenText screenText) {
-		int total = 0;
-		int totalRendered = 0;
-		int totalBuffersSwitched = 0;
-
-		for (var manager : PhysicsParticleManager.ALL) {
-			total += manager.particles.size();
-			totalRendered += manager.rendered;
-			totalBuffersSwitched += manager.buffersSwitched;
-			screenText.topLeft.add("%,d/%,d [%dx] %s".formatted(manager.rendered, manager.particles.size(), manager.buffersSwitched, manager.displayName));
-		}
-
-		screenText.topRight.add(Minecraft.getInstance().fpsString.split(" ", 2)[0] + " FPS");
-		screenText.topRight.add("%,d/%,d [%dx] Total".formatted(totalRendered, total, totalBuffersSwitched));
+		PhysicsParticleManager.debugInfo(screenText.topLeft::add, screenText.topRight::add);
 	}
 }

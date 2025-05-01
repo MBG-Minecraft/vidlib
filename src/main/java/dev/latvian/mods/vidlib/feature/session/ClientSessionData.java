@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.feature.session;
 
+import dev.latvian.mods.vidlib.core.VLEntity;
+import dev.latvian.mods.vidlib.feature.data.DataRecorder;
 import dev.latvian.mods.vidlib.util.Empty;
 import net.minecraft.network.chat.Component;
 
@@ -13,6 +15,18 @@ public class ClientSessionData extends SessionData {
 	public ClientSessionData(UUID uuid) {
 		super(uuid);
 		this.tags = new HashSet<>(0);
+	}
+
+	public Set<String> getTags(VLEntity entity) {
+		if (dataMap.overrides != null) {
+			var v = dataMap.overrides.getOverride(DataRecorder.PLAYER_TAGS, entity.vl$level().getGameTime());
+
+			if (v != null) {
+				return v;
+			}
+		}
+
+		return tags;
 	}
 
 	public Component modifyPlayerName(Component original) {

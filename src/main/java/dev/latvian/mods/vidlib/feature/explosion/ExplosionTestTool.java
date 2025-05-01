@@ -2,6 +2,8 @@ package dev.latvian.mods.vidlib.feature.explosion;
 
 import dev.latvian.mods.kmath.KMath;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
+import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import net.minecraft.core.BlockPos;
@@ -9,6 +11,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -18,7 +21,10 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public class ExplosionTestTool implements VidLibTool {
+import java.util.Set;
+
+public class ExplosionTestTool implements VidLibTool, PlayerActionHandler {
+	private static final Set<PlayerActionType> ACTIONS = Set.of(PlayerActionType.RELOAD);
 	public static final ExplosionData DEFAULT_DATA = new ExplosionData();
 	public static BlockPos lastClickPos = null;
 
@@ -55,11 +61,6 @@ public class ExplosionTestTool implements VidLibTool {
 
 	@Override
 	public boolean rightClick(Player player, ItemStack item, @Nullable BlockHitResult hit) {
-		if (player.level() instanceof ServerLevel && player.isShiftKeyDown()) {
-			player.status("Modified %,d blocks".formatted(player.level().undoLastModification()));
-			return true;
-		}
-
 		lastClickPos = hit != null ? hit.getBlockPos() : null;
 
 		if (hit != null && player.level() instanceof ServerLevel level) {
@@ -99,6 +100,18 @@ public class ExplosionTestTool implements VidLibTool {
 				screenText.topRight.add("Inside: " + KMath.format(inside));
 				screenText.topRight.add("Damage: " + KMath.format(data.entity.damage(inside)));
 			}
+		}
+	}
+
+	@Override
+	public Set<PlayerActionType> getHandledPlayerActions() {
+		return ACTIONS;
+	}
+
+	@Override
+	public void onPlayerAction(ServerPlayer player, PlayerActionType action) {
+		if (action == PlayerActionType.RELOAD) {
+			player.status("Modified %,d blocks".formatted(player.level().undoLastModification()));
 		}
 	}
 }

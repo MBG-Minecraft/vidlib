@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
 public interface VLClientLevel extends VLLevel {
@@ -48,5 +49,21 @@ public interface VLClientLevel extends VLLevel {
 				}
 			}
 		}
+	}
+
+	@Override
+	default boolean isReplayLevel() {
+		var mc = Minecraft.getInstance();
+		return mc.player != null && mc.player.isReplayCamera();
+	}
+
+	@Override
+	default Iterable<Entity> allEntities() {
+		return vl$level().entitiesForRendering();
+	}
+
+	@Override
+	default float vl$getDelta() {
+		return Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
 	}
 }

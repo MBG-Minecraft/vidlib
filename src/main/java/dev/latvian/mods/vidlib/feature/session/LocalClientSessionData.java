@@ -1,7 +1,9 @@
 package dev.latvian.mods.vidlib.feature.session;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.shaders.FogShape;
+import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.kmath.Range;
 import dev.latvian.mods.kmath.Vec2d;
 import dev.latvian.mods.kmath.VoxelShapeBox;
@@ -9,6 +11,7 @@ import dev.latvian.mods.kmath.WorldMouse;
 import dev.latvian.mods.kmath.color.Color;
 import dev.latvian.mods.vidlib.GameEventHandler;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.core.VLLocalPlayer;
 import dev.latvian.mods.vidlib.feature.camera.CameraShakeInstance;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
@@ -16,14 +19,19 @@ import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.cutscene.ClientCutscene;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
+import dev.latvian.mods.vidlib.feature.data.DataRecorder;
 import dev.latvian.mods.vidlib.feature.data.DataType;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
+import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
+import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.fade.ScreenFadeInstance;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.input.PlayerInputChanged;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToServer;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
+import dev.latvian.mods.vidlib.feature.npc.NPCParticleOptions;
+import dev.latvian.mods.vidlib.feature.npc.NPCRecording;
 import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
 import dev.latvian.mods.vidlib.feature.skybox.Skybox;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
@@ -37,27 +45,36 @@ import dev.latvian.mods.vidlib.util.FrameInfo;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import dev.latvian.mods.vidlib.util.Side;
+import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.client.renderer.FogParameters;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.network.connection.ConnectionType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.BufferedOutputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public class LocalClientSessionData extends ClientSessionData {
@@ -81,6 +98,8 @@ public class LocalClientSessionData extends ClientSessionData {
 	public ScreenFadeInstance screenFade;
 	public FrameInfo currentFrameInfo;
 	public WorldMouse worldMouse;
+	public DataRecorder dataRecorder;
+	public NPCRecording npcRecording;
 
 	public LocalClientSessionData(Minecraft mc, UUID uuid, ClientPacketListener connection) {
 		super(uuid);
@@ -175,6 +194,19 @@ public class LocalClientSessionData extends ClientSessionData {
 
 	@ApiStatus.Internal
 	public void preTick(ClientLevel level, LocalPlayer player, Window window, PauseType paused) {
+		if (dataRecorder == null && !VidLibConfig.debugS2CPackets && player.isReplayCamera()) {
+			dataRecorder = initDataRecorder(player, -1L);
+			VidLib.LOGGER.info("Loaded data overrides");
+		}
+
+		if (dataRecorder != null && dataRecorder.start == -1L) {
+			serverDataMap.overrides = dataRecorder.serverData;
+
+			for (var entry : dataRecorder.playerData.entrySet()) {
+				getClientSessionData(entry.getKey()).dataMap.overrides = entry.getValue();
+			}
+		}
+
 		filteredZones.tick(level);
 
 		updateOverrides(player);
@@ -190,6 +222,18 @@ public class LocalClientSessionData extends ClientSessionData {
 			if (otherPlayer instanceof RemotePlayer p) {
 				p.vl$sessionData().preTick(mc, level, p);
 			}
+		}
+
+		if (mc.options.keyJump.isDown() && PlayerActionHandler.handle(player, PlayerActionType.JUMP, true)) {
+			mc.options.keyJump.release();
+		}
+
+		if (mc.options.keyShift.isDown() && !Screen.hasAltDown() && PlayerActionHandler.handle(player, PlayerActionType.SNEAK, true)) {
+			mc.options.keyShift.release();
+		}
+
+		if (mc.options.keySprint.isDown() && PlayerActionHandler.handle(player, PlayerActionType.SPRINT, true)) {
+			mc.options.keySprint.release();
 		}
 	}
 
@@ -243,6 +287,12 @@ public class LocalClientSessionData extends ClientSessionData {
 				session.tick++;
 			}
 		}
+
+		int undo = level.undoAllFutureModifications();
+
+		if (undo > 0) {
+			VidLib.LOGGER.info("Undone " + undo + " future modifications");
+		}
 	}
 
 	public void refreshZones(ResourceKey<Level> dimension) {
@@ -272,31 +322,76 @@ public class LocalClientSessionData extends ClientSessionData {
 		clocks.putAll(map);
 	}
 
+	public DataRecorder initDataRecorder(Player player, long start) {
+		if (dataRecorder == null) {
+			dataRecorder = new DataRecorder(start != -1L, start);
+
+			dataRecorder.load(
+				player.level().registryAccess().createSerializationContext(JsonOps.INSTANCE),
+				FMLPaths.GAMEDIR.get().resolve(start == -1L ? "replay_data_overrides.json" : ("replay_data_" + Long.toUnsignedString(start) + ".json"))
+			);
+		}
+
+		return dataRecorder;
+	}
+
 	@Override
-	public void updateSessionData(Player self, UUID player, List<DataMapValue> playerData) {
+	public void updateServerData(long gameTime, Player self, List<DataMapValue> update) {
+		serverDataMap.update(mc.player, update);
+
+		if (VidLibConfig.debugS2CPackets) {
+			var r = initDataRecorder(self, gameTime);
+
+			if (r.record) {
+				for (var u : update) {
+					if (!u.type().skipLogging()) {
+						r.setServer(gameTime, u.type(), u.value());
+					}
+				}
+			}
+		}
+	}
+
+	@Override
+	public void updatePlayerData(long gameTime, Player self, UUID player, List<DataMapValue> update) {
 		if (self.getUUID().equals(player)) {
-			dataMap.update(self, playerData);
+			dataMap.update(self, update);
 		} else {
-			getRemoteSessionData(player).dataMap.update(self.level().getPlayerByUUID(player), playerData);
+			getRemoteSessionData(player).dataMap.update(self.level().getPlayerByUUID(player), update);
+		}
+
+		if (VidLibConfig.debugS2CPackets) {
+			var r = initDataRecorder(self, gameTime);
+
+			if (r.record) {
+				for (var u : update) {
+					if (!u.type().skipLogging()) {
+						r.setPlayer(gameTime, player, u.type(), u.value());
+					}
+				}
+			}
+		}
+	}
+
+	@Override
+	public void updatePlayerTags(long gameTime, Player self, UUID player, List<String> update) {
+		var t = getClientSessionData(player).tags;
+		t.clear();
+		t.addAll(update);
+		refreshListedPlayers();
+
+		if (VidLibConfig.debugS2CPackets) {
+			var r = initDataRecorder(self, gameTime);
+
+			if (r.record) {
+				r.setPlayer(gameTime, player, DataRecorder.PLAYER_TAGS, Set.copyOf(update));
+			}
 		}
 	}
 
 	@Override
 	public void removeSessionData(UUID id) {
-		remoteSessionData.remove(id);
-	}
-
-	@Override
-	public void updatePlayerTags(UUID player, List<String> update) {
-		var t = getClientSessionData(player).tags;
-		t.clear();
-		t.addAll(update);
-		refreshListedPlayers();
-	}
-
-	@Override
-	public void updateServerData(List<DataMapValue> serverData) {
-		serverDataMap.update(mc.player, serverData);
+		// remoteSessionData.remove(id);
 	}
 
 	@Override
@@ -305,9 +400,19 @@ public class LocalClientSessionData extends ClientSessionData {
 	}
 
 	@Override
-	public void updateInput(UUID player, PlayerInput input) {
+	public void updateInput(Level level, UUID player, PlayerInput input) {
 		var data = getRemoteSessionData(player);
 		data.prevInput = data.input = input;
+
+		var entity = level.getEntityByUUID(player);
+
+		if (entity != null) {
+			var vehicle = entity.getVehicle();
+
+			if (vehicle != null) {
+				vehicle.vl$setPilotInput(input);
+			}
+		}
 	}
 
 	@Override
@@ -339,5 +444,53 @@ public class LocalClientSessionData extends ClientSessionData {
 		}
 
 		return listedPlayers;
+	}
+
+	public void startNPCRecording(Minecraft mc, GameProfile profile) {
+		if (npcRecording == null) {
+			npcRecording = new NPCRecording(profile);
+			npcRecording.record(npcRecording.start, mc.getDeltaTracker().getGameTimeDeltaPartialTick(true), mc.player);
+		} else {
+			mc.tell("Already recording NPC '" + profile.getName() + "'!");
+		}
+	}
+
+	public void stopNPCRecording(Minecraft mc) {
+		if (npcRecording != null) {
+			npcRecording.length = System.currentTimeMillis() - npcRecording.start;
+
+			var buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), mc.level.registryAccess(), ConnectionType.NEOFORGE);
+			var path = FMLPaths.GAMEDIR.get().resolve("vidlib/npc/" + npcRecording.start + "_" + npcRecording.profile.getName().toLowerCase(Locale.ROOT) + ".npcrec");
+
+			if (Files.notExists(path.getParent())) {
+				try {
+					Files.createDirectories(path.getParent());
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+
+			try (var out = new BufferedOutputStream(Files.newOutputStream(path))) {
+				npcRecording.write(buf);
+				buf.readBytes(out, buf.readableBytes());
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+
+			npcRecording = null;
+			NPCRecording.REPLAY = null;
+			mc.tell("NPC recording '" + path.getFileName() + "' saved!");
+		}
+	}
+
+	public void replayNPCRecording(Minecraft mc) {
+		var map = NPCRecording.getReplay(mc.level.registryAccess());
+
+		if (map.isEmpty()) {
+			return;
+		}
+
+		var last = map.lastEntry();
+		mc.level.addParticle(new NPCParticleOptions(last.getKey(), false, 0, Optional.empty()), true, true, mc.player.getX(), mc.player.getY(), mc.player.getZ(), 0D, 0D, 0D);
 	}
 }

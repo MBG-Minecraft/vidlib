@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.core;
 
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.datafixers.util.Either;
 import dev.latvian.mods.vidlib.feature.block.ConnectedBlock;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
@@ -10,6 +11,7 @@ import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModificationHolder;
 import dev.latvian.mods.vidlib.feature.bulk.OptimizedModificationBuilder;
 import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.bulk.UndoableModification;
+import dev.latvian.mods.vidlib.feature.bulk.UndoableModificationHolder;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityTypeFilter;
@@ -17,12 +19,15 @@ import dev.latvian.mods.vidlib.feature.prop.PropList;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
@@ -55,14 +60,12 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		throw new NoMixinException(this);
 	}
 
-	default List<UndoableModification> vl$getUndoableModifications() {
+	default List<UndoableModificationHolder> vl$getUndoableModifications() {
 		throw new NoMixinException(this);
 	}
 
 	default void addUndoable(UndoableModification modification) {
-		if (!vl$isClient()) {
-			vl$getUndoableModifications().add(modification);
-		}
+		vl$getUndoableModifications().add(new UndoableModificationHolder(vl$level().getGameTime(), modification));
 	}
 
 	default int undoLastModification() {
@@ -70,7 +73,7 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 
 		if (!undoable.isEmpty()) {
 			var builder = new OptimizedModificationBuilder();
-			undoable.getLast().undo((Level) this, builder);
+			undoable.getLast().modification().undo((Level) this, builder);
 			undoable.removeLast();
 			return bulkModify(false, builder.build());
 		}
@@ -83,10 +86,27 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		var undoable = vl$getUndoableModifications();
 
 		for (int i = undoable.size() - 1; i >= 0; i--) {
-			undoable.get(i).undo((Level) this, builder);
+			undoable.get(i).modification().undo((Level) this, builder);
 		}
 
 		undoable.clear();
+		return bulkModify(false, builder.build());
+	}
+
+	default int undoAllFutureModifications() {
+		var builder = new OptimizedModificationBuilder();
+		var undoable = vl$getUndoableModifications();
+		var gameTime = vl$level().getGameTime();
+
+		for (int i = undoable.size() - 1; i >= 0; i--) {
+			var u = undoable.get(i);
+
+			if (u.gameTime() > gameTime) {
+				u.modification().undo((Level) this, builder);
+				undoable.remove(i);
+			}
+		}
+
 		return bulkModify(false, builder.build());
 	}
 
@@ -171,5 +191,49 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 
 	default void killAll(EntityType<?> type) {
 		killAll(new EntityTypeFilter(type));
+	}
+
+	default boolean isReplayLevel() {
+		return false;
+	}
+
+	default Iterable<Entity> allEntities() {
+		return vl$level().getEntities((Entity) null, AABB.INFINITE, Entity::isAlive);
+	}
+
+	default List<Entity> selectEntities(EntitySelector selector) {
+		var list = new ArrayList<Entity>(1);
+
+		for (var entity : allEntities()) {
+			if (selector.test(entity)) {
+				list.add(entity);
+			}
+		}
+
+		return list;
+	}
+
+	default List<Entity> selectEntities(CommandContext<?> ctx, String name) {
+		return selectEntities(ctx.getArgument(name, EntitySelector.class));
+	}
+
+	default List<Player> selectPlayers(EntitySelector selector) {
+		var list = new ArrayList<Player>(1);
+
+		for (var player : vl$level().players()) {
+			if (selector.test(player)) {
+				list.add(player);
+			}
+		}
+
+		return list;
+	}
+
+	default List<Player> selectPlayers(CommandContext<?> ctx, String name) {
+		return selectPlayers(ctx.getArgument(name, EntitySelector.class));
+	}
+
+	default float vl$getDelta() {
+		return 1F;
 	}
 }

@@ -22,5 +22,11 @@ public record SyncPlayerInputToServer(PlayerInput input) implements SimplePacket
 	@Override
 	public void handle(Context ctx) {
 		ctx.player().vl$sessionData().input = input;
+
+		var v = ctx.player().getVehicle();
+
+		if (v != null) {
+			v.vl$setPilotInput(input);
+		}
 	}
 }

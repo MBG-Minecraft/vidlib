@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.core.VLBlockState;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.client.IndexBuffer;
 import dev.latvian.mods.vidlib.util.FrameInfo;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
+import java.util.function.Consumer;
 
 @AutoInit(AutoInit.Type.CLIENT_LOADED)
 public class PhysicsParticleManager {
@@ -31,6 +33,22 @@ public class PhysicsParticleManager {
 		ALL.add(SOLID);
 		ALL.add(CUTOUT);
 		ALL.add(TRANSLUCENT);
+	}
+
+	public static void debugInfo(Consumer<String> left, Consumer<String> right) {
+		int total = 0;
+		int totalRendered = 0;
+		int totalBuffersSwitched = 0;
+
+		for (var manager : PhysicsParticleManager.ALL) {
+			total += manager.particles.size();
+			totalRendered += manager.rendered;
+			totalBuffersSwitched += manager.buffersSwitched;
+			left.accept("%,d/%,d [%dx] %s".formatted(manager.rendered, manager.particles.size(), manager.buffersSwitched, manager.displayName));
+		}
+
+		right.accept(Minecraft.getInstance().fpsString.split(" ", 2)[0] + " FPS");
+		right.accept("%,d/%,d [%dx] Total".formatted(totalRendered, total, totalBuffersSwitched));
 	}
 
 	public static void renderAll(FrameInfo frame) {

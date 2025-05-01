@@ -29,6 +29,6 @@ public record SyncPlayerInputToClient(UUID player, PlayerInput input) implements
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.player().vl$sessionData().updateInput(player, input);
+		ctx.player().vl$sessionData().updateInput(ctx.level(), player, input);
 	}
 }

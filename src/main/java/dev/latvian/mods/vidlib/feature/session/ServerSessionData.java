@@ -35,7 +35,10 @@ public class ServerSessionData extends SessionData {
 			packetsToEveryone.s2c(new SyncPlayerInputToClient(player.getUUID(), input));
 		}
 
-		dataMap.sync(packetsToEveryone, player, SyncPlayerDataPayload::new);
+		if (!player.level().isReplayLevel()) {
+			dataMap.sync(packetsToEveryone, player, SyncPlayerDataPayload::new);
+		}
+
 		tick++;
 	}
 

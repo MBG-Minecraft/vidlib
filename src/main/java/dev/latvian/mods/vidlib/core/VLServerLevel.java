@@ -135,4 +135,14 @@ public interface VLServerLevel extends VLLevel {
 			}
 		}
 	}
+
+	@Override
+	default boolean isReplayLevel() {
+		return vl$level().getServer().getClass().getName().equals("com.moulberry.flashback.playback.ReplayServer");
+	}
+
+	@Override
+	default Iterable<Entity> allEntities() {
+		return vl$level().getEntities().getAll();
+	}
 }

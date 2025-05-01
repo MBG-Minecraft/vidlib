@@ -1,9 +1,11 @@
 package dev.latvian.mods.vidlib.core;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Pair;
 import dev.latvian.mods.kmath.Rotation;
 import dev.latvian.mods.kmath.Vec2d;
 import dev.latvian.mods.kmath.WorldMouse;
+import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.camera.CameraShake;
 import dev.latvian.mods.vidlib.feature.camera.CameraShakeInstance;
@@ -37,6 +39,7 @@ import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
 import dev.latvian.mods.vidlib.util.Empty;
 import dev.latvian.mods.vidlib.util.FrameInfo;
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import it.unimi.dsi.fastutil.ints.IntList;
@@ -240,7 +243,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	@Override
 	default void shakeCamera(CameraShake shake) {
-		if (shake.skip()) {
+		if (shake.skip() || vl$self().player.isReplayCamera()) {
 			return;
 		}
 
@@ -358,12 +361,19 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void physicsParticles(PhysicsParticleData data, long seed, List<PositionedBlock> blocks) {
+	default void physicsParticles(PhysicsParticleData data, long spawnTime, long seed, List<PositionedBlock> blocks) {
 		if (blocks.isEmpty()) {
 			return;
 		}
 
-		var particles = new PhysicsParticles(data, vl$level(), vl$level().getGameTime(), seed == 0L ? vl$self().level.getRandom().nextLong() : seed);
+		var realTime = vl$level().getGameTime();
+
+		if (spawnTime < realTime - 60L || spawnTime > realTime + 60L + (long) data.lifespan.max()) {
+			VidLib.LOGGER.info("Discarded physics particles packet @ " + realTime + " from " + spawnTime);
+			return;
+		}
+
+		var particles = new PhysicsParticles(data, vl$level(), spawnTime, seed == 0L ? vl$self().level.getRandom().nextLong() : seed);
 
 		for (var block : blocks) {
 			particles.at = block.pos();
@@ -373,10 +383,10 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void physicsParticles(PhysicsParticlesIdData data) {
+	default void physicsParticles(PhysicsParticlesIdData data, long spawnTime) {
 		if (!data.blocks().isEmpty()) {
 			var p = PhysicsParticleData.REGISTRY.get(data.id());
-			physicsParticles(p == null ? PhysicsParticleData.DEFAULT : p, data.seed(), data.blocks());
+			physicsParticles(p == null ? PhysicsParticleData.DEFAULT : p, spawnTime, data.seed(), data.blocks());
 		}
 	}
 
@@ -451,11 +461,34 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	@Override
 	default void setScreenFade(Fade fade) {
+		if (vl$self().player.isReplayCamera()) {
+			return;
+		}
+
 		vl$self().player.vl$sessionData().screenFade = new ScreenFadeInstance(fade);
 	}
 
 	@Override
 	default void marker(MarkerData data) {
 		// VidLib.LOGGER.info("Marker " + data.event() + "/" + data.name() + " (" + data.uuid() + ") @ ");
+	}
+
+	@Override
+	default GameProfile retrieveGameProfile(UUID uuid) {
+		try {
+			var profile = vl$self().getMinecraftSessionService().fetchProfile(uuid, true).profile();
+			return profile == null ? Empty.PROFILE : profile;
+		} catch (Exception ex) {
+			return Empty.PROFILE;
+		}
+	}
+
+	@Override
+	default GameProfile retrieveGameProfile(String name) {
+		try {
+			return MiscUtils.fetchProfile(name);
+		} catch (Exception ex) {
+			return Empty.PROFILE;
+		}
 	}
 }

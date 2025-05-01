@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.structure;
 
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.util.WithCache;
+import io.netty.buffer.Unpooled;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
@@ -11,6 +12,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.zip.GZIPInputStream;
 
 public class LazyStructures implements WithCache, Supplier<List<StructureHolder>> {
 	public final ResourceLocation id;
@@ -28,9 +30,17 @@ public class LazyStructures implements WithCache, Supplier<List<StructureHolder>
 			structures = List.of();
 
 			try (var in = resource.open()) {
-				var template = new StructureTemplate();
-				template.load(BuiltInRegistries.BLOCK, NbtIo.readCompressed(in, NbtAccounter.unlimitedHeap()));
-				structures = StructureHolder.allOf(template);
+				if (id.getPath().endsWith(".nbt")) {
+					var template = new StructureTemplate();
+					template.load(BuiltInRegistries.BLOCK, NbtIo.readCompressed(in, NbtAccounter.unlimitedHeap()));
+					structures = StructureHolder.allOf(template);
+				} else if (id.getPath().endsWith(".vstruct")) {
+					try (var stream = new GZIPInputStream(in)) {
+						var buf = Unpooled.wrappedBuffer(stream.readAllBytes());
+						var struct = StructureHolder.fromVStruct(buf);
+						structures = List.of(struct);
+					}
+				}
 			} catch (Exception ex) {
 				VidLib.LOGGER.error("Error while loading structure " + id, ex);
 			}

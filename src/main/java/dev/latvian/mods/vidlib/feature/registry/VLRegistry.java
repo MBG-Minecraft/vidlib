@@ -58,7 +58,7 @@ public class VLRegistry<V> extends GenericVLRegistry<ResourceLocation, V> implem
 	}
 
 	@Override
-	public RegistryRef<V> ref(ResourceLocation id) {
+	public synchronized RegistryRef<V> ref(ResourceLocation id) {
 		var ref = refMap.get(id);
 
 		if (ref == null) {

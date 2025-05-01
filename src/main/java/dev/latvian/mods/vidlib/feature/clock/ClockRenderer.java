@@ -1,23 +1,20 @@
 package dev.latvian.mods.vidlib.feature.clock;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.minecraft.client.Minecraft;
+import dev.latvian.mods.vidlib.util.FrameInfo;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
 public class ClockRenderer {
-	public static void render(Minecraft mc, ClockValue value, ClockLocation location, PoseStack ms, Vec3 cameraPos, float delta) {
+	public static void render(FrameInfo frame, ClockValue value, ClockLocation location) {
+		var mc = frame.mc();
+		float delta = frame.worldDelta();
 		var font = location.font();
-
-		if (font == null) {
-			return;
-		}
+		var ms = frame.poseStack();
 
 		var text = location.format().formatted(value.second() / 60, value.second() % 60).toCharArray();
 		var width = font.getWidth(text);
@@ -29,7 +26,7 @@ public class ClockRenderer {
 		var light = location.fullbright() ? LightTexture.FULL_BRIGHT : LightTexture.pack(mc.level.getBrightness(LightLayer.BLOCK, location.pos()), mc.level.getBrightness(LightLayer.SKY, location.pos()));
 
 		ms.pushPose();
-		ms.translate(location.pos().getX() + 0.5D - cameraPos.x, location.pos().getY() + location.offset() + 0.5D - cameraPos.y, location.pos().getZ() + 0.5D - cameraPos.z);
+		frame.translate(location.pos().getX() + 0.5D, location.pos().getY() + location.offset() + 0.5D, location.pos().getZ() + 0.5D);
 		ms.mulPose(Axis.YP.rotationDegrees(-location.facing().toYRot()));
 
 		ms.scale(location.scale(), -location.scale(), -1F);

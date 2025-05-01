@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.core.VLEntity;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverrideValue;
 import dev.latvian.mods.vidlib.feature.entity.ExactEntitySpawnPayload;
+import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -22,6 +23,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
@@ -32,6 +34,9 @@ import java.util.Map;
 public abstract class EntityMixin implements VLEntity {
 	@Shadow
 	private Level level;
+
+	@Unique
+	private PlayerInput vl$pilotInput = PlayerInput.NONE;
 
 	@ModifyReturnValue(method = "collectColliders", at = @At("RETURN"))
 	private static List<VoxelShape> vl$collectColliders(List<VoxelShape> parent, @Local(argsOnly = true) Level level, @Local(argsOnly = true) @Nullable Entity entity, @Local(argsOnly = true) AABB collisionBox) {
@@ -133,5 +138,20 @@ public abstract class EntityMixin implements VLEntity {
 			entity.setDeltaMovement(new Vec3(delta.x, 0D, delta.z));
 			entity.resetFallDistance();
 		}
+	}
+
+	@Override
+	public PlayerInput getPilotInput() {
+		return vl$pilotInput;
+	}
+
+	@Override
+	public void vl$setPilotInput(PlayerInput input) {
+		vl$pilotInput = input;
+	}
+
+	@Inject(method = "removePassenger", at = @At("RETURN"))
+	private void vl$removePassenger(Entity passenger, CallbackInfo ci) {
+		vl$pilotInput = PlayerInput.NONE;
 	}
 }

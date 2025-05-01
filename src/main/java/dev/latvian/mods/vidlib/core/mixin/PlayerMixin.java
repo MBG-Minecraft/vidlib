@@ -77,4 +77,14 @@ public abstract class PlayerMixin implements VLPlayer {
 	private float vl$scaleDamage(IScalingFunction scalingFunction, DamageSource source, Player player, float damage, Difficulty difficulty) {
 		return EntityOverride.SCALE_DAMAGE_WITH_DIFFICULTY.get(this, false) ? scalingFunction.scaleDamage(source, player, damage, difficulty) : damage;
 	}
+
+	@Inject(method = "wantsToStopRiding", at = @At("HEAD"), cancellable = true)
+	private void vl$wantsToStopRiding(CallbackInfoReturnable<Boolean> cir) {
+		var self = (Player) (Object) this;
+		var v = self.getVehicle();
+
+		if (v != null && v.preventDismount(self)) {
+			cir.setReturnValue(false);
+		}
+	}
 }

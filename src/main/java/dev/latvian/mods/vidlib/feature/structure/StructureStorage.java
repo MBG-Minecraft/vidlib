@@ -34,7 +34,11 @@ public class StructureStorage extends SimplePreparableReloadListener<Map<Resourc
 		var map = new HashMap<ResourceLocation, Resource>();
 
 		for (var entry : resourceManager.listResources("structure", p -> p.getPath().endsWith(".nbt")).entrySet()) {
-			map.put(entry.getKey().withPath(p -> p.substring(10, p.length() - 4)), entry.getValue());
+			map.put(entry.getKey().withPath(p -> p.substring(10)), entry.getValue());
+		}
+
+		for (var entry : resourceManager.listResources("structure", p -> p.getPath().endsWith(".vstruct")).entrySet()) {
+			map.put(entry.getKey().withPath(p -> p.substring(10)), entry.getValue());
 		}
 
 		return map;
@@ -45,7 +49,7 @@ public class StructureStorage extends SimplePreparableReloadListener<Map<Resourc
 		var map2 = new HashMap<ResourceLocation, LazyStructures>();
 
 		for (var entry : map.entrySet()) {
-			map2.put(entry.getKey(), new LazyStructures(entry.getKey(), entry.getValue()));
+			map2.put(entry.getKey().withPath(p -> p.substring(0, p.lastIndexOf('.'))), new LazyStructures(entry.getKey(), entry.getValue()));
 		}
 
 		registry.update(map2);

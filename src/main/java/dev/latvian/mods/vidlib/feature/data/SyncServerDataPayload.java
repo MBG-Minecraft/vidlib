@@ -7,9 +7,9 @@ import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 
 import java.util.List;
 
-public record SyncServerDataPayload(List<DataMapValue> serverData) implements SimplePacketPayload {
+public record SyncServerDataPayload(List<DataMapValue> update) implements SimplePacketPayload {
 	@AutoPacket
-	public static final VidLibPacketType<SyncServerDataPayload> TYPE = VidLibPacketType.internal("sync_server_data", DataType.SERVER.valueListStreamCodec.map(SyncServerDataPayload::new, SyncServerDataPayload::serverData));
+	public static final VidLibPacketType<SyncServerDataPayload> TYPE = VidLibPacketType.internal("sync_server_data", DataType.SERVER.valueListStreamCodec.map(SyncServerDataPayload::new, SyncServerDataPayload::update));
 
 	@Override
 	public VidLibPacketType<?> getType() {
@@ -17,7 +17,18 @@ public record SyncServerDataPayload(List<DataMapValue> serverData) implements Si
 	}
 
 	@Override
+	public boolean allowDebugLogging() {
+		for (var u : update) {
+			if (!u.type().skipLogging()) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
 	public void handle(Context ctx) {
-		ctx.player().vl$sessionData().updateServerData(serverData);
+		ctx.player().vl$sessionData().updateServerData(ctx.remoteGameTime(), ctx.player(), update);
 	}
 }

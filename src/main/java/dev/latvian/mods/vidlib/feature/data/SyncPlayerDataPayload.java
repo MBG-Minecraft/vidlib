@@ -24,7 +24,18 @@ public record SyncPlayerDataPayload(UUID player, List<DataMapValue> update) impl
 	}
 
 	@Override
+	public boolean allowDebugLogging() {
+		for (var u : update) {
+			if (!u.type().skipLogging()) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
 	public void handle(Context ctx) {
-		ctx.player().vl$sessionData().updateSessionData(ctx.player(), player, update);
+		ctx.player().vl$sessionData().updatePlayerData(ctx.remoteGameTime(), ctx.player(), player, update);
 	}
 }

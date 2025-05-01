@@ -81,7 +81,8 @@ public class StructureRendererLevel implements BlockAndTintGetter, LightChunkGet
 
 	@Override
 	public FluidState getFluidState(BlockPos pos) {
-		return emptyFluid;
+		var b = blocks.get(pos.asLong());
+		return b == null ? emptyFluid : b.getFluidState();
 	}
 
 	@Override

@@ -13,6 +13,9 @@ public interface Skyboxes {
 	ResourceLocation STORM = ID.mc("storm");
 	ResourceLocation DOOM = ID.mc("doom");
 	ResourceLocation BRIGHT_NIGHT = ID.mc("bright_night");
-	ResourceLocation BLACK_VOID = ID.mc("black_void");
-	ResourceLocation WHITE_VOID = ID.mc("white_void");
+
+	ResourceLocation BLACK_VOID = ID.mc("void/black");
+	ResourceLocation WHITE_VOID = ID.mc("void/white");
+	ResourceLocation GREEN_VOID = ID.mc("void/green");
+	ResourceLocation BLUE_VOID = ID.mc("void/blue");
 }

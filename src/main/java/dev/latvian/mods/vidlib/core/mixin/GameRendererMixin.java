@@ -11,7 +11,9 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -35,5 +37,10 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 	@ModifyExpressionValue(method = "renderLevel", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/GameRenderer;renderHand:Z"))
 	private boolean vl$renderHand(boolean original) {
 		return original && CameraOverride.get(minecraft) == null;
+	}
+
+	@ModifyConstant(method = "getDepthFar", constant = @Constant(floatValue = 4.0F))
+	private float vl$getDepthFar(float constant) {
+		return 8F;
 	}
 }

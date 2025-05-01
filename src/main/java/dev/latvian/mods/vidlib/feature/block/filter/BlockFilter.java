@@ -13,9 +13,11 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -53,6 +55,24 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 		@Override
 		public String toString() {
 			return "vidlib:any";
+		}
+	});
+
+	SimpleRegistryType.Unit<BlockFilter> VISIBLE = SimpleRegistryType.unit(VidLib.id("visible"), new BlockFilter() {
+		@Override
+		public boolean test(BlockInWorld blockInWorld) {
+			var state = blockInWorld.getState();
+			return state != null && state.getRenderShape() != RenderShape.INVISIBLE;
+		}
+
+		@Override
+		public boolean test(Level level, BlockPos pos, BlockState state) {
+			return state.getRenderShape() != RenderShape.INVISIBLE;
+		}
+
+		@Override
+		public String toString() {
+			return "vidlib:visible";
 		}
 	});
 
@@ -95,5 +115,9 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 
 	default BlockFilter not() {
 		return new BlockNotFilter(this);
+	}
+
+	default BlockFilter and(BlockFilter filter) {
+		return new BlockAndFilter(List.of(this, filter));
 	}
 }

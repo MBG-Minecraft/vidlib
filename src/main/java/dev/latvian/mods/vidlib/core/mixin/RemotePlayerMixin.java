@@ -32,6 +32,6 @@ public class RemotePlayerMixin extends AbstractClientPlayer implements VLRemoteP
 
 	@Override
 	public Set<String> getTags() {
-		return vl$sessionData().tags;
+		return vl$sessionData().getTags(this);
 	}
 }

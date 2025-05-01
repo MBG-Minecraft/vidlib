@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.core;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.clock.SyncClocksPayload;
@@ -10,6 +12,8 @@ import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.RemoveZonePayload;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
+import dev.latvian.mods.vidlib.util.Empty;
+import dev.latvian.mods.vidlib.util.JsonUtils;
 import dev.latvian.mods.vidlib.util.PauseType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -17,12 +21,16 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
+import net.neoforged.fml.loading.FMLPaths;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	default MinecraftServer vl$self() {
@@ -82,6 +90,10 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	@Override
 	@ApiStatus.Internal
 	default void vl$postTick(PauseType paused) {
+		if (vl$level().isReplayLevel()) {
+			return;
+		}
+
 		var packetsToEveryone = new S2CPacketBundleBuilder(vl$level());
 
 		getServerData().sync(packetsToEveryone, null, (playerId, update) -> new SyncServerDataPayload(update));
@@ -182,6 +194,51 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 
 		for (var level : vl$self().getAllLevels()) {
 			level.vl$updateLoadedChunks();
+		}
+	}
+
+	default Map<UUID, GameProfile> vl$getReroutedPlayers() {
+		var map = new HashMap<UUID, GameProfile>();
+		var path = FMLPaths.GAMEDIR.get().resolve("vidlib/rerouted-players.json");
+
+		if (Files.exists(path)) {
+			try (var reader = Files.newBufferedReader(path)) {
+				for (var entry : JsonUtils.read(reader).getAsJsonObject().entrySet()) {
+					try {
+						var from = retrieveGameProfile(entry.getKey());
+						var to = retrieveGameProfile(UndashedUuid.fromString(entry.getValue().getAsString()));
+
+						if (from != null && to != null) {
+							map.put(from.getId(), to);
+						}
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+
+		return map;
+	}
+
+	@Override
+	default GameProfile retrieveGameProfile(UUID uuid) {
+		try {
+			var profile = vl$self().getSessionService().fetchProfile(uuid, true).profile();
+			return profile == null ? Empty.PROFILE : profile;
+		} catch (Exception ex) {
+			return Empty.PROFILE;
+		}
+	}
+
+	@Override
+	default GameProfile retrieveGameProfile(String name) {
+		try {
+			return vl$self().getProfileCache().getAsync(name).get(5L, TimeUnit.SECONDS).orElse(Empty.PROFILE);
+		} catch (Exception ex) {
+			return Empty.PROFILE;
 		}
 	}
 }

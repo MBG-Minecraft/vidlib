@@ -1,12 +1,15 @@
 package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.kmath.Line;
+import dev.latvian.mods.kmath.Rotation;
 import dev.latvian.mods.vidlib.feature.entity.C2SEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.entity.EntityData;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverrideValue;
 import dev.latvian.mods.vidlib.feature.entity.ForceEntityVelocityPayload;
+import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.S2CEntityEventPayload;
+import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
@@ -28,10 +31,14 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
-public interface VLEntity extends VLLevelContainer {
+public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
+	default Entity vl$self() {
+		return (Entity) this;
+	}
+
 	@Override
 	default Level vl$level() {
-		return ((Entity) this).level();
+		return vl$self().level();
 	}
 
 	@Nullable
@@ -47,7 +54,7 @@ public interface VLEntity extends VLLevelContainer {
 	default <T> T vl$getDirectOverride(EntityOverride<T> override) {
 		var map = vl$getEntityOverridesMap();
 		var v = map == null ? null : (EntityOverrideValue<T>) map.get(override);
-		return v == null ? null : v.get((Entity) this);
+		return v == null ? null : v.get(vl$self());
 	}
 
 	default <T> void vl$setDirectOverride(EntityOverride<T> override, @Nullable EntityOverrideValue<T> value) {
@@ -77,7 +84,7 @@ public interface VLEntity extends VLLevelContainer {
 
 	default List<ZoneInstance> getZones() {
 		var zones = vl$level().vl$getActiveZones();
-		return zones == null ? List.of() : zones.entityZones.getOrDefault(((Entity) this).getId(), List.of());
+		return zones == null ? List.of() : zones.entityZones.getOrDefault((vl$self()).getId(), List.of());
 	}
 
 	@Nullable
@@ -131,8 +138,8 @@ public interface VLEntity extends VLLevelContainer {
 	}
 
 	default Line ray(double distance, float delta) {
-		var start = ((Entity) this).getEyePosition(delta);
-		var end = start.add(((Entity) this).getViewVector(delta).scale(distance));
+		var start = vl$self().getEyePosition(delta);
+		var end = start.add(vl$self().getViewVector(delta).scale(distance));
 		return new Line(start, end);
 	}
 
@@ -141,7 +148,7 @@ public interface VLEntity extends VLLevelContainer {
 	}
 
 	default void teleport(ServerLevel to, Vec3 pos) {
-		var entity = (Entity) this;
+		var entity = vl$self();
 		entity.teleport(new TeleportTransition(
 			to,
 			pos,
@@ -153,7 +160,7 @@ public interface VLEntity extends VLLevelContainer {
 	}
 
 	default void teleport(Vec3 pos) {
-		teleport((ServerLevel) ((Entity) this).level(), pos);
+		teleport((ServerLevel) vl$level(), pos);
 	}
 
 	default void teleport(ServerLevel to, BlockPos pos) {
@@ -165,12 +172,12 @@ public interface VLEntity extends VLLevelContainer {
 	}
 
 	default void teleport(Location location) {
-		var entity = (Entity) this;
+		var entity = vl$self();
 		teleport(entity.getServer().getLevel(location.dimension()), location.random(entity.getRandom(), new Vec3(0.5D, 0.1D, 0.5D)));
 	}
 
 	default void forceSetVelocity(Vec3 velocity) {
-		var e = (Entity) this;
+		var e = vl$self();
 		e.setDeltaMovement(velocity);
 
 		if (!e.level().isClientSide()) {
@@ -179,11 +186,11 @@ public interface VLEntity extends VLLevelContainer {
 	}
 
 	default void forceAddVelocity(Vec3 velocity) {
-		forceSetVelocity(((Entity) this).getDeltaMovement().add(velocity));
+		forceSetVelocity(vl$self().getDeltaMovement().add(velocity));
 	}
 
 	default void playSound(SoundData data, boolean looping, boolean stopImmediately) {
-		var e = (Entity) this;
+		var e = vl$self();
 		e.level().playGlobalSound(new PositionedSoundData(data, e, looping, stopImmediately), WorldNumberVariables.EMPTY);
 	}
 
@@ -206,11 +213,11 @@ public interface VLEntity extends VLLevelContainer {
 	}
 
 	default Vec3 getSoundSource(float delta) {
-		return ((Entity) this).getEyePosition(delta);
+		return vl$self().getEyePosition(delta);
 	}
 
 	default Vec3 getLookTarget(float delta) {
-		var e = (Entity) this;
+		var e = vl$self();
 
 		if (delta == 1F) {
 			return e.position().add(e.getViewVector(1F));
@@ -220,7 +227,7 @@ public interface VLEntity extends VLLevelContainer {
 	}
 
 	default Vec3 getPosition(EntityPositionType type) {
-		var e = (Entity) this;
+		var e = vl$self();
 
 		return switch (type) {
 			case CENTER -> new Vec3(e.getX(), e.getY() + e.getBbHeight() / 2D, e.getZ());
@@ -234,7 +241,7 @@ public interface VLEntity extends VLLevelContainer {
 	}
 
 	default Vec3 getPosition(EntityPositionType type, float delta) {
-		var e = (Entity) this;
+		var e = vl$self();
 
 		return switch (type) {
 			case CENTER -> e.getPosition(delta).add(0D, e.getBbHeight() / 2D, 0D);
@@ -251,11 +258,38 @@ public interface VLEntity extends VLLevelContainer {
 		return 1F;
 	}
 
+	default boolean preventDismount(Player passenger) {
+		return false;
+	}
+
 	default float getVehicleCameraDistance(Player passenger, float original) {
 		return original;
 	}
 
-	default boolean hidePassenger(Player passenger) {
-		return false;
+	default float getPassengerScale(Player passenger) {
+		return 1F;
+	}
+
+	default PlayerInput getPilotInput() {
+		return PlayerInput.NONE;
+	}
+
+	default void vl$setPilotInput(PlayerInput input) {
+		throw new NoMixinException(this);
+	}
+
+	@Nullable
+	default Boolean forceRenderVehicleCrosshair(Player passenger) {
+		return null;
+	}
+
+	default Rotation rotation(float delta) {
+		var e = vl$self();
+		return Rotation.deg(e.getYRot(delta), e.getXRot(delta));
+	}
+
+	default Rotation viewRotation(float delta) {
+		var e = vl$self();
+		return Rotation.deg(e.getViewYRot(delta), e.getViewXRot(delta));
 	}
 }

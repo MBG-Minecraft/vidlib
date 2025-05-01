@@ -11,7 +11,7 @@ import java.util.List;
 @Mixin(CreativeModeInventoryScreen.class)
 public class CreativeModeInventoryScreenMixin {
 	@Redirect(method = "getTooltipFromContainerItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/CreativeModeTabs;tabs()Ljava/util/List;"))
-	private List<CreativeModeTab> vidlib$getTooltipFromContainerItem() {
+	private List<CreativeModeTab> vl$getTooltipFromContainerItem() {
 		return List.of();
 	}
 }
