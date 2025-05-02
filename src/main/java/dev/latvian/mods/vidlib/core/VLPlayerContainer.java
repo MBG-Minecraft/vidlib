@@ -77,7 +77,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void tell(Component message) {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().tell(message);
 		} else {
 			for (var player : vl$getS2CPlayers()) {
@@ -91,7 +91,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void status(Component message) {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().status(message);
 		} else {
 			for (var player : vl$getS2CPlayers()) {
@@ -105,7 +105,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void playCutscene(Cutscene cutscene, WorldNumberVariables variables) {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().playCutscene(cutscene, variables);
 		} else if (!cutscene.steps.isEmpty()) {
 			s2c(new PlayCutscenePayload(cutscene, variables));
@@ -113,7 +113,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void stopCutscene() {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().stopCutscene();
 		} else {
 			s2c(StopCutscenePayload.INSTANCE);
@@ -121,7 +121,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void shakeCamera(CameraShake shake) {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().shakeCamera(shake);
 		} else if (!shake.skip()) {
 			s2c(new ShakeCameraPayload(shake));
@@ -129,7 +129,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void shakeCamera(CameraShake shake, Vec3 source, double maxDistance) {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().shakeCamera(shake, source, maxDistance);
 		} else {
 			s2c(new ShakeCameraAtPositionPayload(shake, source, maxDistance));
@@ -137,7 +137,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void stopCameraShaking() {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().stopCameraShaking();
 		} else {
 			s2c(StopCameraShakingPayload.INSTANCE);
@@ -145,7 +145,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void setCameraMode(int mode) {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().setCameraMode(mode);
 		} else {
 			s2c(new SetCameraModePayload(mode));
@@ -153,7 +153,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void setPostEffect(ResourceLocation id) {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().setPostEffect(id);
 		} else {
 			s2c(new SetPostEffectPayload(id));
@@ -161,7 +161,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void vl$closeScreen() {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().vl$closeScreen();
 		} else {
 			s2c(CloseScreenPayload.INSTANCE);
@@ -169,7 +169,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void openYesNoVotingScreen(CompoundTag extraData, Component title, Component subtitle, Component yesLabel, Component noLabel) {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().openYesNoVotingScreen(extraData, title, subtitle, yesLabel, noLabel);
 		} else {
 			s2c(new StartYesNoVotingPayload(extraData, title, subtitle, yesLabel, noLabel));
@@ -177,7 +177,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void openNumberVotingScreen(CompoundTag extraData, Component title, Component subtitle, int max, IntList unavailable) {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().openNumberVotingScreen(extraData, title, subtitle, max, unavailable);
 		} else {
 			s2c(new StartNumberVotingPayload(extraData, title, subtitle, max, unavailable));
@@ -185,7 +185,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void removeAllParticles() {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().removeAllParticles();
 		} else {
 			s2c(RemoveAllParticlesPayload.INSTANCE);
@@ -193,7 +193,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void redrawSections(LongList sections, boolean mainThread) {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().redrawSections(sections, mainThread);
 		} else {
 			s2c(new RedrawChunkSectionsPayload(sections, mainThread));
@@ -201,7 +201,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void playGlobalSound(PositionedSoundData data, WorldNumberVariables variables) {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().playGlobalSound(data, variables);
 		} else {
 			s2c(new SoundPayload(data, variables));
@@ -217,7 +217,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void physicsParticles(PhysicsParticleData data, long spawnTime, long seed, List<PositionedBlock> blocks) {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().physicsParticles(data, spawnTime, seed, blocks);
 		} else if (!blocks.isEmpty()) {
 			s2c(new PhysicsParticlesPayload(data, seed, blocks));
@@ -225,7 +225,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void physicsParticles(PhysicsParticlesIdData data, long spawnTime) {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().physicsParticles(data, spawnTime);
 		} else if (!data.blocks().isEmpty()) {
 			s2c(new PhysicsParticlesIdPayload(data));
@@ -245,7 +245,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void cubeParticles(Map<CubeParticleOptions, List<BlockPos>> map) {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().cubeParticles(map);
 		} else {
 			s2c(new SpawnCubeParticlesPayload(map));
@@ -257,7 +257,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void lineParticles(Map<LineParticleOptions, List<AABB>> map) {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().lineParticles(map);
 		} else {
 			s2c(new SpawnLineParticlesPayload(map));
@@ -269,7 +269,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void textParticles(TextParticleOptions options, List<Vec3> positions) {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().textParticles(options, positions);
 		} else {
 			s2c(new SpawnTextParticlePayload(options, positions));
@@ -277,7 +277,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void itemParticles(ItemParticleOptions options, List<Pair<Vec3, Vec3>> positions) {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().itemParticles(options, positions);
 		} else {
 			s2c(new SpawnItemParticlePayload(options, positions));
@@ -289,7 +289,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void windParticles(RandomSource random, WindData data) {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().windParticles(random, data);
 		} else {
 			s2c(new SpawnWindParticlesPayload(data));
@@ -297,7 +297,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void fireParticles(RandomSource random, FireData data) {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().fireParticles(random, data);
 		} else {
 			s2c(new SpawnFireParticlesPayload(data));
@@ -305,7 +305,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void setScreenFade(Fade fade) {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().setScreenFade(fade);
 		} else {
 			s2c(new ScreenFadePayload(fade));
@@ -313,7 +313,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void marker(MarkerData data) {
-		if (vl$isClient()) {
+		if (isClient()) {
 			getEnvironment().marker(data);
 		} else {
 			s2c(new MarkerPayload(data));

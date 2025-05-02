@@ -48,8 +48,7 @@
 		"StyleMixin",
 		"UUIDUtilMixin",
 		"WaterFluidMixin",
-		"neo.EnumArgumentMixin",
-		"neo.ForcedChunkManagerOwnedChunksMixin"
+		"neo.EnumArgumentMixin"
 	],
 	"client": [
 		"AbstractClientPlayerMixin",

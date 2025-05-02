@@ -5,7 +5,7 @@ public interface VLEnvironmentContainer {
 		throw new NoMixinException(this);
 	}
 
-	default boolean vl$isClient() {
-		return getEnvironment().vl$isClient();
+	default boolean isClient() {
+		return getEnvironment().isClient();
 	}
 }

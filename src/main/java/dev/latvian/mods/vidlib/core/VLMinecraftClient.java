@@ -75,7 +75,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default boolean vl$isClient() {
+	default boolean isClient() {
 		return true;
 	}
 
