@@ -40,7 +40,7 @@ public class ClientGradients extends SimplePreparableReloadListener<Map<Resource
 
 		for (var entry : resourceManager.listResources("textures/vidlib/gradient", id -> !id.getPath().startsWith("_") && id.getPath().endsWith(".png")).entrySet()) {
 			try (var in = entry.getValue().open()) {
-				var id = entry.getKey().withPath(s -> s.substring(26, s.length() - 4));
+				var id = entry.getKey().withPath(s -> s.substring(25, s.length() - 4));
 
 				try (var image = NativeImage.read(in)) {
 					var pixels = new Color[image.getWidth()];

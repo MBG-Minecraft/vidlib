@@ -3,8 +3,8 @@ package dev.latvian.mods.vidlib.feature.particle;
 import dev.latvian.mods.vidlib.feature.npc.NPCParticle;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 
-public class VidLibClientParticles {
-	public static void register(RegisterParticleProvidersEvent event) {
+public interface VidLibClientParticles {
+	static void register(RegisterParticleProvidersEvent event) {
 		event.registerSpecial(VidLibParticles.CUBE.get(), CubeParticle::new);
 		event.registerSpecial(VidLibParticles.LINE.get(), LineParticle::new);
 		event.registerSpecial(VidLibParticles.TEXT.get(), TextParticle::new);
