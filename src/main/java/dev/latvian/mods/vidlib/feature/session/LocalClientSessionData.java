@@ -207,6 +207,7 @@ public class LocalClientSessionData extends ClientSessionData {
 			}
 		}
 
+		level.vl$preTick(paused);
 		filteredZones.tick(level);
 
 		updateOverrides(player);

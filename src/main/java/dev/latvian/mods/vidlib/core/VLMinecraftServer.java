@@ -74,6 +74,8 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	@ApiStatus.Internal
 	default void vl$preTick(PauseType paused) {
 		for (var level : vl$self().getAllLevels()) {
+			level.vl$preTick(paused);
+
 			var zones = ZoneLoader.BY_DIMENSION.get(level.dimension());
 			level.vl$setActiveZones(zones);
 

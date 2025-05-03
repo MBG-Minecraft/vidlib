@@ -17,6 +17,7 @@ import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityTypeFilter;
 import dev.latvian.mods.vidlib.feature.prop.PropList;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
+import dev.latvian.mods.vidlib.util.PauseType;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.commands.arguments.selector.EntitySelector;
@@ -28,6 +29,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
@@ -40,6 +42,10 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 	@Override
 	default Level vl$level() {
 		return (Level) this;
+	}
+
+	@ApiStatus.Internal
+	default void vl$preTick(PauseType paused) {
 	}
 
 	default long vl$nextPacketId() {
@@ -235,5 +241,10 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 
 	default float vl$getDelta() {
 		return 1F;
+	}
+
+	@Nullable
+	default Entity getMainBoss() {
+		return null;
 	}
 }
