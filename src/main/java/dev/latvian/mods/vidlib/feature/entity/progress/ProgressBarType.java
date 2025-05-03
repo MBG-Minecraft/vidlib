@@ -31,6 +31,6 @@ public record ProgressBarType(
 	}
 
 	public int height() {
-		return centerY * 2;
+		return Math.min(textureHeight, centerY * 2);
 	}
 }
