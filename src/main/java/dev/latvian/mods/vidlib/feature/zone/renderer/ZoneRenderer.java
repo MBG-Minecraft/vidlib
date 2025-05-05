@@ -5,9 +5,12 @@ import dev.latvian.mods.kmath.VoxelShapeBox;
 import dev.latvian.mods.kmath.color.Color;
 import dev.latvian.mods.kmath.render.BoxRenderer;
 import dev.latvian.mods.kmath.render.SphereRenderer;
+import dev.latvian.mods.kmath.texture.LightUV;
 import dev.latvian.mods.vidlib.core.VLBlockInWorld;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
+import dev.latvian.mods.vidlib.feature.client.DynamicSpriteTexture;
+import dev.latvian.mods.vidlib.feature.client.FluidBoxRenderer;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
 import dev.latvian.mods.vidlib.feature.zone.shape.RotatedBoxZoneShape;
@@ -18,6 +21,7 @@ import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShapeGroup;
 import dev.latvian.mods.vidlib.util.Cast;
 import dev.latvian.mods.vidlib.util.FrameInfo;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 
 import java.util.IdentityHashMap;
@@ -135,6 +139,50 @@ public interface ZoneRenderer<T extends ZoneShape> {
 				if (renderer != null) {
 					var baseColor = zone.color().withAlpha(Mth.lerpInt((float) (dist / 10D), 100, 0));
 					renderer.render(Cast.to(zone.shape()), new ZoneRenderer.Context(frame, baseColor, Color.TRANSPARENT));
+				}
+			}
+		}
+	}
+
+	static void renderFluid(FrameInfo frame) {
+		for (var sz : frame.session().filteredZones.getFluidZones()) {
+			var zone = sz.instance().zone;
+			double dist = zone.shape().closestDistanceTo(frame.camera().getPosition());
+
+			if (dist <= 2048D && frame.frustum().isVisible(zone.shape().getBoundingBox())) {
+				var fluidState = sz.instance().zone.fluid();
+
+				var yOff = 1F - fluidState.getOwnHeight();
+				yOff += (float) Math.clamp(-frame.y(yOff) / 50D, 0D, 0.5D);
+
+				var stillTexture = DynamicSpriteTexture.getStillFluid(frame.mc(), fluidState.getFluidType());
+				var flowingTexture = DynamicSpriteTexture.getFlowingFluid(frame.mc(), fluidState.getFluidType());
+
+				for (var box : sz.shapeBox().boxes()) {
+					var bminX = box.minX;
+					var bminY = box.minY;
+					var bminZ = box.minZ;
+					var bmaxX = box.maxX;
+					var bmaxY = box.maxY - yOff;
+					var bmaxZ = box.maxZ;
+
+					var blockPos = BlockPos.containing(Mth.floor(Mth.lerp(0.5D, bminX, bmaxX)), bmaxY - 1D, Mth.floor(Mth.lerp(0.5D, bminZ, bmaxZ)));
+					var color = Color.of(0xFF000000 | frame.mc().getBlockColors().getColor(fluidState.createLegacyBlock(), frame.mc().level, blockPos, 0));
+
+					FluidBoxRenderer.render(
+						frame,
+						fluidState,
+						color,
+						LightUV.FULLBRIGHT,
+						bminX,
+						bminY,
+						bminZ,
+						bmaxX,
+						bmaxY,
+						bmaxZ,
+						stillTexture,
+						flowingTexture
+					);
 				}
 			}
 		}

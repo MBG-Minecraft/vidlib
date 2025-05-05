@@ -8,7 +8,6 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.entity.Entity;
@@ -19,9 +18,6 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 public class MiscClientUtils {
 	public static final ContextKey<Boolean> CREATIVE = new ContextKey<>(VidLib.id("creative"));
 	public static final ContextKey<Clothing> CLOTHING = new ContextKey<>(VidLib.id("clothing"));
-
-	public static FogParameters fogOverride = FogParameters.NO_FOG;
-
 	public static final ConcurrentLinkedDeque<AutoCloseable> CLIENT_CLOSEABLE = new ConcurrentLinkedDeque<>();
 
 	public static boolean handleDebugKeys(Minecraft mc, int key) {
@@ -56,7 +52,7 @@ public class MiscClientUtils {
 		return !entity.isInvisible() && (entity instanceof LocalPlayer || entity.hasCustomName());
 	}
 
-	public static int overrideRenderDistance(int original) {
-		return original;
+	public static float depthFar(float renderDistance) {
+		return 8192F;
 	}
 }

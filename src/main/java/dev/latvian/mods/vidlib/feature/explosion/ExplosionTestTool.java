@@ -24,7 +24,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Set;
 
 public class ExplosionTestTool implements VidLibTool, PlayerActionHandler {
-	private static final Set<PlayerActionType> ACTIONS = Set.of(PlayerActionType.RELOAD);
 	public static final ExplosionData DEFAULT_DATA = new ExplosionData();
 	public static BlockPos lastClickPos = null;
 
@@ -79,12 +78,6 @@ public class ExplosionTestTool implements VidLibTool, PlayerActionHandler {
 	}
 
 	@Override
-	public boolean leftClick(Player player, ItemStack item) {
-		player.openItemGui(item, InteractionHand.MAIN_HAND);
-		return true;
-	}
-
-	@Override
 	public void debugText(Player player, ItemStack item, @Nullable HitResult hit, ScreenText screenText) {
 		var data = getData(item, false);
 		data.debugText(screenText.topLeft);
@@ -105,7 +98,17 @@ public class ExplosionTestTool implements VidLibTool, PlayerActionHandler {
 
 	@Override
 	public Set<PlayerActionType> getHandledPlayerActions() {
-		return ACTIONS;
+		return PlayerActionType.SWAP_AND_RELOAD_SET;
+	}
+
+	@Override
+	public boolean onClientPlayerAction(Player player, PlayerActionType action) {
+		if (action == PlayerActionType.SWAP) {
+			player.openItemGui(player.getMainHandItem(), InteractionHand.MAIN_HAND);
+			return true;
+		}
+
+		return false;
 	}
 
 	@Override

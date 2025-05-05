@@ -61,7 +61,7 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 
 	@Redirect(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientPacketListener;send(Lnet/minecraft/network/protocol/Packet;)V"))
 	private void vl$swap(ClientPacketListener instance, Packet packet) {
-		if (PlayerActionHandler.handle(player, PlayerActionType.SWAP, true)) {
+		if (!PlayerActionHandler.handle(player, PlayerActionType.SWAP, true)) {
 			instance.send(packet);
 		}
 	}

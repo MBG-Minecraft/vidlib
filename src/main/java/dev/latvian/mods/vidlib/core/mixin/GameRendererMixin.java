@@ -3,17 +3,17 @@ package dev.latvian.mods.vidlib.core.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import dev.latvian.mods.vidlib.core.VLGameRenderer;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
+import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -22,6 +22,9 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 	@Shadow
 	@Final
 	private Minecraft minecraft;
+
+	@Shadow
+	private float renderDistance;
 
 	@Redirect(method = "bobHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getHurtDir()F"))
 	private float vl$bobHurt(LivingEntity entity) {
@@ -39,8 +42,12 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 		return original && CameraOverride.get(minecraft) == null;
 	}
 
-	@ModifyConstant(method = "getDepthFar", constant = @Constant(floatValue = 4.0F))
-	private float vl$getDepthFar(float constant) {
-		return 8F;
+	/**
+	 * @author Lat
+	 * @reason Extend depth
+	 */
+	@Overwrite
+	public float getDepthFar() {
+		return MiscClientUtils.depthFar(renderDistance);
 	}
 }

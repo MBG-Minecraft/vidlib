@@ -3,6 +3,8 @@ package dev.latvian.mods.vidlib.feature.item;
 import dev.latvian.mods.kmath.KMath;
 import dev.latvian.mods.kmath.color.Color;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
+import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import dev.latvian.mods.vidlib.feature.misc.VidLibIcon;
 import dev.latvian.mods.vidlib.feature.particle.CubeParticleOptions;
@@ -10,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -21,7 +24,9 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public class PositionToolItem implements VidLibTool {
+import java.util.Set;
+
+public class PositionToolItem implements VidLibTool, PlayerActionHandler {
 	public enum Type {
 		BLOCK("Block"),
 		BLOCK_FACE("Block Face"),
@@ -72,17 +77,6 @@ public class PositionToolItem implements VidLibTool {
 
 	@Override
 	public boolean rightClick(Player player, ItemStack item, @Nullable BlockHitResult hit) {
-		if (player.vl$sessionData().input.alt()) {
-			if (!player.level().isClientSide()) {
-				var tag = item.get(DataComponents.CUSTOM_DATA).copyTag();
-				var mode = Type.VALUES[(tag.getByteOr("position_tool_mode", (byte) 0) + 1) % Type.VALUES.length];
-				tag.putByte("position_tool_mode", (byte) mode.ordinal());
-				item.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
-			}
-
-			return true;
-		}
-
 		if (player.level().isClientSide()) {
 			var tag = item.get(DataComponents.CUSTOM_DATA).getUnsafe();
 			var mode = Type.VALUES[tag.getByteOr("position_tool_mode", (byte) 0)];
@@ -175,5 +169,21 @@ public class PositionToolItem implements VidLibTool {
 		}
 
 		return ToolVisuals.NONE;
+	}
+
+	@Override
+	public Set<PlayerActionType> getHandledPlayerActions() {
+		return PlayerActionType.SWAP_SET;
+	}
+
+	@Override
+	public void onPlayerAction(ServerPlayer player, PlayerActionType action) {
+		if (action == PlayerActionType.SWAP) {
+			var item = player.getMainHandItem();
+			var tag = item.get(DataComponents.CUSTOM_DATA).copyTag();
+			var mode = Type.VALUES[(tag.getByteOr("position_tool_mode", (byte) 0) + 1) % Type.VALUES.length];
+			tag.putByte("position_tool_mode", (byte) mode.ordinal());
+			item.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+		}
 	}
 }

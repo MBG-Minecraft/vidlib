@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.phys.AABB;
 
@@ -36,7 +37,7 @@ public record BlockZoneShape(BlockPos start, BlockPos end, AABB box) implements 
 	}
 
 	@Override
-	public boolean contains(BlockPos pos) {
+	public boolean contains(Vec3i pos) {
 		return pos.getX() >= Math.min(start.getX(), end.getX())
 			&& pos.getX() <= Math.max(start.getX(), end.getX())
 			&& pos.getY() >= Math.min(start.getY(), end.getY())

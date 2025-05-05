@@ -15,7 +15,7 @@ import java.util.Set;
 public record ReplaceAllSectionBlocks(SectionPos pos, BlockState state) implements BulkLevelModification {
 	public static final SimpleRegistryType<ReplaceAllSectionBlocks> TYPE = SimpleRegistryType.dynamic(VidLib.id("section_all_blocks"), RecordCodecBuilder.mapCodec(instance -> instance.group(
 		VLCodecs.SECTION_POS.fieldOf("pos").forGetter(ReplaceAllSectionBlocks::pos),
-		BlockState.CODEC.fieldOf("state").forGetter(ReplaceAllSectionBlocks::state)
+		VLCodecs.BLOCK_STATE.fieldOf("state").forGetter(ReplaceAllSectionBlocks::state)
 	).apply(instance, ReplaceAllSectionBlocks::new)), CompositeStreamCodec.of(
 		VLStreamCodecs.SECTION_POS, ReplaceAllSectionBlocks::pos,
 		VLStreamCodecs.BLOCK_STATE, ReplaceAllSectionBlocks::state,

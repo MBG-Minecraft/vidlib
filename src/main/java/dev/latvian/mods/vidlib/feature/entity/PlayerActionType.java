@@ -6,6 +6,8 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
 
+import java.util.Set;
+
 public enum PlayerActionType implements StringRepresentable {
 	ATTACK("attack", true), // Left Click
 	INTERACT("interact", true), // Right Click
@@ -21,6 +23,10 @@ public enum PlayerActionType implements StringRepresentable {
 	public static final PlayerActionType[] VALUES = values();
 	public static final Codec<PlayerActionType> CODEC = StringRepresentable.fromEnum(() -> VALUES);
 	public static final StreamCodec<ByteBuf, PlayerActionType> STREAM_CODEC = VLStreamCodecs.enumValue(VALUES);
+
+	public static final Set<PlayerActionType> SWAP_SET = Set.of(SWAP);
+	public static final Set<PlayerActionType> RELOAD_SET = Set.of(RELOAD);
+	public static final Set<PlayerActionType> SWAP_AND_RELOAD_SET = Set.of(SWAP, RELOAD);
 
 	private final String name;
 	private final boolean mouse;

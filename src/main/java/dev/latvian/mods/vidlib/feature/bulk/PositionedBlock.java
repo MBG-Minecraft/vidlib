@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
 import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
@@ -21,7 +22,7 @@ import java.util.Set;
 public record PositionedBlock(BlockPos pos, BlockState state) implements BulkLevelModification {
 	public static final MapCodec<PositionedBlock> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 		BlockPos.CODEC.fieldOf("pos").forGetter(PositionedBlock::pos),
-		BlockState.CODEC.fieldOf("state").forGetter(PositionedBlock::state)
+		VLCodecs.BLOCK_STATE.fieldOf("state").forGetter(PositionedBlock::state)
 	).apply(instance, PositionedBlock::new));
 
 	public static final Codec<PositionedBlock> CODEC = MAP_CODEC.codec();

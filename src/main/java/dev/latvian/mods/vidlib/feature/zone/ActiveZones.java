@@ -4,12 +4,15 @@ import dev.latvian.mods.kmath.Line;
 import dev.latvian.mods.kmath.VoxelShapeBox;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.FlowingFluid;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +29,16 @@ import java.util.Set;
 import java.util.UUID;
 
 public class ActiveZones implements Iterable<ZoneContainer> {
-	public record SolidZone(ZoneInstance instance, VoxelShape shape, VoxelShapeBox shapeBox) {
+	public record CachedZoneShape(ZoneInstance instance, VoxelShape shape, VoxelShapeBox shapeBox) {
+		public static final CachedZoneShape[] EMPTY_ARRAY = new CachedZoneShape[0];
+
+		public static void append(Collection<CachedZoneShape> list, ZoneInstance instance) {
+			var shape = instance.zone.shape().createVoxelShape().optimize();
+
+			if (!shape.isEmpty()) {
+				list.add(new CachedZoneShape(instance, shape, VoxelShapeBox.of(shape)));
+			}
+		}
 	}
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ActiveZones> STREAM_CODEC = new StreamCodec<>() {
@@ -55,12 +67,14 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 
 	public final Map<ResourceLocation, ZoneContainer> containers;
 	public final Int2ObjectOpenHashMap<List<ZoneInstance>> entityZones;
-	List<SolidZone> solidZones;
+	CachedZoneShape[] solidZones;
+	CachedZoneShape[] fluidZones;
 
 	public ActiveZones() {
 		this.containers = new LinkedHashMap<>();
 		this.entityZones = new Int2ObjectOpenHashMap<>();
 		this.solidZones = null;
+		this.fluidZones = null;
 	}
 
 	@Nullable
@@ -79,6 +93,7 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 		}
 
 		solidZones = null;
+		fluidZones = null;
 	}
 
 	public void update(Collection<ZoneContainer> zones) {
@@ -90,6 +105,7 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 		}
 
 		solidZones = null;
+		fluidZones = null;
 	}
 
 	@Override
@@ -137,23 +153,19 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 		return result;
 	}
 
-	public List<SolidZone> getSolidZones() {
+	public CachedZoneShape[] getSolidZones() {
 		if (solidZones == null) {
-			solidZones = new ArrayList<>(0);
+			var solidZonesList = new ArrayList<CachedZoneShape>(0);
 
 			for (var container : containers.values()) {
 				for (var zone : container.zones) {
 					if (zone.zone.solid() != EntityFilter.NONE.instance()) {
-						var shape = zone.zone.shape().createVoxelShape().optimize();
-
-						if (!shape.isEmpty()) {
-							solidZones.add(new SolidZone(zone, shape, VoxelShapeBox.of(shape)));
-						}
+						CachedZoneShape.append(solidZonesList, zone);
 					}
 				}
 			}
 
-			solidZones = List.copyOf(solidZones);
+			solidZones = solidZonesList.toArray(CachedZoneShape.EMPTY_ARRAY);
 		}
 
 		return solidZones;
@@ -164,13 +176,7 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 			return false;
 		}
 
-		var solidZones = getSolidZones();
-
-		if (solidZones.isEmpty()) {
-			return false;
-		}
-
-		for (var sz : solidZones) {
+		for (var sz : getSolidZones()) {
 			if (sz.instance.zone.solid().test(entity)) {
 				for (var box : sz.shapeBox.boxes()) {
 					if (box.intersects(collisionBox)) {
@@ -190,7 +196,7 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 
 		var solidZones = getSolidZones();
 
-		if (solidZones.isEmpty()) {
+		if (solidZones.length == 0) {
 			return List.of();
 		}
 
@@ -214,5 +220,44 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 		for (var container : containers.values()) {
 			container.remove(uuid);
 		}
+	}
+
+	public CachedZoneShape[] getFluidZones() {
+		if (fluidZones == null) {
+			var fluidZonesList = new ArrayList<CachedZoneShape>(0);
+
+			for (var container : containers.values()) {
+				for (var zone : container.zones) {
+					if (!zone.zone.fluid().isEmpty()) {
+						CachedZoneShape.append(fluidZonesList, zone);
+					}
+				}
+			}
+
+			fluidZones = fluidZonesList.toArray(CachedZoneShape.EMPTY_ARRAY);
+		}
+
+		return fluidZones;
+	}
+
+	@Nullable
+	public FluidState getZoneFluidState(Vec3i pos) {
+		for (var c : getFluidZones()) {
+			if (c.instance.zone.shape().contains(pos)) {
+				return c.instance.zone.fluid();
+			}
+		}
+
+		return null;
+	}
+
+	public float getZoneFluidHeight(FlowingFluid fluid, Vec3i pos) {
+		var above = getZoneFluidState(pos.above());
+
+		if (above != null && fluid.isSame(above.getType())) {
+			return 1F;
+		}
+
+		return 0F;
 	}
 }

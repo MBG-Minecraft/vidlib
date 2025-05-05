@@ -10,7 +10,7 @@ import org.joml.Vector3f;
 public record TextureIconRenderer(TextureIcon icon) implements IconRenderer {
 	@Override
 	public void render3D(Minecraft mc, PoseStack ms, float delta, MultiBufferSource source, int light, int overlay) {
-		var buffer = source.getBuffer(VidLibRenderTypes.entityTextureCull(icon.texture(), icon.tint().alpha() < 255 || icon.translucent()));
+		var buffer = source.getBuffer(VidLibRenderTypes.Entity.textureCull(icon.texture(), icon.tint().alpha() < 255 || icon.translucent()));
 
 		int colR = icon.tint().red();
 		int colG = icon.tint().green();

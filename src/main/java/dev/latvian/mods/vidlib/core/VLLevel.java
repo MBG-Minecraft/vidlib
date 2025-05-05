@@ -28,6 +28,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FlowingFluid;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -246,5 +248,24 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 	@Nullable
 	default Entity getMainBoss() {
 		return null;
+	}
+
+	default FluidState vl$overrideFluidState(BlockPos pos) {
+		var zones = vl$getActiveZones();
+		var state = zones == null ? null : zones.getZoneFluidState(pos);
+		return state == null ? vl$level().getFluidState(pos) : state;
+	}
+
+	default float vl$overrideFluidHeight(FluidState state, BlockPos pos) {
+		if (state.getType() instanceof FlowingFluid flowing) {
+			var zones = vl$getActiveZones();
+			var height = zones == null ? 0F : zones.getZoneFluidHeight(flowing, pos);
+
+			if (height > 0F) {
+				return height;
+			}
+		}
+
+		return state.getHeight(vl$level(), pos);
 	}
 }

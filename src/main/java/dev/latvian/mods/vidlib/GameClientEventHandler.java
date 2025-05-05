@@ -162,8 +162,9 @@ public class GameClientEventHandler {
 
 			if (mc.player.getShowZones()) {
 				ZoneRenderer.renderAll(frame);
-			} else if (!session.filteredZones.getSolidZones().isEmpty()) {
+			} else {
 				ZoneRenderer.renderSolid(frame);
+				ZoneRenderer.renderFluid(frame);
 			}
 
 			if (mc.player.getShowAnchor()) {

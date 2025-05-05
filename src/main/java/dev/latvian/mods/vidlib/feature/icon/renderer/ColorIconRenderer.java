@@ -10,7 +10,7 @@ import org.joml.Vector3f;
 public record ColorIconRenderer(ColorIcon icon) implements IconRenderer {
 	@Override
 	public void render3D(Minecraft mc, PoseStack ms, float delta, MultiBufferSource source, int light, int overlay) {
-		var buffer = source.getBuffer(icon.color().alpha() < 255 ? VidLibRenderTypes.WHITE_TRANSLUCENT_ENTITY : VidLibRenderTypes.WHITE_ENTITY);
+		var buffer = source.getBuffer(icon.color().alpha() < 255 ? VidLibRenderTypes.Entity.WHITE_TRANSLUCENT : VidLibRenderTypes.Entity.WHITE);
 
 		int colR = icon.color().red();
 		int colG = icon.color().green();

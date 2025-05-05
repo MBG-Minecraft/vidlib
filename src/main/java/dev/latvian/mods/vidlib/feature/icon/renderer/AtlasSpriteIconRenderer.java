@@ -12,7 +12,7 @@ public record AtlasSpriteIconRenderer(AtlasSpriteIcon icon) implements IconRende
 	@Override
 	public void render3D(Minecraft mc, PoseStack ms, float delta, MultiBufferSource source, int light, int overlay) {
 		var texture = icon.atlas().orElse(TextureAtlas.LOCATION_BLOCKS);
-		var buffer = source.getBuffer(VidLibRenderTypes.entityTextureCull(texture, icon.tint().alpha() < 255 || icon.translucent()));
+		var buffer = source.getBuffer(VidLibRenderTypes.Entity.textureCull(texture, icon.tint().alpha() < 255 || icon.translucent()));
 
 		int colR = icon.tint().red();
 		int colG = icon.tint().green();

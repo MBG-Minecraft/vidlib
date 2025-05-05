@@ -48,7 +48,8 @@
 		"StyleMixin",
 		"UUIDUtilMixin",
 		"WaterFluidMixin",
-		"neo.EnumArgumentMixin"
+		"neo.EnumArgumentMixin",
+		"neo.IEntityExtensionMixin"
 	],
 	"client": [
 		"AbstractClientPlayerMixin",

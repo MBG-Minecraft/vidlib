@@ -14,6 +14,7 @@ import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -82,7 +83,7 @@ public interface ZoneShape {
 		return getBoundingBox().contains(pos);
 	}
 
-	default boolean contains(BlockPos pos) {
+	default boolean contains(Vec3i pos) {
 		return contains(Vec3.atCenterOf(pos));
 	}
 

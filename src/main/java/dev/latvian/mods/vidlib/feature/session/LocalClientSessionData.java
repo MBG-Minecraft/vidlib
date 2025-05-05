@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.session;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.shaders.FogShape;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.kmath.Range;
 import dev.latvian.mods.kmath.Vec2d;
@@ -29,10 +28,10 @@ import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.input.PlayerInputChanged;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToServer;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
-import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.npc.NPCParticleOptions;
 import dev.latvian.mods.vidlib.feature.npc.NPCRecording;
 import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
+import dev.latvian.mods.vidlib.feature.skybox.ClientFogOverride;
 import dev.latvian.mods.vidlib.feature.skybox.Skybox;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
@@ -171,20 +170,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		GameEventHandler.ambientLight = EntityOverride.AMBIENT_LIGHT.get(player, Range.FULL);
 
 		var f = EntityOverride.FOG.get(player);
-
-		if (f == null) {
-			MiscClientUtils.fogOverride = FogParameters.NO_FOG;
-		} else if (f.color().argb() == 0) {
-			if (f.shape() == 0) {
-				MiscClientUtils.fogOverride = FogParameters.NO_FOG;
-			} else {
-				MiscClientUtils.fogOverride = null;
-			}
-		} else {
-			var shape = f.shape() == 0 ? FogShape.SPHERE : FogShape.CYLINDER;
-			var c = f.color();
-			MiscClientUtils.fogOverride = new FogParameters(f.range().min(), f.range().max(), shape, c.redf(), c.greenf(), c.bluef(), c.alphaf());
-		}
+		ClientFogOverride.override = f == null ? FogParameters.NO_FOG : ClientFogOverride.convert(f);
 	}
 
 	@Override

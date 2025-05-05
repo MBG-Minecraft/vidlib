@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public record BlockPalette(BlockState state, ShortList positions) {
 	public static final Codec<BlockPalette> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		BlockState.CODEC.fieldOf("state").forGetter(BlockPalette::state),
+		VLCodecs.BLOCK_STATE.fieldOf("state").forGetter(BlockPalette::state),
 		VLCodecs.SHORT_LIST.fieldOf("positions").forGetter(BlockPalette::positions)
 	).apply(instance, BlockPalette::new));
 

@@ -3,6 +3,8 @@ package dev.latvian.mods.vidlib.feature.particle.physics;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
+import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
+import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import net.minecraft.core.BlockPos;
@@ -16,8 +18,9 @@ import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Set;
 
-public class PhysicsParticlesTool implements VidLibTool {
+public class PhysicsParticlesTool implements VidLibTool, PlayerActionHandler {
 	@AutoInit
 	public static void bootstrap() {
 		VidLibTool.register(new PhysicsParticlesTool());
@@ -58,13 +61,22 @@ public class PhysicsParticlesTool implements VidLibTool {
 	}
 
 	@Override
-	public boolean leftClick(Player player, ItemStack item) {
-		player.openItemGui(item, InteractionHand.MAIN_HAND);
-		return true;
+	public void debugText(Player player, ItemStack item, @Nullable HitResult hit, ScreenText screenText) {
+		PhysicsParticleManager.debugInfo(screenText.topLeft::add, screenText.topRight::add);
 	}
 
 	@Override
-	public void debugText(Player player, ItemStack item, @Nullable HitResult hit, ScreenText screenText) {
-		PhysicsParticleManager.debugInfo(screenText.topLeft::add, screenText.topRight::add);
+	public Set<PlayerActionType> getHandledPlayerActions() {
+		return PlayerActionType.SWAP_SET;
+	}
+
+	@Override
+	public boolean onClientPlayerAction(Player player, PlayerActionType action) {
+		if (action == PlayerActionType.SWAP) {
+			player.openItemGui(player.getMainHandItem(), InteractionHand.MAIN_HAND);
+			return true;
+		}
+
+		return false;
 	}
 }

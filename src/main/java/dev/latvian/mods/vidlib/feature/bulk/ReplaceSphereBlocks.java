@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
+import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
 import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
@@ -21,7 +22,7 @@ public record ReplaceSphereBlocks(BlockPos start, BlockPos end, Vec3 center, dou
 		BlockPos.CODEC.fieldOf("end").forGetter(ReplaceSphereBlocks::end),
 		Vec3.CODEC.fieldOf("center").forGetter(ReplaceSphereBlocks::center),
 		Codec.DOUBLE.fieldOf("radius").forGetter(ReplaceSphereBlocks::radius),
-		BlockState.CODEC.fieldOf("state").forGetter(ReplaceSphereBlocks::state)
+		VLCodecs.BLOCK_STATE.fieldOf("state").forGetter(ReplaceSphereBlocks::state)
 	).apply(instance, ReplaceSphereBlocks::new)), CompositeStreamCodec.of(
 		BlockPos.STREAM_CODEC, ReplaceSphereBlocks::start,
 		BlockPos.STREAM_CODEC, ReplaceSphereBlocks::end,

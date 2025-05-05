@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
+import dev.latvian.mods.vidlib.feature.skybox.ClientFogOverride;
 import net.minecraft.client.renderer.FogParameters;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -35,6 +35,6 @@ public class RenderSystemMixin {
 	 */
 	@Overwrite
 	public static FogParameters getShaderFog() {
-		return MiscClientUtils.fogOverride != null ? MiscClientUtils.fogOverride : shaderFog;
+		return ClientFogOverride.get(shaderFog);
 	}
 }

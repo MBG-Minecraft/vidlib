@@ -15,7 +15,7 @@ public class Skybox {
 
 	public SkyboxTexture loadTexture(Minecraft mc) {
 		if (skyboxTexture == null) {
-			var id = data.id().withPath(p -> "textures/generated/skybox/" + p + ".png");
+			var id = data.id().withPath(p -> "textures/vidlib/generated/skybox/" + p + ".png");
 
 			if (mc.getTextureManager().byPath.get(id) instanceof SkyboxTexture tex) {
 				skyboxTexture = tex;

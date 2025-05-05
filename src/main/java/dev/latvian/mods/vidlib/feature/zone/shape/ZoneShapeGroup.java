@@ -7,6 +7,7 @@ import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -88,7 +89,7 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box) implements Zo
 	}
 
 	@Override
-	public boolean contains(BlockPos pos) {
+	public boolean contains(Vec3i pos) {
 		for (var zone : zoneShapes) {
 			if (zone.contains(pos)) {
 				return true;
