@@ -156,6 +156,8 @@ public class PhysicsParticleManager {
 			for (var p : particles) {
 				p.render(matrix, frame, pass);
 			}
+
+			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 		}
 
 		renderType.clearRenderState();
