@@ -13,6 +13,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 @EventBusSubscriber(modid = VidLib.ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public interface VidLibRenderPipelines {
@@ -59,10 +60,11 @@ public interface VidLibRenderPipelines {
 		event.registerPipeline(PhysicsParticlesRenderTypes.CUTOUT_PIPELINE);
 		event.registerPipeline(PhysicsParticlesRenderTypes.TRANSLUCENT_PIPELINE);
 
-		TerrainRenderLayer.SOLID.setClientValues(RenderType.solid(), VidLibRenderTypes.Terrain.SOLID, VidLibRenderTypes.Terrain.SOLID_NO_CULL);
-		TerrainRenderLayer.CUTOUT_MIPPED.setClientValues(RenderType.cutoutMipped(), VidLibRenderTypes.Terrain.CUTOUT_MIPPED, VidLibRenderTypes.Terrain.CUTOUT_MIPPED_NO_CULL);
-		TerrainRenderLayer.CUTOUT.setClientValues(RenderType.cutout(), VidLibRenderTypes.Terrain.CUTOUT, VidLibRenderTypes.Terrain.CUTOUT_NO_CULL);
-		TerrainRenderLayer.TRANSLUCENT.setClientValues(RenderType.translucent(), VidLibRenderTypes.Terrain.TRANSLUCENT, VidLibRenderTypes.Terrain.TRANSLUCENT_NO_CULL);
-		TerrainRenderLayer.TRIPWIRE.setClientValues(RenderType.tripwire(), VidLibRenderTypes.Terrain.TRANSLUCENT, VidLibRenderTypes.Terrain.TRANSLUCENT_NO_CULL);
+		TerrainRenderLayer.SOLID.setClientValues(RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS, RenderType.solid(), VidLibRenderTypes.Terrain.SOLID, VidLibRenderTypes.Terrain.SOLID_NO_CULL);
+		TerrainRenderLayer.CUTOUT_MIPPED.setClientValues(RenderLevelStageEvent.Stage.AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS, RenderType.cutoutMipped(), VidLibRenderTypes.Terrain.CUTOUT_MIPPED, VidLibRenderTypes.Terrain.CUTOUT_MIPPED_NO_CULL);
+		TerrainRenderLayer.CUTOUT.setClientValues(RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS, RenderType.cutout(), VidLibRenderTypes.Terrain.CUTOUT, VidLibRenderTypes.Terrain.CUTOUT_NO_CULL);
+		TerrainRenderLayer.TRANSLUCENT.setClientValues(RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS, RenderType.translucent(), VidLibRenderTypes.Terrain.TRANSLUCENT, VidLibRenderTypes.Terrain.TRANSLUCENT_NO_CULL);
+		TerrainRenderLayer.TRIPWIRE.setClientValues(RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS, RenderType.tripwire(), VidLibRenderTypes.Terrain.TRANSLUCENT, VidLibRenderTypes.Terrain.TRANSLUCENT_NO_CULL);
+		TerrainRenderLayer.PARTICLE.setClientValues(RenderLevelStageEvent.Stage.AFTER_PARTICLES, RenderType.translucent(), VidLibRenderTypes.Terrain.TRANSLUCENT, VidLibRenderTypes.Terrain.TRANSLUCENT_NO_CULL);
 	}
 }

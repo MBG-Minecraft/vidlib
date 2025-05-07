@@ -16,6 +16,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.client.StaticBuffers;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
+import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.WithCache;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
@@ -38,6 +39,7 @@ import net.neoforged.neoforge.client.model.pipeline.TransformingVertexPipeline;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +60,7 @@ public class StructureRenderer implements WithCache {
 		private static final BuildingLayer[] EMPTY = new BuildingLayer[0];
 	}
 
-	private record CachedLayer(RenderType type, StaticBuffers buffer) {
+	private record CachedLayer(TerrainRenderLayer layer, RenderType type, StaticBuffers buffer) {
 		private static final CachedLayer[] EMPTY = new CachedLayer[0];
 	}
 
@@ -175,7 +177,7 @@ public class StructureRenderer implements WithCache {
 	public BlockPos origin;
 	public boolean inflate;
 
-	private CachedLayer[] layers = null;
+	private EnumMap<TerrainRenderLayer, CachedLayer> layers = null;
 	private boolean rendering = false;
 	private AABB renderBounds = AABB.INFINITE;
 
@@ -201,7 +203,7 @@ public class StructureRenderer implements WithCache {
 		}
 
 		if (layers == null) {
-			layers = CachedLayer.EMPTY;
+			layers = new EnumMap<>(TerrainRenderLayer.class);
 			renderBounds = AABB.INFINITE;
 			var structure = structureProvider.get();
 
@@ -313,7 +315,6 @@ public class StructureRenderer implements WithCache {
 
 	private void upload(BuildingLayer[] buildingLayerArray, long buildTime) {
 		long start = System.currentTimeMillis();
-		var list = new ArrayList<CachedLayer>(buildingLayerArray.length);
 
 		for (var layer : buildingLayerArray) {
 			try (var meshData = layer.bufferBuilder.build()) {
@@ -324,7 +325,8 @@ public class StructureRenderer implements WithCache {
 						}
 
 						var cachedBuffers = StaticBuffers.of(meshData, () -> "StructureRenderer");
-						list.add(new CachedLayer(layer.type, cachedBuffers));
+						var terrainLayer = TerrainRenderLayer.fromBlockRenderType(layer.type);
+						layers.put(terrainLayer, new CachedLayer(terrainLayer, layer.type, cachedBuffers));
 					}
 				}
 			}
@@ -332,7 +334,6 @@ public class StructureRenderer implements WithCache {
 			layer.memory.close();
 		}
 
-		layers = list.toArray(CachedLayer.EMPTY);
 		long time = System.currentTimeMillis() - start;
 
 		if (!FMLLoader.isProduction()) {
@@ -343,10 +344,14 @@ public class StructureRenderer implements WithCache {
 		renderingAll = null;
 	}
 
+	public AABB getRenderBounds() {
+		return renderBounds;
+	}
+
 	@Override
 	public void clearCache() {
 		if (layers != null) {
-			for (var layer : layers) {
+			for (var layer : layers.values()) {
 				MiscClientUtils.CLIENT_CLOSEABLE.add(layer.buffer);
 			}
 
@@ -355,43 +360,51 @@ public class StructureRenderer implements WithCache {
 	}
 
 	public void render(PoseStack ms) {
+		for (var renderLayerFilter : TerrainRenderLayer.ALL) {
+			render(ms, renderLayerFilter);
+		}
+	}
+
+	public void render(PoseStack ms, TerrainRenderLayer renderLayerFilter) {
 		if (layers == null) {
 			preRender();
 		}
 
-		if (layers == null || layers.length == 0) {
+		if (layers == null || layers.isEmpty()) {
+			return;
+		}
+
+		var layer = layers.get(renderLayerFilter);
+
+		if (layer == null) {
 			return;
 		}
 
 		var modelViewMatrix = RenderSystem.getModelViewStack();
 		modelViewMatrix.pushMatrix();
 		modelViewMatrix.mul(ms.last().pose());
+		layer.type.setupRenderState();
 
-		for (var layer : layers) {
-			layer.type.setupRenderState();
+		var renderTarget = layer.type.getRenderTarget();
 
-			var renderTarget = layer.type.getRenderTarget();
-
-			try (var renderPass = RenderSystem.getDevice()
-				.createCommandEncoder()
-				.createRenderPass(
-					renderTarget.getColorTexture(),
-					OptionalInt.empty(),
-					renderTarget.useDepth ? renderTarget.getDepthTexture() : null,
-					OptionalDouble.empty()
-				)
-			) {
-				renderPass.setPipeline(layer.type.getRenderPipeline());
-				renderPass.bindSampler("Sampler0", RenderSystem.getShaderTexture(0));
-				renderPass.bindSampler("Sampler2", RenderSystem.getShaderTexture(2));
-				layer.buffer.setIndexBuffer(renderPass, layer.type.getRenderPipeline());
-				renderPass.setVertexBuffer(0, layer.buffer.vertexBuffer());
-				renderPass.drawIndexed(0, layer.buffer.indexCount());
-			}
-
-			layer.type.clearRenderState();
+		try (var renderPass = RenderSystem.getDevice()
+			.createCommandEncoder()
+			.createRenderPass(
+				renderTarget.getColorTexture(),
+				OptionalInt.empty(),
+				renderTarget.useDepth ? renderTarget.getDepthTexture() : null,
+				OptionalDouble.empty()
+			)
+		) {
+			renderPass.setPipeline(layer.type.getRenderPipeline());
+			renderPass.bindSampler("Sampler0", RenderSystem.getShaderTexture(0));
+			renderPass.bindSampler("Sampler2", RenderSystem.getShaderTexture(2));
+			layer.buffer.setIndexBuffer(renderPass, layer.type.getRenderPipeline());
+			renderPass.setVertexBuffer(0, layer.buffer.vertexBuffer());
+			renderPass.drawIndexed(0, layer.buffer.indexCount());
 		}
 
+		layer.type.clearRenderState();
 		modelViewMatrix.popMatrix();
 	}
 }

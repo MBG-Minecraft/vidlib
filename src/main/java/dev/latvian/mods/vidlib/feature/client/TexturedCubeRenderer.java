@@ -2,19 +2,18 @@ package dev.latvian.mods.vidlib.feature.client;
 
 import dev.latvian.mods.kmath.Directions;
 import dev.latvian.mods.kmath.texture.LightUV;
-import dev.latvian.mods.vidlib.util.CachedCube;
 import dev.latvian.mods.vidlib.util.FaceTexture;
 import dev.latvian.mods.vidlib.util.FrameInfo;
 import dev.latvian.mods.vidlib.util.ResolvedCubeTextures;
-import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
+import dev.latvian.mods.vidlib.util.ResolvedTexturedCube;
 
-public class CubeTexturesRenderer {
-	public static void render(FrameInfo frame, LightUV light, CachedCube cube, TerrainRenderLayer renderLayerFilter) {
+public class TexturedCubeRenderer {
+	public static void render(FrameInfo frame, LightUV light, ResolvedTexturedCube cube) {
 		var b = cube.box();
-		render(frame, light, b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ, cube.textures(), renderLayerFilter);
+		render(frame, light, b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ, cube.textures());
 	}
 
-	public static void render(FrameInfo frame, LightUV light, double bminX, double bminY, double bminZ, double bmaxX, double bmaxY, double bmaxZ, ResolvedCubeTextures textures, TerrainRenderLayer renderLayerFilter) {
+	public static void render(FrameInfo frame, LightUV light, double bminX, double bminY, double bminZ, double bmaxX, double bmaxY, double bmaxZ, ResolvedCubeTextures textures) {
 		var ms = frame.poseStack();
 		var msp = ms.last();
 		var m = msp.pose();
@@ -34,7 +33,7 @@ public class CubeTexturesRenderer {
 		for (int direction = 0; direction < 6; direction++) {
 			var face = textures.faces().get(direction);
 
-			if (face == null || face == FaceTexture.EMPTY || face.layer() != renderLayerFilter) {
+			if (face == null || face == FaceTexture.EMPTY || !frame.is(face.layer())) {
 				continue;
 			}
 
@@ -43,13 +42,13 @@ public class CubeTexturesRenderer {
 			var colB = face.tint().bluef();
 			var colA = face.tint().alphaf();
 
-			var scale = face.scale();
-			float tw = scale <= 0F ? 1F : (maxX - minX) * scale;
-			float th = scale <= 0F ? 1F : (maxY - minY) * scale;
-			float td = scale <= 0F ? 1F : (maxZ - minZ) * scale;
+			var uvScale = face.uvScale();
+			float tw = uvScale <= 0F ? 1F : (maxX - minX) * uvScale;
+			float th = uvScale <= 0F ? 1F : (maxY - minY) * uvScale;
+			float td = uvScale <= 0F ? 1F : (maxZ - minZ) * uvScale;
 
 			var texture = DynamicSpriteTexture.get(frame.mc(), face.sprite());
-			var buffer = buffers.getBuffer(VidLibRenderTypes.Terrain.get(face.layer(), face.cull()).apply(texture.resourceId()));
+			var buffer = buffers.getBuffer(VidLibRenderTypes.Terrain.get(face.layer(), face.cull()).apply(texture));
 
 			msp.transformNormal(Directions.ALL[direction].getUnitVec3f(), n);
 

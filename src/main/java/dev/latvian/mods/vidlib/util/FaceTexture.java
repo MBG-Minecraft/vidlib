@@ -10,7 +10,7 @@ import net.minecraft.network.codec.StreamCodec;
 
 import java.util.Optional;
 
-public record FaceTexture(SpriteKey sprite, TerrainRenderLayer layer, boolean cull, Color tint, float scale) {
+public record FaceTexture(SpriteKey sprite, TerrainRenderLayer layer, boolean cull, Color tint, float uvScale) {
 	public static FaceTexture EMPTY = new FaceTexture(SpriteKey.EMPTY, TerrainRenderLayer.SOLID, true, Color.WHITE, 1F);
 
 	public static final Codec<FaceTexture> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -18,7 +18,7 @@ public record FaceTexture(SpriteKey sprite, TerrainRenderLayer layer, boolean cu
 		TerrainRenderLayer.CODEC.optionalFieldOf("layer", TerrainRenderLayer.SOLID).forGetter(FaceTexture::layer),
 		Codec.BOOL.optionalFieldOf("cull", true).forGetter(FaceTexture::cull),
 		Color.CODEC.optionalFieldOf("tint", Color.WHITE).forGetter(FaceTexture::tint),
-		Codec.FLOAT.optionalFieldOf("scale", 1F).forGetter(FaceTexture::scale)
+		Codec.FLOAT.optionalFieldOf("uv_scale", 1F).forGetter(FaceTexture::uvScale)
 	).apply(instance, FaceTexture::new));
 
 	public static final StreamCodec<ByteBuf, FaceTexture> STREAM_CODEC = CompositeStreamCodec.of(
@@ -26,7 +26,7 @@ public record FaceTexture(SpriteKey sprite, TerrainRenderLayer layer, boolean cu
 		TerrainRenderLayer.STREAM_CODEC, FaceTexture::layer,
 		ByteBufCodecs.BOOL, FaceTexture::cull,
 		Color.STREAM_CODEC, FaceTexture::tint,
-		ByteBufCodecs.FLOAT.optional(1F), FaceTexture::scale,
+		ByteBufCodecs.FLOAT.optional(1F), FaceTexture::uvScale,
 		FaceTexture::new
 	);
 

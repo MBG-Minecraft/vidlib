@@ -9,7 +9,7 @@ import dev.latvian.mods.kmath.texture.LightUV;
 import dev.latvian.mods.vidlib.core.VLBlockInWorld;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
-import dev.latvian.mods.vidlib.feature.client.CubeTexturesRenderer;
+import dev.latvian.mods.vidlib.feature.client.TexturedCubeRenderer;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
 import dev.latvian.mods.vidlib.feature.zone.shape.RotatedBoxZoneShape;
@@ -19,7 +19,6 @@ import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShapeGroup;
 import dev.latvian.mods.vidlib.util.Cast;
 import dev.latvian.mods.vidlib.util.FrameInfo;
-import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.util.Mth;
 
@@ -127,7 +126,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 		}
 	}
 
-	static void renderVisible(FrameInfo frame, TerrainRenderLayer renderLayerFilter) {
+	static void renderVisible(FrameInfo frame) {
 		for (var sz : frame.session().filteredZones.getVisible()) {
 			var zone = sz.instance().zone;
 			double dist = zone.shape().closestDistanceTo(frame.camera().getPosition());
@@ -136,23 +135,23 @@ public interface ZoneRenderer<T extends ZoneShape> {
 				continue;
 			}
 
-			for (var cube : sz.cachedCubes().getOrDefault(renderLayerFilter, List.of())) {
-				CubeTexturesRenderer.render(frame, LightUV.FULLBRIGHT, cube, renderLayerFilter);
+			for (var cube : sz.cachedCubes().getOrDefault(frame.layer(), List.of())) {
+				TexturedCubeRenderer.render(frame, LightUV.FULLBRIGHT, cube);
 			}
 		}
+	}
 
-		if (renderLayerFilter == TerrainRenderLayer.TRANSLUCENT) {
-			for (var sz : frame.session().filteredZones.getSolidZones()) {
-				var zone = sz.instance().zone;
-				double dist = zone.shape().closestDistanceTo(frame.camera().getPosition());
+	static void renderSolid(FrameInfo frame) {
+		for (var sz : frame.session().filteredZones.getSolidZones()) {
+			var zone = sz.instance().zone;
+			double dist = zone.shape().closestDistanceTo(frame.camera().getPosition());
 
-				if (dist <= 10D && zone.color().alpha() > 0 && frame.isVisible(zone.shape().getBoundingBox()) && zone.solid().test(frame.mc().player)) {
-					var renderer = ZoneRenderer.get(zone.shape().type());
+			if (dist <= 10D && zone.color().alpha() > 0 && frame.isVisible(zone.shape().getBoundingBox()) && zone.solid().test(frame.mc().player)) {
+				var renderer = ZoneRenderer.get(zone.shape().type());
 
-					if (renderer != null) {
-						var baseColor = zone.color().withAlpha(Mth.lerpInt((float) (dist / 10D), 100, 0));
-						renderer.render(Cast.to(zone.shape()), new ZoneRenderer.Context(frame, baseColor, Color.TRANSPARENT));
-					}
+				if (renderer != null) {
+					var baseColor = zone.color().withAlpha(Mth.lerpInt((float) (dist / 10D), 100, 0));
+					renderer.render(Cast.to(zone.shape()), new ZoneRenderer.Context(frame, baseColor, Color.TRANSPARENT));
 				}
 			}
 		}

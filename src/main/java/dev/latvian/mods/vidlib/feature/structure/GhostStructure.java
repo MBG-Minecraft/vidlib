@@ -10,6 +10,7 @@ import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.registry.RegistryRef;
 import dev.latvian.mods.vidlib.util.FrameInfo;
 import dev.latvian.mods.vidlib.util.JsonCodecReloadListener;
+import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 
@@ -58,40 +59,42 @@ public record GhostStructure(
 	}
 
 	public static void render(FrameInfo frame) {
-		if (!LIST.isEmpty()) {
-			var mc = frame.mc();
-			var ms = frame.poseStack();
+		if (LIST.isEmpty()) {
+			return;
+		}
 
-			for (var gs : LIST) {
-				for (var pos : gs.location.get().positions()) {
-					if (gs.slice.isPresent()) {
+		var mc = frame.mc();
+		var ms = frame.poseStack();
+
+		for (var gs : LIST) {
+			for (var pos : gs.location.get().positions()) {
+				if (gs.slice.isPresent()) {
+					var b = gs.slice.get();
+					double minX = pos.x + b.minX();
+					double minY = pos.y + b.minY();
+					double minZ = pos.z + b.minZ();
+					double maxX = pos.x + b.maxX() + 1D;
+					double maxY = pos.y + b.maxY() + 1D;
+					double maxZ = pos.z + b.maxZ() + 1D;
+
+					if (!frame.isVisible(minX, minY, minZ, maxX, maxY, maxZ)) {
+						continue;
+					}
+				}
+
+				if (gs.visibleTo().test(mc.player)) {
+					ms.pushPose();
+					frame.translate(pos);
+
+					if (gs.slice.isPresent() && frame.mc().getEntityRenderDispatcher().shouldRenderHitBoxes() && frame.layer() == TerrainRenderLayer.TRANSLUCENT) {
 						var b = gs.slice.get();
-						double minX = pos.x + b.minX();
-						double minY = pos.y + b.minY();
-						double minZ = pos.z + b.minZ();
-						double maxX = pos.x + b.maxX() + 1D;
-						double maxY = pos.y + b.maxY() + 1D;
-						double maxZ = pos.z + b.maxZ() + 1D;
-
-						if (!frame.isVisible(minX, minY, minZ, maxX, maxY, maxZ)) {
-							continue;
-						}
+						BoxRenderer.renderDebugLines(b.minX(), b.minY(), b.minZ(), b.maxX() + 1F, b.maxY() + 1F, b.maxZ() + 1F, ms, frame.buffers(), Color.RED);
 					}
 
-					if (gs.visibleTo().test(mc.player)) {
-						ms.pushPose();
-						frame.translate(pos);
-
-						if (gs.slice.isPresent() && frame.mc().getEntityRenderDispatcher().shouldRenderHitBoxes()) {
-							var b = gs.slice.get();
-							BoxRenderer.renderDebugLines(b.minX(), b.minY(), b.minZ(), b.maxX() + 1F, b.maxY() + 1F, b.maxZ() + 1F, ms, frame.buffers(), Color.RED);
-						}
-
-						gs.structure().origin = BlockPos.containing(pos);
-						gs.structure().inflate = gs.inflate();
-						gs.structure().render(ms);
-						ms.popPose();
-					}
+					gs.structure().origin = BlockPos.containing(pos);
+					gs.structure().inflate = gs.inflate();
+					gs.structure().render(ms, frame.layer());
+					ms.popPose();
 				}
 			}
 		}

@@ -11,14 +11,15 @@ public enum TerrainRenderLayer implements StringRepresentable {
 	CUTOUT_MIPPED("cutout_mipped"),
 	CUTOUT("cutout"),
 	TRANSLUCENT("translucent"),
-	TRIPWIRE("tripwire");
+	TRIPWIRE("tripwire"),
+	PARTICLE("particle");
 
-	public static final TerrainRenderLayer[] VALUES = values();
-	public static final Codec<TerrainRenderLayer> CODEC = StringRepresentable.fromEnum(() -> VALUES);
-	public static final StreamCodec<ByteBuf, TerrainRenderLayer> STREAM_CODEC = VLStreamCodecs.enumValue(VALUES);
+	public static final TerrainRenderLayer[] ALL = values();
+	public static final Codec<TerrainRenderLayer> CODEC = StringRepresentable.fromEnum(() -> ALL);
+	public static final StreamCodec<ByteBuf, TerrainRenderLayer> STREAM_CODEC = VLStreamCodecs.enumValue(ALL);
 
 	public static TerrainRenderLayer fromBlockRenderType(Object blockRenderType) {
-		for (TerrainRenderLayer type : VALUES) {
+		for (TerrainRenderLayer type : ALL) {
 			if (type.blockRenderType == blockRenderType) {
 				return type;
 			}
@@ -28,6 +29,7 @@ public enum TerrainRenderLayer implements StringRepresentable {
 	}
 
 	private final String name;
+	public Object neoForgeStage;
 	public Object blockRenderType;
 	public Object renderTypeFunction;
 	public Object noCullRenderTypeFunction;
@@ -41,7 +43,8 @@ public enum TerrainRenderLayer implements StringRepresentable {
 		return name;
 	}
 
-	public void setClientValues(Object blockRenderType, Object renderTypeFunction, Object noCullRenderTypeFunction) {
+	public void setClientValues(Object neoForgeStage, Object blockRenderType, Object renderTypeFunction, Object noCullRenderTypeFunction) {
+		this.neoForgeStage = neoForgeStage;
 		this.blockRenderType = blockRenderType;
 		this.renderTypeFunction = renderTypeFunction;
 		this.noCullRenderTypeFunction = noCullRenderTypeFunction;

@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
 import dev.latvian.mods.kmath.VoxelShapeBox;
-import dev.latvian.mods.vidlib.util.CachedCube;
 import dev.latvian.mods.vidlib.util.ResolvedCubeTextures;
+import dev.latvian.mods.vidlib.util.ResolvedTexturedCube;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.world.phys.AABB;
@@ -19,7 +19,7 @@ public class CachedZoneShape {
 	private final ZoneInstance instance;
 	private final VoxelShape shape;
 	private VoxelShapeBox shapeBox;
-	private Map<TerrainRenderLayer, List<CachedCube>> cachedCubes;
+	private Map<TerrainRenderLayer, List<ResolvedTexturedCube>> cachedCubes;
 
 	public CachedZoneShape(ZoneInstance instance, VoxelShape shape) {
 		this.instance = instance;
@@ -58,7 +58,7 @@ public class CachedZoneShape {
 			"shapeBox=" + shapeBox + ']';
 	}
 
-	public Map<TerrainRenderLayer, List<CachedCube>> cachedCubes() {
+	public Map<TerrainRenderLayer, List<ResolvedTexturedCube>> cachedCubes() {
 		if (cachedCubes == null) {
 			cachedCubes = new Reference2ObjectOpenHashMap<>();
 
@@ -88,11 +88,11 @@ public class CachedZoneShape {
 				}
 
 				if (textures != ResolvedCubeTextures.EMPTY) {
-					for (var renderLayerFilter : TerrainRenderLayer.VALUES) {
+					for (var renderLayerFilter : TerrainRenderLayer.ALL) {
 						var tex = textures.filter(renderLayerFilter);
 
 						if (tex != ResolvedCubeTextures.EMPTY) {
-							cachedCubes.computeIfAbsent(renderLayerFilter, k -> new ArrayList<>(1)).add(new CachedCube(new AABB(bminX, bminY, bminZ, bmaxX, bmaxY, bmaxZ), tex));
+							cachedCubes.computeIfAbsent(renderLayerFilter, k -> new ArrayList<>(1)).add(new ResolvedTexturedCube(new AABB(bminX, bminY, bminZ, bmaxX, bmaxY, bmaxZ), tex));
 						}
 					}
 				}

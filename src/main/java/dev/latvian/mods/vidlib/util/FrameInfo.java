@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import org.jetbrains.annotations.Nullable;
 import org.joml.FrustumIntersection;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -17,6 +18,7 @@ import org.joml.Vector3f;
 public record FrameInfo(
 	Minecraft mc,
 	LocalClientSessionData session,
+	@Nullable TerrainRenderLayer layer,
 	PoseStack poseStack,
 	Matrix4f projectionMatrix,
 	Matrix4f modelViewMatrix,
@@ -32,10 +34,22 @@ public record FrameInfo(
 	boolean replay,
 	Vector3f normal
 ) {
+	@Nullable
+	private static TerrainRenderLayer renderLayer(RenderLevelStageEvent.Stage stage) {
+		for (var layer : TerrainRenderLayer.ALL) {
+			if (layer.neoForgeStage == stage) {
+				return layer;
+			}
+		}
+
+		return null;
+	}
+
 	public FrameInfo(Minecraft mc, LocalClientSessionData session, RenderLevelStageEvent event) {
 		this(
 			mc,
 			session,
+			renderLayer(event.getStage()),
 			event.getPoseStack(),
 			event.getProjectionMatrix(),
 			event.getModelViewMatrix(),
@@ -88,5 +102,9 @@ public record FrameInfo(
 
 	public boolean isVisible(AABB aabb) {
 		return aabb.isInfinite() || isVisible(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ);
+	}
+
+	public boolean is(TerrainRenderLayer layer) {
+		return this.layer == null || this.layer == layer;
 	}
 }

@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.core.VLBlockState;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.client.IndexBuffer;
 import dev.latvian.mods.vidlib.util.FrameInfo;
+import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -17,6 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Matrix4fStack;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -24,15 +26,19 @@ import java.util.function.Consumer;
 
 @AutoInit(AutoInit.Type.CLIENT_LOADED)
 public class PhysicsParticleManager {
-	public static final PhysicsParticleManager SOLID = new PhysicsParticleManager("Solid", PhysicsParticlesRenderTypes.PHYSICS_SOLID, true);
-	public static final PhysicsParticleManager CUTOUT = new PhysicsParticleManager("Cutout", PhysicsParticlesRenderTypes.PHYSICS_CUTOUT, false);
-	public static final PhysicsParticleManager TRANSLUCENT = new PhysicsParticleManager("Translucent", PhysicsParticlesRenderTypes.PHYSICS_TRANSLUCENT, false);
-	public static final List<PhysicsParticleManager> ALL = new ArrayList<>(4);
+	public static final PhysicsParticleManager SOLID = new PhysicsParticleManager("Solid", TerrainRenderLayer.SOLID, PhysicsParticlesRenderTypes.PHYSICS_SOLID, true);
+	public static final PhysicsParticleManager CUTOUT = new PhysicsParticleManager("Cutout", TerrainRenderLayer.CUTOUT, PhysicsParticlesRenderTypes.PHYSICS_CUTOUT, false);
+	public static final PhysicsParticleManager TRANSLUCENT = new PhysicsParticleManager("Translucent", TerrainRenderLayer.TRANSLUCENT, PhysicsParticlesRenderTypes.PHYSICS_TRANSLUCENT, true);
+	private static final EnumMap<TerrainRenderLayer, PhysicsParticleManager> ALL = new EnumMap<>(TerrainRenderLayer.class);
+
+	public static void register(PhysicsParticleManager manager) {
+		ALL.put(manager.terrainLayer, manager);
+	}
 
 	static {
-		ALL.add(SOLID);
-		ALL.add(CUTOUT);
-		ALL.add(TRANSLUCENT);
+		register(SOLID);
+		register(CUTOUT);
+		register(TRANSLUCENT);
 	}
 
 	public static void debugInfo(Consumer<String> left, Consumer<String> right) {
@@ -40,7 +46,7 @@ public class PhysicsParticleManager {
 		int totalRendered = 0;
 		int totalBuffersSwitched = 0;
 
-		for (var manager : PhysicsParticleManager.ALL) {
+		for (var manager : ALL.values()) {
 			total += manager.particles.size();
 			totalRendered += manager.rendered;
 			totalBuffersSwitched += manager.buffersSwitched;
@@ -51,23 +57,25 @@ public class PhysicsParticleManager {
 		right.accept("%,d/%,d [%dx] Total".formatted(totalRendered, total, totalBuffersSwitched));
 	}
 
-	public static void renderAll(FrameInfo frame) {
+	public static void render(FrameInfo frame) {
+		var manager = ALL.get(frame.layer());
+
+		if (manager == null) {
+			return;
+		}
+
 		var lightmapTextureManager = frame.mc().gameRenderer.lightTexture();
 		lightmapTextureManager.turnOnLightLayer();
 		var matrix = RenderSystem.getModelViewStack();
 		matrix.pushMatrix();
 		// matrix.mul(frame.poseStack().last().pose());
-
-		for (var manager : ALL) {
-			manager.render(matrix, frame);
-		}
-
+		manager.render(matrix, frame);
 		matrix.popMatrix();
 		lightmapTextureManager.turnOffLightLayer();
 	}
 
 	public static void tickAll(Level level, long gameTime) {
-		for (var manager : ALL) {
+		for (var manager : ALL.values()) {
 			manager.tick(level, gameTime);
 		}
 	}
@@ -75,8 +83,11 @@ public class PhysicsParticleManager {
 	@AutoInit(AutoInit.Type.ASSETS_RELOADED)
 	public static void clearAll() {
 		VLBlockState.vl$clearAllCache();
+		clearAllParticles();
+	}
 
-		for (var manager : ALL) {
+	public static void clearAllParticles() {
+		for (var manager : ALL.values()) {
 			manager.clear();
 		}
 	}
@@ -100,6 +111,7 @@ public class PhysicsParticleManager {
 	}
 
 	public final String displayName;
+	public final TerrainRenderLayer terrainLayer;
 	public final RenderType renderType;
 	public final boolean mipmaps;
 	public final List<PhysicsParticle> particles;
@@ -108,8 +120,9 @@ public class PhysicsParticleManager {
 	public int buffersSwitched;
 	public IndexBuffer indexBuffer;
 
-	public PhysicsParticleManager(String displayName, RenderType renderType, boolean mipmaps) {
+	public PhysicsParticleManager(String displayName, TerrainRenderLayer terrainLayer, RenderType renderType, boolean mipmaps) {
 		this.displayName = displayName;
+		this.terrainLayer = terrainLayer;
 		this.renderType = renderType;
 		this.mipmaps = mipmaps;
 		this.particles = new ArrayList<>();

@@ -5,9 +5,11 @@ import dev.latvian.mods.kmath.KMath;
 import dev.latvian.mods.kmath.color.Color;
 import dev.latvian.mods.kmath.render.BoxRenderer;
 import dev.latvian.mods.kmath.render.DebugRenderTypes;
+import dev.latvian.mods.kmath.texture.LightUV;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
+import dev.latvian.mods.vidlib.feature.client.TexturedCubeRenderer;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
@@ -161,19 +163,39 @@ public class GameClientEventHandler {
 		var frame = new FrameInfo(mc, session, event);
 		session.currentFrameInfo = frame;
 		session.worldMouse = null;
-		float delta = frame.worldDelta();
 
 		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SKY) {
 			mc.vl$renderSetup(frame);
-		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
-			var ms = frame.poseStack();
 
+			if (session.npcRecording != null) {
+				session.npcRecording.record(System.currentTimeMillis(), frame.screenDelta(), mc.player);
+			}
+
+			return;
+		}
+
+		var ms = frame.poseStack();
+		float delta = frame.worldDelta();
+
+		if (frame.layer() == TerrainRenderLayer.CUTOUT) {
+			for (var clock : Clock.REGISTRY) {
+				if (!clock.locations().isEmpty()) {
+					var value = session.clocks.get(clock.id());
+
+					if (value != null) {
+						for (var location : clock.locations()) {
+							if (location.dimension() == mc.level.dimension() && location.visible().test(mc.player)) {
+								ClockRenderer.render(frame, value, location);
+							}
+						}
+					}
+				}
+			}
+		} else if (frame.layer() == TerrainRenderLayer.PARTICLE) {
 			if (mc.player.getShowZones()) {
 				ZoneRenderer.renderAll(frame);
 			} else {
-				for (var renderLayerFilter : TerrainRenderLayer.VALUES) {
-					ZoneRenderer.renderVisible(frame, renderLayerFilter);
-				}
+				ZoneRenderer.renderSolid(frame);
 			}
 
 			if (mc.player.getShowAnchor()) {
@@ -196,22 +218,6 @@ public class GameClientEventHandler {
 					}
 				}
 			}
-
-			for (var clock : Clock.REGISTRY) {
-				if (!clock.locations().isEmpty()) {
-					var value = session.clocks.get(clock.id());
-
-					if (value != null) {
-						for (var location : clock.locations()) {
-							if (location.dimension() == mc.level.dimension() && location.visible().test(mc.player)) {
-								ClockRenderer.render(frame, value, location);
-							}
-						}
-					}
-				}
-			}
-
-			GhostStructure.render(frame);
 
 			if (session.cameraOverride instanceof ClientCutscene cc) {
 				for (var task : cc.steps) {
@@ -257,12 +263,26 @@ public class GameClientEventHandler {
 					buffer.addVertex(m, rx + (float) line.line().dx(), ry + (float) line.line().dy(), rz + (float) line.line().dz()).setColor(line.endColor().argb());
 				}
 			}
-		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
-			PhysicsParticleManager.renderAll(frame);
+		}
 
-			if (session.npcRecording != null) {
-				session.npcRecording.record(System.currentTimeMillis(), frame.screenDelta(), mc.player);
+		if (frame.layer() != null) {
+			GhostStructure.render(frame);
+
+			var tool = VidLibTool.of(mc.player);
+
+			if (tool != null) {
+				var visuals = tool.getSecond().visuals(mc.player, tool.getFirst(), frame.screenDelta());
+
+				for (var cube : visuals.texturedCubes()) {
+					TexturedCubeRenderer.render(frame, LightUV.FULLBRIGHT, cube);
+				}
 			}
+
+			if (!mc.player.getShowZones()) {
+				ZoneRenderer.renderVisible(frame);
+			}
+
+			PhysicsParticleManager.render(frame);
 		}
 	}
 

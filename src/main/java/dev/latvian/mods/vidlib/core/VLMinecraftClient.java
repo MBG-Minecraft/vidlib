@@ -320,10 +320,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	@Override
 	default void removeAllParticles() {
 		vl$self().particleEngine.setLevel(vl$self().level);
-
-		for (var manager : PhysicsParticleManager.ALL) {
-			manager.clear();
-		}
+		PhysicsParticleManager.clearAllParticles();
 	}
 
 	@Override

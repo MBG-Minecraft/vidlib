@@ -49,7 +49,11 @@ public class DynamicSpriteTexture extends ReloadableTexture implements Dumpable,
 
 	private static final Map<SpriteKey, DynamicSpriteTexture> ALL = new HashMap<>();
 
-	public static DynamicSpriteTexture get(Minecraft mc, SpriteKey key) {
+	public static ResourceLocation get(Minecraft mc, SpriteKey key) {
+		if (key.atlas() == SpriteKey.SPECIAL) {
+			return key.sprite();
+		}
+
 		var def = ALL.computeIfAbsent(key, DynamicSpriteTexture::new);
 
 		if (def.contents == null) {
@@ -73,17 +77,17 @@ public class DynamicSpriteTexture extends ReloadableTexture implements Dumpable,
 			}
 		}
 
-		return def;
+		return def.resourceId();
 	}
 
 	@Nullable
-	public static DynamicSpriteTexture getStillFluid(Minecraft mc, FluidType fluidType) {
+	public static ResourceLocation getStillFluid(Minecraft mc, FluidType fluidType) {
 		var key = STILL_FLUIDS.get().get(fluidType);
 		return key == null ? null : get(mc, key);
 	}
 
 	@Nullable
-	public static DynamicSpriteTexture getFlowingFluid(Minecraft mc, FluidType fluidType) {
+	public static ResourceLocation getFlowingFluid(Minecraft mc, FluidType fluidType) {
 		var key = FLOWING_FLUIDS.get().get(fluidType);
 		return key == null ? null : get(mc, key);
 	}
