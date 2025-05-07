@@ -4,14 +4,13 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.kmath.color.Color;
 import dev.latvian.mods.kmath.texture.UV;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceLocation;
 
 public record TextureIcon(ResourceLocation texture, UV uv, boolean translucent, Color tint) implements Icon {
-	public static final SimpleRegistryType<TextureIcon> TYPE = SimpleRegistryType.dynamic(VidLib.id("texture"), RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final SimpleRegistryType<TextureIcon> TYPE = SimpleRegistryType.dynamic("texture", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		ResourceLocation.CODEC.fieldOf("texture").forGetter(TextureIcon::texture),
 		UV.CODEC.optionalFieldOf("uv", UV.FULL).forGetter(TextureIcon::uv),
 		Codec.BOOL.optionalFieldOf("translucent", false).forGetter(TextureIcon::translucent),

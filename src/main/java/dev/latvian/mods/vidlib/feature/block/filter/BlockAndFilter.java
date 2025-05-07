@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.block.filter;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -12,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record BlockAndFilter(List<BlockFilter> filters) implements BlockFilter {
-	public static SimpleRegistryType<BlockAndFilter> TYPE = SimpleRegistryType.dynamic(VidLib.id("and"), RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static SimpleRegistryType<BlockAndFilter> TYPE = SimpleRegistryType.dynamic("and", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		BlockFilter.CODEC.listOf().fieldOf("filters").forGetter(BlockAndFilter::filters)
 	).apply(instance, BlockAndFilter::new)), BlockFilter.STREAM_CODEC.list().map(BlockAndFilter::new, BlockAndFilter::filters));
 
@@ -45,6 +44,10 @@ public record BlockAndFilter(List<BlockFilter> filters) implements BlockFilter {
 
 	@Override
 	public BlockFilter and(BlockFilter filter) {
+		if (filter == ANY.instance()) {
+			return this;
+		}
+
 		var list = new ArrayList<>(filters);
 		list.add(filter);
 		return new BlockAndFilter(List.copyOf(list));

@@ -174,7 +174,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 
 	default void teleport(Location location) {
 		var entity = vl$self();
-		teleport(entity.getServer().getLevel(location.dimension()), location.random(entity.getRandom(), new Vec3(0.5D, 0.1D, 0.5D)));
+		teleport(entity.getServer().getLevel(location.dimension()), location.random(entity.getRandom()));
 	}
 
 	default void forceSetVelocity(Vec3 velocity) {

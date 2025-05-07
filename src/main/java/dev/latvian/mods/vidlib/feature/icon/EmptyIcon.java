@@ -1,12 +1,11 @@
 package dev.latvian.mods.vidlib.feature.icon;
 
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 
 public enum EmptyIcon implements Icon {
 	INSTANCE;
 
-	public static final SimpleRegistryType.Unit<EmptyIcon> TYPE = SimpleRegistryType.unit(VidLib.id("empty"), INSTANCE);
+	public static final SimpleRegistryType.Unit<EmptyIcon> TYPE = SimpleRegistryType.unit("empty", INSTANCE);
 
 	@Override
 	public SimpleRegistryType<?> type() {

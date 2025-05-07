@@ -19,6 +19,11 @@ import java.util.List;
 import java.util.Set;
 
 public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
+	@Override
+	default Player vl$self() {
+		return (Player) this;
+	}
+
 	default SessionData vl$sessionData() {
 		throw new NoMixinException(this);
 	}
@@ -29,7 +34,7 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
 
 	@Override
 	default boolean vl$isCreative() {
-		return ((Player) this).isCreative();
+		return vl$self().isCreative();
 	}
 
 	default <T> T get(DataType<T> type) {
@@ -148,7 +153,7 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
 
 	@Override
 	default Line ray(float delta) {
-		return ray(((Player) this).blockInteractionRange(), delta);
+		return ray(vl$self().blockInteractionRange(), delta);
 	}
 
 	@Override

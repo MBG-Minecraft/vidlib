@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.zone.shape;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.kmath.Line;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
@@ -20,7 +19,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box) implements ZoneShape {
-	public static final SimpleRegistryType<ZoneShapeGroup> TYPE = SimpleRegistryType.dynamic(VidLib.id("group"), RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final SimpleRegistryType<ZoneShapeGroup> TYPE = SimpleRegistryType.dynamic("group", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		ZoneShape.CODEC.listOf().fieldOf("zones").forGetter(ZoneShapeGroup::zoneShapes)
 	).apply(instance, ZoneShapeGroup::create)), ZoneShape.STREAM_CODEC.list().map(ZoneShapeGroup::create, ZoneShapeGroup::zoneShapes));
 
@@ -172,7 +171,7 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box) implements Zo
 
 	@Override
 	public void writeUUID(FriendlyByteBuf buf) {
-		buf.writeUtf(type().id().toString());
+		buf.writeUtf(type().id());
 		buf.writeVarInt(zoneShapes.size());
 
 		for (var zone : zoneShapes) {

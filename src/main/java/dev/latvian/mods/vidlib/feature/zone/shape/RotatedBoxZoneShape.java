@@ -5,7 +5,6 @@ import dev.latvian.mods.kmath.KMath;
 import dev.latvian.mods.kmath.Line;
 import dev.latvian.mods.kmath.Rotation;
 import dev.latvian.mods.kmath.Size3f;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
 import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
@@ -56,7 +55,7 @@ public record RotatedBoxZoneShape(Vec3 pos, Size3f size, Rotation rotation, Matr
 		return new RotatedBoxZoneShape(pos, size, rotation, matrix, imatrix, box, List.of(new AABB(-hsx, -hsy, -hsz, hsx, hsy, hsz)));
 	}
 
-	public static final SimpleRegistryType<RotatedBoxZoneShape> TYPE = SimpleRegistryType.dynamic(VidLib.id("rotated_box"), RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final SimpleRegistryType<RotatedBoxZoneShape> TYPE = SimpleRegistryType.dynamic("rotated_box", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		VLCodecs.VEC_3.fieldOf("pos").forGetter(RotatedBoxZoneShape::pos),
 		Size3f.CODEC.fieldOf("size").forGetter(RotatedBoxZoneShape::size),
 		Rotation.CODEC.fieldOf("rotation").forGetter(RotatedBoxZoneShape::rotation)
@@ -129,7 +128,7 @@ public record RotatedBoxZoneShape(Vec3 pos, Size3f size, Rotation rotation, Matr
 
 	@Override
 	public void writeUUID(FriendlyByteBuf buf) {
-		buf.writeUtf(type().id().toString());
+		buf.writeUtf(type().id());
 		buf.writeDouble(pos.x());
 		buf.writeDouble(pos.y());
 		buf.writeDouble(pos.z());

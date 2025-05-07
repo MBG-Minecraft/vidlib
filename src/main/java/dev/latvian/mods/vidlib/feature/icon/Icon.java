@@ -17,8 +17,8 @@ public interface Icon {
 	StreamCodec<RegistryFriendlyByteBuf, Icon> STREAM_CODEC = REGISTRY.valueStreamCodec();
 	KnownCodec<Icon> KNOWN_CODEC = KnownCodec.register(VidLib.id("icon"), CODEC, STREAM_CODEC, Icon.class);
 
-	SimpleRegistryType.Unit<Icon> YES = SimpleRegistryType.unit(VidLib.id("yes"), new TextureIcon(VidLib.id("textures/misc/yes.png"), UV.FULL, true, Color.WHITE));
-	SimpleRegistryType.Unit<Icon> NO = SimpleRegistryType.unit(VidLib.id("no"), new TextureIcon(VidLib.id("textures/misc/no.png"), UV.FULL, true, Color.WHITE));
+	SimpleRegistryType.Unit<Icon> YES = SimpleRegistryType.unit("yes", new TextureIcon(VidLib.id("textures/misc/yes.png"), UV.FULL, true, Color.WHITE));
+	SimpleRegistryType.Unit<Icon> NO = SimpleRegistryType.unit("no", new TextureIcon(VidLib.id("textures/misc/no.png"), UV.FULL, true, Color.WHITE));
 
 	@AutoInit
 	static void bootstrap() {

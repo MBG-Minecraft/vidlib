@@ -8,6 +8,11 @@ import org.lwjgl.glfw.GLFW;
 
 public interface VLLocalPlayer extends VLClientPlayer {
 	@Override
+	default LocalPlayer vl$self() {
+		return (LocalPlayer) this;
+	}
+
+	@Override
 	default LocalClientSessionData vl$sessionData() {
 		throw new NoMixinException(this);
 	}

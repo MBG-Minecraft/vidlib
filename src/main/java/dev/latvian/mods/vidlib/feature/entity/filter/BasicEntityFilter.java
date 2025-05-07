@@ -12,6 +12,6 @@ public record BasicEntityFilter(Predicate<Entity> predicate) implements EntityFi
 
 	@Override
 	public String toString() {
-		return type().id().toString();
+		return type().id();
 	}
 }

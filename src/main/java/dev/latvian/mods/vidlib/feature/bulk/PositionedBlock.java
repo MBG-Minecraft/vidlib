@@ -35,7 +35,7 @@ public record PositionedBlock(BlockPos pos, BlockState state) implements BulkLev
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, List<PositionedBlock>> LIST_STREAM_CODEC = STREAM_CODEC.list();
 
-	public static final SimpleRegistryType<PositionedBlock> TYPE = SimpleRegistryType.dynamic(VidLib.id("block"), MAP_CODEC, STREAM_CODEC);
+	public static final SimpleRegistryType<PositionedBlock> TYPE = SimpleRegistryType.dynamic("block", MAP_CODEC, STREAM_CODEC);
 
 	public static final KnownCodec<PositionedBlock> KNOWN_CODEC = KnownCodec.register(VidLib.id("positioned_block"), CODEC, STREAM_CODEC, PositionedBlock.class);
 	public static final KnownCodec<List<PositionedBlock>> LIST_KNOWN_CODEC = KNOWN_CODEC.listOf();

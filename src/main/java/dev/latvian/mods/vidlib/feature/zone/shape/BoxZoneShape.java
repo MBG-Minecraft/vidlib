@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.zone.shape;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
 import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
@@ -13,7 +12,7 @@ import net.minecraft.world.phys.AABB;
 import java.util.stream.Stream;
 
 public record BoxZoneShape(AABB box) implements ZoneShape {
-	public static final SimpleRegistryType<BoxZoneShape> TYPE = SimpleRegistryType.dynamic(VidLib.id("box"), RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final SimpleRegistryType<BoxZoneShape> TYPE = SimpleRegistryType.dynamic("box", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		VLCodecs.VEC_3.fieldOf("start").forGetter(z -> z.box.getMinPosition()),
 		VLCodecs.VEC_3.fieldOf("end").forGetter(z -> z.box.getMaxPosition())
 	).apply(instance, (start, end) -> new BoxZoneShape(new AABB(start, end)))), CompositeStreamCodec.of(
@@ -39,7 +38,7 @@ public record BoxZoneShape(AABB box) implements ZoneShape {
 
 	@Override
 	public void writeUUID(FriendlyByteBuf buf) {
-		buf.writeUtf(type().id().toString());
+		buf.writeUtf(type().id());
 		buf.writeDouble(box.minX);
 		buf.writeDouble(box.minY);
 		buf.writeDouble(box.minZ);

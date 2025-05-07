@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.client;
 
 import dev.latvian.mods.vidlib.util.Empty;
+import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderStateShard;
@@ -99,9 +100,9 @@ public interface VidLibRenderTypes {
 	interface Terrain {
 		TexturedRenderType SOLID = TexturedRenderType.internal(
 			"terrain/solid",
-			1536,
+			4194304,
 			true,
-			true,
+			false,
 			RenderPipelines.SOLID,
 			texture -> RenderType.CompositeState.builder()
 				.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, true))
@@ -111,13 +112,61 @@ public interface VidLibRenderTypes {
 
 		TexturedRenderType SOLID_NO_CULL = TexturedRenderType.internal(
 			"terrain/solid_no_cull",
-			1536,
+			4194304,
 			true,
-			true,
-			RenderPipelines.SOLID,
+			false,
+			VidLibRenderPipelines.SOLID_TERRAIN_NO_CULL,
 			texture -> RenderType.CompositeState.builder()
 				.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, true))
 				.setLightmapState(RenderStateShard.LIGHTMAP)
+				.createCompositeState(true)
+		);
+
+		TexturedRenderType CUTOUT_MIPPED = TexturedRenderType.internal(
+			"terrain/cutout_mipped",
+			4194304,
+			true,
+			false,
+			RenderPipelines.CUTOUT_MIPPED,
+			texture -> RenderType.CompositeState.builder()
+				.setLightmapState(RenderStateShard.LIGHTMAP)
+				.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, true))
+				.createCompositeState(true)
+		);
+
+		TexturedRenderType CUTOUT_MIPPED_NO_CULL = TexturedRenderType.internal(
+			"terrain/cutout_mipped_no_cull",
+			4194304,
+			true,
+			false,
+			VidLibRenderPipelines.CUTOUT_MIPPED_TERRAIN_NO_CULL,
+			texture -> RenderType.CompositeState.builder()
+				.setLightmapState(RenderStateShard.LIGHTMAP)
+				.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, true))
+				.createCompositeState(true)
+		);
+
+		TexturedRenderType CUTOUT = TexturedRenderType.internal(
+			"terrain/cutout",
+			786432,
+			true,
+			false,
+			RenderPipelines.CUTOUT,
+			texture -> RenderType.CompositeState.builder()
+				.setLightmapState(RenderStateShard.LIGHTMAP)
+				.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
+				.createCompositeState(true)
+		);
+
+		TexturedRenderType CUTOUT_NO_CULL = TexturedRenderType.internal(
+			"terrain/cutout_no_cull",
+			786432,
+			true,
+			false,
+			VidLibRenderPipelines.CUTOUT_TERRAIN_NO_CULL,
+			texture -> RenderType.CompositeState.builder()
+				.setLightmapState(RenderStateShard.LIGHTMAP)
+				.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
 				.createCompositeState(true)
 		);
 
@@ -139,7 +188,7 @@ public interface VidLibRenderTypes {
 			1536,
 			true,
 			true,
-			RenderPipelines.TRANSLUCENT,
+			VidLibRenderPipelines.TRANSLUCENT_TERRAIN_NO_CULL,
 			texture -> RenderType.CompositeState.builder()
 				.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, true))
 				.setLightmapState(RenderStateShard.LIGHTMAP)
@@ -147,17 +196,13 @@ public interface VidLibRenderTypes {
 				.createCompositeState(true)
 		);
 
-		static TexturedRenderType get(boolean cull, int type) {
-			return switch (type) {
-				case 1 -> cull ? SOLID : SOLID_NO_CULL; // CUTOUT
-				case 2 -> cull ? TRANSLUCENT : TRANSLUCENT_NO_CULL;
-				default -> cull ? SOLID : SOLID_NO_CULL;
-			};
+		static TexturedRenderType get(TerrainRenderLayer type, boolean cull) {
+			return (TexturedRenderType) (cull ? type.renderTypeFunction : type.noCullRenderTypeFunction);
 		}
 	}
 
 	static RenderType getFluid(FluidState fluidState, DynamicSpriteTexture texture, boolean cull) {
 		var o = ItemBlockRenderTypes.getRenderLayer(fluidState);
-		return Terrain.get(cull, o == RenderType.translucent() ? 2 : 0).apply(texture.resourceId());
+		return Terrain.get(TerrainRenderLayer.fromBlockRenderType(o), cull).apply(texture.resourceId());
 	}
 }

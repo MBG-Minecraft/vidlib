@@ -1,35 +1,35 @@
 package dev.latvian.mods.vidlib.feature.structure;
 
-import com.mojang.math.Axis;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.kmath.Rotation;
-import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
+import dev.latvian.mods.kmath.AAIBB;
+import dev.latvian.mods.kmath.color.Color;
+import dev.latvian.mods.kmath.render.BoxRenderer;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
+import dev.latvian.mods.vidlib.feature.location.Location;
+import dev.latvian.mods.vidlib.feature.registry.RegistryRef;
 import dev.latvian.mods.vidlib.util.FrameInfo;
 import dev.latvian.mods.vidlib.util.JsonCodecReloadListener;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public record GhostStructure(
 	StructureRenderer structure,
 	EntityFilter visibleTo,
-	Vec3 pos,
-	Vec3 scale,
-	Rotation rotation,
+	RegistryRef<Location> location,
+	Optional<AAIBB> slice,
 	boolean preload,
 	boolean inflate
 ) {
 	public static final Codec<GhostStructure> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		StructureRenderer.GHOST_CODEC.fieldOf("structure").forGetter(GhostStructure::structure),
 		EntityFilter.CODEC.optionalFieldOf("visible_to", EntityFilter.ANY.instance()).forGetter(GhostStructure::visibleTo),
-		VLCodecs.VEC_3.fieldOf("pos").forGetter(GhostStructure::pos),
-		VLCodecs.VEC_3.optionalFieldOf("scale", new Vec3(1D, 1D, 1D)).forGetter(GhostStructure::scale),
-		Rotation.CODEC.optionalFieldOf("rotation", Rotation.NONE).forGetter(GhostStructure::rotation),
+		Location.CLIENT_CODEC.fieldOf("location").forGetter(GhostStructure::location),
+		AAIBB.CODEC.optionalFieldOf("slice").forGetter(GhostStructure::slice),
 		Codec.BOOL.optionalFieldOf("preload", false).forGetter(GhostStructure::preload),
 		Codec.BOOL.optionalFieldOf("inflate", false).forGetter(GhostStructure::inflate)
 	).apply(instance, GhostStructure::new));
@@ -63,17 +63,35 @@ public record GhostStructure(
 			var ms = frame.poseStack();
 
 			for (var gs : LIST) {
-				if (gs.visibleTo().test(mc.player)) {
-					ms.pushPose();
-					frame.translate(gs.pos());
-					ms.scale((float) gs.scale().x, (float) gs.scale().y, (float) gs.scale().z);
-					ms.mulPose(Axis.YP.rotation(gs.rotation().yawRad()));
-					ms.mulPose(Axis.XP.rotation(gs.rotation().pitchRad()));
-					ms.mulPose(Axis.ZP.rotation(gs.rotation().rollRad()));
-					gs.structure().origin = BlockPos.containing(gs.pos());
-					gs.structure().inflate = gs.inflate();
-					gs.structure().render(ms);
-					ms.popPose();
+				for (var pos : gs.location.get().positions()) {
+					if (gs.slice.isPresent()) {
+						var b = gs.slice.get();
+						double minX = pos.x + b.minX();
+						double minY = pos.y + b.minY();
+						double minZ = pos.z + b.minZ();
+						double maxX = pos.x + b.maxX() + 1D;
+						double maxY = pos.y + b.maxY() + 1D;
+						double maxZ = pos.z + b.maxZ() + 1D;
+
+						if (!frame.isVisible(minX, minY, minZ, maxX, maxY, maxZ)) {
+							continue;
+						}
+					}
+
+					if (gs.visibleTo().test(mc.player)) {
+						ms.pushPose();
+						frame.translate(pos);
+
+						if (gs.slice.isPresent() && frame.mc().getEntityRenderDispatcher().shouldRenderHitBoxes()) {
+							var b = gs.slice.get();
+							BoxRenderer.renderDebugLines(b.minX(), b.minY(), b.minZ(), b.maxX() + 1F, b.maxY() + 1F, b.maxZ() + 1F, ms, frame.buffers(), Color.RED);
+						}
+
+						gs.structure().origin = BlockPos.containing(pos);
+						gs.structure().inflate = gs.inflate();
+						gs.structure().render(ms);
+						ms.popPose();
+					}
 				}
 			}
 		}

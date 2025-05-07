@@ -1,12 +1,11 @@
 package dev.latvian.mods.vidlib.math.worldnumber;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 
 public record OffsetWorldNumber(WorldNumber a, WorldNumber b) implements WorldNumber {
-	public static final SimpleRegistryType<OffsetWorldNumber> TYPE = SimpleRegistryType.dynamic(VidLib.id("offset"), RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final SimpleRegistryType<OffsetWorldNumber> TYPE = SimpleRegistryType.dynamic("offset", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		WorldNumber.CODEC.fieldOf("a").forGetter(OffsetWorldNumber::a),
 		WorldNumber.CODEC.fieldOf("b").forGetter(OffsetWorldNumber::b)
 	).apply(instance, OffsetWorldNumber::new)), CompositeStreamCodec.of(

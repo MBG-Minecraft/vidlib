@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.zone.shape;
 
 import dev.latvian.mods.kmath.Line;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
@@ -18,7 +17,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class UniverseZoneShape implements ZoneShape {
-	public static final SimpleRegistryType<UniverseZoneShape> TYPE = SimpleRegistryType.unit(VidLib.id("universe"), new UniverseZoneShape());
+	public static final SimpleRegistryType<UniverseZoneShape> TYPE = SimpleRegistryType.unit("universe", new UniverseZoneShape());
 
 	private UniverseZoneShape() {
 	}
@@ -81,7 +80,7 @@ public class UniverseZoneShape implements ZoneShape {
 
 	@Override
 	public void writeUUID(FriendlyByteBuf buf) {
-		buf.writeUtf(type().id().toString());
+		buf.writeUtf(type().id());
 		buf.writeVarInt(42);
 	}
 }

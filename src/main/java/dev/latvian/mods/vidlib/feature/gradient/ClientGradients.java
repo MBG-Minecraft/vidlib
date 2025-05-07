@@ -25,8 +25,8 @@ import java.util.function.Function;
 public class ClientGradients extends SimplePreparableReloadListener<Map<ResourceLocation, Gradient>> {
 	public static final VLRegistry<Gradient> REGISTRY = VLRegistry.createClient("gradient");
 
-	public static final Codec<Gradient> CODEC = Codec.either(REGISTRY.valueCodec, Color.CODEC).xmap(either -> either.map(Function.identity(), Function.identity()), gradient -> gradient instanceof Color color ? Either.right(color) : Either.left(gradient));
-	public static final StreamCodec<ByteBuf, Gradient> STREAM_CODEC = ByteBufCodecs.either(REGISTRY.valueStreamCodec, Color.STREAM_CODEC).map(either -> either.map(Function.identity(), Function.identity()), gradient -> gradient instanceof Color color ? Either.right(color) : Either.left(gradient));
+	public static final Codec<Gradient> CODEC = Codec.either(REGISTRY.valueCodec(), Color.CODEC).xmap(either -> either.map(Function.identity(), Function.identity()), gradient -> gradient instanceof Color color ? Either.right(color) : Either.left(gradient));
+	public static final StreamCodec<ByteBuf, Gradient> STREAM_CODEC = ByteBufCodecs.either(REGISTRY.valueStreamCodec(), Color.STREAM_CODEC).map(either -> either.map(Function.identity(), Function.identity()), gradient -> gradient instanceof Color color ? Either.right(color) : Either.left(gradient));
 
 	public static final RegistryRef<Gradient> FIRE_1 = REGISTRY.ref(ID.mc("fire/1"));
 	public static final RegistryRef<Gradient> FIRE_2 = REGISTRY.ref(ID.mc("fire/2"));

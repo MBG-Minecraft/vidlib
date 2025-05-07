@@ -119,19 +119,11 @@ public interface ZoneShape {
 
 	default double closestDistanceTo(Vec3 pos) {
 		var box = getBoundingBox();
-
-		if (box.contains(pos)) {
-			return 0D;
-		}
-
-		double dx = pos.x() - Math.clamp(pos.x, box.minX, box.maxX);
-		double dy = pos.y() - Math.clamp(pos.y, box.minY, box.maxY);
-		double dz = pos.z() - Math.clamp(pos.z, box.minZ, box.maxZ);
-		return Math.sqrt(dx * dx + dy * dy + dz * dz);
+		return box.contains(pos) ? 0D : Math.sqrt(box.distanceToSqr(pos));
 	}
 
 	default void writeUUID(FriendlyByteBuf buf) {
-		buf.writeUtf(type().id().toString());
+		buf.writeUtf(type().id());
 		buf.writeUtf(toString());
 	}
 

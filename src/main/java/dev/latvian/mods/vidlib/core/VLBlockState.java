@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.vidlib.util.Cast;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 
 public interface VLBlockState {
@@ -52,5 +53,10 @@ public interface VLBlockState {
 		}
 
 		return sb.toString();
+	}
+
+	default boolean isVisible() {
+		var state = (BlockState) this;
+		return state.getRenderShape() != RenderShape.INVISIBLE || !state.getFluidState().isEmpty();
 	}
 }

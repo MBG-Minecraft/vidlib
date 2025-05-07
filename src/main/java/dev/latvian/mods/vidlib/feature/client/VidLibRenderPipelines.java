@@ -6,7 +6,9 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesRenderTypes;
+import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.RenderType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -28,6 +30,18 @@ public interface VidLibRenderPipelines {
 		.withCull(false)
 		.build();
 
+	RenderPipeline CUTOUT_MIPPED_TERRAIN_NO_CULL = RenderPipeline.builder(RenderPipelines.TERRAIN_SNIPPET)
+		.withLocation(VidLib.id("pipeline/terrain/cutout_mipped_no_cull"))
+		.withShaderDefine("ALPHA_CUTOUT", 0.5F)
+		.withCull(false)
+		.build();
+
+	RenderPipeline CUTOUT_TERRAIN_NO_CULL = RenderPipeline.builder(RenderPipelines.TERRAIN_SNIPPET)
+		.withLocation(VidLib.id("pipeline/terrain/cutout_no_cull"))
+		.withShaderDefine("ALPHA_CUTOUT", 0.1F)
+		.withCull(false)
+		.build();
+
 	RenderPipeline TRANSLUCENT_TERRAIN_NO_CULL = RenderPipeline.builder(RenderPipelines.TERRAIN_SNIPPET)
 		.withLocation(VidLib.id("pipeline/terrain/translucent_no_cull"))
 		.withBlend(BlendFunction.TRANSLUCENT)
@@ -38,9 +52,17 @@ public interface VidLibRenderPipelines {
 	static void registerRenderPipelines(RegisterRenderPipelinesEvent event) {
 		event.registerPipeline(SKYBOX);
 		event.registerPipeline(SOLID_TERRAIN_NO_CULL);
+		event.registerPipeline(CUTOUT_MIPPED_TERRAIN_NO_CULL);
+		event.registerPipeline(CUTOUT_TERRAIN_NO_CULL);
 		event.registerPipeline(TRANSLUCENT_TERRAIN_NO_CULL);
 		event.registerPipeline(PhysicsParticlesRenderTypes.SOLID_PIPELINE);
 		event.registerPipeline(PhysicsParticlesRenderTypes.CUTOUT_PIPELINE);
 		event.registerPipeline(PhysicsParticlesRenderTypes.TRANSLUCENT_PIPELINE);
+
+		TerrainRenderLayer.SOLID.setClientValues(RenderType.solid(), VidLibRenderTypes.Terrain.SOLID, VidLibRenderTypes.Terrain.SOLID_NO_CULL);
+		TerrainRenderLayer.CUTOUT_MIPPED.setClientValues(RenderType.cutoutMipped(), VidLibRenderTypes.Terrain.CUTOUT_MIPPED, VidLibRenderTypes.Terrain.CUTOUT_MIPPED_NO_CULL);
+		TerrainRenderLayer.CUTOUT.setClientValues(RenderType.cutout(), VidLibRenderTypes.Terrain.CUTOUT, VidLibRenderTypes.Terrain.CUTOUT_NO_CULL);
+		TerrainRenderLayer.TRANSLUCENT.setClientValues(RenderType.translucent(), VidLibRenderTypes.Terrain.TRANSLUCENT, VidLibRenderTypes.Terrain.TRANSLUCENT_NO_CULL);
+		TerrainRenderLayer.TRIPWIRE.setClientValues(RenderType.tripwire(), VidLibRenderTypes.Terrain.TRANSLUCENT, VidLibRenderTypes.Terrain.TRANSLUCENT_NO_CULL);
 	}
 }

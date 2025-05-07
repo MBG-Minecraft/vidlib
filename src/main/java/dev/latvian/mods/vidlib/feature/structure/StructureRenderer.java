@@ -29,14 +29,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.biome.Biomes;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.client.model.pipeline.TransformingVertexPipeline;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -196,10 +193,6 @@ public class StructureRenderer implements WithCache {
 		this.inflate = false;
 	}
 
-	private static boolean isTransparent(@Nullable BlockState state) {
-		return state == null || !state.canOcclude() || !state.useShapeForLightOcclusion() || state.getBlock().getClass() != Block.class || state.getRenderShape() != RenderShape.MODEL;
-	}
-
 	public void preRender() {
 		var mc = Minecraft.getInstance();
 
@@ -279,6 +272,8 @@ public class StructureRenderer implements WithCache {
 				maxZ = Math.max(maxZ, pos.getZ() + 2D);
 			}
 		}
+
+		renderBounds = new AABB(minX, minY, minZ, maxX, maxY, maxZ);
 
 		var buildingLayerArray = layerMap.values().toArray(BuildingLayer.EMPTY);
 		Arrays.sort(buildingLayerArray, Comparator.comparingInt(BuildingLayer::sort));

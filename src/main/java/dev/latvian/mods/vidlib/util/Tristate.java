@@ -48,6 +48,14 @@ public enum Tristate implements StringRepresentable {
 		return name;
 	}
 
+	public boolean resolve(boolean defaultValue) {
+		return this == DEFAULT ? defaultValue : this == TRUE;
+	}
+
+	public boolean resolve(BooleanSupplier defaultValue) {
+		return this == DEFAULT ? defaultValue.getAsBoolean() : this == TRUE;
+	}
+
 	public boolean test(boolean enabled) {
 		return this == DEFAULT || (this == TRUE) == enabled;
 	}

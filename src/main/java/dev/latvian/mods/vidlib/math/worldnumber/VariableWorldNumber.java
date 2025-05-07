@@ -2,12 +2,11 @@ package dev.latvian.mods.vidlib.math.worldnumber;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.network.codec.ByteBufCodecs;
 
 public record VariableWorldNumber(String name) implements WorldNumber {
-	public static final SimpleRegistryType<VariableWorldNumber> TYPE = SimpleRegistryType.dynamic(VidLib.id("variable"), RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final SimpleRegistryType<VariableWorldNumber> TYPE = SimpleRegistryType.dynamic("variable", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.STRING.fieldOf("name").forGetter(VariableWorldNumber::name)
 	).apply(instance, VariableWorldNumber::new)), ByteBufCodecs.STRING_UTF8.map(VariableWorldNumber::new, VariableWorldNumber::name));
 

@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.block.filter;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
@@ -10,7 +9,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 
 public record BlockXorFilter(BlockFilter a, BlockFilter b) implements BlockFilter {
-	public static SimpleRegistryType<BlockXorFilter> TYPE = SimpleRegistryType.dynamic(VidLib.id("xor"), RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static SimpleRegistryType<BlockXorFilter> TYPE = SimpleRegistryType.dynamic("xor", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		BlockFilter.CODEC.fieldOf("a").forGetter(BlockXorFilter::a),
 		BlockFilter.CODEC.fieldOf("b").forGetter(BlockXorFilter::b)
 	).apply(instance, BlockXorFilter::new)), CompositeStreamCodec.of(

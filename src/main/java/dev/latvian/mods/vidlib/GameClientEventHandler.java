@@ -22,10 +22,12 @@ import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import dev.latvian.mods.vidlib.feature.misc.VidLibIcon;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
+import dev.latvian.mods.vidlib.feature.structure.GhostStructureCapture;
 import dev.latvian.mods.vidlib.feature.structure.StructureRenderer;
 import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
 import dev.latvian.mods.vidlib.util.FrameInfo;
 import dev.latvian.mods.vidlib.util.JsonUtils;
+import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.AdvancementToast;
@@ -129,6 +131,12 @@ public class GameClientEventHandler {
 		mc.vl$postTick(mc.getPauseType());
 		NeoForge.EVENT_BUS.post(new DebugTextEvent.ClientTick(ScreenText.CLIENT_TICK));
 
+		int b = GhostStructureCapture.CURRENT.getValue().blocks.size();
+
+		if (b > 0) {
+			ScreenText.CLIENT_TICK.topLeft.add("Ghost Structure Capture: %,d blocks".formatted(b));
+		}
+
 		if (!MiscClientUtils.CLIENT_CLOSEABLE.isEmpty()) {
 			for (var c : MiscClientUtils.CLIENT_CLOSEABLE) {
 				try {
@@ -163,8 +171,9 @@ public class GameClientEventHandler {
 			if (mc.player.getShowZones()) {
 				ZoneRenderer.renderAll(frame);
 			} else {
-				ZoneRenderer.renderSolid(frame);
-				ZoneRenderer.renderFluid(frame);
+				for (var renderLayerFilter : TerrainRenderLayer.VALUES) {
+					ZoneRenderer.renderVisible(frame, renderLayerFilter);
+				}
 			}
 
 			if (mc.player.getShowAnchor()) {

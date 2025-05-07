@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHolder {
 	@Override
@@ -150,8 +151,7 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		return bulkModify(undoable, m);
 	}
 
-	default List<ConnectedBlock> walkBlocks(ConnectedBlock.WalkType walkType, BlockPos start, BlockFilter filter, int maxDistance, int maxTotalBlocks) {
-		var result = new Long2ObjectOpenHashMap<ConnectedBlock>();
+	default void walkBlocks(ConnectedBlock.WalkType walkType, BlockPos start, @Nullable BlockFilter filter, int maxDistance, Predicate<ConnectedBlock> callback) {
 		var traversed = new LongOpenHashSet();
 		var queue = new ArrayDeque<ConnectedBlock>();
 
@@ -162,10 +162,8 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		while (!queue.isEmpty()) {
 			var c = queue.pop();
 
-			if (c.distance() == 0 || filter.test(level, c.block().pos(), c.block().state())) {
-				result.put(c.block().pos().asLong(), c);
-
-				if (result.size() >= maxTotalBlocks) {
+			if (c.distance() == 0 || (filter == null ? !c.block().state().isAir() : filter.test(level, c.block().pos(), c.block().state()))) {
+				if (callback.test(c)) {
 					break;
 				}
 
@@ -183,6 +181,15 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 				}
 			}
 		}
+	}
+
+	default List<ConnectedBlock> walkBlocks(ConnectedBlock.WalkType walkType, BlockPos start, @Nullable BlockFilter filter, int maxDistance, int maxTotalBlocks) {
+		var result = new Long2ObjectOpenHashMap<ConnectedBlock>();
+
+		walkBlocks(walkType, start, filter, maxDistance, c -> {
+			result.put(c.block().pos().asLong(), c);
+			return result.size() >= maxTotalBlocks;
+		});
 
 		return List.copyOf(result.values());
 	}
@@ -245,6 +252,10 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		return 1F;
 	}
 
+	default List<Entity> getBosses() {
+		return List.of();
+	}
+
 	@Nullable
 	default Entity getMainBoss() {
 		return null;
@@ -267,5 +278,16 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		}
 
 		return state.getHeight(vl$level(), pos);
+	}
+
+	default boolean isBlockExposed(int x, int y, int z, BlockPos.MutableBlockPos mutablePos) {
+		var level = vl$level();
+
+		return !level.getBlockState(mutablePos.set(x, y + 1, z)).isVisible()
+			|| !level.getBlockState(mutablePos.set(x, y - 1, z)).isVisible()
+			|| !level.getBlockState(mutablePos.set(x - 1, y, z)).isVisible()
+			|| !level.getBlockState(mutablePos.set(x + 1, y, z)).isVisible()
+			|| !level.getBlockState(mutablePos.set(x, y, z - 1)).isVisible()
+			|| !level.getBlockState(mutablePos.set(x, y, z + 1)).isVisible();
 	}
 }

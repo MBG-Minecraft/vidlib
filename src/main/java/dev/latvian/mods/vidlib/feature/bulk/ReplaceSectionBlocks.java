@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.bulk;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
 import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
@@ -13,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 public record ReplaceSectionBlocks(SectionPos pos, List<BlockPalette> palettes) implements BulkLevelModification {
-	public static final SimpleRegistryType<ReplaceSectionBlocks> TYPE = SimpleRegistryType.dynamic(VidLib.id("section_blocks"), RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final SimpleRegistryType<ReplaceSectionBlocks> TYPE = SimpleRegistryType.dynamic("section_blocks", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		VLCodecs.SECTION_POS.fieldOf("pos").forGetter(ReplaceSectionBlocks::pos),
 		BlockPalette.CODEC.listOf().fieldOf("palettes").forGetter(ReplaceSectionBlocks::palettes)
 	).apply(instance, ReplaceSectionBlocks::new)), CompositeStreamCodec.of(

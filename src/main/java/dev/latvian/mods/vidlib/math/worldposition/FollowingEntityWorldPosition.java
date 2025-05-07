@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.math.worldposition;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
 import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
@@ -16,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 
 public record FollowingEntityWorldPosition(Either<Integer, UUID> entityId, EntityPositionType positionType) implements WorldPosition {
-	public static final SimpleRegistryType<FollowingEntityWorldPosition> TYPE = SimpleRegistryType.dynamic(VidLib.id("following_entity"), RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final SimpleRegistryType<FollowingEntityWorldPosition> TYPE = SimpleRegistryType.dynamic("following_entity", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.either(Codec.INT, VLCodecs.UUID).fieldOf("entity_id").forGetter(FollowingEntityWorldPosition::entityId),
 		EntityPositionType.CODEC.optionalFieldOf("position_type", EntityPositionType.CENTER).forGetter(FollowingEntityWorldPosition::positionType)
 	).apply(instance, FollowingEntityWorldPosition::new)), CompositeStreamCodec.of(

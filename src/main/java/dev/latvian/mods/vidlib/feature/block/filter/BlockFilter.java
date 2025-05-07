@@ -13,7 +13,6 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 
@@ -24,7 +23,7 @@ import java.util.function.Predicate;
 public interface BlockFilter extends Predicate<BlockInWorld> {
 	SimpleRegistry<BlockFilter> REGISTRY = SimpleRegistry.create(BlockFilter::type);
 
-	SimpleRegistryType.Unit<BlockFilter> NONE = SimpleRegistryType.unit(VidLib.id("none"), new BlockFilter() {
+	SimpleRegistryType.Unit<BlockFilter> NONE = SimpleRegistryType.unit("none", new BlockFilter() {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
 			return false;
@@ -37,11 +36,16 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 
 		@Override
 		public String toString() {
-			return "vidlib:none";
+			return "none";
+		}
+
+		@Override
+		public BlockFilter and(BlockFilter filter) {
+			return this;
 		}
 	});
 
-	SimpleRegistryType.Unit<BlockFilter> ANY = SimpleRegistryType.unit(VidLib.id("any"), new BlockFilter() {
+	SimpleRegistryType.Unit<BlockFilter> ANY = SimpleRegistryType.unit("any", new BlockFilter() {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
 			return true;
@@ -54,25 +58,47 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 
 		@Override
 		public String toString() {
-			return "vidlib:any";
+			return "any";
+		}
+
+		@Override
+		public BlockFilter and(BlockFilter filter) {
+			return filter;
 		}
 	});
 
-	SimpleRegistryType.Unit<BlockFilter> VISIBLE = SimpleRegistryType.unit(VidLib.id("visible"), new BlockFilter() {
+	SimpleRegistryType.Unit<BlockFilter> VISIBLE = SimpleRegistryType.unit("visible", new BlockFilter() {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
 			var state = blockInWorld.getState();
-			return state != null && state.getRenderShape() != RenderShape.INVISIBLE;
+			return state != null && state.isVisible();
 		}
 
 		@Override
 		public boolean test(Level level, BlockPos pos, BlockState state) {
-			return state.getRenderShape() != RenderShape.INVISIBLE;
+			return state.isVisible();
 		}
 
 		@Override
 		public String toString() {
-			return "vidlib:visible";
+			return "visible";
+		}
+	});
+
+	SimpleRegistryType.Unit<BlockFilter> EXPOSED = SimpleRegistryType.unit("exposed", new BlockFilter() {
+		@Override
+		public boolean test(BlockInWorld blockInWorld) {
+			return blockInWorld.getLevel() instanceof Level l && test(l, blockInWorld.getPos(), blockInWorld.getState());
+		}
+
+		@Override
+		public boolean test(Level level, BlockPos pos, BlockState state) {
+			return !state.isAir() && level.isBlockExposed(pos.getX(), pos.getY(), pos.getZ(), new BlockPos.MutableBlockPos());
+		}
+
+		@Override
+		public String toString() {
+			return "exposed";
 		}
 	});
 
@@ -88,6 +114,8 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 	static void bootstrap() {
 		REGISTRY.register(NONE);
 		REGISTRY.register(ANY);
+		REGISTRY.register(VISIBLE);
+		REGISTRY.register(EXPOSED);
 
 		REGISTRY.register(BlockNotFilter.TYPE);
 		REGISTRY.register(BlockAndFilter.TYPE);
@@ -118,6 +146,12 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 	}
 
 	default BlockFilter and(BlockFilter filter) {
-		return new BlockAndFilter(List.of(this, filter));
+		if (filter == ANY.instance()) {
+			return this;
+		} else if (filter == NONE.instance()) {
+			return filter;
+		} else {
+			return new BlockAndFilter(List.of(this, filter));
+		}
 	}
 }

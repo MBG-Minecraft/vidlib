@@ -17,6 +17,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.VarInt;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -48,6 +49,18 @@ public interface VLStreamCodecs {
 		public void encode(ByteBuf buf, UUID value) {
 			buf.writeLong(value.getMostSignificantBits());
 			buf.writeLong(value.getLeastSignificantBits());
+		}
+	};
+
+	StreamCodec<RegistryFriendlyByteBuf, String> REGISTRY_STRING = new StreamCodec<>() {
+		@Override
+		public String decode(RegistryFriendlyByteBuf buf) {
+			return buf.readUtf();
+		}
+
+		@Override
+		public void encode(RegistryFriendlyByteBuf buf, String value) {
+			buf.writeUtf(value);
 		}
 	};
 

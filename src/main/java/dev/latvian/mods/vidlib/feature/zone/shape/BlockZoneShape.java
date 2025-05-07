@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.zone.shape;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.kmath.AAIBB;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
@@ -13,7 +12,7 @@ import net.minecraft.world.phys.AABB;
 import java.util.stream.Stream;
 
 public record BlockZoneShape(BlockPos start, BlockPos end, AABB box) implements ZoneShape {
-	public static final SimpleRegistryType<BlockZoneShape> TYPE = SimpleRegistryType.dynamic(VidLib.id("block"), RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final SimpleRegistryType<BlockZoneShape> TYPE = SimpleRegistryType.dynamic("block", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		BlockPos.CODEC.fieldOf("start").forGetter(BlockZoneShape::start),
 		BlockPos.CODEC.fieldOf("end").forGetter(BlockZoneShape::end)
 	).apply(instance, BlockZoneShape::new)), CompositeStreamCodec.of(
@@ -57,7 +56,7 @@ public record BlockZoneShape(BlockPos start, BlockPos end, AABB box) implements 
 
 	@Override
 	public void writeUUID(FriendlyByteBuf buf) {
-		buf.writeUtf(type().id().toString());
+		buf.writeUtf(type().id());
 		buf.writeBlockPos(start);
 		buf.writeBlockPos(end);
 	}

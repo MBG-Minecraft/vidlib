@@ -30,22 +30,13 @@ public class VLRegistry<V> extends GenericVLRegistry<ResourceLocation, V> implem
 	}
 
 	public final ResourceLocation id;
-	public final Codec<V> valueCodec;
-	public final StreamCodec<ByteBuf, V> valueStreamCodec;
+	private Codec<V> valueCodec;
+	private Codec<RegistryRef<V>> refCodec;
+	private StreamCodec<ByteBuf, V> valueStreamCodec;
 
 	private VLRegistry(String _id, Side side) {
 		super(side);
 		this.id = VidLib.id(_id);
-
-		this.valueCodec = ID.CODEC.flatXmap(id -> {
-			var value = get(id);
-			return value == null ? DataResult.error(() -> "Not found") : DataResult.success(value);
-		}, value -> {
-			var id = getId(value);
-			return id == null ? DataResult.error(() -> "Not found") : DataResult.success(id);
-		});
-
-		this.valueStreamCodec = ID.STREAM_CODEC.map(this::get, this::getId);
 	}
 
 	@Override
@@ -78,5 +69,38 @@ public class VLRegistry<V> extends GenericVLRegistry<ResourceLocation, V> implem
 	@Override
 	public ArgumentType<V> apply(KnownCodec<V> knownCodec, CommandBuildContext commandBuildContext) {
 		return new RefHolderArgument<>(this, knownCodec);
+	}
+
+	public Codec<V> valueCodec() {
+		if (valueCodec == null) {
+			valueCodec = ID.CODEC.flatXmap(id -> {
+				var value = get(id);
+				return value == null ? DataResult.error(() -> "Not found") : DataResult.success(value);
+			}, value -> {
+				var id = getId(value);
+				return id == null ? DataResult.error(() -> "Not found") : DataResult.success(id);
+			});
+		}
+
+		return valueCodec;
+	}
+
+	public Codec<RegistryRef<V>> refCodec() {
+		if (refCodec == null) {
+			refCodec = ID.CODEC.flatXmap(id -> {
+				var value = ref(id);
+				return value == null ? DataResult.error(() -> "Not found") : DataResult.success(value);
+			}, value -> DataResult.success(value.id()));
+		}
+
+		return refCodec;
+	}
+
+	public StreamCodec<ByteBuf, V> valueStreamCodec() {
+		if (valueStreamCodec == null) {
+			valueStreamCodec = ID.STREAM_CODEC.map(this::get, this::getId);
+		}
+
+		return valueStreamCodec;
 	}
 }

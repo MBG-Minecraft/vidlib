@@ -24,24 +24,24 @@ import java.util.function.Predicate;
 public interface EntityFilter extends Predicate<Entity> {
 	SimpleRegistry<EntityFilter> REGISTRY = SimpleRegistry.create(EntityFilter::type);
 
-	SimpleRegistryType.Unit<EntityFilter> NONE = SimpleRegistryType.unit(VidLib.id("none"), new BasicEntityFilter(entity -> false));
-	SimpleRegistryType.Unit<EntityFilter> ANY = SimpleRegistryType.unit(VidLib.id("any"), new BasicEntityFilter(entity -> true));
+	SimpleRegistryType.Unit<EntityFilter> NONE = SimpleRegistryType.unit("none", new BasicEntityFilter(entity -> false));
+	SimpleRegistryType.Unit<EntityFilter> ANY = SimpleRegistryType.unit("any", new BasicEntityFilter(entity -> true));
 
-	SimpleRegistryType.Unit<EntityFilter> ALIVE = SimpleRegistryType.unit(VidLib.id("alive"), new BasicEntityFilter(Entity::isAlive));
-	SimpleRegistryType.Unit<EntityFilter> DEAD = SimpleRegistryType.unit(VidLib.id("dead"), new BasicEntityFilter(entity -> !entity.isAlive()));
-	SimpleRegistryType.Unit<EntityFilter> LIVING = SimpleRegistryType.unit(VidLib.id("living"), new BasicEntityFilter(entity -> entity instanceof LivingEntity));
-	SimpleRegistryType.Unit<EntityFilter> PLAYER = SimpleRegistryType.unit(VidLib.id("player"), new BasicEntityFilter(entity -> entity instanceof Player));
-	SimpleRegistryType.Unit<EntityFilter> SURVIVAL_PLAYER = SimpleRegistryType.unit(VidLib.id("survival_player"), new BasicEntityFilter(VLEntity::isSurvival));
-	SimpleRegistryType.Unit<EntityFilter> SURVIVAL_LIKE_PLAYER = SimpleRegistryType.unit(VidLib.id("survival_like_player"), new BasicEntityFilter(VLEntity::isSurvivalLike));
-	SimpleRegistryType.Unit<EntityFilter> SPECTATOR = SimpleRegistryType.unit(VidLib.id("spectator"), new BasicEntityFilter(Entity::isSpectator));
-	SimpleRegistryType.Unit<EntityFilter> CREATIVE = SimpleRegistryType.unit(VidLib.id("creative"), new BasicEntityFilter(entity -> entity instanceof Player player && player.isCreative()));
-	SimpleRegistryType.Unit<EntityFilter> SPECTATOR_OR_CREATIVE = SimpleRegistryType.unit(VidLib.id("spectator_or_creative"), new BasicEntityFilter(VLEntity::isSpectatorOrCreative));
-	SimpleRegistryType.Unit<EntityFilter> ITEM = SimpleRegistryType.unit(VidLib.id("item"), new BasicEntityFilter(entity -> entity instanceof ItemEntity));
-	SimpleRegistryType.Unit<EntityFilter> PROJECTILE = SimpleRegistryType.unit(VidLib.id("projectile"), new BasicEntityFilter(entity -> entity instanceof Projectile));
-	SimpleRegistryType.Unit<EntityFilter> VISIBLE = SimpleRegistryType.unit(VidLib.id("visible"), new BasicEntityFilter(entity -> !entity.isInvisible()));
-	SimpleRegistryType.Unit<EntityFilter> INVISIBLE = SimpleRegistryType.unit(VidLib.id("invisible"), new BasicEntityFilter(Entity::isInvisible));
-	SimpleRegistryType.Unit<EntityFilter> SUSPENDED = SimpleRegistryType.unit(VidLib.id("suspended"), new BasicEntityFilter(VLEntity::isSuspended));
-	SimpleRegistryType.Unit<EntityFilter> GLOWING = SimpleRegistryType.unit(VidLib.id("glowing"), new BasicEntityFilter(Entity::isCurrentlyGlowing));
+	SimpleRegistryType.Unit<EntityFilter> ALIVE = SimpleRegistryType.unit("alive", new BasicEntityFilter(Entity::isAlive));
+	SimpleRegistryType.Unit<EntityFilter> DEAD = SimpleRegistryType.unit("dead", new BasicEntityFilter(entity -> !entity.isAlive()));
+	SimpleRegistryType.Unit<EntityFilter> LIVING = SimpleRegistryType.unit("living", new BasicEntityFilter(entity -> entity instanceof LivingEntity));
+	SimpleRegistryType.Unit<EntityFilter> PLAYER = SimpleRegistryType.unit("player", new BasicEntityFilter(entity -> entity instanceof Player));
+	SimpleRegistryType.Unit<EntityFilter> SURVIVAL_PLAYER = SimpleRegistryType.unit("survival_player", new BasicEntityFilter(VLEntity::isSurvival));
+	SimpleRegistryType.Unit<EntityFilter> SURVIVAL_LIKE_PLAYER = SimpleRegistryType.unit("survival_like_player", new BasicEntityFilter(VLEntity::isSurvivalLike));
+	SimpleRegistryType.Unit<EntityFilter> SPECTATOR = SimpleRegistryType.unit("spectator", new BasicEntityFilter(Entity::isSpectator));
+	SimpleRegistryType.Unit<EntityFilter> CREATIVE = SimpleRegistryType.unit("creative", new BasicEntityFilter(entity -> entity instanceof Player player && player.isCreative()));
+	SimpleRegistryType.Unit<EntityFilter> SPECTATOR_OR_CREATIVE = SimpleRegistryType.unit("spectator_or_creative", new BasicEntityFilter(VLEntity::isSpectatorOrCreative));
+	SimpleRegistryType.Unit<EntityFilter> ITEM = SimpleRegistryType.unit("item", new BasicEntityFilter(entity -> entity instanceof ItemEntity));
+	SimpleRegistryType.Unit<EntityFilter> PROJECTILE = SimpleRegistryType.unit("projectile", new BasicEntityFilter(entity -> entity instanceof Projectile));
+	SimpleRegistryType.Unit<EntityFilter> VISIBLE = SimpleRegistryType.unit("visible", new BasicEntityFilter(entity -> !entity.isInvisible()));
+	SimpleRegistryType.Unit<EntityFilter> INVISIBLE = SimpleRegistryType.unit("invisible", new BasicEntityFilter(Entity::isInvisible));
+	SimpleRegistryType.Unit<EntityFilter> SUSPENDED = SimpleRegistryType.unit("suspended", new BasicEntityFilter(VLEntity::isSuspended));
+	SimpleRegistryType.Unit<EntityFilter> GLOWING = SimpleRegistryType.unit("glowing", new BasicEntityFilter(Entity::isCurrentlyGlowing));
 
 	static EntityFilter of(boolean value) {
 		return value ? ANY.instance() : NONE.instance();
@@ -87,7 +87,7 @@ public interface EntityFilter extends Predicate<Entity> {
 	}
 
 	default void writeUUID(FriendlyByteBuf buf) {
-		buf.writeUtf(type().id().toString());
+		buf.writeUtf(type().id());
 		buf.writeUtf(toString());
 	}
 }

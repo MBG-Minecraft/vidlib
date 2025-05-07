@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.bulk;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
 import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
@@ -17,7 +16,7 @@ import net.minecraft.world.phys.Vec3;
 import java.util.Set;
 
 public record ReplaceSphereBlocks(BlockPos start, BlockPos end, Vec3 center, double radius, BlockState state) implements BulkLevelModification {
-	public static final SimpleRegistryType<ReplaceSphereBlocks> TYPE = SimpleRegistryType.dynamic(VidLib.id("sphere_blocks"), RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final SimpleRegistryType<ReplaceSphereBlocks> TYPE = SimpleRegistryType.dynamic("sphere_blocks", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		BlockPos.CODEC.fieldOf("start").forGetter(ReplaceSphereBlocks::start),
 		BlockPos.CODEC.fieldOf("end").forGetter(ReplaceSphereBlocks::end),
 		Vec3.CODEC.fieldOf("center").forGetter(ReplaceSphereBlocks::center),

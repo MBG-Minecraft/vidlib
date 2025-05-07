@@ -41,6 +41,7 @@ import dev.latvian.mods.vidlib.feature.vote.StartNumberVotingPayload;
 import dev.latvian.mods.vidlib.feature.vote.StartYesNoVotingPayload;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
 import dev.latvian.mods.vidlib.math.worldposition.WorldPosition;
+import dev.latvian.mods.vidlib.util.MessageConsumer;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.core.BlockPos;
@@ -59,7 +60,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 
-public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsumer {
+public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsumer, MessageConsumer {
 	default List<? extends Player> vl$getS2CPlayers() {
 		return List.of();
 	}
@@ -76,6 +77,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 		getEnvironment().c2s(packet);
 	}
 
+	@Override
 	default void tell(Component message) {
 		if (isClient()) {
 			getEnvironment().tell(message);
@@ -86,10 +88,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 		}
 	}
 
-	default void tell(String message) {
-		tell(Component.literal(message));
-	}
-
+	@Override
 	default void status(Component message) {
 		if (isClient()) {
 			getEnvironment().status(message);
@@ -98,10 +97,6 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 				player.displayClientMessage(message, true);
 			}
 		}
-	}
-
-	default void status(String message) {
-		status(Component.literal(message));
 	}
 
 	default void playCutscene(Cutscene cutscene, WorldNumberVariables variables) {

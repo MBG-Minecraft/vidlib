@@ -16,8 +16,13 @@ import java.util.List;
 
 public interface VLServerPlayer extends VLPlayer {
 	@Override
+	default ServerPlayer vl$self() {
+		return (ServerPlayer) this;
+	}
+
+	@Override
 	default List<? extends Player> vl$getS2CPlayers() {
-		return List.of((Player) this);
+		return List.of(vl$self());
 	}
 
 	@Override
@@ -33,23 +38,23 @@ public interface VLServerPlayer extends VLPlayer {
 			if (collection.isEmpty()) {
 				return;
 			} else if (collection.size() == 1) {
-				((ServerPlayer) this).connection.send(collection.getFirst());
+				vl$self().connection.send(collection.getFirst());
 				return;
 			}
 		}
 
 		if (packet != null) {
-			((ServerPlayer) this).connection.send(packet);
+			vl$self().connection.send(packet);
 		}
 	}
 
 	@Override
 	default GameType getGameMode() {
-		return ((ServerPlayer) this).gameMode.getGameModeForPlayer();
+		return vl$self().gameMode.getGameModeForPlayer();
 	}
 
 	default void vl$initialSync(PacketAndPayloadAcceptor<ClientGamePacketListener> callback) {
-		var p = (ServerPlayer) this;
+		var p = vl$self();
 		callback.accept(new SyncPlayerTagsPayload(p.getUUID(), List.copyOf(p.getTags())).toS2C(p.level()));
 	}
 }

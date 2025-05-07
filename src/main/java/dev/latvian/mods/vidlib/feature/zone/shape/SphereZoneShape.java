@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.feature.zone.shape;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.kmath.Line;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
 import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
@@ -18,7 +17,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements ZoneShape {
-	public static final SimpleRegistryType<SphereZoneShape> TYPE = SimpleRegistryType.dynamic(VidLib.id("sphere"), RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final SimpleRegistryType<SphereZoneShape> TYPE = SimpleRegistryType.dynamic("sphere", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		VLCodecs.VEC_3.fieldOf("pos").forGetter(SphereZoneShape::pos),
 		Codec.doubleRange(0D, Double.POSITIVE_INFINITY).fieldOf("radius").forGetter(SphereZoneShape::radius)
 	).apply(instance, SphereZoneShape::new)), CompositeStreamCodec.of(
@@ -127,7 +126,7 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 
 	@Override
 	public void writeUUID(FriendlyByteBuf buf) {
-		buf.writeUtf(type().id().toString());
+		buf.writeUtf(type().id());
 		buf.writeDouble(pos.x());
 		buf.writeDouble(pos.y());
 		buf.writeDouble(pos.z());

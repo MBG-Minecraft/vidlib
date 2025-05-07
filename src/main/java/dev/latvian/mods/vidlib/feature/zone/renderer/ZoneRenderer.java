@@ -9,8 +9,7 @@ import dev.latvian.mods.kmath.texture.LightUV;
 import dev.latvian.mods.vidlib.core.VLBlockInWorld;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
-import dev.latvian.mods.vidlib.feature.client.DynamicSpriteTexture;
-import dev.latvian.mods.vidlib.feature.client.FluidBoxRenderer;
+import dev.latvian.mods.vidlib.feature.client.CubeTexturesRenderer;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
 import dev.latvian.mods.vidlib.feature.zone.shape.RotatedBoxZoneShape;
@@ -20,11 +19,12 @@ import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShapeGroup;
 import dev.latvian.mods.vidlib.util.Cast;
 import dev.latvian.mods.vidlib.util.FrameInfo;
+import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 
 public interface ZoneRenderer<T extends ZoneShape> {
@@ -57,7 +57,6 @@ public interface ZoneRenderer<T extends ZoneShape> {
 		var mc = frame.mc();
 		var ms = frame.poseStack();
 		var cameraPos = frame.camera().getPosition();
-		var frustum = frame.frustum();
 		var renderType = mc.player.getZoneRenderType();
 		var buffers = frame.buffers();
 		var session = frame.session();
@@ -73,7 +72,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 
 		if (renderType == ZoneRenderType.COLLISIONS) {
 			for (var sz : session.filteredZones.getSolidZones()) {
-				if (sz.instance().zone.shape().closestDistanceTo(cameraPos) <= 2000D && frustum.isVisible(sz.instance().zone.shape().getBoundingBox())) {
+				if (sz.instance().zone.shape().closestDistanceTo(cameraPos) <= 2048D && frame.isVisible(sz.instance().zone.shape().getBoundingBox())) {
 					boolean hovered = clip != null && clip.instance() == sz.instance();
 					var baseColor = sz.instance().zone.color().withAlpha(50);
 					var outlineColor = hovered ? Color.WHITE : sz.instance().entities.isEmpty() ? sz.instance().zone.color() : Color.GREEN;
@@ -83,7 +82,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 		} else {
 			for (var container : session.filteredZones) {
 				for (var instance : container.zones) {
-					if (instance.zone.shape().closestDistanceTo(cameraPos) <= 2000D && frustum.isVisible(instance.zone.shape().getBoundingBox())) {
+					if (instance.zone.shape().closestDistanceTo(cameraPos) <= 2048D && frame.isVisible(instance.zone.shape().getBoundingBox())) {
 						var renderer = ZoneRenderer.get(instance.zone.shape().type());
 
 						if (renderer != EmptyZoneRenderer.INSTANCE) {
@@ -128,61 +127,32 @@ public interface ZoneRenderer<T extends ZoneShape> {
 		}
 	}
 
-	static void renderSolid(FrameInfo frame) {
-		for (var sz : frame.session().filteredZones.getSolidZones()) {
+	static void renderVisible(FrameInfo frame, TerrainRenderLayer renderLayerFilter) {
+		for (var sz : frame.session().filteredZones.getVisible()) {
 			var zone = sz.instance().zone;
 			double dist = zone.shape().closestDistanceTo(frame.camera().getPosition());
 
-			if (dist <= 10D && zone.color().alpha() > 0 && frame.frustum().isVisible(zone.shape().getBoundingBox()) && zone.solid().test(frame.mc().player)) {
-				var renderer = ZoneRenderer.get(zone.shape().type());
+			if (dist > 2048D || !frame.isVisible(zone.shape().getBoundingBox())) {
+				continue;
+			}
 
-				if (renderer != null) {
-					var baseColor = zone.color().withAlpha(Mth.lerpInt((float) (dist / 10D), 100, 0));
-					renderer.render(Cast.to(zone.shape()), new ZoneRenderer.Context(frame, baseColor, Color.TRANSPARENT));
-				}
+			for (var cube : sz.cachedCubes().getOrDefault(renderLayerFilter, List.of())) {
+				CubeTexturesRenderer.render(frame, LightUV.FULLBRIGHT, cube, renderLayerFilter);
 			}
 		}
-	}
 
-	static void renderFluid(FrameInfo frame) {
-		for (var sz : frame.session().filteredZones.getFluidZones()) {
-			var zone = sz.instance().zone;
-			double dist = zone.shape().closestDistanceTo(frame.camera().getPosition());
+		if (renderLayerFilter == TerrainRenderLayer.TRANSLUCENT) {
+			for (var sz : frame.session().filteredZones.getSolidZones()) {
+				var zone = sz.instance().zone;
+				double dist = zone.shape().closestDistanceTo(frame.camera().getPosition());
 
-			if (dist <= 2048D && frame.frustum().isVisible(zone.shape().getBoundingBox())) {
-				var fluidState = sz.instance().zone.fluid();
+				if (dist <= 10D && zone.color().alpha() > 0 && frame.isVisible(zone.shape().getBoundingBox()) && zone.solid().test(frame.mc().player)) {
+					var renderer = ZoneRenderer.get(zone.shape().type());
 
-				var yOff = 1F - fluidState.getOwnHeight();
-				yOff += (float) Math.clamp(-frame.y(yOff) / 50D, 0D, 0.5D);
-
-				var stillTexture = DynamicSpriteTexture.getStillFluid(frame.mc(), fluidState.getFluidType());
-				var flowingTexture = DynamicSpriteTexture.getFlowingFluid(frame.mc(), fluidState.getFluidType());
-
-				for (var box : sz.shapeBox().boxes()) {
-					var bminX = box.minX;
-					var bminY = box.minY;
-					var bminZ = box.minZ;
-					var bmaxX = box.maxX;
-					var bmaxY = box.maxY - yOff;
-					var bmaxZ = box.maxZ;
-
-					var blockPos = BlockPos.containing(Mth.floor(Mth.lerp(0.5D, bminX, bmaxX)), bmaxY - 1D, Mth.floor(Mth.lerp(0.5D, bminZ, bmaxZ)));
-					var color = Color.of(0xFF000000 | frame.mc().getBlockColors().getColor(fluidState.createLegacyBlock(), frame.mc().level, blockPos, 0));
-
-					FluidBoxRenderer.render(
-						frame,
-						fluidState,
-						color,
-						LightUV.FULLBRIGHT,
-						bminX,
-						bminY,
-						bminZ,
-						bmaxX,
-						bmaxY,
-						bmaxZ,
-						stillTexture,
-						flowingTexture
-					);
+					if (renderer != null) {
+						var baseColor = zone.color().withAlpha(Mth.lerpInt((float) (dist / 10D), 100, 0));
+						renderer.render(Cast.to(zone.shape()), new ZoneRenderer.Context(frame, baseColor, Color.TRANSPARENT));
+					}
 				}
 			}
 		}

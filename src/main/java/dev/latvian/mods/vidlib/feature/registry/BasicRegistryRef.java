@@ -11,6 +11,11 @@ public class BasicRegistryRef<K, V> implements Supplier<V> {
 		this.id = id;
 	}
 
+	BasicRegistryRef(K id, V value) {
+		this.id = id;
+		this.value = value;
+	}
+
 	public K id() {
 		return id;
 	}

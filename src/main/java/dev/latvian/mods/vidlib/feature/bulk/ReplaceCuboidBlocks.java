@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.bulk;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
 import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
@@ -14,7 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.Set;
 
 public record ReplaceCuboidBlocks(BlockPos start, BlockPos end, BlockState state) implements BulkLevelModification {
-	public static final SimpleRegistryType<ReplaceCuboidBlocks> TYPE = SimpleRegistryType.dynamic(VidLib.id("cuboid_blocks"), RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final SimpleRegistryType<ReplaceCuboidBlocks> TYPE = SimpleRegistryType.dynamic("cuboid_blocks", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		BlockPos.CODEC.fieldOf("start").forGetter(ReplaceCuboidBlocks::start),
 		BlockPos.CODEC.fieldOf("end").forGetter(ReplaceCuboidBlocks::end),
 		VLCodecs.BLOCK_STATE.fieldOf("state").forGetter(ReplaceCuboidBlocks::state)

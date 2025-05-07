@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.structure;
 
+import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
 import dev.latvian.mods.vidlib.feature.bulk.OptimizedModificationBuilder;
@@ -31,7 +32,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -44,6 +44,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -174,6 +175,8 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 
 					if (value.isPresent()) {
 						state = state.setValue(property, Cast.to(value.get()));
+					} else {
+						VidLib.LOGGER.warn("Failed to parse property %s with value %s for block %s".formatted(propertyName, valueName, id));
 					}
 				}
 			}
@@ -204,10 +207,6 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 		}
 	}
 
-	public static boolean isInvisible(BlockState state) {
-		return state.getRenderShape() == RenderShape.INVISIBLE && state.getFluidState().isEmpty();
-	}
-
 	public static StructureHolder capture(Level level, BlockPos from, BlockPos to, @Nullable BlockFilter filter, boolean forRendering) {
 		if (filter == BlockFilter.ANY.instance()) {
 			filter = null;
@@ -225,7 +224,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 		for (var pos : BlockPos.betweenClosed(minX, minY, minZ, maxX, maxY, maxZ)) {
 			var state = level.getBlockState(pos);
 
-			if (forRendering ? !isInvisible(state) : !state.is(Blocks.STRUCTURE_VOID)) {
+			if (forRendering ? state.isVisible() : !state.is(Blocks.STRUCTURE_VOID)) {
 				if (filter == null || filter.test(level, pos, state)) {
 					blocks.put(BlockPos.asLong(pos.getX() - minX, pos.getY() - minY, pos.getZ() - minZ), state);
 				}
@@ -247,7 +246,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 		for (var entry : blocks.long2ObjectEntrySet()) {
 			var state = entry.getValue();
 
-			if (isInvisible(state)) {
+			if (!state.isVisible()) {
 				return true;
 			}
 		}
@@ -265,7 +264,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 		for (var entry : blocks.long2ObjectEntrySet()) {
 			var state = entry.getValue();
 
-			if (!isInvisible(state)) {
+			if (state.isVisible()) {
 				newBlocks.put(entry.getLongKey(), state);
 			}
 		}
@@ -284,7 +283,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 
 		var offsetBlocks = new Long2ObjectOpenHashMap<BlockState>(blocks.size());
 
-		for (var entry : offsetBlocks.long2ObjectEntrySet()) {
+		for (var entry : blocks.long2ObjectEntrySet()) {
 			var pos = entry.getLongKey();
 			var state = entry.getValue();
 
@@ -342,7 +341,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 
 	private boolean isTransparent(int x, int y, int z) {
 		var s = blocks.get(BlockPos.asLong(x, y, z));
-		return s == null || isInvisible(s);
+		return s == null || !s.isVisible();
 	}
 
 	public StructureHolder shell() {
@@ -495,17 +494,18 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 			var state = entry.getKey();
 			var id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
 			Utf8String.write(buf, id.getNamespace().equals("minecraft") ? id.getPath() : id.toString(), Short.MAX_VALUE);
+			var defaultState = state.getBlock().defaultBlockState();
 
-			if (state == state.getBlock().defaultBlockState()) {
+			if (state == defaultState) {
 				VarInt.write(buf, 0);
 			} else {
 				var diff = new Reference2ObjectOpenHashMap<Property<?>, String>();
 
 				for (var property : state.getProperties()) {
-					var defaultValue = state.getValue(property);
+					var defaultValue = defaultState.getValue(property);
 					var value = state.getValue(property);
 
-					if (defaultValue != value) {
+					if (!Objects.equals(defaultValue, value)) {
 						diff.put(property, property.getName(Cast.to(value)));
 					}
 				}

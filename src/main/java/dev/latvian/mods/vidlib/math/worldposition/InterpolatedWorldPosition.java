@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.kmath.KMath;
 import dev.latvian.mods.kmath.easing.Easing;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
@@ -13,7 +12,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public record InterpolatedWorldPosition(Easing easing, float start, float end, WorldPosition from, WorldPosition to) implements WorldPosition {
-	public static final SimpleRegistryType<InterpolatedWorldPosition> TYPE = SimpleRegistryType.dynamic(VidLib.id("interpolated"), RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final SimpleRegistryType<InterpolatedWorldPosition> TYPE = SimpleRegistryType.dynamic("interpolated", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Easing.CODEC.optionalFieldOf("easing", Easing.LINEAR).forGetter(InterpolatedWorldPosition::easing),
 		Codec.FLOAT.optionalFieldOf("start", 0F).forGetter(InterpolatedWorldPosition::start),
 		Codec.FLOAT.optionalFieldOf("end", 1F).forGetter(InterpolatedWorldPosition::end),

@@ -7,9 +7,12 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import org.joml.FrustumIntersection;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 public record FrameInfo(
 	Minecraft mc,
@@ -26,7 +29,8 @@ public record FrameInfo(
 	double cameraY,
 	double cameraZ,
 	Frustum frustum,
-	boolean replay
+	boolean replay,
+	Vector3f normal
 ) {
 	public FrameInfo(Minecraft mc, LocalClientSessionData session, RenderLevelStageEvent event) {
 		this(
@@ -44,7 +48,8 @@ public record FrameInfo(
 			event.getCamera().getPosition().y,
 			event.getCamera().getPosition().z,
 			event.getFrustum(),
-			mc.player.isReplayCamera()
+			mc.player.isReplayCamera(),
+			new Vector3f()
 		);
 	}
 
@@ -74,5 +79,14 @@ public record FrameInfo(
 
 	public void translate(Vec3 pos) {
 		translate(pos.x, pos.y, pos.z);
+	}
+
+	public boolean isVisible(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+		int f = frustum.cubeInFrustum(minX, minY, minZ, maxX, maxY, maxZ);
+		return f == FrustumIntersection.INSIDE || f == FrustumIntersection.INTERSECT;
+	}
+
+	public boolean isVisible(AABB aabb) {
+		return aabb.isInfinite() || isVisible(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ);
 	}
 }

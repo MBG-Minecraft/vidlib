@@ -14,7 +14,7 @@ public record ProgressBar(ProgressBarType type, ProgressGetter progressGetter) {
 		ValueSupplier BOSS_ENTITY_BARS = (level, delta) -> {
 			var list = new ArrayList<Value>(0);
 
-			for (var entity : level.allEntities()) {
+			for (var entity : level.getBosses()) {
 				var bar = entity.getBossBar();
 
 				if (bar != null) {

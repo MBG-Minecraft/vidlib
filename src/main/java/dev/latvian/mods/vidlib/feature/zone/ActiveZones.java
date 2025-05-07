@@ -1,8 +1,6 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
 import dev.latvian.mods.kmath.Line;
-import dev.latvian.mods.kmath.VoxelShapeBox;
-import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -29,18 +27,6 @@ import java.util.Set;
 import java.util.UUID;
 
 public class ActiveZones implements Iterable<ZoneContainer> {
-	public record CachedZoneShape(ZoneInstance instance, VoxelShape shape, VoxelShapeBox shapeBox) {
-		public static final CachedZoneShape[] EMPTY_ARRAY = new CachedZoneShape[0];
-
-		public static void append(Collection<CachedZoneShape> list, ZoneInstance instance) {
-			var shape = instance.zone.shape().createVoxelShape().optimize();
-
-			if (!shape.isEmpty()) {
-				list.add(new CachedZoneShape(instance, shape, VoxelShapeBox.of(shape)));
-			}
-		}
-	}
-
 	public static final StreamCodec<RegistryFriendlyByteBuf, ActiveZones> STREAM_CODEC = new StreamCodec<>() {
 		@Override
 		public ActiveZones decode(RegistryFriendlyByteBuf buf) {
@@ -67,14 +53,19 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 
 	public final Map<ResourceLocation, ZoneContainer> containers;
 	public final Int2ObjectOpenHashMap<List<ZoneInstance>> entityZones;
+	CachedZoneShape[] visible;
 	CachedZoneShape[] solidZones;
 	CachedZoneShape[] fluidZones;
 
 	public ActiveZones() {
 		this.containers = new LinkedHashMap<>();
 		this.entityZones = new Int2ObjectOpenHashMap<>();
-		this.solidZones = null;
-		this.fluidZones = null;
+	}
+
+	public void clearCache() {
+		visible = null;
+		solidZones = null;
+		fluidZones = null;
 	}
 
 	@Nullable
@@ -92,8 +83,7 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 			}
 		}
 
-		solidZones = null;
-		fluidZones = null;
+		clearCache();
 	}
 
 	public void update(Collection<ZoneContainer> zones) {
@@ -104,8 +94,7 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 			containers.put(zone.id, zone);
 		}
 
-		solidZones = null;
-		fluidZones = null;
+		clearCache();
 	}
 
 	@Override
@@ -153,19 +142,37 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 		return result;
 	}
 
-	public CachedZoneShape[] getSolidZones() {
-		if (solidZones == null) {
-			var solidZonesList = new ArrayList<CachedZoneShape>(0);
+	public CachedZoneShape[] getVisible() {
+		if (visible == null) {
+			var list = new ArrayList<CachedZoneShape>(0);
 
 			for (var container : containers.values()) {
 				for (var zone : container.zones) {
-					if (zone.zone.solid() != EntityFilter.NONE.instance()) {
-						CachedZoneShape.append(solidZonesList, zone);
+					if (zone.zone.isVisible()) {
+						CachedZoneShape.append(list, zone);
 					}
 				}
 			}
 
-			solidZones = solidZonesList.toArray(CachedZoneShape.EMPTY_ARRAY);
+			visible = list.toArray(CachedZoneShape.EMPTY_ARRAY);
+		}
+
+		return visible;
+	}
+
+	public CachedZoneShape[] getSolidZones() {
+		if (solidZones == null) {
+			var list = new ArrayList<CachedZoneShape>(0);
+
+			for (var container : containers.values()) {
+				for (var zone : container.zones) {
+					if (zone.zone.isSolid()) {
+						CachedZoneShape.append(list, zone);
+					}
+				}
+			}
+
+			solidZones = list.toArray(CachedZoneShape.EMPTY_ARRAY);
 		}
 
 		return solidZones;
@@ -177,8 +184,8 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 		}
 
 		for (var sz : getSolidZones()) {
-			if (sz.instance.zone.solid().test(entity)) {
-				for (var box : sz.shapeBox.boxes()) {
+			if (sz.instance().zone.solid().test(entity)) {
+				for (var box : sz.shapeBox().boxes()) {
 					if (box.intersects(collisionBox)) {
 						return true;
 					}
@@ -203,10 +210,10 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 		var shapes = new ArrayList<VoxelShape>(0);
 
 		for (var sz : solidZones) {
-			if (sz.instance.zone.solid().test(entity)) {
-				for (var box : sz.shapeBox.boxes()) {
+			if (sz.instance().zone.solid().test(entity)) {
+				for (var box : sz.shapeBox().boxes()) {
 					if (box.intersects(collisionBox)) {
-						shapes.add(sz.shape);
+						shapes.add(sz.shape());
 						break;
 					}
 				}
@@ -220,21 +227,23 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 		for (var container : containers.values()) {
 			container.remove(uuid);
 		}
+
+		clearCache();
 	}
 
 	public CachedZoneShape[] getFluidZones() {
 		if (fluidZones == null) {
-			var fluidZonesList = new ArrayList<CachedZoneShape>(0);
+			var list = new ArrayList<CachedZoneShape>(0);
 
 			for (var container : containers.values()) {
 				for (var zone : container.zones) {
 					if (!zone.zone.fluid().isEmpty()) {
-						CachedZoneShape.append(fluidZonesList, zone);
+						CachedZoneShape.append(list, zone);
 					}
 				}
 			}
 
-			fluidZones = fluidZonesList.toArray(CachedZoneShape.EMPTY_ARRAY);
+			fluidZones = list.toArray(CachedZoneShape.EMPTY_ARRAY);
 		}
 
 		return fluidZones;
@@ -243,8 +252,8 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 	@Nullable
 	public FluidState getZoneFluidState(Vec3i pos) {
 		for (var c : getFluidZones()) {
-			if (c.instance.zone.shape().contains(pos)) {
-				return c.instance.zone.fluid();
+			if (c.instance().zone.shape().contains(pos)) {
+				return c.instance().zone.fluid().fluidState();
 			}
 		}
 

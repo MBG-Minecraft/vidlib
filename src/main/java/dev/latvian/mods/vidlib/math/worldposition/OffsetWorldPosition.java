@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.math.worldposition;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
@@ -9,7 +8,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public record OffsetWorldPosition(WorldPosition a, WorldPosition b) implements WorldPosition {
-	public static final SimpleRegistryType<OffsetWorldPosition> TYPE = SimpleRegistryType.dynamic(VidLib.id("offset"), RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final SimpleRegistryType<OffsetWorldPosition> TYPE = SimpleRegistryType.dynamic("offset", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		WorldPosition.CODEC.fieldOf("a").forGetter(OffsetWorldPosition::a),
 		WorldPosition.CODEC.fieldOf("b").forGetter(OffsetWorldPosition::b)
 	).apply(instance, OffsetWorldPosition::new)), CompositeStreamCodec.of(

@@ -29,6 +29,9 @@ public class BlockStateMixin implements VLBlockState {
 	@Unique
 	private float vl$density = Float.NaN;
 
+	@Unique
+	private Boolean vl$visible;
+
 	@Override
 	public void vl$clearCache() {
 		if (vl$clientProperties instanceof WithCache cache) {
@@ -70,5 +73,14 @@ public class BlockStateMixin implements VLBlockState {
 		}
 
 		return vl$density;
+	}
+
+	@Override
+	public boolean isVisible() {
+		if (vl$visible == null) {
+			vl$visible = VLBlockState.super.isVisible();
+		}
+
+		return vl$visible;
 	}
 }
