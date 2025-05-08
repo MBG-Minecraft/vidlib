@@ -15,6 +15,7 @@ import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.server.command.EnumArgument;
 
 public interface FireCommand {
@@ -48,7 +49,7 @@ public interface FireCommand {
 	);
 
 	static int spawn(CommandSourceStack source, MovementType type, BlockPos position, int count, float radius, float yaw, float pitch, ResourceLocation gradient) {
-		source.getLevel().fireParticles(source.getLevel().random, new FireData(new FireParticleOptions(Either.left(gradient), 100, 1F), new ParticleMovementData(type, position, count, radius, 0F, Rotation.deg(yaw, pitch))));
+		source.getLevel().fireParticles(source.getLevel().random, new FireData(new FireParticleOptions(Either.left(gradient), 60, 1F), new ParticleMovementData(type, Vec3.atCenterOf(position), count, radius, 0F, Rotation.deg(yaw, pitch))));
 		return 1;
 	}
 }

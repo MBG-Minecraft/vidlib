@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
 import dev.latvian.mods.kmath.DistanceComparator;
+import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -19,13 +20,14 @@ import java.util.Map;
 import java.util.Objects;
 
 public class VidLibParticleRenderTypes {
-	public static final ParticleRenderType TRANSLUCENT_ADDITION = new ParticleRenderType("vidlib:translucent_addition", RenderType.translucentParticle(TextureAtlas.LOCATION_PARTICLES), true);
 	public static final ParticleRenderType TRUE_TRANSLUCENT = new ParticleRenderType("vidlib:true_translucent", RenderType.translucentParticle(TextureAtlas.LOCATION_PARTICLES), true);
+	public static final ParticleRenderType ADDITIVE = new ParticleRenderType("vidlib:additive", VidLibRenderTypes.Particle.ADDITIVE, true);
 
 	public static final Map<ParticleRenderType, List<Particle>> TEMP_LIST = new IdentityHashMap<>();
 
 	static {
 		TEMP_LIST.put(TRUE_TRANSLUCENT, new ArrayList<>());
+		TEMP_LIST.put(ADDITIVE, new ArrayList<>());
 	}
 
 	@Unique

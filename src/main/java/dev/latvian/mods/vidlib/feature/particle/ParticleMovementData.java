@@ -7,15 +7,15 @@ import dev.latvian.mods.kmath.Rotation;
 import dev.latvian.mods.kmath.Vec3f;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.phys.Vec3;
 
 public record ParticleMovementData(
 	MovementType type,
-	BlockPos position,
+	Vec3 position,
 	int count,
 	float radius,
 	float deviate,
@@ -23,7 +23,7 @@ public record ParticleMovementData(
 ) {
 	public static final Codec<ParticleMovementData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		KnownCodec.MOVEMENT_TYPE.codec().optionalFieldOf("type", MovementType.CIRCULAR).forGetter(ParticleMovementData::type),
-		BlockPos.CODEC.fieldOf("position").forGetter(ParticleMovementData::position),
+		Vec3.CODEC.fieldOf("position").forGetter(ParticleMovementData::position),
 		Codec.INT.optionalFieldOf("count", 1).forGetter(ParticleMovementData::count),
 		Codec.FLOAT.optionalFieldOf("radius", 20F).forGetter(ParticleMovementData::radius),
 		Codec.FLOAT.optionalFieldOf("deviate", 0F).forGetter(ParticleMovementData::deviate),
@@ -32,7 +32,7 @@ public record ParticleMovementData(
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ParticleMovementData> STREAM_CODEC = CompositeStreamCodec.of(
 		KnownCodec.MOVEMENT_TYPE.streamCodec().optional(MovementType.CIRCULAR), ParticleMovementData::type,
-		BlockPos.STREAM_CODEC, ParticleMovementData::position,
+		Vec3.STREAM_CODEC, ParticleMovementData::position,
 		ByteBufCodecs.VAR_INT, ParticleMovementData::count,
 		ByteBufCodecs.FLOAT, ParticleMovementData::radius,
 		ByteBufCodecs.FLOAT, ParticleMovementData::deviate,
@@ -40,7 +40,7 @@ public record ParticleMovementData(
 		ParticleMovementData::new
 	);
 
-	public ParticleMovementData(MovementType type, BlockPos position, int count, float radius) {
+	public ParticleMovementData(MovementType type, Vec3 position, int count, float radius) {
 		this(type, position, count, radius, 0F, Rotation.NONE);
 	}
 

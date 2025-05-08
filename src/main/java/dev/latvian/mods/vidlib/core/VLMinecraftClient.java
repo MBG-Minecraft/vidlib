@@ -104,7 +104,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	@Override
 	default PauseType getPauseType() {
 		var mc = vl$self();
-		return mc.isPaused() ? PauseType.GAME : mc.level != null && mc.level.tickRateManager().isFrozen() ? PauseType.TICK : PauseType.NONE;
+		return mc.isPaused() ? PauseType.GAME : mc.level != null && mc.level.tickRateManager().runsNormally() ? PauseType.NONE : PauseType.TICK;
 	}
 
 	default WorldMouse getWorldMouse() {
@@ -389,70 +389,72 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	@Override
 	default void cubeParticles(Map<CubeParticleOptions, List<BlockPos>> map) {
+		var particles = vl$self().particleEngine;
+
 		for (var entry : map.entrySet()) {
 			for (var pos : entry.getValue()) {
-				vl$level().addParticle(entry.getKey(), pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, 0D, 0D, 0D);
+				particles.createParticle(entry.getKey(), pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, 0D, 0D, 0D);
 			}
 		}
 	}
 
 	@Override
 	default void lineParticles(Map<LineParticleOptions, List<AABB>> map) {
+		var particles = vl$self().particleEngine;
+
 		for (var entry : map.entrySet()) {
 			for (var box : entry.getValue()) {
-				vl$level().addParticle(entry.getKey(), box.minX, box.minY, box.minZ, box.maxX - box.minX, box.maxY - box.minY, box.maxZ - box.minZ);
+				particles.createParticle(entry.getKey(), box.minX, box.minY, box.minZ, box.maxX - box.minX, box.maxY - box.minY, box.maxZ - box.minZ);
 			}
 		}
 	}
 
 	@Override
 	default void textParticles(TextParticleOptions options, List<Vec3> positions) {
+		var particles = vl$self().particleEngine;
+
 		for (var pos : positions) {
-			vl$level().addParticle(options, pos.x, pos.y, pos.z, 0D, 0D, 0D);
+			particles.createParticle(options, pos.x, pos.y, pos.z, 0D, 0D, 0D);
 		}
 	}
 
 	@Override
 	default void itemParticles(ItemParticleOptions options, List<Pair<Vec3, Vec3>> positions) {
+		var particles = vl$self().particleEngine;
+
 		for (var pair : positions) {
 			var pos = pair.getFirst();
 			var vel = pair.getSecond();
-			vl$level().addParticle(options, pos.x, pos.y, pos.z, vel.x, vel.y, vel.z);
+			particles.createParticle(options, pos.x, pos.y, pos.z, vel.x, vel.y, vel.z);
 		}
 	}
 
 	@Override
 	default void windParticles(RandomSource random, WindData data) {
 		var particles = vl$self().particleEngine;
+		var pos = data.data().position();
 
 		for (int i = 0; i < data.data().count(); i++) {
-			var x = data.data().position().getX() + random.nextFloat();
-			var y = data.data().position().getY() + random.nextFloat() * (data.options().ground() ? 0.12D : 1D);
-			var z = data.data().position().getZ() + random.nextFloat();
+			var x = pos.x + random.nextFloat();
+			var y = pos.y + random.nextFloat() * (data.options().ground() ? 0.12D : 1D);
+			var z = pos.z + random.nextFloat();
 			var v = data.data().delta(random);
-			var p = particles.createParticle(data.options(), x, y, z, v.x(), v.y(), v.z());
-
-			if (p != null) {
-				particles.add(p);
-			}
+			particles.createParticle(data.options(), x, y, z, v.x(), v.y(), v.z());
 		}
 	}
 
 	@Override
 	default void fireParticles(RandomSource random, FireData data) {
 		var particles = vl$self().particleEngine;
+		var pos = data.data().position();
 		var options = data.options().withResolvedGradient();
 
 		for (int i = 0; i < data.data().count(); i++) {
-			var x = data.data().position().getX() + random.nextFloat();
-			var y = data.data().position().getY() + random.nextFloat();
-			var z = data.data().position().getZ() + random.nextFloat();
+			var x = pos.x + random.nextFloat();
+			var y = pos.y + random.nextFloat();
+			var z = pos.z + random.nextFloat();
 			var v = data.data().delta(random);
-			var p = particles.createParticle(options, x, y, z, v.x(), v.y(), v.z());
-
-			if (p != null) {
-				particles.add(p);
-			}
+			particles.createParticle(options, x, y, z, v.x(), v.y(), v.z());
 		}
 	}
 

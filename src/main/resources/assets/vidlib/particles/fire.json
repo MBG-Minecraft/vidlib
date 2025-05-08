@@ -1,7 +1,14 @@
 {
 	"textures": [
-		"vidlib:smoke/1",
-		"vidlib:smoke/2",
-		"vidlib:smoke/3"
+		"vidlib:fire/1",
+		"vidlib:fire/2",
+		"vidlib:fire/3",
+		"vidlib:fire/4",
+		"vidlib:fire/5",
+		"vidlib:fire/6",
+		"vidlib:fire/7",
+		"vidlib:fire/8",
+		"vidlib:fire/9",
+		"vidlib:fire/10"
 	]
 }

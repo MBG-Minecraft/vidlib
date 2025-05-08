@@ -1,14 +1,14 @@
 package dev.latvian.mods.vidlib.feature.client;
 
+import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.util.Empty;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.TriState;
-import net.minecraft.world.level.material.FluidState;
 
 public interface VidLibRenderTypes {
 	TexturedRenderType GUI = TexturedRenderType.internal(
@@ -28,7 +28,7 @@ public interface VidLibRenderTypes {
 		VidLibRenderPipelines.SKYBOX,
 		texture -> RenderType.CompositeState.builder()
 			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
-			.createCompositeState(true)
+			.createCompositeState(false)
 	);
 
 	interface Entity {
@@ -201,8 +201,18 @@ public interface VidLibRenderTypes {
 		}
 	}
 
-	static RenderType getFluid(FluidState fluidState, DynamicSpriteTexture texture, boolean cull) {
-		var o = ItemBlockRenderTypes.getRenderLayer(fluidState);
-		return Terrain.get(TerrainRenderLayer.fromBlockRenderType(o), cull).apply(texture.resourceId());
+	interface Particle {
+		RenderType ADDITIVE = RenderType.create(
+			VidLib.id("particle/additive").toString(),
+			1536,
+			false,
+			false,
+			VidLibRenderPipelines.ADDITIVE_PARTICLE,
+			RenderType.CompositeState.builder()
+				.setTextureState(new RenderStateShard.TextureStateShard(TextureAtlas.LOCATION_PARTICLES, TriState.FALSE, false))
+				.setLightmapState(RenderStateShard.LIGHTMAP)
+				.setOutputState(RenderStateShard.PARTICLES_TARGET)
+				.createCompositeState(false)
+		);
 	}
 }

@@ -50,7 +50,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	@Override
 	default PauseType getPauseType() {
 		var server = vl$self();
-		return server.isPaused() ? PauseType.GAME : server.tickRateManager().isFrozen() ? PauseType.TICK : PauseType.NONE;
+		return server.isPaused() ? PauseType.GAME : server.tickRateManager().runsNormally() ? PauseType.NONE : PauseType.TICK;
 	}
 
 	@Override

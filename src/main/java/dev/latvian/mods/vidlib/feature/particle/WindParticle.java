@@ -6,7 +6,7 @@ import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.particle.SpriteSet;
 
-public class WindParticle extends TargetedParticle {
+public class WindParticle extends InterpolatedParticle {
 	public static final SingleQuadParticle.FacingCameraMode GROUND = (quaternion, camera, delta) -> {
 		quaternion.rotateX(-(float) (Math.PI / 2D));
 	};

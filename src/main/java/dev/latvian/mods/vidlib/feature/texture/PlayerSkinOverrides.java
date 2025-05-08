@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.client;
+package dev.latvian.mods.vidlib.feature.texture;
 
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.util.UndashedUuid;

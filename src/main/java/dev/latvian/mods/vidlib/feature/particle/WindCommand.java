@@ -12,6 +12,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.AngleArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.server.command.EnumArgument;
 
 public interface WindCommand {
@@ -44,7 +45,7 @@ public interface WindCommand {
 	);
 
 	static int spawn(CommandSourceStack source, MovementType type, BlockPos position, int count, float radius, float yaw, float pitch, boolean ground) {
-		source.getLevel().windParticles(source.getLevel().random, new WindData(new WindParticleOptions(100, ground, 1F), new ParticleMovementData(type, position, count, radius, 0F, Rotation.deg(yaw, pitch))));
+		source.getLevel().windParticles(source.getLevel().random, new WindData(new WindParticleOptions(100, ground, 1F), new ParticleMovementData(type, Vec3.atCenterOf(position), count, radius, 0F, Rotation.deg(yaw, pitch))));
 		return 1;
 	}
 }

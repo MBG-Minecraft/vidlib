@@ -17,6 +17,7 @@ public class SparkParticle extends TextureSheetParticle {
 
 	private final SpriteSet spriteSet;
 	private final float randomOffset;
+	private float oQuadSize;
 
 	public SparkParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet spriteSet) {
 		super(level, x, y, z);
@@ -29,15 +30,17 @@ public class SparkParticle extends TextureSheetParticle {
 		this.randomOffset = random.nextFloat();
 		this.lifetime = (int) KMath.lerp(randomOffset, 15, org.joml.Math.max(30, Math.sqrt(xd * xd + yd * yd + zd * zd) * 10));
 		this.gravity = KMath.lerp(randomOffset, 1.1F, 1.5F);
+		this.oQuadSize = quadSize;
 	}
 
 	@Override
 	public ParticleRenderType getRenderType() {
-		return VidLibParticleRenderTypes.TRANSLUCENT_ADDITION;
+		return VidLibParticleRenderTypes.ADDITIVE;
 	}
 
 	@Override
 	public void tick() {
+		oQuadSize = quadSize;
 		hasPhysics = yd < 0D;
 		oRoll = roll;
 		super.tick();
@@ -52,5 +55,10 @@ public class SparkParticle extends TextureSheetParticle {
 	@Override
 	protected int getLightColor(float tint) {
 		return 15728880;
+	}
+
+	@Override
+	public float getQuadSize(float delta) {
+		return KMath.lerp(delta, oQuadSize, quadSize);
 	}
 }

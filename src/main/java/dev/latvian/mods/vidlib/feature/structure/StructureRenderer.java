@@ -50,6 +50,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class StructureRenderer implements WithCache {
+	private static final EnumMap<TerrainRenderLayer, CachedLayer> EMPTY_LAYERS = new EnumMap<>(TerrainRenderLayer.class);
+
 	private record StateModel(BlockPos pos, BlockState state, BlockStateModel model, long seed) {
 	}
 
@@ -203,7 +205,7 @@ public class StructureRenderer implements WithCache {
 		}
 
 		if (layers == null) {
-			layers = new EnumMap<>(TerrainRenderLayer.class);
+			layers = EMPTY_LAYERS;
 			renderBounds = AABB.INFINITE;
 			var structure = structureProvider.get();
 
@@ -316,6 +318,8 @@ public class StructureRenderer implements WithCache {
 	private void upload(BuildingLayer[] buildingLayerArray, long buildTime) {
 		long start = System.currentTimeMillis();
 
+		var layers0 = new EnumMap<>(EMPTY_LAYERS);
+
 		for (var layer : buildingLayerArray) {
 			try (var meshData = layer.bufferBuilder.build()) {
 				if (meshData != null) {
@@ -326,13 +330,15 @@ public class StructureRenderer implements WithCache {
 
 						var cachedBuffers = StaticBuffers.of(meshData, () -> "StructureRenderer");
 						var terrainLayer = TerrainRenderLayer.fromBlockRenderType(layer.type);
-						layers.put(terrainLayer, new CachedLayer(terrainLayer, layer.type, cachedBuffers));
+						layers0.put(terrainLayer, new CachedLayer(terrainLayer, layer.type, cachedBuffers));
 					}
 				}
 			}
 
 			layer.memory.close();
 		}
+
+		layers = layers0;
 
 		long time = System.currentTimeMillis() - start;
 
@@ -350,13 +356,15 @@ public class StructureRenderer implements WithCache {
 
 	@Override
 	public void clearCache() {
-		if (layers != null) {
-			for (var layer : layers.values()) {
+		var layers0 = layers;
+
+		if (layers0 != null) {
+			for (var layer : layers0.values()) {
 				MiscClientUtils.CLIENT_CLOSEABLE.add(layer.buffer);
 			}
-
-			layers = null;
 		}
+
+		layers = null;
 	}
 
 	public void render(PoseStack ms) {
@@ -370,11 +378,13 @@ public class StructureRenderer implements WithCache {
 			preRender();
 		}
 
-		if (layers == null || layers.isEmpty()) {
+		var layers0 = layers;
+
+		if (layers0 == null || layers0.isEmpty()) {
 			return;
 		}
 
-		var layer = layers.get(renderLayerFilter);
+		var layer = layers0.get(renderLayerFilter);
 
 		if (layer == null) {
 			return;

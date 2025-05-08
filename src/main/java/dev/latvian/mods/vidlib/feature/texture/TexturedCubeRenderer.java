@@ -1,7 +1,8 @@
-package dev.latvian.mods.vidlib.feature.client;
+package dev.latvian.mods.vidlib.feature.texture;
 
 import dev.latvian.mods.kmath.Directions;
 import dev.latvian.mods.kmath.texture.LightUV;
+import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.util.FaceTexture;
 import dev.latvian.mods.vidlib.util.FrameInfo;
 import dev.latvian.mods.vidlib.util.ResolvedCubeTextures;
@@ -47,7 +48,7 @@ public class TexturedCubeRenderer {
 			float th = uvScale <= 0F ? 1F : (maxY - minY) * uvScale;
 			float td = uvScale <= 0F ? 1F : (maxZ - minZ) * uvScale;
 
-			var texture = DynamicSpriteTexture.get(frame.mc(), face.sprite());
+			var texture = DynamicSpriteTexture.get(face.sprite());
 			var buffer = buffers.getBuffer(VidLibRenderTypes.Terrain.get(face.layer(), face.cull()).apply(texture));
 
 			msp.transformNormal(Directions.ALL[direction].getUnitVec3f(), n);

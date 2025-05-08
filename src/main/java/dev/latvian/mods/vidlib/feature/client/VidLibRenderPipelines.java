@@ -49,6 +49,13 @@ public interface VidLibRenderPipelines {
 		.withCull(false)
 		.build();
 
+	RenderPipeline ADDITIVE_PARTICLE = RenderPipeline.builder(RenderPipelines.PARTICLE_SNIPPET)
+		.withLocation(VidLib.id("pipeline/particle/additive"))
+		.withBlend(BlendFunction.ADDITIVE)
+		// .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+		.withDepthWrite(false)
+		.build();
+
 	@SubscribeEvent
 	static void registerRenderPipelines(RegisterRenderPipelinesEvent event) {
 		event.registerPipeline(SKYBOX);
@@ -56,6 +63,7 @@ public interface VidLibRenderPipelines {
 		event.registerPipeline(CUTOUT_MIPPED_TERRAIN_NO_CULL);
 		event.registerPipeline(CUTOUT_TERRAIN_NO_CULL);
 		event.registerPipeline(TRANSLUCENT_TERRAIN_NO_CULL);
+		event.registerPipeline(ADDITIVE_PARTICLE);
 		event.registerPipeline(PhysicsParticlesRenderTypes.SOLID_PIPELINE);
 		event.registerPipeline(PhysicsParticlesRenderTypes.CUTOUT_PIPELINE);
 		event.registerPipeline(PhysicsParticlesRenderTypes.TRANSLUCENT_PIPELINE);

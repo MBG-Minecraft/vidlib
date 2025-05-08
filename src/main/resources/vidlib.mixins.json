@@ -87,7 +87,8 @@
 		"SectionOcclusionGraphMixin",
 		"ShaderManagerMixin",
 		"SkinManagerMixin",
-		"SkyRendererMixin"
+		"SkyRendererMixin",
+		"TextureManagerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1,
