@@ -124,7 +124,9 @@ public class StructureRenderer implements WithCache {
 		}
 
 		for (var gs : GhostStructure.LIST) {
-			gs.structure().clearCache();
+			for (var s : gs.structures()) {
+				s.clearCache();
+			}
 		}
 
 		renderingAll = null;
@@ -134,17 +136,11 @@ public class StructureRenderer implements WithCache {
 		if (renderingAll == null) {
 			int r = 0;
 
-			/*
-			for (var renderer : RUNTIME_RENDERERS.values()) {
-				if (renderer.rendering) {
-					r++;
-				}
-			}
-			*/
-
 			for (var gs : GhostStructure.LIST) {
-				if (gs.structure().rendering) {
-					r++;
+				for (var s : gs.structures()) {
+					if (s.rendering) {
+						r++;
+					}
 				}
 			}
 

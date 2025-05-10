@@ -12,6 +12,7 @@ import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.RemoveZonePayload;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
+import dev.latvian.mods.vidlib.math.worldnumber.SyncGlobalNumberVariablesPayload;
 import dev.latvian.mods.vidlib.util.Empty;
 import dev.latvian.mods.vidlib.util.JsonUtils;
 import dev.latvian.mods.vidlib.util.PauseType;
@@ -242,5 +243,10 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 		} catch (Exception ex) {
 			return Empty.PROFILE;
 		}
+	}
+
+	@Override
+	default void syncGlobalVariables() {
+		s2c(new SyncGlobalNumberVariablesPayload(globalVariables()));
 	}
 }

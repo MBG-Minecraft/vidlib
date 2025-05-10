@@ -40,6 +40,7 @@ import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneEvent;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
+import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
 import dev.latvian.mods.vidlib.util.FrameInfo;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
@@ -90,6 +91,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	public Map<ResourceLocation, ClockValue> clocks;
 	public Map<ResourceLocation, Skybox> skyboxes;
 	public final DataMap serverDataMap;
+	public final WorldNumberVariables globalVariables;
 	public Skybox skybox;
 	public Map<ZoneShape, VoxelShapeBox> cachedZoneShapes;
 	public List<PlayerInfo> originalListedPlayers;
@@ -114,7 +116,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.clocks = new HashMap<>();
 		this.skyboxes = new HashMap<>();
 		this.serverDataMap = new DataMap(uuid, DataType.SERVER);
-		this.skybox = null;
+		this.globalVariables = new WorldNumberVariables();
 		VidLib.LOGGER.info("Client Session Data Initialized");
 	}
 

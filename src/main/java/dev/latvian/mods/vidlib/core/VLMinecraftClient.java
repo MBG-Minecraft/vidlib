@@ -205,6 +205,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		var player = vl$self().player;
 
 		if (!cutscene.steps.isEmpty() && player != null) {
+			variables = level.getEnvironment().globalVariables().merge(variables);
 			var ctx = new WorldNumberContext(level, 0F, variables);
 
 			for (var step : cutscene.steps) {
@@ -489,5 +490,10 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		} catch (Exception ex) {
 			return Empty.PROFILE;
 		}
+	}
+
+	@Override
+	default WorldNumberVariables globalVariables() {
+		return vl$self().player.vl$sessionData().globalVariables;
 	}
 }

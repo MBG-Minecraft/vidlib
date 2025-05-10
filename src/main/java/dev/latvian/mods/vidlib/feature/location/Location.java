@@ -11,6 +11,7 @@ import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
 import dev.latvian.mods.vidlib.feature.registry.ID;
 import dev.latvian.mods.vidlib.feature.registry.RegistryRef;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
+import dev.latvian.mods.vidlib.math.worldposition.WorldPosition;
 import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -19,7 +20,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 import java.util.function.Function;
@@ -29,15 +29,15 @@ import java.util.function.Supplier;
 public record Location(
 	ResourceLocation id,
 	ResourceKey<Level> dimension,
-	List<Vec3> positions,
+	List<WorldPosition> positions,
 	double range,
 	boolean warp,
 	boolean warpRequiresAdmin
-) implements Supplier<Vec3> {
+) implements Supplier<WorldPosition> {
 	public static final Codec<Location> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		ID.CODEC.fieldOf("id").forGetter(Location::id),
 		VLCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(Location::dimension),
-		VLCodecs.listOrSelf(VLCodecs.VEC_3).fieldOf("position").forGetter(Location::positions),
+		VLCodecs.listOrSelf(WorldPosition.CODEC).fieldOf("position").forGetter(Location::positions),
 		Codec.DOUBLE.optionalFieldOf("range", 0D).forGetter(Location::range),
 		Codec.BOOL.optionalFieldOf("warp", true).forGetter(Location::warp),
 		Codec.BOOL.optionalFieldOf("warp_requires_admin", true).forGetter(Location::warpRequiresAdmin)
@@ -46,7 +46,7 @@ public record Location(
 	public static final StreamCodec<RegistryFriendlyByteBuf, Location> DIRECT_STREAM_CODEC = CompositeStreamCodec.of(
 		ID.STREAM_CODEC, Location::id,
 		VLStreamCodecs.DIMENSION, Location::dimension,
-		VLStreamCodecs.VEC_3.list(), Location::positions,
+		WorldPosition.STREAM_CODEC.list(), Location::positions,
 		ByteBufCodecs.DOUBLE, Location::range,
 		ByteBufCodecs.BOOL, Location::warp,
 		ByteBufCodecs.BOOL, Location::warpRequiresAdmin,
@@ -71,11 +71,11 @@ public record Location(
 	}
 
 	@Override
-	public Vec3 get() {
+	public WorldPosition get() {
 		return positions.getFirst();
 	}
 
-	public Vec3 random(RandomSource source) {
+	public WorldPosition random(RandomSource source) {
 		return positions.get(source.nextInt(positions.size()));
 	}
 }

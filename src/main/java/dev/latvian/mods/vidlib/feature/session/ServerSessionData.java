@@ -9,6 +9,7 @@ import dev.latvian.mods.vidlib.feature.misc.SyncPlayerTagsPayload;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.registry.SyncRegistryPayload;
 import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
+import dev.latvian.mods.vidlib.math.worldnumber.SyncGlobalNumberVariablesPayload;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
@@ -53,6 +54,8 @@ public class ServerSessionData extends SessionData {
 		for (var reg : SyncedRegistry.ALL.values()) {
 			packets.s2c(new SyncRegistryPayload(reg, Map.copyOf(reg.registry().getMap())));
 		}
+
+		packets.s2c(new SyncGlobalNumberVariablesPayload(player.server.globalVariables()));
 
 		updateOverrides(player);
 

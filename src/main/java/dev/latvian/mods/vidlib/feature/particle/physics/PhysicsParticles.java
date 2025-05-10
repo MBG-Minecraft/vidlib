@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.particle.physics;
 
 import dev.latvian.mods.kmath.KMath;
 import dev.latvian.mods.kmath.Split;
+import dev.latvian.mods.kmath.vertexfunction.AdditiveRandomVertexFunction;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.block.VidLibBlockStateClientProperties;
@@ -30,9 +31,11 @@ public class PhysicsParticles {
 	}
 
 	@AutoInit(AutoInit.Type.CLIENT_LOADED)
-	public static void calculateUV() {
+	public static void reshape() {
+		var func = new AdditiveRandomVertexFunction(0L, 0L, 0.4F);
+
 		for (var split : SPLIT) {
-			split.calculateUV(split.id, 0.4F);
+			split.reshape(func);
 			VidLib.LOGGER.info("Reloaded Particle Splitter 1/" + split.split);
 		}
 	}

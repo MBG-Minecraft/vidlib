@@ -123,12 +123,12 @@ public interface GhostStructureCapture {
 
 							Files.writeString(jsonDir.resolve("%s.json".formatted(posString)), """
 								{
-								 	"structure": {
+								 	"structures": [{
 								 		"id": "video:ghost_chunks/%s/%s",
 								 		"center_x": false,
 								 		"center_z": false
-								 	},
-								 	"location": "video:ghost_chunks/%s",
+								 	}],
+								 	"locations": ["video:ghost_chunks/%s"],
 								 	"slice": [%d, %d, %d, %d, %d, %d],
 								 	"preload": true,
 								 	"inflate": true

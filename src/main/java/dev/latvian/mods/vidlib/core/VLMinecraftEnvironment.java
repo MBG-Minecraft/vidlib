@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.core;
 
 import com.mojang.authlib.GameProfile;
+import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
@@ -69,5 +70,12 @@ public interface VLMinecraftEnvironment extends VLPlayerContainer, VLMinecraftEn
 	}
 
 	default void vl$clearProfileCache() {
+	}
+
+	default WorldNumberVariables globalVariables() {
+		return WorldNumberVariables.EMPTY;
+	}
+
+	default void syncGlobalVariables() {
 	}
 }

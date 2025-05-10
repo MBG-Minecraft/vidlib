@@ -16,7 +16,7 @@ void main() {
 	float maxDist = size * size;
 	float intensity = 1.0;
 
-	if(texture(InSampler, texCoord).a < 0.01) {
+	if (texture(InSampler, texCoord).a < 0.01) {
 		for (float x = -csize; x <= csize; x += 1.0) {
 			for (float y = -csize; y <= csize; y += 1.0) {
 				float dist = x * x + y * y;

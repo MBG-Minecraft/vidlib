@@ -33,11 +33,28 @@ public record WorldNumberVariables(Map<String, WorldNumber> numbers, Map<String,
 		return new WorldNumberVariables(Map.of(name, num), Map.of());
 	}
 
+	public WorldNumberVariables() {
+		this(new HashMap<>(), new HashMap<>());
+	}
+
 	public WorldNumberVariables merge(WorldNumberVariables other) {
+		if (numbers.isEmpty() && positions.isEmpty()) {
+			return other;
+		} else if (other.numbers.isEmpty() && other.positions.isEmpty()) {
+			return this;
+		}
+
 		var numbers = new HashMap<>(numbers());
 		numbers.putAll(other.numbers());
 		var positions = new HashMap<>(positions());
 		positions.putAll(other.positions());
 		return new WorldNumberVariables(numbers, positions);
+	}
+
+	public void replace(WorldNumberVariables variables) {
+		numbers.clear();
+		numbers.putAll(variables.numbers);
+		positions.clear();
+		positions.putAll(variables.positions);
 	}
 }

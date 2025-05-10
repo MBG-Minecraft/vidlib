@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.client;
 
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.util.Empty;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
@@ -22,7 +23,7 @@ public interface VidLibRenderTypes {
 
 	TexturedRenderType SKYBOX = TexturedRenderType.internal(
 		"skybox",
-		1536,
+		DefaultVertexFormat.POSITION_TEX_COLOR.getVertexSize() * 6,
 		true,
 		true,
 		VidLibRenderPipelines.SKYBOX,
