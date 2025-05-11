@@ -79,6 +79,7 @@
 		"MouseHandlerMixin",
 		"OptionsMixin",
 		"ParticleEngineMixin",
+		"ParticleMixin",
 		"PlayerModelMixin",
 		"PlayerTabOverlayMixin",
 		"RemotePlayerMixin",
