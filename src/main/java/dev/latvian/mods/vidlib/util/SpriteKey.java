@@ -19,6 +19,7 @@ public record SpriteKey(ResourceLocation atlas, ResourceLocation sprite) {
 	public static final ResourceLocation BLOCKS = ResourceLocation.withDefaultNamespace("textures/atlas/blocks.png");
 	public static final ResourceLocation PARTICLES = ResourceLocation.withDefaultNamespace("textures/atlas/particles.png");
 	public static final SpriteKey EMPTY = new SpriteKey(SPECIAL, Empty.ID);
+	public static final SpriteKey WHITE = special(ResourceLocation.withDefaultNamespace("textures/misc/white.png"));
 
 	public static ResourceLocation atlasOf(ResourceLocation id) {
 		if (id == SPECIAL || id == BLOCKS || id == PARTICLES) {

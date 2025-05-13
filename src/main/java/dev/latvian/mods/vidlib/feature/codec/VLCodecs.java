@@ -10,6 +10,8 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.LongCollection;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.minecraft.Util;
@@ -107,6 +109,23 @@ public interface VLCodecs {
 		}, v -> DataResult.success(keyGetter.apply(v)));
 	}
 
+	static <K, V> Codec<V> partialMap(Map<K, V> map, Codec<K> keyCodec, boolean identity) {
+		Objects.requireNonNull(map, "Map is null");
+		var reverseMap = identity ? new Reference2ObjectOpenHashMap<V, K>() : new Object2ObjectOpenHashMap<V, K>();
+
+		return keyCodec.flatXmap(k -> {
+			if (map.isEmpty()) {
+				return DataResult.error(() -> "Map is empty");
+			} else {
+				var value = map.get(k);
+				return value == null ? DataResult.error(() -> "No value for key " + k) : DataResult.success(value);
+			}
+		}, v -> {
+			var key = reverseMap.get(v);
+			return key != null ? DataResult.success(key) : DataResult.error(() -> "No key for value " + v);
+		});
+	}
+
 	static <V> Codec<Optional<V>> optional(Codec<V> codec) {
 		return Codec.either(UNIT, codec).xmap(either -> either.map(u -> Optional.empty(), Optional::of), opt -> opt.isPresent() ? Either.right(opt.get()) : Either.left(Unit.INSTANCE));
 	}
@@ -117,5 +136,13 @@ public interface VLCodecs {
 
 	static <V> Codec<Set<V>> linkedSet(Codec<V> codec) {
 		return Codec.list(codec).xmap(LinkedHashSet::new, ArrayList::new);
+	}
+
+	static <V> Codec<V> or(List<Codec<V>> codecs) {
+		return new OrCodec<>(codecs);
+	}
+
+	static <V> Codec<V> or(Codec<V> first, Codec<V> second) {
+		return new OrCodec<>(List.of(first, second));
 	}
 }

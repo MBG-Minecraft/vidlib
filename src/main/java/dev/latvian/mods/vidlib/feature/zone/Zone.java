@@ -46,9 +46,9 @@ public record Zone(
 		EntityFilter.CODEC.optionalFieldOf("solid", EntityFilter.NONE.instance()).forGetter(Zone::solid),
 		VLCodecs.set(Codec.STRING).optionalFieldOf("tags", Set.of()).forGetter(Zone::tags),
 		Codec.BOOL.optionalFieldOf("force_loaded", false).forGetter(Zone::forceLoaded),
-		ZoneFluid.CODEC.optionalFieldOf("fluid", ZoneFluid.EMPTY).forGetter(Zone::fluid),
+		ZoneFluid.CODEC.optionalFieldOf("fluid", ZoneFluid.NONE).forGetter(Zone::fluid),
 		CubeTextures.CODEC.optionalFieldOf("textures").forGetter(Zone::textures),
-		ZoneFog.CODEC.optionalFieldOf("fog", ZoneFog.EMPTY).forGetter(Zone::fog)
+		ZoneFog.CODEC.optionalFieldOf("fog", ZoneFog.NONE).forGetter(Zone::fog)
 	).apply(instance, Zone::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, Zone> STREAM_CODEC = CompositeStreamCodec.of(
@@ -95,6 +95,6 @@ public record Zone(
 	}
 
 	public boolean isVisible() {
-		return isSolid() || !fluid.isEmpty() || textures.isPresent() || !fog.equals(ZoneFog.EMPTY);
+		return isSolid() || !fluid.isEmpty() || textures.isPresent() || !fog.isNone();
 	}
 }

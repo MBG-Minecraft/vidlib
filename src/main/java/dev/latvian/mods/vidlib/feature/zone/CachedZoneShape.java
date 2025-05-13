@@ -1,10 +1,14 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
+import dev.latvian.mods.kmath.KMath;
 import dev.latvian.mods.kmath.VoxelShapeBox;
+import dev.latvian.mods.vidlib.util.FaceTexture;
 import dev.latvian.mods.vidlib.util.ResolvedCubeTextures;
 import dev.latvian.mods.vidlib.util.ResolvedTexturedCube;
+import dev.latvian.mods.vidlib.util.SpriteKey;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
+import net.minecraft.core.Direction;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -95,6 +99,47 @@ public class CachedZoneShape {
 							cachedCubes.computeIfAbsent(renderLayerFilter, k -> new ArrayList<>(1)).add(new ResolvedTexturedCube(new AABB(bminX, bminY, bminZ, bmaxX, bmaxY, bmaxZ), tex));
 						}
 					}
+				}
+
+				var fog = instance.zone.fog();
+
+				// 76 // 3.3
+
+				// directionless fog not supported yet
+				if (!fog.isNone() && fog.direction().isPresent()) {
+					var cubes = cachedCubes.computeIfAbsent(TerrainRenderLayer.TRANSLUCENT, k -> new ArrayList<>(1));
+					var dir = fog.direction().get();
+
+					var tex = new ResolvedCubeTextures(TerrainRenderLayer.TRANSLUCENT, new ArrayList<>());
+					tex.faces().add(FaceTexture.EMPTY);
+					tex.faces().add(FaceTexture.EMPTY);
+					tex.faces().add(FaceTexture.EMPTY);
+					tex.faces().add(FaceTexture.EMPTY);
+					tex.faces().add(FaceTexture.EMPTY);
+					tex.faces().add(FaceTexture.EMPTY);
+
+					tex.faces().set(dir.get3DDataValue(), new FaceTexture(SpriteKey.WHITE, TerrainRenderLayer.TRANSLUCENT, false, fog.color(), 0F));
+
+					for (int i = 0; i < fog.steps(); i++) {
+						double l = i / (double) fog.steps();
+
+						switch (dir) {
+							case DOWN, UP -> {
+								double y = KMath.lerp(dir == Direction.UP ? (1D - l) : l, bminY, bmaxY);
+								cubes.add(new ResolvedTexturedCube(new AABB(bminX, y, bminZ, bmaxX, y, bmaxZ), tex));
+							}
+							case NORTH, SOUTH -> {
+								double z = KMath.lerp(dir == Direction.SOUTH ? (1D - l) : l, bminZ, bmaxZ);
+								cubes.add(new ResolvedTexturedCube(new AABB(bminX, bminY, z, bmaxX, bmaxY, z), tex));
+							}
+							case WEST, EAST -> {
+								double x = KMath.lerp(dir == Direction.EAST ? (1D - l) : l, bminX, bmaxX);
+								cubes.add(new ResolvedTexturedCube(new AABB(x, bminY, bminZ, x, bmaxY, bmaxZ), tex));
+							}
+						}
+					}
+
+					System.out.println("AA");
 				}
 			}
 		}
