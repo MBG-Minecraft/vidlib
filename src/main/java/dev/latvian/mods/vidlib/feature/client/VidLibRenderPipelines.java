@@ -95,12 +95,12 @@ public interface VidLibRenderPipelines {
 		event.registerPipeline(PhysicsParticlesRenderTypes.TRANSLUCENT_PIPELINE);
 		CanvasRenderPipelines.register(event);
 
-		TerrainRenderLayer.SOLID.setClientValues(RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS, RenderType.solid(), VidLibRenderTypes.Terrain.SOLID, VidLibRenderTypes.Terrain.SOLID_NO_CULL);
-		TerrainRenderLayer.CUTOUT_MIPPED.setClientValues(RenderLevelStageEvent.Stage.AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS, RenderType.cutoutMipped(), VidLibRenderTypes.Terrain.CUTOUT_MIPPED, VidLibRenderTypes.Terrain.CUTOUT_MIPPED_NO_CULL);
-		TerrainRenderLayer.CUTOUT.setClientValues(RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS, RenderType.cutout(), VidLibRenderTypes.Terrain.CUTOUT, VidLibRenderTypes.Terrain.CUTOUT_NO_CULL);
-		TerrainRenderLayer.TRANSLUCENT.setClientValues(RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS, RenderType.translucent(), VidLibRenderTypes.Terrain.TRANSLUCENT, VidLibRenderTypes.Terrain.TRANSLUCENT_NO_CULL);
-		TerrainRenderLayer.TRIPWIRE.setClientValues(RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS, RenderType.tripwire(), VidLibRenderTypes.Terrain.TRANSLUCENT, VidLibRenderTypes.Terrain.TRANSLUCENT_NO_CULL);
-		TerrainRenderLayer.PARTICLE.setClientValues(RenderLevelStageEvent.Stage.AFTER_PARTICLES, RenderType.translucent(), VidLibRenderTypes.Terrain.TRANSLUCENT, VidLibRenderTypes.Terrain.TRANSLUCENT_NO_CULL);
+		TerrainRenderLayer.SOLID.setClientValues(RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS, RenderType.solid(), TerrainRenderTypes.SOLID, TerrainRenderTypes.SOLID_NO_CULL);
+		TerrainRenderLayer.CUTOUT_MIPPED.setClientValues(RenderLevelStageEvent.Stage.AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS, RenderType.cutoutMipped(), TerrainRenderTypes.CUTOUT_MIPPED, TerrainRenderTypes.CUTOUT_MIPPED_NO_CULL);
+		TerrainRenderLayer.CUTOUT.setClientValues(RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS, RenderType.cutout(), TerrainRenderTypes.CUTOUT, TerrainRenderTypes.CUTOUT_NO_CULL);
+		TerrainRenderLayer.TRANSLUCENT.setClientValues(RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS, RenderType.translucent(), TerrainRenderTypes.TRANSLUCENT, TerrainRenderTypes.TRANSLUCENT_NO_CULL);
+		TerrainRenderLayer.TRIPWIRE.setClientValues(RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS, RenderType.tripwire(), TerrainRenderTypes.TRANSLUCENT, TerrainRenderTypes.TRANSLUCENT_NO_CULL);
+		TerrainRenderLayer.PARTICLE.setClientValues(RenderLevelStageEvent.Stage.AFTER_PARTICLES, RenderType.translucent(), TerrainRenderTypes.TRANSLUCENT, TerrainRenderTypes.TRANSLUCENT_NO_CULL);
 		TerrainRenderLayer.BLOOM.setClientValues(RenderLevelStageEvent.Stage.AFTER_WEATHER, RenderType.translucent(), BloomRenderTypes.POS_TEX_COL, BloomRenderTypes.POS_TEX_COL_NO_CULL);
 	}
 }

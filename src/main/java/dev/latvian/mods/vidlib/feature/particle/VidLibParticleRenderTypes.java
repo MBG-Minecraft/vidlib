@@ -1,7 +1,8 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
 import dev.latvian.mods.kmath.DistanceComparator;
-import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
+import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.client.VidLibRenderPipelines;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -9,8 +10,10 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.util.TriState;
 import org.spongepowered.asm.mixin.Unique;
 
 import java.util.ArrayList;
@@ -21,7 +24,19 @@ import java.util.Objects;
 
 public class VidLibParticleRenderTypes {
 	public static final ParticleRenderType TRUE_TRANSLUCENT = new ParticleRenderType("vidlib:true_translucent", RenderType.translucentParticle(TextureAtlas.LOCATION_PARTICLES), true);
-	public static final ParticleRenderType ADDITIVE = new ParticleRenderType("vidlib:additive", VidLibRenderTypes.Particle.ADDITIVE, true);
+
+	public static final ParticleRenderType ADDITIVE = new ParticleRenderType("vidlib:additive", RenderType.create(
+		VidLib.id("particle/additive").toString(),
+		1536,
+		false,
+		false,
+		VidLibRenderPipelines.ADDITIVE_PARTICLE,
+		RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(TextureAtlas.LOCATION_PARTICLES, TriState.FALSE, false))
+			.setLightmapState(RenderStateShard.LIGHTMAP)
+			.setOutputState(RenderStateShard.PARTICLES_TARGET)
+			.createCompositeState(false)
+	), true);
 
 	private static final Map<ParticleRenderType, List<Particle>> SORTED = new IdentityHashMap<>();
 

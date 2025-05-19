@@ -176,7 +176,6 @@ public class GameClientEventHandler {
 		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
 			// Canvas.MAIN.clone(mc.getMainRenderTarget(), true, true);
 			Bloom.CANVAS.clone(mc.getMainRenderTarget(), false, true);
-			BossRendering.render(frame);
 
 			/*
 			if (!FMLLoader.isProduction()) {
@@ -197,6 +196,8 @@ public class GameClientEventHandler {
 				frame.mc().renderBuffers().bufferSource().endBatch();
 			}
 			 */
+		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
+			BossRendering.CANVAS.copyDepthFrom(mc.getMainRenderTarget());
 		}
 
 		if (frame.layer() == TerrainRenderLayer.CUTOUT) {
@@ -214,6 +215,8 @@ public class GameClientEventHandler {
 				}
 			}
 		} else if (frame.layer() == TerrainRenderLayer.PARTICLE) {
+			BossRendering.render(frame);
+
 			if (mc.player.getShowZones()) {
 				ZoneRenderer.renderAll(frame);
 			} else {

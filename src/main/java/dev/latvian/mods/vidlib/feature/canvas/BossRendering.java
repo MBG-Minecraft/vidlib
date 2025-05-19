@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.feature.canvas;
 import dev.latvian.mods.kmath.texture.LightUV;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
-import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import dev.latvian.mods.vidlib.util.client.MultiBufferSourceOverride;
 import net.minecraft.util.Mth;
@@ -17,7 +16,7 @@ public class BossRendering {
 	public static float lookingAtDepth = 1F;
 
 	public static void handleColors() {
-		lookingAtDepth = CANVAS.getCenterDepth();
+		lookingAtDepth = CANVAS.getCenterARGB() != 0 ? CANVAS.getCenterDepth() : 1F;
 	}
 
 	public static void render(FrameInfo frame) {
@@ -32,7 +31,7 @@ public class BossRendering {
 		for (var entity : mc.level.getBosses()) {
 			if (entity != mc.player) {
 				try {
-					var buffers = new MultiBufferSourceOverride(frame.buffers(), VidLibRenderTypes.BossEntity.CULL, VidLibRenderTypes.BossEntity.NO_CULL);
+					var buffers = MultiBufferSourceOverride.boss(frame.buffers());
 					float x = frame.x(Mth.lerp(frame.worldDelta(), entity.xOld, entity.getX()));
 					float y = frame.y(Mth.lerp(frame.worldDelta(), entity.yOld, entity.getY()));
 					float z = frame.z(Mth.lerp(frame.worldDelta(), entity.zOld, entity.getZ()));

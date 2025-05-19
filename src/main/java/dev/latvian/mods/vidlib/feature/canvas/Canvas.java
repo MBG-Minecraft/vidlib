@@ -236,12 +236,12 @@ public class Canvas {
 			y = h / 2;
 		}
 
+		int prev = GL11.glGetInteger(GL30.GL_READ_FRAMEBUFFER_BINDING);
 		var device = (GlDevice) RenderSystem.getDevice();
-		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, ((GlTexture) c).getFbo(device.directStateAccess(), null));
-		GL30.glReadBuffer(GL30.GL_FRONT);
+		GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, ((GlTexture) c).getFbo(device.directStateAccess(), null));
 		int[] pixels = new int[1];
 		GL11.glReadPixels(x, y, 1, 1, GlConst.toGlExternalId(c.getFormat()), GlConst.toGlType(c.getFormat()), pixels);
-		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
+		GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, prev);
 		return ARGB.fromABGR(pixels[0]);
 	}
 
@@ -268,12 +268,12 @@ public class Canvas {
 			y = h / 2;
 		}
 
+		int prev = GL11.glGetInteger(GL30.GL_READ_FRAMEBUFFER_BINDING);
 		var device = (GlDevice) RenderSystem.getDevice();
-		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, ((GlTexture) c).getFbo(device.directStateAccess(), d));
-		GL30.glReadBuffer(GL30.GL_FRONT);
+		GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, ((GlTexture) c).getFbo(device.directStateAccess(), d));
 		float[] pixels = new float[1];
 		GL11.glReadPixels(x, y, 1, 1, GlConst.toGlExternalId(d.getFormat()), GlConst.toGlType(d.getFormat()), pixels);
-		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
+		GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, prev);
 		return pixels[0];
 	}
 
