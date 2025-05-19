@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.util;
+package dev.latvian.mods.vidlib.feature.texture;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.registry.ID;
+import dev.latvian.mods.vidlib.util.Empty;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;

@@ -38,10 +38,10 @@ import dev.latvian.mods.vidlib.feature.vote.YesNoVotingScreen;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
 import dev.latvian.mods.vidlib.util.Empty;
-import dev.latvian.mods.vidlib.util.FrameInfo;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
+import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.client.Camera;
@@ -111,14 +111,14 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		var session = vl$self().player.vl$sessionData();
 
 		if (session.worldMouse == null) {
-			session.worldMouse = WorldMouse.clip(vl$self(), session.currentFrameInfo.camera().getPosition(), session.currentFrameInfo.worldMatrix());
+			session.worldMouse = WorldMouse.clip(vl$self(), FrameInfo.CURRENT.camera().getPosition(), FrameInfo.CURRENT.worldMatrix());
 		}
 
 		return session.worldMouse;
 	}
 
 	@ApiStatus.Internal
-	default void vl$renderSetup(FrameInfo frame) {
+	default void vl$renderSetup() {
 		var player = vl$self().player;
 
 		if (player == null) {
@@ -284,8 +284,8 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 				}
 			}
 			case 2 -> {
-				if (session.cameraOverride instanceof DetachedCamera c) {
-					session.cameraOverride = new FreeCamera(c.position(), c.rotation());
+				if (session.cameraOverride instanceof DetachedCamera(Vec3 position, Rotation rotation)) {
+					session.cameraOverride = new FreeCamera(position, rotation);
 				} else {
 					session.cameraOverride = new FreeCamera(player.getEyePosition(), Rotation.of(player, 1F));
 				}

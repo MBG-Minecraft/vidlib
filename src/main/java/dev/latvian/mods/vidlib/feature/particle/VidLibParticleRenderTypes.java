@@ -23,18 +23,22 @@ public class VidLibParticleRenderTypes {
 	public static final ParticleRenderType TRUE_TRANSLUCENT = new ParticleRenderType("vidlib:true_translucent", RenderType.translucentParticle(TextureAtlas.LOCATION_PARTICLES), true);
 	public static final ParticleRenderType ADDITIVE = new ParticleRenderType("vidlib:additive", VidLibRenderTypes.Particle.ADDITIVE, true);
 
-	public static final Map<ParticleRenderType, List<Particle>> TEMP_LIST = new IdentityHashMap<>();
+	private static final Map<ParticleRenderType, List<Particle>> SORTED = new IdentityHashMap<>();
+
+	public static void enableSorting(ParticleRenderType type) {
+		SORTED.put(type, new ArrayList<>());
+	}
 
 	static {
-		TEMP_LIST.put(TRUE_TRANSLUCENT, new ArrayList<>());
-		TEMP_LIST.put(ADDITIVE, new ArrayList<>());
+		enableSorting(TRUE_TRANSLUCENT);
+		enableSorting(ADDITIVE);
 	}
 
 	@Unique
 	private static List<Particle> vl$sortedParticleList = null;
 
 	public static void vl$renderParticleTypePre(ParticleRenderType particleType) {
-		vl$sortedParticleList = VidLibParticleRenderTypes.TEMP_LIST.get(particleType);
+		vl$sortedParticleList = VidLibParticleRenderTypes.SORTED.get(particleType);
 
 		if (vl$sortedParticleList != null) {
 			vl$sortedParticleList.clear();

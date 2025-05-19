@@ -117,7 +117,7 @@ public class StructureRenderer implements WithCache {
 		return renderer;
 	}
 
-	@AutoInit(AutoInit.Type.CHUNKS_RELOADED)
+	@AutoInit(AutoInit.Type.CHUNKS_RENDERED)
 	public static void redrawAll() {
 		for (var renderer : RUNTIME_RENDERERS.values()) {
 			renderer.clearCache();

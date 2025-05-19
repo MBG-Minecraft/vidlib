@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.util;
+package dev.latvian.mods.vidlib.feature.texture;
 
 import net.minecraft.world.phys.AABB;
 

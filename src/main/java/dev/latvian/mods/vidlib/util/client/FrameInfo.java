@@ -1,7 +1,8 @@
-package dev.latvian.mods.vidlib.util;
+package dev.latvian.mods.vidlib.util.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.feature.session.LocalClientSessionData;
+import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -13,6 +14,7 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.Nullable;
 import org.joml.FrustumIntersection;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.joml.Vector3f;
 
 public record FrameInfo(
@@ -20,8 +22,9 @@ public record FrameInfo(
 	LocalClientSessionData session,
 	@Nullable TerrainRenderLayer layer,
 	PoseStack poseStack,
-	Matrix4f projectionMatrix,
-	Matrix4f modelViewMatrix,
+	Matrix4fc projectionMatrix,
+	Matrix4fc modelViewMatrix,
+	Matrix4fc worldMatrix,
 	int renderTick,
 	DeltaTracker deltaTracker,
 	float worldDelta,
@@ -34,6 +37,8 @@ public record FrameInfo(
 	boolean replay,
 	Vector3f normal
 ) {
+	public static FrameInfo CURRENT;
+
 	@Nullable
 	private static TerrainRenderLayer renderLayer(RenderLevelStageEvent.Stage stage) {
 		for (var layer : TerrainRenderLayer.ALL) {
@@ -53,6 +58,7 @@ public record FrameInfo(
 			event.getPoseStack(),
 			event.getProjectionMatrix(),
 			event.getModelViewMatrix(),
+			new Matrix4f(event.getProjectionMatrix()).mul(event.getModelViewMatrix()),
 			event.getRenderTick(),
 			event.getPartialTick(),
 			event.getPartialTick().getGameTimeDeltaPartialTick(false),
@@ -65,10 +71,6 @@ public record FrameInfo(
 			mc.player.isReplayCamera(),
 			new Vector3f()
 		);
-	}
-
-	public Matrix4f worldMatrix() {
-		return new Matrix4f(projectionMatrix).mul(modelViewMatrix);
 	}
 
 	public MultiBufferSource buffers() {

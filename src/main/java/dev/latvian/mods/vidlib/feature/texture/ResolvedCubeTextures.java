@@ -1,12 +1,15 @@
-package dev.latvian.mods.vidlib.util;
+package dev.latvian.mods.vidlib.feature.texture;
 
+import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public record ResolvedCubeTextures(@Nullable TerrainRenderLayer commonLayer, List<FaceTexture> faces) {
-	public static final ResolvedCubeTextures EMPTY = new ResolvedCubeTextures(null, List.of(FaceTexture.EMPTY, FaceTexture.EMPTY, FaceTexture.EMPTY, FaceTexture.EMPTY, FaceTexture.EMPTY, FaceTexture.EMPTY));
+	public static final ResolvedCubeTextures EMPTY = new ResolvedCubeTextures(null, FaceTexture.EMPTY);
+	public static final ResolvedCubeTextures WHITE = new ResolvedCubeTextures(TerrainRenderLayer.SOLID, FaceTexture.WHITE);
+	public static final ResolvedCubeTextures BLOOM = new ResolvedCubeTextures(TerrainRenderLayer.BLOOM, FaceTexture.BLOOM);
 
 	public static TerrainRenderLayer commonLayer(List<FaceTexture> faces) {
 		TerrainRenderLayer commonLayer = null;
@@ -44,6 +47,10 @@ public record ResolvedCubeTextures(@Nullable TerrainRenderLayer commonLayer, Lis
 		);
 
 		return new ResolvedCubeTextures(commonLayer(faces), faces);
+	}
+
+	public ResolvedCubeTextures(@Nullable TerrainRenderLayer commonLayer, FaceTexture face) {
+		this(commonLayer, List.of(face, face, face, face, face, face));
 	}
 
 	public ResolvedCubeTextures merge(ResolvedCubeTextures other) {

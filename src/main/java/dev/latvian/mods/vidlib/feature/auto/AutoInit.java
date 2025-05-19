@@ -16,17 +16,17 @@ import java.util.EnumSet;
 import java.util.List;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
 public @interface AutoInit {
 	enum Type {
 		DEFAULT(false, false), // ()
 		GAME_LOADED(false, false), // ()
 		CLIENT_LOADED(true, false), // ()
-		ASSETS_RELOADED(true, false), // ()
+		ASSETS_LOADED(true, false), // (ResourceManager)
 		SERVER_STARTED(false, false), // (MinecraftServer)
-		DATA_RELOADED(false, false), // ()
-		CHUNKS_RELOADED(true, false), // ()
-		SHADERS_RELOADED(true, false), // ()
+		DATA_LOADED(false, false), // ()
+		CHUNKS_RENDERED(true, false), // ()
+		SHADERS_LOADED(true, false), // (ResourceManager)
 		CLIENT_OPTIONS_SAVED(true, false), // (Options)
 		SERVER_STRUCTURES_LOADED(false, false), // (StructureStorage)
 		CLIENT_STRUCTURES_LOADED(true, false), // (StructureStorage)
@@ -72,7 +72,7 @@ public @interface AutoInit {
 	Lazy<List<AutoMethod>> SCANNED = Lazy.of(() -> {
 		var list = new ArrayList<AutoMethod>();
 
-		AutoHelper.load(AutoInit.class, EnumSet.of(ElementType.TYPE, ElementType.METHOD), (mod, classLoader, ad) -> {
+		AutoHelper.load(AutoInit.class, EnumSet.of(ElementType.TYPE, ElementType.METHOD, ElementType.FIELD), (mod, classLoader, ad) -> {
 			var types = AutoHelper.getEnumValues(ad, Type.class, "value", EnumSet.of(Type.DEFAULT));
 
 			for (var type : types) {

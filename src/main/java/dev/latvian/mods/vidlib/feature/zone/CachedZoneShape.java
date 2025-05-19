@@ -2,10 +2,10 @@ package dev.latvian.mods.vidlib.feature.zone;
 
 import dev.latvian.mods.kmath.KMath;
 import dev.latvian.mods.kmath.VoxelShapeBox;
-import dev.latvian.mods.vidlib.util.FaceTexture;
-import dev.latvian.mods.vidlib.util.ResolvedCubeTextures;
-import dev.latvian.mods.vidlib.util.ResolvedTexturedCube;
-import dev.latvian.mods.vidlib.util.SpriteKey;
+import dev.latvian.mods.vidlib.feature.texture.FaceTexture;
+import dev.latvian.mods.vidlib.feature.texture.ResolvedCubeTextures;
+import dev.latvian.mods.vidlib.feature.texture.ResolvedTexturedCube;
+import dev.latvian.mods.vidlib.feature.texture.SpriteKey;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.core.Direction;
@@ -120,7 +120,7 @@ public class CachedZoneShape {
 
 					tex.faces().set(dir.get3DDataValue(), new FaceTexture(SpriteKey.WHITE, TerrainRenderLayer.TRANSLUCENT, false, fog.color(), 0F));
 
-					for (int i = 0; i < fog.steps(); i++) {
+					for (int i = 0; i <= fog.steps(); i++) {
 						double l = i / (double) fog.steps();
 
 						switch (dir) {

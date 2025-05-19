@@ -1,20 +1,18 @@
 package dev.latvian.mods.vidlib.feature.texture;
 
 import dev.latvian.mods.kmath.Directions;
+import dev.latvian.mods.kmath.color.Color;
 import dev.latvian.mods.kmath.texture.LightUV;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
-import dev.latvian.mods.vidlib.util.FaceTexture;
-import dev.latvian.mods.vidlib.util.FrameInfo;
-import dev.latvian.mods.vidlib.util.ResolvedCubeTextures;
-import dev.latvian.mods.vidlib.util.ResolvedTexturedCube;
+import dev.latvian.mods.vidlib.util.client.FrameInfo;
 
 public class TexturedCubeRenderer {
-	public static void render(FrameInfo frame, LightUV light, ResolvedTexturedCube cube) {
+	public static void render(FrameInfo frame, LightUV light, ResolvedTexturedCube cube, Color tint) {
 		var b = cube.box();
-		render(frame, light, b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ, cube.textures());
+		render(frame, light, b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ, cube.textures(), tint);
 	}
 
-	public static void render(FrameInfo frame, LightUV light, double bminX, double bminY, double bminZ, double bmaxX, double bmaxY, double bmaxZ, ResolvedCubeTextures textures) {
+	public static void render(FrameInfo frame, LightUV light, double bminX, double bminY, double bminZ, double bmaxX, double bmaxY, double bmaxZ, ResolvedCubeTextures textures, Color tint) {
 		var ms = frame.poseStack();
 		var msp = ms.last();
 		var m = msp.pose();
@@ -38,10 +36,10 @@ public class TexturedCubeRenderer {
 				continue;
 			}
 
-			var colR = face.tint().redf();
-			var colG = face.tint().greenf();
-			var colB = face.tint().bluef();
-			var colA = face.tint().alphaf();
+			var colR = face.tint().redf() * tint.redf();
+			var colG = face.tint().greenf() * tint.greenf();
+			var colB = face.tint().bluef() * tint.bluef();
+			var colA = face.tint().alphaf() * tint.alphaf();
 
 			var uvScale = face.uvScale();
 			float tw = uvScale <= 0F ? 1F : (maxX - minX) * uvScale;

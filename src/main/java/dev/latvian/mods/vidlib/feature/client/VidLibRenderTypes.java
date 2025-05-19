@@ -2,6 +2,8 @@ package dev.latvian.mods.vidlib.feature.client;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
+import dev.latvian.mods.vidlib.feature.canvas.CanvasRenderPipelines;
 import dev.latvian.mods.vidlib.util.Empty;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -16,6 +18,15 @@ public interface VidLibRenderTypes {
 		"gui",
 		786432,
 		RenderPipelines.GUI_TEXTURED,
+		texture -> RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
+			.createCompositeState(false)
+	);
+
+	TexturedRenderType GUI_DEPTH = TexturedRenderType.internal(
+		"gui_depth",
+		786432,
+		VidLibRenderPipelines.GUI_DEPTH,
 		texture -> RenderType.CompositeState.builder()
 			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
 			.createCompositeState(false)
@@ -96,6 +107,35 @@ public interface VidLibRenderTypes {
 		static RenderType texture(ResourceLocation texture, boolean translucent) {
 			return translucent ? TRANSLUCENT_NO_CULL.apply(texture) : CUTOUT_NO_CULL.apply(texture);
 		}
+	}
+
+	interface BossEntity {
+		TexturedRenderType CULL = TexturedRenderType.internal(
+			"boss/cull",
+			1536,
+			true,
+			true,
+			CanvasRenderPipelines.POS_TEX_COL,
+			texture -> RenderType.CompositeState.builder()
+				.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
+				.setOutputState(BossRendering.CANVAS.getOutputStateShard())
+				.createCompositeState(false)
+		);
+
+		TexturedRenderType NO_CULL = TexturedRenderType.internal(
+			"boss/no_cull",
+			1536,
+			true,
+			true,
+			CanvasRenderPipelines.POS_TEX_COL_NO_CULL,
+			texture -> RenderType.CompositeState.builder()
+				.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
+				.setOutputState(BossRendering.CANVAS.getOutputStateShard())
+				.createCompositeState(false)
+		);
+
+		RenderType WHITE_CULL = CULL.apply(Empty.TEXTURE);
+		RenderType WHITE_NO_CULL = NO_CULL.apply(Empty.TEXTURE);
 	}
 
 	interface Terrain {

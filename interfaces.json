@@ -61,5 +61,8 @@
 	],
 	"net/minecraft/commands/arguments/selector/EntitySelector": [
 		"dev/latvian/mods/vidlib/core/VLEntitySelector"
+	],
+	"net/minecraft/client/renderer/RenderType": [
+		"dev/latvian/mods/vidlib/core/VLRenderType"
 	]
 }

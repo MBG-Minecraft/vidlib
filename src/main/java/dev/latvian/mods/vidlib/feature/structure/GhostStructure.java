@@ -11,9 +11,9 @@ import dev.latvian.mods.kmath.render.BoxRenderer;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.registry.RegistryRef;
-import dev.latvian.mods.vidlib.util.FrameInfo;
 import dev.latvian.mods.vidlib.util.JsonCodecReloadListener;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
+import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -111,7 +111,7 @@ public record GhostStructure(
 						}
 
 						var blockPos = BlockPos.containing(pos);
-						var time = (long) ((mc.level.getGameTime() + (blockPos.asLong() & 32767L)) / Math.abs(gs.animationTicks));
+						var time = (long) ((mc.level.getGameTime() + RandomSource.create(blockPos.asLong()).nextInt(32768)) / Math.abs(gs.animationTicks));
 						int index;
 
 						if (gs.animationTicks < 0D) {

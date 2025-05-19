@@ -81,6 +81,10 @@ public interface VLCodecs {
 		}, nameGetter);
 	}
 
+	static <E> Codec<E> anyEnumCodec(E[] enumValues) {
+		return anyEnumCodec(enumValues, (Function) DEFAULT_NAME_GETTER);
+	}
+
 	static <K, V> Codec<V> map(Supplier<Map<K, V>> mapGetter, Codec<K> keyCodec, Function<V, K> keyGetter) {
 		return keyCodec.flatXmap(k -> {
 			var map = mapGetter.get();

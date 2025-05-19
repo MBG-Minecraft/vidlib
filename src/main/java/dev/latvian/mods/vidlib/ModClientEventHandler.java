@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.BlockEntityRendererHolder;
 import dev.latvian.mods.vidlib.feature.auto.EntityRendererHolder;
+import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockFont;
@@ -14,11 +15,13 @@ import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.multiverse.VoidSpecialEffects;
 import dev.latvian.mods.vidlib.feature.particle.VidLibClientParticles;
-import dev.latvian.mods.vidlib.feature.particle.VidLibParticleRenderTypes;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.entity.state.PlayerRenderState;
@@ -33,8 +36,6 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent;
-
-import java.util.ArrayList;
 
 @EventBusSubscriber(modid = VidLib.ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ModClientEventHandler {
@@ -59,8 +60,6 @@ public class ModClientEventHandler {
 	@SubscribeEvent
 	public static void registerParticleProviders(RegisterParticleProvidersEvent event) {
 		VidLibClientParticles.register(event);
-
-		VidLibParticleRenderTypes.TEMP_LIST.put(VidLibParticleRenderTypes.TRUE_TRANSLUCENT, new ArrayList<>());
 	}
 
 	@SubscribeEvent
@@ -126,6 +125,12 @@ public class ModClientEventHandler {
 
 	@SubscribeEvent
 	public static void registerGuiLayers(RegisterGuiLayersEvent event) {
-		event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, ProgressBarRenderer.ID, ProgressBarRenderer::render);
+		event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, VidLib.id("above_boss"), ModClientEventHandler::drawAboveBossOverlay);
+	}
+
+	public static void drawAboveBossOverlay(GuiGraphics graphics, DeltaTracker deltaTracker) {
+		var mc = Minecraft.getInstance();
+		ProgressBarRenderer.draw(mc, graphics, deltaTracker);
+		CanvasImpl.drawPreview(mc, graphics);
 	}
 }

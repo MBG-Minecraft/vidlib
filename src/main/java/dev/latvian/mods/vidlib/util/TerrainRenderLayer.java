@@ -12,7 +12,8 @@ public enum TerrainRenderLayer implements StringRepresentable {
 	CUTOUT("cutout"),
 	TRANSLUCENT("translucent"),
 	TRIPWIRE("tripwire"),
-	PARTICLE("particle");
+	PARTICLE("particle"),
+	BLOOM("bloom");
 
 	public static final TerrainRenderLayer[] ALL = values();
 	public static final Codec<TerrainRenderLayer> CODEC = StringRepresentable.fromEnum(() -> ALL);

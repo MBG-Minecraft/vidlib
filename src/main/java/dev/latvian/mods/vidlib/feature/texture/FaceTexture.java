@@ -1,9 +1,10 @@
-package dev.latvian.mods.vidlib.util;
+package dev.latvian.mods.vidlib.feature.texture;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.kmath.color.Color;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
+import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -11,7 +12,9 @@ import net.minecraft.network.codec.StreamCodec;
 import java.util.Optional;
 
 public record FaceTexture(SpriteKey sprite, TerrainRenderLayer layer, boolean cull, Color tint, float uvScale) {
-	public static FaceTexture EMPTY = new FaceTexture(SpriteKey.EMPTY, TerrainRenderLayer.SOLID, true, Color.WHITE, 1F);
+	public static final FaceTexture EMPTY = new FaceTexture(SpriteKey.EMPTY, TerrainRenderLayer.SOLID, true, Color.WHITE, 1F);
+	public static final FaceTexture WHITE = new FaceTexture(SpriteKey.WHITE, TerrainRenderLayer.SOLID, true, Color.WHITE, 1F);
+	public static final FaceTexture BLOOM = new FaceTexture(SpriteKey.WHITE, TerrainRenderLayer.BLOOM, true, Color.WHITE, 1F);
 
 	public static final Codec<FaceTexture> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		SpriteKey.CODEC.fieldOf("sprite").forGetter(FaceTexture::sprite),

@@ -9,6 +9,9 @@ import dev.latvian.mods.kmath.texture.LightUV;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
+import dev.latvian.mods.vidlib.feature.bloom.Bloom;
+import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
+import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
@@ -27,9 +30,9 @@ import dev.latvian.mods.vidlib.feature.structure.GhostStructureCapture;
 import dev.latvian.mods.vidlib.feature.structure.StructureRenderer;
 import dev.latvian.mods.vidlib.feature.texture.TexturedCubeRenderer;
 import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
-import dev.latvian.mods.vidlib.util.FrameInfo;
 import dev.latvian.mods.vidlib.util.JsonUtils;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
+import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.AdvancementToast;
@@ -50,13 +53,16 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.event.CalculateDetachedCameraDistanceEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ClientResourceLoadFinishedEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
+import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.RenderNameTagEvent;
 import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.client.event.ToastAddEvent;
@@ -161,21 +167,37 @@ public class GameClientEventHandler {
 
 		var session = mc.player.vl$sessionData();
 		var frame = new FrameInfo(mc, session, event);
-		session.currentFrameInfo = frame;
+		FrameInfo.CURRENT = frame;
 		session.worldMouse = null;
-
-		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SKY) {
-			mc.vl$renderSetup(frame);
-
-			if (session.npcRecording != null) {
-				session.npcRecording.record(System.currentTimeMillis(), frame.screenDelta(), mc.player);
-			}
-
-			return;
-		}
 
 		var ms = frame.poseStack();
 		float delta = frame.worldDelta();
+
+		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
+			// Canvas.MAIN.clone(mc.getMainRenderTarget(), true, true);
+			Bloom.CANVAS.clone(mc.getMainRenderTarget(), false, true);
+			BossRendering.render(frame);
+
+			/*
+			if (!FMLLoader.isProduction()) {
+				RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+				var pos = new Vec3(9864.5, 99.5, 50005.5);
+
+				var ps = frame.poseStack();
+				ps.pushPose();
+				frame.translate(pos.x, pos.y, pos.z);
+				SphereRenderer.renderEntity(SpherePoints.H, ps, frame.buffers().getBuffer(VidLibRenderTypes.Entity.WHITE_TRANSLUCENT_NO_CULL), Color.of(0xFFFFFFFF), UV.FULL, LightUV.NORMAL);
+
+				double s = 0.1D;
+				if (frame.isVisible(pos.x - s, pos.y - s, pos.z - s, pos.x + s, pos.y + s, pos.z + s)) {
+					SphereRenderer.renderEntity(SpherePoints.H, ps, Bloom.posTexColBuffer(frame.buffers(), Empty.TEXTURE), Color.of(0xFFFF4343), UV.FULL, LightUV.NORMAL);
+				}
+
+				ps.popPose();
+				frame.mc().renderBuffers().bufferSource().endBatch();
+			}
+			 */
+		}
 
 		if (frame.layer() == TerrainRenderLayer.CUTOUT) {
 			for (var clock : Clock.REGISTRY) {
@@ -274,7 +296,7 @@ public class GameClientEventHandler {
 				var visuals = tool.getSecond().visuals(mc.player, tool.getFirst(), frame.screenDelta());
 
 				for (var cube : visuals.texturedCubes()) {
-					TexturedCubeRenderer.render(frame, LightUV.FULLBRIGHT, cube);
+					TexturedCubeRenderer.render(frame, LightUV.FULLBRIGHT, cube, Color.WHITE);
 				}
 			}
 
@@ -553,6 +575,37 @@ public class GameClientEventHandler {
 					ex.printStackTrace();
 				}
 			}
+		}
+	}
+
+	@SubscribeEvent
+	public static void clientResourceLoadFinished(ClientResourceLoadFinishedEvent event) {
+		var mc = Minecraft.getInstance();
+		mc.vl$clearProfileCache();
+		AutoInit.Type.ASSETS_LOADED.invoke(mc.getResourceManager());
+	}
+
+	@SubscribeEvent
+	public static void frameGraphSetup(FrameGraphSetupEvent event) {
+		var mc = Minecraft.getInstance();
+		var session = mc.player.vl$sessionData();
+
+		mc.vl$renderSetup();
+
+		if (session.npcRecording != null) {
+			session.npcRecording.record(System.currentTimeMillis(), event.getDeltaTracker().getGameTimeDeltaPartialTick(true), mc.player);
+		}
+
+		CanvasImpl.createHandles(event.getFrameGrapBuilder(), event.getRenderTargetDescriptor());
+		// event.enableOutlineProcessing();
+
+		BossRendering.CANVAS.clear();
+	}
+
+	@SubscribeEvent
+	public static void renderNameTag(RenderNameTagEvent.DoRender event) {
+		if (BossRendering.active) {
+			event.setCanceled(true);
 		}
 	}
 }

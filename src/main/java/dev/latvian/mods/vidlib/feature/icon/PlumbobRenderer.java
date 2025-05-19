@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.icon;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.kmath.KMath;
 import dev.latvian.mods.vidlib.feature.icon.renderer.IconRenderer;
-import dev.latvian.mods.vidlib.util.FrameInfo;
+import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;

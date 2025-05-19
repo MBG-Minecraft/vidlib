@@ -5,8 +5,8 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.latvian.mods.vidlib.core.VLBlockState;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.client.IndexBuffer;
-import dev.latvian.mods.vidlib.util.FrameInfo;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
+import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 
 import java.util.ArrayList;
@@ -80,7 +81,7 @@ public class PhysicsParticleManager {
 		}
 	}
 
-	@AutoInit(AutoInit.Type.ASSETS_RELOADED)
+	@AutoInit(AutoInit.Type.ASSETS_LOADED)
 	public static void clearAll() {
 		VLBlockState.vl$clearAllCache();
 		clearAllParticles();
@@ -160,7 +161,7 @@ public class PhysicsParticleManager {
 		) {
 			renderPass.setPipeline(renderType.getRenderPipeline());
 			renderPass.bindSampler("Sampler0", RenderSystem.getShaderTexture(0));
-			// renderPass.setUniform("ProjMat", frame.projectionMatrix());
+			renderPass.setUniform("ProjMat", new Matrix4f(frame.projectionMatrix()));
 			renderPass.setIndexBuffer(indexBuffer.buffer(), indexBuffer.type());
 
 			var pass = new PhysicsParticleRenderPass(renderPass);
@@ -191,15 +192,7 @@ public class PhysicsParticleManager {
 			particles.sort(PhysicsParticle.COMPARATOR);
 		}
 
-		var it = particles.iterator();
-
-		while (it.hasNext()) {
-			var p = it.next();
-
-			if (p.tick(level, gameTime)) {
-				it.remove();
-			}
-		}
+		particles.removeIf(p -> p.tick(level, gameTime));
 	}
 
 	public String toString() {

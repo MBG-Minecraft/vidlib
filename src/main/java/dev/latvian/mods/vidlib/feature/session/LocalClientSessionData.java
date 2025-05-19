@@ -41,7 +41,6 @@ import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneEvent;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
-import dev.latvian.mods.vidlib.util.FrameInfo;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import dev.latvian.mods.vidlib.util.Side;
@@ -97,7 +96,6 @@ public class LocalClientSessionData extends ClientSessionData {
 	public List<PlayerInfo> originalListedPlayers;
 	public CameraOverride cameraOverride;
 	public ScreenFadeInstance screenFade;
-	public FrameInfo currentFrameInfo;
 	public WorldMouse worldMouse;
 	public DataRecorder dataRecorder;
 	public NPCRecording npcRecording;

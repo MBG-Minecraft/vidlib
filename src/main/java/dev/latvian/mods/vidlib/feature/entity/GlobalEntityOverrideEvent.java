@@ -13,7 +13,7 @@ import java.util.IdentityHashMap;
 import java.util.Objects;
 
 public class GlobalEntityOverrideEvent extends Event {
-	@AutoInit({AutoInit.Type.GAME_LOADED, AutoInit.Type.DATA_RELOADED})
+	@AutoInit({AutoInit.Type.GAME_LOADED, AutoInit.Type.DATA_LOADED})
 	public static void fireEvent() {
 		for (var override : EntityOverride.getAllKeys()) {
 			override.all = null;

@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.particle.physics;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.latvian.mods.kmath.KMath;
-import dev.latvian.mods.vidlib.util.FrameInfo;
+import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.RandomSource;

@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.item;
 import dev.latvian.mods.kmath.Line;
 import dev.latvian.mods.kmath.VoxelShapeBox;
 import dev.latvian.mods.kmath.color.Color;
-import dev.latvian.mods.vidlib.util.ResolvedTexturedCube;
+import dev.latvian.mods.vidlib.feature.texture.ResolvedTexturedCube;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 

@@ -6,7 +6,6 @@ import com.mojang.blaze3d.textures.TextureFormat;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.util.Lazy;
-import dev.latvian.mods.vidlib.util.SpriteKey;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.Dumpable;

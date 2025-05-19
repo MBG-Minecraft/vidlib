@@ -18,7 +18,7 @@ import dev.latvian.mods.vidlib.feature.zone.shape.UniverseZoneShape;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShapeGroup;
 import dev.latvian.mods.vidlib.util.Cast;
-import dev.latvian.mods.vidlib.util.FrameInfo;
+import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.util.Mth;
 
@@ -136,7 +136,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 			}
 
 			for (var cube : sz.cachedCubes().getOrDefault(frame.layer(), List.of())) {
-				TexturedCubeRenderer.render(frame, LightUV.FULLBRIGHT, cube);
+				TexturedCubeRenderer.render(frame, LightUV.FULLBRIGHT, cube, Color.WHITE);
 			}
 		}
 	}

@@ -1,12 +1,26 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
+import com.mojang.blaze3d.framegraph.FramePass;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.resource.ResourceHandle;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.canvas.Canvas;
+import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxRenderer;
 import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.DimensionSpecialEffects;
+import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LevelTargetBundle;
+import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,9 +37,16 @@ public abstract class LevelRendererMixin {
 	@Final
 	private Minecraft minecraft;
 
+	@Shadow
+	@Final
+	private LevelTargetBundle targets;
+
+	@Shadow
+	public abstract int countRenderedSections();
+
 	@Inject(method = "allChanged", at = @At("RETURN"))
 	private void vl$allChanged(CallbackInfo ci) {
-		AutoInit.Type.CHUNKS_RELOADED.invoke();
+		AutoInit.Type.CHUNKS_RENDERED.invoke();
 	}
 
 	//@Redirect(method = "allChanged", at = @At(value = "NEW", target = "(Lnet/minecraft/client/renderer/chunk/SectionRenderDispatcher;Lnet/minecraft/world/level/Level;ILnet/minecraft/client/renderer/LevelRenderer;)Lnet/minecraft/client/renderer/ViewArea;"))
@@ -51,5 +72,40 @@ public abstract class LevelRendererMixin {
 	@Overwrite
 	private boolean shouldRenderDarkDisc(float partialTick) {
 		return false;
+	}
+
+	@Inject(method = "doEntityOutline", at = @At("HEAD"))
+	private void vl$doEntityOutline(CallbackInfo ci) {
+		CanvasImpl.drawAll(minecraft);
+	}
+
+	@Inject(method = "onResourceManagerReload", at = @At("RETURN"))
+	private void vl$initOutline(ResourceManager manager, CallbackInfo ci) {
+		CanvasImpl.initAll(minecraft, manager);
+	}
+
+	@Inject(method = "close", at = @At("RETURN"))
+	private void vl$close(CallbackInfo ci) {
+		CanvasImpl.closeAll();
+	}
+
+	@Inject(method = "resize", at = @At("RETURN"))
+	private void vl$resize(int width, int height, CallbackInfo ci) {
+		CanvasImpl.resizeAll(width, height);
+	}
+
+	@Inject(method = "addWeatherPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/world/phys/Vec3;FLnet/minecraft/client/renderer/FogParameters;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lnet/minecraft/client/Camera;)V", at = @At("RETURN"))
+	private void vl$addMainPass(FrameGraphBuilder frameGraphBuilder, Vec3 cameraPosition, float partialTick, FogParameters fog, Matrix4f modelViewMatrix, Matrix4f projectionMatrix, Camera camera, CallbackInfo ci) {
+		CanvasImpl.addAllToFrame(minecraft, frameGraphBuilder, targets);
+	}
+
+	@Inject(method = "addMainPass", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/framegraph/FramePass;executes(Ljava/lang/Runnable;)V"))
+	private void vl$addMainPassReadsAndWrites(FrameGraphBuilder frameGraphBuilder, Frustum frustum, Camera camera, Matrix4f frustumMatrix, Matrix4f projectionMatrix, FogParameters fogParameters, boolean renderBlockOutline, boolean renderEntityOutline, DeltaTracker deltaTracker, ProfilerFiller profiler, CallbackInfo ci, @Local FramePass framePass) {
+		CanvasImpl.allReadsAndWrites(framePass);
+	}
+
+	@Inject(method = "lambda$addMainPass$2", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;shouldShowEntityOutlines()Z"))
+	private void vl$copyMainDepth(FogParameters fogParameters, DeltaTracker deltaTracker, Camera camera, ProfilerFiller profiler, Matrix4f frustumMatrix, Matrix4f projectionMatrix, ResourceHandle<RenderTarget> itemEntity, ResourceHandle<RenderTarget> entityOutline, Frustum frustum, boolean renderBlockOutline, ResourceHandle<RenderTarget> translucent, ResourceHandle<RenderTarget> main, CallbackInfo ci) {
+		Canvas.MAIN.clone(main.get(), true, true);
 	}
 }

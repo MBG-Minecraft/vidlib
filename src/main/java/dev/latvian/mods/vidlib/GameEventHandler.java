@@ -80,7 +80,7 @@ public class GameEventHandler {
 				ServerLifecycleHooks.getCurrentServer().vl$clearProfileCache();
 			}
 
-			AutoInit.Type.DATA_RELOADED.invoke();
+			AutoInit.Type.DATA_LOADED.invoke();
 
 			for (var player : event.getPlayerList().getPlayers()) {
 				VidLib.sync(player, false);

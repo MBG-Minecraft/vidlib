@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.cutscene;
 
-import dev.latvian.mods.vidlib.util.FrameInfo;
+import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
 

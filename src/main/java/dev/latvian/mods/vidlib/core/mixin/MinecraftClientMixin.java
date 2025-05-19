@@ -3,13 +3,13 @@ package dev.latvian.mods.vidlib.core.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.vidlib.core.VLMinecraftClient;
-import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.protocol.Packet;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -19,11 +19,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftClientMixin implements VLMinecraftClient {
@@ -36,12 +34,6 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 
 	@Unique
 	private final Map<UUID, GameProfile> vl$profileByUUIDCache = new HashMap<>();
-
-	@Inject(method = "reloadResourcePacks()Ljava/util/concurrent/CompletableFuture;", at = @At("HEAD"))
-	private void vl$reloadResourcePacks(CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-		vl$clearProfileCache();
-		AutoInit.Type.ASSETS_RELOADED.invoke();
-	}
 
 	@Override
 	public GameProfile retrieveGameProfile(UUID uuid) {

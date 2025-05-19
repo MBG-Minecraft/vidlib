@@ -295,7 +295,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	}
 
 	default boolean isMainBoss() {
-		return vl$self().getTags().contains("main_boss");
+		return vl$self().getTags().contains("main_boss") || vl$self().hasCustomName() && vl$self().getCustomName().getString().equals("Boss");
 	}
 
 	@Nullable

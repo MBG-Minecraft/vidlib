@@ -15,7 +15,7 @@ public class ForcedPlayerOverrides {
 	public static Map<UUID, Map<EntityOverride<?>, Object>> MAP = Map.of();
 	public static final Codec<Map<UUID, Map<EntityOverride<?>, Object>>> CODEC = Codec.unboundedMap(VLCodecs.UUID, EntityOverride.OVERRIDE_MAP_CODEC);
 
-	@AutoInit({AutoInit.Type.ASSETS_RELOADED, AutoInit.Type.DATA_RELOADED, AutoInit.Type.GAME_LOADED})
+	@AutoInit({AutoInit.Type.ASSETS_LOADED, AutoInit.Type.DATA_LOADED, AutoInit.Type.GAME_LOADED})
 	public static void reload() {
 		var file = FMLPaths.GAMEDIR.get().resolve("forced_player_overrides.json");
 

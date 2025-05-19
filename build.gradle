@@ -57,7 +57,7 @@ neoForge {
 			}
 
 			jvmArguments.addAll("-XX:+IgnoreUnrecognizedVMOptions", "-XX:+AllowEnhancedClassRedefinition")
-			gameDirectory = file 'runs/client_2'
+			gameDirectory = file 'runs/client'
 		}
 
 		server {
@@ -198,6 +198,29 @@ idea {
 	module {
 		downloadSources = true
 		downloadJavadoc = true
+
+		["client", "server"].each {
+			[
+					"config",
+					"crash-reports",
+					"debug",
+					"downloads",
+					"flashback",
+					"local",
+					"logs",
+					"mods",
+					"pack-sync",
+					"profilekeys",
+					"saves",
+					"voicechat_recordings",
+					"command_history.txt",
+					"options.txt",
+					"server.properties",
+					"world",
+			].each { ext ->
+				excludeDirs.add(file("runs/$it/$ext"))
+			}
+		}
 	}
 }
 
