@@ -6,9 +6,9 @@ import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.particle.CubeParticleOptions;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -32,8 +32,8 @@ public class CameraShakeTool implements VidLibTool {
 	}
 
 	@Override
-	public ItemStack createItem() {
-		return new ItemStack(Items.ENDER_EYE);
+	public ResourceLocation getModel() {
+		return ResourceLocation.withDefaultNamespace("ender_eye");
 	}
 
 	@Override

@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.feature.misc.MarkerPayload;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -24,7 +25,7 @@ public class VidLib {
 		return ResourceLocation.fromNamespaceAndPath(ID, path);
 	}
 
-	public VidLib() throws IOException {
+	public VidLib(IEventBus bus) throws IOException {
 		LOGGER.info("VidLib loaded");
 
 		for (var s : AutoRegister.SCANNED.get()) {
@@ -44,6 +45,8 @@ public class VidLib {
 				}
 			}
 		}
+
+		VidLibContent.init(bus);
 	}
 
 	public static void sync(ServerPlayer player, boolean login) {

@@ -46,7 +46,7 @@ public class ModEventHandler {
 			for (var item : BuiltInRegistries.ITEM) {
 				var mod = item.builtInRegistryHolder().getKey().location().getNamespace();
 
-				if (mod.equals("video") || mod.equals(VidLib.ID) || mod.equals(VidLib.ID)) {
+				if (mod.equals("video") || mod.equals(VidLib.ID)) {
 					event.accept(item.getDefaultInstance());
 				}
 			}

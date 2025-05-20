@@ -6,10 +6,10 @@ import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
@@ -33,8 +33,8 @@ public class GhostStructureCaptureToolItem implements VidLibTool {
 	}
 
 	@Override
-	public ItemStack createItem() {
-		return new ItemStack(Items.ECHO_SHARD);
+	public ResourceLocation getModel() {
+		return ResourceLocation.withDefaultNamespace("echo_shard");
 	}
 
 	@Override

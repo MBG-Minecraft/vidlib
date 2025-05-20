@@ -2,12 +2,12 @@
 	"layers": {
 		"humanoid": [
 			{
-				"texture": "minecraft:tracksuit/cyan"
+				"texture": "vidlib:tracksuit/purple"
 			}
 		],
 		"humanoid_leggings": [
 			{
-				"texture": "minecraft:tracksuit/cyan"
+				"texture": "vidlib:tracksuit/purple"
 			}
 		]
 	}

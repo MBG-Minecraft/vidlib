@@ -10,12 +10,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -43,8 +43,8 @@ public class ExplosionTestTool implements VidLibTool, PlayerActionHandler {
 	}
 
 	@Override
-	public ItemStack createItem() {
-		return new ItemStack(Items.TNT);
+	public ResourceLocation getModel() {
+		return ResourceLocation.withDefaultNamespace("tnt");
 	}
 
 	public static ExplosionData getData(ItemStack item, boolean newData) {

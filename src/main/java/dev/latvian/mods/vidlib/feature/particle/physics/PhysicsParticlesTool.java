@@ -9,10 +9,10 @@ import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
@@ -37,8 +37,8 @@ public class PhysicsParticlesTool implements VidLibTool, PlayerActionHandler {
 	}
 
 	@Override
-	public ItemStack createItem() {
-		return new ItemStack(Items.BLAZE_ROD);
+	public ResourceLocation getModel() {
+		return ResourceLocation.withDefaultNamespace("blaze_rod");
 	}
 
 	@Override

@@ -8,6 +8,7 @@ import com.mojang.blaze3d.resource.ResourceHandle;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.kmath.color.Color;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.client.GLDebugLog;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.util.JsonUtils;
 import net.minecraft.client.Minecraft;
@@ -89,21 +90,30 @@ public class CanvasImpl {
 	}
 
 	public static void resizeAll(int width, int height) {
+		GLDebugLog.pushGroup("Canvas Resize");
+
 		for (var canvas : ENABLED_EXT) {
+			GLDebugLog.message(canvas.idString);
 			canvas.resize(width, height);
 		}
+
+		GLDebugLog.popGroup();
 	}
 
 	public static void drawAll(Minecraft mc) {
 		var texture = Objects.requireNonNull(mc.getMainRenderTarget().getColorTexture());
+		GLDebugLog.pushGroup("Canvas Draw All");
 
 		for (var canvas : ENABLED) {
 			if (canvas.data.autoDraw()) {
+				GLDebugLog.message(canvas.idString);
 				canvas.draw(texture);
 			} else if (canvas.drawCallback != null) {
 				canvas.drawCallback.run();
 			}
 		}
+
+		GLDebugLog.popGroup();
 	}
 
 	public static void closeAll() {
@@ -136,30 +146,46 @@ public class CanvasImpl {
 	}
 
 	public static void createHandles(FrameGraphBuilder builder, RenderTargetDescriptor targetDescriptor) {
+		GLDebugLog.pushGroup("Canvas Create Handles");
+
 		for (var canvas : ENABLED) {
+			GLDebugLog.message(canvas.idString);
 			canvas.createHandle(builder, targetDescriptor);
 		}
+
+		GLDebugLog.popGroup();
 	}
 
 	public static void addAllToFrame(Minecraft mc, FrameGraphBuilder frameGraphBuilder, PostChain.TargetBundle targetBundle) {
 		int w = mc.getMainRenderTarget().width;
 		int h = mc.getMainRenderTarget().height;
+		GLDebugLog.pushGroup("Canvas Add to Frame " + w + " x " + h);
 
-		for (var holder : ENABLED_EXT) {
-			holder.addToFrame(mc, frameGraphBuilder, targetBundle, w, h);
+		for (var canvas : ENABLED_EXT) {
+			GLDebugLog.message(canvas.idString);
+			canvas.addToFrame(mc, frameGraphBuilder, targetBundle, w, h);
 		}
+
+		GLDebugLog.popGroup();
 	}
 
 	public static void allReadsAndWrites(FramePass pass) {
-		for (var holder : ENABLED) {
-			holder.readsAndWrites(pass);
+		GLDebugLog.pushGroup("Canvas Reads and Writes");
+
+		for (var canvas : ENABLED) {
+			GLDebugLog.message(canvas.idString);
+			canvas.readsAndWrites(pass);
 		}
+
+		GLDebugLog.popGroup();
 	}
 
 	public static void drawPreview(Minecraft mc, GuiGraphics g) {
 		if (mc.level == null || mc.options.hideGui || mc.level.isReplayLevel()) {
 			return;
 		}
+
+		GLDebugLog.pushGroup("Canvas Preview");
 
 		int y = 5;
 		var buffers = mc.renderBuffers().bufferSource();
@@ -171,12 +197,15 @@ public class CanvasImpl {
 			int x = 5;
 
 			if (canvas.previewColor || canvas.previewDepth) {
+				GLDebugLog.pushGroup(canvas.idString);
+
 				g.pose().pushPose();
 				g.pose().translate(0F, 0F, 950F);
 				var p = g.pose().last();
 				var m = p.pose();
 
 				if (canvas.previewColor) {
+					GLDebugLog.message("Color Preview");
 					var tex = canvas.getColorTexture();
 
 					g.fill(x - 1, y - 1, x + w + 1, y + h + 1, 0xFF000000);
@@ -207,6 +236,7 @@ public class CanvasImpl {
 				}
 
 				if (canvas.previewDepth) {
+					GLDebugLog.message("Depth Preview");
 					var tex = canvas.getDepthTexture();
 
 					g.fill(x - 1, y - 1, x + w + 1, y + h + 1, 0xFF000000);
@@ -234,7 +264,11 @@ public class CanvasImpl {
 
 				y += h + 6;
 				g.pose().popPose();
+
+				GLDebugLog.popGroup();
 			}
 		}
+
+		GLDebugLog.popGroup();
 	}
 }

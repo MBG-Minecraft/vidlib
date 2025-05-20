@@ -8,7 +8,6 @@ import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
 import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
-import dev.latvian.mods.vidlib.feature.registry.ID;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
@@ -22,7 +21,7 @@ import java.util.function.Function;
 @AutoInit
 public record Clothing(ResourceKey<EquipmentAsset> id, ClothingParts parts) {
 	public static ResourceKey<EquipmentAsset> createKey(String id) {
-		return ResourceKey.create(EquipmentAssets.ROOT_ID, ID.mc(id));
+		return ResourceKey.create(EquipmentAssets.ROOT_ID, VidLib.id(id));
 	}
 
 	public static final Clothing NONE = new Clothing(createKey("none"), ClothingParts.NONE);

@@ -1,8 +1,13 @@
 package dev.latvian.mods.vidlib.feature.client;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.profiling.metrics.MetricCategory;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL43;
+
+import java.util.function.Supplier;
 
 public interface GLDebugLog {
 	enum Type {
@@ -36,7 +41,66 @@ public interface GLDebugLog {
 
 	int MAJOR_VERSION = GL11.glGetInteger(GL30.GL_MAJOR_VERSION);
 	int MINOR_VERSION = GL11.glGetInteger(GL30.GL_MINOR_VERSION);
-	boolean AVAILABLE = MAJOR_VERSION >= 4 && (MAJOR_VERSION > 4 || MINOR_VERSION >= 3);
+	boolean AVAILABLE = true; // MAJOR_VERSION >= 4 && (MAJOR_VERSION > 4 || MINOR_VERSION >= 3);
+
+	ProfilerFiller PROFILER = new ProfilerFiller() {
+		@Override
+		public void startTick() {
+		}
+
+		@Override
+		public void endTick() {
+		}
+
+		@Override
+		public void push(String name) {
+			if (RenderSystem.isOnRenderThread()) {
+				pushGroup(name);
+			}
+		}
+
+		@Override
+		public void push(Supplier<String> nameSupplier) {
+			if (RenderSystem.isOnRenderThread()) {
+				pushGroup(nameSupplier.get());
+			}
+		}
+
+		@Override
+		public void pop() {
+			if (RenderSystem.isOnRenderThread()) {
+				popGroup();
+			}
+		}
+
+		@Override
+		public void popPush(String name) {
+			if (RenderSystem.isOnRenderThread()) {
+				popGroup();
+				pushGroup(name);
+			}
+		}
+
+		@Override
+		public void popPush(Supplier<String> nameSupplier) {
+			if (RenderSystem.isOnRenderThread()) {
+				popGroup();
+				pushGroup(nameSupplier.get());
+			}
+		}
+
+		@Override
+		public void markForCharting(MetricCategory category) {
+		}
+
+		@Override
+		public void incrementCounter(String counterName, int increment) {
+		}
+
+		@Override
+		public void incrementCounter(Supplier<String> counterNameSupplier, int increment) {
+		}
+	};
 
 	static void message(Object message, Type type, Severity severity) {
 		if (AVAILABLE) {

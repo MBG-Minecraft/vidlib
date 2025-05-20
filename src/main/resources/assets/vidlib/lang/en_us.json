@@ -3,12 +3,12 @@
 	"key.vidlib.freeze_tick": "Freeze Tick",
 	"key.vidlib.clear_particles": "Clear Particles",
 	"key.vidlib.reload": "Reload",
-	"key.vidlib.tp.n": "Teleport North (-10,000 Z)",
-	"key.vidlib.tp.s": "Teleport South (+10,000 Z)",
-	"key.vidlib.tp.w": "Teleport West (-10,000 X)",
-	"key.vidlib.tp.e": "Teleport East (+10,000 X)",
-	"block.minecraft.money_block": "Money Block",
-	"block.minecraft.banded_money_block": "Banded Money Block",
-	"item.minecraft.money": "Money",
-	"item.minecraft.banded_money": "Banded Money"
+	"block.vidlib.money_block": "Money Block",
+	"block.vidlib.banded_money_block": "Banded Money Block",
+	"item.vidlib.money": "Money",
+	"item.vidlib.banded_money": "Banded Money",
+	"item.vidlib.flat_money": "Money",
+	"item.vidlib.tool": "Tool",
+	"item.vidlib.heart": "Heart",
+	"item.vidlib.crowbar": "Crowbar"
 }

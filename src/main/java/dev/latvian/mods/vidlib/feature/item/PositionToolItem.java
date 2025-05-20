@@ -12,11 +12,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
@@ -71,8 +71,8 @@ public class PositionToolItem implements VidLibTool, PlayerActionHandler {
 	}
 
 	@Override
-	public ItemStack createItem() {
-		return new ItemStack(Items.BREEZE_ROD);
+	public ResourceLocation getModel() {
+		return ResourceLocation.withDefaultNamespace("breeze_rod");
 	}
 
 	@Override

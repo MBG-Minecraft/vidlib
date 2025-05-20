@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.item;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.datafixers.util.Pair;
+import dev.latvian.mods.vidlib.VidLibContent;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
@@ -11,6 +12,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -87,10 +89,13 @@ public interface VidLibTool {
 
 	Component getName();
 
-	ItemStack createItem();
+	@Nullable
+	default ResourceLocation getModel() {
+		return null;
+	}
 
 	default ItemStack createFullItem() {
-		var stack = createItem();
+		var stack = new ItemStack(VidLibContent.Items.TOOL.get());
 		var tag = new CompoundTag();
 		tag.putString("vidlib:tool", getId());
 		stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
@@ -98,6 +103,13 @@ public interface VidLibTool {
 		stack.set(DataComponents.RARITY, Rarity.EPIC);
 		stack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
 		stack.set(DataComponents.MAX_STACK_SIZE, 1);
+
+		var model = getModel();
+
+		if (model != null) {
+			stack.set(DataComponents.ITEM_MODEL, model);
+		}
+
 		return stack;
 	}
 
