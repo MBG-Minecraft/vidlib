@@ -13,6 +13,7 @@ public enum TerrainRenderLayer implements StringRepresentable {
 	TRANSLUCENT("translucent"),
 	TRIPWIRE("tripwire"),
 	PARTICLE("particle"),
+	BRIGHT("bright"),
 	BLOOM("bloom");
 
 	public static final TerrainRenderLayer[] ALL = values();

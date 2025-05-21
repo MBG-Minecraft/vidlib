@@ -1,5 +1,9 @@
 {
 	"targets": {
+		"low": {
+			"width": -8,
+			"height": -8
+		},
 		"swap": {}
 	},
 	"passes": [

@@ -24,7 +24,7 @@ public class InternalCanvas extends Canvas {
 
 	@Override
 	public void createHandle(FrameGraphBuilder builder, RenderTargetDescriptor targetDescriptor) {
-		GLDebugLog.message("Creating internal canvas " + idString);
+		GLDebugLog.message("Created internal canvas");
 		outputTarget = builder.createInternal(pathString, targetDescriptor);
 	}
 }

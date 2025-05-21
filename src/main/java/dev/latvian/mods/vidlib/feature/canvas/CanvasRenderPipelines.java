@@ -9,6 +9,7 @@ import dev.latvian.mods.kmath.render.vertexconsumer.PosColTexVertexConsumer;
 import dev.latvian.mods.kmath.render.vertexconsumer.PosColVertexConsumer;
 import dev.latvian.mods.kmath.render.vertexconsumer.PosVertexConsumer;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.client.BrightVertexConsumer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 
@@ -63,6 +64,16 @@ public interface CanvasRenderPipelines {
 		.withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
 		.build();
 
+	RenderPipeline ENTITY_CUTOUT = RenderPipeline.builder(SNIPPET)
+		.withLocation(VidLib.id("pipeline/canvas/cull/entity/cutout"))
+		.withVertexFormat(DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS)
+		.build();
+
+	RenderPipeline ENTITY_CUTOUT_NO_CULL = RenderPipeline.builder(SNIPPET_NO_CULL)
+		.withLocation(VidLib.id("pipeline/canvas/no_cull/entity/cutout"))
+		.withVertexFormat(DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS)
+		.build();
+
 	static void register(RegisterRenderPipelinesEvent event) {
 		event.registerPipeline(POS);
 		event.registerPipeline(POS_NO_CULL);
@@ -70,6 +81,8 @@ public interface CanvasRenderPipelines {
 		event.registerPipeline(POS_COL_NO_CULL);
 		event.registerPipeline(POS_TEX_COL);
 		event.registerPipeline(POS_TEX_COL_NO_CULL);
+		event.registerPipeline(ENTITY_CUTOUT);
+		event.registerPipeline(ENTITY_CUTOUT_NO_CULL);
 	}
 
 	static VertexConsumer wrap(VertexConsumer buffer, RenderPipeline pipeline) {
@@ -79,6 +92,8 @@ public interface CanvasRenderPipelines {
 			return new PosColVertexConsumer(buffer);
 		} else if (pipeline == POS_TEX_COL || pipeline == POS_TEX_COL_NO_CULL) {
 			return new PosColTexVertexConsumer(buffer);
+		} else if (pipeline == ENTITY_CUTOUT || pipeline == ENTITY_CUTOUT_NO_CULL) {
+			return new BrightVertexConsumer(buffer);
 		} else {
 			return buffer;
 		}

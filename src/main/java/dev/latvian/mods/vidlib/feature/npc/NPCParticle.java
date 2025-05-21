@@ -3,9 +3,9 @@ package dev.latvian.mods.vidlib.feature.npc;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.kmath.KMath;
+import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
-import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.particle.CustomParticle;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -134,7 +134,7 @@ public class NPCParticle extends CustomParticle {
 		playerRenderState.legsEquipment = recording.get(NPCDataType.EQUIPMENT_LEGS, offset);
 		playerRenderState.chestEquipment = recording.get(NPCDataType.EQUIPMENT_CHEST, offset);
 		playerRenderState.headEquipment = recording.get(NPCDataType.EQUIPMENT_HEAD, offset);
-		playerRenderState.setRenderData(MiscClientUtils.CLOTHING, recording.get(NPCDataType.CLOTHING, offset));
+		playerRenderState.setRenderData(VidLibEntityRenderStates.CLOTHING, recording.get(NPCDataType.CLOTHING, offset));
 
 		playerRenderState.showHat = true;
 		playerRenderState.showJacket = true;

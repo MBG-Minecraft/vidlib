@@ -64,5 +64,8 @@
 	],
 	"net/minecraft/client/renderer/RenderType": [
 		"dev/latvian/mods/vidlib/core/VLRenderType"
+	],
+	"net/minecraft/client/renderer/entity/EntityRenderer": [
+		"dev/latvian/mods/vidlib/core/VLEntityRenderer<T, S>"
 	]
 }

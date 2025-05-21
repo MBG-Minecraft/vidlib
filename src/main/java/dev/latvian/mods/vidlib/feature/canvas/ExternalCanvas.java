@@ -14,6 +14,7 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -93,14 +94,18 @@ public class ExternalCanvas extends Canvas implements Consumer<RenderPass> {
 	}
 
 	public void addToFrame(Minecraft mc, FrameGraphBuilder frameGraphBuilder, PostChain.TargetBundle targetBundle, int w, int h) {
-		if (tempShouldDraw) {
-			var chain = mc.getShaderManager().getPostChain(id, data.targets().isEmpty() ? defaultTargets : data.targets());
+		var targets = defaultTargets;
 
-			if (chain != null) {
-				chain.addToFrame(frameGraphBuilder, w, h, targetBundle, this);
-			}
+		if (!data.importTargets().isEmpty()) {
+			targets = new HashSet<>(defaultTargets.size() + data.importTargets().size());
+			targets.addAll(defaultTargets);
+			targets.addAll(data.importTargets());
+		}
 
-			tempShouldDraw = false;
+		var chain = mc.getShaderManager().getPostChain(id, targets);
+
+		if (chain != null) {
+			chain.addToFrame(frameGraphBuilder, w, h, targetBundle, this);
 		}
 	}
 
@@ -119,7 +124,7 @@ public class ExternalCanvas extends Canvas implements Consumer<RenderPass> {
 
 	@Override
 	public void createHandle(FrameGraphBuilder builder, RenderTargetDescriptor targetDescriptor) {
-		GLDebugLog.message("Creating external canvas " + idString);
+		GLDebugLog.message("Created external canvas");
 		outputTarget = builder.importExternal(pathString, externalTarget);
 	}
 }

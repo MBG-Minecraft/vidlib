@@ -1,10 +1,8 @@
 package dev.latvian.mods.vidlib.feature.canvas;
 
-import dev.latvian.mods.kmath.texture.LightUV;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
-import dev.latvian.mods.vidlib.util.client.MultiBufferSourceOverride;
 import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 
@@ -12,7 +10,7 @@ public class BossRendering {
 	@AutoRegister(Dist.CLIENT)
 	public static final Canvas CANVAS = Canvas.createExternal(VidLib.id("boss")).setDrawCallback(BossRendering::handleColors);
 
-	public static boolean active = false;
+	public static int active = 0;
 	public static float lookingAtDepth = 1F;
 
 	public static void handleColors() {
@@ -21,28 +19,35 @@ public class BossRendering {
 
 	public static void render(FrameInfo frame) {
 		var mc = frame.mc();
-		var dispatcher = mc.getEntityRenderDispatcher();
+		var buffers = frame.buffers();
+		var delta = frame.worldDelta();
+		var entity = mc.level.getMainBoss();
 
-		dispatcher.setRenderShadow(false);
-		boolean hitbox = dispatcher.shouldRenderHitBoxes();
-		dispatcher.setRenderHitBoxes(false);
-		active = true;
-
-		for (var entity : mc.level.getBosses()) {
-			if (entity != mc.player) {
-				try {
-					var buffers = MultiBufferSourceOverride.boss(frame.buffers());
-					float x = frame.x(Mth.lerp(frame.worldDelta(), entity.xOld, entity.getX()));
-					float y = frame.y(Mth.lerp(frame.worldDelta(), entity.yOld, entity.getY()));
-					float z = frame.z(Mth.lerp(frame.worldDelta(), entity.zOld, entity.getZ()));
-					dispatcher.render(entity, x, y, z, frame.worldDelta(), frame.poseStack(), buffers, LightUV.FULLBRIGHT.light());
-				} catch (Exception ignored) {
-				}
-			}
+		if (entity == null) {
+			return;
 		}
 
-		dispatcher.setRenderShadow(true);
-		dispatcher.setRenderHitBoxes(hitbox);
-		active = false;
+		var dispatcher = mc.getEntityRenderDispatcher();
+
+		try {
+			var renderer = dispatcher.getRenderer(entity);
+
+			if (renderer != null && renderer.shouldRender(entity, frame.frustum(), frame.cameraX(), frame.cameraY(), frame.cameraZ())) {
+				float x = frame.x(Mth.lerp(delta, entity.xOld, entity.getX()));
+				float y = frame.y(Mth.lerp(delta, entity.yOld, entity.getY()));
+				float z = frame.z(Mth.lerp(delta, entity.zOld, entity.getZ()));
+				frame.poseStack().pushPose();
+				dispatcher.setRenderShadow(false);
+				boolean hitbox = dispatcher.shouldRenderHitBoxes();
+				dispatcher.setRenderHitBoxes(false);
+				active++;
+				renderer.renderBoss(entity, frame.poseStack(), buffers, x, y, z, delta);
+				dispatcher.setRenderShadow(true);
+				dispatcher.setRenderHitBoxes(hitbox);
+				active--;
+				frame.poseStack().popPose();
+			}
+		} catch (Exception ignored) {
+		}
 	}
 }

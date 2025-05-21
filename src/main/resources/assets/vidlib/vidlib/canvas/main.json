@@ -1,4 +1,5 @@
 {
 	"priority": 100,
-	"auto_draw": false
+	"auto_draw": false,
+	"auto_clear": false
 }

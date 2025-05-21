@@ -100,16 +100,36 @@ public class CanvasImpl {
 		GLDebugLog.popGroup();
 	}
 
-	public static void drawAll(Minecraft mc) {
+	public static void drawAllBeforeOutline(Minecraft mc) {
 		var texture = Objects.requireNonNull(mc.getMainRenderTarget().getColorTexture());
-		GLDebugLog.pushGroup("Canvas Draw All");
+		GLDebugLog.pushGroup("Canvas Draw All Before Outline");
 
 		for (var canvas : ENABLED) {
-			if (canvas.data.autoDraw()) {
-				GLDebugLog.message(canvas.idString);
-				canvas.draw(texture);
-			} else if (canvas.drawCallback != null) {
-				canvas.drawCallback.run();
+			if (canvas.data.priority() >= 0) {
+				if (canvas.data.autoDraw()) {
+					GLDebugLog.message(canvas.idString);
+					canvas.draw(texture);
+				} else if (canvas.drawCallback != null) {
+					canvas.drawCallback.run();
+				}
+			}
+		}
+
+		GLDebugLog.popGroup();
+	}
+
+	public static void drawAllAfterOutline(Minecraft mc) {
+		var texture = Objects.requireNonNull(mc.getMainRenderTarget().getColorTexture());
+		GLDebugLog.pushGroup("Canvas Draw All After Outline");
+
+		for (var canvas : ENABLED) {
+			if (canvas.data.priority() < 0) {
+				if (canvas.data.autoDraw()) {
+					GLDebugLog.message(canvas.idString);
+					canvas.draw(texture);
+				} else if (canvas.drawCallback != null) {
+					canvas.drawCallback.run();
+				}
 			}
 		}
 
@@ -151,6 +171,10 @@ public class CanvasImpl {
 		for (var canvas : ENABLED) {
 			GLDebugLog.message(canvas.idString);
 			canvas.createHandle(builder, targetDescriptor);
+
+			if (canvas.data.autoClear()) {
+				canvas.clear();
+			}
 		}
 
 		GLDebugLog.popGroup();
@@ -189,7 +213,7 @@ public class CanvasImpl {
 
 		int y = 5;
 		var buffers = mc.renderBuffers().bufferSource();
-		float scale = 0.75F;
+		float scale = 0.5F;
 		int w = (int) (160F * scale);
 		int h = (int) (90F * scale);
 

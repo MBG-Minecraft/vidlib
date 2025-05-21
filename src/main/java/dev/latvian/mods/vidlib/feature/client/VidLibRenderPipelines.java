@@ -81,6 +81,17 @@ public interface VidLibRenderPipelines {
 		.build()
 	);
 
+	RenderPipeline.Snippet OUTLINE_SNIPPET = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)
+		.withVertexShader("core/rendertype_outline")
+		.withFragmentShader("core/rendertype_outline")
+		.withSampler("Sampler0")
+		.withBlend(BlendFunction.TRANSLUCENT)
+		.withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
+		.buildSnippet();
+
+	RenderPipeline OUTLINE_CULL = RenderPipeline.builder(OUTLINE_SNIPPET).withLocation("pipeline/outline_cull").build();
+	RenderPipeline OUTLINE_NO_CULL = RenderPipeline.builder(OUTLINE_SNIPPET).withLocation("pipeline/outline_no_cull").withCull(false).build();
+
 	@SubscribeEvent
 	static void registerRenderPipelines(RegisterRenderPipelinesEvent event) {
 		event.registerPipeline(GUI_DEPTH);
@@ -101,6 +112,17 @@ public interface VidLibRenderPipelines {
 		TerrainRenderLayer.TRANSLUCENT.setClientValues(RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS, RenderType.translucent(), TerrainRenderTypes.TRANSLUCENT, TerrainRenderTypes.TRANSLUCENT_NO_CULL);
 		TerrainRenderLayer.TRIPWIRE.setClientValues(RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS, RenderType.tripwire(), TerrainRenderTypes.TRANSLUCENT, TerrainRenderTypes.TRANSLUCENT_NO_CULL);
 		TerrainRenderLayer.PARTICLE.setClientValues(RenderLevelStageEvent.Stage.AFTER_PARTICLES, RenderType.translucent(), TerrainRenderTypes.TRANSLUCENT, TerrainRenderTypes.TRANSLUCENT_NO_CULL);
-		TerrainRenderLayer.BLOOM.setClientValues(RenderLevelStageEvent.Stage.AFTER_WEATHER, RenderType.translucent(), BloomRenderTypes.POS_TEX_COL, BloomRenderTypes.POS_TEX_COL_NO_CULL);
+		TerrainRenderLayer.BRIGHT.setClientValues(null, RenderType.translucent(), BrightRenderTypes.POS_TEX_COL, BrightRenderTypes.POS_TEX_COL_NO_CULL);
+		TerrainRenderLayer.BLOOM.setClientValues(null, RenderType.translucent(), BloomRenderTypes.POS_TEX_COL, BloomRenderTypes.POS_TEX_COL_NO_CULL);
+	}
+
+	static RenderPipeline wrap(RenderPipeline original) {
+		if (OUTLINE_CULL.getLocation().equals(original.getLocation())) {
+			return OUTLINE_CULL;
+		} else if (OUTLINE_NO_CULL.getLocation().equals(original.getLocation())) {
+			return OUTLINE_NO_CULL;
+		} else {
+			return original;
+		}
 	}
 }

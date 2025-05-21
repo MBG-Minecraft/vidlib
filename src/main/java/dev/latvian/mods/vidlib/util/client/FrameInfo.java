@@ -9,7 +9,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.Nullable;
 import org.joml.FrustumIntersection;
@@ -36,7 +35,7 @@ public record FrameInfo(
 	Frustum frustum,
 	boolean replay,
 	Vector3f normal
-) {
+) implements FramePoseStack {
 	public static FrameInfo CURRENT;
 
 	@Nullable
@@ -75,26 +74,6 @@ public record FrameInfo(
 
 	public MultiBufferSource buffers() {
 		return mc.renderBuffers().bufferSource();
-	}
-
-	public float x(double x) {
-		return (float) (x - cameraX);
-	}
-
-	public float y(double y) {
-		return (float) (y - cameraY);
-	}
-
-	public float z(double z) {
-		return (float) (z - cameraZ);
-	}
-
-	public void translate(double x, double y, double z) {
-		poseStack.translate(x - cameraX, y - cameraY, z - cameraZ);
-	}
-
-	public void translate(Vec3 pos) {
-		translate(pos.x, pos.y, pos.z);
 	}
 
 	public boolean isVisible(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {

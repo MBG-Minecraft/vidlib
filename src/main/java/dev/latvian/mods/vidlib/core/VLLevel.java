@@ -25,6 +25,7 @@ import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -217,6 +218,18 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		return vl$level().getEntities((Entity) null, AABB.INFINITE, Entity::isAlive);
 	}
 
+	default Iterable<LivingEntity> allLivingEntities() {
+		var list = new ArrayList<LivingEntity>();
+
+		for (var entity : allEntities()) {
+			if (entity instanceof LivingEntity livingEntity) {
+				list.add(livingEntity);
+			}
+		}
+
+		return list;
+	}
+
 	default List<Entity> selectEntities(EntitySelector selector) {
 		var list = new ArrayList<Entity>(1);
 
@@ -253,12 +266,12 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		return 1F;
 	}
 
-	default List<Entity> getBosses() {
+	default List<LivingEntity> getBosses() {
 		return List.of();
 	}
 
 	@Nullable
-	default Entity getMainBoss() {
+	default LivingEntity getMainBoss() {
 		return null;
 	}
 

@@ -1,12 +1,13 @@
 package dev.latvian.mods.vidlib.feature.canvas;
 
 import dev.latvian.mods.vidlib.feature.client.TexturedRenderType;
-import dev.latvian.mods.vidlib.util.Empty;
+import dev.latvian.mods.vidlib.util.client.MultiBufferSourceOverride;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.TriState;
 
-public interface BossEntityRenderTypes {
+public interface BossRenderTypes {
 	TexturedRenderType CULL = TexturedRenderType.internal(
 		"boss/cull",
 		1536,
@@ -31,6 +32,7 @@ public interface BossEntityRenderTypes {
 			.createCompositeState(false)
 	);
 
-	RenderType WHITE_CULL = CULL.apply(Empty.TEXTURE);
-	RenderType WHITE_NO_CULL = NO_CULL.apply(Empty.TEXTURE);
+	static MultiBufferSourceOverride override(MultiBufferSource delegate) {
+		return new MultiBufferSourceOverride(delegate, CULL, NO_CULL);
+	}
 }

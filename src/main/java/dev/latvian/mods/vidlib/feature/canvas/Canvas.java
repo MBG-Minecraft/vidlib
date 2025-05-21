@@ -17,7 +17,6 @@ import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderPipelines;
 import dev.latvian.mods.vidlib.util.Lazy;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelTargetBundle;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ARGB;
@@ -62,11 +61,9 @@ public class Canvas {
 	public boolean previewColor;
 	public boolean previewDepth;
 	public CanvasData data;
-	public boolean shouldDraw;
 	public Runnable drawCallback;
 
 	ResourceHandle<RenderTarget> outputTarget;
-	boolean tempShouldDraw;
 	private RenderPipeline renderPipeline;
 	private RenderStateShard.OutputStateShard outputStateShard;
 
@@ -76,13 +73,12 @@ public class Canvas {
 		this.colorTexturePath = id.withPath(p -> "textures/vidlib/generated/canvas/color/" + p + ".png");
 		this.depthTexturePath = id.withPath(p -> "textures/vidlib/generated/canvas/depth/" + p + ".png");
 		this.pathString = "vidlib_framebuffer/" + id;
-		this.defaultTargets = Set.of(LevelTargetBundle.MAIN_TARGET_ID, id);
+		this.defaultTargets = Set.of(id);
 
 		this.enabled = false;
 		this.previewColor = false;
 		this.previewDepth = false;
 		this.data = CanvasData.DEFAULT;
-		this.shouldDraw = false;
 	}
 
 	public Canvas setDrawCallback(Runnable callback) {
@@ -93,10 +89,6 @@ public class Canvas {
 	public boolean draw(GpuTexture texture) {
 		if (drawCallback != null) {
 			drawCallback.run();
-		}
-
-		if (!shouldDraw) {
-			return false;
 		}
 
 		var t = getColorTexture();
@@ -112,7 +104,6 @@ public class Canvas {
 				pass.setIndexBuffer(ibuf, sequentialBuffer.type());
 				pass.bindSampler("InSampler", t);
 				pass.drawIndexed(0, 6);
-				shouldDraw = false;
 				return true;
 			}
 		}
@@ -282,8 +273,6 @@ public class Canvas {
 	}
 
 	public RenderTarget getOptionalTarget() {
-		shouldDraw = true;
-		tempShouldDraw = true;
 		var t = outputTarget != null ? outputTarget.get() : null;
 		return t != null ? t : Minecraft.getInstance().getMainRenderTarget();
 	}

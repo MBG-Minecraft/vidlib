@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
-import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -40,9 +40,9 @@ public abstract class HumanoidArmorLayerMixin<S extends HumanoidRenderState, M e
 
 	@Inject(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/renderer/entity/state/HumanoidRenderState;FF)V", at = @At("RETURN"))
 	private void vl$render(PoseStack ms, MultiBufferSource buffers, int light, S state, float yRot, float xRot, CallbackInfo ci) {
-		var clothing = state.getRenderData(MiscClientUtils.CLOTHING);
+		var clothing = VidLibEntityRenderStates.getClothing(state);
 
-		if (clothing != null && clothing != Clothing.NONE) {
+		if (clothing != Clothing.NONE) {
 			var item = clothing.parts().getItem();
 
 			for (var slot : Clothing.ORDERED_SLOTS) {

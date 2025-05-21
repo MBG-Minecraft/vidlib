@@ -1,13 +1,15 @@
 package dev.latvian.mods.vidlib.feature.client;
 
 import dev.latvian.mods.vidlib.feature.canvas.CanvasRenderPipelines;
+import dev.latvian.mods.vidlib.util.client.MultiBufferSourceOverride;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.TriState;
 
 public interface BrightRenderTypes {
 	TexturedRenderType POS = TexturedRenderType.internal(
-		"fullbright/cull/pos",
+		"bright/cull/pos",
 		1536,
 		true,
 		true,
@@ -18,7 +20,7 @@ public interface BrightRenderTypes {
 	);
 
 	TexturedRenderType POS_NO_CULL = TexturedRenderType.internal(
-		"fullbright/no_cull/pos",
+		"bright/no_cull/pos",
 		1536,
 		true,
 		true,
@@ -29,7 +31,7 @@ public interface BrightRenderTypes {
 	);
 
 	TexturedRenderType POS_COL = TexturedRenderType.internal(
-		"fullbright/cull/pos_col",
+		"bright/cull/pos_col",
 		1536,
 		true,
 		true,
@@ -40,7 +42,7 @@ public interface BrightRenderTypes {
 	);
 
 	TexturedRenderType POS_COL_NO_CULL = TexturedRenderType.internal(
-		"fullbright/no_cull/pos_col",
+		"bright/no_cull/pos_col",
 		1536,
 		true,
 		true,
@@ -51,7 +53,7 @@ public interface BrightRenderTypes {
 	);
 
 	TexturedRenderType POS_TEX_COL = TexturedRenderType.internal(
-		"fullbright/cull/pos_tex_col",
+		"bright/cull/pos_tex_col",
 		1536,
 		true,
 		true,
@@ -62,7 +64,7 @@ public interface BrightRenderTypes {
 	);
 
 	TexturedRenderType POS_TEX_COL_NO_CULL = TexturedRenderType.internal(
-		"fullbright/no_cull/pos_tex_col",
+		"bright/no_cull/pos_tex_col",
 		1536,
 		true,
 		true,
@@ -71,4 +73,42 @@ public interface BrightRenderTypes {
 			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
 			.createCompositeState(false)
 	);
+
+	TexturedRenderType ENTITY_CUTOUT = TexturedRenderType.internal(
+		"bright/cull/entity/cutout",
+		1536,
+		true,
+		true,
+		CanvasRenderPipelines.ENTITY_CUTOUT,
+		texture -> RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
+			.createCompositeState(false)
+	);
+
+	TexturedRenderType ENTITY_CUTOUT_NO_CULL = TexturedRenderType.internal(
+		"bright/no_cull/entity/cutout",
+		1536,
+		true,
+		true,
+		CanvasRenderPipelines.ENTITY_CUTOUT_NO_CULL,
+		texture -> RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
+			.createCompositeState(false)
+	);
+
+	static MultiBufferSourceOverride overridePos(MultiBufferSource delegate) {
+		return new MultiBufferSourceOverride(delegate, POS, POS_NO_CULL);
+	}
+
+	static MultiBufferSourceOverride overridePosCol(MultiBufferSource delegate) {
+		return new MultiBufferSourceOverride(delegate, POS_COL, POS_COL_NO_CULL);
+	}
+
+	static MultiBufferSourceOverride overridePosTexCol(MultiBufferSource delegate) {
+		return new MultiBufferSourceOverride(delegate, POS_TEX_COL, POS_TEX_COL_NO_CULL);
+	}
+
+	static MultiBufferSourceOverride overrideEntityCutout(MultiBufferSource delegate) {
+		return new MultiBufferSourceOverride(delegate, ENTITY_CUTOUT, ENTITY_CUTOUT_NO_CULL);
+	}
 }

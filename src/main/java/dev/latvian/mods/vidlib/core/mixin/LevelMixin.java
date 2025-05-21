@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 import dev.latvian.mods.vidlib.core.VLLevel;
 import dev.latvian.mods.vidlib.feature.bulk.UndoableModificationHolder;
 import dev.latvian.mods.vidlib.util.PauseType;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,10 +22,10 @@ public abstract class LevelMixin implements VLLevel {
 	private final AtomicLong vl$nextPacketId = new AtomicLong(0L);
 
 	@Unique
-	private List<Entity> vl$bosses = List.of();
+	private List<LivingEntity> vl$bosses = List.of();
 
 	@Unique
-	private Entity vl$mainBoss = null;
+	private LivingEntity vl$mainBoss = null;
 
 	@Override
 	public void vl$preTick(PauseType paused) {
@@ -33,12 +33,9 @@ public abstract class LevelMixin implements VLLevel {
 		vl$mainBoss = null;
 
 		for (var entity : allEntities()) {
-			if (entity.isMainBoss() && entity.isAlive()) {
-				vl$bosses.add(entity);
-
-				if (vl$mainBoss == null) {
-					vl$mainBoss = entity;
-				}
+			if (entity instanceof LivingEntity l && l.isBoss() && l.isAlive()) {
+				vl$bosses.add(l);
+				vl$mainBoss = l;
 			}
 		}
 	}
@@ -54,13 +51,13 @@ public abstract class LevelMixin implements VLLevel {
 	}
 
 	@Override
-	public List<Entity> getBosses() {
+	public List<LivingEntity> getBosses() {
 		return vl$bosses;
 	}
 
 	@Override
 	@Nullable
-	public Entity getMainBoss() {
+	public LivingEntity getMainBoss() {
 		return vl$mainBoss;
 	}
 }

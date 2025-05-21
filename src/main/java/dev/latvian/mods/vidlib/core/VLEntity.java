@@ -9,7 +9,6 @@ import dev.latvian.mods.vidlib.feature.entity.EntityOverrideValue;
 import dev.latvian.mods.vidlib.feature.entity.ForceEntityVelocityPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.S2CEntityEventPayload;
-import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBar;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
@@ -267,7 +266,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		return original;
 	}
 
-	default float getPassengerScale(Player passenger) {
+	default float getPassengerScale(Entity passenger) {
 		return 1F;
 	}
 
@@ -292,14 +291,5 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	default Rotation viewRotation(float delta) {
 		var e = vl$self();
 		return Rotation.deg(e.getViewYRot(delta), e.getViewXRot(delta));
-	}
-
-	default boolean isMainBoss() {
-		return vl$self().getTags().contains("main_boss") || vl$self().hasCustomName() && vl$self().getCustomName().getString().equals("Boss");
-	}
-
-	@Nullable
-	default ProgressBar getBossBar() {
-		return isMainBoss() ? ProgressBar.DEFAULT_ENTITY : null;
 	}
 }

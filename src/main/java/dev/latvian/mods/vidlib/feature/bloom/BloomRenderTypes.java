@@ -2,6 +2,8 @@ package dev.latvian.mods.vidlib.feature.bloom;
 
 import dev.latvian.mods.vidlib.feature.canvas.CanvasRenderPipelines;
 import dev.latvian.mods.vidlib.feature.client.TexturedRenderType;
+import dev.latvian.mods.vidlib.util.client.MultiBufferSourceOverride;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.TriState;
@@ -78,4 +80,44 @@ public interface BloomRenderTypes {
 			.setOutputState(Bloom.CANVAS.getOutputStateShard())
 			.createCompositeState(false)
 	);
+
+	TexturedRenderType ENTITY_CUTOUT = TexturedRenderType.internal(
+		"bloom/cull/entity/cutout",
+		1536,
+		true,
+		true,
+		CanvasRenderPipelines.ENTITY_CUTOUT,
+		texture -> RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
+			.setOutputState(Bloom.CANVAS.getOutputStateShard())
+			.createCompositeState(false)
+	);
+
+	TexturedRenderType ENTITY_CUTOUT_NO_CULL = TexturedRenderType.internal(
+		"bloom/no_cull/entity/cutout",
+		1536,
+		true,
+		true,
+		CanvasRenderPipelines.ENTITY_CUTOUT_NO_CULL,
+		texture -> RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
+			.setOutputState(Bloom.CANVAS.getOutputStateShard())
+			.createCompositeState(false)
+	);
+
+	static MultiBufferSourceOverride overridePos(MultiBufferSource delegate) {
+		return new MultiBufferSourceOverride(delegate, POS, POS_NO_CULL);
+	}
+
+	static MultiBufferSourceOverride overridePosCol(MultiBufferSource delegate) {
+		return new MultiBufferSourceOverride(delegate, POS_COL, POS_COL_NO_CULL);
+	}
+
+	static MultiBufferSourceOverride overridePosTexCol(MultiBufferSource delegate) {
+		return new MultiBufferSourceOverride(delegate, POS_TEX_COL, POS_TEX_COL_NO_CULL);
+	}
+
+	static MultiBufferSourceOverride overrideEntityCutout(MultiBufferSource delegate) {
+		return new MultiBufferSourceOverride(delegate, ENTITY_CUTOUT, ENTITY_CUTOUT_NO_CULL);
+	}
 }

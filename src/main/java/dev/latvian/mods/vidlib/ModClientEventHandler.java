@@ -8,11 +8,9 @@ import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockFont;
 import dev.latvian.mods.vidlib.feature.clothing.ClientClothingLoader;
-import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBarRenderer;
 import dev.latvian.mods.vidlib.feature.gradient.ClientGradients;
 import dev.latvian.mods.vidlib.feature.location.Location;
-import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.multiverse.VoidSpecialEffects;
 import dev.latvian.mods.vidlib.feature.particle.VidLibClientParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
@@ -22,9 +20,6 @@ import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
-import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -35,7 +30,6 @@ import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
-import net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent;
 
 @EventBusSubscriber(modid = VidLib.ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ModClientEventHandler {
@@ -80,42 +74,6 @@ public class ModClientEventHandler {
 
 	@SubscribeEvent
 	public static void addLayers(EntityRenderersEvent.AddLayers event) {
-	}
-
-	@SubscribeEvent
-	public static void registerRenderStateModifiers(RegisterRenderStateModifiersEvent event) {
-		event.registerEntityModifier(PlayerRenderer.class, ModClientEventHandler::modifyPlayerRenderState);
-	}
-
-	private static void modifyPlayerRenderState(AbstractClientPlayer player, PlayerRenderState state) {
-		if (player.isCreative()) {
-			state.setRenderData(MiscClientUtils.CREATIVE, Boolean.TRUE);
-		}
-
-		var vehicle = player.getVehicle();
-
-		if (vehicle != null) {
-			var s = vehicle.getPassengerScale(player);
-
-			if (s <= 0F) {
-				state.isInvisible = true;
-			} else {
-				state.scale *= s;
-			}
-		}
-
-		var session = player.vl$sessionData();
-
-		var clothing = state.isInvisible ? null : player.getClothing();
-		state.setRenderData(MiscClientUtils.CLOTHING, clothing == Clothing.NONE ? null : clothing);
-
-		if (state.nameTag != null) {
-			state.nameTag = session.modifyPlayerName(state.nameTag);
-		}
-
-		if (session.scoreText != null) {
-			state.scoreText = session.scoreText;
-		}
 	}
 
 	@SubscribeEvent

@@ -5,7 +5,7 @@ import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import net.neoforged.api.distmarker.Dist;
 
-public class Bloom {
+public interface Bloom {
 	@AutoRegister(Dist.CLIENT)
-	public static final Canvas CANVAS = Canvas.createExternal(VidLib.id("bloom"));
+	Canvas CANVAS = Canvas.createExternal(VidLib.id("bloom"));
 }

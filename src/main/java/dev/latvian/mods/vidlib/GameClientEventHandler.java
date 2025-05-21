@@ -12,6 +12,7 @@ import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
+import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
@@ -173,31 +174,11 @@ public class GameClientEventHandler {
 		var ms = frame.poseStack();
 		float delta = frame.worldDelta();
 
-		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
-			// Canvas.MAIN.clone(mc.getMainRenderTarget(), true, true);
-			Bloom.CANVAS.clone(mc.getMainRenderTarget(), false, true);
-
-			/*
-			if (!FMLLoader.isProduction()) {
-				RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-				var pos = new Vec3(9864.5, 99.5, 50005.5);
-
-				var ps = frame.poseStack();
-				ps.pushPose();
-				frame.translate(pos.x, pos.y, pos.z);
-				SphereRenderer.renderEntity(SpherePoints.H, ps, frame.buffers().getBuffer(VidLibRenderTypes.Entity.WHITE_TRANSLUCENT_NO_CULL), Color.of(0xFFFFFFFF), UV.FULL, LightUV.NORMAL);
-
-				double s = 0.1D;
-				if (frame.isVisible(pos.x - s, pos.y - s, pos.z - s, pos.x + s, pos.y + s, pos.z + s)) {
-					SphereRenderer.renderEntity(SpherePoints.H, ps, Bloom.posTexColBuffer(frame.buffers(), Empty.TEXTURE), Color.of(0xFFFF4343), UV.FULL, LightUV.NORMAL);
-				}
-
-				ps.popPose();
-				frame.mc().renderBuffers().bufferSource().endBatch();
-			}
-			 */
-		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
+		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS) {
+			Bloom.CANVAS.copyDepthFrom(mc.getMainRenderTarget());
+		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
 			BossRendering.CANVAS.copyDepthFrom(mc.getMainRenderTarget());
+			BossRendering.render(frame);
 		}
 
 		if (frame.layer() == TerrainRenderLayer.CUTOUT) {
@@ -215,8 +196,6 @@ public class GameClientEventHandler {
 				}
 			}
 		} else if (frame.layer() == TerrainRenderLayer.PARTICLE) {
-			BossRendering.render(frame);
-
 			if (mc.player.getShowZones()) {
 				ZoneRenderer.renderAll(frame);
 			} else {
@@ -526,9 +505,7 @@ public class GameClientEventHandler {
 		}
 
 		if (event.getRenderState().isInvisible) {
-			var d = event.getRenderState().getRenderData(MiscClientUtils.CREATIVE);
-
-			if (d != null && d) {
+			if (VidLibEntityRenderStates.isCreative(event.getRenderState())) {
 				event.setCanceled(true);
 			}
 		}
@@ -601,13 +578,11 @@ public class GameClientEventHandler {
 
 		CanvasImpl.createHandles(event.getFrameGrapBuilder(), event.getRenderTargetDescriptor());
 		// event.enableOutlineProcessing();
-
-		BossRendering.CANVAS.clear();
 	}
 
 	@SubscribeEvent
 	public static void renderNameTag(RenderNameTagEvent.DoRender event) {
-		if (BossRendering.active) {
+		if (BossRendering.active > 0) {
 			event.setCanceled(true);
 		}
 	}

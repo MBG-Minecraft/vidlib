@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib.core;
 
+import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBar;
 import net.minecraft.world.entity.LivingEntity;
+import org.jetbrains.annotations.Nullable;
 
 public interface VLLivingEntity extends VLEntity {
 	@Override
@@ -26,5 +28,14 @@ public interface VLLivingEntity extends VLEntity {
 	default float getRelativeHealth(float delta) {
 		var e = vl$self();
 		return Math.clamp(e.getHealth() / e.getMaxHealth(), 0F, 1F);
+	}
+
+	default boolean isBoss() {
+		return vl$self().getTags().contains("main_boss") || vl$self().hasCustomName() && vl$self().getCustomName().getString().equals("Boss");
+	}
+
+	@Nullable
+	default ProgressBar getBossBar() {
+		return isBoss() ? ProgressBar.DEFAULT_ENTITY : null;
 	}
 }

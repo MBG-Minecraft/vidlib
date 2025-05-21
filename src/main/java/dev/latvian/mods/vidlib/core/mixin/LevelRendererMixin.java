@@ -7,6 +7,7 @@ import com.mojang.blaze3d.framegraph.FramePass;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.ResourceHandle;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
@@ -49,7 +50,7 @@ public abstract class LevelRendererMixin {
 	private LevelTargetBundle targets;
 
 	@Shadow
-	public abstract int countRenderedSections();
+	public abstract boolean shouldShowEntityOutlines();
 
 	@Inject(method = "allChanged", at = @At("RETURN"))
 	private void vl$allChanged(CallbackInfo ci) {
@@ -82,8 +83,13 @@ public abstract class LevelRendererMixin {
 	}
 
 	@Inject(method = "doEntityOutline", at = @At("HEAD"))
-	private void vl$doEntityOutline(CallbackInfo ci) {
-		CanvasImpl.drawAll(minecraft);
+	private void vl$doEntityOutlineBefore(CallbackInfo ci) {
+		CanvasImpl.drawAllBeforeOutline(minecraft);
+	}
+
+	@Inject(method = "doEntityOutline", at = @At("RETURN"))
+	private void vl$doEntityOutlineAfter(CallbackInfo ci) {
+		CanvasImpl.drawAllAfterOutline(minecraft);
 	}
 
 	@Inject(method = "onResourceManagerReload", at = @At("RETURN"))
@@ -114,6 +120,13 @@ public abstract class LevelRendererMixin {
 	@Inject(method = "lambda$addMainPass$2", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;shouldShowEntityOutlines()Z"))
 	private void vl$copyMainDepth(FogParameters fogParameters, DeltaTracker deltaTracker, Camera camera, ProfilerFiller profiler, Matrix4f frustumMatrix, Matrix4f projectionMatrix, ResourceHandle<RenderTarget> itemEntity, ResourceHandle<RenderTarget> entityOutline, Frustum frustum, boolean renderBlockOutline, ResourceHandle<RenderTarget> translucent, ResourceHandle<RenderTarget> main, CallbackInfo ci) {
 		Canvas.MAIN.clone(main.get(), true, true);
+	}
+
+	@Inject(method = "lambda$addMainPass$2", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;<init>()V"))
+	private void vl$copyOutlineDepth(FogParameters fogParameters, DeltaTracker deltaTracker, Camera camera, ProfilerFiller profiler, Matrix4f frustumMatrix, Matrix4f projectionMatrix, ResourceHandle<RenderTarget> itemEntity, ResourceHandle<RenderTarget> entityOutline, Frustum frustum, boolean renderBlockOutline, ResourceHandle<RenderTarget> translucent, ResourceHandle<RenderTarget> main, CallbackInfo ci) {
+		if (targets.entityOutline != null && VidLibConfig.entityOutlineDepth && shouldShowEntityOutlines()) {
+			targets.entityOutline.get().copyDepthFrom(minecraft.getMainRenderTarget());
+		}
 	}
 
 	@Inject(method = "renderEntities", at = @At("HEAD"))
