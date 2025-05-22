@@ -14,7 +14,7 @@ out vec4 fragColor;
 void main() {
 	vec4 lowColor = texture(LowSampler, texCoord);
 
-	if (1.0 == 1.0) { fragColor = lowColor; return; }
+	// if (1.0 == 1.0) { fragColor = lowColor; return; }
 
 	if (lowColor.a == 0.0) {
 		discard;
