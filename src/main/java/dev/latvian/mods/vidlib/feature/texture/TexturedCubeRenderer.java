@@ -19,8 +19,8 @@ public class TexturedCubeRenderer {
 		var buffers = frame.buffers();
 		var n = frame.normal();
 
-		var lu = light.lightU();
-		var lv = light.lightV();
+		var lu = light.u();
+		var lv = light.v();
 
 		float minX = frame.x(bminX);
 		float minY = frame.y(bminY);

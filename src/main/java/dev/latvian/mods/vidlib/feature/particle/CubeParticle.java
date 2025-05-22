@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.particle;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.kmath.KMath;
 import dev.latvian.mods.kmath.render.BoxRenderer;
+import dev.latvian.mods.kmath.render.BufferSupplier;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -35,11 +36,11 @@ public class CubeParticle extends CustomParticle {
 		float maxZ = (float) (rz + size - cameraPos.z);
 
 		if (options.lineColor().alpha() > 0) {
-			BoxRenderer.renderDebugLines(minX, minY, minZ, maxX, maxY, maxZ, ms, buffers, options.lineColor().fadeOut(time, lifetime, 20F));
+			BoxRenderer.lines(ms, minX, minY, minZ, maxX, maxY, maxZ, buffers, BufferSupplier.DEBUG, options.lineColor().fadeOut(time, lifetime, 20F));
 		}
 
 		if (options.color().alpha() > 0) {
-			BoxRenderer.renderDebugQuads(minX, minY, minZ, maxX, maxY, maxZ, ms, buffers, false, options.color().withAlpha(50).fadeOut(time, lifetime, 20F));
+			BoxRenderer.quads(ms, minX, minY, minZ, maxX, maxY, maxZ, buffers, BufferSupplier.DEBUG, false, options.color().withAlpha(50).fadeOut(time, lifetime, 20F));
 		}
 	}
 }

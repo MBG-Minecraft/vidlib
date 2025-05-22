@@ -4,6 +4,7 @@ import dev.latvian.mods.kmath.SpherePoints;
 import dev.latvian.mods.kmath.VoxelShapeBox;
 import dev.latvian.mods.kmath.color.Color;
 import dev.latvian.mods.kmath.render.BoxRenderer;
+import dev.latvian.mods.kmath.render.BufferSupplier;
 import dev.latvian.mods.kmath.render.SphereRenderer;
 import dev.latvian.mods.kmath.texture.LightUV;
 import dev.latvian.mods.vidlib.core.VLBlockInWorld;
@@ -65,7 +66,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 			ms.pushPose();
 			frame.translate(clip.pos());
 			ms.scale(0.25F, 0.25F, 0.25F);
-			SphereRenderer.renderDebugLines(SpherePoints.L, ms, buffers, Color.BLACK);
+			SphereRenderer.lines(ms, SpherePoints.L, buffers, BufferSupplier.DEBUG, Color.BLACK);
 			ms.popPose();
 		}
 
@@ -75,7 +76,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 					boolean hovered = clip != null && clip.instance() == sz.instance();
 					var baseColor = sz.instance().zone.color().withAlpha(50);
 					var outlineColor = hovered ? Color.WHITE : sz.instance().entities.isEmpty() ? sz.instance().zone.color() : Color.GREEN;
-					BoxRenderer.renderVoxelShape(ms, buffers, sz.shapeBox(), cameraPos.reverse(), false, baseColor, outlineColor);
+					BoxRenderer.voxelShapeBox(ms, sz.shapeBox(), cameraPos.reverse(), buffers, BufferSupplier.DEBUG, false, baseColor, outlineColor);
 				}
 			}
 		} else {
@@ -117,7 +118,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 									});
 								}
 
-								BoxRenderer.renderVoxelShape(ms, buffers, voxelShape, cameraPos.reverse(), true, baseColor, outlineColor);
+								BoxRenderer.voxelShapeBox(ms, voxelShape, cameraPos.reverse(), buffers, BufferSupplier.DEBUG, true, baseColor, outlineColor);
 							}
 						}
 					}
@@ -136,7 +137,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 			}
 
 			for (var cube : sz.cachedCubes().getOrDefault(frame.layer(), List.of())) {
-				TexturedCubeRenderer.render(frame, LightUV.FULLBRIGHT, cube, Color.WHITE);
+				TexturedCubeRenderer.render(frame, LightUV.BRIGHT, cube, Color.WHITE);
 			}
 		}
 	}

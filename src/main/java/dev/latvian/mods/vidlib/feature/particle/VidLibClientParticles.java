@@ -10,6 +10,7 @@ public interface VidLibClientParticles {
 		event.registerSpecial(VidLibParticles.TEXT.get(), TextParticle::new);
 		event.registerSpecial(VidLibParticles.ITEM.get(), ItemParticle::new);
 		event.registerSpecial(VidLibParticles.NPC.get(), NPCParticle::new);
+		event.registerSpecial(VidLibParticles.BRIGHT_CUBE.get(), BrightCubeParticle::new);
 		event.registerSpriteSet(VidLibParticles.BURN_SMOKE.get(), BurnSmokeParticle::create);
 		event.registerSpriteSet(VidLibParticles.SPARK.get(), SparkParticle::create);
 		event.registerSpriteSet(VidLibParticles.WIND.get(), WindParticle::create);

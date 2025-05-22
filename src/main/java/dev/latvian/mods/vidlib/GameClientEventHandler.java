@@ -4,6 +4,7 @@ import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.kmath.KMath;
 import dev.latvian.mods.kmath.color.Color;
 import dev.latvian.mods.kmath.render.BoxRenderer;
+import dev.latvian.mods.kmath.render.BufferSupplier;
 import dev.latvian.mods.kmath.render.DebugRenderTypes;
 import dev.latvian.mods.kmath.texture.LightUV;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
@@ -218,7 +219,7 @@ public class GameClientEventHandler {
 						float maxY = frame.y(a.maxY() + 0.5D);
 						float maxZ = frame.z(a.maxZ() + 0.5D);
 
-						BoxRenderer.renderDebugFrame(minX, minY, minZ, maxX, maxY, maxZ, ms, buffers, cull, color, Color.YELLOW, 1F, 1F);
+						BoxRenderer.frame(ms, minX, minY, minZ, maxX, maxY, maxZ, buffers, BufferSupplier.DEBUG, cull, color, Color.YELLOW, 1F, 1F);
 					}
 				}
 			}
@@ -252,19 +253,20 @@ public class GameClientEventHandler {
 			if (tool != null) {
 				var visuals = tool.getSecond().visuals(mc.player, tool.getFirst(), frame.screenDelta());
 
+				var debug = BufferSupplier.fixed(DebugRenderTypes.QUADS, DebugRenderTypes.QUADS_NO_CULL);
+
 				for (var cube : visuals.cubes()) {
-					BoxRenderer.renderVoxelShape(ms, frame.buffers(), cube.shape(), cube.pos().subtract(frame.camera().getPosition()), false, cube.color().withAlpha(50), cube.lineColor());
+					BoxRenderer.voxelShapeBox(ms, cube.shape(), cube.pos().subtract(frame.camera().getPosition()), frame.buffers(), debug, false, cube.color().withAlpha(50), cube.lineColor());
 				}
+
+				var linesBuffer = ms.last().transform(debug.lines(frame.buffers()));
 
 				for (var line : visuals.lines()) {
 					var rx = frame.x(line.line().start().x);
 					var ry = frame.y(line.line().start().y);
 					var rz = frame.z(line.line().start().z);
-
-					var m = ms.last().pose();
-					var buffer = frame.buffers().getBuffer(DebugRenderTypes.LINES);
-					buffer.addVertex(m, rx, ry, rz).setColor(line.startColor().argb());
-					buffer.addVertex(m, rx + (float) line.line().dx(), ry + (float) line.line().dy(), rz + (float) line.line().dz()).setColor(line.endColor().argb());
+					linesBuffer.acceptPos(rx, ry, rz).acceptCol(line.startColor().redf(), line.startColor().greenf(), line.startColor().bluef(), line.startColor().alphaf());
+					linesBuffer.acceptPos(rx + (float) line.line().dx(), ry + (float) line.line().dy(), rz + (float) line.line().dz()).acceptCol(line.endColor().redf(), line.endColor().greenf(), line.endColor().bluef(), line.endColor().alphaf());
 				}
 			}
 		}
@@ -278,7 +280,7 @@ public class GameClientEventHandler {
 				var visuals = tool.getSecond().visuals(mc.player, tool.getFirst(), frame.screenDelta());
 
 				for (var cube : visuals.texturedCubes()) {
-					TexturedCubeRenderer.render(frame, LightUV.FULLBRIGHT, cube, Color.WHITE);
+					TexturedCubeRenderer.render(frame, LightUV.BRIGHT, cube, Color.WHITE);
 				}
 			}
 

@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.zone.renderer;
 
 import dev.latvian.mods.kmath.render.BoxRenderer;
+import dev.latvian.mods.kmath.render.BufferSupplier;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 
 public class BoxZoneRenderer implements ZoneRenderer<ZoneShape> {
@@ -18,7 +19,7 @@ public class BoxZoneRenderer implements ZoneRenderer<ZoneShape> {
 		float maxY = ctx.frame().y(box.maxY);
 		float maxZ = ctx.frame().z(box.maxZ);
 
-		BoxRenderer.renderDebugLines(minX, minY, minZ, maxX, maxY, maxZ, ms, ctx.buffers(), ctx.outlineColor());
-		BoxRenderer.renderDebugQuads(minX, minY, minZ, maxX, maxY, maxZ, ms, ctx.buffers(), false, ctx.color());
+		BoxRenderer.lines(ms, minX, minY, minZ, maxX, maxY, maxZ, ctx.buffers(), BufferSupplier.DEBUG, ctx.outlineColor());
+		BoxRenderer.quads(ms, minX, minY, minZ, maxX, maxY, maxZ, ctx.buffers(), BufferSupplier.DEBUG, false, ctx.color());
 	}
 }

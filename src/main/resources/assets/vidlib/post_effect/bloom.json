@@ -1,19 +1,31 @@
 {
 	"targets": {
-		"low": {
-			"width": -8,
-			"height": -8
-		},
+		"vidlib:low": {},
 		"swap": {}
 	},
 	"passes": [
 		{
-			"vertex_shader": "minecraft:post/sobel",
+			"vertex_shader": "vidlib:post/bloom_low",
+			"fragment_shader": "vidlib:post/bloom_low",
+			"inputs": [
+				{
+					"sampler_name": "In",
+					"target": "vidlib:bloom"
+				}
+			],
+			"output": "vidlib:low"
+		},
+		{
+			"vertex_shader": "vidlib:post/bloom",
 			"fragment_shader": "vidlib:post/bloom",
 			"inputs": [
 				{
 					"sampler_name": "In",
 					"target": "vidlib:bloom"
+				},
+				{
+					"sampler_name": "Low",
+					"target": "vidlib:low"
 				}
 			],
 			"output": "swap"

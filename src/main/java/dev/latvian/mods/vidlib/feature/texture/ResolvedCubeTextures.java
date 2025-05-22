@@ -9,6 +9,7 @@ import java.util.List;
 public record ResolvedCubeTextures(@Nullable TerrainRenderLayer commonLayer, List<FaceTexture> faces) {
 	public static final ResolvedCubeTextures EMPTY = new ResolvedCubeTextures(null, FaceTexture.EMPTY);
 	public static final ResolvedCubeTextures WHITE = new ResolvedCubeTextures(TerrainRenderLayer.SOLID, FaceTexture.WHITE);
+	public static final ResolvedCubeTextures BRIGHT = new ResolvedCubeTextures(TerrainRenderLayer.BRIGHT, FaceTexture.WHITE);
 	public static final ResolvedCubeTextures BLOOM = new ResolvedCubeTextures(TerrainRenderLayer.BLOOM, FaceTexture.BLOOM);
 
 	public static TerrainRenderLayer commonLayer(List<FaceTexture> faces) {

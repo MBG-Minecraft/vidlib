@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.zone.renderer;
 import dev.latvian.mods.kmath.SpherePoints;
 import dev.latvian.mods.kmath.color.Color;
 import dev.latvian.mods.kmath.render.BoxRenderer;
+import dev.latvian.mods.kmath.render.BufferSupplier;
 import dev.latvian.mods.kmath.render.SphereRenderer;
 import dev.latvian.mods.vidlib.feature.zone.shape.SphereZoneShape;
 
@@ -20,14 +21,14 @@ public class SphereZoneRenderer implements ZoneRenderer<SphereZoneShape> {
 		float maxX = ctx.frame().x(box.maxX);
 		float maxY = ctx.frame().y(box.maxY);
 		float maxZ = ctx.frame().z(box.maxZ);
-		BoxRenderer.renderDebugLines(minX, minY, minZ, maxX, maxY, maxZ, ms, ctx.buffers(), Color.WHITE);
+		BoxRenderer.lines(ms, minX, minY, minZ, maxX, maxY, maxZ, ctx.buffers(), BufferSupplier.DEBUG, Color.WHITE);
 
 		ms.pushPose();
 		ctx.frame().translate(shape.pos());
 		float scale = (float) (shape.radius() * 2D);
 		ms.scale(scale, scale, scale);
-		SphereRenderer.renderDebugLines(SpherePoints.M, ms, ctx.buffers(), ctx.outlineColor());
-		SphereRenderer.renderDebugQuads(SpherePoints.M, ms, ctx.buffers(), false, ctx.color());
+		SphereRenderer.lines(ms, SpherePoints.M, ctx.buffers(), BufferSupplier.DEBUG, ctx.outlineColor());
+		SphereRenderer.quads(ms, SpherePoints.M, ctx.buffers(), BufferSupplier.DEBUG, false, ctx.color());
 		ms.popPose();
 	}
 }
