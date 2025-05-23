@@ -127,4 +127,30 @@ public interface GLDebugLog {
 			GL43.glPopDebugGroup();
 		}
 	}
+
+	static void label(int type, int id, String label) {
+		if (AVAILABLE) {
+			GL43.glObjectLabel(type, id, label);
+		}
+	}
+
+	static void textureLabel(int id, String label) {
+		label(GL43.GL_TEXTURE, id, label);
+	}
+
+	static void shaderLabel(int id, String label) {
+		label(GL43.GL_SHADER, id, label);
+	}
+
+	static void programLabel(int id, String label) {
+		label(GL43.GL_PROGRAM, id, label);
+	}
+
+	static void bufferLabel(int id, String label) {
+		label(GL43.GL_BUFFER, id, label);
+	}
+
+	static void vertexArrayLabel(int id, String label) {
+		label(GL43.GL_VERTEX_ARRAY, id, label);
+	}
 }

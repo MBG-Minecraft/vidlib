@@ -1,22 +1,42 @@
 {
 	"targets": {
-		"vidlib:low": {},
+		"vidlib:low": {
+			"width": -32,
+			"height": -32
+		},
+		"vidlib:low_swap": {
+			"width": -32,
+			"height": -32
+		},
 		"swap": {}
 	},
 	"passes": [
 		{
-			"vertex_shader": "vidlib:post/bloom_low",
+			"vertex_shader": "vidlib:post/no_texel",
 			"fragment_shader": "vidlib:post/bloom_low",
 			"inputs": [
 				{
 					"sampler_name": "In",
-					"target": "vidlib:bloom"
+					"target": "vidlib:bloom",
+					"bilinear": false
+				}
+			],
+			"output": "vidlib:low_swap"
+		},
+		{
+			"vertex_shader": "vidlib:post/texel",
+			"fragment_shader": "vidlib:post/bloom_grow",
+			"inputs": [
+				{
+					"sampler_name": "In",
+					"target": "vidlib:low_swap",
+					"bilinear": false
 				}
 			],
 			"output": "vidlib:low"
 		},
 		{
-			"vertex_shader": "vidlib:post/bloom",
+			"vertex_shader": "vidlib:post/texel",
 			"fragment_shader": "vidlib:post/bloom",
 			"inputs": [
 				{
@@ -25,7 +45,8 @@
 				},
 				{
 					"sampler_name": "Low",
-					"target": "vidlib:low"
+					"target": "vidlib:low",
+					"bilinear": false
 				}
 			],
 			"output": "swap"

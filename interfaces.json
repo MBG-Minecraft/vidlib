@@ -67,5 +67,11 @@
 	],
 	"net/minecraft/client/renderer/entity/EntityRenderer": [
 		"dev/latvian/mods/vidlib/core/VLEntityRenderer<T, S>"
+	],
+	"com/mojang/blaze3d/textures/GpuTexture": [
+		"dev/latvian/mods/vidlib/core/VLGpuTexture"
+	],
+	"com/mojang/blaze3d/buffers/GpuBuffer": [
+		"dev/latvian/mods/vidlib/core/VLGpuBuffer"
 	]
 }

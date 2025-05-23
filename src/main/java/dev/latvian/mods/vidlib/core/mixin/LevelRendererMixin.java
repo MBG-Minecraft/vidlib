@@ -9,7 +9,6 @@ import com.mojang.blaze3d.resource.ResourceHandle;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.client.GLDebugLog;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxRenderer;
@@ -119,7 +118,7 @@ public abstract class LevelRendererMixin {
 
 	@Inject(method = "lambda$addMainPass$2", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;shouldShowEntityOutlines()Z"))
 	private void vl$copyMainDepth(FogParameters fogParameters, DeltaTracker deltaTracker, Camera camera, ProfilerFiller profiler, Matrix4f frustumMatrix, Matrix4f projectionMatrix, ResourceHandle<RenderTarget> itemEntity, ResourceHandle<RenderTarget> entityOutline, Frustum frustum, boolean renderBlockOutline, ResourceHandle<RenderTarget> translucent, ResourceHandle<RenderTarget> main, CallbackInfo ci) {
-		Canvas.MAIN.clone(main.get(), true, true);
+		// Canvas.MAIN.clone(main.get(), true, true);
 	}
 
 	@Inject(method = "lambda$addMainPass$2", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;<init>()V"))

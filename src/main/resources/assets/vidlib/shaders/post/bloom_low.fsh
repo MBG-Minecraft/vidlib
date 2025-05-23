@@ -2,33 +2,30 @@
 
 uniform sampler2D InSampler;
 uniform vec2 InSize;
+uniform vec2 OutSize;
 
 in vec2 texCoord;
 
 out vec4 fragColor;
 
-const float SCALE = 24.0;
-
 void main() {
-	vec2 s = texCoord * InSize / SCALE;
-	vec2 m = SCALE / InSize;
+	int count = 0;
+	vec2 scale = vec2(1.0 / (InSize.x * 1.0), 1.0 / (InSize.y * 1.0));
+	// vec2 scale = vec2(0.001);
 
-	float a
-	= texture(InSampler, floor(s + vec2(0.5, 0.5)) * m).a
-
-	+ texture(InSampler, floor(s + vec2(1.5, 0.5)) * m).a
-	+ texture(InSampler, floor(s + vec2(0.5, 1.5)) * m).a
-	+ texture(InSampler, floor(s + vec2(-0.5, 0.5)) * m).a
-	+ texture(InSampler, floor(s + vec2(0.5, -0.5)) * m).a
-
-	+ texture(InSampler, floor(s + vec2(1.5, 1.5)) * m).a
-	+ texture(InSampler, floor(s + vec2(1.5, -0.5)) * m).a
-	+ texture(InSampler, floor(s + vec2(-0.5, 1.5)) * m).a
-	+ texture(InSampler, floor(s + vec2(-0.5, -0.5)) * m).a;
-
-	if (a < 0.01) {
-		discard;
+	for (int x = 0; x < 32; x++) {
+		for (int y = 0; y < 32; y++) {
+			if (texture(InSampler, texCoord + vec2(float(x) - 16.0, float(y) - 16.0) * scale).a > 0.0) {
+				count++;
+			}
+		}
 	}
 
-	fragColor = vec4(0.0, 0.0, 0.0, 1.0);
+	if (count == 0) {
+		discard;
+	} else if (count == 1024) {
+		fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+	} else {
+		fragColor = vec4(0.0, 0.0, 1.0, 1.0);
+	}
 }

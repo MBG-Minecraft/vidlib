@@ -12,7 +12,6 @@ import com.mojang.blaze3d.resource.ResourceHandle;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderPipelines;
 import dev.latvian.mods.vidlib.util.Lazy;
@@ -20,7 +19,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ARGB;
-import net.neoforged.api.distmarker.Dist;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
@@ -46,9 +44,6 @@ public class Canvas {
 	public static Canvas createInternal(ResourceLocation id) {
 		return new InternalCanvas(id);
 	}
-
-	@AutoRegister(Dist.CLIENT)
-	public static final Canvas MAIN = createInternal(VidLib.id("main"));
 
 	public final ResourceLocation id;
 	public final String idString;
