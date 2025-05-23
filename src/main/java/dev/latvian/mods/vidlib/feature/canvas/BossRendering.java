@@ -28,6 +28,10 @@ public class BossRendering {
 		}
 
 		var dispatcher = mc.getEntityRenderDispatcher();
+		dispatcher.setRenderShadow(false);
+		boolean hitbox = dispatcher.shouldRenderHitBoxes();
+		dispatcher.setRenderHitBoxes(false);
+		active++;
 
 		try {
 			var renderer = dispatcher.getRenderer(entity);
@@ -37,17 +41,15 @@ public class BossRendering {
 				float y = frame.y(Mth.lerp(delta, entity.yOld, entity.getY()));
 				float z = frame.z(Mth.lerp(delta, entity.zOld, entity.getZ()));
 				frame.poseStack().pushPose();
-				dispatcher.setRenderShadow(false);
-				boolean hitbox = dispatcher.shouldRenderHitBoxes();
-				dispatcher.setRenderHitBoxes(false);
-				active++;
 				renderer.renderBoss(entity, frame.poseStack(), buffers, x, y, z, delta);
-				dispatcher.setRenderShadow(true);
-				dispatcher.setRenderHitBoxes(hitbox);
-				active--;
 				frame.poseStack().popPose();
 			}
-		} catch (Exception ignored) {
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
+
+		dispatcher.setRenderShadow(true);
+		dispatcher.setRenderHitBoxes(hitbox);
+		active--;
 	}
 }
