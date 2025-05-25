@@ -48,9 +48,9 @@ public record CubeTextures(
 
 	public static CubeTextures fluid(ResourceLocation still, ResourceLocation flowing, TerrainRenderLayer type, Color tint) {
 		return new CubeTextures(
-			Optional.of(new FaceTexture(SpriteKey.block(flowing), type, true, tint, 0.5F)),
-			Optional.of(new FaceTexture(SpriteKey.block(still), type, true, tint, 1F)),
-			Optional.of(new FaceTexture(SpriteKey.block(still), type, false, tint, 1F)),
+			Optional.of(new FaceTexture(SpriteKey.block(flowing), type, true, tint, 0.5F, 0D)),
+			Optional.of(new FaceTexture(SpriteKey.block(still), type, true, tint, 1F, 0D)),
+			Optional.of(new FaceTexture(SpriteKey.block(still), type, false, tint, 1F, 0D)),
 			Optional.empty(),
 			Optional.empty(),
 			Optional.empty(),

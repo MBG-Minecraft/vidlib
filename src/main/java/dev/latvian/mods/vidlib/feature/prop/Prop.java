@@ -39,7 +39,7 @@ public class Prop {
 		return removed;
 	}
 
-	public void updatePrevious() {
+	public void snap() {
 		prevPos.set(pos);
 		prevRotation.set(rotation);
 	}

@@ -103,8 +103,6 @@ public class CachedZoneShape {
 
 				var fog = instance.zone.fog();
 
-				// 76 // 3.3
-
 				// directionless fog not supported yet
 				if (!fog.isNone() && fog.direction().isPresent()) {
 					var cubes = cachedCubes.computeIfAbsent(TerrainRenderLayer.TRANSLUCENT, k -> new ArrayList<>(1));
@@ -118,7 +116,7 @@ public class CachedZoneShape {
 					tex.faces().add(FaceTexture.EMPTY);
 					tex.faces().add(FaceTexture.EMPTY);
 
-					tex.faces().set(dir.get3DDataValue(), new FaceTexture(SpriteKey.WHITE, TerrainRenderLayer.TRANSLUCENT, false, fog.color(), 0F));
+					tex.faces().set(dir.get3DDataValue(), new FaceTexture(SpriteKey.WHITE, TerrainRenderLayer.TRANSLUCENT, false, fog.color(), 0F, 1D));
 
 					for (int i = 0; i <= fog.steps(); i++) {
 						double l = i / (double) fog.steps();
@@ -138,8 +136,6 @@ public class CachedZoneShape {
 							}
 						}
 					}
-
-					System.out.println("AA");
 				}
 			}
 		}

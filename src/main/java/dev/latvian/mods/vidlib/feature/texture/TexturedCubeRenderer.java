@@ -5,6 +5,7 @@ import dev.latvian.mods.kmath.color.Color;
 import dev.latvian.mods.kmath.texture.LightUV;
 import dev.latvian.mods.vidlib.feature.client.TerrainRenderTypes;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
+import net.minecraft.util.Mth;
 
 public class TexturedCubeRenderer {
 	public static void render(FrameInfo frame, LightUV light, ResolvedTexturedCube cube, Color tint) {
@@ -36,10 +37,26 @@ public class TexturedCubeRenderer {
 				continue;
 			}
 
+			var colA = face.tint().alphaf() * tint.alphaf();
+
+			if (face.fade() > 0D) {
+				double dx = Math.max(Math.max(bminX - frame.cameraX(), frame.cameraX() - bmaxX), 0D);
+				double dy = Math.max(Math.max(bminY - frame.cameraY(), frame.cameraY() - bmaxY), 0D);
+				double dz = Math.max(Math.max(bminZ - frame.cameraZ(), frame.cameraZ() - bmaxZ), 0D);
+				double d = Mth.length(dx, dy, dz);
+
+				if (d < face.fade()) {
+					colA = (float) (colA * d / face.fade());
+				}
+			}
+
+			if (colA <= 0.01F) {
+				continue;
+			}
+
 			var colR = face.tint().redf() * tint.redf();
 			var colG = face.tint().greenf() * tint.greenf();
 			var colB = face.tint().bluef() * tint.bluef();
-			var colA = face.tint().alphaf() * tint.alphaf();
 
 			var uvScale = face.uvScale();
 			float tw = uvScale <= 0F ? 1F : (maxX - minX) * uvScale;

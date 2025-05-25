@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.canvas;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 
@@ -12,9 +13,11 @@ public class BossRendering {
 
 	public static int active = 0;
 	public static float lookingAtDepth = 1F;
+	public static float lookingAtDistance = 8192F;
 
-	public static void handleColors() {
+	public static void handleColors(Minecraft mc) {
 		lookingAtDepth = CANVAS.getCenterARGB() != 0 ? CANVAS.getCenterDepth() : 1F;
+		lookingAtDistance = mc.linearizeDepth(lookingAtDepth);
 	}
 
 	public static void render(FrameInfo frame) {

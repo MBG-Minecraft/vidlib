@@ -496,4 +496,10 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	default WorldNumberVariables globalVariables() {
 		return vl$self().player.vl$sessionData().globalVariables;
 	}
+
+	default float linearizeDepth(float depth) {
+		float near = 0.05F;
+		float far = vl$self().gameRenderer.getDepthFar();
+		return near * far / (far + depth * (near - far));
+	}
 }

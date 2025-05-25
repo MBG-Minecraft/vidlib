@@ -108,9 +108,9 @@ public class CanvasImpl {
 			if (canvas.data.priority() >= 0) {
 				if (canvas.data.autoDraw()) {
 					GLDebugLog.message(canvas.idString);
-					canvas.draw(texture);
+					canvas.draw(mc, texture);
 				} else if (canvas.drawCallback != null) {
-					canvas.drawCallback.run();
+					canvas.drawCallback.accept(mc);
 				}
 			}
 		}
@@ -126,9 +126,9 @@ public class CanvasImpl {
 			if (canvas.data.priority() < 0) {
 				if (canvas.data.autoDraw()) {
 					GLDebugLog.message(canvas.idString);
-					canvas.draw(texture);
+					canvas.draw(mc, texture);
 				} else if (canvas.drawCallback != null) {
-					canvas.drawCallback.run();
+					canvas.drawCallback.accept(mc);
 				}
 			}
 		}
@@ -273,9 +273,14 @@ public class CanvasImpl {
 						buffer.addVertex(m, x + w, y + h, 0F).setUv(1F, 0F).setColor(255, 255, 255, 255);
 						buffer.addVertex(m, x + w, y, 0F).setUv(1F, 1F).setColor(255, 255, 255, 255);
 
-						var text = String.format("%.09f", canvas.getCenterDepth());
+						var depth = canvas.getCenterDepth();
+						var text = String.format("%.05f", depth);
 						g.fill(x + 1, y + 1, x + 2 + mc.font.width(text), y + 10, 0xA0000000);
 						g.drawString(mc.font, text, x + 2, y + 2, 0xFFFFFFFF);
+
+						var ltext = String.format("%.05f", mc.linearizeDepth(depth));
+						g.fill(x + 1, y + h - 10, x + 2 + mc.font.width(ltext), y + h - 1, 0xA0000000);
+						g.drawString(mc.font, ltext, x + 2, y + h - 9, 0xFFFFFFFF);
 					} else {
 						var buffer = buffers.getBuffer(RenderType.debugLine(1D));
 						buffer.addVertex(m, x, y, 0F).setColor(255, 0, 0, 255).setNormal(p, 0F, 1F, 0F);

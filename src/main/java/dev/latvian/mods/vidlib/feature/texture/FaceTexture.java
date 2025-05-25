@@ -11,17 +11,18 @@ import net.minecraft.network.codec.StreamCodec;
 
 import java.util.Optional;
 
-public record FaceTexture(SpriteKey sprite, TerrainRenderLayer layer, boolean cull, Color tint, float uvScale) {
-	public static final FaceTexture EMPTY = new FaceTexture(SpriteKey.EMPTY, TerrainRenderLayer.SOLID, true, Color.WHITE, 1F);
-	public static final FaceTexture WHITE = new FaceTexture(SpriteKey.WHITE, TerrainRenderLayer.SOLID, true, Color.WHITE, 1F);
-	public static final FaceTexture BLOOM = new FaceTexture(SpriteKey.WHITE, TerrainRenderLayer.BLOOM, true, Color.WHITE, 1F);
+public record FaceTexture(SpriteKey sprite, TerrainRenderLayer layer, boolean cull, Color tint, float uvScale, double fade) {
+	public static final FaceTexture EMPTY = new FaceTexture(SpriteKey.EMPTY, TerrainRenderLayer.SOLID, true, Color.WHITE, 1F, 0D);
+	public static final FaceTexture WHITE = new FaceTexture(SpriteKey.WHITE, TerrainRenderLayer.SOLID, true, Color.WHITE, 1F, 0D);
+	public static final FaceTexture BLOOM = new FaceTexture(SpriteKey.WHITE, TerrainRenderLayer.BLOOM, true, Color.WHITE, 1F, 0D);
 
 	public static final Codec<FaceTexture> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		SpriteKey.CODEC.fieldOf("sprite").forGetter(FaceTexture::sprite),
 		TerrainRenderLayer.CODEC.optionalFieldOf("layer", TerrainRenderLayer.SOLID).forGetter(FaceTexture::layer),
 		Codec.BOOL.optionalFieldOf("cull", true).forGetter(FaceTexture::cull),
 		Color.CODEC.optionalFieldOf("tint", Color.WHITE).forGetter(FaceTexture::tint),
-		Codec.FLOAT.optionalFieldOf("uv_scale", 1F).forGetter(FaceTexture::uvScale)
+		Codec.FLOAT.optionalFieldOf("uv_scale", 1F).forGetter(FaceTexture::uvScale),
+		Codec.DOUBLE.optionalFieldOf("fade", 0D).forGetter(FaceTexture::fade)
 	).apply(instance, FaceTexture::new));
 
 	public static final StreamCodec<ByteBuf, FaceTexture> STREAM_CODEC = CompositeStreamCodec.of(
@@ -30,6 +31,7 @@ public record FaceTexture(SpriteKey sprite, TerrainRenderLayer layer, boolean cu
 		ByteBufCodecs.BOOL, FaceTexture::cull,
 		Color.STREAM_CODEC, FaceTexture::tint,
 		ByteBufCodecs.FLOAT.optional(1F), FaceTexture::uvScale,
+		ByteBufCodecs.DOUBLE.optional(0D), FaceTexture::fade,
 		FaceTexture::new
 	);
 

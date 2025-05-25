@@ -27,6 +27,7 @@ import org.lwjgl.opengl.GL30;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class Canvas {
 	public static final Lazy<Map<ResourceLocation, Canvas>> ALL = Lazy.map(map -> {
@@ -56,7 +57,7 @@ public class Canvas {
 	public boolean previewColor;
 	public boolean previewDepth;
 	public CanvasData data;
-	public Runnable drawCallback;
+	public Consumer<Minecraft> drawCallback;
 
 	ResourceHandle<RenderTarget> outputTarget;
 	private RenderPipeline renderPipeline;
@@ -76,14 +77,14 @@ public class Canvas {
 		this.data = CanvasData.DEFAULT;
 	}
 
-	public Canvas setDrawCallback(Runnable callback) {
+	public Canvas setDrawCallback(Consumer<Minecraft> callback) {
 		this.drawCallback = callback;
 		return this;
 	}
 
-	public boolean draw(GpuTexture texture) {
+	public boolean draw(Minecraft mc, GpuTexture texture) {
 		if (drawCallback != null) {
-			drawCallback.run();
+			drawCallback.accept(mc);
 		}
 
 		var t = getColorTexture();

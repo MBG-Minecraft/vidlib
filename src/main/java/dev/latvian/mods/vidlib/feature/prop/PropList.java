@@ -19,7 +19,7 @@ public abstract class PropList<L extends Level> {
 
 		while (itr.hasNext()) {
 			var prop = itr.next();
-			prop.updatePrevious();
+			prop.snap();
 			prop.tick();
 
 			if (prop.removed) {
