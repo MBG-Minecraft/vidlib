@@ -1,0 +1,6 @@
+{
+	"parent": "vidlib:block/bright",
+	"textures": {
+		"all": "vidlib:block/light/redstone/bright"
+	}
+}

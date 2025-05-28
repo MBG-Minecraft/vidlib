@@ -1,0 +1,21 @@
+{
+	"variants": {
+		"lit=false": {
+			"model": "minecraft:block/redstone_lamp"
+		},
+		"lit=true": {
+			"type": "neoforge:composite",
+			"models": [
+				{
+					"model": "vidlib:block/light/redstone/base"
+				},
+				{
+					"model": "vidlib:block/light/redstone/bright"
+				},
+				{
+					"model": "vidlib:block/light/redstone/bloom"
+				}
+			]
+		}
+	}
+}

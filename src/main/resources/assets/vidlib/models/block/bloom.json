@@ -1,0 +1,4 @@
+{
+	"parent": "vidlib:block/bright",
+	"render_type": "minecraft:tripwire"
+}

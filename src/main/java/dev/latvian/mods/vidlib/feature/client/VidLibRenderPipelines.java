@@ -26,7 +26,7 @@ import java.util.function.Function;
 public interface VidLibRenderPipelines {
 	RenderPipeline GUI_DEPTH = RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
 		.withLocation(VidLib.id("pipeline/gui_depth"))
-		.withFragmentShader(VidLib.id("gui_depth"))
+		.withFragmentShader(VidLib.id("core/gui_depth"))
 		.build();
 
 	RenderPipeline SKYBOX = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)

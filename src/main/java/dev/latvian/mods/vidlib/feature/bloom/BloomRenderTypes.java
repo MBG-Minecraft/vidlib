@@ -4,6 +4,7 @@ import dev.latvian.mods.kmath.render.BufferSupplier;
 import dev.latvian.mods.kmath.vertex.VertexCallback;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasRenderPipelines;
 import dev.latvian.mods.vidlib.feature.client.TexturedRenderType;
+import dev.latvian.mods.vidlib.feature.texture.SpriteKey;
 import dev.latvian.mods.vidlib.util.Empty;
 import dev.latvian.mods.vidlib.util.client.MultiBufferSourceOverride;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -89,7 +90,7 @@ public interface BloomRenderTypes {
 		1536,
 		true,
 		true,
-		CanvasRenderPipelines.ENTITY_CUTOUT,
+		CanvasRenderPipelines.ENTITY,
 		texture -> RenderType.CompositeState.builder()
 			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
 			.setOutputState(Bloom.CANVAS.getOutputStateShard())
@@ -101,12 +102,39 @@ public interface BloomRenderTypes {
 		1536,
 		true,
 		true,
-		CanvasRenderPipelines.ENTITY_CUTOUT_NO_CULL,
+		CanvasRenderPipelines.ENTITY_NO_CULL,
 		texture -> RenderType.CompositeState.builder()
 			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
 			.setOutputState(Bloom.CANVAS.getOutputStateShard())
 			.createCompositeState(false)
 	);
+
+	TexturedRenderType BLOCK = TexturedRenderType.internal(
+		"bloom/cull/block",
+		1536,
+		true,
+		true,
+		CanvasRenderPipelines.BLOCK,
+		texture -> RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
+			.setOutputState(Bloom.CANVAS.getOutputStateShard())
+			.createCompositeState(false)
+	);
+
+	TexturedRenderType BLOCK_NO_CULL = TexturedRenderType.internal(
+		"bloom/no_cull/block",
+		1536,
+		true,
+		true,
+		CanvasRenderPipelines.BLOCK_NO_CULL,
+		texture -> RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
+			.setOutputState(Bloom.CANVAS.getOutputStateShard())
+			.createCompositeState(false)
+	);
+
+	RenderType DEFAULT_BLOCK = BLOCK.apply(SpriteKey.BLOCKS);
+	RenderType DEFAULT_BLOCK_NO_CULL = BLOCK_NO_CULL.apply(SpriteKey.BLOCKS);
 
 	static MultiBufferSourceOverride overridePos(MultiBufferSource delegate) {
 		return new MultiBufferSourceOverride(delegate, POS, POS_NO_CULL);
@@ -125,4 +153,6 @@ public interface BloomRenderTypes {
 	}
 
 	BufferSupplier POS_COL_BUFFER_SUPPLIER = BufferSupplier.fixed(POS_COL.apply(Empty.TEXTURE), POS_COL_NO_CULL.apply(Empty.TEXTURE)).process(VertexCallback::onlyPosCol);
+
+	BufferSupplier BLOCK_BUFFER_SUPPLIER = BufferSupplier.fixed(DEFAULT_BLOCK, DEFAULT_BLOCK_NO_CULL).process(VertexCallback::onlyPosColTex);
 }

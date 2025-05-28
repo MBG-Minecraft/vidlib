@@ -5,6 +5,8 @@
 	"key.vidlib.reload": "Reload",
 	"block.vidlib.money_block": "Money Block",
 	"block.vidlib.banded_money_block": "Banded Money Block",
+	"block.vidlib.light.white": "White Light",
+	"block.vidlib.light.cyan": "Cyan Light",
 	"item.vidlib.money": "Money",
 	"item.vidlib.banded_money": "Banded Money",
 	"item.vidlib.flat_money": "Money",

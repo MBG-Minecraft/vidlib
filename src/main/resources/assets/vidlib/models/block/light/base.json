@@ -1,0 +1,7 @@
+{
+	"parent": "vidlib:block/bright",
+	"render_type": "minecraft:solid",
+	"textures": {
+		"all": "vidlib:block/light/base"
+	}
+}

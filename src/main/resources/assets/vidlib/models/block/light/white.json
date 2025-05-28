@@ -1,0 +1,6 @@
+{
+	"parent": "vidlib:block/light/light",
+	"textures": {
+		"all": "vidlib:block/light/white"
+	}
+}

@@ -14,6 +14,9 @@ public interface VidLibContent {
 
 		DeferredBlock<Block> MONEY_BLOCK = BLOCKS.registerSimpleBlock("money_block");
 		DeferredBlock<Block> BANDED_MONEY_BLOCK = BLOCKS.registerSimpleBlock("banded_money_block");
+
+		DeferredBlock<Block> LIGHT_WHITE = BLOCKS.registerSimpleBlock("light/white");
+		DeferredBlock<Block> LIGHT_CYAN = BLOCKS.registerSimpleBlock("light/cyan");
 	}
 
 	interface Items {
@@ -21,6 +24,9 @@ public interface VidLibContent {
 
 		DeferredItem<BlockItem> MONEY_BLOCK = ITEMS.registerSimpleBlockItem(Blocks.MONEY_BLOCK);
 		DeferredItem<BlockItem> BANDED_MONEY_BLOCK = ITEMS.registerSimpleBlockItem(Blocks.BANDED_MONEY_BLOCK);
+
+		DeferredItem<BlockItem> LIGHT_WHITE = ITEMS.registerSimpleBlockItem(Blocks.LIGHT_WHITE);
+		DeferredItem<BlockItem> LIGHT_CYAN = ITEMS.registerSimpleBlockItem(Blocks.LIGHT_CYAN);
 
 		DeferredItem<Item> MONEY = ITEMS.registerSimpleItem("money");
 		DeferredItem<Item> BANDED_MONEY = ITEMS.registerSimpleItem("banded_money");

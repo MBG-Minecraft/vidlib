@@ -18,8 +18,8 @@ public interface PhysicsParticlesRenderTypes {
 
 	RenderPipeline.Snippet PIPELINE_BASE = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)
 		.withVertexFormat(FORMAT, VertexFormat.Mode.QUADS)
-		.withVertexShader(VidLib.id("physics_particle"))
-		.withFragmentShader(VidLib.id("physics_particle"))
+		.withVertexShader(VidLib.id("core/physics_particle"))
+		.withFragmentShader(VidLib.id("core/physics_particle"))
 		.withSampler("Sampler0")
 		.withCull(true)
 		.buildSnippet();

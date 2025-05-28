@@ -1,0 +1,6 @@
+{
+	"parent": "vidlib:block/bloom",
+	"textures": {
+		"all": "vidlib:block/light/redstone/bloom"
+	}
+}

@@ -1,0 +1,15 @@
+{
+	"variants": {
+		"": {
+			"type": "neoforge:composite",
+			"models": [
+				{
+					"model": "vidlib:block/light/base"
+				},
+				{
+					"model": "vidlib:block/light/cyan"
+				}
+			]
+		}
+	}
+}
