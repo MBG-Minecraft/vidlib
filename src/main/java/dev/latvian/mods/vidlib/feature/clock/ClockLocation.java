@@ -23,7 +23,7 @@ public record ClockLocation(
 	boolean fullbright
 ) {
 	public static final Codec<ClockLocation> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		ClockFont.KNOWN_CODEC.codec().fieldOf("font").forGetter(ClockLocation::font),
+		ClockFont.REGISTERED_DATA_TYPE.type().codec().fieldOf("font").forGetter(ClockLocation::font),
 		EntityFilter.CODEC.optionalFieldOf("visible", EntityFilter.ANY.instance()).forGetter(ClockLocation::visible),
 		VLCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(ClockLocation::dimension),
 		BlockPos.CODEC.fieldOf("pos").forGetter(ClockLocation::pos),

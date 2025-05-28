@@ -14,7 +14,7 @@ public record SyncPlayerDataPayload(UUID player, List<DataMapValue> update) impl
 	@AutoPacket
 	public static final VidLibPacketType<SyncPlayerDataPayload> TYPE = VidLibPacketType.internal("sync_player_data", CompositeStreamCodec.of(
 		VLStreamCodecs.UUID, SyncPlayerDataPayload::player,
-		DataType.PLAYER.valueListStreamCodec, SyncPlayerDataPayload::update,
+		DataKey.PLAYER.valueListStreamCodec, SyncPlayerDataPayload::update,
 		SyncPlayerDataPayload::new
 	));
 
@@ -26,7 +26,7 @@ public record SyncPlayerDataPayload(UUID player, List<DataMapValue> update) impl
 	@Override
 	public boolean allowDebugLogging() {
 		for (var u : update) {
-			if (!u.type().skipLogging()) {
+			if (!u.key().skipLogging()) {
 				return true;
 			}
 		}

@@ -9,7 +9,7 @@ import java.util.List;
 
 public record SyncServerDataPayload(List<DataMapValue> update) implements SimplePacketPayload {
 	@AutoPacket
-	public static final VidLibPacketType<SyncServerDataPayload> TYPE = VidLibPacketType.internal("sync_server_data", DataType.SERVER.valueListStreamCodec.map(SyncServerDataPayload::new, SyncServerDataPayload::update));
+	public static final VidLibPacketType<SyncServerDataPayload> TYPE = VidLibPacketType.internal("sync_server_data", DataKey.SERVER.valueListStreamCodec.map(SyncServerDataPayload::new, SyncServerDataPayload::update));
 
 	@Override
 	public VidLibPacketType<?> getType() {
@@ -19,7 +19,7 @@ public record SyncServerDataPayload(List<DataMapValue> update) implements Simple
 	@Override
 	public boolean allowDebugLogging() {
 		for (var u : update) {
-			if (!u.type().skipLogging()) {
+			if (!u.key().skipLogging()) {
 				return true;
 			}
 		}

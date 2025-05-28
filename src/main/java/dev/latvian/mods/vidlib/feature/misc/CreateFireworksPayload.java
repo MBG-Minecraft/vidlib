@@ -19,7 +19,7 @@ public record CreateFireworksPayload(double x, double y, double z, double vx, do
 		ByteBufCodecs.DOUBLE, CreateFireworksPayload::vx,
 		ByteBufCodecs.DOUBLE, CreateFireworksPayload::vy,
 		ByteBufCodecs.DOUBLE, CreateFireworksPayload::vz,
-		FireworkExplosion.STREAM_CODEC.list(), CreateFireworksPayload::explosions,
+		FireworkExplosion.STREAM_CODEC.listOf(), CreateFireworksPayload::explosions,
 		CreateFireworksPayload::new
 	));
 

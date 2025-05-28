@@ -108,7 +108,7 @@ public record GhostStructure(
 
 						if (gs.slice.isPresent() && frame.mc().getEntityRenderDispatcher().shouldRenderHitBoxes() && frame.layer() == TerrainRenderLayer.TRANSLUCENT) {
 							var b = gs.slice.get();
-							BoxRenderer.lines(ms, b.minX(), b.minY(), b.minZ(), b.maxX() + 1F, b.maxY() + 1F, b.maxZ() + 1F, frame.buffers(), BufferSupplier.DEBUG, Color.RED);
+							BoxRenderer.lines(ms, b.minX(), b.minY(), b.minZ(), b.maxX() + 1F, b.maxY() + 1F, b.maxZ() + 1F, frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Color.RED);
 						}
 
 						var blockPos = BlockPos.containing(pos);

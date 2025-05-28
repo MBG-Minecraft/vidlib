@@ -8,7 +8,8 @@ import dev.latvian.mods.kmath.easing.EasingGroup;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.DataType;
+import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -70,7 +71,8 @@ public record CameraShake(
 		CameraShake::new
 	);
 
-	public static final KnownCodec<CameraShake> KNOWN_CODEC = KnownCodec.register(VidLib.id("camera_shake"), CODEC, STREAM_CODEC, CameraShake.class);
+	public static final DataType<CameraShake> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, CameraShake.class);
+	public static final RegisteredDataType<CameraShake> REGISTERED_DATA_TYPE = RegisteredDataType.register(VidLib.id("screen_shake"), DATA_TYPE);
 
 	public static final ResourceLocation MOTION_BLUR_EFFECT = ResourceLocation.withDefaultNamespace("shaders/post/phosphor.json");
 

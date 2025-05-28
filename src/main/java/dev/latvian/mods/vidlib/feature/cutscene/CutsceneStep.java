@@ -87,9 +87,9 @@ public class CutsceneStep {
 		ComponentSerialization.STREAM_CODEC.optional(), s -> s.bottomBar,
 		ResourceLocation.STREAM_CODEC.optional(), s -> s.shader,
 		Fade.STREAM_CODEC.optional(), s -> s.fade,
-		PositionedSoundData.STREAM_CODEC.list(), s -> s.sounds,
+		PositionedSoundData.STREAM_CODEC.listOf(), s -> s.sounds,
 		Snap.STREAM_CODEC, s -> s.snap,
-		CutsceneEvent.REGISTRY.valueStreamCodec().list(), s -> s.events,
+		CutsceneEvent.REGISTRY.valueStreamCodec().listOf(), s -> s.events,
 		CutsceneStep::new
 	);
 

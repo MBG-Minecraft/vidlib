@@ -12,9 +12,9 @@ public interface CutsceneCommands {
 		.requires(source -> source.hasPermission(2))
 		.then(Commands.literal("play")
 			.then(Commands.argument("player", EntityArgument.players())
-				.then(Commands.argument("id", Cutscene.KNOWN_CODEC.argument(buildContext))
+				.then(Commands.argument("id", Cutscene.REGISTERED_DATA_TYPE.argument(buildContext))
 					.executes(ctx -> {
-						var cutscene = Cutscene.KNOWN_CODEC.get(ctx, "id");
+						var cutscene = Cutscene.REGISTERED_DATA_TYPE.get(ctx, "id");
 
 						for (var player : EntityArgument.getPlayers(ctx, "player")) {
 							player.playCutscene(cutscene, WorldNumberVariables.EMPTY);
@@ -27,9 +27,9 @@ public interface CutsceneCommands {
 		)
 		.then(Commands.literal("create")
 			.then(Commands.argument("player", EntityArgument.players())
-				.then(Commands.argument("data", Cutscene.DIRECT_KNOWN_CODEC.argument(buildContext))
+				.then(Commands.argument("data", Cutscene.DIRECT_REGISTERED_DATA_TYPE.argument(buildContext))
 					.executes(ctx -> {
-						var cutscene = Cutscene.DIRECT_KNOWN_CODEC.get(ctx, "data");
+						var cutscene = Cutscene.DIRECT_REGISTERED_DATA_TYPE.get(ctx, "data");
 
 						for (var player : EntityArgument.getPlayers(ctx, "player")) {
 							player.playCutscene(cutscene, WorldNumberVariables.EMPTY);

@@ -136,6 +136,9 @@ public interface VidLibTool {
 		return true;
 	}
 
+	default void renderSetup(Player player, ItemStack item, @Nullable HitResult hit, float delta) {
+	}
+
 	default void debugText(Player player, ItemStack item, @Nullable HitResult hit, ScreenText screenText) {
 	}
 

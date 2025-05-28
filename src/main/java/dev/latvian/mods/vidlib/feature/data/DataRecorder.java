@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import dev.latvian.mods.vidlib.util.Cast;
 import dev.latvian.mods.vidlib.util.JsonUtils;
 import it.unimi.dsi.fastutil.Function;
@@ -25,18 +25,18 @@ import java.util.Set;
 import java.util.UUID;
 
 public class DataRecorder {
-	public static final DataType<Set<String>> PLAYER_TAGS = DataType.PLAYER.builder("player_tags", KnownCodec.STRING.setOf(), Set.of()).buildDummy();
+	public static final DataKey<Set<String>> PLAYER_TAGS = DataKey.PLAYER.builder("player_tags", RegisteredDataType.STRING.setOf(), Set.of()).buildDummy();
 
 	public static class DataMap {
 		public record DataEntry(long time, Object value) {
 		}
 
-		private static final Function<DataType<?>, Long2ObjectLinkedOpenHashMap<Object>> TYPES = k -> new Long2ObjectLinkedOpenHashMap<>(1);
+		private static final Function<DataKey<?>, Long2ObjectLinkedOpenHashMap<Object>> TYPES = k -> new Long2ObjectLinkedOpenHashMap<>(1);
 
-		private final Map<DataType<?>, Long2ObjectLinkedOpenHashMap<Object>> map = new Reference2ObjectOpenHashMap<>(1);
-		private final Map<DataType<?>, List<DataEntry>> sortedEntries = new Reference2ObjectOpenHashMap<>();
+		private final Map<DataKey<?>, Long2ObjectLinkedOpenHashMap<Object>> map = new Reference2ObjectOpenHashMap<>(1);
+		private final Map<DataKey<?>, List<DataEntry>> sortedEntries = new Reference2ObjectOpenHashMap<>();
 
-		public void set(long time, DataType<?> type, Object value) {
+		public void set(long time, DataKey<?> type, Object value) {
 			var types = map.computeIfAbsent(type, TYPES);
 
 			if (types.isEmpty()) {
@@ -47,7 +47,7 @@ public class DataRecorder {
 			sortedEntries.remove(type);
 		}
 
-		private void load(DynamicOps<JsonElement> ops, DataTypeStorage storage, JsonObject json) {
+		private void load(DynamicOps<JsonElement> ops, DataKeyStorage storage, JsonObject json) {
 			for (var entry : json.entrySet()) {
 				var id = ResourceLocation.parse(entry.getKey());
 
@@ -62,7 +62,7 @@ public class DataRecorder {
 
 				for (var timeEntry : valueJson.entrySet()) {
 					var time = Long.parseUnsignedLong(timeEntry.getKey());
-					var value = type.type().codec().parse(ops, timeEntry.getValue()).getOrThrow();
+					var value = type.type().type().codec().parse(ops, timeEntry.getValue()).getOrThrow();
 					set(time, type, value);
 				}
 			}
@@ -77,7 +77,7 @@ public class DataRecorder {
 
 				for (var timeEntry : dataEntry.getValue().long2ObjectEntrySet().stream().sorted((e1, e2) -> Long.compareUnsigned(e1.getLongKey(), e2.getLongKey())).toList()) {
 					var time = Long.toUnsignedString(timeEntry.getLongKey());
-					var value = dataEntry.getKey().type().codec().encodeStart(ops, Cast.to(timeEntry.getValue())).getOrThrow();
+					var value = dataEntry.getKey().type().type().codec().encodeStart(ops, Cast.to(timeEntry.getValue())).getOrThrow();
 
 					if (lastValue == null || !Objects.equals(lastValue, value)) {
 						valueJson.add(time, value);
@@ -92,7 +92,7 @@ public class DataRecorder {
 		}
 
 		@Nullable
-		public <T> T getOverride(DataType<T> type, long time) {
+		public <T> T getOverride(DataKey<T> type, long time) {
 			var list = sortedEntries.get(type);
 
 			if (list == null) {
@@ -151,14 +151,14 @@ public class DataRecorder {
 
 	public void load(DynamicOps<JsonElement> ops, JsonObject json) {
 		if (json.has("server")) {
-			serverData.load(ops, DataType.SERVER, json.getAsJsonObject("server"));
+			serverData.load(ops, DataKey.SERVER, json.getAsJsonObject("server"));
 		}
 
 		if (json.has("player")) {
 			for (var entry : json.getAsJsonObject("player").entrySet()) {
 				var player = UndashedUuid.fromString(entry.getKey());
 				var types = playerData.computeIfAbsent(player, PLAYERS);
-				types.load(ops, DataType.PLAYER, entry.getValue().getAsJsonObject());
+				types.load(ops, DataKey.PLAYER, entry.getValue().getAsJsonObject());
 			}
 		}
 	}
@@ -179,7 +179,7 @@ public class DataRecorder {
 		return json;
 	}
 
-	public void setServer(long time, DataType<?> type, Object value) {
+	public void setServer(long time, DataKey<?> type, Object value) {
 		serverData.set(time, type, value);
 	}
 
@@ -187,7 +187,7 @@ public class DataRecorder {
 		return playerData.computeIfAbsent(player, PLAYERS);
 	}
 
-	public void setPlayer(long time, UUID player, DataType<?> type, Object value) {
+	public void setPlayer(long time, UUID player, DataKey<?> type, Object value) {
 		getPlayerMap(player).set(time, type, value);
 	}
 }

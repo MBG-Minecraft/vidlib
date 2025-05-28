@@ -43,4 +43,11 @@ public interface FramePoseStack {
 	default void translate(Vec3 pos) {
 		translate(pos.x, pos.y, pos.z);
 	}
+
+	default double distanceSq(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+		double dx = Math.max(Math.max(minX - cameraX(), cameraX() - maxX), 0D);
+		double dy = Math.max(Math.max(minY - cameraY(), cameraY() - maxY), 0D);
+		double dz = Math.max(Math.max(minZ - cameraZ(), cameraZ() - maxZ), 0D);
+		return dx * dx + dy * dy + dz * dz;
+	}
 }

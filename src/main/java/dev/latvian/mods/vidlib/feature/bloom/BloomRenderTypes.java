@@ -1,7 +1,10 @@
 package dev.latvian.mods.vidlib.feature.bloom;
 
+import dev.latvian.mods.kmath.render.BufferSupplier;
+import dev.latvian.mods.kmath.vertex.VertexCallback;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasRenderPipelines;
 import dev.latvian.mods.vidlib.feature.client.TexturedRenderType;
+import dev.latvian.mods.vidlib.util.Empty;
 import dev.latvian.mods.vidlib.util.client.MultiBufferSourceOverride;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
@@ -120,4 +123,6 @@ public interface BloomRenderTypes {
 	static MultiBufferSourceOverride overrideEntityCutout(MultiBufferSource delegate) {
 		return new MultiBufferSourceOverride(delegate, ENTITY_CUTOUT, ENTITY_CUTOUT_NO_CULL);
 	}
+
+	BufferSupplier POS_COL_BUFFER_SUPPLIER = BufferSupplier.fixed(POS_COL.apply(Empty.TEXTURE), POS_COL_NO_CULL.apply(Empty.TEXTURE)).process(VertexCallback::onlyPosCol);
 }

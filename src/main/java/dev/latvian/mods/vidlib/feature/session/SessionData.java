@@ -2,9 +2,9 @@ package dev.latvian.mods.vidlib.feature.session;
 
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
+import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
-import dev.latvian.mods.vidlib.feature.data.DataType;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverrideValue;
@@ -53,7 +53,7 @@ public class SessionData {
 
 	public SessionData(UUID uuid) {
 		this.uuid = uuid;
-		this.dataMap = new DataMap(uuid, DataType.PLAYER);
+		this.dataMap = new DataMap(uuid, DataKey.PLAYER);
 		this.prevInput = PlayerInput.NONE;
 		this.input = PlayerInput.NONE;
 		this.zonesIn = List.of();

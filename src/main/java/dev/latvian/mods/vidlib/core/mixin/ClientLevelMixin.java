@@ -36,8 +36,8 @@ public abstract class ClientLevelMixin implements VLClientLevel {
 
 	@Override
 	public ClientPropList getProps() {
-		if (vl$props == null) {
-			vl$props = new ClientPropList(this.vl$level());
+		if (vl$props == null || vl$props.level != vl$level()) {
+			vl$props = new ClientPropList(vl$level());
 		}
 
 		return vl$props;

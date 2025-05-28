@@ -5,7 +5,8 @@ import com.mojang.serialization.Codec;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.core.VLBlockInWorld;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.DataType;
+import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
@@ -108,7 +109,8 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 
 	Codec<BlockFilter> CODEC = Codec.either(Codec.BOOL, REGISTRY.valueCodec()).xmap(either -> either.map(BlockFilter::of, Function.identity()), filter -> filter == ANY.instance() ? Either.left(true) : filter == NONE.instance() ? Either.left(false) : Either.right(filter));
 	StreamCodec<RegistryFriendlyByteBuf, BlockFilter> STREAM_CODEC = ByteBufCodecs.either(ByteBufCodecs.BOOL, REGISTRY.valueStreamCodec()).map(either -> either.map(BlockFilter::of, Function.identity()), filter -> filter == ANY.instance() ? Either.left(true) : filter == NONE.instance() ? Either.left(false) : Either.right(filter));
-	KnownCodec<BlockFilter> KNOWN_CODEC = KnownCodec.register(VidLib.id("block_filter"), CODEC, STREAM_CODEC, BlockFilter.class);
+	DataType<BlockFilter> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, BlockFilter.class);
+	RegisteredDataType<BlockFilter> REGISTERED_DATA_TYPE = RegisteredDataType.register(VidLib.id("block_filter"), DATA_TYPE);
 
 	@AutoInit
 	static void bootstrap() {

@@ -6,7 +6,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.DataType;
+import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -71,7 +72,8 @@ public record Clothing(ResourceKey<EquipmentAsset> id, ClothingParts parts) {
 		Clothing::new
 	);
 
-	public static final KnownCodec<Clothing> KNOWN_CODEC = KnownCodec.register(VidLib.id("clothing"), CODEC, STREAM_CODEC, Clothing.class);
+	public static final DataType<Clothing> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, Clothing.class);
+	public static final RegisteredDataType<Clothing> REGISTERED_DATA_TYPE = RegisteredDataType.register(VidLib.id("clothing"), DATA_TYPE);
 
 	public static final EquipmentSlot[] ORDERED_SLOTS = {
 		EquipmentSlot.CHEST,

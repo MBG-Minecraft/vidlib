@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.item;
 
 import dev.latvian.mods.kmath.Line;
+import dev.latvian.mods.kmath.Rotation;
 import dev.latvian.mods.kmath.VoxelShapeBox;
 import dev.latvian.mods.kmath.color.Color;
 import dev.latvian.mods.vidlib.feature.texture.ResolvedTexturedCube;
@@ -21,9 +22,9 @@ public record ToolVisuals(List<CubeVisual> cubes, List<LineVisual> lines, List<R
 		return new ToolVisuals(List.of(), List.of(), List.of(cube));
 	}
 
-	public record CubeVisual(Vec3 pos, VoxelShapeBox shape, Color color, Color lineColor) {
+	public record CubeVisual(Vec3 pos, VoxelShapeBox shape, Color color, Color lineColor, Rotation rotation) {
 		public CubeVisual(Vec3 pos) {
-			this(pos, VoxelShapeBox.FULL, Color.CYAN, Color.WHITE);
+			this(pos, VoxelShapeBox.FULL_CENTERED, Color.CYAN, Color.WHITE, Rotation.NONE);
 		}
 	}
 

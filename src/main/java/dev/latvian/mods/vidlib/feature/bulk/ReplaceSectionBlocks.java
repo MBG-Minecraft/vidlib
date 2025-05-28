@@ -17,7 +17,7 @@ public record ReplaceSectionBlocks(SectionPos pos, List<BlockPalette> palettes) 
 		BlockPalette.CODEC.listOf().fieldOf("palettes").forGetter(ReplaceSectionBlocks::palettes)
 	).apply(instance, ReplaceSectionBlocks::new)), CompositeStreamCodec.of(
 		VLStreamCodecs.SECTION_POS, ReplaceSectionBlocks::pos,
-		BlockPalette.STREAM_CODEC.list(), ReplaceSectionBlocks::palettes,
+		BlockPalette.STREAM_CODEC.listOf(), ReplaceSectionBlocks::palettes,
 		ReplaceSectionBlocks::new
 	));
 

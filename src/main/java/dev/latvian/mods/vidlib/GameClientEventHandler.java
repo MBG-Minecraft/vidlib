@@ -1,11 +1,11 @@
 package dev.latvian.mods.vidlib;
 
+import com.mojang.math.Axis;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.kmath.KMath;
 import dev.latvian.mods.kmath.color.Color;
 import dev.latvian.mods.kmath.render.BoxRenderer;
 import dev.latvian.mods.kmath.render.BufferSupplier;
-import dev.latvian.mods.kmath.render.DebugRenderTypes;
 import dev.latvian.mods.kmath.texture.LightUV;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
@@ -48,6 +48,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -219,7 +220,7 @@ public class GameClientEventHandler {
 						float maxY = frame.y(a.maxY() + 0.5D);
 						float maxZ = frame.z(a.maxZ() + 0.5D);
 
-						BoxRenderer.frame(ms, minX, minY, minZ, maxX, maxY, maxZ, buffers, BufferSupplier.DEBUG, cull, color, Color.YELLOW, 1F, 1F);
+						BoxRenderer.frame(ms, minX, minY, minZ, maxX, maxY, maxZ, buffers, BufferSupplier.DEBUG_NO_DEPTH, cull, color, Color.YELLOW, 1F, 1F);
 					}
 				}
 			}
@@ -253,10 +254,16 @@ public class GameClientEventHandler {
 			if (tool != null) {
 				var visuals = tool.getSecond().visuals(mc.player, tool.getFirst(), frame.screenDelta());
 
-				var debug = BufferSupplier.fixed(DebugRenderTypes.QUADS, DebugRenderTypes.QUADS_NO_CULL);
+				var debug = BufferSupplier.DEBUG_NO_DEPTH;
 
 				for (var cube : visuals.cubes()) {
-					BoxRenderer.voxelShapeBox(ms, cube.shape(), cube.pos().subtract(frame.camera().getPosition()), frame.buffers(), debug, false, cube.color().withAlpha(50), cube.lineColor());
+					ms.pushPose();
+					frame.translate(cube.pos());
+					ms.mulPose(Axis.YP.rotation(cube.rotation().yawRad()));
+					ms.mulPose(Axis.XP.rotation(cube.rotation().pitchRad()));
+					ms.mulPose(Axis.ZP.rotation(cube.rotation().rollRad()));
+					BoxRenderer.voxelShapeBox(ms, cube.shape(), Vec3.ZERO, frame.buffers(), debug, false, cube.color().withAlpha(50), cube.lineColor());
+					ms.popPose();
 				}
 
 				var linesBuffer = ms.last().transform(debug.lines(frame.buffers()));
@@ -270,6 +277,8 @@ public class GameClientEventHandler {
 				}
 			}
 		}
+
+		mc.level.getProps().renderAll(frame);
 
 		if (frame.layer() != null) {
 			GhostStructure.render(frame);
@@ -574,8 +583,16 @@ public class GameClientEventHandler {
 
 		mc.vl$renderSetup();
 
+		var tool = VidLibTool.of(mc.player);
+
+		var screenDelta = event.getDeltaTracker().getGameTimeDeltaPartialTick(true);
+
+		if (tool != null) {
+			tool.getSecond().renderSetup(mc.player, tool.getFirst(), mc.hitResult, screenDelta);
+		}
+
 		if (session.npcRecording != null) {
-			session.npcRecording.record(System.currentTimeMillis(), event.getDeltaTracker().getGameTimeDeltaPartialTick(true), mc.player);
+			session.npcRecording.record(System.currentTimeMillis(), screenDelta, mc.player);
 		}
 
 		CanvasImpl.createHandles(event.getFrameGrapBuilder(), event.getRenderTargetDescriptor());

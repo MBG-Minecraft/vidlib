@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.core;
 import dev.latvian.mods.kmath.Line;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
-import dev.latvian.mods.vidlib.feature.data.DataType;
+import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
@@ -37,11 +37,11 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
 		return vl$self().isCreative();
 	}
 
-	default <T> T get(DataType<T> type) {
+	default <T> T get(DataKey<T> type) {
 		return vl$sessionData().dataMap.get(type, vl$level().getGameTime());
 	}
 
-	default <T> void set(DataType<T> type, T value) {
+	default <T> void set(DataKey<T> type, T value) {
 		vl$sessionData().dataMap.set(type, value);
 	}
 

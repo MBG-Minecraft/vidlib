@@ -14,7 +14,7 @@ import java.util.Set;
 public record BulkLevelModificationBundle(List<BulkLevelModification> list) implements BulkLevelModification, BlockModificationConsumer {
 	public static final SimpleRegistryType<BulkLevelModificationBundle> TYPE = SimpleRegistryType.dynamic("bundle", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		BulkLevelModification.REGISTRY.valueCodec().listOf().fieldOf("list").forGetter(BulkLevelModificationBundle::list)
-	).apply(instance, BulkLevelModificationBundle::new)), BulkLevelModification.REGISTRY.valueStreamCodec().list().map(BulkLevelModificationBundle::new, BulkLevelModificationBundle::list));
+	).apply(instance, BulkLevelModificationBundle::new)), BulkLevelModification.REGISTRY.valueStreamCodec().listOf().map(BulkLevelModificationBundle::new, BulkLevelModificationBundle::list));
 
 	@Override
 	public SimpleRegistryType<?> type() {
@@ -67,8 +67,8 @@ public record BulkLevelModificationBundle(List<BulkLevelModification> list) impl
 		for (var m : list) {
 			var o = m.optimize();
 
-			if (o instanceof BulkLevelModificationBundle bundle) {
-				tempList.addAll(bundle.list());
+			if (o instanceof BulkLevelModificationBundle(List<BulkLevelModification> list1)) {
+				tempList.addAll(list1);
 			} else {
 				tempList.add(o);
 			}

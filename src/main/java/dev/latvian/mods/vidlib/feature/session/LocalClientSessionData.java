@@ -16,10 +16,10 @@ import dev.latvian.mods.vidlib.feature.camera.CameraShakeInstance;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.cutscene.ClientCutscene;
+import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
 import dev.latvian.mods.vidlib.feature.data.DataRecorder;
-import dev.latvian.mods.vidlib.feature.data.DataType;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
@@ -113,7 +113,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.prevCameraShake = this.cameraShake = Vec2d.ZERO;
 		this.clocks = new HashMap<>();
 		this.skyboxes = new HashMap<>();
-		this.serverDataMap = new DataMap(uuid, DataType.SERVER);
+		this.serverDataMap = new DataMap(uuid, DataKey.SERVER);
 		this.globalVariables = new WorldNumberVariables();
 		VidLib.LOGGER.info("Client Session Data Initialized");
 	}
@@ -331,8 +331,8 @@ public class LocalClientSessionData extends ClientSessionData {
 
 			if (r.record) {
 				for (var u : update) {
-					if (!u.type().skipLogging()) {
-						r.setServer(gameTime, u.type(), u.value());
+					if (!u.key().skipLogging()) {
+						r.setServer(gameTime, u.key(), u.value());
 					}
 				}
 			}
@@ -352,8 +352,8 @@ public class LocalClientSessionData extends ClientSessionData {
 
 			if (r.record) {
 				for (var u : update) {
-					if (!u.type().skipLogging()) {
-						r.setPlayer(gameTime, player, u.type(), u.value());
+					if (!u.key().skipLogging()) {
+						r.setPlayer(gameTime, player, u.key(), u.value());
 					}
 				}
 			}

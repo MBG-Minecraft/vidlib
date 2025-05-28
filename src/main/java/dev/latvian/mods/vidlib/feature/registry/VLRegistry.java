@@ -5,7 +5,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import dev.latvian.mods.vidlib.util.Side;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.commands.CommandBuildContext;
@@ -18,7 +18,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class VLRegistry<V> extends GenericVLRegistry<ResourceLocation, V> implements Supplier<Iterable<ResourceLocation>>, BiFunction<KnownCodec<V>, CommandBuildContext, ArgumentType<V>> {
+public class VLRegistry<V> extends GenericVLRegistry<ResourceLocation, V> implements Supplier<Iterable<ResourceLocation>>, BiFunction<RegisteredDataType<V>, CommandBuildContext, ArgumentType<V>> {
 	public static <V> VLRegistry<V> createServer(String id) {
 		var holder = new VLRegistry<V>(id, Side.SERVER);
 		DATA_PACK_HOLDERS.add(holder);
@@ -44,8 +44,8 @@ public class VLRegistry<V> extends GenericVLRegistry<ResourceLocation, V> implem
 		return map.keySet();
 	}
 
-	public StreamCodec<? super RegistryFriendlyByteBuf, V> streamCodecOrDirect(KnownCodec<V> knownCodec, StreamCodec<? super RegistryFriendlyByteBuf, V> directStreamCodec) {
-		return ByteBufCodecs.either(knownCodec.streamCodec(), directStreamCodec).map(either -> either.map(Function.identity(), Function.identity()), v -> getId(v) != null ? Either.left(v) : Either.right(v));
+	public StreamCodec<? super RegistryFriendlyByteBuf, V> streamCodecOrDirect(RegisteredDataType<V> dataType, StreamCodec<? super RegistryFriendlyByteBuf, V> directStreamCodec) {
+		return ByteBufCodecs.either(dataType.type().streamCodec(), directStreamCodec).map(either -> either.map(Function.identity(), Function.identity()), v -> getId(v) != null ? Either.left(v) : Either.right(v));
 	}
 
 	@Override
@@ -67,8 +67,8 @@ public class VLRegistry<V> extends GenericVLRegistry<ResourceLocation, V> implem
 	}
 
 	@Override
-	public ArgumentType<V> apply(KnownCodec<V> knownCodec, CommandBuildContext commandBuildContext) {
-		return new RefHolderArgument<>(this, knownCodec);
+	public ArgumentType<V> apply(RegisteredDataType<V> dataType, CommandBuildContext commandBuildContext) {
+		return new RefHolderArgument<>(this, dataType);
 	}
 
 	public Codec<V> valueCodec() {

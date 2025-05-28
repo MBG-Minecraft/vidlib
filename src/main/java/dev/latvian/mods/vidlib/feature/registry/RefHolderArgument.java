@@ -8,7 +8,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
@@ -18,7 +18,7 @@ import net.minecraft.network.chat.Component;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
-public record RefHolderArgument<T>(VLRegistry<T> idHolder, KnownCodec<T> knownCodec) implements ArgumentType<T> {
+public record RefHolderArgument<T>(VLRegistry<T> idHolder, RegisteredDataType<T> dataType) implements ArgumentType<T> {
 	public static final SimpleCommandExceptionType VALUE_NOT_FOUND = new SimpleCommandExceptionType(Component.literal("Value not found"));
 
 	@Override
@@ -56,29 +56,29 @@ public record RefHolderArgument<T>(VLRegistry<T> idHolder, KnownCodec<T> knownCo
 	public static class Info implements ArgumentTypeInfo<RefHolderArgument<?>, RefHolderTemplate> {
 		@Override
 		public void serializeToNetwork(RefHolderTemplate template, FriendlyByteBuf buf) {
-			buf.writeResourceLocation(template.knownCodec.id());
+			buf.writeResourceLocation(template.dataType.id());
 		}
 
 		@Override
 		public RefHolderTemplate deserializeFromNetwork(FriendlyByteBuf buf) {
-			return new RefHolderTemplate(this, KnownCodec.MAP.get(buf.readResourceLocation()));
+			return new RefHolderTemplate(this, RegisteredDataType.REGISTRY.get(buf.readResourceLocation()));
 		}
 
 		@Override
 		public void serializeToJson(RefHolderTemplate template, JsonObject json) {
-			json.addProperty("codec", template.knownCodec.id().toString());
+			json.addProperty("codec", template.dataType.id().toString());
 		}
 
 		@Override
 		public RefHolderTemplate unpack(RefHolderArgument arg) {
-			return new RefHolderTemplate(this, arg.knownCodec);
+			return new RefHolderTemplate(this, arg.dataType);
 		}
 	}
 
-	public record RefHolderTemplate(ArgumentTypeInfo<RefHolderArgument<?>, ?> type, KnownCodec<?> knownCodec) implements ArgumentTypeInfo.Template<RefHolderArgument<?>> {
+	public record RefHolderTemplate(ArgumentTypeInfo<RefHolderArgument<?>, ?> type, RegisteredDataType<?> dataType) implements ArgumentTypeInfo.Template<RefHolderArgument<?>> {
 		@Override
 		public RefHolderArgument<?> instantiate(CommandBuildContext ctx) {
-			return (RefHolderArgument<?>) knownCodec.argument(ctx);
+			return (RefHolderArgument<?>) dataType.argument(ctx);
 		}
 	}
 }

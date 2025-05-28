@@ -134,7 +134,7 @@ public interface VLCodecs {
 		return Codec.either(UNIT, codec).xmap(either -> either.map(u -> Optional.empty(), Optional::of), opt -> opt.isPresent() ? Either.right(opt.get()) : Either.left(Unit.INSTANCE));
 	}
 
-	static <V> Codec<Set<V>> set(Codec<V> codec) {
+	static <V> Codec<Set<V>> setOf(Codec<V> codec) {
 		return Codec.list(codec).xmap(HashSet::new, ArrayList::new);
 	}
 

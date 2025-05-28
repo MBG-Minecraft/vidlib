@@ -5,7 +5,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.kmath.Range;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.DataType;
+import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import dev.latvian.mods.vidlib.feature.config.ConfigValue;
 import dev.latvian.mods.vidlib.feature.config.FloatConfigValue;
 import dev.latvian.mods.vidlib.feature.config.RangeConfigValue;
@@ -63,7 +64,8 @@ public class PhysicsParticleData {
 		PhysicsParticleData::new
 	);
 
-	public static final KnownCodec<PhysicsParticleData> KNOWN_CODEC = KnownCodec.register(VidLib.id("physics_particle_data"), CODEC, STREAM_CODEC, PhysicsParticleData.class);
+	public static final DataType<PhysicsParticleData> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, PhysicsParticleData.class);
+	public static final RegisteredDataType<PhysicsParticleData> REGISTERED_DATA_TYPE = RegisteredDataType.register(VidLib.id("physics_particle_data"), DATA_TYPE);
 
 	public static final List<ConfigValue<PhysicsParticleData, ?>> CONFIG = List.of(
 		new FloatConfigValue<>("Density", Range.of(0F, 1000F), false, data -> data.density, (data, v) -> data.density = v),

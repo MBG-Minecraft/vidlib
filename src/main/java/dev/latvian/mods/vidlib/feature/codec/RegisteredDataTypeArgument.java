@@ -13,13 +13,13 @@ import net.minecraft.nbt.TagParser;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 
-public record CodecArgument<T>(DynamicOps<Tag> ops, KnownCodec<T> knownCodec) implements ArgumentType<T> {
+public record RegisteredDataTypeArgument<T>(DynamicOps<Tag> ops, RegisteredDataType<T> dataType) implements ArgumentType<T> {
 	public static final DynamicCommandExceptionType ERROR_PARSING = new DynamicCommandExceptionType(arg -> Component.literal(String.valueOf(arg)));
 
 	@Override
 	public T parse(StringReader reader) throws CommandSyntaxException {
 		var tag = TagParser.parseCompoundAsArgument(reader);
-		var decoded = knownCodec.codec().parse(ops, tag);
+		var decoded = dataType.type().codec().parse(ops, tag);
 
 		if (decoded.isError()) {
 			throw ERROR_PARSING.create(decoded.error().get().message());
@@ -28,32 +28,32 @@ public record CodecArgument<T>(DynamicOps<Tag> ops, KnownCodec<T> knownCodec) im
 		return decoded.getOrThrow();
 	}
 
-	public static class Info implements ArgumentTypeInfo<CodecArgument<?>, CodecTemplate> {
+	public static class Info implements ArgumentTypeInfo<RegisteredDataTypeArgument<?>, CodecTemplate> {
 		@Override
 		public void serializeToNetwork(CodecTemplate template, FriendlyByteBuf buf) {
-			buf.writeResourceLocation(template.knownCodec.id());
+			buf.writeResourceLocation(template.dataType.id());
 		}
 
 		@Override
 		public CodecTemplate deserializeFromNetwork(FriendlyByteBuf buf) {
-			return new CodecTemplate(this, KnownCodec.MAP.get(buf.readResourceLocation()));
+			return new CodecTemplate(this, RegisteredDataType.REGISTRY.get(buf.readResourceLocation()));
 		}
 
 		@Override
 		public void serializeToJson(CodecTemplate template, JsonObject json) {
-			json.addProperty("codec", template.knownCodec.id().toString());
+			json.addProperty("codec", template.dataType.id().toString());
 		}
 
 		@Override
-		public CodecTemplate unpack(CodecArgument arg) {
-			return new CodecTemplate(this, arg.knownCodec);
+		public CodecTemplate unpack(RegisteredDataTypeArgument arg) {
+			return new CodecTemplate(this, arg.dataType);
 		}
 	}
 
-	public record CodecTemplate(ArgumentTypeInfo<CodecArgument<?>, ?> type, KnownCodec<?> knownCodec) implements ArgumentTypeInfo.Template<CodecArgument<?>> {
+	public record CodecTemplate(ArgumentTypeInfo<RegisteredDataTypeArgument<?>, ?> type, RegisteredDataType<?> dataType) implements ArgumentTypeInfo.Template<RegisteredDataTypeArgument<?>> {
 		@Override
-		public CodecArgument<?> instantiate(CommandBuildContext ctx) {
-			return (CodecArgument<?>) knownCodec.argument(ctx);
+		public RegisteredDataTypeArgument<?> instantiate(CommandBuildContext ctx) {
+			return (RegisteredDataTypeArgument<?>) dataType.argument(ctx);
 		}
 	}
 }

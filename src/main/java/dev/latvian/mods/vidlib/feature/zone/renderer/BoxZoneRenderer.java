@@ -19,7 +19,7 @@ public class BoxZoneRenderer implements ZoneRenderer<ZoneShape> {
 		float maxY = ctx.frame().y(box.maxY);
 		float maxZ = ctx.frame().z(box.maxZ);
 
-		BoxRenderer.lines(ms, minX, minY, minZ, maxX, maxY, maxZ, ctx.buffers(), BufferSupplier.DEBUG, ctx.outlineColor());
-		BoxRenderer.quads(ms, minX, minY, minZ, maxX, maxY, maxZ, ctx.buffers(), BufferSupplier.DEBUG, false, ctx.color());
+		BoxRenderer.lines(ms, minX, minY, minZ, maxX, maxY, maxZ, ctx.buffers(), BufferSupplier.DEBUG_NO_DEPTH, ctx.outlineColor());
+		BoxRenderer.quads(ms, minX, minY, minZ, maxX, maxY, maxZ, ctx.buffers(), BufferSupplier.DEBUG_NO_DEPTH, false, ctx.color());
 	}
 }

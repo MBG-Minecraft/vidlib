@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
 import dev.latvian.mods.kmath.Line;
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -66,7 +66,7 @@ public class ZoneContainer implements Comparable<ZoneContainer> {
 	};
 
 	public static final VLRegistry<ZoneContainer> REGISTRY = VLRegistry.createServer("zone_container");
-	public static final KnownCodec<ZoneContainer> KNOWN_CODEC = KnownCodec.of(REGISTRY, ZoneContainer.class);
+	public static final RegisteredDataType<ZoneContainer> REGISTERED_DATA_TYPE = RegisteredDataType.of(REGISTRY, ZoneContainer.class);
 
 	ActiveZones parent;
 	public final ResourceLocation id;

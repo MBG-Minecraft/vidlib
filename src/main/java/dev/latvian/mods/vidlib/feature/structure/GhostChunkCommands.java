@@ -48,9 +48,9 @@ public interface GhostChunkCommands {
 			})
 		)
 		.then(Commands.literal("set-filter")
-			.then(Commands.argument("filter", BlockFilter.KNOWN_CODEC.argument(buildContext))
+			.then(Commands.argument("filter", BlockFilter.REGISTERED_DATA_TYPE.argument(buildContext))
 				.executes(ctx -> {
-					GhostStructureCapture.FILTER.setValue(BlockFilter.KNOWN_CODEC.get(ctx, "filter"));
+					GhostStructureCapture.FILTER.setValue(BlockFilter.REGISTERED_DATA_TYPE.get(ctx, "filter"));
 					return 1;
 				})
 			)

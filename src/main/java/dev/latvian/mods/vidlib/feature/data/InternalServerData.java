@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.data;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
@@ -11,27 +11,27 @@ import java.util.List;
 
 @AutoInit
 public interface InternalServerData {
-	DataType<ResourceLocation> SKYBOX = DataType.SERVER.builder("skybox", KnownCodec.ID, Skyboxes.DAY_WITH_CELESTIALS)
+	DataKey<ResourceLocation> SKYBOX = DataKey.SERVER.builder("skybox", RegisteredDataType.ID, Skyboxes.DAY_WITH_CELESTIALS)
 		.save()
 		.sync()
 		.build();
 
-	DataType<Boolean> IMMUTABLE_WORLD = DataType.SERVER.builder("immutable_world", KnownCodec.BOOL, false)
+	DataKey<Boolean> IMMUTABLE_WORLD = DataKey.SERVER.builder("immutable_world", RegisteredDataType.BOOL, false)
 		.save()
 		.build();
 
-	DataType<Anchor> ANCHOR = DataType.SERVER.builder("anchor", Anchor.KNOWN_CODEC, Anchor.NONE)
+	DataKey<Anchor> ANCHOR = DataKey.SERVER.builder("anchor", Anchor.REGISTERED_DATA_TYPE, Anchor.NONE)
 		.save()
 		.sync()
 		.onReceived((player, anchor) -> Anchor.client = anchor)
 		.build();
 
-	DataType<Boolean> HIDE_PLUMBOBS = DataType.SERVER.builder("hide_plumbobs", KnownCodec.BOOL, false)
+	DataKey<Boolean> HIDE_PLUMBOBS = DataKey.SERVER.builder("hide_plumbobs", RegisteredDataType.BOOL, false)
 		.save()
 		.sync()
 		.build();
 
-	DataType<List<ChancedParticle>> ENVIRONMENT_EFFECTS = DataType.SERVER.builder("environment_effects", ChancedParticle.LIST_KNOWN_CODEC, List.of())
+	DataKey<List<ChancedParticle>> ENVIRONMENT_EFFECTS = DataKey.SERVER.builder("environment_effects", ChancedParticle.LIST_KNOWN_CODEC, List.of())
 		.save()
 		.sync()
 		.build();

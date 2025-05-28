@@ -44,7 +44,7 @@ public record Zone(
 		CompoundTag.CODEC.optionalFieldOf("data", Empty.COMPOUND_TAG).forGetter(Zone::data),
 		EntityOverride.OVERRIDE_MAP_CODEC.optionalFieldOf("player_overrides", Map.of()).forGetter(Zone::playerOverrides),
 		EntityFilter.CODEC.optionalFieldOf("solid", EntityFilter.NONE.instance()).forGetter(Zone::solid),
-		VLCodecs.set(Codec.STRING).optionalFieldOf("tags", Set.of()).forGetter(Zone::tags),
+		VLCodecs.setOf(Codec.STRING).optionalFieldOf("tags", Set.of()).forGetter(Zone::tags),
 		Codec.BOOL.optionalFieldOf("force_loaded", false).forGetter(Zone::forceLoaded),
 		ZoneFluid.CODEC.optionalFieldOf("fluid", ZoneFluid.NONE).forGetter(Zone::fluid),
 		CubeTextures.CODEC.optionalFieldOf("textures").forGetter(Zone::textures),

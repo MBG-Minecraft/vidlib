@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.item;
 import dev.latvian.mods.vidlib.core.VLItem;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.DataType;
 import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
@@ -14,7 +14,7 @@ import net.minecraft.world.InteractionHand;
 public record UpdateItemDataPayload(InteractionHand hand, CompoundTag tag) implements SimplePacketPayload {
 	@AutoPacket(AutoPacket.To.SERVER)
 	public static final VidLibPacketType<UpdateItemDataPayload> TYPE = VidLibPacketType.internal("update_item_data", CompositeStreamCodec.of(
-		KnownCodec.HAND.streamCodec(), UpdateItemDataPayload::hand,
+		DataType.HAND.streamCodec(), UpdateItemDataPayload::hand,
 		VLStreamCodecs.COMPOUND_TAG, UpdateItemDataPayload::tag,
 		UpdateItemDataPayload::new
 	));

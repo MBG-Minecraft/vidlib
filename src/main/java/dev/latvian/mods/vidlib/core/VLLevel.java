@@ -1,7 +1,9 @@
 package dev.latvian.mods.vidlib.core;
 
+import com.google.gson.JsonElement;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.vidlib.feature.block.ConnectedBlock;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.bulk.BlockModificationConsumer;
@@ -23,6 +25,9 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -311,5 +316,13 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 
 	default WorldNumberContext globalContext() {
 		return globalContext(1F);
+	}
+
+	default RegistryOps<Tag> nbtOps() {
+		return vl$level().registryAccess().createSerializationContext(NbtOps.INSTANCE);
+	}
+
+	default RegistryOps<JsonElement> jsonOps() {
+		return vl$level().registryAccess().createSerializationContext(JsonOps.INSTANCE);
 	}
 }

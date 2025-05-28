@@ -5,7 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
 import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
 import dev.latvian.mods.vidlib.feature.registry.ID;
@@ -46,7 +46,7 @@ public record Location(
 	public static final StreamCodec<RegistryFriendlyByteBuf, Location> DIRECT_STREAM_CODEC = CompositeStreamCodec.of(
 		ID.STREAM_CODEC, Location::id,
 		VLStreamCodecs.DIMENSION, Location::dimension,
-		WorldPosition.STREAM_CODEC.list(), Location::positions,
+		WorldPosition.STREAM_CODEC.listOf(), Location::positions,
 		ByteBufCodecs.DOUBLE, Location::range,
 		ByteBufCodecs.BOOL, Location::warp,
 		ByteBufCodecs.BOOL, Location::warpRequiresAdmin,
@@ -62,7 +62,7 @@ public record Location(
 		ref -> ref.id() != null ? Either.left(ref) : Either.right(ref.get())
 	);
 
-	public static final KnownCodec<Location> KNOWN_CODEC = KnownCodec.of(REGISTRY, Location.class);
+	public static final RegisteredDataType<Location> REGISTERED_DATA_TYPE = RegisteredDataType.of(REGISTRY, Location.class);
 
 	public static class Loader extends JsonRegistryReloadListener<Location> {
 		public Loader(VLRegistry<Location> registry) {

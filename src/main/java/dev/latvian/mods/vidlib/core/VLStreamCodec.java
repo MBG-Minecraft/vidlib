@@ -66,7 +66,7 @@ public interface VLStreamCodec<B, V> {
 		return optional(null);
 	}
 
-	default StreamCodec<B, List<V>> list() {
+	default StreamCodec<B, List<V>> listOf() {
 		var self = vl$self();
 
 		return new StreamCodec<>() {
@@ -100,7 +100,7 @@ public interface VLStreamCodec<B, V> {
 		};
 	}
 
-	default StreamCodec<B, Set<V>> set() {
+	default StreamCodec<B, Set<V>> setOf() {
 		var self = vl$self();
 
 		return new StreamCodec<>() {

@@ -19,6 +19,7 @@ import org.joml.Vector3f;
 public record FrameInfo(
 	Minecraft mc,
 	LocalClientSessionData session,
+	RenderLevelStageEvent.Stage stage,
 	@Nullable TerrainRenderLayer layer,
 	PoseStack poseStack,
 	Matrix4fc projectionMatrix,
@@ -40,7 +41,7 @@ public record FrameInfo(
 
 	@Nullable
 	private static TerrainRenderLayer renderLayer(RenderLevelStageEvent.Stage stage) {
-		for (var layer : TerrainRenderLayer.ALL) {
+		for (var layer : dev.latvian.mods.vidlib.util.TerrainRenderLayer.ALL) {
 			if (layer.neoForgeStage == stage) {
 				return layer;
 			}
@@ -53,6 +54,7 @@ public record FrameInfo(
 		this(
 			mc,
 			session,
+			event.getStage(),
 			renderLayer(event.getStage()),
 			event.getPoseStack(),
 			event.getProjectionMatrix(),

@@ -66,7 +66,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 			ms.pushPose();
 			frame.translate(clip.pos());
 			ms.scale(0.25F, 0.25F, 0.25F);
-			SphereRenderer.lines(ms, SpherePoints.L, buffers, BufferSupplier.DEBUG, Color.BLACK);
+			SphereRenderer.lines(ms, SpherePoints.L, buffers, BufferSupplier.DEBUG_NO_DEPTH, Color.BLACK);
 			ms.popPose();
 		}
 
@@ -76,7 +76,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 					boolean hovered = clip != null && clip.instance() == sz.instance();
 					var baseColor = sz.instance().zone.color().withAlpha(50);
 					var outlineColor = hovered ? Color.WHITE : sz.instance().entities.isEmpty() ? sz.instance().zone.color() : Color.GREEN;
-					BoxRenderer.voxelShapeBox(ms, sz.shapeBox(), cameraPos.reverse(), buffers, BufferSupplier.DEBUG, false, baseColor, outlineColor);
+					BoxRenderer.voxelShapeBox(ms, sz.shapeBox(), cameraPos.reverse(), buffers, BufferSupplier.DEBUG_NO_DEPTH, false, baseColor, outlineColor);
 				}
 			}
 		} else {
@@ -118,7 +118,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 									});
 								}
 
-								BoxRenderer.voxelShapeBox(ms, voxelShape, cameraPos.reverse(), buffers, BufferSupplier.DEBUG, true, baseColor, outlineColor);
+								BoxRenderer.voxelShapeBox(ms, voxelShape, cameraPos.reverse(), buffers, BufferSupplier.DEBUG_NO_DEPTH, true, baseColor, outlineColor);
 							}
 						}
 					}

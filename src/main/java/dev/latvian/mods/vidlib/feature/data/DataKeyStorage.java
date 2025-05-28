@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.data;
 
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import dev.latvian.mods.vidlib.util.Cast;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -11,16 +11,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DataTypeStorage {
+public class DataKeyStorage {
 	public final String name;
 	public final boolean alwaysSyncToAllClients;
-	public final Map<String, DataType<?>> all;
-	public final Map<String, DataType<?>> saved;
-	final Map<String, DataType<?>> synced;
+	public final Map<String, DataKey<?>> all;
+	public final Map<String, DataKey<?>> saved;
+	final Map<String, DataKey<?>> synced;
 	public final StreamCodec<RegistryFriendlyByteBuf, DataMapValue> valueStreamCodec;
 	public final StreamCodec<RegistryFriendlyByteBuf, List<DataMapValue>> valueListStreamCodec;
 
-	public DataTypeStorage(String name, boolean alwaysSyncToAllClients) {
+	public DataKeyStorage(String name, boolean alwaysSyncToAllClients) {
 		this.name = name;
 		this.alwaysSyncToAllClients = alwaysSyncToAllClients;
 		this.all = new LinkedHashMap<>();
@@ -31,27 +31,27 @@ public class DataTypeStorage {
 			@Override
 			public DataMapValue decode(RegistryFriendlyByteBuf buf) {
 				var id = buf.readUtf();
-				var type = synced.get(id);
+				var key = synced.get(id);
 
-				if (type == null) {
-					throw new NullPointerException("Data type with id " + id + " not found. Available types in '" + DataTypeStorage.this.name + "': " + synced.keySet());
+				if (key == null) {
+					throw new NullPointerException("Data type with id " + id + " not found. Available types in '" + DataKeyStorage.this.name + "': " + synced.keySet());
 				}
 
-				return new DataMapValue(type, type.type().streamCodec().decode(buf));
+				return new DataMapValue(key, key.type().type().streamCodec().decode(buf));
 			}
 
 			@Override
 			public void encode(RegistryFriendlyByteBuf buf, DataMapValue value) {
-				buf.writeUtf(value.type().id());
-				value.type().type().streamCodec().encode(buf, Cast.to(value.value()));
+				buf.writeUtf(value.key().id());
+				value.key().type().type().streamCodec().encode(buf, Cast.to(value.value()));
 			}
 		};
 
-		this.valueListStreamCodec = valueStreamCodec.list();
+		this.valueListStreamCodec = valueStreamCodec.listOf();
 	}
 
-	public <T> DataType.Builder<T> builder(String id, @Nullable KnownCodec<T> type, T defaultValue) {
-		return new DataType.Builder<>(this, id, type, defaultValue);
+	public <T> DataKey.Builder<T> builder(String id, @Nullable RegisteredDataType<T> type, T defaultValue) {
+		return new DataKey.Builder<>(this, id, type, defaultValue);
 	}
 
 	@Override

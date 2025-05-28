@@ -10,7 +10,7 @@ import java.util.List;
 
 public record UpdatePlayerDataValuePayload(List<DataMapValue> update) implements SimplePacketPayload {
 	@AutoPacket(AutoPacket.To.SERVER)
-	public static final VidLibPacketType<UpdatePlayerDataValuePayload> TYPE = VidLibPacketType.internal("update_player_data_value", DataType.PLAYER.valueListStreamCodec.map(UpdatePlayerDataValuePayload::new, UpdatePlayerDataValuePayload::update));
+	public static final VidLibPacketType<UpdatePlayerDataValuePayload> TYPE = VidLibPacketType.internal("update_player_data_value", DataKey.PLAYER.valueListStreamCodec.map(UpdatePlayerDataValuePayload::new, UpdatePlayerDataValuePayload::update));
 
 	@Override
 	public VidLibPacketType<?> getType() {
@@ -20,8 +20,8 @@ public record UpdatePlayerDataValuePayload(List<DataMapValue> update) implements
 	@Override
 	public void handle(Context ctx) {
 		for (var value : update) {
-			if (value.type().allowClientUpdates()) {
-				ctx.player().set(value.type(), Cast.to(value.value()));
+			if (value.key().allowClientUpdates()) {
+				ctx.player().set(value.key(), Cast.to(value.value()));
 			}
 		}
 	}

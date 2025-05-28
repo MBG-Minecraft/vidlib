@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.sound;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.DataType;
 import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -28,7 +28,7 @@ public record SoundData(
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, SoundData> STREAM_CODEC = CompositeStreamCodec.of(
 		SoundEvent.STREAM_CODEC, SoundData::sound,
-		KnownCodec.SOUND_SOURCE.streamCodec(), SoundData::source,
+		DataType.SOUND_SOURCE.streamCodec(), SoundData::source,
 		ByteBufCodecs.FLOAT, SoundData::volume,
 		ByteBufCodecs.FLOAT, SoundData::pitch,
 		SoundData::new

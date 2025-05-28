@@ -78,24 +78,20 @@ public class PositionToolItem implements VidLibTool, PlayerActionHandler {
 	@Override
 	public boolean rightClick(Player player, ItemStack item, @Nullable BlockHitResult hit) {
 		if (player.level().isClientSide()) {
-			var tag = item.get(DataComponents.CUSTOM_DATA).getUnsafe();
-			var mode = Type.VALUES[tag.getByteOr("position_tool_mode", (byte) 0)];
-			var pos = mode.position(player, hit);
-
-			if (pos == null) {
+			if (clientPos == null) {
 				return true;
 			}
 
 			if (lastClick == null) {
-				lastClick = pos;
+				lastClick = clientPos;
 			}
 
-			var blockPos = BlockPos.containing(pos);
+			var blockPos = BlockPos.containing(clientPos);
 			var strBlock = KMath.formatBlockPos(blockPos);
-			var strVec = KMath.formatVec3(pos);
-			var strDist = KMath.format(lastClick.distanceTo(pos));
+			var strVec = KMath.formatVec3(clientPos);
+			var strDist = KMath.format(lastClick.distanceTo(clientPos));
 
-			lastClick = pos;
+			lastClick = clientPos;
 
 			player.tell(Component.empty()
 				.append(Component.empty()
@@ -134,31 +130,34 @@ public class PositionToolItem implements VidLibTool, PlayerActionHandler {
 	}
 
 	@Override
+	public void renderSetup(Player player, ItemStack item, @Nullable HitResult hit, float delta) {
+		var tag = item.get(DataComponents.CUSTOM_DATA).getUnsafe();
+		var mode = Type.VALUES[tag.getByteOr("position_tool_mode", (byte) 0)];
+
+		if (hit == null || hit.getType() != HitResult.Type.BLOCK) {
+			hit = player.ray(500D, delta).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY);
+		}
+
+		clientPos = hit instanceof BlockHitResult blockHit ? mode.position(player, blockHit) : mode.position(player, null);
+	}
+
+	@Override
 	public void debugText(Player player, ItemStack item, @Nullable HitResult hit, ScreenText screenText) {
 		var tag = item.get(DataComponents.CUSTOM_DATA).getUnsafe();
 		var mode = Type.VALUES[tag.getByteOr("position_tool_mode", (byte) 0)];
 		screenText.topRight.add("Mode: " + mode.name);
 
-		if (hit == null || hit.getType() != HitResult.Type.BLOCK) {
-			hit = player.ray(500D, 1F).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY);
-		}
-
-		var pos = hit instanceof BlockHitResult blockHit ? mode.position(player, blockHit) : mode.position(player, null);
-		clientPos = pos == null ? null : pos.subtract(0.5D, 0.5D, 0.5D);
-
-		if (pos == null) {
+		if (clientPos == null) {
 			return;
 		}
 
-		var blockPos = BlockPos.containing(pos);
-		// player.level().cubeParticles(new CubeParticleOptions(Color.CYAN, Color.WHITE, 1), List.of(blockPos));
-
+		var blockPos = BlockPos.containing(clientPos);
 		screenText.topRight.add(player.level().getBlockState(blockPos).getBlock().getName());
 		screenText.topRight.add(KMath.formatBlockPos(blockPos));
-		screenText.topRight.add(KMath.formatVec3(pos));
+		screenText.topRight.add(KMath.formatVec3(clientPos));
 
 		if (lastClick != null) {
-			screenText.topRight.add(KMath.format(lastClick.distanceTo(pos)) + " m");
+			screenText.topRight.add(KMath.format(lastClick.distanceTo(clientPos)) + " m");
 		}
 	}
 

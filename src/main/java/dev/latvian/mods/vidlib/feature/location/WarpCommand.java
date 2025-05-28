@@ -8,9 +8,9 @@ import net.minecraft.server.level.ServerPlayer;
 public interface WarpCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("warp", (command, buildContext) -> command
-		.then(Commands.argument("warp", Location.KNOWN_CODEC.argument(buildContext))
+		.then(Commands.argument("warp", Location.REGISTERED_DATA_TYPE.argument(buildContext))
 			.requires(source -> source.hasPermission(2))
-			.executes(ctx -> warp(ctx.getSource().getPlayerOrException(), Location.KNOWN_CODEC.get(ctx, "warp")))
+			.executes(ctx -> warp(ctx.getSource().getPlayerOrException(), Location.REGISTERED_DATA_TYPE.get(ctx, "warp")))
 		)
 	);
 

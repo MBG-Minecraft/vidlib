@@ -1,13 +1,19 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import com.google.gson.JsonElement;
 import dev.latvian.mods.vidlib.core.VLLevel;
 import dev.latvian.mods.vidlib.feature.bulk.UndoableModificationHolder;
 import dev.latvian.mods.vidlib.util.PauseType;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +32,19 @@ public abstract class LevelMixin implements VLLevel {
 
 	@Unique
 	private LivingEntity vl$mainBoss = null;
+
+	@Unique
+	private RegistryOps<Tag> vl$nbtOps = null;
+
+	@Unique
+	private RegistryOps<JsonElement> vl$jsonOps = null;
+
+	@Inject(method = "tickBlockEntities", at = @At("RETURN"))
+	private void vl$tickProps(CallbackInfo ci) {
+		if (getEnvironment().getPauseType().tick()) {
+			getProps().tick();
+		}
+	}
 
 	@Override
 	public void vl$preTick(PauseType paused) {
@@ -59,5 +78,23 @@ public abstract class LevelMixin implements VLLevel {
 	@Nullable
 	public LivingEntity getMainBoss() {
 		return vl$mainBoss;
+	}
+
+	@Override
+	public RegistryOps<Tag> nbtOps() {
+		if (vl$nbtOps == null) {
+			vl$nbtOps = VLLevel.super.nbtOps();
+		}
+
+		return vl$nbtOps;
+	}
+
+	@Override
+	public RegistryOps<JsonElement> jsonOps() {
+		if (vl$jsonOps == null) {
+			vl$jsonOps = VLLevel.super.jsonOps();
+		}
+
+		return vl$jsonOps;
 	}
 }

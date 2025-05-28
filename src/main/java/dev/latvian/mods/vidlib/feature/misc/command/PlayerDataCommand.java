@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.misc.command;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import dev.latvian.mods.vidlib.feature.data.DataType;
+import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.util.Cast;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -20,13 +20,13 @@ public interface PlayerDataCommand {
 		var set = Commands.argument("player", EntityArgument.players());
 		var reset = Commands.argument("player", EntityArgument.players());
 
-		for (var data : DataType.PLAYER.all.values()) {
-			get.then(Commands.literal(data.id())
+		for (var key : DataKey.PLAYER.all.values()) {
+			get.then(Commands.literal(key.id())
 				.executes(ctx -> {
 					for (var player : EntityArgument.getPlayers(ctx, "player")) {
 						ctx.getSource().sendSuccess(() -> {
-							var value = player.get(data);
-							var nbt = data.type().codec().encodeStart(nbtOps, Cast.to(value)).getOrThrow();
+							var value = player.get(key);
+							var nbt = key.type().type().codec().encodeStart(nbtOps, Cast.to(value)).getOrThrow();
 							return Component.literal(player.getScoreboardName() + ": ").append(NbtUtils.toPrettyComponent(nbt));
 						}, false);
 					}
@@ -35,13 +35,13 @@ public interface PlayerDataCommand {
 				})
 			);
 
-			set.then(Commands.literal(data.id())
-				.then(Commands.argument("value", data.type().argument(buildContext))
+			set.then(Commands.literal(key.id())
+				.then(Commands.argument("value", key.type().argument(buildContext))
 					.executes(ctx -> {
-						var value = data.type().get(ctx, "value");
+						var value = key.type().get(ctx, "value");
 
 						for (var player : EntityArgument.getPlayers(ctx, "player")) {
-							player.set(data, Cast.to(value));
+							player.set(key, Cast.to(value));
 						}
 
 						return 1;
@@ -49,10 +49,10 @@ public interface PlayerDataCommand {
 				)
 			);
 
-			reset.then(Commands.literal(data.id())
+			reset.then(Commands.literal(key.id())
 				.executes(ctx -> {
 					for (var player : EntityArgument.getPlayers(ctx, "player")) {
-						player.set(data, Cast.to(data.defaultValue()));
+						player.set(key, Cast.to(key.defaultValue()));
 					}
 
 					return 1;

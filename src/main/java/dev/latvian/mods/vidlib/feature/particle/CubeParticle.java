@@ -36,11 +36,11 @@ public class CubeParticle extends CustomParticle {
 		float maxZ = (float) (rz + size - cameraPos.z);
 
 		if (options.lineColor().alpha() > 0) {
-			BoxRenderer.lines(ms, minX, minY, minZ, maxX, maxY, maxZ, buffers, BufferSupplier.DEBUG, options.lineColor().fadeOut(time, lifetime, 20F));
+			BoxRenderer.lines(ms, minX, minY, minZ, maxX, maxY, maxZ, buffers, BufferSupplier.DEBUG_NO_DEPTH, options.lineColor().fadeOut(time, lifetime, 20F));
 		}
 
 		if (options.color().alpha() > 0) {
-			BoxRenderer.quads(ms, minX, minY, minZ, maxX, maxY, maxZ, buffers, BufferSupplier.DEBUG, false, options.color().withAlpha(50).fadeOut(time, lifetime, 20F));
+			BoxRenderer.quads(ms, minX, minY, minZ, maxX, maxY, maxZ, buffers, BufferSupplier.DEBUG_NO_DEPTH, false, options.color().withAlpha(50).fadeOut(time, lifetime, 20F));
 		}
 	}
 }

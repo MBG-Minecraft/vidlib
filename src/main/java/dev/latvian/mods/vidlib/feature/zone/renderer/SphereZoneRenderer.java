@@ -21,14 +21,14 @@ public class SphereZoneRenderer implements ZoneRenderer<SphereZoneShape> {
 		float maxX = ctx.frame().x(box.maxX);
 		float maxY = ctx.frame().y(box.maxY);
 		float maxZ = ctx.frame().z(box.maxZ);
-		BoxRenderer.lines(ms, minX, minY, minZ, maxX, maxY, maxZ, ctx.buffers(), BufferSupplier.DEBUG, Color.WHITE);
+		BoxRenderer.lines(ms, minX, minY, minZ, maxX, maxY, maxZ, ctx.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Color.WHITE);
 
 		ms.pushPose();
 		ctx.frame().translate(shape.pos());
 		float scale = (float) (shape.radius() * 2D);
 		ms.scale(scale, scale, scale);
-		SphereRenderer.lines(ms, SpherePoints.M, ctx.buffers(), BufferSupplier.DEBUG, ctx.outlineColor());
-		SphereRenderer.quads(ms, SpherePoints.M, ctx.buffers(), BufferSupplier.DEBUG, false, ctx.color());
+		SphereRenderer.lines(ms, SpherePoints.M, ctx.buffers(), BufferSupplier.DEBUG_NO_DEPTH, ctx.outlineColor());
+		SphereRenderer.quads(ms, SpherePoints.M, ctx.buffers(), BufferSupplier.DEBUG_NO_DEPTH, false, ctx.color());
 		ms.popPose();
 	}
 }

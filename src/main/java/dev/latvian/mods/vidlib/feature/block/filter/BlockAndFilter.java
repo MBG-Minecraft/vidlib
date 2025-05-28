@@ -13,7 +13,7 @@ import java.util.List;
 public record BlockAndFilter(List<BlockFilter> filters) implements BlockFilter {
 	public static SimpleRegistryType<BlockAndFilter> TYPE = SimpleRegistryType.dynamic("and", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		BlockFilter.CODEC.listOf().fieldOf("filters").forGetter(BlockAndFilter::filters)
-	).apply(instance, BlockAndFilter::new)), BlockFilter.STREAM_CODEC.list().map(BlockAndFilter::new, BlockAndFilter::filters));
+	).apply(instance, BlockAndFilter::new)), BlockFilter.STREAM_CODEC.listOf().map(BlockAndFilter::new, BlockAndFilter::filters));
 
 	@Override
 	public SimpleRegistryType<?> type() {

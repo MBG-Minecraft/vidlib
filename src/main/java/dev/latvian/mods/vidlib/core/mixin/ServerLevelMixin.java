@@ -67,7 +67,7 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 	@Override
 	public ServerPropList getProps() {
 		if (vl$props == null) {
-			vl$props = new ServerPropList(this.vl$level());
+			vl$props = new ServerPropList(vl$level());
 		}
 
 		return vl$props;

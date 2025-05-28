@@ -5,14 +5,14 @@ import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 public class TrackedDataMapValue {
-	public final DataType<?> type;
+	public final DataKey<?> key;
 	public Object data = null;
 	public int save = -1;
 	public int sync = -1;
 	public int changeCount = 0;
 
-	public TrackedDataMapValue(DataType<?> type) {
-		this.type = type;
+	public TrackedDataMapValue(DataKey<?> key) {
+		this.key = key;
 	}
 
 	public void setChanged() {
@@ -26,8 +26,8 @@ public class TrackedDataMapValue {
 	public void update(@Nullable Player player, Object update) {
 		data = update;
 
-		if (player != null && type.onReceived() != null) {
-			type.onReceived().accept(player, Cast.to(data));
+		if (player != null && key.onReceived() != null) {
+			key.onReceived().accept(player, Cast.to(data));
 		}
 	}
 }

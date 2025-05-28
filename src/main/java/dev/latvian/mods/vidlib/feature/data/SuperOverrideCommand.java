@@ -18,7 +18,7 @@ public interface SuperOverrideCommand {
 			var set = Commands.literal("set");
 			var reset = Commands.literal("reset");
 
-			for (var data : DataType.SERVER.all.values()) {
+			for (var data : DataKey.SERVER.all.values()) {
 				set.then(Commands.literal(data.id())
 					.then(Commands.argument("value", data.type().argument(buildContext))
 						.executes(ctx -> {
@@ -63,7 +63,7 @@ public interface SuperOverrideCommand {
 			var set = Commands.argument("player", EntityArgument.players());
 			var reset = Commands.argument("player", EntityArgument.players());
 
-			for (var data : DataType.PLAYER.all.values()) {
+			for (var data : DataKey.PLAYER.all.values()) {
 				set.then(Commands.literal(data.id())
 					.then(Commands.argument("value", data.type().argument(buildContext))
 						.executes(ctx -> {

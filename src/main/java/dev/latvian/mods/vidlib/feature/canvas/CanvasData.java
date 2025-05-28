@@ -37,7 +37,7 @@ public record CanvasData(
 		Codec.INT.optionalFieldOf("priority", 0).forGetter(CanvasData::priority),
 		Codec.BOOL.optionalFieldOf("auto_draw", true).forGetter(CanvasData::autoDraw),
 		Codec.BOOL.optionalFieldOf("auto_clear", true).forGetter(CanvasData::autoClear),
-		VLCodecs.set(ResourceLocation.CODEC).optionalFieldOf("import", Set.of()).forGetter(CanvasData::importTargets),
+		VLCodecs.setOf(ResourceLocation.CODEC).optionalFieldOf("import", Set.of()).forGetter(CanvasData::importTargets),
 		Codec.BOOL.optionalFieldOf("depth", true).forGetter(CanvasData::depth),
 		Codec.BOOL.optionalFieldOf("stencil", false).forGetter(CanvasData::stencil),
 		Codec.FLOAT.optionalFieldOf("scale", 1F).forGetter(CanvasData::scale),

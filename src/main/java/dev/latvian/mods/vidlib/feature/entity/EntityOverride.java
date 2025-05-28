@@ -8,9 +8,9 @@ import dev.latvian.mods.vidlib.core.VLEntity;
 import dev.latvian.mods.vidlib.core.VLPlayer;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
-import dev.latvian.mods.vidlib.feature.data.DataType;
+import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
@@ -36,7 +36,7 @@ public final class EntityOverride<T> {
 	private static final Map<String, EntityOverride<?>> MAP = new HashMap<>();
 
 	public static final Codec<EntityOverride<?>> CODEC = VLCodecs.map(() -> MAP, Codec.STRING, EntityOverride::id);
-	public static final Codec<Map<EntityOverride<?>, Object>> OVERRIDE_MAP_CODEC = Codec.dispatchedMap(CODEC, o -> o.type.codec());
+	public static final Codec<Map<EntityOverride<?>, Object>> OVERRIDE_MAP_CODEC = Codec.dispatchedMap(CODEC, o -> o.type.type().codec());
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, Map<EntityOverride<?>, Object>> OVERRIDE_MAP_STREAM_CODEC = new StreamCodec<>() {
 		@Override
@@ -51,7 +51,7 @@ public final class EntityOverride<T> {
 
 			for (int i = 0; i < count; i++) {
 				var key = MAP.get(buf.readUtf());
-				var value = key.type.streamCodec().decode(buf);
+				var value = key.type.type().streamCodec().decode(buf);
 				map.put(key, value);
 			}
 
@@ -64,42 +64,42 @@ public final class EntityOverride<T> {
 
 			for (var entry : map.entrySet()) {
 				buf.writeUtf(entry.getKey().id());
-				entry.getKey().type.streamCodec().encode(buf, Cast.to(entry.getValue()));
+				entry.getKey().type.type().streamCodec().encode(buf, Cast.to(entry.getValue()));
 			}
 		}
 	};
 
 	@SuppressWarnings("unchecked")
-	public static <T> EntityOverride<T> createKey(String id, KnownCodec<T> type) {
+	public static <T> EntityOverride<T> createKey(String id, RegisteredDataType<T> type) {
 		return (EntityOverride<T>) MAP.computeIfAbsent(id, k -> new EntityOverride<>(k, type));
 	}
 
 	public static EntityOverride<Boolean> createBooleanKey(String id) {
-		return createKey(id, KnownCodec.BOOL);
+		return createKey(id, RegisteredDataType.BOOL);
 	}
 
 	public static EntityOverride<Integer> createIntKey(String id) {
-		return createKey(id, KnownCodec.INT);
+		return createKey(id, RegisteredDataType.INT);
 	}
 
 	public static EntityOverride<Color> createColorKey(String id) {
-		return createKey(id, KnownCodec.COLOR);
+		return createKey(id, RegisteredDataType.COLOR);
 	}
 
 	public static EntityOverride<Integer> createVarIntKey(String id) {
-		return createKey(id, KnownCodec.VAR_INT);
+		return createKey(id, RegisteredDataType.VAR_INT);
 	}
 
 	public static EntityOverride<Float> createFloatKey(String id) {
-		return createKey(id, KnownCodec.FLOAT);
+		return createKey(id, RegisteredDataType.FLOAT);
 	}
 
 	public static EntityOverride<Double> createDoubleKey(String id) {
-		return createKey(id, KnownCodec.DOUBLE);
+		return createKey(id, RegisteredDataType.DOUBLE);
 	}
 
 	public static EntityOverride<ItemStack> createItemKey(String id) {
-		return createKey(id, KnownCodec.OPTIONAL_ITEM);
+		return createKey(id, RegisteredDataType.ITEM_STACK);
 	}
 
 	public static Collection<EntityOverride<?>> getAllKeys() {
@@ -115,29 +115,29 @@ public final class EntityOverride<T> {
 	public static final EntityOverride<Boolean> PASS_THROUGH_BARRIERS = createBooleanKey("pass_through_barriers");
 	public static final EntityOverride<Integer> REGENERATE = createIntKey("regenerate");
 	public static final EntityOverride<Boolean> INVULNERABLE = createBooleanKey("invulnerable");
-	public static final EntityOverride<IconHolder> PLUMBOB = createKey("plumbob", IconHolder.KNOWN_CODEC);
+	public static final EntityOverride<IconHolder> PLUMBOB = createKey("plumbob", IconHolder.REGISTERED_DATA_TYPE);
 	public static final EntityOverride<Float> ATTACK_DAMAGE = createFloatKey("attack_damage");
-	public static final EntityOverride<Clothing> CLOTHING = createKey("clothing", Clothing.KNOWN_CODEC);
-	public static final EntityOverride<ResourceLocation> SKYBOX = createKey("skybox", KnownCodec.ID);
-	public static final EntityOverride<Range> AMBIENT_LIGHT = createKey("ambient_light", KnownCodec.RANGE);
-	public static final EntityOverride<FogOverride> FOG = createKey("fog", FogOverride.KNOWN_CODEC);
+	public static final EntityOverride<Clothing> CLOTHING = createKey("clothing", Clothing.REGISTERED_DATA_TYPE);
+	public static final EntityOverride<ResourceLocation> SKYBOX = createKey("skybox", RegisteredDataType.ID);
+	public static final EntityOverride<Range> AMBIENT_LIGHT = createKey("ambient_light", RegisteredDataType.RANGE);
+	public static final EntityOverride<FogOverride> FOG = createKey("fog", FogOverride.REGISTERED_DATA_TYPE);
 	public static final EntityOverride<Boolean> UNPUSHABLE = createBooleanKey("unpushable");
-	public static final EntityOverride<Component> NICKNAME = createKey("nickname", KnownCodec.TEXT_COMPONENT);
-	public static final EntityOverride<Component> NAME_PREFIX = createKey("name_prefix", KnownCodec.TEXT_COMPONENT);
-	public static final EntityOverride<Component> NAME_SUFFIX = createKey("name_suffix", KnownCodec.TEXT_COMPONENT);
-	public static final EntityOverride<Component> SCORE_TEXT = createKey("score_text", KnownCodec.TEXT_COMPONENT);
+	public static final EntityOverride<Component> NICKNAME = createKey("nickname", RegisteredDataType.TEXT_COMPONENT);
+	public static final EntityOverride<Component> NAME_PREFIX = createKey("name_prefix", RegisteredDataType.TEXT_COMPONENT);
+	public static final EntityOverride<Component> NAME_SUFFIX = createKey("name_suffix", RegisteredDataType.TEXT_COMPONENT);
+	public static final EntityOverride<Component> SCORE_TEXT = createKey("score_text", RegisteredDataType.TEXT_COMPONENT);
 	public static final EntityOverride<Boolean> NAME_HIDDEN = createBooleanKey("name_hidden");
 	public static final EntityOverride<List<ChancedParticle>> ENVIRONMENT_EFFECTS = createKey("environment_effects", ChancedParticle.LIST_KNOWN_CODEC);
 	public static final EntityOverride<Boolean> SCALE_DAMAGE_WITH_DIFFICULTY = createBooleanKey("scale_damage_with_difficulty");
 
 	public final String id;
-	private final KnownCodec<T> type;
+	private final RegisteredDataType<T> type;
 
 	EntityOverrideValue<T> all;
 	Map<EntityType<?>, EntityOverrideValue<T>> types;
 	List<Pair<EntityFilter, EntityOverrideValue<T>>> filtered;
 
-	private EntityOverride(String id, KnownCodec<T> type) {
+	private EntityOverride(String id, RegisteredDataType<T> type) {
 		this.id = id;
 		this.type = type;
 	}
@@ -146,7 +146,7 @@ public final class EntityOverride<T> {
 		return id;
 	}
 
-	public KnownCodec<T> type() {
+	public RegisteredDataType<T> type() {
 		return type;
 	}
 
@@ -219,7 +219,7 @@ public final class EntityOverride<T> {
 		return v == null ? def : v;
 	}
 
-	public T get(VLPlayer player, @Nullable T def, DataType<T> playerDataFallback) {
+	public T get(VLPlayer player, @Nullable T def, DataKey<T> playerDataFallback) {
 		var v = get(player);
 		return v == null || v.equals(def) ? player.get(playerDataFallback) : v;
 	}

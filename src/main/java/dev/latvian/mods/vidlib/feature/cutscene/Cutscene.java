@@ -4,7 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.DataType;
+import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -23,7 +24,7 @@ public class Cutscene {
 	).apply(instance, Cutscene::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, Cutscene> DIRECT_STREAM_CODEC = CompositeStreamCodec.of(
-		CutsceneStep.STREAM_CODEC.list(),
+		CutsceneStep.STREAM_CODEC.listOf(),
 		c -> c.steps,
 		ByteBufCodecs.BOOL,
 		c -> c.allowMovement,
@@ -34,10 +35,11 @@ public class Cutscene {
 		Cutscene::new
 	);
 
-	public static final KnownCodec<Cutscene> DIRECT_KNOWN_CODEC = KnownCodec.register(VidLib.id("direct_cutscene"), DIRECT_CODEC, DIRECT_STREAM_CODEC, Cutscene.class);
+	public static final DataType<Cutscene> DATA_TYPE = DataType.of(DIRECT_CODEC, DIRECT_STREAM_CODEC, Cutscene.class);
+	public static final RegisteredDataType<Cutscene> DIRECT_REGISTERED_DATA_TYPE = RegisteredDataType.register(VidLib.id("direct_cutscene"), DATA_TYPE);
 	public static final VLRegistry<Cutscene> REGISTRY = VLRegistry.createServer("cutscene");
-	public static final KnownCodec<Cutscene> KNOWN_CODEC = KnownCodec.of(REGISTRY, Cutscene.class);
-	public static final StreamCodec<? super RegistryFriendlyByteBuf, Cutscene> STREAM_CODEC = REGISTRY.streamCodecOrDirect(KNOWN_CODEC, DIRECT_STREAM_CODEC);
+	public static final RegisteredDataType<Cutscene> REGISTERED_DATA_TYPE = RegisteredDataType.of(REGISTRY, Cutscene.class);
+	public static final StreamCodec<? super RegistryFriendlyByteBuf, Cutscene> STREAM_CODEC = REGISTRY.streamCodecOrDirect(REGISTERED_DATA_TYPE, DIRECT_STREAM_CODEC);
 
 	public static class Loader extends JsonRegistryReloadListener<Cutscene> {
 		public Loader() {

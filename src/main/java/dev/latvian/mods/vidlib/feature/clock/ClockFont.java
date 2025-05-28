@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.kmath.Size2;
 import dev.latvian.mods.kmath.texture.UV;
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
 import net.minecraft.resources.ResourceLocation;
@@ -56,7 +56,7 @@ public record ClockFont(
 	).apply(instance, ClockFont::create));
 
 	public static final VLRegistry<ClockFont> REGISTRY = VLRegistry.createClient("clock_font");
-	public static final KnownCodec<ClockFont> KNOWN_CODEC = KnownCodec.of(REGISTRY, ClockFont.class);
+	public static final RegisteredDataType<ClockFont> REGISTERED_DATA_TYPE = RegisteredDataType.of(REGISTRY, ClockFont.class);
 
 	public static class Loader extends JsonRegistryReloadListener<ClockFont> {
 		public Loader() {

@@ -18,14 +18,14 @@ public record ScreenClock(
 ) {
 	public static final Codec<ScreenClock> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		EntityFilter.CODEC.optionalFieldOf("visible", EntityFilter.ANY.instance()).forGetter(ScreenClock::visible),
-		ScreenCorner.KNOWN_CODEC.codec().optionalFieldOf("location", ScreenCorner.BOTTOM_LEFT).forGetter(ScreenClock::location),
+		ScreenCorner.REGISTERED_DATA_TYPE.type().codec().optionalFieldOf("location", ScreenCorner.BOTTOM_LEFT).forGetter(ScreenClock::location),
 		Codec.STRING.optionalFieldOf("format", "%02d:%02d").forGetter(ScreenClock::format),
 		Color.CODEC.optionalFieldOf("color", Color.WHITE).forGetter(ScreenClock::color)
 	).apply(instance, ScreenClock::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ScreenClock> STREAM_CODEC = CompositeStreamCodec.of(
 		EntityFilter.STREAM_CODEC.optional(EntityFilter.ANY.instance()), ScreenClock::visible,
-		ScreenCorner.KNOWN_CODEC.streamCodec(), ScreenClock::location,
+		ScreenCorner.REGISTERED_DATA_TYPE.type().streamCodec(), ScreenClock::location,
 		ByteBufCodecs.STRING_UTF8.optional("%02d:%02d"), ScreenClock::format,
 		Color.STREAM_CODEC, ScreenClock::color,
 		ScreenClock::new

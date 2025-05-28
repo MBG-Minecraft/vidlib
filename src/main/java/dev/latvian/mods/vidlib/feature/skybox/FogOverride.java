@@ -7,7 +7,8 @@ import dev.latvian.mods.kmath.Range;
 import dev.latvian.mods.kmath.color.Color;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.DataType;
+import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -33,5 +34,6 @@ public record FogOverride(Range range, int shape, Color color) {
 		FogOverride::new
 	);
 
-	public static final KnownCodec<FogOverride> KNOWN_CODEC = KnownCodec.register(VidLib.id("fog_override"), CODEC, STREAM_CODEC, FogOverride.class);
+	public static final DataType<FogOverride> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, FogOverride.class);
+	public static final RegisteredDataType<FogOverride> REGISTERED_DATA_TYPE = RegisteredDataType.register(VidLib.id("fog_override"), DATA_TYPE);
 }

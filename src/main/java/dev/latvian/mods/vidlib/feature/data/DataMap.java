@@ -24,17 +24,17 @@ import java.util.function.BiFunction;
 
 public class DataMap {
 	public final UUID owner;
-	private final DataTypeStorage storage;
-	private Map<DataType<?>, TrackedDataMapValue> map;
+	private final DataKeyStorage storage;
+	private Map<DataKey<?>, TrackedDataMapValue> map;
 	public DataRecorder.DataMap overrides;
-	public Map<DataType<?>, Object> superOverrides;
+	public Map<DataKey<?>, Object> superOverrides;
 
-	public DataMap(UUID owner, DataTypeStorage storage) {
+	public DataMap(UUID owner, DataKeyStorage storage) {
 		this.owner = owner;
 		this.storage = storage;
 	}
 
-	TrackedDataMapValue init(DataType<?> type) {
+	TrackedDataMapValue init(DataKey<?> type) {
 		if (map == null) {
 			map = new Reference2ObjectOpenHashMap<>();
 		}
@@ -51,11 +51,11 @@ public class DataMap {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T get(DataType<T> type) {
+	public <T> T get(DataKey<T> type) {
 		return (T) init(type).data;
 	}
 
-	public <T> T get(DataType<T> type, long gameTime) {
+	public <T> T get(DataKey<T> type, long gameTime) {
 		if (superOverrides != null) {
 			var v = superOverrides.get(type);
 
@@ -75,7 +75,7 @@ public class DataMap {
 		return get(type);
 	}
 
-	public <T> void set(DataType<T> type, @Nullable T value) {
+	public <T> void set(DataKey<T> type, @Nullable T value) {
 		var v = init(type);
 		v.data = value;
 		v.setChanged();
@@ -93,7 +93,7 @@ public class DataMap {
 					var tag = data.get(type.id());
 
 					if (tag != null) {
-						var playerData = type.type().codec().parse(ops, tag).getOrThrow();
+						var playerData = type.type().type().codec().parse(ops, tag).getOrThrow();
 
 						if (playerData != null) {
 							init(type).data = playerData;
@@ -111,7 +111,7 @@ public class DataMap {
 
 		if (map != null) {
 			for (var v : map.values()) {
-				if (v.save != v.changeCount && v.type.type() != null && v.type.save()) {
+				if (v.save != v.changeCount && v.key.type() != null && v.key.save()) {
 					needsSave = true;
 					break;
 				}
@@ -131,8 +131,8 @@ public class DataMap {
 			var ops = server.registryAccess().createSerializationContext(NbtOps.INSTANCE);
 
 			for (var v : map.values()) {
-				if (v.type.type() != null && v.type.save()) {
-					data.put(v.type.id(), v.type.type().codec().encodeStart(ops, Cast.to(v.data)).getOrThrow());
+				if (v.key.type() != null && v.key.save()) {
+					data.put(v.key.id(), v.key.type().type().codec().encodeStart(ops, Cast.to(v.data)).getOrThrow());
 				}
 			}
 
@@ -150,7 +150,7 @@ public class DataMap {
 
 	public void update(@Nullable Player player, List<DataMapValue> update) {
 		for (var data : update) {
-			init(data.type()).update(player, data.value());
+			init(data.key()).update(player, data.value());
 		}
 	}
 
@@ -159,8 +159,8 @@ public class DataMap {
 
 		if (map != null) {
 			for (var v : map.values()) {
-				if (v.type.type() != null && v.type.sync() && (v.type.syncToAllClients() || selfPlayer != null && owner.equals(selfPlayer.getUUID()))) {
-					list.add(new DataMapValue(v.type, v.data));
+				if (v.key.type() != null && v.key.sync() && (v.key.syncToAllClients() || selfPlayer != null && owner.equals(selfPlayer.getUUID()))) {
+					list.add(new DataMapValue(v.key, v.data));
 				}
 			}
 		}
@@ -178,21 +178,21 @@ public class DataMap {
 		List<DataMapValue> syncSelf = null, syncAll = null;
 
 		for (var v : map.values()) {
-			if (v.sync != v.changeCount && v.type.type() != null && v.type.sync()) {
+			if (v.sync != v.changeCount && v.key.type() != null && v.key.sync()) {
 				v.sync = v.changeCount;
 
-				if (v.type.syncToAllClients()) {
+				if (v.key.syncToAllClients()) {
 					if (syncAll == null) {
 						syncAll = new ArrayList<>();
 					}
 
-					syncAll.add(new DataMapValue(v.type, v.data));
+					syncAll.add(new DataMapValue(v.key, v.data));
 				} else if (selfPlayer != null) {
 					if (syncSelf == null) {
 						syncSelf = new ArrayList<>();
 					}
 
-					syncSelf.add(new DataMapValue(v.type, v.data));
+					syncSelf.add(new DataMapValue(v.key, v.data));
 				}
 			}
 		}

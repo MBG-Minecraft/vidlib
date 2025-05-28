@@ -13,7 +13,7 @@ public record SpawnTextParticlePayload(TextParticleOptions options, List<Vec3> p
 	@AutoPacket
 	public static final VidLibPacketType<SpawnTextParticlePayload> TYPE = VidLibPacketType.internal("spawn_text_particles", CompositeStreamCodec.of(
 		TextParticleOptions.STREAM_CODEC, SpawnTextParticlePayload::options,
-		Vec3.STREAM_CODEC.list(), SpawnTextParticlePayload::positions,
+		Vec3.STREAM_CODEC.listOf(), SpawnTextParticlePayload::positions,
 		SpawnTextParticlePayload::new
 	));
 

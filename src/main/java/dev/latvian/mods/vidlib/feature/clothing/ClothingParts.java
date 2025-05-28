@@ -5,7 +5,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.DataType;
+import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import dev.latvian.mods.vidlib.util.Lazy;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.component.DataComponents;
@@ -43,7 +44,8 @@ public record ClothingParts(boolean head, boolean body, boolean legs, boolean fe
 		}
 	};
 
-	public static final KnownCodec<ClothingParts> KNOWN_CODEC = KnownCodec.register(VidLib.id("clothing_parts"), CODEC, STREAM_CODEC, ClothingParts.class);
+	public static final DataType<ClothingParts> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, ClothingParts.class);
+	public static final RegisteredDataType<ClothingParts> REGISTERED_DATA_TYPE = RegisteredDataType.register(VidLib.id("clothing_parts"), DATA_TYPE);
 
 	public static final Lazy<ItemStack> ENCHANTED_ITEM = Lazy.of(() -> {
 		var stack = new ItemStack(Items.APPLE);
@@ -73,8 +75,7 @@ public record ClothingParts(boolean head, boolean body, boolean legs, boolean fe
 
 	@Override
 	public int hashCode() {
-		return 0
-			| (head ? 1 : 0)
+		return (head ? 1 : 0)
 			| (body ? 2 : 0)
 			| (legs ? 4 : 0)
 			| (feet ? 8 : 0)

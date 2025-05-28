@@ -1,16 +1,16 @@
 package dev.latvian.mods.vidlib.feature.data;
 
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
 
-public record DataType<T>(
-	DataTypeStorage storage,
+public record DataKey<T>(
+	DataKeyStorage storage,
 	String id,
 	T defaultValue,
-	@Nullable KnownCodec<T> type,
+	@Nullable RegisteredDataType<T> type,
 	boolean save,
 	boolean sync,
 	boolean syncToAllClients,
@@ -18,13 +18,13 @@ public record DataType<T>(
 	boolean allowClientUpdates,
 	boolean skipLogging
 ) {
-	public static final DataTypeStorage SERVER = new DataTypeStorage("server", true);
-	public static final DataTypeStorage PLAYER = new DataTypeStorage("player", false);
+	public static final DataKeyStorage SERVER = new DataKeyStorage("server", true);
+	public static final DataKeyStorage PLAYER = new DataKeyStorage("player", false);
 
 	public static class Builder<T> {
-		private final DataTypeStorage storage;
+		private final DataKeyStorage storage;
 		private final String id;
-		private final KnownCodec<T> type;
+		private final RegisteredDataType<T> type;
 		private final T defaultValue;
 		private boolean save;
 		private boolean sync;
@@ -33,7 +33,7 @@ public record DataType<T>(
 		private boolean allowClientUpdates;
 		private boolean skipLogging;
 
-		Builder(DataTypeStorage storage, String id, @Nullable KnownCodec<T> type, T defaultValue) {
+		Builder(DataKeyStorage storage, String id, @Nullable RegisteredDataType<T> type, T defaultValue) {
 			this.storage = storage;
 			this.id = id;
 			this.type = type;
@@ -76,8 +76,8 @@ public record DataType<T>(
 			return this;
 		}
 
-		public DataType<T> buildDummy() {
-			return new DataType<>(
+		public DataKey<T> buildDummy() {
+			return new DataKey<>(
 				storage,
 				id,
 				defaultValue,
@@ -91,7 +91,7 @@ public record DataType<T>(
 			);
 		}
 
-		public DataType<T> build() {
+		public DataKey<T> build() {
 			var dataType = buildDummy();
 
 			if (type != null) {

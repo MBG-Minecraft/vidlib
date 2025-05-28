@@ -3,8 +3,8 @@ package dev.latvian.mods.vidlib.core.mixin;
 import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.vidlib.core.VLMinecraftServer;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
+import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
-import dev.latvian.mods.vidlib.feature.data.DataType;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
@@ -70,7 +70,7 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	@Override
 	public DataMap getServerData() {
 		if (vl$serverDataMap == null) {
-			vl$serverDataMap = new DataMap(Util.NIL_UUID, DataType.SERVER);
+			vl$serverDataMap = new DataMap(Util.NIL_UUID, DataKey.SERVER);
 			vl$serverDataMap.load(vl$self(), vl$self().getWorldPath(LevelResource.ROOT).resolve("vidlib.nbt"));
 		}
 

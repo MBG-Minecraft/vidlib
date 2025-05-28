@@ -9,7 +9,7 @@ import java.util.List;
 public record EntityAndFilter(List<EntityFilter> filters) implements EntityFilter {
 	public static SimpleRegistryType<EntityAndFilter> TYPE = SimpleRegistryType.dynamic("and", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		EntityFilter.CODEC.listOf().fieldOf("filters").forGetter(EntityAndFilter::filters)
-	).apply(instance, EntityAndFilter::new)), EntityFilter.STREAM_CODEC.list().map(EntityAndFilter::new, EntityAndFilter::filters));
+	).apply(instance, EntityAndFilter::new)), EntityFilter.STREAM_CODEC.listOf().map(EntityAndFilter::new, EntityAndFilter::filters));
 
 	@Override
 	public SimpleRegistryType<?> type() {

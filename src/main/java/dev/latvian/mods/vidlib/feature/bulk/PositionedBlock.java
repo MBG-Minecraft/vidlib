@@ -5,7 +5,8 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.DataType;
+import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
 import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
@@ -33,12 +34,13 @@ public record PositionedBlock(BlockPos pos, BlockState state) implements BulkLev
 		PositionedBlock::new
 	);
 
-	public static final StreamCodec<RegistryFriendlyByteBuf, List<PositionedBlock>> LIST_STREAM_CODEC = STREAM_CODEC.list();
+	public static final StreamCodec<RegistryFriendlyByteBuf, List<PositionedBlock>> LIST_STREAM_CODEC = STREAM_CODEC.listOf();
 
 	public static final SimpleRegistryType<PositionedBlock> TYPE = SimpleRegistryType.dynamic("block", MAP_CODEC, STREAM_CODEC);
 
-	public static final KnownCodec<PositionedBlock> KNOWN_CODEC = KnownCodec.register(VidLib.id("positioned_block"), CODEC, STREAM_CODEC, PositionedBlock.class);
-	public static final KnownCodec<List<PositionedBlock>> LIST_KNOWN_CODEC = KNOWN_CODEC.listOf();
+	public static final DataType<PositionedBlock> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, PositionedBlock.class);
+	public static final RegisteredDataType<PositionedBlock> REGISTERED_DATA_TYPE = RegisteredDataType.register(VidLib.id("positioned_block"), DATA_TYPE);
+	public static final RegisteredDataType<List<PositionedBlock>> LIST_REGISTERED_DATA_TYPE = REGISTERED_DATA_TYPE.listOf();
 
 	@Override
 	public SimpleRegistryType<?> type() {

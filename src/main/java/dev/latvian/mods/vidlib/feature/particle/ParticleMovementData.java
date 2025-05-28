@@ -6,7 +6,7 @@ import dev.latvian.mods.kmath.MovementType;
 import dev.latvian.mods.kmath.Rotation;
 import dev.latvian.mods.kmath.Vec3f;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.DataType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -22,7 +22,7 @@ public record ParticleMovementData(
 	Rotation rotation
 ) {
 	public static final Codec<ParticleMovementData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		KnownCodec.MOVEMENT_TYPE.codec().optionalFieldOf("type", MovementType.CIRCULAR).forGetter(ParticleMovementData::type),
+		DataType.MOVEMENT_TYPE.codec().optionalFieldOf("type", MovementType.CIRCULAR).forGetter(ParticleMovementData::type),
 		Vec3.CODEC.fieldOf("position").forGetter(ParticleMovementData::position),
 		Codec.INT.optionalFieldOf("count", 1).forGetter(ParticleMovementData::count),
 		Codec.FLOAT.optionalFieldOf("radius", 20F).forGetter(ParticleMovementData::radius),
@@ -31,7 +31,7 @@ public record ParticleMovementData(
 	).apply(instance, ParticleMovementData::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ParticleMovementData> STREAM_CODEC = CompositeStreamCodec.of(
-		KnownCodec.MOVEMENT_TYPE.streamCodec().optional(MovementType.CIRCULAR), ParticleMovementData::type,
+		DataType.MOVEMENT_TYPE.streamCodec().optional(MovementType.CIRCULAR), ParticleMovementData::type,
 		Vec3.STREAM_CODEC, ParticleMovementData::position,
 		ByteBufCodecs.VAR_INT, ParticleMovementData::count,
 		ByteBufCodecs.FLOAT, ParticleMovementData::radius,

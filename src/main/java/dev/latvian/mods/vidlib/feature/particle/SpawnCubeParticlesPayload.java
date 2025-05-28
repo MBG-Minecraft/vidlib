@@ -11,7 +11,7 @@ import java.util.Map;
 
 public record SpawnCubeParticlesPayload(Map<CubeParticleOptions, List<BlockPos>> map) implements SimplePacketPayload {
 	@AutoPacket
-	public static final VidLibPacketType<SpawnCubeParticlesPayload> TYPE = VidLibPacketType.internal("spawn_cube_particles", CubeParticleOptions.STREAM_CODEC.unboundedMap(BlockPos.STREAM_CODEC.list()).map(SpawnCubeParticlesPayload::new, SpawnCubeParticlesPayload::map));
+	public static final VidLibPacketType<SpawnCubeParticlesPayload> TYPE = VidLibPacketType.internal("spawn_cube_particles", CubeParticleOptions.STREAM_CODEC.unboundedMap(BlockPos.STREAM_CODEC.listOf()).map(SpawnCubeParticlesPayload::new, SpawnCubeParticlesPayload::map));
 
 	@Override
 	public VidLibPacketType<?> getType() {

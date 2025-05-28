@@ -14,9 +14,9 @@ import dev.latvian.mods.vidlib.feature.camera.FreeCamera;
 import dev.latvian.mods.vidlib.feature.cutscene.ClientCutscene;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneScreen;
+import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
-import dev.latvian.mods.vidlib.feature.data.DataType;
 import dev.latvian.mods.vidlib.feature.data.UpdatePlayerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.fade.Fade;
 import dev.latvian.mods.vidlib.feature.fade.ScreenFadeInstance;
@@ -159,7 +159,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		c2s(new UpdatePlayerDataValuePayload(update));
 	}
 
-	default <T> void updatePlayerData(DataType<T> type, T value) {
+	default <T> void updatePlayerData(DataKey<T> type, T value) {
 		updatePlayerData(List.of(new DataMapValue(type, value)));
 	}
 

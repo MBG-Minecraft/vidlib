@@ -4,7 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.DataType;
+import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -25,6 +26,7 @@ public record ChancedParticle(ParticleOptions particle, float chance) {
 		ChancedParticle::new
 	);
 
-	public static final KnownCodec<ChancedParticle> KNOWN_CODEC = KnownCodec.register(VidLib.id("chanced_particle"), CODEC, STREAM_CODEC, ChancedParticle.class);
-	public static final KnownCodec<List<ChancedParticle>> LIST_KNOWN_CODEC = KNOWN_CODEC.listOf();
+	public static final DataType<ChancedParticle> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, ChancedParticle.class);
+	public static final RegisteredDataType<ChancedParticle> KNOWN_CODEC = RegisteredDataType.register(VidLib.id("chanced_particle"), DATA_TYPE);
+	public static final RegisteredDataType<List<ChancedParticle>> LIST_KNOWN_CODEC = KNOWN_CODEC.listOf();
 }

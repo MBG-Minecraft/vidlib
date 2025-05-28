@@ -5,7 +5,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.kmath.AAIBB;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.KnownCodec;
+import dev.latvian.mods.vidlib.feature.codec.DataType;
+import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -41,10 +42,11 @@ public record Anchor(List<Area> areas, Map<ResourceKey<Level>, List<AAIBB>> shap
 	).apply(instance, list -> list.isEmpty() ? NONE : create(list)));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, Anchor> STREAM_CODEC = CompositeStreamCodec.of(
-		Area.STREAM_CODEC.list(), Anchor::areas,
+		Area.STREAM_CODEC.listOf(), Anchor::areas,
 		list -> list.isEmpty() ? NONE : create(list)
 	);
 
-	public static final KnownCodec<Anchor> KNOWN_CODEC = KnownCodec.register(VidLib.id("anchor"), CODEC, STREAM_CODEC, Anchor.class);
+	public static final DataType<Anchor> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, Anchor.class);
+	public static final RegisteredDataType<Anchor> REGISTERED_DATA_TYPE = RegisteredDataType.register(VidLib.id("anchor"), DATA_TYPE);
 	public static final TicketController TICKET_CONTROLLER = new TicketController(VidLib.id("anchor"));
 }

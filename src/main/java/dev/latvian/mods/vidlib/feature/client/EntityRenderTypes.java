@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.client;
 
+import dev.latvian.mods.kmath.render.BufferSupplier;
 import dev.latvian.mods.vidlib.util.Empty;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderStateShard;
@@ -38,6 +39,8 @@ public interface EntityRenderTypes {
 			.createCompositeState(true)
 	);
 
+	BufferSupplier WHITE_CUTOUT_BUFFER_SUPPLIER = BufferSupplier.fixed(CUTOUT.apply(Empty.TEXTURE), CUTOUT_NO_CULL.apply(Empty.TEXTURE));
+
 	TexturedRenderType TRANSLUCENT = TexturedRenderType.internal(
 		"entity/translucent",
 		1536,
@@ -63,6 +66,8 @@ public interface EntityRenderTypes {
 			.setOverlayState(RenderStateShard.OVERLAY)
 			.createCompositeState(true)
 	);
+
+	BufferSupplier WHITE_TRANSLUCENT_BUFFER_SUPPLIER = BufferSupplier.fixed(TRANSLUCENT.apply(Empty.TEXTURE), TRANSLUCENT_NO_CULL.apply(Empty.TEXTURE));
 
 	static RenderType textureCull(ResourceLocation texture, boolean translucent) {
 		return translucent ? TRANSLUCENT.apply(texture) : CUTOUT.apply(texture);

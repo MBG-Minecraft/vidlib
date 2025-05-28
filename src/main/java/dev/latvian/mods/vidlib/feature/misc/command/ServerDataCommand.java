@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.misc.command;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import dev.latvian.mods.vidlib.feature.data.DataType;
+import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.util.Cast;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.NbtOps;
@@ -19,31 +19,31 @@ public interface ServerDataCommand {
 		var set = Commands.literal("set");
 		var reset = Commands.literal("reset");
 
-		for (var data : DataType.SERVER.all.values()) {
-			get.then(Commands.literal(data.id())
+		for (var key : DataKey.SERVER.all.values()) {
+			get.then(Commands.literal(key.id())
 				.executes(ctx -> {
 					ctx.getSource().sendSuccess(() -> {
-						var value = ctx.getSource().getServer().getServerData().get(data);
-						var nbt = data.type().codec().encodeStart(nbtOps, Cast.to(value)).getOrThrow();
+						var value = ctx.getSource().getServer().getServerData().get(key);
+						var nbt = key.type().type().codec().encodeStart(nbtOps, Cast.to(value)).getOrThrow();
 						return Component.literal("Server: ").append(NbtUtils.toPrettyComponent(nbt));
 					}, false);
 					return 1;
 				})
 			);
 
-			set.then(Commands.literal(data.id())
-				.then(Commands.argument("value", data.type().argument(buildContext))
+			set.then(Commands.literal(key.id())
+				.then(Commands.argument("value", key.type().argument(buildContext))
 					.executes(ctx -> {
-						var value = data.type().get(ctx, "value");
-						ctx.getSource().getServer().getServerData().set(data, Cast.to(value));
+						var value = key.type().get(ctx, "value");
+						ctx.getSource().getServer().getServerData().set(key, Cast.to(value));
 						return 1;
 					})
 				)
 			);
 
-			reset.then(Commands.literal(data.id())
+			reset.then(Commands.literal(key.id())
 				.executes(ctx -> {
-					ctx.getSource().getServer().getServerData().set(data, Cast.to(data.defaultValue()));
+					ctx.getSource().getServer().getServerData().set(key, Cast.to(key.defaultValue()));
 					return 1;
 				})
 			);

@@ -15,7 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.server.command.EnumArgument;
 
-public interface WindCommand {
+public interface WindCommands {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("wind", (command, buildContext) -> command
 		.requires(source -> source.hasPermission(2))
