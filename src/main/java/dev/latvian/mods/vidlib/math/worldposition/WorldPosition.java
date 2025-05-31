@@ -27,7 +27,9 @@ public interface WorldPosition {
 	@AutoInit
 	static void bootstrap() {
 		REGISTRY.register(FixedWorldPosition.ZERO);
+		REGISTRY.register(FixedWorldPosition.ONE);
 		REGISTRY.register(FixedWorldPosition.TYPE);
+		REGISTRY.register(DynamicWorldPosition.TYPE);
 		REGISTRY.register(OffsetWorldPosition.TYPE);
 		REGISTRY.register(ScaledWorldPosition.TYPE);
 		REGISTRY.register(InterpolatedWorldPosition.TYPE);

@@ -14,8 +14,12 @@ import java.util.List;
 public record ToolVisuals(List<CubeVisual> cubes, List<LineVisual> lines, List<ResolvedTexturedCube> texturedCubes) {
 	public static final ToolVisuals NONE = new ToolVisuals(List.of(), List.of(), List.of());
 
+	public static ToolVisuals cube(CubeVisual cube) {
+		return new ToolVisuals(List.of(cube), List.of(), List.of());
+	}
+
 	public static ToolVisuals cube(Vec3 pos) {
-		return new ToolVisuals(List.of(new CubeVisual(pos)), List.of(), List.of());
+		return cube(new CubeVisual(pos));
 	}
 
 	public static ToolVisuals texturedCube(ResolvedTexturedCube cube) {
@@ -24,7 +28,7 @@ public record ToolVisuals(List<CubeVisual> cubes, List<LineVisual> lines, List<R
 
 	public record CubeVisual(Vec3 pos, VoxelShapeBox shape, Color color, Color lineColor, Rotation rotation) {
 		public CubeVisual(Vec3 pos) {
-			this(pos, VoxelShapeBox.FULL_CENTERED, Color.CYAN, Color.WHITE, Rotation.NONE);
+			this(pos, VoxelShapeBox.CENTERED, Color.CYAN, Color.WHITE, Rotation.NONE);
 		}
 	}
 

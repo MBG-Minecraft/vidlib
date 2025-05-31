@@ -45,7 +45,7 @@ public class BurnSmokeParticle extends TextureSheetParticle {
 		this.rCol = this.gCol = this.bCol = KMath.lerp(random2, 0.13F, 0.23F);
 
 		if (random.nextFloat() < 0.04F) {
-			var col = ClientGradients.FIRE_1.get().sample(random);
+			var col = ClientGradients.FIRE_1.sample(random);
 			setColor(col.redf(), col.greenf(), col.bluef());
 		}
 	}

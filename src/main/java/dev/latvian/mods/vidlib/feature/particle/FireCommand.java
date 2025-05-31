@@ -2,9 +2,9 @@ package dev.latvian.mods.vidlib.feature.particle;
 
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.datafixers.util.Either;
 import dev.latvian.mods.kmath.MovementType;
 import dev.latvian.mods.kmath.Rotation;
+import dev.latvian.mods.kmath.color.GradientReference;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.gradient.GradientCommand;
@@ -49,7 +49,7 @@ public interface FireCommand {
 	);
 
 	static int spawn(CommandSourceStack source, MovementType type, BlockPos position, int count, float radius, float yaw, float pitch, ResourceLocation gradient) {
-		source.getLevel().fireParticles(source.getLevel().random, new FireData(new FireParticleOptions(Either.left(gradient), 60, 1F), new ParticleMovementData(type, Vec3.atCenterOf(position), count, radius, 0F, Rotation.deg(yaw, pitch))));
+		source.getLevel().fireParticles(source.getLevel().random, new FireData(new FireParticleOptions(new GradientReference(gradient), 60, 1F), new ParticleMovementData(type, Vec3.atCenterOf(position), count, radius, 0F, Rotation.deg(yaw, pitch))));
 		return 1;
 	}
 }

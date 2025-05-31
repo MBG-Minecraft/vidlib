@@ -13,6 +13,8 @@ import dev.latvian.mods.vidlib.feature.cutscene.PlayCutscenePayload;
 import dev.latvian.mods.vidlib.feature.cutscene.StopCutscenePayload;
 import dev.latvian.mods.vidlib.feature.fade.Fade;
 import dev.latvian.mods.vidlib.feature.fade.ScreenFadePayload;
+import dev.latvian.mods.vidlib.feature.highlight.TerrainHighlight;
+import dev.latvian.mods.vidlib.feature.highlight.TerrainHighlightPayload;
 import dev.latvian.mods.vidlib.feature.misc.CloseScreenPayload;
 import dev.latvian.mods.vidlib.feature.misc.MarkerData;
 import dev.latvian.mods.vidlib.feature.misc.MarkerPayload;
@@ -312,6 +314,14 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 			getEnvironment().marker(data);
 		} else {
 			s2c(new MarkerPayload(data));
+		}
+	}
+
+	default void addTerrainHighlight(TerrainHighlight highlight) {
+		if (isClient()) {
+			getEnvironment().addTerrainHighlight(highlight);
+		} else {
+			s2c(new TerrainHighlightPayload(highlight));
 		}
 	}
 }

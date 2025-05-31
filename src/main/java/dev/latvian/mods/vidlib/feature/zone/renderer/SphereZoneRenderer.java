@@ -26,9 +26,8 @@ public class SphereZoneRenderer implements ZoneRenderer<SphereZoneShape> {
 		ms.pushPose();
 		ctx.frame().translate(shape.pos());
 		float scale = (float) (shape.radius() * 2D);
-		ms.scale(scale, scale, scale);
-		SphereRenderer.lines(ms, SpherePoints.M, ctx.buffers(), BufferSupplier.DEBUG_NO_DEPTH, ctx.outlineColor());
-		SphereRenderer.quads(ms, SpherePoints.M, ctx.buffers(), BufferSupplier.DEBUG_NO_DEPTH, false, ctx.color());
+		SphereRenderer.lines(ms, 0F, 0F, 0F, scale, SpherePoints.M, ctx.buffers(), BufferSupplier.DEBUG_NO_DEPTH, ctx.outlineColor());
+		SphereRenderer.quads(ms, 0F, 0F, 0F, scale, SpherePoints.M, ctx.buffers(), BufferSupplier.DEBUG_NO_DEPTH, false, ctx.color());
 		ms.popPose();
 	}
 }

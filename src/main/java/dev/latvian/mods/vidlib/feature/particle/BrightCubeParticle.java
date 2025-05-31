@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.kmath.KMath;
+import dev.latvian.mods.kmath.color.Gradient;
 import dev.latvian.mods.kmath.render.BoxRenderer;
 import dev.latvian.mods.kmath.render.BufferSupplier;
 import dev.latvian.mods.vidlib.feature.bloom.BloomRenderTypes;
@@ -11,10 +12,14 @@ import net.minecraft.client.renderer.MultiBufferSource;
 
 public class BrightCubeParticle extends CustomParticle {
 	private final BrightCubeParticleOptions options;
+	private final Gradient color;
+	private final Gradient lineColor;
 
 	protected BrightCubeParticle(BrightCubeParticleOptions options, ClientLevel level, double x, double y, double z, double vx, double vy, double vz) {
 		super(level, x, y, z);
 		this.options = options;
+		this.color = options.color().resolve();
+		this.lineColor = options.lineColor().resolve();
 		setLifetime(Math.abs(options.ttl()));
 	}
 
@@ -28,12 +33,16 @@ public class BrightCubeParticle extends CustomParticle {
 
 		float s = options.ttl() > 0 ? 0.505F : 0.2505F;
 
-		if (options.lineColor().alpha() > 0) {
-			BoxRenderer.quads(ms, rx - s, ry, rz - s, rx + s, ry + s * 2F, rz + s, BloomRenderTypes.overridePosCol(buffers), BloomRenderTypes.POS_COL_BUFFER_SUPPLIER, true, options.lineColor());
+		var lc = lineColor.get(time / (float) lifetime);
+
+		if (lc.alpha() > 0) {
+			BoxRenderer.quads(ms, rx - s, ry, rz - s, rx + s, ry + s * 2F, rz + s, BloomRenderTypes.overridePosCol(buffers), BloomRenderTypes.POS_COL_BUFFER_SUPPLIER, true, lc);
 		}
 
-		if (options.color().alpha() > 0) {
-			BoxRenderer.quads(ms, rx - s, ry, rz - s, rx + s, ry + s * 2F, rz + s, buffers, BufferSupplier.DEBUG, true, options.color());
+		var c = color.get(time / (float) lifetime);
+
+		if (c.alpha() > 0) {
+			BoxRenderer.quads(ms, rx - s, ry, rz - s, rx + s, ry + s * 2F, rz + s, buffers, BufferSupplier.DEBUG, true, c);
 		}
 	}
 }

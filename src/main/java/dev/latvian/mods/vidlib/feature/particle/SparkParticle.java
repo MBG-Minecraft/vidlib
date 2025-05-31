@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
 import dev.latvian.mods.kmath.KMath;
+import dev.latvian.mods.kmath.color.Gradient;
 import dev.latvian.mods.vidlib.feature.gradient.ClientGradients;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleProvider;
@@ -16,12 +17,14 @@ public class SparkParticle extends TextureSheetParticle {
 	}
 
 	private final SpriteSet spriteSet;
+	private final Gradient gradient;
 	private final float randomOffset;
 	private float oQuadSize;
 
 	public SparkParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet spriteSet) {
 		super(level, x, y, z);
 		this.spriteSet = spriteSet;
+		this.gradient = ClientGradients.SPARK.resolve();
 		this.pickSprite(spriteSet);
 		this.xd = xd;
 		this.yd = yd;
@@ -45,7 +48,7 @@ public class SparkParticle extends TextureSheetParticle {
 		oRoll = roll;
 		super.tick();
 		setSpriteFromAge(spriteSet);
-		var col = ClientGradients.SPARK.get().get(age / (float) lifetime + KMath.lerp(randomOffset, -0.3F, 0.3F));
+		var col = gradient.get(age / (float) lifetime + KMath.lerp(randomOffset, -0.3F, 0.3F));
 		setColor(col.redf(), col.greenf(), col.bluef());
 		alpha = 1F - (age / (float) lifetime);
 		quadSize = alpha * 0.2F;

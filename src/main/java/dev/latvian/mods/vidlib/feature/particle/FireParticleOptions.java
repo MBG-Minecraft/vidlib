@@ -1,27 +1,20 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.kmath.color.Color;
 import dev.latvian.mods.kmath.color.Gradient;
 import dev.latvian.mods.kmath.easing.Easing;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.gradient.ClientGradients;
-import dev.latvian.mods.vidlib.feature.registry.ID;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
 
-import java.util.function.Function;
-
-public record FireParticleOptions(Either<ResourceLocation, Gradient> gradient, int lifespan, float scale, Easing easing, float brightness) implements ParticleOptions {
+public record FireParticleOptions(Gradient color, int lifespan, float scale, Easing easing, float brightness) implements ParticleOptions {
 	public static final MapCodec<FireParticleOptions> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-		Codec.either(ID.CODEC, ClientGradients.CODEC).fieldOf("gradient").forGetter(FireParticleOptions::gradient),
+		Gradient.CODEC.fieldOf("color").forGetter(FireParticleOptions::color),
 		Codec.INT.optionalFieldOf("lifespan", 60).forGetter(FireParticleOptions::lifespan),
 		Codec.FLOAT.optionalFieldOf("scale", 1F).forGetter(FireParticleOptions::scale),
 		Easing.CODEC.optionalFieldOf("easing", Easing.SINE_OUT).forGetter(FireParticleOptions::easing),
@@ -29,7 +22,7 @@ public record FireParticleOptions(Either<ResourceLocation, Gradient> gradient, i
 	).apply(instance, FireParticleOptions::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, FireParticleOptions> STREAM_CODEC = CompositeStreamCodec.of(
-		ByteBufCodecs.either(ID.STREAM_CODEC, ClientGradients.STREAM_CODEC), FireParticleOptions::gradient,
+		Gradient.STREAM_CODEC, FireParticleOptions::color,
 		ByteBufCodecs.VAR_INT, FireParticleOptions::lifespan,
 		ByteBufCodecs.FLOAT, FireParticleOptions::scale,
 		Easing.STREAM_CODEC.optional(Easing.SINE_OUT), FireParticleOptions::easing,
@@ -37,7 +30,7 @@ public record FireParticleOptions(Either<ResourceLocation, Gradient> gradient, i
 		FireParticleOptions::new
 	);
 
-	public FireParticleOptions(Either<ResourceLocation, Gradient> gradient, int lifespan, float scale) {
+	public FireParticleOptions(Gradient gradient, int lifespan, float scale) {
 		this(gradient, lifespan, scale, Easing.SINE_OUT, 0.4F);
 	}
 
@@ -47,10 +40,6 @@ public record FireParticleOptions(Either<ResourceLocation, Gradient> gradient, i
 	}
 
 	public FireParticleOptions withResolvedGradient() {
-		return new FireParticleOptions(Either.right(resolveGradient()), lifespan, scale, easing, brightness);
-	}
-
-	public Gradient resolveGradient() {
-		return gradient.map(id -> ClientGradients.REGISTRY.get(id, Color.WHITE), Function.identity());
+		return new FireParticleOptions(color.resolve(), lifespan, scale, easing, brightness);
 	}
 }

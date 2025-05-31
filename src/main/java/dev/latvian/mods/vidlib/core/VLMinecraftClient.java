@@ -20,6 +20,7 @@ import dev.latvian.mods.vidlib.feature.data.DataMapValue;
 import dev.latvian.mods.vidlib.feature.data.UpdatePlayerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.fade.Fade;
 import dev.latvian.mods.vidlib.feature.fade.ScreenFadeInstance;
+import dev.latvian.mods.vidlib.feature.highlight.TerrainHighlight;
 import dev.latvian.mods.vidlib.feature.misc.MarkerData;
 import dev.latvian.mods.vidlib.feature.particle.CubeParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.FireData;
@@ -471,6 +472,11 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	@Override
 	default void marker(MarkerData data) {
 		// VidLib.LOGGER.info("Marker " + data.event() + "/" + data.name() + " (" + data.uuid() + ") @ ");
+	}
+
+	@Override
+	default void addTerrainHighlight(TerrainHighlight highlight) {
+		// FIXME
 	}
 
 	@Override

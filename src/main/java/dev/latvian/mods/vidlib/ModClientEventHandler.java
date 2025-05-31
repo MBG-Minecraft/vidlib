@@ -11,7 +11,7 @@ import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockFont;
 import dev.latvian.mods.vidlib.feature.clothing.ClientClothingLoader;
 import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBarRenderer;
-import dev.latvian.mods.vidlib.feature.gradient.ClientGradients;
+import dev.latvian.mods.vidlib.feature.gradient.ClientGradientLoader;
 import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.multiverse.VoidSpecialEffects;
 import dev.latvian.mods.vidlib.feature.particle.VidLibClientParticles;
@@ -52,7 +52,7 @@ public class ModClientEventHandler {
 		event.addListener(VidLib.id("ghost_structure"), new GhostStructure.Loader());
 		event.addListener(VidLib.id("clothing"), new ClientClothingLoader());
 		event.addListener(VidLib.id("physics_particle_data"), new PhysicsParticleData.Loader());
-		event.addListener(VidLib.id("gradient"), new ClientGradients());
+		event.addListener(VidLib.id("gradient"), new ClientGradientLoader());
 		event.addListener(VidLib.id("clock_font"), new ClockFont.Loader());
 		event.addListener(VidLib.id("clock"), new Clock.Loader());
 		event.addListener(VidLib.id("skybox"), new SkyboxData.Loader());

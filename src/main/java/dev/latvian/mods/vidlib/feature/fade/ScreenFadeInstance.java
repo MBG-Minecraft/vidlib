@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.fade;
 
-import dev.latvian.mods.kmath.color.Color;
+import dev.latvian.mods.kmath.color.Gradient;
 import dev.latvian.mods.kmath.easing.Easing;
 
 public class ScreenFadeInstance {
-	public final Color color;
+	public final Gradient color;
 	public final int fadeInTicks;
 	public final int pauseTicks;
 	public final int fadeOutTicks;
@@ -12,10 +12,10 @@ public class ScreenFadeInstance {
 	public final Easing fadeOutEase;
 	public final int totalTicks;
 	public float prevAlpha, alpha;
-	public int tick;
+	public int prevTick, tick;
 
 	public ScreenFadeInstance(Fade data) {
-		this.color = data.color();
+		this.color = data.color().resolve();
 		this.fadeInTicks = data.fadeInTicks();
 		this.pauseTicks = data.pauseTicks();
 		this.fadeOutTicks = data.fadeOutTicks().orElse(data.fadeInTicks());
@@ -25,6 +25,7 @@ public class ScreenFadeInstance {
 	}
 
 	public boolean tick() {
+		prevTick = tick;
 		prevAlpha = alpha;
 
 		if (tick < fadeInTicks) {

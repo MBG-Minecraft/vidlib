@@ -25,9 +25,7 @@ import java.util.List;
 public record RotatedBoxZoneShape(Vec3 pos, Size3f size, Rotation rotation, Matrix3f matrix, Matrix3f imatrix, AABB box, List<AABB> clipBox) implements ZoneShape {
 	public static RotatedBoxZoneShape of(Vec3 pos, Size3f size, Rotation rotation) {
 		var matrix = new Matrix3f();
-		matrix.rotateZ(rotation.roll());
-		matrix.rotateX(rotation.pitchRad());
-		matrix.rotateY(rotation.yawRad());
+		rotation.rotateZXY(matrix);
 		var imatrix = new Matrix3f(matrix).invert();
 
 		var hsx = size.x() / 2F;

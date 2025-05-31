@@ -65,8 +65,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 		if (clip != null && clip.pos() != null) {
 			ms.pushPose();
 			frame.translate(clip.pos());
-			ms.scale(0.25F, 0.25F, 0.25F);
-			SphereRenderer.lines(ms, SpherePoints.L, buffers, BufferSupplier.DEBUG_NO_DEPTH, Color.BLACK);
+			SphereRenderer.lines(ms, 0F, 0F, 0F, 0.25F, SpherePoints.L, buffers, BufferSupplier.DEBUG_NO_DEPTH, Color.BLACK);
 			ms.popPose();
 		}
 
