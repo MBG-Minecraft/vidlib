@@ -7,7 +7,11 @@ import dev.latvian.mods.kmath.color.Gradient;
 import dev.latvian.mods.kmath.color.PairGradient;
 import dev.latvian.mods.kmath.shape.CylinderShape;
 import dev.latvian.mods.kmath.shape.Shape;
+import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
+import dev.latvian.mods.vidlib.feature.codec.DataType;
+import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import dev.latvian.mods.vidlib.math.worldnumber.FixedWorldNumber;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumber;
 import dev.latvian.mods.vidlib.math.worldposition.DynamicWorldPosition;
@@ -18,6 +22,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.Vec3;
 
+@AutoInit
 public record TerrainHighlight(
 	WorldPosition position,
 	Shape shape,
@@ -41,6 +46,9 @@ public record TerrainHighlight(
 		ByteBufCodecs.VAR_INT, TerrainHighlight::duration,
 		TerrainHighlight::new
 	);
+
+	public static final DataType<TerrainHighlight> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, TerrainHighlight.class);
+	public static final RegisteredDataType<TerrainHighlight> REGISTERED_DATA_TYPE = RegisteredDataType.register(VidLib.id("terrain_highlight"), DATA_TYPE);
 
 	public static TerrainHighlight circle(Vec3 position, float radius, Color startColor, Color endColor, int duration) {
 		var num = WorldNumber.fixed(1D);

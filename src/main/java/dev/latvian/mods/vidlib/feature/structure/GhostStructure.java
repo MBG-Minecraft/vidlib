@@ -7,8 +7,8 @@ import dev.latvian.mods.kmath.AAIBB;
 import dev.latvian.mods.kmath.Rotation;
 import dev.latvian.mods.kmath.Vec3f;
 import dev.latvian.mods.kmath.color.Color;
-import dev.latvian.mods.kmath.render.BoxRenderer;
 import dev.latvian.mods.kmath.render.BufferSupplier;
+import dev.latvian.mods.kmath.render.CuboidRenderer;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.registry.RegistryRef;
@@ -108,7 +108,7 @@ public record GhostStructure(
 
 						if (gs.slice.isPresent() && frame.mc().getEntityRenderDispatcher().shouldRenderHitBoxes() && frame.layer() == TerrainRenderLayer.TRANSLUCENT) {
 							var b = gs.slice.get();
-							BoxRenderer.lines(ms, b.minX(), b.minY(), b.minZ(), b.maxX() + 1F, b.maxY() + 1F, b.maxZ() + 1F, frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Color.RED);
+							CuboidRenderer.lines(ms, b.minX(), b.minY(), b.minZ(), b.maxX() + 1F, b.maxY() + 1F, b.maxZ() + 1F, frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Color.RED);
 						}
 
 						var blockPos = BlockPos.containing(pos);

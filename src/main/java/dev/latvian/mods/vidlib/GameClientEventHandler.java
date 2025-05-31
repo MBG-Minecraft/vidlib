@@ -4,8 +4,9 @@ import com.mojang.math.Axis;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.kmath.KMath;
 import dev.latvian.mods.kmath.color.Color;
-import dev.latvian.mods.kmath.render.BoxRenderer;
 import dev.latvian.mods.kmath.render.BufferSupplier;
+import dev.latvian.mods.kmath.render.CuboidRenderer;
+import dev.latvian.mods.kmath.render.DebugRenderTypes;
 import dev.latvian.mods.kmath.texture.LightUV;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
@@ -222,7 +223,7 @@ public class GameClientEventHandler {
 						float maxY = frame.y(a.maxY() + 0.5D);
 						float maxZ = frame.z(a.maxZ() + 0.5D);
 
-						BoxRenderer.frame(ms, minX, minY, minZ, maxX, maxY, maxZ, buffers, BufferSupplier.DEBUG_NO_DEPTH, cull, color, Color.YELLOW, 1F, 1F);
+						CuboidRenderer.frame(ms, minX, minY, minZ, maxX, maxY, maxZ, buffers, BufferSupplier.DEBUG_NO_DEPTH, cull, color, Color.YELLOW, 1F, 1F);
 					}
 				}
 			}
@@ -251,6 +252,16 @@ public class GameClientEventHandler {
 				PlumbobRenderer.render(mc, frame);
 			}
 
+			var variables = mc.level.getEnvironment().globalVariables();
+
+			if (!session.terrainHighlights.isEmpty()) {
+				var buffer = frame.buffers().getBuffer(DebugRenderTypes.QUADS_NO_CULL_NO_DEPTH).onlyPos();
+
+				for (var th : session.terrainHighlights) {
+					th.render(frame, buffer, variables);
+				}
+			}
+
 			var tool = VidLibTool.of(mc.player);
 
 			if (tool != null) {
@@ -264,7 +275,7 @@ public class GameClientEventHandler {
 					ms.mulPose(Axis.YP.rotation(cube.rotation().yawRad()));
 					ms.mulPose(Axis.XP.rotation(cube.rotation().pitchRad()));
 					ms.mulPose(Axis.ZP.rotation(cube.rotation().rollRad()));
-					BoxRenderer.voxelShapeBox(ms, cube.shape(), Vec3.ZERO, frame.buffers(), debug, false, cube.color().withAlpha(50), cube.lineColor());
+					CuboidRenderer.voxelShapeBox(ms, cube.shape(), Vec3.ZERO, frame.buffers(), debug, false, cube.color().withAlpha(50), cube.lineColor());
 					ms.popPose();
 				}
 

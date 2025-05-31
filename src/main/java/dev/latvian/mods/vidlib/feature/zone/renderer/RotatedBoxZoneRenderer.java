@@ -2,8 +2,8 @@ package dev.latvian.mods.vidlib.feature.zone.renderer;
 
 import com.mojang.math.Axis;
 import dev.latvian.mods.kmath.color.Color;
-import dev.latvian.mods.kmath.render.BoxRenderer;
 import dev.latvian.mods.kmath.render.BufferSupplier;
+import dev.latvian.mods.kmath.render.CuboidRenderer;
 import dev.latvian.mods.vidlib.feature.zone.shape.RotatedBoxZoneShape;
 
 public class RotatedBoxZoneRenderer implements ZoneRenderer<RotatedBoxZoneShape> {
@@ -18,7 +18,7 @@ public class RotatedBoxZoneRenderer implements ZoneRenderer<RotatedBoxZoneShape>
 		float maxX = ctx.frame().x(box.maxX);
 		float maxY = ctx.frame().y(box.maxY);
 		float maxZ = ctx.frame().z(box.maxZ);
-		BoxRenderer.lines(ms, minX, minY, minZ, maxX, maxY, maxZ, ctx.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Color.WHITE);
+		CuboidRenderer.lines(ms, minX, minY, minZ, maxX, maxY, maxZ, ctx.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Color.WHITE);
 
 		ms.pushPose();
 		ctx.frame().translate(shape.pos());
@@ -26,7 +26,7 @@ public class RotatedBoxZoneRenderer implements ZoneRenderer<RotatedBoxZoneShape>
 		ms.mulPose(Axis.XN.rotation(shape.rotation().pitchRad()));
 		ms.mulPose(Axis.ZN.rotation(shape.rotation().roll()));
 		ms.scale(shape.size().x(), shape.size().y(), shape.size().z());
-		BoxRenderer.quadsAndLines(ms, -0.5F, -0.5F, -0.5F, 0.5F, 0.5F, 0.5F, ctx.buffers(), BufferSupplier.DEBUG_NO_DEPTH, false, ctx.color(), ctx.outlineColor());
+		CuboidRenderer.quadsAndLines(ms, -0.5F, -0.5F, -0.5F, 0.5F, 0.5F, 0.5F, ctx.buffers(), BufferSupplier.DEBUG_NO_DEPTH, false, ctx.color(), ctx.outlineColor());
 		ms.popPose();
 	}
 }

@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin;
 
-import dev.latvian.mods.kmath.render.BoxRenderer;
 import dev.latvian.mods.kmath.render.BufferSupplier;
+import dev.latvian.mods.kmath.render.CuboidRenderer;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.bloom.BloomRenderTypes;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
@@ -18,11 +18,11 @@ public class BrightCubePropRenderer implements PropRenderer<BrightCubeProp> {
 		float h = (float) prop.height;
 
 		if (prop.outlineColor.alpha() > 0) {
-			BoxRenderer.quads(frame.poseStack(), -w, 0F, -w, w, h, w, BloomRenderTypes.overridePosCol(frame.buffers()), BloomRenderTypes.POS_COL_BUFFER_SUPPLIER, true, prop.outlineColor);
+			CuboidRenderer.quads(frame.poseStack(), -w, 0F, -w, w, h, w, BloomRenderTypes.overridePosCol(frame.buffers()), BloomRenderTypes.POS_COL_BUFFER_SUPPLIER, true, prop.outlineColor);
 		}
 
 		if (prop.color.alpha() > 0) {
-			BoxRenderer.quads(frame.poseStack(), -w, 0F, -w, w, h, w, frame.buffers(), BufferSupplier.DEBUG, true, prop.color);
+			CuboidRenderer.quads(frame.poseStack(), -w, 0F, -w, w, h, w, frame.buffers(), BufferSupplier.DEBUG, true, prop.color);
 		}
 	}
 }

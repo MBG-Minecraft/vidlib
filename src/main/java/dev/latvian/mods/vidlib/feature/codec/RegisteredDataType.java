@@ -11,6 +11,8 @@ import com.mojang.brigadier.context.CommandContext;
 import dev.latvian.mods.kmath.MovementType;
 import dev.latvian.mods.kmath.Range;
 import dev.latvian.mods.kmath.color.Color;
+import dev.latvian.mods.kmath.color.Gradient;
+import dev.latvian.mods.kmath.shape.Shape;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import dev.latvian.mods.vidlib.util.Cast;
@@ -23,6 +25,7 @@ import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -73,7 +76,14 @@ public record RegisteredDataType<T>(
 		return register(
 			id,
 			dataType,
-			(self, ctx) -> dataType.typeClass().isEnum() ? enumArgument(dataType.typeClass()) : new RegisteredDataTypeArgument<>(ctx.createSerializationContext(NbtOps.INSTANCE), self),
+			(self, ctx) -> {
+				if (dataType.typeClass().isEnum()) {
+					return enumArgument(dataType.typeClass());
+				} else {
+					var ops = ctx.createSerializationContext(NbtOps.INSTANCE);
+					return new RegisteredDataTypeArgument<>(ops, TagParser.create(ops), self);
+				}
+			},
 			(ctx, name) -> ctx.getArgument(name, dataType.typeClass())
 		);
 	}
@@ -117,6 +127,8 @@ public record RegisteredDataType<T>(
 	public static final RegisteredDataType<ParticleOptions> PARTICLE_OPTIONS = register(ResourceLocation.withDefaultNamespace("particle_options"), DataType.PARTICLE_OPTIONS);
 
 	public static final RegisteredDataType<Color> COLOR = register(VidLib.id("color"), DataType.COLOR);
+	public static final RegisteredDataType<Gradient> GRADIENT = register(VidLib.id("gradient"), DataType.GRADIENT);
+	public static final RegisteredDataType<Shape> SHAPE = register(VidLib.id("shape"), DataType.SHAPE);
 	public static final RegisteredDataType<dev.latvian.mods.kmath.Rotation> ROTATION = register(VidLib.id("rotation"), DataType.ROTATION);
 	public static final RegisteredDataType<MovementType> MOVEMENT_TYPE = register(VidLib.id("movement_type"), DataType.MOVEMENT_TYPE);
 	public static final RegisteredDataType<Range> RANGE = register(VidLib.id("range"), DataType.RANGE);

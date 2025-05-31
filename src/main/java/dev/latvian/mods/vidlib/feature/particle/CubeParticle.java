@@ -3,8 +3,8 @@ package dev.latvian.mods.vidlib.feature.particle;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.kmath.KMath;
 import dev.latvian.mods.kmath.color.Gradient;
-import dev.latvian.mods.kmath.render.BoxRenderer;
 import dev.latvian.mods.kmath.render.BufferSupplier;
+import dev.latvian.mods.kmath.render.CuboidRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -43,13 +43,13 @@ public class CubeParticle extends CustomParticle {
 		var lc = lineColor.get(time / (float) lifetime);
 
 		if (lc.alpha() > 0) {
-			BoxRenderer.lines(ms, minX, minY, minZ, maxX, maxY, maxZ, buffers, BufferSupplier.DEBUG_NO_DEPTH, lc.fadeOut(time, lifetime, 20F));
+			CuboidRenderer.lines(ms, minX, minY, minZ, maxX, maxY, maxZ, buffers, BufferSupplier.DEBUG_NO_DEPTH, lc.fadeOut(time, lifetime, 20F));
 		}
 
 		var c = color.get(time / (float) lifetime);
 
 		if (c.alpha() > 0) {
-			BoxRenderer.quads(ms, minX, minY, minZ, maxX, maxY, maxZ, buffers, BufferSupplier.DEBUG_NO_DEPTH, false, c.withAlpha(50).fadeOut(time, lifetime, 20F));
+			CuboidRenderer.quads(ms, minX, minY, minZ, maxX, maxY, maxZ, buffers, BufferSupplier.DEBUG_NO_DEPTH, false, c.withAlpha(50).fadeOut(time, lifetime, 20F));
 		}
 	}
 }

@@ -1,11 +1,11 @@
 package dev.latvian.mods.vidlib.feature.zone.renderer;
 
-import dev.latvian.mods.kmath.SpherePoints;
 import dev.latvian.mods.kmath.VoxelShapeBox;
 import dev.latvian.mods.kmath.color.Color;
-import dev.latvian.mods.kmath.render.BoxRenderer;
 import dev.latvian.mods.kmath.render.BufferSupplier;
+import dev.latvian.mods.kmath.render.CuboidRenderer;
 import dev.latvian.mods.kmath.render.SphereRenderer;
+import dev.latvian.mods.kmath.shape.SpherePoints;
 import dev.latvian.mods.kmath.texture.LightUV;
 import dev.latvian.mods.vidlib.core.VLBlockInWorld;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
@@ -75,7 +75,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 					boolean hovered = clip != null && clip.instance() == sz.instance();
 					var baseColor = sz.instance().zone.color().withAlpha(50);
 					var outlineColor = hovered ? Color.WHITE : sz.instance().entities.isEmpty() ? sz.instance().zone.color() : Color.GREEN;
-					BoxRenderer.voxelShapeBox(ms, sz.shapeBox(), cameraPos.reverse(), buffers, BufferSupplier.DEBUG_NO_DEPTH, false, baseColor, outlineColor);
+					CuboidRenderer.voxelShapeBox(ms, sz.shapeBox(), cameraPos.reverse(), buffers, BufferSupplier.DEBUG_NO_DEPTH, false, baseColor, outlineColor);
 				}
 			}
 		} else {
@@ -117,7 +117,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 									});
 								}
 
-								BoxRenderer.voxelShapeBox(ms, voxelShape, cameraPos.reverse(), buffers, BufferSupplier.DEBUG_NO_DEPTH, true, baseColor, outlineColor);
+								CuboidRenderer.voxelShapeBox(ms, voxelShape, cameraPos.reverse(), buffers, BufferSupplier.DEBUG_NO_DEPTH, true, baseColor, outlineColor);
 							}
 						}
 					}

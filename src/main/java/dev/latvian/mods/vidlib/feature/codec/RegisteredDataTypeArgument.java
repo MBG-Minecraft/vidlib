@@ -13,12 +13,12 @@ import net.minecraft.nbt.TagParser;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 
-public record RegisteredDataTypeArgument<T>(DynamicOps<Tag> ops, RegisteredDataType<T> dataType) implements ArgumentType<T> {
+public record RegisteredDataTypeArgument<T>(DynamicOps<Tag> ops, TagParser<Tag> parser, RegisteredDataType<T> dataType) implements ArgumentType<T> {
 	public static final DynamicCommandExceptionType ERROR_PARSING = new DynamicCommandExceptionType(arg -> Component.literal(String.valueOf(arg)));
 
 	@Override
 	public T parse(StringReader reader) throws CommandSyntaxException {
-		var tag = TagParser.parseCompoundAsArgument(reader);
+		var tag = parser.parseAsArgument(reader);
 		var decoded = dataType.type().codec().parse(ops, tag);
 
 		if (decoded.isError()) {

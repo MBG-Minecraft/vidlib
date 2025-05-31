@@ -24,6 +24,7 @@ import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.fade.ScreenFadeInstance;
+import dev.latvian.mods.vidlib.feature.highlight.TerrainHighlightInstance;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.input.PlayerInputChanged;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToServer;
@@ -99,6 +100,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	public WorldMouse worldMouse;
 	public DataRecorder dataRecorder;
 	public NPCRecording npcRecording;
+	public final List<TerrainHighlightInstance> terrainHighlights;
 
 	public LocalClientSessionData(Minecraft mc, UUID uuid, ClientPacketListener connection) {
 		super(uuid);
@@ -115,6 +117,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.skyboxes = new HashMap<>();
 		this.serverDataMap = new DataMap(uuid, DataKey.SERVER);
 		this.globalVariables = new WorldNumberVariables();
+		this.terrainHighlights = new ArrayList<>();
 		VidLib.LOGGER.info("Client Session Data Initialized");
 	}
 
@@ -240,6 +243,10 @@ public class LocalClientSessionData extends ClientSessionData {
 
 		if (screenFade != null && screenFade.tick()) {
 			screenFade = null;
+		}
+
+		if (!terrainHighlights.isEmpty() && paused.tick()) {
+			terrainHighlights.removeIf(TerrainHighlightInstance::tick);
 		}
 
 		prevCameraShake = cameraShake;

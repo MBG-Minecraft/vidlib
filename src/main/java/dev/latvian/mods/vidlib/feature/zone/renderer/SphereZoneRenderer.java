@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.zone.renderer;
 
-import dev.latvian.mods.kmath.SpherePoints;
 import dev.latvian.mods.kmath.color.Color;
-import dev.latvian.mods.kmath.render.BoxRenderer;
 import dev.latvian.mods.kmath.render.BufferSupplier;
+import dev.latvian.mods.kmath.render.CuboidRenderer;
 import dev.latvian.mods.kmath.render.SphereRenderer;
+import dev.latvian.mods.kmath.shape.SpherePoints;
 import dev.latvian.mods.vidlib.feature.zone.shape.SphereZoneShape;
 
 public class SphereZoneRenderer implements ZoneRenderer<SphereZoneShape> {
@@ -21,7 +21,7 @@ public class SphereZoneRenderer implements ZoneRenderer<SphereZoneShape> {
 		float maxX = ctx.frame().x(box.maxX);
 		float maxY = ctx.frame().y(box.maxY);
 		float maxZ = ctx.frame().z(box.maxZ);
-		BoxRenderer.lines(ms, minX, minY, minZ, maxX, maxY, maxZ, ctx.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Color.WHITE);
+		CuboidRenderer.lines(ms, minX, minY, minZ, maxX, maxY, maxZ, ctx.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Color.WHITE);
 
 		ms.pushPose();
 		ctx.frame().translate(shape.pos());

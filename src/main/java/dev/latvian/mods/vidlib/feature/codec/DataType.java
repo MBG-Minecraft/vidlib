@@ -5,6 +5,7 @@ import dev.latvian.mods.kmath.MovementType;
 import dev.latvian.mods.kmath.Range;
 import dev.latvian.mods.kmath.color.Color;
 import dev.latvian.mods.kmath.color.Gradient;
+import dev.latvian.mods.kmath.shape.Shape;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import dev.latvian.mods.vidlib.util.Cast;
 import net.minecraft.core.Registry;
@@ -90,6 +91,7 @@ public record DataType<T>(
 
 	public static final DataType<Color> COLOR = of(Color.CODEC, Color.STREAM_CODEC, Color.class);
 	public static final DataType<Gradient> GRADIENT = of(Gradient.CODEC, Gradient.STREAM_CODEC, Gradient.class);
+	public static final DataType<Shape> SHAPE = of(Shape.CODEC, Shape.STREAM_CODEC, Shape.class);
 	public static final DataType<dev.latvian.mods.kmath.Rotation> ROTATION = of(dev.latvian.mods.kmath.Rotation.CODEC, dev.latvian.mods.kmath.Rotation.STREAM_CODEC, dev.latvian.mods.kmath.Rotation.class);
 	public static final DataType<MovementType> MOVEMENT_TYPE = of(MovementType.values());
 	public static final DataType<Range> RANGE = of(Range.CODEC, Range.STREAM_CODEC, Range.class);
