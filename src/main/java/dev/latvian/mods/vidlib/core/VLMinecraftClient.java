@@ -222,8 +222,6 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 			if (overrideCamera && !cutscene.allowMovement) {
 				vl$self().setScreen(new CutsceneScreen(inst, vl$self().screen));
 			}
-
-			vl$self().options.hideGui = true;
 		}
 	}
 
@@ -240,8 +238,6 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		if (vl$self().screen instanceof CutsceneScreen screen) {
 			vl$self().setScreen(screen.previousScreen);
 		}
-
-		vl$self().options.hideGui = false;
 	}
 
 	@Override
@@ -508,5 +504,21 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		float near = 0.05F;
 		float far = vl$self().gameRenderer.getDepthFar();
 		return near * far / (far + depth * (near - far));
+	}
+
+	default boolean vl$hideGui() {
+		var mc = vl$self();
+
+		if (mc.options.hideGui) {
+			return true;
+		}
+
+		if (mc.player == null) {
+			return false;
+		}
+
+		var session = mc.player.vl$sessionData();
+
+		return session.cameraOverride != null && session.cameraOverride.hideGui();
 	}
 }

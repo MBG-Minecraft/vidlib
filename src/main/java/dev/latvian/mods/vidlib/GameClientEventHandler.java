@@ -348,7 +348,7 @@ public class GameClientEventHandler {
 			}
 		}
 
-		if (!mc.options.hideGui && !mc.player.isReplayCamera()) {
+		if (!mc.vl$hideGui() && !mc.player.isReplayCamera()) {
 			ScreenText.RENDER.addAll(ScreenText.CLIENT_TICK);
 			ScreenText.RENDER.ops = mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
 

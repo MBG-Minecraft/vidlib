@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.VidLibConfig;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -46,5 +48,10 @@ public abstract class GuiMixin {
 	 */
 	@Overwrite
 	protected void renderSpyglassOverlay(GuiGraphics guiGraphics, float scopeScale) {
+	}
+
+	@ModifyExpressionValue(method = {"lambda$new$8", "lambda$new$9"}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z"))
+	private static boolean vl$hideGui(boolean original, @Local(argsOnly = true) Minecraft mc) {
+		return mc.vl$hideGui();
 	}
 }

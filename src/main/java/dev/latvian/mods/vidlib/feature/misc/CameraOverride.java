@@ -29,6 +29,10 @@ public interface CameraOverride {
 		return true;
 	}
 
+	default boolean hideGui() {
+		return false;
+	}
+
 	Vec3 getCameraPosition(float delta);
 
 	Rotation getCameraRotation(float delta, Vec3 cameraPos);

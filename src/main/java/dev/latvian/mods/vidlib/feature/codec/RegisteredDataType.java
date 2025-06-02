@@ -34,7 +34,9 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
+import net.minecraft.world.level.material.FluidState;
 import net.neoforged.neoforge.server.command.EnumArgument;
 
 import java.util.List;
@@ -125,6 +127,8 @@ public record RegisteredDataType<T>(
 	public static final RegisteredDataType<SoundSource> SOUND_SOURCE = register(ResourceLocation.withDefaultNamespace("sound_source"), DataType.SOUND_SOURCE);
 	public static final RegisteredDataType<ItemStack> ITEM_STACK = register(ResourceLocation.withDefaultNamespace("item_stack"), DataType.ITEM_STACK);
 	public static final RegisteredDataType<ParticleOptions> PARTICLE_OPTIONS = register(ResourceLocation.withDefaultNamespace("particle_options"), DataType.PARTICLE_OPTIONS);
+	public static final RegisteredDataType<BlockState> BLOCK_STATE = register(ResourceLocation.withDefaultNamespace("block_state"), DataType.BLOCK_STATE);
+	public static final RegisteredDataType<FluidState> FLUID_STATE = register(ResourceLocation.withDefaultNamespace("fluid_state"), DataType.FLUID_STATE);
 
 	public static final RegisteredDataType<Color> COLOR = register(VidLib.id("color"), DataType.COLOR);
 	public static final RegisteredDataType<Gradient> GRADIENT = register(VidLib.id("gradient"), DataType.GRADIENT);

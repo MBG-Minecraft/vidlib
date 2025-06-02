@@ -21,8 +21,6 @@ public class CutsceneScreen extends Screen {
 
 	@Override
 	protected void init() {
-		minecraft.options.hideGui = true;
-
 		// if (!REClient.adminPanelVisible) {
 		{
 			var x = (double) (this.minecraft.getWindow().getWidth() / 2);
@@ -90,6 +88,11 @@ public class CutsceneScreen extends Screen {
 	@Override
 	public boolean overrideCamera() {
 		return clientCutscene.overrideCamera();
+	}
+
+	@Override
+	public boolean hideGui() {
+		return true;
 	}
 
 	@Override

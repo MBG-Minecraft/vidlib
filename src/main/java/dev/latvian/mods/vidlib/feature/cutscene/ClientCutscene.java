@@ -187,6 +187,11 @@ public class ClientCutscene implements CameraOverride {
 	}
 
 	@Override
+	public boolean hideGui() {
+		return true;
+	}
+
+	@Override
 	public double getZoom(double delta) {
 		return KMath.lerp(delta, prevZoom, zoom);
 	}

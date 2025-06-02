@@ -82,6 +82,10 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	@ModifyExpressionValue(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isUsingItem()Z", ordinal = 1))
 	private boolean vl$handleKeybindsUsingItem(boolean original) {
 		return original || PlayerActionHandler.handle(player, PlayerActionType.INTERACT, false);
+	}
 
+	@ModifyExpressionValue(method = "renderNames", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z"))
+	private static boolean vl$hideGui(boolean original) {
+		return Minecraft.getInstance().vl$hideGui();
 	}
 }

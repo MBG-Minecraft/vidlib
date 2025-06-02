@@ -205,7 +205,7 @@ public class CanvasImpl {
 	}
 
 	public static void drawPreview(Minecraft mc, GuiGraphics g) {
-		if (mc.level == null || mc.options.hideGui || mc.level.isReplayLevel()) {
+		if (mc.level == null || mc.vl$hideGui() || mc.level.isReplayLevel()) {
 			return;
 		}
 

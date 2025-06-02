@@ -87,4 +87,9 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 			profilerfiller.pop();
 		}
 	}
+
+	@ModifyExpressionValue(method = {"render", "renderItemInHand", "shouldRenderBlockOutline"}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z"))
+	private boolean vl$hideGui(boolean original) {
+		return minecraft.vl$hideGui();
+	}
 }

@@ -23,7 +23,9 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
+import net.minecraft.world.level.material.FluidState;
 
 import java.util.List;
 import java.util.Optional;
@@ -88,6 +90,8 @@ public record DataType<T>(
 	public static final DataType<SoundSource> SOUND_SOURCE = of(SoundSource.values());
 	public static final DataType<ItemStack> ITEM_STACK = of(ItemStack.OPTIONAL_CODEC, ItemStack.OPTIONAL_STREAM_CODEC, ItemStack.class);
 	public static final DataType<ParticleOptions> PARTICLE_OPTIONS = of(ParticleTypes.CODEC, ParticleTypes.STREAM_CODEC, ParticleOptions.class);
+	public static final DataType<BlockState> BLOCK_STATE = of(VLCodecs.BLOCK_STATE, VLStreamCodecs.BLOCK_STATE, BlockState.class);
+	public static final DataType<FluidState> FLUID_STATE = of(VLCodecs.FLUID_STATE, VLStreamCodecs.FLUID_STATE, FluidState.class);
 
 	public static final DataType<Color> COLOR = of(Color.CODEC, Color.STREAM_CODEC, Color.class);
 	public static final DataType<Gradient> GRADIENT = of(Gradient.CODEC, Gradient.STREAM_CODEC, Gradient.class);
