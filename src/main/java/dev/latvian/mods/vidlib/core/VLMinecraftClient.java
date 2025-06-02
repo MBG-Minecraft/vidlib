@@ -511,14 +511,13 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 		if (mc.options.hideGui) {
 			return true;
-		}
-
-		if (mc.player == null) {
+		} else if (mc.screen != null && mc.screen.hideGui()) {
+			return true;
+		} else if (mc.player == null) {
 			return false;
 		}
 
 		var session = mc.player.vl$sessionData();
-
 		return session.cameraOverride != null && session.cameraOverride.hideGui();
 	}
 }

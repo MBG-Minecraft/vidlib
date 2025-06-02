@@ -50,4 +50,22 @@ public class MiscClientUtils {
 	public static float depthFar(float renderDistance) {
 		return 8192F;
 	}
+
+	public static int calculateScale(int w, int h) {
+		if (VidLibConfig.forceHalfAuto) {
+			int i = 1;
+
+			while (i < w && i < h && w / (i + 1) >= 320 && h / (i + 1) >= 240) {
+				i++;
+			}
+
+			if (i <= 3) {
+				return 2;
+			} else {
+				return (i + 1) / 2;
+			}
+		}
+
+		return -1;
+	}
 }

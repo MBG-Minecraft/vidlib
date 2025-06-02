@@ -101,7 +101,8 @@
 		"ShaderManagerMixin",
 		"SkinManagerMixin",
 		"SkyRendererMixin",
-		"TextureManagerMixin"
+		"TextureManagerMixin",
+		"WindowMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1,

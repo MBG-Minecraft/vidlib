@@ -50,6 +50,13 @@ public abstract class GuiMixin {
 	protected void renderSpyglassOverlay(GuiGraphics guiGraphics, float scopeScale) {
 	}
 
+	@Inject(method = "renderCrosshair", at = @At("HEAD"), cancellable = true)
+	private void vl$renderCrosshair(GuiGraphics graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
+		if (minecraft.vl$hideGui()) {
+			ci.cancel();
+		}
+	}
+
 	@ModifyExpressionValue(method = {"lambda$new$8", "lambda$new$9"}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z"))
 	private static boolean vl$hideGui(boolean original, @Local(argsOnly = true) Minecraft mc) {
 		return mc.vl$hideGui();
