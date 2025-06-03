@@ -59,7 +59,9 @@ public class ServerPropList extends PropList<ServerLevel> {
 
 	@Override
 	public void add(Prop prop) {
-		pending.add(prop);
+		if (prop.spawnType != PropSpawnType.DUMMY) {
+			pending.add(prop);
+		}
 	}
 
 	@Override

@@ -73,5 +73,8 @@
 	],
 	"com/mojang/blaze3d/buffers/GpuBuffer": [
 		"dev/latvian/mods/vidlib/core/VLGpuBuffer"
+	],
+	"net/minecraft/client/particle/ParticleEngine": [
+		"dev/latvian/mods/vidlib/core/VLParticleEngine"
 	]
 }

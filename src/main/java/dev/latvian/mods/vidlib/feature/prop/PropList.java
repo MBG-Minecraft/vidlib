@@ -32,6 +32,10 @@ public abstract class PropList<L extends Level> {
 	}
 
 	public void add(Prop prop) {
+		if (prop.spawnType == PropSpawnType.DUMMY) {
+			return;
+		}
+
 		prop.level = level;
 		active.put(prop.id, prop);
 		prop.onAdded();
@@ -64,6 +68,19 @@ public abstract class PropList<L extends Level> {
 			var prop = result.getOrThrow();
 			onCreated.accept(prop);
 			add(prop);
+			return prop;
+		}
+
+		return null;
+	}
+
+	@Nullable
+	public <P extends Prop> P createDummy(PropType<P> type, Consumer<P> onCreated) {
+		var result = create(new PropContext<>(this, type, PropSpawnType.DUMMY, null), true, null);
+
+		if (result.isSuccess()) {
+			var prop = result.getOrThrow();
+			onCreated.accept(prop);
 			return prop;
 		}
 

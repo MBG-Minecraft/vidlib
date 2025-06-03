@@ -7,6 +7,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
 
 public enum PropSpawnType implements StringRepresentable {
+	DUMMY("dummy"),
 	USER("user"),
 	GAME("game"),
 	DATA("data"),

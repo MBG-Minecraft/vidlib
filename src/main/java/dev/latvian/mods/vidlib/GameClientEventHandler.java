@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib;
 
-import com.mojang.math.Axis;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.kmath.KMath;
 import dev.latvian.mods.kmath.color.Color;
@@ -50,7 +49,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -292,28 +290,7 @@ public class GameClientEventHandler {
 
 			if (tool != null) {
 				var visuals = tool.getSecond().visuals(mc.player, tool.getFirst(), frame.screenDelta());
-
-				var debug = BufferSupplier.DEBUG_NO_DEPTH;
-
-				for (var cube : visuals.cubes()) {
-					ms.pushPose();
-					frame.translate(cube.pos());
-					ms.mulPose(Axis.YP.rotation(cube.rotation().yawRad()));
-					ms.mulPose(Axis.XP.rotation(cube.rotation().pitchRad()));
-					ms.mulPose(Axis.ZP.rotation(cube.rotation().rollRad()));
-					CuboidRenderer.voxelShapeBox(ms, cube.shape(), Vec3.ZERO, frame.buffers(), debug, false, cube.color().withAlpha(50), cube.lineColor());
-					ms.popPose();
-				}
-
-				var linesBuffer = ms.last().transform(debug.lines(frame.buffers()));
-
-				for (var line : visuals.lines()) {
-					var rx = frame.x(line.line().start().x);
-					var ry = frame.y(line.line().start().y);
-					var rz = frame.z(line.line().start().z);
-					linesBuffer.acceptPos(rx, ry, rz).acceptCol(line.startColor().redf(), line.startColor().greenf(), line.startColor().bluef(), line.startColor().alphaf());
-					linesBuffer.acceptPos(rx + (float) line.line().dx(), ry + (float) line.line().dy(), rz + (float) line.line().dz()).acceptCol(line.endColor().redf(), line.endColor().greenf(), line.endColor().bluef(), line.endColor().alphaf());
-				}
+				MiscClientUtils.renderVisuals(frame.poseStack(), frame.camera().getPosition(), frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, visuals);
 			}
 		}
 

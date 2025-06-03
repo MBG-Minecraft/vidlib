@@ -35,17 +35,14 @@ public record InterpolatedWorldNumber(Easing easing, float start, float end, Wor
 
 	@Override
 	public double get(WorldNumberContext ctx) {
-		var a = this.from.get(ctx);
-
 		if (ctx.progress <= start) {
-			return a;
+			return from.get(ctx);
+		} else if (ctx.progress >= end) {
+			return to.get(ctx);
 		}
 
-		var b = this.to.get(ctx);
-
-		if (ctx.progress >= end) {
-			return b;
-		}
+		var a = from.get(ctx);
+		var b = to.get(ctx);
 
 		return KMath.lerp(easing.easeClamped(KMath.map(ctx.progress, start, end, 0D, 1D)), a, b);
 	}

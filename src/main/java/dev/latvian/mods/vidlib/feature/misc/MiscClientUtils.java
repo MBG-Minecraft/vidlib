@@ -1,13 +1,20 @@
 package dev.latvian.mods.vidlib.feature.misc;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+import dev.latvian.mods.kmath.render.BufferSupplier;
+import dev.latvian.mods.kmath.render.CuboidRenderer;
 import dev.latvian.mods.vidlib.VidLibConfig;
+import dev.latvian.mods.vidlib.feature.item.ToolVisuals;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -67,5 +74,33 @@ public class MiscClientUtils {
 		}
 
 		return -1;
+	}
+
+	public static void renderVisuals(PoseStack ms, Vec3 cameraPos, MultiBufferSource buffers, BufferSupplier type, ToolVisuals visuals) {
+		for (var cube : visuals.cubes()) {
+			ms.pushPose();
+			float x = (float) (cube.pos().x - cameraPos.x);
+			float y = (float) (cube.pos().y - cameraPos.y);
+			float z = (float) (cube.pos().z - cameraPos.z);
+			ms.translate(x, y, z);
+			ms.mulPose(Axis.YP.rotation(cube.rotation().yawRad()));
+			ms.mulPose(Axis.XP.rotation(cube.rotation().pitchRad()));
+			ms.mulPose(Axis.ZP.rotation(cube.rotation().rollRad()));
+			CuboidRenderer.voxelShapeBox(ms, cube.shape(), Vec3.ZERO, buffers, type, false, cube.color().withAlpha(50), cube.lineColor());
+			ms.popPose();
+		}
+
+		if (!visuals.lines().isEmpty()) {
+			var linesBuffer = ms.last().transform(type.lines(buffers));
+
+			for (var line : visuals.lines()) {
+				float rx = (float) (line.line().start().x - cameraPos.x);
+				float ry = (float) (line.line().start().y - cameraPos.y);
+				float rz = (float) (line.line().start().z - cameraPos.z);
+
+				linesBuffer.acceptPos(rx, ry, rz).acceptCol(line.startColor().redf(), line.startColor().greenf(), line.startColor().bluef(), line.startColor().alphaf());
+				linesBuffer.acceptPos(rx + (float) line.line().dx(), ry + (float) line.line().dy(), rz + (float) line.line().dz()).acceptCol(line.endColor().redf(), line.endColor().greenf(), line.endColor().bluef(), line.endColor().alphaf());
+			}
+		}
 	}
 }
