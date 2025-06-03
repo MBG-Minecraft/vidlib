@@ -11,7 +11,7 @@ import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
 import dev.latvian.mods.vidlib.feature.registry.ID;
 import dev.latvian.mods.vidlib.feature.registry.RegistryRef;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
-import dev.latvian.mods.vidlib.math.worldposition.WorldPosition;
+import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
 import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -29,15 +29,15 @@ import java.util.function.Supplier;
 public record Location(
 	ResourceLocation id,
 	ResourceKey<Level> dimension,
-	List<WorldPosition> positions,
+	List<WorldVector> positions,
 	double range,
 	boolean warp,
 	boolean warpRequiresAdmin
-) implements Supplier<WorldPosition> {
+) implements Supplier<WorldVector> {
 	public static final Codec<Location> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		ID.CODEC.fieldOf("id").forGetter(Location::id),
 		VLCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(Location::dimension),
-		VLCodecs.listOrSelf(WorldPosition.CODEC).fieldOf("position").forGetter(Location::positions),
+		VLCodecs.listOrSelf(WorldVector.CODEC).fieldOf("position").forGetter(Location::positions),
 		Codec.DOUBLE.optionalFieldOf("range", 0D).forGetter(Location::range),
 		Codec.BOOL.optionalFieldOf("warp", true).forGetter(Location::warp),
 		Codec.BOOL.optionalFieldOf("warp_requires_admin", true).forGetter(Location::warpRequiresAdmin)
@@ -46,7 +46,7 @@ public record Location(
 	public static final StreamCodec<RegistryFriendlyByteBuf, Location> DIRECT_STREAM_CODEC = CompositeStreamCodec.of(
 		ID.STREAM_CODEC, Location::id,
 		VLStreamCodecs.DIMENSION, Location::dimension,
-		WorldPosition.STREAM_CODEC.listOf(), Location::positions,
+		WorldVector.STREAM_CODEC.listOf(), Location::positions,
 		ByteBufCodecs.DOUBLE, Location::range,
 		ByteBufCodecs.BOOL, Location::warp,
 		ByteBufCodecs.BOOL, Location::warpRequiresAdmin,
@@ -71,11 +71,11 @@ public record Location(
 	}
 
 	@Override
-	public WorldPosition get() {
+	public WorldVector get() {
 		return positions.getFirst();
 	}
 
-	public WorldPosition random(RandomSource source) {
+	public WorldVector random(RandomSource source) {
 		return positions.get(source.nextInt(positions.size()));
 	}
 }

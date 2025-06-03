@@ -14,9 +14,9 @@ import dev.latvian.mods.vidlib.feature.codec.DataType;
 import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import dev.latvian.mods.vidlib.math.worldnumber.FixedWorldNumber;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumber;
-import dev.latvian.mods.vidlib.math.worldposition.DynamicWorldPosition;
-import dev.latvian.mods.vidlib.math.worldposition.FixedWorldPosition;
-import dev.latvian.mods.vidlib.math.worldposition.WorldPosition;
+import dev.latvian.mods.vidlib.math.worldvector.DynamicWorldVector;
+import dev.latvian.mods.vidlib.math.worldvector.FixedWorldVector;
+import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -24,25 +24,25 @@ import net.minecraft.world.phys.Vec3;
 
 @AutoInit
 public record TerrainHighlight(
-	WorldPosition position,
+	WorldVector position,
 	Shape shape,
 	Gradient color,
-	WorldPosition scale,
+	WorldVector scale,
 	int duration
 ) {
 	public static final Codec<TerrainHighlight> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		WorldPosition.CODEC.fieldOf("position").forGetter(TerrainHighlight::position),
+		WorldVector.CODEC.fieldOf("position").forGetter(TerrainHighlight::position),
 		Shape.CODEC.fieldOf("shape").forGetter(TerrainHighlight::shape),
 		Gradient.CODEC.fieldOf("color").forGetter(TerrainHighlight::color),
-		WorldPosition.CODEC.optionalFieldOf("scale", FixedWorldPosition.ONE.instance()).forGetter(TerrainHighlight::scale),
+		WorldVector.CODEC.optionalFieldOf("scale", FixedWorldVector.ONE.instance()).forGetter(TerrainHighlight::scale),
 		Codec.INT.optionalFieldOf("duration", 20).forGetter(TerrainHighlight::duration)
 	).apply(instance, TerrainHighlight::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, TerrainHighlight> STREAM_CODEC = CompositeStreamCodec.of(
-		WorldPosition.STREAM_CODEC, TerrainHighlight::position,
+		WorldVector.STREAM_CODEC, TerrainHighlight::position,
 		Shape.STREAM_CODEC, TerrainHighlight::shape,
 		Gradient.STREAM_CODEC, TerrainHighlight::color,
-		WorldPosition.STREAM_CODEC.optional(FixedWorldPosition.ONE.instance()), TerrainHighlight::scale,
+		WorldVector.STREAM_CODEC.optional(FixedWorldVector.ONE.instance()), TerrainHighlight::scale,
 		ByteBufCodecs.VAR_INT, TerrainHighlight::duration,
 		TerrainHighlight::new
 	);
@@ -52,6 +52,6 @@ public record TerrainHighlight(
 
 	public static TerrainHighlight circle(Vec3 position, float radius, Color startColor, Color endColor, int duration) {
 		var num = WorldNumber.fixed(1D);
-		return new TerrainHighlight(WorldPosition.fixed(position), new CylinderShape(radius, 0F), new PairGradient(startColor, endColor), new DynamicWorldPosition(num, FixedWorldNumber.ONE.instance(), num), duration);
+		return new TerrainHighlight(WorldVector.fixed(position), new CylinderShape(radius, 0F), new PairGradient(startColor, endColor), new DynamicWorldVector(num, FixedWorldNumber.ONE.instance(), num), duration);
 	}
 }

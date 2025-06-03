@@ -1,9 +1,12 @@
 package dev.latvian.mods.vidlib.feature.structure;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.kmath.color.Color;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.particle.CubeParticleOptions;
+import dev.latvian.mods.vidlib.util.JsonUtils;
 import dev.latvian.mods.vidlib.util.MessageConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -76,16 +79,31 @@ public interface GhostStructureCapture {
 				var structureDir = zip.getPath("/assets/video/structure/ghost_chunks/%s".formatted(fname));
 				Files.createDirectories(structureDir);
 
-				var jsonDir = zip.getPath("/assets/video/vidlib/ghost_structure/ghost_chunks/%s".formatted(fname));
+				var jsonDir = zip.getPath("/assets/video/vidlib/ghost_structure/ghost_chunks");
 				Files.createDirectories(jsonDir);
 
-				var locDir = zip.getPath("/assets/video/vidlib/location/ghost_chunks");
-				Files.createDirectories(locDir);
+				var json = new JsonObject();
+				var strucArr = new JsonArray();
 
-				Files.writeString(locDir.resolve("%s.json".formatted(fname)), """
-					{
-					 	"position": [%d, %d, %d]
-					}""".formatted(current.minX, current.minY, current.minZ));
+				json.add("structures", strucArr);
+
+				var dataObj = new JsonObject();
+				dataObj.addProperty("center_x", false);
+				dataObj.addProperty("center_z", false);
+				dataObj.addProperty("inflate", true);
+				json.add("data", dataObj);
+
+				json.addProperty("animation_ticks", 0D);
+
+				var locArr = new JsonArray();
+				var loc = new JsonArray();
+				loc.add(current.minX);
+				loc.add(current.minY);
+				loc.add(current.minZ);
+				locArr.add(loc);
+				json.add("locations", locArr);
+
+				json.addProperty("preload", true);
 
 				for (int chunkY = minChunkY; chunkY <= maxChunkY; chunkY++) {
 					for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
@@ -121,21 +139,23 @@ public interface GhostStructureCapture {
 
 							slice.toVStruct(structureDir.resolve("%s.vstruct".formatted(posString)));
 
-							Files.writeString(jsonDir.resolve("%s.json".formatted(posString)), """
-								{
-								 	"structures": [{
-								 		"id": "video:ghost_chunks/%s/%s",
-								 		"center_x": false,
-								 		"center_z": false
-								 	}],
-								 	"locations": ["video:ghost_chunks/%s"],
-								 	"slice": [%d, %d, %d, %d, %d, %d],
-								 	"preload": true,
-								 	"inflate": true
-								 }""".formatted(fname, posString, fname, rMinSliceX, rMinSliceY, rMinSliceZ, rMaxSliceX, rMaxSliceY, rMaxSliceZ));
+							var str = new JsonObject();
+							str.addProperty("structure", "video:ghost_chunks/%s/%s".formatted(fname, posString));
+
+							var boundsArr = new JsonArray();
+							boundsArr.add(rMinSliceX);
+							boundsArr.add(rMinSliceY);
+							boundsArr.add(rMinSliceZ);
+							boundsArr.add(rMaxSliceX);
+							boundsArr.add(rMaxSliceY);
+							boundsArr.add(rMaxSliceZ);
+							str.add("bounds", boundsArr);
+							strucArr.add(str);
 						}
 					}
 				}
+
+				Files.writeString(jsonDir.resolve("%s.json".formatted(fname)), JsonUtils.string(json));
 			}
 
 			long doneTime = (System.currentTimeMillis() - startTime) / 1000L;

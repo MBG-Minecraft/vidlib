@@ -32,4 +32,9 @@ public record FixedWorldNumber(double number) implements WorldNumber {
 	public double get(WorldNumberContext ctx) {
 		return number;
 	}
+
+	@Override
+	public boolean isLiteral() {
+		return true;
+	}
 }

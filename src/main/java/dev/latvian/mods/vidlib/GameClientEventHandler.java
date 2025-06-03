@@ -163,6 +163,32 @@ public class GameClientEventHandler {
 	}
 
 	@SubscribeEvent(priority = EventPriority.HIGH)
+	public static void frameGraphSetup(FrameGraphSetupEvent event) {
+		var mc = Minecraft.getInstance();
+		var session = mc.player.vl$sessionData();
+		FrameInfo.CURRENT = new FrameInfo(mc, session, event);
+
+		mc.vl$renderSetup();
+
+		var tool = VidLibTool.of(mc.player);
+
+		var screenDelta = event.getDeltaTracker().getGameTimeDeltaPartialTick(true);
+
+		if (tool != null) {
+			tool.getSecond().renderSetup(mc.player, tool.getFirst(), mc.hitResult, screenDelta);
+		}
+
+		GhostStructure.preRender(FrameInfo.CURRENT, mc.level.globalContext());
+
+		if (session.npcRecording != null) {
+			session.npcRecording.record(System.currentTimeMillis(), screenDelta, mc.player);
+		}
+
+		CanvasImpl.createHandles(event.getFrameGrapBuilder(), event.getRenderTargetDescriptor());
+		// event.enableOutlineProcessing();
+	}
+
+	@SubscribeEvent(priority = EventPriority.HIGH)
 	public static void renderWorld(RenderLevelStageEvent event) {
 		var mc = Minecraft.getInstance();
 
@@ -448,7 +474,7 @@ public class GameClientEventHandler {
 		var override = CameraOverride.get(mc);
 
 		if (override != null) {
-			event.setFOV((float) (event.getFOV() * override.getZoom(event.getPartialTick())));
+			event.setFOV((float) (event.getFOV() * override.getFOVModifier(event.getPartialTick())));
 		}
 
 		/*
@@ -588,29 +614,6 @@ public class GameClientEventHandler {
 		var mc = Minecraft.getInstance();
 		mc.vl$clearProfileCache();
 		AutoInit.Type.ASSETS_LOADED.invoke(mc.getResourceManager());
-	}
-
-	@SubscribeEvent
-	public static void frameGraphSetup(FrameGraphSetupEvent event) {
-		var mc = Minecraft.getInstance();
-		var session = mc.player.vl$sessionData();
-
-		mc.vl$renderSetup();
-
-		var tool = VidLibTool.of(mc.player);
-
-		var screenDelta = event.getDeltaTracker().getGameTimeDeltaPartialTick(true);
-
-		if (tool != null) {
-			tool.getSecond().renderSetup(mc.player, tool.getFirst(), mc.hitResult, screenDelta);
-		}
-
-		if (session.npcRecording != null) {
-			session.npcRecording.record(System.currentTimeMillis(), screenDelta, mc.player);
-		}
-
-		CanvasImpl.createHandles(event.getFrameGrapBuilder(), event.getRenderTargetDescriptor());
-		// event.enableOutlineProcessing();
 	}
 
 	@SubscribeEvent

@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.network.codec.ByteBufCodecs;
+import org.jetbrains.annotations.NotNull;
 
 public record VariableWorldNumber(String name) implements WorldNumber {
 	public static final SimpleRegistryType<VariableWorldNumber> TYPE = SimpleRegistryType.dynamic("variable", RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -19,5 +20,16 @@ public record VariableWorldNumber(String name) implements WorldNumber {
 	public double get(WorldNumberContext ctx) {
 		var num = ctx.variables.numbers().get(name);
 		return num == null ? Double.NaN : num.get(ctx);
+	}
+
+	@Override
+	@NotNull
+	public String toString() {
+		return name;
+	}
+
+	@Override
+	public boolean isLiteral() {
+		return true;
 	}
 }

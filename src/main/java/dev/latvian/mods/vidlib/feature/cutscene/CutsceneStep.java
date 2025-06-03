@@ -9,7 +9,7 @@ import dev.latvian.mods.vidlib.feature.fade.Fade;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.math.worldnumber.FixedWorldNumber;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumber;
-import dev.latvian.mods.vidlib.math.worldposition.WorldPosition;
+import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -63,9 +63,9 @@ public class CutsceneStep {
 	public static final Codec<CutsceneStep> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		WorldNumber.CODEC.optionalFieldOf("start", FixedWorldNumber.ZERO.instance()).forGetter(s -> s.start),
 		WorldNumber.CODEC.fieldOf("length").forGetter(s -> s.length),
-		WorldPosition.CODEC.optionalFieldOf("origin").forGetter(s -> s.origin),
-		WorldPosition.CODEC.optionalFieldOf("target").forGetter(s -> s.target),
-		WorldNumber.CODEC.optionalFieldOf("zoom").forGetter(s -> s.zoom),
+		WorldVector.CODEC.optionalFieldOf("origin").forGetter(s -> s.origin),
+		WorldVector.CODEC.optionalFieldOf("target").forGetter(s -> s.target),
+		WorldNumber.CODEC.optionalFieldOf("fov_modifier").forGetter(s -> s.fovModifier),
 		ComponentSerialization.CODEC.optionalFieldOf("status").forGetter(s -> s.status),
 		ComponentSerialization.CODEC.optionalFieldOf("top_bar").forGetter(s -> s.topBar),
 		ComponentSerialization.CODEC.optionalFieldOf("bottom_bar").forGetter(s -> s.bottomBar),
@@ -79,9 +79,9 @@ public class CutsceneStep {
 	public static final StreamCodec<RegistryFriendlyByteBuf, CutsceneStep> STREAM_CODEC = CompositeStreamCodec.of(
 		WorldNumber.STREAM_CODEC, s -> s.start,
 		WorldNumber.STREAM_CODEC, s -> s.length,
-		WorldPosition.STREAM_CODEC.optional(), s -> s.origin,
-		WorldPosition.STREAM_CODEC.optional(), s -> s.target,
-		WorldNumber.STREAM_CODEC.optional(), s -> s.zoom,
+		WorldVector.STREAM_CODEC.optional(), s -> s.origin,
+		WorldVector.STREAM_CODEC.optional(), s -> s.target,
+		WorldNumber.STREAM_CODEC.optional(), s -> s.fovModifier,
 		ComponentSerialization.STREAM_CODEC.optional(), s -> s.status,
 		ComponentSerialization.STREAM_CODEC.optional(), s -> s.topBar,
 		ComponentSerialization.STREAM_CODEC.optional(), s -> s.bottomBar,
@@ -113,9 +113,9 @@ public class CutsceneStep {
 	public final WorldNumber length;
 	public int resolvedStart;
 	public int resolvedLength;
-	public Optional<WorldPosition> origin = Optional.empty();
-	public Optional<WorldPosition> target = Optional.empty();
-	public Optional<WorldNumber> zoom = Optional.empty();
+	public Optional<WorldVector> origin = Optional.empty();
+	public Optional<WorldVector> target = Optional.empty();
+	public Optional<WorldNumber> fovModifier = Optional.empty();
 	public Optional<Component> status = Optional.empty();
 	public Optional<Component> topBar = Optional.empty();
 	public Optional<Component> bottomBar = Optional.empty();
@@ -128,9 +128,9 @@ public class CutsceneStep {
 	private CutsceneStep(
 		WorldNumber start,
 		WorldNumber length,
-		Optional<WorldPosition> origin,
-		Optional<WorldPosition> target,
-		Optional<WorldNumber> zoom,
+		Optional<WorldVector> origin,
+		Optional<WorldVector> target,
+		Optional<WorldNumber> fovModifier,
 		Optional<Component> status,
 		Optional<Component> topBar,
 		Optional<Component> bottomBar,
@@ -144,7 +144,7 @@ public class CutsceneStep {
 		this.length = length;
 		this.origin = origin;
 		this.target = target;
-		this.zoom = zoom;
+		this.fovModifier = fovModifier;
 		this.status = status;
 		this.topBar = topBar;
 		this.bottomBar = bottomBar;
@@ -164,22 +164,22 @@ public class CutsceneStep {
 		this.length = length;
 	}
 
-	public CutsceneStep origin(WorldPosition origin) {
+	public CutsceneStep origin(WorldVector origin) {
 		this.origin = Optional.of(origin);
 		return this;
 	}
 
-	public CutsceneStep target(WorldPosition target) {
+	public CutsceneStep target(WorldVector target) {
 		this.target = Optional.of(target);
 		return this;
 	}
 
-	public CutsceneStep rotated(WorldPosition origin, double yaw, double pitch) {
-		return origin(origin).target(origin.offset(WorldPosition.ofRotation(yaw, pitch)));
+	public CutsceneStep rotated(WorldVector origin, double yaw, double pitch) {
+		return origin(origin).target(origin.offset(WorldVector.ofRotation(yaw, pitch)));
 	}
 
-	public CutsceneStep zoom(WorldNumber zoom) {
-		this.zoom = Optional.of(zoom);
+	public CutsceneStep fovModifier(WorldNumber fovModifier) {
+		this.fovModifier = Optional.of(fovModifier);
 		return this;
 	}
 

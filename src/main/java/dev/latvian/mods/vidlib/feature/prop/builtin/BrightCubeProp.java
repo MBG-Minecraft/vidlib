@@ -17,6 +17,7 @@ public class BrightCubeProp extends Prop {
 	@AutoRegister
 	public static final PropType<BrightCubeProp> TYPE = PropType.create(VidLib.id("bright_cube"), BrightCubeProp::new, PropDataProvider.join(
 		BUILTIN_DATA,
+		LIFESPAN,
 		GRAVITY,
 		WIDTH,
 		HEIGHT,

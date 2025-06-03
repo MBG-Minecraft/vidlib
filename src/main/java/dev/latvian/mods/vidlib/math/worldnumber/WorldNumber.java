@@ -6,6 +6,7 @@ import dev.latvian.mods.kmath.easing.Easing;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -14,8 +15,26 @@ import java.util.function.Function;
 
 public interface WorldNumber {
 	SimpleRegistry<WorldNumber> REGISTRY = SimpleRegistry.create(WorldNumber::type);
-	Codec<WorldNumber> CODEC = Codec.either(Codec.DOUBLE, REGISTRY.valueCodec()).xmap(either -> either.map(FixedWorldNumber::of, Function.identity()), num -> num instanceof FixedWorldNumber(double number) ? Either.left(number) : Either.right(num));
-	StreamCodec<RegistryFriendlyByteBuf, WorldNumber> STREAM_CODEC = ByteBufCodecs.either(ByteBufCodecs.DOUBLE, REGISTRY.valueStreamCodec()).map(either -> either.map(FixedWorldNumber::of, Function.identity()), num -> num instanceof FixedWorldNumber(double number) ? Either.left(number) : Either.right(num));
+
+	Codec<WorldNumber> LITERAL_CODEC = Codec.either(Codec.DOUBLE, Codec.STRING).xmap(
+		e -> e.map(FixedWorldNumber::of, VariableWorldNumber::new),
+		v -> v instanceof FixedWorldNumber(double number) ? Either.left(number) : Either.right(v.toString())
+	);
+
+	Codec<WorldNumber> CODEC = Codec.either(LITERAL_CODEC, REGISTRY.valueCodec()).xmap(
+		e -> e.map(Function.identity(), Function.identity()),
+		v -> v.isLiteral() ? Either.left(v) : Either.right(v)
+	);
+
+	StreamCodec<ByteBuf, WorldNumber> LITERAL_STREAM_CODEC = ByteBufCodecs.either(ByteBufCodecs.DOUBLE, ByteBufCodecs.STRING_UTF8).map(
+		e -> e.map(FixedWorldNumber::of, VariableWorldNumber::new),
+		v -> v instanceof FixedWorldNumber(double number) ? Either.left(number) : Either.right(v.toString())
+	);
+
+	StreamCodec<RegistryFriendlyByteBuf, WorldNumber> STREAM_CODEC = ByteBufCodecs.either(LITERAL_STREAM_CODEC, REGISTRY.valueStreamCodec()).map(
+		e -> e.map(Function.identity(), Function.identity()),
+		v -> v.isLiteral() ? Either.left(v) : Either.right(v)
+	);
 
 	@AutoInit
 	static void bootstrap() {
@@ -52,5 +71,9 @@ public interface WorldNumber {
 
 	default WorldNumber interpolate(Easing easing, WorldNumber other) {
 		return interpolate(easing, 0F, 1F, other);
+	}
+
+	default boolean isLiteral() {
+		return false;
 	}
 }

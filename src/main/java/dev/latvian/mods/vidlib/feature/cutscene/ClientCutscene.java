@@ -26,7 +26,7 @@ public class ClientCutscene implements CameraOverride {
 	public int totalLength;
 
 	public Vec3 prevOrigin, origin, prevTarget, target;
-	public double prevZoom, zoom;
+	public double prevFovMod, fovMod;
 	public List<FormattedCharSequence> topBar, bottomBar;
 	public final List<SoundInstance> playingSounds;
 
@@ -41,7 +41,7 @@ public class ClientCutscene implements CameraOverride {
 		this.prevTotalTick = 0;
 		this.totalTick = 0;
 		this.totalLength = 0;
-		this.zoom = 1D;
+		this.fovMod = 1D;
 		this.playingSounds = new ArrayList<>();
 
 		var ctx = new WorldNumberContext(mc.level, 0F, variables);
@@ -66,8 +66,8 @@ public class ClientCutscene implements CameraOverride {
 					origin = step.origin.get().get(ctx);
 				}
 
-				if (step.zoom.isPresent()) {
-					zoom = step.zoom.get().get(ctx);
+				if (step.fovModifier.isPresent()) {
+					fovMod = step.fovModifier.get().get(ctx);
 				}
 			}
 		}
@@ -82,14 +82,14 @@ public class ClientCutscene implements CameraOverride {
 
 		this.prevOrigin = this.origin;
 		this.prevTarget = this.target;
-		this.prevZoom = this.zoom;
+		this.prevFovMod = this.fovMod;
 	}
 
 	public boolean tick() {
 		prevTotalTick = totalTick;
 		prevOrigin = origin;
 		prevTarget = target;
-		prevZoom = zoom;
+		prevFovMod = fovMod;
 
 		for (var step : steps) {
 			if (step.resolvedStart == totalTick) {
@@ -161,11 +161,11 @@ public class ClientCutscene implements CameraOverride {
 					}
 				}
 
-				if (step.zoom.isPresent()) {
-					zoom = step.zoom.get().get(ctx);
+				if (step.fovModifier.isPresent()) {
+					fovMod = step.fovModifier.get().get(ctx);
 
 					if (step.resolvedStart == totalTick && step.snap.zoom()) {
-						prevZoom = zoom;
+						prevFovMod = fovMod;
 					}
 				}
 
@@ -192,8 +192,8 @@ public class ClientCutscene implements CameraOverride {
 	}
 
 	@Override
-	public double getZoom(double delta) {
-		return KMath.lerp(delta, prevZoom, zoom);
+	public double getFOVModifier(double delta) {
+		return KMath.lerp(delta, prevFovMod, fovMod);
 	}
 
 	@Override

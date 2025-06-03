@@ -39,6 +39,12 @@ public interface JsonUtils {
 		write(new OutputStreamWriter(stream, StandardCharsets.UTF_8), json, pretty);
 	}
 
+	static String string(JsonElement json) {
+		var writer = new StringWriter();
+		write(writer, json, false);
+		return writer.toString();
+	}
+
 	static String prettyString(JsonElement json) {
 		var writer = new StringWriter();
 		write(writer, json, true);

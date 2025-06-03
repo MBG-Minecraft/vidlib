@@ -15,7 +15,7 @@ import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
-import dev.latvian.mods.vidlib.math.worldposition.EntityPositionType;
+import dev.latvian.mods.vidlib.math.worldvector.EntityPositionType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;

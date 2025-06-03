@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.math.worldposition;
+package dev.latvian.mods.vidlib.math.worldvector;
 
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;

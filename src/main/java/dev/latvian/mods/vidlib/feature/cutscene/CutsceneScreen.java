@@ -76,8 +76,8 @@ public class CutsceneScreen extends Screen {
 	}
 
 	@Override
-	public double getZoom(double delta) {
-		return clientCutscene.getZoom(delta);
+	public double getFOVModifier(double delta) {
+		return clientCutscene.getFOVModifier(delta);
 	}
 
 	@Override

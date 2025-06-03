@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.AABB;
+import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.Nullable;
 import org.joml.FrustumIntersection;
@@ -19,7 +20,7 @@ import org.joml.Vector3f;
 public record FrameInfo(
 	Minecraft mc,
 	LocalClientSessionData session,
-	RenderLevelStageEvent.Stage stage,
+	@Nullable RenderLevelStageEvent.Stage stage,
 	@Nullable TerrainRenderLayer layer,
 	PoseStack poseStack,
 	Matrix4fc projectionMatrix,
@@ -64,6 +65,30 @@ public record FrameInfo(
 			event.getPartialTick(),
 			event.getPartialTick().getGameTimeDeltaPartialTick(false),
 			event.getPartialTick().getGameTimeDeltaPartialTick(true),
+			event.getCamera(),
+			event.getCamera().getPosition().x,
+			event.getCamera().getPosition().y,
+			event.getCamera().getPosition().z,
+			event.getFrustum(),
+			mc.player.isReplayCamera(),
+			new Vector3f()
+		);
+	}
+
+	public FrameInfo(Minecraft mc, LocalClientSessionData session, FrameGraphSetupEvent event) {
+		this(
+			mc,
+			session,
+			null,
+			null,
+			new PoseStack(),
+			event.getProjectionMatrix(),
+			event.getModelViewMatrix(),
+			new Matrix4f(event.getProjectionMatrix()).mul(event.getModelViewMatrix()),
+			mc.levelRenderer.getTicks(),
+			mc.getDeltaTracker(),
+			mc.getDeltaTracker().getGameTimeDeltaPartialTick(false),
+			mc.getDeltaTracker().getGameTimeDeltaPartialTick(true),
 			event.getCamera(),
 			event.getCamera().getPosition().x,
 			event.getCamera().getPosition().y,

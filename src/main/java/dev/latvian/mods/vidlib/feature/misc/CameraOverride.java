@@ -17,7 +17,7 @@ public interface CameraOverride {
 		}
 	}
 
-	default double getZoom(double delta) {
+	default double getFOVModifier(double delta) {
 		return 1D;
 	}
 

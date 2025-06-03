@@ -6,15 +6,15 @@ import dev.latvian.mods.kmath.shape.Shape;
 import dev.latvian.mods.kmath.vertex.VertexCallback;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
-import dev.latvian.mods.vidlib.math.worldposition.FixedWorldPosition;
-import dev.latvian.mods.vidlib.math.worldposition.WorldPosition;
+import dev.latvian.mods.vidlib.math.worldvector.FixedWorldVector;
+import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 
 public class TerrainHighlightInstance {
-	public final WorldPosition position;
+	public final WorldVector position;
 	public final Shape shape;
 	public final Gradient color;
-	public final WorldPosition scale;
+	public final WorldVector scale;
 	public final int duration;
 	public int prevTick;
 	public int tick;
@@ -45,7 +45,7 @@ public class TerrainHighlightInstance {
 
 			var s = scale.get(ctx);
 
-			if (s != null && s != FixedWorldPosition.ONE.instance().pos()) {
+			if (s != null && s != FixedWorldVector.ONE.instance().pos()) {
 				ms.scale((float) s.x, (float) s.y, (float) s.z);
 			}
 

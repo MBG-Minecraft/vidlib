@@ -20,6 +20,7 @@ import java.util.Set;
 
 public class Prop {
 	public static final PropData<Prop, Integer> TICK = PropData.create(Prop.class, "tick", DataType.VAR_INT, p -> p.tick, (p, v) -> p.tick = v);
+	public static final PropData<Prop, Integer> LIFESPAN = PropData.create(Prop.class, "lifespan", DataType.VAR_INT, p -> p.lifespan, (p, v) -> p.lifespan = v);
 	public static final PropData<Prop, Vector3d> POSITION = PropData.create(Prop.class, "position", JOMLDataTypes.DVEC_3, p -> p.pos, (p, v) -> p.pos.set(v));
 	public static final PropData<Prop, Vector3f> VELOCITY = PropData.create(Prop.class, "velocity", JOMLDataTypes.VEC_3, p -> p.velocity, (p, v) -> p.velocity.set(v));
 	public static final PropData<Prop, Vector3f> ROTATION = PropData.create(Prop.class, "rotation", JOMLDataTypes.VEC_3, p -> p.rotation, (p, v) -> p.rotation.set(v));
@@ -44,6 +45,7 @@ public class Prop {
 	Object cachedRenderer;
 
 	public int tick;
+	public int lifespan;
 	public final Vector3d pos;
 	public final Vector3d prevPos;
 	public final Vector3f velocity;
@@ -62,6 +64,7 @@ public class Prop {
 		this.uid = 0L;
 		this.removed = false;
 		this.tick = 0;
+		this.lifespan = 0;
 		this.pos = new Vector3d();
 		this.prevPos = new Vector3d();
 		this.velocity = new Vector3f();
@@ -77,7 +80,7 @@ public class Prop {
 		snap();
 		tick();
 
-		if (removed) {
+		if (isRemoved()) {
 			onRemoved();
 			level.getProps().onRemoved(this);
 			return true;
@@ -157,6 +160,15 @@ public class Prop {
 
 	public void tick() {
 		move();
+
+		if (lifespan > 0 && tick >= lifespan) {
+			onExpired();
+			remove();
+		}
+	}
+
+	public float getRelativeTick() {
+		return lifespan > 0 ? tick / (float) lifespan : 0F;
 	}
 
 	public void move() {
@@ -169,6 +181,9 @@ public class Prop {
 	}
 
 	public void onRemoved() {
+	}
+
+	public void onExpired() {
 	}
 
 	public void onSpawned(CommandSourceStack source) {

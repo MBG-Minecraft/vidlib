@@ -9,8 +9,8 @@ import dev.latvian.mods.kmath.shape.CylinderShape;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
-import dev.latvian.mods.vidlib.math.worldposition.FixedWorldPosition;
-import dev.latvian.mods.vidlib.math.worldposition.WorldPosition;
+import dev.latvian.mods.vidlib.math.worldvector.FixedWorldVector;
+import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 
@@ -24,10 +24,10 @@ public interface TerrainHighlightCommands {
 					.then(Commands.argument("duration", IntegerArgumentType.integer(0))
 						.executes(ctx -> {
 							ctx.getSource().getLevel().addTerrainHighlight(new TerrainHighlight(
-								WorldPosition.fixed(Vec3Argument.getVec3(ctx, "position")),
+								WorldVector.fixed(Vec3Argument.getVec3(ctx, "position")),
 								RegisteredDataType.SHAPE.get(ctx, "shape"),
 								RegisteredDataType.GRADIENT.get(ctx, "color"),
-								FixedWorldPosition.ONE.instance(),
+								FixedWorldVector.ONE.instance(),
 								IntegerArgumentType.getInteger(ctx, "duration")
 							));
 
@@ -42,7 +42,7 @@ public interface TerrainHighlightCommands {
 				.then(Commands.argument("radius", FloatArgumentType.floatArg(0F))
 					.then(Commands.argument("duration", IntegerArgumentType.integer(0))
 						.executes(ctx -> {
-							var pos = WorldPosition.fixed(Vec3Argument.getVec3(ctx, "position"));
+							var pos = WorldVector.fixed(Vec3Argument.getVec3(ctx, "position"));
 							var shape = new CylinderShape(FloatArgumentType.getFloat(ctx, "radius"), 0F);
 							var duration = IntegerArgumentType.getInteger(ctx, "duration");
 
@@ -50,7 +50,7 @@ public interface TerrainHighlightCommands {
 								pos,
 								shape,
 								new PairGradient(new Color(0xCCFFDD00).withAlpha(100), Color.RED.withAlpha(100), Easing.QUAD_IN),
-								FixedWorldPosition.ONE.instance(),
+								FixedWorldVector.ONE.instance(),
 								duration
 							));
 
@@ -58,7 +58,7 @@ public interface TerrainHighlightCommands {
 								pos,
 								shape,
 								Color.RED.withAlpha(100),
-								FixedWorldPosition.ZERO.instance().interpolate(Easing.QUAD_IN, FixedWorldPosition.ONE.instance()),
+								FixedWorldVector.ZERO.instance().interpolate(Easing.QUAD_IN, FixedWorldVector.ONE.instance()),
 								duration
 							));
 

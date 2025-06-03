@@ -1,12 +1,14 @@
-package dev.latvian.mods.vidlib.math.worldposition;
+package dev.latvian.mods.vidlib.math.worldvector;
 
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public class SourceWorldPosition implements WorldPosition {
-	public static final SimpleRegistryType.Unit<SourceWorldPosition> TYPE = SimpleRegistryType.unit("source", new SourceWorldPosition());
+public enum SourceWorldVector implements WorldVector {
+	INSTANCE;
+
+	public static final SimpleRegistryType.Unit<SourceWorldVector> TYPE = SimpleRegistryType.unit("source", SourceWorldVector.INSTANCE);
 
 	@Override
 	public SimpleRegistryType<?> type() {
@@ -17,5 +19,15 @@ public class SourceWorldPosition implements WorldPosition {
 	@Nullable
 	public Vec3 get(WorldNumberContext ctx) {
 		return ctx.sourcePos;
+	}
+
+	@Override
+	public String toString() {
+		return "source";
+	}
+
+	@Override
+	public boolean isLiteral() {
+		return true;
 	}
 }

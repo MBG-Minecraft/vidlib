@@ -7,11 +7,8 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.datafixers.util.Either;
 import com.mojang.math.Transformation;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.kmath.color.Color;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.client.StaticBuffers;
@@ -46,7 +43,6 @@ import java.util.Map;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class StructureRenderer implements WithCache {
@@ -96,25 +92,8 @@ public class StructureRenderer implements WithCache {
 		return create(id, id);
 	}
 
-	private static StructureRenderer createGhost(
-		ResourceLocation structure,
-		boolean centerX,
-		boolean centerY,
-		boolean centerZ,
-		boolean cull,
-		Color glowing,
-		int skyLight,
-		int blockLight
-	) {
-		var renderer = new StructureRenderer(structure, StructureHolder.refSupplier(StructureStorage.CLIENT.ref(structure)));
-		renderer.centerX = centerX;
-		renderer.centerY = centerY;
-		renderer.centerZ = centerZ;
-		renderer.cull = cull;
-		renderer.glowing = glowing;
-		renderer.skyLight = skyLight;
-		renderer.blockLight = blockLight;
-		return renderer;
+	private static StructureRenderer createGhost(ResourceLocation structure) {
+		return new StructureRenderer(structure, StructureHolder.refSupplier(StructureStorage.CLIENT.ref(structure)));
 	}
 
 	@AutoInit(AutoInit.Type.CHUNKS_RENDERED)
@@ -125,7 +104,7 @@ public class StructureRenderer implements WithCache {
 
 		for (var gs : GhostStructure.LIST) {
 			for (var s : gs.structures()) {
-				s.clearCache();
+				s.structure().clearCache();
 			}
 		}
 
@@ -138,7 +117,7 @@ public class StructureRenderer implements WithCache {
 
 			for (var gs : GhostStructure.LIST) {
 				for (var s : gs.structures()) {
-					if (s.rendering) {
+					if (s.structure().rendering) {
 						r++;
 					}
 				}
@@ -150,30 +129,11 @@ public class StructureRenderer implements WithCache {
 		return renderingAll;
 	}
 
-	private static final Codec<StructureRenderer> RECORD_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		ResourceLocation.CODEC.fieldOf("id").forGetter(r -> r.id),
-		Codec.BOOL.optionalFieldOf("center_x", true).forGetter(r -> r.centerX),
-		Codec.BOOL.optionalFieldOf("center_y", false).forGetter(r -> r.centerY),
-		Codec.BOOL.optionalFieldOf("center_z", true).forGetter(r -> r.centerZ),
-		Codec.BOOL.optionalFieldOf("cull", true).forGetter(r -> r.cull),
-		Color.CODEC.optionalFieldOf("glowing", Color.TRANSPARENT).forGetter(r -> r.glowing),
-		Codec.INT.optionalFieldOf("sky_level", 15).forGetter(r -> r.skyLight),
-		Codec.INT.optionalFieldOf("block_level", 15).forGetter(r -> r.blockLight)
-	).apply(instance, StructureRenderer::createGhost));
-
-	public static final Codec<StructureRenderer> GHOST_CODEC = Codec.either(ResourceLocation.CODEC, RECORD_CODEC).xmap(either -> either.map(StructureRenderer::create, Function.identity()), Either::right);
+	public static final Codec<StructureRenderer> GHOST_CODEC = ResourceLocation.CODEC.xmap(StructureRenderer::createGhost, r -> r.id);
 
 	public final ResourceLocation id;
 	private final Supplier<StructureHolder> structureProvider;
-	public boolean centerX;
-	public boolean centerY;
-	public boolean centerZ;
-	public boolean cull;
-	public Color glowing;
-	public int skyLight;
-	public int blockLight;
 	public BlockPos origin;
-	public boolean inflate;
 
 	private EnumMap<TerrainRenderLayer, CachedLayer> layers = null;
 	private boolean rendering = false;
@@ -182,18 +142,10 @@ public class StructureRenderer implements WithCache {
 	private StructureRenderer(ResourceLocation id, Supplier<StructureHolder> structureProvider) {
 		this.id = id;
 		this.structureProvider = structureProvider;
-		this.centerX = true;
-		this.centerY = false;
-		this.centerZ = true;
-		this.cull = true;
-		this.glowing = Color.TRANSPARENT;
-		this.skyLight = 15;
-		this.blockLight = 15;
 		this.origin = BlockPos.ZERO;
-		this.inflate = false;
 	}
 
-	public void preRender() {
+	public void preRender(StructureRendererData data) {
 		var mc = Minecraft.getInstance();
 
 		if (mc.level == null) {
@@ -207,7 +159,7 @@ public class StructureRenderer implements WithCache {
 
 			if (structure != null) {
 				rendering = true;
-				buildLevel(mc, structure);
+				buildLevel(mc, structure, data);
 			} else {
 				rendering = false;
 			}
@@ -216,11 +168,11 @@ public class StructureRenderer implements WithCache {
 		}
 	}
 
-	private void buildLevel(Minecraft mc, StructureHolder structure) {
-		CompletableFuture.runAsync(() -> buildLayers(mc, structure.withoutInvisibleBlocks()), Util.backgroundExecutor());
+	private void buildLevel(Minecraft mc, StructureHolder structure, StructureRendererData data) {
+		CompletableFuture.runAsync(() -> buildLayers(mc, structure.withoutInvisibleBlocks(), data), Util.backgroundExecutor());
 	}
 
-	private void buildLayers(Minecraft mc, StructureHolder structure) {
+	private void buildLayers(Minecraft mc, StructureHolder structure, StructureRendererData data) {
 		var start = System.currentTimeMillis();
 		var blockRenderer = mc.getBlockRenderer();
 		var random = RandomSource.create();
@@ -278,14 +230,14 @@ public class StructureRenderer implements WithCache {
 		var buildingLayerArray = layerMap.values().toArray(BuildingLayer.EMPTY);
 		Arrays.sort(buildingLayerArray, Comparator.comparingInt(BuildingLayer::sort));
 
-		var level = new StructureRendererLevel(structure.blocks(), skyLight, blockLight, mc.level.registryAccess().get(Biomes.PLAINS).get().value());
+		var level = new StructureRendererLevel(structure.blocks(), data.skyLight(), data.blockLight(), mc.level.registryAccess().get(Biomes.PLAINS).get().value());
 
 		var poseStack = new PoseStack();
 
-		if (centerX || centerY || centerZ) {
-			var x = centerX ? -structure.size().getX() / 2D : 0D;
-			var y = centerY ? -structure.size().getY() / 2D : 0D;
-			var z = centerZ ? -structure.size().getZ() / 2D : 0D;
+		if (data.centerX() || data.centerY() || data.centerZ()) {
+			var x = data.centerX() ? -structure.size().getX() / 2D : 0D;
+			var y = data.centerY() ? -structure.size().getY() / 2D : 0D;
+			var z = data.centerZ() ? -structure.size().getZ() / 2D : 0D;
 			poseStack.translate(x, y, z);
 		}
 
@@ -298,7 +250,7 @@ public class StructureRenderer implements WithCache {
 				poseStack.translate(model.pos.getX(), model.pos.getY(), model.pos.getZ());
 
 				try {
-					blockRenderer.renderBatched(model.state, model.pos, level, poseStack, layer.bufferBuilder, cull, parts);
+					blockRenderer.renderBatched(model.state, model.pos, level, poseStack, layer.bufferBuilder, data.cull(), parts);
 				} catch (Throwable ex) {
 					VidLib.LOGGER.info("Error rendering " + model.state.getBlock().getName().getString() + " structure block at " + model.pos, ex);
 				}
@@ -363,15 +315,15 @@ public class StructureRenderer implements WithCache {
 		layers = null;
 	}
 
-	public void render(PoseStack ms) {
+	public void render(PoseStack ms, StructureRendererData data) {
 		for (var renderLayerFilter : TerrainRenderLayer.ALL) {
-			render(ms, renderLayerFilter);
+			render(ms, renderLayerFilter, data);
 		}
 	}
 
-	public void render(PoseStack ms, TerrainRenderLayer renderLayerFilter) {
+	public void render(PoseStack ms, TerrainRenderLayer renderLayerFilter, StructureRendererData data) {
 		if (layers == null) {
-			preRender();
+			preRender(data);
 		}
 
 		var layers0 = layers;

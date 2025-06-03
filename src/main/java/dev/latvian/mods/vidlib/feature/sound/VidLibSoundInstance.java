@@ -2,14 +2,14 @@ package dev.latvian.mods.vidlib.feature.sound;
 
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
-import dev.latvian.mods.vidlib.math.worldposition.WorldPosition;
+import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.world.level.Level;
 
 public class VidLibSoundInstance extends AbstractTickableSoundInstance {
 	public final Level level;
-	public final WorldPosition position;
+	public final WorldVector position;
 	public final WorldNumberVariables variables;
 	public final float targetVolume;
 	public final boolean stopImmediately;

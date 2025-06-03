@@ -42,7 +42,7 @@ import dev.latvian.mods.vidlib.feature.sound.SoundPayload;
 import dev.latvian.mods.vidlib.feature.vote.StartNumberVotingPayload;
 import dev.latvian.mods.vidlib.feature.vote.StartYesNoVotingPayload;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
-import dev.latvian.mods.vidlib.math.worldposition.WorldPosition;
+import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
 import dev.latvian.mods.vidlib.util.MessageConsumer;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.LongList;
@@ -206,7 +206,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void playGlobalSound(Vec3 pos, SoundData sound) {
-		playGlobalSound(new PositionedSoundData(sound, WorldPosition.fixed(pos), false, false), WorldNumberVariables.EMPTY);
+		playGlobalSound(new PositionedSoundData(sound, WorldVector.fixed(pos), false, false), WorldNumberVariables.EMPTY);
 	}
 
 	default void playGlobalSound(SoundData sound) {

@@ -75,12 +75,12 @@ public record CubeTextures(
 	);
 
 	public static final CubeTextures OPAQUE_WATER = fluid(
-		VidLib.id("block/opaque_water_still"),
-		VidLib.id("block/opaque_water_flow")
+		VidLib.id("block/opaque_water/still"),
+		VidLib.id("block/opaque_water/flow")
 	);
 
 	public static final CubeTextures PALE_OPAQUE_WATER = fluid(
-		VidLib.id("block/pale_opaque_water_still"),
-		VidLib.id("block/pale_opaque_water_flow")
+		VidLib.id("block/pale_opaque_water/still"),
+		VidLib.id("block/pale_opaque_water/flow")
 	);
 }
