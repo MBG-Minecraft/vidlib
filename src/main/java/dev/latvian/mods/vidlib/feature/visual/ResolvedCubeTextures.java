@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.texture;
+package dev.latvian.mods.vidlib.feature.visual;
 
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import org.jetbrains.annotations.Nullable;

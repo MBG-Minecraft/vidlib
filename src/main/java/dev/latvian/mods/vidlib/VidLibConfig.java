@@ -17,4 +17,5 @@ public class VidLibConfig {
 	public static boolean debugS2CPackets = System.getenv().getOrDefault("VIDLIB_DEBUG_S2C_PACKETS", "0").equals("1");
 	public static boolean entityOutlineDepth = true;
 	public static boolean forceHalfAuto = true;
+	public static boolean infiniteArrows = true;
 }

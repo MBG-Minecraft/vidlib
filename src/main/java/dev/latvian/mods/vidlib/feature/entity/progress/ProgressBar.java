@@ -1,9 +1,11 @@
 package dev.latvian.mods.vidlib.feature.entity.progress;
 
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 public record ProgressBar(ProgressBarType type, ProgressGetter progressGetter) {
 	public record Value(ProgressBar bar, float progress) {
@@ -43,4 +45,5 @@ public record ProgressBar(ProgressBarType type, ProgressGetter progressGetter) {
 	public static final ProgressBar YELLOW_ENTITY = entity(ProgressBarType.YELLOW);
 
 	public static ProgressBar DEFAULT_ENTITY = PURPLE_ENTITY;
+	public static Function<Player, ProgressBar> PLAYER = p -> DEFAULT_ENTITY;
 }

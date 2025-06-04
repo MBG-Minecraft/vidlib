@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.texture;
+package dev.latvian.mods.vidlib.feature.visual;
 
 public interface EphemeralTexture extends AutoCloseable {
 }

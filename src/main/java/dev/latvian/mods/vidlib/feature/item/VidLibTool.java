@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.VidLibContent;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
+import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -142,7 +143,7 @@ public interface VidLibTool {
 	default void debugText(Player player, ItemStack item, @Nullable HitResult hit, ScreenText screenText) {
 	}
 
-	default ToolVisuals visuals(Player player, ItemStack item, float delta) {
-		return ToolVisuals.NONE;
+	default Visuals visuals(Player player, ItemStack item, float delta) {
+		return Visuals.NONE;
 	}
 }

@@ -16,6 +16,15 @@ public interface VidLibRenderTypes {
 			.createCompositeState(false)
 	);
 
+	TexturedRenderType GUI_BLUR = TexturedRenderType.internal(
+		"gui_blur",
+		786432,
+		RenderPipelines.GUI_TEXTURED,
+		texture -> RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.TRUE, false))
+			.createCompositeState(false)
+	);
+
 	TexturedRenderType GUI_DEPTH = TexturedRenderType.internal(
 		"gui_depth",
 		786432,

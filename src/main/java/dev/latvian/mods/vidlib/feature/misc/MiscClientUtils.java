@@ -5,7 +5,7 @@ import com.mojang.math.Axis;
 import dev.latvian.mods.kmath.render.BufferSupplier;
 import dev.latvian.mods.kmath.render.CuboidRenderer;
 import dev.latvian.mods.vidlib.VidLibConfig;
-import dev.latvian.mods.vidlib.feature.item.ToolVisuals;
+import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -76,7 +76,7 @@ public class MiscClientUtils {
 		return -1;
 	}
 
-	public static void renderVisuals(PoseStack ms, Vec3 cameraPos, MultiBufferSource buffers, BufferSupplier type, ToolVisuals visuals) {
+	public static void renderVisuals(PoseStack ms, Vec3 cameraPos, MultiBufferSource buffers, BufferSupplier type, Visuals visuals, float progress) {
 		for (var cube : visuals.cubes()) {
 			ms.pushPose();
 			float x = (float) (cube.pos().x - cameraPos.x);
@@ -90,7 +90,22 @@ public class MiscClientUtils {
 			ms.popPose();
 		}
 
-		if (!visuals.lines().isEmpty()) {
+		if (!visuals.shapes().isEmpty()) {
+			var quadsBuffer = ms.last().transform(type.quads(buffers, false));
+
+			for (var shape : visuals.shapes()) {
+				var col = shape.shape().quads().get(progress);
+
+				if (!col.isTransparent()) {
+					float rx = (float) (shape.position().x - cameraPos.x);
+					float ry = (float) (shape.position().y - cameraPos.y);
+					float rz = (float) (shape.position().z - cameraPos.z);
+					shape.shape().shape().buildQuads(rx, ry, rz, quadsBuffer.withColor(col.withAlpha(50)));
+				}
+			}
+		}
+
+		if (!visuals.lines().isEmpty() || !visuals.shapes().isEmpty()) {
 			var linesBuffer = ms.last().transform(type.lines(buffers));
 
 			for (var line : visuals.lines()) {
@@ -100,6 +115,17 @@ public class MiscClientUtils {
 
 				linesBuffer.acceptPos(rx, ry, rz).acceptCol(line.startColor().redf(), line.startColor().greenf(), line.startColor().bluef(), line.startColor().alphaf());
 				linesBuffer.acceptPos(rx + (float) line.line().dx(), ry + (float) line.line().dy(), rz + (float) line.line().dz()).acceptCol(line.endColor().redf(), line.endColor().greenf(), line.endColor().bluef(), line.endColor().alphaf());
+			}
+
+			for (var shape : visuals.shapes()) {
+				var col = shape.shape().lines().get(progress);
+
+				if (!col.isTransparent()) {
+					float rx = (float) (shape.position().x - cameraPos.x);
+					float ry = (float) (shape.position().y - cameraPos.y);
+					float rz = (float) (shape.position().z - cameraPos.z);
+					shape.shape().shape().buildLines(rx, ry, rz, linesBuffer.withColor(col));
+				}
 			}
 		}
 	}

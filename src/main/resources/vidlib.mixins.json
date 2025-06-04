@@ -4,6 +4,7 @@
 	"package": "dev.latvian.mods.vidlib.core.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
+		"AbstractArrowMixin",
 		"AdvancementTreeMixin",
 		"BarrierBlockMixin",
 		"BlockInWorldMixin",
@@ -34,6 +35,7 @@
 		"PlayerListMixin",
 		"PlayerMixin",
 		"PoiSectionMixin",
+		"ProjectileWeaponItemMixin",
 		"ScoreboardMixin",
 		"SectionStorageMixin",
 		"ServerboundSetStructureBlockPacketMixin",

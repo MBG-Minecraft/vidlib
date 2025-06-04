@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.texture;
+package dev.latvian.mods.vidlib.feature.visual;
 
 import dev.latvian.mods.kmath.Directions;
 import dev.latvian.mods.kmath.color.Color;

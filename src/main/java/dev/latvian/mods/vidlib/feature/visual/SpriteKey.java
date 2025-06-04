@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.texture;
+package dev.latvian.mods.vidlib.feature.visual;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;

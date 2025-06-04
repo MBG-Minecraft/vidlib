@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.texture;
+package dev.latvian.mods.vidlib.feature.visual;
 
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;

@@ -4,7 +4,7 @@ import dev.latvian.mods.kmath.render.BufferSupplier;
 import dev.latvian.mods.kmath.vertex.VertexCallback;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasRenderPipelines;
 import dev.latvian.mods.vidlib.feature.client.TexturedRenderType;
-import dev.latvian.mods.vidlib.feature.texture.SpriteKey;
+import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import dev.latvian.mods.vidlib.util.Empty;
 import dev.latvian.mods.vidlib.util.client.MultiBufferSourceOverride;
 import net.minecraft.client.renderer.MultiBufferSource;

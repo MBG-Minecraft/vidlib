@@ -8,6 +8,7 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import dev.latvian.mods.vidlib.feature.misc.VidLibIcon;
 import dev.latvian.mods.vidlib.feature.particle.CubeParticleOptions;
+import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -162,12 +163,14 @@ public class PositionToolItem implements VidLibTool, PlayerActionHandler {
 	}
 
 	@Override
-	public ToolVisuals visuals(Player player, ItemStack item, float delta) {
+	public Visuals visuals(Player player, ItemStack item, float delta) {
 		if (clientPos != null) {
-			return ToolVisuals.cube(clientPos);
+			var visuals = new Visuals();
+			visuals.addCube(clientPos);
+			return visuals;
 		}
 
-		return ToolVisuals.NONE;
+		return Visuals.NONE;
 	}
 
 	@Override

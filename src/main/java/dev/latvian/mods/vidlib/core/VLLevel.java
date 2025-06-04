@@ -267,6 +267,10 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		return selectPlayers(ctx.getArgument(name, EntitySelector.class));
 	}
 
+	default List<Entity> getDamageableEntities(@Nullable Entity ignoredEntity, AABB box) {
+		return vl$level().getEntities(ignoredEntity, box, e -> e instanceof LivingEntity && (!(e instanceof Player) || e.isSurvivalLike()));
+	}
+
 	default float vl$getDelta() {
 		return 1F;
 	}

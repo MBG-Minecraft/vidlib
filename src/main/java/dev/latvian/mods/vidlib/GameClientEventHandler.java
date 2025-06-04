@@ -26,12 +26,13 @@ import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.feature.misc.DebugTextEvent;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
+import dev.latvian.mods.vidlib.feature.misc.ScreenTextRenderer;
 import dev.latvian.mods.vidlib.feature.misc.VidLibIcon;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructureCapture;
 import dev.latvian.mods.vidlib.feature.structure.StructureRenderer;
-import dev.latvian.mods.vidlib.feature.texture.TexturedCubeRenderer;
+import dev.latvian.mods.vidlib.feature.visual.TexturedCubeRenderer;
 import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
 import dev.latvian.mods.vidlib.util.JsonUtils;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
@@ -290,7 +291,7 @@ public class GameClientEventHandler {
 
 			if (tool != null) {
 				var visuals = tool.getSecond().visuals(mc.player, tool.getFirst(), frame.screenDelta());
-				MiscClientUtils.renderVisuals(frame.poseStack(), frame.camera().getPosition(), frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, visuals);
+				MiscClientUtils.renderVisuals(frame.poseStack(), frame.camera().getPosition(), frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, visuals, 1F);
 			}
 		}
 
@@ -389,46 +390,10 @@ public class GameClientEventHandler {
 				graphics.pose().pushPose();
 				graphics.pose().translate(0F, 0F, 800F);
 
-				int textHeight = height;
-				int bgColor = 0xA0000000;
-				int color = 0xFFFFFFFF;
-
 				if (mc.screen instanceof ChatScreen) {
-					textHeight -= 14;
-					bgColor = 0x40000000;
-					color = 0x70FFFFFF;
-				}
-
-				for (int i = 0; i < ScreenText.RENDER.topLeft.list.size(); i++) {
-					int w = mc.font.width(ScreenText.RENDER.topLeft.list.get(i));
-					int x = 1;
-					int y = 2 + i * 11;
-					graphics.fill(x, y, x + w + 3, y + 11, bgColor);
-					graphics.drawString(mc.font, ScreenText.RENDER.topLeft.list.get(i), x + 2, y + 2, color, true);
-				}
-
-				for (int i = 0; i < ScreenText.RENDER.topRight.list.size(); i++) {
-					int w = mc.font.width(ScreenText.RENDER.topRight.list.get(i));
-					int x = width - w - 4;
-					int y = 2 + i * 11;
-					graphics.fill(x, y, x + w + 3, y + 11, bgColor);
-					graphics.drawString(mc.font, ScreenText.RENDER.topRight.list.get(i), x + 2, y + 2, color, true);
-				}
-
-				for (int i = 0; i < ScreenText.RENDER.bottomLeft.list.size(); i++) {
-					int w = mc.font.width(ScreenText.RENDER.bottomLeft.list.get(i));
-					int x = 1;
-					int y = i * 11 + textHeight - ScreenText.RENDER.bottomLeft.list.size() * 11 - 2;
-					graphics.fill(x, y, x + w + 3, y + 11, bgColor);
-					graphics.drawString(mc.font, ScreenText.RENDER.bottomLeft.list.get(i), x + 2, y + 2, color, true);
-				}
-
-				for (int i = 0; i < ScreenText.RENDER.bottomRight.list.size(); i++) {
-					int w = mc.font.width(ScreenText.RENDER.bottomRight.list.get(i));
-					int x = width - w - 4;
-					int y = i * 11 + textHeight - ScreenText.RENDER.bottomRight.list.size() * 11 - 2;
-					graphics.fill(x, y, x + w + 3, y + 11, bgColor);
-					graphics.drawString(mc.font, ScreenText.RENDER.bottomRight.list.get(i), x + 2, y + 2, color, true);
+					ScreenTextRenderer.render(graphics, ScreenText.RENDER, mc.font, 0, 0, width, height - 14, 0x40000000, 0x70FFFFFF);
+				} else {
+					ScreenTextRenderer.render(graphics, ScreenText.RENDER, mc.font, 0, 0, width, height, 0xA0000000, 0xFFFFFFFF);
 				}
 
 				graphics.pose().popPose();

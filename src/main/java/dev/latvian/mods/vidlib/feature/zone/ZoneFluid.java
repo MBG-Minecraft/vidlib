@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.zone;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
 import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
-import dev.latvian.mods.vidlib.feature.texture.CubeTextures;
+import dev.latvian.mods.vidlib.feature.visual.CubeTextures;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;

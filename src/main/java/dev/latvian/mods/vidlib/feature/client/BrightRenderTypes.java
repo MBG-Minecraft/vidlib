@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.client;
 
 import dev.latvian.mods.vidlib.feature.canvas.CanvasRenderPipelines;
-import dev.latvian.mods.vidlib.feature.texture.SpriteKey;
+import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import dev.latvian.mods.vidlib.util.client.MultiBufferSourceOverride;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;

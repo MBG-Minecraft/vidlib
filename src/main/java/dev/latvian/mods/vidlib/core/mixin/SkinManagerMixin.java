@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
-import dev.latvian.mods.vidlib.feature.texture.PlayerSkinOverrides;
+import dev.latvian.mods.vidlib.feature.visual.PlayerSkinOverrides;
 import net.minecraft.client.resources.SkinManager;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
