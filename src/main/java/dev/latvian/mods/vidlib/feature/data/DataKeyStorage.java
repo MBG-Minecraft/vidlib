@@ -54,6 +54,14 @@ public class DataKeyStorage {
 		return new DataKey.Builder<>(this, id, type, defaultValue);
 	}
 
+	public <T> DataKey.Builder<T> buildDefault(String id, @Nullable RegisteredDataType<T> type, T defaultValue) {
+		return builder(id, type, defaultValue).save().sync();
+	}
+
+	public <T> DataKey<T> createDefault(String id, @Nullable RegisteredDataType<T> type, T defaultValue) {
+		return buildDefault(id, type, defaultValue).build();
+	}
+
 	@Override
 	public String toString() {
 		return name;
