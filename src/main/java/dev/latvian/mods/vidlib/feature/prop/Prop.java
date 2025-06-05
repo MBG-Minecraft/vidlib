@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.prop;
 import com.mojang.serialization.DynamicOps;
 import dev.latvian.mods.vidlib.feature.codec.DataType;
 import dev.latvian.mods.vidlib.feature.codec.JOMLDataTypes;
+import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.util.Cast;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
@@ -37,6 +38,7 @@ public class Prop {
 
 	public final PropType<?> type;
 	public final PropSpawnType spawnType;
+	public final long createdTime;
 	final Set<PropData<?, ?>> sync;
 	public Level level;
 	public int id;
@@ -59,6 +61,7 @@ public class Prop {
 	public Prop(PropContext<?> ctx) {
 		this.type = ctx.type();
 		this.spawnType = ctx.spawnType();
+		this.createdTime = ctx.createdTime();
 		this.sync = new ReferenceArraySet<>();
 		this.id = 0;
 		this.uid = 0L;
@@ -77,6 +80,10 @@ public class Prop {
 	}
 
 	public final boolean fullTick() {
+		if (createdTime > level.getGameTime()) {
+			return true;
+		}
+
 		snap();
 		tick();
 
@@ -103,17 +110,19 @@ public class Prop {
 		sync(GRAVITY);
 	}
 
-	byte[] consumeUpdates() {
-		if (sync.isEmpty()) {
+	byte[] getDataUpdates(boolean allData) {
+		var syncSet = allData ? type.data().values() : sync;
+
+		if (syncSet.isEmpty()) {
 			return null;
 		}
 
 		var buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), level.registryAccess(), ConnectionType.NEOFORGE);
 
 		try {
-			buf.writeVarInt(sync.size());
+			buf.writeVarInt(syncSet.size());
 
-			for (var data : sync) {
+			for (var data : syncSet) {
 				var value = data.get(Cast.to(this));
 				buf.writeVarInt(type.reverseIdMap().getInt(data));
 				data.type().streamCodec().encode(buf, Cast.to(value));
@@ -122,7 +131,10 @@ public class Prop {
 			return buf.array();
 		} finally {
 			buf.release();
-			sync.clear();
+
+			if (!allData) {
+				sync.clear();
+			}
 		}
 	}
 
@@ -200,5 +212,9 @@ public class Prop {
 	@Override
 	public String toString() {
 		return "%s#%08X/%d".formatted(type.id(), uid, id);
+	}
+
+	public SimplePacketPayload createAddPacket() {
+		return new AddPropPayload(this);
 	}
 }

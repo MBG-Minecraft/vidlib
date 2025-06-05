@@ -7,15 +7,20 @@ import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 import net.minecraft.network.codec.ByteBufCodecs;
 
-public record AddPropPayload(PropType<?> type, PropSpawnType spawnType, int id, byte[] update) implements SimplePacketPayload {
+public record AddPropPayload(PropType<?> type, PropSpawnType spawnType, int id, long createdTime, byte[] update) implements SimplePacketPayload {
 	@AutoPacket
 	public static final VidLibPacketType<AddPropPayload> TYPE = VidLibPacketType.internal("add_prop", CompositeStreamCodec.of(
 		PropType.STREAM_CODEC, AddPropPayload::type,
 		PropSpawnType.STREAM_CODEC, AddPropPayload::spawnType,
 		ByteBufCodecs.VAR_INT, AddPropPayload::id,
+		ByteBufCodecs.VAR_LONG, AddPropPayload::createdTime,
 		ByteBufCodecs.BYTE_ARRAY, AddPropPayload::update,
 		AddPropPayload::new
 	));
+
+	public AddPropPayload(Prop prop) {
+		this(prop.type, prop.spawnType, prop.id, prop.createdTime, prop.getDataUpdates(true));
+	}
 
 	@Override
 	public VidLibPacketType<?> getType() {
@@ -25,7 +30,7 @@ public record AddPropPayload(PropType<?> type, PropSpawnType spawnType, int id, 
 	@Override
 	public void handle(Context ctx) {
 		var props = ctx.level().getProps();
-		var prop = type.factory().create(new PropContext(props, type, spawnType, null));
+		var prop = type.factory().create(props.context(type, spawnType, createdTime, null));
 		prop.id = id;
 		prop.update(ctx.level().registryAccess(), update);
 		props.add(prop);

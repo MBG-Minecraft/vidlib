@@ -31,4 +31,8 @@ public enum PropSpawnType implements StringRepresentable {
 	public boolean isCommandKillable() {
 		return this == USER || this == GAME;
 	}
+
+	public boolean generateId() {
+		return this == USER || this == GAME;
+	}
 }

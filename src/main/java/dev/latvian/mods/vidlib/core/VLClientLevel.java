@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
-import dev.latvian.mods.vidlib.feature.prop.ClientPropList;
+import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -21,7 +21,7 @@ public interface VLClientLevel extends VLLevel {
 	}
 
 	@Override
-	default ClientPropList getProps() {
+	default ClientProps getProps() {
 		throw new NoMixinException(this);
 	}
 

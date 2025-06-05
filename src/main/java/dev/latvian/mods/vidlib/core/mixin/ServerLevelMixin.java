@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 import dev.latvian.mods.vidlib.core.VLChunkMap;
 import dev.latvian.mods.vidlib.core.VLServerLevel;
 import dev.latvian.mods.vidlib.feature.misc.CreateFireworksPayload;
-import dev.latvian.mods.vidlib.feature.prop.ServerPropList;
+import dev.latvian.mods.vidlib.feature.prop.ServerProps;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -39,7 +39,7 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 	private final LongSet vl$anchoredChunks = new LongOpenHashSet();
 
 	@Unique
-	private ServerPropList vl$props;
+	private ServerProps vl$props;
 
 	protected ServerLevelMixin(WritableLevelData levelData, ResourceKey<Level> dimension, RegistryAccess registryAccess, Holder<DimensionType> dimensionTypeRegistration, boolean isClientSide, boolean isDebug, long biomeZoomSeed, int maxChainedNeighborUpdates) {
 		super(levelData, dimension, registryAccess, dimensionTypeRegistration, isClientSide, isDebug, biomeZoomSeed, maxChainedNeighborUpdates);
@@ -65,9 +65,9 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 	}
 
 	@Override
-	public ServerPropList getProps() {
+	public ServerProps getProps() {
 		if (vl$props == null) {
-			vl$props = new ServerPropList(vl$level());
+			vl$props = new ServerProps(vl$level());
 		}
 
 		return vl$props;

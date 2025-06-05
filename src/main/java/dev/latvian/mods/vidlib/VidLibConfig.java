@@ -18,4 +18,7 @@ public class VidLibConfig {
 	public static boolean entityOutlineDepth = true;
 	public static boolean forceHalfAuto = true;
 	public static boolean infiniteArrows = true;
+	public static boolean robert = true;
+	public static int clientRenderDistance = 40;
+	public static int serverRenderDistance = 32;
 }

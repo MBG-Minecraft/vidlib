@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import dev.latvian.mods.vidlib.core.VLClientLevel;
-import dev.latvian.mods.vidlib.feature.prop.ClientPropList;
+import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -29,15 +29,15 @@ public abstract class ClientLevelMixin implements VLClientLevel {
 	private Minecraft minecraft;
 
 	@Unique
-	private ClientPropList vl$props;
+	private ClientProps vl$props;
 
 	@Shadow
 	protected abstract LevelEntityGetter<Entity> getEntities();
 
 	@Override
-	public ClientPropList getProps() {
+	public ClientProps getProps() {
 		if (vl$props == null || vl$props.level != vl$level()) {
-			vl$props = new ClientPropList(vl$level());
+			vl$props = new ClientProps(vl$level());
 		}
 
 		return vl$props;

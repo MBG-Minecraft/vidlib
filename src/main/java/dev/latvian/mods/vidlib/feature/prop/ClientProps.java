@@ -11,10 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ClientPropList extends PropList<ClientLevel> {
+public class ClientProps extends Props<ClientLevel> {
 	public final Map<RenderLevelStageEvent.Stage, List<Prop>> renderedProps;
 
-	public ClientPropList(ClientLevel level) {
+	public ClientProps(ClientLevel level) {
 		super(level);
 		this.renderedProps = new Reference2ObjectOpenHashMap<>();
 	}

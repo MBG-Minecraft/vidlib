@@ -8,12 +8,12 @@ import net.minecraft.server.level.ServerLevel;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ServerPropList extends PropList<ServerLevel> {
+public class ServerProps extends Props<ServerLevel> {
 	private final List<Prop> pending;
 	private final IntList removed;
 	private int nextId;
 
-	public ServerPropList(ServerLevel level) {
+	public ServerProps(ServerLevel level) {
 		super(level);
 		this.pending = new ArrayList<>();
 		this.removed = new IntArrayList();
@@ -27,7 +27,7 @@ public class ServerPropList extends PropList<ServerLevel> {
 		var updates = new S2CPacketBundleBuilder(level);
 
 		for (var prop : active.values()) {
-			var update = prop.consumeUpdates();
+			var update = prop.getDataUpdates(false);
 
 			if (update != null) {
 				updates.s2c(new UpdatePropPayload(prop.id, update));
@@ -36,14 +36,17 @@ public class ServerPropList extends PropList<ServerLevel> {
 
 		if (!pending.isEmpty()) {
 			for (var prop : pending) {
-				prop.id = ++nextId;
+				if (prop.spawnType.generateId()) {
+					prop.id = ++nextId;
+				}
+
 				super.add(prop);
 
 				for (var data : prop.type.data().values()) {
 					prop.sync(data);
 				}
 
-				updates.s2c(new AddPropPayload(prop.type, prop.spawnType, prop.id, prop.consumeUpdates()));
+				updates.s2c(prop.createAddPacket());
 			}
 
 			pending.clear();
@@ -59,13 +62,20 @@ public class ServerPropList extends PropList<ServerLevel> {
 
 	@Override
 	public void add(Prop prop) {
-		if (prop.spawnType != PropSpawnType.DUMMY) {
+		if (isValid(prop.spawnType)) {
 			pending.add(prop);
 		}
 	}
 
 	@Override
 	protected void onRemoved(Prop prop) {
-		removed.add(prop.id);
+		if (prop.id != 0) {
+			removed.add(prop.id);
+		}
+	}
+
+	@Override
+	protected boolean isValid(PropSpawnType type) {
+		return type != PropSpawnType.DUMMY && type != PropSpawnType.ASSETS;
 	}
 }

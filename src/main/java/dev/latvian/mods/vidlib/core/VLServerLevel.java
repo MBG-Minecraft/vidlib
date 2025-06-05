@@ -5,7 +5,7 @@ import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModificationBundle;
 import dev.latvian.mods.vidlib.feature.bulk.OptimizedModificationBuilder;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
-import dev.latvian.mods.vidlib.feature.prop.ServerPropList;
+import dev.latvian.mods.vidlib.feature.prop.ServerProps;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
@@ -37,7 +37,7 @@ public interface VLServerLevel extends VLLevel {
 	}
 
 	@Override
-	default ServerPropList getProps() {
+	default ServerProps getProps() {
 		throw new NoMixinException(this);
 	}
 
@@ -58,10 +58,10 @@ public interface VLServerLevel extends VLLevel {
 			return 0;
 		}
 
-		if (optimized instanceof BulkLevelModificationBundle bundle) {
+		if (optimized instanceof BulkLevelModificationBundle(List<BulkLevelModification> list)) {
 			var builder = new OptimizedModificationBuilder();
 
-			for (var m : bundle.list()) {
+			for (var m : list) {
 				m.apply(builder);
 			}
 

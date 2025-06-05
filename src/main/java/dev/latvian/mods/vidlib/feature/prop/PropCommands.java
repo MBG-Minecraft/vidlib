@@ -54,7 +54,7 @@ public interface PropCommands {
 		}
 
 		var props = source.getLevel().getProps();
-		var propResult = props.create(new PropContext<>(props, type, PropSpawnType.USER, initialData), true, (list, prop) -> {
+		var propResult = props.create(props.context(type, PropSpawnType.USER, source.getLevel().getGameTime(), initialData), true, (list, prop) -> {
 			prop.pos.set(pos.x, pos.y, pos.z);
 			prop.onSpawned(source);
 			list.add(prop);

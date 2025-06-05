@@ -17,7 +17,7 @@ import dev.latvian.mods.vidlib.feature.bulk.UndoableModificationHolder;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityTypeFilter;
-import dev.latvian.mods.vidlib.feature.prop.PropList;
+import dev.latvian.mods.vidlib.feature.prop.Props;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
 import dev.latvian.mods.vidlib.util.PauseType;
@@ -62,7 +62,7 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		throw new NoMixinException(this);
 	}
 
-	default PropList<?> getProps() {
+	default Props<?> getProps() {
 		throw new NoMixinException(this);
 	}
 
