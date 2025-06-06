@@ -7,15 +7,17 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
 
 public enum PropSpawnType implements StringRepresentable {
-	DUMMY("dummy"),
-	USER("user"),
-	GAME("game"),
-	DATA("data"),
-	ASSETS("assets");
+	DUMMY(PropListType.LEVEL, "dummy"),
+	USER(PropListType.LEVEL, "user"),
+	GAME(PropListType.LEVEL, "game"),
+	DATA(PropListType.DATA, "data"),
+	ASSETS(PropListType.ASSETS, "assets");
 
+	public final PropListType listType;
 	private final String name;
 
-	PropSpawnType(String name) {
+	PropSpawnType(PropListType listType, String name) {
+		this.listType = listType;
 		this.name = name;
 	}
 
@@ -26,13 +28,5 @@ public enum PropSpawnType implements StringRepresentable {
 	@Override
 	public String getSerializedName() {
 		return name;
-	}
-
-	public boolean isCommandKillable() {
-		return this == USER || this == GAME;
-	}
-
-	public boolean generateId() {
-		return this == USER || this == GAME;
 	}
 }

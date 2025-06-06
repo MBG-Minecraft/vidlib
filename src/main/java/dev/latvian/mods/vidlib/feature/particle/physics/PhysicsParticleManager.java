@@ -7,7 +7,6 @@ import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.client.IndexBuffer;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -54,7 +53,6 @@ public class PhysicsParticleManager {
 			left.accept("%,d/%,d [%dx] %s".formatted(manager.rendered, manager.particles.size(), manager.buffersSwitched, manager.displayName));
 		}
 
-		right.accept(Minecraft.getInstance().fpsString.split(" ", 2)[0] + " FPS");
 		right.accept("%,d/%,d [%dx] Total".formatted(totalRendered, total, totalBuffersSwitched));
 	}
 

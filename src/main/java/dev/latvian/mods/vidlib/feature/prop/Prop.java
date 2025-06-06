@@ -1,21 +1,33 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
 import com.mojang.serialization.DynamicOps;
+import dev.latvian.mods.kmath.Rotation;
+import dev.latvian.mods.kmath.Vec3f;
+import dev.latvian.mods.kmath.color.Color;
+import dev.latvian.mods.kmath.shape.ColoredShape;
+import dev.latvian.mods.kmath.shape.CuboidShape;
 import dev.latvian.mods.vidlib.feature.codec.DataType;
 import dev.latvian.mods.vidlib.feature.codec.JOMLDataTypes;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
+import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.util.Cast;
+import dev.latvian.mods.vidlib.util.client.FrustumCheck;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.Position;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.connection.ConnectionType;
 import org.joml.Vector3d;
+import org.joml.Vector3dc;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import java.util.Set;
 
@@ -46,6 +58,7 @@ public class Prop {
 	boolean removed;
 	Object cachedRenderer;
 
+	public int prevTick;
 	public int tick;
 	public int lifespan;
 	public final Vector3d pos;
@@ -103,11 +116,56 @@ public class Prop {
 		}
 	}
 
-	public void syncMovement() {
-		sync(POSITION);
-		sync(VELOCITY);
-		sync(ROTATION);
-		sync(GRAVITY);
+	public void setPos(double x, double y, double z) {
+		pos.set(x, y, z);
+	}
+
+	public Vec3 getPos(float delta) {
+		return new Vec3(
+			Mth.lerp(delta, prevPos.x, pos.x),
+			Mth.lerp(delta, prevPos.x, pos.y),
+			Mth.lerp(delta, prevPos.x, pos.z)
+		);
+	}
+
+	public final void setPos(Vector3dc pos) {
+		setPos(pos.x(), pos.y(), pos.z());
+	}
+
+	public final void setPos(Position pos) {
+		setPos(pos.x(), pos.y(), pos.z());
+	}
+
+	public void setVelocity(float x, float y, float z) {
+		velocity.set(x, y, z);
+	}
+
+	public final void setVelocity(Vector3fc velocity) {
+		setVelocity(velocity.x(), velocity.y(), velocity.z());
+	}
+
+	public void setRot(float yaw, float pitch, float roll) {
+		rotation.set(yaw, pitch, roll);
+	}
+
+	public float getPitch(float delta) {
+		return Mth.rotLerp(delta, prevRotation.x, rotation.x);
+	}
+
+	public float getYaw(float delta) {
+		return Mth.rotLerp(delta, prevRotation.y, rotation.y);
+	}
+
+	public float getRoll(float delta) {
+		return Mth.rotLerp(delta, prevRotation.z, rotation.z);
+	}
+
+	public final void setRot(Vector3fc rotation) {
+		setRot(rotation.x(), rotation.y(), rotation.z());
+	}
+
+	public final void setRot(Rotation rotation) {
+		setRot(rotation.yawDeg(), rotation.pitchDeg(), rotation.rollDeg());
 	}
 
 	byte[] getDataUpdates(boolean allData) {
@@ -166,6 +224,7 @@ public class Prop {
 	}
 
 	public void snap() {
+		prevTick = tick;
 		prevPos.set(pos);
 		prevRotation.set(rotation);
 	}
@@ -216,5 +275,28 @@ public class Prop {
 
 	public SimplePacketPayload createAddPacket() {
 		return new AddPropPayload(this);
+	}
+
+	public float getTick(float delta) {
+		return Mth.lerp(delta, prevTick, tick);
+	}
+
+	public double getMaxRenderDistance() {
+		return 8192D;
+	}
+
+	public boolean isVisible(double x, double y, double z, FrustumCheck frustum) {
+		double w = width / 2D;
+		return frustum.isVisible(x - w, y, z - w, x + w, y + height, z + w);
+	}
+
+	public Visuals getDebugVisuals(double x, double y, double z) {
+		var visuals = new Visuals();
+		visuals.add(new ColoredShape(new CuboidShape(new Vec3f((float) width, (float) height, (float) width), Rotation.NONE), Color.TRANSPARENT, Color.WHITE).at(new Vec3(x, y + height / 2D, z)));
+		return visuals;
+	}
+
+	public float getDebugVisualsProgress(float delta) {
+		return lifespan > 0 ? getTick(delta) / (float) lifespan : 1F;
 	}
 }

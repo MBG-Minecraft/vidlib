@@ -6,7 +6,6 @@ import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.constant.DataTickets;
@@ -33,17 +32,11 @@ public class GeoPropRenderer<P extends Prop & GeoProp> extends GeoObjectRenderer
 		var delta = state.getGeckolibData(DataTickets.PARTIAL_TICK);
 
 		if (delta != null) {
-			state.addGeckolibData(DataTickets.ENTITY_PITCH, Mth.rotLerp(delta, prop.prevRotation.x, prop.rotation.x));
-			state.addGeckolibData(DataTickets.ENTITY_YAW, Mth.rotLerp(delta, prop.prevRotation.y, prop.rotation.y));
-			state.addGeckolibData(ENTITY_ROLL, Mth.rotLerp(delta, prop.prevRotation.z, prop.rotation.z));
+			state.addGeckolibData(DataTickets.ENTITY_PITCH, prop.getPitch(delta));
+			state.addGeckolibData(DataTickets.ENTITY_YAW, prop.getYaw(delta));
+			state.addGeckolibData(ENTITY_ROLL, prop.getRoll(delta));
 			state.addGeckolibData(DataTickets.VELOCITY, new Vec3(prop.velocity.x, prop.velocity.y, prop.velocity.z));
-
-			var pos = new Vec3(
-				Mth.rotLerp(delta, prop.prevPos.x, prop.pos.x),
-				Mth.rotLerp(delta, prop.prevPos.x, prop.pos.y),
-				Mth.rotLerp(delta, prop.prevPos.x, prop.pos.z)
-			);
-
+			var pos = prop.getPos(delta);
 			state.addGeckolibData(DataTickets.BLOCKPOS, BlockPos.containing(pos));
 			state.addGeckolibData(DataTickets.POSITION, pos);
 		}

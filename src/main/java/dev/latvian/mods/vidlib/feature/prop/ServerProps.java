@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.prop;
 
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.server.level.ServerLevel;
 
 import java.util.ArrayList;
@@ -10,14 +9,10 @@ import java.util.List;
 
 public class ServerProps extends Props<ServerLevel> {
 	private final List<Prop> pending;
-	private final IntList removed;
-	private int nextId;
 
 	public ServerProps(ServerLevel level) {
 		super(level);
 		this.pending = new ArrayList<>();
-		this.removed = new IntArrayList();
-		this.nextId = 0;
 	}
 
 	@Override
@@ -26,20 +21,23 @@ public class ServerProps extends Props<ServerLevel> {
 
 		var updates = new S2CPacketBundleBuilder(level);
 
-		for (var prop : active.values()) {
-			var update = prop.getDataUpdates(false);
+		for (var list : propLists.values()) {
+			for (var prop : list) {
+				var update = prop.isRemoved() ? null : prop.getDataUpdates(false);
 
-			if (update != null) {
-				updates.s2c(new UpdatePropPayload(prop.id, update));
+				if (update != null) {
+					updates.s2c(new UpdatePropPayload(prop.spawnType.listType, prop.id, update));
+				}
+			}
+
+			if (!list.removed.isEmpty()) {
+				updates.s2c(new RemovePropsPayload(list.type, new IntArrayList(list.removed)));
+				list.removed.clear();
 			}
 		}
 
 		if (!pending.isEmpty()) {
 			for (var prop : pending) {
-				if (prop.spawnType.generateId()) {
-					prop.id = ++nextId;
-				}
-
 				super.add(prop);
 
 				for (var data : prop.type.data().values()) {
@@ -50,11 +48,6 @@ public class ServerProps extends Props<ServerLevel> {
 			}
 
 			pending.clear();
-		}
-
-		if (!removed.isEmpty()) {
-			updates.s2c(new RemovePropsPayload(new IntArrayList(removed)));
-			removed.clear();
 		}
 
 		updates.send(level);
@@ -70,7 +63,7 @@ public class ServerProps extends Props<ServerLevel> {
 	@Override
 	protected void onRemoved(Prop prop) {
 		if (prop.id != 0) {
-			removed.add(prop.id);
+			propLists.get(prop.spawnType.listType).removed.add(prop.id);
 		}
 	}
 

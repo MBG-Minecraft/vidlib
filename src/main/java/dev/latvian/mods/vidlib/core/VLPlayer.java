@@ -112,6 +112,14 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
 		set(InternalPlayerData.SHOW_ANCHOR, show);
 	}
 
+	default boolean getShowFPS() {
+		return get(InternalPlayerData.SHOW_FPS);
+	}
+
+	default void setShowFPS(boolean show) {
+		set(InternalPlayerData.SHOW_FPS, show);
+	}
+
 	default float getFlightSpeedMod() {
 		return vl$sessionData().flightSpeedMod;
 	}

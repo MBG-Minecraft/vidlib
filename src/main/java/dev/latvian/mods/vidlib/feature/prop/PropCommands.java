@@ -55,7 +55,7 @@ public interface PropCommands {
 
 		var props = source.getLevel().getProps();
 		var propResult = props.create(props.context(type, PropSpawnType.USER, source.getLevel().getGameTime(), initialData), true, (list, prop) -> {
-			prop.pos.set(pos.x, pos.y, pos.z);
+			prop.setPos(pos.x, pos.y, pos.z);
 			prop.onSpawned(source);
 			list.add(prop);
 		});
@@ -72,11 +72,9 @@ public interface PropCommands {
 		int killed = 0;
 
 		if (typeId == null) {
-			for (var prop : source.getLevel().getProps().active.values()) {
-				if (prop.spawnType.isCommandKillable()) {
-					prop.remove();
-					killed++;
-				}
+			for (var prop : source.getLevel().getProps().propLists.get(PropListType.LEVEL)) {
+				prop.remove();
+				killed++;
 			}
 		} else {
 			var type = PropType.ALL.get().get(typeId);
@@ -86,8 +84,8 @@ public interface PropCommands {
 				return 0;
 			}
 
-			for (var prop : source.getLevel().getProps().active.values()) {
-				if (prop.spawnType.isCommandKillable() && prop.type == type) {
+			for (var prop : source.getLevel().getProps().propLists.get(PropListType.LEVEL)) {
+				if (prop.type == type) {
 					prop.remove();
 					killed++;
 				}

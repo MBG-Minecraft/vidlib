@@ -26,6 +26,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 import java.util.Optional;
@@ -92,6 +93,7 @@ public record DataType<T>(
 	public static final DataType<ParticleOptions> PARTICLE_OPTIONS = of(ParticleTypes.CODEC, ParticleTypes.STREAM_CODEC, ParticleOptions.class);
 	public static final DataType<BlockState> BLOCK_STATE = of(VLCodecs.BLOCK_STATE, VLStreamCodecs.BLOCK_STATE, BlockState.class);
 	public static final DataType<FluidState> FLUID_STATE = of(VLCodecs.FLUID_STATE, VLStreamCodecs.FLUID_STATE, FluidState.class);
+	public static final DataType<Vec3> VEC3 = of(Vec3.CODEC, Vec3.STREAM_CODEC, Vec3.class);
 
 	public static final DataType<Color> COLOR = of(Color.CODEC, Color.STREAM_CODEC, Color.class);
 	public static final DataType<Gradient> GRADIENT = of(Gradient.CODEC, Gradient.STREAM_CODEC, Gradient.class);

@@ -21,16 +21,6 @@ public interface PropRenderer<P extends Prop> {
 		public Set<RenderLevelStageEvent.Stage> getStages(Prop prop) {
 			return Set.of();
 		}
-
-		@Override
-		public double getRenderDistance(Prop prop) {
-			return 0D;
-		}
-
-		@Override
-		public boolean isVisible(Prop prop, FrameInfo frame) {
-			return false;
-		}
 	};
 
 	record Holder(PropType<?> type, PropRenderer<?> renderer) {
@@ -52,21 +42,5 @@ public interface PropRenderer<P extends Prop> {
 
 	default int getPackedLight(P prop) {
 		return LightTexture.FULL_BRIGHT;
-	}
-
-	default double getRenderDistance(P prop) {
-		return 8192D;
-	}
-
-	default boolean isVisible(P prop, FrameInfo frame) {
-		double w = prop.width / 2D;
-		double minX = prop.pos.x - w;
-		double minY = prop.pos.y;
-		double minZ = prop.pos.z - w;
-		double maxX = prop.pos.x + w;
-		double maxY = prop.pos.y + prop.height;
-		double maxZ = prop.pos.z + w;
-		double d = getRenderDistance(prop);
-		return frame.distanceSq(minX, minY, minZ, maxX, maxY, maxZ) <= d * d && frame.isVisible(minX, minY, minZ, maxX, maxY, maxZ);
 	}
 }

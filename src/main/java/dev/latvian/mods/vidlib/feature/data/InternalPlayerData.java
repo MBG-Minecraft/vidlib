@@ -20,9 +20,10 @@ public interface InternalPlayerData {
 	DataKey<Boolean> SHOW_ZONES = DataKey.PLAYER.createDefault("show_zones", RegisteredDataType.BOOL, false);
 	DataKey<ZoneRenderType> ZONE_RENDER_TYPE = DataKey.PLAYER.createDefault("zone_render_type", ZoneRenderType.KNOWN_CODEC, ZoneRenderType.NORMAL);
 	DataKey<BlockFilter> ZONE_BLOCK_FILTER = DataKey.PLAYER.buildDefault("zone_block_filter", BlockFilter.REGISTERED_DATA_TYPE, BlockFilter.ANY.instance()).onReceived((player, value) -> player.vl$sessionData().refreshBlockZones()).build();
-	DataKey<Boolean> SHOW_ANCHOR = DataKey.PLAYER.createDefault("show_anchor", RegisteredDataType.BOOL, false);
-	DataKey<Float> FLIGHT_SPEED = DataKey.PLAYER.createDefault("flight_speed", RegisteredDataType.FLOAT, 1F);
+	DataKey<Boolean> SHOW_ANCHOR = DataKey.PLAYER.createDefaultBoolean("show_anchor", false);
+	DataKey<Float> FLIGHT_SPEED = DataKey.PLAYER.createDefaultFloat("flight_speed", 1F);
 	DataKey<ExplosionData> TEST_EXPLOSION = DataKey.PLAYER.buildDefault("test_explosion", ExplosionData.REGISTERED_DATA_TYPE, ExplosionData.DEFAULT).allowClientUpdates().build();
 	DataKey<PhysicsParticleData> TEST_PARTICLES = DataKey.PLAYER.buildDefault("test_physics_particles", PhysicsParticleData.REGISTERED_DATA_TYPE, PhysicsParticleData.DEFAULT).allowClientUpdates().build();
 	DataKey<Double> TEST_CAMERA_SHAKE = DataKey.PLAYER.buildDefault("test_camera_shake", RegisteredDataType.DOUBLE, 30D).allowClientUpdates().build();
+	DataKey<Boolean> SHOW_FPS = DataKey.PLAYER.createDefaultBoolean("show_fps", false);
 }

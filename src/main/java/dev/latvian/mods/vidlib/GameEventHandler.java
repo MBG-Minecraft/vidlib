@@ -9,6 +9,8 @@ import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.misc.MarkerData;
+import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.registry.GenericVLRegistry;
 import dev.latvian.mods.vidlib.feature.session.RemovePlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
@@ -100,6 +102,24 @@ public class GameEventHandler {
 		if (event.getEntity() instanceof ServerPlayer player) {
 			player.server.marker(new MarkerData("player/logged_out", player));
 			player.server.s2c(new RemovePlayerDataPayload(player.getUUID()));
+		}
+	}
+
+	@SubscribeEvent
+	public static void playerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+		if (event.getEntity() instanceof ServerPlayer player) {
+			var level = event.getEntity().level();
+			var packets = new S2CPacketBundleBuilder(level);
+
+			for (var list : level.getProps().propLists.values()) {
+				packets.s2c(new RemoveAllPropsPayload(list.type));
+
+				for (var prop : list) {
+					packets.s2c(prop.createAddPacket());
+				}
+			}
+
+			packets.send(player);
 		}
 	}
 

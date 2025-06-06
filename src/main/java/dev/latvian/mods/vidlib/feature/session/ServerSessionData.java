@@ -81,5 +81,13 @@ public class ServerSessionData extends SessionData {
 				s.dataMap.syncAll(packets, null, SyncPlayerDataPayload::new);
 			}
 		}
+
+		if (login) {
+			for (var list : level.getProps().propLists.values()) {
+				for (var prop : list) {
+					packets.s2c(prop.createAddPacket());
+				}
+			}
+		}
 	}
 }

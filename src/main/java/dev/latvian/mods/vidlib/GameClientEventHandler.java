@@ -293,6 +293,10 @@ public class GameClientEventHandler {
 				var visuals = tool.getSecond().visuals(mc.player, tool.getFirst(), frame.screenDelta());
 				MiscClientUtils.renderVisuals(frame.poseStack(), frame.camera().getPosition(), frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, visuals, 1F);
 			}
+
+			if (mc.getEntityRenderDispatcher().shouldRenderHitBoxes()) {
+				mc.level.getProps().renderDebug(frame);
+			}
 		}
 
 		mc.level.getProps().renderAll(frame);
@@ -350,6 +354,10 @@ public class GameClientEventHandler {
 			} else {
 				ScreenText.RENDER.topLeft.add(component);
 			}
+		}
+
+		if (mc.player.getShowFPS()) {
+			ScreenText.RENDER.topRight.add(mc.fpsString.split(" ", 2)[0] + " FPS");
 		}
 
 		if (!mc.vl$hideGui() && !mc.player.isReplayCamera()) {

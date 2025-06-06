@@ -62,6 +62,22 @@ public class DataKeyStorage {
 		return buildDefault(id, type, defaultValue).build();
 	}
 
+	public DataKey<Boolean> createDefaultBoolean(String id, boolean defaultValue) {
+		return createDefault(id, RegisteredDataType.BOOL, defaultValue);
+	}
+
+	public DataKey<Integer> createDefaultVarInt(String id, int defaultValue) {
+		return createDefault(id, RegisteredDataType.VAR_INT, defaultValue);
+	}
+
+	public DataKey<Float> createDefaultFloat(String id, float defaultValue) {
+		return createDefault(id, RegisteredDataType.FLOAT, defaultValue);
+	}
+
+	public DataKey<Double> createDefaultDouble(String id, double defaultValue) {
+		return createDefault(id, RegisteredDataType.DOUBLE, defaultValue);
+	}
+
 	@Override
 	public String toString() {
 		return name;

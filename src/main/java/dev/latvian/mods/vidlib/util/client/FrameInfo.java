@@ -8,7 +8,6 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.Nullable;
@@ -37,7 +36,7 @@ public record FrameInfo(
 	Frustum frustum,
 	boolean replay,
 	Vector3f normal
-) implements FramePoseStack {
+) implements FramePoseStack, FrustumCheck {
 	public static FrameInfo CURRENT;
 
 	@Nullable
@@ -103,13 +102,10 @@ public record FrameInfo(
 		return mc.renderBuffers().bufferSource();
 	}
 
+	@Override
 	public boolean isVisible(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
 		int f = frustum.cubeInFrustum(minX, minY, minZ, maxX, maxY, maxZ);
 		return f == FrustumIntersection.INSIDE || f == FrustumIntersection.INTERSECT;
-	}
-
-	public boolean isVisible(AABB aabb) {
-		return aabb.isInfinite() || isVisible(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ);
 	}
 
 	public boolean is(TerrainRenderLayer layer) {

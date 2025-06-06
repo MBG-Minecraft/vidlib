@@ -2,28 +2,24 @@ package dev.latvian.mods.vidlib.feature.prop;
 
 import com.mojang.serialization.DataResult;
 import dev.latvian.mods.vidlib.util.Empty;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public abstract class Props<L extends Level> {
 	public final L level;
-	public final Int2ObjectMap<Prop> active;
-	public final List<Prop> assetProps;
-	public final List<Prop> dataProps;
+	public final Map<PropListType, PropList> propLists;
 
 	public Props(L level) {
 		this.level = level;
-		this.active = new Int2ObjectOpenHashMap<>();
-		this.assetProps = new ArrayList<>();
-		this.dataProps = new ArrayList<>();
+		this.propLists = new EnumMap<>(PropListType.class);
+		this.propLists.put(PropListType.LEVEL, new PropList(this, PropListType.LEVEL));
+		this.propLists.put(PropListType.DATA, new PropList(this, PropListType.DATA));
 	}
 
 	public <P extends Prop> PropContext<P> context(PropType<P> type, PropSpawnType spawnType, long createdTime, @Nullable CompoundTag initialData) {
@@ -35,16 +31,8 @@ public abstract class Props<L extends Level> {
 	}
 
 	public void tick() {
-		if (!active.isEmpty()) {
-			active.values().removeIf(Prop::fullTick);
-		}
-
-		if (!assetProps.isEmpty()) {
-			assetProps.removeIf(Prop::fullTick);
-		}
-
-		if (!dataProps.isEmpty()) {
-			dataProps.removeIf(Prop::fullTick);
+		for (var list : propLists.values()) {
+			list.tick();
 		}
 	}
 
@@ -64,15 +52,7 @@ public abstract class Props<L extends Level> {
 		}
 
 		prop.level = level;
-
-		if (prop.spawnType == PropSpawnType.ASSETS) {
-			assetProps.add(prop);
-		} else if (prop.spawnType == PropSpawnType.DATA) {
-			dataProps.add(prop);
-		} else {
-			active.put(prop.id, prop);
-		}
-
+		propLists.get(prop.spawnType.listType).add(prop);
 		prop.onAdded();
 		onAdded(prop);
 		prop.snap();
