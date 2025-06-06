@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
 import com.mojang.serialization.DynamicOps;
+import dev.latvian.mods.kmath.FrustumCheck;
 import dev.latvian.mods.kmath.Rotation;
 import dev.latvian.mods.kmath.Vec3f;
 import dev.latvian.mods.kmath.color.Color;
@@ -11,7 +12,6 @@ import dev.latvian.mods.vidlib.feature.codec.JOMLDataTypes;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.util.Cast;
-import dev.latvian.mods.vidlib.util.client.FrustumCheck;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import net.minecraft.commands.CommandSourceStack;
@@ -76,6 +76,7 @@ public class Prop {
 		this.spawnType = ctx.spawnType();
 		this.createdTime = ctx.createdTime();
 		this.sync = new ReferenceArraySet<>();
+		this.level = ctx.props().level;
 		this.id = 0;
 		this.uid = 0L;
 		this.removed = false;

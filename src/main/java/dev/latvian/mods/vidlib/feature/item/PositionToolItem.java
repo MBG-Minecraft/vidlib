@@ -88,8 +88,8 @@ public class PositionToolItem implements VidLibTool, PlayerActionHandler {
 			}
 
 			var blockPos = BlockPos.containing(clientPos);
-			var strBlock = KMath.formatBlockPos(blockPos);
-			var strVec = KMath.formatVec3(clientPos);
+			var strBlock = KMath.format(blockPos);
+			var strVec = KMath.format(clientPos);
 			var strDist = KMath.format(lastClick.distanceTo(clientPos));
 
 			lastClick = clientPos;
@@ -123,7 +123,7 @@ public class PositionToolItem implements VidLibTool, PlayerActionHandler {
 	@Override
 	public boolean useOnEntity(Player player, ItemStack item, Entity target) {
 		if (player.level().isClientSide()) {
-			var str = KMath.formatVec3(target.position());
+			var str = KMath.format(target.position());
 			player.tell(Component.empty().append(target.getName()).append(": " + str).withStyle(Style.EMPTY.withCopyString(str)));
 		}
 
@@ -154,8 +154,8 @@ public class PositionToolItem implements VidLibTool, PlayerActionHandler {
 
 		var blockPos = BlockPos.containing(clientPos);
 		screenText.topRight.add(player.level().getBlockState(blockPos).getBlock().getName());
-		screenText.topRight.add(KMath.formatBlockPos(blockPos));
-		screenText.topRight.add(KMath.formatVec3(clientPos));
+		screenText.topRight.add(KMath.format(blockPos));
+		screenText.topRight.add(KMath.format(clientPos));
 
 		if (lastClick != null) {
 			screenText.topRight.add(KMath.format(lastClick.distanceTo(clientPos)) + " m");

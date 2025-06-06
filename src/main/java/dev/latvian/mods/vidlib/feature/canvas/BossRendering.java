@@ -33,8 +33,8 @@ public class BossRendering {
 		var dispatcher = mc.getEntityRenderDispatcher();
 		dispatcher.setRenderShadow(false);
 		boolean hitbox = dispatcher.shouldRenderHitBoxes();
-		dispatcher.setRenderHitBoxes(false);
 		active++;
+		frame.poseStack().pushPose();
 
 		try {
 			var renderer = dispatcher.getRenderer(entity);
@@ -43,14 +43,13 @@ public class BossRendering {
 				float x = frame.x(Mth.lerp(delta, entity.xOld, entity.getX()));
 				float y = frame.y(Mth.lerp(delta, entity.yOld, entity.getY()));
 				float z = frame.z(Mth.lerp(delta, entity.zOld, entity.getZ()));
-				frame.poseStack().pushPose();
 				renderer.renderBoss(entity, frame.poseStack(), buffers, x, y, z, delta);
-				frame.poseStack().popPose();
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 
+		frame.poseStack().popPose();
 		dispatcher.setRenderShadow(true);
 		dispatcher.setRenderHitBoxes(hitbox);
 		active--;

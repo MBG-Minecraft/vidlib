@@ -51,7 +51,6 @@ public abstract class Props<L extends Level> {
 			return;
 		}
 
-		prop.level = level;
 		propLists.get(prop.spawnType.listType).add(prop);
 		prop.onAdded();
 		onAdded(prop);

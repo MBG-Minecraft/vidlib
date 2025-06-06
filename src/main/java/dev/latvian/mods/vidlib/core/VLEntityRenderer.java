@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.core;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.feature.canvas.BossRenderTypes;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -37,7 +38,8 @@ public interface VLEntityRenderer<T extends Entity, S extends EntityRenderState>
 		vl$self().render(state, ms, buffers, light);
 	}
 
-	default void renderBoss(T entity, PoseStack ms, MultiBufferSource buffers, double xOffset, double yOffset, double zOffset, float delta) {
+	default void renderBoss(T entity, PoseStack ms, MultiBufferSource buffers, float xOffset, float yOffset, float zOffset, float delta) {
+		Minecraft.getInstance().getEntityRenderDispatcher().setRenderHitBoxes(false);
 		renderModel(entity, ms, BossRenderTypes.override(buffers), xOffset, yOffset, zOffset, delta, LightTexture.FULL_BRIGHT);
 	}
 }
