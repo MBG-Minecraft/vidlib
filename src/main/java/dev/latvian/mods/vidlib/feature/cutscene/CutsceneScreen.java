@@ -5,6 +5,7 @@ import dev.latvian.mods.kmath.Rotation;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -93,6 +94,12 @@ public class CutsceneScreen extends Screen {
 	@Override
 	public boolean hideGui() {
 		return true;
+	}
+
+	@Override
+	@Nullable
+	public Biome.Precipitation getWeatherOverride() {
+		return clientCutscene.getWeatherOverride();
 	}
 
 	@Override

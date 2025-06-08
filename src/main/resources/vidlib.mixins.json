@@ -107,6 +107,7 @@
 		"SkinManagerMixin",
 		"SkyRendererMixin",
 		"TextureManagerMixin",
+		"WeatherEffectRendererMixin",
 		"WindowMixin"
 	],
 	"injectors": {
