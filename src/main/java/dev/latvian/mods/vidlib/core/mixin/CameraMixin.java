@@ -91,8 +91,9 @@ public abstract class CameraMixin implements VLCamera {
 	@ModifyReturnValue(method = "isDetached", at = @At("RETURN"))
 	private boolean vl$isDetached(boolean original) {
 		if (!original) {
-			var override = CameraOverride.get(Minecraft.getInstance());
-			return override != null && override.renderPlayer();
+			var mc = Minecraft.getInstance();
+			var override = CameraOverride.get(mc);
+			return override != null && override.renderPlayer() && !mc.player.getBoundingBox().contains(getPosition());
 		}
 
 		return true;

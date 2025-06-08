@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 import net.minecraft.network.codec.ByteBufCodecs;
+import org.jetbrains.annotations.Nullable;
 
 public record UpdatePropPayload(PropListType type, int id, byte[] update) implements SimplePacketPayload {
 	@AutoPacket
@@ -15,6 +16,17 @@ public record UpdatePropPayload(PropListType type, int id, byte[] update) implem
 		ByteBufCodecs.BYTE_ARRAY, UpdatePropPayload::update,
 		UpdatePropPayload::new
 	));
+
+	@Nullable
+	public static UpdatePropPayload of(Prop prop) {
+		var update = prop.isRemoved() ? null : prop.getDataUpdates(false);
+
+		if (update != null) {
+			return new UpdatePropPayload(prop.spawnType.listType, prop.id, update);
+		}
+
+		return null;
+	}
 
 	@Override
 	public VidLibPacketType<?> getType() {
@@ -26,7 +38,7 @@ public record UpdatePropPayload(PropListType type, int id, byte[] update) implem
 		var prop = ctx.level().getProps().propLists.get(type).get(id);
 
 		if (prop != null) {
-			prop.update(ctx.level().registryAccess(), update);
+			prop.update(ctx.level().registryAccess(), update, false);
 		}
 	}
 }

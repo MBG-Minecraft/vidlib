@@ -21,9 +21,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.connection.ConnectionType;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.joml.Vector3f;
@@ -54,7 +56,6 @@ public class Prop {
 	final Set<PropData<?, ?>> sync;
 	public Level level;
 	public int id;
-	public long uid;
 	boolean removed;
 	Object cachedRenderer;
 
@@ -78,7 +79,6 @@ public class Prop {
 		this.sync = new ReferenceArraySet<>();
 		this.level = ctx.props().level;
 		this.id = 0;
-		this.uid = 0L;
 		this.removed = false;
 		this.tick = 0;
 		this.lifespan = 0;
@@ -93,8 +93,8 @@ public class Prop {
 		this.height = 1D;
 	}
 
-	public final boolean fullTick() {
-		if (createdTime > level.getGameTime()) {
+	public final boolean fullTick(long time) {
+		if (isRemoved() || createdTime > time) {
 			return true;
 		}
 
@@ -102,8 +102,6 @@ public class Prop {
 		tick();
 
 		if (isRemoved()) {
-			onRemoved();
-			level.getProps().onRemoved(this);
 			return true;
 		}
 
@@ -197,7 +195,7 @@ public class Prop {
 		}
 	}
 
-	void update(RegistryAccess registryAccess, byte[] update) {
+	void update(RegistryAccess registryAccess, byte[] update, boolean allData) {
 		var buf = new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(update), registryAccess, ConnectionType.NEOFORGE);
 
 		try {
@@ -216,7 +214,7 @@ public class Prop {
 		}
 	}
 
-	public void remove() {
+	public final void remove() {
 		removed = true;
 	}
 
@@ -271,11 +269,16 @@ public class Prop {
 
 	@Override
 	public String toString() {
-		return "%s#%08X/%d".formatted(type.id(), uid, id);
+		return "%s#%04X".formatted(type.id(), id);
 	}
 
 	public SimplePacketPayload createAddPacket() {
 		return new AddPropPayload(this);
+	}
+
+	@Nullable
+	public SimplePacketPayload createUpdatePacket() {
+		return UpdatePropPayload.of(this);
 	}
 
 	public float getTick(float delta) {
@@ -293,11 +296,15 @@ public class Prop {
 
 	public Visuals getDebugVisuals(double x, double y, double z) {
 		var visuals = new Visuals();
-		visuals.add(new ColoredShape(new CuboidShape(new Vec3f((float) width, (float) height, (float) width), Rotation.NONE), Color.TRANSPARENT, Color.WHITE).at(new Vec3(x, y + height / 2D, z)));
+		visuals.add(new ColoredShape(new CuboidShape(Vec3f.of(width, height, width), Rotation.NONE), Color.TRANSPARENT, Color.WHITE).at(new Vec3(x, y + height / 2D, z)));
 		return visuals;
 	}
 
 	public float getDebugVisualsProgress(float delta) {
 		return lifespan > 0 ? getTick(delta) / (float) lifespan : 1F;
+	}
+
+	public Entity asEntity() {
+		return new PropEntity(this);
 	}
 }

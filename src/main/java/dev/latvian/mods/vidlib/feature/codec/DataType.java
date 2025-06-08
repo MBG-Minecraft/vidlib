@@ -8,6 +8,7 @@ import dev.latvian.mods.kmath.color.Gradient;
 import dev.latvian.mods.kmath.shape.Shape;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import dev.latvian.mods.vidlib.util.Cast;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -94,6 +95,7 @@ public record DataType<T>(
 	public static final DataType<BlockState> BLOCK_STATE = of(VLCodecs.BLOCK_STATE, VLStreamCodecs.BLOCK_STATE, BlockState.class);
 	public static final DataType<FluidState> FLUID_STATE = of(VLCodecs.FLUID_STATE, VLStreamCodecs.FLUID_STATE, FluidState.class);
 	public static final DataType<Vec3> VEC3 = of(Vec3.CODEC, Vec3.STREAM_CODEC, Vec3.class);
+	public static final DataType<BlockPos> BLOCK_POS = of(BlockPos.CODEC, BlockPos.STREAM_CODEC, BlockPos.class);
 
 	public static final DataType<Color> COLOR = of(Color.CODEC, Color.STREAM_CODEC, Color.class);
 	public static final DataType<Gradient> GRADIENT = of(Gradient.CODEC, Gradient.STREAM_CODEC, Gradient.class);

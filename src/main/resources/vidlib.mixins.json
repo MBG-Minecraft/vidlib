@@ -11,6 +11,7 @@
 		"BlockStateMixin",
 		"ChunkMapMixin",
 		"CollisionGetterMixin",
+		"CommandSourceStackMixin",
 		"ComponentMixin",
 		"CoralBlockMixin",
 		"DataResultMixin",

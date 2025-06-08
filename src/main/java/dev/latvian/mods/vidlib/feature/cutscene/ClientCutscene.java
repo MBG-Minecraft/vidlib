@@ -21,6 +21,7 @@ public class ClientCutscene implements CameraOverride {
 	public final WorldNumberVariables variables;
 	public final CutsceneStep[] steps;
 	public final Supplier<Vec3> sourcePos;
+	public final Vec3 originPos;
 	public int prevTotalTick;
 	public int totalTick;
 	public int totalLength;
@@ -37,6 +38,7 @@ public class ClientCutscene implements CameraOverride {
 		this.variables = variables;
 		this.steps = cutscene.steps.toArray(new CutsceneStep[0]);
 		this.sourcePos = sourcePos;
+		this.originPos = sourcePos.get();
 
 		this.prevTotalTick = 0;
 		this.totalTick = 0;
@@ -45,7 +47,8 @@ public class ClientCutscene implements CameraOverride {
 		this.playingSounds = new ArrayList<>();
 
 		var ctx = new WorldNumberContext(mc.level, 0F, variables);
-		ctx.sourcePos = sourcePos.get();
+		ctx.originPos = originPos;
+		ctx.sourcePos = originPos;
 
 		for (var step : steps) {
 			this.totalLength = Math.max(totalLength, step.resolvedStart + step.resolvedLength);
@@ -127,6 +130,7 @@ public class ClientCutscene implements CameraOverride {
 			if (totalTick >= step.resolvedStart && totalTick < step.resolvedStart + step.resolvedLength) {
 				float progress = (totalTick - step.resolvedStart) / (float) step.resolvedLength;
 				var ctx = new WorldNumberContext(mc.level, progress, variables);
+				ctx.originPos = originPos;
 				ctx.sourcePos = sourcePos.get();
 
 				step.prevRenderTarget = step.renderTarget;

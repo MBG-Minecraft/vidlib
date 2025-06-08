@@ -273,6 +273,24 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 			stopCutscene();
 		}
 
+		if (mode == 3) {
+			int currentMode = 0;
+
+			if (session.cameraOverride instanceof DetachedCamera) {
+				currentMode = 1;
+			} else if (session.cameraOverride instanceof FreeCamera) {
+				currentMode = 2;
+			}
+
+			if (currentMode == 1) {
+				mode = 2;
+			} else if (currentMode == 2) {
+				mode = 1;
+			} else {
+				mode = 2;
+			}
+		}
+
 		switch (mode) {
 			case 1 -> {
 				if (session.cameraOverride instanceof FreeCamera c) {

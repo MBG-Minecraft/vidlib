@@ -105,6 +105,18 @@ public record GhostStructure(
 					continue;
 				}
 
+				var scale = gs.scale.get(ctx);
+
+				if (scale == null) {
+					continue;
+				}
+
+				var scale3f = Vec3f.of(scale);
+
+				if (scale3f.x() == 0F || scale3f.y() == 0F || scale3f.z() == 0F) {
+					continue;
+				}
+
 				var blockPos = BlockPos.containing(pos);
 				var selectedStructures = gs.structures;
 
@@ -121,9 +133,6 @@ public record GhostStructure(
 					selectedStructures = List.of(gs.structures.get(index));
 				}
 
-				var scale = gs.scale.get(ctx);
-				var scale3f = scale == null ? Vec3f.ONE : new Vec3f((float) scale.x(), (float) scale.y(), (float) scale.z());
-
 				for (var s : selectedStructures) {
 					if (s.bounds().isPresent()) {
 						var b = s.bounds().get();
@@ -133,6 +142,10 @@ public record GhostStructure(
 						double maxX = pos.x + b.maxX() + 1D;
 						double maxY = pos.y + b.maxY() + 1D;
 						double maxZ = pos.z + b.maxZ() + 1D;
+
+						if (frame.distanceSq(minX, minY, minZ, maxX, maxY, maxZ) > 8192D * 8192D) {
+							continue;
+						}
 
 						if (!frame.isVisible(minX, minY, minZ, maxX, maxY, maxZ)) {
 							continue;

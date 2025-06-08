@@ -32,7 +32,7 @@ public abstract class Props<L extends Level> {
 
 	public void tick() {
 		for (var list : propLists.values()) {
-			list.tick();
+			list.tick(null);
 		}
 	}
 
@@ -47,14 +47,9 @@ public abstract class Props<L extends Level> {
 	}
 
 	public void add(Prop prop) {
-		if (!isValid(prop.spawnType)) {
-			return;
+		if (isValid(prop.spawnType)) {
+			propLists.get(prop.spawnType.listType).pending.add(prop);
 		}
-
-		propLists.get(prop.spawnType.listType).add(prop);
-		prop.onAdded();
-		onAdded(prop);
-		prop.snap();
 	}
 
 	public <P extends Prop> DataResult<P> create(PropContext<P> ctx, boolean full, @Nullable BiConsumer<Props<?>, P> onCreated) {

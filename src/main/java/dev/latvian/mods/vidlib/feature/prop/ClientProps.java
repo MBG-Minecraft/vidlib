@@ -5,17 +5,17 @@ import dev.latvian.mods.kmath.render.BufferSupplier;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.util.Cast;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 
 public class ClientProps extends Props<ClientLevel> {
-	public final Map<PropListType, Map<RenderLevelStageEvent.Stage, List<Prop>>> renderedPropLists;
+	public final Map<PropListType, Map<RenderLevelStageEvent.Stage, Int2ObjectMap<Prop>>> renderedPropLists;
 
 	public ClientProps(ClientLevel level) {
 		super(level);
@@ -36,7 +36,7 @@ public class ClientProps extends Props<ClientLevel> {
 		var renderedProps = renderedPropLists.computeIfAbsent(prop.spawnType.listType, k -> new Reference2ObjectOpenHashMap<>());
 
 		for (var stage : getRenderer(prop).getStages(Cast.to(prop))) {
-			renderedProps.computeIfAbsent(stage, k -> new ArrayList<>()).add(prop);
+			renderedProps.computeIfAbsent(stage, k -> new Int2ObjectOpenHashMap<>()).put(prop.id, prop);
 		}
 
 		prop.cachedRenderer = null;
@@ -44,18 +44,6 @@ public class ClientProps extends Props<ClientLevel> {
 
 	@Override
 	protected void onRemoved(Prop prop) {
-		var renderedProps = renderedPropLists.get(prop.spawnType.listType);
-
-		if (renderedProps != null && !renderedProps.isEmpty()) {
-			for (var stage : getRenderer(prop).getStages(Cast.to(prop))) {
-				var list = renderedProps.get(stage);
-
-				if (list != null) {
-					list.remove(prop);
-				}
-			}
-		}
-
 		prop.cachedRenderer = null;
 	}
 
@@ -70,7 +58,16 @@ public class ClientProps extends Props<ClientLevel> {
 				continue;
 			}
 
-			for (var prop : list) {
+			var props = list.values().iterator();
+
+			while (props.hasNext()) {
+				var prop = props.next();
+
+				if (prop.isRemoved()) {
+					props.remove();
+					continue;
+				}
+
 				double x = KMath.lerp(frame.worldDelta(), prop.prevPos.x, prop.pos.x);
 				double y = KMath.lerp(frame.worldDelta(), prop.prevPos.y, prop.pos.y);
 				double z = KMath.lerp(frame.worldDelta(), prop.prevPos.z, prop.pos.z);

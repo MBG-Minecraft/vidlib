@@ -7,6 +7,7 @@ public class WorldNumberContext {
 	public final Level level;
 	public final float progress;
 	public final WorldNumberVariables variables;
+	public Vec3 originPos;
 	public Vec3 sourcePos;
 	public Vec3 targetPos;
 
@@ -14,6 +15,7 @@ public class WorldNumberContext {
 		this.level = level;
 		this.progress = progress;
 		this.variables = variables;
+		this.originPos = null;
 		this.sourcePos = null;
 		this.targetPos = null;
 	}

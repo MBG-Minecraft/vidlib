@@ -24,6 +24,7 @@ public interface WorldVector {
 
 	static WorldVector named(String name) {
 		return switch (name) {
+			case "origin" -> OriginWorldVector.INSTANCE;
 			case "source" -> SourceWorldVector.INSTANCE;
 			case "target" -> TargetWorldVector.INSTANCE;
 			default -> new VariableWorldVector(name);
@@ -71,9 +72,11 @@ public interface WorldVector {
 		REGISTRY.register(ScaledWorldVector.TYPE);
 		REGISTRY.register(InterpolatedWorldVector.TYPE);
 		REGISTRY.register(FollowingEntityWorldVector.TYPE);
+		REGISTRY.register(OriginWorldVector.TYPE);
 		REGISTRY.register(SourceWorldVector.TYPE);
 		REGISTRY.register(TargetWorldVector.TYPE);
 		REGISTRY.register(VariableWorldVector.TYPE);
+		REGISTRY.register(IfWorldVector.TYPE);
 		REGISTRY.register(PivotingWorldVector.TYPE);
 	}
 

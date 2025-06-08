@@ -64,6 +64,12 @@ public interface CameraCommands {
 				)
 				.executes(ctx -> mode(List.of(ctx.getSource().getPlayerOrException()), 2))
 			)
+			.then(Commands.literal("swap")
+				.then(Commands.argument("player", EntityArgument.players())
+					.executes(ctx -> mode(EntityArgument.getPlayers(ctx, "player"), 3))
+				)
+				.executes(ctx -> mode(List.of(ctx.getSource().getPlayerOrException()), 3))
+			)
 		)
 	);
 

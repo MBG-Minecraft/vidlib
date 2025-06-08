@@ -32,7 +32,7 @@ public record AddPropPayload(PropType<?> type, PropSpawnType spawnType, int id, 
 		var props = ctx.level().getProps();
 		var prop = type.factory().create(props.context(type, spawnType, createdTime, null));
 		prop.id = id;
-		prop.update(ctx.level().registryAccess(), update);
+		prop.update(ctx.level().registryAccess(), update, true);
 		props.add(prop);
 	}
 }

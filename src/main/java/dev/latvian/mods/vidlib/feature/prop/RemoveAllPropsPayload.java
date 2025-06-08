@@ -20,6 +20,6 @@ public record RemoveAllPropsPayload(PropListType type) implements SimplePacketPa
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.level().getProps().propLists.get(type).reset();
+		ctx.level().getProps().propLists.get(type).removeAll();
 	}
 }

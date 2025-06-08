@@ -22,6 +22,7 @@ import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.ResourceKeyArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.UuidArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.NbtOps;
@@ -131,6 +132,7 @@ public record RegisteredDataType<T>(
 	public static final RegisteredDataType<BlockState> BLOCK_STATE = register(ResourceLocation.withDefaultNamespace("block_state"), DataType.BLOCK_STATE);
 	public static final RegisteredDataType<FluidState> FLUID_STATE = register(ResourceLocation.withDefaultNamespace("fluid_state"), DataType.FLUID_STATE);
 	public static final RegisteredDataType<Vec3> VEC3 = register(ResourceLocation.withDefaultNamespace("vec3"), DataType.VEC3);
+	public static final RegisteredDataType<BlockPos> BLOCK_POS = register(ResourceLocation.withDefaultNamespace("block_pos"), DataType.BLOCK_POS);
 
 	public static final RegisteredDataType<Color> COLOR = register(VidLib.id("color"), DataType.COLOR);
 	public static final RegisteredDataType<Gradient> GRADIENT = register(VidLib.id("gradient"), DataType.GRADIENT);
