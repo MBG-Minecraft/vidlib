@@ -58,7 +58,7 @@ public interface GhostStructureCapture {
 
 			source.tell(Component.literal("Slicing into %d x %d x %d chunks...".formatted(maxChunkX - minChunkX + 1, maxChunkY - minChunkY + 1, maxChunkZ - minChunkZ + 1)));
 
-			var path = FMLPaths.GAMEDIR.get().resolve("vidlib/%s-ghost-chunks.zip".formatted(name));
+			var path = FMLPaths.GAMEDIR.get().resolve("vidlib/%s-ghost-chunks.jar".formatted(name));
 
 			if (Files.notExists(path.getParent())) {
 				Files.createDirectories(path.getParent());
@@ -66,8 +66,8 @@ public interface GhostStructureCapture {
 
 			Files.deleteIfExists(path);
 
-			try (var zip = FileSystems.newFileSystem(new URI("jar:file", path.toUri().getPath(), null), Map.of("create", "true"))) {
-				Files.writeString(zip.getPath("/pack.mcmeta"), """
+			try (var jar = FileSystems.newFileSystem(new URI("jar:file", path.toUri().getPath(), null), Map.of("create", "true"))) {
+				Files.writeString(jar.getPath("/pack.mcmeta"), """
 					{
 						"pack": {
 							"pack_format": 8,
@@ -76,11 +76,14 @@ public interface GhostStructureCapture {
 						}
 					}""".formatted(name));
 
-				var structureDir = zip.getPath("/assets/video/structure/ghost_chunks/%s".formatted(fname));
+				var structureDir = jar.getPath("/assets/video/structure/ghost_chunks/%s".formatted(fname));
 				Files.createDirectories(structureDir);
 
-				var jsonDir = zip.getPath("/assets/video/vidlib/ghost_structure/ghost_chunks");
+				var jsonDir = jar.getPath("/assets/video/vidlib/ghost_structure/ghost_chunks");
 				Files.createDirectories(jsonDir);
+
+				var metaInfDir = jar.getPath("/META-INF");
+				Files.createDirectories(metaInfDir);
 
 				var json = new JsonObject();
 				var strucArr = new JsonArray();
@@ -156,13 +159,25 @@ public interface GhostStructureCapture {
 				}
 
 				Files.writeString(jsonDir.resolve("%s.json".formatted(fname)), JsonUtils.string(json));
+
+				Files.writeString(metaInfDir.resolve("neoforge.mods.toml"), """
+					modLoader = "lowcodefml"
+					loaderVersion = "[1,)"
+					license = "ARR"
+					
+					[[mods]]
+					modId = "%s_ghost_chunks"
+					namespace = "video"
+					displayName = "'%s' Ghost Chunks"
+					description = '''VidLib Ghost Chunks'''
+					""".formatted(fname, name));
 			}
 
 			long doneTime = (System.currentTimeMillis() - startTime) / 1000L;
-			source.tell(Component.literal("Done in %,d s! Saved as vidlib/%s-ghost-chunks.zip".formatted(doneTime, name)));
+			source.tell(Component.literal("Done in %,d s! Saved as vidlib/%s-ghost-chunks.jar".formatted(doneTime, name)));
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			source.error(Component.literal("Failed to create vidlib/%s-ghost-chunks.zip".formatted(name)));
+			source.error(Component.literal("Failed to create vidlib/%s-ghost-chunks.jar".formatted(name)));
 		}
 
 		return 1;

@@ -32,6 +32,7 @@
 		"MinecraftServerMixin",
 		"MobMixin",
 		"NetworkRegistryMixin",
+		"PackDetectorMixin",
 		"PayloadRegistrarMixin",
 		"PlayerListMixin",
 		"PlayerMixin",
