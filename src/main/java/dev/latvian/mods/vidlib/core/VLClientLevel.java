@@ -38,7 +38,9 @@ public interface VLClientLevel extends VLLevel {
 
 		if (override != null && !override.isEmpty()) {
 			for (var effect : override) {
-				if (level.random.nextFloat() <= effect.chance()) {
+				var chance = effect.chance().get(level.globalContext());
+
+				if (!Double.isNaN(chance) && chance > 0D && level.random.nextFloat() <= chance) {
 					level.addParticle(
 						effect.particle(),
 						pos.getX() + level.random.nextDouble(),
