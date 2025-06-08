@@ -21,4 +21,6 @@ public class VidLibConfig {
 	public static boolean robert = true;
 	public static int clientRenderDistance = 40;
 	public static int serverRenderDistance = 32;
+	public static boolean fastArrowDespawn = true;
+	public static boolean arrowTrails = true;
 }

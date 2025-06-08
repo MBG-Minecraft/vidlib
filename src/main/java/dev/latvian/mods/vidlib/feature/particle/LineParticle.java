@@ -10,16 +10,16 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
 
 public class LineParticle extends CustomParticle {
-	private final LineParticleOptions options;
 	private final Gradient startColor;
 	private final Gradient endColor;
+	private final int endOffset;
 	private final Vec3f vector;
 
 	protected LineParticle(LineParticleOptions options, ClientLevel level, double x, double y, double z, double vx, double vy, double vz) {
 		super(level, x, y, z);
-		this.options = options;
 		this.startColor = options.startColor().resolve();
 		this.endColor = options.endColor().resolve();
+		this.endOffset = options.endOffset();
 		setLifetime(options.ttl());
 		vector = Vec3f.of(vx, vy, vz);
 	}
@@ -35,7 +35,11 @@ public class LineParticle extends CustomParticle {
 
 		var m = ms.last().pose();
 		var buffer = buffers.getBuffer(DebugRenderTypes.LINES);
-		buffer.addVertex(m, rx, ry, rz).setColor(startColor.get(time / (float) lifetime).fadeOut(time, lifetime, 20F).argb());
-		buffer.addVertex(m, rx + vector.x(), ry + vector.y(), rz + vector.z()).setColor(endColor.get(time / (float) lifetime).fadeOut(time, lifetime, 20F).argb());
+		var sc = startColor.get(time / (float) lifetime).fadeOut(time, lifetime, 20F);
+		float etime = Math.clamp(time + endOffset, 0F, lifetime);
+		var ec = endColor.get(etime / (float) lifetime).fadeOut(etime, lifetime, 20F);
+
+		buffer.addVertex(m, rx, ry, rz).setColor(sc.argb());
+		buffer.addVertex(m, rx + vector.x(), ry + vector.y(), rz + vector.z()).setColor(ec.argb());
 	}
 }
