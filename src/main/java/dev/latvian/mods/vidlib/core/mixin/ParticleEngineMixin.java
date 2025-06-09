@@ -12,6 +12,7 @@ import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -36,6 +37,10 @@ public abstract class ParticleEngineMixin implements VLParticleEngine {
 	@Final
 	private Map<ResourceLocation, ParticleEngine.MutableSpriteSet> spriteSets;
 
+	@Shadow
+	@Final
+	private TextureAtlas textureAtlas;
+
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Map;computeIfAbsent(Ljava/lang/Object;Ljava/util/function/Function;)Ljava/lang/Object;"))
 	private <K, V> V vl$createQueue(Map<K, V> instance, K key, Function<? super K, ? extends V> factory) {
 		return instance.computeIfAbsent(key, k -> Cast.to(new ArrayDeque<>(16384)));
@@ -56,6 +61,11 @@ public abstract class ParticleEngineMixin implements VLParticleEngine {
 	@Inject(method = "renderParticleType(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/particle/ParticleRenderType;Ljava/util/Queue;Lnet/minecraft/client/renderer/culling/Frustum;)V", at = @At("RETURN"))
 	private static void vl$renderParticleTypePost(Camera camera, float partialTick, MultiBufferSource.BufferSource bufferSource, ParticleRenderType particleType, Queue<Particle> particles, Frustum frustum, CallbackInfo ci) {
 		VidLibParticleRenderTypes.vl$renderParticleTypePost(camera, partialTick, bufferSource, particleType);
+	}
+
+	@Override
+	public TextureAtlas getTextureAtlas() {
+		return textureAtlas;
 	}
 
 	@Override

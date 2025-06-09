@@ -38,6 +38,19 @@ public class VidLibParticleRenderTypes {
 			.createCompositeState(false)
 	), true);
 
+	public static final ParticleRenderType ADDITIVE_ONLY_DEPTH = new ParticleRenderType("vidlib:additive_only_depth", RenderType.create(
+		VidLib.id("particle/additive_only_depth").toString(),
+		1536,
+		false,
+		false,
+		VidLibRenderPipelines.ADDITIVE_PARTICLE_ONLY_DEPTH,
+		RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(TextureAtlas.LOCATION_PARTICLES, TriState.FALSE, false))
+			.setLightmapState(RenderStateShard.LIGHTMAP)
+			.setOutputState(RenderStateShard.PARTICLES_TARGET)
+			.createCompositeState(false)
+	), true);
+
 	private static final Map<ParticleRenderType, List<Particle>> SORTED = new IdentityHashMap<>();
 
 	public static void enableSorting(ParticleRenderType type) {
@@ -47,6 +60,7 @@ public class VidLibParticleRenderTypes {
 	static {
 		enableSorting(TRUE_TRANSLUCENT);
 		enableSorting(ADDITIVE);
+		enableSorting(ADDITIVE_ONLY_DEPTH);
 	}
 
 	@Unique
@@ -86,6 +100,22 @@ public class VidLibParticleRenderTypes {
 					crashreportcategory.setDetail("Particle", particle::toString);
 					crashreportcategory.setDetail("Particle Type", particleType::toString);
 					throw new ReportedException(crashreport);
+				}
+			}
+
+			if (particleType.renderType() == ADDITIVE.renderType()) {
+				var buffer2 = bufferSource.getBuffer(Objects.requireNonNull(ADDITIVE_ONLY_DEPTH.renderType()));
+
+				for (var particle : vl$sortedParticleList) {
+					try {
+						particle.render(buffer2, camera, partialTick);
+					} catch (Throwable throwable) {
+						var crashreport = CrashReport.forThrowable(throwable, "Rendering Particle");
+						CrashReportCategory crashreportcategory = crashreport.addCategory("Particle being rendered");
+						crashreportcategory.setDetail("Particle", particle::toString);
+						crashreportcategory.setDetail("Particle Type", particleType::toString);
+						throw new ReportedException(crashreport);
+					}
 				}
 			}
 

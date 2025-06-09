@@ -43,4 +43,8 @@ public interface PropRenderer<P extends Prop> {
 	default int getPackedLight(P prop) {
 		return LightTexture.FULL_BRIGHT;
 	}
+
+	default boolean shouldSort() {
+		return false;
+	}
 }

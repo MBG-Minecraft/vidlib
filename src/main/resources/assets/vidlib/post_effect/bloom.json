@@ -17,8 +17,17 @@
 			"inputs": [
 				{
 					"sampler_name": "In",
-					"target": "vidlib:bloom",
-					"bilinear": false
+					"target": "vidlib:bloom"
+				},
+				{
+					"sampler_name": "DepthBeforeParticles",
+					"target": "vidlib:main_before_particles",
+					"use_depth_buffer": true
+				},
+				{
+					"sampler_name": "DepthAfterParticles",
+					"target": "vidlib:main_after_particles",
+					"use_depth_buffer": true
 				}
 			],
 			"output": "vidlib:low_swap"
@@ -29,8 +38,7 @@
 			"inputs": [
 				{
 					"sampler_name": "In",
-					"target": "vidlib:low_swap",
-					"bilinear": false
+					"target": "vidlib:low_swap"
 				}
 			],
 			"output": "vidlib:low"
@@ -45,8 +53,7 @@
 				},
 				{
 					"sampler_name": "Low",
-					"target": "vidlib:low",
-					"bilinear": false
+					"target": "vidlib:low"
 				}
 			],
 			"output": "swap"

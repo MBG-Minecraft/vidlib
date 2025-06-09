@@ -39,7 +39,9 @@ public class LineParticle extends CustomParticle {
 		float etime = Math.clamp(time + endOffset, 0F, lifetime);
 		var ec = endColor.get(etime / (float) lifetime).fadeOut(etime, lifetime, 20F);
 
-		buffer.addVertex(m, rx, ry, rz).setColor(sc.argb());
-		buffer.addVertex(m, rx + vector.x(), ry + vector.y(), rz + vector.z()).setColor(ec.argb());
+		var nv = vector.normalize();
+
+		buffer.addVertex(m, rx, ry, rz).setColor(sc.argb()).setNormal(nv.x(), nv.y(), nv.z());
+		buffer.addVertex(m, rx + vector.x(), ry + vector.y(), rz + vector.z()).setColor(ec.argb()).setNormal(nv.x(), nv.y(), nv.z());
 	}
 }

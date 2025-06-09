@@ -64,8 +64,13 @@ public interface VidLibRenderPipelines {
 	RenderPipeline ADDITIVE_PARTICLE = RenderPipeline.builder(RenderPipelines.PARTICLE_SNIPPET)
 		.withLocation(VidLib.id("pipeline/particle/additive"))
 		.withBlend(BlendFunction.ADDITIVE)
-		// .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
 		.withDepthWrite(false)
+		.build();
+
+	RenderPipeline ADDITIVE_PARTICLE_ONLY_DEPTH = RenderPipeline.builder(RenderPipelines.PARTICLE_SNIPPET)
+		.withLocation(VidLib.id("pipeline/particle/additive_only_depth"))
+		.withBlend(BlendFunction.ADDITIVE)
+		.withColorWrite(false)
 		.build();
 
 	Function<BlendFunction, RenderPipeline> CANVAS_PIPELINES = Util.memoize(blendFunction -> RenderPipeline.builder()
@@ -101,6 +106,7 @@ public interface VidLibRenderPipelines {
 		event.registerPipeline(CUTOUT_TERRAIN_NO_CULL);
 		event.registerPipeline(TRANSLUCENT_TERRAIN_NO_CULL);
 		event.registerPipeline(ADDITIVE_PARTICLE);
+		event.registerPipeline(ADDITIVE_PARTICLE_ONLY_DEPTH);
 		event.registerPipeline(PhysicsParticlesRenderTypes.SOLID_PIPELINE);
 		event.registerPipeline(PhysicsParticlesRenderTypes.CUTOUT_PIPELINE);
 		event.registerPipeline(PhysicsParticlesRenderTypes.TRANSLUCENT_PIPELINE);

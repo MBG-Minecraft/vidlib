@@ -1,6 +1,8 @@
 #version 150
 
 uniform sampler2D InSampler;
+uniform sampler2D DepthBeforeParticlesSampler;
+uniform sampler2D DepthAfterParticlesSampler;
 uniform vec2 OutSize;
 
 in vec2 texCoord;
@@ -9,6 +11,13 @@ in vec2 oneTexel;
 out vec4 fragColor;
 
 void main() {
+	float depthBefore = texture(DepthBeforeParticlesSampler, texCoord).r;
+	float depthAfter = texture(DepthAfterParticlesSampler, texCoord).r;
+
+	if (depthAfter < depthBefore) {
+		discard;
+	}
+
 	vec3 result = vec3(0.0);
 	float count = 0.0;
 	float size = max(1.0, OutSize.x / 1920.0 * 3.0);

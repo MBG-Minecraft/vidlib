@@ -11,16 +11,26 @@ import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 public class ClientProps extends Props<ClientLevel> {
+	private record SortedProp(Prop prop, PropRenderer<?> renderer, double x, double y, double z, double distance) {
+		public int compareTo(SortedProp b) {
+			return Double.compare(b.distance, distance);
+		}
+	}
+
 	public final Map<PropListType, Map<RenderLevelStageEvent.Stage, Int2ObjectMap<Prop>>> renderedPropLists;
+	private final List<SortedProp> sortedProps;
 
 	public ClientProps(ClientLevel level) {
 		super(level);
 		this.propLists.put(PropListType.ASSETS, new PropList(this, PropListType.ASSETS));
 		this.renderedPropLists = new EnumMap<>(PropListType.class);
+		this.sortedProps = new ArrayList<>();
 	}
 
 	public PropRenderer<?> getRenderer(Prop prop) {
@@ -72,19 +82,39 @@ public class ClientProps extends Props<ClientLevel> {
 				double y = KMath.lerp(frame.worldDelta(), prop.prevPos.y, prop.pos.y);
 				double z = KMath.lerp(frame.worldDelta(), prop.prevPos.z, prop.pos.z);
 				double r = prop.getMaxRenderDistance();
+				double cd = cam.distanceToSqr(x, y + prop.height / 2D, z);
 
-				if (r >= Double.MAX_VALUE || cam.distanceToSqr(x, y + prop.height / 2D, z) <= r * r) {
+				if (r >= Double.MAX_VALUE || cd <= r * r) {
 					if (prop.isVisible(x, y, z, frame)) {
 						var renderer = getRenderer(prop);
 
 						if (renderer != PropRenderer.INVISIBLE) {
-							ms.pushPose();
-							ms.translate(frame.x(x), frame.y(y), frame.z(z));
-							renderer.renderProp(Cast.to(prop), frame);
-							ms.popPose();
+							if (renderer.shouldSort()) {
+								sortedProps.add(new SortedProp(prop, renderer, x, y, z, cd));
+							} else {
+								ms.pushPose();
+								ms.translate(frame.x(x), frame.y(y), frame.z(z));
+								renderer.renderProp(Cast.to(prop), frame);
+								ms.popPose();
+							}
 						}
 					}
 				}
+			}
+
+			if (!sortedProps.isEmpty()) {
+				if (sortedProps.size() >= 2) {
+					sortedProps.sort(SortedProp::compareTo);
+				}
+
+				for (var p : sortedProps) {
+					ms.pushPose();
+					ms.translate(frame.x(p.x), frame.y(p.y), frame.z(p.z));
+					p.renderer.renderProp(Cast.to(p.prop), frame);
+					ms.popPose();
+				}
+
+				sortedProps.clear();
 			}
 		}
 	}

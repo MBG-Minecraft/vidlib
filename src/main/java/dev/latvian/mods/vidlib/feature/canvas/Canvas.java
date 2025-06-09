@@ -51,6 +51,12 @@ public class Canvas {
 	@AutoRegister(Dist.CLIENT)
 	public static final Canvas MAIN_BEFORE_PARTICLES = createExternal(VidLib.id("main_before_particles"));
 
+	@AutoRegister(Dist.CLIENT)
+	public static final Canvas MAIN_AFTER_PARTICLES = createExternal(VidLib.id("main_after_particles"));
+
+	@AutoRegister(Dist.CLIENT)
+	public static final Canvas ENTITY_OUTLINE = createExternal(VidLib.id("entity_outline"));
+
 	public final ResourceLocation id;
 	public final String idString;
 	public final ResourceLocation colorTexturePath;
@@ -273,8 +279,13 @@ public class Canvas {
 		return getDepth(-1, -1);
 	}
 
-	public RenderTarget getOptionalTarget() {
-		var t = outputTarget != null ? outputTarget.get() : null;
+	@Nullable
+	public RenderTarget getTargetOrNull() {
+		return outputTarget != null ? outputTarget.get() : null;
+	}
+
+	public RenderTarget getTargetOrMain() {
+		var t = getTargetOrNull();
 		return t != null ? t : Minecraft.getInstance().getMainRenderTarget();
 	}
 
@@ -288,7 +299,7 @@ public class Canvas {
 
 	public RenderStateShard.OutputStateShard getOutputStateShard() {
 		if (outputStateShard == null) {
-			outputStateShard = new RenderStateShard.OutputStateShard(pathString, this::getOptionalTarget);
+			outputStateShard = new RenderStateShard.OutputStateShard(pathString, this::getTargetOrMain);
 		}
 
 		return outputStateShard;

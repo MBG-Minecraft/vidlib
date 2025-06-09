@@ -9,6 +9,7 @@ import com.mojang.blaze3d.resource.ResourceHandle;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.client.GLDebugLog;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxRenderer;
@@ -40,6 +41,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 @Mixin(LevelRenderer.class)
@@ -119,7 +121,12 @@ public abstract class LevelRendererMixin {
 		CanvasImpl.addAllToFrame(minecraft, frameGraphBuilder, targets);
 	}
 
-	@Inject(method = "addMainPass", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/framegraph/FramePass;executes(Ljava/lang/Runnable;)V"))
+	@Redirect(method = "addMainPass", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/framegraph/FramePass;readsAndWrites(Lcom/mojang/blaze3d/resource/ResourceHandle;)Lcom/mojang/blaze3d/resource/ResourceHandle;", ordinal = 4))
+	private ResourceHandle<RenderTarget> vl$cancelOutline(FramePass instance, ResourceHandle<RenderTarget> original) {
+		return original;
+	}
+
+	@Inject(method = "addMainPass", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelTargetBundle;main:Lcom/mojang/blaze3d/resource/ResourceHandle;", ordinal = 2))
 	private void vl$addMainPassReadsAndWrites(FrameGraphBuilder frameGraphBuilder, Frustum frustum, Camera camera, Matrix4f frustumMatrix, Matrix4f projectionMatrix, FogParameters fogParameters, boolean renderBlockOutline, boolean renderEntityOutline, DeltaTracker deltaTracker, ProfilerFiller profiler, CallbackInfo ci, @Local FramePass framePass) {
 		CanvasImpl.allReadsAndWrites(framePass);
 	}
@@ -131,8 +138,8 @@ public abstract class LevelRendererMixin {
 
 	@Inject(method = "lambda$addMainPass$2", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;<init>()V"))
 	private void vl$copyOutlineDepth(FogParameters fogParameters, DeltaTracker deltaTracker, Camera camera, ProfilerFiller profiler, Matrix4f frustumMatrix, Matrix4f projectionMatrix, ResourceHandle<RenderTarget> itemEntity, ResourceHandle<RenderTarget> entityOutline, Frustum frustum, boolean renderBlockOutline, ResourceHandle<RenderTarget> translucent, ResourceHandle<RenderTarget> main, CallbackInfo ci) {
-		if (targets.entityOutline != null && VidLibConfig.entityOutlineDepth && shouldShowEntityOutlines()) {
-			targets.entityOutline.get().copyDepthFrom(minecraft.getMainRenderTarget());
+		if (VidLibConfig.entityOutlineDepth && shouldShowEntityOutlines()) {
+			Canvas.ENTITY_OUTLINE.copyDepthFrom(minecraft.getMainRenderTarget());
 		}
 	}
 
@@ -161,5 +168,15 @@ public abstract class LevelRendererMixin {
 	}, at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/Profiler;get()Lnet/minecraft/util/profiling/ProfilerFiller;"))
 	private ProfilerFiller vl$getProfiler(ProfilerFiller profiler) {
 		return GLDebugLog.PROFILER;
+	}
+
+	/**
+	 * @author Lat
+	 * @reason Yeet
+	 */
+	@Overwrite
+	@Nullable
+	public RenderTarget entityOutlineTarget() {
+		return Canvas.ENTITY_OUTLINE.getTargetOrNull();
 	}
 }
