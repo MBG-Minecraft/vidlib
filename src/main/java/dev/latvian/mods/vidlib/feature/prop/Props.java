@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
 import com.mojang.serialization.DataResult;
-import dev.latvian.mods.vidlib.util.Empty;
+import dev.latvian.mods.klib.util.Empty;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;

@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.math.worldvector;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.util.Comparison;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
-import dev.latvian.mods.vidlib.math.worldnumber.Comparison;
 import dev.latvian.mods.vidlib.math.worldnumber.FixedWorldNumber;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumber;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
@@ -21,13 +21,13 @@ public record IfWorldVector(
 ) implements WorldVector {
 	public static final SimpleRegistryType<IfWorldVector> TYPE = SimpleRegistryType.dynamic("if", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		WorldNumber.CODEC.fieldOf("if").forGetter(IfWorldVector::ifValue),
-		Comparison.CODEC.optionalFieldOf("comparison", Comparison.NOT_EQUALS).forGetter(IfWorldVector::comparison),
+		Comparison.DATA_TYPE.codec().optionalFieldOf("comparison", Comparison.NOT_EQUALS).forGetter(IfWorldVector::comparison),
 		WorldNumber.CODEC.optionalFieldOf("value", FixedWorldNumber.ZERO.instance()).forGetter(IfWorldVector::testValue),
 		WorldVector.CODEC.optionalFieldOf("then").forGetter(IfWorldVector::thenValue),
 		WorldVector.CODEC.optionalFieldOf("else").forGetter(IfWorldVector::elseValue)
 	).apply(instance, IfWorldVector::new)), CompositeStreamCodec.of(
 		WorldNumber.STREAM_CODEC, IfWorldVector::ifValue,
-		Comparison.STREAM_CODEC.optional(Comparison.NOT_EQUALS), IfWorldVector::comparison,
+		Comparison.DATA_TYPE.streamCodec().optional(Comparison.NOT_EQUALS), IfWorldVector::comparison,
 		WorldNumber.STREAM_CODEC.optional(FixedWorldNumber.ZERO.instance()), IfWorldVector::testValue,
 		WorldVector.STREAM_CODEC.optional(), IfWorldVector::thenValue,
 		WorldVector.STREAM_CODEC.optional(), IfWorldVector::elseValue,
@@ -44,13 +44,13 @@ public record IfWorldVector(
 	public Vec3 get(WorldNumberContext ctx) {
 		var i = ifValue.get(ctx);
 
-		if (Double.isNaN(i)) {
+		if (i == null) {
 			return null;
 		}
 
 		var t = testValue.get(ctx);
 
-		if (Double.isNaN(t)) {
+		if (t == null) {
 			return null;
 		}
 

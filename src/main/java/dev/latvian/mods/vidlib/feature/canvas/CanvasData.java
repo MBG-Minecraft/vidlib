@@ -3,9 +3,10 @@ package dev.latvian.mods.vidlib.feature.canvas;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.kmath.color.Color;
-import dev.latvian.mods.vidlib.feature.codec.VLClientCodecs;
-import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
+import dev.latvian.mods.klib.codec.KLibClientCodecs;
+import dev.latvian.mods.klib.codec.KLibCodecs;
+import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.util.ID;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Set;
@@ -37,11 +38,11 @@ public record CanvasData(
 		Codec.INT.optionalFieldOf("priority", 0).forGetter(CanvasData::priority),
 		Codec.BOOL.optionalFieldOf("auto_draw", true).forGetter(CanvasData::autoDraw),
 		Codec.BOOL.optionalFieldOf("auto_clear", true).forGetter(CanvasData::autoClear),
-		VLCodecs.setOf(ResourceLocation.CODEC).optionalFieldOf("import", Set.of()).forGetter(CanvasData::importTargets),
+		KLibCodecs.setOf(ID.CODEC).optionalFieldOf("import", Set.of()).forGetter(CanvasData::importTargets),
 		Codec.BOOL.optionalFieldOf("depth", true).forGetter(CanvasData::depth),
 		Codec.BOOL.optionalFieldOf("stencil", false).forGetter(CanvasData::stencil),
 		Codec.FLOAT.optionalFieldOf("scale", 1F).forGetter(CanvasData::scale),
 		Color.CODEC.optionalFieldOf("clear_color", Color.TRANSPARENT).forGetter(CanvasData::clearColor),
-		VLClientCodecs.BLEND_FUNCTION.optionalFieldOf("blend_function", BlendFunction.ENTITY_OUTLINE_BLIT).forGetter(CanvasData::blendFunction)
+		KLibClientCodecs.BLEND_FUNCTION.optionalFieldOf("blend_function", BlendFunction.ENTITY_OUTLINE_BLIT).forGetter(CanvasData::blendFunction)
 	).apply(instance, CanvasData::new));
 }

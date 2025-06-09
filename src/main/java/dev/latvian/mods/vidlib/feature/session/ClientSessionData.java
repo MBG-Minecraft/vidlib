@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.session;
 
+import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.core.VLEntity;
 import dev.latvian.mods.vidlib.feature.data.DataRecorder;
-import dev.latvian.mods.vidlib.util.Empty;
 import net.minecraft.network.chat.Component;
 
 import java.util.HashSet;

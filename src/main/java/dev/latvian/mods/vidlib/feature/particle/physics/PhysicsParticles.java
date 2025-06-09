@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.particle.physics;
 
-import dev.latvian.mods.kmath.KMath;
-import dev.latvian.mods.kmath.Split;
-import dev.latvian.mods.kmath.vertex.function.AdditiveRandomVertexFunction;
+import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.math.Split;
+import dev.latvian.mods.klib.vertex.function.AdditiveRandomVertexFunction;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.block.VidLibBlockStateClientProperties;

@@ -47,7 +47,6 @@
 		"ServerPacksSourceMixin",
 		"ServerPlayerMixin",
 		"ServerScoreboardMixin",
-		"StreamCodecMixin",
 		"StructureBlockEntityMixin",
 		"StructureTemplateMixin",
 		"StyleMixin",

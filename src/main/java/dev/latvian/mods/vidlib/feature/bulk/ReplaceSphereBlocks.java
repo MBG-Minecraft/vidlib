@@ -2,9 +2,9 @@ package dev.latvian.mods.vidlib.feature.bulk;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.MCCodecs;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -19,15 +19,15 @@ public record ReplaceSphereBlocks(BlockPos start, BlockPos end, Vec3 center, dou
 	public static final SimpleRegistryType<ReplaceSphereBlocks> TYPE = SimpleRegistryType.dynamic("sphere_blocks", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		BlockPos.CODEC.fieldOf("start").forGetter(ReplaceSphereBlocks::start),
 		BlockPos.CODEC.fieldOf("end").forGetter(ReplaceSphereBlocks::end),
-		Vec3.CODEC.fieldOf("center").forGetter(ReplaceSphereBlocks::center),
+		MCCodecs.VEC3.fieldOf("center").forGetter(ReplaceSphereBlocks::center),
 		Codec.DOUBLE.fieldOf("radius").forGetter(ReplaceSphereBlocks::radius),
-		VLCodecs.BLOCK_STATE.fieldOf("state").forGetter(ReplaceSphereBlocks::state)
+		MCCodecs.BLOCK_STATE.fieldOf("state").forGetter(ReplaceSphereBlocks::state)
 	).apply(instance, ReplaceSphereBlocks::new)), CompositeStreamCodec.of(
 		BlockPos.STREAM_CODEC, ReplaceSphereBlocks::start,
 		BlockPos.STREAM_CODEC, ReplaceSphereBlocks::end,
-		VLStreamCodecs.VEC_3, ReplaceSphereBlocks::center,
+		MCStreamCodecs.VEC3, ReplaceSphereBlocks::center,
 		ByteBufCodecs.DOUBLE, ReplaceSphereBlocks::radius,
-		VLStreamCodecs.BLOCK_STATE, ReplaceSphereBlocks::state,
+		MCStreamCodecs.BLOCK_STATE, ReplaceSphereBlocks::state,
 		ReplaceSphereBlocks::new
 	));
 

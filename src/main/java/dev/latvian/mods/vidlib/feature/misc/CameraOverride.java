@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.misc;
 
-import dev.latvian.mods.kmath.Rotation;
+import dev.latvian.mods.klib.math.Rotation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.phys.Vec3;

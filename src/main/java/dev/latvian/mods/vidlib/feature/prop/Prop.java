@@ -1,17 +1,17 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
 import com.mojang.serialization.DynamicOps;
-import dev.latvian.mods.kmath.FrustumCheck;
-import dev.latvian.mods.kmath.Rotation;
-import dev.latvian.mods.kmath.Vec3f;
-import dev.latvian.mods.kmath.color.Color;
-import dev.latvian.mods.kmath.shape.ColoredShape;
-import dev.latvian.mods.kmath.shape.CuboidShape;
-import dev.latvian.mods.vidlib.feature.codec.DataType;
-import dev.latvian.mods.vidlib.feature.codec.JOMLDataTypes;
+import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.data.DataTypes;
+import dev.latvian.mods.klib.data.JOMLDataTypes;
+import dev.latvian.mods.klib.math.FrustumCheck;
+import dev.latvian.mods.klib.math.Rotation;
+import dev.latvian.mods.klib.math.Vec3f;
+import dev.latvian.mods.klib.shape.ColoredShape;
+import dev.latvian.mods.klib.shape.CuboidShape;
+import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
-import dev.latvian.mods.vidlib.util.Cast;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import net.minecraft.commands.CommandSourceStack;
@@ -34,14 +34,14 @@ import org.joml.Vector3fc;
 import java.util.Set;
 
 public class Prop {
-	public static final PropData<Prop, Integer> TICK = PropData.create(Prop.class, "tick", DataType.VAR_INT, p -> p.tick, (p, v) -> p.tick = v);
-	public static final PropData<Prop, Integer> LIFESPAN = PropData.create(Prop.class, "lifespan", DataType.VAR_INT, p -> p.lifespan, (p, v) -> p.lifespan = v);
-	public static final PropData<Prop, Vector3d> POSITION = PropData.create(Prop.class, "position", JOMLDataTypes.DVEC_3, p -> p.pos, (p, v) -> p.pos.set(v));
-	public static final PropData<Prop, Vector3f> VELOCITY = PropData.create(Prop.class, "velocity", JOMLDataTypes.VEC_3, p -> p.velocity, (p, v) -> p.velocity.set(v));
-	public static final PropData<Prop, Vector3f> ROTATION = PropData.create(Prop.class, "rotation", JOMLDataTypes.VEC_3, p -> p.rotation, (p, v) -> p.rotation.set(v));
-	public static final PropData<Prop, Float> GRAVITY = PropData.create(Prop.class, "gravity", DataType.FLOAT, p -> p.gravity, (p, v) -> p.gravity = v);
-	public static final PropData<Prop, Float> WIDTH = PropData.create(Prop.class, "width", DataType.FLOAT, p -> (float) p.width, (p, v) -> p.width = v);
-	public static final PropData<Prop, Float> HEIGHT = PropData.create(Prop.class, "height", DataType.FLOAT, p -> (float) p.height, (p, v) -> p.height = v);
+	public static final PropData<Prop, Integer> TICK = PropData.create(Prop.class, "tick", DataTypes.VAR_INT, p -> p.tick, (p, v) -> p.tick = v);
+	public static final PropData<Prop, Integer> LIFESPAN = PropData.create(Prop.class, "lifespan", DataTypes.VAR_INT, p -> p.lifespan, (p, v) -> p.lifespan = v);
+	public static final PropData<Prop, Vector3d> POSITION = PropData.create(Prop.class, "position", JOMLDataTypes.DVEC3, p -> p.pos, (p, v) -> p.pos.set(v));
+	public static final PropData<Prop, Vector3f> VELOCITY = PropData.create(Prop.class, "velocity", JOMLDataTypes.VEC3, p -> p.velocity, (p, v) -> p.velocity.set(v));
+	public static final PropData<Prop, Vector3f> ROTATION = PropData.create(Prop.class, "rotation", JOMLDataTypes.VEC3, p -> p.rotation, (p, v) -> p.rotation.set(v));
+	public static final PropData<Prop, Float> GRAVITY = PropData.create(Prop.class, "gravity", DataTypes.FLOAT, p -> p.gravity, (p, v) -> p.gravity = v);
+	public static final PropData<Prop, Float> WIDTH = PropData.create(Prop.class, "width", DataTypes.FLOAT, p -> (float) p.width, (p, v) -> p.width = v);
+	public static final PropData<Prop, Float> HEIGHT = PropData.create(Prop.class, "height", DataTypes.FLOAT, p -> (float) p.height, (p, v) -> p.height = v);
 
 	public static final PropDataProvider BUILTIN_DATA = PropDataProvider.join(
 		TICK,
@@ -296,7 +296,7 @@ public class Prop {
 
 	public Visuals getDebugVisuals(double x, double y, double z) {
 		var visuals = new Visuals();
-		visuals.add(new ColoredShape(new CuboidShape(Vec3f.of(width, height, width), Rotation.NONE), Color.TRANSPARENT, Color.WHITE).at(new Vec3(x, y + height / 2D, z)));
+		visuals.add(new ColoredShape(new CuboidShape(Vec3f.of(width, height, width), Rotation.NONE), Color.TRANSPARENT, Color.WHITE).at(x, y + height / 2D, z));
 		return visuals;
 	}
 

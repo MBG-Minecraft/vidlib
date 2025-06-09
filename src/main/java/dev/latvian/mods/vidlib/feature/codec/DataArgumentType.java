@@ -6,20 +6,22 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.serialization.DynamicOps;
+import dev.latvian.mods.klib.data.RegisteredDataType;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 
-public record RegisteredDataTypeArgument<T>(DynamicOps<Tag> ops, TagParser<Tag> parser, RegisteredDataType<T> dataType) implements ArgumentType<T> {
+public record DataArgumentType<T>(DynamicOps<Tag> ops, TagParser<Tag> parser, CommandDataType<T> commandDataType) implements ArgumentType<T> {
 	public static final DynamicCommandExceptionType ERROR_PARSING = new DynamicCommandExceptionType(arg -> Component.literal(String.valueOf(arg)));
 
 	@Override
 	public T parse(StringReader reader) throws CommandSyntaxException {
 		var tag = parser.parseAsArgument(reader);
-		var decoded = dataType.type().codec().parse(ops, tag);
+		var decoded = commandDataType.dataType.codec().parse(ops, tag);
 
 		if (decoded.isError()) {
 			throw ERROR_PARSING.create(decoded.error().get().message());
@@ -28,32 +30,33 @@ public record RegisteredDataTypeArgument<T>(DynamicOps<Tag> ops, TagParser<Tag> 
 		return decoded.getOrThrow();
 	}
 
-	public static class Info implements ArgumentTypeInfo<RegisteredDataTypeArgument<?>, CodecTemplate> {
+	public static class Info implements ArgumentTypeInfo<DataArgumentType<?>, CodecTemplate> {
 		@Override
 		public void serializeToNetwork(CodecTemplate template, FriendlyByteBuf buf) {
-			buf.writeResourceLocation(template.dataType.id());
+			buf.writeResourceLocation(template.commandDataType.registeredDataType.get().id());
 		}
 
 		@Override
 		public CodecTemplate deserializeFromNetwork(FriendlyByteBuf buf) {
-			return new CodecTemplate(this, RegisteredDataType.REGISTRY.get(buf.readResourceLocation()));
+			return new CodecTemplate(this, CommandDataType.of(RegisteredDataType.BY_ID.get(buf.readResourceLocation()).type()));
 		}
 
 		@Override
 		public void serializeToJson(CodecTemplate template, JsonObject json) {
-			json.addProperty("codec", template.dataType.id().toString());
+			json.addProperty("codec", template.commandDataType.registeredDataType.get().id().toString());
 		}
 
 		@Override
-		public CodecTemplate unpack(RegisteredDataTypeArgument arg) {
-			return new CodecTemplate(this, arg.dataType);
+		public CodecTemplate unpack(DataArgumentType arg) {
+			return new CodecTemplate(this, arg.commandDataType);
 		}
 	}
 
-	public record CodecTemplate(ArgumentTypeInfo<RegisteredDataTypeArgument<?>, ?> type, RegisteredDataType<?> dataType) implements ArgumentTypeInfo.Template<RegisteredDataTypeArgument<?>> {
+	public record CodecTemplate(ArgumentTypeInfo<DataArgumentType<?>, ?> type, CommandDataType<?> commandDataType) implements ArgumentTypeInfo.Template<DataArgumentType<?>> {
 		@Override
-		public RegisteredDataTypeArgument<?> instantiate(CommandBuildContext ctx) {
-			return (RegisteredDataTypeArgument<?>) dataType.argument(ctx);
+		public DataArgumentType<?> instantiate(CommandBuildContext ctx) {
+			var ops = ctx.createSerializationContext(NbtOps.INSTANCE);
+			return new DataArgumentType<>(ops, TagParser.create(ops), commandDataType);
 		}
 	}
 }

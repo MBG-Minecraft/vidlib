@@ -1,7 +1,8 @@
 package dev.latvian.mods.vidlib.math.worldvector;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumber;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
@@ -26,6 +27,14 @@ public record DynamicWorldVector(WorldNumber x, WorldNumber y, WorldNumber z) im
 
 	@Override
 	public Vec3 get(WorldNumberContext ctx) {
-		return new Vec3(x.get(ctx), y.get(ctx), z.get(ctx));
+		var px = x.get(ctx);
+		var py = y.get(ctx);
+		var pz = z.get(ctx);
+
+		if (px == null || py == null || pz == null) {
+			return null;
+		}
+
+		return KMath.vec3(px, py, pz);
 	}
 }

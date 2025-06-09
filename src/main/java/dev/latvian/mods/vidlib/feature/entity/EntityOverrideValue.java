@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.entity;
 
-import dev.latvian.mods.vidlib.util.Cast;
+import dev.latvian.mods.klib.util.Cast;
 import net.minecraft.world.entity.Entity;
 
 public interface EntityOverrideValue<T> {

@@ -2,9 +2,9 @@ package dev.latvian.mods.vidlib.feature.particle.physics;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import dev.latvian.mods.klib.gl.IndexBuffer;
 import dev.latvian.mods.vidlib.core.VLBlockState;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.client.IndexBuffer;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;

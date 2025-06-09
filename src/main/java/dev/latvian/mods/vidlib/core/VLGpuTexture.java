@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core;
 
-import dev.latvian.mods.vidlib.feature.client.GLDebugLog;
+import dev.latvian.mods.klib.gl.GLDebugLog;
 
 public interface VLGpuTexture {
 	default int vl$getHandle() {

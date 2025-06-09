@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.npc;
 
 import com.mojang.authlib.GameProfile;
+import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.util.Lazy;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectLinkedOpenHashMap;
 import net.minecraft.core.RegistryAccess;

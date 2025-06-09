@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core;
 
-import dev.latvian.mods.vidlib.util.MessageConsumer;
+import dev.latvian.mods.klib.util.MessageConsumer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;

@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
-import dev.latvian.mods.kmath.KMath;
+import dev.latvian.mods.klib.math.KMath;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SingleQuadParticle;

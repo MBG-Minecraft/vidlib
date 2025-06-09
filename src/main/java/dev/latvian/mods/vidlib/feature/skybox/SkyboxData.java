@@ -2,9 +2,9 @@ package dev.latvian.mods.vidlib.feature.skybox;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.kmath.Rotation;
-import dev.latvian.mods.kmath.color.Color;
-import dev.latvian.mods.vidlib.feature.registry.ID;
+import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.math.Rotation;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
 import net.minecraft.resources.ResourceLocation;
@@ -37,7 +37,7 @@ public record SkyboxData(
 		Rotation.CODEC.optionalFieldOf("celestial_rotation").forGetter(SkyboxData::celestialRotation)
 	).apply(instance, SkyboxData::new));
 
-	public static final VLRegistry<SkyboxData> REGISTRY = VLRegistry.createClient("skybox");
+	public static final VLRegistry<SkyboxData> REGISTRY = VLRegistry.createClient("skybox", SkyboxData.class);
 
 	public static class Loader extends JsonRegistryReloadListener<SkyboxData> {
 		public Loader() {

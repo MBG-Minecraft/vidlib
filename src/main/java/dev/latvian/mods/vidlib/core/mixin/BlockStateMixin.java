@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import dev.latvian.mods.klib.util.WithCache;
 import dev.latvian.mods.vidlib.core.VLBlockState;
 import dev.latvian.mods.vidlib.feature.block.VidLibBlockStateClientProperties;
-import dev.latvian.mods.vidlib.util.WithCache;
 import net.minecraft.world.level.block.BarrierBlock;
 import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.ButtonBlock;

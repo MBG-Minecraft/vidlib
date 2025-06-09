@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.feature.zone.shape;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.MCCodecs;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -13,10 +13,10 @@ import java.util.stream.Stream;
 
 public record BoxZoneShape(AABB box) implements ZoneShape {
 	public static final SimpleRegistryType<BoxZoneShape> TYPE = SimpleRegistryType.dynamic("box", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		VLCodecs.VEC_3.fieldOf("start").forGetter(z -> z.box.getMinPosition()),
-		VLCodecs.VEC_3.fieldOf("end").forGetter(z -> z.box.getMaxPosition())
+		MCCodecs.VEC3.fieldOf("start").forGetter(z -> z.box.getMinPosition()),
+		MCCodecs.VEC3.fieldOf("end").forGetter(z -> z.box.getMaxPosition())
 	).apply(instance, (start, end) -> new BoxZoneShape(new AABB(start, end)))), CompositeStreamCodec.of(
-		VLStreamCodecs.AABB,
+		MCStreamCodecs.AABB,
 		BoxZoneShape::box,
 		BoxZoneShape::new
 	));

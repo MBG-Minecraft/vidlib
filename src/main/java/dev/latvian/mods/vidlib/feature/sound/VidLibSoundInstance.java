@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.sound;
 
-import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
 import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
@@ -24,7 +23,7 @@ public class VidLibSoundInstance extends AbstractTickableSoundInstance {
 		this.delay = 0;
 		this.targetVolume = this.volume = data.data().volume();
 		this.pitch = data.data().pitch();
-		var pos = position == null ? null : position.get(new WorldNumberContext(level, 1F, variables));
+		var pos = position == null ? null : position.get(level.globalContext(1F).withVariables(variables));
 
 		if (pos != null) {
 			this.x = pos.x;
@@ -37,7 +36,7 @@ public class VidLibSoundInstance extends AbstractTickableSoundInstance {
 	public void tick() {
 		volume = level.getEnvironment().getPauseType().tick() ? targetVolume : 0F;
 
-		var pos = position == null ? null : position.get(new WorldNumberContext(level, 1F, variables));
+		var pos = position == null ? null : position.get(level.globalContext(1F).withVariables(variables));
 
 		if (pos != null) {
 			x = pos.x;

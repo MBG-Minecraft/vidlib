@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.registry;
 
-import dev.latvian.mods.vidlib.util.Side;
+import dev.latvian.mods.klib.util.Side;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

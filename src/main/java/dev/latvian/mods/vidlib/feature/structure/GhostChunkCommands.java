@@ -2,10 +2,10 @@ package dev.latvian.mods.vidlib.feature.structure;
 
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import dev.latvian.mods.klib.util.MessageConsumer;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
-import dev.latvian.mods.vidlib.util.MessageConsumer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
@@ -48,9 +48,9 @@ public interface GhostChunkCommands {
 			})
 		)
 		.then(Commands.literal("set-filter")
-			.then(Commands.argument("filter", BlockFilter.REGISTERED_DATA_TYPE.argument(buildContext))
+			.then(Commands.argument("filter", BlockFilter.COMMAND.argument(buildContext))
 				.executes(ctx -> {
-					GhostStructureCapture.FILTER.setValue(BlockFilter.REGISTERED_DATA_TYPE.get(ctx, "filter"));
+					GhostStructureCapture.FILTER.setValue(BlockFilter.COMMAND.get(ctx, "filter"));
 					return 1;
 				})
 			)

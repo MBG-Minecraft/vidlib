@@ -20,20 +20,20 @@ public interface CameraCommands {
 			.then(Commands.literal("add")
 				.then(Commands.literal("basic")
 					.then(Commands.argument("player", EntityArgument.players())
-						.then(Commands.argument("data", CameraShake.REGISTERED_DATA_TYPE.argument(buildContext))
-							.executes(ctx -> addBasic(EntityArgument.getPlayers(ctx, "player"), CameraShake.REGISTERED_DATA_TYPE.get(ctx, "data")))
+						.then(Commands.argument("data", ScreenShake.COMMAND.argument(buildContext))
+							.executes(ctx -> addBasic(EntityArgument.getPlayers(ctx, "player"), ScreenShake.COMMAND.get(ctx, "data")))
 						)
-						.executes(ctx -> addBasic(EntityArgument.getPlayers(ctx, "player"), CameraShake.DEFAULT))
+						.executes(ctx -> addBasic(EntityArgument.getPlayers(ctx, "player"), ScreenShake.DEFAULT))
 					)
 				)
 				.then(Commands.literal("at")
 					.then(Commands.argument("player", EntityArgument.players())
 						.then(Commands.argument("at", Vec3Argument.vec3())
 							.then(Commands.argument("max-distance", DoubleArgumentType.doubleArg())
-								.then(Commands.argument("data", CameraShake.REGISTERED_DATA_TYPE.argument(buildContext))
-									.executes(ctx -> addAt(EntityArgument.getPlayers(ctx, "player"), Vec3Argument.getVec3(ctx, "at"), DoubleArgumentType.getDouble(ctx, "max-distance"), CameraShake.REGISTERED_DATA_TYPE.get(ctx, "data")))
+								.then(Commands.argument("data", ScreenShake.COMMAND.argument(buildContext))
+									.executes(ctx -> addAt(EntityArgument.getPlayers(ctx, "player"), Vec3Argument.getVec3(ctx, "at"), DoubleArgumentType.getDouble(ctx, "max-distance"), ScreenShake.COMMAND.get(ctx, "data")))
 								)
-								.executes(ctx -> addAt(EntityArgument.getPlayers(ctx, "player"), Vec3Argument.getVec3(ctx, "at"), DoubleArgumentType.getDouble(ctx, "max-distance"), CameraShake.DEFAULT))
+								.executes(ctx -> addAt(EntityArgument.getPlayers(ctx, "player"), Vec3Argument.getVec3(ctx, "at"), DoubleArgumentType.getDouble(ctx, "max-distance"), ScreenShake.DEFAULT))
 							)
 						)
 					)
@@ -73,17 +73,17 @@ public interface CameraCommands {
 		)
 	);
 
-	static int addBasic(Collection<ServerPlayer> players, CameraShake data) {
+	static int addBasic(Collection<ServerPlayer> players, ScreenShake data) {
 		for (var player : players) {
-			player.shakeCamera(data);
+			player.screenShake(data);
 		}
 
 		return 1;
 	}
 
-	static int addAt(Collection<ServerPlayer> players, Vec3 at, double maxDistance, CameraShake data) {
+	static int addAt(Collection<ServerPlayer> players, Vec3 at, double maxDistance, ScreenShake data) {
 		for (var player : players) {
-			player.shakeCamera(data, at, maxDistance);
+			player.screenShake(data, at, maxDistance);
 		}
 
 		return 1;
@@ -91,7 +91,7 @@ public interface CameraCommands {
 
 	static int clear(Collection<ServerPlayer> players) {
 		for (var player : players) {
-			player.stopCameraShaking();
+			player.stopScreenShake();
 		}
 
 		return 1;

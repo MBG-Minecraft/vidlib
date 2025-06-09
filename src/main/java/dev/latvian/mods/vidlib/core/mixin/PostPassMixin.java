@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.ResourceHandle;
 import com.mojang.blaze3d.systems.RenderPass;
-import dev.latvian.mods.vidlib.feature.client.GLDebugLog;
+import dev.latvian.mods.klib.gl.GLDebugLog;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PostPass;
 import net.minecraft.resources.ResourceLocation;

@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.VidLibConfig;
-import dev.latvian.mods.vidlib.util.Cast;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.server.IntegratedServer;
 import org.spongepowered.asm.mixin.Mixin;

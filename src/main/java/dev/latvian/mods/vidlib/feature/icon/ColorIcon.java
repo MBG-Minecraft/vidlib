@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.icon;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.kmath.color.Color;
+import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 
 public record ColorIcon(Color color) implements Icon {

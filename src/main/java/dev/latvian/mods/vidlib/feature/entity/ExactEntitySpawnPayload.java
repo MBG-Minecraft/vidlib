@@ -1,13 +1,14 @@
 package dev.latvian.mods.vidlib.feature.entity;
 
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.core.VLClientPacketListener;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
-import dev.latvian.mods.vidlib.feature.registry.ID;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -33,10 +34,10 @@ public record ExactEntitySpawnPayload(
 ) implements SimplePacketPayload {
 	public static final StreamCodec<ByteBuf, ExactEntitySpawnPayload> STREAM_CODEC = CompositeStreamCodec.of(
 		ID.STREAM_CODEC.map(BuiltInRegistries.ENTITY_TYPE::getValue, t -> t.builtInRegistryHolder().getKey().location()), ExactEntitySpawnPayload::type,
-		VLStreamCodecs.UUID, ExactEntitySpawnPayload::uuid,
+		KLibStreamCodecs.UUID, ExactEntitySpawnPayload::uuid,
 		ByteBufCodecs.VAR_INT, ExactEntitySpawnPayload::id,
-		VLStreamCodecs.VEC_3, ExactEntitySpawnPayload::pos,
-		VLStreamCodecs.VEC_3, ExactEntitySpawnPayload::velocity,
+		MCStreamCodecs.VEC3, ExactEntitySpawnPayload::pos,
+		MCStreamCodecs.VEC3S, ExactEntitySpawnPayload::velocity,
 		ByteBufCodecs.FLOAT, ExactEntitySpawnPayload::xRot,
 		ByteBufCodecs.FLOAT, ExactEntitySpawnPayload::yRot,
 		ByteBufCodecs.FLOAT, ExactEntitySpawnPayload::yHeadRot,

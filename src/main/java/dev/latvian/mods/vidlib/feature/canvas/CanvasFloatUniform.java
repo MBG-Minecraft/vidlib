@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.canvas;
 
 import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.systems.RenderPass;
-import dev.latvian.mods.kmath.color.Color;
+import dev.latvian.mods.klib.color.Color;
 import org.joml.Matrix3fc;
 import org.joml.Matrix4fc;
 import org.joml.Vector3fc;

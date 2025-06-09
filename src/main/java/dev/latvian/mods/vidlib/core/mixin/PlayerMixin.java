@@ -2,10 +2,10 @@ package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.core.VLPlayer;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverrideValue;
-import dev.latvian.mods.vidlib.util.Empty;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;

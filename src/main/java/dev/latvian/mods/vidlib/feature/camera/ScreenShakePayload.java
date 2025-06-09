@@ -4,13 +4,10 @@ import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
-import net.minecraft.network.codec.StreamCodec;
 
-public enum StopCameraShakingPayload implements SimplePacketPayload {
-	INSTANCE;
-
+public record ScreenShakePayload(ScreenShake shake) implements SimplePacketPayload {
 	@AutoPacket
-	public static final VidLibPacketType<StopCameraShakingPayload> TYPE = VidLibPacketType.internal("stop_camera_shaking", StreamCodec.unit(INSTANCE));
+	public static final VidLibPacketType<ScreenShakePayload> TYPE = VidLibPacketType.internal("screen_shake", ScreenShake.STREAM_CODEC.map(ScreenShakePayload::new, ScreenShakePayload::shake));
 
 	@Override
 	public VidLibPacketType<?> getType() {
@@ -19,6 +16,6 @@ public enum StopCameraShakingPayload implements SimplePacketPayload {
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.player().stopCameraShaking();
+		ctx.player().screenShake(shake);
 	}
 }

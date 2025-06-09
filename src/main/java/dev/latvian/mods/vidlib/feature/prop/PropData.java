@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
-import dev.latvian.mods.vidlib.feature.codec.DataType;
+import dev.latvian.mods.klib.data.DataType;
 
 import java.util.Map;
 import java.util.function.BiConsumer;

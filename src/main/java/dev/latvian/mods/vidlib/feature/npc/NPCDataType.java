@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.feature.npc;
 
+import dev.latvian.mods.klib.util.Cast;
+import dev.latvian.mods.klib.util.SimilarityCheck;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
-import dev.latvian.mods.vidlib.util.Cast;
-import dev.latvian.mods.vidlib.util.SimilarityCheck;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -48,12 +48,12 @@ public record NPCDataType<T>(String name, StreamCodec<?, T> streamCodec, T defau
 		return add(name, ItemStack.OPTIONAL_STREAM_CODEC, ItemStack.EMPTY, SimilarityCheck.ITEM_STACK, (player, delta) -> player.getItemBySlot(slot).copy());
 	}
 
-	public static final NPCDataType<Vec3> POSITION = add("position", Vec3.STREAM_CODEC, Vec3.ZERO, SimilarityCheck.VEC_3, Entity::getPosition);
+	public static final NPCDataType<Vec3> POSITION = add("position", Vec3.STREAM_CODEC, Vec3.ZERO, SimilarityCheck.VEC3, Entity::getPosition);
 	public static final NPCDataType<Float> YAW = addFloat("yaw", 0F, Entity::getViewYRot);
 	public static final NPCDataType<Float> PITCH = addFloat("pitch", 0F, Entity::getViewXRot);
 	public static final NPCDataType<Float> BODY_YAW = addFloat("body_yaw", 0F, (p, d) -> Mth.lerp(d, p.yBodyRotO, p.yBodyRot));
 	public static final NPCDataType<Float> HEAD_YAW = addFloat("head_yaw", 0F, (p, d) -> Mth.lerp(d, p.yHeadRotO, p.yHeadRot));
-	public static final NPCDataType<Vec3> VELOCITY = add("velocity", Vec3.STREAM_CODEC, Vec3.ZERO, SimilarityCheck.VEC_3, (p, d) -> p.getDeltaMovement());
+	public static final NPCDataType<Vec3> VELOCITY = add("velocity", Vec3.STREAM_CODEC, Vec3.ZERO, SimilarityCheck.VEC3, (p, d) -> p.getDeltaMovement());
 	public static final NPCDataType<ItemStack> MAIN_HAND = addEquipment("equipment/hand/main", EquipmentSlot.MAINHAND);
 	public static final NPCDataType<ItemStack> OFF_HAND = addEquipment("equipment/hand/off", EquipmentSlot.OFFHAND);
 	public static final NPCDataType<ItemStack> EQUIPMENT_FEET = addEquipment("equipment/feet", EquipmentSlot.FEET);

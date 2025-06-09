@@ -1,15 +1,15 @@
 package dev.latvian.mods.vidlib.feature.location;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibCodecs;
+import dev.latvian.mods.klib.codec.MCCodecs;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
+import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
-import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
-import dev.latvian.mods.vidlib.feature.registry.ID;
-import dev.latvian.mods.vidlib.feature.registry.RegistryRef;
+import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
 import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
@@ -22,7 +22,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 @AutoInit
@@ -36,8 +35,8 @@ public record Location(
 ) implements Supplier<WorldVector> {
 	public static final Codec<Location> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		ID.CODEC.fieldOf("id").forGetter(Location::id),
-		VLCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(Location::dimension),
-		VLCodecs.listOrSelf(WorldVector.CODEC).fieldOf("position").forGetter(Location::positions),
+		MCCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(Location::dimension),
+		KLibCodecs.listOrSelf(WorldVector.CODEC).fieldOf("position").forGetter(Location::positions),
 		Codec.DOUBLE.optionalFieldOf("range", 0D).forGetter(Location::range),
 		Codec.BOOL.optionalFieldOf("warp", true).forGetter(Location::warp),
 		Codec.BOOL.optionalFieldOf("warp_requires_admin", true).forGetter(Location::warpRequiresAdmin)
@@ -45,7 +44,7 @@ public record Location(
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, Location> DIRECT_STREAM_CODEC = CompositeStreamCodec.of(
 		ID.STREAM_CODEC, Location::id,
-		VLStreamCodecs.DIMENSION, Location::dimension,
+		MCStreamCodecs.DIMENSION, Location::dimension,
 		WorldVector.STREAM_CODEC.listOf(), Location::positions,
 		ByteBufCodecs.DOUBLE, Location::range,
 		ByteBufCodecs.BOOL, Location::warp,
@@ -53,16 +52,9 @@ public record Location(
 		Location::new
 	);
 
-	public static final VLRegistry<Location> REGISTRY = VLRegistry.createServer("location");
-	public static final VLRegistry<Location> CLIENT_REGISTRY = VLRegistry.createClient("location");
-	public static final Codec<RegistryRef<Location>> CLIENT_REF_CODEC = Codec.either(CLIENT_REGISTRY.refCodec(), REGISTRY.refCodec()).xmap(either -> either.map(Function.identity(), Function.identity()), Either::right);
-
-	public static final Codec<RegistryRef<Location>> CLIENT_CODEC = Codec.either(CLIENT_REF_CODEC, DIRECT_CODEC).xmap(
-		either -> either.map(Function.identity(), loc -> new RegistryRef<>(null, loc)),
-		ref -> ref.id() != null ? Either.left(ref) : Either.right(ref.get())
-	);
-
-	public static final RegisteredDataType<Location> REGISTERED_DATA_TYPE = RegisteredDataType.of(REGISTRY, Location.class);
+	public static final VLRegistry<Location> REGISTRY = VLRegistry.createServer("location", Location.class);
+	public static final DataType<Location> DATA_TYPE = REGISTRY.dataType();
+	public static final CommandDataType<Location> COMMAND = CommandDataType.of(DATA_TYPE);
 
 	public static class Loader extends JsonRegistryReloadListener<Location> {
 		public Loader(VLRegistry<Location> registry) {

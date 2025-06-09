@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
-import dev.latvian.mods.vidlib.util.Side;
+import dev.latvian.mods.klib.util.Side;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;

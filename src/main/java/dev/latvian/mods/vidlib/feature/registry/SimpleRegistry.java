@@ -4,9 +4,9 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
-import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
-import dev.latvian.mods.vidlib.util.Cast;
+import dev.latvian.mods.klib.codec.KLibCodecs;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
+import dev.latvian.mods.klib.util.Cast;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import org.jetbrains.annotations.Nullable;
@@ -31,8 +31,8 @@ public record SimpleRegistry<V>(
 		var unitTypeMap = new IdentityHashMap<V, SimpleRegistryType.Unit<V>>();
 		var unitValueMap = new HashMap<String, V>();
 
-		var typeCodec = VLCodecs.map(typeMap, Codec.STRING, SimpleRegistryType::id);
-		var typeStreamCodec = VLStreamCodecs.map(typeMap, VLStreamCodecs.REGISTRY_STRING, SimpleRegistryType::id);
+		var typeCodec = KLibCodecs.map(typeMap, Codec.STRING, SimpleRegistryType::id);
+		var typeStreamCodec = KLibStreamCodecs.map(typeMap, KLibStreamCodecs.REGISTRY_STRING, SimpleRegistryType::id);
 
 		Codec<V> unitCodec = Codec.STRING.flatXmap(s -> {
 			var value = typeMap.get(s);

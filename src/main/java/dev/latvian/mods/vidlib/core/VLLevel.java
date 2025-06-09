@@ -315,7 +315,9 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 	}
 
 	default WorldNumberContext globalContext(float progress) {
-		return new WorldNumberContext(vl$level(), progress, getEnvironment().globalVariables());
+		var ctx = new WorldNumberContext(vl$level(), progress, getEnvironment().globalVariables());
+		ctx.serverDataMap = getServerData();
+		return ctx;
 	}
 
 	default WorldNumberContext globalContext() {

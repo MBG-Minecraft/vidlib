@@ -12,7 +12,6 @@ import dev.latvian.mods.vidlib.feature.clock.ClockFont;
 import dev.latvian.mods.vidlib.feature.clothing.ClientClothingLoader;
 import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBarRenderer;
 import dev.latvian.mods.vidlib.feature.gradient.ClientGradientLoader;
-import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.multiverse.VoidSpecialEffects;
 import dev.latvian.mods.vidlib.feature.particle.VidLibClientParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
@@ -47,7 +46,6 @@ public class ModClientEventHandler {
 
 	@SubscribeEvent
 	public static void addReloadListeners(AddClientReloadListenersEvent event) {
-		event.addListener(VidLib.id("location"), new Location.Loader(Location.CLIENT_REGISTRY));
 		event.addListener(VidLib.id("structure"), new StructureStorage(StructureStorage.CLIENT));
 		event.addListener(VidLib.id("ghost_structure"), new GhostStructure.Loader());
 		event.addListener(VidLib.id("clothing"), new ClientClothingLoader());
@@ -57,9 +55,7 @@ public class ModClientEventHandler {
 		event.addListener(VidLib.id("clock"), new Clock.Loader());
 		event.addListener(VidLib.id("skybox"), new SkyboxData.Loader());
 
-		event.addDependency(VidLib.id("location"), VidLib.id("ghost_structure"));
 		event.addDependency(VidLib.id("structure"), VidLib.id("ghost_structure"));
-		event.addDependency(VidLib.id("location"), VidLib.id("clock"));
 		event.addDependency(VidLib.id("clock_font"), VidLib.id("clock"));
 	}
 

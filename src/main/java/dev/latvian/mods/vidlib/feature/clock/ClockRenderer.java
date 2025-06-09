@@ -13,7 +13,12 @@ public class ClockRenderer {
 	public static void render(FrameInfo frame, ClockValue value, ClockLocation location) {
 		var mc = frame.mc();
 		float delta = frame.worldDelta();
-		var font = location.font();
+		var font = location.font().get();
+
+		if (font == null) {
+			return;
+		}
+
 		var ms = frame.poseStack();
 
 		var text = location.format().formatted(value.second() / 60, value.second() % 60).toCharArray();
@@ -35,7 +40,7 @@ public class ClockRenderer {
 
 		var buffer = mc.renderBuffers().bufferSource().getBuffer(RenderType.entityCutoutNoCull(font.texture()));
 		var x = -width / 2F + 1F;
-		var y = -font.size().h() / 2F;
+		var y = -font.size().y() / 2F;
 		var z = 0.4F;
 
 		var color = location.color().lerp(switch (value.type()) {
@@ -56,8 +61,8 @@ public class ClockRenderer {
 			float v0 = uv.v0();
 			float u1 = uv.u1();
 			float v1 = uv.v1();
-			float cw = index == 10 ? font.actualSeparatorWidth() : font.size().w();
-			float ch = font.size().h();
+			float cw = index == 10 ? font.actualSeparatorWidth() : font.size().x();
+			float ch = font.size().y();
 
 			buffer.addVertex(m4, x, y, z).setColor(cr, cg, cb, ca).setUv(u0, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(normal.x, normal.y, normal.z);
 			buffer.addVertex(m4, x + cw, y, z).setColor(cr, cg, cb, ca).setUv(u1, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(normal.x, normal.y, normal.z);

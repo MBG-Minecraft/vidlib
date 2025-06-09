@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.misc;
 
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.Util;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -14,7 +14,7 @@ public record MarkerData(String event, String name, UUID uuid) {
 	public static final StreamCodec<ByteBuf, MarkerData> STREAM_CODEC = CompositeStreamCodec.of(
 		ByteBufCodecs.STRING_UTF8, MarkerData::event,
 		ByteBufCodecs.STRING_UTF8, MarkerData::name,
-		VLStreamCodecs.UUID, MarkerData::uuid,
+		KLibStreamCodecs.UUID, MarkerData::uuid,
 		MarkerData::new
 	);
 

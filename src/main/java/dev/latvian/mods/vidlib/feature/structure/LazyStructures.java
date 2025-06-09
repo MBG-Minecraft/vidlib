@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.structure;
 
+import dev.latvian.mods.klib.util.WithCache;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.util.WithCache;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtAccounter;

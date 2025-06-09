@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
-import dev.latvian.mods.kmath.Line;
+import dev.latvian.mods.klib.math.Line;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.RegistryFriendlyByteBuf;

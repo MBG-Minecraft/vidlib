@@ -2,10 +2,10 @@ package dev.latvian.mods.vidlib.feature.zone;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.kmath.AAIBB;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.MCCodecs;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
+import dev.latvian.mods.klib.math.AAIBB;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -14,12 +14,12 @@ import net.minecraft.world.level.Level;
 
 public record Area(ResourceKey<Level> dimension, AAIBB shape) {
 	public static final Codec<Area> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		VLCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(Area::dimension),
+		MCCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(Area::dimension),
 		AAIBB.CODEC.fieldOf("areas").forGetter(Area::shape)
 	).apply(instance, Area::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, Area> STREAM_CODEC = CompositeStreamCodec.of(
-		VLStreamCodecs.DIMENSION.optional(Level.OVERWORLD), Area::dimension,
+		MCStreamCodecs.DIMENSION.optional(Level.OVERWORLD), Area::dimension,
 		AAIBB.STREAM_CODEC, Area::shape,
 		Area::new
 	);

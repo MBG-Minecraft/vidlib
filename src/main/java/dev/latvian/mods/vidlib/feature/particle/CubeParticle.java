@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.latvian.mods.kmath.KMath;
-import dev.latvian.mods.kmath.color.Gradient;
-import dev.latvian.mods.kmath.render.BufferSupplier;
-import dev.latvian.mods.kmath.render.CuboidRenderer;
+import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.render.BufferSupplier;
+import dev.latvian.mods.klib.render.CuboidRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;

@@ -1,13 +1,13 @@
 package dev.latvian.mods.vidlib.feature.explosion;
 
-import dev.latvian.mods.kmath.KMath;
-import dev.latvian.mods.kmath.color.Color;
+import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.util.DebugColorBlocks;
 import dev.latvian.mods.vidlib.feature.bulk.BlockModificationConsumer;
 import dev.latvian.mods.vidlib.feature.bulk.OptimizedModificationBuilder;
 import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.particle.CubeParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.TextParticleOptions;
-import dev.latvian.mods.vidlib.util.DebugColorBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;

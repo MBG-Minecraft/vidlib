@@ -8,29 +8,41 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
+import dev.latvian.mods.klib.data.RegisteredDataType;
+import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
+import dev.latvian.mods.vidlib.feature.codec.DataArgumentType;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
-public record RefHolderArgument<T>(VLRegistry<T> idHolder, RegisteredDataType<T> dataType) implements ArgumentType<T> {
+public record RegistryOrDataArgumentType<T>(VLRegistry<T> registry, DataArgumentType<T> fallback) implements ArgumentType<T> {
 	public static final SimpleCommandExceptionType VALUE_NOT_FOUND = new SimpleCommandExceptionType(Component.literal("Value not found"));
 
 	@Override
 	public T parse(StringReader reader) throws CommandSyntaxException {
-		var id = ID.parse(reader);
-		var value = idHolder.get(id);
+		int i = reader.getCursor();
 
-		if (value == null) {
-			throw VALUE_NOT_FOUND.create();
+		try {
+			return fallback.parse(reader);
+		} catch (Exception ex) {
+			reader.setCursor(i);
+			var id = ID.parse(reader);
+			var value = registry.get(id);
+
+			if (value == null) {
+				throw VALUE_NOT_FOUND.create();
+			}
+
+			return value;
 		}
-
-		return value;
 	}
 
 	@Override
@@ -38,7 +50,7 @@ public record RefHolderArgument<T>(VLRegistry<T> idHolder, RegisteredDataType<T>
 		var input = builder.getRemaining().toLowerCase(Locale.ROOT);
 		boolean col = input.indexOf(':') > -1;
 
-		for (var id : idHolder.getMap().keySet()) {
+		for (var id : registry.getMap().keySet()) {
 			var ids = ID.idToString(id);
 
 			if (col) {
@@ -53,32 +65,34 @@ public record RefHolderArgument<T>(VLRegistry<T> idHolder, RegisteredDataType<T>
 		return builder.buildFuture();
 	}
 
-	public static class Info implements ArgumentTypeInfo<RefHolderArgument<?>, RefHolderTemplate> {
+	public static class Info implements ArgumentTypeInfo<RegistryOrDataArgumentType<?>, RefHolderTemplate> {
 		@Override
 		public void serializeToNetwork(RefHolderTemplate template, FriendlyByteBuf buf) {
-			buf.writeResourceLocation(template.dataType.id());
+			buf.writeResourceLocation(template.commandDataType.registeredDataType.get().id());
 		}
 
 		@Override
 		public RefHolderTemplate deserializeFromNetwork(FriendlyByteBuf buf) {
-			return new RefHolderTemplate(this, RegisteredDataType.REGISTRY.get(buf.readResourceLocation()));
+			return new RefHolderTemplate(this, CommandDataType.of(RegisteredDataType.BY_ID.get(buf.readResourceLocation()).type()));
 		}
 
 		@Override
 		public void serializeToJson(RefHolderTemplate template, JsonObject json) {
-			json.addProperty("codec", template.dataType.id().toString());
+			json.addProperty("codec", template.commandDataType.registeredDataType.get().id().toString());
 		}
 
 		@Override
-		public RefHolderTemplate unpack(RefHolderArgument arg) {
-			return new RefHolderTemplate(this, arg.dataType);
+		public RefHolderTemplate unpack(RegistryOrDataArgumentType arg) {
+			return new RefHolderTemplate(this, arg.fallback.commandDataType());
 		}
 	}
 
-	public record RefHolderTemplate(ArgumentTypeInfo<RefHolderArgument<?>, ?> type, RegisteredDataType<?> dataType) implements ArgumentTypeInfo.Template<RefHolderArgument<?>> {
+	public record RefHolderTemplate(ArgumentTypeInfo<RegistryOrDataArgumentType<?>, ?> type, CommandDataType<?> commandDataType) implements ArgumentTypeInfo.Template<RegistryOrDataArgumentType<?>> {
 		@Override
-		public RefHolderArgument<?> instantiate(CommandBuildContext ctx) {
-			return (RefHolderArgument<?>) dataType.argument(ctx);
+		public RegistryOrDataArgumentType<?> instantiate(CommandBuildContext ctx) {
+			var ops = ctx.createSerializationContext(NbtOps.INSTANCE);
+			var fallback = new DataArgumentType<>(ops, TagParser.create(ops), commandDataType);
+			return new RegistryOrDataArgumentType<>((VLRegistry) commandDataType.registeredDataType.get().argumentType(), fallback);
 		}
 	}
 }

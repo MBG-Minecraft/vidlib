@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.core;
 
-import dev.latvian.mods.kmath.Line;
+import dev.latvian.mods.klib.math.Line;
+import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
@@ -10,7 +11,6 @@ import dev.latvian.mods.vidlib.feature.icon.IconHolder;
 import dev.latvian.mods.vidlib.feature.session.SessionData;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
-import dev.latvian.mods.vidlib.util.Empty;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;

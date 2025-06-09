@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.data;
 
-import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
+import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,7 +11,8 @@ public record DataKey<T>(
 	DataKeyStorage storage,
 	String id,
 	T defaultValue,
-	@Nullable RegisteredDataType<T> type,
+	DataType<T> type,
+	CommandDataType<T> command,
 	boolean save,
 	boolean sync,
 	boolean syncToAllClients,
@@ -24,7 +26,7 @@ public record DataKey<T>(
 	public static class Builder<T> {
 		private final DataKeyStorage storage;
 		private final String id;
-		private final RegisteredDataType<T> type;
+		private final DataType<T> type;
 		private final T defaultValue;
 		private boolean save;
 		private boolean sync;
@@ -33,7 +35,7 @@ public record DataKey<T>(
 		private boolean allowClientUpdates;
 		private boolean skipLogging;
 
-		Builder(DataKeyStorage storage, String id, @Nullable RegisteredDataType<T> type, T defaultValue) {
+		Builder(DataKeyStorage storage, String id, DataType<T> type, T defaultValue) {
 			this.storage = storage;
 			this.id = id;
 			this.type = type;
@@ -82,6 +84,7 @@ public record DataKey<T>(
 				id,
 				defaultValue,
 				type,
+				CommandDataType.of(type),
 				save,
 				sync,
 				syncToAllClients,

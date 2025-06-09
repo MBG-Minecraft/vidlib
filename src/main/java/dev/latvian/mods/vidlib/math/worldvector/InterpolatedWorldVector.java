@@ -2,9 +2,9 @@ package dev.latvian.mods.vidlib.math.worldvector;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.kmath.KMath;
-import dev.latvian.mods.kmath.easing.Easing;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.easing.Easing;
+import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -48,6 +48,10 @@ public record InterpolatedWorldVector(Easing easing, float start, float end, Wor
 		var a = from.get(ctx);
 		var b = to.get(ctx);
 
-		return a == null || b == null ? null : a.lerp(b, easing.easeClamped(KMath.map(ctx.progress, start, end, 0D, 1D)));
+		if (a == null || b == null) {
+			return null;
+		}
+
+		return a.lerp(b, easing.easeClamped(KMath.map(ctx.progress, start, end, 0D, 1D)));
 	}
 }

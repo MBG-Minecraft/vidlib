@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.feature.block;
 
-import dev.latvian.mods.kmath.SplitBox;
+import dev.latvian.mods.klib.math.SplitBox;
+import dev.latvian.mods.klib.util.WithCache;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleShape;
-import dev.latvian.mods.vidlib.util.WithCache;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.world.level.block.state.BlockState;

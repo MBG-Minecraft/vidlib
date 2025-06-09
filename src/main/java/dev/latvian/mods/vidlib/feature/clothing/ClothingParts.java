@@ -3,11 +3,10 @@ package dev.latvian.mods.vidlib.feature.clothing;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.codec.DataType;
-import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
-import dev.latvian.mods.vidlib.util.Lazy;
+import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.codec.StreamCodec;
@@ -45,7 +44,7 @@ public record ClothingParts(boolean head, boolean body, boolean legs, boolean fe
 	};
 
 	public static final DataType<ClothingParts> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, ClothingParts.class);
-	public static final RegisteredDataType<ClothingParts> REGISTERED_DATA_TYPE = RegisteredDataType.register(VidLib.id("clothing_parts"), DATA_TYPE);
+	public static final CommandDataType<ClothingParts> COMMAND = CommandDataType.of(DATA_TYPE);
 
 	public static final Lazy<ItemStack> ENCHANTED_ITEM = Lazy.of(() -> {
 		var stack = new ItemStack(Items.APPLE);

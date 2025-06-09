@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.data;
 
+import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import dev.latvian.mods.vidlib.util.Cast;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.nbt.NbtOps;
@@ -25,7 +25,7 @@ public interface PlayerDataCommand {
 					for (var player : EntityArgument.getPlayers(ctx, "player")) {
 						ctx.getSource().sendSuccess(() -> {
 							var value = player.get(key);
-							var nbt = key.type().type().codec().encodeStart(nbtOps, Cast.to(value)).getOrThrow();
+							var nbt = key.type().codec().encodeStart(nbtOps, Cast.to(value)).getOrThrow();
 							return Component.literal(player.getScoreboardName() + ": ").append(NbtUtils.toPrettyComponent(nbt));
 						}, false);
 					}
@@ -35,9 +35,9 @@ public interface PlayerDataCommand {
 			);
 
 			set.then(Commands.literal(key.id())
-				.then(Commands.argument("value", key.type().argument(buildContext))
+				.then(Commands.argument("value", key.command().argument(buildContext))
 					.executes(ctx -> {
-						var value = key.type().get(ctx, "value");
+						var value = key.command().get(ctx, "value");
 
 						for (var player : EntityArgument.getPlayers(ctx, "player")) {
 							player.set(key, Cast.to(value));

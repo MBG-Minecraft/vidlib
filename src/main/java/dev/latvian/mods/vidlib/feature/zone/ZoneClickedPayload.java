@@ -1,13 +1,13 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
-import dev.latvian.mods.vidlib.feature.registry.ID;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceLocation;
@@ -23,7 +23,7 @@ public record ZoneClickedPayload(ResourceLocation id, int index, ZoneShape shape
 		ByteBufCodecs.VAR_INT, ZoneClickedPayload::index,
 		ZoneShape.STREAM_CODEC, ZoneClickedPayload::shape,
 		ByteBufCodecs.DOUBLE, ZoneClickedPayload::distanceSq,
-		VLStreamCodecs.VEC_3.optional(), ZoneClickedPayload::pos,
+		MCStreamCodecs.VEC3.optional(), ZoneClickedPayload::pos,
 		ZoneClickedPayload::new
 	));
 

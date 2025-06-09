@@ -1,10 +1,9 @@
 package dev.latvian.mods.vidlib.feature.highlight;
 
-import dev.latvian.mods.kmath.KMath;
-import dev.latvian.mods.kmath.color.Gradient;
-import dev.latvian.mods.kmath.shape.Shape;
-import dev.latvian.mods.kmath.vertex.VertexCallback;
-import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
+import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.shape.Shape;
+import dev.latvian.mods.klib.vertex.VertexCallback;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
 import dev.latvian.mods.vidlib.math.worldvector.FixedWorldVector;
 import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
@@ -36,7 +35,7 @@ public class TerrainHighlightInstance {
 	public void render(FrameInfo frame, VertexCallback buffer, WorldNumberVariables variables) {
 		var ms = frame.poseStack();
 		var t = KMath.lerp(frame.worldDelta(), prevTick, tick) / (float) duration;
-		var ctx = new WorldNumberContext(frame.mc().level, t, variables);
+		var ctx = frame.mc().level.globalContext(t).withVariables(variables);
 		var pos = position.get(ctx);
 
 		if (pos != null) {

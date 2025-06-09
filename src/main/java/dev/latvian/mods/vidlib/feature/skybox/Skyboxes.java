@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.skybox;
 
-import dev.latvian.mods.vidlib.feature.registry.ID;
+import dev.latvian.mods.klib.util.ID;
 import net.minecraft.resources.ResourceLocation;
 
 public interface Skyboxes {

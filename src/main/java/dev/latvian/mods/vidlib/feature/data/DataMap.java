@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.feature.data;
 
+import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.util.Cast;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
@@ -93,7 +93,7 @@ public class DataMap {
 					var tag = data.get(type.id());
 
 					if (tag != null) {
-						var playerData = type.type().type().codec().parse(ops, tag).getOrThrow();
+						var playerData = type.type().codec().parse(ops, tag).getOrThrow();
 
 						if (playerData != null) {
 							init(type).data = playerData;
@@ -132,7 +132,7 @@ public class DataMap {
 
 			for (var v : map.values()) {
 				if (v.key.type() != null && v.key.save()) {
-					data.put(v.key.id(), v.key.type().type().codec().encodeStart(ops, Cast.to(v.data)).getOrThrow());
+					data.put(v.key.id(), v.key.type().codec().encodeStart(ops, Cast.to(v.data)).getOrThrow());
 				}
 			}
 

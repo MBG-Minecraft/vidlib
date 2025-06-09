@@ -1,12 +1,12 @@
 package dev.latvian.mods.vidlib.feature.icon;
 
 import com.mojang.serialization.Codec;
-import dev.latvian.mods.kmath.color.Color;
-import dev.latvian.mods.kmath.texture.UV;
+import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.codec.DataType;
-import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
+import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -17,7 +17,7 @@ public interface Icon {
 	Codec<Icon> CODEC = REGISTRY.valueCodec();
 	StreamCodec<RegistryFriendlyByteBuf, Icon> STREAM_CODEC = REGISTRY.valueStreamCodec();
 	DataType<Icon> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, Icon.class);
-	RegisteredDataType<Icon> REGISTERED_DATA_TYPE = RegisteredDataType.register(VidLib.id("icon"), DATA_TYPE);
+	CommandDataType<Icon> COMMAND = CommandDataType.of(DATA_TYPE);
 
 	SimpleRegistryType.Unit<Icon> YES = SimpleRegistryType.unit("yes", new TextureIcon(VidLib.id("textures/misc/yes.png"), UV.FULL, true, Color.WHITE));
 	SimpleRegistryType.Unit<Icon> NO = SimpleRegistryType.unit("no", new TextureIcon(VidLib.id("textures/misc/no.png"), UV.FULL, true, Color.WHITE));

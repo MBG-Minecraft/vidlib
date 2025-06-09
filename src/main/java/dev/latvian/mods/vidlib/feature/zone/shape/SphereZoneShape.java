@@ -2,10 +2,10 @@ package dev.latvian.mods.vidlib.feature.zone.shape;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.kmath.Line;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.MCCodecs;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
+import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
@@ -18,10 +18,10 @@ import org.jetbrains.annotations.Nullable;
 
 public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements ZoneShape {
 	public static final SimpleRegistryType<SphereZoneShape> TYPE = SimpleRegistryType.dynamic("sphere", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		VLCodecs.VEC_3.fieldOf("pos").forGetter(SphereZoneShape::pos),
+		MCCodecs.VEC3.fieldOf("pos").forGetter(SphereZoneShape::pos),
 		Codec.doubleRange(0D, Double.POSITIVE_INFINITY).fieldOf("radius").forGetter(SphereZoneShape::radius)
 	).apply(instance, SphereZoneShape::new)), CompositeStreamCodec.of(
-		VLStreamCodecs.VEC_3, SphereZoneShape::pos,
+		MCStreamCodecs.VEC3, SphereZoneShape::pos,
 		ByteBufCodecs.DOUBLE, SphereZoneShape::radius,
 		SphereZoneShape::new
 	));

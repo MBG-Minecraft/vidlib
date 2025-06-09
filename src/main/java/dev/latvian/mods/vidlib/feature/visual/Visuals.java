@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.visual;
 
-import dev.latvian.mods.kmath.Line;
-import dev.latvian.mods.kmath.Rotation;
-import dev.latvian.mods.kmath.VoxelShapeBox;
-import dev.latvian.mods.kmath.color.Color;
-import dev.latvian.mods.kmath.shape.PositionedColoredShape;
+import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.math.Line;
+import dev.latvian.mods.klib.math.Rotation;
+import dev.latvian.mods.klib.math.VoxelShapeBox;
+import dev.latvian.mods.klib.shape.PositionedColoredShape;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 

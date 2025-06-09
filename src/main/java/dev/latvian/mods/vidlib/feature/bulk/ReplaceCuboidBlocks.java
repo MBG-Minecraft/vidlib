@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.feature.bulk;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.MCCodecs;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -16,11 +16,11 @@ public record ReplaceCuboidBlocks(BlockPos start, BlockPos end, BlockState state
 	public static final SimpleRegistryType<ReplaceCuboidBlocks> TYPE = SimpleRegistryType.dynamic("cuboid_blocks", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		BlockPos.CODEC.fieldOf("start").forGetter(ReplaceCuboidBlocks::start),
 		BlockPos.CODEC.fieldOf("end").forGetter(ReplaceCuboidBlocks::end),
-		VLCodecs.BLOCK_STATE.fieldOf("state").forGetter(ReplaceCuboidBlocks::state)
+		MCCodecs.BLOCK_STATE.fieldOf("state").forGetter(ReplaceCuboidBlocks::state)
 	).apply(instance, ReplaceCuboidBlocks::new)), CompositeStreamCodec.of(
 		BlockPos.STREAM_CODEC, ReplaceCuboidBlocks::start,
 		BlockPos.STREAM_CODEC, ReplaceCuboidBlocks::end,
-		VLStreamCodecs.BLOCK_STATE, ReplaceCuboidBlocks::state,
+		MCStreamCodecs.BLOCK_STATE, ReplaceCuboidBlocks::state,
 		ReplaceCuboidBlocks::new
 	));
 

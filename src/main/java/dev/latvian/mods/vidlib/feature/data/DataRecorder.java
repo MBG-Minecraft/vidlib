@@ -4,9 +4,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.util.UndashedUuid;
+import dev.latvian.mods.klib.data.DataTypes;
+import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
-import dev.latvian.mods.vidlib.util.Cast;
 import dev.latvian.mods.vidlib.util.JsonUtils;
 import it.unimi.dsi.fastutil.Function;
 import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
@@ -25,7 +25,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class DataRecorder {
-	public static final DataKey<Set<String>> PLAYER_TAGS = DataKey.PLAYER.builder("player_tags", RegisteredDataType.STRING.setOf(), Set.of()).buildDummy();
+	public static final DataKey<Set<String>> PLAYER_TAGS = DataKey.PLAYER.builder("player_tags", DataTypes.STRING.setOf(), Set.of()).buildDummy();
 
 	public static class DataMap {
 		public record DataEntry(long time, Object value) {
@@ -62,7 +62,7 @@ public class DataRecorder {
 
 				for (var timeEntry : valueJson.entrySet()) {
 					var time = Long.parseUnsignedLong(timeEntry.getKey());
-					var value = type.type().type().codec().parse(ops, timeEntry.getValue()).getOrThrow();
+					var value = type.type().codec().parse(ops, timeEntry.getValue()).getOrThrow();
 					set(time, type, value);
 				}
 			}
@@ -77,7 +77,7 @@ public class DataRecorder {
 
 				for (var timeEntry : dataEntry.getValue().long2ObjectEntrySet().stream().sorted((e1, e2) -> Long.compareUnsigned(e1.getLongKey(), e2.getLongKey())).toList()) {
 					var time = Long.toUnsignedString(timeEntry.getLongKey());
-					var value = dataEntry.getKey().type().type().codec().encodeStart(ops, Cast.to(timeEntry.getValue())).getOrThrow();
+					var value = dataEntry.getKey().type().codec().encodeStart(ops, Cast.to(timeEntry.getValue())).getOrThrow();
 
 					if (lastValue == null || !Objects.equals(lastValue, value)) {
 						valueJson.add(time, value);

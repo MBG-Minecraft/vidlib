@@ -2,8 +2,8 @@ package dev.latvian.mods.vidlib.feature.entity;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
 import dev.latvian.mods.vidlib.util.JsonUtils;
 import net.neoforged.fml.loading.FMLPaths;
 
@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public class ForcedPlayerOverrides {
 	public static Map<UUID, Map<EntityOverride<?>, Object>> MAP = Map.of();
-	public static final Codec<Map<UUID, Map<EntityOverride<?>, Object>>> CODEC = Codec.unboundedMap(VLCodecs.UUID, EntityOverride.OVERRIDE_MAP_CODEC);
+	public static final Codec<Map<UUID, Map<EntityOverride<?>, Object>>> CODEC = Codec.unboundedMap(KLibCodecs.UUID, EntityOverride.OVERRIDE_MAP_CODEC);
 
 	@AutoInit({AutoInit.Type.ASSETS_LOADED, AutoInit.Type.DATA_LOADED, AutoInit.Type.GAME_LOADED})
 	public static void reload() {

@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.feature.zone.renderer;
 
 import com.mojang.math.Axis;
-import dev.latvian.mods.kmath.color.Color;
-import dev.latvian.mods.kmath.render.BufferSupplier;
-import dev.latvian.mods.kmath.render.CuboidRenderer;
+import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.render.BufferSupplier;
+import dev.latvian.mods.klib.render.CuboidRenderer;
 import dev.latvian.mods.vidlib.feature.zone.shape.RotatedBoxZoneShape;
 
 public class RotatedBoxZoneRenderer implements ZoneRenderer<RotatedBoxZoneShape> {

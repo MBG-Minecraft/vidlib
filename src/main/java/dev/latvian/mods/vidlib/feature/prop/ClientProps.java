@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
-import dev.latvian.mods.kmath.KMath;
-import dev.latvian.mods.kmath.render.BufferSupplier;
+import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.render.BufferSupplier;
+import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
-import dev.latvian.mods.vidlib.util.Cast;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;

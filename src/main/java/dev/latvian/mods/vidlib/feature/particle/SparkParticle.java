@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
-import dev.latvian.mods.kmath.KMath;
-import dev.latvian.mods.kmath.color.Gradient;
+import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.gradient.ClientGradients;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleProvider;

@@ -1,12 +1,12 @@
 package dev.latvian.mods.vidlib;
 
 import com.mojang.serialization.JsonOps;
-import dev.latvian.mods.kmath.KMath;
-import dev.latvian.mods.kmath.color.Color;
-import dev.latvian.mods.kmath.render.BufferSupplier;
-import dev.latvian.mods.kmath.render.CuboidRenderer;
-import dev.latvian.mods.kmath.render.DebugRenderTypes;
-import dev.latvian.mods.kmath.texture.LightUV;
+import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.render.BufferSupplier;
+import dev.latvian.mods.klib.render.CuboidRenderer;
+import dev.latvian.mods.klib.render.DebugRenderTypes;
+import dev.latvian.mods.klib.texture.LightUV;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;

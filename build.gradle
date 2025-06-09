@@ -3,7 +3,7 @@ plugins {
 	id 'java'
 	id 'idea'
 	id 'maven-publish'
-	id 'net.neoforged.moddev' version "2.0.75"
+	id 'net.neoforged.moddev' version "2.0.91"
 }
 
 var ENV = System.getenv()
@@ -128,14 +128,14 @@ repositories {
 }
 
 dependencies {
-	jarJar(implementation('dev.latvian.mods:kmath')) {
+	jarJar(implementation('dev.latvian.mods:klib')) {
 		version {
-			strictly "[$kmath_version,)"
-			prefer "$kmath_version"
+			strictly "[$klib_version,)"
+			prefer "$klib_version"
 		}
 	}
 
-	interfaceInjectionData("dev.latvian.mods:kmath:$kmath_version")
+	interfaceInjectionData("dev.latvian.mods:klib:$klib_version")
 
 	compileOnly("maven.modrinth:simple-voice-chat:QOjXGg4I")
 	compileOnly("software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}")

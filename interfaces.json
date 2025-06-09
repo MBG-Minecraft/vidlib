@@ -50,9 +50,6 @@
 	"net/minecraft/world/level/block/state/BlockState": [
 		"dev/latvian/mods/vidlib/core/VLBlockState"
 	],
-	"net/minecraft/network/codec/StreamCodec": [
-		"dev/latvian/mods/vidlib/core/VLStreamCodec<B, V>"
-	],
 	"net/minecraft/network/chat/Style": [
 		"dev/latvian/mods/vidlib/core/VLStyle"
 	],

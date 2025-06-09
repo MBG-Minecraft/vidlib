@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
 import com.mojang.serialization.Codec;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
@@ -23,7 +23,7 @@ public enum PropSpawnType implements StringRepresentable {
 
 	public static final PropSpawnType[] VALUES = values();
 	public static final Codec<PropSpawnType> CODEC = StringRepresentable.fromEnum(() -> VALUES);
-	public static final StreamCodec<ByteBuf, PropSpawnType> STREAM_CODEC = VLStreamCodecs.enumValue(VALUES);
+	public static final StreamCodec<ByteBuf, PropSpawnType> STREAM_CODEC = KLibStreamCodecs.enumValue(VALUES);
 
 	@Override
 	public String getSerializedName() {

@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
-import dev.latvian.mods.kmath.KMath;
-import dev.latvian.mods.kmath.VoxelShapeBox;
+import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.math.VoxelShapeBox;
 import dev.latvian.mods.vidlib.feature.visual.FaceTexture;
 import dev.latvian.mods.vidlib.feature.visual.ResolvedCubeTextures;
 import dev.latvian.mods.vidlib.feature.visual.ResolvedTexturedCube;

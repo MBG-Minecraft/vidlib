@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.util;
 
-import dev.latvian.mods.kmath.color.Color;
+import dev.latvian.mods.klib.color.Color;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntLists;

@@ -2,9 +2,9 @@ package dev.latvian.mods.vidlib.feature.sound;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.DataType;
-import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.MCCodecs;
+import dev.latvian.mods.klib.data.DataTypes;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -21,14 +21,14 @@ public record SoundData(
 ) {
 	public static final Codec<SoundData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		SoundEvent.CODEC.fieldOf("sound").forGetter(SoundData::sound),
-		VLCodecs.SOUND_SOURCE.optionalFieldOf("source", SoundSource.PLAYERS).forGetter(SoundData::source),
+		MCCodecs.SOUND_SOURCE.optionalFieldOf("source", SoundSource.PLAYERS).forGetter(SoundData::source),
 		Codec.FLOAT.optionalFieldOf("volume", 1F).forGetter(SoundData::volume),
 		Codec.FLOAT.optionalFieldOf("pitch", 1F).forGetter(SoundData::pitch)
 	).apply(instance, SoundData::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, SoundData> STREAM_CODEC = CompositeStreamCodec.of(
 		SoundEvent.STREAM_CODEC, SoundData::sound,
-		DataType.SOUND_SOURCE.streamCodec(), SoundData::source,
+		DataTypes.SOUND_SOURCE.streamCodec(), SoundData::source,
 		ByteBufCodecs.FLOAT, SoundData::volume,
 		ByteBufCodecs.FLOAT, SoundData::pitch,
 		SoundData::new

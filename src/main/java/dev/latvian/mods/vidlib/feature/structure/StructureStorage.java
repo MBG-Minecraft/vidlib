@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 public class StructureStorage extends SimplePreparableReloadListener<Map<ResourceLocation, Resource>> {
-	public static final VLRegistry<LazyStructures> SERVER = VLRegistry.createServer("server_structure");
-	public static final VLRegistry<LazyStructures> CLIENT = VLRegistry.createClient("client_structure");
+	public static final VLRegistry<LazyStructures> SERVER = VLRegistry.createServer("server_structure", LazyStructures.class);
+	public static final VLRegistry<LazyStructures> CLIENT = VLRegistry.createClient("client_structure", LazyStructures.class);
 
 	public final VLRegistry<LazyStructures> registry;
 

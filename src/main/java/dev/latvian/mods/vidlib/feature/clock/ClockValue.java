@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.clock;
 
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -12,7 +12,7 @@ public record ClockValue(int second, Type type) {
 		FLASH,
 		FINISHED;
 
-		public static final StreamCodec<ByteBuf, Type> STREAM_CODEC = VLStreamCodecs.enumValue(values());
+		public static final StreamCodec<ByteBuf, Type> STREAM_CODEC = KLibStreamCodecs.enumValue(values());
 	}
 
 	public static final StreamCodec<ByteBuf, ClockValue> STREAM_CODEC = CompositeStreamCodec.of(

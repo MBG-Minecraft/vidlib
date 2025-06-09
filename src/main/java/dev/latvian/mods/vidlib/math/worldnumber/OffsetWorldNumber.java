@@ -1,8 +1,9 @@
 package dev.latvian.mods.vidlib.math.worldnumber;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import org.jetbrains.annotations.Nullable;
 
 public record OffsetWorldNumber(WorldNumber a, WorldNumber b) implements WorldNumber {
 	public static final SimpleRegistryType<OffsetWorldNumber> TYPE = SimpleRegistryType.dynamic("offset", RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -20,9 +21,15 @@ public record OffsetWorldNumber(WorldNumber a, WorldNumber b) implements WorldNu
 	}
 
 	@Override
-	public double get(WorldNumberContext ctx) {
+	@Nullable
+	public Double get(WorldNumberContext ctx) {
 		var a = this.a.get(ctx);
 		var b = this.b.get(ctx);
+
+		if (a == null || b == null) {
+			return null;
+		}
+
 		return a + b;
 	}
 }

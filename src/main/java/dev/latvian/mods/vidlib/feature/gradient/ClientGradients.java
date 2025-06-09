@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.gradient;
 
-import dev.latvian.mods.kmath.color.Gradient;
-import dev.latvian.mods.kmath.color.GradientReference;
-import dev.latvian.mods.vidlib.feature.registry.ID;
+import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.color.GradientReference;
+import dev.latvian.mods.klib.util.ID;
 
 public interface ClientGradients {
 	Gradient TRAIL = new GradientReference(ID.mc("trail"));

@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.explosion;
 
-import dev.latvian.mods.kmath.KMath;
+import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;

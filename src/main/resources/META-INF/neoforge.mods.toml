@@ -14,7 +14,14 @@ logoBlur = false
 modId = "neoforge"
 type = "required"
 versionRange = "[21.1.122,)"
-ordering = "NONE"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.vidlib]]
+modId = "klib"
+type = "required"
+versionRange = "[1.0.0,)"
+ordering = "AFTER"
 side = "BOTH"
 
 [[mixins]]

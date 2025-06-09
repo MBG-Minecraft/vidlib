@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.canvas;
 import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.RenderTargetDescriptor;
-import dev.latvian.mods.vidlib.feature.client.GLDebugLog;
+import dev.latvian.mods.klib.gl.GLDebugLog;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 

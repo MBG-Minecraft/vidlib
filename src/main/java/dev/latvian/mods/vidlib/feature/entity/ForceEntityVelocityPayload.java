@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.entity;
 
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
@@ -13,7 +13,7 @@ public record ForceEntityVelocityPayload(int entity, Vec3 velocity) implements S
 	@AutoPacket
 	public static final VidLibPacketType<ForceEntityVelocityPayload> TYPE = VidLibPacketType.internal("force_entity_velocity", CompositeStreamCodec.of(
 		ByteBufCodecs.VAR_INT, ForceEntityVelocityPayload::entity,
-		VLStreamCodecs.VEC_3, ForceEntityVelocityPayload::velocity,
+		MCStreamCodecs.VEC3, ForceEntityVelocityPayload::velocity,
 		ForceEntityVelocityPayload::new
 	));
 

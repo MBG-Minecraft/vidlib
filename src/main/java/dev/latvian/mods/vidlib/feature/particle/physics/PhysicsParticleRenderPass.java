@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.particle.physics;
 
 import com.mojang.blaze3d.systems.RenderPass;
-import dev.latvian.mods.vidlib.feature.client.StaticBuffers;
+import dev.latvian.mods.klib.gl.StaticBuffers;
 
 public class PhysicsParticleRenderPass {
 	public final RenderPass renderPass;

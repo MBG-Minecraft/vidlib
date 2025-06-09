@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core;
 
-import dev.latvian.mods.kmath.Line;
+import dev.latvian.mods.klib.math.Line;
 import net.minecraft.world.phys.Vec3;
 
 public interface VLCamera {

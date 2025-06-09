@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.editor;
 
-import dev.latvian.mods.kmath.Rotation;
+import dev.latvian.mods.klib.math.Rotation;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;

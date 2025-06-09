@@ -27,6 +27,7 @@ public class VidLib {
 
 	public VidLib(IEventBus bus) throws IOException {
 		LOGGER.info("VidLib loaded");
+		VidLibDataTypes.register();
 
 		for (var s : AutoRegister.SCANNED.get()) {
 			if (s.value() instanceof DeferredRegister<?> reg) {

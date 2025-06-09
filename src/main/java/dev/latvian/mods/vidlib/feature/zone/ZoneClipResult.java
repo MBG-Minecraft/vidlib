@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
-import dev.latvian.mods.kmath.Line;
+import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;

@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.input;
 
-import dev.latvian.mods.kmath.Rotation;
+import dev.latvian.mods.klib.math.Rotation;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;

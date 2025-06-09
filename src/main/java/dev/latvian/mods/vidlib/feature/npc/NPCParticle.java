@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.npc;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.latvian.mods.kmath.KMath;
+import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;

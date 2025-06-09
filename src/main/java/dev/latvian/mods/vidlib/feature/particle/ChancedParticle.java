@@ -2,10 +2,8 @@ package dev.latvian.mods.vidlib.feature.particle;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.DataType;
-import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.vidlib.math.worldnumber.FixedWorldNumber;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumber;
 import net.minecraft.core.particles.ParticleOptions;
@@ -28,6 +26,5 @@ public record ChancedParticle(ParticleOptions particle, WorldNumber chance) {
 	);
 
 	public static final DataType<ChancedParticle> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, ChancedParticle.class);
-	public static final RegisteredDataType<ChancedParticle> KNOWN_CODEC = RegisteredDataType.register(VidLib.id("chanced_particle"), DATA_TYPE);
-	public static final RegisteredDataType<List<ChancedParticle>> LIST_KNOWN_CODEC = KNOWN_CODEC.listOf();
+	public static final DataType<List<ChancedParticle>> LIST_DATA_TYPE = DATA_TYPE.listOf();
 }

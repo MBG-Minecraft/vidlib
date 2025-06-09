@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.sound;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.math.worldvector.EntityPositionType;
 import dev.latvian.mods.vidlib.math.worldvector.FollowingEntityWorldVector;
 import dev.latvian.mods.vidlib.math.worldvector.WorldVector;

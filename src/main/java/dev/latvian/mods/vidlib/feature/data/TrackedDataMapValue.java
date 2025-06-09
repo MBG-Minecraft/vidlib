@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.data;
 
-import dev.latvian.mods.vidlib.util.Cast;
+import dev.latvian.mods.klib.util.Cast;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 

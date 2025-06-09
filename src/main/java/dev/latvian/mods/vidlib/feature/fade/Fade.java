@@ -3,10 +3,10 @@ package dev.latvian.mods.vidlib.feature.fade;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.kmath.color.Color;
-import dev.latvian.mods.kmath.color.Gradient;
-import dev.latvian.mods.kmath.easing.Easing;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.easing.Easing;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -50,7 +50,7 @@ public record Fade(Gradient color, int fadeInTicks, int pauseTicks, Optional<Int
 		Fade::new
 	);
 
-	public Fade(Color color, int fadeInOutTicks, int pauseTicks) {
+	public Fade(Gradient color, int fadeInOutTicks, int pauseTicks) {
 		this(color, fadeInOutTicks, pauseTicks, Optional.empty(), Easing.LINEAR, Optional.empty());
 	}
 }

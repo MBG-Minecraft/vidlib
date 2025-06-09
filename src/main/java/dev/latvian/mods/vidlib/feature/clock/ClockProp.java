@@ -7,9 +7,10 @@ import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropDataProvider;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
+import dev.latvian.mods.vidlib.feature.registry.RegistryRef;
 
 public class ClockProp extends Prop {
-	public static final PropData<ClockProp, ClockFont> FONT = PropData.create(ClockProp.class, "font", ClockFont.REGISTERED_DATA_TYPE.type(), p -> p.font, (p, v) -> p.font = v).required();
+	public static final PropData<ClockProp, RegistryRef<ClockFont>> FONT = PropData.create(ClockProp.class, "font", ClockFont.REF_DATA_TYPE, p -> p.font, (p, v) -> p.font = v).required();
 
 	@AutoRegister
 	public static final PropType<ClockProp> TYPE = PropType.create(VidLib.id("clock"), ClockProp::new, PropDataProvider.join(
@@ -17,7 +18,7 @@ public class ClockProp extends Prop {
 		FONT
 	));
 
-	public ClockFont font;
+	public RegistryRef<ClockFont> font;
 
 	public ClockProp(PropContext<?> ctx) {
 		super(ctx);

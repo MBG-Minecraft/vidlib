@@ -1,11 +1,11 @@
 package dev.latvian.mods.vidlib.feature.bloom;
 
-import dev.latvian.mods.kmath.render.BufferSupplier;
-import dev.latvian.mods.kmath.vertex.VertexCallback;
+import dev.latvian.mods.klib.render.BufferSupplier;
+import dev.latvian.mods.klib.util.Empty;
+import dev.latvian.mods.klib.vertex.VertexCallback;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasRenderPipelines;
 import dev.latvian.mods.vidlib.feature.client.TexturedRenderType;
 import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
-import dev.latvian.mods.vidlib.util.Empty;
 import dev.latvian.mods.vidlib.util.client.MultiBufferSourceOverride;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;

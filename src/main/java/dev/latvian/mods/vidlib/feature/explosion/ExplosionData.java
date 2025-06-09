@@ -2,14 +2,12 @@ package dev.latvian.mods.vidlib.feature.explosion;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.kmath.KMath;
-import dev.latvian.mods.kmath.Range;
-import dev.latvian.mods.kmath.easing.Easing;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.easing.Easing;
+import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.DataType;
-import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import dev.latvian.mods.vidlib.feature.config.BooleanConfigValue;
 import dev.latvian.mods.vidlib.feature.config.ConfigValue;
 import dev.latvian.mods.vidlib.feature.config.FloatConfigValue;
@@ -275,7 +273,6 @@ public class ExplosionData {
 	);
 
 	public static final DataType<ExplosionData> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, ExplosionData.class);
-	public static final RegisteredDataType<ExplosionData> REGISTERED_DATA_TYPE = RegisteredDataType.register(VidLib.id("explosion_data"), DATA_TYPE);
 
 	public static final List<ConfigValue<ExplosionData, ?>> CONFIG = List.of(
 		new FloatConfigValue<>("Radius", Range.of(0F, 500F), false, data -> data.radius, (data, v) -> data.radius = v),

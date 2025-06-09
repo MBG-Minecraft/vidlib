@@ -1,12 +1,13 @@
 package dev.latvian.mods.vidlib.feature.zone.renderer;
 
-import dev.latvian.mods.kmath.VoxelShapeBox;
-import dev.latvian.mods.kmath.color.Color;
-import dev.latvian.mods.kmath.render.BufferSupplier;
-import dev.latvian.mods.kmath.render.CuboidRenderer;
-import dev.latvian.mods.kmath.render.SphereRenderer;
-import dev.latvian.mods.kmath.shape.SpherePoints;
-import dev.latvian.mods.kmath.texture.LightUV;
+import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.math.VoxelShapeBox;
+import dev.latvian.mods.klib.render.BufferSupplier;
+import dev.latvian.mods.klib.render.CuboidRenderer;
+import dev.latvian.mods.klib.render.SphereRenderer;
+import dev.latvian.mods.klib.shape.SpherePoints;
+import dev.latvian.mods.klib.texture.LightUV;
+import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.core.VLBlockInWorld;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
@@ -18,7 +19,6 @@ import dev.latvian.mods.vidlib.feature.zone.shape.SphereZoneShape;
 import dev.latvian.mods.vidlib.feature.zone.shape.UniverseZoneShape;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShapeGroup;
-import dev.latvian.mods.vidlib.util.Cast;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.util.Mth;

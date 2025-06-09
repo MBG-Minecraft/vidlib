@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.client;
 
-import dev.latvian.mods.kmath.render.BufferSupplier;
-import dev.latvian.mods.vidlib.util.Empty;
+import dev.latvian.mods.klib.render.BufferSupplier;
+import dev.latvian.mods.klib.util.Empty;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;

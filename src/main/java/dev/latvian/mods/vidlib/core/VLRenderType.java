@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core;
 
-import dev.latvian.mods.vidlib.util.Empty;
+import dev.latvian.mods.klib.util.Empty;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;

@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import dev.latvian.mods.kmath.Line;
+import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.vidlib.core.VLCamera;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import net.minecraft.client.Camera;

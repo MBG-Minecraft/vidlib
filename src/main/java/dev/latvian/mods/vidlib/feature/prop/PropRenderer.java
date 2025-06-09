@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
+import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
-import dev.latvian.mods.vidlib.util.Lazy;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.client.renderer.LightTexture;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;

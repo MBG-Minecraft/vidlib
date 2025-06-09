@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.math.worldnumber;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-import dev.latvian.mods.kmath.easing.Easing;
+import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
@@ -10,15 +10,24 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
 public interface WorldNumber {
 	SimpleRegistry<WorldNumber> REGISTRY = SimpleRegistry.create(WorldNumber::type);
 
+	static WorldNumber named(String name) {
+		if (name.startsWith("$")) {
+			return new ServerDataWorldNumber(name.substring(1));
+		} else {
+			return new VariableWorldNumber(name);
+		}
+	}
+
 	Codec<WorldNumber> LITERAL_CODEC = Codec.either(Codec.DOUBLE, Codec.STRING).xmap(
-		e -> e.map(FixedWorldNumber::of, VariableWorldNumber::new),
-		v -> v instanceof FixedWorldNumber(double number) ? Either.left(number) : Either.right(v.toString())
+		e -> e.map(FixedWorldNumber::of, WorldNumber::named),
+		v -> v instanceof FixedWorldNumber(Double number) ? Either.left(number) : Either.right(v.toString())
 	);
 
 	Codec<WorldNumber> CODEC = Codec.either(LITERAL_CODEC, REGISTRY.valueCodec()).xmap(
@@ -27,8 +36,8 @@ public interface WorldNumber {
 	);
 
 	StreamCodec<ByteBuf, WorldNumber> LITERAL_STREAM_CODEC = ByteBufCodecs.either(ByteBufCodecs.DOUBLE, ByteBufCodecs.STRING_UTF8).map(
-		e -> e.map(FixedWorldNumber::of, VariableWorldNumber::new),
-		v -> v instanceof FixedWorldNumber(double number) ? Either.left(number) : Either.right(v.toString())
+		e -> e.map(FixedWorldNumber::of, WorldNumber::named),
+		v -> v instanceof FixedWorldNumber(Double number) ? Either.left(number) : Either.right(v.toString())
 	);
 
 	StreamCodec<RegistryFriendlyByteBuf, WorldNumber> STREAM_CODEC = ByteBufCodecs.either(LITERAL_STREAM_CODEC, REGISTRY.valueStreamCodec()).map(
@@ -46,6 +55,7 @@ public interface WorldNumber {
 		REGISTRY.register(VariableWorldNumber.TYPE);
 		REGISTRY.register(IfWorldNumber.TYPE);
 		REGISTRY.register(InterpolatedWorldNumber.TYPE);
+		REGISTRY.register(ServerDataWorldNumber.TYPE);
 	}
 
 	static WorldNumber fixed(double value) {
@@ -56,7 +66,13 @@ public interface WorldNumber {
 		return REGISTRY.getType(this);
 	}
 
-	double get(WorldNumberContext ctx);
+	@Nullable
+	Double get(WorldNumberContext ctx);
+
+	default double getOr(WorldNumberContext ctx, double def) {
+		Double value = get(ctx);
+		return value == null ? def : value;
+	}
 
 	default WorldNumber offset(WorldNumber other) {
 		return new OffsetWorldNumber(this, other);

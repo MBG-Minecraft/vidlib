@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.math.worldvector;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
+import dev.latvian.mods.klib.codec.MCCodecs;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
 import net.minecraft.world.phys.Vec3;
@@ -12,8 +12,8 @@ public record FixedWorldVector(Vec3 pos) implements WorldVector {
 	public static final SimpleRegistryType.Unit<FixedWorldVector> ONE = SimpleRegistryType.unit("one", new FixedWorldVector(new Vec3(1D, 1D, 1D)));
 
 	public static final SimpleRegistryType<FixedWorldVector> TYPE = SimpleRegistryType.dynamic("fixed", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		VLCodecs.VEC_3.fieldOf("pos").forGetter(FixedWorldVector::pos)
-	).apply(instance, FixedWorldVector::new)), VLStreamCodecs.VEC_3.map(FixedWorldVector::new, FixedWorldVector::pos));
+		MCCodecs.VEC3.fieldOf("pos").forGetter(FixedWorldVector::pos)
+	).apply(instance, FixedWorldVector::new)), MCStreamCodecs.VEC3.map(FixedWorldVector::new, FixedWorldVector::pos));
 
 	@Override
 	public SimpleRegistryType<?> type() {

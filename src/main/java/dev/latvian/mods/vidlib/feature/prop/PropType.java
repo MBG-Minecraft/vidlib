@@ -3,16 +3,14 @@ package dev.latvian.mods.vidlib.feature.prop;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.codec.KLibCodecs;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
+import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.util.Cast;
+import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
-import dev.latvian.mods.vidlib.feature.codec.DataType;
-import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
-import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
-import dev.latvian.mods.vidlib.feature.registry.ID;
-import dev.latvian.mods.vidlib.util.Cast;
-import dev.latvian.mods.vidlib.util.Lazy;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -69,10 +67,9 @@ public record PropType<P extends Prop>(
 		return new PropType<>(id, factory, map, idMap, reverseIdMap);
 	}
 
-	public static final Codec<PropType<?>> CODEC = VLCodecs.map(ALL, ID.CODEC, PropType::id);
-	public static final StreamCodec<ByteBuf, PropType<?>> STREAM_CODEC = VLStreamCodecs.map(ALL, ID.STREAM_CODEC, PropType::id);
+	public static final Codec<PropType<?>> CODEC = KLibCodecs.map(ALL, ID.CODEC, PropType::id);
+	public static final StreamCodec<ByteBuf, PropType<?>> STREAM_CODEC = KLibStreamCodecs.map(ALL, ID.STREAM_CODEC, PropType::id);
 	public static final DataType<PropType<?>> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, Cast.to(PropType.class));
-	public static final RegisteredDataType<PropType<?>> REGISTERED_DATA_TYPE = RegisteredDataType.register(VidLib.id("prop_type"), DATA_TYPE);
 
 	public <O> DataResult<P> load(P prop, DynamicOps<O> ops, O map, boolean full) {
 		for (var p : data.values()) {

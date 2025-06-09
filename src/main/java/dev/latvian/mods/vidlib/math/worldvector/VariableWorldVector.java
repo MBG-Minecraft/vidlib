@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.math.worldvector;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -29,7 +30,12 @@ public record VariableWorldVector(String name) implements WorldVector {
 
 			if (num != null) {
 				var d = num.get(ctx);
-				return Double.isNaN(d) ? null : d == 0D ? Vec3.ZERO : new Vec3(d, d, d);
+
+				if (d == null) {
+					return null;
+				}
+
+				return KMath.vec3(d, d, d);
 			}
 		}
 

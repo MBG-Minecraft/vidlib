@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
+import dev.latvian.mods.klib.codec.CollectionStreamCodecs;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
@@ -12,7 +12,7 @@ public record RemovePropsPayload(PropListType type, IntList ids) implements Simp
 	@AutoPacket
 	public static final VidLibPacketType<RemovePropsPayload> TYPE = VidLibPacketType.internal("remove_props", CompositeStreamCodec.of(
 		PropListType.STREAM_CODEC, RemovePropsPayload::type,
-		VLStreamCodecs.VAR_INT_LIST, RemovePropsPayload::ids,
+		CollectionStreamCodecs.VAR_INT_LIST, RemovePropsPayload::ids,
 		RemovePropsPayload::new
 	));
 

@@ -1,8 +1,10 @@
 package dev.latvian.mods.vidlib.math.worldnumber;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.util.Comparison;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -15,13 +17,13 @@ public record IfWorldNumber(
 ) implements WorldNumber {
 	public static final SimpleRegistryType<IfWorldNumber> TYPE = SimpleRegistryType.dynamic("if", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		WorldNumber.CODEC.fieldOf("if").forGetter(IfWorldNumber::ifValue),
-		Comparison.CODEC.optionalFieldOf("comparison", Comparison.NOT_EQUALS).forGetter(IfWorldNumber::comparison),
+		Comparison.DATA_TYPE.codec().optionalFieldOf("comparison", Comparison.NOT_EQUALS).forGetter(IfWorldNumber::comparison),
 		WorldNumber.CODEC.optionalFieldOf("value", FixedWorldNumber.ZERO.instance()).forGetter(IfWorldNumber::testValue),
 		WorldNumber.CODEC.optionalFieldOf("then").forGetter(IfWorldNumber::thenValue),
 		WorldNumber.CODEC.optionalFieldOf("else").forGetter(IfWorldNumber::elseValue)
 	).apply(instance, IfWorldNumber::new)), CompositeStreamCodec.of(
 		WorldNumber.STREAM_CODEC, IfWorldNumber::ifValue,
-		Comparison.STREAM_CODEC.optional(Comparison.NOT_EQUALS), IfWorldNumber::comparison,
+		Comparison.DATA_TYPE.streamCodec().optional(Comparison.NOT_EQUALS), IfWorldNumber::comparison,
 		WorldNumber.STREAM_CODEC.optional(FixedWorldNumber.ZERO.instance()), IfWorldNumber::testValue,
 		WorldNumber.STREAM_CODEC.optional(), IfWorldNumber::thenValue,
 		WorldNumber.STREAM_CODEC.optional(), IfWorldNumber::elseValue,
@@ -34,17 +36,18 @@ public record IfWorldNumber(
 	}
 
 	@Override
-	public double get(WorldNumberContext ctx) {
+	@Nullable
+	public Double get(WorldNumberContext ctx) {
 		var i = ifValue.get(ctx);
 
-		if (Double.isNaN(i)) {
-			return Double.NaN;
+		if (i == null) {
+			return null;
 		}
 
 		var t = testValue.get(ctx);
 
-		if (Double.isNaN(t)) {
-			return Double.NaN;
+		if (t == null) {
+			return null;
 		}
 
 		if (comparison.test(i, t)) {
@@ -57,6 +60,6 @@ public record IfWorldNumber(
 			}
 		}
 
-		return Double.NaN;
+		return null;
 	}
 }

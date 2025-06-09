@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.math.worldvector;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
 import net.minecraft.world.phys.Vec3;
@@ -27,6 +27,11 @@ public record ScaledWorldVector(WorldVector a, WorldVector b) implements WorldVe
 	public Vec3 get(WorldNumberContext ctx) {
 		var a = this.a.get(ctx);
 		var b = this.b.get(ctx);
-		return a == null || b == null ? null : new Vec3(a.x * b.x, a.y * b.y, a.z * b.z);
+
+		if (a == null || b == null) {
+			return null;
+		}
+
+		return new Vec3(a.x * b.x, a.y * b.y, a.z * b.z);
 	}
 }

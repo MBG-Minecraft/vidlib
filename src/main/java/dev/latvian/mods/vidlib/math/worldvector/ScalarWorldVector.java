@@ -1,7 +1,8 @@
 package dev.latvian.mods.vidlib.math.worldvector;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumber;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
@@ -26,10 +27,10 @@ public record ScalarWorldVector(WorldNumber number) implements WorldVector {
 	public Vec3 get(WorldNumberContext ctx) {
 		var n = number.get(ctx);
 
-		if (Double.isNaN(n)) {
+		if (n == null) {
 			return null;
 		}
 
-		return n == 0D ? Vec3.ZERO : new Vec3(n, n, n);
+		return KMath.vec3(n, n, n);
 	}
 }

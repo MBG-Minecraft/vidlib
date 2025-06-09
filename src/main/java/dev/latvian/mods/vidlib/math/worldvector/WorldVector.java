@@ -2,10 +2,11 @@ package dev.latvian.mods.vidlib.math.worldvector;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-import dev.latvian.mods.kmath.easing.Easing;
+import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.math.worldnumber.ServerDataWorldNumber;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumber;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
 import io.netty.buffer.ByteBuf;
@@ -23,12 +24,16 @@ public interface WorldVector {
 	SimpleRegistry<WorldVector> REGISTRY = SimpleRegistry.create(WorldVector::type);
 
 	static WorldVector named(String name) {
-		return switch (name) {
-			case "origin" -> OriginWorldVector.INSTANCE;
-			case "source" -> SourceWorldVector.INSTANCE;
-			case "target" -> TargetWorldVector.INSTANCE;
-			default -> new VariableWorldVector(name);
-		};
+		var v = LiteralWorldVector.BY_NAME.get(name);
+
+		if (v != null) {
+			return v;
+		} else if (name.startsWith("$")) {
+			var n = new ServerDataWorldNumber(name.substring(1));
+			return new DynamicWorldVector(n, n, n);
+		} else {
+			return new VariableWorldVector(name);
+		}
 	}
 
 	Codec<WorldVector> LITERAL_CODEC = Codec.either(Vec3.CODEC, Codec.STRING).xmap(
@@ -72,12 +77,13 @@ public interface WorldVector {
 		REGISTRY.register(ScaledWorldVector.TYPE);
 		REGISTRY.register(InterpolatedWorldVector.TYPE);
 		REGISTRY.register(FollowingEntityWorldVector.TYPE);
-		REGISTRY.register(OriginWorldVector.TYPE);
-		REGISTRY.register(SourceWorldVector.TYPE);
-		REGISTRY.register(TargetWorldVector.TYPE);
 		REGISTRY.register(VariableWorldVector.TYPE);
 		REGISTRY.register(IfWorldVector.TYPE);
 		REGISTRY.register(PivotingWorldVector.TYPE);
+
+		for (var literal : LiteralWorldVector.values()) {
+			REGISTRY.register(literal.type);
+		}
 	}
 
 	static WorldVector fixed(Vec3 position) {

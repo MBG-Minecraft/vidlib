@@ -2,8 +2,8 @@ package dev.latvian.mods.vidlib.feature.zone.shape;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-import dev.latvian.mods.kmath.AAIBB;
-import dev.latvian.mods.kmath.Line;
+import dev.latvian.mods.klib.math.AAIBB;
+import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;

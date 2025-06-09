@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.auto;
 
+import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
-import dev.latvian.mods.vidlib.util.Lazy;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.annotation.ElementType;

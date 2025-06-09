@@ -2,16 +2,14 @@ package dev.latvian.mods.vidlib.feature.highlight;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.kmath.color.Color;
-import dev.latvian.mods.kmath.color.Gradient;
-import dev.latvian.mods.kmath.color.PairGradient;
-import dev.latvian.mods.kmath.shape.CylinderShape;
-import dev.latvian.mods.kmath.shape.Shape;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.color.PairGradient;
+import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.shape.CylinderShape;
+import dev.latvian.mods.klib.shape.Shape;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.DataType;
-import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
 import dev.latvian.mods.vidlib.math.worldnumber.FixedWorldNumber;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumber;
 import dev.latvian.mods.vidlib.math.worldvector.DynamicWorldVector;
@@ -48,7 +46,6 @@ public record TerrainHighlight(
 	);
 
 	public static final DataType<TerrainHighlight> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, TerrainHighlight.class);
-	public static final RegisteredDataType<TerrainHighlight> REGISTERED_DATA_TYPE = RegisteredDataType.register(VidLib.id("terrain_highlight"), DATA_TYPE);
 
 	public static TerrainHighlight circle(Vec3 position, float radius, Color startColor, Color endColor, int duration) {
 		var num = WorldNumber.fixed(1D);

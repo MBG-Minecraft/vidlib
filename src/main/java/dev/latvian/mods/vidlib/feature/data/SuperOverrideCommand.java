@@ -20,10 +20,10 @@ public interface SuperOverrideCommand {
 
 			for (var data : DataKey.SERVER.all.values()) {
 				set.then(Commands.literal(data.id())
-					.then(Commands.argument("value", data.type().argument(buildContext))
+					.then(Commands.argument("value", data.command().argument(buildContext))
 						.executes(ctx -> {
 							var session = Minecraft.getInstance().player.vl$sessionData();
-							var value = data.type().get(ctx, "value");
+							var value = data.command().get(ctx, "value");
 
 							if (session.serverDataMap.superOverrides == null) {
 								session.serverDataMap.superOverrides = new Reference2ObjectArrayMap<>();
@@ -65,10 +65,10 @@ public interface SuperOverrideCommand {
 
 			for (var data : DataKey.PLAYER.all.values()) {
 				set.then(Commands.literal(data.id())
-					.then(Commands.argument("value", data.type().argument(buildContext))
+					.then(Commands.argument("value", data.command().argument(buildContext))
 						.executes(ctx -> {
 							var session = Minecraft.getInstance().player.vl$sessionData();
-							var value = data.type().get(ctx, "value");
+							var value = data.command().get(ctx, "value");
 
 							for (var player : Minecraft.getInstance().level.selectPlayers(ctx, "player")) {
 								var psession = session.getClientSessionData(player.getUUID());

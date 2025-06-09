@@ -2,11 +2,9 @@ package dev.latvian.mods.vidlib.feature.particle.physics;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.kmath.Range;
-import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.DataType;
-import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.vidlib.feature.config.ConfigValue;
 import dev.latvian.mods.vidlib.feature.config.FloatConfigValue;
 import dev.latvian.mods.vidlib.feature.config.RangeConfigValue;
@@ -65,7 +63,6 @@ public class PhysicsParticleData {
 	);
 
 	public static final DataType<PhysicsParticleData> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, PhysicsParticleData.class);
-	public static final RegisteredDataType<PhysicsParticleData> REGISTERED_DATA_TYPE = RegisteredDataType.register(VidLib.id("physics_particle_data"), DATA_TYPE);
 
 	public static final List<ConfigValue<PhysicsParticleData, ?>> CONFIG = List.of(
 		new FloatConfigValue<>("Density", Range.of(0F, 1000F), false, data -> data.density, (data, v) -> data.density = v),
@@ -81,7 +78,7 @@ public class PhysicsParticleData {
 		new RangeConfigValue<>("Section", Range.of(-360F, 360F), false, data -> data.section, (data, v) -> data.section = v)
 	);
 
-	public static final VLRegistry<PhysicsParticleData> REGISTRY = VLRegistry.createClient("physics_particle_data");
+	public static final VLRegistry<PhysicsParticleData> REGISTRY = VLRegistry.createClient("physics_particle_data", PhysicsParticleData.class);
 
 	public static class Loader extends JsonCodecReloadListener<PhysicsParticleData> {
 		public Loader() {

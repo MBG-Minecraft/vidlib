@@ -2,15 +2,16 @@ package dev.latvian.mods.vidlib.core;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Pair;
-import dev.latvian.mods.kmath.Rotation;
-import dev.latvian.mods.kmath.Vec2d;
-import dev.latvian.mods.kmath.WorldMouse;
+import dev.latvian.mods.klib.math.Identity;
+import dev.latvian.mods.klib.math.Rotation;
+import dev.latvian.mods.klib.math.WorldMouse;
+import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
-import dev.latvian.mods.vidlib.feature.camera.CameraShake;
-import dev.latvian.mods.vidlib.feature.camera.CameraShakeInstance;
 import dev.latvian.mods.vidlib.feature.camera.DetachedCamera;
 import dev.latvian.mods.vidlib.feature.camera.FreeCamera;
+import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
+import dev.latvian.mods.vidlib.feature.camera.ScreenShakeInstance;
 import dev.latvian.mods.vidlib.feature.cutscene.ClientCutscene;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneScreen;
@@ -37,9 +38,7 @@ import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.VidLibSoundInstance;
 import dev.latvian.mods.vidlib.feature.vote.NumberVotingScreen;
 import dev.latvian.mods.vidlib.feature.vote.YesNoVotingScreen;
-import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
-import dev.latvian.mods.vidlib.util.Empty;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
@@ -64,6 +63,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2d;
+import org.joml.Vector2dc;
 import org.joml.Vector4f;
 
 import java.util.List;
@@ -137,21 +138,21 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		}
 	}
 
-	default Vec2d vl$getCameraShakeOffset(float delta) {
+	default Vector2dc vl$getCameraShakeOffset(float delta) {
 		var player = vl$self().player;
 
 		if (player != null) {
 			var s = player.vl$sessionData();
-			return s.prevCameraShake.lerp(s.cameraShake, delta);
+			return s.prevCameraShake.lerp(s.cameraShake, delta, new Vector2d());
 		}
 
-		return Vec2d.ZERO;
+		return Identity.DVEC_2;
 	}
 
 	default void vl$applyCameraShake(Camera camera, float delta) {
 		var shake = vl$getCameraShakeOffset(delta);
 
-		if (shake != Vec2d.ZERO) {
+		if (shake != Identity.DVEC_2) {
 			var vec = new Vector4f((float) shake.x(), (float) shake.y(), 0F, 1F).rotate(camera.rotation());
 			camera.vl$setPosition(camera.getPosition().add(vec.x(), vec.y(), vec.z()));
 		}
@@ -207,12 +208,11 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		var player = vl$self().player;
 
 		if (!cutscene.steps.isEmpty() && player != null) {
-			variables = level.getEnvironment().globalVariables().merge(variables);
-			var ctx = new WorldNumberContext(level, 0F, variables);
+			var ctx = level.globalContext(0F).withVariables(variables);
 
 			for (var step : cutscene.steps) {
-				step.resolvedStart = (int) step.start.get(ctx);
-				step.resolvedLength = (int) step.length.get(ctx);
+				step.resolvedStart = (int) step.start.getOr(ctx, 0D);
+				step.resolvedLength = (int) step.length.getOr(ctx, 1D);
 			}
 
 			var overrideCamera = !player.isReplayCamera();
@@ -241,26 +241,26 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void shakeCamera(CameraShake shake) {
+	default void screenShake(ScreenShake shake) {
 		if (shake.skip() || vl$self().player.isReplayCamera()) {
 			return;
 		}
 
-		vl$self().player.vl$sessionData().cameraShakeInstances.add(new CameraShakeInstance(shake));
+		vl$self().player.vl$sessionData().screenShakeInstances.add(new ScreenShakeInstance(shake));
 
 		if (shake.motionBlur()) {
-			vl$self().gameRenderer.setPostEffect(CameraShake.MOTION_BLUR_EFFECT);
+			vl$self().gameRenderer.setPostEffect(ScreenShake.MOTION_BLUR_EFFECT);
 		}
 	}
 
 	@Override
-	default void shakeCamera(CameraShake shake, Vec3 source, double maxDistance) {
-		shakeCamera(shake.atDistance(vl$self().gameRenderer.getMainCamera().getPosition(), source, maxDistance));
+	default void screenShake(ScreenShake shake, Vec3 source, double maxDistance) {
+		screenShake(shake.atDistance(vl$self().gameRenderer.getMainCamera().getPosition(), source, maxDistance));
 	}
 
 	@Override
-	default void stopCameraShaking() {
-		vl$self().player.vl$sessionData().cameraShakeInstances.clear();
+	default void stopScreenShake() {
+		vl$self().player.vl$sessionData().screenShakeInstances.clear();
 	}
 
 	@Override

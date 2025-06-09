@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.block;
 
-import dev.latvian.mods.kmath.Directions;
+import dev.latvian.mods.klib.math.Directions;
 import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import net.minecraft.core.BlockPos;
 

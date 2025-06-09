@@ -2,13 +2,13 @@ package dev.latvian.mods.vidlib.feature.highlight;
 
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import dev.latvian.mods.kmath.color.Color;
-import dev.latvian.mods.kmath.color.PairGradient;
-import dev.latvian.mods.kmath.easing.Easing;
-import dev.latvian.mods.kmath.shape.CylinderShape;
+import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.color.PairGradient;
+import dev.latvian.mods.klib.easing.Easing;
+import dev.latvian.mods.klib.shape.CylinderShape;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
+import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import dev.latvian.mods.vidlib.math.worldvector.FixedWorldVector;
 import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
 import net.minecraft.commands.Commands;
@@ -19,14 +19,14 @@ public interface TerrainHighlightCommands {
 	ServerCommandHolder COMMAND = new ServerCommandHolder("terrain-highlight", (command, buildContext) -> command
 		.requires(source -> source.hasPermission(2))
 		.then(Commands.argument("position", Vec3Argument.vec3())
-			.then(Commands.argument("shape", RegisteredDataType.SHAPE.argument(buildContext))
-				.then(Commands.argument("color", RegisteredDataType.GRADIENT.argument(buildContext))
+			.then(Commands.argument("shape", CommandDataType.SHAPE.argument(buildContext))
+				.then(Commands.argument("color", CommandDataType.GRADIENT.argument(buildContext))
 					.then(Commands.argument("duration", IntegerArgumentType.integer(0))
 						.executes(ctx -> {
 							ctx.getSource().getLevel().addTerrainHighlight(new TerrainHighlight(
 								WorldVector.fixed(Vec3Argument.getVec3(ctx, "position")),
-								RegisteredDataType.SHAPE.get(ctx, "shape"),
-								RegisteredDataType.GRADIENT.get(ctx, "color"),
+								CommandDataType.SHAPE.get(ctx, "shape"),
+								CommandDataType.GRADIENT.get(ctx, "color"),
 								FixedWorldVector.ONE.instance(),
 								IntegerArgumentType.getInteger(ctx, "duration")
 							));

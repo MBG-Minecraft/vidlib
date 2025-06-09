@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.math.worldvector;
 
 import com.mojang.serialization.Codec;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
@@ -19,7 +19,7 @@ public enum EntityPositionType implements StringRepresentable {
 
 	public static final EntityPositionType[] VALUES = values();
 	public static final Codec<EntityPositionType> CODEC = StringRepresentable.fromEnum(() -> VALUES);
-	public static final StreamCodec<ByteBuf, EntityPositionType> STREAM_CODEC = VLStreamCodecs.enumValue(VALUES);
+	public static final StreamCodec<ByteBuf, EntityPositionType> STREAM_CODEC = KLibStreamCodecs.enumValue(VALUES);
 
 	private final String name;
 

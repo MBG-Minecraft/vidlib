@@ -2,15 +2,15 @@ package dev.latvian.mods.vidlib.feature.zone;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.kmath.color.Color;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibCodecs;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
+import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.visual.CubeTextures;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
-import dev.latvian.mods.vidlib.util.Empty;
 import io.netty.buffer.Unpooled;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
@@ -44,7 +44,7 @@ public record Zone(
 		CompoundTag.CODEC.optionalFieldOf("data", Empty.COMPOUND_TAG).forGetter(Zone::data),
 		EntityOverride.OVERRIDE_MAP_CODEC.optionalFieldOf("player_overrides", Map.of()).forGetter(Zone::playerOverrides),
 		EntityFilter.CODEC.optionalFieldOf("solid", EntityFilter.NONE.instance()).forGetter(Zone::solid),
-		VLCodecs.setOf(Codec.STRING).optionalFieldOf("tags", Set.of()).forGetter(Zone::tags),
+		KLibCodecs.setOf(Codec.STRING).optionalFieldOf("tags", Set.of()).forGetter(Zone::tags),
 		Codec.BOOL.optionalFieldOf("force_loaded", false).forGetter(Zone::forceLoaded),
 		ZoneFluid.CODEC.optionalFieldOf("fluid", ZoneFluid.NONE).forGetter(Zone::fluid),
 		CubeTextures.CODEC.optionalFieldOf("textures").forGetter(Zone::textures),
@@ -55,7 +55,7 @@ public record Zone(
 		ZoneShape.STREAM_CODEC, Zone::shape,
 		Color.STREAM_CODEC, Zone::color,
 		EntityFilter.STREAM_CODEC, Zone::entityFilter,
-		VLStreamCodecs.COMPOUND_TAG, Zone::data,
+		MCStreamCodecs.COMPOUND_TAG, Zone::data,
 		EntityOverride.OVERRIDE_MAP_STREAM_CODEC, Zone::playerOverrides,
 		EntityFilter.STREAM_CODEC, Zone::solid,
 		ByteBufCodecs.STRING_UTF8.linkedSet(), Zone::tags,
@@ -70,7 +70,7 @@ public record Zone(
 		shape.writeUUID(buf);
 		buf.writeInt(color.argb());
 		entityFilter.writeUUID(buf);
-		VLStreamCodecs.COMPOUND_TAG.encode(buf, data);
+		MCStreamCodecs.COMPOUND_TAG.encode(buf, data);
 		solid.writeUUID(buf);
 		buf.writeCollection(tags, ByteBufCodecs.STRING_UTF8);
 		buf.writeBoolean(forceLoaded);

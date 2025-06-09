@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.clothing;
 
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import dev.latvian.mods.vidlib.feature.registry.ID;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -30,8 +30,8 @@ public interface ClothingCommand {
 				.then(Commands.argument("clothing", ResourceLocationArgument.id())
 					.suggests(SUGGESTION_PROVIDER)
 					.executes(ctx -> clothing(EntityArgument.getPlayers(ctx, "player"), new Clothing(ResourceKey.create(EquipmentAssets.ROOT_ID, ResourceLocationArgument.getId(ctx, "clothing")), ClothingParts.ALL)))
-					.then(Commands.argument("parts", ClothingParts.REGISTERED_DATA_TYPE.argument(buildContext))
-						.executes(ctx -> clothing(EntityArgument.getPlayers(ctx, "player"), new Clothing(ResourceKey.create(EquipmentAssets.ROOT_ID, ResourceLocationArgument.getId(ctx, "clothing")), ClothingParts.REGISTERED_DATA_TYPE.get(ctx, "parts"))))
+					.then(Commands.argument("parts", ClothingParts.COMMAND.argument(buildContext))
+						.executes(ctx -> clothing(EntityArgument.getPlayers(ctx, "player"), new Clothing(ResourceKey.create(EquipmentAssets.ROOT_ID, ResourceLocationArgument.getId(ctx, "clothing")), ClothingParts.COMMAND.get(ctx, "parts"))))
 					)
 				)
 			)

@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.fade;
 
-import dev.latvian.mods.kmath.color.Gradient;
-import dev.latvian.mods.kmath.easing.Easing;
+import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.easing.Easing;
 
 public class ScreenFadeInstance {
 	public final Gradient color;

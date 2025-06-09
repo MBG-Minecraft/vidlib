@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.structure;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.kmath.AAIBB;
+import dev.latvian.mods.klib.math.AAIBB;
 
 import java.util.Optional;
 import java.util.function.Function;

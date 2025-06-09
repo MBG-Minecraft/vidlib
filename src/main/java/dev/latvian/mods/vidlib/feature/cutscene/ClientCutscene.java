@@ -1,9 +1,8 @@
 package dev.latvian.mods.vidlib.feature.cutscene;
 
-import dev.latvian.mods.kmath.KMath;
-import dev.latvian.mods.kmath.Rotation;
+import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
-import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -46,7 +45,7 @@ public class ClientCutscene implements CameraOverride {
 		this.fovMod = 1D;
 		this.playingSounds = new ArrayList<>();
 
-		var ctx = new WorldNumberContext(mc.level, 0F, variables);
+		var ctx = mc.level.globalContext(0F).withVariables(variables);
 		ctx.originPos = originPos;
 		ctx.sourcePos = originPos;
 
@@ -70,7 +69,7 @@ public class ClientCutscene implements CameraOverride {
 				}
 
 				if (step.fovModifier.isPresent()) {
-					fovMod = step.fovModifier.get().get(ctx);
+					fovMod = step.fovModifier.get().getOr(ctx, 1D);
 				}
 			}
 		}
@@ -129,9 +128,10 @@ public class ClientCutscene implements CameraOverride {
 
 			if (totalTick >= step.resolvedStart && totalTick < step.resolvedStart + step.resolvedLength) {
 				float progress = (totalTick - step.resolvedStart) / (float) step.resolvedLength;
-				var ctx = new WorldNumberContext(mc.level, progress, variables);
+				var ctx = mc.level.globalContext(progress).withVariables(variables);
 				ctx.originPos = originPos;
 				ctx.sourcePos = sourcePos.get();
+				ctx.serverDataMap = mc.getServerData();
 
 				step.prevRenderTarget = step.renderTarget;
 
@@ -166,7 +166,7 @@ public class ClientCutscene implements CameraOverride {
 				}
 
 				if (step.fovModifier.isPresent()) {
-					fovMod = step.fovModifier.get().get(ctx);
+					fovMod = step.fovModifier.get().getOr(ctx, 1D);
 
 					if (step.resolvedStart == totalTick && step.snap.zoom()) {
 						prevFovMod = fovMod;

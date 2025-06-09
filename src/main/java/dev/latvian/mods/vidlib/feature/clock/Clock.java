@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.clock;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.kmath.color.Color;
+import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
 import net.minecraft.resources.ResourceLocation;
@@ -22,7 +22,7 @@ public record Clock(
 		ScreenClock.CODEC.optionalFieldOf("screen").forGetter(Clock::screen)
 	).apply(instance, Clock::new));
 
-	public static final VLRegistry<Clock> REGISTRY = VLRegistry.createClient("clock");
+	public static final VLRegistry<Clock> REGISTRY = VLRegistry.createClient("clock", Clock.class);
 
 	public static final Color RED = Color.of(1F, 1F, 0.3F, 0.3F);
 

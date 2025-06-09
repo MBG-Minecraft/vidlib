@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.block.filter;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 public record BlockTagFilter(TagKey<Block> tag) implements BlockFilter {
 	public static final SimpleRegistryType<BlockTagFilter> TYPE = SimpleRegistryType.dynamic("tag", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		TagKey.codec(Registries.BLOCK).fieldOf("tag").forGetter(BlockTagFilter::tag)
-	).apply(instance, BlockTagFilter::new)), VLStreamCodecs.tagKey(Registries.BLOCK).map(BlockTagFilter::new, BlockTagFilter::tag));
+	).apply(instance, BlockTagFilter::new)), KLibStreamCodecs.tagKey(Registries.BLOCK).map(BlockTagFilter::new, BlockTagFilter::tag));
 
 	@Override
 	public SimpleRegistryType<?> type() {

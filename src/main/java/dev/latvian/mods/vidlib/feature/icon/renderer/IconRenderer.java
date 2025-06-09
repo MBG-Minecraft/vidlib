@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.icon.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.icon.AtlasSpriteIcon;
 import dev.latvian.mods.vidlib.feature.icon.ColorIcon;
@@ -8,7 +9,6 @@ import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.icon.ItemIcon;
 import dev.latvian.mods.vidlib.feature.icon.TextureIcon;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
-import dev.latvian.mods.vidlib.util.Cast;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 

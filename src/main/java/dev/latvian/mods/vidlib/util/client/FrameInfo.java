@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.util.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.latvian.mods.kmath.FrustumCheck;
+import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.vidlib.feature.session.LocalClientSessionData;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import net.minecraft.client.Camera;

@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.camera;
 
-import dev.latvian.mods.kmath.Rotation;
+import dev.latvian.mods.klib.math.Rotation;
 import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;

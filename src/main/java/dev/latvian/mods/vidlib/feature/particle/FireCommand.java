@@ -2,9 +2,9 @@ package dev.latvian.mods.vidlib.feature.particle;
 
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import dev.latvian.mods.kmath.MovementType;
-import dev.latvian.mods.kmath.Rotation;
-import dev.latvian.mods.kmath.color.GradientReference;
+import dev.latvian.mods.klib.color.GradientReference;
+import dev.latvian.mods.klib.math.MovementType;
+import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.gradient.GradientCommand;

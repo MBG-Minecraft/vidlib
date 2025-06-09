@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.network.codec.ByteBufCodecs;
 
-public record FixedWorldNumber(double number) implements WorldNumber {
+public record FixedWorldNumber(Double number) implements WorldNumber {
 	public static final SimpleRegistryType.Unit<FixedWorldNumber> ZERO = SimpleRegistryType.unit("zero", new FixedWorldNumber(0D));
 	public static final SimpleRegistryType.Unit<FixedWorldNumber> ONE = SimpleRegistryType.unit("one", new FixedWorldNumber(1D));
 
@@ -29,7 +29,7 @@ public record FixedWorldNumber(double number) implements WorldNumber {
 	}
 
 	@Override
-	public double get(WorldNumberContext ctx) {
+	public Double get(WorldNumberContext ctx) {
 		return number;
 	}
 

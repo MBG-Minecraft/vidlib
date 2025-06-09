@@ -3,17 +3,18 @@ package dev.latvian.mods.vidlib.feature.session;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.serialization.JsonOps;
-import dev.latvian.mods.kmath.Range;
-import dev.latvian.mods.kmath.Vec2d;
-import dev.latvian.mods.kmath.VoxelShapeBox;
-import dev.latvian.mods.kmath.WorldMouse;
-import dev.latvian.mods.kmath.color.Color;
+import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.math.Identity;
+import dev.latvian.mods.klib.math.Range;
+import dev.latvian.mods.klib.math.VoxelShapeBox;
+import dev.latvian.mods.klib.math.WorldMouse;
+import dev.latvian.mods.klib.util.Side;
 import dev.latvian.mods.vidlib.GameEventHandler;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.core.VLLocalPlayer;
-import dev.latvian.mods.vidlib.feature.camera.CameraShakeInstance;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
+import dev.latvian.mods.vidlib.feature.camera.ScreenShakeInstance;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.cutscene.ClientCutscene;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
@@ -44,7 +45,6 @@ import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
-import dev.latvian.mods.vidlib.util.Side;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
@@ -65,6 +65,8 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.connection.ConnectionType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2d;
+import org.joml.Vector2dc;
 
 import java.io.BufferedOutputStream;
 import java.nio.file.Files;
@@ -85,9 +87,9 @@ public class LocalClientSessionData extends ClientSessionData {
 	public final ActiveZones serverZones;
 	public final ActiveZones filteredZones;
 	public ZoneClipResult zoneClip;
-	public final List<CameraShakeInstance> cameraShakeInstances;
-	public Vec2d prevCameraShake;
-	public Vec2d cameraShake;
+	public final List<ScreenShakeInstance> screenShakeInstances;
+	public Vector2dc prevCameraShake;
+	public Vector2dc cameraShake;
 	public Map<ResourceLocation, ClockValue> clocks;
 	public Map<ResourceLocation, Skybox> skyboxes;
 	public final DataMap serverDataMap;
@@ -111,8 +113,8 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.serverZones = new ActiveZones();
 		this.filteredZones = new ActiveZones();
 		this.zoneClip = null;
-		this.cameraShakeInstances = new ArrayList<>();
-		this.prevCameraShake = this.cameraShake = Vec2d.ZERO;
+		this.screenShakeInstances = new ArrayList<>();
+		this.prevCameraShake = this.cameraShake = Identity.DVEC_2;
 		this.clocks = new HashMap<>();
 		this.skyboxes = new HashMap<>();
 		this.serverDataMap = new DataMap(uuid, DataKey.SERVER);
@@ -253,8 +255,8 @@ public class LocalClientSessionData extends ClientSessionData {
 		double shakeX = 0D;
 		double shakeY = 0D;
 
-		if (!cameraShakeInstances.isEmpty()) {
-			var shakeIt = cameraShakeInstances.iterator();
+		if (!screenShakeInstances.isEmpty()) {
+			var shakeIt = screenShakeInstances.iterator();
 
 			while (shakeIt.hasNext()) {
 				var instance = shakeIt.next();
@@ -272,7 +274,7 @@ public class LocalClientSessionData extends ClientSessionData {
 			}
 		}
 
-		cameraShake = Math.abs(shakeX) <= 0.0001D && Math.abs(shakeY) <= 0.0001D ? Vec2d.ZERO : new Vec2d(shakeX, shakeY);
+		cameraShake = Math.abs(shakeX) <= 0.0001D && Math.abs(shakeY) <= 0.0001D ? Identity.DVEC_2 : new Vector2d(shakeX, shakeY);
 
 		if (paused.tick()) {
 			tick++;

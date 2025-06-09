@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.structure;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.kmath.color.Color;
+import dev.latvian.mods.klib.color.Color;
 
 public record StructureRendererData(
 	boolean centerX,

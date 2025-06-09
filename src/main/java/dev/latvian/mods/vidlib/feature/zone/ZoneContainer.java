@@ -1,8 +1,10 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
-import dev.latvian.mods.kmath.Line;
-import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
+import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.math.Line;
+import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -26,7 +28,7 @@ public class ZoneContainer implements Comparable<ZoneContainer> {
 		@Override
 		public ZoneContainer decode(RegistryFriendlyByteBuf buf) {
 			var id = ResourceLocation.STREAM_CODEC.decode(buf);
-			var dimension = VLStreamCodecs.DIMENSION.decode(buf);
+			var dimension = MCStreamCodecs.DIMENSION.decode(buf);
 			var container = new ZoneContainer(id, dimension);
 
 			int tags = buf.readVarInt();
@@ -38,7 +40,7 @@ public class ZoneContainer implements Comparable<ZoneContainer> {
 			int count = buf.readVarInt();
 
 			for (int i = 0; i < count; i++) {
-				var uuid = VLStreamCodecs.UUID.decode(buf);
+				var uuid = KLibStreamCodecs.UUID.decode(buf);
 				container.add(Zone.STREAM_CODEC.decode(buf), uuid);
 			}
 
@@ -48,7 +50,7 @@ public class ZoneContainer implements Comparable<ZoneContainer> {
 		@Override
 		public void encode(RegistryFriendlyByteBuf buf, ZoneContainer value) {
 			ResourceLocation.STREAM_CODEC.encode(buf, value.id);
-			VLStreamCodecs.DIMENSION.encode(buf, value.dimension);
+			MCStreamCodecs.DIMENSION.encode(buf, value.dimension);
 
 			buf.writeVarInt(value.tags.size());
 
@@ -59,14 +61,15 @@ public class ZoneContainer implements Comparable<ZoneContainer> {
 			buf.writeVarInt(value.zones.size());
 
 			for (var zone : value.zones) {
-				VLStreamCodecs.UUID.encode(buf, zone.uuid);
+				KLibStreamCodecs.UUID.encode(buf, zone.uuid);
 				Zone.STREAM_CODEC.encode(buf, zone.zone);
 			}
 		}
 	};
 
-	public static final VLRegistry<ZoneContainer> REGISTRY = VLRegistry.createServer("zone_container");
-	public static final RegisteredDataType<ZoneContainer> REGISTERED_DATA_TYPE = RegisteredDataType.of(REGISTRY, ZoneContainer.class);
+	public static final VLRegistry<ZoneContainer> REGISTRY = VLRegistry.createServer("zone_container", ZoneContainer.class);
+	public static final DataType<ZoneContainer> DATA_TYPE = REGISTRY.dataType();
+	public static final CommandDataType<ZoneContainer> COMMAND = CommandDataType.of(DATA_TYPE);
 
 	ActiveZones parent;
 	public final ResourceLocation id;

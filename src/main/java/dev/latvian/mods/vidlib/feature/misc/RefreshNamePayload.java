@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.misc;
 
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
@@ -14,7 +14,7 @@ import java.util.UUID;
 public record RefreshNamePayload(UUID player, Component nickname) implements SimplePacketPayload {
 	@AutoPacket
 	public static final VidLibPacketType<RefreshNamePayload> TYPE = VidLibPacketType.internal("refresh_name", CompositeStreamCodec.of(
-		VLStreamCodecs.UUID, RefreshNamePayload::player,
+		KLibStreamCodecs.UUID, RefreshNamePayload::player,
 		ComponentSerialization.TRUSTED_STREAM_CODEC, RefreshNamePayload::nickname,
 		RefreshNamePayload::new
 	));

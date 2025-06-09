@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.entity;
 
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
-import dev.latvian.mods.vidlib.util.Empty;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
+import dev.latvian.mods.klib.util.Empty;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -15,7 +15,7 @@ public record EntityData(int entityId, int id, CompoundTag data) {
 	public static final StreamCodec<ByteBuf, EntityData> STREAM_CODEC = CompositeStreamCodec.of(
 		ByteBufCodecs.VAR_INT, EntityData::entityId,
 		ByteBufCodecs.VAR_INT, EntityData::id,
-		VLStreamCodecs.COMPOUND_TAG, EntityData::data,
+		MCStreamCodecs.COMPOUND_TAG, EntityData::data,
 		EntityData::new
 	);
 

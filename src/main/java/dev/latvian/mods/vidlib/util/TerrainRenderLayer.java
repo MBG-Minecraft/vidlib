@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.util;
 
 import com.mojang.serialization.Codec;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
@@ -18,7 +18,7 @@ public enum TerrainRenderLayer implements StringRepresentable {
 
 	public static final TerrainRenderLayer[] ALL = values();
 	public static final Codec<TerrainRenderLayer> CODEC = StringRepresentable.fromEnum(() -> ALL);
-	public static final StreamCodec<ByteBuf, TerrainRenderLayer> STREAM_CODEC = VLStreamCodecs.enumValue(ALL);
+	public static final StreamCodec<ByteBuf, TerrainRenderLayer> STREAM_CODEC = KLibStreamCodecs.enumValue(ALL);
 
 	public static TerrainRenderLayer fromBlockRenderType(Object blockRenderType) {
 		for (TerrainRenderLayer type : ALL) {

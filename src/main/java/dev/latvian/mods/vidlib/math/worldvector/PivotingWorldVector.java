@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.math.worldvector;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.kmath.easing.Easing;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.worldnumber.FixedWorldNumber;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumber;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 public record PivotingWorldVector(WorldVector target, WorldNumber distance, Easing easing, WorldNumber startAngle, WorldNumber addedAngle, WorldNumber height) implements WorldVector {
 	public static final SimpleRegistryType<PivotingWorldVector> TYPE = SimpleRegistryType.dynamic("pivoting", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		WorldVector.VEC3_CODEC.optionalFieldOf("target", SourceWorldVector.TYPE.instance()).forGetter(PivotingWorldVector::target),
+		WorldVector.VEC3_CODEC.optionalFieldOf("target", LiteralWorldVector.SOURCE).forGetter(PivotingWorldVector::target),
 		WorldNumber.CODEC.fieldOf("distance").forGetter(PivotingWorldVector::distance),
 		Easing.CODEC.optionalFieldOf("easing", Easing.LINEAR).forGetter(PivotingWorldVector::easing),
 		WorldNumber.CODEC.fieldOf("start_angle").forGetter(PivotingWorldVector::startAngle),
@@ -37,10 +37,21 @@ public record PivotingWorldVector(WorldVector target, WorldNumber distance, Easi
 	@Override
 	@Nullable
 	public Vec3 get(WorldNumberContext ctx) {
-		double start = startAngle.get(ctx);
-		double angle = Math.toRadians(Mth.rotLerp(easing.ease(ctx.progress), start, start + addedAngle.get(ctx)));
-		double dist = distance.get(ctx);
+		Double start = startAngle.get(ctx);
+
+		if (start == null) {
+			return null;
+		}
+
+		Double dist = distance.get(ctx);
+
+		if (dist == null) {
+			return null;
+		}
+
+		double angle = Math.toRadians(Mth.rotLerp(easing.ease(ctx.progress), start, start + addedAngle.getOr(ctx, 0D)));
+
 		var pos = target.get(ctx);
-		return pos == null ? null : pos.add(Math.cos(angle) * dist, height.get(ctx), Math.sin(angle) * dist);
+		return pos == null ? null : pos.add(Math.cos(angle) * dist, height.getOr(ctx, 0D), Math.sin(angle) * dist);
 	}
 }

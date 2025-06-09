@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
 import com.mojang.serialization.Codec;
-import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
+import dev.latvian.mods.klib.codec.KLibCodecs;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.feature.visual.CubeTextures;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -30,8 +30,8 @@ public record ZoneFluid(String id, FluidState fluidState, CubeTextures textures)
 		register(new ZoneFluid("pale_opaque_water", Fluids.WATER.defaultFluidState(), CubeTextures.PALE_OPAQUE_WATER));
 	}
 
-	public static final Codec<ZoneFluid> CODEC = VLCodecs.map(MAP, Codec.STRING, ZoneFluid::id);
-	public static final StreamCodec<ByteBuf, ZoneFluid> STREAM_CODEC = VLStreamCodecs.map(MAP, ByteBufCodecs.STRING_UTF8, ZoneFluid::id).optional(NONE);
+	public static final Codec<ZoneFluid> CODEC = KLibCodecs.map(MAP, Codec.STRING, ZoneFluid::id);
+	public static final StreamCodec<ByteBuf, ZoneFluid> STREAM_CODEC = KLibStreamCodecs.map(MAP, ByteBufCodecs.STRING_UTF8, ZoneFluid::id).optional(NONE);
 
 	public boolean isEmpty() {
 		return fluidState.isEmpty();

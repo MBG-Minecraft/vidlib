@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.item;
 
-import dev.latvian.mods.kmath.KMath;
-import dev.latvian.mods.kmath.color.Color;
+import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;

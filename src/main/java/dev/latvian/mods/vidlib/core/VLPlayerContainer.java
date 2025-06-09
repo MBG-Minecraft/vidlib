@@ -1,13 +1,14 @@
 package dev.latvian.mods.vidlib.core;
 
 import com.mojang.datafixers.util.Pair;
+import dev.latvian.mods.klib.util.MessageConsumer;
 import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.bulk.RedrawChunkSectionsPayload;
-import dev.latvian.mods.vidlib.feature.camera.CameraShake;
+import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
+import dev.latvian.mods.vidlib.feature.camera.ScreenShakeAtPositionPayload;
+import dev.latvian.mods.vidlib.feature.camera.ScreenShakePayload;
 import dev.latvian.mods.vidlib.feature.camera.SetCameraModePayload;
-import dev.latvian.mods.vidlib.feature.camera.ShakeCameraAtPositionPayload;
-import dev.latvian.mods.vidlib.feature.camera.ShakeCameraPayload;
-import dev.latvian.mods.vidlib.feature.camera.StopCameraShakingPayload;
+import dev.latvian.mods.vidlib.feature.camera.StopScreenShakePayload;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
 import dev.latvian.mods.vidlib.feature.cutscene.PlayCutscenePayload;
 import dev.latvian.mods.vidlib.feature.cutscene.StopCutscenePayload;
@@ -43,7 +44,6 @@ import dev.latvian.mods.vidlib.feature.vote.StartNumberVotingPayload;
 import dev.latvian.mods.vidlib.feature.vote.StartYesNoVotingPayload;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
 import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
-import dev.latvian.mods.vidlib.util.MessageConsumer;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.core.BlockPos;
@@ -117,27 +117,27 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 		}
 	}
 
-	default void shakeCamera(CameraShake shake) {
+	default void screenShake(ScreenShake shake) {
 		if (isClient()) {
-			getEnvironment().shakeCamera(shake);
+			getEnvironment().screenShake(shake);
 		} else if (!shake.skip()) {
-			s2c(new ShakeCameraPayload(shake));
+			s2c(new ScreenShakePayload(shake));
 		}
 	}
 
-	default void shakeCamera(CameraShake shake, Vec3 source, double maxDistance) {
+	default void screenShake(ScreenShake shake, Vec3 source, double maxDistance) {
 		if (isClient()) {
-			getEnvironment().shakeCamera(shake, source, maxDistance);
+			getEnvironment().screenShake(shake, source, maxDistance);
 		} else {
-			s2c(new ShakeCameraAtPositionPayload(shake, source, maxDistance));
+			s2c(new ScreenShakeAtPositionPayload(shake, source, maxDistance));
 		}
 	}
 
-	default void stopCameraShaking() {
+	default void stopScreenShake() {
 		if (isClient()) {
-			getEnvironment().stopCameraShaking();
+			getEnvironment().stopScreenShake();
 		} else {
-			s2c(StopCameraShakingPayload.INSTANCE);
+			s2c(StopScreenShakePayload.INSTANCE);
 		}
 	}
 

@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.data;
 
-import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
-import dev.latvian.mods.vidlib.util.Cast;
+import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.data.DataTypes;
+import dev.latvian.mods.klib.util.Cast;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -37,45 +37,45 @@ public class DataKeyStorage {
 					throw new NullPointerException("Data type with id " + id + " not found. Available types in '" + DataKeyStorage.this.name + "': " + synced.keySet());
 				}
 
-				return new DataMapValue(key, key.type().type().streamCodec().decode(buf));
+				return new DataMapValue(key, key.type().streamCodec().decode(buf));
 			}
 
 			@Override
 			public void encode(RegistryFriendlyByteBuf buf, DataMapValue value) {
 				buf.writeUtf(value.key().id());
-				value.key().type().type().streamCodec().encode(buf, Cast.to(value.value()));
+				value.key().type().streamCodec().encode(buf, Cast.to(value.value()));
 			}
 		};
 
 		this.valueListStreamCodec = valueStreamCodec.listOf();
 	}
 
-	public <T> DataKey.Builder<T> builder(String id, @Nullable RegisteredDataType<T> type, T defaultValue) {
+	public <T> DataKey.Builder<T> builder(String id, DataType<T> type, T defaultValue) {
 		return new DataKey.Builder<>(this, id, type, defaultValue);
 	}
 
-	public <T> DataKey.Builder<T> buildDefault(String id, @Nullable RegisteredDataType<T> type, T defaultValue) {
+	public <T> DataKey.Builder<T> buildDefault(String id, DataType<T> type, T defaultValue) {
 		return builder(id, type, defaultValue).save().sync();
 	}
 
-	public <T> DataKey<T> createDefault(String id, @Nullable RegisteredDataType<T> type, T defaultValue) {
+	public <T> DataKey<T> createDefault(String id, DataType<T> type, T defaultValue) {
 		return buildDefault(id, type, defaultValue).build();
 	}
 
 	public DataKey<Boolean> createDefaultBoolean(String id, boolean defaultValue) {
-		return createDefault(id, RegisteredDataType.BOOL, defaultValue);
+		return createDefault(id, DataTypes.BOOL, defaultValue);
 	}
 
 	public DataKey<Integer> createDefaultVarInt(String id, int defaultValue) {
-		return createDefault(id, RegisteredDataType.VAR_INT, defaultValue);
+		return createDefault(id, DataTypes.VAR_INT, defaultValue);
 	}
 
 	public DataKey<Float> createDefaultFloat(String id, float defaultValue) {
-		return createDefault(id, RegisteredDataType.FLOAT, defaultValue);
+		return createDefault(id, DataTypes.FLOAT, defaultValue);
 	}
 
 	public DataKey<Double> createDefaultDouble(String id, double defaultValue) {
-		return createDefault(id, RegisteredDataType.DOUBLE, defaultValue);
+		return createDefault(id, DataTypes.DOUBLE, defaultValue);
 	}
 
 	@Override

@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.core.VLParticleEngine;
 import dev.latvian.mods.vidlib.feature.particle.VidLibParticleRenderTypes;
-import dev.latvian.mods.vidlib.util.Cast;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;

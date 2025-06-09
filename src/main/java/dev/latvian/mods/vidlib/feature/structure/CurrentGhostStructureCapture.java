@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.structure;
 
-import dev.latvian.mods.vidlib.util.MessageConsumer;
+import dev.latvian.mods.klib.util.MessageConsumer;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;

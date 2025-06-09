@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core;
 
-import dev.latvian.mods.vidlib.util.Cast;
+import dev.latvian.mods.klib.util.Cast;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;

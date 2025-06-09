@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.config;
 
 import com.mojang.serialization.DynamicOps;
-import dev.latvian.mods.kmath.KMath;
-import dev.latvian.mods.kmath.Range;
+import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.math.Range;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;

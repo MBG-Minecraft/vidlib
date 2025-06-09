@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.zone.renderer;
 
+import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShapeGroup;
-import dev.latvian.mods.vidlib.util.Cast;
 
 public class GroupZoneRenderer implements ZoneRenderer<ZoneShapeGroup> {
 	@Override

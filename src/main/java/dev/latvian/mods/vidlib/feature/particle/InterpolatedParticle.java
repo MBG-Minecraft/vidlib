@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
-import dev.latvian.mods.kmath.easing.Easing;
+import dev.latvian.mods.klib.easing.Easing;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.TextureSheetParticle;

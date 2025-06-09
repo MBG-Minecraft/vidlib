@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.gradient;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import dev.latvian.mods.kmath.color.Color;
-import dev.latvian.mods.kmath.color.CompoundGradient;
-import dev.latvian.mods.kmath.color.Gradient;
-import dev.latvian.mods.kmath.color.GradientReference;
+import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.color.CompoundGradient;
+import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.color.GradientReference;
 import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;

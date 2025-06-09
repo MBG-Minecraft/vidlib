@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.zone.shape;
 
-import dev.latvian.mods.kmath.Line;
+import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;

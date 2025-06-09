@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.data;
 
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
@@ -13,7 +13,7 @@ import java.util.UUID;
 public record SyncPlayerDataPayload(UUID player, List<DataMapValue> update) implements SimplePacketPayload {
 	@AutoPacket
 	public static final VidLibPacketType<SyncPlayerDataPayload> TYPE = VidLibPacketType.internal("sync_player_data", CompositeStreamCodec.of(
-		VLStreamCodecs.UUID, SyncPlayerDataPayload::player,
+		KLibStreamCodecs.UUID, SyncPlayerDataPayload::player,
 		DataKey.PLAYER.valueListStreamCodec, SyncPlayerDataPayload::update,
 		SyncPlayerDataPayload::new
 	));

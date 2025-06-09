@@ -1,8 +1,6 @@
 package dev.latvian.mods.vidlib.util;
 
-import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.codec.DataType;
-import dev.latvian.mods.vidlib.feature.codec.RegisteredDataType;
+import dev.latvian.mods.klib.data.DataType;
 import net.minecraft.util.StringRepresentable;
 
 public enum ScreenCorner implements StringRepresentable {
@@ -12,7 +10,6 @@ public enum ScreenCorner implements StringRepresentable {
 	BOTTOM_RIGHT("bottom_right");
 
 	public static final DataType<ScreenCorner> DATA_TYPE = DataType.of(values());
-	public static final RegisteredDataType<ScreenCorner> REGISTERED_DATA_TYPE = RegisteredDataType.register(VidLib.id("screen_corner"), DATA_TYPE);
 
 	private final String name;
 

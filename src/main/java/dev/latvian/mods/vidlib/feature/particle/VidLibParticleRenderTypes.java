@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
-import dev.latvian.mods.kmath.DistanceComparator;
+import dev.latvian.mods.klib.math.DistanceComparator;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderPipelines;
 import net.minecraft.CrashReport;

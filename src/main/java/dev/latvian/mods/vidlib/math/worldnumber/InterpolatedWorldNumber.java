@@ -2,11 +2,12 @@ package dev.latvian.mods.vidlib.math.worldnumber;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.kmath.KMath;
-import dev.latvian.mods.kmath.easing.Easing;
-import dev.latvian.mods.vidlib.feature.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.easing.Easing;
+import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.network.codec.ByteBufCodecs;
+import org.jetbrains.annotations.Nullable;
 
 public record InterpolatedWorldNumber(Easing easing, float start, float end, WorldNumber from, WorldNumber to) implements WorldNumber {
 	public static final SimpleRegistryType<InterpolatedWorldNumber> TYPE = SimpleRegistryType.dynamic("interpolated", RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -34,7 +35,8 @@ public record InterpolatedWorldNumber(Easing easing, float start, float end, Wor
 	}
 
 	@Override
-	public double get(WorldNumberContext ctx) {
+	@Nullable
+	public Double get(WorldNumberContext ctx) {
 		if (ctx.progress <= start) {
 			return from.get(ctx);
 		} else if (ctx.progress >= end) {
@@ -43,6 +45,10 @@ public record InterpolatedWorldNumber(Easing easing, float start, float end, Wor
 
 		var a = from.get(ctx);
 		var b = to.get(ctx);
+
+		if (a == null || b == null) {
+			return null;
+		}
 
 		return KMath.lerp(easing.easeClamped(KMath.map(ctx.progress, start, end, 0D, 1D)), a, b);
 	}

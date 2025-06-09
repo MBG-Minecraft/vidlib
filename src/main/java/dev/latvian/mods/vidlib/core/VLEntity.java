@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core;
 
-import dev.latvian.mods.kmath.Line;
-import dev.latvian.mods.kmath.Rotation;
+import dev.latvian.mods.klib.math.Line;
+import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.vidlib.feature.entity.C2SEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.entity.EntityData;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
