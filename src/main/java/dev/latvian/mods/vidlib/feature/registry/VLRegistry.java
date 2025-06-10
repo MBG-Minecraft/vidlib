@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import dev.latvian.mods.klib.data.ArgumentTypeProvider;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.data.RegisteredDataType;
 import dev.latvian.mods.klib.util.Cast;
@@ -18,11 +19,10 @@ import net.minecraft.nbt.TagParser;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class VLRegistry<V> extends GenericVLRegistry<ResourceLocation, V> implements Supplier<Iterable<ResourceLocation>>, BiFunction<RegisteredDataType<V>, CommandBuildContext, ArgumentType<V>> {
+public class VLRegistry<V> extends GenericVLRegistry<ResourceLocation, V> implements Supplier<Iterable<ResourceLocation>>, ArgumentTypeProvider<V> {
 	public static <V> VLRegistry<V> createServer(String id, Class<V> valueType) {
 		var holder = new VLRegistry<>(Side.SERVER, id, valueType);
 		DATA_PACK_HOLDERS.add(holder);
@@ -76,7 +76,7 @@ public class VLRegistry<V> extends GenericVLRegistry<ResourceLocation, V> implem
 	}
 
 	@Override
-	public ArgumentType<V> apply(RegisteredDataType<V> dataType, CommandBuildContext ctx) {
+	public ArgumentType<V> create(RegisteredDataType<V> dataType, CommandBuildContext ctx) {
 		var ops = ctx.createSerializationContext(NbtOps.INSTANCE);
 		var fallback = new DataArgumentType<>(ops, TagParser.create(ops), CommandDataType.of(dataType.type()));
 		return new RegistryOrDataArgumentType<>(this, fallback);

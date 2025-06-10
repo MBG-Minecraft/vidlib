@@ -3,8 +3,11 @@ package dev.latvian.mods.vidlib.feature.codec;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.serialization.DynamicOps;
 import dev.latvian.mods.klib.data.RegisteredDataType;
 import net.minecraft.commands.CommandBuildContext;
@@ -14,6 +17,8 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+
+import java.util.concurrent.CompletableFuture;
 
 public record DataArgumentType<T>(DynamicOps<Tag> ops, TagParser<Tag> parser, CommandDataType<T> commandDataType) implements ArgumentType<T> {
 	public static final DynamicCommandExceptionType ERROR_PARSING = new DynamicCommandExceptionType(arg -> Component.literal(String.valueOf(arg)));
@@ -28,6 +33,18 @@ public record DataArgumentType<T>(DynamicOps<Tag> ops, TagParser<Tag> parser, Co
 		}
 
 		return decoded.getOrThrow();
+	}
+
+	@Override
+	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+		if (commandDataType.suggestionProvider != null) {
+			try {
+				return commandDataType.suggestionProvider.getSuggestions(context, builder);
+			} catch (CommandSyntaxException ignore) {
+			}
+		}
+
+		return Suggestions.empty();
 	}
 
 	public static class Info implements ArgumentTypeInfo<DataArgumentType<?>, CodecTemplate> {

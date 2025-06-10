@@ -36,6 +36,7 @@ import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesIdData;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.VidLibSoundInstance;
+import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import dev.latvian.mods.vidlib.feature.vote.NumberVotingScreen;
 import dev.latvian.mods.vidlib.feature.vote.YesNoVotingScreen;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
@@ -49,6 +50,8 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
@@ -537,5 +540,33 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 		var session = mc.player.vl$sessionData();
 		return session.cameraOverride != null && session.cameraOverride.hideGui();
+	}
+
+	default TextureAtlas getBlockAtlas() {
+		return vl$self().getModelManager().getAtlas(SpriteKey.BLOCKS);
+	}
+
+	default TextureAtlas getParticleAtlas() {
+		return vl$self().particleEngine.getTextureAtlas();
+	}
+
+	default TextureAtlas getGuiAtlas() {
+		return vl$self().getGuiSprites().textureAtlas;
+	}
+
+	default TextureAtlas getTextureAtlas(SpriteKey sprite) {
+		if (sprite.atlas() == SpriteKey.BLOCKS) {
+			return getBlockAtlas();
+		} else if (sprite.atlas() == SpriteKey.PARTICLES) {
+			return getParticleAtlas();
+		} else if (sprite.atlas() == SpriteKey.GUI) {
+			return getGuiAtlas();
+		} else {
+			return vl$self().getModelManager().getAtlas(sprite.atlas());
+		}
+	}
+
+	default TextureAtlasSprite getSprite(SpriteKey sprite) {
+		return getTextureAtlas(sprite).getSprite(sprite.sprite());
 	}
 }

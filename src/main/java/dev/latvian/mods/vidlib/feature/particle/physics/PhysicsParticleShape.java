@@ -10,8 +10,8 @@ import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.WithCache;
 import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.GrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
@@ -20,6 +20,8 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 public class PhysicsParticleShape implements WithCache, Supplier<String> {
+	private static final ResourceLocation GRASS = VidLib.id("block/grass");
+
 	public final BlockState state;
 	public final SplitBox box;
 	private StaticBuffers buffers;
@@ -41,7 +43,7 @@ public class PhysicsParticleShape implements WithCache, Supplier<String> {
 			buffers = StaticBuffers.empty(format);
 
 			var mc = Minecraft.getInstance();
-			var s = state.getBlock() instanceof GrassBlock ? mc.getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(VidLib.id("block/grass")) : mc.getBlockRenderer().getBlockModel(state).particleIcon();
+			var s = state.getBlock() instanceof GrassBlock ? mc.getBlockAtlas().getSprite(GRASS) : mc.getBlockRenderer().getBlockModel(state).particleIcon();
 			var suv = new UV(s.getU0(), s.getV0(), s.getU1(), s.getV1());
 
 			try (var memory = new ByteBufferBuilder(format.getVertexSize() * 4 * 6)) {

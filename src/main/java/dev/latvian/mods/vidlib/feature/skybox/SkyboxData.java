@@ -3,12 +3,16 @@ package dev.latvian.mods.vidlib.feature.skybox;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -39,6 +43,10 @@ public record SkyboxData(
 
 	public static final VLRegistry<SkyboxData> REGISTRY = VLRegistry.createClient("skybox", SkyboxData.class);
 
+	public static final List<ResourceLocation> SKYBOX_IDS = new ArrayList<>();
+	public static final DataType<ResourceLocation> ID_DATA_TYPE = DataType.of(ID.CODEC, ID.STREAM_CODEC, ResourceLocation.class);
+	public static final CommandDataType<ResourceLocation> COMMAND = CommandDataType.of(ID_DATA_TYPE).suggestsIDs(() -> SKYBOX_IDS);
+
 	public static class Loader extends JsonRegistryReloadListener<SkyboxData> {
 		public Loader() {
 			super("vidlib/skybox", CODEC, true, REGISTRY);
@@ -47,8 +55,8 @@ public record SkyboxData(
 		@Override
 		protected void apply(Map<ResourceLocation, SkyboxData> map) {
 			super.apply(map);
-			SkyboxCommand.SKYBOX_IDS.clear();
-			SkyboxCommand.SKYBOX_IDS.addAll(map.keySet());
+			SKYBOX_IDS.clear();
+			SKYBOX_IDS.addAll(map.keySet());
 		}
 	}
 }

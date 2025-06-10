@@ -14,12 +14,10 @@ public interface ServerDataCommand {
 		command.requires(source -> source.hasPermission(2));
 		var nbtOps = buildContext.createSerializationContext(NbtOps.INSTANCE);
 
-		var get = Commands.literal("get");
-		var set = Commands.literal("set");
-		var reset = Commands.literal("reset");
-
 		for (var key : DataKey.SERVER.all.values()) {
-			get.then(Commands.literal(key.id())
+			var cmd = Commands.literal(key.id());
+
+			cmd.then(Commands.literal("get")
 				.executes(ctx -> {
 					ctx.getSource().sendSuccess(() -> {
 						var value = ctx.getSource().getServer().getServerData().get(key);
@@ -30,7 +28,7 @@ public interface ServerDataCommand {
 				})
 			);
 
-			set.then(Commands.literal(key.id())
+			cmd.then(Commands.literal("set")
 				.then(Commands.argument("value", key.command().argument(buildContext))
 					.executes(ctx -> {
 						var value = key.command().get(ctx, "value");
@@ -40,16 +38,12 @@ public interface ServerDataCommand {
 				)
 			);
 
-			reset.then(Commands.literal(key.id())
-				.executes(ctx -> {
-					ctx.getSource().getServer().getServerData().set(key, Cast.to(key.defaultValue()));
-					return 1;
-				})
-			);
-		}
+			cmd.then(Commands.literal("reset").executes(ctx -> {
+				ctx.getSource().getServer().getServerData().reset(key);
+				return 1;
+			}));
 
-		command.then(get);
-		command.then(set);
-		command.then(reset);
+			command.then(cmd);
+		}
 	});
 }

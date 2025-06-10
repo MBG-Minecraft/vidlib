@@ -8,6 +8,7 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.network.protocol.Packet;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,6 +36,9 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	@Unique
 	private final Map<UUID, GameProfile> vl$profileByUUIDCache = new HashMap<>();
 
+	@Unique
+	private TextureAtlas vl$blockTextureAtlas = null;
+
 	@Override
 	public GameProfile retrieveGameProfile(UUID uuid) {
 		return vl$profileByUUIDCache.computeIfAbsent(uuid, VLMinecraftClient.super::retrieveGameProfile);
@@ -49,6 +53,7 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	public void vl$clearProfileCache() {
 		vl$profileByUUIDCache.clear();
 		vl$profileByNameCache.clear();
+		vl$blockTextureAtlas = null;
 	}
 
 	@Redirect(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientPacketListener;send(Lnet/minecraft/network/protocol/Packet;)V"))
@@ -87,5 +92,14 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	@ModifyExpressionValue(method = "renderNames", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z"))
 	private static boolean vl$hideGui(boolean original) {
 		return Minecraft.getInstance().vl$hideGui();
+	}
+
+	@Override
+	public TextureAtlas getBlockAtlas() {
+		if (vl$blockTextureAtlas == null) {
+			vl$blockTextureAtlas = VLMinecraftClient.super.getBlockAtlas();
+		}
+
+		return vl$blockTextureAtlas;
 	}
 }

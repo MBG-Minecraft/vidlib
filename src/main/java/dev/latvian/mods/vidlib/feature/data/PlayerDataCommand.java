@@ -15,12 +15,12 @@ public interface PlayerDataCommand {
 		command.requires(source -> source.hasPermission(2));
 		var nbtOps = buildContext.createSerializationContext(NbtOps.INSTANCE);
 
-		var get = Commands.argument("player", EntityArgument.players());
-		var set = Commands.argument("player", EntityArgument.players());
-		var reset = Commands.argument("player", EntityArgument.players());
+		var playerCmd = Commands.argument("player", EntityArgument.players());
 
 		for (var key : DataKey.PLAYER.all.values()) {
-			get.then(Commands.literal(key.id())
+			var cmd = Commands.literal(key.id());
+
+			cmd.then(Commands.literal("set")
 				.executes(ctx -> {
 					for (var player : EntityArgument.getPlayers(ctx, "player")) {
 						ctx.getSource().sendSuccess(() -> {
@@ -34,7 +34,7 @@ public interface PlayerDataCommand {
 				})
 			);
 
-			set.then(Commands.literal(key.id())
+			cmd.then(Commands.literal("set")
 				.then(Commands.argument("value", key.command().argument(buildContext))
 					.executes(ctx -> {
 						var value = key.command().get(ctx, "value");
@@ -48,7 +48,7 @@ public interface PlayerDataCommand {
 				)
 			);
 
-			reset.then(Commands.literal(key.id())
+			cmd.then(Commands.literal("reset")
 				.executes(ctx -> {
 					for (var player : EntityArgument.getPlayers(ctx, "player")) {
 						player.set(key, Cast.to(key.defaultValue()));
@@ -57,10 +57,8 @@ public interface PlayerDataCommand {
 					return 1;
 				})
 			);
-		}
 
-		command.then(Commands.literal("get").then(get));
-		command.then(Commands.literal("set").then(set));
-		command.then(Commands.literal("reset").then(reset));
+			playerCmd.then(cmd);
+		}
 	});
 }

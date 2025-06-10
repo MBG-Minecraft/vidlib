@@ -18,6 +18,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 public class ModEventHandler {
 	@SubscribeEvent
 	public static void afterLoad(FMLLoadCompleteEvent event) {
+		event.enqueueWork(VidLib::setupSync);
 		AutoInit.Type.GAME_LOADED.invoke();
 	}
 

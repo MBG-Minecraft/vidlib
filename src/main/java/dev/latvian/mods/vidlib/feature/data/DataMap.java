@@ -81,6 +81,10 @@ public class DataMap {
 		v.setChanged();
 	}
 
+	public <T> void reset(DataKey<T> type) {
+		set(type, type.defaultValue());
+	}
+
 	public void load(MinecraftServer server, Path path) {
 		map = null;
 
