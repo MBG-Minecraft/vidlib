@@ -23,12 +23,13 @@ public class ClientProps extends Props<ClientLevel> {
 		}
 	}
 
+	public final PropList assetProps;
 	public final Map<PropListType, Map<RenderLevelStageEvent.Stage, Int2ObjectMap<Prop>>> renderedPropLists;
 	private final List<SortedProp> sortedProps;
 
 	public ClientProps(ClientLevel level) {
 		super(level);
-		this.propLists.put(PropListType.ASSETS, new PropList(this, PropListType.ASSETS));
+		this.propLists.put(PropListType.ASSETS, assetProps = new PropList(this, PropListType.ASSETS));
 		this.renderedPropLists = new EnumMap<>(PropListType.class);
 		this.sortedProps = new ArrayList<>();
 	}

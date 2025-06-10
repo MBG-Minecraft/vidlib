@@ -9,8 +9,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class PropList implements Iterable<Prop> {
 	public final Props<?> props;
@@ -91,6 +93,14 @@ public class PropList implements Iterable<Prop> {
 		}
 	}
 
+	public void removeAll(Predicate<Prop> predicate) {
+		for (var prop : this) {
+			if (predicate.test(prop)) {
+				prop.remove();
+			}
+		}
+	}
+
 	public int generateNewId() {
 		int id = 0;
 
@@ -109,6 +119,10 @@ public class PropList implements Iterable<Prop> {
 	@Override
 	public @NotNull Iterator<Prop> iterator() {
 		return map.values().iterator();
+	}
+
+	public Collection<Prop> all() {
+		return map.values();
 	}
 
 	public int size() {

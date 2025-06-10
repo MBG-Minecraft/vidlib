@@ -14,12 +14,14 @@ import java.util.function.Consumer;
 public abstract class Props<L extends Level> {
 	public final L level;
 	public final Map<PropListType, PropList> propLists;
+	public final PropList levelProps;
+	public final PropList dataProps;
 
 	public Props(L level) {
 		this.level = level;
 		this.propLists = new EnumMap<>(PropListType.class);
-		this.propLists.put(PropListType.LEVEL, new PropList(this, PropListType.LEVEL));
-		this.propLists.put(PropListType.DATA, new PropList(this, PropListType.DATA));
+		this.propLists.put(PropListType.LEVEL, levelProps = new PropList(this, PropListType.LEVEL));
+		this.propLists.put(PropListType.DATA, dataProps = new PropList(this, PropListType.DATA));
 	}
 
 	public <P extends Prop> PropContext<P> context(PropType<P> type, PropSpawnType spawnType, long createdTime, @Nullable CompoundTag initialData) {

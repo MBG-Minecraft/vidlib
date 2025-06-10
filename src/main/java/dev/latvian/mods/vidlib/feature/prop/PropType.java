@@ -21,6 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.function.Predicate;
 
 @AutoInit
 public record PropType<P extends Prop>(
@@ -29,7 +30,7 @@ public record PropType<P extends Prop>(
 	Map<String, PropData<?, ?>> data,
 	Int2ObjectMap<PropData<?, ?>> idMap,
 	Reference2IntMap<PropData<?, ?>> reverseIdMap
-) implements PropDataProvider {
+) implements PropDataProvider, Predicate<Prop> {
 	@FunctionalInterface
 	public interface Factory<P extends Prop> {
 		P create(PropContext<?> ctx);
@@ -70,6 +71,11 @@ public record PropType<P extends Prop>(
 	public static final Codec<PropType<?>> CODEC = KLibCodecs.map(ALL, ID.CODEC, PropType::id);
 	public static final StreamCodec<ByteBuf, PropType<?>> STREAM_CODEC = KLibStreamCodecs.map(ALL, ID.STREAM_CODEC, PropType::id);
 	public static final DataType<PropType<?>> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, Cast.to(PropType.class));
+
+	@Override
+	public boolean test(Prop prop) {
+		return prop.type == this;
+	}
 
 	public <O> DataResult<P> load(P prop, DynamicOps<O> ops, O map, boolean full) {
 		for (var p : data.values()) {

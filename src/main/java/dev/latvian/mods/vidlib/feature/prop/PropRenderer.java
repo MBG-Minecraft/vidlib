@@ -12,6 +12,14 @@ import java.util.Set;
 public interface PropRenderer<P extends Prop> {
 	Set<RenderLevelStageEvent.Stage> DEFAULT_STAGES = Set.of(RenderLevelStageEvent.Stage.AFTER_ENTITIES);
 
+	Set<RenderLevelStageEvent.Stage> STRUCTURE_STAGES = Set.of(
+		RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS,
+		RenderLevelStageEvent.Stage.AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS,
+		RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS,
+		RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS,
+		RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS
+	);
+
 	PropRenderer<?> INVISIBLE = new PropRenderer<>() {
 		@Override
 		public void renderProp(Prop prop, FrameInfo frame) {
