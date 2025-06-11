@@ -30,7 +30,7 @@ public record AddPropPayload(PropType<?> type, PropSpawnType spawnType, int id, 
 	@Override
 	public void handle(Context ctx) {
 		var props = ctx.level().getProps();
-		var prop = type.factory().create(props.context(type, spawnType, createdTime, null));
+		var prop = type.factory().create(props.context(type, spawnType, createdTime));
 		prop.id = id;
 		prop.update(ctx.level().registryAccess(), update, true);
 		props.add(prop);

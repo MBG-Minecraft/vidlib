@@ -1,14 +1,13 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
 import com.mojang.serialization.DataResult;
-import dev.latvian.mods.klib.util.Empty;
-import net.minecraft.nbt.CompoundTag;
+import com.mojang.serialization.DynamicOps;
+import dev.latvian.mods.klib.util.Cast;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public abstract class Props<L extends Level> {
@@ -24,12 +23,8 @@ public abstract class Props<L extends Level> {
 		this.propLists.put(PropListType.DATA, dataProps = new PropList(this, PropListType.DATA));
 	}
 
-	public <P extends Prop> PropContext<P> context(PropType<P> type, PropSpawnType spawnType, long createdTime, @Nullable CompoundTag initialData) {
-		return new PropContext<>(this, type, spawnType, createdTime, initialData);
-	}
-
-	public <P extends Prop> PropContext<P> context(PropType<P> type, long spawnedGameTime) {
-		return context(type, PropSpawnType.GAME, spawnedGameTime, null);
+	public <P extends Prop> PropContext<P> context(PropType<P> type, PropSpawnType spawnType, long createdTime) {
+		return new PropContext<>(this, type, spawnType, createdTime);
 	}
 
 	public void tick() {
@@ -54,47 +49,45 @@ public abstract class Props<L extends Level> {
 		}
 	}
 
-	public <P extends Prop> DataResult<P> create(PropContext<P> ctx, boolean full, @Nullable BiConsumer<Props<?>, P> onCreated) {
+	public <O, P extends Prop> DataResult<P> create(PropContext<P> ctx, boolean add, boolean validate, @Nullable DynamicOps<O> ops, @Nullable O initialData, @Nullable Consumer<P> onCreated) {
 		var prop = ctx.type().factory().create(ctx);
-		var result = ctx.type().load(prop, ctx.props().level.nbtOps(), ctx.initialData() == null ? Empty.COMPOUND_TAG : ctx.initialData(), full);
 
-		if (onCreated != null && result.isSuccess()) {
-			onCreated.accept(this, result.getOrThrow());
+		if (ops != null && initialData != null) {
+			var result = ctx.type().load(prop, ops, initialData, validate);
+
+			if (result.isError()) {
+				return result;
+			}
 		}
 
-		return result;
+		if (onCreated != null) {
+			onCreated.accept(prop);
+
+			if (validate && (ops == null || initialData == null)) {
+				for (var p : prop.type.data().values()) {
+					if (p.isRequired() && p.get(Cast.to(prop)) == null) {
+						return DataResult.error(() -> "Missing required data key '" + p.key() + "'");
+					}
+				}
+			}
+
+			if (add) {
+				add(prop);
+			}
+		}
+
+		return DataResult.success(prop);
 	}
 
 	@Nullable
-	public <P extends Prop> P create(PropType<P> type) {
-		var result = create(context(type, level.getGameTime()), true, null);
+	public <P extends Prop> P add(PropType<P> type, @Nullable Consumer<P> onCreated) {
+		var result = create(context(type, PropSpawnType.GAME, level.getGameTime()), true, true, null, null, onCreated);
 		return result.isSuccess() ? result.getOrThrow() : null;
 	}
 
 	@Nullable
-	public <P extends Prop> P add(PropType<P> type, Consumer<P> onCreated) {
-		var result = create(context(type, level.getGameTime()), true, null);
-
-		if (result.isSuccess()) {
-			var prop = result.getOrThrow();
-			onCreated.accept(prop);
-			add(prop);
-			return prop;
-		}
-
-		return null;
-	}
-
-	@Nullable
-	public <P extends Prop> P createDummy(PropType<P> type, Consumer<P> onCreated) {
-		var result = create(context(type, PropSpawnType.DUMMY, level.getGameTime(), null), true, null);
-
-		if (result.isSuccess()) {
-			var prop = result.getOrThrow();
-			onCreated.accept(prop);
-			return prop;
-		}
-
-		return null;
+	public <P extends Prop> P createDummy(PropType<P> type, @Nullable Consumer<P> onCreated) {
+		var result = create(context(type, PropSpawnType.DUMMY, level.getGameTime()), false, false, null, null, onCreated);
+		return result.isSuccess() ? result.getOrThrow() : null;
 	}
 }

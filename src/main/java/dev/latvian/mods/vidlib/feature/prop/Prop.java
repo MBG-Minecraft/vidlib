@@ -36,11 +36,11 @@ import java.util.Set;
 public class Prop {
 	public static final PropData<Prop, Integer> TICK = PropData.create(Prop.class, "tick", DataTypes.TICKS, p -> p.tick, (p, v) -> p.tick = v);
 	public static final PropData<Prop, Integer> LIFESPAN = PropData.create(Prop.class, "lifespan", DataTypes.TICKS, p -> p.lifespan, (p, v) -> p.lifespan = v);
-	public static final PropData<Prop, Vector3d> POSITION = PropData.create(Prop.class, "position", JOMLDataTypes.DVEC3, p -> p.pos, (p, v) -> p.pos.set(v));
-	public static final PropData<Prop, Vector3f> VELOCITY = PropData.create(Prop.class, "velocity", JOMLDataTypes.VEC3, p -> p.velocity, (p, v) -> p.velocity.set(v));
-	public static final PropData<Prop, Float> PITCH = PropData.create(Prop.class, "pitch", DataTypes.FLOAT, p -> p.rotation.x, (p, v) -> p.rotation.x = v);
-	public static final PropData<Prop, Float> YAW = PropData.create(Prop.class, "yaw", DataTypes.FLOAT, p -> p.rotation.y, (p, v) -> p.rotation.y = v);
-	public static final PropData<Prop, Float> ROLL = PropData.create(Prop.class, "roll", DataTypes.FLOAT, p -> p.rotation.z, (p, v) -> p.rotation.z = v);
+	public static final PropData<Prop, Vector3d> POSITION = PropData.create(Prop.class, "position", JOMLDataTypes.DVEC3, p -> p.pos, Prop::setPos);
+	public static final PropData<Prop, Vector3f> VELOCITY = PropData.create(Prop.class, "velocity", JOMLDataTypes.VEC3, p -> p.velocity, Prop::setVelocity);
+	public static final PropData<Prop, Float> PITCH = PropData.create(Prop.class, "pitch", DataTypes.FLOAT, p -> p.rotation.x, Prop::setPitch);
+	public static final PropData<Prop, Float> YAW = PropData.create(Prop.class, "yaw", DataTypes.FLOAT, p -> p.rotation.y, Prop::setYaw);
+	public static final PropData<Prop, Float> ROLL = PropData.create(Prop.class, "roll", DataTypes.FLOAT, p -> p.rotation.z, Prop::setRoll);
 	public static final PropData<Prop, Float> GRAVITY = PropData.create(Prop.class, "gravity", DataTypes.FLOAT, p -> p.gravity, (p, v) -> p.gravity = v);
 	public static final PropData<Prop, Float> WIDTH = PropData.create(Prop.class, "width", DataTypes.FLOAT, p -> (float) p.width, (p, v) -> p.width = v);
 	public static final PropData<Prop, Float> HEIGHT = PropData.create(Prop.class, "height", DataTypes.FLOAT, p -> (float) p.height, (p, v) -> p.height = v);
@@ -118,6 +118,11 @@ public class Prop {
 		}
 	}
 
+	public final void setSize(double size) {
+		width = size;
+		height = size;
+	}
+
 	public void setPos(double x, double y, double z) {
 		pos.set(x, y, z);
 	}
@@ -125,8 +130,8 @@ public class Prop {
 	public Vec3 getPos(float delta) {
 		return new Vec3(
 			Mth.lerp(delta, prevPos.x, pos.x),
-			Mth.lerp(delta, prevPos.x, pos.y),
-			Mth.lerp(delta, prevPos.x, pos.z)
+			Mth.lerp(delta, prevPos.y, pos.y),
+			Mth.lerp(delta, prevPos.z, pos.z)
 		);
 	}
 
@@ -147,7 +152,27 @@ public class Prop {
 	}
 
 	public void setRot(float yaw, float pitch, float roll) {
-		rotation.set(yaw, pitch, roll);
+		rotation.set(pitch, yaw, roll);
+	}
+
+	public final void setYaw(float yaw) {
+		setRot(yaw, rotation.x, rotation.z);
+	}
+
+	public final void setPitch(float pitch) {
+		setRot(rotation.y, pitch, rotation.z);
+	}
+
+	public final void setRoll(float roll) {
+		setRot(rotation.y, rotation.x, roll);
+	}
+
+	public final void setRot(Vector3fc rotation) {
+		setRot(rotation.y(), rotation.x(), rotation.z());
+	}
+
+	public final void setRot(Rotation rotation) {
+		setRot(rotation.yawDeg(), rotation.pitchDeg(), rotation.rollDeg());
 	}
 
 	public float getPitch(float delta) {
@@ -160,14 +185,6 @@ public class Prop {
 
 	public float getRoll(float delta) {
 		return Mth.rotLerp(delta, prevRotation.z, rotation.z);
-	}
-
-	public final void setRot(Vector3fc rotation) {
-		setRot(rotation.x(), rotation.y(), rotation.z());
-	}
-
-	public final void setRot(Rotation rotation) {
-		setRot(rotation.yawDeg(), rotation.pitchDeg(), rotation.rollDeg());
 	}
 
 	byte[] getDataUpdates(boolean allData) {

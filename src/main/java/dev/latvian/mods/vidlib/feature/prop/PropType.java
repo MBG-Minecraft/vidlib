@@ -77,9 +77,9 @@ public record PropType<P extends Prop>(
 		return prop.type == this;
 	}
 
-	public <O> DataResult<P> load(P prop, DynamicOps<O> ops, O map, boolean full) {
+	public <O> DataResult<P> load(P prop, DynamicOps<O> ops, O initialData, boolean validate) {
 		for (var p : data.values()) {
-			var t = ops.get(map, p.key());
+			var t = ops.get(initialData, p.key());
 
 			if (t.isSuccess()) {
 				var result = p.type().codec().parse(ops, t.getOrThrow());
@@ -89,7 +89,7 @@ public record PropType<P extends Prop>(
 				}
 
 				p.set(Cast.to(prop), Cast.to(result.getOrThrow()));
-			} else if (full && p.save() && p.isRequired()) {
+			} else if (validate && p.isRequired()) {
 				return DataResult.error(() -> "Missing required data key '" + p.key() + "'");
 			}
 		}
