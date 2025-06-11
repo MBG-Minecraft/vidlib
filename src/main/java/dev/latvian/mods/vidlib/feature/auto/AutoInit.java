@@ -25,7 +25,7 @@ public @interface AutoInit {
 		ASSETS_LOADED(true, false), // (ResourceManager)
 		SERVER_STARTED(false, false), // (MinecraftServer)
 		DATA_LOADED(false, false), // ()
-		CHUNKS_RENDERED(true, false), // ()
+		CHUNKS_RENDERED(true, false), // (ClientLevel)
 		SHADERS_LOADED(true, false), // (ResourceManager)
 		CLIENT_OPTIONS_SAVED(true, false), // (Options)
 		SERVER_STRUCTURES_LOADED(false, false), // (StructureStorage)

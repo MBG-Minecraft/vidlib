@@ -6,10 +6,11 @@ import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 
-public record RemoveAllPropsPayload(PropListType type) implements SimplePacketPayload {
+public record RemoveAllPropsPayload(PropListType type, PropRemoveType removeType) implements SimplePacketPayload {
 	@AutoPacket
 	public static final VidLibPacketType<RemoveAllPropsPayload> TYPE = VidLibPacketType.internal("remove_all_props", CompositeStreamCodec.of(
 		PropListType.STREAM_CODEC, RemoveAllPropsPayload::type,
+		PropRemoveType.STREAM_CODEC, RemoveAllPropsPayload::removeType,
 		RemoveAllPropsPayload::new
 	));
 
@@ -20,6 +21,10 @@ public record RemoveAllPropsPayload(PropListType type) implements SimplePacketPa
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.level().getProps().propLists.get(type).removeAll();
+		var props = ctx.level().getProps().propLists.get(type);
+
+		for (var prop : props) {
+			prop.removed = removeType;
+		}
 	}
 }

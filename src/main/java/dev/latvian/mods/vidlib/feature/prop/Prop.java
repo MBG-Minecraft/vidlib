@@ -59,8 +59,7 @@ public class Prop {
 	final Set<PropData<?, ?>> sync;
 	public Level level;
 	public int id;
-	boolean removed;
-	Object cachedRenderer;
+	PropRemoveType removed;
 
 	public int prevTick;
 	public int tick;
@@ -82,7 +81,7 @@ public class Prop {
 		this.sync = new ReferenceArraySet<>();
 		this.level = ctx.props().level;
 		this.id = 0;
-		this.removed = false;
+		this.removed = PropRemoveType.NONE;
 		this.tick = 0;
 		this.lifespan = 0;
 		this.pos = new Vector3d();
@@ -96,15 +95,26 @@ public class Prop {
 		this.height = 1D;
 	}
 
+	public final boolean isTimeTraveling(long time) {
+		return createdTime > time || (lifespan > 0 && time > createdTime + lifespan);
+	}
+
 	public final boolean fullTick(long time) {
-		if (isRemoved() || createdTime > time) {
+		if (isRemoved()) {
+			return true;
+		} else if (isTimeTraveling(time)) {
+			removed = PropRemoveType.TIME_TRAVEL;
 			return true;
 		}
 
 		snap();
 		tick();
 
-		if (isRemoved()) {
+		if (lifespan > 0 && tick >= lifespan) {
+			onExpired();
+			removed = PropRemoveType.EXPIRED;
+			return true;
+		} else if (isRemoved()) {
 			return true;
 		}
 
@@ -235,11 +245,17 @@ public class Prop {
 	}
 
 	public final void remove() {
-		removed = true;
+		if (removed == PropRemoveType.NONE) {
+			removed = PropRemoveType.GAME;
+		}
 	}
 
-	public boolean isRemoved() {
+	public final PropRemoveType getRemovedType() {
 		return removed;
+	}
+
+	public final boolean isRemoved() {
+		return removed != PropRemoveType.NONE;
 	}
 
 	public void snap() {
@@ -250,11 +266,6 @@ public class Prop {
 
 	public void tick() {
 		move();
-
-		if (lifespan > 0 && tick >= lifespan) {
-			onExpired();
-			remove();
-		}
 	}
 
 	public float getRelativeTick() {

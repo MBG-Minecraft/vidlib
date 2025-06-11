@@ -113,8 +113,12 @@ public class MiscClientUtils {
 				float ry = (float) (line.line().start().y - cameraPos.y);
 				float rz = (float) (line.line().start().z - cameraPos.z);
 
-				linesBuffer.acceptPos(rx, ry, rz).acceptCol(line.startColor().redf(), line.startColor().greenf(), line.startColor().bluef(), line.startColor().alphaf());
-				linesBuffer.acceptPos(rx + (float) line.line().dx(), ry + (float) line.line().dy(), rz + (float) line.line().dz()).acceptCol(line.endColor().redf(), line.endColor().greenf(), line.endColor().bluef(), line.endColor().alphaf());
+				float dx = (float) line.line().dx();
+				float dy = (float) line.line().dy();
+				float dz = (float) line.line().dz();
+
+				linesBuffer.acceptPos(rx, ry, rz).acceptCol(line.startColor().redf(), line.startColor().greenf(), line.startColor().bluef(), line.startColor().alphaf()).acceptNormal(dx, dy, dz);
+				linesBuffer.acceptPos(rx + dx, ry + dy, rz + dz).acceptCol(line.endColor().redf(), line.endColor().greenf(), line.endColor().bluef(), line.endColor().alphaf()).acceptNormal(dx, dy, dz);
 			}
 
 			for (var shape : visuals.shapes()) {

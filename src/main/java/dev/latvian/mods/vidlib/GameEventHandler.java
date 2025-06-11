@@ -11,6 +11,7 @@ import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.misc.MarkerData;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.registry.GenericVLRegistry;
 import dev.latvian.mods.vidlib.feature.session.RemovePlayerDataPayload;
@@ -112,7 +113,7 @@ public class GameEventHandler {
 			var packets = new S2CPacketBundleBuilder(level);
 
 			for (var list : level.getProps().propLists.values()) {
-				packets.s2c(new RemoveAllPropsPayload(list.type));
+				packets.s2c(new RemoveAllPropsPayload(list.type, PropRemoveType.DIMENSION_CHANGE));
 
 				for (var prop : list) {
 					packets.s2c(prop.createAddPacket());

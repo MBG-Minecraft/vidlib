@@ -3,8 +3,8 @@ package dev.latvian.mods.vidlib.feature.prop.geo;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
+import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
-import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
@@ -22,9 +22,9 @@ public class GeoPropRenderer<P extends Prop & GeoProp> extends GeoObjectRenderer
 	}
 
 	@Override
-	public void renderProp(P prop, FrameInfo frame) {
-		int light = getPackedLight(prop);
-		render(frame.poseStack(), prop, frame.buffers(), null, null, light, frame.worldDelta());
+	public void render(PropRenderContext<P> ctx) {
+		int light = getPackedLight(ctx);
+		render(ctx.poseStack(), ctx.prop(), ctx.frame().buffers(), null, null, light, ctx.delta());
 	}
 
 	@Override

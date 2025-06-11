@@ -29,7 +29,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.phys.AABB;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.client.model.pipeline.TransformingVertexPipeline;
 
@@ -137,7 +136,6 @@ public class StructureRenderer implements WithCache {
 
 	private EnumMap<TerrainRenderLayer, CachedLayer> layers = null;
 	private boolean rendering = false;
-	private AABB renderBounds = AABB.INFINITE;
 
 	private StructureRenderer(ResourceLocation id, Supplier<StructureHolder> structureProvider) {
 		this.id = id;
@@ -154,7 +152,6 @@ public class StructureRenderer implements WithCache {
 
 		if (layers == null) {
 			layers = EMPTY_LAYERS;
-			renderBounds = AABB.INFINITE;
 			var structure = structureProvider.get();
 
 			if (structure != null) {
@@ -185,13 +182,6 @@ public class StructureRenderer implements WithCache {
 			layerSorting.put(allTypes.get(i), i);
 		}
 
-		double minX = Double.POSITIVE_INFINITY;
-		double minY = Double.POSITIVE_INFINITY;
-		double minZ = Double.POSITIVE_INFINITY;
-		double maxX = Double.NEGATIVE_INFINITY;
-		double maxY = Double.NEGATIVE_INFINITY;
-		double maxZ = Double.NEGATIVE_INFINITY;
-
 		for (var entry : structure.blocks().long2ObjectEntrySet()) {
 			var pos = BlockPos.of(entry.getLongKey());
 			var state = entry.getValue();
@@ -214,18 +204,7 @@ public class StructureRenderer implements WithCache {
 				layer.parts.computeIfAbsent(stateModel, k -> new ArrayList<>(1)).add(part);
 				added = true;
 			}
-
-			if (added) {
-				minX = Math.min(minX, pos.getX() - 1D);
-				minY = Math.min(minY, pos.getY() - 1D);
-				minZ = Math.min(minZ, pos.getZ() - 1D);
-				maxX = Math.max(maxX, pos.getX() + 2D);
-				maxY = Math.max(maxY, pos.getY() + 2D);
-				maxZ = Math.max(maxZ, pos.getZ() + 2D);
-			}
 		}
-
-		renderBounds = new AABB(minX, minY, minZ, maxX, maxY, maxZ);
 
 		var buildingLayerArray = layerMap.values().toArray(BuildingLayer.EMPTY);
 		Arrays.sort(buildingLayerArray, Comparator.comparingInt(BuildingLayer::sort));
@@ -296,10 +275,6 @@ public class StructureRenderer implements WithCache {
 
 		rendering = false;
 		renderingAll = null;
-	}
-
-	public AABB getRenderBounds() {
-		return renderBounds;
 	}
 
 	@Override

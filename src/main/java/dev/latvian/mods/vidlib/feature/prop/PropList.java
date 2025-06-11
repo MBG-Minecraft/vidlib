@@ -67,6 +67,13 @@ public class PropList implements Iterable<Prop> {
 			for (var prop : pending) {
 				if (prop.id == 0) {
 					prop.id = generateNewId();
+				} else {
+					var old = map.get(prop.id);
+
+					if (old != null) {
+						old.snap();
+						old.removed = PropRemoveType.REPLACED;
+					}
 				}
 
 				map.put(prop.id, prop);

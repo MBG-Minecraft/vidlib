@@ -302,7 +302,7 @@ public class GameClientEventHandler {
 			}
 		}
 
-		mc.level.getProps().renderAll(frame);
+		mc.level.getProps().renderAll(frame, ms);
 
 		if (frame.layer() != null) {
 			GhostStructure.render(frame);

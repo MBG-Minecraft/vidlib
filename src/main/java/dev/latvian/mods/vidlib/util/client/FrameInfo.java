@@ -36,7 +36,8 @@ public record FrameInfo(
 	double cameraZ,
 	Frustum frustum,
 	boolean replay,
-	Vector3f normal
+	Vector3f normal,
+	long gameTime
 ) implements FramePoseStack, FrustumCheck {
 	public static FrameInfo CURRENT;
 
@@ -71,7 +72,8 @@ public record FrameInfo(
 			event.getCamera().getPosition().z,
 			event.getFrustum(),
 			mc.player.isReplayCamera(),
-			new Vector3f()
+			new Vector3f(),
+			mc.level.getGameTime()
 		);
 	}
 
@@ -95,7 +97,8 @@ public record FrameInfo(
 			event.getCamera().getPosition().z,
 			event.getFrustum(),
 			mc.player.isReplayCamera(),
-			new Vector3f()
+			new Vector3f(),
+			mc.level.getGameTime()
 		);
 	}
 

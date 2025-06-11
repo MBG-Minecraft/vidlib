@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.prop;
 
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
-import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.client.renderer.LightTexture;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
@@ -10,7 +9,9 @@ import java.util.Map;
 import java.util.Set;
 
 public interface PropRenderer<P extends Prop> {
-	Set<RenderLevelStageEvent.Stage> DEFAULT_STAGES = Set.of(RenderLevelStageEvent.Stage.AFTER_ENTITIES);
+	Set<RenderLevelStageEvent.Stage> DEFAULT_STAGES = Set.of(
+		RenderLevelStageEvent.Stage.AFTER_ENTITIES
+	);
 
 	Set<RenderLevelStageEvent.Stage> STRUCTURE_STAGES = Set.of(
 		RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS,
@@ -20,9 +21,13 @@ public interface PropRenderer<P extends Prop> {
 		RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS
 	);
 
+	Set<RenderLevelStageEvent.Stage> SOLID_STRUCTURE_STAGES = Set.of(
+		RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS
+	);
+
 	PropRenderer<?> INVISIBLE = new PropRenderer<>() {
 		@Override
-		public void renderProp(Prop prop, FrameInfo frame) {
+		public void render(PropRenderContext<Prop> ctx) {
 		}
 
 		@Override
@@ -42,17 +47,17 @@ public interface PropRenderer<P extends Prop> {
 		}
 	});
 
-	void renderProp(P prop, FrameInfo frame);
+	void render(PropRenderContext<P> ctx);
 
 	default Set<RenderLevelStageEvent.Stage> getStages(P prop) {
 		return DEFAULT_STAGES;
 	}
 
-	default int getPackedLight(P prop) {
+	default int getPackedLight(PropRenderContext<P> ctx) {
 		return LightTexture.FULL_BRIGHT;
 	}
 
-	default boolean shouldSort() {
+	default boolean shouldSort(PropRenderContext<P> ctx) {
 		return false;
 	}
 }

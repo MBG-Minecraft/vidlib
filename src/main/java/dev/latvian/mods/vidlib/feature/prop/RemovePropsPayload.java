@@ -23,10 +23,10 @@ public record RemovePropsPayload(PropListType type, IntList ids) implements Simp
 
 	@Override
 	public void handle(Context ctx) {
-		var props = ctx.level().getProps();
+		var props = ctx.level().getProps().propLists.get(type);
 
 		for (var id : ids) {
-			var prop = props.propLists.get(type).get(id);
+			var prop = props.get(id);
 
 			if (prop != null) {
 				prop.remove();

@@ -57,9 +57,13 @@ public abstract class LevelRendererMixin {
 	@Shadow
 	public abstract boolean shouldShowEntityOutlines();
 
+	@Shadow
+	@Nullable
+	private ClientLevel level;
+
 	@Inject(method = "allChanged", at = @At("RETURN"))
 	private void vl$allChanged(CallbackInfo ci) {
-		AutoInit.Type.CHUNKS_RENDERED.invoke();
+		AutoInit.Type.CHUNKS_RENDERED.invoke(level);
 	}
 
 	@Redirect(method = "allChanged", at = @At(value = "NEW", target = "(Lnet/minecraft/client/renderer/chunk/SectionRenderDispatcher;Lnet/minecraft/world/level/Level;ILnet/minecraft/client/renderer/LevelRenderer;)Lnet/minecraft/client/renderer/ViewArea;"))
