@@ -1,12 +1,14 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.renderer.MultiBufferSource;
 
-public class CustomParticle extends Particle {
+public abstract class CustomParticle extends Particle {
 	public int prevAge;
 
 	public CustomParticle(ClientLevel level, double x, double y, double z, double vx, double vy, double vz) {
@@ -22,6 +24,9 @@ public class CustomParticle extends Particle {
 	@Override
 	public void render(VertexConsumer buffer, Camera camera, float delta) {
 	}
+
+	@Override
+	public abstract void renderCustom(PoseStack ms, MultiBufferSource buffers, Camera camera, float delta);
 
 	@Override
 	public void tick() {

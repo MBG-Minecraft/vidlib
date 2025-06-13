@@ -136,6 +136,9 @@ public interface BloomRenderTypes {
 	RenderType DEFAULT_BLOCK = BLOCK.apply(SpriteKey.BLOCKS);
 	RenderType DEFAULT_BLOCK_NO_CULL = BLOCK_NO_CULL.apply(SpriteKey.BLOCKS);
 
+	RenderType DEFAULT_POS_COL = POS_COL.apply(Empty.TEXTURE);
+	RenderType DEFAULT_POS_COL_NO_CULL = POS_COL_NO_CULL.apply(Empty.TEXTURE);
+
 	static MultiBufferSourceOverride overridePos(MultiBufferSource delegate) {
 		return new MultiBufferSourceOverride(delegate, POS, POS_NO_CULL);
 	}
@@ -152,7 +155,7 @@ public interface BloomRenderTypes {
 		return new MultiBufferSourceOverride(delegate, ENTITY_CUTOUT, ENTITY_CUTOUT_NO_CULL);
 	}
 
-	BufferSupplier POS_COL_BUFFER_SUPPLIER = BufferSupplier.fixed(POS_COL.apply(Empty.TEXTURE), POS_COL_NO_CULL.apply(Empty.TEXTURE)).process(VertexCallback::onlyPosCol);
+	BufferSupplier POS_COL_BUFFER_SUPPLIER = BufferSupplier.fixed(DEFAULT_POS_COL, DEFAULT_POS_COL_NO_CULL).process(VertexCallback::onlyPosCol);
 
 	BufferSupplier BLOCK_BUFFER_SUPPLIER = BufferSupplier.fixed(DEFAULT_BLOCK, DEFAULT_BLOCK_NO_CULL).process(VertexCallback::onlyPosColTex);
 }

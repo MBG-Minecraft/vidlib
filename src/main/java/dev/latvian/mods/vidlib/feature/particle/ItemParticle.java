@@ -13,7 +13,7 @@ public class ItemParticle extends CustomParticle {
 	protected ItemParticle(ItemParticleOptions options, ClientLevel level, double x, double y, double z, double vx, double vy, double vz) {
 		super(level, x, y, z, vx, vy, vz);
 		this.options = options;
-		setLifetime(Math.abs(options.ttl()));
+		setLifetime(Math.abs(options.lifespan()));
 	}
 
 	@Override
@@ -25,9 +25,9 @@ public class ItemParticle extends CustomParticle {
 		}
 
 		var cameraPos = camera.getPosition();
-		var rx = (float) (KMath.lerp(time, xo, x) - cameraPos.x);
-		var ry = (float) (KMath.lerp(time, yo, y) - cameraPos.y);
-		var rz = (float) (KMath.lerp(time, zo, z) - cameraPos.z);
+		var rx = (float) (KMath.lerp(delta, xo, x) - cameraPos.x);
+		var ry = (float) (KMath.lerp(delta, yo, y) - cameraPos.y);
+		var rz = (float) (KMath.lerp(delta, zo, z) - cameraPos.z);
 
 		ms.pushPose();
 		ms.translate(rx, ry, rz);

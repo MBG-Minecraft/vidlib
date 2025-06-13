@@ -18,7 +18,6 @@ import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
-import dev.latvian.mods.vidlib.feature.cutscene.ClientCutscene;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
@@ -256,19 +255,21 @@ public class GameClientEventHandler {
 				}
 			}
 
-			if (session.cameraOverride instanceof ClientCutscene cc) {
-				for (var task : cc.steps) {
-					int start = task.resolvedStart;
-					int length = task.resolvedLength;
+			if (session.currentCutscene != null) {
+				var cc = session.currentCutscene;
 
-					if (task.render != null && cc.totalTick >= start && cc.totalTick <= start + length) {
+				for (var step : cc.steps) {
+					int start = step.start;
+					int length = step.length;
+
+					if (step.render != null && !step.render.isEmpty() && cc.totalTick >= start && cc.totalTick <= start + length) {
 						float tick = Math.max(cc.totalTick - 1 + delta, 0F);
 						var progress = KMath.clamp((tick - start) / (float) length, 0F, 1F);
 
 						if (progress < 1F) {
-							var target = task.prevRenderTarget == null || task.renderTarget == null ? cc.prevTarget.lerp(cc.target, delta) : task.prevRenderTarget.lerp(task.renderTarget, delta);
+							var target = step.prevRenderTarget == null || step.renderTarget == null ? cc.prevTarget.lerp(cc.target, delta) : step.prevRenderTarget.lerp(step.renderTarget, delta);
 
-							for (var render : task.render) {
+							for (var render : step.render) {
 								render.render(mc, frame, delta, progress, target);
 							}
 						}

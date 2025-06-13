@@ -62,4 +62,24 @@ public interface VidLibRenderTypes {
 			.setOutputState(RenderStateShard.ITEM_ENTITY_TARGET)
 			.createCompositeState(false)
 	);
+
+	TexturedRenderType OUTLINE = TexturedRenderType.create(texture -> RenderType.create(
+		"outline",
+		1536,
+		RenderPipelines.OUTLINE_CULL,
+		RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
+			.setOutputState(RenderStateShard.OUTLINE_TARGET)
+			.createCompositeState(RenderType.OutlineProperty.IS_OUTLINE)
+	));
+
+	TexturedRenderType OUTLINE_NO_CULL = TexturedRenderType.create(texture -> RenderType.create(
+		"outline_no_cull",
+		1536,
+		RenderPipelines.OUTLINE_NO_CULL,
+		RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
+			.setOutputState(RenderStateShard.OUTLINE_TARGET)
+			.createCompositeState(RenderType.OutlineProperty.IS_OUTLINE)
+	));
 }

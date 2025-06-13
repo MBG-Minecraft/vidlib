@@ -24,10 +24,10 @@ import dev.latvian.mods.vidlib.feature.fade.ScreenFadeInstance;
 import dev.latvian.mods.vidlib.feature.highlight.TerrainHighlight;
 import dev.latvian.mods.vidlib.feature.highlight.TerrainHighlightInstance;
 import dev.latvian.mods.vidlib.feature.misc.MarkerData;
-import dev.latvian.mods.vidlib.feature.particle.CubeParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.FireData;
 import dev.latvian.mods.vidlib.feature.particle.ItemParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.LineParticleOptions;
+import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.TextParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.WindData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
@@ -207,19 +207,12 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	@Override
 	default void playCutscene(Cutscene cutscene, WorldNumberVariables variables) {
-		var level = vl$self().level;
 		var player = vl$self().player;
 
 		if (!cutscene.steps.isEmpty() && player != null) {
-			var ctx = level.globalContext(0F).withVariables(variables);
-
-			for (var step : cutscene.steps) {
-				step.resolvedStart = (int) step.start.getOr(ctx, 0D);
-				step.resolvedLength = (int) step.length.getOr(ctx, 1D);
-			}
-
 			var overrideCamera = !player.isReplayCamera();
 			var inst = new ClientCutscene(vl$self(), overrideCamera, cutscene, variables, player::getEyePosition);
+			player.vl$sessionData().currentCutscene = inst;
 			player.vl$sessionData().cameraOverride = inst;
 
 			if (overrideCamera && !cutscene.allowMovement) {
@@ -232,11 +225,12 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	default void stopCutscene() {
 		var data = vl$self().player.vl$sessionData();
 
-		if (data.cameraOverride instanceof ClientCutscene cc) {
-			cc.stopped();
+		if (data.currentCutscene != null) {
+			data.currentCutscene.stopped();
 		}
 
 		data.cameraOverride = null;
+		data.currentCutscene = null;
 
 		if (vl$self().screen instanceof CutsceneScreen screen) {
 			vl$self().setScreen(screen.previousScreen);
@@ -272,7 +266,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 		var session = player.vl$sessionData();
 
-		if (session.cameraOverride instanceof ClientCutscene) {
+		if (session.currentCutscene != null) {
 			stopCutscene();
 		}
 
@@ -408,7 +402,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void cubeParticles(Map<CubeParticleOptions, List<BlockPos>> map) {
+	default void cubeParticles(Map<ShapeParticleOptions, List<BlockPos>> map) {
 		var particles = vl$self().particleEngine;
 
 		for (var entry : map.entrySet()) {

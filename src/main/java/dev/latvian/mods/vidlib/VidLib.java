@@ -27,6 +27,7 @@ public class VidLib {
 
 	public VidLib(IEventBus bus) throws IOException {
 		LOGGER.info("VidLib loaded");
+		VidLibDataTypes.register();
 
 		for (var s : AutoRegister.SCANNED.get()) {
 			if (s.value() instanceof DeferredRegister<?> reg) {
@@ -50,7 +51,6 @@ public class VidLib {
 	}
 
 	public static void setupSync() {
-		VidLibDataTypes.register();
 	}
 
 	public static void sync(ServerPlayer player, boolean login) {

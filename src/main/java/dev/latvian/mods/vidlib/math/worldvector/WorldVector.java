@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.math.worldvector;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.easing.Easing;
+import dev.latvian.mods.klib.util.IntOrUUID;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
@@ -107,7 +108,7 @@ public interface WorldVector {
 	}
 
 	static WorldVector following(Entity entity, EntityPositionType type) {
-		return new FollowingEntityWorldVector(Either.left(entity.getId()), type);
+		return new FollowingEntityWorldVector(IntOrUUID.of(entity.getId()), type);
 	}
 
 	static WorldVector followingBottomOf(Entity entity) {

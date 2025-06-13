@@ -6,7 +6,7 @@ import dev.latvian.mods.klib.util.DebugColorBlocks;
 import dev.latvian.mods.vidlib.feature.bulk.BlockModificationConsumer;
 import dev.latvian.mods.vidlib.feature.bulk.OptimizedModificationBuilder;
 import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
-import dev.latvian.mods.vidlib.feature.particle.CubeParticleOptions;
+import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.TextParticleOptions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -247,18 +247,18 @@ public class ExplosionInstance {
 			}
 		}
 
-		var map = new HashMap<CubeParticleOptions, List<BlockPos>>();
+		var map = new HashMap<ShapeParticleOptions, List<BlockPos>>();
 
 		for (int i = 0; i < maxBlocks; i++) {
 			var list = blocks.get(i);
 
 			if (!list.isEmpty()) {
-				map.put(new CubeParticleOptions(Color.hsb(KMath.lerp(i / (float) maxBlocks, 0F, 0.3F), 1F, 1F, 255), Color.TRANSPARENT, -duration), list);
+				map.put(new ShapeParticleOptions(-duration, Color.hsb(KMath.lerp(i / (float) maxBlocks, 0F, 0.3F), 1F, 1F, 255), Color.TRANSPARENT), list);
 			}
 		}
 
 		if (!instantDeathBlocks.isEmpty()) {
-			map.put(new CubeParticleOptions(Color.MAGENTA, Color.TRANSPARENT, -duration), instantDeathBlocks);
+			map.put(new ShapeParticleOptions(-duration, Color.MAGENTA, Color.TRANSPARENT), instantDeathBlocks);
 		}
 
 		for (var entry : damageText.entrySet()) {

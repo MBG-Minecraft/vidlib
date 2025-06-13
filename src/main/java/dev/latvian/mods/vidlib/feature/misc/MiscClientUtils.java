@@ -4,7 +4,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
+import dev.latvian.mods.klib.texture.UV;
+import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.VidLibConfig;
+import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -86,12 +89,28 @@ public class MiscClientUtils {
 			ms.mulPose(Axis.YP.rotation(cube.rotation().yawRad()));
 			ms.mulPose(Axis.XP.rotation(cube.rotation().pitchRad()));
 			ms.mulPose(Axis.ZP.rotation(cube.rotation().rollRad()));
-			CuboidRenderer.voxelShapeBox(ms, cube.shape(), Vec3.ZERO, buffers, type, false, cube.color().withAlpha(50), cube.lineColor());
+			CuboidRenderer.voxelShapeBox(ms, cube.shape(), Vec3.ZERO, buffers, type, true, cube.color().withAlpha(100), cube.lineColor());
 			ms.popPose();
 		}
 
 		if (!visuals.shapes().isEmpty()) {
-			var quadsBuffer = ms.last().transform(type.quads(buffers, false));
+			var quadsBuffer = ms.last().transform(type.quads(buffers, true));
+
+			for (var shape : visuals.shapes()) {
+				var col = shape.shape().quads().get(progress);
+
+				if (!col.isTransparent()) {
+					float rx = (float) (shape.position().x - cameraPos.x);
+					float ry = (float) (shape.position().y - cameraPos.y);
+					float rz = (float) (shape.position().z - cameraPos.z);
+					shape.shape().shape().buildQuads(rx, ry, rz, quadsBuffer.withColor(col.withAlpha(100)));
+				}
+			}
+		}
+
+		/*
+		if (!visuals.brightShapes().isEmpty()) {
+			var quadsBuffer = ms.last().transform(type.quads(buffers, true));
 
 			for (var shape : visuals.shapes()) {
 				var col = shape.shape().quads().get(progress);
@@ -101,6 +120,23 @@ public class MiscClientUtils {
 					float ry = (float) (shape.position().y - cameraPos.y);
 					float rz = (float) (shape.position().z - cameraPos.z);
 					shape.shape().shape().buildQuads(rx, ry, rz, quadsBuffer.withColor(col.withAlpha(50)));
+				}
+			}
+		}
+		 */
+
+		if (!visuals.outlineShapes().isEmpty()) {
+			//POSITION_TEX_COLOR
+			var quadsBuffer = ms.last().transform(buffers.getBuffer(VidLibRenderTypes.OUTLINE.apply(Empty.TEXTURE))).onlyPosColTex().withTex(UV.FULL);
+
+			for (var shape : visuals.outlineShapes()) {
+				var col = shape.shape().quads().get(progress);
+
+				if (!col.isTransparent()) {
+					float rx = (float) (shape.position().x - cameraPos.x);
+					float ry = (float) (shape.position().y - cameraPos.y);
+					float rz = (float) (shape.position().z - cameraPos.z);
+					shape.shape().shape().buildQuads(rx, ry, rz, quadsBuffer.withColor(col.withAlpha(100)));
 				}
 			}
 		}

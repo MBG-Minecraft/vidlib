@@ -2,12 +2,16 @@ package dev.latvian.mods.vidlib.feature.item;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.math.Line;
+import dev.latvian.mods.klib.shape.ColoredShape;
+import dev.latvian.mods.klib.shape.CubeShape;
+import dev.latvian.mods.klib.shape.SphereShape;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import dev.latvian.mods.vidlib.feature.misc.VidLibIcon;
-import dev.latvian.mods.vidlib.feature.particle.CubeParticleOptions;
+import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
@@ -54,6 +58,7 @@ public class PositionToolItem implements VidLibTool, PlayerActionHandler {
 	}
 
 	public Vec3 lastClick = null;
+	public Type clientMode = Type.BLOCK;
 	public Vec3 clientPos = null;
 
 	@AutoInit
@@ -114,7 +119,7 @@ public class PositionToolItem implements VidLibTool, PlayerActionHandler {
 				)
 			);
 
-			player.level().addParticle(new CubeParticleOptions(Color.CYAN, Color.WHITE, 60), blockPos.getX() + 0.5D, blockPos.getY() + 0.5D, blockPos.getZ() + 0.5D, 0D, 0D, 0D);
+			player.level().addParticle(new ShapeParticleOptions(60, Color.CYAN, Color.WHITE), blockPos.getX() + 0.5D, blockPos.getY() + 0.5D, blockPos.getZ() + 0.5D, 0D, 0D, 0D);
 		}
 
 		return true;
@@ -133,13 +138,9 @@ public class PositionToolItem implements VidLibTool, PlayerActionHandler {
 	@Override
 	public void renderSetup(Player player, ItemStack item, @Nullable HitResult hit, float delta) {
 		var tag = item.get(DataComponents.CUSTOM_DATA).getUnsafe();
-		var mode = Type.VALUES[tag.getByteOr("position_tool_mode", (byte) 0)];
-
-		if (hit == null || hit.getType() != HitResult.Type.BLOCK) {
-			hit = player.ray(500D, delta).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY);
-		}
-
-		clientPos = hit instanceof BlockHitResult blockHit ? mode.position(player, blockHit) : mode.position(player, null);
+		clientMode = Type.VALUES[tag.getByteOr("position_tool_mode", (byte) 0)];
+		var chit = player.ray(500D, delta).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY);
+		clientPos = chit instanceof BlockHitResult blockHit ? clientMode.position(player, blockHit) : clientMode.position(player, null);
 	}
 
 	@Override
@@ -166,7 +167,17 @@ public class PositionToolItem implements VidLibTool, PlayerActionHandler {
 	public Visuals visuals(Player player, ItemStack item, float delta) {
 		if (clientPos != null) {
 			var visuals = new Visuals();
-			visuals.addCube(clientPos);
+
+			if (clientMode == Type.PLANE) {
+				visuals.addLine(new Line(clientPos, new Vec3(clientPos.x + 0.5D, clientPos.y, clientPos.z)), Color.WHITE, Color.WHITE.withAlpha(0));
+				visuals.addLine(new Line(clientPos, new Vec3(clientPos.x, clientPos.y + 0.5D, clientPos.z)), Color.WHITE, Color.WHITE.withAlpha(0));
+				visuals.addLine(new Line(clientPos, new Vec3(clientPos.x, clientPos.y, clientPos.z + 0.5D)), Color.WHITE, Color.WHITE.withAlpha(0));
+				visuals.add(new ColoredShape(SphereShape.UNIT, Color.CYAN, Color.TRANSPARENT).at(clientPos));
+				visuals.addOutline(new ColoredShape(SphereShape.UNIT, Color.WHITE, Color.TRANSPARENT).at(clientPos));
+			} else {
+				visuals.add(new ColoredShape(CubeShape.UNIT, Color.CYAN, Color.WHITE).at(clientPos));
+			}
+
 			return visuals;
 		}
 

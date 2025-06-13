@@ -20,11 +20,11 @@ import dev.latvian.mods.vidlib.feature.misc.CloseScreenPayload;
 import dev.latvian.mods.vidlib.feature.misc.MarkerData;
 import dev.latvian.mods.vidlib.feature.misc.MarkerPayload;
 import dev.latvian.mods.vidlib.feature.misc.SetPostEffectPayload;
-import dev.latvian.mods.vidlib.feature.particle.CubeParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.FireData;
 import dev.latvian.mods.vidlib.feature.particle.ItemParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.LineParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.RemoveAllParticlesPayload;
+import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.SpawnCubeParticlesPayload;
 import dev.latvian.mods.vidlib.feature.particle.SpawnFireParticlesPayload;
 import dev.latvian.mods.vidlib.feature.particle.SpawnItemParticlePayload;
@@ -241,7 +241,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 		physicsParticles(id, vl$level().vl$level().random.nextLong(), blocks);
 	}
 
-	default void cubeParticles(Map<CubeParticleOptions, List<BlockPos>> map) {
+	default void cubeParticles(Map<ShapeParticleOptions, List<BlockPos>> map) {
 		if (isClient()) {
 			getEnvironment().cubeParticles(map);
 		} else {
@@ -249,7 +249,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 		}
 	}
 
-	default void cubeParticles(CubeParticleOptions options, List<BlockPos> blocks) {
+	default void cubeParticles(ShapeParticleOptions options, List<BlockPos> blocks) {
 		cubeParticles(Map.of(options, blocks));
 	}
 

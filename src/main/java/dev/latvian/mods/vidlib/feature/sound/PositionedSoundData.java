@@ -1,9 +1,10 @@
 package dev.latvian.mods.vidlib.feature.sound;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.util.IntOrUUID;
 import dev.latvian.mods.vidlib.math.worldvector.EntityPositionType;
 import dev.latvian.mods.vidlib.math.worldvector.FollowingEntityWorldVector;
 import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
@@ -30,6 +31,8 @@ public record PositionedSoundData(SoundData data, Optional<WorldVector> position
 		PositionedSoundData::new
 	);
 
+	public static final DataType<PositionedSoundData> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, PositionedSoundData.class);
+
 	public PositionedSoundData(SoundData data) {
 		this(data, Optional.empty(), false, false);
 	}
@@ -39,6 +42,6 @@ public record PositionedSoundData(SoundData data, Optional<WorldVector> position
 	}
 
 	public PositionedSoundData(SoundData data, Entity entity, boolean looping, boolean stopImmediately) {
-		this(data, new FollowingEntityWorldVector(Either.left(entity.getId()), EntityPositionType.SOUND_SOURCE), looping, stopImmediately);
+		this(data, new FollowingEntityWorldVector(IntOrUUID.of(entity.getId()), EntityPositionType.SOUND_SOURCE), looping, stopImmediately);
 	}
 }

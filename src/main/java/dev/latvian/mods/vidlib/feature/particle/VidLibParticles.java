@@ -37,12 +37,12 @@ public interface VidLibParticles {
 		return REGISTRY.register(name, () -> new SimpleParticleType(true));
 	}
 
-	DeferredHolder<ParticleType<?>, ParticleType<CubeParticleOptions>> CUBE = register("cube", () -> CubeParticleOptions.CODEC, () -> CubeParticleOptions.STREAM_CODEC);
+	DeferredHolder<ParticleType<?>, ParticleType<ShapeParticleOptions>> SHAPE = register("shape", () -> ShapeParticleOptions.CODEC, () -> ShapeParticleOptions.STREAM_CODEC);
 	DeferredHolder<ParticleType<?>, ParticleType<LineParticleOptions>> LINE = register("line", () -> LineParticleOptions.CODEC, () -> LineParticleOptions.STREAM_CODEC);
 	DeferredHolder<ParticleType<?>, ParticleType<TextParticleOptions>> TEXT = register("text", () -> TextParticleOptions.CODEC, () -> TextParticleOptions.STREAM_CODEC);
 	DeferredHolder<ParticleType<?>, ParticleType<ItemParticleOptions>> ITEM = register("item", () -> ItemParticleOptions.CODEC, () -> ItemParticleOptions.STREAM_CODEC);
 	DeferredHolder<ParticleType<?>, ParticleType<NPCParticleOptions>> NPC = register("npc", () -> NPCParticleOptions.CODEC, () -> NPCParticleOptions.STREAM_CODEC);
-	DeferredHolder<ParticleType<?>, ParticleType<BrightCubeParticleOptions>> BRIGHT_CUBE = register("bright_cube", () -> BrightCubeParticleOptions.CODEC, () -> BrightCubeParticleOptions.STREAM_CODEC);
+	DeferredHolder<ParticleType<?>, ParticleType<LightningParticleOptions>> LIGHTNING = register("lightning", () -> LightningParticleOptions.CODEC, () -> LightningParticleOptions.STREAM_CODEC);
 	DeferredHolder<ParticleType<?>, SimpleParticleType> BURN_SMOKE = register("burn_smoke");
 	DeferredHolder<ParticleType<?>, SimpleParticleType> SPARK = register("spark");
 	DeferredHolder<ParticleType<?>, ParticleType<WindParticleOptions>> WIND = register("wind", () -> WindParticleOptions.CODEC, () -> WindParticleOptions.STREAM_CODEC);

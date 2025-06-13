@@ -20,7 +20,7 @@ public class LineParticle extends CustomParticle {
 		this.startColor = options.startColor().resolve();
 		this.endColor = options.endColor().resolve();
 		this.endOffset = options.endOffset();
-		setLifetime(options.ttl());
+		setLifetime(options.lifespan());
 		vector = Vec3f.of(vx, vy, vz);
 	}
 
@@ -29,9 +29,9 @@ public class LineParticle extends CustomParticle {
 		float time = KMath.lerp(delta, prevAge, age);
 
 		var cameraPos = camera.getPosition();
-		var rx = (float) (KMath.lerp(time, xo, x) - cameraPos.x);
-		var ry = (float) (KMath.lerp(time, yo, y) - cameraPos.y);
-		var rz = (float) (KMath.lerp(time, zo, z) - cameraPos.z);
+		var rx = (float) (KMath.lerp(delta, xo, x) - cameraPos.x);
+		var ry = (float) (KMath.lerp(delta, yo, y) - cameraPos.y);
+		var rz = (float) (KMath.lerp(delta, zo, z) - cameraPos.z);
 
 		var m = ms.last().pose();
 		var buffer = buffers.getBuffer(DebugRenderTypes.LINES);

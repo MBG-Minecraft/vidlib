@@ -19,7 +19,7 @@ public abstract class SimpleRegistryType<V> {
 	}
 
 	public static class Dynamic<V> extends SimpleRegistryType<V> {
-		private Dynamic(String id, MapCodec<? super V> codec, StreamCodec<? super RegistryFriendlyByteBuf, ? super V> streamCodec) {
+		private Dynamic(String id, MapCodec<V> codec, StreamCodec<? super RegistryFriendlyByteBuf, V> streamCodec) {
 			super(id, codec, streamCodec);
 		}
 	}
@@ -28,18 +28,26 @@ public abstract class SimpleRegistryType<V> {
 		return new Unit<>(id, instance);
 	}
 
-	public static <V> Dynamic<V> dynamic(String id, MapCodec<? super V> codec, StreamCodec<? super RegistryFriendlyByteBuf, ? super V> streamCodec) {
+	public static <V> Dynamic<V> dynamic(String id, MapCodec<V> codec, StreamCodec<? super RegistryFriendlyByteBuf, V> streamCodec) {
 		return new Dynamic<>(id, codec, streamCodec);
 	}
 
 	private final String id;
-	final MapCodec<? super V> codec;
-	final StreamCodec<? super RegistryFriendlyByteBuf, ? super V> streamCodec;
+	private final MapCodec<V> codec;
+	private final StreamCodec<? super RegistryFriendlyByteBuf, V> streamCodec;
 
-	private SimpleRegistryType(String id, MapCodec<? super V> codec, StreamCodec<? super RegistryFriendlyByteBuf, ? super V> streamCodec) {
+	private SimpleRegistryType(String id, MapCodec<V> codec, StreamCodec<? super RegistryFriendlyByteBuf, V> streamCodec) {
 		this.id = id;
 		this.codec = codec;
 		this.streamCodec = streamCodec;
+	}
+
+	public MapCodec<V> codec() {
+		return codec;
+	}
+
+	public StreamCodec<? super RegistryFriendlyByteBuf, V> streamCodec() {
+		return streamCodec;
 	}
 
 	public String id() {

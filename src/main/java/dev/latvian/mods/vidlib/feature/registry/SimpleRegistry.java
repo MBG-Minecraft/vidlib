@@ -42,10 +42,10 @@ public record SimpleRegistry<V>(
 			return unit != null ? DataResult.success(unit.id()) : DataResult.error(() -> "Key not found");
 		});
 
-		Codec<V> dispatchCodec = typeCodec.dispatch("type", Cast.to(typeGetter), t -> Cast.to(t.codec));
+		Codec<V> dispatchCodec = typeCodec.dispatch("type", Cast.to(typeGetter), SimpleRegistryType::codec);
 		Codec<V> valueCodec = com.mojang.serialization.Codec.either(unitCodec, dispatchCodec).xmap(either -> either.map(Function.identity(), Function.identity()), v -> unitTypeMap.containsKey(v) ? Either.left(v) : Either.right(v));
-		MapCodec<V> valueMapCodec = typeCodec.dispatchMap("type", Cast.to(typeGetter), t -> Cast.to(t.codec));
-		StreamCodec<RegistryFriendlyByteBuf, V> valueStreamCodec = typeStreamCodec.dispatch(Cast.to(typeGetter), t -> Cast.to(t.streamCodec));
+		MapCodec<V> valueMapCodec = typeCodec.dispatchMap("type", Cast.to(typeGetter), SimpleRegistryType::codec);
+		StreamCodec<RegistryFriendlyByteBuf, V> valueStreamCodec = typeStreamCodec.dispatch(Cast.to(typeGetter), SimpleRegistryType::streamCodec);
 
 		return new SimpleRegistry<>(
 			typeMap,

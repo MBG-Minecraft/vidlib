@@ -2,6 +2,8 @@ package dev.latvian.mods.vidlib.feature.entity.filter;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.vidlib.core.VLEntity;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
@@ -13,10 +15,9 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Projectile;
 
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -35,9 +36,9 @@ public interface EntityFilter extends Predicate<Entity> {
 	SimpleRegistryType.Unit<EntityFilter> SPECTATOR = SimpleRegistryType.unit("spectator", new BasicEntityFilter(Entity::isSpectator));
 	SimpleRegistryType.Unit<EntityFilter> CREATIVE = SimpleRegistryType.unit("creative", new BasicEntityFilter(entity -> entity instanceof Player player && player.isCreative()));
 	SimpleRegistryType.Unit<EntityFilter> SPECTATOR_OR_CREATIVE = SimpleRegistryType.unit("spectator_or_creative", new BasicEntityFilter(VLEntity::isSpectatorOrCreative));
-	SimpleRegistryType.Unit<EntityFilter> ITEM = SimpleRegistryType.unit("item", new BasicEntityFilter(entity -> entity instanceof ItemEntity));
-	SimpleRegistryType.Unit<EntityFilter> PROJECTILE = SimpleRegistryType.unit("projectile", new BasicEntityFilter(entity -> entity instanceof Projectile));
-	SimpleRegistryType.Unit<EntityFilter> VISIBLE = SimpleRegistryType.unit("visible", new BasicEntityFilter(entity -> !entity.isInvisible()));
+	SimpleRegistryType.Unit<EntityFilter> ITEM = SimpleRegistryType.unit("item", new BasicEntityFilter(VLEntity::isItemEntity));
+	SimpleRegistryType.Unit<EntityFilter> PROJECTILE = SimpleRegistryType.unit("projectile", new BasicEntityFilter(VLEntity::isProjectile));
+	SimpleRegistryType.Unit<EntityFilter> VISIBLE = SimpleRegistryType.unit("visible", new BasicEntityFilter(VLEntity::isVisible));
 	SimpleRegistryType.Unit<EntityFilter> INVISIBLE = SimpleRegistryType.unit("invisible", new BasicEntityFilter(Entity::isInvisible));
 	SimpleRegistryType.Unit<EntityFilter> SUSPENDED = SimpleRegistryType.unit("suspended", new BasicEntityFilter(VLEntity::isSuspended));
 	SimpleRegistryType.Unit<EntityFilter> GLOWING = SimpleRegistryType.unit("glowing", new BasicEntityFilter(Entity::isCurrentlyGlowing));
@@ -46,7 +47,17 @@ public interface EntityFilter extends Predicate<Entity> {
 		return value ? ANY.instance() : NONE.instance();
 	}
 
-	Codec<EntityFilter> CODEC = Codec.either(Codec.BOOL, REGISTRY.valueCodec()).xmap(either -> either.map(EntityFilter::of, Function.identity()), filter -> filter == ANY.instance() ? Either.left(true) : filter == NONE.instance() ? Either.left(false) : Either.right(filter));
+	Codec<EntityFilter> NONE_OR_ANY_CODEC = Codec.BOOL.flatXmap(b -> DataResult.success(of(b)), filter -> {
+		if (filter == ANY.instance()) {
+			return DataResult.success(true);
+		} else if (filter == NONE.instance()) {
+			return DataResult.success(false);
+		} else {
+			return DataResult.error(() -> "Expected either 'any' or 'none'");
+		}
+	});
+
+	Codec<EntityFilter> CODEC = KLibCodecs.or(List.of(NONE_OR_ANY_CODEC, ExactEntityFilter.TYPE.codec().codec(), MatchEntityFilter.OPTIONAL_MATCH_CODEC, REGISTRY.valueCodec()));
 	StreamCodec<RegistryFriendlyByteBuf, EntityFilter> STREAM_CODEC = ByteBufCodecs.either(ByteBufCodecs.BOOL, REGISTRY.valueStreamCodec()).map(either -> either.map(EntityFilter::of, Function.identity()), filter -> filter == ANY.instance() ? Either.left(true) : filter == NONE.instance() ? Either.left(false) : Either.right(filter));
 	DataType<EntityFilter> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, EntityFilter.class);
 
@@ -76,9 +87,11 @@ public interface EntityFilter extends Predicate<Entity> {
 		REGISTRY.register(SUSPENDED);
 		REGISTRY.register(GLOWING);
 
+		REGISTRY.register(ExactEntityFilter.TYPE);
 		REGISTRY.register(EntityTagFilter.TYPE);
 		REGISTRY.register(EntityTypeFilter.TYPE);
 		REGISTRY.register(EntityTypeTagFilter.TYPE);
+		REGISTRY.register(MatchEntityFilter.TYPE);
 	}
 
 	default SimpleRegistryType<?> type() {

@@ -2,8 +2,8 @@ package dev.latvian.mods.vidlib.core;
 
 import com.google.gson.JsonElement;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.JsonOps;
+import dev.latvian.mods.klib.util.IntOrUUID;
 import dev.latvian.mods.vidlib.feature.block.ConnectedBlock;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.bulk.BlockModificationConsumer;
@@ -52,6 +52,10 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 	@Override
 	default Level vl$level() {
 		return (Level) this;
+	}
+
+	default boolean isServerSide() {
+		return !getEnvironment().isClient();
 	}
 
 	@ApiStatus.Internal
@@ -140,8 +144,8 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 	}
 
 	@Nullable
-	default Entity getEntityByEither(Either<Integer, UUID> id) {
-		return id.map(((Level) this)::getEntity, this::getEntityByUUID);
+	default Entity getEntity(IntOrUUID id) {
+		return id.getEntity(vl$level());
 	}
 
 	default int bulkModify(boolean undoable, BulkLevelModification modification) {

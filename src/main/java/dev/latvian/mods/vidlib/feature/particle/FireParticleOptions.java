@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.color.Gradient;
 import dev.latvian.mods.klib.easing.Easing;
 import net.minecraft.core.particles.ParticleOptions;
@@ -12,26 +13,26 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
-public record FireParticleOptions(Gradient color, int lifespan, float scale, Easing easing, float brightness) implements ParticleOptions {
+public record FireParticleOptions(int lifespan, Gradient color, float scale, Easing easing, float brightness) implements ParticleOptions {
 	public static final MapCodec<FireParticleOptions> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+		KLibCodecs.TICKS.optionalFieldOf("lifespan", 60).forGetter(FireParticleOptions::lifespan),
 		Gradient.CODEC.fieldOf("color").forGetter(FireParticleOptions::color),
-		Codec.INT.optionalFieldOf("lifespan", 60).forGetter(FireParticleOptions::lifespan),
 		Codec.FLOAT.optionalFieldOf("scale", 1F).forGetter(FireParticleOptions::scale),
 		Easing.CODEC.optionalFieldOf("easing", Easing.SINE_OUT).forGetter(FireParticleOptions::easing),
 		Codec.FLOAT.optionalFieldOf("brightness", 0.4F).forGetter(FireParticleOptions::brightness)
 	).apply(instance, FireParticleOptions::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, FireParticleOptions> STREAM_CODEC = CompositeStreamCodec.of(
-		Gradient.STREAM_CODEC, FireParticleOptions::color,
 		ByteBufCodecs.VAR_INT, FireParticleOptions::lifespan,
+		Gradient.STREAM_CODEC, FireParticleOptions::color,
 		ByteBufCodecs.FLOAT, FireParticleOptions::scale,
 		Easing.STREAM_CODEC.optional(Easing.SINE_OUT), FireParticleOptions::easing,
 		ByteBufCodecs.FLOAT.optional(0.4F), FireParticleOptions::brightness,
 		FireParticleOptions::new
 	);
 
-	public FireParticleOptions(Gradient gradient, int lifespan, float scale) {
-		this(gradient, lifespan, scale, Easing.SINE_OUT, 0.4F);
+	public FireParticleOptions(int lifespan, Gradient gradient, float scale) {
+		this(lifespan, gradient, scale, Easing.SINE_OUT, 0.4F);
 	}
 
 	@Override
@@ -40,6 +41,6 @@ public record FireParticleOptions(Gradient color, int lifespan, float scale, Eas
 	}
 
 	public FireParticleOptions withResolvedGradient() {
-		return new FireParticleOptions(color.resolve(), lifespan, scale, easing, brightness);
+		return new FireParticleOptions(lifespan, color.resolve(), scale, easing, brightness);
 	}
 }

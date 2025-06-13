@@ -49,7 +49,7 @@ public interface FireCommand {
 	);
 
 	static int spawn(CommandSourceStack source, MovementType type, BlockPos position, int count, float radius, float yaw, float pitch, ResourceLocation gradient) {
-		source.getLevel().fireParticles(source.getLevel().random, new FireData(new FireParticleOptions(new GradientReference(gradient), 60, 1F), new ParticleMovementData(type, Vec3.atCenterOf(position), count, radius, 0F, Rotation.deg(yaw, pitch))));
+		source.getLevel().fireParticles(source.getLevel().random, new FireData(new FireParticleOptions(60, new GradientReference(gradient), 1F), new ParticleMovementData(type, Vec3.atCenterOf(position), count, radius, 0F, Rotation.deg(yaw, pitch))));
 		return 1;
 	}
 }

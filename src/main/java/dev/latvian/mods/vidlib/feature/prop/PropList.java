@@ -10,8 +10,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 public class PropList implements Iterable<Prop> {
@@ -19,21 +21,25 @@ public class PropList implements Iterable<Prop> {
 	public final PropListType type;
 	private final Int2ObjectMap<Prop> map;
 	public final List<Prop> pending;
-	public final IntList removed;
+	public final Map<PropRemoveType, IntList> removed;
 
 	public PropList(Props<?> props, PropListType type) {
 		this.props = props;
 		this.type = type;
 		this.map = new Int2ObjectOpenHashMap<>();
 		this.pending = new ArrayList<>();
-		this.removed = new IntArrayList();
+		this.removed = new EnumMap<>(PropRemoveType.class);
+
+		for (var removeType : PropRemoveType.values()) {
+			removed.put(removeType, new IntArrayList());
+		}
 	}
 
 	private boolean fullTick(Prop prop) {
 		if (prop.fullTick(props.level.getGameTime())) {
 			prop.onRemoved();
 			props.onRemoved(prop);
-			removed.add(prop.id);
+			removed.get(prop.removed).add(prop.id);
 			return true;
 		}
 
@@ -55,12 +61,16 @@ public class PropList implements Iterable<Prop> {
 			}
 		}
 
-		if (!removed.isEmpty()) {
-			if (updates != null) {
-				updates.s2c(new RemovePropsPayload(type, new IntArrayList(removed)));
-			}
+		for (var entry : removed.entrySet()) {
+			var list = entry.getValue();
 
-			removed.clear();
+			if (!list.isEmpty()) {
+				if (updates != null) {
+					updates.s2c(new RemovePropsPayload(type, new IntArrayList(list), entry.getKey()));
+				}
+
+				list.clear();
+			}
 		}
 
 		if (!pending.isEmpty()) {

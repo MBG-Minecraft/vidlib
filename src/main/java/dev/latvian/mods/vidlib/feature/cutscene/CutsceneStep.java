@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.cutscene;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
@@ -10,244 +9,57 @@ import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.math.worldnumber.FixedWorldNumber;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumber;
 import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
-public class CutsceneStep {
-	public record Snap(boolean origin, boolean target, boolean zoom) {
-		public static final Snap NONE = new Snap(false);
-		public static final Snap ALL = new Snap(true);
-
-		public static final Codec<Snap> OBJECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			Codec.BOOL.optionalFieldOf("origin", false).forGetter(Snap::origin),
-			Codec.BOOL.optionalFieldOf("target", false).forGetter(Snap::target),
-			Codec.BOOL.optionalFieldOf("zoom", false).forGetter(Snap::zoom)
-		).apply(instance, Snap::new));
-
-		public static final StreamCodec<ByteBuf, Snap> STREAM_CODEC = new StreamCodec<>() {
-			@Override
-			public Snap decode(ByteBuf buf) {
-				int flags = buf.readByte() & 0xFF;
-				return flags == 0 ? NONE : new Snap(
-					(flags & 1) != 0,
-					(flags & 2) != 0,
-					(flags & 4) != 0
-				);
-			}
-
-			@Override
-			public void encode(ByteBuf buf, Snap value) {
-				buf.writeByte((value.origin() ? 1 : 0) | (value.target() ? 2 : 0) | (value.zoom() ? 4 : 0));
-			}
-		};
-
-		public static final Codec<Snap> CODEC = Codec.either(Codec.BOOL, OBJECT_CODEC).xmap(either -> either.map(v -> v ? ALL : NONE, Function.identity()), Either::right);
-
-		private Snap(boolean value) {
-			this(value, value, value);
-		}
-	}
-
+public record CutsceneStep(
+	WorldNumber start,
+	WorldNumber length,
+	Optional<WorldVector> origin,
+	Optional<WorldVector> target,
+	Optional<WorldNumber> fovModifier,
+	Optional<Component> status,
+	Optional<CutsceneStepBars> bars,
+	Optional<ResourceLocation> shader,
+	Optional<Fade> fade,
+	List<PositionedSoundData> sounds,
+	CutsceneStepSnap snap,
+	List<CutsceneEvent> events
+) {
 	public static final Codec<CutsceneStep> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		WorldNumber.CODEC.optionalFieldOf("start", FixedWorldNumber.ZERO.instance()).forGetter(s -> s.start),
-		WorldNumber.CODEC.fieldOf("length").forGetter(s -> s.length),
-		WorldVector.CODEC.optionalFieldOf("origin").forGetter(s -> s.origin),
-		WorldVector.CODEC.optionalFieldOf("target").forGetter(s -> s.target),
-		WorldNumber.CODEC.optionalFieldOf("fov_modifier").forGetter(s -> s.fovModifier),
-		ComponentSerialization.CODEC.optionalFieldOf("status").forGetter(s -> s.status),
-		ComponentSerialization.CODEC.optionalFieldOf("top_bar").forGetter(s -> s.topBar),
-		ComponentSerialization.CODEC.optionalFieldOf("bottom_bar").forGetter(s -> s.bottomBar),
-		ResourceLocation.CODEC.optionalFieldOf("shader").forGetter(s -> s.shader),
-		Fade.CODEC.optionalFieldOf("fade").forGetter(s -> s.fade),
-		PositionedSoundData.CODEC.listOf().optionalFieldOf("sounds", List.of()).forGetter(s -> s.sounds),
-		Snap.CODEC.optionalFieldOf("snap", Snap.NONE).forGetter(s -> s.snap),
-		CutsceneEvent.CODEC.listOf().optionalFieldOf("events", List.of()).forGetter(s -> s.events)
+		WorldNumber.CODEC.optionalFieldOf("start", FixedWorldNumber.ZERO.instance()).forGetter(CutsceneStep::start),
+		WorldNumber.CODEC.fieldOf("length").forGetter(CutsceneStep::length),
+		WorldVector.CODEC.optionalFieldOf("origin").forGetter(CutsceneStep::origin),
+		WorldVector.CODEC.optionalFieldOf("target").forGetter(CutsceneStep::target),
+		WorldNumber.CODEC.optionalFieldOf("fov_modifier").forGetter(CutsceneStep::fovModifier),
+		ComponentSerialization.CODEC.optionalFieldOf("status").forGetter(CutsceneStep::status),
+		CutsceneStepBars.CODEC.optionalFieldOf("bars").forGetter(CutsceneStep::bars),
+		ResourceLocation.CODEC.optionalFieldOf("shader").forGetter(CutsceneStep::shader),
+		Fade.CODEC.optionalFieldOf("fade").forGetter(CutsceneStep::fade),
+		PositionedSoundData.CODEC.listOf().optionalFieldOf("sounds", List.of()).forGetter(CutsceneStep::sounds),
+		CutsceneStepSnap.CODEC.optionalFieldOf("snap", CutsceneStepSnap.NONE).forGetter(CutsceneStep::snap),
+		CutsceneEvent.CODEC.listOf().optionalFieldOf("events", List.of()).forGetter(CutsceneStep::events)
 	).apply(instance, CutsceneStep::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, CutsceneStep> STREAM_CODEC = CompositeStreamCodec.of(
-		WorldNumber.STREAM_CODEC, s -> s.start,
-		WorldNumber.STREAM_CODEC, s -> s.length,
-		WorldVector.STREAM_CODEC.optional(), s -> s.origin,
-		WorldVector.STREAM_CODEC.optional(), s -> s.target,
-		WorldNumber.STREAM_CODEC.optional(), s -> s.fovModifier,
-		ComponentSerialization.STREAM_CODEC.optional(), s -> s.status,
-		ComponentSerialization.STREAM_CODEC.optional(), s -> s.topBar,
-		ComponentSerialization.STREAM_CODEC.optional(), s -> s.bottomBar,
-		ResourceLocation.STREAM_CODEC.optional(), s -> s.shader,
-		Fade.STREAM_CODEC.optional(), s -> s.fade,
-		PositionedSoundData.STREAM_CODEC.listOf(), s -> s.sounds,
-		Snap.STREAM_CODEC, s -> s.snap,
-		CutsceneEvent.REGISTRY.valueStreamCodec().listOf(), s -> s.events,
+		WorldNumber.STREAM_CODEC, CutsceneStep::start,
+		WorldNumber.STREAM_CODEC, CutsceneStep::length,
+		WorldVector.STREAM_CODEC.optional(), CutsceneStep::origin,
+		WorldVector.STREAM_CODEC.optional(), CutsceneStep::target,
+		WorldNumber.STREAM_CODEC.optional(), CutsceneStep::fovModifier,
+		ComponentSerialization.STREAM_CODEC.optional(), CutsceneStep::status,
+		CutsceneStepBars.STREAM_CODEC.optional(), CutsceneStep::bars,
+		ResourceLocation.STREAM_CODEC.optional(), CutsceneStep::shader,
+		Fade.STREAM_CODEC.optional(), CutsceneStep::fade,
+		PositionedSoundData.STREAM_CODEC.listOf(), CutsceneStep::sounds,
+		CutsceneStepSnap.STREAM_CODEC, CutsceneStep::snap,
+		CutsceneEvent.REGISTRY.valueStreamCodec().listOf(), CutsceneStep::events,
 		CutsceneStep::new
 	);
-
-	public static CutsceneStep create(WorldNumber start, WorldNumber length) {
-		return new CutsceneStep(start, length);
-	}
-
-	public static CutsceneStep create(int start, int length) {
-		return create(WorldNumber.fixed(start), WorldNumber.fixed(length));
-	}
-
-	public static CutsceneStep first(int length) {
-		return create(0, length);
-	}
-
-	public static CutsceneStep at(int start) {
-		return create(start, 1);
-	}
-
-	public final WorldNumber start;
-	public final WorldNumber length;
-	public int resolvedStart;
-	public int resolvedLength;
-	public Optional<WorldVector> origin = Optional.empty();
-	public Optional<WorldVector> target = Optional.empty();
-	public Optional<WorldNumber> fovModifier = Optional.empty();
-	public Optional<Component> status = Optional.empty();
-	public Optional<Component> topBar = Optional.empty();
-	public Optional<Component> bottomBar = Optional.empty();
-	public Optional<ResourceLocation> shader = Optional.empty();
-	public Optional<Fade> fade = Optional.empty();
-	public List<PositionedSoundData> sounds = List.of();
-	public Snap snap = Snap.NONE;
-	public List<CutsceneEvent> events = List.of();
-
-	private CutsceneStep(
-		WorldNumber start,
-		WorldNumber length,
-		Optional<WorldVector> origin,
-		Optional<WorldVector> target,
-		Optional<WorldNumber> fovModifier,
-		Optional<Component> status,
-		Optional<Component> topBar,
-		Optional<Component> bottomBar,
-		Optional<ResourceLocation> shader,
-		Optional<Fade> fade,
-		List<PositionedSoundData> sounds,
-		Snap snap,
-		List<CutsceneEvent> events
-	) {
-		this.start = start;
-		this.length = length;
-		this.origin = origin;
-		this.target = target;
-		this.fovModifier = fovModifier;
-		this.status = status;
-		this.topBar = topBar;
-		this.bottomBar = bottomBar;
-		this.shader = shader;
-		this.fade = fade;
-		this.sounds = sounds;
-		this.snap = snap;
-	}
-
-	public Vec3 prevRenderTarget, renderTarget;
-
-	@OnlyIn(Dist.CLIENT)
-	public List<CutsceneRender> render;
-
-	private CutsceneStep(WorldNumber start, WorldNumber length) {
-		this.start = start;
-		this.length = length;
-	}
-
-	public CutsceneStep origin(WorldVector origin) {
-		this.origin = Optional.of(origin);
-		return this;
-	}
-
-	public CutsceneStep target(WorldVector target) {
-		this.target = Optional.of(target);
-		return this;
-	}
-
-	public CutsceneStep rotated(WorldVector origin, double yaw, double pitch) {
-		return origin(origin).target(origin.offset(WorldVector.ofRotation(yaw, pitch)));
-	}
-
-	public CutsceneStep fovModifier(WorldNumber fovModifier) {
-		this.fovModifier = Optional.of(fovModifier);
-		return this;
-	}
-
-	public CutsceneStep snapOrigin() {
-		this.snap = new Snap(true, snap.target, snap.zoom);
-		return this;
-	}
-
-	public CutsceneStep snapTarget() {
-		this.snap = new Snap(snap.origin, true, snap.zoom);
-		return this;
-	}
-
-	public CutsceneStep snapZoom() {
-		this.snap = new Snap(snap.origin, snap.target, true);
-		return this;
-	}
-
-	public CutsceneStep snap() {
-		this.snap = Snap.ALL;
-		return this;
-	}
-
-	public CutsceneStep status(Component status) {
-		this.status = Optional.of(status);
-		return this;
-	}
-
-	public CutsceneStep shader(ResourceLocation shader) {
-		this.shader = Optional.of(shader);
-		return this;
-	}
-
-	public CutsceneStep shader(String name) {
-		return shader(ResourceLocation.withDefaultNamespace("shaders/post/" + name + ".json"));
-	}
-
-	public CutsceneStep fade(Fade fade) {
-		this.fade = Optional.of(fade);
-		return this;
-	}
-
-	public CutsceneStep sound(PositionedSoundData sound) {
-		if (this.sounds == null) {
-			this.sounds = new ArrayList<>(1);
-		}
-
-		this.sounds.add(sound);
-		return this;
-	}
-
-	public CutsceneStep topBar(Component topBar) {
-		this.topBar = Optional.of(topBar);
-		return this;
-	}
-
-	public CutsceneStep bottomBar(Component bottomBar) {
-		this.bottomBar = Optional.of(bottomBar);
-		return this;
-	}
-
-	@OnlyIn(Dist.CLIENT)
-	public CutsceneStep render(CutsceneRender render) {
-		if (this.render == null) {
-			this.render = new ArrayList<>(1);
-		}
-
-		this.render.add(render);
-		return this;
-	}
 }

@@ -6,7 +6,7 @@ import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.util.MessageConsumer;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
-import dev.latvian.mods.vidlib.feature.particle.CubeParticleOptions;
+import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
 import dev.latvian.mods.vidlib.util.JsonUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -25,7 +25,7 @@ public interface GhostStructureCapture {
 
 	MutableObject<CurrentGhostStructureCapture> CURRENT = new MutableObject<>(new CurrentGhostStructureCapture());
 	MutableObject<BlockFilter> FILTER = new MutableObject<>(BlockFilter.ANY.instance());
-	CubeParticleOptions PARTICLE = new CubeParticleOptions(Color.CYAN, Color.TRANSPARENT, 20);
+	ShapeParticleOptions PARTICLE = new ShapeParticleOptions(20, Color.CYAN, Color.TRANSPARENT);
 
 	static int capture(MessageConsumer source, String name) {
 		var startTime = System.currentTimeMillis();

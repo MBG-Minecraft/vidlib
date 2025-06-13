@@ -1,7 +1,9 @@
 package dev.latvian.mods.vidlib.core;
 
+import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.session.LocalClientSessionData;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import org.lwjgl.glfw.GLFW;
@@ -47,5 +49,10 @@ public interface VLLocalPlayer extends VLClientPlayer {
 			// Mouse
 			mouseLeft, mouseRight, mouseMiddle, mouseBack, mouseNext
 		);
+	}
+
+	@Override
+	default Line ray(double distance, float delta) {
+		return Minecraft.getInstance().gameRenderer.getMainCamera().ray(distance);
 	}
 }

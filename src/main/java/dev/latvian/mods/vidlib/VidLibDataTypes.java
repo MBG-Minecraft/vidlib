@@ -19,6 +19,7 @@ import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.skybox.FogOverride;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
+import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
@@ -51,6 +52,7 @@ public class VidLibDataTypes {
 		DataType.register(VidLib.id("clock_font_ref"), ClockFont.REF_DATA_TYPE);
 		DataType.register(VidLib.id("zone_container"), ZoneContainer.DATA_TYPE, ZoneContainer.REGISTRY, null);
 		DataType.register(VidLib.id("location"), Location.DATA_TYPE, Location.REGISTRY, null);
+		DataType.register(VidLib.id("positioned_sound_data"), PositionedSoundData.DATA_TYPE);
 
 		// RegisteredDataType<ZoneContainer> REGISTERED_DATA_TYPE = RegisteredDataType.of(REGISTRY, ZoneContainer.class);
 	}

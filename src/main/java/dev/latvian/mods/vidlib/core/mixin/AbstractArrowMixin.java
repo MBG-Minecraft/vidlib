@@ -47,7 +47,7 @@ public abstract class AbstractArrowMixin {
 				var delta = vl$prevTrailPos.subtract(pos);
 
 				if (delta.lengthSqr() > 0.0001D) {
-					arrow.level().addParticle(new LineParticleOptions(ClientGradients.TRAIL, ClientGradients.TRAIL, 20, 1), true, true, pos.x, pos.y, pos.z, delta.x, delta.y, delta.z);
+					arrow.level().addParticle(new LineParticleOptions(20, ClientGradients.TRAIL, ClientGradients.TRAIL, 1), true, true, pos.x, pos.y, pos.z, delta.x, delta.y, delta.z);
 				}
 
 				vl$prevTrailPos = pos;

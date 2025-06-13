@@ -9,9 +9,9 @@ import net.minecraft.core.BlockPos;
 import java.util.List;
 import java.util.Map;
 
-public record SpawnCubeParticlesPayload(Map<CubeParticleOptions, List<BlockPos>> map) implements SimplePacketPayload {
+public record SpawnCubeParticlesPayload(Map<ShapeParticleOptions, List<BlockPos>> map) implements SimplePacketPayload {
 	@AutoPacket
-	public static final VidLibPacketType<SpawnCubeParticlesPayload> TYPE = VidLibPacketType.internal("spawn_cube_particles", CubeParticleOptions.STREAM_CODEC.unboundedMap(BlockPos.STREAM_CODEC.listOf()).map(SpawnCubeParticlesPayload::new, SpawnCubeParticlesPayload::map));
+	public static final VidLibPacketType<SpawnCubeParticlesPayload> TYPE = VidLibPacketType.internal("spawn_cube_particles", ShapeParticleOptions.STREAM_CODEC.unboundedMap(BlockPos.STREAM_CODEC.listOf()).map(SpawnCubeParticlesPayload::new, SpawnCubeParticlesPayload::map));
 
 	@Override
 	public VidLibPacketType<?> getType() {

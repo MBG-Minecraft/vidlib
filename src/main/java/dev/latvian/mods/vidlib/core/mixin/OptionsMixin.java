@@ -49,6 +49,7 @@ public abstract class OptionsMixin {
 
 	@Inject(method = "save", at = @At("HEAD"))
 	private void vl$save(CallbackInfo ci) {
+		GlobalKeybinds.saveKeybinds((Options) (Object) this);
 		AutoInit.Type.CLIENT_OPTIONS_SAVED.invoke(this);
 	}
 
@@ -56,11 +57,4 @@ public abstract class OptionsMixin {
 	private <T> T vl$getEffectiveRenderDistance(T original) {
 		return VidLibConfig.robert ? Cast.to(VidLibConfig.clientRenderDistance) : original;
 	}
-
-	/*
-	@ModifyConstant(method = "<init>", constant = @Constant(intValue = 32))
-	private int vl$init(int original) {
-		return VidLibConfig.maxChunkDistance;
-	}
-	 */
 }

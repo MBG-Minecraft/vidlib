@@ -269,4 +269,21 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 
 		return 0F;
 	}
+
+	@Nullable
+	public ZoneClipResult clipLevel(Line ray) {
+		ZoneClipResult result = null;
+
+		for (var z : getFluidZones()) {
+			var clip = z.instance().zone.shape().clip(z.instance(), ray);
+
+			if (clip != null) {
+				if (result == null || clip.distanceSq() < result.distanceSq()) {
+					result = clip;
+				}
+			}
+		}
+
+		return result;
+	}
 }

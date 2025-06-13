@@ -4,7 +4,7 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
-import dev.latvian.mods.vidlib.feature.particle.CubeParticleOptions;
+import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -41,7 +41,7 @@ public class ScreenShakeTool implements VidLibTool {
 		if (hit != null && !player.level().isClientSide) {
 			var maxDistance = player.get(InternalPlayerData.TEST_SCREEN_SHAKE);
 			var pos = hit.getBlockPos().relative(hit.getDirection());
-			player.level().cubeParticles(new CubeParticleOptions(Color.CYAN, Color.WHITE, ScreenShake.DEFAULT.duration()), List.of(pos));
+			player.level().cubeParticles(new ShapeParticleOptions(ScreenShake.DEFAULT.duration(), Color.CYAN, Color.WHITE), List.of(pos));
 			player.level().screenShake(ScreenShake.DEFAULT, Vec3.atCenterOf(pos), maxDistance);
 		}
 

@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.MCCodecs;
+import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.data.DataTypes;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -33,6 +34,8 @@ public record SoundData(
 		ByteBufCodecs.FLOAT, SoundData::pitch,
 		SoundData::new
 	);
+
+	public static final DataType<SoundData> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, SoundData.class);
 
 	public SoundData(Holder<SoundEvent> sound, float volume, float pitch) {
 		this(sound, SoundSource.PLAYERS, volume, pitch);

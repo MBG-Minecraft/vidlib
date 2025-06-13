@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.misc;
 
 import com.google.gson.JsonObject;
-import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.util.JsonUtils;
 import net.minecraft.client.Options;
 import net.neoforged.neoforge.client.settings.KeyModifier;
@@ -46,7 +45,6 @@ public class GlobalKeybinds {
 		return json.has(key) ? json.get(key).getAsString() : null;
 	}
 
-	@AutoInit(AutoInit.Type.CLIENT_OPTIONS_SAVED)
 	public static void saveKeybinds(Options options) {
 		var json = getJson();
 

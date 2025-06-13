@@ -8,11 +8,12 @@ import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 import it.unimi.dsi.fastutil.ints.IntList;
 
-public record RemovePropsPayload(PropListType type, IntList ids) implements SimplePacketPayload {
+public record RemovePropsPayload(PropListType type, IntList ids, PropRemoveType removeType) implements SimplePacketPayload {
 	@AutoPacket
 	public static final VidLibPacketType<RemovePropsPayload> TYPE = VidLibPacketType.internal("remove_props", CompositeStreamCodec.of(
 		PropListType.STREAM_CODEC, RemovePropsPayload::type,
 		CollectionStreamCodecs.VAR_INT_LIST, RemovePropsPayload::ids,
+		PropRemoveType.STREAM_CODEC, RemovePropsPayload::removeType,
 		RemovePropsPayload::new
 	));
 
@@ -29,7 +30,7 @@ public record RemovePropsPayload(PropListType type, IntList ids) implements Simp
 			var prop = props.get(id);
 
 			if (prop != null) {
-				prop.remove();
+				prop.removed = removeType;
 			}
 		}
 	}

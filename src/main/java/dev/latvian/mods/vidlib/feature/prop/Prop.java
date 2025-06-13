@@ -96,7 +96,7 @@ public class Prop {
 	}
 
 	public final boolean isTimeTraveling(long time) {
-		return createdTime > time || (lifespan > 0 && time > createdTime + lifespan);
+		return createdTime > time || (lifespan > 0 && time > createdTime + lifespan + 20L);
 	}
 
 	public final boolean fullTick(long time) {

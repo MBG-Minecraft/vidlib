@@ -98,6 +98,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	public Map<ZoneShape, VoxelShapeBox> cachedZoneShapes;
 	public List<PlayerInfo> originalListedPlayers;
 	public CameraOverride cameraOverride;
+	public ClientCutscene currentCutscene;
 	public ScreenFadeInstance screenFade;
 	public WorldMouse worldMouse;
 	public DataRecorder dataRecorder;
@@ -235,7 +236,7 @@ public class LocalClientSessionData extends ClientSessionData {
 			scheduledTaskHandler.tick();
 		}
 
-		if (cameraOverride instanceof ClientCutscene cutscene && cutscene.tick()) {
+		if (currentCutscene != null && currentCutscene.tick()) {
 			mc.stopCutscene();
 		}
 

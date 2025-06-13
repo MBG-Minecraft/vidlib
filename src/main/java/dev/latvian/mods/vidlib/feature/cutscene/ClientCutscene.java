@@ -18,7 +18,7 @@ public class ClientCutscene implements CameraOverride {
 	public final boolean overrideCamera;
 	public final Cutscene cutscene;
 	public final WorldNumberVariables variables;
-	public final CutsceneStep[] steps;
+	public final ClientCutsceneStep[] steps;
 	public final Supplier<Vec3> sourcePos;
 	public final Vec3 originPos;
 	public int prevTotalTick;
@@ -35,7 +35,7 @@ public class ClientCutscene implements CameraOverride {
 		this.overrideCamera = overrideCamera;
 		this.cutscene = cutscene;
 		this.variables = variables;
-		this.steps = cutscene.steps.toArray(new CutsceneStep[0]);
+		this.steps = new ClientCutsceneStep[cutscene.steps.size()];
 		this.sourcePos = sourcePos;
 		this.originPos = sourcePos.get();
 
@@ -49,12 +49,16 @@ public class ClientCutscene implements CameraOverride {
 		ctx.originPos = originPos;
 		ctx.sourcePos = originPos;
 
-		for (var step : steps) {
-			this.totalLength = Math.max(totalLength, step.resolvedStart + step.resolvedLength);
+		for (int i = 0; i < cutscene.steps.size(); i++) {
+			steps[i] = new ClientCutsceneStep(cutscene.steps.get(i), ctx);
+		}
 
-			if (step.resolvedStart == 0) {
-				if (step.target.isPresent()) {
-					var t = step.target.get().get(ctx);
+		for (var step : steps) {
+			this.totalLength = Math.max(totalLength, step.start + step.length);
+
+			if (step.start == 0) {
+				if (step.target != null) {
+					var t = step.target.get(ctx);
 
 					if (target == null) {
 						target = t;
@@ -64,12 +68,12 @@ public class ClientCutscene implements CameraOverride {
 
 				ctx.targetPos = target;
 
-				if (origin == null && step.origin.isPresent()) {
-					origin = step.origin.get().get(ctx);
+				if (origin == null && step.origin != null) {
+					origin = step.origin.get(ctx);
 				}
 
-				if (step.fovModifier.isPresent()) {
-					fovMod = step.fovModifier.get().getOr(ctx, 1D);
+				if (step.fovModifier != null) {
+					fovMod = step.fovModifier.getOr(ctx, 1D);
 				}
 			}
 		}
@@ -94,27 +98,33 @@ public class ClientCutscene implements CameraOverride {
 		prevFovMod = fovMod;
 
 		for (var step : steps) {
-			if (step.resolvedStart == totalTick) {
-				if (step.status.isPresent()) {
-					mc.gui.setOverlayMessage(step.status.get(), false);
+			if (step.start == totalTick) {
+				if (step.status != null) {
+					mc.gui.setOverlayMessage(step.status, false);
 				}
 
 				if (mc.screen != null) {
-					if (step.topBar.isPresent()) {
-						topBar = mc.font.split(step.topBar.get(), mc.screen.width - 60);
-					}
+					if (step.bars != null) {
+						if (step.bars.top().isPresent()) {
+							topBar = List.copyOf(mc.font.split(step.bars.top().get(), mc.screen.width - 60));
+						} else {
+							topBar = List.of();
+						}
 
-					if (step.bottomBar.isPresent()) {
-						bottomBar = mc.font.split(step.bottomBar.get(), mc.screen.width - 60);
+						if (step.bars.bottom().isPresent()) {
+							bottomBar = List.copyOf(mc.font.split(step.bars.bottom().get(), mc.screen.width - 60));
+						} else {
+							bottomBar = List.of();
+						}
 					}
 				}
 
-				if (step.shader.isPresent()) {
-					mc.setPostEffect(step.shader.get());
+				if (step.shader != null) {
+					mc.setPostEffect(step.shader);
 				}
 
-				if (step.fade.isPresent()) {
-					mc.setScreenFade(step.fade.get());
+				if (step.fade != null) {
+					mc.setScreenFade(step.fade);
 				}
 
 				if (!step.sounds.isEmpty()) {
@@ -126,8 +136,8 @@ public class ClientCutscene implements CameraOverride {
 				}
 			}
 
-			if (totalTick >= step.resolvedStart && totalTick < step.resolvedStart + step.resolvedLength) {
-				float progress = (totalTick - step.resolvedStart) / (float) step.resolvedLength;
+			if (totalTick >= step.start && totalTick < step.start + step.length) {
+				float progress = (totalTick - step.start) / (float) step.length;
 				var ctx = mc.level.globalContext(progress).withVariables(variables);
 				ctx.originPos = originPos;
 				ctx.sourcePos = sourcePos.get();
@@ -135,8 +145,8 @@ public class ClientCutscene implements CameraOverride {
 
 				step.prevRenderTarget = step.renderTarget;
 
-				if (step.target.isPresent()) {
-					var newTarget = step.target.get().get(ctx);
+				if (step.target != null) {
+					var newTarget = step.target.get(ctx);
 
 					if (newTarget != null) {
 						step.renderTarget = target = newTarget;
@@ -145,7 +155,7 @@ public class ClientCutscene implements CameraOverride {
 							step.prevRenderTarget = target;
 						}
 
-						if (step.resolvedStart == totalTick && step.snap.target()) {
+						if (step.start == totalTick && step.snap.target()) {
 							prevTarget = target;
 						}
 					}
@@ -153,27 +163,27 @@ public class ClientCutscene implements CameraOverride {
 
 				ctx.targetPos = target;
 
-				if (step.origin.isPresent()) {
-					var newOrigin = step.origin.get().get(ctx);
+				if (step.origin != null) {
+					var newOrigin = step.origin.get(ctx);
 
 					if (newOrigin != null) {
 						origin = newOrigin;
 
-						if (step.resolvedStart == totalTick && step.snap.origin()) {
+						if (step.start == totalTick && step.snap.origin()) {
 							prevOrigin = origin;
 						}
 					}
 				}
 
-				if (step.fovModifier.isPresent()) {
-					fovMod = step.fovModifier.get().getOr(ctx, 1D);
+				if (step.fovModifier != null) {
+					fovMod = step.fovModifier.getOr(ctx, 1D);
 
-					if (step.resolvedStart == totalTick && step.snap.zoom()) {
+					if (step.start == totalTick && step.snap.fov()) {
 						prevFovMod = fovMod;
 					}
 				}
 
-				if (step.resolvedStart == totalTick) {
+				if (step.start == totalTick) {
 					for (var event : step.events) {
 						event.run(mc.level, ctx);
 					}
