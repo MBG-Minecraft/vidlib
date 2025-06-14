@@ -19,6 +19,10 @@ public interface VLMinecraftEnvironmentDataHolder extends VLLevelContainer {
 		getServerData().set(type, value);
 	}
 
+	default <T> void reset(DataKey<T> type) {
+		getServerData().reset(type);
+	}
+
 	default ResourceLocation getSkybox() {
 		return get(InternalServerData.SKYBOX);
 	}

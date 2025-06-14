@@ -45,6 +45,10 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
 		vl$sessionData().dataMap.set(type, value);
 	}
 
+	default <T> void reset(DataKey<T> type) {
+		vl$sessionData().dataMap.reset(type);
+	}
+
 	@Override
 	default boolean isSuspended() {
 		return vl$sessionData().suspended;
