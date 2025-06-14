@@ -141,7 +141,7 @@ public class LocalClientSessionData extends ClientSessionData {
 
 	public ScheduledTask.Handler getScheduledTaskHandler() {
 		if (scheduledTaskHandler == null) {
-			scheduledTaskHandler = new ScheduledTask.Handler(mc, () -> mc.level);
+			scheduledTaskHandler = new ScheduledTask.Handler(mc::getGameTime);
 		}
 
 		return scheduledTaskHandler;

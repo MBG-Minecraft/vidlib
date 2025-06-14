@@ -1,43 +1,33 @@
 package dev.latvian.mods.vidlib.util;
 
-import net.minecraft.world.level.Level;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.function.Supplier;
+import java.util.function.LongSupplier;
 
-public record ScheduledTask(Handler handler, Runnable task, long at, boolean safely) {
+public record ScheduledTask(Handler handler, RepeatingTask task, long at, MutableInt currentTick) {
 	public static class Handler {
-		private final Executor blockableEventLoop;
-		private final Supplier<Level> level;
+		private final LongSupplier time;
 		private final List<ScheduledTask> tasks;
 		private final List<ScheduledTask> newTasks;
-		private long time;
 
-		public Handler(Executor blockableEventLoop, Supplier<Level> level) {
-			this.blockableEventLoop = blockableEventLoop;
-			this.level = level;
-			this.tasks = new ArrayList<>();
+		public Handler(LongSupplier time) {
+			this.time = time;
+			this.tasks = new LinkedList<>();
 			this.newTasks = new ArrayList<>();
 		}
 
-		public void run(long ticks, Runnable task, boolean safely) {
-			if (ticks <= 0L) {
-				if (safely) {
-					blockableEventLoop.execute(task);
-				} else {
-					task.run();
-				}
-			} else {
-				var level = this.level.get();
-				newTasks.add(new ScheduledTask(this, task, level.getGameTime() + ticks, safely));
+		public void run(int delay, RepeatingTask task) {
+			var st = new ScheduledTask(this, task, time.getAsLong() + delay, new MutableInt(0));
+
+			if (delay > 0 || !st.tick()) {
+				newTasks.add(st);
 			}
 		}
 
 		public void tick() {
-			time = level.get().getGameTime();
-
 			if (!newTasks.isEmpty()) {
 				tasks.addAll(newTasks);
 				newTasks.clear();
@@ -48,14 +38,9 @@ public record ScheduledTask(Handler handler, Runnable task, long at, boolean saf
 	}
 
 	public boolean tick() {
-		if (handler.time >= at) {
-			if (safely) {
-				handler.blockableEventLoop.execute(task);
-			} else {
-				task.run();
-			}
-
-			return true;
+		if (handler.time.getAsLong() >= at) {
+			int tick = currentTick.getAndIncrement();
+			return !task.run(tick);
 		} else {
 			return false;
 		}

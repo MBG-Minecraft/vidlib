@@ -104,6 +104,7 @@
 		"ScreenMixin",
 		"SectionOcclusionGraphGraphStorageMixin",
 		"SectionOcclusionGraphMixin",
+		"SectionRenderDispatcherRenderSection",
 		"ShaderManagerMixin",
 		"SkinManagerMixin",
 		"SkyRendererMixin",

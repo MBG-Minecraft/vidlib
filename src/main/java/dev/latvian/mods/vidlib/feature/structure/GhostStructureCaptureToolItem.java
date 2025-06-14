@@ -46,7 +46,7 @@ public class GhostStructureCaptureToolItem implements VidLibTool {
 				player.tell(Component.literal("Scanning the structure..."));
 				var blocks = new Long2ObjectOpenHashMap<BlockState>();
 
-				level.walkBlocks(ConnectedBlock.WalkType.DIAGONAL, origin, BlockFilter.EXPOSED.instance().and(GhostStructureCapture.FILTER.getValue()), 2048, c -> {
+				level.walkBlocks(ConnectedBlock.WalkType.DIAGONAL, origin, BlockFilter.EXPOSED.instance().and(GhostStructureCapture.IGNORE_FILTER.getValue().not()), 2048, c -> {
 					blocks.put(c.block().pos().asLong(), c.block().state());
 					level.cubeParticles(GhostStructureCapture.PARTICLE, List.of(c.block().pos()));
 					return false;

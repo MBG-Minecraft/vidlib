@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.core;
 import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
+import dev.latvian.mods.vidlib.util.RepeatingTask;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import org.jetbrains.annotations.ApiStatus;
@@ -49,12 +50,12 @@ public interface VLMinecraftEnvironment extends VLPlayerContainer, VLMinecraftEn
 		throw new NoMixinException(this);
 	}
 
-	default void schedule(int ticks, Runnable task) {
-		vl$getScheduledTaskHandler().run(ticks, task, false);
+	default void schedule(int delay, Runnable task) {
+		vl$getScheduledTaskHandler().run(delay, new RepeatingTask.WrappedRunnable(task));
 	}
 
-	default void scheduleSafely(int ticks, Runnable task) {
-		vl$getScheduledTaskHandler().run(ticks, task, true);
+	default void scheduleRepeating(int delay, RepeatingTask task) {
+		vl$getScheduledTaskHandler().run(delay, task);
 	}
 
 	default void removeZone(UUID uuid) {

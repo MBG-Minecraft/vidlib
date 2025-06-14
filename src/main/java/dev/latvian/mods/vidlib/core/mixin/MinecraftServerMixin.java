@@ -61,7 +61,7 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	@Override
 	public ScheduledTask.Handler vl$getScheduledTaskHandler() {
 		if (vl$scheduledTaskHandler == null) {
-			vl$scheduledTaskHandler = new ScheduledTask.Handler(vl$self(), () -> vl$self().overworld());
+			vl$scheduledTaskHandler = new ScheduledTask.Handler(this::getGameTime);
 		}
 
 		return vl$scheduledTaskHandler;

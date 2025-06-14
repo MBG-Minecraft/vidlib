@@ -2,11 +2,9 @@ package dev.latvian.mods.vidlib.feature.structure;
 
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import dev.latvian.mods.klib.util.MessageConsumer;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.network.chat.Component;
@@ -23,18 +21,7 @@ public interface GhostChunkCommands {
 					.executes(ctx -> {
 						var start = BlockPosArgument.getBlockPos(ctx, "start");
 						var end = BlockPosArgument.getBlockPos(ctx, "end");
-
-						var minX = Math.min(start.getX(), end.getX());
-						var minY = Math.min(start.getY(), end.getY());
-						var minZ = Math.min(start.getZ(), end.getZ());
-						var maxX = Math.max(start.getX(), end.getX());
-						var maxY = Math.max(start.getY(), end.getY());
-						var maxZ = Math.max(start.getZ(), end.getZ());
-						var volume = (maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1);
-						ctx.getSource().sendSuccess(() -> Component.literal("Scanning %,d block area...".formatted(volume)), false);
-						var capture = StructureHolder.capture(ctx.getSource().getLevel(), start, end, GhostStructureCapture.FILTER.getValue(), true).withoutInvisibleBlocks();
-						GhostStructureCapture.CURRENT.getValue().blocks.putAll(capture.offset(start).blocks());
-						ctx.getSource().sendSuccess(() -> Component.literal("Added %,d blocks".formatted(capture.blocks().size())), false);
+						GhostStructureCapture.CURRENT.getValue().addBlocks(ctx.getSource().getLevel(), ctx.getSource(), start, end);
 						return 1;
 					})
 				)
@@ -47,24 +34,24 @@ public interface GhostChunkCommands {
 				return 1;
 			})
 		)
-		.then(Commands.literal("set-filter")
+		.then(Commands.literal("set-ignore-filter")
 			.then(Commands.argument("filter", BlockFilter.COMMAND.argument(buildContext))
 				.executes(ctx -> {
-					GhostStructureCapture.FILTER.setValue(BlockFilter.COMMAND.get(ctx, "filter"));
+					GhostStructureCapture.IGNORE_FILTER.setValue(BlockFilter.COMMAND.get(ctx, "filter"));
 					return 1;
 				})
 			)
 		)
 		.then(Commands.literal("capture")
 			.then(Commands.argument("name", StringArgumentType.word())
-				.executes(ctx -> capture(ctx.getSource(), StringArgumentType.getString(ctx, "name").toLowerCase(Locale.ROOT)))
+				.executes(ctx -> GhostStructureCapture.capture(ctx.getSource(), StringArgumentType.getString(ctx, "name").toLowerCase(Locale.ROOT)))
 			)
 		)
 		.then(Commands.literal("save")
 			.then(Commands.argument("name", StringArgumentType.word())
-				.executes(ctx -> save(ctx.getSource(), StringArgumentType.getString(ctx, "name").toLowerCase(Locale.ROOT), false))
+				.executes(ctx -> GhostStructureCapture.save(ctx.getSource(), StringArgumentType.getString(ctx, "name").toLowerCase(Locale.ROOT), false))
 				.then(Commands.argument("shell", BoolArgumentType.bool())
-					.executes(ctx -> save(ctx.getSource(), StringArgumentType.getString(ctx, "name").toLowerCase(Locale.ROOT), BoolArgumentType.getBool(ctx, "shell")))
+					.executes(ctx -> GhostStructureCapture.save(ctx.getSource(), StringArgumentType.getString(ctx, "name").toLowerCase(Locale.ROOT), BoolArgumentType.getBool(ctx, "shell")))
 				)
 			)
 		)
@@ -74,12 +61,4 @@ public interface GhostChunkCommands {
 			)
 		)
 	);
-
-	static int capture(CommandSourceStack source, String name) {
-		return GhostStructureCapture.capture(MessageConsumer.ofCommandSource(source), name);
-	}
-
-	static int save(CommandSourceStack source, String name, boolean createShell) {
-		return GhostStructureCapture.save(MessageConsumer.ofCommandSource(source), name, createShell);
-	}
 }

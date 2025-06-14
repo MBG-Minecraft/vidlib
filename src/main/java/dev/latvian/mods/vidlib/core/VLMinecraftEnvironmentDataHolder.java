@@ -11,8 +11,12 @@ public interface VLMinecraftEnvironmentDataHolder extends VLLevelContainer {
 		throw new NoMixinException(this);
 	}
 
+	default long getGameTime() {
+		return vl$level().getGameTime();
+	}
+
 	default <T> T get(DataKey<T> type) {
-		return getServerData().get(type, vl$level().getGameTime());
+		return getServerData().get(type, getGameTime());
 	}
 
 	default <T> void set(DataKey<T> type, T value) {

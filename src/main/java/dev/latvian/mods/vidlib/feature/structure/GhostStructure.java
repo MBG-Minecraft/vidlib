@@ -25,10 +25,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public record GhostStructure(
+	boolean ghostChunks,
 	List<GhostStructurePart> structures,
-	StructureRendererData data,
+	Optional<StructureRendererData> data,
 	double animationTicks,
 	EntityFilter visibleTo,
 	List<WorldVector> locations,
@@ -37,8 +39,9 @@ public record GhostStructure(
 	boolean preload
 ) {
 	public static final Codec<GhostStructure> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+		Codec.BOOL.optionalFieldOf("ghost_chunks", false).forGetter(GhostStructure::ghostChunks),
 		GhostStructurePart.CODEC.listOf().fieldOf("structures").forGetter(GhostStructure::structures),
-		StructureRendererData.CODEC.optionalFieldOf("data", StructureRendererData.DEFAULT).forGetter(GhostStructure::data),
+		StructureRendererData.CODEC.optionalFieldOf("data").forGetter(GhostStructure::data),
 		Codec.DOUBLE.optionalFieldOf("animation_ticks", 1D).forGetter(GhostStructure::animationTicks),
 		EntityFilter.CODEC.optionalFieldOf("visible_to", EntityFilter.ANY.instance()).forGetter(GhostStructure::visibleTo),
 		WorldVector.CODEC.listOf().fieldOf("locations").forGetter(GhostStructure::locations),
@@ -193,7 +196,7 @@ public record GhostStructure(
 			ms.mulPose(Axis.YP.rotation(str.structure.rotation.yawRad()));
 			ms.mulPose(Axis.XP.rotation(str.structure.rotation.pitchRad()));
 			ms.mulPose(Axis.ZP.rotation(str.structure.rotation.rollRad()));
-			s.render(ms, frame.layer(), str.structure.data);
+			s.render(ms, frame.layer(), str.structure.data.orElse(str.structure.ghostChunks ? StructureRendererData.DEFAULT_GHOST_CHUNKS : StructureRendererData.DEFAULT));
 
 			ms.popPose();
 		}

@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class CurrentGhostStructureCapture {
@@ -53,5 +54,19 @@ public class CurrentGhostStructureCapture {
 		maxX += dx;
 		maxY += dy;
 		maxZ += dz;
+	}
+
+	public void addBlocks(Level level, MessageConsumer source, BlockPos start, BlockPos end) {
+		var minX = Math.min(start.getX(), end.getX());
+		var minY = Math.min(start.getY(), end.getY());
+		var minZ = Math.min(start.getZ(), end.getZ());
+		var maxX = Math.max(start.getX(), end.getX());
+		var maxY = Math.max(start.getY(), end.getY());
+		var maxZ = Math.max(start.getZ(), end.getZ());
+		var volume = (maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1);
+		source.tell("Scanning %,d block area...".formatted(volume));
+		var capture = StructureHolder.capture(level, start, end, GhostStructureCapture.IGNORE_FILTER.getValue().not(), true).withoutInvisibleBlocks();
+		blocks.putAll(capture.offset(start).blocks());
+		source.tell("Added %,d blocks".formatted(capture.blocks().size()));
 	}
 }

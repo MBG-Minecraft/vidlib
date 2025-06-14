@@ -24,7 +24,7 @@ public interface GhostStructureCapture {
 	int CHUNK_OFFSET = (1 << CHUNK_SIZE) - 1;
 
 	MutableObject<CurrentGhostStructureCapture> CURRENT = new MutableObject<>(new CurrentGhostStructureCapture());
-	MutableObject<BlockFilter> FILTER = new MutableObject<>(BlockFilter.ANY.instance());
+	MutableObject<BlockFilter> IGNORE_FILTER = new MutableObject<>(BlockFilter.NONE.instance());
 	ShapeParticleOptions PARTICLE = new ShapeParticleOptions(20, Color.CYAN, Color.TRANSPARENT);
 
 	static int capture(MessageConsumer source, String name) {
@@ -88,13 +88,8 @@ public interface GhostStructureCapture {
 				var json = new JsonObject();
 				var strucArr = new JsonArray();
 
+				json.addProperty("ghost_chunks", true);
 				json.add("structures", strucArr);
-
-				var dataObj = new JsonObject();
-				dataObj.addProperty("center_x", false);
-				dataObj.addProperty("center_z", false);
-				dataObj.addProperty("inflate", true);
-				json.add("data", dataObj);
 
 				json.addProperty("animation_ticks", 0D);
 

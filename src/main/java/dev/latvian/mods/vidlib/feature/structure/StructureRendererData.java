@@ -25,6 +25,17 @@ public record StructureRendererData(
 		false
 	);
 
+	public static final StructureRendererData DEFAULT_GHOST_CHUNKS = new StructureRendererData(
+		false,
+		false,
+		false,
+		true,
+		Color.TRANSPARENT,
+		15,
+		15,
+		true
+	);
+
 	public static final Codec<StructureRendererData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Codec.BOOL.optionalFieldOf("center_x", true).forGetter(StructureRendererData::centerX),
 		Codec.BOOL.optionalFieldOf("center_y", false).forGetter(StructureRendererData::centerY),
