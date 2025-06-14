@@ -34,7 +34,8 @@ public interface SimplePacketPayload {
 		buf.writeVarLong(uid);
 		buf.writeVarLong(level.getGameTime());
 		getType().streamCodec().encode(buf, Cast.to(this));
-		var bytes = buf.array();
+		var bytes = new byte[buf.readableBytes()];
+		buf.getBytes(buf.readerIndex(), bytes);
 		buf.release();
 		return bytes;
 	}

@@ -215,7 +215,9 @@ public class Prop {
 				data.type().streamCodec().encode(buf, Cast.to(value));
 			}
 
-			return buf.array();
+			var bytes = new byte[buf.readableBytes()];
+			buf.getBytes(buf.readerIndex(), bytes);
+			return bytes;
 		} finally {
 			buf.release();
 

@@ -5,6 +5,7 @@ import dev.latvian.mods.vidlib.feature.gradient.ClientGradients;
 import dev.latvian.mods.vidlib.feature.particle.LineParticleOptions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -41,19 +42,30 @@ public abstract class AbstractArrowMixin {
 	private void vl$tick(CallbackInfo ci) {
 		var arrow = (AbstractArrow) (Object) this;
 
-		if (life == 0 && VidLibConfig.arrowTrails && arrow.level().isClientSide()) {
+		if (life == 0 && VidLibConfig.arrowTrails && !arrow.level().isClientSide()) {
+			var pos = arrow.getPosition(0F);
+
 			if (vl$prevTrailPos != null) {
-				var pos = arrow.position();
 				var delta = vl$prevTrailPos.subtract(pos);
 
 				if (delta.lengthSqr() > 0.0001D) {
-					arrow.level().addParticle(new LineParticleOptions(20, ClientGradients.TRAIL, ClientGradients.TRAIL, 1), true, true, pos.x, pos.y, pos.z, delta.x, delta.y, delta.z);
+					((ServerLevel) arrow.level()).sendParticles(
+						new LineParticleOptions(20, ClientGradients.TRAIL, ClientGradients.TRAIL, 1),
+						true,
+						true,
+						pos.x,
+						pos.y,
+						pos.z,
+						0,
+						delta.x,
+						delta.y,
+						delta.z,
+						1D
+					);
 				}
-
-				vl$prevTrailPos = pos;
 			}
 
-			vl$prevTrailPos = arrow.position();
+			vl$prevTrailPos = pos;
 		}
 	}
 

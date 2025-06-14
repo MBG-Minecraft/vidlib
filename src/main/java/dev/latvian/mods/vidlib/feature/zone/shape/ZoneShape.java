@@ -23,6 +23,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -73,7 +74,7 @@ public interface ZoneShape {
 		var result = AABB.clip(List.of(getBoundingBox()), ray.start(), ray.end(), BlockPos.ZERO);
 
 		if (result != null && result.getType() == HitResult.Type.BLOCK) {
-			return ZoneClipResult.of(instance, this, ray, result);
+			return ZoneClipResult.of(instance, this, ray, new BlockHitResult(result.getLocation(), result.getDirection(), BlockPos.containing(result.getLocation()), false));
 		}
 
 		return null;
