@@ -20,6 +20,8 @@ import org.joml.Vector3d;
 public class LightningParticle extends CustomParticle {
 	private final LightningParticleOptions options;
 	public final Rotation direction;
+	public float prevRadiusMod;
+	public float radiusMod;
 	public final float length;
 	public final float[] prevAngles;
 	public final float[] prevDist;
@@ -55,12 +57,15 @@ public class LightningParticle extends CustomParticle {
 		this.outlineColor = options.outlineColor().resolve();
 		this.target = new Vector3d();
 		this.matrix = new Matrix3d();
+		this.prevRadiusMod = radiusMod = 0F;
 
 		// level.addParticle(new LineParticleOptions(options.lifespan(), Color.BLACK), x, y, z, vx, vy, vz);
 	}
 
 	@Override
 	public void tick() {
+		prevRadiusMod = radiusMod;
+
 		for (int i = 0; i < angles.length; i++) {
 			prevAngles[i] = angles[i];
 			prevDist[i] = dist[i];
@@ -72,12 +77,16 @@ public class LightningParticle extends CustomParticle {
 			angles[i] = random.nextFloat() * 360F;
 			dist[i] = random.nextFloat() * options.spread();
 		}
+
+		radiusMod = age >= lifetime - 1 ? 0F : 1F;
 	}
 
 	private void renderSegments(PoseStack ms, Vector3d prevPoint, Vector3d point, float delta, VertexCallback buffer) {
+		float rmod = KMath.lerp(delta, prevRadiusMod, radiusMod);
+
 		for (int i = 0; i < angles.length; i++) {
-			var startRadius = i == 0 ? options.endingRadius() : options.radius();
-			var endRadius = options.radius();
+			var startRadius = (i == 0 ? options.endingRadius() : options.radius()) * rmod;
+			var endRadius = options.radius() * rmod;
 
 			var angle = Math.toRadians(Mth.rotLerp(delta, prevAngles[i], angles[i]));
 			var d = KMath.lerp(delta, prevDist[i], dist[i]) * options.spread();
@@ -106,7 +115,7 @@ public class LightningParticle extends CustomParticle {
 		ms.mulPose(Axis.YP.rotationDegrees(-rot.yawDeg()));
 		ms.mulPose(Axis.XP.rotationDegrees(90 + rot.pitchDeg()));
 
-		quads(options.radius(), options.endingRadius(), 0F, (float) prevPoint.distance(point), ms.last().transform(buffer));
+		quads(options.radius() * rmod, options.endingRadius() * rmod, 0F, (float) prevPoint.distance(point), ms.last().transform(buffer));
 		ms.popPose();
 	}
 

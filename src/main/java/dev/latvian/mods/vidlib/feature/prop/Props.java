@@ -86,6 +86,19 @@ public abstract class Props<L extends Level> {
 	}
 
 	@Nullable
+	public <P extends Prop> P addDelayed(PropType<P> type, int delay, @Nullable Consumer<P> onCreated) {
+		var result = create(context(type, PropSpawnType.GAME, level.getGameTime() + delay), false, true, null, null, onCreated);
+
+		if (result.isSuccess()) {
+			var prop = result.getOrThrow();
+			level.getEnvironment().schedule(delay, () -> add(prop));
+			return prop;
+		}
+
+		return null;
+	}
+
+	@Nullable
 	public <P extends Prop> P createDummy(PropType<P> type, @Nullable Consumer<P> onCreated) {
 		var result = create(context(type, PropSpawnType.DUMMY, level.getGameTime()), false, false, null, null, onCreated);
 		return result.isSuccess() ? result.getOrThrow() : null;
