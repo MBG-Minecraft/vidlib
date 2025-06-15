@@ -34,7 +34,7 @@ public record CutsceneStep(
 ) {
 	public static final Codec<CutsceneStep> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		WorldNumber.CODEC.optionalFieldOf("start", FixedWorldNumber.ZERO.instance()).forGetter(CutsceneStep::start),
-		WorldNumber.CODEC.fieldOf("length").forGetter(CutsceneStep::length),
+		WorldNumber.CODEC.optionalFieldOf("length", FixedWorldNumber.ONE.instance()).forGetter(CutsceneStep::length),
 		WorldVector.CODEC.optionalFieldOf("origin").forGetter(CutsceneStep::origin),
 		WorldVector.CODEC.optionalFieldOf("target").forGetter(CutsceneStep::target),
 		WorldNumber.CODEC.optionalFieldOf("fov_modifier").forGetter(CutsceneStep::fovModifier),

@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -19,7 +20,7 @@ public record NPCParticleOptions(String npc, boolean relativePosition, int extra
 	public static final MapCodec<NPCParticleOptions> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.STRING.fieldOf("npc").forGetter(NPCParticleOptions::npc),
 		Codec.BOOL.optionalFieldOf("relative_position", false).forGetter(NPCParticleOptions::relativePosition),
-		Codec.INT.optionalFieldOf("extra_lifespan", 0).forGetter(NPCParticleOptions::extraLifespan),
+		KLibCodecs.TICKS.optionalFieldOf("extra_lifespan", 0).forGetter(NPCParticleOptions::extraLifespan),
 		ExtraCodecs.GAME_PROFILE.optionalFieldOf("profile").forGetter(NPCParticleOptions::profile)
 	).apply(instance, NPCParticleOptions::new));
 

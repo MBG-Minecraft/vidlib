@@ -17,7 +17,7 @@ public class TextParticle extends CustomParticle {
 	protected TextParticle(TextParticleOptions options, ClientLevel level, double x, double y, double z, double vx, double vy, double vz) {
 		super(level, x, y, z);
 		this.options = options;
-		setLifetime(Math.abs(options.ttl()));
+		setLifetime(Math.abs(options.lifespan()));
 	}
 
 	@Override
@@ -28,7 +28,7 @@ public class TextParticle extends CustomParticle {
 			return;
 		}
 
-		var color = options.ttl() < 0 ? options.color() : options.color().fadeOut(time, lifetime, 20F);
+		var color = options.lifespan() < 0 ? options.color() : options.color().fadeOut(time, lifetime, 20F);
 
 		if (color.alpha() == 0) {
 			return;

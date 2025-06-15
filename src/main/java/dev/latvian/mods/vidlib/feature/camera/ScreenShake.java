@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.klib.easing.EasingGroup;
@@ -49,7 +50,7 @@ public record ScreenShake(
 
 	public static final Codec<ScreenShake> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		ScreenShakeType.REGISTRY.valueCodec().optionalFieldOf("type", DEFAULT.type).forGetter(ScreenShake::type),
-		Codec.INT.optionalFieldOf("duration", DEFAULT.duration).forGetter(ScreenShake::duration),
+		KLibCodecs.TICKS.optionalFieldOf("duration", DEFAULT.duration).forGetter(ScreenShake::duration),
 		Codec.FLOAT.optionalFieldOf("speed", DEFAULT.speed).forGetter(ScreenShake::speed),
 		Codec.FLOAT.optionalFieldOf("intensity", DEFAULT.intensity).forGetter(ScreenShake::intensity),
 		EasingGroup.CODEC.optionalFieldOf("start", DEFAULT.start).forGetter(ScreenShake::start),

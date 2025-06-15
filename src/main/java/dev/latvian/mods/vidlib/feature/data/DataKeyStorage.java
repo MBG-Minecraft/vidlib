@@ -70,6 +70,10 @@ public class DataKeyStorage {
 		return createDefault(id, DataTypes.VAR_INT, defaultValue);
 	}
 
+	public DataKey<Integer> createDefaultTicks(String id, int defaultValue) {
+		return createDefault(id, DataTypes.TICKS, defaultValue);
+	}
+
 	public DataKey<Float> createDefaultFloat(String id, float defaultValue) {
 		return createDefault(id, DataTypes.FLOAT, defaultValue);
 	}

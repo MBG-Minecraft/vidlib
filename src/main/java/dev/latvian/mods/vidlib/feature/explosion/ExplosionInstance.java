@@ -262,7 +262,7 @@ public class ExplosionInstance {
 		}
 
 		for (var entry : damageText.entrySet()) {
-			level.textParticles(new TextParticleOptions(Component.literal(entry.getKey()), duration), entry.getValue());
+			level.textParticles(new TextParticleOptions(duration, Component.literal(entry.getKey())), entry.getValue());
 		}
 
 		level.cubeParticles(map);

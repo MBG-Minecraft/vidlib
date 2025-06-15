@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.highlight;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.Gradient;
 import dev.latvian.mods.klib.color.PairGradient;
@@ -33,7 +34,7 @@ public record TerrainHighlight(
 		Shape.CODEC.fieldOf("shape").forGetter(TerrainHighlight::shape),
 		Gradient.CODEC.fieldOf("color").forGetter(TerrainHighlight::color),
 		WorldVector.CODEC.optionalFieldOf("scale", FixedWorldVector.ONE.instance()).forGetter(TerrainHighlight::scale),
-		Codec.INT.optionalFieldOf("duration", 20).forGetter(TerrainHighlight::duration)
+		KLibCodecs.TICKS.optionalFieldOf("duration", 20).forGetter(TerrainHighlight::duration)
 	).apply(instance, TerrainHighlight::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, TerrainHighlight> STREAM_CODEC = CompositeStreamCodec.of(

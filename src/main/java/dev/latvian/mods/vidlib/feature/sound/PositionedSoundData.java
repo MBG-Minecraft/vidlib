@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.util.IntOrUUID;
+import dev.latvian.mods.vidlib.feature.entity.filter.ExactEntityFilter;
 import dev.latvian.mods.vidlib.math.worldvector.EntityPositionType;
 import dev.latvian.mods.vidlib.math.worldvector.FollowingEntityWorldVector;
 import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
@@ -42,6 +43,6 @@ public record PositionedSoundData(SoundData data, Optional<WorldVector> position
 	}
 
 	public PositionedSoundData(SoundData data, Entity entity, boolean looping, boolean stopImmediately) {
-		this(data, new FollowingEntityWorldVector(IntOrUUID.of(entity.getId()), EntityPositionType.SOUND_SOURCE), looping, stopImmediately);
+		this(data, new FollowingEntityWorldVector(new ExactEntityFilter(IntOrUUID.of(entity.getId())), EntityPositionType.SOUND_SOURCE), looping, stopImmediately);
 	}
 }

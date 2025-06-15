@@ -16,6 +16,8 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Function;
@@ -101,5 +103,16 @@ public interface EntityFilter extends Predicate<Entity> {
 	default void writeUUID(FriendlyByteBuf buf) {
 		buf.writeUtf(type().id());
 		buf.writeUtf(toString());
+	}
+
+	@Nullable
+	default Entity getFirst(Level level) {
+		for (var entity : level.allEntities()) {
+			if (test(entity)) {
+				return entity;
+			}
+		}
+
+		return null;
 	}
 }
