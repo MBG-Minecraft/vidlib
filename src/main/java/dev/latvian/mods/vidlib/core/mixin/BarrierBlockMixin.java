@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.BarrierBlock;
 import net.minecraft.world.level.block.Block;
@@ -27,6 +28,10 @@ public abstract class BarrierBlockMixin extends Block {
 	@Override
 	protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
 		if (context instanceof EntityCollisionContext ctx && ctx.getEntity() != null) {
+			if (ctx.getEntity() instanceof AbstractArrow) {
+				return Shapes.empty();
+			}
+
 			var v = EntityOverride.PASS_THROUGH_BARRIERS.get(ctx.getEntity());
 
 			if (v == null ? ctx.getEntity().vl$isCreative() : v) {

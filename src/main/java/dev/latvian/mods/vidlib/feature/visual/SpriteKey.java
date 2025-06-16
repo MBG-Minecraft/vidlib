@@ -69,6 +69,10 @@ public final class SpriteKey {
 		return of(PARTICLES, sprite);
 	}
 
+	public static SpriteKey gui(ResourceLocation sprite) {
+		return of(GUI, sprite);
+	}
+
 	public static final Codec<SpriteKey> MAP_CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		ID.CODEC.optionalFieldOf("atlas", BLOCKS).forGetter(SpriteKey::atlas),
 		ID.CODEC.fieldOf("sprite").forGetter(SpriteKey::sprite)

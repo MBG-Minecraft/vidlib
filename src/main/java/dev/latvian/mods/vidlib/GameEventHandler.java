@@ -22,9 +22,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -243,7 +244,11 @@ public class GameEventHandler {
 
 	@SubscribeEvent
 	public static void projectileImpact(ProjectileImpactEvent event) {
-		if (event.getProjectile() instanceof Projectile && event.getRayTraceResult() instanceof EntityHitResult hit && hit.getEntity() instanceof Player player && player.isCreative()) {
+		if (event.getRayTraceResult() instanceof EntityHitResult hit && hit.getEntity() instanceof Player player && player.isCreative()) {
+			event.setCanceled(true);
+		}
+
+		if (event.getRayTraceResult() instanceof BlockHitResult hit && event.getProjectile().level().getBlockState(hit.getBlockPos()).is(Blocks.BARRIER)) {
 			event.setCanceled(true);
 		}
 	}

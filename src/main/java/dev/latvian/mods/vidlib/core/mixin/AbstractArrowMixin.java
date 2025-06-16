@@ -84,7 +84,7 @@ public abstract class AbstractArrowMixin {
 	}
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getCollisionShape(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/phys/shapes/VoxelShape;"))
-	private VoxelShape vl$tick(BlockState instance, BlockGetter blockGetter, BlockPos pos) {
+	private VoxelShape vl$getShape(BlockState instance, BlockGetter blockGetter, BlockPos pos) {
 		return instance.getCollisionShape(blockGetter, pos, CollisionContext.of((AbstractArrow) (Object) this));
 	}
 }
