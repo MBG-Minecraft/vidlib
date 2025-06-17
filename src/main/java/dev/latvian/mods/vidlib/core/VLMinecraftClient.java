@@ -117,7 +117,11 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		var session = vl$self().player.vl$sessionData();
 
 		if (session.worldMouse == null) {
-			session.worldMouse = WorldMouse.clip(vl$self(), FrameInfo.CURRENT.camera().getPosition(), FrameInfo.CURRENT.worldMatrix());
+			if (session.cameraOverride != null) {
+				session.worldMouse = session.cameraOverride.getWorldMouse(vl$self(), FrameInfo.CURRENT.camera().getPosition(), FrameInfo.CURRENT.worldMatrix());
+			} else {
+				session.worldMouse = WorldMouse.clip(vl$self(), FrameInfo.CURRENT.camera().getPosition(), FrameInfo.CURRENT.worldMatrix());
+			}
 		}
 
 		return session.worldMouse;

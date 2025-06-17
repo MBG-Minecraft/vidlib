@@ -13,6 +13,16 @@ public class TexturedCubeRenderer {
 	}
 
 	public static void render(FrameInfo frame, LightUV light, double bminX, double bminY, double bminZ, double bmaxX, double bmaxY, double bmaxZ, ResolvedCubeTextures textures, Color tint) {
+		float minX = frame.x(bminX);
+		float minY = frame.y(bminY);
+		float minZ = frame.z(bminZ);
+		float maxX = frame.x(bmaxX);
+		float maxY = frame.y(bmaxY);
+		float maxZ = frame.z(bmaxZ);
+		render(frame, light, minX, minY, minZ, maxX, maxY, maxZ, textures, tint);
+	}
+
+	public static void render(FrameInfo frame, LightUV light, float minX, float minY, float minZ, float maxX, float maxY, float maxZ, ResolvedCubeTextures textures, Color tint) {
 		var ms = frame.poseStack();
 		var msp = ms.last();
 		var m = msp.pose();
@@ -21,13 +31,6 @@ public class TexturedCubeRenderer {
 
 		var lu = light.u();
 		var lv = light.v();
-
-		float minX = frame.x(bminX);
-		float minY = frame.y(bminY);
-		float minZ = frame.z(bminZ);
-		float maxX = frame.x(bmaxX);
-		float maxY = frame.y(bmaxY);
-		float maxZ = frame.z(bmaxZ);
 
 		for (int direction = 0; direction < 6; direction++) {
 			var face = textures.faces().get(direction);
@@ -39,7 +42,7 @@ public class TexturedCubeRenderer {
 			var colA = face.tint().alphaf() * tint.alphaf();
 
 			if (face.fade() > 0D) {
-				double d = Math.sqrt(frame.distanceSq(bminX, bminY, bminZ, bmaxX, bmaxY, bmaxZ));
+				double d = Math.sqrt(frame.distanceSq(frame.cameraX() + minX, frame.cameraY() + minY, frame.cameraZ() + minZ, frame.cameraX() + maxX, frame.cameraY() + maxY, frame.cameraZ() + maxZ));
 
 				if (d < face.fade()) {
 					colA = (float) (colA * d / face.fade());
