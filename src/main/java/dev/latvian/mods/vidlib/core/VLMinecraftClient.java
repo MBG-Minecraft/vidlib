@@ -20,6 +20,7 @@ import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
 import dev.latvian.mods.vidlib.feature.data.UpdatePlayerDataValuePayload;
+import dev.latvian.mods.vidlib.feature.data.UpdateServerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.fade.Fade;
 import dev.latvian.mods.vidlib.feature.fade.ScreenFadeInstance;
 import dev.latvian.mods.vidlib.feature.highlight.TerrainHighlight;
@@ -582,5 +583,13 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	default TextureAtlasSprite getSprite(SpriteKey sprite) {
 		return getTextureAtlas(sprite).getSprite(sprite.sprite());
+	}
+
+	default <T> void updateServerDataValue(DataKey<T> key, T value) {
+		c2s(new UpdateServerDataValuePayload(List.of(new DataMapValue(key, value))));
+	}
+
+	default void runClientCommand(String command) {
+		vl$self().player.connection.sendCommand(command.startsWith("/") ? command.substring(1) : command);
 	}
 }

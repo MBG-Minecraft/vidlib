@@ -24,5 +24,12 @@ versionRange = "[1.0.0,)"
 ordering = "AFTER"
 side = "BOTH"
 
+[[dependencies.vidlib]]
+modId = "imguiresources"
+type = "required"
+versionRange = "[1.0.0,)"
+ordering = "AFTER"
+side = "BOTH"
+
 [[mixins]]
 config = "vidlib.mixins.json"

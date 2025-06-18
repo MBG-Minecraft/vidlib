@@ -8,10 +8,8 @@ import imgui.ImGui;
 import imgui.extension.imnodes.ImNodes;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.ImPlotContext;
-import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.flag.ImGuiDockNodeFlags;
-import imgui.flag.ImGuiStyleVar;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.internal.ImGuiContext;
@@ -22,9 +20,7 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWWindowContentScaleCallback;
 
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -55,11 +51,8 @@ public class ImGuiHooks {
 	private static boolean captureMouse, captureKeyboard;
 	private static boolean active = false;
 
-	static Map<BooleanSupplier, Integer> dockingConditions = new IdentityHashMap<>();
 	static List<BooleanSupplier> navigationConditions = new ArrayList<>();
-	static List<BooleanSupplier> dockingDisableConditions = new ArrayList<>();
 	private static boolean endingFrame = false;
-	private static boolean appliedStyles = false;
 
 	static int forceWidth = -1;
 	static int forceHeight = -1;
@@ -144,7 +137,6 @@ public class ImGuiHooks {
 		}
 
 		imGuiGlfw.newFrame();
-		// FIXME StyleImGuiCallback.PUSH_GLOBAL_STYLE.invoker().execute();
 		ImGui.newFrame();
 		active = true;
 
@@ -163,17 +155,6 @@ public class ImGuiHooks {
 
 		handleForcedResolution();
 		handleDocking();
-
-		// Apply custom styles
-		ImGui.pushStyleVar(ImGuiStyleVar.WindowRounding, 4);
-		ImGui.pushStyleVar(ImGuiStyleVar.PopupRounding, 4);
-		ImGui.pushStyleVar(ImGuiStyleVar.FrameRounding, 2);
-		ImGui.pushStyleVar(ImGuiStyleVar.GrabRounding, 2);
-		ImGui.pushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
-		ImGui.pushStyleVar(ImGuiStyleVar.PopupBorderSize, 0);
-		ImGui.pushStyleColor(ImGuiCol.ResizeGrip, 0);
-		appliedStyles = true;
-
 		// FIXME RenderImGuiCallback.START_FRAME.invoker().render();
 	}
 
@@ -195,15 +176,6 @@ public class ImGuiHooks {
 		var window = client.getWindow();
 
 		dockId = -1;
-
-		if (dockingDisableConditions.stream().anyMatch(BooleanSupplier::getAsBoolean)) {
-			return;
-		}
-
-		var dockingMode = dockingConditions.entrySet().stream()
-			.filter(e -> e.getKey().getAsBoolean())
-			.map(Map.Entry::getValue)
-			.reduce((a, b) -> a | b);
 
 		// Establish a docking space and retrieve the central node
 		dockId = ImGui.dockSpaceOverViewport(ImGui.getMainViewport(), ImGuiDockNodeFlags.NoDockingInCentralNode | ImGuiDockNodeFlags.PassthruCentralNode);
@@ -249,13 +221,6 @@ public class ImGuiHooks {
 		endingFrame = false;
 		// FIXME RenderImGuiCallback.END_FRAME.invoker().render();
 
-		// Reset styles
-		if (appliedStyles) {
-			ImGui.popStyleColor(1);
-			ImGui.popStyleVar(6);
-			appliedStyles = false;
-		}
-
 		active = false;
 		// FIXME StyleImGuiCallback.POP_GLOBAL_STYLE.invoker().execute();
 		ImGui.render();
@@ -278,13 +243,6 @@ public class ImGuiHooks {
 	public static void ensureEndFrame() {
 		if (!active) {
 			return;
-		}
-
-		// Reset styles
-		if (appliedStyles) {
-			ImGui.popStyleColor(1); // TODO: Unify both end functions somehow
-			ImGui.popStyleVar(6);
-			appliedStyles = false;
 		}
 
 		ImGui.endFrame();

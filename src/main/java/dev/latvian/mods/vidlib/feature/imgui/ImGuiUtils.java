@@ -3,11 +3,16 @@ package dev.latvian.mods.vidlib.feature.imgui;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import imgui.ImGui;
 import imgui.ImGuiViewport;
+import imgui.ImVec2;
+import imgui.ImVec4;
 import imgui.flag.ImGuiCol;
-import imgui.flag.ImGuiDockNodeFlags;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiWindowFlags;
+import imgui.type.ImBoolean;
+import imgui.type.ImDouble;
 import imgui.type.ImFloat;
+import imgui.type.ImInt;
+import imgui.type.ImString;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector3f;
@@ -16,7 +21,26 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BooleanSupplier;
 
 public class ImGuiUtils {
-	private static final ImFloat FLOAT = new ImFloat();
+	public static final ImInt INT = new ImInt();
+	public static final int[] INT2 = new int[2];
+	public static final int[] INT3 = new int[3];
+	public static final int[] INT4 = new int[4];
+	public static final ImFloat FLOAT = new ImFloat();
+	public static final float[] FLOAT2 = new float[2];
+	public static final float[] FLOAT3 = new float[3];
+	public static final float[] FLOAT4 = new float[4];
+	public static final ImVec2 VEC2 = new ImVec2();
+	public static final ImVec4 VEC4 = new ImVec4();
+	public static final ImDouble DOUBLE = new ImDouble();
+	public static final double[] DOUBLE2 = new double[2];
+	public static final double[] DOUBLE3 = new double[3];
+	public static final double[] DOUBLE4 = new double[4];
+	public static final ImString STRING = new ImString();
+	public static final ImBoolean BOOLEAN = new ImBoolean();
+
+	static {
+		STRING.inputData.isResizable = true;
+	}
 
 	public static void resetResolution() {
 		forceResolution(-1, -1);
@@ -39,18 +63,6 @@ public class ImGuiUtils {
 
 	public static void enableNavigationWhen(BooleanSupplier condition) {
 		ImGuiHooks.navigationConditions.add(condition);
-	}
-
-	public static void enableDockingWhen(BooleanSupplier condition) {
-		enableDockingWhen(condition, ImGuiDockNodeFlags.NoDockingInCentralNode | ImGuiDockNodeFlags.PassthruCentralNode);
-	}
-
-	public static void enableDockingWhen(BooleanSupplier condition, int flags) {
-		ImGuiHooks.dockingConditions.put(condition, flags);
-	}
-
-	public static void disableDockingWhen(BooleanSupplier condition) {
-		ImGuiHooks.dockingDisableConditions.add(condition);
 	}
 
 	public static float getDpiScale() {

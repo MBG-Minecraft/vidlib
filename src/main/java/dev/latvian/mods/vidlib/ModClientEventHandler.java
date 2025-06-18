@@ -12,7 +12,6 @@ import dev.latvian.mods.vidlib.feature.clock.ClockFont;
 import dev.latvian.mods.vidlib.feature.clothing.ClientClothingLoader;
 import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBarRenderer;
 import dev.latvian.mods.vidlib.feature.gradient.ClientGradientLoader;
-import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.multiverse.VoidSpecialEffects;
 import dev.latvian.mods.vidlib.feature.particle.VidLibClientParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
@@ -45,7 +44,6 @@ public class ModClientEventHandler {
 		RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS).getBuffer(1).setLabel("Shared Sequential Quads Buffer");
 		RenderSystem.getSequentialBuffer(VertexFormat.Mode.LINES).getBuffer(1).setLabel("Shared Sequential Lines Buffer");
 		RenderSystem.getSequentialBuffer(VertexFormat.Mode.TRIANGLES).getBuffer(1).setLabel("Shared Sequential Other Buffer");
-		ImGuiUtils.enableDockingWhen(() -> true);
 	}
 
 	@SubscribeEvent

@@ -1,0 +1,41 @@
+package dev.latvian.mods.vidlib.feature.imgui.config;
+
+import dev.latvian.mods.vidlib.feature.data.DataKey;
+import imgui.ImGui;
+import imgui.type.ImInt;
+
+public class IntConfigEntry extends ConfigEntry<Integer> {
+	public final ImInt data;
+	public final int min;
+	public final int max;
+	public final boolean slider;
+
+	public IntConfigEntry(String label, DataKey<Integer> key, int min, int max, boolean slider) {
+		super(label, key);
+		this.data = new ImInt();
+		this.min = min;
+		this.max = max;
+		this.slider = slider;
+	}
+
+	@Override
+	public Integer get() {
+		return data.get();
+	}
+
+	@Override
+	public void set(Integer value) {
+		data.set(value);
+	}
+
+	@Override
+	public boolean imguiValue() {
+		ImGui.setNextItemWidth(ImGui.getContentRegionAvailX() - ImGui.getStyle().getItemSpacingX());
+
+		if (slider) {
+			return ImGui.sliderInt(id, data.getData(), min, max);
+		}
+
+		return ImGui.inputInt(id, data);
+	}
+}

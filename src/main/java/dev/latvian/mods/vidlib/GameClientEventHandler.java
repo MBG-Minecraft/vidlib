@@ -19,6 +19,7 @@ import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
+import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.feature.misc.DebugTextEvent;
@@ -305,17 +306,18 @@ public class GameClientEventHandler {
 
 	@SubscribeEvent
 	public static void renderHUD(RenderGuiEvent.Post event) {
-		renderHUD0(event);
-		ScreenText.RENDER.clear();
-	}
-
-	public static void renderHUD0(RenderGuiEvent.Post event) {
 		var mc = Minecraft.getInstance();
 
 		if (mc.level == null || mc.player == null) {
 			return;
 		}
 
+		renderHUD0(mc, event);
+		ScreenText.RENDER.clear();
+		BuiltInImGui.handle(mc);
+	}
+
+	public static void renderHUD0(Minecraft mc, RenderGuiEvent.Post event) {
 		var session = mc.player.vl$sessionData();
 		var graphics = event.getGuiGraphics();
 		var delta = event.getPartialTick().getGameTimeDeltaPartialTick(true);

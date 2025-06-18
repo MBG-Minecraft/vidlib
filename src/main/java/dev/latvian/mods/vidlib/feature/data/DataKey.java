@@ -44,7 +44,7 @@ public record DataKey<T>(
 			this.sync = false;
 			this.syncToAllClients = storage.alwaysSyncToAllClients;
 			this.onReceived = null;
-			this.allowClientUpdates = false;
+			this.allowClientUpdates = storage.alwaysSyncToAllClients;
 			this.skipLogging = false;
 		}
 

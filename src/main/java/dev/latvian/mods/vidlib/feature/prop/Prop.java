@@ -270,8 +270,12 @@ public class Prop {
 		move();
 	}
 
-	public float getRelativeTick() {
+	public final float getRelativeTick() {
 		return lifespan > 0 ? tick / (float) lifespan : 0F;
+	}
+
+	public final float getRelativeTick(float delta) {
+		return lifespan > 0 ? Mth.lerp(delta, prevTick, tick) / (float) lifespan : 0F;
 	}
 
 	public void move() {

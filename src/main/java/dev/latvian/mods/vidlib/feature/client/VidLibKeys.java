@@ -37,9 +37,9 @@ public class VidLibKeys {
 		while (freezeTickKeyMapping.consumeClick()) {
 			if (!mc.player.isReplayCamera()) {
 				if (mc.level.tickRateManager().isFrozen()) {
-					mc.player.connection.sendCommand("tick unfreeze");
+					mc.runClientCommand("tick unfreeze");
 				} else {
-					mc.player.connection.sendCommand("tick freeze");
+					mc.runClientCommand("tick freeze");
 				}
 			}
 		}
@@ -54,7 +54,7 @@ public class VidLibKeys {
 
 		while (repeatLastCommandKeyMapping.consumeClick()) {
 			if (!mc.commandHistory().history().isEmpty()) {
-				mc.player.connection.sendCommand(((ArrayListDeque<String>) mc.commandHistory().history()).getLast().substring(1));
+				mc.runClientCommand(((ArrayListDeque<String>) mc.commandHistory().history()).getLast());
 			}
 		}
 
