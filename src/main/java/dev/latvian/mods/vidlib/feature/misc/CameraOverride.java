@@ -1,12 +1,10 @@
 package dev.latvian.mods.vidlib.feature.misc;
 
 import dev.latvian.mods.klib.math.Rotation;
-import dev.latvian.mods.klib.math.WorldMouse;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4fc;
 
 public interface CameraOverride {
 	@Nullable
@@ -44,8 +42,4 @@ public interface CameraOverride {
 	Vec3 getCameraPosition(float delta);
 
 	Rotation getCameraRotation(float delta, Vec3 cameraPos);
-
-	default WorldMouse getWorldMouse(Minecraft mc, Vec3 cameraPos, Matrix4fc worldMatrix) {
-		return WorldMouse.clip(mc, cameraPos, worldMatrix);
-	}
 }

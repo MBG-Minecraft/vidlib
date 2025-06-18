@@ -13,7 +13,6 @@ import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
-import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
@@ -162,28 +161,7 @@ public class GameClientEventHandler {
 
 	@SubscribeEvent(priority = EventPriority.HIGH)
 	public static void frameGraphSetup(FrameGraphSetupEvent event) {
-		var mc = Minecraft.getInstance();
-		var session = mc.player.vl$sessionData();
-		FrameInfo.CURRENT = new FrameInfo(mc, session, event);
-
-		mc.vl$renderSetup();
-
-		var tool = VidLibTool.of(mc.player);
-
-		var screenDelta = event.getDeltaTracker().getGameTimeDeltaPartialTick(true);
-
-		if (tool != null) {
-			tool.getSecond().renderSetup(mc.player, tool.getFirst(), mc.hitResult, screenDelta);
-		}
-
-		GhostStructure.preRender(FrameInfo.CURRENT, mc.level.globalContext());
-
-		if (session.npcRecording != null) {
-			session.npcRecording.record(System.currentTimeMillis(), screenDelta, mc.player);
-		}
-
-		CanvasImpl.createHandles(event.getFrameGrapBuilder(), event.getRenderTargetDescriptor());
-		// event.enableOutlineProcessing();
+		Minecraft.getInstance().vl$renderSetup(event);
 	}
 
 	@SubscribeEvent(priority = EventPriority.HIGH)
@@ -197,7 +175,6 @@ public class GameClientEventHandler {
 		var session = mc.player.vl$sessionData();
 		var frame = new FrameInfo(mc, session, event);
 		FrameInfo.CURRENT = frame;
-		session.worldMouse = null;
 
 		var ms = frame.poseStack();
 		float delta = frame.worldDelta();

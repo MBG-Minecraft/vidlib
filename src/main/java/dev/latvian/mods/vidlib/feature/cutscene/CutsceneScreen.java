@@ -2,15 +2,12 @@ package dev.latvian.mods.vidlib.feature.cutscene;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.latvian.mods.klib.math.Rotation;
-import dev.latvian.mods.klib.math.WorldMouse;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4fc;
 import org.lwjgl.glfw.GLFW;
 
 public class CutsceneScreen extends Screen {
@@ -113,10 +110,5 @@ public class CutsceneScreen extends Screen {
 	@Override
 	public Rotation getCameraRotation(float delta, Vec3 cameraPos) {
 		return clientCutscene.getCameraRotation(delta, cameraPos);
-	}
-
-	@Override
-	public WorldMouse getWorldMouse(Minecraft mc, Vec3 cameraPos, Matrix4fc worldMatrix) {
-		return clientCutscene.getWorldMouse(mc, cameraPos, worldMatrix);
 	}
 }

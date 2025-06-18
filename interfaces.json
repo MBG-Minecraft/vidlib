@@ -76,5 +76,8 @@
 	],
 	"net/minecraft/commands/CommandSourceStack": [
 		"dev/latvian/mods/vidlib/core/VLCommandSourceStack"
+	],
+	"com/mojang/blaze3d/platform/Window": [
+		"dev/latvian/mods/vidlib/core/VLWindow"
 	]
 }

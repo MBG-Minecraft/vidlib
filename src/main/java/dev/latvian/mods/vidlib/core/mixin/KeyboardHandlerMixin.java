@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyboardHandler;
@@ -16,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(KeyboardHandler.class)
@@ -58,5 +60,19 @@ public abstract class KeyboardHandlerMixin {
 	@Overwrite
 	private void debugComponent(ChatFormatting formatting, Component message) {
 		minecraft.gui.setOverlayMessage(Component.empty().append(Component.translatable("debug.prefix").withStyle(formatting, ChatFormatting.BOLD)).append(CommonComponents.SPACE).append(message), false);
+	}
+
+	@Inject(method = "keyPress", at = @At("HEAD"), cancellable = true)
+	public void vl$onKey(long window, int key, int scancode, int action, int modifiers, CallbackInfo ci) {
+		if (ImGuiHooks.shouldInterceptKeyboard()) {
+			ci.cancel();
+		}
+	}
+
+	@Inject(method = "charTyped", at = @At("HEAD"), cancellable = true)
+	public void vl$onChar(long window, int codePoint, int modifiers, CallbackInfo ci) {
+		if (ImGuiHooks.shouldInterceptKeyboard()) {
+			ci.cancel();
+		}
 	}
 }

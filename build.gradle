@@ -113,6 +113,13 @@ repositories {
 	}
 
 	maven {
+		url = 'https://maven.latvian.dev/mirror'
+		content {
+			includeGroup "dev.latvian.mods"
+		}
+	}
+
+	maven {
 		url = 'https://api.modrinth.com/maven'
 		content {
 			includeGroup "maven.modrinth"
@@ -137,6 +144,7 @@ dependencies {
 
 	interfaceInjectionData("dev.latvian.mods:klib:$klib_version")
 
+	compileOnly("dev.latvian.mods:imgui-resources:$imgui_resources_version")
 	compileOnly("maven.modrinth:simple-voice-chat:QOjXGg4I")
 	compileOnly("software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}")
 }

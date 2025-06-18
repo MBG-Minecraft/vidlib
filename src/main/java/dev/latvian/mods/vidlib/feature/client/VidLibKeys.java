@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import net.minecraft.client.KeyMapping;
@@ -16,6 +17,7 @@ public class VidLibKeys {
 	public static KeyMapping clearParticlesKeyMapping;
 	public static KeyMapping reloadKeyMapping;
 	public static KeyMapping repeatLastCommandKeyMapping;
+	public static KeyMapping adminPanelKeyMapping;
 
 	private static KeyMapping register(RegisterKeyMappingsEvent event, String name, KeyModifier modifier, int defaultKey) {
 		var key = new KeyMapping(name, KeyConflictContext.IN_GAME, modifier, InputConstants.Type.KEYSYM, defaultKey, "key.categories.vidlib");
@@ -28,6 +30,7 @@ public class VidLibKeys {
 		clearParticlesKeyMapping = register(event, "key.vidlib.clear_particles", KeyModifier.NONE, GLFW.GLFW_KEY_L);
 		reloadKeyMapping = register(event, "key.vidlib.reload", KeyModifier.NONE, GLFW.GLFW_KEY_R);
 		repeatLastCommandKeyMapping = register(event, "key.vidlib.repeat_last_command", KeyModifier.NONE, GLFW.GLFW_KEY_SEMICOLON);
+		adminPanelKeyMapping = register(event, "key.vidlib.admin_panel", KeyModifier.NONE, GLFW.GLFW_KEY_MENU);
 	}
 
 	public static void handle(Minecraft mc) {
@@ -53,6 +56,10 @@ public class VidLibKeys {
 			if (!mc.commandHistory().history().isEmpty()) {
 				mc.player.connection.sendCommand(((ArrayListDeque<String>) mc.commandHistory().history()).getLast().substring(1));
 			}
+		}
+
+		while (adminPanelKeyMapping.consumeClick()) {
+			Minecraft.getInstance().updatePlayerData(InternalPlayerData.ADMIN_PANEL, !mc.player.getAdminPanel());
 		}
 	}
 }

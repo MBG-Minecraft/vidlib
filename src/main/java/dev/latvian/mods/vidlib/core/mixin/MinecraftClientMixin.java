@@ -5,12 +5,17 @@ import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.vidlib.core.VLMinecraftClient;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
+import dev.latvian.mods.vidlib.feature.font.TTFFile;
+import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -29,6 +34,10 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	@Shadow
 	@Nullable
 	public LocalPlayer player;
+
+	@Shadow
+	@Final
+	private ReloadableResourceManager resourceManager;
 
 	@Unique
 	private final Map<String, GameProfile> vl$profileByNameCache = new HashMap<>();
@@ -101,5 +110,41 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 		}
 
 		return vl$blockTextureAtlas;
+	}
+
+	@Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;initRenderer(JIZLjava/util/function/BiFunction;Z)V", shift = At.Shift.AFTER))
+	public void vl$initRenderer(GameConfig gameConfig, CallbackInfo ci) {
+		ImGuiHooks.init();
+	}
+
+	@Inject(method = "<init>", at = @At("RETURN"))
+	public void vl$onFinishInit(CallbackInfo ci) {
+		TTFFile.load(resourceManager);
+		ImGuiHooks.setupFonts(resourceManager);
+	}
+
+	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderFog(Lnet/minecraft/client/renderer/FogParameters;)V"))
+	public void vl$onStartFrame(boolean tick, CallbackInfo ci) {
+		ImGuiHooks.startFrame(vl$self());
+	}
+
+	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;isMinimized()Z"))
+	public void vl$beforeEndFrame(boolean tick, CallbackInfo ci) {
+		ImGuiHooks.beforeEndFrame();
+	}
+
+	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;getNanos()J", ordinal = 1))
+	public void vl$onEndFrame(boolean tick, CallbackInfo ci) {
+		ImGuiHooks.endFrame(vl$self());
+	}
+
+	@Inject(method = "emergencySave", at = @At("HEAD"))
+	public void vl$onCrashCleanup(CallbackInfo ci) {
+		ImGuiHooks.ensureEndFrame();
+	}
+
+	@Inject(method = "run", at = @At("RETURN"))
+	public void vl$onEndGameLoop(CallbackInfo ci) {
+		ImGuiHooks.ensureEndFrame();
 	}
 }

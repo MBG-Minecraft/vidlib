@@ -36,4 +36,9 @@ public class BasicRegistryRef<K, V> implements Supplier<V> {
 	public boolean isSet() {
 		return value != null;
 	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[" + id + ":" + value + "]";
+	}
 }

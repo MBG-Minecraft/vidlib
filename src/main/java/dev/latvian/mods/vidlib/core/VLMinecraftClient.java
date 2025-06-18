@@ -12,6 +12,7 @@ import dev.latvian.mods.vidlib.feature.camera.DetachedCamera;
 import dev.latvian.mods.vidlib.feature.camera.FreeCamera;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeInstance;
+import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.cutscene.ClientCutscene;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneScreen;
@@ -23,6 +24,7 @@ import dev.latvian.mods.vidlib.feature.fade.Fade;
 import dev.latvian.mods.vidlib.feature.fade.ScreenFadeInstance;
 import dev.latvian.mods.vidlib.feature.highlight.TerrainHighlight;
 import dev.latvian.mods.vidlib.feature.highlight.TerrainHighlightInstance;
+import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.MarkerData;
 import dev.latvian.mods.vidlib.feature.particle.FireData;
 import dev.latvian.mods.vidlib.feature.particle.ItemParticleOptions;
@@ -36,6 +38,7 @@ import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesIdData;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.VidLibSoundInstance;
+import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import dev.latvian.mods.vidlib.feature.vote.NumberVotingScreen;
 import dev.latvian.mods.vidlib.feature.vote.YesNoVotingScreen;
@@ -64,6 +67,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
@@ -114,28 +118,23 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	default WorldMouse getWorldMouse() {
-		var session = vl$self().player.vl$sessionData();
-
-		if (session.worldMouse == null) {
-			if (session.cameraOverride != null) {
-				session.worldMouse = session.cameraOverride.getWorldMouse(vl$self(), FrameInfo.CURRENT.camera().getPosition(), FrameInfo.CURRENT.worldMatrix());
-			} else {
-				session.worldMouse = WorldMouse.clip(vl$self(), FrameInfo.CURRENT.camera().getPosition(), FrameInfo.CURRENT.worldMatrix());
-			}
-		}
-
-		return session.worldMouse;
+		return vl$self().player.vl$sessionData().worldMouse;
 	}
 
 	@ApiStatus.Internal
-	default void vl$renderSetup() {
+	default void vl$renderSetup(FrameGraphSetupEvent event) {
+		var mc = vl$self();
 		var player = vl$self().player;
 
-		if (player == null) {
+		if (player == null || mc.level == null) {
 			return;
 		}
 
 		var session = player.vl$sessionData();
+		var frameInfo = new FrameInfo(mc, session, event);
+		session.worldMouse = WorldMouse.of(mc, frameInfo.camera().getPosition(), frameInfo.worldMatrix());
+		FrameInfo.CURRENT = frameInfo;
+
 		var ray = vl$self().gameRenderer.getMainCamera().ray(512D);
 
 		if (vl$self().options.getCameraType() == CameraType.FIRST_PERSON && player.getShowZones()) {
@@ -143,6 +142,23 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		} else {
 			session.zoneClip = null;
 		}
+
+		var tool = VidLibTool.of(player);
+
+		var screenDelta = event.getDeltaTracker().getGameTimeDeltaPartialTick(true);
+
+		if (tool != null) {
+			tool.getSecond().renderSetup(player, tool.getFirst(), mc.hitResult, screenDelta);
+		}
+
+		GhostStructure.preRender(frameInfo, mc.level.globalContext());
+
+		if (session.npcRecording != null) {
+			session.npcRecording.record(System.currentTimeMillis(), screenDelta, mc.player);
+		}
+
+		CanvasImpl.createHandles(event.getFrameGrapBuilder(), event.getRenderTargetDescriptor());
+		// event.enableOutlineProcessing();
 	}
 
 	default Vector2dc vl$getCameraShakeOffset(float delta) {

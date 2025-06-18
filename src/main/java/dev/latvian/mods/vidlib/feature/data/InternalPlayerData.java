@@ -26,4 +26,5 @@ public interface InternalPlayerData {
 	DataKey<PhysicsParticleData> TEST_PARTICLES = DataKey.PLAYER.buildDefault("test_physics_particles", PhysicsParticleData.DATA_TYPE, PhysicsParticleData.DEFAULT).allowClientUpdates().build();
 	DataKey<Double> TEST_SCREEN_SHAKE = DataKey.PLAYER.buildDefault("test_screen_shake", DataTypes.DOUBLE, 30D).allowClientUpdates().build();
 	DataKey<Boolean> SHOW_FPS = DataKey.PLAYER.createDefaultBoolean("show_fps", false);
+	DataKey<Boolean> ADMIN_PANEL = DataKey.PLAYER.buildDefault("admin_panel", DataTypes.BOOL, false).allowClientUpdates().build();
 }

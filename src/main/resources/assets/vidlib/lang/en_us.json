@@ -3,6 +3,7 @@
 	"key.vidlib.freeze_tick": "Freeze Tick",
 	"key.vidlib.clear_particles": "Clear Particles",
 	"key.vidlib.repeat_last_command": "Repeat Last Command",
+	"key.vidlib.admin_panel": "Admin Panel",
 	"key.vidlib.reload": "Reload",
 	"block.vidlib.money_block": "Money Block",
 	"block.vidlib.banded_money_block": "Banded Money Block",
