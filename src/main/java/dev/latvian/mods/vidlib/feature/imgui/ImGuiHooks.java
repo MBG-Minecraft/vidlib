@@ -50,7 +50,7 @@ public class ImGuiHooks {
 	static int dockId;
 	static float dpiScale = 1.0f;
 
-	public static void init() {
+	public static void init(ResourceManager resourceManager) {
 		var client = Minecraft.getInstance();
 		imGuiGlfw = new ImGuiImplGlfw();
 		imGuiGl3 = new ImGuiImplGl3();
@@ -69,31 +69,7 @@ public class ImGuiHooks {
 
 		imGuiGlfw.init(client.getWindow().getWindow(), true);
 		imGuiGl3.init("#version 150"); // MC uses 150 everywhere, so we can too
-	}
 
-	public static void trackDpiScale(Window window) {
-		var previous = new GLFWWindowContentScaleCallback[1];
-		previous[0] = GLFW.glfwSetWindowContentScaleCallback(window.getWindow(), (handle, xScale, yScale) -> {
-			dpiScale = xScale;
-			if (previous[0] != null) {
-				previous[0].invoke(handle, xScale, yScale);
-			}
-		});
-		var xScale = new float[1];
-		GLFW.glfwGetWindowContentScale(window.getWindow(), xScale, null);
-		dpiScale = xScale[0];
-	}
-
-	public static void dispose() {
-		imGuiGl3.dispose();
-		imGuiGlfw.dispose();
-		ImPlot.destroyContext(imPlotContext);
-		ImGui.destroyContext(imGuiContext);
-		ImNodes.destroyContext();
-	}
-
-	public static void setupFonts(ResourceManager resourceManager) {
-		imGuiGl3.updateFontsTexture();
 		imGuiGl3.updateFontsTexture();
 
 		/*
@@ -120,6 +96,27 @@ public class ImGuiHooks {
 		fonts.clearTexData();
 
 		 */
+	}
+
+	public static void trackDpiScale(Window window) {
+		var previous = new GLFWWindowContentScaleCallback[1];
+		previous[0] = GLFW.glfwSetWindowContentScaleCallback(window.getWindow(), (handle, xScale, yScale) -> {
+			dpiScale = xScale;
+			if (previous[0] != null) {
+				previous[0].invoke(handle, xScale, yScale);
+			}
+		});
+		var xScale = new float[1];
+		GLFW.glfwGetWindowContentScale(window.getWindow(), xScale, null);
+		dpiScale = xScale[0];
+	}
+
+	public static void dispose() {
+		imGuiGl3.dispose();
+		imGuiGlfw.dispose();
+		ImPlot.destroyContext(imPlotContext);
+		ImGui.destroyContext(imGuiContext);
+		ImNodes.destroyContext();
 	}
 
 	public static void startFrame(Minecraft mc) {

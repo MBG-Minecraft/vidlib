@@ -30,7 +30,6 @@ public class WidgetDebugPanel extends AdminPanel {
 
 	public WidgetDebugPanel() {
 		super("widget-debug", "Widget Debug");
-		this.ephemeral = true;
 	}
 
 	@Override
