@@ -21,10 +21,14 @@ public class MemoryUsagePanel extends AdminPanel {
 		long freeMemory = Runtime.getRuntime().freeMemory();
 		long usedMemory = totalMemory - freeMemory;
 
+		ImGui.pushItemWidth(-1F);
+
 		ImGui.text("Memory: %2d%% %03d/%03dMB".formatted(usedMemory * 100L / maxMemory, toMiB(usedMemory), toMiB(maxMemory)));
-		ImGui.progressBar(KMath.clamp(usedMemory / (float) maxMemory, 0F, 1F), ImGui.getContentRegionAvailX() - ImGui.getStyle().getItemSpacingX(), 20F, "");
+		ImGui.progressBar(KMath.clamp(usedMemory / (float) maxMemory, 0F, 1F), 0F, 20F, "");
 
 		ImGui.text("Allocated: %2d%% %03dMB".formatted(totalMemory * 100L / maxMemory, toMiB(totalMemory)));
-		ImGui.progressBar(KMath.clamp(totalMemory / (float) maxMemory, 0F, 1F), ImGui.getContentRegionAvailX() - ImGui.getStyle().getItemSpacingX(), 20F, "");
+		ImGui.progressBar(KMath.clamp(totalMemory / (float) maxMemory, 0F, 1F), 0F, 20F, "");
+
+		ImGui.popItemWidth();
 	}
 }

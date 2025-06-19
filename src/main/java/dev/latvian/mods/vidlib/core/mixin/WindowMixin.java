@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.core.mixin;
 import com.mojang.blaze3d.platform.Window;
 import dev.latvian.mods.vidlib.core.VLWindow;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
-import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -69,59 +68,38 @@ public class WindowMixin implements VLWindow {
 
 	@ModifyVariable(method = "setWidth", at = @At(value = "HEAD"), ordinal = 0, argsOnly = true)
 	public int setFramebufferWidth(int width) {
-		if (ImGuiUtils.isResolutionForced()) {
-			return width;
-		}
 		return vl$transformNewFramebufferWidth(width);
 	}
 
 	@ModifyVariable(method = "setHeight", at = @At(value = "HEAD"), ordinal = 0, argsOnly = true)
 	public int setFramebufferHeight(int height) {
-		if (ImGuiUtils.isResolutionForced()) {
-			return height;
-		}
 		return vl$transformNewFramebufferHeight(height);
 	}
 
 	@Inject(method = "refreshFramebufferSize", at = @At("RETURN"))
 	public void updateFramebufferSize(CallbackInfo ci) {
-		if (ImGuiUtils.isResolutionForced()) {
-			return;
-		}
 		framebufferWidth = vl$transformNewFramebufferWidth(framebufferWidth);
 		framebufferHeight = vl$transformNewFramebufferHeight(framebufferHeight);
 	}
 
 	@ModifyVariable(method = "onFramebufferResize", at = @At(value = "HEAD"), ordinal = 0, argsOnly = true)
 	public int onFramebufferSizeChanged$width(int width) {
-		if (ImGuiUtils.isResolutionForced()) {
-			return width;
-		}
 		return vl$transformNewFramebufferWidth(width);
 	}
 
 	@ModifyVariable(method = "onFramebufferResize", at = @At(value = "HEAD"), ordinal = 1, argsOnly = true)
 	public int onFramebufferSizeChanged$height(int height) {
-		if (ImGuiUtils.isResolutionForced()) {
-			return height;
-		}
 		return vl$transformNewFramebufferHeight(height);
 	}
 
 	@ModifyVariable(method = "onResize", at = @At(value = "HEAD"), ordinal = 0, argsOnly = true)
 	public int onWindowSizeChanged$width(int width) {
-		if (ImGuiUtils.isResolutionForced()) {
-			return width;
-		}
 		vl$unscaledWidth = width;
 		return windowedWidth = (int) (vl$unscaledWidth * vl$xScale);
 	}
 
 	@ModifyVariable(method = "onResize", at = @At(value = "HEAD"), ordinal = 1, argsOnly = true)
 	public int onWindowSizeChanged$height(int height) {
-		if (ImGuiUtils.isResolutionForced()) {
-			return height;
-		}
 		vl$unscaledHeight = height;
 		return windowedHeight = (int) (vl$unscaledHeight * vl$yScale);
 	}
@@ -145,26 +123,17 @@ public class WindowMixin implements VLWindow {
 
 	@Override
 	public double vl$getXOffset() {
-		if (ImGuiUtils.isResolutionForced()) {
-			return 0.0;
-		}
 		return vl$xOffset;
 	}
 
 	@Override
 	public double vl$getYOffset() {
-		if (ImGuiUtils.isResolutionForced()) {
-			return 0.0;
-		}
 		return vl$yOffset;
 	}
 
 	@Override
 	public double vl$getInverseYOffset() {
-		if (ImGuiUtils.isResolutionForced()) {
-			return 0.0;
-		}
-		return (1 - vl$yScale) - vl$yOffset;
+		return (1D - vl$yScale) - vl$yOffset;
 	}
 
 	@Override

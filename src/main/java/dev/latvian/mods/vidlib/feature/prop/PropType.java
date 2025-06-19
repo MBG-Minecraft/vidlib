@@ -16,6 +16,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
+import net.minecraft.Util;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 
@@ -29,7 +30,8 @@ public record PropType<P extends Prop>(
 	Factory<? extends P> factory,
 	Map<String, PropData<?, ?>> data,
 	Int2ObjectMap<PropData<?, ?>> idMap,
-	Reference2IntMap<PropData<?, ?>> reverseIdMap
+	Reference2IntMap<PropData<?, ?>> reverseIdMap,
+	String translationKey
 ) implements PropDataProvider, Predicate<Prop> {
 	@FunctionalInterface
 	public interface Factory<P extends Prop> {
@@ -65,7 +67,7 @@ public record PropType<P extends Prop>(
 			idMap.put(i, p);
 		}
 
-		return new PropType<>(id, factory, map, idMap, reverseIdMap);
+		return new PropType<>(id, factory, map, idMap, reverseIdMap, Util.makeDescriptionId("prop", id));
 	}
 
 	public static final Codec<PropType<?>> CODEC = KLibCodecs.map(ALL, ID.CODEC, PropType::id);

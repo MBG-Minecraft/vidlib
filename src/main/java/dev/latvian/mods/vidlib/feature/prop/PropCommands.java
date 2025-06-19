@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
@@ -9,9 +11,10 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.coordinates.Coordinates;
+import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -43,13 +46,27 @@ public interface PropCommands {
 				.executes(ctx -> kill(ctx.getSource(), ResourceLocationArgument.getId(ctx, "prop")))
 			)
 		)
+		.then(Commands.literal("move")
+			.then(Commands.argument("prop", IntegerArgumentType.integer(1))
+				.then(Commands.argument("pos", Vec3Argument.vec3())
+					.executes(ctx -> move(ctx.getSource(), IntegerArgumentType.getInteger(ctx, "prop"), Vec3Argument.getCoordinates(ctx, "pos")))
+				)
+			)
+		)
+		.then(Commands.literal("rotate")
+			.then(Commands.argument("prop", IntegerArgumentType.integer(1))
+				.then(Commands.argument("rotation", RotationArgument.rotation())
+					.executes(ctx -> rotate(ctx.getSource(), IntegerArgumentType.getInteger(ctx, "prop"), RotationArgument.getRotation(ctx, "rotation")))
+				)
+			)
+		)
 	);
 
 	static int spawn(CommandSourceStack source, ResourceLocation typeId, Vec3 pos, @Nullable CompoundTag initialData) {
 		var type = PropType.ALL.get().get(typeId);
 
 		if (type == null) {
-			source.sendFailure(Component.literal("Prop type '" + typeId + "' not found!"));
+			source.error("Prop type '" + typeId + "' not found!");
 			return 0;
 		}
 
@@ -61,7 +78,7 @@ public interface PropCommands {
 		});
 
 		if (propResult.error().isPresent()) {
-			source.sendFailure(Component.literal("Unable to create prop of type '" + typeId + "': " + propResult.error().get().message()));
+			source.error("Unable to create prop of type '" + typeId + "': " + propResult.error().get().message());
 			return 0;
 		}
 
@@ -84,7 +101,7 @@ public interface PropCommands {
 			var type = PropType.ALL.get().get(typeId);
 
 			if (type == null) {
-				source.sendFailure(Component.literal("Prop type '" + typeId + "' not found!"));
+				source.error("Prop type '" + typeId + "' not found!");
 				return 0;
 			}
 
@@ -97,7 +114,32 @@ public interface PropCommands {
 		}
 
 		int k = killed;
-		source.sendSuccess(() -> Component.literal("Killed " + k + " props"), true);
+		source.broadcast("Killed " + k + " props");
 		return killed;
+	}
+
+	static int move(CommandSourceStack source, int propId, Coordinates coordinates) {
+		var prop = source.getLevel().getProps().levelProps.get(propId);
+
+		if (prop != null) {
+			prop.setPos(coordinates.getPosition(prop.getCommandSourceAt(source)));
+			prop.sync(Prop.POSITION);
+			return 1;
+		}
+
+		return 0;
+	}
+
+	static int rotate(CommandSourceStack source, int propId, Coordinates coordinates) {
+		var prop = source.getLevel().getProps().levelProps.get(propId);
+
+		if (prop != null) {
+			prop.setRot(Rotation.deg(coordinates.getRotation(prop.getCommandSourceAt(source))));
+			prop.sync(Prop.YAW);
+			prop.sync(Prop.PITCH);
+			return 1;
+		}
+
+		return 0;
 	}
 }

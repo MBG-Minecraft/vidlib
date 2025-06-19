@@ -7,6 +7,7 @@ import imgui.ImVec2;
 import imgui.ImVec4;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiInputTextFlags;
+import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
@@ -16,9 +17,6 @@ import imgui.type.ImString;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector3f;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.function.BooleanSupplier;
 
 public class ImGuiUtils {
 	public static final ImInt INT = new ImInt();
@@ -42,27 +40,37 @@ public class ImGuiUtils {
 		STRING.inputData.isResizable = true;
 	}
 
-	public static void resetResolution() {
-		forceResolution(-1, -1);
+	public static void pushDefaultStyle() {
+		// ImGui.pushFont(ImFonts.getJetbrainsMono19());
+
+		ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 15, 15);
+		ImGui.pushStyleVar(ImGuiStyleVar.WindowRounding, 5F);
+		ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, 5, 5);
+		ImGui.pushStyleVar(ImGuiStyleVar.FrameRounding, 4F);
+		ImGui.pushStyleVar(ImGuiStyleVar.ChildRounding, 4F);
+		ImGui.pushStyleVar(ImGuiStyleVar.PopupRounding, 4F);
+		ImGui.pushStyleVar(ImGuiStyleVar.PopupBorderSize, 0);
+		ImGui.pushStyleVar(ImGuiStyleVar.ItemSpacing, 12, 8);
+		ImGui.pushStyleVar(ImGuiStyleVar.ItemInnerSpacing, 8, 6);
+		ImGui.pushStyleVar(ImGuiStyleVar.IndentSpacing, 25F);
+		ImGui.pushStyleVar(ImGuiStyleVar.ScrollbarSize, 15F);
+		ImGui.pushStyleVar(ImGuiStyleVar.ScrollbarRounding, 9F);
+		ImGui.pushStyleVar(ImGuiStyleVar.GrabMinSize, 5F);
+		ImGui.pushStyleVar(ImGuiStyleVar.GrabRounding, 3F);
+		ImGui.pushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
+		ImGui.pushStyleVar(ImGuiStyleVar.SelectableTextAlign, 0.0F, 0.5F);
+		ImGui.pushStyleVar(ImGuiStyleVar.Alpha, 1F);
+
+		ImGui.pushStyleColor(ImGuiCol.WindowBg, 0xEF302929);
+		ImGui.pushStyleColor(ImGuiCol.FrameBg, 0xFF231D1D); // checkboxes, sliders
+		ImGui.pushStyleColor(ImGuiCol.TitleBg, 0xEF563847);
+		ImGui.pushStyleColor(ImGuiCol.TitleBgActive, 0xEF70517F);
 	}
 
-	public static boolean isResolutionForced() {
-		return ImGuiHooks.forceWidth > 0 && ImGuiHooks.forceHeight > 0;
-	}
-
-	public static CompletableFuture<Void> forceResolution(int width, int height) {
-		ImGuiHooks.forceWidth = width;
-		ImGuiHooks.forceHeight = height;
-
-		return CompletableFuture.runAsync(() -> {
-			var fbo = Minecraft.getInstance().getMainRenderTarget();
-			while (ImGuiHooks.forceWidth != fbo.width || ImGuiHooks.forceHeight != fbo.height) {
-			}
-		});
-	}
-
-	public static void enableNavigationWhen(BooleanSupplier condition) {
-		ImGuiHooks.navigationConditions.add(condition);
+	public static void popDefaultStyle() {
+		ImGui.popStyleColor(4);
+		ImGui.popStyleVar(17);
+		// ImGui.popFont();
 	}
 
 	public static float getDpiScale() {

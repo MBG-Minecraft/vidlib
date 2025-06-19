@@ -3,13 +3,14 @@ package dev.latvian.mods.vidlib.feature.imgui;
 import imgui.ImGui;
 
 public class StopwatchPanel extends AdminPanel {
-	public static final StopwatchPanel INSTANCE = new StopwatchPanel();
+	public static final StopwatchPanel INSTANCE = new StopwatchPanel("stopwatch", false);
 
 	public long stopwatch = 0L;
 	public long stopwatchStart = 0L;
 
-	public StopwatchPanel() {
-		super("stopwatch", "Stopwatch");
+	public StopwatchPanel(String id, boolean ephemeral) {
+		super(id, "Stopwatch");
+		this.ephemeral = ephemeral;
 	}
 
 	@Override

@@ -15,14 +15,17 @@ import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.Position;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.connection.ConnectionType;
 import org.jetbrains.annotations.Nullable;
@@ -343,5 +346,15 @@ public class Prop {
 
 	public Entity asEntity() {
 		return new PropEntity(this);
+	}
+
+	public Component getDisplayName() {
+		return Component.literal(type.translationKey());
+	}
+
+	public CommandSourceStack getCommandSourceAt(CommandSourceStack original) {
+		return original.withAnchor(EntityAnchorArgument.Anchor.FEET)
+			.withPosition(getPos(1F))
+			.withRotation(new Vec2(getPitch(1F), getYaw(1F)));
 	}
 }

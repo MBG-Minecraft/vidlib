@@ -70,6 +70,7 @@
 		"GameNarratorMixin",
 		"GameRendererMixin",
 		"GlBufferMixin",
+		"GlCommandEncoderMixin",
 		"GlTextureMixin",
 		"GpuBufferMixin",
 		"GpuTextureMixin",

@@ -5,16 +5,16 @@ import imgui.flag.ImGuiWindowFlags;
 
 public class AdminPanel {
 	public final String id;
-	public final String label;
-	private final String internalId;
+	public String label;
 	public boolean canBeClosed;
+	public boolean ephemeral;
 	boolean isOpen;
 
 	public AdminPanel(String id, String label) {
 		this.id = id;
 		this.label = label;
-		this.internalId = label + "###" + id;
 		this.canBeClosed = true;
+		this.ephemeral = false;
 		this.isOpen = false;
 	}
 
@@ -53,9 +53,13 @@ public class AdminPanel {
 			flags |= ImGuiWindowFlags.UnsavedDocument;
 		}
 
+		if (ephemeral) {
+			flags |= ImGuiWindowFlags.NoSavedSettings;
+		}
+
 		ImGuiUtils.BOOLEAN.set(true);
 
-		if (canBeClosed ? ImGui.begin(internalId, ImGuiUtils.BOOLEAN, flags) : ImGui.begin(internalId, flags)) {
+		if (canBeClosed ? ImGui.begin(label + "###" + id, ImGuiUtils.BOOLEAN, flags) : ImGui.begin(label + "###" + id, flags)) {
 			content();
 
 			if (!ImGuiUtils.BOOLEAN.get()) {

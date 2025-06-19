@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
@@ -13,6 +14,11 @@ public final class PropEntity extends Entity {
 	public PropEntity(Prop prop) {
 		super(EntityType.BLOCK_DISPLAY, prop.level);
 		this.prop = prop;
+	}
+
+	@Override
+	public Component getDisplayName() {
+		return prop.getDisplayName();
 	}
 
 	@Override

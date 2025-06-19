@@ -17,7 +17,17 @@ public class CommandHistoryPanel extends AdminPanel {
 		var list = new ArrayList<>(Minecraft.getInstance().commandHistory().history());
 
 		for (int i = list.size() - 1; i >= 0; i--) {
-			ImGui.text(list.get(i));
+			var s = list.get(i);
+
+			ImGui.text(s);
+
+			if (ImGui.isItemHovered()) {
+				ImGui.setTooltip("Click to Copy:\n\n" + s);
+			}
+
+			if (ImGui.isItemClicked()) {
+				ImGui.setClipboardText(s);
+			}
 		}
 	}
 }

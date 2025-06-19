@@ -19,10 +19,14 @@ public class VidLibKeys {
 	public static KeyMapping repeatLastCommandKeyMapping;
 	public static KeyMapping adminPanelKeyMapping;
 
-	private static KeyMapping register(RegisterKeyMappingsEvent event, String name, KeyModifier modifier, int defaultKey) {
-		var key = new KeyMapping(name, KeyConflictContext.IN_GAME, modifier, InputConstants.Type.KEYSYM, defaultKey, "key.categories.vidlib");
+	private static KeyMapping register(RegisterKeyMappingsEvent event, String name, KeyModifier modifier, int defaultKey, KeyConflictContext conflict) {
+		var key = new KeyMapping(name, conflict, modifier, InputConstants.Type.KEYSYM, defaultKey, "key.categories.vidlib");
 		event.register(key);
 		return key;
+	}
+
+	private static KeyMapping register(RegisterKeyMappingsEvent event, String name, KeyModifier modifier, int defaultKey) {
+		return register(event, name, modifier, defaultKey, KeyConflictContext.IN_GAME);
 	}
 
 	public static void register(RegisterKeyMappingsEvent event) {
@@ -30,7 +34,7 @@ public class VidLibKeys {
 		clearParticlesKeyMapping = register(event, "key.vidlib.clear_particles", KeyModifier.NONE, GLFW.GLFW_KEY_L);
 		reloadKeyMapping = register(event, "key.vidlib.reload", KeyModifier.NONE, GLFW.GLFW_KEY_R);
 		repeatLastCommandKeyMapping = register(event, "key.vidlib.repeat_last_command", KeyModifier.NONE, GLFW.GLFW_KEY_SEMICOLON);
-		adminPanelKeyMapping = register(event, "key.vidlib.admin_panel", KeyModifier.NONE, GLFW.GLFW_KEY_MENU);
+		adminPanelKeyMapping = register(event, "key.vidlib.admin_panel", KeyModifier.NONE, GLFW.GLFW_KEY_MENU, KeyConflictContext.UNIVERSAL);
 	}
 
 	public static void handle(Minecraft mc) {

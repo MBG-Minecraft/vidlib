@@ -32,4 +32,12 @@ public interface VLWindow {
 	default int vl$getUnscaledFramebufferHeight() {
 		return 1; // NO-OP
 	}
+
+	default double vl$modifyCursorX(double x) {
+		return x - vl$getXOffset() * vl$getUnscaledWidth();
+	}
+
+	default double vl$modifyCursorY(double y) {
+		return y - vl$getYOffset() * vl$getUnscaledHeight();
+	}
 }

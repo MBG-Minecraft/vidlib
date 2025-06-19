@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 import dev.latvian.mods.vidlib.core.VLMouseHandler;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.ScrollWheelHandler;
 import net.minecraft.client.player.LocalPlayer;
@@ -69,12 +70,12 @@ public abstract class MouseHandlerMixin implements VLMouseHandler {
 
 	@ModifyVariable(method = "onMove", at = @At("HEAD"), ordinal = 0, argsOnly = true)
 	public double vl$modifyCursorX(double x) {
-		return ImGuiHooks.modifyCursorX(x);
+		return Minecraft.getInstance().getWindow().vl$modifyCursorX(x);
 	}
 
 	@ModifyVariable(method = "onMove", at = @At("HEAD"), ordinal = 1, argsOnly = true)
 	public double vl$modifyCursorY(double y) {
-		return ImGuiHooks.modifyCursorY(y);
+		return Minecraft.getInstance().getWindow().vl$modifyCursorY(y);
 	}
 
 	@Override

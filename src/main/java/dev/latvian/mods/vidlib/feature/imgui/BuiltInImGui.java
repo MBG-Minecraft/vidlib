@@ -1,51 +1,27 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import imgui.ImGui;
-import imgui.flag.ImGuiCol;
-import imgui.flag.ImGuiStyleVar;
 import imgui.internal.flag.ImGuiItemFlags;
 import net.minecraft.client.Minecraft;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
 
 public class BuiltInImGui {
 	public static final List<AdminPanel> OPEN_TABS = new ArrayList<>();
 
 	public static void handle(Minecraft mc) {
-		// ImGui.pushFont(ImFonts.getJetbrainsMono19());
-
-		ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 15, 15);
-		ImGui.pushStyleVar(ImGuiStyleVar.WindowRounding, 5F);
-		ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, 5, 5);
-		ImGui.pushStyleVar(ImGuiStyleVar.FrameRounding, 4F);
-		ImGui.pushStyleVar(ImGuiStyleVar.ChildRounding, 4F);
-		ImGui.pushStyleVar(ImGuiStyleVar.PopupRounding, 4F);
-		ImGui.pushStyleVar(ImGuiStyleVar.PopupBorderSize, 0);
-		ImGui.pushStyleVar(ImGuiStyleVar.ItemSpacing, 12, 8);
-		ImGui.pushStyleVar(ImGuiStyleVar.ItemInnerSpacing, 8, 6);
-		ImGui.pushStyleVar(ImGuiStyleVar.IndentSpacing, 25F);
-		ImGui.pushStyleVar(ImGuiStyleVar.ScrollbarSize, 15F);
-		ImGui.pushStyleVar(ImGuiStyleVar.ScrollbarRounding, 9F);
-		ImGui.pushStyleVar(ImGuiStyleVar.GrabMinSize, 5F);
-		ImGui.pushStyleVar(ImGuiStyleVar.GrabRounding, 3F);
-		ImGui.pushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
-		ImGui.pushStyleVar(ImGuiStyleVar.SelectableTextAlign, 0.0F, 0.5F);
-		ImGui.pushStyleVar(ImGuiStyleVar.Alpha, 0.95F);
-
-		ImGui.pushStyleColor(ImGuiCol.WindowBg, 0xEF302929);
-		ImGui.pushStyleColor(ImGuiCol.TitleBg, 0xEF563847);
-		ImGui.pushStyleColor(ImGuiCol.TitleBgActive, 0xEF70517F);
+		ImGuiUtils.pushDefaultStyle();
 
 		if ((mc.isLocalServer() || mc.player.hasPermissions(2)) && mc.player.getAdminPanel()) {
 			adminPanel(mc);
 		}
 
 		NeoForge.EVENT_BUS.post(new ImGuiEvent());
-
-		ImGui.popStyleColor(3);
-		ImGui.popStyleVar(17);
+		ImGuiUtils.popDefaultStyle();
 	}
 
 	public static void adminPanel(Minecraft mc) {
@@ -59,12 +35,12 @@ public class BuiltInImGui {
 					CommandHistoryPanel.INSTANCE.open();
 				}
 
-				if (ImGui.menuItem("Main Stopwatch")) {
+				if (ImGui.menuItem("Stopwatch")) {
 					StopwatchPanel.INSTANCE.open();
 				}
 
 				if (ImGui.menuItem("New Stopwatch")) {
-					new StopwatchPanel().open();
+					new StopwatchPanel("stopwatch-" + UUID.randomUUID().toString().toLowerCase(Locale.ROOT), true).open();
 				}
 
 				NeoForge.EVENT_BUS.post(new AdminPanelEvent.OpenDropdown());
@@ -96,6 +72,10 @@ public class BuiltInImGui {
 
 				if (ImGui.menuItem("Anchor", null, mc.player.getShowAnchor())) {
 					mc.runClientCommand("anchor show");
+				}
+
+				if (ImGui.menuItem("Widgets")) {
+					new WidgetDebugPanel().open();
 				}
 
 				NeoForge.EVENT_BUS.post(new AdminPanelEvent.DebugDropdown());

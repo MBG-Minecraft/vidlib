@@ -119,7 +119,7 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	public void vl$onFinishInit(CallbackInfo ci) {
-		TTFFile.load(resourceManager);
+		TTFFile.find(resourceManager);
 		ImGuiHooks.setupFonts(resourceManager);
 	}
 

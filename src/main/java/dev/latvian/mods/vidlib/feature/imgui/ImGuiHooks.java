@@ -1,7 +1,5 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
-import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.Window;
 import dev.latvian.mods.vidlib.core.VLMouseHandler;
 import imgui.ImGui;
@@ -18,10 +16,6 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWWindowContentScaleCallback;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BooleanSupplier;
 
 /**
  * Internal hooks for ImGui lifecycle management.
@@ -51,11 +45,8 @@ public class ImGuiHooks {
 	private static boolean captureMouse, captureKeyboard;
 	private static boolean active = false;
 
-	static List<BooleanSupplier> navigationConditions = new ArrayList<>();
 	private static boolean endingFrame = false;
 
-	static int forceWidth = -1;
-	static int forceHeight = -1;
 	static int dockId;
 	static float dpiScale = 1.0f;
 
@@ -67,7 +58,10 @@ public class ImGuiHooks {
 		imPlotContext = ImPlot.createContext();
 		ImNodes.createContext();
 		var io = ImGui.getIO();
-		io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable | ImGuiConfigFlags.DockingEnable);
+		io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
+		io.addConfigFlags(ImGuiConfigFlags.DockingEnable);
+		io.addConfigFlags(ImGuiConfigFlags.DpiEnableScaleFonts);
+		io.addConfigFlags(ImGuiConfigFlags.DpiEnableScaleViewports);
 		io.setConfigDockingWithShift(false);
 		io.setConfigWindowsMoveFromTitleBarOnly(true);
 
@@ -131,8 +125,7 @@ public class ImGuiHooks {
 	public static void startFrame(Minecraft mc) {
 		ensureEndFrame();
 
-		boolean enableNavigationMenu = navigationConditions.stream().anyMatch(BooleanSupplier::getAsBoolean);
-		if (!enableNavigationMenu && ImGui.getIO().getKeysDown(GLFW.GLFW_KEY_LEFT_CONTROL)) {
+		if (ImGui.getIO().getKeysDown(GLFW.GLFW_KEY_LEFT_CONTROL)) {
 			ImGui.getIO().setKeysDown(GLFW.GLFW_KEY_TAB, false);
 		}
 
@@ -153,22 +146,8 @@ public class ImGuiHooks {
 			ImGui.getIO().setMousePos(-1, -1);
 		}
 
-		handleForcedResolution();
 		handleDocking();
 		// FIXME RenderImGuiCallback.START_FRAME.invoker().render();
-	}
-
-	private static void handleForcedResolution() {
-		if (ImGuiUtils.isResolutionForced()) {
-			var client = Minecraft.getInstance();
-			var window = client.getWindow();
-
-			if (window.getWidth() != forceWidth || window.getHeight() != forceHeight) {
-				client.getWindow().setWidth(forceWidth);
-				client.getWindow().setHeight(forceHeight);
-				client.resizeDisplay();
-			}
-		}
 	}
 
 	private static void handleDocking() {
@@ -181,21 +160,19 @@ public class ImGuiHooks {
 		dockId = ImGui.dockSpaceOverViewport(ImGui.getMainViewport(), ImGuiDockNodeFlags.NoDockingInCentralNode | ImGuiDockNodeFlags.PassthruCentralNode);
 		var centralNode = imgui.internal.ImGui.dockBuilderGetCentralNode(dockId);
 
-		if (!ImGuiUtils.isResolutionForced()) {
-			// Get the size and position of the central node
-			var windowPos = ImGui.getMainViewport().getPos();
-			var windowSize = ImGui.getMainViewport().getSize();
-			var centralNodePos = centralNode.getPos();
-			var centralNodeSize = centralNode.getSize();
+		// Get the size and position of the central node
+		var windowPos = ImGui.getMainViewport().getPos();
+		var windowSize = ImGui.getMainViewport().getSize();
+		var centralNodePos = centralNode.getPos();
+		var centralNodeSize = centralNode.getSize();
 
-			updateViewportArea(
-				client, window,
-				(centralNodePos.x - windowPos.x) / (double) windowSize.x,
-				(centralNodePos.y - windowPos.y) / (double) windowSize.y,
-				centralNodeSize.x / (double) windowSize.x,
-				centralNodeSize.y / (double) windowSize.y
-			);
-		}
+		updateViewportArea(
+			client, window,
+			(centralNodePos.x - windowPos.x) / (double) windowSize.x,
+			(centralNodePos.y - windowPos.y) / (double) windowSize.y,
+			centralNodeSize.x / (double) windowSize.x,
+			centralNodeSize.y / (double) windowSize.y
+		);
 	}
 
 	private static void updateViewportArea(Minecraft client, Window window, double xOffset, double yOffset, double xScale, double yScale) {
@@ -258,27 +235,23 @@ public class ImGuiHooks {
 		return captureKeyboard;
 	}
 
-	public static void afterSetFramebufferViewport(RenderTarget framebuffer, int width, int height) {
-		var client = Minecraft.getInstance();
-		if (endingFrame && client.getMainRenderTarget() == framebuffer) {
-			var window = client.getWindow();
-			GlStateManager._viewport(
-				(int) (window.vl$getXOffset() * window.vl$getUnscaledFramebufferWidth()),
-				(int) (window.vl$getInverseYOffset() * window.vl$getUnscaledFramebufferHeight()),
-				width,
-				height
-			);
-		}
-	}
-
-	public static double modifyCursorX(double x) {
+	public static int frameX(int original) {
 		var window = Minecraft.getInstance().getWindow();
-		return x - window.vl$getXOffset() * window.vl$getUnscaledWidth();
+		return endingFrame ? (int) (window.vl$getXOffset() * window.vl$getUnscaledFramebufferWidth()) : original;
 	}
 
-	public static double modifyCursorY(double y) {
+	public static int frameY(int original) {
 		var window = Minecraft.getInstance().getWindow();
-		return y - window.vl$getYOffset() * window.vl$getUnscaledHeight();
+		return endingFrame ? (int) (window.vl$getInverseYOffset() * window.vl$getUnscaledFramebufferHeight()) : original;
 	}
 
+	public static int frameW(int original) {
+		var window = Minecraft.getInstance().getWindow();
+		return endingFrame ? (int) (original + window.vl$getXOffset() * window.vl$getUnscaledFramebufferWidth()) : original;
+	}
+
+	public static int frameH(int original) {
+		var window = Minecraft.getInstance().getWindow();
+		return endingFrame ? (int) (original + window.vl$getInverseYOffset() * window.vl$getUnscaledFramebufferHeight()) : original;
+	}
 }
