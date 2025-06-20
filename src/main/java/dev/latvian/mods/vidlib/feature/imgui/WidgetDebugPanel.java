@@ -11,6 +11,8 @@ import imgui.type.ImInt;
 import imgui.type.ImString;
 
 public class WidgetDebugPanel extends AdminPanel {
+	public static final WidgetDebugPanel INSTANCE = new WidgetDebugPanel();
+
 	public final ImInt intData = new ImInt();
 	public final int[] int2Data = new int[2];
 	public final int[] int3Data = new int[3];
@@ -28,7 +30,7 @@ public class WidgetDebugPanel extends AdminPanel {
 	public final ImString stringData = new ImString();
 	public final ImBoolean booleanData = new ImBoolean();
 
-	public WidgetDebugPanel() {
+	private WidgetDebugPanel() {
 		super("widget-debug", "Widget Debug");
 	}
 

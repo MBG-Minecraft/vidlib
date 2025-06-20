@@ -9,6 +9,9 @@ public abstract class AdminPanelEvent extends Event {
 	public static class OpenDropdown extends AdminPanelEvent {
 	}
 
+	public static class ConfigDropdown extends AdminPanelEvent {
+	}
+
 	public static class DebugDropdown extends AdminPanelEvent {
 	}
 }

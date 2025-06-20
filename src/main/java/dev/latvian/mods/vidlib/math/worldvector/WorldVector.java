@@ -79,6 +79,7 @@ public interface WorldVector {
 		REGISTRY.register(ScaledWorldVector.TYPE);
 		REGISTRY.register(InterpolatedWorldVector.TYPE);
 		REGISTRY.register(FollowingEntityWorldVector.TYPE);
+		REGISTRY.register(FollowingPropWorldVector.TYPE);
 		REGISTRY.register(VariableWorldVector.TYPE);
 		REGISTRY.register(IfWorldVector.TYPE);
 		REGISTRY.register(PivotingWorldVector.TYPE);

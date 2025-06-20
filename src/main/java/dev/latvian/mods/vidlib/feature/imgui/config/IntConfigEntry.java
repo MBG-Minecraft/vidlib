@@ -29,13 +29,13 @@ public class IntConfigEntry extends ConfigEntry<Integer> {
 	}
 
 	@Override
-	public boolean imguiValue() {
-		ImGui.setNextItemWidth(ImGui.getContentRegionAvailX() - ImGui.getStyle().getItemSpacingX());
-
+	public Update imguiValue() {
 		if (slider) {
-			return ImGui.sliderInt(id, data.getData(), min, max);
+			ImGui.sliderInt(id, data.getData(), min, max);
+		} else {
+			ImGui.inputInt(id, data);
 		}
 
-		return ImGui.inputInt(id, data);
+		return Update.itemEdit();
 	}
 }

@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
+import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
 import imgui.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import net.minecraft.client.Minecraft;
@@ -25,6 +27,8 @@ public class BuiltInImGui {
 	}
 
 	public static void adminPanel(Minecraft mc) {
+		var session = mc.player.vl$sessionData();
+
 		if (ImGui.beginMainMenuBar()) {
 			if (ImGui.beginMenu(ImIcons.OPEN + " Open")) {
 				if (ImGui.menuItem(ImIcons.MEMORY + " Memory Usage")) {
@@ -44,6 +48,33 @@ public class BuiltInImGui {
 				}
 
 				NeoForge.EVENT_BUS.post(new AdminPanelEvent.OpenDropdown());
+				ImGui.endMenu();
+			}
+
+			if (ImGui.beginMenu(ImIcons.SETTINGS + " Config")) {
+				if (ImGui.beginMenu(ImIcons.BRIGHTNESS + " Skybox")) {
+					imgui.internal.ImGui.pushItemFlag(ImGuiItemFlags.SelectableDontClosePopup, true);
+					var current = mc.level.getSkybox();
+
+					for (var skybox : SkyboxData.SKYBOX_IDS) {
+						var tex = session.getSkybox(skybox).loadTexture(mc);
+						ImGui.image(tex.getTexture().vl$getHandle(), 18F, 18F, 0F, 0.5F, 0.25F, 1F);
+						ImGui.sameLine();
+
+						if (ImGui.menuItem(skybox.getPath(), null, skybox.equals(current))) {
+							mc.runClientCommand("skybox set \"" + skybox + "\"");
+						}
+					}
+
+					if (ImGui.menuItem("Vanilla", null, Skyboxes.VANILLA.equals(current))) {
+						mc.runClientCommand("skybox set \"minecraft:vanilla\"");
+					}
+
+					imgui.internal.ImGui.popItemFlag();
+					ImGui.endMenu();
+				}
+
+				NeoForge.EVENT_BUS.post(new AdminPanelEvent.ConfigDropdown());
 				ImGui.endMenu();
 			}
 
@@ -75,7 +106,7 @@ public class BuiltInImGui {
 				}
 
 				if (ImGui.menuItem(ImIcons.SELECT + " Widgets")) {
-					new WidgetDebugPanel().open();
+					WidgetDebugPanel.INSTANCE.open();
 				}
 
 				NeoForge.EVENT_BUS.post(new AdminPanelEvent.DebugDropdown());

@@ -26,9 +26,9 @@ public class DoubleSliderConfigEntry extends ConfigEntry<Double> {
 	}
 
 	@Override
-	public boolean imguiValue() {
-		ImGui.setNextItemWidth(ImGui.getContentRegionAvailX() - ImGui.getStyle().getItemSpacingX());
-		return ImGui.sliderFloat(id, data, (float) min, (float) max);
+	public Update imguiValue() {
+		ImGui.sliderFloat(id, data, (float) min, (float) max);
+		return Update.itemEdit();
 	}
 
 	@Override

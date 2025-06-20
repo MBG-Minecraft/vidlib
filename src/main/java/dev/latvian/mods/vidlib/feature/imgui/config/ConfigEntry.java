@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib.feature.imgui.config;
 
+import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.vidlib.core.VLMinecraftClient;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import imgui.ImGui;
@@ -9,6 +11,32 @@ import imgui.flag.ImGuiCol;
 import java.util.Objects;
 
 public abstract class ConfigEntry<T> {
+	public enum Update {
+		NONE,
+		PARTIAL,
+		FULL;
+
+		public static final Update[] VALUES = values();
+
+		public static Update full(boolean value) {
+			return value ? FULL : NONE;
+		}
+
+		public static Update itemEdit() {
+			if (ImGui.isItemDeactivatedAfterEdit()) {
+				return Update.FULL;
+			} else if (ImGui.isItemEdited()) {
+				return Update.PARTIAL;
+			} else {
+				return Update.NONE;
+			}
+		}
+
+		public Update or(Update other) {
+			return VALUES[Math.max(ordinal(), other.ordinal())];
+		}
+	}
+
 	public static ConfigEntry<Boolean> bool(String label, DataKey<Boolean> key) {
 		return new BoolConfigEntry(label, key);
 	}
@@ -61,6 +89,10 @@ public abstract class ConfigEntry<T> {
 		return doubleSlider(label, key, 0D, max);
 	}
 
+	public static ConfigEntry<Color> color(String label, DataKey<Color> key) {
+		return new ColorConfigEntry(label, key);
+	}
+
 	public static ConfigEntry<Gradient> gradient(String label, DataKey<Gradient> key) {
 		return new GradientConfigEntry(label, key);
 	}
@@ -68,11 +100,17 @@ public abstract class ConfigEntry<T> {
 	public final String label;
 	public final DataKey<T> key;
 	public final String id;
+	public Object extraData;
 
 	public ConfigEntry(String label, DataKey<T> key) {
 		this.label = label;
 		this.key = key;
 		this.id = "###" + key.id().replace('/', '-');
+	}
+
+	public ConfigEntry<T> withExtraData(Object extraData) {
+		this.extraData = extraData;
+		return this;
 	}
 
 	public void init(DataMap dataMap) {
@@ -87,10 +125,10 @@ public abstract class ConfigEntry<T> {
 		return false;
 	}
 
-	public boolean imguiLabel() {
-		var isSame = equals(get(), key.defaultValue());
+	public Update imguiLabel() {
+		var isDefault = isDefault();
 
-		if (isSame) {
+		if (isDefault) {
 			ImGui.text(label);
 		} else {
 			ImGui.pushStyleColor(ImGuiCol.Text, 0xFF00D8FF);
@@ -100,13 +138,13 @@ public abstract class ConfigEntry<T> {
 
 		ImGui.sameLine();
 
-		if (isSame) {
+		if (isDefault) {
 			ImGui.beginDisabled();
 		}
 
 		boolean reset = ImGui.smallButton("Reset" + id + "-reset");
 
-		if (isSame) {
+		if (isDefault) {
 			ImGui.endDisabled();
 		}
 
@@ -116,13 +154,13 @@ public abstract class ConfigEntry<T> {
 
 		if (reset) {
 			set(key.defaultValue());
-			return true;
+			return Update.FULL;
 		}
 
-		return false;
+		return Update.NONE;
 	}
 
-	public abstract boolean imguiValue();
+	public abstract Update imguiValue();
 
 	public String json(T value) {
 		return value.toString();
@@ -130,5 +168,18 @@ public abstract class ConfigEntry<T> {
 
 	public boolean equals(T a, T b) {
 		return Objects.equals(a, b);
+	}
+
+	public boolean isDefault() {
+		return equals(get(), key.defaultValue());
+	}
+
+	public void update(VLMinecraftClient mc, boolean full) {
+		var value = get();
+		mc.getServerData().set(key, value);
+
+		if (full) {
+			mc.updateServerDataValue(key, value);
+		}
 	}
 }

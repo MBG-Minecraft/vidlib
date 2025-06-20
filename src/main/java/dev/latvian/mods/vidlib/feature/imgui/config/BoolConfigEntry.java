@@ -28,7 +28,7 @@ public class BoolConfigEntry extends ConfigEntry<Boolean> {
 	}
 
 	@Override
-	public boolean imguiValue() {
-		return ImGui.checkbox(id, data);
+	public Update imguiValue() {
+		return Update.full(ImGui.checkbox(id, data));
 	}
 }

@@ -159,24 +159,30 @@ public class LocalClientSessionData extends ClientSessionData {
 		if (skyboxId == null || skyboxId.equals(Skyboxes.VANILLA)) {
 			skybox = null;
 		} else {
-			skybox = skyboxes.get(skyboxId);
-
-			if (skybox == null) {
-				var skyboxData = SkyboxData.REGISTRY.get(skyboxId);
-
-				if (skyboxData == null) {
-					skyboxData = new SkyboxData(skyboxId, Optional.empty(), 0F, 0F, Color.WHITE, false, true, true, Optional.empty(), Optional.empty());
-				}
-
-				skybox = new Skybox(skyboxData);
-				skyboxes.put(skyboxId, skybox);
-			}
+			skybox = getSkybox(skyboxId);
 		}
 
 		GameEventHandler.ambientLight = EntityOverride.AMBIENT_LIGHT.get(player, Range.FULL);
 
 		var f = EntityOverride.FOG.get(player);
 		ClientFogOverride.override = f == null ? FogParameters.NO_FOG : ClientFogOverride.convert(f);
+	}
+
+	public Skybox getSkybox(ResourceLocation id) {
+		var skybox = skyboxes.get(id);
+
+		if (skybox == null) {
+			var skyboxData = SkyboxData.REGISTRY.get(id);
+
+			if (skyboxData == null) {
+				skyboxData = new SkyboxData(id, Optional.empty(), 0F, 0F, Color.WHITE, false, true, true, Optional.empty(), Optional.empty());
+			}
+
+			skybox = new Skybox(skyboxData);
+			skyboxes.put(id, skybox);
+		}
+
+		return skybox;
 	}
 
 	@Override

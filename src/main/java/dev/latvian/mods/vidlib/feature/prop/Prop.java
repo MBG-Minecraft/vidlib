@@ -12,6 +12,7 @@ import dev.latvian.mods.klib.shape.CuboidShape;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
+import dev.latvian.mods.vidlib.math.worldvector.EntityPositionType;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import net.minecraft.commands.CommandSourceStack;
@@ -356,5 +357,17 @@ public class Prop {
 		return original.withAnchor(EntityAnchorArgument.Anchor.FEET)
 			.withPosition(getPos(1F))
 			.withRotation(new Vec2(getPitch(1F), getYaw(1F)));
+	}
+
+	public Vec3 getPos(EntityPositionType type) {
+		return switch (type) {
+			case CENTER -> new Vec3(pos.x, pos.y + height / 2D, pos.z);
+			case TOP -> new Vec3(pos.x, pos.y + height, pos.z);
+			case EYES -> new Vec3(pos.x, pos.y + height * 0.75D, pos.z);
+			case LEASH -> new Vec3(pos.x, pos.y + height * 2D / 5D, pos.z);
+			case SOUND_SOURCE -> getPos(EntityPositionType.EYES);
+			case LOOK_TARGET -> new Vec3(pos.x, pos.y, pos.z).add(Rotation.deg(rotation.y, rotation.x, rotation.z).lookVec3(1D));
+			default -> new Vec3(pos.x, pos.y, pos.z);
+		};
 	}
 }

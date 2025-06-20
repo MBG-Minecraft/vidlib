@@ -27,9 +27,9 @@ public class DoubleInputConfigEntry extends ConfigEntry<Double> {
 	}
 
 	@Override
-	public boolean imguiValue() {
-		ImGui.setNextItemWidth(ImGui.getContentRegionAvailX() - ImGui.getStyle().getItemSpacingX());
-		return ImGui.inputDouble(id, data);
+	public Update imguiValue() {
+		ImGui.inputDouble(id, data);
+		return Update.itemEdit();
 	}
 
 	@Override

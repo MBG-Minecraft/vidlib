@@ -57,6 +57,7 @@ public record SkyboxData(
 			super.apply(map);
 			SKYBOX_IDS.clear();
 			SKYBOX_IDS.addAll(map.keySet());
+			SKYBOX_IDS.sort(ResourceLocation::compareNamespaced);
 		}
 	}
 }

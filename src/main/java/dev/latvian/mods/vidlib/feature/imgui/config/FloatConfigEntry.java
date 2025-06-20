@@ -29,14 +29,14 @@ public class FloatConfigEntry extends ConfigEntry<Float> {
 	}
 
 	@Override
-	public boolean imguiValue() {
-		ImGui.setNextItemWidth(ImGui.getContentRegionAvailX() - ImGui.getStyle().getItemSpacingX());
-
+	public Update imguiValue() {
 		if (slider) {
-			return ImGui.sliderFloat(id, data.getData(), min, max);
+			ImGui.sliderFloat(id, data.getData(), min, max);
+		} else {
+			ImGui.inputFloat(id, data);
 		}
 
-		return ImGui.inputFloat(id, data);
+		return Update.itemEdit();
 	}
 
 	@Override
