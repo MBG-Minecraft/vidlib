@@ -26,20 +26,20 @@ public class BuiltInImGui {
 
 	public static void adminPanel(Minecraft mc) {
 		if (ImGui.beginMainMenuBar()) {
-			if (ImGui.beginMenu("Open...")) {
-				if (ImGui.menuItem("Memory Usage")) {
+			if (ImGui.beginMenu(ImIcons.OPEN + " Open")) {
+				if (ImGui.menuItem(ImIcons.MEMORY + " Memory Usage")) {
 					MemoryUsagePanel.INSTANCE.open();
 				}
 
-				if (ImGui.menuItem("Command History")) {
+				if (ImGui.menuItem(ImIcons.CODE + " Command History")) {
 					CommandHistoryPanel.INSTANCE.open();
 				}
 
-				if (ImGui.menuItem("Stopwatch")) {
+				if (ImGui.menuItem(ImIcons.TIMELAPSE + " Stopwatch")) {
 					StopwatchPanel.INSTANCE.open();
 				}
 
-				if (ImGui.menuItem("New Stopwatch")) {
+				if (ImGui.menuItem(ImIcons.TIMELAPSE + " New Stopwatch")) {
 					new StopwatchPanel("stopwatch-" + UUID.randomUUID().toString().toLowerCase(Locale.ROOT), true).open();
 				}
 
@@ -47,18 +47,18 @@ public class BuiltInImGui {
 				ImGui.endMenu();
 			}
 
-			if (ImGui.beginMenu("Debug")) {
+			if (ImGui.beginMenu(ImIcons.BUG + " Debug")) {
 				imgui.internal.ImGui.pushItemFlag(ImGuiItemFlags.SelectableDontClosePopup, true);
 
-				if (ImGui.menuItem("Entity Hitboxes", null, mc.getEntityRenderDispatcher().shouldRenderHitBoxes())) {
+				if (ImGui.menuItem(ImIcons.SELECT + " Entity Hitboxes", null, mc.getEntityRenderDispatcher().shouldRenderHitBoxes())) {
 					mc.getEntityRenderDispatcher().setRenderHitBoxes(!mc.getEntityRenderDispatcher().shouldRenderHitBoxes());
 				}
 
-				if (ImGui.menuItem("Chunk Borders", null, mc.debugRenderer.renderChunkborder)) {
+				if (ImGui.menuItem(ImIcons.SELECT + " Chunk Borders", null, mc.debugRenderer.renderChunkborder)) {
 					mc.debugRenderer.switchRenderChunkborder();
 				}
 
-				if (ImGui.menuItem("Capture Frustum", null, mc.levelRenderer.getCapturedFrustum() != null)) {
+				if (ImGui.menuItem(ImIcons.APERTURE + " Capture Frustum", null, mc.levelRenderer.getCapturedFrustum() != null)) {
 					if (mc.levelRenderer.getCapturedFrustum() != null) {
 						mc.levelRenderer.killFrustum();
 					} else {
@@ -66,15 +66,15 @@ public class BuiltInImGui {
 					}
 				}
 
-				if (ImGui.menuItem("Zones", null, mc.player.getShowZones())) {
+				if (ImGui.menuItem(ImIcons.SELECT + " Zones", null, mc.player.getShowZones())) {
 					mc.runClientCommand("zones show");
 				}
 
-				if (ImGui.menuItem("Anchor", null, mc.player.getShowAnchor())) {
+				if (ImGui.menuItem(ImIcons.SELECT + " Anchor", null, mc.player.getShowAnchor())) {
 					mc.runClientCommand("anchor show");
 				}
 
-				if (ImGui.menuItem("Widgets")) {
+				if (ImGui.menuItem(ImIcons.SELECT + " Widgets")) {
 					new WidgetDebugPanel().open();
 				}
 

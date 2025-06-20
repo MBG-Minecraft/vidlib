@@ -11,8 +11,7 @@ import java.util.HashMap;
 
 public record TTFFile(ResourceLocation id, ResourceLocation resource) {
 	public static final VLRegistry<TTFFile> REGISTRY = VLRegistry.createClient("ttf", TTFFile.class);
-	public static final RegistryRef<TTFFile> COUSINE_REGULAR = REGISTRY.ref(VidLib.id("cousine_regular"));
-	public static final RegistryRef<TTFFile> OPEN_SANS_REGULAR = REGISTRY.ref(VidLib.id("opensans_regular"));
+	public static final RegistryRef<TTFFile> MATERIAL_ICONS_ROUND_REGULAR = REGISTRY.ref(VidLib.id("materialiconsround_regular"));
 	public static final RegistryRef<TTFFile> JETBRAINS_MONO_REGULAR = REGISTRY.ref(VidLib.id("jetbrainsmono_regular"));
 
 	public static void find(ResourceManager resourceManager) {

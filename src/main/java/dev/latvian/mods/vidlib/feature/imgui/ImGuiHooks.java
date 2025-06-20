@@ -2,6 +2,9 @@ package dev.latvian.mods.vidlib.feature.imgui;
 
 import com.mojang.blaze3d.platform.Window;
 import dev.latvian.mods.vidlib.core.VLMouseHandler;
+import dev.latvian.mods.vidlib.feature.font.TTFFile;
+import imgui.ImFontConfig;
+import imgui.ImFontGlyphRangesBuilder;
 import imgui.ImGui;
 import imgui.extension.imnodes.ImNodes;
 import imgui.extension.implot.ImPlot;
@@ -13,6 +16,7 @@ import imgui.glfw.ImGuiImplGlfw;
 import imgui.internal.ImGuiContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWWindowContentScaleCallback;
@@ -38,6 +42,11 @@ public class ImGuiHooks {
 		0,
 	};
 
+	private static final short[] MATERIAL_ICON_RANGES = {
+		(short) '\ue000', (short) '\uf8ff', // Material Icons
+		0,
+	};
+
 	private static ImGuiImplGlfw imGuiGlfw;
 	private static ImGuiImplGl3 imGuiGl3;
 	private static ImGuiContext imGuiContext;
@@ -46,6 +55,7 @@ public class ImGuiHooks {
 	private static boolean active = false;
 
 	private static boolean endingFrame = false;
+	public static boolean reloadFonts = false;
 
 	static int dockId;
 	static float dpiScale = 1.0f;
@@ -65,37 +75,56 @@ public class ImGuiHooks {
 		io.setConfigDockingWithShift(false);
 		io.setConfigWindowsMoveFromTitleBarOnly(true);
 
-		// setupFonts(client.getResourceManager());
-
 		imGuiGlfw.init(client.getWindow().getWindow(), true);
 		imGuiGl3.init("#version 150"); // MC uses 150 everywhere, so we can too
 
-		imGuiGl3.updateFontsTexture();
+		loadFonts(resourceManager);
+	}
 
-		/*
-		ImGuiIO io = ImGui.getIO();
-		ImFontAtlas fonts = io.getFonts();
+	public static void loadFonts(ResourceManager resourceManager) {
+		var fonts = ImGui.getIO().getFonts();
 		fonts.clear();
 
-		ImFonts.bootstrap();
+		var config = new ImFontConfig();
+		config.setGlyphRanges(GLYPH_RANGES);
+		config.setOversampleH(2);
+		config.setOversampleV(2);
+		config.setGlyphOffset(0, 0);
 
-		var rangesBuilder = new ImFontGlyphRangesBuilder();
-		// rangesBuilder.addRanges(fonts.getGlyphRangesDefault());
-		rangesBuilder.addRanges(GLYPH_RANGES);
+		try {
+			fonts.addFontFromMemoryTTF(TTFFile.JETBRAINS_MONO_REGULAR.get().load(resourceManager), 18, config);
+		} catch (Exception e) {
+			fonts.addFontDefault();
+		}
 
-		var ranges = rangesBuilder.buildRanges();
+		try {
+			var bytes = TTFFile.MATERIAL_ICONS_ROUND_REGULAR.get().load(resourceManager);
+			config.setMergeMode(true);
+			config.setGlyphOffset(0, 3);
+			fonts.addFontFromMemoryTTF(bytes, 20, config, buildMaterialIconRanges());
+			config.setGlyphOffset(0, 0);
+			config.setMergeMode(false);
 
-		for (var font : ImGuiFont.ALL) {
-			font.loadFont(io.getFonts(), ranges);
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
 
 		fonts.build();
 		imGuiGl3.updateFontsTexture();
 
-		// fontConfig.destroy();
+		config.destroy();
 		fonts.clearTexData();
+	}
 
-		 */
+	private static short[] buildMaterialIconRanges() {
+		var builder = new ImFontGlyphRangesBuilder();
+
+		for (var c : ImIcons.ALL) {
+			builder.addChar(c);
+		}
+
+		NeoForge.EVENT_BUS.post(new ImIconsEvent(builder::addChar));
+		return builder.buildRanges();
 	}
 
 	public static void trackDpiScale(Window window) {
@@ -144,7 +173,6 @@ public class ImGuiHooks {
 		}
 
 		handleDocking();
-		// FIXME RenderImGuiCallback.START_FRAME.invoker().render();
 	}
 
 	private static void handleDocking() {
@@ -183,7 +211,6 @@ public class ImGuiHooks {
 
 		if (window.getWidth() != prevWidth || window.getHeight() != prevHeight) {
 			client.resizeDisplay();
-			// FIXME client.getMainRenderTarget().beginWrite(false);
 		}
 	}
 
@@ -193,10 +220,8 @@ public class ImGuiHooks {
 
 	public static void endFrame(Minecraft mc) {
 		endingFrame = false;
-		// FIXME RenderImGuiCallback.END_FRAME.invoker().render();
 
 		active = false;
-		// FIXME StyleImGuiCallback.POP_GLOBAL_STYLE.invoker().execute();
 		ImGui.render();
 		imGuiGl3.renderDrawData(ImGui.getDrawData());
 
@@ -211,7 +236,10 @@ public class ImGuiHooks {
 			GLFW.glfwMakeContextCurrent(backupWindowPtr);
 		}
 
-		// FIXME RenderImGuiCallback.AFTER_END_FRAME.invoker().render();
+		if (reloadFonts) {
+			reloadFonts = false;
+			loadFonts(mc.getResourceManager());
+		}
 	}
 
 	public static void ensureEndFrame() {

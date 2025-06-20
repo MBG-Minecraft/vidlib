@@ -40,9 +40,19 @@ public class ImGuiUtils {
 		STRING.inputData.isResizable = true;
 	}
 
-	public static void pushDefaultStyle() {
-		// ImGui.pushFont(ImFonts.getJetbrainsMono19());
+	public static void pushFontSize(float size) {
+		var font = ImGui.getFont();
+		// font.setScale(size);
+		ImGui.pushFont(font);
+	}
 
+	public static void popFontSize() {
+		// var font = ImGui.getFont();
+		// font.setScale(1F);
+		ImGui.popFont();
+	}
+
+	public static void pushDefaultStyle() {
 		ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 15, 15);
 		ImGui.pushStyleVar(ImGuiStyleVar.WindowRounding, 5F);
 		ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, 5, 5);
@@ -70,7 +80,6 @@ public class ImGuiUtils {
 	public static void popDefaultStyle() {
 		ImGui.popStyleColor(4);
 		ImGui.popStyleVar(17);
-		// ImGui.popFont();
 	}
 
 	public static float getDpiScale() {
