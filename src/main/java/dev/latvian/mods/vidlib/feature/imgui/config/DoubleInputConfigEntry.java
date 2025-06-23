@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib.feature.imgui.config;
 
 import dev.latvian.mods.vidlib.feature.data.DataKey;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.ImGui;
 import imgui.type.ImDouble;
 
@@ -27,9 +29,9 @@ public class DoubleInputConfigEntry extends ConfigEntry<Double> {
 	}
 
 	@Override
-	public Update imguiValue() {
+	public ImUpdate imguiValue(ImGraphics graphics) {
 		ImGui.inputDouble(id, data);
-		return Update.itemEdit();
+		return ImUpdate.itemEdit();
 	}
 
 	@Override

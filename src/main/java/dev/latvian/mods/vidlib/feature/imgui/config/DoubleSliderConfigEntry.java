@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib.feature.imgui.config;
 
 import dev.latvian.mods.vidlib.feature.data.DataKey;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.ImGui;
 
 public class DoubleSliderConfigEntry extends ConfigEntry<Double> {
@@ -26,9 +28,9 @@ public class DoubleSliderConfigEntry extends ConfigEntry<Double> {
 	}
 
 	@Override
-	public Update imguiValue() {
+	public ImUpdate imguiValue(ImGraphics graphics) {
 		ImGui.sliderFloat(id, data, (float) min, (float) max);
-		return Update.itemEdit();
+		return ImUpdate.itemEdit();
 	}
 
 	@Override

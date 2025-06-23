@@ -13,7 +13,6 @@ import net.minecraft.util.profiling.ProfilerFiller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ClientGradientLoader extends SimplePreparableReloadListener<Map<ResourceLocation, Gradient>> {
@@ -26,13 +25,13 @@ public class ClientGradientLoader extends SimplePreparableReloadListener<Map<Res
 				var id = entry.getKey().withPath(s -> s.substring(25, s.length() - 4));
 
 				try (var image = NativeImage.read(in)) {
-					var pixels = new ArrayList<Gradient>(image.getWidth());
+					var pixels = new ArrayList<Color>(image.getWidth());
 
 					for (int x = 0; x < image.getWidth(); x++) {
 						pixels.add(Color.of(image.getPixel(x, 0)));
 					}
 
-					map.put(id, new CompoundGradient(List.copyOf(pixels)));
+					map.put(id, CompoundGradient.ofColors(pixels));
 				}
 			} catch (Exception ex) {
 				VidLib.LOGGER.error("Error while reading file " + entry.getKey(), ex);

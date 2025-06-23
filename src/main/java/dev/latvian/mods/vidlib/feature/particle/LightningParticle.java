@@ -53,8 +53,8 @@ public class LightningParticle extends CustomParticle {
 			dist[i] = random.nextFloat() * options.spread();
 		}
 
-		this.color = options.color().resolve();
-		this.outlineColor = options.outlineColor().resolve();
+		this.color = options.color().optimize();
+		this.outlineColor = options.outlineColor().optimize();
 		this.target = new Vector3d();
 		this.matrix = new Matrix3d();
 		this.prevRadiusMod = radiusMod = 0F;

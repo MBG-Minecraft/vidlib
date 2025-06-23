@@ -6,7 +6,6 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.Gradient;
-import dev.latvian.mods.klib.color.PairGradient;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.shape.CylinderShape;
 import dev.latvian.mods.klib.shape.Shape;
@@ -50,6 +49,6 @@ public record TerrainHighlight(
 
 	public static TerrainHighlight circle(Vec3 position, float radius, Color startColor, Color endColor, int duration) {
 		var num = WorldNumber.fixed(1D);
-		return new TerrainHighlight(WorldVector.fixed(position), new CylinderShape(radius, 0F), new PairGradient(startColor, endColor), new DynamicWorldVector(num, FixedWorldNumber.ONE.instance(), num), duration);
+		return new TerrainHighlight(WorldVector.fixed(position), new CylinderShape(radius, 0F), startColor.gradient(endColor), new DynamicWorldVector(num, FixedWorldNumber.ONE.instance(), num), duration);
 	}
 }

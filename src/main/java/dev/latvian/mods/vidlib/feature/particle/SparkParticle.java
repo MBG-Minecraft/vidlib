@@ -24,7 +24,7 @@ public class SparkParticle extends TextureSheetParticle {
 	public SparkParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet spriteSet) {
 		super(level, x, y, z);
 		this.spriteSet = spriteSet;
-		this.gradient = ClientGradients.SPARK.resolve();
+		this.gradient = ClientGradients.SPARK.optimize();
 		this.pickSprite(spriteSet);
 		this.xd = xd;
 		this.yd = yd;

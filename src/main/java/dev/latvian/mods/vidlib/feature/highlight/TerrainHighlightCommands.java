@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.feature.highlight;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.color.PairGradient;
 import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.klib.shape.CylinderShape;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
@@ -49,7 +48,7 @@ public interface TerrainHighlightCommands {
 							ctx.getSource().getLevel().addTerrainHighlight(new TerrainHighlight(
 								pos,
 								shape,
-								new PairGradient(new Color(0xCCFFDD00).withAlpha(100), Color.RED.withAlpha(100), Easing.QUAD_IN),
+								new Color(0xCCFFDD00).withAlpha(100).gradient(Color.RED.withAlpha(100), Easing.QUAD_IN),
 								FixedWorldVector.ONE.instance(),
 								duration
 							));

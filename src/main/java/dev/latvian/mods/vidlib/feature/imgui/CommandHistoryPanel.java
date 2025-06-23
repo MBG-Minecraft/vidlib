@@ -13,7 +13,7 @@ public class CommandHistoryPanel extends AdminPanel {
 	}
 
 	@Override
-	public void content() {
+	public void content(ImGraphics graphics) {
 		var list = new ArrayList<>(Minecraft.getInstance().commandHistory().history());
 
 		for (int i = list.size() - 1; i >= 0; i--) {

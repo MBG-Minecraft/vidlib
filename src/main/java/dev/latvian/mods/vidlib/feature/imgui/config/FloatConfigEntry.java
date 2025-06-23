@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib.feature.imgui.config;
 
 import dev.latvian.mods.vidlib.feature.data.DataKey;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.ImGui;
 import imgui.type.ImFloat;
 
@@ -29,14 +31,14 @@ public class FloatConfigEntry extends ConfigEntry<Float> {
 	}
 
 	@Override
-	public Update imguiValue() {
+	public ImUpdate imguiValue(ImGraphics graphics) {
 		if (slider) {
 			ImGui.sliderFloat(id, data.getData(), min, max);
 		} else {
 			ImGui.inputFloat(id, data);
 		}
 
-		return Update.itemEdit();
+		return ImUpdate.itemEdit();
 	}
 
 	@Override

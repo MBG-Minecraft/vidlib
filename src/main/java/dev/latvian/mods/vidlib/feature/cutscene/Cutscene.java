@@ -51,7 +51,7 @@ public class Cutscene {
 		return new Cutscene(new ArrayList<>(2), false, false, false);
 	}
 
-	private Cutscene(List<CutsceneStep> steps, boolean allowMovement, boolean openPreviousScreen, boolean hidePlayer) {
+	Cutscene(List<CutsceneStep> steps, boolean allowMovement, boolean openPreviousScreen, boolean hidePlayer) {
 		this.steps = steps;
 		this.allowMovement = allowMovement;
 		this.openPreviousScreen = openPreviousScreen;

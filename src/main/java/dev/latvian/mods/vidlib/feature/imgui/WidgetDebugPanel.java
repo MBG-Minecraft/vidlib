@@ -1,14 +1,24 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.easing.Easing;
 import imgui.ImGui;
+import imgui.ImGuiViewport;
 import imgui.ImVec2;
 import imgui.ImVec4;
+import imgui.extension.imnodes.ImNodes;
+import imgui.extension.implot.ImPlot;
 import imgui.flag.ImGuiColorEditFlags;
+import imgui.flag.ImGuiDir;
+import imgui.flag.ImGuiWindowFlags;
+import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import imgui.type.ImString;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
 
 public class WidgetDebugPanel extends AdminPanel {
 	public static final WidgetDebugPanel INSTANCE = new WidgetDebugPanel();
@@ -28,35 +38,111 @@ public class WidgetDebugPanel extends AdminPanel {
 	public final double[] double3Data = new double[3];
 	public final double[] double4Data = new double[4];
 	public final ImString stringData = new ImString();
+	public final ImString multiLineStringData = new ImString();
 	public final ImBoolean booleanData = new ImBoolean();
+	public final Easing[] easingData = new Easing[1];
+	public final GradientImBuilder gradient1 = new GradientImBuilder();
+	public final GradientImBuilder gradient2 = new GradientImBuilder();
 
 	private WidgetDebugPanel() {
 		super("widget-debug", "Widget Debug");
+		gradient1.set(Color.BLACK.gradient(Color.WHITE));
+		gradient2.set(Color.YELLOW.gradient(Color.RED));
 	}
 
 	@Override
-	public void content() {
+	public void content(ImGraphics graphics) {
+		var mc = Minecraft.getInstance();
+
 		ImGui.pushItemWidth(-1F);
 
-		ImGui.text("Button");
-		ImGui.button("Button###button");
+		ImGui.text("Text");
+
+		graphics.pushStack();
+		graphics.setYellowText();
+		ImGui.text("Yellow Text");
+
+		graphics.setFontScale(1.5F);
+		graphics.setRedText();
+		ImGui.text("1.5x Text");
+
+		graphics.setFontScale(2F);
+		ImGui.text("2x Text");
+
+		graphics.popStack();
+
+		ImGui.bullet();
+		ImGui.text("Bullet + Text");
+		ImGui.bulletText("Bullet Text");
 		ImGui.separator();
+
+		ImGui.text("All Icons:");
+		ImGui.text("");
+
+		for (var icon : ImIcons.VALUES) {
+			ImGui.text(icon + " " + icon.name());
+		}
+
+		ImGui.text("");
+		ImGui.text("Extra Icons:");
+		ImGui.text("");
+		var extraIcons = new StringBuilder();
+
+		for (var c : ImIcons.EXTRA_ICONS.get()) {
+			if (!extraIcons.isEmpty()) {
+				extraIcons.append(' ');
+			}
+
+			extraIcons.append(c);
+		}
+
+		ImGui.textWrapped(extraIcons.toString());
+		ImGui.separator();
+
+		ImGui.button("Button###button");
+		ImGui.button("Wide Button###button", -1F, 0F);
 
 		ImGui.text("Small Button");
 		ImGui.sameLine();
 		ImGui.smallButton("S###small-button");
 		ImGui.separator();
 
-		ImGui.text("Checkbox");
+		ImGui.text("Arrow Buttons: " + intData.get());
+		graphics.pushStack();
+		graphics.setItemFlag(ImGuiItemFlags.ButtonRepeat, true);
+
+		if (ImGui.arrowButton("###arrow-button-left", ImGuiDir.Left)) {
+			intData.getData()[0]--;
+		}
+
+		ImGui.sameLine();
+
+		if (ImGui.arrowButton("###arrow-button-up", ImGuiDir.Up)) {
+			intData.getData()[0]++;
+		}
+
+		ImGui.sameLine();
+
+		if (ImGui.arrowButton("###arrow-button-down", ImGuiDir.Down)) {
+			intData.getData()[0]--;
+		}
+
+		ImGui.sameLine();
+
+		if (ImGui.arrowButton("###arrow-button-right", ImGuiDir.Right)) {
+			intData.getData()[0]++;
+		}
+
+		graphics.popStack();
+		ImGui.separator();
+
 		ImGui.checkbox("Checkbox###checkbox", booleanData);
 		ImGui.separator();
 
-		ImGui.text("Color 3");
-		ImGui.colorEdit3("Color###color-3", float3Data, ImGuiColorEditFlags.NoInputs);
+		ImGui.colorEdit3("Color 3###color-3", float3Data, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.PickerHueWheel);
 		ImGui.separator();
 
-		ImGui.text("Color 4");
-		ImGui.colorEdit4("Color###color-4", float4Data, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreview);
+		ImGui.colorEdit4("Color 4###color-4", float4Data, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.PickerHueWheel);
 		ImGui.separator();
 
 		ImGui.text("Int Slider 1");
@@ -91,14 +177,193 @@ public class WidgetDebugPanel extends AdminPanel {
 		ImGui.sliderFloat4("###float-slider-4", float4Data, 0F, 1F);
 		ImGui.separator();
 
-		ImGui.text("Bar Plot");
+		ImGui.text("Text Input");
+		ImGui.inputText("###text-input", stringData);
+		ImGui.separator();
 
-		// if (ImPlot.beginPlot("Bar Plot###bar-plot")) {
-		// 	ImPlot.endPlot();
-		// }
+		ImGui.text("Multi-line Text Input");
+		ImGui.inputTextMultiline("###multi-line-text-input", multiLineStringData);
+		ImGui.separator();
+
+		ImGui.text("Combo");
+		graphics.easingCombo("###combo", easingData);
+		ImGui.separator();
+
+		if (ImGui.collapsingHeader("Collapsing Header")) {
+			ImGui.text("Hello");
+		}
 
 		ImGui.separator();
 
+		if (ImGui.collapsingHeader("Collapsing Header (Closeable)", new ImBoolean(true))) {
+			ImGui.text("Hello");
+		}
+
+		ImGui.separator();
+
+		ImGui.text("Image");
+		var sprite = mc.getBlockAtlas().getSprite(ResourceLocation.withDefaultNamespace("block/campfire_fire"));
+		ImGui.image(mc.getBlockAtlas().getTexture().vl$getHandle(), 128F, 128F, sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());
+		ImGui.separator();
+
+		ImGui.text("Line Plot");
+
+		if (ImPlot.beginPlot("Line Plot###line-plot")) {
+			var xdata = new Double[100];
+			var ydata = new Double[100];
+
+			for (int i = 0; i < 100; i++) {
+				xdata[i] = (double) i;
+				ydata[i] = Math.sin(i * 0.1);
+			}
+
+			ImPlot.plotLine("Sin###1", xdata, ydata);
+			ImPlot.endPlot();
+		}
+
+		ImGui.separator();
+
+		ImGui.text("Child Window");
+		ImGui.beginChild("AAAA###child", -1F, 80F, true, ImGuiWindowFlags.MenuBar);
+
+		if (ImGui.beginMenuBar()) {
+			if (ImGui.beginMenu("Menu")) {
+				ImGui.menuItem("Example");
+
+				ImGui.endMenu();
+			}
+
+			ImGui.endMenuBar();
+		}
+
+		ImGui.text("Hi");
+		ImGui.endChild();
+		ImGui.separator();
+
+		ImGui.text("Popup");
+
+		if (ImGui.button("Open Popup###open-popup")) {
+			ImGui.openPopup("###widget-debug-popup");
+		}
+
+		if (ImGui.button("Open Modal###open-modal")) {
+			ImGui.openPopup("###widget-debug-modal");
+		}
+
+		ImGui.separator();
+
+		if (ImGui.button("Open Node Editor###open-node-editor")) {
+			ImGui.openPopup("###widget-debug-node-modal");
+		}
+
+		ImGui.separator();
+
+		ImGui.text("Gradient 1");
+		ImGui.pushID("###gradient-1");
+		gradient1.imgui(graphics);
+		// ImGui.endChild();
+		ImGui.popID();
+		ImGui.text("Gradient 2");
+		ImGui.pushID("###gradient-2");
+		gradient2.imgui(graphics);
+		ImGui.popID();
+		ImGui.separator();
+
 		ImGui.popItemWidth();
+	}
+
+	@Override
+	public void postContent(ImGraphics graphics) {
+		if (!isOpen()) {
+			return;
+		}
+
+		if (ImGui.beginPopup("Popup###widget-debug-popup", ImGuiWindowFlags.AlwaysAutoResize)) {
+			ImGui.text("Hi");
+			ImGui.endPopup();
+		}
+
+		if (ImGui.beginPopupModal("Modal###widget-debug-modal", new ImBoolean(true), ImGuiWindowFlags.AlwaysAutoResize)) {
+			ImGui.text("Hi");
+			ImGui.endPopup();
+		}
+
+		ImGuiViewport viewport = ImGui.getMainViewport();
+		ImGui.setNextWindowPos(viewport.getWorkPos().x, viewport.getWorkPos().y);
+		ImGui.setNextWindowSize(viewport.getWorkSizeX(), viewport.getWorkSizeY());
+
+		if (ImGui.beginPopupModal("Node Editor###widget-debug-node-modal", new ImBoolean(true), ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.MenuBar)) {
+			if (ImGui.beginMenuBar()) {
+				if (ImGui.beginMenu(ImIcons.ADD + " Add###add")) {
+					if (ImGui.menuItem("Number")) {
+					}
+
+					ImGui.endMenu();
+				}
+
+				if (ImGui.beginMenu(ImIcons.EDIT + " Edit###edit")) {
+					if (ImGui.menuItem(ImIcons.DELETE + " Delete###delete")) {
+					}
+
+					if (ImGui.menuItem(ImIcons.DELETE + " Delete All###delete-all")) {
+					}
+
+					ImGui.endMenu();
+				}
+
+				graphics.pushStack();
+				graphics.setRedText();
+				ImGui.text(ImIcons.ERROR + " Root node missing!");
+				graphics.popStack();
+
+				ImGui.endMenuBar();
+			}
+
+			ImNodes.beginNodeEditor();
+
+			int uid = 0;
+
+			ImNodes.beginNode(++uid);
+			ImNodes.beginNodeTitleBar();
+			ImGui.text("Node A");
+			ImNodes.endNodeTitleBar();
+
+			ImGui.setNextItemWidth(200F);
+			ImGui.inputText("###node-a-input", stringData);
+			ImNodes.beginInputAttribute(++uid);
+			ImGui.text("-> In");
+			ImNodes.endInputAttribute();
+
+			ImGui.sameLine();
+
+			ImNodes.beginOutputAttribute(++uid);
+			ImGui.text("Out ->");
+			ImNodes.endInputAttribute();
+
+			ImNodes.endNode();
+
+			ImNodes.beginNode(++uid);
+			ImNodes.beginNodeTitleBar();
+			ImGui.text("Node B");
+			ImNodes.endNodeTitleBar();
+
+			ImGui.setNextItemWidth(200F);
+			ImGui.inputDouble("###node-b-input", doubleData);
+			ImNodes.beginInputAttribute(++uid);
+			ImGui.text("-> In");
+			ImNodes.endInputAttribute();
+
+			ImGui.sameLine();
+
+			ImNodes.beginOutputAttribute(++uid);
+			ImGui.text("Out ->");
+			ImNodes.endInputAttribute();
+
+			ImNodes.endNode();
+
+			ImNodes.endNodeEditor();
+
+			ImGui.endPopup();
+		}
 	}
 }

@@ -6,6 +6,7 @@ import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.klib.util.IntOrUUID;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.entity.filter.ExactEntityFilter;
+import dev.latvian.mods.vidlib.feature.imgui.ImBuilderHolderList;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.worldnumber.ServerDataWorldNumber;
@@ -24,6 +25,7 @@ import java.util.function.Function;
 
 public interface WorldVector {
 	SimpleRegistry<WorldVector> REGISTRY = SimpleRegistry.create(WorldVector::type);
+	ImBuilderHolderList<WorldVector> IMGUI_BUILDERS = new ImBuilderHolderList<>();
 
 	static WorldVector named(String name) {
 		var v = LiteralWorldVector.BY_NAME.get(name);
@@ -87,6 +89,12 @@ public interface WorldVector {
 		for (var literal : LiteralWorldVector.values()) {
 			REGISTRY.register(literal.type);
 		}
+
+		IMGUI_BUILDERS.add(FixedWorldVector.Builder.TYPE);
+
+		for (var literal : LiteralWorldVector.values()) {
+			IMGUI_BUILDERS.add(literal.builderHolder);
+		}
 	}
 
 	static WorldVector fixed(Vec3 position) {
@@ -140,6 +148,15 @@ public interface WorldVector {
 	@Nullable
 	Vec3 get(WorldNumberContext ctx);
 
+	default boolean isLiteral() {
+		return false;
+	}
+
+	@Nullable
+	default WorldVectorImBuilder createBuilder() {
+		return null;
+	}
+
 	default WorldVector offset(WorldVector other) {
 		return new OffsetWorldVector(this, other);
 	}
@@ -154,9 +171,5 @@ public interface WorldVector {
 
 	default WorldVector interpolate(Easing easing, WorldVector other) {
 		return interpolate(easing, 0F, 1F, other);
-	}
-
-	default boolean isLiteral() {
-		return false;
 	}
 }

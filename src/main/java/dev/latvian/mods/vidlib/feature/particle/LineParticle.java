@@ -17,8 +17,8 @@ public class LineParticle extends CustomParticle {
 
 	protected LineParticle(LineParticleOptions options, ClientLevel level, double x, double y, double z, double vx, double vy, double vz) {
 		super(level, x, y, z);
-		this.startColor = options.startColor().resolve();
-		this.endColor = options.endColor().resolve();
+		this.startColor = options.startColor().optimize();
+		this.endColor = options.endColor().optimize();
 		this.endOffset = options.endOffset();
 		setLifetime(options.lifespan());
 		vector = Vec3f.of(vx, vy, vz);

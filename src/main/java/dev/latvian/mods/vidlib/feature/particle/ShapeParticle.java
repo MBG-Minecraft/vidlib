@@ -20,8 +20,8 @@ public class ShapeParticle extends CustomParticle {
 		super(level, x, y, z);
 		this.options = options;
 		this.shape = options.shape();
-		this.color = options.color().resolve();
-		this.outlineColor = options.outlineColor().resolve();
+		this.color = options.color().optimize();
+		this.outlineColor = options.outlineColor().optimize();
 		setLifetime(Math.abs(options.lifespan()));
 	}
 

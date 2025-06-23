@@ -1,8 +1,11 @@
 package dev.latvian.mods.vidlib.feature.imgui.config;
 
-import com.mojang.serialization.JsonOps;
+import com.google.gson.JsonElement;
+import com.mojang.serialization.DynamicOps;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.ImGui;
 import imgui.flag.ImGuiColorEditFlags;
 
@@ -28,15 +31,15 @@ public class ColorConfigEntry extends ConfigEntry<Color> {
 	}
 
 	@Override
-	public Update imguiValue() {
-		ImGui.colorEdit4(id, data, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel);
-		return Update.itemEdit();
+	public ImUpdate imguiValue(ImGraphics graphics) {
+		ImGui.colorEdit4(id, data, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel | ImGuiColorEditFlags.PickerHueWheel);
+		return ImUpdate.itemEdit();
 	}
 
 	@Override
-	public String json(Color value) {
+	public String json(DynamicOps<JsonElement> ops, Color value) {
 		try {
-			return Color.CODEC.encodeStart(JsonOps.INSTANCE, value).getOrThrow().toString();
+			return Color.CODEC.encodeStart(ops, value).getOrThrow().toString();
 		} catch (Exception ignore) {
 			return "\"transparent\"";
 		}

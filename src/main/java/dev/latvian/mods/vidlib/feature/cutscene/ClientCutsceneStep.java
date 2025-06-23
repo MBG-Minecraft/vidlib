@@ -33,7 +33,7 @@ public class ClientCutsceneStep {
 
 	public ClientCutsceneStep(CutsceneStep step, WorldNumberContext ctx) {
 		this.start = Mth.floor(step.start().getOr(ctx, 0D));
-		this.length = Mth.ceil(step.length().getOr(ctx, 0D));
+		this.length = Mth.ceil(step.length().getOr(ctx, 1D));
 		this.totalLength = start + length;
 		this.origin = step.origin().orElse(null);
 		this.target = step.target().orElse(null);

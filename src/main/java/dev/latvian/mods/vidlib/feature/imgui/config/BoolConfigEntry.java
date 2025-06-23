@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib.feature.imgui.config;
 
 import dev.latvian.mods.vidlib.feature.data.DataKey;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 
@@ -28,7 +30,7 @@ public class BoolConfigEntry extends ConfigEntry<Boolean> {
 	}
 
 	@Override
-	public Update imguiValue() {
-		return Update.full(ImGui.checkbox(id, data));
+	public ImUpdate imguiValue(ImGraphics graphics) {
+		return ImUpdate.full(ImGui.checkbox(id, data));
 	}
 }

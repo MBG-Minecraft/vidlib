@@ -51,7 +51,7 @@ public class GameEventHandler {
 	public static Range ambientLight = Range.FULL;
 	public static boolean gameLoaded = false;
 
-	public static void gameLoaded() {
+	public static synchronized void gameLoaded() {
 		if (!gameLoaded) {
 			gameLoaded = true;
 			AutoInit.Type.GAME_LOADED.invoke();

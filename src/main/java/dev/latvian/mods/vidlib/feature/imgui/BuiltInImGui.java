@@ -1,9 +1,12 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import dev.latvian.mods.vidlib.feature.canvas.CanvasPanel;
+import dev.latvian.mods.vidlib.feature.cutscene.CutsceneEditorPanel;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
 import imgui.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
+import imgui.type.ImBoolean;
 import net.minecraft.client.Minecraft;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -14,19 +17,27 @@ import java.util.UUID;
 
 public class BuiltInImGui {
 	public static final List<AdminPanel> OPEN_TABS = new ArrayList<>();
+	public static final ImBoolean SHOW_STACK_TOOL = new ImBoolean(false);
 
 	public static void handle(Minecraft mc) {
-		ImGuiUtils.pushDefaultStyle();
+		var graphics = new ImGraphics();
+		graphics.pushStack();
+		graphics.setDefaultStyle();
 
 		if ((mc.isLocalServer() || mc.player.hasPermissions(2)) && mc.player.getAdminPanel()) {
-			adminPanel(mc);
+			adminPanel(mc, graphics);
 		}
 
-		NeoForge.EVENT_BUS.post(new ImGuiEvent());
-		ImGuiUtils.popDefaultStyle();
+		NeoForge.EVENT_BUS.post(new ImGuiEvent(graphics));
+
+		if (SHOW_STACK_TOOL.get()) {
+			ImGui.showStackToolWindow();
+		}
+
+		graphics.popStack();
 	}
 
-	public static void adminPanel(Minecraft mc) {
+	public static void adminPanel(Minecraft mc, ImGraphics graphics) {
 		var session = mc.player.vl$sessionData();
 
 		if (ImGui.beginMainMenuBar()) {
@@ -47,13 +58,28 @@ public class BuiltInImGui {
 					new StopwatchPanel("stopwatch-" + UUID.randomUUID().toString().toLowerCase(Locale.ROOT), true).open();
 				}
 
-				NeoForge.EVENT_BUS.post(new AdminPanelEvent.OpenDropdown());
+				if (ImGui.beginMenu(ImIcons.APERTURE + " Canvas")) {
+					CanvasPanel.menu();
+					ImGui.endMenu();
+				}
+
+				if (ImGui.menuItem(ImIcons.CAMERA + " Cutscene Editor")) {
+					CutsceneEditorPanel.INSTANCE.open();
+				}
+
+				NeoForge.EVENT_BUS.post(new AdminPanelEvent.OpenDropdown(graphics));
+
+				if (ImGui.menuItem(ImIcons.FRAMED_CUBE + " Debug Widgets")) {
+					WidgetDebugPanel.INSTANCE.open();
+				}
+
 				ImGui.endMenu();
 			}
 
 			if (ImGui.beginMenu(ImIcons.SETTINGS + " Config")) {
 				if (ImGui.beginMenu(ImIcons.BRIGHTNESS + " Skybox")) {
-					imgui.internal.ImGui.pushItemFlag(ImGuiItemFlags.SelectableDontClosePopup, true);
+					graphics.pushStack();
+					graphics.setItemFlag(ImGuiItemFlags.SelectableDontClosePopup, true);
 					var current = mc.level.getSkybox();
 
 					for (var skybox : SkyboxData.SKYBOX_IDS) {
@@ -70,16 +96,27 @@ public class BuiltInImGui {
 						mc.runClientCommand("skybox set \"minecraft:vanilla\"");
 					}
 
-					imgui.internal.ImGui.popItemFlag();
+					graphics.popStack();
 					ImGui.endMenu();
 				}
 
-				NeoForge.EVENT_BUS.post(new AdminPanelEvent.ConfigDropdown());
+				NeoForge.EVENT_BUS.post(new AdminPanelEvent.ConfigDropdown(graphics));
 				ImGui.endMenu();
 			}
 
 			if (ImGui.beginMenu(ImIcons.BUG + " Debug")) {
-				imgui.internal.ImGui.pushItemFlag(ImGuiItemFlags.SelectableDontClosePopup, true);
+				if (ImGui.menuItem(ImIcons.RELOAD + " Reload Assets")) {
+					mc.reloadResourcePacks();
+				}
+
+				if (ImGui.menuItem(ImIcons.RELOAD + " Reload Data")) {
+					mc.runClientCommand("reload");
+				}
+
+				ImGui.menuItem(ImIcons.MEMORY + " ID Stack Tool", null, SHOW_STACK_TOOL);
+
+				graphics.pushStack();
+				graphics.setItemFlag(ImGuiItemFlags.SelectableDontClosePopup, true);
 
 				if (ImGui.menuItem(ImIcons.SELECT + " Entity Hitboxes", null, mc.getEntityRenderDispatcher().shouldRenderHitBoxes())) {
 					mc.getEntityRenderDispatcher().setRenderHitBoxes(!mc.getEntityRenderDispatcher().shouldRenderHitBoxes());
@@ -97,27 +134,23 @@ public class BuiltInImGui {
 					}
 				}
 
-				if (ImGui.menuItem(ImIcons.SELECT + " Zones", null, mc.player.getShowZones())) {
+				if (ImGui.menuItem(ImIcons.FULLSCREEN + " Zones", null, mc.player.getShowZones())) {
 					mc.runClientCommand("zones show");
 				}
 
-				if (ImGui.menuItem(ImIcons.SELECT + " Anchor", null, mc.player.getShowAnchor())) {
+				if (ImGui.menuItem(ImIcons.FULLSCREEN + " Anchor", null, mc.player.getShowAnchor())) {
 					mc.runClientCommand("anchor show");
 				}
 
-				if (ImGui.menuItem(ImIcons.SELECT + " Widgets")) {
-					WidgetDebugPanel.INSTANCE.open();
-				}
-
-				NeoForge.EVENT_BUS.post(new AdminPanelEvent.DebugDropdown());
-				imgui.internal.ImGui.popItemFlag();
+				NeoForge.EVENT_BUS.post(new AdminPanelEvent.DebugDropdown(graphics));
+				graphics.popStack();
 				ImGui.endMenu();
 			}
 
-			NeoForge.EVENT_BUS.post(new AdminPanelEvent.MenuBar());
+			NeoForge.EVENT_BUS.post(new AdminPanelEvent.MenuBar(graphics));
 			ImGui.endMainMenuBar();
 		}
 
-		OPEN_TABS.removeIf(AdminPanel::handle);
+		OPEN_TABS.removeIf(panel -> panel.handle(graphics));
 	}
 }

@@ -8,6 +8,7 @@ public class AdminPanel {
 	public String label;
 	public boolean canBeClosed;
 	public boolean ephemeral;
+	public boolean menuBar;
 	boolean isOpen;
 
 	public AdminPanel(String id, String label) {
@@ -15,6 +16,7 @@ public class AdminPanel {
 		this.label = label;
 		this.canBeClosed = true;
 		this.ephemeral = false;
+		this.menuBar = false;
 		this.isOpen = false;
 	}
 
@@ -46,7 +48,7 @@ public class AdminPanel {
 		return false;
 	}
 
-	public final boolean handle() {
+	public int setup(ImGraphics graphics) {
 		int flags = ImGuiWindowFlags.NoCollapse;
 
 		if (isUnsaved()) {
@@ -57,10 +59,19 @@ public class AdminPanel {
 			flags |= ImGuiWindowFlags.NoSavedSettings;
 		}
 
+		if (menuBar) {
+			flags |= ImGuiWindowFlags.MenuBar;
+		}
+
+		return flags;
+	}
+
+	public final boolean handle(ImGraphics graphics) {
+		int flags = setup(graphics);
 		ImGuiUtils.BOOLEAN.set(true);
 
 		if (canBeClosed ? ImGui.begin(label + "###" + id, ImGuiUtils.BOOLEAN, flags) : ImGui.begin(label + "###" + id, flags)) {
-			content();
+			content(graphics);
 
 			if (!ImGuiUtils.BOOLEAN.get()) {
 				close();
@@ -71,10 +82,14 @@ public class AdminPanel {
 			}
 		}
 
+		postContent(graphics);
 		ImGui.end();
 		return !isOpen;
 	}
 
-	public void content() {
+	public void content(ImGraphics graphics) {
+	}
+
+	public void postContent(ImGraphics graphics) {
 	}
 }

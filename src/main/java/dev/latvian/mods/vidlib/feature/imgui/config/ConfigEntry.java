@@ -1,42 +1,20 @@
 package dev.latvian.mods.vidlib.feature.imgui.config;
 
+import com.google.gson.JsonElement;
+import com.mojang.serialization.DynamicOps;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.Gradient;
 import dev.latvian.mods.vidlib.core.VLMinecraftClient;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.ImGui;
-import imgui.flag.ImGuiCol;
+import net.minecraft.client.Minecraft;
 
 import java.util.Objects;
 
 public abstract class ConfigEntry<T> {
-	public enum Update {
-		NONE,
-		PARTIAL,
-		FULL;
-
-		public static final Update[] VALUES = values();
-
-		public static Update full(boolean value) {
-			return value ? FULL : NONE;
-		}
-
-		public static Update itemEdit() {
-			if (ImGui.isItemDeactivatedAfterEdit()) {
-				return Update.FULL;
-			} else if (ImGui.isItemEdited()) {
-				return Update.PARTIAL;
-			} else {
-				return Update.NONE;
-			}
-		}
-
-		public Update or(Update other) {
-			return VALUES[Math.max(ordinal(), other.ordinal())];
-		}
-	}
-
 	public static ConfigEntry<Boolean> bool(String label, DataKey<Boolean> key) {
 		return new BoolConfigEntry(label, key);
 	}
@@ -125,15 +103,16 @@ public abstract class ConfigEntry<T> {
 		return false;
 	}
 
-	public Update imguiLabel() {
+	public ImUpdate imguiLabel(ImGraphics graphics) {
 		var isDefault = isDefault();
 
 		if (isDefault) {
 			ImGui.text(label);
 		} else {
-			ImGui.pushStyleColor(ImGuiCol.Text, 0xFF00D8FF);
+			graphics.pushStack();
+			graphics.setYellowText();
 			ImGui.text(label);
-			ImGui.popStyleColor();
+			graphics.popStack();
 		}
 
 		ImGui.sameLine();
@@ -149,20 +128,32 @@ public abstract class ConfigEntry<T> {
 		}
 
 		if (ImGui.isItemHovered()) {
-			ImGui.setTooltip(json(key.defaultValue()));
+			ImGui.setTooltip(json(Minecraft.getInstance().level.jsonOps(), key.defaultValue()));
 		}
 
 		if (reset) {
 			set(key.defaultValue());
-			return Update.FULL;
+			return ImUpdate.FULL;
 		}
 
-		return Update.NONE;
+		return ImUpdate.NONE;
 	}
 
-	public abstract Update imguiValue();
+	public abstract ImUpdate imguiValue(ImGraphics graphics);
 
-	public String json(T value) {
+	public ImUpdate imgui(ImGraphics graphics) {
+		var update = imguiLabel(graphics);
+
+		if (imguiSameLine()) {
+			ImGui.sameLine();
+			ImGui.text(" ");
+			ImGui.sameLine();
+		}
+
+		return update.or(imguiValue(graphics));
+	}
+
+	public String json(DynamicOps<JsonElement> ops, T value) {
 		return value.toString();
 	}
 

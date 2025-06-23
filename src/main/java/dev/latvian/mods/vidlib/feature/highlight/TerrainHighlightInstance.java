@@ -21,7 +21,7 @@ public class TerrainHighlightInstance {
 	public TerrainHighlightInstance(TerrainHighlight highlight) {
 		this.position = highlight.position();
 		this.shape = highlight.shape();
-		this.color = highlight.color().resolve();
+		this.color = highlight.color().optimize();
 		this.scale = highlight.scale();
 		this.duration = highlight.duration();
 		this.tick = 0;

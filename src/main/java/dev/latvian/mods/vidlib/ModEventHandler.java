@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib;
 
 import dev.latvian.mods.vidlib.core.VLPayloadRegistrar;
-import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
@@ -19,7 +18,7 @@ public class ModEventHandler {
 	@SubscribeEvent
 	public static void afterLoad(FMLLoadCompleteEvent event) {
 		event.enqueueWork(VidLib::setupSync);
-		AutoInit.Type.GAME_LOADED.invoke();
+		GameEventHandler.gameLoaded();
 	}
 
 	@SubscribeEvent

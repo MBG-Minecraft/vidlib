@@ -22,7 +22,7 @@ public class FireParticle extends InterpolatedParticle {
 		super(level, x, y, z, xd, yd, zd, options.easing());
 		this.options = options;
 		this.spriteSet = spriteSet;
-		this.gradient = options.color().resolve();
+		this.gradient = options.color().optimize();
 		this.lifetime = (int) (options.lifespan() * random.nextRange(0.9F, 1.1F));
 		this.pickSprite(spriteSet);
 		this.quadSize *= 6F;

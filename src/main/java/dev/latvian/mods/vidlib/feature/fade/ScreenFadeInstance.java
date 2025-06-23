@@ -15,7 +15,7 @@ public class ScreenFadeInstance {
 	public int prevTick, tick;
 
 	public ScreenFadeInstance(Fade data) {
-		this.color = data.color().resolve();
+		this.color = data.color().optimize();
 		this.fadeInTicks = data.fadeInTicks();
 		this.pauseTicks = data.pauseTicks();
 		this.fadeOutTicks = data.fadeOutTicks().orElse(data.fadeInTicks());

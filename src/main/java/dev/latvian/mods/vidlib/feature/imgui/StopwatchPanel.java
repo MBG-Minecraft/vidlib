@@ -14,7 +14,7 @@ public class StopwatchPanel extends AdminPanel {
 	}
 
 	@Override
-	public void content() {
+	public void content(ImGraphics graphics) {
 		long now = System.currentTimeMillis();
 		long sw = stopwatch;
 
@@ -37,9 +37,7 @@ public class StopwatchPanel extends AdminPanel {
 			}
 		}
 
-		ImGui.button("Reset");
-
-		if (ImGui.isItemClicked()) {
+		if (ImGui.button("Reset")) {
 			stopwatch = 0L;
 			stopwatchStart = stopwatchStart == 0L ? 0L : now;
 		}

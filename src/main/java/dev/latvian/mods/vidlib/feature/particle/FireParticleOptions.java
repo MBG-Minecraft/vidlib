@@ -41,6 +41,6 @@ public record FireParticleOptions(int lifespan, Gradient color, float scale, Eas
 	}
 
 	public FireParticleOptions withResolvedGradient() {
-		return new FireParticleOptions(lifespan, color.resolve(), scale, easing, brightness);
+		return new FireParticleOptions(lifespan, color.optimize(), scale, easing, brightness);
 	}
 }

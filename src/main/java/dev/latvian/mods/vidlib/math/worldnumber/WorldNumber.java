@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.imgui.ImBuilderHolderList;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import io.netty.buffer.ByteBuf;
@@ -16,6 +17,7 @@ import java.util.function.Function;
 
 public interface WorldNumber {
 	SimpleRegistry<WorldNumber> REGISTRY = SimpleRegistry.create(WorldNumber::type);
+	ImBuilderHolderList<WorldNumber> IMGUI_BUILDERS = new ImBuilderHolderList<>();
 
 	static WorldNumber named(String name) {
 		if (name.startsWith("$")) {
@@ -56,6 +58,9 @@ public interface WorldNumber {
 		REGISTRY.register(IfWorldNumber.TYPE);
 		REGISTRY.register(InterpolatedWorldNumber.TYPE);
 		REGISTRY.register(ServerDataWorldNumber.TYPE);
+
+		IMGUI_BUILDERS.add(FixedWorldNumber.Builder.TYPE);
+		IMGUI_BUILDERS.add(InterpolatedWorldNumber.Builder.TYPE);
 	}
 
 	static WorldNumber fixed(double value) {
@@ -68,6 +73,15 @@ public interface WorldNumber {
 
 	@Nullable
 	Double get(WorldNumberContext ctx);
+
+	default boolean isLiteral() {
+		return false;
+	}
+
+	@Nullable
+	default WorldNumberImBuilder createBuilder() {
+		return null;
+	}
 
 	default double getOr(WorldNumberContext ctx, double def) {
 		Double value = get(ctx);
@@ -88,9 +102,5 @@ public interface WorldNumber {
 
 	default WorldNumber interpolate(Easing easing, WorldNumber other) {
 		return interpolate(easing, 0F, 1F, other);
-	}
-
-	default boolean isLiteral() {
-		return false;
 	}
 }

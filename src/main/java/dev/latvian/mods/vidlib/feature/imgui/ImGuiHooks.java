@@ -16,7 +16,6 @@ import imgui.glfw.ImGuiImplGlfw;
 import imgui.internal.ImGuiContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWWindowContentScaleCallback;
@@ -119,11 +118,14 @@ public class ImGuiHooks {
 	private static short[] buildMaterialIconRanges() {
 		var builder = new ImFontGlyphRangesBuilder();
 
-		for (var c : ImIcons.ALL) {
+		for (var icon : ImIcons.VALUES) {
+			builder.addChar(icon.icon);
+		}
+
+		for (var c : ImIcons.EXTRA_ICONS.get()) {
 			builder.addChar(c);
 		}
 
-		NeoForge.EVENT_BUS.post(new ImIconsEvent(builder::addChar));
 		return builder.buildRanges();
 	}
 

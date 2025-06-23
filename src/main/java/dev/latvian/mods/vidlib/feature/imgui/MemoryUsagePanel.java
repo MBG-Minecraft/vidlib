@@ -15,7 +15,7 @@ public class MemoryUsagePanel extends AdminPanel {
 	}
 
 	@Override
-	public void content() {
+	public void content(ImGraphics graphics) {
 		long maxMemory = Runtime.getRuntime().maxMemory();
 		long totalMemory = Runtime.getRuntime().totalMemory();
 		long freeMemory = Runtime.getRuntime().freeMemory();
