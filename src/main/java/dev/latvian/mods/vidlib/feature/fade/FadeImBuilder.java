@@ -40,23 +40,23 @@ public class FadeImBuilder implements ImBuilder<Fade> {
 		update = update.or(color.imgui(graphics));
 		ImGui.popID();
 
+		ImGui.alignTextToFramePadding();
 		ImGui.text("Fade In Ticks");
+		ImGui.sameLine();
+		update = update.or(graphics.easingCombo("###fade-in-ease", fadeInEase));
 		ImGui.sliderInt("###fade-in-ticks", fadeInTicks.getData(), 0, 60);
-		update = update.or(ImUpdate.itemEdit());
+		update = update.orItemEdit();
 
 		ImGui.text("Pause Ticks");
 		ImGui.sliderInt("###pause-ticks", pauseTicks.getData(), 0, 100);
-		update = update.or(ImUpdate.itemEdit());
+		update = update.orItemEdit();
 
+		ImGui.alignTextToFramePadding();
 		ImGui.text("Fade Out Ticks");
-		ImGui.sliderInt("###fade-out-ticks", fadeOutTicks.getData(), 0, 60);
-		update = update.or(ImUpdate.itemEdit());
-
-		ImGui.text("Fade In Easing");
-		update = update.or(graphics.easingCombo("###fade-in-ease", fadeInEase));
-
-		ImGui.text("Fade Out Easing");
+		ImGui.sameLine();
 		update = update.or(graphics.easingCombo("###fade-out-ease", fadeOutEase));
+		ImGui.sliderInt("###fade-out-ticks", fadeOutTicks.getData(), 0, 60);
+		update = update.orItemEdit();
 
 		return update;
 	}

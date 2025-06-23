@@ -1,17 +1,22 @@
 package dev.latvian.mods.vidlib.feature.cutscene;
 
+import com.google.gson.JsonElement;
+import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.imgui.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImIcons;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
+import dev.latvian.mods.vidlib.util.JsonUtils;
 import imgui.ImGui;
+import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.type.ImBoolean;
+import imgui.type.ImString;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.toasts.SystemToast;
-import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,10 +24,15 @@ import java.util.Optional;
 
 public class CutsceneImBuilder implements ImBuilder<Cutscene> {
 	public final WorldNumberVariables variables;
+	public WorldNumberContext numberContext;
 	public final List<CutsceneStepImBuilder> steps = new ArrayList<>();
 	public final ImBoolean allowMovement = new ImBoolean(false);
 	public final ImBoolean openPreviousScreen = new ImBoolean(false);
 	public final ImBoolean hidePlayer = new ImBoolean(false);
+	public Cutscene cutscene = null;
+	public JsonElement cutsceneJson = null;
+	public final ImString json = ImGuiUtils.resizableString();
+	public int jsonLines = 0;
 
 	public CutsceneImBuilder() {
 		this.variables = new WorldNumberVariables();
@@ -30,45 +40,57 @@ public class CutsceneImBuilder implements ImBuilder<Cutscene> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		var ctx = Minecraft.getInstance().level.globalContext(0F).withVariables(variables);
+		numberContext = Minecraft.getInstance().level.globalContext(0F).withVariables(variables);
 		var update = ImUpdate.NONE;
 
-		ImGui.columns(2);
+		if (cutscene == null) {
+			ImGui.beginDisabled();
+		}
 
 		if (ImGui.button("Preview###preview-cutscene", -1F, 0F)) {
-			if (isValid()) {
-				var cutscene = build();
-				Minecraft.getInstance().playCutscene(cutscene, variables);
-			} else {
-				Minecraft.getInstance().getToastManager().addToast(new SystemToast(SystemToast.SystemToastId.NARRATOR_TOGGLE, Component.literal("AAA"), null));
+			if (cutscene != null) {
+				try {
+					Minecraft.getInstance().c2s(new PreviewCutscenePayload(cutscene, variables));
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
 			}
 		}
 
-		ImGui.nextColumn();
+		if (cutscene == null) {
+			ImGui.endDisabled();
+		} else {
+			int len = 0;
 
-		if (ImGui.button("Copy JSON###copy-cutscene-json", -1F, 0F)) {
+			for (var steps : cutscene.steps) {
+				var start = steps.start();
+				var length = Mth.ceil(steps.length().getOr(numberContext, 0D));
+				len = Math.max(len, start + length);
+			}
+
+			ImGui.text("Total length: " + KMath.format(len / 20F) + "s");
 		}
-
-		ImGui.columns();
 
 		ImGui.separator();
 
-		update = update.or(ImGui.checkbox("Allow Movement###allow-movement", allowMovement));
-		update = update.or(ImGui.checkbox("Open Previous Screen###open-previous-screen", openPreviousScreen));
-		update = update.or(ImGui.checkbox("Hide Player###hide-player", hidePlayer));
+		update = update.or(ImGui.checkbox(ImIcons.FREEZE + " Allow Movement###allow-movement", allowMovement));
+		update = update.or(ImGui.checkbox(ImIcons.UNDO + " Open Previous Screen###open-previous-screen", openPreviousScreen));
+		update = update.or(ImGui.checkbox(ImIcons.INVISIBLE + " Hide Player###hide-player", hidePlayer));
 
 		for (int i = 0; i < steps.size(); i++) {
 			var step = steps.get(i);
-			var start = Optional.ofNullable(step.start.build().get(ctx)).orElse(0D).intValue();
-			var length = Optional.ofNullable(step.length.build().get(ctx)).orElse(1D).intValue();
+			var start = step.start.get();
+			var length = Mth.ceil(Optional.ofNullable(step.length.isValid() ? step.length.build().get(numberContext) : null).orElse(0D));
 
 			ImGui.pushID(i);
 			ImGuiUtils.BOOLEAN.set(true);
 
-			if (ImGui.collapsingHeader(length > 1 ? ("Step @ " + start / 20F + "s for " + length / 20F + "s") : ("Step @ " + start / 20F + "s"), ImGuiUtils.BOOLEAN, ImGuiTreeNodeFlags.DefaultOpen)) {
+			if (ImGui.collapsingHeader(length >= 1 ? ("Step @ " + KMath.format(start / 20F) + "s for " + KMath.format(length / 20F) + "s") : ("Step @ " + KMath.format(start / 20F) + "s"), ImGuiUtils.BOOLEAN, ImGuiTreeNodeFlags.DefaultOpen)) {
+				boolean shouldDelete = !ImGuiUtils.BOOLEAN.get();
+
 				update = update.or(step.imgui(graphics));
 
-				if (!ImGuiUtils.BOOLEAN.get()) {
+				if (shouldDelete) {
 					step.delete = true;
 				}
 			}
@@ -76,15 +98,67 @@ public class CutsceneImBuilder implements ImBuilder<Cutscene> {
 			ImGui.popID();
 		}
 
-		if (ImGui.button(ImIcons.ADD + " Step###add-step")) {
-			steps.add(new CutsceneStepImBuilder(this));
+		if (steps.removeIf(step -> step.delete)) {
+			update = ImUpdate.FULL;
 		}
 
+		ImGui.separator();
+
+		if (ImGui.button(ImIcons.ADD + " Step###add-step")) {
+			steps.add(new CutsceneStepImBuilder(this));
+			update = ImUpdate.FULL;
+		}
+
+		ImGui.separator();
+
+		if (update.isFull()) {
+			cutscene = null;
+			cutsceneJson = null;
+			json.clear();
+			jsonLines = 0;
+
+			if (isValid()) {
+				try {
+					var c = build();
+					cutsceneJson = Cutscene.DIRECT_CODEC.encodeStart(Minecraft.getInstance().level.jsonOps(), c).getOrThrow();
+					json.set(JsonUtils.prettyString(cutsceneJson));
+					cutscene = c;
+
+					for (var ch : json.get().toCharArray()) {
+						if (ch == '\n') {
+							jsonLines++;
+						}
+					}
+				} catch (Exception ex) {
+				}
+			}
+		}
+
+		ImGui.text("JSON");
+		ImGui.sameLine();
+
+		if (cutsceneJson == null) {
+			ImGui.beginDisabled();
+			ImGui.smallButton("Copy to Clipboard###copy-json");
+			ImGui.endDisabled();
+		} else if (ImGui.smallButton("Copy to Clipboard###copy-json")) {
+			ImGui.setClipboardText(cutsceneJson.toString());
+		}
+
+		if (jsonLines > 0 && json.isNotEmpty()) {
+			ImGui.inputTextMultiline("###json", json, -1F, 300F, ImGuiInputTextFlags.ReadOnly);
+		}
+
+		numberContext = null;
 		return update;
 	}
 
 	@Override
 	public boolean isValid() {
+		if (steps.isEmpty()) {
+			return false;
+		}
+
 		for (var step : steps) {
 			if (!step.isValid()) {
 				return false;
@@ -102,6 +176,6 @@ public class CutsceneImBuilder implements ImBuilder<Cutscene> {
 			list.add(step.build());
 		}
 
-		return new Cutscene(list, allowMovement.get(), openPreviousScreen.get(), hidePlayer.get());
+		return new Cutscene(allowMovement.get(), openPreviousScreen.get(), hidePlayer.get(), list);
 	}
 }

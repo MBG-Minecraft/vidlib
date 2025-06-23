@@ -4,6 +4,7 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.easing.Easing;
+import dev.latvian.mods.klib.math.Range;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiComboFlags;
@@ -12,6 +13,7 @@ import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
@@ -23,6 +25,8 @@ public class ImGraphics {
 		private int pushedItemFlags = 0;
 		private float currentFontScale = 1F;
 		private FloatList pushedFontScales = null;
+		private ImNumberType numberType = null;
+		private Range numberRange = null;
 	}
 
 	private VarStackStack stack;
@@ -30,6 +34,12 @@ public class ImGraphics {
 	public void pushStack() {
 		var newStack = new VarStackStack();
 		newStack.parent = stack;
+
+		if (stack != null) {
+			newStack.numberType = stack.numberType;
+			newStack.numberRange = stack.numberRange;
+		}
+
 		stack = newStack;
 	}
 
@@ -108,6 +118,23 @@ public class ImGraphics {
 		stack.currentFontScale = scale;
 	}
 
+	public void setNumberType(ImNumberType type) {
+		stack.numberType = type;
+	}
+
+	public ImNumberType getNumberType() {
+		return stack.numberType;
+	}
+
+	public void setNumberRange(@Nullable Range range) {
+		stack.numberRange = range;
+	}
+
+	@Nullable
+	public Range getNumberRange() {
+		return stack.numberRange;
+	}
+
 	public void setDefaultStyle() {
 		setStyleVar(ImGuiStyleVar.WindowPadding, 15F, 15F);
 		setStyleVar(ImGuiStyleVar.WindowRounding, 5F);
@@ -130,7 +157,7 @@ public class ImGraphics {
 		setStyleCol(ImGuiCol.WindowBg, 0xEF292930);
 		setStyleCol(ImGuiCol.FrameBg, 0xFF1D1D23); // checkboxes, sliders
 		setStyleCol(ImGuiCol.TitleBg, 0xEF384756);
-		setStyleCol(ImGuiCol.TitleBgActive, 0xEF517F70);
+		setStyleCol(ImGuiCol.TitleBgActive, 0xEF70517F);
 		setStyleCol(ImGuiCol.MenuBarBg, 0xFF17171C);
 		setStyleCol(ImGuiCol.TitleBgCollapsed, 0xEF517F70);
 	}
@@ -151,7 +178,7 @@ public class ImGraphics {
 
 	public void setButtonColor(Color col) {
 		setStyleCol(ImGuiCol.Button, col);
-		setStyleCol(ImGuiCol.ButtonHovered, col.lerp(0.3F, Color.WHITE));
+		setStyleCol(ImGuiCol.ButtonHovered, col.lerp(0.3F, dev.latvian.mods.klib.color.Color.WHITE));
 		setStyleCol(ImGuiCol.ButtonActive, col.lerp(0.1F, Color.WHITE));
 	}
 
@@ -160,6 +187,28 @@ public class ImGraphics {
 		setRedText();
 		ImGui.textWrapped(throwable.toString());
 		popStack();
+	}
+
+	public void redTextIf(String text, boolean condition) {
+		if (condition) {
+			pushStack();
+			setRedText();
+			ImGui.text(text);
+			popStack();
+		} else {
+			ImGui.text(text);
+		}
+	}
+
+	public void redWrappedTextIf(String text, boolean condition) {
+		if (condition) {
+			pushStack();
+			setRedText();
+			ImGui.textWrapped(text);
+			popStack();
+		} else {
+			ImGui.textWrapped(text);
+		}
 	}
 
 	public static int getTextureId(ResourceLocation identifier) {

@@ -4,11 +4,14 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
+import dev.latvian.mods.vidlib.feature.imgui.ImNumberType;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import imgui.ImGui;
 import imgui.type.ImDouble;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.util.Mth;
 
 public record FixedWorldNumber(Double number) implements WorldNumber {
 	public static final SimpleRegistryType.Unit<FixedWorldNumber> ZERO = SimpleRegistryType.unit("zero", new FixedWorldNumber(0D));
@@ -29,7 +32,7 @@ public record FixedWorldNumber(Double number) implements WorldNumber {
 	).apply(instance, FixedWorldNumber::of)), ByteBufCodecs.DOUBLE.map(FixedWorldNumber::of, FixedWorldNumber::number));
 
 	public static class Builder implements WorldNumberImBuilder {
-		public static final ImBuilderHolder<WorldNumber> TYPE = new ImBuilderHolder<>("Fixed", Builder::new, true);
+		public static final ImBuilderHolder<WorldNumber> TYPE = new ImBuilderHolder<>("Number", Builder::new, true);
 
 		public final ImDouble data;
 
@@ -42,13 +45,44 @@ public record FixedWorldNumber(Double number) implements WorldNumber {
 		}
 
 		@Override
+		public void set(WorldNumber value) {
+			if (value instanceof FixedWorldNumber(Double n)) {
+				data.set(n);
+			}
+		}
+
+		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
-			ImGui.inputDouble("###value", data);
+			var range = graphics.getNumberRange();
+
+			if (graphics.getNumberType() == ImNumberType.INT) {
+				ImGuiUtils.INT.set(Mth.floor(data.get()));
+
+				if (range != null) {
+					ImGui.sliderInt("###value", ImGuiUtils.INT.getData(), Mth.floor(range.min()), Mth.ceil(range.max()));
+				} else {
+					ImGui.inputInt("###value", ImGuiUtils.INT);
+				}
+
+				data.set(ImGuiUtils.INT.get());
+			} else if (range != null) {
+				ImGuiUtils.FLOAT.set((float) data.get());
+				ImGui.sliderFloat("###value", ImGuiUtils.FLOAT.getData(), range.min(), range.max());
+				data.set(ImGuiUtils.FLOAT.get());
+			} else {
+				ImGui.inputDouble("###value", data);
+			}
+
 			return ImUpdate.itemEdit();
 		}
 
 		@Override
-		public FixedWorldNumber build() {
+		public boolean isValid() {
+			return !Double.isNaN(data.get());
+		}
+
+		@Override
+		public WorldNumber build() {
 			return of(data.get());
 		}
 	}
@@ -66,12 +100,5 @@ public record FixedWorldNumber(Double number) implements WorldNumber {
 	@Override
 	public boolean isLiteral() {
 		return true;
-	}
-
-	@Override
-	public Builder createBuilder() {
-		var builder = new Builder();
-		builder.data.set(number);
-		return builder;
 	}
 }

@@ -54,7 +54,7 @@ public class ClientCutscene implements CameraOverride {
 		}
 
 		for (var step : steps) {
-			this.totalLength = Math.max(totalLength, step.start + step.length);
+			this.totalLength = Math.max(totalLength, step.totalLength);
 
 			if (step.start == 0) {
 				if (step.target != null) {
@@ -98,7 +98,7 @@ public class ClientCutscene implements CameraOverride {
 		prevFovMod = fovMod;
 
 		for (var step : steps) {
-			if (step.start == totalTick) {
+			if (totalTick == step.start) {
 				if (step.status != null) {
 					mc.gui.setOverlayMessage(step.status, false);
 				}
@@ -136,8 +136,8 @@ public class ClientCutscene implements CameraOverride {
 				}
 			}
 
-			if (totalTick >= step.start && totalTick < step.start + step.length) {
-				float progress = (totalTick - step.start) / (float) step.length;
+			if (step.length == 0 ? (totalTick == step.start) : (totalTick >= step.start && totalTick < step.start + step.length)) {
+				float progress = step.length == 0 ? 0F : (totalTick - step.start) / (float) step.length;
 				var ctx = mc.level.globalContext(progress).withVariables(variables);
 				ctx.originPos = originPos;
 				ctx.sourcePos = sourcePos.get();
@@ -155,7 +155,7 @@ public class ClientCutscene implements CameraOverride {
 							step.prevRenderTarget = target;
 						}
 
-						if (step.start == totalTick && step.snap.target()) {
+						if (totalTick == step.start && step.snap.target()) {
 							prevTarget = target;
 						}
 					}
@@ -169,7 +169,7 @@ public class ClientCutscene implements CameraOverride {
 					if (newOrigin != null) {
 						origin = newOrigin;
 
-						if (step.start == totalTick && step.snap.origin()) {
+						if (totalTick == step.start && step.snap.origin()) {
 							prevOrigin = origin;
 						}
 					}
@@ -178,12 +178,12 @@ public class ClientCutscene implements CameraOverride {
 				if (step.fovModifier != null) {
 					fovMod = step.fovModifier.getOr(ctx, 1D);
 
-					if (step.start == totalTick && step.snap.fov()) {
+					if (totalTick == step.start && step.snap.fov()) {
 						prevFovMod = fovMod;
 					}
 				}
 
-				if (step.start == totalTick) {
+				if (totalTick == step.start) {
 					for (var event : step.events) {
 						event.run(mc.level, ctx);
 					}

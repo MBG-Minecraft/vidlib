@@ -71,9 +71,11 @@ public class AdminPanel {
 		ImGuiUtils.BOOLEAN.set(true);
 
 		if (canBeClosed ? ImGui.begin(label + "###" + id, ImGuiUtils.BOOLEAN, flags) : ImGui.begin(label + "###" + id, flags)) {
+			boolean shouldClose = !ImGuiUtils.BOOLEAN.get();
+
 			content(graphics);
 
-			if (!ImGuiUtils.BOOLEAN.get()) {
+			if (shouldClose) {
 				close();
 			}
 

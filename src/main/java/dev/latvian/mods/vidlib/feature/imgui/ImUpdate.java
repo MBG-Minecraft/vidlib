@@ -27,6 +27,10 @@ public enum ImUpdate {
 		return VALUES[Math.max(ordinal(), other.ordinal())];
 	}
 
+	public ImUpdate orItemEdit() {
+		return or(itemEdit());
+	}
+
 	public ImUpdate or(boolean full) {
 		return full ? FULL : this;
 	}

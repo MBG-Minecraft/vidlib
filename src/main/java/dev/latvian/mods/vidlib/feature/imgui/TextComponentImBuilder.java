@@ -45,7 +45,7 @@ public class TextComponentImBuilder implements ImBuilder<Component> {
 		var update = ImUpdate.NONE;
 		delete = false;
 		ImGui.inputText("###text", text);
-		update = update.or(ImUpdate.itemEdit());
+		update = update.orItemEdit();
 
 		if (!siblings.isEmpty()) {
 			ImGui.indent();

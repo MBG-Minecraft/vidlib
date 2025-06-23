@@ -1,11 +1,14 @@
 package dev.latvian.mods.vidlib.feature.cutscene;
 
+import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.feature.fade.Fade;
 import dev.latvian.mods.vidlib.feature.fade.FadeImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
+import dev.latvian.mods.vidlib.feature.imgui.ImIcons;
+import dev.latvian.mods.vidlib.feature.imgui.ImNumberType;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.TextComponentImBuilder;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundDataImBuilder;
@@ -17,7 +20,9 @@ import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
 import dev.latvian.mods.vidlib.math.worldvector.WorldVectorImBuilder;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImInt;
 import imgui.type.ImString;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
@@ -26,8 +31,8 @@ import java.util.Optional;
 
 public class CutsceneStepImBuilder implements ImBuilder<CutsceneStep> {
 	public final CutsceneImBuilder parent;
-	public final ImBuilder<WorldNumber> start = WorldNumberImBuilder.create(0D);
-	public final ImBuilder<WorldNumber> length = WorldNumberImBuilder.create(1D);
+	public final ImInt start = new ImInt();
+	public final ImBuilder<WorldNumber> length = WorldNumberImBuilder.create(0D);
 	public final ImBoolean overrideOrigin = new ImBoolean(false);
 	public final ImBuilder<WorldVector> origin = WorldVectorImBuilder.create();
 	public final ImBoolean overrideTarget = new ImBoolean(false);
@@ -88,50 +93,66 @@ public class CutsceneStepImBuilder implements ImBuilder<CutsceneStep> {
 		var update = ImUpdate.NONE;
 		ImGui.pushItemWidth(-1F);
 
+		ImGui.alignTextToFramePadding();
 		ImGui.text("Start");
-		ImGui.pushID("###start");
-		update = update.or(start.imgui(graphics));
-		ImGui.popID();
+		ImGui.sameLine();
+		ImGui.inputInt("###start", start);
+		update = update.orItemEdit();
 
+		ImGui.alignTextToFramePadding();
 		ImGui.text("Length");
+		ImGui.sameLine();
 		ImGui.pushID("###length");
+		graphics.pushStack();
+		graphics.setNumberType(ImNumberType.INT);
 		update = update.or(length.imgui(graphics));
+		graphics.popStack();
 		ImGui.popID();
 
-		ImGui.checkbox("Origin###override-origin", overrideOrigin);
+		ImGui.separator();
+
+		update = update.or(ImGui.checkbox("Origin###override-origin", overrideOrigin));
 
 		if (overrideOrigin.get()) {
 			ImGui.sameLine();
-			ImGui.checkbox("Snap###snap-origin", snapOrigin);
+			update = update.or(ImGui.checkbox("Snap###snap-origin", snapOrigin));
+			ImGui.sameLine();
 
 			ImGui.pushID("###origin");
 			update = update.or(origin.imgui(graphics));
 			ImGui.popID();
 		}
 
-		ImGui.checkbox("Target###override-target", overrideTarget);
+		update = update.or(ImGui.checkbox("Target###override-target", overrideTarget));
 
 		if (overrideTarget.get()) {
 			ImGui.sameLine();
-			ImGui.checkbox("Snap###snap-target", snapTarget);
+			update = update.or(ImGui.checkbox("Snap###snap-target", snapTarget));
+			ImGui.sameLine();
 
 			ImGui.pushID("###target");
 			update = update.or(target.imgui(graphics));
 			ImGui.popID();
 		}
 
-		ImGui.checkbox("FOV Modifier###override-fov-mod", overrideFovModifier);
+		update = update.or(ImGui.checkbox("FOV Modifier###override-fov-mod", overrideFovModifier));
 
 		if (overrideFovModifier.get()) {
 			ImGui.sameLine();
-			ImGui.checkbox("Snap###snap-fov", snapFov);
+			update = update.or(ImGui.checkbox("Snap###snap-fov", snapFov));
+			ImGui.sameLine();
 
 			ImGui.pushID("###fov-mod");
+			graphics.pushStack();
+			graphics.setNumberRange(new Range(0F, 2F));
 			update = update.or(fovModifier.imgui(graphics));
+			graphics.popStack();
 			ImGui.popID();
 		}
 
-		ImGui.checkbox("Status###override-status", overrideStatus);
+		ImGui.separator();
+
+		update = update.or(ImGui.checkbox("Status###override-status", overrideStatus));
 
 		if (overrideStatus.get()) {
 			ImGui.pushID("###status");
@@ -139,10 +160,10 @@ public class CutsceneStepImBuilder implements ImBuilder<CutsceneStep> {
 			ImGui.popID();
 		}
 
-		ImGui.checkbox("Bars###bars", barsEnabled);
+		update = update.or(ImGui.checkbox("Bars###bars", barsEnabled));
 
 		if (barsEnabled.get()) {
-			ImGui.checkbox("Top Text###override-top-bar", overrideTopBar);
+			update = update.or(ImGui.checkbox("Top Text###override-top-bar", overrideTopBar));
 
 			if (overrideTopBar.get()) {
 				ImGui.pushID("###top-bar");
@@ -150,7 +171,7 @@ public class CutsceneStepImBuilder implements ImBuilder<CutsceneStep> {
 				ImGui.popID();
 			}
 
-			ImGui.checkbox("Bottom Text###override-bottom-bar", overrideBottomBar);
+			update = update.or(ImGui.checkbox("Bottom Text###override-bottom-bar", overrideBottomBar));
 
 			if (overrideBottomBar.get()) {
 				ImGui.pushID("###bottom-bar");
@@ -162,13 +183,77 @@ public class CutsceneStepImBuilder implements ImBuilder<CutsceneStep> {
 		ImGui.text("Shader");
 		ImGui.setNextItemWidth(-1F);
 		ImGui.inputText("###shader", shader);
+		update = update.orItemEdit();
 
-		ImGui.checkbox("Fade###fade-enabled", fadeEnabled);
+		update = update.or(ImGui.checkbox("Fade###fade-enabled", fadeEnabled));
 
 		if (fadeEnabled.get()) {
 			ImGui.pushID("###fade");
 			update = update.or(fade.imgui(graphics));
 			ImGui.popID();
+		}
+
+		ImGui.alignTextToFramePadding();
+		graphics.redTextIf("Sounds", !areSoundsValid());
+		ImGui.sameLine();
+
+		if (ImGui.button(ImIcons.ADD + "###add-sound")) {
+			sounds.add(new PositionedSoundDataImBuilder());
+			update = ImUpdate.FULL;
+		}
+
+		if (!sounds.isEmpty()) {
+			ImGui.sameLine();
+
+			if (ImGui.button("Stop all Sounds###stop-all-sounds")) {
+				Minecraft.getInstance().getSoundManager().stop();
+			}
+
+			ImGui.pushID("###sounds");
+
+			for (int i = 0; i < sounds.size(); i++) {
+				var sound = sounds.get(i);
+
+				ImGui.pushID(i);
+
+				ImGui.text("Sound");
+				ImGui.sameLine();
+
+				if (sound.isValid()) {
+					if (ImGui.smallButton(ImIcons.PLAY + " Play")) {
+						Minecraft.getInstance().playGlobalSound(sound.build(), parent.variables);
+					}
+				} else {
+					ImGui.beginDisabled();
+					ImGui.smallButton(ImIcons.PLAY + " Play");
+					ImGui.endDisabled();
+				}
+
+				ImGui.sameLine();
+
+				graphics.pushStack();
+				graphics.setRedButton();
+
+				boolean deleteClicked = ImGui.smallButton(ImIcons.DELETE + " Delete");
+
+				graphics.popStack();
+
+				ImGui.indent();
+				update = update.or(sound.imgui(graphics));
+				ImGui.unindent();
+
+				if (deleteClicked) {
+					sound.delete = true;
+				}
+
+				ImGui.popID();
+			}
+
+			ImGui.popID();
+
+			if (sounds.removeIf(sound -> sound.delete)) {
+				update = ImUpdate.FULL;
+			}
 		}
 
 		// sounds
@@ -177,10 +262,23 @@ public class CutsceneStepImBuilder implements ImBuilder<CutsceneStep> {
 		return update;
 	}
 
+	public boolean areSoundsValid() {
+		if (sounds.isEmpty()) {
+			return true;
+		}
+
+		for (var sound : sounds) {
+			if (!sound.isValid()) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	@Override
 	public boolean isValid() {
-		if (start.isValid()
-			&& length.isValid()
+		return length.isValid()
 			&& origin.isValid()
 			&& target.isValid()
 			&& fovModifier.isValid()
@@ -189,29 +287,19 @@ public class CutsceneStepImBuilder implements ImBuilder<CutsceneStep> {
 			&& bottomBar.isValid()
 			&& (shader.isEmpty() || ResourceLocation.read(shader.get()).isSuccess())
 			&& fade.isValid()
-		) {
-			for (var sound : sounds) {
-				if (!sound.isValid()) {
-					return false;
-				}
-			}
-
-			return true;
-		}
-
-		return false;
+			&& areSoundsValid();
 	}
 
 	@Override
 	public CutsceneStep build() {
 		return new CutsceneStep(
-			start.build(),
+			start.get(),
 			length.build(),
 			overrideOrigin.get() ? Optional.of(origin.build()) : Optional.empty(),
 			overrideTarget.get() ? Optional.of(target.build()) : Optional.empty(),
 			overrideFovModifier.get() ? Optional.of(fovModifier.build()) : Optional.empty(),
 			overrideStatus.get() ? Optional.of(status.build()) : Optional.empty(),
-			barsEnabled.get() ? Optional.of(new CutsceneStepBars(
+			barsEnabled.get() ? Optional.of(CutsceneStepBars.of(
 				overrideTopBar.get() ? Optional.of(topBar.build()) : Optional.empty(),
 				overrideBottomBar.get() ? Optional.of(bottomBar.build()) : Optional.empty()
 			)) : Optional.empty(),

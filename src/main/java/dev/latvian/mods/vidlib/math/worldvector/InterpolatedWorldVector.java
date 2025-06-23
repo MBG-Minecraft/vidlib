@@ -5,8 +5,14 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.vidlib.feature.imgui.ImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
+import imgui.ImGui;
+import imgui.type.ImFloat;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -26,6 +32,58 @@ public record InterpolatedWorldVector(Easing easing, float start, float end, Wor
 		WorldVector.STREAM_CODEC, InterpolatedWorldVector::to,
 		InterpolatedWorldVector::new
 	));
+
+	public static class Builder implements WorldVectorImBuilder {
+		public static final ImBuilderHolder<WorldVector> TYPE = new ImBuilderHolder<>("Interpolated", Builder::new);
+
+		public final Easing[] easing = new Easing[]{Easing.LINEAR};
+		public final ImBuilder<WorldVector> from = WorldVectorImBuilder.create();
+		public final ImBuilder<WorldVector> to = WorldVectorImBuilder.create();
+		public final ImFloat start = new ImFloat(0F);
+		public final ImFloat end = new ImFloat(1F);
+
+		@Override
+		public ImUpdate imgui(ImGraphics graphics) {
+			var update = ImUpdate.NONE;
+			ImGui.pushItemWidth(-1F);
+
+			ImGui.alignTextToFramePadding();
+			ImGui.text("Easing");
+			ImGui.sameLine();
+			update = update.or(graphics.easingCombo("###easing", easing));
+
+			ImGui.alignTextToFramePadding();
+			ImGui.text("From");
+			ImGui.sameLine();
+			ImGui.pushID("###from");
+			update = update.or(from.imgui(graphics));
+			ImGui.popID();
+
+			ImGui.alignTextToFramePadding();
+			ImGui.text("To");
+			ImGui.sameLine();
+			ImGui.pushID("###to");
+			update = update.or(to.imgui(graphics));
+			ImGui.popID();
+
+			graphics.redTextIf("Start / End", start.get() < 0F || start.get() > 1F || end.get() < 0F || end.get() > 1F || start.get() >= end.get());
+			ImGui.dragFloatRange2("###range", start.getData(), end.getData(), 0.01F, 0F, 1F);
+			update = update.orItemEdit();
+
+			ImGui.popItemWidth();
+			return update;
+		}
+
+		@Override
+		public boolean isValid() {
+			return from.isValid() && to.isValid() && start.get() >= 0F && start.get() <= 1F && end.get() >= 0F && end.get() <= 1F && start.get() < end.get();
+		}
+
+		@Override
+		public WorldVector build() {
+			return new InterpolatedWorldVector(easing[0], start.get(), end.get(), from.build(), to.build());
+		}
+	}
 
 	public InterpolatedWorldVector(Easing easing, WorldVector a, WorldVector b) {
 		this(easing, 0F, 1F, a, b);

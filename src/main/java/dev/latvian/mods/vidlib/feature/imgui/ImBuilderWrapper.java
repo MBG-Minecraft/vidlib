@@ -1,37 +1,63 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import dev.latvian.mods.klib.util.Cast;
 import imgui.ImGui;
+import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.Nullable;
 
 public class ImBuilderWrapper<T> implements ImBuilder<T> {
-	private final ImBuilderHolder<T>[] options;
-	private final ImBuilderHolder<T>[] selectedBuilder;
-	public ImBuilder<? extends T> builder;
+	private static class CachedBuilder<T> implements StringRepresentable {
+		private final ImBuilderHolder<T> holder;
+		private ImBuilder<? extends T> builder;
+
+		private CachedBuilder(ImBuilderHolder<T> holder) {
+			this.holder = holder;
+		}
+
+		public ImBuilder<? extends T> get() {
+			if (builder == null) {
+				builder = holder.get();
+			}
+
+			return builder;
+		}
+
+		@Override
+		public String getSerializedName() {
+			return holder.name();
+		}
+	}
+
+	private final CachedBuilder<T>[] options;
+	private final CachedBuilder<T>[] selectedBuilder;
 
 	public ImBuilderWrapper(ImBuilderHolderList<T> options) {
-		this.options = options.list().toArray(new ImBuilderHolder[0]);
-		this.selectedBuilder = new ImBuilderHolder[1];
+		this.options = new CachedBuilder[options.list().size()];
+		this.selectedBuilder = new CachedBuilder[1];
 
-		for (var option : this.options) {
-			if (option.isDefault()) {
-				this.selectedBuilder[0] = option;
-				this.builder = option.get();
+		for (int i = 0; i < this.options.length; i++) {
+			this.options[i] = new CachedBuilder<>(options.list().get(i));
+
+			if (this.options[i].holder.isDefault()) {
+				this.selectedBuilder[0] = this.options[i];
 			}
 		}
 	}
 
 	@Override
 	public void set(T value) {
+		var builder = selectedBuilder[0].get();
+
+		if (builder != null) {
+			builder.set(Cast.to(value));
+		}
 	}
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
 		// selectedBuilder[0] = null;
-		var update = graphics.combo("###select-builder", "", selectedBuilder, options, ImBuilderHolder::name, 0);
-
-		if (update.isAny()) {
-			builder = selectedBuilder[0].get();
-		}
+		var update = graphics.combo("###select-builder", "", selectedBuilder, options);
+		var builder = selectedBuilder[0].get();
 
 		if (builder == null) {
 			return ImUpdate.NONE;
@@ -45,12 +71,14 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 
 	@Override
 	public boolean isValid() {
+		var builder = selectedBuilder[0].get();
 		return builder != null && builder.isValid();
 	}
 
 	@Override
 	@Nullable
 	public T build() {
+		var builder = selectedBuilder[0].get();
 		return builder == null ? null : builder.build();
 	}
 }

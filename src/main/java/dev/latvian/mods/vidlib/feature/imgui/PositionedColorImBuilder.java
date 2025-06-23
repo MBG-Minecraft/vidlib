@@ -45,7 +45,7 @@ public class PositionedColorImBuilder implements Comparable<PositionedColorImBui
 		graphics.popStack();
 
 		ImGui.sliderFloat("Position###position", position.getData(), 0F, 1F, "%.3f");
-		update = update.or(ImUpdate.itemEdit());
+		update = update.orItemEdit();
 		update = update.or(color.imgui(graphics));
 		update = update.or(graphics.easingCombo("Easing###easing", easing));
 

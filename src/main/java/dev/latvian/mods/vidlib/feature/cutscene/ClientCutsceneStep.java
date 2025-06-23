@@ -32,9 +32,9 @@ public class ClientCutsceneStep {
 	public List<CutsceneRender> render;
 
 	public ClientCutsceneStep(CutsceneStep step, WorldNumberContext ctx) {
-		this.start = Mth.floor(step.start().getOr(ctx, 0D));
-		this.length = Mth.ceil(step.length().getOr(ctx, 1D));
-		this.totalLength = start + length;
+		this.start = step.start();
+		this.length = Math.max(0, Mth.ceil(step.length().getOr(ctx, 0D)));
+		this.totalLength = Math.max(0, start) + length;
 		this.origin = step.origin().orElse(null);
 		this.target = step.target().orElse(null);
 		this.fovModifier = step.fovModifier().orElse(null);

@@ -75,11 +75,11 @@ public interface WorldVector {
 		REGISTRY.register(FixedWorldVector.ZERO);
 		REGISTRY.register(FixedWorldVector.ONE);
 		REGISTRY.register(FixedWorldVector.TYPE);
+		REGISTRY.register(InterpolatedWorldVector.TYPE);
 		REGISTRY.register(DynamicWorldVector.TYPE);
 		REGISTRY.register(ScalarWorldVector.TYPE);
 		REGISTRY.register(OffsetWorldVector.TYPE);
 		REGISTRY.register(ScaledWorldVector.TYPE);
-		REGISTRY.register(InterpolatedWorldVector.TYPE);
 		REGISTRY.register(FollowingEntityWorldVector.TYPE);
 		REGISTRY.register(FollowingPropWorldVector.TYPE);
 		REGISTRY.register(VariableWorldVector.TYPE);
@@ -95,6 +95,17 @@ public interface WorldVector {
 		for (var literal : LiteralWorldVector.values()) {
 			IMGUI_BUILDERS.add(literal.builderHolder);
 		}
+
+		IMGUI_BUILDERS.add(InterpolatedWorldVector.Builder.TYPE);
+		IMGUI_BUILDERS.add(DynamicWorldVector.Builder.TYPE);
+		IMGUI_BUILDERS.add(ScalarWorldVector.Builder.TYPE);
+		IMGUI_BUILDERS.add(OffsetWorldVector.Builder.TYPE);
+		IMGUI_BUILDERS.add(ScaledWorldVector.Builder.TYPE);
+		// IMGUI_BUILDERS.add(FollowingEntityWorldVector.Builder.TYPE);
+		// IMGUI_BUILDERS.add(FollowingPropWorldVector.Builder.TYPE);
+		IMGUI_BUILDERS.add(VariableWorldVector.Builder.TYPE);
+		IMGUI_BUILDERS.add(IfWorldVector.Builder.TYPE);
+		IMGUI_BUILDERS.add(PivotingWorldVector.Builder.TYPE);
 	}
 
 	static WorldVector fixed(Vec3 position) {
@@ -150,11 +161,6 @@ public interface WorldVector {
 
 	default boolean isLiteral() {
 		return false;
-	}
-
-	@Nullable
-	default WorldVectorImBuilder createBuilder() {
-		return null;
 	}
 
 	default WorldVector offset(WorldVector other) {

@@ -2,7 +2,12 @@ package dev.latvian.mods.vidlib.math.worldnumber;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.vidlib.feature.imgui.ImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import imgui.ImGui;
 import org.jetbrains.annotations.Nullable;
 
 public record ScaledWorldNumber(WorldNumber a, WorldNumber b) implements WorldNumber {
@@ -14,6 +19,46 @@ public record ScaledWorldNumber(WorldNumber a, WorldNumber b) implements WorldNu
 		WorldNumber.STREAM_CODEC, ScaledWorldNumber::b,
 		ScaledWorldNumber::new
 	));
+
+	public static class Builder implements WorldNumberImBuilder {
+		public static final ImBuilderHolder<WorldNumber> TYPE = new ImBuilderHolder<>("Scaled (a * b)", Builder::new);
+
+		public final ImBuilder<WorldNumber> a = WorldNumberImBuilder.create(0D);
+		public final ImBuilder<WorldNumber> b = WorldNumberImBuilder.create(0D);
+
+		@Override
+		public ImUpdate imgui(ImGraphics graphics) {
+			var update = ImUpdate.NONE;
+			ImGui.pushItemWidth(-1F);
+
+			ImGui.alignTextToFramePadding();
+			graphics.redTextIf("A", !a.isValid());
+			ImGui.sameLine();
+			ImGui.pushID("###a");
+			update = update.or(a.imgui(graphics));
+			ImGui.popID();
+
+			ImGui.alignTextToFramePadding();
+			graphics.redTextIf("B", !b.isValid());
+			ImGui.sameLine();
+			ImGui.pushID("###b");
+			update = update.or(b.imgui(graphics));
+			ImGui.popID();
+
+			ImGui.popItemWidth();
+			return update;
+		}
+
+		@Override
+		public boolean isValid() {
+			return a.isValid() && b.isValid();
+		}
+
+		@Override
+		public WorldNumber build() {
+			return new ScaledWorldNumber(a.build(), b.build());
+		}
+	}
 
 	@Override
 	public SimpleRegistryType<?> type() {

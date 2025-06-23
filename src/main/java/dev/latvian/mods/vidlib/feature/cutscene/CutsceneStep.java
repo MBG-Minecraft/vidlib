@@ -12,6 +12,7 @@ import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 public record CutsceneStep(
-	WorldNumber start,
+	int start,
 	WorldNumber length,
 	Optional<WorldVector> origin,
 	Optional<WorldVector> target,
@@ -33,8 +34,8 @@ public record CutsceneStep(
 	List<CutsceneEvent> events
 ) {
 	public static final Codec<CutsceneStep> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		WorldNumber.CODEC.optionalFieldOf("start", FixedWorldNumber.ZERO.instance()).forGetter(CutsceneStep::start),
-		WorldNumber.CODEC.optionalFieldOf("length", FixedWorldNumber.ONE.instance()).forGetter(CutsceneStep::length),
+		Codec.INT.optionalFieldOf("start", 0).forGetter(CutsceneStep::start),
+		WorldNumber.CODEC.optionalFieldOf("length", FixedWorldNumber.ZERO.instance()).forGetter(CutsceneStep::length),
 		WorldVector.CODEC.optionalFieldOf("origin").forGetter(CutsceneStep::origin),
 		WorldVector.CODEC.optionalFieldOf("target").forGetter(CutsceneStep::target),
 		WorldNumber.CODEC.optionalFieldOf("fov_modifier").forGetter(CutsceneStep::fovModifier),
@@ -48,8 +49,8 @@ public record CutsceneStep(
 	).apply(instance, CutsceneStep::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, CutsceneStep> STREAM_CODEC = CompositeStreamCodec.of(
-		WorldNumber.STREAM_CODEC, CutsceneStep::start,
-		WorldNumber.STREAM_CODEC, CutsceneStep::length,
+		ByteBufCodecs.VAR_INT, CutsceneStep::start,
+		WorldNumber.STREAM_CODEC.optional(FixedWorldNumber.ZERO.instance()), CutsceneStep::length,
 		WorldVector.STREAM_CODEC.optional(), CutsceneStep::origin,
 		WorldVector.STREAM_CODEC.optional(), CutsceneStep::target,
 		WorldNumber.STREAM_CODEC.optional(), CutsceneStep::fovModifier,

@@ -31,6 +31,7 @@ public class Vector3dImBuilder implements ImBuilder<Vec3> {
 		if (ImGui.button(ImIcons.CAMERA + "###camera-pos")) {
 			var cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
 			data.set(cam.x, cam.y, cam.z);
+			update = ImUpdate.FULL;
 		}
 
 		if (ImGui.isItemHovered()) {
@@ -41,7 +42,7 @@ public class Vector3dImBuilder implements ImBuilder<Vec3> {
 
 		ImGuiUtils.DOUBLE.set(data.x);
 		ImGui.inputDouble("###x", ImGuiUtils.DOUBLE, 0.0625D, 1D, "%.3f");
-		update = update.or(ImUpdate.itemEdit());
+		update = update.orItemEdit();
 		data.x = ImGuiUtils.DOUBLE.get();
 
 		if (ImGui.button(ImIcons.ACCOUNT + "###entity-pos")) {
@@ -49,6 +50,7 @@ public class Vector3dImBuilder implements ImBuilder<Vec3> {
 
 			if (entity != null) {
 				data.set(entity.getX(), entity.getY(), entity.getZ());
+				update = ImUpdate.FULL;
 			}
 		}
 
@@ -60,14 +62,15 @@ public class Vector3dImBuilder implements ImBuilder<Vec3> {
 
 		ImGuiUtils.DOUBLE.set(data.y);
 		ImGui.inputDouble("###y", ImGuiUtils.DOUBLE, 0.0625D, 1D, "%.3f");
-		update = update.or(ImUpdate.itemEdit());
+		update = update.orItemEdit();
 		data.y = ImGuiUtils.DOUBLE.get();
 
-		if (ImGui.button(ImIcons.VISIBLE + "###hit-pos")) {
+		if (ImGui.button(ImIcons.TARGET + "###hit-pos")) {
 			var pos = Minecraft.getInstance().getWorldMouse().clipOutline();
 
 			if (pos != null) {
 				data.set(pos.pos().x, pos.pos().y, pos.pos().z);
+				update = ImUpdate.FULL;
 			}
 		}
 
@@ -79,7 +82,7 @@ public class Vector3dImBuilder implements ImBuilder<Vec3> {
 
 		ImGuiUtils.DOUBLE.set(data.z);
 		ImGui.inputDouble("###z", ImGuiUtils.DOUBLE, 0.0625D, 1D, "%.3f");
-		update = update.or(ImUpdate.itemEdit());
+		update = update.orItemEdit();
 		data.z = ImGuiUtils.DOUBLE.get();
 
 		ImGui.popItemWidth();

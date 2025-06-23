@@ -62,6 +62,18 @@ public enum ImIcons {
 	LABEL('\ue892'),
 	QUESTION('\ueb8b'),
 	FULLSCREEN('\ue5d0'),
+	LAYERS('\ue53b'),
+	PLAY('\ue037'),
+	PAUSE('\ue034'),
+	STOP('\ue047'),
+	FAST_FORWARD('\ue01f'),
+	FAST_REWIND('\ue020'),
+	MUSIC_NOTE('\ue3a1'),
+	REPEAT('\ue040'),
+	FOLDER('\ue2c7'),
+	STORAGE('\ue1db'),
+	DATABASE('\uf20e'),
+
 
 	;
 

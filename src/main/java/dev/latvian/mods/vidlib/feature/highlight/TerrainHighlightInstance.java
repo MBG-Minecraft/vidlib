@@ -44,7 +44,7 @@ public class TerrainHighlightInstance {
 
 			var s = scale.get(ctx);
 
-			if (s != null && s != FixedWorldVector.ONE.instance().pos()) {
+			if (s != null && s != FixedWorldVector.ONE.instance().vec()) {
 				ms.scale((float) s.x, (float) s.y, (float) s.z);
 			}
 

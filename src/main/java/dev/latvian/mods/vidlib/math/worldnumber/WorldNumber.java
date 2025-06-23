@@ -52,15 +52,20 @@ public interface WorldNumber {
 		REGISTRY.register(FixedWorldNumber.ZERO);
 		REGISTRY.register(FixedWorldNumber.ONE);
 		REGISTRY.register(FixedWorldNumber.TYPE);
+		REGISTRY.register(InterpolatedWorldNumber.TYPE);
 		REGISTRY.register(OffsetWorldNumber.TYPE);
 		REGISTRY.register(ScaledWorldNumber.TYPE);
 		REGISTRY.register(VariableWorldNumber.TYPE);
 		REGISTRY.register(IfWorldNumber.TYPE);
-		REGISTRY.register(InterpolatedWorldNumber.TYPE);
 		REGISTRY.register(ServerDataWorldNumber.TYPE);
 
 		IMGUI_BUILDERS.add(FixedWorldNumber.Builder.TYPE);
 		IMGUI_BUILDERS.add(InterpolatedWorldNumber.Builder.TYPE);
+		IMGUI_BUILDERS.add(OffsetWorldNumber.Builder.TYPE);
+		IMGUI_BUILDERS.add(ScaledWorldNumber.Builder.TYPE);
+		IMGUI_BUILDERS.add(VariableWorldNumber.Builder.TYPE);
+		IMGUI_BUILDERS.add(IfWorldNumber.Builder.TYPE);
+		IMGUI_BUILDERS.add(ServerDataWorldNumber.Builder.TYPE);
 	}
 
 	static WorldNumber fixed(double value) {
@@ -76,11 +81,6 @@ public interface WorldNumber {
 
 	default boolean isLiteral() {
 		return false;
-	}
-
-	@Nullable
-	default WorldNumberImBuilder createBuilder() {
-		return null;
 	}
 
 	default double getOr(WorldNumberContext ctx, double def) {

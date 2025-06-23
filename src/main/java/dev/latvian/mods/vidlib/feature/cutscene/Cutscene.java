@@ -16,17 +16,17 @@ import java.util.List;
 
 public class Cutscene {
 	public static final Codec<Cutscene> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		CutsceneStep.CODEC.listOf().optionalFieldOf("steps", List.of()).forGetter(c -> c.steps),
 		Codec.BOOL.optionalFieldOf("allow_movement", false).forGetter(c -> c.allowMovement),
 		Codec.BOOL.optionalFieldOf("open_previous_screen", false).forGetter(c -> c.openPreviousScreen),
-		Codec.BOOL.optionalFieldOf("hide_player", false).forGetter(c -> c.hidePlayer)
+		Codec.BOOL.optionalFieldOf("hide_player", false).forGetter(c -> c.hidePlayer),
+		CutsceneStep.CODEC.listOf().optionalFieldOf("steps", List.of()).forGetter(c -> c.steps)
 	).apply(instance, Cutscene::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, Cutscene> DIRECT_STREAM_CODEC = CompositeStreamCodec.of(
-		CutsceneStep.STREAM_CODEC.listOf(), c -> c.steps,
 		ByteBufCodecs.BOOL, c -> c.allowMovement,
 		ByteBufCodecs.BOOL, c -> c.openPreviousScreen,
 		ByteBufCodecs.BOOL, c -> c.hidePlayer,
+		CutsceneStep.STREAM_CODEC.listOf(), c -> c.steps,
 		Cutscene::new
 	);
 
@@ -42,20 +42,20 @@ public class Cutscene {
 		}
 	}
 
-	public final List<CutsceneStep> steps;
 	public boolean allowMovement;
 	public boolean openPreviousScreen;
 	public boolean hidePlayer;
+	public final List<CutsceneStep> steps;
 
 	public static Cutscene create() {
-		return new Cutscene(new ArrayList<>(2), false, false, false);
+		return new Cutscene(false, false, false, new ArrayList<>(1));
 	}
 
-	Cutscene(List<CutsceneStep> steps, boolean allowMovement, boolean openPreviousScreen, boolean hidePlayer) {
-		this.steps = steps;
+	Cutscene(boolean allowMovement, boolean openPreviousScreen, boolean hidePlayer, List<CutsceneStep> steps) {
 		this.allowMovement = allowMovement;
 		this.openPreviousScreen = openPreviousScreen;
 		this.hidePlayer = hidePlayer;
+		this.steps = steps;
 	}
 
 	public List<CutsceneStep> steps() {

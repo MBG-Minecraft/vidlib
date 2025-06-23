@@ -23,6 +23,8 @@ public class BuiltInImGui {
 		var graphics = new ImGraphics();
 		graphics.pushStack();
 		graphics.setDefaultStyle();
+		graphics.setNumberType(ImNumberType.DOUBLE);
+		graphics.setNumberRange(null);
 
 		if ((mc.isLocalServer() || mc.player.hasPermissions(2)) && mc.player.getAdminPanel()) {
 			adminPanel(mc, graphics);

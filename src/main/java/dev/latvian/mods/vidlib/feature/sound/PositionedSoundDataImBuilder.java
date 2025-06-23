@@ -12,10 +12,11 @@ import java.util.Optional;
 
 public class PositionedSoundDataImBuilder implements ImBuilder<PositionedSoundData> {
 	public final SoundDataImBuilder soundData = new SoundDataImBuilder();
-	public final ImBoolean hasPosition = new ImBoolean(true);
+	public final ImBoolean hasPosition = new ImBoolean(false);
 	public final ImBuilder<WorldVector> position = WorldVectorImBuilder.create();
 	public final ImBoolean looping = new ImBoolean(false);
 	public final ImBoolean stopImmediately = new ImBoolean(false);
+	public boolean delete = false;
 
 	@Override
 	public void set(PositionedSoundData value) {
@@ -24,6 +25,7 @@ public class PositionedSoundDataImBuilder implements ImBuilder<PositionedSoundDa
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
+		delete = false;
 		var update = soundData.imgui(graphics);
 		update = update.or(ImGui.checkbox("Has Position###has-position", hasPosition));
 

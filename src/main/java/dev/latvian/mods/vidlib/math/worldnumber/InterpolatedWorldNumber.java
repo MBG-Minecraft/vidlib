@@ -45,26 +45,29 @@ public record InterpolatedWorldNumber(Easing easing, float start, float end, Wor
 			var update = ImUpdate.NONE;
 			ImGui.pushItemWidth(-1F);
 
+			ImGui.alignTextToFramePadding();
 			ImGui.text("Easing");
+			ImGui.sameLine();
+
 			update = update.or(graphics.easingCombo("###easing", easing));
 
-			ImGui.text("From");
+			ImGui.alignTextToFramePadding();
+			graphics.redTextIf("From", !from.isValid());
+			ImGui.sameLine();
 			ImGui.pushID("###from");
 			update = update.or(from.imgui(graphics));
 			ImGui.popID();
 
-			ImGui.text("To");
+			ImGui.alignTextToFramePadding();
+			graphics.redTextIf("To", !to.isValid());
+			ImGui.sameLine();
 			ImGui.pushID("###to");
 			update = update.or(to.imgui(graphics));
 			ImGui.popID();
 
-			ImGui.text("Start");
-			ImGui.inputFloat("###start", start);
-			update = update.or(ImUpdate.itemEdit());
-
-			ImGui.text("End");
-			ImGui.inputFloat("###end", start);
-			update = update.or(ImUpdate.itemEdit());
+			graphics.redTextIf("Start / End", start.get() < 0F || start.get() > 1F || end.get() < 0F || end.get() > 1F || start.get() >= end.get());
+			ImGui.dragFloatRange2("###range", start.getData(), end.getData(), 0.01F, 0F, 1F);
+			update = update.orItemEdit();
 
 			ImGui.popItemWidth();
 			return update;
@@ -72,11 +75,11 @@ public record InterpolatedWorldNumber(Easing easing, float start, float end, Wor
 
 		@Override
 		public boolean isValid() {
-			return from.isValid() && to.isValid();
+			return from.isValid() && to.isValid() && start.get() >= 0F && start.get() <= 1F && end.get() >= 0F && end.get() <= 1F && start.get() < end.get();
 		}
 
 		@Override
-		public InterpolatedWorldNumber build() {
+		public WorldNumber build() {
 			return new InterpolatedWorldNumber(easing[0], start.get(), end.get(), from.build(), to.build());
 		}
 	}

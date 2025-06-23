@@ -3,8 +3,14 @@ package dev.latvian.mods.vidlib.math.worldvector;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.vidlib.feature.imgui.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
+import imgui.ImGui;
+import imgui.type.ImString;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +20,30 @@ public record VariableWorldVector(String name) implements WorldVector {
 	public static final SimpleRegistryType<VariableWorldVector> TYPE = SimpleRegistryType.dynamic("variable", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.STRING.fieldOf("name").forGetter(VariableWorldVector::name)
 	).apply(instance, VariableWorldVector::new)), ByteBufCodecs.STRING_UTF8.map(VariableWorldVector::new, VariableWorldVector::name));
+
+	public static class Builder implements WorldVectorImBuilder {
+		public static final ImBuilderHolder<WorldVector> TYPE = new ImBuilderHolder<>("Variable", Builder::new);
+
+		public final ImString variable = ImGuiUtils.resizableString();
+
+		@Override
+		public ImUpdate imgui(ImGraphics graphics) {
+			ImGui.pushItemWidth(-1F);
+			ImGui.inputText("###variable", variable);
+			ImGui.popItemWidth();
+			return ImUpdate.itemEdit();
+		}
+
+		@Override
+		public boolean isValid() {
+			return variable.isNotEmpty();
+		}
+
+		@Override
+		public WorldVector build() {
+			return new VariableWorldVector(variable.get());
+		}
+	}
 
 	@Override
 	public SimpleRegistryType<?> type() {
