@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import dev.latvian.mods.vidlib.feature.canvas.CanvasPanel;
-import dev.latvian.mods.vidlib.feature.cutscene.CutsceneEditorPanel;
+import dev.latvian.mods.vidlib.feature.cutscene.CutsceneBuilderPanel;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
 import imgui.ImGui;
@@ -65,8 +65,8 @@ public class BuiltInImGui {
 					ImGui.endMenu();
 				}
 
-				if (ImGui.menuItem(ImIcons.CAMERA + " Cutscene Editor")) {
-					CutsceneEditorPanel.INSTANCE.open();
+				if (ImGui.menuItem(ImIcons.CAMERA + " Cutscene Builder")) {
+					CutsceneBuilderPanel.INSTANCE.open();
 				}
 
 				NeoForge.EVENT_BUS.post(new AdminPanelEvent.OpenDropdown(graphics));

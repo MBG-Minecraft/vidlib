@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -29,7 +30,7 @@ public record SimpleRegistry<V>(
 	public static <V> SimpleRegistry<V> create(Function<V, SimpleRegistryType<?>> typeGetter) {
 		var typeMap = new HashMap<String, SimpleRegistryType<V>>();
 		var unitTypeMap = new IdentityHashMap<V, SimpleRegistryType.Unit<V>>();
-		var unitValueMap = new HashMap<String, V>();
+		var unitValueMap = new LinkedHashMap<String, V>();
 
 		var typeCodec = KLibCodecs.map(typeMap, Codec.STRING, SimpleRegistryType::id);
 		var typeStreamCodec = KLibStreamCodecs.map(typeMap, KLibStreamCodecs.REGISTRY_STRING, SimpleRegistryType::id);

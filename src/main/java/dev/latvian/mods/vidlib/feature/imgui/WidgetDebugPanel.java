@@ -2,6 +2,13 @@ package dev.latvian.mods.vidlib.feature.imgui;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.easing.Easing;
+import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
+import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterImBuilder;
+import dev.latvian.mods.vidlib.feature.sound.PositionedSoundDataImBuilder;
+import dev.latvian.mods.vidlib.math.worldnumber.WorldNumber;
+import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberImBuilder;
+import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
+import dev.latvian.mods.vidlib.math.worldvector.WorldVectorImBuilder;
 import imgui.ImGui;
 import imgui.ImGuiViewport;
 import imgui.ImVec2;
@@ -43,6 +50,10 @@ public class WidgetDebugPanel extends AdminPanel {
 	public final Easing[] easingData = new Easing[1];
 	public final GradientImBuilder gradient1 = new GradientImBuilder();
 	public final GradientImBuilder gradient2 = new GradientImBuilder();
+	public final ImBuilder<WorldNumber> numberBuilder = WorldNumberImBuilder.create(0D);
+	public final ImBuilder<WorldVector> vectorBuilder = WorldVectorImBuilder.create();
+	public final ImBuilder<EntityFilter> entityFilterBuilder = EntityFilterImBuilder.create();
+	public final PositionedSoundDataImBuilder soundBuilder = new PositionedSoundDataImBuilder();
 
 	private WidgetDebugPanel() {
 		super("widget-debug", "Widget Debug");
@@ -263,9 +274,34 @@ public class WidgetDebugPanel extends AdminPanel {
 		gradient1.imgui(graphics);
 		// ImGui.endChild();
 		ImGui.popID();
+
 		ImGui.text("Gradient 2");
 		ImGui.pushID("###gradient-2");
 		gradient2.imgui(graphics);
+		ImGui.popID();
+		ImGui.separator();
+
+		ImGui.text("World Number");
+		ImGui.pushID("###world-number");
+		numberBuilder.imgui(graphics);
+		ImGui.popID();
+		ImGui.separator();
+
+		ImGui.text("World Vector");
+		ImGui.pushID("###world-vector");
+		vectorBuilder.imgui(graphics);
+		ImGui.popID();
+		ImGui.separator();
+
+		ImGui.text("Positioned Sound");
+		ImGui.pushID("###positioned-sound");
+		soundBuilder.imgui(graphics);
+		ImGui.popID();
+		ImGui.separator();
+
+		ImGui.text("Entity Filter");
+		ImGui.pushID("###entity-filter");
+		entityFilterBuilder.imgui(graphics);
 		ImGui.popID();
 		ImGui.separator();
 

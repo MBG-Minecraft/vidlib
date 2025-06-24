@@ -4,7 +4,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImBuilderWrapper;
 
 public interface WorldNumberImBuilder extends ImBuilder<WorldNumber> {
-	static ImBuilder<WorldNumber> create(double defaultValue) {
+	static ImBuilderWrapper<WorldNumber> create(double defaultValue) {
 		var w = new ImBuilderWrapper<>(WorldNumber.IMGUI_BUILDERS);
 
 		if (defaultValue != 0D) {

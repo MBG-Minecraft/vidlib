@@ -15,7 +15,7 @@ import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
-import dev.latvian.mods.vidlib.math.worldvector.EntityPositionType;
+import dev.latvian.mods.vidlib.math.worldvector.PositionType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -228,7 +228,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		}
 	}
 
-	default Vec3 getPosition(EntityPositionType type) {
+	default Vec3 getPosition(PositionType type) {
 		var e = vl$self();
 
 		return switch (type) {
@@ -242,7 +242,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		};
 	}
 
-	default Vec3 getPosition(EntityPositionType type, float delta) {
+	default Vec3 getPosition(PositionType type, float delta) {
 		var e = vl$self();
 
 		return switch (type) {

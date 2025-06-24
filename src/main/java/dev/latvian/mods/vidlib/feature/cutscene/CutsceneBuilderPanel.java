@@ -9,13 +9,13 @@ import imgui.flag.ImGuiTabBarFlags;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CutsceneEditorPanel extends AdminPanel {
-	public static final CutsceneEditorPanel INSTANCE = new CutsceneEditorPanel();
+public class CutsceneBuilderPanel extends AdminPanel {
+	public static final CutsceneBuilderPanel INSTANCE = new CutsceneBuilderPanel();
 
 	public final List<CutsceneImBuilder> cutscenes;
 
-	private CutsceneEditorPanel() {
-		super("cutscene-editor", "Cutscene Editor");
+	private CutsceneBuilderPanel() {
+		super("cutscene-builder", "Cutscene Builder");
 		this.cutscenes = new ArrayList<>();
 		this.cutscenes.add(new CutsceneImBuilder());
 	}

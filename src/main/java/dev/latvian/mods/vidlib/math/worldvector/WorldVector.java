@@ -93,7 +93,7 @@ public interface WorldVector {
 		IMGUI_BUILDERS.add(FixedWorldVector.Builder.TYPE);
 
 		for (var literal : LiteralWorldVector.values()) {
-			IMGUI_BUILDERS.add(literal.builderHolder);
+			IMGUI_BUILDERS.addUnit(literal.displayName, literal);
 		}
 
 		IMGUI_BUILDERS.add(InterpolatedWorldVector.Builder.TYPE);
@@ -101,8 +101,8 @@ public interface WorldVector {
 		IMGUI_BUILDERS.add(ScalarWorldVector.Builder.TYPE);
 		IMGUI_BUILDERS.add(OffsetWorldVector.Builder.TYPE);
 		IMGUI_BUILDERS.add(ScaledWorldVector.Builder.TYPE);
-		// IMGUI_BUILDERS.add(FollowingEntityWorldVector.Builder.TYPE);
-		// IMGUI_BUILDERS.add(FollowingPropWorldVector.Builder.TYPE);
+		IMGUI_BUILDERS.add(FollowingEntityWorldVector.Builder.TYPE);
+		IMGUI_BUILDERS.add(FollowingPropWorldVector.Builder.TYPE);
 		IMGUI_BUILDERS.add(VariableWorldVector.Builder.TYPE);
 		IMGUI_BUILDERS.add(IfWorldVector.Builder.TYPE);
 		IMGUI_BUILDERS.add(PivotingWorldVector.Builder.TYPE);
@@ -128,28 +128,28 @@ public interface WorldVector {
 		return fixed(ys * pc * 8D, ps * 8D, yc * pc * 8D);
 	}
 
-	static WorldVector following(Entity entity, EntityPositionType type) {
+	static WorldVector following(Entity entity, PositionType type) {
 		return new FollowingEntityWorldVector(new ExactEntityFilter(IntOrUUID.of(entity.getId())), type);
 	}
 
 	static WorldVector followingBottomOf(Entity entity) {
-		return following(entity, EntityPositionType.BOTTOM);
+		return following(entity, PositionType.BOTTOM);
 	}
 
 	static WorldVector followingCenterOf(Entity entity) {
-		return following(entity, EntityPositionType.CENTER);
+		return following(entity, PositionType.CENTER);
 	}
 
 	static WorldVector followingTopOf(Entity entity) {
-		return following(entity, EntityPositionType.TOP);
+		return following(entity, PositionType.TOP);
 	}
 
 	static WorldVector followingEyesOf(Entity entity) {
-		return following(entity, EntityPositionType.EYES);
+		return following(entity, PositionType.EYES);
 	}
 
 	static WorldVector followingLeashOf(Entity entity) {
-		return following(entity, EntityPositionType.LEASH);
+		return following(entity, PositionType.LEASH);
 	}
 
 	default SimpleRegistryType<?> type() {

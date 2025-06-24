@@ -6,7 +6,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
 
-public enum EntityPositionType implements StringRepresentable {
+public enum PositionType implements StringRepresentable {
 	BOTTOM("bottom"),
 	CENTER("center"),
 	TOP("top"),
@@ -17,13 +17,13 @@ public enum EntityPositionType implements StringRepresentable {
 
 	;
 
-	public static final EntityPositionType[] VALUES = values();
-	public static final Codec<EntityPositionType> CODEC = StringRepresentable.fromEnum(() -> VALUES);
-	public static final StreamCodec<ByteBuf, EntityPositionType> STREAM_CODEC = KLibStreamCodecs.enumValue(VALUES);
+	public static final PositionType[] VALUES = values();
+	public static final Codec<PositionType> CODEC = StringRepresentable.fromEnum(() -> VALUES);
+	public static final StreamCodec<ByteBuf, PositionType> STREAM_CODEC = KLibStreamCodecs.enumValue(VALUES);
 
 	private final String name;
 
-	EntityPositionType(String name) {
+	PositionType(String name) {
 		this.name = name;
 	}
 

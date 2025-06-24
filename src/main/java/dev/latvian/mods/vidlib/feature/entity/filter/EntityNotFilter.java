@@ -1,6 +1,10 @@
 package dev.latvian.mods.vidlib.feature.entity.filter;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.ImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.world.entity.Entity;
 
@@ -8,6 +12,27 @@ public record EntityNotFilter(EntityFilter filter) implements EntityFilter {
 	public static SimpleRegistryType<EntityNotFilter> TYPE = SimpleRegistryType.dynamic("not", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		EntityFilter.CODEC.fieldOf("filter").forGetter(EntityNotFilter::filter)
 	).apply(instance, EntityNotFilter::new)), EntityFilter.STREAM_CODEC.map(EntityNotFilter::new, EntityNotFilter::filter));
+
+	public static class Builder implements EntityFilterImBuilder {
+		public static final ImBuilderHolder<EntityFilter> TYPE = new ImBuilderHolder<>("NOT", Builder::new);
+
+		public final ImBuilder<EntityFilter> entity = EntityFilterImBuilder.create();
+
+		@Override
+		public ImUpdate imgui(ImGraphics graphics) {
+			return entity.imgui(graphics);
+		}
+
+		@Override
+		public boolean isValid() {
+			return entity.isValid();
+		}
+
+		@Override
+		public EntityFilter build() {
+			return new EntityNotFilter(entity.build());
+		}
+	}
 
 	@Override
 	public SimpleRegistryType<?> type() {

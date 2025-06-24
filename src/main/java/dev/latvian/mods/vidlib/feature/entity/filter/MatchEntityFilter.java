@@ -5,6 +5,10 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.util.ParsedEntitySelector;
+import dev.latvian.mods.vidlib.feature.entity.ParsedEntitySelectorImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.world.entity.Entity;
 
@@ -26,6 +30,27 @@ public record MatchEntityFilter(ParsedEntitySelector selector) implements Entity
 			return DataResult.error(() -> "Filter is not a MatchEntityFilter");
 		}
 	});
+
+	public static class Builder implements EntityFilterImBuilder {
+		public static final ImBuilderHolder<EntityFilter> TYPE = new ImBuilderHolder<>("Match Selector", Builder::new);
+
+		public final ParsedEntitySelectorImBuilder selector = new ParsedEntitySelectorImBuilder();
+
+		@Override
+		public ImUpdate imgui(ImGraphics graphics) {
+			return selector.imgui(graphics);
+		}
+
+		@Override
+		public boolean isValid() {
+			return selector.isValid();
+		}
+
+		@Override
+		public EntityFilter build() {
+			return new MatchEntityFilter(selector.build());
+		}
+	}
 
 	@Override
 	public SimpleRegistryType<?> type() {

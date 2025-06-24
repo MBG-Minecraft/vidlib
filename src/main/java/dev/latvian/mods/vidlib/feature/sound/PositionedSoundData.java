@@ -6,8 +6,8 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.util.IntOrUUID;
 import dev.latvian.mods.vidlib.feature.entity.filter.ExactEntityFilter;
-import dev.latvian.mods.vidlib.math.worldvector.EntityPositionType;
 import dev.latvian.mods.vidlib.math.worldvector.FollowingEntityWorldVector;
+import dev.latvian.mods.vidlib.math.worldvector.PositionType;
 import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -43,6 +43,6 @@ public record PositionedSoundData(SoundData data, Optional<WorldVector> position
 	}
 
 	public PositionedSoundData(SoundData data, Entity entity, boolean looping, boolean stopImmediately) {
-		this(data, new FollowingEntityWorldVector(new ExactEntityFilter(IntOrUUID.of(entity.getId())), EntityPositionType.SOUND_SOURCE), looping, stopImmediately);
+		this(data, new FollowingEntityWorldVector(new ExactEntityFilter(IntOrUUID.of(entity.getId())), PositionType.SOUND_SOURCE), looping, stopImmediately);
 	}
 }

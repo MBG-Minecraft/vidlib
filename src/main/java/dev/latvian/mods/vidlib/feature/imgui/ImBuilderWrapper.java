@@ -30,6 +30,7 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 
 	private final CachedBuilder<T>[] options;
 	private final CachedBuilder<T>[] selectedBuilder;
+	public boolean deleted = false;
 
 	public ImBuilderWrapper(ImBuilderHolderList<T> options) {
 		this.options = new CachedBuilder[options.list().size()];
@@ -44,8 +45,23 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 		}
 	}
 
+	public boolean selectUnit(T value) {
+		for (var option : options) {
+			if (option.get() instanceof ImBuilder.Unit<?> unit && unit.value() == value) {
+				selectedBuilder[0] = option;
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	@Override
 	public void set(T value) {
+		if (selectUnit(value)) {
+			return;
+		}
+
 		var builder = selectedBuilder[0].get();
 
 		if (builder != null) {
@@ -55,6 +71,7 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
+		deleted = false;
 		// selectedBuilder[0] = null;
 		var update = graphics.combo("###select-builder", "", selectedBuilder, options);
 		var builder = selectedBuilder[0].get();
