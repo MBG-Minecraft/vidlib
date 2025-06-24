@@ -117,6 +117,7 @@ public interface EntityFilter extends Predicate<Entity> {
 		IMGUI_BUILDERS.add(EntityAndFilter.Builder.TYPE);
 		IMGUI_BUILDERS.add(EntityOrFilter.Builder.TYPE);
 		IMGUI_BUILDERS.add(EntityXorFilter.Builder.TYPE);
+
 		IMGUI_BUILDERS.add(ExactEntityFilter.IDBuilder.TYPE);
 		IMGUI_BUILDERS.add(ExactEntityFilter.UUIDBuilder.TYPE);
 		IMGUI_BUILDERS.add(EntityTagFilter.Builder.TYPE);
@@ -144,5 +145,9 @@ public interface EntityFilter extends Predicate<Entity> {
 		}
 
 		return null;
+	}
+
+	default EntityFilter not() {
+		return new EntityNotFilter(this);
 	}
 }

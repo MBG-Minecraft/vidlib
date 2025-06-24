@@ -2,7 +2,12 @@ package dev.latvian.mods.vidlib.feature.block.filter;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.vidlib.feature.imgui.ImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import imgui.ImGui;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,6 +22,44 @@ public record BlockXorFilter(BlockFilter a, BlockFilter b) implements BlockFilte
 		BlockFilter.STREAM_CODEC, BlockXorFilter::b,
 		BlockXorFilter::new
 	));
+
+	public static class Builder implements BlockFilterImBuilder {
+		public static final ImBuilderHolder<BlockFilter> TYPE = new ImBuilderHolder<>("XOR", Builder::new);
+
+		public final ImBuilder<BlockFilter> a = BlockFilterImBuilder.create();
+		public final ImBuilder<BlockFilter> b = BlockFilterImBuilder.create();
+
+		@Override
+		public ImUpdate imgui(ImGraphics graphics) {
+			var update = ImUpdate.NONE;
+
+			ImGui.alignTextToFramePadding();
+			ImGui.text("A");
+			ImGui.sameLine();
+			ImGui.pushID("###a");
+			update = update.or(a.imgui(graphics));
+			ImGui.popID();
+
+			ImGui.alignTextToFramePadding();
+			ImGui.text("B");
+			ImGui.sameLine();
+			ImGui.pushID("###b");
+			update = update.or(b.imgui(graphics));
+			ImGui.popID();
+
+			return update;
+		}
+
+		@Override
+		public boolean isValid() {
+			return a.isValid() && b.isValid();
+		}
+
+		@Override
+		public BlockFilter build() {
+			return new BlockXorFilter(a.build(), b.build());
+		}
+	}
 
 	@Override
 	public SimpleRegistryType<?> type() {

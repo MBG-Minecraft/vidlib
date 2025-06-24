@@ -2,6 +2,8 @@ package dev.latvian.mods.vidlib.feature.imgui;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.easing.Easing;
+import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
+import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundDataImBuilder;
@@ -53,6 +55,7 @@ public class WidgetDebugPanel extends AdminPanel {
 	public final ImBuilder<WorldNumber> numberBuilder = WorldNumberImBuilder.create(0D);
 	public final ImBuilder<WorldVector> vectorBuilder = WorldVectorImBuilder.create();
 	public final ImBuilder<EntityFilter> entityFilterBuilder = EntityFilterImBuilder.create();
+	public final ImBuilder<BlockFilter> blockFilterBuilder = BlockFilterImBuilder.create();
 	public final PositionedSoundDataImBuilder soundBuilder = new PositionedSoundDataImBuilder();
 
 	private WidgetDebugPanel() {
@@ -293,15 +296,21 @@ public class WidgetDebugPanel extends AdminPanel {
 		ImGui.popID();
 		ImGui.separator();
 
-		ImGui.text("Positioned Sound");
-		ImGui.pushID("###positioned-sound");
-		soundBuilder.imgui(graphics);
-		ImGui.popID();
-		ImGui.separator();
-
 		ImGui.text("Entity Filter");
 		ImGui.pushID("###entity-filter");
 		entityFilterBuilder.imgui(graphics);
+		ImGui.popID();
+		ImGui.separator();
+
+		ImGui.text("Block Filter");
+		ImGui.pushID("###block-filter");
+		blockFilterBuilder.imgui(graphics);
+		ImGui.popID();
+		ImGui.separator();
+
+		ImGui.text("Positioned Sound");
+		ImGui.pushID("###positioned-sound");
+		soundBuilder.imgui(graphics);
 		ImGui.popID();
 		ImGui.separator();
 

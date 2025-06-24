@@ -2,41 +2,42 @@ package dev.latvian.mods.vidlib.feature.block.filter;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
-import dev.latvian.mods.vidlib.feature.block.BlockImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.util.TagKeyImBuilder;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 
-public record BlockIdFilter(Block block) implements BlockFilter {
-	public static final SimpleRegistryType<BlockIdFilter> TYPE = SimpleRegistryType.dynamic("block", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		BuiltInRegistries.BLOCK.byNameCodec().fieldOf("block").forGetter(BlockIdFilter::block)
-	).apply(instance, BlockIdFilter::new)), KLibStreamCodecs.registry(BuiltInRegistries.BLOCK).map(BlockIdFilter::new, BlockIdFilter::block));
+public record BlockTypeTagFilter(TagKey<Block> tag) implements BlockFilter {
+	public static final SimpleRegistryType<BlockTypeTagFilter> TYPE = SimpleRegistryType.dynamic("type_tag", RecordCodecBuilder.mapCodec(instance -> instance.group(
+		TagKey.codec(Registries.BLOCK).fieldOf("tag").forGetter(BlockTypeTagFilter::tag)
+	).apply(instance, BlockTypeTagFilter::new)), KLibStreamCodecs.tagKey(Registries.BLOCK).map(BlockTypeTagFilter::new, BlockTypeTagFilter::tag));
 
 	public static class Builder implements BlockFilterImBuilder {
-		public static final ImBuilderHolder<BlockFilter> TYPE = new ImBuilderHolder<>("ID", Builder::new);
+		public static final ImBuilderHolder<BlockFilter> TYPE = new ImBuilderHolder<>("Type Tag", Builder::new);
 
-		public final BlockImBuilder block = new BlockImBuilder(null);
+		public final TagKeyImBuilder<Block> tag = new TagKeyImBuilder<>(Registries.BLOCK);
 
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
-			return block.imgui(graphics);
+			return tag.imgui(graphics);
 		}
 
 		@Override
 		public boolean isValid() {
-			return block.isValid();
+			return tag.isValid();
 		}
 
 		@Override
 		public BlockFilter build() {
-			return new BlockIdFilter(block.build());
+			return new BlockTypeTagFilter(tag.build());
 		}
 	}
 
@@ -47,11 +48,11 @@ public record BlockIdFilter(Block block) implements BlockFilter {
 
 	@Override
 	public boolean test(BlockInWorld b) {
-		return b.getState().is(block);
+		return b.getState().is(tag);
 	}
 
 	@Override
 	public boolean test(Level level, BlockPos pos, BlockState state) {
-		return state.is(block);
+		return state.is(tag);
 	}
 }

@@ -14,7 +14,7 @@ import net.minecraft.world.entity.EntityType;
 
 public record EntityTypeTagFilter(TagKey<EntityType<?>> tag) implements EntityFilter {
 	public static SimpleRegistryType<EntityTypeTagFilter> TYPE = SimpleRegistryType.dynamic("type_tag", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		TagKey.codec(Registries.ENTITY_TYPE).fieldOf("entity_type").forGetter(EntityTypeTagFilter::tag)
+		TagKey.codec(Registries.ENTITY_TYPE).fieldOf("tag").forGetter(EntityTypeTagFilter::tag)
 	).apply(instance, EntityTypeTagFilter::new)), ByteBufCodecs.fromCodecWithRegistries(TagKey.codec(Registries.ENTITY_TYPE)).map(EntityTypeTagFilter::new, EntityTypeTagFilter::tag));
 
 	public static class Builder implements EntityFilterImBuilder {
