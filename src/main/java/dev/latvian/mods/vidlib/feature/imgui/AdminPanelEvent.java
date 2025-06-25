@@ -36,4 +36,10 @@ public abstract class AdminPanelEvent extends Event {
 			super(graphics);
 		}
 	}
+
+	public static class ShowDropdown extends AdminPanelEvent {
+		ShowDropdown(ImGraphics graphics) {
+			super(graphics);
+		}
+	}
 }

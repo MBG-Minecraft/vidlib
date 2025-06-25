@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterImBuilder;
+import dev.latvian.mods.vidlib.feature.particle.ParticleOptionsImBuilder;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundDataImBuilder;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumber;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberImBuilder;
@@ -27,6 +28,7 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import imgui.type.ImString;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.resources.ResourceLocation;
 
 public class WidgetDebugPanel extends AdminPanel {
@@ -57,6 +59,7 @@ public class WidgetDebugPanel extends AdminPanel {
 	public final ImBuilder<EntityFilter> entityFilterBuilder = EntityFilterImBuilder.create();
 	public final ImBuilder<BlockFilter> blockFilterBuilder = BlockFilterImBuilder.create();
 	public final PositionedSoundDataImBuilder soundBuilder = new PositionedSoundDataImBuilder();
+	public final ImBuilder<ParticleOptions> particleBuilder = ParticleOptionsImBuilder.create();
 
 	private WidgetDebugPanel() {
 		super("widget-debug", "Widget Debug");
@@ -272,45 +275,51 @@ public class WidgetDebugPanel extends AdminPanel {
 
 		ImGui.separator();
 
-		ImGui.text("Gradient 1");
+		graphics.redTextIf("Gradient 1", !gradient1.isValid());
 		ImGui.pushID("###gradient-1");
 		gradient1.imgui(graphics);
 		// ImGui.endChild();
 		ImGui.popID();
 
-		ImGui.text("Gradient 2");
+		graphics.redTextIf("Gradient 2", !gradient2.isValid());
 		ImGui.pushID("###gradient-2");
 		gradient2.imgui(graphics);
 		ImGui.popID();
 		ImGui.separator();
 
-		ImGui.text("World Number");
+		graphics.redTextIf("World Number", !numberBuilder.isValid());
 		ImGui.pushID("###world-number");
 		numberBuilder.imgui(graphics);
 		ImGui.popID();
 		ImGui.separator();
 
-		ImGui.text("World Vector");
+		graphics.redTextIf("World Vector", !vectorBuilder.isValid());
 		ImGui.pushID("###world-vector");
 		vectorBuilder.imgui(graphics);
 		ImGui.popID();
 		ImGui.separator();
 
-		ImGui.text("Entity Filter");
+		graphics.redTextIf("Entity Filter", !entityFilterBuilder.isValid());
 		ImGui.pushID("###entity-filter");
 		entityFilterBuilder.imgui(graphics);
 		ImGui.popID();
 		ImGui.separator();
 
-		ImGui.text("Block Filter");
+		graphics.redTextIf("Block Filter", !blockFilterBuilder.isValid());
 		ImGui.pushID("###block-filter");
 		blockFilterBuilder.imgui(graphics);
 		ImGui.popID();
 		ImGui.separator();
 
-		ImGui.text("Positioned Sound");
+		graphics.redTextIf("Positioned Sound", !soundBuilder.isValid());
 		ImGui.pushID("###positioned-sound");
 		soundBuilder.imgui(graphics);
+		ImGui.popID();
+		ImGui.separator();
+
+		graphics.redTextIf("Particle", !particleBuilder.isValid());
+		ImGui.pushID("###particle");
+		particleBuilder.imgui(graphics);
 		ImGui.popID();
 		ImGui.separator();
 

@@ -9,6 +9,7 @@ import org.joml.Vector3d;
 
 public class Vector3dImBuilder implements ImBuilder<Vec3> {
 	public final Vector3d data;
+	public SelectedPosition selectedPosition;
 
 	public Vector3dImBuilder() {
 		this.data = new Vector3d();
@@ -25,13 +26,15 @@ public class Vector3dImBuilder implements ImBuilder<Vec3> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
+		selectedPosition = null;
 		var update = ImUpdate.NONE;
 		ImGui.pushItemWidth(-1F);
 
-		if (ImGui.button(ImIcons.CAMERA + "###camera-pos")) {
+		if (ImGui.button(SelectedPosition.CAMERA.icon + "###camera-pos")) {
 			var cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
 			data.set(cam.x, cam.y, cam.z);
 			update = ImUpdate.FULL;
+			selectedPosition = SelectedPosition.CAMERA;
 		}
 
 		if (ImGui.isItemHovered()) {
@@ -45,12 +48,13 @@ public class Vector3dImBuilder implements ImBuilder<Vec3> {
 		update = update.orItemEdit();
 		data.x = ImGuiUtils.DOUBLE.get();
 
-		if (ImGui.button(ImIcons.ACCOUNT + "###entity-pos")) {
+		if (ImGui.button(SelectedPosition.ENTITY.icon + "###entity-pos")) {
 			var entity = Minecraft.getInstance().player;
 
 			if (entity != null) {
 				data.set(entity.getX(), entity.getY(), entity.getZ());
 				update = ImUpdate.FULL;
+				selectedPosition = SelectedPosition.ENTITY;
 			}
 		}
 
@@ -65,12 +69,13 @@ public class Vector3dImBuilder implements ImBuilder<Vec3> {
 		update = update.orItemEdit();
 		data.y = ImGuiUtils.DOUBLE.get();
 
-		if (ImGui.button(ImIcons.TARGET + "###hit-pos")) {
+		if (ImGui.button(SelectedPosition.CAMERA.icon + "###cursor-pos")) {
 			var pos = Minecraft.getInstance().getWorldMouse().clipOutline();
 
 			if (pos != null) {
 				data.set(pos.pos().x, pos.pos().y, pos.pos().z);
 				update = ImUpdate.FULL;
+				selectedPosition = SelectedPosition.CURSOR;
 			}
 		}
 

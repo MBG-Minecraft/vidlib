@@ -58,6 +58,7 @@ public interface WorldNumber {
 		REGISTRY.register(VariableWorldNumber.TYPE);
 		REGISTRY.register(IfWorldNumber.TYPE);
 		REGISTRY.register(ServerDataWorldNumber.TYPE);
+		REGISTRY.register(RandomWorldNumber.TYPE);
 
 		IMGUI_BUILDERS.add(FixedWorldNumber.Builder.TYPE);
 		IMGUI_BUILDERS.add(InterpolatedWorldNumber.Builder.TYPE);
@@ -66,6 +67,7 @@ public interface WorldNumber {
 		IMGUI_BUILDERS.add(VariableWorldNumber.Builder.TYPE);
 		IMGUI_BUILDERS.add(IfWorldNumber.Builder.TYPE);
 		IMGUI_BUILDERS.add(ServerDataWorldNumber.Builder.TYPE);
+		IMGUI_BUILDERS.add(RandomWorldNumber.Builder.TYPE);
 	}
 
 	static WorldNumber fixed(double value) {

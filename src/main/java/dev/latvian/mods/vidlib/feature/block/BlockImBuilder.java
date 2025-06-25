@@ -5,6 +5,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImIcons;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.SelectedPosition;
 import imgui.ImGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
@@ -14,10 +15,13 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 public class BlockImBuilder implements ImBuilder<Block> {
-	public static final Lazy<Block[]> BLOCKS = Lazy.of(() -> BuiltInRegistries.BLOCK.stream().toArray(Block[]::new));
+	public static final Lazy<List<Block>> BLOCKS = Lazy.of(() -> BuiltInRegistries.BLOCK.stream().toList());
 
 	public final Block[] block = new Block[1];
+	public SelectedPosition selectedPosition;
 
 	public BlockImBuilder(@Nullable Block defaultType) {
 		this.block[0] = defaultType;
@@ -30,6 +34,7 @@ public class BlockImBuilder implements ImBuilder<Block> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
+		selectedPosition = null;
 		var update = ImUpdate.NONE;
 
 		if (ImGui.button(ImIcons.TARGET + "###pick-block")) {
@@ -38,6 +43,7 @@ public class BlockImBuilder implements ImBuilder<Block> {
 			if (mc.hitResult instanceof BlockHitResult hit && hit.getType() == HitResult.Type.BLOCK) {
 				block[0] = mc.level.getBlockState(hit.getBlockPos()).getBlock();
 				update = ImUpdate.FULL;
+				selectedPosition = SelectedPosition.CURSOR;
 			}
 		}
 

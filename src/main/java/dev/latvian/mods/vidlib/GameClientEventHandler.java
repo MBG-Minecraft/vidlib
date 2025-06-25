@@ -27,6 +27,8 @@ import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import dev.latvian.mods.vidlib.feature.misc.ScreenTextRenderer;
 import dev.latvian.mods.vidlib.feature.misc.VidLibIcon;
+import dev.latvian.mods.vidlib.feature.particle.ParticleOptionsImBuilderRegistryEvent;
+import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructureCapture;
@@ -554,5 +556,10 @@ public class GameClientEventHandler {
 		if (BossRendering.active > 0) {
 			event.setCanceled(true);
 		}
+	}
+
+	@SubscribeEvent
+	public static void particleImBuilders(ParticleOptionsImBuilderRegistryEvent event) {
+		VidLibParticles.registerBuilders(event);
 	}
 }

@@ -9,8 +9,10 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 public class EntityTypeImBuilder implements ImBuilder<EntityType<?>> {
-	public static final Lazy<EntityType<?>[]> ENTITY_TYPES = Lazy.of(() -> BuiltInRegistries.ENTITY_TYPE.stream().toArray(EntityType[]::new));
+	public static final Lazy<List<EntityType<?>>> ENTITY_TYPES = Lazy.of(() -> BuiltInRegistries.ENTITY_TYPE.stream().toList());
 
 	public final EntityType<?>[] entityType = new EntityType[1];
 

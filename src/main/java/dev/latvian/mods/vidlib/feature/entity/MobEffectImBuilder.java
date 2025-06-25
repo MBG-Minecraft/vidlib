@@ -10,8 +10,10 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.effect.MobEffect;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 public class MobEffectImBuilder implements ImBuilder<Holder<MobEffect>> {
-	public static final Lazy<Holder<MobEffect>[]> MOB_EFFECTS = Lazy.of(() -> BuiltInRegistries.MOB_EFFECT.stream().map(BuiltInRegistries.MOB_EFFECT::wrapAsHolder).toArray(Holder[]::new));
+	public static final Lazy<List<Holder<MobEffect>>> MOB_EFFECTS = Lazy.of(() -> BuiltInRegistries.MOB_EFFECT.stream().map(BuiltInRegistries.MOB_EFFECT::wrapAsHolder).toList());
 
 	public final Holder<MobEffect>[] effect = new Holder[1];
 

@@ -4,6 +4,7 @@ import dev.latvian.mods.vidlib.feature.canvas.CanvasPanel;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneBuilderPanel;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
+import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
 import imgui.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImBoolean;
@@ -18,6 +19,8 @@ import java.util.UUID;
 public class BuiltInImGui {
 	public static final List<AdminPanel> OPEN_TABS = new ArrayList<>();
 	public static final ImBoolean SHOW_STACK_TOOL = new ImBoolean(false);
+	public static final ImBoolean SHOW_STYLE_EDITOR_TOOL = new ImBoolean(false);
+	public static Boolean showSounds = null;
 
 	public static void handle(Minecraft mc) {
 		var graphics = new ImGraphics();
@@ -34,6 +37,21 @@ public class BuiltInImGui {
 
 		if (SHOW_STACK_TOOL.get()) {
 			ImGui.showStackToolWindow();
+		}
+
+		if (SHOW_STYLE_EDITOR_TOOL.get()) {
+			ImGui.showStyleEditor();
+		}
+
+		if (showSounds != null) {
+			if (!showSounds) {
+				ImGui.openPopup("###sound-modal");
+				showSounds = true;
+			}
+
+			if (SoundEventImBuilder.soundModal(null).isAny() || !SoundEventImBuilder.PREVIEW_OPEN.get()) {
+				showSounds = null;
+			}
 		}
 
 		graphics.popStack();
@@ -73,6 +91,13 @@ public class BuiltInImGui {
 
 				if (ImGui.menuItem(ImIcons.FRAMED_CUBE + " Debug Widgets")) {
 					WidgetDebugPanel.INSTANCE.open();
+				}
+
+				ImGui.menuItem(ImIcons.MEMORY + " ID Stack Tool", null, SHOW_STACK_TOOL);
+				ImGui.menuItem(ImIcons.EDIT + " Style Editor Tool", null, SHOW_STYLE_EDITOR_TOOL);
+
+				if (ImGui.menuItem(ImIcons.PLAY + " Sounds")) {
+					showSounds = false;
 				}
 
 				ImGui.endMenu();
@@ -115,8 +140,23 @@ public class BuiltInImGui {
 					mc.runClientCommand("reload");
 				}
 
-				ImGui.menuItem(ImIcons.MEMORY + " ID Stack Tool", null, SHOW_STACK_TOOL);
+				if (ImGui.menuItem(ImIcons.APERTURE + " Capture Frustum", null, mc.levelRenderer.getCapturedFrustum() != null)) {
+					if (mc.levelRenderer.getCapturedFrustum() != null) {
+						mc.levelRenderer.killFrustum();
+					} else {
+						mc.levelRenderer.captureFrustum();
+					}
+				}
 
+				if (ImGui.menuItem(ImIcons.STOP + " Stop all Sounds")) {
+					Minecraft.getInstance().getSoundManager().stop();
+				}
+
+				NeoForge.EVENT_BUS.post(new AdminPanelEvent.DebugDropdown(graphics));
+				ImGui.endMenu();
+			}
+
+			if (ImGui.beginMenu(ImIcons.VISIBLE + " Show")) {
 				graphics.pushStack();
 				graphics.setItemFlag(ImGuiItemFlags.SelectableDontClosePopup, true);
 
@@ -128,14 +168,6 @@ public class BuiltInImGui {
 					mc.debugRenderer.switchRenderChunkborder();
 				}
 
-				if (ImGui.menuItem(ImIcons.APERTURE + " Capture Frustum", null, mc.levelRenderer.getCapturedFrustum() != null)) {
-					if (mc.levelRenderer.getCapturedFrustum() != null) {
-						mc.levelRenderer.killFrustum();
-					} else {
-						mc.levelRenderer.captureFrustum();
-					}
-				}
-
 				if (ImGui.menuItem(ImIcons.FULLSCREEN + " Zones", null, mc.player.getShowZones())) {
 					mc.runClientCommand("zones show");
 				}
@@ -144,7 +176,7 @@ public class BuiltInImGui {
 					mc.runClientCommand("anchor show");
 				}
 
-				NeoForge.EVENT_BUS.post(new AdminPanelEvent.DebugDropdown(graphics));
+				NeoForge.EVENT_BUS.post(new AdminPanelEvent.ShowDropdown(graphics));
 				graphics.popStack();
 				ImGui.endMenu();
 			}

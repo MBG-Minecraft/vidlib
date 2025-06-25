@@ -27,6 +27,7 @@ import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -334,5 +335,9 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 
 	default RegistryOps<JsonElement> jsonOps() {
 		return vl$level().registryAccess().createSerializationContext(JsonOps.INSTANCE);
+	}
+
+	default TagParser<Tag> nbtParser() {
+		return TagParser.create(nbtOps());
 	}
 }

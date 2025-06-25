@@ -9,11 +9,13 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 
+import java.util.List;
+
 public class TagKeyImBuilder<T> implements ImBuilder<TagKey<T>> {
 	public final ResourceKey<? extends Registry<T>> registry;
 	public final TagKey<T>[] tag = new TagKey[1];
 	private Registry<T> cachedRegistry;
-	private TagKey<T>[] cachedTags;
+	private List<TagKey<T>> cachedTags;
 
 	public TagKeyImBuilder(ResourceKey<? extends Registry<T>> registry) {
 		this.registry = registry;
@@ -35,7 +37,7 @@ public class TagKeyImBuilder<T> implements ImBuilder<TagKey<T>> {
 
 		if (cachedRegistry != reg) {
 			cachedRegistry = reg;
-			cachedTags = reg.listTags().map(HolderSet.Named::key).toArray(TagKey[]::new);
+			cachedTags = reg.listTags().map(HolderSet.Named::key).toList();
 		}
 
 		return graphics.combo("###tag", "Select Tag...", tag, cachedTags, t -> t.location().toString(), 0);

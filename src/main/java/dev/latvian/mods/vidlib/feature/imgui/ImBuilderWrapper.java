@@ -5,6 +5,9 @@ import imgui.ImGui;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ImBuilderWrapper<T> implements ImBuilder<T> {
 	private static class CachedBuilder<T> implements StringRepresentable {
 		private final ImBuilderHolder<T> holder;
@@ -28,19 +31,20 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 		}
 	}
 
-	private final CachedBuilder<T>[] options;
+	private final List<CachedBuilder<T>> options;
 	private final CachedBuilder<T>[] selectedBuilder;
 	public boolean deleted = false;
 
 	public ImBuilderWrapper(ImBuilderHolderList<T> options) {
-		this.options = new CachedBuilder[options.list().size()];
+		this.options = new ArrayList<>(options.list().size());
 		this.selectedBuilder = new CachedBuilder[1];
 
-		for (int i = 0; i < this.options.length; i++) {
-			this.options[i] = new CachedBuilder<>(options.list().get(i));
+		for (int i = 0; i < options.list().size(); i++) {
+			var option = new CachedBuilder<>(options.list().get(i));
+			this.options.add(option);
 
-			if (this.options[i].holder.isDefault()) {
-				this.selectedBuilder[0] = this.options[i];
+			if (option.holder.isDefault()) {
+				this.selectedBuilder[0] = option;
 			}
 		}
 	}
@@ -73,8 +77,8 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 	public ImUpdate imgui(ImGraphics graphics) {
 		deleted = false;
 		// selectedBuilder[0] = null;
-		var update = graphics.combo("###select-builder", "", selectedBuilder, options);
-		var builder = selectedBuilder[0].get();
+		var update = graphics.combo("###select-builder", "Select...", selectedBuilder, options);
+		var builder = selectedBuilder[0] == null ? null : selectedBuilder[0].get();
 
 		if (builder == null) {
 			return ImUpdate.NONE;
@@ -88,14 +92,14 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 
 	@Override
 	public boolean isValid() {
-		var builder = selectedBuilder[0].get();
+		var builder = selectedBuilder[0] == null ? null : selectedBuilder[0].get();
 		return builder != null && builder.isValid();
 	}
 
 	@Override
 	@Nullable
 	public T build() {
-		var builder = selectedBuilder[0].get();
+		var builder = selectedBuilder[0] == null ? null : selectedBuilder[0].get();
 		return builder == null ? null : builder.build();
 	}
 }

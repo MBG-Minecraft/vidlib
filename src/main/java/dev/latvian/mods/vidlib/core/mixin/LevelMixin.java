@@ -5,6 +5,7 @@ import dev.latvian.mods.vidlib.core.VLLevel;
 import dev.latvian.mods.vidlib.feature.bulk.UndoableModificationHolder;
 import dev.latvian.mods.vidlib.util.PauseType;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -38,6 +39,9 @@ public abstract class LevelMixin implements VLLevel {
 
 	@Unique
 	private RegistryOps<JsonElement> vl$jsonOps = null;
+
+	@Unique
+	private TagParser<Tag> vl$nbtParser = null;
 
 	@Inject(method = "tickBlockEntities", at = @At("RETURN"))
 	private void vl$tickProps(CallbackInfo ci) {
@@ -96,5 +100,14 @@ public abstract class LevelMixin implements VLLevel {
 		}
 
 		return vl$jsonOps;
+	}
+
+	@Override
+	public TagParser<Tag> nbtParser() {
+		if (vl$nbtParser == null) {
+			vl$nbtParser = VLLevel.super.nbtParser();
+		}
+
+		return vl$nbtParser;
 	}
 }

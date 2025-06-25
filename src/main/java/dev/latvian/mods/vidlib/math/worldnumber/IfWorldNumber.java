@@ -8,6 +8,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.jetbrains.annotations.Nullable;
@@ -37,7 +38,6 @@ public record IfWorldNumber(
 	));
 
 	public static class Builder implements WorldNumberImBuilder {
-		public static final Comparison[] COMPARISONS = Comparison.values();
 		public static final ImBuilderHolder<WorldNumber> TYPE = new ImBuilderHolder<>("If", Builder::new);
 
 		public final ImBuilder<WorldNumber> ifValue = WorldNumberImBuilder.create(1D);
@@ -59,7 +59,7 @@ public record IfWorldNumber(
 			update = update.or(ifValue.imgui(graphics));
 			ImGui.popID();
 
-			update = update.or(graphics.combo("###comparison", "", comparison, COMPARISONS));
+			update = update.or(graphics.combo("###comparison", "", comparison, MiscUtils.COMPARISONS));
 
 			ImGui.alignTextToFramePadding();
 			graphics.redTextIf("Value", !testValue.isValid());

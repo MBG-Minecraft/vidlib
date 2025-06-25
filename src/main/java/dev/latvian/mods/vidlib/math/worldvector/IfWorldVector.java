@@ -12,6 +12,7 @@ import dev.latvian.mods.vidlib.math.worldnumber.FixedWorldNumber;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumber;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
 import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberImBuilder;
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import net.minecraft.world.phys.Vec3;
@@ -42,7 +43,6 @@ public record IfWorldVector(
 	));
 
 	public static class Builder implements WorldVectorImBuilder {
-		public static final Comparison[] COMPARISONS = Comparison.values();
 		public static final ImBuilderHolder<WorldVector> TYPE = new ImBuilderHolder<>("If", Builder::new);
 
 		public final ImBuilder<WorldNumber> ifValue = WorldNumberImBuilder.create(1D);
@@ -64,7 +64,7 @@ public record IfWorldVector(
 			update = update.or(ifValue.imgui(graphics));
 			ImGui.popID();
 
-			update = update.or(graphics.combo("###comparison", "", comparison, COMPARISONS));
+			update = update.or(graphics.combo("###comparison", "", comparison, MiscUtils.COMPARISONS));
 
 			ImGui.alignTextToFramePadding();
 			ImGui.text("Value");

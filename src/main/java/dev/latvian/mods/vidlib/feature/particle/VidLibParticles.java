@@ -47,4 +47,8 @@ public interface VidLibParticles {
 	DeferredHolder<ParticleType<?>, SimpleParticleType> SPARK = register("spark");
 	DeferredHolder<ParticleType<?>, ParticleType<WindParticleOptions>> WIND = register("wind", () -> WindParticleOptions.CODEC, () -> WindParticleOptions.STREAM_CODEC);
 	DeferredHolder<ParticleType<?>, ParticleType<FireParticleOptions>> FIRE = register("fire", () -> FireParticleOptions.CODEC, () -> FireParticleOptions.STREAM_CODEC);
+
+	static void registerBuilders(ParticleOptionsImBuilderRegistryEvent event) {
+		event.register(WIND.get(), WindParticleOptionsImBuilder::new);
+	}
 }

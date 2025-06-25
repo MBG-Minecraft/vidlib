@@ -15,6 +15,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 
 public class ImGraphics {
@@ -245,12 +247,12 @@ public class ImGraphics {
 		ImGui.setNextWindowSize(viewport.getWorkSizeX(), viewport.getWorkSizeY());
 	}
 
-	public <E> ImUpdate combo(String label, String defaultPreview, E[] selected, E[] options, Function<E, String> nameFunction, int comboFlags) {
+	public <E> ImUpdate combo(String label, String defaultPreview, E[] selected, List<? extends E> options, Function<E, String> nameFunction, int comboFlags) {
 		var result = ImUpdate.NONE;
 
 		if (ImGui.beginCombo(label, selected[0] == null ? defaultPreview : nameFunction.apply(selected[0]), comboFlags)) {
-			for (int i = 0; i < options.length; i++) {
-				var option = options[i];
+			for (int i = 0; i < options.size(); i++) {
+				var option = options.get(i);
 				boolean isSelected = selected[0] == option;
 
 				if (ImGui.selectable(nameFunction.apply(option) + "###" + i, isSelected)) {
@@ -269,7 +271,15 @@ public class ImGraphics {
 		return result;
 	}
 
+	public <E> ImUpdate combo(String label, String defaultPreview, E[] selected, E[] options, Function<E, String> nameFunction, int comboFlags) {
+		return combo(label, defaultPreview, selected, Arrays.asList(options), nameFunction, comboFlags);
+	}
+
 	public <E> ImUpdate combo(String label, String defaultPreview, E[] selected, E[] options) {
+		return combo(label, defaultPreview, selected, options, (Function) KLibCodecs.DEFAULT_NAME_GETTER, ImGuiComboFlags.None);
+	}
+
+	public <E> ImUpdate combo(String label, String defaultPreview, E[] selected, List<? extends E> options) {
 		return combo(label, defaultPreview, selected, options, (Function) KLibCodecs.DEFAULT_NAME_GETTER, ImGuiComboFlags.None);
 	}
 

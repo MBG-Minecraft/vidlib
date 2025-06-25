@@ -175,7 +175,7 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 		IMGUI_BUILDERS.add(BlockXorFilter.Builder.TYPE);
 
 		IMGUI_BUILDERS.add(BlockIdFilter.Builder.TYPE);
-		// IMGUI_BUILDERS.add(BlockStateFilter.Builder.TYPE);
+		IMGUI_BUILDERS.add(BlockStateFilter.Builder.TYPE);
 		IMGUI_BUILDERS.add(BlockTypeTagFilter.Builder.TYPE);
 	}
 
