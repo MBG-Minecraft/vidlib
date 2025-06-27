@@ -13,8 +13,8 @@ import java.util.List;
 public interface SyncCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("sync", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
 		.then(Commands.argument("player", EntityArgument.players())
+			.requires(source -> source.hasPermission(2))
 			.executes(ctx -> sync(EntityArgument.getPlayers(ctx, "player")))
 		)
 		.executes(ctx -> sync(List.of(ctx.getSource().getPlayerOrException())))
@@ -22,7 +22,7 @@ public interface SyncCommand {
 
 	private static int sync(Collection<ServerPlayer> players) {
 		for (var player : players) {
-			VidLib.sync(player, false);
+			VidLib.sync(player, true);
 		}
 
 		return 1;

@@ -7,6 +7,8 @@ import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToClient;
 import dev.latvian.mods.vidlib.feature.misc.RefreshNamePayload;
 import dev.latvian.mods.vidlib.feature.misc.SyncPlayerTagsPayload;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
+import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.registry.SyncRegistryPayload;
 import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
 import dev.latvian.mods.vidlib.math.worldnumber.SyncGlobalNumberVariablesPayload;
@@ -84,6 +86,8 @@ public class ServerSessionData extends SessionData {
 
 		if (login) {
 			for (var list : level.getProps().propLists.values()) {
+				packets.s2c(new RemoveAllPropsPayload(list.type, PropRemoveType.LOGIN));
+
 				for (var prop : list) {
 					packets.s2c(prop.createAddPacket());
 				}
