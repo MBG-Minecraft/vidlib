@@ -11,7 +11,7 @@ import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.registry.SyncRegistryPayload;
 import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
-import dev.latvian.mods.vidlib.math.worldnumber.SyncGlobalNumberVariablesPayload;
+import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;

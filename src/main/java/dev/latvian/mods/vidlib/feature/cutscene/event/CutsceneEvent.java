@@ -5,7 +5,7 @@ import com.mojang.serialization.Codec;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
-import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
+import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.world.level.Level;
 
 import java.util.function.Function;
@@ -23,5 +23,5 @@ public interface CutsceneEvent {
 		return REGISTRY.getType(this);
 	}
 
-	void run(Level level, WorldNumberContext ctx);
+	void run(Level level, KNumberContext ctx);
 }

@@ -30,6 +30,7 @@ public class BuiltInImGui {
 		graphics.setNumberRange(null);
 
 		if ((mc.isLocalServer() || mc.player.hasPermissions(2)) && mc.player.getAdminPanel()) {
+			ImGuiHooks.enable();
 			adminPanel(mc, graphics);
 		}
 

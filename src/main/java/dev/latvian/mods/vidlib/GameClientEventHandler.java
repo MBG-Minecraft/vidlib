@@ -5,7 +5,6 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
-import dev.latvian.mods.klib.render.DebugRenderTypes;
 import dev.latvian.mods.klib.texture.LightUV;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
@@ -259,16 +258,6 @@ public class GameClientEventHandler {
 
 			if (!session.serverDataMap.get(InternalServerData.HIDE_PLUMBOBS, mc.level.getGameTime())) {
 				PlumbobRenderer.render(mc, frame);
-			}
-
-			var variables = mc.level.getEnvironment().globalVariables();
-
-			if (!session.terrainHighlights.isEmpty()) {
-				var buffer = frame.buffers().getBuffer(DebugRenderTypes.QUADS_NO_CULL_NO_DEPTH).onlyPos();
-
-				for (var th : session.terrainHighlights) {
-					th.render(frame, buffer, variables);
-				}
 			}
 
 			var tool = VidLibTool.of(mc.player);

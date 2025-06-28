@@ -10,7 +10,6 @@ import dev.latvian.mods.vidlib.feature.clothing.ClothingParts;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.explosion.ExplosionData;
-import dev.latvian.mods.vidlib.feature.highlight.TerrainHighlight;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
 import dev.latvian.mods.vidlib.feature.location.Location;
@@ -23,6 +22,8 @@ import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
+import dev.latvian.mods.vidlib.math.knumber.KNumber;
+import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.util.ScreenCorner;
 
 public class VidLibDataTypes {
@@ -45,7 +46,6 @@ public class VidLibDataTypes {
 		DataType.register(VidLib.id("physics_particle_data"), PhysicsParticleData.DATA_TYPE);
 		DataType.register(VidLib.id("positioned_block"), PositionedBlock.DATA_TYPE);
 		DataType.register(VidLib.id("positioned_block_list"), PositionedBlock.LIST_DATA_TYPE);
-		DataType.register(VidLib.id("terrain_highlight"), TerrainHighlight.DATA_TYPE);
 		DataType.register(VidLib.id("prop_type"), PropType.DATA_TYPE);
 		DataType.register(VidLib.id("explosion_data"), ExplosionData.DATA_TYPE);
 		DataType.register(VidLib.id("screen_corner"), ScreenCorner.DATA_TYPE);
@@ -53,6 +53,8 @@ public class VidLibDataTypes {
 		DataType.register(VidLib.id("zone_container"), ZoneContainer.DATA_TYPE, ZoneContainer.REGISTRY, null);
 		DataType.register(VidLib.id("location"), Location.DATA_TYPE, Location.REGISTRY, null);
 		DataType.register(VidLib.id("positioned_sound_data"), PositionedSoundData.DATA_TYPE);
+		DataType.register(VidLib.id("knumber"), KNumber.DATA_TYPE);
+		DataType.register(VidLib.id("kvector"), KVector.DATA_TYPE);
 
 		// RegisteredDataType<ZoneContainer> REGISTERED_DATA_TYPE = RegisteredDataType.of(REGISTRY, ZoneContainer.class);
 	}

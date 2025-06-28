@@ -7,8 +7,8 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImIcons;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
-import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
-import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
+import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
+import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.JsonUtils;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class CutsceneImBuilder implements ImBuilder<Cutscene> {
-	public final WorldNumberVariables variables;
-	public WorldNumberContext numberContext;
+	public final KNumberVariables variables;
+	public KNumberContext numberContext;
 	public final List<CutsceneStepImBuilder> steps = new ArrayList<>();
 	public final ImBoolean allowMovement = new ImBoolean(false);
 	public final ImBoolean openPreviousScreen = new ImBoolean(false);
@@ -35,12 +35,12 @@ public class CutsceneImBuilder implements ImBuilder<Cutscene> {
 	public int jsonLines = 0;
 
 	public CutsceneImBuilder() {
-		this.variables = new WorldNumberVariables();
+		this.variables = new KNumberVariables();
 	}
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		numberContext = Minecraft.getInstance().level.globalContext(0F).withVariables(variables);
+		numberContext = Minecraft.getInstance().level.getGlobalContext().fork(0F, variables);
 		var update = ImUpdate.NONE;
 
 		if (cutscene == null) {

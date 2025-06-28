@@ -1,15 +1,15 @@
 package dev.latvian.mods.vidlib.feature.cutscene.event;
 
-import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
+import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.Event;
 
 public class CustomCutsceneEvent extends Event {
 	private final Level level;
-	private final WorldNumberContext context;
+	private final KNumberContext context;
 	private final String eventName;
 
-	public CustomCutsceneEvent(Level level, WorldNumberContext context, String eventName) {
+	public CustomCutsceneEvent(Level level, KNumberContext context, String eventName) {
 		this.level = level;
 		this.context = context;
 		this.eventName = eventName;
@@ -19,7 +19,7 @@ public class CustomCutsceneEvent extends Event {
 		return level;
 	}
 
-	public WorldNumberContext getContext() {
+	public KNumberContext getContext() {
 		return context;
 	}
 

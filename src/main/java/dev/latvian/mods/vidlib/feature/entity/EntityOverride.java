@@ -123,6 +123,7 @@ public final class EntityOverride<T> {
 	public static final EntityOverride<ResourceLocation> SKYBOX = createKey("skybox", ID.DATA_TYPE);
 	public static final EntityOverride<Range> AMBIENT_LIGHT = createKey("ambient_light", Range.DATA_TYPE);
 	public static final EntityOverride<FogOverride> FOG = createKey("fog", FogOverride.DATA_TYPE);
+	public static final EntityOverride<FogOverride> FLUID_FOG = createKey("fluid_fog", FogOverride.DATA_TYPE);
 	public static final EntityOverride<Boolean> UNPUSHABLE = createBooleanKey("unpushable");
 	public static final EntityOverride<Component> NICKNAME = createKey("nickname", DataTypes.TEXT_COMPONENT);
 	public static final EntityOverride<Component> NAME_PREFIX = createKey("name_prefix", DataTypes.TEXT_COMPONENT);

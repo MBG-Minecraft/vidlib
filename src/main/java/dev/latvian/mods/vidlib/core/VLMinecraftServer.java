@@ -13,7 +13,7 @@ import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.RemoveZonePayload;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
-import dev.latvian.mods.vidlib.math.worldnumber.SyncGlobalNumberVariablesPayload;
+import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
 import dev.latvian.mods.vidlib.util.JsonUtils;
 import dev.latvian.mods.vidlib.util.PauseType;
 import net.minecraft.resources.ResourceLocation;

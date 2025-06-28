@@ -19,7 +19,7 @@ import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityTypeFilter;
 import dev.latvian.mods.vidlib.feature.prop.Props;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
-import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
+import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.util.PauseType;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
@@ -319,14 +319,8 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 			|| !level.getBlockState(mutablePos.set(x, y, z + 1)).isVisible();
 	}
 
-	default WorldNumberContext globalContext(float progress) {
-		var ctx = new WorldNumberContext(vl$level(), progress, getEnvironment().globalVariables());
-		ctx.serverDataMap = getServerData();
-		return ctx;
-	}
-
-	default WorldNumberContext globalContext() {
-		return globalContext(1F);
+	default KNumberContext getGlobalContext() {
+		return new KNumberContext(vl$level());
 	}
 
 	default RegistryOps<Tag> nbtOps() {

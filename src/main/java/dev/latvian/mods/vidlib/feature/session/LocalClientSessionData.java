@@ -25,7 +25,6 @@ import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.fade.ScreenFadeInstance;
-import dev.latvian.mods.vidlib.feature.highlight.TerrainHighlightInstance;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.input.PlayerInputChanged;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToServer;
@@ -42,7 +41,7 @@ import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneEvent;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
-import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
+import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import io.netty.buffer.Unpooled;
@@ -93,7 +92,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	public Map<ResourceLocation, ClockValue> clocks;
 	public Map<ResourceLocation, Skybox> skyboxes;
 	public final DataMap serverDataMap;
-	public final WorldNumberVariables globalVariables;
+	public final KNumberVariables globalVariables;
 	public Skybox skybox;
 	public Map<ZoneShape, VoxelShapeBox> cachedZoneShapes;
 	public List<PlayerInfo> originalListedPlayers;
@@ -103,7 +102,6 @@ public class LocalClientSessionData extends ClientSessionData {
 	public WorldMouse worldMouse;
 	public DataRecorder dataRecorder;
 	public NPCRecording npcRecording;
-	public final List<TerrainHighlightInstance> terrainHighlights;
 
 	public LocalClientSessionData(Minecraft mc, UUID uuid, ClientPacketListener connection) {
 		super(uuid);
@@ -119,8 +117,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.clocks = new HashMap<>();
 		this.skyboxes = new HashMap<>();
 		this.serverDataMap = new DataMap(uuid, DataKey.SERVER);
-		this.globalVariables = new WorldNumberVariables();
-		this.terrainHighlights = new ArrayList<>();
+		this.globalVariables = new KNumberVariables();
 		VidLib.LOGGER.info("Client Session Data Initialized");
 	}
 
@@ -166,6 +163,9 @@ public class LocalClientSessionData extends ClientSessionData {
 
 		var f = EntityOverride.FOG.get(player);
 		ClientFogOverride.override = f == null ? FogParameters.NO_FOG : ClientFogOverride.convert(f);
+
+		var ff = EntityOverride.FLUID_FOG.get(player);
+		ClientFogOverride.fluidOverride = ff == null ? null : ClientFogOverride.convert(ff);
 	}
 
 	public Skybox getSkybox(ResourceLocation id) {
@@ -252,10 +252,6 @@ public class LocalClientSessionData extends ClientSessionData {
 
 		if (screenFade != null && screenFade.tick()) {
 			screenFade = null;
-		}
-
-		if (!terrainHighlights.isEmpty() && paused.tick()) {
-			terrainHighlights.removeIf(TerrainHighlightInstance::tick);
 		}
 
 		prevCameraShake = cameraShake;

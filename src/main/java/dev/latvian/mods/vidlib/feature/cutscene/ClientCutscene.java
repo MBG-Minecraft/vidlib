@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.cutscene;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
-import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
+import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.util.FormattedCharSequence;
@@ -17,7 +17,7 @@ public class ClientCutscene implements CameraOverride {
 	public final Minecraft mc;
 	public final boolean overrideCamera;
 	public final Cutscene cutscene;
-	public final WorldNumberVariables variables;
+	public final KNumberVariables variables;
 	public final ClientCutsceneStep[] steps;
 	public final Supplier<Vec3> sourcePos;
 	public final Vec3 originPos;
@@ -30,7 +30,7 @@ public class ClientCutscene implements CameraOverride {
 	public List<FormattedCharSequence> topBar, bottomBar;
 	public final List<SoundInstance> playingSounds;
 
-	public ClientCutscene(Minecraft mc, boolean overrideCamera, Cutscene cutscene, WorldNumberVariables variables, Supplier<Vec3> sourcePos) {
+	public ClientCutscene(Minecraft mc, boolean overrideCamera, Cutscene cutscene, KNumberVariables variables, Supplier<Vec3> sourcePos) {
 		this.mc = mc;
 		this.overrideCamera = overrideCamera;
 		this.cutscene = cutscene;
@@ -45,7 +45,7 @@ public class ClientCutscene implements CameraOverride {
 		this.fovMod = 1D;
 		this.playingSounds = new ArrayList<>();
 
-		var ctx = mc.level.globalContext(0F).withVariables(variables);
+		var ctx = mc.level.getGlobalContext().fork(0F, variables);
 		ctx.originPos = originPos;
 		ctx.sourcePos = originPos;
 
@@ -138,10 +138,9 @@ public class ClientCutscene implements CameraOverride {
 
 			if (step.length == 0 ? (totalTick == step.start) : (totalTick >= step.start && totalTick < step.start + step.length)) {
 				float progress = step.length == 0 ? 0F : (totalTick - step.start) / (float) step.length;
-				var ctx = mc.level.globalContext(progress).withVariables(variables);
+				var ctx = mc.level.getGlobalContext().fork(progress, variables);
 				ctx.originPos = originPos;
 				ctx.sourcePos = sourcePos.get();
-				ctx.serverDataMap = mc.getServerData();
 
 				step.prevRenderTarget = step.renderTarget;
 

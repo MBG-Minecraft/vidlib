@@ -15,10 +15,11 @@ public class ClientFogOverride {
 	public static final Map<Integer, FogShape> SHAPES = Arrays.stream(FogShape.values()).collect(Collectors.toMap(FogShape::getIndex, Function.identity()));
 
 	public static FogParameters override = FogParameters.NO_FOG;
+	public static FogParameters fluidOverride = null;
 
 	public static FogParameters get(FogParameters shaderFog) {
 		if (Minecraft.getInstance().gameRenderer.getMainCamera().getFluidInCamera() != FogType.NONE) {
-			return shaderFog;
+			return fluidOverride == null ? shaderFog : fluidOverride;
 		}
 
 		return override != null ? override : shaderFog;

@@ -7,11 +7,13 @@ import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.particle.ParticleOptionsImBuilder;
+import dev.latvian.mods.vidlib.feature.prop.builtin.highlight.TerrainHighlightProp;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundDataImBuilder;
-import dev.latvian.mods.vidlib.math.worldnumber.WorldNumber;
-import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberImBuilder;
-import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
-import dev.latvian.mods.vidlib.math.worldvector.WorldVectorImBuilder;
+import dev.latvian.mods.vidlib.math.knumber.KNumber;
+import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
+import dev.latvian.mods.vidlib.math.kvector.DynamicKVector;
+import dev.latvian.mods.vidlib.math.kvector.KVector;
+import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 import imgui.ImGui;
 import imgui.ImGuiViewport;
 import imgui.ImVec2;
@@ -54,8 +56,8 @@ public class WidgetDebugPanel extends AdminPanel {
 	public final Easing[] easingData = new Easing[1];
 	public final GradientImBuilder gradient1 = new GradientImBuilder();
 	public final GradientImBuilder gradient2 = new GradientImBuilder();
-	public final ImBuilder<WorldNumber> numberBuilder = WorldNumberImBuilder.create(0D);
-	public final ImBuilder<WorldVector> vectorBuilder = WorldVectorImBuilder.create();
+	public final ImBuilder<KNumber> numberBuilder = KNumberImBuilder.create(0D);
+	public final ImBuilder<KVector> vectorBuilder = KVectorImBuilder.create();
 	public final ImBuilder<EntityFilter> entityFilterBuilder = EntityFilterImBuilder.create();
 	public final ImBuilder<BlockFilter> blockFilterBuilder = BlockFilterImBuilder.create();
 	public final PositionedSoundDataImBuilder soundBuilder = new PositionedSoundDataImBuilder();
@@ -287,25 +289,61 @@ public class WidgetDebugPanel extends AdminPanel {
 		ImGui.popID();
 		ImGui.separator();
 
-		graphics.redTextIf("World Number", !numberBuilder.isValid());
-		ImGui.pushID("###world-number");
+		ImGui.alignTextToFramePadding();
+		graphics.redTextIf("KNumber", !numberBuilder.isValid());
+		ImGui.sameLine();
+		ImGui.pushID("###knumber");
 		numberBuilder.imgui(graphics);
 		ImGui.popID();
 		ImGui.separator();
 
-		graphics.redTextIf("World Vector", !vectorBuilder.isValid());
-		ImGui.pushID("###world-vector");
+		ImGui.alignTextToFramePadding();
+		graphics.redTextIf("KVector", !vectorBuilder.isValid());
+		ImGui.sameLine();
+		ImGui.pushID("###kvector");
 		vectorBuilder.imgui(graphics);
 		ImGui.popID();
+
+		if (numberBuilder.isValid() && vectorBuilder.isValid()) {
+			var ctx = mc.level.getGlobalContext();
+			var radius = numberBuilder.build().get(ctx);
+
+			if (radius != null && radius > 0D) {
+				if (ImGui.button("Create Danger Highlight###create-danger-highlight")) {
+					var pos = vectorBuilder.build();
+					var scalen = KNumber.of(radius.floatValue());
+					var scale = new DynamicKVector(scalen, KNumber.ZERO, scalen);
+
+					mc.level.getProps().add(TerrainHighlightProp.TYPE, prop -> {
+						prop.dynamicPos = pos;
+						prop.color = new Color(0xCCFFDD00).withAlpha(100).gradient(Color.RED.withAlpha(100), Easing.QUAD_IN);
+						prop.scale = scale;
+						prop.lifespan = 60;
+					});
+
+					mc.level.getProps().add(TerrainHighlightProp.TYPE, prop -> {
+						prop.dynamicPos = pos;
+						prop.color = Color.RED.withAlpha(100);
+						prop.scale = KVector.ZERO.interpolate(Easing.QUAD_IN, scale);
+						prop.lifespan = 60;
+					});
+				}
+			}
+		}
+
 		ImGui.separator();
 
+		ImGui.alignTextToFramePadding();
 		graphics.redTextIf("Entity Filter", !entityFilterBuilder.isValid());
+		ImGui.sameLine();
 		ImGui.pushID("###entity-filter");
 		entityFilterBuilder.imgui(graphics);
 		ImGui.popID();
 		ImGui.separator();
 
+		ImGui.alignTextToFramePadding();
 		graphics.redTextIf("Block Filter", !blockFilterBuilder.isValid());
+		ImGui.sameLine();
 		ImGui.pushID("###block-filter");
 		blockFilterBuilder.imgui(graphics);
 		ImGui.popID();
@@ -317,7 +355,9 @@ public class WidgetDebugPanel extends AdminPanel {
 		ImGui.popID();
 		ImGui.separator();
 
+		ImGui.alignTextToFramePadding();
 		graphics.redTextIf("Particle", !particleBuilder.isValid());
+		ImGui.sameLine();
 		ImGui.pushID("###particle");
 		particleBuilder.imgui(graphics);
 		ImGui.popID();

@@ -10,9 +10,8 @@ import dev.latvian.mods.klib.math.Vec3f;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
-import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
-import dev.latvian.mods.vidlib.math.worldvector.FixedWorldVector;
-import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
+import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
+import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.util.JsonCodecReloadListener;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
@@ -33,8 +32,8 @@ public record GhostStructure(
 	Optional<StructureRendererData> data,
 	double animationTicks,
 	EntityFilter visibleTo,
-	List<WorldVector> locations,
-	WorldVector scale,
+	List<KVector> locations,
+	KVector scale,
 	Rotation rotation,
 	boolean preload
 ) {
@@ -44,8 +43,8 @@ public record GhostStructure(
 		StructureRendererData.CODEC.optionalFieldOf("data").forGetter(GhostStructure::data),
 		Codec.DOUBLE.optionalFieldOf("animation_ticks", 1D).forGetter(GhostStructure::animationTicks),
 		EntityFilter.CODEC.optionalFieldOf("visible_to", EntityFilter.ANY.instance()).forGetter(GhostStructure::visibleTo),
-		WorldVector.CODEC.listOf().fieldOf("locations").forGetter(GhostStructure::locations),
-		WorldVector.CODEC.optionalFieldOf("scale", FixedWorldVector.ONE.instance()).forGetter(GhostStructure::scale),
+		KVector.CODEC.listOf().fieldOf("locations").forGetter(GhostStructure::locations),
+		KVector.CODEC.optionalFieldOf("scale", KVector.ONE).forGetter(GhostStructure::scale),
 		Rotation.CODEC.optionalFieldOf("rotation", Rotation.NONE).forGetter(GhostStructure::rotation),
 		Codec.BOOL.optionalFieldOf("preload", false).forGetter(GhostStructure::preload)
 	).apply(instance, GhostStructure::new));
@@ -86,7 +85,7 @@ public record GhostStructure(
 		}
 	}
 
-	public static void preRender(FrameInfo frame, WorldNumberContext ctx) {
+	public static void preRender(FrameInfo frame, KNumberContext ctx) {
 		// TODO: Collect visible structures here first
 
 		var mc = frame.mc();

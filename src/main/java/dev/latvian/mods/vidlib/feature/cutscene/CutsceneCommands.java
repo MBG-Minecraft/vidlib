@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.cutscene;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
+import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 
@@ -17,7 +17,7 @@ public interface CutsceneCommands {
 						var cutscene = Cutscene.COMMAND.get(ctx, "cutscene");
 
 						for (var player : EntityArgument.getPlayers(ctx, "player")) {
-							player.playCutscene(cutscene, WorldNumberVariables.EMPTY);
+							player.playCutscene(cutscene, KNumberVariables.EMPTY);
 						}
 
 						return 1;

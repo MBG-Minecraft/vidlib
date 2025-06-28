@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.core;
 
+import com.mojang.blaze3d.platform.Window;
+
 public interface VLWindow {
 	default void vl$setViewportArea(double xOffset, double yOffset, double xScale, double yScale) {
 		// NO-OP
@@ -39,5 +41,10 @@ public interface VLWindow {
 
 	default double vl$modifyCursorY(double y) {
 		return y - vl$getYOffset() * vl$getUnscaledHeight();
+	}
+
+	default boolean isInvisible() {
+		var w = (Window) this;
+		return w.isMinimized() || w.getGuiScaledWidth() < 1 || w.getGuiScaledHeight() < 1;
 	}
 }

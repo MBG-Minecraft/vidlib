@@ -64,6 +64,13 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 		return MiscClientUtils.depthFar(renderDistance);
 	}
 
+	@Inject(method = "renderLevel", at = @At("HEAD"), cancellable = true)
+	private void vl$renderLevelHead(DeltaTracker deltaTracker, CallbackInfo ci) {
+		if (minecraft.getWindow().isInvisible()) {
+			ci.cancel();
+		}
+	}
+
 	@ModifyExpressionValue(method = "renderLevel", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/GameRenderer;renderHand:Z"))
 	private boolean vl$renderHand(boolean original) {
 		return false;

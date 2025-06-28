@@ -59,6 +59,14 @@ public class ImGuiHooks {
 	static int dockId;
 	static float dpiScale = 1.0f;
 
+	public static int initialized = 2; // FIXME
+
+	public static void enable() {
+		if (initialized == 0) {
+			initialized = 1;
+		}
+	}
+
 	public static void init(ResourceManager resourceManager) {
 		var client = Minecraft.getInstance();
 		imGuiGlfw = new ImGuiImplGlfw();
@@ -151,6 +159,15 @@ public class ImGuiHooks {
 	}
 
 	public static void startFrame(Minecraft mc) {
+		if (initialized == 0) {
+			return;
+		}
+
+		if (initialized == 1) {
+			init(mc.getResourceManager());
+			initialized = 2;
+		}
+
 		ensureEndFrame();
 
 		if (ImGui.getIO().getKeysDown(GLFW.GLFW_KEY_LEFT_CONTROL)) {
@@ -223,9 +240,18 @@ public class ImGuiHooks {
 	public static void endFrame(Minecraft mc) {
 		endingFrame = false;
 
+		if (initialized == 0) {
+			return;
+		}
+
 		active = false;
 		ImGui.render();
-		imGuiGl3.renderDrawData(ImGui.getDrawData());
+
+		var drawData = ImGui.getDrawData();
+
+		if (drawData != null) {
+			imGuiGl3.renderDrawData(drawData);
+		}
 
 		captureMouse = ImGui.getIO().getWantCaptureMouse() && !mc.mouseHandler.isMouseGrabbed();
 		captureKeyboard = ImGui.getIO().getWantCaptureKeyboard();

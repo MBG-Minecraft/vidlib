@@ -1,0 +1,92 @@
+package dev.latvian.mods.vidlib.math.kvector;
+
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.vidlib.feature.imgui.ImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.math.knumber.KNumber;
+import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
+import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
+import imgui.ImGui;
+import net.minecraft.world.phys.Vec3;
+
+public record DynamicKVector(KNumber x, KNumber y, KNumber z) implements KVector {
+	public static final SimpleRegistryType<DynamicKVector> TYPE = SimpleRegistryType.dynamic("dynamic", RecordCodecBuilder.mapCodec(instance -> instance.group(
+		KNumber.CODEC.fieldOf("x").forGetter(DynamicKVector::x),
+		KNumber.CODEC.fieldOf("y").forGetter(DynamicKVector::y),
+		KNumber.CODEC.fieldOf("z").forGetter(DynamicKVector::z)
+	).apply(instance, DynamicKVector::new)), CompositeStreamCodec.of(
+		KNumber.STREAM_CODEC, DynamicKVector::x,
+		KNumber.STREAM_CODEC, DynamicKVector::y,
+		KNumber.STREAM_CODEC, DynamicKVector::z,
+		DynamicKVector::new
+	));
+
+	public static class Builder implements KVectorImBuilder {
+		public static final ImBuilderHolder<KVector> TYPE = new ImBuilderHolder<>("Dynamic", Builder::new);
+
+		public final ImBuilder<KNumber> x = KNumberImBuilder.create(0D);
+		public final ImBuilder<KNumber> y = KNumberImBuilder.create(0D);
+		public final ImBuilder<KNumber> z = KNumberImBuilder.create(0D);
+
+		@Override
+		public ImUpdate imgui(ImGraphics graphics) {
+			var update = ImUpdate.NONE;
+
+			ImGui.alignTextToFramePadding();
+			ImGui.text("X");
+			ImGui.sameLine();
+			ImGui.pushID("###x");
+			update = update.or(x.imgui(graphics));
+			ImGui.popID();
+
+			ImGui.alignTextToFramePadding();
+			ImGui.text("Y");
+			ImGui.sameLine();
+			ImGui.pushID("###y");
+			update = update.or(y.imgui(graphics));
+			ImGui.popID();
+
+			ImGui.alignTextToFramePadding();
+			ImGui.text("Z");
+			ImGui.sameLine();
+			ImGui.pushID("###z");
+			update = update.or(z.imgui(graphics));
+			ImGui.popID();
+
+			return update;
+		}
+
+		@Override
+		public boolean isValid() {
+			return x.isValid() && y.isValid() && z.isValid();
+		}
+
+		@Override
+		public KVector build() {
+			return new DynamicKVector(x.build(), y.build(), z.build());
+		}
+	}
+
+	@Override
+	public SimpleRegistryType<?> type() {
+		return TYPE;
+	}
+
+	@Override
+	public Vec3 get(KNumberContext ctx) {
+		var px = x.get(ctx);
+		var py = y.get(ctx);
+		var pz = z.get(ctx);
+
+		if (px == null || py == null || pz == null) {
+			return null;
+		}
+
+		return KMath.vec3(px, py, pz);
+	}
+}

@@ -6,9 +6,8 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.cutscene.event.CutsceneEvent;
 import dev.latvian.mods.vidlib.feature.fade.Fade;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
-import dev.latvian.mods.vidlib.math.worldnumber.FixedWorldNumber;
-import dev.latvian.mods.vidlib.math.worldnumber.WorldNumber;
-import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
+import dev.latvian.mods.vidlib.math.knumber.KNumber;
+import dev.latvian.mods.vidlib.math.kvector.KVector;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
@@ -21,10 +20,10 @@ import java.util.Optional;
 
 public record CutsceneStep(
 	int start,
-	WorldNumber length,
-	Optional<WorldVector> origin,
-	Optional<WorldVector> target,
-	Optional<WorldNumber> fovModifier,
+	KNumber length,
+	Optional<KVector> origin,
+	Optional<KVector> target,
+	Optional<KNumber> fovModifier,
 	Optional<Component> status,
 	Optional<CutsceneStepBars> bars,
 	Optional<ResourceLocation> shader,
@@ -35,10 +34,10 @@ public record CutsceneStep(
 ) {
 	public static final Codec<CutsceneStep> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Codec.INT.optionalFieldOf("start", 0).forGetter(CutsceneStep::start),
-		WorldNumber.CODEC.optionalFieldOf("length", FixedWorldNumber.ZERO.instance()).forGetter(CutsceneStep::length),
-		WorldVector.CODEC.optionalFieldOf("origin").forGetter(CutsceneStep::origin),
-		WorldVector.CODEC.optionalFieldOf("target").forGetter(CutsceneStep::target),
-		WorldNumber.CODEC.optionalFieldOf("fov_modifier").forGetter(CutsceneStep::fovModifier),
+		KNumber.CODEC.optionalFieldOf("length", KNumber.ZERO).forGetter(CutsceneStep::length),
+		KVector.CODEC.optionalFieldOf("origin").forGetter(CutsceneStep::origin),
+		KVector.CODEC.optionalFieldOf("target").forGetter(CutsceneStep::target),
+		KNumber.CODEC.optionalFieldOf("fov_modifier").forGetter(CutsceneStep::fovModifier),
 		ComponentSerialization.CODEC.optionalFieldOf("status").forGetter(CutsceneStep::status),
 		CutsceneStepBars.CODEC.optionalFieldOf("bars").forGetter(CutsceneStep::bars),
 		ResourceLocation.CODEC.optionalFieldOf("shader").forGetter(CutsceneStep::shader),
@@ -50,10 +49,10 @@ public record CutsceneStep(
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, CutsceneStep> STREAM_CODEC = CompositeStreamCodec.of(
 		ByteBufCodecs.VAR_INT, CutsceneStep::start,
-		WorldNumber.STREAM_CODEC.optional(FixedWorldNumber.ZERO.instance()), CutsceneStep::length,
-		WorldVector.STREAM_CODEC.optional(), CutsceneStep::origin,
-		WorldVector.STREAM_CODEC.optional(), CutsceneStep::target,
-		WorldNumber.STREAM_CODEC.optional(), CutsceneStep::fovModifier,
+		KNumber.STREAM_CODEC.optional(KNumber.ZERO), CutsceneStep::length,
+		KVector.STREAM_CODEC.optional(), CutsceneStep::origin,
+		KVector.STREAM_CODEC.optional(), CutsceneStep::target,
+		KNumber.STREAM_CODEC.optional(), CutsceneStep::fovModifier,
 		ComponentSerialization.STREAM_CODEC.optional(), CutsceneStep::status,
 		CutsceneStepBars.STREAM_CODEC.optional(), CutsceneStep::bars,
 		ResourceLocation.STREAM_CODEC.optional(), CutsceneStep::shader,

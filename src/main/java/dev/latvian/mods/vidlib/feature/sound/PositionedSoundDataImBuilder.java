@@ -3,8 +3,8 @@ package dev.latvian.mods.vidlib.feature.sound;
 import dev.latvian.mods.vidlib.feature.imgui.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
-import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
-import dev.latvian.mods.vidlib.math.worldvector.WorldVectorImBuilder;
+import dev.latvian.mods.vidlib.math.kvector.KVector;
+import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 
@@ -13,7 +13,7 @@ import java.util.Optional;
 public class PositionedSoundDataImBuilder implements ImBuilder<PositionedSoundData> {
 	public final SoundDataImBuilder soundData = new SoundDataImBuilder();
 	public final ImBoolean hasPosition = new ImBoolean(false);
-	public final ImBuilder<WorldVector> position = WorldVectorImBuilder.create();
+	public final ImBuilder<KVector> position = KVectorImBuilder.create();
 	public final ImBoolean looping = new ImBoolean(false);
 	public final ImBoolean stopImmediately = new ImBoolean(false);
 	public boolean delete = false;

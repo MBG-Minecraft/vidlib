@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.cutscene.event;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
-import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberContext;
+import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForge;
@@ -19,7 +19,7 @@ public record CustomCutsceneEventHolder(String name) implements CutsceneEvent {
 	}
 
 	@Override
-	public void run(Level level, WorldNumberContext ctx) {
+	public void run(Level level, KNumberContext ctx) {
 		NeoForge.EVENT_BUS.post(new CustomCutsceneEvent(level, ctx, name));
 	}
 }

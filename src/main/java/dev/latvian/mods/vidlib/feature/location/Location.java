@@ -11,7 +11,7 @@ import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
-import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
+import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -28,15 +28,15 @@ import java.util.function.Supplier;
 public record Location(
 	ResourceLocation id,
 	ResourceKey<Level> dimension,
-	List<WorldVector> positions,
+	List<KVector> positions,
 	double range,
 	boolean warp,
 	boolean warpRequiresAdmin
-) implements Supplier<WorldVector> {
+) implements Supplier<KVector> {
 	public static final Codec<Location> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		ID.CODEC.fieldOf("id").forGetter(Location::id),
 		MCCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(Location::dimension),
-		KLibCodecs.listOrSelf(WorldVector.CODEC).fieldOf("position").forGetter(Location::positions),
+		KLibCodecs.listOrSelf(KVector.CODEC).fieldOf("position").forGetter(Location::positions),
 		Codec.DOUBLE.optionalFieldOf("range", 0D).forGetter(Location::range),
 		Codec.BOOL.optionalFieldOf("warp", true).forGetter(Location::warp),
 		Codec.BOOL.optionalFieldOf("warp_requires_admin", true).forGetter(Location::warpRequiresAdmin)
@@ -45,7 +45,7 @@ public record Location(
 	public static final StreamCodec<RegistryFriendlyByteBuf, Location> DIRECT_STREAM_CODEC = CompositeStreamCodec.of(
 		ID.STREAM_CODEC, Location::id,
 		MCStreamCodecs.DIMENSION, Location::dimension,
-		WorldVector.STREAM_CODEC.listOf(), Location::positions,
+		KVector.STREAM_CODEC.listOf(), Location::positions,
 		ByteBufCodecs.DOUBLE, Location::range,
 		ByteBufCodecs.BOOL, Location::warp,
 		ByteBufCodecs.BOOL, Location::warpRequiresAdmin,
@@ -63,11 +63,11 @@ public record Location(
 	}
 
 	@Override
-	public WorldVector get() {
+	public KVector get() {
 		return positions.getFirst();
 	}
 
-	public WorldVector random(RandomSource source) {
+	public KVector random(RandomSource source) {
 		return positions.get(source.nextInt(positions.size()));
 	}
 }

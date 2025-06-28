@@ -14,8 +14,6 @@ import dev.latvian.mods.vidlib.feature.cutscene.PlayCutscenePayload;
 import dev.latvian.mods.vidlib.feature.cutscene.StopCutscenePayload;
 import dev.latvian.mods.vidlib.feature.fade.Fade;
 import dev.latvian.mods.vidlib.feature.fade.ScreenFadePayload;
-import dev.latvian.mods.vidlib.feature.highlight.TerrainHighlight;
-import dev.latvian.mods.vidlib.feature.highlight.TerrainHighlightPayload;
 import dev.latvian.mods.vidlib.feature.misc.CloseScreenPayload;
 import dev.latvian.mods.vidlib.feature.misc.MarkerData;
 import dev.latvian.mods.vidlib.feature.misc.MarkerPayload;
@@ -42,8 +40,8 @@ import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundPayload;
 import dev.latvian.mods.vidlib.feature.vote.StartNumberVotingPayload;
 import dev.latvian.mods.vidlib.feature.vote.StartYesNoVotingPayload;
-import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
-import dev.latvian.mods.vidlib.math.worldvector.WorldVector;
+import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
+import dev.latvian.mods.vidlib.math.kvector.KVector;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.core.BlockPos;
@@ -101,7 +99,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 		}
 	}
 
-	default void playCutscene(Cutscene cutscene, WorldNumberVariables variables) {
+	default void playCutscene(Cutscene cutscene, KNumberVariables variables) {
 		if (isClient()) {
 			getEnvironment().playCutscene(cutscene, variables);
 		} else if (!cutscene.steps.isEmpty()) {
@@ -197,7 +195,7 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 		}
 	}
 
-	default void playGlobalSound(PositionedSoundData data, WorldNumberVariables variables) {
+	default void playGlobalSound(PositionedSoundData data, KNumberVariables variables) {
 		if (isClient()) {
 			getEnvironment().playGlobalSound(data, variables);
 		} else {
@@ -206,11 +204,11 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 	}
 
 	default void playGlobalSound(Vec3 pos, SoundData sound) {
-		playGlobalSound(new PositionedSoundData(sound, WorldVector.fixed(pos), false, false), WorldNumberVariables.EMPTY);
+		playGlobalSound(new PositionedSoundData(sound, KVector.of(pos), false, false), KNumberVariables.EMPTY);
 	}
 
 	default void playGlobalSound(SoundData sound) {
-		playGlobalSound(new PositionedSoundData(sound), WorldNumberVariables.EMPTY);
+		playGlobalSound(new PositionedSoundData(sound), KNumberVariables.EMPTY);
 	}
 
 	default void physicsParticles(PhysicsParticleData data, long spawnTime, long seed, List<PositionedBlock> blocks) {
@@ -314,14 +312,6 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 			getEnvironment().marker(data);
 		} else {
 			s2c(new MarkerPayload(data));
-		}
-	}
-
-	default void addTerrainHighlight(TerrainHighlight highlight) {
-		if (isClient()) {
-			getEnvironment().addTerrainHighlight(highlight);
-		} else {
-			s2c(new TerrainHighlightPayload(highlight));
 		}
 	}
 }

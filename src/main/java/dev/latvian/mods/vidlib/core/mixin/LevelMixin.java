@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 import com.google.gson.JsonElement;
 import dev.latvian.mods.vidlib.core.VLLevel;
 import dev.latvian.mods.vidlib.feature.bulk.UndoableModificationHolder;
+import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.util.PauseType;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
@@ -33,6 +34,9 @@ public abstract class LevelMixin implements VLLevel {
 
 	@Unique
 	private LivingEntity vl$mainBoss = null;
+
+	@Unique
+	private KNumberContext vl$knumberContext = null;
 
 	@Unique
 	private RegistryOps<Tag> vl$nbtOps = null;
@@ -82,6 +86,15 @@ public abstract class LevelMixin implements VLLevel {
 	@Nullable
 	public LivingEntity getMainBoss() {
 		return vl$mainBoss;
+	}
+
+	@Override
+	public KNumberContext getGlobalContext() {
+		if (vl$knumberContext == null) {
+			vl$knumberContext = VLLevel.super.getGlobalContext();
+		}
+
+		return vl$knumberContext;
 	}
 
 	@Override

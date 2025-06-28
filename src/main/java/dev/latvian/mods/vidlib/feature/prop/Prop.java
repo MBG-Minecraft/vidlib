@@ -12,7 +12,10 @@ import dev.latvian.mods.klib.shape.CuboidShape;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
-import dev.latvian.mods.vidlib.math.worldvector.PositionType;
+import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
+import dev.latvian.mods.vidlib.math.kvector.FixedKVector;
+import dev.latvian.mods.vidlib.math.kvector.KVector;
+import dev.latvian.mods.vidlib.math.kvector.PositionType;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import net.minecraft.commands.CommandSourceStack;
@@ -49,13 +52,13 @@ public class Prop {
 	public static final PropData<Prop, Float> WIDTH = PropData.create(Prop.class, "width", DataTypes.FLOAT, p -> (float) p.width, (p, v) -> p.width = v);
 	public static final PropData<Prop, Float> HEIGHT = PropData.create(Prop.class, "height", DataTypes.FLOAT, p -> (float) p.height, (p, v) -> p.height = v);
 
-	public static final PropDataProvider BUILTIN_DATA = PropDataProvider.join(
-		TICK,
-		POSITION,
-		VELOCITY,
-		YAW,
-		PITCH
-	);
+	public static final PropData<Prop, KVector> DYNAMIC_POSITION = PropData.create(Prop.class, "position", KVector.DATA_TYPE, p -> p.dynamicPos == null ? KVector.of(p.pos) : p.dynamicPos, (p, v) -> {
+		p.dynamicPos = v;
+
+		if (v instanceof FixedKVector f) {
+			p.setPos(f.vec());
+		}
+	});
 
 	public final PropType<?> type;
 	public final PropSpawnType spawnType;
@@ -69,6 +72,7 @@ public class Prop {
 	public int tick;
 	public int lifespan;
 	public final Vector3d pos;
+	public KVector dynamicPos;
 	public final Vector3d prevPos;
 	public final Vector3f velocity;
 	public final Vector3f rotation;
@@ -94,6 +98,7 @@ public class Prop {
 		this.rotation = new Vector3f();
 		this.prevRotation = new Vector3f();
 		this.velocityMultiplier = new Vector3f(0.98F, 1F, 0.98F);
+		this.dynamicPos = null;
 		this.gravity = 0.08F;
 		this.width = 1D;
 		this.height = 1D;
@@ -274,21 +279,44 @@ public class Prop {
 		move();
 	}
 
-	public final float getRelativeTick() {
-		return lifespan > 0 ? tick / (float) lifespan : 0F;
+	public float getTick(float delta) {
+		return Mth.lerp(delta, prevTick, tick);
 	}
 
-	public final float getRelativeTick(float delta) {
-		return lifespan > 0 ? Mth.lerp(delta, prevTick, tick) / (float) lifespan : 0F;
+	public float getRelativeTick(float delta, float def) {
+		return lifespan > 0 ? getTick(delta) / (float) lifespan : def;
+	}
+
+	public KNumberContext createWorldNumberContext() {
+		var ctx = level.getGlobalContext().fork(getRelativeTick(1F, 1F), null);
+		ctx.sourcePos = new Vec3(pos.x, pos.y, pos.z);
+		return ctx;
 	}
 
 	public void move() {
+		if (dynamicPos != null) {
+			var ctx = createWorldNumberContext();
+			var followPos = dynamicPos.get(ctx);
+
+			if (followPos != null) {
+				pos.set(followPos.x, followPos.y, followPos.z);
+			}
+		}
+
 		pos.add(velocity);
 		velocity.mul(velocityMultiplier);
 		velocity.y -= gravity;
 	}
 
 	public void onAdded() {
+		if (dynamicPos != null) {
+			var ctx = createWorldNumberContext();
+			var followPos = dynamicPos.get(ctx);
+
+			if (followPos != null) {
+				pos.set(followPos.x, followPos.y, followPos.z);
+			}
+		}
 	}
 
 	public void onRemoved() {
@@ -320,10 +348,6 @@ public class Prop {
 	@Nullable
 	public SimplePacketPayload createUpdatePacket() {
 		return UpdatePropPayload.of(this);
-	}
-
-	public float getTick(float delta) {
-		return Mth.lerp(delta, prevTick, tick);
 	}
 
 	public double getMaxRenderDistance() {

@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
+import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +26,7 @@ public class PropList implements Iterable<Prop> {
 	public PropList(Props<?> props, PropListType type) {
 		this.props = props;
 		this.type = type;
-		this.map = new Int2ObjectOpenHashMap<>();
+		this.map = new Int2ObjectLinkedOpenHashMap<>();
 		this.pending = new ArrayList<>();
 		this.removed = new EnumMap<>(PropRemoveType.class);
 

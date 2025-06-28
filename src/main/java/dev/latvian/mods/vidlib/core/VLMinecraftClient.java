@@ -23,8 +23,6 @@ import dev.latvian.mods.vidlib.feature.data.UpdatePlayerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.data.UpdateServerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.fade.Fade;
 import dev.latvian.mods.vidlib.feature.fade.ScreenFadeInstance;
-import dev.latvian.mods.vidlib.feature.highlight.TerrainHighlight;
-import dev.latvian.mods.vidlib.feature.highlight.TerrainHighlightInstance;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.MarkerData;
 import dev.latvian.mods.vidlib.feature.particle.FireData;
@@ -43,7 +41,7 @@ import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import dev.latvian.mods.vidlib.feature.vote.NumberVotingScreen;
 import dev.latvian.mods.vidlib.feature.vote.YesNoVotingScreen;
-import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
+import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
@@ -152,7 +150,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 			tool.getSecond().renderSetup(player, tool.getFirst(), mc.hitResult, screenDelta);
 		}
 
-		GhostStructure.preRender(frameInfo, mc.level.globalContext());
+		GhostStructure.preRender(frameInfo, mc.level.getGlobalContext());
 
 		if (session.npcRecording != null) {
 			session.npcRecording.record(System.currentTimeMillis(), screenDelta, mc.player);
@@ -227,7 +225,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void playCutscene(Cutscene cutscene, WorldNumberVariables variables) {
+	default void playCutscene(Cutscene cutscene, KNumberVariables variables) {
 		var player = vl$self().player;
 
 		if (!cutscene.steps.isEmpty() && player != null) {
@@ -378,11 +376,11 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void playGlobalSound(PositionedSoundData data, WorldNumberVariables variables) {
+	default void playGlobalSound(PositionedSoundData data, KNumberVariables variables) {
 		vl$self().getSoundManager().play(createGlobalSound(data, variables));
 	}
 
-	default SoundInstance createGlobalSound(PositionedSoundData data, WorldNumberVariables variables) {
+	default SoundInstance createGlobalSound(PositionedSoundData data, KNumberVariables variables) {
 		var mc = vl$self();
 
 		if (data.position().isPresent()) {
@@ -508,11 +506,6 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void addTerrainHighlight(TerrainHighlight highlight) {
-		vl$self().player.vl$sessionData().terrainHighlights.add(new TerrainHighlightInstance(highlight));
-	}
-
-	@Override
 	default GameProfile retrieveGameProfile(UUID uuid) {
 		try {
 			var profile = vl$self().getMinecraftSessionService().fetchProfile(uuid, true).profile();
@@ -532,7 +525,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default WorldNumberVariables globalVariables() {
+	default KNumberVariables globalVariables() {
 		return vl$self().player.vl$sessionData().globalVariables;
 	}
 

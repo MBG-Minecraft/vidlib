@@ -14,7 +14,9 @@ public class ClockProp extends Prop {
 
 	@AutoRegister
 	public static final PropType<ClockProp> TYPE = PropType.create(VidLib.id("clock"), ClockProp::new, PropDataProvider.join(
-		BUILTIN_DATA,
+		TICK,
+		POSITION,
+		YAW,
 		FONT
 	));
 

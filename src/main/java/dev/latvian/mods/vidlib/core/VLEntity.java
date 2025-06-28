@@ -14,8 +14,8 @@ import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
-import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
-import dev.latvian.mods.vidlib.math.worldvector.PositionType;
+import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
+import dev.latvian.mods.vidlib.math.kvector.PositionType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -175,7 +175,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 
 	default void teleport(Location location) {
 		var entity = vl$self();
-		teleport(entity.getServer().getLevel(location.dimension()), location.random(entity.getRandom()).get(entity.level().globalContext()));
+		teleport(entity.getServer().getLevel(location.dimension()), location.random(entity.getRandom()).get(entity.level().getGlobalContext()));
 	}
 
 	default void forceSetVelocity(Vec3 velocity) {
@@ -193,7 +193,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 
 	default void playSound(SoundData data, boolean looping, boolean stopImmediately) {
 		var e = vl$self();
-		e.level().playGlobalSound(new PositionedSoundData(data, e, looping, stopImmediately), WorldNumberVariables.EMPTY);
+		e.level().playGlobalSound(new PositionedSoundData(data, e, looping, stopImmediately), KNumberVariables.EMPTY);
 	}
 
 	default void playSound(SoundData data) {

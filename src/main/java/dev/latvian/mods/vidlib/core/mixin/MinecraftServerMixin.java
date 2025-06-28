@@ -5,7 +5,7 @@ import dev.latvian.mods.vidlib.core.VLMinecraftServer;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
-import dev.latvian.mods.vidlib.math.worldnumber.WorldNumberVariables;
+import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import net.minecraft.Util;
@@ -56,7 +56,7 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	private final Map<UUID, GameProfile> vl$profileByUUIDCache = new HashMap<>();
 
 	@Unique
-	private final WorldNumberVariables vl$globalVariables = new WorldNumberVariables();
+	private final KNumberVariables vl$globalVariables = new KNumberVariables();
 
 	@Override
 	public ScheduledTask.Handler vl$getScheduledTaskHandler() {
@@ -131,7 +131,7 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	}
 
 	@Override
-	public WorldNumberVariables globalVariables() {
+	public KNumberVariables globalVariables() {
 		return vl$globalVariables;
 	}
 }
