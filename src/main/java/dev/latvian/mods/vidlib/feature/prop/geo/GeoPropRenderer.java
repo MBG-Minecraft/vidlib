@@ -32,6 +32,7 @@ public class GeoPropRenderer<P extends Prop & GeoProp> extends GeoObjectRenderer
 		var delta = state.getGeckolibData(DataTickets.PARTIAL_TICK);
 
 		if (delta != null) {
+			state.addGeckolibData(DataTickets.TICK, (double) ((Prop) prop).getTick(delta));
 			state.addGeckolibData(DataTickets.ENTITY_PITCH, prop.getPitch(delta));
 			state.addGeckolibData(DataTickets.ENTITY_YAW, prop.getYaw(delta));
 			state.addGeckolibData(ENTITY_ROLL, prop.getRoll(delta));
