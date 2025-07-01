@@ -153,6 +153,12 @@ public class BuiltInImGui {
 					Minecraft.getInstance().getSoundManager().stop();
 				}
 
+				if (ImGui.menuItem(ImIcons.BRIGHTNESS + " Export Skyboxes")) {
+					for (var skyboxId : SkyboxData.SKYBOX_IDS) {
+						session.getSkybox(skyboxId).export(mc);
+					}
+				}
+
 				NeoForge.EVENT_BUS.post(new AdminPanelEvent.DebugDropdown(graphics));
 				ImGui.endMenu();
 			}

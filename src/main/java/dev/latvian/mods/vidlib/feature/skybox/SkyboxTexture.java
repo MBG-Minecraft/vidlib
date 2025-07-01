@@ -16,7 +16,7 @@ import java.util.function.IntUnaryOperator;
 
 public class SkyboxTexture extends ReloadableTexture implements Dumpable {
 	public final Skybox skybox;
-	private int resolution;
+	public int resolution;
 
 	public SkyboxTexture(Skybox skybox, ResourceLocation id) {
 		super(id);
@@ -40,7 +40,7 @@ public class SkyboxTexture extends ReloadableTexture implements Dumpable {
 	}
 
 	@SuppressWarnings({"ConstantValue", "PointlessArithmeticExpression"})
-	private static NativeImage process(ResourceLocation location, NativeImage src, int srcW, int srcH) {
+	public static NativeImage process(ResourceLocation location, NativeImage src, int srcW, int srcH) {
 		if (srcW == srcH * 2) { // Pre-mapped 4x2
 			return src;
 		} else if (srcW == srcH || srcW * 3 == srcH * 4) { // Cube Map 4x4 or 4x3
