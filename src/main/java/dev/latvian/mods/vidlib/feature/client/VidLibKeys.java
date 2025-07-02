@@ -38,6 +38,10 @@ public class VidLibKeys {
 	}
 
 	public static void handle(Minecraft mc) {
+		if (mc.player == null || mc.level == null) {
+			return;
+		}
+
 		while (freezeTickKeyMapping.consumeClick()) {
 			if (!mc.player.isReplayCamera()) {
 				if (mc.level.tickRateManager().isFrozen()) {
@@ -63,7 +67,13 @@ public class VidLibKeys {
 		}
 
 		while (adminPanelKeyMapping.consumeClick()) {
-			Minecraft.getInstance().updatePlayerData(InternalPlayerData.ADMIN_PANEL, !mc.player.getAdminPanel());
+			if (mc.player.isReplayCamera()) {
+				boolean adminPanel = !mc.player.getAdminPanel();
+				mc.player.set(InternalPlayerData.ADMIN_PANEL, adminPanel);
+				mc.options.hideGui = adminPanel;
+			} else {
+				mc.updatePlayerData(InternalPlayerData.ADMIN_PANEL, !mc.player.getAdminPanel());
+			}
 		}
 	}
 }

@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.imgui;
 
 import dev.latvian.mods.vidlib.feature.canvas.CanvasPanel;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneBuilderPanel;
+import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
 import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
@@ -60,6 +61,7 @@ public class BuiltInImGui {
 
 	public static void adminPanel(Minecraft mc, ImGraphics graphics) {
 		var session = mc.player.vl$sessionData();
+		var isReplay = mc.level.isReplayLevel();
 
 		if (ImGui.beginMainMenuBar()) {
 			if (ImGui.beginMenu(ImIcons.OPEN + " Open")) {
@@ -116,12 +118,20 @@ public class BuiltInImGui {
 						ImGui.sameLine();
 
 						if (ImGui.menuItem(skybox.getPath(), null, skybox.equals(current))) {
-							mc.runClientCommand("skybox set \"" + skybox + "\"");
+							if (isReplay) {
+								mc.set(InternalServerData.SKYBOX, skybox);
+							} else {
+								mc.runClientCommand("skybox set \"" + skybox + "\"");
+							}
 						}
 					}
 
 					if (ImGui.menuItem("Vanilla", null, Skyboxes.VANILLA.equals(current))) {
-						mc.runClientCommand("skybox set \"minecraft:vanilla\"");
+						if (isReplay) {
+							mc.set(InternalServerData.SKYBOX, Skyboxes.VANILLA);
+						} else {
+							mc.runClientCommand("skybox set \"minecraft:vanilla\"");
+						}
 					}
 
 					graphics.popStack();
@@ -150,7 +160,7 @@ public class BuiltInImGui {
 				}
 
 				if (ImGui.menuItem(ImIcons.STOP + " Stop all Sounds")) {
-					Minecraft.getInstance().getSoundManager().stop();
+					mc.getSoundManager().stop();
 				}
 
 				if (ImGui.menuItem(ImIcons.BRIGHTNESS + " Export Skyboxes")) {
@@ -176,11 +186,19 @@ public class BuiltInImGui {
 				}
 
 				if (ImGui.menuItem(ImIcons.FULLSCREEN + " Zones", null, mc.player.getShowZones())) {
-					mc.runClientCommand("zones show");
+					if (isReplay) {
+						mc.player.setShowZones(!mc.player.getShowZones());
+					} else {
+						mc.runClientCommand("zones show");
+					}
 				}
 
 				if (ImGui.menuItem(ImIcons.FULLSCREEN + " Anchor", null, mc.player.getShowAnchor())) {
-					mc.runClientCommand("anchor show");
+					if (isReplay) {
+						mc.player.setShowAnchor(!mc.player.getShowAnchor());
+					} else {
+						mc.runClientCommand("anchor show");
+					}
 				}
 
 				NeoForge.EVENT_BUS.post(new AdminPanelEvent.ShowDropdown(graphics));
