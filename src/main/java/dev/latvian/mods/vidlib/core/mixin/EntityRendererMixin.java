@@ -6,25 +6,20 @@ import dev.latvian.mods.vidlib.core.VLEntityRenderer;
 import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
-import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(EntityRenderer.class)
+@Mixin(value = EntityRenderer.class, priority = 1001) // Load before Sodium
 public class EntityRendererMixin<T extends Entity, S extends EntityRenderState> implements VLEntityRenderer<T, S> {
-	/**
-	 * @author Lat
-	 * @reason Yeet
-	 */
-	@Overwrite
-	public boolean shouldRender(T entity, Frustum camera, double camX, double camY, double camZ) {
-		return true;
+
+	@Inject(method = "shouldRender", at = @At("RETURN"), cancellable = true)
+	private void vl$shouldRender(CallbackInfoReturnable<Boolean> cir) {
+	    cir.setReturnValue(true);
 	}
 
 	@ModifyExpressionValue(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderer;shouldShowName(Lnet/minecraft/world/entity/Entity;D)Z"))
