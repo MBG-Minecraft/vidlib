@@ -57,11 +57,13 @@
 	],
 	"client": [
 		"AbstractClientPlayerMixin",
+		"AccessibilityOptionsScreenMixin",
 		"BiomeAmbientSoundsHandlerMixin",
 		"BlockEntityWithBoundingBoxRendererMixin",
 		"CameraMixin",
 		"ClientLevelMixin",
 		"ClientPacketListenerMixin",
+		"ControlsScreenMixin",
 		"CreativeModeInventoryScreenMixin",
 		"DefaultPlayerSkinMixin",
 		"EntityRenderDispatcherMixin",

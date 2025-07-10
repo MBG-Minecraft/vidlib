@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
@@ -10,7 +9,6 @@ import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
 import dev.latvian.mods.vidlib.feature.session.SessionData;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
-import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
@@ -82,50 +80,6 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
 
 	default void setClothing(Clothing clothing) {
 		set(InternalPlayerData.CLOTHING, clothing);
-	}
-
-	default boolean getShowZones() {
-		return get(InternalPlayerData.SHOW_ZONES);
-	}
-
-	default void setShowZones(boolean show) {
-		set(InternalPlayerData.SHOW_ZONES, show);
-	}
-
-	default ZoneRenderType getZoneRenderType() {
-		return get(InternalPlayerData.ZONE_RENDER_TYPE);
-	}
-
-	default void setZoneRenderType(ZoneRenderType type) {
-		set(InternalPlayerData.ZONE_RENDER_TYPE, type);
-	}
-
-	default BlockFilter getZoneBlockFilter() {
-		return get(InternalPlayerData.ZONE_BLOCK_FILTER);
-	}
-
-	default void setZoneBlockFilter(BlockFilter filter) {
-		set(InternalPlayerData.ZONE_BLOCK_FILTER, filter);
-	}
-
-	default boolean getShowAnchor() {
-		return get(InternalPlayerData.SHOW_ANCHOR);
-	}
-
-	default void setShowAnchor(boolean show) {
-		set(InternalPlayerData.SHOW_ANCHOR, show);
-	}
-
-	default boolean getShowFPS() {
-		return get(InternalPlayerData.SHOW_FPS);
-	}
-
-	default void setShowFPS(boolean show) {
-		set(InternalPlayerData.SHOW_FPS, show);
-	}
-
-	default boolean getAdminPanel() {
-		return get(InternalPlayerData.ADMIN_PANEL);
 	}
 
 	default float getFlightSpeedMod() {

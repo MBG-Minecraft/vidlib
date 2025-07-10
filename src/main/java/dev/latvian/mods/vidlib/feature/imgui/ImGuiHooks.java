@@ -131,7 +131,7 @@ public class ImGuiHooks {
 		}
 
 		for (var c : ImIcons.EXTRA_ICONS.get()) {
-			builder.addChar(c);
+			builder.addChar(c.toChar());
 		}
 
 		return builder.buildRanges();
@@ -234,6 +234,8 @@ public class ImGuiHooks {
 	}
 
 	public static void beforeEndFrame() {
+		BuiltInImGui.handle(Minecraft.getInstance());
+
 		endingFrame = true;
 	}
 

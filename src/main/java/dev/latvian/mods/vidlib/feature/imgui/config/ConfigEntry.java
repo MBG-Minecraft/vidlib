@@ -110,7 +110,7 @@ public abstract class ConfigEntry<T> {
 			ImGui.text(label);
 		} else {
 			graphics.pushStack();
-			graphics.setYellowText();
+			graphics.setWarningText();
 			ImGui.text(label);
 			graphics.popStack();
 		}

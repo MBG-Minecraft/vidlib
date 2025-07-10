@@ -2,8 +2,15 @@ package dev.latvian.mods.vidlib.feature.imgui;
 
 import imgui.ImGui;
 
+import java.util.Locale;
+import java.util.UUID;
+
 public class StopwatchPanel extends AdminPanel {
 	public static final StopwatchPanel INSTANCE = new StopwatchPanel("stopwatch", false);
+
+	public static void openNew() {
+		new StopwatchPanel("stopwatch-" + UUID.randomUUID().toString().toLowerCase(Locale.ROOT), true).open();
+	}
 
 	public long stopwatch = 0L;
 	public long stopwatchStart = 0L;

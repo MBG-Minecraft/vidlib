@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import imgui.ImGui;
-import net.minecraft.client.Minecraft;
 
 import java.util.ArrayList;
 
@@ -14,7 +13,7 @@ public class CommandHistoryPanel extends AdminPanel {
 
 	@Override
 	public void content(ImGraphics graphics) {
-		var list = new ArrayList<>(Minecraft.getInstance().commandHistory().history());
+		var list = new ArrayList<>(graphics.mc.commandHistory().history());
 
 		for (int i = list.size() - 1; i >= 0; i--) {
 			var s = list.get(i);

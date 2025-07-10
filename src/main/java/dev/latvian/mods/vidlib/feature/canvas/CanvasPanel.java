@@ -3,18 +3,25 @@ package dev.latvian.mods.vidlib.feature.canvas;
 import dev.latvian.mods.vidlib.feature.imgui.AdminPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
+import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
 import imgui.ImGui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CanvasPanel extends AdminPanel {
-	public static void menu() {
+	public static List<MenuItem> menu(ImGraphics graphics) {
 		// CutsceneEditorPanel.INSTANCE.open();
+		var list = new ArrayList<MenuItem>(CanvasImpl.ENABLED.size());
 
 		for (var canvas : CanvasImpl.ENABLED) {
-			if (ImGui.menuItem(canvas.idString)) {
+			list.add(MenuItem.item(canvas.idString, g -> {
 				new CanvasPanel(canvas, true).open();
 				new CanvasPanel(canvas, false).open();
-			}
+			}));
 		}
+
+		return list;
 	}
 
 	public final Canvas canvas;
@@ -41,7 +48,7 @@ public class CanvasPanel extends AdminPanel {
 				float texh = tex.getHeight(0);
 
 				float max = ImGui.getContentRegionAvailX() - 20F;
-				ImGui.image(tex.vl$getHandle(), max, max * texh / texw);
+				ImGui.image(tex.vl$getHandle(), max, max * texh / texw, 0F, 1F, 1F, 0F);
 			} else {
 				ImGui.text("No texture available");
 			}

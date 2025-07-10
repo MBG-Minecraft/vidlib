@@ -72,7 +72,7 @@ public record IfKNumber(
 
 			if (thenInvalid) {
 				graphics.pushStack();
-				graphics.setRedText();
+				graphics.setErrorText();
 			}
 
 			update = update.or(ImGui.checkbox("Then###then-enabled", thenValueEnabled));
@@ -92,7 +92,7 @@ public record IfKNumber(
 
 			if (elseInvalid) {
 				graphics.pushStack();
-				graphics.setRedText();
+				graphics.setErrorText();
 			}
 
 			update = update.or(ImGui.checkbox("Else###else-enabled", elseValueEnabled));

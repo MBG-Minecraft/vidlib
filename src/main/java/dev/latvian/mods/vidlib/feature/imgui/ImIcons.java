@@ -3,7 +3,10 @@ package dev.latvian.mods.vidlib.feature.imgui;
 import dev.latvian.mods.klib.util.Lazy;
 import net.neoforged.neoforge.common.NeoForge;
 
-public enum ImIcons {
+import java.util.ArrayList;
+import java.util.List;
+
+public enum ImIcons implements ImIcon {
 	SQUARE('\ueb36'),
 	CIRCLE('\uef4a'),
 	HEXAGON('\ueb39'),
@@ -33,6 +36,7 @@ public enum ImIcons {
 	TIMELAPSE('\ue422'),
 	BRIGHTNESS('\ue518'),
 	FREEZE('\ueb3b'),
+	FIRE('\uef55'),
 	LOCATION('\ue55f'),
 	BUG('\ue868'),
 	HOME('\ue88a'),
@@ -74,15 +78,14 @@ public enum ImIcons {
 	STORAGE('\ue1db'),
 	DATABASE('\uf20e'),
 
-
 	;
 
 	public static final ImIcons[] VALUES = values();
 
-	public static final Lazy<char[]> EXTRA_ICONS = Lazy.of(() -> {
-		var sb = new StringBuilder();
-		NeoForge.EVENT_BUS.post(new ImIconsEvent(sb::append));
-		return sb.toString().toCharArray();
+	public static final Lazy<List<ImIcon>> EXTRA_ICONS = Lazy.of(() -> {
+		var list = new ArrayList<ImIcon>();
+		NeoForge.EVENT_BUS.post(new ImIconsEvent(list::add));
+		return list;
 	});
 
 	public final char icon;
@@ -91,6 +94,16 @@ public enum ImIcons {
 	ImIcons(char icon) {
 		this.icon = icon;
 		this.iconString = String.valueOf(icon);
+	}
+
+	@Override
+	public String iconName() {
+		return name();
+	}
+
+	@Override
+	public char toChar() {
+		return icon;
 	}
 
 	@Override

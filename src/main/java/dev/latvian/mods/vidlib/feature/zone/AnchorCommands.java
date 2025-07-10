@@ -6,7 +6,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
 
@@ -14,9 +13,6 @@ public interface AnchorCommands {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("anchor", (command, buildContext) -> command
 		.requires(source -> source.hasPermission(2))
-		.then(Commands.literal("show")
-			.executes(ctx -> show(ctx.getSource().getPlayerOrException()))
-		)
 		.then(Commands.literal("set")
 			.then(Commands.argument("start", BlockPosArgument.blockPos())
 				.then(Commands.argument("end", BlockPosArgument.blockPos())
@@ -28,11 +24,6 @@ public interface AnchorCommands {
 			.executes(ctx -> remove(ctx.getSource()))
 		)
 	);
-
-	private static int show(ServerPlayer player) {
-		player.setShowAnchor(!player.getShowAnchor());
-		return 1;
-	}
 
 	private static int set(CommandSourceStack source, BlockPos start, BlockPos end) {
 		var list = new ArrayList<>(source.getServer().getAnchor().areas());

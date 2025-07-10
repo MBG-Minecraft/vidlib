@@ -5,7 +5,9 @@ import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.klib.math.Range;
+import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import imgui.ImGui;
+import imgui.ImVec2;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiComboFlags;
 import imgui.flag.ImGuiStyleVar;
@@ -31,7 +33,24 @@ public class ImGraphics {
 		private Range numberRange = null;
 	}
 
+	public final Minecraft mc;
+	public final boolean inGame;
+	public final boolean isReplay;
+	public final boolean isNeoForgeServer;
+	public final boolean isClientOnly;
+	public final boolean adminPanel;
+	public final boolean isAdmin;
 	private VarStackStack stack;
+
+	public ImGraphics(Minecraft mc) {
+		this.mc = mc;
+		this.inGame = mc.player != null && mc.level != null;
+		this.isReplay = inGame && mc.level.isReplayLevel();
+		this.isNeoForgeServer = inGame && "neoforge".equals(mc.player.connection.serverBrand());
+		this.isClientOnly = isReplay || !isNeoForgeServer;
+		this.adminPanel = VidLibClientOptions.getAdminPanel();
+		this.isAdmin = inGame && (mc.isLocalServer() || mc.player.hasPermissions(2));
+	}
 
 	public void pushStack() {
 		var newStack = new VarStackStack();
@@ -164,12 +183,20 @@ public class ImGraphics {
 		setStyleCol(ImGuiCol.TitleBgCollapsed, 0xEF517F70);
 	}
 
-	public void setYellowText() {
+	public void setWarningText() {
 		setStyleCol(ImGuiCol.Text, 0xFFFFFF55);
 	}
 
-	public void setRedText() {
+	public void setErrorText() {
 		setStyleCol(ImGuiCol.Text, 0xFFFF5555);
+	}
+
+	public void setSuccessText() {
+		setStyleCol(ImGuiCol.Text, 0xFF8CFF95);
+	}
+
+	public void setInfoText() {
+		setStyleCol(ImGuiCol.Text, 0xFF63BEFF);
 	}
 
 	public void setRedButton() {
@@ -186,7 +213,7 @@ public class ImGraphics {
 
 	public void stackTrace(Throwable throwable) {
 		pushStack();
-		setRedText();
+		setErrorText();
 		ImGui.textWrapped(throwable.toString());
 		popStack();
 	}
@@ -194,7 +221,7 @@ public class ImGraphics {
 	public void redTextIf(String text, boolean condition) {
 		if (condition) {
 			pushStack();
-			setRedText();
+			setErrorText();
 			ImGui.text(text);
 			popStack();
 		} else {
@@ -205,7 +232,7 @@ public class ImGraphics {
 	public void redWrappedTextIf(String text, boolean condition) {
 		if (condition) {
 			pushStack();
-			setRedText();
+			setErrorText();
 			ImGui.textWrapped(text);
 			popStack();
 		} else {
@@ -285,5 +312,40 @@ public class ImGraphics {
 
 	public ImUpdate easingCombo(String label, Easing[] selected) {
 		return combo(label, "Select Easing...", selected, Easing.VALUES);
+	}
+
+	public void hideMainMenuBar() {
+		BuiltInImGui.mainMenuOpen = false;
+	}
+
+	public float calcTextWidth(String text) {
+		ImVec2 textSizeVec = new ImVec2();
+		ImGui.calcTextSize(textSizeVec, text);
+		return textSizeVec.x;
+	}
+
+	public void separatorWithText(String text) {
+		float cursorX = ImGui.getCursorScreenPosX();
+		float cursorY = ImGui.getCursorScreenPosY();
+		float textStartX = cursorX + ImGui.getStyle().getIndentSpacing();
+		float size = ImGui.getWindowSizeX();
+		int fontSize = ImGui.getFontSize();
+
+		if (ImGui.isRectVisible(size, fontSize)) {
+			float textEndX = textStartX + calcTextWidth(text);
+			float lineEndX = ImGui.getWindowPosX() + size;
+			float lineY = cursorY + fontSize / 2F;
+			var drawList = ImGui.getWindowDrawList();
+			var sepColor = ImGui.getColorU32(ImGuiCol.Separator);
+
+			drawList.addLine(cursorX - 4, lineY, Math.min(lineEndX, textStartX) - 4, lineY, sepColor);
+
+			if (textEndX + 4 < lineEndX) {
+				drawList.addLine(textEndX + 4, lineY, lineEndX - 4, lineY, sepColor);
+			}
+		}
+
+		ImGui.setCursorScreenPos(textStartX, cursorY);
+		ImGui.textColored(ImGui.getColorU32(ImGuiCol.TextDisabled), text);
 	}
 }

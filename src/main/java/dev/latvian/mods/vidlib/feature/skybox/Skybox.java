@@ -1,13 +1,57 @@
 package dev.latvian.mods.vidlib.feature.skybox;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import dev.latvian.mods.vidlib.feature.data.InternalServerData;
+import dev.latvian.mods.vidlib.feature.imgui.ImIcon;
+import dev.latvian.mods.vidlib.feature.imgui.ImIcons;
+import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.nio.file.Files;
+import java.util.ArrayList;
 
 public class Skybox {
+	public static final MenuItem MENU_ITEM = MenuItem.menu(ImIcons.BRIGHTNESS, "Skybox", g -> {
+		var slist = new ArrayList<MenuItem>();
+
+		var current = g.mc.level.getSkybox();
+		var session = g.mc.player.vl$sessionData();
+
+		for (var skybox : SkyboxData.SKYBOX_IDS) {
+			var tex = session.getSkybox(skybox).loadTexture(g.mc);
+
+			slist.add(MenuItem.item(ImIcon.image(tex.getTexture(), 0F, 0.5F, 0.25F, 1F), skybox.getPath(), skybox.equals(current), g1 -> {
+				if (g1.isClientOnly) {
+					g1.mc.set(InternalServerData.SKYBOX, skybox);
+				} else {
+					g1.mc.runClientCommand("skybox set \"" + skybox + "\"");
+				}
+			}));
+		}
+
+		slist.add(MenuItem.SEPARATOR);
+
+		slist.add(MenuItem.item(ImIcons.INVISIBLE, "Vanilla", Skyboxes.VANILLA.equals(current), g1 -> {
+			if (g1.isClientOnly) {
+				g1.mc.set(InternalServerData.SKYBOX, Skyboxes.VANILLA);
+			} else {
+				g1.mc.runClientCommand("skybox set \"minecraft:vanilla\"");
+			}
+		}));
+
+		slist.add(MenuItem.item(ImIcons.DOWNLOAD, "Export PNGs", g1 -> {
+			var session1 = g1.mc.player.vl$sessionData();
+
+			for (var skyboxId : SkyboxData.SKYBOX_IDS) {
+				session1.getSkybox(skyboxId).export(g1.mc);
+			}
+		}));
+
+		return slist;
+	}).remainOpen();
+
 	public final SkyboxData data;
 	public final ResourceLocation texture;
 	public SkyboxTexture skyboxTexture;

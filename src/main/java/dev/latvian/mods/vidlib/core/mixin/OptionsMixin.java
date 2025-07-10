@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.misc.GlobalKeybinds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
@@ -45,6 +46,11 @@ public abstract class OptionsMixin {
 	private String vl$processOptionsForge(Options.FieldAccess fieldAccess, String key, String fallback) {
 		var override = key.startsWith("key_") ? GlobalKeybinds.get(key.substring(4)) : null;
 		return override == null ? fallback : override;
+	}
+
+	@Inject(method = "processOptions", at = @At("RETURN"))
+	private void vl$addOptions(Options.FieldAccess accessor, CallbackInfo ci) {
+		VidLibClientOptions.process(accessor);
 	}
 
 	@Inject(method = "save", at = @At("HEAD"))

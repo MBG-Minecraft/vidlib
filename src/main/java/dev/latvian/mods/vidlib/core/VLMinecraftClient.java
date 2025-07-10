@@ -13,6 +13,7 @@ import dev.latvian.mods.vidlib.feature.camera.FreeCamera;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeInstance;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
+import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.cutscene.ClientCutscene;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneScreen;
@@ -136,7 +137,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 		var ray = vl$self().gameRenderer.getMainCamera().ray(512D);
 
-		if (vl$self().options.getCameraType() == CameraType.FIRST_PERSON && player.getShowZones()) {
+		if (vl$self().options.getCameraType() == CameraType.FIRST_PERSON && VidLibClientOptions.getShowZones()) {
 			session.zoneClip = session.filteredZones.clip(ray);
 		} else {
 			session.zoneClip = null;
@@ -383,7 +384,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	default SoundInstance createGlobalSound(PositionedSoundData data, KNumberVariables variables) {
 		var mc = vl$self();
 
-		if (data.position().isPresent()) {
+		if (mc.level != null && data.position().isPresent()) {
 			return new VidLibSoundInstance(mc.level, data, variables);
 		} else {
 			return SimpleSoundInstance.forUI(data.data().sound().value(), data.data().pitch(), data.data().volume());

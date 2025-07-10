@@ -33,6 +33,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.List;
+
 public class WidgetDebugPanel extends AdminPanel {
 	public static final WidgetDebugPanel INSTANCE = new WidgetDebugPanel();
 
@@ -78,11 +80,20 @@ public class WidgetDebugPanel extends AdminPanel {
 		ImGui.text("Text");
 
 		graphics.pushStack();
-		graphics.setYellowText();
-		ImGui.text("Yellow Text");
+
+		graphics.setErrorText();
+		ImGui.text("Error Text");
+
+		graphics.setWarningText();
+		ImGui.text("Warning Text");
+
+		graphics.setSuccessText();
+		ImGui.text("Success Text");
+
+		graphics.setInfoText();
+		ImGui.text("Info Text");
 
 		graphics.setFontScale(1.5F);
-		graphics.setRedText();
 		ImGui.text("1.5x Text");
 
 		graphics.setFontScale(2F);
@@ -304,7 +315,7 @@ public class WidgetDebugPanel extends AdminPanel {
 		vectorBuilder.imgui(graphics);
 		ImGui.popID();
 
-		if (numberBuilder.isValid() && vectorBuilder.isValid()) {
+		if (graphics.inGame && numberBuilder.isValid() && vectorBuilder.isValid()) {
 			var ctx = mc.level.getGlobalContext();
 			var radius = numberBuilder.build().get(ctx);
 
@@ -387,31 +398,21 @@ public class WidgetDebugPanel extends AdminPanel {
 		ImGui.setNextWindowSize(viewport.getWorkSizeX(), viewport.getWorkSizeY());
 
 		if (ImGui.beginPopupModal("Node Editor###widget-debug-node-modal", new ImBoolean(true), ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.MenuBar)) {
-			if (ImGui.beginMenuBar()) {
-				if (ImGui.beginMenu(ImIcons.ADD + " Add###add")) {
-					if (ImGui.menuItem("Number")) {
-					}
+			graphics.hideMainMenuBar();
 
-					ImGui.endMenu();
-				}
-
-				if (ImGui.beginMenu(ImIcons.EDIT + " Edit###edit")) {
-					if (ImGui.menuItem(ImIcons.DELETE + " Delete###delete")) {
-					}
-
-					if (ImGui.menuItem(ImIcons.DELETE + " Delete All###delete-all")) {
-					}
-
-					ImGui.endMenu();
-				}
-
-				graphics.pushStack();
-				graphics.setRedText();
-				ImGui.text(ImIcons.ERROR + " Root node missing!");
-				graphics.popStack();
-
-				ImGui.endMenuBar();
-			}
+			MenuItem.root(g -> List.of(
+				MenuItem.menu(ImIcons.ADD, "Add", g1 -> List.of(
+					MenuItem.item("Number", g2 -> {
+					})
+				)),
+				MenuItem.menu(ImIcons.EDIT, "Edit", g1 -> List.of(
+					MenuItem.item(ImIcons.DELETE, "Delete", g2 -> {
+					}),
+					MenuItem.item(ImIcons.DELETE, "Delete All", g2 -> {
+					})
+				)),
+				MenuItem.text(ImIcons.WARNING, "").withTooltip(ImText.error("Root node missing!"))
+			)).buildRoot(graphics, false);
 
 			ImNodes.beginNodeEditor();
 

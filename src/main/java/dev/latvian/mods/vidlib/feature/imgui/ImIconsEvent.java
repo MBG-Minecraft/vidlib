@@ -1,16 +1,17 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
-import it.unimi.dsi.fastutil.chars.CharConsumer;
 import net.neoforged.bus.api.Event;
 
-public class ImIconsEvent extends Event {
-	private final CharConsumer callback;
+import java.util.function.Consumer;
 
-	ImIconsEvent(CharConsumer callback) {
+public class ImIconsEvent extends Event {
+	private final Consumer<ImIcon> callback;
+
+	ImIconsEvent(Consumer<ImIcon> callback) {
 		this.callback = callback;
 	}
 
-	public void add(char icon) {
+	public void add(ImIcon icon) {
 		callback.accept(icon);
 	}
 }

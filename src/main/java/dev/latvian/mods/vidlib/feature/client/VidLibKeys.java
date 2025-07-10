@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import net.minecraft.client.KeyMapping;
@@ -63,16 +62,6 @@ public class VidLibKeys {
 		while (repeatLastCommandKeyMapping.consumeClick()) {
 			if (!mc.commandHistory().history().isEmpty()) {
 				mc.runClientCommand(((ArrayListDeque<String>) mc.commandHistory().history()).getLast());
-			}
-		}
-
-		while (adminPanelKeyMapping.consumeClick()) {
-			if (mc.player.isReplayCamera()) {
-				boolean adminPanel = !mc.player.getAdminPanel();
-				mc.player.set(InternalPlayerData.ADMIN_PANEL, adminPanel);
-				mc.options.hideGui = adminPanel;
-			} else {
-				mc.updatePlayerData(InternalPlayerData.ADMIN_PANEL, !mc.player.getAdminPanel());
 			}
 		}
 	}

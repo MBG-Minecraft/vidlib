@@ -7,33 +7,13 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.Nullable;
 
 public interface ZoneCommands {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("zones", (command, buildContext) -> command
 		.requires(source -> source.hasPermission(2))
-		.then(Commands.literal("show")
-			.executes(ctx -> show(ctx.getSource().getPlayerOrException()))
-		)
-		.then(Commands.literal("render-type")
-			.then(Commands.literal("normal")
-				.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), ZoneRenderType.NORMAL, null))
-			)
-			.then(Commands.literal("collisions")
-				.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), ZoneRenderType.COLLISIONS, null))
-			)
-			.then(Commands.literal("blocks")
-				.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), ZoneRenderType.BLOCKS, BlockFilter.NONE.instance()))
-				.then(Commands.argument("filter", BlockFilter.COMMAND.argument(buildContext))
-					.executes(ctx -> renderType(ctx.getSource().getPlayerOrException(), ZoneRenderType.BLOCKS, BlockFilter.COMMAND.get(ctx, "filter")))
-
-				)
-			)
-		)
 		.then(Commands.literal("count-blocks")
 			.then(Commands.argument("id", ZoneContainer.COMMAND.argument(buildContext))
 				.executes(ctx -> countBlocks(ctx.getSource(), ZoneContainer.COMMAND.get(ctx, "id"), BlockFilter.NONE.instance()))
@@ -51,21 +31,6 @@ public interface ZoneCommands {
 			)
 		)
 	);
-
-	private static int show(ServerPlayer player) {
-		player.setShowZones(!player.getShowZones());
-		return 1;
-	}
-
-	private static int renderType(ServerPlayer player, ZoneRenderType type, @Nullable BlockFilter filter) {
-		player.setZoneRenderType(type);
-
-		if (filter != null) {
-			player.setZoneBlockFilter(filter);
-		}
-
-		return 1;
-	}
 
 	class BlockProcessor {
 		public final Level level;

@@ -12,13 +12,13 @@ import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
+import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
-import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.feature.misc.DebugTextEvent;
@@ -71,7 +71,9 @@ import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.client.event.ToastAddEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
+import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.common.NeoForge;
+import org.lwjgl.glfw.GLFW;
 
 import java.nio.file.Files;
 import java.util.List;
@@ -102,37 +104,35 @@ public class GameClientEventHandler {
 		ScreenText.CLIENT_TICK.clear();
 		var mc = Minecraft.getInstance();
 
-		if (mc.level == null || mc.player == null) {
-			return;
-		}
+		if (mc.level != null && mc.player != null) {
+			ScreenText.CLIENT_TICK.ops = mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
 
-		ScreenText.CLIENT_TICK.ops = mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
+			var tool = VidLibTool.of(mc.player);
 
-		var tool = VidLibTool.of(mc.player);
+			if (tool != null) {
+				tool.getSecond().debugText(mc.player, tool.getFirst(), mc.hitResult, ScreenText.CLIENT_TICK);
+			}
 
-		if (tool != null) {
-			tool.getSecond().debugText(mc.player, tool.getFirst(), mc.hitResult, ScreenText.CLIENT_TICK);
-		}
+			for (var clock : Clock.REGISTRY) {
+				if (clock.screen().isPresent()) {
+					var screen = clock.screen().get();
+					var value = mc.player.vl$sessionData().clocks.get(clock.id());
 
-		for (var clock : Clock.REGISTRY) {
-			if (clock.screen().isPresent()) {
-				var screen = clock.screen().get();
-				var value = mc.player.vl$sessionData().clocks.get(clock.id());
+					if (value != null && screen.visible().test(mc.player)) {
+						var string = screen.format().formatted(value.second() / 60, value.second() % 60);
+						var color = screen.color().lerp(switch (value.type()) {
+							case FINISHED -> 1F;
+							case FLASH -> 0.65F + Mth.cos((mc.player.vl$sessionData().tick) * 0.85F) * 0.35F;
+							default -> 0F;
+						}, Clock.RED);
 
-				if (value != null && screen.visible().test(mc.player)) {
-					var string = screen.format().formatted(value.second() / 60, value.second() % 60);
-					var color = screen.color().lerp(switch (value.type()) {
-						case FINISHED -> 1F;
-						case FLASH -> 0.65F + Mth.cos((mc.player.vl$sessionData().tick) * 0.85F) * 0.35F;
-						default -> 0F;
-					}, Clock.RED);
-
-					ScreenText.CLIENT_TICK.get(screen.location()).add(Component.literal(string).withStyle(Style.EMPTY.withColor(color.rgb())));
+						ScreenText.CLIENT_TICK.get(screen.location()).add(Component.literal(string).withStyle(Style.EMPTY.withColor(color.rgb())));
+					}
 				}
 			}
-		}
 
-		mc.vl$preTick(mc.getPauseType());
+			mc.vl$preTick(mc.getPauseType());
+		}
 
 		VidLibKeys.handle(mc);
 	}
@@ -158,6 +158,21 @@ public class GameClientEventHandler {
 			}
 
 			MiscClientUtils.CLIENT_CLOSEABLE.clear();
+		}
+	}
+
+	@SubscribeEvent
+	public static void keyInput(InputEvent.Key event) {
+		if (event.getAction() == GLFW.GLFW_PRESS && VidLibKeys.adminPanelKeyMapping.matches(event.getKey(), event.getScanCode()) && VidLibKeys.adminPanelKeyMapping.getKeyModifier().isActive(KeyConflictContext.UNIVERSAL)) {
+			var mc = Minecraft.getInstance();
+			boolean adminPanel = !VidLibClientOptions.getAdminPanel();
+			VidLibClientOptions.ADMIN_PANEL.set(adminPanel);
+
+			if (mc.player != null && mc.player.isReplayCamera()) {
+				mc.options.hideGui = adminPanel;
+			}
+
+			mc.options.save();
 		}
 	}
 
@@ -207,13 +222,13 @@ public class GameClientEventHandler {
 				}
 			}
 		} else if (frame.layer() == TerrainRenderLayer.PARTICLE) {
-			if (mc.player.getShowZones()) {
+			if (VidLibClientOptions.getShowZones()) {
 				ZoneRenderer.renderAll(frame);
 			} else {
 				ZoneRenderer.renderSolid(frame);
 			}
 
-			if (mc.player.getShowAnchor()) {
+			if (VidLibClientOptions.getShowAnchor()) {
 				var areas = mc.getAnchor().shapes().get(mc.level.dimension());
 
 				if (areas != null && !areas.isEmpty()) {
@@ -287,7 +302,7 @@ public class GameClientEventHandler {
 				}
 			}
 
-			if (!mc.player.getShowZones()) {
+			if (!VidLibClientOptions.getShowZones()) {
 				ZoneRenderer.renderVisible(frame);
 			}
 
@@ -299,13 +314,11 @@ public class GameClientEventHandler {
 	public static void renderHUD(RenderGuiEvent.Post event) {
 		var mc = Minecraft.getInstance();
 
-		if (mc.level == null || mc.player == null) {
-			return;
+		if (mc.level != null && mc.player != null) {
+			renderHUD0(mc, event);
 		}
 
-		renderHUD0(mc, event);
 		ScreenText.RENDER.clear();
-		BuiltInImGui.handle(mc);
 	}
 
 	public static void renderHUD0(Minecraft mc, RenderGuiEvent.Post event) {
@@ -330,7 +343,7 @@ public class GameClientEventHandler {
 			}
 		}
 
-		if (mc.player.getShowFPS()) {
+		if (VidLibClientOptions.getShowFPS()) {
 			ScreenText.RENDER.topRight.add(mc.fpsString.split(" ", 2)[0] + " FPS");
 		}
 
@@ -361,7 +374,7 @@ public class GameClientEventHandler {
 					}
 				}
 
-				if (!session.zonesTagsIn.isEmpty() && mc.player.getShowZones()) {
+				if (!session.zonesTagsIn.isEmpty() && VidLibClientOptions.getShowZones()) {
 					ScreenText.RENDER.topRight.add("Zones in:");
 
 					for (var tag : session.zonesTagsIn) {

@@ -11,7 +11,6 @@ import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImString;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundEvent;
@@ -66,11 +65,11 @@ public class SoundEventImBuilder implements ImBuilder<Holder<SoundEvent>> {
 			ImGui.openPopup("###sound-modal");
 		}
 
-		update = update.or(soundModal(sound));
+		update = update.or(soundModal(graphics, sound));
 		return update;
 	}
 
-	public static ImUpdate soundModal(@Nullable Holder<SoundEvent>[] sound) {
+	public static ImUpdate soundModal(ImGraphics graphics, @Nullable Holder<SoundEvent>[] sound) {
 		var update = ImUpdate.NONE;
 		var viewport = ImGui.getMainViewport();
 		ImGui.setNextWindowSizeConstraints(700F, 500F, viewport.getWorkSizeX(), viewport.getWorkSizeY());
@@ -85,7 +84,7 @@ public class SoundEventImBuilder implements ImBuilder<Holder<SoundEvent>> {
 			ImGui.nextColumn();
 
 			if (ImGui.button(ImIcons.STOP + "###stop-all-sounds")) {
-				Minecraft.getInstance().getSoundManager().stop();
+				graphics.mc.getSoundManager().stop();
 			}
 
 			if (ImGui.isItemHovered()) {
@@ -126,7 +125,7 @@ public class SoundEventImBuilder implements ImBuilder<Holder<SoundEvent>> {
 					}
 
 					if (ImGui.smallButton(ImIcons.PLAY + "###preview" + i)) {
-						Minecraft.getInstance().playGlobalSound(new SoundData(option, SoundSource.MASTER, PREVIEW_VOLUME.get(), PREVIEW_PITCH.get()));
+						graphics.mc.playGlobalSound(new SoundData(option, SoundSource.MASTER, PREVIEW_VOLUME.get(), PREVIEW_PITCH.get()));
 					}
 
 					ImGui.sameLine();

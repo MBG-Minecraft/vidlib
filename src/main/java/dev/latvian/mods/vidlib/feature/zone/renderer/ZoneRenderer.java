@@ -11,6 +11,7 @@ import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.core.VLBlockInWorld;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
+import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.visual.TexturedCubeRenderer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
@@ -57,7 +58,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 		var mc = frame.mc();
 		var ms = frame.poseStack();
 		var cameraPos = frame.camera().getPosition();
-		var renderType = mc.player.getZoneRenderType();
+		var renderType = VidLibClientOptions.getZoneRenderType();
 		var buffers = frame.buffers();
 		var session = frame.session();
 		var clip = session.zoneClip;
@@ -103,7 +104,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 									session.cachedZoneShapes.put(instance.zone.shape(), voxelShape);
 
 									Thread.startVirtualThread(() -> {
-										var filter = mc.player.getZoneBlockFilter();
+										var filter = VidLibClientOptions.getZoneBlockFilter();
 
 										session.cachedZoneShapes.put(instance.zone.shape(), VoxelShapeBox.of(instance.zone.shape().createBlockRenderingShape(pos -> {
 											var state = mc.level.getBlockState(pos);
