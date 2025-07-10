@@ -31,25 +31,37 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 		}
 	}
 
-	private final List<CachedBuilder<T>> options;
+	private final ImBuilderHolderList<T> originalOptions;
+	private List<CachedBuilder<T>> options;
 	private final CachedBuilder<T>[] selectedBuilder;
 	public boolean deleted = false;
 
 	public ImBuilderWrapper(ImBuilderHolderList<T> options) {
-		this.options = new ArrayList<>(options.list().size());
+		this.originalOptions = options;
 		this.selectedBuilder = new CachedBuilder[1];
+	}
 
-		for (int i = 0; i < options.list().size(); i++) {
-			var option = new CachedBuilder<>(options.list().get(i));
-			this.options.add(option);
+	private List<CachedBuilder<T>> getOptions() {
+		if (options == null) {
+			options = new ArrayList<>(originalOptions.list().size());
+			selectedBuilder[0] = null;
 
-			if (option.holder.isDefault()) {
-				this.selectedBuilder[0] = option;
+			for (var originalOption : originalOptions.list()) {
+				var option = new CachedBuilder<>(originalOption);
+				options.add(option);
+
+				if (option.holder.isDefault()) {
+					selectedBuilder[0] = option;
+				}
 			}
 		}
+
+		return options;
 	}
 
 	public boolean selectUnit(T value) {
+		options = getOptions();
+
 		for (var option : options) {
 			if (option.get() instanceof ImBuilder.Unit<?> unit && unit.value() == value) {
 				selectedBuilder[0] = option;
@@ -66,19 +78,24 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 			return;
 		}
 
-		var builder = selectedBuilder[0].get();
+		var builder = getBuilder();
 
 		if (builder != null) {
 			builder.set(Cast.to(value));
 		}
 	}
 
+	public ImBuilder<? extends T> getBuilder() {
+		return selectedBuilder[0] == null ? null : selectedBuilder[0].get();
+	}
+
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
 		deleted = false;
-		// selectedBuilder[0] = null;
+		options = getOptions();
+
 		var update = graphics.combo("###select-builder", "Select...", selectedBuilder, options);
-		var builder = selectedBuilder[0] == null ? null : selectedBuilder[0].get();
+		var builder = getBuilder();
 
 		if (builder == null) {
 			return ImUpdate.NONE;
@@ -92,14 +109,14 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 
 	@Override
 	public boolean isValid() {
-		var builder = selectedBuilder[0] == null ? null : selectedBuilder[0].get();
+		var builder = getBuilder();
 		return builder != null && builder.isValid();
 	}
 
 	@Override
 	@Nullable
 	public T build() {
-		var builder = selectedBuilder[0] == null ? null : selectedBuilder[0].get();
+		var builder = getBuilder();
 		return builder == null ? null : builder.build();
 	}
 }
