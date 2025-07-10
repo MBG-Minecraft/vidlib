@@ -12,6 +12,7 @@ public class MemoryUsagePanel extends AdminPanel {
 
 	private MemoryUsagePanel() {
 		super("memory-usage", "Memory Usage");
+		this.style = AdminPanelStyle.MINIMAL;
 	}
 
 	@Override

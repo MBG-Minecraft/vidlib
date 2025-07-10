@@ -18,6 +18,7 @@ public class StopwatchPanel extends AdminPanel {
 	public StopwatchPanel(String id, boolean ephemeral) {
 		super(id, "Stopwatch");
 		this.ephemeral = ephemeral;
+		this.style = AdminPanelStyle.MINIMAL;
 	}
 
 	@Override
@@ -29,13 +30,14 @@ public class StopwatchPanel extends AdminPanel {
 			sw += now - stopwatchStart;
 		}
 
-		// ImGui.pushFont(ImFonts.getCousine25());
-		ImGui.text("%02d:%02d:%03d".formatted(sw / 60000L, (sw / 1000L) % 60, sw % 1000L));
-		// ImGui.popFont();
+		if (ImGui.smallButton(ImIcons.RELOAD.toString())) {
+			stopwatch = 0L;
+			stopwatchStart = stopwatchStart == 0L ? 0L : now;
+		}
 
-		ImGui.button(stopwatchStart == 0 ? "Start" : "Stop");
+		ImGui.sameLine();
 
-		if (ImGui.isItemClicked()) {
+		if (ImGui.smallButton(stopwatchStart == 0 ? ImIcons.PLAY.toString() : ImIcons.PAUSE.toString())) {
 			if (stopwatchStart == 0L) {
 				stopwatchStart = now;
 			} else {
@@ -44,9 +46,16 @@ public class StopwatchPanel extends AdminPanel {
 			}
 		}
 
-		if (ImGui.button("Reset")) {
-			stopwatch = 0L;
-			stopwatchStart = stopwatchStart == 0L ? 0L : now;
+		ImGui.sameLine();
+
+		ImGui.text("%02d:%02d:%03d".formatted(sw / 60000L, (sw / 1000L) % 60, sw % 1000L));
+
+		if (this != INSTANCE) {
+			ImGui.sameLine();
+
+			if (ImGui.smallButton(ImIcons.CLOSE.toString())) {
+				close();
+			}
 		}
 	}
 }

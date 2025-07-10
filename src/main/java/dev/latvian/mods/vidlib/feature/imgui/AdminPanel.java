@@ -10,6 +10,8 @@ public class AdminPanel {
 	public boolean ephemeral;
 	public boolean menuBar;
 	boolean isOpen;
+	private ImWindowType windowType;
+	public AdminPanelStyle style;
 
 	public AdminPanel(String id, String label) {
 		this.id = id;
@@ -18,12 +20,14 @@ public class AdminPanel {
 		this.ephemeral = false;
 		this.menuBar = false;
 		this.isOpen = false;
+		this.windowType = ImWindowType.FLOATING;
+		this.style = AdminPanelStyle.NORMAL;
 	}
 
 	public final void open() {
 		if (!isOpen) {
 			isOpen = true;
-			BuiltInImGui.OPEN_TABS.add(this);
+			BuiltInImGui.OPEN_PANELS.add(this);
 			onOpened();
 		}
 	}
@@ -36,6 +40,10 @@ public class AdminPanel {
 
 	public final boolean isOpen() {
 		return isOpen;
+	}
+
+	public final ImWindowType getWindowType() {
+		return windowType;
 	}
 
 	public void onOpened() {
@@ -70,6 +78,16 @@ public class AdminPanel {
 		int flags = setup(graphics);
 		ImGuiUtils.BOOLEAN.set(true);
 
+		if (style != AdminPanelStyle.NORMAL && windowType != ImWindowType.DOCKED) {
+			flags |= ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize;
+
+			if (windowType == ImWindowType.ATTACHED && style == AdminPanelStyle.GLASS) {
+				flags |= ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration;
+			}
+
+			ImGui.setNextWindowSizeConstraints(0F, 0F, 600F, graphics.mc.getWindow().getHeight() - 80F);
+		}
+
 		if (canBeClosed ? ImGui.begin(label + "###" + id, ImGuiUtils.BOOLEAN, flags) : ImGui.begin(label + "###" + id, flags)) {
 			boolean shouldClose = !ImGuiUtils.BOOLEAN.get();
 
@@ -85,7 +103,21 @@ public class AdminPanel {
 		}
 
 		postContent(graphics);
+
+		// check window type - floating, docked, or attached
+
+		if (ImGui.getWindowViewport() == null) {
+			windowType = ImWindowType.FLOATING;
+		} else if (ImGui.getWindowViewport().getPlatformHandle() != graphics.mc.getWindow().getWindow()) {
+			windowType = ImWindowType.FLOATING;
+		} else if (ImGui.isWindowDocked()) {
+			windowType = ImWindowType.DOCKED;
+		} else {
+			windowType = ImWindowType.ATTACHED;
+		}
+
 		ImGui.end();
+
 		return !isOpen;
 	}
 

@@ -5,7 +5,9 @@ import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImBoolean;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcut, int flags, @Nullable OnClick onClick, @Nullable Function<ImGraphics, List<MenuItem>> subItems) {
@@ -66,7 +68,15 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 		return new MenuItem(icon, ImText.of(label), ImText.EMPTY, null, FLAG_MENU, null, subItems);
 	}
 
-	public static MenuItem root(Function<ImGraphics, List<MenuItem>> subItems) {
+	public static MenuItem menu(ImIcon icon, String label, BiConsumer<ImGraphics, List<MenuItem>> subItems) {
+		return new MenuItem(icon, ImText.of(label), ImText.EMPTY, null, FLAG_MENU, null, graphics -> {
+			var list = new ArrayList<MenuItem>();
+			subItems.accept(graphics, list);
+			return list;
+		});
+	}
+
+	public static MenuItem root(BiConsumer<ImGraphics, List<MenuItem>> subItems) {
 		return menu(ImIcon.NONE, "Root", subItems);
 	}
 

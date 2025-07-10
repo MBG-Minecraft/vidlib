@@ -14,14 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BuiltInImGui {
-	public static final List<AdminPanel> OPEN_TABS = new ArrayList<>();
+	public static final List<AdminPanel> OPEN_PANELS = new ArrayList<>();
 	public static boolean mainMenuOpen = true;
 	public static final ImBoolean SHOW_STACK_TOOL = new ImBoolean(false);
 	public static final ImBoolean SHOW_STYLE_EDITOR_TOOL = new ImBoolean(false);
 	public static Boolean showSounds = null;
 
-	public static final MenuItem OPEN = MenuItem.menu(ImIcons.OPEN, "Open", graphics -> {
-		var list = new ArrayList<MenuItem>();
+	public static final MenuItem OPEN = MenuItem.menu(ImIcons.OPEN, "Open", (graphics, list) -> {
 		list.add(MenuItem.item(ImIcons.MEMORY, "Memory Usage", MemoryUsagePanel.INSTANCE));
 		list.add(MenuItem.item(ImIcons.CODE, "Command History", CommandHistoryPanel.INSTANCE));
 		list.add(MenuItem.item(ImIcons.TIMELAPSE, "Stopwatch", StopwatchPanel.INSTANCE));
@@ -37,24 +36,17 @@ public class BuiltInImGui {
 		list.add(MenuItem.item(ImIcons.EDIT, "Style Editor Tool", SHOW_STYLE_EDITOR_TOOL));
 
 		list.add(MenuItem.item(ImIcons.PLAY, "Sounds", BuiltInImGui.showSounds != null, g -> BuiltInImGui.showSounds = false));
-
-		return list;
 	});
 
-	public static final MenuItem CONFIG = MenuItem.menu(ImIcons.SETTINGS, "Config", graphics -> {
-		var list = new ArrayList<MenuItem>();
-
+	public static final MenuItem CONFIG = MenuItem.menu(ImIcons.SETTINGS, "Config", (graphics, list) -> {
 		if (graphics.inGame) {
 			list.add(Skybox.MENU_ITEM);
 		}
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.ConfigDropdown(graphics, list));
-		return list;
 	});
 
-	public static final MenuItem DEBUG = MenuItem.menu(ImIcons.BUG, "Debug", graphics -> {
-		var list = new ArrayList<MenuItem>();
-
+	public static final MenuItem DEBUG = MenuItem.menu(ImIcons.BUG, "Debug", (graphics, list) -> {
 		list.add(MenuItem.item(ImIcons.RELOAD, "Reload Assets", g -> g.mc.reloadResourcePacks()));
 		list.add(MenuItem.item(ImIcons.RELOAD, "Reload Data", g -> g.mc.runClientCommand("reload")).enabled(graphics.isAdmin));
 
@@ -71,50 +63,48 @@ public class BuiltInImGui {
 		list.add(MenuItem.item(ImIcons.STOP, "Stop all Sounds", g -> g.mc.getSoundManager().stop()));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.DebugDropdown(graphics, list));
-		return list;
 	});
 
-	public static final MenuItem SHOW = MenuItem.menu(ImIcons.VISIBLE, "Show", graphics -> {
-		var list = new ArrayList<MenuItem>();
-
+	public static final MenuItem SHOW = MenuItem.menu(ImIcons.VISIBLE, "Show", (graphics, list) -> {
 		list.add(MenuItem.item(ImIcons.SELECT, "Entity Hitboxes", graphics.mc.getEntityRenderDispatcher().shouldRenderHitBoxes(), g -> g.mc.getEntityRenderDispatcher().setRenderHitBoxes(!g.mc.getEntityRenderDispatcher().shouldRenderHitBoxes())).enabled(graphics.inGame));
 
 		list.add(MenuItem.item(ImIcons.SELECT, "Chunk Borders", graphics.mc.debugRenderer.renderChunkborder, g -> g.mc.debugRenderer.switchRenderChunkborder()).enabled(graphics.inGame));
 		list.add(MenuItem.item(ImIcons.SELECT, "Octree", graphics.mc.debugRenderer.renderOctree, g -> g.mc.debugRenderer.toggleRenderOctree()).enabled(graphics.inGame));
+		list.add(MenuItem.item(ImIcons.SELECT, "Section Path", graphics.mc.sectionPath, g -> g.mc.sectionPath = !g.mc.sectionPath).enabled(graphics.inGame));
+		list.add(MenuItem.item(ImIcons.SELECT, "Section Visibility", graphics.mc.sectionVisibility, g -> g.mc.sectionVisibility = !g.mc.sectionVisibility).enabled(graphics.inGame));
+
+		list.add(MenuItem.SEPARATOR);
 
 		list.add(MenuItem.item(ImIcons.FULLSCREEN, "Zones", VidLibClientOptions.getShowZones(), g -> {
 			VidLibClientOptions.SHOW_ZONES.set(!VidLibClientOptions.getShowZones());
 			g.mc.options.save();
 		}).enabled(graphics.isAdmin));
 
-		list.add(MenuItem.item(ImIcons.FULLSCREEN, "Anchor", VidLibClientOptions.getShowAnchor(), g -> {
+		list.add(MenuItem.item(ImIcons.ANCHOR, "Anchor", VidLibClientOptions.getShowAnchor(), g -> {
 			VidLibClientOptions.SHOW_ANCHOR.set(!VidLibClientOptions.getShowAnchor());
 			g.mc.options.save();
 		}).enabled(graphics.isAdmin));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.ShowDropdown(graphics, list));
-		return list;
 	}).remainOpen();
 
-	public static final MenuItem WARP = MenuItem.menu(ImIcons.LOCATION, "Warp", graphics -> {
-		var list = new ArrayList<MenuItem>();
+	public static final MenuItem WARP = MenuItem.menu(ImIcons.LOCATION, "Warp", (graphics, list) -> {
+		if (graphics.inGame) {
+			list.add(MenuItem.menu(ImIcons.WORLD, "Dimension", (g1, list1) -> {
+				var registry = g1.mc.player.connection.levels();
 
-		if (graphics.isAdmin) {
-			var registry = graphics.mc.player.connection.levels();
-
-			for (var dimension : registry) {
-				list.add(MenuItem.item(dimension.location().toString(), g -> g.mc.runClientCommand("execute in " + dimension.location() + " run tp @s ~ ~ ~")).disabled(graphics.isReplay));
-			}
+				for (var dimension : registry) {
+					list1.add(MenuItem.item(dimension.location().toString(), g -> g.mc.runClientCommand("execute in " + dimension.location() + " run tp @s ~ ~ ~")).disabled(graphics.isReplay));
+				}
+			}).enabled(graphics.isAdmin));
 		}
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.WarpDropdown(graphics, list));
-		return list;
 	});
 
 	public static final MenuItem TICK_FROZEN = MenuItem.text(ImIcons.FREEZE, ImText.info("Tick Frozen"));
 
-	public static final MenuItem MAIN_MENU_BAR = MenuItem.root(graphics -> {
-		var list = new ArrayList<MenuItem>();
+	public static final MenuItem MAIN_MENU_BAR = MenuItem.root((graphics, list) -> {
 		list.add(OPEN);
 		list.add(CONFIG);
 		list.add(DEBUG);
@@ -126,8 +116,6 @@ public class BuiltInImGui {
 		if (!graphics.isReplay && graphics.inGame && graphics.mc.level.tickRateManager().isFrozen()) {
 			list.add(TICK_FROZEN);
 		}
-
-		return list;
 	});
 
 	public static void handle(Minecraft mc) {
@@ -173,6 +161,6 @@ public class BuiltInImGui {
 			MAIN_MENU_BAR.buildRoot(graphics, true);
 		}
 
-		OPEN_TABS.removeIf(panel -> panel.handle(graphics));
+		OPEN_PANELS.removeIf(panel -> panel.handle(graphics));
 	}
 }

@@ -400,19 +400,21 @@ public class WidgetDebugPanel extends AdminPanel {
 		if (ImGui.beginPopupModal("Node Editor###widget-debug-node-modal", new ImBoolean(true), ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.MenuBar)) {
 			graphics.hideMainMenuBar();
 
-			MenuItem.root(g -> List.of(
-				MenuItem.menu(ImIcons.ADD, "Add", g1 -> List.of(
+			MenuItem.root((g, list) -> {
+				list.add(MenuItem.menu(ImIcons.ADD, "Add", g1 -> List.of(
 					MenuItem.item("Number", g2 -> {
 					})
-				)),
-				MenuItem.menu(ImIcons.EDIT, "Edit", g1 -> List.of(
+				)));
+
+				list.add(MenuItem.menu(ImIcons.EDIT, "Edit", g1 -> List.of(
 					MenuItem.item(ImIcons.DELETE, "Delete", g2 -> {
 					}),
 					MenuItem.item(ImIcons.DELETE, "Delete All", g2 -> {
 					})
-				)),
-				MenuItem.text(ImIcons.WARNING, "").withTooltip(ImText.error("Root node missing!"))
-			)).buildRoot(graphics, false);
+				)));
+
+				list.add(MenuItem.text(ImIcons.WARNING, "").withTooltip(ImText.error("Root node missing!")));
+			}).buildRoot(graphics, false);
 
 			ImNodes.beginNodeEditor();
 

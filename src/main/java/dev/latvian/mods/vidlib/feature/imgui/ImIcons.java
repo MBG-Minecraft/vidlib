@@ -77,6 +77,7 @@ public enum ImIcons implements ImIcon {
 	FOLDER('\ue2c7'),
 	STORAGE('\ue1db'),
 	DATABASE('\uf20e'),
+	ANCHOR('\uf1cd'),
 
 	;
 
