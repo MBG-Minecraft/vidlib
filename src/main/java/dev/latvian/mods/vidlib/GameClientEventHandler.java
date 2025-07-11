@@ -196,9 +196,7 @@ public class GameClientEventHandler {
 		var ms = frame.poseStack();
 		float delta = frame.worldDelta();
 
-		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS) {
-			Bloom.CANVAS.copyDepthFrom(mc.getMainRenderTarget());
-		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
+		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
 			Canvas.MAIN_BEFORE_PARTICLES.copyColorFrom(mc.getMainRenderTarget());
 			Canvas.MAIN_BEFORE_PARTICLES.copyDepthFrom(mc.getMainRenderTarget());
 			BossRendering.render(frame);
@@ -298,7 +296,7 @@ public class GameClientEventHandler {
 				var visuals = tool.getSecond().visuals(mc.player, tool.getFirst(), frame.screenDelta());
 
 				for (var cube : visuals.texturedCubes()) {
-					TexturedCubeRenderer.render(frame, LightUV.BRIGHT, cube, Color.WHITE);
+					TexturedCubeRenderer.render(frame, LightUV.FULLBRIGHT, cube, Color.WHITE);
 				}
 			}
 
@@ -307,6 +305,10 @@ public class GameClientEventHandler {
 			}
 
 			PhysicsParticleManager.render(frame);
+		}
+
+		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS) {
+			Bloom.CANVAS.copyDepthFrom(mc.getMainRenderTarget());
 		}
 	}
 

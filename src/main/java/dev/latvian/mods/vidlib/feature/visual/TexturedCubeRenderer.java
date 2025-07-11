@@ -27,7 +27,7 @@ public class TexturedCubeRenderer {
 		var msp = ms.last();
 		var m = msp.pose();
 		var buffers = frame.buffers();
-		var n = frame.normal();
+		var n = frame.tempNormal();
 
 		var lu = light.u();
 		var lv = light.v();

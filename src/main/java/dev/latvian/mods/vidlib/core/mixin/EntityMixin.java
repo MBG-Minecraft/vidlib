@@ -30,7 +30,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -50,22 +49,16 @@ public abstract class EntityMixin implements VLEntity {
 
 	@ModifyReturnValue(method = "collectColliders", at = @At("RETURN"))
 	private static List<VoxelShape> vl$collectColliders(List<VoxelShape> parent, @Local(argsOnly = true) Level level, @Local(argsOnly = true) @Nullable Entity entity, @Local(argsOnly = true) AABB collisionBox) {
-		var zones = level.vl$getActiveZones();
+		var list = level.vl$getShapesIntersecting(entity, collisionBox);
 
-		if (zones != null) {
-			var list = zones.getShapesIntersecting(entity, collisionBox);
-
-			if (parent.isEmpty()) {
-				return list;
-			} else if (!list.isEmpty()) {
-				var list2 = new ArrayList<VoxelShape>(parent.size() + list.size());
-				list2.addAll(parent);
-				list2.addAll(list);
-				return list2;
-			}
+		if (parent.isEmpty()) {
+			return list;
+		} else if (!list.isEmpty()) {
+			list.addAll(0, parent);
+			return list;
+		} else {
+			return parent;
 		}
-
-		return parent;
 	}
 
 	@Unique

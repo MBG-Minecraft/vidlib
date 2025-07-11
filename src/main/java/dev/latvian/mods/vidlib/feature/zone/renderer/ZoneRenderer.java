@@ -137,7 +137,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 			}
 
 			for (var cube : sz.cachedCubes().getOrDefault(frame.layer(), List.of())) {
-				TexturedCubeRenderer.render(frame, LightUV.BRIGHT, cube, Color.WHITE);
+				TexturedCubeRenderer.render(frame, LightUV.FULLBRIGHT, cube, Color.WHITE);
 			}
 		}
 	}

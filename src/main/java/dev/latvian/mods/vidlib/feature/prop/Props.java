@@ -64,7 +64,9 @@ public abstract class Props<L extends Level> {
 			onCreated.accept(prop);
 
 			if (validate && (ops == null || initialData == null)) {
-				for (var p : prop.type.data().values()) {
+				for (var entry : prop.type.data()) {
+					var p = entry.data();
+
 					if (p.isRequired() && p.get(Cast.to(prop)) == null) {
 						return DataResult.error(() -> "Missing required data key '" + p.key() + "'");
 					}

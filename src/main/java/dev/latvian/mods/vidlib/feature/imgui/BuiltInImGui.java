@@ -26,16 +26,18 @@ public class BuiltInImGui {
 		list.add(MenuItem.item(ImIcons.TIMELAPSE, "Stopwatch", StopwatchPanel.INSTANCE));
 		list.add(MenuItem.item(ImIcons.TIMELAPSE, "New Stopwatch", g -> StopwatchPanel.openNew()));
 		list.add(MenuItem.menu(ImIcons.APERTURE, "Canvas", CanvasPanel::menu));
+		list.add(MenuItem.item(ImIcons.PLAY, "Sounds", BuiltInImGui.showSounds != null, g -> BuiltInImGui.showSounds = false));
+		list.add(MenuItem.SEPARATOR);
 		list.add(MenuItem.item(ImIcons.CAMERA, "Cutscene Builder", CutsceneBuilderPanel.INSTANCE).enabled(graphics.inGame));
+		list.add(MenuItem.item(ImIcons.SEARCH, "Entity Explorer", EntityExplorerPanel.INSTANCE).enabled(graphics.inGame));
+		list.add(MenuItem.item(ImIcons.SEARCH, "Prop Explorer", PropExplorerPanel.INSTANCE).enabled(graphics.inGame));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.OpenDropdown(graphics, list));
 
+		list.add(MenuItem.SEPARATOR);
 		list.add(MenuItem.item(ImIcons.FRAMED_CUBE, "Debug Widgets", WidgetDebugPanel.INSTANCE));
-
 		list.add(MenuItem.item(ImIcons.MEMORY, "ID Stack Tool", SHOW_STACK_TOOL));
 		list.add(MenuItem.item(ImIcons.EDIT, "Style Editor Tool", SHOW_STYLE_EDITOR_TOOL));
-
-		list.add(MenuItem.item(ImIcons.PLAY, "Sounds", BuiltInImGui.showSounds != null, g -> BuiltInImGui.showSounds = false));
 	});
 
 	public static final MenuItem CONFIG = MenuItem.menu(ImIcons.SETTINGS, "Config", (graphics, list) -> {

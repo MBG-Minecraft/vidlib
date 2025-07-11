@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.core;
 import com.google.gson.JsonElement;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.serialization.JsonOps;
+import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.klib.util.IntOrUUID;
 import dev.latvian.mods.vidlib.feature.block.ConnectedBlock;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
@@ -33,12 +34,15 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -333,5 +337,81 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 
 	default TagParser<Tag> nbtParser() {
 		return TagParser.create(nbtOps());
+	}
+
+	default boolean vl$intersectsSolid(@Nullable Entity entity, AABB collisionBox) {
+		var props = getProps();
+
+		if (props.levelProps.intersectsSolid(entity, collisionBox) || props.dataProps.intersectsSolid(entity, collisionBox)) {
+			return true;
+		}
+
+		var zones = vl$getActiveZones();
+
+		return zones != null && zones.intersectsSolid(entity, collisionBox);
+	}
+
+	default List<VoxelShape> vl$getShapesIntersecting(@Nullable Entity entity, AABB collisionBox) {
+		var props = getProps();
+		var shapes = List.<VoxelShape>of();
+
+		for (var propList : props.propLists.values()) {
+			var intersecting = propList.getShapesIntersecting(entity, collisionBox);
+
+			if (!intersecting.isEmpty()) {
+				if (shapes.isEmpty()) {
+					shapes = new ArrayList<>(intersecting.size());
+				}
+
+				shapes.addAll(intersecting);
+			}
+		}
+
+		var zones = vl$getActiveZones();
+
+		if (zones != null) {
+			var list = zones.getShapesIntersecting(entity, collisionBox);
+
+			if (!list.isEmpty()) {
+				if (shapes.isEmpty()) {
+					shapes = new ArrayList<>(list.size());
+				}
+
+				shapes.addAll(list);
+			}
+		}
+
+		return shapes;
+	}
+
+	default BlockHitResult vl$clip(BlockHitResult result, ClipContext ctx) {
+		var props = getProps();
+		var ray = new Line(ctx.getFrom(), ctx.getTo());
+
+		for (var propList : props.propLists.values()) {
+			var propClip = propList.clip(ray, ctx);
+
+			if (propClip != null) {
+				if (result == null || propClip.getLocation().distanceToSqr(ctx.getFrom()) < result.getLocation().distanceToSqr(ctx.getFrom())) {
+					result = propClip;
+				}
+			}
+		}
+
+		var zones = vl$getActiveZones();
+
+		if (zones != null) {
+			var zoneClip = zones.clipLevel(ray);
+
+			if (zoneClip != null && zoneClip.distanceSq() < result.getLocation().distanceToSqr(ctx.getFrom())) {
+				var r = zoneClip.asBlockHitResult();
+
+				if (r != null) {
+					result = r;
+				}
+			}
+		}
+
+		return result;
 	}
 }

@@ -207,12 +207,16 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 			return List.of();
 		}
 
-		var shapes = new ArrayList<VoxelShape>(0);
+		var shapes = List.<VoxelShape>of();
 
 		for (var sz : solidZones) {
 			if (sz.instance().zone.solid().test(entity)) {
 				for (var box : sz.shapeBox().boxes()) {
 					if (box.intersects(collisionBox)) {
+						if (shapes.isEmpty()) {
+							shapes = new ArrayList<>();
+						}
+
 						shapes.add(sz.shape());
 						break;
 					}

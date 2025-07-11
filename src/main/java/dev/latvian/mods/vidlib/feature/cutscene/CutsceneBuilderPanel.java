@@ -22,6 +22,11 @@ public class CutsceneBuilderPanel extends AdminPanel {
 
 	@Override
 	public void content(ImGraphics graphics) {
+		if (!graphics.inGame) {
+			close();
+			return;
+		}
+
 		if (ImGui.beginTabBar("###tabs", ImGuiTabBarFlags.AutoSelectNewTabs | ImGuiTabBarFlags.FittingPolicyScroll)) {
 			for (int i = 0; i < cutscenes.size(); i++) {
 				if (ImGui.beginTabItem("Cutscene #" + (i + 1) + "###" + i)) {

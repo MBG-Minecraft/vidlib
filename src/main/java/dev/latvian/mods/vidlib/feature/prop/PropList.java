@@ -1,10 +1,15 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
+import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,6 +27,8 @@ public class PropList implements Iterable<Prop> {
 	private final Int2ObjectMap<Prop> map;
 	public final List<Prop> pending;
 	public final Map<PropRemoveType, IntList> removed;
+	public final List<Prop> collidingProps;
+	public final List<Prop> interactableProps;
 
 	public PropList(Props<?> props, PropListType type) {
 		this.props = props;
@@ -29,6 +36,8 @@ public class PropList implements Iterable<Prop> {
 		this.map = new Int2ObjectLinkedOpenHashMap<>();
 		this.pending = new ArrayList<>();
 		this.removed = new EnumMap<>(PropRemoveType.class);
+		this.collidingProps = new ArrayList<>(0);
+		this.interactableProps = new ArrayList<>(0);
 
 		for (var removeType : PropRemoveType.values()) {
 			removed.put(removeType, new IntArrayList());
@@ -41,12 +50,23 @@ public class PropList implements Iterable<Prop> {
 			props.onRemoved(prop);
 			removed.get(prop.removed).add(prop.id);
 			return true;
+		} else {
+			if (prop.canCollide) {
+				collidingProps.add(prop);
+			}
+
+			if (prop.canInteract) {
+				interactableProps.add(prop);
+			}
 		}
 
 		return false;
 	}
 
 	public void tick(@Nullable S2CPacketBundleBuilder updates) {
+		collidingProps.clear();
+		interactableProps.clear();
+
 		if (!map.isEmpty()) {
 			map.values().removeIf(this::fullTick);
 		}
@@ -92,8 +112,8 @@ public class PropList implements Iterable<Prop> {
 				prop.snap();
 
 				if (updates != null) {
-					for (var data : prop.type.data().values()) {
-						prop.sync(data);
+					for (var entry : prop.type.data()) {
+						prop.sync(entry.data());
 					}
 
 					updates.s2c(prop.createAddPacket());
@@ -144,5 +164,60 @@ public class PropList implements Iterable<Prop> {
 
 	public int size() {
 		return map.size();
+	}
+
+	public boolean intersectsSolid(@Nullable Entity entity, AABB collisionBox) {
+		if (entity == null || collidingProps.isEmpty()) {
+			return false;
+		}
+
+		for (var prop : collidingProps) {
+			if (prop.isCollidingWith(entity, collisionBox)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public List<VoxelShape> getShapesIntersecting(@Nullable Entity entity, AABB collisionBox) {
+		if (collidingProps.isEmpty()) {
+			return List.of();
+		}
+
+		var shapes = List.<VoxelShape>of();
+
+		for (var prop : collidingProps) {
+			if (prop.isCollidingWith(entity, collisionBox)) {
+				if (shapes.isEmpty()) {
+					shapes = new ArrayList<>();
+				}
+
+				prop.addCollisionShapes(entity, shapes);
+			}
+		}
+
+		return shapes;
+	}
+
+	@Nullable
+	public PropHitResult clip(Line ray, ClipContext ctx) {
+		if (interactableProps.isEmpty()) {
+			return null;
+		}
+
+		PropHitResult result = null;
+
+		for (var prop : interactableProps) {
+			var hit = prop.clip(ray, ctx);
+
+			if (hit != null) {
+				if (result == null || hit.getLocation().distanceToSqr(ray.start()) < result.getLocation().distanceToSqr(ray.start())) {
+					result = hit;
+				}
+			}
+		}
+
+		return result;
 	}
 }

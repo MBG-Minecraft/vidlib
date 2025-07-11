@@ -12,15 +12,17 @@ import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import io.netty.buffer.ByteBuf;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Reference2IntMap;
-import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -28,14 +30,21 @@ import java.util.function.Predicate;
 public record PropType<P extends Prop>(
 	ResourceLocation id,
 	Factory<? extends P> factory,
-	Map<String, PropData<?, ?>> data,
-	Int2ObjectMap<PropData<?, ?>> idMap,
-	Reference2IntMap<PropData<?, ?>> reverseIdMap,
+	List<PropDataEntry> data,
+	Map<PropData<?, ?>, PropDataEntry> reverseData,
+	List<PropPacketEntry> packets,
+	Map<PropPacketType<?, ?>, PropPacketEntry> reversePackets,
 	String translationKey
-) implements PropDataProvider, Predicate<Prop> {
+) implements PropTypeInfo, Predicate<Prop> {
 	@FunctionalInterface
 	public interface Factory<P extends Prop> {
 		P create(PropContext<?> ctx);
+	}
+
+	public record PropDataEntry(int index, PropData<?, ?> data) {
+	}
+
+	public record PropPacketEntry(int index, PropPacketType<?, ?> packet) {
 	}
 
 	public static final Lazy<Map<ResourceLocation, PropType<?>>> ALL = Lazy.map(map -> {
@@ -46,28 +55,48 @@ public record PropType<P extends Prop>(
 		}
 	});
 
-	public static <P extends Prop> PropType<P> create(ResourceLocation id, Factory<? extends P> factory, PropDataProvider data) {
-		var map = Map.copyOf(data.data());
-		var sortedList = new ArrayList<PropData<?, ?>>();
+	public static <P extends Prop> PropType<P> create(ResourceLocation id, Factory<? extends P> factory, PropTypeInfo... info) {
+		var dataMap = new LinkedHashMap<String, PropData<?, ?>>();
+		var packetSet = new LinkedHashSet<PropPacketType<?, ?>>();
 
-		for (var d : map.values()) {
-			if (d.sync()) {
-				sortedList.add(d);
+		for (var data : info) {
+			if (data instanceof PropType<?> type) {
+				for (var entry : type.data) {
+					dataMap.put(entry.data.key(), entry.data);
+				}
+
+				for (var entry : type.packets) {
+					packetSet.add(entry.packet);
+				}
+			} else if (data instanceof PropData<?, ?> propData) {
+				dataMap.put(propData.key(), propData);
+			} else if (data instanceof PropPacketType<?, ?> packetType) {
+				packetSet.add(packetType);
 			}
 		}
 
-		sortedList.sort((a, b) -> a.key().compareToIgnoreCase(b.key()));
-		var reverseIdMap = new Reference2IntOpenHashMap<PropData<?, ?>>();
-		reverseIdMap.defaultReturnValue(-1);
-		var idMap = new Int2ObjectOpenHashMap<PropData<?, ?>>();
+		var sortedDataList = dataMap.values().stream().filter(PropData::sync).sorted(PropData.COMPARATOR).toList();
+		var sortedPacketList = List.copyOf(packetSet);
 
-		for (int i = 0; i < sortedList.size(); i++) {
-			var p = sortedList.get(i);
-			reverseIdMap.put(p, i);
-			idMap.put(i, p);
+		var data = new ArrayList<PropDataEntry>(sortedDataList.size());
+		var reverseData = new Reference2ObjectOpenHashMap<PropData<?, ?>, PropDataEntry>(sortedDataList.size());
+
+		var packets = new ArrayList<PropPacketEntry>(sortedPacketList.size());
+		var reversePackets = new Reference2ObjectOpenHashMap<PropPacketType<?, ?>, PropPacketEntry>(sortedPacketList.size());
+
+		for (int i = 0; i < sortedDataList.size(); i++) {
+			var p = new PropDataEntry(i, sortedDataList.get(i));
+			reverseData.put(p.data, p);
+			data.add(p);
 		}
 
-		return new PropType<>(id, factory, map, idMap, reverseIdMap, Util.makeDescriptionId("prop", id));
+		for (int i = 0; i < sortedPacketList.size(); i++) {
+			var p = new PropPacketEntry(i, sortedPacketList.get(i));
+			reversePackets.put(p.packet, p);
+			packets.add(p);
+		}
+
+		return new PropType<>(id, factory, List.copyOf(data), Collections.unmodifiableMap(reverseData), List.copyOf(packets), Collections.unmodifiableMap(reversePackets), Util.makeDescriptionId("prop", id));
 	}
 
 	public static final Codec<PropType<?>> CODEC = KLibCodecs.map(ALL, ID.CODEC, PropType::id);
@@ -80,7 +109,8 @@ public record PropType<P extends Prop>(
 	}
 
 	public <O> DataResult<P> load(P prop, DynamicOps<O> ops, O initialData, boolean validate) {
-		for (var p : data.values()) {
+		for (var entry : data) {
+			var p = entry.data();
 			var t = ops.get(initialData, p.key());
 
 			if (t.isSuccess()) {
@@ -97,5 +127,25 @@ public record PropType<P extends Prop>(
 		}
 
 		return DataResult.success(prop);
+	}
+
+	@Nullable
+	public PropDataEntry getData(int index) {
+		return index < 0 || index >= data.size() ? null : data.get(index);
+	}
+
+	public int getDataIndex(PropData<?, ?> data) {
+		var r = reverseData.get(data);
+		return r == null ? -1 : r.index;
+	}
+
+	@Nullable
+	public PropPacketEntry getPacket(int index) {
+		return index < 0 || index >= packets.size() ? null : packets.get(index);
+	}
+
+	public int getPacketIndex(PropPacketType<?, ?> packet) {
+		var r = reversePackets.get(packet);
+		return r == null ? -1 : r.index;
 	}
 }

@@ -5,21 +5,25 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.data.JOMLDataTypes;
 import dev.latvian.mods.klib.math.FrustumCheck;
+import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.math.Vec3f;
 import dev.latvian.mods.klib.shape.ColoredShape;
 import dev.latvian.mods.klib.shape.CuboidShape;
 import dev.latvian.mods.klib.util.Cast;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.kvector.FixedKVector;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.PositionType;
+import imgui.ImGui;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Position;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
@@ -28,9 +32,15 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.EntityCollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.network.connection.ConnectionType;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
@@ -38,6 +48,7 @@ import org.joml.Vector3dc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
+import java.util.List;
 import java.util.Set;
 
 public class Prop {
@@ -51,6 +62,8 @@ public class Prop {
 	public static final PropData<Prop, Float> GRAVITY = PropData.create(Prop.class, "gravity", DataTypes.FLOAT, p -> p.gravity, (p, v) -> p.gravity = v);
 	public static final PropData<Prop, Float> WIDTH = PropData.create(Prop.class, "width", DataTypes.FLOAT, p -> (float) p.width, (p, v) -> p.width = v);
 	public static final PropData<Prop, Float> HEIGHT = PropData.create(Prop.class, "height", DataTypes.FLOAT, p -> (float) p.height, (p, v) -> p.height = v);
+	public static final PropData<Prop, Boolean> CAN_COLLIDE = PropData.create(Prop.class, "can_collide", DataTypes.BOOL, p -> p.canCollide, (p, v) -> p.canCollide = v);
+	public static final PropData<Prop, Boolean> CAN_INTERACT = PropData.create(Prop.class, "can_interact", DataTypes.BOOL, p -> p.canInteract, (p, v) -> p.canInteract = v);
 
 	public static final PropData<Prop, KVector> DYNAMIC_POSITION = PropData.create(Prop.class, "position", KVector.DATA_TYPE, p -> p.dynamicPos == null ? KVector.of(p.pos) : p.dynamicPos, (p, v) -> {
 		p.dynamicPos = v;
@@ -63,7 +76,7 @@ public class Prop {
 	public final PropType<?> type;
 	public final PropSpawnType spawnType;
 	public final long createdTime;
-	final Set<PropData<?, ?>> sync;
+	final Set<PropType.PropDataEntry> sync;
 	public Level level;
 	public int id;
 	PropRemoveType removed;
@@ -81,6 +94,8 @@ public class Prop {
 	public float gravity;
 	public double width;
 	public double height;
+	public boolean canCollide;
+	public boolean canInteract;
 
 	public Prop(PropContext<?> ctx) {
 		this.type = ctx.type();
@@ -102,6 +117,8 @@ public class Prop {
 		this.gravity = 0.08F;
 		this.width = 1D;
 		this.height = 1D;
+		this.canCollide = false;
+		this.canInteract = false;
 	}
 
 	public final boolean isTimeTraveling(long time) {
@@ -132,8 +149,12 @@ public class Prop {
 	}
 
 	public final void sync(PropData<?, ?> data) {
-		if (data.sync() && type.reverseIdMap().containsKey(data)) {
-			sync.add(data);
+		if (data.sync()) {
+			var entry = type.reverseData().get(data);
+
+			if (entry != null) {
+				sync.add(entry);
+			}
 		}
 	}
 
@@ -207,7 +228,7 @@ public class Prop {
 	}
 
 	byte[] getDataUpdates(boolean allData) {
-		var syncSet = allData ? type.data().values() : sync;
+		var syncSet = allData ? type.data() : sync;
 
 		if (syncSet.isEmpty()) {
 			return null;
@@ -218,9 +239,10 @@ public class Prop {
 		try {
 			buf.writeVarInt(syncSet.size());
 
-			for (var data : syncSet) {
+			for (var entry : syncSet) {
+				var data = entry.data();
 				var value = data.get(Cast.to(this));
-				buf.writeVarInt(type.reverseIdMap().getInt(data));
+				buf.writeVarInt(type.getDataIndex(data));
 				data.type().streamCodec().encode(buf, Cast.to(value));
 			}
 
@@ -243,9 +265,10 @@ public class Prop {
 			int size = buf.readVarInt();
 
 			for (int i = 0; i < size; i++) {
-				var data = type.idMap().get(buf.readVarInt());
+				var entry = type.getData(buf.readVarInt());
 
-				if (data != null) {
+				if (entry != null) {
+					var data = entry.data();
 					var value = data.type().streamCodec().decode(buf);
 					data.set(Cast.to(this), Cast.to(value));
 				}
@@ -329,7 +352,9 @@ public class Prop {
 	}
 
 	public void save(DynamicOps<Tag> ops, CompoundTag nbt) {
-		for (var p : type.data().values()) {
+		for (var entry : type.data()) {
+			var p = entry.data();
+
 			if (p.save()) {
 				nbt.put(p.key(), p.type().codec().encodeStart(ops, Cast.to(p.get(Cast.to(this)))).getOrThrow());
 			}
@@ -393,5 +418,88 @@ public class Prop {
 			case LOOK_TARGET -> new Vec3(pos.x, pos.y, pos.z).add(Rotation.deg(rotation.y, rotation.x, rotation.z).lookVec3(1D));
 			default -> new Vec3(pos.x, pos.y, pos.z);
 		};
+	}
+
+	public <T> void s2c(PropPacketType<?, T> type, T payload) {
+		if (level.isServerSide()) {
+			var packet = type.createPayload(this, payload);
+
+			if (packet != null) {
+				level.s2c(packet);
+			}
+		}
+	}
+
+	public void s2c(PropPacketType<?, Object> unitType) {
+		s2c(unitType, PropPacketType.UNIT);
+	}
+
+	public <T> void c2s(PropPacketType<?, T> type, T payload) {
+		if (level.isClientSide()) {
+			var packet = type.createPayload(this, payload);
+
+			if (packet != null) {
+				level.c2s(packet);
+			}
+		}
+	}
+
+	public void c2s(PropPacketType<?, Object> unitType) {
+		c2s(unitType, PropPacketType.UNIT);
+	}
+
+	public boolean canCollide(@Nullable Entity entity) {
+		return true;
+	}
+
+	public boolean canInteract(@Nullable Entity entity) {
+		return true;
+	}
+
+	public boolean isCollidingWith(@Nullable Entity entity, AABB collisionBox) {
+		if (!canCollide(entity)) {
+			return false;
+		}
+
+		return collisionBox.intersects(pos.x - width / 2D, pos.y, pos.z - width / 2D, pos.x + width / 2D, pos.y + height, pos.z + width / 2D);
+	}
+
+	public void addCollisionShapes(@Nullable Entity entity, List<VoxelShape> shapes) {
+		shapes.add(Shapes.create(pos.x - width / 2D, pos.y, pos.z - width / 2D, pos.x + width / 2D, pos.y + height, pos.z + width / 2D));
+	}
+
+	public List<AABB> clipBoxes(@Nullable Entity entity) {
+		return List.of(new AABB(pos.x - width / 2D, pos.y, pos.z - width / 2D, pos.x + width / 2D, pos.y + height, pos.z + width / 2D));
+	}
+
+	@Nullable
+	public PropHitResult clip(Line ray, ClipContext ctx) {
+		var entity = ctx.collisionContext instanceof EntityCollisionContext c ? c.getEntity() : null;
+
+		if (canInteract(entity)) {
+			var hit = AABB.clip(clipBoxes(entity), ray.start(), ray.end(), BlockPos.ZERO);
+
+			if (hit != null && hit.getType() == HitResult.Type.BLOCK) {
+				return new PropHitResult(this, hit.getLocation(), hit.getDirection(), BlockPos.containing(hit.getLocation()), false);
+			}
+		}
+
+		return null;
+	}
+
+	public void imgui(ImGraphics graphics, float delta) {
+		var ops = graphics.mc.level.jsonOps();
+
+		if (lifespan > 0) {
+			ImGui.progressBar(getRelativeTick(delta, 0F), 0F, 20F);
+		}
+
+		for (var entry : type.data()) {
+			try {
+				ImGui.text(entry.data().key() + ": " + entry.data().type().codec().encodeStart(ops, Cast.to(entry.data().getter().apply(Cast.to(this)))).getOrThrow());
+			} catch (Exception ex) {
+				graphics.stackTrace(ex);
+			}
+		}
 	}
 }

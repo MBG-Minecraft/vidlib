@@ -1,8 +1,10 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin;
 
+import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.render.DebugRenderTypes;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.bloom.BloomRenderTypes;
+import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
 import net.neoforged.api.distmarker.Dist;
@@ -26,7 +28,7 @@ public class ShapePropRenderer implements PropRenderer<ShapeProp> {
 
 		ms.translate(0F, 0.5F, 0F);
 
-		var lc = prop.outlineColor.get(progress);
+		var lc = prop.canInteract && ctx.frame().mc().hitResult instanceof PropHitResult hit && hit.prop == prop ? Color.WHITE : prop.outlineColor.get(progress);
 
 		if (lc.alpha() > 0) {
 			if (prop.bloom) {

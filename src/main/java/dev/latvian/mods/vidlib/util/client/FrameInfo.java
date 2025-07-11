@@ -36,7 +36,7 @@ public record FrameInfo(
 	double cameraZ,
 	Frustum frustum,
 	boolean replay,
-	Vector3f normal,
+	Vector3f tempNormal,
 	long gameTime
 ) implements FramePoseStack, FrustumCheck {
 	public static FrameInfo CURRENT;

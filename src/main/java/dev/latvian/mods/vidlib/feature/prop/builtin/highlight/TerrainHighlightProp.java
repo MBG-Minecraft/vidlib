@@ -10,7 +10,6 @@ import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
-import dev.latvian.mods.vidlib.feature.prop.PropDataProvider;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 
@@ -20,14 +19,14 @@ public class TerrainHighlightProp extends Prop {
 	public static final PropData<TerrainHighlightProp, KVector> SCALE = PropData.create(TerrainHighlightProp.class, "scale", KVector.DATA_TYPE, p -> p.scale, (p, v) -> p.scale = v);
 
 	@AutoRegister
-	public static final PropType<TerrainHighlightProp> TYPE = PropType.create(VidLib.id("terrain_highlight"), TerrainHighlightProp::new, PropDataProvider.join(
+	public static final PropType<TerrainHighlightProp> TYPE = PropType.create(VidLib.id("terrain_highlight"), TerrainHighlightProp::new,
 		TICK,
 		LIFESPAN,
 		DYNAMIC_POSITION,
 		SHAPE,
 		COLOR,
 		SCALE
-	));
+	);
 
 	public Shape shape;
 	public Gradient color;

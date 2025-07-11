@@ -12,9 +12,9 @@ import net.minecraft.network.codec.StreamCodec;
 import java.util.Optional;
 
 public record FaceTexture(SpriteKey sprite, TerrainRenderLayer layer, boolean cull, Color tint, float uvScale, double fade) {
-	public static final FaceTexture EMPTY = new FaceTexture(SpriteKey.EMPTY, TerrainRenderLayer.SOLID, true, Color.WHITE, 1F, 0D);
-	public static final FaceTexture WHITE = new FaceTexture(SpriteKey.WHITE, TerrainRenderLayer.SOLID, true, Color.WHITE, 1F, 0D);
-	public static final FaceTexture BLOOM = new FaceTexture(SpriteKey.WHITE, TerrainRenderLayer.BLOOM, true, Color.WHITE, 1F, 0D);
+	public static final FaceTexture EMPTY = new FaceTexture(SpriteKey.EMPTY, TerrainRenderLayer.SOLID, true);
+	public static final FaceTexture WHITE = new FaceTexture(SpriteKey.WHITE, TerrainRenderLayer.SOLID, true);
+	public static final FaceTexture BLOOM = new FaceTexture(SpriteKey.WHITE, TerrainRenderLayer.BLOOM, true);
 
 	public static final Codec<FaceTexture> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		SpriteKey.CODEC.fieldOf("sprite").forGetter(FaceTexture::sprite),
@@ -37,7 +37,15 @@ public record FaceTexture(SpriteKey sprite, TerrainRenderLayer layer, boolean cu
 
 	public static final StreamCodec<ByteBuf, Optional<FaceTexture>> OPTIONAL_STREAM_CODEC = STREAM_CODEC.optional();
 
+	public FaceTexture(SpriteKey sprite, TerrainRenderLayer layer, boolean cull) {
+		this(sprite, layer, cull, Color.WHITE, 1F, 0D);
+	}
+
 	public FaceTexture merge(FaceTexture other) {
 		return other == EMPTY ? this : other;
+	}
+
+	public FaceTexture withTint(Color tint) {
+		return new FaceTexture(sprite, layer, cull, tint, uvScale, fade);
 	}
 }

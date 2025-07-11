@@ -10,7 +10,6 @@ import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
-import dev.latvian.mods.vidlib.feature.prop.PropDataProvider;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 
 public class ShapeProp extends Prop {
@@ -20,7 +19,7 @@ public class ShapeProp extends Prop {
 	public static final PropData<ShapeProp, Boolean> BLOOM = PropData.create(ShapeProp.class, "bloom", DataTypes.BOOL, p -> p.bloom, (p, v) -> p.bloom = v);
 
 	@AutoRegister
-	public static final PropType<ShapeProp> TYPE = PropType.create(VidLib.id("shape"), ShapeProp::new, PropDataProvider.join(
+	public static final PropType<ShapeProp> TYPE = PropType.create(VidLib.id("shape"), ShapeProp::new,
 		TICK,
 		LIFESPAN,
 		DYNAMIC_POSITION,
@@ -33,8 +32,10 @@ public class ShapeProp extends Prop {
 		SHAPE,
 		COLOR,
 		OUTLINE_COLOR,
-		BLOOM
-	));
+		BLOOM,
+		CAN_COLLIDE,
+		CAN_INTERACT
+	);
 
 	public Shape shape;
 	public Gradient color;
@@ -48,5 +49,6 @@ public class ShapeProp extends Prop {
 		this.color = Color.WHITE;
 		this.outlineColor = Color.CYAN;
 		this.bloom = false;
+		this.canCollide = false;
 	}
 }
