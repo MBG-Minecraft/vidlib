@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.imgui;
+package dev.latvian.mods.vidlib.feature.imgui.icon;
 
 import dev.latvian.mods.klib.util.Lazy;
 import net.neoforged.neoforge.common.NeoForge;

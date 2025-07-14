@@ -19,11 +19,13 @@ import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.skybox.FogOverride;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
+import dev.latvian.mods.vidlib.feature.stage.Stage;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
+import dev.latvian.mods.vidlib.util.NameRenderType;
 import dev.latvian.mods.vidlib.util.ScreenCorner;
 
 public class VidLibDataTypes {
@@ -55,6 +57,8 @@ public class VidLibDataTypes {
 		DataType.register(VidLib.id("positioned_sound_data"), PositionedSoundData.DATA_TYPE);
 		DataType.register(VidLib.id("knumber"), KNumber.DATA_TYPE);
 		DataType.register(VidLib.id("kvector"), KVector.DATA_TYPE);
+		DataType.register(VidLib.id("stage"), Stage.DATA_TYPE);
+		DataType.register(VidLib.id("name_render_type"), NameRenderType.DATA_TYPE);
 
 		// RegisteredDataType<ZoneContainer> REGISTERED_DATA_TYPE = RegisteredDataType.of(REGISTRY, ZoneContainer.class);
 	}

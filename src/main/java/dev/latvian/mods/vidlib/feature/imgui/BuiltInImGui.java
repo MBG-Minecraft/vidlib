@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.imgui;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasPanel;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneBuilderPanel;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.skybox.Skybox;
 import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
 import imgui.ImGui;
@@ -88,7 +89,7 @@ public class BuiltInImGui {
 		}).enabled(graphics.isAdmin));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.ShowDropdown(graphics, list));
-	}).remainOpen();
+	}).remainOpen(true);
 
 	public static final MenuItem WARP = MenuItem.menu(ImIcons.LOCATION, "Warp", (graphics, list) -> {
 		if (graphics.inGame) {

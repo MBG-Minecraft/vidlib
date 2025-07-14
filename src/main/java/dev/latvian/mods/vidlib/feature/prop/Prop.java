@@ -13,8 +13,11 @@ import dev.latvian.mods.klib.shape.CuboidShape;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
+import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
+import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
+import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.math.kvector.FixedKVector;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.PositionType;
@@ -414,7 +417,7 @@ public class Prop {
 			case TOP -> new Vec3(pos.x, pos.y + height, pos.z);
 			case EYES -> new Vec3(pos.x, pos.y + height * 0.75D, pos.z);
 			case LEASH -> new Vec3(pos.x, pos.y + height * 2D / 5D, pos.z);
-			case SOUND_SOURCE -> getPos(PositionType.EYES);
+			case SOUND_SOURCE -> getSoundSource(1F);
 			case LOOK_TARGET -> new Vec3(pos.x, pos.y, pos.z).add(Rotation.deg(rotation.y, rotation.x, rotation.z).lookVec3(1D));
 			default -> new Vec3(pos.x, pos.y, pos.z);
 		};
@@ -501,5 +504,21 @@ public class Prop {
 				graphics.stackTrace(ex);
 			}
 		}
+	}
+
+	public void playSound(SoundData data, boolean looping, boolean stopImmediately) {
+		level.playGlobalSound(new PositionedSoundData(data, this, looping, stopImmediately), KNumberVariables.EMPTY);
+	}
+
+	public final void playSound(SoundData data) {
+		playSound(data, false, true);
+	}
+
+	public Vec3 getSoundSource(float delta) {
+		return getPos(PositionType.EYES);
+	}
+
+	public BlockPos getBlockPos() {
+		return BlockPos.containing(pos.x, pos.y, pos.z);
 	}
 }

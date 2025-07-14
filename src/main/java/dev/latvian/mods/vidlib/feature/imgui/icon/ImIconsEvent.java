@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.imgui;
+package dev.latvian.mods.vidlib.feature.imgui.icon;
 
 import net.neoforged.bus.api.Event;
 

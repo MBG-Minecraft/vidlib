@@ -4,6 +4,7 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.CompoundGradient;
 import dev.latvian.mods.klib.color.Gradient;
 import dev.latvian.mods.klib.color.PositionedColor;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 
 import java.util.ArrayList;

@@ -31,6 +31,11 @@ public class ColorConfigEntry extends ConfigEntry<Color> {
 	}
 
 	@Override
+	public boolean imguiSameLine() {
+		return true;
+	}
+
+	@Override
 	public ImUpdate imguiValue(ImGraphics graphics) {
 		ImGui.colorEdit4(id, data, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel | ImGuiColorEditFlags.PickerHueWheel);
 		return ImUpdate.itemEdit();

@@ -4,15 +4,14 @@ import com.google.gson.JsonElement;
 import com.mojang.serialization.DynamicOps;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.Gradient;
-import dev.latvian.mods.vidlib.core.VLMinecraftClient;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.ImGui;
-import net.minecraft.client.Minecraft;
 
 import java.util.Objects;
+import java.util.function.IntFunction;
 
 public abstract class ConfigEntry<T> {
 	public static ConfigEntry<Boolean> bool(String label, DataKey<Boolean> key) {
@@ -75,6 +74,14 @@ public abstract class ConfigEntry<T> {
 		return new GradientConfigEntry(label, key);
 	}
 
+	public static <E> ConfigEntry<E> ofEnum(String label, DataKey<E> key, IntFunction<E[]> arrayConstructor, E[] options) {
+		return new EnumConfigEntry<>(label, key, arrayConstructor, options);
+	}
+
+	public static <E> ConfigEntry<E> ofEnum(String label, DataKey<E> key, IntFunction<E[]> arrayConstructor) {
+		return new EnumConfigEntry<>(label, key, arrayConstructor, key.getEnumConstants());
+	}
+
 	public final String label;
 	public final DataKey<T> key;
 	public final String id;
@@ -103,7 +110,18 @@ public abstract class ConfigEntry<T> {
 		return false;
 	}
 
-	public ImUpdate imguiLabel(ImGraphics graphics) {
+	public abstract ImUpdate imguiValue(ImGraphics graphics);
+
+	public ImUpdate imgui(ImGraphics graphics) {
+		var update = ImUpdate.NONE;
+		boolean sameLine = imguiSameLine();
+
+		if (sameLine) {
+			update = update.or(imguiValue(graphics));
+			ImGui.sameLine();
+			ImGui.alignTextToFramePadding();
+		}
+
 		var isDefault = isDefault();
 
 		if (isDefault) {
@@ -121,36 +139,22 @@ public abstract class ConfigEntry<T> {
 			ImGui.beginDisabled();
 		}
 
-		boolean reset = ImGui.smallButton("Reset" + id + "-reset");
+		if (ImGui.smallButton("Reset" + id + "-reset")) {
+			set(key.defaultValue());
+			update = ImUpdate.FULL;
+		}
 
 		if (isDefault) {
 			ImGui.endDisabled();
+		} else if (ImGui.isItemHovered()) {
+			ImGui.setTooltip(json(graphics.mc.level.jsonOps(), key.defaultValue()));
 		}
 
-		if (ImGui.isItemHovered()) {
-			ImGui.setTooltip(json(Minecraft.getInstance().level.jsonOps(), key.defaultValue()));
+		if (!sameLine) {
+			update = update.or(imguiValue(graphics));
 		}
 
-		if (reset) {
-			set(key.defaultValue());
-			return ImUpdate.FULL;
-		}
-
-		return ImUpdate.NONE;
-	}
-
-	public abstract ImUpdate imguiValue(ImGraphics graphics);
-
-	public ImUpdate imgui(ImGraphics graphics) {
-		var update = imguiLabel(graphics);
-
-		if (imguiSameLine()) {
-			ImGui.sameLine();
-			ImGui.text(" ");
-			ImGui.sameLine();
-		}
-
-		return update.or(imguiValue(graphics));
+		return update;
 	}
 
 	public String json(DynamicOps<JsonElement> ops, T value) {
@@ -165,12 +169,12 @@ public abstract class ConfigEntry<T> {
 		return equals(get(), key.defaultValue());
 	}
 
-	public void update(VLMinecraftClient mc, boolean full) {
+	public void update(ImGraphics graphics, boolean full) {
 		var value = get();
-		mc.getServerData().set(key, value);
+		graphics.mc.getServerData().set(key, value);
 
-		if (full) {
-			mc.updateServerDataValue(key, value);
+		if (full && !graphics.isClientOnly) {
+			graphics.mc.updateServerDataValue(key, value);
 		}
 	}
 }

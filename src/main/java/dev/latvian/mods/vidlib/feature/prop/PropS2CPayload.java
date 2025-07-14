@@ -9,7 +9,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 
 public record PropS2CPayload(int prop, int packet, byte[] data) implements SimplePacketPayload {
 	@AutoPacket
-	public static final VidLibPacketType<PropS2CPayload> TYPE = VidLibPacketType.internal("prop/s2c", CompositeStreamCodec.of(
+	public static final VidLibPacketType<PropS2CPayload> TYPE = VidLibPacketType.internal("s2c_prop", CompositeStreamCodec.of(
 		ByteBufCodecs.VAR_INT, PropS2CPayload::prop,
 		ByteBufCodecs.VAR_INT, PropS2CPayload::packet,
 		ByteBufCodecs.BYTE_ARRAY, PropS2CPayload::data,

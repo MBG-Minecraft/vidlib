@@ -1,8 +1,10 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import com.mojang.blaze3d.platform.Window;
+import dev.latvian.mods.vidlib.GameClientEventHandler;
 import dev.latvian.mods.vidlib.core.VLMouseHandler;
 import dev.latvian.mods.vidlib.feature.font.TTFFile;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImFontConfig;
 import imgui.ImFontGlyphRangesBuilder;
 import imgui.ImGui;
@@ -234,7 +236,9 @@ public class ImGuiHooks {
 	}
 
 	public static void beforeEndFrame() {
-		BuiltInImGui.handle(Minecraft.getInstance());
+		if (GameClientEventHandler.clientLoaded) {
+			BuiltInImGui.handle(Minecraft.getInstance());
+		}
 
 		endingFrame = true;
 	}

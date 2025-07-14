@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.imgui;
 
 import dev.latvian.mods.klib.color.PositionedColor;
 import dev.latvian.mods.klib.easing.Easing;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 import imgui.type.ImFloat;
 import org.jetbrains.annotations.NotNull;

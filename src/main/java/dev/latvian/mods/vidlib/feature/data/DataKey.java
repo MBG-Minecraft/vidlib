@@ -117,4 +117,9 @@ public record DataKey<T>(
 	public String toString() {
 		return "DataType[storage=" + storage + ", id=" + id + "]";
 	}
+
+	@Nullable
+	public T[] getEnumConstants() {
+		return type.typeClass().isEnum() ? type.typeClass().getEnumConstants() : null;
+	}
 }

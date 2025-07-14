@@ -3,6 +3,8 @@ package dev.latvian.mods.vidlib.feature.skybox;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.imgui.icon.DirectImageImIcon;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import net.minecraft.client.renderer.texture.Dumpable;
 import net.minecraft.client.renderer.texture.ReloadableTexture;
 import net.minecraft.client.renderer.texture.TextureContents;
@@ -17,6 +19,7 @@ import java.util.function.IntUnaryOperator;
 public class SkyboxTexture extends ReloadableTexture implements Dumpable {
 	public final Skybox skybox;
 	public int resolution;
+	private ImIcon icon;
 
 	public SkyboxTexture(Skybox skybox, ResourceLocation id) {
 		super(id);
@@ -27,6 +30,15 @@ public class SkyboxTexture extends ReloadableTexture implements Dumpable {
 	public void close() {
 		super.close();
 		skybox.skyboxTexture = null;
+		icon = null;
+	}
+
+	public ImIcon getIcon() {
+		if (icon == null) {
+			icon = new DirectImageImIcon(getTexture(), 0F, 0.5F, 0.25F, 1F);
+		}
+
+		return icon;
 	}
 
 	@Override

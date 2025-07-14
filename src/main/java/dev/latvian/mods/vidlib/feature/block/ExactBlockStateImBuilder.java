@@ -64,14 +64,9 @@ public class ExactBlockStateImBuilder implements ImBuilder<BlockState> {
 	public ImUpdate imgui(ImGraphics graphics) {
 		selectedPosition = null;
 		var update = ImUpdate.NONE;
-
-		ImGui.alignTextToFramePadding();
-		ImGui.text("Block");
-		ImGui.sameLine();
-		ImGui.pushID("###block");
 		var prevBlock = block.isValid() ? block.build() : null;
-		update = update.or(block.imgui(graphics));
-		ImGui.popID();
+
+		update = update.or(block.imguiKey(graphics, "Block", "###block"));
 
 		selectedPosition = block.selectedPosition;
 

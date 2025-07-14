@@ -2,10 +2,11 @@ package dev.latvian.mods.vidlib.feature.skybox;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
-import dev.latvian.mods.vidlib.feature.imgui.ImIcon;
-import dev.latvian.mods.vidlib.feature.imgui.ImIcons;
 import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.loading.FMLPaths;
 
@@ -22,7 +23,7 @@ public class Skybox {
 		for (var skybox : SkyboxData.SKYBOX_IDS) {
 			var tex = session.getSkybox(skybox).loadTexture(g.mc);
 
-			slist.add(MenuItem.item(ImIcon.image(tex.getTexture(), 0F, 0.5F, 0.25F, 1F), skybox.getPath(), skybox.equals(current), g1 -> {
+			slist.add(MenuItem.item(tex.getIcon(), skybox.getPath(), skybox.equals(current), g1 -> {
 				if (g1.isClientOnly) {
 					g1.mc.set(InternalServerData.SKYBOX, skybox);
 				} else {
@@ -47,10 +48,12 @@ public class Skybox {
 			for (var skyboxId : SkyboxData.SKYBOX_IDS) {
 				session1.getSkybox(skyboxId).export(g1.mc);
 			}
-		}));
+
+			g1.mc.tell(Component.literal("Skyboxes exported! Click here to open the directory").setStyle(Style.EMPTY.withClickToOpen(FMLPaths.GAMEDIR.get().resolve("local/vidlib/export/skyboxes"))));
+		}).remainOpen(false));
 
 		return slist;
-	}).remainOpen();
+	}).remainOpen(true);
 
 	public final SkyboxData data;
 	public final ResourceLocation texture;

@@ -5,6 +5,7 @@ import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
+import dev.latvian.mods.vidlib.util.NameRenderType;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
@@ -16,4 +17,5 @@ public interface InternalServerData {
 	DataKey<Anchor> ANCHOR = DataKey.SERVER.buildDefault("anchor", Anchor.DATA_TYPE, Anchor.NONE).onReceived((player, anchor) -> Anchor.client = anchor).build();
 	DataKey<Boolean> HIDE_PLUMBOBS = DataKey.SERVER.createDefaultBoolean("hide_plumbobs", false);
 	DataKey<List<ChancedParticle>> ENVIRONMENT_EFFECTS = DataKey.SERVER.createDefault("environment_effects", ChancedParticle.LIST_DATA_TYPE, List.of());
+	DataKey<NameRenderType> NAME_RENDER_TYPE = DataKey.SERVER.createDefault("name_render_type", NameRenderType.DATA_TYPE, NameRenderType.DEFAULT);
 }

@@ -10,7 +10,7 @@ import it.unimi.dsi.fastutil.ints.IntList;
 
 public record RemovePropsPayload(PropListType type, IntList ids, PropRemoveType removeType) implements SimplePacketPayload {
 	@AutoPacket
-	public static final VidLibPacketType<RemovePropsPayload> TYPE = VidLibPacketType.internal("prop/remove", CompositeStreamCodec.of(
+	public static final VidLibPacketType<RemovePropsPayload> TYPE = VidLibPacketType.internal("remove_props", CompositeStreamCodec.of(
 		PropListType.STREAM_CODEC, RemovePropsPayload::type,
 		CollectionStreamCodecs.VAR_INT_LIST, RemovePropsPayload::ids,
 		PropRemoveType.STREAM_CODEC, RemovePropsPayload::removeType,

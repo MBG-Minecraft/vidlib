@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.particle.ParticleOptionsImBuilder;
 import dev.latvian.mods.vidlib.feature.prop.builtin.highlight.TerrainHighlightProp;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundDataImBuilder;

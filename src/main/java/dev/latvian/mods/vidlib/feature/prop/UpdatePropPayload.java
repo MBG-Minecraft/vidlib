@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 public record UpdatePropPayload(PropListType type, int id, byte[] update) implements SimplePacketPayload {
 	@AutoPacket
-	public static final VidLibPacketType<UpdatePropPayload> TYPE = VidLibPacketType.internal("prop/update", CompositeStreamCodec.of(
+	public static final VidLibPacketType<UpdatePropPayload> TYPE = VidLibPacketType.internal("update_prop", CompositeStreamCodec.of(
 		PropListType.STREAM_CODEC, UpdatePropPayload::type,
 		ByteBufCodecs.VAR_INT, UpdatePropPayload::id,
 		ByteBufCodecs.BYTE_ARRAY, UpdatePropPayload::update,

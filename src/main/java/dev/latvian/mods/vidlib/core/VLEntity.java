@@ -200,6 +200,10 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		playSound(data, false, true);
 	}
 
+	default Vec3 getSoundSource(float delta) {
+		return vl$self().getEyePosition(delta);
+	}
+
 	default void s2c(EntityData data) {
 		vl$level().s2c(new S2CEntityEventPayload(data));
 	}
@@ -212,10 +216,6 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	}
 
 	default void c2sReceived(EntityData event, ServerPlayer from) {
-	}
-
-	default Vec3 getSoundSource(float delta) {
-		return vl$self().getEyePosition(delta);
 	}
 
 	default Vec3 getLookTarget(float delta) {

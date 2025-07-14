@@ -1,27 +1,25 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
-import dev.latvian.mods.klib.math.KMath;
 import imgui.ImGui;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.Position;
-import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 
-public class Vector3dImBuilder implements ImBuilder<Vec3> {
-	public final Vector3d data;
+public class BlockPosImBuilder implements ImBuilder<BlockPos> {
+	public BlockPos.MutableBlockPos pos;
 	public SelectedPosition selectedPosition;
 
-	public Vector3dImBuilder() {
-		this.data = new Vector3d();
+	public BlockPosImBuilder() {
+		this.pos = new BlockPos.MutableBlockPos(0, 0, 0);
 	}
 
-	public Vector3dImBuilder(Position position) {
-		this.data = new Vector3d(position.x(), position.y(), position.z());
+	public BlockPosImBuilder(Vec3i position) {
+		this.pos = new BlockPos.MutableBlockPos(position.getX(), position.getY(), position.getZ());
 	}
 
 	@Override
-	public void set(Vec3 value) {
-		data.set(value.x(), value.y(), value.z());
+	public void set(BlockPos value) {
+		pos.set(value);
 	}
 
 	@Override
@@ -32,7 +30,7 @@ public class Vector3dImBuilder implements ImBuilder<Vec3> {
 
 		if (ImGui.button(SelectedPosition.CAMERA.icon + "###camera-pos")) {
 			var cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
-			data.set(cam.x, cam.y, cam.z);
+			pos.set(cam.x, cam.y, cam.z);
 			update = ImUpdate.FULL;
 			selectedPosition = SelectedPosition.CAMERA;
 		}
@@ -43,16 +41,16 @@ public class Vector3dImBuilder implements ImBuilder<Vec3> {
 
 		ImGui.sameLine();
 
-		ImGuiUtils.DOUBLE.set(data.x);
-		ImGui.inputDouble("###x", ImGuiUtils.DOUBLE, 0.0625D, 1D, "%.3f");
+		ImGuiUtils.INT.set(pos.getX());
+		ImGui.inputInt("###x", ImGuiUtils.INT, 1, 16);
 		update = update.orItemEdit();
-		data.x = ImGuiUtils.DOUBLE.get();
+		pos.setX(ImGuiUtils.INT.get());
 
 		if (ImGui.button(SelectedPosition.ENTITY.icon + "###entity-pos")) {
 			var entity = Minecraft.getInstance().player;
 
 			if (entity != null) {
-				data.set(entity.getX(), entity.getY(), entity.getZ());
+				pos.set(entity.getX(), entity.getY(), entity.getZ());
 				update = ImUpdate.FULL;
 				selectedPosition = SelectedPosition.ENTITY;
 			}
@@ -64,16 +62,16 @@ public class Vector3dImBuilder implements ImBuilder<Vec3> {
 
 		ImGui.sameLine();
 
-		ImGuiUtils.DOUBLE.set(data.y);
-		ImGui.inputDouble("###y", ImGuiUtils.DOUBLE, 0.0625D, 1D, "%.3f");
+		ImGuiUtils.INT.set(pos.getY());
+		ImGui.inputInt("###y", ImGuiUtils.INT, 1, 16);
 		update = update.orItemEdit();
-		data.y = ImGuiUtils.DOUBLE.get();
+		pos.setY(ImGuiUtils.INT.get());
 
 		if (ImGui.button(SelectedPosition.CURSOR.icon + "###cursor-pos")) {
 			var pos = Minecraft.getInstance().getWorldMouse().clipOutline();
 
 			if (pos != null) {
-				data.set(pos.pos().x, pos.pos().y, pos.pos().z);
+				this.pos.set(pos.pos().x, pos.pos().y, pos.pos().z);
 				update = ImUpdate.FULL;
 				selectedPosition = SelectedPosition.CURSOR;
 			}
@@ -85,10 +83,10 @@ public class Vector3dImBuilder implements ImBuilder<Vec3> {
 
 		ImGui.sameLine();
 
-		ImGuiUtils.DOUBLE.set(data.z);
-		ImGui.inputDouble("###z", ImGuiUtils.DOUBLE, 0.0625D, 1D, "%.3f");
+		ImGuiUtils.INT.set(pos.getZ());
+		ImGui.inputInt("###z", ImGuiUtils.INT, 1, 16);
 		update = update.orItemEdit();
-		data.z = ImGuiUtils.DOUBLE.get();
+		pos.setZ(ImGuiUtils.INT.get());
 
 		ImGui.popItemWidth();
 		return update;
@@ -96,11 +94,12 @@ public class Vector3dImBuilder implements ImBuilder<Vec3> {
 
 	@Override
 	public boolean isValid() {
-		return !Double.isNaN(data.x) && !Double.isNaN(data.y) && !Double.isNaN(data.z);
+		var mc = Minecraft.getInstance();
+		return mc.level == null || mc.level.isInWorldBounds(pos);
 	}
 
 	@Override
-	public Vec3 build() {
-		return KMath.vec3(data.x, data.y, data.z);
+	public BlockPos build() {
+		return pos.immutable();
 	}
 }

@@ -9,7 +9,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 
 public record AddPropPayload(PropType<?> type, PropSpawnType spawnType, int id, long createdTime, byte[] update) implements SimplePacketPayload {
 	@AutoPacket
-	public static final VidLibPacketType<AddPropPayload> TYPE = VidLibPacketType.internal("prop/add", CompositeStreamCodec.of(
+	public static final VidLibPacketType<AddPropPayload> TYPE = VidLibPacketType.internal("add_prop", CompositeStreamCodec.of(
 		PropType.STREAM_CODEC, AddPropPayload::type,
 		PropSpawnType.STREAM_CODEC, AddPropPayload::spawnType,
 		ByteBufCodecs.VAR_INT, AddPropPayload::id,

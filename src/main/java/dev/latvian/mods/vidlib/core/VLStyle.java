@@ -6,6 +6,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 
+import java.net.URI;
+import java.nio.file.Path;
+
 public interface VLStyle {
 	default Style vl$self() {
 		return (Style) this;
@@ -33,6 +36,14 @@ public interface VLStyle {
 
 	default Style withCopyString(String string) {
 		return withClickToCopyToClipboard(string).withHoverText("Click to Copy");
+	}
+
+	default Style withClickToOpen(Path path) {
+		return vl$self().withClickEvent(new ClickEvent.OpenFile(path));
+	}
+
+	default Style withClickToOpen(URI uri) {
+		return vl$self().withClickEvent(new ClickEvent.OpenUrl(uri));
 	}
 
 	default Style withColor(Color color) {

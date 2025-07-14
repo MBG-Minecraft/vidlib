@@ -7,7 +7,6 @@ import dev.latvian.mods.vidlib.feature.imgui.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
-import imgui.ImGui;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -32,21 +31,8 @@ public record BlockXorFilter(BlockFilter a, BlockFilter b) implements BlockFilte
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("A");
-			ImGui.sameLine();
-			ImGui.pushID("###a");
-			update = update.or(a.imgui(graphics));
-			ImGui.popID();
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("B");
-			ImGui.sameLine();
-			ImGui.pushID("###b");
-			update = update.or(b.imgui(graphics));
-			ImGui.popID();
-
+			update = update.or(a.imguiKey(graphics, "A", "###a"));
+			update = update.or(b.imguiKey(graphics, "B", "###b"));
 			return update;
 		}
 

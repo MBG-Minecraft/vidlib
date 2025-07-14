@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+
 public enum SelectedPosition {
 	CAMERA(ImIcons.CAMERA.icon),
 	ENTITY(ImIcons.ACCOUNT.icon),

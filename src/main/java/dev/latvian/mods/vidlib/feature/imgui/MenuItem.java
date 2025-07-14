@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import dev.latvian.mods.vidlib.feature.imgui.config.VideoConfigPanel;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import imgui.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImBoolean;
@@ -15,8 +17,9 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 	public static final int FLAG_MENU = 1 << 1;
 	public static final int FLAG_CHECKMARK = 1 << 2;
 	public static final int FLAG_DISABLED = 1 << 3;
-	public static final int FLAG_REMAIN_OPEN = 1 << 4;
-	public static final int FLAG_SKIP = 1 << 5;
+	public static final int FLAG_REMAIN_OPEN_OVERRIDE = 1 << 4;
+	public static final int FLAG_REMAIN_OPEN = 1 << 5;
+	public static final int FLAG_SKIP = 1 << 6;
 
 	public static final MenuItem SEPARATOR = text(ImIcon.NONE, "").withFlags(FLAG_SEPARATOR);
 	public static final MenuItem SKIP = text(ImIcon.NONE, "").withFlags(FLAG_SKIP);
@@ -64,6 +67,22 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 		});
 	}
 
+	public static MenuItem config(ImIcon icon, String label, VideoConfigPanel panel) {
+		return item(icon, label, panel.isOpen(), g -> {
+			if (panel.isOpen()) {
+				panel.close();
+			} else {
+				for (var p : BuiltInImGui.OPEN_PANELS) {
+					if (p instanceof VideoConfigPanel) {
+						p.close();
+					}
+				}
+
+				panel.open();
+			}
+		});
+	}
+
 	public static MenuItem menu(ImIcon icon, String label, Function<ImGraphics, List<MenuItem>> subItems) {
 		return new MenuItem(icon, ImText.of(label), ImText.EMPTY, null, FLAG_MENU, null, subItems);
 	}
@@ -88,8 +107,8 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 		return (flags & flag) != 0;
 	}
 
-	public MenuItem remainOpen() {
-		return withFlags(FLAG_REMAIN_OPEN);
+	public MenuItem remainOpen(boolean remainOpen) {
+		return withFlags(FLAG_REMAIN_OPEN_OVERRIDE | (remainOpen ? FLAG_REMAIN_OPEN : 0));
 	}
 
 	public MenuItem withShortcut(String shortcut) {
@@ -126,11 +145,11 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 			var items = subItems.apply(graphics);
 
 			if (!items.isEmpty()) {
-				boolean remainOpen = hasFlag(FLAG_REMAIN_OPEN);
+				boolean remainOpen = hasFlag(FLAG_REMAIN_OPEN_OVERRIDE);
 
 				if (remainOpen) {
 					graphics.pushStack();
-					graphics.setItemFlag(ImGuiItemFlags.SelectableDontClosePopup, true);
+					graphics.setItemFlag(ImGuiItemFlags.SelectableDontClosePopup, hasFlag(FLAG_REMAIN_OPEN));
 				}
 
 				label.push(graphics);

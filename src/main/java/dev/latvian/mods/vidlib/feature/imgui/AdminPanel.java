@@ -27,7 +27,11 @@ public class AdminPanel {
 	public final void open() {
 		if (!isOpen) {
 			isOpen = true;
-			BuiltInImGui.OPEN_PANELS.add(this);
+
+			if (!BuiltInImGui.OPEN_PANELS.contains(this)) {
+				BuiltInImGui.OPEN_PANELS.add(this);
+			}
+
 			onOpened();
 		}
 	}

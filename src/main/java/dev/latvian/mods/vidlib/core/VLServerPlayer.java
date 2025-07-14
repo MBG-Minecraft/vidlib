@@ -1,8 +1,10 @@
 package dev.latvian.mods.vidlib.core;
 
+import dev.latvian.mods.vidlib.feature.misc.RefreshNamePayload;
 import dev.latvian.mods.vidlib.feature.misc.SyncPlayerTagsPayload;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.util.MiscUtils;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
@@ -56,5 +58,13 @@ public interface VLServerPlayer extends VLPlayer {
 	default void vl$initialSync(PacketAndPayloadAcceptor<ClientGamePacketListener> callback) {
 		var p = vl$self();
 		callback.accept(new SyncPlayerTagsPayload(p.getUUID(), List.copyOf(p.getTags())).toS2C(p.level()));
+	}
+
+	default void updateNickname(Component name) {
+		var player = vl$self();
+		player.setNickname(name);
+		player.refreshDisplayName();
+		player.refreshTabListName();
+		player.server.s2c(new RefreshNamePayload(player.getUUID(), player.getNickname()));
 	}
 }
