@@ -57,6 +57,9 @@ public class Canvas {
 	@AutoRegister(Dist.CLIENT)
 	public static final Canvas ENTITY_OUTLINE = createExternal(VidLib.id("entity_outline"));
 
+	@AutoRegister(Dist.CLIENT)
+	public static final Canvas PLAYER_OUTLINE = createExternal(VidLib.id("player_outline"));
+
 	public final ResourceLocation id;
 	public final String idString;
 	public final ResourceLocation colorTexturePath;

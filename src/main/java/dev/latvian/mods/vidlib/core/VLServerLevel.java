@@ -15,6 +15,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.GameRules;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -144,5 +145,10 @@ public interface VLServerLevel extends VLLevel {
 	@Override
 	default Iterable<Entity> allEntities() {
 		return vl$level().getEntities().getAll();
+	}
+
+	@Override
+	default boolean vl$getTickDayTime() {
+		return vl$level().getGameRules().getBoolean(GameRules.RULE_DAYLIGHT);
 	}
 }

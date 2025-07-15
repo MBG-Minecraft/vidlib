@@ -414,4 +414,8 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 
 		return result;
 	}
+
+	default boolean vl$getTickDayTime() {
+		return true;
+	}
 }

@@ -87,7 +87,7 @@ public class GameEventHandler {
 			AutoInit.Type.DATA_LOADED.invoke();
 
 			for (var player : event.getPlayerList().getPlayers()) {
-				VidLib.sync(player, false);
+				VidLib.sync(player, 0);
 			}
 		}
 	}

@@ -13,23 +13,30 @@ logoBlur = false
 [[dependencies.vidlib]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.1.122,)"
+versionRange = "*"
 ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies.vidlib]]
 modId = "klib"
 type = "required"
-versionRange = "[1.0.0,)"
+versionRange = "*"
 ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies.vidlib]]
 modId = "imguiresources"
 type = "required"
-versionRange = "[1.0.0,)"
+versionRange = "*"
 ordering = "AFTER"
 side = "BOTH"
+
+[[dependencies.vidlib]]
+modId = "flashback"
+type = "optional"
+versionRange = "*"
+ordering = "AFTER"
+side = "CLIENT"
 
 [[mixins]]
 config = "vidlib.mixins.json"

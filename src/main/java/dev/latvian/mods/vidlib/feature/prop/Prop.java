@@ -287,6 +287,12 @@ public class Prop {
 		}
 	}
 
+	public final void removeByCommand() {
+		if (removed == PropRemoveType.NONE) {
+			removed = PropRemoveType.COMMAND;
+		}
+	}
+
 	public final PropRemoveType getRemovedType() {
 		return removed;
 	}

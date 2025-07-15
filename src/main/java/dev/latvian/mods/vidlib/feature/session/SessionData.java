@@ -7,14 +7,25 @@ import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
+import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverrideValue;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
+import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToClient;
+import dev.latvian.mods.vidlib.feature.misc.RefreshNamePayload;
+import dev.latvian.mods.vidlib.feature.misc.SyncPlayerTagsPayload;
+import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
+import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
+import dev.latvian.mods.vidlib.feature.registry.SyncRegistryPayload;
 import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
+import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -147,5 +158,67 @@ public class SessionData {
 	}
 
 	public void refreshListedPlayers() {
+	}
+
+	/**
+	 * syncType 0 = reload
+	 * syncType 1 = flashback snapshot
+	 * syncType 2 = login
+	 */
+	public void sync(S2CPacketBundleBuilder packets, Player player, int syncType) {
+		var level = player.level();
+		var environment = level.getEnvironment();
+		var time = level.getGameTime();
+
+		packets.s2c(new ClientboundSetTimePacket(time, level.getDayTime(), level.vl$getTickDayTime()));
+
+		for (var reg : SyncedRegistry.ALL.values()) {
+			packets.s2c(new SyncRegistryPayload(reg, Map.copyOf(reg.registry().getMap())));
+		}
+
+		packets.s2c(new SyncGlobalNumberVariablesPayload(environment.globalVariables()));
+
+		updateOverrides(player);
+
+		if (syncType > 0) {
+			player.refreshDisplayName();
+
+			if (player instanceof ServerPlayer serverPlayer) {
+				serverPlayer.refreshTabListName();
+			}
+		}
+
+		environment.sync(packets);
+
+		dataMap.syncAll(packets, player, SyncPlayerDataPayload::new);
+
+		if (syncType > 0) {
+			packets.s2c(new RefreshNamePayload(player.getUUID(), player.getNickname()));
+		}
+
+		for (var s : environment.vl$getAllSessionData()) {
+			packets.s2c(new SyncPlayerTagsPayload(s.uuid, List.copyOf(s.getTags(time))));
+
+			if (!s.uuid.equals(player.getUUID())) {
+				packets.s2c(new SyncPlayerInputToClient(s.uuid, s.input));
+				s.dataMap.syncAll(packets, null, SyncPlayerDataPayload::new);
+			}
+		}
+
+		if (syncType > 0) {
+			for (var list : level.getProps().propLists.values()) {
+				if (syncType == 1) {
+					packets.s2c(new RemoveAllPropsPayload(list.type, PropRemoveType.LOGIN));
+				}
+
+				for (var prop : list) {
+					packets.s2c(prop.createAddPacket());
+				}
+			}
+		}
+	}
+
+	public Set<String> getTags(long gameTime) {
+		return Set.of();
 	}
 }

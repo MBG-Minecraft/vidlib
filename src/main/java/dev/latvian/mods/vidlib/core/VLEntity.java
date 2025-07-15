@@ -11,6 +11,7 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.S2CEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.location.Location;
+import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
@@ -305,5 +306,8 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 
 	default boolean isItemEntity() {
 		return this instanceof ItemEntity;
+	}
+
+	default void replaySnapshot(S2CPacketBundleBuilder packets) {
 	}
 }

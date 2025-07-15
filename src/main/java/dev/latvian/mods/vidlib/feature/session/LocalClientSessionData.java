@@ -144,6 +144,14 @@ public class LocalClientSessionData extends ClientSessionData {
 		return scheduledTaskHandler;
 	}
 
+	@ApiStatus.Internal
+	public List<ClientSessionData> getAllClientSessionData() {
+		var list = new ArrayList<ClientSessionData>(remoteSessionData.size() + 1);
+		list.add(this);
+		list.addAll(remoteSessionData.values());
+		return list;
+	}
+
 	@Override
 	public void updateOverrides(Player player) {
 		super.updateOverrides(player);

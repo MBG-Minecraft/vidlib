@@ -22,7 +22,7 @@ public interface SyncCommand {
 
 	private static int sync(Collection<ServerPlayer> players) {
 		for (var player : players) {
-			VidLib.sync(player, true);
+			VidLib.sync(player, 0);
 		}
 
 		return 1;

@@ -59,4 +59,20 @@ public class S2CPacketBundleBuilder implements VLS2CPacketConsumer {
 			}
 		}
 	}
+
+	public void sendUnbundled(VLS2CPacketConsumer other) {
+		for (var packet : list) {
+			sendUnbundled0(other, packet);
+		}
+	}
+
+	private void sendUnbundled0(VLS2CPacketConsumer other, Packet<? super ClientGamePacketListener> packet) {
+		if (packet instanceof ClientboundBundlePacket bundle) {
+			for (var packet1 : bundle.subPackets()) {
+				sendUnbundled0(other, packet1);
+			}
+		} else {
+			other.s2c(packet);
+		}
+	}
 }

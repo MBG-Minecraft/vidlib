@@ -34,6 +34,9 @@ public abstract class ClientLevelMixin implements VLClientLevel {
 	@Shadow
 	protected abstract LevelEntityGetter<Entity> getEntities();
 
+	@Shadow
+	private boolean tickDayTime;
+
 	@Override
 	public ClientProps getProps() {
 		if (vl$props == null || vl$props.level != vl$level()) {
@@ -57,5 +60,10 @@ public abstract class ClientLevelMixin implements VLClientLevel {
 	@Redirect(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getFluidState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;"))
 	private FluidState vl$getFluidState(ClientLevel level, BlockPos pos) {
 		return level.vl$overrideFluidState(pos);
+	}
+
+	@Override
+	public boolean vl$getTickDayTime() {
+		return tickDayTime;
 	}
 }

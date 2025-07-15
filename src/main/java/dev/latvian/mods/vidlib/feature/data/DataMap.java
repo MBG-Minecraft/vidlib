@@ -10,7 +10,6 @@ import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -158,7 +157,7 @@ public class DataMap {
 		}
 	}
 
-	public void syncAll(VLS2CPacketConsumer target, @Nullable ServerPlayer selfPlayer, BiFunction<UUID, List<DataMapValue>, SimplePacketPayload> factory) {
+	public void syncAll(VLS2CPacketConsumer target, @Nullable Player selfPlayer, BiFunction<UUID, List<DataMapValue>, SimplePacketPayload> factory) {
 		var list = new ArrayList<DataMapValue>();
 
 		if (map != null) {
@@ -174,7 +173,7 @@ public class DataMap {
 		}
 	}
 
-	public void sync(VLS2CPacketConsumer packetsToEveryone, @Nullable ServerPlayer selfPlayer, BiFunction<UUID, List<DataMapValue>, SimplePacketPayload> factory) {
+	public void sync(VLS2CPacketConsumer packetsToEveryone, @Nullable Player selfPlayer, BiFunction<UUID, List<DataMapValue>, SimplePacketPayload> factory) {
 		if (map == null) {
 			return;
 		}

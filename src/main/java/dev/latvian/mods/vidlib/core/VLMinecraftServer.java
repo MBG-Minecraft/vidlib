@@ -9,6 +9,7 @@ import dev.latvian.mods.vidlib.feature.clock.SyncClocksPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.misc.MarkerData;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.RemoveZonePayload;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
@@ -26,6 +27,7 @@ import net.neoforged.fml.loading.FMLPaths;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,14 +62,8 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	}
 
 	@ApiStatus.Internal
-	default void sync(S2CPacketBundleBuilder packets, ServerPlayer player) {
-		getServerData().syncAll(packets, null, (uuid, updates) -> new SyncServerDataPayload(updates));
-		packets.s2c(new SyncClocksPayload(vl$getClocks()));
-	}
-
-	@ApiStatus.Internal
 	default void vl$playerJoined(ServerPlayer player) {
-		VidLib.sync(player, true);
+		VidLib.sync(player, 2);
 		player.server.marker(new MarkerData("player/logged_in", player));
 	}
 
@@ -139,10 +135,6 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 		rules.getRule(GameRules.RULE_DO_TRADER_SPAWNING).set(false, server);
 		rules.getRule(GameRules.RULE_DO_WARDEN_SPAWNING).set(false, server);
 		rules.getRule(GameRules.RULE_GLOBAL_SOUND_EVENTS).set(false, server);
-	}
-
-	default Map<ResourceLocation, ClockValue> vl$getClocks() {
-		throw new NoMixinException(this);
 	}
 
 	default void setClock(ResourceLocation id, ClockValue value) {
@@ -248,5 +240,17 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	@Override
 	default void syncGlobalVariables() {
 		s2c(new SyncGlobalNumberVariablesPayload(globalVariables()));
+	}
+
+	@Override
+	default List<ServerSessionData> vl$getAllSessionData() {
+		var players = vl$self().getPlayerList().getPlayers();
+		var list = new ArrayList<ServerSessionData>(players.size());
+
+		for (var player : players) {
+			list.add(player.vl$sessionData());
+		}
+
+		return list;
 	}
 }

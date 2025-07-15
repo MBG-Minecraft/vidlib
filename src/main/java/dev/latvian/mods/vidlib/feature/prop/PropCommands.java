@@ -93,7 +93,7 @@ public interface PropCommands {
 			killed = list.size();
 
 			for (var prop : list) {
-				prop.removed = PropRemoveType.COMMAND;
+				prop.removeByCommand();
 			}
 
 			source.getLevel().s2c(new RemoveAllPropsPayload(list.type, PropRemoveType.COMMAND));
@@ -107,7 +107,7 @@ public interface PropCommands {
 
 			for (var prop : list) {
 				if (prop.type == type) {
-					prop.removed = PropRemoveType.COMMAND;
+					prop.removeByCommand();
 					killed++;
 				}
 			}

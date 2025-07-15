@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
+import dev.latvian.mods.vidlib.feature.misc.FlashbackIntegration;
 import dev.latvian.mods.vidlib.feature.misc.MarkerData;
 import dev.latvian.mods.vidlib.feature.misc.MarkerPayload;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
@@ -51,16 +52,19 @@ public class VidLib {
 	}
 
 	public static void setupSync() {
+		if (ModList.get().isLoaded("flashback")) {
+			FlashbackIntegration.init();
+		}
 	}
 
-	public static void sync(ServerPlayer player, boolean login) {
+	public static void sync(ServerPlayer player, int syncType) {
 		if (player.level().isReplayLevel()) {
 			return;
 		}
 
 		var packets = new S2CPacketBundleBuilder(player.level());
 		packets.s2c(new MarkerPayload(new MarkerData("sync", player)).toS2C(player.level()));
-		player.vl$sessionData().sync(packets, player, login);
+		player.vl$sessionData().sync(packets, player, syncType);
 		packets.send(player);
 	}
 }

@@ -14,6 +14,7 @@ import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeInstance;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
+import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.cutscene.ClientCutscene;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneScreen;
@@ -36,6 +37,7 @@ import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesIdData;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.VidLibSoundInstance;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
@@ -585,5 +587,15 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	default void runClientCommand(String command) {
 		vl$self().player.connection.sendCommand(command.startsWith("/") ? command.substring(1) : command);
+	}
+
+	@Override
+	default List<ClientSessionData> vl$getAllSessionData() {
+		return vl$self().player.vl$sessionData().getAllClientSessionData();
+	}
+
+	@Override
+	default Map<ResourceLocation, ClockValue> vl$getClocks() {
+		return vl$self().player.vl$sessionData().clocks;
 	}
 }
