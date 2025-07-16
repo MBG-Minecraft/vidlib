@@ -2,11 +2,16 @@ package dev.latvian.mods.vidlib.feature.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import dev.latvian.mods.vidlib.feature.canvas.Canvas;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.TriState;
+
+import java.util.function.BiFunction;
 
 public interface VidLibRenderTypes {
 	TexturedRenderType GUI = TexturedRenderType.internal(
@@ -82,4 +87,19 @@ public interface VidLibRenderTypes {
 			.setOutputState(RenderStateShard.OUTLINE_TARGET)
 			.createCompositeState(RenderType.OutlineProperty.IS_OUTLINE)
 	));
+
+	BiFunction<ResourceLocation, Boolean, RenderType> PLAYER_OUTLINE = Util.memoize(
+		(texture, cull) -> RenderType.create(
+			"outline",
+			1536,
+			cull ? RenderPipelines.OUTLINE_CULL : RenderPipelines.OUTLINE_NO_CULL,
+			RenderType.CompositeState.builder()
+				.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
+				.setOutputState(new RenderStateShard.OutputStateShard("player_outline_target", () -> {
+					var rendertarget = Canvas.PLAYER_OUTLINE.getTargetOrNull();
+					return rendertarget != null ? rendertarget : Minecraft.getInstance().getMainRenderTarget();
+				}))
+				.createCompositeState(RenderType.OutlineProperty.IS_OUTLINE)
+		)
+	);
 }

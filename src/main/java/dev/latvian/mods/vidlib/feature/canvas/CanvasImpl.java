@@ -214,8 +214,8 @@ public class CanvasImpl {
 		int y = 5;
 		var buffers = mc.renderBuffers().bufferSource();
 		float scale = 0.5F;
-		int w = (int) (160F * scale);
-		int h = (int) (90F * scale);
+		int w = (int) (256F * scale);
+		int h = (int) (144F * scale);
 
 		for (var canvas : ENABLED) {
 			int x = 5;

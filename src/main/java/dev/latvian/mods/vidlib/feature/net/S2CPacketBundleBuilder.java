@@ -61,6 +61,10 @@ public class S2CPacketBundleBuilder implements VLS2CPacketConsumer {
 	}
 
 	public void sendUnbundled(VLS2CPacketConsumer other) {
+		if (list == null || list.isEmpty()) {
+			return;
+		}
+
 		for (var packet : list) {
 			sendUnbundled0(other, packet);
 		}

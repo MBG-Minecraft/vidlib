@@ -23,4 +23,5 @@ public class VidLibConfig {
 	public static int serverRenderDistance = 32;
 	public static boolean fastArrowDespawn = true;
 	public static boolean arrowTrails = true;
+	public static boolean seeThroughEntityOutline = true;
 }

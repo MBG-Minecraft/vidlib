@@ -9,6 +9,7 @@ import com.mojang.blaze3d.resource.ResourceHandle;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.klib.gl.GLDebugLog;
 import dev.latvian.mods.vidlib.VidLibConfig;
+import dev.latvian.mods.vidlib.core.VLOutlineBufferSource;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
@@ -23,12 +24,14 @@ import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LevelTargetBundle;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.OutlineBufferSource;
 import net.minecraft.client.renderer.ViewArea;
 import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
@@ -184,5 +187,10 @@ public abstract class LevelRendererMixin {
 	@Nullable
 	public RenderTarget entityOutlineTarget() {
 		return Canvas.ENTITY_OUTLINE.getTargetOrNull();
+	}
+
+	@Inject(method = "renderEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/OutlineBufferSource;setColor(IIII)V"))
+	private void vl$renderEntitiesSetColor(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, Camera camera, DeltaTracker deltaTracker, List<Entity> entities, CallbackInfo ci, @Local OutlineBufferSource outlineBuffer, @Local Entity entity) {
+		((VLOutlineBufferSource) outlineBuffer).vl$setPlayer(entity instanceof Player);
 	}
 }
