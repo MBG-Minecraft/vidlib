@@ -24,4 +24,5 @@ public class VidLibConfig {
 	public static boolean fastArrowDespawn = true;
 	public static boolean arrowTrails = true;
 	public static boolean seeThroughEntityOutline = true;
+	public static boolean endBatchesBeforeOutline = false;
 }
