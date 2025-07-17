@@ -37,4 +37,8 @@ public interface StringUtils {
 		chars[0] = Character.toUpperCase(chars[0]);
 		return new String(chars);
 	}
+
+	static String timer(long millis) {
+		return "%02d:%02d:%03d".formatted(millis / 60000L, (millis / 1000L) % 60, millis % 1000L);
+	}
 }

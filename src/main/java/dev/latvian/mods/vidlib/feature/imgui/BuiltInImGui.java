@@ -24,7 +24,6 @@ public class BuiltInImGui {
 	public static final MenuItem OPEN = MenuItem.menu(ImIcons.OPEN, "Open", (graphics, list) -> {
 		list.add(MenuItem.item(ImIcons.MEMORY, "Memory Usage", MemoryUsagePanel.INSTANCE));
 		list.add(MenuItem.item(ImIcons.CODE, "Command History", CommandHistoryPanel.INSTANCE));
-		list.add(MenuItem.item(ImIcons.TIMELAPSE, "Stopwatch", StopwatchPanel.INSTANCE));
 		list.add(MenuItem.item(ImIcons.TIMELAPSE, "New Stopwatch", g -> StopwatchPanel.openNew()));
 		list.add(MenuItem.menu(ImIcons.APERTURE, "Canvas", CanvasPanel::menu));
 		list.add(MenuItem.item(ImIcons.PLAY, "Sounds", BuiltInImGui.showSounds != null, g -> BuiltInImGui.showSounds = false));
@@ -87,6 +86,10 @@ public class BuiltInImGui {
 			VidLibClientOptions.SHOW_ANCHOR.set(!VidLibClientOptions.getShowAnchor());
 			g.mc.options.save();
 		}).enabled(graphics.isAdmin));
+
+		list.add(MenuItem.SEPARATOR);
+
+		list.add(MenuItem.item(ImIcons.TIMELAPSE, "Stopwatch", GlobalStopwatchPanel.INSTANCE).enabled(graphics.inGame));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.ShowDropdown(graphics, list));
 	}).remainOpen(true);

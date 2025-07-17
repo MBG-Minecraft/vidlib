@@ -41,7 +41,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.network.connection.ConnectionType;
@@ -461,10 +460,6 @@ public class Prop {
 		return true;
 	}
 
-	public boolean canInteract(@Nullable Entity entity) {
-		return true;
-	}
-
 	public boolean isCollidingWith(@Nullable Entity entity, AABB collisionBox) {
 		if (!canCollide(entity)) {
 			return false;
@@ -477,16 +472,20 @@ public class Prop {
 		shapes.add(Shapes.create(pos.x - width / 2D, pos.y, pos.z - width / 2D, pos.x + width / 2D, pos.y + height, pos.z + width / 2D));
 	}
 
-	public List<AABB> clipBoxes(@Nullable Entity entity) {
+	public boolean canInteract(@Nullable Entity entity) {
+		return true;
+	}
+
+	public List<AABB> getClipBoxes(@Nullable Entity entity) {
 		return List.of(new AABB(pos.x - width / 2D, pos.y, pos.z - width / 2D, pos.x + width / 2D, pos.y + height, pos.z + width / 2D));
 	}
 
 	@Nullable
 	public PropHitResult clip(Line ray, ClipContext ctx) {
-		var entity = ctx.collisionContext instanceof EntityCollisionContext c ? c.getEntity() : null;
+		var entity = ctx.getEntity();
 
 		if (canInteract(entity)) {
-			var hit = AABB.clip(clipBoxes(entity), ray.start(), ray.end(), BlockPos.ZERO);
+			var hit = AABB.clip(getClipBoxes(entity), ray.start(), ray.end(), BlockPos.ZERO);
 
 			if (hit != null && hit.getType() == HitResult.Type.BLOCK) {
 				return new PropHitResult(this, hit.getLocation(), hit.getDirection(), BlockPos.containing(hit.getLocation()), false);

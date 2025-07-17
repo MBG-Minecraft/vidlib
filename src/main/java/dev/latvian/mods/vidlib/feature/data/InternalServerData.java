@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.data;
 
+import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
@@ -18,4 +19,6 @@ public interface InternalServerData {
 	DataKey<Boolean> HIDE_PLUMBOBS = DataKey.SERVER.createDefaultBoolean("hide_plumbobs", false);
 	DataKey<List<ChancedParticle>> ENVIRONMENT_EFFECTS = DataKey.SERVER.createDefault("environment_effects", ChancedParticle.LIST_DATA_TYPE, List.of());
 	DataKey<NameRenderType> NAME_RENDER_TYPE = DataKey.SERVER.createDefault("name_render_type", NameRenderType.DATA_TYPE, NameRenderType.DEFAULT);
+	DataKey<Long> GLOBAL_STOPWATCH = DataKey.SERVER.createDefault("name_render_type", DataTypes.VAR_LONG, 0L);
+	DataKey<Long> GLOBAL_STOPWATCH_START = DataKey.SERVER.createDefault("name_render_type", DataTypes.VAR_LONG, 0L);
 }

@@ -7,6 +7,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.Event;
 
+import java.util.List;
+
 public class ZoneEvent extends Event {
 	public static class EntityEvent extends ZoneEvent {
 		private final ZoneInstance zoneInstance;
@@ -58,6 +60,19 @@ public class ZoneEvent extends Event {
 
 		public ZoneClipResult getClip() {
 			return clip;
+		}
+	}
+
+	public static class Generate extends ZoneEvent {
+		private final List<ZoneContainer> zoneContainers;
+
+		public Generate(List<ZoneContainer> zoneContainers) {
+			this.zoneContainers = zoneContainers;
+		}
+
+		public void add(ZoneContainer zoneContainer) {
+			zoneContainers.add(zoneContainer);
+			zoneContainer.generated = true;
 		}
 	}
 

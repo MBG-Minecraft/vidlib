@@ -11,6 +11,7 @@
 		"BlockInWorldMixin",
 		"BlockStateMixin",
 		"ChunkMapMixin",
+		"ClipContextMixin",
 		"CollisionGetterMixin",
 		"CommandSourceStackMixin",
 		"ComponentMixin",

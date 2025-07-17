@@ -34,7 +34,13 @@ public class ZoneContainer implements Comparable<ZoneContainer> {
 			int tags = buf.readVarInt();
 
 			for (int i = 0; i < tags; i++) {
-				container.tags.add(buf.readUtf());
+				var tag = buf.readUtf();
+
+				if (tag.equals("_g")) {
+					container.generated = true;
+				} else {
+					container.tags.add(tag);
+				}
 			}
 
 			int count = buf.readVarInt();
@@ -52,7 +58,11 @@ public class ZoneContainer implements Comparable<ZoneContainer> {
 			ResourceLocation.STREAM_CODEC.encode(buf, value.id);
 			MCStreamCodecs.DIMENSION.encode(buf, value.dimension);
 
-			buf.writeVarInt(value.tags.size());
+			buf.writeVarInt(value.tags.size() + (value.generated ? 1 : 0));
+
+			if (value.generated) {
+				buf.writeUtf("_g");
+			}
 
 			for (var tag : value.tags) {
 				buf.writeUtf(tag);
@@ -79,6 +89,7 @@ public class ZoneContainer implements Comparable<ZoneContainer> {
 	public final Set<String> tags;
 	public int priority;
 	public final Int2ObjectOpenHashMap<List<ZoneInstance>> entityZones;
+	boolean generated;
 
 	public ZoneContainer(ResourceLocation id, ResourceKey<Level> dimension) {
 		this.id = id;
@@ -88,6 +99,11 @@ public class ZoneContainer implements Comparable<ZoneContainer> {
 		this.tags = new LinkedHashSet<>();
 		this.priority = 0;
 		this.entityZones = new Int2ObjectOpenHashMap<>();
+		this.generated = false;
+	}
+
+	public ZoneContainer add(Zone zone) {
+		return add(zone, zone.computeUUID());
 	}
 
 	public ZoneContainer add(Zone zone, UUID uuid) {
@@ -215,5 +231,9 @@ public class ZoneContainer implements Comparable<ZoneContainer> {
 				hasPlayerOverrides = true;
 			}
 		}
+	}
+
+	public boolean isGenerated() {
+		return generated;
 	}
 }

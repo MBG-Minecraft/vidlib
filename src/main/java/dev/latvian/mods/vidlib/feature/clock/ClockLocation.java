@@ -33,6 +33,6 @@ public record ClockLocation(
 		Direction.CODEC.fieldOf("facing").forGetter(ClockLocation::facing),
 		Codec.STRING.optionalFieldOf("format", "%02d:%02d").forGetter(ClockLocation::format),
 		Color.CODEC.optionalFieldOf("color", Color.WHITE).forGetter(ClockLocation::color),
-		Codec.BOOL.optionalFieldOf("fullbright", false).forGetter(ClockLocation::fullbright)
+		Codec.BOOL.optionalFieldOf("fullbright", true).forGetter(ClockLocation::fullbright)
 	).apply(instance, ClockLocation::new));
 }

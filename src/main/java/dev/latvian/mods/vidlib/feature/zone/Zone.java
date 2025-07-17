@@ -66,6 +66,31 @@ public record Zone(
 		Zone::new
 	);
 
+	public Zone(ZoneShape shape, Color color, EntityFilter entityFilter, CompoundTag data) {
+		this(
+			shape,
+			color,
+			entityFilter,
+			data,
+			Map.of(),
+			EntityFilter.NONE.instance(),
+			Set.of(),
+			false,
+			ZoneFluid.NONE,
+			Optional.empty(),
+			ZoneFog.NONE
+		);
+	}
+
+	public Zone(ZoneShape shape, Color color) {
+		this(
+			shape,
+			color,
+			EntityFilter.PLAYER.instance(),
+			Empty.COMPOUND_TAG
+		);
+	}
+
 	public void writeUUID(FriendlyByteBuf buf) {
 		shape.writeUUID(buf);
 		buf.writeInt(color.argb());

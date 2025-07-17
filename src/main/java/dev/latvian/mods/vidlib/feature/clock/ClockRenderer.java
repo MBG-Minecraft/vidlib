@@ -7,7 +7,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LightLayer;
-import org.joml.Vector3f;
 
 public class ClockRenderer {
 	public static void render(FrameInfo frame, ClockValue value, ClockLocation location) {
@@ -36,7 +35,6 @@ public class ClockRenderer {
 
 		ms.scale(location.scale(), -location.scale(), -1F);
 		var m4 = ms.last().pose();
-		var normal = new Vector3f(0F, -1F, 0F).mul(ms.last().normal());
 
 		var buffer = mc.renderBuffers().bufferSource().getBuffer(RenderType.entityCutoutNoCull(font.texture()));
 		var x = -width / 2F + 1F;
@@ -64,10 +62,10 @@ public class ClockRenderer {
 			float cw = index == 10 ? font.actualSeparatorWidth() : font.size().x();
 			float ch = font.size().y();
 
-			buffer.addVertex(m4, x, y, z).setColor(cr, cg, cb, ca).setUv(u0, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(normal.x, normal.y, normal.z);
-			buffer.addVertex(m4, x + cw, y, z).setColor(cr, cg, cb, ca).setUv(u1, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(normal.x, normal.y, normal.z);
-			buffer.addVertex(m4, x + cw, y + ch, z).setColor(cr, cg, cb, ca).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(normal.x, normal.y, normal.z);
-			buffer.addVertex(m4, x, y + ch, z).setColor(cr, cg, cb, ca).setUv(u0, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(normal.x, normal.y, normal.z);
+			buffer.addVertex(m4, x, y, z).setColor(cr, cg, cb, ca).setUv(u0, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0F, 1F, 0F);
+			buffer.addVertex(m4, x + cw, y, z).setColor(cr, cg, cb, ca).setUv(u1, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0F, 1F, 0F);
+			buffer.addVertex(m4, x + cw, y + ch, z).setColor(cr, cg, cb, ca).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0F, 1F, 0F);
+			buffer.addVertex(m4, x, y + ch, z).setColor(cr, cg, cb, ca).setUv(u0, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0F, 1F, 0F);
 
 			x += cw + 1F;
 		}

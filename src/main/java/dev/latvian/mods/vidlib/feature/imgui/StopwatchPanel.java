@@ -1,24 +1,23 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.util.StringUtils;
 import imgui.ImGui;
 
 import java.util.Locale;
 import java.util.UUID;
 
 public class StopwatchPanel extends AdminPanel {
-	public static final StopwatchPanel INSTANCE = new StopwatchPanel("stopwatch", false);
-
 	public static void openNew() {
-		new StopwatchPanel("stopwatch-" + UUID.randomUUID().toString().toLowerCase(Locale.ROOT), true).open();
+		new StopwatchPanel("stopwatch-" + UUID.randomUUID().toString().toLowerCase(Locale.ROOT)).open();
 	}
 
 	public long stopwatch = 0L;
 	public long stopwatchStart = 0L;
 
-	public StopwatchPanel(String id, boolean ephemeral) {
+	public StopwatchPanel(String id) {
 		super(id, "Stopwatch");
-		this.ephemeral = ephemeral;
+		this.ephemeral = true;
 		this.style = AdminPanelStyle.MINIMAL;
 	}
 
@@ -48,15 +47,11 @@ public class StopwatchPanel extends AdminPanel {
 		}
 
 		ImGui.sameLine();
+		ImGui.text(StringUtils.timer(sw));
+		ImGui.sameLine();
 
-		ImGui.text("%02d:%02d:%03d".formatted(sw / 60000L, (sw / 1000L) % 60, sw % 1000L));
-
-		if (this != INSTANCE) {
-			ImGui.sameLine();
-
-			if (ImGui.smallButton(ImIcons.CLOSE.toString())) {
-				close();
-			}
+		if (ImGui.smallButton(ImIcons.CLOSE.toString())) {
+			close();
 		}
 	}
 }

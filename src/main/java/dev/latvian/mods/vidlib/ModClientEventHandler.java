@@ -94,11 +94,26 @@ public class ModClientEventHandler {
 	@SubscribeEvent
 	public static void registerGuiLayers(RegisterGuiLayersEvent event) {
 		event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, VidLib.id("above_boss"), ModClientEventHandler::drawAboveBossOverlay);
+		event.registerAboveAll(VidLib.id("fade"), ModClientEventHandler::drawFade);
 	}
 
 	public static void drawAboveBossOverlay(GuiGraphics graphics, DeltaTracker deltaTracker) {
 		var mc = Minecraft.getInstance();
 		ProgressBarRenderer.draw(mc, graphics, deltaTracker);
 		CanvasImpl.drawPreview(mc, graphics);
+	}
+
+	public static void drawFade(GuiGraphics graphics, DeltaTracker deltaTracker) {
+		var mc = Minecraft.getInstance();
+		int width = mc.getWindow().getGuiScaledWidth();
+		int height = mc.getWindow().getGuiScaledHeight();
+
+		if (mc.player != null) {
+			var session = mc.player.vl$sessionData();
+
+			if (session.screenFade != null) {
+				session.screenFade.draw(graphics, deltaTracker.getGameTimeDeltaPartialTick(true), width, height);
+			}
+		}
 	}
 }

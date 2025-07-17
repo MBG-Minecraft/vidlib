@@ -79,5 +79,8 @@
 	],
 	"com/mojang/blaze3d/platform/Window": [
 		"dev/latvian/mods/vidlib/core/VLWindow"
+	],
+	"net/minecraft/world/level/ClipContext": [
+		"dev/latvian/mods/vidlib/core/VLClipContext"
 	]
 }

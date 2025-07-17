@@ -70,6 +70,8 @@ public class ZoneLoader extends JsonReloadListener {
 			}
 		}
 
+		NeoForge.EVENT_BUS.post(new ZoneEvent.Generate(list));
+
 		list.sort(null);
 		BY_DIMENSION.clear();
 

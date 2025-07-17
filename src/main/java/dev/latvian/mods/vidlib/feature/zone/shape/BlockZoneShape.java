@@ -25,6 +25,10 @@ public record BlockZoneShape(BlockPos start, BlockPos end, AABB box) implements 
 		this(start, end, AABB.encapsulatingFullBlocks(start, end));
 	}
 
+	public BlockZoneShape(BlockPos pos) {
+		this(pos, pos);
+	}
+
 	@Override
 	public SimpleRegistryType<?> type() {
 		return TYPE;

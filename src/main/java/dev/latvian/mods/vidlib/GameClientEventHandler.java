@@ -365,6 +365,10 @@ public class GameClientEventHandler {
 						component.append(Component.literal("[" + zoneClip.instance().index + "]").withStyle(ChatFormatting.GREEN));
 					}
 
+					if (zoneClip.instance().container.isGenerated()) {
+						component.append(Component.literal("*").withStyle(ChatFormatting.LIGHT_PURPLE));
+					}
+
 					ScreenText.RENDER.topLeft.add(component);
 
 					var zoneTag = zoneClip.instance().zone.data();
@@ -394,15 +398,6 @@ public class GameClientEventHandler {
 				}
 
 				graphics.pose().popPose();
-			}
-		}
-
-		if (session.screenFade != null) {
-			float t = Mth.lerp(delta, session.screenFade.prevTick, session.screenFade.tick) / (float) session.screenFade.totalTicks;
-			float a = Math.clamp(Mth.lerp(delta, session.screenFade.prevAlpha, session.screenFade.alpha), 0F, 1F);
-
-			if (a > 0F) {
-				graphics.fill(0, 0, width, height, 1000, session.screenFade.color.get(t).withAlpha(a).argb());
 			}
 		}
 	}
