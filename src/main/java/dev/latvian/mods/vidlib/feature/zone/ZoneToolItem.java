@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import net.minecraft.client.Minecraft;
@@ -36,8 +37,12 @@ public class ZoneToolItem implements VidLibTool {
 
 	@Override
 	public boolean rightClick(Player player, ItemStack item, @Nullable BlockHitResult hit) {
-		if (player.level().isClientSide()) {
+		if (player.level().isClientSide() && !player.isShiftKeyDown()) {
 			clickedOnZone(player);
+		}
+
+		if (player.level().isServerSide() && player.isShiftKeyDown()) {
+			player.level().getEnvironment().removeZone(ID.idFromString("video:leviathan"), 0);
 		}
 
 		return true;

@@ -6,14 +6,13 @@ import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -73,24 +72,13 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box) implements Zo
 	}
 
 	@Override
-	public boolean contains(Vec3 pos) {
-		if (box != null && !box.contains(pos)) {
+	public boolean contains(double x, double y, double z) {
+		if (box != null && !box.contains(x, y, z)) {
 			return false;
 		}
 
 		for (var zone : zoneShapes) {
-			if (zone.contains(pos)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	@Override
-	public boolean contains(Vec3i pos) {
-		for (var zone : zoneShapes) {
-			if (zone.contains(pos)) {
+			if (zone.contains(x, y, z)) {
 				return true;
 			}
 		}
@@ -170,12 +158,18 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box) implements Zo
 	}
 
 	@Override
-	public void writeUUID(FriendlyByteBuf buf) {
-		buf.writeUtf(type().id());
-		buf.writeVarInt(zoneShapes.size());
+	public ZoneShape move(double x, double y, double z) {
+		var shapes = new ArrayList<ZoneShape>(zoneShapes.size());
 
-		for (var zone : zoneShapes) {
-			zone.writeUUID(buf);
+		for (var shape : zoneShapes) {
+			shapes.add(shape.move(x, y, z));
 		}
+
+		return new ZoneShapeGroup(shapes, box.move(x, y, z));
+	}
+
+	@Override
+	public ZoneShape scale(double x, double y, double z) {
+		return this;
 	}
 }

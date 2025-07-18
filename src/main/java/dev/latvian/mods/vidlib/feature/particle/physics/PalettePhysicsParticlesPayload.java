@@ -5,9 +5,9 @@ import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 
-public record PhysicsParticlesIdPayload(PhysicsParticlesIdData data) implements SimplePacketPayload {
+public record PalettePhysicsParticlesPayload(PalettePhysicsParticlesData data) implements SimplePacketPayload {
 	@AutoPacket
-	public static final VidLibPacketType<PhysicsParticlesIdPayload> TYPE = VidLibPacketType.internal("physics_particles/id", PhysicsParticlesIdData.STREAM_CODEC.map(PhysicsParticlesIdPayload::new, PhysicsParticlesIdPayload::data));
+	public static final VidLibPacketType<PalettePhysicsParticlesPayload> TYPE = VidLibPacketType.internal("physics_particles/palette", PalettePhysicsParticlesData.STREAM_CODEC.map(PalettePhysicsParticlesPayload::new, PalettePhysicsParticlesPayload::data));
 
 	@Override
 	public VidLibPacketType<?> getType() {

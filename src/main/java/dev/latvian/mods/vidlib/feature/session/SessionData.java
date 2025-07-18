@@ -208,7 +208,7 @@ public class SessionData {
 		if (syncType > 0) {
 			for (var list : level.getProps().propLists.values()) {
 				if (syncType == 1) {
-					packets.s2c(new RemoveAllPropsPayload(list.type, PropRemoveType.LOGIN));
+					packets.s2c(new RemoveAllPropsPayload(list.type, PropRemoveType.REPLAY));
 				}
 
 				for (var prop : list) {

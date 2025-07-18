@@ -58,7 +58,7 @@ public class ZoneLoader extends JsonReloadListener {
 							VidLib.LOGGER.error("Error while parsing zone " + id + "[" + index + "]: " + decoded.error().get());
 						} else {
 							var zone = decoded.result().orElseThrow();
-							container.add(zone, zone.computeUUID());
+							container.add(zone);
 						}
 					}
 					index++;

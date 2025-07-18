@@ -341,7 +341,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 
 	private boolean isTransparent(int x, int y, int z) {
 		var s = blocks.get(BlockPos.asLong(x, y, z));
-		return s == null || !s.isVisible();
+		return s == null || s.isTransparent();
 	}
 
 	public StructureHolder shell() {

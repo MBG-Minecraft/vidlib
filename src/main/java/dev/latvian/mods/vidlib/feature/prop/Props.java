@@ -105,8 +105,4 @@ public abstract class Props<L extends Level> {
 		var result = create(context(type, PropSpawnType.DUMMY, level.getGameTime()), false, false, null, null, onCreated);
 		return result.isSuccess() ? result.getOrThrow() : null;
 	}
-
-	public void removeAll(PropListType type) {
-		propLists.get(type).removeAll();
-	}
 }

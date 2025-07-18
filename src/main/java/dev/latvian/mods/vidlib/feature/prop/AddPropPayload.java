@@ -9,7 +9,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 
 public record AddPropPayload(PropType<?> type, PropSpawnType spawnType, int id, long createdTime, byte[] update) implements SimplePacketPayload {
 	@AutoPacket
-	public static final VidLibPacketType<AddPropPayload> TYPE = VidLibPacketType.internal("add_prop", CompositeStreamCodec.of(
+	public static final VidLibPacketType<AddPropPayload> TYPE = VidLibPacketType.internal("prop/add", CompositeStreamCodec.of(
 		PropType.STREAM_CODEC, AddPropPayload::type,
 		PropSpawnType.STREAM_CODEC, AddPropPayload::spawnType,
 		ByteBufCodecs.VAR_INT, AddPropPayload::id,
@@ -30,9 +30,16 @@ public record AddPropPayload(PropType<?> type, PropSpawnType spawnType, int id, 
 	@Override
 	public void handle(Context ctx) {
 		var props = ctx.level().getProps();
-		var prop = type.factory().create(props.context(type, spawnType, createdTime));
-		prop.id = id;
-		prop.update(ctx.level().registryAccess(), update, true);
-		props.add(prop);
+
+		var oldProp = props.levelProps.get(id);
+
+		if (oldProp != null) {
+			oldProp.update(ctx.level().registryAccess(), update, true);
+		} else {
+			var prop = type.factory().create(props.context(type, spawnType, createdTime));
+			prop.id = id;
+			prop.update(ctx.level().registryAccess(), update, true);
+			props.add(prop);
+		}
 	}
 }

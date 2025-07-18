@@ -11,14 +11,16 @@ public class RotatedBoxZoneRenderer implements ZoneRenderer<RotatedBoxZoneShape>
 	public void render(RotatedBoxZoneShape shape, Context ctx) {
 		var ms = ctx.frame().poseStack();
 
-		var box = shape.getBoundingBox();
-		float minX = ctx.frame().x(box.minX);
-		float minY = ctx.frame().y(box.minY);
-		float minZ = ctx.frame().z(box.minZ);
-		float maxX = ctx.frame().x(box.maxX);
-		float maxY = ctx.frame().y(box.maxY);
-		float maxZ = ctx.frame().z(box.maxZ);
-		CuboidRenderer.lines(ms, minX, minY, minZ, maxX, maxY, maxZ, ctx.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Color.WHITE);
+		if (ctx.outerBounds()) {
+			var box = shape.getBoundingBox();
+			float minX = ctx.frame().x(box.minX);
+			float minY = ctx.frame().y(box.minY);
+			float minZ = ctx.frame().z(box.minZ);
+			float maxX = ctx.frame().x(box.maxX);
+			float maxY = ctx.frame().y(box.maxY);
+			float maxZ = ctx.frame().z(box.maxZ);
+			CuboidRenderer.lines(ms, minX, minY, minZ, maxX, maxY, maxZ, ctx.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Color.WHITE);
+		}
 
 		ms.pushPose();
 		ctx.frame().translate(shape.pos());

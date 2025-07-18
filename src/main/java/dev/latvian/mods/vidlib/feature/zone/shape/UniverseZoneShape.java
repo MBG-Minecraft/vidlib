@@ -5,8 +5,6 @@ import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -44,12 +42,7 @@ public class UniverseZoneShape implements ZoneShape {
 	}
 
 	@Override
-	public boolean contains(Vec3 pos) {
-		return true;
-	}
-
-	@Override
-	public boolean contains(Vec3i pos) {
+	public boolean contains(double x, double y, double z) {
 		return true;
 	}
 
@@ -79,8 +72,12 @@ public class UniverseZoneShape implements ZoneShape {
 	}
 
 	@Override
-	public void writeUUID(FriendlyByteBuf buf) {
-		buf.writeUtf(type().id());
-		buf.writeVarInt(42);
+	public ZoneShape move(double x, double y, double z) {
+		return this;
+	}
+
+	@Override
+	public ZoneShape scale(double x, double y, double z) {
+		return this;
 	}
 }

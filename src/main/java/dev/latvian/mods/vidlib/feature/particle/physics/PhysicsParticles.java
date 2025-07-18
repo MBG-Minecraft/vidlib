@@ -61,7 +61,7 @@ public class PhysicsParticles {
 	public void spawn() {
 		var clientProperties = VidLibBlockStateClientProperties.of(state);
 		var manager = clientProperties.getManager();
-		float density1 = data.density * state.vl$getDensity();
+		float density1 = data.ignoreBlockDensity ? data.density : (data.density * state.vl$getDensity());
 		int count = (int) density1;
 
 		if (density1 - count > 0) {

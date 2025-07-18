@@ -9,12 +9,13 @@ import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceLocation;
 
-public record RemoveZonePayload(ResourceLocation zone, int index) implements SimplePacketPayload {
+public record UpdateZonePayload(ResourceLocation zone, int index, Zone zoneData) implements SimplePacketPayload {
 	@AutoPacket
-	public static final VidLibPacketType<RemoveZonePayload> TYPE = VidLibPacketType.internal("zone/remove", CompositeStreamCodec.of(
-		ID.STREAM_CODEC, RemoveZonePayload::zone,
-		ByteBufCodecs.VAR_INT, RemoveZonePayload::index,
-		RemoveZonePayload::new
+	public static final VidLibPacketType<UpdateZonePayload> TYPE = VidLibPacketType.internal("zone/update", CompositeStreamCodec.of(
+		ID.STREAM_CODEC, UpdateZonePayload::zone,
+		ByteBufCodecs.VAR_INT, UpdateZonePayload::index,
+		Zone.STREAM_CODEC, UpdateZonePayload::zoneData,
+		UpdateZonePayload::new
 	));
 
 	@Override
@@ -24,6 +25,6 @@ public record RemoveZonePayload(ResourceLocation zone, int index) implements Sim
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.level().getEnvironment().removeZone(zone, index);
+		ctx.level().getEnvironment().updateZone(zone, index, zoneData);
 	}
 }

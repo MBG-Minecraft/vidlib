@@ -13,6 +13,7 @@ public interface VidLibClientOptions {
 	OptionInstance<Boolean> SHOW_FPS = OptionInstance.createBoolean("options.vidlib.show_fps", false);
 	OptionInstance<Boolean> SHOW_ANCHOR = OptionInstance.createBoolean("options.vidlib.show_anchor", false);
 	OptionInstance<Boolean> SHOW_ZONES = OptionInstance.createBoolean("options.vidlib.show_zones", false);
+	OptionInstance<Boolean> SHOW_ZONE_OUTER_BOUNDS = OptionInstance.createBoolean("options.vidlib.show_zone_outer_bounds", true);
 
 	OptionInstance<ZoneRenderType> ZONE_RENDER_TYPE = new OptionInstance<>(
 		"options.vidlib.zone_render_type",
@@ -50,6 +51,7 @@ public interface VidLibClientOptions {
 		SHOW_ANCHOR,
 		SHOW_FPS,
 		SHOW_ZONES,
+		SHOW_ZONE_OUTER_BOUNDS,
 		ZONE_RENDER_TYPE,
 	};
 
@@ -69,6 +71,10 @@ public interface VidLibClientOptions {
 		return SHOW_ZONES.get();
 	}
 
+	static boolean getShowZoneOuterBounds() {
+		return SHOW_ZONE_OUTER_BOUNDS.get();
+	}
+
 	static ZoneRenderType getZoneRenderType() {
 		return ZONE_RENDER_TYPE.get();
 	}
@@ -83,6 +89,7 @@ public interface VidLibClientOptions {
 		accessor.process("vidlib.show_fps", SHOW_FPS);
 		accessor.process("vidlib.show_anchor", SHOW_ANCHOR);
 		accessor.process("vidlib.show_zones", SHOW_ZONES);
+		accessor.process("vidlib.show_zone_outer_bounds", SHOW_ZONE_OUTER_BOUNDS);
 		accessor.process("vidlib.zone_render_type", ZONE_RENDER_TYPE);
 		accessor.process("vidlib.zone_block_filter", ZONE_BLOCK_FILTER);
 	}

@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.Range;
+import dev.latvian.mods.vidlib.feature.config.BooleanConfigValue;
 import dev.latvian.mods.vidlib.feature.config.ConfigValue;
 import dev.latvian.mods.vidlib.feature.config.FloatConfigValue;
 import dev.latvian.mods.vidlib.feature.config.RangeConfigValue;
@@ -30,6 +31,7 @@ public class PhysicsParticleData {
 	public static final float DEFAULT_DIRECTION = 0F;
 	public static final float DEFAULT_TILT = 0F;
 	public static final Range DEFAULT_SECTION = Range.of(0F, 360F);
+	public static final boolean DEFAULT_IGNORE_BLOCK_DENSITY = false;
 
 	public static final PhysicsParticleData DEFAULT = new PhysicsParticleData();
 
@@ -44,7 +46,8 @@ public class PhysicsParticleData {
 		Range.CODEC.optionalFieldOf("speed", DEFAULT_SPEED).forGetter(p -> p.speed),
 		Codec.FLOAT.optionalFieldOf("direction", DEFAULT_DIRECTION).forGetter(p -> p.direction),
 		Codec.FLOAT.optionalFieldOf("tilt", DEFAULT_TILT).forGetter(p -> p.tilt),
-		Range.CODEC.optionalFieldOf("section", DEFAULT_SECTION).forGetter(p -> p.section)
+		Range.CODEC.optionalFieldOf("section", DEFAULT_SECTION).forGetter(p -> p.section),
+		Codec.BOOL.optionalFieldOf("ignore_block_density", DEFAULT_IGNORE_BLOCK_DENSITY).forGetter(p -> p.ignoreBlockDensity)
 	).apply(instance, PhysicsParticleData::new));
 
 	public static final StreamCodec<ByteBuf, PhysicsParticleData> STREAM_CODEC = CompositeStreamCodec.of(
@@ -59,6 +62,7 @@ public class PhysicsParticleData {
 		ByteBufCodecs.FLOAT.optional(DEFAULT_DIRECTION), p -> p.direction,
 		ByteBufCodecs.FLOAT.optional(DEFAULT_TILT), p -> p.tilt,
 		Range.STREAM_CODEC.optional(DEFAULT_SECTION), p -> p.section,
+		ByteBufCodecs.BOOL, p -> p.ignoreBlockDensity,
 		PhysicsParticleData::new
 	);
 
@@ -75,7 +79,8 @@ public class PhysicsParticleData {
 		new RangeConfigValue<>("Speed", Range.of(0.1F, 10F), true, data -> data.speed, (data, v) -> data.speed = v),
 		new FloatConfigValue<>("Direction", Range.of(0F, 360F), true, data -> data.direction, (data, v) -> data.direction = v),
 		new FloatConfigValue<>("Tilt", Range.of(0F, 180F), true, data -> data.tilt, (data, v) -> data.tilt = v),
-		new RangeConfigValue<>("Section", Range.of(-360F, 360F), false, data -> data.section, (data, v) -> data.section = v)
+		new RangeConfigValue<>("Section", Range.of(-360F, 360F), false, data -> data.section, (data, v) -> data.section = v),
+		new BooleanConfigValue<>("Ignore Block Density", data -> data.ignoreBlockDensity, (data, v) -> data.ignoreBlockDensity = v)
 	);
 
 	public static final VLRegistry<PhysicsParticleData> REGISTRY = VLRegistry.createClient("physics_particle_data", PhysicsParticleData.class);
@@ -102,6 +107,7 @@ public class PhysicsParticleData {
 	public float direction = DEFAULT_DIRECTION;
 	public float tilt = DEFAULT_TILT;
 	public Range section = DEFAULT_SECTION;
+	public boolean ignoreBlockDensity = DEFAULT_IGNORE_BLOCK_DENSITY;
 
 	public PhysicsParticleData() {
 	}
@@ -117,7 +123,8 @@ public class PhysicsParticleData {
 		Range speed,
 		float direction,
 		float tilt,
-		Range section
+		Range section,
+		boolean ignoreBlockDensity
 	) {
 		this.density = density;
 		this.lifespan = lifespan;
@@ -130,6 +137,7 @@ public class PhysicsParticleData {
 		this.direction = direction;
 		this.tilt = tilt;
 		this.section = section;
+		this.ignoreBlockDensity = ignoreBlockDensity;
 	}
 
 	@Override
@@ -146,6 +154,7 @@ public class PhysicsParticleData {
 			", direction=" + direction +
 			", tilt=" + tilt +
 			", section=" + section +
+			", ignoreBlockDensity=" + ignoreBlockDensity +
 			']';
 	}
 }

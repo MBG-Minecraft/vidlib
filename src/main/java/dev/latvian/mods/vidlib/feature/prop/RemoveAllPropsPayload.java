@@ -8,7 +8,7 @@ import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 
 public record RemoveAllPropsPayload(PropListType type, PropRemoveType removeType) implements SimplePacketPayload {
 	@AutoPacket
-	public static final VidLibPacketType<RemoveAllPropsPayload> TYPE = VidLibPacketType.internal("remove_all_props", CompositeStreamCodec.of(
+	public static final VidLibPacketType<RemoveAllPropsPayload> TYPE = VidLibPacketType.internal("prop/remove_all", CompositeStreamCodec.of(
 		PropListType.STREAM_CODEC, RemoveAllPropsPayload::type,
 		PropRemoveType.STREAM_CODEC, RemoveAllPropsPayload::removeType,
 		RemoveAllPropsPayload::new
@@ -21,10 +21,6 @@ public record RemoveAllPropsPayload(PropListType type, PropRemoveType removeType
 
 	@Override
 	public void handle(Context ctx) {
-		var props = ctx.level().getProps().propLists.get(type);
-
-		for (var prop : props) {
-			prop.removed = removeType;
-		}
+		ctx.level().getProps().propLists.get(type).removeAll(removeType);
 	}
 }

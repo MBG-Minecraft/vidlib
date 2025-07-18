@@ -9,7 +9,7 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 
 public record PlayCutscenePayload(Cutscene cutscene, KNumberVariables variables) implements SimplePacketPayload {
 	@AutoPacket
-	public static final VidLibPacketType<PlayCutscenePayload> TYPE = VidLibPacketType.internal("play_cutscene", CompositeStreamCodec.of(
+	public static final VidLibPacketType<PlayCutscenePayload> TYPE = VidLibPacketType.internal("cutscene/play", CompositeStreamCodec.of(
 		Cutscene.DATA_TYPE.streamCodec(), PlayCutscenePayload::cutscene,
 		KNumberVariables.STREAM_CODEC, PlayCutscenePayload::variables,
 		PlayCutscenePayload::new

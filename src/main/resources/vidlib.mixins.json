@@ -78,6 +78,7 @@
 		"GlTextureMixin",
 		"GpuBufferMixin",
 		"GpuTextureMixin",
+		"GuiGraphicsMixin",
 		"GuiMixin",
 		"HumanoidArmorLayerMixin",
 		"IntegratedServerMixin",

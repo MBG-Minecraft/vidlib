@@ -12,6 +12,8 @@ import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.RemoveZonePayload;
+import dev.latvian.mods.vidlib.feature.zone.UpdateZonePayload;
+import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
@@ -171,16 +173,33 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void removeZone(UUID uuid) {
-		for (var container : ZoneContainer.REGISTRY.getMap().values()) {
-			container.remove(uuid);
+	default void removeZone(ResourceLocation zone, int index) {
+		var container = ZoneContainer.REGISTRY.get(zone);
+
+		if (container != null) {
+			container.remove(index);
 		}
 
 		for (var dim : ZoneLoader.BY_DIMENSION.values()) {
-			dim.remove(uuid);
+			dim.remove(zone, index);
 		}
 
-		s2c(new RemoveZonePayload(uuid));
+		s2c(new RemoveZonePayload(zone, index));
+	}
+
+	@Override
+	default void updateZone(ResourceLocation zone, int index, Zone zoneData) {
+		var container = ZoneContainer.REGISTRY.get(zone);
+
+		if (container != null) {
+			container.update(index, zoneData);
+		}
+
+		for (var dim : ZoneLoader.BY_DIMENSION.values()) {
+			dim.update(zone, index, zoneData);
+		}
+
+		s2c(new UpdateZonePayload(zone, index, zoneData));
 	}
 
 	@Override

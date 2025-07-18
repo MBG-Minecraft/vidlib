@@ -13,7 +13,6 @@ import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -103,12 +102,16 @@ public record RotatedBoxZoneShape(Vec3 pos, Vector3f size, Rotation rotation, Ma
 	}
 
 	@Override
-	public boolean contains(Vec3 p) {
-		var vec = new Vector3f((float) (p.x - pos.x), (float) (p.y - pos.y), (float) (p.z - pos.z)).mul(matrix);
-		var hsx = size.x() / 2F;
-		var hsy = size.y() / 2F;
-		var hsz = size.z() / 2F;
-		return vec.x >= -hsx && vec.x <= hsx && vec.y >= -hsy && vec.y <= hsy && vec.z >= -hsz && vec.z <= hsz;
+	public boolean contains(double x, double y, double z) {
+		if (box.contains(x, y, z)) {
+			var vec = new Vector3f((float) (x - pos.x), (float) (y - pos.y), (float) (z - pos.z)).mul(matrix);
+			var hsx = size.x() / 2F;
+			var hsy = size.y() / 2F;
+			var hsz = size.z() / 2F;
+			return vec.x >= -hsx && vec.x <= hsx && vec.y >= -hsy && vec.y <= hsy && vec.z >= -hsz && vec.z <= hsz;
+		}
+
+		return false;
 	}
 
 	@Override
@@ -126,16 +129,12 @@ public record RotatedBoxZoneShape(Vec3 pos, Vector3f size, Rotation rotation, Ma
 	}
 
 	@Override
-	public void writeUUID(FriendlyByteBuf buf) {
-		buf.writeUtf(type().id());
-		buf.writeDouble(pos.x());
-		buf.writeDouble(pos.y());
-		buf.writeDouble(pos.z());
-		buf.writeFloat(size.x());
-		buf.writeFloat(size.y());
-		buf.writeFloat(size.z());
-		buf.writeFloat(rotation.roll());
-		buf.writeFloat(rotation.pitch());
-		buf.writeFloat(rotation.yaw());
+	public ZoneShape move(double x, double y, double z) {
+		return of(pos.add(x, y, z), size, rotation);
+	}
+
+	@Override
+	public ZoneShape scale(double x, double y, double z) {
+		return of(pos, size.mul((float) x, (float) y, (float) z, new Vector3f()), rotation);
 	}
 }

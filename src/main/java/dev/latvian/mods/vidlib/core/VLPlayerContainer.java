@@ -31,6 +31,8 @@ import dev.latvian.mods.vidlib.feature.particle.SpawnTextParticlePayload;
 import dev.latvian.mods.vidlib.feature.particle.SpawnWindParticlesPayload;
 import dev.latvian.mods.vidlib.feature.particle.TextParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.WindData;
+import dev.latvian.mods.vidlib.feature.particle.physics.PalettePhysicsParticlesData;
+import dev.latvian.mods.vidlib.feature.particle.physics.PalettePhysicsParticlesPayload;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesIdData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesIdPayload;
@@ -224,6 +226,14 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 			getEnvironment().physicsParticles(data, spawnTime);
 		} else if (!data.blocks().isEmpty()) {
 			s2c(new PhysicsParticlesIdPayload(data));
+		}
+	}
+
+	default void physicsParticles(PalettePhysicsParticlesData data, long spawnTime) {
+		if (isClient()) {
+			getEnvironment().physicsParticles(data, spawnTime);
+		} else if (!data.positions().isEmpty()) {
+			s2c(new PalettePhysicsParticlesPayload(data));
 		}
 	}
 

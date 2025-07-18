@@ -33,6 +33,7 @@ import dev.latvian.mods.vidlib.feature.particle.LineParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.TextParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.WindData;
+import dev.latvian.mods.vidlib.feature.particle.physics.PalettePhysicsParticlesData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticles;
@@ -44,6 +45,7 @@ import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import dev.latvian.mods.vidlib.feature.vote.NumberVotingScreen;
 import dev.latvian.mods.vidlib.feature.vote.YesNoVotingScreen;
+import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.latvian.mods.vidlib.util.PauseType;
@@ -360,10 +362,17 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void removeZone(UUID uuid) {
+	default void removeZone(ResourceLocation zone, int index) {
 		var session = vl$self().player.vl$sessionData();
-		session.serverZones.remove(uuid);
-		session.filteredZones.remove(uuid);
+		session.serverZones.remove(zone, index);
+		session.filteredZones.remove(zone, index);
+	}
+
+	@Override
+	default void updateZone(ResourceLocation zone, int index, Zone zoneData) {
+		var session = vl$self().player.vl$sessionData();
+		session.serverZones.update(zone, index, zoneData);
+		session.filteredZones.update(zone, index, zoneData);
 	}
 
 	@Override
@@ -420,6 +429,13 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		if (!data.blocks().isEmpty()) {
 			var p = PhysicsParticleData.REGISTRY.get(data.id());
 			physicsParticles(p == null ? PhysicsParticleData.DEFAULT : p, spawnTime, data.seed(), data.blocks());
+		}
+	}
+
+	@Override
+	default void physicsParticles(PalettePhysicsParticlesData data, long spawnTime) {
+		if (!data.positions().isEmpty()) {
+			// FIXME
 		}
 	}
 

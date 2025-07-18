@@ -82,6 +82,13 @@ public class BuiltInImGui {
 			g.mc.options.save();
 		}).enabled(graphics.isAdmin));
 
+		if (VidLibClientOptions.getShowZones()) {
+			list.add(MenuItem.item(ImIcons.FULLSCREEN, "Zone Outer Bounds", VidLibClientOptions.getShowZoneOuterBounds(), g -> {
+				VidLibClientOptions.SHOW_ZONE_OUTER_BOUNDS.set(!VidLibClientOptions.getShowZoneOuterBounds());
+				g.mc.options.save();
+			}).enabled(graphics.isAdmin));
+		}
+
 		list.add(MenuItem.item(ImIcons.ANCHOR, "Anchor", VidLibClientOptions.getShowAnchor(), g -> {
 			VidLibClientOptions.SHOW_ANCHOR.set(!VidLibClientOptions.getShowAnchor());
 			g.mc.options.save();

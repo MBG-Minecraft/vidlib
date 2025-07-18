@@ -10,7 +10,7 @@ public enum StopCutscenePayload implements SimplePacketPayload {
 	INSTANCE;
 
 	@AutoPacket
-	public static final VidLibPacketType<StopCutscenePayload> TYPE = VidLibPacketType.internal("stop_cutscene", StreamCodec.unit(INSTANCE));
+	public static final VidLibPacketType<StopCutscenePayload> TYPE = VidLibPacketType.internal("cutscene/stop", StreamCodec.unit(INSTANCE));
 
 	@Override
 	public VidLibPacketType<?> getType() {

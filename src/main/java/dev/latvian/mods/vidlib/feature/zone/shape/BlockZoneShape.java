@@ -6,7 +6,7 @@ import dev.latvian.mods.klib.math.AAIBB;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 
 import java.util.stream.Stream;
@@ -59,9 +59,15 @@ public record BlockZoneShape(BlockPos start, BlockPos end, AABB box) implements 
 	}
 
 	@Override
-	public void writeUUID(FriendlyByteBuf buf) {
-		buf.writeUtf(type().id());
-		buf.writeBlockPos(start);
-		buf.writeBlockPos(end);
+	public ZoneShape move(double x, double y, double z) {
+		int ix = Mth.floor(x);
+		int iy = Mth.floor(y);
+		int iz = Mth.floor(z);
+
+		if (ix == x && iy == y && iz == z) {
+			return new BlockZoneShape(start.offset(ix, iy, iz), end.offset(ix, iy, iz), box.move(x, y, z));
+		}
+
+		return ZoneShape.super.move(x, y, z);
 	}
 }

@@ -9,6 +9,7 @@
 	"options.vidlib.show_anchor": "Show Anchor",
 	"options.vidlib.show_fps": "Show FPS",
 	"options.vidlib.show_zones": "Show Zones",
+	"options.vidlib.show_zone_outer_bounds": "Show Zone Outer Bounds",
 	"options.vidlib.zone_render_type": "Zone Render Type",
 	"options.vidlib.zone_render_type.normal": "Normal",
 	"options.vidlib.zone_render_type.collisions": "Collisions",

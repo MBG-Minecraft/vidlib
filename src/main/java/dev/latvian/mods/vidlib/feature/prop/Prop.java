@@ -131,7 +131,7 @@ public class Prop {
 		if (isRemoved()) {
 			return true;
 		} else if (isTimeTraveling(time)) {
-			removed = PropRemoveType.TIME_TRAVEL;
+			remove(PropRemoveType.TIME_TRAVEL);
 			return true;
 		}
 
@@ -140,7 +140,7 @@ public class Prop {
 
 		if (lifespan > 0 && tick >= lifespan) {
 			onExpired();
-			removed = PropRemoveType.EXPIRED;
+			remove(PropRemoveType.EXPIRED);
 			return true;
 		} else if (isRemoved()) {
 			return true;
@@ -280,16 +280,14 @@ public class Prop {
 		}
 	}
 
-	public final void remove() {
+	public final void remove(PropRemoveType removeType) {
 		if (removed == PropRemoveType.NONE) {
-			removed = PropRemoveType.GAME;
+			removed = removeType;
 		}
 	}
 
-	public final void removeByCommand() {
-		if (removed == PropRemoveType.NONE) {
-			removed = PropRemoveType.COMMAND;
-		}
+	public final void remove() {
+		remove(PropRemoveType.GAME);
 	}
 
 	public final PropRemoveType getRemovedType() {

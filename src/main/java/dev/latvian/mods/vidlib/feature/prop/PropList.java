@@ -39,7 +39,7 @@ public class PropList implements Iterable<Prop> {
 		this.collidingProps = new ArrayList<>(0);
 		this.interactableProps = new ArrayList<>(0);
 
-		for (var removeType : PropRemoveType.values()) {
+		for (var removeType : PropRemoveType.VALUES) {
 			removed.put(removeType, new IntArrayList());
 		}
 	}
@@ -102,7 +102,7 @@ public class PropList implements Iterable<Prop> {
 
 					if (old != null) {
 						old.snap();
-						old.removed = PropRemoveType.REPLACED;
+						old.remove(PropRemoveType.REPLACED);
 					}
 				}
 
@@ -124,18 +124,27 @@ public class PropList implements Iterable<Prop> {
 		}
 	}
 
-	public void removeAll() {
+	public int removeAll(PropRemoveType removeType) {
+		int count = map.size();
+
 		for (var prop : map.values()) {
-			prop.remove();
+			prop.remove(removeType);
 		}
+
+		return count;
 	}
 
-	public void removeAll(Predicate<Prop> predicate) {
+	public int removeAll(PropRemoveType removeType, Predicate<Prop> predicate) {
+		int count = 0;
+
 		for (var prop : this) {
 			if (predicate.test(prop)) {
-				prop.remove();
+				prop.remove(removeType);
+				count++;
 			}
 		}
+
+		return count;
 	}
 
 	public int generateNewId() {

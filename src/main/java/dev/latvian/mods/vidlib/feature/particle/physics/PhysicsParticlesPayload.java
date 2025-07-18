@@ -12,7 +12,7 @@ import java.util.List;
 
 public record PhysicsParticlesPayload(PhysicsParticleData data, long seed, List<PositionedBlock> blocks) implements SimplePacketPayload {
 	@AutoPacket
-	public static final VidLibPacketType<PhysicsParticlesPayload> TYPE = VidLibPacketType.internal("physics_particles", CompositeStreamCodec.of(
+	public static final VidLibPacketType<PhysicsParticlesPayload> TYPE = VidLibPacketType.internal("physics_particles/data", CompositeStreamCodec.of(
 		PhysicsParticleData.STREAM_CODEC, PhysicsParticlesPayload::data,
 		ByteBufCodecs.LONG, PhysicsParticlesPayload::seed,
 		PositionedBlock.LIST_STREAM_CODEC, PhysicsParticlesPayload::blocks,

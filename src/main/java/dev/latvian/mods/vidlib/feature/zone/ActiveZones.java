@@ -13,6 +13,7 @@ import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,7 +25,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 public class ActiveZones implements Iterable<ZoneContainer> {
 	public static final StreamCodec<RegistryFriendlyByteBuf, ActiveZones> STREAM_CODEC = new StreamCodec<>() {
@@ -227,9 +227,23 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 		return shapes;
 	}
 
-	public void remove(UUID uuid) {
-		for (var container : containers.values()) {
-			container.remove(uuid);
+	@ApiStatus.Internal
+	public void remove(ResourceLocation zone, int index) {
+		var container = containers.get(zone);
+
+		if (container != null) {
+			container.remove(index);
+		}
+
+		clearCache();
+	}
+
+	@ApiStatus.Internal
+	public void update(ResourceLocation zone, int index, Zone zoneData) {
+		var container = containers.get(zone);
+
+		if (container != null) {
+			container.update(index, zoneData);
 		}
 
 		clearCache();

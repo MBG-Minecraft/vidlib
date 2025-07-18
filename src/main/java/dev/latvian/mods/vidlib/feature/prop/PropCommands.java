@@ -86,17 +86,11 @@ public interface PropCommands {
 	}
 
 	static int kill(CommandSourceStack source, @Nullable ResourceLocation typeId) {
-		int killed = 0;
+		int killed;
 		var list = source.getLevel().getProps().propLists.get(PropListType.LEVEL);
 
 		if (typeId == null) {
-			killed = list.size();
-
-			for (var prop : list) {
-				prop.removeByCommand();
-			}
-
-			source.getLevel().s2c(new RemoveAllPropsPayload(list.type, PropRemoveType.COMMAND));
+			killed = list.removeAll(PropRemoveType.COMMAND);
 		} else {
 			var type = PropType.ALL.get().get(typeId);
 
@@ -105,16 +99,10 @@ public interface PropCommands {
 				return 0;
 			}
 
-			for (var prop : list) {
-				if (prop.type == type) {
-					prop.removeByCommand();
-					killed++;
-				}
-			}
+			killed = list.removeAll(PropRemoveType.COMMAND, type);
 		}
 
-		int k = killed;
-		source.broadcast("Killed " + k + " props");
+		source.broadcast("Killed " + killed + " props");
 		return killed;
 	}
 

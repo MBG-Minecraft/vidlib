@@ -15,6 +15,7 @@ import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.visual.TexturedCubeRenderer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
+import dev.latvian.mods.vidlib.feature.zone.shape.CylinderZoneShape;
 import dev.latvian.mods.vidlib.feature.zone.shape.RotatedBoxZoneShape;
 import dev.latvian.mods.vidlib.feature.zone.shape.SphereZoneShape;
 import dev.latvian.mods.vidlib.feature.zone.shape.UniverseZoneShape;
@@ -31,7 +32,7 @@ import java.util.Map;
 public interface ZoneRenderer<T extends ZoneShape> {
 	Map<SimpleRegistryType<?>, ZoneRenderer<?>> RENDERERS = new IdentityHashMap<>();
 
-	record Context(FrameInfo frame, Color color, Color outlineColor) {
+	record Context(FrameInfo frame, Color color, Color outlineColor, boolean outerBounds) {
 		public MultiBufferSource buffers() {
 			return frame.buffers();
 		}
@@ -46,6 +47,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 		ZoneRenderer.register(UniverseZoneShape.TYPE, EmptyZoneRenderer.INSTANCE);
 		ZoneRenderer.register(ZoneShapeGroup.TYPE, new GroupZoneRenderer());
 		ZoneRenderer.register(SphereZoneShape.TYPE, new SphereZoneRenderer());
+		ZoneRenderer.register(CylinderZoneShape.TYPE, new CylinderZoneRenderer());
 		ZoneRenderer.register(RotatedBoxZoneShape.TYPE, new RotatedBoxZoneRenderer());
 	}
 
@@ -80,6 +82,8 @@ public interface ZoneRenderer<T extends ZoneShape> {
 				}
 			}
 		} else {
+			boolean outerBounds = VidLibClientOptions.getShowZoneOuterBounds();
+
 			for (var container : session.filteredZones) {
 				for (var instance : container.zones) {
 					if (instance.zone.shape().closestDistanceTo(cameraPos) <= 2048D && frame.isVisible(instance.zone.shape().getBoundingBox())) {
@@ -91,7 +95,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 							var outlineColor = hovered ? Color.WHITE : instance.entities.isEmpty() ? instance.zone.color() : Color.GREEN;
 
 							if (renderType == ZoneRenderType.NORMAL) {
-								renderer.render(Cast.to(instance.zone.shape()), new ZoneRenderer.Context(frame, baseColor, outlineColor));
+								renderer.render(Cast.to(instance.zone.shape()), new ZoneRenderer.Context(frame, baseColor, outlineColor, outerBounds));
 							} else if (renderType == ZoneRenderType.BLOCKS) {
 								if (session.cachedZoneShapes == null) {
 									session.cachedZoneShapes = new IdentityHashMap<>();
@@ -152,11 +156,20 @@ public interface ZoneRenderer<T extends ZoneShape> {
 
 				if (renderer != null) {
 					var baseColor = zone.color().withAlpha(Mth.lerpInt((float) (dist / 10D), 100, 0));
-					renderer.render(Cast.to(zone.shape()), new ZoneRenderer.Context(frame, baseColor, Color.TRANSPARENT));
+					renderer.render(Cast.to(zone.shape()), new ZoneRenderer.Context(frame, baseColor, Color.TRANSPARENT, false));
 				}
 			}
 		}
 	}
 
 	void render(T shape, Context ctx);
+
+	/*
+	void buildLines(T shape, Context ctx, VertexCallback callback);
+
+	default void buildOuterLines(T shape, Context ctx, VertexCallback callback) {
+	}
+
+	void buildQuads(T shape, Context ctx, VertexCallback callback);
+	 */
 }

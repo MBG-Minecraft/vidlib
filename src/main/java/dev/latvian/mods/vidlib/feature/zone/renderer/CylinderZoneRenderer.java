@@ -3,13 +3,12 @@ package dev.latvian.mods.vidlib.feature.zone.renderer;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
-import dev.latvian.mods.klib.render.SphereRenderer;
-import dev.latvian.mods.klib.shape.SpherePoints;
-import dev.latvian.mods.vidlib.feature.zone.shape.SphereZoneShape;
+import dev.latvian.mods.klib.render.DebugRenderTypes;
+import dev.latvian.mods.vidlib.feature.zone.shape.CylinderZoneShape;
 
-public class SphereZoneRenderer implements ZoneRenderer<SphereZoneShape> {
+public class CylinderZoneRenderer implements ZoneRenderer<CylinderZoneShape> {
 	@Override
-	public void render(SphereZoneShape shape, Context ctx) {
+	public void render(CylinderZoneShape shape, Context ctx) {
 		var ms = ctx.frame().poseStack();
 
 		if (ctx.outerBounds()) {
@@ -25,9 +24,8 @@ public class SphereZoneRenderer implements ZoneRenderer<SphereZoneShape> {
 
 		ms.pushPose();
 		ctx.frame().translate(shape.pos());
-		float scale = (float) (shape.radius() * 2D);
-		SphereRenderer.lines(ms, 0F, 0F, 0F, scale, SpherePoints.M, ctx.buffers(), BufferSupplier.DEBUG_NO_DEPTH, ctx.outlineColor());
-		SphereRenderer.quads(ms, 0F, 0F, 0F, scale, SpherePoints.M, ctx.buffers(), BufferSupplier.DEBUG_NO_DEPTH, false, ctx.color());
+		shape.shape().buildLines(0F, 0F, 0F, ms.last().transform(ctx.buffers().getBuffer(DebugRenderTypes.LINES)).withColor(ctx.outlineColor()));
+		shape.shape().buildQuads(0F, 0F, 0F, ms.last().transform(ctx.buffers().getBuffer(DebugRenderTypes.QUADS_NO_CULL_NO_DEPTH)).withColor(ctx.color()));
 		ms.popPose();
 	}
 }

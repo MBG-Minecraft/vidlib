@@ -15,7 +15,7 @@ public enum PropRemoveType implements StringRepresentable {
 	REPLACED("replaced"),
 	RESOURCE_RELOAD("resource_reload"),
 	DIMENSION_CHANGE("dimension_change"),
-	LOGIN("login");
+	REPLAY("replay");
 
 	private final String name;
 

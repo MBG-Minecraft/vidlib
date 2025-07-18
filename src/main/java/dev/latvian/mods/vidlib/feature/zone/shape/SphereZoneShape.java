@@ -9,7 +9,6 @@ import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -81,8 +80,8 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 	}
 
 	@Override
-	public boolean contains(Vec3 pos) {
-		return this.pos.distanceToSqr(pos) <= radius * radius;
+	public boolean contains(double x, double y, double z) {
+		return this.pos.distanceToSqr(x, y, z) <= radius * radius;
 	}
 
 	@Override
@@ -90,7 +89,7 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 		double dx = pos.x() - Math.clamp(pos.x, box.minX, box.maxX);
 		double dy = pos.y() - Math.clamp(pos.y, box.minY, box.maxY);
 		double dz = pos.z() - Math.clamp(pos.z, box.minZ, box.maxZ);
-		return dx * dx + dy * dy + dz * dz < radius * radius;
+		return dx * dx + dy * dy + dz * dz <= radius * radius;
 	}
 
 	@Override
@@ -125,11 +124,12 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 	}
 
 	@Override
-	public void writeUUID(FriendlyByteBuf buf) {
-		buf.writeUtf(type().id());
-		buf.writeDouble(pos.x());
-		buf.writeDouble(pos.y());
-		buf.writeDouble(pos.z());
-		buf.writeDouble(radius);
+	public ZoneShape move(double x, double y, double z) {
+		return new SphereZoneShape(pos.add(x, y, z), radius, box.move(x, y, z));
+	}
+
+	@Override
+	public ZoneShape scale(double x, double y, double z) {
+		return new SphereZoneShape(pos, radius * x * y * z);
 	}
 }

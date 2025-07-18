@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib;
 
 import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.vidlib.feature.block.BlockStatePalette;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
@@ -59,6 +60,7 @@ public class VidLibDataTypes {
 		DataType.register(VidLib.id("kvector"), KVector.DATA_TYPE);
 		DataType.register(VidLib.id("stage"), Stage.DATA_TYPE);
 		DataType.register(VidLib.id("name_render_type"), NameRenderType.DATA_TYPE);
+		DataType.register(VidLib.id("block_state_palette"), BlockStatePalette.DATA_TYPE);
 
 		// RegisteredDataType<ZoneContainer> REGISTERED_DATA_TYPE = RegisteredDataType.of(REGISTRY, ZoneContainer.class);
 	}

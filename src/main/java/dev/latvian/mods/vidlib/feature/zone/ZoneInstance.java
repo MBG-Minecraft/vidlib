@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.zone;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.Util;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.NeoForge;
@@ -11,11 +10,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.UUID;
 
 public class ZoneInstance {
 	public final ZoneContainer container;
-	public UUID uuid;
 	public int index;
 	public Zone zone;
 	public final Int2ObjectMap<Entity> entities;
@@ -24,7 +21,6 @@ public class ZoneInstance {
 
 	public ZoneInstance(ZoneContainer container, Zone zone) {
 		this.container = container;
-		this.uuid = Util.NIL_UUID;
 		this.index = -1;
 		this.zone = zone;
 		this.entities = new Int2ObjectOpenHashMap<>();
@@ -78,5 +74,10 @@ public class ZoneInstance {
 
 	public void entityExited(Level level, Entity entity) {
 		NeoForge.EVENT_BUS.post(new ZoneEvent.EntityExited(this, level, entity));
+	}
+
+	public void updateZone(Zone newZone) {
+		zone = newZone;
+		renderer = null;
 	}
 }

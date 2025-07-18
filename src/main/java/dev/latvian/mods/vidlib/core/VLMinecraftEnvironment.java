@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.feature.clock.SyncClocksPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.session.SessionData;
+import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.RepeatingTask;
@@ -67,7 +68,11 @@ public interface VLMinecraftEnvironment extends VLPlayerContainer, VLMinecraftEn
 		vl$getScheduledTaskHandler().run(delay, task);
 	}
 
-	default void removeZone(UUID uuid) {
+	default void removeZone(ResourceLocation zone, int index) {
+		throw new NoMixinException(this);
+	}
+
+	default void updateZone(ResourceLocation zone, int index, Zone zoneData) {
 		throw new NoMixinException(this);
 	}
 

@@ -82,5 +82,8 @@
 	],
 	"net/minecraft/world/level/ClipContext": [
 		"dev/latvian/mods/vidlib/core/VLClipContext"
+	],
+	"net/minecraft/client/gui/GuiGraphics": [
+		"dev/latvian/mods/vidlib/core/VLGuiGraphics"
 	]
 }
