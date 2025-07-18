@@ -294,9 +294,27 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 	}
 
 	default FluidState vl$overrideFluidState(BlockPos pos) {
-		var zones = vl$getActiveZones();
-		var state = zones == null ? null : zones.getZoneFluidState(pos);
-		return state == null ? vl$level().getFluidState(pos) : state;
+		var original = vl$level().getFluidState(pos);
+
+		if (original.isEmpty()) {
+			var zones = vl$getActiveZones();
+			var state = zones == null ? null : zones.getZoneFluidState(pos);
+			return state == null ? original : state;
+		}
+
+		return original;
+	}
+
+	default BlockState vl$overrideFluidStateBlock(BlockPos pos) {
+		var original = vl$level().getBlockState(pos);
+
+		if (original.isAir()) {
+			var zones = vl$getActiveZones();
+			var state = zones == null ? null : zones.getZoneFluidState(pos);
+			return state == null ? original : state.createLegacyBlock();
+		}
+
+		return original;
 	}
 
 	default float vl$overrideFluidHeight(FluidState state, BlockPos pos) {
