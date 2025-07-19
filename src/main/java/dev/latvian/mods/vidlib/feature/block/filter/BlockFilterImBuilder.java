@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.block.filter;
 
-import dev.latvian.mods.vidlib.feature.imgui.ImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import org.jetbrains.annotations.Nullable;
 
 public interface BlockFilterImBuilder extends ImBuilder<BlockFilter> {

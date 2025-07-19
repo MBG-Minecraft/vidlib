@@ -2,10 +2,10 @@ package dev.latvian.mods.vidlib.feature.cutscene;
 
 import com.google.gson.JsonElement;
 import dev.latvian.mods.klib.math.KMath;
-import dev.latvian.mods.vidlib.feature.imgui.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;

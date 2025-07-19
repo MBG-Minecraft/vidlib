@@ -1,7 +1,9 @@
-package dev.latvian.mods.vidlib.feature.imgui;
+package dev.latvian.mods.vidlib.feature.imgui.builder;
 
 import dev.latvian.mods.klib.color.PositionedColor;
 import dev.latvian.mods.klib.easing.Easing;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 import imgui.type.ImFloat;
@@ -10,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 public class PositionedColorImBuilder implements Comparable<PositionedColorImBuilder>, ImBuilder<PositionedColor> {
 	public String label;
 	public final ImFloat position = new ImFloat(0F);
-	public final ColorImBuilder color = new ColorImBuilder("Color###color");
+	public final Color4ImBuilder color = new Color4ImBuilder();
 	public final Easing[] easing = {Easing.LINEAR};
 	public boolean delete = false;
 
@@ -47,7 +49,7 @@ public class PositionedColorImBuilder implements Comparable<PositionedColorImBui
 
 		ImGui.sliderFloat("Position###position", position.getData(), 0F, 1F, "%.3f");
 		update = update.orItemEdit();
-		update = update.or(color.imgui(graphics));
+		update = update.or(color.imguiKey(graphics, "Color", "color"));
 		update = update.or(graphics.easingCombo("Easing###easing", easing));
 
 		return update;

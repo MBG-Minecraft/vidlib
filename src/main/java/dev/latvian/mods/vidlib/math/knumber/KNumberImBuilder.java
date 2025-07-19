@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.math.knumber;
 
-import dev.latvian.mods.vidlib.feature.imgui.ImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 
 public interface KNumberImBuilder extends ImBuilder<KNumber> {
 	static ImBuilderWrapper<KNumber> create(double defaultValue) {

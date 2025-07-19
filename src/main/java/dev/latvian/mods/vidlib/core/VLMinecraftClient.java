@@ -121,6 +121,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		return mc.isPaused() ? PauseType.GAME : mc.level != null && mc.level.tickRateManager().runsNormally() ? PauseType.NONE : PauseType.TICK;
 	}
 
+	@Nullable
 	default WorldMouse getWorldMouse() {
 		return vl$self().player.vl$sessionData().worldMouse;
 	}

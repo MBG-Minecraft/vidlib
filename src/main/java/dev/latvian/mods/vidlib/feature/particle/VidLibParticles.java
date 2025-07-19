@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.particle;
 import com.mojang.serialization.MapCodec;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
+import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ParticleOptionsImBuilderRegistryEvent;
 import dev.latvian.mods.vidlib.feature.npc.NPCParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -49,6 +50,6 @@ public interface VidLibParticles {
 	DeferredHolder<ParticleType<?>, ParticleType<FireParticleOptions>> FIRE = register("fire", () -> FireParticleOptions.CODEC, () -> FireParticleOptions.STREAM_CODEC);
 
 	static void registerBuilders(ParticleOptionsImBuilderRegistryEvent event) {
-		event.register(WIND.get(), WindParticleOptionsImBuilder::new);
+		event.register(WIND.get(), t -> new WindParticleOptionsImBuilder());
 	}
 }

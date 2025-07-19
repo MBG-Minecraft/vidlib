@@ -1,6 +1,5 @@
-package dev.latvian.mods.vidlib.util;
+package dev.latvian.mods.vidlib.feature.imgui.builder;
 
-import dev.latvian.mods.vidlib.feature.imgui.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import net.minecraft.client.Minecraft;

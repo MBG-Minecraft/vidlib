@@ -26,7 +26,7 @@ import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
-import dev.latvian.mods.vidlib.util.NameRenderType;
+import dev.latvian.mods.vidlib.util.NameDrawType;
 import dev.latvian.mods.vidlib.util.ScreenCorner;
 
 public class VidLibDataTypes {
@@ -59,7 +59,7 @@ public class VidLibDataTypes {
 		DataType.register(VidLib.id("knumber"), KNumber.DATA_TYPE);
 		DataType.register(VidLib.id("kvector"), KVector.DATA_TYPE);
 		DataType.register(VidLib.id("stage"), Stage.DATA_TYPE);
-		DataType.register(VidLib.id("name_render_type"), NameRenderType.DATA_TYPE);
+		DataType.register(VidLib.id("name_draw_type"), NameDrawType.DATA_TYPE);
 		DataType.register(VidLib.id("block_state_palette"), BlockStatePalette.DATA_TYPE);
 
 		// RegisteredDataType<ZoneContainer> REGISTERED_DATA_TYPE = RegisteredDataType.of(REGISTRY, ZoneContainer.class);

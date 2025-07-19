@@ -9,7 +9,7 @@ import dev.latvian.mods.klib.util.IntOrUUID;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.ExactEntityFilter;
-import dev.latvian.mods.vidlib.feature.imgui.ImBuilderHolderList;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolderList;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;

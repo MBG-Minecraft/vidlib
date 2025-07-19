@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.core.VLGameRenderer;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
@@ -87,7 +88,7 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 
 	@Inject(method = "render", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;setOrtho(FFFFFF)Lorg/joml/Matrix4f;"))
 	private void vl$render(DeltaTracker deltaTracker, boolean renderLevel, CallbackInfo ci) {
-		if (minecraft.isGameLoadFinished() && renderLevel && this.minecraft.level != null && renderHand && CameraOverride.get(minecraft) == null) {
+		if (minecraft.isGameLoadFinished() && frustumMatrix != null && renderLevel && this.minecraft.level != null && renderHand && CameraOverride.get(minecraft) == null) {
 			var profilerfiller = Profiler.get();
 			profilerfiller.push("hand");
 			renderItemInHand(mainCamera, minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(true), frustumMatrix);
@@ -98,5 +99,9 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 	@ModifyExpressionValue(method = {"render", "renderItemInHand", "shouldRenderBlockOutline"}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z"))
 	private boolean vl$hideGui(boolean original) {
 		return minecraft.vl$hideGui();
+	}
+
+	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;bobView(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"))
+	private void vl$bobView(GameRenderer instance, PoseStack $$5, float $$6) {
 	}
 }

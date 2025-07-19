@@ -4,6 +4,7 @@ import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
+import dev.latvian.mods.vidlib.util.NameDrawType;
 import net.minecraft.resources.ResourceLocation;
 
 public interface VLMinecraftEnvironmentDataHolder extends VLLevelContainer {
@@ -49,5 +50,13 @@ public interface VLMinecraftEnvironmentDataHolder extends VLLevelContainer {
 
 	default void setAnchor(Anchor anchor) {
 		set(InternalServerData.ANCHOR, anchor);
+	}
+
+	default NameDrawType getNameDrawType() {
+		return get(InternalServerData.NAME_DRAW_TYPE);
+	}
+
+	default void setNameDrawType(NameDrawType type) {
+		set(InternalServerData.NAME_DRAW_TYPE, type);
 	}
 }

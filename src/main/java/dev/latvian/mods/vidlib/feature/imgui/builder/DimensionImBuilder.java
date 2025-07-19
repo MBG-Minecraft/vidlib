@@ -1,5 +1,7 @@
-package dev.latvian.mods.vidlib.feature.imgui;
+package dev.latvian.mods.vidlib.feature.imgui.builder;
 
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 

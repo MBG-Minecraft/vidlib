@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.block.filter;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import imgui.ImGui;

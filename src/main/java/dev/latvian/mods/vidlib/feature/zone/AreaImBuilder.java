@@ -1,11 +1,11 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
 import dev.latvian.mods.klib.math.AAIBB;
-import dev.latvian.mods.vidlib.feature.imgui.BlockPosImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.DimensionImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.builder.BlockPosImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.DimensionImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 
 public class AreaImBuilder implements ImBuilder<Area> {
 	private final DimensionImBuilder dimension = new DimensionImBuilder();
@@ -22,9 +22,9 @@ public class AreaImBuilder implements ImBuilder<Area> {
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
 		var update = ImUpdate.NONE;
-		update = update.or(dimension.imguiKey(graphics, "Dimension", "###dimension"));
-		update = update.or(corner1.imguiKey(graphics, "Corner 1", "###corner-1"));
-		update = update.or(corner2.imguiKey(graphics, "Corner 2", "###corner-2"));
+		update = update.or(dimension.imguiKey(graphics, "Dimension", "dimension"));
+		update = update.or(corner1.imguiKey(graphics, "Corner 1", "corner-1"));
+		update = update.or(corner2.imguiKey(graphics, "Corner 2", "corner-2"));
 		return update;
 	}
 

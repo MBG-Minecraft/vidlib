@@ -19,4 +19,8 @@ public interface VLScreen extends CameraOverride {
 	default Rotation getCameraRotation(float delta, Vec3 cameraPos) {
 		return Rotation.NONE;
 	}
+
+	default boolean hidePlayerNames() {
+		return false;
+	}
 }

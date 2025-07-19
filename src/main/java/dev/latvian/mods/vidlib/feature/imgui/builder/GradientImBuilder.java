@@ -1,9 +1,11 @@
-package dev.latvian.mods.vidlib.feature.imgui;
+package dev.latvian.mods.vidlib.feature.imgui.builder;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.CompoundGradient;
 import dev.latvian.mods.klib.color.Gradient;
 import dev.latvian.mods.klib.color.PositionedColor;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 

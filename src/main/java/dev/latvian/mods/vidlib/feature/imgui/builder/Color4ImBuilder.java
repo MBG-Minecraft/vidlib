@@ -1,16 +1,13 @@
-package dev.latvian.mods.vidlib.feature.imgui;
+package dev.latvian.mods.vidlib.feature.imgui.builder;
 
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.ImGui;
 import imgui.flag.ImGuiColorEditFlags;
 
-public class ColorImBuilder implements ImBuilder<Color> {
-	public String label;
+public class Color4ImBuilder implements ImBuilder<Color> {
 	public final float[] rgba = new float[4];
-
-	public ColorImBuilder(String label) {
-		this.label = label;
-	}
 
 	@Override
 	public void set(Color c) {
@@ -22,12 +19,17 @@ public class ColorImBuilder implements ImBuilder<Color> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		ImGui.colorPicker4(label, rgba, ImGuiColorEditFlags.PickerHueWheel);
+		ImGui.colorEdit4("###color", rgba, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.PickerHueWheel);
 		return ImUpdate.itemEdit();
 	}
 
 	@Override
 	public Color build() {
 		return Color.of(rgba[3], rgba[0], rgba[1], rgba[2]);
+	}
+
+	@Override
+	public boolean isSmall() {
+		return true;
 	}
 }

@@ -3,10 +3,10 @@ package dev.latvian.mods.vidlib.feature.fade;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.PositionedColor;
 import dev.latvian.mods.klib.easing.Easing;
-import dev.latvian.mods.vidlib.feature.imgui.GradientImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import imgui.ImGui;
 import imgui.type.ImInt;
 

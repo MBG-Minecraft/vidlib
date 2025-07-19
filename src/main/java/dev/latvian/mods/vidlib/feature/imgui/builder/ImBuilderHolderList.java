@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.imgui;
+package dev.latvian.mods.vidlib.feature.imgui.builder;
 
 import java.util.ArrayList;
 import java.util.List;

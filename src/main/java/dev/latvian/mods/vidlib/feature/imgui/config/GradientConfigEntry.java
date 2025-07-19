@@ -5,9 +5,9 @@ import com.mojang.serialization.DynamicOps;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.Gradient;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
-import dev.latvian.mods.vidlib.feature.imgui.GradientImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
 
 public class GradientConfigEntry extends ConfigEntry<Gradient> {
 	public final GradientImBuilder builder;

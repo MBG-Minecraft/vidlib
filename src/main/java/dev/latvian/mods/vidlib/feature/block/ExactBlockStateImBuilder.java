@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.block;
 
 import dev.latvian.mods.klib.util.Cast;
-import dev.latvian.mods.vidlib.feature.imgui.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.SelectedPosition;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
@@ -66,7 +66,7 @@ public class ExactBlockStateImBuilder implements ImBuilder<BlockState> {
 		var update = ImUpdate.NONE;
 		var prevBlock = block.isValid() ? block.build() : null;
 
-		update = update.or(block.imguiKey(graphics, "Block", "###block"));
+		update = update.or(block.imguiKey(graphics, "Block", "block"));
 
 		selectedPosition = block.selectedPosition;
 

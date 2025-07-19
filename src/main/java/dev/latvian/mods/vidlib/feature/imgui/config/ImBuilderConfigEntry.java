@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.feature.imgui.config;
 
 import dev.latvian.mods.vidlib.feature.data.DataKey;
-import dev.latvian.mods.vidlib.feature.imgui.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 
 public class ImBuilderConfigEntry<T> extends ConfigEntry<T> {
 	public final ImBuilder<T> builder;

@@ -2,10 +2,10 @@ package dev.latvian.mods.vidlib.feature.block.filter;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.imgui.ImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -31,8 +31,8 @@ public record BlockXorFilter(BlockFilter a, BlockFilter b) implements BlockFilte
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
-			update = update.or(a.imguiKey(graphics, "A", "###a"));
-			update = update.or(b.imguiKey(graphics, "B", "###b"));
+			update = update.or(a.imguiKey(graphics, "A", "a"));
+			update = update.or(b.imguiKey(graphics, "B", "b"));
 			return update;
 		}
 

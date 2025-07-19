@@ -14,11 +14,13 @@ import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
+import dev.latvian.mods.vidlib.feature.client.VidLibHUD;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
+import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ParticleOptionsImBuilderRegistryEvent;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.feature.misc.DebugTextEvent;
@@ -26,7 +28,6 @@ import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import dev.latvian.mods.vidlib.feature.misc.ScreenTextRenderer;
 import dev.latvian.mods.vidlib.feature.misc.VidLibIcon;
-import dev.latvian.mods.vidlib.feature.particle.ParticleOptionsImBuilderRegistryEvent;
 import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
@@ -35,6 +36,7 @@ import dev.latvian.mods.vidlib.feature.structure.StructureRenderer;
 import dev.latvian.mods.vidlib.feature.visual.TexturedCubeRenderer;
 import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
 import dev.latvian.mods.vidlib.util.JsonUtils;
+import dev.latvian.mods.vidlib.util.NameDrawType;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.ChatFormatting;
@@ -49,6 +51,8 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
+import net.minecraft.util.TriState;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
@@ -560,5 +564,18 @@ public class GameClientEventHandler {
 	@SubscribeEvent
 	public static void particleImBuilders(ParticleOptionsImBuilderRegistryEvent event) {
 		VidLibParticles.registerBuilders(event);
+	}
+
+	@SubscribeEvent
+	public static void canRenderNameTag(RenderNameTagEvent.CanRender event) {
+		var mc = Minecraft.getInstance();
+
+		if (mc.player == null || !(event.getEntity() instanceof Player)) {
+			return;
+		}
+
+		if (mc.getNameDrawType() != NameDrawType.VANILLA && VidLibHUD.shouldDrawName(mc, mc.player, (Player) event.getEntity())) {
+			event.setCanRender(TriState.FALSE);
+		}
 	}
 }

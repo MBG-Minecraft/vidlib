@@ -1,6 +1,10 @@
-package dev.latvian.mods.vidlib.feature.imgui;
+package dev.latvian.mods.vidlib.feature.imgui.builder;
 
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.SelectedPosition;
 import imgui.ImGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Position;
@@ -70,7 +74,8 @@ public class Vector3dImBuilder implements ImBuilder<Vec3> {
 		data.y = ImGuiUtils.DOUBLE.get();
 
 		if (ImGui.button(SelectedPosition.CURSOR.icon + "###cursor-pos")) {
-			var pos = Minecraft.getInstance().getWorldMouse().clipOutline();
+			var worldMouse = graphics.mc.getWorldMouse();
+			var pos = worldMouse == null ? null : worldMouse.clipOutline();
 
 			if (pos != null) {
 				data.set(pos.pos().x, pos.pos().y, pos.pos().z);

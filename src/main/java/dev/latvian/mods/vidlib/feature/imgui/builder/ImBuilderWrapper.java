@@ -1,6 +1,8 @@
-package dev.latvian.mods.vidlib.feature.imgui;
+package dev.latvian.mods.vidlib.feature.imgui.builder;
 
 import dev.latvian.mods.klib.util.Cast;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.ImGui;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.Nullable;

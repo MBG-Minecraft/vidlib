@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.entity;
 
 import dev.latvian.mods.klib.util.ParsedEntitySelector;
-import dev.latvian.mods.vidlib.feature.imgui.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;

@@ -1,5 +1,9 @@
-package dev.latvian.mods.vidlib.feature.imgui;
+package dev.latvian.mods.vidlib.feature.imgui.builder;
 
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.SelectedPosition;
 import imgui.ImGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -68,7 +72,8 @@ public class BlockPosImBuilder implements ImBuilder<BlockPos> {
 		pos.setY(ImGuiUtils.INT.get());
 
 		if (ImGui.button(SelectedPosition.CURSOR.icon + "###cursor-pos")) {
-			var pos = Minecraft.getInstance().getWorldMouse().clipOutline();
+			var worldMouse = graphics.mc.getWorldMouse();
+			var pos = worldMouse == null ? null : worldMouse.clipOutline();
 
 			if (pos != null) {
 				this.pos.set(pos.pos().x, pos.pos().y, pos.pos().z);

@@ -5,12 +5,11 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.BlockEntityRendererHolder;
 import dev.latvian.mods.vidlib.feature.auto.EntityRendererHolder;
-import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
+import dev.latvian.mods.vidlib.feature.client.VidLibHUD;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockFont;
 import dev.latvian.mods.vidlib.feature.clothing.ClientClothingLoader;
-import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBarRenderer;
 import dev.latvian.mods.vidlib.feature.gradient.ClientGradientLoader;
 import dev.latvian.mods.vidlib.feature.multiverse.VoidSpecialEffects;
 import dev.latvian.mods.vidlib.feature.particle.VidLibClientParticles;
@@ -18,9 +17,6 @@ import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
-import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -93,27 +89,8 @@ public class ModClientEventHandler {
 
 	@SubscribeEvent
 	public static void registerGuiLayers(RegisterGuiLayersEvent event) {
-		event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, VidLib.id("above_boss"), ModClientEventHandler::drawAboveBossOverlay);
-		event.registerAboveAll(VidLib.id("fade"), ModClientEventHandler::drawFade);
-	}
-
-	public static void drawAboveBossOverlay(GuiGraphics graphics, DeltaTracker deltaTracker) {
-		var mc = Minecraft.getInstance();
-		ProgressBarRenderer.draw(mc, graphics, deltaTracker);
-		CanvasImpl.drawPreview(mc, graphics);
-	}
-
-	public static void drawFade(GuiGraphics graphics, DeltaTracker deltaTracker) {
-		var mc = Minecraft.getInstance();
-		int width = mc.getWindow().getGuiScaledWidth();
-		int height = mc.getWindow().getGuiScaledHeight();
-
-		if (mc.player != null) {
-			var session = mc.player.vl$sessionData();
-
-			if (session.screenFade != null) {
-				session.screenFade.draw(graphics, deltaTracker.getGameTimeDeltaPartialTick(true), width, height);
-			}
-		}
+		event.registerBelowAll(VidLib.id("player_names"), VidLibHUD::drawPlayerNames);
+		event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, VidLib.id("above_boss"), VidLibHUD::drawAboveBossOverlay);
+		event.registerAboveAll(VidLib.id("fade"), VidLibHUD::drawFade);
 	}
 }

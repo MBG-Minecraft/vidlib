@@ -8,7 +8,7 @@ import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.vidlib.core.VLBlockInWorld;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
-import dev.latvian.mods.vidlib.feature.imgui.ImBuilderHolderList;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolderList;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.util.StringUtils;
