@@ -7,6 +7,7 @@ import com.mojang.blaze3d.resource.RenderTargetDescriptor;
 import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.systems.RenderPass;
 import dev.latvian.mods.klib.gl.GLDebugLog;
+import dev.latvian.mods.vidlib.core.VLWithCanvas;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.resources.ResourceLocation;
@@ -94,6 +95,8 @@ public class ExternalCanvas extends Canvas implements Consumer<RenderPass> {
 	}
 
 	public void addToFrame(Minecraft mc, FrameGraphBuilder frameGraphBuilder, PostChain.TargetBundle targetBundle, int w, int h) {
+		GLDebugLog.message("[VidLib] " + idString);
+
 		var targets = defaultTargets;
 
 		if (!data.importTargets().isEmpty()) {
@@ -105,6 +108,7 @@ public class ExternalCanvas extends Canvas implements Consumer<RenderPass> {
 		var chain = mc.getShaderManager().getPostChain(id, targets);
 
 		if (chain != null) {
+			((VLWithCanvas) chain).vl$setCanvas(this);
 			chain.addToFrame(frameGraphBuilder, w, h, targetBundle, this);
 		}
 	}
@@ -124,7 +128,7 @@ public class ExternalCanvas extends Canvas implements Consumer<RenderPass> {
 
 	@Override
 	public void createHandle(FrameGraphBuilder builder, RenderTargetDescriptor targetDescriptor) {
-		GLDebugLog.message("Created external canvas");
+		GLDebugLog.message("[VidLib] Created external canvas " + idString);
 		outputTarget = builder.importExternal(pathString, externalTarget);
 	}
 }

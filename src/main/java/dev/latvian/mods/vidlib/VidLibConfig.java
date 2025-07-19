@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib;
 
+import net.neoforged.fml.ModList;
+
 public class VidLibConfig {
 	public static int cycleShadersKey = 83; // GLFW.GLFW_KEY_S;
 	public static int reloadShadersKey = 88; // GLFW.GLFW_KEY_X;
@@ -23,6 +25,6 @@ public class VidLibConfig {
 	public static int serverRenderDistance = 32;
 	public static boolean fastArrowDespawn = true;
 	public static boolean arrowTrails = true;
-	public static boolean seeThroughEntityOutline = true;
+	public static boolean strongEntityOutline = ModList.get().isLoaded("video");
 	public static boolean endBatchesBeforeOutline = false;
 }

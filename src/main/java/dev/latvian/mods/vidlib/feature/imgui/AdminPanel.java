@@ -78,6 +78,9 @@ public class AdminPanel {
 		return flags;
 	}
 
+	public void postSetup(ImGraphics graphics, boolean menuOpen) {
+	}
+
 	public final boolean handle(ImGraphics graphics) {
 		int flags = setup(graphics);
 		ImGuiUtils.BOOLEAN.set(true);
@@ -92,7 +95,10 @@ public class AdminPanel {
 			ImGui.setNextWindowSizeConstraints(0F, 0F, 600F, graphics.mc.getWindow().getHeight() - 80F);
 		}
 
-		if (canBeClosed ? ImGui.begin(label + "###" + id, ImGuiUtils.BOOLEAN, flags) : ImGui.begin(label + "###" + id, flags)) {
+		boolean menuOpen = canBeClosed ? ImGui.begin(label + "###" + id, ImGuiUtils.BOOLEAN, flags) : ImGui.begin(label + "###" + id, flags);
+		postSetup(graphics, menuOpen);
+
+		if (menuOpen) {
 			boolean shouldClose = !ImGuiUtils.BOOLEAN.get();
 
 			content(graphics);

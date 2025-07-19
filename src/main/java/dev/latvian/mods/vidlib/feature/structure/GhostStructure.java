@@ -5,7 +5,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.AAIBB;
-import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.math.Vec3f;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
@@ -34,8 +33,9 @@ public record GhostStructure(
 	EntityFilter visibleTo,
 	List<KVector> locations,
 	KVector scale,
-	Rotation rotation,
-	boolean preload
+	KVector rotation,
+	boolean preload,
+	boolean preloadRenderer
 ) {
 	public static final Codec<GhostStructure> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Codec.BOOL.optionalFieldOf("ghost_chunks", false).forGetter(GhostStructure::ghostChunks),
@@ -45,8 +45,9 @@ public record GhostStructure(
 		EntityFilter.CODEC.optionalFieldOf("visible_to", EntityFilter.ANY.instance()).forGetter(GhostStructure::visibleTo),
 		KVector.CODEC.listOf().fieldOf("locations").forGetter(GhostStructure::locations),
 		KVector.CODEC.optionalFieldOf("scale", KVector.ONE).forGetter(GhostStructure::scale),
-		Rotation.CODEC.optionalFieldOf("rotation", Rotation.NONE).forGetter(GhostStructure::rotation),
-		Codec.BOOL.optionalFieldOf("preload", false).forGetter(GhostStructure::preload)
+		KVector.CODEC.optionalFieldOf("rotation", KVector.ZERO).forGetter(GhostStructure::rotation),
+		Codec.BOOL.optionalFieldOf("preload", false).forGetter(GhostStructure::preload),
+		Codec.BOOL.optionalFieldOf("preload_renderer", false).forGetter(GhostStructure::preloadRenderer)
 	).apply(instance, GhostStructure::new));
 
 	public static List<GhostStructure> LIST = List.of();
@@ -58,7 +59,8 @@ public record GhostStructure(
 		@Nullable AAIBB slice,
 		Vec3 pos,
 		BlockPos blockPos,
-		Vec3f scale
+		Vec3f scale,
+		Vec3f rotation
 	) {
 	}
 
@@ -69,9 +71,16 @@ public record GhostStructure(
 
 		@Override
 		protected GhostStructure finalize(GhostStructure s) {
-			if (s.preload) {
-				for (var st : s.structures) {
-					StructureStorage.CLIENT.ref(st.structure().id).get().get();
+			if (s.preload || s.preloadRenderer) {
+				var data = s.data.orElse(s.ghostChunks ? StructureRendererData.DEFAULT_GHOST_CHUNKS : StructureRendererData.DEFAULT);
+
+				for (var part : s.structures) {
+					var holders = StructureStorage.CLIENT.ref(part.structure().id).get().get();
+
+					if (s.preloadRenderer && !holders.isEmpty()) {
+						// var mc = Minecraft.getInstance();
+						// mc.executeBlocking(() -> part.structure().preRender(mc, data, mc, mc));
+					}
 				}
 			}
 
@@ -119,6 +128,10 @@ public record GhostStructure(
 					continue;
 				}
 
+				var rotation = gs.rotation.get(ctx);
+
+				var rotation3f = rotation == null ? Vec3f.ZERO : Vec3f.of(rotation);
+
 				var blockPos = BlockPos.containing(pos);
 				var selectedStructures = gs.structures;
 
@@ -160,7 +173,8 @@ public record GhostStructure(
 						s.bounds().orElse(null),
 						pos,
 						blockPos,
-						scale3f
+						scale3f,
+						rotation3f
 					));
 				}
 			}
@@ -191,10 +205,16 @@ public record GhostStructure(
 			s.origin = str.blockPos;
 			// s.inflate = str.structure.inflate();
 
-			ms.scale(str.scale.x(), str.scale.y(), str.scale.z());
-			ms.mulPose(Axis.YP.rotation(str.structure.rotation.yawRad()));
-			ms.mulPose(Axis.XP.rotation(str.structure.rotation.pitchRad()));
-			ms.mulPose(Axis.ZP.rotation(str.structure.rotation.rollRad()));
+			if (str.scale != Vec3f.ONE) {
+				ms.scale(str.scale.x(), str.scale.y(), str.scale.z());
+			}
+
+			if (str.rotation != Vec3f.ZERO) {
+				ms.mulPose(Axis.YP.rotation(str.rotation.y()));
+				ms.mulPose(Axis.XP.rotation(str.rotation.x()));
+				ms.mulPose(Axis.ZP.rotation(str.rotation.z()));
+			}
+
 			s.render(ms, frame.layer(), str.structure.data.orElse(str.structure.ghostChunks ? StructureRendererData.DEFAULT_GHOST_CHUNKS : StructureRendererData.DEFAULT));
 
 			ms.popPose();

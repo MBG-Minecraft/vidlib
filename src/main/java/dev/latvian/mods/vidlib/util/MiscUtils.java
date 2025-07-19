@@ -4,8 +4,11 @@ import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.util.Comparison;
+import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.level.biome.Biome;
+import net.neoforged.fml.ModList;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -89,4 +92,16 @@ public interface MiscUtils {
 
 		throw new IOException(connection.getResponseMessage());
 	}
+
+	Lazy<Biome> VOID_BIOME = Lazy.of(() -> {
+		try {
+			var file = ModList.get().getModFileById(VidLib.ID).getFile().findResource("data", VidLib.ID, "worldgen", "biome", "void.json");
+			try (var reader = Files.newBufferedReader(file)) {
+				var json = JsonUtils.read(reader);
+				return Biome.DIRECT_CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
+			}
+		} catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
+	});
 }

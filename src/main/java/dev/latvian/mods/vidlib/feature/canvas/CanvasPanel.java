@@ -3,7 +3,9 @@ package dev.latvian.mods.vidlib.feature.canvas;
 import dev.latvian.mods.vidlib.feature.imgui.AdminPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
+import dev.latvian.mods.vidlib.feature.imgui.ImText;
 import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 
 import java.util.ArrayList;
@@ -18,7 +20,7 @@ public class CanvasPanel extends AdminPanel {
 			list.add(MenuItem.item(canvas.idString, g -> {
 				new CanvasPanel(canvas, true).open();
 				new CanvasPanel(canvas, false).open();
-			}));
+			}).withLabel(ImText.of(canvas.idString, canvas.active ? ImText.SUCCESS : ImText.ERROR)));
 		}
 
 		return list;
@@ -28,14 +30,29 @@ public class CanvasPanel extends AdminPanel {
 	public final boolean color;
 
 	public CanvasPanel(Canvas canvas, boolean color) {
-		super("canvas-" + ImGuiUtils.id(canvas.id) + (color ? "-color" : "-depth"), canvas.idString + (color ? " Canvas (Color)" : " Canvas (Depth)"));
+		super("canvas-" + ImGuiUtils.id(canvas.id) + (color ? "-color" : "-depth"), canvas.idString + (color ? " (Color)" : " (Depth)"));
 		this.canvas = canvas;
 		this.color = color;
 	}
 
 	@Override
 	public int setup(ImGraphics graphics) {
+		graphics.pushStack();
+
+		if (canvas.active) {
+			label = ImIcons.VISIBLE + " " + canvas.idString + (color ? " (Color)" : " (Depth)");
+			graphics.setSuccessText();
+		} else {
+			label = ImIcons.INVISIBLE + " " + canvas.idString + (color ? " (Color)" : " (Depth)");
+			graphics.setErrorText();
+		}
+
 		return super.setup(graphics);
+	}
+
+	@Override
+	public void postSetup(ImGraphics graphics, boolean menuOpen) {
+		graphics.popStack();
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.render.DebugRenderTypes;
 import dev.latvian.mods.klib.vertex.VertexCallback;
+import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.bloom.BloomRenderTypes;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -151,6 +152,7 @@ public class LightningParticle extends CustomParticle {
 
 		point.set(0D, 0D, 0D);
 
+		Bloom.markActive();
 		var bloomBuffer = buffers.getBuffer(BloomRenderTypes.DEFAULT_POS_COL_NO_CULL).withColor(outlineColor.get(time / (float) lifetime));
 		renderSegments(ms, prevPoint, point, delta, bloomBuffer);
 

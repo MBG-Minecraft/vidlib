@@ -30,6 +30,8 @@ public class BossRendering {
 			return;
 		}
 
+		CANVAS.markActive();
+
 		var dispatcher = mc.getEntityRenderDispatcher();
 		dispatcher.setRenderShadow(false);
 		boolean hitbox = dispatcher.shouldRenderHitBoxes();

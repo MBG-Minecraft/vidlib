@@ -111,6 +111,10 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 		return withFlags(FLAG_REMAIN_OPEN_OVERRIDE | (remainOpen ? FLAG_REMAIN_OPEN : 0));
 	}
 
+	public MenuItem withLabel(ImText label) {
+		return new MenuItem(icon, label, tooltip, shortcut, flags, onClick, subItems);
+	}
+
 	public MenuItem withShortcut(String shortcut) {
 		return new MenuItem(icon, label, tooltip, shortcut, flags, onClick, subItems);
 	}
@@ -153,10 +157,10 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 				}
 
 				label.push(graphics);
+				boolean menuOpen = ImGui.beginMenu(rIcon.formatLabel(graphics, label.text()));
+				label.pop(graphics);
 
-				if (ImGui.beginMenu(rIcon.formatLabel(graphics, label.text()))) {
-					label.pop(graphics);
-
+				if (menuOpen) {
 					for (int i = 0; i < items.size(); i++) {
 						ImGui.pushID(i);
 						items.get(i).build(graphics);
@@ -183,13 +187,11 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 			}
 
 			label.push(graphics);
+			boolean menuItemClicked = ImGui.menuItem(rIcon.formatLabel(graphics, label.text()), shortcut, hasFlag(FLAG_CHECKMARK), !hasFlag(FLAG_DISABLED));
+			label.pop(graphics);
 
-			if (ImGui.menuItem(rIcon.formatLabel(graphics, label.text()), shortcut, hasFlag(FLAG_CHECKMARK), !hasFlag(FLAG_DISABLED))) {
-				label.pop(graphics);
-
-				if (!hasFlag(FLAG_DISABLED)) {
-					onClick.onClick(graphics);
-				}
+			if (menuItemClicked && !hasFlag(FLAG_DISABLED)) {
+				onClick.onClick(graphics);
 			}
 
 			if (!tooltip.text().isEmpty() && ImGui.isItemHovered()) {

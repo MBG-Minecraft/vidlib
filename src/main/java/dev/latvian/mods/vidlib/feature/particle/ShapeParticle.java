@@ -5,6 +5,7 @@ import dev.latvian.mods.klib.color.Gradient;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.render.DebugRenderTypes;
 import dev.latvian.mods.klib.shape.Shape;
+import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.bloom.BloomRenderTypes;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -45,6 +46,7 @@ public class ShapeParticle extends CustomParticle {
 
 		if (lc.alpha() > 0) {
 			if (options.bright()) {
+				Bloom.markActive();
 				shape.buildQuads(0F, 0F, 0F, ms.last().transform(BloomRenderTypes.POS_COL_BUFFER_SUPPLIER.quadsCull(BloomRenderTypes.overridePosCol(buffers))).withColor(lc.fadeOut(time, lifetime, 20F)));
 			} else {
 				shape.buildLines(0F, 0F, 0F, ms.last().transform(buffers.getBuffer(DebugRenderTypes.LINES)).withColor(lc.fadeOut(time, lifetime, 20F)));
@@ -55,6 +57,7 @@ public class ShapeParticle extends CustomParticle {
 
 		if (c.alpha() > 0) {
 			if (options.bright()) {
+				Bloom.markActive();
 				shape.buildQuads(0F, 0F, 0F, ms.last().transform(buffers.getBuffer(DebugRenderTypes.QUADS)).withColor(c.fadeOut(time, lifetime, 20F)));
 			} else {
 				shape.buildQuads(0F, 0F, 0F, ms.last().transform(buffers.getBuffer(DebugRenderTypes.QUADS_NO_DEPTH)).withColor(c.withAlpha(50).fadeOut(time, lifetime, 20F)));

@@ -5,11 +5,21 @@
 	"passes": [
 		{
 			"vertex_shader": "minecraft:post/sobel",
-			"fragment_shader": "vidlib:post/player_outline",
+			"fragment_shader": "vidlib:post/weak_outline",
 			"inputs": [
 				{
 					"sampler_name": "In",
-					"target": "vidlib:player_outline"
+					"target": "vidlib:weak_outline"
+				},
+				{
+					"sampler_name": "DepthBeforeParticles",
+					"target": "vidlib:main_before_particles",
+					"use_depth_buffer": true
+				},
+				{
+					"sampler_name": "DepthAfterParticles",
+					"target": "vidlib:main_after_particles",
+					"use_depth_buffer": true
 				}
 			],
 			"output": "swap"
@@ -23,7 +33,7 @@
 					"target": "swap"
 				}
 			],
-			"output": "vidlib:player_outline",
+			"output": "vidlib:weak_outline",
 			"uniforms": [
 				{
 					"name": "ColorModulate",

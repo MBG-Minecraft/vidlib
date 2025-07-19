@@ -12,6 +12,7 @@ import com.mojang.blaze3d.resource.ResourceHandle;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import dev.latvian.mods.klib.gl.GLDebugLog;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
@@ -55,10 +56,10 @@ public class Canvas {
 	public static final Canvas MAIN_AFTER_PARTICLES = createExternal(VidLib.id("main_after_particles"));
 
 	@AutoRegister(Dist.CLIENT)
-	public static final Canvas ENTITY_OUTLINE = createExternal(VidLib.id("entity_outline"));
+	public static final Canvas WEAK_OUTLINE = createExternal(VidLib.id("weak_outline"));
 
 	@AutoRegister(Dist.CLIENT)
-	public static final Canvas PLAYER_OUTLINE = createExternal(VidLib.id("player_outline"));
+	public static final Canvas STRONG_OUTLINE = createExternal(VidLib.id("strong_outline"));
 
 	public final ResourceLocation id;
 	public final String idString;
@@ -68,6 +69,7 @@ public class Canvas {
 	public final Set<ResourceLocation> defaultTargets;
 
 	public boolean enabled;
+	public boolean active;
 	public boolean previewColor;
 	public boolean previewDepth;
 	public CanvasData data;
@@ -86,9 +88,18 @@ public class Canvas {
 		this.defaultTargets = Set.of(id);
 
 		this.enabled = false;
+		this.active = false;
 		this.previewColor = false;
 		this.previewDepth = false;
 		this.data = CanvasData.DEFAULT;
+	}
+
+	public void markActive() {
+		if (!active) {
+			GLDebugLog.message("[VidLib] Activated canvas " + idString);
+		}
+
+		active = true;
 	}
 
 	public Canvas setDrawCallback(Consumer<Minecraft> callback) {
@@ -97,6 +108,10 @@ public class Canvas {
 	}
 
 	public boolean draw(Minecraft mc, GpuTexture texture) {
+		if (!active) {
+			return false;
+		}
+
 		if (drawCallback != null) {
 			drawCallback.accept(mc);
 		}
@@ -314,7 +329,7 @@ public class Canvas {
 	}
 
 	public void readsAndWrites(FramePass pass) {
-		if (outputTarget != null) {
+		if (outputTarget != null && active) {
 			outputTarget = pass.readsAndWrites(outputTarget);
 		}
 	}

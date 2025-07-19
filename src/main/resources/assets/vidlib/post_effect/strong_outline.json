@@ -5,21 +5,11 @@
 	"passes": [
 		{
 			"vertex_shader": "minecraft:post/sobel",
-			"fragment_shader": "vidlib:post/entity_outline",
+			"fragment_shader": "vidlib:post/strong_outline",
 			"inputs": [
 				{
 					"sampler_name": "In",
-					"target": "vidlib:entity_outline"
-				},
-				{
-					"sampler_name": "DepthBeforeParticles",
-					"target": "vidlib:main_before_particles",
-					"use_depth_buffer": true
-				},
-				{
-					"sampler_name": "DepthAfterParticles",
-					"target": "vidlib:main_after_particles",
-					"use_depth_buffer": true
+					"target": "vidlib:strong_outline"
 				}
 			],
 			"output": "swap"
@@ -33,7 +23,7 @@
 					"target": "swap"
 				}
 			],
-			"output": "vidlib:entity_outline",
+			"output": "vidlib:strong_outline",
 			"uniforms": [
 				{
 					"name": "ColorModulate",

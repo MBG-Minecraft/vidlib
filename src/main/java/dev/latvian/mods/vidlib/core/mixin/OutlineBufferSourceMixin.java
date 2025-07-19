@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.core.VLOutlineBufferSource;
+import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import net.minecraft.client.renderer.OutlineBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -25,14 +26,16 @@ public class OutlineBufferSourceMixin implements VLOutlineBufferSource {
 
 	@Redirect(method = "getBuffer", at = @At(value = "INVOKE", target = "Ljava/util/Optional;get()Ljava/lang/Object;"))
 	private <T> T vl$getBuffer(Optional<T> instance, @Local(argsOnly = true) RenderType renderType) {
-		if (vl$isPlayer || VidLibConfig.seeThroughEntityOutline) {
+		if (vl$isPlayer || VidLibConfig.strongEntityOutline) {
 			var tex = renderType.vl$getTexture();
 
 			if (tex != null) {
-				return (T) VidLibRenderTypes.PLAYER_OUTLINE.apply(tex, false);
+				Canvas.STRONG_OUTLINE.markActive();
+				return (T) VidLibRenderTypes.STRONG_OUTLINE_NO_CULL.apply(tex);
 			}
 		}
 
+		Canvas.WEAK_OUTLINE.markActive();
 		return instance.get();
 	}
 }

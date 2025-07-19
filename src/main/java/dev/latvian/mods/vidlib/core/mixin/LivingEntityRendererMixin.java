@@ -15,6 +15,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class LivingEntityRendererMixin<S extends LivingEntityRenderState> {
 	@Redirect(method = "getRenderType", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderType;outline(Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;"))
 	private RenderType vidlib$outline(ResourceLocation texture, @Local(argsOnly = true) S state) {
-		return state instanceof PlayerRenderState ? VidLibRenderTypes.PLAYER_OUTLINE.apply(texture, false) : RenderType.outline(texture);
+		return state instanceof PlayerRenderState ? VidLibRenderTypes.STRONG_OUTLINE_NO_CULL.apply(texture) : RenderType.outline(texture);
 	}
 }

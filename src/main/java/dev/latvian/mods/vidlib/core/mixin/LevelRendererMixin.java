@@ -127,7 +127,7 @@ public abstract class LevelRendererMixin {
 
 	@Inject(method = "addWeatherPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/world/phys/Vec3;FLnet/minecraft/client/renderer/FogParameters;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lnet/minecraft/client/Camera;)V", at = @At("RETURN"))
 	private void vl$addMainPass(FrameGraphBuilder frameGraphBuilder, Vec3 cameraPosition, float partialTick, FogParameters fog, Matrix4f modelViewMatrix, Matrix4f projectionMatrix, Camera camera, CallbackInfo ci) {
-		CanvasImpl.addAllToFrame(minecraft, frameGraphBuilder, targets);
+		CanvasImpl.addAllToFrame(minecraft, frameGraphBuilder, targets, false);
 	}
 
 	@Redirect(method = "addMainPass", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/framegraph/FramePass;readsAndWrites(Lcom/mojang/blaze3d/resource/ResourceHandle;)Lcom/mojang/blaze3d/resource/ResourceHandle;", ordinal = 4))
@@ -154,7 +154,7 @@ public abstract class LevelRendererMixin {
 
 	@Inject(method = "renderEntities", at = @At("HEAD"))
 	private void vl$renderEntitiesHead(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, Camera camera, DeltaTracker deltaTracker, List<Entity> entities, CallbackInfo ci) {
-		GLDebugLog.pushGroup("Render Entities");
+		GLDebugLog.pushGroup("[VidLib] Render Entities");
 	}
 
 	@Inject(method = "renderEntities", at = @At("RETURN"))
@@ -164,7 +164,7 @@ public abstract class LevelRendererMixin {
 
 	@Inject(method = "renderEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderEntity(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V"))
 	private void vl$renderEntitiesRender(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, Camera camera, DeltaTracker deltaTracker, List<Entity> entities, CallbackInfo ci, @Local Entity entity) {
-		GLDebugLog.message(entity.getScoreboardName() + " [" + entity.getType().getDescription().getString() + "]");
+		GLDebugLog.message("[VidLib] " + entity.getScoreboardName() + " [" + entity.getType().getDescription().getString() + "]");
 	}
 
 	@ModifyExpressionValue(method = {
@@ -186,7 +186,7 @@ public abstract class LevelRendererMixin {
 	@Overwrite
 	@Nullable
 	public RenderTarget entityOutlineTarget() {
-		return Canvas.ENTITY_OUTLINE.getTargetOrNull();
+		return Canvas.WEAK_OUTLINE.getTargetOrNull();
 	}
 
 	@Inject(method = "renderEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/OutlineBufferSource;setColor(IIII)V"))

@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.prop.builtin;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.render.DebugRenderTypes;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
+import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.bloom.BloomRenderTypes;
 import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
@@ -32,6 +33,7 @@ public class ShapePropRenderer implements PropRenderer<ShapeProp> {
 
 		if (lc.alpha() > 0) {
 			if (prop.bloom) {
+				Bloom.markActive();
 				prop.shape.buildQuads(0F, 0F, 0F, ms.last().transform(BloomRenderTypes.POS_COL_BUFFER_SUPPLIER.quadsCull(BloomRenderTypes.overridePosCol(buffers))).withColor(lc));
 			} else {
 				prop.shape.buildLines(0F, 0F, 0F, ms.last().transform(buffers.getBuffer(DebugRenderTypes.LINES)).withColor(lc));
@@ -42,6 +44,7 @@ public class ShapePropRenderer implements PropRenderer<ShapeProp> {
 
 		if (c.alpha() > 0) {
 			if (prop.bloom) {
+				Bloom.markActive();
 				prop.shape.buildQuads(0F, 0F, 0F, ms.last().transform(buffers.getBuffer(DebugRenderTypes.QUADS)).withColor(c));
 			} else {
 				prop.shape.buildQuads(0F, 0F, 0F, ms.last().transform(buffers.getBuffer(DebugRenderTypes.QUADS_NO_DEPTH)).withColor(c.withAlpha(50)));

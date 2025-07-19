@@ -14,6 +14,7 @@ import dev.latvian.mods.klib.util.WithCache;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
@@ -26,7 +27,6 @@ import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.neoforged.fml.loading.FMLLoader;
@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 public class StructureRenderer implements WithCache {
@@ -143,20 +144,14 @@ public class StructureRenderer implements WithCache {
 		this.origin = BlockPos.ZERO;
 	}
 
-	public void preRender(StructureRendererData data) {
-		var mc = Minecraft.getInstance();
-
-		if (mc.level == null) {
-			return;
-		}
-
+	public void preRender(Minecraft mc, StructureRendererData data, Executor renderExecutor, Executor backgroundExecutor) {
 		if (layers == null) {
 			layers = EMPTY_LAYERS;
 			var structure = structureProvider.get();
 
 			if (structure != null) {
 				rendering = true;
-				buildLevel(mc, structure, data);
+				buildLevel(mc, structure, data, renderExecutor, backgroundExecutor);
 			} else {
 				rendering = false;
 			}
@@ -165,11 +160,15 @@ public class StructureRenderer implements WithCache {
 		}
 	}
 
-	private void buildLevel(Minecraft mc, StructureHolder structure, StructureRendererData data) {
-		CompletableFuture.runAsync(() -> buildLayers(mc, structure.withoutInvisibleBlocks(), data), Util.backgroundExecutor());
+	private void buildLevel(Minecraft mc, StructureHolder structure, StructureRendererData data, Executor renderExecutor, Executor backgroundExecutor) {
+		if (renderExecutor == backgroundExecutor) {
+			buildLayers(mc, structure.withoutInvisibleBlocks(), data, renderExecutor, backgroundExecutor);
+		} else {
+			CompletableFuture.runAsync(() -> buildLayers(mc, structure.withoutInvisibleBlocks(), data, renderExecutor, backgroundExecutor), backgroundExecutor);
+		}
 	}
 
-	private void buildLayers(Minecraft mc, StructureHolder structure, StructureRendererData data) {
+	private void buildLayers(Minecraft mc, StructureHolder structure, StructureRendererData data, Executor renderExecutor, Executor backgroundExecutor) {
 		var start = System.currentTimeMillis();
 		var blockRenderer = mc.getBlockRenderer();
 		var random = RandomSource.create();
@@ -209,7 +208,9 @@ public class StructureRenderer implements WithCache {
 		var buildingLayerArray = layerMap.values().toArray(BuildingLayer.EMPTY);
 		Arrays.sort(buildingLayerArray, Comparator.comparingInt(BuildingLayer::sort));
 
-		var level = new StructureRendererLevel(structure.blocks(), data.skyLight(), data.blockLight(), mc.level.registryAccess().get(Biomes.PLAINS).get().value());
+		var biome = MiscUtils.VOID_BIOME.get();
+		// var biome = mc.level.registryAccess().get(Biomes.PLAINS).get().value();
+		var level = new StructureRendererLevel(structure.blocks(), data.skyLight(), data.blockLight(), biome);
 
 		var poseStack = new PoseStack();
 
@@ -239,7 +240,12 @@ public class StructureRenderer implements WithCache {
 		}
 
 		var time = System.currentTimeMillis() - start;
-		mc.execute(() -> upload(buildingLayerArray, time));
+
+		if (renderExecutor == backgroundExecutor) {
+			upload(buildingLayerArray, time);
+		} else {
+			renderExecutor.execute(() -> upload(buildingLayerArray, time));
+		}
 	}
 
 	private void upload(BuildingLayer[] buildingLayerArray, long buildTime) {
@@ -298,7 +304,8 @@ public class StructureRenderer implements WithCache {
 
 	public void render(PoseStack ms, TerrainRenderLayer renderLayerFilter, StructureRendererData data) {
 		if (layers == null) {
-			preRender(data);
+			var mc = Minecraft.getInstance();
+			preRender(mc, data, mc, Util.backgroundExecutor());
 		}
 
 		var layers0 = layers;

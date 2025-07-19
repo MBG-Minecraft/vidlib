@@ -8,4 +8,8 @@ import net.neoforged.api.distmarker.Dist;
 public interface Bloom {
 	@AutoRegister(Dist.CLIENT)
 	Canvas CANVAS = Canvas.createExternal(VidLib.id("bloom"));
+
+	static void markActive() {
+		CANVAS.markActive();
+	}
 }

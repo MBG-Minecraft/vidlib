@@ -1,5 +1,6 @@
 {
 	"priority": -51,
 	"import": [
-	]
+	],
+	"always_active": false
 }

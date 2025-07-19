@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.latvian.mods.klib.gl.GLDebugLog;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.util.Cast;
@@ -68,6 +69,7 @@ public class ClientProps extends Props<ClientLevel> {
 			return;
 		}
 
+		GLDebugLog.pushGroup("[VidLib] Render Props " + frame.stage());
 		var props = list.iterator();
 
 		while (props.hasNext()) {
@@ -95,7 +97,9 @@ public class ClientProps extends Props<ClientLevel> {
 					if (renderer.shouldSort(ctx)) {
 						sortedProps.add(ctx);
 					} else {
+						GLDebugLog.pushGroup("[VidLib] " + prop);
 						ctx.render();
+						GLDebugLog.popGroup();
 					}
 				}
 			}
@@ -107,11 +111,15 @@ public class ClientProps extends Props<ClientLevel> {
 			}
 
 			for (var p : sortedProps) {
+				GLDebugLog.pushGroup("[VidLib] " + p.prop());
 				p.render();
+				GLDebugLog.popGroup();
 			}
 
 			sortedProps.clear();
 		}
+
+		GLDebugLog.popGroup();
 	}
 
 	public void renderDebug(FrameInfo frame) {

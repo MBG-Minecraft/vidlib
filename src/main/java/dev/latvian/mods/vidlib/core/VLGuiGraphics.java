@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.core;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.vidlib.feature.client.HUDNameEvent;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -20,6 +21,7 @@ import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.ReadOnlyScoreInfo;
 import net.minecraft.world.scores.Scoreboard;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.ArrayList;
 
@@ -71,6 +73,8 @@ public interface VLGuiGraphics {
 				lines.addAll(font.split(Component.empty().append(component).append(CommonComponents.SPACE).append(objective.getDisplayName()), 1000));
 			}
 		}
+
+		NeoForge.EVENT_BUS.post(new HUDNameEvent(entity, font, lines));
 
 		graphics.pose().pushPose();
 		graphics.pose().translate(x + w / 2F, nameY - 6F, 0F);

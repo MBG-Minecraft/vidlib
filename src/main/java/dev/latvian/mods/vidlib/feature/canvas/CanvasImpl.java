@@ -92,10 +92,10 @@ public class CanvasImpl {
 	}
 
 	public static void resizeAll(int width, int height) {
-		GLDebugLog.pushGroup("Canvas Resize");
+		GLDebugLog.pushGroup("[VidLib] Canvas Resize");
 
 		for (var canvas : ENABLED_EXT) {
-			GLDebugLog.message(canvas.idString);
+			GLDebugLog.message("[VidLib] " + canvas.idString);
 			canvas.resize(width, height);
 		}
 
@@ -104,12 +104,12 @@ public class CanvasImpl {
 
 	public static void drawAllBeforeOutline(Minecraft mc) {
 		var texture = Objects.requireNonNull(mc.getMainRenderTarget().getColorTexture());
-		GLDebugLog.pushGroup("Canvas Draw All Before Outline");
+		GLDebugLog.pushGroup("[VidLib] Canvas Draw All Before Outline");
 
 		for (var canvas : ENABLED) {
 			if (canvas.data.priority() >= 0) {
 				if (canvas.data.autoDraw()) {
-					GLDebugLog.message(canvas.idString);
+					GLDebugLog.message("[VidLib] " + canvas.idString);
 					canvas.draw(mc, texture);
 				} else if (canvas.drawCallback != null) {
 					canvas.drawCallback.accept(mc);
@@ -122,12 +122,12 @@ public class CanvasImpl {
 
 	public static void drawAllAfterOutline(Minecraft mc) {
 		var texture = Objects.requireNonNull(mc.getMainRenderTarget().getColorTexture());
-		GLDebugLog.pushGroup("Canvas Draw All After Outline");
+		GLDebugLog.pushGroup("[VidLib] Canvas Draw All After Outline");
 
 		for (var canvas : ENABLED) {
 			if (canvas.data.priority() < 0) {
 				if (canvas.data.autoDraw()) {
-					GLDebugLog.message(canvas.idString);
+					GLDebugLog.message("[VidLib] " + canvas.idString);
 					canvas.draw(mc, texture);
 				} else if (canvas.drawCallback != null) {
 					canvas.drawCallback.accept(mc);
@@ -168,11 +168,11 @@ public class CanvasImpl {
 	}
 
 	public static void createHandles(FrameGraphBuilder builder, RenderTargetDescriptor targetDescriptor) {
-		GLDebugLog.pushGroup("Canvas Create Handles");
+		GLDebugLog.pushGroup("[VidLib] Canvas Create Handles");
 
 		for (var canvas : ENABLED) {
-			GLDebugLog.message(canvas.idString);
 			canvas.createHandle(builder, targetDescriptor);
+			canvas.active = canvas.data.alwaysActive();
 
 			if (canvas.data.autoClear()) {
 				canvas.clear();
@@ -182,24 +182,25 @@ public class CanvasImpl {
 		GLDebugLog.popGroup();
 	}
 
-	public static void addAllToFrame(Minecraft mc, FrameGraphBuilder frameGraphBuilder, PostChain.TargetBundle targetBundle) {
+	public static void addAllToFrame(Minecraft mc, FrameGraphBuilder frameGraphBuilder, PostChain.TargetBundle targetBundle, boolean gui) {
 		int w = mc.getMainRenderTarget().width;
 		int h = mc.getMainRenderTarget().height;
-		GLDebugLog.pushGroup("Canvas Add to Frame " + w + " x " + h);
+		GLDebugLog.pushGroup("[VidLib] Canvas Add to Frame " + w + " x " + h);
 
 		for (var canvas : ENABLED_EXT) {
-			GLDebugLog.message(canvas.idString);
-			canvas.addToFrame(mc, frameGraphBuilder, targetBundle, w, h);
+			if (canvas.data.gui() == gui) {
+				canvas.addToFrame(mc, frameGraphBuilder, targetBundle, w, h);
+			}
 		}
 
 		GLDebugLog.popGroup();
 	}
 
 	public static void allReadsAndWrites(FramePass pass) {
-		GLDebugLog.pushGroup("Canvas Reads and Writes");
+		GLDebugLog.pushGroup("[VidLib] Canvas Reads and Writes");
 
 		for (var canvas : ENABLED) {
-			GLDebugLog.message(canvas.idString);
+			GLDebugLog.message("[VidLib] " + canvas.idString);
 			canvas.readsAndWrites(pass);
 		}
 
@@ -211,7 +212,7 @@ public class CanvasImpl {
 			return;
 		}
 
-		GLDebugLog.pushGroup("Canvas Preview");
+		GLDebugLog.pushGroup("[VidLib] Canvas Preview");
 
 		int y = 5;
 		var buffers = mc.renderBuffers().bufferSource();
@@ -223,7 +224,7 @@ public class CanvasImpl {
 			int x = 5;
 
 			if (canvas.previewColor || canvas.previewDepth) {
-				GLDebugLog.pushGroup(canvas.idString);
+				GLDebugLog.pushGroup("[VidLib] Canvas " + canvas.idString);
 
 				g.pose().pushPose();
 				g.pose().translate(0F, 0F, 950F);
@@ -231,7 +232,7 @@ public class CanvasImpl {
 				var m = p.pose();
 
 				if (canvas.previewColor) {
-					GLDebugLog.message("Color Preview");
+					GLDebugLog.message("[VidLib] Canvas Color Preview");
 					var tex = canvas.getColorTexture();
 
 					g.fill(x - 1, y - 1, x + w + 1, y + h + 1, 0xFF000000);
@@ -262,7 +263,7 @@ public class CanvasImpl {
 				}
 
 				if (canvas.previewDepth) {
-					GLDebugLog.message("Depth Preview");
+					GLDebugLog.message("[VidLib] Canvas Depth Preview");
 					var tex = canvas.getDepthTexture();
 
 					g.fill(x - 1, y - 1, x + w + 1, y + h + 1, 0xFF000000);
@@ -319,6 +320,6 @@ public class CanvasImpl {
 			buffers.endBatch(Sheets.chestSheet());
 		}
 
-		Canvas.ENTITY_OUTLINE.copyDepthFrom(from);
+		Canvas.WEAK_OUTLINE.copyDepthFrom(from);
 	}
 }
