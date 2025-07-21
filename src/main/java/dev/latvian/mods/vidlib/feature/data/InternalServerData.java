@@ -25,4 +25,6 @@ public interface InternalServerData {
 	DataKey<Float> NAME_DRAW_MIN_SIZE = DataKey.SERVER.createDefaultFloat("name_draw_min_size", 0.5F);
 	DataKey<Long> GLOBAL_STOPWATCH = DataKey.SERVER.createDefault("global_stopwatch", DataTypes.VAR_LONG, 0L);
 	DataKey<Long> GLOBAL_STOPWATCH_START = DataKey.SERVER.createDefault("global_stopwatch_start", DataTypes.VAR_LONG, 0L);
+	DataKey<Boolean> ICE_MELTS = DataKey.SERVER.createDefaultBoolean("ice_melts", false);
+	DataKey<Boolean> BLOCK_GRAVITY = DataKey.SERVER.createDefaultBoolean("block_gravity", false);
 }

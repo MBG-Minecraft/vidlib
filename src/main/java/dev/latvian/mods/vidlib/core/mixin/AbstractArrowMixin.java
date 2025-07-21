@@ -42,7 +42,7 @@ public abstract class AbstractArrowMixin {
 	private void vl$tick(CallbackInfo ci) {
 		var arrow = (AbstractArrow) (Object) this;
 
-		if (life == 0 && VidLibConfig.arrowTrails && !arrow.level().isClientSide()) {
+		if (life == 0 && !arrow.level().isClientSide() && VidLibConfig.arrowTrails) {
 			var pos = arrow.getPosition(0F);
 
 			if (vl$prevTrailPos != null) {

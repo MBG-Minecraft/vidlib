@@ -6,7 +6,6 @@ public class VidLibConfig {
 	public static int cycleShadersKey = 83; // GLFW.GLFW_KEY_S;
 	public static int reloadShadersKey = 88; // GLFW.GLFW_KEY_X;
 	public static boolean betterDefaultGameRules = true;
-	public static boolean disableFallingBlocks = true;
 	public static boolean disableCoralBlocks = true;
 	public static boolean limitHeldItemRendering = true;
 	public static double heldItemRenderDistance = 64D;

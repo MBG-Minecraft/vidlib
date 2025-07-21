@@ -21,6 +21,7 @@ import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
@@ -54,17 +55,20 @@ public class StructureRenderer implements WithCache {
 	private record FluidModel(BlockPos pos, BlockState state, FluidState fluid) {
 	}
 
-	private record BuildingLayer(ByteBufferBuilder memory, BufferBuilder bufferBuilder, RenderType type, Map<StateModel, List<BlockModelPart>> parts, int sort) {
+	private record BuildingLayer(ByteBufferBuilder memory, BufferBuilder bufferBuilder, RenderType type, Map<StateModel, List<BlockModelPart>> parts, List<FluidModel> fluids, int sort) {
 		private static final BuildingLayer[] EMPTY = new BuildingLayer[0];
 	}
 
 	private record CachedLayer(TerrainRenderLayer layer, RenderType type, StaticBuffers buffer) {
-		private static final CachedLayer[] EMPTY = new CachedLayer[0];
 	}
 
 	public static class FluidTransformingVertexPipeline extends TransformingVertexPipeline {
 		public FluidTransformingVertexPipeline(VertexConsumer parent, Transformation transformation) {
 			super(parent, transformation);
+		}
+
+		public int wrap() {
+			return 0xFFFFFFFF;
 		}
 	}
 
@@ -173,6 +177,9 @@ public class StructureRenderer implements WithCache {
 		var blockRenderer = mc.getBlockRenderer();
 		var random = RandomSource.create();
 
+		var biome = MiscUtils.VOID_BIOME.get();
+		var level = new StructureRendererLevel(structure.blocks(), data.skyLight(), data.blockLight(), biome);
+
 		var allTypes = RenderType.chunkBufferLayers();
 		var layerMap = new Reference2ObjectOpenHashMap<RenderType, BuildingLayer>(allTypes.size());
 		var layerSorting = new Reference2IntOpenHashMap<RenderType>(allTypes.size());
@@ -187,7 +194,6 @@ public class StructureRenderer implements WithCache {
 
 			var stateModel = new StateModel(pos, state, blockRenderer.getBlockModel(state), state.getSeed(pos));
 			random.setSeed(stateModel.seed);
-			boolean added = false;
 
 			for (var part : stateModel.model.collectParts(random)) {
 				var type = part.getRenderType(state);
@@ -196,21 +202,32 @@ public class StructureRenderer implements WithCache {
 				if (layer == null) {
 					var memory = new ByteBufferBuilder(65536);
 					var bufferBuilder = new BufferBuilder(memory, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-					layer = new BuildingLayer(memory, bufferBuilder, type, new Reference2ObjectArrayMap<>(1), layerSorting.getOrDefault(type, 9999));
+					layer = new BuildingLayer(memory, bufferBuilder, type, new Reference2ObjectArrayMap<>(1), new ArrayList<>(), layerSorting.getOrDefault(type, 9999));
 					layerMap.put(type, layer);
 				}
 
 				layer.parts.computeIfAbsent(stateModel, k -> new ArrayList<>(1)).add(part);
-				added = true;
+			}
+
+			var fluidState = state.getFluidState();
+
+			if (!fluidState.isEmpty()) {
+				var type = ItemBlockRenderTypes.getRenderLayer(fluidState);
+				var layer = layerMap.get(type);
+
+				if (layer == null) {
+					var memory = new ByteBufferBuilder(65536);
+					var bufferBuilder = new BufferBuilder(memory, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+					layer = new BuildingLayer(memory, bufferBuilder, type, new Reference2ObjectArrayMap<>(1), new ArrayList<>(), layerSorting.getOrDefault(type, 9999));
+					layerMap.put(type, layer);
+				}
+
+				layer.fluids.add(new FluidModel(pos, state, fluidState));
 			}
 		}
 
 		var buildingLayerArray = layerMap.values().toArray(BuildingLayer.EMPTY);
 		Arrays.sort(buildingLayerArray, Comparator.comparingInt(BuildingLayer::sort));
-
-		var biome = MiscUtils.VOID_BIOME.get();
-		// var biome = mc.level.registryAccess().get(Biomes.PLAINS).get().value();
-		var level = new StructureRendererLevel(structure.blocks(), data.skyLight(), data.blockLight(), biome);
 
 		var poseStack = new PoseStack();
 
@@ -236,6 +253,16 @@ public class StructureRenderer implements WithCache {
 				}
 
 				poseStack.popPose();
+			}
+
+			if (!layer.fluids.isEmpty()) {
+				for (var model : layer.fluids) {
+					poseStack.pushPose();
+					// poseStack.translate(model.pos.getX(), model.pos.getY(), model.pos.getZ());
+					var buffer = new FluidTransformingVertexPipeline(layer.bufferBuilder, new Transformation(poseStack.last().pose()));
+					blockRenderer.renderLiquid(model.pos, level, buffer, model.state, model.fluid);
+					poseStack.popPose();
+				}
 			}
 		}
 

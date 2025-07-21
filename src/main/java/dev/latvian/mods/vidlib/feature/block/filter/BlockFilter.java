@@ -92,6 +92,24 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 		}
 	});
 
+	SimpleRegistryType.Unit<BlockFilter> PARTIAL = SimpleRegistryType.unit("partial", new BlockFilter() {
+		@Override
+		public boolean test(BlockInWorld blockInWorld) {
+			var state = blockInWorld.getState();
+			return state != null && state.isPartial();
+		}
+
+		@Override
+		public boolean test(Level level, BlockPos pos, BlockState state) {
+			return state.isPartial();
+		}
+
+		@Override
+		public String toString() {
+			return "partial";
+		}
+	});
+
 	SimpleRegistryType.Unit<BlockFilter> EXPOSED = SimpleRegistryType.unit("exposed", new BlockFilter() {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
@@ -106,6 +124,23 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 		@Override
 		public String toString() {
 			return "exposed";
+		}
+	});
+
+	SimpleRegistryType.Unit<BlockFilter> FLUID = SimpleRegistryType.unit("fluid", new BlockFilter() {
+		@Override
+		public boolean test(BlockInWorld blockInWorld) {
+			return blockInWorld.getLevel() instanceof Level l && test(l, blockInWorld.getPos(), blockInWorld.getState());
+		}
+
+		@Override
+		public boolean test(Level level, BlockPos pos, BlockState state) {
+			return !state.isAir() && state.liquid();
+		}
+
+		@Override
+		public String toString() {
+			return "fluid";
 		}
 	});
 
@@ -210,6 +245,16 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 			return filter;
 		} else {
 			return new BlockAndFilter(List.of(this, filter));
+		}
+	}
+
+	default BlockFilter or(BlockFilter filter) {
+		if (filter == ANY.instance()) {
+			return filter;
+		} else if (filter == NONE.instance()) {
+			return this;
+		} else {
+			return new BlockOrFilter(List.of(this, filter));
 		}
 	}
 }

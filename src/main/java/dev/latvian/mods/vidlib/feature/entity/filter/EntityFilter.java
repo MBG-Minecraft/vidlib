@@ -150,4 +150,24 @@ public interface EntityFilter extends Predicate<Entity> {
 	default EntityFilter not() {
 		return new EntityNotFilter(this);
 	}
+
+	default EntityFilter and(EntityFilter filter) {
+		if (filter == ANY.instance()) {
+			return this;
+		} else if (filter == NONE.instance()) {
+			return filter;
+		} else {
+			return new EntityAndFilter(List.of(this, filter));
+		}
+	}
+
+	default EntityFilter or(EntityFilter filter) {
+		if (filter == ANY.instance()) {
+			return filter;
+		} else if (filter == NONE.instance()) {
+			return this;
+		} else {
+			return new EntityOrFilter(List.of(this, filter));
+		}
+	}
 }

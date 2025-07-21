@@ -57,9 +57,9 @@ public class BlockStateMixin implements VLBlockState {
 	}
 
 	@Override
-	public boolean isTransparent() {
+	public boolean isPartial() {
 		if (vl$transparent == null) {
-			vl$transparent = VLBlockState.super.isTransparent();
+			vl$transparent = VLBlockState.super.isPartial();
 		}
 
 		return vl$transparent;

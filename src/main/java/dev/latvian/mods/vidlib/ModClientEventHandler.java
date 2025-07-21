@@ -17,6 +17,7 @@ import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
+import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -52,6 +53,7 @@ public class ModClientEventHandler {
 		event.addListener(VidLib.id("clock_font"), new ClockFont.Loader());
 		event.addListener(VidLib.id("clock"), new Clock.Loader());
 		event.addListener(VidLib.id("skybox"), new SkyboxData.Loader());
+		event.addListener(VidLib.id("zone"), new ZoneLoader(ZoneLoader.CLIENT_BY_DIMENSION, false));
 
 		event.addDependency(VidLib.id("structure"), VidLib.id("ghost_structure"));
 		event.addDependency(VidLib.id("clock_font"), VidLib.id("clock"));

@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.net;
 
 import dev.latvian.mods.klib.util.Cast;
+import dev.latvian.mods.vidlib.VidLib;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
@@ -15,7 +16,13 @@ public interface SimplePacketPayload {
 	}
 
 	default void handleAsync(Context ctx) {
-		ctx.parent().enqueueWork(() -> handle(ctx));
+		ctx.parent().enqueueWork(() -> {
+			try {
+				handle(ctx);
+			} catch (Exception ex) {
+				VidLib.LOGGER.error("Failed to handle packet '%s' #%,d @ %,d, %s".formatted(ctx.type(), ctx.uid(), ctx.remoteGameTime(), this), ex);
+			}
+		});
 	}
 
 	default void handle(Context ctx) {

@@ -72,7 +72,7 @@ public class GameEventHandler {
 	@SubscribeEvent
 	public static void addReloadListeners(AddServerReloadListenersEvent event) {
 		event.addListener(VidLib.id("location"), new Location.Loader(Location.REGISTRY));
-		event.addListener(VidLib.id("zone"), new ZoneLoader());
+		event.addListener(VidLib.id("zone"), new ZoneLoader(ZoneLoader.SERVER_BY_DIMENSION, true));
 		event.addListener(VidLib.id("structure"), new StructureStorage(StructureStorage.SERVER));
 		event.addListener(VidLib.id("cutscene"), new Cutscene.Loader());
 	}

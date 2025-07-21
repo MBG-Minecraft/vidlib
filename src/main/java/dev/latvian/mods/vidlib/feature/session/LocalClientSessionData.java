@@ -40,6 +40,7 @@ import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneEvent;
+import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
@@ -303,7 +304,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	}
 
 	public void refreshZones(ResourceKey<Level> dimension) {
-		filteredZones.filter(dimension, serverZones);
+		filteredZones.filter(dimension, serverZones, ZoneLoader.CLIENT_BY_DIMENSION.get(dimension));
 		cachedZoneShapes = null;
 		NeoForge.EVENT_BUS.post(new ZoneEvent.Updated(dimension, filteredZones, Side.CLIENT));
 	}

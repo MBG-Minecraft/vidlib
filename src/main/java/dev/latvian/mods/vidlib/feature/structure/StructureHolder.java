@@ -339,9 +339,9 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 		return !blocks.containsKey(BlockPos.asLong(x, y, z));
 	}
 
-	private boolean isTransparent(int x, int y, int z) {
+	private boolean isPartial(int x, int y, int z) {
 		var s = blocks.get(BlockPos.asLong(x, y, z));
-		return s == null || s.isTransparent();
+		return s == null || s.isPartial();
 	}
 
 	public StructureHolder shell() {
@@ -380,7 +380,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 			var z = BlockPos.getZ(pos);
 			var state = entry.getValue();
 
-			if (isTransparent(x - 1, y, z) || isTransparent(x + 1, y, z) || isTransparent(x, y - 1, z) || isTransparent(x, y + 1, z) || isTransparent(x, y, z - 1) || isTransparent(x, y, z + 1)) {
+			if (isPartial(x - 1, y, z) || isPartial(x + 1, y, z) || isPartial(x, y - 1, z) || isPartial(x, y + 1, z) || isPartial(x, y, z - 1) || isPartial(x, y, z + 1)) {
 				newBlocks.put(pos, state);
 			}
 		}

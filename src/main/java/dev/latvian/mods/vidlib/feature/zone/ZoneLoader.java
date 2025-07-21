@@ -20,10 +20,16 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 
 public class ZoneLoader extends JsonReloadListener {
-	public static final Map<ResourceKey<Level>, ActiveZones> BY_DIMENSION = new IdentityHashMap<>();
+	public static final Map<ResourceKey<Level>, ActiveZones> SERVER_BY_DIMENSION = new IdentityHashMap<>();
+	public static final Map<ResourceKey<Level>, ActiveZones> CLIENT_BY_DIMENSION = new IdentityHashMap<>();
 
-	public ZoneLoader() {
+	public final Map<ResourceKey<Level>, ActiveZones> byDimension;
+	public final boolean serverSide;
+
+	public ZoneLoader(Map<ResourceKey<Level>, ActiveZones> byDimension, boolean serverSide) {
 		super("vidlib/zone");
+		this.byDimension = byDimension;
+		this.serverSide = serverSide;
 	}
 
 	@Override
@@ -70,17 +76,19 @@ public class ZoneLoader extends JsonReloadListener {
 			}
 		}
 
-		NeoForge.EVENT_BUS.post(new ZoneEvent.Generate(list));
+		if (serverSide) {
+			NeoForge.EVENT_BUS.post(new ZoneEvent.Generate(list));
+		}
 
 		list.sort(null);
-		BY_DIMENSION.clear();
+		byDimension.clear();
 
 		for (var container : list) {
-			var zones = BY_DIMENSION.get(container.dimension);
+			var zones = byDimension.get(container.dimension);
 
 			if (zones == null) {
 				zones = new ActiveZones();
-				BY_DIMENSION.put(container.dimension, zones);
+				byDimension.put(container.dimension, zones);
 			}
 
 			zones.containers.put(container.id, container);
@@ -92,10 +100,12 @@ public class ZoneLoader extends JsonReloadListener {
 			map.put(container.id, container);
 		}
 
-		ZoneContainer.REGISTRY.update(map);
+		if (serverSide) {
+			ZoneContainer.REGISTRY.update(map);
 
-		for (var entry : BY_DIMENSION.entrySet()) {
-			NeoForge.EVENT_BUS.post(new ZoneEvent.Updated(entry.getKey(), entry.getValue(), Side.SERVER));
+			for (var entry : byDimension.entrySet()) {
+				NeoForge.EVENT_BUS.post(new ZoneEvent.Updated(entry.getKey(), entry.getValue(), Side.SERVER));
+			}
 		}
 	}
 }

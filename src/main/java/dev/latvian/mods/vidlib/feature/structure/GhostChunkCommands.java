@@ -42,6 +42,14 @@ public interface GhostChunkCommands {
 				})
 			)
 		)
+		.then(Commands.literal("fluids")
+			.then(Commands.argument("fluids", BoolArgumentType.bool())
+				.executes(ctx -> {
+					GhostStructureCapture.INCLUDE_FLUIDS.setValue(BoolArgumentType.getBool(ctx, "fluids"));
+					return 1;
+				})
+			)
+		)
 		.then(Commands.literal("capture")
 			.then(Commands.argument("name", StringArgumentType.word())
 				.executes(ctx -> GhostStructureCapture.capture(ctx.getSource(), StringArgumentType.getString(ctx, "name").toLowerCase(Locale.ROOT)))

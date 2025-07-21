@@ -73,13 +73,17 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 		return containers.get(id);
 	}
 
-	public void filter(ResourceKey<Level> dimension, ActiveZones from) {
+	public void filter(ResourceKey<Level> dimension, ActiveZones... fromAll) {
 		containers.clear();
 		entityZones.clear();
 
-		for (var container : from) {
-			if (container.dimension == dimension) {
-				containers.put(container.id, container);
+		for (var from : fromAll) {
+			if (from != null) {
+				for (var container : from) {
+					if (container.dimension == dimension) {
+						containers.put(container.id, container);
+					}
+				}
 			}
 		}
 

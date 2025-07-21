@@ -10,7 +10,9 @@ import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
 import dev.latvian.mods.vidlib.util.JsonUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.neoforged.fml.loading.FMLPaths;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 import java.net.URI;
@@ -26,6 +28,17 @@ public interface GhostStructureCapture {
 	MutableObject<CurrentGhostStructureCapture> CURRENT = new MutableObject<>(new CurrentGhostStructureCapture());
 	MutableObject<BlockFilter> IGNORE_FILTER = new MutableObject<>(BlockFilter.NONE.instance());
 	ShapeParticleOptions PARTICLE = new ShapeParticleOptions(20, Color.CYAN, Color.TRANSPARENT);
+	MutableBoolean INCLUDE_FLUIDS = new MutableBoolean(true);
+
+	static BlockFilter buildFilter() {
+		var filter = GhostStructureCapture.IGNORE_FILTER.getValue().not();
+
+		if (!INCLUDE_FLUIDS.getValue()) {
+			filter = filter.and(BlockFilter.FLUID.instance().not());
+		}
+
+		return filter;
+	}
 
 	static int capture(MessageConsumer source, String name) {
 		var startTime = System.currentTimeMillis();
@@ -58,7 +71,7 @@ public interface GhostStructureCapture {
 
 			source.tell(Component.literal("Slicing into %d x %d x %d chunks...".formatted(maxChunkX - minChunkX + 1, maxChunkY - minChunkY + 1, maxChunkZ - minChunkZ + 1)));
 
-			var path = FMLPaths.GAMEDIR.get().resolve("vidlib/%s-ghost-chunks.jar".formatted(name));
+			var path = FMLPaths.GAMEDIR.get().resolve("local/vidlib/export/%s-ghost-chunks.jar".formatted(name));
 
 			if (Files.notExists(path.getParent())) {
 				Files.createDirectories(path.getParent());
@@ -169,7 +182,7 @@ public interface GhostStructureCapture {
 			}
 
 			long doneTime = (System.currentTimeMillis() - startTime) / 1000L;
-			source.tell(Component.literal("Done in %,d s! Saved as vidlib/%s-ghost-chunks.jar".formatted(doneTime, name)));
+			source.tell(Component.literal("Done in %,d s! Saved as local/vidlib/export/%s-ghost-chunks.jar".formatted(doneTime, name)).setStyle(Style.EMPTY.withClickToOpen(path.getParent())));
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			source.error(Component.literal("Failed to create vidlib/%s-ghost-chunks.jar".formatted(name)));

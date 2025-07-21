@@ -122,4 +122,17 @@ public record BlockOrFilter(List<BlockFilter> filters) implements BlockFilter {
 
 		return false;
 	}
+
+	@Override
+	public BlockFilter or(BlockFilter filter) {
+		if (filter == ANY.instance()) {
+			return filter;
+		} else if (filter == NONE.instance()) {
+			return this;
+		}
+
+		var list = new ArrayList<>(filters);
+		list.add(filter);
+		return new BlockOrFilter(List.copyOf(list));
+	}
 }

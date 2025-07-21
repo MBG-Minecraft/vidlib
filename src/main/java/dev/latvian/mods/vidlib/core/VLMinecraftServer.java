@@ -75,7 +75,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 		for (var level : vl$self().getAllLevels()) {
 			level.vl$preTick(paused);
 
-			var zones = ZoneLoader.BY_DIMENSION.get(level.dimension());
+			var zones = ZoneLoader.SERVER_BY_DIMENSION.get(level.dimension());
 			level.vl$setActiveZones(zones);
 
 			if (zones != null) {
@@ -180,7 +180,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 			container.remove(index);
 		}
 
-		for (var dim : ZoneLoader.BY_DIMENSION.values()) {
+		for (var dim : ZoneLoader.SERVER_BY_DIMENSION.values()) {
 			dim.remove(zone, index);
 		}
 
@@ -195,7 +195,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 			container.update(index, zoneData);
 		}
 
-		for (var dim : ZoneLoader.BY_DIMENSION.values()) {
+		for (var dim : ZoneLoader.SERVER_BY_DIMENSION.values()) {
 			dim.update(zone, index, zoneData);
 		}
 

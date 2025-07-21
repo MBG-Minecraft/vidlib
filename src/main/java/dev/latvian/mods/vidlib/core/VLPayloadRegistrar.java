@@ -13,13 +13,17 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public interface VLPayloadRegistrar {
 	IPayloadHandler<VidLibPacketPayloadContainer> HANDLER = (payload, ctx) -> {
-		if (payload.wrapped().allowDebugLogging()) {
-			if (VidLibConfig.debugS2CPackets && !(ctx.player() instanceof ServerPlayer)) {
-				VidLib.LOGGER.info("S2C Packet '%s' #%,d @ %,d: %s".formatted(payload.type().id(), payload.uid(), payload.remoteGameTime(), payload.wrapped()));
+		try {
+			if (payload.wrapped().allowDebugLogging()) {
+				if (VidLibConfig.debugS2CPackets && !(ctx.player() instanceof ServerPlayer)) {
+					VidLib.LOGGER.info("S2C Packet '%s' #%,d @ %,d: %s".formatted(payload.type().id(), payload.uid(), payload.remoteGameTime(), payload.wrapped()));
+				}
 			}
-		}
 
-		payload.wrapped().handleAsync(new Context(ctx, payload.uid(), payload.remoteGameTime()));
+			payload.wrapped().handleAsync(new Context(ctx, payload.type().id(), payload.uid(), payload.remoteGameTime()));
+		} catch (Exception ex) {
+			VidLib.LOGGER.error("Failed to handle packet '%s' #%,d @ %,d, %s".formatted(payload.type().id(), payload.uid(), payload.remoteGameTime(), payload.wrapped()), ex);
+		}
 	};
 
 	static VLPayloadRegistrar of(PayloadRegistrar registrar) {

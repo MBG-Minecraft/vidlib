@@ -65,7 +65,7 @@ public class CurrentGhostStructureCapture {
 		var maxZ = Math.max(start.getZ(), end.getZ());
 		var volume = (maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1);
 		source.tell("Scanning %,d block area...".formatted(volume));
-		var capture = StructureHolder.capture(level, start, end, GhostStructureCapture.IGNORE_FILTER.getValue().not(), true).withoutInvisibleBlocks();
+		var capture = StructureHolder.capture(level, start, end, GhostStructureCapture.buildFilter(), true).withoutInvisibleBlocks();
 		blocks.putAll(capture.offset(start).blocks());
 		source.tell("Added %,d blocks".formatted(capture.blocks().size()));
 	}

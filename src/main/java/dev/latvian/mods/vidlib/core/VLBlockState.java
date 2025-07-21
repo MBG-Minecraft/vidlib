@@ -96,11 +96,12 @@ public interface VLBlockState {
 		return state.getRenderShape() != RenderShape.INVISIBLE || !state.getFluidState().isEmpty();
 	}
 
-	default boolean isTransparent() {
+	default boolean isPartial() {
 		var state = (BlockState) this;
+
 		var b = state.getBlock();
 
-		if (b instanceof HalfTransparentBlock || b instanceof SimpleWaterloggedBlock) {
+		if (b instanceof HalfTransparentBlock || b instanceof SimpleWaterloggedBlock || !state.getFluidState().isEmpty()) {
 			return true;
 		}
 

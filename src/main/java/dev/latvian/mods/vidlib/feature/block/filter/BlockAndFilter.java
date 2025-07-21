@@ -127,6 +127,8 @@ public record BlockAndFilter(List<BlockFilter> filters) implements BlockFilter {
 	public BlockFilter and(BlockFilter filter) {
 		if (filter == ANY.instance()) {
 			return this;
+		} else if (filter == NONE.instance()) {
+			return filter;
 		}
 
 		var list = new ArrayList<>(filters);

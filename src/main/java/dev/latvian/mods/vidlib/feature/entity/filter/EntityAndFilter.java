@@ -108,4 +108,17 @@ public record EntityAndFilter(List<EntityFilter> filters) implements EntityFilte
 
 		return true;
 	}
+
+	@Override
+	public EntityFilter and(EntityFilter filter) {
+		if (filter == ANY.instance()) {
+			return this;
+		} else if (filter == NONE.instance()) {
+			return filter;
+		}
+
+		var list = new ArrayList<>(filters);
+		list.add(filter);
+		return new EntityAndFilter(List.copyOf(list));
+	}
 }

@@ -25,6 +25,7 @@
 		"FillCommandMixin",
 		"FireworkRocketEntityMixin",
 		"FoodDataMixin",
+		"IceBlockMixin",
 		"IdDispatchCodecMixin",
 		"IOWorkerMixin",
 		"ItemMixin",
