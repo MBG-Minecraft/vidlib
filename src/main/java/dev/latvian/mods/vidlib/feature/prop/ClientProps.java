@@ -10,6 +10,7 @@ import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 import java.util.ArrayList;
@@ -32,6 +33,17 @@ public class ClientProps extends Props<ClientLevel> {
 		this.propLists.put(PropListType.ASSETS, assetProps = new PropList(this, PropListType.ASSETS));
 		this.stages = new Reference2ObjectOpenHashMap<>();
 		this.sortedProps = new ArrayList<>();
+	}
+
+	@Override
+	public void tick() {
+		if (ModList.get().isLoaded("flashback")) {
+			if (level.isReplayLevel()) {
+				reloadAll();
+			}
+		}
+
+		super.tick();
 	}
 
 	@Override
