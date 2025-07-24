@@ -69,6 +69,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
@@ -140,7 +141,8 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		session.worldMouse = WorldMouse.of(mc, frameInfo.camera().getPosition(), frameInfo.worldMatrix());
 		FrameInfo.CURRENT = frameInfo;
 
-		var ray = vl$self().gameRenderer.getMainCamera().ray(512D);
+		var rayLine = vl$self().gameRenderer.getMainCamera().ray(512D);
+		var ray = new ClipContext(rayLine.start(), rayLine.end(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player);
 
 		if (vl$self().options.getCameraType() == CameraType.FIRST_PERSON && VidLibClientOptions.getShowZones()) {
 			session.zoneClip = session.filteredZones.clip(ray);

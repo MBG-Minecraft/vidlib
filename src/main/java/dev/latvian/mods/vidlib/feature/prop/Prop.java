@@ -5,7 +5,6 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.data.JOMLDataTypes;
 import dev.latvian.mods.klib.math.FrustumCheck;
-import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.math.Vec3f;
 import dev.latvian.mods.klib.shape.ColoredShape;
@@ -479,11 +478,11 @@ public class Prop {
 	}
 
 	@Nullable
-	public PropHitResult clip(Line ray, ClipContext ctx) {
+	public PropHitResult clip(ClipContext ctx) {
 		var entity = ctx.getEntity();
 
 		if (canInteract(entity)) {
-			var hit = AABB.clip(getClipBoxes(entity), ray.start(), ray.end(), BlockPos.ZERO);
+			var hit = AABB.clip(getClipBoxes(entity), ctx.getFrom(), ctx.getTo(), BlockPos.ZERO);
 
 			if (hit != null && hit.getType() == HitResult.Type.BLOCK) {
 				return new PropHitResult(this, hit.getLocation(), hit.getDirection(), BlockPos.containing(hit.getLocation()), false);

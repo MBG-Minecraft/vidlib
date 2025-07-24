@@ -7,12 +7,12 @@ import dev.latvian.mods.klib.codec.JOMLStreamCodecs;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.math.KMath;
-import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -81,13 +81,13 @@ public record RotatedBoxZoneShape(Vec3 pos, Vector3f size, Rotation rotation, Ma
 
 	@Override
 	@Nullable
-	public ZoneClipResult clip(ZoneInstance instance, Line ray) {
-		if (contains(ray.start())) {
+	public ZoneClipResult clip(ZoneInstance instance, ClipContext ctx) {
+		if (contains(ctx.getFrom())) {
 			return null;
 		}
 
-		var rstart = new Vector3f((float) (ray.start().x - pos.x), (float) (ray.start().y - pos.y), (float) (ray.start().z - pos.z)).mul(matrix);
-		var rend = new Vector3f((float) (ray.end().x - pos.x), (float) (ray.end().y - pos.y), (float) (ray.end().z - pos.z)).mul(matrix);
+		var rstart = new Vector3f((float) (ctx.getFrom().x - pos.x), (float) (ctx.getFrom().y - pos.y), (float) (ctx.getFrom().z - pos.z)).mul(matrix);
+		var rend = new Vector3f((float) (ctx.getTo().x - pos.x), (float) (ctx.getTo().y - pos.y), (float) (ctx.getTo().z - pos.z)).mul(matrix);
 
 		var result = AABB.clip(clipBox, new Vec3(rstart.x, rstart.y, rstart.z), new Vec3(rend.x, rend.y, rend.z), BlockPos.ZERO);
 
@@ -95,7 +95,7 @@ public record RotatedBoxZoneShape(Vec3 pos, Vector3f size, Rotation rotation, Ma
 			var l = result.getLocation();
 			var vec = new Vector3f((float) l.x, (float) l.y, (float) l.z).mul(imatrix);
 			var apos = new Vec3(vec.x + pos.x, vec.y + pos.y, vec.z + pos.z);
-			return ZoneClipResult.of(instance, this, ray, apos);
+			return ZoneClipResult.of(instance, this, ctx, apos);
 		}
 
 		return null;

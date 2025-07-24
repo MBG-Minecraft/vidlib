@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
-import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -210,18 +209,20 @@ public class PropList implements Iterable<Prop> {
 	}
 
 	@Nullable
-	public PropHitResult clip(Line ray, ClipContext ctx) {
-		if (interactableProps.isEmpty()) {
+	public PropHitResult clip(ClipContext ctx, boolean ignoreInteractable) {
+		var props = ignoreInteractable ? all() : interactableProps;
+
+		if (props.isEmpty()) {
 			return null;
 		}
 
 		PropHitResult result = null;
 
-		for (var prop : interactableProps) {
-			var hit = prop.clip(ray, ctx);
+		for (var prop : props) {
+			var hit = prop.clip(ctx);
 
 			if (hit != null) {
-				if (result == null || hit.getLocation().distanceToSqr(ray.start()) < result.getLocation().distanceToSqr(ray.start())) {
+				if (result == null || hit.getLocation().distanceToSqr(ctx.getFrom()) < result.getLocation().distanceToSqr(ctx.getFrom())) {
 					result = hit;
 				}
 			}

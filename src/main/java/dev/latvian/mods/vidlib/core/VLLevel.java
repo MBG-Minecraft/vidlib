@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.core;
 import com.google.gson.JsonElement;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.serialization.JsonOps;
-import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.klib.util.IntOrUUID;
 import dev.latvian.mods.vidlib.feature.block.ConnectedBlock;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
@@ -404,22 +403,18 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 
 	default BlockHitResult vl$clip(BlockHitResult result, ClipContext ctx) {
 		var props = getProps();
-		var ray = new Line(ctx.getFrom(), ctx.getTo());
+		var propClip = props.clip(ctx, false);
 
-		for (var propList : props.propLists.values()) {
-			var propClip = propList.clip(ray, ctx);
-
-			if (propClip != null) {
-				if (result == null || propClip.getLocation().distanceToSqr(ctx.getFrom()) < result.getLocation().distanceToSqr(ctx.getFrom())) {
-					result = propClip;
-				}
+		if (propClip != null) {
+			if (result == null || propClip.getLocation().distanceToSqr(ctx.getFrom()) < result.getLocation().distanceToSqr(ctx.getFrom())) {
+				result = propClip;
 			}
 		}
 
 		var zones = vl$getActiveZones();
 
 		if (zones != null) {
-			var zoneClip = zones.clipLevel(ray);
+			var zoneClip = zones.clipLevel(ctx);
 
 			if (zoneClip != null && zoneClip.distanceSq() < result.getLocation().distanceToSqr(ctx.getFrom())) {
 				var r = zoneClip.asBlockHitResult();

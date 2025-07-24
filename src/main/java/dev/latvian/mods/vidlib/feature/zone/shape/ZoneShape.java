@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.feature.zone.shape;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.math.AAIBB;
-import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
@@ -16,6 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -52,15 +52,15 @@ public interface ZoneShape extends ZoneLike {
 	AABB getBoundingBox();
 
 	@Nullable
-	default ZoneClipResult clip(ZoneInstance instance, Line ray) {
-		if (contains(ray.start())) {
+	default ZoneClipResult clip(ZoneInstance instance, ClipContext ctx) {
+		if (contains(ctx.getFrom())) {
 			return null;
 		}
 
-		var result = AABB.clip(List.of(getBoundingBox()), ray.start(), ray.end(), BlockPos.ZERO);
+		var result = AABB.clip(List.of(getBoundingBox()), ctx.getFrom(), ctx.getTo(), BlockPos.ZERO);
 
 		if (result != null && result.getType() == HitResult.Type.BLOCK) {
-			return ZoneClipResult.of(instance, this, ray, new BlockHitResult(result.getLocation(), result.getDirection(), BlockPos.containing(result.getLocation()), false));
+			return ZoneClipResult.of(instance, this, ctx, new BlockHitResult(result.getLocation(), result.getDirection(), BlockPos.containing(result.getLocation()), false));
 		}
 
 		return null;

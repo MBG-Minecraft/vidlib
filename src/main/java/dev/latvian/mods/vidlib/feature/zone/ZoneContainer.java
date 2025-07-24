@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.zone;
 
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -11,6 +10,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -282,18 +282,18 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 	}
 
 	@Nullable
-	public ZoneClipResult clip(Line ray) {
+	public ZoneClipResult clip(ClipContext ctx) {
 		if (zones.isEmpty()) {
 			return null;
 		} else if (zones.size() == 1) {
 			var instance = zones.getFirst();
-			return instance.zone.shape().clip(instance, ray);
+			return instance.zone.shape().clip(instance, ctx);
 		}
 
 		ZoneClipResult result = null;
 
 		for (var instance : zones) {
-			var clip = instance.zone.shape().clip(instance, ray);
+			var clip = instance.zone.shape().clip(instance, ctx);
 
 			if (clip != null) {
 				if (result == null || clip.distanceSq() < result.distanceSq()) {

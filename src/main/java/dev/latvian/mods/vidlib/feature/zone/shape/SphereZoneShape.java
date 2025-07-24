@@ -5,11 +5,11 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
-import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -46,14 +46,14 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 
 	@Override
 	@Nullable
-	public ZoneClipResult clip(ZoneInstance instance, Line ray) {
-		double dx = ray.dx();
-		double dy = ray.dy();
-		double dz = ray.dz();
+	public ZoneClipResult clip(ZoneInstance instance, ClipContext ctx) {
+		double dx = ctx.getTo().x - ctx.getFrom().x;
+		double dy = ctx.getTo().y - ctx.getFrom().y;
+		double dz = ctx.getTo().z - ctx.getFrom().z;
 
-		double fx = ray.start().x - pos.x;
-		double fy = ray.start().y - pos.y;
-		double fz = ray.start().z - pos.z;
+		double fx = ctx.getFrom().x - pos.x;
+		double fy = ctx.getFrom().y - pos.y;
+		double fz = ctx.getFrom().z - pos.z;
 
 		double a = dx * dx + dy * dy + dz * dz;
 		double b = 2D * (fx * dx + fy * dy + fz * dz);
@@ -73,7 +73,7 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 		// Check if either intersection is within the segment range [0, 1]
 		if (t1 >= 0D && t1 <= 1D || t2 >= 0D && t2 <= 1D) {
 			// FIXME: Get actual intersection point
-			return ZoneClipResult.of(instance, this, ray, pos);
+			return ZoneClipResult.of(instance, this, ctx, pos);
 		}
 
 		return null;

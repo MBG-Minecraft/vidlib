@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
-import dev.latvian.mods.klib.math.Line;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -8,6 +7,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.FluidState;
@@ -130,11 +130,11 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 	}
 
 	@Nullable
-	public ZoneClipResult clip(Line ray) {
+	public ZoneClipResult clip(ClipContext ctx) {
 		ZoneClipResult result = null;
 
 		for (var container : this) {
-			var clip = container.clip(ray);
+			var clip = container.clip(ctx);
 
 			if (clip != null) {
 				if (result == null || clip.distanceSq() < result.distanceSq()) {
@@ -293,11 +293,11 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 	}
 
 	@Nullable
-	public ZoneClipResult clipLevel(Line ray) {
+	public ZoneClipResult clipLevel(ClipContext ctx) {
 		ZoneClipResult result = null;
 
 		for (var z : getFluidZones()) {
-			var clip = z.instance().zone.shape().clip(z.instance(), ray);
+			var clip = z.instance().zone.shape().clip(z.instance(), ctx);
 
 			if (clip != null) {
 				if (result == null || clip.distanceSq() < result.distanceSq()) {

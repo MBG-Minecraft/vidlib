@@ -1,18 +1,23 @@
 package dev.latvian.mods.vidlib.feature.misc;
 
+import com.google.gson.JsonObject;
 import dev.latvian.mods.klib.util.Lazy;
-import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.configuration.ClientConfigurationPacketListener;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public interface FlashbackIntegration {
 	Lazy<Class<?>> FLASHBACK_API = Lazy.of(() -> {
@@ -23,60 +28,47 @@ public interface FlashbackIntegration {
 		}
 	});
 
-	private static <T> Lazy<List<T>> field(String name) {
-		return FLASHBACK_API.map(c -> {
-			try {
-				var field = c.getDeclaredField(name);
-				var value = field.get(null);
-				return (List<T>) value;
-			} catch (Exception ex) {
-				return new ArrayList<>();
-			}
-		});
+	private static <T> T field(String name, @Nullable T defaultValue) {
+		try {
+			var c = FLASHBACK_API.get();
+			var field = c.getDeclaredField(name);
+			var value = field.get(null);
+			return (T) value;
+		} catch (Exception ex) {
+			return defaultValue;
+		}
 	}
 
-	Lazy<List<Consumer<List<Packet<? super ClientConfigurationPacketListener>>>>> CONFIG_SNAPSHOT = field("CONFIG_SNAPSHOT");
-	Lazy<List<Consumer<List<Packet<? super ClientGamePacketListener>>>>> GAME_SNAPSHOT = field("GAME_SNAPSHOT");
-	Lazy<List<BiConsumer<Entity, List<Packet<? super ClientGamePacketListener>>>>> ENTITY_SNAPSHOT = field("ENTITY_SNAPSHOT");
-	Lazy<List<Consumer<Entity>>> ENTITY_MENU = field("ENTITY_MENU");
-	Lazy<List<Runnable>> VISUALS_MENU = field("VISUALS_MENU");
-	Lazy<List<Runnable>> RENDER_FILTER_MENU = field("RENDER_FILTER_MENU");
-
-	static void init() {
-		VidLib.LOGGER.info("Flashback integration loaded");
-		CONFIG_SNAPSHOT.get().add(FlashbackIntegration::configSnapshot);
-		GAME_SNAPSHOT.get().add(FlashbackIntegration::gameSnapshot);
-		ENTITY_SNAPSHOT.get().add(FlashbackIntegration::entitySnapshot);
-		ENTITY_MENU.get().add(FlashbackIntegration::entityMenu);
-		VISUALS_MENU.get().add(FlashbackIntegration::visualsMenu);
-		RENDER_FILTER_MENU.get().add(FlashbackIntegration::renderFilterMenu);
+	private static BooleanSupplier booleanField(String name) {
+		return field(name, () -> false);
 	}
 
-	private static void configSnapshot(List<Packet<? super ClientConfigurationPacketListener>> packets) {
-		// VidLib.LOGGER.info("Flashback Config snapshot");
+	private static <T> List<T> listField(String name) {
+		return field(name, new ArrayList<>(1));
 	}
 
-	private static void gameSnapshot(List<Packet<? super ClientGamePacketListener>> packets) {
-		VidLib.LOGGER.info("Flashback Game snapshot");
+	List<BiConsumer<Entity, List<Packet<? super ClientGamePacketListener>>>> ENTITY_SNAPSHOT = listField("ENTITY_SNAPSHOT");
+	List<Consumer<List<Packet<? super ClientConfigurationPacketListener>>>> CONFIG_SNAPSHOT = listField("CONFIG_SNAPSHOT");
+	List<Consumer<List<Packet<? super ClientGamePacketListener>>>> GAME_SNAPSHOT = listField("GAME_SNAPSHOT");
+	List<Consumer<Entity>> ENTITY_MENU = listField("ENTITY_MENU");
+	List<Runnable> VISUALS_MENU = listField("VISUALS_MENU");
+	List<Runnable> RENDER_FILTER_MENU = listField("RENDER_FILTER_MENU");
+	List<BiFunction<Vec3, Vec3, HitResult>> CLICK_TARGET = listField("CLICK_TARGET");
+	List<Predicate<HitResult>> HANDLE_CLICK_TARGET = listField("HANDLE_CLICK_TARGET");
+	List<Runnable> POPUPS = listField("POPUPS");
 
-		var mc = Minecraft.getInstance();
-		var packets2 = new S2CPacketBundleBuilder(mc.level);
-		mc.player.vl$sessionData().sync(packets2, mc.player, 1);
-		packets2.sendUnbundled(packets::add);
-	}
+	BooleanSupplier IN_REPLAY = booleanField("IN_REPLAY");
+	BooleanSupplier IN_EXPORTING = booleanField("IN_EXPORTING");
 
-	private static void entitySnapshot(Entity entity, List<Packet<? super ClientGamePacketListener>> packets) {
-		var packets2 = new S2CPacketBundleBuilder(Minecraft.getInstance().level);
-		entity.replaySnapshot(packets2);
-		packets2.sendUnbundled(packets::add);
-	}
+	Supplier<JsonObject> CUSTOM_EDITOR_STATE_DATA = field("CUSTOM_EDITOR_STATE_DATA", JsonObject::new);
 
-	private static void entityMenu(Entity entity) {
-	}
+	BooleanSupplier RENDER_BLOCKS = booleanField("RENDER_BLOCKS");
+	BooleanSupplier RENDER_ENTITIES = booleanField("RENDER_ENTITIES");
+	BooleanSupplier RENDER_PLAYERS = booleanField("RENDER_PLAYERS");
+	BooleanSupplier RENDER_PARTICLES = booleanField("RENDER_PARTICLES");
+	BooleanSupplier RENDER_NAMETAGS = booleanField("RENDER_NAMETAGS");
 
-	private static void visualsMenu() {
-	}
-
-	private static void renderFilterMenu() {
+	static JsonObject getCustomEditorStateData() {
+		return CUSTOM_EDITOR_STATE_DATA.get();
 	}
 }
