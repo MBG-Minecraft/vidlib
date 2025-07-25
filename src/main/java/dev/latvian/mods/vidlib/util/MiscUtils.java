@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.util;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.JsonOps;
-import dev.latvian.mods.klib.util.Comparison;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.util.ExtraCodecs;
@@ -19,12 +18,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.SequencedCollection;
 
 public interface MiscUtils {
-	List<Comparison> COMPARISONS = List.of(Comparison.values());
-
 	static Path createDir(Path path) {
 		if (Files.notExists(path)) {
 			try {

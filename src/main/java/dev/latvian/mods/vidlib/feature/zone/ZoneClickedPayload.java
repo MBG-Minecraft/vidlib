@@ -23,7 +23,7 @@ public record ZoneClickedPayload(ResourceLocation id, int index, ZoneShape shape
 		ByteBufCodecs.VAR_INT, ZoneClickedPayload::index,
 		ZoneShape.STREAM_CODEC, ZoneClickedPayload::shape,
 		ByteBufCodecs.DOUBLE, ZoneClickedPayload::distanceSq,
-		MCStreamCodecs.VEC3.optional(), ZoneClickedPayload::pos,
+		ByteBufCodecs.optional(MCStreamCodecs.VEC3), ZoneClickedPayload::pos,
 		ZoneClickedPayload::new
 	));
 

@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
@@ -13,7 +14,7 @@ public record SpawnTextParticlePayload(TextParticleOptions options, List<Vec3> p
 	@AutoPacket
 	public static final VidLibPacketType<SpawnTextParticlePayload> TYPE = VidLibPacketType.internal("spawn_text_particles", CompositeStreamCodec.of(
 		TextParticleOptions.STREAM_CODEC, SpawnTextParticlePayload::options,
-		Vec3.STREAM_CODEC.listOf(), SpawnTextParticlePayload::positions,
+		KLibStreamCodecs.listOf(Vec3.STREAM_CODEC), SpawnTextParticlePayload::positions,
 		SpawnTextParticlePayload::new
 	));
 

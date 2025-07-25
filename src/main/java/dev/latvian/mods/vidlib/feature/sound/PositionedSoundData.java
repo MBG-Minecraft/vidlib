@@ -24,7 +24,7 @@ public record PositionedSoundData(SoundData data, Optional<KVector> position, bo
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, PositionedSoundData> STREAM_CODEC = CompositeStreamCodec.of(
 		SoundData.STREAM_CODEC, PositionedSoundData::data,
-		KVector.STREAM_CODEC.optional(), PositionedSoundData::position,
+		ByteBufCodecs.optional(KVector.STREAM_CODEC), PositionedSoundData::position,
 		ByteBufCodecs.BOOL, PositionedSoundData::looping,
 		ByteBufCodecs.BOOL, PositionedSoundData::stopImmediately,
 		PositionedSoundData::new

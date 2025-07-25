@@ -8,7 +8,6 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
-import imgui.ImGui;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
@@ -31,16 +30,7 @@ public record GroundKVector(KVector vector) implements KVector {
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
-			ImGui.pushItemWidth(-1F);
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("Vector");
-			ImGui.sameLine();
-			ImGui.pushID("###vector");
-			update = update.or(vector.imgui(graphics));
-			ImGui.popID();
-
-			ImGui.popItemWidth();
+			update = update.or(vector.imguiKey(graphics, "Vector", "vector"));
 			return update;
 		}
 

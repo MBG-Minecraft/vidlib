@@ -90,7 +90,7 @@ public class VLFlashbackIntegration {
 			openSelectedPropPopup = false;
 		}
 
-		if (selectedProp != 0 && ImGui.beginPopup("AAAA###vidlib-prop-popup")) {
+		if (selectedProp != 0 && ImGui.beginPopup("###vidlib-prop-popup")) {
 			var mc = Minecraft.getInstance();
 			var propList = mc.level.getProps().propLists.get(selectedPropList);
 			var prop = propList == null ? null : propList.get(selectedProp);

@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.math.knumber;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
@@ -15,8 +16,8 @@ public record Atan2KNumber(KNumber x, KNumber y) implements KNumber {
 		KNumber.CODEC.optionalFieldOf("x", KNumber.ZERO).forGetter(Atan2KNumber::x),
 		KNumber.CODEC.optionalFieldOf("y", KNumber.ONE).forGetter(Atan2KNumber::y)
 	).apply(instance, Atan2KNumber::new)), CompositeStreamCodec.of(
-		KNumber.STREAM_CODEC.optional(KNumber.ZERO), Atan2KNumber::x,
-		KNumber.STREAM_CODEC.optional(KNumber.ONE), Atan2KNumber::y,
+		KLibStreamCodecs.optional(KNumber.STREAM_CODEC, KNumber.ZERO), Atan2KNumber::x,
+		KLibStreamCodecs.optional(KNumber.STREAM_CODEC, KNumber.ONE), Atan2KNumber::y,
 		Atan2KNumber::new
 	));
 
@@ -30,21 +31,8 @@ public record Atan2KNumber(KNumber x, KNumber y) implements KNumber {
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
 			ImGui.pushItemWidth(-1F);
-
-			ImGui.alignTextToFramePadding();
-			graphics.redTextIf("X", !x.isValid());
-			ImGui.sameLine();
-			ImGui.pushID("###x");
-			update = update.or(x.imgui(graphics));
-			ImGui.popID();
-
-			ImGui.alignTextToFramePadding();
-			graphics.redTextIf("Y", !y.isValid());
-			ImGui.sameLine();
-			ImGui.pushID("###y");
-			update = update.or(y.imgui(graphics));
-			ImGui.popID();
-
+			update = update.or(x.imguiKey(graphics, "X", "x"));
+			update = update.or(y.imguiKey(graphics, "Y", "y"));
 			ImGui.popItemWidth();
 			return update;
 		}

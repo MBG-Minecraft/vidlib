@@ -24,7 +24,7 @@ public record WindParticleOptions(int lifespan, boolean ground, float scale, Eas
 		ByteBufCodecs.VAR_INT, WindParticleOptions::lifespan,
 		ByteBufCodecs.BOOL, WindParticleOptions::ground,
 		ByteBufCodecs.FLOAT, WindParticleOptions::scale,
-		Easing.STREAM_CODEC.optional(Easing.SINE_OUT), WindParticleOptions::easing,
+		Easing.STREAM_CODEC, WindParticleOptions::easing,
 		WindParticleOptions::new
 	);
 

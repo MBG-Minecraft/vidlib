@@ -5,6 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibCodecs;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.Gradient;
 import net.minecraft.core.particles.ParticleOptions;
@@ -33,7 +34,7 @@ public record LightningParticleOptions(int lifespan, Gradient color, Gradient ou
 		ByteBufCodecs.VAR_INT, LightningParticleOptions::segments,
 		ByteBufCodecs.FLOAT, LightningParticleOptions::spread,
 		ByteBufCodecs.FLOAT, LightningParticleOptions::radius,
-		ByteBufCodecs.FLOAT.optional(0F), LightningParticleOptions::endingRadius,
+		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 0F), LightningParticleOptions::endingRadius,
 		LightningParticleOptions::new
 	);
 

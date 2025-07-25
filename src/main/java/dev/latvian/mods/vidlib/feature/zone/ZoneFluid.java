@@ -31,7 +31,7 @@ public record ZoneFluid(String id, FluidState fluidState, CubeTextures textures)
 	}
 
 	public static final Codec<ZoneFluid> CODEC = KLibCodecs.map(MAP, Codec.STRING, ZoneFluid::id);
-	public static final StreamCodec<ByteBuf, ZoneFluid> STREAM_CODEC = KLibStreamCodecs.map(MAP, ByteBufCodecs.STRING_UTF8, ZoneFluid::id).optional(NONE);
+	public static final StreamCodec<ByteBuf, ZoneFluid> STREAM_CODEC = KLibStreamCodecs.optional(KLibStreamCodecs.map(MAP, ByteBufCodecs.STRING_UTF8, ZoneFluid::id), NONE);
 
 	public boolean isEmpty() {
 		return fluidState.isEmpty();

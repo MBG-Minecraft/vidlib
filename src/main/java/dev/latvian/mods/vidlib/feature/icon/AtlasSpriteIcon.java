@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.icon;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
@@ -16,7 +17,7 @@ public record AtlasSpriteIcon(SpriteKey sprite, boolean translucent, Color tint)
 	).apply(instance, AtlasSpriteIcon::new)), CompositeStreamCodec.of(
 		SpriteKey.STREAM_CODEC, AtlasSpriteIcon::sprite,
 		ByteBufCodecs.BOOL, AtlasSpriteIcon::translucent,
-		Color.STREAM_CODEC.optional(Color.WHITE), AtlasSpriteIcon::tint,
+		KLibStreamCodecs.optional(Color.STREAM_CODEC, Color.WHITE), AtlasSpriteIcon::tint,
 		AtlasSpriteIcon::new
 	));
 

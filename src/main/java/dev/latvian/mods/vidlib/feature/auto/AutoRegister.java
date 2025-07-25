@@ -21,6 +21,9 @@ import java.util.List;
  * @see BlockEntityRendererHolder
  * @see ServerCommandHolder
  * @see ClientCommandHolder
+ * @see dev.latvian.mods.vidlib.feature.canvas.Canvas
+ * @see dev.latvian.mods.vidlib.feature.prop.PropType
+ * @see dev.latvian.mods.vidlib.feature.prop.PropRenderer.Holder
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

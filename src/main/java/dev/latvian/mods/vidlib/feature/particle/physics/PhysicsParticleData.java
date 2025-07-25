@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.particle.physics;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.vidlib.feature.config.BooleanConfigValue;
@@ -51,17 +52,17 @@ public class PhysicsParticleData {
 	).apply(instance, PhysicsParticleData::new));
 
 	public static final StreamCodec<ByteBuf, PhysicsParticleData> STREAM_CODEC = CompositeStreamCodec.of(
-		ByteBufCodecs.FLOAT.optional(DEFAULT_DENSITY), p -> p.density,
-		Range.STREAM_CODEC.optional(DEFAULT_LIFESPAN), p -> p.lifespan,
-		Range.STREAM_CODEC.optional(DEFAULT_SCALE), p -> p.scale,
-		Range.STREAM_CODEC.optional(DEFAULT_POWER), p -> p.power,
-		Range.STREAM_CODEC.optional(DEFAULT_SPREAD), p -> p.spread,
-		ByteBufCodecs.FLOAT.optional(DEFAULT_INERTIA), p -> p.inertia,
-		ByteBufCodecs.FLOAT.optional(DEFAULT_GRAVITY), p -> p.gravity,
-		Range.STREAM_CODEC.optional(DEFAULT_SPEED), p -> p.speed,
-		ByteBufCodecs.FLOAT.optional(DEFAULT_DIRECTION), p -> p.direction,
-		ByteBufCodecs.FLOAT.optional(DEFAULT_TILT), p -> p.tilt,
-		Range.STREAM_CODEC.optional(DEFAULT_SECTION), p -> p.section,
+		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, DEFAULT_DENSITY), p -> p.density,
+		KLibStreamCodecs.optional(Range.STREAM_CODEC, DEFAULT_LIFESPAN), p -> p.lifespan,
+		KLibStreamCodecs.optional(Range.STREAM_CODEC, DEFAULT_SCALE), p -> p.scale,
+		KLibStreamCodecs.optional(Range.STREAM_CODEC, DEFAULT_POWER), p -> p.power,
+		KLibStreamCodecs.optional(Range.STREAM_CODEC, DEFAULT_SPREAD), p -> p.spread,
+		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, DEFAULT_INERTIA), p -> p.inertia,
+		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, DEFAULT_GRAVITY), p -> p.gravity,
+		KLibStreamCodecs.optional(Range.STREAM_CODEC, DEFAULT_SPEED), p -> p.speed,
+		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, DEFAULT_DIRECTION), p -> p.direction,
+		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, DEFAULT_TILT), p -> p.tilt,
+		KLibStreamCodecs.optional(Range.STREAM_CODEC, DEFAULT_SECTION), p -> p.section,
 		ByteBufCodecs.BOOL, p -> p.ignoreBlockDensity,
 		PhysicsParticleData::new
 	);

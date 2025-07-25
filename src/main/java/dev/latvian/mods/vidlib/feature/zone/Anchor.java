@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.zone;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.AAIBB;
 import dev.latvian.mods.vidlib.VidLib;
@@ -41,7 +42,7 @@ public record Anchor(List<Area> areas, Map<ResourceKey<Level>, List<AAIBB>> shap
 	).apply(instance, list -> list.isEmpty() ? NONE : create(list)));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, Anchor> STREAM_CODEC = CompositeStreamCodec.of(
-		Area.STREAM_CODEC.listOf(), Anchor::areas,
+		KLibStreamCodecs.listOf(Area.STREAM_CODEC), Anchor::areas,
 		list -> list.isEmpty() ? NONE : create(list)
 	);
 

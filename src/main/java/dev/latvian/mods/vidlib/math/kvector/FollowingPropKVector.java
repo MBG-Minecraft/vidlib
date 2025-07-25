@@ -5,6 +5,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
@@ -28,7 +30,7 @@ public record FollowingPropKVector(int prop, PositionType positionType) implemen
 		public static final ImBuilderHolder<KVector> TYPE = new ImBuilderHolder<>("Following Prop", Builder::new);
 
 		public final ImInt prop = new ImInt(0);
-		public final PositionType[] positionType = {PositionType.CENTER};
+		public final ImBuilder<PositionType> positionType = new EnumImBuilder<>(PositionType[]::new, PositionType.VALUES, PositionType.CENTER);
 
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
@@ -40,22 +42,18 @@ public record FollowingPropKVector(int prop, PositionType positionType) implemen
 			ImGui.inputInt("###prop-id", prop);
 			update = update.orItemEdit();
 
-			ImGui.alignTextToFramePadding();
-			ImGui.text("Position Type");
-			ImGui.sameLine();
-			update = update.or(graphics.combo("###position-type", "", positionType, PositionType.VALUES));
-
+			update = update.or(positionType.imguiKey(graphics, "Position Type", "position-type"));
 			return update;
 		}
 
 		@Override
 		public boolean isValid() {
-			return prop.get() != 0;
+			return prop.get() != 0 && positionType.isValid();
 		}
 
 		@Override
 		public KVector build() {
-			return new FollowingPropKVector(prop.get(), positionType[0]);
+			return new FollowingPropKVector(prop.get(), positionType.build());
 		}
 	}
 

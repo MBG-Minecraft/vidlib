@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.zone;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.color.Color;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.Direction;
@@ -23,13 +24,13 @@ public record ZoneFog(Color color, double distance, Optional<Direction> directio
 
 	public static final StreamCodec<ByteBuf, ZoneFog> DIRECT_STREAM_CODEC = CompositeStreamCodec.of(
 		Color.STREAM_CODEC, ZoneFog::color,
-		ByteBufCodecs.DOUBLE.optional(3D), ZoneFog::distance,
-		Direction.STREAM_CODEC.optional(), ZoneFog::direction,
+		KLibStreamCodecs.optional(ByteBufCodecs.DOUBLE, 3D), ZoneFog::distance,
+		ByteBufCodecs.optional(Direction.STREAM_CODEC), ZoneFog::direction,
 		ByteBufCodecs.VAR_INT, ZoneFog::steps,
 		ZoneFog::new
 	);
 
-	public static final StreamCodec<ByteBuf, ZoneFog> STREAM_CODEC = DIRECT_STREAM_CODEC.optional(NONE);
+	public static final StreamCodec<ByteBuf, ZoneFog> STREAM_CODEC = KLibStreamCodecs.optional(DIRECT_STREAM_CODEC, NONE);
 
 	public boolean isNone() {
 		return steps <= 0;

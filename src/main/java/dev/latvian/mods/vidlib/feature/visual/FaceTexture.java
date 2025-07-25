@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.visual;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import io.netty.buffer.ByteBuf;
@@ -30,12 +31,12 @@ public record FaceTexture(SpriteKey sprite, TerrainRenderLayer layer, boolean cu
 		TerrainRenderLayer.STREAM_CODEC, FaceTexture::layer,
 		ByteBufCodecs.BOOL, FaceTexture::cull,
 		Color.STREAM_CODEC, FaceTexture::tint,
-		ByteBufCodecs.FLOAT.optional(1F), FaceTexture::uvScale,
-		ByteBufCodecs.DOUBLE.optional(0D), FaceTexture::fade,
+		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 1F), FaceTexture::uvScale,
+		KLibStreamCodecs.optional(ByteBufCodecs.DOUBLE, 0D), FaceTexture::fade,
 		FaceTexture::new
 	);
 
-	public static final StreamCodec<ByteBuf, Optional<FaceTexture>> OPTIONAL_STREAM_CODEC = STREAM_CODEC.optional();
+	public static final StreamCodec<ByteBuf, Optional<FaceTexture>> OPTIONAL_STREAM_CODEC = ByteBufCodecs.optional(STREAM_CODEC);
 
 	public FaceTexture(SpriteKey sprite, TerrainRenderLayer layer, boolean cull) {
 		this(sprite, layer, cull, Color.WHITE, 1F, 0D);

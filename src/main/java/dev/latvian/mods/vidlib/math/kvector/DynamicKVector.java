@@ -11,7 +11,6 @@ import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
-import imgui.ImGui;
 import net.minecraft.world.phys.Vec3;
 
 public record DynamicKVector(KNumber x, KNumber y, KNumber z) implements KVector {
@@ -36,28 +35,9 @@ public record DynamicKVector(KNumber x, KNumber y, KNumber z) implements KVector
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("X");
-			ImGui.sameLine();
-			ImGui.pushID("###x");
-			update = update.or(x.imgui(graphics));
-			ImGui.popID();
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("Y");
-			ImGui.sameLine();
-			ImGui.pushID("###y");
-			update = update.or(y.imgui(graphics));
-			ImGui.popID();
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("Z");
-			ImGui.sameLine();
-			ImGui.pushID("###z");
-			update = update.or(z.imgui(graphics));
-			ImGui.popID();
-
+			update = update.or(x.imguiKey(graphics, "X", "x"));
+			update = update.or(y.imguiKey(graphics, "Y", "y"));
+			update = update.or(z.imguiKey(graphics, "Z", "z"));
 			return update;
 		}
 

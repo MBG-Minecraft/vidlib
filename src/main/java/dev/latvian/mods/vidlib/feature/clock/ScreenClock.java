@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.clock;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.util.ScreenCorner;
@@ -24,9 +25,9 @@ public record ScreenClock(
 	).apply(instance, ScreenClock::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ScreenClock> STREAM_CODEC = CompositeStreamCodec.of(
-		EntityFilter.STREAM_CODEC.optional(EntityFilter.ANY.instance()), ScreenClock::visible,
+		KLibStreamCodecs.optional(EntityFilter.STREAM_CODEC, EntityFilter.ANY.instance()), ScreenClock::visible,
 		ScreenCorner.DATA_TYPE.streamCodec(), ScreenClock::location,
-		ByteBufCodecs.STRING_UTF8.optional("%02d:%02d"), ScreenClock::format,
+		KLibStreamCodecs.optional(ByteBufCodecs.STRING_UTF8, "%02d:%02d"), ScreenClock::format,
 		Color.STREAM_CODEC, ScreenClock::color,
 		ScreenClock::new
 	);

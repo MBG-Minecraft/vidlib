@@ -6,11 +6,11 @@ import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
-import imgui.ImGui;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,35 +28,24 @@ public record FollowingEntityKVector(EntityFilter entity, PositionType positionT
 		public static final ImBuilderHolder<KVector> TYPE = new ImBuilderHolder<>("Following Entity", Builder::new);
 
 		public final ImBuilder<EntityFilter> entity = EntityFilterImBuilder.create();
-		public final PositionType[] positionType = {PositionType.CENTER};
+		public final ImBuilder<PositionType> positionType = new EnumImBuilder<>(PositionType[]::new, PositionType.VALUES, PositionType.CENTER);
 
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("Entity");
-			ImGui.sameLine();
-			ImGui.pushID("###entity");
-			update = update.or(entity.imgui(graphics));
-			ImGui.popID();
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("Position Type");
-			ImGui.sameLine();
-			update = update.or(graphics.combo("###position-type", "", positionType, PositionType.VALUES));
-
+			update = update.or(entity.imguiKey(graphics, "Entity", "entity"));
+			update = update.or(positionType.imguiKey(graphics, "Position Type", "position-type"));
 			return update;
 		}
 
 		@Override
 		public boolean isValid() {
-			return entity.isValid() && entity.build() != EntityFilter.NONE.instance();
+			return entity.isValid() && entity.build() != EntityFilter.NONE.instance() && positionType.isValid();
 		}
 
 		@Override
 		public KVector build() {
-			return KVector.following(entity.build(), positionType[0]);
+			return KVector.following(entity.build(), positionType.build());
 		}
 	}
 

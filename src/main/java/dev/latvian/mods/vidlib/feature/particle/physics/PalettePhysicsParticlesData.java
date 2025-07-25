@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.particle.physics;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.block.BlockStatePalette;
 import net.minecraft.core.BlockPos;
@@ -25,7 +26,7 @@ public record PalettePhysicsParticlesData(ResourceLocation id, long seed, BlockS
 		ID.STREAM_CODEC, PalettePhysicsParticlesData::id,
 		ByteBufCodecs.LONG, PalettePhysicsParticlesData::seed,
 		BlockStatePalette.STREAM_CODEC, PalettePhysicsParticlesData::palette,
-		BlockPos.STREAM_CODEC.listOf(), PalettePhysicsParticlesData::positions,
+		KLibStreamCodecs.listOf(BlockPos.STREAM_CODEC), PalettePhysicsParticlesData::positions,
 		PalettePhysicsParticlesData::new
 	);
 }

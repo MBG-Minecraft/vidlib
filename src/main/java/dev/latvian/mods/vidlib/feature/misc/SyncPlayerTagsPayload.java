@@ -15,7 +15,7 @@ public record SyncPlayerTagsPayload(UUID player, List<String> tags) implements S
 	@AutoPacket
 	public static final VidLibPacketType<SyncPlayerTagsPayload> TYPE = VidLibPacketType.internal("sync_player_tags", CompositeStreamCodec.of(
 		KLibStreamCodecs.UUID, SyncPlayerTagsPayload::player,
-		ByteBufCodecs.STRING_UTF8.listOf(), SyncPlayerTagsPayload::tags,
+		KLibStreamCodecs.listOf(ByteBufCodecs.STRING_UTF8), SyncPlayerTagsPayload::tags,
 		SyncPlayerTagsPayload::new
 	));
 

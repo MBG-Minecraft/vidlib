@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
@@ -32,7 +33,7 @@ public record PositionedBlock(BlockPos pos, BlockState state) implements BulkLev
 		PositionedBlock::new
 	);
 
-	public static final StreamCodec<RegistryFriendlyByteBuf, List<PositionedBlock>> LIST_STREAM_CODEC = STREAM_CODEC.listOf();
+	public static final StreamCodec<RegistryFriendlyByteBuf, List<PositionedBlock>> LIST_STREAM_CODEC = KLibStreamCodecs.listOf(STREAM_CODEC);
 
 	public static final SimpleRegistryType<PositionedBlock> TYPE = SimpleRegistryType.dynamic("block", MAP_CODEC, STREAM_CODEC);
 

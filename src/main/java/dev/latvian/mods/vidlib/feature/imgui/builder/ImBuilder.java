@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.imgui.builder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 
 import java.util.Objects;
 
@@ -27,7 +28,7 @@ public interface ImBuilder<T> {
 	default ImUpdate imguiKey(ImGraphics graphics, String label, String id) {
 		if (!label.isEmpty()) {
 			ImGui.alignTextToFramePadding();
-			ImGui.text(label);
+			graphics.redTextIf(label, !isValid());
 			ImGui.sameLine();
 		}
 
@@ -39,6 +40,17 @@ public interface ImBuilder<T> {
 
 		if (!id.isEmpty()) {
 			ImGui.popID();
+		}
+
+		return update;
+	}
+
+	default ImUpdate imguiOptionalKey(ImGraphics graphics, ImBoolean enabled, String label, String id) {
+		var update = ImUpdate.full(ImGui.checkbox(label + "###" + id + "-enabled", enabled));
+
+		if (enabled.get()) {
+			ImGui.sameLine();
+			update = update.or(imguiKey(graphics, "", id));
 		}
 
 		return update;

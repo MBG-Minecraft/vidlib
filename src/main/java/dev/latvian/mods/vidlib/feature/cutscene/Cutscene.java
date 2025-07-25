@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.cutscene;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
@@ -26,7 +27,7 @@ public class Cutscene {
 		ByteBufCodecs.BOOL, c -> c.allowMovement,
 		ByteBufCodecs.BOOL, c -> c.openPreviousScreen,
 		ByteBufCodecs.BOOL, c -> c.hidePlayer,
-		CutsceneStep.STREAM_CODEC.listOf(), c -> c.steps,
+		KLibStreamCodecs.listOf(CutsceneStep.STREAM_CODEC), c -> c.steps,
 		Cutscene::new
 	);
 

@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.math.knumber;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -20,8 +21,8 @@ public record KNumberVariables(Map<String, KNumber> numbers, Map<String, KVector
 	).apply(instance, KNumberVariables::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, KNumberVariables> STREAM_CODEC = CompositeStreamCodec.of(
-		ByteBufCodecs.STRING_UTF8.unboundedMap(KNumber.STREAM_CODEC), KNumberVariables::numbers,
-		ByteBufCodecs.STRING_UTF8.unboundedMap(KVector.STREAM_CODEC), KNumberVariables::vectors,
+		KLibStreamCodecs.unboundedMap(ByteBufCodecs.STRING_UTF8, KNumber.STREAM_CODEC), KNumberVariables::numbers,
+		KLibStreamCodecs.unboundedMap(ByteBufCodecs.STRING_UTF8, KVector.STREAM_CODEC), KNumberVariables::vectors,
 		KNumberVariables::new
 	);
 

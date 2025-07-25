@@ -5,6 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibCodecs;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.color.Gradient;
 import dev.latvian.mods.klib.easing.Easing;
 import net.minecraft.core.particles.ParticleOptions;
@@ -26,8 +27,8 @@ public record FireParticleOptions(int lifespan, Gradient color, float scale, Eas
 		ByteBufCodecs.VAR_INT, FireParticleOptions::lifespan,
 		Gradient.STREAM_CODEC, FireParticleOptions::color,
 		ByteBufCodecs.FLOAT, FireParticleOptions::scale,
-		Easing.STREAM_CODEC.optional(Easing.SINE_OUT), FireParticleOptions::easing,
-		ByteBufCodecs.FLOAT.optional(0.4F), FireParticleOptions::brightness,
+		Easing.STREAM_CODEC, FireParticleOptions::easing,
+		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 0.4F), FireParticleOptions::brightness,
 		FireParticleOptions::new
 	);
 

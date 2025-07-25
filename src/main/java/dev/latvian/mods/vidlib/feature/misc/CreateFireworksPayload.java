@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.misc;
 
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
@@ -19,7 +20,7 @@ public record CreateFireworksPayload(double x, double y, double z, double vx, do
 		ByteBufCodecs.DOUBLE, CreateFireworksPayload::vx,
 		ByteBufCodecs.DOUBLE, CreateFireworksPayload::vy,
 		ByteBufCodecs.DOUBLE, CreateFireworksPayload::vz,
-		FireworkExplosion.STREAM_CODEC.listOf(), CreateFireworksPayload::explosions,
+		KLibStreamCodecs.listOf(FireworkExplosion.STREAM_CODEC), CreateFireworksPayload::explosions,
 		CreateFireworksPayload::new
 	));
 

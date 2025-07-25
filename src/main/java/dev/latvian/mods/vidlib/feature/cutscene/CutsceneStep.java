@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.cutscene;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.feature.cutscene.event.CutsceneEvent;
 import dev.latvian.mods.vidlib.feature.fade.Fade;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
@@ -49,17 +50,17 @@ public record CutsceneStep(
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, CutsceneStep> STREAM_CODEC = CompositeStreamCodec.of(
 		ByteBufCodecs.VAR_INT, CutsceneStep::start,
-		KNumber.STREAM_CODEC.optional(KNumber.ZERO), CutsceneStep::length,
-		KVector.STREAM_CODEC.optional(), CutsceneStep::origin,
-		KVector.STREAM_CODEC.optional(), CutsceneStep::target,
-		KNumber.STREAM_CODEC.optional(), CutsceneStep::fovModifier,
-		ComponentSerialization.STREAM_CODEC.optional(), CutsceneStep::status,
-		CutsceneStepBars.STREAM_CODEC.optional(), CutsceneStep::bars,
-		ResourceLocation.STREAM_CODEC.optional(), CutsceneStep::shader,
-		Fade.STREAM_CODEC.optional(), CutsceneStep::fade,
-		PositionedSoundData.STREAM_CODEC.listOf(), CutsceneStep::sounds,
+		KLibStreamCodecs.optional(KNumber.STREAM_CODEC, KNumber.ZERO), CutsceneStep::length,
+		ByteBufCodecs.optional(KVector.STREAM_CODEC), CutsceneStep::origin,
+		ByteBufCodecs.optional(KVector.STREAM_CODEC), CutsceneStep::target,
+		ByteBufCodecs.optional(KNumber.STREAM_CODEC), CutsceneStep::fovModifier,
+		ByteBufCodecs.optional(ComponentSerialization.STREAM_CODEC), CutsceneStep::status,
+		ByteBufCodecs.optional(CutsceneStepBars.STREAM_CODEC), CutsceneStep::bars,
+		ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC), CutsceneStep::shader,
+		ByteBufCodecs.optional(Fade.STREAM_CODEC), CutsceneStep::fade,
+		KLibStreamCodecs.listOf(PositionedSoundData.STREAM_CODEC), CutsceneStep::sounds,
 		CutsceneStepSnap.STREAM_CODEC, CutsceneStep::snap,
-		CutsceneEvent.REGISTRY.valueStreamCodec().listOf(), CutsceneStep::events,
+		KLibStreamCodecs.listOf(CutsceneEvent.REGISTRY.valueStreamCodec()), CutsceneStep::events,
 		CutsceneStep::new
 	);
 }

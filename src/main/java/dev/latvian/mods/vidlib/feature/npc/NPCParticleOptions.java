@@ -28,7 +28,7 @@ public record NPCParticleOptions(String npc, boolean relativePosition, int extra
 		ByteBufCodecs.STRING_UTF8, NPCParticleOptions::npc,
 		ByteBufCodecs.BOOL, NPCParticleOptions::relativePosition,
 		ByteBufCodecs.VAR_INT, NPCParticleOptions::extraLifespan,
-		ByteBufCodecs.GAME_PROFILE.optional(), NPCParticleOptions::profile,
+		ByteBufCodecs.optional(ByteBufCodecs.GAME_PROFILE), NPCParticleOptions::profile,
 		NPCParticleOptions::new
 	);
 

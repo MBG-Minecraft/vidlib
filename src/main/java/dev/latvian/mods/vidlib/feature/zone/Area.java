@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.math.AAIBB;
@@ -24,7 +25,7 @@ public record Area(ResourceKey<Level> dimension, AAIBB shape) {
 	public static final Codec<Area> CODEC = Codec.either(DIRECT_CODEC, AAIBB.CODEC).xmap(e -> e.map(Function.identity(), shape -> new Area(Level.OVERWORLD, shape)), area -> area.dimension == Level.OVERWORLD ? Either.right(area.shape) : Either.left(area));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, Area> STREAM_CODEC = CompositeStreamCodec.of(
-		MCStreamCodecs.DIMENSION.optional(Level.OVERWORLD), Area::dimension,
+		KLibStreamCodecs.optional(MCStreamCodecs.DIMENSION, Level.OVERWORLD), Area::dimension,
 		AAIBB.STREAM_CODEC, Area::shape,
 		Area::new
 	);

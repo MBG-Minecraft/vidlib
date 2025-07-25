@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibCodecs;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
@@ -45,7 +46,7 @@ public record Location(
 	public static final StreamCodec<RegistryFriendlyByteBuf, Location> DIRECT_STREAM_CODEC = CompositeStreamCodec.of(
 		ID.STREAM_CODEC, Location::id,
 		MCStreamCodecs.DIMENSION, Location::dimension,
-		KVector.STREAM_CODEC.listOf(), Location::positions,
+		KLibStreamCodecs.listOf(KVector.STREAM_CODEC), Location::positions,
 		ByteBufCodecs.DOUBLE, Location::range,
 		ByteBufCodecs.BOOL, Location::warp,
 		ByteBufCodecs.BOOL, Location::warpRequiresAdmin,

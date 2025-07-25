@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.zone.shape;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
@@ -20,7 +21,7 @@ import java.util.stream.Stream;
 public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box) implements ZoneShape {
 	public static final SimpleRegistryType<ZoneShapeGroup> TYPE = SimpleRegistryType.dynamic("group", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		ZoneShape.CODEC.listOf().fieldOf("zones").forGetter(ZoneShapeGroup::zoneShapes)
-	).apply(instance, ZoneShapeGroup::create)), ZoneShape.STREAM_CODEC.listOf().map(ZoneShapeGroup::create, ZoneShapeGroup::zoneShapes));
+	).apply(instance, ZoneShapeGroup::create)), KLibStreamCodecs.listOf(ZoneShape.STREAM_CODEC).map(ZoneShapeGroup::create, ZoneShapeGroup::zoneShapes));
 
 	public static ZoneShapeGroup create(List<ZoneShape> zoneShapes) {
 		double minX = Double.POSITIVE_INFINITY;

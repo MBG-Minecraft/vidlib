@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibCodecs;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.util.Empty;
@@ -54,7 +55,7 @@ public record Zone(
 		MCStreamCodecs.COMPOUND_TAG, Zone::data,
 		EntityOverride.OVERRIDE_MAP_STREAM_CODEC, Zone::playerOverrides,
 		EntityFilter.STREAM_CODEC, Zone::solid,
-		ByteBufCodecs.STRING_UTF8.linkedSet(), Zone::tags,
+		KLibStreamCodecs.linkedSetOf(ByteBufCodecs.STRING_UTF8), Zone::tags,
 		ByteBufCodecs.BOOL, Zone::forceLoaded,
 		ZoneFluid.STREAM_CODEC, Zone::fluid,
 		CubeTextures.OPTIONAL_STREAM_CODEC, Zone::textures,

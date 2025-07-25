@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.math.knumber;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
@@ -14,7 +15,7 @@ public record CosKNumber(KNumber angle) implements KNumber {
 	public static final SimpleRegistryType<CosKNumber> TYPE = SimpleRegistryType.dynamic("cos", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.optionalFieldOf("angle", KNumber.ONE).forGetter(CosKNumber::angle)
 	).apply(instance, CosKNumber::new)), CompositeStreamCodec.of(
-		KNumber.STREAM_CODEC.optional(KNumber.ZERO), CosKNumber::angle,
+		KLibStreamCodecs.optional(KNumber.STREAM_CODEC, KNumber.ZERO), CosKNumber::angle,
 		CosKNumber::new
 	));
 
@@ -27,14 +28,7 @@ public record CosKNumber(KNumber angle) implements KNumber {
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
 			ImGui.pushItemWidth(-1F);
-
-			ImGui.alignTextToFramePadding();
-			graphics.redTextIf("Angle", !angle.isValid());
-			ImGui.sameLine();
-			ImGui.pushID("###angle");
-			update = update.or(angle.imgui(graphics));
-			ImGui.popID();
-
+			update = update.or(angle.imguiKey(graphics, "Angle", "angle"));
 			ImGui.popItemWidth();
 			return update;
 		}

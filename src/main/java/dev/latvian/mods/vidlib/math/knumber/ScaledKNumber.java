@@ -30,21 +30,8 @@ public record ScaledKNumber(KNumber a, KNumber b) implements KNumber {
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
 			ImGui.pushItemWidth(-1F);
-
-			ImGui.alignTextToFramePadding();
-			graphics.redTextIf("A", !a.isValid());
-			ImGui.sameLine();
-			ImGui.pushID("###a");
-			update = update.or(a.imgui(graphics));
-			ImGui.popID();
-
-			ImGui.alignTextToFramePadding();
-			graphics.redTextIf("B", !b.isValid());
-			ImGui.sameLine();
-			ImGui.pushID("###b");
-			update = update.or(b.imgui(graphics));
-			ImGui.popID();
-
+			update = update.or(a.imguiKey(graphics, "A", "a"));
+			update = update.or(b.imguiKey(graphics, "B", "b"));
 			ImGui.popItemWidth();
 			return update;
 		}

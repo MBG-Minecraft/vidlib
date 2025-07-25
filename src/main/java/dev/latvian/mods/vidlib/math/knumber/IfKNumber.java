@@ -2,15 +2,16 @@ package dev.latvian.mods.vidlib.math.knumber;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.util.Comparison;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
-import dev.latvian.mods.vidlib.util.MiscUtils;
-import imgui.ImGui;
 import imgui.type.ImBoolean;
+import net.minecraft.network.codec.ByteBufCodecs;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -30,10 +31,10 @@ public record IfKNumber(
 		KNumber.CODEC.optionalFieldOf("else").forGetter(IfKNumber::elseValue)
 	).apply(instance, IfKNumber::new)), CompositeStreamCodec.of(
 		KNumber.STREAM_CODEC, IfKNumber::ifValue,
-		Comparison.DATA_TYPE.streamCodec().optional(Comparison.NOT_EQUALS), IfKNumber::comparison,
-		KNumber.STREAM_CODEC.optional(KNumber.ZERO), IfKNumber::testValue,
-		KNumber.STREAM_CODEC.optional(), IfKNumber::thenValue,
-		KNumber.STREAM_CODEC.optional(), IfKNumber::elseValue,
+		Comparison.DATA_TYPE.streamCodec(), IfKNumber::comparison,
+		KLibStreamCodecs.optional(KNumber.STREAM_CODEC, KNumber.ZERO), IfKNumber::testValue,
+		ByteBufCodecs.optional(KNumber.STREAM_CODEC), IfKNumber::thenValue,
+		ByteBufCodecs.optional(KNumber.STREAM_CODEC), IfKNumber::elseValue,
 		IfKNumber::new
 	));
 
@@ -41,7 +42,7 @@ public record IfKNumber(
 		public static final ImBuilderHolder<KNumber> TYPE = new ImBuilderHolder<>("If", Builder::new);
 
 		public final ImBuilder<KNumber> ifValue = KNumberImBuilder.create(1D);
-		public final Comparison[] comparison = {Comparison.NOT_EQUALS};
+		public final ImBuilder<Comparison> comparison = new EnumImBuilder<>(Comparison.ARRAY_FACTORY, Comparison.VALUES, Comparison.NOT_EQUALS);
 		public final ImBuilder<KNumber> testValue = KNumberImBuilder.create(0D);
 		public final ImBoolean thenValueEnabled = new ImBoolean(true);
 		public final ImBuilder<KNumber> thenValue = KNumberImBuilder.create(0D);
@@ -51,76 +52,24 @@ public record IfKNumber(
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
-
-			ImGui.alignTextToFramePadding();
-			graphics.redTextIf("If", !ifValue.isValid());
-			ImGui.sameLine();
-			ImGui.pushID("###if");
-			update = update.or(ifValue.imgui(graphics));
-			ImGui.popID();
-
-			update = update.or(graphics.combo("###comparison", "", comparison, MiscUtils.COMPARISONS));
-
-			ImGui.alignTextToFramePadding();
-			graphics.redTextIf("Value", !testValue.isValid());
-			ImGui.sameLine();
-			ImGui.pushID("###value");
-			update = update.or(testValue.imgui(graphics));
-			ImGui.popID();
-
-			boolean thenInvalid = thenValueEnabled.get() && !thenValue.isValid();
-
-			if (thenInvalid) {
-				graphics.pushStack();
-				graphics.setErrorText();
-			}
-
-			update = update.or(ImGui.checkbox("Then###then-enabled", thenValueEnabled));
-
-			if (thenInvalid) {
-				graphics.popStack();
-			}
-
-			if (thenValueEnabled.get()) {
-				ImGui.sameLine();
-				ImGui.pushID("###then");
-				update = update.or(thenValue.imgui(graphics));
-				ImGui.popID();
-			}
-
-			boolean elseInvalid = elseValueEnabled.get() && !elseValue.isValid();
-
-			if (elseInvalid) {
-				graphics.pushStack();
-				graphics.setErrorText();
-			}
-
-			update = update.or(ImGui.checkbox("Else###else-enabled", elseValueEnabled));
-
-			if (elseInvalid) {
-				graphics.popStack();
-			}
-
-			if (elseValueEnabled.get()) {
-				ImGui.sameLine();
-				ImGui.pushID("###else");
-				update = update.or(elseValue.imgui(graphics));
-				ImGui.popID();
-			}
-
+			update = update.or(ifValue.imguiKey(graphics, "If", "if"));
+			update = update.or(comparison.imguiKey(graphics, "Comparison", "comparison"));
+			update = update.or(testValue.imguiKey(graphics, "Value", "value"));
+			update = update.or(testValue.imguiOptionalKey(graphics, thenValueEnabled, "Then", "then"));
+			update = update.or(testValue.imguiOptionalKey(graphics, elseValueEnabled, "Else", "else"));
 			return update;
 		}
 
 		@Override
 		public boolean isValid() {
-			return ifValue.isValid() && testValue.isValid() && (!thenValueEnabled.get() || thenValue.isValid()) && (!elseValueEnabled.get() || elseValue.isValid());
+			return ifValue.isValid() && comparison.isValid() && testValue.isValid() && (!thenValueEnabled.get() || thenValue.isValid()) && (!elseValueEnabled.get() || elseValue.isValid());
 		}
 
 		@Override
 		public KNumber build() {
 			return new IfKNumber(
 				ifValue.build(),
-				comparison[0],
+				comparison.build(),
 				testValue.build(),
 				thenValueEnabled.get() ? Optional.of(thenValue.build()) : Optional.empty(),
 				elseValueEnabled.get() ? Optional.of(elseValue.build()) : Optional.empty()

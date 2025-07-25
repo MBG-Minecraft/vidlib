@@ -4,11 +4,13 @@ import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBarRenderer;
+import dev.latvian.mods.vidlib.feature.misc.FlashbackIntegration;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.entity.player.Player;
+import net.neoforged.fml.ModList;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 
@@ -44,6 +46,10 @@ public interface VidLibHUD {
 		var worldMouse = mc.getWorldMouse();
 
 		if (worldMouse == null) {
+			return;
+		}
+
+		if (ModList.get().isLoaded("flashback") && (FlashbackIntegration.IN_REPLAY.getAsBoolean() || FlashbackIntegration.IN_EXPORTING.getAsBoolean()) && !FlashbackIntegration.RENDER_NAMETAGS.getAsBoolean()) {
 			return;
 		}
 

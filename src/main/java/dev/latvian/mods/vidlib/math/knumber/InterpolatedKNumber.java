@@ -7,6 +7,7 @@ import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
@@ -34,7 +35,7 @@ public record InterpolatedKNumber(Easing easing, float start, float end, KNumber
 	public static class Builder implements KNumberImBuilder {
 		public static final ImBuilderHolder<KNumber> TYPE = new ImBuilderHolder<>("Interpolated", Builder::new);
 
-		public final Easing[] easing = new Easing[]{Easing.LINEAR};
+		public final ImBuilder<Easing> easing = EnumImBuilder.easing();
 		public final ImBuilder<KNumber> from = KNumberImBuilder.create(0D);
 		public final ImBuilder<KNumber> to = KNumberImBuilder.create(1D);
 		public final ImFloat start = new ImFloat(0F);
@@ -44,26 +45,9 @@ public record InterpolatedKNumber(Easing easing, float start, float end, KNumber
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
 			ImGui.pushItemWidth(-1F);
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("Easing");
-			ImGui.sameLine();
-
-			update = update.or(graphics.easingCombo("###easing", easing));
-
-			ImGui.alignTextToFramePadding();
-			graphics.redTextIf("From", !from.isValid());
-			ImGui.sameLine();
-			ImGui.pushID("###from");
-			update = update.or(from.imgui(graphics));
-			ImGui.popID();
-
-			ImGui.alignTextToFramePadding();
-			graphics.redTextIf("To", !to.isValid());
-			ImGui.sameLine();
-			ImGui.pushID("###to");
-			update = update.or(to.imgui(graphics));
-			ImGui.popID();
+			update = update.or(easing.imguiKey(graphics, "Easing", "easing"));
+			update = update.or(from.imguiKey(graphics, "From", "from"));
+			update = update.or(to.imguiKey(graphics, "To", "to"));
 
 			graphics.redTextIf("Start / End", start.get() < 0F || start.get() > 1F || end.get() < 0F || end.get() > 1F || start.get() >= end.get());
 			ImGui.dragFloatRange2("###range", start.getData(), end.getData(), 0.01F, 0F, 1F);
@@ -75,12 +59,12 @@ public record InterpolatedKNumber(Easing easing, float start, float end, KNumber
 
 		@Override
 		public boolean isValid() {
-			return from.isValid() && to.isValid() && start.get() >= 0F && start.get() <= 1F && end.get() >= 0F && end.get() <= 1F && start.get() < end.get();
+			return easing.isValid() && from.isValid() && to.isValid() && start.get() >= 0F && start.get() <= 1F && end.get() >= 0F && end.get() <= 1F && start.get() < end.get();
 		}
 
 		@Override
 		public KNumber build() {
-			return new InterpolatedKNumber(easing[0], start.get(), end.get(), from.build(), to.build());
+			return new InterpolatedKNumber(easing.build(), start.get(), end.get(), from.build(), to.build());
 		}
 	}
 

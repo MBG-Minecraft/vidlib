@@ -39,9 +39,9 @@ public record Fade(Gradient color, int fadeInTicks, int pauseTicks, Optional<Int
 		Gradient.STREAM_CODEC, Fade::color,
 		ByteBufCodecs.VAR_INT, Fade::fadeInTicks,
 		ByteBufCodecs.VAR_INT, Fade::pauseTicks,
-		ByteBufCodecs.VAR_INT.optional(), Fade::fadeOutTicks,
-		Easing.STREAM_CODEC.optional(Easing.LINEAR), Fade::fadeInEase,
-		Easing.STREAM_CODEC.optional(), Fade::fadeOutEase,
+		ByteBufCodecs.optional(ByteBufCodecs.VAR_INT), Fade::fadeOutTicks,
+		Easing.STREAM_CODEC, Fade::fadeInEase,
+		ByteBufCodecs.optional(Easing.STREAM_CODEC), Fade::fadeOutEase,
 		Fade::new
 	);
 

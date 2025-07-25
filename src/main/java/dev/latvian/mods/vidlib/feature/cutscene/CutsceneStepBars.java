@@ -8,6 +8,7 @@ import dev.latvian.mods.klib.util.Empty;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 import java.util.List;
@@ -41,8 +42,8 @@ public record CutsceneStepBars(Optional<Component> top, Optional<Component> bott
 	public static final Codec<CutsceneStepBars> CODEC = KLibCodecs.or(List.of(LITERAL_CODEC, DIRECT_CODEC));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, CutsceneStepBars> STREAM_CODEC = CompositeStreamCodec.of(
-		ComponentSerialization.STREAM_CODEC.optional(), CutsceneStepBars::top,
-		ComponentSerialization.STREAM_CODEC.optional(), CutsceneStepBars::bottom,
+		ByteBufCodecs.optional(ComponentSerialization.STREAM_CODEC), CutsceneStepBars::top,
+		ByteBufCodecs.optional(ComponentSerialization.STREAM_CODEC), CutsceneStepBars::bottom,
 		CutsceneStepBars::of
 	);
 }

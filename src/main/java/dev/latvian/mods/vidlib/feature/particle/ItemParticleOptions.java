@@ -5,6 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibCodecs;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -23,8 +24,8 @@ public record ItemParticleOptions(int lifespan, ItemStack item, float gravity, f
 	public static final StreamCodec<RegistryFriendlyByteBuf, ItemParticleOptions> STREAM_CODEC = CompositeStreamCodec.of(
 		ByteBufCodecs.VAR_INT, ItemParticleOptions::lifespan,
 		ItemStack.STREAM_CODEC, ItemParticleOptions::item,
-		ByteBufCodecs.FLOAT.optional(1F), ItemParticleOptions::gravity,
-		ByteBufCodecs.FLOAT.optional(1F), ItemParticleOptions::scale,
+		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 1F), ItemParticleOptions::gravity,
+		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 1F), ItemParticleOptions::scale,
 		ItemParticleOptions::new
 	);
 

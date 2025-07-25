@@ -7,6 +7,7 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 
@@ -44,7 +45,7 @@ public record CubeTextures(
 		CubeTextures::new
 	);
 
-	public static final StreamCodec<ByteBuf, Optional<CubeTextures>> OPTIONAL_STREAM_CODEC = STREAM_CODEC.optional();
+	public static final StreamCodec<ByteBuf, Optional<CubeTextures>> OPTIONAL_STREAM_CODEC = ByteBufCodecs.optional(STREAM_CODEC);
 
 	public static CubeTextures fluid(ResourceLocation still, ResourceLocation flowing, TerrainRenderLayer type, Color tint) {
 		return new CubeTextures(

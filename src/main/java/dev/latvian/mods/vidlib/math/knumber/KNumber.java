@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.math.knumber;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
@@ -46,6 +47,9 @@ public interface KNumber {
 	FixedKNumber ONE = new FixedKNumber(1D);
 	SimpleRegistryType.Unit<FixedKNumber> ZERO_TYPE = SimpleRegistryType.unit("zero", ZERO);
 	SimpleRegistryType.Unit<FixedKNumber> ONE_TYPE = SimpleRegistryType.unit("one", ONE);
+
+	StreamCodec<RegistryFriendlyByteBuf, KNumber> OPTIONAL_ZERO_STREAM_CODEC = KLibStreamCodecs.optional(STREAM_CODEC, ZERO);
+	StreamCodec<RegistryFriendlyByteBuf, KNumber> OPTIONAL_ONE_STREAM_CODEC = KLibStreamCodecs.optional(STREAM_CODEC, ONE);
 
 	static FixedKNumber of(double number) {
 		if (number == 0D) {

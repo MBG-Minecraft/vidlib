@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.explosion;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.klib.math.KMath;
@@ -52,13 +53,13 @@ public class ExplosionData {
 		).apply(instance, EntityData::new));
 
 		public static final StreamCodec<ByteBuf, EntityData> STREAM_CODEC = CompositeStreamCodec.of(
-			ByteBufCodecs.FLOAT.optional(0F), v -> v.minDamage,
+			KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 0F), v -> v.minDamage,
 			ByteBufCodecs.FLOAT, v -> v.maxDamage,
-			Easing.STREAM_CODEC.optional(Easing.CUBIC_IN), v -> v.damageEasing,
-			ByteBufCodecs.FLOAT.optional(1F), v -> v.horizontalKnockback,
-			ByteBufCodecs.FLOAT.optional(0F), v -> v.verticalKnockback,
+			Easing.STREAM_CODEC, v -> v.damageEasing,
+			KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 1F), v -> v.horizontalKnockback,
+			KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 0F), v -> v.verticalKnockback,
 			ByteBufCodecs.BOOL, v -> v.spherical,
-			ByteBufCodecs.FLOAT.optional(1.05F), v -> v.radiusMod,
+			KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 1.05F), v -> v.radiusMod,
 			EntityData::new
 		);
 
@@ -161,11 +162,11 @@ public class ExplosionData {
 		).apply(instance, FilterData::new));
 
 		public static final StreamCodec<RegistryFriendlyByteBuf, FilterData> STREAM_CODEC = CompositeStreamCodec.of(
-			ByteBufCodecs.VAR_INT.optional(-1000), v -> v.floor,
-			ByteBufCodecs.VAR_INT.optional(1000), v -> v.ceiling,
-			BlockFilter.STREAM_CODEC.optional(BlockFilter.ANY.instance()), v -> v.blocks,
-			EntityFilter.STREAM_CODEC.optional(EntityFilter.CREATIVE.instance()), v -> v.ignored,
-			EntityFilter.STREAM_CODEC.optional(EntityFilter.NONE.instance()), v -> v.invincible,
+			KLibStreamCodecs.optional(ByteBufCodecs.VAR_INT, -1000), v -> v.floor,
+			KLibStreamCodecs.optional(ByteBufCodecs.VAR_INT, 1000), v -> v.ceiling,
+			KLibStreamCodecs.optional(BlockFilter.STREAM_CODEC, BlockFilter.ANY.instance()), v -> v.blocks,
+			KLibStreamCodecs.optional(EntityFilter.STREAM_CODEC, EntityFilter.CREATIVE.instance()), v -> v.ignored,
+			KLibStreamCodecs.optional(EntityFilter.STREAM_CODEC, EntityFilter.NONE.instance()), v -> v.invincible,
 			ByteBufCodecs.BOOL, v -> v.bypassUnbreakable,
 			FilterData::new
 		);
@@ -263,12 +264,12 @@ public class ExplosionData {
 		ByteBufCodecs.FLOAT, v -> v.radius,
 		ByteBufCodecs.FLOAT, v -> v.depth,
 		ByteBufCodecs.FLOAT, v -> v.height,
-		ByteBufCodecs.FLOAT.optional(1F), v -> v.destroy,
-		ByteBufCodecs.FLOAT.optional(0.3F), v -> v.decay,
-		ByteBufCodecs.FLOAT.optional(0F), v -> v.fire,
+		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 1F), v -> v.destroy,
+		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 0.3F), v -> v.decay,
+		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 0F), v -> v.fire,
 		ByteBufCodecs.BOOL, v -> v.smolder,
-		EntityData.STREAM_CODEC.optional(EntityData.DEFAULT), v -> v.entity,
-		FilterData.STREAM_CODEC.optional(FilterData.DEFAULT), v -> v.filter,
+		KLibStreamCodecs.optional(EntityData.STREAM_CODEC, EntityData.DEFAULT), v -> v.entity,
+		KLibStreamCodecs.optional(FilterData.STREAM_CODEC, FilterData.DEFAULT), v -> v.filter,
 		ExplosionData::new
 	);
 

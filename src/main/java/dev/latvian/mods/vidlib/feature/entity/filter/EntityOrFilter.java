@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.entity.filter;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
@@ -16,7 +17,7 @@ import java.util.List;
 public record EntityOrFilter(List<EntityFilter> filters) implements EntityFilter {
 	public static SimpleRegistryType<EntityOrFilter> TYPE = SimpleRegistryType.dynamic("or", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		EntityFilter.CODEC.listOf().fieldOf("filters").forGetter(EntityOrFilter::filters)
-	).apply(instance, EntityOrFilter::new)), EntityFilter.STREAM_CODEC.listOf().map(EntityOrFilter::new, EntityOrFilter::filters));
+	).apply(instance, EntityOrFilter::new)), KLibStreamCodecs.listOf(EntityFilter.STREAM_CODEC).map(EntityOrFilter::new, EntityOrFilter::filters));
 
 	public static class Builder implements EntityFilterImBuilder {
 		public static final ImBuilderHolder<EntityFilter> TYPE = new ImBuilderHolder<>("OR", Builder::new);

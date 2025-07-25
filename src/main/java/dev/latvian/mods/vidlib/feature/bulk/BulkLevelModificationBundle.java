@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.bulk;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -14,7 +15,7 @@ import java.util.Set;
 public record BulkLevelModificationBundle(List<BulkLevelModification> list) implements BulkLevelModification, BlockModificationConsumer {
 	public static final SimpleRegistryType<BulkLevelModificationBundle> TYPE = SimpleRegistryType.dynamic("bundle", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		BulkLevelModification.REGISTRY.valueCodec().listOf().fieldOf("list").forGetter(BulkLevelModificationBundle::list)
-	).apply(instance, BulkLevelModificationBundle::new)), BulkLevelModification.REGISTRY.valueStreamCodec().listOf().map(BulkLevelModificationBundle::new, BulkLevelModificationBundle::list));
+	).apply(instance, BulkLevelModificationBundle::new)), KLibStreamCodecs.listOf(BulkLevelModification.REGISTRY.valueStreamCodec()).map(BulkLevelModificationBundle::new, BulkLevelModificationBundle::list));
 
 	@Override
 	public SimpleRegistryType<?> type() {

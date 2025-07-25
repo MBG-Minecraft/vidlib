@@ -15,7 +15,7 @@ public record SpawnItemParticlePayload(ItemParticleOptions options, List<Pair<Ve
 	@AutoPacket
 	public static final VidLibPacketType<SpawnItemParticlePayload> TYPE = VidLibPacketType.internal("spawn_item_particles", CompositeStreamCodec.of(
 		ItemParticleOptions.STREAM_CODEC, SpawnItemParticlePayload::options,
-		KLibStreamCodecs.pair(Vec3.STREAM_CODEC, Vec3.STREAM_CODEC).listOf(), SpawnItemParticlePayload::positions,
+		KLibStreamCodecs.listOf(KLibStreamCodecs.pair(Vec3.STREAM_CODEC, Vec3.STREAM_CODEC)), SpawnItemParticlePayload::positions,
 		SpawnItemParticlePayload::new
 	));
 

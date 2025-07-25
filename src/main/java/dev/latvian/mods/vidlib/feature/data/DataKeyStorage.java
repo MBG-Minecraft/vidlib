@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.data;
 
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.util.Cast;
@@ -47,7 +48,7 @@ public class DataKeyStorage {
 			}
 		};
 
-		this.valueListStreamCodec = valueStreamCodec.listOf();
+		this.valueListStreamCodec = KLibStreamCodecs.listOf(valueStreamCodec);
 	}
 
 	public <T> DataKey.Builder<T> builder(String id, DataType<T> type, T defaultValue) {

@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.bulk;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
@@ -17,7 +18,7 @@ public record ReplaceSectionBlocks(SectionPos pos, List<BlockPalette> palettes) 
 		BlockPalette.CODEC.listOf().fieldOf("palettes").forGetter(ReplaceSectionBlocks::palettes)
 	).apply(instance, ReplaceSectionBlocks::new)), CompositeStreamCodec.of(
 		MCStreamCodecs.SECTION_POS, ReplaceSectionBlocks::pos,
-		BlockPalette.STREAM_CODEC.listOf(), ReplaceSectionBlocks::palettes,
+		KLibStreamCodecs.listOf(BlockPalette.STREAM_CODEC), ReplaceSectionBlocks::palettes,
 		ReplaceSectionBlocks::new
 	));
 

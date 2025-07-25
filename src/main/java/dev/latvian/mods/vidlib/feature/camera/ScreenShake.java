@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibCodecs;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.klib.easing.EasingGroup;
@@ -61,12 +62,12 @@ public record ScreenShake(
 	public static final Codec<ScreenShake> CODEC = Codec.either(Codec.BOOL, DIRECT_CODEC).xmap(either -> either.map(b -> b ? DEFAULT : NONE, Function.identity()), shake -> shake.equals(NONE) ? Either.left(false) : shake.equals(DEFAULT) ? Either.left(true) : Either.right(shake));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ScreenShake> STREAM_CODEC = CompositeStreamCodec.of(
-		ScreenShakeType.REGISTRY.valueStreamCodec().optional(DEFAULT.type), ScreenShake::type,
+		KLibStreamCodecs.optional(ScreenShakeType.REGISTRY.valueStreamCodec(), DEFAULT.type), ScreenShake::type,
 		ByteBufCodecs.VAR_INT, ScreenShake::duration,
 		ByteBufCodecs.FLOAT, ScreenShake::speed,
 		ByteBufCodecs.FLOAT, ScreenShake::intensity,
-		EasingGroup.STREAM_CODEC.optional(DEFAULT.start), ScreenShake::start,
-		EasingGroup.STREAM_CODEC.optional(DEFAULT.end), ScreenShake::end,
+		KLibStreamCodecs.optional(EasingGroup.STREAM_CODEC, DEFAULT.start), ScreenShake::start,
+		KLibStreamCodecs.optional(EasingGroup.STREAM_CODEC, DEFAULT.end), ScreenShake::end,
 		ByteBufCodecs.BOOL, ScreenShake::motionBlur,
 		ScreenShake::new
 	);
