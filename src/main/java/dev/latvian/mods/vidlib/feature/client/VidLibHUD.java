@@ -5,12 +5,12 @@ import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBarRenderer;
 import dev.latvian.mods.vidlib.feature.misc.FlashbackIntegration;
+import dev.latvian.mods.vidlib.feature.misc.VLFlashbackIntegration;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.ModList;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 
@@ -49,7 +49,7 @@ public interface VidLibHUD {
 			return;
 		}
 
-		if (ModList.get().isLoaded("flashback") && (FlashbackIntegration.IN_REPLAY.getAsBoolean() || FlashbackIntegration.IN_EXPORTING.getAsBoolean()) && !FlashbackIntegration.RENDER_NAMETAGS.getAsBoolean()) {
+		if (VLFlashbackIntegration.ENABLED && FlashbackIntegration.isInReplayOrExporting() && !FlashbackIntegration.getRenderNameTags()) {
 			return;
 		}
 

@@ -30,7 +30,6 @@ public class BlockPosImBuilder implements ImBuilder<BlockPos> {
 	public ImUpdate imgui(ImGraphics graphics) {
 		selectedPosition = null;
 		var update = ImUpdate.NONE;
-		ImGui.pushItemWidth(-1F);
 
 		if (ImGui.button(SelectedPosition.CAMERA.icon + "###camera-pos")) {
 			var cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
@@ -92,8 +91,6 @@ public class BlockPosImBuilder implements ImBuilder<BlockPos> {
 		ImGui.inputInt("###z", ImGuiUtils.INT, 1, 16);
 		update = update.orItemEdit();
 		pos.setZ(ImGuiUtils.INT.get());
-
-		ImGui.popItemWidth();
 		return update;
 	}
 

@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.clock;
 
 import com.mojang.math.Axis;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
+import imgui.type.ImBoolean;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -9,6 +10,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.LightLayer;
 
 public class ClockRenderer {
+	public static final ImBoolean VISIBLE = new ImBoolean(true);
+
 	public static void render(FrameInfo frame, ClockValue value, ClockLocation location) {
 		var mc = frame.mc();
 		float delta = frame.worldDelta();

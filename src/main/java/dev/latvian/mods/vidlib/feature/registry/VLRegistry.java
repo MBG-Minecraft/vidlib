@@ -70,6 +70,11 @@ public class VLRegistry<V> extends GenericVLRegistry<ResourceLocation, V> implem
 		return (RegistryRef<V>) ref;
 	}
 
+	public RegistryRef<V> asRef(V value, Function<V, ResourceLocation> idGetter) {
+		var id = idGetter.apply(value);
+		return id == null ? null : ref(id);
+	}
+
 	@Override
 	public String toString() {
 		return id.toString();

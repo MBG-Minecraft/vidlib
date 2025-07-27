@@ -7,11 +7,11 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
-import imgui.ImGui;
 import org.jetbrains.annotations.Nullable;
 
-public record SinKNumber(KNumber angle) implements KNumber {
+public record SinKNumber(KNumber angle) implements KNumber, ImBuilderWrapper.BuilderSupplier {
 	public static final SimpleRegistryType<SinKNumber> TYPE = SimpleRegistryType.dynamic("sin", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.optionalFieldOf("angle", KNumber.ONE).forGetter(SinKNumber::angle)
 	).apply(instance, SinKNumber::new)), CompositeStreamCodec.of(
@@ -25,11 +25,16 @@ public record SinKNumber(KNumber angle) implements KNumber {
 		public final ImBuilder<KNumber> angle = KNumberImBuilder.create(0D);
 
 		@Override
+		public void set(KNumber value) {
+			if (value instanceof SinKNumber n) {
+				angle.set(n.angle);
+			}
+		}
+
+		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
-			ImGui.pushItemWidth(-1F);
 			update = update.or(imguiKey(graphics, "Angle", "angle"));
-			ImGui.popItemWidth();
 			return update;
 		}
 
@@ -59,5 +64,10 @@ public record SinKNumber(KNumber angle) implements KNumber {
 		}
 
 		return Math.sin(Math.toRadians(angle));
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return Builder.TYPE;
 	}
 }

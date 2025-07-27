@@ -10,6 +10,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import imgui.ImGui;
@@ -18,7 +19,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public record InterpolatedKVector(Easing easing, float start, float end, KVector from, KVector to) implements KVector {
+public record InterpolatedKVector(Easing easing, float start, float end, KVector from, KVector to) implements KVector, ImBuilderWrapper.BuilderSupplier {
 	public static final SimpleRegistryType<InterpolatedKVector> TYPE = SimpleRegistryType.dynamic("interpolated", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Easing.CODEC.optionalFieldOf("easing", Easing.LINEAR).forGetter(InterpolatedKVector::easing),
 		Codec.FLOAT.optionalFieldOf("start", 0F).forGetter(InterpolatedKVector::start),
@@ -44,9 +45,19 @@ public record InterpolatedKVector(Easing easing, float start, float end, KVector
 		public final ImFloat end = new ImFloat(1F);
 
 		@Override
+		public void set(KVector value) {
+			if (value instanceof InterpolatedKVector v) {
+				easing.set(v.easing);
+				from.set(v.from);
+				to.set(v.to);
+				start.set(v.start);
+				end.set(v.end);
+			}
+		}
+
+		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
-			ImGui.pushItemWidth(-1F);
 			update = update.or(easing.imguiKey(graphics, "Easing", "easing"));
 			update = update.or(from.imguiKey(graphics, "From", "from"));
 			update = update.or(to.imguiKey(graphics, "To", "to"));
@@ -55,7 +66,6 @@ public record InterpolatedKVector(Easing easing, float start, float end, KVector
 			ImGui.dragFloatRange2("###range", start.getData(), end.getData(), 0.01F, 0F, 1F);
 			update = update.orItemEdit();
 
-			ImGui.popItemWidth();
 			return update;
 		}
 
@@ -96,5 +106,10 @@ public record InterpolatedKVector(Easing easing, float start, float end, KVector
 		}
 
 		return a.lerp(b, easing.easeClamped(KMath.map(ctx.progress, start, end, 0D, 1D)));
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return Builder.TYPE;
 	}
 }

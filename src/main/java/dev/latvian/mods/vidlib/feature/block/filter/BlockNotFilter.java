@@ -5,6 +5,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import imgui.ImGui;
 import net.minecraft.core.BlockPos;
@@ -12,7 +13,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 
-public record BlockNotFilter(BlockFilter filter) implements BlockFilter {
+public record BlockNotFilter(BlockFilter filter) implements BlockFilter, ImBuilderWrapper.BuilderSupplier {
 	public static SimpleRegistryType<BlockNotFilter> TYPE = SimpleRegistryType.dynamic("not", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		BlockFilter.CODEC.fieldOf("filter").forGetter(BlockNotFilter::filter)
 	).apply(instance, BlockNotFilter::new)), BlockFilter.STREAM_CODEC.map(BlockNotFilter::new, BlockNotFilter::filter));
@@ -21,6 +22,13 @@ public record BlockNotFilter(BlockFilter filter) implements BlockFilter {
 		public static final ImBuilderHolder<BlockFilter> TYPE = new ImBuilderHolder<>("NOT", Builder::new);
 
 		public final ImBuilder<BlockFilter> filter = BlockFilterImBuilder.create();
+
+		@Override
+		public void set(BlockFilter value) {
+			if (value instanceof BlockNotFilter f) {
+				filter.set(f.filter);
+			}
+		}
 
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
@@ -59,5 +67,10 @@ public record BlockNotFilter(BlockFilter filter) implements BlockFilter {
 	@Override
 	public BlockFilter not() {
 		return filter;
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return Builder.TYPE;
 	}
 }

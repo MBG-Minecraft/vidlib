@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.prop;
 import dev.latvian.mods.klib.codec.CollectionStreamCodecs;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
+import dev.latvian.mods.vidlib.feature.misc.VLFlashbackIntegration;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
@@ -24,6 +25,10 @@ public record RemovePropsPayload(PropListType type, IntList ids, PropRemoveType 
 
 	@Override
 	public void handle(Context ctx) {
+		if (VLFlashbackIntegration.ENABLED && !VLFlashbackIntegration.RECORD_PROPS.get() && !VLFlashbackIntegration.RECORDED_PROPS.isEmpty()) {
+			return;
+		}
+
 		var props = ctx.level().getProps().propLists.get(type);
 
 		for (var id : ids) {
@@ -31,6 +36,11 @@ public record RemovePropsPayload(PropListType type, IntList ids, PropRemoveType 
 
 			if (prop != null) {
 				prop.remove(removeType);
+			}
+
+			if (VLFlashbackIntegration.ENABLED && VLFlashbackIntegration.RECORD_PROPS.get()) {
+				var p = VLFlashbackIntegration.RECORDING_PROPS.remove(id.intValue());
+				VLFlashbackIntegration.RECORDED_PROPS.put(p.id(), p.finish(ctx.remoteGameTime()));
 			}
 		}
 	}

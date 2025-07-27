@@ -201,8 +201,14 @@ public class ImGraphics {
 
 	public void setRedButton() {
 		setStyleCol(ImGuiCol.Button, 0xFFA0243B);
-		setStyleCol(ImGuiCol.ButtonHovered, 0xFFFF7777);
+		setStyleCol(ImGuiCol.ButtonHovered, 0xFFFF5E5E);
 		setStyleCol(ImGuiCol.ButtonActive, 0xFFEE3333);
+	}
+
+	public void setGreenButton() {
+		setStyleCol(ImGuiCol.Button, 0xFF249E3E);
+		setStyleCol(ImGuiCol.ButtonHovered, 0xFF2EC618);
+		setStyleCol(ImGuiCol.ButtonActive, 0xFF49ED34);
 	}
 
 	public void setButtonColor(Color col) {
@@ -214,7 +220,58 @@ public class ImGraphics {
 	public void stackTrace(Throwable throwable) {
 		pushStack();
 		setErrorText();
-		ImGui.textWrapped(throwable.toString());
+		setStyleVar(ImGuiStyleVar.ItemSpacing, 0F, 0F);
+
+		var stackTrace = throwable.getStackTrace();
+
+		ImGui.textWrapped(throwable + " [" + stackTrace.length + " lines]");
+
+		for (var e : stackTrace) {
+			int cni = e.getClassName().lastIndexOf('.');
+
+			ImGui.text("  at " + (cni == -1 ? e.getClassName() : e.getClassName().substring(cni + 1)) + ".");
+			ImGui.sameLine();
+			pushStack();
+			setSuccessText();
+			ImGui.text(e.getMethodName());
+			popStack();
+			ImGui.sameLine();
+			ImGui.text("(");
+
+			if (e.isNativeMethod()) {
+				ImGui.sameLine();
+				pushStack();
+				setWarningText();
+				ImGui.text("Native Method");
+				popStack();
+			} else if (e.getFileName() == null) {
+				ImGui.sameLine();
+				pushStack();
+				setWarningText();
+				ImGui.text("Unknown Source");
+				popStack();
+			} else {
+				ImGui.sameLine();
+				pushStack();
+				setWarningText();
+				ImGui.text(e.getFileName());
+				popStack();
+
+				if (e.getLineNumber() >= 0) {
+					ImGui.sameLine();
+					ImGui.text(":");
+					ImGui.sameLine();
+					pushStack();
+					setInfoText();
+					ImGui.text(String.valueOf(e.getLineNumber()));
+					popStack();
+				}
+			}
+
+			ImGui.sameLine();
+			ImGui.text(")");
+		}
+
 		popStack();
 	}
 

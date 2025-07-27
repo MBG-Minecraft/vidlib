@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.feature.block.BlockImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -14,7 +15,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 
-public record BlockIdFilter(Block block) implements BlockFilter {
+public record BlockIdFilter(Block block) implements BlockFilter, ImBuilderWrapper.BuilderSupplier {
 	public static final SimpleRegistryType<BlockIdFilter> TYPE = SimpleRegistryType.dynamic("block", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		BuiltInRegistries.BLOCK.byNameCodec().fieldOf("block").forGetter(BlockIdFilter::block)
 	).apply(instance, BlockIdFilter::new)), KLibStreamCodecs.registry(BuiltInRegistries.BLOCK).map(BlockIdFilter::new, BlockIdFilter::block));
@@ -23,6 +24,13 @@ public record BlockIdFilter(Block block) implements BlockFilter {
 		public static final ImBuilderHolder<BlockFilter> TYPE = new ImBuilderHolder<>("ID", Builder::new);
 
 		public final BlockImBuilder block = new BlockImBuilder(null);
+
+		@Override
+		public void set(BlockFilter value) {
+			if (value instanceof BlockIdFilter f) {
+				block.set(f.block);
+			}
+		}
 
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
@@ -53,5 +61,10 @@ public record BlockIdFilter(Block block) implements BlockFilter {
 	@Override
 	public boolean test(Level level, BlockPos pos, BlockState state) {
 		return state.is(block);
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return Builder.TYPE;
 	}
 }

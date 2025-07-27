@@ -7,16 +7,16 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
-import imgui.ImGui;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 
-public record YRotatedKVector(KVector vector, KNumber angle) implements KVector {
+public record YRotatedKVector(KVector vector, KNumber angle) implements KVector, ImBuilderWrapper.BuilderSupplier {
 	public static final SimpleRegistryType<YRotatedKVector> TYPE = SimpleRegistryType.dynamic("y_rotated", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KVector.CODEC.fieldOf("vector").forGetter(YRotatedKVector::vector),
 		KNumber.CODEC.fieldOf("angle").forGetter(YRotatedKVector::angle)
@@ -33,25 +33,18 @@ public record YRotatedKVector(KVector vector, KNumber angle) implements KVector 
 		public final ImBuilder<KNumber> angle = KNumberImBuilder.create(5D);
 
 		@Override
+		public void set(KVector value) {
+			if (value instanceof YRotatedKVector v) {
+				vector.set(v.vector);
+				angle.set(v.angle);
+			}
+		}
+
+		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
-			ImGui.pushItemWidth(-1F);
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("Vector");
-			ImGui.sameLine();
-			ImGui.pushID("###vector");
-			update = update.or(vector.imgui(graphics));
-			ImGui.popID();
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("Angle");
-			ImGui.sameLine();
-			ImGui.pushID("###angle");
-			update = update.or(angle.imgui(graphics));
-			ImGui.popID();
-
-			ImGui.popItemWidth();
+			update = update.or(vector.imguiKey(graphics, "Vector", "vector"));
+			update = update.or(angle.imguiKey(graphics, "Angle", "angle"));
 			return update;
 		}
 
@@ -89,5 +82,10 @@ public record YRotatedKVector(KVector vector, KNumber angle) implements KVector 
 		var vec = new Vector3d(vector.x, vector.y, vector.z);
 		vec.rotateY(Math.toRadians(angle));
 		return KMath.vec3(vec.x, vec.y, vec.z);
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return Builder.TYPE;
 	}
 }

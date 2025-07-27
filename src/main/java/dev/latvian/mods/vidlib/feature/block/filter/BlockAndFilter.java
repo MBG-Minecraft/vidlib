@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import java.util.ArrayList;
 import java.util.List;
 
-public record BlockAndFilter(List<BlockFilter> filters) implements BlockFilter {
+public record BlockAndFilter(List<BlockFilter> filters) implements BlockFilter, ImBuilderWrapper.BuilderSupplier {
 	public static SimpleRegistryType<BlockAndFilter> TYPE = SimpleRegistryType.dynamic("and", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		BlockFilter.CODEC.listOf().fieldOf("filters").forGetter(BlockAndFilter::filters)
 	).apply(instance, BlockAndFilter::new)), KLibStreamCodecs.listOf(BlockFilter.STREAM_CODEC).map(BlockAndFilter::new, BlockAndFilter::filters));
@@ -31,6 +31,19 @@ public record BlockAndFilter(List<BlockFilter> filters) implements BlockFilter {
 			this.filters = new ArrayList<>(2);
 			this.filters.add(BlockFilterImBuilder.create());
 			this.filters.add(BlockFilterImBuilder.create());
+		}
+
+		@Override
+		public void set(BlockFilter value) {
+			if (value instanceof BlockAndFilter f) {
+				filters.clear();
+
+				for (var filter : f.filters) {
+					var filterBuilder = BlockFilterImBuilder.create();
+					filterBuilder.set(filter);
+					filters.add(filterBuilder);
+				}
+			}
 		}
 
 		@Override
@@ -135,5 +148,10 @@ public record BlockAndFilter(List<BlockFilter> filters) implements BlockFilter {
 		var list = new ArrayList<>(filters);
 		list.add(filter);
 		return new BlockAndFilter(List.copyOf(list));
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return Builder.TYPE;
 	}
 }

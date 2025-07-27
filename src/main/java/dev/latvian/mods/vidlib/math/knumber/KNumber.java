@@ -6,7 +6,6 @@ import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolderList;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import io.netty.buffer.ByteBuf;
@@ -19,7 +18,6 @@ import java.util.function.Function;
 
 public interface KNumber {
 	SimpleRegistry<KNumber> REGISTRY = SimpleRegistry.create(KNumber::type);
-	ImBuilderHolderList<KNumber> IMGUI_BUILDERS = new ImBuilderHolderList<>();
 
 	Codec<KNumber> LITERAL_CODEC = Codec.either(Codec.DOUBLE, Codec.STRING).xmap(
 		e -> e.map(KNumber::of, KNumber::named),
@@ -87,21 +85,6 @@ public interface KNumber {
 		REGISTRY.register(SinKNumber.TYPE);
 		REGISTRY.register(CosKNumber.TYPE);
 		REGISTRY.register(Atan2KNumber.TYPE);
-
-		IMGUI_BUILDERS.add(FixedKNumber.Builder.TYPE);
-		IMGUI_BUILDERS.add(InterpolatedKNumber.Builder.TYPE);
-		IMGUI_BUILDERS.add(OffsetKNumber.Builder.TYPE);
-		IMGUI_BUILDERS.add(ScaledKNumber.Builder.TYPE);
-		IMGUI_BUILDERS.add(VariableKNumber.Builder.TYPE);
-		IMGUI_BUILDERS.add(IfKNumber.Builder.TYPE);
-		IMGUI_BUILDERS.add(ServerDataKNumber.Builder.TYPE);
-		IMGUI_BUILDERS.add(RandomKNumber.Builder.TYPE);
-		IMGUI_BUILDERS.addUnit("Time", TimeKNumber.INSTANCE);
-		IMGUI_BUILDERS.addUnit("Game Time", GameTimeKNumber.INSTANCE);
-		IMGUI_BUILDERS.addUnit("Day Time", DayTimeKNumber.INSTANCE);
-		IMGUI_BUILDERS.add(SinKNumber.Builder.TYPE);
-		IMGUI_BUILDERS.add(CosKNumber.Builder.TYPE);
-		IMGUI_BUILDERS.add(Atan2KNumber.Builder.TYPE);
 	}
 
 	default SimpleRegistryType<?> type() {

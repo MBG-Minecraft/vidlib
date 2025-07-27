@@ -53,6 +53,8 @@ public interface FlashbackIntegration {
 	List<Consumer<Entity>> ENTITY_MENU = listField("ENTITY_MENU");
 	List<Runnable> VISUALS_MENU = listField("VISUALS_MENU");
 	List<Runnable> RENDER_FILTER_MENU = listField("RENDER_FILTER_MENU");
+	List<Consumer<JsonObject>> EDITOR_STATE_LOADED = listField("EDITOR_STATE_LOADED");
+	List<Consumer<JsonObject>> EDITOR_STATE_SAVED = listField("EDITOR_STATE_SAVED");
 	List<BiFunction<Vec3, Vec3, HitResult>> CLICK_TARGET = listField("CLICK_TARGET");
 	List<Predicate<HitResult>> HANDLE_CLICK_TARGET = listField("HANDLE_CLICK_TARGET");
 	List<Runnable> POPUPS = listField("POPUPS");
@@ -60,7 +62,23 @@ public interface FlashbackIntegration {
 	BooleanSupplier IN_REPLAY = booleanField("IN_REPLAY");
 	BooleanSupplier IN_EXPORTING = booleanField("IN_EXPORTING");
 
+	static boolean isInReplay() {
+		return IN_REPLAY.getAsBoolean();
+	}
+
+	static boolean isExporting() {
+		return IN_EXPORTING.getAsBoolean();
+	}
+
+	static boolean isInReplayOrExporting() {
+		return isInReplay() || isExporting();
+	}
+
 	Supplier<JsonObject> CUSTOM_EDITOR_STATE_DATA = field("CUSTOM_EDITOR_STATE_DATA", JsonObject::new);
+
+	static JsonObject getCustomEditorStateData() {
+		return CUSTOM_EDITOR_STATE_DATA.get();
+	}
 
 	BooleanSupplier RENDER_BLOCKS = booleanField("RENDER_BLOCKS");
 	BooleanSupplier RENDER_ENTITIES = booleanField("RENDER_ENTITIES");
@@ -68,7 +86,23 @@ public interface FlashbackIntegration {
 	BooleanSupplier RENDER_PARTICLES = booleanField("RENDER_PARTICLES");
 	BooleanSupplier RENDER_NAMETAGS = booleanField("RENDER_NAMETAGS");
 
-	static JsonObject getCustomEditorStateData() {
-		return CUSTOM_EDITOR_STATE_DATA.get();
+	static boolean getRenderBlocks() {
+		return RENDER_BLOCKS.getAsBoolean();
+	}
+
+	static boolean getRenderEntities() {
+		return RENDER_ENTITIES.getAsBoolean();
+	}
+
+	static boolean getRenderPlayers() {
+		return RENDER_PLAYERS.getAsBoolean();
+	}
+
+	static boolean getRenderParticles() {
+		return RENDER_PARTICLES.getAsBoolean();
+	}
+
+	static boolean getRenderNameTags() {
+		return RENDER_NAMETAGS.getAsBoolean();
 	}
 }

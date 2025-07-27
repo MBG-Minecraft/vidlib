@@ -17,6 +17,12 @@ import java.util.HashSet;
 import java.util.List;
 
 public class BulkLevelModificationHolder implements BlockModificationConsumer {
+	public enum UndoableType {
+		UNDOABLE,
+		NOT_UNDOABLE,
+		FUTURE
+	}
+
 	public static boolean debug = false;
 
 	public record UndoableBulkModification(Reference2ObjectOpenHashMap<BlockState, LongArrayList> undo) implements UndoableModification {
@@ -60,7 +66,7 @@ public class BulkLevelModificationHolder implements BlockModificationConsumer {
 		}
 	}
 
-	public int apply(Level level, BulkLevelModification modification, boolean undoable) {
+	public int apply(Level level, BulkLevelModification modification, boolean undoable, boolean future) {
 		var sectionSet = new HashSet<SectionPos>();
 		modification.collectSections(level, sectionSet);
 
@@ -86,7 +92,7 @@ public class BulkLevelModificationHolder implements BlockModificationConsumer {
 		var server = !level.isClientSide();
 		var packets = server ? new S2CPacketBundleBuilder(level) : null;
 
-		boolean collectUndoable = (undoable && server) || (!server && level.isReplayLevel());
+		boolean collectUndoable = (undoable && server) || (!future && !server && level.isReplayLevel());
 
 		for (var sd : sections.values()) {
 			if (!sd.modified) {

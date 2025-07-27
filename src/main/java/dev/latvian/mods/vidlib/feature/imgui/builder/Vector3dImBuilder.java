@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.imgui.builder;
 
-import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
@@ -8,10 +7,10 @@ import dev.latvian.mods.vidlib.feature.imgui.SelectedPosition;
 import imgui.ImGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Position;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
+import org.joml.Vector3dc;
 
-public class Vector3dImBuilder implements ImBuilder<Vec3> {
+public class Vector3dImBuilder implements ImBuilder<Vector3d> {
 	public final Vector3d data;
 	public SelectedPosition selectedPosition;
 
@@ -23,8 +22,12 @@ public class Vector3dImBuilder implements ImBuilder<Vec3> {
 		this.data = new Vector3d(position.x(), position.y(), position.z());
 	}
 
+	public Vector3dImBuilder(Vector3dc position) {
+		this.data = new Vector3d(position.x(), position.y(), position.z());
+	}
+
 	@Override
-	public void set(Vec3 value) {
+	public void set(Vector3d value) {
 		data.set(value.x(), value.y(), value.z());
 	}
 
@@ -32,7 +35,6 @@ public class Vector3dImBuilder implements ImBuilder<Vec3> {
 	public ImUpdate imgui(ImGraphics graphics) {
 		selectedPosition = null;
 		var update = ImUpdate.NONE;
-		ImGui.pushItemWidth(-1F);
 
 		if (ImGui.button(SelectedPosition.CAMERA.icon + "###camera-pos")) {
 			var cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
@@ -95,7 +97,6 @@ public class Vector3dImBuilder implements ImBuilder<Vec3> {
 		update = update.orItemEdit();
 		data.z = ImGuiUtils.DOUBLE.get();
 
-		ImGui.popItemWidth();
 		return update;
 	}
 
@@ -105,7 +106,7 @@ public class Vector3dImBuilder implements ImBuilder<Vec3> {
 	}
 
 	@Override
-	public Vec3 build() {
-		return KMath.vec3(data.x, data.y, data.z);
+	public Vector3d build() {
+		return new Vector3d(data.x, data.y, data.z);
 	}
 }

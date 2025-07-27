@@ -117,7 +117,7 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		return bulkModify(false, builder.build());
 	}
 
-	default int undoAllFutureModifications() {
+	default int undoAllFutureModifications(boolean everything) {
 		var builder = new OptimizedModificationBuilder();
 		var undoable = vl$getUndoableModifications();
 		var gameTime = vl$level().getGameTime();
@@ -125,13 +125,19 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		for (int i = undoable.size() - 1; i >= 0; i--) {
 			var u = undoable.get(i);
 
-			if (u.gameTime() > gameTime) {
+			if (everything || u.gameTime() > gameTime) {
 				u.modification().undo((Level) this, builder);
 				undoable.remove(i);
 			}
 		}
 
-		return bulkModify(false, builder.build());
+		var result = builder.build();
+
+		if (result == BulkLevelModification.NONE) {
+			return 0;
+		}
+
+		return new BulkLevelModificationHolder().apply((Level) this, result, false, true);
 	}
 
 	default void setBlockFast(BlockPos pos, BlockState state) {
@@ -157,7 +163,7 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 			return 0;
 		}
 
-		return new BulkLevelModificationHolder().apply((Level) this, modification, undoable);
+		return new BulkLevelModificationHolder().apply((Level) this, modification, undoable, false);
 	}
 
 	default int bulkModify(boolean undoable, Consumer<BlockModificationConsumer> modifications) {

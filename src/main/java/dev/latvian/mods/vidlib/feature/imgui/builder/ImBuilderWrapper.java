@@ -5,12 +5,38 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.ImGui;
 import net.minecraft.util.StringRepresentable;
+import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class ImBuilderWrapper<T> implements ImBuilder<T> {
+	public interface BuilderSupplier {
+		ImBuilderHolder<?> getImBuilderHolder();
+	}
+
+	public static class Factory<T> {
+		private final Supplier<? extends ImBuilderEvent<T>> event;
+		private List<ImBuilderHolder<T>> options;
+
+		public Factory(Supplier<? extends ImBuilderEvent<T>> event) {
+			this.event = event;
+			this.options = null;
+		}
+
+		public synchronized List<ImBuilderHolder<T>> getOptions() {
+			if (options == null) {
+				var e = event.get();
+				NeoForge.EVENT_BUS.post(e);
+				options = List.copyOf(e.getBuilderHolders());
+			}
+
+			return options;
+		}
+	}
+
 	private static class CachedBuilder<T> implements StringRepresentable {
 		private final ImBuilderHolder<T> holder;
 		private ImBuilder<? extends T> builder;
@@ -33,22 +59,24 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 		}
 	}
 
-	private final ImBuilderHolderList<T> originalOptions;
+	private final Factory<T> factory;
 	private List<CachedBuilder<T>> options;
 	private final CachedBuilder<T>[] selectedBuilder;
 	public boolean deleted = false;
 
-	public ImBuilderWrapper(ImBuilderHolderList<T> options) {
-		this.originalOptions = options;
+	public ImBuilderWrapper(Factory<T> factory) {
+		this.factory = factory;
 		this.selectedBuilder = new CachedBuilder[1];
 	}
 
 	private List<CachedBuilder<T>> getOptions() {
 		if (options == null) {
-			options = new ArrayList<>(originalOptions.list().size());
+			var originalOptions = factory.getOptions();
+
+			options = new ArrayList<>(originalOptions.size());
 			selectedBuilder[0] = null;
 
-			for (var originalOption : originalOptions.list()) {
+			for (var originalOption : originalOptions) {
 				var option = new CachedBuilder<>(originalOption);
 				options.add(option);
 
@@ -62,7 +90,7 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 	}
 
 	public boolean selectUnit(T value) {
-		options = getOptions();
+		var options = getOptions();
 
 		for (var option : options) {
 			if (option.get() instanceof ImBuilder.Unit<?> unit && unit.value() == value) {
@@ -78,6 +106,18 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 	public void set(T value) {
 		if (selectUnit(value)) {
 			return;
+		}
+
+		if (value instanceof BuilderSupplier s) {
+			var options = getOptions();
+			var holder = s.getImBuilderHolder();
+
+			for (var option : options) {
+				if (option.holder == holder) {
+					selectedBuilder[0] = option;
+					return;
+				}
+			}
 		}
 
 		var builder = getBuilder();

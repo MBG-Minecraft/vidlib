@@ -9,7 +9,6 @@ import dev.latvian.mods.klib.util.IntOrUUID;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.ExactEntityFilter;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolderList;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
@@ -32,7 +31,6 @@ import java.util.function.Function;
 
 public interface KVector {
 	SimpleRegistry<KVector> REGISTRY = SimpleRegistry.create(KVector::type);
-	ImBuilderHolderList<KVector> IMGUI_BUILDERS = new ImBuilderHolderList<>();
 
 	Codec<KVector> LITERAL_CODEC = Codec.either(Vec3.CODEC, Codec.STRING).xmap(
 		e -> e.map(FixedKVector::new, KVector::named),
@@ -131,25 +129,6 @@ public interface KVector {
 		for (var literal : LiteralKVector.values()) {
 			REGISTRY.register(literal.type);
 		}
-
-		IMGUI_BUILDERS.add(FixedKVector.Builder.TYPE);
-
-		for (var literal : LiteralKVector.values()) {
-			IMGUI_BUILDERS.addUnit(literal.displayName, literal);
-		}
-
-		IMGUI_BUILDERS.add(InterpolatedKVector.Builder.TYPE);
-		IMGUI_BUILDERS.add(DynamicKVector.Builder.TYPE);
-		IMGUI_BUILDERS.add(ScalarKVector.Builder.TYPE);
-		IMGUI_BUILDERS.add(OffsetKVector.Builder.TYPE);
-		IMGUI_BUILDERS.add(ScaledKVector.Builder.TYPE);
-		IMGUI_BUILDERS.add(FollowingEntityKVector.Builder.TYPE);
-		IMGUI_BUILDERS.add(FollowingPropKVector.Builder.TYPE);
-		IMGUI_BUILDERS.add(VariableKVector.Builder.TYPE);
-		IMGUI_BUILDERS.add(IfKVector.Builder.TYPE);
-		IMGUI_BUILDERS.add(PivotingKVector.Builder.TYPE);
-		IMGUI_BUILDERS.add(YRotatedKVector.Builder.TYPE);
-		IMGUI_BUILDERS.add(GroundKVector.Builder.TYPE);
 	}
 
 	static KVector ofRotation(double yaw, double pitch) {

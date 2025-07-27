@@ -5,6 +5,7 @@ import dev.latvian.mods.vidlib.feature.entity.EntityTypeImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -12,7 +13,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 
-public record EntityTypeFilter(EntityType<?> entityType) implements EntityFilter {
+public record EntityTypeFilter(EntityType<?> entityType) implements EntityFilter, ImBuilderWrapper.BuilderSupplier {
 	public static SimpleRegistryType<EntityTypeFilter> TYPE = SimpleRegistryType.dynamic("entity_type", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		BuiltInRegistries.ENTITY_TYPE.byNameCodec().fieldOf("entity_type").forGetter(EntityTypeFilter::entityType)
 	).apply(instance, EntityTypeFilter::new)), ByteBufCodecs.registry(Registries.ENTITY_TYPE).map(EntityTypeFilter::new, EntityTypeFilter::entityType));
@@ -21,6 +22,13 @@ public record EntityTypeFilter(EntityType<?> entityType) implements EntityFilter
 		public static final ImBuilderHolder<EntityFilter> TYPE = new ImBuilderHolder<>("Type", Builder::new);
 
 		public final EntityTypeImBuilder entityType = new EntityTypeImBuilder(EntityType.PLAYER);
+
+		@Override
+		public void set(EntityFilter value) {
+			if (value instanceof EntityTypeFilter f) {
+				entityType.set(f.entityType);
+			}
+		}
 
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
@@ -46,5 +54,10 @@ public record EntityTypeFilter(EntityType<?> entityType) implements EntityFilter
 	@Override
 	public boolean test(Entity entity) {
 		return entity.getType() == entityType;
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return Builder.TYPE;
 	}
 }

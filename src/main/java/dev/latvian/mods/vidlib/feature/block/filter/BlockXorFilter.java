@@ -6,13 +6,14 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 
-public record BlockXorFilter(BlockFilter a, BlockFilter b) implements BlockFilter {
+public record BlockXorFilter(BlockFilter a, BlockFilter b) implements BlockFilter, ImBuilderWrapper.BuilderSupplier {
 	public static SimpleRegistryType<BlockXorFilter> TYPE = SimpleRegistryType.dynamic("xor", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		BlockFilter.CODEC.fieldOf("a").forGetter(BlockXorFilter::a),
 		BlockFilter.CODEC.fieldOf("b").forGetter(BlockXorFilter::b)
@@ -27,6 +28,14 @@ public record BlockXorFilter(BlockFilter a, BlockFilter b) implements BlockFilte
 
 		public final ImBuilder<BlockFilter> a = BlockFilterImBuilder.create();
 		public final ImBuilder<BlockFilter> b = BlockFilterImBuilder.create();
+
+		@Override
+		public void set(BlockFilter value) {
+			if (value instanceof BlockXorFilter f) {
+				a.set(f.a);
+				b.set(f.b);
+			}
+		}
 
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
@@ -60,5 +69,10 @@ public record BlockXorFilter(BlockFilter a, BlockFilter b) implements BlockFilte
 	@Override
 	public boolean test(Level level, BlockPos pos, BlockState state) {
 		return a.test(level, pos, state) ^ b.test(level, pos, state);
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return Builder.TYPE;
 	}
 }

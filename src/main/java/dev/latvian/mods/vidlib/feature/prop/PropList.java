@@ -24,7 +24,6 @@ public class PropList implements Iterable<Prop> {
 	public final Props<?> props;
 	public final PropListType type;
 	private final Int2ObjectMap<Prop> map;
-	public final List<Prop> pending;
 	public final Map<PropRemoveType, IntList> removed;
 	public final List<Prop> collidingProps;
 	public final List<Prop> interactableProps;
@@ -33,7 +32,6 @@ public class PropList implements Iterable<Prop> {
 		this.props = props;
 		this.type = type;
 		this.map = new Int2ObjectLinkedOpenHashMap<>();
-		this.pending = new ArrayList<>();
 		this.removed = new EnumMap<>(PropRemoveType.class);
 		this.collidingProps = new ArrayList<>(0);
 		this.interactableProps = new ArrayList<>(0);
@@ -75,6 +73,7 @@ public class PropList implements Iterable<Prop> {
 				var update = prop.createUpdatePacket();
 
 				if (update != null) {
+					prop.sync.clear();
 					updates.s2c(update);
 				}
 			}
@@ -91,35 +90,31 @@ public class PropList implements Iterable<Prop> {
 				list.clear();
 			}
 		}
+	}
 
-		if (!pending.isEmpty()) {
-			for (var prop : pending) {
-				if (prop.id == 0) {
-					prop.id = generateNewId();
-				} else {
-					var old = map.get(prop.id);
+	void add(Prop prop) {
+		if (prop.id == 0) {
+			prop.id = generateNewId();
+		} else {
+			var old = map.get(prop.id);
 
-					if (old != null) {
-						old.snap();
-						old.remove(PropRemoveType.REPLACED);
-					}
-				}
+			if (old != null) {
+				old.snap();
+				old.remove(PropRemoveType.REPLACED);
+			}
+		}
 
-				map.put(prop.id, prop);
-				prop.onAdded();
-				props.onAdded(prop);
-				prop.snap();
+		map.put(prop.id, prop);
+		prop.onAdded();
+		props.onAdded(prop);
+		prop.snap();
 
-				if (updates != null) {
-					for (var entry : prop.type.data()) {
-						prop.sync(entry.data());
-					}
-
-					updates.s2c(prop.createAddPacket());
-				}
+		if (props.level.isServerSide()) {
+			for (var entry : prop.type.data()) {
+				prop.sync(entry.data());
 			}
 
-			pending.clear();
+			props.level.s2c(prop.createAddPacket());
 		}
 	}
 
@@ -149,8 +144,8 @@ public class PropList implements Iterable<Prop> {
 	public int generateNewId() {
 		int id = 0;
 
-		while (id == 0 || map.containsKey(id)) {
-			id = props.level.random.nextInt() & 0x7FFFFFFF;
+		while (id <= 0 || map.containsKey(id)) {
+			id = props.level.random.nextInt(32768, Integer.MAX_VALUE);
 		}
 
 		return id;

@@ -6,11 +6,11 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
-import imgui.ImGui;
 import net.minecraft.world.entity.Entity;
 
-public record EntityXorFilter(EntityFilter a, EntityFilter b) implements EntityFilter {
+public record EntityXorFilter(EntityFilter a, EntityFilter b) implements EntityFilter, ImBuilderWrapper.BuilderSupplier {
 	public static SimpleRegistryType<EntityXorFilter> TYPE = SimpleRegistryType.dynamic("xor", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		EntityFilter.CODEC.fieldOf("a").forGetter(EntityXorFilter::a),
 		EntityFilter.CODEC.fieldOf("b").forGetter(EntityXorFilter::b)
@@ -27,23 +27,18 @@ public record EntityXorFilter(EntityFilter a, EntityFilter b) implements EntityF
 		public final ImBuilder<EntityFilter> b = EntityFilterImBuilder.create();
 
 		@Override
+		public void set(EntityFilter value) {
+			if (value instanceof EntityXorFilter f) {
+				a.set(f.a);
+				b.set(f.b);
+			}
+		}
+
+		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("A");
-			ImGui.sameLine();
-			ImGui.pushID("###a");
-			update = update.or(a.imgui(graphics));
-			ImGui.popID();
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("B");
-			ImGui.sameLine();
-			ImGui.pushID("###b");
-			update = update.or(b.imgui(graphics));
-			ImGui.popID();
-
+			update = update.or(a.imguiKey(graphics, "A", "a"));
+			update = update.or(b.imguiKey(graphics, "B", "b"));
 			return update;
 		}
 
@@ -66,5 +61,10 @@ public record EntityXorFilter(EntityFilter a, EntityFilter b) implements EntityF
 	@Override
 	public boolean test(Entity entity) {
 		return a.test(entity) ^ b.test(entity);
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return Builder.TYPE;
 	}
 }

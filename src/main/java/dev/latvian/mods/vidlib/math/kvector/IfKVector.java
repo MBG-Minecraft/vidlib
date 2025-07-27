@@ -9,6 +9,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
@@ -26,7 +27,7 @@ public record IfKVector(
 	KNumber testValue,
 	Optional<KVector> thenValue,
 	Optional<KVector> elseValue
-) implements KVector {
+) implements KVector, ImBuilderWrapper.BuilderSupplier {
 	public static final SimpleRegistryType<IfKVector> TYPE = SimpleRegistryType.dynamic("if", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.fieldOf("if").forGetter(IfKVector::ifValue),
 		Comparison.DATA_TYPE.codec().optionalFieldOf("comparison", Comparison.NOT_EQUALS).forGetter(IfKVector::comparison),
@@ -52,6 +53,19 @@ public record IfKVector(
 		public final ImBuilder<KVector> thenValue = KVectorImBuilder.create();
 		public final ImBoolean elseValueEnabled = new ImBoolean(false);
 		public final ImBuilder<KVector> elseValue = KVectorImBuilder.create();
+
+		@Override
+		public void set(KVector value) {
+			if (value instanceof IfKVector v) {
+				ifValue.set(v.ifValue);
+				comparison.set(v.comparison);
+				testValue.set(v.testValue);
+				thenValueEnabled.set(v.thenValue.isPresent());
+				thenValue.set(v.thenValue.orElse(KVector.ZERO));
+				elseValueEnabled.set(v.elseValue.isPresent());
+				elseValue.set(v.elseValue.orElse(KVector.ZERO));
+			}
+		}
 
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
@@ -112,5 +126,10 @@ public record IfKVector(
 		}
 
 		return null;
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return Builder.TYPE;
 	}
 }

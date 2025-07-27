@@ -14,7 +14,7 @@ import net.minecraft.world.entity.Entity;
 import java.util.ArrayList;
 import java.util.List;
 
-public record EntityOrFilter(List<EntityFilter> filters) implements EntityFilter {
+public record EntityOrFilter(List<EntityFilter> filters) implements EntityFilter, ImBuilderWrapper.BuilderSupplier {
 	public static SimpleRegistryType<EntityOrFilter> TYPE = SimpleRegistryType.dynamic("or", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		EntityFilter.CODEC.listOf().fieldOf("filters").forGetter(EntityOrFilter::filters)
 	).apply(instance, EntityOrFilter::new)), KLibStreamCodecs.listOf(EntityFilter.STREAM_CODEC).map(EntityOrFilter::new, EntityOrFilter::filters));
@@ -28,6 +28,19 @@ public record EntityOrFilter(List<EntityFilter> filters) implements EntityFilter
 			this.filters = new ArrayList<>(2);
 			this.filters.add(EntityFilterImBuilder.create());
 			this.filters.add(EntityFilterImBuilder.create());
+		}
+
+		@Override
+		public void set(EntityFilter value) {
+			if (value instanceof EntityOrFilter f) {
+				filters.clear();
+
+				for (var filter : f.filters) {
+					var filterBuilder = EntityFilterImBuilder.create();
+					filterBuilder.set(filter);
+					filters.add(filterBuilder);
+				}
+			}
 		}
 
 		@Override
@@ -121,5 +134,10 @@ public record EntityOrFilter(List<EntityFilter> filters) implements EntityFilter
 		var list = new ArrayList<>(filters);
 		list.add(filter);
 		return new EntityOrFilter(List.copyOf(list));
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return Builder.TYPE;
 	}
 }

@@ -296,7 +296,7 @@ public class LocalClientSessionData extends ClientSessionData {
 			}
 		}
 
-		int undo = level.undoAllFutureModifications();
+		int undo = level.undoAllFutureModifications(false);
 
 		if (undo > 0) {
 			VidLib.LOGGER.info("Undone " + undo + " future modifications");

@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.prop;
 
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
-import dev.latvian.mods.klib.util.Cast;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
@@ -46,7 +45,7 @@ public abstract class Props<L extends Level> {
 
 	public void add(Prop prop) {
 		if (isValid(prop.spawnType)) {
-			propLists.get(prop.spawnType.listType).pending.add(prop);
+			propLists.get(prop.spawnType.listType).add(prop);
 		}
 	}
 
@@ -68,7 +67,7 @@ public abstract class Props<L extends Level> {
 				for (var entry : prop.type.data()) {
 					var p = entry.data();
 
-					if (p.isRequired() && p.get(Cast.to(prop)) == null) {
+					if (p.isRequired() && prop.getData(p) == null) {
 						return DataResult.error(() -> "Missing required data key '" + p.key() + "'");
 					}
 				}

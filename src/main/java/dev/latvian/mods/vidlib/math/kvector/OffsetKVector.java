@@ -6,13 +6,13 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
-import imgui.ImGui;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public record OffsetKVector(KVector a, KVector b) implements KVector {
+public record OffsetKVector(KVector a, KVector b) implements KVector, ImBuilderWrapper.BuilderSupplier {
 	public static final SimpleRegistryType<OffsetKVector> TYPE = SimpleRegistryType.dynamic("offset", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KVector.CODEC.fieldOf("a").forGetter(OffsetKVector::a),
 		KVector.CODEC.fieldOf("b").forGetter(OffsetKVector::b)
@@ -29,23 +29,18 @@ public record OffsetKVector(KVector a, KVector b) implements KVector {
 		public final ImBuilder<KVector> b = KVectorImBuilder.create();
 
 		@Override
+		public void set(KVector value) {
+			if (value instanceof OffsetKVector v) {
+				a.set(v.a);
+				b.set(v.b);
+			}
+		}
+
+		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("A");
-			ImGui.sameLine();
-			ImGui.pushID("###a");
-			update = update.or(a.imgui(graphics));
-			ImGui.popID();
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("B");
-			ImGui.sameLine();
-			ImGui.pushID("###b");
-			update = update.or(b.imgui(graphics));
-			ImGui.popID();
-
+			update = update.or(a.imguiKey(graphics, "A", "a"));
+			update = update.or(b.imguiKey(graphics, "B", "b"));
 			return update;
 		}
 
@@ -76,5 +71,10 @@ public record OffsetKVector(KVector a, KVector b) implements KVector {
 		}
 
 		return new Vec3(a.x + b.x, a.y + b.y, a.z + b.z);
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return Builder.TYPE;
 	}
 }

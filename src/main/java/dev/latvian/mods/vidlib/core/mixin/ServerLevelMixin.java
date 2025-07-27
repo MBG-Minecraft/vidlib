@@ -41,6 +41,9 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 	@Unique
 	private ServerProps vl$props;
 
+	@Unique
+	private Boolean vl$isReplayLevel;
+
 	protected ServerLevelMixin(WritableLevelData levelData, ResourceKey<Level> dimension, RegistryAccess registryAccess, Holder<DimensionType> dimensionTypeRegistration, boolean isClientSide, boolean isDebug, long biomeZoomSeed, int maxChainedNeighborUpdates) {
 		super(levelData, dimension, registryAccess, dimensionTypeRegistration, isClientSide, isDebug, biomeZoomSeed, maxChainedNeighborUpdates);
 	}
@@ -81,5 +84,14 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 	@Override
 	public void vl$reloadChunks() {
 		((VLChunkMap) chunkSource.chunkMap).vl$reloadChunks();
+	}
+
+	@Override
+	public boolean isReplayLevel() {
+		if (vl$isReplayLevel == null) {
+			vl$isReplayLevel = vl$level().getServer().getClass().getName().equals("com.moulberry.flashback.playback.ReplayServer");
+		}
+
+		return vl$isReplayLevel;
 	}
 }

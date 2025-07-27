@@ -7,6 +7,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import imgui.ImGui;
@@ -16,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public record VariableKVector(String name) implements KVector {
+public record VariableKVector(String name) implements KVector, ImBuilderWrapper.BuilderSupplier {
 	public static final SimpleRegistryType<VariableKVector> TYPE = SimpleRegistryType.dynamic("variable", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.STRING.fieldOf("name").forGetter(VariableKVector::name)
 	).apply(instance, VariableKVector::new)), ByteBufCodecs.STRING_UTF8.map(VariableKVector::new, VariableKVector::name));
@@ -24,24 +25,29 @@ public record VariableKVector(String name) implements KVector {
 	public static class Builder implements KVectorImBuilder {
 		public static final ImBuilderHolder<KVector> TYPE = new ImBuilderHolder<>("Variable", Builder::new);
 
-		public final ImString variable = ImGuiUtils.resizableString();
+		public final ImString name = ImGuiUtils.resizableString();
+
+		@Override
+		public void set(KVector value) {
+			if (value instanceof VariableKVector v) {
+				name.set(v.name);
+			}
+		}
 
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
-			ImGui.pushItemWidth(-1F);
-			ImGui.inputText("###variable", variable);
-			ImGui.popItemWidth();
+			ImGui.inputText("###name", name);
 			return ImUpdate.itemEdit();
 		}
 
 		@Override
 		public boolean isValid() {
-			return variable.isNotEmpty();
+			return name.isNotEmpty();
 		}
 
 		@Override
 		public KVector build() {
-			return new VariableKVector(variable.get());
+			return new VariableKVector(name.get());
 		}
 	}
 
@@ -81,5 +87,10 @@ public record VariableKVector(String name) implements KVector {
 	@Override
 	public boolean isLiteral() {
 		return true;
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return Builder.TYPE;
 	}
 }

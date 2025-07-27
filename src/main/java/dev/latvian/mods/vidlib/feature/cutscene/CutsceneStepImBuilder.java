@@ -89,7 +89,6 @@ public class CutsceneStepImBuilder implements ImBuilder<CutsceneStep> {
 	public ImUpdate imgui(ImGraphics graphics) {
 		delete = false;
 		var update = ImUpdate.NONE;
-		ImGui.pushItemWidth(-1F);
 
 		ImGui.alignTextToFramePadding();
 		ImGui.text("Start");
@@ -116,9 +115,7 @@ public class CutsceneStepImBuilder implements ImBuilder<CutsceneStep> {
 			update = update.or(ImGui.checkbox("Snap###snap-origin", snapOrigin));
 			ImGui.sameLine();
 
-			ImGui.pushID("###origin");
-			update = update.or(origin.imgui(graphics));
-			ImGui.popID();
+			update = update.or(origin.imguiKey(graphics, "", "origin"));
 		}
 
 		update = update.or(ImGui.checkbox("Target###override-target", overrideTarget));
@@ -128,9 +125,7 @@ public class CutsceneStepImBuilder implements ImBuilder<CutsceneStep> {
 			update = update.or(ImGui.checkbox("Snap###snap-target", snapTarget));
 			ImGui.sameLine();
 
-			ImGui.pushID("###target");
-			update = update.or(target.imgui(graphics));
-			ImGui.popID();
+			update = update.or(target.imguiKey(graphics, "", "target"));
 		}
 
 		update = update.or(ImGui.checkbox("FOV Modifier###override-fov-mod", overrideFovModifier));
@@ -256,7 +251,6 @@ public class CutsceneStepImBuilder implements ImBuilder<CutsceneStep> {
 
 		// sounds
 
-		ImGui.popItemWidth();
 		return update;
 	}
 

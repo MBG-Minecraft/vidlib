@@ -9,6 +9,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import imgui.ImGui;
 import imgui.type.ImInt;
@@ -17,15 +18,22 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
-public record ExactEntityFilter(IntOrUUID entityId) implements EntityFilter {
+public record ExactEntityFilter(IntOrUUID entityId) implements EntityFilter, ImBuilderWrapper.BuilderSupplier {
 	public static SimpleRegistryType<ExactEntityFilter> TYPE = SimpleRegistryType.dynamic("exact", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		IntOrUUID.DATA_TYPE.codec().fieldOf("entity_id").forGetter(ExactEntityFilter::entityId)
 	).apply(instance, ExactEntityFilter::new)), IntOrUUID.DATA_TYPE.streamCodec().map(ExactEntityFilter::new, ExactEntityFilter::entityId));
 
 	public static class IDBuilder implements EntityFilterImBuilder {
-		public static final ImBuilderHolder<EntityFilter> TYPE = new ImBuilderHolder<>("ID", IDBuilder::new);
+		public static final ImBuilderHolder<EntityFilter> TYPE = new ImBuilderHolder<>("Network ID", IDBuilder::new);
 
 		public final ImInt id = new ImInt();
+
+		@Override
+		public void set(EntityFilter value) {
+			if (value instanceof ExactEntityFilter f && f.entityId.optionalInt().isPresent()) {
+				id.set(f.entityId.optionalInt().getAsInt());
+			}
+		}
 
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
@@ -48,6 +56,13 @@ public record ExactEntityFilter(IntOrUUID entityId) implements EntityFilter {
 		public static final ImBuilderHolder<EntityFilter> TYPE = new ImBuilderHolder<>("UUID", UUIDBuilder::new);
 
 		public final ImString uuid = ImGuiUtils.resizableString();
+
+		@Override
+		public void set(EntityFilter value) {
+			if (value instanceof ExactEntityFilter f && f.entityId.optionalUUID().isPresent()) {
+				uuid.set(f.entityId.optionalUUID().get());
+			}
+		}
 
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
@@ -80,5 +95,10 @@ public record ExactEntityFilter(IntOrUUID entityId) implements EntityFilter {
 	@Nullable
 	public Entity getFirst(Level level) {
 		return level.getEntity(entityId);
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return entityId.optionalUUID().isPresent() ? UUIDBuilder.TYPE : IDBuilder.TYPE;
 	}
 }

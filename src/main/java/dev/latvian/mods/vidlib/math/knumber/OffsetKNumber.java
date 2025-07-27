@@ -6,11 +6,11 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
-import imgui.ImGui;
 import org.jetbrains.annotations.Nullable;
 
-public record OffsetKNumber(KNumber a, KNumber b) implements KNumber {
+public record OffsetKNumber(KNumber a, KNumber b) implements KNumber, ImBuilderWrapper.BuilderSupplier {
 	public static final SimpleRegistryType<OffsetKNumber> TYPE = SimpleRegistryType.dynamic("offset", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.fieldOf("a").forGetter(OffsetKNumber::a),
 		KNumber.CODEC.fieldOf("b").forGetter(OffsetKNumber::b)
@@ -27,12 +27,18 @@ public record OffsetKNumber(KNumber a, KNumber b) implements KNumber {
 		public final ImBuilder<KNumber> b = KNumberImBuilder.create(0D);
 
 		@Override
+		public void set(KNumber value) {
+			if (value instanceof OffsetKNumber n) {
+				a.set(n.a);
+				b.set(n.b);
+			}
+		}
+
+		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
-			ImGui.pushItemWidth(-1F);
 			update = update.or(a.imguiKey(graphics, "A", "a"));
 			update = update.or(b.imguiKey(graphics, "B", "b"));
-			ImGui.popItemWidth();
 			return update;
 		}
 
@@ -63,5 +69,10 @@ public record OffsetKNumber(KNumber a, KNumber b) implements KNumber {
 		}
 
 		return a + b;
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return Builder.TYPE;
 	}
 }

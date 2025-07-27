@@ -7,11 +7,11 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
-import imgui.ImGui;
 import org.jetbrains.annotations.Nullable;
 
-public record Atan2KNumber(KNumber x, KNumber y) implements KNumber {
+public record Atan2KNumber(KNumber x, KNumber y) implements KNumber, ImBuilderWrapper.BuilderSupplier {
 	public static final SimpleRegistryType<Atan2KNumber> TYPE = SimpleRegistryType.dynamic("atan2", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.optionalFieldOf("x", KNumber.ZERO).forGetter(Atan2KNumber::x),
 		KNumber.CODEC.optionalFieldOf("y", KNumber.ONE).forGetter(Atan2KNumber::y)
@@ -28,12 +28,18 @@ public record Atan2KNumber(KNumber x, KNumber y) implements KNumber {
 		public final ImBuilder<KNumber> y = KNumberImBuilder.create(0D);
 
 		@Override
+		public void set(KNumber value) {
+			if (value instanceof Atan2KNumber n) {
+				x.set(n.x);
+				y.set(n.y);
+			}
+		}
+
+		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
-			ImGui.pushItemWidth(-1F);
 			update = update.or(x.imguiKey(graphics, "X", "x"));
 			update = update.or(y.imguiKey(graphics, "Y", "y"));
-			ImGui.popItemWidth();
 			return update;
 		}
 
@@ -64,5 +70,10 @@ public record Atan2KNumber(KNumber x, KNumber y) implements KNumber {
 		}
 
 		return Math.toDegrees(Math.atan2(y, x));
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return Builder.TYPE;
 	}
 }

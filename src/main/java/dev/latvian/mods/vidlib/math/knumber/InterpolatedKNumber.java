@@ -10,13 +10,14 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import imgui.ImGui;
 import imgui.type.ImFloat;
 import net.minecraft.network.codec.ByteBufCodecs;
 import org.jetbrains.annotations.Nullable;
 
-public record InterpolatedKNumber(Easing easing, float start, float end, KNumber from, KNumber to) implements KNumber {
+public record InterpolatedKNumber(Easing easing, float start, float end, KNumber from, KNumber to) implements KNumber, ImBuilderWrapper.BuilderSupplier {
 	public static final SimpleRegistryType<InterpolatedKNumber> TYPE = SimpleRegistryType.dynamic("interpolated", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Easing.CODEC.optionalFieldOf("easing", Easing.LINEAR).forGetter(InterpolatedKNumber::easing),
 		Codec.FLOAT.optionalFieldOf("start", 0F).forGetter(InterpolatedKNumber::start),
@@ -42,9 +43,19 @@ public record InterpolatedKNumber(Easing easing, float start, float end, KNumber
 		public final ImFloat end = new ImFloat(1F);
 
 		@Override
+		public void set(KNumber value) {
+			if (value instanceof InterpolatedKNumber n) {
+				easing.set(n.easing);
+				from.set(n.from);
+				to.set(n.to);
+				start.set(n.start);
+				end.set(n.end);
+			}
+		}
+
+		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
-			ImGui.pushItemWidth(-1F);
 			update = update.or(easing.imguiKey(graphics, "Easing", "easing"));
 			update = update.or(from.imguiKey(graphics, "From", "from"));
 			update = update.or(to.imguiKey(graphics, "To", "to"));
@@ -52,8 +63,6 @@ public record InterpolatedKNumber(Easing easing, float start, float end, KNumber
 			graphics.redTextIf("Start / End", start.get() < 0F || start.get() > 1F || end.get() < 0F || end.get() > 1F || start.get() >= end.get());
 			ImGui.dragFloatRange2("###range", start.getData(), end.getData(), 0.01F, 0F, 1F);
 			update = update.orItemEdit();
-
-			ImGui.popItemWidth();
 			return update;
 		}
 
@@ -94,5 +103,10 @@ public record InterpolatedKNumber(Easing easing, float start, float end, KNumber
 		}
 
 		return KMath.lerp(easing.easeClamped(KMath.map(ctx.progress, start, end, 0D, 1D)), a, b);
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return Builder.TYPE;
 	}
 }

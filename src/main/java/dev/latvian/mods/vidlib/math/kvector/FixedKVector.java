@@ -6,12 +6,13 @@ import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.Vector3dImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.Vec3ImBuilder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.world.phys.Vec3;
 
-public record FixedKVector(Vec3 vec) implements KVector {
+public record FixedKVector(Vec3 vec) implements KVector, ImBuilderWrapper.BuilderSupplier {
 	public static final SimpleRegistryType<FixedKVector> TYPE = SimpleRegistryType.dynamic("fixed", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		MCCodecs.VEC3S.fieldOf("vec").forGetter(FixedKVector::vec)
 	).apply(instance, KVector::of)), MCStreamCodecs.VEC3.map(KVector::of, FixedKVector::vec));
@@ -19,7 +20,14 @@ public record FixedKVector(Vec3 vec) implements KVector {
 	public static class Builder implements KVectorImBuilder {
 		public static final ImBuilderHolder<KVector> TYPE = new ImBuilderHolder<>("Vector", Builder::new, true);
 
-		public final Vector3dImBuilder builder = new Vector3dImBuilder();
+		public final Vec3ImBuilder builder = new Vec3ImBuilder();
+
+		@Override
+		public void set(KVector value) {
+			if (value instanceof FixedKVector v) {
+				builder.set(v.vec);
+			}
+		}
 
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
@@ -82,5 +90,10 @@ public record FixedKVector(Vec3 vec) implements KVector {
 		}
 
 		return KVector.super.scale(other);
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return Builder.TYPE;
 	}
 }

@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mojang.serialization.DynamicOps;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.data.DataTypes;
@@ -11,6 +13,11 @@ import dev.latvian.mods.klib.shape.ColoredShape;
 import dev.latvian.mods.klib.shape.CuboidShape;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.PropExplorerPanel;
+import dev.latvian.mods.vidlib.feature.imgui.builder.BooleanImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.FloatImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.Vector3dImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.Vector3fImBuilder;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
@@ -19,6 +26,7 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.math.kvector.FixedKVector;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
+import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 import dev.latvian.mods.vidlib.math.kvector.PositionType;
 import imgui.ImGui;
 import io.netty.buffer.Unpooled;
@@ -49,6 +57,8 @@ import org.joml.Vector3dc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -81,6 +91,7 @@ public class Prop {
 	public Level level;
 	public int id;
 	PropRemoveType removed;
+	private List<PropImBuilderData<?>> imguiBuilders;
 
 	public int prevTick;
 	public int tick;
@@ -122,6 +133,18 @@ public class Prop {
 		this.canInteract = false;
 	}
 
+	public <T> T getData(PropData<?, T> data) {
+		return data.getter().apply(Cast.to(this));
+	}
+
+	public <T> void setData(PropData<?, T> data, T value) {
+		data.setter().accept(Cast.to(this), value);
+	}
+
+	public boolean hasData(PropData<?, ?> data) {
+		return type.reverseData().containsKey(data);
+	}
+
 	public final boolean isTimeTraveling(long time) {
 		return createdTime > time || (lifespan > 0 && time > createdTime + lifespan + 20L);
 	}
@@ -135,6 +158,11 @@ public class Prop {
 		}
 
 		snap();
+
+		if (level.isReplayLevel()) {
+			tick = (int) (time - createdTime);
+		}
+
 		tick();
 
 		if (lifespan > 0 && tick >= lifespan) {
@@ -145,7 +173,10 @@ public class Prop {
 			return true;
 		}
 
-		tick++;
+		if (!level.isReplayLevel()) {
+			tick++;
+		}
+
 		return false;
 	}
 
@@ -228,9 +259,7 @@ public class Prop {
 		return Mth.rotLerp(delta, prevRotation.z, rotation.z);
 	}
 
-	byte[] getDataUpdates(boolean allData) {
-		var syncSet = allData ? type.data() : sync;
-
+	final byte[] getDataUpdates(Collection<PropType.PropDataEntry> syncSet) {
 		if (syncSet.isEmpty()) {
 			return null;
 		}
@@ -242,7 +271,7 @@ public class Prop {
 
 			for (var entry : syncSet) {
 				var data = entry.data();
-				var value = data.get(Cast.to(this));
+				var value = getData(data);
 				buf.writeVarInt(type.getDataIndex(data));
 				data.type().streamCodec().encode(buf, Cast.to(value));
 			}
@@ -252,14 +281,14 @@ public class Prop {
 			return bytes;
 		} finally {
 			buf.release();
-
-			if (!allData) {
-				sync.clear();
-			}
 		}
 	}
 
-	void update(RegistryAccess registryAccess, byte[] update, boolean allData) {
+	final byte[] getDataUpdates(boolean allData) {
+		return getDataUpdates(allData ? type.data() : sync);
+	}
+
+	final void update(RegistryAccess registryAccess, byte[] update, boolean allData) {
 		var buf = new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(update), registryAccess, ConnectionType.NEOFORGE);
 
 		try {
@@ -271,7 +300,7 @@ public class Prop {
 				if (entry != null) {
 					var data = entry.data();
 					var value = data.type().streamCodec().decode(buf);
-					data.set(Cast.to(this), Cast.to(value));
+					setData(data, Cast.to(value));
 				}
 			}
 		} finally {
@@ -361,18 +390,26 @@ public class Prop {
 			var p = entry.data();
 
 			if (p.save()) {
-				nbt.put(p.key(), p.type().codec().encodeStart(ops, Cast.to(p.get(Cast.to(this)))).getOrThrow());
+				nbt.put(p.key(), p.type().codec().encodeStart(ops, Cast.to(getData(p))).getOrThrow());
 			}
 		}
 	}
 
 	@Override
 	public String toString() {
-		return "%s#%04X".formatted(type.id(), id);
+		return type.id() + "#" + getIdString();
+	}
+
+	public final String getIdString() {
+		return "%08X".formatted(id);
 	}
 
 	public SimplePacketPayload createAddPacket() {
 		return new AddPropPayload(this);
+	}
+
+	public void handleAddPacket(Props<?> props) {
+		props.add(this);
 	}
 
 	@Nullable
@@ -389,9 +426,15 @@ public class Prop {
 		return frustum.isVisible(x - w, y, z - w, x + w, y + height, z + w);
 	}
 
-	public Visuals getDebugVisuals(double x, double y, double z) {
+	public Visuals getDebugVisuals(double x, double y, double z, boolean selected) {
 		var visuals = new Visuals();
-		visuals.add(new ColoredShape(new CuboidShape(Vec3f.of(width, height, width), Rotation.NONE), Color.TRANSPARENT, Color.WHITE).at(x, y + height / 2D, z));
+
+		if (selected) {
+			visuals.add(new ColoredShape(new CuboidShape(Vec3f.of(width + 0.125D, height + 0.125D, width + 0.125D), Rotation.NONE), Color.TRANSPARENT, Color.YELLOW).at(x, y + height / 2D, z));
+		} else {
+			visuals.add(new ColoredShape(new CuboidShape(Vec3f.of(width, height, width), Rotation.NONE), Color.TRANSPARENT, Color.WHITE).at(x, y + height / 2D, z));
+		}
+
 		return visuals;
 	}
 
@@ -493,18 +536,153 @@ public class Prop {
 	}
 
 	public void imgui(ImGraphics graphics, float delta) {
-		var ops = graphics.mc.level.jsonOps();
+		graphics.pushStack();
+		graphics.setRedButton();
 
-		if (lifespan > 0) {
-			ImGui.progressBar(getRelativeTick(delta, 0F), 0F, 20F);
+		if (ImGui.smallButton("Remove")) {
+			remove(PropRemoveType.COMMAND);
 		}
 
+		graphics.popStack();
+
+		ImGui.sameLine();
+
+		boolean isHidden = PropExplorerPanel.HIDDEN_PROPS.contains(id);
+
+		if (isHidden) {
+			graphics.pushStack();
+			graphics.setGreenButton();
+		}
+
+		if (ImGui.smallButton(isHidden ? "Show" : "Hide")) {
+			if (isHidden) {
+				PropExplorerPanel.HIDDEN_PROPS.remove(id);
+			} else {
+				PropExplorerPanel.HIDDEN_PROPS.add(id);
+			}
+		}
+
+		if (isHidden) {
+			graphics.popStack();
+		}
+
+		ImGui.sameLine();
+
+		boolean isTypeHidden = PropExplorerPanel.HIDDEN_PROP_TYPES.contains(type);
+
+		if (isTypeHidden) {
+			graphics.pushStack();
+			graphics.setGreenButton();
+		}
+
+		if (ImGui.smallButton(isTypeHidden ? "Show All of Type" : "Hide All of Type")) {
+			if (isTypeHidden) {
+				PropExplorerPanel.HIDDEN_PROP_TYPES.remove(type);
+			} else {
+				PropExplorerPanel.HIDDEN_PROP_TYPES.add(type);
+			}
+		}
+
+		if (isTypeHidden) {
+			graphics.popStack();
+		}
+
+		ImGui.sameLine();
+
+		if (ImGui.smallButton("Copy ID")) {
+			ImGui.setClipboardText(getIdString());
+		}
+
+		if (lifespan > 0) {
+			ImGui.text("Tick: %,d / %,d".formatted(tick, lifespan));
+			ImGui.progressBar(getRelativeTick(delta, 0F), 0F, 20F);
+		} else {
+			ImGui.text("Tick: %,d".formatted(tick));
+		}
+
+		if (imguiBuilders == null) {
+			imguiBuilders = new ArrayList<>();
+			imguiBuilders(imguiBuilders);
+			imguiBuilders = List.copyOf(imguiBuilders);
+		}
+
+		ImGui.pushID("###data");
+
+		for (var builder : imguiBuilders) {
+			var k = builder.data();
+			var b = builder.builder();
+
+			try {
+				b.set(Cast.to(getData(k)));
+			} catch (Throwable ex) {
+				graphics.stackTrace(ex);
+			}
+
+			var update = b.imguiKey(graphics, k.key(), k.key());
+
+			if (update.isAny() && b.isValid()) {
+				c2sEdit(k, Cast.to(b.build()), update.isFull());
+			}
+		}
+
+		ImGui.popID();
+
+		/*
 		for (var entry : type.data()) {
+			if (entry.data() == TICK || entry.data() == LIFESPAN) {
+				continue;
+			}
+
 			try {
 				ImGui.text(entry.data().key() + ": " + entry.data().type().codec().encodeStart(ops, Cast.to(entry.data().getter().apply(Cast.to(this)))).getOrThrow());
 			} catch (Exception ex) {
 				graphics.stackTrace(ex);
 			}
+		}
+		 */
+	}
+
+	protected void imguiBuilders(List<PropImBuilderData<?>> builders) {
+		if (hasData(DYNAMIC_POSITION)) {
+			builders.add(new PropImBuilderData<>(DYNAMIC_POSITION, KVectorImBuilder.create()));
+		} else if (hasData(POSITION)) {
+			builders.add(new PropImBuilderData<>(POSITION, new Vector3dImBuilder()));
+		}
+
+		if (hasData(VELOCITY)) {
+			builders.add(new PropImBuilderData<>(VELOCITY, new Vector3fImBuilder()));
+		}
+
+		if (hasData(PITCH)) {
+			builders.add(new PropImBuilderData<>(PITCH, new FloatImBuilder(0F, -90F, 90F)));
+		}
+
+		if (hasData(YAW)) {
+			builders.add(new PropImBuilderData<>(YAW, new FloatImBuilder(0F, -180F, 180F)));
+		}
+
+		if (hasData(ROLL)) {
+			builders.add(new PropImBuilderData<>(ROLL, new FloatImBuilder(0F, -180F, 180F)));
+		}
+
+		if (hasData(GRAVITY)) {
+			builders.add(new PropImBuilderData<>(GRAVITY, new FloatImBuilder(0F, 0F, 1F)));
+		}
+
+		if (hasData(WIDTH)) {
+			builders.add(new PropImBuilderData<>(WIDTH, new FloatImBuilder(0F, 0F, 16F)));
+		}
+
+		if (hasData(HEIGHT)) {
+			builders.add(new PropImBuilderData<>(HEIGHT, new FloatImBuilder(0F, 0F, 16F)));
+		}
+
+		if (hasData(CAN_COLLIDE)) {
+			builders.add(new PropImBuilderData<>(CAN_COLLIDE, new BooleanImBuilder(false)));
+		}
+
+		if (hasData(CAN_INTERACT)) {
+			builders.add(new PropImBuilderData<>(CAN_INTERACT, new BooleanImBuilder(false)));
 		}
 	}
 
@@ -522,5 +700,49 @@ public class Prop {
 
 	public BlockPos getBlockPos() {
 		return BlockPos.containing(pos.x, pos.y, pos.z);
+	}
+
+	public <T> void c2sEdit(PropData<?, T> data, T value, boolean sync) {
+		if (!level.isClientSide) {
+			return;
+		}
+
+		setData(data, value);
+
+		if (sync && !level.isReplayLevel()) {
+			var payload = EditPropPayload.of(this, List.of(data));
+
+			if (payload != null) {
+				level.c2s(payload);
+			}
+		}
+	}
+
+	public JsonObject getDataJson(DynamicOps<JsonElement> ops) {
+		var json = new JsonObject();
+
+		for (var entry : type.data()) {
+			try {
+				json.add(entry.data().key(), entry.data().type().codec().encodeStart(ops, Cast.to(getData(entry.data()))).getOrThrow());
+			} catch (Exception ignore) {
+			}
+		}
+
+		return json;
+	}
+
+	public void setDataJson(DynamicOps<JsonElement> ops, JsonObject json) {
+		for (var entry : type.data()) {
+			var p = entry.data();
+			var t = json.get(p.key());
+
+			if (t != null) {
+				var result = p.type().codec().parse(ops, t);
+
+				if (result.isSuccess()) {
+					setData(p, Cast.to(result.getOrThrow()));
+				}
+			}
+		}
 	}
 }

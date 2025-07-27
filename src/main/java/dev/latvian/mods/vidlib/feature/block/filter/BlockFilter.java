@@ -8,10 +8,8 @@ import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.vidlib.core.VLBlockInWorld;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolderList;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
-import dev.latvian.mods.vidlib.util.StringUtils;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -28,7 +26,6 @@ import java.util.function.Predicate;
 
 public interface BlockFilter extends Predicate<BlockInWorld> {
 	SimpleRegistry<BlockFilter> REGISTRY = SimpleRegistry.create(BlockFilter::type);
-	ImBuilderHolderList<BlockFilter> IMGUI_BUILDERS = new ImBuilderHolderList<>();
 
 	SimpleRegistryType.Unit<BlockFilter> NONE = SimpleRegistryType.unit("none", new BlockFilter() {
 		@Override
@@ -199,19 +196,6 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 		REGISTRY.register(BlockIdFilter.TYPE);
 		REGISTRY.register(BlockStateFilter.TYPE);
 		REGISTRY.register(BlockTypeTagFilter.TYPE);
-
-		for (var unit : REGISTRY.unitValueMap().entrySet()) {
-			IMGUI_BUILDERS.addUnit(StringUtils.snakeCaseToTitleCase(unit.getKey()), unit.getValue());
-		}
-
-		IMGUI_BUILDERS.add(BlockNotFilter.Builder.TYPE);
-		IMGUI_BUILDERS.add(BlockAndFilter.Builder.TYPE);
-		IMGUI_BUILDERS.add(BlockOrFilter.Builder.TYPE);
-		IMGUI_BUILDERS.add(BlockXorFilter.Builder.TYPE);
-
-		IMGUI_BUILDERS.add(BlockIdFilter.Builder.TYPE);
-		IMGUI_BUILDERS.add(BlockStateFilter.Builder.TYPE);
-		IMGUI_BUILDERS.add(BlockTypeTagFilter.Builder.TYPE);
 	}
 
 	default SimpleRegistryType<?> type() {

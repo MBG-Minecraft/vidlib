@@ -120,7 +120,7 @@ public record PropType<P extends Prop>(
 					return result.map(o -> prop);
 				}
 
-				p.set(Cast.to(prop), Cast.to(result.getOrThrow()));
+				prop.setData(p, Cast.to(result.getOrThrow()));
 			} else if (validate && p.isRequired()) {
 				return DataResult.error(() -> "Missing required data key '" + p.key() + "'");
 			}

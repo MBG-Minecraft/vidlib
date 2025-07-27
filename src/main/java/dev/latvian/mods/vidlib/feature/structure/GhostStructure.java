@@ -14,6 +14,7 @@ import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.util.JsonCodecReloadListener;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
+import imgui.type.ImBoolean;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -37,6 +38,8 @@ public record GhostStructure(
 	boolean preload,
 	boolean preloadRenderer
 ) {
+	public static final ImBoolean VISIBLE_CONFIG = new ImBoolean(true);
+
 	public static final Codec<GhostStructure> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Codec.BOOL.optionalFieldOf("ghost_chunks", false).forGetter(GhostStructure::ghostChunks),
 		GhostStructurePart.CODEC.listOf().fieldOf("structures").forGetter(GhostStructure::structures),
@@ -184,7 +187,7 @@ public record GhostStructure(
 	}
 
 	public static void render(FrameInfo frame) {
-		if (VISIBLE.isEmpty()) {
+		if (VISIBLE.isEmpty() || !VISIBLE_CONFIG.get()) {
 			return;
 		}
 

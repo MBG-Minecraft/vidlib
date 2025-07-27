@@ -20,12 +20,4 @@ public record PropData<P extends Prop, V>(Class<P> origin, String key, DataType<
 	public PropData<P, V> required() {
 		return new PropData<>(origin, key, type, true, save, sync, getter, setter);
 	}
-
-	public void set(P prop, V value) {
-		setter.accept(prop, value);
-	}
-
-	public V get(P prop) {
-		return getter.apply(prop);
-	}
 }

@@ -19,4 +19,8 @@ public record Context(IPayloadContext parent, ResourceLocation type, Level level
 	public long getSeed() {
 		return Long.rotateLeft(uid + remoteGameTime, 17) + uid;
 	}
+
+	public boolean canEdit() {
+		return level.getServer().isSingleplayer() || player.hasPermissions(2);
+	}
 }

@@ -53,8 +53,12 @@ public class VidLib {
 
 	public static void setupSync() {
 		if (ModList.get().isLoaded("flashback")) {
-			VLFlashbackIntegration.init();
+			loadFlashbackIntegration();
 		}
+	}
+
+	private static void loadFlashbackIntegration() {
+		VLFlashbackIntegration.init();
 	}
 
 	public static void sync(ServerPlayer player, int syncType) {

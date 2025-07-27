@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.prop;
 
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
+import dev.latvian.mods.vidlib.feature.misc.VLFlashbackIntegration;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
@@ -29,17 +30,25 @@ public record AddPropPayload(PropType<?> type, PropSpawnType spawnType, int id, 
 
 	@Override
 	public void handle(Context ctx) {
-		var props = ctx.level().getProps();
+		var level = ctx.level();
+		var props = level.getProps();
 
-		var oldProp = props.levelProps.get(id);
+		var prop = props.levelProps.get(id);
 
-		if (oldProp != null) {
-			oldProp.update(ctx.level().registryAccess(), update, true);
+		if (prop != null) {
+			prop.update(level.registryAccess(), update, true);
 		} else {
-			var prop = type.factory().create(props.context(type, spawnType, createdTime));
+			prop = type.factory().create(props.context(type, spawnType, createdTime));
 			prop.id = id;
-			prop.update(ctx.level().registryAccess(), update, true);
-			props.add(prop);
+			prop.update(level.registryAccess(), update, true);
+
+			if (!VLFlashbackIntegration.ENABLED || VLFlashbackIntegration.RECORD_PROPS.get() || VLFlashbackIntegration.RECORDED_PROPS.isEmpty()) {
+				prop.handleAddPacket(props);
+			}
+		}
+
+		if (VLFlashbackIntegration.ENABLED && VLFlashbackIntegration.RECORD_PROPS.get()) {
+			VLFlashbackIntegration.RECORDING_PROPS.put(id, new RecordedProp(id, type, createdTime, 0L, prop.getDataJson(level.jsonOps())));
 		}
 	}
 }

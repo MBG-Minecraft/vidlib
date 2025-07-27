@@ -9,12 +9,13 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public record FollowingEntityKVector(EntityFilter entity, PositionType positionType) implements KVector {
+public record FollowingEntityKVector(EntityFilter entity, PositionType positionType) implements KVector, ImBuilderWrapper.BuilderSupplier {
 	public static final SimpleRegistryType<FollowingEntityKVector> TYPE = SimpleRegistryType.dynamic("following_entity", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		EntityFilter.CODEC.fieldOf("entity").forGetter(FollowingEntityKVector::entity),
 		PositionType.CODEC.optionalFieldOf("position_type", PositionType.CENTER).forGetter(FollowingEntityKVector::positionType)
@@ -29,6 +30,14 @@ public record FollowingEntityKVector(EntityFilter entity, PositionType positionT
 
 		public final ImBuilder<EntityFilter> entity = EntityFilterImBuilder.create();
 		public final ImBuilder<PositionType> positionType = new EnumImBuilder<>(PositionType[]::new, PositionType.VALUES, PositionType.CENTER);
+
+		@Override
+		public void set(KVector value) {
+			if (value instanceof FollowingEntityKVector v) {
+				entity.set(v.entity);
+				positionType.set(v.positionType);
+			}
+		}
 
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
@@ -59,5 +68,10 @@ public record FollowingEntityKVector(EntityFilter entity, PositionType positionT
 	public Vec3 get(KNumberContext ctx) {
 		var e = entity.getFirst(ctx.level);
 		return e == null ? null : e.getPosition(positionType);
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return Builder.TYPE;
 	}
 }

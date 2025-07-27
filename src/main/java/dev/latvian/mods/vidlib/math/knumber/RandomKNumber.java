@@ -7,11 +7,11 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
-import imgui.ImGui;
 import org.jetbrains.annotations.Nullable;
 
-public record RandomKNumber(KNumber min, KNumber max) implements KNumber {
+public record RandomKNumber(KNumber min, KNumber max) implements KNumber, ImBuilderWrapper.BuilderSupplier {
 	public static final SimpleRegistryType<RandomKNumber> TYPE = SimpleRegistryType.dynamic("random", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.optionalFieldOf("min", KNumber.ZERO).forGetter(RandomKNumber::min),
 		KNumber.CODEC.optionalFieldOf("max", KNumber.ONE).forGetter(RandomKNumber::max)
@@ -28,12 +28,18 @@ public record RandomKNumber(KNumber min, KNumber max) implements KNumber {
 		public final ImBuilder<KNumber> max = KNumberImBuilder.create(0D);
 
 		@Override
+		public void set(KNumber value) {
+			if (value instanceof RandomKNumber n) {
+				min.set(n.min);
+				max.set(n.max);
+			}
+		}
+
+		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
-			ImGui.pushItemWidth(-1F);
 			update = update.or(min.imguiKey(graphics, "Min", "min"));
 			update = update.or(max.imguiKey(graphics, "Max", "max"));
-			ImGui.popItemWidth();
 			return update;
 		}
 
@@ -64,5 +70,10 @@ public record RandomKNumber(KNumber min, KNumber max) implements KNumber {
 		}
 
 		return ctx.level.random.nextRange(min, max);
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return Builder.TYPE;
 	}
 }

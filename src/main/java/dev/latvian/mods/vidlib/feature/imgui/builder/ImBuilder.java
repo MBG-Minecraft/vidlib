@@ -36,7 +36,13 @@ public interface ImBuilder<T> {
 			ImGui.pushID("###" + id);
 		}
 
-		var update = imgui(graphics);
+		var update = ImUpdate.NONE;
+
+		try {
+			update = imgui(graphics);
+		} catch (Throwable ex) {
+			graphics.stackTrace(ex);
+		}
 
 		if (!id.isEmpty()) {
 			ImGui.popID();

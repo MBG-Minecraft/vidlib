@@ -5,18 +5,19 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
-import imgui.ImGui;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public record PivotingKVector(KVector target, KNumber distance, Easing easing, KNumber startAngle, KNumber addedAngle, KNumber height) implements KVector {
+public record PivotingKVector(KVector target, KNumber distance, Easing easing, KNumber startAngle, KNumber addedAngle, KNumber height) implements KVector, ImBuilderWrapper.BuilderSupplier {
 	public static final SimpleRegistryType<PivotingKVector> TYPE = SimpleRegistryType.dynamic("pivoting", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KVector.CODEC.optionalFieldOf("target", LiteralKVector.SOURCE).forGetter(PivotingKVector::target),
 		KNumber.CODEC.fieldOf("distance").forGetter(PivotingKVector::distance),
@@ -39,68 +40,43 @@ public record PivotingKVector(KVector target, KNumber distance, Easing easing, K
 
 		public final ImBuilder<KVector> target = KVectorImBuilder.create();
 		public final ImBuilder<KNumber> distance = KNumberImBuilder.create(5D);
-		public final Easing[] easing = new Easing[]{Easing.LINEAR};
+		public final ImBuilder<Easing> easing = EnumImBuilder.easing();
 		public final ImBuilder<KNumber> startAngle = KNumberImBuilder.create(0D);
 		public final ImBuilder<KNumber> addedAngle = KNumberImBuilder.create(0D);
 		public final ImBuilder<KNumber> height = KNumberImBuilder.create(0D);
 
 		@Override
+		public void set(KVector value) {
+			if (value instanceof PivotingKVector v) {
+				target.set(v.target);
+				distance.set(v.distance);
+				easing.set(v.easing);
+				startAngle.set(v.startAngle);
+				addedAngle.set(v.addedAngle);
+				height.set(v.height);
+			}
+		}
+
+		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
-			ImGui.pushItemWidth(-1F);
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("Target");
-			ImGui.sameLine();
-			ImGui.pushID("###target");
-			update = update.or(target.imgui(graphics));
-			ImGui.popID();
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("Distance");
-			ImGui.sameLine();
-			ImGui.pushID("###distance");
-			update = update.or(distance.imgui(graphics));
-			ImGui.popID();
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("Easing");
-			ImGui.sameLine();
-			update = update.or(graphics.easingCombo("###easing", easing));
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("Start Angle");
-			ImGui.sameLine();
-			ImGui.pushID("###start-angle");
-			update = update.or(startAngle.imgui(graphics));
-			ImGui.popID();
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("Added Angle");
-			ImGui.sameLine();
-			ImGui.pushID("###added-angle");
-			update = update.or(addedAngle.imgui(graphics));
-			ImGui.popID();
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("Height");
-			ImGui.sameLine();
-			ImGui.pushID("###height");
-			update = update.or(height.imgui(graphics));
-			ImGui.popID();
-
-			ImGui.popItemWidth();
+			update = update.or(target.imguiKey(graphics, "Target", "target"));
+			update = update.or(distance.imguiKey(graphics, "Distance", "distance"));
+			update = update.or(easing.imguiKey(graphics, "Easing", "easing"));
+			update = update.or(startAngle.imguiKey(graphics, "Start Angle", "start-angle"));
+			update = update.or(addedAngle.imguiKey(graphics, "Added Angle", "added-angle"));
+			update = update.or(height.imguiKey(graphics, "Height", "height"));
 			return update;
 		}
 
 		@Override
 		public boolean isValid() {
-			return target.isValid() && distance.isValid() && startAngle.isValid() && addedAngle.isValid() && height.isValid();
+			return target.isValid() && distance.isValid() && easing.isValid() && startAngle.isValid() && addedAngle.isValid() && height.isValid();
 		}
 
 		@Override
 		public KVector build() {
-			return new PivotingKVector(target.build(), distance.build(), easing[0], startAngle.build(), addedAngle.build(), height.build());
+			return new PivotingKVector(target.build(), distance.build(), easing.build(), startAngle.build(), addedAngle.build(), height.build());
 		}
 	}
 
@@ -128,5 +104,10 @@ public record PivotingKVector(KVector target, KNumber distance, Easing easing, K
 
 		var pos = target.get(ctx);
 		return pos == null ? null : pos.add(Math.cos(angle) * dist, height.getOr(ctx, 0D), Math.sin(angle) * dist);
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return Builder.TYPE;
 	}
 }

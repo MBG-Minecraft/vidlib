@@ -26,7 +26,7 @@ public record UpdateItemDataPayload(InteractionHand hand, CompoundTag tag) imple
 
 	@Override
 	public void handle(Context ctx) {
-		if (ctx.player().getServer().isSingleplayer() || ctx.player().hasPermissions(2)) {
+		if (ctx.canEdit()) {
 			VLItem.partiallyMergeCustomData(ctx.player().getItemInHand(hand), tag);
 		}
 	}

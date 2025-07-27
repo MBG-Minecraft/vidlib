@@ -7,11 +7,8 @@ import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.vidlib.core.VLEntity;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolderList;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
-import dev.latvian.mods.vidlib.util.StringUtils;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -27,7 +24,6 @@ import java.util.function.Predicate;
 
 public interface EntityFilter extends Predicate<Entity> {
 	SimpleRegistry<EntityFilter> REGISTRY = SimpleRegistry.create(EntityFilter::type);
-	ImBuilderHolderList<EntityFilter> IMGUI_BUILDERS = new ImBuilderHolderList<>();
 
 	SimpleRegistryType.Unit<EntityFilter> NONE = SimpleRegistryType.unit("none", new BasicEntityFilter(entity -> false));
 	SimpleRegistryType.Unit<EntityFilter> ANY = SimpleRegistryType.unit("any", new BasicEntityFilter(entity -> true));
@@ -108,32 +104,10 @@ public interface EntityFilter extends Predicate<Entity> {
 		REGISTRY.register(EntityTypeTagFilter.TYPE);
 		REGISTRY.register(MatchEntityFilter.TYPE);
 		REGISTRY.register(HasEffectEntityFilter.TYPE);
-
-		for (var unit : REGISTRY.unitValueMap().entrySet()) {
-			IMGUI_BUILDERS.addUnit(StringUtils.snakeCaseToTitleCase(unit.getKey()), unit.getValue());
-		}
-
-		IMGUI_BUILDERS.add(EntityNotFilter.Builder.TYPE);
-		IMGUI_BUILDERS.add(EntityAndFilter.Builder.TYPE);
-		IMGUI_BUILDERS.add(EntityOrFilter.Builder.TYPE);
-		IMGUI_BUILDERS.add(EntityXorFilter.Builder.TYPE);
-
-		IMGUI_BUILDERS.add(ExactEntityFilter.IDBuilder.TYPE);
-		IMGUI_BUILDERS.add(ExactEntityFilter.UUIDBuilder.TYPE);
-		IMGUI_BUILDERS.add(EntityTagFilter.Builder.TYPE);
-		IMGUI_BUILDERS.add(EntityTypeFilter.Builder.TYPE);
-		IMGUI_BUILDERS.add(EntityTypeTagFilter.Builder.TYPE);
-		IMGUI_BUILDERS.add(MatchEntityFilter.Builder.TYPE);
-		IMGUI_BUILDERS.add(HasEffectEntityFilter.Builder.TYPE);
 	}
 
 	default SimpleRegistryType<?> type() {
 		return REGISTRY.getType(this);
-	}
-
-	default void writeUUID(FriendlyByteBuf buf) {
-		buf.writeUtf(type().id());
-		buf.writeUtf(toString());
 	}
 
 	@Nullable

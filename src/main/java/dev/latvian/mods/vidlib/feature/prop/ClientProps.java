@@ -6,8 +6,11 @@ import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.imgui.PropExplorerPanel;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
+import dev.latvian.mods.vidlib.feature.misc.VLFlashbackIntegration;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
+import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
@@ -18,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 public class ClientProps extends Props<ClientLevel> {
+	public static final ImBoolean VISIBLE = new ImBoolean(true);
+
 	@AutoInit(AutoInit.Type.CHUNKS_RENDERED)
 	public static void chunksRendered(ClientLevel level) {
 		level.getProps().reloadAll();
@@ -32,6 +37,11 @@ public class ClientProps extends Props<ClientLevel> {
 		this.propLists.put(PropListType.ASSETS, assetProps = new PropList(this, PropListType.ASSETS));
 		this.stages = new Reference2ObjectOpenHashMap<>();
 		this.sortedProps = new ArrayList<>();
+	}
+
+	@Override
+	public void add(Prop prop) {
+		super.add(prop);
 	}
 
 	@Override
@@ -59,6 +69,40 @@ public class ClientProps extends Props<ClientLevel> {
 		}
 	}
 
+	@Override
+	public void tick() {
+		if (VLFlashbackIntegration.ENABLED && !VLFlashbackIntegration.RECORDED_PROPS.isEmpty()) {
+			var now = level.getGameTime();
+			var ops = level.jsonOps();
+
+			for (var existing : levelProps) {
+				var p = VLFlashbackIntegration.RECORDED_PROPS.get(existing.id);
+
+				if (p == null || !p.exists(now)) {
+					existing.remove(PropRemoveType.TIME_TRAVEL);
+				}
+			}
+
+			for (var p : VLFlashbackIntegration.RECORDED_PROPS.values()) {
+				var existing = levelProps.get(p.id());
+
+				if (p.exists(now)) {
+					if (existing == null) {
+						create(context(p.type(), PropSpawnType.GAME, p.spawn()), true, true, null, null, prop -> {
+							prop.id = p.id();
+							prop.setDataJson(ops, p.data());
+							prop.tick = (int) (now - p.spawn());
+						});
+					}
+				} else if (existing != null) {
+					existing.remove(PropRemoveType.TIME_TRAVEL);
+				}
+			}
+		}
+
+		super.tick();
+	}
+
 	public void renderAll(FrameInfo frame, PoseStack ms) {
 		var cam = frame.camera().getPosition();
 		float delta = frame.worldDelta();
@@ -80,7 +124,9 @@ public class ClientProps extends Props<ClientLevel> {
 			if (prop.isRemoved()) {
 				props.remove();
 				continue;
-			} else if (prop.isTimeTraveling(frame.gameTime())) {
+			} else if (!VISIBLE.get() || prop.isTimeTraveling(frame.gameTime())) {
+				continue;
+			} else if (PropExplorerPanel.HIDDEN_PROPS.contains(prop.id) || PropExplorerPanel.HIDDEN_PROP_TYPES.contains(prop.type)) {
 				continue;
 			}
 
@@ -136,8 +182,12 @@ public class ClientProps extends Props<ClientLevel> {
 
 				if (r >= Double.MAX_VALUE || cam.distanceToSqr(x, y + prop.height / 2D, z) <= r * r) {
 					if (prop.isVisible(x, y, z, frame)) {
-						var visuals = prop.getDebugVisuals(x, y, z);
-						MiscClientUtils.renderVisuals(ms, cam, frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, visuals, prop.getDebugVisualsProgress(delta));
+						boolean selected = PropExplorerPanel.OPEN_PROPS.contains(prop.id);
+
+						if (selected || frame.mc().getEntityRenderDispatcher().shouldRenderHitBoxes()) {
+							var visuals = prop.getDebugVisuals(x, y, z, selected);
+							MiscClientUtils.renderVisuals(ms, cam, frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, visuals, prop.getDebugVisualsProgress(delta));
+						}
 					}
 				}
 			}

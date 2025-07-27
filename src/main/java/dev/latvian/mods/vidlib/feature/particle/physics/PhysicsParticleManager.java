@@ -7,6 +7,7 @@ import dev.latvian.mods.vidlib.core.VLBlockState;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
+import imgui.type.ImBoolean;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -40,6 +41,8 @@ public class PhysicsParticleManager {
 		register(CUTOUT);
 		register(TRANSLUCENT);
 	}
+
+	public static final ImBoolean VISIBLE = new ImBoolean(true);
 
 	public static void debugInfo(Consumer<String> left, Consumer<String> right) {
 		int total = 0;
@@ -132,7 +135,7 @@ public class PhysicsParticleManager {
 		rendered = 0;
 		buffersSwitched = 0;
 
-		if (particles.isEmpty()) {
+		if (particles.isEmpty() || !VISIBLE.get()) {
 			return;
 		}
 

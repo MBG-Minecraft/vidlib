@@ -9,6 +9,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import imgui.type.ImBoolean;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -22,7 +23,7 @@ public record IfKNumber(
 	KNumber testValue,
 	Optional<KNumber> thenValue,
 	Optional<KNumber> elseValue
-) implements KNumber {
+) implements KNumber, ImBuilderWrapper.BuilderSupplier {
 	public static final SimpleRegistryType<IfKNumber> TYPE = SimpleRegistryType.dynamic("if", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.fieldOf("if").forGetter(IfKNumber::ifValue),
 		Comparison.DATA_TYPE.codec().optionalFieldOf("comparison", Comparison.NOT_EQUALS).forGetter(IfKNumber::comparison),
@@ -108,5 +109,10 @@ public record IfKNumber(
 		}
 
 		return null;
+	}
+
+	@Override
+	public ImBuilderHolder<?> getImBuilderHolder() {
+		return Builder.TYPE;
 	}
 }
