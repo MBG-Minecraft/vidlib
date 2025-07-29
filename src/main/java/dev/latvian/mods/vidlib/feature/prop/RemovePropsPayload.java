@@ -25,7 +25,7 @@ public record RemovePropsPayload(PropListType type, IntList ids, PropRemoveType 
 
 	@Override
 	public void handle(Context ctx) {
-		if (VLFlashbackIntegration.ENABLED && !VLFlashbackIntegration.RECORD_PROPS.get() && !VLFlashbackIntegration.RECORDED_PROPS.isEmpty()) {
+		if (VLFlashbackIntegration.ENABLED && VLFlashbackIntegration.RECORDED_PROPS != null) {
 			return;
 		}
 
@@ -36,11 +36,6 @@ public record RemovePropsPayload(PropListType type, IntList ids, PropRemoveType 
 
 			if (prop != null) {
 				prop.remove(removeType);
-			}
-
-			if (VLFlashbackIntegration.ENABLED && VLFlashbackIntegration.RECORD_PROPS.get()) {
-				var p = VLFlashbackIntegration.RECORDING_PROPS.remove(id.intValue());
-				VLFlashbackIntegration.RECORDED_PROPS.put(p.id(), p.finish(ctx.remoteGameTime()));
 			}
 		}
 	}

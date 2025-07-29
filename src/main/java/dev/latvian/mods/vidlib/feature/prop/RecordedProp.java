@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
-import com.google.gson.JsonObject;
+import java.util.Map;
 
-public record RecordedProp(int id, PropType<?> type, long spawn, long remove, JsonObject data) {
+public record RecordedProp(int id, PropType<?> type, long spawn, long remove, Map<PropData<?, ?>, Object> data) {
 	public RecordedProp finish(long remove) {
 		return new RecordedProp(id, type, spawn, remove, data);
 	}

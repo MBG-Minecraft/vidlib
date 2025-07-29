@@ -71,7 +71,7 @@ public class ClientProps extends Props<ClientLevel> {
 
 	@Override
 	public void tick() {
-		if (VLFlashbackIntegration.ENABLED && !VLFlashbackIntegration.RECORDED_PROPS.isEmpty()) {
+		if (VLFlashbackIntegration.ENABLED && VLFlashbackIntegration.RECORDED_PROPS != null) {
 			var now = level.getGameTime();
 			var ops = level.jsonOps();
 
@@ -90,7 +90,11 @@ public class ClientProps extends Props<ClientLevel> {
 					if (existing == null) {
 						create(context(p.type(), PropSpawnType.GAME, p.spawn()), true, true, null, null, prop -> {
 							prop.id = p.id();
-							prop.setDataJson(ops, p.data());
+
+							for (var entry : p.data().entrySet()) {
+								prop.setData(entry.getKey(), Cast.to(entry.getValue()));
+							}
+
 							prop.tick = (int) (now - p.spawn());
 						});
 					}

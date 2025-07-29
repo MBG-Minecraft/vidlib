@@ -29,7 +29,6 @@ import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 import dev.latvian.mods.vidlib.math.kvector.PositionType;
 import imgui.ImGui;
-import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -38,7 +37,6 @@ import net.minecraft.core.Position;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -50,7 +48,6 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.network.connection.ConnectionType;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
@@ -260,28 +257,7 @@ public class Prop {
 	}
 
 	final byte[] getDataUpdates(Collection<PropType.PropDataEntry> syncSet) {
-		if (syncSet.isEmpty()) {
-			return null;
-		}
-
-		var buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), level.registryAccess(), ConnectionType.NEOFORGE);
-
-		try {
-			buf.writeVarInt(syncSet.size());
-
-			for (var entry : syncSet) {
-				var data = entry.data();
-				var value = getData(data);
-				buf.writeVarInt(type.getDataIndex(data));
-				data.type().streamCodec().encode(buf, Cast.to(value));
-			}
-
-			var bytes = new byte[buf.readableBytes()];
-			buf.getBytes(buf.readerIndex(), bytes);
-			return bytes;
-		} finally {
-			buf.release();
-		}
+		return type.writeUpdate(level.registryAccess(), syncSet, this::getData);
 	}
 
 	final byte[] getDataUpdates(boolean allData) {
@@ -289,23 +265,7 @@ public class Prop {
 	}
 
 	final void update(RegistryAccess registryAccess, byte[] update, boolean allData) {
-		var buf = new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(update), registryAccess, ConnectionType.NEOFORGE);
-
-		try {
-			int size = buf.readVarInt();
-
-			for (int i = 0; i < size; i++) {
-				var entry = type.getData(buf.readVarInt());
-
-				if (entry != null) {
-					var data = entry.data();
-					var value = data.type().streamCodec().decode(buf);
-					setData(data, Cast.to(value));
-				}
-			}
-		} finally {
-			buf.release();
-		}
+		type.readUpdate(registryAccess, update, allData, (k, v) -> setData(k, Cast.to(v)));
 	}
 
 	public final void remove(PropRemoveType removeType) {

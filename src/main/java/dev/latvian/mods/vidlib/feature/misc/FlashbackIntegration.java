@@ -2,12 +2,15 @@ package dev.latvian.mods.vidlib.feature.misc;
 
 import com.google.gson.JsonObject;
 import dev.latvian.mods.klib.util.Lazy;
+import it.unimi.dsi.fastutil.longs.LongObjectPair;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.configuration.ClientConfigurationPacketListener;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -47,9 +50,27 @@ public interface FlashbackIntegration {
 		return field(name, new ArrayList<>(1));
 	}
 
-	List<BiConsumer<Entity, List<Packet<? super ClientGamePacketListener>>>> ENTITY_SNAPSHOT = listField("ENTITY_SNAPSHOT");
+	MutableLong START_TICK = field("START_TICK", new MutableLong(0L));
+	MutableLong END_TICK = field("END_TICK", new MutableLong(0L));
+	MutableInt TOTAL_DURATION = field("TOTAL_DURATION", new MutableInt(0));
+
+	static long getStartTick() {
+		return START_TICK.longValue();
+	}
+
+	static long getEndTick() {
+		return END_TICK.longValue();
+	}
+
+	static int getTotalDuration() {
+		return TOTAL_DURATION.intValue();
+	}
+
+	List<BiConsumer<List<Packet<? super ClientConfigurationPacketListener>>, List<LongObjectPair<Packet<? super ClientGamePacketListener>>>>> INITIALIZED = listField("INITIALIZED");
+	List<Runnable> CLEANUP = listField("CLEANUP");
 	List<Consumer<List<Packet<? super ClientConfigurationPacketListener>>>> CONFIG_SNAPSHOT = listField("CONFIG_SNAPSHOT");
 	List<Consumer<List<Packet<? super ClientGamePacketListener>>>> GAME_SNAPSHOT = listField("GAME_SNAPSHOT");
+	List<BiConsumer<Entity, List<Packet<? super ClientGamePacketListener>>>> ENTITY_SNAPSHOT = listField("ENTITY_SNAPSHOT");
 	List<Consumer<Entity>> ENTITY_MENU = listField("ENTITY_MENU");
 	List<Runnable> VISUALS_MENU = listField("VISUALS_MENU");
 	List<Runnable> RENDER_FILTER_MENU = listField("RENDER_FILTER_MENU");

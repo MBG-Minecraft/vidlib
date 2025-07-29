@@ -30,6 +30,10 @@ public record AddPropPayload(PropType<?> type, PropSpawnType spawnType, int id, 
 
 	@Override
 	public void handle(Context ctx) {
+		if (VLFlashbackIntegration.ENABLED && VLFlashbackIntegration.RECORDED_PROPS != null) {
+			return;
+		}
+
 		var level = ctx.level();
 		var props = level.getProps();
 
@@ -41,14 +45,7 @@ public record AddPropPayload(PropType<?> type, PropSpawnType spawnType, int id, 
 			prop = type.factory().create(props.context(type, spawnType, createdTime));
 			prop.id = id;
 			prop.update(level.registryAccess(), update, true);
-
-			if (!VLFlashbackIntegration.ENABLED || VLFlashbackIntegration.RECORD_PROPS.get() || VLFlashbackIntegration.RECORDED_PROPS.isEmpty()) {
-				prop.handleAddPacket(props);
-			}
-		}
-
-		if (VLFlashbackIntegration.ENABLED && VLFlashbackIntegration.RECORD_PROPS.get()) {
-			VLFlashbackIntegration.RECORDING_PROPS.put(id, new RecordedProp(id, type, createdTime, 0L, prop.getDataJson(level.jsonOps())));
+			prop.handleAddPacket(props);
 		}
 	}
 }

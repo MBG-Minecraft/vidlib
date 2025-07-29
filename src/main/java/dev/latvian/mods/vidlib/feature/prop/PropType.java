@@ -12,18 +12,25 @@ import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.Util;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.connection.ConnectionType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 @AutoInit
@@ -147,5 +154,51 @@ public record PropType<P extends Prop>(
 	public int getPacketIndex(PropPacketType<?, ?> packet) {
 		var r = reversePackets.get(packet);
 		return r == null ? -1 : r.index;
+	}
+
+	@Nullable
+	public byte[] writeUpdate(RegistryAccess registryAccess, Collection<PropDataEntry> syncSet, Function<PropData<?, ?>, Object> dataGetter) {
+		if (syncSet.isEmpty()) {
+			return null;
+		}
+
+		var buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), registryAccess, ConnectionType.NEOFORGE);
+
+		try {
+			buf.writeVarInt(syncSet.size());
+
+			for (var entry : syncSet) {
+				var data = entry.data();
+				var value = dataGetter.apply(data);
+				buf.writeVarInt(getDataIndex(data));
+				data.type().streamCodec().encode(buf, Cast.to(value));
+			}
+
+			var bytes = new byte[buf.readableBytes()];
+			buf.getBytes(buf.readerIndex(), bytes);
+			return bytes;
+		} finally {
+			buf.release();
+		}
+	}
+
+	public void readUpdate(RegistryAccess registryAccess, byte[] update, boolean allData, BiConsumer<PropData<?, ?>, Object> setData) {
+		var buf = new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(update), registryAccess, ConnectionType.NEOFORGE);
+
+		try {
+			int size = buf.readVarInt();
+
+			for (int i = 0; i < size; i++) {
+				var entry = getData(buf.readVarInt());
+
+				if (entry != null) {
+					var data = entry.data();
+					var value = data.type().streamCodec().decode(buf);
+					setData.accept(data, value);
+				}
+			}
+		} finally {
+			buf.release();
+		}
 	}
 }
