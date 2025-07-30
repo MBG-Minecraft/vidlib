@@ -8,7 +8,6 @@ import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.imgui.PropExplorerPanel;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
-import dev.latvian.mods.vidlib.feature.misc.VLFlashbackIntegration;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
@@ -71,19 +70,19 @@ public class ClientProps extends Props<ClientLevel> {
 
 	@Override
 	public void tick() {
-		if (VLFlashbackIntegration.ENABLED && VLFlashbackIntegration.RECORDED_PROPS != null) {
+		if (RecordedProp.INSTANCE != null) {
 			var now = level.getGameTime();
 			var ops = level.jsonOps();
 
 			for (var existing : levelProps) {
-				var p = VLFlashbackIntegration.RECORDED_PROPS.get(existing.id);
+				var p = RecordedProp.INSTANCE.get(existing.id);
 
 				if (p == null || !p.exists(now)) {
 					existing.remove(PropRemoveType.TIME_TRAVEL);
 				}
 			}
 
-			for (var p : VLFlashbackIntegration.RECORDED_PROPS.values()) {
+			for (var p : RecordedProp.INSTANCE.values()) {
 				var existing = levelProps.get(p.id());
 
 				if (p.exists(now)) {

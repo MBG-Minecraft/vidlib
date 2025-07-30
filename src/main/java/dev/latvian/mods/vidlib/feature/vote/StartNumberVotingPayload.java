@@ -31,6 +31,10 @@ public record StartNumberVotingPayload(CompoundTag extraData, Component title, C
 
 	@Override
 	public void handle(Context ctx) {
+		if (ctx.isReplay()) {
+			return;
+		}
+
 		ctx.player().openNumberVotingScreen(extraData, title, subtitle, max, unavailable);
 	}
 }

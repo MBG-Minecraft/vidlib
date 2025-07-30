@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.session;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.math.Range;
@@ -11,7 +10,6 @@ import dev.latvian.mods.klib.math.WorldMouse;
 import dev.latvian.mods.klib.util.Side;
 import dev.latvian.mods.vidlib.GameEventHandler;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.core.VLLocalPlayer;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeInstance;
@@ -19,8 +17,8 @@ import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.cutscene.ClientCutscene;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
+import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
-import dev.latvian.mods.vidlib.feature.data.DataRecorder;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
@@ -76,7 +74,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 public class LocalClientSessionData extends ClientSessionData {
@@ -101,7 +98,6 @@ public class LocalClientSessionData extends ClientSessionData {
 	public ClientCutscene currentCutscene;
 	public ScreenFadeInstance screenFade;
 	public WorldMouse worldMouse;
-	public DataRecorder dataRecorder;
 	public NPCRecording npcRecording;
 
 	public LocalClientSessionData(Minecraft mc, UUID uuid, ClientPacketListener connection) {
@@ -201,16 +197,11 @@ public class LocalClientSessionData extends ClientSessionData {
 
 	@ApiStatus.Internal
 	public void preTick(ClientLevel level, LocalPlayer player, Window window, PauseType paused) {
-		if (dataRecorder == null && !VidLibConfig.debugS2CPackets && player.isReplayCamera()) {
-			dataRecorder = initDataRecorder(player, -1L);
-			VidLib.LOGGER.info("Loaded data overrides");
-		}
+		if (DataMapOverrides.INSTANCE != null) {
+			serverDataMap.overrides = DataMapOverrides.INSTANCE.serverData;
 
-		if (dataRecorder != null && dataRecorder.start == -1L) {
-			serverDataMap.overrides = dataRecorder.serverData;
-
-			for (var entry : dataRecorder.playerData.entrySet()) {
-				getClientSessionData(entry.getKey()).dataMap.overrides = entry.getValue();
+			for (var session : getAllClientSessionData()) {
+				session.dataMap.overrides = DataMapOverrides.INSTANCE.getPlayerMap(session.uuid);
 			}
 		}
 
@@ -330,34 +321,9 @@ public class LocalClientSessionData extends ClientSessionData {
 		clocks.putAll(map);
 	}
 
-	public DataRecorder initDataRecorder(Player player, long start) {
-		if (dataRecorder == null) {
-			dataRecorder = new DataRecorder(start != -1L, start);
-
-			dataRecorder.load(
-				player.level().registryAccess().createSerializationContext(JsonOps.INSTANCE),
-				FMLPaths.GAMEDIR.get().resolve(start == -1L ? "replay_data_overrides.json" : ("replay_data_" + Long.toUnsignedString(start) + ".json"))
-			);
-		}
-
-		return dataRecorder;
-	}
-
 	@Override
 	public void updateServerData(long gameTime, Player self, List<DataMapValue> update) {
 		serverDataMap.update(mc.player, update);
-
-		if (VidLibConfig.debugS2CPackets) {
-			var r = initDataRecorder(self, gameTime);
-
-			if (r.record) {
-				for (var u : update) {
-					if (!u.key().skipLogging()) {
-						r.setServer(gameTime, u.key(), u.value());
-					}
-				}
-			}
-		}
 	}
 
 	@Override
@@ -367,18 +333,6 @@ public class LocalClientSessionData extends ClientSessionData {
 		} else {
 			getRemoteSessionData(player).dataMap.update(self.level().getPlayerByUUID(player), update);
 		}
-
-		if (VidLibConfig.debugS2CPackets) {
-			var r = initDataRecorder(self, gameTime);
-
-			if (r.record) {
-				for (var u : update) {
-					if (!u.key().skipLogging()) {
-						r.setPlayer(gameTime, player, u.key(), u.value());
-					}
-				}
-			}
-		}
 	}
 
 	@Override
@@ -387,14 +341,6 @@ public class LocalClientSessionData extends ClientSessionData {
 		t.clear();
 		t.addAll(update);
 		refreshListedPlayers();
-
-		if (VidLibConfig.debugS2CPackets) {
-			var r = initDataRecorder(self, gameTime);
-
-			if (r.record) {
-				r.setPlayer(gameTime, player, DataRecorder.PLAYER_TAGS, Set.copyOf(update));
-			}
-		}
 	}
 
 	@Override

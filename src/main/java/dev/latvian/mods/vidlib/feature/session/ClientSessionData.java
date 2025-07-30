@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.session;
 
 import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.vidlib.feature.data.DataRecorder;
+import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
 import net.minecraft.network.chat.Component;
 
 import java.util.HashSet;
@@ -19,7 +19,7 @@ public class ClientSessionData extends SessionData {
 	@Override
 	public Set<String> getTags(long gameTime) {
 		if (dataMap.overrides != null) {
-			var v = dataMap.overrides.getOverride(DataRecorder.PLAYER_TAGS, gameTime);
+			var v = dataMap.overrides.getOverride(DataMapOverrides.PLAYER_TAGS, gameTime);
 
 			if (v != null) {
 				return v;

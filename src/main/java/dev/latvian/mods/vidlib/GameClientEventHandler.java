@@ -92,7 +92,6 @@ import dev.latvian.mods.vidlib.math.kvector.ScalarKVector;
 import dev.latvian.mods.vidlib.math.kvector.ScaledKVector;
 import dev.latvian.mods.vidlib.math.kvector.VariableKVector;
 import dev.latvian.mods.vidlib.math.kvector.YRotatedKVector;
-import dev.latvian.mods.vidlib.util.JsonUtils;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import dev.latvian.mods.vidlib.util.StringUtils;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
@@ -117,7 +116,6 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.event.CalculateDetachedCameraDistanceEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientResourceLoadFinishedEvent;
@@ -138,7 +136,6 @@ import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.common.NeoForge;
 import org.lwjgl.glfw.GLFW;
 
-import java.nio.file.Files;
 import java.util.List;
 
 @EventBusSubscriber(modid = VidLib.ID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
@@ -596,19 +593,6 @@ public class GameClientEventHandler {
 
 	@SubscribeEvent
 	public static void loggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
-		var player = event.getPlayer();
-
-		if (player != null) {
-			var session = player.vl$sessionData();
-
-			if (session.dataRecorder != null && session.dataRecorder.record) {
-				try (var writer = Files.newBufferedWriter(FMLPaths.GAMEDIR.get().resolve("replay-data-" + Long.toUnsignedString(session.dataRecorder.start) + ".json"))) {
-					JsonUtils.write(writer, session.dataRecorder.save(player.level().registryAccess().createSerializationContext(JsonOps.INSTANCE)), false);
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-		}
 	}
 
 	@SubscribeEvent

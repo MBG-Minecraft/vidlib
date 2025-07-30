@@ -21,6 +21,7 @@ import dev.latvian.mods.vidlib.feature.prop.Props;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.util.PauseType;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.commands.arguments.selector.EntitySelector;
@@ -172,9 +173,16 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		return bulkModify(undoable, m);
 	}
 
-	default void walkBlocks(ConnectedBlock.WalkType walkType, BlockPos start, @Nullable BlockFilter filter, int maxDistance, Predicate<ConnectedBlock> callback) {
+	default void walkBlocks(ConnectedBlock.WalkType walkType, BlockPos start, @Nullable BlockFilter filter, boolean onlyExposed, int maxDistance, Predicate<ConnectedBlock> callback) {
+		if (filter == BlockFilter.ANY.instance()) {
+			filter = null;
+		}
+
 		var traversed = new LongOpenHashSet();
 		var queue = new ArrayDeque<ConnectedBlock>();
+		var partialCache = new Long2IntOpenHashMap();
+		partialCache.defaultReturnValue(-1);
+		var partialMutablePos = new BlockPos.MutableBlockPos();
 
 		queue.add(new ConnectedBlock(new PositionedBlock(start, vl$level().getBlockState(start)), 0));
 		traversed.add(start.asLong());
@@ -184,6 +192,10 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 			var c = queue.pop();
 
 			if (c.distance() == 0 || (filter == null ? !c.block().state().isAir() : filter.test(level, c.block().pos(), c.block().state()))) {
+				if (onlyExposed && !isBlockExposed(partialCache, c.block().pos().getX(), c.block().pos().getY(), c.block().pos().getZ(), partialMutablePos)) {
+					continue;
+				}
+
 				if (callback.test(c)) {
 					break;
 				}
@@ -204,10 +216,10 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		}
 	}
 
-	default List<ConnectedBlock> walkBlocks(ConnectedBlock.WalkType walkType, BlockPos start, @Nullable BlockFilter filter, int maxDistance, int maxTotalBlocks) {
+	default List<ConnectedBlock> walkBlocks(ConnectedBlock.WalkType walkType, BlockPos start, @Nullable BlockFilter filter, boolean onlyExposed, int maxDistance, int maxTotalBlocks) {
 		var result = new Long2ObjectOpenHashMap<ConnectedBlock>();
 
-		walkBlocks(walkType, start, filter, maxDistance, c -> {
+		walkBlocks(walkType, start, filter, onlyExposed, maxDistance, c -> {
 			result.put(c.block().pos().asLong(), c);
 			return result.size() >= maxTotalBlocks;
 		});
@@ -335,15 +347,36 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		return state.getHeight(vl$level(), pos);
 	}
 
+	default boolean isBlockPartial(Long2IntOpenHashMap cache, BlockPos pos) {
+		long key = pos.asLong();
+		int exposed = cache.get(key);
+
+		if (exposed == -1) {
+			exposed = vl$level().getBlockState(pos).isPartial() ? 1 : 0;
+			cache.put(key, exposed);
+		}
+
+		return exposed == 1;
+	}
+
+	private boolean isBlockExposed(Long2IntOpenHashMap cache, int x, int y, int z, BlockPos.MutableBlockPos mutable) {
+		return isBlockPartial(cache, mutable.set(x, y + 1, z))
+			|| isBlockPartial(cache, mutable.set(x, y - 1, z))
+			|| isBlockPartial(cache, mutable.set(x - 1, y, z))
+			|| isBlockPartial(cache, mutable.set(x + 1, y, z))
+			|| isBlockPartial(cache, mutable.set(x, y, z - 1))
+			|| isBlockPartial(cache, mutable.set(x, y, z + 1));
+	}
+
 	default boolean isBlockExposed(int x, int y, int z, BlockPos.MutableBlockPos mutablePos) {
 		var level = vl$level();
 
-		return !level.getBlockState(mutablePos.set(x, y + 1, z)).isVisible()
-			|| !level.getBlockState(mutablePos.set(x, y - 1, z)).isVisible()
-			|| !level.getBlockState(mutablePos.set(x - 1, y, z)).isVisible()
-			|| !level.getBlockState(mutablePos.set(x + 1, y, z)).isVisible()
-			|| !level.getBlockState(mutablePos.set(x, y, z - 1)).isVisible()
-			|| !level.getBlockState(mutablePos.set(x, y, z + 1)).isVisible();
+		return level.getBlockState(mutablePos.set(x, y + 1, z)).isPartial()
+			|| level.getBlockState(mutablePos.set(x, y - 1, z)).isPartial()
+			|| level.getBlockState(mutablePos.set(x - 1, y, z)).isPartial()
+			|| level.getBlockState(mutablePos.set(x + 1, y, z)).isPartial()
+			|| level.getBlockState(mutablePos.set(x, y, z - 1)).isPartial()
+			|| level.getBlockState(mutablePos.set(x, y, z + 1)).isPartial();
 	}
 
 	default KNumberContext getGlobalContext() {

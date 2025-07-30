@@ -45,7 +45,15 @@ public interface GhostChunkCommands {
 		.then(Commands.literal("fluids")
 			.then(Commands.argument("fluids", BoolArgumentType.bool())
 				.executes(ctx -> {
-					GhostStructureCapture.INCLUDE_FLUIDS.setValue(BoolArgumentType.getBool(ctx, "fluids"));
+					GhostStructureCapture.INCLUDE_FLUIDS.set(BoolArgumentType.getBool(ctx, "fluids"));
+					return 1;
+				})
+			)
+		)
+		.then(Commands.literal("particles")
+			.then(Commands.argument("particles", BoolArgumentType.bool())
+				.executes(ctx -> {
+					GhostStructureCapture.PARTICLES.set(BoolArgumentType.getBool(ctx, "particles"));
 					return 1;
 				})
 			)

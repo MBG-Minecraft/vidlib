@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.structure;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.block.ConnectedBlock;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.network.chat.Component;
@@ -46,9 +45,13 @@ public class GhostStructureCaptureToolItem implements VidLibTool {
 				player.tell(Component.literal("Scanning the structure..."));
 				var blocks = new Long2ObjectOpenHashMap<BlockState>();
 
-				level.walkBlocks(ConnectedBlock.WalkType.DIAGONAL, origin, BlockFilter.EXPOSED.instance().and(GhostStructureCapture.buildFilter()), 2048, c -> {
+				level.walkBlocks(ConnectedBlock.WalkType.DIAGONAL, origin, GhostStructureCapture.buildFilter(), true, 2048, c -> {
 					blocks.put(c.block().pos().asLong(), c.block().state());
-					level.cubeParticles(GhostStructureCapture.PARTICLE, List.of(c.block().pos()));
+
+					if (GhostStructureCapture.PARTICLES.get()) {
+						level.cubeParticles(GhostStructureCapture.PARTICLE, List.of(c.block().pos()));
+					}
+
 					return false;
 				});
 
@@ -57,6 +60,7 @@ public class GhostStructureCaptureToolItem implements VidLibTool {
 					GhostStructureCapture.CURRENT.getValue().blocks.putAll(blocks);
 				});
 			});
+
 		}
 
 		return true;

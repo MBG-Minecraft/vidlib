@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.misc.MarkerData;
 import dev.latvian.mods.vidlib.feature.misc.MarkerPayload;
-import dev.latvian.mods.vidlib.feature.misc.VLFlashbackIntegration;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -52,13 +51,6 @@ public class VidLib {
 	}
 
 	public static void setupSync() {
-		if (ModList.get().isLoaded("flashback")) {
-			loadFlashbackIntegration();
-		}
-	}
-
-	private static void loadFlashbackIntegration() {
-		VLFlashbackIntegration.init();
 	}
 
 	public static void sync(ServerPlayer player, int syncType) {

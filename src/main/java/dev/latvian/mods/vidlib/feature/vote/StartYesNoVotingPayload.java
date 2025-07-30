@@ -28,6 +28,10 @@ public record StartYesNoVotingPayload(CompoundTag extraData, Component title, Co
 
 	@Override
 	public void handle(Context ctx) {
+		if (ctx.isReplay()) {
+			return;
+		}
+
 		ctx.player().openYesNoVotingScreen(extraData, title, subtitle, yesLabel, noLabel);
 	}
 }

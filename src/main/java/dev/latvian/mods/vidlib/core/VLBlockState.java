@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.klib.util.Cast;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.block.AirBlock;
 import net.minecraft.world.level.block.BarrierBlock;
 import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.CarpetBlock;
@@ -101,7 +102,7 @@ public interface VLBlockState {
 
 		var b = state.getBlock();
 
-		if (b instanceof HalfTransparentBlock || b instanceof SimpleWaterloggedBlock || !state.getFluidState().isEmpty()) {
+		if (b instanceof AirBlock || b instanceof HalfTransparentBlock || b instanceof SimpleWaterloggedBlock || !state.getFluidState().isEmpty()) {
 			return true;
 		}
 

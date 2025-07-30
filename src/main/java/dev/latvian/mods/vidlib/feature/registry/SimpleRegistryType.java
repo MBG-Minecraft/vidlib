@@ -53,4 +53,9 @@ public abstract class SimpleRegistryType<V> {
 	public String id() {
 		return id;
 	}
+
+	@Override
+	public String toString() {
+		return id;
+	}
 }

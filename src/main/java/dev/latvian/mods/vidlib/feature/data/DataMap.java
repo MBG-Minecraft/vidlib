@@ -25,7 +25,7 @@ public class DataMap {
 	public final UUID owner;
 	private final DataKeyStorage storage;
 	private Map<DataKey<?>, TrackedDataMapValue> map;
-	public DataRecorder.DataMap overrides;
+	public DataMapOverrides.DataMap overrides;
 	public Map<DataKey<?>, Object> superOverrides;
 
 	public DataMap(UUID owner, DataKeyStorage storage) {

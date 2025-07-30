@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.prop;
 
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
-import dev.latvian.mods.vidlib.feature.misc.VLFlashbackIntegration;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
@@ -30,7 +29,7 @@ public record AddPropPayload(PropType<?> type, PropSpawnType spawnType, int id, 
 
 	@Override
 	public void handle(Context ctx) {
-		if (VLFlashbackIntegration.ENABLED && VLFlashbackIntegration.RECORDED_PROPS != null) {
+		if (RecordedProp.INSTANCE != null) {
 			return;
 		}
 

@@ -4,6 +4,10 @@ import com.google.gson.JsonObject;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
+import dev.latvian.mods.vidlib.feature.data.DataKey;
+import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
+import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
+import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImNumberType;
 import dev.latvian.mods.vidlib.feature.imgui.PropExplorerPanel;
@@ -21,8 +25,9 @@ import dev.latvian.mods.vidlib.feature.prop.RecordedProp;
 import dev.latvian.mods.vidlib.feature.prop.RemovePropsPayload;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import imgui.ImGui;
+import imgui.flag.ImGuiWindowFlags;
+import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.longs.LongObjectPair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.protocol.Packet;
@@ -30,6 +35,7 @@ import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.configuration.ClientConfigurationPacketListener;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -39,6 +45,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class VLFlashbackIntegration {
 	public static final boolean ENABLED = ModList.get().isLoaded("flashback");
@@ -46,7 +53,6 @@ public class VLFlashbackIntegration {
 	private static int selectedProp = 0;
 	private static PropListType selectedPropList = PropListType.LEVEL;
 	private static boolean openSelectedPropPopup = false;
-	public static Int2ObjectMap<RecordedProp> RECORDED_PROPS = null;
 
 	public static void init() {
 		VidLib.LOGGER.info("Flashback integration loaded");
@@ -66,25 +72,50 @@ public class VLFlashbackIntegration {
 	}
 
 	private static void initialized(List<Packet<? super ClientConfigurationPacketListener>> configPackets, List<LongObjectPair<Packet<? super ClientGamePacketListener>>> gamePackets) {
-		var registryAccess = Minecraft.getInstance().getSingleplayerServer().registryAccess();
+		var mc = Minecraft.getInstance();
+		var server = mc.getSingleplayerServer();
+		var registryAccess = server.registryAccess();
 
-		RECORDED_PROPS = new Int2ObjectLinkedOpenHashMap<>();
+		var dataMapOverrideBuilder = new DataMapOverrides.Builder();
+		var recorderProps = new Int2ObjectLinkedOpenHashMap<RecordedProp>();
 		var recordingProps = new Int2ObjectLinkedOpenHashMap<RecordedProp>();
 
 		for (var entry : gamePackets) {
 			if (entry.value() instanceof ClientboundCustomPayloadPacket c) {
 				if (c.payload() instanceof VidLibPacketPayloadContainer w) {
-					if (w.wrapped() instanceof AddPropPayload p) {
-						var map = new IdentityHashMap<PropData<?, ?>, Object>();
-						p.type().readUpdate(registryAccess, p.update(), true, map::put);
-						recordingProps.put(p.id(), new RecordedProp(p.id(), p.type(), p.createdTime(), 0L, Map.copyOf(map)));
-					} else if (w.wrapped() instanceof RemovePropsPayload p) {
-						for (var id : p.ids()) {
-							var prop = recordingProps.remove(id.intValue());
+					long now = w.remoteGameTime();
 
-							if (prop != null) {
-								RECORDED_PROPS.put(prop.id(), prop.finish(w.remoteGameTime()));
+					switch (w.wrapped()) {
+						case SyncServerDataPayload p -> {
+							for (var u : p.update()) {
+								if (!u.key().skipLogging()) {
+									dataMapOverrideBuilder.set(now, null, u.key(), u.value());
+								}
 							}
+						}
+						case SyncPlayerDataPayload p -> {
+							for (var u : p.update()) {
+								if (!u.key().skipLogging()) {
+									dataMapOverrideBuilder.set(now, p.player(), u.key(), u.value());
+								}
+							}
+						}
+						case SyncPlayerTagsPayload p -> dataMapOverrideBuilder.set(now, p.player(), DataMapOverrides.PLAYER_TAGS, Set.copyOf(p.tags()));
+						case AddPropPayload p -> {
+							var map = new IdentityHashMap<PropData<?, ?>, Object>();
+							p.type().readUpdate(registryAccess, p.update(), true, map::put);
+							recordingProps.put(p.id(), new RecordedProp(p.id(), p.type(), p.createdTime(), 0L, Map.copyOf(map)));
+						}
+						case RemovePropsPayload p -> {
+							for (var id : p.ids()) {
+								var prop = recordingProps.remove(id.intValue());
+
+								if (prop != null) {
+									recorderProps.put(prop.id(), prop.finish(now));
+								}
+							}
+						}
+						case null, default -> {
 						}
 					}
 				}
@@ -94,14 +125,18 @@ public class VLFlashbackIntegration {
 		long endTick = FlashbackIntegration.getEndTick();
 
 		for (var prop : recordingProps.values()) {
-			RECORDED_PROPS.put(prop.id(), prop.finish(endTick));
+			recorderProps.put(prop.id(), prop.finish(endTick));
 		}
 
-		VidLib.LOGGER.info("Flashback props: " + RECORDED_PROPS.size());
+		VidLib.LOGGER.info("Flashback props: " + recorderProps.size());
+
+		DataMapOverrides.INSTANCE = dataMapOverrideBuilder.build();
+		RecordedProp.INSTANCE = recorderProps;
 	}
 
 	private static void cleanup() {
-		RECORDED_PROPS = null;
+		DataMapOverrides.INSTANCE = null;
+		RecordedProp.INSTANCE = null;
 	}
 
 	private static void configSnapshot(List<Packet<? super ClientConfigurationPacketListener>> packets) {
@@ -124,13 +159,88 @@ public class VLFlashbackIntegration {
 	}
 
 	private static void entityMenu(Entity entity) {
+		ImGui.separator();
+		ImGui.spacing();
+		ImGui.text("VidLib");
+
+		if (entity instanceof Player player) {
+			ImGui.sameLine();
+
+			if (ImGui.smallButton("Edit Player Data###vidlib-edit-player-data")) {
+				ImGui.openPopup("###vidlib-edit-player-data-popup");
+			}
+
+			ImGui.setNextWindowSizeConstraints(50F, 10F, 800F, 600F);
+
+			if (ImGui.beginPopupModal("Edit Player Data###vidlib-edit-player-data-popup", new ImBoolean(true), ImGuiWindowFlags.AlwaysAutoResize)) {
+				ImGui.text("WIP!");
+				ImGui.pushID("###vidlib-player-data");
+
+				for (var key : DataKey.PLAYER.all.values()) {
+					var selected = new ImBoolean(false);
+					ImGui.checkbox(key.id() + ": " + player.get(key) + "###" + key.id() + "-enabled", selected);
+				}
+
+				ImGui.popID();
+				ImGui.endPopup();
+			}
+		}
+
+		var team = entity.getTeam();
+
+		ImGui.text("Team: " + (team == null ? "None" : team.getName()));
+		ImGui.sameLine();
+
+		if (ImGui.smallButton("Edit###vidlib-entity-team")) {
+			ImGui.openPopup("###vidlib-edit-team-popup");
+		}
+
+		if (ImGui.beginPopupModal("Edit Team###vidlib-edit-team-popup", new ImBoolean(true), ImGuiWindowFlags.AlwaysAutoResize)) {
+			// var teams = entity.level().getScoreboard().getPlayerTeams();
+			ImGui.text("WIP");
+			ImGui.endPopup();
+		}
+
+		ImGui.text("Tags: " + entity.getTags());
+		ImGui.sameLine();
+
+		if (ImGui.smallButton("Edit###vidlib-entity-tags")) {
+			ImGui.openPopup("###vidlib-edit-tags-popup");
+		}
+
+		if (ImGui.beginPopupModal("Edit Team###vidlib-edit-tags-popup", new ImBoolean(true), ImGuiWindowFlags.AlwaysAutoResize)) {
+			ImGui.text("WIP");
+			ImGui.endPopup();
+		}
 	}
 
 	private static void visualsMenu() {
-		var level = Minecraft.getInstance().level;
+		var mc = Minecraft.getInstance();
+		var level = mc.level;
 
 		ImGui.separator();
 		ImGui.text("VidLib");
+		ImGui.sameLine();
+
+		if (ImGui.smallButton("Edit Server Data###vidlib-edit-server-data")) {
+			ImGui.openPopup("###vidlib-edit-server-data-popup");
+		}
+
+		ImGui.setNextWindowSizeConstraints(50F, 10F, 800F, 600F);
+
+		if (ImGui.beginPopupModal("Edit Server Data###vidlib-edit-server-data-popup", new ImBoolean(true), ImGuiWindowFlags.AlwaysAutoResize)) {
+			ImGui.text("WIP!");
+			ImGui.pushID("###vidlib-server-data");
+
+			for (var key : DataKey.SERVER.all.values()) {
+				var selected = new ImBoolean(false);
+				ImGui.checkbox(key.id() + ": " + mc.get(key) + "###" + key.id() + "-enabled", selected);
+			}
+
+			ImGui.popID();
+			ImGui.endPopup();
+		}
+
 		ImGui.pushID("vidlib");
 		ImGui.checkbox("Props", ClientProps.VISIBLE);
 		ImGui.checkbox("Physics Particles", PhysicsParticleManager.VISIBLE);
@@ -138,7 +248,7 @@ public class VLFlashbackIntegration {
 		ImGui.checkbox("Ghost Structures", GhostStructure.VISIBLE_CONFIG);
 		ImGui.checkbox("Bloom", Bloom.VISIBLE);
 
-		if (ImGui.button("Restore Bulk Removed Blocks###restore-bulk-removed-blocks")) {
+		if (!level.vl$getUndoableModifications().isEmpty() && ImGui.button("Restore Bulk Removed Blocks###restore-bulk-removed-blocks")) {
 			level.undoAllFutureModifications(true);
 		}
 

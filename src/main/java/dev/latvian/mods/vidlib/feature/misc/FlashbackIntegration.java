@@ -2,7 +2,9 @@ package dev.latvian.mods.vidlib.feature.misc;
 
 import com.google.gson.JsonObject;
 import dev.latvian.mods.klib.util.Lazy;
+import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import it.unimi.dsi.fastutil.longs.LongObjectPair;
+import it.unimi.dsi.fastutil.objects.ObjectIntPair;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.configuration.ClientConfigurationPacketListener;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -67,6 +69,7 @@ public interface FlashbackIntegration {
 	}
 
 	List<BiConsumer<List<Packet<? super ClientConfigurationPacketListener>>, List<LongObjectPair<Packet<? super ClientGamePacketListener>>>>> INITIALIZED = listField("INITIALIZED");
+	List<Supplier<List<IntObjectPair<ObjectIntPair<String>>>>> MARKERS = listField("MARKERS");
 	List<Runnable> CLEANUP = listField("CLEANUP");
 	List<Consumer<List<Packet<? super ClientConfigurationPacketListener>>>> CONFIG_SNAPSHOT = listField("CONFIG_SNAPSHOT");
 	List<Consumer<List<Packet<? super ClientGamePacketListener>>>> GAME_SNAPSHOT = listField("GAME_SNAPSHOT");

@@ -23,4 +23,8 @@ public record Context(IPayloadContext parent, ResourceLocation type, Level level
 	public boolean canEdit() {
 		return level.getServer().isSingleplayer() || player.hasPermissions(2);
 	}
+
+	public boolean isReplay() {
+		return level.isReplayLevel();
+	}
 }

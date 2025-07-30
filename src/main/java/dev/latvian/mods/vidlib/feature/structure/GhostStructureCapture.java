@@ -8,11 +8,11 @@ import dev.latvian.mods.klib.util.MessageConsumer;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
 import dev.latvian.mods.vidlib.util.JsonUtils;
+import imgui.type.ImBoolean;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.neoforged.fml.loading.FMLPaths;
-import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 import java.net.URI;
@@ -28,12 +28,13 @@ public interface GhostStructureCapture {
 	MutableObject<CurrentGhostStructureCapture> CURRENT = new MutableObject<>(new CurrentGhostStructureCapture());
 	MutableObject<BlockFilter> IGNORE_FILTER = new MutableObject<>(BlockFilter.NONE.instance());
 	ShapeParticleOptions PARTICLE = new ShapeParticleOptions(20, Color.CYAN, Color.TRANSPARENT);
-	MutableBoolean INCLUDE_FLUIDS = new MutableBoolean(true);
+	ImBoolean INCLUDE_FLUIDS = new ImBoolean(true);
+	ImBoolean PARTICLES = new ImBoolean(true);
 
 	static BlockFilter buildFilter() {
 		var filter = GhostStructureCapture.IGNORE_FILTER.getValue().not();
 
-		if (!INCLUDE_FLUIDS.getValue()) {
+		if (!INCLUDE_FLUIDS.get()) {
 			filter = filter.and(BlockFilter.FLUID.instance().not());
 		}
 
