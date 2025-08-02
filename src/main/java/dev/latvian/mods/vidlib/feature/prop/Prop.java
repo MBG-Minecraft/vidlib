@@ -614,35 +614,35 @@ public class Prop {
 		}
 
 		if (hasData(PITCH)) {
-			builders.add(new PropImBuilderData<>(PITCH, new FloatImBuilder(0F, -90F, 90F)));
+			builders.add(new PropImBuilderData<>(PITCH, new FloatImBuilder(-90F, 90F)));
 		}
 
 		if (hasData(YAW)) {
-			builders.add(new PropImBuilderData<>(YAW, new FloatImBuilder(0F, -180F, 180F)));
+			builders.add(new PropImBuilderData<>(YAW, new FloatImBuilder(-180F, 180F)));
 		}
 
 		if (hasData(ROLL)) {
-			builders.add(new PropImBuilderData<>(ROLL, new FloatImBuilder(0F, -180F, 180F)));
+			builders.add(new PropImBuilderData<>(ROLL, new FloatImBuilder(-180F, 180F)));
 		}
 
 		if (hasData(GRAVITY)) {
-			builders.add(new PropImBuilderData<>(GRAVITY, new FloatImBuilder(0F, 0F, 1F)));
+			builders.add(new PropImBuilderData<>(GRAVITY, new FloatImBuilder(0F, 1F)));
 		}
 
 		if (hasData(WIDTH)) {
-			builders.add(new PropImBuilderData<>(WIDTH, new FloatImBuilder(0F, 0F, 16F)));
+			builders.add(new PropImBuilderData<>(WIDTH, new FloatImBuilder(0F, 16F)));
 		}
 
 		if (hasData(HEIGHT)) {
-			builders.add(new PropImBuilderData<>(HEIGHT, new FloatImBuilder(0F, 0F, 16F)));
+			builders.add(new PropImBuilderData<>(HEIGHT, new FloatImBuilder(0F, 16F)));
 		}
 
 		if (hasData(CAN_COLLIDE)) {
-			builders.add(new PropImBuilderData<>(CAN_COLLIDE, new BooleanImBuilder(false)));
+			builders.add(new PropImBuilderData<>(CAN_COLLIDE, new BooleanImBuilder()));
 		}
 
 		if (hasData(CAN_INTERACT)) {
-			builders.add(new PropImBuilderData<>(CAN_INTERACT, new BooleanImBuilder(false)));
+			builders.add(new PropImBuilderData<>(CAN_INTERACT, new BooleanImBuilder()));
 		}
 	}
 

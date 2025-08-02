@@ -11,15 +11,20 @@ import java.util.Optional;
 
 public class PositionedSoundDataImBuilder implements ImBuilder<PositionedSoundData> {
 	public final SoundDataImBuilder soundData = new SoundDataImBuilder();
-	public final BooleanImBuilder hasPosition = new BooleanImBuilder(false);
+	public final BooleanImBuilder hasPosition = new BooleanImBuilder();
 	public final ImBuilder<KVector> position = KVectorImBuilder.create();
-	public final BooleanImBuilder looping = new BooleanImBuilder(false);
-	public final BooleanImBuilder stopImmediately = new BooleanImBuilder(false);
+	public final BooleanImBuilder looping = new BooleanImBuilder();
+	public final BooleanImBuilder stopImmediately = new BooleanImBuilder();
 	public boolean delete = false;
 
 	@Override
 	public void set(PositionedSoundData value) {
-		ImBuilder.super.set(value);
+		soundData.set(value.data());
+		hasPosition.set(value.position().isPresent());
+		position.set(value.position().orElse(KVector.ZERO));
+		looping.set(value.looping());
+		stopImmediately.set(value.stopImmediately());
+		delete = false;
 	}
 
 	@Override

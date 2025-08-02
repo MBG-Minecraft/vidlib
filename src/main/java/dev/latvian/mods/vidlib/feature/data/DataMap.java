@@ -153,7 +153,9 @@ public class DataMap {
 
 	public void update(@Nullable Player player, List<DataMapValue> update) {
 		for (var data : update) {
-			init(data.key()).update(player, data.value());
+			if (data.key() != null) {
+				init(data.key()).update(player, data.value());
+			}
 		}
 	}
 

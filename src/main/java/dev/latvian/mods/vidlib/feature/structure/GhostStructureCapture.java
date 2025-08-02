@@ -49,19 +49,15 @@ public interface GhostStructureCapture {
 			var current = CURRENT.getValue();
 			current.build(source);
 
-			if (current.structure.empty()) {
+			if (current.blockStructure.empty() && current.waterStructure.empty()) {
 				source.error(Component.literal("No blocks captured!"));
 				return 0;
 			}
 
-			source.tell(Component.literal("Found %,d blocks".formatted(current.structure.blocks().size())));
+			source.tell(Component.literal("Found %,d blocks".formatted(current.blockStructure.blocks().size() + current.waterStructure.blocks().size())));
 
-			var shell = current.structure.visualShell();
-
-			if (shell.empty()) {
-				source.error(Component.literal("Empty shell!"));
-				return 0;
-			}
+			var blockStructure = current.blockStructure;
+			var fluidStructure = current.waterStructure;
 
 			int minChunkX = current.minX >> CHUNK_SIZE;
 			int minChunkY = current.minY >> CHUNK_SIZE;
@@ -117,6 +113,40 @@ public interface GhostStructureCapture {
 
 				json.addProperty("preload", true);
 
+				if (!fluidStructure.empty()) {
+					int rMinSliceX = Integer.MAX_VALUE;
+					int rMinSliceY = Integer.MAX_VALUE;
+					int rMinSliceZ = Integer.MAX_VALUE;
+					int rMaxSliceX = Integer.MIN_VALUE;
+					int rMaxSliceY = Integer.MIN_VALUE;
+					int rMaxSliceZ = Integer.MIN_VALUE;
+
+					for (var entry : fluidStructure.blocks().long2ObjectEntrySet()) {
+						var pos = BlockPos.of(entry.getLongKey());
+						rMinSliceX = Math.min(rMinSliceX, pos.getX());
+						rMinSliceY = Math.min(rMinSliceY, pos.getY());
+						rMinSliceZ = Math.min(rMinSliceZ, pos.getZ());
+						rMaxSliceX = Math.max(rMaxSliceX, pos.getX());
+						rMaxSliceY = Math.max(rMaxSliceY, pos.getY());
+						rMaxSliceZ = Math.max(rMaxSliceZ, pos.getZ());
+					}
+
+					fluidStructure.toVStruct(structureDir.resolve("fluids.vstruct"));
+
+					var str = new JsonObject();
+					str.addProperty("structure", "video:ghost_chunks/%s/%s".formatted(fname, "fluids"));
+
+					var boundsArr = new JsonArray();
+					boundsArr.add(rMinSliceX);
+					boundsArr.add(rMinSliceY);
+					boundsArr.add(rMinSliceZ);
+					boundsArr.add(rMaxSliceX);
+					boundsArr.add(rMaxSliceY);
+					boundsArr.add(rMaxSliceZ);
+					str.add("bounds", boundsArr);
+					strucArr.add(str);
+				}
+
 				for (int chunkY = minChunkY; chunkY <= maxChunkY; chunkY++) {
 					for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
 						for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
@@ -124,7 +154,7 @@ public interface GhostStructureCapture {
 							int sliceY = chunkY << CHUNK_SIZE;
 							int sliceZ = chunkZ << CHUNK_SIZE;
 
-							var slice = shell.slice(sliceX - current.minX, sliceY - current.minY, sliceZ - current.minZ, sliceX - current.minX + CHUNK_OFFSET, sliceY - current.minY + CHUNK_OFFSET, sliceZ - current.minZ + CHUNK_OFFSET);
+							var slice = blockStructure.slice(sliceX - current.minX, sliceY - current.minY, sliceZ - current.minZ, sliceX - current.minX + CHUNK_OFFSET, sliceY - current.minY + CHUNK_OFFSET, sliceZ - current.minZ + CHUNK_OFFSET);
 
 							if (slice.empty()) {
 								continue;
@@ -201,14 +231,14 @@ public interface GhostStructureCapture {
 			var current = CURRENT.getValue();
 			current.build(source);
 
-			if (current.structure.empty()) {
+			if (current.blockStructure.empty()) {
 				source.error(Component.literal("No blocks captured!"));
 				return 0;
 			}
 
-			source.tell(Component.literal("Found %,d blocks".formatted(current.structure.blocks().size())));
+			source.tell(Component.literal("Found %,d blocks".formatted(current.blockStructure.blocks().size())));
 
-			var finalStructure = createShell ? current.structure.visualShell() : current.structure;
+			var finalStructure = createShell ? current.blockStructure.visualShell() : current.blockStructure;
 
 			if (finalStructure.empty()) {
 				source.error(Component.literal("Empty structure!"));

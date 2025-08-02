@@ -28,7 +28,7 @@ public interface ImGuiUtils {
 	ImBoolean BOOLEAN = new ImBoolean();
 
 	static ImString resizableString() {
-		var s = new ImString();
+		var s = new ImString("");
 		s.inputData.isResizable = true;
 		return s;
 	}

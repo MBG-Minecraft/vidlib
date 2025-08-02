@@ -5,6 +5,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderSupplier;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
@@ -23,6 +24,7 @@ import java.util.List;
 
 public class SoundEventImBuilder implements ImBuilder<Holder<SoundEvent>> {
 	public static final Holder<SoundEvent> EMPTY_SOUND = BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.EMPTY);
+	public static final ImBuilderSupplier<Holder<SoundEvent>> SUPPLIER = SoundEventImBuilder::new;
 
 	public static final Lazy<List<Holder<SoundEvent>>> ALL_SOUNDS = Lazy.of(() -> {
 		var list = new ArrayList<Holder<SoundEvent>>();

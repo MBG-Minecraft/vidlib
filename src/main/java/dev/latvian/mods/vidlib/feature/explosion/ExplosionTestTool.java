@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.explosion;
 
 import dev.latvian.mods.klib.math.KMath;
-import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
@@ -23,14 +23,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
-public class ExplosionTestTool implements VidLibTool, PlayerActionHandler {
+public enum ExplosionTestTool implements VidLibTool, PlayerActionHandler {
+	@AutoRegister
+	INSTANCE;
+
 	public static final ExplosionData DEFAULT_DATA = new ExplosionData();
 	public static BlockPos lastClickPos = null;
-
-	@AutoInit
-	public static void bootstrap() {
-		VidLibTool.register(new ExplosionTestTool());
-	}
 
 	@Override
 	public String getId() {

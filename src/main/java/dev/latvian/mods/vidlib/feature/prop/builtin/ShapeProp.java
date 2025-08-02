@@ -72,7 +72,7 @@ public class ShapeProp extends Prop {
 		// builders.add(new PropImBuilderData<>(SHAPE, new Vector3dImBuilder()));
 		builders.add(new PropImBuilderData<>(COLOR, new Color4ImBuilder()));
 		builders.add(new PropImBuilderData<>(OUTLINE_COLOR, new Color4ImBuilder()));
-		builders.add(new PropImBuilderData<>(BLOOM, new BooleanImBuilder(false)));
-		builders.add(new PropImBuilderData<>(TEXTURE, new ResourceLocationImBuilder(null, false)));
+		builders.add(new PropImBuilderData<>(BLOOM, new BooleanImBuilder()));
+		builders.add(new PropImBuilderData<>(TEXTURE, ResourceLocationImBuilder.delayed()));
 	}
 }

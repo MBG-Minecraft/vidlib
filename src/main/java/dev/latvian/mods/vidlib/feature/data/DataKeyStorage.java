@@ -4,6 +4,9 @@ import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.util.Cast;
+import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.VidLibConfig;
+import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 
@@ -34,17 +37,39 @@ public class DataKeyStorage {
 				var id = buf.readUtf();
 				var key = synced.get(id);
 
-				if (key == null) {
-					throw new NullPointerException("Data type with id " + id + " not found. Available types in '" + DataKeyStorage.this.name + "': " + synced.keySet());
+				if (VidLibConfig.legacyDataKeyStream) {
+					if (key == null) {
+						throw new NullPointerException("Data type with id " + id + " not found. Available types in '" + DataKeyStorage.this.name + "': " + synced.keySet());
+					}
+
+					return new DataMapValue(key, key.type().streamCodec().decode(buf));
 				}
 
-				return new DataMapValue(key, key.type().streamCodec().decode(buf));
+				var decoded = VLStreamCodecs.decode(buf);
+
+				if (key == null) {
+					VidLib.LOGGER.error("Data type with id " + id + " not found. Available types in '" + DataKeyStorage.this.name + "': " + synced.keySet());
+					return DataMapValue.INVALID;
+				}
+
+				var value = decoded.left().orElse(null);
+
+				if (decoded.right().isPresent()) {
+					value = VLStreamCodecs.decodeValue(buf, key.type(), decoded.right().get());
+				}
+
+				return new DataMapValue(key, value);
 			}
 
 			@Override
-			public void encode(RegistryFriendlyByteBuf buf, DataMapValue value) {
-				buf.writeUtf(value.key().id());
-				value.key().type().streamCodec().encode(buf, Cast.to(value.value()));
+			public void encode(RegistryFriendlyByteBuf buf, DataMapValue dataMapValue) {
+				buf.writeUtf(dataMapValue.key().id());
+
+				if (VidLibConfig.legacyDataKeyStream) {
+					dataMapValue.key().type().streamCodec().encode(buf, Cast.to(dataMapValue.value()));
+				} else {
+					VLStreamCodecs.encode(buf, dataMapValue.key().type(), dataMapValue.value());
+				}
 			}
 		};
 

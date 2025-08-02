@@ -47,12 +47,16 @@ public record IfKVector(
 		public static final ImBuilderHolder<KVector> TYPE = new ImBuilderHolder<>("If", Builder::new);
 
 		public final ImBuilder<KNumber> ifValue = KNumberImBuilder.create(1D);
-		public final ImBuilder<Comparison> comparison = new EnumImBuilder<>(Comparison.ARRAY_FACTORY, Comparison.VALUES, Comparison.NOT_EQUALS);
+		public final ImBuilder<Comparison> comparison = new EnumImBuilder<>(Comparison.ARRAY_FACTORY, Comparison.VALUES);
 		public final ImBuilder<KNumber> testValue = KNumberImBuilder.create(0D);
 		public final ImBoolean thenValueEnabled = new ImBoolean(true);
 		public final ImBuilder<KVector> thenValue = KVectorImBuilder.create();
 		public final ImBoolean elseValueEnabled = new ImBoolean(false);
 		public final ImBuilder<KVector> elseValue = KVectorImBuilder.create();
+
+		public Builder() {
+			this.comparison.set(Comparison.NOT_EQUALS);
+		}
 
 		@Override
 		public void set(KVector value) {

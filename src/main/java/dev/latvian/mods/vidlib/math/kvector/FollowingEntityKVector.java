@@ -29,7 +29,11 @@ public record FollowingEntityKVector(EntityFilter entity, PositionType positionT
 		public static final ImBuilderHolder<KVector> TYPE = new ImBuilderHolder<>("Following Entity", Builder::new);
 
 		public final ImBuilder<EntityFilter> entity = EntityFilterImBuilder.create();
-		public final ImBuilder<PositionType> positionType = new EnumImBuilder<>(PositionType[]::new, PositionType.VALUES, PositionType.CENTER);
+		public final ImBuilder<PositionType> positionType = new EnumImBuilder<>(PositionType[]::new, PositionType.VALUES);
+
+		public Builder() {
+			this.positionType.set(PositionType.CENTER);
+		}
 
 		@Override
 		public void set(KVector value) {

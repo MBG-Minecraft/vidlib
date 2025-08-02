@@ -26,7 +26,7 @@ public record SyncPlayerDataPayload(UUID player, List<DataMapValue> update) impl
 	@Override
 	public boolean allowDebugLogging() {
 		for (var u : update) {
-			if (!u.key().skipLogging()) {
+			if (u.key() != null && !u.key().skipLogging()) {
 				return true;
 			}
 		}

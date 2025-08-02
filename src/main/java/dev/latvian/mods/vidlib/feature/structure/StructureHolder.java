@@ -9,6 +9,7 @@ import dev.latvian.mods.vidlib.feature.registry.RegistryRef;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceArrayMap;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -207,7 +208,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 		}
 	}
 
-	public static StructureHolder capture(Level level, BlockPos from, BlockPos to, @Nullable BlockFilter filter, boolean forRendering) {
+	public static StructureHolder capture(Level level, BlockPos from, BlockPos to, @Nullable BlockFilter filter, boolean onlyExposed, boolean forRendering) {
 		if (filter == BlockFilter.ANY.instance()) {
 			filter = null;
 		}
@@ -221,11 +222,19 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 		var maxZ = Math.max(from.getZ(), to.getZ());
 		var size = new Vec3i(maxX - minX + 1, maxY - minY + 1, maxZ - minZ + 1);
 
+		var partialCache = new Long2IntOpenHashMap();
+		partialCache.defaultReturnValue(-1);
+		var partialMutablePos = new BlockPos.MutableBlockPos();
+
 		for (var pos : BlockPos.betweenClosed(minX, minY, minZ, maxX, maxY, maxZ)) {
 			var state = level.getBlockState(pos);
 
 			if (forRendering ? state.isVisible() : !state.is(Blocks.STRUCTURE_VOID)) {
 				if (filter == null || filter.test(level, pos, state)) {
+					if (onlyExposed && !level.isBlockExposed(partialCache, pos.getX(), pos.getY(), pos.getZ(), partialMutablePos)) {
+						continue;
+					}
+
 					blocks.put(BlockPos.asLong(pos.getX() - minX, pos.getY() - minY, pos.getZ() - minZ), state);
 				}
 			}

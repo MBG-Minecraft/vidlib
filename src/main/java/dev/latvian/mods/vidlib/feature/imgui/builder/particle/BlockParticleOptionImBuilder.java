@@ -12,7 +12,7 @@ public class BlockParticleOptionImBuilder implements ParticleOptionsImBuilder<Bl
 
 	public BlockParticleOptionImBuilder(ParticleType<BlockParticleOption> type) {
 		this.type = type;
-		this.block = new ExactBlockStateImBuilder(null);
+		this.block = new ExactBlockStateImBuilder();
 	}
 
 	@Override

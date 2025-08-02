@@ -6,6 +6,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
 public class DimensionImBuilder implements ImBuilder<ResourceKey<Level>> {
+	public static final ImBuilderSupplier<ResourceKey<Level>> SUPPLIER = DimensionImBuilder::new;
+
 	private static final ResourceKey<ResourceKey<Level>>[] EMPTY_DIMENSION_ARRAY = new ResourceKey[0];
 
 	public final ResourceKey<Level>[] dimension = new ResourceKey[]{Level.OVERWORLD};

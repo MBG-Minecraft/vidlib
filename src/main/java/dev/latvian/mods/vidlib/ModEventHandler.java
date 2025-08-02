@@ -39,7 +39,7 @@ public class ModEventHandler {
 	@SubscribeEvent
 	public static void buildCreativeModeTabContents(BuildCreativeModeTabContentsEvent event) {
 		if (event.getTabKey() == CreativeModeTabs.OP_BLOCKS) {
-			for (var entry : VidLibTool.REGISTRY.entrySet()) {
+			for (var entry : VidLibTool.REGISTRY.get().entrySet()) {
 				event.accept(entry.getValue().createFullItem());
 			}
 

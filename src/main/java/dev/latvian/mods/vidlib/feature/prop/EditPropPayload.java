@@ -50,7 +50,7 @@ public record EditPropPayload(PropListType type, int id, byte[] update) implemen
 
 	@Override
 	public void handle(Context ctx) {
-		if (ctx.canEdit()) {
+		if (ctx.isAdmin()) {
 			var prop = ctx.level().getProps().propLists.get(type).get(id);
 
 			if (prop != null) {

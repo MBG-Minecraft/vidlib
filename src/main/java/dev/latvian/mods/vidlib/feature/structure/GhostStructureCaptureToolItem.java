@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.structure;
 
-import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.block.ConnectedBlock;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -15,11 +15,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class GhostStructureCaptureToolItem implements VidLibTool {
-	@AutoInit
-	public static void bootstrap() {
-		VidLibTool.register(new GhostStructureCaptureToolItem());
-	}
+public enum GhostStructureCaptureToolItem implements VidLibTool {
+	@AutoRegister
+	INSTANCE;
 
 	@Override
 	public String getId() {

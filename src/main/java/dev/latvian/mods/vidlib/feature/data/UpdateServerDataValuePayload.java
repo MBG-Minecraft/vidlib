@@ -19,10 +19,10 @@ public record UpdateServerDataValuePayload(List<DataMapValue> update) implements
 
 	@Override
 	public void handle(Context ctx) {
-		if (ctx.canEdit()) {
-			for (var value : update) {
-				if (value.key().allowClientUpdates()) {
-					ctx.level().getServer().set(value.key(), Cast.to(value.value()));
+		if (ctx.isAdmin()) {
+			for (var u : update) {
+				if (u.key() != null && u.key().allowClientUpdates()) {
+					ctx.level().getServer().set(u.key(), Cast.to(u.value()));
 				}
 			}
 		}

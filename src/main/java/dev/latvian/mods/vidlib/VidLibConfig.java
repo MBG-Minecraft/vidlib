@@ -26,4 +26,5 @@ public class VidLibConfig {
 	public static boolean arrowTrails = true;
 	public static boolean strongEntityOutline = ModList.get().isLoaded("video");
 	public static boolean endBatchesBeforeOutline = false;
+	public static boolean legacyDataKeyStream = false;
 }

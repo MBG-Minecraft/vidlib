@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib.feature.client;
 
+import com.mojang.serialization.Codec;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
+import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
@@ -21,7 +23,7 @@ public interface VidLibClientOptions {
 		OptionInstance.forOptionEnum(),
 		new OptionInstance.Enum<>(Arrays.asList(ZoneRenderType.values()), ZoneRenderType.DATA_TYPE.codec()),
 		ZoneRenderType.NORMAL,
-		type -> {
+		callback -> {
 		}
 	);
 
@@ -30,7 +32,7 @@ public interface VidLibClientOptions {
 		BlockFilter.DATA_TYPE.codec(),
 		OptionInstance.noTooltip(),
 		BlockFilter.ANY.instance(),
-		type -> {
+		callback -> {
 			var mc = Minecraft.getInstance();
 
 			if (mc.player != null) {
@@ -40,8 +42,31 @@ public interface VidLibClientOptions {
 	);
 
 	// OptionInstance<ExplosionData> TEST_EXPLOSION = DataKey.PLAYER.buildDefault("options.vidlib.test_explosion", ExplosionData.DATA_TYPE, ExplosionData.DEFAULT);
-	// OptionInstance<PhysicsParticleData> TEST_PARTICLES = DataKey.PLAYER.buildDefault("options.vidlib.test_physics_particles", PhysicsParticleData.DATA_TYPE, PhysicsParticleData.DEFAULT);
-	// OptionInstance<Double> TEST_SCREEN_SHAKE = DataKey.PLAYER.buildDefault("options.vidlib.test_screen_shake", DataTypes.DOUBLE, 30D);
+
+	OptionInstance<PhysicsParticleData> TEST_PHYSICS_PARTICLE_DATA = UnconfigurableValueSet.create(
+		"options.vidlib.test_physics_particles.data",
+		PhysicsParticleData.DATA_TYPE.codec(),
+		OptionInstance.noTooltip(),
+		PhysicsParticleData.DEFAULT,
+		callback -> {
+			var mc = Minecraft.getInstance();
+
+			if (mc.player != null) {
+				mc.player.vl$sessionData().refreshBlockZones();
+			}
+		}
+	);
+
+	OptionInstance<Double> TEST_SCREEN_SHAKE_MAX_DISTANCE = new OptionInstance<>(
+		"options.vidlib.test_screen_shake.max_distance",
+		OptionInstance.noTooltip(),
+		(l, v) -> Options.genericValueLabel(l, v.intValue()),
+		new OptionInstance.IntRange(0, 1000).xmap(i -> (double) i, Double::intValue),
+		Codec.doubleRange(0.0, 1000.0),
+		30.0,
+		callback -> {
+		}
+	);
 
 	OptionInstance<?>[] CONTROLS_OPTIONS = {
 		ADMIN_PANEL,
@@ -53,6 +78,7 @@ public interface VidLibClientOptions {
 		SHOW_ZONES,
 		SHOW_ZONE_OUTER_BOUNDS,
 		ZONE_RENDER_TYPE,
+		TEST_SCREEN_SHAKE_MAX_DISTANCE,
 	};
 
 	static boolean getAdminPanel() {

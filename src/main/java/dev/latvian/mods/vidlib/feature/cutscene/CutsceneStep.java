@@ -54,7 +54,7 @@ public record CutsceneStep(
 		ByteBufCodecs.optional(KVector.STREAM_CODEC), CutsceneStep::origin,
 		ByteBufCodecs.optional(KVector.STREAM_CODEC), CutsceneStep::target,
 		ByteBufCodecs.optional(KNumber.STREAM_CODEC), CutsceneStep::fovModifier,
-		ByteBufCodecs.optional(ComponentSerialization.STREAM_CODEC), CutsceneStep::status,
+		ByteBufCodecs.optional(ComponentSerialization.TRUSTED_STREAM_CODEC), CutsceneStep::status,
 		ByteBufCodecs.optional(CutsceneStepBars.STREAM_CODEC), CutsceneStep::bars,
 		ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC), CutsceneStep::shader,
 		ByteBufCodecs.optional(Fade.STREAM_CODEC), CutsceneStep::fade,

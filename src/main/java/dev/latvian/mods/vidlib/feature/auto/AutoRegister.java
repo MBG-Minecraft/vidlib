@@ -24,6 +24,7 @@ import java.util.List;
  * @see dev.latvian.mods.vidlib.feature.canvas.Canvas
  * @see dev.latvian.mods.vidlib.feature.prop.PropType
  * @see dev.latvian.mods.vidlib.feature.prop.PropRenderer.Holder
+ * @see dev.latvian.mods.vidlib.feature.item.VidLibTool
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

@@ -7,6 +7,8 @@ import imgui.ImGui;
 import imgui.flag.ImGuiColorEditFlags;
 
 public class Color4ImBuilder implements ImBuilder<Color> {
+	public static final ImBuilderSupplier<Color> SUPPLIER = Color4ImBuilder::new;
+
 	public final float[] rgba = new float[4];
 
 	@Override

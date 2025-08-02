@@ -88,14 +88,14 @@ public class VLFlashbackIntegration {
 					switch (w.wrapped()) {
 						case SyncServerDataPayload p -> {
 							for (var u : p.update()) {
-								if (!u.key().skipLogging()) {
+								if (u.key() != null) {
 									dataMapOverrideBuilder.set(now, null, u.key(), u.value());
 								}
 							}
 						}
 						case SyncPlayerDataPayload p -> {
 							for (var u : p.update()) {
-								if (!u.key().skipLogging()) {
+								if (u.key() != null) {
 									dataMapOverrideBuilder.set(now, p.player(), u.key(), u.value());
 								}
 							}

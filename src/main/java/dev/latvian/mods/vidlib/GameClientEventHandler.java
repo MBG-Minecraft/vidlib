@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib;
 
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
@@ -9,6 +10,7 @@ import dev.latvian.mods.klib.texture.LightUV;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
+import dev.latvian.mods.vidlib.feature.block.ExactBlockStateImBuilder;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockAndFilter;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilderEvent;
@@ -40,11 +42,24 @@ import dev.latvian.mods.vidlib.feature.entity.filter.EntityXorFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.ExactEntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.HasEffectEntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.MatchEntityFilter;
+import dev.latvian.mods.vidlib.feature.entity.filter.ServerDataEntityFilter;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
 import dev.latvian.mods.vidlib.feature.imgui.PropExplorerPanel;
+import dev.latvian.mods.vidlib.feature.imgui.builder.BlockPosImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.BooleanImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.DataTypeImBuilderEvent;
+import dev.latvian.mods.vidlib.feature.imgui.builder.DoubleImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.FloatImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.IntImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.LongImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.StringImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.TextComponentImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.Vec3ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.BlockParticleOptionImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ColorParticleOptionImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.DustParticleOptionImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ParticleOptionsImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ParticleOptionsImBuilderRegistryEvent;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
@@ -57,6 +72,8 @@ import dev.latvian.mods.vidlib.feature.misc.VLFlashbackIntegration;
 import dev.latvian.mods.vidlib.feature.misc.VidLibIcon;
 import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
+import dev.latvian.mods.vidlib.feature.sound.SoundDataImBuilder;
+import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructureCapture;
 import dev.latvian.mods.vidlib.feature.structure.StructureRenderer;
@@ -110,8 +127,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TriState;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -700,6 +721,7 @@ public class GameClientEventHandler {
 		event.add(EntityTypeTagFilter.Builder.TYPE);
 		event.add(MatchEntityFilter.Builder.TYPE);
 		event.add(HasEffectEntityFilter.Builder.TYPE);
+		event.add(ServerDataEntityFilter.Builder.TYPE);
 	}
 
 	@SubscribeEvent
@@ -716,5 +738,34 @@ public class GameClientEventHandler {
 		event.add(BlockIdFilter.Builder.TYPE);
 		event.add(BlockStateFilter.Builder.TYPE);
 		event.add(BlockTypeTagFilter.Builder.TYPE);
+	}
+
+	@SubscribeEvent
+	public static void dataTypeImBuilders(DataTypeImBuilderEvent event) {
+		event.register(DataTypes.BOOL, BooleanImBuilder.SUPPLIER);
+		event.register(DataTypes.INT, IntImBuilder.SUPPLIER);
+		event.register(DataTypes.VAR_INT, IntImBuilder.SUPPLIER);
+		event.register(DataTypes.LONG, LongImBuilder.SUPPLIER);
+		event.register(DataTypes.VAR_LONG, LongImBuilder.SUPPLIER);
+		event.register(DataTypes.FLOAT, FloatImBuilder.SUPPLIER);
+		event.register(DataTypes.DOUBLE, DoubleImBuilder.SUPPLIER);
+		event.register(DataTypes.STRING, StringImBuilder.SUPPLIER);
+		// event.register(DataTypes.UUID, UUIDImBuilder.SUPPLIER);
+
+		event.register(DataTypes.TEXT_COMPONENT, TextComponentImBuilder.SUPPLIER);
+		event.register(DataTypes.MIRROR, () -> new EnumImBuilder<>(Mirror[]::new, Mirror.values()));
+		event.register(DataTypes.BLOCK_ROTATION, () -> new EnumImBuilder<>(Rotation[]::new, Rotation.values()));
+		event.register(DataTypes.LIQUID_SETTINGS, () -> new EnumImBuilder<>(LiquidSettings[]::new, LiquidSettings.values()));
+		event.register(DataTypes.HAND, () -> new EnumImBuilder<>(InteractionHand[]::new, InteractionHand.values()));
+		event.register(DataTypes.SOUND_EVENT, SoundEventImBuilder.SUPPLIER);
+		event.register(DataTypes.SOUND_SOURCE, SoundDataImBuilder::soundSource);
+		// event.register(DataTypes.ITEM_STACK, ItemStackImBuilder.SUPPLIER);
+		event.register(DataTypes.PARTICLE_OPTIONS, ParticleOptionsImBuilder::create);
+		event.register(DataTypes.BLOCK_STATE, ExactBlockStateImBuilder.SUPPLIER);
+		// event.register(DataTypes.FLUID_STATE, ExactFluidStateImBuilder.SUPPLIER);
+		event.register(DataTypes.VEC3, Vec3ImBuilder.SUPPLIER);
+		event.register(DataTypes.VEC3S, Vec3ImBuilder.SUPPLIER);
+		event.register(DataTypes.BLOCK_POS, BlockPosImBuilder.SUPPLIER);
+		event.register(DataTypes.TICKS, IntImBuilder.SUPPLIER);
 	}
 }

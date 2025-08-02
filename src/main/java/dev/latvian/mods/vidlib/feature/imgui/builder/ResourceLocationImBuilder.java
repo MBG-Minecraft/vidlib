@@ -6,19 +6,22 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.ImGui;
 import imgui.type.ImString;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.Nullable;
 
 public class ResourceLocationImBuilder implements ImBuilder<ResourceLocation> {
+	public static ResourceLocationImBuilder immediate() {
+		return new ResourceLocationImBuilder(true);
+	}
+
+	public static ResourceLocationImBuilder delayed() {
+		return new ResourceLocationImBuilder(false);
+	}
+
 	public final ImString value;
 	public final boolean immediateUpdates;
 
-	public ResourceLocationImBuilder(@Nullable ResourceLocation def, boolean immediateUpdates) {
+	public ResourceLocationImBuilder(boolean immediateUpdates) {
 		this.value = ImGuiUtils.resizableString();
 		this.immediateUpdates = immediateUpdates;
-
-		if (def != null) {
-			this.value.set(def);
-		}
 	}
 
 	@Override

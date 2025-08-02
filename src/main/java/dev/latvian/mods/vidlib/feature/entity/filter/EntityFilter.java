@@ -104,6 +104,7 @@ public interface EntityFilter extends Predicate<Entity> {
 		REGISTRY.register(EntityTypeTagFilter.TYPE);
 		REGISTRY.register(MatchEntityFilter.TYPE);
 		REGISTRY.register(HasEffectEntityFilter.TYPE);
+		REGISTRY.register(ServerDataEntityFilter.TYPE);
 	}
 
 	default SimpleRegistryType<?> type() {

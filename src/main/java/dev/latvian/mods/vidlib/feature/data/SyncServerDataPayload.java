@@ -19,7 +19,7 @@ public record SyncServerDataPayload(List<DataMapValue> update) implements Simple
 	@Override
 	public boolean allowDebugLogging() {
 		for (var u : update) {
-			if (!u.key().skipLogging()) {
+			if (u.key() != null && !u.key().skipLogging()) {
 				return true;
 			}
 		}

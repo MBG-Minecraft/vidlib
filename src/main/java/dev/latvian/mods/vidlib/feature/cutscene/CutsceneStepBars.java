@@ -42,8 +42,8 @@ public record CutsceneStepBars(Optional<Component> top, Optional<Component> bott
 	public static final Codec<CutsceneStepBars> CODEC = KLibCodecs.or(List.of(LITERAL_CODEC, DIRECT_CODEC));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, CutsceneStepBars> STREAM_CODEC = CompositeStreamCodec.of(
-		ByteBufCodecs.optional(ComponentSerialization.STREAM_CODEC), CutsceneStepBars::top,
-		ByteBufCodecs.optional(ComponentSerialization.STREAM_CODEC), CutsceneStepBars::bottom,
+		ByteBufCodecs.optional(ComponentSerialization.TRUSTED_STREAM_CODEC), CutsceneStepBars::top,
+		ByteBufCodecs.optional(ComponentSerialization.TRUSTED_STREAM_CODEC), CutsceneStepBars::bottom,
 		CutsceneStepBars::of
 	);
 }

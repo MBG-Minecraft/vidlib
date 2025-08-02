@@ -22,7 +22,7 @@ public record BlockStateFilter(BlockState blockState) implements BlockFilter, Im
 	public static class Builder implements BlockFilterImBuilder {
 		public static final ImBuilderHolder<BlockFilter> TYPE = new ImBuilderHolder<>("Exact Block State", Builder::new);
 
-		public final ExactBlockStateImBuilder blockState = new ExactBlockStateImBuilder(null);
+		public final ExactBlockStateImBuilder blockState = new ExactBlockStateImBuilder();
 
 		@Override
 		public void set(BlockFilter value) {

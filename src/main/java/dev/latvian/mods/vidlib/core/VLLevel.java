@@ -359,7 +359,7 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		return exposed == 1;
 	}
 
-	private boolean isBlockExposed(Long2IntOpenHashMap cache, int x, int y, int z, BlockPos.MutableBlockPos mutable) {
+	default boolean isBlockExposed(Long2IntOpenHashMap cache, int x, int y, int z, BlockPos.MutableBlockPos mutable) {
 		return isBlockPartial(cache, mutable.set(x, y + 1, z))
 			|| isBlockPartial(cache, mutable.set(x, y - 1, z))
 			|| isBlockPartial(cache, mutable.set(x - 1, y, z))

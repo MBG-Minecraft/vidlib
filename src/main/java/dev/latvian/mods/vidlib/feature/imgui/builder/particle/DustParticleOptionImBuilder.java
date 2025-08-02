@@ -12,7 +12,8 @@ public class DustParticleOptionImBuilder implements ParticleOptionsImBuilder<Dus
 
 	public DustParticleOptionImBuilder() {
 		this.color = new Color3ImBuilder();
-		this.scale = new FloatImBuilder(1F, 0F, 2F);
+		this.scale = new FloatImBuilder(0F, 2F).logarithmic();
+		this.scale.set(1F);
 	}
 
 	@Override

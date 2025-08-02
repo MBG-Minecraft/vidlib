@@ -166,9 +166,9 @@ public class StructureRenderer implements WithCache {
 
 	private void buildLevel(Minecraft mc, StructureHolder structure, StructureRendererData data, Executor renderExecutor, Executor backgroundExecutor) {
 		if (renderExecutor == backgroundExecutor) {
-			buildLayers(mc, structure.withoutInvisibleBlocks(), data, renderExecutor, backgroundExecutor);
+			buildLayers(mc, structure, data, renderExecutor, backgroundExecutor);
 		} else {
-			CompletableFuture.runAsync(() -> buildLayers(mc, structure.withoutInvisibleBlocks(), data, renderExecutor, backgroundExecutor), backgroundExecutor);
+			CompletableFuture.runAsync(() -> buildLayers(mc, structure, data, renderExecutor, backgroundExecutor), backgroundExecutor);
 		}
 	}
 

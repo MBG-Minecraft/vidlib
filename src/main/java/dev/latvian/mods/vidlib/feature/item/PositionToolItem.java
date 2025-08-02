@@ -6,7 +6,7 @@ import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.klib.shape.ColoredShape;
 import dev.latvian.mods.klib.shape.CubeShape;
 import dev.latvian.mods.klib.shape.SphereShape;
-import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
@@ -31,7 +31,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
-public class PositionToolItem implements VidLibTool, PlayerActionHandler {
+public enum PositionToolItem implements VidLibTool, PlayerActionHandler {
+	@AutoRegister
+	INSTANCE;
+
 	public enum Type {
 		BLOCK("Block"),
 		BLOCK_FACE("Block Face"),
@@ -60,11 +63,6 @@ public class PositionToolItem implements VidLibTool, PlayerActionHandler {
 	public Vec3 lastClick = null;
 	public Type clientMode = Type.BLOCK;
 	public Vec3 clientPos = null;
-
-	@AutoInit
-	public static void bootstrap() {
-		VidLibTool.register(new PositionToolItem());
-	}
 
 	@Override
 	public String getId() {

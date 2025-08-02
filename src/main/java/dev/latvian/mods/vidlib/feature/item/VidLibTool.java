@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.item;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.datafixers.util.Pair;
+import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLibContent;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
@@ -26,21 +27,22 @@ import net.minecraft.world.phys.HitResult;
 import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public interface VidLibTool {
-	Map<String, VidLibTool> REGISTRY = new HashMap<>();
-
-	static void register(VidLibTool tool) {
-		REGISTRY.put(tool.getId(), tool);
-	}
+	Lazy<Map<String, VidLibTool>> REGISTRY = Lazy.map(map -> {
+		for (var scanned : AutoRegister.SCANNED.get()) {
+			if (scanned.value() instanceof VidLibTool tool) {
+				map.put(tool.getId(), tool);
+			}
+		}
+	});
 
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("vidlib-tool", (command, buildContext) -> {
 		command.requires(source -> source.hasPermission(2));
 
-		for (var tool : REGISTRY.values()) {
+		for (var tool : REGISTRY.get().values()) {
 			var cmd = Commands.literal(tool.getId().replace('_', '-'));
 			tool.registerCommands(cmd, buildContext);
 
@@ -56,7 +58,7 @@ public interface VidLibTool {
 			var toolType = stack.get(DataComponents.CUSTOM_DATA).getUnsafe().getStringOr("vidlib:tool", "");
 
 			if (!toolType.isEmpty()) {
-				return VidLibTool.REGISTRY.get(toolType);
+				return VidLibTool.REGISTRY.get().get(toolType);
 			}
 		}
 
@@ -82,8 +84,8 @@ public interface VidLibTool {
 		return null;
 	}
 
-	static boolean isHolding(LivingEntity entity, Class<?> toolClass) {
-		return toolClass.isInstance(of(entity.getMainHandItem())) || toolClass.isInstance(of(entity.getOffhandItem()));
+	static boolean isHolding(LivingEntity entity, VidLibTool tool) {
+		return of(entity.getMainHandItem()) == tool || of(entity.getOffhandItem()) == tool;
 	}
 
 	String getId();

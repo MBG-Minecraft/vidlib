@@ -1,12 +1,13 @@
 package dev.latvian.mods.vidlib.feature.particle.physics;
 
-import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
-import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
+import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
+import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -20,11 +21,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Set;
 
-public class PhysicsParticlesTool implements VidLibTool, PlayerActionHandler {
-	@AutoInit
-	public static void bootstrap() {
-		VidLibTool.register(new PhysicsParticlesTool());
-	}
+public enum PhysicsParticlesTool implements VidLibTool, PlayerActionHandler {
+	@AutoRegister
+	INSTANCE;
 
 	@Override
 	public String getId() {
@@ -33,7 +32,7 @@ public class PhysicsParticlesTool implements VidLibTool, PlayerActionHandler {
 
 	@Override
 	public Component getName() {
-		return Component.literal("Physics Particles");
+		return Component.literal("Physics Particles Tool");
 	}
 
 	@Override
@@ -43,21 +42,27 @@ public class PhysicsParticlesTool implements VidLibTool, PlayerActionHandler {
 
 	@Override
 	public boolean rightClick(Player player, ItemStack item, @Nullable BlockHitResult hit) {
-		if (hit != null) {
-			var blocks = new ArrayList<PositionedBlock>();
-
-			for (var pos : BlockPos.betweenClosed(hit.getBlockPos().offset(-4, -1, -4), hit.getBlockPos().offset(4, 1, 4))) {
-				var state = player.level().getBlockState(pos);
-
-				if (!state.isAir()) {
-					blocks.add(new PositionedBlock(pos.immutable(), state));
-				}
-			}
-
-			player.level().physicsParticles(player.get(InternalPlayerData.TEST_PARTICLES), blocks);
+		if (hit != null && player.level().isClientSide()) {
+			clientRightClick(player, hit);
 		}
 
 		return true;
+	}
+
+	private void clientRightClick(Player player, BlockHitResult hit) {
+		var blocks = new ArrayList<PositionedBlock>();
+		int radius = 4;
+		int depth = 1;
+
+		for (var pos : BlockPos.betweenClosed(hit.getBlockPos().offset(-radius, -depth, -radius), hit.getBlockPos().offset(radius, depth, radius))) {
+			var state = player.level().getBlockState(pos);
+
+			if (!state.isAir()) {
+				blocks.add(new PositionedBlock(pos.immutable(), state));
+			}
+		}
+
+		player.c2s(new TestPhysicsParticlesPayload(VidLibClientOptions.TEST_PHYSICS_PARTICLE_DATA.get(), 0L, blocks));
 	}
 
 	@Override
@@ -78,5 +83,10 @@ public class PhysicsParticlesTool implements VidLibTool, PlayerActionHandler {
 		}
 
 		return false;
+	}
+
+	@Override
+	public Visuals visuals(Player player, ItemStack item, float delta) {
+		return Visuals.NONE;
 	}
 }

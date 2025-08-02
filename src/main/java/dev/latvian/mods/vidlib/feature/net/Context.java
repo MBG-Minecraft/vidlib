@@ -20,7 +20,7 @@ public record Context(IPayloadContext parent, ResourceLocation type, Level level
 		return Long.rotateLeft(uid + remoteGameTime, 17) + uid;
 	}
 
-	public boolean canEdit() {
+	public boolean isAdmin() {
 		return level.getServer().isSingleplayer() || player.hasPermissions(2);
 	}
 

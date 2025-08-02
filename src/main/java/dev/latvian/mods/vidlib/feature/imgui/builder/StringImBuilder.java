@@ -7,11 +7,12 @@ import imgui.ImGui;
 import imgui.type.ImString;
 
 public class StringImBuilder implements ImBuilder<String> {
+	public static final ImBuilderSupplier<String> SUPPLIER = StringImBuilder::new;
+
 	public final ImString value;
 
-	public StringImBuilder(String def) {
+	public StringImBuilder() {
 		this.value = ImGuiUtils.resizableString();
-		this.value.set(def);
 	}
 
 	@Override

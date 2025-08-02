@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GradientImBuilder implements ImBuilder<Gradient> {
+	public static final ImBuilderSupplier<Gradient> SUPPLIER = GradientImBuilder::new;
+
 	public final List<PositionedColorImBuilder> colors;
 
 	public GradientImBuilder() {

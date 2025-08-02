@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -14,11 +14,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
-public class ZoneToolItem implements VidLibTool {
-	@AutoInit
-	public static void bootstrap() {
-		VidLibTool.register(new ZoneToolItem());
-	}
+public enum ZoneToolItem implements VidLibTool {
+	@AutoRegister
+	INSTANCE;
 
 	@Override
 	public String getId() {

@@ -5,21 +5,23 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.ImGui;
 
 public class DoubleImBuilder implements ImBuilder<Double> {
+	public static final ImBuilderSupplier<Double> SUPPLIER = DoubleImBuilder::new;
+
 	public final float[] value;
 	public final double min, max;
 
-	public DoubleImBuilder(double def, double min, double max) {
-		this.value = new float[]{(float) def};
+	public DoubleImBuilder(double min, double max) {
+		this.value = new float[]{0F};
 		this.min = min;
 		this.max = max;
 	}
 
-	public DoubleImBuilder(double def, double max) {
-		this(def, 0D, max);
+	public DoubleImBuilder(double max) {
+		this(0D, max);
 	}
 
-	public DoubleImBuilder(double def) {
-		this(def, 0D, 1D);
+	public DoubleImBuilder() {
+		this(0D, 1D);
 	}
 
 	@Override

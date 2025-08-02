@@ -10,6 +10,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 
 public class BlockPosImBuilder implements ImBuilder<BlockPos> {
+	public static final ImBuilderSupplier<BlockPos> SUPPLIER = BlockPosImBuilder::new;
+
 	public BlockPos.MutableBlockPos pos;
 	public SelectedPosition selectedPosition;
 

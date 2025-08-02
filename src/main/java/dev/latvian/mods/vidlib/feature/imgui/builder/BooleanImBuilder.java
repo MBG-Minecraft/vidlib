@@ -6,10 +6,12 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 
 public class BooleanImBuilder implements ImBuilder<Boolean> {
+	public static final ImBuilderSupplier<Boolean> SUPPLIER = BooleanImBuilder::new;
+
 	public final ImBoolean value;
 
-	public BooleanImBuilder(boolean def) {
-		this.value = new ImBoolean(def);
+	public BooleanImBuilder() {
+		this.value = new ImBoolean(false);
 	}
 
 	@Override

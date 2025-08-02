@@ -1,9 +1,7 @@
 package dev.latvian.mods.vidlib.feature.imgui.builder;
 
-import java.util.function.Supplier;
-
-public record ImBuilderHolder<T>(String name, Supplier<ImBuilder<? extends T>> factory, boolean isDefault) {
-	public ImBuilderHolder(String name, Supplier<ImBuilder<? extends T>> factory) {
+public record ImBuilderHolder<T>(String name, ImBuilderSupplier<T> factory, boolean isDefault) {
+	public ImBuilderHolder(String name, ImBuilderSupplier<T> factory) {
 		this(name, factory, false);
 	}
 

@@ -19,9 +19,9 @@ public record UpdatePlayerDataValuePayload(List<DataMapValue> update) implements
 
 	@Override
 	public void handle(Context ctx) {
-		for (var value : update) {
-			if (value.key().allowClientUpdates()) {
-				ctx.player().set(value.key(), Cast.to(value.value()));
+		for (var u : update) {
+			if (u.key() != null && u.key().allowClientUpdates()) {
+				ctx.player().set(u.key(), Cast.to(u.value()));
 			}
 		}
 	}
