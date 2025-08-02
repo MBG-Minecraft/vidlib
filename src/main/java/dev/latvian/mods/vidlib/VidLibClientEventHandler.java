@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.data.DataTypes;
@@ -9,7 +11,9 @@ import dev.latvian.mods.klib.render.CuboidRenderer;
 import dev.latvian.mods.klib.texture.LightUV;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
+import dev.latvian.mods.vidlib.feature.auto.BlockEntityRendererHolder;
 import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
+import dev.latvian.mods.vidlib.feature.auto.EntityRendererHolder;
 import dev.latvian.mods.vidlib.feature.block.ExactBlockStateImBuilder;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockAndFilter;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
@@ -28,7 +32,9 @@ import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.client.VidLibHUD;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
+import dev.latvian.mods.vidlib.feature.clock.ClockFont;
 import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
+import dev.latvian.mods.vidlib.feature.clothing.ClientClothingLoader;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityAndFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
@@ -43,6 +49,7 @@ import dev.latvian.mods.vidlib.feature.entity.filter.ExactEntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.HasEffectEntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.MatchEntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.ServerDataEntityFilter;
+import dev.latvian.mods.vidlib.feature.gradient.ClientGradientLoader;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
 import dev.latvian.mods.vidlib.feature.imgui.PropExplorerPanel;
 import dev.latvian.mods.vidlib.feature.imgui.builder.BlockPosImBuilder;
@@ -55,6 +62,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.IntImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.LongImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.StringImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TextComponentImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.UUIDImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Vec3ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.BlockParticleOptionImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ColorParticleOptionImBuilder;
@@ -70,14 +78,21 @@ import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import dev.latvian.mods.vidlib.feature.misc.ScreenTextRenderer;
 import dev.latvian.mods.vidlib.feature.misc.VLFlashbackIntegration;
 import dev.latvian.mods.vidlib.feature.misc.VidLibIcon;
+import dev.latvian.mods.vidlib.feature.multiverse.VoidSpecialEffects;
+import dev.latvian.mods.vidlib.feature.particle.VidLibClientParticles;
 import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
+import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
+import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
+import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundDataImBuilder;
 import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructureCapture;
 import dev.latvian.mods.vidlib.feature.structure.StructureRenderer;
+import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
 import dev.latvian.mods.vidlib.feature.visual.TexturedCubeRenderer;
+import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
 import dev.latvian.mods.vidlib.math.knumber.Atan2KNumber;
 import dev.latvian.mods.vidlib.math.knumber.CosKNumber;
@@ -127,24 +142,27 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TriState;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.CalculateDetachedCameraDistanceEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientResourceLoadFinishedEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
@@ -153,14 +171,15 @@ import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.client.event.ToastAddEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.common.NeoForge;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 
-@EventBusSubscriber(modid = VidLib.ID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
-public class GameClientEventHandler {
+@EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
+public class VidLibClientEventHandler {
 	public static boolean clientLoaded = false;
 
 	private static final List<String> REMOVE_RIGHT = List.of(
@@ -174,8 +193,76 @@ public class GameClientEventHandler {
 	);
 
 	@SubscribeEvent
+	public static void clientSetup(FMLClientSetupEvent event) {
+		event.enqueueWork(VidLibClientEventHandler::syncSetup);
+	}
+
+	public static void syncSetup() {
+		RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS).getBuffer(1).setLabel("Shared Sequential Quads Buffer");
+		RenderSystem.getSequentialBuffer(VertexFormat.Mode.LINES).getBuffer(1).setLabel("Shared Sequential Lines Buffer");
+		RenderSystem.getSequentialBuffer(VertexFormat.Mode.TRIANGLES).getBuffer(1).setLabel("Shared Sequential Other Buffer");
+
+		if (VLFlashbackIntegration.ENABLED) {
+			VLFlashbackIntegration.init();
+		}
+	}
+
+	@SubscribeEvent
+	public static void addReloadListeners(AddClientReloadListenersEvent event) {
+		event.addListener(VidLib.id("structure"), new StructureStorage(StructureStorage.CLIENT));
+		event.addListener(VidLib.id("ghost_structure"), new GhostStructure.Loader());
+		event.addListener(VidLib.id("clothing"), new ClientClothingLoader());
+		event.addListener(VidLib.id("physics_particle_data"), new PhysicsParticleData.Loader());
+		event.addListener(VidLib.id("gradient"), new ClientGradientLoader());
+		event.addListener(VidLib.id("clock_font"), new ClockFont.Loader());
+		event.addListener(VidLib.id("clock"), new Clock.Loader());
+		event.addListener(VidLib.id("skybox"), new SkyboxData.Loader());
+		event.addListener(VidLib.id("zone"), new ZoneLoader(ZoneLoader.CLIENT_BY_DIMENSION, false));
+
+		event.addDependency(VidLib.id("structure"), VidLib.id("ghost_structure"));
+		event.addDependency(VidLib.id("clock_font"), VidLib.id("clock"));
+	}
+
+	@SubscribeEvent
+	public static void registerParticleProviders(RegisterParticleProvidersEvent event) {
+		VidLibClientParticles.register(event);
+	}
+
+	@SubscribeEvent
+	public static void registerDimensionSpecialEffects(RegisterDimensionSpecialEffectsEvent event) {
+		event.register(VidLib.id("void"), new VoidSpecialEffects());
+	}
+
+	@SubscribeEvent
+	public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+		for (var s : AutoRegister.SCANNED.get()) {
+			if (s.value() instanceof EntityRendererHolder<?> holder) {
+				holder.register(event);
+			} else if (s.value() instanceof BlockEntityRendererHolder<?> holder) {
+				holder.register(event);
+			}
+		}
+	}
+
+	@SubscribeEvent
+	public static void addLayers(EntityRenderersEvent.AddLayers event) {
+	}
+
+	@SubscribeEvent
+	public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
+		VidLibKeys.register(event);
+	}
+
+	@SubscribeEvent
+	public static void registerGuiLayers(RegisterGuiLayersEvent event) {
+		event.registerBelowAll(VidLib.id("player_names"), VidLibHUD::drawPlayerNames);
+		event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, VidLib.id("above_boss"), VidLibHUD::drawAboveBossOverlay);
+		event.registerAboveAll(VidLib.id("fade"), VidLibHUD::drawFade);
+	}
+
+	@SubscribeEvent
 	public static void clientPreTick(ClientTickEvent.Pre event) {
-		GameEventHandler.gameLoaded();
+		VidLibEventHandler.gameLoaded();
 
 		if (!clientLoaded) {
 			clientLoaded = true;
@@ -750,17 +837,18 @@ public class GameClientEventHandler {
 		event.register(DataTypes.FLOAT, FloatImBuilder.SUPPLIER);
 		event.register(DataTypes.DOUBLE, DoubleImBuilder.SUPPLIER);
 		event.register(DataTypes.STRING, StringImBuilder.SUPPLIER);
-		// event.register(DataTypes.UUID, UUIDImBuilder.SUPPLIER);
+		event.register(DataTypes.UUID, UUIDImBuilder.SUPPLIER);
 
 		event.register(DataTypes.TEXT_COMPONENT, TextComponentImBuilder.SUPPLIER);
-		event.register(DataTypes.MIRROR, () -> new EnumImBuilder<>(Mirror[]::new, Mirror.values()));
-		event.register(DataTypes.BLOCK_ROTATION, () -> new EnumImBuilder<>(Rotation[]::new, Rotation.values()));
-		event.register(DataTypes.LIQUID_SETTINGS, () -> new EnumImBuilder<>(LiquidSettings[]::new, LiquidSettings.values()));
-		event.register(DataTypes.HAND, () -> new EnumImBuilder<>(InteractionHand[]::new, InteractionHand.values()));
+		event.register(DataTypes.MIRROR, EnumImBuilder.MIRROR_SUPPLIER);
+		event.register(DataTypes.BLOCK_ROTATION, EnumImBuilder.BLOCK_ROTATION_SUPPLIER);
+		event.register(DataTypes.LIQUID_SETTINGS, EnumImBuilder.LIQUID_SETTINGS_SUPPLIER);
+		event.register(DataTypes.HAND, EnumImBuilder.HAND_SUPPLIER);
 		event.register(DataTypes.SOUND_EVENT, SoundEventImBuilder.SUPPLIER);
-		event.register(DataTypes.SOUND_SOURCE, SoundDataImBuilder::soundSource);
+		event.register(SoundData.DATA_TYPE, SoundDataImBuilder.SUPPLIER);
+		event.register(DataTypes.SOUND_SOURCE, SoundDataImBuilder.SOURCE_SUPPLIER);
 		// event.register(DataTypes.ITEM_STACK, ItemStackImBuilder.SUPPLIER);
-		event.register(DataTypes.PARTICLE_OPTIONS, ParticleOptionsImBuilder::create);
+		event.register(DataTypes.PARTICLE_OPTIONS, ParticleOptionsImBuilder.SUPPLIER);
 		event.register(DataTypes.BLOCK_STATE, ExactBlockStateImBuilder.SUPPLIER);
 		// event.register(DataTypes.FLUID_STATE, ExactFluidStateImBuilder.SUPPLIER);
 		event.register(DataTypes.VEC3, Vec3ImBuilder.SUPPLIER);

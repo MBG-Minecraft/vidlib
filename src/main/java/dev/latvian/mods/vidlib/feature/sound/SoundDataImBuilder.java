@@ -5,6 +5,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.FloatImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderSupplier;
 import net.minecraft.sounds.SoundSource;
 
 import java.util.List;
@@ -17,6 +18,9 @@ public class SoundDataImBuilder implements ImBuilder<SoundData> {
 		builder.set(SoundSource.PLAYERS);
 		return builder;
 	}
+
+	public static final ImBuilderSupplier<SoundData> SUPPLIER = SoundDataImBuilder::new;
+	public static final ImBuilderSupplier<SoundSource> SOURCE_SUPPLIER = SoundDataImBuilder::soundSource;
 
 	public final SoundEventImBuilder sound = new SoundEventImBuilder();
 	public final EnumImBuilder<SoundSource> source = soundSource();

@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import com.mojang.blaze3d.platform.Window;
-import dev.latvian.mods.vidlib.GameClientEventHandler;
+import dev.latvian.mods.vidlib.VidLibClientEventHandler;
 import dev.latvian.mods.vidlib.core.VLMouseHandler;
 import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
@@ -236,7 +236,7 @@ public class ImGuiHooks {
 	}
 
 	public static void beforeEndFrame() {
-		if (GameClientEventHandler.clientLoaded) {
+		if (VidLibClientEventHandler.clientLoaded) {
 			BuiltInImGui.handle(Minecraft.getInstance());
 		}
 

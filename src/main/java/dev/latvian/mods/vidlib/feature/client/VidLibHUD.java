@@ -49,7 +49,9 @@ public interface VidLibHUD {
 			return;
 		}
 
-		if (VLFlashbackIntegration.ENABLED && FlashbackIntegration.isInReplayOrExporting() && !FlashbackIntegration.getRenderNameTags()) {
+		boolean replay = VLFlashbackIntegration.ENABLED && FlashbackIntegration.isInReplayOrExporting();
+
+		if (replay && !FlashbackIntegration.getRenderNameTags()) {
 			return;
 		}
 
@@ -83,18 +85,33 @@ public interface VidLibHUD {
 				continue;
 			}
 
-			var wpos = worldMouse.screen(pos);
+			if (replay && FlashbackIntegration.isEntityHidden(player.getUUID())) {
+				continue;
+			}
 
-			if (wpos != null) {
-				var scale = (float) Math.clamp(KMath.map(dist, minDist, midDist, 1F, minSize), minSize, 1F);
+			var renderName = nameDrawType.renderName.resolve(DEFAULT_DRAW_NAME.getValue().test(player));
+			var renderHealth = nameDrawType.renderHealth.resolve(DEFAULT_DRAW_HEALTH_BAR.getValue().test(player));
 
-				graphics.pose().pushPose();
-				graphics.pose().translate(wpos.x(), wpos.y() - 2F, 0F);
-				graphics.pose().scale(scale, scale, 1F);
-				var renderName = nameDrawType.renderName.resolve(DEFAULT_DRAW_NAME.getValue().test(player));
-				var renderHealth = nameDrawType.renderHealth.resolve(DEFAULT_DRAW_HEALTH_BAR.getValue().test(player));
-				graphics.healthBarWithLabel(mc.font, player, -20, -3, 40, 6, renderName, renderHealth, alpha);
-				graphics.pose().popPose();
+			if (renderName && replay && FlashbackIntegration.isNameHidden(player.getUUID())) {
+				renderName = false;
+			}
+
+			if (renderHealth && replay && FlashbackIntegration.isHealthHidden(player.getUUID())) {
+				renderHealth = false;
+			}
+
+			if (renderName || renderHealth) {
+				var wpos = worldMouse.screen(pos);
+
+				if (wpos != null) {
+					var scale = (float) Math.clamp(KMath.map(dist, minDist, midDist, 1F, minSize), minSize, 1F);
+
+					graphics.pose().pushPose();
+					graphics.pose().translate(wpos.x(), wpos.y() - 2F, 0F);
+					graphics.pose().scale(scale, scale, 1F);
+					graphics.healthBarWithLabel(mc.font, player, -20, -3, 40, 6, renderName, renderHealth, alpha);
+					graphics.pose().popPose();
+				}
 			}
 		}
 	}

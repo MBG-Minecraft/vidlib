@@ -13,7 +13,7 @@ logoBlur = false
 [[dependencies.vidlib]]
 modId = "neoforge"
 type = "required"
-versionRange = "*"
+versionRange = "[21.5.89,)"
 ordering = "AFTER"
 side = "BOTH"
 

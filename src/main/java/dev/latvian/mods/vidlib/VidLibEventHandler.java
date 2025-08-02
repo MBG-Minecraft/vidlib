@@ -2,7 +2,9 @@ package dev.latvian.mods.vidlib;
 
 import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.klib.util.Empty;
+import dev.latvian.mods.vidlib.core.VLPayloadRegistrar;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
@@ -16,12 +18,15 @@ import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.registry.GenericVLRegistry;
 import dev.latvian.mods.vidlib.feature.session.RemovePlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
+import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.LevelResource;
@@ -29,7 +34,10 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.neoforged.neoforge.common.world.chunk.RegisterTicketControllersEvent;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityInvulnerabilityCheckEvent;
@@ -44,10 +52,11 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
-@EventBusSubscriber(modid = VidLib.ID, bus = EventBusSubscriber.Bus.GAME)
-public class GameEventHandler {
+@EventBusSubscriber(modid = VidLib.ID)
+public class VidLibEventHandler {
 	public static Range ambientLight = Range.FULL;
 	public static boolean gameLoaded = false;
 
@@ -56,6 +65,49 @@ public class GameEventHandler {
 			gameLoaded = true;
 			AutoInit.Type.GAME_LOADED.invoke();
 		}
+	}
+
+	@SubscribeEvent
+	public static void afterLoad(FMLLoadCompleteEvent event) {
+		event.enqueueWork(VidLib::setupSync);
+		gameLoaded();
+	}
+
+	@SubscribeEvent
+	public static void registerPayloadHandlers(RegisterPayloadHandlersEvent event) {
+		var reg = VLPayloadRegistrar.of(event);
+
+		for (var s : AutoPacket.SCANNED.get()) {
+			if (s.to().contains(AutoPacket.To.CLIENT) && s.to().contains(AutoPacket.To.SERVER)) {
+				reg.bidi(s.type());
+			} else if (s.to().contains(AutoPacket.To.CLIENT)) {
+				reg.s2c(s.type());
+			} else if (s.to().contains(AutoPacket.To.SERVER)) {
+				reg.c2s(s.type());
+			}
+		}
+	}
+
+	@SubscribeEvent
+	public static void buildCreativeModeTabContents(BuildCreativeModeTabContentsEvent event) {
+		if (event.getTabKey() == CreativeModeTabs.OP_BLOCKS) {
+			for (var entry : VidLibTool.REGISTRY.get().entrySet()) {
+				event.accept(entry.getValue().createFullItem());
+			}
+
+			for (var item : BuiltInRegistries.ITEM) {
+				var mod = item.builtInRegistryHolder().getKey().location().getNamespace();
+
+				if (mod.equals("video") || mod.equals(VidLib.ID)) {
+					event.accept(item.getDefaultInstance());
+				}
+			}
+		}
+	}
+
+	@SubscribeEvent
+	public static void registerTicketControllers(RegisterTicketControllersEvent event) {
+		event.register(Anchor.TICKET_CONTROLLER);
 	}
 
 	@SubscribeEvent

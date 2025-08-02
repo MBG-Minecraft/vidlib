@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
@@ -109,6 +110,9 @@ public interface FlashbackIntegration {
 	BooleanSupplier RENDER_PLAYERS = booleanField("RENDER_PLAYERS");
 	BooleanSupplier RENDER_PARTICLES = booleanField("RENDER_PARTICLES");
 	BooleanSupplier RENDER_NAMETAGS = booleanField("RENDER_NAMETAGS");
+	Predicate<UUID> IS_ENTITY_HIDDEN = field("IS_ENTITY_HIDDEN", uuid -> false);
+	Predicate<UUID> IS_NAME_HIDDEN = field("IS_NAME_HIDDEN", uuid -> false);
+	Predicate<UUID> IS_HEALTH_HIDDEN = field("IS_HEALTH_HIDDEN", uuid -> false);
 
 	static boolean getRenderBlocks() {
 		return RENDER_BLOCKS.getAsBoolean();
@@ -128,5 +132,17 @@ public interface FlashbackIntegration {
 
 	static boolean getRenderNameTags() {
 		return RENDER_NAMETAGS.getAsBoolean();
+	}
+
+	static boolean isEntityHidden(UUID uuid) {
+		return IS_ENTITY_HIDDEN.test(uuid);
+	}
+
+	static boolean isNameHidden(UUID uuid) {
+		return IS_NAME_HIDDEN.test(uuid);
+	}
+
+	static boolean isHealthHidden(UUID uuid) {
+		return IS_HEALTH_HIDDEN.test(uuid);
 	}
 }

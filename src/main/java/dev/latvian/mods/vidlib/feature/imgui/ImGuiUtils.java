@@ -27,10 +27,14 @@ public interface ImGuiUtils {
 	ImString STRING = resizableString();
 	ImBoolean BOOLEAN = new ImBoolean();
 
-	static ImString resizableString() {
-		var s = new ImString("");
+	static ImString resizableString(String initial) {
+		var s = new ImString(initial);
 		s.inputData.isResizable = true;
 		return s;
+	}
+
+	static ImString resizableString() {
+		return resizableString("");
 	}
 
 	static String id(ResourceLocation id) {

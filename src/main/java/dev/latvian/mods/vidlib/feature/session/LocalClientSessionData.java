@@ -8,8 +8,8 @@ import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.klib.math.VoxelShapeBox;
 import dev.latvian.mods.klib.math.WorldMouse;
 import dev.latvian.mods.klib.util.Side;
-import dev.latvian.mods.vidlib.GameEventHandler;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.VidLibEventHandler;
 import dev.latvian.mods.vidlib.core.VLLocalPlayer;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeInstance;
@@ -164,7 +164,7 @@ public class LocalClientSessionData extends ClientSessionData {
 			skybox = getSkybox(skyboxId);
 		}
 
-		GameEventHandler.ambientLight = EntityOverride.AMBIENT_LIGHT.get(player, Range.FULL);
+		VidLibEventHandler.ambientLight = EntityOverride.AMBIENT_LIGHT.get(player, Range.FULL);
 
 		var f = EntityOverride.FOG.get(player);
 		ClientFogOverride.override = f == null ? FogParameters.NO_FOG : ClientFogOverride.convert(f);
