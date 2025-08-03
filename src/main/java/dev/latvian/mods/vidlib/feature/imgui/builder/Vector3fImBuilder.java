@@ -7,6 +7,8 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 public class Vector3fImBuilder implements ImBuilder<Vector3f> {
+	public static final ImBuilderSupplier<Vector3f> SUPPLIER = Vector3fImBuilder::new;
+
 	public final float[] data;
 
 	public Vector3fImBuilder() {
@@ -27,7 +29,7 @@ public class Vector3fImBuilder implements ImBuilder<Vector3f> {
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
 		var update = ImUpdate.NONE;
-		ImGui.inputFloat3("###vec", data);
+		ImGui.dragFloat3("###vec", data, 0.0625F, -30000000F, 30000000F, "%.4f");
 		update = update.orItemEdit();
 		return update;
 	}

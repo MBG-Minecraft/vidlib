@@ -15,7 +15,7 @@ import net.minecraft.network.codec.StreamCodec;
 
 public record LineParticleOptions(int lifespan, Gradient startColor, Gradient endColor, int endOffset) implements ParticleOptions {
 	public static final MapCodec<LineParticleOptions> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-		KLibCodecs.TICKS.optionalFieldOf("ttl", 40).forGetter(LineParticleOptions::lifespan),
+		KLibCodecs.TICKS.optionalFieldOf("lifespan", 40).forGetter(LineParticleOptions::lifespan),
 		Gradient.CODEC.optionalFieldOf("start_color", Color.WHITE).forGetter(LineParticleOptions::startColor),
 		Gradient.CODEC.optionalFieldOf("end_color", Color.CYAN).forGetter(LineParticleOptions::endColor),
 		Codec.INT.optionalFieldOf("end_offset", 0).forGetter(LineParticleOptions::endOffset)

@@ -32,7 +32,10 @@ public class ClockProp extends Prop {
 	@Override
 	protected void imguiBuilders(List<PropImBuilderData<?>> builders) {
 		super.imguiBuilders(builders);
-		var allFonts = ClockFont.REGISTRY.getMap().values().stream().map(f -> ClockFont.REGISTRY.asRef(f, ClockFont::id)).toList();
-		builders.add(new PropImBuilderData<>(FONT, new EnumImBuilder<RegistryRef<ClockFont>>(RegistryRef[]::new, allFonts)));
+
+		builders.add(new PropImBuilderData<>(FONT, () -> {
+			var allFonts = ClockFont.REGISTRY.getMap().values().stream().map(f -> ClockFont.REGISTRY.asRef(f, ClockFont::id)).toList();
+			return new EnumImBuilder<RegistryRef<ClockFont>>(RegistryRef[]::new, allFonts);
+		}));
 	}
 }

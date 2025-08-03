@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.util.ID;
@@ -18,6 +19,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Predicate;
 
 public interface PropCommands {
 	SuggestionProvider<CommandSourceStack> TYPE_SUGGESTION_PROVIDER = ID.registerSuggestionProvider(VidLib.id("prop_type"), () -> PropType.ALL.get().keySet());
@@ -39,11 +42,21 @@ public interface PropCommands {
 		)
 		.then(Commands.literal("kill")
 			.then(Commands.literal("all")
-				.executes(ctx -> kill(ctx.getSource(), null))
+				.executes(ctx -> kill(ctx.getSource(), prop -> true))
 			)
-			.then(Commands.argument("prop", ResourceLocationArgument.id())
-				.suggests(TYPE_SUGGESTION_PROVIDER)
-				.executes(ctx -> kill(ctx.getSource(), ResourceLocationArgument.getId(ctx, "prop")))
+			.then(Commands.literal("type")
+				.then(Commands.argument("type", ResourceLocationArgument.id())
+					.suggests(TYPE_SUGGESTION_PROVIDER)
+					.executes(ctx -> kill(ctx.getSource(), PropType.ALL.get().get(ResourceLocationArgument.getId(ctx, "type"))))
+				)
+			)
+			.then(Commands.literal("id")
+				.then(Commands.argument("id", StringArgumentType.word())
+					.executes(ctx -> {
+						int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "id"), 16);
+						return kill(ctx.getSource(), prop -> prop.id == id);
+					})
+				)
 			)
 		)
 		.then(Commands.literal("move")
@@ -85,23 +98,9 @@ public interface PropCommands {
 		return 1;
 	}
 
-	static int kill(CommandSourceStack source, @Nullable ResourceLocation typeId) {
-		int killed;
+	static int kill(CommandSourceStack source, Predicate<Prop> predicate) {
 		var list = source.getLevel().getProps().propLists.get(PropListType.LEVEL);
-
-		if (typeId == null) {
-			killed = list.removeAll(PropRemoveType.COMMAND);
-		} else {
-			var type = PropType.ALL.get().get(typeId);
-
-			if (type == null) {
-				source.error("Prop type '" + typeId + "' not found!");
-				return 0;
-			}
-
-			killed = list.removeAll(PropRemoveType.COMMAND, type);
-		}
-
+		int killed = list.removeAll(PropRemoveType.COMMAND, predicate);
 		source.broadcast("Killed " + killed + " props");
 		return killed;
 	}

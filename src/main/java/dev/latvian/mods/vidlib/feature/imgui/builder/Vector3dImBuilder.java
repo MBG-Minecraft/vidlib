@@ -11,6 +11,8 @@ import org.joml.Vector3d;
 import org.joml.Vector3dc;
 
 public class Vector3dImBuilder implements ImBuilder<Vector3d> {
+	public static final ImBuilderSupplier<Vector3d> SUPPLIER = Vector3dImBuilder::new;
+
 	public final Vector3d data;
 	public SelectedPosition selectedPosition;
 
@@ -49,8 +51,8 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d> {
 
 		ImGui.sameLine();
 
-		ImGuiUtils.DOUBLE.set(data.x);
-		ImGui.inputDouble("###x", ImGuiUtils.DOUBLE, 0.0625D, 1D, "%.3f");
+		ImGuiUtils.FLOAT.set((float) data.x);
+		ImGui.dragFloat("###x", ImGuiUtils.FLOAT.getData(), 0.0625F, -30000000F, 30000000F, "%.4f");
 		update = update.orItemEdit();
 		data.x = ImGuiUtils.DOUBLE.get();
 
@@ -70,10 +72,10 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d> {
 
 		ImGui.sameLine();
 
-		ImGuiUtils.DOUBLE.set(data.y);
-		ImGui.inputDouble("###y", ImGuiUtils.DOUBLE, 0.0625D, 1D, "%.3f");
+		ImGuiUtils.FLOAT.set((float) data.y);
+		ImGui.dragFloat("###y", ImGuiUtils.FLOAT.getData(), 0.0625F, -30000000F, 30000000F, "%.4f");
 		update = update.orItemEdit();
-		data.y = ImGuiUtils.DOUBLE.get();
+		data.y = ImGuiUtils.FLOAT.get();
 
 		if (ImGui.button(SelectedPosition.CURSOR.icon + "###cursor-pos")) {
 			var worldMouse = graphics.mc.getWorldMouse();
@@ -92,10 +94,10 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d> {
 
 		ImGui.sameLine();
 
-		ImGuiUtils.DOUBLE.set(data.z);
-		ImGui.inputDouble("###z", ImGuiUtils.DOUBLE, 0.0625D, 1D, "%.3f");
+		ImGuiUtils.FLOAT.set((float) data.z);
+		ImGui.dragFloat("###z", ImGuiUtils.FLOAT.getData(), 0.0625F, -30000000F, 30000000F, "%.4f");
 		update = update.orItemEdit();
-		data.z = ImGuiUtils.DOUBLE.get();
+		data.z = ImGuiUtils.FLOAT.get();
 
 		return update;
 	}

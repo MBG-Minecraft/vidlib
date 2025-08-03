@@ -10,7 +10,7 @@ import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.imgui.builder.BooleanImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ResourceLocationImBuilder;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
@@ -70,9 +70,9 @@ public class ShapeProp extends Prop {
 	protected void imguiBuilders(List<PropImBuilderData<?>> builders) {
 		super.imguiBuilders(builders);
 		// builders.add(new PropImBuilderData<>(SHAPE, new Vector3dImBuilder()));
-		builders.add(new PropImBuilderData<>(COLOR, new Color4ImBuilder()));
-		builders.add(new PropImBuilderData<>(OUTLINE_COLOR, new Color4ImBuilder()));
-		builders.add(new PropImBuilderData<>(BLOOM, new BooleanImBuilder()));
-		builders.add(new PropImBuilderData<>(TEXTURE, ResourceLocationImBuilder.delayed()));
+		builders.add(new PropImBuilderData<>(COLOR, GradientImBuilder.SUPPLIER));
+		builders.add(new PropImBuilderData<>(OUTLINE_COLOR, GradientImBuilder.SUPPLIER));
+		builders.add(new PropImBuilderData<>(BLOOM, BooleanImBuilder.SUPPLIER));
+		builders.add(new PropImBuilderData<>(TEXTURE, ResourceLocationImBuilder.DELAYED_SUPPLIER));
 	}
 }

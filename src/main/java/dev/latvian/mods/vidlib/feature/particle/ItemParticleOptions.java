@@ -15,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
 
 public record ItemParticleOptions(int lifespan, ItemStack item, float gravity, float scale) implements ParticleOptions {
 	public static final MapCodec<ItemParticleOptions> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-		KLibCodecs.TICKS.optionalFieldOf("ttl", 40).forGetter(ItemParticleOptions::lifespan),
+		KLibCodecs.TICKS.optionalFieldOf("lifespan", 40).forGetter(ItemParticleOptions::lifespan),
 		ItemStack.CODEC.fieldOf("item").forGetter(ItemParticleOptions::item),
 		Codec.FLOAT.optionalFieldOf("gravity", 1F).forGetter(ItemParticleOptions::gravity),
 		Codec.FLOAT.optionalFieldOf("scale", 1F).forGetter(ItemParticleOptions::scale)

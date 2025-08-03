@@ -4,6 +4,8 @@ import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.misc.MarkerData;
 import dev.latvian.mods.vidlib.feature.misc.MarkerPayload;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
@@ -48,6 +50,14 @@ public class VidLib {
 		}
 
 		VidLibContent.init(bus);
+
+		var particleRegistry = DeferredRegister.create(Registries.PARTICLE_TYPE, ID);
+
+		for (var particle : VidLibParticles.PARTICLES) {
+			particleRegistry.register(particle.left(), particle.right());
+		}
+
+		particleRegistry.register(bus);
 	}
 
 	public static void setupSync() {

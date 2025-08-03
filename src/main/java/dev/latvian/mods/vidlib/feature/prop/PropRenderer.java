@@ -7,6 +7,7 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 public interface PropRenderer<P extends Prop> {
 	Set<RenderLevelStageEvent.Stage> DEFAULT_STAGES = Set.of(
@@ -36,13 +37,16 @@ public interface PropRenderer<P extends Prop> {
 		}
 	};
 
-	record Holder(PropType<?> type, PropRenderer<?> renderer) {
+	record Holder(PropType<?> type, Function<Prop, PropRenderer<?>> rendererFactory) {
+		public Holder(PropType<?> type, PropRenderer<?> renderer) {
+			this(type, prop -> renderer);
+		}
 	}
 
-	Lazy<Map<PropType<?>, PropRenderer<?>>> ALL = Lazy.identityMap(map -> {
+	Lazy<Map<PropType<?>, Function<Prop, PropRenderer<?>>>> ALL = Lazy.identityMap(map -> {
 		for (var s : AutoRegister.SCANNED.get()) {
-			if (s.value() instanceof Holder(PropType<?> type, PropRenderer<?> renderer)) {
-				map.put(type, renderer);
+			if (s.value() instanceof Holder(PropType<?> type, Function<Prop, PropRenderer<?>> rendererFactory)) {
+				map.put(type, rendererFactory);
 			}
 		}
 	});

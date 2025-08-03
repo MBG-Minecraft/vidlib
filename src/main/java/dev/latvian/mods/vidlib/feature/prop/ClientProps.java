@@ -45,7 +45,13 @@ public class ClientProps extends Props<ClientLevel> {
 
 	@Override
 	protected void onAdded(Prop prop) {
-		var renderer = PropRenderer.ALL.get().getOrDefault(prop.type, PropRenderer.INVISIBLE);
+		var rendererFactory = PropRenderer.ALL.get().get(prop.type);
+
+		if (rendererFactory == null) {
+			return;
+		}
+
+		var renderer = rendererFactory.apply(prop);
 
 		if (renderer == PropRenderer.INVISIBLE) {
 			return;
@@ -72,7 +78,6 @@ public class ClientProps extends Props<ClientLevel> {
 	public void tick() {
 		if (RecordedProp.INSTANCE != null) {
 			var now = level.getGameTime();
-			var ops = level.jsonOps();
 
 			for (var existing : levelProps) {
 				var p = RecordedProp.INSTANCE.get(existing.id);

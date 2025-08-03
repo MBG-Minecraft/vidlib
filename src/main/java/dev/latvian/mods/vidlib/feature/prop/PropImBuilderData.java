@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderSupplier;
 
-public record PropImBuilderData<T>(PropData<?, T> data, ImBuilder<? extends T> builder) {
+public record PropImBuilderData<T>(PropData<?, T> data, ImBuilderSupplier<T> supplier) {
 }

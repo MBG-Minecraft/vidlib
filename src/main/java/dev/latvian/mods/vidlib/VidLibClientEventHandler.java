@@ -81,6 +81,7 @@ import dev.latvian.mods.vidlib.feature.misc.VidLibIcon;
 import dev.latvian.mods.vidlib.feature.multiverse.VoidSpecialEffects;
 import dev.latvian.mods.vidlib.feature.particle.VidLibClientParticles;
 import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
+import dev.latvian.mods.vidlib.feature.particle.WindParticleOptionsImBuilder;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
@@ -747,7 +748,7 @@ public class VidLibClientEventHandler {
 			ParticleTypes.TINTED_LEAVES
 		), ColorParticleOptionImBuilder::new);
 
-		VidLibParticles.registerBuilders(event);
+		event.register(VidLibParticles.WIND.get(), t -> new WindParticleOptionsImBuilder());
 	}
 
 	@SubscribeEvent

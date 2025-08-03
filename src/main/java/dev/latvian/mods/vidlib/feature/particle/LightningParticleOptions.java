@@ -13,6 +13,7 @@ import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.Mth;
 
 public record LightningParticleOptions(int lifespan, Gradient color, Gradient outlineColor, int segments, float spread, float radius, float endingRadius) implements ParticleOptions {
 	public static final Color DEFAULT_OUTLINE = Color.of(0xFF80BFFF);
@@ -37,6 +38,14 @@ public record LightningParticleOptions(int lifespan, Gradient color, Gradient ou
 		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 0F), LightningParticleOptions::endingRadius,
 		LightningParticleOptions::new
 	);
+
+	public LightningParticleOptions(int lifespan, int segments, float spread, float radius, float endingRadius) {
+		this(lifespan, Color.WHITE, DEFAULT_OUTLINE, segments, spread, radius, endingRadius);
+	}
+
+	public LightningParticleOptions(int lifespan, double distance) {
+		this(lifespan, Mth.ceil(10D * distance / 32D), 1.3F, 0.2F, 0F);
+	}
 
 	@Override
 	public ParticleType<?> getType() {

@@ -14,8 +14,10 @@ import dev.latvian.mods.klib.shape.CuboidShape;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.PropExplorerPanel;
+import dev.latvian.mods.vidlib.feature.imgui.builder.AngleImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.BooleanImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.FloatImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Vector3dImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Vector3fImBuilder;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
@@ -29,6 +31,7 @@ import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 import dev.latvian.mods.vidlib.math.kvector.PositionType;
 import imgui.ImGui;
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -88,7 +91,7 @@ public class Prop {
 	public Level level;
 	public int id;
 	PropRemoveType removed;
-	private List<PropImBuilderData<?>> imguiBuilders;
+	private List<Pair<PropData<?, ?>, ImBuilder<?>>> imguiBuilders;
 
 	public int prevTick;
 	public int tick;
@@ -143,14 +146,11 @@ public class Prop {
 	}
 
 	public final boolean isTimeTraveling(long time) {
-		return createdTime > time || (lifespan > 0 && time > createdTime + lifespan + 20L);
+		return time <= createdTime - 20L || (lifespan > 0 && time > createdTime + lifespan + 20L);
 	}
 
 	public final boolean fullTick(long time) {
 		if (isRemoved()) {
-			return true;
-		} else if (isTimeTraveling(time)) {
-			remove(PropRemoveType.TIME_TRAVEL);
 			return true;
 		}
 
@@ -500,7 +500,7 @@ public class Prop {
 		graphics.setRedButton();
 
 		if (ImGui.smallButton("Remove")) {
-			remove(PropRemoveType.COMMAND);
+			graphics.mc.runClientCommand("prop kill id " + getIdString());
 		}
 
 		graphics.popStack();
@@ -547,6 +547,8 @@ public class Prop {
 			graphics.popStack();
 		}
 
+		boolean refresh = ImGui.smallButton("Refresh Data###refresh-data");
+
 		ImGui.sameLine();
 
 		if (ImGui.smallButton("Copy ID")) {
@@ -561,22 +563,36 @@ public class Prop {
 		}
 
 		if (imguiBuilders == null) {
-			imguiBuilders = new ArrayList<>();
-			imguiBuilders(imguiBuilders);
+			var list = new ArrayList<PropImBuilderData<?>>();
+			imguiBuilders(list);
+			imguiBuilders = new ArrayList<>(list.size());
+
+			for (var builder : list) {
+				imguiBuilders.add(Pair.of(builder.data(), builder.supplier().get()));
+			}
+
 			imguiBuilders = List.copyOf(imguiBuilders);
+			refresh = true;
+		}
+
+		if (refresh) {
+			for (var builder : imguiBuilders) {
+				var k = builder.left();
+				var b = builder.right();
+
+				try {
+					b.set(Cast.to(getData(k)));
+				} catch (Throwable ex) {
+					graphics.stackTrace(ex);
+				}
+			}
 		}
 
 		ImGui.pushID("###data");
 
 		for (var builder : imguiBuilders) {
-			var k = builder.data();
-			var b = builder.builder();
-
-			try {
-				b.set(Cast.to(getData(k)));
-			} catch (Throwable ex) {
-				graphics.stackTrace(ex);
-			}
+			var k = builder.left();
+			var b = builder.right();
 
 			var update = b.imguiKey(graphics, k.key(), k.key());
 
@@ -586,63 +602,49 @@ public class Prop {
 		}
 
 		ImGui.popID();
-
-		/*
-		for (var entry : type.data()) {
-			if (entry.data() == TICK || entry.data() == LIFESPAN) {
-				continue;
-			}
-
-			try {
-				ImGui.text(entry.data().key() + ": " + entry.data().type().codec().encodeStart(ops, Cast.to(entry.data().getter().apply(Cast.to(this)))).getOrThrow());
-			} catch (Exception ex) {
-				graphics.stackTrace(ex);
-			}
-		}
-		 */
 	}
 
 	protected void imguiBuilders(List<PropImBuilderData<?>> builders) {
 		if (hasData(DYNAMIC_POSITION)) {
-			builders.add(new PropImBuilderData<>(DYNAMIC_POSITION, KVectorImBuilder.create()));
+			builders.add(new PropImBuilderData<>(DYNAMIC_POSITION, KVectorImBuilder.SUPPLIER));
 		} else if (hasData(POSITION)) {
-			builders.add(new PropImBuilderData<>(POSITION, new Vector3dImBuilder()));
+			builders.add(new PropImBuilderData<>(POSITION, Vector3dImBuilder.SUPPLIER));
 		}
 
 		if (hasData(VELOCITY)) {
-			builders.add(new PropImBuilderData<>(VELOCITY, new Vector3fImBuilder()));
+			builders.add(new PropImBuilderData<>(VELOCITY, Vector3fImBuilder.SUPPLIER));
 		}
 
 		if (hasData(PITCH)) {
-			builders.add(new PropImBuilderData<>(PITCH, new FloatImBuilder(-90F, 90F)));
+			builders.add(new PropImBuilderData<>(PITCH, AngleImBuilder.SUPPLIER_90));
 		}
 
 		if (hasData(YAW)) {
-			builders.add(new PropImBuilderData<>(YAW, new FloatImBuilder(-180F, 180F)));
+			builders.add(new PropImBuilderData<>(YAW, AngleImBuilder.SUPPLIER_180));
 		}
 
 		if (hasData(ROLL)) {
-			builders.add(new PropImBuilderData<>(ROLL, new FloatImBuilder(-180F, 180F)));
+			builders.add(new PropImBuilderData<>(ROLL, AngleImBuilder.SUPPLIER_180));
 		}
 
 		if (hasData(GRAVITY)) {
-			builders.add(new PropImBuilderData<>(GRAVITY, new FloatImBuilder(0F, 1F)));
+			builders.add(new PropImBuilderData<>(GRAVITY, FloatImBuilder.SUPPLIER));
 		}
 
 		if (hasData(WIDTH)) {
-			builders.add(new PropImBuilderData<>(WIDTH, new FloatImBuilder(0F, 16F)));
+			builders.add(new PropImBuilderData<>(WIDTH, () -> new FloatImBuilder(0F, 16F)));
 		}
 
 		if (hasData(HEIGHT)) {
-			builders.add(new PropImBuilderData<>(HEIGHT, new FloatImBuilder(0F, 16F)));
+			builders.add(new PropImBuilderData<>(HEIGHT, () -> new FloatImBuilder(0F, 16F)));
 		}
 
 		if (hasData(CAN_COLLIDE)) {
-			builders.add(new PropImBuilderData<>(CAN_COLLIDE, new BooleanImBuilder()));
+			builders.add(new PropImBuilderData<>(CAN_COLLIDE, BooleanImBuilder.SUPPLIER));
 		}
 
 		if (hasData(CAN_INTERACT)) {
-			builders.add(new PropImBuilderData<>(CAN_INTERACT, new BooleanImBuilder()));
+			builders.add(new PropImBuilderData<>(CAN_INTERACT, BooleanImBuilder.SUPPLIER));
 		}
 	}
 
