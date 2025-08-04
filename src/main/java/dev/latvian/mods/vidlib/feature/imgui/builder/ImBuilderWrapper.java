@@ -114,7 +114,7 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 
 			for (var option : options) {
 				if (option.holder == holder) {
-					selectedBuilder[0] = option;
+					selectedBuilder[0].builder = (ImBuilder) holder.get();
 					return;
 				}
 			}

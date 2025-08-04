@@ -35,7 +35,7 @@ public class BuiltInImGui {
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.OpenDropdown(graphics, list));
 
 		list.add(MenuItem.SEPARATOR);
-		list.add(MenuItem.item(ImIcons.FRAMED_CUBE, "Debug Widgets", WidgetDebugPanel.INSTANCE));
+		list.add(MenuItem.item(ImIcons.FRAMED_CUBE, "Debug Widgets", DebugWidgetPanel.INSTANCE));
 		list.add(MenuItem.item(ImIcons.MEMORY, "ID Stack Tool", SHOW_STACK_TOOL));
 		list.add(MenuItem.item(ImIcons.EDIT, "Style Editor Tool", SHOW_STYLE_EDITOR_TOOL));
 	});

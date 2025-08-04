@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 @Mixin(LiquidBlockRenderer.class)
 public class LiquidBlockRendererMixin {
 	@ModifyConstant(method = "tesselate", constant = @Constant(intValue = 15))
-	private int shimmer$blockWrap(int value, @Local(argsOnly = true) VertexConsumer buffer) {
+	private int vl$blockWrap(int value, @Local(argsOnly = true) VertexConsumer buffer) {
 		return buffer instanceof StructureRenderer.FluidTransformingVertexPipeline pipeline ? pipeline.wrap() : value;
 	}
 }

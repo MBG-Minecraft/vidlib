@@ -36,7 +36,7 @@ public class Vector3fImBuilder implements ImBuilder<Vector3f> {
 
 	@Override
 	public boolean isValid() {
-		return !Double.isNaN(data[0]) && !Double.isNaN(data[1]) && !Double.isNaN(data[2]);
+		return Float.isFinite(data[0]) && Float.isFinite(data[1]) && Float.isFinite(data[2]);
 	}
 
 	@Override

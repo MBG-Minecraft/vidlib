@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ParticleOptionsImBuilder;
@@ -38,8 +39,8 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 
-public class WidgetDebugPanel extends AdminPanel {
-	public static final WidgetDebugPanel INSTANCE = new WidgetDebugPanel();
+public class DebugWidgetPanel extends AdminPanel {
+	public static final DebugWidgetPanel INSTANCE = new DebugWidgetPanel();
 
 	public final ImInt intData = new ImInt();
 	public final int[] int2Data = new int[2];
@@ -67,8 +68,9 @@ public class WidgetDebugPanel extends AdminPanel {
 	public final ImBuilder<BlockFilter> blockFilterBuilder = BlockFilterImBuilder.create();
 	public final PositionedSoundDataImBuilder soundBuilder = new PositionedSoundDataImBuilder();
 	public final ImBuilder<ParticleOptions> particleBuilder = ParticleOptionsImBuilder.create();
+	public final GameProfileImBuilder profileBuilder = new GameProfileImBuilder();
 
-	private WidgetDebugPanel() {
+	private DebugWidgetPanel() {
 		super("widget-debug", "Widget Debug");
 		gradient1.set(Color.BLACK.gradient(Color.WHITE));
 		gradient2.set(Color.YELLOW.gradient(Color.RED));
@@ -290,33 +292,12 @@ public class WidgetDebugPanel extends AdminPanel {
 		}
 
 		ImGui.separator();
-
-		graphics.redTextIf("Gradient 1", !gradient1.isValid());
-		ImGui.pushID("###gradient-1");
-		gradient1.imgui(graphics);
-		// ImGui.endChild();
-		ImGui.popID();
-
-		graphics.redTextIf("Gradient 2", !gradient2.isValid());
-		ImGui.pushID("###gradient-2");
-		gradient2.imgui(graphics);
-		ImGui.popID();
+		gradient1.imguiKey(graphics, "Gradient 1", "gradient-1");
+		gradient2.imguiKey(graphics, "Gradient 2", "gradient-2");
 		ImGui.separator();
-
-		ImGui.alignTextToFramePadding();
-		graphics.redTextIf("KNumber", !numberBuilder.isValid());
-		ImGui.sameLine();
-		ImGui.pushID("###knumber");
-		numberBuilder.imgui(graphics);
-		ImGui.popID();
+		numberBuilder.imguiKey(graphics, "KNumber", "knumber");
 		ImGui.separator();
-
-		ImGui.alignTextToFramePadding();
-		graphics.redTextIf("KVector", !vectorBuilder.isValid());
-		ImGui.sameLine();
-		ImGui.pushID("###kvector");
-		vectorBuilder.imgui(graphics);
-		ImGui.popID();
+		vectorBuilder.imguiKey(graphics, "KVector", "kvector");
 
 		if (graphics.inGame && numberBuilder.isValid() && vectorBuilder.isValid()) {
 			var ctx = mc.level.getGlobalContext();
@@ -346,35 +327,15 @@ public class WidgetDebugPanel extends AdminPanel {
 		}
 
 		ImGui.separator();
-
-		ImGui.alignTextToFramePadding();
-		graphics.redTextIf("Entity Filter", !entityFilterBuilder.isValid());
-		ImGui.sameLine();
-		ImGui.pushID("###entity-filter");
-		entityFilterBuilder.imgui(graphics);
-		ImGui.popID();
+		entityFilterBuilder.imguiKey(graphics, "Entity Filter", "entity-filter");
 		ImGui.separator();
-
-		ImGui.alignTextToFramePadding();
-		graphics.redTextIf("Block Filter", !blockFilterBuilder.isValid());
-		ImGui.sameLine();
-		ImGui.pushID("###block-filter");
-		blockFilterBuilder.imgui(graphics);
-		ImGui.popID();
+		blockFilterBuilder.imguiKey(graphics, "Block Filter", "block-filter");
 		ImGui.separator();
-
-		graphics.redTextIf("Positioned Sound", !soundBuilder.isValid());
-		ImGui.pushID("###positioned-sound");
-		soundBuilder.imgui(graphics);
-		ImGui.popID();
+		soundBuilder.imguiKey(graphics, "Positioned Sound", "positioned-sound");
 		ImGui.separator();
-
-		ImGui.alignTextToFramePadding();
-		graphics.redTextIf("Particle", !particleBuilder.isValid());
-		ImGui.sameLine();
-		ImGui.pushID("###particle");
-		particleBuilder.imgui(graphics);
-		ImGui.popID();
+		particleBuilder.imguiKey(graphics, "Particle", "particle");
+		ImGui.separator();
+		profileBuilder.imguiKey(graphics, "Profile", "profile");
 		ImGui.separator();
 
 		ImGui.popItemWidth();

@@ -9,10 +9,11 @@ import imgui.ImGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Position;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 
-public class Vec3ImBuilder implements ImBuilder<Vec3> {
+public class Vec3ImBuilder implements ImBuilder<Vec3>, SelectedPosition.Holder {
 	public static final ImBuilderSupplier<Vec3> SUPPLIER = Vec3ImBuilder::new;
 
 	public final Vector3d data;
@@ -124,5 +125,11 @@ public class Vec3ImBuilder implements ImBuilder<Vec3> {
 	@Override
 	public Vec3 build() {
 		return KMath.vec3(data.x, data.y, data.z);
+	}
+
+	@Override
+	@Nullable
+	public SelectedPosition getSelectedPosition() {
+		return selectedPosition;
 	}
 }

@@ -11,15 +11,12 @@ import net.minecraft.Util;
 import java.util.UUID;
 
 public class UUIDImBuilder implements ImBuilder<UUID> {
-	public static final ImBuilderSupplier<UUID> SUPPLIER = () -> new UUIDImBuilder(false);
-	public static final ImBuilderSupplier<UUID> PLAYER_SUPPLIER = () -> new UUIDImBuilder(true);
+	public static final ImBuilderSupplier<UUID> SUPPLIER = UUIDImBuilder::new;
 
-	public final boolean player;
 	public final ImString value;
 	private UUID uuid;
 
-	public UUIDImBuilder(boolean player) {
-		this.player = player;
+	public UUIDImBuilder() {
 		this.value = ImGuiUtils.resizableString(Util.NIL_UUID.toString());
 		this.uuid = null;
 	}

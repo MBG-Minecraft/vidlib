@@ -43,7 +43,7 @@ public class ParticleOptionsImBuilderRegistryEvent extends ImBuilderEvent<Partic
 		var list = new ArrayList<ImBuilderHolder<ParticleOptions>>();
 
 		for (var entry : map.entrySet()) {
-			list.add(new ImBuilderHolder<>(BuiltInRegistries.PARTICLE_TYPE.getKey(entry.getKey()).toString(), () -> entry.getValue().create(Cast.to(entry.getKey()))));
+			list.add(new ImBuilderHolder<>(BuiltInRegistries.PARTICLE_TYPE.getKey(entry.getKey()).toString(), () -> Cast.to(entry.getValue().create(Cast.to(entry.getKey())))));
 		}
 
 		return list;

@@ -7,10 +7,11 @@ import dev.latvian.mods.vidlib.feature.imgui.SelectedPosition;
 import imgui.ImGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Position;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 
-public class Vector3dImBuilder implements ImBuilder<Vector3d> {
+public class Vector3dImBuilder implements ImBuilder<Vector3d>, SelectedPosition.Holder {
 	public static final ImBuilderSupplier<Vector3d> SUPPLIER = Vector3dImBuilder::new;
 
 	public final Vector3d data;
@@ -51,6 +52,10 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d> {
 
 		ImGui.sameLine();
 
+		ImGui.alignTextToFramePadding();
+		ImGui.text("X");
+		ImGui.sameLine();
+
 		ImGuiUtils.FLOAT.set((float) data.x);
 		ImGui.dragFloat("###x", ImGuiUtils.FLOAT.getData(), 0.0625F, -30000000F, 30000000F, "%.4f");
 		update = update.orItemEdit();
@@ -70,6 +75,10 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d> {
 			ImGui.setTooltip("Use Entity Position");
 		}
 
+		ImGui.sameLine();
+
+		ImGui.alignTextToFramePadding();
+		ImGui.text("Y");
 		ImGui.sameLine();
 
 		ImGuiUtils.FLOAT.set((float) data.y);
@@ -94,6 +103,10 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d> {
 
 		ImGui.sameLine();
 
+		ImGui.alignTextToFramePadding();
+		ImGui.text("Z");
+		ImGui.sameLine();
+
 		ImGuiUtils.FLOAT.set((float) data.z);
 		ImGui.dragFloat("###z", ImGuiUtils.FLOAT.getData(), 0.0625F, -30000000F, 30000000F, "%.4f");
 		update = update.orItemEdit();
@@ -104,11 +117,17 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d> {
 
 	@Override
 	public boolean isValid() {
-		return !Double.isNaN(data.x) && !Double.isNaN(data.y) && !Double.isNaN(data.z);
+		return data.isFinite();
 	}
 
 	@Override
 	public Vector3d build() {
 		return new Vector3d(data.x, data.y, data.z);
+	}
+
+	@Override
+	@Nullable
+	public SelectedPosition getSelectedPosition() {
+		return selectedPosition;
 	}
 }

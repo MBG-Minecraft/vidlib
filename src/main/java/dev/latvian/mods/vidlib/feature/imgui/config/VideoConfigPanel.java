@@ -71,11 +71,14 @@ public class VideoConfigPanel extends AdminPanel {
 					ImGui.spacing();
 
 					config.init(mc.level.getServerData());
-					var update = config.imgui(graphics);
+					ImGui.pushID(config.id);
+					var update = config.imguiConfig(graphics);
 
 					if (update.isAny()) {
 						config.update(graphics, update.isFull());
 					}
+
+					ImGui.popID();
 				}
 			}
 		}

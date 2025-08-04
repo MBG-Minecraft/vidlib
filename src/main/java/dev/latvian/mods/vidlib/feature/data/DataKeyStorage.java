@@ -52,10 +52,10 @@ public class DataKeyStorage {
 					return DataMapValue.INVALID;
 				}
 
-				var value = decoded.left().orElse(null);
+				var value = decoded.value();
 
-				if (decoded.right().isPresent()) {
-					value = VLStreamCodecs.decodeValue(buf, key.type(), decoded.right().get());
+				if (decoded.bytes() != null) {
+					value = VLStreamCodecs.decodeValue(buf, key.type(), decoded.bytes());
 				}
 
 				return new DataMapValue(key, value);

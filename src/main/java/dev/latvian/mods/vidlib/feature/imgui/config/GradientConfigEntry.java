@@ -1,7 +1,5 @@
 package dev.latvian.mods.vidlib.feature.imgui.config;
 
-import com.google.gson.JsonElement;
-import com.mojang.serialization.DynamicOps;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.Gradient;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
@@ -34,14 +32,5 @@ public class GradientConfigEntry extends ConfigEntry<Gradient> {
 	@Override
 	public ImUpdate imguiValue(ImGraphics graphics) {
 		return builder.imgui(graphics);
-	}
-
-	@Override
-	public String json(DynamicOps<JsonElement> ops, Gradient value) {
-		try {
-			return Gradient.CODEC.encodeStart(ops, value).getOrThrow().toString();
-		} catch (Exception ignore) {
-			return "\"transparent\"";
-		}
 	}
 }

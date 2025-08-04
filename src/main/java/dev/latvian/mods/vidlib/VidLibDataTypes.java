@@ -9,6 +9,7 @@ import dev.latvian.mods.vidlib.feature.clock.ClockFont;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingParts;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
+import dev.latvian.mods.vidlib.feature.entity.EntitySnapshot;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.explosion.ExplosionData;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
@@ -61,6 +62,8 @@ public class VidLibDataTypes {
 		DataType.register(VidLib.id("stage"), Stage.DATA_TYPE);
 		DataType.register(VidLib.id("name_draw_type"), NameDrawType.DATA_TYPE);
 		DataType.register(VidLib.id("block_state_palette"), BlockStatePalette.DATA_TYPE);
+		DataType.register(VidLib.id("entity_snapshot"), EntitySnapshot.DATA_TYPE);
+		DataType.register(VidLib.id("entity_snapshot_list"), EntitySnapshot.LIST_DATA_TYPE);
 
 		// RegisteredDataType<ZoneContainer> REGISTERED_DATA_TYPE = RegisteredDataType.of(REGISTRY, ZoneContainer.class);
 	}

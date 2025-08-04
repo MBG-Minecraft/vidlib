@@ -3,7 +3,7 @@ plugins {
 	id 'java'
 	id 'idea'
 	id 'maven-publish'
-	id 'net.neoforged.moddev' version "2.0.91"
+	id 'net.neoforged.moddev' version "2.0.106"
 }
 
 var ENV = System.getenv()
@@ -18,7 +18,7 @@ println("Building version: ${version}")
 
 neoForge {
 	version = project.neoforge_version
-	// validateAccessTransformers = true // See https://github.com/neoforged/ModDevGradle/issues/236
+	validateAccessTransformers = true
 
 	accessTransformers {
 		publish(project.file('src/main/resources/META-INF/accesstransformer.cfg'))

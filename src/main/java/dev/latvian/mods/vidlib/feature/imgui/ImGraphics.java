@@ -238,6 +238,8 @@ public class ImGraphics {
 			ImGui.sameLine();
 			ImGui.text("(");
 
+			boolean exit = false;
+
 			if (e.isNativeMethod()) {
 				ImGui.sameLine();
 				pushStack();
@@ -255,6 +257,11 @@ public class ImGraphics {
 				pushStack();
 				setWarningText();
 				ImGui.text(e.getFileName());
+
+				if (e.getFileName().equals("Main.java")) {
+					exit = true;
+				}
+
 				popStack();
 
 				if (e.getLineNumber() >= 0) {
@@ -270,6 +277,10 @@ public class ImGraphics {
 
 			ImGui.sameLine();
 			ImGui.text(")");
+
+			if (exit) {
+				break;
+			}
 		}
 
 		popStack();

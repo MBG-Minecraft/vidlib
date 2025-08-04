@@ -7,9 +7,9 @@ import dev.latvian.mods.vidlib.feature.imgui.SelectedPosition;
 import imgui.ImGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
+import org.jetbrains.annotations.Nullable;
 
-public class BlockPosImBuilder implements ImBuilder<BlockPos> {
+public class BlockPosImBuilder implements ImBuilder<BlockPos>, SelectedPosition.Holder {
 	public static final ImBuilderSupplier<BlockPos> SUPPLIER = BlockPosImBuilder::new;
 
 	public BlockPos.MutableBlockPos pos;
@@ -17,10 +17,6 @@ public class BlockPosImBuilder implements ImBuilder<BlockPos> {
 
 	public BlockPosImBuilder() {
 		this.pos = new BlockPos.MutableBlockPos(0, 0, 0);
-	}
-
-	public BlockPosImBuilder(Vec3i position) {
-		this.pos = new BlockPos.MutableBlockPos(position.getX(), position.getY(), position.getZ());
 	}
 
 	@Override
@@ -46,8 +42,12 @@ public class BlockPosImBuilder implements ImBuilder<BlockPos> {
 
 		ImGui.sameLine();
 
+		ImGui.alignTextToFramePadding();
+		ImGui.text("X");
+		ImGui.sameLine();
+
 		ImGuiUtils.INT.set(pos.getX());
-		ImGui.inputInt("###x", ImGuiUtils.INT, 1, 16);
+		ImGui.dragInt("###x", ImGuiUtils.INT.getData(), 1);
 		update = update.orItemEdit();
 		pos.setX(ImGuiUtils.INT.get());
 
@@ -67,8 +67,12 @@ public class BlockPosImBuilder implements ImBuilder<BlockPos> {
 
 		ImGui.sameLine();
 
+		ImGui.alignTextToFramePadding();
+		ImGui.text("Y");
+		ImGui.sameLine();
+
 		ImGuiUtils.INT.set(pos.getY());
-		ImGui.inputInt("###y", ImGuiUtils.INT, 1, 16);
+		ImGui.dragInt("###y", ImGuiUtils.INT.getData(), 1);
 		update = update.orItemEdit();
 		pos.setY(ImGuiUtils.INT.get());
 
@@ -89,8 +93,12 @@ public class BlockPosImBuilder implements ImBuilder<BlockPos> {
 
 		ImGui.sameLine();
 
+		ImGui.alignTextToFramePadding();
+		ImGui.text("Y");
+		ImGui.sameLine();
+
 		ImGuiUtils.INT.set(pos.getZ());
-		ImGui.inputInt("###z", ImGuiUtils.INT, 1, 16);
+		ImGui.dragInt("###z", ImGuiUtils.INT.getData(), 1);
 		update = update.orItemEdit();
 		pos.setZ(ImGuiUtils.INT.get());
 		return update;
@@ -105,5 +113,11 @@ public class BlockPosImBuilder implements ImBuilder<BlockPos> {
 	@Override
 	public BlockPos build() {
 		return pos.immutable();
+	}
+
+	@Override
+	@Nullable
+	public SelectedPosition getSelectedPosition() {
+		return selectedPosition;
 	}
 }

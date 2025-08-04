@@ -8,12 +8,17 @@ import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderSupplier;
 import imgui.ImGui;
 
 import java.util.Objects;
 import java.util.function.IntFunction;
 
 public abstract class ConfigEntry<T> {
+	public static <T> ConfigEntry<T> of(String label, DataKey<T> key, ImBuilderSupplier<T> supplier) {
+		return new BuilderConfigEntry<>(label, key, supplier.get());
+	}
+
 	public static ConfigEntry<Boolean> bool(String label, DataKey<Boolean> key) {
 		return new BoolConfigEntry(label, key);
 	}
@@ -85,17 +90,11 @@ public abstract class ConfigEntry<T> {
 	public final String label;
 	public final DataKey<T> key;
 	public final String id;
-	public Object extraData;
 
 	public ConfigEntry(String label, DataKey<T> key) {
 		this.label = label;
 		this.key = key;
 		this.id = "###" + key.id().replace('/', '-');
-	}
-
-	public ConfigEntry<T> withExtraData(Object extraData) {
-		this.extraData = extraData;
-		return this;
 	}
 
 	public void init(DataMap dataMap) {
@@ -112,7 +111,7 @@ public abstract class ConfigEntry<T> {
 
 	public abstract ImUpdate imguiValue(ImGraphics graphics);
 
-	public ImUpdate imgui(ImGraphics graphics) {
+	public ImUpdate imguiConfig(ImGraphics graphics) {
 		var update = ImUpdate.NONE;
 		boolean sameLine = imguiSameLine();
 
@@ -147,7 +146,7 @@ public abstract class ConfigEntry<T> {
 		if (isDefault) {
 			ImGui.endDisabled();
 		} else if (ImGui.isItemHovered()) {
-			ImGui.setTooltip(json(graphics.mc.level.jsonOps(), key.defaultValue()));
+			ImGui.setTooltip(getTooltip(graphics.mc.level.jsonOps(), key.defaultValue()));
 		}
 
 		if (!sameLine) {
@@ -157,8 +156,8 @@ public abstract class ConfigEntry<T> {
 		return update;
 	}
 
-	public String json(DynamicOps<JsonElement> ops, T value) {
-		return value.toString();
+	public String getTooltip(DynamicOps<JsonElement> ops, T value) {
+		return String.valueOf(value);
 	}
 
 	public boolean equals(T a, T b) {

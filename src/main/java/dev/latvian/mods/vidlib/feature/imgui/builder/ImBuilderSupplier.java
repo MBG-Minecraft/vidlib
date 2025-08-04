@@ -8,6 +8,6 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 @FunctionalInterface
-public interface ImBuilderSupplier<T> extends Supplier<ImBuilder<? extends T>> {
+public interface ImBuilderSupplier<T> extends Supplier<ImBuilder<T>> {
 	Lazy<Map<DataType<?>, ImBuilderSupplier<?>>> BY_DATA_TYPE = Lazy.identityMap(map -> NeoForge.EVENT_BUS.post(new DataTypeImBuilderEvent(map::put)));
 }
