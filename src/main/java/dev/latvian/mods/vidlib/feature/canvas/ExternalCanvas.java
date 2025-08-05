@@ -4,8 +4,6 @@ import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.resource.RenderTargetDescriptor;
-import com.mojang.blaze3d.shaders.UniformType;
-import com.mojang.blaze3d.systems.RenderPass;
 import dev.latvian.mods.klib.gl.GLDebugLog;
 import dev.latvian.mods.vidlib.core.VLWithCanvas;
 import net.minecraft.client.Minecraft;
@@ -14,55 +12,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
-import java.util.function.Consumer;
 
-public class ExternalCanvas extends Canvas implements Consumer<RenderPass> {
+public class ExternalCanvas extends Canvas {
 	RenderTarget externalTarget;
-	public final List<CanvasPassModifier> passModifiers;
 
 	protected ExternalCanvas(ResourceLocation id) {
 		super(id);
-		this.passModifiers = new ArrayList<>(0);
-	}
-
-	public <T extends CanvasPassModifier> T modifier(T modifier) {
-		passModifiers.add(modifier);
-		return modifier;
-	}
-
-	public CanvasSampler sampler(String name) {
-		return modifier(new CanvasSampler(name));
-	}
-
-	public CanvasIntUniform intUniform(String name) {
-		return modifier(new CanvasIntUniform(name, UniformType.INT));
-	}
-
-	public CanvasIntUniform ivec3Uniform(String name) {
-		return modifier(new CanvasIntUniform(name, UniformType.IVEC3));
-	}
-
-	public CanvasFloatUniform floatUniform(String name) {
-		return modifier(new CanvasFloatUniform(name, UniformType.FLOAT));
-	}
-
-	public CanvasFloatUniform vec2Uniform(String name) {
-		return modifier(new CanvasFloatUniform(name, UniformType.VEC2));
-	}
-
-	public CanvasFloatUniform vec3Uniform(String name) {
-		return modifier(new CanvasFloatUniform(name, UniformType.VEC3));
-	}
-
-	public CanvasFloatUniform vec4Uniform(String name) {
-		return modifier(new CanvasFloatUniform(name, UniformType.VEC4));
-	}
-
-	public CanvasFloatUniform mat4Uniform(String name) {
-		return modifier(new CanvasFloatUniform(name, UniformType.MATRIX4X4));
 	}
 
 	public void init(int w, int h) {
@@ -110,13 +66,6 @@ public class ExternalCanvas extends Canvas implements Consumer<RenderPass> {
 		if (chain != null) {
 			((VLWithCanvas) chain).vl$setCanvas(this);
 			chain.addToFrame(frameGraphBuilder, w, h, targetBundle, this);
-		}
-	}
-
-	@Override
-	public void accept(RenderPass pass) {
-		for (var passModifier : passModifiers) {
-			passModifier.apply(pass);
 		}
 	}
 

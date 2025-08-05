@@ -3,6 +3,5 @@
 	"import": [
 		"vidlib:main_before_particles",
 		"vidlib:main_after_particles"
-	],
-	"always_active": false
+	]
 }

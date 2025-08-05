@@ -42,7 +42,7 @@ public record CanvasData(
 		Codec.INT.optionalFieldOf("priority", 0).forGetter(CanvasData::priority),
 		Codec.BOOL.optionalFieldOf("auto_draw", true).forGetter(CanvasData::autoDraw),
 		Codec.BOOL.optionalFieldOf("auto_clear", true).forGetter(CanvasData::autoClear),
-		Codec.BOOL.optionalFieldOf("always_active", true).forGetter(CanvasData::alwaysActive),
+		Codec.BOOL.optionalFieldOf("always_active", false).forGetter(CanvasData::alwaysActive),
 		KLibCodecs.setOf(ID.CODEC).optionalFieldOf("import", Set.of()).forGetter(CanvasData::importTargets),
 		Codec.BOOL.optionalFieldOf("depth", true).forGetter(CanvasData::depth),
 		Codec.BOOL.optionalFieldOf("stencil", false).forGetter(CanvasData::stencil),

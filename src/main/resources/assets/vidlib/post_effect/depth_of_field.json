@@ -1,0 +1,41 @@
+{
+	"targets": {
+		"swap": {}
+	},
+	"passes": [
+		{
+			"vertex_shader": "vidlib:post/no_texel",
+			"fragment_shader": "vidlib:post/depth_of_field",
+			"inputs": [
+				{
+					"sampler_name": "Main",
+					"target": "minecraft:main"
+				},
+				{
+					"sampler_name": "MainDepth",
+					"target": "minecraft:main",
+					"use_depth_buffer": true
+				}
+			],
+			"output": "swap"
+		},
+		{
+			"vertex_shader": "minecraft:post/blit",
+			"fragment_shader": "minecraft:post/blit",
+			"inputs": [
+				{
+					"sampler_name": "In",
+					"target": "swap"
+				}
+			],
+			"output": "vidlib:depth_of_field",
+			"uniforms": [
+				{
+					"name": "ColorModulate",
+					"type": "vec4",
+					"values": [1.0, 1.0, 1.0, 1.0]
+				}
+			]
+		}
+	]
+}

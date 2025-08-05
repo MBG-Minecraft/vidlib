@@ -138,7 +138,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 		var session = player.vl$sessionData();
 		var frameInfo = new FrameInfo(mc, session, event);
-		session.worldMouse = WorldMouse.of(mc, frameInfo.camera().getPosition(), frameInfo.worldMatrix());
+		session.worldMouse = WorldMouse.of(mc, frameInfo.camera().getPosition());
 		FrameInfo.CURRENT = frameInfo;
 
 		var rayLine = vl$self().gameRenderer.getMainCamera().ray(512D);
@@ -164,7 +164,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 			session.npcRecording.record(System.currentTimeMillis(), screenDelta, mc.player);
 		}
 
-		CanvasImpl.createHandles(event.getFrameGrapBuilder(), event.getRenderTargetDescriptor());
+		CanvasImpl.createHandles(mc, event.getFrameGrapBuilder(), event.getRenderTargetDescriptor());
 		// event.enableOutlineProcessing();
 	}
 

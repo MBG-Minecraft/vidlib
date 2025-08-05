@@ -25,7 +25,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -56,6 +58,21 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	@Override
 	public GameProfile retrieveGameProfile(String name) {
 		return vl$profileByNameCache.computeIfAbsent(name, VLMinecraftClient.super::retrieveGameProfile);
+	}
+
+	@Override
+	public Collection<GameProfile> vl$getCachedGameProfiles() {
+		if (vl$profileByNameCache.isEmpty() && vl$profileByUUIDCache.isEmpty()) {
+			return List.of();
+		}
+
+		var map = new HashMap<>(vl$profileByUUIDCache);
+
+		for (var p : vl$profileByNameCache.values()) {
+			map.putIfAbsent(p.getId(), p);
+		}
+
+		return map.values();
 	}
 
 	@Override

@@ -167,7 +167,7 @@ public class CanvasImpl {
 		}
 	}
 
-	public static void createHandles(FrameGraphBuilder builder, RenderTargetDescriptor targetDescriptor) {
+	public static void createHandles(Minecraft mc, FrameGraphBuilder builder, RenderTargetDescriptor targetDescriptor) {
 		GLDebugLog.pushGroup("[VidLib] Canvas Create Handles");
 
 		for (var canvas : ENABLED) {
@@ -176,6 +176,10 @@ public class CanvasImpl {
 
 			if (canvas.data.autoClear()) {
 				canvas.clear();
+			}
+
+			if (canvas.drawSetupCallback != null) {
+				canvas.drawSetupCallback.accept(mc);
 			}
 		}
 

@@ -13,8 +13,6 @@ import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.Nullable;
 import org.joml.FrustumIntersection;
-import org.joml.Matrix4f;
-import org.joml.Matrix4fc;
 import org.joml.Vector3f;
 
 public record FrameInfo(
@@ -23,9 +21,6 @@ public record FrameInfo(
 	@Nullable RenderLevelStageEvent.Stage stage,
 	@Nullable TerrainRenderLayer layer,
 	PoseStack poseStack,
-	Matrix4fc projectionMatrix,
-	Matrix4fc modelViewMatrix,
-	Matrix4fc worldMatrix,
 	int renderTick,
 	DeltaTracker deltaTracker,
 	float worldDelta,
@@ -59,9 +54,6 @@ public record FrameInfo(
 			event.getStage(),
 			renderLayer(event.getStage()),
 			event.getPoseStack(),
-			event.getProjectionMatrix(),
-			event.getModelViewMatrix(),
-			new Matrix4f(event.getProjectionMatrix()).mul(event.getModelViewMatrix()),
 			event.getRenderTick(),
 			event.getPartialTick(),
 			event.getPartialTick().getGameTimeDeltaPartialTick(false),
@@ -84,9 +76,6 @@ public record FrameInfo(
 			null,
 			null,
 			new PoseStack(),
-			event.getProjectionMatrix(),
-			event.getModelViewMatrix(),
-			new Matrix4f(event.getProjectionMatrix()).mul(event.getModelViewMatrix()),
 			mc.levelRenderer.getTicks(),
 			mc.getDeltaTracker(),
 			mc.getDeltaTracker().getGameTimeDeltaPartialTick(false),

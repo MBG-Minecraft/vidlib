@@ -76,6 +76,7 @@
 		"GameRendererMixin",
 		"GlBufferMixin",
 		"GlCommandEncoderMixin",
+		"GlProgramMixin",
 		"GlTextureMixin",
 		"GpuBufferMixin",
 		"GpuTextureMixin",

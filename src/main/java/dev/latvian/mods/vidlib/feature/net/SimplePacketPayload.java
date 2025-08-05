@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.net;
 
-import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.VidLib;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -28,16 +27,16 @@ public interface SimplePacketPayload {
 	default void handle(Context ctx) {
 	}
 
-	default ClientboundCustomPayloadPacket toS2C(Level level, long nextPacketId) {
-		return new ClientboundCustomPayloadPacket(new VidLibPacketPayloadContainer(this, nextPacketId, level.getGameTime()));
+	default ClientboundCustomPayloadPacket toS2C(Level level, long uid) {
+		return new ClientboundCustomPayloadPacket(new VidLibPacketPayloadContainer(this, uid, level.getGameTime()));
 	}
 
 	default ClientboundCustomPayloadPacket toS2C(Level level) {
 		return toS2C(level, level.vl$nextPacketId());
 	}
 
-	default ServerboundCustomPayloadPacket toC2S(Level level, long nextPacketId) {
-		return new ServerboundCustomPayloadPacket(new VidLibPacketPayloadContainer(this, nextPacketId, level.getGameTime()));
+	default ServerboundCustomPayloadPacket toC2S(Level level, long uid) {
+		return new ServerboundCustomPayloadPacket(new VidLibPacketPayloadContainer(this, uid, level.getGameTime()));
 	}
 
 	default ServerboundCustomPayloadPacket toC2S(Level level) {
@@ -46,9 +45,8 @@ public interface SimplePacketPayload {
 
 	default byte[] toBytes(Level level, long uid) {
 		var buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), level.registryAccess());
-		buf.writeVarLong(uid);
-		buf.writeVarLong(level.getGameTime());
-		getType().streamCodec().encode(buf, Cast.to(this));
+		var container = new VidLibPacketPayloadContainer(this, uid, level.getGameTime());
+		getType().streamCodec().encode(buf, container);
 		var bytes = new byte[buf.readableBytes()];
 		buf.getBytes(buf.readerIndex(), bytes);
 		buf.release();

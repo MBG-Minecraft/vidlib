@@ -84,6 +84,10 @@ public interface VLMinecraftEnvironment extends VLPlayerContainer, VLMinecraftEn
 		throw new NoMixinException(this);
 	}
 
+	default Collection<GameProfile> vl$getCachedGameProfiles() {
+		return List.of();
+	}
+
 	default void vl$clearProfileCache() {
 	}
 

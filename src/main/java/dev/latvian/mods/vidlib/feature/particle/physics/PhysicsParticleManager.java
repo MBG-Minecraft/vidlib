@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.particle.physics;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.latvian.mods.klib.gl.IndexBuffer;
+import dev.latvian.mods.klib.math.ClientMatrices;
 import dev.latvian.mods.vidlib.core.VLBlockState;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
@@ -15,7 +16,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 
 import java.util.ArrayList;
@@ -162,7 +162,7 @@ public class PhysicsParticleManager {
 		) {
 			renderPass.setPipeline(renderType.getRenderPipeline());
 			renderPass.bindSampler("Sampler0", RenderSystem.getShaderTexture(0));
-			renderPass.setUniform("ProjMat", new Matrix4f(frame.projectionMatrix()));
+			renderPass.setUniform("ProjMat", ClientMatrices.PROJECTION);
 			renderPass.setIndexBuffer(indexBuffer.buffer(), indexBuffer.type());
 
 			var pass = new PhysicsParticleRenderPass(renderPass);

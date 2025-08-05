@@ -6,18 +6,21 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
+import net.minecraft.Util;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.biome.Biome;
 import net.neoforged.fml.ModList;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -25,6 +28,12 @@ import java.util.SequencedCollection;
 
 public interface MiscUtils {
 	Comparator<GameProfile> PROFILE_COMPARATOR = (a, b) -> a.getName().compareToIgnoreCase(b.getName());
+
+	HttpClient HTTP_CLIENT = HttpClient.newBuilder()
+		.executor(Util.backgroundExecutor())
+		.followRedirects(HttpClient.Redirect.ALWAYS)
+		.connectTimeout(Duration.ofSeconds(10L))
+		.build();
 
 	static Path createDir(Path path) {
 		if (Files.notExists(path)) {
@@ -75,31 +84,31 @@ public interface MiscUtils {
 		return iterable.iterator().hasNext();
 	}
 
-	static DataResult<byte[]> fetch(String url) throws IOException {
-		var connection = (HttpURLConnection) URI.create(url).toURL().openConnection();
-		connection.setRequestMethod("GET");
-		connection.setDoInput(true);
-		connection.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
-		connection.setRequestProperty("User-Agent", "VidLib/1.0");
-		connection.setConnectTimeout(3000);
-		connection.setReadTimeout(3000);
+	static DataResult<byte[]> fetch(String url) {
+		var request = HttpRequest.newBuilder()
+			.uri(URI.create(url))
+			.GET()
+			.timeout(Duration.ofSeconds(10L))
+			.header("Accept-Language", "en-US,en;q=0.5")
+			.header("User-Agent", "VidLib/1.0")
+			.build();
 
-		if (connection.getResponseCode() / 100 == 2) {
-			try (var in = connection.getInputStream()) {
-				return DataResult.success(in.readAllBytes());
+		HttpResponse<byte[]> response = null;
+
+		try {
+			response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofByteArray());
+			return DataResult.success(response.body());
+		} catch (Exception ex) {
+			if (response != null) {
+				var res = response;
+				return DataResult.error(() -> "Error " + res.statusCode() + ": " + ex);
+			} else {
+				return DataResult.error(ex::toString);
 			}
 		}
-
-		return DataResult.error(() -> {
-			try {
-				return "Failed to fetch data from " + url + ": " + connection.getResponseMessage();
-			} catch (Exception e) {
-				return "Failed to fetch data from " + url;
-			}
-		});
 	}
 
-	static GameProfile fetchProfile(String name) throws IOException {
+	static GameProfile fetchProfile(String name) {
 		return fetch("https://api.mojang.com/users/profiles/minecraft/" + name).flatMap(bytes -> {
 			try {
 				var json = JsonUtils.GSON.fromJson(new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8), JsonObject.class);
@@ -107,7 +116,7 @@ public interface MiscUtils {
 			} catch (Exception e) {
 				return DataResult.error(() -> "Failed to parse profile json: " + e.getMessage());
 			}
-		}).getOrThrow(IOException::new);
+		}).getOrThrow();
 	}
 
 	Lazy<Biome> VOID_BIOME = Lazy.of(() -> {

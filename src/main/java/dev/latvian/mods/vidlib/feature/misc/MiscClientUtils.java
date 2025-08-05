@@ -18,12 +18,15 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class MiscClientUtils {
 	public static final ConcurrentLinkedDeque<AutoCloseable> CLIENT_CLOSEABLE = new ConcurrentLinkedDeque<>();
+	public static final Matrix4f FRUSTUM_MATRIX = new Matrix4f();
+	public static final Matrix4f PERSPECTIVE_MATRIX = new Matrix4f();
 
 	public static boolean handleDebugKeys(Minecraft mc, int key) {
 		if (key == VidLibConfig.cycleShadersKey) {

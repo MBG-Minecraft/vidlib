@@ -58,6 +58,10 @@ public class VidLib {
 		}
 
 		particleRegistry.register(bus);
+
+		if (ModList.get().isLoaded("video")) {
+			VidLibConfig.strongEntityOutline = true;
+		}
 	}
 
 	public static void setupSync() {
