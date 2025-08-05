@@ -7,12 +7,11 @@ import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
-import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
 import org.joml.SimplexNoise;
 
 public class BurnSmokeParticle extends TextureSheetParticle {
-	public static ParticleProvider<SimpleParticleType> create(SpriteSet spriteSet) {
+	public static ParticleProvider<VidLibParticles.SimpleParticleType> create(SpriteSet spriteSet) {
 		return (type, level, x, y, z, xd, yd, zd) -> new BurnSmokeParticle(level, x, y, z, xd, yd, zd, spriteSet);
 	}
 

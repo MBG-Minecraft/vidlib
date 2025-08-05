@@ -6,7 +6,6 @@ import dev.latvian.mods.vidlib.feature.npc.NPCParticleOptions;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
-import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 
@@ -15,6 +14,32 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public interface VidLibParticles {
+
+	/**
+	 * Copies the functionality of {@link net.minecraft.core.particles.SimpleParticleType}
+	 * because NeoForge has an access transformer that opens the constructor.
+	 */
+	class SimpleParticleType extends ParticleType<SimpleParticleType> implements ParticleOptions {
+		private final MapCodec<SimpleParticleType> codec = MapCodec.unit(this::getType);
+		private final StreamCodec<RegistryFriendlyByteBuf, SimpleParticleType> streamCodec = StreamCodec.unit(this);
+
+		public SimpleParticleType(boolean overrideLimiter) {
+			super(overrideLimiter);
+		}
+
+		public SimpleParticleType getType() {
+			return this;
+		}
+
+		public MapCodec<SimpleParticleType> codec() {
+			return this.codec;
+		}
+
+		public StreamCodec<RegistryFriendlyByteBuf, SimpleParticleType> streamCodec() {
+			return this.streamCodec;
+		}
+	}
+
 	List<Pair<String, Supplier<? extends ParticleType<?>>>> PARTICLES = new ArrayList<>();
 
 	static <T extends ParticleOptions> Supplier<ParticleType<T>> register(String name, Supplier<MapCodec<T>> codec, Supplier<StreamCodec<? super RegistryFriendlyByteBuf, T>> streamCodec) {

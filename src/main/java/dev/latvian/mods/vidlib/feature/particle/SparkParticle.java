@@ -8,11 +8,10 @@ import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
-import net.minecraft.core.particles.SimpleParticleType;
 import org.joml.Math;
 
 public class SparkParticle extends TextureSheetParticle {
-	public static ParticleProvider<SimpleParticleType> create(SpriteSet spriteSet) {
+	public static ParticleProvider<VidLibParticles.SimpleParticleType> create(SpriteSet spriteSet) {
 		return (type, level, x, y, z, xd, yd, zd) -> new SparkParticle(level, x, y, z, xd, yd, zd, spriteSet);
 	}
 
