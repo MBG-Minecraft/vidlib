@@ -14,8 +14,8 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 
 public class DepthOfField {
-	public static DepthOfFieldData REPLAY = new DepthOfFieldData(KVector.ZERO, 2F, 4F, 0F);
-	public static DepthOfFieldData OVERRIDE = new DepthOfFieldData(KVector.ZERO, 2F, 4F, 1F);
+	public static DepthOfFieldData REPLAY = new DepthOfFieldData(KVector.ZERO, 1.5F, 8F, 0F);
+	public static DepthOfFieldData OVERRIDE = new DepthOfFieldData(KVector.ZERO, 1.5F, 8F, 10F);
 	public static final ImBoolean OVERRIDE_ENABLED = new ImBoolean(false);
 	public static final ImBoolean DEBUG_ENABLED = new ImBoolean(false);
 	public static final Color4ImBuilder DEBUG_NEAR_COLOR = new Color4ImBuilder();

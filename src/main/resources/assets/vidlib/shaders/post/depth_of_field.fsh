@@ -1,7 +1,7 @@
 #version 150
 
-uniform sampler2D MainSampler;
-uniform sampler2D MainDepthSampler;
+uniform sampler2D InSampler;
+uniform sampler2D InDepthSampler;
 
 uniform vec3 FocusPos;
 uniform float FocusRange;
@@ -12,12 +12,14 @@ uniform vec4 DebugNearCol;
 uniform vec4 DebugFarCol;
 
 in vec2 texCoord;
+in vec2 oneTexel;
+
 out vec4 fragColor;
 
-void main() {
-	float depth = texture(MainDepthSampler, texCoord).r;
+float blurAt(in vec2 coord) {
+	float depth = texture(InDepthSampler, coord).r;
 	vec4 clipPos;
-	clipPos.xy = texCoord * 2.0 - 1.0;
+	clipPos.xy = coord * 2.0 - 1.0;
 	clipPos.z = depth * 2.0 - 1.0;
 	clipPos.w = 1.0;
 	vec4 homogenousPos = InverseViewProjectionMat * clipPos;
@@ -25,18 +27,58 @@ void main() {
 	vec3 diff = worldPos - FocusPos;
 	float distSq = dot(diff, diff);
 
-	float blur = 1.0;
-
 	if (distSq < FocusRange * FocusRange) {
-		blur = 0.0;
+		return 0.0;
 	} else if (distSq < BlurRange * BlurRange) {
-		blur = (sqrt(distSq) - FocusRange) / (BlurRange - FocusRange);
+		return (sqrt(distSq) - FocusRange) / (BlurRange - FocusRange);
+	} else {
+		return 1.0;
 	}
+}
+
+void main() {
+	float blur = blurAt(texCoord);
 
 	if (Strength <= 0.0) {
 		fragColor = mix(DebugNearCol, DebugFarCol, blur);
 		return;
 	}
 
-	float blurStrength = Strength * blur;
+	float size = Strength * blur;
+
+	if (size <= 0.0) {
+		discard;
+	}
+
+	float count = 0.0;
+	int csize = int(ceil(size));
+	float maxDist = size * size;
+
+	vec3 result = vec3(0.0);
+
+	for (int x = -csize; x <= csize; x += 1) {
+		for (int y = -csize; y <= csize; y += 1) {
+			if (x == 0 && y == 0) {
+				continue;
+			}
+
+			float dist = x * x + y * y;
+			vec2 texCoord2 = texCoord + oneTexel * vec2(x, y);
+
+			if (dist <= maxDist && blurAt(texCoord2) >= blur) {
+				vec4 c = texture(InSampler, texCoord2);
+
+				if (c.a > 0.0) {
+					count += 1.0;
+					result += c.rgb;
+				}
+			}
+		}
+	}
+
+	if (count <= 0.0) {
+		discard;
+	}
+
+	fragColor = vec4(result / count, 1.0);
 }

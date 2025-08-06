@@ -26,17 +26,17 @@ void main() {
 		return;
 	}
 
-	float count = 0.0;
 	float size = max(1.0, OutSize.x / 1920.0 * 24.0);
-	float csize = ceil(size);
+	float count = 0.0;
+	int csize = int(ceil(size));
 	float maxDist = size * size;
 
 	vec3 result = vec3(0.0);
 	float intensity = 1.0;
 	float maxAlpha = 0.0;
 
-	for (float x = -csize; x <= csize; x += 1.0) {
-		for (float y = -csize; y <= csize; y += 1.0) {
+	for (int x = -csize; x <= csize; x += 1) {
+		for (int y = -csize; y <= csize; y += 1) {
 			float dist = x * x + y * y;
 
 			if (dist <= maxDist) {
