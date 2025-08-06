@@ -1,19 +1,15 @@
 package dev.latvian.mods.vidlib.feature.entity.filter;
 
-import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.mojang.util.UndashedUuid;
-import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.util.IntOrUUID;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.UUIDImBuilder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import imgui.ImGui;
 import imgui.type.ImInt;
-import imgui.type.ImString;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
@@ -55,7 +51,7 @@ public record ExactEntityFilter(IntOrUUID entityId) implements EntityFilter, ImB
 	public static class UUIDBuilder implements EntityFilterImBuilder {
 		public static final ImBuilderHolder<EntityFilter> TYPE = new ImBuilderHolder<>("UUID", UUIDBuilder::new);
 
-		public final ImString uuid = ImGuiUtils.resizableString();
+		public final UUIDImBuilder uuid = new UUIDImBuilder();
 
 		@Override
 		public void set(EntityFilter value) {
@@ -66,18 +62,17 @@ public record ExactEntityFilter(IntOrUUID entityId) implements EntityFilter, ImB
 
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
-			ImGui.inputText("###uuid", uuid);
-			return ImUpdate.itemEdit();
+			return uuid.imgui(graphics);
 		}
 
 		@Override
 		public boolean isValid() {
-			return KLibCodecs.UUID.decode(JavaOps.INSTANCE, uuid.get()).isSuccess();
+			return uuid.isValid();
 		}
 
 		@Override
 		public EntityFilter build() {
-			return new ExactEntityFilter(IntOrUUID.of(UndashedUuid.fromStringLenient(uuid.get())));
+			return new ExactEntityFilter(IntOrUUID.of(uuid.build()));
 		}
 	}
 

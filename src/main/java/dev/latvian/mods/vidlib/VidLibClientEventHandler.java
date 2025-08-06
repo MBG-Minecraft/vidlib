@@ -48,6 +48,7 @@ import dev.latvian.mods.vidlib.feature.entity.filter.EntityXorFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.ExactEntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.HasEffectEntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.MatchEntityFilter;
+import dev.latvian.mods.vidlib.feature.entity.filter.ProfileEntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.ServerDataEntityFilter;
 import dev.latvian.mods.vidlib.feature.gradient.ClientGradientLoader;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
@@ -810,6 +811,7 @@ public class VidLibClientEventHandler {
 		event.add(MatchEntityFilter.Builder.TYPE);
 		event.add(HasEffectEntityFilter.Builder.TYPE);
 		event.add(ServerDataEntityFilter.Builder.TYPE);
+		event.add(ProfileEntityFilter.Builder.TYPE);
 	}
 
 	@SubscribeEvent

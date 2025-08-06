@@ -4,7 +4,6 @@ import dev.latvian.mods.vidlib.feature.imgui.AdminPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import imgui.ImGui;
 
 public class DepthOfFieldPanel extends AdminPanel {
@@ -38,10 +37,6 @@ public class DepthOfFieldPanel extends AdminPanel {
 		if (DepthOfField.DEBUG_ENABLED.get()) {
 			DepthOfField.DEBUG_NEAR_COLOR.imguiKey(graphics, "Near Color", "near-color");
 			DepthOfField.DEBUG_FAR_COLOR.imguiKey(graphics, "Far Color", "far-color");
-		}
-
-		if (ImGui.button("Reload Shaders")) {
-			MiscClientUtils.reloadShaders(graphics.mc);
 		}
 
 		ImGui.popItemWidth();
