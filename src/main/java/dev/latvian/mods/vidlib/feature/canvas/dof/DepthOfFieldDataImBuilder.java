@@ -9,8 +9,8 @@ import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 
 public class DepthOfFieldDataImBuilder implements ImBuilder<DepthOfFieldData> {
 	public final ImBuilder<KVector> focus = KVectorImBuilder.create();
-	public final FloatImBuilder focusRange = new FloatImBuilder(0F, 100F);
-	public final FloatImBuilder blurRange = new FloatImBuilder(0F, 100F);
+	public final FloatImBuilder focusRange = new FloatImBuilder(0F, 20F).logarithmic();
+	public final FloatImBuilder blurRange = new FloatImBuilder(0F, 20F).logarithmic();
 	public final FloatImBuilder strength = new FloatImBuilder(0F, 10F);
 
 	@Override
@@ -23,7 +23,7 @@ public class DepthOfFieldDataImBuilder implements ImBuilder<DepthOfFieldData> {
 		} else {
 			focus.set(KVector.ZERO);
 			focusRange.set(2F);
-			blurRange.set(4F);
+			blurRange.set(2F);
 			strength.set(1F);
 		}
 	}

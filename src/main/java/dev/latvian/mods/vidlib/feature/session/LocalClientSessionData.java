@@ -13,6 +13,7 @@ import dev.latvian.mods.vidlib.VidLibEventHandler;
 import dev.latvian.mods.vidlib.core.VLLocalPlayer;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeInstance;
+import dev.latvian.mods.vidlib.feature.canvas.dof.DepthOfField;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.cutscene.ClientCutscene;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
@@ -207,6 +208,7 @@ public class LocalClientSessionData extends ClientSessionData {
 
 		level.vl$preTick(paused);
 		filteredZones.tick(level);
+		DepthOfField.tick(mc);
 
 		updateOverrides(player);
 		input = VLLocalPlayer.fromInput(window.getWindow(), player, mc.screen == null && mc.isWindowActive());
