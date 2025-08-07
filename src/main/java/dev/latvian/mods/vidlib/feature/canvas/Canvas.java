@@ -81,6 +81,7 @@ public class Canvas implements Consumer<RenderPass> {
 	public boolean previewColor;
 	public boolean previewDepth;
 	public CanvasData data;
+	public Consumer<Minecraft> tickCallback;
 	public Consumer<Minecraft> drawSetupCallback;
 	public Consumer<Minecraft> drawCallback;
 
@@ -110,6 +111,11 @@ public class Canvas implements Consumer<RenderPass> {
 		}
 
 		active = true;
+	}
+
+	public Canvas setTickCallback(Consumer<Minecraft> callback) {
+		this.tickCallback = callback;
+		return this;
 	}
 
 	public Canvas setDrawSetupCallback(Consumer<Minecraft> callback) {

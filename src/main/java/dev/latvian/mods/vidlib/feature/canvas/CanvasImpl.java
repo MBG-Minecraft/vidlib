@@ -144,6 +144,14 @@ public class CanvasImpl {
 		}
 	}
 
+	public static void tickAll(Minecraft mc) {
+		for (var canvas : ENABLED) {
+			if (canvas.tickCallback != null) {
+				canvas.tickCallback.accept(mc);
+			}
+		}
+	}
+
 	@Nullable
 	public static Canvas get(ResourceLocation id) {
 		var c = Canvas.ALL.get().get(id);

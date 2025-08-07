@@ -27,20 +27,20 @@ public class DepthOfField {
 	}
 
 	@AutoRegister(Dist.CLIENT)
-	public static final Canvas CANVAS = Canvas.createExternal(VidLib.id("depth_of_field")).setDrawSetupCallback(DepthOfField::setup);
+	public static final Canvas CANVAS = Canvas.createExternal(VidLib.id("depth_of_field")).setTickCallback(DepthOfField::tick).setDrawSetupCallback(DepthOfField::setup);
 
+	public static final CanvasFloatUniform INVERSE_VIEW_PROJECTION_MATRIX_UNIFORM = CANVAS.mat4Uniform("InverseViewProjectionMat");
 	public static final CanvasFloatUniform FOCUS_UNIFORM = CANVAS.vec3Uniform("FocusPos");
 	public static final CanvasFloatUniform FOCUS_RANGE_UNIFORM = CANVAS.floatUniform("FocusRange");
 	public static final CanvasFloatUniform BLUR_RANGE_UNIFORM = CANVAS.floatUniform("BlurRange");
 	public static final CanvasFloatUniform STRENGTH_UNIFORM = CANVAS.floatUniform("Strength");
-	public static final CanvasFloatUniform INVERSE_VIEW_PROJECTION_MATRIX_UNIFORM = CANVAS.mat4Uniform("InverseViewProjectionMat");
 	public static final CanvasFloatUniform DEBUG_NEAR_COLOR_UNIFORM = CANVAS.floatUniform("DebugNearCol");
 	public static final CanvasFloatUniform DEBUG_FAR_COLOR_UNIFORM = CANVAS.floatUniform("DebugFarCol");
 
 	public static Vec3 prevFocusPosition = null;
 	public static Vec3 focusPosition = null;
 
-	public static void tick(Minecraft mc) {
+	private static void tick(Minecraft mc) {
 		prevFocusPosition = focusPosition;
 		focusPosition = null;
 
@@ -61,7 +61,7 @@ public class DepthOfField {
 		}
 	}
 
-	public static void setup(Minecraft mc) {
+	private static void setup(Minecraft mc) {
 		if (prevFocusPosition == null || focusPosition == null) {
 			return;
 		}
@@ -77,11 +77,11 @@ public class DepthOfField {
 		CANVAS.markActive();
 		var cam = mc.gameRenderer.getMainCamera().getPosition();
 
+		INVERSE_VIEW_PROJECTION_MATRIX_UNIFORM.set(ClientMatrices.INVERSE_WORLD);
 		FOCUS_UNIFORM.set((float) (vec.x - cam.x), (float) (vec.y - cam.y), (float) (vec.z - cam.z));
 		FOCUS_RANGE_UNIFORM.set(Math.max(data.focusRange(), 0F));
 		BLUR_RANGE_UNIFORM.set(Math.max(data.focusRange(), 0F) + Math.max(data.blurRange(), 0F));
 		STRENGTH_UNIFORM.set(DEBUG_ENABLED.get() ? 0F : Math.max(data.strength(), 0F));
-		INVERSE_VIEW_PROJECTION_MATRIX_UNIFORM.set(ClientMatrices.INVERSE_WORLD);
 		DEBUG_NEAR_COLOR_UNIFORM.set(DEBUG_NEAR_COLOR.build());
 		DEBUG_FAR_COLOR_UNIFORM.set(DEBUG_FAR_COLOR.build());
 	}

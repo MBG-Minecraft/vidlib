@@ -3,11 +3,11 @@
 uniform sampler2D InSampler;
 uniform sampler2D InDepthSampler;
 
+uniform mat4 InverseViewProjectionMat;
 uniform vec3 FocusPos;
 uniform float FocusRange;
 uniform float BlurRange;
 uniform float Strength;
-uniform mat4 InverseViewProjectionMat;
 uniform vec4 DebugNearCol;
 uniform vec4 DebugFarCol;
 
