@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.serialization.JsonOps;
@@ -70,6 +71,7 @@ import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
 import dev.latvian.mods.vidlib.feature.particle.WindParticleOptionsImBuilder;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
+import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructureCapture;
@@ -126,6 +128,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TriState;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
@@ -810,5 +813,22 @@ public class VidLibClientEventHandler {
 		event.add(BlockIdFilter.Builder.TYPE);
 		event.add(BlockStateFilter.Builder.TYPE);
 		event.add(BlockTypeTagFilter.Builder.TYPE);
+	}
+
+	@SubscribeEvent
+	public static void mouseClicked(InputEvent.MouseButton.Pre event) {
+		if (event.getAction() == InputConstants.PRESS) {
+			var mc = Minecraft.getInstance();
+
+			if (mc.player != null && mc.screen == null && mc.isWindowActive() && mc.hitResult instanceof PropHitResult hit) {
+				hit.prop.onInteraction(mc.player, event.getButton(), hit.getLocation(), hit.getDirection());
+
+				if (event.getButton() == 0) {
+					mc.player.swing(InteractionHand.MAIN_HAND);
+				}
+
+				event.setCanceled(true);
+			}
+		}
 	}
 }

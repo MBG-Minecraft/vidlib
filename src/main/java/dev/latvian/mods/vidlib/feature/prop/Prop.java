@@ -37,6 +37,7 @@ import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
@@ -488,6 +489,12 @@ public class Prop {
 		return null;
 	}
 
+	public void onInteraction(Player player, int button, Vec3 at, Direction side) {
+		if (level.isClientSide()) {
+			level.c2s(new PropInteractionPayload(spawnType.listType, id, button, at, side));
+		}
+	}
+
 	public void imgui(ImGraphics graphics, float delta) {
 		graphics.pushStack();
 		graphics.setRedButton();
@@ -704,7 +711,7 @@ public class Prop {
 		setData(data, value);
 
 		if (sync && !level.isReplayLevel()) {
-			var payload = EditPropPayload.of(this, List.of(data));
+			var payload = UpdatePropRequestPayload.of(this, List.of(data));
 
 			if (payload != null) {
 				level.c2s(payload);

@@ -11,17 +11,17 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public record EditPropPayload(PropListType type, int id, byte[] update) implements SimplePacketPayload {
+public record UpdatePropRequestPayload(PropListType type, int id, byte[] update) implements SimplePacketPayload {
 	@AutoPacket(AutoPacket.To.SERVER)
-	public static final VidLibPacketType<EditPropPayload> TYPE = VidLibPacketType.internal("prop/edit", CompositeStreamCodec.of(
-		PropListType.STREAM_CODEC, EditPropPayload::type,
-		ByteBufCodecs.VAR_INT, EditPropPayload::id,
-		ByteBufCodecs.BYTE_ARRAY, EditPropPayload::update,
-		EditPropPayload::new
+	public static final VidLibPacketType<UpdatePropRequestPayload> TYPE = VidLibPacketType.internal("prop/update_request", CompositeStreamCodec.of(
+		PropListType.STREAM_CODEC, UpdatePropRequestPayload::type,
+		ByteBufCodecs.VAR_INT, UpdatePropRequestPayload::id,
+		ByteBufCodecs.BYTE_ARRAY, UpdatePropRequestPayload::update,
+		UpdatePropRequestPayload::new
 	));
 
 	@Nullable
-	public static EditPropPayload of(Prop prop, Collection<PropData<?, ?>> keys) {
+	public static UpdatePropRequestPayload of(Prop prop, Collection<PropData<?, ?>> keys) {
 		var data = new ArrayList<PropType.PropDataEntry>(keys.size());
 
 		for (var key : keys) {
@@ -35,7 +35,7 @@ public record EditPropPayload(PropListType type, int id, byte[] update) implemen
 		var update = prop.isRemoved() ? null : prop.getDataUpdates(data);
 
 		if (update != null) {
-			return new EditPropPayload(prop.spawnType.listType, prop.id, update);
+			return new UpdatePropRequestPayload(prop.spawnType.listType, prop.id, update);
 		}
 
 		return null;
