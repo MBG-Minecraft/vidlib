@@ -40,7 +40,7 @@ public record PivotingKVector(KVector target, KNumber distance, Easing easing, K
 
 		public final ImBuilder<KVector> target = KVectorImBuilder.create();
 		public final ImBuilder<KNumber> distance = KNumberImBuilder.create(5D);
-		public final ImBuilder<Easing> easing = EnumImBuilder.easing();
+		public final ImBuilder<Easing> easing = EnumImBuilder.EASING_TYPE.get();
 		public final ImBuilder<KNumber> startAngle = KNumberImBuilder.create(0D);
 		public final ImBuilder<KNumber> addedAngle = KNumberImBuilder.create(0D);
 		public final ImBuilder<KNumber> height = KNumberImBuilder.create(0D);

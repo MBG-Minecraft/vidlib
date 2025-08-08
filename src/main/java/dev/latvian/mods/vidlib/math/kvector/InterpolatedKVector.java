@@ -38,7 +38,7 @@ public record InterpolatedKVector(Easing easing, float start, float end, KVector
 	public static class Builder implements KVectorImBuilder {
 		public static final ImBuilderHolder<KVector> TYPE = new ImBuilderHolder<>("Interpolated", Builder::new);
 
-		public final ImBuilder<Easing> easing = EnumImBuilder.easing();
+		public final ImBuilder<Easing> easing = EnumImBuilder.EASING_TYPE.get();
 		public final ImBuilder<KVector> from = KVectorImBuilder.create();
 		public final ImBuilder<KVector> to = KVectorImBuilder.create();
 		public final ImFloat start = new ImFloat(0F);

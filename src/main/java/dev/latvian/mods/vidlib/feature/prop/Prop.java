@@ -15,9 +15,9 @@ import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.PropExplorerPanel;
 import dev.latvian.mods.vidlib.feature.imgui.builder.AngleImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.BooleanImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.FloatImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.IntImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Vector3dImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Vector3fImBuilder;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
@@ -31,6 +31,7 @@ import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 import dev.latvian.mods.vidlib.math.kvector.PositionType;
 import imgui.ImGui;
+import imgui.flag.ImGuiTableFlags;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import net.minecraft.commands.CommandSourceStack;
@@ -63,18 +64,18 @@ import java.util.List;
 import java.util.Set;
 
 public class Prop {
-	public static final PropData<Prop, Integer> TICK = PropData.create(Prop.class, "tick", DataTypes.TICKS, p -> p.tick, (p, v) -> p.tick = v);
-	public static final PropData<Prop, Integer> LIFESPAN = PropData.create(Prop.class, "lifespan", DataTypes.TICKS, p -> p.lifespan, (p, v) -> p.lifespan = v);
-	public static final PropData<Prop, Vector3d> POSITION = PropData.create(Prop.class, "position", JOMLDataTypes.DVEC3, p -> p.pos, Prop::setPos);
-	public static final PropData<Prop, Vector3f> VELOCITY = PropData.create(Prop.class, "velocity", JOMLDataTypes.VEC3, p -> p.velocity, Prop::setVelocity);
-	public static final PropData<Prop, Float> PITCH = PropData.create(Prop.class, "pitch", DataTypes.FLOAT, p -> p.rotation.x, Prop::setPitch);
-	public static final PropData<Prop, Float> YAW = PropData.create(Prop.class, "yaw", DataTypes.FLOAT, p -> p.rotation.y, Prop::setYaw);
-	public static final PropData<Prop, Float> ROLL = PropData.create(Prop.class, "roll", DataTypes.FLOAT, p -> p.rotation.z, Prop::setRoll);
-	public static final PropData<Prop, Float> GRAVITY = PropData.create(Prop.class, "gravity", DataTypes.FLOAT, p -> p.gravity, (p, v) -> p.gravity = v);
-	public static final PropData<Prop, Float> WIDTH = PropData.create(Prop.class, "width", DataTypes.FLOAT, p -> (float) p.width, (p, v) -> p.width = v);
-	public static final PropData<Prop, Float> HEIGHT = PropData.create(Prop.class, "height", DataTypes.FLOAT, p -> (float) p.height, (p, v) -> p.height = v);
-	public static final PropData<Prop, Boolean> CAN_COLLIDE = PropData.create(Prop.class, "can_collide", DataTypes.BOOL, p -> p.canCollide, (p, v) -> p.canCollide = v);
-	public static final PropData<Prop, Boolean> CAN_INTERACT = PropData.create(Prop.class, "can_interact", DataTypes.BOOL, p -> p.canInteract, (p, v) -> p.canInteract = v);
+	public static final PropData<Prop, Integer> TICK = PropData.create(Prop.class, "tick", DataTypes.TICKS, p -> p.tick, (p, v) -> p.tick = v, IntImBuilder.TYPE_1M);
+	public static final PropData<Prop, Integer> LIFESPAN = PropData.create(Prop.class, "lifespan", DataTypes.TICKS, p -> p.lifespan, (p, v) -> p.lifespan = v, IntImBuilder.TYPE_1M);
+	public static final PropData<Prop, Vector3d> POSITION = PropData.create(Prop.class, "position", JOMLDataTypes.DVEC3, p -> p.pos, Prop::setPos, Vector3dImBuilder.TYPE);
+	public static final PropData<Prop, Vector3f> VELOCITY = PropData.create(Prop.class, "velocity", JOMLDataTypes.VEC3, p -> p.velocity, Prop::setVelocity, Vector3fImBuilder.TYPE);
+	public static final PropData<Prop, Float> PITCH = PropData.create(Prop.class, "pitch", DataTypes.FLOAT, p -> p.rotation.x, Prop::setPitch, AngleImBuilder.TYPE_90);
+	public static final PropData<Prop, Float> YAW = PropData.create(Prop.class, "yaw", DataTypes.FLOAT, p -> p.rotation.y, Prop::setYaw, AngleImBuilder.TYPE_180);
+	public static final PropData<Prop, Float> ROLL = PropData.create(Prop.class, "roll", DataTypes.FLOAT, p -> p.rotation.z, Prop::setRoll, AngleImBuilder.TYPE_180);
+	public static final PropData<Prop, Float> GRAVITY = PropData.createFloat(Prop.class, "gravity", p -> p.gravity, (p, v) -> p.gravity = v);
+	public static final PropData<Prop, Float> WIDTH = PropData.create(Prop.class, "width", DataTypes.FLOAT, p -> (float) p.width, (p, v) -> p.width = v, FloatImBuilder.type(0F, 16F));
+	public static final PropData<Prop, Float> HEIGHT = PropData.create(Prop.class, "height", DataTypes.FLOAT, p -> (float) p.height, (p, v) -> p.height = v, FloatImBuilder.type(0F, 16F));
+	public static final PropData<Prop, Boolean> CAN_COLLIDE = PropData.createBoolean(Prop.class, "can_collide", p -> p.canCollide, (p, v) -> p.canCollide = v);
+	public static final PropData<Prop, Boolean> CAN_INTERACT = PropData.createBoolean(Prop.class, "can_interact", p -> p.canInteract, (p, v) -> p.canInteract = v);
 
 	public static final PropData<Prop, KVector> DYNAMIC_POSITION = PropData.create(Prop.class, "position", KVector.DATA_TYPE, p -> p.dynamicPos == null ? KVector.of(p.pos) : p.dynamicPos, (p, v) -> {
 		p.dynamicPos = v;
@@ -82,7 +83,7 @@ public class Prop {
 		if (v instanceof FixedKVector f) {
 			p.setPos(f.vec());
 		}
-	});
+	}, KVectorImBuilder.TYPE);
 
 	public final PropType<?> type;
 	public final PropSpawnType spawnType;
@@ -178,12 +179,10 @@ public class Prop {
 	}
 
 	public final void sync(PropData<?, ?> data) {
-		if (data.sync()) {
-			var entry = type.reverseData().get(data);
+		var entry = type.reverseData().get(data);
 
-			if (entry != null) {
-				sync.add(entry);
-			}
+		if (entry != null) {
+			sync.add(entry);
 		}
 	}
 
@@ -348,10 +347,8 @@ public class Prop {
 	public void save(DynamicOps<Tag> ops, CompoundTag nbt) {
 		for (var entry : type.data()) {
 			var p = entry.data();
-
-			if (p.save()) {
-				nbt.put(p.key(), p.type().codec().encodeStart(ops, Cast.to(getData(p))).getOrThrow());
-			}
+			var data = getData(p);
+			nbt.put(p.key(), p.type().codec().encodeStart(ops, Cast.to(data)).getOrThrow());
 		}
 	}
 
@@ -563,12 +560,16 @@ public class Prop {
 		}
 
 		if (imguiBuilders == null) {
-			var list = new ArrayList<PropImBuilderData<?>>();
-			imguiBuilders(list);
-			imguiBuilders = new ArrayList<>(list.size());
+			imguiBuilders = new ArrayList<>(type.data().size());
 
-			for (var builder : list) {
-				imguiBuilders.add(Pair.of(builder.data(), builder.supplier().get()));
+			for (var data : type.unsortedData()) {
+				if (data == TICK || data == LIFESPAN) {
+					continue;
+				}
+
+				if (data.imBuilder() != null) {
+					imguiBuilders.add(Pair.of(data, data.imBuilder().get()));
+				}
 			}
 
 			imguiBuilders = List.copyOf(imguiBuilders);
@@ -588,63 +589,30 @@ public class Prop {
 			}
 		}
 
-		ImGui.pushID("###data");
+		if (ImGui.beginTable("###data", 2, ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.Borders)) {
+			for (var builder : imguiBuilders) {
+				ImGui.tableNextRow();
 
-		for (var builder : imguiBuilders) {
-			var k = builder.left();
-			var b = builder.right();
+				var k = builder.left();
+				var b = builder.right();
 
-			var update = b.imguiKey(graphics, k.key(), k.key());
+				ImGui.tableNextColumn();
+				ImGui.alignTextToFramePadding();
+				ImGui.text(k.key());
 
-			if (update.isAny() && b.isValid()) {
-				c2sEdit(k, Cast.to(b.build()), update.isFull());
+				ImGui.tableNextColumn();
+				ImGui.pushItemWidth(-1F);
+				ImGui.pushID(k.key());
+				var update = b.imgui(graphics);
+				ImGui.popID();
+				ImGui.popItemWidth();
+
+				if (update.isAny() && b.isValid()) {
+					c2sEdit(k, Cast.to(b.build()), update.isFull());
+				}
 			}
-		}
 
-		ImGui.popID();
-	}
-
-	protected void imguiBuilders(List<PropImBuilderData<?>> builders) {
-		if (hasData(DYNAMIC_POSITION)) {
-			builders.add(new PropImBuilderData<>(DYNAMIC_POSITION, KVectorImBuilder.SUPPLIER));
-		} else if (hasData(POSITION)) {
-			builders.add(new PropImBuilderData<>(POSITION, Vector3dImBuilder.SUPPLIER));
-		}
-
-		if (hasData(VELOCITY)) {
-			builders.add(new PropImBuilderData<>(VELOCITY, Vector3fImBuilder.SUPPLIER));
-		}
-
-		if (hasData(PITCH)) {
-			builders.add(new PropImBuilderData<>(PITCH, AngleImBuilder.SUPPLIER_90));
-		}
-
-		if (hasData(YAW)) {
-			builders.add(new PropImBuilderData<>(YAW, AngleImBuilder.SUPPLIER_180));
-		}
-
-		if (hasData(ROLL)) {
-			builders.add(new PropImBuilderData<>(ROLL, AngleImBuilder.SUPPLIER_180));
-		}
-
-		if (hasData(GRAVITY)) {
-			builders.add(new PropImBuilderData<>(GRAVITY, FloatImBuilder.SUPPLIER));
-		}
-
-		if (hasData(WIDTH)) {
-			builders.add(new PropImBuilderData<>(WIDTH, () -> new FloatImBuilder(0F, 16F)));
-		}
-
-		if (hasData(HEIGHT)) {
-			builders.add(new PropImBuilderData<>(HEIGHT, () -> new FloatImBuilder(0F, 16F)));
-		}
-
-		if (hasData(CAN_COLLIDE)) {
-			builders.add(new PropImBuilderData<>(CAN_COLLIDE, BooleanImBuilder.SUPPLIER));
-		}
-
-		if (hasData(CAN_INTERACT)) {
-			builders.add(new PropImBuilderData<>(CAN_INTERACT, BooleanImBuilder.SUPPLIER));
+			ImGui.endTable();
 		}
 	}
 

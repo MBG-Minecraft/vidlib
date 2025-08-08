@@ -4,6 +4,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TagKeyImBuilder;
@@ -24,7 +25,7 @@ public record BlockTypeTagFilter(TagKey<Block> tag) implements BlockFilter, ImBu
 	public static class Builder implements BlockFilterImBuilder {
 		public static final ImBuilderHolder<BlockFilter> TYPE = new ImBuilderHolder<>("Type Tag", Builder::new);
 
-		public final TagKeyImBuilder<Block> tag = new TagKeyImBuilder<>(Registries.BLOCK);
+		public final ImBuilder<TagKey<Block>> tag = TagKeyImBuilder.BLOCK_TYPE.get();
 
 		@Override
 		public void set(BlockFilter value) {

@@ -5,7 +5,17 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.ImGui;
 
 public class IntImBuilder implements ImBuilder<Integer> {
-	public static final ImBuilderSupplier<Integer> SUPPLIER = IntImBuilder::new;
+	public static ImBuilderType<Integer> type(int min, int max) {
+		return () -> new IntImBuilder(min, max);
+	}
+
+	public static ImBuilderType<Integer> type(int max) {
+		return type(0, max);
+	}
+
+	public static final ImBuilderType<Integer> TYPE_100 = type(0, 100);
+	public static final ImBuilderType<Integer> TYPE_1K = type(0, 1_000);
+	public static final ImBuilderType<Integer> TYPE_1M = type(0, 1_000_000);
 
 	public final int[] value;
 	public final int min, max;
@@ -14,14 +24,6 @@ public class IntImBuilder implements ImBuilder<Integer> {
 		this.value = new int[]{0};
 		this.min = min;
 		this.max = max;
-	}
-
-	public IntImBuilder(int max) {
-		this(0, max);
-	}
-
-	public IntImBuilder() {
-		this(0, Integer.MAX_VALUE);
 	}
 
 	@Override

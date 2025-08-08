@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class GameProfileImBuilder implements ImBuilder<GameProfile> {
-	public static final ImBuilderSupplier<GameProfile> SUPPLIER = GameProfileImBuilder::new;
+	public static final ImBuilderType<GameProfile> TYPE = GameProfileImBuilder::new;
 
 	private static final Lazy<String> VALID_NAME_CHARS = Lazy.of(() -> {
 		int min = 33;

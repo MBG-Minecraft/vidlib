@@ -25,12 +25,10 @@ public record EditPropPayload(PropListType type, int id, byte[] update) implemen
 		var data = new ArrayList<PropType.PropDataEntry>(keys.size());
 
 		for (var key : keys) {
-			if (key.sync()) {
-				var entry = prop.type.reverseData().get(key);
+			var entry = prop.type.reverseData().get(key);
 
-				if (entry != null) {
-					data.add(entry);
-				}
+			if (entry != null) {
+				data.add(entry);
 			}
 		}
 

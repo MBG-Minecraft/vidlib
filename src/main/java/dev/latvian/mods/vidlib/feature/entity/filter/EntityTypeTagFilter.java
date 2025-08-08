@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.entity.filter;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TagKeyImBuilder;
@@ -21,7 +22,7 @@ public record EntityTypeTagFilter(TagKey<EntityType<?>> tag) implements EntityFi
 	public static class Builder implements EntityFilterImBuilder {
 		public static final ImBuilderHolder<EntityFilter> TYPE = new ImBuilderHolder<>("Type Tag", Builder::new);
 
-		public final TagKeyImBuilder<EntityType<?>> tag = new TagKeyImBuilder<>(Registries.ENTITY_TYPE);
+		public final ImBuilder<TagKey<EntityType<?>>> tag = TagKeyImBuilder.ENTITY_TYPE_TYPE.get();
 
 		@Override
 		public void set(EntityFilter value) {

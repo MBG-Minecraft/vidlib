@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.imgui.builder;
 
+import com.mojang.serialization.DynamicOps;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.ImGui;
@@ -68,11 +69,15 @@ public interface ImBuilder<T> {
 
 	T build();
 
+	default boolean equals(T a, T b) {
+		return Objects.equals(a, b);
+	}
+
 	default boolean isSmall() {
 		return false;
 	}
 
-	default boolean equals(T a, T b) {
-		return Objects.equals(a, b);
+	default <O> String toString(DynamicOps<O> ops, T value) {
+		return String.valueOf(value);
 	}
 }

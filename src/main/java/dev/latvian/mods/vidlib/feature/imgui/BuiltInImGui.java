@@ -42,10 +42,9 @@ public class BuiltInImGui {
 	});
 
 	public static final MenuItem CONFIG = MenuItem.menu(ImIcons.SETTINGS, "Config", (graphics, list) -> {
-		if (graphics.inGame) {
-			list.add(Skybox.MENU_ITEM);
-			list.add(DepthOfFieldPanel.MENU_ITEM);
-		}
+		list.add(MenuItem.item(ImIcons.WRENCH, "Server Data", ServerDataConfigPanel.INSTANCE).enabled(graphics.isAdmin));
+		list.add(Skybox.MENU_ITEM.enabled(graphics.inGame));
+		list.add(DepthOfFieldPanel.MENU_ITEM.enabled(graphics.inGame));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.ConfigDropdown(graphics, list));
 	});

@@ -6,7 +6,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 
 public class BooleanImBuilder implements ImBuilder<Boolean> {
-	public static final ImBuilderSupplier<Boolean> SUPPLIER = BooleanImBuilder::new;
+	public static final ImBuilderType<Boolean> TYPE = BooleanImBuilder::new;
 
 	public final ImBoolean value;
 

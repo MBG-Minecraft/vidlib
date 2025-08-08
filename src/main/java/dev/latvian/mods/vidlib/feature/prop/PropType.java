@@ -37,6 +37,7 @@ import java.util.function.Predicate;
 public record PropType<P extends Prop>(
 	ResourceLocation id,
 	Factory<? extends P> factory,
+	List<PropData<?, ?>> unsortedData,
 	List<PropDataEntry> data,
 	Map<PropData<?, ?>, PropDataEntry> reverseData,
 	List<PropPacketEntry> packets,
@@ -82,7 +83,9 @@ public record PropType<P extends Prop>(
 			}
 		}
 
-		var sortedDataList = dataMap.values().stream().filter(PropData::sync).sorted(PropData.COMPARATOR).toList();
+		var unsortedData = List.copyOf(dataMap.values().stream().toList());
+
+		var sortedDataList = unsortedData.stream().sorted(PropData.COMPARATOR).toList();
 		var sortedPacketList = List.copyOf(packetSet);
 
 		var data = new ArrayList<PropDataEntry>(sortedDataList.size());
@@ -103,7 +106,7 @@ public record PropType<P extends Prop>(
 			packets.add(p);
 		}
 
-		return new PropType<>(id, factory, List.copyOf(data), Collections.unmodifiableMap(reverseData), List.copyOf(packets), Collections.unmodifiableMap(reversePackets), Util.makeDescriptionId("prop", id));
+		return new PropType<>(id, factory, unsortedData, List.copyOf(data), Collections.unmodifiableMap(reverseData), List.copyOf(packets), Collections.unmodifiableMap(reversePackets), Util.makeDescriptionId("prop", id));
 	}
 
 	public static final Codec<PropType<?>> CODEC = KLibCodecs.map(ALL, ID.CODEC, PropType::id);

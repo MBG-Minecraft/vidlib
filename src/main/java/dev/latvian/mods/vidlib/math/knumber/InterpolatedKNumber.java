@@ -36,7 +36,7 @@ public record InterpolatedKNumber(Easing easing, float start, float end, KNumber
 	public static class Builder implements KNumberImBuilder {
 		public static final ImBuilderHolder<KNumber> TYPE = new ImBuilderHolder<>("Interpolated", Builder::new);
 
-		public final ImBuilder<Easing> easing = EnumImBuilder.easing();
+		public final ImBuilder<Easing> easing = EnumImBuilder.EASING_TYPE.get();
 		public final ImBuilder<KNumber> from = KNumberImBuilder.create(0D);
 		public final ImBuilder<KNumber> to = KNumberImBuilder.create(1D);
 		public final ImFloat start = new ImFloat(0F);

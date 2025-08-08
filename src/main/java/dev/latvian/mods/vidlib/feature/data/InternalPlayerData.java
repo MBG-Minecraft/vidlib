@@ -5,23 +5,26 @@ import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
+import dev.latvian.mods.vidlib.feature.clothing.ClothingImBuilder;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.BooleanImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.TextComponentImBuilder;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import net.minecraft.network.chat.Component;
 
 @AutoInit
 public interface InternalPlayerData {
-	DataKey<Boolean> SUSPENDED = DataKey.PLAYER.buildDefault("suspended", DataTypes.BOOL, false).syncToAllClients().build();
-	DataKey<Component> NICKNAME = DataKey.PLAYER.buildDefault("nickname", DataTypes.TEXT_COMPONENT, Empty.COMPONENT).syncToAllClients().build();
-	DataKey<IconHolder> PLUMBOB = DataKey.PLAYER.buildDefault("plumbob", IconHolder.DATA_TYPE, IconHolder.EMPTY).syncToAllClients().build();
-	DataKey<Clothing> CLOTHING = DataKey.PLAYER.buildDefault("clothing", Clothing.DATA_TYPE, Clothing.NONE).syncToAllClients().build();
-	DataKey<Float> FLIGHT_SPEED = DataKey.PLAYER.createDefaultFloat("flight_speed", 1F);
+	DataKey<Boolean> SUSPENDED = DataKey.PLAYER.createDefault("suspended", DataTypes.BOOL, false, BooleanImBuilder.TYPE);
+	DataKey<Component> NICKNAME = DataKey.PLAYER.createDefault("nickname", DataTypes.TEXT_COMPONENT, Empty.COMPONENT, TextComponentImBuilder.TYPE);
+	DataKey<IconHolder> PLUMBOB = DataKey.PLAYER.createDefault("plumbob", IconHolder.DATA_TYPE, IconHolder.EMPTY, null);
+	DataKey<Clothing> CLOTHING = DataKey.PLAYER.createDefault("clothing", Clothing.DATA_TYPE, Clothing.NONE, ClothingImBuilder.TYPE);
+	DataKey<Float> FLIGHT_SPEED = DataKey.PLAYER.createFloat("flight_speed", 1F, 0F, 20F);
 
 	@AutoInit
 	static void bootstrap() {
 		if (VidLibConfig.legacyDataKeyStream) {
-			DataKey.PLAYER.buildDefault("test_physics_particles", PhysicsParticleData.DATA_TYPE, PhysicsParticleData.DEFAULT).build();
-			DataKey.PLAYER.buildDefault("test_screen_shake", DataTypes.DOUBLE, 30D).build();
+			DataKey.PLAYER.createDefault("test_physics_particles", PhysicsParticleData.DATA_TYPE, PhysicsParticleData.DEFAULT, null);
+			DataKey.PLAYER.createDouble("test_screen_shake", 30D);
 		}
 	}
 }

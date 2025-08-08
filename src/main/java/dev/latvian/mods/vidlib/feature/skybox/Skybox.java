@@ -12,9 +12,14 @@ import net.neoforged.fml.loading.FMLPaths;
 
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Skybox {
 	public static final MenuItem MENU_ITEM = MenuItem.menu(ImIcons.BRIGHTNESS, "Skybox", g -> {
+		if (!g.inGame) {
+			return List.of();
+		}
+
 		var slist = new ArrayList<MenuItem>();
 
 		var current = g.mc.level.getSkybox();

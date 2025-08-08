@@ -6,7 +6,6 @@ import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
-import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
@@ -29,7 +28,7 @@ public record FollowingEntityKVector(EntityFilter entity, PositionType positionT
 		public static final ImBuilderHolder<KVector> TYPE = new ImBuilderHolder<>("Following Entity", Builder::new);
 
 		public final ImBuilder<EntityFilter> entity = EntityFilterImBuilder.create();
-		public final ImBuilder<PositionType> positionType = new EnumImBuilder<>(PositionType[]::new, PositionType.VALUES);
+		public final ImBuilder<PositionType> positionType = PositionType.BUILDER_TYPE.get();
 
 		public Builder() {
 			this.positionType.set(PositionType.CENTER);

@@ -14,7 +14,7 @@ import org.joml.Vector3d;
 import org.joml.Vector3dc;
 
 public class Vec3ImBuilder implements ImBuilder<Vec3>, SelectedPosition.Holder {
-	public static final ImBuilderSupplier<Vec3> SUPPLIER = Vec3ImBuilder::new;
+	public static final ImBuilderType<Vec3> TYPE = Vec3ImBuilder::new;
 
 	public final Vector3d data;
 	public SelectedPosition selectedPosition;

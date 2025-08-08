@@ -7,7 +7,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiColorEditFlags;
 
 public class Color3ImBuilder implements ImBuilder<Color> {
-	public static final ImBuilderSupplier<Color> SUPPLIER = Color3ImBuilder::new;
+	public static final ImBuilderType<Color> TYPE = Color3ImBuilder::new;
 
 	public final float[] rgba = new float[3];
 
@@ -20,7 +20,7 @@ public class Color3ImBuilder implements ImBuilder<Color> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		ImGui.colorEdit3("###color", rgba, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.PickerHueWheel);
+		ImGui.colorEdit3("###color", rgba, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel | ImGuiColorEditFlags.PickerHueWheel);
 		return ImUpdate.itemEdit();
 	}
 

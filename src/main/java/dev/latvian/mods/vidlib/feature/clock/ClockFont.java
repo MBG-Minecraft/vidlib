@@ -5,6 +5,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.JOMLCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.texture.UV;
+import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
 import dev.latvian.mods.vidlib.feature.registry.RegistryRef;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
@@ -60,6 +62,11 @@ public record ClockFont(
 	public static final VLRegistry<ClockFont> REGISTRY = VLRegistry.createClient("clock_font", ClockFont.class);
 
 	public static final DataType<RegistryRef<ClockFont>> REF_DATA_TYPE = REGISTRY.refDataType();
+
+	public static final ImBuilderType<RegistryRef<ClockFont>> REGISTRY_REF_IM_BUILDER_SUPPLIER = () -> {
+		var allFonts = REGISTRY.getMap().values().stream().map(f -> REGISTRY.asRef(f, ClockFont::id)).toList();
+		return new EnumImBuilder<>(allFonts);
+	};
 
 	public static class Loader extends JsonRegistryReloadListener<ClockFont> {
 		public Loader() {

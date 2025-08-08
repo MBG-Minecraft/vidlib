@@ -7,8 +7,15 @@ import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
+import dev.latvian.mods.vidlib.feature.imgui.builder.BooleanImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.DoubleImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.FloatImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
+import dev.latvian.mods.vidlib.feature.imgui.builder.IntImBuilder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -17,16 +24,14 @@ import java.util.Map;
 
 public class DataKeyStorage {
 	public final String name;
-	public final boolean alwaysSyncToAllClients;
 	public final Map<String, DataKey<?>> all;
 	public final Map<String, DataKey<?>> saved;
 	final Map<String, DataKey<?>> synced;
 	public final StreamCodec<RegistryFriendlyByteBuf, DataMapValue> valueStreamCodec;
 	public final StreamCodec<RegistryFriendlyByteBuf, List<DataMapValue>> valueListStreamCodec;
 
-	public DataKeyStorage(String name, boolean alwaysSyncToAllClients) {
+	public DataKeyStorage(String name) {
 		this.name = name;
-		this.alwaysSyncToAllClients = alwaysSyncToAllClients;
 		this.all = new LinkedHashMap<>();
 		this.saved = new HashMap<>();
 		this.synced = new HashMap<>();
@@ -80,32 +85,52 @@ public class DataKeyStorage {
 		return new DataKey.Builder<>(this, id, type, defaultValue);
 	}
 
-	public <T> DataKey.Builder<T> buildDefault(String id, DataType<T> type, T defaultValue) {
-		return builder(id, type, defaultValue).save().sync();
+	public <T> DataKey.Builder<T> buildDefault(String id, DataType<T> type, T defaultValue, @Nullable ImBuilderType<T> imBuilder) {
+		return builder(id, type, defaultValue).imBuilder(imBuilder).save().sync();
 	}
 
-	public <T> DataKey<T> createDefault(String id, DataType<T> type, T defaultValue) {
-		return buildDefault(id, type, defaultValue).build();
+	public <T> DataKey<T> createDefault(String id, DataType<T> type, T defaultValue, @Nullable ImBuilderType<T> imBuilder) {
+		return buildDefault(id, type, defaultValue, imBuilder).build();
 	}
 
-	public DataKey<Boolean> createDefaultBoolean(String id, boolean defaultValue) {
-		return createDefault(id, DataTypes.BOOL, defaultValue);
+	public DataKey<Boolean> createBoolean(String id, boolean defaultValue) {
+		return createDefault(id, DataTypes.BOOL, defaultValue, BooleanImBuilder.TYPE);
 	}
 
-	public DataKey<Integer> createDefaultVarInt(String id, int defaultValue) {
-		return createDefault(id, DataTypes.VAR_INT, defaultValue);
+	public DataKey<Integer> createInt(String id, int defaultValue) {
+		return createDefault(id, DataTypes.VAR_INT, defaultValue, IntImBuilder.TYPE_1M);
 	}
 
-	public DataKey<Integer> createDefaultTicks(String id, int defaultValue) {
-		return createDefault(id, DataTypes.TICKS, defaultValue);
+	public DataKey<Integer> createInt(String id, int defaultValue, int min, int max) {
+		return createDefault(id, DataTypes.VAR_INT, defaultValue, () -> new IntImBuilder(min, max));
 	}
 
-	public DataKey<Float> createDefaultFloat(String id, float defaultValue) {
-		return createDefault(id, DataTypes.FLOAT, defaultValue);
+	public DataKey<Integer> createTicks(String id, int defaultValue) {
+		return createDefault(id, DataTypes.TICKS, defaultValue, IntImBuilder.TYPE_1M);
 	}
 
-	public DataKey<Double> createDefaultDouble(String id, double defaultValue) {
-		return createDefault(id, DataTypes.DOUBLE, defaultValue);
+	public DataKey<Integer> createTicks(String id, int defaultValue, int min, int max) {
+		return createDefault(id, DataTypes.TICKS, defaultValue, () -> new IntImBuilder(min, max));
+	}
+
+	public DataKey<Float> createFloat(String id, float defaultValue) {
+		return createDefault(id, DataTypes.FLOAT, defaultValue, FloatImBuilder.TYPE);
+	}
+
+	public DataKey<Float> createFloat(String id, float defaultValue, float min, float max) {
+		return createDefault(id, DataTypes.FLOAT, defaultValue, FloatImBuilder.type(min, max));
+	}
+
+	public DataKey<Double> createDouble(String id, double defaultValue) {
+		return createDefault(id, DataTypes.DOUBLE, defaultValue, DoubleImBuilder.TYPE);
+	}
+
+	public DataKey<Double> createDouble(String id, double defaultValue, double min, double max) {
+		return createDefault(id, DataTypes.DOUBLE, defaultValue, DoubleImBuilder.type(min, max));
+	}
+
+	public <E> DataKey<E> createEnum(String id, DataType<E> type, E defaultValue, E[] values) {
+		return createDefault(id, type, defaultValue, () -> new EnumImBuilder<>(values));
 	}
 
 	@Override

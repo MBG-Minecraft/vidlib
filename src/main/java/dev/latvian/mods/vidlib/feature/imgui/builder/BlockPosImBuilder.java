@@ -10,7 +10,7 @@ import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 public class BlockPosImBuilder implements ImBuilder<BlockPos>, SelectedPosition.Holder {
-	public static final ImBuilderSupplier<BlockPos> SUPPLIER = BlockPosImBuilder::new;
+	public static final ImBuilderType<BlockPos> TYPE = BlockPosImBuilder::new;
 
 	public BlockPos.MutableBlockPos pos;
 	public SelectedPosition selectedPosition;

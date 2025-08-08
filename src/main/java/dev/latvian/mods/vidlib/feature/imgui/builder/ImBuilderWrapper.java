@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.feature.imgui.builder;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
-import imgui.ImGui;
 import net.minecraft.util.StringRepresentable;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
@@ -143,10 +142,7 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 			return ImUpdate.NONE;
 		}
 
-		ImGui.indent();
-		update = update.or(builder.imgui(graphics));
-		ImGui.unindent();
-		return update;
+		return update.or(builder.imgui(graphics));
 	}
 
 	@Override

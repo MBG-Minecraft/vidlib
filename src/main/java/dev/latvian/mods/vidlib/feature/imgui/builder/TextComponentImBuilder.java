@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class TextComponentImBuilder implements ImBuilder<Component> {
-	public static final ImBuilderSupplier<Component> SUPPLIER = TextComponentImBuilder::new;
+	public static final ImBuilderType<Component> TYPE = TextComponentImBuilder::new;
 
 	public final TextComponentImBuilder parent;
 	public final ImString text = ImGuiUtils.resizableString();

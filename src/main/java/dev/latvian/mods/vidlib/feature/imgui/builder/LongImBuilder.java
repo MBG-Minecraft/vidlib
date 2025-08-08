@@ -5,7 +5,9 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.ImGui;
 
 public class LongImBuilder implements ImBuilder<Long> {
-	public static final ImBuilderSupplier<Long> SUPPLIER = LongImBuilder::new;
+	public static ImBuilderType<Long> type(long min, long max) {
+		return () -> new LongImBuilder(min, max);
+	}
 
 	public final long[] value;
 	public final long min, max;
@@ -14,14 +16,6 @@ public class LongImBuilder implements ImBuilder<Long> {
 		this.value = new long[]{0L};
 		this.min = min;
 		this.max = max;
-	}
-
-	public LongImBuilder(long max) {
-		this(0, max);
-	}
-
-	public LongImBuilder() {
-		this(0, Long.MAX_VALUE);
 	}
 
 	@Override

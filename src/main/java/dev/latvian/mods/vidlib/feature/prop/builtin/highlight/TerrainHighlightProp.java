@@ -7,19 +7,18 @@ import dev.latvian.mods.klib.shape.CircleShape;
 import dev.latvian.mods.klib.shape.Shape;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
+import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
-import dev.latvian.mods.vidlib.feature.prop.PropImBuilderData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
-
-import java.util.List;
+import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 
 public class TerrainHighlightProp extends Prop {
-	public static final PropData<TerrainHighlightProp, Shape> SHAPE = PropData.create(TerrainHighlightProp.class, "shape", Shape.DATA_TYPE, p -> p.shape, (p, v) -> p.shape = v);
-	public static final PropData<TerrainHighlightProp, Gradient> COLOR = PropData.create(TerrainHighlightProp.class, "color", Gradient.DATA_TYPE, p -> p.color, (p, v) -> p.color = v.optimize());
-	public static final PropData<TerrainHighlightProp, KVector> SCALE = PropData.create(TerrainHighlightProp.class, "scale", KVector.DATA_TYPE, p -> p.scale, (p, v) -> p.scale = v);
+	public static final PropData<TerrainHighlightProp, Shape> SHAPE = PropData.create(TerrainHighlightProp.class, "shape", Shape.DATA_TYPE, p -> p.shape, (p, v) -> p.shape = v, null);
+	public static final PropData<TerrainHighlightProp, Gradient> COLOR = PropData.create(TerrainHighlightProp.class, "color", Gradient.DATA_TYPE, p -> p.color, (p, v) -> p.color = v.optimize(), GradientImBuilder.TYPE);
+	public static final PropData<TerrainHighlightProp, KVector> SCALE = PropData.create(TerrainHighlightProp.class, "scale", KVector.DATA_TYPE, p -> p.scale, (p, v) -> p.scale = v, KVectorImBuilder.TYPE);
 
 	@AutoRegister
 	public static final PropType<TerrainHighlightProp> TYPE = PropType.create(VidLib.id("terrain_highlight"), TerrainHighlightProp::new,
@@ -68,10 +67,5 @@ public class TerrainHighlightProp extends Prop {
 		var s = scale.get(createWorldNumberContext());
 		renderScale = s == null ? Vec3f.ONE : Vec3f.of(s);
 		width = Math.max(renderScale.x(), renderScale.z());
-	}
-
-	@Override
-	protected void imguiBuilders(List<PropImBuilderData<?>> builders) {
-		super.imguiBuilders(builders);
 	}
 }

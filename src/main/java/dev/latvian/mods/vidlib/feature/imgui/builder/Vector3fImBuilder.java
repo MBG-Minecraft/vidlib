@@ -7,7 +7,7 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 public class Vector3fImBuilder implements ImBuilder<Vector3f> {
-	public static final ImBuilderSupplier<Vector3f> SUPPLIER = Vector3fImBuilder::new;
+	public static final ImBuilderType<Vector3f> TYPE = Vector3fImBuilder::new;
 
 	public final float[] data;
 

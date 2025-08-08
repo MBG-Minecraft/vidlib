@@ -11,7 +11,7 @@ import net.minecraft.Util;
 import java.util.UUID;
 
 public class UUIDImBuilder implements ImBuilder<UUID> {
-	public static final ImBuilderSupplier<UUID> SUPPLIER = UUIDImBuilder::new;
+	public static final ImBuilderType<UUID> TYPE = UUIDImBuilder::new;
 
 	public final ImString value;
 	private UUID uuid;

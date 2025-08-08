@@ -6,7 +6,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderSupplier;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import imgui.ImGui;
 import imgui.type.ImString;
@@ -25,7 +25,7 @@ public interface ParticleOptionsImBuilder<T extends ParticleOptions> extends ImB
 		return new ImBuilderWrapper<>(IMGUI_BUILDER_FACTORY);
 	}
 
-	ImBuilderSupplier<ParticleOptions> SUPPLIER = ParticleOptionsImBuilder::create;
+	ImBuilderType<ParticleOptions> TYPE = ParticleOptionsImBuilder::create;
 
 	record Simple(ParticleOptions options) implements ParticleOptionsImBuilder<ParticleOptions> {
 		@Override

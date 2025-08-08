@@ -21,7 +21,7 @@ public record UpdateServerDataValuePayload(List<DataMapValue> update) implements
 	public void handle(Context ctx) {
 		if (ctx.isAdmin()) {
 			for (var u : update) {
-				if (u.key() != null && u.key().allowClientUpdates()) {
+				if (u.key() != null) {
 					ctx.level().getServer().set(u.key(), Cast.to(u.value()));
 				}
 			}

@@ -6,29 +6,29 @@ import imgui.ImGui;
 import imgui.flag.ImGuiSliderFlags;
 
 public class FloatImBuilder implements ImBuilder<Float> {
-	public static final ImBuilderSupplier<Float> SUPPLIER = FloatImBuilder::new;
+	public static ImBuilderType<Float> type(float min, float max, boolean logarithmic) {
+		return () -> new FloatImBuilder(min, max, logarithmic);
+	}
+
+	public static ImBuilderType<Float> type(float min, float max) {
+		return type(min, max, false);
+	}
+
+	public static final ImBuilderType<Float> TYPE = type(0F, 1F);
 
 	public final float[] value;
 	public final float min, max;
-	public boolean logarithmic = false;
+	public final boolean logarithmic;
 
-	public FloatImBuilder(float min, float max) {
+	public FloatImBuilder(float min, float max, boolean logarithmic) {
 		this.value = new float[]{0F};
 		this.min = min;
 		this.max = max;
+		this.logarithmic = logarithmic;
 	}
 
-	public FloatImBuilder(float max) {
-		this(0F, max);
-	}
-
-	public FloatImBuilder() {
-		this(0F, 1F);
-	}
-
-	public FloatImBuilder logarithmic() {
-		this.logarithmic = true;
-		return this;
+	public FloatImBuilder(float min, float max) {
+		this(min, max, false);
 	}
 
 	@Override

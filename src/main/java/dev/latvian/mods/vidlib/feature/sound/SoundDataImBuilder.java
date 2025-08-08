@@ -5,7 +5,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.FloatImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderSupplier;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
 import net.minecraft.sounds.SoundSource;
 
 import java.util.List;
@@ -13,19 +13,13 @@ import java.util.List;
 public class SoundDataImBuilder implements ImBuilder<SoundData> {
 	private static final List<SoundSource> ALL_SOURCES = List.of(SoundSource.values());
 
-	public static EnumImBuilder<SoundSource> soundSource() {
-		var builder = new EnumImBuilder<>(SoundSource[]::new, ALL_SOURCES);
-		builder.set(SoundSource.PLAYERS);
-		return builder;
-	}
-
-	public static final ImBuilderSupplier<SoundData> SUPPLIER = SoundDataImBuilder::new;
-	public static final ImBuilderSupplier<SoundSource> SOURCE_SUPPLIER = SoundDataImBuilder::soundSource;
+	public static final ImBuilderType<SoundData> TYPE = SoundDataImBuilder::new;
+	public static final ImBuilderType<SoundSource> SOURCE_TYPE = () -> new EnumImBuilder<>(ALL_SOURCES, SoundSource.PLAYERS);
 
 	public final SoundEventImBuilder sound = new SoundEventImBuilder();
-	public final EnumImBuilder<SoundSource> source = soundSource();
+	public final ImBuilder<SoundSource> source = SOURCE_TYPE.get();
 	public final FloatImBuilder volume = new FloatImBuilder(0F, 1F);
-	public final FloatImBuilder pitch = new FloatImBuilder(0.5F, 2F).logarithmic();
+	public final FloatImBuilder pitch = new FloatImBuilder(0.5F, 2F, true);
 	public boolean delete = false;
 
 	public SoundDataImBuilder() {

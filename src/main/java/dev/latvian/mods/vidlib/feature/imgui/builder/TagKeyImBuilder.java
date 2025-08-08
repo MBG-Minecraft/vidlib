@@ -5,12 +5,26 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Fluid;
 
 import java.util.List;
 
 public class TagKeyImBuilder<T> implements ImBuilder<TagKey<T>> {
+	public static <T> ImBuilderType<TagKey<T>> type(ResourceKey<? extends Registry<T>> registry) {
+		return () -> new TagKeyImBuilder<>(registry);
+	}
+
+	public static final ImBuilderType<TagKey<Block>> BLOCK_TYPE = type(Registries.BLOCK);
+	public static final ImBuilderType<TagKey<Item>> ITEM_TYPE = type(Registries.ITEM);
+	public static final ImBuilderType<TagKey<Fluid>> FLUID_TYPE = type(Registries.FLUID);
+	public static final ImBuilderType<TagKey<EntityType<?>>> ENTITY_TYPE_TYPE = type(Registries.ENTITY_TYPE);
+
 	public final ResourceKey<? extends Registry<T>> registry;
 	public final TagKey<T>[] tag = new TagKey[1];
 	private Registry<T> cachedRegistry;

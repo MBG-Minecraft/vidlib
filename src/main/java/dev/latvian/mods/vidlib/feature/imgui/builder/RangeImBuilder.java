@@ -7,7 +7,11 @@ import imgui.ImGui;
 import imgui.flag.ImGuiSliderFlags;
 
 public class RangeImBuilder implements ImBuilder<Range> {
-	public static final ImBuilderSupplier<Range> SUPPLIER = () -> new RangeImBuilder(Range.FULL);
+	public static ImBuilderType<Range> type(Range range) {
+		return () -> new RangeImBuilder(range);
+	}
+
+	public static final ImBuilderType<Range> TYPE = type(Range.FULL);
 
 	public final float[] value;
 	public final Range range;

@@ -6,7 +6,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.ImGui;
 
 public class RotationImBuilder implements ImBuilder<Rotation> {
-	public static final ImBuilderSupplier<Rotation> SUPPLIER = RotationImBuilder::new;
+	public static final ImBuilderType<Rotation> TYPE = RotationImBuilder::new;
 
 	public final float[] value;
 

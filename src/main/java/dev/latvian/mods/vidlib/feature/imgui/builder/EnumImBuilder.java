@@ -1,6 +1,9 @@
 package dev.latvian.mods.vidlib.feature.imgui.builder;
 
+import com.mojang.serialization.DynamicOps;
+import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.easing.Easing;
+import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import net.minecraft.world.InteractionHand;
@@ -10,31 +13,32 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSetting
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.IntFunction;
 
 public class EnumImBuilder<E> implements ImBuilder<E> {
-	public static final ImBuilderSupplier<Mirror> MIRROR_SUPPLIER = () -> new EnumImBuilder<>(Mirror[]::new, Mirror.values());
-	public static final ImBuilderSupplier<Rotation> BLOCK_ROTATION_SUPPLIER = () -> new EnumImBuilder<>(Rotation[]::new, Rotation.values());
-	public static final ImBuilderSupplier<LiquidSettings> LIQUID_SETTINGS_SUPPLIER = () -> new EnumImBuilder<>(LiquidSettings[]::new, LiquidSettings.values());
-	public static final ImBuilderSupplier<InteractionHand> HAND_SUPPLIER = () -> new EnumImBuilder<>(InteractionHand[]::new, InteractionHand.values());
+	public static final ImBuilderType<Easing> EASING_TYPE = () -> new EnumImBuilder<>(Easing.VALUES, Easing.LINEAR);
+	public static final ImBuilderType<Mirror> MIRROR_TYPE = () -> new EnumImBuilder<>(Mirror.values(), Mirror.NONE);
+	public static final ImBuilderType<Rotation> BLOCK_ROTATION_TYPE = () -> new EnumImBuilder<>(Rotation.values(), Rotation.NONE);
+	public static final ImBuilderType<LiquidSettings> LIQUID_SETTINGS_TYPE = () -> new EnumImBuilder<>(LiquidSettings.values(), LiquidSettings.IGNORE_WATERLOGGING);
+	public static final ImBuilderType<InteractionHand> HAND_TYPE = () -> new EnumImBuilder<>(InteractionHand.values(), InteractionHand.MAIN_HAND);
 
-	public final E[] value;
 	public final List<E> options;
+	public final Object[] value;
 
-	public static EnumImBuilder<Easing> easing() {
-		var builder = new EnumImBuilder<>(Easing.ARRAY_FACTORY, Easing.VALUES);
-		builder.set(Easing.LINEAR);
-		return builder;
-	}
-
-	public EnumImBuilder(IntFunction<E[]> arrayConstructor, List<E> options) {
-		this.value = arrayConstructor.apply(1);
+	public EnumImBuilder(List<E> options, E defaultValue) {
 		this.options = options;
-		this.value[0] = options.getFirst();
+		this.value = new Object[]{defaultValue};
 	}
 
-	public EnumImBuilder(IntFunction<E[]> arrayConstructor, E[] options) {
-		this(arrayConstructor, Arrays.asList(options));
+	public EnumImBuilder(E[] options, E defaultValue) {
+		this(Arrays.asList(options), defaultValue);
+	}
+
+	public EnumImBuilder(List<E> options) {
+		this(options, options.getFirst());
+	}
+
+	public EnumImBuilder(E[] options) {
+		this(Arrays.asList(options));
 	}
 
 	@Override
@@ -49,6 +53,11 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 
 	@Override
 	public E build() {
-		return value[0];
+		return (E) value[0];
+	}
+
+	@Override
+	public <O> String toString(DynamicOps<O> ops, E value) {
+		return KLibCodecs.DEFAULT_NAME_GETTER.apply(Cast.to(value));
 	}
 }

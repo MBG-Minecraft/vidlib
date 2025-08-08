@@ -5,7 +5,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
-import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
@@ -31,7 +30,7 @@ public record FollowingPropKVector(int prop, PositionType positionType) implemen
 		public static final ImBuilderHolder<KVector> TYPE = new ImBuilderHolder<>("Following Prop", Builder::new);
 
 		public final ImInt prop = new ImInt(0);
-		public final ImBuilder<PositionType> positionType = new EnumImBuilder<>(PositionType[]::new, PositionType.VALUES);
+		public final ImBuilder<PositionType> positionType = PositionType.BUILDER_TYPE.get();
 
 		public Builder() {
 			this.positionType.set(PositionType.CENTER);

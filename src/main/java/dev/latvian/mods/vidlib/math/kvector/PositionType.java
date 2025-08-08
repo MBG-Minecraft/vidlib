@@ -2,6 +2,8 @@ package dev.latvian.mods.vidlib.math.kvector;
 
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
+import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
@@ -20,6 +22,7 @@ public enum PositionType implements StringRepresentable {
 	public static final PositionType[] VALUES = values();
 	public static final Codec<PositionType> CODEC = StringRepresentable.fromEnum(() -> VALUES);
 	public static final StreamCodec<ByteBuf, PositionType> STREAM_CODEC = KLibStreamCodecs.enumValue(VALUES);
+	public static final ImBuilderType<PositionType> BUILDER_TYPE = () -> new EnumImBuilder<>(PositionType.VALUES);
 
 	private final String name;
 

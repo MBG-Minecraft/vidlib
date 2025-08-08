@@ -8,14 +8,14 @@ import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderSupplier;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
 import imgui.ImGui;
 
 import java.util.Objects;
 import java.util.function.IntFunction;
 
 public abstract class ConfigEntry<T> {
-	public static <T> ConfigEntry<T> of(String label, DataKey<T> key, ImBuilderSupplier<T> supplier) {
+	public static <T> ConfigEntry<T> of(String label, DataKey<T> key, ImBuilderType<T> supplier) {
 		return new BuilderConfigEntry<>(label, key, supplier.get());
 	}
 

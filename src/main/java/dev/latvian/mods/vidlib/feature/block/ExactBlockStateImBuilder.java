@@ -5,7 +5,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.SelectedPosition;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderSupplier;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
@@ -22,7 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ExactBlockStateImBuilder implements ImBuilder<BlockState> {
-	public static final ImBuilderSupplier<BlockState> SUPPLIER = ExactBlockStateImBuilder::new;
+	public static final ImBuilderType<BlockState> TYPE = ExactBlockStateImBuilder::new;
 
 	public final BlockImBuilder block;
 	public final Map<Property<?>, Object> properties;

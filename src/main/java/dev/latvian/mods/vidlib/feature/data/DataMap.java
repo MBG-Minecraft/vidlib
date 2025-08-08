@@ -164,7 +164,7 @@ public class DataMap {
 
 		if (map != null) {
 			for (var v : map.values()) {
-				if (v.key.type() != null && v.key.sync() && (v.key.syncToAllClients() || selfPlayer != null && owner.equals(selfPlayer.getUUID()))) {
+				if (v.key.type() != null && v.key.sync()) {
 					list.add(new DataMapValue(v.key, v.data));
 				}
 			}
@@ -180,30 +180,18 @@ public class DataMap {
 			return;
 		}
 
-		List<DataMapValue> syncSelf = null, syncAll = null;
+		List<DataMapValue> syncAll = null;
 
 		for (var v : map.values()) {
 			if (v.sync != v.changeCount && v.key.type() != null && v.key.sync()) {
 				v.sync = v.changeCount;
 
-				if (v.key.syncToAllClients()) {
-					if (syncAll == null) {
-						syncAll = new ArrayList<>();
-					}
-
-					syncAll.add(new DataMapValue(v.key, v.data));
-				} else if (selfPlayer != null) {
-					if (syncSelf == null) {
-						syncSelf = new ArrayList<>();
-					}
-
-					syncSelf.add(new DataMapValue(v.key, v.data));
+				if (syncAll == null) {
+					syncAll = new ArrayList<>();
 				}
-			}
-		}
 
-		if (syncSelf != null) {
-			selfPlayer.s2c(factory.apply(selfPlayer.getUUID(), syncSelf));
+				syncAll.add(new DataMapValue(v.key, v.data));
+			}
 		}
 
 		if (syncAll != null) {

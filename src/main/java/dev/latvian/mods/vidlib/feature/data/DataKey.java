@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.data;
 
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,13 +16,13 @@ public record DataKey<T>(
 	CommandDataType<T> command,
 	boolean save,
 	boolean sync,
-	boolean syncToAllClients,
 	@Nullable BiConsumer<Player, T> onReceived,
 	boolean allowClientUpdates,
-	boolean skipLogging
+	boolean skipLogging,
+	@Nullable ImBuilderType<T> imBuilder
 ) {
-	public static final DataKeyStorage SERVER = new DataKeyStorage("server", true);
-	public static final DataKeyStorage PLAYER = new DataKeyStorage("player", false);
+	public static final DataKeyStorage SERVER = new DataKeyStorage("server");
+	public static final DataKeyStorage PLAYER = new DataKeyStorage("player");
 
 	public static class Builder<T> {
 		private final DataKeyStorage storage;
@@ -30,10 +31,10 @@ public record DataKey<T>(
 		private final T defaultValue;
 		private boolean save;
 		private boolean sync;
-		private boolean syncToAllClients;
 		private BiConsumer<Player, T> onReceived;
 		private boolean allowClientUpdates;
 		private boolean skipLogging;
+		private ImBuilderType<T> imBuilder;
 
 		Builder(DataKeyStorage storage, String id, DataType<T> type, T defaultValue) {
 			this.storage = storage;
@@ -42,9 +43,8 @@ public record DataKey<T>(
 			this.defaultValue = defaultValue;
 			this.save = false;
 			this.sync = false;
-			this.syncToAllClients = storage.alwaysSyncToAllClients;
 			this.onReceived = null;
-			this.allowClientUpdates = storage.alwaysSyncToAllClients;
+			this.allowClientUpdates = false;
 			this.skipLogging = false;
 		}
 
@@ -55,11 +55,6 @@ public record DataKey<T>(
 
 		public Builder<T> sync() {
 			this.sync = true;
-			return this;
-		}
-
-		public Builder<T> syncToAllClients() {
-			this.syncToAllClients = true;
 			return this;
 		}
 
@@ -78,6 +73,11 @@ public record DataKey<T>(
 			return this;
 		}
 
+		public Builder<T> imBuilder(ImBuilderType<T> imBuilder) {
+			this.imBuilder = imBuilder;
+			return this;
+		}
+
 		public DataKey<T> buildDummy() {
 			return new DataKey<>(
 				storage,
@@ -87,10 +87,10 @@ public record DataKey<T>(
 				CommandDataType.of(type),
 				save,
 				sync,
-				syncToAllClients,
 				onReceived,
 				allowClientUpdates,
-				skipLogging
+				skipLogging,
+				imBuilder
 			);
 		}
 

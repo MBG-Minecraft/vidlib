@@ -6,9 +6,13 @@ import imgui.ImGui;
 import imgui.flag.ImGuiSliderFlags;
 
 public class AngleImBuilder extends FloatImBuilder {
-	public static final ImBuilderSupplier<Float> SUPPLIER_360 = () -> new AngleImBuilder(0F, 360F);
-	public static final ImBuilderSupplier<Float> SUPPLIER_180 = () -> new AngleImBuilder(-180F, 180F);
-	public static final ImBuilderSupplier<Float> SUPPLIER_90 = () -> new AngleImBuilder(-90F, 90F);
+	public static ImBuilderType<Float> type(float min, float max) {
+		return () -> new AngleImBuilder(min, max);
+	}
+
+	public static final ImBuilderType<Float> TYPE_360 = type(0F, 360F);
+	public static final ImBuilderType<Float> TYPE_180 = type(-180F, 180F);
+	public static final ImBuilderType<Float> TYPE_90 = type(-90F, 90F);
 
 	public AngleImBuilder(float min, float max) {
 		super(min, max);

@@ -8,16 +8,8 @@ import imgui.type.ImString;
 import net.minecraft.resources.ResourceLocation;
 
 public class ResourceLocationImBuilder implements ImBuilder<ResourceLocation> {
-	public static final ImBuilderSupplier<ResourceLocation> IMMEDIATE_SUPPLIER = () -> new ResourceLocationImBuilder(true);
-	public static final ImBuilderSupplier<ResourceLocation> DELAYED_SUPPLIER = () -> new ResourceLocationImBuilder(false);
-
-	public static ResourceLocationImBuilder immediate() {
-		return new ResourceLocationImBuilder(true);
-	}
-
-	public static ResourceLocationImBuilder delayed() {
-		return new ResourceLocationImBuilder(false);
-	}
+	public static final ImBuilderType<ResourceLocation> IMMEDIATE_TYPE = () -> new ResourceLocationImBuilder(true);
+	public static final ImBuilderType<ResourceLocation> DELAYED_TYPE = () -> new ResourceLocationImBuilder(false);
 
 	public final ImString value;
 	public final boolean immediateUpdates;
