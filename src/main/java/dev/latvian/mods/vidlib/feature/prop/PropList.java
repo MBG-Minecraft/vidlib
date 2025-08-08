@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -109,7 +110,13 @@ public class PropList implements Iterable<Prop> {
 		props.onAdded(prop);
 		prop.snap();
 
-		if (props.level.isServerSide()) {
+		if (props.level.isClientSide()) {
+			prop.defaultValues = new IdentityHashMap<>();
+
+			for (var entry : prop.type.data()) {
+				prop.defaultValues.put(entry.data(), prop.getData(entry.data()));
+			}
+		} else {
 			for (var entry : prop.type.data()) {
 				prop.sync(entry.data());
 			}

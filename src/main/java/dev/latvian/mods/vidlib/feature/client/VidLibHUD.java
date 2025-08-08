@@ -4,16 +4,25 @@ import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBarRenderer;
+import dev.latvian.mods.vidlib.feature.imgui.PropExplorerPanel;
 import dev.latvian.mods.vidlib.feature.misc.FlashbackIntegration;
 import dev.latvian.mods.vidlib.feature.misc.VLFlashbackIntegration;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.numbers.StyledFormat;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.scores.DisplaySlot;
+import net.minecraft.world.scores.ReadOnlyScoreInfo;
+import net.neoforged.neoforge.common.NeoForge;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 
+import java.util.ArrayList;
 import java.util.function.Predicate;
 
 public interface VidLibHUD {
@@ -61,16 +70,24 @@ public interface VidLibHUD {
 		double maxDist = mc.get(InternalServerData.NAME_DRAW_MAX_DIST);
 		float minSize = mc.get(InternalServerData.NAME_DRAW_MIN_SIZE);
 
-		for (var player : level.players()) {
-			if (!shouldDrawName(mc, self, player)) {
-				continue;
-			}
+		var lines = new ArrayList<FormattedCharSequence>(1);
+		var delta = deltaTracker.getGameTimeDeltaPartialTick(false);
+		var selfDelta = deltaTracker.getGameTimeDeltaPartialTick(true);
 
+		for (var player : level.players()) {
 			if (player.isSpectator()) {
 				continue;
 			}
 
-			var pos = player.getPosition(deltaTracker.getGameTimeDeltaPartialTick(player == self)).add(0D, player.getBbHeight() * 1.1D, 0D);
+			if (replay && FlashbackIntegration.isEntityHidden(player.getUUID())) {
+				continue;
+			}
+
+			if (!shouldDrawName(mc, self, player)) {
+				continue;
+			}
+
+			var pos = player.getPosition(player == self ? selfDelta : delta).add(0D, player.getBbHeight() * 1.1D, 0D);
 			var distSq = cam.distanceToSqr(pos);
 
 			if (distSq > maxDist * maxDist) {
@@ -82,10 +99,6 @@ public interface VidLibHUD {
 			var alpha = (int) Math.clamp(KMath.map(dist, midDist, maxDist, 255F, 0F), 0F, 255F);
 
 			if (alpha <= 3) {
-				continue;
-			}
-
-			if (replay && FlashbackIntegration.isEntityHidden(player.getUUID())) {
 				continue;
 			}
 
@@ -106,11 +119,78 @@ public interface VidLibHUD {
 				if (wpos != null) {
 					var scale = (float) Math.clamp(KMath.map(dist, minDist, midDist, 1F, minSize), minSize, 1F);
 
+					lines.clear();
+
+					if (renderName) {
+						lines.addAll(mc.font.split(player.getDisplayName(), 1000));
+
+						var scoreboard = player.getScoreboard();
+						var objective = scoreboard.getDisplayObjective(DisplaySlot.BELOW_NAME);
+
+						if (objective != null) {
+							ReadOnlyScoreInfo readonlyscoreinfo = scoreboard.getPlayerScoreInfo(player, objective);
+							Component component = ReadOnlyScoreInfo.safeFormatValue(readonlyscoreinfo, objective.numberFormatOrDefault(StyledFormat.NO_STYLE));
+							lines.addAll(mc.font.split(Component.empty().append(component).append(CommonComponents.SPACE).append(objective.getDisplayName()), 1000));
+						}
+
+						NeoForge.EVENT_BUS.post(new HUDNameEvent(player, mc.font, lines));
+					}
+
+					float health = renderHealth ? player.getRelativeHealth(player == self ? selfDelta : delta) : -1F;
+
 					graphics.pose().pushPose();
 					graphics.pose().translate(wpos.x(), wpos.y() - 2F, 0F);
 					graphics.pose().scale(scale, scale, 1F);
-					graphics.healthBarWithLabel(mc.font, player, -20, -3, 40, 6, renderName, renderHealth, alpha);
+					graphics.healthBarWithText(mc.font, -20, -3, 40, 6, lines, health, alpha);
 					graphics.pose().popPose();
+				}
+			}
+		}
+
+		for (var propList : level.getProps().propLists.values()) {
+			for (var prop : propList) {
+				boolean renderName = prop.shouldRenderDisplayName(self);
+				boolean renderHealth = prop.shouldRenderHealth(self);
+
+				if (renderName || renderHealth) {
+					if (PropExplorerPanel.isPropHidden(prop)) {
+						continue;
+					}
+
+					var pos = prop.getInfoPos(delta);
+					var distSq = cam.distanceToSqr(pos);
+
+					if (distSq > maxDist * maxDist) {
+						continue;
+					}
+
+					var dist = Math.sqrt(distSq);
+
+					var alpha = (int) Math.clamp(KMath.map(dist, midDist, maxDist, 255F, 0F), 0F, 255F);
+
+					if (alpha <= 3) {
+						continue;
+					}
+
+					var wpos = worldMouse.screen(pos);
+
+					if (wpos != null) {
+						var scale = (float) Math.clamp(KMath.map(dist, minDist, midDist, 1F, minSize), minSize, 1F);
+
+						lines.clear();
+
+						if (renderName) {
+							lines.addAll(mc.font.split(prop.getDisplayName(), 1000));
+						}
+
+						float health = renderHealth ? prop.getDisplayHealth(delta) : -1F;
+
+						graphics.pose().pushPose();
+						graphics.pose().translate(wpos.x(), wpos.y() - 2F, 0F);
+						graphics.pose().scale(scale, scale, 1F);
+						graphics.healthBarWithText(mc.font, -20, -3, 40, 6, lines, health, alpha);
+						graphics.pose().popPose();
+					}
 				}
 			}
 		}

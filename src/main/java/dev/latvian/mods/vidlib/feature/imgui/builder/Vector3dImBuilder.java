@@ -59,7 +59,7 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d>, SelectedPosition.
 		ImGuiUtils.FLOAT.set((float) data.x);
 		ImGui.dragFloat("###x", ImGuiUtils.FLOAT.getData(), 0.0625F, -30000000F, 30000000F, "%.4f");
 		update = update.orItemEdit();
-		data.x = ImGuiUtils.DOUBLE.get();
+		data.x = ImGuiUtils.FLOAT.get();
 
 		if (ImGui.button(SelectedPosition.ENTITY.icon + "###entity-pos")) {
 			var entity = Minecraft.getInstance().player;

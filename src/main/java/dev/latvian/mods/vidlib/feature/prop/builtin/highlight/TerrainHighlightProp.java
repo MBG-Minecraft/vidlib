@@ -24,7 +24,7 @@ public class TerrainHighlightProp extends Prop {
 	public static final PropType<TerrainHighlightProp> TYPE = PropType.create(VidLib.id("terrain_highlight"), TerrainHighlightProp::new,
 		TICK,
 		LIFESPAN,
-		DYNAMIC_POSITION,
+		POSITION,
 		SHAPE,
 		COLOR,
 		SCALE

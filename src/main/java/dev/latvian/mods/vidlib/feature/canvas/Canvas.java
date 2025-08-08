@@ -17,13 +17,12 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.latvian.mods.klib.gl.GLDebugLog;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
+import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderPipelines;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ARGB;
-import net.neoforged.api.distmarker.Dist;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
@@ -38,7 +37,7 @@ import java.util.function.Consumer;
 
 public class Canvas implements Consumer<RenderPass> {
 	public static final Lazy<Map<ResourceLocation, Canvas>> ALL = Lazy.map(map -> {
-		for (var s : AutoRegister.SCANNED.get()) {
+		for (var s : ClientAutoRegister.SCANNED.get()) {
 			if (s.value() instanceof Canvas canvas) {
 				map.put(canvas.id, canvas);
 			}
@@ -53,19 +52,19 @@ public class Canvas implements Consumer<RenderPass> {
 		return new InternalCanvas(id);
 	}
 
-	@AutoRegister(Dist.CLIENT)
+	@ClientAutoRegister
 	public static final Canvas MAIN_BEFORE_PARTICLES = createExternal(VidLib.id("main_before_particles"));
 
-	@AutoRegister(Dist.CLIENT)
+	@ClientAutoRegister
 	public static final Canvas MAIN_AFTER_PARTICLES = createExternal(VidLib.id("main_after_particles"));
 
 	// @AutoRegister(Dist.CLIENT)
 	// public static final Canvas CHROMATIC_ABERRATION = createExternal(VidLib.id("chromatic_aberration"));
 
-	@AutoRegister(Dist.CLIENT)
+	@ClientAutoRegister
 	public static final Canvas WEAK_OUTLINE = createExternal(VidLib.id("weak_outline"));
 
-	@AutoRegister(Dist.CLIENT)
+	@ClientAutoRegister
 	public static final Canvas STRONG_OUTLINE = createExternal(VidLib.id("strong_outline"));
 
 	public final ResourceLocation id;

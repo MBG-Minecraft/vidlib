@@ -4,6 +4,7 @@ import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -48,7 +49,7 @@ public interface VLStreamCodecs {
 	}
 
 	static Object decodeValue(RegistryFriendlyByteBuf buf, DataType<?> type, byte[] bytes) {
-		var buf1 = new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(bytes), buf.registryAccess(), buf.getConnectionType());
+		var buf1 = PlatformHelper.CURRENT.createBuffer(Unpooled.wrappedBuffer(bytes), buf);
 
 		try {
 			return type.streamCodec().decode(buf1);
@@ -100,7 +101,7 @@ public interface VLStreamCodecs {
 			buf.writeBlockPos(v);
 		} else {
 			buf.writeVarInt(1);
-			var buf1 = new RegistryFriendlyByteBuf(Unpooled.buffer(), buf.registryAccess(), buf.getConnectionType());
+			var buf1 = PlatformHelper.CURRENT.createBuffer(Unpooled.buffer(), buf);
 
 			try {
 				type.streamCodec().encode(buf1, Cast.to(value));

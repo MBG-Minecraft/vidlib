@@ -3,14 +3,13 @@ package dev.latvian.mods.vidlib.feature.auto;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
-import net.neoforged.fml.loading.FMLLoader;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -44,12 +43,12 @@ public @interface AutoInit {
 
 		public void invoke(Object... args) {
 			for (var s : SCANNED.get()) {
-				if (s.type == this) {
+				if (s.type() == this) {
 					try {
-						if (s.method.getParameterCount() == 0) {
-							s.method.invoke(null);
+						if (s.method().getParameterCount() == 0) {
+							s.method().invoke(null);
 						} else {
-							s.method.invoke(null, args);
+							s.method().invoke(null, args);
 						}
 					} catch (Exception ex) {
 						VidLib.LOGGER.error("Failed to invoke @AutoInit method " + s.method().getDeclaringClass().getName() + "#" + s.method().getName(), ex);
@@ -65,14 +64,11 @@ public @interface AutoInit {
 
 	Type[] value() default Type.DEFAULT;
 
-	record AutoMethod(Type type, Method method) {
-	}
-
 	@ApiStatus.Internal
 	Lazy<List<AutoMethod>> SCANNED = Lazy.of(() -> {
 		var list = new ArrayList<AutoMethod>();
 
-		AutoHelper.load(AutoInit.class, EnumSet.of(ElementType.TYPE, ElementType.METHOD, ElementType.FIELD), (mod, classLoader, ad) -> {
+		AutoHelper.load(AutoInit.class, EnumSet.of(ElementType.TYPE, ElementType.METHOD, ElementType.FIELD), (source, classLoader, ad) -> {
 			var types = AutoHelper.getEnumValues(ad, Type.class, "value", EnumSet.of(Type.DEFAULT));
 
 			for (var type : types) {
@@ -80,7 +76,7 @@ public @interface AutoInit {
 					type = Type.GAME_LOADED;
 				}
 
-				if (type.clientOnly && !FMLLoader.getDist().isClient()) {
+				if (type.clientOnly && !PlatformHelper.CURRENT.getSide().isClient()) {
 					VidLib.LOGGER.info("Skipped @AutoInit class " + ad.clazz().getClassName());
 					return;
 				}

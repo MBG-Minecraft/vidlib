@@ -30,6 +30,7 @@ import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToServer;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.feature.npc.NPCParticleOptions;
 import dev.latvian.mods.vidlib.feature.npc.NPCRecording;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
 import dev.latvian.mods.vidlib.feature.skybox.ClientFogOverride;
 import dev.latvian.mods.vidlib.feature.skybox.Skybox;
@@ -54,14 +55,12 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.client.renderer.FogParameters;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.network.connection.ConnectionType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
@@ -415,7 +414,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		if (npcRecording != null) {
 			npcRecording.length = System.currentTimeMillis() - npcRecording.start;
 
-			var buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), mc.level.registryAccess(), ConnectionType.NEOFORGE);
+			var buf = PlatformHelper.CURRENT.createBuffer(Unpooled.buffer(), mc.level.registryAccess());
 			var path = FMLPaths.GAMEDIR.get().resolve("vidlib/npc/" + npcRecording.start + "_" + npcRecording.profile.getName().toLowerCase(Locale.ROOT) + ".npcrec");
 
 			if (Files.notExists(path.getParent())) {

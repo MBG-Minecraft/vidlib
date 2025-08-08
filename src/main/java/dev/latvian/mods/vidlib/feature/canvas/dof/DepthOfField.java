@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.canvas.dof;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.ClientMatrices;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
+import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasFloatUniform;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
@@ -11,7 +11,6 @@ import dev.latvian.mods.vidlib.math.kvector.KVector;
 import imgui.type.ImBoolean;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
 
 public class DepthOfField {
 	public static DepthOfFieldData REPLAY = new DepthOfFieldData(KVector.ZERO, 1.5F, 8F, 0F);
@@ -26,7 +25,7 @@ public class DepthOfField {
 		DEBUG_FAR_COLOR.set(Color.of(0x7FFF0000));
 	}
 
-	@AutoRegister(Dist.CLIENT)
+	@ClientAutoRegister
 	public static final Canvas CANVAS = Canvas.createExternal(VidLib.id("depth_of_field")).setTickCallback(DepthOfField::tick).setDrawSetupCallback(DepthOfField::setup);
 
 	public static final CanvasFloatUniform INVERSE_VIEW_PROJECTION_MATRIX_UNIFORM = CANVAS.mat4Uniform("InverseViewProjectionMat");

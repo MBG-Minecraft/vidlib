@@ -34,7 +34,7 @@ public @interface AutoPacket {
 	Lazy<List<ScanData>> SCANNED = Lazy.of(() -> {
 		var list = new ArrayList<ScanData>();
 
-		AutoHelper.load(AutoPacket.class, EnumSet.of(ElementType.FIELD), (mod, classLoader, ad) -> {
+		AutoHelper.load(AutoPacket.class, EnumSet.of(ElementType.FIELD), (source, classLoader, ad) -> {
 				var clazz = Class.forName(ad.clazz().getClassName(), true, classLoader);
 				var type = AutoHelper.getStaticFieldValue(clazz, ad);
 

@@ -31,8 +31,8 @@ import java.util.Map;
 
 public interface VidLibTool {
 	Lazy<Map<String, VidLibTool>> REGISTRY = Lazy.map(map -> {
-		for (var scanned : AutoRegister.SCANNED.get()) {
-			if (scanned.value() instanceof VidLibTool tool) {
+		for (var s : AutoRegister.SCANNED.get()) {
+			if (s.value() instanceof VidLibTool tool) {
 				map.put(tool.getId(), tool);
 			}
 		}

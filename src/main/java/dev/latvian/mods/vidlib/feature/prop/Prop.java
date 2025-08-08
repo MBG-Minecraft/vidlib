@@ -13,6 +13,8 @@ import dev.latvian.mods.klib.shape.ColoredShape;
 import dev.latvian.mods.klib.shape.CuboidShape;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.PropExplorerPanel;
 import dev.latvian.mods.vidlib.feature.imgui.builder.AngleImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.FloatImBuilder;
@@ -20,15 +22,13 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.IntImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Vector3dImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Vector3fImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
-import dev.latvian.mods.vidlib.math.kvector.FixedKVector;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
-import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 import dev.latvian.mods.vidlib.math.kvector.PositionType;
 import imgui.ImGui;
 import imgui.flag.ImGuiTableFlags;
@@ -44,6 +44,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -61,6 +62,8 @@ import org.joml.Vector3fc;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class Prop {
@@ -76,14 +79,7 @@ public class Prop {
 	public static final PropData<Prop, Float> HEIGHT = PropData.create(Prop.class, "height", DataTypes.FLOAT, p -> (float) p.height, (p, v) -> p.height = v, FloatImBuilder.type(0F, 16F));
 	public static final PropData<Prop, Boolean> CAN_COLLIDE = PropData.createBoolean(Prop.class, "can_collide", p -> p.canCollide, (p, v) -> p.canCollide = v);
 	public static final PropData<Prop, Boolean> CAN_INTERACT = PropData.createBoolean(Prop.class, "can_interact", p -> p.canInteract, (p, v) -> p.canInteract = v);
-
-	public static final PropData<Prop, KVector> DYNAMIC_POSITION = PropData.create(Prop.class, "position", KVector.DATA_TYPE, p -> p.dynamicPos == null ? KVector.of(p.pos) : p.dynamicPos, (p, v) -> {
-		p.dynamicPos = v;
-
-		if (v instanceof FixedKVector f) {
-			p.setPos(f.vec());
-		}
-	}, KVectorImBuilder.TYPE);
+	public static final PropData<Prop, Boolean> PAUSED = PropData.createBoolean(Prop.class, "paused", p -> p.paused, (p, v) -> p.paused = v);
 
 	public final PropType<?> type;
 	public final PropSpawnType spawnType;
@@ -93,12 +89,12 @@ public class Prop {
 	public int id;
 	PropRemoveType removed;
 	private List<Pair<PropData<?, ?>, ImBuilder<?>>> imguiBuilders;
+	Map<PropData<?, ?>, Object> defaultValues = Map.of();
 
 	public int prevTick;
 	public int tick;
 	public int lifespan;
 	public final Vector3d pos;
-	public KVector dynamicPos;
 	public final Vector3d prevPos;
 	public final Vector3f velocity;
 	public final Vector3f rotation;
@@ -109,6 +105,7 @@ public class Prop {
 	public double height;
 	public boolean canCollide;
 	public boolean canInteract;
+	public boolean paused;
 
 	public Prop(PropContext<?> ctx) {
 		this.type = ctx.type();
@@ -126,12 +123,12 @@ public class Prop {
 		this.rotation = new Vector3f();
 		this.prevRotation = new Vector3f();
 		this.velocityMultiplier = new Vector3f(0.98F, 1F, 0.98F);
-		this.dynamicPos = null;
 		this.gravity = 0.08F;
 		this.width = 1D;
 		this.height = 1D;
 		this.canCollide = false;
 		this.canInteract = false;
+		this.paused = false;
 	}
 
 	public <T> T getData(PropData<?, T> data) {
@@ -171,7 +168,7 @@ public class Prop {
 			return true;
 		}
 
-		if (!level.isReplayLevel()) {
+		if (!paused && !level.isReplayLevel()) {
 			tick++;
 		}
 
@@ -310,29 +307,12 @@ public class Prop {
 	}
 
 	public void move() {
-		if (dynamicPos != null) {
-			var ctx = createWorldNumberContext();
-			var followPos = dynamicPos.get(ctx);
-
-			if (followPos != null) {
-				pos.set(followPos.x, followPos.y, followPos.z);
-			}
-		}
-
 		pos.add(velocity);
 		velocity.mul(velocityMultiplier);
 		velocity.y -= gravity;
 	}
 
 	public void onAdded() {
-		if (dynamicPos != null) {
-			var ctx = createWorldNumberContext();
-			var followPos = dynamicPos.get(ctx);
-
-			if (followPos != null) {
-				pos.set(followPos.x, followPos.y, followPos.z);
-			}
-		}
 	}
 
 	public void onRemoved() {
@@ -403,8 +383,24 @@ public class Prop {
 		return new PropEntity(this);
 	}
 
+	public Vec3 getInfoPos(float delta) {
+		return getPos(delta).add(0D, height * 1.1D, 0D);
+	}
+
 	public Component getDisplayName() {
 		return Component.literal(type.translationKey());
+	}
+
+	public boolean shouldRenderDisplayName(Player to) {
+		return false;
+	}
+
+	public boolean shouldRenderHealth(Player to) {
+		return false;
+	}
+
+	public float getDisplayHealth(float delta) {
+		return 1F;
 	}
 
 	public CommandSourceStack getCommandSourceAt(CommandSourceStack original) {
@@ -544,26 +540,17 @@ public class Prop {
 			graphics.popStack();
 		}
 
-		boolean refresh = ImGui.smallButton("Refresh Data###refresh-data");
-
 		ImGui.sameLine();
 
 		if (ImGui.smallButton("Copy ID")) {
 			ImGui.setClipboardText(getIdString());
 		}
 
-		if (lifespan > 0) {
-			ImGui.text("Tick: %,d / %,d".formatted(tick, lifespan));
-			ImGui.progressBar(getRelativeTick(delta, 0F), 0F, 20F);
-		} else {
-			ImGui.text("Tick: %,d".formatted(tick));
-		}
-
 		if (imguiBuilders == null) {
 			imguiBuilders = new ArrayList<>(type.data().size());
 
 			for (var data : type.unsortedData()) {
-				if (data == TICK || data == LIFESPAN) {
+				if (data == TICK || data == LIFESPAN || data == PAUSED) {
 					continue;
 				}
 
@@ -573,43 +560,120 @@ public class Prop {
 			}
 
 			imguiBuilders = List.copyOf(imguiBuilders);
-			refresh = true;
 		}
 
-		if (refresh) {
-			for (var builder : imguiBuilders) {
-				var k = builder.left();
-				var b = builder.right();
-
-				try {
-					b.set(Cast.to(getData(k)));
-				} catch (Throwable ex) {
-					graphics.stackTrace(ex);
-				}
-			}
-		}
-
-		if (ImGui.beginTable("###data", 2, ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.Borders)) {
-			for (var builder : imguiBuilders) {
+		if (ImGui.beginTable("###data", 3, ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.Borders)) {
+			if (hasData(TICK)) {
 				ImGui.tableNextRow();
+				ImGui.pushID("tick");
+				ImGui.tableNextColumn();
+				ImGui.alignTextToFramePadding();
 
-				var k = builder.left();
-				var b = builder.right();
+				if (ImGui.smallButton(ImIcons.UNDO + "###reset")) {
+					prevTick = 0;
+					tick = 0;
+					c2sEdit(TICK, 0, true);
+				}
 
 				ImGui.tableNextColumn();
 				ImGui.alignTextToFramePadding();
-				ImGui.text(k.key());
+
+				if (ImGui.checkbox("tick", !paused)) {
+					level.c2s(new RequestPausePropPayload(spawnType.listType, id, !paused));
+				}
+
+				ImGui.tableNextColumn();
+				ImGui.alignTextToFramePadding();
+
+				int lifespan1 = lifespan > 0 && hasData(LIFESPAN) ? lifespan : 0;
+				var tickText = lifespan1 > 0 ? "%,d / %,d".formatted(tick, lifespan1) : "%,d".formatted(tick);
+
+				if (paused) {
+					ImGuiUtils.INT.set(tick);
+					ImGui.pushItemWidth(-1F);
+					ImGui.dragInt("###value", ImGuiUtils.INT.getData(), 1F, 0F, 1000000F, tickText);
+					ImGui.popItemWidth();
+
+					var update = ImUpdate.itemEdit();
+
+					if (update.isAny()) {
+						c2sEdit(TICK, Math.max(0, ImGuiUtils.INT.get()), update.isFull());
+					}
+				} else {
+					ImGui.text(tickText);
+				}
+
+				ImGui.popID();
+
+				if (lifespan1 > 0) {
+					ImGui.tableNextRow();
+					ImGui.pushID("progress");
+					ImGui.tableNextColumn();
+					ImGui.beginDisabled();
+					ImGui.alignTextToFramePadding();
+					ImGui.smallButton(ImIcons.UNDO + "###reset");
+					ImGui.endDisabled();
+					ImGui.tableNextColumn();
+					ImGui.alignTextToFramePadding();
+					ImGui.text("progress");
+					ImGui.tableNextColumn();
+					ImGui.progressBar(getRelativeTick(delta, 0F), 0F, 20F);
+					ImGui.popID();
+				}
+			}
+
+			for (var entry : imguiBuilders) {
+				var data = entry.left();
+				var builder = entry.right();
+
+				ImGui.tableNextRow();
+				ImGui.pushID(data.key());
+				ImGui.tableNextColumn();
+				ImGui.alignTextToFramePadding();
+
+				var value = getData(data);
+
+				try {
+					builder.set(Cast.to(value));
+				} catch (Throwable ex) {
+					graphics.stackTrace(ex);
+				}
+
+				var defaultValue = defaultValues.get(data);
+				var isDefault = Objects.equals(defaultValue, value);
+
+				if (isDefault) {
+					ImGui.beginDisabled();
+				}
+
+				if (ImGui.smallButton(ImIcons.UNDO + "###reset")) {
+					c2sEdit(data, Cast.to(defaultValue), true);
+				}
+
+				if (!isDefault && ImGui.isItemHovered()) {
+					ImGui.setTooltip("Reset to " + defaultValue);
+				}
+
+				if (isDefault) {
+					ImGui.endDisabled();
+				}
+
+				ImGui.tableNextColumn();
+				ImGui.alignTextToFramePadding();
+				ImGui.text(data.key());
 
 				ImGui.tableNextColumn();
 				ImGui.pushItemWidth(-1F);
-				ImGui.pushID(k.key());
-				var update = b.imgui(graphics);
+				ImGui.pushID("###value");
+				var update = builder.imgui(graphics);
 				ImGui.popID();
 				ImGui.popItemWidth();
 
-				if (update.isAny() && b.isValid()) {
-					c2sEdit(k, Cast.to(b.build()), update.isFull());
+				if (update.isAny() && builder.isValid()) {
+					c2sEdit(data, Cast.to(builder.build()), update.isFull());
 				}
+
+				ImGui.popID();
 			}
 
 			ImGui.endTable();

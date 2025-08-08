@@ -134,7 +134,7 @@ public class ClientProps extends Props<ClientLevel> {
 				continue;
 			} else if (!VISIBLE.get() || prop.isTimeTraveling(frame.gameTime())) {
 				continue;
-			} else if (PropExplorerPanel.HIDDEN_PROPS.contains(prop.id) || PropExplorerPanel.HIDDEN_PROP_TYPES.contains(prop.type)) {
+			} else if (PropExplorerPanel.isPropHidden(prop)) {
 				continue;
 			}
 

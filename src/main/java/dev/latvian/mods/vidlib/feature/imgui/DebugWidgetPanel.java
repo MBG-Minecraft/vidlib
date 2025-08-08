@@ -305,19 +305,19 @@ public class DebugWidgetPanel extends AdminPanel {
 
 			if (radius != null && radius > 0D) {
 				if (ImGui.button("Create Danger Highlight###create-danger-highlight")) {
-					var pos = vectorBuilder.build();
+					var pos = vectorBuilder.build().get(ctx);
 					var scalen = KNumber.of(radius.floatValue());
 					var scale = new DynamicKVector(scalen, KNumber.ZERO, scalen);
 
 					mc.level.getProps().add(TerrainHighlightProp.TYPE, prop -> {
-						prop.dynamicPos = pos;
+						prop.setPos(pos);
 						prop.color = new Color(0xCCFFDD00).withAlpha(100).gradient(Color.RED.withAlpha(100), Easing.QUAD_IN);
 						prop.scale = scale;
 						prop.lifespan = 60;
 					});
 
 					mc.level.getProps().add(TerrainHighlightProp.TYPE, prop -> {
-						prop.dynamicPos = pos;
+						prop.setPos(pos);
 						prop.color = Color.RED.withAlpha(100);
 						prop.scale = KVector.ZERO.interpolate(Easing.QUAD_IN, scale);
 						prop.lifespan = 60;

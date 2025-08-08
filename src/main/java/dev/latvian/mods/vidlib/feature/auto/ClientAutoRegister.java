@@ -13,24 +13,25 @@ import java.util.EnumSet;
 import java.util.List;
 
 /**
- * @see net.neoforged.neoforge.registries.DeferredRegister
- * @see ServerCommandHolder
- * @see dev.latvian.mods.vidlib.feature.prop.PropType
- * @see dev.latvian.mods.vidlib.feature.item.VidLibTool
+ * @see EntityRendererHolder
+ * @see BlockEntityRendererHolder
+ * @see ClientCommandHolder
+ * @see dev.latvian.mods.vidlib.feature.canvas.Canvas
+ * @see dev.latvian.mods.vidlib.feature.prop.PropRenderer.Holder
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface AutoRegister {
+public @interface ClientAutoRegister {
 	@ApiStatus.Internal
 	Lazy<List<ScanData>> SCANNED = Lazy.of(() -> {
 		var list = new ArrayList<ScanData>();
 
-		AutoHelper.load(AutoRegister.class, EnumSet.of(ElementType.FIELD), (source, classLoader, ad) -> {
+		AutoHelper.load(ClientAutoRegister.class, EnumSet.of(ElementType.FIELD), (source, classLoader, ad) -> {
 			var clazz = Class.forName(ad.clazz().getClassName(), true, classLoader);
 			var value = AutoHelper.getStaticFieldValue(clazz, ad);
 
 			if (value != null) {
-				VidLib.LOGGER.info("Found @AutoRegister field " + clazz.getName() + "." + ad.memberName());
+				VidLib.LOGGER.info("Found @ClientAutoRegister field " + clazz.getName() + "." + ad.memberName());
 				list.add(new ScanData(source, value));
 			}
 		});

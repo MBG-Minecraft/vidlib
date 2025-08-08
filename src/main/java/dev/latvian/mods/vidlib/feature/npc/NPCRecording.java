@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.npc;
 import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectLinkedOpenHashMap;
 import net.minecraft.core.RegistryAccess;
@@ -12,7 +13,6 @@ import net.minecraft.network.VarLong;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.fml.loading.FMLPaths;
-import net.neoforged.neoforge.network.connection.ConnectionType;
 
 import java.io.BufferedInputStream;
 import java.nio.file.Files;
@@ -36,7 +36,7 @@ public class NPCRecording {
 
 						REPLAY.put(name, Lazy.of(() -> {
 							try (var in = new BufferedInputStream(Files.newInputStream(path))) {
-								var buf = new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(in.readAllBytes()), registryAccess, ConnectionType.NEOFORGE);
+								var buf = PlatformHelper.CURRENT.createBuffer(Unpooled.wrappedBuffer(in.readAllBytes()), registryAccess);
 								var recording = new NPCRecording(buf);
 								VidLib.LOGGER.info("Loaded NPC recording '" + name + "'");
 								return recording;

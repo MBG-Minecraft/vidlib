@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
 import dev.latvian.mods.klib.util.Lazy;
-import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
+import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import net.minecraft.client.renderer.LightTexture;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
@@ -44,7 +44,7 @@ public interface PropRenderer<P extends Prop> {
 	}
 
 	Lazy<Map<PropType<?>, Function<Prop, PropRenderer<?>>>> ALL = Lazy.identityMap(map -> {
-		for (var s : AutoRegister.SCANNED.get()) {
+		for (var s : ClientAutoRegister.SCANNED.get()) {
 			if (s.value() instanceof Holder(PropType<?> type, Function<Prop, PropRenderer<?>> rendererFactory)) {
 				map.put(type, rendererFactory);
 			}

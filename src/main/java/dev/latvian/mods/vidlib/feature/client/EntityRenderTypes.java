@@ -69,6 +69,19 @@ public interface EntityRenderTypes {
 
 	BufferSupplier WHITE_TRANSLUCENT_BUFFER_SUPPLIER = BufferSupplier.fixed(TRANSLUCENT.apply(Empty.TEXTURE), TRANSLUCENT_NO_CULL.apply(Empty.TEXTURE));
 
+	TexturedRenderType STONE_CUTOUT_NO_CULL = TexturedRenderType.internal(
+		"entity/stone_cutout_no_cull",
+		1536,
+		true,
+		false,
+		VidLibRenderPipelines.STONE_ENTITY_NO_CULL,
+		texture -> RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
+			.setLightmapState(RenderStateShard.LIGHTMAP)
+			.setOverlayState(RenderStateShard.OVERLAY)
+			.createCompositeState(true)
+	);
+
 	static RenderType textureCull(ResourceLocation texture, boolean translucent) {
 		return translucent ? TRANSLUCENT.apply(texture) : CUTOUT.apply(texture);
 	}

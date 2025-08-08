@@ -11,15 +11,14 @@ import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.connection.ConnectionType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -165,7 +164,7 @@ public record PropType<P extends Prop>(
 			return null;
 		}
 
-		var buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), registryAccess, ConnectionType.NEOFORGE);
+		var buf = PlatformHelper.CURRENT.createBuffer(Unpooled.buffer(), registryAccess);
 
 		try {
 			buf.writeVarInt(syncSet.size());
@@ -186,7 +185,7 @@ public record PropType<P extends Prop>(
 	}
 
 	public void readUpdate(RegistryAccess registryAccess, byte[] update, boolean allData, BiConsumer<PropData<?, ?>, Object> setData) {
-		var buf = new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(update), registryAccess, ConnectionType.NEOFORGE);
+		var buf = PlatformHelper.CURRENT.createBuffer(Unpooled.wrappedBuffer(update), registryAccess);
 
 		try {
 			int size = buf.readVarInt();

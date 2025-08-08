@@ -69,7 +69,6 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent
 	public static void afterLoad(FMLLoadCompleteEvent event) {
-		event.enqueueWork(VidLib::setupSync);
 		gameLoaded();
 	}
 

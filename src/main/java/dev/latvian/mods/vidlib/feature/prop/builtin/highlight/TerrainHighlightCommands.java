@@ -22,13 +22,13 @@ public interface TerrainHighlightCommands {
 				.then(Commands.argument("color", CommandDataType.GRADIENT.argument(buildContext))
 					.then(Commands.argument("duration", IntegerArgumentType.integer(0))
 						.executes(ctx -> {
-							var pos = KVector.of(Vec3Argument.getVec3(ctx, "position"));
+							var pos = Vec3Argument.getVec3(ctx, "position");
 							var shape = CommandDataType.SHAPE.get(ctx, "shape");
 							var color = CommandDataType.GRADIENT.get(ctx, "color");
 							var duration = IntegerArgumentType.getInteger(ctx, "duration");
 
 							ctx.getSource().getLevel().getProps().add(TerrainHighlightProp.TYPE, prop -> {
-								prop.dynamicPos = pos;
+								prop.setPos(pos);
 								prop.shape = shape;
 								prop.color = color;
 								prop.scale = KVector.ONE;
@@ -46,20 +46,20 @@ public interface TerrainHighlightCommands {
 				.then(Commands.argument("radius", FloatArgumentType.floatArg(0F))
 					.then(Commands.argument("duration", IntegerArgumentType.integer(0))
 						.executes(ctx -> {
-							var pos = KVector.of(Vec3Argument.getVec3(ctx, "position"));
+							var pos = Vec3Argument.getVec3(ctx, "position");
 							var scalen = KNumber.of(FloatArgumentType.getFloat(ctx, "radius"));
 							var scale = new DynamicKVector(scalen, KNumber.ZERO, scalen);
 							var duration = IntegerArgumentType.getInteger(ctx, "duration");
 
 							ctx.getSource().getLevel().getProps().add(TerrainHighlightProp.TYPE, prop -> {
-								prop.dynamicPos = pos;
+								prop.setPos(pos);
 								prop.color = new Color(0xCCFFDD00).withAlpha(100).gradient(Color.RED.withAlpha(100), Easing.QUAD_IN);
 								prop.scale = scale;
 								prop.lifespan = duration;
 							});
 
 							ctx.getSource().getLevel().getProps().add(TerrainHighlightProp.TYPE, prop -> {
-								prop.dynamicPos = pos;
+								prop.setPos(pos);
 								prop.color = Color.RED.withAlpha(100);
 								prop.scale = KVector.ZERO.interpolate(Easing.QUAD_IN, scale);
 								prop.lifespan = duration;

@@ -9,6 +9,7 @@ import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.util.MiscUtils;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
@@ -73,6 +74,10 @@ public class PlayerHeadTexture extends AbstractTexture {
 			}
 
 			device.createCommandEncoder().writeToTexture(texture, dst, 0, 0, 0, dst.getWidth(), dst.getHeight(), 0, 0);
+		}
+
+		if (uuid.equals(Util.NIL_UUID)) {
+			return;
 		}
 
 		Thread.startVirtualThread(() -> {

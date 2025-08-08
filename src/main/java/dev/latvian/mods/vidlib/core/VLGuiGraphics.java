@@ -3,27 +3,17 @@ package dev.latvian.mods.vidlib.core;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.feature.client.HUDNameEvent;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.numbers.StyledFormat;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.scores.DisplaySlot;
-import net.minecraft.world.scores.Objective;
-import net.minecraft.world.scores.ReadOnlyScoreInfo;
-import net.minecraft.world.scores.Scoreboard;
-import net.neoforged.neoforge.common.NeoForge;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public interface VLGuiGraphics {
 	ResourceLocation HEART_BACKGROUND = ID.mc("hud/heart/container");
@@ -45,36 +35,19 @@ public interface VLGuiGraphics {
 		graphics.fill(x + 2, y + 2, x + Mth.ceil((w - 3F) * hp + 1F), y + h - 2, barColor.argb());
 	}
 
-	default void healthBarWithLabel(Font font, Entity entity, int x, int y, int w, int h, boolean renderName, boolean renderHealth, int alpha) {
+	default void healthBarWithText(Font font, int x, int y, int w, int h, List<FormattedCharSequence> lines, float health, int alpha) {
 		var graphics = (GuiGraphics) this;
-		var mc = vl$mc();
-		var hp = entity.getRelativeHealth(mc.getDeltaTracker().getGameTimeDeltaPartialTick(entity == mc.player));
 		var nameY = y;
 
-		if (renderHealth) {
-			healthBar(x, y, w, h, hp, alpha);
+		if (health >= 0F) {
+			healthBar(x, y, w, h, health, alpha);
 		} else {
 			nameY += 6;
 		}
 
-		if (!renderName) {
+		if (lines.isEmpty()) {
 			return;
 		}
-
-		var lines = new ArrayList<FormattedCharSequence>();
-		lines.addAll(font.split(entity.getDisplayName(), 1000));
-
-		if (entity instanceof Player player) {
-			Scoreboard scoreboard = player.getScoreboard();
-			Objective objective = scoreboard.getDisplayObjective(DisplaySlot.BELOW_NAME);
-			if (objective != null) {
-				ReadOnlyScoreInfo readonlyscoreinfo = scoreboard.getPlayerScoreInfo(player, objective);
-				Component component = ReadOnlyScoreInfo.safeFormatValue(readonlyscoreinfo, objective.numberFormatOrDefault(StyledFormat.NO_STYLE));
-				lines.addAll(font.split(Component.empty().append(component).append(CommonComponents.SPACE).append(objective.getDisplayName()), 1000));
-			}
-		}
-
-		NeoForge.EVENT_BUS.post(new HUDNameEvent(entity, font, lines));
 
 		graphics.pose().pushPose();
 		graphics.pose().translate(x + w / 2F, nameY - 6F, 0F);

@@ -4,6 +4,7 @@ import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -44,7 +45,7 @@ public record PropPacketType<P extends Prop, T>(Handler<P, T> handler, StreamCod
 		RegistryFriendlyByteBuf buf = null;
 
 		try {
-			buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), prop.level.registryAccess());
+			buf = PlatformHelper.CURRENT.createBuffer(Unpooled.buffer(), prop.level.registryAccess());
 			streamCodec.encode(buf, payload);
 			var bytes = new byte[buf.readableBytes()];
 			buf.getBytes(buf.readerIndex(), bytes);
@@ -63,7 +64,7 @@ public record PropPacketType<P extends Prop, T>(Handler<P, T> handler, StreamCod
 		var buf0 = Unpooled.wrappedBuffer(data);
 
 		try {
-			var buf = new RegistryFriendlyByteBuf(buf0, prop.level.registryAccess());
+			var buf = PlatformHelper.CURRENT.createBuffer(buf0, prop.level.registryAccess());
 			var payload = streamCodec.decode(buf);
 			handler.handle(Cast.to(prop), ctx, payload);
 		} catch (Exception ex) {

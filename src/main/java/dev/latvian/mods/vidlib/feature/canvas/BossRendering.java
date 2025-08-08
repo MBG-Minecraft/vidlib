@@ -1,14 +1,13 @@
 package dev.latvian.mods.vidlib.feature.canvas;
 
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
+import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
 
 public class BossRendering {
-	@AutoRegister(Dist.CLIENT)
+	@ClientAutoRegister
 	public static final Canvas CANVAS = Canvas.createExternal(VidLib.id("boss")).setDrawCallback(BossRendering::handleColors);
 
 	public static int active = 0;

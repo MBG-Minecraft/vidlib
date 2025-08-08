@@ -2,13 +2,12 @@ package dev.latvian.mods.vidlib.feature.prop.builtin.highlight;
 
 import dev.latvian.mods.klib.math.Vec3f;
 import dev.latvian.mods.klib.render.DebugRenderTypes;
-import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
+import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
-import net.neoforged.api.distmarker.Dist;
 
 public class TerrainHighlightPropRenderer implements PropRenderer<TerrainHighlightProp> {
-	@AutoRegister(Dist.CLIENT)
+	@ClientAutoRegister
 	public static final Holder HOLDER = new Holder(TerrainHighlightProp.TYPE, new TerrainHighlightPropRenderer());
 
 	@Override

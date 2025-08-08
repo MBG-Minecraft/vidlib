@@ -20,6 +20,10 @@ public class PropExplorerPanel extends AdminPanel {
 	public static final IntSet HIDDEN_PROPS = new IntOpenHashSet();
 	public static final Set<PropType<?>> HIDDEN_PROP_TYPES = new ReferenceOpenHashSet<>();
 
+	public static boolean isPropHidden(Prop prop) {
+		return HIDDEN_PROPS.contains(prop.id) || HIDDEN_PROP_TYPES.contains(prop.type);
+	}
+
 	public final ImBoolean sortByClosest;
 
 	public PropExplorerPanel() {

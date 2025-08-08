@@ -1,21 +1,20 @@
-package dev.latvian.mods.vidlib.feature.prop.builtin;
+package dev.latvian.mods.vidlib.feature.prop.builtin.shape;
 
 import com.mojang.math.Axis;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.render.DebugRenderTypes;
 import dev.latvian.mods.klib.texture.LightUV;
 import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
+import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.bloom.BloomRenderTypes;
 import dev.latvian.mods.vidlib.feature.client.TerrainRenderTypes;
 import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
-import net.neoforged.api.distmarker.Dist;
 
 public class ShapePropRenderer implements PropRenderer<ShapeProp> {
-	@AutoRegister(Dist.CLIENT)
+	@ClientAutoRegister
 	public static final Holder HOLDER = new Holder(ShapeProp.TYPE, new ShapePropRenderer());
 
 	@Override

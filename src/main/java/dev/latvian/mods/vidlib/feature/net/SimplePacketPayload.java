@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.net;
 
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import io.netty.buffer.Unpooled;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.world.level.Level;
@@ -44,7 +44,7 @@ public interface SimplePacketPayload {
 	}
 
 	default byte[] toBytes(Level level, long uid) {
-		var buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), level.registryAccess());
+		var buf = PlatformHelper.CURRENT.createBuffer(Unpooled.buffer(), level.registryAccess());
 		var container = new VidLibPacketPayloadContainer(this, uid, level.getGameTime());
 		getType().streamCodec().encode(buf, container);
 		var bytes = new byte[buf.readableBytes()];

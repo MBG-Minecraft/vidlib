@@ -6,11 +6,13 @@ import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.visual.PlayerHeadTexture;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImString;
+import net.minecraft.Util;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 
 import java.util.ArrayList;
@@ -44,7 +46,7 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 
 	@Override
 	public void set(GameProfile v) {
-		if (v != null) {
+		if (v != null && !v.getName().isEmpty() && !v.getId().equals(Util.NIL_UUID)) {
 			name.set(v.getName());
 			profile = v;
 		} else {
@@ -112,10 +114,19 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 					list.sort(MiscUtils.PROFILE_COMPARATOR);
 				}
 
+				tex = PlayerHeadTexture.get(Util.NIL_UUID);
+				ImGui.image(tex.getTexture().vl$getHandle(), ImGui.getFontSize(), ImGui.getFontSize());
+				ImGui.sameLine();
+
+				if (ImGui.selectable(ImIcons.CLOSE + " None", profile == null)) {
+					profile = null;
+					update = ImUpdate.FULL;
+					ImGui.closeCurrentPopup();
+				}
+
 				for (var p : list) {
-					var tex1 = PlayerHeadTexture.get(p.getId());
-					int texId1 = tex1.getTexture().vl$getHandle();
-					ImGui.image(texId1, ImGui.getFontSize(), ImGui.getFontSize());
+					tex = PlayerHeadTexture.get(p.getId());
+					ImGui.image(tex.getTexture().vl$getHandle(), ImGui.getFontSize(), ImGui.getFontSize());
 					ImGui.sameLine();
 
 					if (ImGui.selectable(p.getName(), profile != null && p.getId().equals(profile.getId()))) {
@@ -161,11 +172,11 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 
 	@Override
 	public boolean isValid() {
-		return profile != null;
+		return true;
 	}
 
 	@Override
 	public GameProfile build() {
-		return profile;
+		return profile == null ? Empty.PROFILE : profile;
 	}
 }

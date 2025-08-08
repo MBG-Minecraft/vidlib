@@ -1,14 +1,10 @@
 package dev.latvian.mods.vidlib.feature.auto;
 
+import dev.latvian.mods.klib.util.Side;
 import dev.latvian.mods.vidlib.VidLib;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.fml.ModList;
-import net.neoforged.fml.loading.FMLLoader;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import net.neoforged.fml.loading.modscan.ModAnnotation;
-import net.neoforged.neoforgespi.language.IModInfo;
-import net.neoforged.neoforgespi.language.ModFileScanData;
 import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.Type;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -21,43 +17,13 @@ import java.util.Locale;
 import java.util.Set;
 
 public class AutoHelper {
-	public interface Callback {
-		void accept(IModInfo mod, ClassLoader classLoader, ModFileScanData.AnnotationData ad) throws Exception;
+	public static void load(Class<? extends Annotation> annotation, Set<ElementType> elementTypes, AutoCallback callback) {
+		PlatformHelper.CURRENT.load(annotation, elementTypes, callback);
 	}
 
-	public static void load(Class<? extends Annotation> annotation, Set<ElementType> elementTypes, Callback callback) {
-		var annotationType = Type.getType(annotation);
+	public static final EnumSet<Side> BOTH_SIDES = EnumSet.of(Side.CLIENT, Side.SERVER);
 
-		for (var mod : ModList.get().getMods()) {
-			var owningFile = mod.getOwningFile();
-
-			if (owningFile != null) {
-				var file = owningFile.getFile();
-
-				if (file != null) {
-					ClassLoader classLoader = null;
-
-					for (var ad : file.getScanResult().getAnnotations()) {
-						if (elementTypes.contains(ad.targetType()) && ad.annotationType().equals(annotationType)) {
-							try {
-								if (classLoader == null) {
-									classLoader = FMLLoader.getGameLayer().findLoader(owningFile.moduleName());
-								}
-
-								callback.accept(mod, classLoader, ad);
-							} catch (Exception ex) {
-								throw new RuntimeException("Failed to process @" + annotation.getSimpleName() + " for '" + mod.getDisplayName() + "' mod", ex);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	public static final EnumSet<Dist> BOTH_SIDES = EnumSet.of(Dist.CLIENT, Dist.DEDICATED_SERVER);
-
-	public static <E extends Enum<E>> E getEnumValue(ModFileScanData.AnnotationData ad, Class<E> enumClass, String name, E defaultValue) {
+	public static <E extends Enum<E>> E getEnumValue(ScannedAnnotation ad, Class<E> enumClass, String name, E defaultValue) {
 		var typeData = ad.annotationData().get(name);
 
 		if (typeData == null) {
@@ -75,7 +41,7 @@ public class AutoHelper {
 		return defaultValue;
 	}
 
-	public static <E extends Enum<E>> EnumSet<E> getEnumValues(ModFileScanData.AnnotationData ad, Class<E> enumClass, String name, EnumSet<E> defaultValues) {
+	public static <E extends Enum<E>> EnumSet<E> getEnumValues(ScannedAnnotation ad, Class<E> enumClass, String name, EnumSet<E> defaultValues) {
 		var typeData = ad.annotationData().get(name);
 
 		if (typeData == null) {
@@ -100,7 +66,7 @@ public class AutoHelper {
 		return EnumSet.copyOf(values);
 	}
 
-	public static Method getMethod(Class<?> clazz, ModFileScanData.AnnotationData ad, ClassLoader classLoader) throws Exception {
+	public static Method getMethod(Class<?> clazz, ScannedAnnotation ad, ClassLoader classLoader) throws Exception {
 		var argData = org.objectweb.asm.Type.getArgumentTypes(ad.memberName().substring(ad.memberName().indexOf('(')));
 		var argTypes = new Class[argData.length];
 
@@ -112,7 +78,7 @@ public class AutoHelper {
 	}
 
 	@Nullable
-	public static Object getStaticFieldValue(Class<?> clazz, ModFileScanData.AnnotationData ad) throws Exception {
+	public static Object getStaticFieldValue(Class<?> clazz, ScannedAnnotation ad) throws Exception {
 		var name = ad.memberName();
 
 		try {

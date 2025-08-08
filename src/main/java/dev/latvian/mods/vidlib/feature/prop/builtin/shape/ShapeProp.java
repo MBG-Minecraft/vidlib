@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.prop.builtin;
+package dev.latvian.mods.vidlib.feature.prop.builtin.shape;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.Gradient;
@@ -27,7 +27,7 @@ public class ShapeProp extends Prop {
 	public static final PropType<ShapeProp> TYPE = PropType.create(VidLib.id("shape"), ShapeProp::new,
 		TICK,
 		LIFESPAN,
-		DYNAMIC_POSITION,
+		POSITION,
 		VELOCITY,
 		YAW,
 		PITCH,

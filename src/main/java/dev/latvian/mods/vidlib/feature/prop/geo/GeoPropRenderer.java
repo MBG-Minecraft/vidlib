@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.constant.DataTickets;
@@ -16,9 +17,15 @@ import software.bernie.geckolib.renderer.base.GeoRenderState;
 
 public class GeoPropRenderer<P extends Prop & GeoProp> extends GeoObjectRenderer<P> implements PropRenderer<P> {
 	public static final DataTicket<Float> ENTITY_ROLL = DataTicket.create("entity_roll", Float.class);
+	public static final DataTicket<Float> WIDTH = DataTicket.create("width", Float.class);
+	public static final DataTicket<Float> HEIGHT = DataTicket.create("height", Float.class);
 
 	public GeoPropRenderer(GeoModel<P> model) {
 		super(model);
+	}
+
+	public GeoPropRenderer(ResourceLocation id) {
+		super(new DefaultedPropGeoModel<>(id));
 	}
 
 	@Override
@@ -29,23 +36,29 @@ public class GeoPropRenderer<P extends Prop & GeoProp> extends GeoObjectRenderer
 
 	@Override
 	public void addRenderData(P prop, Void relatedObject, GeoRenderState state) {
-		var delta = state.getGeckolibData(DataTickets.PARTIAL_TICK);
+		float delta = state.getOrDefaultGeckolibData(DataTickets.PARTIAL_TICK, 1F);
 
-		if (delta != null) {
-			state.addGeckolibData(DataTickets.TICK, (double) ((Prop) prop).getTick(delta));
-			state.addGeckolibData(DataTickets.ENTITY_PITCH, prop.getPitch(delta));
-			state.addGeckolibData(DataTickets.ENTITY_YAW, prop.getYaw(delta));
-			state.addGeckolibData(ENTITY_ROLL, prop.getRoll(delta));
-			state.addGeckolibData(DataTickets.VELOCITY, new Vec3(prop.velocity.x, prop.velocity.y, prop.velocity.z));
-			var pos = prop.getPos(delta);
-			state.addGeckolibData(DataTickets.BLOCKPOS, BlockPos.containing(pos));
-			state.addGeckolibData(DataTickets.POSITION, pos);
-		}
+		state.addGeckolibData(DataTickets.TICK, (double) prop.getTick(delta));
+		state.addGeckolibData(DataTickets.ENTITY_PITCH, prop.getPitch(delta));
+		state.addGeckolibData(DataTickets.ENTITY_YAW, prop.getYaw(delta));
+		state.addGeckolibData(ENTITY_ROLL, prop.getRoll(delta));
+		state.addGeckolibData(DataTickets.VELOCITY, new Vec3(prop.velocity.x, prop.velocity.y, prop.velocity.z));
+		var pos = prop.getPos(delta);
+		state.addGeckolibData(DataTickets.BLOCKPOS, BlockPos.containing(pos));
+		state.addGeckolibData(DataTickets.POSITION, pos);
+		state.addGeckolibData(WIDTH, (float) prop.width);
+		state.addGeckolibData(HEIGHT, (float) prop.height);
 	}
 
 	@Override
 	public void adjustPositionForRender(GeoRenderState state, PoseStack ms, BakedGeoModel model, boolean isReRender) {
 		if (!isReRender) {
+			var roll = state.getGeckolibData(ENTITY_ROLL);
+
+			if (roll != null) {
+				ms.mulPose(Axis.ZP.rotationDegrees(roll));
+			}
+
 			var yaw = state.getGeckolibData(DataTickets.ENTITY_YAW);
 
 			if (yaw != null) {
@@ -56,12 +69,6 @@ public class GeoPropRenderer<P extends Prop & GeoProp> extends GeoObjectRenderer
 
 			if (pitch != null) {
 				ms.mulPose(Axis.XP.rotationDegrees(pitch));
-			}
-
-			var roll = state.getGeckolibData(ENTITY_ROLL);
-
-			if (roll != null) {
-				ms.mulPose(Axis.ZP.rotationDegrees(roll));
 			}
 		}
 	}

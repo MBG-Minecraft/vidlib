@@ -9,8 +9,8 @@ import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
 import dev.latvian.mods.klib.texture.LightUV;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.BlockEntityRendererHolder;
+import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
 import dev.latvian.mods.vidlib.feature.auto.EntityRendererHolder;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockAndFilter;
@@ -219,7 +219,7 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-		for (var s : AutoRegister.SCANNED.get()) {
+		for (var s : ClientAutoRegister.SCANNED.get()) {
 			if (s.value() instanceof EntityRendererHolder<?> holder) {
 				holder.register(event);
 			} else if (s.value() instanceof BlockEntityRendererHolder<?> holder) {
@@ -615,7 +615,7 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void registerClientCommands(RegisterClientCommandsEvent event) {
-		for (var s : AutoRegister.SCANNED.get()) {
+		for (var s : ClientAutoRegister.SCANNED.get()) {
 			if (s.value() instanceof ClientCommandHolder(String name, ClientCommandHolder.Callback callback)) {
 				var command = Commands.literal(name);
 				callback.register(command, event.getBuildContext());

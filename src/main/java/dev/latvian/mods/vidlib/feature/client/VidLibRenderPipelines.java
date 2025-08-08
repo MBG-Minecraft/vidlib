@@ -22,7 +22,7 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import java.util.Locale;
 import java.util.function.Function;
 
-@EventBusSubscriber(modid = VidLib.ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
 public interface VidLibRenderPipelines {
 	RenderPipeline GUI_DEPTH = RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
 		.withLocation(VidLib.id("pipeline/gui_depth"))
@@ -97,6 +97,14 @@ public interface VidLibRenderPipelines {
 	RenderPipeline OUTLINE_CULL = RenderPipeline.builder(OUTLINE_SNIPPET).withLocation("pipeline/outline_cull").build();
 	RenderPipeline OUTLINE_NO_CULL = RenderPipeline.builder(OUTLINE_SNIPPET).withLocation("pipeline/outline_no_cull").withCull(false).build();
 
+	RenderPipeline STONE_ENTITY_NO_CULL = RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET)
+		.withLocation(VidLib.id("pipeline/canvas/no_cull/stone_entity"))
+		.withFragmentShader(VidLib.id("core/stone_entity"))
+		.withSampler("Sampler1")
+		.withCull(false)
+		.withVertexFormat(DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS)
+		.build();
+
 	@SubscribeEvent
 	static void registerRenderPipelines(RegisterRenderPipelinesEvent event) {
 		event.registerPipeline(GUI_DEPTH);
@@ -110,6 +118,7 @@ public interface VidLibRenderPipelines {
 		event.registerPipeline(PhysicsParticlesRenderTypes.SOLID_PIPELINE);
 		event.registerPipeline(PhysicsParticlesRenderTypes.CUTOUT_PIPELINE);
 		event.registerPipeline(PhysicsParticlesRenderTypes.TRANSLUCENT_PIPELINE);
+		event.registerPipeline(STONE_ENTITY_NO_CULL);
 		CanvasRenderPipelines.register(event);
 
 		TerrainRenderLayer.SOLID.setClientValues(RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS, RenderType.solid(), TerrainRenderTypes.SOLID, TerrainRenderTypes.SOLID_NO_CULL);
