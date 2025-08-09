@@ -43,7 +43,9 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
@@ -489,9 +491,23 @@ public class Prop {
 		return null;
 	}
 
-	public void onInteraction(Player player, int button, Vec3 at, Direction side) {
-		if (level.isClientSide()) {
-			level.c2s(new PropInteractionPayload(spawnType.listType, id, button, at, side));
+	public boolean onClientInteraction(Player player, int button, Vec3 at, Direction side) {
+		if (button != 0 && button != 1 && button != 2) {
+			return false;
+		}
+
+		level.c2s(new PropInteractionPayload(spawnType.listType, id, button, at, side));
+
+		if (button == 0) {
+			player.swing(InteractionHand.MAIN_HAND, true);
+		}
+
+		return true;
+	}
+
+	public void onServerInteraction(ServerPlayer player, int button, Vec3 at, Direction side) {
+		if (button == 0) {
+			player.swing(InteractionHand.MAIN_HAND, false);
 		}
 	}
 

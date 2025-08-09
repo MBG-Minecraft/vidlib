@@ -7,6 +7,7 @@ import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 import net.minecraft.core.Direction;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 
 public record PropInteractionPayload(PropListType type, int id, int button, Vec3 pos, Direction side) implements SimplePacketPayload {
@@ -30,7 +31,7 @@ public record PropInteractionPayload(PropListType type, int id, int button, Vec3
 		var prop = ctx.level().getProps().propLists.get(type).get(id);
 
 		if (prop != null) {
-			prop.onInteraction(ctx.player(), button, pos, side);
+			prop.onServerInteraction((ServerPlayer) ctx.player(), button, pos, side);
 		}
 	}
 }

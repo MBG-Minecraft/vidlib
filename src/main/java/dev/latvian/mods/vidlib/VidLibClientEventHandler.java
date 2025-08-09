@@ -128,7 +128,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TriState;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
@@ -821,13 +820,11 @@ public class VidLibClientEventHandler {
 			var mc = Minecraft.getInstance();
 
 			if (mc.player != null && mc.screen == null && mc.isWindowActive() && mc.hitResult instanceof PropHitResult hit && !PropExplorerPanel.isPropHidden(hit.prop)) {
-				hit.prop.onInteraction(mc.player, event.getButton(), hit.getLocation(), hit.getDirection());
+				boolean cancel = hit.prop.onClientInteraction(mc.player, event.getButton(), hit.getLocation(), hit.getDirection());
 
-				if (event.getButton() == 0) {
-					mc.player.swing(InteractionHand.MAIN_HAND);
+				if (cancel) {
+					event.setCanceled(true);
 				}
-
-				event.setCanceled(true);
 			}
 		}
 	}
