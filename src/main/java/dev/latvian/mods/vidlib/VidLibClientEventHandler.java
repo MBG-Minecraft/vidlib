@@ -820,7 +820,7 @@ public class VidLibClientEventHandler {
 		if (event.getAction() == InputConstants.PRESS) {
 			var mc = Minecraft.getInstance();
 
-			if (mc.player != null && mc.screen == null && mc.isWindowActive() && mc.hitResult instanceof PropHitResult hit) {
+			if (mc.player != null && mc.screen == null && mc.isWindowActive() && mc.hitResult instanceof PropHitResult hit && !PropExplorerPanel.isPropHidden(hit.prop)) {
 				hit.prop.onInteraction(mc.player, event.getButton(), hit.getLocation(), hit.getDirection());
 
 				if (event.getButton() == 0) {

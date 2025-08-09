@@ -586,7 +586,7 @@ public class Prop {
 				ImGui.alignTextToFramePadding();
 
 				if (ImGui.checkbox("tick", !paused)) {
-					level.c2s(new RequestPausePropPayload(spawnType.listType, id, !paused));
+					level.c2s(new PausePropRequestPayload(spawnType.listType, id, !paused));
 				}
 
 				ImGui.tableNextColumn();

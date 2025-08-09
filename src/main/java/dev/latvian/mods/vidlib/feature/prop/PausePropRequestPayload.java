@@ -7,13 +7,13 @@ import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 import net.minecraft.network.codec.ByteBufCodecs;
 
-public record RequestPausePropPayload(PropListType type, int id, boolean paused) implements SimplePacketPayload {
+public record PausePropRequestPayload(PropListType type, int id, boolean paused) implements SimplePacketPayload {
 	@AutoPacket(AutoPacket.To.SERVER)
-	public static final VidLibPacketType<RequestPausePropPayload> TYPE = VidLibPacketType.internal("prop/request_pause", CompositeStreamCodec.of(
-		PropListType.STREAM_CODEC, RequestPausePropPayload::type,
-		ByteBufCodecs.VAR_INT, RequestPausePropPayload::id,
-		ByteBufCodecs.BOOL, RequestPausePropPayload::paused,
-		RequestPausePropPayload::new
+	public static final VidLibPacketType<PausePropRequestPayload> TYPE = VidLibPacketType.internal("prop/request_pause", CompositeStreamCodec.of(
+		PropListType.STREAM_CODEC, PausePropRequestPayload::type,
+		ByteBufCodecs.VAR_INT, PausePropRequestPayload::id,
+		ByteBufCodecs.BOOL, PausePropRequestPayload::paused,
+		PausePropRequestPayload::new
 	));
 
 	@Override
