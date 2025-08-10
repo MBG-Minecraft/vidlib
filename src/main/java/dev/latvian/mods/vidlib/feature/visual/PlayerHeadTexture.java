@@ -13,6 +13,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +37,11 @@ public class PlayerHeadTexture extends AbstractTexture {
 		DEFAULT_SKIN.forget(NativeImage::close);
 	}
 
-	public static PlayerHeadTexture get(UUID uuid) {
+	public static AbstractTexture get(@Nullable UUID uuid) {
+		if (uuid == null || uuid.equals(Util.NIL_UUID)) {
+			return Minecraft.getInstance().getTextureManager().getTexture(DEFAULT_SKIN_TEXTURE);
+		}
+
 		var tex = ALL.get(uuid);
 
 		if (tex == null) {

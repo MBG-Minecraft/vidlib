@@ -13,7 +13,6 @@ import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImString;
 import net.minecraft.Util;
-import net.minecraft.client.renderer.texture.AbstractTexture;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,23 +58,7 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 	public ImUpdate imgui(ImGraphics graphics) {
 		var update = ImUpdate.NONE;
 
-		AbstractTexture tex;
-
-		if (profile != null) {
-			tex = PlayerHeadTexture.get(profile.getId());
-		} else {
-			tex = graphics.mc.getTextureManager().getTexture(PlayerHeadTexture.DEFAULT_SKIN_TEXTURE);
-		}
-
-		int texId = tex.getTexture().vl$getHandle();
-		ImGui.image(texId, ImGui.getFrameHeight(), ImGui.getFrameHeight());
-
-		if (ImGui.isItemHovered()) {
-			ImGui.beginTooltip();
-			ImGui.image(texId, 128F, 128F);
-			ImGui.endTooltip();
-		}
-
+		appendMainIcon();
 		ImGui.sameLine();
 
 		boolean select = ImGui.button(profile == null ? "Select..." : profile.getName());
@@ -114,8 +97,7 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 					list.sort(MiscUtils.PROFILE_COMPARATOR);
 				}
 
-				tex = PlayerHeadTexture.get(Util.NIL_UUID);
-				ImGui.image(tex.getTexture().vl$getHandle(), ImGui.getFontSize(), ImGui.getFontSize());
+				appendIcon(Util.NIL_UUID);
 				ImGui.sameLine();
 
 				if (ImGui.selectable(ImIcons.CLOSE + " None", profile == null)) {
@@ -125,8 +107,7 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 				}
 
 				for (var p : list) {
-					tex = PlayerHeadTexture.get(p.getId());
-					ImGui.image(tex.getTexture().vl$getHandle(), ImGui.getFontSize(), ImGui.getFontSize());
+					appendIcon(p.getId());
 					ImGui.sameLine();
 
 					if (ImGui.selectable(p.getName(), profile != null && p.getId().equals(profile.getId()))) {
@@ -168,6 +149,23 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 		}
 
 		return update;
+	}
+
+	private void appendMainIcon() {
+		var tex = PlayerHeadTexture.get(profile == null ? null : profile.getId());
+		int texId = tex.getTexture().vl$getHandle();
+		ImGui.image(texId, ImGui.getFrameHeight(), ImGui.getFrameHeight());
+
+		if (ImGui.isItemHovered()) {
+			ImGui.beginTooltip();
+			ImGui.image(texId, 128F, 128F);
+			ImGui.endTooltip();
+		}
+	}
+
+	private void appendIcon(UUID uuid) {
+		var tex = PlayerHeadTexture.get(uuid);
+		ImGui.image(tex.getTexture().vl$getHandle(), ImGui.getFontSize(), ImGui.getFontSize());
 	}
 
 	@Override

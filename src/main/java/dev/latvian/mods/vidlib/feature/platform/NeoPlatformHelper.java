@@ -52,8 +52,8 @@ public class NeoPlatformHelper extends PlatformHelper {
 								}
 
 								callback.accept(mod.getModId(), classLoader, new ScannedAnnotation(ad.annotationType(), ad.targetType(), ad.clazz(), ad.memberName(), ad.annotationData()));
-							} catch (Exception ex) {
-								throw new RuntimeException("Failed to process @" + annotation.getSimpleName() + " for '" + mod.getDisplayName() + "' mod", ex);
+							} catch (Throwable ex) {
+								throw new RuntimeException("Failed to process @" + annotation.getSimpleName() + " on " + ad.clazz().getClassName() + " in '" + mod.getDisplayName() + "' mod", ex);
 							}
 						}
 					}
