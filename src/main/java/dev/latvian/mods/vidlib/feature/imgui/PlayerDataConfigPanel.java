@@ -5,25 +5,25 @@ import dev.latvian.mods.vidlib.feature.data.DataKeyStorage;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import net.minecraft.client.Minecraft;
 
-public class ServerDataConfigPanel extends DataMapConfigPanel {
-	public static final ServerDataConfigPanel INSTANCE = new ServerDataConfigPanel();
+public class PlayerDataConfigPanel extends DataMapConfigPanel {
+	public final DataMap dataMap;
 
-	private ServerDataConfigPanel() {
-		super("Server Data");
+	public PlayerDataConfigPanel(String name, DataMap dataMap) {
+		super("Player Data of " + name);
+		this.dataMap = dataMap;
 	}
 
 	@Override
 	public DataKeyStorage getDataKeyStorage() {
-		return DataKey.SERVER;
+		return DataKey.PLAYER;
 	}
 
 	@Override
 	public DataMap getDataMap(Minecraft mc) {
-		return mc.getServerData();
+		return dataMap;
 	}
 
 	@Override
 	public <T> void sendUpdate(Minecraft mc, DataKey<T> key, T value) {
-		mc.updateServerDataValue(key, value);
 	}
 }

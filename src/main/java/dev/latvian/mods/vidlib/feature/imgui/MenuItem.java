@@ -72,12 +72,6 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 			if (panel.isOpen()) {
 				panel.close();
 			} else {
-				for (var p : BuiltInImGui.OPEN_PANELS) {
-					if (p instanceof VideoConfigPanel) {
-						p.close();
-					}
-				}
-
 				panel.open();
 			}
 		});

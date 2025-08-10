@@ -6,6 +6,7 @@ import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import imgui.flag.ImGuiComboFlags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -13,6 +14,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSetting
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 public class EnumImBuilder<E> implements ImBuilder<E> {
 	public static final ImBuilderType<Easing> EASING_TYPE = () -> new EnumImBuilder<>(Easing.VALUES, Easing.LINEAR);
@@ -23,10 +25,12 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 
 	public final List<E> options;
 	public final Object[] value;
+	public Function<E, String> nameGetter;
 
 	public EnumImBuilder(List<E> options, E defaultValue) {
 		this.options = options;
 		this.value = new Object[]{defaultValue};
+		this.nameGetter = (Function) KLibCodecs.DEFAULT_NAME_GETTER;
 	}
 
 	public EnumImBuilder(E[] options, E defaultValue) {
@@ -41,6 +45,12 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 		this(Arrays.asList(options));
 	}
 
+	public EnumImBuilder<E> withNameGetter(Function<E, String> nameGetter) {
+		var b = new EnumImBuilder<E>(options, build());
+		b.nameGetter = nameGetter;
+		return b;
+	}
+
 	@Override
 	public void set(E v) {
 		value[0] = v;
@@ -48,7 +58,7 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		return graphics.combo("###enum", "Select...", value, options);
+		return graphics.combo("###enum", "Select...", value, options, nameGetter, ImGuiComboFlags.None);
 	}
 
 	@Override

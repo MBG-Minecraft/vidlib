@@ -11,11 +11,11 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import net.neoforged.neoforge.common.NeoForge;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class BuiltInImGui {
-	public static final List<AdminPanel> OPEN_PANELS = new ArrayList<>();
+	public static final Map<String, AdminPanel> OPEN_PANELS = new LinkedHashMap<>();
 	public static boolean mainMenuOpen = true;
 	public static final ImBoolean SHOW_STACK_TOOL = new ImBoolean(false);
 	public static final ImBoolean SHOW_STYLE_EDITOR_TOOL = new ImBoolean(false);
@@ -166,6 +166,6 @@ public class BuiltInImGui {
 			MAIN_MENU_BAR.buildRoot(graphics, true);
 		}
 
-		OPEN_PANELS.removeIf(panel -> panel.handle(graphics));
+		OPEN_PANELS.values().removeIf(panel -> panel.handle(graphics));
 	}
 }

@@ -100,6 +100,10 @@ public class DataMap {
 		}
 	}
 
+	public boolean hasSuperOverride(DataKey<?> type) {
+		return superOverrides != null && superOverrides.containsKey(type);
+	}
+
 	public <T> void reset(DataKey<T> type) {
 		set(type, type.defaultValue());
 	}

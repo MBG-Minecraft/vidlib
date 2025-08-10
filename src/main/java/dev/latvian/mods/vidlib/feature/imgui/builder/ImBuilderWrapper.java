@@ -148,9 +148,9 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 		if (ImGui.beginCombo("###select-builder", selectedBuilder[0] == null ? "Select..." : selectedBuilder[0].getSerializedName(), 0)) {
 			for (int i = 0; i < options.size(); i++) {
 				var option = options.get(i);
-				boolean isSelected = selectedBuilder[0] == option;
+				boolean isSelected = selectedBuilder[0] != null && selectedBuilder[0].holder.type() == option.holder.type();
 
-				if (ImGui.selectable(selectedBuilder[i].getSerializedName() + "###" + i, isSelected)) {
+				if (ImGui.selectable(options.get(i).getSerializedName() + "###" + i, isSelected)) {
 					selectedBuilder[0] = option;
 					update = ImUpdate.FULL;
 				}

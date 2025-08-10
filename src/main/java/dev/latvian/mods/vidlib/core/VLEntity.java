@@ -4,7 +4,6 @@ import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.vidlib.feature.canvas.dof.DepthOfField;
 import dev.latvian.mods.vidlib.feature.canvas.dof.DepthOfFieldPanel;
-import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.entity.C2SEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.entity.EntityData;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
@@ -14,6 +13,7 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.S2CEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.entity.filter.ProfileEntityFilter;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.PlayerDataConfigPanel;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
@@ -325,22 +325,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 
 		if (entity instanceof Player player) {
 			if (ImGui.button("Edit Player Data###vidlib-edit-player-data")) {
-				ImGui.openPopup("###vidlib-edit-player-data-popup");
-			}
-
-			ImGui.setNextWindowSizeConstraints(50F, 10F, 800F, 600F);
-
-			if (ImGui.beginPopupModal("Edit Player Data###vidlib-edit-player-data-popup", new ImBoolean(true), ImGuiWindowFlags.AlwaysAutoResize)) {
-				ImGui.text("WIP!");
-				ImGui.pushID("###vidlib-player-data");
-
-				for (var key : DataKey.PLAYER.all.values()) {
-					var selected = new ImBoolean(false);
-					ImGui.checkbox(key.id() + ": " + player.get(key) + "###" + key.id() + "-enabled", selected);
-				}
-
-				ImGui.popID();
-				ImGui.endPopup();
+				new PlayerDataConfigPanel(player.getScoreboardName(), player.vl$sessionData().dataMap).open();
 			}
 		}
 

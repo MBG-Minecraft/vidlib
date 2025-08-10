@@ -26,5 +26,7 @@ public class ClientClothingLoader extends JsonReloadListener {
 				}
 			}
 		}
+
+		ClothingCommand.CLOTHING_IDS.sort(ResourceLocation::compareNamespaced);
 	}
 }

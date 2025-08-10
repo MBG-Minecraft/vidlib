@@ -28,10 +28,13 @@ public class AdminPanel {
 		if (!isOpen) {
 			isOpen = true;
 
-			if (!BuiltInImGui.OPEN_PANELS.contains(this)) {
-				BuiltInImGui.OPEN_PANELS.add(this);
+			for (var p : BuiltInImGui.OPEN_PANELS.values()) {
+				if (p != this && p.id.equals(id)) {
+					p.close();
+				}
 			}
 
+			BuiltInImGui.OPEN_PANELS.put(id, this);
 			onOpened();
 		}
 	}
