@@ -2,14 +2,15 @@ package dev.latvian.mods.vidlib.feature.misc;
 
 import com.google.gson.JsonObject;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.VidLibClientEventHandler;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
-import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
+import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.imgui.ImNumberType;
+import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.PropExplorerPanel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
@@ -25,8 +26,7 @@ import dev.latvian.mods.vidlib.feature.prop.RecordedProp;
 import dev.latvian.mods.vidlib.feature.prop.RemovePropsPayload;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import imgui.ImGui;
-import imgui.flag.ImGuiWindowFlags;
-import imgui.type.ImBoolean;
+import it.unimi.dsi.fastutil.chars.CharConsumer;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongObjectPair;
 import net.minecraft.client.Minecraft;
@@ -35,7 +35,6 @@ import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.configuration.ClientConfigurationPacketListener;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -61,6 +60,7 @@ public class VLFlashbackIntegration {
 		FlashbackIntegration.CONFIG_SNAPSHOT.add(VLFlashbackIntegration::configSnapshot);
 		FlashbackIntegration.GAME_SNAPSHOT.add(VLFlashbackIntegration::gameSnapshot);
 		FlashbackIntegration.ENTITY_SNAPSHOT.add(VLFlashbackIntegration::entitySnapshot);
+		FlashbackIntegration.MENU_BAR.add(VLFlashbackIntegration::menuBar);
 		FlashbackIntegration.ENTITY_MENU.add(VLFlashbackIntegration::entityMenu);
 		FlashbackIntegration.VISUALS_MENU.add(VLFlashbackIntegration::visualsMenu);
 		FlashbackIntegration.RENDER_FILTER_MENU.add(VLFlashbackIntegration::renderFilterMenu);
@@ -69,6 +69,7 @@ public class VLFlashbackIntegration {
 		FlashbackIntegration.CLICK_TARGET.add(VLFlashbackIntegration::clickTarget);
 		FlashbackIntegration.HANDLE_CLICK_TARGET.add(VLFlashbackIntegration::handleClickTarget);
 		FlashbackIntegration.POPUPS.add(VLFlashbackIntegration::popups);
+		FlashbackIntegration.ICONS.add(VLFlashbackIntegration::icons);
 	}
 
 	private static void initialized(List<Packet<? super ClientConfigurationPacketListener>> configPackets, List<LongObjectPair<Packet<? super ClientGamePacketListener>>> gamePackets) {
@@ -103,7 +104,7 @@ public class VLFlashbackIntegration {
 						case SyncPlayerTagsPayload p -> dataMapOverrideBuilder.set(now, p.player(), DataMapOverrides.PLAYER_TAGS, Set.copyOf(p.tags()));
 						case AddPropPayload p -> {
 							var map = new IdentityHashMap<PropData<?, ?>, Object>();
-							p.type().readUpdate(registryAccess, p.update(), true, map::put);
+							p.type().readUpdate(p.id(), registryAccess, p.update(), true, map::put);
 							recordingProps.put(p.id(), new RecordedProp(p.id(), p.type(), p.createdTime(), 0L, Map.copyOf(map)));
 						}
 						case RemovePropsPayload p -> {
@@ -158,88 +159,28 @@ public class VLFlashbackIntegration {
 		packets2.sendUnbundled(packets::add);
 	}
 
-	private static void entityMenu(Entity entity) {
+	private static void menuBar() {
 		ImGui.separator();
-		ImGui.spacing();
-		ImGui.text("VidLib");
+		var graphics = new ImGraphics(Minecraft.getInstance());
+		graphics.pushRootStack();
+		BuiltInImGui.MAIN_MENU_BAR.buildRoot(graphics, false);
+		graphics.popStack();
+	}
 
-		if (entity instanceof Player player) {
-			ImGui.sameLine();
-
-			if (ImGui.smallButton("Edit Player Data###vidlib-edit-player-data")) {
-				ImGui.openPopup("###vidlib-edit-player-data-popup");
-			}
-
-			ImGui.setNextWindowSizeConstraints(50F, 10F, 800F, 600F);
-
-			if (ImGui.beginPopupModal("Edit Player Data###vidlib-edit-player-data-popup", new ImBoolean(true), ImGuiWindowFlags.AlwaysAutoResize)) {
-				ImGui.text("WIP!");
-				ImGui.pushID("###vidlib-player-data");
-
-				for (var key : DataKey.PLAYER.all.values()) {
-					var selected = new ImBoolean(false);
-					ImGui.checkbox(key.id() + ": " + player.get(key) + "###" + key.id() + "-enabled", selected);
-				}
-
-				ImGui.popID();
-				ImGui.endPopup();
-			}
-		}
-
-		var team = entity.getTeam();
-
-		ImGui.text("Team: " + (team == null ? "None" : team.getName()));
-		ImGui.sameLine();
-
-		if (ImGui.smallButton("Edit###vidlib-entity-team")) {
-			ImGui.openPopup("###vidlib-edit-team-popup");
-		}
-
-		if (ImGui.beginPopupModal("Edit Team###vidlib-edit-team-popup", new ImBoolean(true), ImGuiWindowFlags.AlwaysAutoResize)) {
-			// var teams = entity.level().getScoreboard().getPlayerTeams();
-			ImGui.text("WIP");
-			ImGui.endPopup();
-		}
-
-		ImGui.text("Tags: " + entity.getTags());
-		ImGui.sameLine();
-
-		if (ImGui.smallButton("Edit###vidlib-entity-tags")) {
-			ImGui.openPopup("###vidlib-edit-tags-popup");
-		}
-
-		if (ImGui.beginPopupModal("Edit Team###vidlib-edit-tags-popup", new ImBoolean(true), ImGuiWindowFlags.AlwaysAutoResize)) {
-			ImGui.text("WIP");
-			ImGui.endPopup();
-		}
+	private static void entityMenu(Entity entity) {
+		ImGuiUtils.separatorWithText("VidLib");
+		var mc = Minecraft.getInstance();
+		var graphics = new ImGraphics(mc);
+		graphics.pushRootStack();
+		entity.imgui(graphics, mc.getDeltaTracker().getGameTimeDeltaPartialTick(entity == mc.player));
+		graphics.popStack();
 	}
 
 	private static void visualsMenu() {
 		var mc = Minecraft.getInstance();
 		var level = mc.level;
 
-		ImGui.separator();
-		ImGui.text("VidLib");
-		ImGui.sameLine();
-
-		if (ImGui.smallButton("Edit Server Data###vidlib-edit-server-data")) {
-			ImGui.openPopup("###vidlib-edit-server-data-popup");
-		}
-
-		ImGui.setNextWindowSizeConstraints(50F, 10F, 800F, 600F);
-
-		if (ImGui.beginPopupModal("Edit Server Data###vidlib-edit-server-data-popup", new ImBoolean(true), ImGuiWindowFlags.AlwaysAutoResize)) {
-			ImGui.text("WIP!");
-			ImGui.pushID("###vidlib-server-data");
-
-			for (var key : DataKey.SERVER.all.values()) {
-				var selected = new ImBoolean(false);
-				ImGui.checkbox(key.id() + ": " + mc.get(key) + "###" + key.id() + "-enabled", selected);
-			}
-
-			ImGui.popID();
-			ImGui.endPopup();
-		}
+		ImGuiUtils.separatorWithText("VidLib");
 
 		ImGui.pushID("vidlib");
 		ImGui.checkbox("Props", ClientProps.VISIBLE);
@@ -303,27 +244,27 @@ public class VLFlashbackIntegration {
 	}
 
 	private static void popups() {
+		var mc = Minecraft.getInstance();
+		var graphics = new ImGraphics(mc);
+		graphics.pushRootStack();
+
+		if (VidLibClientEventHandler.clientLoaded && mc.level != null && mc.level.isReplayLevel()) {
+			BuiltInImGui.handle(graphics);
+		}
+
 		if (openSelectedPropPopup) {
 			ImGui.openPopup("###vidlib-prop-popup");
 			openSelectedPropPopup = false;
 		}
 
 		if (selectedProp != 0 && ImGui.beginPopup("###vidlib-prop-popup")) {
-			var mc = Minecraft.getInstance();
 			var propList = mc.level.getProps().propLists.get(selectedPropList);
 			var prop = propList == null ? null : propList.get(selectedProp);
 
 			if (prop != null) {
 				PropExplorerPanel.OPEN_PROPS.add(prop.id);
-
 				ImGui.text(prop.toString());
-				var graphics = new ImGraphics(mc);
-				graphics.pushStack();
-				graphics.setDefaultStyle();
-				graphics.setNumberType(ImNumberType.DOUBLE);
-				graphics.setNumberRange(null);
 				prop.imgui(graphics, mc.getDeltaTracker().getGameTimeDeltaPartialTick(false));
-				graphics.popStack();
 			}
 
 			ImGui.endPopup();
@@ -331,6 +272,18 @@ public class VLFlashbackIntegration {
 
 		if (!ImGui.isPopupOpen("###vidlib-prop-popup")) {
 			selectedProp = 0;
+		}
+
+		graphics.popStack();
+	}
+
+	private static void icons(CharConsumer chars) {
+		for (var icon : ImIcons.VALUES) {
+			chars.accept(icon.icon);
+		}
+
+		for (var c : ImIcons.EXTRA_ICONS.get()) {
+			chars.accept(c.toChar());
 		}
 	}
 }

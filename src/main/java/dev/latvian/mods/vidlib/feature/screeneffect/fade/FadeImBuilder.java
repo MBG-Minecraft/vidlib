@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.fade;
+package dev.latvian.mods.vidlib.feature.screeneffect.fade;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.PositionedColor;

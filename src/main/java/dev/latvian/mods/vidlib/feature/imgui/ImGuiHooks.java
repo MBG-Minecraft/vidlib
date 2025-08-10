@@ -237,7 +237,14 @@ public class ImGuiHooks {
 
 	public static void beforeEndFrame() {
 		if (VidLibClientEventHandler.clientLoaded) {
-			BuiltInImGui.handle(Minecraft.getInstance());
+			var mc = Minecraft.getInstance();
+
+			if (mc.level == null || !mc.level.isReplayLevel()) {
+				var graphics = new ImGraphics(mc);
+				graphics.pushRootStack();
+				BuiltInImGui.handle(graphics);
+				graphics.popStack();
+			}
 		}
 
 		endingFrame = true;

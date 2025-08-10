@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.misc;
 
 import com.google.gson.JsonObject;
 import dev.latvian.mods.klib.util.Lazy;
+import it.unimi.dsi.fastutil.chars.CharConsumer;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import it.unimi.dsi.fastutil.longs.LongObjectPair;
 import it.unimi.dsi.fastutil.objects.ObjectIntPair;
@@ -75,6 +76,7 @@ public interface FlashbackIntegration {
 	List<Consumer<List<Packet<? super ClientConfigurationPacketListener>>>> CONFIG_SNAPSHOT = listField("CONFIG_SNAPSHOT");
 	List<Consumer<List<Packet<? super ClientGamePacketListener>>>> GAME_SNAPSHOT = listField("GAME_SNAPSHOT");
 	List<BiConsumer<Entity, List<Packet<? super ClientGamePacketListener>>>> ENTITY_SNAPSHOT = listField("ENTITY_SNAPSHOT");
+	List<Runnable> MENU_BAR = listField("MENU_BAR");
 	List<Consumer<Entity>> ENTITY_MENU = listField("ENTITY_MENU");
 	List<Runnable> VISUALS_MENU = listField("VISUALS_MENU");
 	List<Runnable> RENDER_FILTER_MENU = listField("RENDER_FILTER_MENU");
@@ -83,6 +85,7 @@ public interface FlashbackIntegration {
 	List<BiFunction<Vec3, Vec3, HitResult>> CLICK_TARGET = listField("CLICK_TARGET");
 	List<Predicate<HitResult>> HANDLE_CLICK_TARGET = listField("HANDLE_CLICK_TARGET");
 	List<Runnable> POPUPS = listField("POPUPS");
+	List<Consumer<CharConsumer>> ICONS = listField("ICONS");
 
 	BooleanSupplier IN_REPLAY = booleanField("IN_REPLAY");
 	BooleanSupplier IN_EXPORTING = booleanField("IN_EXPORTING");

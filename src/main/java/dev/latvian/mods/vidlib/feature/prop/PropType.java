@@ -184,7 +184,7 @@ public record PropType<P extends Prop>(
 		}
 	}
 
-	public void readUpdate(RegistryAccess registryAccess, byte[] update, boolean allData, BiConsumer<PropData<?, ?>, Object> setData) {
+	public void readUpdate(int propId, RegistryAccess registryAccess, byte[] update, boolean allData, BiConsumer<PropData<?, ?>, Object> setData) {
 		var buf = PlatformHelper.CURRENT.createBuffer(Unpooled.wrappedBuffer(update), registryAccess);
 
 		try {
@@ -199,6 +199,8 @@ public record PropType<P extends Prop>(
 					setData.accept(data, value);
 				}
 			}
+		} catch (Throwable ex) {
+			throw new IllegalStateException("Failed to parse update of prop %s#%08X, %,d bytes".formatted(id, propId, update.length), ex);
 		} finally {
 			buf.release();
 		}

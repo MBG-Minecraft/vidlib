@@ -2,8 +2,6 @@ package dev.latvian.mods.vidlib.feature.cutscene;
 
 import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.vidlib.feature.fade.Fade;
-import dev.latvian.mods.vidlib.feature.fade.FadeImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImNumberType;
@@ -11,6 +9,8 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TextComponentImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.screeneffect.fade.Fade;
+import dev.latvian.mods.vidlib.feature.screeneffect.fade.FadeImBuilder;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundDataImBuilder;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;

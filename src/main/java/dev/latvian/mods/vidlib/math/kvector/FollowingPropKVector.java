@@ -8,10 +8,9 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.prop.PropIdImBuilder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
-import imgui.ImGui;
-import imgui.type.ImInt;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +28,7 @@ public record FollowingPropKVector(int prop, PositionType positionType) implemen
 	public static class Builder implements KVectorImBuilder {
 		public static final ImBuilderHolder<KVector> TYPE = new ImBuilderHolder<>("Following Prop", Builder::new);
 
-		public final ImInt prop = new ImInt(0);
+		public final PropIdImBuilder prop = new PropIdImBuilder();
 		public final ImBuilder<PositionType> positionType = PositionType.BUILDER_TYPE.get();
 
 		public Builder() {
@@ -47,25 +46,19 @@ public record FollowingPropKVector(int prop, PositionType positionType) implemen
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
-
-			ImGui.alignTextToFramePadding();
-			ImGui.text("Prop ID");
-			ImGui.sameLine();
-			ImGui.inputInt("###prop-id", prop);
-			update = update.orItemEdit();
-
+			update = update.or(prop.imguiKey(graphics, "Prop", "prop"));
 			update = update.or(positionType.imguiKey(graphics, "Position Type", "position-type"));
 			return update;
 		}
 
 		@Override
 		public boolean isValid() {
-			return prop.get() != 0 && positionType.isValid();
+			return prop.isValid() && positionType.isValid();
 		}
 
 		@Override
 		public KVector build() {
-			return new FollowingPropKVector(prop.get(), positionType.build());
+			return new FollowingPropKVector(prop.build(), positionType.build());
 		}
 	}
 

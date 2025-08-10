@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.npc;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
+import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
@@ -25,7 +25,7 @@ public interface NPCCommands {
 		return builder.buildFuture();
 	};
 
-	@AutoRegister
+	@ClientAutoRegister
 	ClientCommandHolder COMMAND = new ClientCommandHolder("npc", (command, buildContext) -> {
 		command.then(Commands.literal("record")
 			.then(Commands.argument("username", StringArgumentType.word())

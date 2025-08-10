@@ -4,6 +4,7 @@ import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
@@ -18,6 +19,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
 
@@ -26,7 +28,7 @@ public class DataMap {
 	private final DataKeyStorage storage;
 	private Map<DataKey<?>, TrackedDataMapValue> map;
 	public DataMapOverrides.DataMap overrides;
-	public Map<DataKey<?>, Object> superOverrides;
+	public Map<DataKey<?>, Optional<Object>> superOverrides;
 
 	public DataMap(UUID owner, DataKeyStorage storage) {
 		this.owner = owner;
@@ -59,7 +61,7 @@ public class DataMap {
 			var v = superOverrides.get(type);
 
 			if (v != null) {
-				return Cast.to(v);
+				return Cast.to(v.orElse(null));
 			}
 		}
 
@@ -78,6 +80,24 @@ public class DataMap {
 		var v = init(type);
 		v.data = value;
 		v.setChanged();
+	}
+
+	public void setSuperOverride(DataKey<?> type, @Nullable Object value) {
+		if (superOverrides == null) {
+			superOverrides = new Reference2ObjectArrayMap<>();
+		}
+
+		superOverrides.put(type, Optional.ofNullable(value));
+	}
+
+	public void removeSuperOverride(DataKey<?> type) {
+		if (superOverrides != null) {
+			superOverrides.remove(type);
+
+			if (superOverrides.isEmpty()) {
+				superOverrides = null;
+			}
+		}
 	}
 
 	public <T> void reset(DataKey<T> type) {

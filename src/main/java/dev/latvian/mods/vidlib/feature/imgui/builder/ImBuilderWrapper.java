@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.imgui.builder;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import imgui.ImGui;
 import net.minecraft.util.StringRepresentable;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
@@ -113,7 +114,14 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 
 			for (var option : options) {
 				if (option.holder == holder) {
+					selectedBuilder[0] = option;
 					selectedBuilder[0].builder = (ImBuilder) holder.get();
+
+					try {
+						selectedBuilder[0].builder.set(Cast.to(value));
+					} catch (Throwable ex) {
+					}
+
 					return;
 				}
 			}
@@ -135,7 +143,26 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 		deleted = false;
 		options = getOptions();
 
-		var update = graphics.combo("###select-builder", "Select...", selectedBuilder, options);
+		var update = ImUpdate.NONE;
+
+		if (ImGui.beginCombo("###select-builder", selectedBuilder[0] == null ? "Select..." : selectedBuilder[0].getSerializedName(), 0)) {
+			for (int i = 0; i < options.size(); i++) {
+				var option = options.get(i);
+				boolean isSelected = selectedBuilder[0] == option;
+
+				if (ImGui.selectable(selectedBuilder[i].getSerializedName() + "###" + i, isSelected)) {
+					selectedBuilder[0] = option;
+					update = ImUpdate.FULL;
+				}
+
+				if (isSelected) {
+					ImGui.setItemDefaultFocus();
+				}
+			}
+
+			ImGui.endCombo();
+		}
+
 		var builder = getBuilder();
 
 		if (builder == null) {

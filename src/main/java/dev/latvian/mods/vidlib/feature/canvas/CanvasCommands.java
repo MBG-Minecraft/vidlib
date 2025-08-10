@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.canvas;
 
-import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
+import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 public interface CanvasCommands {
-	@AutoRegister
+	@ClientAutoRegister
 	ClientCommandHolder COMMAND = new ClientCommandHolder("canvas", (command, buildContext) -> command
 		.then(Commands.literal("preview")
 			.then(Commands.literal("color")

@@ -321,11 +321,6 @@ public class VidLibClientEventHandler {
 			var mc = Minecraft.getInstance();
 			boolean adminPanel = !VidLibClientOptions.getAdminPanel();
 			VidLibClientOptions.ADMIN_PANEL.set(adminPanel);
-
-			if (mc.player != null && mc.player.isReplayCamera()) {
-				mc.options.hideGui = adminPanel;
-			}
-
 			mc.options.save();
 		}
 	}

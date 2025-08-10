@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.fade;
+package dev.latvian.mods.vidlib.feature.screeneffect.fade;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;

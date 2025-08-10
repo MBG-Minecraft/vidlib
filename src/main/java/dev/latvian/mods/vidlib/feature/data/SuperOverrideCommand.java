@@ -1,8 +1,7 @@
 package dev.latvian.mods.vidlib.feature.data;
 
-import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
+import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
-import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -10,7 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 
 public interface SuperOverrideCommand {
-	@AutoRegister
+	@ClientAutoRegister
 	ClientCommandHolder COMMAND = new ClientCommandHolder("super-override", (command, buildContext) -> {
 		{
 			var serverDataCommand = Commands.literal("server-data");
@@ -18,35 +17,22 @@ public interface SuperOverrideCommand {
 			var set = Commands.literal("set");
 			var reset = Commands.literal("reset");
 
-			for (var data : DataKey.SERVER.all.values()) {
-				set.then(Commands.literal(data.id())
-					.then(Commands.argument("value", data.command().argument(buildContext))
+			for (var key : DataKey.SERVER.all.values()) {
+				set.then(Commands.literal(key.id())
+					.then(Commands.argument("value", key.command().argument(buildContext))
 						.executes(ctx -> {
 							var session = Minecraft.getInstance().player.vl$sessionData();
-							var value = data.command().get(ctx, "value");
-
-							if (session.serverDataMap.superOverrides == null) {
-								session.serverDataMap.superOverrides = new Reference2ObjectArrayMap<>();
-							}
-
-							session.serverDataMap.superOverrides.put(data, value);
+							var value = key.command().get(ctx, "value");
+							session.serverDataMap.setSuperOverride(key, value);
 							return 1;
 						})
 					)
 				);
 
-				reset.then(Commands.literal(data.id())
+				reset.then(Commands.literal(key.id())
 					.executes(ctx -> {
 						var session = Minecraft.getInstance().player.vl$sessionData();
-
-						if (session.serverDataMap.superOverrides != null) {
-							session.serverDataMap.superOverrides.remove(data);
-
-							if (session.serverDataMap.superOverrides.isEmpty()) {
-								session.serverDataMap.superOverrides = null;
-							}
-						}
-
+						session.serverDataMap.removeSuperOverride(key);
 						return 1;
 					})
 				);
@@ -63,21 +49,16 @@ public interface SuperOverrideCommand {
 			var set = Commands.argument("player", EntityArgument.players());
 			var reset = Commands.argument("player", EntityArgument.players());
 
-			for (var data : DataKey.PLAYER.all.values()) {
-				set.then(Commands.literal(data.id())
-					.then(Commands.argument("value", data.command().argument(buildContext))
+			for (var key : DataKey.PLAYER.all.values()) {
+				set.then(Commands.literal(key.id())
+					.then(Commands.argument("value", key.command().argument(buildContext))
 						.executes(ctx -> {
 							var session = Minecraft.getInstance().player.vl$sessionData();
-							var value = data.command().get(ctx, "value");
+							var value = key.command().get(ctx, "value");
 
 							for (var player : Minecraft.getInstance().level.selectPlayers(ctx, "player")) {
 								var psession = session.getClientSessionData(player.getUUID());
-
-								if (psession.dataMap.superOverrides == null) {
-									psession.dataMap.superOverrides = new Reference2ObjectArrayMap<>();
-								}
-
-								psession.dataMap.superOverrides.put(data, value);
+								psession.dataMap.setSuperOverride(key, value);
 							}
 
 							return 1;
@@ -85,20 +66,13 @@ public interface SuperOverrideCommand {
 					)
 				);
 
-				reset.then(Commands.literal(data.id())
+				reset.then(Commands.literal(key.id())
 					.executes(ctx -> {
 						var session = Minecraft.getInstance().player.vl$sessionData();
 
 						for (var player : Minecraft.getInstance().level.selectPlayers(ctx, "player")) {
 							var psession = session.getClientSessionData(player.getUUID());
-
-							if (psession.dataMap.superOverrides != null) {
-								psession.dataMap.superOverrides.remove(data);
-
-								if (psession.dataMap.superOverrides.isEmpty()) {
-									psession.dataMap.superOverrides = null;
-								}
-							}
+							psession.dataMap.removeSuperOverride(key);
 						}
 
 						return 1;

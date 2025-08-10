@@ -12,6 +12,8 @@ import dev.latvian.mods.klib.math.Vec3f;
 import dev.latvian.mods.klib.shape.ColoredShape;
 import dev.latvian.mods.klib.shape.CuboidShape;
 import dev.latvian.mods.klib.util.Cast;
+import dev.latvian.mods.vidlib.feature.canvas.dof.DepthOfField;
+import dev.latvian.mods.vidlib.feature.canvas.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
@@ -29,6 +31,7 @@ import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
+import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.PositionType;
 import imgui.ImGui;
 import imgui.flag.ImGuiTableFlags;
@@ -264,7 +267,7 @@ public class Prop {
 	}
 
 	final void update(RegistryAccess registryAccess, byte[] update, boolean allData) {
-		type.readUpdate(registryAccess, update, allData, (k, v) -> setData(k, Cast.to(v)));
+		type.readUpdate(id, registryAccess, update, allData, (k, v) -> setData(k, Cast.to(v)));
 	}
 
 	public final void remove(PropRemoveType removeType) {
@@ -513,10 +516,19 @@ public class Prop {
 
 	public void imgui(ImGraphics graphics, float delta) {
 		graphics.pushStack();
+
+		if (graphics.isReplay) {
+			ImGui.beginDisabled();
+		}
+
 		graphics.setRedButton();
 
 		if (ImGui.smallButton("Remove")) {
 			graphics.mc.runClientCommand("prop kill id " + getIdString());
+		}
+
+		if (graphics.isReplay) {
+			ImGui.endDisabled();
 		}
 
 		graphics.popStack();
@@ -567,6 +579,13 @@ public class Prop {
 
 		if (ImGui.smallButton("Copy ID")) {
 			ImGui.setClipboardText(getIdString());
+		}
+
+		if (graphics.isReplay) {
+			if (DepthOfField.OVERRIDE_ENABLED.get() && ImGui.smallButton("Focus DoF")) {
+				DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(this, PositionType.EYES));
+				DepthOfFieldPanel.INSTANCE.builder.set(DepthOfField.OVERRIDE);
+			}
 		}
 
 		if (imguiBuilders == null) {

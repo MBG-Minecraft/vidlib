@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.fade;
+package dev.latvian.mods.vidlib.feature.screeneffect.fade;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

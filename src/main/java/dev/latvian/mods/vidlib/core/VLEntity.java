@@ -2,6 +2,9 @@ package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.klib.math.Rotation;
+import dev.latvian.mods.vidlib.feature.canvas.dof.DepthOfField;
+import dev.latvian.mods.vidlib.feature.canvas.dof.DepthOfFieldPanel;
+import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.entity.C2SEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.entity.EntityData;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
@@ -9,6 +12,8 @@ import dev.latvian.mods.vidlib.feature.entity.EntityOverrideValue;
 import dev.latvian.mods.vidlib.feature.entity.ForceEntityVelocityPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.S2CEntityEventPayload;
+import dev.latvian.mods.vidlib.feature.entity.filter.ProfileEntityFilter;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
@@ -16,7 +21,11 @@ import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
+import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.PositionType;
+import imgui.ImGui;
+import imgui.flag.ImGuiWindowFlags;
+import imgui.type.ImBoolean;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -309,5 +318,67 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	}
 
 	default void replaySnapshot(S2CPacketBundleBuilder packets) {
+	}
+
+	default void imgui(ImGraphics graphics, float delta) {
+		var entity = vl$self();
+
+		if (entity instanceof Player player) {
+			if (ImGui.button("Edit Player Data###vidlib-edit-player-data")) {
+				ImGui.openPopup("###vidlib-edit-player-data-popup");
+			}
+
+			ImGui.setNextWindowSizeConstraints(50F, 10F, 800F, 600F);
+
+			if (ImGui.beginPopupModal("Edit Player Data###vidlib-edit-player-data-popup", new ImBoolean(true), ImGuiWindowFlags.AlwaysAutoResize)) {
+				ImGui.text("WIP!");
+				ImGui.pushID("###vidlib-player-data");
+
+				for (var key : DataKey.PLAYER.all.values()) {
+					var selected = new ImBoolean(false);
+					ImGui.checkbox(key.id() + ": " + player.get(key) + "###" + key.id() + "-enabled", selected);
+				}
+
+				ImGui.popID();
+				ImGui.endPopup();
+			}
+		}
+
+		if (DepthOfField.OVERRIDE_ENABLED.get() && ImGui.smallButton("Focus DoF")) {
+			if (entity instanceof Player player) {
+				DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(new ProfileEntityFilter(player.getGameProfile()), PositionType.EYES));
+			} else {
+				DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(entity, PositionType.EYES));
+			}
+
+			DepthOfFieldPanel.INSTANCE.builder.set(DepthOfField.OVERRIDE);
+		}
+
+		var team = entity.getTeam();
+
+		ImGui.text("Team: " + (team == null ? "None" : team.getName()));
+		ImGui.sameLine();
+
+		if (ImGui.smallButton("Edit###vidlib-entity-team")) {
+			ImGui.openPopup("###vidlib-edit-team-popup");
+		}
+
+		if (ImGui.beginPopupModal("Edit Team###vidlib-edit-team-popup", new ImBoolean(true), ImGuiWindowFlags.AlwaysAutoResize)) {
+			// var teams = entity.level().getScoreboard().getPlayerTeams();
+			ImGui.text("WIP");
+			ImGui.endPopup();
+		}
+
+		ImGui.text("Tags: " + entity.getTags());
+		ImGui.sameLine();
+
+		if (ImGui.smallButton("Edit###vidlib-entity-tags")) {
+			ImGui.openPopup("###vidlib-edit-tags-popup");
+		}
+
+		if (ImGui.beginPopupModal("Edit Team###vidlib-edit-tags-popup", new ImBoolean(true), ImGuiWindowFlags.AlwaysAutoResize)) {
+			ImGui.text("WIP");
+			ImGui.endPopup();
+		}
 	}
 }

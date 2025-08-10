@@ -1,7 +1,9 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.ImVec4;
+import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImFloat;
@@ -47,5 +49,36 @@ public interface ImGuiUtils {
 
 	static int getDockId() {
 		return ImGuiHooks.dockId;
+	}
+
+	static float calcTextWidth(String text) {
+		ImVec2 textSizeVec = new ImVec2();
+		ImGui.calcTextSize(textSizeVec, text);
+		return textSizeVec.x;
+	}
+
+	static void separatorWithText(String text) {
+		float cursorX = ImGui.getCursorScreenPosX();
+		float cursorY = ImGui.getCursorScreenPosY();
+		float textStartX = cursorX + ImGui.getStyle().getIndentSpacing();
+		float size = ImGui.getWindowSizeX();
+		int fontSize = ImGui.getFontSize();
+
+		if (ImGui.isRectVisible(size, fontSize)) {
+			float textEndX = textStartX + calcTextWidth(text);
+			float lineEndX = ImGui.getWindowPosX() + size;
+			float lineY = cursorY + fontSize / 2F;
+			var drawList = ImGui.getWindowDrawList();
+			var sepColor = ImGui.getColorU32(ImGuiCol.Separator);
+
+			drawList.addLine(cursorX - 4, lineY, Math.min(lineEndX, textStartX) - 4, lineY, sepColor);
+
+			if (textEndX + 4 < lineEndX) {
+				drawList.addLine(textEndX + 4, lineY, lineEndX - 4, lineY, sepColor);
+			}
+		}
+
+		ImGui.setCursorScreenPos(textStartX, cursorY);
+		ImGui.textColored(ImGui.getColorU32(ImGuiCol.TextDisabled), text);
 	}
 }

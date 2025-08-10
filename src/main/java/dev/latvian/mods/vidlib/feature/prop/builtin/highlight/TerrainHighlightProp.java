@@ -20,11 +20,13 @@ public class TerrainHighlightProp extends Prop {
 	public static final PropData<TerrainHighlightProp, Gradient> COLOR = PropData.create(TerrainHighlightProp.class, "color", Gradient.DATA_TYPE, p -> p.color, (p, v) -> p.color = v.optimize(), GradientImBuilder.TYPE);
 	public static final PropData<TerrainHighlightProp, KVector> SCALE = PropData.create(TerrainHighlightProp.class, "scale", KVector.DATA_TYPE, p -> p.scale, (p, v) -> p.scale = v, KVectorImBuilder.TYPE);
 
+	public static final PropData<Prop, KVector> DYNAMIC_POSITION = PropData.create(Prop.class, "position", KVector.DATA_TYPE, p -> KVector.of(p.pos), (p, v) -> p.setPos(v.get(p.level.getGlobalContext())), KVectorImBuilder.TYPE);
+
 	@AutoRegister
 	public static final PropType<TerrainHighlightProp> TYPE = PropType.create(VidLib.id("terrain_highlight"), TerrainHighlightProp::new,
 		TICK,
 		LIFESPAN,
-		POSITION,
+		DYNAMIC_POSITION,
 		SHAPE,
 		COLOR,
 		SCALE

@@ -9,7 +9,6 @@ import dev.latvian.mods.vidlib.feature.skybox.Skybox;
 import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import net.minecraft.client.Minecraft;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.ArrayList;
@@ -132,13 +131,7 @@ public class BuiltInImGui {
 		}
 	});
 
-	public static void handle(Minecraft mc) {
-		var graphics = new ImGraphics(mc);
-		graphics.pushStack();
-		graphics.setDefaultStyle();
-		graphics.setNumberType(ImNumberType.DOUBLE);
-		graphics.setNumberRange(null);
-
+	public static void handle(ImGraphics graphics) {
 		if (graphics.adminPanel) {
 			adminPanel(graphics);
 		}
@@ -163,15 +156,13 @@ public class BuiltInImGui {
 				showSounds = null;
 			}
 		}
-
-		graphics.popStack();
 	}
 
 	public static void adminPanel(ImGraphics graphics) {
 		var menuOpen = mainMenuOpen;
 		mainMenuOpen = true;
 
-		if (menuOpen) {
+		if (menuOpen && !graphics.isReplay) {
 			MAIN_MENU_BAR.buildRoot(graphics, true);
 		}
 
