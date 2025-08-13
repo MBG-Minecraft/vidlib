@@ -64,7 +64,5 @@ public class VidLibDataTypes {
 		DataType.register(VidLib.id("block_state_palette"), BlockStatePalette.DATA_TYPE);
 		DataType.register(VidLib.id("entity_snapshot"), EntitySnapshot.DATA_TYPE);
 		DataType.register(VidLib.id("entity_snapshot_list"), EntitySnapshot.LIST_DATA_TYPE);
-
-		// RegisteredDataType<ZoneContainer> REGISTERED_DATA_TYPE = RegisteredDataType.of(REGISTRY, ZoneContainer.class);
 	}
 }

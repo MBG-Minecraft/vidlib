@@ -85,7 +85,7 @@ public class CutsceneImBuilder implements ImBuilder<Cutscene> {
 			ImGui.pushID(i);
 			ImGuiUtils.BOOLEAN.set(true);
 
-			if (ImGui.collapsingHeader(length >= 1 ? ("Step @ " + KMath.format(start / 20F) + "s for " + KMath.format(length / 20F) + "s") : ("Step @ " + KMath.format(start / 20F) + "s"), ImGuiUtils.BOOLEAN, ImGuiTreeNodeFlags.DefaultOpen)) {
+			if (graphics.collapsingHeader(length >= 1 ? ("Step @ " + KMath.format(start / 20F) + "s for " + KMath.format(length / 20F) + "s") : ("Step @ " + KMath.format(start / 20F) + "s"), ImGuiUtils.BOOLEAN, ImGuiTreeNodeFlags.DefaultOpen)) {
 				boolean shouldDelete = !ImGuiUtils.BOOLEAN.get();
 
 				update = update.or(step.imgui(graphics));

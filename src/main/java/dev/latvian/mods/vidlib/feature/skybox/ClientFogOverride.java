@@ -1,9 +1,7 @@
 package dev.latvian.mods.vidlib.feature.skybox;
 
 import com.mojang.blaze3d.shaders.FogShape;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.FogParameters;
-import net.minecraft.world.level.material.FogType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -13,17 +11,6 @@ import java.util.stream.Collectors;
 
 public class ClientFogOverride {
 	public static final Map<Integer, FogShape> SHAPES = Arrays.stream(FogShape.values()).collect(Collectors.toMap(FogShape::getIndex, Function.identity()));
-
-	public static FogParameters override = FogParameters.NO_FOG;
-	public static FogParameters fluidOverride = null;
-
-	public static FogParameters get(FogParameters shaderFog) {
-		if (Minecraft.getInstance().gameRenderer.getMainCamera().getFluidInCamera() != FogType.NONE) {
-			return fluidOverride == null ? shaderFog : fluidOverride;
-		}
-
-		return override != null ? override : shaderFog;
-	}
 
 	@Nullable
 	public static FogParameters convert(FogOverride f) {

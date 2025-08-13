@@ -62,6 +62,10 @@ public record PropType<P extends Prop>(
 		}
 	});
 
+	public static final Lazy<List<PropType<?>>> SORTED = ALL.map(map -> {
+		return List.copyOf(map.values().stream().sorted((a, b) -> a.id.compareNamespaced(b.id)).toList());
+	});
+
 	public static <P extends Prop> PropType<P> create(ResourceLocation id, Factory<? extends P> factory, PropTypeInfo... info) {
 		var dataMap = new LinkedHashMap<String, PropData<?, ?>>();
 		var packetSet = new LinkedHashSet<PropPacketType<?, ?>>();

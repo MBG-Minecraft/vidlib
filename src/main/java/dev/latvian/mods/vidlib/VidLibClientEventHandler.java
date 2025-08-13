@@ -51,7 +51,6 @@ import dev.latvian.mods.vidlib.feature.entity.filter.ProfileEntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.ServerDataEntityFilter;
 import dev.latvian.mods.vidlib.feature.gradient.ClientGradientLoader;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
-import dev.latvian.mods.vidlib.feature.imgui.PropExplorerPanel;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.BlockParticleOptionImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ColorParticleOptionImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.DustParticleOptionImBuilder;
@@ -71,6 +70,7 @@ import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
 import dev.latvian.mods.vidlib.feature.particle.WindParticleOptionsImBuilder;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
+import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
@@ -431,9 +431,9 @@ public class VidLibClientEventHandler {
 				MiscClientUtils.renderVisuals(frame.poseStack(), frame.camera().getPosition(), frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, visuals, 1F);
 			}
 
-			if (mc.getEntityRenderDispatcher().shouldRenderHitBoxes() || !PropExplorerPanel.OPEN_PROPS.isEmpty()) {
+			if (mc.getEntityRenderDispatcher().shouldRenderHitBoxes() || !ClientProps.OPEN_PROPS.isEmpty()) {
 				mc.level.getProps().renderDebug(frame);
-				PropExplorerPanel.OPEN_PROPS.clear();
+				ClientProps.OPEN_PROPS.clear();
 			}
 		}
 
@@ -814,7 +814,7 @@ public class VidLibClientEventHandler {
 		if (event.getAction() == InputConstants.PRESS) {
 			var mc = Minecraft.getInstance();
 
-			if (mc.player != null && mc.screen == null && mc.isWindowActive() && mc.hitResult instanceof PropHitResult hit && !PropExplorerPanel.isPropHidden(hit.prop)) {
+			if (mc.player != null && mc.screen == null && mc.isWindowActive() && mc.hitResult instanceof PropHitResult hit && !ClientProps.isPropHidden(hit.prop)) {
 				boolean cancel = hit.prop.onClientInteraction(mc.player, event.getButton(), hit.getLocation(), hit.getDirection());
 
 				if (cancel) {

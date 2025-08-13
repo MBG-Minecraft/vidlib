@@ -4,9 +4,9 @@ import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBarRenderer;
-import dev.latvian.mods.vidlib.feature.imgui.PropExplorerPanel;
 import dev.latvian.mods.vidlib.feature.misc.FlashbackIntegration;
 import dev.latvian.mods.vidlib.feature.misc.VLFlashbackIntegration;
+import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -153,7 +153,7 @@ public interface VidLibHUD {
 				boolean renderHealth = prop.shouldRenderHealth(self);
 
 				if (renderName || renderHealth) {
-					if (PropExplorerPanel.isPropHidden(prop)) {
+					if (ClientProps.isPropHidden(prop)) {
 						continue;
 					}
 

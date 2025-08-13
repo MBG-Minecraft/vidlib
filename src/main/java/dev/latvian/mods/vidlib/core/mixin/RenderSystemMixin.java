@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.latvian.mods.vidlib.feature.skybox.ClientFogOverride;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.renderer.FogParameters;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -38,7 +38,7 @@ public class RenderSystemMixin {
 	 */
 	@Overwrite
 	public static FogParameters getShaderFog() {
-		return ClientFogOverride.get(shaderFog);
+		return ClientGameEngine.INSTANCE.getShaderFog(shaderFog);
 	}
 
 	@Inject(at = @At("HEAD"), method = "flipFrame")

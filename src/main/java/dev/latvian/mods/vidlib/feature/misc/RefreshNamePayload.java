@@ -11,6 +11,7 @@ import net.minecraft.network.chat.ComponentSerialization;
 
 import java.util.UUID;
 
+@Deprecated
 public record RefreshNamePayload(UUID player, Component nickname) implements SimplePacketPayload {
 	@AutoPacket
 	public static final VidLibPacketType<RefreshNamePayload> TYPE = VidLibPacketType.internal("refresh_name", CompositeStreamCodec.of(
@@ -31,7 +32,6 @@ public record RefreshNamePayload(UUID player, Component nickname) implements Sim
 		if (p != null) {
 			p.setNickname(nickname);
 			p.refreshDisplayName();
-			p.vl$sessionData().refreshListedPlayers();
 		}
 	}
 }

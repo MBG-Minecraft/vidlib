@@ -11,7 +11,6 @@ import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
-import dev.latvian.mods.vidlib.feature.imgui.PropExplorerPanel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
@@ -199,14 +198,14 @@ public class VLFlashbackIntegration {
 	private static void renderFilterMenu() {
 		if (ImGui.beginTabItem("Props")) {
 			if (ImGui.beginListBox("###props")) {
-				for (var propType : PropType.ALL.get().values()) {
-					boolean visible = !PropExplorerPanel.HIDDEN_PROP_TYPES.contains(propType);
+				for (var propType : PropType.SORTED.get()) {
+					boolean visible = !ClientProps.HIDDEN_PROP_TYPES.contains(propType);
 
 					if (ImGui.selectable((visible ? ImIcons.VISIBLE : ImIcons.INVISIBLE) + " " + propType.id().toString(), visible)) {
 						if (visible) {
-							PropExplorerPanel.HIDDEN_PROP_TYPES.add(propType);
+							ClientProps.HIDDEN_PROP_TYPES.add(propType);
 						} else {
-							PropExplorerPanel.HIDDEN_PROP_TYPES.remove(propType);
+							ClientProps.HIDDEN_PROP_TYPES.remove(propType);
 						}
 					}
 				}
@@ -262,7 +261,7 @@ public class VLFlashbackIntegration {
 			var prop = propList == null ? null : propList.get(selectedProp);
 
 			if (prop != null) {
-				PropExplorerPanel.OPEN_PROPS.add(prop.id);
+				ClientProps.OPEN_PROPS.add(prop.id);
 				ImGui.text(prop.toString());
 				prop.imgui(graphics, mc.getDeltaTracker().getGameTimeDeltaPartialTick(false));
 			}

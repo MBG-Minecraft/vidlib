@@ -26,4 +26,9 @@ public record ChancedParticle(ParticleOptions particle, KNumber chance) {
 
 	public static final DataType<ChancedParticle> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, ChancedParticle.class);
 	public static final DataType<List<ChancedParticle>> LIST_DATA_TYPE = DATA_TYPE.listOf();
+
+	public static final List<ChancedParticle> SOUL_SAND_VALLEY = List.of(new ChancedParticle(ParticleTypes.ASH, KNumber.of(0.00625D)));
+	public static final List<ChancedParticle> BASALT_DELTAS = List.of(new ChancedParticle(ParticleTypes.WHITE_ASH, KNumber.of(0.118093334D)));
+	public static final List<ChancedParticle> CRIMSON_FOREST = List.of(new ChancedParticle(ParticleTypes.CRIMSON_SPORE, KNumber.of(0.025D)));
+	public static final List<ChancedParticle> WARPED_FOREST = List.of(new ChancedParticle(ParticleTypes.WARPED_SPORE, KNumber.of(0.01428D)));
 }

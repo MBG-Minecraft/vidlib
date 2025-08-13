@@ -10,6 +10,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiComboFlags;
 import imgui.flag.ImGuiStyleVar;
+import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 import net.minecraft.client.Minecraft;
@@ -181,45 +182,51 @@ public class ImGraphics {
 		setStyleVar(ImGuiStyleVar.SelectableTextAlign, 0F, 0.5F);
 		setStyleVar(ImGuiStyleVar.Alpha, 1F);
 
-		setStyleCol(ImGuiCol.WindowBg, 0xEF292930);
-		setStyleCol(ImGuiCol.FrameBg, 0xFF1D1D23); // checkboxes, sliders
+		setStyleCol(ImGuiCol.WindowBg, 0xEF1D1D23);
+		setStyleCol(ImGuiCol.FrameBg, 0xFF141419); // checkboxes, sliders
 		setStyleCol(ImGuiCol.TitleBg, 0xEF384756);
 		setStyleCol(ImGuiCol.TitleBgActive, 0xEF70517F);
 		setStyleCol(ImGuiCol.MenuBarBg, 0xFF17171C);
 		setStyleCol(ImGuiCol.TitleBgCollapsed, 0xEF517F70);
 	}
 
+	public void setText(ImColorVariant variant) {
+		setStyleCol(ImGuiCol.Text, variant.textColor);
+	}
+
 	public void setWarningText() {
-		setStyleCol(ImGuiCol.Text, 0xFFFFFF55);
+		setText(ImColorVariant.YELLOW);
 	}
 
 	public void setErrorText() {
-		setStyleCol(ImGuiCol.Text, 0xFFFF5555);
+		setText(ImColorVariant.RED);
 	}
 
 	public void setSuccessText() {
-		setStyleCol(ImGuiCol.Text, 0xFF8CFF95);
+		setText(ImColorVariant.GREEN);
 	}
 
 	public void setInfoText() {
-		setStyleCol(ImGuiCol.Text, 0xFF63BEFF);
+		setText(ImColorVariant.BLUE);
+	}
+
+	public void setButton(ImColorVariant variant) {
+		setStyleCol(ImGuiCol.Button, variant.color);
+		setStyleCol(ImGuiCol.ButtonHovered, variant.hoverColor);
+		setStyleCol(ImGuiCol.ButtonActive, variant.activeColor);
 	}
 
 	public void setRedButton() {
-		setStyleCol(ImGuiCol.Button, 0xFFA0243B);
-		setStyleCol(ImGuiCol.ButtonHovered, 0xFFFF5E5E);
-		setStyleCol(ImGuiCol.ButtonActive, 0xFFEE3333);
+		setButton(ImColorVariant.RED);
 	}
 
 	public void setGreenButton() {
-		setStyleCol(ImGuiCol.Button, 0xFF249E3E);
-		setStyleCol(ImGuiCol.ButtonHovered, 0xFF2EC618);
-		setStyleCol(ImGuiCol.ButtonActive, 0xFF49ED34);
+		setButton(ImColorVariant.GREEN);
 	}
 
 	public void setButtonColor(Color col) {
 		setStyleCol(ImGuiCol.Button, col);
-		setStyleCol(ImGuiCol.ButtonHovered, col.lerp(0.3F, dev.latvian.mods.klib.color.Color.WHITE));
+		setStyleCol(ImGuiCol.ButtonHovered, col.lerp(0.3F, Color.WHITE));
 		setStyleCol(ImGuiCol.ButtonActive, col.lerp(0.1F, Color.WHITE));
 	}
 
@@ -390,5 +397,21 @@ public class ImGraphics {
 
 	public void hideMainMenuBar() {
 		BuiltInImGui.mainMenuOpen = false;
+	}
+
+	public boolean collapsingHeader(String label, int imGuiTreeNodeFlags) {
+		pushStack();
+		setStyleCol(ImGuiCol.Header, 0xFF000000);
+		boolean open = ImGui.collapsingHeader(label, imGuiTreeNodeFlags);
+		popStack();
+		return open;
+	}
+
+	public boolean collapsingHeader(String label, ImBoolean visible, int imGuiTreeNodeFlags) {
+		pushStack();
+		setStyleCol(ImGuiCol.Header, 0xFF000000);
+		boolean open = ImGui.collapsingHeader(label, visible, imGuiTreeNodeFlags);
+		popStack();
+		return open;
 	}
 }

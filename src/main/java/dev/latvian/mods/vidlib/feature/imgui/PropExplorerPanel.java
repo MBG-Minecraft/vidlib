@@ -1,28 +1,16 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
-import dev.latvian.mods.vidlib.feature.prop.PropType;
 import imgui.ImGui;
 import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.type.ImBoolean;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
-import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Set;
 
 public class PropExplorerPanel extends AdminPanel {
 	public static final PropExplorerPanel INSTANCE = new PropExplorerPanel();
-
-	public static final IntSet OPEN_PROPS = new IntOpenHashSet();
-	public static final IntSet HIDDEN_PROPS = new IntOpenHashSet();
-	public static final Set<PropType<?>> HIDDEN_PROP_TYPES = new ReferenceOpenHashSet<>();
-
-	public static boolean isPropHidden(Prop prop) {
-		return HIDDEN_PROPS.contains(prop.id) || HIDDEN_PROP_TYPES.contains(prop.type);
-	}
 
 	public final ImBoolean sortByClosest;
 
@@ -63,8 +51,8 @@ public class PropExplorerPanel extends AdminPanel {
 		for (var prop : allProps) {
 			ImGui.pushID(prop.id);
 
-			if (ImGui.collapsingHeader(prop.toString(), ImGuiTreeNodeFlags.NoTreePushOnOpen)) {
-				OPEN_PROPS.add(prop.id);
+			if (graphics.collapsingHeader(prop.toString(), ImGuiTreeNodeFlags.NoTreePushOnOpen)) {
+				ClientProps.OPEN_PROPS.add(prop.id);
 				prop.imgui(graphics, delta);
 			}
 

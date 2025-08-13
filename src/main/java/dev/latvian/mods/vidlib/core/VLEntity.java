@@ -7,13 +7,15 @@ import dev.latvian.mods.vidlib.feature.canvas.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.entity.C2SEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.entity.EntityData;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
-import dev.latvian.mods.vidlib.feature.entity.EntityOverrideValue;
 import dev.latvian.mods.vidlib.feature.entity.ForceEntityVelocityPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.S2CEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.entity.filter.ProfileEntityFilter;
+import dev.latvian.mods.vidlib.feature.imgui.EntityExplorerPanel;
+import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.PlayerDataConfigPanel;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
@@ -25,7 +27,6 @@ import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.PositionType;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
-import imgui.type.ImBoolean;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -39,9 +40,7 @@ import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Map;
 
 public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	default Entity vl$self() {
@@ -51,43 +50,6 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	@Override
 	default Level vl$level() {
 		return vl$self().level();
-	}
-
-	@Nullable
-	default Map<EntityOverride<?>, EntityOverrideValue<?>> vl$getEntityOverridesMap() {
-		throw new NoMixinException(this);
-	}
-
-	default void vl$setEntityOverridesMap(@Nullable Map<EntityOverride<?>, EntityOverrideValue<?>> map) {
-		throw new NoMixinException(this);
-	}
-
-	@SuppressWarnings("unchecked")
-	default <T> T vl$getDirectOverride(EntityOverride<T> override) {
-		var map = vl$getEntityOverridesMap();
-		var v = map == null ? null : (EntityOverrideValue<T>) map.get(override);
-		return v == null ? null : v.get(vl$self());
-	}
-
-	default <T> void vl$setDirectOverride(EntityOverride<T> override, @Nullable EntityOverrideValue<T> value) {
-		var map = vl$getEntityOverridesMap();
-
-		if (value == null) {
-			if (map != null) {
-				map.remove(override);
-
-				if (map.isEmpty()) {
-					vl$setEntityOverridesMap(null);
-				}
-			}
-		} else {
-			if (map == null) {
-				map = new IdentityHashMap<>(1);
-				vl$setEntityOverridesMap(map);
-			}
-
-			map.put(override, value);
-		}
 	}
 
 	default boolean vl$isSaving() {
@@ -124,17 +86,6 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 
 	default boolean isSuspended() {
 		return EntityOverride.SUSPENDED.get(this, false);
-	}
-
-	@Nullable
-	default Boolean vl$glowingOverride() {
-		return EntityOverride.GLOWING.get(this);
-	}
-
-	@Nullable
-	default Integer vl$teamColorOverride() {
-		var col = EntityOverride.TEAM_COLOR.get(this);
-		return col == null ? null : col.rgb();
 	}
 
 	default double vl$gravityMod() {
@@ -323,13 +274,76 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	default void imgui(ImGraphics graphics, float delta) {
 		var entity = vl$self();
 
+		if (entity == null) {
+			return;
+		}
+
+		if (ImGui.smallButton("Copy UUID")) {
+			ImGui.setClipboardText(entity.getUUID().toString());
+		}
+
+		ImGui.sameLine();
+
+		if (ImGui.smallButton("Copy Network ID")) {
+			ImGui.setClipboardText(Integer.toString(entity.getId()));
+		}
+
+		if (!graphics.isReplay) {
+			graphics.pushStack();
+			graphics.setRedButton();
+
+			if (ImGui.smallButton("Kill")) {
+				graphics.mc.runClientCommand("kill " + entity.getUUID());
+			}
+
+			if (entity instanceof Player) {
+				ImGui.beginDisabled();
+			}
+
+			ImGui.sameLine();
+
+			if (ImGui.smallButton("Discard")) {
+				graphics.mc.runClientCommand("discard " + entity.getUUID());
+			}
+
+			if (entity instanceof Player) {
+				ImGui.endDisabled();
+			}
+
+			graphics.popStack();
+			ImGui.sameLine();
+		}
+
+		if (entity == graphics.mc.player) {
+			ImGui.beginDisabled();
+		}
+
+		graphics.pushStack();
+		graphics.setButton(ImColorVariant.DARK_PURPLE);
+
+		if (ImGui.smallButton("TP To")) {
+			graphics.mc.runClientCommand("tp " + entity.getUUID());
+		}
+
+		ImGui.sameLine();
+
+		if (ImGui.smallButton("TP Here")) {
+			graphics.mc.runClientCommand("tp " + entity.getUUID() + " @s");
+		}
+
+		graphics.popStack();
+
+		if (entity == graphics.mc.player) {
+			ImGui.endDisabled();
+		}
+
 		if (entity instanceof Player player) {
-			if (ImGui.button("Edit Player Data###vidlib-edit-player-data")) {
+			if (ImGui.button("Edit Player Data###vidlib-edit-player-data", -1F, 0F)) {
 				new PlayerDataConfigPanel(player.getScoreboardName(), player.vl$sessionData().dataMap).open();
 			}
 		}
 
-		if (DepthOfField.OVERRIDE_ENABLED.get() && ImGui.smallButton("Focus DoF")) {
+		if (DepthOfField.OVERRIDE_ENABLED.get() && ImGui.button("Focus DoF")) {
 			if (entity instanceof Player player) {
 				DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(new ProfileEntityFilter(player.getGameProfile()), PositionType.EYES));
 			} else {
@@ -341,29 +355,76 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 
 		var team = entity.getTeam();
 
-		ImGui.text("Team: " + (team == null ? "None" : team.getName()));
-		ImGui.sameLine();
-
-		if (ImGui.smallButton("Edit###vidlib-entity-team")) {
+		if (ImGui.button("Team: " + (team == null ? "None" : team.getName()) + "###vidlib-entity-team")) {
 			ImGui.openPopup("###vidlib-edit-team-popup");
 		}
 
-		if (ImGui.beginPopupModal("Edit Team###vidlib-edit-team-popup", new ImBoolean(true), ImGuiWindowFlags.AlwaysAutoResize)) {
-			// var teams = entity.level().getScoreboard().getPlayerTeams();
-			ImGui.text("WIP");
+		if (ImGui.beginPopup("Edit Team###vidlib-edit-team-popup", ImGuiWindowFlags.AlwaysAutoResize)) {
+			if (ImGui.beginListBox("###teams", 200F, 120F)) {
+				if (ImGui.selectable(ImIcons.CLOSE + " None", team == null)) {
+					graphics.mc.runClientCommand("team leave " + entity.getUUID());
+					ImGui.closeCurrentPopup();
+				}
+
+				for (var teamName : graphics.mc.level.getScoreboard().getTeamNames()) {
+					if (ImGui.selectable(teamName, team != null && team.getName().equals(teamName))) {
+						graphics.mc.runClientCommand("team join " + teamName + " " + entity.getUUID());
+						ImGui.closeCurrentPopup();
+					}
+				}
+
+				ImGui.endListBox();
+			}
+
 			ImGui.endPopup();
 		}
 
-		ImGui.text("Tags: " + entity.getTags());
-		ImGui.sameLine();
+		if (entity instanceof Player) {
+			ImGui.sameLine();
 
-		if (ImGui.smallButton("Edit###vidlib-entity-tags")) {
-			ImGui.openPopup("###vidlib-edit-tags-popup");
-		}
+			var tags = entity.getTags();
 
-		if (ImGui.beginPopupModal("Edit Team###vidlib-edit-tags-popup", new ImBoolean(true), ImGuiWindowFlags.AlwaysAutoResize)) {
-			ImGui.text("WIP");
-			ImGui.endPopup();
+			if (ImGui.button(tags.size() + " Tags###vidlib-entity-tags")) {
+				ImGui.openPopup("###vidlib-edit-tags-popup");
+			}
+
+			if (!tags.isEmpty()) {
+				ImGui.sameLine();
+				ImGui.alignTextToFramePadding();
+				ImGui.text(String.join(", ", tags));
+			}
+
+			if (ImGui.beginPopup("Edit Team###vidlib-edit-tags-popup", ImGuiWindowFlags.AlwaysAutoResize)) {
+				if (tags.isEmpty()) {
+					ImGui.text("No tags");
+				}
+
+				for (var tag : tags) {
+					ImGui.text(tag);
+					ImGui.sameLine();
+					graphics.pushStack();
+					graphics.setRedButton();
+
+					if (ImGui.smallButton("-###remove-tag-" + tag)) {
+						graphics.mc.runClientCommand("tag " + entity.getUUID() + " remove " + tag);
+					}
+
+					graphics.popStack();
+				}
+
+				ImGui.inputText("###add-tag-input", EntityExplorerPanel.INSTANCE.tagInput);
+				boolean finished = ImGui.isItemDeactivatedAfterEdit();
+
+				ImGui.sameLine();
+
+				if (ImGui.button("+###add-tag") || finished) {
+					var tag = EntityExplorerPanel.INSTANCE.tagInput.get();
+					EntityExplorerPanel.INSTANCE.tagInput.set("");
+					graphics.mc.runClientCommand("tag " + entity.getUUID() + " add " + tag);
+				}
+
+				ImGui.endPopup();
+			}
 		}
 	}
 }

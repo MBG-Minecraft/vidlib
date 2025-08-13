@@ -23,9 +23,7 @@ public interface NicknameCommand {
 
 	private static int nickname(Collection<ServerPlayer> players, Component name) {
 		for (var player : players) {
-			player.updateNickname(name.copy());
-			// Has to be done twice to take effect for some reason
-			player.server.schedule(5, () -> player.updateNickname(name.copy()));
+			player.setNickname(name.copy());
 		}
 
 		return 1;

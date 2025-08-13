@@ -111,6 +111,15 @@ public class DebugWidgetPanel extends AdminPanel {
 		ImGui.bulletText("Bullet Text");
 		ImGui.separator();
 
+		for (var variant : ImColorVariant.VALUES) {
+			graphics.pushStack();
+			graphics.setText(variant);
+			ImGui.text(variant.displayName + " Text");
+			graphics.popStack();
+		}
+
+		ImGui.separator();
+
 		ImGui.text("All Icons:");
 		ImGui.text("");
 
@@ -140,6 +149,18 @@ public class DebugWidgetPanel extends AdminPanel {
 		ImGui.text("Small Button");
 		ImGui.sameLine();
 		ImGui.smallButton("S###small-button");
+		ImGui.separator();
+
+		for (var variant : ImColorVariant.VALUES) {
+			graphics.pushStack();
+			graphics.setButton(variant);
+			ImGui.button(variant.displayName + " Button###button-variant-" + variant.id);
+			ImGui.sameLine();
+			ImGui.alignTextToFramePadding();
+			ImGui.smallButton("Small " + variant.displayName + " Button###small-button-variant-" + variant.id);
+			graphics.popStack();
+		}
+
 		ImGui.separator();
 
 		ImGui.text("Arrow Buttons: " + intData.get());
@@ -224,13 +245,13 @@ public class DebugWidgetPanel extends AdminPanel {
 		graphics.easingCombo("###combo", easingData);
 		ImGui.separator();
 
-		if (ImGui.collapsingHeader("Collapsing Header")) {
+		if (graphics.collapsingHeader("Collapsing Header", 0)) {
 			ImGui.text("Hello");
 		}
 
 		ImGui.separator();
 
-		if (ImGui.collapsingHeader("Collapsing Header (Closeable)", new ImBoolean(true))) {
+		if (graphics.collapsingHeader("Collapsing Header (Closeable)", new ImBoolean(true), 0)) {
 			ImGui.text("Hello");
 		}
 

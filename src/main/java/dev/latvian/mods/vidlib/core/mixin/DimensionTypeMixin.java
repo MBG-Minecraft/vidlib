@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
-import dev.latvian.mods.vidlib.VidLibEventHandler;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,6 +19,6 @@ public class DimensionTypeMixin {
 	 */
 	@Overwrite
 	public float ambientLight() {
-		return VidLibEventHandler.ambientLight.clamp(ambientLight);
+		return ClientGameEngine.INSTANCE.getAmbientLight(ambientLight);
 	}
 }

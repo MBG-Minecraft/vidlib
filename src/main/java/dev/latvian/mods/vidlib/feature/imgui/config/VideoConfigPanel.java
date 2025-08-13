@@ -66,7 +66,7 @@ public class VideoConfigPanel extends AdminPanel {
 			ImGui.spacing();
 			ImGui.spacing();
 
-			if (ImGui.collapsingHeader(all.label().getString(), ImGuiTreeNodeFlags.DefaultOpen)) {
+			if (graphics.collapsingHeader(all.label().getString(), ImGuiTreeNodeFlags.DefaultOpen)) {
 				for (var config : all.config()) {
 					ImGui.spacing();
 

@@ -6,12 +6,10 @@ import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
-import dev.latvian.mods.vidlib.feature.icon.IconHolder;
 import dev.latvian.mods.vidlib.feature.session.SessionData;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;
@@ -56,26 +54,12 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
 		set(InternalPlayerData.SUSPENDED, value);
 	}
 
-	default Component getNickname() {
-		var s = vl$sessionData();
-		return s == null ? Empty.COMPONENT : s.nickname;
-	}
-
 	default void setNickname(Component nickname) {
 		set(InternalPlayerData.NICKNAME, Empty.isEmpty(nickname) ? Empty.COMPONENT : nickname);
 	}
 
-	@Nullable
-	default IconHolder getPlumbobHolder() {
-		return vl$sessionData().plumbobIcon;
-	}
-
 	default void setPlumbob(Icon icon) {
 		set(InternalPlayerData.PLUMBOB, icon.holder());
-	}
-
-	default Clothing getClothing() {
-		return vl$sessionData().clothing;
 	}
 
 	default void setClothing(Clothing clothing) {
@@ -88,18 +72,6 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
 
 	default void setFlightSpeedMod(float value) {
 		set(InternalPlayerData.FLIGHT_SPEED, value);
-	}
-
-	@Override
-	@Nullable
-	default Boolean vl$glowingOverride() {
-		return vl$sessionData().glowingOverride;
-	}
-
-	@Override
-	@Nullable
-	default Integer vl$teamColorOverride() {
-		return vl$sessionData().teamColorOverride;
 	}
 
 	@Override

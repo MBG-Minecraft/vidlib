@@ -2,7 +2,9 @@ package dev.latvian.mods.vidlib.feature.icon;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.feature.icon.renderer.IconRenderer;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
@@ -21,7 +23,7 @@ public class PlumbobRenderer {
 				continue;
 			}
 
-			var h = player.getPlumbobHolder();
+			var h = ClientGameEngine.INSTANCE.getPlumbob(player);
 
 			if (h == null || player == mc.player && mc.options.getCameraType().isFirstPerson()) {
 				continue;
@@ -33,7 +35,7 @@ public class PlumbobRenderer {
 			var blockpos = BlockPos.containing(player.getLightProbePosition(pdelta));
 			int light = LightTexture.pack(mc.level.getBrightness(LightLayer.BLOCK, blockpos), mc.level.getBrightness(LightLayer.SKY, blockpos));
 
-			render(mc, h, player.getEyePosition(pdelta), ms, frame.worldDelta(), source, light, player.isCrouching(), player.vl$sessionData().scoreText != null);
+			render(mc, h, player.getEyePosition(pdelta), ms, frame.worldDelta(), source, light, player.isCrouching(), !Empty.isEmpty(ClientGameEngine.INSTANCE.getScoreText(player)));
 		}
 	}
 

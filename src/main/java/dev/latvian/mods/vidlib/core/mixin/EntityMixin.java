@@ -3,10 +3,9 @@ package dev.latvian.mods.vidlib.core.mixin;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.core.VLEntity;
-import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
-import dev.latvian.mods.vidlib.feature.entity.EntityOverrideValue;
 import dev.latvian.mods.vidlib.feature.entity.ExactEntitySpawnPayload;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -31,18 +30,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
-import java.util.Map;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin implements VLEntity {
 	@Shadow
-	private Level level;
-
-	@Shadow
 	public abstract void load(CompoundTag compound);
-
-	@Shadow
-	public abstract boolean removeTag(String tag);
 
 	@Unique
 	private PlayerInput vl$pilotInput = PlayerInput.NONE;
@@ -62,21 +54,7 @@ public abstract class EntityMixin implements VLEntity {
 	}
 
 	@Unique
-	private Map<EntityOverride<?>, EntityOverrideValue<?>> vl$entityOverridesMap;
-
-	@Unique
 	private boolean vl$isSaving = false;
-
-	@Nullable
-	@Override
-	public Map<EntityOverride<?>, EntityOverrideValue<?>> vl$getEntityOverridesMap() {
-		return vl$entityOverridesMap;
-	}
-
-	@Override
-	public void vl$setEntityOverridesMap(@Nullable Map<EntityOverride<?>, EntityOverrideValue<?>> map) {
-		vl$entityOverridesMap = map;
-	}
 
 	@Override
 	public boolean vl$isSaving() {
@@ -94,19 +72,17 @@ public abstract class EntityMixin implements VLEntity {
 
 	@Inject(method = "isCurrentlyGlowing", at = @At("HEAD"), cancellable = true)
 	private void vl$isCurrentlyGlowing(CallbackInfoReturnable<Boolean> cir) {
-		var override = level == null || !level.isClientSide ? null : vl$glowingOverride();
-
-		if (override != null) {
-			cir.setReturnValue(override);
+		if (ClientGameEngine.INSTANCE.isGlowing(vl$self())) {
+			cir.setReturnValue(true);
 		}
 	}
 
 	@Inject(method = "getTeamColor", at = @At("HEAD"), cancellable = true)
 	private void vl$getTeamColor(CallbackInfoReturnable<Integer> cir) {
-		var override = vl$teamColorOverride();
+		var override = ClientGameEngine.INSTANCE.getTeamColor(vl$self());
 
 		if (override != null) {
-			cir.setReturnValue(override);
+			cir.setReturnValue(override.rgb());
 		}
 	}
 

@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -34,7 +35,7 @@ public class PlayerTabOverlayMixin {
 
 	@ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/PlayerTabOverlay;getNameForDisplay(Lnet/minecraft/client/multiplayer/PlayerInfo;)Lnet/minecraft/network/chat/Component;"))
 	private Component vl$modifyPlayerName(Component component, @Local PlayerInfo playerInfo) {
-		return minecraft.player.vl$sessionData().getClientSessionData(playerInfo.getProfile().getId()).modifyPlayerName(component);
+		return ClientGameEngine.INSTANCE.getPlayerListName(minecraft, playerInfo, component);
 	}
 
 	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;drawString(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;III)I"))

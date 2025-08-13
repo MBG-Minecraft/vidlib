@@ -6,11 +6,13 @@ import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.imgui.PropExplorerPanel;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import imgui.type.ImBoolean;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
@@ -18,9 +20,17 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ClientProps extends Props<ClientLevel> {
 	public static final ImBoolean VISIBLE = new ImBoolean(true);
+	public static final IntSet OPEN_PROPS = new IntOpenHashSet();
+	public static final IntSet HIDDEN_PROPS = new IntOpenHashSet();
+	public static final Set<PropType<?>> HIDDEN_PROP_TYPES = new ReferenceOpenHashSet<>();
+
+	public static boolean isPropHidden(Prop prop) {
+		return HIDDEN_PROPS.contains(prop.id) || HIDDEN_PROP_TYPES.contains(prop.type);
+	}
 
 	@AutoInit(AutoInit.Type.CHUNKS_RENDERED)
 	public static void chunksRendered(ClientLevel level) {
@@ -134,7 +144,7 @@ public class ClientProps extends Props<ClientLevel> {
 				continue;
 			} else if (!VISIBLE.get() || prop.isTimeTraveling(frame.gameTime())) {
 				continue;
-			} else if (PropExplorerPanel.isPropHidden(prop)) {
+			} else if (isPropHidden(prop)) {
 				continue;
 			}
 
@@ -190,7 +200,7 @@ public class ClientProps extends Props<ClientLevel> {
 
 				if (r >= Double.MAX_VALUE || cam.distanceToSqr(x, y + prop.height / 2D, z) <= r * r) {
 					if (prop.isVisible(x, y, z, frame)) {
-						boolean selected = PropExplorerPanel.OPEN_PROPS.contains(prop.id);
+						boolean selected = OPEN_PROPS.contains(prop.id);
 
 						if (selected || frame.mc().getEntityRenderDispatcher().shouldRenderHitBoxes()) {
 							var visuals = prop.getDebugVisuals(x, y, z, selected);

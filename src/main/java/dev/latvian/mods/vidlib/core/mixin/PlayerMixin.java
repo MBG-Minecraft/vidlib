@@ -4,14 +4,13 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.core.VLPlayer;
+import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
-import dev.latvian.mods.vidlib.feature.entity.EntityOverrideValue;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.common.damagesource.IScalingFunction;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,23 +19,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Map;
-
 @Mixin(Player.class)
 public abstract class PlayerMixin implements VLPlayer {
 	@Shadow
 	private Component displayname;
-
-	@Nullable
-	@Override
-	public Map<EntityOverride<?>, EntityOverrideValue<?>> vl$getEntityOverridesMap() {
-		return vl$sessionData().entityOverridesMap;
-	}
-
-	@Override
-	public void vl$setEntityOverridesMap(@Nullable Map<EntityOverride<?>, EntityOverrideValue<?>> map) {
-		vl$sessionData().entityOverridesMap = map;
-	}
 
 	/**
 	 * @author Lat
@@ -45,11 +31,16 @@ public abstract class PlayerMixin implements VLPlayer {
 	@Overwrite
 	public void refreshDisplayName() {
 		displayname = null;
+		var s = vl$sessionData();
+
+		if (s != null) {
+			s.refreshListedPlayers();
+		}
 	}
 
 	@Inject(method = "getName", at = @At("HEAD"), cancellable = true)
 	public void vl$getName(CallbackInfoReturnable<Component> cir) {
-		var nickname = getNickname();
+		var nickname = vl$sessionData() == null ? null : get(InternalPlayerData.NICKNAME);
 
 		if (!Empty.isEmpty(nickname)) {
 			cir.setReturnValue(nickname.copy());

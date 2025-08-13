@@ -1,8 +1,6 @@
 package dev.latvian.mods.vidlib.feature.session;
 
-import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
-import net.minecraft.network.chat.Component;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -27,29 +25,5 @@ public class ClientSessionData extends SessionData {
 		}
 
 		return tags;
-	}
-
-	public Component modifyPlayerName(Component original) {
-		if (namePrefix != null || nameSuffix != null || !Empty.isEmpty(nickname)) {
-			var name = Component.empty();
-
-			if (namePrefix != null) {
-				name.append(namePrefix);
-			}
-
-			if (Empty.isEmpty(nickname)) {
-				name.append(original);
-			} else {
-				name.append(nickname);
-			}
-
-			if (nameSuffix != null) {
-				name.append(nameSuffix);
-			}
-
-			return name;
-		}
-
-		return original;
 	}
 }

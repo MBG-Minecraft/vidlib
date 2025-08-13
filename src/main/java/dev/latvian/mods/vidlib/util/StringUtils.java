@@ -1,5 +1,9 @@
 package dev.latvian.mods.vidlib.util;
 
+import dev.latvian.mods.klib.util.Empty;
+import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
@@ -40,5 +44,40 @@ public interface StringUtils {
 
 	static String timer(long millis) {
 		return "%02d:%02d:%03d".formatted(millis / 60000L, (millis / 1000L) % 60, millis % 1000L);
+	}
+
+	@Nullable
+	static Component buildComponent(@Nullable Component prefix, @Nullable Component original, @Nullable Component suffix) {
+		if (Empty.isEmpty(prefix)) {
+			prefix = null;
+		}
+
+		if (Empty.isEmpty(suffix)) {
+			suffix = null;
+		}
+
+		if (prefix == null && suffix == null) {
+			return original;
+		}
+
+		if (Empty.isEmpty(original)) {
+			original = null;
+		}
+
+		var component = Component.empty();
+
+		if (prefix != null) {
+			component.append(prefix);
+		}
+
+		if (original != null) {
+			component.append(original);
+		}
+
+		if (suffix != null) {
+			component.append(suffix);
+		}
+
+		return component;
 	}
 }

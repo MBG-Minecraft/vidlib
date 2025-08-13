@@ -17,7 +17,6 @@ import dev.latvian.mods.vidlib.feature.canvas.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
-import dev.latvian.mods.vidlib.feature.imgui.PropExplorerPanel;
 import dev.latvian.mods.vidlib.feature.imgui.builder.AngleImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.FloatImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
@@ -535,7 +534,7 @@ public class Prop {
 
 		ImGui.sameLine();
 
-		boolean isHidden = PropExplorerPanel.HIDDEN_PROPS.contains(id);
+		boolean isHidden = ClientProps.HIDDEN_PROPS.contains(id);
 
 		if (isHidden) {
 			graphics.pushStack();
@@ -544,9 +543,9 @@ public class Prop {
 
 		if (ImGui.smallButton(isHidden ? "Show" : "Hide")) {
 			if (isHidden) {
-				PropExplorerPanel.HIDDEN_PROPS.remove(id);
+				ClientProps.HIDDEN_PROPS.remove(id);
 			} else {
-				PropExplorerPanel.HIDDEN_PROPS.add(id);
+				ClientProps.HIDDEN_PROPS.add(id);
 			}
 		}
 
@@ -556,7 +555,7 @@ public class Prop {
 
 		ImGui.sameLine();
 
-		boolean isTypeHidden = PropExplorerPanel.HIDDEN_PROP_TYPES.contains(type);
+		boolean isTypeHidden = ClientProps.HIDDEN_PROP_TYPES.contains(type);
 
 		if (isTypeHidden) {
 			graphics.pushStack();
@@ -565,9 +564,9 @@ public class Prop {
 
 		if (ImGui.smallButton(isTypeHidden ? "Show All of Type" : "Hide All of Type")) {
 			if (isTypeHidden) {
-				PropExplorerPanel.HIDDEN_PROP_TYPES.remove(type);
+				ClientProps.HIDDEN_PROP_TYPES.remove(type);
 			} else {
-				PropExplorerPanel.HIDDEN_PROP_TYPES.add(type);
+				ClientProps.HIDDEN_PROP_TYPES.add(type);
 			}
 		}
 

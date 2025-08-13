@@ -1,7 +1,5 @@
 package dev.latvian.mods.vidlib;
 
-import dev.latvian.mods.klib.math.Range;
-import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.core.VLPayloadRegistrar;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
@@ -57,7 +55,6 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 @EventBusSubscriber(modid = VidLib.ID)
 public class VidLibEventHandler {
-	public static Range ambientLight = Range.FULL;
 	public static boolean gameLoaded = false;
 
 	public static synchronized void gameLoaded() {
@@ -261,15 +258,6 @@ public class VidLibEventHandler {
 	public static void entityInvulnerabilityCheck(EntityInvulnerabilityCheckEvent event) {
 		if (!event.getOriginalInvulnerability() && !event.isInvulnerable() && EntityOverride.INVULNERABLE.get(event.getEntity(), false)) {
 			event.setInvulnerable(true);
-		}
-	}
-
-	@SubscribeEvent
-	public static void tabName(PlayerEvent.TabListNameFormat event) {
-		var nickname = event.getEntity().getNickname();
-
-		if (!Empty.isEmpty(nickname)) {
-			event.setDisplayName(nickname);
 		}
 	}
 

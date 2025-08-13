@@ -1,12 +1,18 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasPanel;
 import dev.latvian.mods.vidlib.feature.canvas.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
+import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneBuilderPanel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
+import dev.latvian.mods.vidlib.feature.prop.ClientProps;
+import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.skybox.Skybox;
 import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
+import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import net.neoforged.neoforge.common.NeoForge;
@@ -24,6 +30,7 @@ public class BuiltInImGui {
 	public static final MenuItem OPEN = MenuItem.menu(ImIcons.OPEN, "Open", (graphics, list) -> {
 		list.add(MenuItem.item(ImIcons.MEMORY, "Memory Usage", MemoryUsagePanel.INSTANCE));
 		list.add(MenuItem.item(ImIcons.CODE, "Command History", CommandHistoryPanel.INSTANCE));
+		list.add(MenuItem.item(ImIcons.TIMELAPSE, "Server Stopwatch", GlobalStopwatchPanel.INSTANCE).enabled(graphics.inGame));
 		list.add(MenuItem.item(ImIcons.TIMELAPSE, "New Stopwatch", g -> StopwatchPanel.openNew()));
 		list.add(MenuItem.menu(ImIcons.APERTURE, "Canvas", CanvasPanel::menu));
 		list.add(MenuItem.item(ImIcons.PLAY, "Sounds", BuiltInImGui.showSounds != null, g -> BuiltInImGui.showSounds = false));
@@ -94,9 +101,26 @@ public class BuiltInImGui {
 			g.mc.options.save();
 		}).enabled(graphics.isAdmin));
 
-		list.add(MenuItem.SEPARATOR);
+		list.add(MenuItem.item(ImIcons.FLAG, "Props", ClientProps.VISIBLE).enabled(graphics.isAdmin));
 
-		list.add(MenuItem.item(ImIcons.TIMELAPSE, "Stopwatch", GlobalStopwatchPanel.INSTANCE).enabled(graphics.inGame));
+		if (ClientProps.VISIBLE.get()) {
+			list.add(MenuItem.menu(ImIcons.FLAG, "Prop Types", (graphics2, propTypes) -> {
+				for (var type : PropType.SORTED.get()) {
+					propTypes.add(MenuItem.item(type.id().toString(), !ClientProps.HIDDEN_PROP_TYPES.contains(type), graphics3 -> {
+						if (ClientProps.HIDDEN_PROP_TYPES.contains(type)) {
+							ClientProps.HIDDEN_PROP_TYPES.remove(type);
+						} else {
+							ClientProps.HIDDEN_PROP_TYPES.add(type);
+						}
+					}));
+				}
+			}).enabled(graphics.isAdmin));
+		}
+
+		list.add(MenuItem.item(ImIcons.STAR, "Physics Particles", PhysicsParticleManager.VISIBLE).enabled(graphics.isAdmin));
+		list.add(MenuItem.item(ImIcons.TIMELAPSE, "Clocks", ClockRenderer.VISIBLE).enabled(graphics.isAdmin));
+		list.add(MenuItem.item(ImIcons.BRIGHTNESS, "Bloom", Bloom.VISIBLE).enabled(graphics.isAdmin));
+		list.add(MenuItem.item(ImIcons.FRAMED_CUBE, "Ghost Structures", GhostStructure.VISIBLE_CONFIG).enabled(graphics.isAdmin));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.ShowDropdown(graphics, list));
 	}).remainOpen(true);

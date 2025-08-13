@@ -1,7 +1,9 @@
 package dev.latvian.mods.vidlib.feature.client;
 
+import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
@@ -9,10 +11,9 @@ import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 
 public interface VidLibEntityRenderStates {
-	ContextKey<Boolean> MAIN_BOSS = new ContextKey<>(VidLib.id("main_boss"));
+	ContextKey<Boolean> BOSS_FRAMEBUFFER = new ContextKey<>(VidLib.id("boss_framebuffer"));
 	ContextKey<Boolean> CREATIVE = new ContextKey<>(VidLib.id("creative"));
 	ContextKey<Clothing> CLOTHING = new ContextKey<>(VidLib.id("clothing"));
 
@@ -39,10 +40,10 @@ public interface VidLibEntityRenderStates {
 	}
 
 	static void extractLiving(LivingEntity entity, LivingEntityRenderState state) {
-		var mainBoss = entity.level().getMainBoss() == entity;
-		state.setRenderData(MAIN_BOSS, mainBoss ? Boolean.TRUE : null);
+		boolean bossFramebuffer = ClientGameEngine.INSTANCE.renderOnBossFramebuffer(entity);
+		state.setRenderData(BOSS_FRAMEBUFFER, bossFramebuffer ? Boolean.TRUE : null);
 
-		if (mainBoss && !(entity instanceof Player)) {
+		if (ClientGameEngine.INSTANCE.hideRenderedName(entity, bossFramebuffer)) {
 			state.nameTag = null;
 			state.customName = null;
 		}
@@ -51,22 +52,22 @@ public interface VidLibEntityRenderStates {
 	static void extractPlayer(AbstractClientPlayer player, PlayerRenderState state) {
 		state.setRenderData(CREATIVE, player.isCreative() ? Boolean.TRUE : null);
 
-		var session = player.vl$sessionData();
-
-		var clothing = state.isInvisible ? null : player.getClothing();
+		var clothing = state.isInvisible ? null : ClientGameEngine.INSTANCE.getClothing(player);
 		state.setRenderData(CLOTHING, clothing == Clothing.NONE ? null : clothing);
 
 		if (state.nameTag != null) {
-			state.nameTag = session.modifyPlayerName(state.nameTag);
+			state.nameTag = ClientGameEngine.INSTANCE.getFullPlayerWorldName(player, state.nameTag);
 		}
 
-		if (session.scoreText != null) {
-			state.scoreText = session.scoreText;
+		var scoreText = ClientGameEngine.INSTANCE.getScoreText(player);
+
+		if (scoreText != null) {
+			state.scoreText = Empty.isEmpty(scoreText) ? null : scoreText;
 		}
 	}
 
 	static boolean isMainBoss(EntityRenderState state) {
-		var v = state.getRenderData(MAIN_BOSS);
+		var v = state.getRenderData(BOSS_FRAMEBUFFER);
 		return v != null && v;
 	}
 

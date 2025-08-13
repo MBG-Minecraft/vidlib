@@ -4,12 +4,10 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.Window;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.Identity;
-import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.klib.math.VoxelShapeBox;
 import dev.latvian.mods.klib.math.WorldMouse;
 import dev.latvian.mods.klib.util.Side;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.VidLibEventHandler;
 import dev.latvian.mods.vidlib.core.VLLocalPlayer;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeInstance;
@@ -20,20 +18,18 @@ import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
-import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
-import dev.latvian.mods.vidlib.feature.hud.SpectatorTablistOverride;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.input.PlayerInputChanged;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToServer;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.feature.npc.NPCParticleOptions;
 import dev.latvian.mods.vidlib.feature.npc.NPCRecording;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
-import dev.latvian.mods.vidlib.feature.skybox.ClientFogOverride;
 import dev.latvian.mods.vidlib.feature.skybox.Skybox;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
@@ -55,11 +51,9 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
-import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
@@ -95,7 +89,6 @@ public class LocalClientSessionData extends ClientSessionData {
 	public final KNumberVariables globalVariables;
 	public Skybox skybox;
 	public Map<ZoneShape, VoxelShapeBox> cachedZoneShapes;
-	public List<PlayerInfo> originalListedPlayers;
 	public CameraOverride cameraOverride;
 	public ClientCutscene currentCutscene;
 	public ScreenFadeInstance screenFade;
@@ -154,7 +147,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	@Override
 	public void updateOverrides(Player player) {
 		super.updateOverrides(player);
-		var skyboxId = EntityOverride.SKYBOX.get(player);
+		var skyboxId = ClientGameEngine.INSTANCE.getSkybox(mc);
 
 		if (skyboxId == null) {
 			skyboxId = player.level().getSkybox();
@@ -165,14 +158,6 @@ public class LocalClientSessionData extends ClientSessionData {
 		} else {
 			skybox = getSkybox(skyboxId);
 		}
-
-		VidLibEventHandler.ambientLight = EntityOverride.AMBIENT_LIGHT.get(player, Range.FULL);
-
-		var f = EntityOverride.FOG.get(player);
-		ClientFogOverride.override = f == null ? FogParameters.NO_FOG : ClientFogOverride.convert(f);
-
-		var ff = EntityOverride.FLUID_FOG.get(player);
-		ClientFogOverride.fluidOverride = ff == null ? null : ClientFogOverride.convert(ff);
 	}
 
 	public Skybox getSkybox(ResourceLocation id) {
@@ -379,37 +364,21 @@ public class LocalClientSessionData extends ClientSessionData {
 
 	@Override
 	public void refreshListedPlayers() {
-		originalListedPlayers = null;
+		// NOOP
 	}
 
 	public List<PlayerInfo> getListedPlayers() {
-		if (originalListedPlayers == null) {
-			SpectatorTablistOverride.TablistOverrideType state = EntityOverride.SHOW_SPECTATORS_TABLIST.get(mc.player, SpectatorTablistOverride.TablistOverrideType.HIDE_TO_NON_OPS);
-			var original = mc.player.connection.getListedOnlinePlayers().stream()
-				.filter(playerInfo -> switch (state) {
-					case HIDE_TO_NON_OPS -> playerInfo.getGameMode() != GameType.SPECTATOR || mc.player.hasPermissions(2);
-					case HIDE -> playerInfo.getGameMode() != GameType.SPECTATOR;
-					case SHOW -> true;
-				})
-				.sorted(PlayerTabOverlay.PLAYER_COMPARATOR)
-				.limit(80L)
-				.toList();
-			originalListedPlayers = new ArrayList<>(original);
-
-			return originalListedPlayers;
+		if (mc.player == null) {
+			return List.of();
 		}
 
-		var listedPlayers = new ArrayList<PlayerInfo>(originalListedPlayers.size());
+		var stream = mc.player.connection.getListedOnlinePlayers().stream();
 
-		for (var player : originalListedPlayers) {
-			var data = getClientSessionData(player.getProfile().getId());
-
-			if (!data.nameHidden) {
-				listedPlayers.add(player);
-			}
+		if (!ClientGameEngine.INSTANCE.canSeeAllPlayersInList(mc.player)) {
+			stream = stream.filter(info -> ClientGameEngine.INSTANCE.canSeePlayerInList(mc.player, info));
 		}
 
-		return listedPlayers;
+		return stream.sorted(PlayerTabOverlay.PLAYER_COMPARATOR).limit(80L).toList();
 	}
 
 	public void startNPCRecording(Minecraft mc, GameProfile profile) {

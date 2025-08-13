@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core;
 
-import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import net.minecraft.client.Minecraft;
@@ -33,11 +33,11 @@ public interface VLClientLevel extends VLLevel {
 	}
 
 	default void environmentEffects(Minecraft mc, BlockPos pos) {
-		var override = EntityOverride.ENVIRONMENT_EFFECTS.get(mc.player);
+		var effects = ClientGameEngine.INSTANCE.getEnvironmentEffects(mc, pos);
 		var level = this.vl$level();
 
-		if (override != null && !override.isEmpty()) {
-			for (var effect : override) {
+		if (!effects.isEmpty()) {
+			for (var effect : effects) {
 				var chance = effect.chance().getOr(level.getGlobalContext(), 0D);
 
 				if (level.random.roll((float) chance)) {
