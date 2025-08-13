@@ -146,7 +146,7 @@ dependencies {
 
 	compileOnly("dev.latvian.mods:imgui-resources:$imgui_resources_version")
 
-	compileOnly("maven.modrinth:simple-voice-chat:neoforge-1.21.5-2.5.36")
+	compileOnly("maven.modrinth:simple-voice-chat:V8UvxUr5")
 	compileOnly("software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}")
 }
 
