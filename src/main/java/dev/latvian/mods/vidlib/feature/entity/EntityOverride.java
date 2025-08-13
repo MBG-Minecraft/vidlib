@@ -132,6 +132,7 @@ public final class EntityOverride<T> {
 	public static final EntityOverride<Boolean> NAME_HIDDEN = createBooleanKey("name_hidden");
 	public static final EntityOverride<List<ChancedParticle>> ENVIRONMENT_EFFECTS = createKey("environment_effects", ChancedParticle.LIST_DATA_TYPE);
 	public static final EntityOverride<Boolean> SCALE_DAMAGE_WITH_DIFFICULTY = createBooleanKey("scale_damage_with_difficulty");
+	public static final EntityOverride<Boolean> SHOW_SPECTATORS_TABLIST = createBooleanKey("show_spectators_tablist");
 
 	public final String id;
 	private final DataType<T> type;

@@ -58,6 +58,7 @@ import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
@@ -382,7 +383,16 @@ public class LocalClientSessionData extends ClientSessionData {
 
 	public List<PlayerInfo> getListedPlayers() {
 		if (originalListedPlayers == null) {
-			var original = mc.player.connection.getListedOnlinePlayers().stream().sorted(PlayerTabOverlay.PLAYER_COMPARATOR).limit(80L).toList();
+			boolean showSpectatorsTablist = EntityOverride.SHOW_SPECTATORS_TABLIST.get(mc.player, false);
+			var original = mc.player.connection.getListedOnlinePlayers().stream()
+				.filter(playerInfo -> {
+					if (showSpectatorsTablist)
+						return true;
+					return playerInfo.getGameMode() != GameType.SPECTATOR;
+				})
+				.sorted(PlayerTabOverlay.PLAYER_COMPARATOR)
+				.limit(80L)
+				.toList();
 			originalListedPlayers = new ArrayList<>(original);
 
 			return originalListedPlayers;
