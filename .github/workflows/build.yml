@@ -31,11 +31,8 @@ jobs:
           distribution: 'microsoft'
           check-latest: true
           cache: gradle
-      - name: Grant execute permission for gradlew
-        if: ${{ runner.os == 'Linux' }}
-        run: chmod +x gradlew
       - name: build
-        run: gradlew build
+        run: gradle build
       - name: capture build artifacts
         if: ${{ runner.os == 'Linux' }}
         uses: actions/upload-artifact@v4
