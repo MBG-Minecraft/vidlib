@@ -24,6 +24,9 @@ import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.input.PlayerInputChanged;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToServer;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
+import dev.latvian.mods.vidlib.feature.net.Context;
+import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
+import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.npc.NPCParticleOptions;
 import dev.latvian.mods.vidlib.feature.npc.NPCRecording;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
@@ -94,6 +97,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	public ScreenFadeInstance screenFade;
 	public WorldMouse worldMouse;
 	public NPCRecording npcRecording;
+	public final List<PacketDebuggerPanel.LoggedPacket> debugPackets;
 
 	public LocalClientSessionData(Minecraft mc, UUID uuid, ClientPacketListener connection) {
 		super(uuid);
@@ -110,6 +114,8 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.skyboxes = new HashMap<>();
 		this.serverDataMap = new DataMap(uuid, DataKey.SERVER);
 		this.globalVariables = new KNumberVariables();
+		this.debugPackets = new ArrayList<>();
+
 		VidLib.LOGGER.info("Client Session Data Initialized");
 	}
 
@@ -427,5 +433,12 @@ public class LocalClientSessionData extends ClientSessionData {
 
 		var last = map.lastEntry();
 		mc.level.addParticle(new NPCParticleOptions(last.getKey(), false, 0, Optional.empty()), true, true, mc.player.getX(), mc.player.getY(), mc.player.getZ(), 0D, 0D, 0D);
+	}
+
+	@Override
+	public void debugPacket(Context ctx, SimplePacketPayload payload) {
+		if (PacketDebuggerPanel.INSTANCE.isOpen()) {
+			debugPackets.add(new PacketDebuggerPanel.LoggedPacket(ctx.uid(), ctx.remoteGameTime(), payload));
+		}
 	}
 }

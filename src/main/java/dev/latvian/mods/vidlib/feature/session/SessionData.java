@@ -10,7 +10,9 @@ import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToClient;
 import dev.latvian.mods.vidlib.feature.misc.SyncPlayerTagsPayload;
+import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.registry.SyncRegistryPayload;
@@ -181,5 +183,8 @@ public class SessionData {
 
 	public Set<String> getTags(long gameTime) {
 		return Set.of();
+	}
+
+	public void debugPacket(Context ctx, SimplePacketPayload payload) {
 	}
 }

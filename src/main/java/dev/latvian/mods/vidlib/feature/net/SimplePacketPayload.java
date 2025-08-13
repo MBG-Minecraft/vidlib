@@ -15,6 +15,10 @@ public interface SimplePacketPayload {
 	}
 
 	default void handleAsync(Context ctx) {
+		if (ctx.level().isClientSide()) {
+			ctx.player().vl$sessionData().debugPacket(ctx, this);
+		}
+
 		ctx.parent().enqueueWork(() -> {
 			try {
 				handle(ctx);
