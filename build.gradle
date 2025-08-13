@@ -12,7 +12,7 @@ var localBuildNumber = localBuildFile.getText("UTF-8").toInteger() + 1
 
 version = "${mod_version}-build.$localBuildNumber"
 group = project.maven_group
-base.archivesBaseName = project.archives_base_name
+base.archivesName = project.archives_base_name
 
 println("Building version: ${version}")
 
