@@ -15,6 +15,7 @@ import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
+import dev.latvian.mods.vidlib.feature.hud.SpectatorTablistOverride;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.skybox.FogOverride;
@@ -132,7 +133,8 @@ public final class EntityOverride<T> {
 	public static final EntityOverride<Boolean> NAME_HIDDEN = createBooleanKey("name_hidden");
 	public static final EntityOverride<List<ChancedParticle>> ENVIRONMENT_EFFECTS = createKey("environment_effects", ChancedParticle.LIST_DATA_TYPE);
 	public static final EntityOverride<Boolean> SCALE_DAMAGE_WITH_DIFFICULTY = createBooleanKey("scale_damage_with_difficulty");
-	public static final EntityOverride<Boolean> SHOW_SPECTATORS_TABLIST = createBooleanKey("show_spectators_tablist");
+	public static final EntityOverride<SpectatorTablistOverride.TablistOverrideType> SHOW_SPECTATORS_TABLIST =
+		createKey("show_spectators_tablist", SpectatorTablistOverride.DATA_TYPE);
 
 	public final String id;
 	private final DataType<T> type;

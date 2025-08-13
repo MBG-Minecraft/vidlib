@@ -23,6 +23,7 @@ import dev.latvian.mods.vidlib.feature.data.DataMapValue;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
+import dev.latvian.mods.vidlib.feature.hud.SpectatorTablistOverride;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.input.PlayerInputChanged;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToServer;
@@ -383,12 +384,12 @@ public class LocalClientSessionData extends ClientSessionData {
 
 	public List<PlayerInfo> getListedPlayers() {
 		if (originalListedPlayers == null) {
-			boolean showSpectatorsTablist = EntityOverride.SHOW_SPECTATORS_TABLIST.get(mc.player, false);
+			SpectatorTablistOverride.TablistOverrideType state = EntityOverride.SHOW_SPECTATORS_TABLIST.get(mc.player, SpectatorTablistOverride.TablistOverrideType.HIDE_TO_NON_OPS);
 			var original = mc.player.connection.getListedOnlinePlayers().stream()
-				.filter(playerInfo -> {
-					if (showSpectatorsTablist)
-						return true;
-					return playerInfo.getGameMode() != GameType.SPECTATOR;
+				.filter(playerInfo -> switch (state) {
+					case HIDE_TO_NON_OPS -> playerInfo.getGameMode() != GameType.SPECTATOR || mc.player.hasPermissions(2);
+					case HIDE -> playerInfo.getGameMode() != GameType.SPECTATOR;
+					case SHOW -> true;
 				})
 				.sorted(PlayerTabOverlay.PLAYER_COMPARATOR)
 				.limit(80L)
