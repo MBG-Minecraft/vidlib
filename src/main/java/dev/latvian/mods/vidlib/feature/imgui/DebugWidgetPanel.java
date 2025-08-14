@@ -9,6 +9,7 @@ import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.TransformationListImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ParticleOptionsImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.prop.builtin.highlight.TerrainHighlightProp;
@@ -23,6 +24,7 @@ import imgui.ImGuiViewport;
 import imgui.ImVec2;
 import imgui.ImVec4;
 import imgui.extension.imnodes.ImNodes;
+import imgui.extension.imnodes.flag.ImNodesMiniMapLocation;
 import imgui.extension.implot.ImPlot;
 import imgui.flag.ImGuiColorEditFlags;
 import imgui.flag.ImGuiDir;
@@ -69,6 +71,7 @@ public class DebugWidgetPanel extends AdminPanel {
 	public final PositionedSoundDataImBuilder soundBuilder = new PositionedSoundDataImBuilder();
 	public final ImBuilder<ParticleOptions> particleBuilder = ParticleOptionsImBuilder.create();
 	public final GameProfileImBuilder profileBuilder = new GameProfileImBuilder();
+	public final TransformationListImBuilder transformationListBuilder = new TransformationListImBuilder();
 
 	private DebugWidgetPanel() {
 		super("widget-debug", "Widget Debug");
@@ -152,13 +155,13 @@ public class DebugWidgetPanel extends AdminPanel {
 		ImGui.separator();
 
 		for (var variant : ImColorVariant.VALUES) {
-			graphics.pushStack();
-			graphics.setButton(variant);
-			ImGui.button(variant.displayName + " Button###button-variant-" + variant.id);
-			ImGui.sameLine();
-			ImGui.alignTextToFramePadding();
-			ImGui.smallButton("Small " + variant.displayName + " Button###small-button-variant-" + variant.id);
-			graphics.popStack();
+			graphics.button(variant.displayName + " Button###button-variant-" + variant.id, variant);
+		}
+
+		ImGui.separator();
+
+		for (var variant : ImColorVariant.VALUES) {
+			graphics.smallButton("Small " + variant.displayName + " Button###small-button-variant-" + variant.id, variant);
 		}
 
 		ImGui.separator();
@@ -198,7 +201,7 @@ public class DebugWidgetPanel extends AdminPanel {
 		ImGui.colorEdit3("Color 3###color-3", float3Data, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.PickerHueWheel);
 		ImGui.separator();
 
-		ImGui.colorEdit4("Color 4###color-4", float4Data, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.PickerHueWheel);
+		ImGui.colorEdit4("Color 4###color-4", float4Data, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.PickerHueWheel);
 		ImGui.separator();
 
 		ImGui.text("Int Slider 1");
@@ -358,6 +361,8 @@ public class DebugWidgetPanel extends AdminPanel {
 		ImGui.separator();
 		profileBuilder.imguiKey(graphics, "Profile", "profile");
 		ImGui.separator();
+		transformationListBuilder.imguiKey(graphics, "Transformation List", "transformation-list");
+		ImGui.separator();
 
 		ImGui.popItemWidth();
 	}
@@ -403,47 +408,68 @@ public class DebugWidgetPanel extends AdminPanel {
 
 			ImNodes.beginNodeEditor();
 
-			int uid = 0;
-
-			ImNodes.beginNode(++uid);
+			ImNodes.beginNode(1);
 			ImNodes.beginNodeTitleBar();
-			ImGui.text("Node A");
+			ImGui.text("Root Node");
 			ImNodes.endNodeTitleBar();
 
-			ImGui.setNextItemWidth(200F);
-			ImGui.inputText("###node-a-input", stringData);
-			ImNodes.beginInputAttribute(++uid);
-			ImGui.text("-> In");
+			ImNodes.beginInputAttribute(1);
+			ImGui.textUnformatted("Left Side");
 			ImNodes.endInputAttribute();
 
 			ImGui.sameLine();
 
-			ImNodes.beginOutputAttribute(++uid);
-			ImGui.text("Out ->");
+			graphics.pushStack();
+			graphics.setNodesPin(ImColorVariant.YELLOW);
+			ImNodes.beginOutputAttribute(2);
+
+			ImGui.indent(200F - ImGui.calcTextSize("Left Side").x - ImGui.calcTextSize("Right Side").x);
+
+			ImGui.textUnformatted("Right Side");
 			ImNodes.endInputAttribute();
+			graphics.popStack();
+
+			ImNodes.beginStaticAttribute(10);
+			ImGui.setNextItemWidth(120F);
+			ImGui.inputText("###node-a-input", stringData);
+			ImNodes.endStaticAttribute();
 
 			ImNodes.endNode();
 
-			ImNodes.beginNode(++uid);
+			ImNodes.beginNode(2);
 			ImNodes.beginNodeTitleBar();
 			ImGui.text("Node B");
 			ImNodes.endNodeTitleBar();
 
 			ImGui.setNextItemWidth(200F);
 			ImGui.inputDouble("###node-b-input", doubleData);
-			ImNodes.beginInputAttribute(++uid);
+			ImNodes.beginInputAttribute(3);
 			ImGui.text("-> In");
 			ImNodes.endInputAttribute();
 
 			ImGui.sameLine();
 
-			ImNodes.beginOutputAttribute(++uid);
+			ImNodes.beginOutputAttribute(4);
 			ImGui.text("Out ->");
 			ImNodes.endInputAttribute();
 
 			ImNodes.endNode();
 
+			ImNodes.link(1, 2, 3);
+
+			ImNodes.miniMap(0.1F, ImNodesMiniMapLocation.TopRight);
 			ImNodes.endNodeEditor();
+
+			var start = new ImInt();
+			var end = new ImInt();
+
+			if (ImNodes.isLinkCreated(start, end)) {
+				System.out.println("Hi " + start.get() + " " + end.get());
+			}
+
+			if (ImNodes.isLinkDestroyed(start)) {
+				System.out.println("Bye " + start.get());
+			}
 
 			ImGui.endPopup();
 		}

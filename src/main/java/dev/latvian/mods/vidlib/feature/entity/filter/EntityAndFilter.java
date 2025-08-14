@@ -61,7 +61,9 @@ public record EntityAndFilter(List<EntityFilter> filters) implements EntityFilte
 
 				graphics.popStack();
 
+				ImGui.indent();
 				update = update.or(filter.imgui(graphics));
+				ImGui.unindent();
 				ImGui.popID();
 
 				if (deleted) {

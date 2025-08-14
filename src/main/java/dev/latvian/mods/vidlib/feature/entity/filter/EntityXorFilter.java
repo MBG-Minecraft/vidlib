@@ -8,6 +8,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import imgui.ImGui;
 import net.minecraft.world.entity.Entity;
 
 public record EntityXorFilter(EntityFilter a, EntityFilter b) implements EntityFilter, ImBuilderWrapper.BuilderSupplier {
@@ -37,8 +38,10 @@ public record EntityXorFilter(EntityFilter a, EntityFilter b) implements EntityF
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
+			ImGui.indent();
 			update = update.or(a.imguiKey(graphics, "A", "a"));
 			update = update.or(b.imguiKey(graphics, "B", "b"));
+			ImGui.unindent();
 			return update;
 		}
 

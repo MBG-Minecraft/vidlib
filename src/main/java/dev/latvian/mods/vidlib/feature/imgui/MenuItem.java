@@ -164,9 +164,7 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 					ImGui.endMenu();
 				}
 
-				if (!tooltip.text().isEmpty() && ImGui.isItemHovered()) {
-					ImGui.setTooltip(tooltip.text());
-				}
+				ImGuiUtils.hoveredTooltip(tooltip.text());
 
 				if (remainOpen) {
 					graphics.popStack();
@@ -188,9 +186,7 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 				onClick.onClick(graphics);
 			}
 
-			if (!tooltip.text().isEmpty() && ImGui.isItemHovered()) {
-				ImGui.setTooltip(tooltip.text());
-			}
+			ImGuiUtils.hoveredTooltip(tooltip.text());
 
 			if (remainOpen) {
 				graphics.popStack();
@@ -200,9 +196,7 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 			ImGui.text(rIcon.formatLabel(graphics, label.text()));
 			label.pop(graphics);
 
-			if (!tooltip.text().isEmpty() && ImGui.isItemHovered()) {
-				ImGui.setTooltip(tooltip.text());
-			}
+			ImGuiUtils.hoveredTooltip(tooltip.text());
 		}
 	}
 

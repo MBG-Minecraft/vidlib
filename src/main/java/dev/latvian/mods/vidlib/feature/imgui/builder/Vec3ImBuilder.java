@@ -48,9 +48,7 @@ public class Vec3ImBuilder implements ImBuilder<Vec3>, SelectedPosition.Holder {
 			selectedPosition = SelectedPosition.CAMERA;
 		}
 
-		if (ImGui.isItemHovered()) {
-			ImGui.setTooltip("Use Camera Position");
-		}
+		ImGuiUtils.hoveredTooltip("Use Camera Position");
 
 		ImGui.sameLine();
 
@@ -73,9 +71,7 @@ public class Vec3ImBuilder implements ImBuilder<Vec3>, SelectedPosition.Holder {
 			}
 		}
 
-		if (ImGui.isItemHovered()) {
-			ImGui.setTooltip("Use Entity Position");
-		}
+		ImGuiUtils.hoveredTooltip("Use Entity Position");
 
 		ImGui.sameLine();
 
@@ -99,9 +95,7 @@ public class Vec3ImBuilder implements ImBuilder<Vec3>, SelectedPosition.Holder {
 			}
 		}
 
-		if (ImGui.isItemHovered()) {
-			ImGui.setTooltip("Use Cursor Position");
-		}
+		ImGuiUtils.hoveredTooltip("Use Cursor Position");
 
 		ImGui.sameLine();
 

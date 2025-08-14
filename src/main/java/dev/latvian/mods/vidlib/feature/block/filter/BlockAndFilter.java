@@ -64,7 +64,9 @@ public record BlockAndFilter(List<BlockFilter> filters) implements BlockFilter, 
 
 				graphics.popStack();
 
+				ImGui.indent();
 				update = update.or(filter.imgui(graphics));
+				ImGui.unindent();
 				ImGui.popID();
 
 				if (deleted) {

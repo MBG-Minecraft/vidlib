@@ -63,7 +63,7 @@ public class SoundEventImBuilder implements ImBuilder<Holder<SoundEvent>> {
 	public ImUpdate imgui(ImGraphics graphics) {
 		var update = ImUpdate.NONE;
 
-		if (ImGui.button((sound[0] == EMPTY_SOUND ? "Select Sound..." : sound[0].getKey().location().getPath()) + "###sound")) {
+		if (ImGui.button((sound[0] == EMPTY_SOUND ? "Select Sound..." : sound[0].getKey().location().getPath()) + "###sound", -1F, 0F)) {
 			ImGui.openPopup("###sound-modal");
 		}
 
@@ -89,27 +89,19 @@ public class SoundEventImBuilder implements ImBuilder<Holder<SoundEvent>> {
 				graphics.mc.getSoundManager().stop();
 			}
 
-			if (ImGui.isItemHovered()) {
-				ImGui.setTooltip("Stop All Sounds");
-			}
+			ImGuiUtils.hoveredTooltip("Stop All Sounds");
 
 			ImGui.sameLine();
 
 			ImGui.setNextItemWidth(-1F);
 			ImGui.sliderFloat("###volume", PREVIEW_VOLUME.getData(), 0F, 1F);
-
-			if (ImGui.isItemHovered()) {
-				ImGui.setTooltip("Volume");
-			}
+			ImGuiUtils.hoveredTooltip("Volume");
 
 			ImGui.nextColumn();
 
 			ImGui.setNextItemWidth(-1F);
 			ImGui.sliderFloat("###pitch", PREVIEW_PITCH.getData(), 0.5F, 2F);
-
-			if (ImGui.isItemHovered()) {
-				ImGui.setTooltip("Pitch");
-			}
+			ImGuiUtils.hoveredTooltip("Pitch");
 
 			ImGui.columns();
 

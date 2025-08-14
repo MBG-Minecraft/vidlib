@@ -4,10 +4,14 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.CompoundGradient;
 import dev.latvian.mods.klib.color.Gradient;
 import dev.latvian.mods.klib.color.PositionedColor;
+import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
+import imgui.flag.ImGuiColorEditFlags;
+import imgui.flag.ImGuiStyleVar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +54,10 @@ public class GradientImBuilder implements ImBuilder<Gradient> {
 	public ImUpdate imgui(ImGraphics graphics) {
 		var update = ImUpdate.NONE;
 
+		graphics.pushStack();
+		graphics.setStyleVar(ImGuiStyleVar.ItemSpacing, 6F, 8F);
+		float[] rgba = new float[4];
+
 		for (int i = 0; i < colors.size(); i++) {
 			if (i > 0) {
 				ImGui.sameLine();
@@ -61,7 +69,13 @@ public class GradientImBuilder implements ImBuilder<Gradient> {
 			graphics.pushStack();
 			graphics.setButtonColor(c.color.build());
 
-			if (ImGui.button("###open-popup", 30F, 30F)) {
+			rgba[0] = c.color.build().redf();
+			rgba[1] = c.color.build().greenf();
+			rgba[2] = c.color.build().bluef();
+			rgba[3] = c.color.build().alphaf();
+			ImGui.colorEdit4("###open-popup", rgba, ImGuiColorEditFlags.NoLabel | ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.NoPicker | ImGuiColorEditFlags.NoInputs);
+
+			if (ImGui.isItemClicked()) {
 				ImGui.openPopup("###popup");
 			}
 
@@ -87,7 +101,7 @@ public class GradientImBuilder implements ImBuilder<Gradient> {
 			ImGui.sameLine();
 		}
 
-		if (ImGui.button(ImIcons.ADD + "###add", 30F, 30F)) {
+		if (graphics.button(ImIcons.ADD + "###add", ImColorVariant.GREEN)) {
 			if (colors.size() == 1) {
 				colors.getFirst().position.set(0F);
 			} else {
@@ -103,6 +117,10 @@ public class GradientImBuilder implements ImBuilder<Gradient> {
 			colors.add(builder);
 			update = ImUpdate.FULL;
 		}
+
+		ImGuiUtils.hoveredTooltip("Add");
+
+		graphics.popStack();
 
 		return update;
 	}

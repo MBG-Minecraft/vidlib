@@ -33,7 +33,9 @@ public record BlockNotFilter(BlockFilter filter) implements BlockFilter, ImBuild
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			ImGui.pushID("###not");
+			ImGui.indent();
 			var update = filter.imgui(graphics);
+			ImGui.unindent();
 			ImGui.popID();
 			return update;
 		}

@@ -14,6 +14,7 @@ import dev.latvian.mods.klib.shape.CuboidShape;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.canvas.dof.DepthOfField;
 import dev.latvian.mods.vidlib.feature.canvas.dof.DepthOfFieldPanel;
+import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
@@ -536,12 +537,7 @@ public class Prop {
 
 		boolean isHidden = ClientProps.HIDDEN_PROPS.contains(id);
 
-		if (isHidden) {
-			graphics.pushStack();
-			graphics.setGreenButton();
-		}
-
-		if (ImGui.smallButton(isHidden ? "Show" : "Hide")) {
+		if (graphics.smallButton(isHidden ? "Show" : "Hide", isHidden ? ImColorVariant.GREEN : null)) {
 			if (isHidden) {
 				ClientProps.HIDDEN_PROPS.remove(id);
 			} else {
@@ -549,29 +545,16 @@ public class Prop {
 			}
 		}
 
-		if (isHidden) {
-			graphics.popStack();
-		}
-
 		ImGui.sameLine();
 
 		boolean isTypeHidden = ClientProps.HIDDEN_PROP_TYPES.contains(type);
 
-		if (isTypeHidden) {
-			graphics.pushStack();
-			graphics.setGreenButton();
-		}
-
-		if (ImGui.smallButton(isTypeHidden ? "Show All of Type" : "Hide All of Type")) {
+		if (graphics.smallButton(isTypeHidden ? "Show All of Type" : "Hide All of Type", isTypeHidden ? ImColorVariant.GREEN : null)) {
 			if (isTypeHidden) {
 				ClientProps.HIDDEN_PROP_TYPES.remove(type);
 			} else {
 				ClientProps.HIDDEN_PROP_TYPES.add(type);
 			}
-		}
-
-		if (isTypeHidden) {
-			graphics.popStack();
 		}
 
 		ImGui.sameLine();

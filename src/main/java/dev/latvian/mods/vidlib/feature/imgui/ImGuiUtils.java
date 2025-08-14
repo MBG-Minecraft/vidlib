@@ -81,4 +81,10 @@ public interface ImGuiUtils {
 		ImGui.setCursorScreenPos(textStartX, cursorY);
 		ImGui.textColored(ImGui.getColorU32(ImGuiCol.TextDisabled), text);
 	}
+
+	static void hoveredTooltip(String tooltip) {
+		if (!tooltip.isEmpty() && ImGui.isItemHovered()) {
+			ImGui.setTooltip(tooltip);
+		}
+	}
 }

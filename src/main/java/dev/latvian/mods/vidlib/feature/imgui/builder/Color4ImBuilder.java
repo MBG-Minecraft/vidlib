@@ -21,7 +21,7 @@ public class Color4ImBuilder implements ImBuilder<Color> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		ImGui.colorEdit4("###color", rgba, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel | ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.PickerHueWheel);
+		ImGui.colorEdit4("###color", rgba, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel | ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.PickerHueWheel);
 		return ImUpdate.itemEdit();
 	}
 

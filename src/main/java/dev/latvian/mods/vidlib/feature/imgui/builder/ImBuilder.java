@@ -30,7 +30,10 @@ public interface ImBuilder<T> {
 		if (!label.isEmpty()) {
 			ImGui.alignTextToFramePadding();
 			graphics.redTextIf(label, !isValid());
-			ImGui.sameLine();
+
+			if (!(this instanceof CompoundImBuilder)) {
+				ImGui.sameLine();
+			}
 		}
 
 		if (!id.isEmpty()) {

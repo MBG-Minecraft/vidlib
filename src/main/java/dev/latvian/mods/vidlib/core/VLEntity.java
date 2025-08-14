@@ -289,10 +289,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		}
 
 		if (!graphics.isReplay) {
-			graphics.pushStack();
-			graphics.setRedButton();
-
-			if (ImGui.smallButton("Kill")) {
+			if (graphics.smallButton("Kill", ImColorVariant.RED)) {
 				graphics.mc.runClientCommand("kill " + entity.getUUID());
 			}
 
@@ -302,7 +299,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 
 			ImGui.sameLine();
 
-			if (ImGui.smallButton("Discard")) {
+			if (graphics.smallButton("Discard", ImColorVariant.RED)) {
 				graphics.mc.runClientCommand("discard " + entity.getUUID());
 			}
 
@@ -310,7 +307,6 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 				ImGui.endDisabled();
 			}
 
-			graphics.popStack();
 			ImGui.sameLine();
 		}
 
@@ -318,20 +314,15 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 			ImGui.beginDisabled();
 		}
 
-		graphics.pushStack();
-		graphics.setButton(ImColorVariant.DARK_PURPLE);
-
-		if (ImGui.smallButton("TP To")) {
+		if (graphics.smallButton("TP To", ImColorVariant.DARK_PURPLE)) {
 			graphics.mc.runClientCommand("tp " + entity.getUUID());
 		}
 
 		ImGui.sameLine();
 
-		if (ImGui.smallButton("TP Here")) {
+		if (graphics.smallButton("TP Here", ImColorVariant.DARK_PURPLE)) {
 			graphics.mc.runClientCommand("tp " + entity.getUUID() + " @s");
 		}
-
-		graphics.popStack();
 
 		if (entity == graphics.mc.player) {
 			ImGui.endDisabled();

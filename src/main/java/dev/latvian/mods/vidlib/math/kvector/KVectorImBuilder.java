@@ -11,4 +11,10 @@ public interface KVectorImBuilder extends ImBuilder<KVector> {
 	static ImBuilderWrapper<KVector> create() {
 		return new ImBuilderWrapper<>(IMGUI_BUILDER_FACTORY);
 	}
+
+	static ImBuilderWrapper<KVector> create(KVector defaultValue) {
+		var builder = create();
+		builder.set(defaultValue);
+		return builder;
+	}
 }

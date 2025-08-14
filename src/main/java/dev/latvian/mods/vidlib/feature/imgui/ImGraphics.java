@@ -7,6 +7,8 @@ import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import imgui.ImGui;
+import imgui.extension.imnodes.ImNodes;
+import imgui.extension.imnodes.flag.ImNodesColorStyle;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiComboFlags;
 import imgui.flag.ImGuiStyleVar;
@@ -27,6 +29,8 @@ public class ImGraphics {
 		private int pushedStyle = 0;
 		private int pushedColors = 0;
 		private int pushedItemFlags = 0;
+		private int pushedNodesStyle = 0;
+		private int pushedNodesColors = 0;
 		private float currentFontScale = 1F;
 		private FloatList pushedFontScales = null;
 		private ImNumberType numberType = null;
@@ -84,6 +88,14 @@ public class ImGraphics {
 			ImGui.popStyleColor(stack.pushedColors);
 		}
 
+		for (int i = 0; i < stack.pushedNodesStyle; i++) {
+			ImNodes.popStyleVar();
+		}
+
+		for (int i = 0; i < stack.pushedNodesColors; i++) {
+			ImNodes.popColorStyle();
+		}
+
 		for (int i = 0; i < stack.pushedItemFlags; i++) {
 			imgui.internal.ImGui.popItemFlag();
 		}
@@ -110,10 +122,6 @@ public class ImGraphics {
 		stack.pushedStyle++;
 	}
 
-	public void setStyleCol(int key, int argb) {
-		setStyleCol(key, (argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF, (argb >> 24) & 0xFF);
-	}
-
 	public void setStyleCol(int key, float r, float g, float b, float a) {
 		ImGui.pushStyleColor(key, r, g, b, a);
 		stack.pushedColors++;
@@ -124,8 +132,39 @@ public class ImGraphics {
 		stack.pushedColors++;
 	}
 
+	public void setStyleCol(int key, int argb) {
+		setStyleCol(key, (argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF, (argb >> 24) & 0xFF);
+	}
+
 	public void setStyleCol(int key, Color value) {
 		setStyleCol(key, value.red(), value.green(), value.blue(), value.alpha());
+	}
+
+	public void setNodesStyleVar(int key, float value) {
+		ImNodes.pushStyleVar(key, value);
+		stack.pushedNodesStyle++;
+	}
+
+	public void setNodesStyleVar(int key, float x, float y) {
+		ImNodes.pushStyleVar(key, x, y);
+		stack.pushedNodesStyle++;
+	}
+
+	public void setNodesStyleCol(int key, int r, int g, int b, int a) {
+		ImNodes.pushColorStyle(key, a << 24 | b << 16 | g << 8 | r);
+		stack.pushedNodesColors++;
+	}
+
+	public void setNodesStyleCol(int key, float r, float g, float b, float a) {
+		setNodesStyleCol(key, (int) (r * 255F), (int) (g * 255F), (int) (b * 255F), (int) (a * 255F));
+	}
+
+	public void setNodesStyleCol(int key, int argb) {
+		setNodesStyleCol(key, (argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF, (argb >> 24) & 0xFF);
+	}
+
+	public void setNodesStyleCol(int key, Color value) {
+		setNodesStyleCol(key, value.red(), value.green(), value.blue(), value.alpha());
 	}
 
 	public void setItemFlag(int key, boolean flag) {
@@ -188,6 +227,10 @@ public class ImGraphics {
 		setStyleCol(ImGuiCol.TitleBgActive, 0xEF70517F);
 		setStyleCol(ImGuiCol.MenuBarBg, 0xFF17171C);
 		setStyleCol(ImGuiCol.TitleBgCollapsed, 0xEF517F70);
+
+		setButton(ImColorVariant.DEFAULT);
+		setNodesPin(ImColorVariant.DEFAULT);
+		setNodesPin(ImColorVariant.DEFAULT);
 	}
 
 	public void setText(ImColorVariant variant) {
@@ -216,18 +259,21 @@ public class ImGraphics {
 		setStyleCol(ImGuiCol.ButtonActive, variant.activeColor);
 	}
 
-	public void setRedButton() {
-		setButton(ImColorVariant.RED);
-	}
-
-	public void setGreenButton() {
-		setButton(ImColorVariant.GREEN);
-	}
-
 	public void setButtonColor(Color col) {
 		setStyleCol(ImGuiCol.Button, col);
 		setStyleCol(ImGuiCol.ButtonHovered, col.lerp(0.3F, Color.WHITE));
 		setStyleCol(ImGuiCol.ButtonActive, col.lerp(0.1F, Color.WHITE));
+	}
+
+	public void setNodesPin(ImColorVariant variant) {
+		setNodesStyleCol(ImNodesColorStyle.Pin, variant.color);
+		setNodesStyleCol(ImNodesColorStyle.PinHovered, variant.hoverColor);
+	}
+
+	public void setNodesLink(ImColorVariant variant) {
+		setNodesStyleCol(ImNodesColorStyle.Link, variant.color);
+		setNodesStyleCol(ImNodesColorStyle.LinkHovered, variant.hoverColor);
+		setNodesStyleCol(ImNodesColorStyle.LinkSelected, variant.activeColor);
 	}
 
 	public void stackTrace(Throwable throwable) {
@@ -413,5 +459,47 @@ public class ImGraphics {
 		boolean open = ImGui.collapsingHeader(label, visible, imGuiTreeNodeFlags);
 		popStack();
 		return open;
+	}
+
+	public boolean button(String label, @Nullable ImColorVariant variant, float width) {
+		if (variant != null) {
+			pushStack();
+			setButton(variant);
+		}
+
+		boolean clicked = ImGui.button(label, width, 0F);
+
+		if (variant != null) {
+			popStack();
+		}
+
+		return clicked;
+	}
+
+	public boolean button(String label, @Nullable ImColorVariant variant) {
+		return button(label, variant, 0F);
+	}
+
+	public boolean smallButton(String label, @Nullable ImColorVariant variant) {
+		if (variant != null) {
+			pushStack();
+			setButton(variant);
+		}
+
+		boolean clicked = ImGui.smallButton(label);
+
+		if (variant != null) {
+			popStack();
+		}
+
+		return clicked;
+	}
+
+	public void setRedButton() {
+		setButton(ImColorVariant.RED);
+	}
+
+	public void setGreenButton() {
+		setButton(ImColorVariant.GREEN);
 	}
 }

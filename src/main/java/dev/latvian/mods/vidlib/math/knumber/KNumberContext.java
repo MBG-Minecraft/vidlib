@@ -19,11 +19,11 @@ public class KNumberContext {
 	public Vec3 targetPos;
 
 	@ApiStatus.Internal
-	public KNumberContext(Level level) {
+	public KNumberContext(@Nullable Level level) {
 		this.parent = null;
 		this.level = level;
 		this.progress = 1F;
-		this.variables = level.getEnvironment().globalVariables();
+		this.variables = level == null ? KNumberVariables.EMPTY : level.getEnvironment().globalVariables();
 		this.serverDataMap = null;
 		this.originPos = null;
 		this.sourcePos = null;
@@ -75,7 +75,9 @@ public class KNumberContext {
 
 	@Nullable
 	public Object getServerData(DataKey<?> key) {
-		if (serverDataMap == null) {
+		if (level == null) {
+			return null;
+		} else if (serverDataMap == null) {
 			serverDataMap = level.getServerData();
 		}
 

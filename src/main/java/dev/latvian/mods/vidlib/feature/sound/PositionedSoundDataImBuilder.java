@@ -3,25 +3,40 @@ package dev.latvian.mods.vidlib.feature.sound;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.BooleanImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.CompoundImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
+import imgui.type.ImBoolean;
 
 import java.util.Optional;
 
-public class PositionedSoundDataImBuilder implements ImBuilder<PositionedSoundData> {
+public class PositionedSoundDataImBuilder extends CompoundImBuilder<PositionedSoundData> {
 	public final SoundDataImBuilder soundData = new SoundDataImBuilder();
-	public final BooleanImBuilder hasPosition = new BooleanImBuilder();
+	public final ImBoolean hasPosition = new ImBoolean();
 	public final ImBuilder<KVector> position = KVectorImBuilder.create();
 	public final BooleanImBuilder looping = new BooleanImBuilder();
 	public final BooleanImBuilder stopImmediately = new BooleanImBuilder();
 	public boolean delete = false;
 
+	public PositionedSoundDataImBuilder() {
+		add("Sound Data", soundData);
+		add("Position", position, hasPosition);
+		add("Looping", looping);
+		add("Stop Immediately", stopImmediately);
+	}
+
 	@Override
 	public void set(PositionedSoundData value) {
 		soundData.set(value.data());
-		hasPosition.set(value.position().isPresent());
-		position.set(value.position().orElse(KVector.ZERO));
+
+		if (value.position().isPresent()) {
+			hasPosition.set(true);
+			position.set(value.position().get());
+		} else {
+			hasPosition.set(false);
+		}
+
 		looping.set(value.looping());
 		stopImmediately.set(value.stopImmediately());
 		delete = false;
@@ -30,28 +45,14 @@ public class PositionedSoundDataImBuilder implements ImBuilder<PositionedSoundDa
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
 		delete = false;
-		var update = soundData.imgui(graphics);
-		update = update.or(hasPosition.imguiKey(graphics, "Has Position", "has-position"));
-
-		if (hasPosition.build()) {
-			update = update.or(position.imguiKey(graphics, "", "position"));
-		}
-
-		update = update.or(looping.imguiKey(graphics, "Looping", "looping"));
-		update = update.or(stopImmediately.imguiKey(graphics, "Stop Immediately", "stop-immediately"));
-		return update;
-	}
-
-	@Override
-	public boolean isValid() {
-		return soundData.isValid() && hasPosition.isValid() && (!hasPosition.build() || position.isValid()) && looping.isValid() && stopImmediately.isValid();
+		return super.imgui(graphics);
 	}
 
 	@Override
 	public PositionedSoundData build() {
 		return new PositionedSoundData(
 			soundData.build(),
-			hasPosition.build() ? Optional.of(position.build()) : Optional.empty(),
+			hasPosition.get() ? Optional.of(position.build()) : Optional.empty(),
 			looping.build(),
 			stopImmediately.build()
 		);

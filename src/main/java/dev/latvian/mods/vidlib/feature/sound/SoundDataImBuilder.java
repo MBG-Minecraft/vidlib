@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.sound;
 
-import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.builder.CompoundImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.FloatImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
@@ -10,7 +9,7 @@ import net.minecraft.sounds.SoundSource;
 
 import java.util.List;
 
-public class SoundDataImBuilder implements ImBuilder<SoundData> {
+public class SoundDataImBuilder extends CompoundImBuilder<SoundData> {
 	private static final List<SoundSource> ALL_SOURCES = List.of(SoundSource.values());
 
 	public static final ImBuilderType<SoundData> TYPE = SoundDataImBuilder::new;
@@ -20,11 +19,14 @@ public class SoundDataImBuilder implements ImBuilder<SoundData> {
 	public final ImBuilder<SoundSource> source = SOURCE_TYPE.get();
 	public final FloatImBuilder volume = new FloatImBuilder(0F, 1F);
 	public final FloatImBuilder pitch = new FloatImBuilder(0.5F, 2F, true);
-	public boolean delete = false;
 
 	public SoundDataImBuilder() {
 		this.volume.set(1F);
 		this.pitch.set(1F);
+		add("Sound", sound);
+		add("Source", source);
+		add("Volume", volume);
+		add("Pitch", pitch);
 	}
 
 	@Override
@@ -33,22 +35,6 @@ public class SoundDataImBuilder implements ImBuilder<SoundData> {
 		source.set(value.source());
 		volume.set(value.volume());
 		pitch.set(value.pitch());
-	}
-
-	@Override
-	public ImUpdate imgui(ImGraphics graphics) {
-		delete = false;
-		var update = ImUpdate.NONE;
-		update = update.or(sound.imguiKey(graphics, "Sound", "sound"));
-		update = update.or(source.imguiKey(graphics, "Source", "source"));
-		update = update.or(volume.imguiKey(graphics, "Volume", "volume"));
-		update = update.or(pitch.imguiKey(graphics, "Pitch", "pitch"));
-		return update;
-	}
-
-	@Override
-	public boolean isValid() {
-		return sound.isValid() && source.isValid() && volume.isValid() && pitch.isValid();
 	}
 
 	@Override

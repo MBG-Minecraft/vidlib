@@ -49,7 +49,7 @@ public record FixedKNumber(Double number) implements KNumber, ImBuilderWrapper.B
 				if (range != null) {
 					ImGui.sliderInt("###value", ImGuiUtils.INT.getData(), Mth.floor(range.min()), Mth.ceil(range.max()));
 				} else {
-					ImGui.inputInt("###value", ImGuiUtils.INT);
+					ImGui.dragInt("###value", ImGuiUtils.INT.getData(), 0.05F);
 				}
 
 				number.set(ImGuiUtils.INT.get());
@@ -58,7 +58,9 @@ public record FixedKNumber(Double number) implements KNumber, ImBuilderWrapper.B
 				ImGui.sliderFloat("###value", ImGuiUtils.FLOAT.getData(), range.min(), range.max());
 				number.set(ImGuiUtils.FLOAT.get());
 			} else {
-				ImGui.inputDouble("###value", number);
+				ImGuiUtils.FLOAT.set((float) number.get());
+				ImGui.dragFloat("###value", ImGuiUtils.FLOAT.getData(), 0.05F);
+				number.set(ImGuiUtils.FLOAT.get());
 			}
 
 			return ImUpdate.itemEdit();
