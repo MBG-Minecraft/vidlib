@@ -4,6 +4,7 @@ import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.klib.util.SimilarityCheck;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -73,8 +74,8 @@ public record NPCDataType<T>(String name, StreamCodec<?, T> streamCodec, T defau
 	public static final NPCDataType<Integer> DEATH_TIME = addInt("death_time", 0, p -> p.deathTime);
 	public static final NPCDataType<Float> WALK_ANIMATION_POS = addFloat("walk_animation_pos", 0F, (p, d) -> p.walkAnimation.position(d));
 	public static final NPCDataType<Float> WALK_ANIMATION_SPEED = addFloat("walk_animation_speed", 0F, (p, d) -> p.walkAnimation.speed(d));
-	public static final NPCDataType<Clothing> CLOTHING = add("clothing", Clothing.STREAM_CODEC, Clothing.NONE, SimilarityCheck.getDefault(), (p, d) -> p.getClothing());
-	public static final NPCDataType<IconHolder> PLUMBOB = add("plumbob", IconHolder.STREAM_CODEC, IconHolder.EMPTY, SimilarityCheck.getDefault(), (p, d) -> p.getPlumbobHolder());
+	public static final NPCDataType<Clothing> CLOTHING = add("clothing", Clothing.STREAM_CODEC, Clothing.NONE, SimilarityCheck.getDefault(), (p, d) -> ClientGameEngine.INSTANCE.getClothing(p));
+	public static final NPCDataType<IconHolder> PLUMBOB = add("plumbob", IconHolder.STREAM_CODEC, IconHolder.EMPTY, SimilarityCheck.getDefault(), (p, d) -> ClientGameEngine.INSTANCE.getPlumbob(p));
 
 	@Override
 	public String getSerializedName() {

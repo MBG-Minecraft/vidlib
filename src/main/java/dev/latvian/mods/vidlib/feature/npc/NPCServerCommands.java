@@ -5,7 +5,6 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -21,7 +20,7 @@ public interface NPCServerCommands {
 	SuggestionProvider<CommandSourceStack> SUGGESTION_PROVIDER = (ctx, builder) -> {
 		var input = builder.getRemaining().toLowerCase(Locale.ROOT);
 
-		for (var id : NPCRecording.getReplay(Minecraft.getInstance().level.registryAccess()).keySet()) {
+		for (var id : NPCRecording.getReplay(ctx.getSource().registryAccess()).keySet()) {
 			if (SharedSuggestionProvider.matchesSubStr(input, id)) {
 				builder.suggest(id);
 			}
