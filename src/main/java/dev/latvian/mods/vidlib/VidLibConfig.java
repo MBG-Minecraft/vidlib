@@ -25,4 +25,5 @@ public class VidLibConfig {
 	public static boolean strongEntityOutline = false;
 	public static boolean endBatchesBeforeOutline = false;
 	public static boolean legacyDataKeyStream = false;
+	public static boolean logClientModList = false;
 }

@@ -57,6 +57,8 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.particle.DustParticleOption
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ParticleOptionsImBuilderRegistryEvent;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
+import dev.latvian.mods.vidlib.feature.misc.ClientModInfo;
+import dev.latvian.mods.vidlib.feature.misc.ClientModListPayload;
 import dev.latvian.mods.vidlib.feature.misc.DebugTextEvent;
 import dev.latvian.mods.vidlib.feature.misc.FlashbackIntegration;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
@@ -133,6 +135,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
@@ -162,6 +165,7 @@ import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.common.NeoForge;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
@@ -822,5 +826,16 @@ public class VidLibClientEventHandler {
 				}
 			}
 		}
+	}
+
+	@SubscribeEvent
+	public static void loggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
+		var list = new ArrayList<ClientModInfo>();
+
+		for (var mod : ModList.get().getMods()) {
+			list.add(new ClientModInfo(mod.getModId(), mod.getDisplayName(), mod.getVersion().toString(), mod.getOwningFile().getFile().getFileName()));
+		}
+
+		event.getPlayer().c2s(new ClientModListPayload(list));
 	}
 }
