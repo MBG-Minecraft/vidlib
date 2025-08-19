@@ -23,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -39,12 +40,17 @@ public abstract class DebugScreenOverlayMixin {
 	private Minecraft minecraft;
 
 	@Shadow
+	@Nullable
 	private LevelChunk clientChunk;
 
 	@Shadow
-	private static String printBiome(Holder<Biome> biomeHolder) {
-		return null;
-	}
+	public void clearChunkCache() {}
+
+	@Shadow
+	private LevelChunk getClientChunk() { return null; }
+
+	@Shadow
+	private static String printBiome(Holder<Biome> biomeHolder) { return null; }
 
 	@Inject(method = "getSystemInformation", at = @At("RETURN"), cancellable = true)
 	private void getSystemInformation(CallbackInfoReturnable<List<String>> cir) {
@@ -62,7 +68,7 @@ public abstract class DebugScreenOverlayMixin {
 
 	@Inject(method = "collectGameInformationText", at = @At("RETURN"), cancellable = true)
 	private void collectGameInformationText(CallbackInfoReturnable<List<String>> cir) {
-		if (Minecraft.getInstance().showOnlyReducedInfo()) {
+		if (minecraft.showOnlyReducedInfo()) {
 			List<String> list = new ArrayList<>();
 			list.add("Minecraft " + SharedConstants.getCurrentVersion().getName() + " (" + minecraft.getLaunchedVersion() + "/" + ClientBrandRetriever.getClientModName() + ")");
 			list.add(minecraft.fpsString);
@@ -73,6 +79,7 @@ public abstract class DebugScreenOverlayMixin {
 			ChunkPos chunkpos = new ChunkPos(blockpos);
 			if (!Objects.equals(this.lastPos, chunkpos)) {
 				this.lastPos = chunkpos;
+				this.clearChunkCache();
 			}
 
 			String s;
@@ -89,8 +96,8 @@ public abstract class DebugScreenOverlayMixin {
 			list.add(String.format(Locale.ROOT, "Chunk: %d %d %d [%d %d in r.%d.%d.mca]", chunkpos.x, SectionPos.blockToSectionCoord(blockpos.getY()), chunkpos.z, chunkpos.getRegionLocalX(), chunkpos.getRegionLocalZ(), chunkpos.getRegionX(), chunkpos.getRegionZ()));
 			list.add(String.format(Locale.ROOT, "Block: %d %d %d [%d %d %d]", blockpos.getX(), blockpos.getY(), blockpos.getZ(), blockpos.getX() & 15, blockpos.getY() & 15, blockpos.getZ() & 15));
 
-			LevelChunk levelchunk = vidlib$getClientChunk();
-			if (levelchunk.isEmpty()) {
+			LevelChunk levelchunk = getClientChunk();
+			if (levelchunk == null || levelchunk.isEmpty()) {
 				list.add("Waiting for chunk...");
 			} else {
 				int i = minecraft.level.getChunkSource().getLightEngine().getRawBrightness(blockpos, 0);
@@ -106,15 +113,6 @@ public abstract class DebugScreenOverlayMixin {
 			list.add(minecraft.levelRenderer.getEntityStatistics().replace("E:", "Entities:"));
 			cir.setReturnValue(list);
 		}
-	}
-
-	@Unique
-	private LevelChunk vidlib$getClientChunk() {
-		if (this.clientChunk == null) {
-			this.clientChunk = minecraft.level.getChunk(this.lastPos.x, this.lastPos.z);
-		}
-
-		return this.clientChunk;
 	}
 
 	@Inject(method = "showNetworkCharts", at = @At("RETURN"), cancellable = true)
