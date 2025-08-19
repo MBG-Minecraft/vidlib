@@ -9,6 +9,7 @@ import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import imgui.type.ImBoolean;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -45,6 +46,10 @@ public class PhysicsParticleManager {
 	public static final ImBoolean VISIBLE = new ImBoolean(true);
 
 	public static void debugInfo(Consumer<String> left, Consumer<String> right) {
+		if (Minecraft.getInstance().showOnlyReducedInfo()) {
+			return;
+		}
+
 		int total = 0;
 		int totalRendered = 0;
 		int totalBuffersSwitched = 0;
