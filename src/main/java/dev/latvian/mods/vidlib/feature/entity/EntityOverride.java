@@ -117,6 +117,7 @@ public final class EntityOverride<T> {
 	public static final EntityOverride<Float> ATTACK_DAMAGE = createFloatKey("attack_damage");
 	public static final EntityOverride<Boolean> UNPUSHABLE = createBooleanKey("unpushable");
 	public static final EntityOverride<Boolean> SCALE_DAMAGE_WITH_DIFFICULTY = createBooleanKey("scale_damage_with_difficulty");
+	public static final EntityOverride<Boolean> DISABLE_DEBUG = createBooleanKey("disable_debug");
 
 	@AutoInit
 	public static void legacy() {

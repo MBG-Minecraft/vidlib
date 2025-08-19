@@ -19,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.UUID;
 
@@ -66,4 +67,12 @@ public abstract class ClientLevelMixin implements VLClientLevel {
 	public boolean vl$getTickDayTime() {
 		return tickDayTime;
 	}
+
+	@Inject(method = "gatherChunkSourceStats", at = @At("RETURN"), cancellable = true)
+	private void gatherChunkSourceStats(CallbackInfoReturnable<String> cir) {
+		if (Minecraft.getInstance().showOnlyReducedInfo()) {
+			cir.setReturnValue("");
+		}
+	}
+
 }
