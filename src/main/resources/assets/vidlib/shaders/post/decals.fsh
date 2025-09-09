@@ -97,16 +97,31 @@ void main() {
 		float inside = getInside(type, diff, start, end, rotation);
 
 		if (inside >= 0.0 && inside <= 1.0) {
-			float thickness = decodeFloat(7, y);
 			vec4 startColor = decodeColor(8, y);
 			vec4 endColor = decodeColor(9, y);
 			vec4 decalColor = mix(startColor, endColor, inside);
-			color = blend(color, decalColor);
+
+			if (decalColor.a > 0.0) {
+				float grid = decodeFloat(7, y);
+
+				if (grid > 0.0) {
+					float thickness = decodeFloat(10, y);
+					vec3 g = abs(diff) + thickness * 0.5;
+
+					if (mod(g.x, grid) < thickness || mod(g.y, grid) < thickness || mod(g.z, grid) < thickness) {
+						color = blend(color, decalColor);
+					}
+
+					continue;
+				}
+
+				color = blend(color, decalColor);
+			}
 		}
 	}
 
 	if (color.a > 0.0) {
-		fragColor = clamp(color, 0.0, 1.0);
+		fragColor = color;
 	} else {
 		discard;
 	}

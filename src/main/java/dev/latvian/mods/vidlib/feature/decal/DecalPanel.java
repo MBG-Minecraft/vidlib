@@ -63,6 +63,10 @@ public class DecalPanel extends AdminPanel {
 				graphics.combo("###type", "", DecalType.UNIT, DecalType.VALUES);
 				decal.type = DecalType.UNIT[0];
 
+				Vector3dImBuilder.imgui(graphics, decal.position, SelectedPosition.UNIT);
+
+				ImGui.text("Size");
+
 				float[] start = {decal.start};
 				float[] end = {decal.end};
 				ImGuiUtils.FLOAT.set(decal.start);
@@ -83,7 +87,17 @@ public class DecalPanel extends AdminPanel {
 				Color4ImBuilder.UNIT.imguiKey(graphics, "End Color", "end-color");
 				decal.endColor = Color4ImBuilder.UNIT.build();
 
-				Vector3dImBuilder.imgui(graphics, decal.position, SelectedPosition.UNIT);
+				ImGui.text("Grid");
+
+				ImGuiUtils.FLOAT.set(decal.grid);
+				ImGui.sliderFloat("###grid", ImGuiUtils.FLOAT.getData(), 0F, 4F, "%f");
+				decal.grid = ImGuiUtils.FLOAT.get();
+
+				if (decal.grid > 0F) {
+					ImGuiUtils.FLOAT.set(decal.thickness);
+					ImGui.sliderFloat("###thickness", ImGuiUtils.FLOAT.getData(), 0F, 0.5F, "%f");
+					decal.thickness = ImGuiUtils.FLOAT.get();
+				}
 			}
 
 			ImGui.popID();
