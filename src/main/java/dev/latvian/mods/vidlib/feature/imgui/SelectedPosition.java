@@ -13,6 +13,8 @@ public enum SelectedPosition {
 		SelectedPosition getSelectedPosition();
 	}
 
+	public static final SelectedPosition[] UNIT = new SelectedPosition[1];
+
 	public final char icon;
 
 	SelectedPosition(char icon) {

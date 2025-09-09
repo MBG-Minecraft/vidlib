@@ -91,6 +91,10 @@ configurations {
 }
 
 repositories {
+
+}
+
+repositories {
 	mavenLocal()
 	mavenCentral()
 
@@ -109,6 +113,7 @@ repositories {
 		url = 'https://maven.latvian.dev/releases'
 		content {
 			includeGroup "dev.latvian.mods"
+			includeGroup "dev.latvian.apps"
 		}
 	}
 
@@ -148,6 +153,8 @@ dependencies {
 
 	compileOnly("maven.modrinth:simple-voice-chat:neoforge-1.21.5-2.5.36")
 	compileOnly("software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}")
+
+	implementation "dev.latvian.apps:tiny-java-server:1.0.0-build.26"
 }
 
 processResources {

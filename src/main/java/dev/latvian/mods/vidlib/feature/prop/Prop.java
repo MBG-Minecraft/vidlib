@@ -181,13 +181,17 @@ public class Prop {
 		return false;
 	}
 
+	public final void sync(PropData<?, ?> data) {
+		var entry = type.reverseData().get(data);
+
+		if (entry != null) {
+			sync.add(entry);
+		}
+	}
+
 	public final void sync(PropData<?, ?>... datas) {
 		for (var data : datas) {
-			var entry = type.reverseData().get(data);
-
-			if (entry != null) {
-				sync.add(entry);
-			}
+			sync(data);
 		}
 	}
 

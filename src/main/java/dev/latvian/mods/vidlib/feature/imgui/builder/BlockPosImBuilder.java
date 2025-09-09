@@ -13,10 +13,11 @@ public class BlockPosImBuilder implements ImBuilder<BlockPos>, SelectedPosition.
 	public static final ImBuilderType<BlockPos> TYPE = BlockPosImBuilder::new;
 
 	public BlockPos.MutableBlockPos pos;
-	public SelectedPosition selectedPosition;
+	private final SelectedPosition[] selectedPosition;
 
 	public BlockPosImBuilder() {
 		this.pos = new BlockPos.MutableBlockPos(0, 0, 0);
+		this.selectedPosition = new SelectedPosition[1];
 	}
 
 	@Override
@@ -24,16 +25,15 @@ public class BlockPosImBuilder implements ImBuilder<BlockPos>, SelectedPosition.
 		pos.set(value);
 	}
 
-	@Override
-	public ImUpdate imgui(ImGraphics graphics) {
-		selectedPosition = null;
+	public static ImUpdate imgui(ImGraphics graphics, BlockPos.MutableBlockPos data, SelectedPosition[] selectedPosition) {
+		selectedPosition[0] = null;
 		var update = ImUpdate.NONE;
 
 		if (ImGui.button(SelectedPosition.CAMERA.icon + "###camera-pos")) {
 			var cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
-			pos.set(cam.x, cam.y, cam.z);
+			data.set(cam.x, cam.y, cam.z);
 			update = ImUpdate.FULL;
-			selectedPosition = SelectedPosition.CAMERA;
+			selectedPosition[0] = SelectedPosition.CAMERA;
 		}
 
 		ImGuiUtils.hoveredTooltip("Use Camera Position");
@@ -44,18 +44,18 @@ public class BlockPosImBuilder implements ImBuilder<BlockPos>, SelectedPosition.
 		ImGui.text("X");
 		ImGui.sameLine();
 
-		ImGuiUtils.INT.set(pos.getX());
+		ImGuiUtils.INT.set(data.getX());
 		ImGui.dragInt("###x", ImGuiUtils.INT.getData(), 1);
 		update = update.orItemEdit();
-		pos.setX(ImGuiUtils.INT.get());
+		data.setX(ImGuiUtils.INT.get());
 
 		if (ImGui.button(SelectedPosition.ENTITY.icon + "###entity-pos")) {
 			var entity = Minecraft.getInstance().player;
 
 			if (entity != null) {
-				pos.set(entity.getX(), entity.getY(), entity.getZ());
+				data.set(entity.getX(), entity.getY(), entity.getZ());
 				update = ImUpdate.FULL;
-				selectedPosition = SelectedPosition.ENTITY;
+				selectedPosition[0] = SelectedPosition.ENTITY;
 			}
 		}
 
@@ -67,19 +67,19 @@ public class BlockPosImBuilder implements ImBuilder<BlockPos>, SelectedPosition.
 		ImGui.text("Y");
 		ImGui.sameLine();
 
-		ImGuiUtils.INT.set(pos.getY());
+		ImGuiUtils.INT.set(data.getY());
 		ImGui.dragInt("###y", ImGuiUtils.INT.getData(), 1);
 		update = update.orItemEdit();
-		pos.setY(ImGuiUtils.INT.get());
+		data.setY(ImGuiUtils.INT.get());
 
 		if (ImGui.button(SelectedPosition.CURSOR.icon + "###cursor-pos")) {
 			var worldMouse = graphics.mc.getWorldMouse();
 			var pos = worldMouse == null ? null : worldMouse.clipOutline();
 
 			if (pos != null) {
-				this.pos.set(pos.pos().x, pos.pos().y, pos.pos().z);
+				data.set(pos.pos().x, pos.pos().y, pos.pos().z);
 				update = ImUpdate.FULL;
-				selectedPosition = SelectedPosition.CURSOR;
+				selectedPosition[0] = SelectedPosition.CURSOR;
 			}
 		}
 
@@ -91,11 +91,16 @@ public class BlockPosImBuilder implements ImBuilder<BlockPos>, SelectedPosition.
 		ImGui.text("Y");
 		ImGui.sameLine();
 
-		ImGuiUtils.INT.set(pos.getZ());
+		ImGuiUtils.INT.set(data.getZ());
 		ImGui.dragInt("###z", ImGuiUtils.INT.getData(), 1);
 		update = update.orItemEdit();
-		pos.setZ(ImGuiUtils.INT.get());
+		data.setZ(ImGuiUtils.INT.get());
 		return update;
+	}
+
+	@Override
+	public ImUpdate imgui(ImGraphics graphics) {
+		return imgui(graphics, pos, selectedPosition);
 	}
 
 	@Override
@@ -112,6 +117,6 @@ public class BlockPosImBuilder implements ImBuilder<BlockPos>, SelectedPosition.
 	@Override
 	@Nullable
 	public SelectedPosition getSelectedPosition() {
-		return selectedPosition;
+		return selectedPosition[0];
 	}
 }

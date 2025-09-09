@@ -1,0 +1,48 @@
+{
+	"targets": {
+		"swap": {}
+	},
+	"passes": [
+		{
+			"vertex_shader": "vidlib:post/texel",
+			"fragment_shader": "vidlib:post/decals",
+			"inputs": [
+				{
+					"sampler_name": "In",
+					"target": "minecraft:main",
+					"bilinear": true
+				},
+				{
+					"sampler_name": "InDepth",
+					"target": "minecraft:main",
+					"use_depth_buffer": true
+				},
+				{
+					"sampler_name": "Decals",
+					"location": "vidlib:decals",
+					"width": 1,
+					"height": 1
+				}
+			],
+			"output": "swap"
+		},
+		{
+			"vertex_shader": "minecraft:post/blit",
+			"fragment_shader": "minecraft:post/blit",
+			"inputs": [
+				{
+					"sampler_name": "In",
+					"target": "swap"
+				}
+			],
+			"output": "vidlib:decals",
+			"uniforms": [
+				{
+					"name": "ColorModulate",
+					"type": "vec4",
+					"values": [1.0, 1.0, 1.0, 1.0]
+				}
+			]
+		}
+	]
+}

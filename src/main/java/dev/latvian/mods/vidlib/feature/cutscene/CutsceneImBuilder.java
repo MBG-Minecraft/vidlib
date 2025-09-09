@@ -50,7 +50,11 @@ public class CutsceneImBuilder implements ImBuilder<Cutscene> {
 		if (ImGui.button("Preview###preview-cutscene", -1F, 0F)) {
 			if (cutscene != null) {
 				try {
-					Minecraft.getInstance().c2s(new PreviewCutscenePayload(cutscene, variables));
+					if (graphics.isAdmin) {
+						Minecraft.getInstance().c2s(new PreviewCutscenePayload(cutscene, variables));
+					} else {
+						Minecraft.getInstance().playCutscene(cutscene, variables);
+					}
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}

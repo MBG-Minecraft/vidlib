@@ -136,6 +136,10 @@ public class Canvas implements Consumer<RenderPass> {
 		return modifier(new CanvasSampler(name));
 	}
 
+	public CanvasBoolUniform boolUniform(String name) {
+		return modifier(new CanvasBoolUniform(name));
+	}
+
 	public CanvasIntUniform intUniform(String name) {
 		return modifier(new CanvasIntUniform(name, UniformType.INT));
 	}

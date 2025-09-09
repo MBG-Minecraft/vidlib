@@ -18,6 +18,7 @@ import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
+import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
@@ -98,6 +99,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	public WorldMouse worldMouse;
 	public NPCRecording npcRecording;
 	public final List<PacketDebuggerPanel.LoggedPacket> debugPackets;
+	public final List<Decal> decals;
 
 	public LocalClientSessionData(Minecraft mc, UUID uuid, ClientPacketListener connection) {
 		super(uuid);
@@ -115,6 +117,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.serverDataMap = new DataMap(uuid, DataKey.SERVER);
 		this.globalVariables = new KNumberVariables();
 		this.debugPackets = new ArrayList<>();
+		this.decals = new ArrayList<>();
 
 		VidLib.LOGGER.info("Client Session Data Initialized");
 	}

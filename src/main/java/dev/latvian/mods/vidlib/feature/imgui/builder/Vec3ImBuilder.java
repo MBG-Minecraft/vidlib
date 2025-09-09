@@ -1,12 +1,10 @@
 package dev.latvian.mods.vidlib.feature.imgui.builder;
 
+import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.SelectedPosition;
-import imgui.ImGui;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.Position;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -17,18 +15,20 @@ public class Vec3ImBuilder implements ImBuilder<Vec3>, SelectedPosition.Holder {
 	public static final ImBuilderType<Vec3> TYPE = Vec3ImBuilder::new;
 
 	public final Vector3d data;
-	public SelectedPosition selectedPosition;
+	private final SelectedPosition[] selectedPosition;
 
 	public Vec3ImBuilder() {
-		this.data = new Vector3d();
+		this(Identity.DVEC_3);
 	}
 
 	public Vec3ImBuilder(Position position) {
 		this.data = new Vector3d(position.x(), position.y(), position.z());
+		this.selectedPosition = new SelectedPosition[1];
 	}
 
 	public Vec3ImBuilder(Vector3dc position) {
 		this.data = new Vector3d(position.x(), position.y(), position.z());
+		this.selectedPosition = new SelectedPosition[1];
 	}
 
 	@Override
@@ -38,77 +38,7 @@ public class Vec3ImBuilder implements ImBuilder<Vec3>, SelectedPosition.Holder {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		selectedPosition = null;
-		var update = ImUpdate.NONE;
-
-		if (ImGui.button(SelectedPosition.CAMERA.icon + "###camera-pos")) {
-			var cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
-			data.set(cam.x, cam.y, cam.z);
-			update = ImUpdate.FULL;
-			selectedPosition = SelectedPosition.CAMERA;
-		}
-
-		ImGuiUtils.hoveredTooltip("Use Camera Position");
-
-		ImGui.sameLine();
-
-		ImGui.alignTextToFramePadding();
-		ImGui.text("X");
-		ImGui.sameLine();
-
-		ImGuiUtils.FLOAT.set((float) data.x);
-		ImGui.dragFloat("###x", ImGuiUtils.FLOAT.getData(), 0.0625F, -30000000F, 30000000F, "%.4f");
-		update = update.orItemEdit();
-		data.x = ImGuiUtils.FLOAT.get();
-
-		if (ImGui.button(SelectedPosition.ENTITY.icon + "###entity-pos")) {
-			var entity = Minecraft.getInstance().player;
-
-			if (entity != null) {
-				data.set(entity.getX(), entity.getY(), entity.getZ());
-				update = ImUpdate.FULL;
-				selectedPosition = SelectedPosition.ENTITY;
-			}
-		}
-
-		ImGuiUtils.hoveredTooltip("Use Entity Position");
-
-		ImGui.sameLine();
-
-		ImGui.alignTextToFramePadding();
-		ImGui.text("Y");
-		ImGui.sameLine();
-
-		ImGuiUtils.FLOAT.set((float) data.y);
-		ImGui.dragFloat("###y", ImGuiUtils.FLOAT.getData(), 0.0625F, -30000000F, 30000000F, "%.4f");
-		update = update.orItemEdit();
-		data.y = ImGuiUtils.FLOAT.get();
-
-		if (ImGui.button(SelectedPosition.CURSOR.icon + "###cursor-pos")) {
-			var worldMouse = graphics.mc.getWorldMouse();
-			var pos = worldMouse == null ? null : worldMouse.clipOutline();
-
-			if (pos != null) {
-				data.set(pos.pos().x, pos.pos().y, pos.pos().z);
-				update = ImUpdate.FULL;
-				selectedPosition = SelectedPosition.CURSOR;
-			}
-		}
-
-		ImGuiUtils.hoveredTooltip("Use Cursor Position");
-
-		ImGui.sameLine();
-
-		ImGui.alignTextToFramePadding();
-		ImGui.text("Z");
-		ImGui.sameLine();
-
-		ImGuiUtils.FLOAT.set((float) data.z);
-		ImGui.dragFloat("###z", ImGuiUtils.FLOAT.getData(), 0.0625F, -30000000F, 30000000F, "%.4f");
-		update = update.orItemEdit();
-		data.z = ImGuiUtils.FLOAT.get();
-
-		return update;
+		return Vector3dImBuilder.imgui(graphics, data, selectedPosition);
 	}
 
 	@Override
@@ -124,6 +54,6 @@ public class Vec3ImBuilder implements ImBuilder<Vec3>, SelectedPosition.Holder {
 	@Override
 	@Nullable
 	public SelectedPosition getSelectedPosition() {
-		return selectedPosition;
+		return selectedPosition[0];
 	}
 }

@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.feature.canvas.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneBuilderPanel;
+import dev.latvian.mods.vidlib.feature.decal.DecalPanel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
@@ -36,9 +37,10 @@ public class BuiltInImGui {
 		list.add(MenuItem.menu(ImIcons.APERTURE, "Canvas", CanvasPanel::menu));
 		list.add(MenuItem.item(ImIcons.PLAY, "Sounds", BuiltInImGui.showSounds != null, g -> BuiltInImGui.showSounds = false));
 		list.add(MenuItem.SEPARATOR);
-		list.add(MenuItem.item(ImIcons.CAMERA, "Cutscene Builder", CutsceneBuilderPanel.INSTANCE).enabled(graphics.inGame));
-		list.add(MenuItem.item(ImIcons.SEARCH, "Entity Explorer", EntityExplorerPanel.INSTANCE).enabled(graphics.inGame));
-		list.add(MenuItem.item(ImIcons.SEARCH, "Prop Explorer", PropExplorerPanel.INSTANCE).enabled(graphics.inGame));
+		list.add(MenuItem.item(ImIcons.CAMERA, "Cutscene Builder", CutsceneBuilderPanel.INSTANCE).enabled(graphics.isAdmin));
+		list.add(MenuItem.item(ImIcons.SEARCH, "Entity Explorer", EntityExplorerPanel.INSTANCE).enabled(graphics.isAdmin));
+		list.add(MenuItem.item(ImIcons.SEARCH, "Prop Explorer", PropExplorerPanel.INSTANCE).enabled(graphics.isAdmin));
+		list.add(MenuItem.item(ImIcons.LAYERS, "Decals", DecalPanel.INSTANCE).enabled(graphics.isAdmin));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.OpenDropdown(graphics, list));
 

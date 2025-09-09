@@ -8,6 +8,7 @@ import imgui.flag.ImGuiColorEditFlags;
 
 public class Color3ImBuilder implements ImBuilder<Color> {
 	public static final ImBuilderType<Color> TYPE = Color3ImBuilder::new;
+	public static final Color3ImBuilder UNIT = new Color3ImBuilder();
 
 	public final float[] rgba = new float[3];
 

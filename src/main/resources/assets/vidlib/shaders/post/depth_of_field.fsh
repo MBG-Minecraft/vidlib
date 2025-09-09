@@ -8,6 +8,7 @@ uniform vec3 FocusPos;
 uniform float FocusRange;
 uniform float BlurRange;
 uniform float Strength;
+uniform int Shape;
 uniform vec4 DebugNearCol;
 uniform vec4 DebugFarCol;
 
@@ -25,7 +26,7 @@ float blurAt(in vec2 coord) {
 	vec4 homogenousPos = InverseViewProjectionMat * clipPos;
 	vec3 worldPos = homogenousPos.xyz / homogenousPos.w;
 	vec3 diff = worldPos - FocusPos;
-	float distSq = dot(diff, diff);
+	float distSq = Shape == 1 ? dot(diff.xz, diff.xz) : dot(diff, diff);
 
 	if (distSq < FocusRange * FocusRange) {
 		return 0.0;

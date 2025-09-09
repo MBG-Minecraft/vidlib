@@ -46,7 +46,7 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 	}
 
 	public EnumImBuilder<E> withNameGetter(Function<E, String> nameGetter) {
-		var b = new EnumImBuilder<E>(options, build());
+		var b = new EnumImBuilder<>(options, build());
 		b.nameGetter = nameGetter;
 		return b;
 	}

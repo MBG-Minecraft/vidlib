@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.imgui.builder;
 
+import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
@@ -15,18 +16,20 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d>, SelectedPosition.
 	public static final ImBuilderType<Vector3d> TYPE = Vector3dImBuilder::new;
 
 	public final Vector3d data;
-	public SelectedPosition selectedPosition;
+	private final SelectedPosition[] selectedPosition;
 
 	public Vector3dImBuilder() {
-		this.data = new Vector3d();
+		this(Identity.DVEC_3);
 	}
 
 	public Vector3dImBuilder(Position position) {
 		this.data = new Vector3d(position.x(), position.y(), position.z());
+		this.selectedPosition = new SelectedPosition[1];
 	}
 
 	public Vector3dImBuilder(Vector3dc position) {
 		this.data = new Vector3d(position.x(), position.y(), position.z());
+		this.selectedPosition = new SelectedPosition[1];
 	}
 
 	@Override
@@ -34,16 +37,15 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d>, SelectedPosition.
 		data.set(value.x(), value.y(), value.z());
 	}
 
-	@Override
-	public ImUpdate imgui(ImGraphics graphics) {
-		selectedPosition = null;
+	public static ImUpdate imgui(ImGraphics graphics, Vector3d data, SelectedPosition[] selectedPosition) {
+		selectedPosition[0] = null;
 		var update = ImUpdate.NONE;
 
 		if (ImGui.button(SelectedPosition.CAMERA.icon + "###camera-pos")) {
 			var cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
 			data.set(cam.x, cam.y, cam.z);
 			update = ImUpdate.FULL;
-			selectedPosition = SelectedPosition.CAMERA;
+			selectedPosition[0] = SelectedPosition.CAMERA;
 		}
 
 		ImGuiUtils.hoveredTooltip("Use Camera Position");
@@ -65,7 +67,7 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d>, SelectedPosition.
 			if (entity != null) {
 				data.set(entity.getX(), entity.getY(), entity.getZ());
 				update = ImUpdate.FULL;
-				selectedPosition = SelectedPosition.ENTITY;
+				selectedPosition[0] = SelectedPosition.ENTITY;
 			}
 		}
 
@@ -89,7 +91,7 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d>, SelectedPosition.
 			if (pos != null) {
 				data.set(pos.pos().x, pos.pos().y, pos.pos().z);
 				update = ImUpdate.FULL;
-				selectedPosition = SelectedPosition.CURSOR;
+				selectedPosition[0] = SelectedPosition.CURSOR;
 			}
 		}
 
@@ -110,6 +112,11 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d>, SelectedPosition.
 	}
 
 	@Override
+	public ImUpdate imgui(ImGraphics graphics) {
+		return imgui(graphics, data, selectedPosition);
+	}
+
+	@Override
 	public boolean isValid() {
 		return data.isFinite();
 	}
@@ -122,6 +129,6 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d>, SelectedPosition.
 	@Override
 	@Nullable
 	public SelectedPosition getSelectedPosition() {
-		return selectedPosition;
+		return selectedPosition[0];
 	}
 }
