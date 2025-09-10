@@ -5,12 +5,14 @@ import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.EntityRenderTypes;
+import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
 import dev.latvian.mods.vidlib.feature.prop.geo.DefaultedPropGeoModel;
 import dev.latvian.mods.vidlib.feature.prop.geo.GeoPropRenderer;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.constant.dataticket.DataTicket;
@@ -36,6 +38,28 @@ public class PlayerStatuePropRenderer extends GeoPropRenderer<PlayerStatueProp> 
 			state.addGeckolibData(SKIN, Minecraft.getInstance().getSkinManager().getInsecureSkin(prop.profile).texture());
 		} else {
 			state.addGeckolibData(SKIN, null);
+		}
+	}
+
+	@Override
+	public void render(PropRenderContext<PlayerStatueProp> ctx) {
+		int count = Math.max(1, ctx.prop().count);
+
+		if (count == 1) {
+			super.render(ctx);
+			return;
+		}
+
+		float radius = ctx.prop().spreadRadius;
+		var random = RandomSource.create(10L);
+		float spreadRandom = ctx.prop().spreadRandom;
+
+		for (int i = 0; i < count; i++) {
+			ctx.poseStack().pushPose();
+			var offset = ctx.prop().spread.offset(i, count, radius);
+			ctx.poseStack().translate(offset.x() + random.nextRange(spreadRandom), 0F, offset.y() + random.nextRange(spreadRandom));
+			super.render(ctx);
+			ctx.poseStack().popPose();
 		}
 	}
 
