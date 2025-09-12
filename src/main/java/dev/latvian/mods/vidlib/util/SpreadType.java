@@ -24,8 +24,6 @@ public enum SpreadType {
 			float angle = delta * Mth.TWO_PI;
 			float currentRadius = radius * Mth.sqrt(delta);
 			return new Vec2f(currentRadius * Mth.cos(angle), currentRadius * Mth.sin(angle));
-		} else if (this == LINE) {
-			return new Vec2f(Mth.lerp(delta, -radius, radius), 0F);
 		} else if (this == SQUARE) {
 			if (delta < 0.25F) {
 				return new Vec2f(Mth.lerp(delta * 4F, -radius, radius), -radius);
@@ -45,8 +43,8 @@ public enum SpreadType {
 				Mth.lerp((x + 0.5F) / (float) max, -radius, radius),
 				Mth.lerp((y + 0.5F) / (float) max, -radius, radius)
 			);
+		} else {
+			return new Vec2f(Mth.lerp((index + 0.5F) / (float) count, -radius, radius), 0F);
 		}
-
-		return Vec2f.ZERO;
 	}
 }

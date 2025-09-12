@@ -6,6 +6,7 @@ import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
+import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TextComponentImBuilder;
@@ -27,8 +28,11 @@ public class PlayerStatueProp extends BaseGeoProp {
 	public static final PropData<PlayerStatueProp, GameProfile> PROFILE = PropData.create(PlayerStatueProp.class, "profile", DataTypes.GAME_PROFILE, p -> p.profile, (p, v) -> p.profile = v, GameProfileImBuilder.TYPE);
 	public static final PropData<PlayerStatueProp, Integer> COUNT = PropData.createInt(PlayerStatueProp.class, "count", p -> p.count, (p, v) -> p.count = v, 1, 1000);
 	public static final PropData<PlayerStatueProp, SpreadType> SPREAD = PropData.create(PlayerStatueProp.class, "spread", SpreadType.DATA_TYPE, p -> p.spread, (p, v) -> p.spread = v, () -> new EnumImBuilder<>(SpreadType.VALUES));
+	public static final PropData<PlayerStatueProp, Float> HEAD_PITCH = PropData.createFloat(PlayerStatueProp.class, "head_pitch", p -> p.headPitch, (p, v) -> p.headPitch = v, -90F, 90F);
 	public static final PropData<PlayerStatueProp, Float> SPREAD_RADIUS = PropData.createFloat(PlayerStatueProp.class, "spread_radius", p -> p.spreadRadius, (p, v) -> p.spreadRadius = v, 0F, 200F);
-	public static final PropData<PlayerStatueProp, Float> SPREAD_RANDOM = PropData.createFloat(PlayerStatueProp.class, "spread_random", p -> p.spreadRandom, (p, v) -> p.spreadRandom = v, 0F, 0.5F);
+	public static final PropData<PlayerStatueProp, Float> RANDOM_OFFSET = PropData.createFloat(PlayerStatueProp.class, "random_offset", p -> p.randomOffset, (p, v) -> p.randomOffset = v, 0F, 5F);
+	public static final PropData<PlayerStatueProp, Float> RANDOM_YAW = PropData.createFloat(PlayerStatueProp.class, "random_yaw", p -> p.randomYaw, (p, v) -> p.randomYaw = v, 0F, 180F);
+	public static final PropData<PlayerStatueProp, Float> RANDOM_HEAD_PITCH = PropData.createFloat(PlayerStatueProp.class, "random_head_pitch", p -> p.randomHeadPitch, (p, v) -> p.randomHeadPitch = v, 0F, 90F);
 
 	@AutoRegister
 	public static final PropType<PlayerStatueProp> TYPE = PropType.create(VidLib.id("player_statue"), PlayerStatueProp::new,
@@ -37,6 +41,7 @@ public class PlayerStatueProp extends BaseGeoProp {
 		HEIGHT,
 		YAW,
 		PITCH,
+		HEAD_PITCH,
 		ROLL,
 		NAME,
 		STONE,
@@ -44,16 +49,22 @@ public class PlayerStatueProp extends BaseGeoProp {
 		COUNT,
 		SPREAD,
 		SPREAD_RADIUS,
-		SPREAD_RANDOM
+		RANDOM_OFFSET,
+		RANDOM_YAW,
+		RANDOM_HEAD_PITCH
 	);
 
 	public Component name;
 	public boolean stone;
 	public GameProfile profile;
+	public float headPitch;
 	public int count;
 	public SpreadType spread;
 	public float spreadRadius;
-	public float spreadRandom;
+	public float randomOffset;
+	public float randomYaw;
+	public float randomHeadPitch;
+	public Clothing clothing;
 
 	public PlayerStatueProp(PropContext<?> ctx) {
 		super(ctx);
@@ -63,10 +74,14 @@ public class PlayerStatueProp extends BaseGeoProp {
 		this.gravity = 0F;
 		this.stone = false;
 		this.profile = Empty.PROFILE;
+		this.headPitch = 0F;
 		this.count = 1;
 		this.spread = SpreadType.LINE;
 		this.spreadRadius = 10F;
-		this.spreadRandom = 0.35F;
+		this.randomOffset = 0.35F;
+		this.randomYaw = 0F;
+		this.randomHeadPitch = 0F;
+		this.clothing = Clothing.NONE;
 	}
 
 	@Override
