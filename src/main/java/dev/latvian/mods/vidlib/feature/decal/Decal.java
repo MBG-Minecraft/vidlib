@@ -64,6 +64,7 @@ public class Decal {
 	public Color startColor = Color.WHITE;
 	public Color endColor = Color.WHITE;
 	public boolean surface = false;
+	public boolean additive = false;
 
 	public void setPosition(Position p) {
 		position.set(p.x(), p.y(), p.z());
@@ -72,6 +73,7 @@ public class Decal {
 	public void upload(IntArrayList arr, Vec3 cameraPos) {
 		arr.add((type.shaderId & 7)
 			| (surface ? 8 : 0)
+			| (additive ? 16 : 0)
 		);
 
 		arr.add(Float.floatToIntBits((float) (position.x - cameraPos.x))); // 1

@@ -60,7 +60,8 @@ float getInside(int type, vec3 diff, float start, float end, float rotation) {
 	return -1.0;
 }
 
-vec4 blend(vec4 src, vec4 dst) {
+vec4 blend(vec4 src, vec4 dst, int additive) {
+	// TODO: impl additive
 	vec3 c = src.rgb * src.a + dst.rgb * (1.0 - src.a);
 	float a = src.a + dst.a * (1.0 - src.a);
 	return vec4(c, a);
@@ -79,7 +80,10 @@ void main() {
 	vec4 homogenousPos = InverseViewProjectionMat * clipPos;
 	vec3 worldPos = homogenousPos.xyz / homogenousPos.w;
 
-	vec4 color = vec4(0.0, 0.0, 0.0, 0.0);
+	// vec4 color = texture(InSampler, texCoord);
+	// vec4 color = vec4(texture(InSampler, texCoord).rgb, 0.0);
+	vec4 color = vec4(0.0);
+	bool modified = false;
 
 	for (int y = 0; y < DecalCount; y++) {
 		int head = decodeInt(0, y);
@@ -109,18 +113,20 @@ void main() {
 					vec3 g = abs(diff) + thickness * 0.5;
 
 					if (mod(g.x, grid) < thickness || mod(g.y, grid) < thickness || mod(g.z, grid) < thickness) {
-						color = blend(color, decalColor);
+						color = blend(color, decalColor, head & 16);
+						modified = true;
 					}
 
 					continue;
 				}
 
-				color = blend(color, decalColor);
+				color = blend(color, decalColor, head & 16);
+				modified = true;
 			}
 		}
 	}
 
-	if (color.a > 0.0) {
+	if (modified) {
 		fragColor = color;
 	} else {
 		discard;
