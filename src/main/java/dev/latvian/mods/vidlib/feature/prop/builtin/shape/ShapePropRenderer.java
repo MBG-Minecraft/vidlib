@@ -26,14 +26,13 @@ public class ShapePropRenderer implements PropRenderer<ShapeProp> {
 		float sw = (float) prop.width;
 		float sh = (float) prop.height;
 
+		ms.mulPose(Axis.YP.rotationDegrees(prop.getYaw(ctx.delta())));
+		ms.mulPose(Axis.XP.rotationDegrees(prop.getPitch(ctx.delta())));
+		ms.translate(0F, sh / 2F, 0F);
+
 		if (sw != 1F || sh != 1F) {
 			ms.scale(sw, sh, sw);
 		}
-
-		ms.translate(0F, 0.5F, 0F);
-
-		ms.mulPose(Axis.YP.rotationDegrees(prop.getYaw(ctx.delta())));
-		ms.mulPose(Axis.XP.rotationDegrees(prop.getPitch(ctx.delta())));
 
 		var lc = prop.canInteract && ctx.frame().mc().hitResult instanceof PropHitResult hit && hit.prop == prop ? Color.WHITE : prop.outlineColor.get(progress);
 

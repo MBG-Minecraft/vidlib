@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.prop.builtin.shape;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.shape.CubeShape;
 import dev.latvian.mods.klib.shape.Shape;
 import dev.latvian.mods.klib.util.Empty;
@@ -59,5 +60,10 @@ public class ShapeProp extends Prop {
 		this.texture = Empty.TEXTURE;
 		this.canCollide = false;
 		this.canInteract = false;
+	}
+
+	@Override
+	public boolean isVisible(double x, double y, double z, FrustumCheck frustum) {
+		return true;
 	}
 }

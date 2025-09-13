@@ -59,7 +59,6 @@ public class YesNoVotingScreen extends BaseVotingScreen {
 	}
 
 	@Override
-	@Override
 	public void sendPayload() {
 		if (extraData.isEmpty()) {
 			minecraft.runClientCommand(selected == 0 ? "vote no" : "vote yes");
