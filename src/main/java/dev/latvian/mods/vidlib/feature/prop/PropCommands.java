@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import dev.latvian.mods.klib.math.Rotation;
@@ -40,37 +39,67 @@ public interface PropCommands {
 				)
 			)
 		)
-		.then(Commands.literal("kill")
+		.then(Commands.literal("remove")
 			.then(Commands.literal("all")
-				.executes(ctx -> kill(ctx.getSource(), prop -> true))
+				.executes(ctx -> remove(ctx.getSource(), prop -> true))
 			)
 			.then(Commands.literal("type")
 				.then(Commands.argument("type", ResourceLocationArgument.id())
 					.suggests(TYPE_SUGGESTION_PROVIDER)
-					.executes(ctx -> kill(ctx.getSource(), PropType.ALL.get().get(ResourceLocationArgument.getId(ctx, "type"))))
+					.executes(ctx -> remove(ctx.getSource(), PropType.ALL.get().get(ResourceLocationArgument.getId(ctx, "type"))))
 				)
 			)
 			.then(Commands.literal("id")
 				.then(Commands.argument("id", StringArgumentType.word())
 					.executes(ctx -> {
 						int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "id"), 16);
-						return kill(ctx.getSource(), prop -> prop.id == id);
+						return remove(ctx.getSource(), prop -> prop.id == id);
 					})
 				)
 			)
 		)
 		.then(Commands.literal("move")
-			.then(Commands.argument("prop", IntegerArgumentType.integer(1))
+			.then(Commands.argument("prop", StringArgumentType.word())
 				.then(Commands.argument("pos", Vec3Argument.vec3())
-					.executes(ctx -> move(ctx.getSource(), IntegerArgumentType.getInteger(ctx, "prop"), Vec3Argument.getCoordinates(ctx, "pos")))
+					.executes(ctx -> {
+						int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "id"), 16);
+						return move(ctx.getSource(), id, Vec3Argument.getCoordinates(ctx, "pos"));
+					})
 				)
 			)
 		)
 		.then(Commands.literal("rotate")
-			.then(Commands.argument("prop", IntegerArgumentType.integer(1))
+			.then(Commands.argument("prop", StringArgumentType.word())
 				.then(Commands.argument("rotation", RotationArgument.rotation())
-					.executes(ctx -> rotate(ctx.getSource(), IntegerArgumentType.getInteger(ctx, "prop"), RotationArgument.getRotation(ctx, "rotation")))
+					.executes(ctx -> {
+						int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "id"), 16);
+						return rotate(ctx.getSource(), id, RotationArgument.getRotation(ctx, "rotation"));
+					})
 				)
+			)
+		)
+		.then(Commands.literal("clone")
+			.then(Commands.argument("id", StringArgumentType.word())
+				.executes(ctx -> {
+					int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "id"), 16);
+					return clone(ctx.getSource(), id);
+				})
+			)
+		)
+		.then(Commands.literal("pause")
+			.then(Commands.argument("id", StringArgumentType.word())
+				.executes(ctx -> {
+					int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "id"), 16);
+					return pause(ctx.getSource(), id, true);
+				})
+			)
+		)
+		.then(Commands.literal("unpause")
+			.then(Commands.argument("id", StringArgumentType.word())
+				.executes(ctx -> {
+					int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "id"), 16);
+					return pause(ctx.getSource(), id, false);
+				})
 			)
 		)
 	);
@@ -98,15 +127,17 @@ public interface PropCommands {
 		return 1;
 	}
 
-	static int kill(CommandSourceStack source, Predicate<Prop> predicate) {
-		var list = source.getLevel().getProps().propLists.get(PropListType.LEVEL);
+	static int remove(CommandSourceStack source, Predicate<Prop> predicate) {
+		var props = source.getLevel().getProps();
+		var list = props.propLists.get(PropListType.LEVEL);
 		int killed = list.removeAll(PropRemoveType.COMMAND, predicate);
-		source.broadcast("Killed " + killed + " props");
+		source.broadcast("Removed " + killed + " props");
 		return killed;
 	}
 
 	static int move(CommandSourceStack source, int propId, Coordinates coordinates) {
-		var prop = source.getLevel().getProps().levelProps.get(propId);
+		var props = source.getLevel().getProps();
+		var prop = props.levelProps.get(propId);
 
 		if (prop != null) {
 			prop.setPos(coordinates.getPosition(prop.getCommandSourceAt(source)));
@@ -118,12 +149,36 @@ public interface PropCommands {
 	}
 
 	static int rotate(CommandSourceStack source, int propId, Coordinates coordinates) {
-		var prop = source.getLevel().getProps().levelProps.get(propId);
+		var props = source.getLevel().getProps();
+		var prop = props.levelProps.get(propId);
 
 		if (prop != null) {
 			prop.setRot(Rotation.deg(coordinates.getRotation(prop.getCommandSourceAt(source))));
 			prop.sync(Prop.YAW);
 			prop.sync(Prop.PITCH);
+			return 1;
+		}
+
+		return 0;
+	}
+
+	static int clone(CommandSourceStack source, int propId) {
+		var props = source.getLevel().getProps();
+		var prop = props.levelProps.get(propId);
+
+		if (prop != null) {
+			return prop.copy().ifSuccess(props::add).isSuccess() ? 1 : 0;
+		}
+
+		return 0;
+	}
+
+	static int pause(CommandSourceStack source, int propId, boolean paused) {
+		var props = source.getLevel().getProps();
+		var prop = props.levelProps.get(propId);
+
+		if (prop != null) {
+			prop.setPausedAndSync(paused);
 			return 1;
 		}
 

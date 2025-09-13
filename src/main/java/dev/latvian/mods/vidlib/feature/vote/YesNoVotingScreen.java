@@ -57,4 +57,14 @@ public class YesNoVotingScreen extends BaseVotingScreen {
 		addRenderableWidget(new VoteButton(width / 3 - 64, height / 2 - 64 - 14, false));
 		addRenderableWidget(new VoteButton(width * 2 / 3 - 64, height / 2 - 64 - 14, true));
 	}
+
+	@Override
+	@Override
+	public void sendPayload() {
+		if (extraData.isEmpty()) {
+			minecraft.runClientCommand(selected == 0 ? "vote no" : "vote yes");
+		} else {
+			minecraft.runClientCommand((selected == 0 ? "vote no" : "vote yes") + " " + extraData);
+		}
+	}
 }

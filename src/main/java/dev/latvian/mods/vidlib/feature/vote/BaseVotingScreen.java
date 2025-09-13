@@ -44,7 +44,11 @@ public abstract class BaseVotingScreen extends Screen {
 	}
 
 	public void sendPayload() {
-		minecraft.c2s(new PlayerVotedPayload(extraData, selected));
+		if (extraData.isEmpty()) {
+			minecraft.runClientCommand("vote for-option " + (selected + 1));
+		} else {
+			minecraft.runClientCommand("vote for-option " + (selected + 1) + " " + extraData);
+		}
 	}
 
 	@Override

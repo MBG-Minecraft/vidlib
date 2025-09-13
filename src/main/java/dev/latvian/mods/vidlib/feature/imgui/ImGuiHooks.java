@@ -85,7 +85,7 @@ public class ImGuiHooks {
 		io.setConfigWindowsMoveFromTitleBarOnly(true);
 
 		imGuiGlfw.init(client.getWindow().getWindow(), true);
-		imGuiGl3.init("#version 150"); // MC uses 150 everywhere, so we can too
+		imGuiGl3.init("#version 330");
 
 		loadFonts(resourceManager);
 	}
@@ -101,7 +101,7 @@ public class ImGuiHooks {
 		config.setGlyphOffset(0, 0);
 
 		try {
-			fonts.addFontFromMemoryTTF(TTFFile.JETBRAINS_MONO_REGULAR.get().load(resourceManager), 18, config);
+			fonts.addFontFromMemoryTTF(TTFFile.JETBRAINS_MONO_REGULAR.get().load(resourceManager), 20F, config);
 		} catch (Exception e) {
 			fonts.addFontDefault();
 		}
@@ -110,7 +110,7 @@ public class ImGuiHooks {
 			var bytes = TTFFile.MATERIAL_ICONS_ROUND_REGULAR.get().load(resourceManager);
 			config.setMergeMode(true);
 			config.setGlyphOffset(0, 3);
-			fonts.addFontFromMemoryTTF(bytes, 20, config, buildMaterialIconRanges());
+			fonts.addFontFromMemoryTTF(bytes, 22F, config, buildMaterialIconRanges());
 			config.setGlyphOffset(0, 0);
 			config.setMergeMode(false);
 

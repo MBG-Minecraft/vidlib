@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.prop;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.data.DataTypes;
@@ -529,8 +530,8 @@ public class Prop {
 
 		graphics.setRedButton();
 
-		if (ImGui.smallButton("Remove")) {
-			graphics.mc.runClientCommand("prop kill id " + getIdString());
+		if (ImGui.smallButton(ImIcons.DELETE + " Remove###remove")) {
+			graphics.mc.runClientCommand("prop remove id " + getIdString());
 		}
 
 		if (graphics.isReplay) {
@@ -543,7 +544,7 @@ public class Prop {
 
 		boolean isHidden = ClientProps.HIDDEN_PROPS.contains(id);
 
-		if (graphics.smallButton(isHidden ? "Show" : "Hide", isHidden ? ImColorVariant.GREEN : null)) {
+		if (graphics.smallButton(isHidden ? (ImIcons.VISIBLE + " Show###visible") : (ImIcons.INVISIBLE + " Hide###visible"), isHidden ? ImColorVariant.GREEN : null)) {
 			if (isHidden) {
 				ClientProps.HIDDEN_PROPS.remove(id);
 			} else {
@@ -555,7 +556,7 @@ public class Prop {
 
 		boolean isTypeHidden = ClientProps.HIDDEN_PROP_TYPES.contains(type);
 
-		if (graphics.smallButton(isTypeHidden ? "Show All of Type" : "Hide All of Type", isTypeHidden ? ImColorVariant.GREEN : null)) {
+		if (graphics.smallButton(isTypeHidden ? (ImIcons.VISIBLE + " Show All of Type###type-visible") : (ImIcons.INVISIBLE + " Hide All of Type###type-visible"), isTypeHidden ? ImColorVariant.GREEN : null)) {
 			if (isTypeHidden) {
 				ClientProps.HIDDEN_PROP_TYPES.remove(type);
 			} else {
@@ -563,22 +564,26 @@ public class Prop {
 			}
 		}
 
-		if (ImGui.smallButton("Copy ID")) {
+		if (ImGui.smallButton(ImIcons.COPY + " Copy ID###copy-id")) {
 			ImGui.setClipboardText(getIdString());
 		}
 
 		ImGui.sameLine();
 
-		ImGui.beginDisabled();
-
-		if (ImGui.smallButton("Clone")) {
-			// ImGui.setClipboardText(getIdString());
+		if (RecordedProp.INSTANCE != null) {
+			ImGui.beginDisabled();
 		}
 
-		ImGui.endDisabled();
+		if (ImGui.smallButton(ImIcons.PASTE + " Clone###clone")) {
+			graphics.mc.runClientCommand("prop clone " + getIdString());
+		}
+
+		if (RecordedProp.INSTANCE != null) {
+			ImGui.endDisabled();
+		}
 
 		if (graphics.isReplay) {
-			if (DepthOfField.OVERRIDE_ENABLED.get() && ImGui.smallButton("Focus DoF")) {
+			if (DepthOfField.OVERRIDE_ENABLED.get() && ImGui.smallButton(ImIcons.APERTURE + " Focus DoF###focus-dof")) {
 				DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(this, PositionType.EYES));
 				DepthOfFieldPanel.INSTANCE.builder.set(DepthOfField.OVERRIDE);
 			}
@@ -617,7 +622,11 @@ public class Prop {
 				ImGui.alignTextToFramePadding();
 
 				if (ImGui.checkbox("tick", !paused)) {
-					level.c2s(new PausePropRequestPayload(spawnType.listType, id, !paused));
+					if (paused) {
+						graphics.mc.runClientCommand("prop unpause " + getIdString());
+					} else {
+						graphics.mc.runClientCommand("prop pause " + getIdString());
+					}
 				}
 
 				ImGui.tableNextColumn();
@@ -776,5 +785,27 @@ public class Prop {
 				}
 			}
 		}
+	}
+
+	public void setPausedAndSync(boolean paused) {
+		if (this.paused != paused) {
+			this.paused = paused;
+
+			if (!level.isClientSide()) {
+				level.s2c(new PausePropPayload(spawnType.listType, id, paused));
+			}
+		}
+	}
+
+	public DataResult<Prop> copy() {
+		var ctx = new PropContext<>(level.getProps(), type, PropSpawnType.GAME, level.getGameTime());
+		var newProp = type.factory().create(ctx);
+
+		for (var entry : type.data()) {
+			var p = entry.data();
+			newProp.setData(p, Cast.to(getData(p)));
+		}
+
+		return DataResult.success(newProp);
 	}
 }

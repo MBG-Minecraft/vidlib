@@ -338,7 +338,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 			}
 		}
 
-		if (DepthOfField.OVERRIDE_ENABLED.get() && ImGui.button("Focus DoF")) {
+		if (DepthOfField.OVERRIDE_ENABLED.get() && ImGui.button(ImIcons.APERTURE + " Focus DoF###focus-dof")) {
 			if (entity instanceof Player player) {
 				DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(new ProfileEntityFilter(player.getGameProfile()), PositionType.EYES));
 			} else {
