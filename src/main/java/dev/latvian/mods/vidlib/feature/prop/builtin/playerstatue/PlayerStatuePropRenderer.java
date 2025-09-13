@@ -1,129 +1,171 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.playerstatue;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.EntityRenderTypes;
+import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
-import dev.latvian.mods.vidlib.feature.prop.geo.DefaultedPropGeoModel;
-import dev.latvian.mods.vidlib.feature.prop.geo.GeoPropRenderer;
+import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
+import dev.latvian.mods.vidlib.util.client.MultiBufferSourceOverride;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.RemotePlayer;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.renderer.entity.state.PlayerRenderState;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.cache.object.BakedGeoModel;
-import software.bernie.geckolib.cache.object.GeoBone;
-import software.bernie.geckolib.constant.DataTickets;
-import software.bernie.geckolib.constant.dataticket.DataTicket;
-import software.bernie.geckolib.renderer.base.GeoRenderState;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
+import net.minecraft.world.phys.Vec3;
 
-public class PlayerStatuePropRenderer extends GeoPropRenderer<PlayerStatueProp> {
+public class PlayerStatuePropRenderer implements PropRenderer<PlayerStatueProp> {
+	private static final PlayerSkin[] DEFAULT_SKINS = new PlayerSkin[]{
+		new PlayerSkin(ID.mc("textures/entity/player/wide/steve.png"), null, null, null, PlayerSkin.Model.WIDE, true),
+		new PlayerSkin(ID.mc("textures/entity/player/wide/alex.png"), null, null, null, PlayerSkin.Model.WIDE, true),
+		new PlayerSkin(ID.mc("textures/entity/player/wide/ari.png"), null, null, null, PlayerSkin.Model.WIDE, true),
+		new PlayerSkin(ID.mc("textures/entity/player/wide/efe.png"), null, null, null, PlayerSkin.Model.WIDE, true),
+		new PlayerSkin(ID.mc("textures/entity/player/wide/kai.png"), null, null, null, PlayerSkin.Model.WIDE, true),
+		new PlayerSkin(ID.mc("textures/entity/player/wide/makena.png"), null, null, null, PlayerSkin.Model.WIDE, true),
+		new PlayerSkin(ID.mc("textures/entity/player/wide/noor.png"), null, null, null, PlayerSkin.Model.WIDE, true),
+		new PlayerSkin(ID.mc("textures/entity/player/wide/sunny.png"), null, null, null, PlayerSkin.Model.WIDE, true),
+		new PlayerSkin(ID.mc("textures/entity/player/wide/zuri.png"), null, null, null, PlayerSkin.Model.WIDE, true)
+	};
+
+	private static final PlayerSkin[] SINGLE_SKIN = {DEFAULT_SKINS[0]};
+
 	@ClientAutoRegister
 	public static final Holder HOLDER = new Holder(PlayerStatueProp.TYPE, new PlayerStatuePropRenderer());
 
-	public static final DataTicket<Boolean> STONE = DataTicket.create("stone", Boolean.class);
-	public static final DataTicket<ResourceLocation> SKIN = DataTicket.create("skin", ResourceLocation.class);
-	public static final DataTicket<Float> HEAD_PITCH = DataTicket.create("head_pitch", Float.class);
 	public RandomSource randomSource = RandomSource.create(0L);
-
-	public PlayerStatuePropRenderer() {
-		super(new DefaultedPropGeoModel<>(VidLib.id("player"), ID.mc("textures/entity/player/wide/steve.png")));
-	}
-
-	@Override
-	public void addRenderData(PlayerStatueProp prop, Void relatedObject, GeoRenderState state) {
-		super.addRenderData(prop, relatedObject, state);
-		float delta = state.getOrDefaultGeckolibData(DataTickets.PARTIAL_TICK, 1F);
-		state.addGeckolibData(DataTickets.ENTITY_YAW, prop.getYaw(delta) + (prop.randomYaw == 0F ? 0F : randomSource.nextRange(prop.randomYaw)));
-		state.addGeckolibData(STONE, prop.stone);
-
-		float headPitch = prop.headPitch + (prop.randomHeadPitch == 0F ? 0F : randomSource.nextRange(prop.randomHeadPitch));
-		state.addGeckolibData(HEAD_PITCH, headPitch == 0F ? null : headPitch);
-
-		if (!prop.profile.getName().isEmpty() && !prop.profile.getId().equals(Util.NIL_UUID)) {
-			state.addGeckolibData(SKIN, Minecraft.getInstance().getSkinManager().getInsecureSkin(prop.profile).texture());
-		} else {
-			state.addGeckolibData(SKIN, null);
-		}
-	}
+	private PlayerRenderer playerRenderer;
+	private RemotePlayer fakePlayer;
+	private PlayerRenderState playerRenderState;
 
 	@Override
 	public void render(PropRenderContext<PlayerStatueProp> ctx) {
 		var p = ctx.prop();
+		var ms = ctx.poseStack();
 		int count = Math.max(1, p.count);
+		float delta = ctx.delta();
+		var buffers = ctx.frame().buffers();
+
+		if (p.stone) {
+			buffers = new MultiBufferSourceOverride(buffers, EntityRenderTypes.STONE_CUTOUT_NO_CULL, EntityRenderTypes.STONE_CUTOUT_NO_CULL);
+		}
 
 		float radius = p.spreadRadius;
-		randomSource = RandomSource.create(BlockPos.asLong(Float.floatToIntBits((float) p.pos.x), count, Float.floatToIntBits((float) p.pos.z)));
-		float spreadRandom = p.randomOffset;
+		randomSource = new XoroshiroRandomSource(Double.doubleToLongBits(p.pos.x + p.id), Double.doubleToLongBits(p.pos.z + count));
+		var modelType = Minecraft.getInstance().getModelType(p.profile);
+		playerRenderer = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getSkinMap().get(modelType);
+		playerRenderState = playerRenderer.createRenderState();
+
+		if (fakePlayer == null) {
+			fakePlayer = new RemotePlayer((ClientLevel) ctx.prop().level, p.profile);
+			fakePlayer.setHealth(20F);
+			fakePlayer.getAttribute(Attributes.MAX_HEALTH).setBaseValue(20F);
+		}
+
+		fakePlayer.vl$setLevel(ctx.prop().level);
+		fakePlayer.tickCount = 0;
+		fakePlayer.noPhysics = true;
+
+		float pitch = p.getPitch(delta);
+		float yaw = p.getYaw(delta);
+		float roll = p.getRoll(delta);
+
+		fakePlayer.snapTo(p.getPos(delta), yaw, pitch);
+		fakePlayer.setYBodyRot(fakePlayer.getYRot());
+		fakePlayer.setYHeadRot(fakePlayer.getYRot());
+		fakePlayer.setOldPosAndRot();
+		fakePlayer.yBodyRotO = fakePlayer.yBodyRot;
+		fakePlayer.yHeadRotO = fakePlayer.yHeadRot;
+		fakePlayer.setDeltaMovement(Vec3.ZERO);
+		fakePlayer.setItemSlot(EquipmentSlot.MAINHAND, p.mainHandItem);
+		fakePlayer.setItemSlot(EquipmentSlot.OFFHAND, p.offHandItem);
+		fakePlayer.setPose(p.pose);
+		fakePlayer.setSwimming(p.pose == Pose.SWIMMING);
+
+		playerRenderer.extractRenderState(fakePlayer, playerRenderState, delta);
+
+		var mc = Minecraft.getInstance();
+		var eyePos = new Vec3(playerRenderState.x, playerRenderState.y + fakePlayer.getEyeHeight(), playerRenderState.z);
+		var blockpos = BlockPos.containing(eyePos);
+		int light = LightTexture.pack(mc.level.getBrightness(LightLayer.BLOCK, blockpos), mc.level.getBrightness(LightLayer.SKY, blockpos));
+
+		PlayerSkin[] skins;
+
+		if (!p.profile.getName().isEmpty() && !p.profile.getId().equals(Util.NIL_UUID)) {
+			skins = SINGLE_SKIN;
+			skins[0] = mc.getSkinManager().getInsecureSkin(p.profile);
+		} else if (p.randomSkin) {
+			skins = DEFAULT_SKINS;
+		} else {
+			skins = SINGLE_SKIN;
+			skins[0] = DEFAULT_SKINS[0];
+		}
+
+		playerRenderState.attackTime = 0;
+
+		playerRenderState.feetEquipment = p.feetItem;
+		playerRenderState.legsEquipment = p.legsItem;
+		playerRenderState.chestEquipment = p.chestItem;
+		playerRenderState.headEquipment = p.headItem;
+		playerRenderState.setRenderData(VidLibEntityRenderStates.CLOTHING, p.clothing);
+
+		playerRenderState.showHat = true;
+		playerRenderState.showJacket = true;
+		playerRenderState.showLeftPants = true;
+		playerRenderState.showRightPants = true;
+		playerRenderState.showLeftSleeve = true;
+		playerRenderState.showRightSleeve = true;
+		playerRenderState.showCape = true;
 
 		for (int i = 0; i < count; i++) {
-			ctx.poseStack().pushPose();
-			var offset = p.spread.offset(i, count, radius);
-			ctx.poseStack().translate(offset.x(), 0F, offset.y());
-
-			if (spreadRandom > 0F && count > 1) {
-				ctx.poseStack().translate(randomSource.nextRange(spreadRandom), 0F, randomSource.nextRange(spreadRandom));
-			}
-
-			super.render(ctx);
-			ctx.poseStack().popPose();
-		}
-	}
-
-	@Override
-	public ResourceLocation getTextureLocation(GeoRenderState state) {
-		var skin = state.getGeckolibData(SKIN);
-
-		if (skin != null) {
-			return skin;
-		}
-
-		return super.getTextureLocation(state);
-	}
-
-	@Override
-	@Nullable
-	public RenderType getRenderType(GeoRenderState state, ResourceLocation texture) {
-		if (Boolean.TRUE.equals(state.getGeckolibData(STONE))) {
-			return EntityRenderTypes.STONE_CUTOUT_NO_CULL.apply(texture);
-		}
-
-		return super.getRenderType(state, texture);
-	}
-
-	@Override
-	public void renderCubesOfBone(GeoRenderState state, GeoBone bone, PoseStack ms, VertexConsumer buffer, int packedLight, int packedOverlay, int renderColor) {
-		var headPitch = state.getGeckolibData(HEAD_PITCH);
-
-		if (headPitch != null && bone.getName().equals("head")) {
 			ms.pushPose();
-			ms.translate(0F, 1.5F, 0F);
-			ms.mulPose(Axis.XN.rotationDegrees(headPitch));
-			ms.translate(0F, -1.5F, 0F);
-			super.renderCubesOfBone(state, bone, ms, buffer, packedLight, packedOverlay, renderColor);
-			ms.popPose();
-		} else {
-			super.renderCubesOfBone(state, bone, ms, buffer, packedLight, packedOverlay, renderColor);
-		}
-	}
 
-	@Override
-	public void scaleModelForRender(GeoRenderState state, float widthScale, float heightScale, PoseStack poseStack, BakedGeoModel model, boolean isReRender) {
-		super.scaleModelForRender(state, widthScale, heightScale, poseStack, model, isReRender);
-
-		if (!isReRender) {
-			var s0 = state.getGeckolibData(HEIGHT);
-
-			if (s0 != null) {
-				float s = s0 / 1.92F;
-				poseStack.scale(s, s, s);
+			if (radius > 0F && count > 1) {
+				var offset = p.spread.offset(i, count, radius);
+				ms.translate(offset.x(), 0F, offset.y());
 			}
+
+			if (p.randomOffset > 0F && count > 1) {
+				ms.translate(
+					randomSource.nextRange(p.randomOffset),
+					0F,
+					randomSource.nextRange(p.randomOffset)
+				);
+			}
+
+			if (p.bodyPitch != 0F) {
+				ms.mulPose(Axis.XN.rotationDegrees(p.bodyPitch));
+			}
+
+			if (roll != 0F) {
+				ms.mulPose(Axis.ZN.rotationDegrees(roll));
+			}
+
+			float s = (float) (p.height / 1.92D);
+			ms.scale(s, s, s);
+
+			fakePlayer.swinging = false;
+
+			playerRenderState.yRot = 0F;
+			playerRenderState.bodyRot = yaw + randomSource.nextRange(p.randomYaw);
+			playerRenderState.xRot = pitch + randomSource.nextRange(p.randomPitch);
+			playerRenderState.swimAmount = p.pose == Pose.SWIMMING ? 1F : 0F;
+
+			playerRenderState.skin = skins[randomSource.nextInt(skins.length)];
+			playerRenderer.render(playerRenderState, ms, buffers, light);
+			ms.popPose();
 		}
+
+		fakePlayer.vl$setLevel(null);
 	}
 }

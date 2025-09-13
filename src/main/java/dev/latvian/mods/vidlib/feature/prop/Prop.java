@@ -563,11 +563,19 @@ public class Prop {
 			}
 		}
 
-		ImGui.sameLine();
-
 		if (ImGui.smallButton("Copy ID")) {
 			ImGui.setClipboardText(getIdString());
 		}
+
+		ImGui.sameLine();
+
+		ImGui.beginDisabled();
+
+		if (ImGui.smallButton("Clone")) {
+			// ImGui.setClipboardText(getIdString());
+		}
+
+		ImGui.endDisabled();
 
 		if (graphics.isReplay) {
 			if (DepthOfField.OVERRIDE_ENABLED.get() && ImGui.smallButton("Focus DoF")) {
@@ -690,7 +698,7 @@ public class Prop {
 
 				ImGui.tableNextColumn();
 				ImGui.alignTextToFramePadding();
-				ImGui.text(data.key());
+				graphics.redTextIf(data.key(), !builder.isValid());
 
 				ImGui.tableNextColumn();
 				ImGui.pushItemWidth(-1F);

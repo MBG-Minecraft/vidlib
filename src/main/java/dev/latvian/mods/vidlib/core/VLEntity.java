@@ -52,6 +52,10 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		return vl$self().level();
 	}
 
+	default void vl$setLevel(Level level) {
+		throw new NoMixinException(this);
+	}
+
 	default boolean vl$isSaving() {
 		return false;
 	}

@@ -15,14 +15,12 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.entity.state.PlayerRenderState;
-import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 
 public class NPCParticle extends CustomParticle {
 	private final NPCRecording recording;
@@ -32,36 +30,13 @@ public class NPCParticle extends CustomParticle {
 	private final RemotePlayer fakePlayer;
 	private final PlayerRenderState playerRenderState;
 
-	public static PlayerSkin.Model getModelType(@Nullable GameProfile profile) {
-		if (profile == null) {
-			return PlayerSkin.Model.WIDE;
-		}
-
-		try {
-			var mc = Minecraft.getInstance();
-			var packedTextures = mc.getMinecraftSessionService().getPackedTextures(profile);
-
-			if (packedTextures != null) {
-				var unpackedTextures = mc.getMinecraftSessionService().unpackTextures(packedTextures);
-
-				if (unpackedTextures.skin() != null) {
-					return PlayerSkin.Model.byName(unpackedTextures.skin().getMetadata("model"));
-				}
-			}
-
-		} catch (Exception ignored) {
-		}
-
-		return PlayerSkin.Model.WIDE;
-	}
-
 	public NPCParticle(NPCParticleOptions options, ClientLevel level, double x, double y, double z, double vx, double vy, double vz) {
 		super(level, x, y, z);
 		var recordingMap = NPCRecording.getReplay(level.registryAccess());
 		var recordingLazy = recordingMap.isEmpty() ? null : options.npc().equals("latest") ? recordingMap.lastEntry().getValue() : recordingMap.get(options.npc());
 		this.recording = recordingLazy == null ? null : recordingLazy.get();
 		this.profile = recording == null ? null : options.profile().orElse(recording.profile);
-		var modelType = getModelType(profile);
+		var modelType = Minecraft.getInstance().getModelType(profile);
 		this.playerRenderer = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getSkinMap().get(modelType);
 		this.fakePlayer = recording == null ? null : new RemotePlayer(level, profile);
 		this.playerRenderState = playerRenderer.createRenderState();

@@ -5,6 +5,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -21,7 +22,7 @@ public interface ImBuilder<T> {
 		}
 	}
 
-	default void set(T value) {
+	default void set(@Nullable T value) {
 	}
 
 	ImUpdate imgui(ImGraphics graphics);

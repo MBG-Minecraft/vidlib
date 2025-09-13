@@ -23,6 +23,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -55,6 +56,10 @@ public abstract class EntityMixin implements VLEntity {
 
 	@Unique
 	private boolean vl$isSaving = false;
+
+	@Override
+	@Invoker("setLevel")
+	public abstract void vl$setLevel(Level level);
 
 	@Override
 	public boolean vl$isSaving() {

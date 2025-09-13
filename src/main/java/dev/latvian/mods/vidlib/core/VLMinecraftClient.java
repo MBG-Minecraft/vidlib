@@ -59,6 +59,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
@@ -616,5 +617,28 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	@Override
 	default Map<ResourceLocation, ClockValue> vl$getClocks() {
 		return vl$self().player.vl$sessionData().clocks;
+	}
+
+	default PlayerSkin.Model getModelType(@Nullable GameProfile profile) {
+		if (profile == null || profile == Empty.PROFILE) {
+			return PlayerSkin.Model.WIDE;
+		}
+
+		try {
+			var sessionService = vl$self().getMinecraftSessionService();
+			var packedTextures = sessionService.getPackedTextures(profile);
+
+			if (packedTextures != null) {
+				var unpackedTextures = sessionService.unpackTextures(packedTextures);
+
+				if (unpackedTextures.skin() != null) {
+					return PlayerSkin.Model.byName(unpackedTextures.skin().getMetadata("model"));
+				}
+			}
+
+		} catch (Exception ignored) {
+		}
+
+		return PlayerSkin.Model.WIDE;
 	}
 }
