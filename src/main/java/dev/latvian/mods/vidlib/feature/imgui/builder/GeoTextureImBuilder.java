@@ -26,6 +26,8 @@ public class GeoTextureImBuilder implements ImBuilder<ResourceLocation> {
 			list = new ArrayList<>();
 			list.addAll(graphics.mc.getResourceManager().listResources("textures/entity", id -> id.getPath().endsWith(".png")).keySet());
 			list.addAll(graphics.mc.getResourceManager().listResources("textures/prop", id -> id.getPath().endsWith(".png")).keySet());
+			list.sort(ResourceLocation::compareNamespaced);
+			list = List.copyOf(list);
 		}
 
 		return graphics.combo("###texture", "", value, list, id -> id.getNamespace() + ":" + id.getPath().substring(9, id.getPath().length() - 4), ImGuiComboFlags.None);

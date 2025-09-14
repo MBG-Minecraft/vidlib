@@ -24,7 +24,6 @@ public class GeoAnimationsImBuilder implements ImBuilder<ResourceLocation> {
 	public ImUpdate imgui(ImGraphics graphics) {
 		if (list == null) {
 			list = new ArrayList<>();
-			list.add(Empty.ID);
 
 			for (var id : graphics.mc.getResourceManager().listResources("geckolib/animations", id -> id.getPath().endsWith(".json")).keySet()) {
 				if (id.getPath().endsWith(".animation.json")) {
@@ -35,6 +34,10 @@ public class GeoAnimationsImBuilder implements ImBuilder<ResourceLocation> {
 
 				list.add(id.withPath(id.getPath().substring(20)));
 			}
+
+			list.sort(ResourceLocation::compareNamespaced);
+			list.addFirst(Empty.ID);
+			list = List.copyOf(list);
 		}
 
 		return graphics.combo("###animation", "", value, list);

@@ -33,6 +33,9 @@ public class GeoModelImBuilder implements ImBuilder<ResourceLocation> {
 
 				list.add(id.withPath(id.getPath().substring(16)));
 			}
+
+			list.sort(ResourceLocation::compareNamespaced);
+			list = List.copyOf(list);
 		}
 
 		return graphics.combo("###model", "", value, list);

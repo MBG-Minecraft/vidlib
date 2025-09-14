@@ -11,6 +11,7 @@
 		"BlockGetterMixin",
 		"BlockInWorldMixin",
 		"BlockStateMixin",
+		"ButtonBlockMixin",
 		"ChunkMapMixin",
 		"ClipContextMixin",
 		"CollisionGetterMixin",
