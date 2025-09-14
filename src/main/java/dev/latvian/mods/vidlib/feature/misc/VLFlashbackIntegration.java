@@ -1,6 +1,9 @@
 package dev.latvian.mods.vidlib.feature.misc;
 
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.util.UndashedUuid;
+import de.maxhenkel.voicechat.api.Player;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibClientEventHandler;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
@@ -24,15 +27,23 @@ import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.prop.RecordedProp;
 import dev.latvian.mods.vidlib.feature.prop.RemovePropsPayload;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
+import dev.latvian.mods.vidlib.feature.visual.PlayerHeadTexture;
+import dev.latvian.mods.vidlib.feature.visual.PlayerPins;
+import dev.latvian.mods.vidlib.util.AsyncFileSelector;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.chars.CharConsumer;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongObjectPair;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.configuration.ClientConfigurationPacketListener;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
@@ -40,10 +51,18 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.ModList;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 public class VLFlashbackIntegration {
 	public static final boolean ENABLED = ModList.get().isLoaded("flashback");
@@ -187,6 +206,59 @@ public class VLFlashbackIntegration {
 		ImGui.checkbox("Clocks", ClockRenderer.VISIBLE);
 		ImGui.checkbox("Ghost Structures", GhostStructure.VISIBLE_CONFIG);
 		ImGui.checkbox("Bloom", Bloom.VISIBLE);
+
+		if (PlayerPins.ENABLED.get()) {
+			ImGuiUtils.separatorWithText("Player Pins");
+			if (ImGui.checkbox("Player Pins", PlayerPins.ENABLED)) {
+				PlayerPins.PINS.values().forEach(pin -> pin.enabled().set(false));
+			}
+
+			// Show pins on a scroll whose height scales to content
+			if (!PlayerPins.PINS.isEmpty()) {
+				float spacing = ImGui.getTextLineHeightWithSpacing();
+				float lineH = spacing + (spacing / 2);
+				int pinCount = PlayerPins.PINS.size();
+				float desiredHeight = lineH * Math.max(1, pinCount);
+				float availY = ImGui.getContentRegionAvailY();
+				float height = Math.min(desiredHeight, availY);
+				ImGui.beginChild("PlayerPinsList", 0, height, true);
+				for (var pin : PlayerPins.PINS.values()) {
+					ImGui.checkbox(pin.name() + "###pin-" + pin.name(), pin.enabled());
+				}
+				ImGui.endChild();
+			}
+
+			var graphics = new ImGraphics(Minecraft.getInstance());
+			PlayerPins.newPinProfileBuilder.imguiKey(graphics, "User", "profile");
+			if (ImGui.button("Select pin image...")) {
+				var profile = PlayerPins.newPinProfileBuilder.build();
+				if (profile != null && !profile.getId().equals(Util.NIL_UUID) && !profile.getName().isEmpty() && !PlayerPins.PINS.containsKey(profile.getId())) {
+					AsyncFileSelector.openFileDialog(null, "Select Pin Image", "png").thenAccept(pathString -> {
+						Path path = pathString == null ? null : Path.of(pathString);
+						if (path != null && Files.exists(path)) {
+							mc.execute(() -> {
+								try (FileInputStream inputStream = new FileInputStream(path.toFile())) {
+									ResourceLocation resourceLocation = VidLib.id("textures/vidlib/cache/pins/" + UndashedUuid.toString(profile.getId()) + ".png");
+									NativeImage image = NativeImage.read(inputStream);
+									AbstractTexture texture = new DynamicTexture(() -> profile.getId().toString(), image);
+									mc.getTextureManager().register(resourceLocation, texture);
+									PlayerPins.PINS.put(profile.getId(), new PlayerPins.Pin(profile.getName(), new ImBoolean(true), resourceLocation));
+									PlayerPins.newPinProfileBuilder.set(null);
+								} catch (IOException e) {
+									throw new RuntimeException(e);
+								}
+							});
+						}
+					});
+				}
+			}
+			ImGui.spacing();
+			ImGui.sliderFloat("Pin Offset###pin-offset", PlayerPins.PIN_OFFSET.getData(), 0F, 64F);
+			ImGui.sliderInt("Pin Alpha###pin-alpha", PlayerPins.PIN_ALPHA.getData(), 1, 255);
+			ImGui.sliderFloat("Pin Size###pin-size", PlayerPins.PIN_SIZE.getData(), 0F, 10F);
+		} else {
+			ImGui.checkbox("Player Pins", PlayerPins.ENABLED);
+		}
 
 		if (!level.vl$getUndoableModifications().isEmpty() && ImGui.button("Restore Bulk Removed Blocks###restore-bulk-removed-blocks")) {
 			level.undoAllFutureModifications(true);
