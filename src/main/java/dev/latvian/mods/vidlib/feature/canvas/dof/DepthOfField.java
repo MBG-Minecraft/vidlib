@@ -15,7 +15,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class DepthOfField {
 	public static DepthOfFieldData REPLAY = new DepthOfFieldData(KVector.ZERO, 1.5F, 8F, 0F, DepthOfFieldShape.SPHERE);
-	public static DepthOfFieldData OVERRIDE = new DepthOfFieldData(KVector.ZERO, 1.5F, 8F, 10F, DepthOfFieldShape.SPHERE);
+	public static DepthOfFieldData OVERRIDE = new DepthOfFieldData(KVector.ZERO, 1.5F, 8F, 5F, DepthOfFieldShape.SPHERE);
 	public static final ImBoolean OVERRIDE_ENABLED = new ImBoolean(false);
 	public static final ImBoolean DEBUG_ENABLED = new ImBoolean(false);
 	public static final Color4ImBuilder DEBUG_NEAR_COLOR = new Color4ImBuilder();
@@ -82,7 +82,7 @@ public class DepthOfField {
 		FOCUS_UNIFORM.set((float) (vec.x - cam.x), (float) (vec.y - cam.y), (float) (vec.z - cam.z));
 		FOCUS_RANGE_UNIFORM.set(Math.max(data.focusRange(), 0F));
 		BLUR_RANGE_UNIFORM.set(Math.max(data.focusRange(), 0F) + Math.max(data.blurRange(), 0F));
-		STRENGTH_UNIFORM.set(DEBUG_ENABLED.get() ? 0F : Math.max(data.strength(), 0F));
+		STRENGTH_UNIFORM.set(DEBUG_ENABLED.get() ? 0F : Math.max(data.strength() * mc.getEffectScale(), 0F));
 		SHAPE_UNIFORM.set(data.shape().ordinal());
 		DEBUG_NEAR_COLOR_UNIFORM.set(DEBUG_NEAR_COLOR.build());
 		DEBUG_FAR_COLOR_UNIFORM.set(DEBUG_FAR_COLOR.build());

@@ -6,7 +6,9 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
+import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
 import imgui.ImGui;
+import imgui.ImGuiStyle;
 import imgui.extension.imnodes.ImNodes;
 import imgui.extension.imnodes.flag.ImNodesColorStyle;
 import imgui.flag.ImGuiCol;
@@ -16,6 +18,7 @@ import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -203,14 +206,14 @@ public class ImGraphics {
 	}
 
 	public void setDefaultStyle() {
-		setStyleVar(ImGuiStyleVar.WindowPadding, 15F, 15F);
-		setStyleVar(ImGuiStyleVar.WindowRounding, 5F);
-		setStyleVar(ImGuiStyleVar.FramePadding, 5F, 5F);
-		setStyleVar(ImGuiStyleVar.FrameRounding, 4F);
-		setStyleVar(ImGuiStyleVar.ChildRounding, 4F);
-		setStyleVar(ImGuiStyleVar.PopupRounding, 4F);
+		setStyleVar(ImGuiStyleVar.WindowPadding, 8F, 8F);
+		setStyleVar(ImGuiStyleVar.WindowRounding, 4F);
+		setStyleVar(ImGuiStyleVar.FramePadding, 4F, 3F);
+		setStyleVar(ImGuiStyleVar.FrameRounding, 3F);
+		setStyleVar(ImGuiStyleVar.ChildRounding, 3F);
+		setStyleVar(ImGuiStyleVar.PopupRounding, 3F);
 		setStyleVar(ImGuiStyleVar.PopupBorderSize, 0F);
-		setStyleVar(ImGuiStyleVar.ItemSpacing, 12F, 8F);
+		setStyleVar(ImGuiStyleVar.ItemSpacing, 8F, 8F);
 		setStyleVar(ImGuiStyleVar.ItemInnerSpacing, 8F, 6F);
 		setStyleVar(ImGuiStyleVar.IndentSpacing, 25F);
 		setStyleVar(ImGuiStyleVar.ScrollbarSize, 15F);
@@ -221,16 +224,47 @@ public class ImGraphics {
 		setStyleVar(ImGuiStyleVar.SelectableTextAlign, 0F, 0.5F);
 		setStyleVar(ImGuiStyleVar.Alpha, 1F);
 
-		setStyleCol(ImGuiCol.WindowBg, 0xEF1D1D23);
-		setStyleCol(ImGuiCol.FrameBg, 0xFF141419); // checkboxes, sliders
-		setStyleCol(ImGuiCol.TitleBg, 0xEF384756);
-		setStyleCol(ImGuiCol.TitleBgActive, 0xEF70517F);
+		setStyleCol(ImGuiCol.WindowBg, 0xFF222228);
+		setStyleCol(ImGuiCol.PopupBg, 0xFF222228);
+		setStyleCol(ImGuiCol.FrameBg, 0xFF15151C);
+		setStyleCol(ImGuiCol.TitleBg, 0xFF010101);
+		setStyleCol(ImGuiCol.TitleBgActive, 0xFF010101);
 		setStyleCol(ImGuiCol.MenuBarBg, 0xFF17171C);
 		setStyleCol(ImGuiCol.TitleBgCollapsed, 0xEF517F70);
+		// setStyleCol(ImGuiCol.Tab, 0xFF000000);
+		// setStyleCol(ImGuiCol.TabActive, 0xFF313033);
+		// setStyleCol(ImGuiCol.TabHovered, 0xFF4E4D51);
 
 		setButton(ImColorVariant.DEFAULT);
 		setNodesPin(ImColorVariant.DEFAULT);
 		setNodesPin(ImColorVariant.DEFAULT);
+	}
+
+	public static void setDefaultStyle(ImGuiStyle style) {
+		style.setWindowRounding(4F);
+		style.setFrameRounding(3F);
+		style.setChildRounding(3F);
+		style.setPopupRounding(3F);
+		style.setIndentSpacing(25F);
+		style.setScrollbarSize(15F);
+		style.setScrollbarRounding(9F);
+		style.setGrabMinSize(5F);
+		style.setGrabRounding(3F);
+		style.setWindowBorderSize(0F);
+		style.setSelectableTextAlign(0F, 0.5F);
+		style.setAlpha(1F);
+
+		style.setColor(ImGuiCol.WindowBg, 0xFF282222);
+		style.setColor(ImGuiCol.PopupBg, 0xFF282222);
+		style.setColor(ImGuiCol.FrameBg, 0xFF1C1515);
+		style.setColor(ImGuiCol.TitleBg, 0xFF010101);
+		style.setColor(ImGuiCol.TitleBgActive, 0xFF010101);
+		style.setColor(ImGuiCol.MenuBarBg, 0xFF1C1717);
+		style.setColor(ImGuiCol.TitleBgCollapsed, 0xEF707F51);
+
+		style.setColor(ImGuiCol.Button, ImColorVariant.DEFAULT.color.abgr());
+		style.setColor(ImGuiCol.ButtonHovered, ImColorVariant.DEFAULT.hoverColor.abgr());
+		style.setColor(ImGuiCol.ButtonActive, ImColorVariant.DEFAULT.activeColor.abgr());
 	}
 
 	public void setText(ImColorVariant variant) {
@@ -251,6 +285,12 @@ public class ImGraphics {
 
 	public void setInfoText() {
 		setText(ImColorVariant.BLUE);
+	}
+
+	public void setStyle(Style style) {
+		if (style.getColor() != null) {
+			setStyleCol(ImGuiCol.Text, 0xFF000000 | style.getColor().getValue());
+		}
 	}
 
 	public void setButton(ImColorVariant variant) {
@@ -501,5 +541,24 @@ public class ImGraphics {
 
 	public void setGreenButton() {
 		setButton(ImColorVariant.GREEN);
+	}
+
+	public void text(List<FormattedCharSinkPartBuilder.Part> parts) {
+		ImGui.beginGroup();
+		pushStack();
+		setStyleVar(ImGuiStyleVar.ItemSpacing, 0F, ImGui.getStyle().getItemSpacingY());
+
+		for (int i = 0; i < parts.size(); i++) {
+			if (i > 0) {
+				ImGui.sameLine();
+			}
+
+			var part = parts.get(i);
+			setStyle(part.style());
+			ImGui.textUnformatted(part.text());
+		}
+
+		popStack();
+		ImGui.endGroup();
 	}
 }

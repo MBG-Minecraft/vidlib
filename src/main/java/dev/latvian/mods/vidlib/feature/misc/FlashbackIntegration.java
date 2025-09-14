@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.misc;
 
 import com.google.gson.JsonObject;
 import dev.latvian.mods.klib.util.Lazy;
+import imgui.ImGuiStyle;
 import it.unimi.dsi.fastutil.chars.CharConsumer;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import it.unimi.dsi.fastutil.longs.LongObjectPair;
@@ -86,6 +87,7 @@ public interface FlashbackIntegration {
 	List<Predicate<HitResult>> HANDLE_CLICK_TARGET = listField("HANDLE_CLICK_TARGET");
 	List<Runnable> POPUPS = listField("POPUPS");
 	List<Consumer<CharConsumer>> ICONS = listField("ICONS");
+	List<Consumer<ImGuiStyle>> STYLE = listField("STYLE");
 
 	BooleanSupplier IN_REPLAY = booleanField("IN_REPLAY");
 	BooleanSupplier IN_EXPORTING = booleanField("IN_EXPORTING");

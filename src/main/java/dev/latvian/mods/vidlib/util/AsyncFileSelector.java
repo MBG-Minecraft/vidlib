@@ -11,7 +11,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public final class AsyncFileSelector {
-
 	private static final ExecutorService DIALOG_THREAD = Executors.newSingleThreadExecutor(r -> {
 		var t = new Thread(r, "File Dialog Thread");
 		t.setDaemon(true);
@@ -21,7 +20,8 @@ public final class AsyncFileSelector {
 	private static CompletableFuture<String> currentDialog;
 	private static boolean nfdInitialized = false;
 
-	private AsyncFileSelector() {}
+	private AsyncFileSelector() {
+	}
 
 	public static boolean hasDialog() {
 		return currentDialog != null;
@@ -44,6 +44,7 @@ public final class AsyncFileSelector {
 			}
 
 			String resultPath = null;
+
 			try (var stack = MemoryStack.stackPush()) {
 				var out = stack.callocPointer(1);
 				int result = task.run(stack, out);
@@ -96,6 +97,7 @@ public final class AsyncFileSelector {
 		}
 
 		var specBuilder = new StringBuilder();
+
 		for (var spec : specs) {
 			if (!specBuilder.isEmpty()) {
 				specBuilder.append(',');
@@ -105,8 +107,8 @@ public final class AsyncFileSelector {
 
 		var buffer = NFDFilterItem.malloc(1, stack);
 		buffer.get(0)
-				.name(stack.UTF8(filter(description)))
-				.spec(stack.UTF8(specBuilder.toString()));
+			.name(stack.UTF8(filter(description)))
+			.spec(stack.UTF8(specBuilder.toString()));
 		return buffer;
 	}
 
@@ -117,12 +119,14 @@ public final class AsyncFileSelector {
 
 		var s = in.toString();
 		var builder = new StringBuilder(s.length());
+
 		for (int i = 0; i < s.length(); i++) {
 			char c = s.charAt(i);
 			if (c >= 32 || c == '\n' || c == '\t' || c == '\r') {
 				builder.append(c);
 			}
 		}
+
 		return builder.toString();
 	}
 

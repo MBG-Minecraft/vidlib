@@ -641,4 +641,8 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 		return PlayerSkin.Model.WIDE;
 	}
+
+	default float getEffectScale() {
+		return vl$self().getWindow().getGuiScaledHeight() / 1080F;
+	}
 }

@@ -35,7 +35,7 @@ public class BuiltInImGui {
 		list.add(MenuItem.item(ImIcons.TIMELAPSE, "Server Stopwatch", GlobalStopwatchPanel.INSTANCE).enabled(graphics.inGame));
 		list.add(MenuItem.item(ImIcons.TIMELAPSE, "New Stopwatch", g -> StopwatchPanel.openNew()));
 		list.add(MenuItem.menu(ImIcons.APERTURE, "Canvas", CanvasPanel::menu));
-		list.add(MenuItem.item(ImIcons.PLAY, "Sounds", BuiltInImGui.showSounds != null, g -> BuiltInImGui.showSounds = false));
+		list.add(MenuItem.item(ImIcons.MUSIC_NOTE, "Sounds", BuiltInImGui.showSounds != null, g -> BuiltInImGui.showSounds = false));
 		list.add(MenuItem.SEPARATOR);
 		list.add(MenuItem.item(ImIcons.CAMERA, "Cutscene Builder", CutsceneBuilderPanel.INSTANCE).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.SEARCH, "Entity Explorer", EntityExplorerPanel.INSTANCE).enabled(graphics.isAdmin));

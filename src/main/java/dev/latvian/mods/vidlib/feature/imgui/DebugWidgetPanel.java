@@ -19,6 +19,7 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
 import dev.latvian.mods.vidlib.math.kvector.DynamicKVector;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
+import dev.latvian.mods.vidlib.util.AsyncFileSelector;
 import imgui.ImGui;
 import imgui.ImGuiViewport;
 import imgui.ImVec2;
@@ -240,6 +241,12 @@ public class DebugWidgetPanel extends AdminPanel {
 		ImGui.inputText("###text-input", stringData);
 		ImGui.separator();
 
+		if (ImGui.button("Open File Dialog")) {
+			stringData.set(AsyncFileSelector.openFileDialog(null, "").join());
+		}
+
+		ImGui.separator();
+
 		ImGui.text("Multi-line Text Input");
 		ImGui.inputTextMultiline("###multi-line-text-input", multiLineStringData);
 		ImGui.separator();
@@ -263,23 +270,6 @@ public class DebugWidgetPanel extends AdminPanel {
 		ImGui.text("Image");
 		var sprite = mc.getBlockAtlas().getSprite(ResourceLocation.withDefaultNamespace("block/campfire_fire"));
 		ImGui.image(mc.getBlockAtlas().getTexture().vl$getHandle(), 128F, 128F, sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());
-		ImGui.separator();
-
-		ImGui.text("Line Plot");
-
-		if (ImPlot.beginPlot("Line Plot###line-plot")) {
-			var xdata = new Double[100];
-			var ydata = new Double[100];
-
-			for (int i = 0; i < 100; i++) {
-				xdata[i] = (double) i;
-				ydata[i] = Math.sin(i * 0.1);
-			}
-
-			ImPlot.plotLine("Sin###1", xdata, ydata);
-			ImPlot.endPlot();
-		}
-
 		ImGui.separator();
 
 		ImGui.text("Child Window");
@@ -362,6 +352,23 @@ public class DebugWidgetPanel extends AdminPanel {
 		profileBuilder.imguiKey(graphics, "Profile", "profile");
 		ImGui.separator();
 		transformationListBuilder.imguiKey(graphics, "Transformation List", "transformation-list");
+		ImGui.separator();
+
+		ImGui.text("Line Plot");
+
+		if (ImPlot.beginPlot("Line Plot###line-plot")) {
+			var xdata = new Double[100];
+			var ydata = new Double[100];
+
+			for (int i = 0; i < 100; i++) {
+				xdata[i] = (double) i;
+				ydata[i] = Math.sin(i * 0.1);
+			}
+
+			ImPlot.plotLine("Sin###1", xdata, ydata);
+			ImPlot.endPlot();
+		}
+
 		ImGui.separator();
 
 		ImGui.popItemWidth();

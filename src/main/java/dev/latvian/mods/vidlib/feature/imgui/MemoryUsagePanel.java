@@ -6,8 +6,8 @@ import imgui.ImGui;
 public class MemoryUsagePanel extends AdminPanel {
 	public static final MemoryUsagePanel INSTANCE = new MemoryUsagePanel();
 
-	private static long toMiB(long bytes) {
-		return bytes / 1024L / 1024L;
+	private static long toMB(long bytes) {
+		return bytes / 1000L / 1000L;
 	}
 
 	private MemoryUsagePanel() {
@@ -24,10 +24,10 @@ public class MemoryUsagePanel extends AdminPanel {
 
 		ImGui.pushItemWidth(-1F);
 
-		ImGui.text("Memory: %2d%% %03d/%03dMB".formatted(usedMemory * 100L / maxMemory, toMiB(usedMemory), toMiB(maxMemory)));
-		ImGui.progressBar(KMath.clamp(usedMemory / (float) maxMemory, 0F, 1F), 0F, 20F, "");
+		ImGui.text("Memory: %2d%% %,03d/%,03d MB".formatted(usedMemory * 100L / totalMemory, toMB(usedMemory), toMB(totalMemory)));
+		ImGui.progressBar(KMath.clamp(usedMemory / (float) totalMemory, 0F, 1F), 0F, 20F, "");
 
-		ImGui.text("Allocated: %2d%% %03dMB".formatted(totalMemory * 100L / maxMemory, toMiB(totalMemory)));
+		ImGui.text("Allocated: %2d%% %,03d/%,03d MB".formatted(totalMemory * 100L / maxMemory, toMB(totalMemory), toMB(maxMemory)));
 		ImGui.progressBar(KMath.clamp(totalMemory / (float) maxMemory, 0F, 1F), 0F, 20F, "");
 
 		ImGui.popItemWidth();

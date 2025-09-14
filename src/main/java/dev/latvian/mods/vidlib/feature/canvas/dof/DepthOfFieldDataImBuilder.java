@@ -27,7 +27,7 @@ public class DepthOfFieldDataImBuilder implements ImBuilder<DepthOfFieldData> {
 			focus.set(KVector.ZERO);
 			focusRange.set(1.5F);
 			blurRange.set(8F);
-			strength.set(10F);
+			strength.set(5F);
 			shape.set(DepthOfFieldShape.SPHERE);
 		}
 	}

@@ -139,4 +139,7 @@ public class AdminPanel {
 
 	public void postContent(ImGraphics graphics) {
 	}
+
+	public void tick() {
+	}
 }

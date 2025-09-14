@@ -21,6 +21,8 @@ import dev.latvian.mods.vidlib.feature.data.DataMapValue;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
+import dev.latvian.mods.vidlib.feature.imgui.AdminPanel;
+import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.input.PlayerInputChanged;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToServer;
@@ -289,6 +291,8 @@ public class LocalClientSessionData extends ClientSessionData {
 		if (undo > 0) {
 			VidLib.LOGGER.info("Undone " + undo + " future modifications");
 		}
+
+		BuiltInImGui.OPEN_PANELS.values().forEach(AdminPanel::tick);
 	}
 
 	public void refreshZones(ResourceKey<Level> dimension) {
