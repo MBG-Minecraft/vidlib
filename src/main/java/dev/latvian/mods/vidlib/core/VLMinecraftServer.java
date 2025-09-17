@@ -25,7 +25,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
-import net.neoforged.fml.loading.FMLPaths;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.nio.file.Files;
@@ -213,7 +212,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 
 	default Map<UUID, GameProfile> vl$getReroutedPlayers() {
 		var map = new HashMap<UUID, GameProfile>();
-		var path = FMLPaths.GAMEDIR.get().resolve("vidlib/rerouted-players.json");
+		var path = VidLib.DIR.resolve("rerouted-players.json");
 
 		if (Files.exists(path)) {
 			try (var reader = Files.newBufferedReader(path)) {

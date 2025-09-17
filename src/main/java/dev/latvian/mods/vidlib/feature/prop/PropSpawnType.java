@@ -10,8 +10,7 @@ public enum PropSpawnType implements StringRepresentable {
 	DUMMY(PropListType.LEVEL, "dummy"),
 	USER(PropListType.LEVEL, "user"),
 	GAME(PropListType.LEVEL, "game"),
-	DATA(PropListType.DATA, "data"),
-	ASSETS(PropListType.ASSETS, "assets");
+	DATA(PropListType.DATA, "data");
 
 	public final PropListType listType;
 	private final String name;

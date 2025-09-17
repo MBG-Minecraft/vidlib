@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.misc;
 
+import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.latvian.mods.klib.render.BufferSupplier;
@@ -13,6 +14,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
@@ -20,6 +23,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
+import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -171,5 +175,11 @@ public class MiscClientUtils {
 				}
 			}
 		}
+	}
+
+	public static ImmutableMap<ModelLayerLocation, LayerDefinition> customLayerDefinitions(ImmutableMap<ModelLayerLocation, LayerDefinition> original) {
+		var map = new HashMap<>(original);
+		// map.put(ModelLayers.PLAYER, LayerDefinition.create(PlayerModel.createMesh(CubeDeformation.NONE, false), 64, 64).apply(HumanoidModel.BABY_TRANSFORMER));
+		return ImmutableMap.<ModelLayerLocation, LayerDefinition>builder().putAll(map).build();
 	}
 }

@@ -32,6 +32,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.chars.CharConsumer;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongObjectPair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -49,9 +50,9 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -79,7 +80,7 @@ public class VLFlashbackIntegration {
 		FlashbackIntegration.HANDLE_CLICK_TARGET.add(VLFlashbackIntegration::handleClickTarget);
 		FlashbackIntegration.POPUPS.add(VLFlashbackIntegration::popups);
 		FlashbackIntegration.ICONS.add(VLFlashbackIntegration::icons);
-		FlashbackIntegration.STYLE.add(ImGraphics::setDefaultStyle);
+		FlashbackIntegration.STYLE.add(ImGraphics::setFullDefaultStyle);
 	}
 
 	private static void initialized(List<Packet<? super ClientConfigurationPacketListener>> configPackets, List<LongObjectPair<Packet<? super ClientGamePacketListener>>> gamePackets) {
@@ -88,7 +89,7 @@ public class VLFlashbackIntegration {
 		var registryAccess = server.registryAccess();
 
 		var dataMapOverrideBuilder = new DataMapOverrides.Builder();
-		var recorderProps = new Int2ObjectLinkedOpenHashMap<RecordedProp>();
+		var recordedProps = new ArrayList<RecordedProp>();
 		var recordingProps = new Int2ObjectLinkedOpenHashMap<RecordedProp>();
 
 		for (var entry : gamePackets) {
@@ -115,14 +116,25 @@ public class VLFlashbackIntegration {
 						case AddPropPayload p -> {
 							var map = new IdentityHashMap<PropData<?, ?>, Object>();
 							p.type().readUpdate(p.id(), registryAccess, p.update(), true, map::put);
-							recordingProps.put(p.id(), new RecordedProp(p.id(), p.type(), p.createdTime(), 0L, Map.copyOf(map)));
+
+							var old = recordingProps.get(p.id());
+
+							if (old != null) {
+								old.data.putAll(map);
+							} else {
+								var rp = new RecordedProp(p.id(), p.type());
+								rp.spawn = p.createdTime();
+								rp.data.putAll(map);
+								recordingProps.put(p.id(), rp);
+							}
 						}
 						case RemovePropsPayload p -> {
 							for (var id : p.ids()) {
 								var prop = recordingProps.remove(id.intValue());
 
 								if (prop != null) {
-									recorderProps.put(prop.id(), prop.finish(now));
+									prop.remove = now;
+									recordedProps.add(prop);
 								}
 							}
 						}
@@ -136,18 +148,25 @@ public class VLFlashbackIntegration {
 		long endTick = FlashbackIntegration.getEndTick();
 
 		for (var prop : recordingProps.values()) {
-			recorderProps.put(prop.id(), prop.finish(endTick));
+			prop.remove = endTick;
+			recordedProps.add(prop);
 		}
 
-		VidLib.LOGGER.info("Flashback props: " + recorderProps.size());
+		VidLib.LOGGER.info("Flashback props: " + recordedProps.size());
 
 		DataMapOverrides.INSTANCE = dataMapOverrideBuilder.build();
-		RecordedProp.INSTANCE = recorderProps;
+		RecordedProp.LIST = recordedProps;
+		RecordedProp.MAP = new Int2ObjectOpenHashMap<>();
+
+		for (var prop : recordedProps) {
+			RecordedProp.MAP.put(prop.id, prop);
+		}
 	}
 
 	private static void cleanup() {
 		DataMapOverrides.INSTANCE = null;
-		RecordedProp.INSTANCE = null;
+		RecordedProp.MAP = null;
+		RecordedProp.LIST = null;
 	}
 
 	private static void configSnapshot(List<Packet<? super ClientConfigurationPacketListener>> packets) {
@@ -334,6 +353,16 @@ public class VLFlashbackIntegration {
 		}
 
 		graphics.popStack();
+
+		int w = mc.getWindow().getWidth();
+		int h = mc.getWindow().getHeight();
+		int scw = mc.getWindow().getGuiScaledWidth();
+		int sch = mc.getWindow().getGuiScaledHeight();
+
+		// Fix flashback lagging extremely after window is minimized
+		if (scw > w || sch > h) {
+			mc.resizeDisplay();
+		}
 	}
 
 	private static void icons(CharConsumer chars) {

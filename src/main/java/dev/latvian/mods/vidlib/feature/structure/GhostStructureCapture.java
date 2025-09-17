@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.util.MessageConsumer;
+import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
 import dev.latvian.mods.vidlib.util.JsonUtils;
@@ -12,7 +13,6 @@ import imgui.type.ImBoolean;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.neoforged.fml.loading.FMLPaths;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 import java.net.URI;
@@ -68,7 +68,7 @@ public interface GhostStructureCapture {
 
 			source.tell(Component.literal("Slicing into %d x %d x %d chunks...".formatted(maxChunkX - minChunkX + 1, maxChunkY - minChunkY + 1, maxChunkZ - minChunkZ + 1)));
 
-			var path = FMLPaths.GAMEDIR.get().resolve("local/vidlib/export/%s-ghost-chunks.jar".formatted(name));
+			var path = VidLib.LOCAL_DIR.resolve("export/%s-ghost-chunks.jar".formatted(name));
 
 			if (Files.notExists(path.getParent())) {
 				Files.createDirectories(path.getParent());
@@ -225,7 +225,7 @@ public interface GhostStructureCapture {
 	static int save(MessageConsumer source, String name, boolean createShell) {
 		long startTime = System.currentTimeMillis();
 		var fname = name.replace('-', '_').replaceAll("\\W+", "_");
-		var pathStr = "vidlib/%s.vstruct".formatted(fname);
+		var pathStr = "%s.vstruct".formatted(fname);
 
 		try {
 			var current = CURRENT.getValue();
@@ -245,11 +245,7 @@ public interface GhostStructureCapture {
 				return 0;
 			}
 
-			var path = FMLPaths.GAMEDIR.get().resolve(pathStr);
-
-			if (Files.notExists(path.getParent())) {
-				Files.createDirectories(path.getParent());
-			}
+			var path = VidLib.DIR.resolve(pathStr);
 
 			finalStructure.toVStruct(path);
 

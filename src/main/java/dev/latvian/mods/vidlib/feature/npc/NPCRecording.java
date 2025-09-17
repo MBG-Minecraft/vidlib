@@ -12,7 +12,6 @@ import net.minecraft.network.VarInt;
 import net.minecraft.network.VarLong;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.BufferedInputStream;
 import java.nio.file.Files;
@@ -26,7 +25,7 @@ public class NPCRecording {
 		if (REPLAY == null) {
 			REPLAY = new LinkedHashMap<>();
 
-			var rootPath = FMLPaths.GAMEDIR.get().resolve("vidlib/npc");
+			var rootPath = VidLib.DIR.resolve("npc");
 
 			if (Files.exists(rootPath)) {
 				try (var stream = Files.walk(rootPath)) {

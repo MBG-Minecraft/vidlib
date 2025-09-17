@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import imgui.ImGui;
@@ -57,6 +58,18 @@ public class PropExplorerPanel extends AdminPanel {
 			}
 
 			ImGui.popID();
+		}
+
+		if (graphics.isReplay) {
+			ImGuiUtils.separatorWithText("Replay Props");
+
+			if (graphics.button(ImIcons.ADD + " Add Replay Prop##add-replay-prop", ImColorVariant.GREEN)) {
+				ImGui.openPopup("###add-replay-prop-popup");
+			}
+
+			if (ImGui.beginPopup("###add-replay-prop-popup")) {
+				ImGui.endPopup();
+			}
 		}
 
 		ImGui.popItemWidth();

@@ -20,6 +20,7 @@ import it.unimi.dsi.fastutil.floats.FloatList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ARGB;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -73,7 +74,7 @@ public class ImGraphics {
 
 	public void pushRootStack() {
 		pushStack();
-		setDefaultStyle();
+		// setDefaultStyle();
 		setNumberType(ImNumberType.DOUBLE);
 		setNumberRange(null);
 	}
@@ -205,39 +206,13 @@ public class ImGraphics {
 		return stack.numberRange;
 	}
 
-	public void setDefaultStyle() {
-		setStyleVar(ImGuiStyleVar.WindowPadding, 8F, 8F);
-		setStyleVar(ImGuiStyleVar.WindowRounding, 4F);
-		setStyleVar(ImGuiStyleVar.FramePadding, 4F, 3F);
-		setStyleVar(ImGuiStyleVar.FrameRounding, 3F);
-		setStyleVar(ImGuiStyleVar.ChildRounding, 3F);
-		setStyleVar(ImGuiStyleVar.PopupRounding, 3F);
-		setStyleVar(ImGuiStyleVar.PopupBorderSize, 0F);
-		setStyleVar(ImGuiStyleVar.ItemSpacing, 8F, 8F);
-		setStyleVar(ImGuiStyleVar.ItemInnerSpacing, 8F, 6F);
-		setStyleVar(ImGuiStyleVar.IndentSpacing, 25F);
-		setStyleVar(ImGuiStyleVar.ScrollbarSize, 15F);
-		setStyleVar(ImGuiStyleVar.ScrollbarRounding, 9F);
-		setStyleVar(ImGuiStyleVar.GrabMinSize, 5F);
-		setStyleVar(ImGuiStyleVar.GrabRounding, 3F);
-		setStyleVar(ImGuiStyleVar.WindowBorderSize, 0F);
-		setStyleVar(ImGuiStyleVar.SelectableTextAlign, 0F, 0.5F);
-		setStyleVar(ImGuiStyleVar.Alpha, 1F);
-
-		setStyleCol(ImGuiCol.WindowBg, 0xFF222228);
-		setStyleCol(ImGuiCol.PopupBg, 0xFF222228);
-		setStyleCol(ImGuiCol.FrameBg, 0xFF15151C);
-		setStyleCol(ImGuiCol.TitleBg, 0xFF010101);
-		setStyleCol(ImGuiCol.TitleBgActive, 0xFF010101);
-		setStyleCol(ImGuiCol.MenuBarBg, 0xFF17171C);
-		setStyleCol(ImGuiCol.TitleBgCollapsed, 0xEF517F70);
-		// setStyleCol(ImGuiCol.Tab, 0xFF000000);
-		// setStyleCol(ImGuiCol.TabActive, 0xFF313033);
-		// setStyleCol(ImGuiCol.TabHovered, 0xFF4E4D51);
-
-		setButton(ImColorVariant.DEFAULT);
-		setNodesPin(ImColorVariant.DEFAULT);
-		setNodesPin(ImColorVariant.DEFAULT);
+	public static void setFullDefaultStyle(ImGuiStyle style) {
+		setDefaultStyle(style);
+		style.setWindowPadding(8F, 8F);
+		style.setFramePadding(4F, 3F);
+		style.setPopupBorderSize(0F);
+		style.setItemSpacing(8F, 8F);
+		style.setItemInnerSpacing(8F, 6F);
 	}
 
 	public static void setDefaultStyle(ImGuiStyle style) {
@@ -245,26 +220,31 @@ public class ImGraphics {
 		style.setFrameRounding(3F);
 		style.setChildRounding(3F);
 		style.setPopupRounding(3F);
+		style.setScrollbarRounding(9F);
+		style.setGrabRounding(3F);
+
 		style.setIndentSpacing(25F);
 		style.setScrollbarSize(15F);
-		style.setScrollbarRounding(9F);
 		style.setGrabMinSize(5F);
-		style.setGrabRounding(3F);
 		style.setWindowBorderSize(0F);
 		style.setSelectableTextAlign(0F, 0.5F);
 		style.setAlpha(1F);
 
-		style.setColor(ImGuiCol.WindowBg, 0xFF282222);
-		style.setColor(ImGuiCol.PopupBg, 0xFF282222);
-		style.setColor(ImGuiCol.FrameBg, 0xFF1C1515);
-		style.setColor(ImGuiCol.TitleBg, 0xFF010101);
-		style.setColor(ImGuiCol.TitleBgActive, 0xFF010101);
-		style.setColor(ImGuiCol.MenuBarBg, 0xFF1C1717);
-		style.setColor(ImGuiCol.TitleBgCollapsed, 0xEF707F51);
+		setColor(style, ImGuiCol.WindowBg, 0xFF222228);
+		setColor(style, ImGuiCol.PopupBg, 0xE30D0D11);
+		setColor(style, ImGuiCol.FrameBg, 0xFF15151C);
+		setColor(style, ImGuiCol.TitleBg, 0xFF010101);
+		setColor(style, ImGuiCol.TitleBgActive, 0xFF010101);
+		setColor(style, ImGuiCol.MenuBarBg, 0xFF17171C);
+		setColor(style, ImGuiCol.TitleBgCollapsed, 0xEF517F70);
 
-		style.setColor(ImGuiCol.Button, ImColorVariant.DEFAULT.color.abgr());
-		style.setColor(ImGuiCol.ButtonHovered, ImColorVariant.DEFAULT.hoverColor.abgr());
-		style.setColor(ImGuiCol.ButtonActive, ImColorVariant.DEFAULT.activeColor.abgr());
+		setColor(style, ImGuiCol.Button, ImColorVariant.DEFAULT.color.argb());
+		setColor(style, ImGuiCol.ButtonHovered, ImColorVariant.DEFAULT.hoverColor.argb());
+		setColor(style, ImGuiCol.ButtonActive, ImColorVariant.DEFAULT.activeColor.argb());
+	}
+
+	public static void setColor(ImGuiStyle style, int key, int color) {
+		style.setColor(key, ARGB.toABGR(color));
 	}
 
 	public void setText(ImColorVariant variant) {

@@ -37,13 +37,11 @@ public class ClientProps extends Props<ClientLevel> {
 		level.getProps().reloadAll();
 	}
 
-	public final PropList assetProps;
 	public final Map<RenderLevelStageEvent.Stage, List<RenderedProp<?>>> stages;
 	private final List<PropRenderContext<?>> sortedProps;
 
 	public ClientProps(ClientLevel level) {
 		super(level);
-		this.propLists.put(PropListType.ASSETS, assetProps = new PropList(this, PropListType.ASSETS));
 		this.stages = new Reference2ObjectOpenHashMap<>();
 		this.sortedProps = new ArrayList<>();
 	}
@@ -85,31 +83,31 @@ public class ClientProps extends Props<ClientLevel> {
 	}
 
 	@Override
-	public void tick() {
-		if (RecordedProp.INSTANCE != null) {
+	public void tick(boolean tick) {
+		if (RecordedProp.MAP != null && RecordedProp.LIST != null) {
 			var now = level.getGameTime();
 
 			for (var existing : levelProps) {
-				var p = RecordedProp.INSTANCE.get(existing.id);
+				var p = RecordedProp.MAP.get(existing.id);
 
 				if (p == null || !p.exists(now)) {
 					existing.remove(PropRemoveType.TIME_TRAVEL);
 				}
 			}
 
-			for (var p : RecordedProp.INSTANCE.values()) {
-				var existing = levelProps.get(p.id());
+			for (var p : RecordedProp.LIST) {
+				var existing = levelProps.get(p.id);
 
 				if (p.exists(now)) {
 					if (existing == null) {
-						create(context(p.type(), PropSpawnType.GAME, p.spawn()), true, true, null, null, prop -> {
-							prop.id = p.id();
+						create(context(p.type, PropSpawnType.GAME, p.spawn), true, true, null, null, prop -> {
+							prop.id = p.id;
 
-							for (var entry : p.data().entrySet()) {
+							for (var entry : p.data.entrySet()) {
 								prop.setData(entry.getKey(), Cast.to(entry.getValue()));
 							}
 
-							prop.tick = (int) (now - p.spawn());
+							prop.tick = (int) (now - p.spawn);
 						});
 					}
 				} else if (existing != null) {
@@ -118,7 +116,11 @@ public class ClientProps extends Props<ClientLevel> {
 			}
 		}
 
-		super.tick();
+		super.tick(tick);
+
+		if (RecordedProp.MAP != null && RecordedProp.LIST != null && !tick) {
+			levelProps.map.values().removeIf(prop -> prop.removed == PropRemoveType.TIME_TRAVEL);
+		}
 	}
 
 	public void renderAll(FrameInfo frame, PoseStack ms) {

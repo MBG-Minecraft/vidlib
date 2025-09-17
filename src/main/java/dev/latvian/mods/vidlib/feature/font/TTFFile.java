@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.font;
 
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.registry.RegistryRef;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import net.minecraft.resources.ResourceLocation;
@@ -11,18 +10,18 @@ import java.util.HashMap;
 
 public record TTFFile(ResourceLocation id, ResourceLocation resource) {
 	public static final VLRegistry<TTFFile> REGISTRY = VLRegistry.createClient("ttf", TTFFile.class);
-	public static final RegistryRef<TTFFile> MATERIAL_ICONS_ROUND_REGULAR = REGISTRY.ref(VidLib.id("materialiconsround_regular"));
-	public static final RegistryRef<TTFFile> JETBRAINS_MONO_REGULAR = REGISTRY.ref(VidLib.id("jetbrainsmono_regular"));
+	public static final RegistryRef<TTFFile> MATERIAL_ICONS_ROUND_REGULAR = REGISTRY.ref(ResourceLocation.fromNamespaceAndPath("imguiresources", "materialiconsround_regular"));
+	public static final RegistryRef<TTFFile> JETBRAINS_MONO_REGULAR = REGISTRY.ref(ResourceLocation.fromNamespaceAndPath("imguiresources", "jetbrainsmono_regular"));
 
 	public static void find(ResourceManager resourceManager) {
 		var map = new HashMap<ResourceLocation, TTFFile>();
-
-		for (var entry : resourceManager.listResources("vidlib/ttf", id -> !id.getPath().startsWith("_") && (id.getPath().endsWith(".ttf") || id.getPath().endsWith(".otf"))).entrySet()) {
-			var id = entry.getKey().withPath(s -> s.substring(11, s.length() - 4));
-			map.put(id, new TTFFile(id, entry.getKey()));
-		}
-
+		map.put(MATERIAL_ICONS_ROUND_REGULAR.id(), new TTFFile(MATERIAL_ICONS_ROUND_REGULAR.id()));
+		map.put(JETBRAINS_MONO_REGULAR.id(), new TTFFile(JETBRAINS_MONO_REGULAR.id()));
 		REGISTRY.update(map);
+	}
+
+	public TTFFile(ResourceLocation id) {
+		this(id, id.withPath(p -> p + ".ttf"));
 	}
 
 	public byte[] load(ResourceManager resourceManager) throws IOException {

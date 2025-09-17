@@ -49,9 +49,7 @@ public abstract class LevelMixin implements VLLevel {
 
 	@Inject(method = "tickBlockEntities", at = @At("RETURN"))
 	private void vl$tickProps(CallbackInfo ci) {
-		if (getEnvironment().getPauseType().tick()) {
-			getProps().tick();
-		}
+		getProps().tick(getEnvironment().getPauseType().tick());
 	}
 
 	@Override

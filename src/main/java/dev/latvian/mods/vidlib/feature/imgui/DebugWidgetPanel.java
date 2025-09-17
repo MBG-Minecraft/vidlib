@@ -19,7 +19,6 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
 import dev.latvian.mods.vidlib.math.kvector.DynamicKVector;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
-import dev.latvian.mods.vidlib.util.AsyncFileSelector;
 import imgui.ImGui;
 import imgui.ImGuiViewport;
 import imgui.ImVec2;

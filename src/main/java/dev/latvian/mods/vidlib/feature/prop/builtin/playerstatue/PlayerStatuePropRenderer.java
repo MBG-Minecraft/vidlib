@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.playerstatue;
 
 import com.mojang.math.Axis;
+import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.EntityRenderTypes;
@@ -126,6 +127,13 @@ public class PlayerStatuePropRenderer implements PropRenderer<PlayerStatueProp> 
 		playerRenderState.showLeftSleeve = true;
 		playerRenderState.showRightSleeve = true;
 		playerRenderState.showCape = true;
+		playerRenderState.capeFlap = 0F;
+		playerRenderState.capeLean = 0F;
+		playerRenderState.capeLean2 = 0F;
+		playerRenderState.nameTag = Empty.isEmpty(p.name) ? null : p.name;
+		playerRenderState.swimAmount = p.pose == Pose.SWIMMING ? 1F : 0F;
+		playerRenderState.isPassenger = p.pose == Pose.SITTING;
+		playerRenderState.ageInTicks = p.breathing ? p.getTick(delta) : 0F;
 
 		for (int i = 0; i < count; i++) {
 			ms.pushPose();
@@ -159,9 +167,8 @@ public class PlayerStatuePropRenderer implements PropRenderer<PlayerStatueProp> 
 			playerRenderState.yRot = 0F;
 			playerRenderState.bodyRot = yaw + randomSource.nextRange(p.randomYaw);
 			playerRenderState.xRot = pitch + randomSource.nextRange(p.randomPitch);
-			playerRenderState.swimAmount = p.pose == Pose.SWIMMING ? 1F : 0F;
-
 			playerRenderState.skin = skins[randomSource.nextInt(skins.length)];
+
 			playerRenderer.render(playerRenderState, ms, buffers, light);
 			ms.popPose();
 		}

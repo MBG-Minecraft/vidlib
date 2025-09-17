@@ -130,7 +130,7 @@ public class BuiltInImGui {
 	}).remainOpen(true);
 
 	public static final MenuItem WARP = MenuItem.menu(ImIcons.LOCATION, "Warp", (graphics, list) -> {
-		if (graphics.inGame) {
+		if (graphics.inGame && !graphics.isReplay) {
 			list.add(MenuItem.menu(ImIcons.WORLD, "Dimension", (g1, list1) -> {
 				var registry = g1.mc.player.connection.levels();
 

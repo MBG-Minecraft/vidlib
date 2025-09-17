@@ -68,4 +68,11 @@ public abstract class LivingEntityMixin implements VLLivingEntity {
 	private FluidState vl$getFluidState(Level level, BlockPos pos) {
 		return level.vl$overrideFluidState(pos);
 	}
+
+	@Inject(method = "isBaby", at = @At("HEAD"), cancellable = true)
+	private void vl$isBaby(CallbackInfoReturnable<Boolean> cir) {
+		if (vl$self().getTags().contains("baby")) {
+			cir.setReturnValue(true);
+		}
+	}
 }

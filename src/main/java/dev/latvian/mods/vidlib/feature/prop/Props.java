@@ -27,9 +27,9 @@ public abstract class Props<L extends Level> {
 		return new PropContext<>(this, type, spawnType, createdTime);
 	}
 
-	public void tick() {
+	public void tick(boolean tick) {
 		for (var list : propLists.values()) {
-			list.tick(null);
+			list.tick(null, tick);
 		}
 	}
 

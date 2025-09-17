@@ -14,6 +14,7 @@ import dev.latvian.mods.vidlib.feature.entity.ForceEntityVelocityPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.S2CEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.entity.filter.ProfileEntityFilter;
+import dev.latvian.mods.vidlib.feature.imgui.AsyncFileSelector;
 import dev.latvian.mods.vidlib.feature.imgui.EntityExplorerPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
@@ -29,7 +30,6 @@ import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.PositionType;
-import dev.latvian.mods.vidlib.util.AsyncFileSelector;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
@@ -292,14 +292,16 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 			return;
 		}
 
-		if (ImGui.smallButton("Copy UUID")) {
-			ImGui.setClipboardText(entity.getUUID().toString());
-		}
+		if (!graphics.isReplay) {
+			if (ImGui.smallButton("Copy UUID")) {
+				ImGui.setClipboardText(entity.getUUID().toString());
+			}
 
-		ImGui.sameLine();
+			ImGui.sameLine();
 
-		if (ImGui.smallButton("Copy Network ID")) {
-			ImGui.setClipboardText(Integer.toString(entity.getId()));
+			if (ImGui.smallButton("Copy Network ID")) {
+				ImGui.setClipboardText(Integer.toString(entity.getId()));
+			}
 		}
 
 		if (!graphics.isReplay) {

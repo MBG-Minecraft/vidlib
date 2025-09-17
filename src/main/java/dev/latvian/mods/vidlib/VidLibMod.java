@@ -10,11 +10,21 @@ import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import java.nio.file.Files;
+
 @Mod(VidLib.ID)
 public class VidLibMod {
-	public VidLibMod(IEventBus bus) {
+	public VidLibMod(IEventBus bus) throws Exception {
 		PlatformHelper.CURRENT = new NeoPlatformHelper();
 		VidLib.init();
+
+		if (Files.notExists(VidLib.DIR)) {
+			Files.createDirectories(VidLib.DIR);
+		}
+
+		if (Files.notExists(VidLib.LOCAL_DIR)) {
+			Files.createDirectories(VidLib.LOCAL_DIR);
+		}
 
 		for (var s : AutoRegister.SCANNED.get()) {
 			if (s.value() instanceof DeferredRegister<?> reg) {

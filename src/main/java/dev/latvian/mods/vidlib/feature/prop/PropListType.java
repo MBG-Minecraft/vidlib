@@ -8,8 +8,7 @@ import net.minecraft.util.StringRepresentable;
 
 public enum PropListType implements StringRepresentable {
 	LEVEL("level"),
-	DATA("data"),
-	ASSETS("assets");
+	DATA("data");
 
 	private final String name;
 

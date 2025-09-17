@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
+import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibClientEventHandler;
 import dev.latvian.mods.vidlib.core.VLMouseHandler;
 import dev.latvian.mods.vidlib.feature.font.TTFFile;
@@ -8,6 +10,7 @@ import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImFontConfig;
 import imgui.ImFontGlyphRangesBuilder;
 import imgui.ImGui;
+import imgui.ImGuiIO;
 import imgui.extension.imnodes.ImNodes;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.ImPlotContext;
@@ -73,21 +76,26 @@ public class ImGuiHooks {
 		var client = Minecraft.getInstance();
 		imGuiGlfw = new ImGuiImplGlfw();
 		imGuiGl3 = new ImGuiImplGl3();
-		imGuiContext = ImGui.createContext();
+		imGuiContext = new ImGuiContext(ImGui.createContext().ptr);
+		ImGui.setCurrentContext(imGuiContext);
 		imPlotContext = ImPlot.createContext();
 		ImNodes.createContext();
-		var io = ImGui.getIO();
+		var io = new ImGuiIO(ImGui.getIO().ptr);
+		io.setIniFilename(VidLib.LOCAL_DIR.resolve("imgui.ini").toAbsolutePath().toString());
 		io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
 		io.addConfigFlags(ImGuiConfigFlags.DockingEnable);
 		io.addConfigFlags(ImGuiConfigFlags.DpiEnableScaleFonts);
 		io.addConfigFlags(ImGuiConfigFlags.DpiEnableScaleViewports);
 		io.setConfigDockingWithShift(false);
 		io.setConfigWindowsMoveFromTitleBarOnly(true);
+		io.setConfigMacOSXBehaviors(Minecraft.ON_OSX);
 
 		imGuiGlfw.init(client.getWindow().getWindow(), true);
 		imGuiGl3.init("#version 330");
-
 		loadFonts(resourceManager);
+		var style = ImGui.getStyle();
+		ImGui.styleColorsDark(style);
+		ImGraphics.setFullDefaultStyle(style);
 	}
 
 	public static void loadFonts(ResourceManager resourceManager) {
@@ -160,6 +168,12 @@ public class ImGuiHooks {
 		ImNodes.destroyContext();
 	}
 
+	public static void frame(Minecraft mc) {
+		startFrame(mc);
+		beforeEndFrame();
+		endFrame(mc);
+	}
+
 	public static void startFrame(Minecraft mc) {
 		if (initialized == 0) {
 			return;
@@ -171,6 +185,8 @@ public class ImGuiHooks {
 		}
 
 		ensureEndFrame();
+
+		GlStateManager._disableColorLogicOp();
 
 		if (ImGui.getIO().getKeysDown(GLFW.GLFW_KEY_LEFT_CONTROL)) {
 			ImGui.getIO().setKeysDown(GLFW.GLFW_KEY_TAB, false);

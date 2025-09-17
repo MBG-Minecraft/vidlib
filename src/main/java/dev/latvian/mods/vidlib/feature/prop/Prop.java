@@ -530,9 +530,11 @@ public class Prop {
 
 		graphics.setRedButton();
 
-		if (ImGui.smallButton(ImIcons.DELETE + " Remove###remove")) {
+		if (ImGui.button(ImIcons.DELETE + "###remove")) {
 			graphics.mc.runClientCommand("prop remove id " + getIdString());
 		}
+
+		ImGuiUtils.hoveredTooltip("Remove");
 
 		if (graphics.isReplay) {
 			ImGui.endDisabled();
@@ -544,7 +546,7 @@ public class Prop {
 
 		boolean isHidden = ClientProps.HIDDEN_PROPS.contains(id);
 
-		if (graphics.smallButton(isHidden ? (ImIcons.VISIBLE + " Show###visible") : (ImIcons.INVISIBLE + " Hide###visible"), isHidden ? ImColorVariant.GREEN : null)) {
+		if (graphics.button((isHidden ? ImIcons.INVISIBLE : ImIcons.VISIBLE) + "###visible", isHidden ? ImColorVariant.RED : null)) {
 			if (isHidden) {
 				ClientProps.HIDDEN_PROPS.remove(id);
 			} else {
@@ -552,11 +554,13 @@ public class Prop {
 			}
 		}
 
+		ImGuiUtils.hoveredTooltip(isHidden ? "Hidden" : "Visible");
+
 		ImGui.sameLine();
 
 		boolean isTypeHidden = ClientProps.HIDDEN_PROP_TYPES.contains(type);
 
-		if (graphics.smallButton(isTypeHidden ? (ImIcons.VISIBLE + " Show All of Type###type-visible") : (ImIcons.INVISIBLE + " Hide All of Type###type-visible"), isTypeHidden ? ImColorVariant.GREEN : null)) {
+		if (graphics.button((isTypeHidden ? ImIcons.INVISIBLE : ImIcons.VISIBLE) + ImIcons.ASTERIX.toString() + "###type-visible", isTypeHidden ? ImColorVariant.RED : null)) {
 			if (isTypeHidden) {
 				ClientProps.HIDDEN_PROP_TYPES.remove(type);
 			} else {
@@ -564,23 +568,31 @@ public class Prop {
 			}
 		}
 
-		if (ImGui.smallButton(ImIcons.COPY + " Copy ID###copy-id")) {
-			ImGui.setClipboardText(getIdString());
+		ImGuiUtils.hoveredTooltip(isTypeHidden ? "Type Hidden" : "Type Visible");
+
+		ImGui.sameLine();
+
+		if (RecordedProp.LIST != null) {
+			ImGui.beginDisabled();
+		}
+
+		if (ImGui.button(ImIcons.PASTE + "###clone")) {
+			graphics.mc.runClientCommand("prop clone " + getIdString());
+		}
+
+		ImGuiUtils.hoveredTooltip("Clone");
+
+		if (RecordedProp.LIST != null) {
+			ImGui.endDisabled();
 		}
 
 		ImGui.sameLine();
 
-		if (RecordedProp.INSTANCE != null) {
-			ImGui.beginDisabled();
+		if (ImGui.button(ImIcons.COPY + "###copy-id")) {
+			ImGui.setClipboardText(getIdString());
 		}
 
-		if (ImGui.smallButton(ImIcons.PASTE + " Clone###clone")) {
-			graphics.mc.runClientCommand("prop clone " + getIdString());
-		}
-
-		if (RecordedProp.INSTANCE != null) {
-			ImGui.endDisabled();
-		}
+		ImGuiUtils.hoveredTooltip("Copy ID");
 
 		if (graphics.isReplay) {
 			if (DepthOfField.OVERRIDE_ENABLED.get() && ImGui.smallButton(ImIcons.APERTURE + " Focus DoF###focus-dof")) {
@@ -603,6 +615,10 @@ public class Prop {
 			}
 
 			imguiBuilders = List.copyOf(imguiBuilders);
+		}
+
+		if (graphics.isReplay) {
+			ImGui.beginChild("Test###data", -1F, 300F);
 		}
 
 		if (ImGui.beginTable("###data", 3, ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.Borders)) {
@@ -724,6 +740,10 @@ public class Prop {
 			}
 
 			ImGui.endTable();
+		}
+
+		if (graphics.isReplay) {
+			ImGui.endChild();
 		}
 	}
 

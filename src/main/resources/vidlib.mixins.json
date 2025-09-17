@@ -91,6 +91,7 @@
 		"KeyboardHandlerMixin",
 		"KeyboardMixinInput",
 		"KeyMappingMixin",
+		"LayerDefinitionsMixin",
 		"LevelEventHandlerMixin",
 		"LevelRendererMixin",
 		"LevelTargetBundleMixin",

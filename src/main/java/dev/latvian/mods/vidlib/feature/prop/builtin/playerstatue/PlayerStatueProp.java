@@ -28,7 +28,7 @@ import org.joml.Matrix3f;
 import org.joml.Vector3f;
 
 public class PlayerStatueProp extends BaseGeoProp {
-	public static final Pose[] POSES = {Pose.STANDING, Pose.CROUCHING, Pose.SLEEPING, Pose.SWIMMING};
+	public static final Pose[] POSES = {Pose.STANDING, Pose.CROUCHING, Pose.SLEEPING, Pose.SWIMMING, Pose.SITTING};
 
 	public static final PropData<PlayerStatueProp, Component> NAME = PropData.create(PlayerStatueProp.class, "name", DataTypes.TEXT_COMPONENT, p -> p.name, (p, v) -> p.name = v, TextComponentImBuilder.TYPE);
 	public static final PropData<PlayerStatueProp, Boolean> STONE = PropData.createBoolean(PlayerStatueProp.class, "stone", p -> p.stone, (p, v) -> p.stone = v);
@@ -51,6 +51,7 @@ public class PlayerStatueProp extends BaseGeoProp {
 	public static final PropData<PlayerStatueProp, ItemStack> LEGS_ITEM = PropData.create(PlayerStatueProp.class, "legs_item", DataTypes.ITEM_STACK, p -> p.legsItem, (p, v) -> p.legsItem = v, ItemStackImBuilder.TYPE);
 	public static final PropData<PlayerStatueProp, ItemStack> FEET_ITEM = PropData.create(PlayerStatueProp.class, "feet_item", DataTypes.ITEM_STACK, p -> p.feetItem, (p, v) -> p.feetItem = v, ItemStackImBuilder.TYPE);
 	public static final PropData<PlayerStatueProp, Pose> POSE = PropData.create(PlayerStatueProp.class, "pose", DataType.of(POSES), p -> p.pose, (p, v) -> p.pose = v, () -> new EnumImBuilder<>(POSES));
+	public static final PropData<PlayerStatueProp, Boolean> BREATHING = PropData.createBoolean(PlayerStatueProp.class, "breathing", p -> p.breathing, (p, v) -> p.breathing = v);
 
 	@AutoRegister
 	public static final PropType<PlayerStatueProp> TYPE = PropType.create(VidLib.id("player_statue"), PlayerStatueProp::new,
@@ -80,7 +81,8 @@ public class PlayerStatueProp extends BaseGeoProp {
 		CHEST_ITEM,
 		LEGS_ITEM,
 		FEET_ITEM,
-		POSE
+		POSE,
+		BREATHING
 	);
 
 	public Component name;
@@ -104,6 +106,7 @@ public class PlayerStatueProp extends BaseGeoProp {
 	public ItemStack legsItem;
 	public ItemStack feetItem;
 	public Pose pose;
+	public boolean breathing;
 
 	public PlayerStatueProp(PropContext<?> ctx) {
 		super(ctx);
@@ -131,6 +134,7 @@ public class PlayerStatueProp extends BaseGeoProp {
 		this.legsItem = ItemStack.EMPTY;
 		this.feetItem = ItemStack.EMPTY;
 		this.pose = Pose.STANDING;
+		this.breathing = false;
 	}
 
 	@Override

@@ -24,7 +24,7 @@ import java.util.function.Predicate;
 public class PropList implements Iterable<Prop> {
 	public final Props<?> props;
 	public final PropListType type;
-	private final Int2ObjectMap<Prop> map;
+	final Int2ObjectMap<Prop> map;
 	public final Map<PropRemoveType, IntList> removed;
 	public final List<Prop> collidingProps;
 	public final List<Prop> interactableProps;
@@ -61,7 +61,11 @@ public class PropList implements Iterable<Prop> {
 		return false;
 	}
 
-	public void tick(@Nullable S2CPacketBundleBuilder updates) {
+	public void tick(@Nullable S2CPacketBundleBuilder updates, boolean tick) {
+		if (!tick) {
+			return;
+		}
+
 		collidingProps.clear();
 		interactableProps.clear();
 

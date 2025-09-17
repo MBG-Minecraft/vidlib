@@ -61,7 +61,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -408,7 +407,7 @@ public class LocalClientSessionData extends ClientSessionData {
 			npcRecording.length = System.currentTimeMillis() - npcRecording.start;
 
 			var buf = PlatformHelper.CURRENT.createBuffer(Unpooled.buffer(), mc.level.registryAccess());
-			var path = FMLPaths.GAMEDIR.get().resolve("vidlib/npc/" + npcRecording.start + "_" + npcRecording.profile.getName().toLowerCase(Locale.ROOT) + ".npcrec");
+			var path = VidLib.DIR.resolve("npc/" + npcRecording.start + "_" + npcRecording.profile.getName().toLowerCase(Locale.ROOT) + ".npcrec");
 
 			if (Files.notExists(path.getParent())) {
 				try {

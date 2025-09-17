@@ -9,18 +9,15 @@ public class ServerProps extends Props<ServerLevel> {
 	}
 
 	@Override
-	public void tick() {
-		var updates = new S2CPacketBundleBuilder(level);
+	public void tick(boolean tick) {
+		var updates = tick ? new S2CPacketBundleBuilder(level) : null;
 
 		for (var list : propLists.values()) {
-			list.tick(updates);
+			list.tick(updates, tick);
 		}
 
-		updates.send(level);
-	}
-
-	@Override
-	protected boolean isValid(PropSpawnType type) {
-		return type != PropSpawnType.DUMMY && type != PropSpawnType.ASSETS;
+		if (updates != null) {
+			updates.send(level);
+		}
 	}
 }
