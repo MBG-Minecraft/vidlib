@@ -31,12 +31,5 @@ versionRange = "*"
 ordering = "AFTER"
 side = "BOTH"
 
-[[dependencies.vidlib]]
-modId = "flashback"
-type = "optional"
-versionRange = "*"
-ordering = "AFTER"
-side = "CLIENT"
-
 [[mixins]]
 config = "vidlib.mixins.json"

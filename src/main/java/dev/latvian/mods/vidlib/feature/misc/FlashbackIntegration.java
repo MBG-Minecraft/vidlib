@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.misc;
 
 import com.google.gson.JsonObject;
 import dev.latvian.mods.klib.util.Lazy;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import imgui.ImGuiStyle;
 import it.unimi.dsi.fastutil.chars.CharConsumer;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
@@ -77,15 +78,15 @@ public interface FlashbackIntegration {
 	List<Consumer<List<Packet<? super ClientConfigurationPacketListener>>>> CONFIG_SNAPSHOT = listField("CONFIG_SNAPSHOT");
 	List<Consumer<List<Packet<? super ClientGamePacketListener>>>> GAME_SNAPSHOT = listField("GAME_SNAPSHOT");
 	List<BiConsumer<Entity, List<Packet<? super ClientGamePacketListener>>>> ENTITY_SNAPSHOT = listField("ENTITY_SNAPSHOT");
-	List<Runnable> MENU_BAR = listField("MENU_BAR");
-	List<Consumer<Entity>> ENTITY_MENU = listField("ENTITY_MENU");
-	List<Runnable> VISUALS_MENU = listField("VISUALS_MENU");
-	List<Runnable> RENDER_FILTER_MENU = listField("RENDER_FILTER_MENU");
+	List<Consumer<ImGraphics>> MENU_BAR = listField("MENU_BAR");
+	List<BiConsumer<ImGraphics, Entity>> ENTITY_MENU = listField("ENTITY_MENU");
+	List<Consumer<ImGraphics>> VISUALS_MENU = listField("VISUALS_MENU");
+	List<Consumer<ImGraphics>> RENDER_FILTER_MENU = listField("RENDER_FILTER_MENU");
 	List<Consumer<JsonObject>> EDITOR_STATE_LOADED = listField("EDITOR_STATE_LOADED");
 	List<Consumer<JsonObject>> EDITOR_STATE_SAVED = listField("EDITOR_STATE_SAVED");
 	List<BiFunction<Vec3, Vec3, HitResult>> CLICK_TARGET = listField("CLICK_TARGET");
 	List<Predicate<HitResult>> HANDLE_CLICK_TARGET = listField("HANDLE_CLICK_TARGET");
-	List<Runnable> POPUPS = listField("POPUPS");
+	List<Consumer<ImGraphics>> POPUPS = listField("POPUPS");
 	List<Consumer<CharConsumer>> ICONS = listField("ICONS");
 	List<Consumer<ImGuiStyle>> STYLE = listField("STYLE");
 

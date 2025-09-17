@@ -188,26 +188,18 @@ public class VLFlashbackIntegration {
 		packets2.sendUnbundled(packets::add);
 	}
 
-	private static void menuBar() {
+	private static void menuBar(ImGraphics graphics) {
 		ImGui.separator();
-		var graphics = new ImGraphics(Minecraft.getInstance());
-		graphics.pushRootStack();
 		BuiltInImGui.MAIN_MENU_BAR.buildRoot(graphics, false);
-		graphics.popStack();
 	}
 
-	private static void entityMenu(Entity entity) {
+	private static void entityMenu(ImGraphics graphics, Entity entity) {
 		ImGuiUtils.separatorWithText("VidLib");
 		var mc = Minecraft.getInstance();
-		var graphics = new ImGraphics(mc);
-		graphics.pushRootStack();
 		entity.imgui(graphics, mc.getDeltaTracker().getGameTimeDeltaPartialTick(entity == mc.player));
-		graphics.popStack();
 	}
 
-	private static void visualsMenu() {
-		var mc = Minecraft.getInstance();
-
+	private static void visualsMenu(ImGraphics graphics) {
 		ImGuiUtils.separatorWithText("VidLib");
 
 		ImGui.pushID("vidlib");
@@ -226,7 +218,7 @@ public class VLFlashbackIntegration {
 		ImGui.popID();
 	}
 
-	private static void renderFilterMenu() {
+	private static void renderFilterMenu(ImGraphics graphics) {
 		if (ImGui.beginTabItem("Props")) {
 			if (ImGui.beginListBox("###props")) {
 				for (var propType : PropType.SORTED.get()) {
@@ -321,10 +313,8 @@ public class VLFlashbackIntegration {
 		return false;
 	}
 
-	private static void popups() {
+	private static void popups(ImGraphics graphics) {
 		var mc = Minecraft.getInstance();
-		var graphics = new ImGraphics(mc);
-		graphics.pushRootStack();
 
 		if (VidLibClientEventHandler.clientLoaded && mc.level != null && mc.level.isReplayLevel()) {
 			BuiltInImGui.handle(graphics);
@@ -351,8 +341,6 @@ public class VLFlashbackIntegration {
 		if (!ImGui.isPopupOpen("###vidlib-prop-popup")) {
 			selectedProp = 0;
 		}
-
-		graphics.popStack();
 
 		int w = mc.getWindow().getWidth();
 		int h = mc.getWindow().getHeight();
