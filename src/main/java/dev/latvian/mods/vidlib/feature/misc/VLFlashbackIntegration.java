@@ -115,7 +115,11 @@ public class VLFlashbackIntegration {
 						case SyncPlayerTagsPayload p -> dataMapOverrideBuilder.set(now, p.player(), DataMapOverrides.PLAYER_TAGS, Set.copyOf(p.tags()));
 						case AddPropPayload p -> {
 							var map = new IdentityHashMap<PropData<?, ?>, Object>();
-							p.type().readUpdate(p.id(), registryAccess, p.update(), true, map::put);
+							try {
+								p.type().readUpdate(p.id(), registryAccess, p.update(), true, map::put);
+							} catch (Exception ex) {
+								ex.printStackTrace();
+							}
 
 							var old = recordingProps.get(p.id());
 
@@ -127,6 +131,7 @@ public class VLFlashbackIntegration {
 								rp.data.putAll(map);
 								recordingProps.put(p.id(), rp);
 							}
+
 						}
 						case RemovePropsPayload p -> {
 							for (var id : p.ids()) {
