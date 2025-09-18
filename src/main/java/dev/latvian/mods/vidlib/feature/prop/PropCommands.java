@@ -50,9 +50,9 @@ public interface PropCommands {
 				)
 			)
 			.then(Commands.literal("id")
-				.then(Commands.argument("id", StringArgumentType.word())
+				.then(Commands.argument("prop", StringArgumentType.word())
 					.executes(ctx -> {
-						int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "id"), 16);
+						int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "prop"), 16);
 						return remove(ctx.getSource(), prop -> prop.id == id);
 					})
 				)
@@ -62,7 +62,7 @@ public interface PropCommands {
 			.then(Commands.argument("prop", StringArgumentType.word())
 				.then(Commands.argument("pos", Vec3Argument.vec3())
 					.executes(ctx -> {
-						int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "id"), 16);
+						int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "prop"), 16);
 						return move(ctx.getSource(), id, Vec3Argument.getCoordinates(ctx, "pos"));
 					})
 				)
@@ -72,32 +72,32 @@ public interface PropCommands {
 			.then(Commands.argument("prop", StringArgumentType.word())
 				.then(Commands.argument("rotation", RotationArgument.rotation())
 					.executes(ctx -> {
-						int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "id"), 16);
+						int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "prop"), 16);
 						return rotate(ctx.getSource(), id, RotationArgument.getRotation(ctx, "rotation"));
 					})
 				)
 			)
 		)
 		.then(Commands.literal("clone")
-			.then(Commands.argument("id", StringArgumentType.word())
+			.then(Commands.argument("prop", StringArgumentType.word())
 				.executes(ctx -> {
-					int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "id"), 16);
+					int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "prop"), 16);
 					return clone(ctx.getSource(), id);
 				})
 			)
 		)
 		.then(Commands.literal("pause")
-			.then(Commands.argument("id", StringArgumentType.word())
+			.then(Commands.argument("prop", StringArgumentType.word())
 				.executes(ctx -> {
-					int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "id"), 16);
+					int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "prop"), 16);
 					return pause(ctx.getSource(), id, true);
 				})
 			)
 		)
 		.then(Commands.literal("unpause")
-			.then(Commands.argument("id", StringArgumentType.word())
+			.then(Commands.argument("prop", StringArgumentType.word())
 				.executes(ctx -> {
-					int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "id"), 16);
+					int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "prop"), 16);
 					return pause(ctx.getSource(), id, false);
 				})
 			)
