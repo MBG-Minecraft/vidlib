@@ -38,6 +38,9 @@ jobs:
         uses: gradle/actions/wrapper-validation@v4
       - name: Build for validation
         run: ./gradlew clean build
+        env:
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+          MAVEN_TOKEN: ${{ secrets.MAVEN_TOKEN }}
       - name: Commit and push changes
         if: success()
         run: |
