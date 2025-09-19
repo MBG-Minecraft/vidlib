@@ -44,9 +44,17 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 		return 0F;
 	}
 
+	// Removes the night vision fade in/out effect nearing the end of the effect
 	@Inject(method = "getNightVisionScale", at = @At("HEAD"), cancellable = true)
 	private static void vl$getNightVisionStrength(LivingEntity entity, float delta, CallbackInfoReturnable<Float> cir) {
-		int duration = entity.getEffect(MobEffects.NIGHT_VISION).getDuration();
+		var effect = entity.getEffect(MobEffects.NIGHT_VISION);
+		if (effect == null) {
+			return;
+		}
+		int duration = effect.getDuration();
+		if (effect.isInfiniteDuration()) {
+			return;
+		}
 		cir.setReturnValue(duration > 20F ? 1F : duration / 20F);
 	}
 
