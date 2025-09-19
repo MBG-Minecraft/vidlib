@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Skybox {
-	public static final MenuItem MENU_ITEM = MenuItem.menu(ImIcons.BRIGHTNESS, "Skybox", g -> {
+	public static final MenuItem MENU_ITEM = MenuItem.menu(ImIcons.SUN, "Skybox", g -> {
 		if (!g.inGame) {
 			return List.of();
 		}

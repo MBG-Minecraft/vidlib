@@ -1,6 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "[2,)"
-license = "ARR"
+license = "MIT"
+openGLVersion = "[3.2,)"
 
 [[mods]]
 modId = "vidlib"

@@ -6,18 +6,18 @@ plugins {
 	id 'net.neoforged.moddev' version "2.0.107"
 }
 
-ext.ENV = System.getenv() + (file('.env').exists() ? file('.env').readLines().findAll { it && !it.startsWith('#') }.collectEntries {
+var ENV = System.getenv() + (file('.env').exists() ? file('.env').readLines().findAll { it && !it.startsWith('#') }.collectEntries {
 	def (k, v) = it.split('=', 2); [(k.trim()): v.trim()]
 } : [:])
 //var ENV = System.getenv()
 var localBuildFile = new File(project.rootDir, "build.txt")
 var localBuildNumber = localBuildFile.getText("UTF-8").toInteger() + 1
 
-version = "${mod_version}-build.$localBuildNumber"
+version = "$mod_version-build.$localBuildNumber"
 group = project.maven_group
 base.archivesName = project.archives_base_name
 
-println("Building version: ${version}")
+println("Building version: $version")
 
 neoForge {
 	version = project.neoforge_version
@@ -87,14 +87,15 @@ compileJava {
 java {
 	sourceCompatibility = targetCompatibility = '21'
 	withSourcesJar()
+	withJavadocJar()
 }
 
 configurations {
 	runtimeClasspath.extendsFrom localRuntime
 }
 
-repositories {
-
+tasks.withType(Javadoc) {
+	options.addStringOption('Xdoclint:none', '-quiet')
 }
 
 repositories {

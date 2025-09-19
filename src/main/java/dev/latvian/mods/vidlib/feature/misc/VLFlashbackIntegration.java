@@ -360,7 +360,9 @@ public class VLFlashbackIntegration {
 
 	private static void icons(CharConsumer chars) {
 		for (var icon : ImIcons.VALUES) {
-			chars.accept(icon.icon);
+			if (icon.icon != 0) {
+				chars.accept(icon.icon);
+			}
 		}
 
 		for (var c : ImIcons.EXTRA_ICONS.get()) {

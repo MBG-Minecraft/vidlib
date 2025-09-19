@@ -124,15 +124,37 @@ public class DebugWidgetPanel extends AdminPanel {
 		ImGui.separator();
 
 		ImGui.text("All Icons:");
-		ImGui.text("");
+
+		float maxX = ImGui.getContentRegionMaxX() - ImGui.getStyle().getFramePaddingX() - ImGui.getStyle().getScrollbarSize();
 
 		for (var icon : ImIcons.VALUES) {
-			ImGui.text(icon + " " + icon.name());
+			if (icon.icon == 0) {
+				ImGui.newLine();
+				ImGui.text(icon.toString());
+			} else {
+				if (ImGui.getCursorPosX() > maxX) {
+					ImGui.newLine();
+				}
+
+				ImGui.text(icon.toString());
+				ImGui.sameLine();
+
+				if (ImGui.isItemHovered()) {
+					ImGui.beginTooltip();
+					graphics.pushStack();
+					graphics.setFontScale(2F);
+					ImGui.text(icon.toString());
+					graphics.popStack();
+					ImGui.text(icon.name());
+					ImGui.endTooltip();
+				}
+			}
 		}
 
-		ImGui.text("");
+		ImGui.newLine();
+		ImGui.newLine();
 		ImGui.text("Extra Icons:");
-		ImGui.text("");
+		ImGui.newLine();
 		var extraIcons = new StringBuilder();
 
 		for (var c : ImIcons.EXTRA_ICONS.get()) {

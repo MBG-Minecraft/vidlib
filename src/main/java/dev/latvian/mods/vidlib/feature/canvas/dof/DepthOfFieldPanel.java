@@ -9,7 +9,7 @@ import imgui.ImGui;
 public class DepthOfFieldPanel extends AdminPanel {
 	public static final DepthOfFieldPanel INSTANCE = new DepthOfFieldPanel();
 
-	public static final MenuItem MENU_ITEM = MenuItem.item(ImIcons.APERTURE, "Depth of Field", INSTANCE);
+	public static final MenuItem MENU_ITEM = MenuItem.item(ImIcons.BLUR, "Depth of Field", INSTANCE);
 
 	public final DepthOfFieldDataImBuilder builder;
 

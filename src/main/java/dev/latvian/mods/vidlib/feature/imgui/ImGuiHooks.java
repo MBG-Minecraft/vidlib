@@ -137,7 +137,9 @@ public class ImGuiHooks {
 		var builder = new ImFontGlyphRangesBuilder();
 
 		for (var icon : ImIcons.VALUES) {
-			builder.addChar(icon.icon);
+			if (icon.icon != 0) {
+				builder.addChar(icon.icon);
+			}
 		}
 
 		for (var c : ImIcons.EXTRA_ICONS.get()) {

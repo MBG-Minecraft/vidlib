@@ -31,14 +31,14 @@ public class BuiltInImGui {
 
 	public static final MenuItem OPEN = MenuItem.menu(ImIcons.OPEN, "Open", (graphics, list) -> {
 		list.add(MenuItem.item(ImIcons.MEMORY, "Memory Usage", MemoryUsagePanel.INSTANCE));
-		list.add(MenuItem.item(ImIcons.CODE, "Command History", CommandHistoryPanel.INSTANCE));
+		list.add(MenuItem.item(ImIcons.SLASH, "Command History", CommandHistoryPanel.INSTANCE));
 		list.add(MenuItem.item(ImIcons.TIMELAPSE, "Server Stopwatch", GlobalStopwatchPanel.INSTANCE).enabled(graphics.inGame));
 		list.add(MenuItem.item(ImIcons.TIMELAPSE, "New Stopwatch", g -> StopwatchPanel.openNew()));
 		list.add(MenuItem.menu(ImIcons.APERTURE, "Canvas", CanvasPanel::menu));
 		list.add(MenuItem.item(ImIcons.MUSIC_NOTE, "Sounds", BuiltInImGui.showSounds != null, g -> BuiltInImGui.showSounds = false));
 		list.add(MenuItem.SEPARATOR);
 		list.add(MenuItem.item(ImIcons.CAMERA, "Cutscene Builder", CutsceneBuilderPanel.INSTANCE).enabled(graphics.isAdmin));
-		list.add(MenuItem.item(ImIcons.SEARCH, "Entity Explorer", EntityExplorerPanel.INSTANCE).enabled(graphics.isAdmin));
+		list.add(MenuItem.item(ImIcons.PAW, "Entity Explorer", EntityExplorerPanel.INSTANCE).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.SEARCH, "Prop Explorer", PropExplorerPanel.INSTANCE).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.LAYERS, "Decals", DecalPanel.INSTANCE).enabled(graphics.isAdmin));
 
@@ -123,7 +123,7 @@ public class BuiltInImGui {
 
 		list.add(MenuItem.item(ImIcons.STAR, "Physics Particles", PhysicsParticleManager.VISIBLE).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.TIMELAPSE, "Clocks", ClockRenderer.VISIBLE).enabled(graphics.isAdmin));
-		list.add(MenuItem.item(ImIcons.BRIGHTNESS, "Bloom", Bloom.VISIBLE).enabled(graphics.isAdmin));
+		list.add(MenuItem.item(ImIcons.SUN, "Bloom", Bloom.VISIBLE).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.FRAMED_CUBE, "Ghost Structures", GhostStructure.VISIBLE_CONFIG).enabled(graphics.isAdmin));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.ShowDropdown(graphics, list));
@@ -160,8 +160,15 @@ public class BuiltInImGui {
 	});
 
 	public static void handle(ImGraphics graphics) {
-		if (graphics.adminPanel) {
-			adminPanel(graphics);
+		if (graphics.adminPanel || graphics.isReplay) {
+			var menuOpen = mainMenuOpen;
+			mainMenuOpen = true;
+
+			if (menuOpen && !graphics.isReplay) {
+				MAIN_MENU_BAR.buildRoot(graphics, true);
+			}
+
+			OPEN_PANELS.values().removeIf(panel -> panel.handle(graphics));
 		}
 
 		NeoForge.EVENT_BUS.post(new ImGuiEvent(graphics));
@@ -184,16 +191,5 @@ public class BuiltInImGui {
 				showSounds = null;
 			}
 		}
-	}
-
-	public static void adminPanel(ImGraphics graphics) {
-		var menuOpen = mainMenuOpen;
-		mainMenuOpen = true;
-
-		if (menuOpen && !graphics.isReplay) {
-			MAIN_MENU_BAR.buildRoot(graphics, true);
-		}
-
-		OPEN_PANELS.values().removeIf(panel -> panel.handle(graphics));
 	}
 }
