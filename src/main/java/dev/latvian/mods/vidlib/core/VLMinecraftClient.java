@@ -626,6 +626,12 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		return p == null ? null : p.connection.serverBrand();
 	}
 
+	@Override
+	default boolean isServerNeoForge() {
+		var p = vl$self().player;
+		return p != null && p.vl$sessionData().isServerNeoForge();
+	}
+
 	default PlayerSkin.Model getModelType(@Nullable GameProfile profile) {
 		if (profile == null || profile == Empty.PROFILE) {
 			return PlayerSkin.Model.WIDE;

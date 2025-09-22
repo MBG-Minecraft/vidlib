@@ -54,6 +54,7 @@
 		"StructureBlockEntityMixin",
 		"StructureTemplateMixin",
 		"StyleMixin",
+		"TallGrassBlockMixin",
 		"UUIDUtilMixin",
 		"WaterFluidMixin",
 		"neo.EnumArgumentMixin",

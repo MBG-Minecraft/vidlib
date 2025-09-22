@@ -101,6 +101,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	public NPCRecording npcRecording;
 	public final List<PacketDebuggerPanel.LoggedPacket> debugPackets;
 	public final List<Decal> decals;
+	private Boolean isServerNeoForge;
 
 	public LocalClientSessionData(Minecraft mc, UUID uuid, ClientPacketListener connection) {
 		super(uuid);
@@ -446,5 +447,13 @@ public class LocalClientSessionData extends ClientSessionData {
 		if (PacketDebuggerPanel.INSTANCE.isOpen()) {
 			debugPackets.add(new PacketDebuggerPanel.LoggedPacket(ctx.uid(), ctx.remoteGameTime(), payload));
 		}
+	}
+
+	public boolean isServerNeoForge() {
+		if (isServerNeoForge == null) {
+			isServerNeoForge = "neoforge".equals(mc.getServerBrand());
+		}
+
+		return isServerNeoForge;
 	}
 }
