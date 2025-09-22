@@ -22,7 +22,7 @@ public class ClothingImBuilder implements ImBuilder<Clothing> {
 	public final BooleanImBuilder enchanted = new BooleanImBuilder();
 
 	public ClothingImBuilder() {
-		this.clothing.set(Clothing.BLUE_TRACKSUIT.id().location());
+		this.clothing.set(Tracksuits.BLUE.id().location());
 		this.head.set(true);
 		this.body.set(true);
 		this.legs.set(true);
