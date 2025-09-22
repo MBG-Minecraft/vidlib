@@ -54,7 +54,7 @@ public class ImGraphics {
 		this.mc = mc;
 		this.inGame = mc.player != null && mc.level != null;
 		this.isReplay = inGame && mc.level.isReplayLevel();
-		this.isNeoForgeServer = inGame && "neoforge".equals(mc.player.connection.serverBrand());
+		this.isNeoForgeServer = inGame && mc.isServerNeoForge();
 		this.isClientOnly = isReplay || !isNeoForgeServer;
 		this.adminPanel = VidLibClientOptions.getAdminPanel();
 		this.isAdmin = inGame && (mc.isLocalServer() || mc.player.hasPermissions(2));

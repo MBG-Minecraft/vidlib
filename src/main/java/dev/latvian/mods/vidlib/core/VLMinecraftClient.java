@@ -619,6 +619,13 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		return vl$self().player.vl$sessionData().clocks;
 	}
 
+	@Override
+	@Nullable
+	default String getServerBrand() {
+		var p = vl$self().player;
+		return p == null ? null : p.connection.serverBrand();
+	}
+
 	default PlayerSkin.Model getModelType(@Nullable GameProfile profile) {
 		if (profile == null || profile == Empty.PROFILE) {
 			return PlayerSkin.Model.WIDE;

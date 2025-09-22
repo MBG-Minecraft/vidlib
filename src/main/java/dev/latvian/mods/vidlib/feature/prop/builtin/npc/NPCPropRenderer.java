@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.prop.builtin.playerstatue;
+package dev.latvian.mods.vidlib.feature.prop.builtin.npc;
 
 import com.mojang.math.Axis;
 import dev.latvian.mods.klib.util.Empty;
@@ -26,7 +26,7 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.phys.Vec3;
 
-public class PlayerStatuePropRenderer implements PropRenderer<PlayerStatueProp> {
+public class NPCPropRenderer implements PropRenderer<NPCProp> {
 	private static final PlayerSkin[] DEFAULT_SKINS = new PlayerSkin[]{
 		new PlayerSkin(ID.mc("textures/entity/player/wide/steve.png"), null, null, null, PlayerSkin.Model.WIDE, true),
 		new PlayerSkin(ID.mc("textures/entity/player/wide/alex.png"), null, null, null, PlayerSkin.Model.WIDE, true),
@@ -42,7 +42,7 @@ public class PlayerStatuePropRenderer implements PropRenderer<PlayerStatueProp> 
 	private static final PlayerSkin[] SINGLE_SKIN = {DEFAULT_SKINS[0]};
 
 	@ClientAutoRegister
-	public static final Holder HOLDER = new Holder(PlayerStatueProp.TYPE, new PlayerStatuePropRenderer());
+	public static final Holder HOLDER = new Holder(NPCProp.TYPE, new NPCPropRenderer());
 
 	public RandomSource randomSource = RandomSource.create(0L);
 	private PlayerRenderer playerRenderer;
@@ -50,7 +50,7 @@ public class PlayerStatuePropRenderer implements PropRenderer<PlayerStatueProp> 
 	private PlayerRenderState playerRenderState;
 
 	@Override
-	public void render(PropRenderContext<PlayerStatueProp> ctx) {
+	public void render(PropRenderContext<NPCProp> ctx) {
 		var p = ctx.prop();
 		var ms = ctx.poseStack();
 		int count = Math.max(1, p.count);

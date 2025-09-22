@@ -12,11 +12,9 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TransformationListImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ParticleOptionsImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.feature.prop.builtin.highlight.TerrainHighlightProp;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundDataImBuilder;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
-import dev.latvian.mods.vidlib.math.kvector.DynamicKVector;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 import imgui.ImGui;
@@ -333,33 +331,6 @@ public class DebugWidgetPanel extends AdminPanel {
 		numberBuilder.imguiKey(graphics, "KNumber", "knumber");
 		ImGui.separator();
 		vectorBuilder.imguiKey(graphics, "KVector", "kvector");
-
-		if (graphics.inGame && numberBuilder.isValid() && vectorBuilder.isValid()) {
-			var ctx = mc.level.getGlobalContext();
-			var radius = numberBuilder.build().get(ctx);
-
-			if (radius != null && radius > 0D) {
-				if (ImGui.button("Create Danger Highlight###create-danger-highlight")) {
-					var pos = vectorBuilder.build().get(ctx);
-					var scalen = KNumber.of(radius.floatValue());
-					var scale = new DynamicKVector(scalen, KNumber.ZERO, scalen);
-
-					mc.level.getProps().add(TerrainHighlightProp.TYPE, prop -> {
-						prop.setPos(pos);
-						prop.color = new Color(0xCCFFDD00).withAlpha(100).gradient(Color.RED.withAlpha(100), Easing.QUAD_IN);
-						prop.scale = scale;
-						prop.lifespan = 60;
-					});
-
-					mc.level.getProps().add(TerrainHighlightProp.TYPE, prop -> {
-						prop.setPos(pos);
-						prop.color = Color.RED.withAlpha(100);
-						prop.scale = KVector.ZERO.interpolate(Easing.QUAD_IN, scale);
-						prop.lifespan = 60;
-					});
-				}
-			}
-		}
 
 		ImGui.separator();
 		entityFilterBuilder.imguiKey(graphics, "Entity Filter", "entity-filter");

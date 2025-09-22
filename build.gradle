@@ -87,7 +87,7 @@ compileJava {
 java {
 	sourceCompatibility = targetCompatibility = '21'
 	withSourcesJar()
-	withJavadocJar()
+	// withJavadocJar()
 }
 
 configurations {

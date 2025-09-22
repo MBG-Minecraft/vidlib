@@ -271,4 +271,9 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 
 		return list;
 	}
+
+	@Override
+	default String getServerBrand() {
+		return "neoforge";
+	}
 }

@@ -14,6 +14,7 @@ import dev.latvian.mods.vidlib.util.ScheduledTask;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -110,5 +111,14 @@ public interface VLMinecraftEnvironment extends VLPlayerContainer, VLMinecraftEn
 
 	default Map<ResourceLocation, ClockValue> vl$getClocks() {
 		throw new NoMixinException(this);
+	}
+
+	@Nullable
+	default String getServerBrand() {
+		return null;
+	}
+
+	default boolean isServerNeoForge() {
+		return "neoforge".equals(getServerBrand());
 	}
 }
