@@ -12,9 +12,10 @@ import imgui.ImGuiStyle;
 import imgui.extension.imnodes.ImNodes;
 import imgui.extension.imnodes.flag.ImNodesColorStyle;
 import imgui.flag.ImGuiCol;
-import imgui.flag.ImGuiComboFlags;
+import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiStyleVar;
 import imgui.type.ImBoolean;
+import imgui.type.ImString;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 import net.minecraft.client.Minecraft;
@@ -25,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Function;
 
 public class ImGraphics {
@@ -421,15 +423,25 @@ public class ImGraphics {
 		ImGui.setNextWindowSize(viewport.getWorkSizeX(), viewport.getWorkSizeY());
 	}
 
-	public <E> ImUpdate combo(String label, String defaultPreview, Object[] selected, List<? extends E> options, Function<E, String> nameFunction, int comboFlags) {
+	public <E> ImUpdate combo(String label, Object[] selected, List<? extends E> options, Function<E, String> nameFunction, @Nullable ImString search) {
 		var result = ImUpdate.NONE;
+		var searchText = search != null && options.size() > 16 ? search.get().toLowerCase(Locale.ROOT) : null;
 
-		if (ImGui.beginCombo(label, selected[0] == null ? defaultPreview : nameFunction.apply((E) selected[0]), comboFlags)) {
+		if (ImGui.beginCombo(label, selected[0] == null ? "Select..." : nameFunction.apply((E) selected[0]), ImGuiInputTextFlags.None)) {
+			float y = ImGui.getCursorPos().y;
+
+			if (searchText != null) {
+				ImGui.setCursorPosY(y);
+				ImGui.setNextItemWidth(-1F);
+				ImGui.inputTextWithHint("###search", "Search...", search);
+			}
+
 			for (int i = 0; i < options.size(); i++) {
 				var option = options.get(i);
 				boolean isSelected = selected[0] == option;
+				var itemLabel = nameFunction.apply(option);
 
-				if (ImGui.selectable(nameFunction.apply(option) + "###" + i, isSelected)) {
+				if ((isSelected || searchText == null || searchText.isEmpty() || itemLabel.toLowerCase(Locale.ROOT).contains(searchText)) && ImGui.selectable(itemLabel + "###" + i, isSelected)) {
 					selected[0] = option;
 					result = ImUpdate.FULL;
 				}
@@ -445,20 +457,16 @@ public class ImGraphics {
 		return result;
 	}
 
-	public <E> ImUpdate combo(String label, String defaultPreview, Object[] selected, E[] options, Function<E, String> nameFunction, int comboFlags) {
-		return combo(label, defaultPreview, selected, Arrays.asList(options), nameFunction, comboFlags);
+	public <E> ImUpdate combo(String label, Object[] selected, E[] options, Function<E, String> nameFunction) {
+		return combo(label, selected, Arrays.asList(options), nameFunction, null);
 	}
 
-	public <E> ImUpdate combo(String label, String defaultPreview, Object[] selected, E[] options) {
-		return combo(label, defaultPreview, selected, options, (Function) KLibCodecs.DEFAULT_NAME_GETTER, ImGuiComboFlags.None);
-	}
-
-	public <E> ImUpdate combo(String label, String defaultPreview, Object[] selected, List<? extends E> options) {
-		return combo(label, defaultPreview, selected, options, (Function) KLibCodecs.DEFAULT_NAME_GETTER, ImGuiComboFlags.None);
+	public <E> ImUpdate combo(String label, Object[] selected, E[] options) {
+		return combo(label, selected, options, (Function) KLibCodecs.DEFAULT_NAME_GETTER);
 	}
 
 	public ImUpdate easingCombo(String label, Easing[] selected) {
-		return combo(label, "Select Easing...", selected, Easing.VALUES);
+		return combo(label, selected, Easing.VALUES);
 	}
 
 	public void hideMainMenuBar() {

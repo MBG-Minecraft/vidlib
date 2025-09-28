@@ -2,11 +2,13 @@ package dev.latvian.mods.vidlib.feature.block;
 
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.SelectedPosition;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
+import imgui.type.ImString;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -19,6 +21,7 @@ import java.util.List;
 
 public class BlockImBuilder implements ImBuilder<Block> {
 	public static final Lazy<List<Block>> BLOCKS = Lazy.of(() -> BuiltInRegistries.BLOCK.stream().toList());
+	public static final ImString SEARCH = ImGuiUtils.resizableString();
 
 	public final Block[] block = new Block[1];
 	public SelectedPosition selectedPosition;
@@ -49,7 +52,7 @@ public class BlockImBuilder implements ImBuilder<Block> {
 
 		ImGui.sameLine();
 
-		update = update.or(graphics.combo("###block", "Select Block...", block, BLOCKS.get(), e -> I18n.get(e.getDescriptionId()), 0));
+		update = update.or(graphics.combo("###block", block, BLOCKS.get(), e -> I18n.get(e.getDescriptionId()), SEARCH));
 		return update;
 	}
 

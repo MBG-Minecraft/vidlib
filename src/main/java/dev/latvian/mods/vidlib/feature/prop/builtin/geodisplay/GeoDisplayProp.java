@@ -30,8 +30,8 @@ public class GeoDisplayProp extends BaseGeoProp {
 		ANIMATIONS
 	);
 
-	public ResourceLocation model = VidLib.id("prop/skeleton");
-	public ResourceLocation texture = ID.mc("textures/entity/skeleton/skeleton.png");
+	public ResourceLocation model = VidLib.id("prop/player");
+	public ResourceLocation texture = ID.mc("textures/entity/player/wide/steve.png");
 	public ResourceLocation animations = Empty.ID;
 
 	public GeoDisplayProp(PropContext<?> ctx) {

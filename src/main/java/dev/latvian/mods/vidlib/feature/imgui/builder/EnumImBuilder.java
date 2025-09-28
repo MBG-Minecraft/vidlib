@@ -5,8 +5,9 @@ import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
-import imgui.flag.ImGuiComboFlags;
+import imgui.type.ImString;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -22,6 +23,8 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 	public static final ImBuilderType<Rotation> BLOCK_ROTATION_TYPE = () -> new EnumImBuilder<>(Rotation.values(), Rotation.NONE);
 	public static final ImBuilderType<LiquidSettings> LIQUID_SETTINGS_TYPE = () -> new EnumImBuilder<>(LiquidSettings.values(), LiquidSettings.IGNORE_WATERLOGGING);
 	public static final ImBuilderType<InteractionHand> HAND_TYPE = () -> new EnumImBuilder<>(InteractionHand.values(), InteractionHand.MAIN_HAND);
+
+	public static final ImString SEARCH = ImGuiUtils.resizableString();
 
 	public final List<E> options;
 	public final Object[] value;
@@ -58,7 +61,7 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		return graphics.combo("###enum", "Select...", value, options, nameGetter, ImGuiComboFlags.None);
+		return graphics.combo("###enum", value, options, nameGetter, SEARCH);
 	}
 
 	@Override

@@ -1,7 +1,9 @@
 package dev.latvian.mods.vidlib.feature.imgui.builder;
 
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import imgui.type.ImString;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
@@ -24,6 +26,8 @@ public class TagKeyImBuilder<T> implements ImBuilder<TagKey<T>> {
 	public static final ImBuilderType<TagKey<Item>> ITEM_TYPE = type(Registries.ITEM);
 	public static final ImBuilderType<TagKey<Fluid>> FLUID_TYPE = type(Registries.FLUID);
 	public static final ImBuilderType<TagKey<EntityType<?>>> ENTITY_TYPE_TYPE = type(Registries.ENTITY_TYPE);
+
+	public static final ImString SEARCH = ImGuiUtils.resizableString();
 
 	public final ResourceKey<? extends Registry<T>> registry;
 	public final TagKey<T>[] tag = new TagKey[1];
@@ -53,7 +57,7 @@ public class TagKeyImBuilder<T> implements ImBuilder<TagKey<T>> {
 			cachedTags = reg.listTags().map(HolderSet.Named::key).toList();
 		}
 
-		return graphics.combo("###tag", "Select Tag...", tag, cachedTags, t -> t.location().toString(), 0);
+		return graphics.combo("###tag", tag, cachedTags, t -> t.location().toString(), SEARCH);
 	}
 
 	@Override

@@ -29,7 +29,7 @@ public class EnumConfigEntry<E> extends ConfigEntry<E> {
 
 	@Override
 	public ImUpdate imguiValue(ImGraphics graphics) {
-		return graphics.combo(id, "Select...", data, options);
+		return graphics.combo(id, data, options);
 	}
 
 	@Override

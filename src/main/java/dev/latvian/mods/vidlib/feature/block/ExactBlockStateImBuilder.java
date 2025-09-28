@@ -1,7 +1,9 @@
 package dev.latvian.mods.vidlib.feature.block;
 
+import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.SelectedPosition;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
@@ -9,6 +11,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
+import imgui.type.ImString;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -20,9 +23,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public class ExactBlockStateImBuilder implements ImBuilder<BlockState> {
 	public static final ImBuilderType<BlockState> TYPE = ExactBlockStateImBuilder::new;
+
+	public static final ImString SEARCH = ImGuiUtils.resizableString();
 
 	public final BlockImBuilder block;
 	public final Map<Property<?>, Object> properties;
@@ -119,7 +125,7 @@ public class ExactBlockStateImBuilder implements ImBuilder<BlockState> {
 					ImGui.sliderInt("###" + property.getName(), ((ImInt) value).getData(), min, max);
 					update = update.orItemEdit();
 				} else {
-					update = update.or(graphics.combo("###" + property.getName(), "", (Object[]) value, property.getPossibleValues()));
+					update = update.or(graphics.combo("###" + property.getName(), (Object[]) value, property.getPossibleValues(), (Function) KLibCodecs.DEFAULT_NAME_GETTER, SEARCH));
 				}
 			}
 

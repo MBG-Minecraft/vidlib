@@ -2,8 +2,9 @@ package dev.latvian.mods.vidlib.feature.imgui.builder;
 
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
-import imgui.flag.ImGuiComboFlags;
+import imgui.type.ImString;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
@@ -11,6 +12,8 @@ import java.util.List;
 
 public class GeoTextureImBuilder implements ImBuilder<ResourceLocation> {
 	public static final ImBuilderType<ResourceLocation> TYPE = GeoTextureImBuilder::new;
+
+	public static final ImString SEARCH = ImGuiUtils.resizableString();
 
 	public final ResourceLocation[] value = {ID.mc("textures/entity/skeleton/skeleton.png")};
 	private List<ResourceLocation> list;
@@ -30,7 +33,7 @@ public class GeoTextureImBuilder implements ImBuilder<ResourceLocation> {
 			list = List.copyOf(list);
 		}
 
-		return graphics.combo("###texture", "", value, list, id -> id.getNamespace() + ":" + id.getPath().substring(9, id.getPath().length() - 4), ImGuiComboFlags.None);
+		return graphics.combo("###texture", value, list, id -> id.getNamespace() + ":" + id.getPath().substring(9, id.getPath().length() - 4), SEARCH);
 	}
 
 	@Override

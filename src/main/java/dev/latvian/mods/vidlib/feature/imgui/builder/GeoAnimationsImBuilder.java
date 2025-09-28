@@ -3,7 +3,9 @@ package dev.latvian.mods.vidlib.feature.imgui.builder;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import imgui.type.ImString;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
@@ -11,6 +13,8 @@ import java.util.List;
 
 public class GeoAnimationsImBuilder implements ImBuilder<ResourceLocation> {
 	public static final ImBuilderType<ResourceLocation> TYPE = GeoAnimationsImBuilder::new;
+
+	public static final ImString SEARCH = ImGuiUtils.resizableString();
 
 	public final ResourceLocation[] value = {VidLib.id("prop/skeleton")};
 	private List<ResourceLocation> list;
@@ -40,7 +44,7 @@ public class GeoAnimationsImBuilder implements ImBuilder<ResourceLocation> {
 			list = List.copyOf(list);
 		}
 
-		return graphics.combo("###animation", "", value, list);
+		return graphics.combo("###animation", value, list, ResourceLocation::toString, SEARCH);
 	}
 
 	@Override

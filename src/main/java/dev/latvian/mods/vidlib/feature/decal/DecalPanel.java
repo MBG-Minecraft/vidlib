@@ -61,7 +61,7 @@ public class DecalPanel extends AdminPanel {
 				}
 
 				DecalType.UNIT[0] = decal.type;
-				graphics.combo("###type", "", DecalType.UNIT, DecalType.VALUES);
+				graphics.combo("###type", DecalType.UNIT, DecalType.VALUES);
 				decal.type = DecalType.UNIT[0];
 
 				Vector3dImBuilder.imgui(graphics, decal.position, SelectedPosition.UNIT);
