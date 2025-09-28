@@ -51,6 +51,7 @@ public class DecalPanel extends AdminPanel {
 					d.start = decal.start;
 					d.end = decal.end;
 					d.thickness = decal.thickness;
+					d.height = decal.height;
 					d.rotation = decal.rotation;
 					d.startColor = decal.startColor;
 					d.endColor = decal.endColor;
@@ -107,10 +108,11 @@ public class DecalPanel extends AdminPanel {
 
 		if (ImGui.button(ImIcons.ADD + " Add###add")) {
 			var d = new Decal();
+			d.type = DecalType.CYLINDER;
 			d.start = 5F;
 			d.end = 6F;
 			d.startColor = d.endColor = Color.RED.withAlpha(100);
-			d.setPosition(graphics.mc.player.getPosition(graphics.mc.getDeltaTracker().getGameTimeDeltaPartialTick(true)));
+			d.setPosition(graphics.mc.player.getPosition(graphics.mc.getDeltaTracker().getGameTimeDeltaPartialTick(true)).add(0D, 0.5D, 0D));
 			decals.add(d);
 		}
 

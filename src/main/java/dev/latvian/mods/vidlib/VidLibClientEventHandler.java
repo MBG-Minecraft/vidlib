@@ -72,6 +72,7 @@ import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
 import dev.latvian.mods.vidlib.feature.particle.WindParticleOptionsImBuilder;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
+import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
@@ -79,7 +80,6 @@ import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructureCapture;
 import dev.latvian.mods.vidlib.feature.structure.StructureRenderer;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
-import dev.latvian.mods.vidlib.feature.visual.PlayerPins;
 import dev.latvian.mods.vidlib.feature.visual.TexturedCubeRenderer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
@@ -249,7 +249,7 @@ public class VidLibClientEventHandler {
 		event.registerBelowAll(VidLib.id("player_names"), VidLibHUD::drawPlayerNames);
 		event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, VidLib.id("above_boss"), VidLibHUD::drawAboveBossOverlay);
 		event.registerAboveAll(VidLib.id("fade"), VidLibHUD::drawFade);
-		event.registerAboveAll(VidLib.id("player_pins"), PlayerPins::draw);
+		event.registerAboveAll(VidLib.id("player_pins"), Pins::draw);
 	}
 
 	@SubscribeEvent

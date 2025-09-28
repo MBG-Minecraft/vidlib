@@ -1,7 +1,6 @@
 modLoader = "javafml"
 loaderVersion = "[2,)"
 license = "MIT"
-openGLVersion = "[3.2,)"
 
 [[mods]]
 modId = "vidlib"
@@ -14,7 +13,7 @@ logoBlur = false
 [[dependencies.vidlib]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.5.89,)"
+versionRange = "[21.5.95,)"
 ordering = "AFTER"
 side = "BOTH"
 

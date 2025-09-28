@@ -2,8 +2,8 @@ package dev.latvian.mods.vidlib.feature.imgui;
 
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibClientEventHandler;
+import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.core.VLMouseHandler;
 import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
@@ -46,11 +46,6 @@ public class ImGuiHooks {
 		0,
 	};
 
-	private static final short[] MATERIAL_ICON_RANGES = {
-		(short) '\ue000', (short) '\uf8ff', // Material Icons
-		0,
-	};
-
 	private static ImGuiImplGlfw imGuiGlfw;
 	private static ImGuiImplGl3 imGuiGl3;
 	private static ImGuiContext imGuiContext;
@@ -81,7 +76,7 @@ public class ImGuiHooks {
 		imPlotContext = ImPlot.createContext();
 		ImNodes.createContext();
 		var io = new ImGuiIO(ImGui.getIO().ptr);
-		io.setIniFilename(VidLib.LOCAL_DIR.resolve("imgui.ini").toAbsolutePath().toString());
+		io.setIniFilename(VidLibPaths.USER.resolve("imgui.ini").toAbsolutePath().toString());
 		io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
 		io.addConfigFlags(ImGuiConfigFlags.DockingEnable);
 		io.addConfigFlags(ImGuiConfigFlags.DpiEnableScaleFonts);

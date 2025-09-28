@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.util.MessageConsumer;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
 import dev.latvian.mods.vidlib.util.JsonUtils;
@@ -68,7 +68,7 @@ public interface GhostStructureCapture {
 
 			source.tell(Component.literal("Slicing into %d x %d x %d chunks...".formatted(maxChunkX - minChunkX + 1, maxChunkY - minChunkY + 1, maxChunkZ - minChunkZ + 1)));
 
-			var path = VidLib.LOCAL_DIR.resolve("export/%s-ghost-chunks.jar".formatted(name));
+			var path = VidLibPaths.LOCAL.resolve("export/%s-ghost-chunks.jar".formatted(name));
 
 			if (Files.notExists(path.getParent())) {
 				Files.createDirectories(path.getParent());
@@ -245,7 +245,7 @@ public interface GhostStructureCapture {
 				return 0;
 			}
 
-			var path = VidLib.DIR.resolve(pathStr);
+			var path = VidLibPaths.GAME.resolve(pathStr);
 
 			finalStructure.toVStruct(path);
 

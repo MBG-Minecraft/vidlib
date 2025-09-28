@@ -1,10 +1,7 @@
 package dev.latvian.mods.vidlib.core;
 
-import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.klib.math.Rotation;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.canvas.dof.DepthOfField;
 import dev.latvian.mods.vidlib.feature.canvas.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.entity.C2SEntityEventPayload;
@@ -14,7 +11,6 @@ import dev.latvian.mods.vidlib.feature.entity.ForceEntityVelocityPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.S2CEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.entity.filter.ProfileEntityFilter;
-import dev.latvian.mods.vidlib.feature.imgui.AsyncFileSelector;
 import dev.latvian.mods.vidlib.feature.imgui.EntityExplorerPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
@@ -23,17 +19,15 @@ import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
-import dev.latvian.mods.vidlib.feature.visual.PlayerPins;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.PositionType;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
-import imgui.type.ImBoolean;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -47,9 +41,6 @@ import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
@@ -434,37 +425,10 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 
 				ImGui.endPopup();
 			}
+		}
 
-			if (graphics.isReplay) {
-				var pin = PlayerPins.PINS.get(entity.getUUID());
-
-				if (pin != null) {
-					ImGui.checkbox("Pin###pin-visible", pin.enabled());
-					ImGui.sameLine();
-
-					if (graphics.button("Remove Pin Image###pin-image", ImColorVariant.RED)) {
-						PlayerPins.PINS.remove(entity.getUUID());
-					}
-				} else if (ImGui.button("Set Pin Image...###pin-image")) {
-					AsyncFileSelector.openFileDialog(null, "Select Pin Image", "png").thenAccept(pathString -> {
-						var path = pathString == null ? null : Path.of(pathString);
-
-						if (path != null && Files.exists(path)) {
-							graphics.mc.execute(() -> {
-								try (var stream = Files.newInputStream(path)) {
-									var resourceLocation = VidLib.id("textures/vidlib/cache/pins/" + UndashedUuid.toString(entity.getUUID()) + ".png");
-									var image = NativeImage.read(stream);
-									var texture = new DynamicTexture(() -> entity.getUUID().toString(), image);
-									graphics.mc.getTextureManager().register(resourceLocation, texture);
-									PlayerPins.PINS.put(entity.getUUID(), new PlayerPins.Pin(entity.getUUID(), entity.getScoreboardName(), new ImBoolean(true), resourceLocation, pathString));
-								} catch (IOException ex) {
-									throw new RuntimeException(ex);
-								}
-							});
-						}
-					});
-				}
-			}
+		if (graphics.isReplay) {
+			Pins.imgui(graphics, entity);
 		}
 	}
 }

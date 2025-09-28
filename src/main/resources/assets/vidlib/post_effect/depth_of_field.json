@@ -18,7 +18,41 @@
 					"use_depth_buffer": true
 				}
 			],
-			"output": "swap"
+			"output": "swap",
+			"uniforms": [
+				{
+					"name": "InverseViewProjectionMat",
+					"type": "matrix4x4"
+				},
+				{
+					"name": "FocusPos",
+					"type": "float"
+				},
+				{
+					"name": "FocusRange",
+					"type": "float"
+				},
+				{
+					"name": "BlurRange",
+					"type": "float"
+				},
+				{
+					"name": "Strength",
+					"type": "float"
+				},
+				{
+					"name": "Shape",
+					"type": "int"
+				},
+				{
+					"name": "DebugNearCol",
+					"type": "float"
+				},
+				{
+					"name": "DebugFarCol",
+					"type": "float"
+				}
+			]
 		},
 		{
 			"vertex_shader": "minecraft:post/blit",

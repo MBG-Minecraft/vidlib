@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.npc;
 import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectLinkedOpenHashMap;
@@ -25,7 +26,7 @@ public class NPCRecording {
 		if (REPLAY == null) {
 			REPLAY = new LinkedHashMap<>();
 
-			var rootPath = VidLib.DIR.resolve("npc");
+			var rootPath = VidLibPaths.GAME.resolve("npc");
 
 			if (Files.exists(rootPath)) {
 				try (var stream = Files.walk(rootPath)) {

@@ -9,7 +9,6 @@ import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.klib.easing.EasingGroup;
-import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -19,7 +18,6 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.function.Function;
 
-@AutoInit
 public record ScreenShake(
 	ScreenShakeType type,
 	int duration,

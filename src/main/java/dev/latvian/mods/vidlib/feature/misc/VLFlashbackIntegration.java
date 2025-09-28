@@ -18,6 +18,8 @@ import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
+import dev.latvian.mods.vidlib.feature.pin.Pin;
+import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.prop.AddPropPayload;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
@@ -27,7 +29,6 @@ import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.prop.RecordedProp;
 import dev.latvian.mods.vidlib.feature.prop.RemovePropsPayload;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
-import dev.latvian.mods.vidlib.feature.visual.PlayerPins;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.chars.CharConsumer;
@@ -215,10 +216,10 @@ public class VLFlashbackIntegration {
 		ImGui.checkbox("Bloom", Bloom.VISIBLE);
 
 		ImGuiUtils.separatorWithText("Player Pins");
-		ImGui.checkbox("Enabled###pins-enabled", PlayerPins.ENABLED);
-		ImGui.sliderFloat("Pin Size###pin-size", PlayerPins.PIN_SIZE.getData(), 0F, 1024F);
-		ImGui.sliderFloat("Pin Offset###pin-offset", PlayerPins.PIN_OFFSET.getData(), 0F, 1F);
-		ImGui.sliderInt("Pin Alpha###pin-alpha", PlayerPins.PIN_ALPHA.getData(), 1, 255);
+		ImGui.checkbox("Enabled###pins-enabled", Pins.ENABLED);
+		ImGui.sliderFloat("Pin Size###pin-size", Pins.PIN_SIZE.getData(), 0F, 1024F);
+		ImGui.sliderFloat("Pin Offset###pin-offset", Pins.PIN_OFFSET.getData(), 0F, 1F);
+		ImGui.sliderInt("Pin Alpha###pin-alpha", Pins.PIN_ALPHA.getData(), 1, 255);
 
 		ImGui.popID();
 	}
@@ -247,7 +248,7 @@ public class VLFlashbackIntegration {
 
 	private static void editorStateLoaded(JsonObject customData) {
 		var mc = Minecraft.getInstance();
-		PlayerPins.PINS.clear();
+		Pins.PINS.clear();
 
 		if (customData.has("vidlib:pins")) {
 			var pins = customData.getAsJsonArray("vidlib:pins");
@@ -269,7 +270,7 @@ public class VLFlashbackIntegration {
 									var image = NativeImage.read(stream);
 									var texture = new DynamicTexture(uuid::toString, image);
 									mc.getTextureManager().register(resourceLocation, texture);
-									PlayerPins.PINS.put(uuid, new PlayerPins.Pin(uuid, name, new ImBoolean(enabled), resourceLocation, pathString));
+									Pins.PINS.put(uuid, new Pin(uuid, name, new ImBoolean(enabled), resourceLocation, pathString));
 								} catch (IOException ignore) {
 								}
 							});
@@ -283,10 +284,10 @@ public class VLFlashbackIntegration {
 	}
 
 	private static void editorStateSaved(JsonObject customData) {
-		if (!PlayerPins.PINS.isEmpty()) {
+		if (!Pins.PINS.isEmpty()) {
 			var pins = new JsonArray();
 
-			for (var pin : PlayerPins.PINS.values()) {
+			for (var pin : Pins.PINS.values()) {
 				var pinJson = new JsonObject();
 				pinJson.addProperty("uuid", pin.uuid().toString());
 				pinJson.addProperty("name", pin.name());

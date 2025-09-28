@@ -23,6 +23,20 @@ public class AutoHelper {
 
 	public static final EnumSet<Side> BOTH_SIDES = EnumSet.of(Side.CLIENT, Side.SERVER);
 
+	public static Class<?> initClass(String name, ClassLoader classLoader) {
+		try {
+			return Class.forName(name, true, classLoader);
+		} catch (ClassNotFoundException ex) {
+			throw new IllegalArgumentException("Class '" + name + "' not found", ex);
+		} catch (Throwable ex) {
+			throw new IllegalArgumentException("Failed to load class '" + name + "'", ex);
+		}
+	}
+
+	public static Class<?> initClass(ScannedAnnotation annotation, ClassLoader classLoader) {
+		return initClass(annotation.clazz().getClassName(), classLoader);
+	}
+
 	public static <E extends Enum<E>> E getEnumValue(ScannedAnnotation ad, Class<E> enumClass, String name, E defaultValue) {
 		var typeData = ad.annotationData().get(name);
 
@@ -71,7 +85,7 @@ public class AutoHelper {
 		var argTypes = new Class[argData.length];
 
 		for (var i = 0; i < argData.length; i++) {
-			argTypes[i] = Class.forName(argData[i].getClassName(), true, classLoader);
+			argTypes[i] = initClass(argData[i].getClassName(), classLoader);
 		}
 
 		return clazz.getDeclaredMethod(ad.memberName().substring(0, ad.memberName().indexOf('(')), argTypes);

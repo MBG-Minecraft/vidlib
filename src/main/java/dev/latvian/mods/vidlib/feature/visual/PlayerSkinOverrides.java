@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.visual;
 
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.util.UndashedUuid;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.util.JsonUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,7 +21,7 @@ public record PlayerSkinOverrides(Map<UUID, Map<MinecraftProfileTexture.Type, Mi
 		if (INSTANCE == null) {
 			var map = new HashMap<UUID, Map<MinecraftProfileTexture.Type, MinecraftProfileTexture>>();
 
-			var path = VidLib.DIR.resolve("skin-overrides.json");
+			var path = VidLibPaths.GAME.resolve("skin-overrides.json");
 
 			if (Files.exists(path)) {
 				try (var reader = Files.newBufferedReader(path)) {

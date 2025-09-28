@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.entity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.codec.KLibCodecs;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.util.JsonUtils;
 
@@ -17,7 +17,7 @@ public class ForcedPlayerOverrides {
 
 	@AutoInit({AutoInit.Type.ASSETS_LOADED, AutoInit.Type.DATA_LOADED, AutoInit.Type.GAME_LOADED})
 	public static void reload() {
-		var file = VidLib.DIR.resolve("forced_player_overrides.json");
+		var file = VidLibPaths.GAME.resolve("forced_player_overrides.json");
 
 		if (Files.exists(file)) {
 			try (var reader = Files.newBufferedReader(file)) {

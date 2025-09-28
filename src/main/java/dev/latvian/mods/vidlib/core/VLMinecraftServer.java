@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.clock.SyncClocksPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
@@ -212,7 +213,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 
 	default Map<UUID, GameProfile> vl$getReroutedPlayers() {
 		var map = new HashMap<UUID, GameProfile>();
-		var path = VidLib.DIR.resolve("rerouted-players.json");
+		var path = VidLibPaths.GAME.resolve("rerouted-players.json");
 
 		if (Files.exists(path)) {
 			try (var reader = Files.newBufferedReader(path)) {

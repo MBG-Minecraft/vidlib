@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.skybox;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
@@ -54,7 +54,7 @@ public class Skybox {
 				session1.getSkybox(skyboxId).export(g1.mc);
 			}
 
-			g1.mc.tell(Component.literal("Skyboxes exported! Click here to open the directory").setStyle(Style.EMPTY.withClickToOpen(VidLib.LOCAL_DIR.resolve("export/skyboxes"))));
+			g1.mc.tell(Component.literal("Skyboxes exported! Click here to open the directory").setStyle(Style.EMPTY.withClickToOpen(VidLibPaths.LOCAL.resolve("export/skyboxes"))));
 		}).remainOpen(false));
 
 		return slist;
@@ -88,7 +88,7 @@ public class Skybox {
 	public void export(Minecraft mc) {
 		var path = data.id().getPath().replace('/', '_');
 
-		var dir = VidLib.LOCAL_DIR.resolve("export/skyboxes/" + data.id().getNamespace());
+		var dir = VidLibPaths.LOCAL.resolve("export/skyboxes/" + data.id().getNamespace());
 
 		try (var in = mc.getResourceManager().getResource(texture).orElseThrow().open()) {
 			try (var src = NativeImage.read(in); var image = SkyboxTexture.process(texture, src, src.getWidth(), src.getHeight())) {

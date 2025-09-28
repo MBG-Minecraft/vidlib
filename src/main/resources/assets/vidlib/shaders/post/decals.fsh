@@ -1,6 +1,5 @@
 #version 330
 
-uniform sampler2D InSampler;
 uniform sampler2D InDepthSampler;
 uniform sampler2D DecalsSampler;
 uniform int DecalCount;
@@ -11,20 +10,26 @@ in vec2 oneTexel;
 
 out vec4 fragColor;
 
-int decodeInt(int x, int y) {
-	ivec4 v = ivec4(texelFetch(DecalsSampler, ivec2(x, y), 0) * 255);
-	return (v.a << 24) | (v.r << 16) | (v.g << 8) | v.b;
+uvec4 fetchRGBA8u(ivec2 tc) {
+	vec4 s = texelFetch(DecalsSampler, tc, 0) * 255.0;
+	return uvec4(round(s));
+}
+
+uint decodeUInt(int x, int y) {
+	uvec4 v = fetchRGBA8u(ivec2(x, y));
+	// assemble as unsigned to avoid UB
+	return (v.w << 24) | (v.x << 16) | (v.y << 8) | v.z;
 }
 
 float decodeFloat(int x, int y) {
-	return intBitsToFloat(decodeInt(x, y));
+	return uintBitsToFloat(decodeUInt(x, y));
 }
 
 vec4 decodeColor(int x, int y) {
-	return vec4(texelFetch(DecalsSampler, ivec2(x, y), 0));
+	return texelFetch(DecalsSampler, ivec2(x, y), 0);
 }
 
-float getInside(int type, vec3 diff, float start, float end, float rotation) {
+float getInside(int type, vec3 diff, float start, float end, float height, float rotation) {
 	if (type == 1) {
 		float distSq = dot(diff, diff);
 
@@ -80,13 +85,15 @@ void main() {
 	vec4 homogenousPos = InverseViewProjectionMat * clipPos;
 	vec3 worldPos = homogenousPos.xyz / homogenousPos.w;
 
-	// vec4 color = texture(InSampler, texCoord);
-	// vec4 color = vec4(texture(InSampler, texCoord).rgb, 0.0);
 	vec4 color = vec4(0.0);
 	bool modified = false;
 
-	for (int y = 0; y < DecalCount; y++) {
-		int head = decodeInt(0, y);
+	for (int y = 0; y < 128; y++) {
+		if (y >= DecalCount) {
+			break;
+		}
+
+		int head = int(decodeUInt(0, y));
 		int type = head & 7;
 
 		if (type == 0) {
@@ -96,9 +103,11 @@ void main() {
 		vec3 decalPos = vec3(decodeFloat(1, y), decodeFloat(2, y), decodeFloat(3, y));
 		float start = decodeFloat(4, y);
 		float end = decodeFloat(5, y);
-		float rotation = decodeFloat(6, y);
+		float height = decodeFloat(6, y);
+		float rotation = decodeFloat(7, y);
+
 		vec3 diff = worldPos - decalPos;
-		float inside = getInside(type, diff, start, end, rotation);
+		float inside = getInside(type, diff, start, end, height, rotation);
 
 		if (inside >= 0.0 && inside <= 1.0) {
 			vec4 startColor = decodeColor(8, y);
@@ -106,10 +115,10 @@ void main() {
 			vec4 decalColor = mix(startColor, endColor, inside);
 
 			if (decalColor.a > 0.0) {
-				float grid = decodeFloat(7, y);
+				float grid = decodeFloat(10, y);
 
 				if (grid > 0.0) {
-					float thickness = decodeFloat(10, y);
+					float thickness = decodeFloat(11, y);
 					vec3 g = abs(diff) + thickness * 0.5;
 
 					if (mod(g.x, grid) < thickness || mod(g.y, grid) < thickness || mod(g.z, grid) < thickness) {

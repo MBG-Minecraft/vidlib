@@ -67,6 +67,7 @@ public @interface AutoInit {
 	@ApiStatus.Internal
 	Lazy<List<AutoMethod>> SCANNED = Lazy.of(() -> {
 		var list = new ArrayList<AutoMethod>();
+		VidLib.LOGGER.info("Scanning @AutoInit...");
 
 		AutoHelper.load(AutoInit.class, EnumSet.of(ElementType.TYPE, ElementType.METHOD, ElementType.FIELD), (source, classLoader, ad) -> {
 			var types = AutoHelper.getEnumValues(ad, Type.class, "value", EnumSet.of(Type.DEFAULT));
@@ -87,7 +88,7 @@ public @interface AutoInit {
 				}
 			}
 
-			var clazz = Class.forName(ad.clazz().getClassName(), true, classLoader);
+			var clazz = AutoHelper.initClass(ad, classLoader);
 
 			if (ad.targetType() == ElementType.METHOD) {
 				var method = AutoHelper.getMethod(clazz, ad, classLoader);

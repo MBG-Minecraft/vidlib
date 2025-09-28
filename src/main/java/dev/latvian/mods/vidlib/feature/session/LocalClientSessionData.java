@@ -8,6 +8,7 @@ import dev.latvian.mods.klib.math.VoxelShapeBox;
 import dev.latvian.mods.klib.math.WorldMouse;
 import dev.latvian.mods.klib.util.Side;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.core.VLLocalPlayer;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeInstance;
@@ -408,7 +409,7 @@ public class LocalClientSessionData extends ClientSessionData {
 			npcRecording.length = System.currentTimeMillis() - npcRecording.start;
 
 			var buf = PlatformHelper.CURRENT.createBuffer(Unpooled.buffer(), mc.level.registryAccess());
-			var path = VidLib.DIR.resolve("npc/" + npcRecording.start + "_" + npcRecording.profile.getName().toLowerCase(Locale.ROOT) + ".npcrec");
+			var path = VidLibPaths.GAME.resolve("npc/" + npcRecording.start + "_" + npcRecording.profile.getName().toLowerCase(Locale.ROOT) + ".npcrec");
 
 			if (Files.notExists(path.getParent())) {
 				try {

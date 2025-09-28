@@ -23,10 +23,11 @@ import java.util.List;
 public @interface AutoRegister {
 	@ApiStatus.Internal
 	Lazy<List<ScanData>> SCANNED = Lazy.of(() -> {
+		VidLib.LOGGER.info("Scanning @AutoRegister...");
 		var list = new ArrayList<ScanData>();
 
 		AutoHelper.load(AutoRegister.class, EnumSet.of(ElementType.FIELD), (source, classLoader, ad) -> {
-			var clazz = Class.forName(ad.clazz().getClassName(), true, classLoader);
+			var clazz = AutoHelper.initClass(ad, classLoader);
 			var value = AutoHelper.getStaticFieldValue(clazz, ad);
 
 			if (value != null) {

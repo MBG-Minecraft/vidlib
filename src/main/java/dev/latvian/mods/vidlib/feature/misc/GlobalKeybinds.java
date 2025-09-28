@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.misc;
 
 import com.google.gson.JsonObject;
+import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.util.JsonUtils;
 import net.minecraft.client.Options;
 import net.neoforged.neoforge.client.settings.KeyModifier;
@@ -10,25 +11,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class GlobalKeybinds {
-	private static Path path;
+	private static final Path PATH = VidLibPaths.USER.resolve("global-keybinds.json");
 	private static JsonObject json;
-
-	public static Path getPath() {
-		if (path == null) {
-			path = Path.of(System.getProperty("user.home") + "/.latvian.dev/global-keybinds.json");
-		}
-
-		return path;
-	}
 
 	public static JsonObject getJson() {
 		if (json == null) {
 			json = new JsonObject();
 
-			var path = getPath();
-
-			if (Files.exists(path)) {
-				try (var reader = Files.newBufferedReader(path)) {
+			if (Files.exists(PATH)) {
+				try (var reader = Files.newBufferedReader(PATH)) {
 					json = JsonUtils.read(reader).getAsJsonObject();
 				} catch (Exception ex) {
 					ex.printStackTrace();
@@ -52,17 +43,7 @@ public class GlobalKeybinds {
 			json.addProperty(key.getName(), key.saveString() + (key.getKeyModifier() != KeyModifier.NONE ? ":" + key.getKeyModifier() : ""));
 		}
 
-		var path = getPath();
-
-		if (Files.notExists(path.getParent())) {
-			try {
-				Files.createDirectories(path.getParent());
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-		}
-
-		try (var writer = Files.newBufferedWriter(path)) {
+		try (var writer = Files.newBufferedWriter(PATH)) {
 			JsonUtils.write(writer, json, true);
 		} catch (Exception ex) {
 			ex.printStackTrace();

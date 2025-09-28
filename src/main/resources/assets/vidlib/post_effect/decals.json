@@ -8,11 +8,6 @@
 			"fragment_shader": "vidlib:post/decals",
 			"inputs": [
 				{
-					"sampler_name": "In",
-					"target": "minecraft:main",
-					"bilinear": true
-				},
-				{
 					"sampler_name": "InDepth",
 					"target": "minecraft:main",
 					"use_depth_buffer": true
@@ -24,7 +19,17 @@
 					"height": 1
 				}
 			],
-			"output": "swap"
+			"output": "swap",
+			"uniforms": [
+				{
+					"name": "DecalCount",
+					"type": "int"
+				},
+				{
+					"name": "InverseViewProjectionMat",
+					"type": "matrix4x4"
+				}
+			]
 		},
 		{
 			"vertex_shader": "minecraft:post/blit",

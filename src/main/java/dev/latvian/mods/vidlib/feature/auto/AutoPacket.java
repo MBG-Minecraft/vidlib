@@ -33,9 +33,10 @@ public @interface AutoPacket {
 	@ApiStatus.Internal
 	Lazy<List<ScanData>> SCANNED = Lazy.of(() -> {
 		var list = new ArrayList<ScanData>();
+		VidLib.LOGGER.info("Scanning @AutoPacket...");
 
 		AutoHelper.load(AutoPacket.class, EnumSet.of(ElementType.FIELD), (source, classLoader, ad) -> {
-				var clazz = Class.forName(ad.clazz().getClassName(), true, classLoader);
+			var clazz = AutoHelper.initClass(ad, classLoader);
 				var type = AutoHelper.getStaticFieldValue(clazz, ad);
 
 			if (type instanceof VidLibPacketType<?> t) {

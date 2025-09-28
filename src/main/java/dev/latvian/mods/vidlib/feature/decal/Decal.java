@@ -60,6 +60,7 @@ public class Decal {
 	public float end = 1F;
 	public float grid = 0F;
 	public float thickness = 0.0625F;
+	public float height = 1F;
 	public float rotation = 0F;
 	public Color startColor = Color.WHITE;
 	public Color endColor = Color.WHITE;
@@ -82,11 +83,12 @@ public class Decal {
 
 		arr.add(Float.floatToIntBits(start)); // 4
 		arr.add(Float.floatToIntBits(end)); // 5
-		arr.add(Float.floatToIntBits((float) Math.toRadians(rotation))); // 6
-		arr.add(Float.floatToIntBits(grid)); // 7
+		arr.add(Float.floatToIntBits(height)); // 6
+		arr.add(Float.floatToIntBits((float) Math.toRadians(rotation))); // 7
 
 		arr.add(startColor.argb()); // 8
 		arr.add(endColor.argb()); // 9
-		arr.add(Float.floatToIntBits(thickness)); // 10
+		arr.add(Float.floatToIntBits(grid)); // 10
+		arr.add(Float.floatToIntBits(thickness)); // 11
 	}
 }
