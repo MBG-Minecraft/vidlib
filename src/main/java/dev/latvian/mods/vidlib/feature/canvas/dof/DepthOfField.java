@@ -14,8 +14,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
 
 public class DepthOfField {
-	public static DepthOfFieldData REPLAY = new DepthOfFieldData(KVector.ZERO, 1.5F, 8F, 0F, DepthOfFieldShape.SPHERE);
-	public static DepthOfFieldData OVERRIDE = new DepthOfFieldData(KVector.ZERO, 1.5F, 8F, 5F, DepthOfFieldShape.SPHERE);
+	public static DepthOfFieldData REPLAY = new DepthOfFieldData(KVector.ZERO, 8F, 16F, 0F, DepthOfFieldShape.SPHERE);
+	public static DepthOfFieldData OVERRIDE = new DepthOfFieldData(KVector.ZERO, 8F, 16F, 16F, DepthOfFieldShape.SPHERE);
 	public static final ImBoolean OVERRIDE_ENABLED = new ImBoolean(false);
 	public static final ImBoolean DEBUG_ENABLED = new ImBoolean(false);
 	public static final Color4ImBuilder DEBUG_NEAR_COLOR = new Color4ImBuilder();
