@@ -13,9 +13,23 @@ import java.util.List;
 
 public record Visuals(List<CubeVisual> cubes, List<LineVisual> lines, List<ResolvedTexturedCube> texturedCubes, List<PositionedColoredShape> shapes, List<PositionedColoredShape> brightShapes, List<PositionedColoredShape> outlineShapes) {
 	public static final Visuals NONE = new Visuals(List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
+	public static final Visuals DEBUG = new Visuals();
 
 	public Visuals() {
 		this(new ArrayList<>(0), new ArrayList<>(0), new ArrayList<>(0), new ArrayList<>(0), new ArrayList<>(0), new ArrayList<>(0));
+	}
+
+	public boolean hasAny() {
+		return !cubes.isEmpty() || !lines.isEmpty() || !texturedCubes.isEmpty() || !shapes.isEmpty() || !brightShapes.isEmpty() || !outlineShapes.isEmpty();
+	}
+
+	public void clear() {
+		cubes.clear();
+		lines.clear();
+		texturedCubes.clear();
+		shapes.clear();
+		brightShapes.clear();
+		outlineShapes.clear();
 	}
 
 	@Deprecated

@@ -81,6 +81,7 @@ import dev.latvian.mods.vidlib.feature.structure.GhostStructureCapture;
 import dev.latvian.mods.vidlib.feature.structure.StructureRenderer;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
 import dev.latvian.mods.vidlib.feature.visual.TexturedCubeRenderer;
+import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
 import dev.latvian.mods.vidlib.math.knumber.Atan2KNumber;
@@ -441,6 +442,8 @@ public class VidLibClientEventHandler {
 				mc.level.getProps().renderDebug(frame);
 				ClientProps.OPEN_PROPS.clear();
 			}
+
+			MiscClientUtils.renderVisuals(frame.poseStack(), frame.camera().getPosition(), frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Visuals.DEBUG, 1F);
 		}
 
 		mc.level.getProps().renderAll(frame, ms);
