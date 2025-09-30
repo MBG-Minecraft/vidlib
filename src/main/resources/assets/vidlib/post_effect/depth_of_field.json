@@ -51,6 +51,10 @@
 				{
 					"name": "DebugFarCol",
 					"type": "vec4"
+				},
+				{
+					"name": "BlurMode",
+					"type": "int"
 				}
 			]
 		},

@@ -1,4 +1,4 @@
-#version 150
+#version 410 core
 
 uniform sampler2D InSampler;
 uniform sampler2D InDepthSampler;
@@ -11,11 +11,12 @@ uniform float Strength;
 uniform int Shape;
 uniform vec4 DebugNearCol;
 uniform vec4 DebugFarCol;
+uniform int BlurMode;
 
 in vec2 texCoord;
 in vec2 oneTexel;
 
-out vec4 fragColor;
+layout (location = 0) out vec4 fragColor;
 
 float blurAt(in vec2 coord) {
 	float depth = texture(InDepthSampler, coord).r;
@@ -66,7 +67,7 @@ void main() {
 			float dist = x * x + y * y;
 			vec2 texCoord2 = texCoord + oneTexel * vec2(x, y);
 
-			if (dist <= maxDist && blurAt(texCoord2) >= blur) {
+			if (dist <= maxDist && BlurMode == 0 ? (blurAt(texCoord2) >= blur) : BlurMode == 1 ? (blurAt(texCoord2) > 0.0) : BlurMode == 2) {
 				vec4 c = texture(InSampler, texCoord2);
 
 				if (c.a > 0.0) {

@@ -84,15 +84,16 @@ public interface MiscUtils {
 		return iterable.iterator().hasNext();
 	}
 
-	static DataResult<byte[]> fetch(String url) {
-		var request = HttpRequest.newBuilder()
+	static HttpRequest.Builder newRequest(String url) {
+		return HttpRequest.newBuilder()
 			.uri(URI.create(url))
-			.GET()
 			.timeout(Duration.ofSeconds(10L))
 			.header("Accept-Language", "en-US,en;q=0.5")
-			.header("User-Agent", "VidLib/1.0")
-			.build();
+			.header("User-Agent", "VidLib/" + VidLib.VERSION);
+	}
 
+	static DataResult<byte[]> fetch(String url) {
+		var request = newRequest(url).GET().build();
 		HttpResponse<byte[]> response = null;
 
 		try {

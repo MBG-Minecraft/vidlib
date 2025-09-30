@@ -6,14 +6,16 @@ import dev.latvian.mods.vidlib.feature.platform.NeoPlatformHelper;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import net.minecraft.core.registries.Registries;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 @Mod(VidLib.ID)
 public class VidLibMod {
-	public VidLibMod(IEventBus bus) {
+	public VidLibMod(ModContainer mod, IEventBus bus) {
 		PlatformHelper.CURRENT = new NeoPlatformHelper();
+		VidLib.VERSION = mod.getModInfo().getVersion().toString();
 		VidLib.init();
 
 		for (var s : AutoRegister.SCANNED.get()) {

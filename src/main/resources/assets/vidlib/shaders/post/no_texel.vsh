@@ -1,6 +1,6 @@
-#version 150
+#version 410 core
 
-in vec4 Position;
+layout (location = 0) in vec4 Position;
 
 uniform mat4 ProjMat;
 uniform vec2 InSize;

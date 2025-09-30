@@ -4,13 +4,11 @@ import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
 import dev.latvian.mods.vidlib.VidLibClientEventHandler;
 import dev.latvian.mods.vidlib.VidLibPaths;
-import dev.latvian.mods.vidlib.core.VLMouseHandler;
 import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImFontConfig;
 import imgui.ImFontGlyphRangesBuilder;
 import imgui.ImGui;
-import imgui.ImGuiIO;
 import imgui.extension.imnodes.ImNodes;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.ImPlotContext;
@@ -48,9 +46,7 @@ public class ImGuiHooks {
 
 	private static ImGuiImplGlfw imGuiGlfw;
 	private static ImGuiImplGl3 imGuiGl3;
-	private static ImGuiContext imGuiContext;
-	private static ImPlotContext imPlotContext;
-	private static boolean captureMouse, captureKeyboard;
+	private static ImGuiContextStack context;
 	private static boolean active = false;
 
 	private static boolean endingFrame = false;
@@ -71,11 +67,15 @@ public class ImGuiHooks {
 		var client = Minecraft.getInstance();
 		imGuiGlfw = new ImGuiImplGlfw();
 		imGuiGl3 = new ImGuiImplGl3();
-		imGuiContext = new ImGuiContext(ImGui.createContext().ptr);
-		ImGui.setCurrentContext(imGuiContext);
-		imPlotContext = ImPlot.createContext();
+
+		context = new ImGuiContextStack(
+			new ImGuiContext(ImGui.createContext().ptr),
+			new ImPlotContext(ImPlot.createContext().ptr)
+		);
+
+		var old = context.push();
 		ImNodes.createContext();
-		var io = new ImGuiIO(ImGui.getIO().ptr);
+		var io = ImGui.getIO();
 		io.setIniFilename(VidLibPaths.USER.resolve("imgui.ini").toAbsolutePath().toString());
 		io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
 		io.addConfigFlags(ImGuiConfigFlags.DockingEnable);
@@ -85,12 +85,13 @@ public class ImGuiHooks {
 		io.setConfigWindowsMoveFromTitleBarOnly(true);
 		io.setConfigMacOSXBehaviors(Minecraft.ON_OSX);
 
+		imGuiGl3.init("#version 410 core");
 		imGuiGlfw.init(client.getWindow().getWindow(), true);
-		imGuiGl3.init("#version 330");
 		loadFonts(resourceManager);
 		var style = ImGui.getStyle();
 		ImGui.styleColorsDark(style);
 		ImGraphics.setFullDefaultStyle(style);
+		old.pop();
 	}
 
 	public static void loadFonts(ResourceManager resourceManager) {
@@ -160,15 +161,8 @@ public class ImGuiHooks {
 	public static void dispose() {
 		imGuiGl3.dispose();
 		imGuiGlfw.dispose();
-		ImPlot.destroyContext(imPlotContext);
-		ImGui.destroyContext(imGuiContext);
+		context.destroy();
 		ImNodes.destroyContext();
-	}
-
-	public static void frame(Minecraft mc) {
-		startFrame(mc);
-		beforeEndFrame();
-		endFrame(mc);
 	}
 
 	public static void startFrame(Minecraft mc) {
@@ -180,6 +174,8 @@ public class ImGuiHooks {
 			init(mc.getResourceManager());
 			initialized = 2;
 		}
+
+		var old = context.push();
 
 		ensureEndFrame();
 
@@ -193,10 +189,12 @@ public class ImGuiHooks {
 		ImGui.newFrame();
 		active = true;
 
+		/*
 		if (captureMouse) {
 			// If capturing the mouse, position it off-screen, so it doesn't show hover effects
 			((VLMouseHandler) mc.mouseHandler).vl$resetMouse();
 		}
+		 */
 
 		// If Minecraft is capturing input, there is no world where ImGui widgets should handle
 		// any mouse interactions (hover, clicking...). Setting the mouse position to (-1, -1) allows us to
@@ -206,16 +204,8 @@ public class ImGuiHooks {
 			ImGui.getIO().setMousePos(-1, -1);
 		}
 
-		handleDocking();
-	}
+		var window = mc.getWindow();
 
-	private static void handleDocking() {
-		var client = Minecraft.getInstance();
-		var window = client.getWindow();
-
-		dockId = -1;
-
-		// Establish a docking space and retrieve the central node
 		dockId = ImGui.dockSpaceOverViewport(ImGui.getMainViewport(), ImGuiDockNodeFlags.NoDockingInCentralNode | ImGuiDockNodeFlags.PassthruCentralNode);
 		var centralNode = imgui.internal.ImGui.dockBuilderGetCentralNode(dockId);
 
@@ -226,12 +216,14 @@ public class ImGuiHooks {
 		var centralNodeSize = centralNode.getSize();
 
 		updateViewportArea(
-			client, window,
+			mc, window,
 			(centralNodePos.x - windowPos.x) / (double) windowSize.x,
 			(centralNodePos.y - windowPos.y) / (double) windowSize.y,
 			centralNodeSize.x / (double) windowSize.x,
 			centralNodeSize.y / (double) windowSize.y
 		);
+
+		old.pop();
 	}
 
 	private static void updateViewportArea(Minecraft client, Window window, double xOffset, double yOffset, double xScale, double yScale) {
@@ -253,10 +245,12 @@ public class ImGuiHooks {
 			var mc = Minecraft.getInstance();
 
 			if (mc.level == null || !mc.level.isReplayLevel()) {
+				var old = context.push();
 				var graphics = new ImGraphics(mc);
 				graphics.pushRootStack();
 				BuiltInImGui.handle(graphics);
 				graphics.popStack();
+				old.pop();
 			}
 		}
 
@@ -270,6 +264,8 @@ public class ImGuiHooks {
 			return;
 		}
 
+		var old = context.push();
+
 		active = false;
 		ImGui.render();
 
@@ -279,8 +275,8 @@ public class ImGuiHooks {
 			imGuiGl3.renderDrawData(drawData);
 		}
 
-		captureMouse = ImGui.getIO().getWantCaptureMouse() && !mc.mouseHandler.isMouseGrabbed();
-		captureKeyboard = ImGui.getIO().getWantCaptureKeyboard();
+		// captureMouse = ImGui.getIO().getWantCaptureMouse() && !mc.mouseHandler.isMouseGrabbed();
+		// captureKeyboard = ImGui.getIO().getWantCaptureKeyboard();
 
 		if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
 			GLFW.glfwWindowHint(GLFW.GLFW_TRANSPARENT_FRAMEBUFFER, GLFW.GLFW_TRUE);
@@ -294,6 +290,8 @@ public class ImGuiHooks {
 			reloadFonts = false;
 			loadFonts(mc.getResourceManager());
 		}
+
+		old.pop();
 	}
 
 	public static void ensureEndFrame() {
@@ -301,17 +299,25 @@ public class ImGuiHooks {
 			return;
 		}
 
+		var old = context.push();
 		ImGui.endFrame();
 		ImGui.updatePlatformWindows();
+		old.pop();
 		active = false;
 	}
 
 	public static boolean shouldInterceptMouse() {
-		return captureMouse;
+		var old = context.push();
+		boolean value = ImGui.getIO().getWantCaptureMouse() && !Minecraft.getInstance().mouseHandler.isMouseGrabbed();
+		old.pop();
+		return value;
 	}
 
 	public static boolean shouldInterceptKeyboard() {
-		return captureKeyboard;
+		var old = context.push();
+		boolean value = ImGui.getIO().getWantCaptureKeyboard();
+		old.pop();
+		return value;
 	}
 
 	public static int frameX(int original) {

@@ -1,4 +1,4 @@
-#version 150
+#version 410 core
 
 uniform sampler2D InSampler;
 uniform vec2 InSize;
@@ -7,7 +7,7 @@ uniform vec2 OutSize;
 in vec2 texCoord;
 in vec2 oneTexel;
 
-out vec4 fragColor;
+layout (location = 0) out vec4 fragColor;
 
 bool e(float x, float y) {
 	return texture(InSampler, texCoord + oneTexel * vec2(x, y)).a > 0.0;

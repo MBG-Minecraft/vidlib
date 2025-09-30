@@ -34,7 +34,7 @@ public record SinKNumber(KNumber angle) implements KNumber, ImBuilderWrapper.Bui
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
-			update = update.or(imguiKey(graphics, "Angle", "angle"));
+			update = update.or(angle.imguiKey(graphics, "Angle", "angle"));
 			return update;
 		}
 

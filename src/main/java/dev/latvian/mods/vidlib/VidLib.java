@@ -12,13 +12,14 @@ public class VidLib {
 	public static final String ID = "vidlib";
 	public static final String NAME = "VidLib";
 	public static final Logger LOGGER = LoggerFactory.getLogger(NAME);
+	public static String VERSION = "dev";
 
 	public static ResourceLocation id(String path) {
 		return ResourceLocation.fromNamespaceAndPath(ID, path);
 	}
 
 	public static void init() {
-		VidLib.LOGGER.info("VidLib loaded");
+		VidLib.LOGGER.info("VidLib " + VERSION + " loaded");
 		VidLibDataTypes.register();
 	}
 

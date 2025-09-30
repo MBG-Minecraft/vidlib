@@ -1,4 +1,4 @@
-#version 330
+#version 410 core
 
 uniform sampler2D InDepthSampler;
 uniform sampler2D TerrainInDepthSampler;
@@ -9,7 +9,7 @@ uniform mat4 InverseViewProjectionMat;
 in vec2 texCoord;
 in vec2 oneTexel;
 
-out vec4 fragColor;
+layout (location = 0) out vec4 fragColor;
 
 uvec4 fetchRGBA8u(ivec2 tc) {
 	vec4 s = texelFetch(DecalsSampler, tc, 0) * 255.0;

@@ -1,4 +1,4 @@
-#version 150
+#version 410 core
 
 uniform sampler2D InSampler;
 uniform sampler2D DepthBeforeParticlesSampler;
@@ -8,7 +8,7 @@ uniform vec2 OutSize;
 
 in vec2 texCoord;
 
-out vec4 fragColor;
+layout (location = 0) out vec4 fragColor;
 
 void main() {
 	float depthBefore = texture(DepthBeforeParticlesSampler, texCoord).r;

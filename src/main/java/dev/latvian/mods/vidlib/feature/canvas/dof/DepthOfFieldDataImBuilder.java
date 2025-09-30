@@ -14,6 +14,7 @@ public class DepthOfFieldDataImBuilder implements ImBuilder<DepthOfFieldData> {
 	public final FloatImBuilder blurRange = new FloatImBuilder(0F, 30F);
 	public final FloatImBuilder strength = new FloatImBuilder(0F, 30F);
 	public final ImBuilder<DepthOfFieldShape> shape = new EnumImBuilder<>(DepthOfFieldShape.VALUES);
+	public final ImBuilder<DepthOfFieldBlurMode> blurMode = new EnumImBuilder<>(DepthOfFieldBlurMode.VALUES);
 
 	@Override
 	public void set(DepthOfFieldData value) {
@@ -23,12 +24,14 @@ public class DepthOfFieldDataImBuilder implements ImBuilder<DepthOfFieldData> {
 			blurRange.set(value.blurRange());
 			strength.set(value.strength());
 			shape.set(value.shape());
+			blurMode.set(value.blurMode());
 		} else {
 			focus.set(KVector.ZERO);
 			focusRange.set(1.5F);
 			blurRange.set(8F);
 			strength.set(5F);
 			shape.set(DepthOfFieldShape.SPHERE);
+			blurMode.set(DepthOfFieldBlurMode.DEPTH);
 		}
 	}
 
@@ -36,20 +39,21 @@ public class DepthOfFieldDataImBuilder implements ImBuilder<DepthOfFieldData> {
 	public ImUpdate imgui(ImGraphics graphics) {
 		var update = ImUpdate.NONE;
 		update = update.or(focus.imguiKey(graphics, "Focus", "focus"));
-		update = update.or(focusRange.imguiKey(graphics, "Focus Range", "focus_range"));
-		update = update.or(blurRange.imguiKey(graphics, "Blur Range", "blur_range"));
+		update = update.or(focusRange.imguiKey(graphics, "Focus Range", "focus-range"));
+		update = update.or(blurRange.imguiKey(graphics, "Blur Range", "blur-range"));
 		update = update.or(strength.imguiKey(graphics, "Strength", "strength"));
 		update = update.or(shape.imguiKey(graphics, "Shape", "shape"));
+		update = update.or(blurMode.imguiKey(graphics, "Blur Mode", "blur-mode"));
 		return update;
 	}
 
 	@Override
 	public boolean isValid() {
-		return focus.isValid() && focusRange.isValid() && blurRange.isValid() && strength.isValid() && shape.isValid();
+		return focus.isValid() && focusRange.isValid() && blurRange.isValid() && strength.isValid() && shape.isValid() && blurMode.isValid();
 	}
 
 	@Override
 	public DepthOfFieldData build() {
-		return new DepthOfFieldData(focus.build(), focusRange.build(), blurRange.build(), strength.build(), shape.build());
+		return new DepthOfFieldData(focus.build(), focusRange.build(), blurRange.build(), strength.build(), shape.build(), blurMode.build());
 	}
 }
