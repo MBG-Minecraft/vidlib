@@ -26,6 +26,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
@@ -469,5 +470,21 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 
 	default boolean vl$getTickDayTime() {
 		return true;
+	}
+
+	default double getGroundY(double x, double y, double z) {
+		var level = vl$level();
+		var bpos = new BlockPos.MutableBlockPos(x, y + 0.001D, z);
+		BlockState state;
+
+		while ((state = level.getBlockState(bpos)).isAir()) {
+			bpos.move(0, -1, 0);
+
+			if (level.isOutsideBuildHeight(bpos.getY())) {
+				return Double.NaN;
+			}
+		}
+
+		return bpos.getY() + state.getCollisionShape(level, bpos).max(Direction.Axis.Y);
 	}
 }

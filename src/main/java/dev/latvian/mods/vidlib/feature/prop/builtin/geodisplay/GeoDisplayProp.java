@@ -15,19 +15,15 @@ import dev.latvian.mods.vidlib.feature.prop.geo.BaseGeoProp;
 import net.minecraft.resources.ResourceLocation;
 
 public class GeoDisplayProp extends BaseGeoProp {
-	public static final PropData<GeoDisplayProp, ResourceLocation> MODEL = PropData.create(GeoDisplayProp.class, "model", ID.DATA_TYPE, p -> p.model, (p, v) -> p.model = v, GeoModelImBuilder.TYPE);
-	public static final PropData<GeoDisplayProp, ResourceLocation> TEXTURE = PropData.create(GeoDisplayProp.class, "texture", ID.DATA_TYPE, p -> p.texture, (p, v) -> p.texture = v, GeoTextureImBuilder.TYPE);
-	public static final PropData<GeoDisplayProp, ResourceLocation> ANIMATIONS = PropData.create(GeoDisplayProp.class, "animations", ID.DATA_TYPE, p -> p.animations, (p, v) -> p.animations = v, GeoAnimationsImBuilder.TYPE);
-
 	@AutoRegister
 	public static final PropType<GeoDisplayProp> TYPE = PropType.create(VidLib.id("geo_display"), GeoDisplayProp::new,
 		TICK,
 		POSITION,
 		HEIGHT,
 		YAW,
-		MODEL,
-		TEXTURE,
-		ANIMATIONS
+		PropData.create(GeoDisplayProp.class, "model", ID.DATA_TYPE, p -> p.model, (p, v) -> p.model = v, GeoModelImBuilder.TYPE),
+		PropData.create(GeoDisplayProp.class, "texture", ID.DATA_TYPE, p -> p.texture, (p, v) -> p.texture = v, GeoTextureImBuilder.TYPE),
+		PropData.create(GeoDisplayProp.class, "animations", ID.DATA_TYPE, p -> p.animations, (p, v) -> p.animations = v, GeoAnimationsImBuilder.TYPE)
 	);
 
 	public ResourceLocation model = VidLib.id("prop/player");

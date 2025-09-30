@@ -35,7 +35,6 @@ public class OutlineBufferSourceMixin implements VLOutlineBufferSource {
 			}
 		}
 
-		Canvas.WEAK_OUTLINE.markActive();
 		return instance.get();
 	}
 }

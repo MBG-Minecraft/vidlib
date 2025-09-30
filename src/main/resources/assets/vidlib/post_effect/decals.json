@@ -17,6 +17,11 @@
 					"location": "vidlib:decals",
 					"width": 1,
 					"height": 1
+				},
+				{
+					"sampler_name": "TerrainInDepth",
+					"target": "vidlib:weak_outline",
+					"use_depth_buffer": true
 				}
 			],
 			"output": "swap",

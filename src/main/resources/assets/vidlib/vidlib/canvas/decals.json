@@ -1,6 +1,7 @@
 {
 	"priority": -20,
 	"import": [
-		"minecraft:main"
+		"minecraft:main",
+		"vidlib:weak_outline"
 	]
 }

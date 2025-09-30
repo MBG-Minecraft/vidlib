@@ -9,9 +9,6 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -63,23 +60,17 @@ public record GroundKVector(KVector vector) implements KVector, ImBuilderWrapper
 	public Vec3 get(KNumberContext ctx) {
 		var pos = vector.get(ctx);
 
-		if (pos == null) {
+		if (pos == null || ctx.level == null) {
 			return null;
 		}
 
-		var bpos = new BlockPos.MutableBlockPos(pos.x, pos.y + 0.001D, pos.z);
-		BlockState state;
+		var groundY = ctx.level.getGroundY(pos.x, pos.y, pos.z);
 
-		while ((state = ctx.level.getBlockState(bpos)).isAir()) {
-			bpos.move(0, -1, 0);
-
-			if (ctx.level.isOutsideBuildHeight(bpos.getY())) {
-				return null;
-			}
+		if (Double.isNaN(groundY)) {
+			return null;
 		}
 
-		//
-		return new Vec3(pos.x, bpos.getY() + state.getCollisionShape(ctx.level, bpos).max(Direction.Axis.Y), pos.z);
+		return new Vec3(pos.x, groundY, pos.z);
 	}
 
 	@Override

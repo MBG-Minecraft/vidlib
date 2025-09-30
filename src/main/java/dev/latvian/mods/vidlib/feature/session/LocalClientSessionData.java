@@ -101,7 +101,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	public WorldMouse worldMouse;
 	public NPCRecording npcRecording;
 	public final List<PacketDebuggerPanel.LoggedPacket> debugPackets;
-	public final List<Decal> decals;
+	public final List<Decal> debugDecals;
 	private Boolean isServerNeoForge;
 
 	public LocalClientSessionData(Minecraft mc, UUID uuid, ClientPacketListener connection) {
@@ -120,7 +120,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.serverDataMap = new DataMap(uuid, DataKey.SERVER);
 		this.globalVariables = new KNumberVariables();
 		this.debugPackets = new ArrayList<>();
-		this.decals = new ArrayList<>();
+		this.debugDecals = new ArrayList<>();
 
 		VidLib.LOGGER.info("Client Session Data Initialized");
 	}

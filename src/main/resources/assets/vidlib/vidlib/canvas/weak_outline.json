@@ -1,5 +1,6 @@
 {
 	"priority": -50,
+	"always_active": true,
 	"import": [
 		"vidlib:main_before_particles",
 		"vidlib:main_after_particles"

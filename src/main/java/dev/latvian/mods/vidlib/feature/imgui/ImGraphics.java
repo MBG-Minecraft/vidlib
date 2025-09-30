@@ -389,6 +389,13 @@ public class ImGraphics {
 		}
 	}
 
+	public void smallText(String text) {
+		pushStack();
+		setFontScale(0.75F);
+		ImGui.text(text);
+		popStack();
+	}
+
 	public static int getTextureId(ResourceLocation identifier) {
 		return Minecraft.getInstance().getTextureManager().getTexture(identifier).getTexture().vl$getHandle();
 	}

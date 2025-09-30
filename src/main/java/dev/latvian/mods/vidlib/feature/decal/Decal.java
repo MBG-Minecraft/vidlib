@@ -1,80 +1,149 @@
 package dev.latvian.mods.vidlib.feature.decal;
 
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.math.ClientMatrices;
-import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
-import dev.latvian.mods.vidlib.feature.canvas.Canvas;
-import dev.latvian.mods.vidlib.feature.canvas.CanvasFloatUniform;
-import dev.latvian.mods.vidlib.feature.canvas.CanvasIntUniform;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
+import dev.latvian.mods.vidlib.feature.imgui.SelectedPosition;
+import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.Vector3dImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import imgui.ImGui;
+import imgui.flag.ImGuiSliderFlags;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.Position;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class Decal {
-	@ClientAutoRegister
-	public static final Canvas CANVAS = Canvas.createExternal(VidLib.id("decals")).setDrawSetupCallback(Decal::setup);
+	public static Color DANGER_INNER_COLOR = Color.ofRGB(0xFFAA00);
+	public static Color DANGER_OUTER_COLOR = Color.RED;
 
-	// public static final CanvasSampler TEXTURE = CANVAS.sampler("DecalsSampler");
-	public static final CanvasIntUniform COUNT = CANVAS.intUniform("DecalCount");
-	public static final CanvasFloatUniform INVERSE_VIEW_PROJECTION_MATRIX_UNIFORM = CANVAS.mat4Uniform("InverseViewProjectionMat");
-
-	private static final List<Decal> TEMP_LIST = new ArrayList<>();
-
-	private static void setup(Minecraft mc) {
-		var decals = mc.player.vl$sessionData().decals;
-
-		if (!decals.isEmpty()) {
-			for (var decal : decals) {
-				if (decal.type != DecalType.NONE && decal.end > 0F && (decal.startColor.alpha() > 0 || decal.endColor.alpha() > 0)) {
-					TEMP_LIST.add(decal);
-				}
-			}
-		}
-
-		if (!TEMP_LIST.isEmpty()) {
-			var texture = mc.getTextureManager().byPath.get(DecalTexture.ID);
-
-			if (texture == null) {
-				texture = new DecalTexture();
-				mc.getTextureManager().register(DecalTexture.ID, texture);
-			}
-
-			((DecalTexture) texture).update(TEMP_LIST, mc.gameRenderer.getMainCamera().getPosition());
-			// TEXTURE.set(texture.getTexture());
-			COUNT.set(TEMP_LIST.size());
-			INVERSE_VIEW_PROJECTION_MATRIX_UNIFORM.set(ClientMatrices.INVERSE_WORLD);
-			CANVAS.markActive();
-			TEMP_LIST.clear();
-		}
+	public static Decal createDanger(float width) {
+		var d = new Decal();
+		d.type = DecalType.DANGER;
+		d.start = 0F;
+		d.end = width;
+		d.startColor = DANGER_INNER_COLOR.withAlpha(100);
+		d.endColor = DANGER_OUTER_COLOR.withAlpha(100);
+		d.setHeight(0.1875F);
+		d.grid = 1F;
+		d.terrain = true;
+		return d;
 	}
 
-	public DecalType type = DecalType.SPHERE;
-	public Vector3d position = new Vector3d();
-	public float start = 0F;
-	public float end = 1F;
-	public float grid = 0F;
-	public float thickness = 0.0625F;
-	public float height = 1F;
-	public float rotation = 0F;
-	public Color startColor = Color.WHITE;
-	public Color endColor = Color.WHITE;
-	public boolean surface = false;
-	public boolean additive = false;
+	public Decal parent;
+	public DecalType type;
+	public Vector3d position;
+	public float start;
+	public float end;
+	public float grid;
+	public float thickness;
+	public float heightScale;
+	public float rotation;
+	public Color startColor;
+	public Color endColor;
+	public boolean surface;
+	public boolean terrain;
+	public boolean additive;
 
-	public void setPosition(Position p) {
-		position.set(p.x(), p.y(), p.z());
+	public Decal() {
+		this.parent = null;
+		this.type = DecalType.SPHERE;
+		this.position = new Vector3d();
+		this.start = 0F;
+		this.end = 1F;
+		this.grid = 0F;
+		this.thickness = 0.0625F;
+		this.heightScale = 1F;
+		this.rotation = 0F;
+		this.startColor = Color.WHITE;
+		this.endColor = Color.WHITE;
+		this.surface = false;
+		this.terrain = false;
+		this.additive = false;
+	}
+
+	public Decal(Decal other) {
+		this.parent = other;
+		this.type = other.type;
+		this.position = other.position;
+		this.start = other.start;
+		this.end = other.end;
+		this.grid = other.grid;
+		this.thickness = other.thickness;
+		this.heightScale = other.heightScale;
+		this.rotation = other.rotation;
+		this.startColor = other.startColor;
+		this.endColor = other.endColor;
+		this.surface = other.surface;
+		this.terrain = other.terrain;
+		this.additive = other.additive;
+	}
+
+	public void setPosition(Vector3d pos, boolean joined) {
+		if (!joined && parent != null) {
+			parent = null;
+			position = new Vector3d();
+		}
+
+		position.set(pos);
+	}
+
+	public void setPosition(Position pos, boolean joined) {
+		if (!joined && parent != null) {
+			parent = null;
+			position = new Vector3d();
+		}
+
+		position.set(pos.x(), pos.y(), pos.z());
+	}
+
+	public boolean isVisible() {
+		return type != DecalType.NONE && end > 0F && (startColor.alpha() > 0 || endColor.alpha() > 0);
+	}
+
+	public void addToList(List<Decal> list) {
+		if (type == DecalType.DANGER) {
+			if (grid > 0F) {
+				var g = new Decal(this);
+				g.type = DecalType.CYLINDER;
+				g.startColor = startColor.withAlpha(0);
+				g.end = end - thickness;
+
+				if (g.isVisible()) {
+					list.add(g);
+				}
+			}
+
+			var e = new Decal(this);
+			e.type = DecalType.CYLINDER;
+			e.start = e.end - thickness;
+			e.startColor = endColor;
+			e.grid = 0F;
+
+			if (e.isVisible()) {
+				list.add(e);
+			}
+
+			var f = new Decal(this);
+			f.type = DecalType.CYLINDER;
+			f.grid = 0F;
+
+			if (f.isVisible()) {
+				list.add(f);
+			}
+		} else if (isVisible()) {
+			list.add(this);
+		}
 	}
 
 	public void upload(IntArrayList arr, Vec3 cameraPos) {
 		arr.add((type.shaderId & 7)
 			| (surface ? 8 : 0)
-			| (additive ? 16 : 0)
+			| (terrain ? 16 : 0)
 		);
 
 		arr.add(Float.floatToIntBits((float) (position.x - cameraPos.x))); // 1
@@ -83,12 +152,115 @@ public class Decal {
 
 		arr.add(Float.floatToIntBits(start)); // 4
 		arr.add(Float.floatToIntBits(end)); // 5
-		arr.add(Float.floatToIntBits(height)); // 6
+		arr.add(Float.floatToIntBits(heightScale)); // 6
 		arr.add(Float.floatToIntBits((float) Math.toRadians(rotation))); // 7
 
 		arr.add(startColor.argb()); // 8
 		arr.add(endColor.argb()); // 9
 		arr.add(Float.floatToIntBits(grid)); // 10
 		arr.add(Float.floatToIntBits(thickness)); // 11
+	}
+
+	public void imgui(ImGraphics graphics, Collection<Decal> decals) {
+		DecalType.UNIT[0] = type;
+		graphics.combo("###type", DecalType.UNIT, DecalType.VALUES);
+		type = DecalType.UNIT[0];
+
+		if (parent != null && !decals.contains(parent)) {
+			setPosition(position, false);
+		}
+
+		if (parent != null) {
+			ImGuiUtils.BOOLEAN.set(true);
+
+			if (ImGui.checkbox(ImIcons.LOCK + " Joined Position###joined-position", ImGuiUtils.BOOLEAN)) {
+				setPosition(position, false);
+			}
+		} else {
+			Vector3dImBuilder.imgui(graphics, position, SelectedPosition.UNIT);
+		}
+
+		ImGui.text("Size");
+		graphics.smallText("Width");
+
+		float[] starta = {start};
+		float[] enda = {end};
+		ImGuiUtils.FLOAT.set(start);
+		ImGui.dragFloatRange2("###size-range", starta, enda, 0.0625F, 0F, 100F, "%f");
+		start = starta[0];
+		end = enda[0];
+
+		ImGuiUtils.hoveredTooltip("Size Range");
+
+		float diff = end - start;
+		if (ImGui.dragFloat("###size", starta, 0.0625F, 0F, 100F, "%f")) {
+			start = starta[0];
+			end = start + diff;
+		}
+
+		ImGuiUtils.hoveredTooltip("Size");
+
+		graphics.smallText("Height");
+
+		ImGuiUtils.FLOAT.set(heightScale);
+		ImGui.sliderFloat("###height-scale", ImGuiUtils.FLOAT.getData(), 0.125F, 8F, "%f", ImGuiSliderFlags.Logarithmic);
+		heightScale = ImGuiUtils.FLOAT.get();
+
+		ImGuiUtils.hoveredTooltip("Height Scale");
+
+		starta[0] = getHeight();
+
+		if (ImGui.dragFloat("###height", starta, 0.0625F, 0F, 100F, "%f")) {
+			setHeight(starta[0]);
+		}
+
+		ImGuiUtils.hoveredTooltip("Height");
+
+		// start = starta[0];
+		// end = start + hdiff;
+
+		Color4ImBuilder.UNIT.set(startColor);
+		Color4ImBuilder.UNIT.imguiKey(graphics, "Start Color", "start-color");
+		startColor = Color4ImBuilder.UNIT.build();
+
+		Color4ImBuilder.UNIT.set(endColor);
+		Color4ImBuilder.UNIT.imguiKey(graphics, "End Color", "end-color");
+		endColor = Color4ImBuilder.UNIT.build();
+
+		ImGui.text("Grid");
+
+		ImGuiUtils.FLOAT.set(grid);
+		ImGui.sliderFloat("###grid", ImGuiUtils.FLOAT.getData(), 0F, 4F, "%f");
+		grid = ImGuiUtils.FLOAT.get();
+
+		if (grid > 0F) {
+			ImGuiUtils.FLOAT.set(thickness);
+			ImGui.sliderFloat("###thickness", ImGuiUtils.FLOAT.getData(), 0F, 0.5F, "%f");
+			thickness = ImGuiUtils.FLOAT.get();
+		}
+
+		ImGuiUtils.BOOLEAN.set(terrain);
+
+		if (ImGui.checkbox("Terrain###terrain", ImGuiUtils.BOOLEAN)) {
+			terrain = ImGuiUtils.BOOLEAN.get();
+		}
+	}
+
+	public float getHeight() {
+		return end * heightScale * 2F;
+	}
+
+	public void setHeight(float height) {
+		heightScale = height / (end * 2F);
+	}
+
+	public void applyProgress(float progress) {
+		if (progress <= 0F) {
+			type = DecalType.NONE;
+			return;
+		}
+
+		startColor = startColor.withAlpha(startColor.alphaf() * progress);
+		endColor = endColor.withAlpha(endColor.alphaf() * progress);
 	}
 }

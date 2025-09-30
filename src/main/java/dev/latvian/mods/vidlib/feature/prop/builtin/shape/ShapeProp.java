@@ -18,12 +18,6 @@ import dev.latvian.mods.vidlib.feature.prop.PropType;
 import net.minecraft.resources.ResourceLocation;
 
 public class ShapeProp extends Prop {
-	public static final PropData<ShapeProp, Shape> SHAPE = PropData.create(ShapeProp.class, "shape", Shape.DATA_TYPE, p -> p.shape, (p, v) -> p.shape = v, null);
-	public static final PropData<ShapeProp, Gradient> COLOR = PropData.create(ShapeProp.class, "color", Gradient.DATA_TYPE, p -> p.color, (p, v) -> p.color = v.optimize(), GradientImBuilder.TYPE);
-	public static final PropData<ShapeProp, Gradient> OUTLINE_COLOR = PropData.create(ShapeProp.class, "outline_color", Gradient.DATA_TYPE, p -> p.outlineColor, (p, v) -> p.outlineColor = v.optimize(), GradientImBuilder.TYPE);
-	public static final PropData<ShapeProp, Boolean> BLOOM = PropData.createBoolean(ShapeProp.class, "bloom", p -> p.bloom, (p, v) -> p.bloom = v);
-	public static final PropData<ShapeProp, ResourceLocation> TEXTURE = PropData.create(ShapeProp.class, "texture", ID.DATA_TYPE, p -> p.texture, (p, v) -> p.texture = v.equals(Empty.TEXTURE) ? Empty.TEXTURE : v, ResourceLocationImBuilder.DELAYED_TYPE);
-
 	@AutoRegister
 	public static final PropType<ShapeProp> TYPE = PropType.create(VidLib.id("shape"), ShapeProp::new,
 		TICK,
@@ -35,13 +29,13 @@ public class ShapeProp extends Prop {
 		GRAVITY,
 		WIDTH,
 		HEIGHT,
-		SHAPE,
-		COLOR,
-		OUTLINE_COLOR,
-		BLOOM,
 		CAN_COLLIDE,
 		CAN_INTERACT,
-		TEXTURE
+		PropData.create(ShapeProp.class, "shape", Shape.DATA_TYPE, p -> p.shape, (p, v) -> p.shape = v, null),
+		PropData.create(ShapeProp.class, "color", Gradient.DATA_TYPE, p -> p.color, (p, v) -> p.color = v.optimize(), GradientImBuilder.TYPE),
+		PropData.create(ShapeProp.class, "outline_color", Gradient.DATA_TYPE, p -> p.outlineColor, (p, v) -> p.outlineColor = v.optimize(), GradientImBuilder.TYPE),
+		PropData.createBoolean(ShapeProp.class, "bloom", p -> p.bloom, (p, v) -> p.bloom = v),
+		PropData.create(ShapeProp.class, "texture", ID.DATA_TYPE, p -> p.texture, (p, v) -> p.texture = v.equals(Empty.TEXTURE) ? Empty.TEXTURE : v, ResourceLocationImBuilder.DELAYED_TYPE)
 	);
 
 	public Shape shape;
