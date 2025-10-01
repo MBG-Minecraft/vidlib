@@ -13,7 +13,8 @@ import java.util.List;
 
 public record Visuals(List<CubeVisual> cubes, List<LineVisual> lines, List<ResolvedTexturedCube> texturedCubes, List<PositionedColoredShape> shapes, List<PositionedColoredShape> brightShapes, List<PositionedColoredShape> outlineShapes) {
 	public static final Visuals NONE = new Visuals(List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
-	public static final Visuals DEBUG = new Visuals();
+	public static final Visuals FRAME_DEBUG = new Visuals();
+	public static final Visuals TICK_DEBUG = new Visuals();
 
 	public Visuals() {
 		this(new ArrayList<>(0), new ArrayList<>(0), new ArrayList<>(0), new ArrayList<>(0), new ArrayList<>(0), new ArrayList<>(0));
@@ -30,6 +31,15 @@ public record Visuals(List<CubeVisual> cubes, List<LineVisual> lines, List<Resol
 		shapes.clear();
 		brightShapes.clear();
 		outlineShapes.clear();
+	}
+
+	public void copyFrom(Visuals from) {
+		cubes.addAll(from.cubes);
+		lines.addAll(from.lines);
+		texturedCubes.addAll(from.texturedCubes);
+		shapes.addAll(from.shapes);
+		brightShapes.addAll(from.brightShapes);
+		outlineShapes.addAll(from.outlineShapes);
 	}
 
 	@Deprecated

@@ -14,7 +14,7 @@ public interface PropRenderer<P extends Prop> {
 		RenderLevelStageEvent.Stage.AFTER_ENTITIES
 	);
 
-	Set<RenderLevelStageEvent.Stage> STRUCTURE_STAGES = Set.of(
+	Set<RenderLevelStageEvent.Stage> TERRAIN_STAGES = Set.of(
 		RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS,
 		RenderLevelStageEvent.Stage.AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS,
 		RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS,
@@ -22,7 +22,7 @@ public interface PropRenderer<P extends Prop> {
 		RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS
 	);
 
-	Set<RenderLevelStageEvent.Stage> SOLID_STRUCTURE_STAGES = Set.of(
+	Set<RenderLevelStageEvent.Stage> SOLID_TERRAIN_STAGES = Set.of(
 		RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS
 	);
 

@@ -12,6 +12,7 @@ import dev.latvian.mods.vidlib.feature.camera.StopScreenShakePayload;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
 import dev.latvian.mods.vidlib.feature.cutscene.PlayCutscenePayload;
 import dev.latvian.mods.vidlib.feature.cutscene.StopCutscenePayload;
+import dev.latvian.mods.vidlib.feature.hud.ToastDisplayPayload;
 import dev.latvian.mods.vidlib.feature.misc.CloseScreenPayload;
 import dev.latvian.mods.vidlib.feature.misc.MarkerData;
 import dev.latvian.mods.vidlib.feature.misc.MarkerPayload;
@@ -99,6 +100,18 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 				player.displayClientMessage(message, true);
 			}
 		}
+	}
+
+	default void toast(String uniqueId, long displayTime, Component title, Component description) {
+		if (isClient()) {
+			getEnvironment().toast(uniqueId, displayTime, title, description);
+		} else {
+			s2c(new ToastDisplayPayload(uniqueId, displayTime, title, description));
+		}
+	}
+
+	default void toast(Component title, Component description) {
+		toast("", 5000L, title, description);
 	}
 
 	default void playCutscene(Cutscene cutscene, KNumberVariables variables) {

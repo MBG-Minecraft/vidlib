@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluids;
 
-public class CurrentGhostStructureCapture {
+public class CurrentStructureCapture {
 	public final Long2ObjectMap<BlockState> blocks = new Long2ObjectOpenHashMap<>();
 	public final Long2ObjectMap<BlockState> water = new Long2ObjectOpenHashMap<>();
 	public int minX = Integer.MAX_VALUE;
@@ -84,7 +84,7 @@ public class CurrentGhostStructureCapture {
 		var maxZ = Math.max(start.getZ(), end.getZ());
 		var volume = (maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1);
 		source.tell("Scanning %,d block area...".formatted(volume));
-		var capture = StructureHolder.capture(level, start, end, GhostStructureCapture.buildFilter(), true, true).offset(minX, minY, minZ);
+		var capture = StructureHolder.capture(level, start, end, StructureCapture.buildFilter(), true, true).offset(minX, minY, minZ);
 
 		for (var entry : capture.blocks().long2ObjectEntrySet()) {
 			var pos = entry.getLongKey();

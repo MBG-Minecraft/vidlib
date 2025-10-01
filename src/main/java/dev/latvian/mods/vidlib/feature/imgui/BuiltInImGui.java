@@ -15,7 +15,6 @@ import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.skybox.Skybox;
 import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
-import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import net.neoforged.neoforge.common.NeoForge;
@@ -75,10 +74,6 @@ public class BuiltInImGui {
 		}).enabled(graphics.inGame));
 
 		list.add(MenuItem.item(ImIcons.STOP, "Stop all Sounds", g -> g.mc.getSoundManager().stop()));
-
-		if (Visuals.DEBUG.hasAny()) {
-			list.add(MenuItem.item(ImIcons.DELETE, "Clear Debug Visuals", g -> Visuals.DEBUG.clear()));
-		}
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.DebugDropdown(graphics, list));
 	});

@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.core;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Pair;
 import dev.latvian.mods.klib.math.Identity;
@@ -56,6 +58,7 @@ import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.client.Camera;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -83,9 +86,12 @@ import org.joml.Vector4f;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("resource")
 public interface VLMinecraftClient extends VLMinecraftEnvironment {
+	Cache<String, SystemToast.SystemToastId> SYSTEM_TOAST_IDS = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build();
+
 	default Minecraft vl$self() {
 		return (Minecraft) this;
 	}
@@ -231,6 +237,23 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	@Override
 	default void status(Component message) {
 		vl$self().player.displayClientMessage(message, true);
+	}
+
+	@Override
+	default void toast(String uniqueId, long displayTime, Component title, Component description) {
+		SystemToast.SystemToastId id;
+
+		if (uniqueId.isEmpty()) {
+			id = new SystemToast.SystemToastId(displayTime);
+		} else {
+			try {
+				id = SYSTEM_TOAST_IDS.get(uniqueId, () -> new SystemToast.SystemToastId(displayTime));
+			} catch (Exception e) {
+				id = new SystemToast.SystemToastId(displayTime);
+			}
+		}
+
+		SystemToast.addOrUpdate(vl$self().getToastManager(), id, title, description);
 	}
 
 	@Override

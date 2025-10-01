@@ -136,7 +136,7 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	@Inject(method = "<init>", at = @At("RETURN"))
 	public void vl$onFinishInit(CallbackInfo ci) {
 		TTFFile.find(resourceManager);
-		ImGuiHooks.init(resourceManager);
+		ImGuiHooks.init(vl$self(), resourceManager);
 	}
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderFog(Lnet/minecraft/client/renderer/FogParameters;)V"))

@@ -13,10 +13,13 @@ public class BossRendering {
 	public static int active = 0;
 	public static float lookingAtDepth = 1F;
 	public static float lookingAtDistance = 8192F;
+	public static boolean trackCenterPixel = false;
 
 	public static void handleColors(Minecraft mc) {
-		lookingAtDepth = CANVAS.getCenterARGB() != 0 ? CANVAS.getCenterDepth() : 1F;
-		lookingAtDistance = mc.linearizeDepth(lookingAtDepth);
+		if (trackCenterPixel) {
+			lookingAtDepth = CANVAS.getCenterARGB() != 0 ? CANVAS.getCenterDepth() : 1F;
+			lookingAtDistance = mc.linearizeDepth(lookingAtDepth);
+		}
 	}
 
 	public static void render(FrameInfo frame) {

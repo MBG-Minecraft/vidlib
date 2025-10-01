@@ -13,6 +13,7 @@ import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImGuiAPI;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
@@ -82,6 +83,8 @@ public class VLFlashbackIntegration {
 		FlashbackIntegration.POPUPS.add(VLFlashbackIntegration::popups);
 		FlashbackIntegration.ICONS.add(VLFlashbackIntegration::icons);
 		FlashbackIntegration.STYLE.add(ImGraphics::setFullDefaultStyle);
+
+		ImGuiAPI.HIDE.add(FlashbackIntegration.IN_EXPORTING);
 	}
 
 	private static void initialized(List<Packet<? super ClientConfigurationPacketListener>> configPackets, List<LongObjectPair<Packet<? super ClientGamePacketListener>>> gamePackets) {

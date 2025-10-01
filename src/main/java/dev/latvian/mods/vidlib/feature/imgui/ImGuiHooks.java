@@ -15,7 +15,6 @@ import imgui.extension.implot.ImPlotContext;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.flag.ImGuiDockNodeFlags;
 import imgui.gl3.ImGuiImplGl3;
-import imgui.glfw.ImGuiImplGlfw;
 import imgui.internal.ImGuiContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -44,7 +43,7 @@ public class ImGuiHooks {
 		0,
 	};
 
-	private static ImGuiImplGlfw imGuiGlfw;
+	private static VLImGuiImplGlfw imGuiGlfw;
 	private static ImGuiImplGl3 imGuiGl3;
 	private static ImGuiContextStack context;
 	private static boolean active = false;
@@ -63,9 +62,8 @@ public class ImGuiHooks {
 		}
 	}
 
-	public static void init(ResourceManager resourceManager) {
-		var client = Minecraft.getInstance();
-		imGuiGlfw = new ImGuiImplGlfw();
+	public static void init(Minecraft mc, ResourceManager resourceManager) {
+		imGuiGlfw = new VLImGuiImplGlfw(mc);
 		imGuiGl3 = new ImGuiImplGl3();
 
 		context = new ImGuiContextStack(
@@ -86,7 +84,7 @@ public class ImGuiHooks {
 		io.setConfigMacOSXBehaviors(Minecraft.ON_OSX);
 
 		imGuiGl3.init("#version 410 core");
-		imGuiGlfw.init(client.getWindow().getWindow(), true);
+		imGuiGlfw.init(mc.getWindow().getWindow(), true);
 		loadFonts(resourceManager);
 		var style = ImGui.getStyle();
 		ImGui.styleColorsDark(style);
@@ -171,7 +169,7 @@ public class ImGuiHooks {
 		}
 
 		if (initialized == 1) {
-			init(mc.getResourceManager());
+			init(mc, mc.getResourceManager());
 			initialized = 2;
 		}
 
@@ -181,8 +179,10 @@ public class ImGuiHooks {
 
 		GlStateManager._disableColorLogicOp();
 
-		if (ImGui.getIO().getKeysDown(GLFW.GLFW_KEY_LEFT_CONTROL)) {
-			ImGui.getIO().setKeysDown(GLFW.GLFW_KEY_TAB, false);
+		var io = ImGui.getIO();
+
+		if (io.getKeysDown(GLFW.GLFW_KEY_LEFT_CONTROL)) {
+			io.setKeysDown(GLFW.GLFW_KEY_TAB, false);
 		}
 
 		imGuiGlfw.newFrame();
@@ -201,7 +201,7 @@ public class ImGuiHooks {
 		// cancel incorrect hover interactions that will sometimes occur when the Minecraft cursor is locked
 		// but is invisibly "hovering" over a floating/docked ImGui window.
 		if (mc.mouseHandler.isMouseGrabbed()) {
-			ImGui.getIO().setMousePos(-1, -1);
+			io.setMousePos(-1, -1);
 		}
 
 		var window = mc.getWindow();
@@ -241,7 +241,7 @@ public class ImGuiHooks {
 	}
 
 	public static void beforeEndFrame() {
-		if (VidLibClientEventHandler.clientLoaded) {
+		if (VidLibClientEventHandler.clientLoaded && !ImGuiAPI.getHide()) {
 			var mc = Minecraft.getInstance();
 
 			if (mc.level == null || !mc.level.isReplayLevel()) {

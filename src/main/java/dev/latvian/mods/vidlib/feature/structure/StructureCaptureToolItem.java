@@ -15,18 +15,18 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public enum GhostStructureCaptureToolItem implements VidLibTool {
+public enum StructureCaptureToolItem implements VidLibTool {
 	@AutoRegister
 	INSTANCE;
 
 	@Override
 	public String getId() {
-		return "ghost_structure_capture";
+		return "structure_capture";
 	}
 
 	@Override
 	public Component getName() {
-		return Component.literal("Ghost Structure Capture Tool");
+		return Component.literal("Structure Capture Tool");
 	}
 
 	@Override
@@ -43,11 +43,11 @@ public enum GhostStructureCaptureToolItem implements VidLibTool {
 				player.tell(Component.literal("Scanning the structure..."));
 				var blocks = new Long2ObjectOpenHashMap<BlockState>();
 
-				level.walkBlocks(ConnectedBlock.WalkType.DIAGONAL, origin, GhostStructureCapture.buildFilter(), true, 2048, c -> {
+				level.walkBlocks(ConnectedBlock.WalkType.DIAGONAL, origin, StructureCapture.buildFilter(), true, 2048, c -> {
 					blocks.put(c.block().pos().asLong(), c.block().state());
 
-					if (GhostStructureCapture.PARTICLES.get()) {
-						level.cubeParticles(GhostStructureCapture.PARTICLE, List.of(c.block().pos()));
+					if (StructureCapture.PARTICLES.get()) {
+						level.cubeParticles(StructureCapture.PARTICLE, List.of(c.block().pos()));
 					}
 
 					return false;
@@ -55,7 +55,7 @@ public enum GhostStructureCaptureToolItem implements VidLibTool {
 
 				level.getServer().executeBlocking(() -> {
 					player.tell(Component.literal("Added %,d blocks".formatted(blocks.size())));
-					GhostStructureCapture.CURRENT.getValue().blocks.putAll(blocks);
+					StructureCapture.CURRENT.getValue().blocks.putAll(blocks);
 				});
 			});
 

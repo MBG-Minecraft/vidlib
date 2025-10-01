@@ -77,7 +77,7 @@ import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
-import dev.latvian.mods.vidlib.feature.structure.GhostStructureCapture;
+import dev.latvian.mods.vidlib.feature.structure.StructureCapture;
 import dev.latvian.mods.vidlib.feature.structure.StructureRenderer;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
 import dev.latvian.mods.vidlib.feature.visual.TexturedCubeRenderer;
@@ -262,6 +262,7 @@ public class VidLibClientEventHandler {
 			AutoInit.Type.CLIENT_LOADED.invoke();
 		}
 
+		Visuals.TICK_DEBUG.clear();
 		ScreenText.CLIENT_TICK.clear();
 		var mc = Minecraft.getInstance();
 
@@ -304,7 +305,7 @@ public class VidLibClientEventHandler {
 		mc.vl$postTick(mc.getPauseType());
 		NeoForge.EVENT_BUS.post(new DebugTextEvent.ClientTick(ScreenText.CLIENT_TICK));
 
-		int b = GhostStructureCapture.CURRENT.getValue().blocks.size();
+		int b = StructureCapture.CURRENT.getValue().blocks.size();
 
 		if (b > 0) {
 			ScreenText.CLIENT_TICK.topLeft.add("Ghost Structure Capture: %,d blocks".formatted(b));
@@ -443,7 +444,12 @@ public class VidLibClientEventHandler {
 				ClientProps.OPEN_PROPS.clear();
 			}
 
-			MiscClientUtils.renderVisuals(frame.poseStack(), frame.camera().getPosition(), frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Visuals.DEBUG, 1F);
+			Visuals.FRAME_DEBUG.copyFrom(Visuals.TICK_DEBUG);
+
+			if (Visuals.FRAME_DEBUG.hasAny()) {
+				MiscClientUtils.renderVisuals(frame.poseStack(), frame.camera().getPosition(), frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Visuals.FRAME_DEBUG, 1F);
+				Visuals.FRAME_DEBUG.clear();
+			}
 		}
 
 		mc.level.getProps().renderAll(frame, ms);

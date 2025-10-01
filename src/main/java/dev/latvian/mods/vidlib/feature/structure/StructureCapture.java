@@ -21,18 +21,18 @@ import java.nio.file.Files;
 import java.util.Map;
 import java.util.UUID;
 
-public interface GhostStructureCapture {
+public interface StructureCapture {
 	int CHUNK_SIZE = 6;
 	int CHUNK_OFFSET = (1 << CHUNK_SIZE) - 1;
 
-	MutableObject<CurrentGhostStructureCapture> CURRENT = new MutableObject<>(new CurrentGhostStructureCapture());
+	MutableObject<CurrentStructureCapture> CURRENT = new MutableObject<>(new CurrentStructureCapture());
 	MutableObject<BlockFilter> IGNORE_FILTER = new MutableObject<>(BlockFilter.NONE.instance());
 	ShapeParticleOptions PARTICLE = new ShapeParticleOptions(20, Color.CYAN, Color.TRANSPARENT);
 	ImBoolean INCLUDE_FLUIDS = new ImBoolean(true);
 	ImBoolean PARTICLES = new ImBoolean(true);
 
 	static BlockFilter buildFilter() {
-		var filter = GhostStructureCapture.IGNORE_FILTER.getValue().not();
+		var filter = StructureCapture.IGNORE_FILTER.getValue().not();
 
 		if (!INCLUDE_FLUIDS.get()) {
 			filter = filter.and(BlockFilter.FLUID.instance().not());
