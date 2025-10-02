@@ -2,8 +2,6 @@ package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.klib.math.Rotation;
-import dev.latvian.mods.vidlib.feature.canvas.dof.DepthOfField;
-import dev.latvian.mods.vidlib.feature.canvas.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.entity.C2SEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.entity.EntityData;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
@@ -20,6 +18,8 @@ import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
+import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfField;
+import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;

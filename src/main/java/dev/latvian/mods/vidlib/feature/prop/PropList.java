@@ -28,6 +28,8 @@ public class PropList implements Iterable<Prop> {
 	public final Map<PropRemoveType, IntList> removed;
 	public final List<Prop> collidingProps;
 	public final List<Prop> interactableProps;
+	boolean queueNewProps;
+	private final List<Prop> propQueue;
 
 	public PropList(Props<?> props, PropListType type) {
 		this.props = props;
@@ -36,6 +38,8 @@ public class PropList implements Iterable<Prop> {
 		this.removed = new EnumMap<>(PropRemoveType.class);
 		this.collidingProps = new ArrayList<>(0);
 		this.interactableProps = new ArrayList<>(0);
+		this.queueNewProps = false;
+		this.propQueue = new ArrayList<>(0);
 
 		for (var removeType : PropRemoveType.VALUES) {
 			removed.put(removeType, new IntArrayList());
@@ -70,7 +74,17 @@ public class PropList implements Iterable<Prop> {
 		interactableProps.clear();
 
 		if (!map.isEmpty()) {
+			queueNewProps = true;
 			map.values().removeIf(this::fullTick);
+			queueNewProps = false;
+		}
+
+		if (!propQueue.isEmpty()) {
+			for (var prop : propQueue) {
+				add(prop, updates);
+			}
+
+			propQueue.clear();
 		}
 
 		if (updates != null) {
@@ -97,7 +111,12 @@ public class PropList implements Iterable<Prop> {
 		}
 	}
 
-	void add(Prop prop) {
+	void add(Prop prop, @Nullable S2CPacketBundleBuilder packets) {
+		if (queueNewProps) {
+			propQueue.add(prop);
+			return;
+		}
+
 		if (prop.id == 0) {
 			prop.id = generateNewId();
 		} else {
@@ -125,7 +144,9 @@ public class PropList implements Iterable<Prop> {
 				prop.sync(entry.data());
 			}
 
-			props.level.s2c(prop.createAddPacket());
+			if (packets != null) {
+				packets.s2c(prop.createAddPacket());
+			}
 		}
 	}
 

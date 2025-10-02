@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.canvas.dof;
+package dev.latvian.mods.vidlib.feature.screeneffect.dof;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.ClientMatrices;
@@ -74,7 +74,7 @@ public class DepthOfField {
 			return;
 		}
 
-		var vec = prevFocusPosition.lerp(focusPosition, mc.getDeltaTracker().getGameTimeDeltaPartialTick(false));
+		var vec = prevFocusPosition.lerp(focusPosition, mc.getDeltaTracker().getGameTimeDeltaPartialTick(true));
 
 		CANVAS.markActive();
 		var cam = mc.gameRenderer.getMainCamera().getPosition();

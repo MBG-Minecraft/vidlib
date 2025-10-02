@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.canvas.dof;
+package dev.latvian.mods.vidlib.feature.screeneffect.dof;
 
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;

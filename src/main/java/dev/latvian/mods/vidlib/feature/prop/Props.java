@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.prop;
 
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
@@ -45,7 +46,8 @@ public abstract class Props<L extends Level> {
 
 	public void add(Prop prop) {
 		if (isValid(prop.spawnType)) {
-			propLists.get(prop.spawnType.listType).add(prop);
+			var list = propLists.get(prop.spawnType.listType);
+			list.add(prop, list.queueNewProps || level.isClientSide() ? null : new S2CPacketBundleBuilder(level));
 		}
 	}
 

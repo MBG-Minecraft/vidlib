@@ -10,7 +10,7 @@
 				{
 					"sampler_name": "In",
 					"target": "minecraft:main",
-					"bilinear": true
+					"bilinear": false
 				},
 				{
 					"sampler_name": "InDepth",

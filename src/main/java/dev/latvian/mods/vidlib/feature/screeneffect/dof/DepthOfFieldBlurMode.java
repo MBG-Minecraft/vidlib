@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.canvas.dof;
+package dev.latvian.mods.vidlib.feature.screeneffect.dof;
 
 public enum DepthOfFieldBlurMode {
 	DEPTH,

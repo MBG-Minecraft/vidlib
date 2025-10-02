@@ -1,0 +1,36 @@
+{
+	"targets": {
+		"swap": {}
+	},
+	"passes": [
+		{
+			"vertex_shader": "vidlib:post/texel",
+			"fragment_shader": "vidlib:post/chromatic_aberration",
+			"inputs": [
+				{
+					"sampler_name": "In",
+					"target": "minecraft:main"
+				}
+			],
+			"output": "swap"
+		},
+		{
+			"vertex_shader": "minecraft:post/blit",
+			"fragment_shader": "minecraft:post/blit",
+			"inputs": [
+				{
+					"sampler_name": "In",
+					"target": "swap"
+				}
+			],
+			"output": "vidlib:chromatic_aberration",
+			"uniforms": [
+				{
+					"name": "ColorModulate",
+					"type": "vec4",
+					"values": [1.0, 1.0, 1.0, 1.0]
+				}
+			]
+		}
+	]
+}
