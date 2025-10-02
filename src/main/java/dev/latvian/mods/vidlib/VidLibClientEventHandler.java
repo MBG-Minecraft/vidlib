@@ -1,8 +1,6 @@
 package dev.latvian.mods.vidlib;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.KMath;
@@ -190,10 +188,6 @@ public class VidLibClientEventHandler {
 	}
 
 	public static void syncSetup() {
-		RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS).getBuffer(1).setLabel("Shared Sequential Quads Buffer");
-		RenderSystem.getSequentialBuffer(VertexFormat.Mode.LINES).getBuffer(1).setLabel("Shared Sequential Lines Buffer");
-		RenderSystem.getSequentialBuffer(VertexFormat.Mode.TRIANGLES).getBuffer(1).setLabel("Shared Sequential Other Buffer");
-
 		if (VLFlashbackIntegration.ENABLED) {
 			VLFlashbackIntegration.init();
 		}
