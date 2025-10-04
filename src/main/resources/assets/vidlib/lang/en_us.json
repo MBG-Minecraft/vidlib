@@ -16,6 +16,7 @@
 	"options.vidlib.zone_render_type.blocks": "Blocks",
 	"options.vidlib.zone_block_filter": "Zone Block Filter",
 	"options.vidlib.test_screen_shake.max_distance": "Test Screen Shake Max Distance",
+	"options.vidlib.show_coordinates": "Show Coordinates",
 	"item.vidlib.tool": "Tool",
 	"prop.vidlib.npc": "NPC",
 	"prop.vidlib.shape": "Shape",

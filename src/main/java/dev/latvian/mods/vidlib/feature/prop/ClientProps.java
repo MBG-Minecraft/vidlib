@@ -29,6 +29,7 @@ public class ClientProps extends Props<ClientLevel> {
 	public static final IntSet HIDDEN_PROPS = new IntOpenHashSet();
 	public static final Set<PropType<?>> HIDDEN_PROP_TYPES = new ReferenceOpenHashSet<>();
 	public static final Visuals DEBUG_VISUALS = new Visuals();
+	public static final ImBoolean HIDE_OUTLINE = new ImBoolean(false);
 
 	public static boolean isPropHidden(Prop prop) {
 		return HIDDEN_PROPS.contains(prop.id) || HIDDEN_PROP_TYPES.contains(prop.type);
@@ -204,7 +205,7 @@ public class ClientProps extends Props<ClientLevel> {
 
 				if (r >= Double.MAX_VALUE || cam.distanceToSqr(x, y + prop.height / 2D, z) <= r * r) {
 					if (prop.isVisible(x, y, z, frame)) {
-						boolean selected = OPEN_PROPS.contains(prop.id);
+						boolean selected = !HIDE_OUTLINE.get() && OPEN_PROPS.contains(prop.id);
 
 						if (selected || frame.mc().getEntityRenderDispatcher().shouldRenderHitBoxes()) {
 							var progress = prop.getDebugVisualsProgress(delta);

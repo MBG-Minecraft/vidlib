@@ -515,6 +515,29 @@ public class VidLibClientEventHandler {
 			ScreenText.RENDER.topRight.add(mc.fpsString.split(" ", 2)[0] + " FPS");
 		}
 
+		if (VidLibClientOptions.getShowCoordinates() && mc.player.hasPermissions(2)) {
+			var pos = mc.player.getPosition(delta);
+			var x = Component.literal("%.01f".formatted(pos.x)).withColor(0xFF7070);
+			var y = Component.literal("%.01f".formatted(pos.y)).withColor(0x7CFF70);
+			var z = Component.literal("%.01f".formatted(pos.z)).withColor(0x70BCFF);
+			var yaw = Component.literal("%.01f".formatted(Mth.wrapDegrees(mc.player.getViewYRot(delta)))).withColor(0xFFD870);
+			var pitch = Component.literal("%.01f".formatted(Mth.wrapDegrees(mc.player.getViewXRot(delta)))).withColor(0xFF9870);
+
+			var comp = Component.empty();
+			comp.append(x);
+			comp.append(" ");
+			comp.append(y);
+			comp.append(" ");
+			comp.append(z);
+			comp.append(" " + StringUtils.snakeCaseToTitleCase(mc.player.getDirection().getSerializedName()) + " (");
+			comp.append(yaw);
+			comp.append(" ");
+			comp.append(pitch);
+			comp.append(")");
+
+			ScreenText.RENDER.topLeft.add(comp);
+		}
+
 		if (!mc.vl$hideGui() && !mc.player.isReplayCamera()) {
 			ScreenText.RENDER.addAll(ScreenText.CLIENT_TICK);
 			ScreenText.RENDER.ops = mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);

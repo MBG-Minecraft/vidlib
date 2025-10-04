@@ -16,6 +16,7 @@ public interface VidLibClientOptions {
 	OptionInstance<Boolean> SHOW_ANCHOR = OptionInstance.createBoolean("options.vidlib.show_anchor", false);
 	OptionInstance<Boolean> SHOW_ZONES = OptionInstance.createBoolean("options.vidlib.show_zones", false);
 	OptionInstance<Boolean> SHOW_ZONE_OUTER_BOUNDS = OptionInstance.createBoolean("options.vidlib.show_zone_outer_bounds", true);
+	OptionInstance<Boolean> SHOW_COORDINATES = OptionInstance.createBoolean("options.vidlib.show_coordinates", false);
 
 	OptionInstance<ZoneRenderType> ZONE_RENDER_TYPE = new OptionInstance<>(
 		"options.vidlib.zone_render_type",
@@ -79,6 +80,7 @@ public interface VidLibClientOptions {
 		SHOW_ZONE_OUTER_BOUNDS,
 		ZONE_RENDER_TYPE,
 		TEST_SCREEN_SHAKE_MAX_DISTANCE,
+		SHOW_COORDINATES,
 	};
 
 	static boolean getAdminPanel() {
@@ -109,6 +111,10 @@ public interface VidLibClientOptions {
 		return ZONE_BLOCK_FILTER.get();
 	}
 
+	static boolean getShowCoordinates() {
+		return SHOW_COORDINATES.get();
+	}
+
 	static void process(Options.FieldAccess accessor) {
 		accessor.process("vidlib.admin_panel", ADMIN_PANEL);
 
@@ -118,5 +124,6 @@ public interface VidLibClientOptions {
 		accessor.process("vidlib.show_zone_outer_bounds", SHOW_ZONE_OUTER_BOUNDS);
 		accessor.process("vidlib.zone_render_type", ZONE_RENDER_TYPE);
 		accessor.process("vidlib.zone_block_filter", ZONE_BLOCK_FILTER);
+		accessor.process("vidlib.show_coordinates", SHOW_COORDINATES);
 	}
 }

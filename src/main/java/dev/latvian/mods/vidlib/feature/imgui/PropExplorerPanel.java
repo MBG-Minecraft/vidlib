@@ -41,6 +41,7 @@ public class PropExplorerPanel extends AdminPanel {
 
 		ImGui.text("Props: %,d".formatted(allProps.size()));
 		ImGui.checkbox("Sort by Closest", sortByClosest);
+		ImGui.checkbox("Hide Outline", ClientProps.HIDE_OUTLINE);
 
 		if (sortByClosest.get() && allProps.size() >= 2) {
 			var cam = graphics.mc.gameRenderer.getMainCamera().getPosition();
