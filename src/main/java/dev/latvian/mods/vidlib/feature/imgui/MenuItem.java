@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.feature.imgui.config.VideoConfigPanel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import imgui.ImGui;
@@ -109,6 +110,10 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 		return new MenuItem(icon, label, tooltip, shortcut, flags, onClick, subItems);
 	}
 
+	public MenuItem withColor(@Nullable Color color) {
+		return withLabel(label.withColor(color));
+	}
+
 	public MenuItem withShortcut(String shortcut) {
 		return new MenuItem(icon, label, tooltip, shortcut, flags, onClick, subItems);
 	}
@@ -151,7 +156,7 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 				}
 
 				label.push(graphics);
-				boolean menuOpen = ImGui.beginMenu(rIcon.formatLabel(graphics, label.text()));
+				boolean menuOpen = ImGui.beginMenu(rIcon.formatLabel(graphics, label.text()), !hasFlag(FLAG_DISABLED));
 				label.pop(graphics);
 
 				if (menuOpen) {
@@ -169,6 +174,10 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 				if (remainOpen) {
 					graphics.popStack();
 				}
+			} else {
+				label.push(graphics);
+				ImGui.beginMenu(rIcon.formatLabel(graphics, label.text()), false);
+				label.pop(graphics);
 			}
 		} else if (onClick != null) {
 			boolean remainOpen = hasFlag(FLAG_REMAIN_OPEN);

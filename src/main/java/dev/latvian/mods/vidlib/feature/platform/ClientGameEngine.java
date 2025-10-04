@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -109,12 +110,19 @@ public class ClientGameEngine {
 	}
 
 	public FogParameters getShaderFog(FogParameters shaderFog) {
-		if (Minecraft.getInstance().gameRenderer.getMainCamera().getFluidInCamera() != FogType.NONE) {
+		var mc = Minecraft.getInstance();
+
+		if (mc.gameRenderer.getMainCamera().getFluidInCamera() != FogType.NONE) {
 			var fg = ClientGameEngine.INSTANCE.getFluidFog();
 			return fg == null ? shaderFog : fg;
 		}
 
 		var fg = ClientGameEngine.INSTANCE.getFog();
+
+		if (mc.player != null && (mc.player.hasEffect(MobEffects.DARKNESS) || mc.player.hasEffect(MobEffects.BLINDNESS))) {
+			return shaderFog;
+		}
+
 		return fg != null ? fg : shaderFog;
 	}
 

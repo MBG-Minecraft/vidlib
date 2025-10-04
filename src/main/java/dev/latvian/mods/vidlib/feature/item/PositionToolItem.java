@@ -162,10 +162,8 @@ public enum PositionToolItem implements VidLibTool, PlayerActionHandler {
 	}
 
 	@Override
-	public Visuals visuals(Player player, ItemStack item, float delta) {
+	public void visuals(Player player, ItemStack item, Visuals visuals, float delta) {
 		if (clientPos != null) {
-			var visuals = new Visuals();
-
 			if (clientMode == Type.PLANE) {
 				visuals.addLine(new Line(clientPos, new Vec3(clientPos.x + 0.5D, clientPos.y, clientPos.z)), Color.WHITE, Color.WHITE.withAlpha(0));
 				visuals.addLine(new Line(clientPos, new Vec3(clientPos.x, clientPos.y + 0.5D, clientPos.z)), Color.WHITE, Color.WHITE.withAlpha(0));
@@ -175,11 +173,7 @@ public enum PositionToolItem implements VidLibTool, PlayerActionHandler {
 			} else {
 				visuals.add(new ColoredShape(CubeShape.UNIT, Color.CYAN, Color.WHITE).at(clientPos));
 			}
-
-			return visuals;
 		}
-
-		return Visuals.NONE;
 	}
 
 	@Override

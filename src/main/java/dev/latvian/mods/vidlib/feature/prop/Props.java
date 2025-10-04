@@ -47,7 +47,14 @@ public abstract class Props<L extends Level> {
 	public void add(Prop prop) {
 		if (isValid(prop.spawnType)) {
 			var list = propLists.get(prop.spawnType.listType);
-			list.add(prop, list.queueNewProps || level.isClientSide() ? null : new S2CPacketBundleBuilder(level));
+
+			if (list.queueNewProps || level.isClientSide()) {
+				list.add(prop, null);
+			} else {
+				var builder = new S2CPacketBundleBuilder(level);
+				list.add(prop, builder);
+				builder.send(level);
+			}
 		}
 	}
 

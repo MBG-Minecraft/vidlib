@@ -15,8 +15,7 @@ public class DecalRenderer {
 	@ClientAutoRegister
 	public static final Canvas CANVAS = Canvas.createExternal(VidLib.id("decals")).setDrawSetupCallback(DecalRenderer::setup);
 
-	// public static final CanvasSampler TEXTURE = CANVAS.sampler("DecalsSampler");
-	public static final CanvasIntUniform COUNT = CANVAS.intUniform("DecalCount");
+	public static final CanvasIntUniform COUNT = CANVAS.intUniform("Count");
 	public static final CanvasFloatUniform INVERSE_VIEW_PROJECTION_MATRIX_UNIFORM = CANVAS.mat4Uniform("InverseViewProjectionMat");
 
 	private static final List<Decal> TEMP_LIST = new ArrayList<>();
@@ -43,7 +42,6 @@ public class DecalRenderer {
 			}
 
 			((DecalTexture) texture).update(TEMP_LIST, mc.gameRenderer.getMainCamera().getPosition());
-			// TEXTURE.set(texture.getTexture());
 			COUNT.set(TEMP_LIST.size());
 			INVERSE_VIEW_PROJECTION_MATRIX_UNIFORM.set(ClientMatrices.INVERSE_WORLD);
 			CANVAS.markActive();

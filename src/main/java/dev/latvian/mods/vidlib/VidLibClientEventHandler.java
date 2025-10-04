@@ -429,8 +429,9 @@ public class VidLibClientEventHandler {
 			var tool = VidLibTool.of(mc.player);
 
 			if (tool != null) {
-				var visuals = tool.getSecond().visuals(mc.player, tool.getFirst(), frame.screenDelta());
-				MiscClientUtils.renderVisuals(frame.poseStack(), frame.camera().getPosition(), frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, visuals, 1F);
+				tool.getSecond().visuals(mc.player, tool.getFirst(), Visuals.TEMP, frame.screenDelta());
+				MiscClientUtils.renderVisuals(frame.poseStack(), frame.camera().getPosition(), frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Visuals.TEMP, 1F);
+				Visuals.TEMP.clear();
 			}
 
 			if (mc.getEntityRenderDispatcher().shouldRenderHitBoxes() || !ClientProps.OPEN_PROPS.isEmpty()) {
@@ -454,11 +455,13 @@ public class VidLibClientEventHandler {
 			var tool = VidLibTool.of(mc.player);
 
 			if (tool != null) {
-				var visuals = tool.getSecond().visuals(mc.player, tool.getFirst(), frame.screenDelta());
+				tool.getSecond().visuals(mc.player, tool.getFirst(), Visuals.TEMP, frame.screenDelta());
 
-				for (var cube : visuals.texturedCubes()) {
+				for (var cube : Visuals.TEMP.texturedCubes()) {
 					TexturedCubeRenderer.render(frame, LightUV.FULLBRIGHT, cube, Color.WHITE);
 				}
+
+				Visuals.TEMP.clear();
 			}
 
 			if (!VidLibClientOptions.getShowZones()) {
@@ -593,8 +596,14 @@ public class VidLibClientEventHandler {
 
 			var tool = VidLibTool.of(mc.player);
 
-			if (tool != null && tool.getSecond().visuals(mc.player, tool.getFirst(), event.getDeltaTracker().getGameTimeDeltaPartialTick(true)).contains(event.getTarget().getBlockPos())) {
-				event.setCanceled(true);
+			if (tool != null) {
+				tool.getSecond().visuals(mc.player, tool.getFirst(), Visuals.TEMP, event.getDeltaTracker().getGameTimeDeltaPartialTick(true));
+
+				if (Visuals.TEMP.contains(event.getTarget().getBlockPos())) {
+					event.setCanceled(true);
+				}
+
+				Visuals.TEMP.clear();
 			}
 		}
 	}

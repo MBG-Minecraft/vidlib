@@ -17,10 +17,11 @@ public class CanvasPanel extends AdminPanel {
 		var list = new ArrayList<MenuItem>(CanvasImpl.ENABLED.size());
 
 		for (var canvas : CanvasImpl.ENABLED) {
-			list.add(MenuItem.item(canvas.idString, g -> {
-				new CanvasPanel(canvas, true).open();
-				new CanvasPanel(canvas, false).open();
-			}).withLabel(ImText.of(canvas.idString, canvas.active ? ImText.SUCCESS : ImText.ERROR)));
+			list.add(MenuItem.menu(canvas.active ? ImIcons.VISIBLE : ImIcons.INVISIBLE, canvas.idString, g -> List.of(
+				MenuItem.item(ImIcons.PALETTE, "Color", g1 -> new CanvasPanel(canvas, true).open()),
+				MenuItem.item(ImIcons.ANIMATION, "Depth", g1 -> new CanvasPanel(canvas, false).open()),
+				MenuItem.item(ImIcons.BLOCK, "Disable", !canvas.enabled, g1 -> canvas.enabled = !canvas.enabled)
+			)).withColor(canvas.active ? ImText.SUCCESS : ImText.ERROR));
 		}
 
 		return list;
@@ -47,6 +48,7 @@ public class CanvasPanel extends AdminPanel {
 			graphics.setErrorText();
 		}
 
+		ImGui.setNextWindowSizeConstraints(160F, 90F, Float.MAX_VALUE, Float.MAX_VALUE);
 		return super.setup(graphics);
 	}
 

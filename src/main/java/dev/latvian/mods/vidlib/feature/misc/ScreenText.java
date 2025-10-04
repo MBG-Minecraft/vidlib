@@ -72,7 +72,11 @@ public class ScreenText {
 				} else if (value instanceof IntConfigValue c) {
 					addValue(value.name, (int) c.getter.apply(instance));
 				} else {
-					addValue(value.name, Cast.to(value.getter.apply(instance)), value.codec);
+					try {
+						addValue(value.name, Cast.to(value.getter.apply(instance)), value.codec);
+					} catch (Exception ex) {
+						addValue(value.name, "Error: " + ex, ChatFormatting.RED);
+					}
 				}
 			}
 		}

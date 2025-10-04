@@ -7,6 +7,7 @@ import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
+import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
@@ -27,6 +28,7 @@ public class ClientProps extends Props<ClientLevel> {
 	public static final IntSet OPEN_PROPS = new IntOpenHashSet();
 	public static final IntSet HIDDEN_PROPS = new IntOpenHashSet();
 	public static final Set<PropType<?>> HIDDEN_PROP_TYPES = new ReferenceOpenHashSet<>();
+	public static final Visuals DEBUG_VISUALS = new Visuals();
 
 	public static boolean isPropHidden(Prop prop) {
 		return HIDDEN_PROPS.contains(prop.id) || HIDDEN_PROP_TYPES.contains(prop.type);
@@ -205,12 +207,22 @@ public class ClientProps extends Props<ClientLevel> {
 						boolean selected = OPEN_PROPS.contains(prop.id);
 
 						if (selected || frame.mc().getEntityRenderDispatcher().shouldRenderHitBoxes()) {
-							var visuals = prop.getDebugVisuals(x, y, z, selected);
-							MiscClientUtils.renderVisuals(ms, cam, frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, visuals, prop.getDebugVisualsProgress(delta));
+							var progress = prop.getDebugVisualsProgress(delta);
+
+							if (progress >= 0F && progress <= 1F) {
+								prop.debugVisuals(Visuals.TEMP, x, y, z, delta, selected);
+								MiscClientUtils.renderVisuals(ms, cam, frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Visuals.TEMP, progress);
+								Visuals.TEMP.clear();
+							} else {
+								prop.debugVisuals(DEBUG_VISUALS, x, y, z, delta, selected);
+							}
 						}
 					}
 				}
 			}
 		}
+
+		MiscClientUtils.renderVisuals(ms, cam, frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, DEBUG_VISUALS, 1F);
+		DEBUG_VISUALS.clear();
 	}
 }

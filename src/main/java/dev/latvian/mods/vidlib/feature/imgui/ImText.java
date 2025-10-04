@@ -32,6 +32,10 @@ public record ImText(String text, @Nullable Color color) {
 		return new ImText(text, INFO);
 	}
 
+	public ImText withColor(@Nullable Color color) {
+		return new ImText(text, color);
+	}
+
 	public boolean pushStack() {
 		return color != null;
 	}

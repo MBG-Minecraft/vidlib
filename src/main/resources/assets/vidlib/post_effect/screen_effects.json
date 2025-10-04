@@ -5,8 +5,12 @@
 	"passes": [
 		{
 			"vertex_shader": "vidlib:post/texel",
-			"fragment_shader": "vidlib:post/decals",
+			"fragment_shader": "vidlib:post/screen_effects",
 			"inputs": [
+				{
+					"sampler_name": "In",
+					"target": "minecraft:main"
+				},
 				{
 					"sampler_name": "InDepth",
 					"target": "minecraft:main",
@@ -14,14 +18,9 @@
 				},
 				{
 					"sampler_name": "Data",
-					"location": "vidlib:decals",
+					"location": "vidlib:screen_effects",
 					"width": 1,
 					"height": 1
-				},
-				{
-					"sampler_name": "TerrainInDepth",
-					"target": "vidlib:weak_outline",
-					"use_depth_buffer": true
 				}
 			],
 			"output": "swap",
@@ -45,7 +44,7 @@
 					"target": "swap"
 				}
 			],
-			"output": "vidlib:decals",
+			"output": "vidlib:screen_effects",
 			"uniforms": [
 				{
 					"name": "ColorModulate",

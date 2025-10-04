@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import com.mojang.blaze3d.platform.TextureUtil;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasPanel;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
@@ -11,6 +12,7 @@ import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectPanel;
 import dev.latvian.mods.vidlib.feature.screeneffect.chromaticaberration.ChromaticAberrationPanel;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.skybox.Skybox;
@@ -18,6 +20,10 @@ import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.LinkedHashMap;
@@ -42,6 +48,7 @@ public class BuiltInImGui {
 		list.add(MenuItem.item(ImIcons.PAW, "Entity Explorer", EntityExplorerPanel.INSTANCE).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.SEARCH, "Prop Explorer", PropExplorerPanel.INSTANCE).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.LAYERS, "Decals", DecalPanel.INSTANCE).enabled(graphics.isAdmin));
+		list.add(MenuItem.item(ImIcons.BLUR, "Screen Effects", ScreenEffectPanel.INSTANCE).enabled(graphics.isAdmin));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.OpenDropdown(graphics, list));
 
@@ -76,6 +83,16 @@ public class BuiltInImGui {
 		}).enabled(graphics.inGame));
 
 		list.add(MenuItem.item(ImIcons.STOP, "Stop all Sounds", g -> g.mc.getSoundManager().stop()));
+
+		list.add(MenuItem.item(ImIcons.DATABASE, "Dump Textures", g -> {
+			var gameDir = FMLPaths.GAMEDIR.get().toAbsolutePath();
+			var textures = TextureUtil.getDebugTexturePath(gameDir);
+			g.mc.getTextureManager().dumpAllSheets(textures);
+			g.mc.tell(Component.translatableEscape("debug.dump_dynamic_textures", Component.literal(gameDir.relativize(textures).toString())
+				.withStyle(ChatFormatting.UNDERLINE)
+				.withStyle(s -> s.withClickEvent(new ClickEvent.OpenFile(textures)))
+			));
+		}));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.DebugDropdown(graphics, list));
 	});

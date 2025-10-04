@@ -376,20 +376,17 @@ public class Prop {
 		return frustum.isVisible(x - w, y, z - w, x + w, y + height, z + w);
 	}
 
-	public Visuals getDebugVisuals(double x, double y, double z, boolean selected) {
-		var visuals = new Visuals();
-
+	public void debugVisuals(Visuals visuals, double x, double y, double z, float delta, boolean selected) {
 		if (selected) {
 			visuals.add(new ColoredShape(new CuboidShape(Vec3f.of(width + 0.125D, height + 0.125D, width + 0.125D), Rotation.NONE), Color.TRANSPARENT, Color.YELLOW).at(x, y + height / 2D, z));
 		} else {
 			visuals.add(new ColoredShape(new CuboidShape(Vec3f.of(width, height, width), Rotation.NONE), Color.TRANSPARENT, Color.WHITE).at(x, y + height / 2D, z));
 		}
-
-		return visuals;
 	}
 
 	public float getDebugVisualsProgress(float delta) {
-		return lifespan > 0 ? getTick(delta) / (float) lifespan : 1F;
+		// return getRelativeTick(delta, 1F);
+		return -1F;
 	}
 
 	public Entity asEntity() {

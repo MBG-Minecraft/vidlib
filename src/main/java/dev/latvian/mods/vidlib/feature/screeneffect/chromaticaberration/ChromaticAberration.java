@@ -44,7 +44,7 @@ public class ChromaticAberration {
 	}
 
 	private static void setup(Minecraft mc) {
-		if (strength <= 0F) {
+		if (strength == 0F) {
 			return;
 		}
 
@@ -53,6 +53,6 @@ public class ChromaticAberration {
 		CANVAS.markActive();
 		STRENGTH_UNIFORM.set(strength / 10F);
 		ANGLE_UNIFORM.set(isAngled ? (float) Math.toRadians(angle) : -1F);
-		FOCUS_UNIFORM.set(Mth.lerp(delta, prevFocusPos.x, focusPos.x), Mth.lerp(delta, prevFocusPos.y, focusPos.y));
+		FOCUS_UNIFORM.set(Mth.lerp(delta, prevFocusPos.x, focusPos.x), -Mth.lerp(delta, prevFocusPos.y, focusPos.y));
 	}
 }

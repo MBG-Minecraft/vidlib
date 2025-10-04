@@ -18,13 +18,15 @@ public record AngledChromaticAberrationEffect(KNumber strength, KNumber angle) i
 		AngledChromaticAberrationEffect::new
 	));
 
-	public static class Inst implements ScreenEffectInstance {
-		private final AngledChromaticAberrationEffect effect;
+	public static class Inst extends ScreenEffectInstance {
+		public KNumber strengthNum;
+		public KNumber angleNum;
 		private float strength, prevStrength;
 		private float angle, prevAngle;
 
-		public Inst(AngledChromaticAberrationEffect effect) {
-			this.effect = effect;
+		public Inst(KNumber strengthNum, KNumber angleNum) {
+			this.strengthNum = strengthNum;
+			this.angleNum = angleNum;
 		}
 
 		@Override
@@ -34,14 +36,15 @@ public record AngledChromaticAberrationEffect(KNumber strength, KNumber angle) i
 
 		@Override
 		public void snap() {
+			super.snap();
 			prevStrength = strength;
 			prevAngle = angle;
 		}
 
 		@Override
 		public void update(KNumberContext ctx) {
-			strength = (float) effect.strength.getOr(ctx, 0D);
-			angle = (float) effect.angle.getOr(ctx, 0D);
+			strength = (float) strengthNum.getOr(ctx, 0D);
+			angle = (float) angleNum.getOr(ctx, 0D);
 		}
 
 		@Override
@@ -58,6 +61,6 @@ public record AngledChromaticAberrationEffect(KNumber strength, KNumber angle) i
 
 	@Override
 	public ScreenEffectInstance createInstance() {
-		return new Inst(this);
+		return new Inst(strength, angle);
 	}
 }

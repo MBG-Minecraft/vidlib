@@ -36,6 +36,7 @@ import dev.latvian.mods.vidlib.feature.npc.NPCRecording;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
 import dev.latvian.mods.vidlib.feature.skybox.Skybox;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
@@ -102,6 +103,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	public NPCRecording npcRecording;
 	public final List<PacketDebuggerPanel.LoggedPacket> debugPackets;
 	public final List<Decal> debugDecals;
+	public final List<ScreenEffectInstance> screenEffects;
 	private Boolean isServerNeoForge;
 
 	public LocalClientSessionData(Minecraft mc, UUID uuid, ClientPacketListener connection) {
@@ -121,6 +123,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.globalVariables = new KNumberVariables();
 		this.debugPackets = new ArrayList<>();
 		this.debugDecals = new ArrayList<>();
+		this.screenEffects = new ArrayList<>();
 
 		VidLib.LOGGER.info("Client Session Data Initialized");
 	}

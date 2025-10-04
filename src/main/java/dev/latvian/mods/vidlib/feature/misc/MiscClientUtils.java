@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.misc;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
 import dev.latvian.mods.klib.texture.UV;
@@ -96,7 +97,7 @@ public class MiscClientUtils {
 			ms.mulPose(Axis.YP.rotation(cube.rotation().yawRad()));
 			ms.mulPose(Axis.XP.rotation(cube.rotation().pitchRad()));
 			ms.mulPose(Axis.ZP.rotation(cube.rotation().rollRad()));
-			CuboidRenderer.voxelShapeBox(ms, cube.shape(), Vec3.ZERO, buffers, type, true, cube.color().withAlpha(100), cube.lineColor());
+			CuboidRenderer.voxelShapeBox(ms, cube.shape(), Vec3.ZERO, buffers, type, true, cube.color().isTransparent() ? Color.TRANSPARENT : cube.color().withAlpha(100), cube.lineColor());
 			ms.popPose();
 		}
 

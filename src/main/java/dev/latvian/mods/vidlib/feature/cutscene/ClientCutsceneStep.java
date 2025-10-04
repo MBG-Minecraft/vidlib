@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib.feature.cutscene;
 
 import dev.latvian.mods.vidlib.feature.cutscene.event.CutsceneEvent;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.Fade;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
@@ -24,6 +26,7 @@ public class ClientCutsceneStep {
 	public final CutsceneStepBars bars;
 	public final ResourceLocation shader;
 	public final Fade fade;
+	public List<ScreenEffectInstance> screenEffects;
 	public final List<PositionedSoundData> sounds;
 	public final CutsceneStepSnap snap;
 	public final List<CutsceneEvent> events;
@@ -42,6 +45,7 @@ public class ClientCutsceneStep {
 		this.bars = step.bars().orElse(null);
 		this.shader = step.shader().orElse(null);
 		this.fade = step.fade().orElse(null);
+		this.screenEffects = step.screenEffects().stream().map(ScreenEffect::createInstance).toList();
 		this.sounds = step.sounds();
 		this.snap = step.snap();
 		this.events = step.events();

@@ -5,8 +5,11 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
+import imgui.ImGui;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.network.codec.ByteBufCodecs;
 
@@ -20,12 +23,14 @@ public record ColorEffect(Gradient color, boolean additive) implements ScreenEff
 		ColorEffect::new
 	));
 
-	public static class Inst implements ScreenEffectInstance {
-		private final ColorEffect effect;
+	public static class Inst extends ScreenEffectInstance {
+		public Gradient gradient;
+		public boolean additive;
 		private Color color, prevColor;
 
-		public Inst(ColorEffect effect) {
-			this.effect = effect;
+		public Inst(Gradient gradient, boolean additive) {
+			this.gradient = gradient;
+			this.additive = additive;
 		}
 
 		@Override
@@ -35,17 +40,37 @@ public record ColorEffect(Gradient color, boolean additive) implements ScreenEff
 
 		@Override
 		public void snap() {
+			super.snap();
 			prevColor = color;
 		}
 
 		@Override
 		public void update(KNumberContext ctx) {
-			color = effect.color.get(ctx.progress);
+			color = gradient.get(ctx.progress);
 		}
 
 		@Override
 		public void upload(IntArrayList arr, float delta) {
 			arr.add(prevColor.lerp(delta, color).argb()); // 1
+			arr.add(additive ? 1 : 0); // 2
+		}
+
+		@Override
+		public String getName() {
+			return "Color";
+		}
+
+		@Override
+		public void imgui(ImGraphics graphics) {
+			super.imgui(graphics);
+
+			var imGradient = new GradientImBuilder();
+			imGradient.set(gradient);
+			imGradient.imguiKey(graphics, "gradient", "Gradient");
+
+			if (ImGui.checkbox("Additive", additive)) {
+				additive = !additive;
+			}
 		}
 	}
 
@@ -56,6 +81,6 @@ public record ColorEffect(Gradient color, boolean additive) implements ScreenEff
 
 	@Override
 	public ScreenEffectInstance createInstance() {
-		return new Inst(this);
+		return new Inst(color, additive);
 	}
 }

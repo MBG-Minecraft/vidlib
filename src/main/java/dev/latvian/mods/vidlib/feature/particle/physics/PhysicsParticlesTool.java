@@ -7,7 +7,6 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
-import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -83,10 +82,5 @@ public enum PhysicsParticlesTool implements VidLibTool, PlayerActionHandler {
 		}
 
 		return false;
-	}
-
-	@Override
-	public Visuals visuals(Player player, ItemStack item, float delta) {
-		return Visuals.NONE;
 	}
 }

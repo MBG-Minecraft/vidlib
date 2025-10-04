@@ -38,12 +38,12 @@ public class CutsceneStepImBuilder implements ImBuilder<CutsceneStep> {
 	public final ImBoolean overrideFovModifier = new ImBoolean(false);
 	public final ImBuilder<KNumber> fovModifier = KNumberImBuilder.create(1D);
 	public final ImBoolean overrideStatus = new ImBoolean(false);
-	public final TextComponentImBuilder status = new TextComponentImBuilder();
+	public final TextComponentImBuilder status = new TextComponentImBuilder(false);
 	public final ImBoolean barsEnabled = new ImBoolean(false);
 	public final ImBoolean overrideTopBar = new ImBoolean(false);
-	public final TextComponentImBuilder topBar = new TextComponentImBuilder();
+	public final TextComponentImBuilder topBar = new TextComponentImBuilder(true);
 	public final ImBoolean overrideBottomBar = new ImBoolean(false);
-	public final TextComponentImBuilder bottomBar = new TextComponentImBuilder();
+	public final TextComponentImBuilder bottomBar = new TextComponentImBuilder(true);
 
 	public final ImString shader = ImGuiUtils.resizableString();
 	public final ImBoolean fadeEnabled = new ImBoolean(false);
@@ -297,6 +297,7 @@ public class CutsceneStepImBuilder implements ImBuilder<CutsceneStep> {
 			)) : Optional.empty(),
 			shader.get().isEmpty() ? Optional.empty() : Optional.of(ResourceLocation.parse(shader.get())),
 			fadeEnabled.get() ? Optional.of(fade.build()) : Optional.empty(),
+			List.of(),
 			sounds.stream().map(PositionedSoundDataImBuilder::build).toList(),
 			new CutsceneStepSnap(snapOrigin.get(), snapTarget.get(), snapFov.get()),
 			List.of()

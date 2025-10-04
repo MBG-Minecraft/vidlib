@@ -28,7 +28,7 @@ public class ChromaticAberrationPanel extends AdminPanel {
 
 		ImGuiUtils.FLOAT.set(ChromaticAberration.strength);
 		ImGui.text("Strength");
-		ImGui.sliderFloat("###strength", ImGuiUtils.FLOAT.getData(), 0F, 1F);
+		ImGui.sliderFloat("###strength", ImGuiUtils.FLOAT.getData(), -1F, 1F);
 		ChromaticAberration.strength = ImGuiUtils.FLOAT.get();
 
 		ImGuiUtils.BOOLEAN.set(ChromaticAberration.isAngled);

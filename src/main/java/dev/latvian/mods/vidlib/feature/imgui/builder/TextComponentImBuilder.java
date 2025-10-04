@@ -12,31 +12,38 @@ import java.util.List;
 import java.util.Optional;
 
 public class TextComponentImBuilder implements ImBuilder<Component> {
-	public static final ImBuilderType<Component> TYPE = TextComponentImBuilder::new;
+	public static final ImBuilderType<Component> TYPE = () -> new TextComponentImBuilder(false);
+	public static final ImBuilderType<Component> MULTILINE_TYPE = () -> new TextComponentImBuilder(true);
 
 	public final TextComponentImBuilder parent;
+	public final boolean multiline;
 	public final ImString text = ImGuiUtils.resizableString();
 	public final List<TextComponentImBuilder> siblings = new ArrayList<>(0);
 	public boolean delete = false;
 
 	private TextComponentImBuilder(TextComponentImBuilder parent) {
 		this.parent = parent;
+		this.multiline = parent.multiline;
 	}
 
-	public TextComponentImBuilder() {
-		this(null);
+	public TextComponentImBuilder(boolean multiline) {
+		this.parent = null;
+		this.multiline = multiline;
 	}
 
 	@Override
 	public void set(Component c) {
 		text.clear();
+		siblings.clear();
+
+		if (c == null) {
+			return;
+		}
 
 		c.getContents().visit(content -> {
 			text.set(content);
 			return Optional.empty();
 		});
-
-		siblings.clear();
 
 		for (var s : c.getSiblings()) {
 			var sibling = new TextComponentImBuilder(this);
@@ -49,7 +56,13 @@ public class TextComponentImBuilder implements ImBuilder<Component> {
 	public ImUpdate imgui(ImGraphics graphics) {
 		var update = ImUpdate.NONE;
 		delete = false;
-		ImGui.inputText("###text", text);
+
+		if (multiline) {
+			ImGui.inputTextMultiline("###text", text);
+		} else {
+			ImGui.inputText("###text", text);
+		}
+
 		update = update.orItemEdit();
 
 		if (!siblings.isEmpty()) {

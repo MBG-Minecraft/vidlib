@@ -7,6 +7,7 @@ import dev.latvian.mods.klib.math.VoxelShapeBox;
 import dev.latvian.mods.klib.shape.PositionedColoredShape;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,9 @@ public record Visuals(List<CubeVisual> cubes, List<LineVisual> lines, List<Resol
 	public static final Visuals NONE = new Visuals(List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
 	public static final Visuals FRAME_DEBUG = new Visuals();
 	public static final Visuals TICK_DEBUG = new Visuals();
+
+	@ApiStatus.Internal
+	public static final Visuals TEMP = new Visuals();
 
 	public Visuals() {
 		this(new ArrayList<>(0), new ArrayList<>(0), new ArrayList<>(0), new ArrayList<>(0), new ArrayList<>(0), new ArrayList<>(0));

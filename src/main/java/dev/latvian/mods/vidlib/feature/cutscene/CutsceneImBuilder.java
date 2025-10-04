@@ -134,6 +134,7 @@ public class CutsceneImBuilder implements ImBuilder<Cutscene> {
 						}
 					}
 				} catch (Exception ex) {
+					graphics.stackTrace(ex);
 				}
 			}
 		}

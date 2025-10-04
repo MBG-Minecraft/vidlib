@@ -17,11 +17,22 @@ void main() {
 	if (Angle >= 0.0) {
 		toCenter = vec2(cos(Angle), sin(Angle)) * Strength;
 	} else {
-		toCenter = (FocusPos - (texCoord * 2.0 - 1.0)) * Strength;
+		toCenter = (FocusPos - (texCoord * 2.0 - 1.0)) * abs(Strength);
 	}
 
-	float cr = texture(InSampler, texCoord).r;
-	float cg = texture(InSampler, texCoord + toCenter).g;
-	float cb = texture(InSampler, texCoord + toCenter * 2.0).b;
-	fragColor = vec4(cr, cg, cb, 1.0);
+	vec3 c;
+
+	if (Strength > 0.0) {
+		fragColor = vec4(
+		texture(InSampler, texCoord).r,
+		texture(InSampler, texCoord + toCenter).g,
+		texture(InSampler, texCoord + toCenter * 2.0).b,
+		1.0);
+	} else {
+		fragColor = vec4(
+		texture(InSampler, texCoord + toCenter * 2.0).r,
+		texture(InSampler, texCoord + toCenter).g,
+		texture(InSampler, texCoord).b,
+		1.0);
+	}
 }

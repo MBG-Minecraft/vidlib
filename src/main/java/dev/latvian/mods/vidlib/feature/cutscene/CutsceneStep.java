@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.feature.cutscene.event.CutsceneEvent;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.Fade;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
@@ -29,6 +30,7 @@ public record CutsceneStep(
 	Optional<CutsceneStepBars> bars,
 	Optional<ResourceLocation> shader,
 	Optional<Fade> fade,
+	List<ScreenEffect> screenEffects,
 	List<PositionedSoundData> sounds,
 	CutsceneStepSnap snap,
 	List<CutsceneEvent> events
@@ -43,6 +45,7 @@ public record CutsceneStep(
 		CutsceneStepBars.CODEC.optionalFieldOf("bars").forGetter(CutsceneStep::bars),
 		ResourceLocation.CODEC.optionalFieldOf("shader").forGetter(CutsceneStep::shader),
 		Fade.CODEC.optionalFieldOf("fade").forGetter(CutsceneStep::fade),
+		ScreenEffect.CODEC.listOf().optionalFieldOf("screen_effects", List.of()).forGetter(CutsceneStep::screenEffects),
 		PositionedSoundData.CODEC.listOf().optionalFieldOf("sounds", List.of()).forGetter(CutsceneStep::sounds),
 		CutsceneStepSnap.CODEC.optionalFieldOf("snap", CutsceneStepSnap.NONE).forGetter(CutsceneStep::snap),
 		CutsceneEvent.CODEC.listOf().optionalFieldOf("events", List.of()).forGetter(CutsceneStep::events)
@@ -58,6 +61,7 @@ public record CutsceneStep(
 		ByteBufCodecs.optional(CutsceneStepBars.STREAM_CODEC), CutsceneStep::bars,
 		ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC), CutsceneStep::shader,
 		ByteBufCodecs.optional(Fade.STREAM_CODEC), CutsceneStep::fade,
+		KLibStreamCodecs.listOf(ScreenEffect.STREAM_CODEC), CutsceneStep::screenEffects,
 		KLibStreamCodecs.listOf(PositionedSoundData.STREAM_CODEC), CutsceneStep::sounds,
 		CutsceneStepSnap.STREAM_CODEC, CutsceneStep::snap,
 		KLibStreamCodecs.listOf(CutsceneEvent.REGISTRY.valueStreamCodec()), CutsceneStep::events,

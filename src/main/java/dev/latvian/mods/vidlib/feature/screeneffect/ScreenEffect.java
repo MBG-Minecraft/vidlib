@@ -17,8 +17,7 @@ public interface ScreenEffect {
 	@AutoInit
 	static void bootstrap() {
 		REGISTRY.register(ColorEffect.TYPE);
-		REGISTRY.register(ScreenFocusedChromaticAberrationEffect.TYPE);
-		REGISTRY.register(WorldFocusedChromaticAberrationEffect.TYPE);
+		REGISTRY.register(FocusedChromaticAberrationEffect.TYPE);
 		REGISTRY.register(AngledChromaticAberrationEffect.TYPE);
 	}
 

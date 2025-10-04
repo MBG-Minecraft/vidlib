@@ -145,7 +145,6 @@ public interface VidLibTool {
 	default void debugText(Player player, ItemStack item, @Nullable HitResult hit, ScreenText screenText) {
 	}
 
-	default Visuals visuals(Player player, ItemStack item, float delta) {
-		return Visuals.NONE;
+	default void visuals(Player player, ItemStack item, Visuals visuals, float delta) {
 	}
 }
