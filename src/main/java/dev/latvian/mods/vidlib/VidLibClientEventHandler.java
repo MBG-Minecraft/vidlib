@@ -127,7 +127,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TriState;
 import net.minecraft.world.entity.player.Player;
@@ -267,24 +266,6 @@ public class VidLibClientEventHandler {
 
 			if (tool != null) {
 				tool.getSecond().debugText(mc.player, tool.getFirst(), mc.hitResult, ScreenText.CLIENT_TICK);
-			}
-
-			for (var clock : Clock.REGISTRY) {
-				if (clock.screen().isPresent()) {
-					var screen = clock.screen().get();
-					var value = mc.player.vl$sessionData().clocks.get(clock.id());
-
-					if (value != null && screen.visible().test(mc.player)) {
-						var string = screen.format().formatted(value.second() / 60, value.second() % 60);
-						var color = screen.color().lerp(switch (value.type()) {
-							case FINISHED -> 1F;
-							case FLASH -> 0.65F + Mth.cos((mc.player.vl$sessionData().tick) * 0.85F) * 0.35F;
-							default -> 0F;
-						}, Clock.RED);
-
-						ScreenText.CLIENT_TICK.get(screen.location()).add(Component.literal(string).withStyle(Style.EMPTY.withColor(color.rgb())));
-					}
-				}
 			}
 
 			mc.vl$preTick(mc.getPauseType());

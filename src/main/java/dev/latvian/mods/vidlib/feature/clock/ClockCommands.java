@@ -31,6 +31,7 @@ public interface ClockCommands {
 		)
 		.then(Commands.literal("reset")
 			.then(Commands.argument("id", ResourceLocationArgument.id())
+				.suggests(SUGGESTION_PROVIDER)
 				.executes(ctx -> reset(ctx.getSource(), ResourceLocationArgument.getId(ctx, "id")))
 			)
 		)

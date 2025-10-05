@@ -6,14 +6,19 @@ import dev.latvian.mods.vidlib.VidLibClientEventHandler;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.misc.FlashbackIntegration;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import imgui.ImFontConfig;
 import imgui.ImFontGlyphRangesBuilder;
 import imgui.ImGui;
 import imgui.extension.imnodes.ImNodes;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.ImPlotContext;
+import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.flag.ImGuiDockNodeFlags;
+import imgui.flag.ImGuiStyleVar;
+import imgui.flag.ImGuiWindowFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.internal.ImGuiContext;
 import net.minecraft.client.Minecraft;
@@ -215,18 +220,63 @@ public class ImGuiHooks {
 		var centralNodePos = centralNode.getPos();
 		var centralNodeSize = centralNode.getSize();
 
+		float h = FlashbackIntegration.isInReplay() ? 0F : 24F;
+		boolean topInfoBar = h > 0F && ClientGameEngine.INSTANCE.hasTopInfoBar(mc);
+		boolean bottomInfoBar = h > 0F && ClientGameEngine.INSTANCE.hasBottomInfoBar(mc);
+
 		updateViewportArea(
 			mc, window,
 			(centralNodePos.x - windowPos.x) / (double) windowSize.x,
-			(centralNodePos.y - windowPos.y) / (double) windowSize.y,
+			(centralNodePos.y - windowPos.y + (topInfoBar ? h : 0D)) / (double) windowSize.y,
 			centralNodeSize.x / (double) windowSize.x,
-			centralNodeSize.y / (double) windowSize.y
+			(centralNodeSize.y - (topInfoBar ? h : 0D) - (bottomInfoBar ? h : 0D)) / (double) windowSize.y
 		);
+
+		if (topInfoBar || bottomInfoBar) {
+			var graphics = new ImGraphics(mc);
+			graphics.pushRootStack();
+			graphics.setStyleCol(ImGuiCol.WindowBg, 0xFF000000);
+			graphics.setStyleVar(ImGuiStyleVar.WindowRounding, 0F);
+			graphics.setStyleVar(ImGuiStyleVar.WindowPadding, 2F, 2F);
+			graphics.setStyleVar(ImGuiStyleVar.FramePadding, 2F, 0F);
+			graphics.setStyleVar(ImGuiStyleVar.WindowMinSize, 0F, 0F);
+			graphics.setStyleVar(ImGuiStyleVar.ItemSpacing, 2F, 0F);
+
+			int flags = ImGuiWindowFlags.NoSavedSettings
+				| ImGuiWindowFlags.NoMove
+				| ImGuiWindowFlags.NoDocking
+				| ImGuiWindowFlags.NoNav
+				| ImGuiWindowFlags.NoDecoration;
+
+			if (topInfoBar) {
+				ImGui.setNextWindowPos(centralNodePos.x, centralNodePos.y);
+				ImGui.setNextWindowSize(centralNodeSize.x, h);
+
+				if (ImGui.begin("###top-info-bar", flags)) {
+					ClientGameEngine.INSTANCE.topInfoBar(graphics, centralNodePos.x, centralNodePos.y, centralNodeSize.x, h);
+				}
+
+				ImGui.end();
+			}
+
+			if (bottomInfoBar) {
+				ImGui.setNextWindowPos(centralNodePos.x, centralNodePos.y + centralNodeSize.y - h);
+				ImGui.setNextWindowSize(centralNodeSize.x, h);
+
+				if (ImGui.begin("###bottom-info-bar", flags)) {
+					ClientGameEngine.INSTANCE.bottomInfoBar(graphics, centralNodePos.x, centralNodePos.y + centralNodeSize.y - h, centralNodeSize.x, h);
+				}
+
+				ImGui.end();
+			}
+
+			graphics.popStack();
+		}
 
 		old.pop();
 	}
 
-	private static void updateViewportArea(Minecraft client, Window window, double xOffset, double yOffset, double xScale, double yScale) {
+	private static void updateViewportArea(Minecraft mc, Window window, double xOffset, double yOffset, double xScale, double yScale) {
 		var prevWidth = window.getWidth();
 		var prevHeight = window.getHeight();
 		window.vl$setViewportArea(xOffset, yOffset, xScale, yScale);
@@ -236,7 +286,7 @@ public class ImGuiHooks {
 		}
 
 		if (window.getWidth() != prevWidth || window.getHeight() != prevHeight) {
-			client.resizeDisplay();
+			mc.resizeDisplay();
 		}
 	}
 

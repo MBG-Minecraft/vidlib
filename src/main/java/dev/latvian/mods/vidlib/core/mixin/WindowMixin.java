@@ -111,10 +111,10 @@ public class WindowMixin implements VLWindow {
 
 	@Override
 	public void vl$setViewportArea(double xOffset, double yOffset, double xScale, double yScale) {
-		this.vl$xOffset = xOffset;
-		this.vl$yOffset = yOffset;
-		this.vl$xScale = xScale;
-		this.vl$yScale = yScale;
+		vl$xOffset = xOffset;
+		vl$yOffset = yOffset;
+		vl$xScale = xScale;
+		vl$yScale = yScale;
 		framebufferWidth = (int) (vl$unscaledFramebufferWidth * xScale);
 		framebufferHeight = (int) (vl$unscaledFramebufferHeight * yScale);
 		width = windowedWidth = (int) (vl$unscaledWidth * xScale);

@@ -2,11 +2,15 @@ package dev.latvian.mods.vidlib.feature.platform;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.util.Empty;
+import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.util.StringUtils;
+import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.LocalPlayer;
@@ -14,6 +18,7 @@ import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -136,5 +141,66 @@ public class ClientGameEngine {
 
 	public boolean hideRenderedName(LivingEntity entity, boolean bossFramebuffer) {
 		return bossFramebuffer && !(entity instanceof Player);
+	}
+
+	public boolean hasTopInfoBar(Minecraft mc) {
+		return false;
+	}
+
+	public boolean hasBottomInfoBar(Minecraft mc) {
+		for (var clock : Clock.REGISTRY) {
+			if (clock.screen().isPresent()) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public void topInfoBar(ImGraphics graphics, float x, float y, float w, float h) {
+	}
+
+	public void bottomInfoBar(ImGraphics graphics, float x, float y, float w, float h) {
+		if (graphics.mc.player != null) {
+			var session = graphics.mc.player.vl$sessionData();
+
+			for (var clock : Clock.REGISTRY) {
+				if (clock.screen().isPresent()) {
+					var screen = clock.screen().get();
+					var value = session.clocks.get(clock.id());
+
+					if (value != null && screen.visible().test(graphics.mc.player)) {
+						var string = screen.format().formatted(value.second() / 60, value.second() % 60);
+						var color = screen.color().lerp(switch (value.type()) {
+							case FINISHED -> 1F;
+							case FLASH -> 0.65F + Mth.cos((session.tick) * 0.85F) * 0.35F;
+							default -> 0F;
+						}, Clock.RED);
+
+						graphics.pushStack();
+						graphics.setStyleCol(ImGuiCol.Text, color);
+						ImGui.text(string);
+						graphics.popStack();
+						return;
+					}
+				}
+			}
+		}
+
+		ImGui.text("--:--");
+
+		/*
+		graphics.redTextIf(ImIcons.CIRCLE.toString(), true);
+		ImGui.sameLine();
+		ImGui.text("15:00");
+		ImGui.sameLine();
+		ImGui.text("|");
+		ImGui.sameLine();
+		ImGui.progressBar(0.67F, 200F, h - 4F);
+		ImGui.sameLine();
+		ImGui.text("|");
+		ImGui.sameLine();
+		ImGui.text("Some more info here");
+		 */
 	}
 }
