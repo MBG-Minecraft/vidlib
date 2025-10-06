@@ -24,5 +24,6 @@ public record InfoBarOverridePayload(int bar, Component text) implements SimpleP
 
 	@Override
 	public void handle(Context ctx) {
+		ctx.player().setInfoBarText(bar, text);
 	}
 }
