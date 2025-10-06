@@ -3,7 +3,6 @@
 uniform sampler2D InSampler;
 uniform vec2 InSize;
 uniform sampler2D LowSampler;
-uniform vec2 LowSize;
 uniform vec2 OutSize;
 
 in vec2 texCoord;

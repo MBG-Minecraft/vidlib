@@ -5,41 +5,45 @@ import com.mojang.blaze3d.systems.RenderPass;
 import net.minecraft.core.Vec3i;
 import org.joml.Vector3ic;
 
-public class CanvasIntUniform extends CanvasUniform {
-	private int[] stored;
+import java.util.function.Consumer;
 
-	public CanvasIntUniform(String name, UniformType type) {
+public class CanvasIntUniform extends CanvasUniform {
+	private final int[] stored;
+	private final Consumer<CanvasIntUniform> callback;
+
+	public CanvasIntUniform(String name, UniformType type, Consumer<CanvasIntUniform> callback) {
 		super(name, type);
-		this.stored = null;
+		this.stored = new int[type.count()];
+		this.callback = callback;
 	}
 
-	private void setSize(int size) {
-		if (stored == null || stored.length != size) {
-			stored = new int[size];
+	private void testSize(int size) {
+		if (stored.length != size) {
+			throw new RuntimeException("Size of uniform " + name + " is invalid");
 		}
 	}
 
 	public CanvasIntUniform set(int... value) {
-		setSize(value.length);
+		testSize(value.length);
 		System.arraycopy(value, 0, stored, 0, value.length);
 		return this;
 	}
 
 	public CanvasIntUniform set(int value) {
-		setSize(1);
+		testSize(1);
 		stored[0] = value;
 		return this;
 	}
 
 	public CanvasIntUniform set(int value1, int value2) {
-		setSize(2);
+		testSize(2);
 		stored[0] = value1;
 		stored[1] = value2;
 		return this;
 	}
 
 	public CanvasIntUniform set(int value1, int value2, int value3) {
-		setSize(3);
+		testSize(3);
 		stored[0] = value1;
 		stored[1] = value2;
 		stored[2] = value3;
@@ -56,8 +60,7 @@ public class CanvasIntUniform extends CanvasUniform {
 
 	@Override
 	public void apply(RenderPass pass) {
-		if (stored != null) {
-			pass.setUniform(name, stored);
-		}
+		callback.accept(this);
+		pass.setUniform(name, stored);
 	}
 }

@@ -20,7 +20,7 @@ public class DecalTexture extends DataTexture {
 		super("Decal Texture", 16, 16);
 	}
 
-	public void update(List<Decal> decals, Vec3 cameraPos) {
+	public int update(List<Decal> decals, Vec3 cameraPos) {
 		beginUpdate();
 
 		for (var decal : decals) {
@@ -28,6 +28,6 @@ public class DecalTexture extends DataTexture {
 			decal.upload(row, cameraPos);
 		}
 
-		endUpdate();
+		return endUpdate();
 	}
 }

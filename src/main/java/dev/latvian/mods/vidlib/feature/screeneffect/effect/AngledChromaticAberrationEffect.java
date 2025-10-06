@@ -1,12 +1,17 @@
-package dev.latvian.mods.vidlib.feature.screeneffect;
+package dev.latvian.mods.vidlib.feature.screeneffect.effect;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectShaderType;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
+import dev.latvian.mods.vidlib.math.knumber.KNumberFloatInstance;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import net.minecraft.util.Mth;
 
 public record AngledChromaticAberrationEffect(KNumber strength, KNumber angle) implements ScreenEffect {
 	public static final SimpleRegistryType<AngledChromaticAberrationEffect> TYPE = SimpleRegistryType.dynamic("angled_chromatic_aberration", RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -19,14 +24,12 @@ public record AngledChromaticAberrationEffect(KNumber strength, KNumber angle) i
 	));
 
 	public static class Inst extends ScreenEffectInstance {
-		public KNumber strengthNum;
-		public KNumber angleNum;
-		private float strength, prevStrength;
-		private float angle, prevAngle;
+		public final KNumberFloatInstance strength;
+		public final KNumberFloatInstance angle;
 
-		public Inst(KNumber strengthNum, KNumber angleNum) {
-			this.strengthNum = strengthNum;
-			this.angleNum = angleNum;
+		public Inst(KNumber strength, KNumber angle) {
+			this.strength = new KNumberFloatInstance(strength);
+			this.angle = new KNumberFloatInstance(angle);
 		}
 
 		@Override
@@ -37,21 +40,31 @@ public record AngledChromaticAberrationEffect(KNumber strength, KNumber angle) i
 		@Override
 		public void snap() {
 			super.snap();
-			prevStrength = strength;
-			prevAngle = angle;
+			strength.snap();
+			angle.snap();
 		}
 
 		@Override
 		public void update(KNumberContext ctx) {
-			strength = (float) strengthNum.getOr(ctx, 0D);
-			angle = (float) angleNum.getOr(ctx, 0D);
+			strength.update(ctx);
+			angle.update(ctx);
 		}
 
 		@Override
 		public void upload(IntArrayList arr, float delta) {
-			arr.add(Float.floatToIntBits(Mth.lerp(delta, prevStrength, strength))); // 1
-			arr.add(Float.floatToIntBits((float) Math.toRadians(Mth.rotLerp(delta, prevAngle, angle)))); // 2
+			arr.add(Float.floatToIntBits(strength.get(delta))); // 1
+			arr.add(Float.floatToIntBits(angle.getRadians(delta))); // 2
 		}
+	}
+
+	@Override
+	public String getName() {
+		return "Angled Chromatic Aberration";
+	}
+
+	@Override
+	public ImIcon getIcon() {
+		return ImIcons.BLUR;
 	}
 
 	@Override

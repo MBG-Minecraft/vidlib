@@ -258,6 +258,16 @@ tasks.register('increaseLocalBuild') {
 	}
 }
 
+tasks.register('webHookUpdate') {
+	group 'build'
+	description 'Send webhook update'
+
+	doFirst {
+		println("Sending webhook update...")
+		// localBuildFile.setText(localBuildNumber.toString(), "UTF-8")
+	}
+}
+
 tasks.register('releaseLocalBuild') {
 	group 'build'
 	description 'Builds the mod locally'
@@ -267,5 +277,9 @@ tasks.register('releaseLocalBuild') {
 
 	if (ENV.MAVEN_URL && ENV.MAVEN_USERNAME && ENV.MAVEN_TOKEN) {
 		dependsOn tasks.publish
+	}
+
+	if (ENV.DISCORD_WEBHOOK) {
+		dependsOn tasks.webHookUpdate
 	}
 }

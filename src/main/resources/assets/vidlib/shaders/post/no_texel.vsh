@@ -3,7 +3,6 @@
 layout (location = 0) in vec4 Position;
 
 uniform mat4 ProjMat;
-uniform vec2 InSize;
 uniform vec2 OutSize;
 
 out vec2 texCoord;

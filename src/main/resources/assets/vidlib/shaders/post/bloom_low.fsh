@@ -4,7 +4,6 @@ uniform sampler2D InSampler;
 uniform sampler2D DepthBeforeParticlesSampler;
 uniform sampler2D DepthAfterParticlesSampler;
 uniform vec2 InSize;
-uniform vec2 OutSize;
 
 in vec2 texCoord;
 

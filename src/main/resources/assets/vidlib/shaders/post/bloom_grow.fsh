@@ -1,8 +1,6 @@
 #version 410 core
 
 uniform sampler2D InSampler;
-uniform vec2 InSize;
-uniform vec2 OutSize;
 
 in vec2 texCoord;
 in vec2 oneTexel;

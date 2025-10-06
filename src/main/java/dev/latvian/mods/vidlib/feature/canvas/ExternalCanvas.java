@@ -13,12 +13,13 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
+import java.util.function.Consumer;
 
 public class ExternalCanvas extends Canvas {
 	RenderTarget externalTarget;
 
-	protected ExternalCanvas(ResourceLocation id) {
-		super(id);
+	protected ExternalCanvas(ResourceLocation id, Consumer<CanvasBuilder> builder) {
+		super(id, builder);
 	}
 
 	public void init(int w, int h) {

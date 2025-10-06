@@ -8,6 +8,7 @@ import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
+import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
 import dev.latvian.mods.vidlib.util.StringUtils;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
@@ -144,7 +145,7 @@ public class ClientGameEngine {
 	}
 
 	public boolean hasTopInfoBar(Minecraft mc) {
-		return false;
+		return mc.player != null && mc.player.vl$sessionData().topInfoBarOverride != null;
 	}
 
 	public boolean hasBottomInfoBar(Minecraft mc) {
@@ -154,15 +155,36 @@ public class ClientGameEngine {
 			}
 		}
 
-		return false;
+		return mc.player != null && mc.player.vl$sessionData().bottomInfoBarOverride != null;
 	}
 
 	public void topInfoBar(ImGraphics graphics, float x, float y, float w, float h) {
+		if (graphics.mc.player != null) {
+			var session = graphics.mc.player.vl$sessionData();
+
+			if (session.topInfoBarOverride != null) {
+				if (!Empty.isEmpty(session.topInfoBarOverride)) {
+					var sink = new FormattedCharSinkPartBuilder();
+					graphics.mc.font.split(session.topInfoBarOverride, Integer.MAX_VALUE).getFirst().accept(sink);
+					graphics.text(sink.build());
+				}
+			}
+		}
 	}
 
 	public void bottomInfoBar(ImGraphics graphics, float x, float y, float w, float h) {
 		if (graphics.mc.player != null) {
 			var session = graphics.mc.player.vl$sessionData();
+
+			if (session.bottomInfoBarOverride != null) {
+				if (!Empty.isEmpty(session.bottomInfoBarOverride)) {
+					var sink = new FormattedCharSinkPartBuilder();
+					graphics.mc.font.split(session.bottomInfoBarOverride, Integer.MAX_VALUE).getFirst().accept(sink);
+					graphics.text(sink.build());
+				}
+
+				return;
+			}
 
 			for (var clock : Clock.REGISTRY) {
 				if (clock.screen().isPresent()) {

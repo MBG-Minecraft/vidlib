@@ -3,8 +3,13 @@ package dev.latvian.mods.vidlib.feature.screeneffect;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.AngledChromaticAberrationEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.ColorEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.ColorOverlayEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.FocusedChromaticAberrationEffect;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 
@@ -17,9 +22,14 @@ public interface ScreenEffect {
 	@AutoInit
 	static void bootstrap() {
 		REGISTRY.register(ColorEffect.TYPE);
+		REGISTRY.register(ColorOverlayEffect.TYPE);
 		REGISTRY.register(FocusedChromaticAberrationEffect.TYPE);
 		REGISTRY.register(AngledChromaticAberrationEffect.TYPE);
 	}
+
+	String getName();
+
+	ImIcon getIcon();
 
 	default SimpleRegistryType<?> type() {
 		return REGISTRY.getType(this);

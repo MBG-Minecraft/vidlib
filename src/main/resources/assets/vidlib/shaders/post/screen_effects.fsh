@@ -4,7 +4,6 @@ uniform sampler2D InSampler;
 uniform sampler2D InDepthSampler;
 uniform sampler2D DataSampler;
 uniform int Count;
-uniform float GameTime;
 uniform mat4 InverseViewProjectionMat;
 
 in vec2 texCoord;
@@ -30,10 +29,8 @@ vec4 decodeColor(int x, int y) {
 	return texelFetch(DataSampler, ivec2(x, y), 0);
 }
 
-vec4 blend(vec4 src, vec4 dst) {
-	vec3 c = src.rgb * src.a + dst.rgb * (1.0 - src.a);
-	float a = src.a + dst.a * (1.0 - src.a);
-	return vec4(c, a);
+vec3 blend(vec3 src, vec4 dst) {
+	return src * (1.0 - dst.a) + dst.rgb * dst.a;
 }
 
 vec3 clip(float depth) {
@@ -53,10 +50,17 @@ void main() {
 	float depth = texture(InDepthSampler, texCoord).r;
 	vec3 worldPos = clip(depth);
 
-	vec4 color = vec4(texture(InSampler, texCoord).rgb, 1.0);
-	bool modified = false;
+	if (Count == 999) {
+		fragColor = vec4(mod(length(worldPos), 1.0), 0.0, 0.0, 1.0);
+		return;
+	} else if (Count == 998) {
+		fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+		return;
+	}
 
-	for (int y = 0; y < 1024; y++) {
+	vec3 color = texture(InSampler, texCoord).rgb;
+
+	for (int y = 0; y < 8; y++) {
 		if (y >= Count) {
 			break;
 		}
@@ -69,16 +73,14 @@ void main() {
 		}
 
 		if (type == 1) {
-			// float start = decodeFloat(1, y);
+			vec4 col = decodeColor(1, y);
+			color = blend(color, col);
 		}
 
-		// color = blend(color, decalColor);
-		// modified = true;
+		if (type == 998) {
+			color = blend(color, vec4(mod(length(worldPos), 1.0), 0.0, 0.0, 1.0));
+		}
 	}
 
-	if (modified) {
-		fragColor = color;
-	} else {
-		discard;
-	}
+	fragColor = vec4(color, 1.0);
 }

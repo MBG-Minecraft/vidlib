@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.screeneffect;
+package dev.latvian.mods.vidlib.feature.screeneffect.effect;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -7,7 +7,12 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.Gradient;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectShaderType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import imgui.ImGui;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -24,13 +29,14 @@ public record ColorEffect(Gradient color, boolean additive) implements ScreenEff
 	));
 
 	public static class Inst extends ScreenEffectInstance {
-		public Gradient gradient;
-		public boolean additive;
+		public Gradient vColor;
+		public boolean vAdditive;
+
 		private Color color, prevColor;
 
-		public Inst(Gradient gradient, boolean additive) {
-			this.gradient = gradient;
-			this.additive = additive;
+		public Inst(Gradient vColor, boolean vAdditive) {
+			this.vColor = vColor;
+			this.vAdditive = vAdditive;
 		}
 
 		@Override
@@ -46,32 +52,41 @@ public record ColorEffect(Gradient color, boolean additive) implements ScreenEff
 
 		@Override
 		public void update(KNumberContext ctx) {
-			color = gradient.get(ctx.progress);
+			color = vColor.get(ctx.progress);
 		}
 
 		@Override
 		public void upload(IntArrayList arr, float delta) {
 			arr.add(prevColor.lerp(delta, color).argb()); // 1
-			arr.add(additive ? 1 : 0); // 2
-		}
-
-		@Override
-		public String getName() {
-			return "Color";
+			arr.add(vAdditive ? 1 : 0); // 2
 		}
 
 		@Override
 		public void imgui(ImGraphics graphics) {
 			super.imgui(graphics);
 
-			var imGradient = new GradientImBuilder();
-			imGradient.set(gradient);
-			imGradient.imguiKey(graphics, "gradient", "Gradient");
+			var imColor = new GradientImBuilder();
+			imColor.set(vColor);
+			imColor.imguiKey(graphics, "color", "Color");
 
-			if (ImGui.checkbox("Additive", additive)) {
-				additive = !additive;
+			if (imColor.isValid()) {
+				vColor = imColor.build();
+			}
+
+			if (ImGui.checkbox("Additive", vAdditive)) {
+				vAdditive = !vAdditive;
 			}
 		}
+	}
+
+	@Override
+	public String getName() {
+		return "Color";
+	}
+
+	@Override
+	public ImIcon getIcon() {
+		return ImIcons.PALETTE;
 	}
 
 	@Override

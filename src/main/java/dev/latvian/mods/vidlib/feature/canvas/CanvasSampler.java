@@ -4,18 +4,15 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.textures.GpuTexture;
 
+import java.util.function.Supplier;
+
 public class CanvasSampler implements CanvasPassModifier {
 	public final String name;
-	private GpuTexture value;
+	private final Supplier<GpuTexture> valueSupplier;
 
-	public CanvasSampler(String name) {
+	public CanvasSampler(String name, Supplier<GpuTexture> valueSupplier) {
 		this.name = name;
-		this.value = null;
-	}
-
-	public CanvasSampler set(GpuTexture value) {
-		this.value = value;
-		return this;
+		this.valueSupplier = valueSupplier;
 	}
 
 	@Override
@@ -25,6 +22,8 @@ public class CanvasSampler implements CanvasPassModifier {
 
 	@Override
 	public void apply(RenderPass pass) {
+		var value = valueSupplier.get();
+
 		if (value != null && !value.isClosed()) {
 			pass.bindSampler(name, value);
 		}

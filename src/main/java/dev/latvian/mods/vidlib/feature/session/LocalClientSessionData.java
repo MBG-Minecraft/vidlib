@@ -59,6 +59,7 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -105,6 +106,8 @@ public class LocalClientSessionData extends ClientSessionData {
 	public final List<Decal> debugDecals;
 	public final List<ScreenEffectInstance> screenEffects;
 	private Boolean isServerNeoForge;
+	public Component topInfoBarOverride;
+	public Component bottomInfoBarOverride;
 
 	public LocalClientSessionData(Minecraft mc, UUID uuid, ClientPacketListener connection) {
 		super(uuid);

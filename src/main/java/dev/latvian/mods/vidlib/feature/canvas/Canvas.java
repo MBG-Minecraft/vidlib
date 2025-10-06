@@ -9,7 +9,6 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.RenderTargetDescriptor;
 import com.mojang.blaze3d.resource.ResourceHandle;
-import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
@@ -44,28 +43,29 @@ public class Canvas implements Consumer<RenderPass> {
 		}
 	});
 
-	public static Canvas createExternal(ResourceLocation id) {
-		return new ExternalCanvas(id);
+	public static Canvas createExternal(ResourceLocation id, Consumer<CanvasBuilder> builder) {
+		return new ExternalCanvas(id, builder);
 	}
 
-	public static Canvas createInternal(ResourceLocation id) {
-		return new InternalCanvas(id);
+	public static Canvas createInternal(ResourceLocation id, Consumer<CanvasBuilder> builder) {
+		return new InternalCanvas(id, builder);
 	}
 
 	@ClientAutoRegister
-	public static final Canvas MAIN_BEFORE_PARTICLES = createExternal(VidLib.id("main_before_particles"));
+	public static final Canvas MAIN_BEFORE_PARTICLES = createExternal(VidLib.id("main_before_particles"), builder -> {
+	});
 
 	@ClientAutoRegister
-	public static final Canvas MAIN_AFTER_PARTICLES = createExternal(VidLib.id("main_after_particles"));
-
-	// @AutoRegister(Dist.CLIENT)
-	// public static final Canvas CHROMATIC_ABERRATION = createExternal(VidLib.id("chromatic_aberration"));
+	public static final Canvas MAIN_AFTER_PARTICLES = createExternal(VidLib.id("main_after_particles"), builder -> {
+	});
 
 	@ClientAutoRegister
-	public static final Canvas WEAK_OUTLINE = createExternal(VidLib.id("weak_outline"));
+	public static final Canvas WEAK_OUTLINE = createExternal(VidLib.id("weak_outline"), builder -> {
+	});
 
 	@ClientAutoRegister
-	public static final Canvas STRONG_OUTLINE = createExternal(VidLib.id("strong_outline"));
+	public static final Canvas STRONG_OUTLINE = createExternal(VidLib.id("strong_outline"), builder -> {
+	});
 
 	public final ResourceLocation id;
 	public final String idString;
@@ -73,29 +73,42 @@ public class Canvas implements Consumer<RenderPass> {
 	public final ResourceLocation depthTexturePath;
 	public final String pathString;
 	public final Set<ResourceLocation> defaultTargets;
-	public final List<CanvasPassModifier> passModifiers;
+	public final Consumer<Minecraft> tickCallback;
+	public final Consumer<Minecraft> drawSetupCallback;
+	public final Consumer<Minecraft> drawCallback;
+	public final List<CanvasSampler> samplers;
+	public final List<CanvasUniform> uniforms;
+	private final List<CanvasPassModifier> passModifiers;
 
 	public boolean enabled;
 	public boolean active;
 	public boolean previewColor;
 	public boolean previewDepth;
 	public CanvasData data;
-	public Consumer<Minecraft> tickCallback;
-	public Consumer<Minecraft> drawSetupCallback;
-	public Consumer<Minecraft> drawCallback;
 
 	ResourceHandle<RenderTarget> outputTarget;
 	private RenderPipeline renderPipeline;
 	private RenderStateShard.OutputStateShard outputStateShard;
 
-	protected Canvas(ResourceLocation id) {
+	protected Canvas(ResourceLocation id, Consumer<CanvasBuilder> builderCallback) {
 		this.id = id;
 		this.idString = id.toString();
 		this.colorTexturePath = id.withPath(p -> "textures/vidlib/generated/canvas/color/" + p + ".png");
 		this.depthTexturePath = id.withPath(p -> "textures/vidlib/generated/canvas/depth/" + p + ".png");
 		this.pathString = "vidlib_framebuffer/" + id;
 		this.defaultTargets = Set.of(id);
+
+		var builder = new CanvasBuilder();
+		builderCallback.accept(builder);
+		this.tickCallback = builder.tickCallback;
+		this.drawSetupCallback = builder.drawSetupCallback;
+		this.drawCallback = builder.drawCallback;
+		this.samplers = List.copyOf(builder.samplers);
+		this.uniforms = List.copyOf(builder.uniforms);
+
 		this.passModifiers = new ArrayList<>(0);
+		passModifiers.addAll(samplers);
+		passModifiers.addAll(uniforms);
 
 		this.enabled = false;
 		this.active = false;
@@ -110,62 +123,6 @@ public class Canvas implements Consumer<RenderPass> {
 		}
 
 		active = true;
-	}
-
-	public Canvas setTickCallback(Consumer<Minecraft> callback) {
-		this.tickCallback = callback;
-		return this;
-	}
-
-	public Canvas setDrawSetupCallback(Consumer<Minecraft> callback) {
-		this.drawSetupCallback = callback;
-		return this;
-	}
-
-	public Canvas setDrawCallback(Consumer<Minecraft> callback) {
-		this.drawCallback = callback;
-		return this;
-	}
-
-	public <T extends CanvasPassModifier> T modifier(T modifier) {
-		passModifiers.add(modifier);
-		return modifier;
-	}
-
-	public CanvasSampler sampler(String name) {
-		return modifier(new CanvasSampler(name));
-	}
-
-	public CanvasBoolUniform boolUniform(String name) {
-		return modifier(new CanvasBoolUniform(name));
-	}
-
-	public CanvasIntUniform intUniform(String name) {
-		return modifier(new CanvasIntUniform(name, UniformType.INT));
-	}
-
-	public CanvasIntUniform ivec3Uniform(String name) {
-		return modifier(new CanvasIntUniform(name, UniformType.IVEC3));
-	}
-
-	public CanvasFloatUniform floatUniform(String name) {
-		return modifier(new CanvasFloatUniform(name, UniformType.FLOAT));
-	}
-
-	public CanvasFloatUniform vec2Uniform(String name) {
-		return modifier(new CanvasFloatUniform(name, UniformType.VEC2));
-	}
-
-	public CanvasFloatUniform vec3Uniform(String name) {
-		return modifier(new CanvasFloatUniform(name, UniformType.VEC3));
-	}
-
-	public CanvasFloatUniform vec4Uniform(String name) {
-		return modifier(new CanvasFloatUniform(name, UniformType.VEC4));
-	}
-
-	public CanvasFloatUniform mat4Uniform(String name) {
-		return modifier(new CanvasFloatUniform(name, UniformType.MATRIX4X4));
 	}
 
 	public boolean draw(Minecraft mc, GpuTexture texture) {

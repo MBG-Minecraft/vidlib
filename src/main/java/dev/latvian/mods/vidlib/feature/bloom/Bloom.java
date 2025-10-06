@@ -7,7 +7,8 @@ import imgui.type.ImBoolean;
 
 public interface Bloom {
 	@ClientAutoRegister
-	Canvas CANVAS = Canvas.createExternal(VidLib.id("bloom"));
+	Canvas CANVAS = Canvas.createExternal(VidLib.id("bloom"), builder -> {
+	});
 
 	ImBoolean VISIBLE = new ImBoolean(true);
 

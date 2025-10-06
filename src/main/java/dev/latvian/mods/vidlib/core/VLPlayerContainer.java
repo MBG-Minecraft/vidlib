@@ -14,6 +14,7 @@ import dev.latvian.mods.vidlib.feature.cutscene.PlayCutscenePayload;
 import dev.latvian.mods.vidlib.feature.cutscene.StopCutscenePayload;
 import dev.latvian.mods.vidlib.feature.hud.ToastDisplayPayload;
 import dev.latvian.mods.vidlib.feature.misc.CloseScreenPayload;
+import dev.latvian.mods.vidlib.feature.misc.InfoBarOverridePayload;
 import dev.latvian.mods.vidlib.feature.misc.MarkerData;
 import dev.latvian.mods.vidlib.feature.misc.MarkerPayload;
 import dev.latvian.mods.vidlib.feature.misc.SetPostEffectPayload;
@@ -335,6 +336,14 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 			getEnvironment().marker(data);
 		} else {
 			s2c(new MarkerPayload(data));
+		}
+	}
+
+	default void setInfoBarText(int bar, Component text) {
+		if (isClient()) {
+			getEnvironment().setInfoBarText(bar, text);
+		} else {
+			s2c(new InfoBarOverridePayload(bar, text));
 		}
 	}
 }

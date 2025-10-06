@@ -1,10 +1,18 @@
-package dev.latvian.mods.vidlib.feature.screeneffect;
+package dev.latvian.mods.vidlib.feature.screeneffect.effect;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.screeneffect.FocusPoint;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectShaderType;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
+import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
@@ -20,14 +28,15 @@ public record FocusedChromaticAberrationEffect(KNumber strength, FocusPoint focu
 	));
 
 	public static class Inst extends ScreenEffectInstance {
-		private final KNumber strengthNum;
-		public FocusPoint focusNum;
+		private KNumber vStrength;
+		public FocusPoint vFocus;
+
 		private float strength, prevStrength;
 		private Vec2 focus, prevFocus;
 
-		public Inst(KNumber strengthNum, FocusPoint focusNum) {
-			this.strengthNum = strengthNum;
-			this.focusNum = focusNum;
+		public Inst(KNumber vStrength, FocusPoint vFocus) {
+			this.vStrength = vStrength;
+			this.vFocus = vFocus;
 		}
 
 		@Override
@@ -44,8 +53,8 @@ public record FocusedChromaticAberrationEffect(KNumber strength, FocusPoint focu
 
 		@Override
 		public void update(KNumberContext ctx) {
-			strength = (float) strengthNum.getOr(ctx, 0D);
-			focus = focusNum.get(ctx);
+			strength = (float) vStrength.getOr(ctx, 0D);
+			focus = vFocus.get(ctx);
 		}
 
 		@Override
@@ -54,6 +63,30 @@ public record FocusedChromaticAberrationEffect(KNumber strength, FocusPoint focu
 			arr.add(Float.floatToIntBits(Mth.lerp(delta, prevFocus.x, focus.x))); // 2
 			arr.add(Float.floatToIntBits(Mth.lerp(delta, prevFocus.y, focus.y))); // 3
 		}
+
+		@Override
+		public void imgui(ImGraphics graphics) {
+			super.imgui(graphics);
+
+			var imStrengthNum = KNumberImBuilder.create(0D);
+			imStrengthNum.set(vStrength);
+
+			if (imStrengthNum.imguiKey(graphics, "Strength", "strength").isAny() && imStrengthNum.isValid()) {
+				vStrength = imStrengthNum.build();
+			}
+
+
+		}
+	}
+
+	@Override
+	public String getName() {
+		return "Focused Chromatic Aberration";
+	}
+
+	@Override
+	public ImIcon getIcon() {
+		return ImIcons.BLUR;
 	}
 
 	@Override

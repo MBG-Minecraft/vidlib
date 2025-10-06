@@ -16,18 +16,20 @@ public class ScreenEffectTexture extends DataTexture {
 	public static final DynamicTextureHolder<ScreenEffectTexture> HOLDER = new DynamicTextureHolder<>(ID, Lazy.of(ScreenEffectTexture::new));
 
 	public ScreenEffectTexture() {
-		super("Screen Effect Texture", 16, 4);
+		super("Screen Effect Texture", 8, 4);
 	}
 
-	public void update(List<ScreenEffectInstance> instances, float delta) {
+	public int update(List<ScreenEffectInstance> instances, float delta) {
 		beginUpdate();
 
 		for (var instance : instances) {
-			var row = nextRow();
-			row.add(instance.shaderType().shaderId);
-			instance.upload(row, delta);
+			if (instance.shaderType() != ScreenEffectShaderType.NONE) {
+				var row = nextRow();
+				row.add(instance.shaderType().shaderId); // 0
+				instance.upload(row, delta);
+			}
 		}
 
-		endUpdate();
+		return endUpdate();
 	}
 }

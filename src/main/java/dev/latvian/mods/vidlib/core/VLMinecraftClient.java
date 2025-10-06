@@ -552,6 +552,16 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
+	default void setInfoBarText(int bar, Component text) {
+		var session = vl$self().player.vl$sessionData();
+
+		switch (bar) {
+			case 0 -> session.topInfoBarOverride = text;
+			case 1 -> session.bottomInfoBarOverride = text;
+		}
+	}
+
+	@Override
 	default GameProfile retrieveGameProfile(UUID uuid) {
 		try {
 			var profile = vl$self().getMinecraftSessionService().fetchProfile(uuid, true).profile();

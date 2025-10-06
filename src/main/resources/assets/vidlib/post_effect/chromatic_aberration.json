@@ -12,7 +12,21 @@
 					"target": "minecraft:main"
 				}
 			],
-			"output": "swap"
+			"output": "swap",
+			"uniforms": [
+				{
+					"name": "Strength",
+					"type": "float"
+				},
+				{
+					"name": "Angle",
+					"type": "float"
+				},
+				{
+					"name": "FocusPos",
+					"type": "vec2"
+				}
+			]
 		},
 		{
 			"vertex_shader": "minecraft:post/blit",

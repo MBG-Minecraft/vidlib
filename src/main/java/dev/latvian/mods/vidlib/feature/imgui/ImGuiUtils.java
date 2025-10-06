@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.ImVec4;
 import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiHoveredFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImFloat;
@@ -83,7 +84,7 @@ public interface ImGuiUtils {
 	}
 
 	static void hoveredTooltip(String tooltip) {
-		if (!tooltip.isEmpty() && ImGui.isItemHovered()) {
+		if (!tooltip.isEmpty() && ImGui.isItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) {
 			ImGui.setTooltip(tooltip);
 		}
 	}

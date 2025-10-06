@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.screeneffect;
 
 public enum ScreenEffectShaderType {
+	NONE(0),
 	COLOR(1),
 	BLUR(2),
 	ANGLED_BLUR(3),
@@ -12,10 +13,6 @@ public enum ScreenEffectShaderType {
 	RIPPLE(9), // https://www.shadertoy.com/view/ldBXDD
 	SCREEN_SHAKE(10),
 	CRT(11),
-	UNUSED_12(12),
-	UNUSED_13(13),
-	UNUSED_14(14),
-	UNUSED_15(15),
 
 	;
 

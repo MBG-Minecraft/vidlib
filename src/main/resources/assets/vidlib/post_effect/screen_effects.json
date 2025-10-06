@@ -18,7 +18,7 @@
 				},
 				{
 					"sampler_name": "Data",
-					"location": "vidlib:screen_effects",
+					"location": "vidlib:screen",
 					"width": 1,
 					"height": 1
 				}

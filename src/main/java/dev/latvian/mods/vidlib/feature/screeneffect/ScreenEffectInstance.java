@@ -8,6 +8,8 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 public abstract class ScreenEffectInstance {
 	public int tick = 0;
 	public int duration = 1;
+	public boolean paused = false;
+	public String name = "Unknown";
 	public KNumberVariables variables = KNumberVariables.EMPTY;
 
 	public abstract ScreenEffectShaderType shaderType();
@@ -19,10 +21,6 @@ public abstract class ScreenEffectInstance {
 	}
 
 	public abstract void upload(IntArrayList arr, float delta);
-
-	public String getName() {
-		return "Unknown Screen Effect";
-	}
 
 	public void imgui(ImGraphics graphics) {
 	}

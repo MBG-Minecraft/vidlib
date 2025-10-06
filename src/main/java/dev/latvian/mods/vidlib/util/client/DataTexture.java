@@ -18,8 +18,7 @@ import java.util.function.IntUnaryOperator;
 
 public class DataTexture extends AbstractTexture implements Dumpable {
 	private final String name;
-	private int width;
-	private int height;
+	private final int expectedWidth;
 	private final List<IntArrayList> pixels;
 	private NativeImage image;
 	private int currentRow;
@@ -27,10 +26,9 @@ public class DataTexture extends AbstractTexture implements Dumpable {
 
 	public DataTexture(String name, int width, int height) {
 		this.name = name;
-		this.width = width;
-		this.height = height;
+		this.expectedWidth = width;
 		this.texture = RenderSystem.getDevice().createTexture(name, TextureFormat.RGBA8, width, height, 1);
-		texture.setTextureFilter(FilterMode.LINEAR, false);
+		texture.setTextureFilter(FilterMode.NEAREST, false);
 		this.pixels = new ArrayList<>(height);
 	}
 
@@ -60,7 +58,7 @@ public class DataTexture extends AbstractTexture implements Dumpable {
 		IntArrayList row;
 
 		if (currentRow >= pixels.size()) {
-			row = new IntArrayList(width);
+			row = new IntArrayList(expectedWidth);
 			pixels.add(row);
 		} else {
 			row = pixels.get(currentRow);
@@ -71,14 +69,21 @@ public class DataTexture extends AbstractTexture implements Dumpable {
 		return row;
 	}
 
-	public void endUpdate() {
+	public int endUpdate() {
 		countPrevRow();
 
-		if (image == null || columnCount > width || currentRow > height) {
-			width = Mth.ceil((columnCount + 1) / 4D) * 4;
-			height = Mth.ceil((currentRow + 1) / 4D) * 4;
+		if (columnCount == 0 || currentRow == 0) {
+			return 0;
+		}
+
+		if (image == null || columnCount > image.getWidth() || currentRow > image.getHeight()) {
+			int width = Mth.ceil((columnCount + 1) / 4D) * 4;
+			int height = Mth.ceil((currentRow + 1) / 4D) * 4;
 
 			if (image != null) {
+				width = Math.max(width, image.getWidth());
+				height = Math.max(height, image.getHeight());
+
 				image.close();
 				image = null;
 			}
@@ -90,7 +95,7 @@ public class DataTexture extends AbstractTexture implements Dumpable {
 			}
 
 			texture = RenderSystem.getDevice().createTexture(name, TextureFormat.RGBA8, width, height, 1);
-			texture.setTextureFilter(FilterMode.LINEAR, false);
+			texture.setTextureFilter(FilterMode.NEAREST, false);
 		}
 
 		for (int y = 0; y < currentRow; y++) {
@@ -102,6 +107,7 @@ public class DataTexture extends AbstractTexture implements Dumpable {
 		}
 
 		RenderSystem.getDevice().createCommandEncoder().writeToTexture(texture, image, 0, 0, 0, columnCount, currentRow, 0, 0);
+		return currentRow;
 	}
 
 	@Override

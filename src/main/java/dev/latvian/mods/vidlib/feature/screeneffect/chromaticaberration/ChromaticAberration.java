@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.screeneffect.chromaticaberration;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
-import dev.latvian.mods.vidlib.feature.canvas.CanvasFloatUniform;
+import dev.latvian.mods.vidlib.feature.canvas.CanvasUniform;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
@@ -15,13 +15,16 @@ public class ChromaticAberration {
 	public static float angle = 0F;
 	public static KVector focus = null;
 	public static Vec2 screenFocus = Vec2.ZERO;
+	private static Vec2 uFocusPos = Vec2.ZERO;
 
 	@ClientAutoRegister
-	public static final Canvas CANVAS = Canvas.createExternal(VidLib.id("chromatic_aberration")).setTickCallback(ChromaticAberration::tick).setDrawSetupCallback(ChromaticAberration::setup);
-
-	public static final CanvasFloatUniform STRENGTH_UNIFORM = CANVAS.floatUniform("Strength");
-	public static final CanvasFloatUniform ANGLE_UNIFORM = CANVAS.floatUniform("Angle");
-	public static final CanvasFloatUniform FOCUS_UNIFORM = CANVAS.floatUniform("FocusPos");
+	public static final Canvas CANVAS = Canvas.createExternal(VidLib.id("chromatic_aberration"), builder -> {
+		builder.setTickCallback(ChromaticAberration::tick);
+		builder.setDrawSetupCallback(ChromaticAberration::setup);
+		builder.addUniform(CanvasUniform.float1("Strength", () -> strength / 10F));
+		builder.addUniform(CanvasUniform.float1("Angle", () -> isAngled ? (float) Math.toRadians(angle) : -1F));
+		builder.addUniform(CanvasUniform.vec2("FocusPos", u -> u.set(uFocusPos)));
+	});
 
 	public static Vec2 prevFocusPos = null;
 	public static Vec2 focusPos = null;
@@ -51,8 +54,6 @@ public class ChromaticAberration {
 		float delta = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
 
 		CANVAS.markActive();
-		STRENGTH_UNIFORM.set(strength / 10F);
-		ANGLE_UNIFORM.set(isAngled ? (float) Math.toRadians(angle) : -1F);
-		FOCUS_UNIFORM.set(Mth.lerp(delta, prevFocusPos.x, focusPos.x), -Mth.lerp(delta, prevFocusPos.y, focusPos.y));
+		uFocusPos = new Vec2(Mth.lerp(delta, prevFocusPos.x, focusPos.x), -Mth.lerp(delta, prevFocusPos.y, focusPos.y));
 	}
 }

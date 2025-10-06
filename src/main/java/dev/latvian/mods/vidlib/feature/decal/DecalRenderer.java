@@ -4,19 +4,21 @@ import dev.latvian.mods.klib.math.ClientMatrices;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
-import dev.latvian.mods.vidlib.feature.canvas.CanvasFloatUniform;
-import dev.latvian.mods.vidlib.feature.canvas.CanvasIntUniform;
+import dev.latvian.mods.vidlib.feature.canvas.CanvasUniform;
 import net.minecraft.client.Minecraft;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class DecalRenderer {
-	@ClientAutoRegister
-	public static final Canvas CANVAS = Canvas.createExternal(VidLib.id("decals")).setDrawSetupCallback(DecalRenderer::setup);
+	private static int uCount = 0;
 
-	public static final CanvasIntUniform COUNT = CANVAS.intUniform("Count");
-	public static final CanvasFloatUniform INVERSE_VIEW_PROJECTION_MATRIX_UNIFORM = CANVAS.mat4Uniform("InverseViewProjectionMat");
+	@ClientAutoRegister
+	public static final Canvas CANVAS = Canvas.createExternal(VidLib.id("decals"), builder -> {
+		builder.setDrawSetupCallback(DecalRenderer::setup);
+		builder.addUniform(CanvasUniform.int1("Count", () -> uCount));
+		builder.addUniform(CanvasUniform.mat4("InverseViewProjectionMat", () -> ClientMatrices.INVERSE_WORLD));
+	});
 
 	private static final List<Decal> TEMP_LIST = new ArrayList<>();
 
@@ -34,16 +36,8 @@ public class DecalRenderer {
 		}
 
 		if (!TEMP_LIST.isEmpty()) {
-			var texture = mc.getTextureManager().byPath.get(DecalTexture.ID);
-
-			if (texture == null) {
-				texture = new DecalTexture();
-				mc.getTextureManager().register(DecalTexture.ID, texture);
-			}
-
-			((DecalTexture) texture).update(TEMP_LIST, mc.gameRenderer.getMainCamera().getPosition());
-			COUNT.set(TEMP_LIST.size());
-			INVERSE_VIEW_PROJECTION_MATRIX_UNIFORM.set(ClientMatrices.INVERSE_WORLD);
+			var texture = DecalTexture.HOLDER.texture().get();
+			uCount = texture.update(TEMP_LIST, mc.gameRenderer.getMainCamera().getPosition());
 			CANVAS.markActive();
 			TEMP_LIST.clear();
 		}

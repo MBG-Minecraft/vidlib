@@ -7,9 +7,11 @@ import dev.latvian.mods.klib.gl.GLDebugLog;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Consumer;
+
 public class InternalCanvas extends Canvas {
-	protected InternalCanvas(ResourceLocation id) {
-		super(id);
+	protected InternalCanvas(ResourceLocation id, Consumer<CanvasBuilder> builder) {
+		super(id, builder);
 	}
 
 	@Override

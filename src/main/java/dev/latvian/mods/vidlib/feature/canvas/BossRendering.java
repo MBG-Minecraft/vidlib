@@ -8,7 +8,7 @@ import net.minecraft.util.Mth;
 
 public class BossRendering {
 	@ClientAutoRegister
-	public static final Canvas CANVAS = Canvas.createExternal(VidLib.id("boss")).setDrawCallback(BossRendering::handleColors);
+	public static final Canvas CANVAS = Canvas.createExternal(VidLib.id("boss"), builder -> builder.setDrawCallback(BossRendering::handleColors));
 
 	public static int active = 0;
 	public static float lookingAtDepth = 1F;
