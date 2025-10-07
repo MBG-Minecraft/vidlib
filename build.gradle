@@ -188,11 +188,53 @@ jar {
 	}
 }
 
+tasks.register('buildResourcePack', Zip) {
+	group "build"
+	description "Builds a resource pack from assets"
+	dependsOn tasks.named('processResources')
+	into('/')
+
+	from('src/main/resources') {
+		include 'assets/**'
+		include 'pack.mcmeta'
+		exclude '**/.DS_Store', '**/Thumbs.db'
+		exclude 'assets/*/particles/**'
+		exclude 'assets/*/shaders/**'
+		exclude 'assets/*/post_effect/**'
+		exclude 'assets/*/vidlib/canvas/**'
+	}
+
+	from('src/main/resources') {
+		include 'vidlib_logo.png'
+		rename { fileName ->
+			fileName == 'vidlib_logo.png' ? 'pack.png' : fileName
+		}
+	}
+
+	destinationDirectory = layout.buildDirectory.dir('libs')
+	archiveBaseName.set(project.name)
+	archiveVersion.set(project.version.toString())
+	archiveClassifier.set('resource-pack')
+
+	preserveFileTimestamps = false
+	reproducibleFileOrder = true
+	duplicatesStrategy = DuplicatesStrategy.WARN
+}
+
+tasks.build {
+	dependsOn tasks.buildResourcePack
+}
+
 publishing {
 	publications {
 		mavenNeoForge(MavenPublication) {
 			artifactId = archives_base_name
 			from components.java
+
+			artifact(tasks.named('buildResourcePack')) {
+				classifier 'resource-pack'
+				extension 'zip'
+			}
 		}
 	}
 
