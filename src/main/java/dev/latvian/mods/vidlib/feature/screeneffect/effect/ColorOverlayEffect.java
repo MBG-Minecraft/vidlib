@@ -13,7 +13,6 @@ import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectShaderType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 public record ColorOverlayEffect(Gradient color) implements ScreenEffect {
 	public static final SimpleRegistryType<ColorOverlayEffect> TYPE = SimpleRegistryType.dynamic("color_overlay", RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -46,11 +45,6 @@ public record ColorOverlayEffect(Gradient color) implements ScreenEffect {
 		@Override
 		public void update(KNumberContext ctx) {
 			color = vColor.get(ctx.progress);
-		}
-
-		@Override
-		public void upload(IntArrayList arr, float delta) {
-			arr.add(prevColor.lerp(delta, color).argb()); // 1
 		}
 
 		@Override

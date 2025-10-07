@@ -10,6 +10,7 @@ import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.screeneffect.effect.AngledChromaticAberrationEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.effect.ColorEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.ColorOverlayEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.effect.FocusedChromaticAberrationEffect;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import imgui.ImGui;
@@ -71,6 +72,8 @@ public class ScreenEffectPanel extends AdminPanel {
 		add(graphics, ImIcons.ANIMATION, "screen-shake", "Screen Shake", null);
 
 		add(graphics, ImIcons.PALETTE, "color", "Color", () -> new ColorEffect.Inst(Color.BLACK.withAlpha(0).gradient(Color.BLACK), false));
+		ImGui.sameLine();
+		add(graphics, ImIcons.PALETTE, "overlay-color", "Overlay Color", () -> new ColorOverlayEffect.Inst(Color.BLACK.withAlpha(0).gradient(Color.BLACK)));
 		ImGui.sameLine();
 		add(graphics, ImIcons.STACKS, "f-ca", "Focused Chromatic Aberration", () -> new FocusedChromaticAberrationEffect.Inst(KNumber.of(0.1D), FocusPoint.Screen.CENTER));
 		ImGui.sameLine();

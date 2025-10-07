@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.core.VLParticleEngine;
@@ -13,6 +14,7 @@ import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -24,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayDeque;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.function.Function;
@@ -61,6 +64,18 @@ public abstract class ParticleEngineMixin implements VLParticleEngine {
 	@Inject(method = "renderParticleType(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/particle/ParticleRenderType;Ljava/util/Queue;Lnet/minecraft/client/renderer/culling/Frustum;)V", at = @At("RETURN"))
 	private static void vl$renderParticleTypePost(Camera camera, float partialTick, MultiBufferSource.BufferSource bufferSource, ParticleRenderType particleType, Queue<Particle> particles, Frustum frustum, CallbackInfo ci) {
 		VidLibParticleRenderTypes.vl$renderParticleTypePost(camera, partialTick, bufferSource, particleType);
+	}
+
+	@ModifyExpressionValue(method = "loadParticleDescription", at = @At(value = "INVOKE", target = "Ljava/util/Map;containsKey(Ljava/lang/Object;)Z"))
+	private static boolean vl$loadParticleDescription(boolean original) {
+		return true;
+	}
+
+	@Redirect(method = "lambda$reload$6", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine$MutableSpriteSet;rebind(Ljava/util/List;)V"))
+	private static void vl$rebind(ParticleEngine.MutableSpriteSet instance, List<TextureAtlasSprite> sprites) {
+		if (instance != null) {
+			instance.rebind(sprites);
+		}
 	}
 
 	@Override

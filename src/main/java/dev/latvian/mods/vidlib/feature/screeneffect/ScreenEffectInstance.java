@@ -20,7 +20,8 @@ public abstract class ScreenEffectInstance {
 	public void update(KNumberContext ctx) {
 	}
 
-	public abstract void upload(IntArrayList arr, float delta);
+	public void upload(IntArrayList arr, float delta) {
+	}
 
 	public void imgui(ImGraphics graphics) {
 	}
