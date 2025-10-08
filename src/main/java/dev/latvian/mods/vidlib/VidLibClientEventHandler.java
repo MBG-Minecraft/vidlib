@@ -301,10 +301,10 @@ public class VidLibClientEventHandler {
 	@SubscribeEvent
 	public static void keyInput(InputEvent.Key event) {
 		if (event.getAction() == GLFW.GLFW_PRESS && VidLibKeys.adminPanelKeyMapping.matches(event.getKey(), event.getScanCode()) && VidLibKeys.adminPanelKeyMapping.getKeyModifier().isActive(KeyConflictContext.UNIVERSAL)) {
-			var mc = Minecraft.getInstance();
-			boolean adminPanel = !VidLibClientOptions.getAdminPanel();
-			VidLibClientOptions.ADMIN_PANEL.set(adminPanel);
-			mc.options.save();
+			// var mc = Minecraft.getInstance();
+			// boolean adminPanel = !VidLibClientOptions.getAdminPanel();
+			// VidLibClientOptions.ADMIN_PANEL.set(adminPanel);
+			// mc.options.save();
 		}
 	}
 

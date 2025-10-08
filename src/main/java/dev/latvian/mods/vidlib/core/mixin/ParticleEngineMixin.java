@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.klib.util.Cast;
+import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.core.VLParticleEngine;
 import dev.latvian.mods.vidlib.feature.particle.VidLibParticleRenderTypes;
 import net.minecraft.client.Camera;
@@ -44,6 +45,8 @@ public abstract class ParticleEngineMixin implements VLParticleEngine {
 	@Final
 	private TextureAtlas textureAtlas;
 
+	private ResourceLocation lastSpriteSetId;
+
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Map;computeIfAbsent(Ljava/lang/Object;Ljava/util/function/Function;)Ljava/lang/Object;"))
 	private <K, V> V vl$createQueue(Map<K, V> instance, K key, Function<? super K, ? extends V> factory) {
 		return instance.computeIfAbsent(key, k -> Cast.to(new ArrayDeque<>(16384)));
@@ -71,10 +74,21 @@ public abstract class ParticleEngineMixin implements VLParticleEngine {
 		return true;
 	}
 
+	@ModifyExpressionValue(method = "lambda$reload$6", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine$1ParticleDefinition;id()Lnet/minecraft/resources/ResourceLocation;"))
+	private ResourceLocation vl$getLastId(ResourceLocation id) {
+		lastSpriteSetId = id;
+		return id;
+	}
+
 	@Redirect(method = "lambda$reload$6", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine$MutableSpriteSet;rebind(Ljava/util/List;)V"))
-	private static void vl$rebind(ParticleEngine.MutableSpriteSet instance, List<TextureAtlasSprite> sprites) {
+	private void vl$rebind(ParticleEngine.MutableSpriteSet instance, List<TextureAtlasSprite> sprites) {
 		if (instance != null) {
 			instance.rebind(sprites);
+		} else {
+			var set = new ParticleEngine.MutableSpriteSet();
+			set.rebind(sprites);
+			spriteSets.put(lastSpriteSetId, set);
+			VidLib.LOGGER.info("ParticleType-less SpriteSet " + lastSpriteSetId + " found");
 		}
 	}
 

@@ -46,12 +46,10 @@ public record Visuals(List<CubeVisual> cubes, List<LineVisual> lines, List<Resol
 		outlineShapes.addAll(from.outlineShapes);
 	}
 
-	@Deprecated
 	public void addCube(Vec3 pos, VoxelShapeBox shape, Color color, Color lineColor, Rotation rotation) {
 		cubes.add(new CubeVisual(pos, shape, color, lineColor, rotation));
 	}
 
-	@Deprecated
 	public void addCube(Vec3 pos) {
 		addCube(pos, VoxelShapeBox.CENTERED, Color.CYAN, Color.WHITE, Rotation.NONE);
 	}

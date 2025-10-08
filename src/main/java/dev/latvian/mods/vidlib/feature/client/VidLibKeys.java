@@ -64,5 +64,11 @@ public class VidLibKeys {
 				mc.runClientCommand(((ArrayListDeque<String>) mc.commandHistory().history()).getLast());
 			}
 		}
+
+		while (adminPanelKeyMapping.consumeClick()) {
+			boolean adminPanel = !VidLibClientOptions.getAdminPanel();
+			VidLibClientOptions.ADMIN_PANEL.set(adminPanel);
+			mc.options.save();
+		}
 	}
 }
