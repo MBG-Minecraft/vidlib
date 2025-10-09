@@ -2,7 +2,9 @@ package dev.latvian.mods.vidlib.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.InputStream;
@@ -49,5 +51,42 @@ public interface JsonUtils {
 		var writer = new StringWriter();
 		write(writer, json, true);
 		return writer.toString();
+	}
+
+	static JsonElement sort(JsonElement json) {
+		if (json instanceof JsonObject o) {
+			if (o.isEmpty()) {
+				return o;
+			}
+
+			var t = o.get("type");
+			var sorted = new JsonObject();
+
+			if (t != null) {
+				sorted.add("type", sort(t));
+			}
+
+			for (var entry : o.entrySet()) {
+				if (!entry.getKey().equals("type")) {
+					sorted.add(entry.getKey(), sort(entry.getValue()));
+				}
+			}
+
+			return sorted;
+		} else if (json instanceof JsonArray a) {
+			if (a.isEmpty()) {
+				return a;
+			}
+
+			var sorted = new JsonArray();
+
+			for (var e : a) {
+				sorted.add(sort(e));
+			}
+
+			return sorted;
+		} else {
+			return json;
+		}
 	}
 }

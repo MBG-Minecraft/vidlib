@@ -81,7 +81,7 @@ public class TextProp extends Prop {
 
 	@Override
 	public boolean isVisible(double x, double y, double z, FrustumCheck frustum) {
-		return cachedData == null || cachedData.lines.length > 0 && frustum.isVisible(cachedData.box.move(x, y, z));
+		return cachedData == null || cachedData.lines.length > 0 && frustum.isVisible(x, y, z, cachedData.box);
 	}
 
 	@Override

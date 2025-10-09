@@ -60,6 +60,10 @@ public class CutsceneStepImBuilder implements ImBuilder<CutsceneStep> {
 
 	@Override
 	public void set(CutsceneStep value) {
+		if (value == null) {
+			return;
+		}
+
 		start.set(value.start());
 		length.set(value.length());
 		overrideOrigin.set(value.origin().isPresent());
@@ -78,8 +82,14 @@ public class CutsceneStepImBuilder implements ImBuilder<CutsceneStep> {
 		shader.set(value.shader().map(ResourceLocation::toString).orElse(""));
 		fadeEnabled.set(value.fade().isPresent());
 		fade.set(value.fade().orElse(Fade.DEFAULT));
-		// sounds.clear();
-		// sounds.addAll(value.sounds());
+		sounds.clear();
+
+		for (var s : value.sounds()) {
+			var b = new PositionedSoundDataImBuilder();
+			b.set(s);
+			sounds.add(b);
+		}
+
 		snapOrigin.set(value.snap().origin());
 		snapTarget.set(value.snap().target());
 		snapFov.set(value.snap().fov());
@@ -254,7 +264,7 @@ public class CutsceneStepImBuilder implements ImBuilder<CutsceneStep> {
 		return update;
 	}
 
-	public boolean areSoundsValid() {
+	private boolean areSoundsValid() {
 		if (sounds.isEmpty()) {
 			return true;
 		}
@@ -271,14 +281,13 @@ public class CutsceneStepImBuilder implements ImBuilder<CutsceneStep> {
 	@Override
 	public boolean isValid() {
 		return length.isValid()
-			&& origin.isValid()
-			&& target.isValid()
-			&& fovModifier.isValid()
-			&& status.isValid()
-			&& topBar.isValid()
-			&& bottomBar.isValid()
+			&& (!overrideOrigin.get() || origin.isValid())
+			&& (!overrideTarget.get() || target.isValid())
+			&& (!overrideFovModifier.get() || fovModifier.isValid())
+			&& (!overrideStatus.get() || status.isValid())
+			&& (!barsEnabled.get() || ((!overrideTopBar.get() || topBar.isValid()) && (!overrideBottomBar.get() || bottomBar.isValid())))
 			&& (shader.isEmpty() || ResourceLocation.read(shader.get()).isSuccess())
-			&& fade.isValid()
+			&& (!fadeEnabled.get() || fade.isValid())
 			&& areSoundsValid();
 	}
 

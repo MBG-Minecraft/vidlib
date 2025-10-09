@@ -14,6 +14,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import imgui.ImGui;
+import imgui.flag.ImGuiTableFlags;
 import imgui.type.ImFloat;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.Vec3;
@@ -59,10 +60,20 @@ public record InterpolatedKVector(Easing easing, float start, float end, KVector
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
 			update = update.or(easing.imguiKey(graphics, "Easing", "easing"));
-			update = update.or(from.imguiKey(graphics, "From", "from"));
-			update = update.or(to.imguiKey(graphics, "To", "to"));
 
+
+			if (ImGui.beginTable("###table", 2, ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.Borders)) {
+				ImGui.tableNextRow();
+				ImGui.tableNextColumn();
+				update = update.or(from.imguiKey(graphics, "From", "from"));
+				ImGui.tableNextColumn();
+				update = update.or(to.imguiKey(graphics, "To", "to"));
+				ImGui.endTable();
+			}
+
+			ImGui.alignTextToFramePadding();
 			graphics.redTextIf("Start / End", start.get() < 0F || start.get() > 1F || end.get() < 0F || end.get() > 1F || start.get() >= end.get());
+			ImGui.sameLine();
 			ImGui.dragFloatRange2("###range", start.getData(), end.getData(), 0.01F, 0F, 1F);
 			update = update.orItemEdit();
 

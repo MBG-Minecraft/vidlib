@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.cutscene;
 
 import dev.latvian.mods.vidlib.feature.imgui.AdminPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 import imgui.flag.ImGuiTabBarFlags;
@@ -27,11 +28,25 @@ public class CutsceneBuilderPanel extends AdminPanel {
 			return;
 		}
 
+		ImGui.pushItemWidth(-1F);
+
 		if (ImGui.beginTabBar("###tabs", ImGuiTabBarFlags.AutoSelectNewTabs | ImGuiTabBarFlags.FittingPolicyScroll)) {
 			for (int i = 0; i < cutscenes.size(); i++) {
-				if (ImGui.beginTabItem("Cutscene #" + (i + 1) + "###" + i)) {
+				ImGuiUtils.BOOLEAN.set(true);
+				boolean remove = false;
+
+				if (ImGui.beginTabItem("Cutscene #" + (i + 1) + "###" + i, ImGuiUtils.BOOLEAN)) {
+					if (!ImGuiUtils.BOOLEAN.get()) {
+						remove = true;
+					}
+
 					cutscenes.get(i).imgui(graphics);
 					ImGui.endTabItem();
+				}
+
+				if (remove) {
+					cutscenes.remove(i);
+					i--;
 				}
 			}
 
@@ -45,5 +60,7 @@ public class CutsceneBuilderPanel extends AdminPanel {
 
 			ImGui.endTabBar();
 		}
+
+		ImGui.popItemWidth();
 	}
 }
