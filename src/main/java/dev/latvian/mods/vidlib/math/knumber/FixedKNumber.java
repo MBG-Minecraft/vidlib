@@ -7,20 +7,24 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImNumberType;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
+import dev.latvian.mods.vidlib.feature.imgui.node.NodePin;
+import dev.latvian.mods.vidlib.feature.imgui.node.NodePinType;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import imgui.ImGui;
 import imgui.type.ImDouble;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.util.Mth;
 
-public record FixedKNumber(Double number) implements KNumber, ImBuilderWrapper.BuilderSupplier {
+import java.util.List;
+
+public record FixedKNumber(Double number) implements KNumber, ImBuilderWithHolder.Factory {
 	public static final SimpleRegistryType<FixedKNumber> TYPE = SimpleRegistryType.dynamic("fixed", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.DOUBLE.fieldOf("number").forGetter(FixedKNumber::number)
 	).apply(instance, KNumber::of)), ByteBufCodecs.DOUBLE.map(KNumber::of, FixedKNumber::number));
 
 	public static class Builder implements KNumberImBuilder {
-		public static final ImBuilderHolder<KNumber> TYPE = new ImBuilderHolder<>("Number", Builder::new, true);
+		public static final ImBuilderHolder<KNumber> TYPE = ImBuilderHolder.ofDefault("Number", Builder::new);
 
 		public final ImDouble number;
 
@@ -28,8 +32,9 @@ public record FixedKNumber(Double number) implements KNumber, ImBuilderWrapper.B
 			this.number = new ImDouble();
 		}
 
-		public Builder(double value) {
-			this.number = new ImDouble(value);
+		@Override
+		public ImBuilderHolder<?> holder() {
+			return TYPE;
 		}
 
 		@Override
@@ -67,6 +72,12 @@ public record FixedKNumber(Double number) implements KNumber, ImBuilderWrapper.B
 		}
 
 		@Override
+		public ImUpdate nodeImgui(ImGraphics graphics) {
+			ImGui.setNextItemWidth(130F);
+			return imgui(graphics);
+		}
+
+		@Override
 		public boolean isValid() {
 			return !Double.isNaN(number.get());
 		}
@@ -74,6 +85,11 @@ public record FixedKNumber(Double number) implements KNumber, ImBuilderWrapper.B
 		@Override
 		public KNumber build() {
 			return KNumber.of(number.get());
+		}
+
+		@Override
+		public List<NodePin> getNodePins() {
+			return NodePinType.NUMBER.singleOutput;
 		}
 	}
 
@@ -111,7 +127,7 @@ public record FixedKNumber(Double number) implements KNumber, ImBuilderWrapper.B
 	}
 
 	@Override
-	public ImBuilderHolder<?> getImBuilderHolder() {
-		return Builder.TYPE;
+	public ImBuilderWithHolder<?> createImBuilder() {
+		return new Builder();
 	}
 }

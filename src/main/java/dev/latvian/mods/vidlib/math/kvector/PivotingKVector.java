@@ -2,23 +2,26 @@ package dev.latvian.mods.vidlib.math.kvector;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
+import dev.latvian.mods.vidlib.math.knumber.LiteralKNumber;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public record PivotingKVector(KVector target, KNumber distance, Easing easing, KNumber startAngle, KNumber addedAngle, KNumber height) implements KVector, ImBuilderWrapper.BuilderSupplier {
+public record PivotingKVector(KNumber progress, KVector target, KNumber distance, Easing easing, KNumber startAngle, KNumber addedAngle, KNumber height) implements KVector, ImBuilderWithHolder.Factory {
 	public static final SimpleRegistryType<PivotingKVector> TYPE = SimpleRegistryType.dynamic("pivoting", RecordCodecBuilder.mapCodec(instance -> instance.group(
+		KNumber.CODEC.optionalFieldOf("progress", LiteralKNumber.PROGRESS).forGetter(PivotingKVector::progress),
 		KVector.CODEC.optionalFieldOf("target", LiteralKVector.SOURCE).forGetter(PivotingKVector::target),
 		KNumber.CODEC.fieldOf("distance").forGetter(PivotingKVector::distance),
 		Easing.CODEC.optionalFieldOf("easing", Easing.LINEAR).forGetter(PivotingKVector::easing),
@@ -26,6 +29,7 @@ public record PivotingKVector(KVector target, KNumber distance, Easing easing, K
 		KNumber.CODEC.optionalFieldOf("added_angle", KNumber.ZERO).forGetter(PivotingKVector::addedAngle),
 		KNumber.CODEC.optionalFieldOf("height", KNumber.ZERO).forGetter(PivotingKVector::height)
 	).apply(instance, PivotingKVector::new)), CompositeStreamCodec.of(
+		KLibStreamCodecs.optional(KNumber.STREAM_CODEC, LiteralKNumber.PROGRESS), PivotingKVector::progress,
 		KVector.STREAM_CODEC, PivotingKVector::target,
 		KNumber.STREAM_CODEC, PivotingKVector::distance,
 		Easing.STREAM_CODEC, PivotingKVector::easing,
@@ -36,8 +40,9 @@ public record PivotingKVector(KVector target, KNumber distance, Easing easing, K
 	));
 
 	public static class Builder implements KVectorImBuilder {
-		public static final ImBuilderHolder<KVector> TYPE = new ImBuilderHolder<>("Pivoting", Builder::new);
+		public static final ImBuilderHolder<KVector> TYPE = ImBuilderHolder.of("Pivoting", Builder::new);
 
+		public final ImBuilder<KNumber> progress = KNumberImBuilder.create(LiteralKNumber.PROGRESS);
 		public final ImBuilder<KVector> target = KVectorImBuilder.create();
 		public final ImBuilder<KNumber> distance = KNumberImBuilder.create(5D);
 		public final ImBuilder<Easing> easing = EnumImBuilder.EASING_TYPE.get();
@@ -46,8 +51,14 @@ public record PivotingKVector(KVector target, KNumber distance, Easing easing, K
 		public final ImBuilder<KNumber> height = KNumberImBuilder.create(0D);
 
 		@Override
+		public ImBuilderHolder<?> holder() {
+			return TYPE;
+		}
+
+		@Override
 		public void set(KVector value) {
 			if (value instanceof PivotingKVector v) {
+				progress.set(v.progress);
 				target.set(v.target);
 				distance.set(v.distance);
 				easing.set(v.easing);
@@ -60,6 +71,7 @@ public record PivotingKVector(KVector target, KNumber distance, Easing easing, K
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
+			update = update.or(progress.imguiKey(graphics, "Progress", "progress"));
 			update = update.or(target.imguiKey(graphics, "Target", "target"));
 			update = update.or(distance.imguiKey(graphics, "Distance", "distance"));
 			update = update.or(easing.imguiKey(graphics, "Easing", "easing"));
@@ -71,12 +83,12 @@ public record PivotingKVector(KVector target, KNumber distance, Easing easing, K
 
 		@Override
 		public boolean isValid() {
-			return target.isValid() && distance.isValid() && easing.isValid() && startAngle.isValid() && addedAngle.isValid() && height.isValid();
+			return progress.isValid() && target.isValid() && distance.isValid() && easing.isValid() && startAngle.isValid() && addedAngle.isValid() && height.isValid();
 		}
 
 		@Override
 		public KVector build() {
-			return new PivotingKVector(target.build(), distance.build(), easing.build(), startAngle.build(), addedAngle.build(), height.build());
+			return new PivotingKVector(progress.build(), target.build(), distance.build(), easing.build(), startAngle.build(), addedAngle.build(), height.build());
 		}
 	}
 
@@ -88,6 +100,12 @@ public record PivotingKVector(KVector target, KNumber distance, Easing easing, K
 	@Override
 	@Nullable
 	public Vec3 get(KNumberContext ctx) {
+		var progress = this.progress.getOrNaN(ctx);
+
+		if (Double.isNaN(progress)) {
+			return null;
+		}
+
 		Double start = startAngle.get(ctx);
 
 		if (start == null) {
@@ -100,14 +118,14 @@ public record PivotingKVector(KVector target, KNumber distance, Easing easing, K
 			return null;
 		}
 
-		double angle = Math.toRadians(Mth.rotLerp(easing.ease(ctx.progress), start, start + addedAngle.getOr(ctx, 0D)));
+		double angle = Math.toRadians(Mth.rotLerp(easing.ease(progress), start, start + addedAngle.getOr(ctx, 0D)));
 
 		var pos = target.get(ctx);
 		return pos == null ? null : pos.add(Math.cos(angle) * dist, height.getOr(ctx, 0D), Math.sin(angle) * dist);
 	}
 
 	@Override
-	public ImBuilderHolder<?> getImBuilderHolder() {
-		return Builder.TYPE;
+	public ImBuilderWithHolder<?> createImBuilder() {
+		return new Builder();
 	}
 }

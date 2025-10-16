@@ -7,7 +7,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
@@ -16,7 +16,7 @@ import imgui.ImGui;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public record ScalarKVector(KNumber number) implements KVector, ImBuilderWrapper.BuilderSupplier {
+public record ScalarKVector(KNumber number) implements KVector, ImBuilderWithHolder.Factory {
 	public static final SimpleRegistryType<ScalarKVector> TYPE = SimpleRegistryType.dynamic("scalar", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.fieldOf("number").forGetter(ScalarKVector::number)
 	).apply(instance, ScalarKVector::new)), CompositeStreamCodec.of(
@@ -25,9 +25,14 @@ public record ScalarKVector(KNumber number) implements KVector, ImBuilderWrapper
 	));
 
 	public static class Builder implements KVectorImBuilder {
-		public static final ImBuilderHolder<KVector> TYPE = new ImBuilderHolder<>("Scalar (n, n, n)", Builder::new);
+		public static final ImBuilderHolder<KVector> TYPE = ImBuilderHolder.of("Scalar (n, n, n)", Builder::new);
 
 		public final ImBuilder<KNumber> number = KNumberImBuilder.create(0D);
+
+		@Override
+		public ImBuilderHolder<?> holder() {
+			return TYPE;
+		}
 
 		@Override
 		public void set(KVector value) {
@@ -76,7 +81,7 @@ public record ScalarKVector(KNumber number) implements KVector, ImBuilderWrapper
 	}
 
 	@Override
-	public ImBuilderHolder<?> getImBuilderHolder() {
-		return Builder.TYPE;
+	public ImBuilderWithHolder<?> createImBuilder() {
+		return new Builder();
 	}
 }

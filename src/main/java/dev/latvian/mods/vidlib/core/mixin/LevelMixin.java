@@ -63,6 +63,8 @@ public abstract class LevelMixin implements VLLevel {
 				vl$mainBoss = l;
 			}
 		}
+
+		getGlobalContext().updateLevelData(vl$level());
 	}
 
 	@Override

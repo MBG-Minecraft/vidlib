@@ -4,7 +4,6 @@ import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.ImGui;
-import net.minecraft.util.StringRepresentable;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,10 +12,6 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class ImBuilderWrapper<T> implements ImBuilder<T> {
-	public interface BuilderSupplier {
-		ImBuilderHolder<?> getImBuilderHolder();
-	}
-
 	public static class Factory<T> {
 		private final Supplier<? extends ImBuilderEvent<T>> event;
 		private List<ImBuilderHolder<T>> options;
@@ -35,9 +30,19 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 
 			return options;
 		}
+
+		public ImBuilder<T> create(@Nullable T defaultValue) {
+			var builder = new ImBuilderWrapper<>(this);
+
+			if (defaultValue != null) {
+				builder.set(defaultValue);
+			}
+
+			return builder;
+		}
 	}
 
-	private static class CachedBuilder<T> implements StringRepresentable {
+	private static class CachedBuilder<T> {
 		private final ImBuilderHolder<T> holder;
 		private ImBuilder<? extends T> builder;
 
@@ -47,26 +52,20 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 
 		public ImBuilder<? extends T> get() {
 			if (builder == null) {
-				builder = holder.get();
+				builder = holder.type().get();
 			}
 
 			return builder;
-		}
-
-		@Override
-		public String getSerializedName() {
-			return holder.name();
 		}
 	}
 
 	private final Factory<T> factory;
 	private List<CachedBuilder<T>> options;
-	private final CachedBuilder<T>[] selectedBuilder;
-	public boolean deleted = false;
+	private ImBuilder<? extends T> selectedBuilder;
 
 	public ImBuilderWrapper(Factory<T> factory) {
 		this.factory = factory;
-		this.selectedBuilder = new CachedBuilder[1];
+		this.selectedBuilder = null;
 	}
 
 	private List<CachedBuilder<T>> getOptions() {
@@ -74,14 +73,13 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 			var originalOptions = factory.getOptions();
 
 			options = new ArrayList<>(originalOptions.size());
-			selectedBuilder[0] = null;
 
 			for (var originalOption : originalOptions) {
 				var option = new CachedBuilder<>(originalOption);
 				options.add(option);
 
-				if (option.holder.isDefault()) {
-					selectedBuilder[0] = option;
+				if (selectedBuilder == null && option.holder.isDefault()) {
+					selectedBuilder = option.get();
 				}
 			}
 		}
@@ -89,69 +87,43 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 		return options;
 	}
 
-	public boolean selectUnit(T value) {
+	@Override
+	public void set(T value) {
+		selectedBuilder = null;
+
+		if (value == null) {
+			return;
+		}
+
+		if (value instanceof ImBuilderWithHolder.Factory bf) {
+			selectedBuilder = Cast.to(bf.createImBuilder());
+			selectedBuilder.set(Cast.to(value));
+			return;
+		}
+
 		var options = getOptions();
 
 		for (var option : options) {
 			if (option.get() instanceof ImBuilder.Unit<?> unit && unit.value() == value) {
-				selectedBuilder[0] = option;
-				return true;
+				selectedBuilder = (ImBuilder<? extends T>) unit;
+				return;
 			}
 		}
-
-		return false;
-	}
-
-	@Override
-	public void set(T value) {
-		if (selectUnit(value)) {
-			return;
-		}
-
-		if (value instanceof BuilderSupplier s) {
-			var options = getOptions();
-			var holder = s.getImBuilderHolder();
-
-			for (var option : options) {
-				if (option.holder == holder) {
-					selectedBuilder[0] = option;
-					selectedBuilder[0].builder = (ImBuilder) holder.get();
-
-					try {
-						selectedBuilder[0].builder.set(Cast.to(value));
-					} catch (Throwable ex) {
-					}
-
-					return;
-				}
-			}
-		}
-
-		var builder = getBuilder();
-
-		if (builder != null) {
-			builder.set(Cast.to(value));
-		}
-	}
-
-	public ImBuilder<? extends T> getBuilder() {
-		return selectedBuilder[0] == null ? null : selectedBuilder[0].get();
 	}
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		deleted = false;
 		options = getOptions();
 
 		var update = ImUpdate.NONE;
 
-		if (ImGui.beginCombo("###select-builder", selectedBuilder[0] == null ? "Select..." : selectedBuilder[0].getSerializedName(), 0)) {
+		if (ImGui.beginCombo("###select-builder", selectedBuilder == null ? "Select..." : selectedBuilder.getDisplayName(), 0)) {
 			for (int i = 0; i < options.size(); i++) {
 				var option = options.get(i);
-				boolean isSelected = selectedBuilder[0] != null && selectedBuilder[0].holder.type() == option.holder.type();
+				boolean isSelected = selectedBuilder != null && option.holder.isSame(selectedBuilder);
 
-				if (ImGui.selectable(options.get(i).getSerializedName() + "###" + i, isSelected)) {
-					selectedBuilder[0] = option;
+				if (ImGui.selectable(options.get(i).holder.name() + "###" + i, isSelected)) {
+					selectedBuilder = option.get();
 					update = ImUpdate.FULL;
 				}
 
@@ -163,25 +135,21 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 			ImGui.endCombo();
 		}
 
-		var builder = getBuilder();
-
-		if (builder == null) {
+		if (selectedBuilder == null) {
 			return ImUpdate.NONE;
 		}
 
-		return update.or(builder.imgui(graphics));
+		return update.or(selectedBuilder.imgui(graphics));
 	}
 
 	@Override
 	public boolean isValid() {
-		var builder = getBuilder();
-		return builder != null && builder.isValid();
+		return selectedBuilder != null && selectedBuilder.isValid();
 	}
 
 	@Override
 	@Nullable
 	public T build() {
-		var builder = getBuilder();
-		return builder == null ? null : builder.build();
+		return selectedBuilder == null ? null : selectedBuilder.build();
 	}
 }

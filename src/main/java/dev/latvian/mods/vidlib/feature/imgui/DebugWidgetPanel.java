@@ -14,16 +14,17 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ParticleOptionsImB
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundDataImBuilder;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
+import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
+import dev.latvian.mods.vidlib.math.knumber.KNumberNodeImBuilder;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 import imgui.ImGui;
-import imgui.ImGuiViewport;
 import imgui.ImVec2;
 import imgui.ImVec4;
-import imgui.extension.imnodes.ImNodes;
-import imgui.extension.imnodes.flag.ImNodesMiniMapLocation;
 import imgui.extension.implot.ImPlot;
+import imgui.extension.implot.flag.ImPlotAxisFlags;
+import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.flag.ImGuiColorEditFlags;
 import imgui.flag.ImGuiDir;
 import imgui.flag.ImGuiWindowFlags;
@@ -37,16 +38,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.List;
-
 public class DebugWidgetPanel extends AdminPanel {
 	public static final DebugWidgetPanel INSTANCE = new DebugWidgetPanel();
 
 	public final ImInt intData = new ImInt();
+	public final ImInt intData2 = new ImInt();
 	public final int[] int2Data = new int[2];
 	public final int[] int3Data = new int[3];
 	public final int[] int4Data = new int[4];
 	public final ImFloat floatData = new ImFloat();
+	public final ImFloat floatData2 = new ImFloat();
 	public final float[] float2Data = new float[2];
 	public final float[] float3Data = new float[3];
 	public final float[] float4Data = new float[4];
@@ -70,6 +71,7 @@ public class DebugWidgetPanel extends AdminPanel {
 	public final ImBuilder<ParticleOptions> particleBuilder = ParticleOptionsImBuilder.create();
 	public final GameProfileImBuilder profileBuilder = new GameProfileImBuilder();
 	public final TransformationListImBuilder transformationListBuilder = new TransformationListImBuilder();
+	public final ImBuilder<KNumber> numberBuilder2 = new KNumberNodeImBuilder();
 
 	private DebugWidgetPanel() {
 		super("widget-debug", "Widget Debug");
@@ -80,6 +82,8 @@ public class DebugWidgetPanel extends AdminPanel {
 	@Override
 	public void content(ImGraphics graphics) {
 		var mc = Minecraft.getInstance();
+		var ctx = mc.level == null ? new KNumberContext() : mc.level.getGlobalContext().fork(null);
+		ctx.progress = 0.5D;
 
 		ImGui.pushItemWidth(-1F);
 
@@ -225,7 +229,11 @@ public class DebugWidgetPanel extends AdminPanel {
 		ImGui.separator();
 
 		ImGui.text("Int Slider 1");
-		ImGui.sliderInt("###int-slider-1", intData.getData(), 0, 100);
+		ImGui.sliderInt("###int-slider-1", intData.getData(), 0, 20);
+		ImGui.separator();
+
+		ImGui.text("Int Slider 1 (2)");
+		ImGui.sliderInt("###int-slider-1-2", intData2.getData(), 0, 20);
 		ImGui.separator();
 
 		ImGui.text("Int Slider 2");
@@ -240,8 +248,16 @@ public class DebugWidgetPanel extends AdminPanel {
 		ImGui.sliderInt4("###int-slider-4", int4Data, 0, 100);
 		ImGui.separator();
 
+		ImGui.text("Range Int Slider 2");
+		ImGuiUtils.rangeSliderInt("###range-int-slider-2", intData, intData2, 0, 20, null);
+		ImGui.separator();
+
 		ImGui.text("Float Slider 1");
 		ImGui.sliderFloat("###float-slider-1", floatData.getData(), 0F, 1F);
+		ImGui.separator();
+
+		ImGui.text("Float Slider 1 (2)");
+		ImGui.sliderFloat("###float-slider-1-2", floatData2.getData(), 0F, 1F);
 		ImGui.separator();
 
 		ImGui.text("Float Slider 2");
@@ -254,6 +270,10 @@ public class DebugWidgetPanel extends AdminPanel {
 
 		ImGui.text("Float Slider 4");
 		ImGui.sliderFloat4("###float-slider-4", float4Data, 0F, 1F);
+		ImGui.separator();
+
+		ImGui.text("Range Float Slider 2");
+		ImGuiUtils.rangeSliderFloat("###range-float-slider-2", floatData, floatData2, 0F, 1F, null);
 		ImGui.separator();
 
 		ImGui.text("Text Input");
@@ -329,8 +349,10 @@ public class DebugWidgetPanel extends AdminPanel {
 		gradient2.imguiKey(graphics, "Gradient 2", "gradient-2");
 		ImGui.separator();
 		numberBuilder.imguiKey(graphics, "KNumber", "knumber");
+		ImGui.text("Result: " + (numberBuilder.isValid() ? String.valueOf(numberBuilder.build().get(ctx)) : "Invalid"));
 		ImGui.separator();
 		vectorBuilder.imguiKey(graphics, "KVector", "kvector");
+		ImGui.text("Result: " + (vectorBuilder.isValid() ? String.valueOf(vectorBuilder.build().get(ctx)) : "Invalid"));
 
 		ImGui.separator();
 		entityFilterBuilder.imguiKey(graphics, "Entity Filter", "entity-filter");
@@ -345,10 +367,15 @@ public class DebugWidgetPanel extends AdminPanel {
 		ImGui.separator();
 		transformationListBuilder.imguiKey(graphics, "Transformation List", "transformation-list");
 		ImGui.separator();
+		numberBuilder2.imguiKey(graphics, "KNumber Node Editor", "knumber-node-editor");
+		ImGui.text("Result: " + (numberBuilder2.isValid() ? String.valueOf(numberBuilder2.build().get(ctx)) : "Invalid"));
+		ImGui.separator();
 
 		ImGui.text("Line Plot");
 
-		if (ImPlot.beginPlot("Line Plot###line-plot")) {
+		// ImPlot.fitNextPlotAxes();
+
+		if (ImPlot.beginPlot("Line Plot###line-plot", "X", "Sin", new ImVec2(-1F, 200F), ImPlotFlags.CanvasOnly, ImPlotAxisFlags.NoLabel, ImPlotAxisFlags.NoLabel)) {
 			var xdata = new Double[100];
 			var ydata = new Double[100];
 
@@ -377,99 +404,8 @@ public class DebugWidgetPanel extends AdminPanel {
 			ImGui.endPopup();
 		}
 
-		if (ImGui.beginPopupModal("Modal###widget-debug-modal", new ImBoolean(true), ImGuiWindowFlags.AlwaysAutoResize)) {
+		if (ImGui.beginPopupModal("Modal###widget-debug-modal", new ImBoolean(true), ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.AlwaysAutoResize)) {
 			ImGui.text("Hi");
-			ImGui.endPopup();
-		}
-
-		ImGuiViewport viewport = ImGui.getMainViewport();
-		ImGui.setNextWindowPos(viewport.getWorkPos().x, viewport.getWorkPos().y);
-		ImGui.setNextWindowSize(viewport.getWorkSizeX(), viewport.getWorkSizeY());
-
-		if (ImGui.beginPopupModal("Node Editor###widget-debug-node-modal", new ImBoolean(true), ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.MenuBar)) {
-			graphics.hideMainMenuBar();
-
-			MenuItem.root((g, list) -> {
-				list.add(MenuItem.menu(ImIcons.ADD, "Add", g1 -> List.of(
-					MenuItem.item("Number", g2 -> {
-					})
-				)));
-
-				list.add(MenuItem.menu(ImIcons.EDIT, "Edit", g1 -> List.of(
-					MenuItem.item(ImIcons.DELETE, "Delete", g2 -> {
-					}),
-					MenuItem.item(ImIcons.DELETE, "Delete All", g2 -> {
-					})
-				)));
-
-				list.add(MenuItem.text(ImIcons.WARNING, "").withTooltip(ImText.error("Root node missing!")));
-			}).buildRoot(graphics, false);
-
-			ImNodes.beginNodeEditor();
-
-			ImNodes.beginNode(1);
-			ImNodes.beginNodeTitleBar();
-			ImGui.text("Root Node");
-			ImNodes.endNodeTitleBar();
-
-			ImNodes.beginInputAttribute(1);
-			ImGui.textUnformatted("Left Side");
-			ImNodes.endInputAttribute();
-
-			ImGui.sameLine();
-
-			graphics.pushStack();
-			graphics.setNodesPin(ImColorVariant.YELLOW);
-			ImNodes.beginOutputAttribute(2);
-
-			ImGui.indent(200F - ImGui.calcTextSize("Left Side").x - ImGui.calcTextSize("Right Side").x);
-
-			ImGui.textUnformatted("Right Side");
-			ImNodes.endInputAttribute();
-			graphics.popStack();
-
-			ImNodes.beginStaticAttribute(10);
-			ImGui.setNextItemWidth(120F);
-			ImGui.inputText("###node-a-input", stringData);
-			ImNodes.endStaticAttribute();
-
-			ImNodes.endNode();
-
-			ImNodes.beginNode(2);
-			ImNodes.beginNodeTitleBar();
-			ImGui.text("Node B");
-			ImNodes.endNodeTitleBar();
-
-			ImGui.setNextItemWidth(200F);
-			ImGui.inputDouble("###node-b-input", doubleData);
-			ImNodes.beginInputAttribute(3);
-			ImGui.text("-> In");
-			ImNodes.endInputAttribute();
-
-			ImGui.sameLine();
-
-			ImNodes.beginOutputAttribute(4);
-			ImGui.text("Out ->");
-			ImNodes.endInputAttribute();
-
-			ImNodes.endNode();
-
-			ImNodes.link(1, 2, 3);
-
-			ImNodes.miniMap(0.1F, ImNodesMiniMapLocation.TopRight);
-			ImNodes.endNodeEditor();
-
-			var start = new ImInt();
-			var end = new ImInt();
-
-			if (ImNodes.isLinkCreated(start, end)) {
-				System.out.println("Hi " + start.get() + " " + end.get());
-			}
-
-			if (ImNodes.isLinkDestroyed(start)) {
-				System.out.println("Bye " + start.get());
-			}
-
 			ImGui.endPopup();
 		}
 	}

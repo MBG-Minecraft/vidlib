@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.BooleanImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.FloatImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
 import dev.latvian.mods.vidlib.feature.imgui.builder.IntImBuilder;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
@@ -41,5 +42,10 @@ public record PropData<P extends Prop, V>(Class<P> origin, String key, DataType<
 
 	public PropData<P, V> required() {
 		return new PropData<>(origin, key, type, true, getter, setter, imBuilder);
+	}
+
+	@Override
+	public @NotNull String toString() {
+		return key;
 	}
 }

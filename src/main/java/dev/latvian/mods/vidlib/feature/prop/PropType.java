@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -39,6 +40,7 @@ public record PropType<P extends Prop>(
 	List<PropData<?, ?>> unsortedData,
 	List<PropDataEntry> data,
 	Map<PropData<?, ?>, PropDataEntry> reverseData,
+	Set<PropPacketType<?, ?>> unsortedPackets,
 	List<PropPacketEntry> packets,
 	Map<PropPacketType<?, ?>, PropPacketEntry> reversePackets,
 	String translationKey
@@ -46,12 +48,6 @@ public record PropType<P extends Prop>(
 	@FunctionalInterface
 	public interface Factory<P extends Prop> {
 		P create(PropContext<?> ctx);
-	}
-
-	public record PropDataEntry(int index, PropData<?, ?> data) {
-	}
-
-	public record PropPacketEntry(int index, PropPacketType<?, ?> packet) {
 	}
 
 	public static final Lazy<Map<ResourceLocation, PropType<?>>> ALL = Lazy.map(map -> {
@@ -73,11 +69,11 @@ public record PropType<P extends Prop>(
 		for (var data : info) {
 			if (data instanceof PropType<?> type) {
 				for (var entry : type.data) {
-					dataMap.put(entry.data.key(), entry.data);
+					dataMap.put(entry.data().key(), entry.data());
 				}
 
 				for (var entry : type.packets) {
-					packetSet.add(entry.packet);
+					packetSet.add(entry.packet());
 				}
 			} else if (data instanceof PropData<?, ?> propData) {
 				dataMap.put(propData.key(), propData);
@@ -99,17 +95,17 @@ public record PropType<P extends Prop>(
 
 		for (int i = 0; i < sortedDataList.size(); i++) {
 			var p = new PropDataEntry(i, sortedDataList.get(i));
-			reverseData.put(p.data, p);
+			reverseData.put(p.data(), p);
 			data.add(p);
 		}
 
 		for (int i = 0; i < sortedPacketList.size(); i++) {
 			var p = new PropPacketEntry(i, sortedPacketList.get(i));
-			reversePackets.put(p.packet, p);
+			reversePackets.put(p.packet(), p);
 			packets.add(p);
 		}
 
-		return new PropType<>(id, factory, unsortedData, List.copyOf(data), Collections.unmodifiableMap(reverseData), List.copyOf(packets), Collections.unmodifiableMap(reversePackets), Util.makeDescriptionId("prop", id));
+		return new PropType<>(id, factory, unsortedData, List.copyOf(data), Collections.unmodifiableMap(reverseData), Set.copyOf(packetSet), List.copyOf(packets), Collections.unmodifiableMap(reversePackets), Util.makeDescriptionId("prop", id));
 	}
 
 	public static final Codec<PropType<?>> CODEC = KLibCodecs.map(ALL, ID.CODEC, PropType::id);
@@ -149,7 +145,7 @@ public record PropType<P extends Prop>(
 
 	public int getDataIndex(PropData<?, ?> data) {
 		var r = reverseData.get(data);
-		return r == null ? -1 : r.index;
+		return r == null ? -1 : r.index();
 	}
 
 	@Nullable
@@ -159,7 +155,7 @@ public record PropType<P extends Prop>(
 
 	public int getPacketIndex(PropPacketType<?, ?> packet) {
 		var r = reversePackets.get(packet);
-		return r == null ? -1 : r.index;
+		return r == null ? -1 : r.index();
 	}
 
 	@Nullable
@@ -208,5 +204,13 @@ public record PropType<P extends Prop>(
 		} finally {
 			buf.release();
 		}
+	}
+
+	public void readPropUpdate(Prop prop, RegistryAccess registryAccess, byte[] update, boolean allData, BiConsumer<PropData<?, ?>, Object> setData) {
+		readUpdate(prop.id, registryAccess, update, allData, setData);
+	}
+
+	public void readReplayUpdate(long now, int propId, RegistryAccess registryAccess, byte[] update, boolean allData, BiConsumer<PropData<?, ?>, Object> setData) {
+		readUpdate(propId, registryAccess, update, allData, setData);
 	}
 }

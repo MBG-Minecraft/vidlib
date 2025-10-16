@@ -9,7 +9,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
@@ -27,7 +27,7 @@ public record IfKVector(
 	KNumber testValue,
 	Optional<KVector> thenValue,
 	Optional<KVector> elseValue
-) implements KVector, ImBuilderWrapper.BuilderSupplier {
+) implements KVector, ImBuilderWithHolder.Factory {
 	public static final SimpleRegistryType<IfKVector> TYPE = SimpleRegistryType.dynamic("if", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.fieldOf("if").forGetter(IfKVector::ifValue),
 		Comparison.DATA_TYPE.codec().optionalFieldOf("comparison", Comparison.NOT_EQUALS).forGetter(IfKVector::comparison),
@@ -44,7 +44,7 @@ public record IfKVector(
 	));
 
 	public static class Builder implements KVectorImBuilder {
-		public static final ImBuilderHolder<KVector> TYPE = new ImBuilderHolder<>("If", Builder::new);
+		public static final ImBuilderHolder<KVector> TYPE = ImBuilderHolder.of("If", Builder::new);
 
 		public final ImBuilder<KNumber> ifValue = KNumberImBuilder.create(1D);
 		public final ImBuilder<Comparison> comparison = new EnumImBuilder<>(Comparison.VALUES, Comparison.NOT_EQUALS);
@@ -53,6 +53,11 @@ public record IfKVector(
 		public final ImBuilder<KVector> thenValue = KVectorImBuilder.create();
 		public final ImBoolean elseValueEnabled = new ImBoolean(false);
 		public final ImBuilder<KVector> elseValue = KVectorImBuilder.create();
+
+		@Override
+		public ImBuilderHolder<?> holder() {
+			return TYPE;
+		}
 
 		@Override
 		public void set(KVector value) {
@@ -129,7 +134,7 @@ public record IfKVector(
 	}
 
 	@Override
-	public ImBuilderHolder<?> getImBuilderHolder() {
-		return Builder.TYPE;
+	public ImBuilderWithHolder<?> createImBuilder() {
+		return new Builder();
 	}
 }

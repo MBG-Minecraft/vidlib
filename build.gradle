@@ -249,6 +249,7 @@ publishing {
 			}
 		}
 
+		/*
 		if (ENV.MBG_MAVEN_URL && ENV.MBG_MAVEN_USERNAME && ENV.MBG_MAVEN_TOKEN) {
 			maven {
 				url = ENV.MBG_MAVEN_URL
@@ -258,6 +259,7 @@ publishing {
 				}
 			}
 		}
+		 */
 	}
 }
 

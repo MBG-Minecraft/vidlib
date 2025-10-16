@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.math.kvector;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.IntOrUUID;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
@@ -113,6 +112,11 @@ public interface KVector {
 		REGISTRY.register(ZERO_TYPE);
 		REGISTRY.register(ONE_TYPE);
 		REGISTRY.register(FixedKVector.TYPE);
+
+		for (var literal : LiteralKVector.values()) {
+			REGISTRY.register(literal.type);
+		}
+
 		REGISTRY.register(InterpolatedKVector.TYPE);
 		REGISTRY.register(DynamicKVector.TYPE);
 		REGISTRY.register(ScalarKVector.TYPE);
@@ -125,10 +129,6 @@ public interface KVector {
 		REGISTRY.register(PivotingKVector.TYPE);
 		REGISTRY.register(YRotatedKVector.TYPE);
 		REGISTRY.register(GroundKVector.TYPE);
-
-		for (var literal : LiteralKVector.values()) {
-			REGISTRY.register(literal.type);
-		}
 	}
 
 	static KVector ofRotation(double yaw, double pitch) {
@@ -176,13 +176,5 @@ public interface KVector {
 
 	default KVector scale(KVector other) {
 		return new ScaledKVector(this, other);
-	}
-
-	default KVector interpolate(Easing easing, float start, float end, KVector other) {
-		return new InterpolatedKVector(easing, start, end, this, other);
-	}
-
-	default KVector interpolate(Easing easing, KVector other) {
-		return interpolate(easing, 0F, 1F, other);
 	}
 }

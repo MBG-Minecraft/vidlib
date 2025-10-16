@@ -260,7 +260,7 @@ public class TransformationListImBuilder implements ImBuilder<List<Transformatio
 
 				if (update.isAny()) {
 					transformationList.clear();
-					var ctx = graphics.mc.level == null ? new KNumberContext(null) : graphics.mc.level.getGlobalContext();
+					var ctx = graphics.mc.level == null ? new KNumberContext() : graphics.mc.level.getGlobalContext();
 
 					for (var step : steps) {
 						if (step.isValid()) {

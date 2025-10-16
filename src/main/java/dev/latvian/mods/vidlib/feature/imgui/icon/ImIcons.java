@@ -35,7 +35,7 @@ public enum ImIcons implements ImIcon {
 	REPEAT('\ue040'),
 	MORE('\ue5d3'),
 	MORE_VERTICAL('\ue5d4'),
-	DELETE('\ue872'),
+	TRASHCAN('\ue872'),
 	BACKSPACE('\ue14a'),
 	EDIT('\ue3c9'),
 	OPEN('\ue2c8'),
@@ -54,6 +54,7 @@ public enum ImIcons implements ImIcon {
 	CUT('\ue14e'),
 	PASTE('\ue14f'),
 	NUMBERS('\ueac7'),
+	ABC('\ueb94'),
 	PERCENT('\ueb58'),
 	MENU('\ue5d2'),
 	DOWNLOAD('\uf090'),
@@ -76,6 +77,7 @@ public enum ImIcons implements ImIcon {
 	FLOWCHART('\uf38d'),
 	GRAPH('\uf3a0'),
 	SLASH('\uf753'),
+	SPLIT_SCREEN('\uf06d'),
 
 	CATEGORY_MEDIA("Media"),
 	PLAY('\ue037'),
@@ -98,6 +100,7 @@ public enum ImIcons implements ImIcon {
 	STORAGE('\ue1db'),
 	DATABASE('\uf20e'),
 	TEXT_DOCUMENT('\uf1c6'),
+	TEXT('\ue728'),
 	NOTES('\uf562'),
 
 	CATEGORY_ENVIRONMENT("Environment"),

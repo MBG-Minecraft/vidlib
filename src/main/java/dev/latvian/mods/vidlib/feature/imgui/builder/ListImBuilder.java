@@ -44,7 +44,7 @@ public class ListImBuilder<T> implements ImBuilder<List<T>> {
 			graphics.pushStack();
 			graphics.setRedButton();
 
-			if (ImGui.smallButton(ImIcons.DELETE + " Delete###delete-item")) {
+			if (ImGui.smallButton(ImIcons.TRASHCAN + " Delete###delete-item")) {
 				delete = i;
 				update = ImUpdate.FULL;
 			}

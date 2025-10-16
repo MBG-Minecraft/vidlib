@@ -7,7 +7,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import imgui.ImGui;
@@ -17,15 +17,20 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public record VariableKVector(String name) implements KVector, ImBuilderWrapper.BuilderSupplier {
+public record VariableKVector(String name) implements KVector, ImBuilderWithHolder.Factory {
 	public static final SimpleRegistryType<VariableKVector> TYPE = SimpleRegistryType.dynamic("variable", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.STRING.fieldOf("name").forGetter(VariableKVector::name)
 	).apply(instance, VariableKVector::new)), ByteBufCodecs.STRING_UTF8.map(VariableKVector::new, VariableKVector::name));
 
 	public static class Builder implements KVectorImBuilder {
-		public static final ImBuilderHolder<KVector> TYPE = new ImBuilderHolder<>("Variable", Builder::new);
+		public static final ImBuilderHolder<KVector> TYPE = ImBuilderHolder.of("Variable", Builder::new);
 
 		public final ImString name = ImGuiUtils.resizableString();
+
+		@Override
+		public ImBuilderHolder<?> holder() {
+			return TYPE;
+		}
 
 		@Override
 		public void set(KVector value) {
@@ -90,7 +95,7 @@ public record VariableKVector(String name) implements KVector, ImBuilderWrapper.
 	}
 
 	@Override
-	public ImBuilderHolder<?> getImBuilderHolder() {
-		return Builder.TYPE;
+	public ImBuilderWithHolder<?> createImBuilder() {
+		return new Builder();
 	}
 }

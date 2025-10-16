@@ -4,8 +4,13 @@ import dev.latvian.mods.klib.util.MessageConsumer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 public interface VLCommandSourceStack extends MessageConsumer {
+	default Level getSidedLevel() {
+		return ((CommandSourceStack) this).getLevel();
+	}
+
 	@Override
 	default void tell(Component message) {
 		((CommandSourceStack) this).sendSuccess(() -> message, false);

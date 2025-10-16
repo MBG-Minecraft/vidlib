@@ -10,39 +10,87 @@ import org.jetbrains.annotations.Nullable;
 
 public class KNumberContext {
 	public final KNumberContext parent;
-	public final Level level;
-	public final float progress;
 	public final KNumberVariables variables;
-	private DataMap serverDataMap;
+
+	public Double progress;
+	public Double tick;
+	public Double maxTick;
+	public Level level;
+	public DataMap serverDataMap;
+	public Double gameTime;
+	public Double gameDay;
+	public Double clock;
 	public Vec3 originPos;
 	public Vec3 sourcePos;
 	public Vec3 targetPos;
 
 	@ApiStatus.Internal
-	public KNumberContext(@Nullable Level level) {
+	public KNumberContext() {
 		this.parent = null;
-		this.level = level;
-		this.progress = 1F;
-		this.variables = level == null ? KNumberVariables.EMPTY : level.getEnvironment().globalVariables();
+		this.variables = KNumberVariables.EMPTY;
+
+		this.progress = null;
+		this.tick = null;
+		this.maxTick = null;
+		this.level = null;
 		this.serverDataMap = null;
+		this.gameTime = null;
+		this.gameDay = null;
+		this.clock = null;
 		this.originPos = null;
 		this.sourcePos = null;
 		this.targetPos = null;
 	}
 
-	private KNumberContext(KNumberContext parent, float progress, @Nullable KNumberVariables variables) {
+	@ApiStatus.Internal
+	public KNumberContext(Level level) {
+		this.parent = null;
+		this.variables = level.getEnvironment().globalVariables();
+
+		this.progress = null;
+		this.tick = null;
+		this.maxTick = null;
+		this.updateLevelData(level);
+		this.originPos = null;
+		this.sourcePos = null;
+		this.targetPos = null;
+	}
+
+	private KNumberContext(KNumberContext parent, @Nullable KNumberVariables variables) {
 		this.parent = parent;
-		this.level = parent.level;
-		this.progress = progress;
 		this.variables = variables == null ? KNumberVariables.EMPTY : variables;
+
+		this.progress = parent.progress;
+		this.tick = parent.tick;
+		this.maxTick = parent.maxTick;
+		this.level = parent.level;
 		this.serverDataMap = parent.serverDataMap;
+		this.gameTime = parent.gameTime;
+		this.gameDay = parent.gameDay;
+		this.clock = parent.clock;
 		this.originPos = parent.originPos;
 		this.sourcePos = parent.sourcePos;
 		this.targetPos = parent.targetPos;
 	}
 
-	public KNumberContext fork(float progress, @Nullable KNumberVariables variables) {
-		return new KNumberContext(this, progress, variables);
+	public KNumberContext fork(@Nullable KNumberVariables variables) {
+		return new KNumberContext(this, variables);
+	}
+
+	public void updateLevelData(Level level) {
+		this.level = level;
+
+		if (level != null) {
+			this.serverDataMap = level.getServerData();
+			this.gameTime = (double) level.getGameTime();
+			this.gameDay = (double) (level.getGameTime() % 24000L) / 24000D;
+			this.clock = (double) level.getDayTime();
+		} else {
+			this.serverDataMap = null;
+			this.gameTime = null;
+			this.gameDay = null;
+			this.clock = null;
+		}
 	}
 
 	@Nullable

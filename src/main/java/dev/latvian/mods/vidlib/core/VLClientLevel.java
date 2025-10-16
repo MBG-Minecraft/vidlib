@@ -35,10 +35,11 @@ public interface VLClientLevel extends VLLevel {
 	default void environmentEffects(Minecraft mc, BlockPos pos) {
 		var effects = ClientGameEngine.INSTANCE.getEnvironmentEffects(mc, pos);
 		var level = this.vl$level();
+		var ctx = level.getGlobalContext();
 
 		if (!effects.isEmpty()) {
 			for (var effect : effects) {
-				var chance = effect.chance().getOr(level.getGlobalContext(), 0D);
+				var chance = effect.chance().getOr(ctx, 0D);
 
 				if (level.random.roll((float) chance)) {
 					level.addParticle(

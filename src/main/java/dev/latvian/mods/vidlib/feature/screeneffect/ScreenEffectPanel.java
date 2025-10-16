@@ -36,7 +36,9 @@ public class ScreenEffectPanel extends AdminPanel {
 				var inst = effect.get();
 				inst.duration = duration[0];
 				inst.name = tooltip;
-				inst.update(graphics.mc.level.getGlobalContext().fork(0F, inst.variables));
+				var ctx = graphics.mc.level.getGlobalContext().fork(inst.variables);
+				ctx.progress = 0D;
+				inst.update(ctx);
 				inst.snap();
 				graphics.mc.player.vl$sessionData().screenEffects.add(inst);
 			}
@@ -100,7 +102,7 @@ public class ScreenEffectPanel extends AdminPanel {
 			ImGui.text(effect.name);
 			ImGui.sameLine();
 
-			if (graphics.button(ImIcons.DELETE + "###remove", ImColorVariant.RED)) {
+			if (graphics.button(ImIcons.TRASHCAN + "###remove", ImColorVariant.RED)) {
 				effects.remove(i);
 				i--;
 			}

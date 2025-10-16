@@ -9,12 +9,15 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
+import dev.latvian.mods.vidlib.feature.imgui.node.NodePin;
+import dev.latvian.mods.vidlib.feature.imgui.node.NodePinType;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import imgui.type.ImBoolean;
 import net.minecraft.network.codec.ByteBufCodecs;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 
 public record IfKNumber(
@@ -23,7 +26,7 @@ public record IfKNumber(
 	KNumber testValue,
 	Optional<KNumber> thenValue,
 	Optional<KNumber> elseValue
-) implements KNumber, ImBuilderWrapper.BuilderSupplier {
+) implements KNumber, ImBuilderWithHolder.Factory {
 	public static final SimpleRegistryType<IfKNumber> TYPE = SimpleRegistryType.dynamic("if", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.fieldOf("if").forGetter(IfKNumber::ifValue),
 		Comparison.DATA_TYPE.codec().optionalFieldOf("comparison", Comparison.NOT_EQUALS).forGetter(IfKNumber::comparison),
@@ -40,7 +43,15 @@ public record IfKNumber(
 	));
 
 	public static class Builder implements KNumberImBuilder {
-		public static final ImBuilderHolder<KNumber> TYPE = new ImBuilderHolder<>("If", Builder::new);
+		public static final ImBuilderHolder<KNumber> TYPE = ImBuilderHolder.of("If", Builder::new);
+
+		public static final List<NodePin> PINS = List.of(
+			NodePinType.NUMBER.required("If"),
+			NodePinType.NUMBER.required("Test"),
+			NodePinType.NUMBER.optional("Then"),
+			NodePinType.NUMBER.optional("Else"),
+			NodePinType.NUMBER.output("Out")
+		);
 
 		public final ImBuilder<KNumber> ifValue = KNumberImBuilder.create(1D);
 		public final ImBuilder<Comparison> comparison = new EnumImBuilder<>(Comparison.VALUES, Comparison.NOT_EQUALS);
@@ -51,6 +62,24 @@ public record IfKNumber(
 		public final ImBuilder<KNumber> elseValue = KNumberImBuilder.create(0D);
 
 		@Override
+		public ImBuilderHolder<?> holder() {
+			return TYPE;
+		}
+
+		@Override
+		public void set(@Nullable KNumber value) {
+			if (value instanceof IfKNumber v) {
+				ifValue.set(v.ifValue);
+				comparison.set(v.comparison);
+				testValue.set(v.testValue);
+				thenValueEnabled.set(v.thenValue.isPresent());
+				thenValue.set(v.thenValue.orElse(KNumber.ZERO));
+				elseValueEnabled.set(v.elseValue.isPresent());
+				elseValue.set(v.elseValue.orElse(KNumber.ZERO));
+			}
+		}
+
+		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
 			update = update.or(ifValue.imguiKey(graphics, "If", "if"));
@@ -59,6 +88,11 @@ public record IfKNumber(
 			update = update.or(testValue.imguiOptionalKey(graphics, thenValueEnabled, "Then", "then"));
 			update = update.or(testValue.imguiOptionalKey(graphics, elseValueEnabled, "Else", "else"));
 			return update;
+		}
+
+		@Override
+		public ImUpdate nodeImgui(ImGraphics graphics) {
+			return comparison.imguiKey(graphics, "Comparison", "comparison");
 		}
 
 		@Override
@@ -75,6 +109,11 @@ public record IfKNumber(
 				thenValueEnabled.get() ? Optional.of(thenValue.build()) : Optional.empty(),
 				elseValueEnabled.get() ? Optional.of(elseValue.build()) : Optional.empty()
 			);
+		}
+
+		@Override
+		public List<NodePin> getNodePins() {
+			return PINS;
 		}
 	}
 
@@ -112,7 +151,7 @@ public record IfKNumber(
 	}
 
 	@Override
-	public ImBuilderHolder<?> getImBuilderHolder() {
-		return Builder.TYPE;
+	public ImBuilderWithHolder<?> createImBuilder() {
+		return new Builder();
 	}
 }

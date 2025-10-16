@@ -48,6 +48,7 @@ import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import dev.latvian.mods.vidlib.feature.vote.NumberVotingScreen;
 import dev.latvian.mods.vidlib.feature.vote.YesNoVotingScreen;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
+import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.latvian.mods.vidlib.util.PauseType;
@@ -419,11 +420,21 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		vl$self().getSoundManager().play(createGlobalSound(data, variables));
 	}
 
+	default SoundInstance createGlobalSound(PositionedSoundData data, KNumberContext ctx) {
+		var mc = vl$self();
+
+		if (mc.level != null && data.position().isPresent()) {
+			return new VidLibSoundInstance(mc.level, data, ctx);
+		} else {
+			return SimpleSoundInstance.forUI(data.data().sound().value(), data.data().pitch(), data.data().volume());
+		}
+	}
+
 	default SoundInstance createGlobalSound(PositionedSoundData data, KNumberVariables variables) {
 		var mc = vl$self();
 
 		if (mc.level != null && data.position().isPresent()) {
-			return new VidLibSoundInstance(mc.level, data, variables);
+			return new VidLibSoundInstance(mc.level, data, mc.level.getGlobalContext().fork(variables));
 		} else {
 			return SimpleSoundInstance.forUI(data.data().sound().value(), data.data().pitch(), data.data().volume());
 		}

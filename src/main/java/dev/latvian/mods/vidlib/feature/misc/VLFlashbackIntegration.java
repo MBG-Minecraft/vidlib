@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
@@ -64,6 +65,7 @@ public class VLFlashbackIntegration {
 	private static int selectedProp = 0;
 	private static PropListType selectedPropList = PropListType.LEVEL;
 	private static boolean openSelectedPropPopup = false;
+	private static int lastWidth = -1, lastHeight = -1;
 
 	public static void init() {
 		VidLib.LOGGER.info("Flashback integration loaded");
@@ -120,7 +122,7 @@ public class VLFlashbackIntegration {
 						case AddPropPayload p -> {
 							var map = new IdentityHashMap<PropData<?, ?>, Object>();
 							try {
-								p.type().readUpdate(p.id(), registryAccess, p.update(), true, map::put);
+								p.type().readReplayUpdate(now, p.id(), registryAccess, p.update(), true, map::put);
 							} catch (Exception ex) {
 								ex.printStackTrace();
 							}
@@ -160,6 +162,8 @@ public class VLFlashbackIntegration {
 			prop.remove = endTick;
 			recordedProps.add(prop);
 		}
+
+		recordedProps.sort(Comparator.comparingLong(a -> a.spawn));
 
 		VidLib.LOGGER.info("Flashback props: " + recordedProps.size());
 
@@ -357,8 +361,10 @@ public class VLFlashbackIntegration {
 		int sch = mc.getWindow().getGuiScaledHeight();
 
 		// Fix flashback lagging extremely after window is minimized
-		if (scw > w || sch > h) {
+		if (scw > w || sch > h || lastWidth != scw || lastHeight != sch) {
 			mc.resizeDisplay();
+			lastWidth = scw;
+			lastHeight = sch;
 		}
 	}
 

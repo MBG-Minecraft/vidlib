@@ -29,7 +29,10 @@ public class ScreenEffectRenderer {
 		if (!effects.isEmpty()) {
 			effects.removeIf(effect -> {
 				effect.snap();
-				effect.update(ctx.fork(effect.duration <= 1 ? 0F : (effect.tick / (float) effect.duration), effect.variables));
+				var ectx = ctx.fork(effect.variables);
+				float progress = effect.duration <= 1 ? 0F : (effect.tick / (float) effect.duration);
+				ectx.progress = (double) progress;
+				effect.update(ectx);
 
 				if (!effect.paused) {
 					effect.tick++;

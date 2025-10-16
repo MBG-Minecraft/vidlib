@@ -6,13 +6,13 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public record OffsetKVector(KVector a, KVector b) implements KVector, ImBuilderWrapper.BuilderSupplier {
+public record OffsetKVector(KVector a, KVector b) implements KVector, ImBuilderWithHolder.Factory {
 	public static final SimpleRegistryType<OffsetKVector> TYPE = SimpleRegistryType.dynamic("offset", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KVector.CODEC.fieldOf("a").forGetter(OffsetKVector::a),
 		KVector.CODEC.fieldOf("b").forGetter(OffsetKVector::b)
@@ -23,10 +23,15 @@ public record OffsetKVector(KVector a, KVector b) implements KVector, ImBuilderW
 	));
 
 	public static class Builder implements KVectorImBuilder {
-		public static final ImBuilderHolder<KVector> TYPE = new ImBuilderHolder<>("Offset (a + b)", Builder::new);
+		public static final ImBuilderHolder<KVector> TYPE = ImBuilderHolder.of("Offset (a + b)", Builder::new);
 
 		public final ImBuilder<KVector> a = KVectorImBuilder.create();
 		public final ImBuilder<KVector> b = KVectorImBuilder.create();
+
+		@Override
+		public ImBuilderHolder<?> holder() {
+			return TYPE;
+		}
 
 		@Override
 		public void set(KVector value) {
@@ -74,7 +79,7 @@ public record OffsetKVector(KVector a, KVector b) implements KVector, ImBuilderW
 	}
 
 	@Override
-	public ImBuilderHolder<?> getImBuilderHolder() {
-		return Builder.TYPE;
+	public ImBuilderWithHolder<?> createImBuilder() {
+		return new Builder();
 	}
 }

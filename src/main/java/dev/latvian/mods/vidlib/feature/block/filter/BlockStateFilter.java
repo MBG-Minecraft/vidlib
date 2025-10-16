@@ -7,22 +7,27 @@ import dev.latvian.mods.vidlib.feature.block.ExactBlockStateImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 
-public record BlockStateFilter(BlockState blockState) implements BlockFilter, ImBuilderWrapper.BuilderSupplier {
+public record BlockStateFilter(BlockState blockState) implements BlockFilter, ImBuilderWithHolder.Factory {
 	public static final SimpleRegistryType<BlockStateFilter> TYPE = SimpleRegistryType.dynamic("block_state", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		MCCodecs.BLOCK_STATE.fieldOf("block_state").forGetter(BlockStateFilter::blockState)
 	).apply(instance, BlockStateFilter::new)), MCStreamCodecs.BLOCK_STATE.map(BlockStateFilter::new, BlockStateFilter::blockState));
 
 	public static class Builder implements BlockFilterImBuilder {
-		public static final ImBuilderHolder<BlockFilter> TYPE = new ImBuilderHolder<>("Exact Block State", Builder::new);
+		public static final ImBuilderHolder<BlockFilter> TYPE = ImBuilderHolder.of("Exact Block State", Builder::new);
 
 		public final ExactBlockStateImBuilder blockState = new ExactBlockStateImBuilder();
+
+		@Override
+		public ImBuilderHolder<?> holder() {
+			return TYPE;
+		}
 
 		@Override
 		public void set(BlockFilter value) {
@@ -63,7 +68,7 @@ public record BlockStateFilter(BlockState blockState) implements BlockFilter, Im
 	}
 
 	@Override
-	public ImBuilderHolder<?> getImBuilderHolder() {
-		return Builder.TYPE;
+	public ImBuilderWithHolder<?> createImBuilder() {
+		return new Builder();
 	}
 }

@@ -6,12 +6,14 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
 import imgui.ImGui;
 import imgui.ImGuiStyle;
 import imgui.extension.imnodes.ImNodes;
 import imgui.extension.imnodes.flag.ImNodesColorStyle;
 import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiDir;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiStyleVar;
 import imgui.type.ImBoolean;
@@ -210,24 +212,25 @@ public class ImGraphics {
 
 	public static void setFullDefaultStyle(ImGuiStyle style) {
 		setDefaultStyle(style);
-		style.setWindowPadding(8F, 8F);
-		style.setFramePadding(4F, 3F);
+		style.setWindowPadding(4F, 4F);
+		style.setFramePadding(4F, 1F);
 		style.setPopupBorderSize(0F);
-		style.setItemSpacing(8F, 8F);
+		style.setItemSpacing(6F, 4F);
 		style.setItemInnerSpacing(8F, 6F);
 	}
 
 	public static void setDefaultStyle(ImGuiStyle style) {
+		style.setWindowMenuButtonPosition(ImGuiDir.None);
 		style.setWindowRounding(4F);
 		style.setFrameRounding(3F);
 		style.setChildRounding(3F);
 		style.setPopupRounding(3F);
-		style.setScrollbarRounding(9F);
-		style.setGrabRounding(3F);
+		style.setScrollbarRounding(1F);
+		style.setGrabRounding(2F);
 
 		style.setIndentSpacing(25F);
-		style.setScrollbarSize(15F);
-		style.setGrabMinSize(5F);
+		style.setScrollbarSize(13F);
+		style.setGrabMinSize(16F);
 		style.setWindowBorderSize(0F);
 		style.setSelectableTextAlign(0F, 0.5F);
 		style.setAlpha(1F);
@@ -239,6 +242,7 @@ public class ImGraphics {
 		setColor(style, ImGuiCol.TitleBgActive, 0xFF010101);
 		setColor(style, ImGuiCol.MenuBarBg, 0xFF17171C);
 		setColor(style, ImGuiCol.TitleBgCollapsed, 0xEF517F70);
+		setColor(style, ImGuiCol.SliderGrab, 0xFF446692);
 
 		setColor(style, ImGuiCol.Button, ImColorVariant.DEFAULT.color.argb());
 		setColor(style, ImGuiCol.ButtonHovered, ImColorVariant.DEFAULT.hoverColor.argb());
@@ -555,5 +559,34 @@ public class ImGraphics {
 
 		popStack();
 		ImGui.endGroup();
+	}
+
+	public boolean iconButton(ImIcons icon, String id, String tooltip, @Nullable ImColorVariant variant) {
+		if (variant != null) {
+			pushStack();
+			setButton(variant);
+		}
+
+		boolean clicked = ImGui.button(icon + id);
+
+		if (variant != null) {
+			popStack();
+		}
+
+		ImGuiUtils.hoveredTooltip(tooltip);
+		return clicked;
+	}
+
+	public boolean iconButton(ImIcons icon, String id, String tooltip, @Nullable ImColorVariant variant, ImBoolean value) {
+		if (iconButton(icon, id, tooltip, variant)) {
+			value.set(!value.get());
+			return true;
+		}
+
+		return false;
+	}
+
+	public boolean toggleButton(ImIcons icon, String id, String tooltip, ImBoolean value) {
+		return iconButton(icon, (value.get() ? ImIcons.CHECK : ImIcons.CLOSE) + id, tooltip + (value.get() ? ": Enabled" : ": Disabled"), value.get() ? null : ImColorVariant.GRAY, value);
 	}
 }

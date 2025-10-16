@@ -117,7 +117,7 @@ public enum PositionToolItem implements VidLibTool, PlayerActionHandler {
 				)
 			);
 
-			player.level().addParticle(new ShapeParticleOptions(60, Color.CYAN, Color.WHITE), blockPos.getX() + 0.5D, blockPos.getY() + 0.5D, blockPos.getZ() + 0.5D, 0D, 0D, 0D);
+			player.level().addParticle(new ShapeParticleOptions(60, Color.CYAN, Color.WHITE), clientPos.x, clientPos.y, clientPos.z, 0D, 0D, 0D);
 		}
 
 		return true;

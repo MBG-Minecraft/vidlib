@@ -40,7 +40,7 @@ public class PositionedColorImBuilder implements Comparable<PositionedColorImBui
 		graphics.pushStack();
 		graphics.setRedButton();
 
-		if (ImGui.smallButton(ImIcons.DELETE + " Delete")) {
+		if (ImGui.smallButton(ImIcons.TRASHCAN + " Delete")) {
 			update = ImUpdate.FULL;
 			delete = true;
 		}

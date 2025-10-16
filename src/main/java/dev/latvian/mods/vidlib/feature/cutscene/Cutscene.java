@@ -6,6 +6,7 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
+import dev.latvian.mods.vidlib.feature.cutscene.step.CutsceneStep;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -21,14 +22,24 @@ public class Cutscene {
 		Codec.BOOL.optionalFieldOf("open_previous_screen", false).forGetter(c -> c.openPreviousScreen),
 		Codec.BOOL.optionalFieldOf("hide_player", false).forGetter(c -> c.hidePlayer),
 		CutsceneStep.CODEC.listOf().optionalFieldOf("steps", List.of()).forGetter(c -> c.steps)
-	).apply(instance, Cutscene::new));
+	).apply(instance, (allowMovement, openPreviousScreen, hidePlayer, steps) -> {
+		var c = new Cutscene();
+		c.allowMovement = allowMovement;
+		c.openPreviousScreen = openPreviousScreen;
+		c.hidePlayer = hidePlayer;
+		c.steps.addAll(steps);
+		return c;
+	}));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, Cutscene> DIRECT_STREAM_CODEC = CompositeStreamCodec.of(
-		ByteBufCodecs.BOOL, c -> c.allowMovement,
-		ByteBufCodecs.BOOL, c -> c.openPreviousScreen,
-		ByteBufCodecs.BOOL, c -> c.hidePlayer,
+		ByteBufCodecs.VAR_INT, Cutscene::getFlags,
 		KLibStreamCodecs.listOf(CutsceneStep.STREAM_CODEC), c -> c.steps,
-		Cutscene::new
+		(flags, steps) -> {
+			var c = new Cutscene();
+			c.setFlags(flags);
+			c.steps.addAll(steps);
+			return c;
+		}
 	);
 
 	public static final DataType<Cutscene> DIRECT_DATA_TYPE = DataType.of(DIRECT_CODEC, DIRECT_STREAM_CODEC, Cutscene.class);
@@ -48,38 +59,34 @@ public class Cutscene {
 	public boolean hidePlayer;
 	public final List<CutsceneStep> steps;
 
-	public static Cutscene create() {
-		return new Cutscene(false, false, false, new ArrayList<>(1));
+	public Cutscene() {
+		this.allowMovement = false;
+		this.openPreviousScreen = false;
+		this.hidePlayer = false;
+		this.steps = new ArrayList<>();
 	}
 
-	Cutscene(boolean allowMovement, boolean openPreviousScreen, boolean hidePlayer, List<CutsceneStep> steps) {
-		this.allowMovement = allowMovement;
-		this.openPreviousScreen = openPreviousScreen;
-		this.hidePlayer = hidePlayer;
-		this.steps = steps;
+	public int getFlags() {
+		int f = 0;
+
+		if (allowMovement) {
+			f |= 1;
+		}
+
+		if (openPreviousScreen) {
+			f |= 2;
+		}
+
+		if (hidePlayer) {
+			f |= 4;
+		}
+
+		return f;
 	}
 
-	public List<CutsceneStep> steps() {
-		return steps;
-	}
-
-	public Cutscene step(CutsceneStep step) {
-		steps.add(step);
-		return this;
-	}
-
-	public Cutscene allowMovement() {
-		this.allowMovement = true;
-		return this;
-	}
-
-	public Cutscene openPreviousScreen() {
-		this.openPreviousScreen = true;
-		return this;
-	}
-
-	public Cutscene hidePlayer() {
-		this.hidePlayer = true;
-		return this;
+	public void setFlags(int flags) {
+		allowMovement = (flags & 1) != 0;
+		openPreviousScreen = (flags & 2) != 0;
+		hidePlayer = (flags & 4) != 0;
 	}
 }

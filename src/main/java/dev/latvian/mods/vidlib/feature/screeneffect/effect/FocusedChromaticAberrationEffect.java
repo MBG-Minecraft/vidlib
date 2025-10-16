@@ -12,7 +12,7 @@ import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectShaderType;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
-import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
+import dev.latvian.mods.vidlib.math.knumber.KNumberFloatInstance;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
@@ -28,14 +28,13 @@ public record FocusedChromaticAberrationEffect(KNumber strength, FocusPoint focu
 	));
 
 	public static class Inst extends ScreenEffectInstance {
-		private KNumber vStrength;
+		public final KNumberFloatInstance strength;
 		public FocusPoint vFocus;
 
-		private float strength, prevStrength;
 		private Vec2 focus, prevFocus;
 
-		public Inst(KNumber vStrength, FocusPoint vFocus) {
-			this.vStrength = vStrength;
+		public Inst(KNumber strength, FocusPoint vFocus) {
+			this.strength = new KNumberFloatInstance(strength);
 			this.vFocus = vFocus;
 		}
 
@@ -47,19 +46,19 @@ public record FocusedChromaticAberrationEffect(KNumber strength, FocusPoint focu
 		@Override
 		public void snap() {
 			super.snap();
-			prevStrength = strength;
+			strength.snap();
 			prevFocus = focus;
 		}
 
 		@Override
 		public void update(KNumberContext ctx) {
-			strength = (float) vStrength.getOr(ctx, 0D);
+			strength.update(ctx);
 			focus = vFocus.get(ctx);
 		}
 
 		@Override
 		public void upload(IntArrayList arr, float delta) {
-			arr.add(Float.floatToIntBits(Mth.lerp(delta, prevStrength, strength))); // 1
+			arr.add(Float.floatToIntBits(strength.get(delta))); // 1
 			arr.add(Float.floatToIntBits(Mth.lerp(delta, prevFocus.x, focus.x))); // 2
 			arr.add(Float.floatToIntBits(Mth.lerp(delta, prevFocus.y, focus.y))); // 3
 		}
@@ -67,15 +66,7 @@ public record FocusedChromaticAberrationEffect(KNumber strength, FocusPoint focu
 		@Override
 		public void imgui(ImGraphics graphics) {
 			super.imgui(graphics);
-
-			var imStrengthNum = KNumberImBuilder.create(0D);
-			imStrengthNum.set(vStrength);
-
-			if (imStrengthNum.imguiKey(graphics, "Strength", "strength").isAny() && imStrengthNum.isValid()) {
-				vStrength = imStrengthNum.build();
-			}
-
-
+			strength.imgui(graphics, "Strength", "strength");
 		}
 	}
 

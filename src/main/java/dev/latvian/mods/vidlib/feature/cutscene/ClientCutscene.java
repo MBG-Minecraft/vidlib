@@ -5,12 +5,8 @@ import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Supplier;
 
 public class ClientCutscene implements CameraOverride {
@@ -18,175 +14,85 @@ public class ClientCutscene implements CameraOverride {
 	public final boolean overrideCamera;
 	public final Cutscene cutscene;
 	public final KNumberVariables variables;
-	public final ClientCutsceneStep[] steps;
 	public final Supplier<Vec3> sourcePos;
 	public final Vec3 originPos;
 	public int prevTotalTick;
 	public int totalTick;
 	public int totalLength;
-
-	public Vec3 prevOrigin, origin, prevTarget, target;
-	public double prevFovMod, fovMod;
-	public List<FormattedCharSequence> topBar, bottomBar;
-	public final List<SoundInstance> playingSounds;
+	public final CutsceneState state;
 
 	public ClientCutscene(Minecraft mc, boolean overrideCamera, Cutscene cutscene, KNumberVariables variables, Supplier<Vec3> sourcePos) {
 		this.mc = mc;
 		this.overrideCamera = overrideCamera;
 		this.cutscene = cutscene;
 		this.variables = variables;
-		this.steps = new ClientCutsceneStep[cutscene.steps.size()];
 		this.sourcePos = sourcePos;
 		this.originPos = sourcePos.get();
 
 		this.prevTotalTick = 0;
 		this.totalTick = 0;
 		this.totalLength = 0;
-		this.fovMod = 1D;
-		this.playingSounds = new ArrayList<>();
+		this.state = new CutsceneState();
 
-		var ctx = mc.level.getGlobalContext().fork(0F, variables);
-		ctx.originPos = originPos;
+		var ctx = mc.level.getGlobalContext().fork(variables);
 		ctx.sourcePos = originPos;
+		ctx.originPos = originPos;
 
-		for (int i = 0; i < cutscene.steps.size(); i++) {
-			steps[i] = new ClientCutsceneStep(cutscene.steps.get(i), ctx);
+		for (var c : cutscene.steps) {
+			this.totalLength = Math.max(totalLength, c.start + c.length);
 		}
 
-		for (var step : steps) {
-			this.totalLength = Math.max(totalLength, step.totalLength);
+		ctx.maxTick = (double) totalLength;
 
+		for (var step : cutscene.steps) {
 			if (step.start == 0) {
-				if (step.target != null) {
-					var t = step.target.get(ctx);
+				ctx.progress = 0D;
+				ctx.tick = 0D;
+				ctx.maxTick = (double) step.length;
 
-					if (target == null) {
-						target = t;
-						step.prevRenderTarget = step.renderTarget = t;
-					}
-				}
-
-				ctx.targetPos = target;
-
-				if (origin == null && step.origin != null) {
-					origin = step.origin.get(ctx);
-				}
-
-				if (step.fovModifier != null) {
-					fovMod = step.fovModifier.getOr(ctx, 1D);
-				}
+				step.start(state, ctx);
 			}
 		}
 
-		if (origin == null) {
-			origin = ctx.sourcePos;
+		if (state.origin == null) {
+			state.origin = ctx.sourcePos;
 		}
 
-		if (target == null) {
-			target = ctx.sourcePos.add(mc.player.getLookAngle()); // 1F
+		if (state.target == null) {
+			state.target = ctx.sourcePos.add(mc.player.getViewVector(1F));
 		}
 
-		this.prevOrigin = this.origin;
-		this.prevTarget = this.target;
-		this.prevFovMod = this.fovMod;
+		state.snap();
 	}
 
 	public boolean tick() {
 		prevTotalTick = totalTick;
-		prevOrigin = origin;
-		prevTarget = target;
-		prevFovMod = fovMod;
+		state.snap();
+		state.topBar.clear();
+		state.bottomBar.clear();
 
-		for (var step : steps) {
-			if (totalTick == step.start) {
-				if (step.status != null) {
-					mc.gui.setOverlayMessage(step.status, false);
-				}
+		var ctx = mc.level.getGlobalContext().fork(variables);
+		ctx.sourcePos = sourcePos.get();
+		ctx.originPos = originPos;
+		ctx.targetPos = state.target;
 
-				if (mc.screen != null) {
-					if (step.bars != null) {
-						if (step.bars.top().isPresent()) {
-							topBar = List.copyOf(mc.font.split(step.bars.top().get(), mc.screen.width - 60));
-						} else {
-							topBar = List.of();
-						}
+		for (var step : cutscene.steps) {
+			if (totalTick == step.start + step.length) {
+				ctx.progress = 1D;
+				ctx.tick = (double) step.length;
+				ctx.maxTick = (double) step.length;
 
-						if (step.bars.bottom().isPresent()) {
-							bottomBar = List.copyOf(mc.font.split(step.bars.bottom().get(), mc.screen.width - 60));
-						} else {
-							bottomBar = List.of();
-						}
-					}
-				}
-
-				if (step.shader != null) {
-					mc.setPostEffect(step.shader);
-				}
-
-				if (step.fade != null) {
-					mc.setScreenFade(step.fade);
-				}
-
-				if (!step.sounds.isEmpty()) {
-					for (var sound : step.sounds) {
-						var instance = mc.createGlobalSound(sound, variables);
-						playingSounds.add(instance);
-						mc.getSoundManager().play(instance);
-					}
-				}
+				step.exit(state, ctx);
 			}
+		}
 
-			if (step.length == 0 ? (totalTick == step.start) : (totalTick >= step.start && totalTick < step.start + step.length)) {
-				float progress = step.length == 0 ? 0F : (totalTick - step.start) / (float) step.length;
-				var ctx = mc.level.getGlobalContext().fork(progress, variables);
-				ctx.originPos = originPos;
-				ctx.sourcePos = sourcePos.get();
+		for (var step : cutscene.steps) {
+			if (totalTick >= step.start && totalTick < step.start + step.length) {
+				ctx.tick = (double) (totalTick - step.start);
+				ctx.maxTick = (double) step.length;
+				ctx.progress = ctx.tick / ctx.maxTick;
 
-				step.prevRenderTarget = step.renderTarget;
-
-				if (step.target != null) {
-					var newTarget = step.target.get(ctx);
-
-					if (newTarget != null) {
-						step.renderTarget = target = newTarget;
-
-						if (step.prevRenderTarget == null) {
-							step.prevRenderTarget = target;
-						}
-
-						if (totalTick == step.start && step.snap.target()) {
-							prevTarget = target;
-						}
-					}
-				}
-
-				ctx.targetPos = target;
-
-				if (step.origin != null) {
-					var newOrigin = step.origin.get(ctx);
-
-					if (newOrigin != null) {
-						origin = newOrigin;
-
-						if (totalTick == step.start && step.snap.origin()) {
-							prevOrigin = origin;
-						}
-					}
-				}
-
-				if (step.fovModifier != null) {
-					fovMod = step.fovModifier.getOr(ctx, 1D);
-
-					if (totalTick == step.start && step.snap.fov()) {
-						prevFovMod = fovMod;
-					}
-				}
-
-				if (totalTick == step.start) {
-					for (var event : step.events) {
-						event.run(mc.level, ctx);
-					}
-				}
+				step.tick(state, ctx);
 			}
 		}
 
@@ -206,7 +112,7 @@ public class ClientCutscene implements CameraOverride {
 
 	@Override
 	public double getFOVModifier(double delta) {
-		return KMath.lerp(delta, prevFovMod, fovMod);
+		return KMath.lerp(delta, state.prevFovMod, state.fovMod);
 	}
 
 	@Override
@@ -216,20 +122,19 @@ public class ClientCutscene implements CameraOverride {
 
 	@Override
 	public Vec3 getCameraPosition(float delta) {
-		return prevOrigin.lerp(origin, delta);
+		return state.prevOrigin.lerp(state.origin, delta);
 	}
 
 	@Override
 	public Rotation getCameraRotation(float delta, Vec3 cameraPos) {
-		return Rotation.compute(cameraPos, prevTarget.lerp(target, delta));
+		return Rotation.compute(cameraPos, state.prevTarget.lerp(state.target, delta));
 	}
 
 	public void stopped() {
-		for (var sound : playingSounds) {
-			mc.getSoundManager().stop(sound);
+		for (var task : state.exitTasks) {
+			task.run();
 		}
 
-		playingSounds.clear();
-		mc.gameRenderer.clearPostEffect();
+		state.exitTasks.clear();
 	}
 }

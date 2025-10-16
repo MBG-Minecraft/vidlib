@@ -67,6 +67,15 @@ public class PropList implements Iterable<Prop> {
 
 	public void tick(@Nullable S2CPacketBundleBuilder updates, boolean tick) {
 		if (!tick) {
+			if (!map.isEmpty() && props.level.isReplayLevel()) {
+				var time = props.level.getGameTime();
+
+				for (var prop : map.values()) {
+					prop.prevTick = prop.tick;
+					prop.tick = Math.max(0, (int) (time - prop.createdTime));
+				}
+			}
+
 			return;
 		}
 
@@ -154,7 +163,9 @@ public class PropList implements Iterable<Prop> {
 		int count = map.size();
 
 		for (var prop : map.values()) {
-			prop.remove(removeType);
+			if (removeType == PropRemoveType.COMMAND || !prop.clientSideOnly) {
+				prop.remove(removeType);
+			}
 		}
 
 		return count;

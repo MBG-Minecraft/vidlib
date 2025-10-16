@@ -6,11 +6,15 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
+import dev.latvian.mods.vidlib.feature.imgui.node.NodePin;
+import dev.latvian.mods.vidlib.feature.imgui.node.NodePinType;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import org.jetbrains.annotations.Nullable;
 
-public record OffsetKNumber(KNumber a, KNumber b) implements KNumber, ImBuilderWrapper.BuilderSupplier {
+import java.util.List;
+
+public record OffsetKNumber(KNumber a, KNumber b) implements KNumber, ImBuilderWithHolder.Factory {
 	public static final SimpleRegistryType<OffsetKNumber> TYPE = SimpleRegistryType.dynamic("offset", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.fieldOf("a").forGetter(OffsetKNumber::a),
 		KNumber.CODEC.fieldOf("b").forGetter(OffsetKNumber::b)
@@ -21,10 +25,21 @@ public record OffsetKNumber(KNumber a, KNumber b) implements KNumber, ImBuilderW
 	));
 
 	public static class Builder implements KNumberImBuilder {
-		public static final ImBuilderHolder<KNumber> TYPE = new ImBuilderHolder<>("Offset (a + b)", Builder::new);
+		public static final ImBuilderHolder<KNumber> TYPE = ImBuilderHolder.of("Offset (a + b)", Builder::new);
+
+		public static final List<NodePin> PINS = List.of(
+			NodePinType.NUMBER.required("A"),
+			NodePinType.NUMBER.required("B"),
+			NodePinType.NUMBER.output("Out")
+		);
 
 		public final ImBuilder<KNumber> a = KNumberImBuilder.create(0D);
 		public final ImBuilder<KNumber> b = KNumberImBuilder.create(0D);
+
+		@Override
+		public ImBuilderHolder<?> holder() {
+			return TYPE;
+		}
 
 		@Override
 		public void set(KNumber value) {
@@ -43,6 +58,11 @@ public record OffsetKNumber(KNumber a, KNumber b) implements KNumber, ImBuilderW
 		}
 
 		@Override
+		public ImUpdate nodeImgui(ImGraphics graphics) {
+			return ImUpdate.NONE;
+		}
+
+		@Override
 		public boolean isValid() {
 			return a.isValid() && b.isValid();
 		}
@@ -50,6 +70,11 @@ public record OffsetKNumber(KNumber a, KNumber b) implements KNumber, ImBuilderW
 		@Override
 		public KNumber build() {
 			return a.build().offset(b.build());
+		}
+
+		@Override
+		public List<NodePin> getNodePins() {
+			return PINS;
 		}
 	}
 
@@ -72,7 +97,7 @@ public record OffsetKNumber(KNumber a, KNumber b) implements KNumber, ImBuilderW
 	}
 
 	@Override
-	public ImBuilderHolder<?> getImBuilderHolder() {
-		return Builder.TYPE;
+	public ImBuilderWithHolder<?> createImBuilder() {
+		return new Builder();
 	}
 }

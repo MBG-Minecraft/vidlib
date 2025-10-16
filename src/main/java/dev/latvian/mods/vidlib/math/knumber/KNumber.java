@@ -4,7 +4,6 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
@@ -72,6 +71,11 @@ public interface KNumber {
 		REGISTRY.register(ZERO_TYPE);
 		REGISTRY.register(ONE_TYPE);
 		REGISTRY.register(FixedKNumber.TYPE);
+
+		for (var literal : LiteralKNumber.values()) {
+			REGISTRY.register(literal.type);
+		}
+
 		REGISTRY.register(InterpolatedKNumber.TYPE);
 		REGISTRY.register(OffsetKNumber.TYPE);
 		REGISTRY.register(ScaledKNumber.TYPE);
@@ -79,12 +83,10 @@ public interface KNumber {
 		REGISTRY.register(IfKNumber.TYPE);
 		REGISTRY.register(ServerDataKNumber.TYPE);
 		REGISTRY.register(RandomKNumber.TYPE);
-		REGISTRY.register(TimeKNumber.TYPE);
-		REGISTRY.register(GameTimeKNumber.TYPE);
-		REGISTRY.register(DayTimeKNumber.TYPE);
 		REGISTRY.register(SinKNumber.TYPE);
 		REGISTRY.register(CosKNumber.TYPE);
 		REGISTRY.register(Atan2KNumber.TYPE);
+		REGISTRY.register(ClampedKNumber.TYPE);
 	}
 
 	default SimpleRegistryType<?> type() {
@@ -103,19 +105,15 @@ public interface KNumber {
 		return value == null ? def : value;
 	}
 
+	default double getOrNaN(KNumberContext ctx) {
+		return getOr(ctx, Double.NaN);
+	}
+
 	default KNumber offset(KNumber other) {
 		return new OffsetKNumber(this, other);
 	}
 
 	default KNumber scale(KNumber other) {
 		return new ScaledKNumber(this, other);
-	}
-
-	default KNumber interpolate(Easing easing, float start, float end, KNumber other) {
-		return new InterpolatedKNumber(easing, start, end, this, other);
-	}
-
-	default KNumber interpolate(Easing easing, KNumber other) {
-		return interpolate(easing, 0F, 1F, other);
 	}
 }

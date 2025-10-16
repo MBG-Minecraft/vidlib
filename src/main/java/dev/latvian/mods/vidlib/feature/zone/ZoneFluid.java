@@ -16,7 +16,7 @@ import java.util.Map;
 public record ZoneFluid(String id, FluidState fluidState, CubeTextures textures) {
 	public static final ZoneFluid NONE = new ZoneFluid("none", Fluids.EMPTY.defaultFluidState(), CubeTextures.EMPTY);
 
-	private static final Map<String, ZoneFluid> MAP = new LinkedHashMap<>();
+	public static final Map<String, ZoneFluid> MAP = new LinkedHashMap<>();
 
 	public static void register(ZoneFluid fluid) {
 		MAP.put(fluid.id, fluid);

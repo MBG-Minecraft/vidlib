@@ -15,7 +15,7 @@ public abstract class ImBuilderEvent<T> extends Event {
 		}
 
 		public void addUnit(String name, T unit) {
-			list.add(new ImBuilderHolder<>(name, () -> new ImBuilder.Unit<>(unit)));
+			list.add(ImBuilderHolder.of(name, new ImBuilderType.Unit<>(new ImBuilder.Unit<>(name, unit))));
 		}
 
 		@Override

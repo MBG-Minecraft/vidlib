@@ -44,7 +44,10 @@ public class BlockPosImBuilder implements ImBuilder<BlockPos>, SelectedPosition.
 		ImGui.text("X");
 		ImGui.sameLine();
 
+		float dragW = Math.max(ImGui.getContentRegionAvailX(), 100F);
+
 		ImGuiUtils.INT.set(data.getX());
+		ImGui.setNextItemWidth(dragW);
 		ImGui.dragInt("###x", ImGuiUtils.INT.getData(), 1);
 		update = update.orItemEdit();
 		data.setX(ImGuiUtils.INT.get());
@@ -68,6 +71,7 @@ public class BlockPosImBuilder implements ImBuilder<BlockPos>, SelectedPosition.
 		ImGui.sameLine();
 
 		ImGuiUtils.INT.set(data.getY());
+		ImGui.setNextItemWidth(dragW);
 		ImGui.dragInt("###y", ImGuiUtils.INT.getData(), 1);
 		update = update.orItemEdit();
 		data.setY(ImGuiUtils.INT.get());
@@ -92,6 +96,7 @@ public class BlockPosImBuilder implements ImBuilder<BlockPos>, SelectedPosition.
 		ImGui.sameLine();
 
 		ImGuiUtils.INT.set(data.getZ());
+		ImGui.setNextItemWidth(dragW);
 		ImGui.dragInt("###z", ImGuiUtils.INT.getData(), 1);
 		update = update.orItemEdit();
 		data.setZ(ImGuiUtils.INT.get());

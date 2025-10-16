@@ -112,9 +112,14 @@ public interface PropCommands {
 			return 0;
 		}
 
-		var props = source.getLevel().getProps();
+		var level = source.getSidedLevel();
+		var props = level.getProps();
 
-		var propResult = props.create(props.context(type, PropSpawnType.USER, source.getLevel().getGameTime()), true, true, initialData == null ? null : source.getLevel().nbtOps(), initialData, prop -> {
+		var propResult = props.create(props.context(type, PropSpawnType.USER, level.getGameTime()), true, true, initialData == null ? null : level.nbtOps(), initialData, prop -> {
+			if (level.isClientSide()) {
+				prop.clientSideOnly = true;
+			}
+
 			prop.setPos(pos.x, pos.y, pos.z);
 			prop.onSpawned(source);
 		});
@@ -128,7 +133,8 @@ public interface PropCommands {
 	}
 
 	static int remove(CommandSourceStack source, Predicate<Prop> predicate) {
-		var props = source.getLevel().getProps();
+		var level = source.getSidedLevel();
+		var props = level.getProps();
 		var list = props.propLists.get(PropListType.LEVEL);
 		int killed = list.removeAll(PropRemoveType.COMMAND, predicate);
 		source.broadcast("Removed " + killed + " props");
@@ -136,7 +142,8 @@ public interface PropCommands {
 	}
 
 	static int move(CommandSourceStack source, int propId, Coordinates coordinates) {
-		var props = source.getLevel().getProps();
+		var level = source.getSidedLevel();
+		var props = level.getProps();
 		var prop = props.levelProps.get(propId);
 
 		if (prop != null) {
@@ -149,7 +156,8 @@ public interface PropCommands {
 	}
 
 	static int rotate(CommandSourceStack source, int propId, Coordinates coordinates) {
-		var props = source.getLevel().getProps();
+		var level = source.getSidedLevel();
+		var props = level.getProps();
 		var prop = props.levelProps.get(propId);
 
 		if (prop != null) {
@@ -163,7 +171,8 @@ public interface PropCommands {
 	}
 
 	static int clone(CommandSourceStack source, int propId) {
-		var props = source.getLevel().getProps();
+		var level = source.getSidedLevel();
+		var props = level.getProps();
 		var prop = props.levelProps.get(propId);
 
 		if (prop != null) {
@@ -174,7 +183,8 @@ public interface PropCommands {
 	}
 
 	static int pause(CommandSourceStack source, int propId, boolean paused) {
-		var props = source.getLevel().getProps();
+		var level = source.getSidedLevel();
+		var props = level.getProps();
 		var prop = props.levelProps.get(propId);
 
 		if (prop != null) {

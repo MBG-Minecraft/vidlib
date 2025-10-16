@@ -10,7 +10,7 @@ public abstract class ScreenEffectInstance {
 	public int duration = 1;
 	public boolean paused = false;
 	public String name = "Unknown";
-	public KNumberVariables variables = KNumberVariables.EMPTY;
+	public KNumberVariables variables = null;
 
 	public abstract ScreenEffectShaderType shaderType();
 

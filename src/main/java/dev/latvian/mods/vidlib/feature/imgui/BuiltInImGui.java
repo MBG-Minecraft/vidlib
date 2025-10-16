@@ -47,6 +47,11 @@ public class BuiltInImGui {
 		list.add(MenuItem.item(ImIcons.CAMERA, "Cutscene Builder", CutsceneBuilderPanel.INSTANCE).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.PAW, "Entity Explorer", EntityExplorerPanel.INSTANCE).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.SEARCH, "Prop Explorer", PropExplorerPanel.INSTANCE).enabled(graphics.isAdmin));
+
+		if (graphics.isReplay) {
+			list.add(MenuItem.item(ImIcons.SEARCH, "Replay Prop Explorer", ReplayPropExplorerPanel.INSTANCE));
+		}
+
 		list.add(MenuItem.item(ImIcons.LAYERS, "Decals", DecalPanel.INSTANCE).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.BLUR, "Screen Effects", ScreenEffectPanel.INSTANCE).enabled(graphics.isAdmin));
 
@@ -145,6 +150,11 @@ public class BuiltInImGui {
 		list.add(MenuItem.item(ImIcons.SUN, "Bloom", Bloom.VISIBLE).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.FRAMED_CUBE, "Ghost Structures", GhostStructure.VISIBLE_CONFIG).enabled(graphics.isAdmin));
 
+		list.add(MenuItem.SEPARATOR);
+
+		list.add(MenuItem.item(ImIcons.SPEED, "FPS", VidLibClientOptions.getShowFPS(), g -> VidLibClientOptions.setShowFPS(!VidLibClientOptions.getShowFPS())).enabled(graphics.inGame));
+		list.add(MenuItem.item(ImIcons.LOCATION, "Coordinates", VidLibClientOptions.getShowCoordinates(), g -> VidLibClientOptions.setShowCoordinates(!VidLibClientOptions.getShowCoordinates())).enabled(graphics.isAdmin));
+
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.ShowDropdown(graphics, list));
 	}).remainOpen(true);
 
@@ -154,7 +164,7 @@ public class BuiltInImGui {
 				var registry = g1.mc.player.connection.levels();
 
 				for (var dimension : registry) {
-					list1.add(MenuItem.item(dimension.location().toString(), g -> g.mc.runClientCommand("execute in " + dimension.location() + " run tp @s ~ ~ ~")).disabled(graphics.isReplay));
+					list1.add(MenuItem.item(dimension.location().toString(), g -> g.mc.runClientCommand("execute in " + dimension.location() + " run tp @s ~ ~ ~")).disabled(g1.isReplay));
 				}
 			}).enabled(graphics.isAdmin));
 		}

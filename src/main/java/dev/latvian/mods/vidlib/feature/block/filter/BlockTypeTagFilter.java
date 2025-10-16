@@ -6,7 +6,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TagKeyImBuilder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
@@ -17,15 +17,20 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 
-public record BlockTypeTagFilter(TagKey<Block> tag) implements BlockFilter, ImBuilderWrapper.BuilderSupplier {
+public record BlockTypeTagFilter(TagKey<Block> tag) implements BlockFilter, ImBuilderWithHolder.Factory {
 	public static final SimpleRegistryType<BlockTypeTagFilter> TYPE = SimpleRegistryType.dynamic("type_tag", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		TagKey.codec(Registries.BLOCK).fieldOf("tag").forGetter(BlockTypeTagFilter::tag)
 	).apply(instance, BlockTypeTagFilter::new)), KLibStreamCodecs.tagKey(Registries.BLOCK).map(BlockTypeTagFilter::new, BlockTypeTagFilter::tag));
 
 	public static class Builder implements BlockFilterImBuilder {
-		public static final ImBuilderHolder<BlockFilter> TYPE = new ImBuilderHolder<>("Type Tag", Builder::new);
+		public static final ImBuilderHolder<BlockFilter> TYPE = ImBuilderHolder.of("Type Tag", Builder::new);
 
 		public final ImBuilder<TagKey<Block>> tag = TagKeyImBuilder.BLOCK_TYPE.get();
+
+		@Override
+		public ImBuilderHolder<?> holder() {
+			return TYPE;
+		}
 
 		@Override
 		public void set(BlockFilter value) {
@@ -66,7 +71,7 @@ public record BlockTypeTagFilter(TagKey<Block> tag) implements BlockFilter, ImBu
 	}
 
 	@Override
-	public ImBuilderHolder<?> getImBuilderHolder() {
-		return Builder.TYPE;
+	public ImBuilderWithHolder<?> createImBuilder() {
+		return new Builder();
 	}
 }

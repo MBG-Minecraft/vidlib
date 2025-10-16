@@ -91,12 +91,13 @@ public class Prop {
 	public final PropType<?> type;
 	public final PropSpawnType spawnType;
 	public final long createdTime;
-	final Set<PropType.PropDataEntry> sync;
+	final Set<PropDataEntry> sync;
 	public Level level;
 	public int id;
 	PropRemoveType removed;
 	private List<Pair<PropData<?, ?>, ImBuilder<?>>> imguiBuilders;
 	Map<PropData<?, ?>, Object> defaultValues = Map.of();
+	boolean clientSideOnly;
 
 	public int prevTick;
 	public int tick;
@@ -162,7 +163,7 @@ public class Prop {
 		snap();
 
 		if (level.isReplayLevel()) {
-			tick = (int) (time - createdTime);
+			tick = Math.max(0, (int) (time - createdTime));
 		}
 
 		tick();
@@ -265,7 +266,7 @@ public class Prop {
 		return Mth.rotLerp(delta, prevRotation.z, rotation.z);
 	}
 
-	final byte[] getDataUpdates(Collection<PropType.PropDataEntry> syncSet) {
+	final byte[] getDataUpdates(Collection<PropDataEntry> syncSet) {
 		return type.writeUpdate(level.registryAccess(), syncSet, this::getData);
 	}
 
@@ -274,7 +275,7 @@ public class Prop {
 	}
 
 	final void update(RegistryAccess registryAccess, byte[] update, boolean allData) {
-		type.readUpdate(id, registryAccess, update, allData, (k, v) -> setData(k, Cast.to(v)));
+		type.readPropUpdate(this, registryAccess, update, allData, (k, v) -> setData(k, Cast.to(v)));
 	}
 
 	public final void remove(PropRemoveType removeType) {
@@ -293,6 +294,10 @@ public class Prop {
 
 	public final boolean isRemoved() {
 		return removed != PropRemoveType.NONE;
+	}
+
+	public final boolean isClientSideOnly() {
+		return clientSideOnly;
 	}
 
 	public void snap() {
@@ -314,7 +319,7 @@ public class Prop {
 	}
 
 	public KNumberContext createWorldNumberContext() {
-		var ctx = level.getGlobalContext().fork(getRelativeTick(1F, 1F), null);
+		var ctx = level.getGlobalContext();
 		ctx.sourcePos = new Vec3(pos.x, pos.y, pos.z);
 		return ctx;
 	}
@@ -521,19 +526,19 @@ public class Prop {
 	public void imgui(ImGraphics graphics, float delta) {
 		graphics.pushStack();
 
-		if (graphics.isReplay) {
+		if (graphics.isReplay && !clientSideOnly) {
 			ImGui.beginDisabled();
 		}
 
 		graphics.setRedButton();
 
-		if (ImGui.button(ImIcons.DELETE + "###remove")) {
-			graphics.mc.runClientCommand("prop remove id " + getIdString());
+		if (ImGui.button(ImIcons.TRASHCAN + "###remove")) {
+			graphics.mc.runClientCommand((clientSideOnly ? "client-prop remove id " : "prop remove id ") + getIdString());
 		}
 
 		ImGuiUtils.hoveredTooltip("Remove");
 
-		if (graphics.isReplay) {
+		if (graphics.isReplay && !clientSideOnly) {
 			ImGui.endDisabled();
 		}
 
@@ -569,18 +574,31 @@ public class Prop {
 
 		ImGui.sameLine();
 
-		if (RecordedProp.LIST != null) {
+		if (RecordedProp.LIST != null && !clientSideOnly) {
 			ImGui.beginDisabled();
 		}
 
 		if (ImGui.button(ImIcons.PASTE + "###clone")) {
-			graphics.mc.runClientCommand("prop clone " + getIdString());
+			graphics.mc.runClientCommand((clientSideOnly ? "client-prop clone " : "prop clone ") + getIdString());
 		}
 
 		ImGuiUtils.hoveredTooltip("Clone");
 
-		if (RecordedProp.LIST != null) {
+		if (RecordedProp.LIST != null && !clientSideOnly) {
 			ImGui.endDisabled();
+		}
+
+		if (graphics.isReplay) {
+			if (DepthOfField.OVERRIDE_ENABLED.get()) {
+				ImGui.sameLine();
+
+				if (ImGui.button(ImIcons.APERTURE + "###focus-dof")) {
+					DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(this, PositionType.EYES));
+					DepthOfFieldPanel.INSTANCE.builder.set(DepthOfField.OVERRIDE);
+				}
+
+				ImGuiUtils.hoveredTooltip("Focus DoF");
+			}
 		}
 
 		ImGui.sameLine();
@@ -591,11 +609,10 @@ public class Prop {
 
 		ImGuiUtils.hoveredTooltip("Copy ID");
 
-		if (graphics.isReplay) {
-			if (DepthOfField.OVERRIDE_ENABLED.get() && ImGui.smallButton(ImIcons.APERTURE + " Focus DoF###focus-dof")) {
-				DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(this, PositionType.EYES));
-				DepthOfFieldPanel.INSTANCE.builder.set(DepthOfField.OVERRIDE);
-			}
+		if (clientSideOnly) {
+			ImGui.sameLine();
+			graphics.button(ImIcons.WARNING + "###client-only", ImColorVariant.ORANGE);
+			ImGuiUtils.hoveredTooltip("Client-Side Only!");
 		}
 
 		if (imguiBuilders == null) {
@@ -612,10 +629,6 @@ public class Prop {
 			}
 
 			imguiBuilders = List.copyOf(imguiBuilders);
-		}
-
-		if (graphics.isReplay) {
-			ImGui.beginChild("Test###data", -1F, 300F);
 		}
 
 		if (ImGui.beginTable("###data", 3, ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.Borders)) {
@@ -636,9 +649,9 @@ public class Prop {
 
 				if (ImGui.checkbox("tick", !paused)) {
 					if (paused) {
-						graphics.mc.runClientCommand("prop unpause " + getIdString());
+						graphics.mc.runClientCommand((clientSideOnly ? "client-prop unpause " : "prop unpause ") + getIdString());
 					} else {
-						graphics.mc.runClientCommand("prop pause " + getIdString());
+						graphics.mc.runClientCommand((clientSideOnly ? "client-prop pause " : "prop pause ") + getIdString());
 					}
 				}
 
@@ -738,10 +751,6 @@ public class Prop {
 
 			ImGui.endTable();
 		}
-
-		if (graphics.isReplay) {
-			ImGui.endChild();
-		}
 	}
 
 	public void playSound(SoundData data, boolean looping, boolean stopImmediately) {
@@ -815,7 +824,7 @@ public class Prop {
 	}
 
 	public DataResult<Prop> copy() {
-		var ctx = new PropContext<>(level.getProps(), type, PropSpawnType.GAME, level.getGameTime());
+		var ctx = level.getProps().context(type, PropSpawnType.GAME, level.getGameTime());
 		var newProp = type.factory().create(ctx);
 
 		for (var entry : type.data()) {

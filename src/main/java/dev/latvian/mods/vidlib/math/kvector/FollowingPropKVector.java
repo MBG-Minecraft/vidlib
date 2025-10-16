@@ -7,7 +7,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.prop.PropIdImBuilder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
@@ -15,7 +15,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public record FollowingPropKVector(int prop, PositionType positionType) implements KVector, ImBuilderWrapper.BuilderSupplier {
+public record FollowingPropKVector(int prop, PositionType positionType) implements KVector, ImBuilderWithHolder.Factory {
 	public static final SimpleRegistryType<FollowingPropKVector> TYPE = SimpleRegistryType.dynamic("following_prop", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.INT.fieldOf("prop").forGetter(FollowingPropKVector::prop),
 		PositionType.CODEC.optionalFieldOf("position_type", PositionType.CENTER).forGetter(FollowingPropKVector::positionType)
@@ -26,13 +26,18 @@ public record FollowingPropKVector(int prop, PositionType positionType) implemen
 	));
 
 	public static class Builder implements KVectorImBuilder {
-		public static final ImBuilderHolder<KVector> TYPE = new ImBuilderHolder<>("Following Prop", Builder::new);
+		public static final ImBuilderHolder<KVector> TYPE = ImBuilderHolder.of("Following Prop", Builder::new);
 
 		public final PropIdImBuilder prop = new PropIdImBuilder();
 		public final ImBuilder<PositionType> positionType = PositionType.BUILDER_TYPE.get();
 
 		public Builder() {
 			this.positionType.set(PositionType.CENTER);
+		}
+
+		@Override
+		public ImBuilderHolder<?> holder() {
+			return TYPE;
 		}
 
 		@Override
@@ -75,7 +80,7 @@ public record FollowingPropKVector(int prop, PositionType positionType) implemen
 	}
 
 	@Override
-	public ImBuilderHolder<?> getImBuilderHolder() {
-		return Builder.TYPE;
+	public ImBuilderWithHolder<?> createImBuilder() {
+		return new Builder();
 	}
 }

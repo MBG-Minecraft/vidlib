@@ -91,6 +91,10 @@ public class ClientProps extends Props<ClientLevel> {
 			var now = level.getGameTime();
 
 			for (var existing : levelProps) {
+				if (existing.clientSideOnly) {
+					continue;
+				}
+
 				var p = RecordedProp.MAP.get(existing.id);
 
 				if (p == null || !p.exists(now)) {

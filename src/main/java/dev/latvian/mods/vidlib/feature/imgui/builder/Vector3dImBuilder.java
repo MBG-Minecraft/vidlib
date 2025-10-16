@@ -56,7 +56,10 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d>, SelectedPosition.
 		ImGui.text("X");
 		ImGui.sameLine();
 
+		float dragW = Math.max(ImGui.getContentRegionAvailX(), 100F);
+
 		ImGuiUtils.FLOAT.set((float) data.x);
+		ImGui.setNextItemWidth(dragW);
 		ImGui.dragFloat("###x", ImGuiUtils.FLOAT.getData(), 0.0625F, -30000000F, 30000000F, "%.4f");
 		update = update.orItemEdit();
 		data.x = ImGuiUtils.FLOAT.get();
@@ -80,6 +83,7 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d>, SelectedPosition.
 		ImGui.sameLine();
 
 		ImGuiUtils.FLOAT.set((float) data.y);
+		ImGui.setNextItemWidth(dragW);
 		ImGui.dragFloat("###y", ImGuiUtils.FLOAT.getData(), 0.0625F, -30000000F, 30000000F, "%.4f");
 		update = update.orItemEdit();
 		data.y = ImGuiUtils.FLOAT.get();
@@ -104,6 +108,7 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d>, SelectedPosition.
 		ImGui.sameLine();
 
 		ImGuiUtils.FLOAT.set((float) data.z);
+		ImGui.setNextItemWidth(dragW);
 		ImGui.dragFloat("###z", ImGuiUtils.FLOAT.getData(), 0.0625F, -30000000F, 30000000F, "%.4f");
 		update = update.orItemEdit();
 		data.z = ImGuiUtils.FLOAT.get();

@@ -44,7 +44,9 @@ public record ColorOverlayEffect(Gradient color) implements ScreenEffect {
 
 		@Override
 		public void update(KNumberContext ctx) {
-			color = vColor.get(ctx.progress);
+			if (ctx.progress != null) {
+				color = vColor.get(ctx.progress.floatValue());
+			}
 		}
 
 		@Override
@@ -58,6 +60,10 @@ public record ColorOverlayEffect(Gradient color) implements ScreenEffect {
 			if (imGradient.isValid()) {
 				vColor = imGradient.build();
 			}
+		}
+
+		public Color getColor(float delta) {
+			return prevColor.lerp(delta, color);
 		}
 	}
 

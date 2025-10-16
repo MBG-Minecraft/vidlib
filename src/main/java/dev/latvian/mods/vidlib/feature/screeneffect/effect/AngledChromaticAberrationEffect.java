@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.screeneffect.effect;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
@@ -54,6 +55,13 @@ public record AngledChromaticAberrationEffect(KNumber strength, KNumber angle) i
 		public void upload(IntArrayList arr, float delta) {
 			arr.add(Float.floatToIntBits(strength.get(delta))); // 1
 			arr.add(Float.floatToIntBits(angle.getRadians(delta))); // 2
+		}
+
+		@Override
+		public void imgui(ImGraphics graphics) {
+			super.imgui(graphics);
+			strength.imgui(graphics, "Strength", "strength");
+			angle.imgui(graphics, "Angle", "angle");
 		}
 	}
 

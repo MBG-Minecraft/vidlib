@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
-import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import imgui.ImGui;
@@ -9,6 +8,7 @@ import imgui.type.ImBoolean;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 public class PropExplorerPanel extends AdminPanel {
 	public static final PropExplorerPanel INSTANCE = new PropExplorerPanel();
@@ -28,28 +28,42 @@ public class PropExplorerPanel extends AdminPanel {
 		}
 
 		var allProps = new ArrayList<Prop>();
+		var clientProps = new ArrayList<Prop>();
 
 		var props = graphics.mc.level.getProps();
 
 		for (var propList : props.propLists.values()) {
 			for (var prop : propList) {
-				allProps.add(prop);
+				(prop.isClientSideOnly() ? clientProps : allProps).add(prop);
 			}
 		}
 
 		var delta = graphics.mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);
 
-		ImGui.text("Props: %,d".formatted(allProps.size()));
 		ImGui.checkbox("Sort by Closest", sortByClosest);
 		ImGui.checkbox("Hide Outline", ClientProps.HIDE_OUTLINE);
 
-		if (sortByClosest.get() && allProps.size() >= 2) {
+		if (sortByClosest.get()) {
 			var cam = graphics.mc.gameRenderer.getMainCamera().getPosition();
 			allProps.sort(Comparator.comparingDouble(p -> p.getPos(delta).distanceToSqr(cam)));
+			clientProps.sort(Comparator.comparingDouble(p -> p.getPos(delta).distanceToSqr(cam)));
 		}
 
 		ImGui.pushItemWidth(-1F);
+		ImGui.separator();
 
+		if (!clientProps.isEmpty()) {
+			ImGui.text("Client Props: %,d".formatted(allProps.size()));
+			content(graphics, clientProps, delta);
+			ImGui.separator();
+		}
+
+		ImGui.text("Props: %,d".formatted(allProps.size()));
+		content(graphics, allProps, delta);
+		ImGui.popItemWidth();
+	}
+
+	public void content(ImGraphics graphics, List<Prop> allProps, float delta) {
 		for (var prop : allProps) {
 			ImGui.pushID(prop.id);
 
@@ -58,21 +72,11 @@ public class PropExplorerPanel extends AdminPanel {
 				prop.imgui(graphics, delta);
 			}
 
+			if (ImGui.isItemHovered()) {
+				ClientProps.OPEN_PROPS.add(prop.id);
+			}
+
 			ImGui.popID();
 		}
-
-		if (graphics.isReplay) {
-			ImGuiUtils.separatorWithText("Replay Props");
-
-			if (graphics.button(ImIcons.ADD + " Add Replay Prop##add-replay-prop", ImColorVariant.GREEN)) {
-				ImGui.openPopup("###add-replay-prop-popup");
-			}
-
-			if (ImGui.beginPopup("###add-replay-prop-popup")) {
-				ImGui.endPopup();
-			}
-		}
-
-		ImGui.popItemWidth();
 	}
 }

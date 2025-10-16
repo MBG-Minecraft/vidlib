@@ -39,5 +39,4 @@ public final class RecordedProp {
 			"remove=" + remove + ", " +
 			"data=" + data + ']';
 	}
-
 }

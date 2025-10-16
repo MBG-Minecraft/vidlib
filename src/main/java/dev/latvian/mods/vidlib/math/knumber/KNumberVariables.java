@@ -39,9 +39,9 @@ public record KNumberVariables(Map<String, KNumber> numbers, Map<String, KVector
 	}
 
 	public KNumberVariables merge(KNumberVariables other) {
-		if (numbers.isEmpty() && vectors.isEmpty()) {
+		if (isEmpty()) {
 			return other;
-		} else if (other.numbers.isEmpty() && other.vectors.isEmpty()) {
+		} else if (other.isEmpty()) {
 			return this;
 		}
 
@@ -57,5 +57,9 @@ public record KNumberVariables(Map<String, KNumber> numbers, Map<String, KVector
 		numbers.putAll(variables.numbers);
 		vectors.clear();
 		vectors.putAll(variables.vectors);
+	}
+
+	public boolean isEmpty() {
+		return numbers.isEmpty() && vectors.isEmpty();
 	}
 }

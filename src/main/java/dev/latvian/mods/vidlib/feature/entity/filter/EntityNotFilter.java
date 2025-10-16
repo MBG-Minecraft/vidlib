@@ -5,20 +5,25 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import imgui.ImGui;
 import net.minecraft.world.entity.Entity;
 
-public record EntityNotFilter(EntityFilter filter) implements EntityFilter, ImBuilderWrapper.BuilderSupplier {
+public record EntityNotFilter(EntityFilter filter) implements EntityFilter, ImBuilderWithHolder.Factory {
 	public static SimpleRegistryType<EntityNotFilter> TYPE = SimpleRegistryType.dynamic("not", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		EntityFilter.CODEC.fieldOf("filter").forGetter(EntityNotFilter::filter)
 	).apply(instance, EntityNotFilter::new)), EntityFilter.STREAM_CODEC.map(EntityNotFilter::new, EntityNotFilter::filter));
 
 	public static class Builder implements EntityFilterImBuilder {
-		public static final ImBuilderHolder<EntityFilter> TYPE = new ImBuilderHolder<>("NOT", Builder::new);
+		public static final ImBuilderHolder<EntityFilter> TYPE = ImBuilderHolder.of("NOT", Builder::new);
 
 		public final ImBuilder<EntityFilter> filter = EntityFilterImBuilder.create();
+
+		@Override
+		public ImBuilderHolder<?> holder() {
+			return TYPE;
+		}
 
 		@Override
 		public void set(EntityFilter value) {
@@ -64,7 +69,7 @@ public record EntityNotFilter(EntityFilter filter) implements EntityFilter, ImBu
 	}
 
 	@Override
-	public ImBuilderHolder<?> getImBuilderHolder() {
-		return Builder.TYPE;
+	public ImBuilderWithHolder<?> createImBuilder() {
+		return new Builder();
 	}
 }

@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
 import dev.latvian.mods.klib.texture.LightUV;
@@ -83,19 +82,18 @@ import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
 import dev.latvian.mods.vidlib.math.knumber.Atan2KNumber;
+import dev.latvian.mods.vidlib.math.knumber.ClampedKNumber;
 import dev.latvian.mods.vidlib.math.knumber.CosKNumber;
-import dev.latvian.mods.vidlib.math.knumber.DayTimeKNumber;
 import dev.latvian.mods.vidlib.math.knumber.FixedKNumber;
-import dev.latvian.mods.vidlib.math.knumber.GameTimeKNumber;
 import dev.latvian.mods.vidlib.math.knumber.IfKNumber;
 import dev.latvian.mods.vidlib.math.knumber.InterpolatedKNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilderEvent;
+import dev.latvian.mods.vidlib.math.knumber.LiteralKNumber;
 import dev.latvian.mods.vidlib.math.knumber.OffsetKNumber;
 import dev.latvian.mods.vidlib.math.knumber.RandomKNumber;
 import dev.latvian.mods.vidlib.math.knumber.ScaledKNumber;
 import dev.latvian.mods.vidlib.math.knumber.ServerDataKNumber;
 import dev.latvian.mods.vidlib.math.knumber.SinKNumber;
-import dev.latvian.mods.vidlib.math.knumber.TimeKNumber;
 import dev.latvian.mods.vidlib.math.knumber.VariableKNumber;
 import dev.latvian.mods.vidlib.math.kvector.DynamicKVector;
 import dev.latvian.mods.vidlib.math.kvector.FixedKVector;
@@ -381,28 +379,6 @@ public class VidLibClientEventHandler {
 				}
 			}
 
-			if (session.currentCutscene != null) {
-				var cc = session.currentCutscene;
-
-				for (var step : cc.steps) {
-					int start = step.start;
-					int length = step.length;
-
-					if (step.render != null && !step.render.isEmpty() && cc.totalTick >= start && cc.totalTick <= start + length) {
-						float tick = Math.max(cc.totalTick - 1 + delta, 0F);
-						var progress = KMath.clamp((tick - start) / (float) length, 0F, 1F);
-
-						if (progress < 1F) {
-							var target = step.prevRenderTarget == null || step.renderTarget == null ? cc.prevTarget.lerp(cc.target, delta) : step.prevRenderTarget.lerp(step.renderTarget, delta);
-
-							for (var render : step.render) {
-								render.render(mc, frame, delta, progress, target);
-							}
-						}
-					}
-				}
-			}
-
 			if (!session.serverDataMap.get(InternalServerData.HIDE_PLUMBOBS, mc.level.getGameTime())) {
 				PlumbobRenderer.render(mc, frame);
 			}
@@ -496,7 +472,7 @@ public class VidLibClientEventHandler {
 			ScreenText.RENDER.topRight.add(mc.fpsString.split(" ", 2)[0] + " FPS");
 		}
 
-		if (VidLibClientOptions.getShowCoordinates() && mc.player.hasPermissions(2)) {
+		if (VidLibClientOptions.getShowCoordinates() && (mc.isLocalServer() || mc.player.hasPermissions(2))) {
 			var pos = mc.player.getPosition(delta);
 			var x = Component.literal("%.01f".formatted(pos.x)).withColor(0xFF7070);
 			var y = Component.literal("%.01f".formatted(pos.y)).withColor(0x7CFF70);
@@ -756,6 +732,11 @@ public class VidLibClientEventHandler {
 	@SubscribeEvent
 	public static void numberImBuilders(KNumberImBuilderEvent event) {
 		event.add(FixedKNumber.Builder.TYPE);
+
+		for (var literal : LiteralKNumber.values()) {
+			event.addUnit(literal.displayName, literal);
+		}
+
 		event.add(InterpolatedKNumber.Builder.TYPE);
 		event.add(OffsetKNumber.Builder.TYPE);
 		event.add(ScaledKNumber.Builder.TYPE);
@@ -763,12 +744,10 @@ public class VidLibClientEventHandler {
 		event.add(IfKNumber.Builder.TYPE);
 		event.add(ServerDataKNumber.Builder.TYPE);
 		event.add(RandomKNumber.Builder.TYPE);
-		event.addUnit("Time", TimeKNumber.INSTANCE);
-		event.addUnit("Game Time", GameTimeKNumber.INSTANCE);
-		event.addUnit("Day Time", DayTimeKNumber.INSTANCE);
 		event.add(SinKNumber.Builder.TYPE);
 		event.add(CosKNumber.Builder.TYPE);
 		event.add(Atan2KNumber.Builder.TYPE);
+		event.add(ClampedKNumber.Builder.TYPE);
 	}
 
 	@SubscribeEvent

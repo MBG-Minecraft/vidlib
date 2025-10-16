@@ -8,4 +8,8 @@ public record ClientCommandHolder(String name, Callback callback) {
 	public interface Callback {
 		void register(LiteralArgumentBuilder<CommandSourceStack> command, CommandBuildContext buildContext);
 	}
+
+	public ClientCommandHolder(String name, ServerCommandHolder holder) {
+		this(name, (command, context) -> holder.callback().register(command, context));
+	}
 }

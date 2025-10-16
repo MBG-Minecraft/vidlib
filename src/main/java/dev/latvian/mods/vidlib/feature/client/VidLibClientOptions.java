@@ -91,6 +91,11 @@ public interface VidLibClientOptions {
 		return SHOW_FPS.get();
 	}
 
+	static void setShowFPS(boolean value) {
+		SHOW_FPS.set(value);
+		Minecraft.getInstance().options.save();
+	}
+
 	static boolean getShowAnchor() {
 		return SHOW_ANCHOR.get();
 	}
@@ -113,6 +118,11 @@ public interface VidLibClientOptions {
 
 	static boolean getShowCoordinates() {
 		return SHOW_COORDINATES.get();
+	}
+
+	static void setShowCoordinates(boolean value) {
+		SHOW_COORDINATES.set(value);
+		Minecraft.getInstance().options.save();
 	}
 
 	static void process(Options.FieldAccess accessor) {

@@ -7,7 +7,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
@@ -15,7 +15,7 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
 import imgui.ImGui;
 import net.minecraft.world.phys.Vec3;
 
-public record DynamicKVector(KNumber x, KNumber y, KNumber z) implements KVector, ImBuilderWrapper.BuilderSupplier {
+public record DynamicKVector(KNumber x, KNumber y, KNumber z) implements KVector, ImBuilderWithHolder.Factory {
 	public static final SimpleRegistryType<DynamicKVector> TYPE = SimpleRegistryType.dynamic("dynamic", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.fieldOf("x").forGetter(DynamicKVector::x),
 		KNumber.CODEC.fieldOf("y").forGetter(DynamicKVector::y),
@@ -28,11 +28,16 @@ public record DynamicKVector(KNumber x, KNumber y, KNumber z) implements KVector
 	));
 
 	public static class Builder implements KVectorImBuilder {
-		public static final ImBuilderHolder<KVector> TYPE = new ImBuilderHolder<>("Dynamic", Builder::new);
+		public static final ImBuilderHolder<KVector> TYPE = ImBuilderHolder.of("Dynamic", Builder::new);
 
 		public final ImBuilder<KNumber> x = KNumberImBuilder.create(0D);
 		public final ImBuilder<KNumber> y = KNumberImBuilder.create(0D);
 		public final ImBuilder<KNumber> z = KNumberImBuilder.create(0D);
+
+		@Override
+		public ImBuilderHolder<?> holder() {
+			return TYPE;
+		}
 
 		@Override
 		public void set(KVector value) {
@@ -84,7 +89,7 @@ public record DynamicKVector(KNumber x, KNumber y, KNumber z) implements KVector
 	}
 
 	@Override
-	public ImBuilderHolder<?> getImBuilderHolder() {
-		return Builder.TYPE;
+	public ImBuilderWithHolder<?> createImBuilder() {
+		return new Builder();
 	}
 }

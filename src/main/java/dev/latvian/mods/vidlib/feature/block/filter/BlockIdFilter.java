@@ -6,7 +6,7 @@ import dev.latvian.mods.vidlib.feature.block.BlockImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -15,15 +15,20 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 
-public record BlockIdFilter(Block block) implements BlockFilter, ImBuilderWrapper.BuilderSupplier {
+public record BlockIdFilter(Block block) implements BlockFilter, ImBuilderWithHolder.Factory {
 	public static final SimpleRegistryType<BlockIdFilter> TYPE = SimpleRegistryType.dynamic("block", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		BuiltInRegistries.BLOCK.byNameCodec().fieldOf("block").forGetter(BlockIdFilter::block)
 	).apply(instance, BlockIdFilter::new)), KLibStreamCodecs.registry(BuiltInRegistries.BLOCK).map(BlockIdFilter::new, BlockIdFilter::block));
 
 	public static class Builder implements BlockFilterImBuilder {
-		public static final ImBuilderHolder<BlockFilter> TYPE = new ImBuilderHolder<>("ID", Builder::new);
+		public static final ImBuilderHolder<BlockFilter> TYPE = ImBuilderHolder.of("ID", Builder::new);
 
 		public final BlockImBuilder block = new BlockImBuilder(null);
+
+		@Override
+		public ImBuilderHolder<?> holder() {
+			return TYPE;
+		}
 
 		@Override
 		public void set(BlockFilter value) {
@@ -64,7 +69,7 @@ public record BlockIdFilter(Block block) implements BlockFilter, ImBuilderWrappe
 	}
 
 	@Override
-	public ImBuilderHolder<?> getImBuilderHolder() {
-		return Builder.TYPE;
+	public ImBuilderWithHolder<?> createImBuilder() {
+		return new Builder();
 	}
 }

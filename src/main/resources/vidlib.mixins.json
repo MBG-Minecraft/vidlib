@@ -124,7 +124,8 @@
 		"SkyRendererMixin",
 		"TextureManagerMixin",
 		"WeatherEffectRendererMixin",
-		"WindowMixin"
+		"WindowMixin",
+		"neo.ClientCommandSourceStackMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1,

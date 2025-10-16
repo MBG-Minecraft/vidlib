@@ -282,4 +282,8 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	default boolean isServerNeoForge() {
 		return true;
 	}
+
+	default void runServerCommand(String command) {
+		vl$self().getCommands().performPrefixedCommand(vl$self().createCommandSourceStack(), command);
+	}
 }

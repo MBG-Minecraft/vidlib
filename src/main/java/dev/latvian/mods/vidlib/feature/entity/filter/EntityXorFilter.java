@@ -6,12 +6,12 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import imgui.ImGui;
 import net.minecraft.world.entity.Entity;
 
-public record EntityXorFilter(EntityFilter a, EntityFilter b) implements EntityFilter, ImBuilderWrapper.BuilderSupplier {
+public record EntityXorFilter(EntityFilter a, EntityFilter b) implements EntityFilter, ImBuilderWithHolder.Factory {
 	public static SimpleRegistryType<EntityXorFilter> TYPE = SimpleRegistryType.dynamic("xor", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		EntityFilter.CODEC.fieldOf("a").forGetter(EntityXorFilter::a),
 		EntityFilter.CODEC.fieldOf("b").forGetter(EntityXorFilter::b)
@@ -22,10 +22,15 @@ public record EntityXorFilter(EntityFilter a, EntityFilter b) implements EntityF
 	));
 
 	public static class Builder implements EntityFilterImBuilder {
-		public static final ImBuilderHolder<EntityFilter> TYPE = new ImBuilderHolder<>("XOR", Builder::new);
+		public static final ImBuilderHolder<EntityFilter> TYPE = ImBuilderHolder.of("XOR", Builder::new);
 
 		public final ImBuilder<EntityFilter> a = EntityFilterImBuilder.create();
 		public final ImBuilder<EntityFilter> b = EntityFilterImBuilder.create();
+
+		@Override
+		public ImBuilderHolder<?> holder() {
+			return TYPE;
+		}
 
 		@Override
 		public void set(EntityFilter value) {
@@ -67,7 +72,7 @@ public record EntityXorFilter(EntityFilter a, EntityFilter b) implements EntityF
 	}
 
 	@Override
-	public ImBuilderHolder<?> getImBuilderHolder() {
-		return Builder.TYPE;
+	public ImBuilderWithHolder<?> createImBuilder() {
+		return new Builder();
 	}
 }

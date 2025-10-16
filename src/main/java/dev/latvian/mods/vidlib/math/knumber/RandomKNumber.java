@@ -7,11 +7,15 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
+import dev.latvian.mods.vidlib.feature.imgui.node.NodePin;
+import dev.latvian.mods.vidlib.feature.imgui.node.NodePinType;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import org.jetbrains.annotations.Nullable;
 
-public record RandomKNumber(KNumber min, KNumber max) implements KNumber, ImBuilderWrapper.BuilderSupplier {
+import java.util.List;
+
+public record RandomKNumber(KNumber min, KNumber max) implements KNumber, ImBuilderWithHolder.Factory {
 	public static final SimpleRegistryType<RandomKNumber> TYPE = SimpleRegistryType.dynamic("random", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.optionalFieldOf("min", KNumber.ZERO).forGetter(RandomKNumber::min),
 		KNumber.CODEC.optionalFieldOf("max", KNumber.ONE).forGetter(RandomKNumber::max)
@@ -22,10 +26,21 @@ public record RandomKNumber(KNumber min, KNumber max) implements KNumber, ImBuil
 	));
 
 	public static class Builder implements KNumberImBuilder {
-		public static final ImBuilderHolder<KNumber> TYPE = new ImBuilderHolder<>("Random [min, max)", Builder::new);
+		public static final ImBuilderHolder<KNumber> TYPE = ImBuilderHolder.of("Random [min, max)", Builder::new);
+
+		public static final List<NodePin> PINS = List.of(
+			NodePinType.NUMBER.required("Min"),
+			NodePinType.NUMBER.required("Max"),
+			NodePinType.NUMBER.output("Out")
+		);
 
 		public final ImBuilder<KNumber> min = KNumberImBuilder.create(0D);
 		public final ImBuilder<KNumber> max = KNumberImBuilder.create(0D);
+
+		@Override
+		public ImBuilderHolder<?> holder() {
+			return TYPE;
+		}
 
 		@Override
 		public void set(KNumber value) {
@@ -44,6 +59,11 @@ public record RandomKNumber(KNumber min, KNumber max) implements KNumber, ImBuil
 		}
 
 		@Override
+		public ImUpdate nodeImgui(ImGraphics graphics) {
+			return ImUpdate.NONE;
+		}
+
+		@Override
 		public boolean isValid() {
 			return min.isValid() && max.isValid();
 		}
@@ -51,6 +71,11 @@ public record RandomKNumber(KNumber min, KNumber max) implements KNumber, ImBuil
 		@Override
 		public KNumber build() {
 			return new RandomKNumber(min.build(), max.build());
+		}
+
+		@Override
+		public List<NodePin> getNodePins() {
+			return PINS;
 		}
 	}
 
@@ -73,7 +98,7 @@ public record RandomKNumber(KNumber min, KNumber max) implements KNumber, ImBuil
 	}
 
 	@Override
-	public ImBuilderHolder<?> getImBuilderHolder() {
-		return Builder.TYPE;
+	public ImBuilderWithHolder<?> createImBuilder() {
+		return new Builder();
 	}
 }

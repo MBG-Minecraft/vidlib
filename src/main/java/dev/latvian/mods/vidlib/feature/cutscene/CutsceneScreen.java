@@ -5,10 +5,14 @@ import dev.latvian.mods.klib.math.Rotation;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.ArrayList;
 
 public class CutsceneScreen extends Screen {
 	public final Screen previousScreen;
@@ -49,29 +53,41 @@ public class CutsceneScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-		int barSize = 35;
+		var barVisibility = Mth.lerp(delta, clientCutscene.state.prevBarVisibility, clientCutscene.state.barVisibility);
 
-		var tb = clientCutscene.topBar;
+		if (barVisibility > 0F) {
+			int barSize = 35;
 
-		if (tb != null) {
 			graphics.fill(0, 0, width, barSize, 0xFF000000);
 
-			for (int i = 0; i < tb.size(); i++) {
-				int x = (width - font.width(tb.get(i))) / 2;
-				int y = (barSize - tb.size() * 10) / 2 + i * 10;
-				graphics.drawString(font, tb.get(i), x, y, 0xFFFFFFFF, true);
+			if (!clientCutscene.state.topBar.isEmpty()) {
+				var tb = new ArrayList<FormattedCharSequence>(clientCutscene.state.topBar.size());
+
+				for (var line : clientCutscene.state.topBar) {
+					tb.addAll(font.split(line, width - 60));
+				}
+
+				for (int i = 0; i < tb.size(); i++) {
+					int x = (width - font.width(tb.get(i))) / 2;
+					int y = (barSize - tb.size() * 10) / 2 + i * 10;
+					graphics.drawString(font, tb.get(i), x, y, 0xFFFFFFFF, true);
+				}
 			}
-		}
 
-		var bb = clientCutscene.bottomBar;
-
-		if (bb != null) {
 			graphics.fill(0, height - barSize, width, height, 0xFF000000);
 
-			for (int i = 0; i < bb.size(); i++) {
-				int x = (width - font.width(bb.get(i))) / 2;
-				int y = (barSize - bb.size() * 10) / 2 + i * 10;
-				graphics.drawString(font, bb.get(i), x, height - barSize + y, 0xFFFFFFFF, true);
+			if (!clientCutscene.state.bottomBar.isEmpty()) {
+				var bb = new ArrayList<FormattedCharSequence>(clientCutscene.state.bottomBar.size());
+
+				for (var line : clientCutscene.state.bottomBar) {
+					bb.addAll(font.split(line, width - 60));
+				}
+
+				for (int i = 0; i < bb.size(); i++) {
+					int x = (width - font.width(bb.get(i))) / 2;
+					int y = (barSize - bb.size() * 10) / 2 + i * 10;
+					graphics.drawString(font, bb.get(i), x, height - barSize + y, 0xFFFFFFFF, true);
+				}
 			}
 		}
 	}

@@ -4,10 +4,7 @@ import dev.latvian.mods.vidlib.feature.imgui.AdminPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
-import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 import imgui.ImGui;
 import net.minecraft.world.phys.Vec2;
 
@@ -15,8 +12,6 @@ public class ChromaticAberrationPanel extends AdminPanel {
 	public static final ChromaticAberrationPanel INSTANCE = new ChromaticAberrationPanel();
 
 	public static final MenuItem MENU_ITEM = MenuItem.item(ImIcons.ANIMATION, "Chromatic Aberration", INSTANCE);
-
-	public final ImBuilderWrapper<KVector> focusPos = KVectorImBuilder.create();
 
 	private ChromaticAberrationPanel() {
 		super("chromatic-aberration", "Chromatic Aberration");

@@ -19,7 +19,8 @@ public record SyncRegistryPayload(SyncedRegistry<?> registry, Map<?, ?> values) 
 	public static final VidLibPacketType<SyncRegistryPayload> TYPE = VidLibPacketType.internal("sync_registry", new StreamCodec<>() {
 		@Override
 		public SyncRegistryPayload decode(RegistryFriendlyByteBuf buf) {
-			var registry = SyncedRegistry.ALL.get(ID.idFromString(buf.readUtf()));
+			var registryKey = ID.idFromString(buf.readUtf());
+			var registry = SyncedRegistry.ALL.get(registryKey);
 			int size = buf.readVarInt();
 
 			if (size == 0) {
@@ -34,7 +35,7 @@ public record SyncRegistryPayload(SyncedRegistry<?> registry, Map<?, ?> values) 
 					var value = registry.value().decode(buf);
 					map.put(id, value);
 				} catch (Exception ex) {
-					VidLib.LOGGER.error("Failed to decode registry value #" + i, ex);
+					VidLib.LOGGER.error("Failed to decode registry " + registryKey + " value #" + i, ex);
 				}
 			}
 
@@ -43,19 +44,19 @@ public record SyncRegistryPayload(SyncedRegistry<?> registry, Map<?, ?> values) 
 
 		@Override
 		public void encode(RegistryFriendlyByteBuf buf, SyncRegistryPayload value) {
-			buf.writeUtf(ID.idToString(value.registry.registry().id));
+			var registryKey = value.registry.registry().id;
+			buf.writeUtf(ID.idToString(registryKey));
 
 			buf.writeVarInt(value.values.size());
 
 			for (var entry : value.values.entrySet()) {
-				Object key = null;
+				var key = entry.getKey();
 
 				try {
-					key = entry.getKey();
 					buf.writeUtf(ID.idToString(Cast.to(key)));
 					value.registry.value().encode(buf, Cast.to(entry.getValue()));
 				} catch (Exception ex) {
-					VidLib.LOGGER.error("Failed to encode registry value '" + key + "': " + entry, ex);
+					VidLib.LOGGER.error("Failed to encode registry " + registryKey + " value '" + key + "': " + entry, ex);
 				}
 			}
 		}

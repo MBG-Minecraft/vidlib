@@ -22,7 +22,7 @@ public record UpdatePropRequestPayload(PropListType type, int id, byte[] update)
 
 	@Nullable
 	public static UpdatePropRequestPayload of(Prop prop, Collection<PropData<?, ?>> keys) {
-		var data = new ArrayList<PropType.PropDataEntry>(keys.size());
+		var data = new ArrayList<PropDataEntry>(keys.size());
 
 		for (var key : keys) {
 			var entry = prop.type.reverseData().get(key);

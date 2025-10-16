@@ -8,13 +8,13 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public record FollowingEntityKVector(EntityFilter entity, PositionType positionType) implements KVector, ImBuilderWrapper.BuilderSupplier {
+public record FollowingEntityKVector(EntityFilter entity, PositionType positionType) implements KVector, ImBuilderWithHolder.Factory {
 	public static final SimpleRegistryType<FollowingEntityKVector> TYPE = SimpleRegistryType.dynamic("following_entity", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		EntityFilter.CODEC.fieldOf("entity").forGetter(FollowingEntityKVector::entity),
 		PositionType.CODEC.optionalFieldOf("position_type", PositionType.CENTER).forGetter(FollowingEntityKVector::positionType)
@@ -25,13 +25,18 @@ public record FollowingEntityKVector(EntityFilter entity, PositionType positionT
 	));
 
 	public static class Builder implements KVectorImBuilder {
-		public static final ImBuilderHolder<KVector> TYPE = new ImBuilderHolder<>("Following Entity", Builder::new);
+		public static final ImBuilderHolder<KVector> TYPE = ImBuilderHolder.of("Following Entity", Builder::new);
 
 		public final ImBuilder<EntityFilter> entity = EntityFilterImBuilder.create();
 		public final ImBuilder<PositionType> positionType = PositionType.BUILDER_TYPE.get();
 
 		public Builder() {
 			this.positionType.set(PositionType.CENTER);
+		}
+
+		@Override
+		public ImBuilderHolder<?> holder() {
+			return TYPE;
 		}
 
 		@Override
@@ -74,7 +79,7 @@ public record FollowingEntityKVector(EntityFilter entity, PositionType positionT
 	}
 
 	@Override
-	public ImBuilderHolder<?> getImBuilderHolder() {
-		return Builder.TYPE;
+	public ImBuilderWithHolder<?> createImBuilder() {
+		return new Builder();
 	}
 }

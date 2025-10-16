@@ -30,13 +30,13 @@ public record ColorEffect(Gradient color, boolean additive) implements ScreenEff
 
 	public static class Inst extends ScreenEffectInstance {
 		public Gradient vColor;
-		public boolean vAdditive;
+		public boolean additive;
 
 		private Color color, prevColor;
 
-		public Inst(Gradient vColor, boolean vAdditive) {
+		public Inst(Gradient vColor, boolean additive) {
 			this.vColor = vColor;
-			this.vAdditive = vAdditive;
+			this.additive = additive;
 		}
 
 		@Override
@@ -52,13 +52,15 @@ public record ColorEffect(Gradient color, boolean additive) implements ScreenEff
 
 		@Override
 		public void update(KNumberContext ctx) {
-			color = vColor.get(ctx.progress);
+			if (ctx.progress != null) {
+				color = vColor.get(ctx.progress.floatValue());
+			}
 		}
 
 		@Override
 		public void upload(IntArrayList arr, float delta) {
 			arr.add(prevColor.lerp(delta, color).argb()); // 1
-			arr.add(vAdditive ? 1 : 0); // 2
+			arr.add(additive ? 1 : 0); // 2
 		}
 
 		@Override
@@ -73,8 +75,8 @@ public record ColorEffect(Gradient color, boolean additive) implements ScreenEff
 				vColor = imColor.build();
 			}
 
-			if (ImGui.checkbox("Additive", vAdditive)) {
-				vAdditive = !vAdditive;
+			if (ImGui.checkbox("Additive", additive)) {
+				additive = !additive;
 			}
 		}
 	}

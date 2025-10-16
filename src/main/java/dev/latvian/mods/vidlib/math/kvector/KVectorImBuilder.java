@@ -2,19 +2,19 @@ package dev.latvian.mods.vidlib.math.kvector;
 
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import org.jetbrains.annotations.Nullable;
 
-public interface KVectorImBuilder extends ImBuilder<KVector> {
+public interface KVectorImBuilder extends ImBuilderWithHolder<KVector> {
 	ImBuilderWrapper.Factory<KVector> IMGUI_BUILDER_FACTORY = new ImBuilderWrapper.Factory<>(KVectorImBuilderEvent::new);
 	ImBuilderType<KVector> TYPE = KVectorImBuilder::create;
 
-	static ImBuilderWrapper<KVector> create() {
-		return new ImBuilderWrapper<>(IMGUI_BUILDER_FACTORY);
+	static ImBuilder<KVector> create(@Nullable KVector defaultValue) {
+		return IMGUI_BUILDER_FACTORY.create(defaultValue);
 	}
 
-	static ImBuilderWrapper<KVector> create(KVector defaultValue) {
-		var builder = create();
-		builder.set(defaultValue);
-		return builder;
+	static ImBuilder<KVector> create() {
+		return create(null);
 	}
 }

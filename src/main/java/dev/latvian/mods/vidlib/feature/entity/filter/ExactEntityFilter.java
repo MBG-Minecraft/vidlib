@@ -5,7 +5,7 @@ import dev.latvian.mods.klib.util.IntOrUUID;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.UUIDImBuilder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import imgui.ImGui;
@@ -14,15 +14,20 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
-public record ExactEntityFilter(IntOrUUID entityId) implements EntityFilter, ImBuilderWrapper.BuilderSupplier {
+public record ExactEntityFilter(IntOrUUID entityId) implements EntityFilter, ImBuilderWithHolder.Factory {
 	public static SimpleRegistryType<ExactEntityFilter> TYPE = SimpleRegistryType.dynamic("exact", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		IntOrUUID.DATA_TYPE.codec().fieldOf("entity_id").forGetter(ExactEntityFilter::entityId)
 	).apply(instance, ExactEntityFilter::new)), IntOrUUID.DATA_TYPE.streamCodec().map(ExactEntityFilter::new, ExactEntityFilter::entityId));
 
 	public static class IDBuilder implements EntityFilterImBuilder {
-		public static final ImBuilderHolder<EntityFilter> TYPE = new ImBuilderHolder<>("Network ID", IDBuilder::new);
+		public static final ImBuilderHolder<EntityFilter> TYPE = ImBuilderHolder.of("Network ID", IDBuilder::new);
 
 		public final ImInt id = new ImInt();
+
+		@Override
+		public ImBuilderHolder<?> holder() {
+			return TYPE;
+		}
 
 		@Override
 		public void set(EntityFilter value) {
@@ -49,9 +54,14 @@ public record ExactEntityFilter(IntOrUUID entityId) implements EntityFilter, ImB
 	}
 
 	public static class UUIDBuilder implements EntityFilterImBuilder {
-		public static final ImBuilderHolder<EntityFilter> TYPE = new ImBuilderHolder<>("UUID", UUIDBuilder::new);
+		public static final ImBuilderHolder<EntityFilter> TYPE = ImBuilderHolder.ofDefault("UUID", UUIDBuilder::new);
 
 		public final UUIDImBuilder uuid = new UUIDImBuilder();
+
+		@Override
+		public ImBuilderHolder<?> holder() {
+			return TYPE;
+		}
 
 		@Override
 		public void set(EntityFilter value) {
@@ -93,7 +103,7 @@ public record ExactEntityFilter(IntOrUUID entityId) implements EntityFilter, ImB
 	}
 
 	@Override
-	public ImBuilderHolder<?> getImBuilderHolder() {
-		return entityId.optionalUUID().isPresent() ? UUIDBuilder.TYPE : IDBuilder.TYPE;
+	public ImBuilderWithHolder<?> createImBuilder() {
+		return entityId.optionalUUID().isPresent() ? new UUIDBuilder() : new IDBuilder();
 	}
 }

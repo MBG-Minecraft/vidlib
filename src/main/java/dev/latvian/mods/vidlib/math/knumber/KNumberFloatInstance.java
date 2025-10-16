@@ -22,7 +22,11 @@ public class KNumberFloatInstance {
 	}
 
 	public void update(KNumberContext ctx) {
-		floatValue = (float) value.getOr(ctx, 0D);
+		var v = value.get(ctx);
+
+		if (v != null) {
+			floatValue = v.floatValue();
+		}
 	}
 
 	public float get(float delta) {
