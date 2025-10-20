@@ -29,7 +29,7 @@ public class Decal {
 		d.startColor = DANGER_INNER_COLOR.withAlpha(100);
 		d.endColor = DANGER_OUTER_COLOR.withAlpha(100);
 		d.setHeight(0.1875F);
-		d.grid = 1F;
+		d.fillSize = 1F;
 		d.terrain = true;
 		return d;
 	}
@@ -39,8 +39,9 @@ public class Decal {
 	public Vector3d position;
 	public float start;
 	public float end;
-	public float grid;
-	public float thickness;
+	public DecalFillType fillType;
+	public float fillSize;
+	public float fillThickness;
 	public float heightScale;
 	public float rotation;
 	public Color startColor;
@@ -55,8 +56,9 @@ public class Decal {
 		this.position = new Vector3d();
 		this.start = 0F;
 		this.end = 1F;
-		this.grid = 0F;
-		this.thickness = 0.0625F;
+		this.fillType = DecalFillType.SOLID;
+		this.fillSize = 1F;
+		this.fillThickness = 0.0625F;
 		this.heightScale = 1F;
 		this.rotation = 0F;
 		this.startColor = Color.WHITE;
@@ -72,8 +74,9 @@ public class Decal {
 		this.position = other.position;
 		this.start = other.start;
 		this.end = other.end;
-		this.grid = other.grid;
-		this.thickness = other.thickness;
+		this.fillType = other.fillType;
+		this.fillSize = other.fillSize;
+		this.fillThickness = other.fillThickness;
 		this.heightScale = other.heightScale;
 		this.rotation = other.rotation;
 		this.startColor = other.startColor;
@@ -107,11 +110,12 @@ public class Decal {
 
 	public void addToList(List<Decal> list) {
 		if (type == DecalType.DANGER) {
-			if (grid > 0F) {
+			if (fillSize > 0F) {
 				var g = new Decal(this);
 				g.type = DecalType.CYLINDER;
 				g.startColor = startColor.withAlpha(0);
-				g.end = end - thickness;
+				g.end = end - fillThickness;
+				g.fillType = DecalFillType.GRID;
 
 				if (g.isVisible()) {
 					list.add(g);
@@ -120,9 +124,10 @@ public class Decal {
 
 			var e = new Decal(this);
 			e.type = DecalType.CYLINDER;
-			e.start = e.end - thickness;
+			e.start = e.end - fillThickness;
 			e.startColor = endColor;
-			e.grid = 0F;
+			e.fillType = DecalFillType.SOLID;
+			e.fillSize = 0F;
 
 			if (e.isVisible()) {
 				list.add(e);
@@ -130,7 +135,8 @@ public class Decal {
 
 			var f = new Decal(this);
 			f.type = DecalType.CYLINDER;
-			f.grid = 0F;
+			f.fillType = DecalFillType.SOLID;
+			f.fillSize = 0F;
 
 			if (f.isVisible()) {
 				list.add(f);
@@ -157,8 +163,9 @@ public class Decal {
 
 		arr.add(startColor.argb()); // 8
 		arr.add(endColor.argb()); // 9
-		arr.add(Float.floatToIntBits(grid)); // 10
-		arr.add(Float.floatToIntBits(thickness)); // 11
+		arr.add(fillType.shaderId & 7); // 10
+		arr.add(Float.floatToIntBits(fillSize)); // 11
+		arr.add(Float.floatToIntBits(fillThickness)); // 12
 	}
 
 	public void imgui(ImGraphics graphics, Collection<Decal> decals) {
@@ -178,6 +185,12 @@ public class Decal {
 			}
 		} else {
 			Vector3dImBuilder.imgui(graphics, position, SelectedPosition.UNIT);
+		}
+
+		ImGuiUtils.BOOLEAN.set(terrain);
+
+		if (ImGui.checkbox("Terrain###terrain", ImGuiUtils.BOOLEAN)) {
+			terrain = ImGuiUtils.BOOLEAN.get();
 		}
 
 		ImGui.text("Size");
@@ -227,23 +240,36 @@ public class Decal {
 		Color4ImBuilder.UNIT.imguiKey(graphics, "End Color", "end-color");
 		endColor = Color4ImBuilder.UNIT.build();
 
-		ImGui.text("Grid");
+		ImGui.alignTextToFramePadding();
+		ImGui.text("Fill");
+		ImGui.sameLine();
 
-		ImGuiUtils.FLOAT.set(grid);
-		ImGui.sliderFloat("###grid", ImGuiUtils.FLOAT.getData(), 0F, 4F, "%f");
-		grid = ImGuiUtils.FLOAT.get();
+		DecalFillType.UNIT[0] = fillType;
+		graphics.combo("###fill-type", DecalFillType.UNIT, DecalFillType.VALUES);
+		fillType = DecalFillType.UNIT[0];
 
-		if (grid > 0F) {
-			ImGuiUtils.FLOAT.set(thickness);
-			ImGui.sliderFloat("###thickness", ImGuiUtils.FLOAT.getData(), 0F, 0.5F, "%f");
-			thickness = ImGuiUtils.FLOAT.get();
+		if (fillType != DecalFillType.SOLID) {
+			ImGui.alignTextToFramePadding();
+			graphics.smallText("Size");
+			ImGui.sameLine();
+			ImGuiUtils.FLOAT.set(fillSize);
+			ImGui.sliderFloat("###fill-size", ImGuiUtils.FLOAT.getData(), 0F, 4F, "%f");
+			fillSize = ImGuiUtils.FLOAT.get();
+
+			ImGui.alignTextToFramePadding();
+			graphics.smallText("Thickness");
+			ImGui.sameLine();
+			ImGuiUtils.FLOAT.set(fillThickness);
+			ImGui.sliderFloat("###fill-thickness", ImGuiUtils.FLOAT.getData(), 0F, 0.5F, "%f");
+			fillThickness = ImGuiUtils.FLOAT.get();
 		}
 
-		ImGuiUtils.BOOLEAN.set(terrain);
-
-		if (ImGui.checkbox("Terrain###terrain", ImGuiUtils.BOOLEAN)) {
-			terrain = ImGuiUtils.BOOLEAN.get();
-		}
+		ImGui.alignTextToFramePadding();
+		ImGui.text("Rotation");
+		ImGui.sameLine();
+		ImGuiUtils.FLOAT.set(rotation);
+		ImGui.sliderFloat("###rotation", ImGuiUtils.FLOAT.getData(), -180F, 180F, "%f");
+		rotation = ImGuiUtils.FLOAT.get();
 	}
 
 	public float getHeight() {

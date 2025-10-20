@@ -8,8 +8,14 @@ import org.jetbrains.annotations.Nullable;
 public interface EntityFilterImBuilder extends ImBuilderWithHolder<EntityFilter> {
 	ImBuilderWrapper.Factory<EntityFilter> IMGUI_BUILDER_FACTORY = new ImBuilderWrapper.Factory<>(EntityFilterImBuilderEvent::new);
 
-	static ImBuilder<EntityFilter> create(@Nullable EntityFilter defaultFilter) {
-		return IMGUI_BUILDER_FACTORY.create(defaultFilter);
+	static ImBuilder<EntityFilter> create(@Nullable EntityFilter defaultValue) {
+		var builder = IMGUI_BUILDER_FACTORY.get();
+
+		if (defaultValue != null) {
+			builder.set(defaultValue);
+		}
+
+		return builder;
 	}
 
 	static ImBuilder<EntityFilter> create() {

@@ -20,6 +20,7 @@ import net.minecraft.core.particles.ParticleOptions;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class NodePinType<T> {
 	public static final NodePinType<KNumber> NUMBER = new NodePinType<>("Number", KNumberImBuilder.IMGUI_BUILDER_FACTORY);
@@ -28,26 +29,30 @@ public class NodePinType<T> {
 	public static final NodePinType<BlockFilter> BLOCK_FILTER = new NodePinType<>("Block Filter", BlockFilterImBuilder.IMGUI_BUILDER_FACTORY);
 	public static final NodePinType<ParticleOptions> PARTICLE_OPTIONS = new NodePinType<>("Particle Options", ParticleOptionsImBuilder.IMGUI_BUILDER_FACTORY);
 
-	public static final NodePinType<Easing> EASING = new NodePinType<>("Easing", editor -> MenuItem.root((graphics, menuItems) -> {
+	public static final NodePinType<Easing> EASING = new NodePinType<>("Easing", NodePinShape.FILLED_SQUARE, editor -> MenuItem.root((graphics, menuItems) -> {
 		for (var easing : Easing.VALUES) {
 			menuItems.add(MenuItem.item(easing.name, g -> editor.accept(new ImBuilder.Unit<>(easing.name, easing).asNode())));
 		}
-	}));
+	}), null);
 
 	public final String displayName;
+	public final NodePinShape defaultShape;
 	public final List<NodePin> singleOutput;
 	public final List<NodePin> singleRequiredInput;
 	public final Function<Consumer<Node>, MenuItem> menu;
+	public final Supplier<ImBuilder<T>> builderFactory;
 
-	public NodePinType(String displayName, Function<Consumer<Node>, MenuItem> menu) {
+	public NodePinType(String displayName, NodePinShape defaultShape, Function<Consumer<Node>, MenuItem> menu, Supplier<ImBuilder<T>> builderFactory) {
 		this.displayName = displayName;
+		this.defaultShape = defaultShape;
 		this.singleOutput = List.of(output("Out"));
 		this.singleRequiredInput = List.of(required("In"));
 		this.menu = menu;
+		this.builderFactory = builderFactory;
 	}
 
 	public NodePinType(String displayName, ImBuilderWrapper.Factory<T> factory) {
-		this(displayName, editor -> MenuItem.root((graphics, menuItems) -> {
+		this(displayName, NodePinShape.FILLED_TRIANGLE, editor -> MenuItem.root((graphics, menuItems) -> {
 			int units = 0;
 
 			for (var option : factory.getOptions()) {
@@ -67,18 +72,18 @@ public class NodePinType<T> {
 					}
 				}));
 			}
-		}));
+		}), factory);
 	}
 
 	public NodePin output(String label) {
-		return new NodePin(this, label, NodePinConnectionType.OUTPUT);
+		return new NodePin(this, label, NodePinConnectionType.OUTPUT, defaultShape);
 	}
 
 	public NodePin required(String label) {
-		return new NodePin(this, label, NodePinConnectionType.REQUIRED_INPUT);
+		return new NodePin(this, label, NodePinConnectionType.REQUIRED_INPUT, defaultShape);
 	}
 
 	public NodePin optional(String label) {
-		return new NodePin(this, label, NodePinConnectionType.OPTIONAL_INPUT);
+		return new NodePin(this, label, NodePinConnectionType.OPTIONAL_INPUT, defaultShape);
 	}
 }

@@ -47,9 +47,7 @@ public record CosKNumber(KNumber angle) implements KNumber, ImBuilderWithHolder.
 
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
-			var update = ImUpdate.NONE;
-			update = update.or(angle.imguiKey(graphics, "Angle", "angle"));
-			return update;
+			return angle.imguiKey(graphics, "Angle", "angle");
 		}
 
 		@Override

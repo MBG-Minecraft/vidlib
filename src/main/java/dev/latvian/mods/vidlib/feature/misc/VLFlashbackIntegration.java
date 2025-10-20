@@ -203,7 +203,7 @@ public class VLFlashbackIntegration {
 
 	private static void menuBar(ImGraphics graphics) {
 		ImGui.separator();
-		BuiltInImGui.MAIN_MENU_BAR.buildRoot(graphics, false);
+		BuiltInImGui.MAIN_MENU_BAR.buildMenuBar(graphics, false);
 	}
 
 	private static void entityMenu(ImGraphics graphics, Entity entity) {

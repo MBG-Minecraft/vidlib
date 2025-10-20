@@ -290,10 +290,8 @@ public class ImGuiHooks {
 		}
 	}
 
-	public static void beforeEndFrame() {
+	public static void beforeEndFrame(Minecraft mc) {
 		if (VidLibClientEventHandler.clientLoaded && !ImGuiAPI.getHide()) {
-			var mc = Minecraft.getInstance();
-
 			if (mc.level == null || !mc.level.isReplayLevel()) {
 				var old = context.push();
 				var graphics = new ImGraphics(mc);

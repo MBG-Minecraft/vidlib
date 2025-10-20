@@ -8,7 +8,7 @@ public class AdminPanel {
 	public String label;
 	public boolean canBeClosed;
 	public boolean ephemeral;
-	public boolean menuBar;
+	public MenuItem menuBar;
 	boolean isOpen;
 	private ImWindowType windowType;
 	public AdminPanelStyle style;
@@ -18,7 +18,7 @@ public class AdminPanel {
 		this.label = label;
 		this.canBeClosed = true;
 		this.ephemeral = false;
-		this.menuBar = false;
+		this.menuBar = null;
 		this.isOpen = false;
 		this.windowType = ImWindowType.FLOATING;
 		this.style = AdminPanelStyle.NORMAL;
@@ -74,7 +74,7 @@ public class AdminPanel {
 			flags |= ImGuiWindowFlags.NoSavedSettings;
 		}
 
-		if (menuBar) {
+		if (menuBar != null) {
 			flags |= ImGuiWindowFlags.MenuBar;
 		}
 

@@ -5,6 +5,7 @@ uniform sampler2D TerrainInDepthSampler;
 uniform sampler2D DataSampler;
 uniform int Count;
 uniform mat4 InverseViewProjectionMat;
+uniform float GameTime;
 
 in vec2 texCoord;
 in vec2 oneTexel;
@@ -53,6 +54,13 @@ float getInside(int type, vec3 diff, float start, float end, float height, float
 			}
 		}
 	} else if (type == 4 || type == 5) {
+		if (rotation != 0.0) {
+			float r = atan(diff.z, diff.x) + rotation;
+			float l = length(diff.xz);
+			diff.x = cos(r) * l;
+			diff.z = sin(r) * l;
+		}
+
 		diff.y /= height;
 		float v = max(abs(diff.x), abs(diff.z));
 
@@ -124,18 +132,49 @@ void main() {
 			vec4 decalColor = mix(startColor, endColor, inside);
 
 			if (decalColor.a > 0.0) {
-				float grid = decodeFloat(10, y);
+				int fillHead = int(decodeUInt(10, y));
+				int fillType = fillHead & 7;
 
-				if (grid > 0.0) {
-					float thickness = decodeFloat(11, y);
-					vec3 g = abs(diff) + thickness * 0.5;
+				if (fillType != 0) {
+					float fillSize = decodeFloat(11, y);
+					float fillThickness = decodeFloat(12, y);
 
-					if (mod(g.x, grid) < thickness || mod(g.y, grid) < thickness || mod(g.z, grid) < thickness) {
-						color = blend(color, decalColor);
-						modified = true;
+					if (fillType == 1) {
+						vec3 g = diff + fillThickness * 0.5;
+
+						if (rotation != 0.0) {
+							float r = atan(g.z, g.x) + rotation;
+							float l = length(g.xz);
+							g.x = cos(r) * l;
+							g.z = sin(r) * l;
+						}
+
+						if (mod(g.x, fillSize) < fillThickness || mod(g.y, fillSize) < fillThickness || mod(g.z, fillSize) < fillThickness) {
+							color = blend(color, decalColor);
+							modified = true;
+						}
+
+						continue;
+					} else if (fillType == 2 || fillType == 3) {
+						float fillThickness = decodeFloat(12, y);
+						vec3 g = diff + fillThickness * 0.5;
+
+						if (rotation != 0.0) {
+							float r = atan(g.z, g.x) + rotation;
+							float l = length(g.xz);
+							g.x = cos(r) * l;
+							g.z = sin(r) * l;
+						}
+
+						float time = (fillType == 3) ? (GameTime * 1200.0 * fillSize) : 0.0;
+
+						if (mod(g.x + g.y + g.z + time, fillSize) < fillThickness) {
+							color = blend(color, decalColor);
+							modified = true;
+						}
+
+						continue;
 					}
-
-					continue;
 				}
 
 				color = blend(color, decalColor);

@@ -46,16 +46,9 @@ public record ServerDataKNumber(String key, Supplier<DataKey<?>> dataKey) implem
 
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
-			var update = ImUpdate.NONE;
+			// TODO: Replace with combo of all server data keys
 			ImGui.inputText("###key", key);
-			update = update.orItemEdit();
-			return update;
-		}
-
-		@Override
-		public ImUpdate nodeImgui(ImGraphics graphics) {
-			ImGui.setNextItemWidth(130F);
-			return imgui(graphics);
+			return ImUpdate.itemEdit();
 		}
 
 		@Override

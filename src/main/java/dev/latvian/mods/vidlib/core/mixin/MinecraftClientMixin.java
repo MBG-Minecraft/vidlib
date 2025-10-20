@@ -146,7 +146,7 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;isMinimized()Z"))
 	public void vl$beforeEndFrame(boolean tick, CallbackInfo ci) {
-		ImGuiHooks.beforeEndFrame();
+		ImGuiHooks.beforeEndFrame(vl$self());
 	}
 
 	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;getNanos()J", ordinal = 1))

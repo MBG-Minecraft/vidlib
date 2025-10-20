@@ -3,7 +3,9 @@ package dev.latvian.mods.vidlib.feature.imgui.node;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import imgui.ImGui;
 import imgui.extension.imnodes.ImNodes;
 import imgui.extension.imnodes.flag.ImNodesMiniMapLocation;
@@ -11,9 +13,11 @@ import imgui.type.ImInt;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 public class NodeEditorInstance<T> {
 	public final NodePinType<T> type;
+	public final ImBuilder<T> rootBuilder;
 	public final Node root;
 	public final Int2ObjectMap<Node> nodes;
 	public final Int2ObjectMap<NodePinInfo> pins;
@@ -25,6 +29,7 @@ public class NodeEditorInstance<T> {
 
 	public NodeEditorInstance(NodePinType<T> type) {
 		this.type = type;
+		this.rootBuilder = type.builderFactory == null ? null : type.builderFactory.get();
 		this.root = new Node(null, type.singleRequiredInput);
 		this.nodes = new Int2ObjectLinkedOpenHashMap<>();
 		this.pins = new Int2ObjectLinkedOpenHashMap<>();
@@ -72,7 +77,7 @@ public class NodeEditorInstance<T> {
 		if (lastDroppedPin != null) {
 			for (var pin : node.outputPins) {
 				if (pin.pin.type() == lastDroppedPin.pin.type()) {
-					pin.link = lastDroppedPin;
+					pin.inputLink = lastDroppedPin;
 					break;
 				}
 			}
@@ -106,25 +111,39 @@ public class NodeEditorInstance<T> {
 
 			ImGui.text(node.builder == null ? "Root" : node.builder.getDisplayName());
 			ImNodes.endNodeTitleBar();
+			ImGui.pushItemWidth(130F);
 
 			if (node.builder != null) {
 				// ImNodes.beginStaticAttribute(node.id);
 				update = update.or(node.builder.nodeImgui(graphics));
 				// ImNodes.endStaticAttribute();
+			} else {
+				ImGui.textUnformatted("Root Node");
+				ImGui.textUnformatted("Value:");
+
+				if (rootBuilder.isValid()) {
+					var ctx = graphics.mc.level != null ? graphics.mc.level.getGlobalContext() : new KNumberContext();
+					rootBuilder.resolve(ctx);
+
+					ImGui.textUnformatted(String.valueOf(rootBuilder.build()));
+				} else {
+					graphics.redTextIf("Invalid", true);
+				}
 			}
 
 			for (var pin : node.inputPins) {
-				ImNodes.beginInputAttribute(pin.id);
+				ImNodes.beginInputAttribute(pin.id, pin.pin.shape().id);
 				ImGui.textUnformatted(pin.pin.label());
 				ImNodes.endInputAttribute();
 			}
 
 			for (var pin : node.outputPins) {
-				ImNodes.beginOutputAttribute(pin.id);
+				ImNodes.beginOutputAttribute(pin.id, pin.pin.shape().id);
 				ImGui.textUnformatted(pin.pin.label());
 				ImNodes.endOutputAttribute();
 			}
 
+			ImGui.popItemWidth();
 			ImNodes.endNode();
 
 			/*
@@ -148,8 +167,8 @@ public class NodeEditorInstance<T> {
 		}
 
 		for (var pin : pins.values()) {
-			if (pin.link != null) {
-				ImNodes.link(pin.id, pin.link.id, pin.id);
+			if (pin.inputLink != null) {
+				ImNodes.link(pin.id, pin.inputLink.id, pin.id);
 			}
 		}
 
@@ -165,7 +184,7 @@ public class NodeEditorInstance<T> {
 			var in = src.pin.connectionType() == NodePinConnectionType.OUTPUT ? dst : src;
 			var out = src.pin.connectionType() == NodePinConnectionType.OUTPUT ? src : dst;
 
-			in.link = out;
+			in.inputLink = out;
 
 			update = ImUpdate.FULL;
 		}
@@ -185,7 +204,7 @@ public class NodeEditorInstance<T> {
 		}
 
 		if (ImGui.beginPopup("###context-menu")) {
-			type.menu.apply(this::dropNewNode).build(graphics);
+			type.menu.apply(this::dropNewNode).buildContextMenu(graphics);
 			ImGui.endPopup();
 		}
 
@@ -193,8 +212,36 @@ public class NodeEditorInstance<T> {
 			lastDroppedPin = null;
 		}
 
+		for (var node : nodes.values()) {
+			node.selected = ImNodes.isNodeSelected(node.id);
+		}
+
+		for (var pin : pins.values()) {
+			pin.inputLinkSelected = pin.inputLink != null && ImNodes.isLinkSelected(pin.id);
+		}
+
+		if (ImGui.getIO().getKeysDown(GLFW.GLFW_KEY_DELETE)) {
+			for (var pin : pins.values()) {
+				if (pin.inputLinkSelected) {
+					pin.inputLinkSelected = false;
+					pin.inputLink = null;
+					update = ImUpdate.FULL;
+				}
+			}
+		}
+
 		if (removedNode != null) {
 			update = ImUpdate.FULL;
+
+			for (var pin : pins.values()) {
+				for (var oPin : removedNode.outputPins) {
+					if (pin.inputLink == oPin) {
+						pin.inputLink = null;
+						pin.inputLinkSelected = false;
+						break;
+					}
+				}
+			}
 		}
 
 		return update;
@@ -205,7 +252,7 @@ public class NodeEditorInstance<T> {
 		pins.clear();
 
 		for (var pin : root.inputPins) {
-			pin.link = null;
+			pin.inputLink = null;
 		}
 
 		addNode(root);

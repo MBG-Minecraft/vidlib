@@ -10,6 +10,7 @@ public class Node {
 	public final ImBuilder<?> builder;
 	public final List<NodePinInfo> inputPins;
 	public final List<NodePinInfo> outputPins;
+	public boolean selected;
 
 	public Node(ImBuilder<?> builder, List<NodePin> pins) {
 		this.builder = builder;

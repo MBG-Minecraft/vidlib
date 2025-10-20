@@ -8,10 +8,21 @@ public interface KNumberImBuilder extends ImBuilderWithHolder<KNumber> {
 	ImBuilderWrapper.Factory<KNumber> IMGUI_BUILDER_FACTORY = new ImBuilderWrapper.Factory<>(KNumberImBuilderEvent::new);
 
 	static ImBuilder<KNumber> create(KNumber defaultValue) {
-		return IMGUI_BUILDER_FACTORY.create(defaultValue);
+		var builder = IMGUI_BUILDER_FACTORY.get();
+
+		if (defaultValue != null) {
+			builder.set(defaultValue);
+		}
+
+		return builder;
 	}
 
 	static ImBuilder<KNumber> create(double defaultValue) {
 		return create(KNumber.of(defaultValue));
+	}
+
+	@Override
+	default String resolve(KNumberContext ctx) {
+		return isValid() ? String.valueOf(build().get(ctx)) : "Invalid";
 	}
 }

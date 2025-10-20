@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class ImBuilderWrapper<T> implements ImBuilder<T> {
-	public static class Factory<T> {
+	public static class Factory<T> implements Supplier<ImBuilder<T>> {
 		private final Supplier<? extends ImBuilderEvent<T>> event;
 		private List<ImBuilderHolder<T>> options;
 
@@ -31,14 +31,9 @@ public class ImBuilderWrapper<T> implements ImBuilder<T> {
 			return options;
 		}
 
-		public ImBuilder<T> create(@Nullable T defaultValue) {
-			var builder = new ImBuilderWrapper<>(this);
-
-			if (defaultValue != null) {
-				builder.set(defaultValue);
-			}
-
-			return builder;
+		@Override
+		public ImBuilder<T> get() {
+			return new ImBuilderWrapper<>(this);
 		}
 	}
 

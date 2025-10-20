@@ -47,12 +47,6 @@ public record VariableKNumber(String name) implements KNumber, ImBuilderWithHold
 		}
 
 		@Override
-		public ImUpdate nodeImgui(ImGraphics graphics) {
-			ImGui.setNextItemWidth(130F);
-			return imgui(graphics);
-		}
-
-		@Override
 		public boolean isValid() {
 			return name.isNotEmpty();
 		}

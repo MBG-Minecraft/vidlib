@@ -209,7 +209,23 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 		}
 	}
 
-	public void buildRoot(ImGraphics graphics, boolean mainMenuBar) {
+	public void buildContextMenu(ImGraphics graphics) {
+		if (subItems == null) {
+			return;
+		}
+
+		var mainMenu = subItems.apply(graphics);
+
+		if (!mainMenu.isEmpty()) {
+			for (int i = 0; i < mainMenu.size(); i++) {
+				ImGui.pushID(i);
+				mainMenu.get(i).build(graphics);
+				ImGui.popID();
+			}
+		}
+	}
+
+	public void buildMenuBar(ImGraphics graphics, boolean mainMenuBar) {
 		if (subItems == null) {
 			return;
 		}

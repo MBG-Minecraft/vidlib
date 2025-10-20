@@ -1,7 +1,13 @@
 package dev.latvian.mods.vidlib.feature.imgui.node;
 
 public enum NodePinConnectionType {
-	OUTPUT,
-	REQUIRED_INPUT,
-	OPTIONAL_INPUT
+	OUTPUT("output"),
+	REQUIRED_INPUT("required_input"),
+	OPTIONAL_INPUT("optional_input");
+
+	public final String name;
+
+	NodePinConnectionType(String name) {
+		this.name = name;
+	}
 }

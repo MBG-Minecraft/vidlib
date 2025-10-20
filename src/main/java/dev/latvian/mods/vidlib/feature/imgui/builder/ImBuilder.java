@@ -1,10 +1,12 @@
 package dev.latvian.mods.vidlib.feature.imgui.builder;
 
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.JavaOps;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.node.Node;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePin;
+import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.jetbrains.annotations.Nullable;
@@ -109,5 +111,9 @@ public interface ImBuilder<T> {
 	default Node asNode() {
 		var pins = getNodePins();
 		return pins.isEmpty() ? null : new Node(this, pins);
+	}
+
+	default String resolve(KNumberContext ctx) {
+		return isValid() ? toString(JavaOps.INSTANCE, build()) : "Invalid";
 	}
 }

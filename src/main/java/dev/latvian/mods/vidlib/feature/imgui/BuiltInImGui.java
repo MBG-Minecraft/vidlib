@@ -194,7 +194,7 @@ public class BuiltInImGui {
 			mainMenuOpen = true;
 
 			if (menuOpen && !graphics.isReplay) {
-				MAIN_MENU_BAR.buildRoot(graphics, true);
+				MAIN_MENU_BAR.buildMenuBar(graphics, true);
 			}
 
 			OPEN_PANELS.values().removeIf(panel -> panel.handle(graphics));

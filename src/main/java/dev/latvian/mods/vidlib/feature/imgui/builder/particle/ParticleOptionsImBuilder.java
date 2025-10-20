@@ -22,7 +22,7 @@ public interface ParticleOptionsImBuilder<T extends ParticleOptions> extends ImB
 	ImBuilderWrapper.Factory<ParticleOptions> IMGUI_BUILDER_FACTORY = new ImBuilderWrapper.Factory<>(ParticleOptionsImBuilderRegistryEvent::new);
 
 	static ImBuilder<ParticleOptions> create() {
-		return IMGUI_BUILDER_FACTORY.create(null);
+		return IMGUI_BUILDER_FACTORY.get();
 	}
 
 	ImBuilderType<ParticleOptions> TYPE = ParticleOptionsImBuilder::create;

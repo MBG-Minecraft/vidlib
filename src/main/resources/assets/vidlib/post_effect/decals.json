@@ -33,6 +33,10 @@
 				{
 					"name": "InverseViewProjectionMat",
 					"type": "matrix4x4"
+				},
+				{
+					"name": "GameTime",
+					"type": "float"
 				}
 			]
 		},
