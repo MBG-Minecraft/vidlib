@@ -7,6 +7,7 @@ import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneBuilderPanel;
 import dev.latvian.mods.vidlib.feature.decal.DecalPanel;
+import dev.latvian.mods.vidlib.feature.environment.FluidPlanePanel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
@@ -69,6 +70,7 @@ public class BuiltInImGui {
 		list.add(Skybox.MENU_ITEM.enabled(graphics.inGame));
 		list.add(DepthOfFieldPanel.MENU_ITEM.enabled(graphics.inGame));
 		list.add(ChromaticAberrationPanel.MENU_ITEM.enabled(graphics.inGame));
+		list.add(FluidPlanePanel.MENU_ITEM.enabled(graphics.inGame));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.ConfigDropdown(graphics, list));
 	});

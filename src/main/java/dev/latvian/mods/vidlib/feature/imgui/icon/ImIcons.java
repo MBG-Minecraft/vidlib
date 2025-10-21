@@ -125,6 +125,9 @@ public enum ImIcons implements ImIcon {
 	LEAF('\uf8be'),
 	TREE('\uea63'),
 	BOLT('\uea0b'),
+	WATER('\uf084'),
+	FLUID('\ue798'),
+	FOG('\ue176'),
 
 	CATEGORY_MISC("Misc"),
 	CAMERA('\ue04b'),

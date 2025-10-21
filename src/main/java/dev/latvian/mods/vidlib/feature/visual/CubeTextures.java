@@ -3,13 +3,9 @@ package dev.latvian.mods.vidlib.feature.visual;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
-import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
 
 import java.util.Optional;
 
@@ -46,42 +42,4 @@ public record CubeTextures(
 	);
 
 	public static final StreamCodec<ByteBuf, Optional<CubeTextures>> OPTIONAL_STREAM_CODEC = ByteBufCodecs.optional(STREAM_CODEC);
-
-	public static CubeTextures fluid(ResourceLocation still, ResourceLocation flowing, TerrainRenderLayer type, Color tint) {
-		return new CubeTextures(
-			Optional.of(new FaceTexture(SpriteKey.block(flowing), type, true, tint, 0.5F, 0D)),
-			Optional.of(new FaceTexture(SpriteKey.block(still), type, true, tint, 1F, 0D)),
-			Optional.of(new FaceTexture(SpriteKey.block(still), type, false, tint, 1F, 0D)),
-			Optional.empty(),
-			Optional.empty(),
-			Optional.empty(),
-			Optional.empty()
-		);
-	}
-
-	public static CubeTextures fluid(ResourceLocation still, ResourceLocation flowing) {
-		return fluid(still, flowing, TerrainRenderLayer.SOLID, Color.WHITE);
-	}
-
-	public static final CubeTextures WATER = fluid(
-		ResourceLocation.withDefaultNamespace("block/water_still"),
-		ResourceLocation.withDefaultNamespace("block/water_flow"),
-		TerrainRenderLayer.TRANSLUCENT,
-		Color.of(0xFF3F76E4)
-	);
-
-	public static final CubeTextures LAVA = fluid(
-		ResourceLocation.withDefaultNamespace("block/lava_still"),
-		ResourceLocation.withDefaultNamespace("block/lava_flow")
-	);
-
-	public static final CubeTextures OPAQUE_WATER = fluid(
-		VidLib.id("block/opaque_water/still"),
-		VidLib.id("block/opaque_water/flow")
-	);
-
-	public static final CubeTextures PALE_OPAQUE_WATER = fluid(
-		VidLib.id("block/pale_opaque_water/still"),
-		VidLib.id("block/pale_opaque_water/flow")
-	);
 }

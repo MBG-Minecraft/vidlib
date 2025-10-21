@@ -259,7 +259,7 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 
 			for (var container : containers.values()) {
 				for (var zone : container.zones) {
-					if (!zone.zone.fluid().isEmpty()) {
+					if (zone.zone.fluid().isPresent()) {
 						CachedZoneShape.append(list, zone);
 					}
 				}
@@ -274,8 +274,8 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 	@Nullable
 	public FluidState getZoneFluidState(Vec3i pos) {
 		for (var c : getFluidZones()) {
-			if (c.instance().zone.shape().contains(pos)) {
-				return c.instance().zone.fluid().fluidState();
+			if (c.instance().zone.fluid().isPresent() && c.instance().zone.shape().contains(pos)) {
+				return c.instance().zone.fluid().get().fluidState();
 			}
 		}
 

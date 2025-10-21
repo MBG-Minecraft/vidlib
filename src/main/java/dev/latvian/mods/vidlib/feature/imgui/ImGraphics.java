@@ -27,6 +27,7 @@ import net.minecraft.util.ARGB;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
@@ -434,7 +435,7 @@ public class ImGraphics {
 		ImGui.setNextWindowSize(viewport.getWorkSizeX(), viewport.getWorkSizeY());
 	}
 
-	public <E> ImUpdate combo(String label, Object[] selected, List<? extends E> options, Function<E, String> nameFunction, @Nullable ImString search) {
+	public <E> ImUpdate combo(String label, Object[] selected, Collection<? extends E> options, Function<E, String> nameFunction, @Nullable ImString search) {
 		var result = ImUpdate.NONE;
 		var searchText = search != null && options.size() > 16 ? search.get().toLowerCase(Locale.ROOT) : null;
 
@@ -447,8 +448,9 @@ public class ImGraphics {
 				ImGui.inputTextWithHint("###search", "Search...", search);
 			}
 
-			for (int i = 0; i < options.size(); i++) {
-				var option = options.get(i);
+			int i = 0;
+
+			for (var option : options) {
 				boolean isSelected = selected[0] == option;
 				var itemLabel = nameFunction.apply(option);
 
@@ -460,6 +462,8 @@ public class ImGraphics {
 				if (isSelected) {
 					ImGui.setItemDefaultFocus();
 				}
+
+				i++;
 			}
 
 			ImGui.endCombo();

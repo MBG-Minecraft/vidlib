@@ -68,8 +68,8 @@ public class CachedZoneShape {
 
 			double yOff = 0D;
 
-			if (!instance.zone.fluid().isEmpty()) {
-				yOff = 1D - instance.zone.fluid().fluidState().getOwnHeight();
+			if (instance.zone.fluid().isPresent()) {
+				yOff = 1D - instance.zone.fluid().get().fluidState().getOwnHeight();
 				// yOff += Math.clamp(-frame.y(yOff) / 50D, 0D, 0.5D);
 			}
 
@@ -83,19 +83,19 @@ public class CachedZoneShape {
 
 				var textures = ResolvedCubeTextures.EMPTY;
 
-				if (!instance.zone.fluid().isEmpty()) {
-					textures = textures.merge(ResolvedCubeTextures.resolve(instance.zone.fluid().textures()));
+				if (instance.zone.fluid().isPresent()) {
+					textures = textures.merge(ResolvedCubeTextures.resolve(instance.zone.fluid().get().textures().cubeTextures()));
 				}
 
 				if (instance.zone.textures().isPresent()) {
 					textures = textures.merge(ResolvedCubeTextures.resolve(instance.zone.textures().get()));
 				}
 
-				if (textures != ResolvedCubeTextures.EMPTY) {
+				if (!textures.isEmpty()) {
 					for (var renderLayerFilter : TerrainRenderLayer.ALL) {
-						var tex = textures.filter(renderLayerFilter);
+						var tex = textures.filter(renderLayerFilter, false);
 
-						if (tex != ResolvedCubeTextures.EMPTY) {
+						if (!tex.isEmpty()) {
 							cachedCubes.computeIfAbsent(renderLayerFilter, k -> new ArrayList<>(1)).add(new ResolvedTexturedCube(new AABB(bminX, bminY, bminZ, bmaxX, bmaxY, bmaxZ), tex));
 						}
 					}

@@ -54,10 +54,14 @@ public record ResolvedCubeTextures(@Nullable TerrainRenderLayer commonLayer, Lis
 		this(commonLayer, List.of(face, face, face, face, face, face));
 	}
 
+	public boolean isEmpty() {
+		return this == EMPTY;
+	}
+
 	public ResolvedCubeTextures merge(ResolvedCubeTextures other) {
-		if (other == EMPTY) {
+		if (other.isEmpty()) {
 			return this;
-		} else if (this == EMPTY) {
+		} else if (isEmpty()) {
 			return other;
 		}
 
@@ -73,7 +77,21 @@ public record ResolvedCubeTextures(@Nullable TerrainRenderLayer commonLayer, Lis
 		return new ResolvedCubeTextures(commonLayer(faces), faces);
 	}
 
-	public ResolvedCubeTextures filter(TerrainRenderLayer filter) {
+	public boolean anyIn(TerrainRenderLayer layer) {
+		if (commonLayer == layer) {
+			return true;
+		}
+
+		for (var face : faces) {
+			if (face != FaceTexture.EMPTY && face.layer() == layer) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public ResolvedCubeTextures filter(TerrainRenderLayer filter, boolean onlyUp) {
 		if (commonLayer != null && commonLayer == filter) {
 			return this;
 		}
@@ -81,8 +99,10 @@ public record ResolvedCubeTextures(@Nullable TerrainRenderLayer commonLayer, Lis
 		boolean empty = true;
 		var faces = new ArrayList<FaceTexture>(6);
 
-		for (var face : this.faces) {
-			if (face != FaceTexture.EMPTY && face.layer() == filter) {
+		for (int i = 0; i < 6; i++) {
+			var face = this.faces.get(i);
+
+			if ((!onlyUp || i == 1) && face != FaceTexture.EMPTY && face.layer() == filter) {
 				faces.add(face);
 				empty = false;
 			} else {

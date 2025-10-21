@@ -22,6 +22,7 @@ import dev.latvian.mods.vidlib.feature.data.DataMapValue;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
+import dev.latvian.mods.vidlib.feature.environment.FluidPlane;
 import dev.latvian.mods.vidlib.feature.imgui.AdminPanel;
 import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
@@ -108,6 +109,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	private Boolean isServerNeoForge;
 	public Component topInfoBarOverride;
 	public Component bottomInfoBarOverride;
+	public FluidPlane fluidPlane;
 
 	public LocalClientSessionData(Minecraft mc, UUID uuid, ClientPacketListener connection) {
 		super(uuid);

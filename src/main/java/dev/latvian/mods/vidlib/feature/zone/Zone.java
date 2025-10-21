@@ -30,7 +30,7 @@ public record Zone(
 	EntityFilter solid,
 	Set<String> tags,
 	boolean forceLoaded,
-	ZoneFluid fluid,
+	Optional<ZoneFluid> fluid,
 	Optional<CubeTextures> textures,
 	ZoneFog fog
 ) {
@@ -43,7 +43,7 @@ public record Zone(
 		EntityFilter.CODEC.optionalFieldOf("solid", EntityFilter.NONE.instance()).forGetter(Zone::solid),
 		KLibCodecs.setOf(Codec.STRING).optionalFieldOf("tags", Set.of()).forGetter(Zone::tags),
 		Codec.BOOL.optionalFieldOf("force_loaded", false).forGetter(Zone::forceLoaded),
-		ZoneFluid.CODEC.optionalFieldOf("fluid", ZoneFluid.NONE).forGetter(Zone::fluid),
+		ZoneFluid.CODEC.optionalFieldOf("fluid").forGetter(Zone::fluid),
 		CubeTextures.CODEC.optionalFieldOf("textures").forGetter(Zone::textures),
 		ZoneFog.CODEC.optionalFieldOf("fog", ZoneFog.NONE).forGetter(Zone::fog)
 	).apply(instance, Zone::new));
@@ -57,7 +57,7 @@ public record Zone(
 		EntityFilter.STREAM_CODEC, Zone::solid,
 		KLibStreamCodecs.linkedSetOf(ByteBufCodecs.STRING_UTF8), Zone::tags,
 		ByteBufCodecs.BOOL, Zone::forceLoaded,
-		ZoneFluid.STREAM_CODEC, Zone::fluid,
+		ByteBufCodecs.optional(ZoneFluid.STREAM_CODEC), Zone::fluid,
 		CubeTextures.OPTIONAL_STREAM_CODEC, Zone::textures,
 		ZoneFog.STREAM_CODEC, Zone::fog,
 		Zone::new
@@ -73,7 +73,7 @@ public record Zone(
 			EntityFilter.NONE.instance(),
 			Set.of(),
 			false,
-			ZoneFluid.NONE,
+			Optional.empty(),
 			Optional.empty(),
 			ZoneFog.NONE
 		);

@@ -46,6 +46,7 @@ import dev.latvian.mods.vidlib.feature.entity.filter.HasEffectEntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.MatchEntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.ProfileEntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.ServerDataEntityFilter;
+import dev.latvian.mods.vidlib.feature.environment.FluidPlaneRenderer;
 import dev.latvian.mods.vidlib.feature.gradient.ClientGradientLoader;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.BlockParticleOptionImBuilder;
@@ -325,6 +326,10 @@ public class VidLibClientEventHandler {
 
 		var ms = frame.poseStack();
 		float delta = frame.worldDelta();
+
+		if (session.fluidPlane != null && frame.layer() != null) {
+			FluidPlaneRenderer.render(frame, session.fluidPlane);
+		}
 
 		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
 			Canvas.MAIN_BEFORE_PARTICLES.copyColorFrom(mc.getMainRenderTarget());
