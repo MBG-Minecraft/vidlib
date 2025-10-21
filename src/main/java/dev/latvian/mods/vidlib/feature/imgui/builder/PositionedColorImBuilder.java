@@ -1,9 +1,10 @@
 package dev.latvian.mods.vidlib.feature.imgui.builder;
 
 import dev.latvian.mods.klib.color.PositionedColor;
-import dev.latvian.mods.klib.easing.Easing;
+import dev.latvian.mods.klib.interpolation.Interpolation;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.builder.interpolation.InterpolationImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 import imgui.type.ImFloat;
@@ -13,7 +14,7 @@ public class PositionedColorImBuilder implements Comparable<PositionedColorImBui
 	public String label;
 	public final ImFloat position = new ImFloat(0F);
 	public final Color4ImBuilder color = new Color4ImBuilder();
-	public final Easing[] easing = {Easing.LINEAR};
+	public final ImBuilder<Interpolation> interpolation = InterpolationImBuilder.create();
 	public boolean delete = false;
 
 	public PositionedColorImBuilder(String label) {
@@ -24,7 +25,7 @@ public class PositionedColorImBuilder implements Comparable<PositionedColorImBui
 	public void set(PositionedColor c) {
 		position.set(c.position());
 		color.set(c.color());
-		easing[0] = c.easing();
+		interpolation.set(c.interpolation());
 	}
 
 	@Override
@@ -50,19 +51,19 @@ public class PositionedColorImBuilder implements Comparable<PositionedColorImBui
 		ImGui.sliderFloat("Position###position", position.getData(), 0F, 1F, "%.3f");
 		update = update.orItemEdit();
 		update = update.or(color.imguiKey(graphics, "Color", "color"));
-		update = update.or(graphics.easingCombo("Easing###easing", easing));
+		update = update.or(interpolation.imguiKey(graphics, "Interpolation", "interpolation"));
 
 		return update;
 	}
 
 	@Override
 	public boolean isValid() {
-		return color.isValid();
+		return color.isValid() && interpolation.isValid();
 	}
 
 	@Override
 	public PositionedColor build() {
-		return new PositionedColor(position.get(), color.build(), easing[0]);
+		return new PositionedColor(position.get(), color.build(), interpolation.build());
 	}
 
 	@Override

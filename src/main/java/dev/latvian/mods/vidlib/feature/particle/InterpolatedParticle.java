@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
-import dev.latvian.mods.klib.easing.Easing;
+import dev.latvian.mods.klib.interpolation.Interpolation;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.TextureSheetParticle;
@@ -9,16 +9,16 @@ import net.minecraft.world.phys.Vec3;
 
 public class InterpolatedParticle extends TextureSheetParticle {
 	public final Vec3 origin;
-	public final Easing easing;
+	public final Interpolation interpolation;
 	public float relativeAge;
 	public float relativePos;
 	public float oAlpha;
 	public float oQuadSizeMod;
 	public float quadSizeMod;
 
-	public InterpolatedParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, Easing easing) {
+	public InterpolatedParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, Interpolation interpolation) {
 		super(level, x, y, z);
-		this.easing = easing;
+		this.interpolation = interpolation;
 		this.xd = xd;
 		this.yd = yd;
 		this.zd = zd;
@@ -49,7 +49,7 @@ public class InterpolatedParticle extends TextureSheetParticle {
 		zo = z;
 
 		relativeAge = age / (float) lifetime;
-		relativePos = easing.easeClamped(relativeAge);
+		relativePos = interpolation.interpolateClamped(relativeAge);
 
 		setPos(
 			origin.x + xd * relativePos,

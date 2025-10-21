@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.imgui.builder;
 
 import com.mojang.serialization.DynamicOps;
 import dev.latvian.mods.klib.codec.KLibCodecs;
-import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
@@ -18,7 +17,6 @@ import java.util.List;
 import java.util.function.Function;
 
 public class EnumImBuilder<E> implements ImBuilder<E> {
-	public static final ImBuilderType<Easing> EASING_TYPE = () -> new EnumImBuilder<>(Easing.VALUES, Easing.LINEAR);
 	public static final ImBuilderType<Mirror> MIRROR_TYPE = () -> new EnumImBuilder<>(Mirror.values(), Mirror.NONE);
 	public static final ImBuilderType<Rotation> BLOCK_ROTATION_TYPE = () -> new EnumImBuilder<>(Rotation.values(), Rotation.NONE);
 	public static final ImBuilderType<LiquidSettings> LIQUID_SETTINGS_TYPE = () -> new EnumImBuilder<>(LiquidSettings.values(), LiquidSettings.IGNORE_WATERLOGGING);

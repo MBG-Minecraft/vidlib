@@ -7,8 +7,9 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.klib.easing.Easing;
-import dev.latvian.mods.klib.easing.EasingGroup;
+import dev.latvian.mods.klib.interpolation.EaseIn;
+import dev.latvian.mods.klib.interpolation.Interpolation;
+import dev.latvian.mods.klib.interpolation.LinearInterpolation;
 import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -23,8 +24,8 @@ public record ScreenShake(
 	int duration,
 	float speed,
 	float intensity,
-	EasingGroup start,
-	EasingGroup end,
+	Interpolation start,
+	Interpolation end,
 	boolean motionBlur
 ) {
 	public static final ScreenShake NONE = new ScreenShake(
@@ -32,8 +33,8 @@ public record ScreenShake(
 		0,
 		0F,
 		0F,
-		EasingGroup.LINEAR,
-		EasingGroup.LINEAR,
+		LinearInterpolation.INSTANCE,
+		LinearInterpolation.INSTANCE,
 		false
 	);
 
@@ -42,8 +43,8 @@ public record ScreenShake(
 		25,
 		4F,
 		0.6F,
-		EasingGroup.QUINT,
-		EasingGroup.CUBIC,
+		EaseIn.QUINT,
+		EaseIn.CUBIC,
 		false
 	);
 
@@ -52,8 +53,8 @@ public record ScreenShake(
 		KLibCodecs.TICKS.optionalFieldOf("duration", DEFAULT.duration).forGetter(ScreenShake::duration),
 		Codec.FLOAT.optionalFieldOf("speed", DEFAULT.speed).forGetter(ScreenShake::speed),
 		Codec.FLOAT.optionalFieldOf("intensity", DEFAULT.intensity).forGetter(ScreenShake::intensity),
-		EasingGroup.CODEC.optionalFieldOf("start", DEFAULT.start).forGetter(ScreenShake::start),
-		EasingGroup.CODEC.optionalFieldOf("end", DEFAULT.end).forGetter(ScreenShake::end),
+		Interpolation.CODEC.optionalFieldOf("start", DEFAULT.start).forGetter(ScreenShake::start),
+		Interpolation.CODEC.optionalFieldOf("end", DEFAULT.end).forGetter(ScreenShake::end),
 		Codec.BOOL.optionalFieldOf("motion_blur", DEFAULT.motionBlur).forGetter(ScreenShake::motionBlur)
 	).apply(instance, ScreenShake::new));
 
@@ -64,8 +65,8 @@ public record ScreenShake(
 		ByteBufCodecs.VAR_INT, ScreenShake::duration,
 		ByteBufCodecs.FLOAT, ScreenShake::speed,
 		ByteBufCodecs.FLOAT, ScreenShake::intensity,
-		KLibStreamCodecs.optional(EasingGroup.STREAM_CODEC, DEFAULT.start), ScreenShake::start,
-		KLibStreamCodecs.optional(EasingGroup.STREAM_CODEC, DEFAULT.end), ScreenShake::end,
+		KLibStreamCodecs.optional(Interpolation.STREAM_CODEC, DEFAULT.start), ScreenShake::start,
+		KLibStreamCodecs.optional(Interpolation.STREAM_CODEC, DEFAULT.end), ScreenShake::end,
 		ByteBufCodecs.BOOL, ScreenShake::motionBlur,
 		ScreenShake::new
 	);
@@ -112,7 +113,7 @@ public record ScreenShake(
 	}
 
 	public ScreenShake atDistance(Vec3 camera, Vec3 source, double maxDistance) {
-		return withIntensityMod((float) Easing.QUINT_IN.ease(1D - Math.clamp(camera.distanceTo(source) / maxDistance, 0D, 1D)));
+		return withIntensityMod((float) EaseIn.QUINT.interpolate(1D - Math.clamp(camera.distanceTo(source) / maxDistance, 0D, 1D)));
 	}
 
 	public boolean skip() {

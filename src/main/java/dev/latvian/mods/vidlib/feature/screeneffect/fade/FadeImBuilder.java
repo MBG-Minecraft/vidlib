@@ -2,11 +2,12 @@ package dev.latvian.mods.vidlib.feature.screeneffect.fade;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.PositionedColor;
-import dev.latvian.mods.klib.easing.Easing;
+import dev.latvian.mods.klib.interpolation.Interpolation;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.interpolation.InterpolationImBuilder;
 import imgui.ImGui;
 import imgui.type.ImInt;
 
@@ -18,8 +19,8 @@ public class FadeImBuilder implements ImBuilder<Fade> {
 	public final ImInt fadeInTicks = new ImInt(20);
 	public final ImInt pauseTicks = new ImInt(20);
 	public final ImInt fadeOutTicks = new ImInt(20);
-	public final Easing[] fadeInEase = {Easing.LINEAR};
-	public final Easing[] fadeOutEase = {Easing.LINEAR};
+	public final ImBuilder<Interpolation> fadeInInterpolation = InterpolationImBuilder.create();
+	public final ImBuilder<Interpolation> fadeOutInterpolation = InterpolationImBuilder.create();
 
 	@Override
 	public void set(Fade value) {
@@ -27,8 +28,8 @@ public class FadeImBuilder implements ImBuilder<Fade> {
 		fadeInTicks.set(value.fadeInTicks());
 		pauseTicks.set(value.pauseTicks());
 		fadeOutTicks.set(value.fadeOutTicks().orElse(fadeInTicks.get()));
-		fadeInEase[0] = value.fadeInEase();
-		fadeOutEase[0] = value.fadeOutEase().orElse(fadeInEase[0]);
+		fadeInInterpolation.set(value.fadeInInterpolation());
+		fadeOutInterpolation.set(value.fadeOutInterpolation().orElse(value.fadeInInterpolation()));
 	}
 
 	@Override
@@ -43,7 +44,7 @@ public class FadeImBuilder implements ImBuilder<Fade> {
 		ImGui.alignTextToFramePadding();
 		ImGui.text("Fade In Ticks");
 		ImGui.sameLine();
-		update = update.or(graphics.easingCombo("###fade-in-ease", fadeInEase));
+		update = update.or(fadeInInterpolation.imguiKey(graphics, "", "fade-in-interpolation"));
 		ImGui.sliderInt("###fade-in-ticks", fadeInTicks.getData(), 0, 60);
 		update = update.orItemEdit();
 
@@ -54,7 +55,7 @@ public class FadeImBuilder implements ImBuilder<Fade> {
 		ImGui.alignTextToFramePadding();
 		ImGui.text("Fade Out Ticks");
 		ImGui.sameLine();
-		update = update.or(graphics.easingCombo("###fade-out-ease", fadeOutEase));
+		update = update.or(fadeOutInterpolation.imguiKey(graphics, "", "fade-out-interpolation"));
 		ImGui.sliderInt("###fade-out-ticks", fadeOutTicks.getData(), 0, 60);
 		update = update.orItemEdit();
 
@@ -63,18 +64,21 @@ public class FadeImBuilder implements ImBuilder<Fade> {
 
 	@Override
 	public boolean isValid() {
-		return color.isValid();
+		return color.isValid() && fadeInInterpolation.isValid() && fadeOutInterpolation.isValid();
 	}
 
 	@Override
 	public Fade build() {
+		var inInt = fadeInInterpolation.build();
+		var outInt = fadeOutInterpolation.build();
+
 		return new Fade(
 			color.build(),
 			fadeInTicks.get(),
 			pauseTicks.get(),
 			fadeInTicks.get() == fadeOutTicks.get() ? Optional.empty() : Optional.of(fadeOutTicks.get()),
-			fadeInEase[0],
-			fadeOutEase[0] == fadeInEase[0] ? Optional.empty() : Optional.of(fadeOutEase[0])
+			inInt,
+			outInt.equals(inInt) ? Optional.empty() : Optional.of(outInt)
 		);
 	}
 }

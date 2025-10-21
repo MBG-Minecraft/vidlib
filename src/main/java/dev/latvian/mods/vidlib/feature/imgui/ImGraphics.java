@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.feature.imgui;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.easing.Easing;
 import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
@@ -478,10 +477,6 @@ public class ImGraphics {
 
 	public <E> ImUpdate combo(String label, Object[] selected, E[] options) {
 		return combo(label, selected, options, (Function) KLibCodecs.DEFAULT_NAME_GETTER);
-	}
-
-	public ImUpdate easingCombo(String label, Easing[] selected) {
-		return combo(label, selected, Easing.VALUES);
 	}
 
 	public void hideMainMenuBar() {

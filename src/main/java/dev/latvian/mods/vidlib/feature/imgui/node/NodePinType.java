@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.imgui.node;
 
-import dev.latvian.mods.klib.easing.Easing;
+import dev.latvian.mods.klib.interpolation.Interpolation;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
@@ -29,10 +29,10 @@ public class NodePinType<T> {
 	public static final NodePinType<BlockFilter> BLOCK_FILTER = new NodePinType<>("Block Filter", BlockFilterImBuilder.IMGUI_BUILDER_FACTORY);
 	public static final NodePinType<ParticleOptions> PARTICLE_OPTIONS = new NodePinType<>("Particle Options", ParticleOptionsImBuilder.IMGUI_BUILDER_FACTORY);
 
-	public static final NodePinType<Easing> EASING = new NodePinType<>("Easing", NodePinShape.FILLED_SQUARE, editor -> MenuItem.root((graphics, menuItems) -> {
-		for (var easing : Easing.VALUES) {
-			menuItems.add(MenuItem.item(easing.name, g -> editor.accept(new ImBuilder.Unit<>(easing.name, easing).asNode())));
-		}
+	public static final NodePinType<Interpolation> INTERPOLATION = new NodePinType<>("Interpolation", NodePinShape.FILLED_SQUARE, editor -> MenuItem.root((graphics, menuItems) -> {
+		// for (var easing : Easing.VALUES) {
+		// 	menuItems.add(MenuItem.item(easing.name, g -> editor.accept(new ImBuilder.Unit<>(easing.name, easing).asNode())));
+		// }
 	}), null);
 
 	public final String displayName;

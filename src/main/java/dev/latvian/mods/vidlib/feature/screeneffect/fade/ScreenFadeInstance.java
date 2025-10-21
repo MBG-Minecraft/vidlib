@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.screeneffect.fade;
 
 import dev.latvian.mods.klib.color.Gradient;
-import dev.latvian.mods.klib.easing.Easing;
+import dev.latvian.mods.klib.interpolation.Interpolation;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
 
@@ -10,8 +10,8 @@ public class ScreenFadeInstance {
 	public final int fadeInTicks;
 	public final int pauseTicks;
 	public final int fadeOutTicks;
-	public final Easing fadeInEase;
-	public final Easing fadeOutEase;
+	public final Interpolation fadeInEase;
+	public final Interpolation fadeOutEase;
 	public final int totalTicks;
 	public float prevAlpha, alpha;
 	public int prevTick, tick;
@@ -21,8 +21,8 @@ public class ScreenFadeInstance {
 		this.fadeInTicks = data.fadeInTicks();
 		this.pauseTicks = data.pauseTicks();
 		this.fadeOutTicks = data.fadeOutTicks().orElse(data.fadeInTicks());
-		this.fadeInEase = data.fadeInEase();
-		this.fadeOutEase = data.fadeOutEase().orElse(data.fadeInEase());
+		this.fadeInEase = data.fadeInInterpolation();
+		this.fadeOutEase = data.fadeOutInterpolation().orElse(data.fadeInInterpolation());
 		this.totalTicks = fadeInTicks + pauseTicks + fadeOutTicks;
 	}
 
@@ -31,11 +31,11 @@ public class ScreenFadeInstance {
 		prevAlpha = alpha;
 
 		if (tick < fadeInTicks) {
-			alpha = fadeInEase.ease(tick / (float) fadeInTicks);
+			alpha = fadeInEase.interpolate(tick / (float) fadeInTicks);
 		} else if (tick < fadeInTicks + pauseTicks) {
 			alpha = 1F;
 		} else if (tick < totalTicks) {
-			alpha = 1F - fadeOutEase.ease((tick - fadeInTicks - pauseTicks) / (float) fadeOutTicks);
+			alpha = 1F - fadeOutEase.interpolate((tick - fadeInTicks - pauseTicks) / (float) fadeOutTicks);
 		} else {
 			alpha = 0F;
 		}

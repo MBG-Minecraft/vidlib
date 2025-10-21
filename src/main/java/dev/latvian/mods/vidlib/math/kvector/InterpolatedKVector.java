@@ -3,13 +3,14 @@ package dev.latvian.mods.vidlib.math.kvector;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
-import dev.latvian.mods.klib.easing.Easing;
+import dev.latvian.mods.klib.interpolation.Interpolation;
+import dev.latvian.mods.klib.interpolation.LinearInterpolation;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
-import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.interpolation.InterpolationImBuilder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
@@ -20,15 +21,15 @@ import imgui.flag.ImGuiTableFlags;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public record InterpolatedKVector(KNumber progress, Easing easing, KVector from, KVector to) implements KVector, ImBuilderWithHolder.Factory {
+public record InterpolatedKVector(KNumber progress, Interpolation interpolation, KVector from, KVector to) implements KVector, ImBuilderWithHolder.Factory {
 	public static final SimpleRegistryType<InterpolatedKVector> TYPE = SimpleRegistryType.dynamic("interpolated", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.optionalFieldOf("progress", LiteralKNumber.PROGRESS).forGetter(InterpolatedKVector::progress),
-		Easing.CODEC.optionalFieldOf("easing", Easing.LINEAR).forGetter(InterpolatedKVector::easing),
+		Interpolation.CODEC.optionalFieldOf("interpolation", LinearInterpolation.INSTANCE).forGetter(InterpolatedKVector::interpolation),
 		KVector.CODEC.fieldOf("from").forGetter(InterpolatedKVector::from),
 		KVector.CODEC.fieldOf("to").forGetter(InterpolatedKVector::to)
 	).apply(instance, InterpolatedKVector::new)), CompositeStreamCodec.of(
 		KLibStreamCodecs.optional(KNumber.STREAM_CODEC, LiteralKNumber.PROGRESS), InterpolatedKVector::progress,
-		Easing.STREAM_CODEC, InterpolatedKVector::easing,
+		Interpolation.STREAM_CODEC, InterpolatedKVector::interpolation,
 		KVector.STREAM_CODEC, InterpolatedKVector::from,
 		KVector.STREAM_CODEC, InterpolatedKVector::to,
 		InterpolatedKVector::new
@@ -38,7 +39,7 @@ public record InterpolatedKVector(KNumber progress, Easing easing, KVector from,
 		public static final ImBuilderHolder<KVector> TYPE = ImBuilderHolder.of("Interpolated", Builder::new);
 
 		public final ImBuilder<KNumber> progress = KNumberImBuilder.create(LiteralKNumber.PROGRESS);
-		public final ImBuilder<Easing> easing = EnumImBuilder.EASING_TYPE.get();
+		public final ImBuilder<Interpolation> interpolation = InterpolationImBuilder.create();
 		public final ImBuilder<KVector> from = KVectorImBuilder.create();
 		public final ImBuilder<KVector> to = KVectorImBuilder.create();
 
@@ -51,7 +52,7 @@ public record InterpolatedKVector(KNumber progress, Easing easing, KVector from,
 		public void set(KVector value) {
 			if (value instanceof InterpolatedKVector v) {
 				progress.set(v.progress);
-				easing.set(v.easing);
+				interpolation.set(v.interpolation);
 				from.set(v.from);
 				to.set(v.to);
 			}
@@ -61,7 +62,7 @@ public record InterpolatedKVector(KNumber progress, Easing easing, KVector from,
 		public ImUpdate imgui(ImGraphics graphics) {
 			var update = ImUpdate.NONE;
 			update = update.or(progress.imguiKey(graphics, "Progress", "progress"));
-			update = update.or(easing.imguiKey(graphics, "Easing", "easing"));
+			update = update.or(interpolation.imguiKey(graphics, "Interpolation", "interpolation"));
 
 			if (ImGui.beginTable("###table", 2, ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.Borders)) {
 				ImGui.tableNextRow();
@@ -81,12 +82,12 @@ public record InterpolatedKVector(KNumber progress, Easing easing, KVector from,
 
 		@Override
 		public boolean isValid() {
-			return progress.isValid() && easing.isValid() && from.isValid() && to.isValid();
+			return progress.isValid() && interpolation.isValid() && from.isValid() && to.isValid();
 		}
 
 		@Override
 		public KVector build() {
-			return new InterpolatedKVector(progress.build(), easing.build(), from.build(), to.build());
+			return new InterpolatedKVector(progress.build(), interpolation.build(), from.build(), to.build());
 		}
 	}
 
@@ -117,7 +118,7 @@ public record InterpolatedKVector(KNumber progress, Easing easing, KVector from,
 			return null;
 		}
 
-		return a.lerp(b, easing.easeClamped(progress));
+		return a.lerp(b, interpolation.interpolateClamped(progress));
 	}
 
 	@Override

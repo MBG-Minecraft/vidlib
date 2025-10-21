@@ -19,7 +19,7 @@ public class FireParticle extends InterpolatedParticle {
 	public final float randomOffset;
 
 	public FireParticle(FireParticleOptions options, ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet spriteSet) {
-		super(level, x, y, z, xd, yd, zd, options.easing());
+		super(level, x, y, z, xd, yd, zd, options.interpolation());
 		this.options = options;
 		this.spriteSet = spriteSet;
 		this.gradient = options.color().optimize();

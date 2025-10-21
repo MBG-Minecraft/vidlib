@@ -1,8 +1,10 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
-import dev.latvian.mods.klib.easing.Easing;
+import dev.latvian.mods.klib.interpolation.Interpolation;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.interpolation.InterpolationImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ParticleOptionsImBuilder;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
@@ -13,7 +15,7 @@ public class WindParticleOptionsImBuilder implements ParticleOptionsImBuilder<Wi
 	public final ImInt lifespan = new ImInt(100);
 	public final ImBoolean ground = new ImBoolean(false);
 	public final ImFloat scale = new ImFloat(1F);
-	public final Easing[] easing = {Easing.SINE_OUT};
+	public final ImBuilder<Interpolation> interpolation = InterpolationImBuilder.create();
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
@@ -25,12 +27,17 @@ public class WindParticleOptionsImBuilder implements ParticleOptionsImBuilder<Wi
 		ImGui.text("Scale");
 		ImGui.sliderFloat("###scale", scale.getData(), 0F, 10F);
 		update = update.orItemEdit();
-		update = update.or(graphics.easingCombo("Easing", easing));
+		update = update.or(interpolation.imguiKey(graphics, "Interpolation", "interpolation"));
 		return update;
 	}
 
 	@Override
+	public boolean isValid() {
+		return interpolation.isValid();
+	}
+
+	@Override
 	public WindParticleOptions build() {
-		return new WindParticleOptions(lifespan.get(), ground.get(), scale.get(), easing[0]);
+		return new WindParticleOptions(lifespan.get(), ground.get(), scale.get(), interpolation.build());
 	}
 }

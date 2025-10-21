@@ -19,7 +19,7 @@ public class WindParticle extends InterpolatedParticle {
 	public final SpriteSet spriteSet;
 
 	public WindParticle(WindParticleOptions options, ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet spriteSet) {
-		super(level, x, y, z, xd, yd, zd, options.easing());
+		super(level, x, y, z, xd, yd, zd, options.interpolation());
 		this.hasPhysics = false;
 		this.options = options;
 		this.spriteSet = spriteSet;
@@ -43,6 +43,6 @@ public class WindParticle extends InterpolatedParticle {
 	public void tick() {
 		super.tick();
 		setSpriteFromAge(spriteSet);
-		quadSizeMod = KMath.lerp(easing.ease(age / (float) lifetime), 0.25F, 1F) * options.scale();
+		quadSizeMod = KMath.lerp(interpolation.interpolate(age / (float) lifetime), 0.25F, 1F) * options.scale();
 	}
 }

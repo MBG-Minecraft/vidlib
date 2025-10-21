@@ -1,7 +1,9 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.easing.Easing;
+import dev.latvian.mods.klib.interpolation.BezierPreset;
+import dev.latvian.mods.klib.interpolation.Interpolation;
+import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
@@ -10,6 +12,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TransformationListImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.interpolation.InterpolationImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ParticleOptionsImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundDataImBuilder;
@@ -37,6 +40,7 @@ import imgui.type.ImString;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Vector2f;
 
 public class DebugWidgetPanel extends AdminPanel {
 	public static final DebugWidgetPanel INSTANCE = new DebugWidgetPanel();
@@ -51,6 +55,9 @@ public class DebugWidgetPanel extends AdminPanel {
 	public final float[] float2Data = new float[2];
 	public final float[] float3Data = new float[3];
 	public final float[] float4Data = new float[4];
+	public final Vector2f bezierP1Data = new Vector2f(0F, 0F);
+	public final Vector2f bezierP2Data = new Vector2f(1F, 1F);
+	public final BezierPreset[] bezierPreset = new BezierPreset[1];
 	public final ImVec2 vec2Data = new ImVec2();
 	public final ImVec4 vec4Data = new ImVec4();
 	public final ImDouble doubleData = new ImDouble();
@@ -60,7 +67,7 @@ public class DebugWidgetPanel extends AdminPanel {
 	public final ImString stringData = new ImString();
 	public final ImString multiLineStringData = new ImString();
 	public final ImBoolean booleanData = new ImBoolean();
-	public final Easing[] easingData = new Easing[1];
+	public final ImBuilder<Interpolation> interpolationBuilder = InterpolationImBuilder.create();
 	public final GradientImBuilder gradient1 = new GradientImBuilder();
 	public final GradientImBuilder gradient2 = new GradientImBuilder();
 	public final ImBuilder<KNumber> numberBuilder = KNumberImBuilder.create(0D);
@@ -290,8 +297,7 @@ public class DebugWidgetPanel extends AdminPanel {
 		ImGui.inputTextMultiline("###multi-line-text-input", multiLineStringData);
 		ImGui.separator();
 
-		ImGui.text("Combo");
-		graphics.easingCombo("###combo", easingData);
+		interpolationBuilder.imguiKey(graphics, "Interpolation", "interpolation");
 		ImGui.separator();
 
 		if (graphics.collapsingHeader("Collapsing Header", 0)) {
@@ -371,17 +377,23 @@ public class DebugWidgetPanel extends AdminPanel {
 		ImGui.text("Result: " + (numberBuilder2.isValid() ? String.valueOf(numberBuilder2.build().get(ctx)) : "Invalid"));
 		ImGui.separator();
 
+		ImGui.text("Bezier");
+		Bezier.draw("###bezier", bezierP1Data, bezierP2Data, bezierPreset, 128F, 64);
+		ImGui.separator();
+
 		ImGui.text("Line Plot");
 
 		// ImPlot.fitNextPlotAxes();
 
-		if (ImPlot.beginPlot("Line Plot###line-plot", "X", "Sin", new ImVec2(-1F, 200F), ImPlotFlags.CanvasOnly, ImPlotAxisFlags.NoLabel, ImPlotAxisFlags.NoLabel)) {
+		if (ImPlot.beginPlot("Line Plot###line-plot", "X", "Sin", new ImVec2(300F, 300F), ImPlotFlags.CanvasOnly, ImPlotAxisFlags.NoLabel, ImPlotAxisFlags.NoLabel)) {
 			var xdata = new Double[100];
 			var ydata = new Double[100];
 
 			for (int i = 0; i < 100; i++) {
-				xdata[i] = (double) i;
-				ydata[i] = Math.sin(i * 0.1);
+				float t = i / 100F;
+
+				xdata[i] = (double) t * 100D;
+				ydata[i] = (double) KMath.linearizedBezierY(t, bezierP1Data.x, bezierP1Data.y, bezierP2Data.x, bezierP2Data.y) * 100D;
 			}
 
 			ImPlot.plotLine("Sin###1", xdata, ydata);

@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.danger;
 
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.easing.Easing;
+import dev.latvian.mods.klib.interpolation.EaseOut;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
@@ -26,7 +26,7 @@ public class DangerPropRenderer implements PropRenderer<DangerProp> {
 		float delta = ctx.delta();
 		var pos = prop.getPos(delta);
 		var distance = Math.clamp(KMath.map(Math.abs(pos.y - prop.groundY), 0.5D, prop.maxHeight, 1D, 0D), 0D, 1D);
-		float progress = (float) (1D - Easing.QUINT_OUT.ease(1D - distance));
+		float progress = (float) (1D - EaseOut.QUINT.interpolate(1D - distance));
 
 		if (progress > 0F) {
 			var decal = Decal.createDanger((float) (prop.width / 2D * Mth.lerp(progress, prop.widthMod, 1D)));

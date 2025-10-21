@@ -273,7 +273,7 @@ public class LocalClientSessionData extends ClientSessionData {
 				var instance = shakeIt.next();
 				var vec = instance.shake.type().get(instance.progress);
 				var intensity = instance.shake.intensity();
-				var intensityScale = instance.shake.start().easeMirrored(instance.ticks / (float) instance.shake.duration(), instance.shake.end());
+				var intensityScale = instance.shake.start().interpolateMirrored(instance.ticks / (float) instance.shake.duration(), instance.shake.end());
 				shakeX += vec.x() * intensity * intensityScale;
 				shakeY += vec.y() * intensity * intensityScale;
 

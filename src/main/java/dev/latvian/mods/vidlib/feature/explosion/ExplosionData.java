@@ -5,7 +5,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.klib.easing.Easing;
+import dev.latvian.mods.klib.interpolation.EaseIn;
+import dev.latvian.mods.klib.interpolation.Interpolation;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
@@ -45,7 +46,7 @@ public class ExplosionData {
 		public static final Codec<EntityData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			Codec.FLOAT.optionalFieldOf("min_damage", 0F).forGetter(v -> v.minDamage),
 			Codec.FLOAT.optionalFieldOf("max_damage", 4F).forGetter(v -> v.maxDamage),
-			Easing.CODEC.optionalFieldOf("damage_easing", Easing.CUBIC_IN).forGetter(v -> v.damageEasing),
+			Interpolation.CODEC.optionalFieldOf("damage_easing", EaseIn.CUBIC).forGetter(v -> v.damageInterpolation),
 			Codec.FLOAT.optionalFieldOf("horizontal_knockback", 1F).forGetter(v -> v.horizontalKnockback),
 			Codec.FLOAT.optionalFieldOf("vertical_knockback", 0F).forGetter(v -> v.verticalKnockback),
 			Codec.BOOL.optionalFieldOf("spherical", false).forGetter(v -> v.spherical),
@@ -55,7 +56,7 @@ public class ExplosionData {
 		public static final StreamCodec<ByteBuf, EntityData> STREAM_CODEC = CompositeStreamCodec.of(
 			KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 0F), v -> v.minDamage,
 			ByteBufCodecs.FLOAT, v -> v.maxDamage,
-			Easing.STREAM_CODEC, v -> v.damageEasing,
+			Interpolation.STREAM_CODEC, v -> v.damageInterpolation,
 			KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 1F), v -> v.horizontalKnockback,
 			KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 0F), v -> v.verticalKnockback,
 			ByteBufCodecs.BOOL, v -> v.spherical,
@@ -65,7 +66,7 @@ public class ExplosionData {
 
 		public float minDamage;
 		public float maxDamage;
-		public Easing damageEasing;
+		public Interpolation damageInterpolation;
 		public float horizontalKnockback;
 		public float verticalKnockback;
 		public boolean spherical;
@@ -74,7 +75,7 @@ public class ExplosionData {
 		public EntityData() {
 			this.minDamage = 0F;
 			this.maxDamage = 4F;
-			this.damageEasing = Easing.CUBIC_IN;
+			this.damageInterpolation = EaseIn.CUBIC;
 			this.horizontalKnockback = 1F;
 			this.verticalKnockback = 0F;
 			this.spherical = false;
@@ -84,7 +85,7 @@ public class ExplosionData {
 		private EntityData(
 			float minDamage,
 			float maxDamage,
-			Easing damageEasing,
+			Interpolation damageInterpolation,
 			float horizontalKnockback,
 			float verticalKnockback,
 			boolean spherical,
@@ -92,7 +93,7 @@ public class ExplosionData {
 		) {
 			this.minDamage = minDamage;
 			this.maxDamage = maxDamage;
-			this.damageEasing = damageEasing;
+			this.damageInterpolation = damageInterpolation;
 			this.horizontalKnockback = horizontalKnockback;
 			this.verticalKnockback = verticalKnockback;
 			this.spherical = spherical;
@@ -100,7 +101,7 @@ public class ExplosionData {
 		}
 
 		private EntityData copy() {
-			return new EntityData(minDamage, maxDamage, damageEasing, horizontalKnockback, verticalKnockback, spherical, radiusMod);
+			return new EntityData(minDamage, maxDamage, damageInterpolation, horizontalKnockback, verticalKnockback, spherical, radiusMod);
 		}
 
 		@Override
@@ -108,7 +109,7 @@ public class ExplosionData {
 			return "EntityData[" +
 				"minDamage=" + minDamage +
 				", maxDamage=" + maxDamage +
-				", damageEasing=" + damageEasing +
+				", damageEasing=" + damageInterpolation +
 				", horizontalKnockback=" + horizontalKnockback +
 				", verticalKnockback=" + verticalKnockback +
 				']';
@@ -119,7 +120,7 @@ public class ExplosionData {
 			return Objects.hash(
 				minDamage,
 				maxDamage,
-				damageEasing,
+				damageInterpolation,
 				horizontalKnockback,
 				verticalKnockback,
 				spherical,
@@ -134,7 +135,7 @@ public class ExplosionData {
 			} else if (o instanceof EntityData d) {
 				return minDamage == d.minDamage
 					&& maxDamage == d.maxDamage
-					&& damageEasing == d.damageEasing
+					&& damageInterpolation == d.damageInterpolation
 					&& horizontalKnockback == d.horizontalKnockback
 					&& verticalKnockback == d.verticalKnockback
 					&& spherical == d.spherical
@@ -145,7 +146,7 @@ public class ExplosionData {
 		}
 
 		public float damage(float relativeDistance) {
-			return KMath.lerp(damageEasing.easeClamped(relativeDistance), maxDamage, minDamage);
+			return KMath.lerp(damageInterpolation.interpolateClamped(relativeDistance), maxDamage, minDamage);
 		}
 	}
 
@@ -285,7 +286,7 @@ public class ExplosionData {
 		new BooleanConfigValue<>("Smolder", data -> data.smolder, (data, v) -> data.smolder = v),
 		new FloatConfigValue<>("Max Entity Damage", Range.of(0F, 100F), false, data -> data.entity.maxDamage, (data, v) -> data.entity.maxDamage = v),
 		new FloatConfigValue<>("Min Entity Damage", Range.of(0F, 100F), false, data -> data.entity.minDamage, (data, v) -> data.entity.minDamage = v),
-		new ConfigValue<>("Entity Damage Easing", Easing.CODEC, data -> data.entity.damageEasing, (data, v) -> data.entity.damageEasing = v),
+		new ConfigValue<>("Entity Damage Interpolation", Interpolation.CODEC, data -> data.entity.damageInterpolation, (data, v) -> data.entity.damageInterpolation = v),
 		new FloatConfigValue<>("Entity Horizontal Knockback", Range.of(0F, 100F), false, data -> data.entity.horizontalKnockback, (data, v) -> data.entity.horizontalKnockback = v),
 		new FloatConfigValue<>("Entity Vertical Knockback", Range.of(0F, 100F), false, data -> data.entity.verticalKnockback, (data, v) -> data.entity.verticalKnockback = v),
 		new IntConfigValue<>("Floor", IntRange.range(-1000, 1000), false, data -> data.filter.floor, (data, v) -> data.filter.floor = v),
