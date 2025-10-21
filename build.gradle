@@ -9,7 +9,7 @@ plugins {
 var ENV = System.getenv() + (file('.env').exists() ? file('.env').readLines().findAll { it && !it.startsWith('#') }.collectEntries {
 	def (k, v) = it.split('=', 2); [(k.trim()): v.trim()]
 } : [:])
-//var ENV = System.getenv()
+
 var localBuildFile = new File(project.rootDir, "build.txt")
 var localBuildNumber = localBuildFile.getText("UTF-8").toInteger() + 1
 
@@ -248,18 +248,6 @@ publishing {
 				}
 			}
 		}
-
-		/*
-		if (ENV.MBG_MAVEN_URL && ENV.MBG_MAVEN_USERNAME && ENV.MBG_MAVEN_TOKEN) {
-			maven {
-				url = ENV.MBG_MAVEN_URL
-				credentials {
-					username = ENV.MBG_MAVEN_USERNAME
-					password = ENV.MBG_MAVEN_TOKEN
-				}
-			}
-		}
-		 */
 	}
 }
 
