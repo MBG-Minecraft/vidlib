@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.session;
 
+import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
@@ -19,6 +20,8 @@ import dev.latvian.mods.vidlib.feature.registry.SyncRegistryPayload;
 import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -47,6 +50,7 @@ public class SessionData {
 	public boolean pvp;
 	public boolean unpushable;
 	public float flightSpeedMod;
+	public Int2ObjectMap<Color> glowColors;
 
 	public SessionData(UUID uuid) {
 		this.uuid = uuid;
@@ -63,6 +67,7 @@ public class SessionData {
 		this.pvp = true;
 		this.unpushable = false;
 		this.flightSpeedMod = 1F;
+		this.glowColors = new Int2ObjectOpenHashMap<>();
 	}
 
 	public void respawned(Level level, boolean loggedIn) {
