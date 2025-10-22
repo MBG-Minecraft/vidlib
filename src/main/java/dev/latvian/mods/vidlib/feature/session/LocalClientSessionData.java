@@ -110,6 +110,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	public Component topInfoBarOverride;
 	public Component bottomInfoBarOverride;
 	public FluidPlane fluidPlane;
+	public Map<UUID, Color> glowColors;
 
 	public LocalClientSessionData(Minecraft mc, UUID uuid, ClientPacketListener connection) {
 		super(uuid);
@@ -129,6 +130,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.debugPackets = new ArrayList<>();
 		this.debugDecals = new ArrayList<>();
 		this.screenEffects = new ArrayList<>();
+		this.glowColors = new HashMap<>();
 
 		VidLib.LOGGER.info("Client Session Data Initialized");
 	}
@@ -387,6 +389,15 @@ public class LocalClientSessionData extends ClientSessionData {
 	@Override
 	public void refreshListedPlayers() {
 		// NOOP
+	}
+
+	@Override
+	public void setGlowColor(UUID uuid, @Nullable Color color) {
+		if (color == null) {
+			glowColors.remove(uuid);
+		} else {
+			glowColors.put(uuid, color);
+		}
 	}
 
 	public List<PlayerInfo> getListedPlayers() {

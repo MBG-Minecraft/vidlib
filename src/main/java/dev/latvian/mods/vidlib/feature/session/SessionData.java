@@ -20,14 +20,13 @@ import dev.latvian.mods.vidlib.feature.registry.SyncRegistryPayload;
 import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -50,7 +49,6 @@ public class SessionData {
 	public boolean pvp;
 	public boolean unpushable;
 	public float flightSpeedMod;
-	public Int2ObjectMap<Color> glowColors;
 
 	public SessionData(UUID uuid) {
 		this.uuid = uuid;
@@ -67,7 +65,6 @@ public class SessionData {
 		this.pvp = true;
 		this.unpushable = false;
 		this.flightSpeedMod = 1F;
-		this.glowColors = new Int2ObjectOpenHashMap<>();
 	}
 
 	public void respawned(Level level, boolean loggedIn) {
@@ -130,6 +127,9 @@ public class SessionData {
 	}
 
 	public void refreshListedPlayers() {
+	}
+
+	public void setGlowColor(UUID uuid, @Nullable Color color) {
 	}
 
 	/**

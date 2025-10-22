@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.platform;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
@@ -58,12 +57,14 @@ public class ClientGameEngine {
 			return player.get(InternalPlayerData.GLOW_COLOR) != null;
 		}
 
-		return Minecraft.getInstance().player.vl$sessionData().glowColors.get(entity.getId()) != null;
+		var mc = Minecraft.getInstance();
+		return mc.player != null && mc.player.vl$sessionData().glowColors.get(entity.getUUID()) != null;
 	}
 
 	@Nullable
 	public Color getTeamColor(Entity entity) {
-		return Minecraft.getInstance().player.vl$sessionData().glowColors.get(entity.getId());
+		var mc = Minecraft.getInstance();
+		return mc.player != null ? mc.player.vl$sessionData().glowColors.get(entity.getUUID()) : null;
 	}
 
 	public Component getPlayerWorldName(Player player, Component fallback) {
