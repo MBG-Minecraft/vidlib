@@ -20,7 +20,7 @@ public class Color4ImBuilder implements ImBuilder<Color> {
 			rgba[1] = 0F;
 			rgba[2] = 0F;
 			rgba[3] = 0F;
-			c = Color.TRANSPARENT;
+			color = Color.TRANSPARENT;
 		} else {
 			rgba[0] = c.redf();
 			rgba[1] = c.greenf();

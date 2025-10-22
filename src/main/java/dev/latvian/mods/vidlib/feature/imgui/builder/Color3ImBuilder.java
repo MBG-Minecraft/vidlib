@@ -19,7 +19,7 @@ public class Color3ImBuilder implements ImBuilder<Color> {
 			rgba[0] = 0F;
 			rgba[1] = 0F;
 			rgba[2] = 0F;
-			c = Color.BLACK;
+			color = Color.BLACK;
 		} else {
 			rgba[0] = c.redf();
 			rgba[1] = c.greenf();

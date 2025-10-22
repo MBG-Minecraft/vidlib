@@ -32,7 +32,7 @@ vec4 decodeColor(int x, int y) {
 	return texelFetch(DataSampler, ivec2(x, y), 0);
 }
 
-float getInsideRegularShape(int type, vec3 pos, float start, float end, float height, float rotation, float edges) {
+float getInsideRegularShape(vec3 pos, float start, float end, float rotation, float edges) {
 	float degSeg = 6.283185307179586 / edges;
 	float degSegd2 = degSeg / 2.0;
 
@@ -93,9 +93,9 @@ float getInside(int type, vec3 pos, float start, float end, float height, float 
 			return (v - start) / (end - start);
 		}
 	} else if (type == 4) {
-		return getInsideRegularShape(type, pos, start, end, height, rotation, 6.0);
+		return getInsideRegularShape(pos, start, end, rotation, 6.0);
 	} else if (type == 7) {
-		return getInsideRegularShape(type, pos, start, end, height, rotation, 8.0);
+		return getInsideRegularShape(pos, start, end, rotation, 8.0);
 	}
 
 	return -1.0;
