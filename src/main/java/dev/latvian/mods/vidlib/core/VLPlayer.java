@@ -10,6 +10,7 @@ import dev.latvian.mods.vidlib.feature.session.SessionData;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;
@@ -33,8 +34,10 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
 		return vl$self().isCreative();
 	}
 
+	@Nullable
 	default <T> T get(DataKey<T> type) {
-		return vl$sessionData().dataMap.get(type, vl$level().getGameTime());
+		var session = vl$sessionData();
+		return session == null ? null : session.dataMap.get(type, vl$level().getGameTime());
 	}
 
 	default <T> void set(DataKey<T> type, T value) {

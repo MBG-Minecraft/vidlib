@@ -12,6 +12,7 @@ import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
+import dev.latvian.mods.vidlib.feature.imgui.EntityExplorerPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiAPI;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
@@ -209,7 +210,7 @@ public class VLFlashbackIntegration {
 	private static void entityMenu(ImGraphics graphics, Entity entity) {
 		ImGuiUtils.separatorWithText("VidLib");
 		var mc = Minecraft.getInstance();
-		entity.imgui(graphics, mc.getDeltaTracker().getGameTimeDeltaPartialTick(entity == mc.player));
+		EntityExplorerPanel.imgui(graphics, entity, mc.getDeltaTracker().getGameTimeDeltaPartialTick(entity == mc.player));
 	}
 
 	private static void visualsMenu(ImGraphics graphics) {

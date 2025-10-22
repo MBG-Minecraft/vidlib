@@ -47,23 +47,21 @@ public class ClientGameEngine {
 		return !isStaff(sessionData.getTags(self.level().getGameTime()), playerInfo.getGameMode());
 	}
 
-	public Component getPlayerListName(Minecraft minecraft, PlayerInfo playerInfo, Component fallback) {
-		var nickname = minecraft.player.vl$sessionData().getClientSessionData(playerInfo.getProfile().getId()).dataMap.get(InternalPlayerData.NICKNAME, minecraft.getGameTime());
+	public Component getPlayerListName(Minecraft mc, PlayerInfo playerInfo, Component fallback) {
+		var nickname = mc.player.vl$sessionData().getClientSessionData(playerInfo.getProfile().getId()).dataMap.get(InternalPlayerData.NICKNAME, mc.getGameTime());
 		return Empty.isEmpty(nickname) ? fallback : nickname;
 	}
 
-	public boolean isGlowing(Entity entity) {
+	public boolean isGlowing(Minecraft mc, Entity entity) {
 		if (entity instanceof Player player) {
 			return player.get(InternalPlayerData.GLOW_COLOR) != null;
 		}
 
-		var mc = Minecraft.getInstance();
 		return mc.player != null && mc.player.vl$sessionData().glowColors.get(entity.getUUID()) != null;
 	}
 
 	@Nullable
-	public Color getTeamColor(Entity entity) {
-		var mc = Minecraft.getInstance();
+	public Color getTeamColor(Minecraft mc, Entity entity) {
 		return mc.player != null ? mc.player.vl$sessionData().glowColors.get(entity.getUUID()) : null;
 	}
 

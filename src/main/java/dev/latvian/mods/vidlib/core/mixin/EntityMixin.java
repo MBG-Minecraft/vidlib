@@ -5,7 +5,6 @@ import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.core.VLEntity;
 import dev.latvian.mods.vidlib.feature.entity.ExactEntitySpawnPayload;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
-import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -72,22 +71,6 @@ public abstract class EntityMixin implements VLEntity {
 
 		if (!e.getType().builtInRegistryHolder().getKey().location().getNamespace().equals("minecraft")) {
 			cir.setReturnValue((Packet) new ExactEntitySpawnPayload(e, serverEntity, 0).toS2C(e.level()));
-		}
-	}
-
-	@Inject(method = "isCurrentlyGlowing", at = @At("HEAD"), cancellable = true)
-	private void vl$isCurrentlyGlowing(CallbackInfoReturnable<Boolean> cir) {
-		if (ClientGameEngine.INSTANCE.isGlowing(vl$self())) {
-			cir.setReturnValue(true);
-		}
-	}
-
-	@Inject(method = "getTeamColor", at = @At("HEAD"), cancellable = true)
-	private void vl$getTeamColor(CallbackInfoReturnable<Integer> cir) {
-		var override = ClientGameEngine.INSTANCE.getTeamColor(vl$self());
-
-		if (override != null) {
-			cir.setReturnValue(override.rgb());
 		}
 	}
 

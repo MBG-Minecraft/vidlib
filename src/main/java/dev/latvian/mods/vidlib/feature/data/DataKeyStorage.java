@@ -85,11 +85,11 @@ public class DataKeyStorage {
 		return new DataKey.Builder<>(this, id, type, defaultValue);
 	}
 
-	public <T> DataKey.Builder<T> buildDefault(String id, DataType<T> type, T defaultValue, @Nullable ImBuilderType<T> imBuilder) {
+	public <T> DataKey.Builder<T> buildDefault(String id, DataType<T> type, @Nullable T defaultValue, @Nullable ImBuilderType<T> imBuilder) {
 		return builder(id, type, defaultValue).imBuilder(imBuilder).save().sync();
 	}
 
-	public <T> DataKey<T> createDefault(String id, DataType<T> type, T defaultValue, @Nullable ImBuilderType<T> imBuilder) {
+	public <T> DataKey<T> createDefault(String id, DataType<T> type, @Nullable T defaultValue, @Nullable ImBuilderType<T> imBuilder) {
 		return buildDefault(id, type, defaultValue, imBuilder).build();
 	}
 

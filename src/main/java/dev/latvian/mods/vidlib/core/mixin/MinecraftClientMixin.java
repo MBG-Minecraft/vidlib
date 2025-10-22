@@ -7,6 +7,7 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -14,6 +15,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -162,5 +164,12 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	@Inject(method = "run", at = @At("RETURN"))
 	public void vl$onEndGameLoop(CallbackInfo ci) {
 		ImGuiHooks.ensureEndFrame();
+	}
+
+	@Inject(method = "shouldEntityAppearGlowing", at = @At("HEAD"), cancellable = true)
+	private void vl$isCurrentlyGlowing(Entity entity, CallbackInfoReturnable<Boolean> cir) {
+		if (ClientGameEngine.INSTANCE.isGlowing(vl$self(), entity)) {
+			cir.setReturnValue(true);
+		}
 	}
 }

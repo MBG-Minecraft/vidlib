@@ -13,6 +13,7 @@ import dev.latvian.mods.vidlib.core.VLOutlineBufferSource;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxRenderer;
 import dev.latvian.mods.vidlib.util.client.VLViewArea;
 import net.minecraft.client.Camera;
@@ -192,5 +193,16 @@ public abstract class LevelRendererMixin {
 	@Inject(method = "renderEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/OutlineBufferSource;setColor(IIII)V"))
 	private void vl$renderEntitiesSetColor(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, Camera camera, DeltaTracker deltaTracker, List<Entity> entities, CallbackInfo ci, @Local OutlineBufferSource outlineBuffer, @Local Entity entity) {
 		((VLOutlineBufferSource) outlineBuffer).vl$setPlayer(entity instanceof Player);
+	}
+
+	@Redirect(method = "renderEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getTeamColor()I"))
+	private int vl$getTeamColor(Entity instance, @Local Entity entity) {
+		var color = ClientGameEngine.INSTANCE.getTeamColor(minecraft, entity);
+
+		if (color != null) {
+			return color.rgb();
+		}
+
+		return entity.getTeamColor();
 	}
 }
