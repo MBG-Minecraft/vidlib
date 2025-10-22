@@ -32,34 +32,32 @@ vec4 decodeColor(int x, int y) {
 	return texelFetch(DataSampler, ivec2(x, y), 0);
 }
 
-float getInsideRegularShape(vec3 pos, float start, float end, float rotation, float edges) {
-	float degSeg = 6.283185307179586 / edges;
-	float degSegd2 = degSeg / 2.0;
-
-	float angle = mod(atan(pos.z, pos.x) + rotation + degSegd2, degSeg);
-	float len = length(pos.xz);
-	pos.x = cos(angle) * len;
-	pos.z = sin(angle) * len;
-
-	float m = 1.0 / cos(angle - degSegd2);
-	float hs = start * sqrt3d2;
-	float he = end * sqrt3d2;
-	float rhs = hs * m;
-	float rhe = he * m;
-	float h = (len - rhs) / (rhe - rhs);
-
-	return h >= 0.0 && h <= 1.0 ? h : -1.0;
-}
-
-float getInside(int type, vec3 pos, float start, float end, float height, float rotation) {
+float getInside(int type, vec3 pos, float start, float end, float height, float rotation, float edges) {
 	if (type == 1) {
+		float degSeg = 6.283185307179586 / edges;
+		float degSegd2 = degSeg / 2.0;
+
+		float angle = mod(atan(pos.z, pos.x) + rotation + degSegd2, degSeg);
+		float len = length(pos.xz);
+		pos.x = cos(angle) * len;
+		pos.z = sin(angle) * len;
+
+		float m = 1.0 / cos(angle - degSegd2);
+		float hs = start * sqrt3d2;
+		float he = end * sqrt3d2;
+		float rhs = hs * m;
+		float rhe = he * m;
+		float h = (len - rhs) / (rhe - rhs);
+
+		return h >= 0.0 && h <= 1.0 ? h : -1.0;
+	} else if (type == 2) {
 		pos.y /= height;
 		float distSq = dot(pos, pos);
 
 		if (distSq <= end * end && distSq >= start * start) {
 			return (sqrt(distSq) - start) / (end - start);
 		}
-	} else if (type == 2 || type == 5) {
+	} else if (type == 3 || type == 5) {
 		pos.y /= height;
 		float y = abs(pos.y);
 
@@ -74,7 +72,7 @@ float getInside(int type, vec3 pos, float start, float end, float height, float 
 				return distSq <= end * end ? max(r, v) : -1.0;
 			}
 		}
-	} else if (type == 3 || type == 6) {
+	} else if (type == 6) {
 		if (rotation != 0.0) {
 			float r = atan(pos.z, pos.x) + rotation;
 			float l = length(pos.xz);
@@ -92,10 +90,6 @@ float getInside(int type, vec3 pos, float start, float end, float height, float 
 		if (v >= start && v <= end) {
 			return (v - start) / (end - start);
 		}
-	} else if (type == 4) {
-		return getInsideRegularShape(pos, start, end, rotation, 6.0);
-	} else if (type == 7) {
-		return getInsideRegularShape(pos, start, end, rotation, 8.0);
 	}
 
 	return -1.0;
@@ -147,9 +141,10 @@ void main() {
 		float end = decodeFloat(5, y);
 		float height = decodeFloat(6, y);
 		float rotation = decodeFloat(7, y);
+		float edges = decodeFloat(13, y);
 
 		vec3 pos = (terrain == 0 ? worldPos : terrainWorldPos) - decalPos;
-		float inside = getInside(type, pos, start, end, height, rotation);
+		float inside = getInside(type, pos, start, end, height, rotation, edges);
 
 		if (inside >= 0.0 && inside <= 1.0) {
 			vec4 startColor = decodeColor(8, y);

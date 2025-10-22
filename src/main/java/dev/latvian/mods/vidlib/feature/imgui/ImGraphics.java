@@ -6,6 +6,7 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.session.LocalClientSessionData;
 import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
 import imgui.ImGui;
 import imgui.ImGuiStyle;
@@ -47,6 +48,8 @@ public class ImGraphics {
 
 	public final Minecraft mc;
 	public final boolean inGame;
+	public final LocalClientSessionData session;
+	public final boolean isSinglePlayer;
 	public final boolean isReplay;
 	public final boolean isNeoForgeServer;
 	public final boolean isClientOnly;
@@ -57,11 +60,13 @@ public class ImGraphics {
 	public ImGraphics(Minecraft mc) {
 		this.mc = mc;
 		this.inGame = mc.player != null && mc.level != null;
+		this.session = inGame ? mc.player.vl$sessionData() : null;
+		this.isSinglePlayer = inGame && mc.isLocalServer();
 		this.isReplay = inGame && mc.level.isReplayLevel();
 		this.isNeoForgeServer = inGame && mc.isServerNeoForge();
 		this.isClientOnly = isReplay || !isNeoForgeServer;
 		this.adminPanel = VidLibClientOptions.getAdminPanel();
-		this.isAdmin = inGame && (mc.isLocalServer() || mc.player.hasPermissions(2));
+		this.isAdmin = inGame && (isSinglePlayer || mc.player.hasPermissions(2));
 	}
 
 	public void pushStack() {

@@ -1,16 +1,13 @@
 package dev.latvian.mods.vidlib.feature.imgui.builder;
 
-import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.SelectedPosition;
 import imgui.ImGui;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.Position;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
-import org.joml.Vector3dc;
 
 public class Vector3dImBuilder implements ImBuilder<Vector3d>, SelectedPosition.Holder {
 	public static final ImBuilderType<Vector3d> TYPE = Vector3dImBuilder::new;
@@ -19,22 +16,15 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d>, SelectedPosition.
 	private final SelectedPosition[] selectedPosition;
 
 	public Vector3dImBuilder() {
-		this(Identity.DVEC_3);
-	}
-
-	public Vector3dImBuilder(Position position) {
-		this.data = new Vector3d(position.x(), position.y(), position.z());
-		this.selectedPosition = new SelectedPosition[1];
-	}
-
-	public Vector3dImBuilder(Vector3dc position) {
-		this.data = new Vector3d(position.x(), position.y(), position.z());
+		this.data = new Vector3d();
 		this.selectedPosition = new SelectedPosition[1];
 	}
 
 	@Override
 	public void set(Vector3d value) {
-		data.set(value.x(), value.y(), value.z());
+		if (value != null) {
+			data.set(value.x(), value.y(), value.z());
+		}
 	}
 
 	public static ImUpdate imgui(ImGraphics graphics, Vector3d data, SelectedPosition[] selectedPosition) {
@@ -119,6 +109,11 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d>, SelectedPosition.
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
 		return imgui(graphics, data, selectedPosition);
+	}
+
+	@Override
+	public boolean keySameLine() {
+		return false;
 	}
 
 	@Override

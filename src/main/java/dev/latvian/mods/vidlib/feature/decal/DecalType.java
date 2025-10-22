@@ -6,14 +6,12 @@ import net.minecraft.util.StringRepresentable;
 public enum DecalType implements StringRepresentable {
 	// Static types
 	NONE("none", 0),
-	SPHERE("sphere", 1),
-	CYLINDER("cylinder", 2),
-	SQUARE("square", 3),
-	HEXAGON("hexagon", 4),
+	REGULAR("regular", 1),
+	SPHERE("sphere", 2),
+	CYLINDER("cylinder", 3),
 	// FILLED
 	FILLED_CYLINDER("filled_cylinder", 5),
 	CUBE("cube", 6),
-	OCTAGON("octagon", 7),
 	// Dynamic types
 	DANGER("danger", -1),
 

@@ -23,6 +23,7 @@ import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.environment.FluidPlane;
+import dev.latvian.mods.vidlib.feature.environment.WorldBorderOverride;
 import dev.latvian.mods.vidlib.feature.imgui.AdminPanel;
 import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
@@ -65,6 +66,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.border.WorldBorder;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -111,6 +113,9 @@ public class LocalClientSessionData extends ClientSessionData {
 	public Component bottomInfoBarOverride;
 	public FluidPlane fluidPlane;
 	public Map<UUID, Color> glowColors;
+	public WorldBorder worldBorderOverride;
+	public WorldBorderOverride worldBorderOverrideStart;
+	public WorldBorderOverride worldBorderOverrideEnd;
 
 	public LocalClientSessionData(Minecraft mc, UUID uuid, ClientPacketListener connection) {
 		super(uuid);
@@ -169,6 +174,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	@Override
 	public void updateOverrides(Player player) {
 		super.updateOverrides(player);
+		var now = player.level().getGameTime();
 		var skyboxId = ClientGameEngine.INSTANCE.getSkybox(mc);
 
 		if (skyboxId == null) {

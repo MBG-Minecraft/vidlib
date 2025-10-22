@@ -41,12 +41,16 @@ public interface ImBuilder<T> {
 		return imgui(graphics);
 	}
 
+	default boolean keySameLine() {
+		return true;
+	}
+
 	default ImUpdate imguiKey(ImGraphics graphics, String label, String id) {
 		if (!label.isEmpty()) {
 			ImGui.alignTextToFramePadding();
 			graphics.redTextIf(label, !isValid());
 
-			if (!(this instanceof CompoundImBuilder)) {
+			if (keySameLine()) {
 				ImGui.sameLine();
 			}
 		}

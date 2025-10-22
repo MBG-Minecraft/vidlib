@@ -109,6 +109,11 @@ public class BlockPosImBuilder implements ImBuilder<BlockPos>, SelectedPosition.
 	}
 
 	@Override
+	public boolean keySameLine() {
+		return false;
+	}
+
+	@Override
 	public boolean isValid() {
 		var mc = Minecraft.getInstance();
 		return mc.level == null || mc.level.isInWorldBounds(pos);

@@ -5,6 +5,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasUniform;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.Minecraft;
 
 import java.util.ArrayList;
@@ -34,6 +35,8 @@ public class DecalRenderer {
 				add(decal);
 			}
 		}
+
+		ClientGameEngine.INSTANCE.addDecals(TEMP_LIST);
 
 		if (!TEMP_LIST.isEmpty()) {
 			var texture = DecalTexture.HOLDER.texture().get();

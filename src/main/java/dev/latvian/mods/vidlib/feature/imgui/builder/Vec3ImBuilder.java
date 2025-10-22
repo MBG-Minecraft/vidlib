@@ -42,6 +42,11 @@ public class Vec3ImBuilder implements ImBuilder<Vec3>, SelectedPosition.Holder {
 	}
 
 	@Override
+	public boolean keySameLine() {
+		return false;
+	}
+
+	@Override
 	public boolean isValid() {
 		return !Double.isNaN(data.x) && !Double.isNaN(data.y) && !Double.isNaN(data.z);
 	}

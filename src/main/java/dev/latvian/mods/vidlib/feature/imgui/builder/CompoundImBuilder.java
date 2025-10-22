@@ -73,6 +73,11 @@ public abstract class CompoundImBuilder<T> implements ImBuilder<T> {
 	}
 
 	@Override
+	public boolean keySameLine() {
+		return false;
+	}
+
+	@Override
 	public boolean isValid() {
 		for (var builder : builders) {
 			if ((builder.optional == null || builder.optional.get()) && !builder.builder.isValid()) {

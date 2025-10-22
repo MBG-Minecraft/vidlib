@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.skybox;
+package dev.latvian.mods.vidlib.feature.environment;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;

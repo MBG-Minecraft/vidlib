@@ -49,6 +49,7 @@ public class Decal {
 	public boolean surface;
 	public boolean terrain;
 	public boolean additive;
+	public float edges;
 
 	public Decal() {
 		this.parent = null;
@@ -66,6 +67,7 @@ public class Decal {
 		this.surface = false;
 		this.terrain = false;
 		this.additive = false;
+		this.edges = 4F;
 	}
 
 	public Decal(Decal other) {
@@ -84,6 +86,7 @@ public class Decal {
 		this.surface = other.surface;
 		this.terrain = other.terrain;
 		this.additive = other.additive;
+		this.edges = other.edges;
 	}
 
 	public void setPosition(Vector3d pos, boolean joined) {
@@ -166,6 +169,7 @@ public class Decal {
 		arr.add(fillType.shaderId & 7); // 10
 		arr.add(Float.floatToIntBits(fillSize)); // 11
 		arr.add(Float.floatToIntBits(fillThickness)); // 12
+		arr.add(Float.floatToIntBits(edges)); // 13
 	}
 
 	public void imgui(ImGraphics graphics, Collection<Decal> decals) {
@@ -173,6 +177,13 @@ public class Decal {
 		DecalType.UNIT[0] = type;
 		graphics.combo("###type", DecalType.UNIT, DecalType.VALUES);
 		type = DecalType.UNIT[0];
+
+		if (type == DecalType.REGULAR) {
+			ImGuiUtils.FLOAT.set(edges);
+			ImGui.sliderFloat("###edges", ImGuiUtils.FLOAT.getData(), 1F, 16F, "%.01f");
+			edges = ImGuiUtils.FLOAT.get();
+			ImGuiUtils.hoveredTooltip("Edges");
+		}
 
 		if (parent != null && !decals.contains(parent)) {
 			setPosition(position, false);

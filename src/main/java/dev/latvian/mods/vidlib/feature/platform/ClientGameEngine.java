@@ -5,6 +5,7 @@ import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
+import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
@@ -13,6 +14,7 @@ import dev.latvian.mods.vidlib.util.StringUtils;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.FogParameters;
@@ -25,6 +27,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.material.FogType;
 import org.jetbrains.annotations.Nullable;
 
@@ -228,5 +231,42 @@ public class ClientGameEngine {
 		ImGui.sameLine();
 		ImGui.text("Some more info here");
 		 */
+	}
+
+	public void addDecals(List<Decal> list) {
+	}
+
+	public WorldBorder getRenderedWorldBorder(Minecraft mc, ClientLevel level) {
+		var session = mc.player == null ? null : mc.player.vl$sessionData();
+
+		if (session != null && session.worldBorderOverrideEnd != null) {
+			if (session.worldBorderOverride == null) {
+				session.worldBorderOverride = new WorldBorder();
+			}
+
+			var b = session.worldBorderOverrideEnd;
+			double now = level.getGameTime() - 1D + mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+			boolean moving = false;
+
+			if (session.worldBorderOverrideStart != null) {
+				b = session.worldBorderOverrideStart.lerp(now, b);
+				moving = b != session.worldBorderOverrideStart && b != session.worldBorderOverrideEnd;
+			}
+
+			if (b != null) {
+				session.worldBorderOverride.setCenter(b.pos().x, b.pos().z);
+				session.worldBorderOverride.setSize(b.size());
+
+				if (moving) {
+					session.worldBorderOverride.lerpSizeBetween(b.size(), b.size() + Math.signum(session.worldBorderOverrideEnd.size() - session.worldBorderOverrideStart.size()), 1L);
+				} else {
+					session.worldBorderOverride.setSize(b.size());
+				}
+
+				return session.worldBorderOverride;
+			}
+		}
+
+		return level.getWorldBorder();
 	}
 }

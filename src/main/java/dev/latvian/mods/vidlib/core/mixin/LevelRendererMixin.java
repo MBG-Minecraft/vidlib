@@ -34,6 +34,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
@@ -204,5 +205,10 @@ public abstract class LevelRendererMixin {
 		}
 
 		return entity.getTeamColor();
+	}
+
+	@Redirect(method = "lambda$addWeatherPass$7", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getWorldBorder()Lnet/minecraft/world/level/border/WorldBorder;"))
+	private WorldBorder vl$getWorldBorder(ClientLevel level) {
+		return ClientGameEngine.INSTANCE.getRenderedWorldBorder(minecraft, level);
 	}
 }
