@@ -71,6 +71,25 @@ float getInside(int type, vec3 diff, float start, float end, float height, float
 		if (v >= start && v <= end) {
 			return (v - start) / (end - start);
 		}
+	} else if (type == 6 || type == 7) {
+		float sqrt3 = 1.73205080757;
+		float sqrt32 = sqrt3 / 2.0;
+
+		if (rotation != 0.0) {
+			float r = atan(diff.z, diff.x) + rotation;
+			float l = length(diff.xz);
+			diff.x = cos(r) * l;
+			diff.z = sin(r) * l;
+		}
+
+		diff.y /= height;
+
+		float dx = diff.x / end;
+		float dz = diff.z / end;
+
+		if (dz > -sqrt32 && dz < sqrt32 && sqrt3 * dx + sqrt3 > dz && sqrt3 * dx - sqrt3 < dz && -sqrt3 * dx + sqrt3 > dz && -sqrt3 * dx - sqrt3 < dz) {
+			return 1.0;
+		}
 	}
 
 	return -1.0;

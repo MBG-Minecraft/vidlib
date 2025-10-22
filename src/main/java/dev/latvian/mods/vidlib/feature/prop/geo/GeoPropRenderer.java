@@ -42,7 +42,8 @@ public class GeoPropRenderer<P extends Prop & GeoProp> extends GeoObjectRenderer
 		state.addGeckolibData(DataTickets.ENTITY_PITCH, prop.getPitch(delta));
 		state.addGeckolibData(DataTickets.ENTITY_YAW, prop.getYaw(delta));
 		state.addGeckolibData(ENTITY_ROLL, prop.getRoll(delta));
-		state.addGeckolibData(DataTickets.VELOCITY, new Vec3(prop.velocity.x, prop.velocity.y, prop.velocity.z));
+		// state.addGeckolibData(DataTickets.VELOCITY, new Vec3(prop.velocity.x, prop.velocity.y, prop.velocity.z));
+		state.addGeckolibData(DataTickets.VELOCITY, Vec3.ZERO);
 		var pos = prop.getPos(delta);
 		state.addGeckolibData(DataTickets.BLOCKPOS, BlockPos.containing(pos));
 		state.addGeckolibData(DataTickets.POSITION, pos);

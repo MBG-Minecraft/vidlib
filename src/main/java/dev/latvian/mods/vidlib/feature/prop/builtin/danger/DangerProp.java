@@ -26,7 +26,6 @@ public class DangerProp extends Prop {
 	public DangerProp(PropContext<?> ctx) {
 		super(ctx);
 		this.width = 12F;
-		this.gravity = 0F;
 	}
 
 	@Override

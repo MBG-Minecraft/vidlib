@@ -91,7 +91,6 @@ public class NPCProp extends BaseGeoProp {
 		this.width = 0.6F;
 		this.height = 1.8F;
 		this.name = Empty.COMPONENT;
-		this.gravity = 0F;
 		this.stone = false;
 		this.profile = Empty.PROFILE;
 		this.bodyPitch = 0F;

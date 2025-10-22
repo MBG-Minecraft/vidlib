@@ -34,7 +34,6 @@ public class GeoDisplayProp extends BaseGeoProp {
 		super(ctx);
 		this.width = 0F;
 		this.height = 1F;
-		this.gravity = 0F;
 	}
 
 	@Override

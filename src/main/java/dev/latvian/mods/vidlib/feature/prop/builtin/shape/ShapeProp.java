@@ -23,10 +23,8 @@ public class ShapeProp extends Prop {
 		TICK,
 		LIFESPAN,
 		POSITION,
-		VELOCITY,
 		YAW,
 		PITCH,
-		GRAVITY,
 		WIDTH,
 		HEIGHT,
 		CAN_COLLIDE,
@@ -46,7 +44,6 @@ public class ShapeProp extends Prop {
 
 	public ShapeProp(PropContext<?> ctx) {
 		super(ctx);
-		this.gravity = 0F;
 		this.shape = CubeShape.UNIT;
 		this.color = Color.CYAN.withAlpha(50);
 		this.outlineColor = Color.WHITE;

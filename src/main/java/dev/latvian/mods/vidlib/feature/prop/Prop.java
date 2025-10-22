@@ -22,7 +22,6 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.FloatImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.IntImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Vector3dImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.Vector3fImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfField;
@@ -77,11 +76,9 @@ public class Prop {
 	public static final PropData<Prop, Integer> TICK = PropData.create(Prop.class, "tick", DataTypes.TICKS, p -> p.tick, (p, v) -> p.tick = v, IntImBuilder.TYPE_1M);
 	public static final PropData<Prop, Integer> LIFESPAN = PropData.create(Prop.class, "lifespan", DataTypes.TICKS, p -> p.lifespan, (p, v) -> p.lifespan = v, IntImBuilder.TYPE_1M);
 	public static final PropData<Prop, Vector3d> POSITION = PropData.create(Prop.class, "position", JOMLDataTypes.DVEC3, p -> p.pos, Prop::setPos, Vector3dImBuilder.TYPE);
-	public static final PropData<Prop, Vector3f> VELOCITY = PropData.create(Prop.class, "velocity", JOMLDataTypes.VEC3, p -> p.velocity, Prop::setVelocity, Vector3fImBuilder.TYPE);
 	public static final PropData<Prop, Float> PITCH = PropData.create(Prop.class, "pitch", DataTypes.FLOAT, p -> p.rotation.x, Prop::setPitch, AngleImBuilder.TYPE_90);
 	public static final PropData<Prop, Float> YAW = PropData.create(Prop.class, "yaw", DataTypes.FLOAT, p -> p.rotation.y, Prop::setYaw, AngleImBuilder.TYPE_180);
 	public static final PropData<Prop, Float> ROLL = PropData.create(Prop.class, "roll", DataTypes.FLOAT, p -> p.rotation.z, Prop::setRoll, AngleImBuilder.TYPE_180);
-	public static final PropData<Prop, Float> GRAVITY = PropData.createFloat(Prop.class, "gravity", p -> p.gravity, (p, v) -> p.gravity = v);
 	public static final PropData<Prop, Float> WIDTH = PropData.create(Prop.class, "width", DataTypes.FLOAT, p -> (float) p.width, (p, v) -> p.width = v, FloatImBuilder.type(0F, 16F));
 	public static final PropData<Prop, Float> HEIGHT = PropData.create(Prop.class, "height", DataTypes.FLOAT, p -> (float) p.height, (p, v) -> p.height = v, FloatImBuilder.type(0F, 16F));
 	public static final PropData<Prop, Boolean> CAN_COLLIDE = PropData.createBoolean(Prop.class, "can_collide", p -> p.canCollide, (p, v) -> p.canCollide = v);
@@ -104,11 +101,8 @@ public class Prop {
 	public int lifespan;
 	public final Vector3d pos;
 	public final Vector3d prevPos;
-	public final Vector3f velocity;
 	public final Vector3f rotation;
 	public final Vector3f prevRotation;
-	public final Vector3f velocityMultiplier;
-	public float gravity;
 	public double width;
 	public double height;
 	public boolean canCollide;
@@ -127,11 +121,10 @@ public class Prop {
 		this.lifespan = 0;
 		this.pos = new Vector3d();
 		this.prevPos = new Vector3d();
-		this.velocity = new Vector3f();
 		this.rotation = new Vector3f();
 		this.prevRotation = new Vector3f();
-		this.velocityMultiplier = new Vector3f(0.98F, 1F, 0.98F);
-		this.gravity = 0.08F;
+		// this.velocityMultiplier = new Vector3f(0.98F, 1F, 0.98F);
+		// this.gravity = 0.08F;
 		this.width = 1D;
 		this.height = 1D;
 		this.canCollide = false;
@@ -220,14 +213,6 @@ public class Prop {
 
 	public final void setPos(Position pos) {
 		setPos(pos.x(), pos.y(), pos.z());
-	}
-
-	public void setVelocity(float x, float y, float z) {
-		velocity.set(x, y, z);
-	}
-
-	public final void setVelocity(Vector3fc velocity) {
-		setVelocity(velocity.x(), velocity.y(), velocity.z());
 	}
 
 	public void setRot(float yaw, float pitch, float roll) {
@@ -325,9 +310,6 @@ public class Prop {
 	}
 
 	public void move() {
-		pos.add(velocity);
-		velocity.mul(velocityMultiplier);
-		velocity.y -= gravity;
 	}
 
 	public void onAdded() {

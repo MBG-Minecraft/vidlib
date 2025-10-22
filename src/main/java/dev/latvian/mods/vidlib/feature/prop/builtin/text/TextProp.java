@@ -56,7 +56,6 @@ public class TextProp extends Prop {
 		super(ctx);
 		this.width = 1F;
 		this.height = 2F;
-		this.gravity = 0F;
 		this.text = Component.literal("Text");
 		this.color = Color.WHITE;
 		this.shadow = true;
