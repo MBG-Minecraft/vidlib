@@ -10,6 +10,8 @@ uniform float GameTime;
 in vec2 texCoord;
 in vec2 oneTexel;
 
+const float sqrt3d2 = sqrt(3.0) / 2.0;
+
 layout (location = 0) out vec4 fragColor;
 
 uvec4 fetchRGBA8u(ivec2 tc) {
@@ -30,20 +32,39 @@ vec4 decodeColor(int x, int y) {
 	return texelFetch(DataSampler, ivec2(x, y), 0);
 }
 
-float getInside(int type, vec3 diff, float start, float end, float height, float rotation) {
+float getInsideRegularShape(int type, vec3 pos, float start, float end, float height, float rotation, float edges) {
+	float degSeg = 6.283185307179586 / edges;
+	float degSegd2 = degSeg / 2.0;
+
+	float angle = mod(atan(pos.z, pos.x) + rotation + degSegd2, degSeg);
+	float len = length(pos.xz);
+	pos.x = cos(angle) * len;
+	pos.z = sin(angle) * len;
+
+	float m = 1.0 / cos(angle - degSegd2);
+	float hs = start * sqrt3d2;
+	float he = end * sqrt3d2;
+	float rhs = hs * m;
+	float rhe = he * m;
+	float h = (len - rhs) / (rhe - rhs);
+
+	return h >= 0.0 && h <= 1.0 ? h : -1.0;
+}
+
+float getInside(int type, vec3 pos, float start, float end, float height, float rotation) {
 	if (type == 1) {
-		diff.y /= height;
-		float distSq = dot(diff, diff);
+		pos.y /= height;
+		float distSq = dot(pos, pos);
 
 		if (distSq <= end * end && distSq >= start * start) {
 			return (sqrt(distSq) - start) / (end - start);
 		}
-	} else if (type == 2 || type == 3) {
-		diff.y /= height;
-		float y = abs(diff.y);
+	} else if (type == 2 || type == 5) {
+		pos.y /= height;
+		float y = abs(pos.y);
 
 		if (y <= end) {
-			float distSq = dot(diff.xz, diff.xz);
+			float distSq = dot(pos.xz, pos.xz);
 			float r = (distSq <= end * end && distSq >= start * start) ? (sqrt(distSq) - start) / (end - start) : -1.0;
 
 			if (type == 2) {
@@ -53,43 +74,28 @@ float getInside(int type, vec3 diff, float start, float end, float height, float
 				return distSq <= end * end ? max(r, v) : -1.0;
 			}
 		}
-	} else if (type == 4 || type == 5) {
+	} else if (type == 3 || type == 6) {
 		if (rotation != 0.0) {
-			float r = atan(diff.z, diff.x) + rotation;
-			float l = length(diff.xz);
-			diff.x = cos(r) * l;
-			diff.z = sin(r) * l;
+			float r = atan(pos.z, pos.x) + rotation;
+			float l = length(pos.xz);
+			pos.x = cos(r) * l;
+			pos.z = sin(r) * l;
 		}
 
-		diff.y /= height;
-		float v = max(abs(diff.x), abs(diff.z));
+		pos.y /= height;
+		float v = max(abs(pos.x), abs(pos.z));
 
-		if (type == 5) {
-			v = max(v, abs(diff.y));
+		if (type == 6) {
+			v = max(v, abs(pos.y));
 		}
 
 		if (v >= start && v <= end) {
 			return (v - start) / (end - start);
 		}
-	} else if (type == 6 || type == 7) {
-		float sqrt3 = 1.73205080757;
-		float sqrt32 = sqrt3 / 2.0;
-
-		if (rotation != 0.0) {
-			float r = atan(diff.z, diff.x) + rotation;
-			float l = length(diff.xz);
-			diff.x = cos(r) * l;
-			diff.z = sin(r) * l;
-		}
-
-		diff.y /= height;
-
-		float dx = diff.x / end;
-		float dz = diff.z / end;
-
-		if (dz > -sqrt32 && dz < sqrt32 && sqrt3 * dx + sqrt3 > dz && sqrt3 * dx - sqrt3 < dz && -sqrt3 * dx + sqrt3 > dz && -sqrt3 * dx - sqrt3 < dz) {
-			return 1.0;
-		}
+	} else if (type == 4) {
+		return getInsideRegularShape(type, pos, start, end, height, rotation, 6.0);
+	} else if (type == 7) {
+		return getInsideRegularShape(type, pos, start, end, height, rotation, 8.0);
 	}
 
 	return -1.0;
@@ -142,8 +148,8 @@ void main() {
 		float height = decodeFloat(6, y);
 		float rotation = decodeFloat(7, y);
 
-		vec3 diff = (terrain == 0 ? worldPos : terrainWorldPos) - decalPos;
-		float inside = getInside(type, diff, start, end, height, rotation);
+		vec3 pos = (terrain == 0 ? worldPos : terrainWorldPos) - decalPos;
+		float inside = getInside(type, pos, start, end, height, rotation);
 
 		if (inside >= 0.0 && inside <= 1.0) {
 			vec4 startColor = decodeColor(8, y);
@@ -159,7 +165,7 @@ void main() {
 					float fillThickness = decodeFloat(12, y);
 
 					if (fillType == 1) {
-						vec3 g = diff + fillThickness * 0.5;
+						vec3 g = pos + fillThickness * 0.5;
 
 						if (rotation != 0.0) {
 							float r = atan(g.z, g.x) + rotation;
@@ -176,7 +182,7 @@ void main() {
 						continue;
 					} else if (fillType == 2 || fillType == 3) {
 						float fillThickness = decodeFloat(12, y);
-						vec3 g = diff + fillThickness * 0.5;
+						vec3 g = pos + fillThickness * 0.5;
 
 						if (rotation != 0.0) {
 							float r = atan(g.z, g.x) + rotation;

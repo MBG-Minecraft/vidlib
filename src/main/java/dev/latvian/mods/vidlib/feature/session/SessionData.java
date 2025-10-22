@@ -129,7 +129,7 @@ public class SessionData {
 	public void refreshListedPlayers() {
 	}
 
-	public void setGlowColor(UUID uuid, @Nullable Color color) {
+	public void setGlowColor(@Nullable UUID uuid, @Nullable Color color) {
 	}
 
 	/**

@@ -159,7 +159,7 @@ public class Decal {
 		arr.add(Float.floatToIntBits(start)); // 4
 		arr.add(Float.floatToIntBits(end)); // 5
 		arr.add(Float.floatToIntBits(heightScale)); // 6
-		arr.add(Float.floatToIntBits((float) Math.toRadians(rotation))); // 7
+		arr.add(Float.floatToIntBits((float) Math.toRadians(rotation < 0F ? (rotation + 360F) : rotation))); // 7
 
 		arr.add(startColor.argb()); // 8
 		arr.add(endColor.argb()); // 9
@@ -169,6 +169,7 @@ public class Decal {
 	}
 
 	public void imgui(ImGraphics graphics, Collection<Decal> decals) {
+		ImGui.text("Shape");
 		DecalType.UNIT[0] = type;
 		graphics.combo("###type", DecalType.UNIT, DecalType.VALUES);
 		type = DecalType.UNIT[0];
@@ -184,6 +185,7 @@ public class Decal {
 				setPosition(position, false);
 			}
 		} else {
+			ImGui.text("Position");
 			Vector3dImBuilder.imgui(graphics, position, SelectedPosition.UNIT);
 		}
 

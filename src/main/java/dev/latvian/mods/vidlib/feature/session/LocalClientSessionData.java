@@ -392,8 +392,10 @@ public class LocalClientSessionData extends ClientSessionData {
 	}
 
 	@Override
-	public void setGlowColor(UUID uuid, @Nullable Color color) {
-		if (color == null) {
+	public void setGlowColor(@Nullable UUID uuid, @Nullable Color color) {
+		if (uuid == null) {
+			glowColors.clear();
+		} else if (color == null) {
 			glowColors.remove(uuid);
 		} else {
 			glowColors.put(uuid, color);
