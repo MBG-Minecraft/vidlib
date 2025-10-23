@@ -27,7 +27,7 @@ public class DoubleImBuilder implements ImBuilder<Double> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		ImGui.sliderFloat("###double", value, (float) min, (float) max);
+		ImGui.dragFloat("###double", value, 0.0625F, (float) min, (float) max, "%.4f");
 		return ImUpdate.itemEdit();
 	}
 

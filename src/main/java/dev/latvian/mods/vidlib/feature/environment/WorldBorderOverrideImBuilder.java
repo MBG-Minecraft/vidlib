@@ -17,7 +17,7 @@ public class WorldBorderOverrideImBuilder implements ImBuilder<WorldBorderOverri
 
 	public WorldBorderOverrideImBuilder(boolean hasTime) {
 		this.position = new Vec3ImBuilder();
-		this.size = new DoubleImBuilder(0D, 1024D);
+		this.size = new DoubleImBuilder(0D, 1024D * 10);
 		this.size.set(100D);
 		this.hasTime = hasTime;
 		this.time = 0L;
