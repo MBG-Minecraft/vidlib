@@ -190,6 +190,14 @@ public class Prop {
 		}
 	}
 
+	public final void syncAll() {
+		for (var data : type.unsortedData()) {
+			if (data != PAUSED) {
+				sync(data);
+			}
+		}
+	}
+
 	public final void setSize(double size) {
 		width = size;
 		height = size;
