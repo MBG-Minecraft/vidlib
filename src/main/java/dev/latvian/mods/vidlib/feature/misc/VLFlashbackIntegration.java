@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.misc;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.serialization.JsonOps;
 import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibClientEventHandler;
@@ -32,6 +33,7 @@ import dev.latvian.mods.vidlib.feature.prop.RecordedProp;
 import dev.latvian.mods.vidlib.feature.prop.RemovePropsPayload;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import imgui.ImGui;
+import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.chars.CharConsumer;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
@@ -64,6 +66,7 @@ public class VLFlashbackIntegration {
 	public static final boolean ENABLED = ModList.get().isLoaded("flashback");
 
 	private static int selectedProp = 0;
+	private static JsonObject selectedPropData = null;
 	private static PropListType selectedPropList = PropListType.LEVEL;
 	private static boolean openSelectedPropPopup = false;
 	private static int lastWidth = -1, lastHeight = -1;
@@ -319,6 +322,7 @@ public class VLFlashbackIntegration {
 	private static boolean handleClickTarget(HitResult result) {
 		if (result instanceof PropHitResult propResult) {
 			selectedProp = propResult.prop.id;
+			selectedPropData = propResult.prop.getDataJson(JsonOps.INSTANCE);
 			selectedPropList = propResult.prop.spawnType.listType;
 			openSelectedPropPopup = true;
 			return true;
@@ -339,7 +343,7 @@ public class VLFlashbackIntegration {
 			openSelectedPropPopup = false;
 		}
 
-		if (selectedProp != 0 && ImGui.beginPopup("###vidlib-prop-popup")) {
+		if (selectedProp != 0 && ImGui.beginPopup("###vidlib-prop-popup", ImGuiWindowFlags.AlwaysAutoResize)) {
 			var propList = mc.level.getProps().propLists.get(selectedPropList);
 			var prop = propList == null ? null : propList.get(selectedProp);
 
@@ -353,6 +357,14 @@ public class VLFlashbackIntegration {
 		}
 
 		if (!ImGui.isPopupOpen("###vidlib-prop-popup")) {
+			var propList = mc.level.getProps().propLists.get(selectedPropList);
+			var prop = propList == null ? null : propList.get(selectedProp);
+			if (prop != null) {
+				var data = prop.getDataJson(JsonOps.INSTANCE);
+				if (!selectedPropData.equals(data)) {
+					FlashbackIntegration.MAKE_PROP_KEYFRAMES.add(prop);
+				}
+			}
 			selectedProp = 0;
 		}
 

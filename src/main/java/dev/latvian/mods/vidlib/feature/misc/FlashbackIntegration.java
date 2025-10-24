@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.misc;
 import com.google.gson.JsonObject;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.prop.Prop;
 import imgui.ImGuiStyle;
 import it.unimi.dsi.fastutil.chars.CharConsumer;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
@@ -75,6 +76,7 @@ public interface FlashbackIntegration {
 	List<BiConsumer<List<Packet<? super ClientConfigurationPacketListener>>, List<LongObjectPair<Packet<? super ClientGamePacketListener>>>>> INITIALIZED = listField("INITIALIZED");
 	List<Supplier<List<IntObjectPair<ObjectIntPair<String>>>>> MARKERS = listField("MARKERS");
 	List<Runnable> CLEANUP = listField("CLEANUP");
+	List<Prop> MAKE_PROP_KEYFRAMES = listField("MAKE_PROP_KEYFRAMES");
 	List<Consumer<List<Packet<? super ClientConfigurationPacketListener>>>> CONFIG_SNAPSHOT = listField("CONFIG_SNAPSHOT");
 	List<Consumer<List<Packet<? super ClientGamePacketListener>>>> GAME_SNAPSHOT = listField("GAME_SNAPSHOT");
 	List<BiConsumer<Entity, List<Packet<? super ClientGamePacketListener>>>> ENTITY_SNAPSHOT = listField("ENTITY_SNAPSHOT");
