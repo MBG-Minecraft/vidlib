@@ -15,7 +15,7 @@ public class VidLib {
 	public static String VERSION = "dev";
 
 	public static ResourceLocation id(String path) {
-		return ResourceLocation.fromNamespaceAndPath(ID, path);
+		return ResourceLocation.tryBuild(ID, path);
 	}
 
 	public static void init() {
