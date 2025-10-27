@@ -17,7 +17,7 @@ public class PlayerRendererMixin {
 		at = @At("RETURN")
 	)
 	private void video$extractRenderState(AbstractClientPlayer player, PlayerRenderState state, float delta, CallbackInfo ci) {
-		VLSkin.modifyPlayerRenderState(player, state, delta);
+//		VLSkin.getSkinOverride(player, state, delta);
 	}
 
 }

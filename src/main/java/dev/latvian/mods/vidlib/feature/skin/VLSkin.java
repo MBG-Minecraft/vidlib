@@ -59,19 +59,22 @@ public record VLSkin(
 
 	public static final DataType<VLSkin> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, VLSkin.class);
 
-	public static void modifyPlayerRenderState(AbstractClientPlayer player, PlayerRenderState state, float delta) {
+	public static Optional<PlayerSkin> getSkinOverride(AbstractClientPlayer player) {
 		VLSkin newSkin = player.get(InternalPlayerData.SKIN);
 
 		if (newSkin != null) {
-			state.skin = new PlayerSkin(
-				newSkin.texture,
-				null,
-				newSkin.capeTexture().orElse(null),
-				newSkin.elytraTexture().orElse(null),
-				newSkin.slim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE,
-				false
-			);
+			return Optional.of(
+				new PlayerSkin(
+					newSkin.texture,
+					null,
+					newSkin.capeTexture().orElse(null),
+					newSkin.elytraTexture().orElse(null),
+					newSkin.slim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE,
+					false
+				));
 		}
+
+		return Optional.empty();
 	}
 
 	@Override
