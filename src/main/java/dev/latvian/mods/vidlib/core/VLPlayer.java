@@ -70,7 +70,7 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
 		set(InternalPlayerData.CLOTHING, clothing);
 	}
 
-	default void setSkin(VLSkin skin) {
+	default void setSkin(@Nullable VLSkin skin) {
 		set(InternalPlayerData.SKIN, skin);
 	}
 

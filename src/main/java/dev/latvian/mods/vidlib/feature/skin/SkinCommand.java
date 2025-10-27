@@ -69,7 +69,7 @@ public interface SkinCommand {
 
 	private static int removeSkin(Collection<ServerPlayer> players) {
 		for (var player : players) {
-			player.setClothing(Clothing.NONE);
+			player.setSkin(null);
 		}
 
 		return 1;
