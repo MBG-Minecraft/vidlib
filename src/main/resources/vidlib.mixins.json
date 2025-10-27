@@ -121,7 +121,6 @@
     "SectionOcclusionGraphMixin",
     "SectionRenderDispatcherRenderSection",
     "ShaderManagerMixin",
-    "SkinManagerMixin",
     "SkyRendererMixin",
     "TextureManagerMixin",
     "WeatherEffectRendererMixin",
