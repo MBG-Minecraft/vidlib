@@ -30,7 +30,7 @@ public record VLCape(
 
 	public static final DataType<VLCape> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, VLCape.class);
 
-	public static PlayerSkin skinWithCape(AbstractClientPlayer player, PlayerSkin oldSkin) {
+	public static PlayerSkin addCapeToSkin(AbstractClientPlayer player, PlayerSkin oldSkin) {
 		VLCape cape = player.get(InternalPlayerData.CAPE);
 
 		if (cape == null) {

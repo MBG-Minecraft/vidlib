@@ -12,8 +12,6 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(AbstractClientPlayer.class)
 public abstract class AbstractClientPlayerMixin implements VLClientPlayer {
@@ -29,22 +27,14 @@ public abstract class AbstractClientPlayerMixin implements VLClientPlayer {
 		return info == null ? null : info.getGameMode();
 	}
 
-	@Inject(
-		method = "getSkin",
-		at = @At("HEAD"),
-		cancellable = true
-	)
-	private void vidlib$overrideSkin(CallbackInfoReturnable<PlayerSkin> cir) {
-		var skinOverride = VLSkin.getSkinOverride((AbstractClientPlayer) (Object) this);
-		skinOverride.ifPresent(cir::setReturnValue);
-	}
-
 	@ModifyReturnValue(
 		method = "getSkin",
 		at = @At("RETURN")
 	)
 	private PlayerSkin vidlib$addCape(PlayerSkin oldSkin) {
-		return VLCape.skinWithCape((AbstractClientPlayer) (Object) this, oldSkin);
+		AbstractClientPlayer player = (AbstractClientPlayer) (Object) this;
+		var skinOverride = VLSkin.getSkinOverride(player);
+		return VLCape.addCapeToSkin(player, skinOverride.orElse(oldSkin));
 	}
 
 }
