@@ -9,6 +9,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -47,4 +48,13 @@ public record PlayerSkin(
 
 	public static final DataType<PlayerSkin> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, PlayerSkin.class);
 
+	@Override
+	public @NotNull String toString() {
+		return "PlayerSkin[" +
+			"texture=" + texture +
+			", slim=" + slim +
+			", capeTexture=" + capeTexture +
+			", elytraTexture=" + elytraTexture +
+			']';
+	}
 }
