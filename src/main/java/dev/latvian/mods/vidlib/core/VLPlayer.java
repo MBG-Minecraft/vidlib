@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.klib.util.Empty;
+import dev.latvian.mods.vidlib.feature.cape.VLCape;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
@@ -72,6 +73,10 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
 
 	default void setSkin(@Nullable VLSkin skin) {
 		set(InternalPlayerData.SKIN, skin);
+	}
+
+	default void setCape(@Nullable VLCape cape) {
+		set(InternalPlayerData.CAPE, cape);
 	}
 
 	default float getFlightSpeedMod() {

@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import dev.latvian.mods.vidlib.core.VLClientPlayer;
+import dev.latvian.mods.vidlib.feature.cape.VLCape;
 import dev.latvian.mods.vidlib.feature.skin.VLSkin;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -33,8 +35,16 @@ public abstract class AbstractClientPlayerMixin implements VLClientPlayer {
 		cancellable = true
 	)
 	private void vidlib$overrideSkin(CallbackInfoReturnable<PlayerSkin> cir) {
-		var newSkin = VLSkin.getSkinOverride((AbstractClientPlayer) (Object) this);
-		newSkin.ifPresent(cir::setReturnValue);
+		var skinOverride = VLSkin.getSkinOverride((AbstractClientPlayer) (Object) this);
+		skinOverride.ifPresent(cir::setReturnValue);
+	}
+
+	@ModifyReturnValue(
+		method = "getSkin",
+		at = @At("RETURN")
+	)
+	private PlayerSkin vidlib$addCape(PlayerSkin skin) {
+		return VLCape.skinWithCape((AbstractClientPlayer) (Object) this);
 	}
 
 }
