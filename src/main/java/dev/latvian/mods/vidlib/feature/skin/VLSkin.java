@@ -14,39 +14,39 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 
 @AutoInit
-public record PlayerSkin(
+public record VLSkin(
 	ResourceLocation texture,
 	boolean slim,
 	Optional<ResourceLocation> capeTexture,
 	Optional<ResourceLocation> elytraTexture
 ) {
 
-	public static final Codec<PlayerSkin> CODEC =
+	public static final Codec<VLSkin> CODEC =
 		RecordCodecBuilder.create(instance -> instance.group(
 			ResourceLocation.CODEC
 				.fieldOf("texture")
-				.forGetter(PlayerSkin::texture),
+				.forGetter(VLSkin::texture),
 			Codec.BOOL
 				.fieldOf("slim")
-				.forGetter(PlayerSkin::slim),
+				.forGetter(VLSkin::slim),
 			ResourceLocation.CODEC
 				.optionalFieldOf("cape")
-				.forGetter(PlayerSkin::capeTexture),
+				.forGetter(VLSkin::capeTexture),
 			ResourceLocation.CODEC
 				.optionalFieldOf("elytra")
-				.forGetter(PlayerSkin::elytraTexture)
-		).apply(instance, PlayerSkin::new));
+				.forGetter(VLSkin::elytraTexture)
+		).apply(instance, VLSkin::new));
 
-	public static final StreamCodec<ByteBuf, PlayerSkin> STREAM_CODEC =
+	public static final StreamCodec<ByteBuf, VLSkin> STREAM_CODEC =
 		CompositeStreamCodec.of(
-			ResourceLocation.STREAM_CODEC, PlayerSkin::texture,
-			ByteBufCodecs.BOOL, PlayerSkin::slim,
-			ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC), PlayerSkin::capeTexture,
-			ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC), PlayerSkin::elytraTexture,
-			PlayerSkin::new
+			ResourceLocation.STREAM_CODEC, VLSkin::texture,
+			ByteBufCodecs.BOOL, VLSkin::slim,
+			ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC), VLSkin::capeTexture,
+			ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC), VLSkin::elytraTexture,
+			VLSkin::new
 		);
 
-	public static final DataType<PlayerSkin> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, PlayerSkin.class);
+	public static final DataType<VLSkin> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, VLSkin.class);
 
 	@Override
 	public @NotNull String toString() {

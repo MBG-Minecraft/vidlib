@@ -7,6 +7,7 @@ import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.session.SessionData;
+import dev.latvian.mods.vidlib.feature.skin.VLSkin;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -67,6 +68,10 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
 
 	default void setClothing(Clothing clothing) {
 		set(InternalPlayerData.CLOTHING, clothing);
+	}
+
+	default void setSkin(VLSkin skin) {
+		set(InternalPlayerData.SKIN, skin);
 	}
 
 	default float getFlightSpeedMod() {

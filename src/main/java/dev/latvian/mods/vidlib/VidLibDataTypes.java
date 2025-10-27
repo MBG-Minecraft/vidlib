@@ -19,7 +19,7 @@ import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
-import dev.latvian.mods.vidlib.feature.skin.PlayerSkin;
+import dev.latvian.mods.vidlib.feature.skin.VLSkin;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.stage.Stage;
@@ -37,7 +37,7 @@ public class VidLibDataTypes {
 		DataType.register(VidLib.id("icon_holder"), IconHolder.DATA_TYPE);
 		DataType.register(VidLib.id("clothing_parts"), ClothingParts.DATA_TYPE);
 		DataType.register(VidLib.id("clothing"), Clothing.DATA_TYPE);
-		DataType.register(VidLib.id("skin"), PlayerSkin.DATA_TYPE);
+		DataType.register(VidLib.id("skin"), VLSkin.DATA_TYPE);
 		DataType.register(VidLib.id("skybox_id"), SkyboxData.ID_DATA_TYPE);
 		DataType.register(VidLib.id("fog_override"), FogOverride.DATA_TYPE);
 		DataType.register(VidLib.id("chanced_particle"), ChancedParticle.DATA_TYPE);

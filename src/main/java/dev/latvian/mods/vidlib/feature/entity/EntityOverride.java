@@ -19,7 +19,7 @@ import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.environment.FogOverride;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
-import dev.latvian.mods.vidlib.feature.skin.PlayerSkin;
+import dev.latvian.mods.vidlib.feature.skin.VLSkin;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.Entity;
@@ -140,7 +140,7 @@ public final class EntityOverride<T> {
 		createKey("score_text", DataTypes.TEXT_COMPONENT);
 		createBooleanKey("name_hidden");
 		createKey("environment_effects", ChancedParticle.LIST_DATA_TYPE);
-		createKey("skin", PlayerSkin.DATA_TYPE);
+		createKey("skin", VLSkin.DATA_TYPE);
 	}
 
 	public final String id;

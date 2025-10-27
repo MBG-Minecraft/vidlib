@@ -11,7 +11,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.BooleanImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TextComponentImBuilder;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
-import dev.latvian.mods.vidlib.feature.skin.PlayerSkin;
+import dev.latvian.mods.vidlib.feature.skin.VLSkin;
 import net.minecraft.network.chat.Component;
 
 @AutoInit
@@ -20,7 +20,7 @@ public interface InternalPlayerData {
 	DataKey<Component> NICKNAME = DataKey.PLAYER.createDefault("nickname", DataTypes.TEXT_COMPONENT, Component.empty(), TextComponentImBuilder.TYPE);
 	DataKey<IconHolder> PLUMBOB = DataKey.PLAYER.createDefault("plumbob", IconHolder.DATA_TYPE, IconHolder.EMPTY, null);
 	DataKey<Clothing> CLOTHING = DataKey.PLAYER.createDefault("clothing", Clothing.DATA_TYPE, Clothing.NONE, ClothingImBuilder.TYPE);
-	DataKey<PlayerSkin> SKIN = DataKey.PLAYER.createDefault("skin", PlayerSkin.DATA_TYPE, null, null);
+	DataKey<VLSkin> SKIN = DataKey.PLAYER.createDefault("skin", VLSkin.DATA_TYPE, null, null);
 	DataKey<Float> FLIGHT_SPEED = DataKey.PLAYER.createFloat("flight_speed", 1F, 0F, 20F);
 	DataKey<Color> GLOW_COLOR = DataKey.PLAYER.createDefault("glow_color", Color.DATA_TYPE, null, Color4ImBuilder::new);
 
