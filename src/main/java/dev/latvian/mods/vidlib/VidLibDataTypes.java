@@ -5,6 +5,7 @@ import dev.latvian.mods.vidlib.feature.block.BlockStatePalette;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
+import dev.latvian.mods.vidlib.feature.cape.VLCape;
 import dev.latvian.mods.vidlib.feature.clock.ClockFont;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingParts;
@@ -38,6 +39,7 @@ public class VidLibDataTypes {
 		DataType.register(VidLib.id("clothing_parts"), ClothingParts.DATA_TYPE);
 		DataType.register(VidLib.id("clothing"), Clothing.DATA_TYPE);
 		DataType.register(VidLib.id("skin"), VLSkin.DATA_TYPE);
+		DataType.register(VidLib.id("cape"), VLCape.DATA_TYPE);
 		DataType.register(VidLib.id("skybox_id"), SkyboxData.ID_DATA_TYPE);
 		DataType.register(VidLib.id("fog_override"), FogOverride.DATA_TYPE);
 		DataType.register(VidLib.id("chanced_particle"), ChancedParticle.DATA_TYPE);

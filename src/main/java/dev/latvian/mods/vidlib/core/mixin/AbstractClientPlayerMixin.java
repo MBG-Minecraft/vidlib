@@ -43,8 +43,8 @@ public abstract class AbstractClientPlayerMixin implements VLClientPlayer {
 		method = "getSkin",
 		at = @At("RETURN")
 	)
-	private PlayerSkin vidlib$addCape(PlayerSkin skin) {
-		return VLCape.skinWithCape((AbstractClientPlayer) (Object) this);
+	private PlayerSkin vidlib$addCape(PlayerSkin oldSkin) {
+		return VLCape.skinWithCape((AbstractClientPlayer) (Object) this, oldSkin);
 	}
 
 }
