@@ -25,6 +25,13 @@ public record VLSkin(
 	Optional<ResourceLocation> elytraTexture
 ) {
 
+	public static final VLSkin STEVE = new VLSkin(
+		ResourceLocation.withDefaultNamespace("textures/entity/wide/steve.png"),
+		false,
+		Optional.empty(),
+		Optional.empty()
+	);
+
 	public static final Codec<VLSkin> CODEC =
 		RecordCodecBuilder.create(instance -> instance.group(
 			ResourceLocation.CODEC
