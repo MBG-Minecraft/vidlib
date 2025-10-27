@@ -107,7 +107,6 @@
     "ParticleEngineMixin",
     "ParticleMixin",
     "PlayerModelMixin",
-    "PlayerRendererMixin",
     "PlayerTabOverlayMixin",
     "PostChainConfigFixedSizeTargetMixin",
     "PostChainMixin",
