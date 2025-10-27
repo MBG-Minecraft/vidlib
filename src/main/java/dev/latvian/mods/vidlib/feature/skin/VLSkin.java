@@ -5,7 +5,11 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.entity.state.PlayerRenderState;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -47,6 +51,21 @@ public record VLSkin(
 		);
 
 	public static final DataType<VLSkin> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, VLSkin.class);
+
+	public static void modifyPlayerRenderState(AbstractClientPlayer player, PlayerRenderState state, float delta) {
+		VLSkin newSkin = player.get(InternalPlayerData.SKIN);
+
+		if (newSkin != null) {
+			state.skin = new PlayerSkin(
+				newSkin.texture,
+				null,
+				newSkin.capeTexture().orElse(null),
+				newSkin.elytraTexture().orElse(null),
+				newSkin.slim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE,
+				false
+			);
+		}
+	}
 
 	@Override
 	public @NotNull String toString() {
