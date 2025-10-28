@@ -2,11 +2,13 @@ package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.klib.util.Empty;
+import dev.latvian.mods.vidlib.feature.cape.VLCape;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.session.SessionData;
+import dev.latvian.mods.vidlib.feature.skin.VLSkin;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -67,6 +69,14 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
 
 	default void setClothing(Clothing clothing) {
 		set(InternalPlayerData.CLOTHING, clothing);
+	}
+
+	default void setSkin(@Nullable VLSkin skin) {
+		set(InternalPlayerData.SKIN, skin);
+	}
+
+	default void setCape(@Nullable VLCape cape) {
+		set(InternalPlayerData.CAPE, cape);
 	}
 
 	default float getFlightSpeedMod() {
