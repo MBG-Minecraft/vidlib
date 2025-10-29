@@ -471,9 +471,24 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void physicsParticles(PalettePhysicsParticlesData data, long spawnTime) {
-		if (!data.positions().isEmpty()) {
-			// FIXME
+	default void physicsParticles(PalettePhysicsParticlesData palettePhysicsParticlesData, long spawnTime) {
+		var realTime = vl$level().getGameTime();
+		var data = palettePhysicsParticlesData.data();
+
+		if (spawnTime < realTime - 60L || spawnTime > realTime + 60L + (long) data.lifespan.max()) {
+			VidLib.LOGGER.info("Discarded palette physics particles packet @ " + realTime + " from " + spawnTime);
+			return;
+		}
+
+		var random = vl$level().getRandom();
+		var particles = new PhysicsParticles(data, vl$level(), spawnTime, random.nextLong());
+		var positions = palettePhysicsParticlesData.positions();
+
+		var palette = palettePhysicsParticlesData.palette();
+		for (var position : positions) {
+			particles.at = position;
+			particles.state = palette.sample(random);
+			particles.spawn();
 		}
 	}
 
