@@ -1,9 +1,9 @@
 plugins {
+	id 'net.neoforged.moddev' version "2.0.107"
+	id 'maven-publish'
 	id 'base'
 	id 'java'
 	id 'idea'
-	id 'maven-publish'
-	id 'net.neoforged.moddev' version "2.0.107"
 }
 
 var ENV = System.getenv() + (file('.env').exists() ? file('.env').readLines().findAll { it && !it.startsWith('#') }.collectEntries {
