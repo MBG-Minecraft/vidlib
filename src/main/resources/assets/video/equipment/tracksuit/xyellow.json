@@ -1,0 +1,14 @@
+{
+	"layers": {
+		"humanoid": [
+			{
+				"texture": "video:tracksuit/xyellow"
+			}
+		],
+		"humanoid_leggings": [
+			{
+				"texture": "video:tracksuit/xyellow"
+			}
+		]
+	}
+}

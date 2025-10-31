@@ -13,7 +13,7 @@ var ENV = System.getenv() + (file('.env').exists() ? file('.env').readLines().fi
 var localBuildFile = new File(project.rootDir, "build.txt")
 var localBuildNumber = localBuildFile.getText("UTF-8").toInteger() + 1
 
-version = "$mod_version-build-1206.$localBuildNumber"
+version = "$mod_version-build.$localBuildNumber"
 group = project.maven_group
 base.archivesName = project.archives_base_name
 
