@@ -680,4 +680,8 @@ public class VidLibClientEventHandler {
 
 		event.getPlayer().c2s(new ClientModListPayload(list));
 	}
+
+	@SubscribeEvent
+	public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
+	}
 }

@@ -263,11 +263,11 @@ public class Prop {
 		return type.writeUpdate(level.registryAccess(), syncSet, this::getData);
 	}
 
-	final byte[] getDataUpdates(boolean allData) {
+	public final byte[] getDataUpdates(boolean allData) {
 		return getDataUpdates(allData ? type.data() : sync);
 	}
 
-	final void update(RegistryAccess registryAccess, byte[] update, boolean allData) {
+	public final void update(RegistryAccess registryAccess, byte[] update, boolean allData) {
 		type.readPropUpdate(this, registryAccess, update, allData, (k, v) -> setData(k, Cast.to(v)));
 	}
 
