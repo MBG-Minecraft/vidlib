@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.platform;
 import com.google.common.collect.ImmutableMap;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.vidlib.VidLibConfig;
+import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
@@ -286,7 +286,7 @@ public class ClientGameEngine {
 	}
 
 	public int calculateScale(int w, int h) {
-		if (VidLibConfig.forceHalfAuto) {
+		if (VidLibClientOptions.LOCK_GUI_SCALE.get()) {
 			int i = 1;
 
 			while (i < w && i < h && w / (i + 1) >= 320 && h / (i + 1) >= 240) {
@@ -311,5 +311,13 @@ public class ClientGameEngine {
 
 	public float getClothingScale(Clothing clothing) {
 		return 0.95F;
+	}
+
+	public boolean primitiveF3(Minecraft mc) {
+		return true;
+	}
+
+	public boolean allowCoordinates(Minecraft mc) {
+		return mc.isLocalServer() || mc.player.hasPermissions(2);
 	}
 }

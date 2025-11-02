@@ -14,6 +14,7 @@ import dev.latvian.mods.vidlib.feature.auto.EntityRendererHolder;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
+import dev.latvian.mods.vidlib.feature.client.ClientItemTooltips;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.client.VidLibHUD;
@@ -22,6 +23,8 @@ import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockFont;
 import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
 import dev.latvian.mods.vidlib.feature.clothing.ClientClothingLoader;
+import dev.latvian.mods.vidlib.feature.clothing.ClothingLayer;
+import dev.latvian.mods.vidlib.feature.clothing.ClothingModel;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.environment.FluidPlaneRenderer;
 import dev.latvian.mods.vidlib.feature.gradient.ClientGradientLoader;
@@ -42,6 +45,7 @@ import dev.latvian.mods.vidlib.feature.particle.VidLibClientParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
@@ -64,6 +68,8 @@ import net.minecraft.client.gui.components.toasts.RecipeToast;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
 import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
@@ -102,6 +108,7 @@ import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -167,10 +174,6 @@ public class VidLibClientEventHandler {
 				holder.register(event);
 			}
 		}
-	}
-
-	@SubscribeEvent
-	public static void addLayers(EntityRenderersEvent.AddLayers event) {
 	}
 
 	@SubscribeEvent
@@ -414,14 +417,16 @@ public class VidLibClientEventHandler {
 			}
 		}
 
-		if (VidLibClientOptions.getShowFPS()) {
+		boolean primitiveF3Open = mc.gui.getDebugOverlay().showDebugScreen() && ClientGameEngine.INSTANCE.primitiveF3(mc);
+
+		if (primitiveF3Open || VidLibClientOptions.getShowFPS()) {
 			ScreenText.RENDER.topRight.add(mc.fpsString.split(" ", 2)[0] + " FPS");
 		}
 
-		if (VidLibClientOptions.getShowCoordinates() && (mc.isLocalServer() || mc.player.hasPermissions(2))) {
-			var pos = mc.player.getPosition(delta);
+		if ((primitiveF3Open || VidLibClientOptions.getShowCoordinates()) && ClientGameEngine.INSTANCE.allowCoordinates(mc)) {
+			var pos = mc.gameRenderer.getMainCamera().getPosition();
 			var x = Component.literal("%.01f".formatted(pos.x)).withColor(0xFF7070);
-			var y = Component.literal("%.01f".formatted(pos.y)).withColor(0x7CFF70);
+			var y = Component.literal("%.01f".formatted(pos.y - mc.player.getEyeHeight())).withColor(0x7CFF70);
 			var z = Component.literal("%.01f".formatted(pos.z)).withColor(0x70BCFF);
 			var yaw = Component.literal("%.01f".formatted(Mth.wrapDegrees(mc.player.getViewYRot(delta)))).withColor(0xFFD870);
 			var pitch = Component.literal("%.01f".formatted(Mth.wrapDegrees(mc.player.getViewXRot(delta)))).withColor(0xFF9870);
@@ -534,12 +539,18 @@ public class VidLibClientEventHandler {
 		}
 	}
 
-	@SubscribeEvent
+	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void debugText(CustomizeGuiOverlayEvent.DebugText event) {
 		var mc = Minecraft.getInstance();
 
 		var left = event.getLeft();
 		var right = event.getRight();
+
+		if (ClientGameEngine.INSTANCE.primitiveF3(mc)) {
+			left.clear();
+			right.clear();
+			return;
+		}
 
 		right.removeIf(s -> {
 			for (var r : REMOVE_RIGHT) {
@@ -683,5 +694,23 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
+		event.registerLayerDefinition(ClothingLayer.WIDE, ClothingModel::createWideClothingLayer);
+		event.registerLayerDefinition(ClothingLayer.SLIM, ClothingModel::createSlimClothingLayer);
+	}
+
+	@SubscribeEvent
+	public static void registerLayers(EntityRenderersEvent.AddLayers event) {
+		if (event.getSkin(PlayerSkin.Model.WIDE) instanceof PlayerRenderer r) {
+			r.addLayer(new ClothingLayer(r, event.getContext(), false));
+		}
+
+		if (event.getSkin(PlayerSkin.Model.SLIM) instanceof PlayerRenderer r) {
+			r.addLayer(new ClothingLayer(r, event.getContext(), false)); // TODO: Fixme
+		}
+	}
+
+	@SubscribeEvent(priority = EventPriority.LOW)
+	public static void onItemTooltip(ItemTooltipEvent event) {
+		ClientItemTooltips.onItemTooltip(event);
 	}
 }
