@@ -14,16 +14,16 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 
-public record PalettePhysicsParticlesData(ResourceLocation id, long seed, BlockStatePalette palette, List<BlockPos> positions) {
+public record PalettePhysicsParticlesData(PhysicsParticleData data, long seed, BlockStatePalette palette, List<BlockPos> positions) {
 	public static final Codec<PalettePhysicsParticlesData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		ID.CODEC.fieldOf("id").forGetter(PalettePhysicsParticlesData::id),
+		PhysicsParticleData.CODEC.fieldOf("data").forGetter(PalettePhysicsParticlesData::data),
 		Codec.LONG.optionalFieldOf("seed", 0L).forGetter(PalettePhysicsParticlesData::seed),
 		BlockStatePalette.CODEC.fieldOf("palette").forGetter(PalettePhysicsParticlesData::palette),
 		BlockPos.CODEC.listOf().optionalFieldOf("positions", List.of()).forGetter(PalettePhysicsParticlesData::positions)
 	).apply(instance, PalettePhysicsParticlesData::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, PalettePhysicsParticlesData> STREAM_CODEC = CompositeStreamCodec.of(
-		ID.STREAM_CODEC, PalettePhysicsParticlesData::id,
+		PhysicsParticleData.STREAM_CODEC, PalettePhysicsParticlesData::data,
 		ByteBufCodecs.LONG, PalettePhysicsParticlesData::seed,
 		BlockStatePalette.STREAM_CODEC, PalettePhysicsParticlesData::palette,
 		KLibStreamCodecs.listOf(BlockPos.STREAM_CODEC), PalettePhysicsParticlesData::positions,

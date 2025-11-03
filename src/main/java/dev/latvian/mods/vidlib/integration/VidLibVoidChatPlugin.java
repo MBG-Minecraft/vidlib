@@ -6,6 +6,7 @@ import de.maxhenkel.voicechat.api.events.ClientVoicechatConnectionEvent;
 import de.maxhenkel.voicechat.api.events.EventRegistration;
 import de.maxhenkel.voicechat.voice.client.ClientManager;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.VidLibConfig;
 
 @ForgeVoicechatPlugin
 public class VidLibVoidChatPlugin implements VoicechatPlugin {
@@ -19,7 +20,7 @@ public class VidLibVoidChatPlugin implements VoicechatPlugin {
 		registration.registerEvent(ClientVoicechatConnectionEvent.class, event -> {
 			var client = ClientManager.getClient();
 
-			if (client != null) {
+			if (client != null && VidLibConfig.recordVoicechat) {
 				client.setRecording(event.isConnected());
 				VidLib.LOGGER.info("Set VoiceChat recording state to " + event.isConnected());
 			}

@@ -17,6 +17,7 @@ public interface VidLibClientOptions {
 	OptionInstance<Boolean> SHOW_ZONES = OptionInstance.createBoolean("options.vidlib.show_zones", false);
 	OptionInstance<Boolean> SHOW_ZONE_OUTER_BOUNDS = OptionInstance.createBoolean("options.vidlib.show_zone_outer_bounds", true);
 	OptionInstance<Boolean> SHOW_COORDINATES = OptionInstance.createBoolean("options.vidlib.show_coordinates", false);
+	OptionInstance<Boolean> LOCK_GUI_SCALE = OptionInstance.createBoolean("options.vidlib.lock_gui_scale", true, v -> Minecraft.getInstance().resizeDisplay());
 
 	OptionInstance<ZoneRenderType> ZONE_RENDER_TYPE = new OptionInstance<>(
 		"options.vidlib.zone_render_type",
@@ -81,6 +82,7 @@ public interface VidLibClientOptions {
 		ZONE_RENDER_TYPE,
 		TEST_SCREEN_SHAKE_MAX_DISTANCE,
 		SHOW_COORDINATES,
+		LOCK_GUI_SCALE,
 	};
 
 	static boolean getAdminPanel() {
@@ -135,5 +137,6 @@ public interface VidLibClientOptions {
 		accessor.process("vidlib.zone_render_type", ZONE_RENDER_TYPE);
 		accessor.process("vidlib.zone_block_filter", ZONE_BLOCK_FILTER);
 		accessor.process("vidlib.show_coordinates", SHOW_COORDINATES);
+		accessor.process("vidlib.lock_gui_scale", LOCK_GUI_SCALE);
 	}
 }
