@@ -5,7 +5,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.core.VLEntityRenderer;
 import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
-import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.world.entity.Entity;
@@ -19,12 +19,12 @@ public class EntityRendererMixin<T extends Entity, S extends EntityRenderState> 
 
 	@Inject(method = "shouldRender", at = @At("RETURN"), cancellable = true)
 	private void vl$shouldRender(CallbackInfoReturnable<Boolean> cir) {
-	    cir.setReturnValue(true);
+		cir.setReturnValue(true);
 	}
 
 	@ModifyExpressionValue(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderer;shouldShowName(Lnet/minecraft/world/entity/Entity;D)Z"))
 	private boolean vl$shouldShowName(boolean original, @Local(argsOnly = true) Entity entity) {
-		return BossRendering.active <= 0 && (original || MiscClientUtils.shouldShowName(entity));
+		return BossRendering.active <= 0 && (original || ClientGameEngine.INSTANCE.shouldShowName(entity));
 	}
 
 	@Inject(method = "createRenderState(Lnet/minecraft/world/entity/Entity;F)Lnet/minecraft/client/renderer/entity/state/EntityRenderState;", at = @At("RETURN"))

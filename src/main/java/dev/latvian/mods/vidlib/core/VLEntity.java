@@ -146,6 +146,10 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		forceSetVelocity(vl$self().getDeltaMovement().add(velocity));
 	}
 
+	default void forceAddVelocity(double dx, double dy, double dz) {
+		forceSetVelocity(vl$self().getDeltaMovement().add(dx, dy, dz));
+	}
+
 	default void playSound(SoundData data, boolean looping, boolean stopImmediately) {
 		var e = vl$self();
 		e.level().playGlobalSound(new PositionedSoundData(data, e, looping, stopImmediately), KNumberVariables.EMPTY);

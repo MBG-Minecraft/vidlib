@@ -1,7 +1,9 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
+import com.google.common.collect.ImmutableMap;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.util.Empty;
+import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
@@ -14,6 +16,8 @@ import dev.latvian.mods.vidlib.util.StringUtils;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.LocalPlayer;
@@ -32,6 +36,7 @@ import net.minecraft.world.level.material.FogType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 public class ClientGameEngine {
@@ -268,5 +273,51 @@ public class ClientGameEngine {
 		}
 
 		return level.getWorldBorder();
+	}
+
+	public boolean shouldShowName(Entity entity) {
+		// var mc = Minecraft.getInstance();
+		// return entity instanceof LocalPlayer && mc.isLocalServer() && !mc.options.getCameraType().isFirstPerson() || entity.hasCustomName();
+		return !entity.isInvisible() && (entity instanceof LocalPlayer || entity.hasCustomName());
+	}
+
+	public float depthFar(float renderDistance) {
+		return 8192F;
+	}
+
+	public int calculateScale(int w, int h) {
+		if (VidLibClientOptions.LOCK_GUI_SCALE.get()) {
+			int i = 1;
+
+			while (i < w && i < h && w / (i + 1) >= 320 && h / (i + 1) >= 240) {
+				i++;
+			}
+
+			if (i <= 3) {
+				return 2;
+			} else {
+				return (i + 1) / 2;
+			}
+		}
+
+		return -1;
+	}
+
+	public ImmutableMap<ModelLayerLocation, LayerDefinition> customLayerDefinitions(ImmutableMap<ModelLayerLocation, LayerDefinition> original) {
+		var map = new HashMap<>(original);
+		// map.put(ModelLayers.PLAYER, LayerDefinition.create(PlayerModel.createMesh(CubeDeformation.NONE, false), 64, 64).apply(HumanoidModel.BABY_TRANSFORMER));
+		return ImmutableMap.<ModelLayerLocation, LayerDefinition>builder().putAll(map).build();
+	}
+
+	public float getClothingScale(Clothing clothing) {
+		return 0.95F;
+	}
+
+	public boolean primitiveF3(Minecraft mc) {
+		return true;
+	}
+
+	public boolean allowCoordinates(Minecraft mc) {
+		return mc.isLocalServer() || mc.player.hasPermissions(2);
 	}
 }

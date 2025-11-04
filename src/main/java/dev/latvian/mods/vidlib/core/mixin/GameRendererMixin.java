@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.core.VLGameRenderer;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -64,7 +65,7 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 	 */
 	@Overwrite
 	public float getDepthFar() {
-		return MiscClientUtils.depthFar(renderDistance);
+		return ClientGameEngine.INSTANCE.depthFar(renderDistance);
 	}
 
 	@Inject(method = "renderLevel", at = @At("HEAD"), cancellable = true)
