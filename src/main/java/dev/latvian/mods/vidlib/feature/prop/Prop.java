@@ -176,6 +176,29 @@ public class Prop {
 		return false;
 	}
 
+	public final boolean fullTickBukkit(long time) {
+		if (isRemoved()) {
+			return true;
+		}
+
+		snap();
+		tick();
+
+		if (lifespan > 0 && tick >= lifespan) {
+			onExpired();
+			remove(PropRemoveType.EXPIRED);
+			return true;
+		} else if (isRemoved()) {
+			return true;
+		}
+
+		if (!paused) {
+			tick++;
+		}
+
+		return false;
+	}
+
 	public final void sync(PropData<?, ?> data) {
 		var entry = type.reverseData().get(data);
 

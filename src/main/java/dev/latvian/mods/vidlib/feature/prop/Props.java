@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.prop;
 
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -31,6 +32,12 @@ public abstract class Props<L extends Level> {
 	public void tick(boolean tick) {
 		for (var list : propLists.values()) {
 			list.tick(null, tick);
+		}
+	}
+
+	public void tickBukkit(@Nullable VLS2CPacketConsumer updates, boolean tick) {
+		for (var list : propLists.values()) {
+			list.tickBukkit(null, tick);
 		}
 	}
 

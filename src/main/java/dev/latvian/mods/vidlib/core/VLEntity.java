@@ -143,7 +143,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	}
 
 	default void forceAddVelocity(Vec3 velocity) {
-		forceSetVelocity(vl$self().getDeltaMovement().add(velocity));
+		forceAddVelocity(velocity.x, velocity.y, velocity.z);
 	}
 
 	default void forceAddVelocity(double dx, double dy, double dz) {
