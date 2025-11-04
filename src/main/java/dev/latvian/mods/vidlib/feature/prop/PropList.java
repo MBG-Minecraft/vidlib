@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
-import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -65,7 +65,26 @@ public class PropList implements Iterable<Prop> {
 		return false;
 	}
 
-	public void tick(@Nullable S2CPacketBundleBuilder updates, boolean tick) {
+	private boolean fullTickBukkit(Prop prop) {
+		if (prop.fullTick(props.level.getGameTime())) {
+			prop.onRemoved();
+			props.onRemoved(prop);
+			removed.get(prop.removed).add(prop.id);
+			return true;
+		} else {
+			if (prop.canCollide) {
+				collidingProps.add(prop);
+			}
+
+			if (prop.canInteract) {
+				interactableProps.add(prop);
+			}
+		}
+
+		return false;
+	}
+
+	public void tick(@Nullable VLS2CPacketConsumer updates, boolean tick) {
 		if (!tick) {
 			if (!map.isEmpty() && props.level.isReplayLevel()) {
 				var time = props.level.getGameTime();
@@ -120,7 +139,53 @@ public class PropList implements Iterable<Prop> {
 		}
 	}
 
-	void add(Prop prop, @Nullable S2CPacketBundleBuilder packets) {
+	public void tickBukkit(@Nullable VLS2CPacketConsumer updates, boolean tick) {
+		if (!tick) {
+			return;
+		}
+
+		collidingProps.clear();
+		interactableProps.clear();
+
+		if (!map.isEmpty()) {
+			queueNewProps = true;
+			map.values().removeIf(this::fullTickBukkit);
+			queueNewProps = false;
+		}
+
+		if (!propQueue.isEmpty()) {
+			for (var prop : propQueue) {
+				add(prop, updates);
+			}
+
+			propQueue.clear();
+		}
+
+		if (updates != null) {
+			for (var prop : map.values()) {
+				var update = prop.createUpdatePacket();
+
+				if (update != null) {
+					prop.sync.clear();
+					updates.s2c(update);
+				}
+			}
+		}
+
+		for (var entry : removed.entrySet()) {
+			var list = entry.getValue();
+
+			if (!list.isEmpty()) {
+				if (updates != null) {
+					updates.s2c(new RemovePropsPayload(type, new IntArrayList(list), entry.getKey()));
+				}
+
+				list.clear();
+			}
+		}
+	}
+
+	void add(Prop prop, @Nullable VLS2CPacketConsumer packets) {
 		if (queueNewProps) {
 			propQueue.add(prop);
 			return;

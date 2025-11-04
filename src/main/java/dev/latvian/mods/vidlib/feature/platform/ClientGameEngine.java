@@ -314,7 +314,7 @@ public class ClientGameEngine {
 	}
 
 	public boolean primitiveF3(Minecraft mc) {
-		return true;
+		return false;
 	}
 
 	public boolean allowCoordinates(Minecraft mc) {
