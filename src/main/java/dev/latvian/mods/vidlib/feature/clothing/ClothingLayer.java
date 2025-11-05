@@ -2,8 +2,10 @@ package dev.latvian.mods.vidlib.feature.clothing;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -43,7 +45,7 @@ public class ClothingLayer extends RenderLayer<PlayerRenderState, PlayerModel> {
 	public void render(PoseStack ms, MultiBufferSource buffers, int light, PlayerRenderState state, float yRot, float xRot) {
 		var clothing = VidLibEntityRenderStates.getClothing(state);
 
-		if (clothing == Clothing.NONE) {
+		if (clothing == Clothing.NONE || !VidLibConfig.clothingLevelOfDetail.isVisible(Minecraft.getInstance().gameRenderer.getMainCamera().getPosition(), state.x, state.y, state.z)) {
 			return;
 		}
 
