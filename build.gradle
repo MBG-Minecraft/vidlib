@@ -113,18 +113,20 @@ repositories {
 		}
 	}
 
-	maven {
-		url = 'https://maven.latvian.dev/releases'
-		content {
-			includeGroup "dev.latvian.mods"
-			includeGroup "dev.latvian.apps"
-		}
-	}
-
-	maven {
-		url = 'https://maven.latvian.dev/mirror'
-		content {
-			includeGroup "dev.latvian.mods"
+	if (findProperty('mrbeastURL') ?: ENV.MBG_MAVEN_URL) {
+		maven {
+			url = findProperty('mrbeastURL') ?:  ENV.MBG_MAVEN_URL
+			content {
+				includeGroup "software.bernie.geckolib"
+				includeGroup "dev.latvian.mods"
+				includeGroup "dev.latvian.apps"
+				includeGroup "dev.beast.mods"
+				includeGroup "maven.modrinth"
+			}
+			credentials {
+				username = findProperty('mrbeastUsername') ?: ENV.MBG_MAVEN_USERNAME
+				password = findProperty('mrbeastPassword') ?: ENV.MBG_MAVEN_TOKEN
+			}
 		}
 	}
 
@@ -144,12 +146,7 @@ repositories {
 }
 
 dependencies {
-	jarJar(implementation('dev.latvian.mods:klib')) {
-		version {
-			strictly "[$klib_version,)"
-			prefer "$klib_version"
-		}
-	}
+	jarJar(implementation("dev.latvian.mods:klib:$klib_version"))
 
 	interfaceInjectionData("dev.latvian.mods:klib:$klib_version")
 
@@ -239,12 +236,12 @@ publishing {
 	}
 
 	repositories {
-		if (ENV.MAVEN_URL && ENV.MAVEN_USERNAME && ENV.MAVEN_TOKEN) {
+		if (ENV.MBG_MAVEN_URL && ENV.MBG_MAVEN_USERNAME && ENV.MBG_MAVEN_TOKEN) {
 			maven {
-				url = ENV.MAVEN_URL
+				url = ENV.MBG_MAVEN_URL
 				credentials {
-					username = ENV.MAVEN_USERNAME
-					password = ENV.MAVEN_TOKEN
+					username = ENV.MBG_MAVEN_USERNAME
+					password = ENV.MBG_MAVEN_TOKEN
 				}
 			}
 		}
