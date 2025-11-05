@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import com.mojang.blaze3d.platform.TextureUtil;
+import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasPanel;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
@@ -73,6 +74,14 @@ public class BuiltInImGui {
 		list.add(ChromaticAberrationPanel.MENU_ITEM.enabled(graphics.inGame));
 		list.add(FluidPlanePanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
 		list.add(WorldBorderPanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
+
+		list.add(MenuItem.menu(ImIcons.VISIBLE, "Level of Detail", (g1, menuItems) -> {
+			menuItems.add(MenuItem.menu(ImIcons.SHIELD, "Player Armor", VidLibConfig.playerArmorLevelOfDetail));
+			menuItems.add(MenuItem.menu(ImIcons.SWORDS, "Held Item", VidLibConfig.heldItemLevelOfDetail));
+			menuItems.add(MenuItem.menu(ImIcons.SHIRT, "Clothing", VidLibConfig.clothingLevelOfDetail));
+			menuItems.add(MenuItem.menu(ImIcons.PAW, "Entity Details", VidLibConfig.entityDetailsLevelOfDetail));
+			menuItems.add(MenuItem.menu(ImIcons.SHIELD, "Entity Armor", VidLibConfig.entityArmorLevelOfDetail));
+		}));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.ConfigDropdown(graphics, list));
 	});

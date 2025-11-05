@@ -3,6 +3,8 @@ package dev.latvian.mods.vidlib.feature.imgui;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.feature.imgui.config.VideoConfigPanel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
 import imgui.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImBoolean;
@@ -21,6 +23,7 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 	public static final int FLAG_REMAIN_OPEN_OVERRIDE = 1 << 4;
 	public static final int FLAG_REMAIN_OPEN = 1 << 5;
 	public static final int FLAG_SKIP = 1 << 6;
+	public static final int FLAG_CUSTOM_IMGUI = 1 << 7;
 
 	public static final MenuItem SEPARATOR = text(ImIcon.NONE, "").withFlags(FLAG_SEPARATOR);
 	public static final MenuItem SKIP = text(ImIcon.NONE, "").withFlags(FLAG_SKIP);
@@ -90,8 +93,32 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 		});
 	}
 
+	public static MenuItem menu(ImIcon icon, String label, LevelOfDetailValue lod) {
+		return menu(icon, label, (graphics, menuItems) -> {
+			menuItems.add(item(ImIcons.VISIBLE, "Always", lod.getType() == LevelOfDetailValue.Type.ALWAYS, g -> lod.setAlwaysVisible()).remainOpen(true));
+			menuItems.add(item(ImIcons.INVISIBLE, "Never", lod.getType() == LevelOfDetailValue.Type.NEVER, g -> lod.setNeverVisible()).remainOpen(true));
+			menuItems.add(item(ImIcons.NUMBERS, "Within Distance", lod.getType() == LevelOfDetailValue.Type.WITHIN_DISTANCE, g -> lod.setVisibleWithin()).remainOpen(true));
+
+			if (lod.getType() == LevelOfDetailValue.Type.WITHIN_DISTANCE) {
+				menuItems.add(custom(g -> {
+					ImGuiUtils.FLOAT.set((float) lod.getDistance());
+
+					ImGui.setNextItemWidth(-1F);
+
+					if (ImGui.dragFloat("###distance", ImGuiUtils.FLOAT.getData(), 1F, 0F, 256F)) {
+						lod.setDistance(ImGuiUtils.FLOAT.get());
+					}
+				}));
+			}
+		});
+	}
+
 	public static MenuItem root(BiConsumer<ImGraphics, List<MenuItem>> subItems) {
 		return menu(ImIcon.NONE, "Root", subItems);
+	}
+
+	public static MenuItem custom(OnClick imgui) {
+		return new MenuItem(ImIcon.NONE, ImText.EMPTY, ImText.EMPTY, null, FLAG_CUSTOM_IMGUI, imgui, null);
 	}
 
 	public MenuItem withFlags(int add) {
@@ -139,6 +166,9 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 			return;
 		} else if (hasFlag(FLAG_SEPARATOR)) {
 			ImGui.separator();
+			return;
+		} else if (hasFlag(FLAG_CUSTOM_IMGUI)) {
+			onClick.onClick(graphics);
 			return;
 		}
 

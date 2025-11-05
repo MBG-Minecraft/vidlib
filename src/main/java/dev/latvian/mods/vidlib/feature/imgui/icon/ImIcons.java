@@ -161,6 +161,9 @@ public enum ImIcons implements ImIcon {
 	BLUR('\uf029'),
 	FLAG('\ue153'),
 	SHIELD('\ue9e0'),
+	SWORDS('\uf889'),
+	SHIRT('\uef7b'),
+	FOOTPRINT('\uf87d'),
 	PALETTE('\ue40a'),
 
 	;
