@@ -185,7 +185,7 @@ public class PropList implements Iterable<Prop> {
 		}
 	}
 
-	void add(Prop prop, @Nullable VLS2CPacketConsumer packets) {
+	public void add(Prop prop, @Nullable VLS2CPacketConsumer packets) {
 		if (queueNewProps) {
 			propQueue.add(prop);
 			return;
