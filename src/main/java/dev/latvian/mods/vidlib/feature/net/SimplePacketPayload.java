@@ -35,16 +35,8 @@ public interface SimplePacketPayload {
 		return new ClientboundCustomPayloadPacket(new VidLibPacketPayloadContainer(this, uid, level.getGameTime()));
 	}
 
-	default ClientboundCustomPayloadPacket toS2C(Level level) {
-		return toS2C(level, level.vl$nextPacketId());
-	}
-
 	default ServerboundCustomPayloadPacket toC2S(Level level, long uid) {
 		return new ServerboundCustomPayloadPacket(new VidLibPacketPayloadContainer(this, uid, level.getGameTime()));
-	}
-
-	default ServerboundCustomPayloadPacket toC2S(Level level) {
-		return toC2S(level, level.vl$nextPacketId());
 	}
 
 	default byte[] toBytes(Level level, long uid) {

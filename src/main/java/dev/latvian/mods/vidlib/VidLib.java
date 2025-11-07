@@ -29,7 +29,7 @@ public class VidLib {
 		}
 
 		var packets = new S2CPacketBundleBuilder(player.level());
-		packets.s2c(new MarkerPayload(new MarkerData("sync", player)).toS2C(player.level()));
+		packets.s2c(new MarkerPayload(new MarkerData("sync", player)));
 		player.vl$sessionData().sync(packets, player, syncType);
 		packets.send(player);
 	}

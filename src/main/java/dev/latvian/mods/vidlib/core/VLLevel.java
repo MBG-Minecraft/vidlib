@@ -68,6 +68,7 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 	default void vl$preTick(PauseType paused) {
 	}
 
+	@Override
 	default long vl$nextPacketId() {
 		throw new NoMixinException(this);
 	}

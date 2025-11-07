@@ -66,7 +66,7 @@ public class PropList implements Iterable<Prop> {
 	}
 
 	private boolean fullTickBukkit(Prop prop) {
-		if (prop.fullTick(props.level.getGameTime())) {
+		if (prop.fullTickBukkit(props.level.getGameTime())) {
 			prop.onRemoved();
 			props.onRemoved(prop);
 			removed.get(prop.removed).add(prop.id);
