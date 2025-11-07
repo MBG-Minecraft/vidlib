@@ -70,7 +70,7 @@ public abstract class EntityMixin implements VLEntity {
 		var e = (Entity) (Object) this;
 
 		if (!e.getType().builtInRegistryHolder().getKey().location().getNamespace().equals("minecraft")) {
-			cir.setReturnValue((Packet) new ExactEntitySpawnPayload(e, serverEntity, 0).toS2C(e.level()));
+			cir.setReturnValue((Packet) new ExactEntitySpawnPayload(e, serverEntity, 0).toS2C(e.level(), e.level().vl$nextPacketId()));
 		}
 	}
 

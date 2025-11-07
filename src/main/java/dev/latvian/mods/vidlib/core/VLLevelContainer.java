@@ -11,4 +11,8 @@ public interface VLLevelContainer extends VLEnvironmentContainer {
 	default VLMinecraftEnvironment getEnvironment() {
 		return vl$level().getEnvironment();
 	}
+
+	default long vl$nextPacketId() {
+		return vl$level().vl$nextPacketId();
+	}
 }
