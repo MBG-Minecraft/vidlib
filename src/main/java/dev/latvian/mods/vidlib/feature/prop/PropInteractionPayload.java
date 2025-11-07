@@ -15,13 +15,23 @@ import net.minecraft.world.phys.Vec3;
 
 public record PropInteractionPayload(PropListType type, int id, int button, Vec3 pos, Direction side) implements SimplePacketPayload {
 
+	public static Vec3 readVec3(ByteBuf buffer) {
+		return new Vec3(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
+	}
+
+	public static void writeVec3(ByteBuf buffer, Vec3 vec3) {
+		buffer.writeDouble(vec3.x());
+		buffer.writeDouble(vec3.y());
+		buffer.writeDouble(vec3.z());
+	}
+
 	private static StreamCodec<ByteBuf, Vec3> VEC3_STREAM_CODEC = new StreamCodec<ByteBuf, Vec3>() {
 		public Vec3 decode(ByteBuf p_361466_) {
-			return FriendlyByteBuf.readVec3(p_361466_);
+			return readVec3(p_361466_);
 		}
 
 		public void encode(ByteBuf p_364962_, Vec3 p_364468_) {
-			FriendlyByteBuf.writeVec3(p_364962_, p_364468_);
+			writeVec3(p_364962_, p_364468_);
 		}
 	};
 
