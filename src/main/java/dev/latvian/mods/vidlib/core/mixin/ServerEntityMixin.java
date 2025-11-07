@@ -40,7 +40,7 @@ public class ServerEntityMixin {
 
 			if (vl$prevTags == null || !vl$prevTags.equals(tags)) {
 				vl$prevTags = Set.copyOf(tags);
-				entity.getServer().s2c(new SyncPlayerTagsPayload(entity.getUUID(), List.copyOf(tags)).toS2C(entity.level()));
+				entity.getServer().vl$level().s2c(new SyncPlayerTagsPayload(entity.getUUID(), List.copyOf(tags)));
 			}
 		}
 	}

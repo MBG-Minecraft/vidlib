@@ -23,6 +23,6 @@ public interface VLC2SPacketConsumer extends VLLevelContainer {
 	}
 
 	default void c2s(SimplePacketPayload packet) {
-		c2s(packet.toC2S(vl$level()));
+		c2s(packet.toC2S(vl$level(), vl$nextPacketId()));
 	}
 }
