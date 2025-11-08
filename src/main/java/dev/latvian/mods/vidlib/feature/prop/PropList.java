@@ -214,10 +214,6 @@ public class PropList implements Iterable<Prop> {
 				prop.defaultValues.put(entry.data(), prop.getData(entry.data()));
 			}
 		} else {
-			for (var entry : prop.type.data()) {
-				prop.sync(entry.data());
-			}
-
 			if (packets != null) {
 				packets.s2c(prop.createAddPacket());
 			}

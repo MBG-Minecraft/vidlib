@@ -66,14 +66,18 @@ public interface VidLibEntityRenderStates {
 			extractPlayer(mc, camPos, e, s);
 		}
 
+		lod(state, camPos);
+	}
+
+	static void lod(EntityRenderState state, Vec3 camPos) {
 		boolean hideDetails = !VidLibConfig.entityDetailsLevelOfDetail.isVisible(camPos, state.x, state.y, state.z);
 		boolean hideArmor = !(state instanceof PlayerRenderState ? VidLibConfig.playerArmorLevelOfDetail : VidLibConfig.entityArmorLevelOfDetail).isVisible(camPos, state.x, state.y, state.z);
 		boolean hideHandItems = !VidLibConfig.heldItemLevelOfDetail.isVisible(camPos, state.x, state.y, state.z);
 		boolean hideClothing = !VidLibConfig.clothingLevelOfDetail.isVisible(camPos, state.x, state.y, state.z);
-		handleLOD(state, hideDetails, hideArmor, hideHandItems, hideClothing);
+		lod(state, hideDetails, hideArmor, hideHandItems, hideClothing);
 	}
 
-	private static void handleLOD(EntityRenderState state, boolean hideDetails, boolean hideArmor, boolean hideHandItems, boolean hideClothing) {
+	private static void lod(EntityRenderState state, boolean hideDetails, boolean hideArmor, boolean hideHandItems, boolean hideClothing) {
 		if (state instanceof ArmedEntityRenderState s && hideHandItems) {
 			s.leftHandItem.clear();
 			s.rightHandItem.clear();
