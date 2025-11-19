@@ -14,7 +14,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 @Mod(VidLib.ID)
 public class VidLibMod {
 	public VidLibMod(ModContainer mod, IEventBus bus) {
-		PlatformHelper.CURRENT = new NeoPlatformHelper();
+		PlatformHelper.CURRENT = new NeoPlatformHelper(mod);
 		VidLib.VERSION = mod.getModInfo().getVersion().toString();
 		VidLib.init();
 

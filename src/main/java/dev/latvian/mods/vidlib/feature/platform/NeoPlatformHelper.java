@@ -10,6 +10,7 @@ import dev.latvian.mods.vidlib.feature.capture.PacketCaptureEvent;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.common.NeoForge;
@@ -18,10 +19,17 @@ import org.objectweb.asm.Type;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
+import java.nio.file.Path;
 import java.util.Set;
 import java.util.function.Function;
 
 public class NeoPlatformHelper extends PlatformHelper {
+	public final ModContainer mod;
+
+	public NeoPlatformHelper(ModContainer mod) {
+		this.mod = mod;
+	}
+
 	@Override
 	public Side getSide() {
 		return FMLLoader.getDist().isClient() ? Side.CLIENT : Side.SERVER;
@@ -98,5 +106,15 @@ public class NeoPlatformHelper extends PlatformHelper {
 		}
 
 		metadata.add("mod_list", ml);
+	}
+
+	@Override
+	public Path findFile(String modid, String... path) {
+		return ModList.get().getModFileById(modid).getFile().findResource(path);
+	}
+
+	@Override
+	public Path findVidLibFile(String... path) {
+		return mod.getModInfo().getOwningFile().getFile().findResource(path);
 	}
 }
