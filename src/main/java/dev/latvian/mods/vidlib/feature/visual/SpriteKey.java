@@ -132,7 +132,7 @@ public final class SpriteKey {
 	}
 
 	public ResourceLocation dynamic() {
-		return ResourceLocation.fromNamespaceAndPath(sprite.getNamespace(), "textures/vidlib/generated/atlas/" + atlas.getNamespace() + "/" + atlas.getPath() + "/" + sprite.getPath() + ".png");
+		return ResourceLocation.tryBuild(sprite.getNamespace(), "textures/vidlib/generated/atlas/" + atlas.getNamespace() + "/" + atlas.getPath() + "/" + sprite.getPath() + ".png");
 	}
 
 	@Override

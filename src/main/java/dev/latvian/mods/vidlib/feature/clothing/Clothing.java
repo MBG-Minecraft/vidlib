@@ -21,7 +21,7 @@ import java.util.function.Function;
 @AutoInit
 public record Clothing(ResourceKey<EquipmentAsset> id, ClothingParts parts) {
 	public static ResourceKey<EquipmentAsset> createKey(String id) {
-		return ResourceKey.create(EquipmentAssets.ROOT_ID, ResourceLocation.fromNamespaceAndPath("video", id));
+		return ResourceKey.create(EquipmentAssets.ROOT_ID, ResourceLocation.tryBuild("video", id));
 	}
 
 	public static final Clothing NONE = new Clothing(ResourceKey.create(EquipmentAssets.ROOT_ID, VidLib.id("none")), ClothingParts.NONE);

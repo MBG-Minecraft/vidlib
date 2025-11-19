@@ -35,6 +35,6 @@ public record VidLibPacketType<T extends SimplePacketPayload>(CustomPacketPayloa
 	}
 
 	public static <T extends SimplePacketPayload> VidLibPacketType<T> video(String path, StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec) {
-		return create(ResourceLocation.fromNamespaceAndPath("video", path), streamCodec);
+		return create(ResourceLocation.tryBuild("video", path), streamCodec);
 	}
 }

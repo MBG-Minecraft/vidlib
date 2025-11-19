@@ -10,8 +10,8 @@ import java.util.HashMap;
 
 public record TTFFile(ResourceLocation id, ResourceLocation resource) {
 	public static final VLRegistry<TTFFile> REGISTRY = VLRegistry.createClient("ttf", TTFFile.class);
-	public static final RegistryRef<TTFFile> MATERIAL_ICONS_ROUND_REGULAR = REGISTRY.ref(ResourceLocation.fromNamespaceAndPath("imguiresources", "materialiconsround_regular"));
-	public static final RegistryRef<TTFFile> JETBRAINS_MONO_REGULAR = REGISTRY.ref(ResourceLocation.fromNamespaceAndPath("imguiresources", "jetbrainsmono_regular"));
+	public static final RegistryRef<TTFFile> MATERIAL_ICONS_ROUND_REGULAR = REGISTRY.ref(ResourceLocation.tryBuild("imguiresources", "materialiconsround_regular"));
+	public static final RegistryRef<TTFFile> JETBRAINS_MONO_REGULAR = REGISTRY.ref(ResourceLocation.tryBuild("imguiresources", "jetbrainsmono_regular"));
 
 	public static void find(ResourceManager resourceManager) {
 		var map = new HashMap<ResourceLocation, TTFFile>();
