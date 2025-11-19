@@ -17,6 +17,7 @@
 		"CollisionGetterMixin",
 		"CommandSourceStackMixin",
 		"ComponentMixin",
+		"ConnectionMixin",
 		"CoralBlockMixin",
 		"DataResultMixin",
 		"DimensionTypeMixin",

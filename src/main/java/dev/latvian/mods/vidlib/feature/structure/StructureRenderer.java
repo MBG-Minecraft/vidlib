@@ -14,8 +14,8 @@ import dev.latvian.mods.klib.util.WithCache;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
-import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
+import dev.latvian.mods.vidlib.util.VLBiomes;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
@@ -177,7 +177,7 @@ public class StructureRenderer implements WithCache {
 		var blockRenderer = mc.getBlockRenderer();
 		var random = RandomSource.create();
 
-		var biome = MiscUtils.VOID_BIOME.get();
+		var biome = VLBiomes.VOID.get();
 		var level = new StructureRendererLevel(structure.blocks(), data.skyLight(), data.blockLight(), biome);
 
 		var allTypes = RenderType.chunkBufferLayers();

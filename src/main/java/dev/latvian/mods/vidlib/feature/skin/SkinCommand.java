@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.feature.skin;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;

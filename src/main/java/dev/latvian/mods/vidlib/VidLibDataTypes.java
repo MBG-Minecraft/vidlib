@@ -31,6 +31,7 @@ import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import dev.latvian.mods.vidlib.util.ScreenCorner;
+import dev.latvian.mods.vidlib.util.Timestamp;
 
 public class VidLibDataTypes {
 	public static void register() {
@@ -68,5 +69,6 @@ public class VidLibDataTypes {
 		DataType.register(VidLib.id("block_state_palette"), BlockStatePalette.DATA_TYPE);
 		DataType.register(VidLib.id("entity_snapshot"), EntitySnapshot.DATA_TYPE);
 		DataType.register(VidLib.id("entity_snapshot_list"), EntitySnapshot.LIST_DATA_TYPE);
+		DataType.register(VidLib.id("timestamp"), Timestamp.DATA_TYPE);
 	}
 }

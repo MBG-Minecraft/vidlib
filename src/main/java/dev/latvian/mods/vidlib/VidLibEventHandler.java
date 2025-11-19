@@ -197,6 +197,12 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void serverStopped(ServerStoppedEvent event) {
 		GenericVLRegistry.releaseServerHolders();
+
+		var packetCapture = event.getServer().vl$getPacketCapture(false);
+
+		if (packetCapture != null) {
+			packetCapture.finish();
+		}
 	}
 
 	@SubscribeEvent
@@ -216,7 +222,7 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void levelSaved(LevelEvent.Save event) {
 		if (event.getLevel() instanceof ServerLevel level && level.dimension() == Level.OVERWORLD) {
-			level.getServer().getServerData().save(level.getServer(), level.getServer().getWorldPath(LevelResource.ROOT).resolve("vidlib.nbt"));
+			level.getServer().vl$save();
 		}
 	}
 

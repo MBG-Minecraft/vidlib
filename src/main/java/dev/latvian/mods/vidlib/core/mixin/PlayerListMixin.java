@@ -5,12 +5,15 @@ import dev.latvian.mods.vidlib.core.VLServerPacketListener;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.Entity;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -20,12 +23,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PlayerList.class)
 public class PlayerListMixin {
+	@Shadow
+	@Final
+	private MinecraftServer server;
+
 	@Unique
 	private ServerSessionData vl$newPlayerSession;
 
 	@Inject(method = "placeNewPlayer", at = @At("HEAD"))
 	private void vl$placeNewPlayerHead(Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci) {
-		vl$newPlayerSession = new ServerSessionData(player.getUUID());
+		vl$newPlayerSession = new ServerSessionData(server, player.getUUID());
 		vl$newPlayerSession.load(player);
 	}
 
@@ -51,5 +58,14 @@ public class PlayerListMixin {
 	private void vl$respawn(ServerPlayer player, boolean keepInventory, Entity.RemovalReason reason, CallbackInfoReturnable<ServerPlayer> cir) {
 		var newPlayer = cir.getReturnValue();
 		newPlayer.vl$sessionData().respawned(newPlayer.level(), false);
+	}
+
+	@Inject(method = "remove", at = @At("RETURN"))
+	private void vl$remove(ServerPlayer player, CallbackInfo ci) {
+		var packetCapture = server.vl$getPacketCapture(false);
+
+		if (packetCapture != null) {
+			packetCapture.disconnect(player.getUUID());
+		}
 	}
 }

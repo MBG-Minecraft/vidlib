@@ -6,20 +6,12 @@ import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.data.DataTypes;
-import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.klib.util.Cast;
-import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.core.VLEntity;
 import dev.latvian.mods.vidlib.core.VLPlayer;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
-import dev.latvian.mods.vidlib.feature.environment.FogOverride;
-import dev.latvian.mods.vidlib.feature.icon.IconHolder;
-import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
-import dev.latvian.mods.vidlib.feature.skin.VLSkin;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.Entity;
@@ -119,29 +111,6 @@ public final class EntityOverride<T> {
 	public static final EntityOverride<Boolean> UNPUSHABLE = createBooleanKey("unpushable");
 	public static final EntityOverride<Boolean> SCALE_DAMAGE_WITH_DIFFICULTY = createBooleanKey("scale_damage_with_difficulty");
 	public static final EntityOverride<Boolean> DISABLE_DEBUG = createBooleanKey("disable_debug");
-
-	@AutoInit
-	public static void legacy() {
-		if (!VidLibConfig.legacyDataKeyStream) {
-			return;
-		}
-
-		createKey("plumbob", IconHolder.DATA_TYPE);
-		createBooleanKey("glowing");
-		createColorKey("team_color");
-		createKey("clothing", Clothing.DATA_TYPE);
-		createKey("skybox", ID.DATA_TYPE);
-		createKey("ambient_light", Range.DATA_TYPE);
-		createKey("fog", FogOverride.DATA_TYPE);
-		createKey("fluid_fog", FogOverride.DATA_TYPE);
-		createKey("nickname", DataTypes.TEXT_COMPONENT);
-		createKey("name_prefix", DataTypes.TEXT_COMPONENT);
-		createKey("name_suffix", DataTypes.TEXT_COMPONENT);
-		createKey("score_text", DataTypes.TEXT_COMPONENT);
-		createBooleanKey("name_hidden");
-		createKey("environment_effects", ChancedParticle.LIST_DATA_TYPE);
-		createKey("skin", VLSkin.DATA_TYPE);
-	}
 
 	public final String id;
 	private final DataType<T> type;
