@@ -26,7 +26,7 @@ import dev.latvian.mods.vidlib.feature.data.DataMapValue;
 import dev.latvian.mods.vidlib.feature.data.UpdatePlayerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.data.UpdateServerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
-import dev.latvian.mods.vidlib.feature.misc.MarkerData;
+import dev.latvian.mods.vidlib.feature.misc.EventMarkerData;
 import dev.latvian.mods.vidlib.feature.particle.FireData;
 import dev.latvian.mods.vidlib.feature.particle.ItemParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.LineParticleOptions;
@@ -573,7 +573,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void marker(MarkerData data) {
+	default void marker(EventMarkerData data) {
 		// VidLib.LOGGER.info("Marker " + data.event() + "/" + data.name() + " (" + data.uuid() + ") @ ");
 	}
 

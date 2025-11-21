@@ -9,7 +9,7 @@ import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.clock.SyncClocksPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
-import dev.latvian.mods.vidlib.feature.misc.MarkerData;
+import dev.latvian.mods.vidlib.feature.misc.EventMarkerData;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
@@ -78,7 +78,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	@ApiStatus.Internal
 	default void vl$playerJoined(ServerPlayer player) {
 		VidLib.sync(player, 2);
-		player.server.marker(new MarkerData("player/logged_in", player));
+		player.server.marker(new EventMarkerData("player/logged_in", player));
 	}
 
 	@Override

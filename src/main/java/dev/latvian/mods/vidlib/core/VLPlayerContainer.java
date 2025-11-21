@@ -14,9 +14,9 @@ import dev.latvian.mods.vidlib.feature.cutscene.PlayCutscenePayload;
 import dev.latvian.mods.vidlib.feature.cutscene.StopCutscenePayload;
 import dev.latvian.mods.vidlib.feature.hud.ToastDisplayPayload;
 import dev.latvian.mods.vidlib.feature.misc.CloseScreenPayload;
+import dev.latvian.mods.vidlib.feature.misc.EventMarkerData;
+import dev.latvian.mods.vidlib.feature.misc.EventMarkerPayload;
 import dev.latvian.mods.vidlib.feature.misc.InfoBarOverridePayload;
-import dev.latvian.mods.vidlib.feature.misc.MarkerData;
-import dev.latvian.mods.vidlib.feature.misc.MarkerPayload;
 import dev.latvian.mods.vidlib.feature.misc.SetPostEffectPayload;
 import dev.latvian.mods.vidlib.feature.particle.FireData;
 import dev.latvian.mods.vidlib.feature.particle.ItemParticleOptions;
@@ -331,11 +331,11 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 		}
 	}
 
-	default void marker(MarkerData data) {
+	default void marker(EventMarkerData data) {
 		if (isClient()) {
 			getEnvironment().marker(data);
 		} else {
-			s2c(new MarkerPayload(data));
+			s2c(new EventMarkerPayload(data));
 		}
 	}
 

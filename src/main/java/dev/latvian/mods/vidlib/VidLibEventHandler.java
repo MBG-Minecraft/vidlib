@@ -9,7 +9,7 @@ import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.location.Location;
-import dev.latvian.mods.vidlib.feature.misc.MarkerData;
+import dev.latvian.mods.vidlib.feature.misc.EventMarkerData;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
@@ -150,7 +150,7 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void playerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
 		if (event.getEntity() instanceof ServerPlayer player) {
-			player.server.marker(new MarkerData("player/logged_out", player));
+			player.server.marker(new EventMarkerData("player/logged_out", player));
 			player.server.s2c(new RemovePlayerDataPayload(player.getUUID()));
 		}
 	}

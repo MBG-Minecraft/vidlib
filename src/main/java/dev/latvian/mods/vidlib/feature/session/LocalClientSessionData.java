@@ -43,6 +43,7 @@ import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
 import dev.latvian.mods.vidlib.feature.skybox.Skybox;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
+import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
@@ -53,6 +54,7 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import io.netty.buffer.Unpooled;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.gui.screens.Screen;
@@ -76,7 +78,6 @@ import org.joml.Vector2dc;
 import java.io.BufferedOutputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -116,26 +117,28 @@ public class LocalClientSessionData extends ClientSessionData {
 	public WorldBorder worldBorderOverride;
 	public WorldBorderOverride worldBorderOverrideStart;
 	public WorldBorderOverride worldBorderOverrideEnd;
+	public Map<String, Waypoint> waypoints;
 
 	public LocalClientSessionData(Minecraft mc, UUID uuid, ClientPacketListener connection) {
 		super(uuid);
 		this.mc = mc;
 		this.connection = connection;
-		this.remoteSessionData = new HashMap<>();
+		this.remoteSessionData = new Object2ObjectOpenHashMap<>();
 
 		this.serverZones = new ActiveZones();
 		this.filteredZones = new ActiveZones();
 		this.zoneClip = null;
 		this.screenShakeInstances = new ArrayList<>();
 		this.prevCameraShake = this.cameraShake = Identity.DVEC_2;
-		this.clocks = new HashMap<>();
-		this.skyboxes = new HashMap<>();
+		this.clocks = new Object2ObjectOpenHashMap<>();
+		this.skyboxes = new Object2ObjectOpenHashMap<>();
 		this.serverDataMap = new DataMap(uuid, DataKey.SERVER);
 		this.globalVariables = new KNumberVariables();
 		this.debugPackets = new ArrayList<>();
 		this.debugDecals = new ArrayList<>();
 		this.screenEffects = new ArrayList<>();
-		this.glowColors = new HashMap<>();
+		this.glowColors = new Object2ObjectOpenHashMap<>();
+		this.waypoints = new Object2ObjectOpenHashMap<>();
 
 		VidLib.LOGGER.info("Client Session Data Initialized");
 	}
@@ -405,6 +408,24 @@ public class LocalClientSessionData extends ClientSessionData {
 			glowColors.remove(uuid);
 		} else {
 			glowColors.put(uuid, color);
+		}
+	}
+
+	@Override
+	public void addWaypoints(List<Waypoint> list) {
+		for (var waypoint : list) {
+			waypoints.put(waypoint.id, waypoint);
+		}
+	}
+
+	@Override
+	public void removeWaypoints(List<String> ids) {
+		if (ids.isEmpty()) {
+			waypoints.clear();
+		} else {
+			for (var id : ids) {
+				waypoints.remove(id);
+			}
 		}
 	}
 
