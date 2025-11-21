@@ -4,7 +4,6 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
@@ -19,6 +18,7 @@ import net.minecraft.world.level.Level;
 
 public class Waypoint {
 	public static final ResourceLocation DEFAULT_ICON = VidLib.id("textures/misc/default_marker.png");
+	public static final Component DEFAULT_LABEL = Component.empty();
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, Waypoint> STREAM_CODEC = CompositeStreamCodec.of(
 		ByteBufCodecs.STRING_UTF8, m -> m.id,
@@ -28,7 +28,7 @@ public class Waypoint {
 		KLibStreamCodecs.optional(ID.STREAM_CODEC, DEFAULT_ICON), m -> m.icon,
 		Color.STREAM_CODEC, m -> m.tint,
 		KLibStreamCodecs.optional(KLibStreamCodecs.DOUBLE_AS_FLOAT, 0D), m -> m.maxDistance,
-		KLibStreamCodecs.optional(ComponentSerialization.TRUSTED_STREAM_CODEC, Empty.COMPONENT), m -> m.label,
+		KLibStreamCodecs.optional(ComponentSerialization.TRUSTED_STREAM_CODEC, DEFAULT_LABEL), m -> m.label,
 		Waypoint::new
 	);
 
@@ -39,7 +39,7 @@ public class Waypoint {
 	public ResourceLocation icon = DEFAULT_ICON;
 	public Color tint = Color.WHITE;
 	public double maxDistance = 0D;
-	public Component label = Empty.COMPONENT;
+	public Component label = DEFAULT_LABEL;
 	public boolean centered = true;
 	public boolean showDistance = true;
 
