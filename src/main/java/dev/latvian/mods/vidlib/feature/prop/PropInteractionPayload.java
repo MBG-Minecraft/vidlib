@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
@@ -16,7 +17,7 @@ public record PropInteractionPayload(PropListType type, int id, int button, Vec3
 		PropListType.STREAM_CODEC, PropInteractionPayload::type,
 		ByteBufCodecs.VAR_INT, PropInteractionPayload::id,
 		ByteBufCodecs.VAR_INT, PropInteractionPayload::button,
-		Vec3.STREAM_CODEC, PropInteractionPayload::pos,
+		MCStreamCodecs.VEC3, PropInteractionPayload::pos,
 		Direction.STREAM_CODEC, PropInteractionPayload::side,
 		PropInteractionPayload::new
 	));

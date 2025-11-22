@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.camera;
 
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
@@ -18,7 +19,7 @@ public record TestScreenShakePayload(ScreenShake shake, Optional<Vec3> position,
 	@AutoPacket(AutoPacket.To.SERVER)
 	public static final VidLibPacketType<TestScreenShakePayload> TYPE = VidLibPacketType.internal("screen_shake/test", CompositeStreamCodec.of(
 		ScreenShake.STREAM_CODEC, TestScreenShakePayload::shake,
-		ByteBufCodecs.optional(Vec3.STREAM_CODEC), TestScreenShakePayload::position,
+		ByteBufCodecs.optional(MCStreamCodecs.VEC3), TestScreenShakePayload::position,
 		ByteBufCodecs.DOUBLE, TestScreenShakePayload::maxDistance,
 		TestScreenShakePayload::new
 	));

@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.particle;
 import com.mojang.datafixers.util.Pair;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
@@ -15,7 +16,7 @@ public record SpawnItemParticlePayload(ItemParticleOptions options, List<Pair<Ve
 	@AutoPacket
 	public static final VidLibPacketType<SpawnItemParticlePayload> TYPE = VidLibPacketType.internal("spawn_item_particles", CompositeStreamCodec.of(
 		ItemParticleOptions.STREAM_CODEC, SpawnItemParticlePayload::options,
-		KLibStreamCodecs.listOf(KLibStreamCodecs.pair(Vec3.STREAM_CODEC, Vec3.STREAM_CODEC)), SpawnItemParticlePayload::positions,
+		KLibStreamCodecs.listOf(KLibStreamCodecs.pair(MCStreamCodecs.VEC3, MCStreamCodecs.VEC3)), SpawnItemParticlePayload::positions,
 		SpawnItemParticlePayload::new
 	));
 
