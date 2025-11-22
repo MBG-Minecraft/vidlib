@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.data;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.data.DataTypes;
-import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.cape.VLCape;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
@@ -11,11 +10,9 @@ import dev.latvian.mods.vidlib.feature.icon.IconHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.BooleanImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TextComponentImBuilder;
-import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.skin.VLSkin;
 import net.minecraft.network.chat.Component;
 
-@AutoInit
 public interface InternalPlayerData {
 	DataKey<Boolean> SUSPENDED = DataKey.PLAYER.createDefault("suspended", DataTypes.BOOL, false, BooleanImBuilder.TYPE);
 	DataKey<Component> NICKNAME = DataKey.PLAYER.createDefault("nickname", DataTypes.TEXT_COMPONENT, Component.empty(), TextComponentImBuilder.TYPE);
@@ -28,9 +25,5 @@ public interface InternalPlayerData {
 
 	@AutoInit
 	static void bootstrap() {
-		if (VidLibConfig.legacyDataKeyStream) {
-			DataKey.PLAYER.createDefault("test_physics_particles", PhysicsParticleData.DATA_TYPE, PhysicsParticleData.DEFAULT, null);
-			DataKey.PLAYER.createDouble("test_screen_shake", 30D);
-		}
 	}
 }

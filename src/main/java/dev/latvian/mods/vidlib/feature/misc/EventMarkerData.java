@@ -10,23 +10,23 @@ import net.minecraft.world.entity.Entity;
 
 import java.util.UUID;
 
-public record MarkerData(String event, String name, UUID uuid) {
-	public static final StreamCodec<ByteBuf, MarkerData> STREAM_CODEC = CompositeStreamCodec.of(
-		ByteBufCodecs.STRING_UTF8, MarkerData::event,
-		ByteBufCodecs.STRING_UTF8, MarkerData::name,
-		KLibStreamCodecs.UUID, MarkerData::uuid,
-		MarkerData::new
+public record EventMarkerData(String event, String name, UUID uuid) {
+	public static final StreamCodec<ByteBuf, EventMarkerData> STREAM_CODEC = CompositeStreamCodec.of(
+		ByteBufCodecs.STRING_UTF8, EventMarkerData::event,
+		ByteBufCodecs.STRING_UTF8, EventMarkerData::name,
+		KLibStreamCodecs.UUID, EventMarkerData::uuid,
+		EventMarkerData::new
 	);
 
-	public MarkerData(String event, String name, Entity entity) {
+	public EventMarkerData(String event, String name, Entity entity) {
 		this(event, name, entity.getUUID());
 	}
 
-	public MarkerData(String event, Entity entity) {
+	public EventMarkerData(String event, Entity entity) {
 		this(event, entity.getName().getString(), entity.getUUID());
 	}
 
-	public MarkerData(String event) {
+	public EventMarkerData(String event) {
 		this(event, "", Util.NIL_UUID);
 	}
 }

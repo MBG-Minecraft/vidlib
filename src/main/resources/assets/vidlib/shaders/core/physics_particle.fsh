@@ -11,10 +11,10 @@ out vec4 fragColor;
 
 void main() {
 	vec4 color = texture(Sampler0, texCoord0) * vertexColor * ColorModulator;
-#ifdef ALPHA_CUTOUT
+	#ifdef ALPHA_CUTOUT
 	if (color.a < ALPHA_CUTOUT) {
 		discard;
 	}
-#endif
+	#endif
 	fragColor = color;
 }

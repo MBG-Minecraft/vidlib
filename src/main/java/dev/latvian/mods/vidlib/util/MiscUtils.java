@@ -4,12 +4,9 @@ import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
-import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.Util;
 import net.minecraft.util.ExtraCodecs;
-import net.minecraft.world.level.biome.Biome;
-import net.neoforged.fml.ModList;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
@@ -25,8 +22,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.SequencedCollection;
+import java.util.function.IntFunction;
+import java.util.function.ToIntFunction;
 
 public interface MiscUtils {
+	Runnable NO_OP = () -> {
+	};
+
 	Comparator<GameProfile> PROFILE_COMPARATOR = (a, b) -> a.getName().compareToIgnoreCase(b.getName());
 
 	HttpClient HTTP_CLIENT = HttpClient.newBuilder()
@@ -120,15 +122,19 @@ public interface MiscUtils {
 		}).getOrThrow();
 	}
 
-	Lazy<Biome> VOID_BIOME = Lazy.of(() -> {
-		try {
-			var file = ModList.get().getModFileById(VidLib.ID).getFile().findResource("data", VidLib.ID, "worldgen", "biome", "void.json");
-			try (var reader = Files.newBufferedReader(file)) {
-				var json = JsonUtils.read(reader);
-				return Biome.DIRECT_CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
-			}
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
+	static <T> T[] fastIndexedLookup(T[] values, ToIntFunction<T> idGetter, IntFunction<T[]> arrayConstructor) {
+		int max = 0;
+
+		for (var type : values) {
+			max = Math.max(max, idGetter.applyAsInt(type));
 		}
-	});
+
+		var lookup = arrayConstructor.apply(max + 1);
+
+		for (var type : values) {
+			lookup[idGetter.applyAsInt(type)] = type;
+		}
+
+		return lookup;
+	}
 }

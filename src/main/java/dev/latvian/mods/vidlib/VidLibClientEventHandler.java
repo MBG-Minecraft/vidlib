@@ -55,6 +55,7 @@ import dev.latvian.mods.vidlib.feature.structure.StructureRenderer;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
 import dev.latvian.mods.vidlib.feature.visual.TexturedCubeRenderer;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
+import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
 import dev.latvian.mods.vidlib.util.NameDrawType;
@@ -187,6 +188,7 @@ public class VidLibClientEventHandler {
 		event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, VidLib.id("above_boss"), VidLibHUD::drawAboveBossOverlay);
 		event.registerAboveAll(VidLib.id("fade"), VidLibHUD::drawFade);
 		event.registerAboveAll(VidLib.id("player_pins"), Pins::draw);
+		event.registerBelowAll(VidLib.id("waypoints"), ClientWaypoints::draw);
 	}
 
 	@SubscribeEvent

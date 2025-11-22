@@ -43,13 +43,18 @@ public abstract class DebugScreenOverlayMixin {
 	private LevelChunk clientChunk;
 
 	@Shadow
-	public void clearChunkCache() {}
+	public void clearChunkCache() {
+	}
 
 	@Shadow
-	private LevelChunk getClientChunk() { return null; }
+	private LevelChunk getClientChunk() {
+		return null;
+	}
 
 	@Shadow
-	private static String printBiome(Holder<Biome> biomeHolder) { return null; }
+	private static String printBiome(Holder<Biome> biomeHolder) {
+		return null;
+	}
 
 	@Inject(method = "getSystemInformation", at = @At("RETURN"), cancellable = true)
 	private void getSystemInformation(CallbackInfoReturnable<List<String>> cir) {

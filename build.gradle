@@ -1,9 +1,9 @@
 plugins {
-	id 'net.neoforged.moddev' version "2.0.107"
-	id 'maven-publish'
 	id 'base'
 	id 'java'
 	id 'idea'
+	id 'maven-publish'
+	id 'net.neoforged.moddev' version "2.0.118"
 }
 
 var ENV = System.getenv() + (file('.env').exists() ? file('.env').readLines().findAll { it && !it.startsWith('#') }.collectEntries {
@@ -115,7 +115,7 @@ repositories {
 
 	if (findProperty('mrbeastURL') ?: ENV.MBG_MAVEN_URL) {
 		maven {
-			url = findProperty('mrbeastURL') ?:  ENV.MBG_MAVEN_URL
+			url = findProperty('mrbeastURL') ?: ENV.MBG_MAVEN_URL
 			content {
 				includeGroup "software.bernie.geckolib"
 				includeGroup "dev.latvian.mods"
@@ -123,6 +123,7 @@ repositories {
 				includeGroup "dev.beast.mods"
 				includeGroup "maven.modrinth"
 			}
+
 			credentials {
 				username = findProperty('mrbeastUsername') ?: ENV.MBG_MAVEN_USERNAME
 				password = findProperty('mrbeastPassword') ?: ENV.MBG_MAVEN_TOKEN

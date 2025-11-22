@@ -11,12 +11,11 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.Connection;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -39,6 +38,10 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 	@Final
 	@Mutable
 	private ServerChunkCache chunkSource;
+
+	@Shadow
+	@Final
+	private MinecraftServer server;
 
 	@Unique
 	private ActiveZones vl$activeZones;
@@ -109,7 +112,7 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 		if (player.vl$sessionData() != null) {
 			return;
 		}
-		ServerSessionData newPlayerSession = new ServerSessionData(player.getUUID());
+		ServerSessionData newPlayerSession = new ServerSessionData(server, player.getUUID());
 		((VLServerPacketListener) player.connection).vl$sessionData(newPlayerSession);
 		newPlayerSession.load(player);
 	}

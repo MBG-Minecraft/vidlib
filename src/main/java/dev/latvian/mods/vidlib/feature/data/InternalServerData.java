@@ -13,7 +13,6 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 
-@AutoInit
 public interface InternalServerData {
 	DataKey<ResourceLocation> SKYBOX = DataKey.SERVER.createDefault("skybox", SkyboxData.ID_DATA_TYPE, Skyboxes.DAY_WITH_CELESTIALS, null);
 	DataKey<Boolean> IMMUTABLE_WORLD = DataKey.SERVER.createBoolean("immutable_world", false);
@@ -29,4 +28,8 @@ public interface InternalServerData {
 	DataKey<Long> GLOBAL_STOPWATCH_START = DataKey.SERVER.createDefault("global_stopwatch_start", DataTypes.VAR_LONG, 0L, null);
 	DataKey<Boolean> ICE_MELTS = DataKey.SERVER.createBoolean("ice_melts", false);
 	DataKey<Boolean> BLOCK_GRAVITY = DataKey.SERVER.createBoolean("block_gravity", false);
+
+	@AutoInit
+	static void bootstrap() {
+	}
 }

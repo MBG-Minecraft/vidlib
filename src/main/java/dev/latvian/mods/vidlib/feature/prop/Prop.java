@@ -94,7 +94,7 @@ public class Prop {
 	PropRemoveType removed;
 	private List<Pair<PropData<?, ?>, ImBuilder<?>>> imguiBuilders;
 	Map<PropData<?, ?>, Object> defaultValues = Map.of();
-	boolean clientSideOnly;
+	public boolean clientSideOnly;
 
 	public int prevTick;
 	public int tick;

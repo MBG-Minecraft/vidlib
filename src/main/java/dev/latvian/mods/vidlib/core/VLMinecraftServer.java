@@ -5,10 +5,11 @@ import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
+import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.clock.SyncClocksPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
-import dev.latvian.mods.vidlib.feature.misc.MarkerData;
+import dev.latvian.mods.vidlib.feature.misc.EventMarkerData;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
@@ -24,9 +25,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -52,6 +56,14 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 		return vl$self().overworld();
 	}
 
+	default RandomSource vl$sessionRandom() {
+		throw new NoMixinException(this);
+	}
+
+	default int vl$sessionId() {
+		throw new NoMixinException(this);
+	}
+
 	@Override
 	default PauseType getPauseType() {
 		var server = vl$self();
@@ -66,7 +78,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	@ApiStatus.Internal
 	default void vl$playerJoined(ServerPlayer player) {
 		VidLib.sync(player, 2);
-		player.server.marker(new MarkerData("player/logged_in", player));
+		player.server.marker(new EventMarkerData("player/logged_in", player));
 	}
 
 	@Override
@@ -285,5 +297,20 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 
 	default void runServerCommand(String command) {
 		vl$self().getCommands().performPrefixedCommand(vl$self().createCommandSourceStack(), command);
+	}
+
+	@Nullable
+	default PacketCapture vl$getPacketCapture(boolean start) {
+		throw new NoMixinException(this);
+	}
+
+	default void vl$save() {
+		getServerData().save(vl$self(), vl$self().getWorldPath(LevelResource.ROOT).resolve("vidlib.nbt"));
+
+		var packetCapture = vl$getPacketCapture(false);
+
+		if (packetCapture != null) {
+			packetCapture.saveAll();
+		}
 	}
 }

@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.cape;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import dev.latvian.mods.vidlib.feature.skin.VLSkin;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
@@ -10,7 +9,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Collection;
-import java.util.Optional;
 
 public interface CapeCommand {
 

@@ -4,6 +4,7 @@ import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.input.PlayerInputChanged;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToClient;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.LevelResource;
@@ -13,10 +14,12 @@ import java.util.Set;
 import java.util.UUID;
 
 public class ServerSessionData extends SessionData {
+	public final MinecraftServer server;
 	private Set<String> currentTags = Set.of();
 
-	public ServerSessionData(UUID uuid) {
+	public ServerSessionData(MinecraftServer server, UUID uuid) {
 		super(uuid);
+		this.server = server;
 	}
 
 	public void vl$preTick(ServerPlayer player) {
