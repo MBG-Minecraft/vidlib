@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.math.MovementType;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.math.Vec3f;
@@ -32,7 +33,7 @@ public record ParticleMovementData(
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ParticleMovementData> STREAM_CODEC = CompositeStreamCodec.of(
 		MovementType.DATA_TYPE.streamCodec(), ParticleMovementData::type,
-		Vec3.STREAM_CODEC, ParticleMovementData::position,
+		MCStreamCodecs.VEC3, ParticleMovementData::position,
 		ByteBufCodecs.VAR_INT, ParticleMovementData::count,
 		ByteBufCodecs.FLOAT, ParticleMovementData::radius,
 		ByteBufCodecs.FLOAT, ParticleMovementData::deviate,

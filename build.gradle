@@ -148,7 +148,7 @@ repositories {
 
 dependencies {
 	jarJar(implementation("dev.latvian.mods:klib:$klib_version"))
-	interfaceInjectionData("dev.latvian.mods:klib:2105.1.1-build-1206.102")
+	interfaceInjectionData("dev.latvian.mods:klib:2105.1.1-build-1206.103")
 
 	compileOnly("dev.latvian.mods:imgui-resources:$imgui_resources_version")
 

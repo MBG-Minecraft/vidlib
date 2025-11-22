@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.Rotation;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -22,7 +23,7 @@ public record EntitySnapshot(UUID player, Vec3 position, Rotation rotation, bool
 		Codec.BOOL.fieldOf("crouching").forGetter(EntitySnapshot::crouching)
 	).apply(instance, EntitySnapshot::new)), CompositeStreamCodec.of(
 		KLibStreamCodecs.UUID, EntitySnapshot::player,
-		Vec3.STREAM_CODEC, EntitySnapshot::position,
+		MCStreamCodecs.VEC3, EntitySnapshot::position,
 		Rotation.STREAM_CODEC_NO_ROLL, EntitySnapshot::rotation,
 		ByteBufCodecs.BOOL, EntitySnapshot::crouching,
 		EntitySnapshot::new

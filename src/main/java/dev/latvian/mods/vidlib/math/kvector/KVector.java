@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.math.kvector;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.IntOrUUID;
@@ -46,7 +47,7 @@ public interface KVector {
 		v -> v instanceof ScalarKVector(KNumber n) ? Either.right(n) : Either.left(v)
 	);
 
-	StreamCodec<ByteBuf, KVector> LITERAL_STREAM_CODEC = ByteBufCodecs.either(Vec3.STREAM_CODEC, ByteBufCodecs.STRING_UTF8).map(
+	StreamCodec<ByteBuf, KVector> LITERAL_STREAM_CODEC = ByteBufCodecs.either(MCStreamCodecs.VEC3, ByteBufCodecs.STRING_UTF8).map(
 		e -> e.map(FixedKVector::new, KVector::named),
 		v -> v instanceof FixedKVector(Vec3 pos) ? Either.left(pos) : Either.right(v.toString())
 	);

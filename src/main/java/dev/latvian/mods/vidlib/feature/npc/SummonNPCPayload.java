@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.npc;
 
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
@@ -11,7 +12,7 @@ public record SummonNPCPayload(NPCParticleOptions options, Vec3 pos) implements 
 	@AutoPacket
 	public static final VidLibPacketType<SummonNPCPayload> TYPE = VidLibPacketType.internal("summon_npc", CompositeStreamCodec.of(
 		NPCParticleOptions.STREAM_CODEC, SummonNPCPayload::options,
-		Vec3.STREAM_CODEC, SummonNPCPayload::pos,
+		MCStreamCodecs.VEC3, SummonNPCPayload::pos,
 		SummonNPCPayload::new
 	));
 

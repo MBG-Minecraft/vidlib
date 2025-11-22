@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.camera;
 
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
@@ -12,7 +13,7 @@ public record ScreenShakeAtPositionPayload(ScreenShake shake, Vec3 position, dou
 	@AutoPacket
 	public static final VidLibPacketType<ScreenShakeAtPositionPayload> TYPE = VidLibPacketType.internal("screen_shake_at_position", CompositeStreamCodec.of(
 		ScreenShake.STREAM_CODEC, ScreenShakeAtPositionPayload::shake,
-		Vec3.STREAM_CODEC, ScreenShakeAtPositionPayload::position,
+		MCStreamCodecs.VEC3, ScreenShakeAtPositionPayload::position,
 		ByteBufCodecs.DOUBLE, ScreenShakeAtPositionPayload::maxDistance,
 		ScreenShakeAtPositionPayload::new
 	));
