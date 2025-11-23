@@ -85,5 +85,8 @@
 	],
 	"net/minecraft/client/gui/GuiGraphics": [
 		"dev/latvian/mods/vidlib/core/VLGuiGraphics"
+	],
+	"net/minecraft/client/renderer/texture/TextureAtlasSprite": [
+		"dev/latvian/mods/vidlib/core/VLTextureAtlasSprite"
 	]
 }

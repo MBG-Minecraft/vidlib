@@ -12,16 +12,16 @@ import dev.latvian.mods.vidlib.feature.client.TerrainRenderTypes;
 import dev.latvian.mods.vidlib.feature.visual.DynamicSpriteTexture;
 import dev.latvian.mods.vidlib.feature.visual.ResolvedCubeTextures;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 
 public class FluidPlaneRenderer {
-	public static final Map<ResourceLocation, StaticBuffers> BUFFERS = new HashMap<>();
+	public static final Map<ResourceLocation, StaticBuffers> BUFFERS = new Object2ObjectOpenHashMap<>();
 
 	@AutoInit({AutoInit.Type.TEXTURES_RELOADED, AutoInit.Type.CHUNKS_RENDERED})
 	public static void refreshBuffers() {
@@ -40,6 +40,7 @@ public class FluidPlaneRenderer {
 	}
 
 	public static void render(FrameInfo frame, FluidPlane fluidPlane) {
+		var mc = frame.mc();
 		var tex = ResolvedCubeTextures.resolve(fluidPlane.fluid().textures().cubeTextures());
 
 		if (tex.anyIn(frame.layer())) {
@@ -99,7 +100,7 @@ public class FluidPlaneRenderer {
 					}
 				}
 
-				var renderTexture = DynamicSpriteTexture.get(tex1.faces().get(1).sprite());
+				var renderTexture = DynamicSpriteTexture.get(mc, tex1.faces().get(1).sprite());
 				var renderType = TerrainRenderTypes.get(frame.layer(), false).apply(renderTexture);
 
 				var modelViewMatrix = RenderSystem.getModelViewStack();

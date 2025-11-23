@@ -12,6 +12,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -22,7 +23,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -32,7 +32,7 @@ public interface Pins {
 	ImFloat PIN_OFFSET = new ImFloat(0F);
 	ImInt PIN_ALPHA = new ImInt(255);
 
-	Map<UUID, Pin> PINS = new HashMap<>();
+	Map<UUID, Pin> PINS = new Object2ObjectOpenHashMap<>();
 
 	static void draw(GuiGraphics graphics, DeltaTracker deltaTracker) {
 		if (!ENABLED.get() || PINS.isEmpty()) {

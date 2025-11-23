@@ -6,6 +6,8 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import io.netty.buffer.Unpooled;
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectSortedMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectLinkedOpenHashMap;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -16,15 +18,14 @@ import net.minecraft.world.entity.player.Player;
 
 import java.io.BufferedInputStream;
 import java.nio.file.Files;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class NPCRecording {
-	public static LinkedHashMap<String, Lazy<NPCRecording>> REPLAY = null;
+	public static Object2ObjectSortedMap<String, Lazy<NPCRecording>> REPLAY = null;
 
-	public static LinkedHashMap<String, Lazy<NPCRecording>> getReplay(RegistryAccess registryAccess) {
+	public static Object2ObjectSortedMap<String, Lazy<NPCRecording>> getReplay(RegistryAccess registryAccess) {
 		if (REPLAY == null) {
-			REPLAY = new LinkedHashMap<>();
+			REPLAY = new Object2ObjectLinkedOpenHashMap<>();
 
 			var rootPath = VidLibPaths.GAME.resolve("npc");
 

@@ -6,6 +6,7 @@ import dev.latvian.mods.klib.util.SimilarityCheck;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -19,14 +20,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 
 public record NPCDataType<T>(String name, StreamCodec<?, T> streamCodec, T defaultValue, SimilarityCheck<T> similarityCheck, NPCValueGetter<T> getter) implements StringRepresentable {
-	public static final Map<String, NPCDataType<?>> MAP = new HashMap<>();
+	public static final Map<String, NPCDataType<?>> MAP = new Object2ObjectOpenHashMap<>();
 
 	public static <T> NPCDataType<T> add(String name, StreamCodec<?, T> streamCodec, T defaultValue, SimilarityCheck<T> similarityCheck, NPCValueGetter<T> getter) {
 		var type = new NPCDataType<>(name, streamCodec, defaultValue, similarityCheck, getter);

@@ -10,6 +10,7 @@ import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -30,7 +31,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.nio.file.Files;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -57,16 +57,16 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	private DataMap vl$serverDataMap;
 
 	@Unique
-	private final Map<ResourceLocation, ClockValue> vl$clocks = new HashMap<>();
+	private final Map<ResourceLocation, ClockValue> vl$clocks = new Object2ObjectOpenHashMap<>();
 
 	@Unique
 	private Map<UUID, GameProfile> vl$reroutedPlayers;
 
 	@Unique
-	private final Map<String, GameProfile> vl$profileByNameCache = new HashMap<>();
+	private final Map<String, GameProfile> vl$profileByNameCache = new Object2ObjectOpenHashMap<>();
 
 	@Unique
-	private final Map<UUID, GameProfile> vl$profileByUUIDCache = new HashMap<>();
+	private final Map<UUID, GameProfile> vl$profileByUUIDCache = new Object2ObjectOpenHashMap<>();
 
 	@Unique
 	private final KNumberVariables vl$globalVariables = new KNumberVariables();
@@ -160,7 +160,7 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 			return List.of();
 		}
 
-		var map = new HashMap<>(vl$profileByUUIDCache);
+		var map = new Object2ObjectOpenHashMap<>(vl$profileByUUIDCache);
 
 		for (var p : vl$profileByNameCache.values()) {
 			map.putIfAbsent(p.getId(), p);

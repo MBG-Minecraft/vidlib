@@ -8,6 +8,7 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -28,7 +29,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -44,10 +44,10 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	private ReloadableResourceManager resourceManager;
 
 	@Unique
-	private final Map<String, GameProfile> vl$profileByNameCache = new HashMap<>();
+	private final Map<String, GameProfile> vl$profileByNameCache = new Object2ObjectOpenHashMap<>();
 
 	@Unique
-	private final Map<UUID, GameProfile> vl$profileByUUIDCache = new HashMap<>();
+	private final Map<UUID, GameProfile> vl$profileByUUIDCache = new Object2ObjectOpenHashMap<>();
 
 	@Unique
 	private TextureAtlas vl$blockTextureAtlas = null;
@@ -68,7 +68,7 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 			return List.of();
 		}
 
-		var map = new HashMap<>(vl$profileByUUIDCache);
+		var map = new Object2ObjectOpenHashMap<>(vl$profileByUUIDCache);
 
 		for (var p : vl$profileByNameCache.values()) {
 			map.putIfAbsent(p.getId(), p);

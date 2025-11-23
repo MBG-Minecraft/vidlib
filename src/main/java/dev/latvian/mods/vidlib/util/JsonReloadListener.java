@@ -2,12 +2,12 @@ package dev.latvian.mods.vidlib.util;
 
 import com.google.gson.JsonObject;
 import dev.latvian.mods.vidlib.VidLib;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public abstract class JsonReloadListener extends SimplePreparableReloadListener<Map<ResourceLocation, JsonObject>> {
@@ -21,7 +21,7 @@ public abstract class JsonReloadListener extends SimplePreparableReloadListener<
 
 	@Override
 	protected Map<ResourceLocation, JsonObject> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
-		var map = new HashMap<ResourceLocation, JsonObject>();
+		var map = new Object2ObjectOpenHashMap<ResourceLocation, JsonObject>();
 
 		for (var entry : resourceManager.listResources(rootPath, id -> !id.getPath().startsWith("_") && id.getPath().endsWith(".json")).entrySet()) {
 			try (var reader = entry.getValue().openAsReader()) {

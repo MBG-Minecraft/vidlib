@@ -14,6 +14,8 @@ import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.core.RegistryAccess;
@@ -24,8 +26,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,8 +63,8 @@ public record PropType<P extends Prop>(
 	});
 
 	public static <P extends Prop> PropType<P> create(ResourceLocation id, Factory<? extends P> factory, PropTypeInfo... info) {
-		var dataMap = new LinkedHashMap<String, PropData<?, ?>>();
-		var packetSet = new LinkedHashSet<PropPacketType<?, ?>>();
+		var dataMap = new Object2ObjectLinkedOpenHashMap<String, PropData<?, ?>>();
+		var packetSet = new ObjectLinkedOpenHashSet<PropPacketType<?, ?>>();
 
 		for (var data : info) {
 			if (data instanceof PropType<?> type) {

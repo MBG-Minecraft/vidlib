@@ -21,6 +21,7 @@ import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
 import dev.latvian.mods.vidlib.util.JsonUtils;
 import dev.latvian.mods.vidlib.util.PauseType;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -34,7 +35,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -224,7 +224,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	}
 
 	default Map<UUID, GameProfile> vl$getReroutedPlayers() {
-		var map = new HashMap<UUID, GameProfile>();
+		var map = new Object2ObjectOpenHashMap<UUID, GameProfile>();
 		var path = VidLibPaths.GAME.resolve("rerouted-players.json");
 
 		if (Files.exists(path)) {
