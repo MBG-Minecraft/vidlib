@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public record ZoneFluid(String id, FluidState fluidState, FluidTextures textures) {
+	public static final ZoneFluid DEBUG = new ZoneFluid("debug", Fluids.WATER.defaultFluidState(), FluidTextures.DEBUG);
 	public static final ZoneFluid WATER = new ZoneFluid("water", Fluids.WATER.defaultFluidState(), FluidTextures.WATER);
 	public static final ZoneFluid LAVA = new ZoneFluid("lava", Fluids.LAVA.defaultFluidState(), FluidTextures.LAVA);
 	public static final ZoneFluid OPAQUE_WATER = new ZoneFluid("opaque_water", Fluids.WATER.defaultFluidState(), FluidTextures.OPAQUE_WATER);
@@ -26,6 +27,7 @@ public record ZoneFluid(String id, FluidState fluidState, FluidTextures textures
 	}
 
 	static {
+		register(DEBUG);
 		register(WATER);
 		register(LAVA);
 		register(OPAQUE_WATER);
