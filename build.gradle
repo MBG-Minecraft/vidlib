@@ -131,6 +131,16 @@ repositories {
 		}
 	}
 
+	// Leave in the repositories below due to public repository of Vidlib
+
+	maven {
+		url = 'https://maven.latvian.dev/releases'
+		content {
+			includeGroup "dev.latvian.mods"
+			includeGroup "dev.latvian.apps"
+		}
+	}
+
 	maven {
 		url = 'https://api.modrinth.com/maven'
 		content {
