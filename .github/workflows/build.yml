@@ -1,8 +1,8 @@
 name: build
 env:
-  MAVEN_USERNAME: ${{ secrets.MBG_MAVEN_USERNAME }}
-  MAVEN_TOKEN: ${{ secrets.MBG_MAVEN_TOKEN }}
-  MAVEN_URL: ${{ secrets.MBG_MAVEN_URL }}
+  MBG_MAVEN_USERNAME: ${{ secrets.MBG_MAVEN_USERNAME }}
+  MBG_MAVEN_TOKEN: ${{ secrets.MBG_MAVEN_TOKEN }}
+  MBG_MAVEN_URL: ${{ secrets.MBG_MAVEN_URL }}
 on:
   push:
     branches:
