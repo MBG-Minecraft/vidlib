@@ -16,7 +16,7 @@ public final class Pin {
 		this.uuid = uuid;
 		this.enabled = true;
 		this.texture = null;
-		this.color = Color.WHITE;
+		this.color = Color.of(0x4DFF4D);
 	}
 
 	public Pin(JsonObject json) {

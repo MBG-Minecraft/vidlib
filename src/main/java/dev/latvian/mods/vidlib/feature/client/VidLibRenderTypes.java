@@ -3,11 +3,15 @@ package dev.latvian.mods.vidlib.feature.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.TriState;
+
+import java.util.function.Function;
 
 public interface VidLibRenderTypes {
 	TexturedRenderType GUI = TexturedRenderType.internal(
@@ -36,6 +40,23 @@ public interface VidLibRenderTypes {
 			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
 			.createCompositeState(false)
 	);
+
+	Function<ResourceLocation, TexturedRenderType> MASKED_GUI = Util.memoize(maskTexture -> TexturedRenderType.internal(
+		"masked_gui",
+		786432,
+		VidLibRenderPipelines.MASKED_GUI,
+		texture -> RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.EmptyTextureStateShard(() -> {
+				var manager = Minecraft.getInstance().getTextureManager();
+				var tex = manager.getTexture(texture);
+				var maskTex = manager.getTexture(maskTexture);
+				tex.setFilter(TriState.DEFAULT, false);
+				maskTex.setFilter(TriState.DEFAULT, false);
+				RenderSystem.setShaderTexture(0, tex.getTexture());
+				RenderSystem.setShaderTexture(1, maskTex.getTexture());
+			}, () -> RenderSystem.setShaderTexture(1, null)))
+			.createCompositeState(false)
+	));
 
 	TexturedRenderType SKYBOX = TexturedRenderType.internal(
 		"skybox",

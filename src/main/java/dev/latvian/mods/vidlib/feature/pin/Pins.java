@@ -5,6 +5,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
+import dev.latvian.mods.vidlib.feature.client.TexturedRenderType;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.gallery.Gallery;
 import dev.latvian.mods.vidlib.feature.gallery.GalleryImageImBuilder;
@@ -42,8 +43,10 @@ public interface Pins {
 
 	Gallery GALLERY = new Gallery("pins", () -> VidLibPaths.USER.get().resolve("pin-gallery"));
 
-	ImagePreProcessor PRE_PROCESSOR = ImagePreProcessor.CLOSEST_4.andThen(ImagePreProcessor.FIT_SQUARE).andThen(ImagePreProcessor.CIRCLE);
+	ImagePreProcessor PRE_PROCESSOR = ImagePreProcessor.FIT_SQUARE.andThen(ImagePreProcessor.CLOSEST_4);
 	GalleryImageImBuilder IMAGE_IM_BUILDER = new GalleryImageImBuilder(GALLERY, PRE_PROCESSOR);
+
+	TexturedRenderType CIRCLE_RENDER_TYPE = VidLibRenderTypes.MASKED_GUI.apply(VidLib.id("textures/misc/circle.png"));
 
 	@AutoInit(AutoInit.Type.TEXTURES_RELOADED)
 	static void reload(TextureManager manager, Executor backgroundExecutor, Executor gameExecutor) throws IOException {
@@ -113,8 +116,10 @@ public interface Pins {
 				int wi = Mth.ceil(w * 308F / 512F);
 				int hi = Mth.ceil(h * 308F / 512F);
 
-				graphics.blit(VidLibRenderTypes.GUI_BLUR, screenPin.image().textureId(), xi, yi, 0F, 0F, wi, hi, wi, hi, pinAlpha | 0xFFFFFF);
-				graphics.blit(VidLibRenderTypes.GUI_BLUR, PIN_TEXTURE, x, y, 0F, 0F, w, h, w, h, pinAlpha | screenPin.pin().color.rgb());
+				// RenderSystem.setShaderTexture(1, null);
+
+				graphics.blit(CIRCLE_RENDER_TYPE, screenPin.image().textureId(), xi, yi, 0F, 0F, wi, hi, wi, hi, pinAlpha | 0xFFFFFF);
+				graphics.blit(VidLibRenderTypes.GUI, PIN_TEXTURE, x, y, 0F, 0F, w, h, w, h, pinAlpha | screenPin.pin().color.rgb());
 				graphics.pose().popPose();
 			}
 		}

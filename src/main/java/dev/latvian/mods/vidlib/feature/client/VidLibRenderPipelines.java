@@ -29,6 +29,12 @@ public interface VidLibRenderPipelines {
 		.withFragmentShader(VidLib.id("core/gui_depth"))
 		.build();
 
+	RenderPipeline MASKED_GUI = RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
+		.withLocation(VidLib.id("pipeline/masked_gui"))
+		.withFragmentShader(VidLib.id("core/masked_gui"))
+		.withSampler("Sampler1")
+		.build();
+
 	RenderPipeline SKYBOX = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)
 		.withLocation(VidLib.id("pipeline/skybox"))
 		.withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
