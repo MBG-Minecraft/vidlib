@@ -80,4 +80,25 @@ public interface StringUtils {
 
 		return component;
 	}
+
+	static String normalizeFileName(String name) {
+		name = name.trim();
+		int index = name.lastIndexOf('.');
+
+		if (index != -1) {
+			name = name.substring(0, index);
+		}
+
+		name = name.replaceAll("[^-\\w]", "_").replaceAll("_{2,}", "_");
+
+		if (name.startsWith("_")) {
+			name = name.substring(1);
+		}
+
+		if (name.endsWith("_")) {
+			name = name.substring(0, name.length() - 1);
+		}
+
+		return name.isBlank() ? "" : name;
+	}
 }

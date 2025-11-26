@@ -2,9 +2,7 @@ package dev.latvian.mods.vidlib.feature.misc;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.serialization.JsonOps;
-import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibClientEventHandler;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
@@ -34,13 +32,11 @@ import dev.latvian.mods.vidlib.feature.prop.RemovePropsPayload;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
-import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.chars.CharConsumer;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongObjectPair;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.configuration.ClientConfigurationPacketListener;
@@ -52,15 +48,11 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.ModList;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 public class VLFlashbackIntegration {
 	public static final boolean ENABLED = ModList.get().isLoaded("flashback");
@@ -258,7 +250,6 @@ public class VLFlashbackIntegration {
 	}
 
 	private static void editorStateLoaded(JsonObject customData) {
-		var mc = Minecraft.getInstance();
 		Pins.PINS.clear();
 
 		if (customData.has("vidlib:pins")) {
@@ -267,25 +258,8 @@ public class VLFlashbackIntegration {
 			for (var e : pins) {
 				if (e instanceof JsonObject pinJson) {
 					try {
-						var uuid = UUID.fromString(pinJson.get("uuid").getAsString());
-						var name = pinJson.get("name").getAsString();
-						var enabled = pinJson.get("enabled").getAsBoolean();
-						var pathString = pinJson.get("path").getAsString();
-
-						var path = Path.of(pathString);
-
-						if (Files.exists(path)) {
-							mc.execute(() -> {
-								try (var stream = Files.newInputStream(path)) {
-									var resourceLocation = VidLib.id("textures/vidlib/cache/pins/" + UndashedUuid.toString(uuid) + ".png");
-									var image = NativeImage.read(stream);
-									var texture = new DynamicTexture(uuid::toString, image);
-									mc.getTextureManager().register(resourceLocation, texture);
-									Pins.PINS.put(uuid, new Pin(uuid, name, new ImBoolean(enabled), resourceLocation, pathString));
-								} catch (IOException ignore) {
-								}
-							});
-						}
+						var pin = new Pin(pinJson);
+						Pins.PINS.put(pin.uuid, pin);
 					} catch (Throwable t) {
 						VidLib.LOGGER.error("Failed to load player pin from editor state", t);
 					}
@@ -299,12 +273,7 @@ public class VLFlashbackIntegration {
 			var pins = new JsonArray();
 
 			for (var pin : Pins.PINS.values()) {
-				var pinJson = new JsonObject();
-				pinJson.addProperty("uuid", pin.uuid().toString());
-				pinJson.addProperty("name", pin.name());
-				pinJson.addProperty("enabled", pin.enabled().get());
-				pinJson.addProperty("path", pin.path());
-				pins.add(pinJson);
+				pins.add(pin.toJson());
 			}
 
 			customData.add("vidlib:pins", pins);

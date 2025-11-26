@@ -29,7 +29,7 @@ public @interface AutoInit {
 		CLIENT_OPTIONS_SAVED(true, false), // (Options)
 		SERVER_STRUCTURES_LOADED(false, false), // (StructureStorage)
 		CLIENT_STRUCTURES_LOADED(true, false), // (StructureStorage)
-		TEXTURES_RELOADED(true, false), // (TextureManager)
+		TEXTURES_RELOADED(true, false), // (TextureManager, Executor backgroundExecutor, Executor gameExecutor)
 
 		;
 

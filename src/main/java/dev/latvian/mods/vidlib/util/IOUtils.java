@@ -7,9 +7,15 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.Set;
 
 public interface IOUtils {
+	Set<StandardOpenOption> WRITE_OPEN_OPTIONS = EnumSet.of(StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+	Set<StandardOpenOption> APPEND_OPEN_OPTIONS = EnumSet.of(StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+
 	static void deleteRecursively(Path dir) throws IOException {
 		try (var stream = Files.walk(dir)) {
 			stream.sorted(Comparator.reverseOrder())

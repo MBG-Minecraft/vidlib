@@ -27,7 +27,7 @@ public class NPCRecording {
 		if (REPLAY == null) {
 			REPLAY = new Object2ObjectLinkedOpenHashMap<>();
 
-			var rootPath = VidLibPaths.GAME.resolve("npc");
+			var rootPath = VidLibPaths.GAME.get().resolve("npc");
 
 			if (Files.exists(rootPath)) {
 				try (var stream = Files.walk(rootPath)) {

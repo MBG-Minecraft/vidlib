@@ -457,7 +457,7 @@ public class LocalClientSessionData extends ClientSessionData {
 			npcRecording.length = System.currentTimeMillis() - npcRecording.start;
 
 			var buf = PlatformHelper.CURRENT.createBuffer(Unpooled.buffer(), mc.level.registryAccess());
-			var path = VidLibPaths.GAME.resolve("npc/" + npcRecording.start + "_" + npcRecording.profile.getName().toLowerCase(Locale.ROOT) + ".npcrec");
+			var path = VidLibPaths.GAME.get().resolve("npc/" + npcRecording.start + "_" + npcRecording.profile.getName().toLowerCase(Locale.ROOT) + ".npcrec");
 
 			if (Files.notExists(path.getParent())) {
 				try {
