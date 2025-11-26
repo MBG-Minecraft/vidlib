@@ -39,7 +39,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage> {
 	public ImUpdate imgui(ImGraphics graphics) {
 		var update = ImUpdate.NONE;
 		var img = build();
-		var tex = img == null ? null : graphics.mc.getTextureManager().byPath.get(img.textureId());
+		var tex = img == null ? null : img.load(graphics.mc);
 
 		if (tex == null) {
 			if (ImGui.button("Select Image...###gallery-popup-button")) {
@@ -65,10 +65,15 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage> {
 			}
 
 			var list = new ArrayList<>(gallery.images.values());
-			list.sort((o1, o2) -> o1.displayName().compareToIgnoreCase(o2.displayName()));
+
+			if (list.size() >= 2) {
+				list.sort((o1, o2) -> o1.displayName().compareToIgnoreCase(o2.displayName()));
+			}
 
 			for (var image : list) {
-				if (graphics.imageButton(image.textureId(), s, s, 0F, 0F, 1F, 1F, 2)) {
+				var imageTex = image.load(graphics.mc);
+
+				if (graphics.imageButton(imageTex.getTexture(), s, s, 0F, 0F, 1F, 1F, 2)) {
 					set(image);
 					update = ImUpdate.FULL;
 				}
@@ -104,7 +109,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage> {
 			if (path != null && Files.exists(path) && Files.isRegularFile(path)) {
 				graphics.mc.execute(() -> {
 					try {
-						set(gallery.upload(graphics.mc, path, preProcessor));
+						set(gallery.upload(graphics.mc, UUID.randomUUID(), path, preProcessor));
 						fullUpdate = true;
 					} catch (Exception ex) {
 						throw new RuntimeException(ex);

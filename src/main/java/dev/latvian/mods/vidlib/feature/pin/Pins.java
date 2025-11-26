@@ -23,6 +23,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.TriState;
 import net.minecraft.world.entity.Entity;
 
 import java.io.IOException;
@@ -41,7 +42,7 @@ public interface Pins {
 
 	ResourceLocation PIN_TEXTURE = VidLib.id("textures/misc/pin/1.png");
 
-	Gallery GALLERY = new Gallery("pins", () -> VidLibPaths.USER.get().resolve("pin-gallery"));
+	Gallery GALLERY = new Gallery("pins", () -> VidLibPaths.USER.get().resolve("pin-gallery"), TriState.TRUE);
 
 	ImagePreProcessor PRE_PROCESSOR = ImagePreProcessor.FIT_SQUARE.andThen(ImagePreProcessor.CLOSEST_4);
 	GalleryImageImBuilder IMAGE_IM_BUILDER = new GalleryImageImBuilder(GALLERY, PRE_PROCESSOR);
@@ -50,7 +51,7 @@ public interface Pins {
 
 	@AutoInit(AutoInit.Type.TEXTURES_RELOADED)
 	static void reload(TextureManager manager, Executor backgroundExecutor, Executor gameExecutor) throws IOException {
-		GALLERY.load(manager, backgroundExecutor, gameExecutor);
+		GALLERY.load(manager);
 	}
 
 	static void draw(GuiGraphics graphics, DeltaTracker deltaTracker) {
@@ -118,6 +119,7 @@ public interface Pins {
 
 				// RenderSystem.setShaderTexture(1, null);
 
+				screenPin.image().load(mc);
 				graphics.blit(CIRCLE_RENDER_TYPE, screenPin.image().textureId(), xi, yi, 0F, 0F, wi, hi, wi, hi, pinAlpha | 0xFFFFFF);
 				graphics.blit(VidLibRenderTypes.GUI, PIN_TEXTURE, x, y, 0F, 0F, w, h, w, h, pinAlpha | screenPin.pin().color.rgb());
 				graphics.pose().popPose();

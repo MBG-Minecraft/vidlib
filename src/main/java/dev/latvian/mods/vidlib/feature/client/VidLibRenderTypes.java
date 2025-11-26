@@ -50,8 +50,6 @@ public interface VidLibRenderTypes {
 				var manager = Minecraft.getInstance().getTextureManager();
 				var tex = manager.getTexture(texture);
 				var maskTex = manager.getTexture(maskTexture);
-				tex.setFilter(TriState.DEFAULT, false);
-				maskTex.setFilter(TriState.DEFAULT, false);
 				RenderSystem.setShaderTexture(0, tex.getTexture());
 				RenderSystem.setShaderTexture(1, maskTex.getTexture());
 			}, () -> RenderSystem.setShaderTexture(1, null)))
