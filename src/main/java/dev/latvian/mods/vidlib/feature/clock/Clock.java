@@ -6,6 +6,7 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.util.List;
 import java.util.Map;
@@ -32,8 +33,8 @@ public record Clock(
 		}
 
 		@Override
-		protected void apply(Map<ResourceLocation, Clock> map) {
-			super.apply(map);
+		protected void apply(ResourceManager resourceManager, Map<ResourceLocation, Clock> map) {
+			super.apply(resourceManager, map);
 			ClockCommands.CLOCK_IDS.clear();
 			ClockCommands.CLOCK_IDS.addAll(map.keySet());
 		}

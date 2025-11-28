@@ -11,6 +11,7 @@ import dev.latvian.mods.vidlib.feature.capture.task.DisconnectTask;
 import dev.latvian.mods.vidlib.feature.capture.task.SessionInfoTask;
 import dev.latvian.mods.vidlib.feature.capture.task.WriteTasks;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.util.IOUtils;
 import dev.latvian.mods.vidlib.util.Timestamp;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -28,8 +29,8 @@ import net.minecraft.network.protocol.game.GameProtocols;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -205,7 +206,7 @@ public class PlayerPacketCaptureSession {
 			return;
 		}
 
-		try (var out = new DataOutputStream(new BufferedOutputStream(Files.newOutputStream(writePath, StandardOpenOption.APPEND)))) {
+		try (var out = new DataOutputStream(new BufferedOutputStream(Files.newOutputStream(writePath, IOUtils.APPEND_OPEN_OPTIONS.toArray(new OpenOption[0]))))) {
 			for (var task : tasks) {
 				task.writeFully(packetCapture, out);
 			}

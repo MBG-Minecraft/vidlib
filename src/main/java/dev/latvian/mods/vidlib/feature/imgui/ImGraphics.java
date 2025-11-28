@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.textures.GpuTexture;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.Range;
@@ -592,5 +593,13 @@ public class ImGraphics {
 
 	public boolean toggleButton(ImIcons icon, String id, String tooltip, ImBoolean value) {
 		return iconButton(icon, (value.get() ? ImIcons.CHECK : ImIcons.CLOSE) + id, tooltip + (value.get() ? ": Enabled" : ": Disabled"), value.get() ? null : ImColorVariant.GRAY, value);
+	}
+
+	public boolean imageButton(@Nullable GpuTexture texture, float w, float h, float u0, float v0, float u1, float v1, int padding) {
+		return ImGui.imageButton(texture == null ? 0 : texture.vl$getHandle(), w, h, u0, v0, u1, v1, padding);
+	}
+
+	public boolean imageButton(ResourceLocation texture, float w, float h, float u0, float v0, float u1, float v1, int padding) {
+		return imageButton(mc.getTextureManager().getTexture(texture).getTexture(), w, h, u0, v0, u1, v1, padding);
 	}
 }

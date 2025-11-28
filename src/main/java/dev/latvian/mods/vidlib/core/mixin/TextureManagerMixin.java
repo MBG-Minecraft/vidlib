@@ -30,7 +30,7 @@ public abstract class TextureManagerMixin {
 	public Map<ResourceLocation, AbstractTexture> byPath;
 
 	@Inject(method = "reload", at = @At("HEAD"))
-	public void vl$reload(PreparableReloadListener.PreparationBarrier barrier, ResourceManager manager, Executor executor1, Executor executor2, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
+	public void vl$reload(PreparableReloadListener.PreparationBarrier barrier, ResourceManager manager, Executor backgroundExecutor, Executor gameExecutor, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
 		Minecraft.getInstance().vl$clearProfileCache();
 		var list = new ArrayList<Map.Entry<ResourceLocation, AbstractTexture>>();
 
@@ -44,6 +44,6 @@ public abstract class TextureManagerMixin {
 			safeClose(entry.getKey(), entry.getValue());
 		}
 
-		AutoInit.Type.TEXTURES_RELOADED.invoke(this);
+		AutoInit.Type.TEXTURES_RELOADED.invoke(this, backgroundExecutor, gameExecutor);
 	}
 }

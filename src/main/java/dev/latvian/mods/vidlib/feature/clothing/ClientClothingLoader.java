@@ -28,6 +28,6 @@ public class ClientClothingLoader extends JsonReloadListener {
 		}
 
 		ClothingCommand.CLOTHING_IDS.sort(ResourceLocation::compareNamespaced);
-		ClothingCommand.CLOTHING_IDS.addFirst(Clothing.NONE.id().location());
+		ClothingCommand.CLOTHING_IDS.addFirst(Clothing.NONE.id());
 	}
 }

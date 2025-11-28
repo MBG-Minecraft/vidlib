@@ -79,7 +79,10 @@ public class ImGuiHooks {
 		var old = context.push();
 		ImNodes.createContext();
 		var io = ImGui.getIO();
-		io.setIniFilename(VidLibPaths.USER.resolve("imgui.ini").toAbsolutePath().toString());
+
+		var iniPath = VidLibPaths.mkdirs(VidLibPaths.USER.get().resolve("imgui.ini")).toAbsolutePath();
+
+		io.setIniFilename(iniPath.toString());
 		io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
 		io.addConfigFlags(ImGuiConfigFlags.DockingEnable);
 		io.addConfigFlags(ImGuiConfigFlags.DpiEnableScaleFonts);
@@ -108,7 +111,8 @@ public class ImGuiHooks {
 		config.setGlyphOffset(0, 0);
 
 		try {
-			fonts.addFontFromMemoryTTF(TTFFile.JETBRAINS_MONO_REGULAR.get().load(resourceManager), 20F, config);
+			var bytes = TTFFile.JETBRAINS_MONO_REGULAR.get().load(resourceManager);
+			fonts.addFontFromMemoryTTF(bytes, 20F, config);
 		} catch (Exception e) {
 			fonts.addFontDefault();
 		}

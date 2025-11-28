@@ -6,6 +6,7 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
 import dev.latvian.mods.klib.texture.LightUV;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.BlockEntityRendererHolder;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
@@ -26,6 +27,7 @@ import dev.latvian.mods.vidlib.feature.clothing.ClientClothingLoader;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingLayer;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingModel;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
+import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
 import dev.latvian.mods.vidlib.feature.environment.FluidPlaneRenderer;
 import dev.latvian.mods.vidlib.feature.gradient.ClientGradientLoader;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
@@ -138,6 +140,11 @@ public class VidLibClientEventHandler {
 		if (VLFlashbackIntegration.ENABLED) {
 			VLFlashbackIntegration.init();
 		}
+	}
+
+	@SubscribeEvent
+	public static void dynamicResources(DynamicResourceEvent.Assets event) {
+		event.register(ID.video("dynamic_resources/tracksuits"));
 	}
 
 	@SubscribeEvent

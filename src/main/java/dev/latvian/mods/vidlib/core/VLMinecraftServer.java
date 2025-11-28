@@ -225,7 +225,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 
 	default Map<UUID, GameProfile> vl$getReroutedPlayers() {
 		var map = new Object2ObjectOpenHashMap<UUID, GameProfile>();
-		var path = VidLibPaths.GAME.resolve("rerouted-players.json");
+		var path = VidLibPaths.GAME.get().resolve("rerouted-players.json");
 
 		if (Files.exists(path)) {
 			try (var reader = Files.newBufferedReader(path)) {

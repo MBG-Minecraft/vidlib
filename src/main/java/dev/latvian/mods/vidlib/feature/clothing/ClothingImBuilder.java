@@ -7,9 +7,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.BooleanImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.equipment.EquipmentAssets;
 
 public class ClothingImBuilder implements ImBuilder<Clothing> {
 	public static final ImBuilderType<Clothing> TYPE = ClothingImBuilder::new;
@@ -22,7 +20,7 @@ public class ClothingImBuilder implements ImBuilder<Clothing> {
 	public final BooleanImBuilder enchanted = new BooleanImBuilder();
 
 	public ClothingImBuilder() {
-		this.clothing.set(Tracksuits.BLUE.id().location());
+		this.clothing.set(Tracksuits.BLUE.id());
 		this.head.set(true);
 		this.body.set(true);
 		this.legs.set(true);
@@ -33,7 +31,7 @@ public class ClothingImBuilder implements ImBuilder<Clothing> {
 	@Override
 	public void set(Clothing value) {
 		if (value != null) {
-			clothing.set(value.id().location());
+			clothing.set(value.id());
 			head.set(value.parts().head());
 			body.set(value.parts().body());
 			legs.set(value.parts().legs());
@@ -63,7 +61,7 @@ public class ClothingImBuilder implements ImBuilder<Clothing> {
 	@Override
 	public Clothing build() {
 		return new Clothing(
-			ResourceKey.create(EquipmentAssets.ROOT_ID, clothing.build()),
+			clothing.build(),
 			new ClothingParts(
 				head.build(),
 				body.build(),

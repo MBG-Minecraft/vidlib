@@ -4,15 +4,16 @@ import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.gallery.PlayerHeads;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.feature.visual.PlayerHeadTexture;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImString;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,7 +59,7 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 	public ImUpdate imgui(ImGraphics graphics) {
 		var update = ImUpdate.NONE;
 
-		appendMainIcon();
+		appendMainIcon(graphics.mc);
 		ImGui.sameLine();
 
 		boolean select = ImGui.button(profile == null ? "Select..." : profile.getName());
@@ -97,7 +98,7 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 					list.sort(MiscUtils.PROFILE_COMPARATOR);
 				}
 
-				appendIcon(Util.NIL_UUID);
+				appendIcon(graphics.mc, Util.NIL_UUID, "");
 				ImGui.sameLine();
 
 				if (ImGui.selectable(ImIcons.CLOSE + " None", profile == null)) {
@@ -107,7 +108,7 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 				}
 
 				for (var p : list) {
-					appendIcon(p.getId());
+					appendIcon(graphics.mc, p.getId(), p.getName());
 					ImGui.sameLine();
 
 					if (ImGui.selectable(p.getName(), profile != null && p.getId().equals(profile.getId()))) {
@@ -151,8 +152,8 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 		return update;
 	}
 
-	private void appendMainIcon() {
-		var tex = PlayerHeadTexture.get(profile == null ? null : profile.getId());
+	private void appendMainIcon(Minecraft mc) {
+		var tex = PlayerHeads.getTexture(mc, profile == null ? null : profile.getId(), profile == null ? "" : profile.getName());
 		int texId = tex.getTexture().vl$getHandle();
 		ImGui.image(texId, ImGui.getFrameHeight(), ImGui.getFrameHeight());
 
@@ -163,8 +164,8 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 		}
 	}
 
-	private void appendIcon(UUID uuid) {
-		var tex = PlayerHeadTexture.get(uuid);
+	private void appendIcon(Minecraft mc, UUID uuid, String name) {
+		var tex = PlayerHeads.getTexture(mc, uuid, name);
 		ImGui.image(tex.getTexture().vl$getHandle(), ImGui.getFontSize(), ImGui.getFontSize());
 	}
 

@@ -59,7 +59,8 @@
 		"UUIDUtilMixin",
 		"WaterFluidMixin",
 		"neo.EnumArgumentMixin",
-		"neo.IEntityExtensionMixin"
+		"neo.IEntityExtensionMixin",
+		"neo.ReloadableResourceManagerMixin"
 	],
 	"client": [
 		"AbstractClientPlayerMixin",

@@ -4,6 +4,8 @@ import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.Vec2f;
 import net.minecraft.util.Mth;
 
+import java.util.ArrayList;
+
 public enum SpreadType {
 	CIRCLE,
 	FILLED_CIRCLE,
@@ -14,37 +16,77 @@ public enum SpreadType {
 	public static final SpreadType[] VALUES = values();
 	public static final DataType<SpreadType> DATA_TYPE = DataType.of(VALUES);
 
-	public Vec2f offset(int index, int count, float radius) {
-		float delta = index / (float) count;
+	public Vec2f[] spread(int count) {
+		return switch (this) {
+			case CIRCLE -> {
+				var values = new Vec2f[count];
 
-		if (this == CIRCLE) {
-			float angle = delta * Mth.TWO_PI;
-			return new Vec2f(Mth.sin(angle) * radius, Mth.cos(angle) * radius);
-		} else if (this == FILLED_CIRCLE) {
-			float angle = delta * Mth.TWO_PI;
-			float currentRadius = radius * Mth.sqrt(delta);
-			return new Vec2f(currentRadius * Mth.cos(angle), currentRadius * Mth.sin(angle));
-		} else if (this == SQUARE) {
-			if (delta < 0.25F) {
-				return new Vec2f(Mth.lerp(delta * 4F, -radius, radius), -radius);
-			} else if (delta < 0.5F) {
-				return new Vec2f(radius, Mth.lerp((delta - 0.25F) * 4F, -radius, radius));
-			} else if (delta < 0.75F) {
-				return new Vec2f(Mth.lerp((delta - 0.5F) * 4F, radius, -radius), radius);
-			} else {
-				return new Vec2f(-radius, Mth.lerp((delta - 0.75F) * 4F, radius, -radius));
+				for (int i = 0; i < count; i++) {
+					float angle = i / (float) count * Mth.TWO_PI;
+					values[i] = new Vec2f(Mth.cos(angle), Mth.sin(angle));
+				}
+
+				yield values;
 			}
-		} else if (this == FILLED_SQUARE) {
-			int max = Mth.ceil(Mth.sqrt(count));
-			int x = index % max;
-			int y = index / max;
+			case FILLED_CIRCLE -> {
+				var values = new ArrayList<Vec2f>(count);
+				double cr = Math.sqrt(count / Math.PI);
+				int r = Mth.ceil(cr);
 
-			return new Vec2f(
-				Mth.lerp((x + 0.5F) / (float) max, -radius, radius),
-				Mth.lerp((y + 0.5F) / (float) max, -radius, radius)
-			);
-		} else {
-			return new Vec2f(Mth.lerp((index + 0.5F) / (float) count, -radius, radius), 0F);
-		}
+				for (int y = -r; y <= r; y++) {
+					for (int x = -r; x <= r; x++) {
+						if (x * x + y * y <= cr * cr) {
+							values.add(new Vec2f(x / (float) r, y / (float) r));
+						}
+					}
+				}
+
+				yield values.toArray(new Vec2f[0]);
+			}
+			case SQUARE -> {
+				var values = new Vec2f[count];
+
+				for (int i = 0; i < count; i++) {
+					float delta = (i + 0.5F) / (float) count;
+
+					if (delta < 0.25F) {
+						values[i] = new Vec2f(Mth.lerp(delta * 4F, -1F, 1F), -1F);
+					} else if (delta < 0.5F) {
+						values[i] = new Vec2f(1F, Mth.lerp((delta - 0.25F) * 4F, -1F, 1F));
+					} else if (delta < 0.75F) {
+						values[i] = new Vec2f(Mth.lerp((delta - 0.5F) * 4F, 1F, -1F), 1F);
+					} else {
+						values[i] = new Vec2f(-1F, Mth.lerp((delta - 0.75F) * 4F, 1F, -1F));
+					}
+				}
+
+				yield values;
+			}
+			case FILLED_SQUARE -> {
+				int max = Mth.ceil(Mth.sqrt(count));
+				var values = new Vec2f[count];
+
+				for (int i = 0; i < count; i++) {
+					int x = i % max;
+					int y = i / max;
+
+					values[i] = new Vec2f(
+						Mth.lerp((x + 0.5F) / (float) max, -1F, 1F),
+						Mth.lerp((y + 0.5F) / (float) max, -1F, 1F)
+					);
+				}
+
+				yield values;
+			}
+			case LINE -> {
+				var values = new Vec2f[count];
+
+				for (int i = 0; i < count; i++) {
+					values[i] = new Vec2f(Mth.lerp((i + 0.5F) / (float) count, -1F, 1F), 0F);
+				}
+
+				yield values;
+			}
+		};
 	}
 }

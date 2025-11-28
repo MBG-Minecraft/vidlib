@@ -7,20 +7,27 @@ import dev.latvian.mods.vidlib.feature.auto.AutoCallback;
 import dev.latvian.mods.vidlib.feature.auto.ScannedAnnotation;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.capture.PacketCaptureEvent;
+import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
+import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.connection.ConnectionType;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class NeoPlatformHelper extends PlatformHelper {
@@ -109,12 +116,21 @@ public class NeoPlatformHelper extends PlatformHelper {
 	}
 
 	@Override
-	public Path findFile(String modid, String... path) {
-		return ModList.get().getModFileById(modid).getFile().findResource(path);
+	@Nullable
+	public Path findFile(String... path) {
+		for (var file : ModList.get().getModFiles()) {
+			var res = file.getFile().findResource(path);
+
+			if (Files.exists(res)) {
+				return res;
+			}
+		}
+
+		return null;
 	}
 
 	@Override
-	public Path findVidLibFile(String... path) {
-		return mod.getModInfo().getOwningFile().getFile().findResource(path);
+	public void collectDynamicResources(PackType type, Consumer<ResourceLocation> callback) {
+		ModLoader.postEvent(type == PackType.CLIENT_RESOURCES ? new DynamicResourceEvent.Assets(callback) : new DynamicResourceEvent.Data(callback));
 	}
 }

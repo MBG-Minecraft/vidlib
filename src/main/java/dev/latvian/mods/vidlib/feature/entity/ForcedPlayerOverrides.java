@@ -17,7 +17,7 @@ public class ForcedPlayerOverrides {
 
 	@AutoInit({AutoInit.Type.ASSETS_LOADED, AutoInit.Type.DATA_LOADED, AutoInit.Type.GAME_LOADED})
 	public static void reload() {
-		var file = VidLibPaths.GAME.resolve("forced_player_overrides.json");
+		var file = VidLibPaths.GAME.get().resolve("forced_player_overrides.json");
 
 		if (Files.exists(file)) {
 			try (var reader = Files.newBufferedReader(file)) {

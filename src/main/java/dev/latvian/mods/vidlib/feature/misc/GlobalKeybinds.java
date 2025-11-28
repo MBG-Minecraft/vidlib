@@ -11,7 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class GlobalKeybinds {
-	private static final Path PATH = VidLibPaths.USER.resolve("global-keybinds.json");
+	private static final Path PATH = VidLibPaths.USER.get().resolve("global-keybinds.json");
 	private static JsonObject json;
 
 	public static JsonObject getJson() {
@@ -43,7 +43,7 @@ public class GlobalKeybinds {
 			json.addProperty(key.getName(), key.saveString() + (key.getKeyModifier() != KeyModifier.NONE ? ":" + key.getKeyModifier() : ""));
 		}
 
-		try (var writer = Files.newBufferedWriter(PATH)) {
+		try (var writer = Files.newBufferedWriter(VidLibPaths.mkdirs(PATH))) {
 			JsonUtils.write(writer, json, true);
 		} catch (Exception ex) {
 			ex.printStackTrace();
