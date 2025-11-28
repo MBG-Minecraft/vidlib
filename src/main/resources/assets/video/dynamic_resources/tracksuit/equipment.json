@@ -1,0 +1,14 @@
+{
+	"layers": {
+		"humanoid": [
+			{
+				"texture": "{namespace}:tracksuit/{path}"
+			}
+		],
+		"humanoid_leggings": [
+			{
+				"texture": "{namespace}:tracksuit/{path}"
+			}
+		]
+	}
+}

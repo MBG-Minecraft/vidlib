@@ -47,7 +47,8 @@ public interface Pins {
 	ImagePreProcessor PRE_PROCESSOR = ImagePreProcessor.FIT_SQUARE.andThen(ImagePreProcessor.CLOSEST_4);
 	GalleryImageImBuilder IMAGE_IM_BUILDER = new GalleryImageImBuilder(GALLERY, PRE_PROCESSOR);
 
-	TexturedRenderType CIRCLE_RENDER_TYPE = VidLibRenderTypes.MASKED_GUI.apply(VidLib.id("textures/misc/circle.png"));
+	ResourceLocation CIRCLE_TEXTURE = VidLib.id("textures/misc/circle.png");
+	TexturedRenderType CIRCLE_RENDER_TYPE = VidLibRenderTypes.MASKED_GUI.apply(CIRCLE_TEXTURE);
 
 	@AutoInit(AutoInit.Type.TEXTURES_RELOADED)
 	static void reload(TextureManager manager, Executor backgroundExecutor, Executor gameExecutor) throws IOException {
@@ -120,6 +121,7 @@ public interface Pins {
 				// RenderSystem.setShaderTexture(1, null);
 
 				screenPin.image().load(mc);
+				graphics.blit(VidLibRenderTypes.GUI, CIRCLE_TEXTURE, x, y, 0F, 0F, w, h, w, h, pinAlpha | screenPin.pin().color.rgb());
 				graphics.blit(CIRCLE_RENDER_TYPE, screenPin.image().textureId(), xi, yi, 0F, 0F, wi, hi, wi, hi, pinAlpha | 0xFFFFFF);
 				graphics.blit(VidLibRenderTypes.GUI, PIN_TEXTURE, x, y, 0F, 0F, w, h, w, h, pinAlpha | screenPin.pin().color.rgb());
 				graphics.pose().popPose();

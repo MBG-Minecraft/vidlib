@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 import java.util.HashMap;
@@ -15,6 +16,27 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class JsonCodecReloadListener<T> extends JsonReloadListener {
+	public static class Dummy<T> extends JsonCodecReloadListener<T> {
+		public final Map<ResourceLocation, T> map;
+
+		public Dummy(String rootPath, Codec<T> codec, boolean includeId) {
+			super(rootPath, codec, includeId);
+			this.map = new Object2ObjectOpenHashMap<>();
+		}
+
+		public void load(ResourceManager manager) {
+			var profiler = Profiler.get();
+			var prepare = prepare(manager, profiler);
+			apply(prepare, manager, profiler);
+		}
+
+		@Override
+		protected void apply(ResourceManager resourceManager, Map<ResourceLocation, T> map) {
+			this.map.clear();
+			this.map.putAll(map);
+		}
+	}
+
 	public final Codec<T> codec;
 	public final boolean includeId;
 
@@ -73,8 +95,8 @@ public abstract class JsonCodecReloadListener<T> extends JsonReloadListener {
 			}
 		}
 
-		apply(finalMap);
+		apply(resourceManager, finalMap);
 	}
 
-	protected abstract void apply(Map<ResourceLocation, T> map);
+	protected abstract void apply(ResourceManager resourceManager, Map<ResourceLocation, T> map);
 }

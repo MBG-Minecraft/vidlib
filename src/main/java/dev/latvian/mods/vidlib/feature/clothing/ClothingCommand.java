@@ -9,10 +9,8 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.equipment.EquipmentAssets;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,9 +27,9 @@ public interface ClothingCommand {
 			.then(Commands.argument("player", EntityArgument.players())
 				.then(Commands.argument("clothing", ResourceLocationArgument.id())
 					.suggests(SUGGESTION_PROVIDER)
-					.executes(ctx -> clothing(EntityArgument.getPlayers(ctx, "player"), new Clothing(ResourceKey.create(EquipmentAssets.ROOT_ID, ResourceLocationArgument.getId(ctx, "clothing")), ClothingParts.ALL)))
+					.executes(ctx -> clothing(EntityArgument.getPlayers(ctx, "player"), new Clothing(ResourceLocationArgument.getId(ctx, "clothing"), ClothingParts.ALL)))
 					.then(Commands.argument("parts", ClothingParts.COMMAND.argument(buildContext))
-						.executes(ctx -> clothing(EntityArgument.getPlayers(ctx, "player"), new Clothing(ResourceKey.create(EquipmentAssets.ROOT_ID, ResourceLocationArgument.getId(ctx, "clothing")), ClothingParts.COMMAND.get(ctx, "parts"))))
+						.executes(ctx -> clothing(EntityArgument.getPlayers(ctx, "player"), new Clothing(ResourceLocationArgument.getId(ctx, "clothing"), ClothingParts.COMMAND.get(ctx, "parts"))))
 					)
 				)
 			)

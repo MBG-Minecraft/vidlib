@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.PlayerModel;
@@ -17,8 +18,12 @@ import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.EquipmentAssetManager;
 import net.minecraft.client.resources.model.EquipmentClientInfo;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.equipment.EquipmentAsset;
+import net.minecraft.world.item.equipment.EquipmentAssets;
 
+import java.util.Map;
 import java.util.function.Function;
 
 public class ClothingLayer extends RenderLayer<PlayerRenderState, PlayerModel> {
@@ -28,6 +33,12 @@ public class ClothingLayer extends RenderLayer<PlayerRenderState, PlayerModel> {
 	private static final EquipmentClientInfo.LayerType[] LAYER_TYPES = {EquipmentClientInfo.LayerType.HUMANOID_LEGGINGS, EquipmentClientInfo.LayerType.HUMANOID};
 
 	record LayerTextureKey(EquipmentClientInfo.LayerType layerType, EquipmentClientInfo.Layer layer) {
+	}
+
+	private static final Map<ResourceLocation, ResourceKey<EquipmentAsset>> KEYS = new Object2ObjectOpenHashMap<>();
+
+	public static ResourceKey<EquipmentAsset> getKey(ResourceLocation id) {
+		return KEYS.computeIfAbsent(id, i -> ResourceKey.create(EquipmentAssets.ROOT_ID, i));
 	}
 
 	private final EquipmentAssetManager equipmentAssets;
@@ -50,7 +61,7 @@ public class ClothingLayer extends RenderLayer<PlayerRenderState, PlayerModel> {
 		}
 
 		var parentModel = getParentModel();
-		var assets = equipmentAssets.get(clothing.id());
+		var assets = equipmentAssets.get(getKey(clothing.id()));
 
 		for (var layerType : LAYER_TYPES) {
 			for (var layer : assets.getLayers(layerType)) {

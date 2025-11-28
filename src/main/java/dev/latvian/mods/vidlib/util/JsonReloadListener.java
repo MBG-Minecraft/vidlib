@@ -19,11 +19,32 @@ public abstract class JsonReloadListener extends SimplePreparableReloadListener<
 		this.rootPathOffset = rootPath.length() + 1;
 	}
 
-	@Override
-	protected Map<ResourceLocation, JsonObject> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
-		var map = new Object2ObjectOpenHashMap<ResourceLocation, JsonObject>();
+	public boolean onlyRoot() {
+		return false;
+	}
 
-		for (var entry : resourceManager.listResources(rootPath, id -> !id.getPath().startsWith("_") && id.getPath().endsWith(".json")).entrySet()) {
+	private boolean filter(ResourceLocation id) {
+		var path = id.getPath();
+
+		if (!path.endsWith(".json")) {
+			return false;
+		}
+
+		int lastSlash = path.lastIndexOf("/");
+
+		if (onlyRoot()) {
+			return lastSlash == rootPathOffset - 1;
+		} else {
+			return path.charAt(lastSlash + 1) != '_';
+		}
+	}
+
+	@Override
+	public Map<ResourceLocation, JsonObject> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
+		var map = new Object2ObjectOpenHashMap<ResourceLocation, JsonObject>();
+		var allResources = resourceManager.listResources(rootPath, this::filter);
+
+		for (var entry : allResources.entrySet()) {
 			try (var reader = entry.getValue().openAsReader()) {
 				var id = entry.getKey().withPath(s -> s.substring(rootPathOffset, s.length() - 5));
 				var json = JsonUtils.read(reader);

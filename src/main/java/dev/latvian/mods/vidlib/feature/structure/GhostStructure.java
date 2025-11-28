@@ -17,6 +17,7 @@ import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import imgui.type.ImBoolean;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -91,7 +92,7 @@ public record GhostStructure(
 		}
 
 		@Override
-		protected void apply(Map<ResourceLocation, GhostStructure> from) {
+		protected void apply(ResourceManager resourceManager, Map<ResourceLocation, GhostStructure> from) {
 			StructureRenderer.redrawAll();
 			LIST = List.copyOf(from.values());
 		}
