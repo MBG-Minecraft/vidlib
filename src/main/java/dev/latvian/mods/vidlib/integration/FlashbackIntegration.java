@@ -1,9 +1,10 @@
-package dev.latvian.mods.vidlib.feature.misc;
+package dev.latvian.mods.vidlib.integration;
 
 import com.google.gson.JsonObject;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
+import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldData;
 import imgui.ImGuiStyle;
 import it.unimi.dsi.fastutil.chars.CharConsumer;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
@@ -15,8 +16,10 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -94,6 +97,8 @@ public interface FlashbackIntegration {
 
 	BooleanSupplier IN_REPLAY = booleanField("IN_REPLAY");
 	BooleanSupplier IN_EXPORTING = booleanField("IN_EXPORTING");
+
+	MutableObject<DepthOfFieldData> CURRENTLY_APPLIED_DOF = field("CURRENTLY_APPLIED_DOF", new MutableObject<>());
 
 	static boolean isInReplay() {
 		return IN_REPLAY.getAsBoolean();
