@@ -37,8 +37,8 @@ public record Clothing(ResourceLocation id, ClothingParts parts) {
 	public static final DataType<Clothing> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, Clothing.class);
 
 	public static final EquipmentSlot[] ORDERED_SLOTS = {
-		EquipmentSlot.CHEST,
 		EquipmentSlot.LEGS,
+		EquipmentSlot.CHEST,
 		EquipmentSlot.FEET,
 		EquipmentSlot.HEAD
 	};
