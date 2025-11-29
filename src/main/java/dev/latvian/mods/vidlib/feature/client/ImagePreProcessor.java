@@ -108,6 +108,12 @@ public interface ImagePreProcessor extends UnaryOperator<NativeImage> {
 	};
 
 	default ImagePreProcessor andThen(ImagePreProcessor after) {
-		return img -> after.apply(apply(img));
+		if (this == NONE) {
+			return after;
+		} else if (after == NONE) {
+			return this;
+		} else {
+			return img -> after.apply(apply(img));
+		}
 	}
 }

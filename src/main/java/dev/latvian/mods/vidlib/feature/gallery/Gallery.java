@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.latvian.mods.vidlib.util.StringUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -14,12 +15,16 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class Gallery {
@@ -127,5 +132,41 @@ public class Gallery {
 			VidLib.LOGGER.info("Uploaded " + fullPath.get() + " as " + dst.getFileName() + " to gallery '" + id + "'");
 			return galleryImage;
 		}
+	}
+
+	public GalleryImage getRemote(Minecraft mc, UUID uuid, String name, Function<UUID, String> urlGetter, ImagePreProcessor preProcessor) {
+		var img = images.get(uuid);
+
+		if (img == null) {
+			img = createDummy(uuid, name);
+			images.put(uuid, img);
+			var url = urlGetter.apply(uuid);
+
+			try {
+				img = upload(
+					mc,
+					uuid,
+					() -> {
+						var req = MiscUtils.HTTP_CLIENT.send(HttpRequest.newBuilder(URI.create(url))
+							.GET()
+							.header("User-Agent", "VidLib/" + VidLib.VERSION)
+							.build(), HttpResponse.BodyHandlers.ofInputStream());
+
+						if (req.statusCode() / 100 != 2) {
+							throw new IllegalStateException("Request " + url + " returned " + req.statusCode());
+						}
+
+						return req.body();
+					},
+					() -> name,
+					() -> url,
+					preProcessor
+				);
+			} catch (Exception ex) {
+				VidLib.LOGGER.warn("Failed to download " + id + "/" + uuid, ex);
+			}
+		}
+
+		return img;
 	}
 }
