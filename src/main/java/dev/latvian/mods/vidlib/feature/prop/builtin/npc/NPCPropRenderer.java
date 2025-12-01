@@ -7,6 +7,7 @@ import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.EntityRenderTypes;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
+import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
 import dev.latvian.mods.vidlib.util.client.MultiBufferSourceOverride;
@@ -51,6 +52,7 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 
 	@Override
 	public void render(PropRenderContext<NPCProp> ctx) {
+		var mc = Minecraft.getInstance();
 		var p = ctx.prop();
 		var ms = ctx.poseStack();
 		float delta = ctx.delta();
@@ -62,12 +64,13 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 		}
 
 		var instances = p.getInstances();
-		var modelType = Minecraft.getInstance().getModelType(p.profile);
-		playerRenderer = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getSkinMap().get(modelType);
+		var profile = PlayerProfiles.get(p.profile.getId());
+		var modelType = mc.getModelType(profile);
+		playerRenderer = (PlayerRenderer) mc.getEntityRenderDispatcher().getSkinMap().get(modelType);
 		playerRenderState = playerRenderer.createRenderState();
 
 		if (fakePlayer == null) {
-			fakePlayer = new RemotePlayer((ClientLevel) ctx.prop().level, p.profile);
+			fakePlayer = new RemotePlayer((ClientLevel) ctx.prop().level, profile.profile());
 			fakePlayer.setHealth(20F);
 			fakePlayer.getAttribute(Attributes.MAX_HEALTH).setBaseValue(20F);
 		}
@@ -94,7 +97,6 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 
 		playerRenderer.extractRenderState(fakePlayer, playerRenderState, delta);
 
-		var mc = Minecraft.getInstance();
 		var eyePos = new Vec3(playerRenderState.x, playerRenderState.y + fakePlayer.getEyeHeight(), playerRenderState.z);
 		var blockpos = BlockPos.containing(eyePos);
 		int light = LightTexture.pack(mc.level.getBrightness(LightLayer.BLOCK, blockpos), mc.level.getBrightness(LightLayer.SKY, blockpos));

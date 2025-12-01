@@ -595,11 +595,22 @@ public class ImGraphics {
 		return iconButton(icon, (value.get() ? ImIcons.CHECK : ImIcons.CLOSE) + id, tooltip + (value.get() ? ": Enabled" : ": Disabled"), value.get() ? null : ImColorVariant.GRAY, value);
 	}
 
-	public boolean imageButton(@Nullable GpuTexture texture, float w, float h, float u0, float v0, float u1, float v1, int padding) {
-		return ImGui.imageButton(texture == null ? 0 : texture.vl$getHandle(), w, h, u0, v0, u1, v1, padding);
+	public boolean imageButton(@Nullable GpuTexture texture, float w, float h, float u0, float v0, float u1, float v1, int padding, @Nullable ImColorVariant variant) {
+		if (variant != null) {
+			pushStack();
+			setButton(variant);
+		}
+
+		var clicked = ImGui.imageButton(texture == null ? 0 : texture.vl$getHandle(), w, h, u0, v0, u1, v1, padding);
+
+		if (variant != null) {
+			popStack();
+		}
+
+		return clicked;
 	}
 
-	public boolean imageButton(ResourceLocation texture, float w, float h, float u0, float v0, float u1, float v1, int padding) {
-		return imageButton(mc.getTextureManager().getTexture(texture).getTexture(), w, h, u0, v0, u1, v1, padding);
+	public boolean imageButton(@Nullable ResourceLocation texture, float w, float h, float u0, float v0, float u1, float v1, int padding, @Nullable ImColorVariant variant) {
+		return imageButton(texture == null ? null : mc.getTextureManager().getTexture(texture).getTexture(), w, h, u0, v0, u1, v1, padding, variant);
 	}
 }

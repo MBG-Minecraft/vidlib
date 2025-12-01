@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibConfig;
-import dev.latvian.mods.vidlib.util.MiscUtils;
+import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import net.minecraft.core.UUIDUtil;
 import net.neoforged.fml.loading.FMLLoader;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,9 +19,12 @@ public class UUIDUtilMixin {
 		if (VidLibConfig.fetchOfflinePlayerData && !FMLLoader.isProduction() && !name.startsWith("Player") && !name.startsWith("Dev")) {
 			try {
 				VidLib.LOGGER.info("Fetching offline UUID for " + name + "...");
-				var profile = MiscUtils.fetchProfile(name);
-				VidLib.LOGGER.info("UUID for " + name + " found: " + profile.getId());
-				cir.setReturnValue(profile.getId());
+				var profile = PlayerProfiles.get(name);
+
+				if (!profile.isError()) {
+					VidLib.LOGGER.info("UUID for " + name + " found: " + profile.profile().getId());
+					cir.setReturnValue(profile.profile().getId());
+				}
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}

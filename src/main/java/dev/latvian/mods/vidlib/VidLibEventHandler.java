@@ -36,6 +36,7 @@ import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.common.world.chunk.RegisterTicketControllersEvent;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.GameShuttingDownEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityInvulnerabilityCheckEvent;
@@ -203,6 +204,8 @@ public class VidLibEventHandler {
 		if (packetCapture != null) {
 			packetCapture.finish();
 		}
+
+		AutoInit.Type.SAVE_GAME.invoke();
 	}
 
 	@SubscribeEvent
@@ -223,6 +226,7 @@ public class VidLibEventHandler {
 	public static void levelSaved(LevelEvent.Save event) {
 		if (event.getLevel() instanceof ServerLevel level && level.dimension() == Level.OVERWORLD) {
 			level.getServer().vl$save();
+			AutoInit.Type.SAVE_GAME.invoke();
 		}
 	}
 
@@ -296,5 +300,10 @@ public class VidLibEventHandler {
 		if (event.getRayTraceResult() instanceof BlockHitResult hit && event.getProjectile().level().getBlockState(hit.getBlockPos()).is(Blocks.BARRIER)) {
 			event.setCanceled(true);
 		}
+	}
+
+	@SubscribeEvent
+	public static void gameShuttingDown(GameShuttingDownEvent event) {
+		AutoInit.Type.SAVE_GAME.invoke();
 	}
 }

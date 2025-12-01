@@ -8,6 +8,8 @@ import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterImBuilder;
+import dev.latvian.mods.vidlib.feature.gallery.GalleryImageImBuilder;
+import dev.latvian.mods.vidlib.feature.gallery.PlayerBodies;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
@@ -41,6 +43,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector2f;
+
+import java.util.List;
 
 public class DebugWidgetPanel extends AdminPanel {
 	public static final DebugWidgetPanel INSTANCE = new DebugWidgetPanel();
@@ -79,6 +83,7 @@ public class DebugWidgetPanel extends AdminPanel {
 	public final GameProfileImBuilder profileBuilder = new GameProfileImBuilder();
 	public final TransformationListImBuilder transformationListBuilder = new TransformationListImBuilder();
 	public final ImBuilder<KNumber> numberBuilder2 = new KNumberNodeImBuilder();
+	public final GalleryImageImBuilder selectedPlayerBodyBuilder = new GalleryImageImBuilder(List.of(PlayerBodies.GALLERY), List.of(PlayerBodies.UPLOADER));
 
 	private DebugWidgetPanel() {
 		super("widget-debug", "Widget Debug");
@@ -375,6 +380,11 @@ public class DebugWidgetPanel extends AdminPanel {
 		ImGui.separator();
 		numberBuilder2.imguiKey(graphics, "KNumber Node Editor", "knumber-node-editor");
 		ImGui.text("Result: " + (numberBuilder2.isValid() ? String.valueOf(numberBuilder2.build().get(ctx)) : "Invalid"));
+		ImGui.separator();
+		selectedPlayerBodyBuilder.imguiKey(graphics, "Player Body Image", "player-body-image");
+		var selectedPlayerBody = selectedPlayerBodyBuilder.isValid() ? selectedPlayerBodyBuilder.build() : null;
+		// graphics.imageButton(PlayerBodies.RENDER_TARGET.get().getColorTexture(), 128F, 128F, 0F, 0F, 1F, 1F, 2, null);
+		graphics.imageButton(selectedPlayerBody == null ? null : selectedPlayerBody.textureId(), 256F, 256F, 0F, 0F, 1F, 1F, 2, null);
 		ImGui.separator();
 
 		ImGui.text("Bezier");

@@ -1,17 +1,16 @@
 package dev.latvian.mods.vidlib.feature.pin;
 
 import dev.latvian.mods.klib.math.DistanceComparator;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
-import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
-import dev.latvian.mods.vidlib.feature.client.TexturedRenderType;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.gallery.Gallery;
 import dev.latvian.mods.vidlib.feature.gallery.GalleryImageImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
+import dev.latvian.mods.vidlib.feature.gallery.PlayerBodies;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color3ImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
@@ -20,17 +19,13 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.util.TriState;
 import net.minecraft.world.entity.Entity;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.Executor;
 
 public interface Pins {
 	ImBoolean ENABLED = new ImBoolean(true);
@@ -40,20 +35,12 @@ public interface Pins {
 
 	Map<UUID, Pin> PINS = new Object2ObjectOpenHashMap<>();
 
-	ResourceLocation PIN_TEXTURE = VidLib.id("textures/misc/pin/1.png");
-
+	@ClientAutoRegister
 	Gallery GALLERY = new Gallery("pins", () -> VidLibPaths.USER.get().resolve("pin-gallery"), TriState.TRUE);
 
 	ImagePreProcessor PRE_PROCESSOR = ImagePreProcessor.FIT_SQUARE.andThen(ImagePreProcessor.CLOSEST_4);
-	GalleryImageImBuilder IMAGE_IM_BUILDER = new GalleryImageImBuilder(GALLERY, PRE_PROCESSOR);
-
-	ResourceLocation CIRCLE_TEXTURE = VidLib.id("textures/misc/circle.png");
-	TexturedRenderType CIRCLE_RENDER_TYPE = VidLibRenderTypes.MASKED_GUI.apply(CIRCLE_TEXTURE);
-
-	@AutoInit(AutoInit.Type.TEXTURES_RELOADED)
-	static void reload(TextureManager manager, Executor backgroundExecutor, Executor gameExecutor) throws IOException {
-		GALLERY.load(manager);
-	}
+	GalleryImageImBuilder.Uploader PIN_UPLOADER = new GalleryImageImBuilder.FileUploader(GALLERY, PRE_PROCESSOR);
+	GalleryImageImBuilder IMAGE_IM_BUILDER = new GalleryImageImBuilder(List.of(GALLERY, PlayerBodies.GALLERY), List.of(PIN_UPLOADER, PlayerBodies.UPLOADER));
 
 	static void draw(GuiGraphics graphics, DeltaTracker deltaTracker) {
 		if (!ENABLED.get() || PINS.isEmpty()) {
@@ -79,11 +66,11 @@ public interface Pins {
 		var list = new ArrayList<ScreenPin>(PINS.size());
 
 		for (var pin : PINS.values()) {
-			if (pin.enabled) {
+			if (pin.enabled && pin.isSet()) {
 				var entity = level.getEntity(pin.uuid);
 
 				if (entity != null) {
-					var img = GALLERY.get(pin.texture);
+					var img = pin.getImage();
 
 					if (img != null) {
 						list.add(new ScreenPin(entity, pin, img, entity.getPosition(delta).add(0D, entity.getBbHeight() * 1.1D, 0D)));
@@ -106,22 +93,20 @@ public interface Pins {
 
 				graphics.pose().pushPose();
 				graphics.pose().translate(wpos.x(), wpos.y() - 2F, 0F);
-				graphics.pose().translate(0F, -pinSize * PIN_OFFSET.get(), 0F);
+				graphics.pose().translate(-pinSize / 2F, -pinSize * (1F + PIN_OFFSET.get()), 0F);
+				graphics.pose().scale(pinSize / 512F, pinSize / 512F, 1F);
 
-				int x = -pinSize / 2;
-				int y = -pinSize;
-				int w = pinSize;
-				int h = pinSize;
+				var s = screenPin.pin().shape;
 
-				int xi = Mth.floor(x + w * 103F / 512F);
-				int yi = Mth.floor(y + h * 137F / 512F);
-				int wi = Mth.ceil(w * 308F / 512F);
-				int hi = Mth.ceil(h * 308F / 512F);
+				screenPin.image().load(mc, true);
+				graphics.blit(VidLibRenderTypes.GUI, s.maskTexture, s.x, s.y, 0F, 0F, s.w, s.h, s.w, s.h, pinAlpha | screenPin.pin().color.rgb());
 
-				screenPin.image().load(mc);
-				graphics.blit(VidLibRenderTypes.GUI, CIRCLE_TEXTURE, xi, yi, 0F, 0F, wi, hi, wi, hi, pinAlpha | screenPin.pin().color.rgb());
-				graphics.blit(CIRCLE_RENDER_TYPE, screenPin.image().textureId(), xi, yi, 0F, 0F, wi, hi, wi, hi, pinAlpha | 0xFFFFFF);
-				graphics.blit(VidLibRenderTypes.GUI, PIN_TEXTURE, x, y, 0F, 0F, w, h, w, h, pinAlpha | screenPin.pin().color.rgb());
+				if (!screenPin.pin().background.isTransparent()) {
+					graphics.blit(VidLibRenderTypes.GUI, s.maskTexture, s.x, s.y, 0F, 0F, s.w, s.h, s.w, s.h, screenPin.pin().background.withAlpha(screenPin.pin().background.alphaf() * (PIN_ALPHA.get() / 255F)).argb());
+				}
+
+				graphics.blit(s.maskedRenderType, screenPin.image().textureId(), s.x, s.y, 0F, 0F, s.w, s.h, s.w, s.h, pinAlpha | 0xFFFFFF);
+				graphics.blit(VidLibRenderTypes.GUI, s.overlayTexture, 0, 0, 0F, 0F, 512, 512, 512, 512, pinAlpha | screenPin.pin().color.rgb());
 				graphics.pose().popPose();
 			}
 		}
@@ -130,35 +115,59 @@ public interface Pins {
 	static void imgui(ImGraphics graphics, Entity entity) {
 		var pin = PINS.get(entity.getUUID());
 
-		if (pin != null) {
-			if (ImGui.checkbox("Pin###pin-visible", pin.enabled)) {
+		if (ImGui.checkbox("Pin###pin-visible", pin != null && pin.enabled)) {
+			if (pin != null) {
 				pin.enabled = !pin.enabled;
 			}
+		}
 
-			ImGui.sameLine();
+		ImGui.sameLine();
 
-			if (graphics.button("Remove Pin Image###pin-image", ImColorVariant.RED)) {
-				PINS.remove(entity.getUUID());
+		IMAGE_IM_BUILDER.set(pin == null ? null : pin.getImage());
+
+		if (IMAGE_IM_BUILDER.imguiKey(graphics, "", "pin-image").isFull()) {
+			if (pin == null) {
+				pin = new Pin(entity.getUUID());
+				PINS.put(pin.uuid, pin);
 			}
 
+			pin.setImage(IMAGE_IM_BUILDER.isValid() ? IMAGE_IM_BUILDER.build() : null);
+
+			if (pin.isSet()) {
+				pin.enabled = true;
+			}
+		}
+
+		IMAGE_IM_BUILDER.set(null);
+
+		if (pin != null && pin.isSet()) {
 			ImGui.sameLine();
 
 			Color3ImBuilder.UNIT.set(pin.color);
 
-			if (Color3ImBuilder.UNIT.imgui(graphics).isAny()) {
+			if (Color3ImBuilder.UNIT.imguiKey(graphics, "", "color").isAny()) {
 				pin.color = Color3ImBuilder.UNIT.build();
 			}
-		} else {
-			if (IMAGE_IM_BUILDER.imguiKey(graphics, "Pin", "pin-image").isFull()) {
-				if (IMAGE_IM_BUILDER.isValid()) {
-					var newPin = new Pin(entity.getUUID());
-					newPin.texture = IMAGE_IM_BUILDER.build().id();
-					PINS.put(newPin.uuid, newPin);
-				} else {
-					PINS.remove(entity.getUUID());
-				}
 
-				IMAGE_IM_BUILDER.set(null);
+			ImGui.sameLine();
+
+			Color4ImBuilder.UNIT.set(pin.background);
+
+			if (Color4ImBuilder.UNIT.imguiKey(graphics, "", "background").isAny()) {
+				pin.background = Color4ImBuilder.UNIT.build();
+			}
+
+			ImGui.sameLine();
+
+			if (graphics.imageButton(pin.shape.iconTexture, ImGui.getFrameHeight() - 4F, ImGui.getFrameHeight() - 4F, 0F, 0F, 1F, 1F, 2, null)) {
+				pin.shape = PinShape.VALUES[(pin.shape.ordinal() + 1) % PinShape.VALUES.length];
+			}
+
+			if (ImGui.isItemHovered()) {
+				ImGui.beginTooltip();
+				ImGui.text("Shape: " + (pin.shape.ordinal() + 1));
+				ImGui.image(graphics.mc.getTextureManager().getTexture(pin.shape.iconTexture).getTexture().vl$getHandle(), 64F, 64F);
+				ImGui.endTooltip();
 			}
 		}
 	}

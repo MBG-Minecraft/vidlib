@@ -10,6 +10,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingImBuilder;
+import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ItemStackImBuilder;
@@ -117,7 +118,7 @@ public class NPCProp extends BaseGeoProp {
 		this.height = 1.8F;
 		this.name = Empty.COMPONENT;
 		this.stone = false;
-		this.profile = Empty.PROFILE;
+		this.profile = PlayerProfile.EMPTY_GAME_PROFILE;
 		this.bodyPitch = 0F;
 		this.count = 1;
 		this.spread = SpreadType.FILLED_SQUARE;

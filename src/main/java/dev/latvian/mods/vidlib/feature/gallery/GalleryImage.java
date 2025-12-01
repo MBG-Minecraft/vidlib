@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.gallery;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
@@ -20,8 +20,6 @@ public record GalleryImage(
 	@Nullable Path path,
 	ResourceLocation textureId
 ) {
-	public static final ResourceLocation LOADING_TEXTURE = VidLib.id("textures/misc/loading.png");
-
 	public boolean delete() {
 		try {
 			if (path != null) {
@@ -35,30 +33,50 @@ public record GalleryImage(
 		}
 	}
 
-	public AbstractTexture load(Minecraft mc) {
+	public AbstractTexture load(Minecraft mc, boolean blocking) {
 		var tex = mc.getTextureManager().byPath.get(textureId);
 
 		if (tex == null) {
-			tex = mc.getTextureManager().getTexture(LOADING_TEXTURE);
-			mc.getTextureManager().byPath.put(textureId, tex);
+			if (blocking) {
+				tex = loadNow(mc, true);
 
-			if (path != null && Files.exists(path)) {
-				Util.backgroundExecutor().execute(() -> {
-					try (var in = Files.newInputStream(path)) {
-						var image = NativeImage.read(in);
-
-						mc.execute(() -> {
-							var texture = new DynamicTexture(textureId::toString, image);
-							texture.setFilter(gallery.blur, false);
-							mc.getTextureManager().byPath.put(textureId, texture);
-						});
-					} catch (Exception ex) {
-						ex.printStackTrace();
-					}
-				});
+				if (tex == null) {
+					tex = mc.getTextureManager().getTexture(VidLibTextures.LOADING);
+					mc.getTextureManager().byPath.put(textureId, tex);
+				}
+			} else {
+				tex = mc.getTextureManager().getTexture(VidLibTextures.LOADING);
+				mc.getTextureManager().byPath.put(textureId, tex);
+				Util.backgroundExecutor().execute(() -> loadNow(mc, false));
 			}
 		}
 
 		return tex;
+	}
+
+	@Nullable
+	private AbstractTexture loadNow(Minecraft mc, boolean blocking) {
+		if (path != null && Files.exists(path)) {
+			try (var in = Files.newInputStream(path)) {
+				var image = NativeImage.read(in);
+
+				if (blocking) {
+					var texture = new DynamicTexture(textureId::toString, image);
+					texture.setFilter(gallery.blur, false);
+					mc.getTextureManager().byPath.put(textureId, texture);
+					return texture;
+				} else {
+					mc.execute(() -> {
+						var texture = new DynamicTexture(textureId::toString, image);
+						texture.setFilter(gallery.blur, false);
+						mc.getTextureManager().byPath.put(textureId, texture);
+					});
+				}
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+
+		return null;
 	}
 }

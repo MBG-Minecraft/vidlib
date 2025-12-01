@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
-import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.core.VLMinecraftServer;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
@@ -30,10 +29,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.nio.file.Files;
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin implements VLMinecraftServer {
@@ -58,15 +54,6 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 
 	@Unique
 	private final Map<ResourceLocation, ClockValue> vl$clocks = new Object2ObjectOpenHashMap<>();
-
-	@Unique
-	private Map<UUID, GameProfile> vl$reroutedPlayers;
-
-	@Unique
-	private final Map<String, GameProfile> vl$profileByNameCache = new Object2ObjectOpenHashMap<>();
-
-	@Unique
-	private final Map<UUID, GameProfile> vl$profileByUUIDCache = new Object2ObjectOpenHashMap<>();
 
 	@Unique
 	private final KNumberVariables vl$globalVariables = new KNumberVariables();
@@ -133,46 +120,6 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	@Override
 	public Map<ResourceLocation, ClockValue> vl$getClocks() {
 		return vl$clocks;
-	}
-
-	@Override
-	public Map<UUID, GameProfile> vl$getReroutedPlayers() {
-		if (vl$reroutedPlayers == null) {
-			vl$reroutedPlayers = VLMinecraftServer.super.vl$getReroutedPlayers();
-		}
-
-		return vl$reroutedPlayers;
-	}
-
-	@Override
-	public GameProfile retrieveGameProfile(UUID uuid) {
-		return vl$profileByUUIDCache.computeIfAbsent(uuid, VLMinecraftServer.super::retrieveGameProfile);
-	}
-
-	@Override
-	public GameProfile retrieveGameProfile(String name) {
-		return vl$profileByNameCache.computeIfAbsent(name, VLMinecraftServer.super::retrieveGameProfile);
-	}
-
-	@Override
-	public Collection<GameProfile> vl$getCachedGameProfiles() {
-		if (vl$profileByNameCache.isEmpty() && vl$profileByUUIDCache.isEmpty()) {
-			return List.of();
-		}
-
-		var map = new Object2ObjectOpenHashMap<>(vl$profileByUUIDCache);
-
-		for (var p : vl$profileByNameCache.values()) {
-			map.putIfAbsent(p.getId(), p);
-		}
-
-		return map.values();
-	}
-
-	@Override
-	public void vl$clearProfileCache() {
-		vl$profileByUUIDCache.clear();
-		vl$profileByNameCache.clear();
 	}
 
 	@Override

@@ -1,9 +1,10 @@
 package dev.latvian.mods.vidlib.feature.npc;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
+import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
+import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
 import dev.latvian.mods.vidlib.feature.particle.CustomParticle;
@@ -24,7 +25,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class NPCParticle extends CustomParticle {
 	private final NPCRecording recording;
-	private final GameProfile profile;
+	private final PlayerProfile profile;
 	private final Vec3 positionOffset;
 	private final PlayerRenderer playerRenderer;
 	private final RemotePlayer fakePlayer;
@@ -32,13 +33,14 @@ public class NPCParticle extends CustomParticle {
 
 	public NPCParticle(NPCParticleOptions options, ClientLevel level, double x, double y, double z, double vx, double vy, double vz) {
 		super(level, x, y, z);
+		var mc = Minecraft.getInstance();
 		var recordingMap = NPCRecording.getReplay(level.registryAccess());
 		var recordingLazy = recordingMap.isEmpty() ? null : options.npc().equals("latest") ? recordingMap.lastEntry().getValue() : recordingMap.get(options.npc());
 		this.recording = recordingLazy == null ? null : recordingLazy.get();
-		this.profile = recording == null ? null : options.profile().orElse(recording.profile);
-		var modelType = Minecraft.getInstance().getModelType(profile);
-		this.playerRenderer = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getSkinMap().get(modelType);
-		this.fakePlayer = recording == null ? null : new RemotePlayer(level, profile);
+		this.profile = recording == null ? PlayerProfile.ERROR : PlayerProfiles.get(options.profile().orElse(recording.profile).getId());
+		var modelType = mc.getModelType(profile);
+		this.playerRenderer = (PlayerRenderer) mc.getEntityRenderDispatcher().getSkinMap().get(modelType);
+		this.fakePlayer = recording == null ? null : new RemotePlayer(level, profile.profile());
 		this.playerRenderState = playerRenderer.createRenderState();
 
 		if (recording != null && fakePlayer != null) {
@@ -90,7 +92,7 @@ public class NPCParticle extends CustomParticle {
 		var blockpos = BlockPos.containing(eyePos);
 		int light = LightTexture.pack(mc.level.getBrightness(LightLayer.BLOCK, blockpos), mc.level.getBrightness(LightLayer.SKY, blockpos));
 
-		playerRenderState.skin = mc.getSkinManager().getInsecureSkin(profile);
+		playerRenderState.skin = mc.getSkinManager().getInsecureSkin(profile.profile());
 		playerRenderState.swimAmount = recording.get(NPCDataType.SWIM_AMOUNT, offset);
 		playerRenderState.attackTime = recording.get(NPCDataType.ATTACK_TIME, offset);
 		playerRenderState.isPassenger = recording.get(NPCDataType.PASSENGER, offset);

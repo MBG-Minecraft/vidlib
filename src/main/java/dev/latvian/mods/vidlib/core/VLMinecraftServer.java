@@ -1,10 +1,6 @@
 package dev.latvian.mods.vidlib.core;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.util.UndashedUuid;
-import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.clock.SyncClocksPayload;
@@ -19,9 +15,7 @@ import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
-import dev.latvian.mods.vidlib.util.JsonUtils;
 import dev.latvian.mods.vidlib.util.PauseType;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -33,13 +27,9 @@ import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	default MinecraftServer vl$self() {
@@ -220,51 +210,6 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 
 		for (var level : vl$self().getAllLevels()) {
 			level.vl$updateLoadedChunks();
-		}
-	}
-
-	default Map<UUID, GameProfile> vl$getReroutedPlayers() {
-		var map = new Object2ObjectOpenHashMap<UUID, GameProfile>();
-		var path = VidLibPaths.GAME.get().resolve("rerouted-players.json");
-
-		if (Files.exists(path)) {
-			try (var reader = Files.newBufferedReader(path)) {
-				for (var entry : JsonUtils.read(reader).getAsJsonObject().entrySet()) {
-					try {
-						var from = retrieveGameProfile(entry.getKey());
-						var to = retrieveGameProfile(UndashedUuid.fromString(entry.getValue().getAsString()));
-
-						if (from != null && to != null) {
-							map.put(from.getId(), to);
-						}
-					} catch (Exception ex) {
-						ex.printStackTrace();
-					}
-				}
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-		}
-
-		return map;
-	}
-
-	@Override
-	default GameProfile retrieveGameProfile(UUID uuid) {
-		try {
-			var profile = vl$self().getSessionService().fetchProfile(uuid, true).profile();
-			return profile == null ? Empty.PROFILE : profile;
-		} catch (Exception ex) {
-			return Empty.PROFILE;
-		}
-	}
-
-	@Override
-	default GameProfile retrieveGameProfile(String name) {
-		try {
-			return vl$self().getProfileCache().getAsync(name).get(5L, TimeUnit.SECONDS).orElse(Empty.PROFILE);
-		} catch (Exception ex) {
-			return Empty.PROFILE;
 		}
 	}
 

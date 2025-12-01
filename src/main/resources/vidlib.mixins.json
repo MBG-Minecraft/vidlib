@@ -74,6 +74,7 @@
 		"CreativeModeInventoryScreenMixin",
 		"DebugScreenOverlayMixin",
 		"DefaultPlayerSkinMixin",
+		"DirectStateAccessMixin",
 		"EntityRenderDispatcherMixin",
 		"EntityRendererMixin",
 		"FireworkParticlesStarterMixin",

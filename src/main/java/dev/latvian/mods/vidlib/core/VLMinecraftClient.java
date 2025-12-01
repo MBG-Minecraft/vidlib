@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.core;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Pair;
 import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.math.Rotation;
@@ -25,6 +24,7 @@ import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
 import dev.latvian.mods.vidlib.feature.data.UpdatePlayerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.data.UpdateServerDataValuePayload;
+import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.EventMarkerData;
 import dev.latvian.mods.vidlib.feature.particle.FireData;
@@ -50,7 +50,6 @@ import dev.latvian.mods.vidlib.feature.vote.YesNoVotingScreen;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
-import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
@@ -86,7 +85,6 @@ import org.joml.Vector4f;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("resource")
@@ -588,25 +586,6 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default GameProfile retrieveGameProfile(UUID uuid) {
-		try {
-			var profile = vl$self().getMinecraftSessionService().fetchProfile(uuid, true).profile();
-			return profile == null ? Empty.PROFILE : profile;
-		} catch (Exception ex) {
-			return Empty.PROFILE;
-		}
-	}
-
-	@Override
-	default GameProfile retrieveGameProfile(String name) {
-		try {
-			return MiscUtils.fetchProfile(name);
-		} catch (Exception ex) {
-			return Empty.PROFILE;
-		}
-	}
-
-	@Override
 	default KNumberVariables globalVariables() {
 		return vl$self().player.vl$sessionData().globalVariables;
 	}
@@ -691,27 +670,12 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		return p != null && p.vl$sessionData().isServerNeoForge();
 	}
 
-	default PlayerSkin.Model getModelType(@Nullable GameProfile profile) {
-		if (profile == null || profile == Empty.PROFILE) {
+	default PlayerSkin.Model getModelType(@Nullable PlayerProfile profile) {
+		if (profile == null || profile.isError()) {
 			return PlayerSkin.Model.WIDE;
 		}
 
-		try {
-			var sessionService = vl$self().getMinecraftSessionService();
-			var packedTextures = sessionService.getPackedTextures(profile);
-
-			if (packedTextures != null) {
-				var unpackedTextures = sessionService.unpackTextures(packedTextures);
-
-				if (unpackedTextures.skin() != null) {
-					return PlayerSkin.Model.byName(unpackedTextures.skin().getMetadata("model"));
-				}
-			}
-
-		} catch (Exception ignored) {
-		}
-
-		return PlayerSkin.Model.WIDE;
+		return profile.slimModel() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE;
 	}
 
 	default float getEffectScale() {
