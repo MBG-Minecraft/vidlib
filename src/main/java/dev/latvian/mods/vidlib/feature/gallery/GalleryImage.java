@@ -20,13 +20,12 @@ public record GalleryImage(
 	@Nullable Path path,
 	ResourceLocation textureId
 ) {
-	public boolean delete() {
+	public boolean deleteFile() {
 		try {
 			if (path != null) {
 				Files.deleteIfExists(path);
 			}
 
-			gallery.images.remove(id);
 			return true;
 		} catch (Exception ex) {
 			return false;

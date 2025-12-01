@@ -5,6 +5,7 @@ import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
+import dev.latvian.mods.vidlib.feature.gallery.PlayerSkins;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
 import dev.latvian.mods.vidlib.feature.particle.CustomParticle;
@@ -38,7 +39,7 @@ public class NPCParticle extends CustomParticle {
 		var recordingLazy = recordingMap.isEmpty() ? null : options.npc().equals("latest") ? recordingMap.lastEntry().getValue() : recordingMap.get(options.npc());
 		this.recording = recordingLazy == null ? null : recordingLazy.get();
 		this.profile = recording == null ? PlayerProfile.ERROR : PlayerProfiles.get(options.profile().orElse(recording.profile).getId());
-		var modelType = mc.getModelType(profile);
+		var modelType = PlayerSkins.getModelType(profile);
 		this.playerRenderer = (PlayerRenderer) mc.getEntityRenderDispatcher().getSkinMap().get(modelType);
 		this.fakePlayer = recording == null ? null : new RemotePlayer(level, profile.profile());
 		this.playerRenderState = playerRenderer.createRenderState();

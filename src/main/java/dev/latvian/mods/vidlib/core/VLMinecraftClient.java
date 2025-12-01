@@ -24,7 +24,6 @@ import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
 import dev.latvian.mods.vidlib.feature.data.UpdatePlayerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.data.UpdateServerDataValuePayload;
-import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.EventMarkerData;
 import dev.latvian.mods.vidlib.feature.particle.FireData;
@@ -62,7 +61,6 @@ import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
@@ -668,14 +666,6 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	default boolean isServerNeoForge() {
 		var p = vl$self().player;
 		return p != null && p.vl$sessionData().isServerNeoForge();
-	}
-
-	default PlayerSkin.Model getModelType(@Nullable PlayerProfile profile) {
-		if (profile == null || profile.isError()) {
-			return PlayerSkin.Model.WIDE;
-		}
-
-		return profile.slimModel() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE;
 	}
 
 	default float getEffectScale() {

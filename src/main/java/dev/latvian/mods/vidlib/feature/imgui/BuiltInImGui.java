@@ -10,6 +10,10 @@ import dev.latvian.mods.vidlib.feature.cutscene.CutsceneBuilderPanel;
 import dev.latvian.mods.vidlib.feature.decal.DecalPanel;
 import dev.latvian.mods.vidlib.feature.environment.FluidPlanePanel;
 import dev.latvian.mods.vidlib.feature.environment.WorldBorderPanel;
+import dev.latvian.mods.vidlib.feature.gallery.LowQualityPlayerBodies;
+import dev.latvian.mods.vidlib.feature.gallery.PlayerBodies;
+import dev.latvian.mods.vidlib.feature.gallery.PlayerHeads;
+import dev.latvian.mods.vidlib.feature.gallery.PlayerSkins;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
@@ -30,6 +34,7 @@ import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BuiltInImGui {
@@ -110,6 +115,24 @@ public class BuiltInImGui {
 				.withStyle(ChatFormatting.UNDERLINE)
 				.withStyle(s -> s.withClickEvent(new ClickEvent.OpenFile(textures)))
 			));
+		}));
+
+		list.add(MenuItem.item(ImIcons.RELOAD, "Clear Skin Cache", g -> {
+			boolean reload = false;
+
+			for (var gallery : List.of(PlayerSkins.GALLERY, PlayerHeads.GALLERY, PlayerBodies.GALLERY, LowQualityPlayerBodies.GALLERY)) {
+				for (var value : gallery.images.values()) {
+					if (value.deleteFile()) {
+						reload = true;
+					}
+				}
+
+				gallery.images.clear();
+			}
+
+			if (reload) {
+				g.mc.reloadResourcePacks();
+			}
 		}));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.DebugDropdown(graphics, list));

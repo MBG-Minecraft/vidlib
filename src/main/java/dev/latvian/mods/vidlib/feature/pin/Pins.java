@@ -8,6 +8,7 @@ import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.gallery.Gallery;
 import dev.latvian.mods.vidlib.feature.gallery.GalleryImageImBuilder;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerBodies;
+import dev.latvian.mods.vidlib.feature.gallery.PlayerHeads;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color3ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
@@ -39,8 +40,12 @@ public interface Pins {
 	Gallery GALLERY = new Gallery("pins", () -> VidLibPaths.USER.get().resolve("pin-gallery"), TriState.TRUE);
 
 	ImagePreProcessor PRE_PROCESSOR = ImagePreProcessor.FIT_SQUARE.andThen(ImagePreProcessor.CLOSEST_4);
-	GalleryImageImBuilder.Uploader PIN_UPLOADER = new GalleryImageImBuilder.FileUploader(GALLERY, PRE_PROCESSOR);
-	GalleryImageImBuilder IMAGE_IM_BUILDER = new GalleryImageImBuilder(List.of(GALLERY, PlayerBodies.GALLERY), List.of(PIN_UPLOADER, PlayerBodies.UPLOADER));
+	GalleryImageImBuilder.Uploader UPLOADER = new GalleryImageImBuilder.FileUploader(GALLERY, PRE_PROCESSOR);
+
+	GalleryImageImBuilder IMAGE_IM_BUILDER = new GalleryImageImBuilder(
+		List.of(GALLERY, PlayerBodies.GALLERY, PlayerHeads.GALLERY),
+		List.of(UPLOADER, PlayerBodies.UPLOADER, PlayerHeads.UPLOADER)
+	);
 
 	static void draw(GuiGraphics graphics, DeltaTracker deltaTracker) {
 		if (!ENABLED.get() || PINS.isEmpty()) {

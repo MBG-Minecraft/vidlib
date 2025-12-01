@@ -53,6 +53,9 @@ public class PlayerProfiles {
 		BY_UUID.clear();
 		BY_NAME.clear();
 
+		BY_UUID.put(PlayerProfile.STEVE.profile().getId(), PlayerProfile.STEVE);
+		BY_UUID.put(PlayerProfile.ALEX.profile().getId(), PlayerProfile.ALEX);
+
 		try {
 			var path = VidLibPaths.USER.get().resolve("cached-profiles.json");
 
@@ -70,6 +73,8 @@ public class PlayerProfiles {
 		} catch (Exception ex) {
 			VidLib.LOGGER.error("Failed to load cached player profiles", ex);
 		}
+
+		allKnown = null;
 	}
 
 	@AutoInit(AutoInit.Type.SAVE_GAME)
@@ -81,7 +86,8 @@ public class PlayerProfiles {
 		shouldSave = false;
 
 		try (var writer = Files.newBufferedWriter(VidLibPaths.mkdirs(VidLibPaths.USER.get().resolve("cached-profiles.json")))) {
-			var list = getAllKnown();
+			var list = new ArrayList<>(getAllKnown());
+			list.removeIf(PlayerProfile::isError);
 			var json = PlayerProfile.LIST_CODEC.encodeStart(JsonOps.INSTANCE, list).getOrThrow();
 			JsonUtils.write(writer, json, false);
 		} catch (Exception ex) {
@@ -106,6 +112,8 @@ public class PlayerProfiles {
 			}
 
 			var list = new ArrayList<>(map.values());
+			list.add(PlayerProfile.STEVE);
+			list.add(PlayerProfile.ALEX);
 			list.sort((o1, o2) -> o1.profile().getName().compareToIgnoreCase(o2.profile().getName()));
 			allKnown = list;
 			return list;
@@ -202,7 +210,7 @@ public class PlayerProfiles {
 
 	public static String getName(UUID uuid) {
 		var p = get(uuid);
-		return p.isError() ? UndashedUuid.toString(uuid) : p.profile().getName();
+		return p.isError() ? uuid.equals(PlayerProfile.STEVE.profile().getId()) ? "Steve" : uuid.equals(PlayerProfile.ALEX.profile().getId()) ? "Alex" : UndashedUuid.toString(uuid) : p.profile().getName();
 	}
 
 	public static MinecraftProfileTextures unpackTextures(Property packedTextures) {

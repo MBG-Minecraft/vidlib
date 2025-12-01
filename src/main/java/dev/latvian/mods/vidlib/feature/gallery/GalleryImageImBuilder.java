@@ -9,6 +9,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import imgui.ImGui;
+import imgui.flag.ImGuiStyleVar;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,6 +25,10 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage> {
 
 		String getTooltip();
 
+		default ImColorVariant getColor() {
+			return ImColorVariant.GREEN;
+		}
+
 		void render(GalleryImageImBuilder builder, ImGraphics graphics, boolean clicked);
 	}
 
@@ -35,7 +40,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage> {
 
 		@Override
 		public String getTooltip() {
-			return "Open...";
+			return "Open";
 		}
 
 		@Override
@@ -100,19 +105,40 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage> {
 		if (!fullUpdate && ImGui.beginPopup("###gallery-popup")) {
 			boolean close = false;
 
-			int count = 0;
-			float s = 50F;
+			graphics.pushStack();
+			graphics.setStyleVar(ImGuiStyleVar.ItemSpacing, 4F, 4F);
+			ImGui.pushID("###remove");
 
-			if (graphics.imageButton(VidLibTextures.TRASH, s, s, 0F, 0F, 1F, 1F, 2, selected == null ? ImColorVariant.GRAY : ImColorVariant.RED)) {
-				set(null);
-				update = ImUpdate.FULL;
-				close = true;
+			if (graphics.imageButton(VidLibTextures.TRASH, 40F, 40F, 0F, 0F, 1F, 1F, 2, selected == null ? ImColorVariant.GRAY : ImColorVariant.RED)) {
+				if (selected != null) {
+					set(null);
+					update = ImUpdate.FULL;
+					close = true;
+				}
 			}
 
 			ImGuiUtils.hoveredTooltip("Remove");
+			ImGui.popID();
 
-			ImGui.sameLine();
-			count++;
+			ImGui.pushID("###uploaders");
+
+			for (int i = 0; i < uploaders.size(); i++) {
+				ImGui.sameLine();
+				ImGui.pushID(i);
+				var uploader = uploaders.get(i);
+				boolean clicked = graphics.imageButton(uploader.getIcon(), 40F, 40F, 0F, 0F, 1F, 1F, 2, uploader.getColor());
+				uploader.render(this, graphics, clicked);
+				ImGuiUtils.hoveredTooltip(uploader.getTooltip());
+				ImGui.popID();
+			}
+
+			ImGui.popID();
+			graphics.popStack();
+
+			ImGui.separator();
+
+			graphics.pushStack();
+			graphics.setStyleVar(ImGuiStyleVar.ItemSpacing, 4F, 4F);
 
 			var list = new ArrayList<GalleryImage>();
 
@@ -124,10 +150,12 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage> {
 				list.sort((o1, o2) -> o1.displayName().compareToIgnoreCase(o2.displayName()));
 			}
 
+			int count = 0;
+
 			for (var image : list) {
 				var imageTex = image.load(graphics.mc, false);
 
-				if (graphics.imageButton(imageTex.getTexture(), s, s, 0F, 0F, 1F, 1F, 2, null)) {
+				if (graphics.imageButton(imageTex.getTexture(), 50F, 50F, 0F, 0F, 1F, 1F, 2, null)) {
 					set(image);
 					update = ImUpdate.FULL;
 					close = true;
@@ -140,15 +168,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage> {
 				}
 			}
 
-			for (var uploader : uploaders) {
-				boolean clicked = graphics.imageButton(uploader.getIcon(), s, s, 0F, 0F, 1F, 1F, 2, ImColorVariant.GREEN);
-				uploader.render(this, graphics, clicked);
-				ImGuiUtils.hoveredTooltip(uploader.getTooltip());
-
-				if (++count % 5 != 0) {
-					ImGui.sameLine();
-				}
-			}
+			graphics.popStack();
 
 			if (close) {
 				ImGui.closeCurrentPopup();

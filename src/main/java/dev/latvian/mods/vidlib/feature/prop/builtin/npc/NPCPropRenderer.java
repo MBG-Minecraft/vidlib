@@ -3,11 +3,11 @@ package dev.latvian.mods.vidlib.feature.prop.builtin.npc;
 import com.mojang.math.Axis;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.EntityRenderTypes;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
+import dev.latvian.mods.vidlib.feature.gallery.PlayerSkins;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
 import dev.latvian.mods.vidlib.util.client.MultiBufferSourceOverride;
@@ -17,7 +17,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
-import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -29,26 +28,12 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.SimplexNoise;
 
 public class NPCPropRenderer implements PropRenderer<NPCProp> {
-	private static final PlayerSkin[] DEFAULT_SKINS = new PlayerSkin[]{
-		new PlayerSkin(ID.mc("textures/entity/player/wide/steve.png"), null, null, null, PlayerSkin.Model.WIDE, true),
-		new PlayerSkin(ID.mc("textures/entity/player/wide/alex.png"), null, null, null, PlayerSkin.Model.WIDE, true),
-		new PlayerSkin(ID.mc("textures/entity/player/wide/ari.png"), null, null, null, PlayerSkin.Model.WIDE, true),
-		new PlayerSkin(ID.mc("textures/entity/player/wide/efe.png"), null, null, null, PlayerSkin.Model.WIDE, true),
-		new PlayerSkin(ID.mc("textures/entity/player/wide/kai.png"), null, null, null, PlayerSkin.Model.WIDE, true),
-		new PlayerSkin(ID.mc("textures/entity/player/wide/makena.png"), null, null, null, PlayerSkin.Model.WIDE, true),
-		new PlayerSkin(ID.mc("textures/entity/player/wide/noor.png"), null, null, null, PlayerSkin.Model.WIDE, true),
-		new PlayerSkin(ID.mc("textures/entity/player/wide/sunny.png"), null, null, null, PlayerSkin.Model.WIDE, true),
-		new PlayerSkin(ID.mc("textures/entity/player/wide/zuri.png"), null, null, null, PlayerSkin.Model.WIDE, true)
-	};
-
-	private static final PlayerSkin[] SINGLE_SKIN = {DEFAULT_SKINS[0]};
+	private static final PlayerSkin[] SINGLE_SKIN = {PlayerSkins.DEFAULT_WIDE_SKINS[0]};
 
 	@ClientAutoRegister
 	public static final Holder HOLDER = new Holder(NPCProp.TYPE, new NPCPropRenderer());
 
-	private PlayerRenderer playerRenderer;
 	private RemotePlayer fakePlayer;
-	private PlayerRenderState playerRenderState;
 
 	@Override
 	public void render(PropRenderContext<NPCProp> ctx) {
@@ -65,9 +50,9 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 
 		var instances = p.getInstances();
 		var profile = PlayerProfiles.get(p.profile.getId());
-		var modelType = mc.getModelType(profile);
-		playerRenderer = (PlayerRenderer) mc.getEntityRenderDispatcher().getSkinMap().get(modelType);
-		playerRenderState = playerRenderer.createRenderState();
+		var modelType = PlayerSkins.getModelType(profile);
+		var playerRenderer = (PlayerRenderer) mc.getEntityRenderDispatcher().getSkinMap().get(modelType);
+		var playerRenderState = playerRenderer.createRenderState();
 
 		if (fakePlayer == null) {
 			fakePlayer = new RemotePlayer((ClientLevel) ctx.prop().level, profile.profile());
@@ -103,14 +88,14 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 
 		PlayerSkin[] skins;
 
-		if (!p.profile.getName().isEmpty() && !p.profile.getId().equals(Util.NIL_UUID)) {
+		if (!profile.profile().getName().isEmpty() && !profile.profile().getId().equals(Util.NIL_UUID)) {
 			skins = SINGLE_SKIN;
-			skins[0] = mc.getSkinManager().getInsecureSkin(p.profile);
+			skins[0] = mc.getSkinManager().getInsecureSkin(profile.profile());
 		} else if (p.randomSkin) {
-			skins = DEFAULT_SKINS;
+			skins = PlayerSkins.DEFAULT_WIDE_SKINS;
 		} else {
 			skins = SINGLE_SKIN;
-			skins[0] = DEFAULT_SKINS[0];
+			skins[0] = PlayerSkins.DEFAULT_WIDE_SKINS[0];
 		}
 
 		playerRenderState.attackTime = 0;

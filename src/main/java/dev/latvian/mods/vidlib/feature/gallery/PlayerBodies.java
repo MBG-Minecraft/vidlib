@@ -18,6 +18,7 @@ import dev.latvian.mods.vidlib.feature.client.TexturedRenderType;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
+import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
 import imgui.ImGui;
@@ -28,7 +29,6 @@ import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.TriState;
 import org.jetbrains.annotations.Nullable;
@@ -42,7 +42,7 @@ public interface PlayerBodies {
 	@ClientAutoRegister
 	Gallery GALLERY = new Gallery("player_bodies", () -> VidLibPaths.USER.get().resolve("player-bodies"), TriState.TRUE);
 
-	Lazy<RenderTarget> RENDER_TARGET = Lazy.of(() -> new TextureTarget("PlayerBodiesCanvas", 512, 512, true));
+	Lazy<RenderTarget> RENDER_TARGET = Lazy.of(() -> new TextureTarget("PlayerBodiesCanvas", 1024, 1024, true));
 
 	TexturedRenderType RENDER_TYPE = TexturedRenderType.internal(
 		"player_body",
@@ -63,12 +63,17 @@ public interface PlayerBodies {
 
 		@Override
 		public ResourceLocation getIcon() {
-			return VidLibTextures.ID_CARD;
+			return VidLibTextures.DEFAULT_PLAYER_BODY;
 		}
 
 		@Override
 		public String getTooltip() {
-			return "Fetch...";
+			return "Select a Profile Icon";
+		}
+
+		@Override
+		public ImColorVariant getColor() {
+			return ImColorVariant.BLUE;
 		}
 
 		@Override
@@ -120,15 +125,12 @@ public interface PlayerBodies {
 		// modelViewStack.scale(1F, 1F, -1F);
 		Lighting.setupForEntityInInventory();
 
+		var playerSkin = PlayerSkins.getSkin(mc, uuid, true);
 		var buffers = mc.renderBuffers().bufferSource();
-		var profile = PlayerProfiles.get(uuid);
-		var modelType = mc.getModelType(profile);
-		var playerRenderer = (PlayerRenderer) mc.getEntityRenderDispatcher().getSkinMap().get(modelType);
+		var playerRenderer = (PlayerRenderer) mc.getEntityRenderDispatcher().getSkinMap().get(playerSkin.model());
 		var playerRenderState = playerRenderer.createRenderState();
+		playerRenderState.skin = playerSkin;
 
-		var skin = PlayerSkins.get(mc, uuid);
-		skin.load(mc, true);
-		playerRenderState.skin = new PlayerSkin(skin.textureId(), profile.skinUrl().orElse(null), null, null, modelType, true);
 		var renderType = type.apply(playerRenderer.getTextureLocation(playerRenderState));
 		var renderTarget = renderType.getRenderTarget();
 		gpu.createCommandEncoder().clearColorAndDepthTextures(renderTarget.getColorTexture(), 0, renderTarget.getDepthTexture(), 1D);

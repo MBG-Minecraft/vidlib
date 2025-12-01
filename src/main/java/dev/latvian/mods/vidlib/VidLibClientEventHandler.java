@@ -28,6 +28,7 @@ import dev.latvian.mods.vidlib.feature.clothing.ClothingLayer;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingModel;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
+import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.environment.FluidPlaneRenderer;
 import dev.latvian.mods.vidlib.feature.gradient.ClientGradientLoader;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
@@ -645,6 +646,18 @@ public class VidLibClientEventHandler {
 	}
 
 	@SubscribeEvent
+	public static void loggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
+		PlayerProfiles.cache(event.getPlayer().getGameProfile());
+		var list = new ArrayList<ClientModInfo>();
+
+		for (var mod : ModList.get().getMods()) {
+			list.add(new ClientModInfo(mod.getModId(), mod.getDisplayName(), mod.getVersion().toString(), mod.getOwningFile().getFile().getFileName()));
+		}
+
+		event.getPlayer().c2s(new ClientModListPayload(list));
+	}
+
+	@SubscribeEvent
 	public static void loggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
 	}
 
@@ -688,17 +701,6 @@ public class VidLibClientEventHandler {
 				}
 			}
 		}
-	}
-
-	@SubscribeEvent
-	public static void loggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
-		var list = new ArrayList<ClientModInfo>();
-
-		for (var mod : ModList.get().getMods()) {
-			list.add(new ClientModInfo(mod.getModId(), mod.getDisplayName(), mod.getVersion().toString(), mod.getOwningFile().getFile().getFileName()));
-		}
-
-		event.getPlayer().c2s(new ClientModListPayload(list));
 	}
 
 	@SubscribeEvent
