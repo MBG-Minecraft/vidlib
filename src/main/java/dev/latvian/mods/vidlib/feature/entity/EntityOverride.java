@@ -145,8 +145,8 @@ public final class EntityOverride<T> {
 
 		var e = (Entity) entity;
 
-		if (e instanceof Player) {
-			var f = ForcedPlayerOverrides.MAP.get(e.getUUID());
+		if (e instanceof Player player) {
+			var f = ForcedPlayerOverrides.MAP.get(player.getUUID());
 
 			if (f != null) {
 				var fo = f.get(this);
@@ -156,7 +156,13 @@ public final class EntityOverride<T> {
 				}
 			}
 
-			for (var instance : e.getZones()) {
+			// Fake spawned in players like Flashback may not have been initialized yet.
+			// new ServerPlayer called before PlayerList#placeNewPlayer
+			if (player.vl$sessionData() == null) {
+				return null;
+			}
+
+			for (var instance : player.getZones()) {
 				var v1 = instance.zone.playerOverrides().get(this);
 
 				if (v1 != null) {
