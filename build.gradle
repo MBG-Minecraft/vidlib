@@ -252,12 +252,12 @@ publishing {
 	}
 
 	repositories {
-		if (ENV.MBG_MAVEN_URL && ENV.MBG_MAVEN_USERNAME && ENV.MBG_MAVEN_TOKEN) {
+		if (ENV.MAVEN_URL && ENV.MAVEN_USERNAME && ENV.MAVEN_TOKEN) {
 			maven {
-				url = ENV.MBG_MAVEN_URL
+				url = ENV.MAVEN_URL
 				credentials {
-					username = ENV.MBG_MAVEN_USERNAME
-					password = ENV.MBG_MAVEN_TOKEN
+					username = ENV.MAVEN_USERNAME
+					password = ENV.MAVEN_TOKEN
 				}
 			}
 		}
@@ -321,10 +321,13 @@ tasks.register('releaseLocalBuild') {
 	dependsOn tasks.publishToMavenLocal
 
 	if (ENV.MAVEN_URL && ENV.MAVEN_USERNAME && ENV.MAVEN_TOKEN) {
+		println("Publishing enabled, ${ENV.MAVEN_USERNAME} to ${ENV.MAVEN_URL}")
 		dependsOn tasks.publish
+	} else {
+		println("Publishing disabled")
 	}
 
-	if (ENV.DISCORD_WEBHOOK) {
+	if (ENV.MBG_DISCORD_WEBHOOK) {
 		dependsOn tasks.webHookUpdate
 	}
 }
