@@ -1,43 +1,28 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
-import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BarrierBlock;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BarrierBlock.class)
 public abstract class BarrierBlockMixin extends Block {
-	@Override
-	@Shadow
-	protected abstract RenderShape getRenderShape(BlockState state);
-
 	public BarrierBlockMixin(Properties properties) {
 		super(properties);
 	}
 
 	@Override
 	protected VoxelShape getCollisionShape(BlockState state, BlockGetter blockGetter, BlockPos pos, CollisionContext context) {
-		if (context instanceof EntityCollisionContext ctx && ctx.getEntity() != null && blockGetter instanceof Level level && level.getEnvironment().isServerNeoForge()) {
-			if (ctx.getEntity() instanceof AbstractArrow) {
-				return Shapes.empty();
-			}
+		var override = CommonGameEngine.INSTANCE.overrideBarrierShape(state, blockGetter, pos, context);
 
-			var v = EntityOverride.PASS_THROUGH_BARRIERS.get(ctx.getEntity());
-
-			if (v == null ? ctx.getEntity().vl$isCreative() : v) {
-				return Shapes.empty();
-			}
+		if (override != null) {
+			return override;
 		}
 
 		return Shapes.block();

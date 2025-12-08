@@ -55,6 +55,6 @@ public interface VLServerPlayer extends VLPlayer {
 
 	default void vl$initialSync(PacketAndPayloadAcceptor<ClientGamePacketListener> callback) {
 		var p = vl$self();
-		callback.accept(new SyncPlayerTagsPayload(p.getUUID(), List.copyOf(p.getTags())).toS2C(p.level(), p.level().vl$nextPacketId()));
+		callback.accept(new SyncPlayerTagsPayload(p.getUUID(), List.copyOf(p.getTags())).toGameS2C(p.level()));
 	}
 }

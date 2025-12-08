@@ -11,6 +11,12 @@ public class LevelOfDetailValue {
 		WITHIN_DISTANCE
 	}
 
+	public static final LevelOfDetailValue PLAYER_ARMOR = new LevelOfDetailValue(false, 128D);
+	public static final LevelOfDetailValue HELD_ITEM = new LevelOfDetailValue(false, 64D);
+	public static final LevelOfDetailValue CLOTHING = new LevelOfDetailValue(false, 96D);
+	public static final LevelOfDetailValue ENTITY_DETAILS = new LevelOfDetailValue(false, 96D);
+	public static final LevelOfDetailValue ENTITY_ARMOR = new LevelOfDetailValue(false, 128D);
+
 	// public static final Codec<LevelOfDetailValue> CODEC = Codec.either(Codec.BOOL, Codec.DOUBLE);
 
 	public final boolean is2D;

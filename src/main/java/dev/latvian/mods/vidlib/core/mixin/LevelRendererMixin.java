@@ -8,14 +8,12 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.ResourceHandle;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.klib.gl.GLDebugLog;
-import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.core.VLOutlineBufferSource;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxRenderer;
-import dev.latvian.mods.vidlib.util.client.VLViewArea;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -26,14 +24,11 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LevelTargetBundle;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.OutlineBufferSource;
-import net.minecraft.client.renderer.ViewArea;
-import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
@@ -70,15 +65,6 @@ public abstract class LevelRendererMixin {
 	private void vl$allChanged(CallbackInfo ci) {
 		if (level != null) {
 			AutoInit.Type.CHUNKS_RENDERED.invoke(level);
-		}
-	}
-
-	@Redirect(method = "allChanged", at = @At(value = "NEW", target = "(Lnet/minecraft/client/renderer/chunk/SectionRenderDispatcher;Lnet/minecraft/world/level/Level;ILnet/minecraft/client/renderer/LevelRenderer;)Lnet/minecraft/client/renderer/ViewArea;"))
-	private ViewArea vl$customViewArea(SectionRenderDispatcher dispatcher, Level level, int viewDistance, LevelRenderer levelRenderer) {
-		if (VidLibConfig.robert) {
-			return new VLViewArea(dispatcher, level, viewDistance, levelRenderer);
-		} else {
-			return new ViewArea(dispatcher, level, viewDistance, levelRenderer);
 		}
 	}
 
@@ -144,14 +130,12 @@ public abstract class LevelRendererMixin {
 
 	@Inject(method = "lambda$addMainPass$2", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;shouldShowEntityOutlines()Z"))
 	private void vl$copyMainDepth(FogParameters fogParameters, DeltaTracker deltaTracker, Camera camera, ProfilerFiller profiler, Matrix4f frustumMatrix, Matrix4f projectionMatrix, ResourceHandle<RenderTarget> itemEntity, ResourceHandle<RenderTarget> entityOutline, Frustum frustum, boolean renderBlockOutline, ResourceHandle<RenderTarget> translucent, ResourceHandle<RenderTarget> main, CallbackInfo ci) {
-		// Canvas.MAIN.clone(main.get(), true, true);
+		ClientGameEngine.INSTANCE.copyMainDepth(minecraft);
 	}
 
 	@Inject(method = "lambda$addMainPass$2", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;<init>()V"))
 	private void vl$copyOutlineDepth(FogParameters fogParameters, DeltaTracker deltaTracker, Camera camera, ProfilerFiller profiler, Matrix4f frustumMatrix, Matrix4f projectionMatrix, ResourceHandle<RenderTarget> itemEntity, ResourceHandle<RenderTarget> entityOutline, Frustum frustum, boolean renderBlockOutline, ResourceHandle<RenderTarget> translucent, ResourceHandle<RenderTarget> main, CallbackInfo ci) {
-		if (VidLibConfig.entityOutlineDepth && shouldShowEntityOutlines()) {
-			CanvasImpl.copyEntityOutlineDepth(minecraft, minecraft.getMainRenderTarget());
-		}
+		ClientGameEngine.INSTANCE.copyOutlineDepth(minecraft);
 	}
 
 	@Inject(method = "renderEntities", at = @At("HEAD"))

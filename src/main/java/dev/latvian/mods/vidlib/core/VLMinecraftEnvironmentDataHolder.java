@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.core;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
+import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import net.minecraft.resources.ResourceLocation;
@@ -14,6 +15,10 @@ public interface VLMinecraftEnvironmentDataHolder extends VLLevelContainer {
 
 	default long getGameTime() {
 		return vl$level().getGameTime();
+	}
+
+	default FeatureSet getServerFeatures() {
+		throw new NoMixinException(this);
 	}
 
 	default <T> T get(DataKey<T> type) {

@@ -5,6 +5,7 @@
 	"key.vidlib.repeat_last_command": "Repeat Last Command",
 	"key.vidlib.admin_panel": "Admin Panel",
 	"key.vidlib.reload": "Reload",
+	"key.vidlib.reload_shaders": "Reload Shaders",
 	"options.vidlib.admin_panel": "Admin Panel",
 	"options.vidlib.show_anchor": "Show Anchor",
 	"options.vidlib.show_fps": "Show FPS",

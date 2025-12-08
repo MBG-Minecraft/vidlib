@@ -1,8 +1,6 @@
 package dev.latvian.mods.vidlib;
 
-import dev.latvian.mods.vidlib.core.VLPayloadRegistrar;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
@@ -12,6 +10,8 @@ import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.misc.EventMarkerData;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.registry.GenericVLRegistry;
@@ -52,7 +52,6 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 @EventBusSubscriber(modid = VidLib.ID)
@@ -69,21 +68,6 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void afterLoad(FMLLoadCompleteEvent event) {
 		gameLoaded();
-	}
-
-	@SubscribeEvent
-	public static void registerPayloadHandlers(RegisterPayloadHandlersEvent event) {
-		var reg = VLPayloadRegistrar.of(event);
-
-		for (var s : AutoPacket.SCANNED.get()) {
-			if (s.to().contains(AutoPacket.To.CLIENT) && s.to().contains(AutoPacket.To.SERVER)) {
-				reg.bidi(s.type());
-			} else if (s.to().contains(AutoPacket.To.CLIENT)) {
-				reg.s2c(s.type());
-			} else if (s.to().contains(AutoPacket.To.SERVER)) {
-				reg.c2s(s.type());
-			}
-		}
 	}
 
 	@SubscribeEvent
@@ -185,15 +169,13 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent
 	public static void serverStarting(ServerStartingEvent event) {
+		SimplePacketPayload.S2C.set(0L);
 		gameLoaded();
 	}
 
 	@SubscribeEvent
 	public static void serverStarted(ServerStartedEvent event) {
-		if (VidLibConfig.betterDefaultGameRules) {
-			event.getServer().betterDefaultGameRules();
-		}
-
+		CommonGameEngine.INSTANCE.setupServer(event.getServer());
 		AutoInit.Type.SERVER_STARTED.invoke(event.getServer());
 	}
 

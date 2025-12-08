@@ -1,8 +1,5 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import dev.latvian.mods.klib.util.Cast;
-import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.misc.GlobalKeybinds;
@@ -57,10 +54,5 @@ public abstract class OptionsMixin {
 	private void vl$save(CallbackInfo ci) {
 		GlobalKeybinds.saveKeybinds((Options) (Object) this);
 		AutoInit.Type.CLIENT_OPTIONS_SAVED.invoke(this);
-	}
-
-	@ModifyExpressionValue(method = "getEffectiveRenderDistance", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/OptionInstance;get()Ljava/lang/Object;"))
-	private <T> T vl$getEffectiveRenderDistance(T original) {
-		return VidLibConfig.robert ? Cast.to(VidLibConfig.clientRenderDistance) : original;
 	}
 }

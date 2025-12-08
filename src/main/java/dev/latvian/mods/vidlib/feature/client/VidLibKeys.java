@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
+import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ArrayListDeque;
@@ -17,6 +18,7 @@ public class VidLibKeys {
 	public static KeyMapping reloadKeyMapping;
 	public static KeyMapping repeatLastCommandKeyMapping;
 	public static KeyMapping adminPanelKeyMapping;
+	public static KeyMapping reloadShadersKeyMapping;
 
 	private static KeyMapping register(RegisterKeyMappingsEvent event, String name, KeyModifier modifier, int defaultKey, KeyConflictContext conflict) {
 		var key = new KeyMapping(name, conflict, modifier, InputConstants.Type.KEYSYM, defaultKey, "key.categories.vidlib");
@@ -34,6 +36,7 @@ public class VidLibKeys {
 		reloadKeyMapping = register(event, "key.vidlib.reload", KeyModifier.NONE, GLFW.GLFW_KEY_R);
 		repeatLastCommandKeyMapping = register(event, "key.vidlib.repeat_last_command", KeyModifier.NONE, GLFW.GLFW_KEY_SEMICOLON);
 		adminPanelKeyMapping = register(event, "key.vidlib.admin_panel", KeyModifier.NONE, GLFW.GLFW_KEY_GRAVE_ACCENT, KeyConflictContext.UNIVERSAL);
+		reloadShadersKeyMapping = register(event, "key.vidlib.reload_shaders", KeyModifier.NONE, GLFW.GLFW_KEY_X);
 	}
 
 	public static void handle(Minecraft mc) {
@@ -70,5 +73,14 @@ public class VidLibKeys {
 			VidLibClientOptions.ADMIN_PANEL.set(adminPanel);
 			mc.options.save();
 		}
+	}
+
+	public static boolean handleDebugKeys(Minecraft mc, int key) {
+		if (key == reloadShadersKeyMapping.getKey().getValue()) {
+			MiscClientUtils.reloadShaders(mc);
+			return true;
+		}
+
+		return false;
 	}
 }

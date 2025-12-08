@@ -2,12 +2,12 @@ package dev.latvian.mods.vidlib.feature.misc;
 
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
-import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
 
@@ -25,12 +25,6 @@ public record ClientModListPayload(List<ClientModInfo> modList) implements Simpl
 
 	@Override
 	public void handle(Context ctx) {
-		if (VidLibConfig.logClientModList && ctx.level().getServer().isDedicatedServer()) {
-			VidLib.LOGGER.info("Player " + ctx.player().getScoreboardName() + " logged in with mods:");
-
-			for (var info : modList) {
-				VidLib.LOGGER.info(" - " + info.name() + " (" + info.name() + " / " + info.fileName() + "), " + info.version());
-			}
-		}
+		CommonGameEngine.INSTANCE.handleClientModList((ServerPlayer) ctx.player(), modList);
 	}
 }

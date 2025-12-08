@@ -6,6 +6,7 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.Gradient;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
+import dev.latvian.mods.vidlib.feature.feature.Feature;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
@@ -172,7 +173,7 @@ public abstract class ConfigEntry<T> {
 		var value = get();
 		graphics.mc.getServerData().set(key, value);
 
-		if (full && !graphics.isClientOnly) {
+		if (full && !graphics.isReplay && graphics.serverFeatures.has(Feature.SERVER_DATA)) {
 			graphics.mc.updateServerDataValue(key, value);
 		}
 	}

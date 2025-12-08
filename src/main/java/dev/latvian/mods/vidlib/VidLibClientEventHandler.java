@@ -456,7 +456,7 @@ public class VidLibClientEventHandler {
 			ScreenText.RENDER.topLeft.add(comp);
 		}
 
-		if (!mc.vl$hideGui() && !mc.player.isReplayCamera()) {
+		if (!ClientGameEngine.INSTANCE.hideGui(mc) && !mc.player.isReplayCamera()) {
 			ScreenText.RENDER.addAll(ScreenText.CLIENT_TICK);
 			ScreenText.RENDER.ops = mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
 
@@ -655,6 +655,7 @@ public class VidLibClientEventHandler {
 		}
 
 		event.getPlayer().c2s(new ClientModListPayload(list));
+		// event.getPlayer().c2s(new ClientFeaturesPayload(FeatureSet.CLIENT_FEATURES.get()));
 	}
 
 	@SubscribeEvent

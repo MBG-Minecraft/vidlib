@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import com.mojang.blaze3d.platform.TextureUtil;
-import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasPanel;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
@@ -15,6 +14,7 @@ import dev.latvian.mods.vidlib.feature.gallery.PlayerBodies;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerHeads;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerSkins;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
@@ -25,6 +25,7 @@ import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.skybox.Skybox;
 import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
+import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import net.minecraft.ChatFormatting;
@@ -81,11 +82,11 @@ public class BuiltInImGui {
 		list.add(WorldBorderPanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
 
 		list.add(MenuItem.menu(ImIcons.VISIBLE, "Level of Detail", (g1, menuItems) -> {
-			menuItems.add(MenuItem.menu(ImIcons.SHIELD, "Player Armor", VidLibConfig.playerArmorLevelOfDetail));
-			menuItems.add(MenuItem.menu(ImIcons.SWORDS, "Held Item", VidLibConfig.heldItemLevelOfDetail));
-			menuItems.add(MenuItem.menu(ImIcons.SHIRT, "Clothing", VidLibConfig.clothingLevelOfDetail));
-			menuItems.add(MenuItem.menu(ImIcons.PAW, "Entity Details", VidLibConfig.entityDetailsLevelOfDetail));
-			menuItems.add(MenuItem.menu(ImIcons.SHIELD, "Entity Armor", VidLibConfig.entityArmorLevelOfDetail));
+			menuItems.add(MenuItem.menu(ImIcons.SHIELD, "Player Armor", LevelOfDetailValue.PLAYER_ARMOR));
+			menuItems.add(MenuItem.menu(ImIcons.SWORDS, "Held Item", LevelOfDetailValue.HELD_ITEM));
+			menuItems.add(MenuItem.menu(ImIcons.SHIRT, "Clothing", LevelOfDetailValue.CLOTHING));
+			menuItems.add(MenuItem.menu(ImIcons.PAW, "Entity Details", LevelOfDetailValue.ENTITY_DETAILS));
+			menuItems.add(MenuItem.menu(ImIcons.SHIELD, "Entity Armor", LevelOfDetailValue.ENTITY_ARMOR));
 		}));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.ConfigDropdown(graphics, list));
@@ -104,6 +105,8 @@ public class BuiltInImGui {
 				g.mc.levelRenderer.captureFrustum();
 			}
 		}).enabled(graphics.inGame));
+
+		list.add(MenuItem.item(ImIcons.RELOAD, "Reload Shaders", g -> MiscClientUtils.reloadShaders(g.mc)));
 
 		list.add(MenuItem.item(ImIcons.STOP, "Stop all Sounds", g -> g.mc.getSoundManager().stop()));
 

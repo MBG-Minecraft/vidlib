@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.skybox;
 import com.mojang.blaze3d.platform.NativeImage;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
+import dev.latvian.mods.vidlib.feature.feature.Feature;
 import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import net.minecraft.client.Minecraft;
@@ -29,7 +30,7 @@ public class Skybox {
 			var tex = session.getSkybox(skybox).loadTexture(g.mc);
 
 			slist.add(MenuItem.item(tex.getIcon(), skybox.getPath(), skybox.equals(current), g1 -> {
-				if (g1.isClientOnly) {
+				if (g1.isReplay || !g1.serverFeatures.has(Feature.SKYBOX)) {
 					g1.mc.getServerData().setSuperOverride(InternalServerData.SKYBOX, skybox);
 				} else {
 					g1.mc.runClientCommand("skybox set \"" + skybox + "\"");
@@ -40,7 +41,7 @@ public class Skybox {
 		slist.add(MenuItem.SEPARATOR);
 
 		slist.add(MenuItem.item(ImIcons.INVISIBLE, "Vanilla", Skyboxes.VANILLA.equals(current), g1 -> {
-			if (g1.isClientOnly) {
+			if (g1.isReplay || !g1.serverFeatures.has(Feature.SKYBOX)) {
 				g1.mc.getServerData().setSuperOverride(InternalServerData.SKYBOX, Skyboxes.VANILLA);
 			} else {
 				g1.mc.runClientCommand("skybox set \"minecraft:vanilla\"");

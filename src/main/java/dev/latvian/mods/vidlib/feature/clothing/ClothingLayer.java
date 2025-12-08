@@ -4,8 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
+import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -59,7 +59,7 @@ public class ClothingLayer extends RenderLayer<PlayerRenderState, PlayerModel> {
 	public void render(PoseStack ms, MultiBufferSource buffers, int light, PlayerRenderState state, float yRot, float xRot) {
 		var clothing = VidLibEntityRenderStates.getClothing(state);
 
-		if (clothing == Clothing.NONE || !VidLibConfig.clothingLevelOfDetail.isVisible(Minecraft.getInstance().gameRenderer.getMainCamera().getPosition(), state.x, state.y, state.z)) {
+		if (clothing == Clothing.NONE || !LevelOfDetailValue.CLOTHING.isVisible(Minecraft.getInstance().gameRenderer.getMainCamera().getPosition(), state.x, state.y, state.z)) {
 			return;
 		}
 

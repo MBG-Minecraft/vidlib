@@ -79,7 +79,7 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 
 	@ModifyExpressionValue(method = "renderNames", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z"))
 	private static boolean vl$hideGui(boolean original) {
-		return Minecraft.getInstance().vl$hideGui();
+		return ClientGameEngine.INSTANCE.hideGui(Minecraft.getInstance());
 	}
 
 	@Override

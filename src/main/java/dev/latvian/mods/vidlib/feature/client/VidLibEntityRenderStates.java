@@ -2,9 +2,9 @@ package dev.latvian.mods.vidlib.feature.client;
 
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.state.ArmedEntityRenderState;
@@ -70,10 +70,10 @@ public interface VidLibEntityRenderStates {
 	}
 
 	static void lod(EntityRenderState state, Vec3 camPos) {
-		boolean hideDetails = !VidLibConfig.entityDetailsLevelOfDetail.isVisible(camPos, state.x, state.y, state.z);
-		boolean hideArmor = !(state instanceof PlayerRenderState ? VidLibConfig.playerArmorLevelOfDetail : VidLibConfig.entityArmorLevelOfDetail).isVisible(camPos, state.x, state.y, state.z);
-		boolean hideHandItems = !VidLibConfig.heldItemLevelOfDetail.isVisible(camPos, state.x, state.y, state.z);
-		boolean hideClothing = !VidLibConfig.clothingLevelOfDetail.isVisible(camPos, state.x, state.y, state.z);
+		boolean hideDetails = !LevelOfDetailValue.ENTITY_DETAILS.isVisible(camPos, state.x, state.y, state.z);
+		boolean hideArmor = !(state instanceof PlayerRenderState ? LevelOfDetailValue.PLAYER_ARMOR : LevelOfDetailValue.ENTITY_ARMOR).isVisible(camPos, state.x, state.y, state.z);
+		boolean hideHandItems = !LevelOfDetailValue.HELD_ITEM.isVisible(camPos, state.x, state.y, state.z);
+		boolean hideClothing = !LevelOfDetailValue.CLOTHING.isVisible(camPos, state.x, state.y, state.z);
 		lod(state, hideDetails, hideArmor, hideHandItems, hideClothing);
 	}
 

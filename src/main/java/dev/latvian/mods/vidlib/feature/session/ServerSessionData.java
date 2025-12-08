@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.session;
 
 import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
+import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.input.PlayerInputChanged;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToClient;
 import net.minecraft.server.MinecraftServer;
@@ -16,10 +17,12 @@ import java.util.UUID;
 public class ServerSessionData extends SessionData {
 	public final MinecraftServer server;
 	private Set<String> currentTags = Set.of();
+	public FeatureSet clientFeatureSet;
 
 	public ServerSessionData(MinecraftServer server, UUID uuid) {
 		super(uuid);
 		this.server = server;
+		this.clientFeatureSet = FeatureSet.EMPTY;
 	}
 
 	public void vl$preTick(ServerPlayer player) {
@@ -53,5 +56,10 @@ public class ServerSessionData extends SessionData {
 	@Override
 	public Set<String> getTags(long gameTime) {
 		return currentTags;
+	}
+
+	@Override
+	public FeatureSet getClientFeatures() {
+		return clientFeatureSet;
 	}
 }

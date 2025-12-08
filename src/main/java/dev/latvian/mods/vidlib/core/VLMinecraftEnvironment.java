@@ -103,8 +103,4 @@ public interface VLMinecraftEnvironment extends VLPlayerContainer, VLMinecraftEn
 	default String getServerBrand() {
 		return null;
 	}
-
-	default boolean isServerNeoForge() {
-		return "neoforge".equals(getServerBrand());
-	}
 }

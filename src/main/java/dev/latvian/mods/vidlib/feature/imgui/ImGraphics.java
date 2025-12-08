@@ -6,6 +6,7 @@ import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
+import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.session.LocalClientSessionData;
 import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
@@ -52,8 +53,7 @@ public class ImGraphics {
 	public final LocalClientSessionData session;
 	public final boolean isSinglePlayer;
 	public final boolean isReplay;
-	public final boolean isNeoForgeServer;
-	public final boolean isClientOnly;
+	public final FeatureSet serverFeatures;
 	public final boolean adminPanel;
 	public final boolean isAdmin;
 	private VarStackStack stack;
@@ -64,8 +64,7 @@ public class ImGraphics {
 		this.session = inGame ? mc.player.vl$sessionData() : null;
 		this.isSinglePlayer = inGame && mc.isLocalServer();
 		this.isReplay = inGame && mc.level.isReplayLevel();
-		this.isNeoForgeServer = inGame && mc.isServerNeoForge();
-		this.isClientOnly = isReplay || !isNeoForgeServer;
+		this.serverFeatures = inGame ? mc.level.getServerFeatures() : FeatureSet.EMPTY;
 		this.adminPanel = VidLibClientOptions.getAdminPanel();
 		this.isAdmin = inGame && (isSinglePlayer || mc.player.hasPermissions(2));
 	}

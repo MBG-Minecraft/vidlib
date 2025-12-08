@@ -6,20 +6,24 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 public interface SimplePacketPayload {
+	AtomicLong S2C = new AtomicLong(0L);
+	AtomicLong C2S = new AtomicLong(0L);
+
 	VidLibPacketType<?> getType();
 
 	default boolean allowDebugLogging() {
 		return true;
 	}
 
-	default void handleAsync(Context ctx) {
-		if (ctx.level().isClientSide()) {
-			ctx.player().vl$sessionData().debugPacket(ctx, this);
-		}
+	default void handleAsync(IPayloadContext payloadContext, long uid, long remoteGameTime) {
+		payloadContext.enqueueWork(() -> {
+			var ctx = new Context(payloadContext, getType().type().id(), uid, remoteGameTime);
 
-		ctx.parent().enqueueWork(() -> {
 			try {
 				handle(ctx);
 			} catch (Exception ex) {
@@ -31,12 +35,28 @@ public interface SimplePacketPayload {
 	default void handle(Context ctx) {
 	}
 
-	default ClientboundCustomPayloadPacket toS2C(Level level, long uid) {
-		return new ClientboundCustomPayloadPacket(new VidLibPacketPayloadContainer(this, uid, level.getGameTime()));
+	default VidLibPacketPayloadContainer toS2C(long gameTime) {
+		return new VidLibPacketPayloadContainer(this, S2C.incrementAndGet(), gameTime);
 	}
 
-	default ServerboundCustomPayloadPacket toC2S(Level level, long uid) {
-		return new ServerboundCustomPayloadPacket(new VidLibPacketPayloadContainer(this, uid, level.getGameTime()));
+	default VidLibPacketPayloadContainer toC2S(long gameTime) {
+		return new VidLibPacketPayloadContainer(this, C2S.incrementAndGet(), gameTime);
+	}
+
+	default ClientboundCustomPayloadPacket toConfigS2C() {
+		return toS2C(0L).toVanillaClientbound();
+	}
+
+	default ServerboundCustomPayloadPacket toConfigC2S() {
+		return toC2S(0L).toVanillaServerbound();
+	}
+
+	default ClientboundCustomPayloadPacket toGameS2C(Level level) {
+		return toS2C(level.getGameTime()).toVanillaClientbound();
+	}
+
+	default ServerboundCustomPayloadPacket toGameC2S(Level level) {
+		return toC2S(level.getGameTime()).toVanillaServerbound();
 	}
 
 	default byte[] toBytes(Level level, long uid) {

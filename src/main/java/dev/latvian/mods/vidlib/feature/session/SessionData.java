@@ -8,12 +8,11 @@ import dev.latvian.mods.vidlib.feature.data.DataMapValue;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
+import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToClient;
 import dev.latvian.mods.vidlib.feature.misc.SyncPlayerTagsPayload;
-import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.registry.SyncRegistryPayload;
@@ -37,6 +36,7 @@ import java.util.UUID;
 public class SessionData {
 	public final UUID uuid;
 	public final DataMap dataMap;
+	public final long startTime;
 	public int tick;
 	public PlayerInput prevInput;
 	public PlayerInput input;
@@ -54,6 +54,7 @@ public class SessionData {
 	public SessionData(UUID uuid) {
 		this.uuid = uuid;
 		this.dataMap = new DataMap(uuid, DataKey.PLAYER);
+		this.startTime = System.currentTimeMillis();
 		this.prevInput = PlayerInput.NONE;
 		this.input = PlayerInput.NONE;
 		this.zonesIn = List.of();
@@ -150,6 +151,7 @@ public class SessionData {
 		var time = level.getGameTime();
 
 		packets.s2c(new ClientboundSetTimePacket(time, level.getDayTime(), level.vl$getTickDayTime()));
+		// packets.s2c(new ServerFeaturesPayload(FeatureSet.SERVER_FEATURES.get()));
 
 		for (var reg : SyncedRegistry.ALL.values()) {
 			packets.s2c(new SyncRegistryPayload(reg, Map.copyOf(reg.registry().getMap())));
@@ -197,6 +199,7 @@ public class SessionData {
 		return Set.of();
 	}
 
-	public void debugPacket(Context ctx, SimplePacketPayload payload) {
+	public FeatureSet getClientFeatures() {
+		return FeatureSet.EMPTY;
 	}
 }

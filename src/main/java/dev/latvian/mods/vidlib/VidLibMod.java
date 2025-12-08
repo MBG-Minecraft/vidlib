@@ -45,9 +45,5 @@ public class VidLibMod {
 		}
 
 		particleRegistry.register(bus);
-
-		if (ModList.get().isLoaded("video")) {
-			VidLibConfig.strongEntityOutline = true;
-		}
 	}
 }

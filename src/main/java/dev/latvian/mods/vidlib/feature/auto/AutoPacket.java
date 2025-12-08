@@ -12,22 +12,40 @@ import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Locale;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface AutoPacket {
 	enum To {
 		CLIENT,
-		SERVER,
-		CLIENT_CONFIG,
-		SERVER_CONFIG;
+		SERVER;
 
 		public static final EnumSet<To> DEFAULT = EnumSet.of(CLIENT);
+
+		@Override
+		public String toString() {
+			return name().toLowerCase(Locale.ROOT);
+		}
+	}
+
+	enum Stage {
+		CONFIG,
+		GAME;
+
+		public static final EnumSet<Stage> DEFAULT = EnumSet.of(GAME);
+
+		@Override
+		public String toString() {
+			return name().toLowerCase(Locale.ROOT);
+		}
 	}
 
 	To[] value() default To.CLIENT;
 
-	record ScanData(VidLibPacketType<?> type, EnumSet<To> to) {
+	Stage[] stage() default Stage.GAME;
+
+	record ScanData(String className, VidLibPacketType<?> type, EnumSet<To> to, EnumSet<Stage> stage) {
 	}
 
 	@ApiStatus.Internal
@@ -37,15 +55,14 @@ public @interface AutoPacket {
 
 		AutoHelper.load(AutoPacket.class, EnumSet.of(ElementType.FIELD), (source, classLoader, ad) -> {
 			var clazz = AutoHelper.initClass(ad, classLoader);
-				var type = AutoHelper.getStaticFieldValue(clazz, ad);
+			var type = AutoHelper.getStaticFieldValue(clazz, ad);
 
 			if (type instanceof VidLibPacketType<?> t) {
-					var toList = AutoHelper.getEnumValues(ad, To.class, "value", To.DEFAULT);
-				VidLib.LOGGER.info("Found @AutoPacket " + clazz.getName() + "." + ad.memberName() + " to " + String.join(", ", toList.stream().map(p -> p.name().toLowerCase()).toList()));
-					list.add(new ScanData(t, toList));
-				}
+				var toList = AutoHelper.getEnumValues(ad, To.class, "value", To.DEFAULT);
+				var stageList = AutoHelper.getEnumValues(ad, Stage.class, "stage", Stage.DEFAULT);
+				list.add(new ScanData(clazz.getName(), t, toList, stageList));
 			}
-		);
+		});
 
 		return list;
 	});

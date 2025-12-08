@@ -24,15 +24,13 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.environment.FluidPlane;
 import dev.latvian.mods.vidlib.feature.environment.WorldBorderOverride;
+import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.imgui.AdminPanel;
 import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.input.PlayerInputChanged;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToServer;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
-import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.npc.NPCParticleOptions;
 import dev.latvian.mods.vidlib.feature.npc.NPCRecording;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
@@ -106,10 +104,8 @@ public class LocalClientSessionData extends ClientSessionData {
 	public ScreenFadeInstance screenFade;
 	public WorldMouse worldMouse;
 	public NPCRecording npcRecording;
-	public final List<PacketDebuggerPanel.LoggedPacket> debugPackets;
 	public final List<Decal> debugDecals;
 	public final List<ScreenEffectInstance> screenEffects;
-	private Boolean isServerNeoForge;
 	public Component topInfoBarOverride;
 	public Component bottomInfoBarOverride;
 	public FluidPlane fluidPlane;
@@ -134,7 +130,6 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.skyboxes = new Object2ObjectOpenHashMap<>();
 		this.serverDataMap = new DataMap(uuid, DataKey.SERVER);
 		this.globalVariables = new KNumberVariables();
-		this.debugPackets = new ArrayList<>();
 		this.debugDecals = new ArrayList<>();
 		this.screenEffects = new ArrayList<>();
 		this.glowColors = new Object2ObjectOpenHashMap<>();
@@ -492,17 +487,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	}
 
 	@Override
-	public void debugPacket(Context ctx, SimplePacketPayload payload) {
-		if (PacketDebuggerPanel.INSTANCE.isOpen()) {
-			debugPackets.add(new PacketDebuggerPanel.LoggedPacket(ctx.uid(), ctx.remoteGameTime(), payload));
-		}
-	}
-
-	public boolean isServerNeoForge() {
-		if (isServerNeoForge == null) {
-			isServerNeoForge = "neoforge".equals(mc.getServerBrand());
-		}
-
-		return isServerNeoForge;
+	public FeatureSet getClientFeatures() {
+		return FeatureSet.CLIENT_FEATURES.get();
 	}
 }

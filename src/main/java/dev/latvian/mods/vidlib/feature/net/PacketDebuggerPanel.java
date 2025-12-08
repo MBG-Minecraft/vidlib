@@ -5,15 +5,22 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PacketDebuggerPanel extends AdminPanel {
 	public record LoggedPacket(long uid, long remoteGameTime, SimplePacketPayload payload) {
 	}
 
 	public static final PacketDebuggerPanel INSTANCE = new PacketDebuggerPanel();
-	public final ImBoolean includeHidden = new ImBoolean(false);
+
+	public final List<LoggedPacket> debugPackets;
+	public final ImBoolean includeHidden;
 
 	public PacketDebuggerPanel() {
 		super("packet-debugger", "Packet Debugger");
+		this.debugPackets = new ArrayList<>();
+		this.includeHidden = new ImBoolean(false);
 	}
 
 	@Override
@@ -25,8 +32,6 @@ public class PacketDebuggerPanel extends AdminPanel {
 
 		ImGui.pushItemWidth(-1F);
 		ImGui.checkbox("Include Hidden Packets", includeHidden);
-
-		var debugPackets = graphics.mc.player.vl$sessionData().debugPackets;
 
 		for (int i = 0; i < debugPackets.size(); i++) {
 			var p = debugPackets.get(i);

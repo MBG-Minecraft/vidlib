@@ -95,7 +95,7 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 
 	@ModifyExpressionValue(method = {"render", "renderItemInHand", "shouldRenderBlockOutline"}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z"))
 	private boolean vl$hideGui(boolean original) {
-		return minecraft.vl$hideGui();
+		return ClientGameEngine.INSTANCE.hideGui(minecraft);
 	}
 
 	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;bobView(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"))

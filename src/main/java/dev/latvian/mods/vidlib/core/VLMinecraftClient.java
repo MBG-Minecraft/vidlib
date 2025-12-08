@@ -24,6 +24,7 @@ import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
 import dev.latvian.mods.vidlib.feature.data.UpdatePlayerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.data.UpdateServerDataValuePayload;
+import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.EventMarkerData;
 import dev.latvian.mods.vidlib.feature.particle.FireData;
@@ -118,6 +119,11 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	@Override
 	default DataMap getServerData() {
 		return vl$self().player.vl$sessionData().serverDataMap;
+	}
+
+	@Override
+	default FeatureSet getServerFeatures() {
+		return FeatureSet.REMOTE_SERVER_FEATURES;
 	}
 
 	@Override
@@ -594,21 +600,6 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		return near * far / (far + depth * (near - far));
 	}
 
-	default boolean vl$hideGui() {
-		var mc = vl$self();
-
-		if (mc.options.hideGui) {
-			return true;
-		} else if (mc.screen != null && mc.screen.hideGui()) {
-			return true;
-		} else if (mc.player == null) {
-			return false;
-		}
-
-		var session = mc.player.vl$sessionData();
-		return session.cameraOverride != null && session.cameraOverride.hideGui();
-	}
-
 	default TextureAtlas getBlockAtlas() {
 		return vl$self().getModelManager().getAtlas(SpriteKey.BLOCKS);
 	}
@@ -660,12 +651,6 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	default String getServerBrand() {
 		var p = vl$self().player;
 		return p == null ? null : p.connection.serverBrand();
-	}
-
-	@Override
-	default boolean isServerNeoForge() {
-		var p = vl$self().player;
-		return p != null && p.vl$sessionData().isServerNeoForge();
 	}
 
 	default float getEffectScale() {
