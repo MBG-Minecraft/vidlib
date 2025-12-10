@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.platform;
+package dev.latvian.mods.vidlib.feature.platform.neoforge;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -8,6 +8,7 @@ import dev.latvian.mods.vidlib.feature.auto.ScannedAnnotation;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.capture.PacketCaptureEvent;
 import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;

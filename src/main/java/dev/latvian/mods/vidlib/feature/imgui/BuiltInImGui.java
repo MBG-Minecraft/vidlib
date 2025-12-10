@@ -83,6 +83,7 @@ public class BuiltInImGui {
 
 		list.add(MenuItem.menu(ImIcons.VISIBLE, "Level of Detail", (g1, menuItems) -> {
 			menuItems.add(MenuItem.menu(ImIcons.SHIELD, "Player Armor", LevelOfDetailValue.PLAYER_ARMOR));
+			menuItems.add(MenuItem.item(ImIcons.SHIELD, "Player Headwear", MiscClientUtils.PLAYER_HEADWEAR).remainOpen(true));
 			menuItems.add(MenuItem.menu(ImIcons.SWORDS, "Held Item", LevelOfDetailValue.HELD_ITEM));
 			menuItems.add(MenuItem.menu(ImIcons.SHIRT, "Clothing", LevelOfDetailValue.CLOTHING));
 			menuItems.add(MenuItem.menu(ImIcons.PAW, "Entity Details", LevelOfDetailValue.ENTITY_DETAILS));

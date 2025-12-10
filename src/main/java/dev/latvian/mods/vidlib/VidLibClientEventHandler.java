@@ -34,8 +34,6 @@ import dev.latvian.mods.vidlib.feature.gradient.ClientGradientLoader;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
-import dev.latvian.mods.vidlib.feature.misc.ClientModInfo;
-import dev.latvian.mods.vidlib.feature.misc.ClientModListPayload;
 import dev.latvian.mods.vidlib.feature.misc.DebugTextEvent;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
@@ -84,7 +82,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
@@ -115,7 +112,6 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
@@ -648,14 +644,6 @@ public class VidLibClientEventHandler {
 	@SubscribeEvent
 	public static void loggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
 		PlayerProfiles.cache(event.getPlayer().getGameProfile());
-		var list = new ArrayList<ClientModInfo>();
-
-		for (var mod : ModList.get().getMods()) {
-			list.add(new ClientModInfo(mod.getModId(), mod.getDisplayName(), mod.getVersion().toString(), mod.getOwningFile().getFile().getFileName()));
-		}
-
-		event.getPlayer().c2s(new ClientModListPayload(list));
-		// event.getPlayer().c2s(new ClientFeaturesPayload(FeatureSet.CLIENT_FEATURES.get()));
 	}
 
 	@SubscribeEvent

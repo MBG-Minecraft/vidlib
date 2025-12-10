@@ -5,12 +5,11 @@ import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
 import dev.latvian.mods.vidlib.feature.misc.ClientModInfo;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
+import dev.latvian.mods.vidlib.feature.net.Context;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
@@ -24,7 +23,6 @@ import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.fml.loading.FMLLoader;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -117,21 +115,21 @@ public class CommonGameEngine {
 		return 20; // 1200 = default
 	}
 
-	public void handlePacket(IPayloadContext ctx, VidLibPacketPayloadContainer payload) {
-		if (ctx.flow() == PacketFlow.CLIENTBOUND) {
-			if (!forwardHandlePacketToClient(ctx, payload)) {
+	public void handlePacket(Context ctx) {
+		if (ctx.listener().flow() == PacketFlow.CLIENTBOUND) {
+			if (!forwardHandlePacketToClient(ctx)) {
 				return;
 			}
 		}
 
-		payload.wrapped().handleAsync(ctx, payload.uid(), payload.remoteGameTime());
+		ctx.payload().wrapped().handleAsync(ctx);
 	}
 
-	private boolean forwardHandlePacketToClient(IPayloadContext ctx, VidLibPacketPayloadContainer payload) {
-		return ClientGameEngine.INSTANCE.handleClientPacket(ctx, payload);
+	private boolean forwardHandlePacketToClient(Context ctx) {
+		return ClientGameEngine.INSTANCE.handleClientPacket(ctx);
 	}
 
-	public void handleClientModList(ServerPlayer player, List<ClientModInfo> modList) {
+	public void handleClientModList(Context ctx, List<ClientModInfo> modList) {
 		/*
 		if (player.server.isDedicatedServer()) {
 			VidLib.LOGGER.info("Player " + player.getScoreboardName() + " logged in with mods:");

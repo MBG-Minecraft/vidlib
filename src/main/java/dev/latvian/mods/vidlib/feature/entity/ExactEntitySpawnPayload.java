@@ -76,7 +76,7 @@ public record ExactEntitySpawnPayload(
 
 	@Nullable
 	public Entity spawnEntity(Context ctx) {
-		if (ctx.parent().listener() instanceof VLClientPacketListener listener) {
+		if (ctx.listener() instanceof VLClientPacketListener listener) {
 			return listener.vl$addEntity(ctx, this);
 		}
 

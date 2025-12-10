@@ -12,7 +12,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 
 public record UpdateItemDataPayload(InteractionHand hand, CompoundTag tag) implements SimplePacketPayload {
-	@AutoPacket(AutoPacket.To.SERVER)
+	@AutoPacket(to = AutoPacket.To.SERVER)
 	public static final VidLibPacketType<UpdateItemDataPayload> TYPE = VidLibPacketType.internal("update_item_data", CompositeStreamCodec.of(
 		DataTypes.HAND.streamCodec(), UpdateItemDataPayload::hand,
 		MCStreamCodecs.COMPOUND_TAG, UpdateItemDataPayload::tag,

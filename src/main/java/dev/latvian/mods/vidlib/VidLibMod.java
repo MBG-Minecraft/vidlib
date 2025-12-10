@@ -2,8 +2,8 @@ package dev.latvian.mods.vidlib;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
-import dev.latvian.mods.vidlib.feature.platform.NeoPlatformHelper;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.neoforge.NeoPlatformHelper;
 import net.minecraft.core.registries.Registries;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;

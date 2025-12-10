@@ -9,6 +9,7 @@ import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
+import imgui.type.ImBoolean;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -24,6 +25,7 @@ public class MiscClientUtils {
 	public static final ConcurrentLinkedDeque<AutoCloseable> CLIENT_CLOSEABLE = new ConcurrentLinkedDeque<>();
 	public static final Matrix4f FRUSTUM_MATRIX = new Matrix4f();
 	public static final Matrix4f PERSPECTIVE_MATRIX = new Matrix4f();
+	public static final ImBoolean PLAYER_HEADWEAR = new ImBoolean(true);
 
 	public static void reloadShaders(Minecraft mc) {
 		mc.getShaderManager().reload(CompletableFuture::completedFuture, mc.getResourceManager(), Util.backgroundExecutor(), mc).thenRunAsync(() -> {

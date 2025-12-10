@@ -9,7 +9,7 @@ import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 import java.util.List;
 
 public record UpdateServerDataValuePayload(List<DataMapValue> update) implements SimplePacketPayload {
-	@AutoPacket(AutoPacket.To.SERVER)
+	@AutoPacket(to = AutoPacket.To.SERVER)
 	public static final VidLibPacketType<UpdateServerDataValuePayload> TYPE = VidLibPacketType.internal("update_server_data_value", DataKey.SERVER.valueListStreamCodec.map(UpdateServerDataValuePayload::new, UpdateServerDataValuePayload::update));
 
 	@Override

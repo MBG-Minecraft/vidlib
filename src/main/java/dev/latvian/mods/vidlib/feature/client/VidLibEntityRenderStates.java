@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.client;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
+import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
 import net.minecraft.client.Minecraft;
@@ -88,6 +89,9 @@ public interface VidLibEntityRenderStates {
 			s.chestEquipment = ItemStack.EMPTY;
 			s.legsEquipment = ItemStack.EMPTY;
 			s.feetEquipment = ItemStack.EMPTY;
+			s.headItem.clear();
+		} else if (state instanceof PlayerRenderState s && !MiscClientUtils.PLAYER_HEADWEAR.get()) {
+			s.headEquipment = ItemStack.EMPTY;
 			s.headItem.clear();
 		}
 

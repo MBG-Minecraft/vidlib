@@ -17,7 +17,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import java.util.Optional;
 
 public record ZoneClickedPayload(ResourceLocation id, int index, ZoneShape shape, double distanceSq, Optional<Vec3> pos) implements SimplePacketPayload {
-	@AutoPacket(AutoPacket.To.SERVER)
+	@AutoPacket(to = AutoPacket.To.SERVER)
 	public static final VidLibPacketType<ZoneClickedPayload> TYPE = VidLibPacketType.internal("zone/clicked", CompositeStreamCodec.of(
 		ID.STREAM_CODEC, ZoneClickedPayload::id,
 		ByteBufCodecs.VAR_INT, ZoneClickedPayload::index,

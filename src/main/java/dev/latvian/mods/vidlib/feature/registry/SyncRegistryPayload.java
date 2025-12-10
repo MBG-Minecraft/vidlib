@@ -16,7 +16,7 @@ import java.util.Map;
 
 public record SyncRegistryPayload(SyncedRegistry<?> registry, Map<?, ?> values) implements SimplePacketPayload {
 	@AutoPacket
-	public static final VidLibPacketType<SyncRegistryPayload> TYPE = VidLibPacketType.internal("sync_registry", new StreamCodec<>() {
+	public static final VidLibPacketType<SyncRegistryPayload> TYPE = VidLibPacketType.internal("sync_registry", new StreamCodec<RegistryFriendlyByteBuf, SyncRegistryPayload>() {
 		@Override
 		public SyncRegistryPayload decode(RegistryFriendlyByteBuf buf) {
 			var registryKey = ID.idFromString(buf.readUtf());

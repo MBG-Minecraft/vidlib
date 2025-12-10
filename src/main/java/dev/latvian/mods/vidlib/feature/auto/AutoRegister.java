@@ -17,6 +17,7 @@ import java.util.List;
  * @see ServerCommandHolder
  * @see dev.latvian.mods.vidlib.feature.prop.PropType
  * @see dev.latvian.mods.vidlib.feature.item.VidLibTool
+ * @see dev.latvian.mods.vidlib.feature.net.ConfigurationTaskHolder
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

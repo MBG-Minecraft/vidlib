@@ -8,7 +8,7 @@ import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 
 public record PreviewCutscenePayload(Cutscene cutscene, KNumberVariables variables) implements SimplePacketPayload {
-	@AutoPacket(AutoPacket.To.SERVER)
+	@AutoPacket(to = AutoPacket.To.SERVER)
 	public static final VidLibPacketType<PreviewCutscenePayload> TYPE = VidLibPacketType.internal("preview_cutscene", CompositeStreamCodec.of(
 		Cutscene.DATA_TYPE.streamCodec(), PreviewCutscenePayload::cutscene,
 		KNumberVariables.STREAM_CODEC, PreviewCutscenePayload::variables,

@@ -6,7 +6,7 @@ import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 
 public record SyncPlayerInputToServer(PlayerInput input) implements SimplePacketPayload {
-	@AutoPacket(AutoPacket.To.SERVER)
+	@AutoPacket(to = AutoPacket.To.SERVER)
 	public static final VidLibPacketType<SyncPlayerInputToServer> TYPE = VidLibPacketType.internal("sync_input_to_server", PlayerInput.STREAM_CODEC.map(SyncPlayerInputToServer::new, SyncPlayerInputToServer::input));
 
 	@Override

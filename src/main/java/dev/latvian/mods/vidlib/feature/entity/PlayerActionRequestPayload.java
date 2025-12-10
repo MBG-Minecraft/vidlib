@@ -6,7 +6,7 @@ import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 
 public record PlayerActionRequestPayload(PlayerActionType action) implements SimplePacketPayload {
-	@AutoPacket(AutoPacket.To.SERVER)
+	@AutoPacket(to = AutoPacket.To.SERVER)
 	public static final VidLibPacketType<PlayerActionRequestPayload> TYPE = VidLibPacketType.internal("player_action_request", PlayerActionType.STREAM_CODEC.map(PlayerActionRequestPayload::new, PlayerActionRequestPayload::action));
 
 	@Override

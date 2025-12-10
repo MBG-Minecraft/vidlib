@@ -12,7 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 
 public record PropInteractionPayload(PropListType type, int id, int button, Vec3 pos, Direction side) implements SimplePacketPayload {
-	@AutoPacket(AutoPacket.To.SERVER)
+	@AutoPacket(to = AutoPacket.To.SERVER)
 	public static final VidLibPacketType<PropInteractionPayload> TYPE = VidLibPacketType.internal("prop/interaction", CompositeStreamCodec.of(
 		PropListType.STREAM_CODEC, PropInteractionPayload::type,
 		ByteBufCodecs.VAR_INT, PropInteractionPayload::id,

@@ -14,6 +14,7 @@ import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
@@ -50,7 +51,6 @@ import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.FogType;
 import net.neoforged.fml.ModList;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -437,13 +437,15 @@ public class ClientGameEngine {
 		return false;
 	}
 
-	public boolean handleClientPacket(IPayloadContext ctx, VidLibPacketPayloadContainer payload) {
-		if (isPacketLoggingEnabled() && payload.wrapped().allowDebugLogging()) {
-			VidLib.LOGGER.info("S2C Packet '%s' #%,d @ %,d: %s".formatted(payload.type().id(), payload.uid(), payload.remoteGameTime(), payload.wrapped()));
-		}
+	public boolean handleClientPacket(Context ctx) {
+		if (ctx.payload() instanceof VidLibPacketPayloadContainer container) {
+			if (isPacketLoggingEnabled() && container.wrapped().allowDebugLogging()) {
+				VidLib.LOGGER.info("S2C Packet '%s' #%,d @ %,d: %s".formatted(ctx.payload().type().id(), ctx.uid(), ctx.remoteGameTime(), ctx.payload()));
+			}
 
-		if (PacketDebuggerPanel.INSTANCE.isOpen()) {
-			Minecraft.getInstance().execute(() -> PacketDebuggerPanel.INSTANCE.debugPackets.add(new PacketDebuggerPanel.LoggedPacket(payload.uid(), payload.remoteGameTime(), payload.wrapped())));
+			if (PacketDebuggerPanel.INSTANCE.isOpen()) {
+				Minecraft.getInstance().execute(() -> PacketDebuggerPanel.INSTANCE.debugPackets.add(new PacketDebuggerPanel.LoggedPacket(ctx.uid(), ctx.remoteGameTime(), container.wrapped())));
+			}
 		}
 
 		return true;

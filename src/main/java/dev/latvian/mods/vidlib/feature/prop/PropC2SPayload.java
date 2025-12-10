@@ -8,7 +8,7 @@ import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 import net.minecraft.network.codec.ByteBufCodecs;
 
 public record PropC2SPayload(int prop, int packet, byte[] data) implements SimplePacketPayload {
-	@AutoPacket(AutoPacket.To.SERVER)
+	@AutoPacket(to = AutoPacket.To.SERVER)
 	public static final VidLibPacketType<PropC2SPayload> TYPE = VidLibPacketType.internal("prop/c2s", CompositeStreamCodec.of(
 		ByteBufCodecs.VAR_INT, PropC2SPayload::prop,
 		ByteBufCodecs.VAR_INT, PropC2SPayload::packet,

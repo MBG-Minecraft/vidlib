@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.util;
 
+import io.netty.buffer.ByteBuf;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.File;
@@ -102,6 +104,17 @@ public interface IOUtils {
 
 	static void writeUTF(DataOutput out, String value) throws IOException {
 		writeBytes(out, value.getBytes(StandardCharsets.UTF_8));
+	}
+
+	static byte[] toByteArray(ByteBuf buf, boolean release) {
+		var bytes = new byte[buf.readableBytes()];
+		buf.getBytes(buf.readerIndex(), bytes);
+
+		if (release) {
+			buf.release();
+		}
+
+		return bytes;
 	}
 }
 
