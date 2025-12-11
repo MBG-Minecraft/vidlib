@@ -57,7 +57,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
@@ -84,7 +83,6 @@ import java.util.UUID;
 
 public class LocalClientSessionData extends ClientSessionData {
 	public final Minecraft mc;
-	public final ClientPacketListener connection;
 	private final Map<UUID, RemoteClientSessionData> remoteSessionData;
 	private ScheduledTask.Handler scheduledTaskHandler;
 	public final ActiveZones serverZones;
@@ -115,10 +113,9 @@ public class LocalClientSessionData extends ClientSessionData {
 	public WorldBorderOverride worldBorderOverrideEnd;
 	public Map<String, Waypoint> waypoints;
 
-	public LocalClientSessionData(Minecraft mc, UUID uuid, ClientPacketListener connection) {
+	public LocalClientSessionData(Minecraft mc, UUID uuid) {
 		super(uuid);
 		this.mc = mc;
-		this.connection = connection;
 		this.remoteSessionData = new Object2ObjectOpenHashMap<>();
 
 		this.serverZones = new ActiveZones();

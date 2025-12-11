@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.session;
 
-import net.minecraft.network.protocol.game.ServerGamePacketListener;
+import net.minecraft.network.PacketListener;
 
 public interface LoginData {
-	void transfer(ServerGamePacketListener connection, ServerSessionData data);
+	void transfer(PacketListener packetListener);
 }

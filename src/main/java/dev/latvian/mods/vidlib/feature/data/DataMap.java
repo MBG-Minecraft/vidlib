@@ -128,7 +128,7 @@ public class DataMap {
 					}
 				}
 			} catch (Exception ex) {
-				VidLib.LOGGER.error("Failed to load data", ex);
+				VidLib.LOGGER.error("Failed to load data from " + path, ex);
 			}
 		}
 	}

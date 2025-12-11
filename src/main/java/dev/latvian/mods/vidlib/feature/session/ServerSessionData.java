@@ -5,12 +5,14 @@ import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.input.PlayerInputChanged;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToClient;
+import dev.latvian.mods.vidlib.feature.misc.ClientModInfo;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.LevelResource;
 import net.neoforged.neoforge.common.NeoForge;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -18,11 +20,13 @@ public class ServerSessionData extends SessionData {
 	public final MinecraftServer server;
 	private Set<String> currentTags = Set.of();
 	public FeatureSet clientFeatureSet;
+	public Map<String, ClientModInfo> clientMods;
 
 	public ServerSessionData(MinecraftServer server, UUID uuid) {
 		super(uuid);
 		this.server = server;
 		this.clientFeatureSet = FeatureSet.EMPTY;
+		this.clientMods = Map.of();
 	}
 
 	public void vl$preTick(ServerPlayer player) {
@@ -49,8 +53,8 @@ public class ServerSessionData extends SessionData {
 		tick++;
 	}
 
-	public void load(ServerPlayer player) {
-		dataMap.load(player.server, player.server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("vidlib").resolve(player.getUUID() + ".nbt"));
+	public void load(MinecraftServer server) {
+		dataMap.load(server, server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("vidlib").resolve(uuid + ".nbt"));
 	}
 
 	@Override

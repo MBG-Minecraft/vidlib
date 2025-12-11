@@ -39,6 +39,6 @@ public enum ModListRequestPayload implements SimplePacketPayload {
 			list.add(new ClientModInfo(mod.getModId(), mod.getDisplayName(), mod.getVersion().toString(), mod.getOwningFile().getFile().getFileName()));
 		}
 
-		ctx.listener().send(new ClientModListPayload(list).toConfigC2S());
+		ctx.send(new ClientModListPayload(list).toConfigC2S());
 	}
 }

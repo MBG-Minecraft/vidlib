@@ -34,6 +34,6 @@ public record ServerFeaturesPayload(FeatureSet featureSet) implements SimplePack
 
 	private void handleClient(Context ctx) {
 		FeatureSet.REMOTE_SERVER_FEATURES = featureSet;
-		ctx.listener().send(new ClientFeaturesPayload(FeatureSet.CLIENT_FEATURES.get()).toConfigC2S());
+		ctx.send(new ClientFeaturesPayload(FeatureSet.CLIENT_FEATURES.get()).toConfigC2S());
 	}
 }

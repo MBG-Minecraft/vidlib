@@ -26,7 +26,7 @@ import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class CommonGameEngine {
@@ -129,7 +129,7 @@ public class CommonGameEngine {
 		return ClientGameEngine.INSTANCE.handleClientPacket(ctx);
 	}
 
-	public void handleClientModList(Context ctx, List<ClientModInfo> modList) {
+	public boolean handleClientModList(Context ctx, Map<String, ClientModInfo> mods) {
 		/*
 		if (player.server.isDedicatedServer()) {
 			VidLib.LOGGER.info("Player " + player.getScoreboardName() + " logged in with mods:");
@@ -139,6 +139,8 @@ public class CommonGameEngine {
 			}
 		}
 		 */
+
+		return true;
 	}
 
 	@Nullable

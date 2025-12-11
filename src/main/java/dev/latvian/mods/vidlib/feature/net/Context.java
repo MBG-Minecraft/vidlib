@@ -1,15 +1,17 @@
 package dev.latvian.mods.vidlib.feature.net;
 
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.core.VLPacketListener;
+import dev.latvian.mods.vidlib.core.VLServerConfigPacketListener;
 import dev.latvian.mods.vidlib.feature.session.LoginData;
+import dev.latvian.mods.vidlib.feature.session.SessionData;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.PacketListener;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.network.ConfigurationTask;
-import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
-import net.neoforged.neoforge.common.extensions.ICommonPacketListener;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -18,9 +20,11 @@ import java.util.function.Supplier;
 public interface Context {
 	VidLibPacketPayloadContainer payload();
 
-	ICommonPacketListener listener();
+	PacketListener listener();
 
 	Player player();
+
+	void send(Packet<?> packet);
 
 	default Level level() {
 		return player().level();
@@ -34,27 +38,17 @@ public interface Context {
 		return payload().remoteGameTime();
 	}
 
-	default CompletableFuture<Void> enqueueWork(Runnable task) {
-		if (listener().getMainThreadEventLoop().isSameThread()) {
-			task.run();
-			return CompletableFuture.completedFuture(null);
-		}
+	default SessionData sessionData() {
+		return ((VLPacketListener) listener()).vl$sessionData();
+	}
 
-		return listener().getMainThreadEventLoop().submit(task).exceptionally(ex -> {
-			VidLib.LOGGER.error("Failed to process a synchronized task of the payload: %s".formatted(getClass().getName()), ex);
-			return null;
-		});
+	default CompletableFuture<Void> enqueueWork(Runnable task) {
+		task.run();
+		return CompletableFuture.completedFuture(null);
 	}
 
 	default <T> CompletableFuture<T> enqueueWork(Supplier<T> task) {
-		if (listener().getMainThreadEventLoop().isSameThread()) {
-			return CompletableFuture.completedFuture(task.get());
-		}
-
-		return listener().getMainThreadEventLoop().submit(task).exceptionally(ex -> {
-			VidLib.LOGGER.error("Failed to process a synchronized task of the payload: %s".formatted(getClass().getName()), ex);
-			return null;
-		});
+		return CompletableFuture.completedFuture(task.get());
 	}
 
 	default RandomSource createRandom() {
@@ -74,18 +68,26 @@ public interface Context {
 	}
 
 	default UUID uuid() {
-		if (listener() instanceof ServerCommonPacketListenerImpl listener) {
-			return listener.getOwner().getId();
-		} else {
-			return clientUuid();
-		}
+		return ((VLPacketListener) listener()).vl$sessionData().uuid;
 	}
 
 	private UUID clientUuid() {
 		return Minecraft.getInstance().getUser().getProfileId();
 	}
 
-	void finishTask(ConfigurationTask.Type type);
+	default void finishTask(ConfigurationTask.Type type) {
+		if (listener() instanceof VLServerConfigPacketListener listener) {
+			listener.vl$finishTask(type);
+		} else {
+			throw new UnsupportedOperationException("Attempted to complete a configuration task outside of the configuration phase!");
+		}
+	}
 
-	void addLoginData(LoginData data);
+	default void addLoginData(LoginData data) {
+		if (listener() instanceof VLPacketListener listener) {
+			listener.vl$addLoginData(data);
+		} else {
+			throw new UnsupportedOperationException("Attempted to add login data outside of the configuration phase!");
+		}
+	}
 }
