@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.pin;
 
 import dev.latvian.mods.klib.math.DistanceComparator;
+import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
@@ -37,12 +38,12 @@ public interface Pins {
 	Map<UUID, Pin> PINS = new Object2ObjectOpenHashMap<>();
 
 	@ClientAutoRegister
-	Gallery GALLERY = new Gallery("pins", () -> VidLibPaths.USER.get().resolve("pin-gallery"), TriState.TRUE);
+	Gallery<UUID> GALLERY = Gallery.ofUUIDKey("pins", () -> VidLibPaths.USER.get().resolve("pin-gallery"), TriState.TRUE);
 
 	ImagePreProcessor PRE_PROCESSOR = ImagePreProcessor.FIT_SQUARE.andThen(ImagePreProcessor.CLOSEST_4);
-	GalleryImageImBuilder.Uploader UPLOADER = new GalleryImageImBuilder.FileUploader(GALLERY, PRE_PROCESSOR);
+	GalleryImageImBuilder.Uploader<UUID> UPLOADER = new GalleryImageImBuilder.FileUploader<>(GALLERY, UUID::randomUUID, PRE_PROCESSOR);
 
-	GalleryImageImBuilder IMAGE_IM_BUILDER = new GalleryImageImBuilder(
+	GalleryImageImBuilder<UUID> IMAGE_IM_BUILDER = new GalleryImageImBuilder<>(
 		List.of(GALLERY, PlayerBodies.GALLERY, PlayerHeads.GALLERY),
 		List.of(UPLOADER, PlayerBodies.UPLOADER, PlayerHeads.UPLOADER)
 	);
@@ -164,7 +165,7 @@ public interface Pins {
 
 			ImGui.sameLine();
 
-			if (graphics.imageButton(pin.shape.iconTexture, ImGui.getFrameHeight() - 4F, ImGui.getFrameHeight() - 4F, 0F, 0F, 1F, 1F, 2, null)) {
+			if (graphics.imageButton(pin.shape.iconTexture, ImGui.getFrameHeight() - 4F, ImGui.getFrameHeight() - 4F, UV.FULL, 2, null)) {
 				pin.shape = PinShape.VALUES[(pin.shape.ordinal() + 1) % PinShape.VALUES.length];
 			}
 

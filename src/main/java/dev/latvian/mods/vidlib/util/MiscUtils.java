@@ -4,6 +4,8 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.DataResult;
 import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.Util;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -30,6 +32,8 @@ public interface MiscUtils {
 		.followRedirects(HttpClient.Redirect.ALWAYS)
 		.connectTimeout(Duration.ofSeconds(10L))
 		.build();
+
+	RegistryAccess STATIC_REGISTRY_ACCESS = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
 
 	static Path createDir(Path path) {
 		if (Files.notExists(path)) {

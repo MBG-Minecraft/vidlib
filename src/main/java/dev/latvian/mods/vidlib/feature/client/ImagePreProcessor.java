@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.client;
 import com.mojang.blaze3d.platform.NativeImage;
 import dev.latvian.mods.klib.math.KMath;
 import net.minecraft.util.Mth;
+import org.lwjgl.system.MemoryUtil;
 
 import java.util.function.UnaryOperator;
 
@@ -102,6 +103,69 @@ public interface ImagePreProcessor extends UnaryOperator<NativeImage> {
 					img.setPixel(x, y, 0);
 				}
 			}
+		}
+
+		return img;
+	};
+
+	static ImagePreProcessor reduce(int cellw, int cellh) {
+		return img -> {
+			int w = img.getWidth();
+			int h = img.getHeight();
+
+			if (w % cellw != 0 || h % cellh != 0) {
+				return img;
+			}
+
+			int nw = w / cellw;
+			int nh = h / cellh;
+			var dst = new NativeImage(img.format(), nw, nh, true);
+
+			for (int cy = 0; cy < nh; cy++) {
+				for (int cx = 0; cx < nw; cx++) {
+					int cell = img.getPixel(cx * cellw, cy * cellh);
+
+					for (int x = 0; x < cellw; x++) {
+						for (int y = 0; y < cellh; y++) {
+							if (x == 0 && y == 0) {
+								continue;
+							}
+
+							int c = img.getPixel(cx * cellw + x, cy * cellh + y);
+
+							if (c != cell) {
+								dst.close();
+								return img;
+							}
+						}
+					}
+
+					dst.setPixel(cx, cy, cell);
+				}
+			}
+
+			return dst;
+		};
+	}
+
+	ImagePreProcessor FLIP_Y = img -> {
+		long c = img.format().components();
+		long w = img.getWidth();
+		long cw = w * c;
+		long h = img.getHeight();
+		long as = img.getPointer();
+		long at = MemoryUtil.nmemAlloc(cw);
+
+		try {
+			for (long l = 0L; l < h / 2L; l++) {
+				long l1 = l * w * c;
+				long l2 = (h - 1L - l) * w * c;
+				MemoryUtil.memCopy(as + l1, at, cw);
+				MemoryUtil.memCopy(as + l2, as + l1, cw);
+				MemoryUtil.memCopy(at, as + l2, cw);
+			}
+		} finally {
+			MemoryUtil.nmemFree(at);
 		}
 
 		return img;

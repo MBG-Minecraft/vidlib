@@ -40,7 +40,7 @@ import java.util.UUID;
 
 public interface PlayerBodies {
 	@ClientAutoRegister
-	Gallery GALLERY = new Gallery("player_bodies", () -> VidLibPaths.USER.get().resolve("player-bodies"), TriState.TRUE);
+	Gallery<UUID> GALLERY = Gallery.ofUUIDKey("player_bodies", () -> VidLibPaths.USER.get().resolve("player-bodies"), TriState.TRUE);
 
 	Lazy<RenderTarget> RENDER_TARGET = Lazy.of(() -> new TextureTarget("PlayerBodiesCanvas", 1024, 1024, true));
 
@@ -58,7 +58,7 @@ public interface PlayerBodies {
 			.createCompositeState(false)
 	);
 
-	GalleryImageImBuilder.Uploader UPLOADER = new GalleryImageImBuilder.Uploader() {
+	GalleryImageImBuilder.Uploader<UUID> UPLOADER = new GalleryImageImBuilder.Uploader<>() {
 		public static final GameProfileImBuilder UNIT = new GameProfileImBuilder();
 
 		@Override
@@ -77,7 +77,7 @@ public interface PlayerBodies {
 		}
 
 		@Override
-		public void render(GalleryImageImBuilder builder, ImGraphics graphics, boolean clicked) {
+		public void render(GalleryImageImBuilder<UUID> builder, ImGraphics graphics, boolean clicked) {
 			if (clicked) {
 				ImGui.openPopup("###select-profile");
 			}
@@ -102,13 +102,13 @@ public interface PlayerBodies {
 		}
 	};
 
-	static GalleryImage get(Minecraft mc, UUID uuid) {
+	static GalleryImage<UUID> get(Minecraft mc, UUID uuid) {
 		return GALLERY.getRender(mc, uuid, PlayerProfiles::getName, PlayerBodies::render, ImagePreProcessor.NONE);
 	}
 
 	private static NativeImage render(Minecraft mc, UUID uuid, String name) {
 		render(mc, RENDER_TYPE, uuid, 0.45F);
-		return FramebufferUtils.capture(RENDER_TARGET.get(), 0);
+		return FramebufferUtils.capture(RENDER_TARGET.get());
 	}
 
 	static void render(Minecraft mc, TexturedRenderType type, UUID uuid, float zoom) {

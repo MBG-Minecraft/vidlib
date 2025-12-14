@@ -202,4 +202,7 @@ public class SessionData {
 	public FeatureSet getClientFeatures() {
 		return FeatureSet.EMPTY;
 	}
+
+	public void setClientModListSentDuringConfig() {
+	}
 }

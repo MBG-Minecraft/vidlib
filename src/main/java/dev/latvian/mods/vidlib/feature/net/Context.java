@@ -7,6 +7,8 @@ import dev.latvian.mods.vidlib.feature.session.SessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.configuration.ClientConfigurationPacketListener;
+import net.minecraft.network.protocol.configuration.ServerConfigurationPacketListener;
 import net.minecraft.server.network.ConfigurationTask;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
@@ -89,5 +91,9 @@ public interface Context {
 		} else {
 			throw new UnsupportedOperationException("Attempted to add login data outside of the configuration phase!");
 		}
+	}
+
+	default boolean isConfig() {
+		return listener() instanceof ServerConfigurationPacketListener || listener() instanceof ClientConfigurationPacketListener;
 	}
 }

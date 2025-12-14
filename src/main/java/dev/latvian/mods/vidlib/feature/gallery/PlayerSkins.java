@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public interface PlayerSkins {
 	@ClientAutoRegister
-	Gallery GALLERY = new Gallery("player_skins", () -> VidLibPaths.USER.get().resolve("player-skins"), TriState.TRUE);
+	Gallery<UUID> GALLERY = Gallery.ofUUIDKey("player_skins", () -> VidLibPaths.USER.get().resolve("player-skins"), TriState.TRUE);
 
 	PlayerSkin[] DEFAULT_WIDE_SKINS = new PlayerSkin[]{
 		new PlayerSkin(ID.mc("textures/entity/player/wide/steve.png"), null, null, null, PlayerSkin.Model.WIDE, true),
@@ -43,7 +43,7 @@ public interface PlayerSkins {
 		new PlayerSkin(ID.mc("textures/entity/player/slim/zuri.png"), null, null, null, PlayerSkin.Model.SLIM, true)
 	};
 
-	static GalleryImage get(Minecraft mc, UUID uuid) {
+	static GalleryImage<UUID> get(Minecraft mc, UUID uuid) {
 		return GALLERY.getRemote(mc, uuid, PlayerProfiles::getName, (id, n) -> PlayerProfiles.get(id).skinUrl().orElse(null), ImagePreProcessor.NONE);
 	}
 

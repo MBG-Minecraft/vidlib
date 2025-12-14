@@ -33,6 +33,8 @@ public enum ModListRequestPayload implements SimplePacketPayload {
 
 	@Override
 	public void handle(Context ctx) {
+		ctx.sessionData().setClientModListSentDuringConfig();
+
 		var list = new ArrayList<ClientModInfo>();
 
 		for (var mod : ModList.get().getMods()) {

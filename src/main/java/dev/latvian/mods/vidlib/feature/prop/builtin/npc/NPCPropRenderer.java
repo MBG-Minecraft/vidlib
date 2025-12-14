@@ -77,6 +77,10 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 		fakePlayer.setDeltaMovement(Vec3.ZERO);
 		fakePlayer.setItemSlot(EquipmentSlot.MAINHAND, p.mainHandItem);
 		fakePlayer.setItemSlot(EquipmentSlot.OFFHAND, p.offHandItem);
+		fakePlayer.setItemSlot(EquipmentSlot.HEAD, p.headItem);
+		fakePlayer.setItemSlot(EquipmentSlot.CHEST, p.chestItem);
+		fakePlayer.setItemSlot(EquipmentSlot.LEGS, p.legsItem);
+		fakePlayer.setItemSlot(EquipmentSlot.FEET, p.feetItem);
 		fakePlayer.setPose(p.pose);
 		fakePlayer.setSwimming(p.pose == Pose.SWIMMING);
 
@@ -100,10 +104,6 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 
 		playerRenderState.attackTime = 0;
 
-		playerRenderState.feetEquipment = p.feetItem;
-		playerRenderState.legsEquipment = p.legsItem;
-		playerRenderState.chestEquipment = p.chestItem;
-		playerRenderState.headEquipment = p.headItem;
 		playerRenderState.setRenderData(VidLibEntityRenderStates.CLOTHING, p.clothing);
 
 		playerRenderState.showHat = true;

@@ -4,11 +4,13 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.interpolation.BezierPreset;
 import dev.latvian.mods.klib.interpolation.Interpolation;
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.gallery.GalleryImageImBuilder;
+import dev.latvian.mods.vidlib.feature.gallery.ItemIcons;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerBodies;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerHeads;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
@@ -18,6 +20,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.TransformationListImBuilder
 import dev.latvian.mods.vidlib.feature.imgui.builder.interpolation.InterpolationImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ParticleOptionsImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.item.VisualItemKey;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundDataImBuilder;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
@@ -26,6 +29,8 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
 import dev.latvian.mods.vidlib.math.knumber.KNumberNodeImBuilder;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
+import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.ImVec4;
@@ -42,8 +47,10 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import imgui.type.ImString;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import org.joml.Vector2f;
 
 import java.util.List;
@@ -89,6 +96,9 @@ public class DebugWidgetPanel extends AdminPanel {
 		List.of(Pins.GALLERY, PlayerBodies.GALLERY, PlayerHeads.GALLERY),
 		List.of(Pins.UPLOADER, PlayerBodies.UPLOADER, PlayerHeads.UPLOADER)
 	);
+
+	public ItemStack currentStack = ItemStack.EMPTY;
+	public VisualItemKey currentStackKey = VisualItemKey.AIR;
 
 	private DebugWidgetPanel() {
 		super("widget-debug", "Widget Debug");
@@ -388,14 +398,37 @@ public class DebugWidgetPanel extends AdminPanel {
 		ImGui.separator();
 		galleryImageBuilder.imguiKey(graphics, "Gallery Image", "gallery-image");
 		var selectedGalleryImage = galleryImageBuilder.isValid() ? galleryImageBuilder.build() : null;
-		graphics.imageButton(selectedGalleryImage == null ? null : selectedGalleryImage.textureId(), 256F, 256F, 0F, 0F, 1F, 1F, 2, null);
+		graphics.imageButton(selectedGalleryImage == null ? null : selectedGalleryImage.textureId(), 256F, 256F, UV.FULL, 2, null);
 
 		/*
 		if (mc.player != null) {
-			graphics.imageButton(PlayerHeads.RENDER_TARGET.get().getColorTexture(), 256F, 256F, 0F, 0F, 1F, 1F, 2, null);
+			graphics.imageButton(PlayerHeads.RENDER_TARGET.get().getColorTexture(), 256F, 256F, UV.FULL, 2, null);
 			PlayerHeads.render(mc, PlayerHeads.RENDER_TYPE, mc.player.getUUID(), 0.38F);
 		}
 		 */
+
+		ImGui.separator();
+
+		if (mc.screen instanceof AbstractContainerScreen<?> screen && screen.getSlotUnderMouse() != null && !screen.getSlotUnderMouse().getItem().isEmpty()) {
+			currentStack = screen.getSlotUnderMouse().getItem();
+			currentStackKey = VisualItemKey.of(currentStack, mc.level == null ? MiscUtils.STATIC_REGISTRY_ACCESS : mc.level.registryAccess());
+		}
+
+		if (currentStackKey != VisualItemKey.AIR) {
+			ItemIcons.render(mc, currentStackKey);
+		}
+
+		var sink = new FormattedCharSinkPartBuilder();
+		graphics.mc.font.split(currentStack.getHoverName(), Integer.MAX_VALUE).getFirst().accept(sink);
+		graphics.text(sink.build());
+
+		graphics.pushStack();
+		graphics.setFontScale(0.75F);
+		ImGui.text(currentStackKey.toString());
+		graphics.popStack();
+
+		var currentStackTex = ItemIcons.getTexture(mc, currentStackKey);
+		graphics.imageButton(currentStackTex.getTexture(), 48F, 48F, UV.FULL, 2, null);
 
 		ImGui.separator();
 

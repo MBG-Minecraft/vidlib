@@ -76,12 +76,12 @@ public class NPCProp extends BaseGeoProp {
 		PropData.createBoolean(NPCProp.class, "random_skin", p -> p.randomSkin, (p, v) -> p.randomSkin = v),
 		PropData.createInt(NPCProp.class, "jumping", p -> p.jumping, (p, v) -> p.jumping = v, 0, 100),
 		PropData.createInt(NPCProp.class, "punching", p -> p.punching, (p, v) -> p.punching = v, 0, 100),
-		PropData.create(NPCProp.class, "main_hand_item", DataTypes.ITEM_STACK, p -> p.mainHandItem, (p, v) -> p.mainHandItem = v, ItemStackImBuilder.TYPE),
-		PropData.create(NPCProp.class, "off_hand_item", DataTypes.ITEM_STACK, p -> p.offHandItem, (p, v) -> p.offHandItem = v, ItemStackImBuilder.TYPE),
-		PropData.create(NPCProp.class, "head_item", DataTypes.ITEM_STACK, p -> p.headItem, (p, v) -> p.headItem = v, ItemStackImBuilder.TYPE),
-		PropData.create(NPCProp.class, "chest_item", DataTypes.ITEM_STACK, p -> p.chestItem, (p, v) -> p.chestItem = v, ItemStackImBuilder.TYPE),
-		PropData.create(NPCProp.class, "legs_item", DataTypes.ITEM_STACK, p -> p.legsItem, (p, v) -> p.legsItem = v, ItemStackImBuilder.TYPE),
-		PropData.create(NPCProp.class, "feet_item", DataTypes.ITEM_STACK, p -> p.feetItem, (p, v) -> p.feetItem = v, ItemStackImBuilder.TYPE),
+		PropData.create(NPCProp.class, "main_hand_item", DataTypes.ITEM_STACK, p -> p.mainHandItem, (p, v) -> p.mainHandItem = v, ItemStackImBuilder.MAIN_HAND_EQUIPMENT_TYPE),
+		PropData.create(NPCProp.class, "off_hand_item", DataTypes.ITEM_STACK, p -> p.offHandItem, (p, v) -> p.offHandItem = v, ItemStackImBuilder.OFF_HAND_EQUIPMENT_TYPE),
+		PropData.create(NPCProp.class, "head_item", DataTypes.ITEM_STACK, p -> p.headItem, (p, v) -> p.headItem = v, ItemStackImBuilder.HEAD_EQUIPMENT_TYPE),
+		PropData.create(NPCProp.class, "chest_item", DataTypes.ITEM_STACK, p -> p.chestItem, (p, v) -> p.chestItem = v, ItemStackImBuilder.CHEST_EQUIPMENT_TYPE),
+		PropData.create(NPCProp.class, "legs_item", DataTypes.ITEM_STACK, p -> p.legsItem, (p, v) -> p.legsItem = v, ItemStackImBuilder.LEGS_EQUIPMENT_TYPE),
+		PropData.create(NPCProp.class, "feet_item", DataTypes.ITEM_STACK, p -> p.feetItem, (p, v) -> p.feetItem = v, ItemStackImBuilder.FEET_EQUIPMENT_TYPE),
 		PropData.create(NPCProp.class, "pose", DataType.of(POSES), p -> p.pose, (p, v) -> p.pose = v, () -> new EnumImBuilder<>(VALID_POSES)),
 		PropData.createBoolean(NPCProp.class, "breathing", p -> p.breathing, (p, v) -> p.breathing = v),
 		PropData.createFloat(NPCProp.class, "running_distance", p -> p.runningDistance, (p, v) -> p.runningDistance = v, 0F, 200F)
@@ -115,7 +115,7 @@ public class NPCProp extends BaseGeoProp {
 	public NPCProp(PropContext<?> ctx) {
 		super(ctx);
 		this.width = 0.6F;
-		this.height = 1.8F;
+		this.height = 1.92F;
 		this.name = Empty.COMPONENT;
 		this.stone = false;
 		this.profile = PlayerProfile.EMPTY_GAME_PROFILE;

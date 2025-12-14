@@ -10,12 +10,15 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.latvian.mods.vidlib.core.VLDirectStateAccess;
-import org.lwjgl.system.MemoryUtil;
 
 public class FramebufferUtils {
 	public static final int READ_FBO = ((VLDirectStateAccess) ((GlDevice) RenderSystem.getDevice()).directStateAccess()).vl$createFrameBufferObject();
 
-	public static NativeImage capture(RenderTarget framebuffer, int mipLevel) {
+	public static NativeImage capture(RenderTarget framebuffer) {
+		return capture(framebuffer, 0, false, false);
+	}
+
+	public static NativeImage capture(RenderTarget framebuffer, int mipLevel, boolean flipX, boolean flipY) {
 		var colorTexture = framebuffer.getColorTexture();
 
 		if (colorTexture == null) {
@@ -53,7 +56,7 @@ public class FramebufferUtils {
 			for (int y = 0; y < h; y++) {
 				for (int x = 0; x < w; x++) {
 					int col = buf.getInt((x + y * w) * colorTexture.getFormat().pixelSize());
-					img.setPixelABGR(x, y, col);
+					img.setPixelABGR(flipX ? (w - x - 1) : x, flipY ? (h - y - 1) : y, col);
 				}
 			}
 		}
@@ -70,26 +73,5 @@ public class FramebufferUtils {
 		}
 
 		return img;
-	}
-
-	public static void flipY(NativeImage image) {
-		long c = image.format().components();
-		long w = image.getWidth();
-		long cw = w * c;
-		long h = image.getHeight();
-		long as = image.getPointer();
-		long at = MemoryUtil.nmemAlloc(cw);
-
-		try {
-			for (long l = 0L; l < h / 2L; l++) {
-				long l1 = l * w * c;
-				long l2 = (h - 1L - l) * w * c;
-				MemoryUtil.memCopy(as + l1, at, cw);
-				MemoryUtil.memCopy(as + l2, as + l1, cw);
-				MemoryUtil.memCopy(at, as + l2, cw);
-			}
-		} finally {
-			MemoryUtil.nmemFree(at);
-		}
 	}
 }

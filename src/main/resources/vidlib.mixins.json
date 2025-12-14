@@ -117,6 +117,7 @@
 		"RenderTypeMixin",
 		"ScreenMixin",
 		"ShaderManagerMixin",
+		"SkinManagerMixin",
 		"SkyRendererMixin",
 		"SpriteContentsMixin",
 		"TextureAtlasSpriteMixin",

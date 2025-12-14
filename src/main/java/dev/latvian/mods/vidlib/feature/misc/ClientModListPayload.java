@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 public record ClientModListPayload(List<ClientModInfo> modList) implements SimplePacketPayload {
-	@AutoPacket(stage = AutoPacket.Stage.CONFIG, to = AutoPacket.To.SERVER)
+	@AutoPacket(stage = AutoPacket.Stage.COMMON, to = AutoPacket.To.SERVER)
 	public static final VidLibPacketType<ClientModListPayload> TYPE = VidLibPacketType.internal("client_mod_list", KLibStreamCodecs.listOf(ClientModInfo.STREAM_CODEC).map(ClientModListPayload::new, ClientModListPayload::modList));
 
 	@Override
@@ -39,6 +39,8 @@ public record ClientModListPayload(List<ClientModInfo> modList) implements Simpl
 			sessionData.clientMods = map;
 		}
 
-		ctx.finishTask(ModListRequestPayload.CONFIG_TASK.type());
+		if (ctx.isConfig()) {
+			ctx.finishTask(ModListRequestPayload.CONFIG_TASK.type());
+		}
 	}
 }

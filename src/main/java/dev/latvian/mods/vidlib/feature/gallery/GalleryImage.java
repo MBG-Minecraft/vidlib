@@ -11,11 +11,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.UUID;
 
-public record GalleryImage(
-	Gallery gallery,
-	UUID id,
+public record GalleryImage<K>(
+	Gallery<K> gallery,
+	K id,
 	String displayName,
 	@Nullable Path path,
 	ResourceLocation textureId

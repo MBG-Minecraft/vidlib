@@ -112,6 +112,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	public WorldBorderOverride worldBorderOverrideStart;
 	public WorldBorderOverride worldBorderOverrideEnd;
 	public Map<String, Waypoint> waypoints;
+	public boolean clientModListSentDuringConfig;
 
 	public LocalClientSessionData(Minecraft mc, UUID uuid) {
 		super(uuid);
@@ -131,6 +132,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.screenEffects = new ArrayList<>();
 		this.glowColors = new Object2ObjectOpenHashMap<>();
 		this.waypoints = new Object2ObjectOpenHashMap<>();
+		this.clientModListSentDuringConfig = false;
 
 		VidLib.LOGGER.info("Client Session Data Initialized");
 	}
@@ -486,5 +488,10 @@ public class LocalClientSessionData extends ClientSessionData {
 	@Override
 	public FeatureSet getClientFeatures() {
 		return FeatureSet.CLIENT_FEATURES.get();
+	}
+
+	@Override
+	public void setClientModListSentDuringConfig() {
+		clientModListSentDuringConfig = true;
 	}
 }

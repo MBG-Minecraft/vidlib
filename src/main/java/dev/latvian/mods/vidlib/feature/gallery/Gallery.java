@@ -31,10 +31,10 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class Gallery {
-	public static final Lazy<Map<String, Gallery>> ALL = Lazy.map(map -> {
+public class Gallery<K> {
+	public static final Lazy<Map<String, Gallery<?>>> ALL = Lazy.map(map -> {
 		for (var s : ClientAutoRegister.SCANNED.get()) {
-			if (s.value() instanceof Gallery gallery) {
+			if (s.value() instanceof Gallery<?> gallery) {
 				map.put(gallery.id, gallery);
 			}
 		}
@@ -47,30 +47,43 @@ public class Gallery {
 		}
 	}
 
+	public static Gallery<UUID> ofUUIDKey(String id, Supplier<Path> directory, TriState blur) {
+		return new Gallery<>(id, directory, blur, UndashedUuid::toString, UndashedUuid::fromStringLenient);
+	}
+
 	public final String id;
 	public final Supplier<Path> directory;
 	public final TriState blur;
-	public final Map<UUID, GalleryImage> images;
+	public final Function<K, String> keyToString;
+	public final Function<String, K> stringToKey;
+	public final Map<K, GalleryImage<K>> images;
 
-	public Gallery(String id, Supplier<Path> directory, TriState blur) {
+	public Gallery(String id, Supplier<Path> directory, TriState blur, Function<K, String> keyToString, @Nullable Function<String, K> stringToKey) {
 		this.id = id;
 		this.directory = directory;
 		this.blur = blur;
+		this.keyToString = keyToString;
+		this.stringToKey = stringToKey;
 		this.images = new ConcurrentHashMap<>();
 	}
 
-	public ResourceLocation id(UUID imageId) {
-		return VidLib.id("textures/vidlib/generated/gallery/" + id + "/" + UndashedUuid.toString(imageId) + ".png");
+	public ResourceLocation id(K imageId) {
+		return VidLib.id("textures/vidlib/generated/gallery/" + id + "/" + keyToString.apply(imageId) + ".png");
 	}
 
-	public Path newPath(UUID imageId, String displayName) throws IOException {
+	@Nullable
+	public Path newPath(K imageId, String displayName) throws IOException {
 		var dir = directory.get();
+
+		if (dir == null) {
+			return null;
+		}
 
 		if (Files.notExists(dir)) {
 			Files.createDirectories(dir);
 		}
 
-		var fileName = UndashedUuid.toString(imageId) + "-" + displayName;
+		var fileName = keyToString.apply(imageId) + (displayName.isEmpty() ? "" : ("-" + displayName));
 		var finalFileName = fileName + ".png";
 
 		var path = dir.resolve(finalFileName);
@@ -87,12 +100,12 @@ public class Gallery {
 		return path;
 	}
 
-	public GalleryImage createDummy(UUID imageId, String displayName) {
-		return new GalleryImage(this, imageId, displayName, null, id(imageId));
+	public GalleryImage<K> createDummy(K imageId, String displayName) {
+		return new GalleryImage<>(this, imageId, displayName, null, id(imageId));
 	}
 
 	@Nullable
-	public GalleryImage get(UUID imageId) {
+	public GalleryImage<K> get(K imageId) {
 		return imageId == null ? null : images.get(imageId);
 	}
 
@@ -107,7 +120,7 @@ public class Gallery {
 
 		var dir = directory.get();
 
-		if (Files.exists(dir)) {
+		if (stringToKey != null && Files.exists(dir)) {
 			try (var stream = Files.list(dir)) {
 				for (var file : stream.filter(Files::isRegularFile).toList()) {
 					var fileName = file.getFileName().toString();
@@ -117,9 +130,9 @@ public class Gallery {
 						var nameParts = fileName.split("-", 2);
 
 						if (nameParts.length == 2) {
-							var uuid = UndashedUuid.fromString(nameParts[0]);
+							var uuid = stringToKey.apply(nameParts[0]);
 							var textureId = id(uuid);
-							images.put(uuid, new GalleryImage(this, uuid, nameParts[1], file, textureId));
+							images.put(uuid, new GalleryImage<>(this, uuid, nameParts[1], file, textureId));
 						}
 					}
 				}
@@ -129,7 +142,7 @@ public class Gallery {
 		VidLib.LOGGER.info("Loaded " + images.size() + " gallery '" + id + "' images");
 	}
 
-	public GalleryImage upload(Minecraft mc, UUID uuid, Path src, ImagePreProcessor preProcessor) throws Exception {
+	public GalleryImage<K> upload(Minecraft mc, K uuid, Path src, ImagePreProcessor preProcessor) throws Exception {
 		return upload(
 			mc,
 			uuid,
@@ -144,40 +157,42 @@ public class Gallery {
 		);
 	}
 
-	public GalleryImage upload(Minecraft mc, UUID uuid, Callable<NativeImage> input, String displayName, Supplier<String> fullPath, ImagePreProcessor preProcessor) throws Exception {
+	public GalleryImage<K> upload(Minecraft mc, K key, Callable<NativeImage> input, String displayName, Supplier<String> fullPath, ImagePreProcessor preProcessor) throws Exception {
 		var originalImg = input.call();
 		var img = preProcessor.apply(originalImg);
 
-		if (displayName.isEmpty()) {
-			displayName = "unknown";
-		}
+		var textureId = id(key);
+		var dst = newPath(key, displayName);
 
-		var textureId = id(uuid);
-		var dst = newPath(uuid, displayName);
-		img.writeToFile(dst);
+		if (dst != null) {
+			img.writeToFile(dst);
+		}
 
 		var texture = new DynamicTexture(textureId::toString, img);
 		texture.setFilter(blur, false);
 		mc.getTextureManager().register(textureId, texture);
 
-		var galleryImage = new GalleryImage(this, uuid, displayName, dst, textureId);
-		images.put(uuid, galleryImage);
+		var galleryImage = new GalleryImage<>(this, key, displayName, dst, textureId);
+		images.put(key, galleryImage);
 
-		VidLib.LOGGER.info("Uploaded " + fullPath.get() + " as " + dst.getFileName() + " to gallery '" + id + "'");
+		if (dst != null) {
+			VidLib.LOGGER.info("Uploaded " + fullPath.get() + " as " + dst.getFileName() + " to gallery '" + id + "'");
+		}
+
 		return galleryImage;
 	}
 
-	public GalleryImage getRemote(Minecraft mc, UUID uuid, Function<UUID, String> nameGetter, BiFunction<UUID, String, String> urlGetter, ImagePreProcessor preProcessor) {
-		var img = images.get(uuid);
+	public GalleryImage<K> getRemote(Minecraft mc, K key, Function<K, String> nameGetter, BiFunction<K, String, String> urlGetter, ImagePreProcessor preProcessor) {
+		var img = images.get(key);
 
 		if (img != null) {
 			return img;
 		}
 
-		var name = nameGetter.apply(uuid);
-		img = createDummy(uuid, name);
-		images.put(uuid, img);
-		var url = urlGetter.apply(uuid, name);
+		var name = nameGetter.apply(key);
+		img = createDummy(key, name);
+		images.put(key, img);
+		var url = urlGetter.apply(key, name);
 
 		if (url == null || url.isEmpty()) {
 			return img;
@@ -186,7 +201,7 @@ public class Gallery {
 		try {
 			return upload(
 				mc,
-				uuid,
+				key,
 				() -> {
 					var req = MiscUtils.HTTP_CLIENT.send(HttpRequest.newBuilder(URI.create(url))
 						.GET()
@@ -206,12 +221,12 @@ public class Gallery {
 				preProcessor
 			);
 		} catch (Exception ex) {
-			VidLib.LOGGER.warn("Failed to download " + id + "/" + uuid, ex);
+			VidLib.LOGGER.warn("Failed to download " + id + "/" + key, ex);
 			return img;
 		}
 	}
 
-	public GalleryImage getRender(Minecraft mc, UUID uuid, Function<UUID, String> nameSupplier, GalleryImageRenderCallback render, ImagePreProcessor preProcessor) {
+	public GalleryImage<K> getRender(Minecraft mc, K uuid, Function<K, String> nameSupplier, GalleryImageRenderCallback<K> render, ImagePreProcessor preProcessor) {
 		// return GALLERY.getRemote(mc, uuid, name, id -> "https://mc-heads.net/body/" + UndashedUuid.toString(id) + "/420", PRE_PROCESSOR);
 
 		var img = images.get(uuid);
@@ -227,7 +242,7 @@ public class Gallery {
 					uuid,
 					() -> render.render(mc, uuid, name),
 					name,
-					() -> "render/" + id + "/" + uuid + "/" + name,
+					() -> "render/" + id + "/" + uuid + (name.isEmpty() ? "" : ("/" + name)),
 					preProcessor
 				);
 			} catch (Exception ex) {

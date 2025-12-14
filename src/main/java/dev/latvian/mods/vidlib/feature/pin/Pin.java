@@ -59,19 +59,19 @@ public final class Pin {
 	}
 
 	@Nullable
-	public GalleryImage getImage() {
+	public GalleryImage<UUID> getImage() {
 		if (isSet()) {
-			var g = Gallery.ALL.get().get(gallery);
+			var g = (Gallery<UUID>) Gallery.ALL.get().get(gallery);
 
 			if (g != null) {
-				return g.images.get(texture);
+				return g.get(texture);
 			}
 		}
 
 		return null;
 	}
 
-	public void setImage(@Nullable GalleryImage image) {
+	public void setImage(@Nullable GalleryImage<UUID> image) {
 		if (image == null) {
 			gallery = "";
 			texture = Util.NIL_UUID;

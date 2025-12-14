@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.gallery;
 
+import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.imgui.AsyncFileSelector;
@@ -17,10 +18,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.function.Supplier;
 
-public class GalleryImageImBuilder implements ImBuilder<GalleryImage> {
-	public interface Uploader {
+public class GalleryImageImBuilder<K> implements ImBuilder<GalleryImage<K>> {
+	public interface Uploader<K> {
 		ResourceLocation getIcon();
 
 		String getTooltip();
@@ -29,10 +30,10 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage> {
 			return ImColorVariant.GREEN;
 		}
 
-		void render(GalleryImageImBuilder builder, ImGraphics graphics, boolean clicked);
+		void render(GalleryImageImBuilder<K> builder, ImGraphics graphics, boolean clicked);
 	}
 
-	public record FileUploader(Gallery gallery, ImagePreProcessor preProcessor) implements Uploader {
+	public record FileUploader<K>(Gallery<K> gallery, Supplier<K> randomId, ImagePreProcessor preProcessor) implements Uploader<K> {
 		@Override
 		public ResourceLocation getIcon() {
 			return VidLibTextures.FOLDER;
@@ -52,7 +53,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage> {
 					if (path != null && Files.exists(path) && Files.isRegularFile(path)) {
 						graphics.mc.execute(() -> {
 							try {
-								builder.set(gallery.upload(graphics.mc, UUID.randomUUID(), path, preProcessor));
+								builder.set(gallery.upload(graphics.mc, randomId.get(), path, preProcessor));
 								builder.fullUpdate = true;
 							} catch (Exception ex) {
 								throw new RuntimeException(ex);
@@ -64,12 +65,12 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage> {
 		}
 	}
 
-	public final List<Gallery> galleries;
-	public final List<Uploader> uploaders;
-	public GalleryImage selected;
+	public final List<Gallery<K>> galleries;
+	public final List<Uploader<K>> uploaders;
+	public GalleryImage<K> selected;
 	public boolean fullUpdate = false;
 
-	public GalleryImageImBuilder(List<Gallery> galleries, List<Uploader> uploaders) {
+	public GalleryImageImBuilder(List<Gallery<K>> galleries, List<Uploader<K>> uploaders) {
 		this.galleries = galleries;
 		this.uploaders = uploaders;
 	}
@@ -90,7 +91,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage> {
 				ImGui.openPopup("###gallery-popup");
 			}
 		} else {
-			if (graphics.imageButton(tex.getTexture(), ImGui.getFrameHeight() - 4F, ImGui.getFrameHeight() - 4F, 0F, 0F, 1F, 1F, 2, null)) {
+			if (graphics.imageButton(tex.getTexture(), ImGui.getFrameHeight() - 4F, ImGui.getFrameHeight() - 4F, UV.FULL, 2, null)) {
 				ImGui.openPopup("###gallery-popup");
 			}
 
@@ -109,7 +110,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage> {
 			graphics.setStyleVar(ImGuiStyleVar.ItemSpacing, 4F, 4F);
 			ImGui.pushID("###remove");
 
-			if (graphics.imageButton(VidLibTextures.TRASH, 40F, 40F, 0F, 0F, 1F, 1F, 2, selected == null ? ImColorVariant.GRAY : ImColorVariant.RED)) {
+			if (graphics.imageButton(VidLibTextures.TRASH, 40F, 40F, UV.FULL, 2, selected == null ? ImColorVariant.GRAY : ImColorVariant.RED)) {
 				if (selected != null) {
 					set(null);
 					update = ImUpdate.FULL;
@@ -126,7 +127,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage> {
 				ImGui.sameLine();
 				ImGui.pushID(i);
 				var uploader = uploaders.get(i);
-				boolean clicked = graphics.imageButton(uploader.getIcon(), 40F, 40F, 0F, 0F, 1F, 1F, 2, uploader.getColor());
+				boolean clicked = graphics.imageButton(uploader.getIcon(), 40F, 40F, UV.FULL, 2, uploader.getColor());
 				uploader.render(this, graphics, clicked);
 				ImGuiUtils.hoveredTooltip(uploader.getTooltip());
 				ImGui.popID();
@@ -140,7 +141,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage> {
 			graphics.pushStack();
 			graphics.setStyleVar(ImGuiStyleVar.ItemSpacing, 4F, 4F);
 
-			var list = new ArrayList<GalleryImage>();
+			var list = new ArrayList<GalleryImage<K>>();
 
 			for (var gallery : galleries) {
 				list.addAll(gallery.images.values());
@@ -155,7 +156,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage> {
 			for (var image : list) {
 				var imageTex = image.load(graphics.mc, false);
 
-				if (graphics.imageButton(imageTex.getTexture(), 50F, 50F, 0F, 0F, 1F, 1F, 2, null)) {
+				if (graphics.imageButton(imageTex.getTexture(), 50F, 50F, UV.FULL, 2, null)) {
 					set(image);
 					update = ImUpdate.FULL;
 					close = true;
@@ -191,7 +192,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage> {
 	}
 
 	@Override
-	public GalleryImage build() {
+	public GalleryImage<K> build() {
 		return selected;
 	}
 }

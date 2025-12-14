@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
+import dev.latvian.mods.vidlib.feature.misc.GlobalKeybinds;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -19,6 +20,7 @@ public class VidLibKeys {
 	public static KeyMapping repeatLastCommandKeyMapping;
 	public static KeyMapping adminPanelKeyMapping;
 	public static KeyMapping reloadShadersKeyMapping;
+	public static KeyMapping playerGlowKeyMapping;
 
 	private static KeyMapping register(RegisterKeyMappingsEvent event, String name, KeyModifier modifier, int defaultKey, KeyConflictContext conflict) {
 		var key = new KeyMapping(name, conflict, modifier, InputConstants.Type.KEYSYM, defaultKey, "key.categories.vidlib");
@@ -35,13 +37,20 @@ public class VidLibKeys {
 		clearParticlesKeyMapping = register(event, "key.vidlib.clear_particles", KeyModifier.NONE, GLFW.GLFW_KEY_L);
 		reloadKeyMapping = register(event, "key.vidlib.reload", KeyModifier.NONE, GLFW.GLFW_KEY_R);
 		repeatLastCommandKeyMapping = register(event, "key.vidlib.repeat_last_command", KeyModifier.NONE, GLFW.GLFW_KEY_SEMICOLON);
-		adminPanelKeyMapping = register(event, "key.vidlib.admin_panel", KeyModifier.NONE, GLFW.GLFW_KEY_GRAVE_ACCENT, KeyConflictContext.UNIVERSAL);
+		adminPanelKeyMapping = register(event, "key.vidlib.admin_panel", KeyModifier.NONE, GLFW.GLFW_KEY_MENU, KeyConflictContext.UNIVERSAL);
 		reloadShadersKeyMapping = register(event, "key.vidlib.reload_shaders", KeyModifier.NONE, GLFW.GLFW_KEY_X);
+		playerGlowKeyMapping = register(event, "key.vidlib.player_glow", KeyModifier.NONE, GLFW.GLFW_KEY_GRAVE_ACCENT);
 	}
 
 	public static void handle(Minecraft mc) {
 		if (mc.player == null || mc.level == null) {
 			return;
+		}
+
+		if (adminPanelKeyMapping.getKey() == playerGlowKeyMapping.getKey()) {
+			adminPanelKeyMapping.setKey(InputConstants.getKey(GLFW.GLFW_KEY_MENU, 0));
+			playerGlowKeyMapping.setKey(InputConstants.getKey(GLFW.GLFW_KEY_GRAVE_ACCENT, 0));
+			GlobalKeybinds.saveKeybinds(mc.options);
 		}
 
 		while (freezeTickKeyMapping.consumeClick()) {

@@ -5,6 +5,7 @@ import com.mojang.blaze3d.textures.GpuTexture;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.Range;
+import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
@@ -594,13 +595,20 @@ public class ImGraphics {
 		return iconButton(icon, (value.get() ? ImIcons.CHECK : ImIcons.CLOSE) + id, tooltip + (value.get() ? ": Enabled" : ": Disabled"), value.get() ? null : ImColorVariant.GRAY, value);
 	}
 
-	public boolean imageButton(@Nullable GpuTexture texture, float w, float h, float u0, float v0, float u1, float v1, int padding, @Nullable ImColorVariant variant) {
+	public boolean imageButton(@Nullable GpuTexture texture, float w, float h, UV uv, int padding, @Nullable ImColorVariant variant, Color background, Color tint) {
 		if (variant != null) {
 			pushStack();
 			setButton(variant);
 		}
 
-		var clicked = ImGui.imageButton(texture == null ? 0 : texture.vl$getHandle(), w, h, u0, v0, u1, v1, padding);
+		var clicked = ImGui.imageButton(
+			texture == null ? 0 : texture.vl$getHandle(),
+			w, h,
+			uv.u0(), uv.v0(), uv.u1(), uv.v1(),
+			padding,
+			background.redf(), background.greenf(), background.bluef(), background.alphaf(),
+			tint.redf(), tint.greenf(), tint.bluef(), tint.alphaf()
+		);
 
 		if (variant != null) {
 			popStack();
@@ -609,7 +617,11 @@ public class ImGraphics {
 		return clicked;
 	}
 
-	public boolean imageButton(@Nullable ResourceLocation texture, float w, float h, float u0, float v0, float u1, float v1, int padding, @Nullable ImColorVariant variant) {
-		return imageButton(texture == null ? null : mc.getTextureManager().getTexture(texture).getTexture(), w, h, u0, v0, u1, v1, padding, variant);
+	public boolean imageButton(@Nullable GpuTexture texture, float w, float h, UV uv, int padding, @Nullable ImColorVariant variant) {
+		return imageButton(texture, w, h, uv, padding, variant, Color.TRANSPARENT, Color.WHITE);
+	}
+
+	public boolean imageButton(@Nullable ResourceLocation texture, float w, float h, UV uv, int padding, @Nullable ImColorVariant variant) {
+		return imageButton(texture == null ? null : mc.getTextureManager().getTexture(texture).getTexture(), w, h, uv, padding, variant);
 	}
 }
