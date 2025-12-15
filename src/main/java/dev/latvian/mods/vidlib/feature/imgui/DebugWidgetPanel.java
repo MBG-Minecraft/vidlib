@@ -39,6 +39,7 @@ import imgui.extension.implot.flag.ImPlotAxisFlags;
 import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.flag.ImGuiColorEditFlags;
 import imgui.flag.ImGuiDir;
+import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImBoolean;
@@ -326,7 +327,7 @@ public class DebugWidgetPanel extends AdminPanel {
 
 		ImGui.separator();
 
-		if (graphics.collapsingHeader("Collapsing Header (Closeable)", new ImBoolean(true), 0)) {
+		if (graphics.collapsingHeader("Collapsing Header (Closeable, No Push)", new ImBoolean(true), ImGuiTreeNodeFlags.NoTreePushOnOpen)) {
 			ImGui.text("Hello");
 		}
 

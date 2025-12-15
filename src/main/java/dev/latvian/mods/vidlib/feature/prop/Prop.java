@@ -340,6 +340,10 @@ public class Prop {
 		return ctx;
 	}
 
+	public double getDepth() {
+		return width;
+	}
+
 	public void move() {
 	}
 
@@ -391,14 +395,15 @@ public class Prop {
 
 	public boolean isVisible(double x, double y, double z, FrustumCheck frustum) {
 		double w = width / 2D;
-		return frustum.isVisible(x - w, y, z - w, x + w, y + height, z + w);
+		double d = getDepth() / 2D;
+		return frustum.isVisible(x - w, y, z - d, x + w, y + height, z + d);
 	}
 
 	public void debugVisuals(Visuals visuals, double x, double y, double z, float delta, boolean selected) {
 		if (selected) {
-			visuals.add(new ColoredShape(new CuboidShape(Vec3f.of(width + 0.125D, height + 0.125D, width + 0.125D), Rotation.NONE), Color.TRANSPARENT, Color.YELLOW).at(x, y + height / 2D, z));
+			visuals.add(new ColoredShape(new CuboidShape(Vec3f.of(width + 0.125D, height + 0.125D, getDepth() + 0.125D), Rotation.NONE), Color.TRANSPARENT, Color.YELLOW).at(x, y + height / 2D, z));
 		} else {
-			visuals.add(new ColoredShape(new CuboidShape(Vec3f.of(width, height, width), Rotation.NONE), Color.TRANSPARENT, Color.WHITE).at(x, y + height / 2D, z));
+			visuals.add(new ColoredShape(new CuboidShape(Vec3f.of(width, height, getDepth()), Rotation.NONE), Color.TRANSPARENT, Color.WHITE).at(x, y + height / 2D, z));
 		}
 	}
 
@@ -486,11 +491,17 @@ public class Prop {
 			return false;
 		}
 
-		return collisionBox.intersects(pos.x - width / 2D, pos.y, pos.z - width / 2D, pos.x + width / 2D, pos.y + height, pos.z + width / 2D);
+		double w = width / 2D;
+		double d = getDepth() / 2D;
+
+		return collisionBox.intersects(pos.x - w, pos.y, pos.z - d, pos.x + w, pos.y + height, pos.z + d);
 	}
 
 	public void addCollisionShapes(@Nullable Entity entity, List<VoxelShape> shapes) {
-		shapes.add(Shapes.create(pos.x - width / 2D, pos.y, pos.z - width / 2D, pos.x + width / 2D, pos.y + height, pos.z + width / 2D));
+		double w = width / 2D;
+		double d = getDepth() / 2D;
+
+		shapes.add(Shapes.create(pos.x - w, pos.y, pos.z - d, pos.x + w, pos.y + height, pos.z + d));
 	}
 
 	public boolean canInteract(@Nullable Entity entity) {
@@ -498,7 +509,10 @@ public class Prop {
 	}
 
 	public List<AABB> getClipBoxes(@Nullable Entity entity) {
-		return List.of(new AABB(pos.x - width / 2D, pos.y, pos.z - width / 2D, pos.x + width / 2D, pos.y + height, pos.z + width / 2D));
+		double w = width / 2D;
+		double d = getDepth() / 2D;
+
+		return List.of(new AABB(pos.x - w, pos.y, pos.z - d, pos.x + w, pos.y + height, pos.z + d));
 	}
 
 	@Nullable
