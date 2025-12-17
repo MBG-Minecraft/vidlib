@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
@@ -213,7 +212,7 @@ public class VidLibClientEventHandler {
 		var mc = Minecraft.getInstance();
 
 		if (mc.level != null && mc.player != null) {
-			ScreenText.CLIENT_TICK.ops = mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
+			ScreenText.CLIENT_TICK.ops = mc.jsonOps();
 
 			var tool = VidLibTool.of(mc.player);
 
@@ -458,7 +457,7 @@ public class VidLibClientEventHandler {
 
 		if (!ClientGameEngine.INSTANCE.hideGui(mc) && !mc.player.isReplayCamera()) {
 			ScreenText.RENDER.addAll(ScreenText.CLIENT_TICK);
-			ScreenText.RENDER.ops = mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
+			ScreenText.RENDER.ops = mc.jsonOps();
 
 			if (mc.screen == null || mc.screen instanceof ChatScreen) {
 				NeoForge.EVENT_BUS.post(new DebugTextEvent.Render(ScreenText.RENDER));

@@ -386,10 +386,12 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		return new KNumberContext(vl$level());
 	}
 
+	@Override
 	default RegistryOps<Tag> nbtOps() {
 		return vl$level().registryAccess().createSerializationContext(NbtOps.INSTANCE);
 	}
 
+	@Override
 	default RegistryOps<JsonElement> jsonOps() {
 		return vl$level().registryAccess().createSerializationContext(JsonOps.INSTANCE);
 	}

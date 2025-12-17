@@ -1,11 +1,16 @@
 package dev.latvian.mods.vidlib.core;
 
+import com.google.gson.JsonElement;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.util.NameDrawType;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 
 public interface VLMinecraftEnvironmentDataHolder extends VLLevelContainer {
@@ -15,6 +20,16 @@ public interface VLMinecraftEnvironmentDataHolder extends VLLevelContainer {
 
 	default long getGameTime() {
 		return vl$level().getGameTime();
+	}
+
+	default DynamicOps<Tag> nbtOps() {
+		var level = vl$level();
+		return level == null ? NbtOps.INSTANCE : level.nbtOps();
+	}
+
+	default DynamicOps<JsonElement> jsonOps() {
+		var level = vl$level();
+		return level == null ? JsonOps.INSTANCE : level.jsonOps();
 	}
 
 	default FeatureSet getServerFeatures() {
