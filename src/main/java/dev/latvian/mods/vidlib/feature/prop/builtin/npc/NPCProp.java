@@ -234,21 +234,23 @@ public class NPCProp extends BaseGeoProp {
 				spreadPositions = spread.spread(Math.clamp(count, 1, 10000));
 			}
 
-			instances = new NPCInstance[spreadPositions.length];
+			var arr = new NPCInstance[spreadPositions.length];
+			var random = new XoroshiroRandomSource(Double.doubleToLongBits(pos.x + id), Double.doubleToLongBits(pos.z + arr.length));
 
-			var random = new XoroshiroRandomSource(Double.doubleToLongBits(pos.x + id), Double.doubleToLongBits(pos.z + instances.length));
-
-			for (int i = 0; i < instances.length; i++) {
-				instances[i] = new NPCInstance();
-				instances[i].index = i;
-				instances[i].profile = random.nextInt(Integer.MAX_VALUE);
-				instances[i].x = spreadPositions[i].x();
-				instances[i].z = spreadPositions[i].y();
-				instances[i].randomOffsetX = random.nextFloat();
-				instances[i].randomOffsetZ = random.nextFloat();
-				instances[i].randomYaw = random.nextFloat();
-				instances[i].randomPitch = random.nextFloat();
+			for (int i = 0; i < arr.length; i++) {
+				arr[i] = new NPCInstance();
+				arr[i].index = i;
+				arr[i].profile = random.nextInt(Integer.MAX_VALUE);
+				arr[i].x = spreadPositions[i].x();
+				arr[i].z = spreadPositions[i].y();
+				arr[i].randomOffsetX = random.nextFloat();
+				arr[i].randomOffsetZ = random.nextFloat();
+				arr[i].randomYaw = random.nextFloat();
+				arr[i].randomPitch = random.nextFloat();
 			}
+
+			instances = arr;
+			return arr;
 		}
 
 		return instances;
