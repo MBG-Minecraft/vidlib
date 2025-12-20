@@ -225,7 +225,9 @@ public class NPCProp extends BaseGeoProp {
 	}
 
 	public NPCInstance[] getInstances() {
-		if (instances == null) {
+		var arr = instances;
+
+		if (arr == null) {
 			Vec2f[] spreadPositions;
 
 			if (count <= 1) {
@@ -234,7 +236,7 @@ public class NPCProp extends BaseGeoProp {
 				spreadPositions = spread.spread(Math.clamp(count, 1, 10000));
 			}
 
-			var arr = new NPCInstance[spreadPositions.length];
+			arr = new NPCInstance[spreadPositions.length];
 			var random = new XoroshiroRandomSource(Double.doubleToLongBits(pos.x + id), Double.doubleToLongBits(pos.z + arr.length));
 
 			for (int i = 0; i < arr.length; i++) {
@@ -250,9 +252,8 @@ public class NPCProp extends BaseGeoProp {
 			}
 
 			instances = arr;
-			return arr;
 		}
 
-		return instances;
+		return arr;
 	}
 }
