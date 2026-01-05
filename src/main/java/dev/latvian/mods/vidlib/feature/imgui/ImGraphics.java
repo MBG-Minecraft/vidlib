@@ -14,11 +14,9 @@ import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
 import imgui.ImGui;
 import imgui.ImGuiStyle;
 import imgui.extension.imnodes.ImNodes;
-import imgui.extension.imnodes.flag.ImNodesColorStyle;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiDir;
 import imgui.flag.ImGuiInputTextFlags;
-import imgui.flag.ImGuiStyleVar;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
@@ -35,7 +33,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
 
-public class ImGraphics {
+public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImNodesStyleVarConsumer, ImNodesStyleColorConsumer {
 	private static class VarStackStack {
 		private VarStackStack parent;
 		private int pushedStyle = 0;
@@ -126,59 +124,40 @@ public class ImGraphics {
 		stack = stack.parent;
 	}
 
+	@Override
 	public void setStyleVar(int key, float value) {
 		ImGui.pushStyleVar(key, value);
 		stack.pushedStyle++;
 	}
 
+	@Override
 	public void setStyleVar(int key, float x, float y) {
 		ImGui.pushStyleVar(key, x, y);
 		stack.pushedStyle++;
 	}
 
-	public void setStyleCol(int key, float r, float g, float b, float a) {
-		ImGui.pushStyleColor(key, r, g, b, a);
-		stack.pushedColors++;
-	}
-
+	@Override
 	public void setStyleCol(int key, int r, int g, int b, int a) {
 		ImGui.pushStyleColor(key, r, g, b, a);
 		stack.pushedColors++;
 	}
 
-	public void setStyleCol(int key, int argb) {
-		setStyleCol(key, (argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF, (argb >> 24) & 0xFF);
-	}
-
-	public void setStyleCol(int key, Color value) {
-		setStyleCol(key, value.red(), value.green(), value.blue(), value.alpha());
-	}
-
+	@Override
 	public void setNodesStyleVar(int key, float value) {
 		ImNodes.pushStyleVar(key, value);
 		stack.pushedNodesStyle++;
 	}
 
+	@Override
 	public void setNodesStyleVar(int key, float x, float y) {
 		ImNodes.pushStyleVar(key, x, y);
 		stack.pushedNodesStyle++;
 	}
 
+	@Override
 	public void setNodesStyleCol(int key, int r, int g, int b, int a) {
 		ImNodes.pushColorStyle(key, a << 24 | b << 16 | g << 8 | r);
 		stack.pushedNodesColors++;
-	}
-
-	public void setNodesStyleCol(int key, float r, float g, float b, float a) {
-		setNodesStyleCol(key, (int) (r * 255F), (int) (g * 255F), (int) (b * 255F), (int) (a * 255F));
-	}
-
-	public void setNodesStyleCol(int key, int argb) {
-		setNodesStyleCol(key, (argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF, (argb >> 24) & 0xFF);
-	}
-
-	public void setNodesStyleCol(int key, Color value) {
-		setNodesStyleCol(key, value.red(), value.green(), value.blue(), value.alpha());
 	}
 
 	public void setItemFlag(int key, boolean flag) {
@@ -259,59 +238,16 @@ public class ImGraphics {
 		style.setColor(key, ARGB.toABGR(color));
 	}
 
-	public void setText(ImColorVariant variant) {
-		setStyleCol(ImGuiCol.Text, variant.textColor);
-	}
-
-	public void setWarningText() {
-		setText(ImColorVariant.YELLOW);
-	}
-
-	public void setErrorText() {
-		setText(ImColorVariant.RED);
-	}
-
-	public void setSuccessText() {
-		setText(ImColorVariant.GREEN);
-	}
-
-	public void setInfoText() {
-		setText(ImColorVariant.BLUE);
-	}
-
 	public void setStyle(Style style) {
 		if (style.getColor() != null) {
 			setStyleCol(ImGuiCol.Text, 0xFF000000 | style.getColor().getValue());
 		}
 	}
 
-	public void setButton(ImColorVariant variant) {
-		setStyleCol(ImGuiCol.Button, variant.color);
-		setStyleCol(ImGuiCol.ButtonHovered, variant.hoverColor);
-		setStyleCol(ImGuiCol.ButtonActive, variant.activeColor);
-	}
-
-	public void setButtonColor(Color col) {
-		setStyleCol(ImGuiCol.Button, col);
-		setStyleCol(ImGuiCol.ButtonHovered, col.lerp(0.3F, Color.WHITE));
-		setStyleCol(ImGuiCol.ButtonActive, col.lerp(0.1F, Color.WHITE));
-	}
-
-	public void setNodesPin(ImColorVariant variant) {
-		setNodesStyleCol(ImNodesColorStyle.Pin, variant.color);
-		setNodesStyleCol(ImNodesColorStyle.PinHovered, variant.hoverColor);
-	}
-
-	public void setNodesLink(ImColorVariant variant) {
-		setNodesStyleCol(ImNodesColorStyle.Link, variant.color);
-		setNodesStyleCol(ImNodesColorStyle.LinkHovered, variant.hoverColor);
-		setNodesStyleCol(ImNodesColorStyle.LinkSelected, variant.activeColor);
-	}
-
 	public void stackTrace(Throwable throwable) {
 		pushStack();
 		setErrorText();
-		setStyleVar(ImGuiStyleVar.ItemSpacing, 0F, 0F);
+		setItemSpacing(0F, 0F);
 
 		var stackTrace = throwable.getStackTrace();
 
@@ -539,18 +475,10 @@ public class ImGraphics {
 		return clicked;
 	}
 
-	public void setRedButton() {
-		setButton(ImColorVariant.RED);
-	}
-
-	public void setGreenButton() {
-		setButton(ImColorVariant.GREEN);
-	}
-
 	public void text(List<FormattedCharSinkPartBuilder.Part> parts) {
 		ImGui.beginGroup();
 		pushStack();
-		setStyleVar(ImGuiStyleVar.ItemSpacing, 0F, ImGui.getStyle().getItemSpacingY());
+		setItemSpacing(0F, ImGui.getStyle().getItemSpacingY());
 
 		for (int i = 0; i < parts.size(); i++) {
 			if (i > 0) {

@@ -11,7 +11,6 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 import imgui.flag.ImGuiColorEditFlags;
-import imgui.flag.ImGuiStyleVar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +54,7 @@ public class GradientImBuilder implements ImBuilder<Gradient> {
 		var update = ImUpdate.NONE;
 
 		graphics.pushStack();
-		graphics.setStyleVar(ImGuiStyleVar.ItemSpacing, 6F, 8F);
+		graphics.setItemSpacing(6F, 8F);
 		float[] rgba = new float[4];
 
 		for (int i = 0; i < colors.size(); i++) {

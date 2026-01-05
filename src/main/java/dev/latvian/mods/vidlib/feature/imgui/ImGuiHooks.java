@@ -17,7 +17,6 @@ import imgui.extension.implot.ImPlotContext;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.flag.ImGuiDockNodeFlags;
-import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.internal.ImGuiContext;
@@ -240,11 +239,11 @@ public class ImGuiHooks {
 			var graphics = new ImGraphics(mc);
 			graphics.pushRootStack();
 			graphics.setStyleCol(ImGuiCol.WindowBg, 0xFF000000);
-			graphics.setStyleVar(ImGuiStyleVar.WindowRounding, 0F);
-			graphics.setStyleVar(ImGuiStyleVar.WindowPadding, 2F, 2F);
-			graphics.setStyleVar(ImGuiStyleVar.FramePadding, 2F, 0F);
-			graphics.setStyleVar(ImGuiStyleVar.WindowMinSize, 0F, 0F);
-			graphics.setStyleVar(ImGuiStyleVar.ItemSpacing, 2F, 0F);
+			graphics.setWindowRounding(0F);
+			graphics.setWindowPadding(2F, 2F);
+			graphics.setFramePadding(2F, 0F);
+			graphics.setWindowMinSize(0F, 0F);
+			graphics.setItemSpacing(2F, 0F);
 
 			int flags = ImGuiWindowFlags.NoSavedSettings
 				| ImGuiWindowFlags.NoMove

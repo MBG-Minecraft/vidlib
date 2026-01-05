@@ -10,7 +10,6 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import imgui.ImGui;
-import imgui.flag.ImGuiStyleVar;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -107,7 +106,7 @@ public class GalleryImageImBuilder<K> implements ImBuilder<GalleryImage<K>> {
 			boolean close = false;
 
 			graphics.pushStack();
-			graphics.setStyleVar(ImGuiStyleVar.ItemSpacing, 4F, 4F);
+			graphics.setItemSpacing(4F, 4F);
 			ImGui.pushID("###remove");
 
 			if (graphics.imageButton(VidLibTextures.TRASH, 40F, 40F, UV.FULL, 2, selected == null ? ImColorVariant.GRAY : ImColorVariant.RED)) {
@@ -139,7 +138,7 @@ public class GalleryImageImBuilder<K> implements ImBuilder<GalleryImage<K>> {
 			ImGui.separator();
 
 			graphics.pushStack();
-			graphics.setStyleVar(ImGuiStyleVar.ItemSpacing, 4F, 4F);
+			graphics.setItemSpacing(4F, 4F);
 
 			var list = new ArrayList<GalleryImage<K>>();
 

@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.feature.imgui;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
 import imgui.ImGui;
-import imgui.flag.ImGuiStyleVar;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.CommandSuggestions;
 import net.minecraft.client.gui.components.EditBox;
@@ -48,14 +47,14 @@ public class CommandHistoryPanel extends AdminPanel {
 
 		var sink = new FormattedCharSinkPartBuilder();
 		graphics.pushStack();
-		graphics.setStyleVar(ImGuiStyleVar.ItemSpacing, 8F, 2F);
+		graphics.setItemSpacing(8F, 2F);
 
 		for (int i = list.size() - 1; i >= 0; i--) {
 			var s = list.get(i);
 
 			if (graphics.inGame) {
 				graphics.pushStack();
-				graphics.setStyleVar(ImGuiStyleVar.FramePadding, 2F, 0F);
+				graphics.setFramePadding(2F, 0F);
 
 				if (ImGui.smallButton(ImIcons.PLAY + "###run-" + i)) {
 					Minecraft.getInstance().runClientCommand(s);

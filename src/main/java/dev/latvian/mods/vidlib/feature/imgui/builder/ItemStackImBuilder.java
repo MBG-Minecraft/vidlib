@@ -18,7 +18,6 @@ import dev.latvian.mods.vidlib.feature.item.ItemKey;
 import dev.latvian.mods.vidlib.util.JsonUtils;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import imgui.ImGui;
-import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImInt;
 import imgui.type.ImString;
@@ -206,7 +205,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack> {
 				}
 
 				graphics.pushStack();
-				graphics.setStyleVar(ImGuiStyleVar.ItemSpacing, 4F, 4F);
+				graphics.setItemSpacing(4F, 4F);
 
 				if (renderedItems == null) {
 					renderedItems = new ArrayList<>();
