@@ -312,7 +312,7 @@ tasks.register('webHookUpdate') {
 	group 'other'
 	description 'Send webhook update'
 
-	def content = "New VidLib version: [${version}](<${ENV.MAVEN_ARTIFACT_LOCATION}/${version}>)"
+	def content = "New VidLib version: [`${version}`](<${ENV.MAVEN_ARTIFACT_LOCATION}/${version}>) (KLib `${klib_version}`)"
 
 	doLast {
 		println("Sending webhook update...")
