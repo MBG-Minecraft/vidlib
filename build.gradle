@@ -7,7 +7,7 @@ plugins {
 	id 'java'
 	id 'idea'
 	id 'maven-publish'
-	id 'net.neoforged.moddev' version "2.0.118"
+	id 'net.neoforged.moddev' version "2.0.137"
 }
 
 var ENV = System.getenv() + (file('.env').exists() ? file('.env').readLines().findAll { it && !it.startsWith('#') }.collectEntries {
@@ -169,6 +169,13 @@ dependencies {
 		}
 	}
 
+	jarJar(implementation('dev.latvian.mods:better-advanced-tooltips')) {
+		version {
+			strictly "[$bat_version,)"
+			prefer "$bat_version"
+		}
+	}
+
 	interfaceInjectionData("dev.latvian.mods:klib:$klib_version")
 
 	compileOnly("dev.latvian.mods:imgui-resources:$imgui_resources_version")
@@ -176,7 +183,7 @@ dependencies {
 	compileOnly("maven.modrinth:simple-voice-chat:neoforge-1.21.5-2.5.36")
 	compileOnly("software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}")
 
-	implementation "dev.latvian.apps:tiny-java-server:1.0.0-build.26"
+	implementation "dev.latvian.apps:tiny-java-server:1.0.0-build.33"
 }
 
 processResources {

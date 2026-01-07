@@ -163,4 +163,8 @@ public class CommonGameEngine {
 	public boolean isSmallTallGrassHitbox(BlockGetter blockGetter) {
 		return blockGetter instanceof Level level && level.getServerFeatures().has(Feature.SMALL_GRASS_HITBOX);
 	}
+
+	public boolean disablePOI() {
+		return true;
+	}
 }
