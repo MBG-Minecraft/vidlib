@@ -16,17 +16,25 @@ public class LevelOfDetailValue {
 	public static final LevelOfDetailValue CLOTHING = new LevelOfDetailValue(false, 96D);
 	public static final LevelOfDetailValue ENTITY_DETAILS = new LevelOfDetailValue(false, 96D);
 	public static final LevelOfDetailValue ENTITY_ARMOR = new LevelOfDetailValue(false, 128D);
-	public static final LevelOfDetailValue BLOCK_ENTITIES = new LevelOfDetailValue(false, 128D);
+	public static final LevelOfDetailValue BLOCK_ENTITIES = new LevelOfDetailValue(false, 128D, false);
 
 	// public static final Codec<LevelOfDetailValue> CODEC = Codec.either(Codec.BOOL, Codec.DOUBLE);
+	private static final double MAX_DISTANCE = 8192D;
 
 	public final boolean is2D;
 	public Type type;
+
+	private boolean canBeAlways;
 	private double distance;
 
 	public LevelOfDetailValue(boolean is2D, double distance) {
+		this(is2D, distance, true);
+	}
+
+	public LevelOfDetailValue(boolean is2D, double distance, boolean canBeAlways) {
 		this.is2D = is2D;
 		this.type = Type.WITHIN_DISTANCE;
+		this.canBeAlways = canBeAlways;
 		this.distance = distance;
 	}
 
@@ -50,8 +58,12 @@ public class LevelOfDetailValue {
 		return distance;
 	}
 
+	public boolean canBeAlways() {
+		return canBeAlways;
+	}
+
 	public void setDistance(double d) {
-		distance = Math.clamp(d, 0D, 8192D);
+		distance = Math.clamp(d, 0D, MAX_DISTANCE);
 	}
 
 	public boolean isVisible(Position camera, double x, double y, double z) {
