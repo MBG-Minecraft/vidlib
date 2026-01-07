@@ -88,6 +88,7 @@ public class BuiltInImGui {
 			menuItems.add(MenuItem.menu(ImIcons.SHIRT, "Clothing", LevelOfDetailValue.CLOTHING));
 			menuItems.add(MenuItem.menu(ImIcons.PAW, "Entity Details", LevelOfDetailValue.ENTITY_DETAILS));
 			menuItems.add(MenuItem.menu(ImIcons.SHIELD, "Entity Armor", LevelOfDetailValue.ENTITY_ARMOR));
+			menuItems.add(MenuItem.menu(ImIcons.FIRE, "Block Entities", LevelOfDetailValue.BLOCK_ENTITIES));
 		}));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.ConfigDropdown(graphics, list));

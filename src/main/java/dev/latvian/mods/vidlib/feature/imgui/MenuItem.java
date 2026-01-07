@@ -95,8 +95,10 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 
 	public static MenuItem menu(ImIcon icon, String label, LevelOfDetailValue lod) {
 		return menu(icon, label, (graphics, menuItems) -> {
-			menuItems.add(item(ImIcons.VISIBLE, "Always", lod.getType() == LevelOfDetailValue.Type.ALWAYS, g -> lod.setAlwaysVisible()).remainOpen(true));
-			menuItems.add(item(ImIcons.INVISIBLE, "Never", lod.getType() == LevelOfDetailValue.Type.NEVER, g -> lod.setNeverVisible()).remainOpen(true));
+			if (lod.canBeAlways()) {
+				menuItems.add(item(ImIcons.VISIBLE, "Always", lod.getType() == LevelOfDetailValue.Type.ALWAYS, g -> lod.setAlwaysVisible()).remainOpen(true));
+				menuItems.add(item(ImIcons.INVISIBLE, "Never", lod.getType() == LevelOfDetailValue.Type.NEVER, g -> lod.setNeverVisible()).remainOpen(true));
+			}
 			menuItems.add(item(ImIcons.NUMBERS, "Within Distance", lod.getType() == LevelOfDetailValue.Type.WITHIN_DISTANCE, g -> lod.setVisibleWithin()).remainOpen(true));
 
 			if (lod.getType() == LevelOfDetailValue.Type.WITHIN_DISTANCE) {
