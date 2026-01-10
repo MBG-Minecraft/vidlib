@@ -14,7 +14,6 @@ import dev.latvian.mods.vidlib.feature.auto.EntityRendererHolder;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
-import dev.latvian.mods.vidlib.feature.client.ClientItemTooltips;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.client.VidLibHUD;
@@ -111,7 +110,6 @@ import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -720,10 +718,5 @@ public class VidLibClientEventHandler {
 		if (event.getSkin(PlayerSkin.Model.SLIM) instanceof PlayerRenderer r) {
 			r.addLayer(new ClothingLayer(r, event.getContext(), false)); // TODO: Fixme
 		}
-	}
-
-	@SubscribeEvent(priority = EventPriority.LOW)
-	public static void onItemTooltip(ItemTooltipEvent event) {
-		ClientItemTooltips.onItemTooltip(event);
 	}
 }

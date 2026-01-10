@@ -183,8 +183,6 @@ public class PlayerProfiles {
 	}
 
 	public static PlayerProfile get(String name) {
-		BY_NAME.clear();
-
 		return BY_NAME.computeIfAbsent(name.toLowerCase(Locale.ROOT), n -> {
 			for (var p : BY_UUID.values()) {
 				if (!p.isError() && p.profile().getName().equalsIgnoreCase(n)) {
