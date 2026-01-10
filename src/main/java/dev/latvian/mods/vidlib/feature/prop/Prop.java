@@ -29,6 +29,7 @@ import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
+import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
@@ -770,6 +771,7 @@ public class Prop {
 				ImGui.popItemWidth();
 
 				if (update.isAny() && builder.isValid()) {
+					FlashbackIntegration.MAKE_PROP_KEYFRAMES.add(this);
 					c2sEdit(data, Cast.to(builder.build()), update.isFull());
 				}
 
