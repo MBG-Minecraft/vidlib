@@ -57,6 +57,7 @@
 		"UUIDUtilMixin",
 		"WaterFluidMixin",
 		"neo.EnumArgumentMixin",
+		"neo.IBlockExtensionMixin",
 		"neo.IEntityExtensionMixin",
 		"neo.ReloadableResourceManagerMixin"
 	],

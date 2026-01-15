@@ -10,11 +10,13 @@ import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -166,5 +168,9 @@ public class CommonGameEngine {
 
 	public boolean disablePOI() {
 		return true;
+	}
+
+	public boolean isLadder(LevelReader level, BlockPos pos, BlockState state, LivingEntity entity) {
+		return false;
 	}
 }

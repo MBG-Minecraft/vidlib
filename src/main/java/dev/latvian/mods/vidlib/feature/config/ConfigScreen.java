@@ -4,8 +4,8 @@ import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
+import dev.latvian.mods.betteradvancedtooltips.BATIcons;
 import dev.latvian.mods.klib.math.Range;
-import dev.latvian.mods.vidlib.feature.misc.VidLibIcon;
 import dev.latvian.mods.vidlib.util.JsonUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
@@ -140,7 +140,7 @@ public class ConfigScreen<C> extends Screen {
 	}
 
 	public void addCopyJsonButton(Codec<C> fullCodec) {
-		addRenderableWidget(Button.builder(Component.empty().append(VidLibIcon.COPY.prefix()).append("Copy"), button -> {
+		addRenderableWidget(Button.builder(Component.empty().append(BATIcons.COPY).append(BATIcons.SMALL_SPACE).append("Copy"), button -> {
 			try {
 				minecraft.keyboardHandler.setClipboard(JsonUtils.GSON.toJson(fullCodec.encodeStart(minecraft.level.registryAccess().createSerializationContext(JsonOps.INSTANCE), instance).getOrThrow()));
 			} catch (Exception ex) {

@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.latvian.mods.betteradvancedtooltips.BATIcons;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
@@ -39,7 +40,6 @@ import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import dev.latvian.mods.vidlib.feature.misc.ScreenTextRenderer;
 import dev.latvian.mods.vidlib.feature.misc.VLFlashbackIntegration;
-import dev.latvian.mods.vidlib.feature.misc.VidLibIcon;
 import dev.latvian.mods.vidlib.feature.multiverse.VoidSpecialEffects;
 import dev.latvian.mods.vidlib.feature.particle.VidLibClientParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
@@ -411,7 +411,7 @@ public class VidLibClientEventHandler {
 
 		if (renderingStructures != 0) {
 			if (!VLFlashbackIntegration.ENABLED || !FlashbackIntegration.isExporting()) {
-				var component = Component.empty().append(VidLibIcon.ERROR.prefix()).append("Rendering " + renderingStructures + " structures...");
+				var component = Component.empty().append(BATIcons.ERROR).append(BATIcons.SMALL_SPACE).append("Rendering " + renderingStructures + " structures...");
 
 				if (mc.player.isReplayCamera()) {
 					int x = 1;

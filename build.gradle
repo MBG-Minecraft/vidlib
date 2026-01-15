@@ -14,6 +14,8 @@ var ENV = System.getenv() + (file('.env').exists() ? file('.env').readLines().fi
 	def (k, v) = it.split('=', 2); [(k.trim()): v.trim()]
 } : [:])
 
+var CI = ENV.CI == "true"
+
 var localBuildFile = new File(project.rootDir, "build.txt")
 var localBuildNumber = localBuildFile.getText("UTF-8").toInteger() + 1
 var webHookId = ""
@@ -25,60 +27,63 @@ base.archivesName = project.archives_base_name
 println("Building version: $version")
 
 neoForge {
-	version = project.neoforge_version
-	validateAccessTransformers = true
+	enable {
+		version = project.neoforge_version
+		validateAccessTransformers = !CI
+		disableRecompilation = CI
 
-	accessTransformers {
-		publish(project.file('src/main/resources/META-INF/accesstransformer.cfg'))
-	}
-
-	interfaceInjectionData {
-		from(file('interfaces.json'))
-		publish(file('interfaces.json'))
-	}
-
-	runs {
-		configureEach {
-			logLevel = org.slf4j.event.Level.INFO
+		accessTransformers {
+			publish(project.file('src/main/resources/META-INF/accesstransformer.cfg'))
 		}
 
-		client {
-			ideName = 'Client'
-			client()
-			systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+		interfaceInjectionData {
+			from(file('interfaces.json'))
+			publish(file('interfaces.json'))
+		}
 
-			if (ENV.MC_CLIENT_ARGS) {
-				programArguments.addAll(ENV.MC_CLIENT_ARGS.split(' '))
+		runs {
+			configureEach {
+				logLevel = org.slf4j.event.Level.INFO
 			}
 
-			jvmArguments.addAll("-XX:+IgnoreUnrecognizedVMOptions", "-XX:+AllowEnhancedClassRedefinition")
-			gameDirectory = file 'runs/client'
-		}
+			client {
+				ideName = 'Client'
+				client()
+				systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
 
-		client2 {
-			ideName = 'Client 2'
-			client()
-			systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+				if (ENV.MC_CLIENT_ARGS) {
+					programArguments.addAll(ENV.MC_CLIENT_ARGS.split(' '))
+				}
 
-			if (ENV.MC_CLIENT_2_ARGS) {
-				programArguments.addAll(ENV.MC_CLIENT_2_ARGS.split(' '))
+				jvmArguments.addAll("-XX:+IgnoreUnrecognizedVMOptions", "-XX:+AllowEnhancedClassRedefinition")
+				gameDirectory = file 'runs/client'
 			}
 
-			jvmArguments.addAll("-XX:+IgnoreUnrecognizedVMOptions", "-XX:+AllowEnhancedClassRedefinition")
-			gameDirectory = file 'runs/client'
+			client2 {
+				ideName = 'Client 2'
+				client()
+				systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+
+				if (ENV.MC_CLIENT_2_ARGS) {
+					programArguments.addAll(ENV.MC_CLIENT_2_ARGS.split(' '))
+				}
+
+				jvmArguments.addAll("-XX:+IgnoreUnrecognizedVMOptions", "-XX:+AllowEnhancedClassRedefinition")
+				gameDirectory = file 'runs/client'
+			}
+
+			server {
+				ideName = 'Server'
+				server()
+				programArgument("--nogui")
+				gameDirectory = file 'runs/server'
+			}
 		}
 
-		server {
-			ideName = 'Server'
-			server()
-			programArgument("--nogui")
-			gameDirectory = file 'runs/server'
-		}
-	}
-
-	mods {
-		vidlib {
-			sourceSet sourceSets.main
+		mods {
+			vidlib {
+				sourceSet sourceSets.main
+			}
 		}
 	}
 }
@@ -278,29 +283,35 @@ publishing {
 
 idea {
 	module {
-		downloadSources = true
-		downloadJavadoc = true
+		if (!CI) {
+			downloadSources = true
+			downloadJavadoc = true
 
-		["client", "server"].each {
-			[
-					"config",
-					"crash-reports",
-					"debug",
-					"downloads",
-					"flashback",
-					"local",
-					"logs",
-					"mods",
-					"pack-sync",
-					"profilekeys",
-					"saves",
-					"voicechat_recordings",
-					"command_history.txt",
-					"options.txt",
-					"server.properties",
-					"world",
-			].each { ext ->
-				excludeDirs.add(file("runs/$it/$ext"))
+			["client", "server"].each {
+				[
+						".architectury-transformer",
+						"config",
+						"crash-reports",
+						"debug",
+						"downloads",
+						"dumps",
+						"flashback",
+						"local",
+						"logs",
+						"mods",
+						"profilekeys",
+						"saves",
+						"voicechat_recordings",
+						"command_history.txt",
+						"options.txt",
+						"server.properties",
+						"world",
+						"emi.json",
+						"usercache.json",
+						"usernamecache.json"
+				].each { ext ->
+					excludeDirs.add(file("runs/$it/$ext"))
+				}
 			}
 		}
 	}

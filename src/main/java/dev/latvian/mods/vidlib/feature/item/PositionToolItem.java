@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.item;
 
+import dev.latvian.mods.betteradvancedtooltips.BATIcons;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.math.Line;
@@ -10,7 +11,6 @@ import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
-import dev.latvian.mods.vidlib.feature.misc.VidLibIcon;
 import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import net.minecraft.core.BlockPos;
@@ -100,19 +100,22 @@ public enum PositionToolItem implements VidLibTool, PlayerActionHandler {
 			player.tell(Component.empty()
 				.append(Component.empty()
 					.withStyle(Style.EMPTY.withCopyString(strBlock))
-					.append(VidLibIcon.COPY.prefix())
+					.append(BATIcons.COPY)
+					.append(BATIcons.SMALL_SPACE)
 					.append(Component.literal(strBlock).withStyle(Style.EMPTY.withHoverText("Block Position")))
 				)
 				.append(" | ")
 				.append(Component.empty()
 					.withStyle(Style.EMPTY.withCopyString(strVec))
-					.append(VidLibIcon.COPY.prefix())
+					.append(BATIcons.COPY)
+					.append(BATIcons.SMALL_SPACE)
 					.append(Component.literal(strVec).withStyle(Style.EMPTY.withHoverText("Vec3 Position")))
 				)
 				.append(" | ")
 				.append(Component.empty()
 					.withStyle(Style.EMPTY.withCopyString(strDist))
-					.append(VidLibIcon.COPY.prefix())
+					.append(BATIcons.COPY)
+					.append(BATIcons.SMALL_SPACE)
 					.append(Component.literal(strDist).withStyle(Style.EMPTY.withHoverText("Distance from last click")))
 				)
 			);
