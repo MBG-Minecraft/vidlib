@@ -18,7 +18,6 @@ import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.flag.ImGuiDockNodeFlags;
 import imgui.flag.ImGuiWindowFlags;
-import imgui.gl3.ImGuiImplGl3;
 import imgui.internal.ImGuiContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -47,28 +46,26 @@ public class ImGuiHooks {
 		0,
 	};
 
-	private static VLImGuiImplGlfw imGuiGlfw;
-	private static ImGuiImplGl3 imGuiGl3;
+	public static VLImGuiImplGlfw imGuiGlfw;
+	public static VLImGuiImplGl3 imGuiGl3;
 	private static ImGuiContextStack context;
 	private static boolean active = false;
 
 	private static boolean endingFrame = false;
-	public static boolean reloadFonts = false;
 
 	static int dockId;
 	static float dpiScale = 1.0f;
 
-	public static int initialized = 2; // FIXME
-
-	public static void enable() {
-		if (initialized == 0) {
-			initialized = 1;
-		}
-	}
+	public static boolean initialized = false;
 
 	public static void init(Minecraft mc, ResourceManager resourceManager) {
+		if (initialized) {
+			return;
+		}
+
+		initialized = true;
 		imGuiGlfw = new VLImGuiImplGlfw(mc);
-		imGuiGl3 = new ImGuiImplGl3();
+		imGuiGl3 = new VLImGuiImplGl3();
 
 		context = new ImGuiContextStack(
 			new ImGuiContext(ImGui.createContext().ptr),
@@ -90,7 +87,7 @@ public class ImGuiHooks {
 		io.setConfigWindowsMoveFromTitleBarOnly(true);
 		io.setConfigMacOSXBehaviors(Minecraft.ON_OSX);
 
-		imGuiGl3.init("#version 410 core");
+		imGuiGl3.init();
 		imGuiGlfw.init(mc.getWindow().getWindow(), true);
 		loadFonts(resourceManager);
 		var style = ImGui.getStyle();
@@ -172,13 +169,13 @@ public class ImGuiHooks {
 	}
 
 	public static void startFrame(Minecraft mc) {
-		if (initialized == 0) {
-			return;
-		}
+		if (!initialized) {
+			//if (mc.getOverlay() instanceof LoadingOverlay) {
+			//	return;
+			//}
 
-		if (initialized == 1) {
 			init(mc, mc.getResourceManager());
-			initialized = 2;
+			initialized = true;
 		}
 
 		var old = context.push();
@@ -227,13 +224,20 @@ public class ImGuiHooks {
 		boolean topInfoBar = h > 0F && ClientGameEngine.INSTANCE.hasTopInfoBar(mc);
 		boolean bottomInfoBar = h > 0F && ClientGameEngine.INSTANCE.hasBottomInfoBar(mc);
 
-		updateViewportArea(
-			mc, window,
+		var prevWidth = window.getWidth();
+		var prevHeight = window.getHeight();
+		window.vl$setViewportArea(
 			(centralNodePos.x - windowPos.x) / (double) windowSize.x,
 			(centralNodePos.y - windowPos.y + (topInfoBar ? h : 0D)) / (double) windowSize.y,
 			centralNodeSize.x / (double) windowSize.x,
 			(centralNodeSize.y - (topInfoBar ? h : 0D) - (bottomInfoBar ? h : 0D)) / (double) windowSize.y
 		);
+
+		if (window.getWidth() != 0 && window.getHeight() != 0) {
+			if (window.getWidth() != prevWidth || window.getHeight() != prevHeight) {
+				mc.resizeDisplay();
+			}
+		}
 
 		if (topInfoBar || bottomInfoBar) {
 			var graphics = new ImGraphics(mc);
@@ -279,21 +283,11 @@ public class ImGuiHooks {
 		old.pop();
 	}
 
-	private static void updateViewportArea(Minecraft mc, Window window, double xOffset, double yOffset, double xScale, double yScale) {
-		var prevWidth = window.getWidth();
-		var prevHeight = window.getHeight();
-		window.vl$setViewportArea(xOffset, yOffset, xScale, yScale);
-
-		if (window.getWidth() == 0 || window.getHeight() == 0) {
-			return; // Window has been minimized...
-		}
-
-		if (window.getWidth() != prevWidth || window.getHeight() != prevHeight) {
-			mc.resizeDisplay();
-		}
-	}
-
 	public static void beforeEndFrame(Minecraft mc) {
+		if (!initialized) {
+			return;
+		}
+
 		if (VidLibClientEventHandler.clientLoaded && !ImGuiAPI.getHide()) {
 			if (mc.level == null || !mc.level.isReplayLevel()) {
 				var old = context.push();
@@ -311,7 +305,7 @@ public class ImGuiHooks {
 	public static void endFrame(Minecraft mc) {
 		endingFrame = false;
 
-		if (initialized == 0) {
+		if (!initialized) {
 			return;
 		}
 
@@ -337,16 +331,11 @@ public class ImGuiHooks {
 			GLFW.glfwMakeContextCurrent(backupWindowPtr);
 		}
 
-		if (reloadFonts) {
-			reloadFonts = false;
-			loadFonts(mc.getResourceManager());
-		}
-
 		old.pop();
 	}
 
 	public static void ensureEndFrame() {
-		if (!active) {
+		if (!initialized || !active) {
 			return;
 		}
 

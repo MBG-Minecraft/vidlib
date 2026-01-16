@@ -2,7 +2,7 @@
 	"providers": [
 		{
 			"type": "bitmap",
-			"file": "betteradvancedtooltips:font/icons/star.png",
+			"file": "vidlib:font/icons/star.png",
 			"ascent": 7,
 			"chars": ["*"]
 		},

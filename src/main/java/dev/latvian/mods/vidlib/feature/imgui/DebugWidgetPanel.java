@@ -337,6 +337,16 @@ public class DebugWidgetPanel extends AdminPanel {
 		var sprite = mc.getBlockAtlas().getSprite(ResourceLocation.withDefaultNamespace("block/campfire_fire"));
 		ImGui.image(mc.getBlockAtlas().getTexture().vl$getHandle(), 128F, 128F, sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());
 		ImGui.separator();
+		ImGui.image(ImGuiHooks.imGuiGl3.gFontTexture, 128F, 128F, 0F, 0F, 1F, 1F);
+
+		if (ImGui.isItemHovered()) {
+			float h = 1024F;
+			ImGui.beginTooltip();
+			ImGui.image(ImGuiHooks.imGuiGl3.gFontTexture, h * ImGuiHooks.imGuiGl3.glFontWidth / (float) ImGuiHooks.imGuiGl3.glFontHeight, h, 0F, 0F, 1F, 1F);
+			ImGui.endTooltip();
+		}
+
+		ImGui.separator();
 
 		ImGui.text("Child Window");
 		ImGui.beginChild("AAAA###child", -1F, 80F, true, ImGuiWindowFlags.MenuBar);
