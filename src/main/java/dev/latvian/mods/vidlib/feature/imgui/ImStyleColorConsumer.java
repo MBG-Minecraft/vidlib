@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import dev.latvian.mods.klib.color.Color;
+import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 
 public interface ImStyleColorConsumer {
@@ -16,6 +17,11 @@ public interface ImStyleColorConsumer {
 
 	default void setStyleCol(int key, Color value) {
 		setStyleCol(key, value.red(), value.green(), value.blue(), value.alpha());
+	}
+
+	default void copyStyleColFrom(int key, int from) {
+		int col = ImGui.getColorU32(from);
+		setStyleCol(key, col & 0xFF, (col >> 8) & 0xFF, (col >> 16) & 0xFF, (col >> 24) & 0xFF);
 	}
 
 	default void setText(ImColorVariant variant) {

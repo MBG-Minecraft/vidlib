@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
 import dev.latvian.mods.vidlib.feature.misc.ClientModInfo;
@@ -21,8 +20,6 @@ import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.EntityCollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
@@ -33,6 +30,7 @@ import java.util.UUID;
 
 public class CommonGameEngine {
 	public static CommonGameEngine INSTANCE = new CommonGameEngine();
+	public static final long START_TIME = System.currentTimeMillis();
 
 	public void collectServerFeatures(Reference2IntMap<Feature> map) {
 		map.put(Feature.INFINITE_CHUNK_RENDERING, 1);
@@ -57,21 +55,14 @@ public class CommonGameEngine {
 
 	public void setupGameRules(GameRules rules, MinecraftServer server) {
 		rules.getRule(GameRules.RULE_DOFIRETICK).set(false, server);
-		rules.getRule(GameRules.RULE_KEEPINVENTORY).set(true, server);
-		rules.getRule(GameRules.RULE_DOMOBSPAWNING).set(false, server);
 		// rules.getRule(GameRules.RULE_DOBLOCKDROPS).set(false, server);
 		rules.getRule(GameRules.RULE_COMMANDBLOCKOUTPUT).set(false, server);
-		rules.getRule(GameRules.RULE_NATURAL_REGENERATION).set(false, server);
-		rules.getRule(GameRules.RULE_DAYLIGHT).set(false, server);
-		rules.getRule(GameRules.RULE_RANDOMTICKING).set(0, server);
 		rules.getRule(GameRules.RULE_SPAWN_RADIUS).set(0, server);
 		rules.getRule(GameRules.RULE_DISABLE_PLAYER_MOVEMENT_CHECK).set(true, server);
 		rules.getRule(GameRules.RULE_DISABLE_ELYTRA_MOVEMENT_CHECK).set(true, server);
-		rules.getRule(GameRules.RULE_WEATHER_CYCLE).set(false, server);
 		rules.getRule(GameRules.RULE_ANNOUNCE_ADVANCEMENTS).set(false, server);
 		rules.getRule(GameRules.RULE_DISABLE_RAIDS).set(true, server);
 		rules.getRule(GameRules.RULE_DOINSOMNIA).set(false, server);
-		rules.getRule(GameRules.RULE_FALL_DAMAGE).set(false, server);
 		rules.getRule(GameRules.RULE_DO_PATROL_SPAWNING).set(false, server);
 		rules.getRule(GameRules.RULE_DO_TRADER_SPAWNING).set(false, server);
 		rules.getRule(GameRules.RULE_DO_WARDEN_SPAWNING).set(false, server);
@@ -83,7 +74,7 @@ public class CommonGameEngine {
 	}
 
 	public boolean tickCoralBlocks(ScheduledTickAccess instance, BlockPos pos, Block block) {
-		return false;
+		return true;
 	}
 
 	@Nullable
@@ -106,7 +97,7 @@ public class CommonGameEngine {
 	}
 
 	public boolean getInfiniteArrows() {
-		return true;
+		return false;
 	}
 
 	public boolean getArrowTrail(AbstractArrow arrow) {
@@ -114,7 +105,7 @@ public class CommonGameEngine {
 	}
 
 	public int getArrowDespawnTime(AbstractArrow arrow) {
-		return 20; // 1200 = default
+		return 1200;
 	}
 
 	public void handlePacket(Context ctx) {
@@ -147,18 +138,6 @@ public class CommonGameEngine {
 
 	@Nullable
 	public VoxelShape overrideBarrierShape(BlockState state, BlockGetter blockGetter, BlockPos pos, CollisionContext context) {
-		if (context instanceof EntityCollisionContext ctx && ctx.getEntity() != null && blockGetter instanceof Level level && level.getServerFeatures().has(Feature.SOFT_BARRIERS)) {
-			if (ctx.getEntity() instanceof AbstractArrow) {
-				return Shapes.empty();
-			}
-
-			var v = EntityOverride.PASS_THROUGH_BARRIERS.get(ctx.getEntity());
-
-			if (v == null ? ctx.getEntity().vl$isCreative() : v) {
-				return Shapes.empty();
-			}
-		}
-
 		return null;
 	}
 
@@ -167,7 +146,7 @@ public class CommonGameEngine {
 	}
 
 	public boolean disablePOI() {
-		return true;
+		return false;
 	}
 
 	public boolean isLadder(LevelReader level, BlockPos pos, BlockState state, LivingEntity entity) {

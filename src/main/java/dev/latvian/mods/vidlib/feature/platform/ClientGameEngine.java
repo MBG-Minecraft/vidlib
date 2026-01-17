@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
@@ -13,7 +14,9 @@ import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
+import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
@@ -192,16 +195,10 @@ public class ClientGameEngine {
 	}
 
 	public boolean hasBottomInfoBar(Minecraft mc) {
-		for (var clock : Clock.REGISTRY) {
-			if (clock.screen().isPresent()) {
-				return true;
-			}
-		}
-
-		return mc.player != null && mc.player.vl$sessionData().bottomInfoBarOverride != null;
+		return true;
 	}
 
-	public void topInfoBar(ImGraphics graphics, float x, float y, float w, float h) {
+	public void topInfoBar(ImGraphics graphics, float h) {
 		if (graphics.mc.player != null) {
 			var session = graphics.mc.player.vl$sessionData();
 
@@ -215,7 +212,7 @@ public class ClientGameEngine {
 		}
 	}
 
-	public void bottomInfoBar(ImGraphics graphics, float x, float y, float w, float h) {
+	public void bottomInfoBar(ImGraphics graphics, float h) {
 		if (graphics.mc.player != null) {
 			var session = graphics.mc.player.vl$sessionData();
 
@@ -252,21 +249,12 @@ public class ClientGameEngine {
 			}
 		}
 
-		ImGui.text("--:--");
-
-		/*
-		graphics.redTextIf(ImIcons.CIRCLE.toString(), true);
-		ImGui.sameLine();
-		ImGui.text("15:00");
-		ImGui.sameLine();
-		ImGui.text("|");
-		ImGui.sameLine();
-		ImGui.progressBar(0.67F, 200F, h - 4F);
-		ImGui.sameLine();
-		ImGui.text("|");
-		ImGui.sameLine();
-		ImGui.text("Some more info here");
-		 */
+		graphics.pushStack();
+		graphics.setText(ImColorVariant.BLUE);
+		ImGui.text(ImIcons.CIRCLE.toString());
+		graphics.popStack();
+		var seconds = (System.currentTimeMillis() - CommonGameEngine.START_TIME) / 1000L;
+		ImGui.text("%02d:%02d:%02d ".formatted(seconds / 3600L, (seconds / 60L) % 60L, seconds % 60L));
 	}
 
 	public void addDecals(List<Decal> list) {
@@ -306,7 +294,13 @@ public class ClientGameEngine {
 		return level.getWorldBorder();
 	}
 
-	public boolean shouldShowName(Entity entity) {
+	public boolean shouldShowName(Entity entity, boolean original) {
+		if (BossRendering.active > 0) {
+			return false;
+		} else if (original) {
+			return true;
+		}
+
 		// var mc = Minecraft.getInstance();
 		// return entity instanceof LocalPlayer && mc.isLocalServer() && !mc.options.getCameraType().isFirstPerson() || entity.hasCustomName();
 		return !entity.isInvisible() && (entity instanceof LocalPlayer || entity.hasCustomName());
@@ -338,10 +332,6 @@ public class ClientGameEngine {
 		var map = new HashMap<>(original);
 		// map.put(ModelLayers.PLAYER, LayerDefinition.create(PlayerModel.createMesh(CubeDeformation.NONE, false), 64, 64).apply(HumanoidModel.BABY_TRANSFORMER));
 		return ImmutableMap.<ModelLayerLocation, LayerDefinition>builder().putAll(map).build();
-	}
-
-	public float getClothingScale(Clothing clothing) {
-		return 0.95F;
 	}
 
 	public boolean primitiveF3(Minecraft mc) {

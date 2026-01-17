@@ -17,6 +17,7 @@ import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectPanel;
@@ -25,6 +26,7 @@ import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.skybox.Skybox;
 import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
+import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
 import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
@@ -230,17 +232,33 @@ public class BuiltInImGui {
 	});
 
 	public static void handle(ImGraphics graphics) {
+		var infoBar = FlashbackIntegration.isInReplayOrExporting() || !ClientGameEngine.INSTANCE.hasTopInfoBar(graphics.mc) ? 0F : 22F;
+
 		if (graphics.adminPanel || graphics.isReplay) {
 			var menuOpen = mainMenuOpen;
 			mainMenuOpen = true;
 
 			if (menuOpen && !graphics.isReplay) {
-				MAIN_MENU_BAR.buildMenuBar(graphics, true);
-			}
+				if (ImGui.beginMainMenuBar()) {
+					MAIN_MENU_BAR.buildMenuBar(graphics, true);
 
-			OPEN_PANELS.values().removeIf(panel -> panel.handle(graphics));
+					if (infoBar > 0F) {
+						ImGui.separator();
+						ClientGameEngine.INSTANCE.topInfoBar(graphics, infoBar);
+						infoBar = 0F;
+					}
+
+					ImGui.endMainMenuBar();
+				}
+			}
 		}
 
+		if (infoBar > 0F && ImGui.beginMainMenuBar()) {
+			ClientGameEngine.INSTANCE.topInfoBar(graphics, infoBar);
+			ImGui.endMainMenuBar();
+		}
+
+		OPEN_PANELS.values().removeIf(panel -> panel.handle(graphics));
 		NeoForge.EVENT_BUS.post(new ImGuiEvent(graphics));
 
 		if (SHOW_STACK_TOOL.get()) {

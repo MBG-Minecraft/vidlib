@@ -257,29 +257,31 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 		}
 	}
 
-	public void buildMenuBar(ImGraphics graphics, boolean mainMenuBar) {
+	public boolean buildMenuBar(ImGraphics graphics, boolean mainMenuBar) {
 		if (subItems == null) {
-			return;
+			return false;
 		}
 
 		var mainMenu = subItems.apply(graphics);
 
-		if (!mainMenu.isEmpty()) {
-			if (graphics.isReplay ? ImGui.beginMenu("VidLib") : mainMenuBar ? ImGui.beginMainMenuBar() : ImGui.beginMenuBar()) {
-				for (int i = 0; i < mainMenu.size(); i++) {
-					ImGui.pushID(i);
-					mainMenu.get(i).build(graphics);
-					ImGui.popID();
-				}
+		if (mainMenu.isEmpty()) {
+			return false;
+		}
 
-				if (graphics.isReplay) {
-					ImGui.endMenu();
-				} else if (mainMenuBar) {
-					ImGui.endMainMenuBar();
-				} else {
-					ImGui.endMenuBar();
-				}
+		if (graphics.isReplay ? ImGui.beginMenu("VidLib") : mainMenuBar || ImGui.beginMenuBar()) {
+			for (int i = 0; i < mainMenu.size(); i++) {
+				ImGui.pushID(i);
+				mainMenu.get(i).build(graphics);
+				ImGui.popID();
+			}
+
+			if (graphics.isReplay) {
+				ImGui.endMenu();
+			} else if (!mainMenuBar) {
+				ImGui.endMenuBar();
 			}
 		}
+
+		return true;
 	}
 }

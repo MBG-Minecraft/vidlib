@@ -220,17 +220,16 @@ public class ImGuiHooks {
 		var centralNodePos = centralNode.getPos();
 		var centralNodeSize = centralNode.getSize();
 
-		float h = FlashbackIntegration.isInReplay() ? 0F : 24F;
-		boolean topInfoBar = h > 0F && ClientGameEngine.INSTANCE.hasTopInfoBar(mc);
+		float h = FlashbackIntegration.isInReplayOrExporting() ? 0F : 22F;
 		boolean bottomInfoBar = h > 0F && ClientGameEngine.INSTANCE.hasBottomInfoBar(mc);
 
 		var prevWidth = window.getWidth();
 		var prevHeight = window.getHeight();
 		window.vl$setViewportArea(
 			(centralNodePos.x - windowPos.x) / (double) windowSize.x,
-			(centralNodePos.y - windowPos.y + (topInfoBar ? h : 0D)) / (double) windowSize.y,
+			(centralNodePos.y - windowPos.y) / (double) windowSize.y,
 			centralNodeSize.x / (double) windowSize.x,
-			(centralNodeSize.y - (topInfoBar ? h : 0D) - (bottomInfoBar ? h : 0D)) / (double) windowSize.y
+			(centralNodeSize.y - (bottomInfoBar ? h : 0D)) / (double) windowSize.y
 		);
 
 		if (window.getWidth() != 0 && window.getHeight() != 0) {
@@ -239,43 +238,34 @@ public class ImGuiHooks {
 			}
 		}
 
-		if (topInfoBar || bottomInfoBar) {
+		if (bottomInfoBar) {
 			var graphics = new ImGraphics(mc);
 			graphics.pushRootStack();
-			graphics.setStyleCol(ImGuiCol.WindowBg, 0xFF000000);
+			graphics.copyStyleColFrom(ImGuiCol.WindowBg, ImGuiCol.MenuBarBg);
 			graphics.setWindowRounding(0F);
-			graphics.setWindowPadding(2F, 2F);
+			graphics.setWindowPadding(0F, 0F);
 			graphics.setFramePadding(2F, 0F);
-			graphics.setWindowMinSize(0F, 0F);
+			graphics.setWindowMinSize(0F, 22F);
 			graphics.setItemSpacing(2F, 0F);
 
 			int flags = ImGuiWindowFlags.NoSavedSettings
+				| ImGuiWindowFlags.MenuBar
 				| ImGuiWindowFlags.NoMove
 				| ImGuiWindowFlags.NoDocking
 				| ImGuiWindowFlags.NoNav
 				| ImGuiWindowFlags.NoDecoration;
 
-			if (topInfoBar) {
-				ImGui.setNextWindowPos(centralNodePos.x, centralNodePos.y);
-				ImGui.setNextWindowSize(centralNodeSize.x, h);
+			ImGui.setNextWindowPos(centralNodePos.x, centralNodePos.y + centralNodeSize.y - h);
+			ImGui.setNextWindowSize(centralNodeSize.x, h);
 
-				if (ImGui.begin("###top-info-bar", flags)) {
-					ClientGameEngine.INSTANCE.topInfoBar(graphics, centralNodePos.x, centralNodePos.y, centralNodeSize.x, h);
+			if (ImGui.begin("###bottom-info-bar", flags)) {
+				if (ImGui.beginMenuBar()) {
+					ClientGameEngine.INSTANCE.bottomInfoBar(graphics, h);
+					ImGui.endMenuBar();
 				}
-
-				ImGui.end();
 			}
 
-			if (bottomInfoBar) {
-				ImGui.setNextWindowPos(centralNodePos.x, centralNodePos.y + centralNodeSize.y - h);
-				ImGui.setNextWindowSize(centralNodeSize.x, h);
-
-				if (ImGui.begin("###bottom-info-bar", flags)) {
-					ClientGameEngine.INSTANCE.bottomInfoBar(graphics, centralNodePos.x, centralNodePos.y + centralNodeSize.y - h, centralNodeSize.x, h);
-				}
-
-				ImGui.end();
-			}
+			ImGui.end();
 
 			graphics.popStack();
 		}
