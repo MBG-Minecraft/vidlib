@@ -42,6 +42,11 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
 		return session == null ? null : session.dataMap.get(type, vl$level().getGameTime());
 	}
 
+	default <T> T get(DataKey<T> type, T fallback) {
+		var value = get(type);
+		return value == null ? fallback : value;
+	}
+
 	default <T> void set(DataKey<T> type, T value) {
 		vl$sessionData().dataMap.set(type, value);
 	}
