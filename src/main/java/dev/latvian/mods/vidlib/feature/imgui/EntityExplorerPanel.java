@@ -20,7 +20,7 @@ import net.minecraft.world.entity.player.Player;
 import java.util.ArrayList;
 import java.util.Comparator;
 
-public class EntityExplorerPanel extends AdminPanel {
+public class EntityExplorerPanel extends Panel {
 	public static final EntityExplorerPanel INSTANCE = new EntityExplorerPanel();
 
 	public final ImBoolean sortByClosest;

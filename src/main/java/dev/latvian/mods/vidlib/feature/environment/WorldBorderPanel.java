@@ -1,14 +1,14 @@
 package dev.latvian.mods.vidlib.feature.environment;
 
-import dev.latvian.mods.vidlib.feature.imgui.AdminPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
+import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 
-public class WorldBorderPanel extends AdminPanel {
+public class WorldBorderPanel extends Panel {
 	public static final WorldBorderPanel INSTANCE = new WorldBorderPanel();
 
 	public static final MenuItem MENU_ITEM = MenuItem.item(ImIcons.SHIELD, "World Border", INSTANCE);

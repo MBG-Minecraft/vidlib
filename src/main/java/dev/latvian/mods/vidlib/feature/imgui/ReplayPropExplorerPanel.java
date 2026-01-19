@@ -9,7 +9,7 @@ import imgui.flag.ImGuiTreeNodeFlags;
 
 import java.util.ArrayList;
 
-public class ReplayPropExplorerPanel extends AdminPanel {
+public class ReplayPropExplorerPanel extends Panel {
 	public static final ReplayPropExplorerPanel INSTANCE = new ReplayPropExplorerPanel();
 
 	public ReplayPropExplorerPanel() {

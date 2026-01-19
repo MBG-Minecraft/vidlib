@@ -72,7 +72,7 @@ public record ServerDataEntityFilter(String key, Supplier<DataKey<?>> dataKey) i
 	@Override
 	public boolean test(Entity entity) {
 		var dk = dataKey.get();
-		var data = entity.level().get(dk);
+		var data = entity.level().getOptional(dk);
 
 		if (data == null) {
 			return false;

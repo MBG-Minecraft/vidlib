@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
-public enum AdminPanelStyle {
+public enum PanelStyle {
 	NORMAL,
 	MINIMAL,
 	GLASS

@@ -1,14 +1,14 @@
 package dev.latvian.mods.vidlib.feature.decal;
 
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.vidlib.feature.imgui.AdminPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 import imgui.flag.ImGuiTreeNodeFlags;
 
-public class DecalPanel extends AdminPanel {
+public class DecalPanel extends Panel {
 	public static final DecalPanel INSTANCE = new DecalPanel();
 
 	private DecalPanel() {

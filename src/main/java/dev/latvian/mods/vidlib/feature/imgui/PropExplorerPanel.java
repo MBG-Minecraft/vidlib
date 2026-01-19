@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class PropExplorerPanel extends AdminPanel {
+public class PropExplorerPanel extends Panel {
 	public static final PropExplorerPanel INSTANCE = new PropExplorerPanel();
 
 	public final ImBoolean sortByClosest;

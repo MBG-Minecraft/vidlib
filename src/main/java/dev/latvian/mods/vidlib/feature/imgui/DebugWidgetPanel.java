@@ -56,7 +56,7 @@ import org.joml.Vector2f;
 
 import java.util.List;
 
-public class DebugWidgetPanel extends AdminPanel {
+public class DebugWidgetPanel extends Panel {
 	public static final DebugWidgetPanel INSTANCE = new DebugWidgetPanel();
 
 	public final ImInt intData = new ImInt();

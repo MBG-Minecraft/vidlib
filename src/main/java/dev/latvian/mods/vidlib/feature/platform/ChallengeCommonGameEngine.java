@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
+import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
 import net.minecraft.core.BlockPos;
@@ -79,5 +80,20 @@ public class ChallengeCommonGameEngine extends CommonGameEngine {
 	@Override
 	public boolean disablePOI() {
 		return true;
+	}
+
+	@Override
+	public boolean disableAdvancements() {
+		return true;
+	}
+
+	@Override
+	public boolean disableIceMelting(Level level, BlockPos pos, BlockState state) {
+		return !level.get(InternalServerData.ICE_MELTS);
+	}
+
+	@Override
+	public boolean disableBlockGravity(Level level, BlockPos pos, BlockState state) {
+		return !level.get(InternalServerData.BLOCK_GRAVITY);
 	}
 }

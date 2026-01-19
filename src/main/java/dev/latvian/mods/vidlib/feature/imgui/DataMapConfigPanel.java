@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public abstract class DataMapConfigPanel extends AdminPanel {
+public abstract class DataMapConfigPanel extends Panel {
 	private record DataMapBuilderEntry<T>(DataKey<T> key, ImBuilder<T> builder) {
 	}
 

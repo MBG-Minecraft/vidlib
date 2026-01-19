@@ -11,7 +11,7 @@ import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 
-public class CommandHistoryPanel extends AdminPanel {
+public class CommandHistoryPanel extends Panel {
 	public static final CommandHistoryPanel INSTANCE = new CommandHistoryPanel();
 
 	private EditBox input;

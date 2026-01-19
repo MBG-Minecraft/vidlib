@@ -24,7 +24,7 @@ public interface PlayerDataCommand {
 				.executes(ctx -> {
 					for (var player : EntityArgument.getPlayers(ctx, "player")) {
 						ctx.getSource().sendSuccess(() -> {
-							var value = player.get(key);
+							var value = player.getOptional(key);
 							var nbt = key.type().codec().encodeStart(nbtOps, Cast.to(value)).getOrThrow();
 							return Component.literal(player.getScoreboardName() + ": ").append(NbtUtils.toPrettyComponent(nbt));
 						}, false);

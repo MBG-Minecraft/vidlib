@@ -430,7 +430,7 @@ public class VidLibClientEventHandler {
 			ScreenText.RENDER.topRight.add(mc.fpsString.split(" ", 2)[0] + " FPS");
 		}
 
-		if ((primitiveF3Open || VidLibClientOptions.getShowCoordinates()) && ClientGameEngine.INSTANCE.allowCoordinates(mc)) {
+		if ((primitiveF3Open || VidLibClientOptions.getShowCoordinates()) && ClientGameEngine.INSTANCE.allowCoordinateDisplay(mc)) {
 			var pos = mc.gameRenderer.getMainCamera().getPosition();
 			var x = Component.literal("%.01f".formatted(pos.x)).withColor(0xFF7070);
 			var y = Component.literal("%.01f".formatted(pos.y - mc.player.getEyeHeight())).withColor(0x7CFF70);

@@ -51,11 +51,13 @@ public class DataMap {
 		return value;
 	}
 
+	@Nullable
 	@SuppressWarnings("unchecked")
 	public <T> T get(DataKey<T> type) {
 		return (T) init(type).data;
 	}
 
+	@Nullable
 	public <T> T get(DataKey<T> type, long gameTime) {
 		if (superOverrides != null) {
 			var v = superOverrides.get(type);

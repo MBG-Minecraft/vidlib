@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.imgui;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 
-public class AdminPanel {
+public class Panel {
 	public final String id;
 	public String label;
 	public boolean canBeClosed;
@@ -11,9 +11,9 @@ public class AdminPanel {
 	public MenuItem menuBar;
 	boolean isOpen;
 	private ImWindowType windowType;
-	public AdminPanelStyle style;
+	public PanelStyle style;
 
-	public AdminPanel(String id, String label) {
+	public Panel(String id, String label) {
 		this.id = id;
 		this.label = label;
 		this.canBeClosed = true;
@@ -21,7 +21,15 @@ public class AdminPanel {
 		this.menuBar = null;
 		this.isOpen = false;
 		this.windowType = ImWindowType.FLOATING;
-		this.style = AdminPanelStyle.NORMAL;
+		this.style = PanelStyle.NORMAL;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public String getLabel() {
+		return label;
 	}
 
 	public final void open() {
@@ -88,10 +96,10 @@ public class AdminPanel {
 		int flags = setup(graphics);
 		ImGuiUtils.BOOLEAN.set(true);
 
-		if (style != AdminPanelStyle.NORMAL && windowType != ImWindowType.DOCKED) {
+		if (style != PanelStyle.NORMAL && windowType != ImWindowType.DOCKED) {
 			flags |= ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize;
 
-			if (windowType == ImWindowType.ATTACHED && style == AdminPanelStyle.GLASS) {
+			if (windowType == ImWindowType.ATTACHED && style == PanelStyle.GLASS) {
 				flags |= ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration;
 			}
 
@@ -100,7 +108,8 @@ public class AdminPanel {
 			ImGui.setNextWindowSizeConstraints(160F, 90F, Float.MAX_VALUE, Float.MAX_VALUE);
 		}
 
-		boolean menuOpen = canBeClosed ? ImGui.begin(label + "###" + id, ImGuiUtils.BOOLEAN, flags) : ImGui.begin(label + "###" + id, flags);
+		var title = getLabel() + "###" + getId();
+		boolean menuOpen = canBeClosed ? ImGui.begin(title, ImGuiUtils.BOOLEAN, flags) : ImGui.begin(title, flags);
 		postSetup(graphics, menuOpen);
 
 		if (menuOpen) {
@@ -119,18 +128,7 @@ public class AdminPanel {
 
 		postContent(graphics);
 
-		// check window type - floating, docked, or attached
-
-		if (ImGui.getWindowViewport() == null) {
-			windowType = ImWindowType.FLOATING;
-		} else if (ImGui.getWindowViewport().getPlatformHandle() != graphics.mc.getWindow().getWindow()) {
-			windowType = ImWindowType.FLOATING;
-		} else if (ImGui.isWindowDocked()) {
-			windowType = ImWindowType.DOCKED;
-		} else {
-			windowType = ImWindowType.ATTACHED;
-		}
-
+		windowType = ImWindowType.get(graphics.mc.getWindow().getWindow());
 		ImGui.end();
 
 		return !isOpen;

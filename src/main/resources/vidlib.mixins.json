@@ -43,7 +43,6 @@
 		"PoiSectionMixin",
 		"ProjectileWeaponItemMixin",
 		"ScoreboardMixin",
-		"SectionStorageMixin",
 		"ServerCommonPacketListenerImplMixin",
 		"ServerConfigurationPacketListenerImplMixin",
 		"ServerEntityMixin",

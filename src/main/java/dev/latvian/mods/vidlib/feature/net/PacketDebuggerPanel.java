@@ -1,14 +1,14 @@
 package dev.latvian.mods.vidlib.feature.net;
 
-import dev.latvian.mods.vidlib.feature.imgui.AdminPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PacketDebuggerPanel extends AdminPanel {
+public class PacketDebuggerPanel extends Panel {
 	public record LoggedPacket(long uid, long remoteGameTime, SimplePacketPayload payload) {
 	}
 

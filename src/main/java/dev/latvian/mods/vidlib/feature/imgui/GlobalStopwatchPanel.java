@@ -5,12 +5,12 @@ import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.util.StringUtils;
 import imgui.ImGui;
 
-public class GlobalStopwatchPanel extends AdminPanel {
+public class GlobalStopwatchPanel extends Panel {
 	public static final GlobalStopwatchPanel INSTANCE = new GlobalStopwatchPanel();
 
 	public GlobalStopwatchPanel() {
 		super("stopwatch", "Stopwatch");
-		this.style = AdminPanelStyle.MINIMAL;
+		this.style = PanelStyle.MINIMAL;
 	}
 
 	@Override
@@ -20,8 +20,8 @@ public class GlobalStopwatchPanel extends AdminPanel {
 			return;
 		}
 
-		long stopwatch = graphics.mc.get(InternalServerData.GLOBAL_STOPWATCH);
-		long stopwatchStart = graphics.mc.get(InternalServerData.GLOBAL_STOPWATCH_START);
+		long stopwatch = graphics.mc.getOptional(InternalServerData.GLOBAL_STOPWATCH);
+		long stopwatchStart = graphics.mc.getOptional(InternalServerData.GLOBAL_STOPWATCH_START);
 		boolean update = false;
 
 		long now = graphics.mc.getGameTime();

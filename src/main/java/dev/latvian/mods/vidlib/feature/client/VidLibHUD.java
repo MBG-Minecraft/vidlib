@@ -65,10 +65,10 @@ public interface VidLibHUD {
 		}
 
 		var cam = mc.gameRenderer.getMainCamera().getPosition();
-		double minDist = mc.get(InternalServerData.NAME_DRAW_MIN_DIST);
-		double midDist = mc.get(InternalServerData.NAME_DRAW_MID_DIST);
-		double maxDist = mc.get(InternalServerData.NAME_DRAW_MAX_DIST);
-		float minSize = mc.get(InternalServerData.NAME_DRAW_MIN_SIZE);
+		double minDist = mc.getOptional(InternalServerData.NAME_DRAW_MIN_DIST);
+		double midDist = mc.getOptional(InternalServerData.NAME_DRAW_MID_DIST);
+		double maxDist = mc.getOptional(InternalServerData.NAME_DRAW_MAX_DIST);
+		float minSize = mc.getOptional(InternalServerData.NAME_DRAW_MIN_SIZE);
 
 		var lines = new ArrayList<FormattedCharSequence>(1);
 		var delta = deltaTracker.getGameTimeDeltaPartialTick(false);

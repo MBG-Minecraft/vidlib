@@ -149,7 +149,19 @@ public class CommonGameEngine {
 		return false;
 	}
 
+	public boolean disableAdvancements() {
+		return false;
+	}
+
 	public boolean isLadder(LevelReader level, BlockPos pos, BlockState state, LivingEntity entity) {
+		return false;
+	}
+
+	public boolean disableIceMelting(Level level, BlockPos pos, BlockState state) {
+		return false;
+	}
+
+	public boolean disableBlockGravity(Level level, BlockPos pos, BlockState state) {
 		return false;
 	}
 }

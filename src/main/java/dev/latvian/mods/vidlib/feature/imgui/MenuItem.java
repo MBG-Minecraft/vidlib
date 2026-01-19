@@ -61,7 +61,7 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 		return item(icon, label, flag.get(), g -> flag.set(!flag.get()));
 	}
 
-	public static MenuItem item(ImIcon icon, String label, AdminPanel panel) {
+	public static MenuItem item(ImIcon icon, String label, Panel panel) {
 		return item(icon, label, panel.isOpen(), g -> {
 			if (panel.isOpen()) {
 				panel.close();

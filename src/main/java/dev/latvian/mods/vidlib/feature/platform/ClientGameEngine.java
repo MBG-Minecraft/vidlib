@@ -46,6 +46,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
@@ -96,7 +97,7 @@ public class ClientGameEngine {
 
 	public boolean isGlowing(Minecraft mc, Entity entity) {
 		if (entity instanceof Player player) {
-			return player.get(InternalPlayerData.GLOW_COLOR) != null;
+			return player.getOptional(InternalPlayerData.GLOW_COLOR) != null;
 		}
 
 		return mc.player != null && mc.player.vl$sessionData().glowColors.get(entity.getUUID()) != null;
@@ -108,7 +109,7 @@ public class ClientGameEngine {
 	}
 
 	public Component getPlayerWorldName(Player player, Component fallback) {
-		var nickname = player.get(InternalPlayerData.NICKNAME);
+		var nickname = player.getOptional(InternalPlayerData.NICKNAME);
 		return Empty.isEmpty(nickname) ? fallback : nickname;
 	}
 
@@ -165,11 +166,11 @@ public class ClientGameEngine {
 		var mc = Minecraft.getInstance();
 
 		if (mc.gameRenderer.getMainCamera().getFluidInCamera() != FogType.NONE) {
-			var fg = ClientGameEngine.INSTANCE.getFluidFog();
+			var fg = getFluidFog();
 			return fg == null ? shaderFog : fg;
 		}
 
-		var fg = ClientGameEngine.INSTANCE.getFog();
+		var fg = getFog();
 
 		if (mc.player != null && (mc.player.hasEffect(MobEffects.DARKNESS) || mc.player.hasEffect(MobEffects.BLINDNESS))) {
 			return shaderFog;
@@ -338,7 +339,7 @@ public class ClientGameEngine {
 		return false;
 	}
 
-	public boolean allowCoordinates(Minecraft mc) {
+	public boolean allowCoordinateDisplay(Minecraft mc) {
 		return mc.isLocalServer() || mc.player.hasPermissions(2);
 	}
 
@@ -442,6 +443,10 @@ public class ClientGameEngine {
 	}
 
 	public boolean isPacketLoggingEnabled() {
+		return false;
+	}
+
+	public boolean disableLightningSounds(LightningBolt entity) {
 		return false;
 	}
 }

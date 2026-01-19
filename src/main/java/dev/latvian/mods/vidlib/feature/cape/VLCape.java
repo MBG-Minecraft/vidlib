@@ -15,7 +15,6 @@ import net.minecraft.resources.ResourceLocation;
 public record VLCape(
 	ResourceLocation capeTexture
 ) {
-
 	public static final Codec<VLCape> CODEC =
 		ResourceLocation.CODEC.xmap(
 			VLCape::new,
@@ -31,7 +30,7 @@ public record VLCape(
 	public static final DataType<VLCape> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, VLCape.class);
 
 	public static PlayerSkin addCapeToSkin(AbstractClientPlayer player, PlayerSkin oldSkin) {
-		VLCape cape = player.get(InternalPlayerData.CAPE);
+		VLCape cape = player.getOptional(InternalPlayerData.CAPE);
 
 		if (cape == null) {
 			return oldSkin;

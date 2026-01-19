@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Map;
 
 public class BuiltInImGui {
-	public static final Map<String, AdminPanel> OPEN_PANELS = new LinkedHashMap<>();
+	public static final Map<String, Panel> OPEN_PANELS = new LinkedHashMap<>();
 	public static boolean mainMenuOpen = true;
 	public static final ImBoolean SHOW_STACK_TOOL = new ImBoolean(false);
 	public static final ImBoolean SHOW_STYLE_EDITOR_TOOL = new ImBoolean(false);

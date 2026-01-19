@@ -203,6 +203,6 @@ public final class EntityOverride<T> {
 
 	public T get(VLPlayer player, @Nullable T def, DataKey<T> playerDataFallback) {
 		var v = get(player);
-		return v == null || v.equals(def) ? player.get(playerDataFallback) : v;
+		return v == null || v.equals(def) ? player.getOptional(playerDataFallback) : v;
 	}
 }
