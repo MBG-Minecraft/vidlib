@@ -83,10 +83,18 @@ public class DataKeyStorage {
 	}
 
 	public DataKey<Integer> createInt(String id, int defaultValue) {
-		return createDefault(id, DataTypes.VAR_INT, defaultValue, IntImBuilder.TYPE_1M);
+		return createDefault(id, DataTypes.INT, defaultValue, IntImBuilder.TYPE_1M);
 	}
 
 	public DataKey<Integer> createInt(String id, int defaultValue, int min, int max) {
+		return createDefault(id, DataTypes.INT, defaultValue, () -> new IntImBuilder(min, max));
+	}
+
+	public DataKey<Integer> createVarInt(String id, int defaultValue) {
+		return createDefault(id, DataTypes.VAR_INT, defaultValue, IntImBuilder.TYPE_1M);
+	}
+
+	public DataKey<Integer> createVarInt(String id, int defaultValue, int min, int max) {
 		return createDefault(id, DataTypes.VAR_INT, defaultValue, () -> new IntImBuilder(min, max));
 	}
 

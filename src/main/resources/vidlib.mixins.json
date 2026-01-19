@@ -29,7 +29,6 @@
 		"FoodDataMixin",
 		"IceBlockMixin",
 		"IdDispatchCodecMixin",
-		"IOWorkerMixin",
 		"ItemMixin",
 		"LevelMixin",
 		"LightningBoltMixin",

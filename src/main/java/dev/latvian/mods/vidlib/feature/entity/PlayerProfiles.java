@@ -15,6 +15,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import com.mojang.util.UUIDTypeAdapter;
 import com.mojang.util.UndashedUuid;
+import dev.latvian.mods.common.CommonPaths;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
@@ -85,7 +86,7 @@ public class PlayerProfiles {
 
 		shouldSave = false;
 
-		try (var writer = Files.newBufferedWriter(VidLibPaths.mkdirs(VidLibPaths.USER.get().resolve("cached-profiles.json")))) {
+		try (var writer = Files.newBufferedWriter(CommonPaths.mkdirs(VidLibPaths.USER.get().resolve("cached-profiles.json")))) {
 			var list = new ArrayList<>(getAllKnown());
 			list.removeIf(PlayerProfile::isError);
 			var json = PlayerProfile.LIST_CODEC.encodeStart(JsonOps.INSTANCE, list).getOrThrow();

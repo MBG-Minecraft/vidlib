@@ -476,6 +476,10 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		return true;
 	}
 
+	default void vl$setDayTime(long time) {
+		throw new NoMixinException(this);
+	}
+
 	default double getGroundY(double x, double y, double z) {
 		var level = vl$level();
 		var bpos = new BlockPos.MutableBlockPos(x, y + 0.001D, z);

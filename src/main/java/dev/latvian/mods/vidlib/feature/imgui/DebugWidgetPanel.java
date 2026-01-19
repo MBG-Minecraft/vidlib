@@ -31,6 +31,8 @@ import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
 import dev.latvian.mods.vidlib.util.MiscUtils;
+import dev.mrbeastgaming.hub.api.Countries;
+import dev.mrbeastgaming.hub.api.Country;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.ImVec4;
@@ -465,6 +467,11 @@ public class DebugWidgetPanel extends Panel {
 			ImPlot.plotLine("Sin###1", xdata, ydata);
 			ImPlot.endPlot();
 		}
+
+		ImGui.separator();
+
+		ImGui.text("LV: " + Countries.LV.get().displayName());
+		graphics.combo("Country###country", new Country[1], Countries.LOADED.get().byCode().values().toArray(new Country[0]), Country::displayName);
 
 		ImGui.separator();
 

@@ -69,4 +69,9 @@ public interface VLClientLevel extends VLLevel {
 	default float vl$getDelta() {
 		return Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
 	}
+
+	@Override
+	default void vl$setDayTime(long time) {
+		vl$level().getLevelData().setDayTime(time);
+	}
 }
