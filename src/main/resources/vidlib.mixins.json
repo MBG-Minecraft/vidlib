@@ -65,6 +65,7 @@
 		"AbstractClientPlayerMixin",
 		"AccessibilityOptionsScreenMixin",
 		"BiomeAmbientSoundsHandlerMixin",
+		"BlockElementDeserializerMixin",
 		"BlockEntityRendererMixin",
 		"BlockEntityWithBoundingBoxRendererMixin",
 		"CameraMixin",
