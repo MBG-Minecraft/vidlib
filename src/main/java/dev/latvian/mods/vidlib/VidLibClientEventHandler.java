@@ -1,11 +1,12 @@
 package dev.latvian.mods.vidlib;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.serialization.JsonOps;
+import dev.latvian.mods.betteradvancedtooltips.BATIcons;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
 import dev.latvian.mods.klib.texture.LightUV;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.BlockEntityRendererHolder;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
@@ -14,7 +15,6 @@ import dev.latvian.mods.vidlib.feature.auto.EntityRendererHolder;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
-import dev.latvian.mods.vidlib.feature.client.ClientItemTooltips;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.client.VidLibHUD;
@@ -26,6 +26,8 @@ import dev.latvian.mods.vidlib.feature.clothing.ClientClothingLoader;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingLayer;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingModel;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
+import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
+import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.environment.FluidPlaneRenderer;
 import dev.latvian.mods.vidlib.feature.gradient.ClientGradientLoader;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
@@ -34,12 +36,10 @@ import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.feature.misc.ClientModInfo;
 import dev.latvian.mods.vidlib.feature.misc.ClientModListPayload;
 import dev.latvian.mods.vidlib.feature.misc.DebugTextEvent;
-import dev.latvian.mods.vidlib.feature.misc.FlashbackIntegration;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import dev.latvian.mods.vidlib.feature.misc.ScreenTextRenderer;
 import dev.latvian.mods.vidlib.feature.misc.VLFlashbackIntegration;
-import dev.latvian.mods.vidlib.feature.misc.VidLibIcon;
 import dev.latvian.mods.vidlib.feature.multiverse.VoidSpecialEffects;
 import dev.latvian.mods.vidlib.feature.particle.VidLibClientParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
@@ -58,6 +58,7 @@ import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
+import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import dev.latvian.mods.vidlib.util.StringUtils;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
@@ -109,7 +110,6 @@ import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -138,6 +138,11 @@ public class VidLibClientEventHandler {
 		if (VLFlashbackIntegration.ENABLED) {
 			VLFlashbackIntegration.init();
 		}
+	}
+
+	@SubscribeEvent
+	public static void dynamicResources(DynamicResourceEvent.Assets event) {
+		event.register(ID.video("dynamic_resources/tracksuits"));
 	}
 
 	@SubscribeEvent
@@ -205,7 +210,7 @@ public class VidLibClientEventHandler {
 		var mc = Minecraft.getInstance();
 
 		if (mc.level != null && mc.player != null) {
-			ScreenText.CLIENT_TICK.ops = mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
+			ScreenText.CLIENT_TICK.ops = mc.jsonOps();
 
 			var tool = VidLibTool.of(mc.player);
 
@@ -406,7 +411,7 @@ public class VidLibClientEventHandler {
 
 		if (renderingStructures != 0) {
 			if (!VLFlashbackIntegration.ENABLED || !FlashbackIntegration.isExporting()) {
-				var component = Component.empty().append(VidLibIcon.ERROR.prefix()).append("Rendering " + renderingStructures + " structures...");
+				var component = Component.empty().append(BATIcons.ERROR).append(BATIcons.SMALL_SPACE).append("Rendering " + renderingStructures + " structures...");
 
 				if (mc.player.isReplayCamera()) {
 					int x = 1;
@@ -425,7 +430,7 @@ public class VidLibClientEventHandler {
 			ScreenText.RENDER.topRight.add(mc.fpsString.split(" ", 2)[0] + " FPS");
 		}
 
-		if ((primitiveF3Open || VidLibClientOptions.getShowCoordinates()) && ClientGameEngine.INSTANCE.allowCoordinates(mc)) {
+		if ((primitiveF3Open || VidLibClientOptions.getShowCoordinates()) && ClientGameEngine.INSTANCE.allowCoordinateDisplay(mc)) {
 			var pos = mc.gameRenderer.getMainCamera().getPosition();
 			var x = Component.literal("%.01f".formatted(pos.x)).withColor(0xFF7070);
 			var y = Component.literal("%.01f".formatted(pos.y - mc.player.getEyeHeight())).withColor(0x7CFF70);
@@ -448,9 +453,9 @@ public class VidLibClientEventHandler {
 			ScreenText.RENDER.topLeft.add(comp);
 		}
 
-		if (!mc.vl$hideGui() && !mc.player.isReplayCamera()) {
+		if (!ClientGameEngine.INSTANCE.hideGui(mc) && !mc.player.isReplayCamera()) {
 			ScreenText.RENDER.addAll(ScreenText.CLIENT_TICK);
-			ScreenText.RENDER.ops = mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
+			ScreenText.RENDER.ops = mc.jsonOps();
 
 			if (mc.screen == null || mc.screen instanceof ChatScreen) {
 				NeoForge.EVENT_BUS.post(new DebugTextEvent.Render(ScreenText.RENDER));
@@ -638,6 +643,21 @@ public class VidLibClientEventHandler {
 	}
 
 	@SubscribeEvent
+	public static void loggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
+		PlayerProfiles.cache(event.getPlayer().getGameProfile());
+
+		if (!event.getPlayer().vl$sessionData().clientModListSentDuringConfig) {
+			var list = new ArrayList<ClientModInfo>();
+
+			for (var mod : ModList.get().getMods()) {
+				list.add(new ClientModInfo(mod.getModId(), mod.getDisplayName(), mod.getVersion().toString(), mod.getOwningFile().getFile().getFileName()));
+			}
+
+			event.getPlayer().c2s(new ClientModListPayload(list));
+		}
+	}
+
+	@SubscribeEvent
 	public static void loggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
 	}
 
@@ -684,17 +704,6 @@ public class VidLibClientEventHandler {
 	}
 
 	@SubscribeEvent
-	public static void loggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
-		var list = new ArrayList<ClientModInfo>();
-
-		for (var mod : ModList.get().getMods()) {
-			list.add(new ClientModInfo(mod.getModId(), mod.getDisplayName(), mod.getVersion().toString(), mod.getOwningFile().getFile().getFileName()));
-		}
-
-		event.getPlayer().c2s(new ClientModListPayload(list));
-	}
-
-	@SubscribeEvent
 	public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
 		event.registerLayerDefinition(ClothingLayer.WIDE, ClothingModel::createWideClothingLayer);
 		event.registerLayerDefinition(ClothingLayer.SLIM, ClothingModel::createSlimClothingLayer);
@@ -709,10 +718,5 @@ public class VidLibClientEventHandler {
 		if (event.getSkin(PlayerSkin.Model.SLIM) instanceof PlayerRenderer r) {
 			r.addLayer(new ClothingLayer(r, event.getContext(), false)); // TODO: Fixme
 		}
-	}
-
-	@SubscribeEvent(priority = EventPriority.LOW)
-	public static void onItemTooltip(ItemTooltipEvent event) {
-		ClientItemTooltips.onItemTooltip(event);
 	}
 }

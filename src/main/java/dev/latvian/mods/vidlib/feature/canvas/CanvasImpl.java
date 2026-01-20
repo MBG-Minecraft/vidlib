@@ -9,14 +9,13 @@ import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.gl.GLDebugLog;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.util.JsonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.ApiStatus;
@@ -220,7 +219,7 @@ public class CanvasImpl {
 	}
 
 	public static void drawPreview(Minecraft mc, GuiGraphics g) {
-		if (mc.level == null || mc.vl$hideGui() || mc.level.isReplayLevel()) {
+		if (mc.level == null || ClientGameEngine.INSTANCE.hideGui(mc) || mc.level.isReplayLevel()) {
 			return;
 		}
 
@@ -314,24 +313,5 @@ public class CanvasImpl {
 		}
 
 		GLDebugLog.popGroup();
-	}
-
-	public static void copyEntityOutlineDepth(Minecraft mc, RenderTarget from) {
-		if (VidLibConfig.endBatchesBeforeOutline) {
-			var buffers = mc.renderBuffers().bufferSource();
-			buffers.endLastBatch();
-			buffers.endBatch(RenderType.solid());
-			buffers.endBatch(RenderType.endPortal());
-			buffers.endBatch(RenderType.endGateway());
-			buffers.endBatch(Sheets.solidBlockSheet());
-			buffers.endBatch(Sheets.cutoutBlockSheet());
-			buffers.endBatch(Sheets.bedSheet());
-			buffers.endBatch(Sheets.shulkerBoxSheet());
-			buffers.endBatch(Sheets.signSheet());
-			buffers.endBatch(Sheets.hangingSignSheet());
-			buffers.endBatch(Sheets.chestSheet());
-		}
-
-		Canvas.WEAK_OUTLINE.copyDepthFrom(from);
 	}
 }

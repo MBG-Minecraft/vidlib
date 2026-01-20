@@ -146,4 +146,9 @@ public interface VLServerLevel extends VLLevel {
 	default boolean vl$getTickDayTime() {
 		return vl$level().getGameRules().getBoolean(GameRules.RULE_DAYLIGHT);
 	}
+
+	@Override
+	default void vl$setDayTime(long time) {
+		vl$level().setDayTime(time);
+	}
 }

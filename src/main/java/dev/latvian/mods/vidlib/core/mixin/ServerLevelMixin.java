@@ -112,8 +112,9 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 		if (player.vl$sessionData() != null) {
 			return;
 		}
-		ServerSessionData newPlayerSession = new ServerSessionData(server, player.getUUID());
+
+		var newPlayerSession = new ServerSessionData(server, player.getUUID());
 		((VLServerPacketListener) player.connection).vl$sessionData(newPlayerSession);
-		newPlayerSession.load(player);
+		newPlayerSession.load(server);
 	}
 }

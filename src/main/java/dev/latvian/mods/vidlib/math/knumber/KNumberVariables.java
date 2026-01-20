@@ -5,11 +5,11 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public record KNumberVariables(Map<String, KNumber> numbers, Map<String, KVector> vectors) {
@@ -35,7 +35,7 @@ public record KNumberVariables(Map<String, KNumber> numbers, Map<String, KVector
 	}
 
 	public KNumberVariables() {
-		this(new HashMap<>(), new HashMap<>());
+		this(new Object2ObjectOpenHashMap<>(), new Object2ObjectOpenHashMap<>());
 	}
 
 	public KNumberVariables merge(KNumberVariables other) {
@@ -45,9 +45,9 @@ public record KNumberVariables(Map<String, KNumber> numbers, Map<String, KVector
 			return this;
 		}
 
-		var numbers = new HashMap<>(numbers());
+		var numbers = new Object2ObjectOpenHashMap<>(numbers());
 		numbers.putAll(other.numbers());
-		var positions = new HashMap<>(vectors());
+		var positions = new Object2ObjectOpenHashMap<>(vectors());
 		positions.putAll(other.vectors());
 		return new KNumberVariables(numbers, positions);
 	}

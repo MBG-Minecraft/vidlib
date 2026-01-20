@@ -37,9 +37,14 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
 	}
 
 	@Nullable
-	default <T> T get(DataKey<T> type) {
+	default <T> T getOptional(DataKey<T> type) {
 		var session = vl$sessionData();
 		return session == null ? null : session.dataMap.get(type, vl$level().getGameTime());
+	}
+
+	default <T> T get(DataKey<T> type) {
+		var value = getOptional(type);
+		return value == null ? type.defaultValue() : value;
 	}
 
 	default <T> void set(DataKey<T> type, T value) {

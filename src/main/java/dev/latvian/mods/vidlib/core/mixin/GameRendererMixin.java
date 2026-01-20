@@ -18,13 +18,14 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(GameRenderer.class)
+@Mixin(value = GameRenderer.class, priority = 1002)
 public abstract class GameRendererMixin implements VLGameRenderer {
 	@Shadow
 	@Final
@@ -39,6 +40,9 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 
 	@Shadow
 	private boolean renderHand;
+
+	@Unique
+	private boolean bobViewport;
 
 	@Redirect(method = "bobHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getHurtDir()F"))
 	private float vl$bobHurt(LivingEntity entity) {
@@ -95,10 +99,23 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 
 	@ModifyExpressionValue(method = {"render", "renderItemInHand", "shouldRenderBlockOutline"}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z"))
 	private boolean vl$hideGui(boolean original) {
-		return minecraft.vl$hideGui();
+		return ClientGameEngine.INSTANCE.hideGui(minecraft);
 	}
 
-	@Redirect(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;bobView(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"))
-	private void vl$bobView(GameRenderer instance, PoseStack $$5, float $$6) {
+	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;bobView(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"))
+	private void vl$bobViewport(DeltaTracker deltaTracker, CallbackInfo ci) {
+		bobViewport = true;
+	}
+
+	@Inject(method = "renderItemInHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;bobView(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"))
+	private void vl$bobItem(Camera camera, float partialTick, Matrix4f projectionMatrix, CallbackInfo ci) {
+		bobViewport = false;
+	}
+
+	@Inject(method = "bobView", at = @At("HEAD"), cancellable = true)
+	private void vl$bobView(PoseStack poseStack, float partialTicks, CallbackInfo ci) {
+		if (bobViewport) {
+			ci.cancel();
+		}
 	}
 }

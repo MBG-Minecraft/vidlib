@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.imgui;
 
 import dev.latvian.mods.vidlib.feature.imgui.node.NodeEditorInstance;
 
-public class NodeEditorPanel extends AdminPanel {
+public class NodeEditorPanel extends Panel {
 	public static final NodeEditorPanel INSTANCE = new NodeEditorPanel();
 
 	public static void open(NodeEditorInstance<?> instance) {

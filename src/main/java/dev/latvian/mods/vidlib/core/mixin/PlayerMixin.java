@@ -40,7 +40,7 @@ public abstract class PlayerMixin implements VLPlayer {
 
 	@Inject(method = "getName", at = @At("HEAD"), cancellable = true)
 	public void vl$getName(CallbackInfoReturnable<Component> cir) {
-		var nickname = vl$sessionData() == null ? null : get(InternalPlayerData.NICKNAME);
+		var nickname = vl$sessionData() == null ? null : getOptional(InternalPlayerData.NICKNAME);
 
 		if (!Empty.isEmpty(nickname)) {
 			cir.setReturnValue(nickname.copy());

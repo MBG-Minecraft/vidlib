@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import dev.latvian.mods.vidlib.VidLibConfig;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
@@ -12,6 +12,6 @@ import org.spongepowered.asm.mixin.injection.At;
 public abstract class ProjectileWeaponItemMixin {
 	@ModifyReturnValue(method = "getHeldProjectile", at = @At("RETURN"))
 	private static ItemStack vl$skipAmmo(ItemStack original) {
-		return VidLibConfig.infiniteArrows && original.isEmpty() ? Items.ARROW.getDefaultInstance() : original;
+		return CommonGameEngine.INSTANCE.getInfiniteArrows() && original.isEmpty() ? Items.ARROW.getDefaultInstance() : original;
 	}
 }

@@ -3,36 +3,58 @@ package dev.latvian.mods.vidlib.feature.platform;
 import com.google.common.collect.ImmutableMap;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.util.Empty;
+import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
+import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
+import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
+import dev.latvian.mods.vidlib.feature.feature.Feature;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
+import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.net.Context;
+import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
+import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
 import dev.latvian.mods.vidlib.util.StringUtils;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.FogParameters;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.FogType;
+import net.neoforged.fml.ModList;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -42,17 +64,30 @@ import java.util.List;
 public class ClientGameEngine {
 	public static ClientGameEngine INSTANCE = new ClientGameEngine();
 
-	public boolean isStaff(Collection<String> tags, GameType gameMode) {
-		return gameMode == GameType.SPECTATOR || tags.contains("staff");
+	public void collectClientFeatures(Reference2IntMap<Feature> map) {
+		for (var mod : ModList.get().getMods()) {
+			map.put(Feature.create(ResourceLocation.fromNamespaceAndPath("mod", mod.getModId())), 1);
+		}
+
+		map.put(Feature.INFINITE_CHUNK_RENDERING, 1);
+		map.put(Feature.SMALL_GRASS_HITBOX, 1);
+		map.put(Feature.SOFT_BARRIERS, 1);
+		map.put(Feature.SERVER_DATA, 1);
+		map.put(Feature.PLAYER_DATA, 1);
+		map.put(Feature.SKYBOX, 1);
+	}
+
+	public boolean isClientStaff(Collection<String> tags, GameType gameMode) {
+		return CommonGameEngine.INSTANCE.isPlayerStaff(tags, gameMode);
 	}
 
 	public boolean canSeeAllPlayersInList(LocalPlayer self) {
-		return isStaff(self.getTags(), self.getGameMode());
+		return isClientStaff(self.getTags(), self.getGameMode());
 	}
 
 	public boolean canSeePlayerInList(LocalPlayer self, PlayerInfo playerInfo) {
 		var sessionData = self.vl$sessionData().getClientSessionData(playerInfo.getProfile().getId());
-		return !isStaff(sessionData.getTags(self.level().getGameTime()), playerInfo.getGameMode());
+		return !isClientStaff(sessionData.getTags(self.level().getGameTime()), playerInfo.getGameMode());
 	}
 
 	public Component getPlayerListName(Minecraft mc, PlayerInfo playerInfo, Component fallback) {
@@ -62,7 +97,7 @@ public class ClientGameEngine {
 
 	public boolean isGlowing(Minecraft mc, Entity entity) {
 		if (entity instanceof Player player) {
-			return player.get(InternalPlayerData.GLOW_COLOR) != null;
+			return player.getOptional(InternalPlayerData.GLOW_COLOR) != null;
 		}
 
 		return mc.player != null && mc.player.vl$sessionData().glowColors.get(entity.getUUID()) != null;
@@ -74,7 +109,7 @@ public class ClientGameEngine {
 	}
 
 	public Component getPlayerWorldName(Player player, Component fallback) {
-		var nickname = player.get(InternalPlayerData.NICKNAME);
+		var nickname = player.getOptional(InternalPlayerData.NICKNAME);
 		return Empty.isEmpty(nickname) ? fallback : nickname;
 	}
 
@@ -131,11 +166,11 @@ public class ClientGameEngine {
 		var mc = Minecraft.getInstance();
 
 		if (mc.gameRenderer.getMainCamera().getFluidInCamera() != FogType.NONE) {
-			var fg = ClientGameEngine.INSTANCE.getFluidFog();
+			var fg = getFluidFog();
 			return fg == null ? shaderFog : fg;
 		}
 
-		var fg = ClientGameEngine.INSTANCE.getFog();
+		var fg = getFog();
 
 		if (mc.player != null && (mc.player.hasEffect(MobEffects.DARKNESS) || mc.player.hasEffect(MobEffects.BLINDNESS))) {
 			return shaderFog;
@@ -161,16 +196,10 @@ public class ClientGameEngine {
 	}
 
 	public boolean hasBottomInfoBar(Minecraft mc) {
-		for (var clock : Clock.REGISTRY) {
-			if (clock.screen().isPresent()) {
-				return true;
-			}
-		}
-
-		return mc.player != null && mc.player.vl$sessionData().bottomInfoBarOverride != null;
+		return true;
 	}
 
-	public void topInfoBar(ImGraphics graphics, float x, float y, float w, float h) {
+	public void topInfoBar(ImGraphics graphics, float h) {
 		if (graphics.mc.player != null) {
 			var session = graphics.mc.player.vl$sessionData();
 
@@ -184,7 +213,7 @@ public class ClientGameEngine {
 		}
 	}
 
-	public void bottomInfoBar(ImGraphics graphics, float x, float y, float w, float h) {
+	public void bottomInfoBar(ImGraphics graphics, float h) {
 		if (graphics.mc.player != null) {
 			var session = graphics.mc.player.vl$sessionData();
 
@@ -221,21 +250,12 @@ public class ClientGameEngine {
 			}
 		}
 
-		ImGui.text("--:--");
-
-		/*
-		graphics.redTextIf(ImIcons.CIRCLE.toString(), true);
-		ImGui.sameLine();
-		ImGui.text("15:00");
-		ImGui.sameLine();
-		ImGui.text("|");
-		ImGui.sameLine();
-		ImGui.progressBar(0.67F, 200F, h - 4F);
-		ImGui.sameLine();
-		ImGui.text("|");
-		ImGui.sameLine();
-		ImGui.text("Some more info here");
-		 */
+		graphics.pushStack();
+		graphics.setText(ImColorVariant.BLUE);
+		ImGui.text(ImIcons.CIRCLE.toString());
+		graphics.popStack();
+		var seconds = (System.currentTimeMillis() - CommonGameEngine.START_TIME) / 1000L;
+		ImGui.text("%02d:%02d:%02d ".formatted(seconds / 3600L, (seconds / 60L) % 60L, seconds % 60L));
 	}
 
 	public void addDecals(List<Decal> list) {
@@ -275,7 +295,13 @@ public class ClientGameEngine {
 		return level.getWorldBorder();
 	}
 
-	public boolean shouldShowName(Entity entity) {
+	public boolean shouldShowName(Entity entity, boolean original) {
+		if (BossRendering.active > 0) {
+			return false;
+		} else if (original) {
+			return true;
+		}
+
 		// var mc = Minecraft.getInstance();
 		// return entity instanceof LocalPlayer && mc.isLocalServer() && !mc.options.getCameraType().isFirstPerson() || entity.hasCustomName();
 		return !entity.isInvisible() && (entity instanceof LocalPlayer || entity.hasCustomName());
@@ -309,15 +335,118 @@ public class ClientGameEngine {
 		return ImmutableMap.<ModelLayerLocation, LayerDefinition>builder().putAll(map).build();
 	}
 
-	public float getClothingScale(Clothing clothing) {
-		return 0.95F;
-	}
-
 	public boolean primitiveF3(Minecraft mc) {
 		return false;
 	}
 
-	public boolean allowCoordinates(Minecraft mc) {
+	public boolean allowCoordinateDisplay(Minecraft mc) {
 		return mc.isLocalServer() || mc.player.hasPermissions(2);
+	}
+
+	public boolean hideGui(Minecraft mc) {
+		if (mc.options.hideGui) {
+			return true;
+		} else if (mc.screen != null && mc.screen.hideGui()) {
+			return true;
+		} else if (mc.player == null) {
+			return false;
+		}
+
+		var session = mc.player.vl$sessionData();
+		return session.cameraOverride != null && session.cameraOverride.hideGui();
+	}
+
+	public boolean overrideWaterParticles(Level level, BlockPos pos, FluidState state, RandomSource random) {
+		return true;
+	}
+
+	public void renderOverlays(Minecraft mc, Gui gui, GuiGraphics graphics, DeltaTracker deltaTracker) {
+		if (getRenderSuspendedOverlay() && mc.player.vl$sessionData().suspended) {
+			gui.renderTextureOverlay(graphics, Gui.POWDER_SNOW_OUTLINE_LOCATION, 1F);
+		}
+	}
+
+	public boolean getRenderSuspendedOverlay() {
+		return false;
+	}
+
+	public boolean getRecordVoiceChat() {
+		return false;
+	}
+
+	public void copyMainDepth(Minecraft mc) {
+	}
+
+	public void copyOutlineDepth(Minecraft mc) {
+		if (getEntityOutlineDepth() && mc.levelRenderer.shouldShowEntityOutlines()) {
+			if (getEndBatchesBeforeOutline()) {
+				var buffers = mc.renderBuffers().bufferSource();
+				buffers.endLastBatch();
+				endBatchesBeforeOutline(buffers);
+			}
+
+			Canvas.WEAK_OUTLINE.copyDepthFrom(mc.getMainRenderTarget());
+		}
+	}
+
+	public boolean getEndBatchesBeforeOutline() {
+		return false;
+	}
+
+	public void endBatchesBeforeOutline(MultiBufferSource.BufferSource buffers) {
+		buffers.endBatch(RenderType.solid());
+		buffers.endBatch(RenderType.endPortal());
+		buffers.endBatch(RenderType.endGateway());
+		buffers.endBatch(Sheets.solidBlockSheet());
+		buffers.endBatch(Sheets.cutoutBlockSheet());
+		buffers.endBatch(Sheets.bedSheet());
+		buffers.endBatch(Sheets.shulkerBoxSheet());
+		buffers.endBatch(Sheets.signSheet());
+		buffers.endBatch(Sheets.hangingSignSheet());
+		buffers.endBatch(Sheets.chestSheet());
+	}
+
+	public boolean getEntityOutlineDepth() {
+		return true;
+	}
+
+	@Nullable
+	public RenderType overrideRenderType(RenderType renderType, boolean isPlayer) {
+		if (isPlayer || getStrongEntityOutline()) {
+			var tex = renderType.vl$getTexture();
+
+			if (tex != null) {
+				Canvas.STRONG_OUTLINE.markActive();
+				return VidLibRenderTypes.STRONG_OUTLINE_NO_CULL.apply(tex);
+			}
+		}
+
+		return null;
+	}
+
+	public boolean getStrongEntityOutline() {
+		return false;
+	}
+
+	public boolean handleClientPacket(Context ctx) {
+		if (ctx.payload() instanceof VidLibPacketPayloadContainer container) {
+			if (isPacketLoggingEnabled() && container.wrapped().allowDebugLogging()) {
+				VidLib.LOGGER.info("S2C Packet '%s' #%,d @ %,d: %s".formatted(ctx.payload().type().id(), ctx.uid(), ctx.remoteGameTime(), ctx.payload()));
+			}
+
+			if (PacketDebuggerPanel.INSTANCE.isOpen()) {
+				Minecraft.getInstance().execute(() -> PacketDebuggerPanel.INSTANCE.debugPackets.add(new PacketDebuggerPanel.LoggedPacket(ctx.uid(), ctx.remoteGameTime(), container.wrapped())));
+			}
+		}
+
+		return true;
+	}
+
+	public boolean isPacketLoggingEnabled() {
+		return false;
+	}
+
+	public boolean disableLightningSounds(LightningBolt entity) {
+		return false;
 	}
 }

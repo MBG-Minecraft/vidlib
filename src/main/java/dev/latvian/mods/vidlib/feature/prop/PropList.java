@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
@@ -15,7 +16,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -208,7 +208,7 @@ public class PropList implements Iterable<Prop> {
 		prop.snap();
 
 		if (props.level.isClientSide()) {
-			prop.defaultValues = new IdentityHashMap<>();
+			prop.defaultValues = new Reference2ObjectOpenHashMap<>();
 
 			for (var entry : prop.type.data()) {
 				prop.defaultValues.put(entry.data(), prop.getData(entry.data()));

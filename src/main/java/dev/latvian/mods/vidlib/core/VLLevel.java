@@ -17,6 +17,7 @@ import dev.latvian.mods.vidlib.feature.bulk.UndoableModificationHolder;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityTypeFilter;
+import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.prop.Props;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
@@ -68,11 +69,6 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 	default void vl$preTick(PauseType paused) {
 	}
 
-	@Override
-	default long vl$nextPacketId() {
-		throw new NoMixinException(this);
-	}
-
 	default Props<?> getProps() {
 		throw new NoMixinException(this);
 	}
@@ -80,6 +76,11 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 	@Override
 	default DataMap getServerData() {
 		return getEnvironment().getServerData();
+	}
+
+	@Override
+	default FeatureSet getServerFeatures() {
+		return getEnvironment().getServerFeatures();
 	}
 
 	@Nullable
@@ -385,10 +386,12 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		return new KNumberContext(vl$level());
 	}
 
+	@Override
 	default RegistryOps<Tag> nbtOps() {
 		return vl$level().registryAccess().createSerializationContext(NbtOps.INSTANCE);
 	}
 
+	@Override
 	default RegistryOps<JsonElement> jsonOps() {
 		return vl$level().registryAccess().createSerializationContext(JsonOps.INSTANCE);
 	}
@@ -471,6 +474,10 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 
 	default boolean vl$getTickDayTime() {
 		return true;
+	}
+
+	default void vl$setDayTime(long time) {
+		throw new NoMixinException(this);
 	}
 
 	default double getGroundY(double x, double y, double z) {

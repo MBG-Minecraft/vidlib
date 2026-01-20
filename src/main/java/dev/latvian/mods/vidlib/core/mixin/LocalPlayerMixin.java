@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.authlib.GameProfile;
-import dev.latvian.mods.vidlib.core.VLClientPacketListener;
+import dev.latvian.mods.vidlib.core.VLClientPlayPacketListener;
 import dev.latvian.mods.vidlib.core.VLLocalPlayer;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
@@ -45,7 +45,7 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements V
 
 	@Override
 	public LocalClientSessionData vl$sessionData() {
-		if (connection instanceof VLClientPacketListener listener) {
+		if (connection instanceof VLClientPlayPacketListener listener) {
 			return listener.vl$sessionData();
 		}
 

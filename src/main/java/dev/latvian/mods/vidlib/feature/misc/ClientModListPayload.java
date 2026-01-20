@@ -1,22 +1,20 @@
 package dev.latvian.mods.vidlib.feature.misc;
 
-import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
-import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public record ClientModListPayload(List<ClientModInfo> modList) implements SimplePacketPayload {
-	@AutoPacket(AutoPacket.To.SERVER)
-	public static final VidLibPacketType<ClientModListPayload> TYPE = VidLibPacketType.internal("client_mod_list", CompositeStreamCodec.of(
-		KLibStreamCodecs.listOf(ClientModInfo.STREAM_CODEC), ClientModListPayload::modList,
-		ClientModListPayload::new
-	));
+	@AutoPacket(stage = AutoPacket.Stage.COMMON, to = AutoPacket.To.SERVER)
+	public static final VidLibPacketType<ClientModListPayload> TYPE = VidLibPacketType.internal("client_mod_list", KLibStreamCodecs.listOf(ClientModInfo.STREAM_CODEC).map(ClientModListPayload::new, ClientModListPayload::modList));
 
 	@Override
 	public VidLibPacketType<?> getType() {
@@ -25,12 +23,24 @@ public record ClientModListPayload(List<ClientModInfo> modList) implements Simpl
 
 	@Override
 	public void handle(Context ctx) {
-		if (VidLibConfig.logClientModList && ctx.level().getServer().isDedicatedServer()) {
-			VidLib.LOGGER.info("Player " + ctx.player().getScoreboardName() + " logged in with mods:");
+		var mods = new LinkedHashMap<String, ClientModInfo>();
 
-			for (var info : modList) {
-				VidLib.LOGGER.info(" - " + info.name() + " (" + info.name() + " / " + info.fileName() + "), " + info.version());
-			}
+		for (var mod : modList) {
+			mods.put(mod.id(), mod);
+		}
+
+		var map = Map.copyOf(mods);
+
+		if (!CommonGameEngine.INSTANCE.handleClientModList(ctx, map)) {
+			return;
+		}
+
+		if (ctx.sessionData() instanceof ServerSessionData sessionData) {
+			sessionData.clientMods = map;
+		}
+
+		if (ctx.isConfig()) {
+			ctx.finishTask(ModListRequestPayload.CONFIG_TASK.type());
 		}
 	}
 }

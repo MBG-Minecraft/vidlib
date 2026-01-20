@@ -29,7 +29,7 @@ public class ClientProps extends Props<ClientLevel> {
 	public static final IntSet HIDDEN_PROPS = new IntOpenHashSet();
 	public static final Set<PropType<?>> HIDDEN_PROP_TYPES = new ReferenceOpenHashSet<>();
 	public static final Visuals DEBUG_VISUALS = new Visuals();
-	public static final ImBoolean HIDE_OUTLINE = new ImBoolean(false);
+	public static final ImBoolean HIDE_OUTLINE = new ImBoolean(true);
 
 	public static boolean isPropHidden(Prop prop) {
 		return HIDDEN_PROPS.contains(prop.id) || HIDDEN_PROP_TYPES.contains(prop.type);

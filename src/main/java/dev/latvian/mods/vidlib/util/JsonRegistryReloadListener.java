@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.util;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.util.Map;
 
@@ -15,7 +16,7 @@ public class JsonRegistryReloadListener<T> extends JsonCodecReloadListener<T> {
 	}
 
 	@Override
-	protected void apply(Map<ResourceLocation, T> map) {
+	protected void apply(ResourceManager resourceManager, Map<ResourceLocation, T> map) {
 		registry.update(Map.copyOf(map));
 	}
 }

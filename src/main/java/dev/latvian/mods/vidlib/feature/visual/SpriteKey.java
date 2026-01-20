@@ -3,9 +3,9 @@ package dev.latvian.mods.vidlib.feature.visual;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -24,7 +24,7 @@ public final class SpriteKey {
 	public static final ResourceLocation PARTICLES = ResourceLocation.withDefaultNamespace("textures/atlas/particles.png");
 	public static final ResourceLocation GUI = ResourceLocation.withDefaultNamespace("textures/atlas/gui.png");
 
-	public static final SpriteKey EMPTY = new SpriteKey(1, SPECIAL, Empty.ID);
+	public static final SpriteKey EMPTY = new SpriteKey(1, SPECIAL, VidLibTextures.TRANSPARENT);
 	public static final SpriteKey WHITE = special(ResourceLocation.withDefaultNamespace("textures/misc/white.png"));
 	private static final Map<ResourceLocation, ResourceLocation> INTERN_ATLAS = new HashMap<>();
 
@@ -55,7 +55,7 @@ public final class SpriteKey {
 			atlas = INTERN_ATLAS.computeIfAbsent(atlas, Function.identity());
 		}
 
-		return atlas == SPECIAL && sprite.equals(Empty.ID) ? EMPTY : new SpriteKey(atlasType, atlas, sprite);
+		return atlas == SPECIAL && sprite.equals(VidLibTextures.TRANSPARENT) ? EMPTY : new SpriteKey(atlasType, atlas, sprite);
 	}
 
 	public static SpriteKey special(ResourceLocation sprite) {

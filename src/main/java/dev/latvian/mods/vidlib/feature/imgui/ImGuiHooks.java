@@ -2,12 +2,13 @@ package dev.latvian.mods.vidlib.feature.imgui;
 
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
+import dev.latvian.mods.common.CommonPaths;
 import dev.latvian.mods.vidlib.VidLibClientEventHandler;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.feature.misc.FlashbackIntegration;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
 import imgui.ImFontConfig;
 import imgui.ImFontGlyphRangesBuilder;
 import imgui.ImGui;
@@ -17,9 +18,7 @@ import imgui.extension.implot.ImPlotContext;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.flag.ImGuiDockNodeFlags;
-import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
-import imgui.gl3.ImGuiImplGl3;
 import imgui.internal.ImGuiContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -48,28 +47,26 @@ public class ImGuiHooks {
 		0,
 	};
 
-	private static VLImGuiImplGlfw imGuiGlfw;
-	private static ImGuiImplGl3 imGuiGl3;
+	public static VLImGuiImplGlfw imGuiGlfw;
+	public static VLImGuiImplGl3 imGuiGl3;
 	private static ImGuiContextStack context;
 	private static boolean active = false;
 
 	private static boolean endingFrame = false;
-	public static boolean reloadFonts = false;
 
 	static int dockId;
 	static float dpiScale = 1.0f;
 
-	public static int initialized = 2; // FIXME
-
-	public static void enable() {
-		if (initialized == 0) {
-			initialized = 1;
-		}
-	}
+	public static boolean initialized = false;
 
 	public static void init(Minecraft mc, ResourceManager resourceManager) {
+		if (initialized) {
+			return;
+		}
+
+		initialized = true;
 		imGuiGlfw = new VLImGuiImplGlfw(mc);
-		imGuiGl3 = new ImGuiImplGl3();
+		imGuiGl3 = new VLImGuiImplGl3();
 
 		context = new ImGuiContextStack(
 			new ImGuiContext(ImGui.createContext().ptr),
@@ -79,7 +76,10 @@ public class ImGuiHooks {
 		var old = context.push();
 		ImNodes.createContext();
 		var io = ImGui.getIO();
-		io.setIniFilename(VidLibPaths.USER.resolve("imgui.ini").toAbsolutePath().toString());
+
+		var iniPath = CommonPaths.mkdirs(VidLibPaths.USER.get().resolve("imgui.ini")).toAbsolutePath();
+
+		io.setIniFilename(iniPath.toString());
 		io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
 		io.addConfigFlags(ImGuiConfigFlags.DockingEnable);
 		io.addConfigFlags(ImGuiConfigFlags.DpiEnableScaleFonts);
@@ -88,7 +88,7 @@ public class ImGuiHooks {
 		io.setConfigWindowsMoveFromTitleBarOnly(true);
 		io.setConfigMacOSXBehaviors(Minecraft.ON_OSX);
 
-		imGuiGl3.init("#version 410 core");
+		imGuiGl3.init();
 		imGuiGlfw.init(mc.getWindow().getWindow(), true);
 		loadFonts(resourceManager);
 		var style = ImGui.getStyle();
@@ -108,7 +108,8 @@ public class ImGuiHooks {
 		config.setGlyphOffset(0, 0);
 
 		try {
-			fonts.addFontFromMemoryTTF(TTFFile.JETBRAINS_MONO_REGULAR.get().load(resourceManager), 20F, config);
+			var bytes = TTFFile.JETBRAINS_MONO_REGULAR.get().load(resourceManager);
+			fonts.addFontFromMemoryTTF(bytes, 20F, config);
 		} catch (Exception e) {
 			fonts.addFontDefault();
 		}
@@ -169,13 +170,13 @@ public class ImGuiHooks {
 	}
 
 	public static void startFrame(Minecraft mc) {
-		if (initialized == 0) {
-			return;
-		}
+		if (!initialized) {
+			//if (mc.getOverlay() instanceof LoadingOverlay) {
+			//	return;
+			//}
 
-		if (initialized == 1) {
 			init(mc, mc.getResourceManager());
-			initialized = 2;
+			initialized = true;
 		}
 
 		var old = context.push();
@@ -220,55 +221,52 @@ public class ImGuiHooks {
 		var centralNodePos = centralNode.getPos();
 		var centralNodeSize = centralNode.getSize();
 
-		float h = FlashbackIntegration.isInReplay() ? 0F : 24F;
-		boolean topInfoBar = h > 0F && ClientGameEngine.INSTANCE.hasTopInfoBar(mc);
+		float h = FlashbackIntegration.isInReplayOrExporting() ? 0F : 22F;
 		boolean bottomInfoBar = h > 0F && ClientGameEngine.INSTANCE.hasBottomInfoBar(mc);
 
-		updateViewportArea(
-			mc, window,
+		var prevWidth = window.getWidth();
+		var prevHeight = window.getHeight();
+		window.vl$setViewportArea(
 			(centralNodePos.x - windowPos.x) / (double) windowSize.x,
-			(centralNodePos.y - windowPos.y + (topInfoBar ? h : 0D)) / (double) windowSize.y,
+			(centralNodePos.y - windowPos.y) / (double) windowSize.y,
 			centralNodeSize.x / (double) windowSize.x,
-			(centralNodeSize.y - (topInfoBar ? h : 0D) - (bottomInfoBar ? h : 0D)) / (double) windowSize.y
+			(centralNodeSize.y - (bottomInfoBar ? h : 0D)) / (double) windowSize.y
 		);
 
-		if (topInfoBar || bottomInfoBar) {
+		if (window.getWidth() != 0 && window.getHeight() != 0) {
+			if (window.getWidth() != prevWidth || window.getHeight() != prevHeight) {
+				mc.resizeDisplay();
+			}
+		}
+
+		if (bottomInfoBar) {
 			var graphics = new ImGraphics(mc);
 			graphics.pushRootStack();
-			graphics.setStyleCol(ImGuiCol.WindowBg, 0xFF000000);
-			graphics.setStyleVar(ImGuiStyleVar.WindowRounding, 0F);
-			graphics.setStyleVar(ImGuiStyleVar.WindowPadding, 2F, 2F);
-			graphics.setStyleVar(ImGuiStyleVar.FramePadding, 2F, 0F);
-			graphics.setStyleVar(ImGuiStyleVar.WindowMinSize, 0F, 0F);
-			graphics.setStyleVar(ImGuiStyleVar.ItemSpacing, 2F, 0F);
+			graphics.copyStyleColFrom(ImGuiCol.WindowBg, ImGuiCol.MenuBarBg);
+			graphics.setWindowRounding(0F);
+			graphics.setWindowPadding(0F, 0F);
+			graphics.setFramePadding(2F, 0F);
+			graphics.setWindowMinSize(0F, 22F);
+			graphics.setItemSpacing(2F, 0F);
 
 			int flags = ImGuiWindowFlags.NoSavedSettings
+				| ImGuiWindowFlags.MenuBar
 				| ImGuiWindowFlags.NoMove
 				| ImGuiWindowFlags.NoDocking
 				| ImGuiWindowFlags.NoNav
 				| ImGuiWindowFlags.NoDecoration;
 
-			if (topInfoBar) {
-				ImGui.setNextWindowPos(centralNodePos.x, centralNodePos.y);
-				ImGui.setNextWindowSize(centralNodeSize.x, h);
+			ImGui.setNextWindowPos(centralNodePos.x, centralNodePos.y + centralNodeSize.y - h);
+			ImGui.setNextWindowSize(centralNodeSize.x, h);
 
-				if (ImGui.begin("###top-info-bar", flags)) {
-					ClientGameEngine.INSTANCE.topInfoBar(graphics, centralNodePos.x, centralNodePos.y, centralNodeSize.x, h);
+			if (ImGui.begin("###bottom-info-bar", flags)) {
+				if (ImGui.beginMenuBar()) {
+					ClientGameEngine.INSTANCE.bottomInfoBar(graphics, h);
+					ImGui.endMenuBar();
 				}
-
-				ImGui.end();
 			}
 
-			if (bottomInfoBar) {
-				ImGui.setNextWindowPos(centralNodePos.x, centralNodePos.y + centralNodeSize.y - h);
-				ImGui.setNextWindowSize(centralNodeSize.x, h);
-
-				if (ImGui.begin("###bottom-info-bar", flags)) {
-					ClientGameEngine.INSTANCE.bottomInfoBar(graphics, centralNodePos.x, centralNodePos.y + centralNodeSize.y - h, centralNodeSize.x, h);
-				}
-
-				ImGui.end();
-			}
+			ImGui.end();
 
 			graphics.popStack();
 		}
@@ -276,21 +274,11 @@ public class ImGuiHooks {
 		old.pop();
 	}
 
-	private static void updateViewportArea(Minecraft mc, Window window, double xOffset, double yOffset, double xScale, double yScale) {
-		var prevWidth = window.getWidth();
-		var prevHeight = window.getHeight();
-		window.vl$setViewportArea(xOffset, yOffset, xScale, yScale);
-
-		if (window.getWidth() == 0 || window.getHeight() == 0) {
-			return; // Window has been minimized...
-		}
-
-		if (window.getWidth() != prevWidth || window.getHeight() != prevHeight) {
-			mc.resizeDisplay();
-		}
-	}
-
 	public static void beforeEndFrame(Minecraft mc) {
+		if (!initialized) {
+			return;
+		}
+
 		if (VidLibClientEventHandler.clientLoaded && !ImGuiAPI.getHide()) {
 			if (mc.level == null || !mc.level.isReplayLevel()) {
 				var old = context.push();
@@ -308,7 +296,7 @@ public class ImGuiHooks {
 	public static void endFrame(Minecraft mc) {
 		endingFrame = false;
 
-		if (initialized == 0) {
+		if (!initialized) {
 			return;
 		}
 
@@ -334,16 +322,11 @@ public class ImGuiHooks {
 			GLFW.glfwMakeContextCurrent(backupWindowPtr);
 		}
 
-		if (reloadFonts) {
-			reloadFonts = false;
-			loadFonts(mc.getResourceManager());
-		}
-
 		old.pop();
 	}
 
 	public static void ensureEndFrame() {
-		if (!active) {
+		if (!initialized || !active) {
 			return;
 		}
 

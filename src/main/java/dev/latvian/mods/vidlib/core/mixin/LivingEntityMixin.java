@@ -1,9 +1,13 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.core.VLLivingEntity;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -74,5 +78,10 @@ public abstract class LivingEntityMixin implements VLLivingEntity {
 		if (vl$self().getTags().contains("baby")) {
 			cir.setReturnValue(true);
 		}
+	}
+
+	@ModifyExpressionValue(method = "causeFallDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;calculateFallDamage(DF)I"))
+	private int vl$ca(int original, @Local(argsOnly = true) double fallDistance, @Local(argsOnly = true) float damageMultiplier, @Local(argsOnly = true) DamageSource damageSource) {
+		return CommonGameEngine.INSTANCE.calculateFallDamage(vl$self(), fallDistance, damageMultiplier, damageSource, original);
 	}
 }

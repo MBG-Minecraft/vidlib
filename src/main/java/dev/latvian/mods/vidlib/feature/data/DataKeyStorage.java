@@ -11,12 +11,12 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.FloatImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
 import dev.latvian.mods.vidlib.feature.imgui.builder.IntImBuilder;
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,9 +30,9 @@ public class DataKeyStorage {
 
 	public DataKeyStorage(String name) {
 		this.name = name;
-		this.all = new LinkedHashMap<>();
-		this.saved = new HashMap<>();
-		this.synced = new HashMap<>();
+		this.all = new Object2ObjectLinkedOpenHashMap<>();
+		this.saved = new Object2ObjectOpenHashMap<>();
+		this.synced = new Object2ObjectOpenHashMap<>();
 
 		this.valueStreamCodec = new StreamCodec<>() {
 			@Override
@@ -83,10 +83,18 @@ public class DataKeyStorage {
 	}
 
 	public DataKey<Integer> createInt(String id, int defaultValue) {
-		return createDefault(id, DataTypes.VAR_INT, defaultValue, IntImBuilder.TYPE_1M);
+		return createDefault(id, DataTypes.INT, defaultValue, IntImBuilder.TYPE_1M);
 	}
 
 	public DataKey<Integer> createInt(String id, int defaultValue, int min, int max) {
+		return createDefault(id, DataTypes.INT, defaultValue, () -> new IntImBuilder(min, max));
+	}
+
+	public DataKey<Integer> createVarInt(String id, int defaultValue) {
+		return createDefault(id, DataTypes.VAR_INT, defaultValue, IntImBuilder.TYPE_1M);
+	}
+
+	public DataKey<Integer> createVarInt(String id, int defaultValue, int min, int max) {
 		return createDefault(id, DataTypes.VAR_INT, defaultValue, () -> new IntImBuilder(min, max));
 	}
 

@@ -4,9 +4,9 @@ import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBarRenderer;
-import dev.latvian.mods.vidlib.feature.misc.FlashbackIntegration;
 import dev.latvian.mods.vidlib.feature.misc.VLFlashbackIntegration;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
+import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -65,10 +65,10 @@ public interface VidLibHUD {
 		}
 
 		var cam = mc.gameRenderer.getMainCamera().getPosition();
-		double minDist = mc.get(InternalServerData.NAME_DRAW_MIN_DIST);
-		double midDist = mc.get(InternalServerData.NAME_DRAW_MID_DIST);
-		double maxDist = mc.get(InternalServerData.NAME_DRAW_MAX_DIST);
-		float minSize = mc.get(InternalServerData.NAME_DRAW_MIN_SIZE);
+		double minDist = mc.getOptional(InternalServerData.NAME_DRAW_MIN_DIST);
+		double midDist = mc.getOptional(InternalServerData.NAME_DRAW_MID_DIST);
+		double maxDist = mc.getOptional(InternalServerData.NAME_DRAW_MAX_DIST);
+		float minSize = mc.getOptional(InternalServerData.NAME_DRAW_MIN_SIZE);
 
 		var lines = new ArrayList<FormattedCharSequence>(1);
 		var delta = deltaTracker.getGameTimeDeltaPartialTick(false);

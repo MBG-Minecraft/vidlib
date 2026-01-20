@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public abstract class DataMapConfigPanel extends AdminPanel {
+public abstract class DataMapConfigPanel extends Panel {
 	private record DataMapBuilderEntry<T>(DataKey<T> key, ImBuilder<T> builder) {
 	}
 
@@ -85,8 +85,7 @@ public abstract class DataMapConfigPanel extends AdminPanel {
 						entry.builder.set(Cast.to(defaultValue));
 					}
 
-
-					if (!graphics.isClientOnly) {
+					if (!graphics.isReplay) {
 						sendUpdate(graphics.mc, entry.key, Cast.to(defaultValue));
 					}
 				}
@@ -129,7 +128,7 @@ public abstract class DataMapConfigPanel extends AdminPanel {
 						dataMap.set(entry.key, Cast.to(value));
 					}
 
-					if (!graphics.isClientOnly && update.isFull()) {
+					if (!graphics.isReplay && update.isFull()) {
 						sendUpdate(graphics.mc, entry.key, Cast.to(value));
 					}
 				}

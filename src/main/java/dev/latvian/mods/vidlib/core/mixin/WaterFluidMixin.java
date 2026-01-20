@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
-import dev.latvian.mods.vidlib.VidLibConfig;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class WaterFluidMixin {
 	@Inject(method = "animateTick", at = @At("HEAD"), cancellable = true)
 	public void vl$animateTick(Level level, BlockPos pos, FluidState state, RandomSource random, CallbackInfo ci) {
-		if (VidLibConfig.hideWaterParticles) {
+		if (ClientGameEngine.INSTANCE.overrideWaterParticles(level, pos, state, random)) {
 			ci.cancel();
 		}
 	}

@@ -4,7 +4,7 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.core.VLClientPacketListener;
+import dev.latvian.mods.vidlib.core.VLClientPlayPacketListener;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
@@ -76,7 +76,7 @@ public record ExactEntitySpawnPayload(
 
 	@Nullable
 	public Entity spawnEntity(Context ctx) {
-		if (ctx.parent().listener() instanceof VLClientPacketListener listener) {
+		if (ctx.listener() instanceof VLClientPlayPacketListener listener) {
 			return listener.vl$addEntity(ctx, this);
 		}
 

@@ -19,15 +19,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Mixin(Level.class)
 public abstract class LevelMixin implements VLLevel {
 	@Unique
 	private final List<UndoableModificationHolder> vl$undoable = new ArrayList<>();
-
-	@Unique
-	private final AtomicLong vl$nextPacketId = new AtomicLong(0L);
 
 	@Unique
 	private List<LivingEntity> vl$bosses = List.of();
@@ -70,11 +66,6 @@ public abstract class LevelMixin implements VLLevel {
 	@Override
 	public List<UndoableModificationHolder> vl$getUndoableModifications() {
 		return vl$undoable;
-	}
-
-	@Override
-	public long vl$nextPacketId() {
-		return vl$nextPacketId.incrementAndGet();
 	}
 
 	@Override

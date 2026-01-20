@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 public record TestScreenShakePayload(ScreenShake shake, Optional<Vec3> position, double maxDistance) implements SimplePacketPayload {
-	@AutoPacket(AutoPacket.To.SERVER)
+	@AutoPacket(to = AutoPacket.To.SERVER)
 	public static final VidLibPacketType<TestScreenShakePayload> TYPE = VidLibPacketType.internal("screen_shake/test", CompositeStreamCodec.of(
 		ScreenShake.STREAM_CODEC, TestScreenShakePayload::shake,
 		ByteBufCodecs.optional(MCStreamCodecs.VEC3), TestScreenShakePayload::position,

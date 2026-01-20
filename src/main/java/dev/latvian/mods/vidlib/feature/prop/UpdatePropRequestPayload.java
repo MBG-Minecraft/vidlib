@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public record UpdatePropRequestPayload(PropListType type, int id, byte[] update) implements SimplePacketPayload {
-	@AutoPacket(AutoPacket.To.SERVER)
+	@AutoPacket(to = AutoPacket.To.SERVER)
 	public static final VidLibPacketType<UpdatePropRequestPayload> TYPE = VidLibPacketType.internal("prop/update_request", CompositeStreamCodec.of(
 		PropListType.STREAM_CODEC, UpdatePropRequestPayload::type,
 		ByteBufCodecs.VAR_INT, UpdatePropRequestPayload::id,

@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.imgui;
 
 import imgui.ImGui;
 
-public class MemoryUsagePanel extends AdminPanel {
+public class MemoryUsagePanel extends Panel {
 	public static final MemoryUsagePanel INSTANCE = new MemoryUsagePanel();
 
 	private static long toMB(long bytes) {
@@ -11,7 +11,7 @@ public class MemoryUsagePanel extends AdminPanel {
 
 	private MemoryUsagePanel() {
 		super("memory-usage", "Memory Usage");
-		this.style = AdminPanelStyle.MINIMAL;
+		this.style = PanelStyle.MINIMAL;
 	}
 
 	@Override

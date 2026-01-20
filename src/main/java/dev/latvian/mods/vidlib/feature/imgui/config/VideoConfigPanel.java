@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.imgui.config;
 
-import dev.latvian.mods.vidlib.feature.imgui.AdminPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import imgui.ImGui;
 import imgui.flag.ImGuiTreeNodeFlags;
 import net.minecraft.client.Minecraft;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class VideoConfigPanel extends AdminPanel {
+public class VideoConfigPanel extends Panel {
 	public final Supplier<List<ConfigEntryList>> config;
 	private final Consumer<ImGraphics> extraContent;
 

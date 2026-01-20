@@ -1,20 +1,16 @@
 package dev.latvian.mods.vidlib.util;
 
-import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.DataResult;
-import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.Util;
-import net.minecraft.util.ExtraCodecs;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -36,6 +32,8 @@ public interface MiscUtils {
 		.followRedirects(HttpClient.Redirect.ALWAYS)
 		.connectTimeout(Duration.ofSeconds(10L))
 		.build();
+
+	RegistryAccess STATIC_REGISTRY_ACCESS = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
 
 	static Path createDir(Path path) {
 		if (Files.notExists(path)) {
@@ -109,17 +107,6 @@ public interface MiscUtils {
 				return DataResult.error(ex::toString);
 			}
 		}
-	}
-
-	static GameProfile fetchProfile(String name) {
-		return fetch("https://api.mojang.com/users/profiles/minecraft/" + name).flatMap(bytes -> {
-			try {
-				var json = JsonUtils.GSON.fromJson(new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8), JsonObject.class);
-				return ExtraCodecs.GAME_PROFILE.parse(JsonOps.INSTANCE, json);
-			} catch (Exception e) {
-				return DataResult.error(() -> "Failed to parse profile json: " + e.getMessage());
-			}
-		}).getOrThrow();
 	}
 
 	static <T> T[] fastIndexedLookup(T[] values, ToIntFunction<T> idGetter, IntFunction<T[]> arrayConstructor) {

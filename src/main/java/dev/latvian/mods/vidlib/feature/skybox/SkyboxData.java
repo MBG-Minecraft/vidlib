@@ -10,6 +10,7 @@ import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,8 +54,8 @@ public record SkyboxData(
 		}
 
 		@Override
-		protected void apply(Map<ResourceLocation, SkyboxData> map) {
-			super.apply(map);
+		protected void apply(ResourceManager resourceManager, Map<ResourceLocation, SkyboxData> map) {
+			super.apply(resourceManager, map);
 			SKYBOX_IDS.clear();
 			SKYBOX_IDS.addAll(map.keySet());
 			SKYBOX_IDS.sort(ResourceLocation::compareNamespaced);

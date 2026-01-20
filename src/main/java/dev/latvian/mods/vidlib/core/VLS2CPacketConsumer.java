@@ -15,6 +15,6 @@ public interface VLS2CPacketConsumer extends VLLevelContainer {
 	}
 
 	default void s2c(SimplePacketPayload packet) {
-		s2c(packet.toS2C(vl$level(), vl$nextPacketId()));
+		s2c(packet.toGameS2C(vl$level()));
 	}
 }

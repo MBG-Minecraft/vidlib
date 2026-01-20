@@ -7,7 +7,7 @@ import imgui.ImGui;
 import java.util.Locale;
 import java.util.UUID;
 
-public class StopwatchPanel extends AdminPanel {
+public class StopwatchPanel extends Panel {
 	public static void openNew() {
 		new StopwatchPanel("stopwatch-" + UUID.randomUUID().toString().toLowerCase(Locale.ROOT)).open();
 	}
@@ -18,7 +18,7 @@ public class StopwatchPanel extends AdminPanel {
 	public StopwatchPanel(String id) {
 		super(id, "Stopwatch");
 		this.ephemeral = true;
-		this.style = AdminPanelStyle.MINIMAL;
+		this.style = PanelStyle.MINIMAL;
 	}
 
 	@Override

@@ -4,10 +4,15 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.interpolation.BezierPreset;
 import dev.latvian.mods.klib.interpolation.Interpolation;
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterImBuilder;
+import dev.latvian.mods.vidlib.feature.gallery.GalleryImageImBuilder;
+import dev.latvian.mods.vidlib.feature.gallery.ItemIcons;
+import dev.latvian.mods.vidlib.feature.gallery.PlayerBodies;
+import dev.latvian.mods.vidlib.feature.gallery.PlayerHeads;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
@@ -15,6 +20,8 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.TransformationListImBuilder
 import dev.latvian.mods.vidlib.feature.imgui.builder.interpolation.InterpolationImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ParticleOptionsImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.item.VisualItemKey;
+import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundDataImBuilder;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
@@ -22,6 +29,10 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
 import dev.latvian.mods.vidlib.math.knumber.KNumberNodeImBuilder;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
+import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
+import dev.latvian.mods.vidlib.util.MiscUtils;
+import dev.mrbeastgaming.hub.api.Countries;
+import dev.mrbeastgaming.hub.api.Country;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.ImVec4;
@@ -30,6 +41,7 @@ import imgui.extension.implot.flag.ImPlotAxisFlags;
 import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.flag.ImGuiColorEditFlags;
 import imgui.flag.ImGuiDir;
+import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImBoolean;
@@ -38,11 +50,15 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import imgui.type.ImString;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import org.joml.Vector2f;
 
-public class DebugWidgetPanel extends AdminPanel {
+import java.util.List;
+
+public class DebugWidgetPanel extends Panel {
 	public static final DebugWidgetPanel INSTANCE = new DebugWidgetPanel();
 
 	public final ImInt intData = new ImInt();
@@ -79,6 +95,13 @@ public class DebugWidgetPanel extends AdminPanel {
 	public final GameProfileImBuilder profileBuilder = new GameProfileImBuilder();
 	public final TransformationListImBuilder transformationListBuilder = new TransformationListImBuilder();
 	public final ImBuilder<KNumber> numberBuilder2 = new KNumberNodeImBuilder();
+	public final GalleryImageImBuilder galleryImageBuilder = new GalleryImageImBuilder(
+		List.of(Pins.GALLERY, PlayerBodies.GALLERY, PlayerHeads.GALLERY),
+		List.of(Pins.UPLOADER, PlayerBodies.UPLOADER, PlayerHeads.UPLOADER)
+	);
+
+	public ItemStack currentStack = ItemStack.EMPTY;
+	public VisualItemKey currentStackKey = VisualItemKey.AIR;
 
 	private DebugWidgetPanel() {
 		super("widget-debug", "Widget Debug");
@@ -306,7 +329,7 @@ public class DebugWidgetPanel extends AdminPanel {
 
 		ImGui.separator();
 
-		if (graphics.collapsingHeader("Collapsing Header (Closeable)", new ImBoolean(true), 0)) {
+		if (graphics.collapsingHeader("Collapsing Header (Closeable, No Push)", new ImBoolean(true), ImGuiTreeNodeFlags.NoTreePushOnOpen)) {
 			ImGui.text("Hello");
 		}
 
@@ -315,6 +338,16 @@ public class DebugWidgetPanel extends AdminPanel {
 		ImGui.text("Image");
 		var sprite = mc.getBlockAtlas().getSprite(ResourceLocation.withDefaultNamespace("block/campfire_fire"));
 		ImGui.image(mc.getBlockAtlas().getTexture().vl$getHandle(), 128F, 128F, sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());
+		ImGui.separator();
+		ImGui.image(ImGuiHooks.imGuiGl3.gFontTexture, 128F, 128F, 0F, 0F, 1F, 1F);
+
+		if (ImGui.isItemHovered()) {
+			float h = 1024F;
+			ImGui.beginTooltip();
+			ImGui.image(ImGuiHooks.imGuiGl3.gFontTexture, h * ImGuiHooks.imGuiGl3.glFontWidth / (float) ImGuiHooks.imGuiGl3.glFontHeight, h, 0F, 0F, 1F, 1F);
+			ImGui.endTooltip();
+		}
+
 		ImGui.separator();
 
 		ImGui.text("Child Window");
@@ -376,6 +409,41 @@ public class DebugWidgetPanel extends AdminPanel {
 		numberBuilder2.imguiKey(graphics, "KNumber Node Editor", "knumber-node-editor");
 		ImGui.text("Result: " + (numberBuilder2.isValid() ? String.valueOf(numberBuilder2.build().get(ctx)) : "Invalid"));
 		ImGui.separator();
+		galleryImageBuilder.imguiKey(graphics, "Gallery Image", "gallery-image");
+		var selectedGalleryImage = galleryImageBuilder.isValid() ? galleryImageBuilder.build() : null;
+		graphics.imageButton(selectedGalleryImage == null ? null : selectedGalleryImage.textureId(), 256F, 256F, UV.FULL, 2, null);
+
+		/*
+		if (mc.player != null) {
+			graphics.imageButton(PlayerHeads.RENDER_TARGET.get().getColorTexture(), 256F, 256F, UV.FULL, 2, null);
+			PlayerHeads.render(mc, PlayerHeads.RENDER_TYPE, mc.player.getUUID(), 0.38F);
+		}
+		 */
+
+		ImGui.separator();
+
+		if (mc.screen instanceof AbstractContainerScreen<?> screen && screen.getSlotUnderMouse() != null && !screen.getSlotUnderMouse().getItem().isEmpty()) {
+			currentStack = screen.getSlotUnderMouse().getItem();
+			currentStackKey = VisualItemKey.of(currentStack, mc.level == null ? MiscUtils.STATIC_REGISTRY_ACCESS : mc.level.registryAccess());
+		}
+
+		if (currentStackKey != VisualItemKey.AIR) {
+			ItemIcons.render(mc, currentStackKey);
+		}
+
+		var sink = new FormattedCharSinkPartBuilder();
+		graphics.mc.font.split(currentStack.getHoverName(), Integer.MAX_VALUE).getFirst().accept(sink);
+		graphics.text(sink.build());
+
+		graphics.pushStack();
+		graphics.setFontScale(0.75F);
+		ImGui.text(currentStackKey.toString());
+		graphics.popStack();
+
+		var currentStackTex = ItemIcons.getTexture(mc, currentStackKey);
+		graphics.imageButton(currentStackTex.getTexture(), 48F, 48F, UV.FULL, 2, null);
+
+		ImGui.separator();
 
 		ImGui.text("Bezier");
 		Bezier.draw("###bezier", bezierP1Data, bezierP2Data, bezierPreset, 128F, 64);
@@ -399,6 +467,11 @@ public class DebugWidgetPanel extends AdminPanel {
 			ImPlot.plotLine("Sin###1", xdata, ydata);
 			ImPlot.endPlot();
 		}
+
+		ImGui.separator();
+
+		ImGui.text("LV: " + Countries.LV.get().displayName());
+		graphics.combo("###country", new Country[1], Countries.LOADED.get().byCode().values().toArray(new Country[0]), Country::displayName);
 
 		ImGui.separator();
 

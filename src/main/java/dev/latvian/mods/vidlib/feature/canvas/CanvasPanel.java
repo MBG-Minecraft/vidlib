@@ -1,17 +1,17 @@
 package dev.latvian.mods.vidlib.feature.canvas;
 
-import dev.latvian.mods.vidlib.feature.imgui.AdminPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImText;
 import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
+import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CanvasPanel extends AdminPanel {
+public class CanvasPanel extends Panel {
 	public static List<MenuItem> menu(ImGraphics graphics) {
 		// CutsceneEditorPanel.INSTANCE.open();
 		var list = new ArrayList<MenuItem>(CanvasImpl.ENABLED.size());

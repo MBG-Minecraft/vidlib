@@ -1,14 +1,15 @@
 package dev.latvian.mods.vidlib.feature.screeneffect.dof;
 
-import dev.latvian.mods.vidlib.feature.imgui.AdminPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
+import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.PositionType;
 import imgui.ImGui;
 
-public class DepthOfFieldPanel extends AdminPanel {
+public class DepthOfFieldPanel extends Panel {
 	public static final DepthOfFieldPanel INSTANCE = new DepthOfFieldPanel();
 
 	public static final MenuItem MENU_ITEM = MenuItem.item(ImIcons.BLUR, "Depth of Field", INSTANCE);
@@ -35,6 +36,7 @@ public class DepthOfFieldPanel extends AdminPanel {
 		if (DepthOfField.OVERRIDE_ENABLED.get()) {
 			if ((builder.imgui(graphics).isAny() || update) && builder.isValid()) {
 				DepthOfField.OVERRIDE = builder.build();
+				FlashbackIntegration.CURRENTLY_APPLIED_DOF.setValue(DepthOfField.OVERRIDE);
 			}
 		}
 

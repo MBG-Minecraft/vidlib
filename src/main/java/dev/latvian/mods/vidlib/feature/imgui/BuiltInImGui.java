@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import com.mojang.blaze3d.platform.TextureUtil;
-import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasPanel;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
@@ -10,9 +9,15 @@ import dev.latvian.mods.vidlib.feature.cutscene.CutsceneBuilderPanel;
 import dev.latvian.mods.vidlib.feature.decal.DecalPanel;
 import dev.latvian.mods.vidlib.feature.environment.FluidPlanePanel;
 import dev.latvian.mods.vidlib.feature.environment.WorldBorderPanel;
+import dev.latvian.mods.vidlib.feature.gallery.LowQualityPlayerBodies;
+import dev.latvian.mods.vidlib.feature.gallery.PlayerBodies;
+import dev.latvian.mods.vidlib.feature.gallery.PlayerHeads;
+import dev.latvian.mods.vidlib.feature.gallery.PlayerSkins;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectPanel;
@@ -21,6 +26,8 @@ import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.skybox.Skybox;
 import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
+import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
+import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import net.minecraft.ChatFormatting;
@@ -30,10 +37,11 @@ import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BuiltInImGui {
-	public static final Map<String, AdminPanel> OPEN_PANELS = new LinkedHashMap<>();
+	public static final Map<String, Panel> OPEN_PANELS = new LinkedHashMap<>();
 	public static boolean mainMenuOpen = true;
 	public static final ImBoolean SHOW_STACK_TOOL = new ImBoolean(false);
 	public static final ImBoolean SHOW_STYLE_EDITOR_TOOL = new ImBoolean(false);
@@ -76,11 +84,13 @@ public class BuiltInImGui {
 		list.add(WorldBorderPanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
 
 		list.add(MenuItem.menu(ImIcons.VISIBLE, "Level of Detail", (g1, menuItems) -> {
-			menuItems.add(MenuItem.menu(ImIcons.SHIELD, "Player Armor", VidLibConfig.playerArmorLevelOfDetail));
-			menuItems.add(MenuItem.menu(ImIcons.SWORDS, "Held Item", VidLibConfig.heldItemLevelOfDetail));
-			menuItems.add(MenuItem.menu(ImIcons.SHIRT, "Clothing", VidLibConfig.clothingLevelOfDetail));
-			menuItems.add(MenuItem.menu(ImIcons.PAW, "Entity Details", VidLibConfig.entityDetailsLevelOfDetail));
-			menuItems.add(MenuItem.menu(ImIcons.SHIELD, "Entity Armor", VidLibConfig.entityArmorLevelOfDetail));
+			menuItems.add(MenuItem.menu(ImIcons.SHIELD, "Player Armor", LevelOfDetailValue.PLAYER_ARMOR));
+			menuItems.add(MenuItem.item(ImIcons.SHIELD, "Player Headwear", MiscClientUtils.PLAYER_HEADWEAR).remainOpen(true));
+			menuItems.add(MenuItem.menu(ImIcons.SWORDS, "Held Item", LevelOfDetailValue.HELD_ITEM));
+			menuItems.add(MenuItem.menu(ImIcons.SHIRT, "Clothing", LevelOfDetailValue.CLOTHING));
+			menuItems.add(MenuItem.menu(ImIcons.PAW, "Entity Details", LevelOfDetailValue.ENTITY_DETAILS));
+			menuItems.add(MenuItem.menu(ImIcons.SHIELD, "Entity Armor", LevelOfDetailValue.ENTITY_ARMOR));
+			menuItems.add(MenuItem.menu(ImIcons.FIRE, "Block Entities", LevelOfDetailValue.BLOCK_ENTITIES));
 		}));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.ConfigDropdown(graphics, list));
@@ -100,6 +110,8 @@ public class BuiltInImGui {
 			}
 		}).enabled(graphics.inGame));
 
+		list.add(MenuItem.item(ImIcons.RELOAD, "Reload Shaders", g -> MiscClientUtils.reloadShaders(g.mc)));
+
 		list.add(MenuItem.item(ImIcons.STOP, "Stop all Sounds", g -> g.mc.getSoundManager().stop()));
 
 		list.add(MenuItem.item(ImIcons.DATABASE, "Dump Textures", g -> {
@@ -110,6 +122,24 @@ public class BuiltInImGui {
 				.withStyle(ChatFormatting.UNDERLINE)
 				.withStyle(s -> s.withClickEvent(new ClickEvent.OpenFile(textures)))
 			));
+		}));
+
+		list.add(MenuItem.item(ImIcons.RELOAD, "Clear Skin Cache", g -> {
+			boolean reload = false;
+
+			for (var gallery : List.of(PlayerSkins.GALLERY, PlayerHeads.GALLERY, PlayerBodies.GALLERY, LowQualityPlayerBodies.GALLERY)) {
+				for (var value : gallery.images.values()) {
+					if (value.deleteFile()) {
+						reload = true;
+					}
+				}
+
+				gallery.images.clear();
+			}
+
+			if (reload) {
+				g.mc.reloadResourcePacks();
+			}
 		}));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.DebugDropdown(graphics, list));
@@ -202,17 +232,33 @@ public class BuiltInImGui {
 	});
 
 	public static void handle(ImGraphics graphics) {
+		var infoBar = FlashbackIntegration.isInReplayOrExporting() || !ClientGameEngine.INSTANCE.hasTopInfoBar(graphics.mc) ? 0F : 22F;
+
 		if (graphics.adminPanel || graphics.isReplay) {
 			var menuOpen = mainMenuOpen;
 			mainMenuOpen = true;
 
 			if (menuOpen && !graphics.isReplay) {
-				MAIN_MENU_BAR.buildMenuBar(graphics, true);
-			}
+				if (ImGui.beginMainMenuBar()) {
+					MAIN_MENU_BAR.buildMenuBar(graphics, true);
 
-			OPEN_PANELS.values().removeIf(panel -> panel.handle(graphics));
+					if (infoBar > 0F) {
+						ImGui.separator();
+						ClientGameEngine.INSTANCE.topInfoBar(graphics, infoBar);
+						infoBar = 0F;
+					}
+
+					ImGui.endMainMenuBar();
+				}
+			}
 		}
 
+		if (infoBar > 0F && ImGui.beginMainMenuBar()) {
+			ClientGameEngine.INSTANCE.topInfoBar(graphics, infoBar);
+			ImGui.endMainMenuBar();
+		}
+
+		OPEN_PANELS.values().removeIf(panel -> panel.handle(graphics));
 		NeoForge.EVENT_BUS.post(new ImGuiEvent(graphics));
 
 		if (SHOW_STACK_TOOL.get()) {

@@ -2,51 +2,9 @@
 	"providers": [
 		{
 			"type": "bitmap",
-			"file": "vidlib:font/icons/small_space.png",
-			"ascent": 7,
-			"chars": ["."]
-		},
-		{
-			"type": "bitmap",
-			"file": "vidlib:font/icons/error.png",
-			"ascent": 7,
-			"chars": ["!"]
-		},
-		{
-			"type": "bitmap",
-			"file": "vidlib:font/icons/plus.png",
-			"ascent": 7,
-			"chars": ["+"]
-		},
-		{
-			"type": "bitmap",
-			"file": "vidlib:font/icons/minus.png",
-			"ascent": 7,
-			"chars": ["-"]
-		},
-		{
-			"type": "bitmap",
-			"file": "vidlib:font/icons/tilde.png",
-			"ascent": 7,
-			"chars": ["~"]
-		},
-		{
-			"type": "bitmap",
 			"file": "vidlib:font/icons/star.png",
 			"ascent": 7,
 			"chars": ["*"]
-		},
-		{
-			"type": "bitmap",
-			"file": "vidlib:font/icons/block_tag.png",
-			"ascent": 7,
-			"chars": ["B"]
-		},
-		{
-			"type": "bitmap",
-			"file": "vidlib:font/icons/copy.png",
-			"ascent": 7,
-			"chars": ["C"]
 		},
 		{
 			"type": "bitmap",
@@ -56,81 +14,9 @@
 		},
 		{
 			"type": "bitmap",
-			"file": "vidlib:font/icons/fluid_tag.png",
-			"ascent": 7,
-			"chars": ["F"]
-		},
-		{
-			"type": "bitmap",
-			"file": "vidlib:font/icons/info.png",
-			"ascent": 7,
-			"chars": ["I"]
-		},
-		{
-			"type": "bitmap",
-			"file": "vidlib:font/icons/item_tag.png",
-			"ascent": 7,
-			"chars": ["J"]
-		},
-		{
-			"type": "bitmap",
-			"file": "vidlib:font/icons/camera.png",
-			"ascent": 7,
-			"chars": ["M"]
-		},
-		{
-			"type": "bitmap",
-			"file": "vidlib:font/icons/no.png",
-			"ascent": 7,
-			"chars": ["N"]
-		},
-		{
-			"type": "bitmap",
-			"file": "vidlib:font/icons/prototype_component.png",
-			"ascent": 7,
-			"chars": ["P"]
-		},
-		{
-			"type": "bitmap",
-			"file": "vidlib:font/icons/patched_component.png",
-			"ascent": 7,
-			"chars": ["Q"]
-		},
-		{
-			"type": "bitmap",
-			"file": "vidlib:font/icons/fire.png",
-			"ascent": 7,
-			"chars": ["R"]
-		},
-		{
-			"type": "bitmap",
-			"file": "vidlib:font/icons/sword.png",
-			"ascent": 7,
-			"chars": ["S"]
-		},
-		{
-			"type": "bitmap",
-			"file": "vidlib:font/icons/tag.png",
-			"ascent": 7,
-			"chars": ["T"]
-		},
-		{
-			"type": "bitmap",
 			"file": "vidlib:font/icons/pvp.png",
 			"ascent": 7,
 			"chars": ["V"]
-		},
-		{
-			"type": "bitmap",
-			"file": "vidlib:font/icons/warn.png",
-			"ascent": 7,
-			"chars": ["W"]
-		},
-		{
-			"type": "bitmap",
-			"file": "vidlib:font/icons/yes.png",
-			"ascent": 7,
-			"chars": ["Y"]
 		}
 	]
 }

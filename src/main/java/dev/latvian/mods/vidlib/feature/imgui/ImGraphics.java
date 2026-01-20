@@ -1,21 +1,22 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.textures.GpuTexture;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.Range;
+import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
+import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.session.LocalClientSessionData;
 import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
 import imgui.ImGui;
 import imgui.ImGuiStyle;
 import imgui.extension.imnodes.ImNodes;
-import imgui.extension.imnodes.flag.ImNodesColorStyle;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiDir;
 import imgui.flag.ImGuiInputTextFlags;
-import imgui.flag.ImGuiStyleVar;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
@@ -32,7 +33,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
 
-public class ImGraphics {
+public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImNodesStyleVarConsumer, ImNodesStyleColorConsumer {
 	private static class VarStackStack {
 		private VarStackStack parent;
 		private int pushedStyle = 0;
@@ -51,8 +52,7 @@ public class ImGraphics {
 	public final LocalClientSessionData session;
 	public final boolean isSinglePlayer;
 	public final boolean isReplay;
-	public final boolean isNeoForgeServer;
-	public final boolean isClientOnly;
+	public final FeatureSet serverFeatures;
 	public final boolean adminPanel;
 	public final boolean isAdmin;
 	private VarStackStack stack;
@@ -63,8 +63,7 @@ public class ImGraphics {
 		this.session = inGame ? mc.player.vl$sessionData() : null;
 		this.isSinglePlayer = inGame && mc.isLocalServer();
 		this.isReplay = inGame && mc.level.isReplayLevel();
-		this.isNeoForgeServer = inGame && mc.isServerNeoForge();
-		this.isClientOnly = isReplay || !isNeoForgeServer;
+		this.serverFeatures = inGame ? mc.level.getServerFeatures() : FeatureSet.EMPTY;
 		this.adminPanel = VidLibClientOptions.getAdminPanel();
 		this.isAdmin = inGame && (isSinglePlayer || mc.player.hasPermissions(2));
 	}
@@ -125,59 +124,40 @@ public class ImGraphics {
 		stack = stack.parent;
 	}
 
+	@Override
 	public void setStyleVar(int key, float value) {
 		ImGui.pushStyleVar(key, value);
 		stack.pushedStyle++;
 	}
 
+	@Override
 	public void setStyleVar(int key, float x, float y) {
 		ImGui.pushStyleVar(key, x, y);
 		stack.pushedStyle++;
 	}
 
-	public void setStyleCol(int key, float r, float g, float b, float a) {
-		ImGui.pushStyleColor(key, r, g, b, a);
-		stack.pushedColors++;
-	}
-
+	@Override
 	public void setStyleCol(int key, int r, int g, int b, int a) {
 		ImGui.pushStyleColor(key, r, g, b, a);
 		stack.pushedColors++;
 	}
 
-	public void setStyleCol(int key, int argb) {
-		setStyleCol(key, (argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF, (argb >> 24) & 0xFF);
-	}
-
-	public void setStyleCol(int key, Color value) {
-		setStyleCol(key, value.red(), value.green(), value.blue(), value.alpha());
-	}
-
+	@Override
 	public void setNodesStyleVar(int key, float value) {
 		ImNodes.pushStyleVar(key, value);
 		stack.pushedNodesStyle++;
 	}
 
+	@Override
 	public void setNodesStyleVar(int key, float x, float y) {
 		ImNodes.pushStyleVar(key, x, y);
 		stack.pushedNodesStyle++;
 	}
 
+	@Override
 	public void setNodesStyleCol(int key, int r, int g, int b, int a) {
 		ImNodes.pushColorStyle(key, a << 24 | b << 16 | g << 8 | r);
 		stack.pushedNodesColors++;
-	}
-
-	public void setNodesStyleCol(int key, float r, float g, float b, float a) {
-		setNodesStyleCol(key, (int) (r * 255F), (int) (g * 255F), (int) (b * 255F), (int) (a * 255F));
-	}
-
-	public void setNodesStyleCol(int key, int argb) {
-		setNodesStyleCol(key, (argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF, (argb >> 24) & 0xFF);
-	}
-
-	public void setNodesStyleCol(int key, Color value) {
-		setNodesStyleCol(key, value.red(), value.green(), value.blue(), value.alpha());
 	}
 
 	public void setItemFlag(int key, boolean flag) {
@@ -258,59 +238,16 @@ public class ImGraphics {
 		style.setColor(key, ARGB.toABGR(color));
 	}
 
-	public void setText(ImColorVariant variant) {
-		setStyleCol(ImGuiCol.Text, variant.textColor);
-	}
-
-	public void setWarningText() {
-		setText(ImColorVariant.YELLOW);
-	}
-
-	public void setErrorText() {
-		setText(ImColorVariant.RED);
-	}
-
-	public void setSuccessText() {
-		setText(ImColorVariant.GREEN);
-	}
-
-	public void setInfoText() {
-		setText(ImColorVariant.BLUE);
-	}
-
 	public void setStyle(Style style) {
 		if (style.getColor() != null) {
 			setStyleCol(ImGuiCol.Text, 0xFF000000 | style.getColor().getValue());
 		}
 	}
 
-	public void setButton(ImColorVariant variant) {
-		setStyleCol(ImGuiCol.Button, variant.color);
-		setStyleCol(ImGuiCol.ButtonHovered, variant.hoverColor);
-		setStyleCol(ImGuiCol.ButtonActive, variant.activeColor);
-	}
-
-	public void setButtonColor(Color col) {
-		setStyleCol(ImGuiCol.Button, col);
-		setStyleCol(ImGuiCol.ButtonHovered, col.lerp(0.3F, Color.WHITE));
-		setStyleCol(ImGuiCol.ButtonActive, col.lerp(0.1F, Color.WHITE));
-	}
-
-	public void setNodesPin(ImColorVariant variant) {
-		setNodesStyleCol(ImNodesColorStyle.Pin, variant.color);
-		setNodesStyleCol(ImNodesColorStyle.PinHovered, variant.hoverColor);
-	}
-
-	public void setNodesLink(ImColorVariant variant) {
-		setNodesStyleCol(ImNodesColorStyle.Link, variant.color);
-		setNodesStyleCol(ImNodesColorStyle.LinkHovered, variant.hoverColor);
-		setNodesStyleCol(ImNodesColorStyle.LinkSelected, variant.activeColor);
-	}
-
 	public void stackTrace(Throwable throwable) {
 		pushStack();
 		setErrorText();
-		setStyleVar(ImGuiStyleVar.ItemSpacing, 0F, 0F);
+		setItemSpacing(0F, 0F);
 
 		var stackTrace = throwable.getStackTrace();
 
@@ -538,18 +475,10 @@ public class ImGraphics {
 		return clicked;
 	}
 
-	public void setRedButton() {
-		setButton(ImColorVariant.RED);
-	}
-
-	public void setGreenButton() {
-		setButton(ImColorVariant.GREEN);
-	}
-
 	public void text(List<FormattedCharSinkPartBuilder.Part> parts) {
 		ImGui.beginGroup();
 		pushStack();
-		setStyleVar(ImGuiStyleVar.ItemSpacing, 0F, ImGui.getStyle().getItemSpacingY());
+		setItemSpacing(0F, ImGui.getStyle().getItemSpacingY());
 
 		for (int i = 0; i < parts.size(); i++) {
 			if (i > 0) {
@@ -592,5 +521,35 @@ public class ImGraphics {
 
 	public boolean toggleButton(ImIcons icon, String id, String tooltip, ImBoolean value) {
 		return iconButton(icon, (value.get() ? ImIcons.CHECK : ImIcons.CLOSE) + id, tooltip + (value.get() ? ": Enabled" : ": Disabled"), value.get() ? null : ImColorVariant.GRAY, value);
+	}
+
+	public boolean imageButton(@Nullable GpuTexture texture, float w, float h, UV uv, int padding, @Nullable ImColorVariant variant, Color background, Color tint) {
+		if (variant != null) {
+			pushStack();
+			setButton(variant);
+		}
+
+		var clicked = ImGui.imageButton(
+			texture == null ? 0 : texture.vl$getHandle(),
+			w, h,
+			uv.u0(), uv.v0(), uv.u1(), uv.v1(),
+			padding,
+			background.redf(), background.greenf(), background.bluef(), background.alphaf(),
+			tint.redf(), tint.greenf(), tint.bluef(), tint.alphaf()
+		);
+
+		if (variant != null) {
+			popStack();
+		}
+
+		return clicked;
+	}
+
+	public boolean imageButton(@Nullable GpuTexture texture, float w, float h, UV uv, int padding, @Nullable ImColorVariant variant) {
+		return imageButton(texture, w, h, uv, padding, variant, Color.TRANSPARENT, Color.WHITE);
+	}
+
+	public boolean imageButton(@Nullable ResourceLocation texture, float w, float h, UV uv, int padding, @Nullable ImColorVariant variant) {
+		return imageButton(texture == null ? null : mc.getTextureManager().getTexture(texture).getTexture(), w, h, uv, padding, variant);
 	}
 }

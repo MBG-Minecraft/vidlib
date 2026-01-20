@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.core;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Pair;
 import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.math.Rotation;
@@ -25,6 +24,7 @@ import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
 import dev.latvian.mods.vidlib.feature.data.UpdatePlayerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.data.UpdateServerDataValuePayload;
+import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.EventMarkerData;
 import dev.latvian.mods.vidlib.feature.particle.FireData;
@@ -50,7 +50,6 @@ import dev.latvian.mods.vidlib.feature.vote.YesNoVotingScreen;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
-import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
@@ -63,7 +62,6 @@ import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
@@ -86,7 +84,6 @@ import org.joml.Vector4f;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("resource")
@@ -122,6 +119,11 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	@Override
 	default DataMap getServerData() {
 		return vl$self().player.vl$sessionData().serverDataMap;
+	}
+
+	@Override
+	default FeatureSet getServerFeatures() {
+		return FeatureSet.REMOTE_SERVER_FEATURES;
 	}
 
 	@Override
@@ -588,25 +590,6 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default GameProfile retrieveGameProfile(UUID uuid) {
-		try {
-			var profile = vl$self().getMinecraftSessionService().fetchProfile(uuid, true).profile();
-			return profile == null ? Empty.PROFILE : profile;
-		} catch (Exception ex) {
-			return Empty.PROFILE;
-		}
-	}
-
-	@Override
-	default GameProfile retrieveGameProfile(String name) {
-		try {
-			return MiscUtils.fetchProfile(name);
-		} catch (Exception ex) {
-			return Empty.PROFILE;
-		}
-	}
-
-	@Override
 	default KNumberVariables globalVariables() {
 		return vl$self().player.vl$sessionData().globalVariables;
 	}
@@ -615,21 +598,6 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		float near = 0.05F;
 		float far = vl$self().gameRenderer.getDepthFar();
 		return near * far / (far + depth * (near - far));
-	}
-
-	default boolean vl$hideGui() {
-		var mc = vl$self();
-
-		if (mc.options.hideGui) {
-			return true;
-		} else if (mc.screen != null && mc.screen.hideGui()) {
-			return true;
-		} else if (mc.player == null) {
-			return false;
-		}
-
-		var session = mc.player.vl$sessionData();
-		return session.cameraOverride != null && session.cameraOverride.hideGui();
 	}
 
 	default TextureAtlas getBlockAtlas() {
@@ -683,35 +651,6 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	default String getServerBrand() {
 		var p = vl$self().player;
 		return p == null ? null : p.connection.serverBrand();
-	}
-
-	@Override
-	default boolean isServerNeoForge() {
-		var p = vl$self().player;
-		return p != null && p.vl$sessionData().isServerNeoForge();
-	}
-
-	default PlayerSkin.Model getModelType(@Nullable GameProfile profile) {
-		if (profile == null || profile == Empty.PROFILE) {
-			return PlayerSkin.Model.WIDE;
-		}
-
-		try {
-			var sessionService = vl$self().getMinecraftSessionService();
-			var packedTextures = sessionService.getPackedTextures(profile);
-
-			if (packedTextures != null) {
-				var unpackedTextures = sessionService.unpackTextures(packedTextures);
-
-				if (unpackedTextures.skin() != null) {
-					return PlayerSkin.Model.byName(unpackedTextures.skin().getMetadata("model"));
-				}
-			}
-
-		} catch (Exception ignored) {
-		}
-
-		return PlayerSkin.Model.WIDE;
 	}
 
 	default float getEffectScale() {

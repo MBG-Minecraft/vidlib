@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.util;
 
+import io.netty.buffer.ByteBuf;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.File;
@@ -7,9 +9,15 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.Set;
 
 public interface IOUtils {
+	Set<StandardOpenOption> WRITE_OPEN_OPTIONS = EnumSet.of(StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+	Set<StandardOpenOption> APPEND_OPEN_OPTIONS = EnumSet.of(StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+
 	static void deleteRecursively(Path dir) throws IOException {
 		try (var stream = Files.walk(dir)) {
 			stream.sorted(Comparator.reverseOrder())
@@ -96,6 +104,17 @@ public interface IOUtils {
 
 	static void writeUTF(DataOutput out, String value) throws IOException {
 		writeBytes(out, value.getBytes(StandardCharsets.UTF_8));
+	}
+
+	static byte[] toByteArray(ByteBuf buf, boolean release) {
+		var bytes = new byte[buf.readableBytes()];
+		buf.getBytes(buf.readerIndex(), bytes);
+
+		if (release) {
+			buf.release();
+		}
+
+		return bytes;
 	}
 }
 

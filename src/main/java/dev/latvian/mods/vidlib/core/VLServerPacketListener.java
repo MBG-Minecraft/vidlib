@@ -2,7 +2,8 @@ package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 
-public interface VLServerPacketListener {
+public interface VLServerPacketListener extends VLPacketListener {
+	@Override
 	default ServerSessionData vl$sessionData() {
 		throw new NoMixinException(this);
 	}

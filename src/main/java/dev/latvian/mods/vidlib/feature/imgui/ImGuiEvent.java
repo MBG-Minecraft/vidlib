@@ -9,10 +9,6 @@ public class ImGuiEvent extends Event {
 		this.graphics = graphics;
 	}
 
-	public void enable() {
-		ImGuiHooks.enable();
-	}
-
 	public ImGraphics getGraphics() {
 		return graphics;
 	}

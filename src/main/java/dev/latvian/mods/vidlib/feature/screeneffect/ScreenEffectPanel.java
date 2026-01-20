@@ -2,10 +2,10 @@ package dev.latvian.mods.vidlib.feature.screeneffect;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.KMath;
-import dev.latvian.mods.vidlib.feature.imgui.AdminPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
+import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.screeneffect.effect.AngledChromaticAberrationEffect;
@@ -17,7 +17,7 @@ import imgui.ImGui;
 
 import java.util.function.Supplier;
 
-public class ScreenEffectPanel extends AdminPanel {
+public class ScreenEffectPanel extends Panel {
 	public static final ScreenEffectPanel INSTANCE = new ScreenEffectPanel();
 
 	public final int[] duration = {100};

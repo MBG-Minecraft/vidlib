@@ -1,21 +1,13 @@
 package dev.latvian.mods.vidlib.feature.vote;
 
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
+import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 
 public class YesNoVotingScreen extends BaseVotingScreen {
-	public static final ResourceLocation TEXTURE_NO = VidLib.id("textures/misc/no.png");
-	public static final ResourceLocation TEXTURE_NO_OFF = VidLib.id("textures/misc/no_off.png");
-	public static final ResourceLocation TEXTURE_NO_OUTLINE = VidLib.id("textures/misc/no_outline.png");
-	public static final ResourceLocation TEXTURE_YES = VidLib.id("textures/misc/yes.png");
-	public static final ResourceLocation TEXTURE_YES_OFF = VidLib.id("textures/misc/yes_off.png");
-	public static final ResourceLocation TEXTURE_YES_OUTLINE = VidLib.id("textures/misc/yes_outline.png");
-
 	public class VoteButton extends Button {
 		private final boolean isYes;
 
@@ -29,13 +21,13 @@ public class YesNoVotingScreen extends BaseVotingScreen {
 			boolean isSelected = selected == (isYes ? 1 : 0);
 
 			if (isYes) {
-				graphics.blit(VidLibRenderTypes.GUI, isSelected || isHovered ? TEXTURE_YES : TEXTURE_YES_OFF, getX(), getY(), 0F, 0F, width, height, width, height);
+				graphics.blit(VidLibRenderTypes.GUI, isSelected || isHovered ? VidLibTextures.YES : VidLibTextures.YES_OFF, getX(), getY(), 0F, 0F, width, height, width, height);
 			} else {
-				graphics.blit(VidLibRenderTypes.GUI, isSelected || isHovered ? TEXTURE_NO : TEXTURE_NO_OFF, getX(), getY(), 0F, 0F, width, height, width, height);
+				graphics.blit(VidLibRenderTypes.GUI, isSelected || isHovered ? VidLibTextures.NO : VidLibTextures.NO_OFF, getX(), getY(), 0F, 0F, width, height, width, height);
 			}
 
 			if (isSelected) {
-				graphics.blit(VidLibRenderTypes.GUI, isYes ? TEXTURE_YES_OUTLINE : TEXTURE_NO_OUTLINE, getX(), getY(), 0F, 0F, width, height, width, height);
+				graphics.blit(VidLibRenderTypes.GUI, isYes ? VidLibTextures.YES_OUTLINE : VidLibTextures.NO_OUTLINE, getX(), getY(), 0F, 0F, width, height, width, height);
 			}
 
 			graphics.drawString(font, getMessage(), getX() + (width - font.width(getMessage())) / 2, getY() + height + 6, 0xFFFFFFFF, true);

@@ -2,12 +2,18 @@ package dev.latvian.mods.vidlib.feature.net;
 
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.util.IOUtils;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.world.level.Level;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 public interface SimplePacketPayload {
+	AtomicLong S2C = new AtomicLong(0L);
+	AtomicLong C2S = new AtomicLong(0L);
+
 	VidLibPacketType<?> getType();
 
 	default boolean allowDebugLogging() {
@@ -15,15 +21,11 @@ public interface SimplePacketPayload {
 	}
 
 	default void handleAsync(Context ctx) {
-		if (ctx.level().isClientSide()) {
-			ctx.player().vl$sessionData().debugPacket(ctx, this);
-		}
-
-		ctx.parent().enqueueWork(() -> {
+		ctx.enqueueWork(() -> {
 			try {
 				handle(ctx);
 			} catch (Exception ex) {
-				VidLib.LOGGER.error("Failed to handle packet '%s' #%,d @ %,d, %s".formatted(ctx.type(), ctx.uid(), ctx.remoteGameTime(), this), ex);
+				VidLib.LOGGER.error("Failed to handle packet '%s' #%,d @ %,d, %s".formatted(getType().type().id(), ctx.uid(), ctx.remoteGameTime(), this), ex);
 			}
 		});
 	}
@@ -31,21 +33,34 @@ public interface SimplePacketPayload {
 	default void handle(Context ctx) {
 	}
 
-	default ClientboundCustomPayloadPacket toS2C(Level level, long uid) {
-		return new ClientboundCustomPayloadPacket(new VidLibPacketPayloadContainer(this, uid, level.getGameTime()));
+	default VidLibPacketPayloadContainer toS2C(long gameTime) {
+		return new VidLibPacketPayloadContainer(this, S2C.incrementAndGet(), gameTime);
 	}
 
-	default ServerboundCustomPayloadPacket toC2S(Level level, long uid) {
-		return new ServerboundCustomPayloadPacket(new VidLibPacketPayloadContainer(this, uid, level.getGameTime()));
+	default VidLibPacketPayloadContainer toC2S(long gameTime) {
+		return new VidLibPacketPayloadContainer(this, C2S.incrementAndGet(), gameTime);
+	}
+
+	default ClientboundCustomPayloadPacket toConfigS2C() {
+		return new ClientboundCustomPayloadPacket(toS2C(0L));
+	}
+
+	default ServerboundCustomPayloadPacket toConfigC2S() {
+		return new ServerboundCustomPayloadPacket(toC2S(0L));
+	}
+
+	default ClientboundCustomPayloadPacket toGameS2C(Level level) {
+		return new ClientboundCustomPayloadPacket(toS2C(level.getGameTime()));
+	}
+
+	default ServerboundCustomPayloadPacket toGameC2S(Level level) {
+		return new ServerboundCustomPayloadPacket(toC2S(level.getGameTime()));
 	}
 
 	default byte[] toBytes(Level level, long uid) {
 		var buf = PlatformHelper.CURRENT.createBuffer(Unpooled.buffer(), level.registryAccess());
 		var container = new VidLibPacketPayloadContainer(this, uid, level.getGameTime());
 		getType().streamCodec().encode(buf, container);
-		var bytes = new byte[buf.readableBytes()];
-		buf.getBytes(buf.readerIndex(), bytes);
-		buf.release();
-		return bytes;
+		return IOUtils.toByteArray(buf, true);
 	}
 }

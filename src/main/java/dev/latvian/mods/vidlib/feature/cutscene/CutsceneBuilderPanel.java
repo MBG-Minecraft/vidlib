@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.cutscene;
 
-import dev.latvian.mods.vidlib.feature.imgui.AdminPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
+import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 import imgui.flag.ImGuiTabBarFlags;
@@ -10,7 +10,7 @@ import imgui.flag.ImGuiTabBarFlags;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CutsceneBuilderPanel extends AdminPanel {
+public class CutsceneBuilderPanel extends Panel {
 	public static final CutsceneBuilderPanel INSTANCE = new CutsceneBuilderPanel();
 
 	public final List<CutsceneImBuilder> cutscenes;

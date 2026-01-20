@@ -23,7 +23,6 @@ public record VLSkin(
 	Optional<ResourceLocation> capeTexture,
 	Optional<ResourceLocation> elytraTexture
 ) {
-
 	public static final VLSkin STEVE = new VLSkin(
 		ResourceLocation.withDefaultNamespace("textures/entity/wide/steve.png"),
 		false,
@@ -59,7 +58,7 @@ public record VLSkin(
 	public static final DataType<VLSkin> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, VLSkin.class);
 
 	public static Optional<PlayerSkin> getSkinOverride(AbstractClientPlayer player) {
-		VLSkin newSkin = player.get(InternalPlayerData.SKIN);
+		VLSkin newSkin = player.getOptional(InternalPlayerData.SKIN);
 
 		if (newSkin != null) {
 			return Optional.of(

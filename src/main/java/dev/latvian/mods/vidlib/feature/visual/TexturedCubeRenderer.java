@@ -23,6 +23,7 @@ public class TexturedCubeRenderer {
 	}
 
 	public static void render(FrameInfo frame, LightUV light, float minX, float minY, float minZ, float maxX, float maxY, float maxZ, ResolvedCubeTextures textures, Color tint) {
+		var mc = frame.mc();
 		var ms = frame.poseStack();
 		var msp = ms.last();
 		var m = msp.pose();
@@ -62,7 +63,7 @@ public class TexturedCubeRenderer {
 			float th = uvScale <= 0F ? 1F : (maxY - minY) * uvScale;
 			float td = uvScale <= 0F ? 1F : (maxZ - minZ) * uvScale;
 
-			var texture = DynamicSpriteTexture.get(face.sprite());
+			var texture = DynamicSpriteTexture.get(mc, face.sprite());
 			var buffer = buffers.getBuffer(TerrainRenderTypes.get(face.layer(), face.cull()).apply(texture));
 
 			msp.transformNormal(Directions.ALL[direction].getUnitVec3f(), n);

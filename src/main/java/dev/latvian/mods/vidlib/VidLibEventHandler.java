@@ -1,16 +1,17 @@
 package dev.latvian.mods.vidlib;
 
-import dev.latvian.mods.vidlib.core.VLPayloadRegistrar;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
 import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
+import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.misc.EventMarkerData;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.registry.GenericVLRegistry;
@@ -36,8 +37,10 @@ import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.common.world.chunk.RegisterTicketControllersEvent;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.GameShuttingDownEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.entity.EntityInvulnerabilityCheckEvent;
 import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
@@ -50,7 +53,6 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 @EventBusSubscriber(modid = VidLib.ID)
@@ -67,21 +69,6 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void afterLoad(FMLLoadCompleteEvent event) {
 		gameLoaded();
-	}
-
-	@SubscribeEvent
-	public static void registerPayloadHandlers(RegisterPayloadHandlersEvent event) {
-		var reg = VLPayloadRegistrar.of(event);
-
-		for (var s : AutoPacket.SCANNED.get()) {
-			if (s.to().contains(AutoPacket.To.CLIENT) && s.to().contains(AutoPacket.To.SERVER)) {
-				reg.bidi(s.type());
-			} else if (s.to().contains(AutoPacket.To.CLIENT)) {
-				reg.s2c(s.type());
-			} else if (s.to().contains(AutoPacket.To.SERVER)) {
-				reg.c2s(s.type());
-			}
-		}
 	}
 
 	@SubscribeEvent
@@ -143,6 +130,7 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
 		if (event.getEntity() instanceof ServerPlayer player) {
+			PlayerProfiles.cache(player.getGameProfile());
 			player.server.vl$playerJoined(player);
 		}
 	}
@@ -182,15 +170,13 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent
 	public static void serverStarting(ServerStartingEvent event) {
+		SimplePacketPayload.S2C.set(0L);
 		gameLoaded();
 	}
 
 	@SubscribeEvent
 	public static void serverStarted(ServerStartedEvent event) {
-		if (VidLibConfig.betterDefaultGameRules) {
-			event.getServer().betterDefaultGameRules();
-		}
-
+		CommonGameEngine.INSTANCE.setupServer(event.getServer());
 		AutoInit.Type.SERVER_STARTED.invoke(event.getServer());
 	}
 
@@ -203,6 +189,8 @@ public class VidLibEventHandler {
 		if (packetCapture != null) {
 			packetCapture.finish();
 		}
+
+		AutoInit.Type.SAVE_GAME.invoke();
 	}
 
 	@SubscribeEvent
@@ -223,6 +211,7 @@ public class VidLibEventHandler {
 	public static void levelSaved(LevelEvent.Save event) {
 		if (event.getLevel() instanceof ServerLevel level && level.dimension() == Level.OVERWORLD) {
 			level.getServer().vl$save();
+			AutoInit.Type.SAVE_GAME.invoke();
 		}
 	}
 
@@ -295,6 +284,18 @@ public class VidLibEventHandler {
 
 		if (event.getRayTraceResult() instanceof BlockHitResult hit && event.getProjectile().level().getBlockState(hit.getBlockPos()).is(Blocks.BARRIER)) {
 			event.setCanceled(true);
+		}
+	}
+
+	@SubscribeEvent
+	public static void gameShuttingDown(GameShuttingDownEvent event) {
+		AutoInit.Type.SAVE_GAME.invoke();
+	}
+
+	@SubscribeEvent
+	public static void serverTagsUpdated(TagsUpdatedEvent event) {
+		if (event.getUpdateCause() == TagsUpdatedEvent.UpdateCause.SERVER_DATA_LOAD) {
+			// datapacks loaded?
 		}
 	}
 }

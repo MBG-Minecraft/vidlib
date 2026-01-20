@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.vidlib.core.VLMinecraftClient;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
@@ -27,12 +26,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 @Mixin(Minecraft.class)
 public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	@Shadow
@@ -44,43 +37,10 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	private ReloadableResourceManager resourceManager;
 
 	@Unique
-	private final Map<String, GameProfile> vl$profileByNameCache = new HashMap<>();
-
-	@Unique
-	private final Map<UUID, GameProfile> vl$profileByUUIDCache = new HashMap<>();
-
-	@Unique
 	private TextureAtlas vl$blockTextureAtlas = null;
 
 	@Override
-	public GameProfile retrieveGameProfile(UUID uuid) {
-		return vl$profileByUUIDCache.computeIfAbsent(uuid, VLMinecraftClient.super::retrieveGameProfile);
-	}
-
-	@Override
-	public GameProfile retrieveGameProfile(String name) {
-		return vl$profileByNameCache.computeIfAbsent(name, VLMinecraftClient.super::retrieveGameProfile);
-	}
-
-	@Override
-	public Collection<GameProfile> vl$getCachedGameProfiles() {
-		if (vl$profileByNameCache.isEmpty() && vl$profileByUUIDCache.isEmpty()) {
-			return List.of();
-		}
-
-		var map = new HashMap<>(vl$profileByUUIDCache);
-
-		for (var p : vl$profileByNameCache.values()) {
-			map.putIfAbsent(p.getId(), p);
-		}
-
-		return map.values();
-	}
-
-	@Override
 	public void vl$clearProfileCache() {
-		vl$profileByUUIDCache.clear();
-		vl$profileByNameCache.clear();
 		vl$blockTextureAtlas = null;
 	}
 
@@ -119,7 +79,7 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 
 	@ModifyExpressionValue(method = "renderNames", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z"))
 	private static boolean vl$hideGui(boolean original) {
-		return Minecraft.getInstance().vl$hideGui();
+		return ClientGameEngine.INSTANCE.hideGui(Minecraft.getInstance());
 	}
 
 	@Override

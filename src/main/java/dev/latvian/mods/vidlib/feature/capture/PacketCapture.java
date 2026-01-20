@@ -10,9 +10,11 @@ import dev.latvian.mods.vidlib.util.JsonUtils;
 import dev.latvian.mods.vidlib.util.Timestamp;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelData;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.net.URI;
 import java.nio.file.FileSystems;
@@ -22,7 +24,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -37,7 +38,6 @@ public class PacketCapture {
 	public final LevelData levelData;
 	public final Timestamp sessionStart;
 	public Timestamp sessionEnd;
-	private final Random random;
 	public final int sessionId;
 	private final String toString;
 	public final Path directory;
@@ -48,13 +48,13 @@ public class PacketCapture {
 	public final List<PlayerPacketCaptureSession> finishedSessions;
 	private final Object2IntMap<ResourceLocation> identifierMap;
 	private final Lock identifierMapLock;
+	public final Map<UUID, MutableInt> sessionCounts;
 
 	public PacketCapture(MinecraftServer server, int sessionId, Path directory) {
 		this.server = server;
 		this.levelData = server.getWorldData().overworldData();
 		this.sessionStart = Timestamp.now(levelData.getGameTime());
 		this.sessionEnd = Timestamp.NONE;
-		this.random = new Random();
 		this.sessionId = sessionId;
 		var idString = "%08x".formatted(sessionId);
 		this.toString = "Packet-Capture/" + idString;
@@ -67,6 +67,7 @@ public class PacketCapture {
 		this.identifierMap = new Object2IntOpenHashMap<>();
 		this.identifierMap.defaultReturnValue(0);
 		this.identifierMapLock = new ReentrantLock();
+		this.sessionCounts = new Object2ObjectOpenHashMap<>();
 	}
 
 	private Thread newThread(Runnable task) {
@@ -77,7 +78,7 @@ public class PacketCapture {
 	}
 
 	public PlayerPacketCaptureSession getSession(UUID player) {
-		return sessions.computeIfAbsent(player, uuid -> new PlayerPacketCaptureSession(this, uuid, random.nextInt()));
+		return sessions.computeIfAbsent(player, uuid -> new PlayerPacketCaptureSession(this, uuid, sessionCounts.computeIfAbsent(uuid, u -> new MutableInt(0)).incrementAndGet()));
 	}
 
 	public void disconnect(UUID player) {

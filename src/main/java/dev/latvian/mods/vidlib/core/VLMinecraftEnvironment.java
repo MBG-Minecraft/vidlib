@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.core;
 
-import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.clock.SyncClocksPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
@@ -19,7 +18,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
@@ -77,18 +75,6 @@ public interface VLMinecraftEnvironment extends VLPlayerContainer, VLMinecraftEn
 		throw new NoMixinException(this);
 	}
 
-	default GameProfile retrieveGameProfile(UUID uuid) {
-		throw new NoMixinException(this);
-	}
-
-	default GameProfile retrieveGameProfile(String name) {
-		throw new NoMixinException(this);
-	}
-
-	default Collection<GameProfile> vl$getCachedGameProfiles() {
-		return List.of();
-	}
-
 	default void vl$clearProfileCache() {
 	}
 
@@ -116,9 +102,5 @@ public interface VLMinecraftEnvironment extends VLPlayerContainer, VLMinecraftEn
 	@Nullable
 	default String getServerBrand() {
 		return null;
-	}
-
-	default boolean isServerNeoForge() {
-		return "neoforge".equals(getServerBrand());
 	}
 }

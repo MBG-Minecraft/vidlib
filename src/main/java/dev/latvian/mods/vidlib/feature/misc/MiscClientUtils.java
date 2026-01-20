@@ -7,13 +7,12 @@ import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.vidlib.VidLibConfig;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
+import imgui.type.ImBoolean;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
@@ -26,23 +25,7 @@ public class MiscClientUtils {
 	public static final ConcurrentLinkedDeque<AutoCloseable> CLIENT_CLOSEABLE = new ConcurrentLinkedDeque<>();
 	public static final Matrix4f FRUSTUM_MATRIX = new Matrix4f();
 	public static final Matrix4f PERSPECTIVE_MATRIX = new Matrix4f();
-
-	public static boolean handleDebugKeys(Minecraft mc, int key) {
-		if (key == VidLibConfig.cycleShadersKey) {
-			if (Screen.hasShiftDown()) {
-				mc.execute(mc.gameRenderer::clearPostEffect);
-			} else {
-				// minecraft.submit(minecraft.gameRenderer::cycleSuperSecretSetting);
-			}
-
-			return false;
-		} else if (key == VidLibConfig.reloadShadersKey) {
-			reloadShaders(mc);
-			return true;
-		}
-
-		return false;
-	}
+	public static final ImBoolean PLAYER_HEADWEAR = new ImBoolean(true);
 
 	public static void reloadShaders(Minecraft mc) {
 		mc.getShaderManager().reload(CompletableFuture::completedFuture, mc.getResourceManager(), Util.backgroundExecutor(), mc).thenRunAsync(() -> {

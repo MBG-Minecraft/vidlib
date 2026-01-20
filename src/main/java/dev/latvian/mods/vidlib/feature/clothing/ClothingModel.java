@@ -19,7 +19,7 @@ public class ClothingModel extends HumanoidModel<PlayerRenderState> {
 	public static LayerDefinition createClothingLayer(boolean slim) {
 		var mesh = HumanoidArmorModel.createBodyLayer(CUBE_DEFORMATION);
 		var rootPart = mesh.getRoot();
-		var headPart = rootPart.clearChild("head");
+		var headPart = rootPart.getChild("head");
 		headPart.clearChild("hat");
 
 		if (slim) {

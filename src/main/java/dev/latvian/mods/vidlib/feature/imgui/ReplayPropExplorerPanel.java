@@ -1,15 +1,15 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.feature.misc.FlashbackIntegration;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.RecordedProp;
+import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
 import imgui.ImGui;
 import imgui.flag.ImGuiTreeNodeFlags;
 
 import java.util.ArrayList;
 
-public class ReplayPropExplorerPanel extends AdminPanel {
+public class ReplayPropExplorerPanel extends Panel {
 	public static final ReplayPropExplorerPanel INSTANCE = new ReplayPropExplorerPanel();
 
 	public ReplayPropExplorerPanel() {

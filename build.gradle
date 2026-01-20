@@ -1,17 +1,24 @@
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
+
 plugins {
 	id 'base'
 	id 'java'
 	id 'idea'
 	id 'maven-publish'
-	id 'net.neoforged.moddev' version "2.0.118"
+	id 'net.neoforged.moddev' version "2.0.137"
 }
 
 var ENV = System.getenv() + (file('.env').exists() ? file('.env').readLines().findAll { it && !it.startsWith('#') }.collectEntries {
 	def (k, v) = it.split('=', 2); [(k.trim()): v.trim()]
 } : [:])
 
+var CI = ENV.CI == "true"
+
 var localBuildFile = new File(project.rootDir, "build.txt")
 var localBuildNumber = localBuildFile.getText("UTF-8").toInteger() + 1
+var webHookId = ""
 
 version = "$mod_version-build-1206.$localBuildNumber"
 group = project.maven_group
@@ -20,60 +27,63 @@ base.archivesName = project.archives_base_name
 println("Building version: $version")
 
 neoForge {
-	version = project.neoforge_version
-	validateAccessTransformers = true
+	enable {
+		version = project.neoforge_version
+		validateAccessTransformers = !CI
+		disableRecompilation = CI
 
-	accessTransformers {
-		publish(project.file('src/main/resources/META-INF/accesstransformer.cfg'))
-	}
-
-	interfaceInjectionData {
-		from(file('interfaces.json'))
-		publish(file('interfaces.json'))
-	}
-
-	runs {
-		configureEach {
-			logLevel = org.slf4j.event.Level.INFO
+		accessTransformers {
+			publish(project.file('src/main/resources/META-INF/accesstransformer.cfg'))
 		}
 
-		client {
-			ideName = 'Client'
-			client()
-			systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+		interfaceInjectionData {
+			from(file('interfaces.json'))
+			publish(file('interfaces.json'))
+		}
 
-			if (ENV.MC_CLIENT_ARGS) {
-				programArguments.addAll(ENV.MC_CLIENT_ARGS.split(' '))
+		runs {
+			configureEach {
+				logLevel = org.slf4j.event.Level.INFO
 			}
 
-			jvmArguments.addAll("-XX:+IgnoreUnrecognizedVMOptions", "-XX:+AllowEnhancedClassRedefinition")
-			gameDirectory = file 'runs/client'
-		}
+			client {
+				ideName = 'Client'
+				client()
+				systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
 
-		client2 {
-			ideName = 'Client 2'
-			client()
-			systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+				if (ENV.MC_CLIENT_ARGS) {
+					programArguments.addAll(ENV.MC_CLIENT_ARGS.split(' '))
+				}
 
-			if (ENV.MC_CLIENT_2_ARGS) {
-				programArguments.addAll(ENV.MC_CLIENT_2_ARGS.split(' '))
+				jvmArguments.addAll("-XX:+IgnoreUnrecognizedVMOptions", "-XX:+AllowEnhancedClassRedefinition")
+				gameDirectory = file 'runs/client'
 			}
 
-			jvmArguments.addAll("-XX:+IgnoreUnrecognizedVMOptions", "-XX:+AllowEnhancedClassRedefinition")
-			gameDirectory = file 'runs/client'
+			client2 {
+				ideName = 'Client 2'
+				client()
+				systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+
+				if (ENV.MC_CLIENT_2_ARGS) {
+					programArguments.addAll(ENV.MC_CLIENT_2_ARGS.split(' '))
+				}
+
+				jvmArguments.addAll("-XX:+IgnoreUnrecognizedVMOptions", "-XX:+AllowEnhancedClassRedefinition")
+				gameDirectory = file 'runs/client'
+			}
+
+			server {
+				ideName = 'Server'
+				server()
+				programArgument("--nogui")
+				gameDirectory = file 'runs/server'
+			}
 		}
 
-		server {
-			ideName = 'Server'
-			server()
-			programArgument("--nogui")
-			gameDirectory = file 'runs/server'
-		}
-	}
-
-	mods {
-		vidlib {
-			sourceSet sourceSets.main
+		mods {
+			vidlib {
+				sourceSet sourceSets.main
+			}
 		}
 	}
 }
@@ -131,6 +141,16 @@ repositories {
 		}
 	}
 
+	// Leave in the repositories below due to public repository of Vidlib
+
+	maven {
+		url = 'https://maven.latvian.dev/releases'
+		content {
+			includeGroup "dev.latvian.mods"
+			includeGroup "dev.latvian.apps"
+		}
+	}
+
 	maven {
 		url = 'https://api.modrinth.com/maven'
 		content {
@@ -149,13 +169,21 @@ repositories {
 dependencies {
 	jarJar(implementation("dev.latvian.mods:klib:$klib_version"))
 	interfaceInjectionData("dev.latvian.mods:klib:2105.1.1-build-1206.103")
+	jarJar(implementation('dev.latvian.mods:better-advanced-tooltips')) {
+		version {
+			strictly "[$bat_version,)"
+			prefer "$bat_version"
+		}
+	}
+
+	interfaceInjectionData("dev.latvian.mods:klib:$klib_version")
 
 	compileOnly("dev.latvian.mods:imgui-resources:$imgui_resources_version")
 
 	compileOnly("maven.modrinth:simple-voice-chat:neoforge-1.21.5-2.5.36")
 	compileOnly("software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}")
 
-	implementation "dev.latvian.apps:tiny-java-server:1.0.0-build.26"
+	implementation "dev.latvian.apps:tiny-java-server:1.0.0-build.33"
 }
 
 processResources {
@@ -236,12 +264,12 @@ publishing {
 	}
 
 	repositories {
-		if (ENV.MBG_MAVEN_URL && ENV.MBG_MAVEN_USERNAME && ENV.MBG_MAVEN_TOKEN) {
+		if (ENV.MAVEN_URL && ENV.MAVEN_USERNAME && ENV.MAVEN_TOKEN) {
 			maven {
-				url = ENV.MBG_MAVEN_URL
+				url = ENV.MAVEN_URL
 				credentials {
-					username = ENV.MBG_MAVEN_USERNAME
-					password = ENV.MBG_MAVEN_TOKEN
+					username = ENV.MAVEN_USERNAME
+					password = ENV.MAVEN_TOKEN
 				}
 			}
 		}
@@ -250,36 +278,42 @@ publishing {
 
 idea {
 	module {
-		downloadSources = true
-		downloadJavadoc = true
+		if (!CI) {
+			downloadSources = true
+			downloadJavadoc = true
 
-		["client", "server"].each {
-			[
-					"config",
-					"crash-reports",
-					"debug",
-					"downloads",
-					"flashback",
-					"local",
-					"logs",
-					"mods",
-					"pack-sync",
-					"profilekeys",
-					"saves",
-					"voicechat_recordings",
-					"command_history.txt",
-					"options.txt",
-					"server.properties",
-					"world",
-			].each { ext ->
-				excludeDirs.add(file("runs/$it/$ext"))
+			["client", "server"].each {
+				[
+						".architectury-transformer",
+						"config",
+						"crash-reports",
+						"debug",
+						"downloads",
+						"dumps",
+						"flashback",
+						"local",
+						"logs",
+						"mods",
+						"profilekeys",
+						"saves",
+						"voicechat_recordings",
+						"command_history.txt",
+						"options.txt",
+						"server.properties",
+						"world",
+						"emi.json",
+						"usercache.json",
+						"usernamecache.json"
+				].each { ext ->
+					excludeDirs.add(file("runs/$it/$ext"))
+				}
 			}
 		}
 	}
 }
 
 tasks.register('increaseLocalBuild') {
-	group 'build'
+	group 'other'
 	description 'Increase local build number'
 
 	doFirst {
@@ -288,27 +322,46 @@ tasks.register('increaseLocalBuild') {
 }
 
 tasks.register('webHookUpdate') {
-	group 'build'
+	group 'other'
 	description 'Send webhook update'
 
-	doFirst {
+	def content = "New VidLib version: [`${version}`](<${ENV.MAVEN_ARTIFACT_LOCATION}/${version}>) (KLib `${klib_version}`)"
+
+	doLast {
 		println("Sending webhook update...")
 		// localBuildFile.setText(localBuildNumber.toString(), "UTF-8")
+
+		def client = HttpClient.newHttpClient()
+
+		def request = HttpRequest.newBuilder()
+				.uri(URI.create("${ENV.DISCORD_WEBHOOK_URL}"))
+				.header("Content-Type", "application/json")
+				.POST(HttpRequest.BodyPublishers.ofString(
+						'{"content":"' + content + '"}'
+				))
+				.build()
+
+		def response = client.send(request, HttpResponse.BodyHandlers.ofString())
+		println "Status code: ${response.statusCode()}"
+		println "Response body: ${response.body()}"
 	}
 }
 
 tasks.register('releaseLocalBuild') {
-	group 'build'
+	group 'publishing'
 	description 'Builds the mod locally'
 	dependsOn tasks.increaseLocalBuild
 	dependsOn tasks.build
 	dependsOn tasks.publishToMavenLocal
 
 	if (ENV.MAVEN_URL && ENV.MAVEN_USERNAME && ENV.MAVEN_TOKEN) {
+		println("Publishing enabled, ${ENV.MAVEN_USERNAME} to ${ENV.MAVEN_URL}")
 		dependsOn tasks.publish
+	} else {
+		println("Publishing disabled")
 	}
 
-	if (ENV.DISCORD_WEBHOOK) {
+	if (ENV.DISCORD_WEBHOOK_URL) {
 		dependsOn tasks.webHookUpdate
 	}
 }

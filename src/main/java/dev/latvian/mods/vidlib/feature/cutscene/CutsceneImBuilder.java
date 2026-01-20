@@ -13,7 +13,6 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.JsonUtils;
 import imgui.ImGui;
 import imgui.extension.texteditor.TextEditor;
-import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
@@ -112,7 +111,7 @@ public class CutsceneImBuilder implements ImBuilder<Cutscene> {
 
 		if (ImGui.beginPopup("###add-step-popup", ImGuiWindowFlags.NoSavedSettings)) {
 			graphics.pushStack();
-			graphics.setStyleVar(ImGuiStyleVar.ButtonTextAlign, 0F, 0.5F);
+			graphics.setButtonTextAlign(0F, 0.5F);
 
 			float width = 0F;
 

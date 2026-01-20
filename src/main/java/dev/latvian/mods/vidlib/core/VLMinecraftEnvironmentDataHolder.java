@@ -1,11 +1,18 @@
 package dev.latvian.mods.vidlib.core;
 
+import com.google.gson.JsonElement;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
+import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.util.NameDrawType;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 public interface VLMinecraftEnvironmentDataHolder extends VLLevelContainer {
 	default DataMap getServerData() {
@@ -16,8 +23,28 @@ public interface VLMinecraftEnvironmentDataHolder extends VLLevelContainer {
 		return vl$level().getGameTime();
 	}
 
-	default <T> T get(DataKey<T> type) {
+	default DynamicOps<Tag> nbtOps() {
+		var level = vl$level();
+		return level == null ? NbtOps.INSTANCE : level.nbtOps();
+	}
+
+	default DynamicOps<JsonElement> jsonOps() {
+		var level = vl$level();
+		return level == null ? JsonOps.INSTANCE : level.jsonOps();
+	}
+
+	default FeatureSet getServerFeatures() {
+		throw new NoMixinException(this);
+	}
+
+	@Nullable
+	default <T> T getOptional(DataKey<T> type) {
 		return getServerData().get(type, getGameTime());
+	}
+
+	default <T> T get(DataKey<T> type) {
+		var value = getOptional(type);
+		return value == null ? type.defaultValue() : value;
 	}
 
 	default <T> void set(DataKey<T> type, T value) {
@@ -29,19 +56,11 @@ public interface VLMinecraftEnvironmentDataHolder extends VLLevelContainer {
 	}
 
 	default ResourceLocation getSkybox() {
-		return get(InternalServerData.SKYBOX);
+		return getOptional(InternalServerData.SKYBOX);
 	}
 
 	default void setSkybox(ResourceLocation skybox) {
 		set(InternalServerData.SKYBOX, skybox);
-	}
-
-	default boolean isImmutableWorld() {
-		return get(InternalServerData.IMMUTABLE_WORLD);
-	}
-
-	default void setImmutableWorld(boolean immutable) {
-		set(InternalServerData.IMMUTABLE_WORLD, immutable);
 	}
 
 	default Anchor getAnchor() {
@@ -53,7 +72,7 @@ public interface VLMinecraftEnvironmentDataHolder extends VLLevelContainer {
 	}
 
 	default NameDrawType getNameDrawType() {
-		return get(InternalServerData.NAME_DRAW_TYPE);
+		return getOptional(InternalServerData.NAME_DRAW_TYPE);
 	}
 
 	default void setNameDrawType(NameDrawType type) {

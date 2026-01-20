@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
-import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
@@ -41,7 +41,7 @@ public abstract class KeyboardHandlerMixin {
 
 	@Inject(method = "handleDebugKeys", at = @At("HEAD"), cancellable = true)
 	private void vl$handleDebugKeysPre(int key, CallbackInfoReturnable<Boolean> cir) {
-		if (MiscClientUtils.handleDebugKeys(minecraft, key)) {
+		if (VidLibKeys.handleDebugKeys(minecraft, key)) {
 			cir.setReturnValue(true);
 		}
 	}

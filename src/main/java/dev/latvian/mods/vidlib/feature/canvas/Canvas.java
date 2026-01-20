@@ -167,31 +167,45 @@ public class Canvas implements Consumer<RenderPass> {
 		RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(c, data.clearColor().argb(), d, 1D);
 	}
 
-	public void copyColorFrom(@Nullable RenderTarget from) {
-		var c = getColorTexture();
+	public void copyColorFrom(@Nullable RenderTarget source) {
+		var target = getColorTexture();
 
-		if (c == null) {
+		if (target == null) {
 			throw new IllegalStateException("Trying to copy color texture to a RenderTarget without a color texture");
-		} else if (from == null || from.getColorTexture() == null) {
+		} else if (source == null || source.getColorTexture() == null) {
 			throw new IllegalStateException("Trying to copy color texture from a RenderTarget without a color texture");
 		} else {
-			RenderSystem.getDevice()
-				.createCommandEncoder()
-				.copyTextureToTexture(from.getColorTexture(), c, 0, 0, 0, 0, 0, c.getWidth(0), c.getHeight(0));
+			int tw = target.getWidth(0);
+			int th = target.getHeight(0);
+			int sw = source.getColorTexture().getWidth(0);
+			int sh = source.getColorTexture().getHeight(0);
+
+			if (sw == tw && sh == th) {
+				RenderSystem.getDevice()
+					.createCommandEncoder()
+					.copyTextureToTexture(source.getColorTexture(), target, 0, 0, 0, 0, 0, tw, th);
+			}
 		}
 	}
 
-	public void copyDepthFrom(@Nullable RenderTarget from) {
-		var d = getDepthTexture();
+	public void copyDepthFrom(@Nullable RenderTarget source) {
+		var target = getDepthTexture();
 
-		if (d == null) {
+		if (target == null) {
 			throw new IllegalStateException("Trying to copy depth texture to a RenderTarget without a depth texture");
-		} else if (from == null || from.getDepthTexture() == null) {
+		} else if (source == null || source.getDepthTexture() == null) {
 			throw new IllegalStateException("Trying to copy depth texture from a RenderTarget without a depth texture");
 		} else {
-			RenderSystem.getDevice()
-				.createCommandEncoder()
-				.copyTextureToTexture(from.getDepthTexture(), d, 0, 0, 0, 0, 0, d.getWidth(0), d.getHeight(0));
+			int tw = target.getWidth(0);
+			int th = target.getHeight(0);
+			int sw = source.getDepthTexture().getWidth(0);
+			int sh = source.getDepthTexture().getHeight(0);
+
+			if (sw == tw && sh == th) {
+				RenderSystem.getDevice()
+					.createCommandEncoder()
+					.copyTextureToTexture(source.getDepthTexture(), target, 0, 0, 0, 0, 0, tw, th);
+			}
 		}
 	}
 

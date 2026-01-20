@@ -24,6 +24,11 @@ public record FluidTextures(ResourceLocation still, ResourceLocation flowing, Te
 		return of(still, flowing, TerrainRenderLayer.SOLID, Color.WHITE);
 	}
 
+	public static final FluidTextures DEBUG = of(
+		VidLib.id("block/debug_fluid/still"),
+		VidLib.id("block/debug_fluid/flow")
+	);
+
 	public static final FluidTextures WATER = of(
 		ResourceLocation.withDefaultNamespace("block/water_still"),
 		ResourceLocation.withDefaultNamespace("block/water_flow"),

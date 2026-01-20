@@ -5,7 +5,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.DoubleImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Vec3ImBuilder;
-import dev.latvian.mods.vidlib.feature.misc.FlashbackIntegration;
+import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
 import imgui.ImGui;
 import org.jetbrains.annotations.Nullable;
 

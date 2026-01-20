@@ -17,7 +17,6 @@ import dev.latvian.mods.vidlib.math.transform.Transformation;
 import dev.latvian.mods.vidlib.math.transform.TranslateTransformation;
 import imgui.ImGui;
 import imgui.flag.ImGuiSliderFlags;
-import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import net.minecraft.core.Direction;
 import org.joml.Matrix4f;
@@ -162,7 +161,7 @@ public class TransformationListImBuilder implements ImBuilder<List<Transformatio
 					int moveTo = -2;
 
 					graphics.pushStack();
-					graphics.setStyleVar(ImGuiStyleVar.ItemSpacing, 6F, 8F);
+					graphics.setItemSpacing(6F, 8F);
 
 					if (graphics.button(ImIcons.REMOVE + "###remove-step-" + i, ImColorVariant.RED)) {
 						moveTo = -1;

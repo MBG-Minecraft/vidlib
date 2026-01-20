@@ -61,7 +61,7 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 		return item(icon, label, flag.get(), g -> flag.set(!flag.get()));
 	}
 
-	public static MenuItem item(ImIcon icon, String label, AdminPanel panel) {
+	public static MenuItem item(ImIcon icon, String label, Panel panel) {
 		return item(icon, label, panel.isOpen(), g -> {
 			if (panel.isOpen()) {
 				panel.close();
@@ -95,8 +95,10 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 
 	public static MenuItem menu(ImIcon icon, String label, LevelOfDetailValue lod) {
 		return menu(icon, label, (graphics, menuItems) -> {
-			menuItems.add(item(ImIcons.VISIBLE, "Always", lod.getType() == LevelOfDetailValue.Type.ALWAYS, g -> lod.setAlwaysVisible()).remainOpen(true));
-			menuItems.add(item(ImIcons.INVISIBLE, "Never", lod.getType() == LevelOfDetailValue.Type.NEVER, g -> lod.setNeverVisible()).remainOpen(true));
+			if (lod.canBeAlways()) {
+				menuItems.add(item(ImIcons.VISIBLE, "Always", lod.getType() == LevelOfDetailValue.Type.ALWAYS, g -> lod.setAlwaysVisible()).remainOpen(true));
+				menuItems.add(item(ImIcons.INVISIBLE, "Never", lod.getType() == LevelOfDetailValue.Type.NEVER, g -> lod.setNeverVisible()).remainOpen(true));
+			}
 			menuItems.add(item(ImIcons.NUMBERS, "Within Distance", lod.getType() == LevelOfDetailValue.Type.WITHIN_DISTANCE, g -> lod.setVisibleWithin()).remainOpen(true));
 
 			if (lod.getType() == LevelOfDetailValue.Type.WITHIN_DISTANCE) {
@@ -255,29 +257,31 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 		}
 	}
 
-	public void buildMenuBar(ImGraphics graphics, boolean mainMenuBar) {
+	public boolean buildMenuBar(ImGraphics graphics, boolean mainMenuBar) {
 		if (subItems == null) {
-			return;
+			return false;
 		}
 
 		var mainMenu = subItems.apply(graphics);
 
-		if (!mainMenu.isEmpty()) {
-			if (graphics.isReplay ? ImGui.beginMenu("VidLib") : mainMenuBar ? ImGui.beginMainMenuBar() : ImGui.beginMenuBar()) {
-				for (int i = 0; i < mainMenu.size(); i++) {
-					ImGui.pushID(i);
-					mainMenu.get(i).build(graphics);
-					ImGui.popID();
-				}
+		if (mainMenu.isEmpty()) {
+			return false;
+		}
 
-				if (graphics.isReplay) {
-					ImGui.endMenu();
-				} else if (mainMenuBar) {
-					ImGui.endMainMenuBar();
-				} else {
-					ImGui.endMenuBar();
-				}
+		if (graphics.isReplay ? ImGui.beginMenu("VidLib") : mainMenuBar || ImGui.beginMenuBar()) {
+			for (int i = 0; i < mainMenu.size(); i++) {
+				ImGui.pushID(i);
+				mainMenu.get(i).build(graphics);
+				ImGui.popID();
+			}
+
+			if (graphics.isReplay) {
+				ImGui.endMenu();
+			} else if (!mainMenuBar) {
+				ImGui.endMenuBar();
 			}
 		}
+
+		return true;
 	}
 }

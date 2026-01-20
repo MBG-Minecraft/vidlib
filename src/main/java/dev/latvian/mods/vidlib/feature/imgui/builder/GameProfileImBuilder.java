@@ -1,22 +1,24 @@
 package dev.latvian.mods.vidlib.feature.imgui.builder;
 
 import com.mojang.authlib.GameProfile;
-import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
+import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
+import dev.latvian.mods.vidlib.feature.gallery.LowQualityPlayerBodies;
+import dev.latvian.mods.vidlib.feature.gallery.PlayerBodies;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.feature.visual.PlayerHeadTexture;
-import dev.latvian.mods.vidlib.util.MiscUtils;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImString;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 	public static final ImBuilderType<GameProfile> TYPE = GameProfileImBuilder::new;
@@ -58,7 +60,7 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 	public ImUpdate imgui(ImGraphics graphics) {
 		var update = ImUpdate.NONE;
 
-		appendMainIcon();
+		appendMainIcon(graphics.mc);
 		ImGui.sameLine();
 
 		boolean select = ImGui.button(profile == null ? "Select..." : profile.getName());
@@ -78,71 +80,11 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 		}
 
 		if (ImGui.beginPopup("Select Profile###select-profile", ImGuiWindowFlags.AlwaysAutoResize)) {
-			if (ImGui.beginListBox("###existing", -1F, 120F)) {
-				var map = new HashMap<UUID, GameProfile>();
+			var u = profileSelector(graphics, null);
+			update = update.or(u);
 
-				for (var p : graphics.mc.vl$getCachedGameProfiles()) {
-					map.put(p.getId(), p);
-				}
-
-				if (graphics.mc.getConnection() != null) {
-					for (var info : graphics.mc.getConnection().getOnlinePlayers()) {
-						map.put(info.getProfile().getId(), info.getProfile());
-					}
-				}
-
-				var list = new ArrayList<>(map.values());
-
-				if (list.size() >= 2) {
-					list.sort(MiscUtils.PROFILE_COMPARATOR);
-				}
-
-				appendIcon(Util.NIL_UUID);
-				ImGui.sameLine();
-
-				if (ImGui.selectable(ImIcons.CLOSE + " None", profile == null)) {
-					profile = null;
-					update = ImUpdate.FULL;
-					ImGui.closeCurrentPopup();
-				}
-
-				for (var p : list) {
-					appendIcon(p.getId());
-					ImGui.sameLine();
-
-					if (ImGui.selectable(p.getName(), profile != null && p.getId().equals(profile.getId()))) {
-						profile = p;
-						update = ImUpdate.FULL;
-						ImGui.closeCurrentPopup();
-					}
-				}
-
-				ImGui.endListBox();
-			}
-
-			ImGui.setNextItemWidth(180F);
-			ImGui.inputTextWithHint("###fetch", "Username", name);
-
-			boolean edited = ImGui.isItemDeactivatedAfterEdit();
-
-			ImGui.sameLine();
-			boolean button = ImGui.button("Fetch###fetch-button");
-
-			if (edited || button) {
+			if (u.isFull()) {
 				ImGui.closeCurrentPopup();
-				var nameStr = name.get();
-				profile = null;
-
-				if (!nameStr.isEmpty()) {
-					profile = graphics.mc.retrieveGameProfile(nameStr);
-
-					if (profile == Empty.PROFILE) {
-						profile = null;
-						VidLib.LOGGER.error("Failed to fetch profile '" + nameStr + "'");
-					}
-				}
-
-				update = ImUpdate.FULL;
 			}
 
 			ImGui.endPopup();
@@ -151,20 +93,79 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 		return update;
 	}
 
-	private void appendMainIcon() {
-		var tex = PlayerHeadTexture.get(profile == null ? null : profile.getId());
-		int texId = tex.getTexture().vl$getHandle();
-		ImGui.image(texId, ImGui.getFrameHeight(), ImGui.getFrameHeight());
+	public ImUpdate profileSelector(ImGraphics graphics, @Nullable Predicate<GameProfile> filter) {
+		var update = ImUpdate.NONE;
+
+		if (ImGui.beginListBox("###existing", -1F, 120F)) {
+			if (filter == null || filter.test(PlayerProfile.EMPTY_GAME_PROFILE)) {
+				appendIcon(graphics.mc, Util.NIL_UUID);
+
+				ImGui.sameLine();
+
+				if (ImGui.selectable(ImIcons.CLOSE + " None", profile == null)) {
+					profile = null;
+					update = ImUpdate.FULL;
+				}
+			}
+
+			for (var p : PlayerProfiles.getAllKnown()) {
+				if (filter == null || filter.test(p.profile())) {
+					appendIcon(graphics.mc, p.profile().getId());
+					ImGui.sameLine();
+
+					if (ImGui.selectable(p.profile().getName(), profile != null && p.profile().getId().equals(profile.getId()))) {
+						profile = p.profile();
+						update = ImUpdate.FULL;
+					}
+				}
+			}
+
+			ImGui.endListBox();
+		}
+
+		ImGui.setNextItemWidth(180F);
+		ImGui.inputTextWithHint("###fetch", "Username", name);
+
+		boolean edited = ImGui.isItemDeactivatedAfterEdit();
+
+		ImGui.sameLine();
+		boolean button = ImGui.button("Fetch###fetch-button");
+
+		if (edited || button) {
+			var nameStr = name.get();
+			profile = null;
+
+			if (!nameStr.isEmpty()) {
+				var p = PlayerProfiles.get(nameStr);
+
+				if (p.isError()) {
+					profile = null;
+					VidLib.LOGGER.error("Failed to fetch profile '" + nameStr + "'");
+				} else {
+					profile = p.profile();
+				}
+			}
+
+			update = ImUpdate.FULL;
+		}
+
+		return update;
+	}
+
+	private void appendMainIcon(Minecraft mc) {
+		var tex = LowQualityPlayerBodies.getTexture(mc, profile == null ? null : profile.getId());
+		ImGui.image(tex.getTexture().vl$getHandle(), ImGui.getFrameHeight(), ImGui.getFrameHeight());
 
 		if (ImGui.isItemHovered()) {
 			ImGui.beginTooltip();
-			ImGui.image(texId, 128F, 128F);
+			var texHD = PlayerBodies.getTexture(mc, profile == null ? null : profile.getId());
+			ImGui.image(texHD.getTexture().vl$getHandle(), 128F, 128F);
 			ImGui.endTooltip();
 		}
 	}
 
-	private void appendIcon(UUID uuid) {
-		var tex = PlayerHeadTexture.get(uuid);
+	private void appendIcon(Minecraft mc, UUID uuid) {
+		var tex = LowQualityPlayerBodies.getTexture(mc, uuid);
 		ImGui.image(tex.getTexture().vl$getHandle(), ImGui.getFontSize(), ImGui.getFontSize());
 	}
 
@@ -175,6 +176,6 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 
 	@Override
 	public GameProfile build() {
-		return profile == null ? Empty.PROFILE : profile;
+		return profile == null ? PlayerProfile.EMPTY_GAME_PROFILE : profile;
 	}
 }
