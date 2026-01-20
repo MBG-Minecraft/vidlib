@@ -9,7 +9,10 @@ import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.BlockGetter;
@@ -168,5 +171,21 @@ public class CommonGameEngine {
 
 	public Iterable<RecipeHolder<?>> modifyRecipeList(Iterable<RecipeHolder<?>> original) {
 		return original;
+	}
+
+	public int calculateFallDamage(LivingEntity livingEntity, double fallDistance, float damageMultiplier, DamageSource damageSource, int original) {
+		if (livingEntity instanceof Player && nonLethalFalling()) {
+			int hp = Mth.floor(livingEntity.getHealth());
+
+			if (original >= hp) {
+				return hp - 1;
+			}
+		}
+
+		return original;
+	}
+
+	public boolean nonLethalFalling() {
+		return true;
 	}
 }
