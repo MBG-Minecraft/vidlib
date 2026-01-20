@@ -186,6 +186,6 @@ public class CommonGameEngine {
 	}
 
 	public boolean nonLethalFalling() {
-		return true;
+		return false;
 	}
 }
