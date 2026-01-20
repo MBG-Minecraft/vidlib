@@ -40,6 +40,7 @@ import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.GameShuttingDownEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.entity.EntityInvulnerabilityCheckEvent;
 import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
@@ -289,5 +290,12 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void gameShuttingDown(GameShuttingDownEvent event) {
 		AutoInit.Type.SAVE_GAME.invoke();
+	}
+
+	@SubscribeEvent
+	public static void serverTagsUpdated(TagsUpdatedEvent event) {
+		if (event.getUpdateCause() == TagsUpdatedEvent.UpdateCause.SERVER_DATA_LOAD) {
+			// datapacks loaded?
+		}
 	}
 }

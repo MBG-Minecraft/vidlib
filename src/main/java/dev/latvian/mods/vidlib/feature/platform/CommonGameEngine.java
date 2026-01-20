@@ -11,6 +11,7 @@ import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
@@ -163,5 +164,9 @@ public class CommonGameEngine {
 
 	public boolean disableBlockGravity(Level level, BlockPos pos, BlockState state) {
 		return false;
+	}
+
+	public Iterable<RecipeHolder<?>> modifyRecipeList(Iterable<RecipeHolder<?>> original) {
+		return original;
 	}
 }

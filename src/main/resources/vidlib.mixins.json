@@ -41,6 +41,7 @@
 		"PlayerMixin",
 		"PoiSectionMixin",
 		"ProjectileWeaponItemMixin",
+		"RecipeManagerMixin",
 		"ScoreboardMixin",
 		"ServerCommonPacketListenerImplMixin",
 		"ServerConfigurationPacketListenerImplMixin",

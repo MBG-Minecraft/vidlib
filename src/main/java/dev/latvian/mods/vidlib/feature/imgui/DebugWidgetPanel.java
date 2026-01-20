@@ -471,7 +471,7 @@ public class DebugWidgetPanel extends Panel {
 		ImGui.separator();
 
 		ImGui.text("LV: " + Countries.LV.get().displayName());
-		graphics.combo("Country###country", new Country[1], Countries.LOADED.get().byCode().values().toArray(new Country[0]), Country::displayName);
+		graphics.combo("###country", new Country[1], Countries.LOADED.get().byCode().values().toArray(new Country[0]), Country::displayName);
 
 		ImGui.separator();
 
