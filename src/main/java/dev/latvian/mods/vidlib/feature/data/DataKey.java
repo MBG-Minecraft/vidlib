@@ -6,6 +6,8 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
 
 public record DataKey<T>(
@@ -16,7 +18,7 @@ public record DataKey<T>(
 	CommandDataType<T> command,
 	boolean save,
 	boolean sync,
-	@Nullable BiConsumer<Player, T> onReceived,
+	List<BiConsumer<Player, T>> onReceived,
 	boolean allowClientUpdates,
 	boolean skipLogging,
 	@Nullable ImBuilderType<T> imBuilder
@@ -31,7 +33,6 @@ public record DataKey<T>(
 		private final T defaultValue;
 		private boolean save;
 		private boolean sync;
-		private BiConsumer<Player, T> onReceived;
 		private boolean allowClientUpdates;
 		private boolean skipLogging;
 		private ImBuilderType<T> imBuilder;
@@ -43,7 +44,6 @@ public record DataKey<T>(
 			this.defaultValue = defaultValue;
 			this.save = false;
 			this.sync = false;
-			this.onReceived = null;
 			this.allowClientUpdates = false;
 			this.skipLogging = false;
 		}
@@ -55,11 +55,6 @@ public record DataKey<T>(
 
 		public Builder<T> sync() {
 			this.sync = true;
-			return this;
-		}
-
-		public Builder<T> onReceived(BiConsumer<Player, T> onReceived) {
-			this.onReceived = onReceived;
 			return this;
 		}
 
@@ -87,7 +82,7 @@ public record DataKey<T>(
 				CommandDataType.of(type),
 				save,
 				sync,
-				onReceived,
+				new ArrayList<>(0),
 				allowClientUpdates,
 				skipLogging,
 				imBuilder
@@ -121,5 +116,9 @@ public record DataKey<T>(
 	@Nullable
 	public T[] getEnumConstants() {
 		return type.typeClass().isEnum() ? type.typeClass().getEnumConstants() : null;
+	}
+
+	public void addUpdateListener(BiConsumer<Player, T> onReceived) {
+		this.onReceived.add(onReceived);
 	}
 }

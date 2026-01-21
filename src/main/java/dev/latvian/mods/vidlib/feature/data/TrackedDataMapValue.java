@@ -26,8 +26,10 @@ public class TrackedDataMapValue {
 	public void update(@Nullable Player player, Object update) {
 		data = update;
 
-		if (player != null && key.onReceived() != null) {
-			key.onReceived().accept(player, Cast.to(data));
+		if (player != null && !key.onReceived().isEmpty()) {
+			for (var listener : key.onReceived()) {
+				listener.accept(player, Cast.to(data));
+			}
 		}
 	}
 }

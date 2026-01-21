@@ -56,6 +56,7 @@ import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
 import dev.latvian.mods.vidlib.feature.visual.TexturedCubeRenderer;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
+import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
 import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
@@ -138,6 +139,8 @@ public class VidLibClientEventHandler {
 		if (VLFlashbackIntegration.ENABLED) {
 			VLFlashbackIntegration.init();
 		}
+
+		InternalServerData.ANCHOR.addUpdateListener((player, anchor) -> Anchor.client = anchor);
 	}
 
 	@SubscribeEvent

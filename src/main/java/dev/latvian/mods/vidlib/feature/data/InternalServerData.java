@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public interface InternalServerData {
 	DataKey<ResourceLocation> SKYBOX = DataKey.SERVER.createDefault("skybox", SkyboxData.ID_DATA_TYPE, Skyboxes.DAY_WITH_CELESTIALS, null);
-	DataKey<Anchor> ANCHOR = DataKey.SERVER.buildDefault("anchor", Anchor.DATA_TYPE, Anchor.NONE, null).onReceived((player, anchor) -> Anchor.client = anchor).build();
+	DataKey<Anchor> ANCHOR = DataKey.SERVER.createDefault("anchor", Anchor.DATA_TYPE, Anchor.NONE, null);
 	DataKey<Boolean> HIDE_PLUMBOBS = DataKey.SERVER.createBoolean("hide_plumbobs", false);
 	DataKey<NameDrawType> NAME_DRAW_TYPE = DataKey.SERVER.createEnum("name_draw_type", NameDrawType.DATA_TYPE, NameDrawType.VANILLA, NameDrawType.VALUES);
 	DataKey<Double> NAME_DRAW_MIN_DIST = DataKey.SERVER.createDouble("name_draw_min_dist", 20D, 0D, 500D);
