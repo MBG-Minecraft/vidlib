@@ -20,7 +20,7 @@ public interface PlayerDataCommand {
 		for (var key : DataKey.PLAYER.all.values()) {
 			var cmd = Commands.literal(key.id());
 
-			cmd.then(Commands.literal("set")
+			cmd.then(Commands.literal("get")
 				.executes(ctx -> {
 					for (var player : EntityArgument.getPlayers(ctx, "player")) {
 						ctx.getSource().sendSuccess(() -> {
