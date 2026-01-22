@@ -22,6 +22,7 @@ import imgui.flag.ImGuiWindowFlags;
 import imgui.internal.ImGuiContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWWindowContentScaleCallback;
@@ -221,16 +222,16 @@ public class ImGuiHooks {
 		var centralNodePos = centralNode.getPos();
 		var centralNodeSize = centralNode.getSize();
 
-		float h = FlashbackIntegration.isInReplayOrExporting() ? 0F : 22F;
-		boolean bottomInfoBar = h > 0F && ClientGameEngine.INSTANCE.hasBottomInfoBar(mc);
+		float h = FlashbackIntegration.isInReplayOrExporting() || !ClientGameEngine.INSTANCE.hasBottomInfoBar(mc) ? 0F : Mth.ceil(22F * ImGuiHooks.dpiScale);
 
 		var prevWidth = window.getWidth();
 		var prevHeight = window.getHeight();
+
 		window.vl$setViewportArea(
-			(centralNodePos.x - windowPos.x) / (double) windowSize.x,
-			(centralNodePos.y - windowPos.y) / (double) windowSize.y,
-			centralNodeSize.x / (double) windowSize.x,
-			(centralNodeSize.y - (bottomInfoBar ? h : 0D)) / (double) windowSize.y
+			(centralNodePos.x - windowPos.x) / windowSize.x,
+			(centralNodePos.y - windowPos.y) / windowSize.y,
+			centralNodeSize.x / windowSize.x,
+			(centralNodeSize.y - h) / windowSize.y
 		);
 
 		if (window.getWidth() != 0 && window.getHeight() != 0) {
@@ -239,14 +240,15 @@ public class ImGuiHooks {
 			}
 		}
 
-		if (bottomInfoBar) {
+		if (h > 0F) {
 			var graphics = new ImGraphics(mc);
 			graphics.pushRootStack();
 			graphics.copyStyleColFrom(ImGuiCol.WindowBg, ImGuiCol.MenuBarBg);
 			graphics.setWindowRounding(0F);
 			graphics.setWindowPadding(0F, 0F);
+			graphics.setWindowBorderSize(0F);
 			graphics.setFramePadding(2F, 0F);
-			graphics.setWindowMinSize(0F, 22F);
+			graphics.setWindowMinSize(0F, h);
 			graphics.setItemSpacing(2F, 0F);
 
 			int flags = ImGuiWindowFlags.NoSavedSettings
