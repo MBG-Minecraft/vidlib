@@ -518,7 +518,7 @@ public class Prop {
 
 	@Nullable
 	public PropHitResult clip(ClipContext ctx) {
-		var entity = ctx.getEntity();
+		var entity = ctx.vl$getEntity();
 
 		if (canInteract(entity)) {
 			var hit = AABB.clip(getClipBoxes(entity), ctx.getFrom(), ctx.getTo(), BlockPos.ZERO);

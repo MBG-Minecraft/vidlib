@@ -15,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(AbstractClientPlayer.class)
 public abstract class AbstractClientPlayerMixin implements VLClientPlayer {
-
 	@Shadow
 	@Nullable
 	protected abstract PlayerInfo getPlayerInfo();
@@ -27,14 +26,10 @@ public abstract class AbstractClientPlayerMixin implements VLClientPlayer {
 		return info == null ? null : info.getGameMode();
 	}
 
-	@ModifyReturnValue(
-		method = "getSkin",
-		at = @At("RETURN")
-	)
-	private PlayerSkin vidlib$addCape(PlayerSkin oldSkin) {
+	@ModifyReturnValue(method = "getSkin", at = @At("RETURN"))
+	private PlayerSkin vl$addCape(PlayerSkin oldSkin) {
 		AbstractClientPlayer player = (AbstractClientPlayer) (Object) this;
 		var skinOverride = VLSkin.getSkinOverride(player);
 		return VLCape.addCapeToSkin(player, skinOverride.orElse(oldSkin));
 	}
-
 }

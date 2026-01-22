@@ -88,5 +88,8 @@
 	],
 	"net/minecraft/client/renderer/texture/TextureAtlasSprite": [
 		"dev/latvian/mods/vidlib/core/VLTextureAtlasSprite"
+	],
+	"net/minecraft/world/food/FoodData": [
+		"dev/latvian/mods/vidlib/core/VLFoodData"
 	]
 }

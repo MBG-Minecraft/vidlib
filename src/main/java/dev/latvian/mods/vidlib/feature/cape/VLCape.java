@@ -12,20 +12,10 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 
 @AutoInit
-public record VLCape(
-	ResourceLocation capeTexture
-) {
-	public static final Codec<VLCape> CODEC =
-		ResourceLocation.CODEC.xmap(
-			VLCape::new,
-			VLCape::capeTexture
-		);
+public record VLCape(ResourceLocation capeTexture) {
+	public static final Codec<VLCape> CODEC = ResourceLocation.CODEC.xmap(VLCape::new, VLCape::capeTexture);
 
-	public static final StreamCodec<ByteBuf, VLCape> STREAM_CODEC =
-		CompositeStreamCodec.of(
-			ResourceLocation.STREAM_CODEC, VLCape::capeTexture,
-			VLCape::new
-		);
+	public static final StreamCodec<ByteBuf, VLCape> STREAM_CODEC = CompositeStreamCodec.of(ResourceLocation.STREAM_CODEC, VLCape::capeTexture, VLCape::new);
 
 	public static final DataType<VLCape> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, VLCape.class);
 

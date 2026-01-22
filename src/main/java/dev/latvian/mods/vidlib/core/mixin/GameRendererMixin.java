@@ -11,7 +11,6 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.util.profiling.Profiler;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
@@ -49,18 +48,13 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 		return 0F;
 	}
 
-	// Removes the night vision fade in/out effect nearing the end of the effect
 	@Inject(method = "getNightVisionScale", at = @At("HEAD"), cancellable = true)
 	private static void vl$getNightVisionStrength(LivingEntity entity, float delta, CallbackInfoReturnable<Float> cir) {
-		var effect = entity.getEffect(MobEffects.NIGHT_VISION);
-		if (effect == null) {
-			return;
+		var override = ClientGameEngine.INSTANCE.overrideNightVisionScale(entity, delta);
+
+		if (override != null) {
+			cir.setReturnValue(override);
 		}
-		int duration = effect.getDuration();
-		if (effect.isInfiniteDuration()) {
-			return;
-		}
-		cir.setReturnValue(duration > 20F ? 1F : duration / 20F);
 	}
 
 	/**
@@ -69,7 +63,7 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 	 */
 	@Overwrite
 	public float getDepthFar() {
-		return ClientGameEngine.INSTANCE.depthFar(renderDistance);
+		return ClientGameEngine.INSTANCE.getFarDepth(renderDistance);
 	}
 
 	@Inject(method = "renderLevel", at = @At("HEAD"), cancellable = true)

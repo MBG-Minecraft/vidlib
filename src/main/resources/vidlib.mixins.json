@@ -120,6 +120,7 @@
 		"RenderSystemMixin",
 		"RenderTypeMixin",
 		"ScreenMixin",
+		"ServerStatusPingerMixin",
 		"ShaderManagerMixin",
 		"SkinManagerMixin",
 		"SkyRendererMixin",

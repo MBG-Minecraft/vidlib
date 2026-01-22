@@ -1,11 +1,9 @@
 package dev.latvian.mods.vidlib.core;
 
-import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,28 +28,6 @@ public interface VLClientLevel extends VLLevel {
 	default ActiveZones vl$getActiveZones() {
 		var player = Minecraft.getInstance().player;
 		return player == null ? null : player.vl$sessionData().filteredZones;
-	}
-
-	default void environmentEffects(Minecraft mc, BlockPos pos) {
-		var effects = ClientGameEngine.INSTANCE.getEnvironmentEffects(mc, pos);
-		var level = this.vl$level();
-		var ctx = level.getGlobalContext();
-
-		if (!effects.isEmpty()) {
-			for (var effect : effects) {
-				var chance = effect.chance().getOr(ctx, 0D);
-
-				if (level.random.roll((float) chance)) {
-					level.addParticle(
-						effect.particle(),
-						pos.getX() + level.random.nextFloat(),
-						pos.getY() + level.random.nextFloat(),
-						pos.getZ() + level.random.nextFloat(),
-						0.0, 0.0, 0.0
-					);
-				}
-			}
-		}
 	}
 
 	@Override

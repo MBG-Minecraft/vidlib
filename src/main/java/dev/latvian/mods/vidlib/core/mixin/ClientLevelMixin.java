@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import dev.latvian.mods.vidlib.core.VLClientLevel;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -55,7 +56,7 @@ public abstract class ClientLevelMixin implements VLClientLevel {
 
 	@Inject(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getBiome(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/core/Holder;"))
 	private void vl$doAnimateTick(int posX, int posY, int posZ, int range, RandomSource random, Block block, BlockPos.MutableBlockPos blockPos, CallbackInfo ci) {
-		environmentEffects(minecraft, blockPos);
+		ClientGameEngine.INSTANCE.handleEnvironmentalEffects(minecraft, vl$level(), blockPos);
 	}
 
 	@Redirect(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getFluidState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;"))

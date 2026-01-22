@@ -1,12 +1,15 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
+import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
@@ -17,49 +20,72 @@ import dev.latvian.mods.vidlib.feature.icon.IconHolder;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
+import dev.latvian.mods.vidlib.feature.skin.PlayerSkinOverrides;
 import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
 import dev.latvian.mods.vidlib.util.StringUtils;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
+import net.minecraft.SharedConstants;
+import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.particle.FireworkParticles;
+import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.resources.sounds.BiomeAmbientSoundsHandler;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.FogType;
+import net.minecraft.world.phys.Vec2;
 import net.neoforged.fml.ModList;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.UUID;
 
 public class ClientGameEngine {
 	public static ClientGameEngine INSTANCE = new ClientGameEngine();
@@ -179,8 +205,29 @@ public class ClientGameEngine {
 		return fg != null ? fg : shaderFog;
 	}
 
-	public List<ChancedParticle> getEnvironmentEffects(Minecraft mc, BlockPos pos) {
+	public List<ChancedParticle> getEnvironmentEffects(Minecraft mc, ClientLevel level, BlockPos pos) {
 		return List.of();
+	}
+
+	public void handleEnvironmentalEffects(Minecraft mc, ClientLevel level, BlockPos pos) {
+		var effects = getEnvironmentEffects(mc, level, pos);
+		var ctx = level.getGlobalContext();
+
+		if (!effects.isEmpty()) {
+			for (var effect : effects) {
+				var chance = effect.chance().getOr(ctx, 0D);
+
+				if (level.random.roll((float) chance)) {
+					level.addParticle(
+						effect.particle(),
+						pos.getX() + level.random.nextFloat(),
+						pos.getY() + level.random.nextFloat(),
+						pos.getZ() + level.random.nextFloat(),
+						0.0, 0.0, 0.0
+					);
+				}
+			}
+		}
 	}
 
 	public boolean renderOnBossFramebuffer(LivingEntity entity) {
@@ -307,7 +354,7 @@ public class ClientGameEngine {
 		return !entity.isInvisible() && (entity instanceof LocalPlayer || entity.hasCustomName());
 	}
 
-	public float depthFar(float renderDistance) {
+	public float getFarDepth(float renderDistance) {
 		return 8192F;
 	}
 
@@ -448,5 +495,152 @@ public class ClientGameEngine {
 
 	public boolean disableLightningSounds(LightningBolt entity) {
 		return false;
+	}
+
+	public OptionInstance<?>[] insertControlsOptions() {
+		return VidLibClientOptions.CONTROLS_OPTIONS;
+	}
+
+	public OptionInstance<?>[] insertAccessibilityOptions() {
+		return VidLibClientOptions.ACCESSIBILITY_OPTIONS;
+	}
+
+	public boolean overrideBiomeMoodSounds(BiomeAmbientSoundsHandler handler) {
+		return true;
+	}
+
+	@Nullable
+	public List<String> collectGameInformationText(Minecraft mc, DebugScreenOverlay overlay) {
+		if (!mc.showOnlyReducedInfo()) {
+			return null;
+		}
+
+		var list = new ArrayList<String>();
+		list.add("Minecraft " + SharedConstants.getCurrentVersion().getName() + " (" + mc.getLaunchedVersion() + "/" + ClientBrandRetriever.getClientModName() + ")");
+		list.add(mc.fpsString);
+
+		var blockpos = mc.getCameraEntity().blockPosition();
+		var entity = mc.getCameraEntity();
+		var direction = entity.getDirection();
+		var chunkpos = new ChunkPos(blockpos);
+
+		if (!Objects.equals(overlay.lastPos, chunkpos)) {
+			overlay.lastPos = chunkpos;
+			overlay.clearChunkCache();
+		}
+
+		String s;
+		switch (direction) {
+			case NORTH -> s = "Towards negative Z";
+			case SOUTH -> s = "Towards positive Z";
+			case WEST -> s = "Towards negative X";
+			case EAST -> s = "Towards positive X";
+			default -> s = "Invalid";
+		}
+
+		list.add(String.format(Locale.ROOT, "Facing: %s (%s) (%.1f / %.1f)", direction, s, Mth.wrapDegrees(entity.getYRot()), Mth.wrapDegrees(entity.getXRot())));
+		list.add(String.format(Locale.ROOT, "XYZ: %.3f / %.5f / %.3f", mc.getCameraEntity().getX(), mc.getCameraEntity().getY(), mc.getCameraEntity().getZ()));
+		list.add(String.format(Locale.ROOT, "Chunk: %d %d %d [%d %d in r.%d.%d.mca]", chunkpos.x, SectionPos.blockToSectionCoord(blockpos.getY()), chunkpos.z, chunkpos.getRegionLocalX(), chunkpos.getRegionLocalZ(), chunkpos.getRegionX(), chunkpos.getRegionZ()));
+		list.add(String.format(Locale.ROOT, "Block: %d %d %d [%d %d %d]", blockpos.getX(), blockpos.getY(), blockpos.getZ(), blockpos.getX() & 15, blockpos.getY() & 15, blockpos.getZ() & 15));
+
+		var levelchunk = overlay.getClientChunk();
+
+		if (levelchunk == null || levelchunk.isEmpty()) {
+			list.add("Waiting for chunk...");
+		} else {
+			int rawBrightness = mc.level.getChunkSource().getLightEngine().getRawBrightness(blockpos, 0);
+			int skyLight = mc.level.getBrightness(LightLayer.SKY, blockpos);
+			int blockLight = mc.level.getBrightness(LightLayer.BLOCK, blockpos);
+			list.add("Client Light: " + rawBrightness + " (" + skyLight + " sky, " + blockLight + " block)");
+
+			if (mc.level.isInsideBuildHeight(blockpos.getY())) {
+				var biome = mc.level.getBiome(blockpos);
+				list.add("Biome: " + overlay.printBiome(biome));
+			}
+		}
+
+		list.add(mc.levelRenderer.getEntityStatistics().replace("E:", "Entities:"));
+		return list;
+	}
+
+	@Nullable
+	public SoundEvent overrideFireworkSound(FireworkParticles.Starter firework, SoundEvent original) {
+		return null;
+	}
+
+	@Nullable
+	public Float overrideNightVisionScale(LivingEntity entity, float delta) {
+		// Removes the night vision fade in/out effect nearing the end of the effect
+		var effect = entity.getEffect(MobEffects.NIGHT_VISION);
+
+		if (effect == null) {
+			return null;
+		}
+
+		int duration = effect.getDuration();
+
+		if (effect.isInfiniteDuration()) {
+			return null;
+		}
+
+		return duration > 20F ? 1F : duration / 20F;
+	}
+
+	public boolean handleDebugKeys(Minecraft mc, int key) {
+		return VidLibKeys.handleDebugKeys(mc, key);
+	}
+
+	public void tickPlayerInput(LocalPlayer player, KeyboardInput in) {
+		if (player != null && player.vl$sessionData().cameraOverride instanceof ControlledCameraOverride c && c.move(in)) {
+			in.keyPresses = Input.EMPTY;
+			in.moveVector = Vec2.ZERO;
+		} else if (player != null && player.vl$sessionData().suspended) {
+			in.keyPresses = in.keyPresses.shift() ? new Input(
+				false,
+				false,
+				false,
+				false,
+				false,
+				true,
+				false
+			) : Input.EMPTY;
+
+			in.moveVector = Vec2.ZERO;
+		}
+	}
+
+	public boolean overrideLevelEvent(Level level, int eventId, BlockPos pos, int data) {
+		// Cancel sound that plays when you switch dimensions
+		if (eventId == 1032) {
+			return true;
+		}
+
+		return false;
+	}
+
+	public boolean overrideServerPingPlayers(ServerData serverData, ServerStatus.Players players) {
+		if (hideServerPingPlayers()) {
+			serverData.status = CommonComponents.EMPTY;
+			serverData.players = null;
+			serverData.playerList = List.of();
+			return true;
+		}
+
+		return false;
+	}
+
+	public boolean hideServerPingPlayers() {
+		return false;
+	}
+
+	@Nullable
+	public MinecraftProfileTexture overridePlayerTexture(UUID uuid, MinecraftProfileTexture.Type type) {
+		return PlayerSkinOverrides.get(uuid, type);
+	}
+
+	@Nullable
+	public Biome.Precipitation overrideGlobalPrecipitation() {
+		var cam = CameraOverride.get(Minecraft.getInstance());
+		return cam == null ? null : cam.getWeatherOverride();
 	}
 }

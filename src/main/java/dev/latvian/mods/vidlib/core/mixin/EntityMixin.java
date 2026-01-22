@@ -3,8 +3,8 @@ package dev.latvian.mods.vidlib.core.mixin;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.core.VLEntity;
-import dev.latvian.mods.vidlib.feature.entity.ExactEntitySpawnPayload;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -67,10 +67,10 @@ public abstract class EntityMixin implements VLEntity {
 
 	@Inject(method = "getAddEntityPacket", at = @At("HEAD"), cancellable = true)
 	private void vl$getAddEntityPacket(ServerEntity serverEntity, CallbackInfoReturnable<Packet<ClientGamePacketListener>> cir) {
-		var e = (Entity) (Object) this;
+		var override = CommonGameEngine.INSTANCE.overrideEntitySpawnPacket(vl$self(), serverEntity);
 
-		if (!e.getType().builtInRegistryHolder().getKey().location().getNamespace().equals("minecraft")) {
-			cir.setReturnValue((Packet) new ExactEntitySpawnPayload(e, serverEntity, 0).toGameS2C(e.level()));
+		if (override != null) {
+			cir.setReturnValue(override);
 		}
 	}
 

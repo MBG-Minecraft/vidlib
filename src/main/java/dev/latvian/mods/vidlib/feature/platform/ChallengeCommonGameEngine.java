@@ -5,7 +5,9 @@ import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.food.FoodData;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -95,5 +97,14 @@ public class ChallengeCommonGameEngine extends CommonGameEngine {
 	@Override
 	public boolean disableBlockGravity(Level level, BlockPos pos, BlockState state) {
 		return !level.get(InternalServerData.BLOCK_GRAVITY);
+	}
+
+	@Override
+	public boolean replaceFoodTick(ServerPlayer player, FoodData foodData) {
+		foodData.setFoodLevel(20);
+		foodData.setSaturation(20F);
+		foodData.vl$setExhaustionLevel(0F);
+		foodData.vl$setTickTimer(0);
+		return true;
 	}
 }

@@ -1,19 +1,26 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.entity.ExactEntitySpawnPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
 import dev.latvian.mods.vidlib.feature.misc.ClientModInfo;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
@@ -21,7 +28,25 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.block.BarrierBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.world.level.block.CarpetBlock;
+import net.minecraft.world.level.block.CrossCollisionBlock;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.EnchantingTableBlock;
+import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.FireBlock;
+import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.HopperBlock;
+import net.minecraft.world.level.block.LadderBlock;
+import net.minecraft.world.level.block.LightBlock;
+import net.minecraft.world.level.block.PressurePlateBlock;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.SnowLayerBlock;
+import net.minecraft.world.level.block.VegetationBlock;
+import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -187,5 +212,38 @@ public class CommonGameEngine {
 
 	public boolean nonLethalFalling() {
 		return false;
+	}
+
+	public boolean replaceFoodTick(ServerPlayer player, FoodData foodData) {
+		return false;
+	}
+
+	public float getBlockDensity(BlockState state) {
+		var b = state.getBlock();
+
+		if (state.isAir() || b instanceof LightBlock || b instanceof BarrierBlock || b instanceof FireBlock) {
+			return 0F;
+		} else if (b instanceof CarpetBlock || b instanceof ButtonBlock || b instanceof PressurePlateBlock || b instanceof VineBlock || b instanceof LadderBlock) {
+			return 0.06125F;
+		} else if (b instanceof DoorBlock || b instanceof SnowLayerBlock || b instanceof FlowerPotBlock) {
+			return 0.125F;
+		} else if (b instanceof SlabBlock || b instanceof CrossCollisionBlock || b instanceof FenceGateBlock || b instanceof EnchantingTableBlock) {
+			return 0.5F;
+		} else if (b instanceof VegetationBlock) {
+			return 0.25F;
+		} else if (b instanceof SimpleWaterloggedBlock || b instanceof HopperBlock) {
+			return 0.75F;
+		} else {
+			return 1F;
+		}
+	}
+
+	@Nullable
+	public Packet<ClientGamePacketListener> overrideEntitySpawnPacket(Entity entity, ServerEntity serverEntity) {
+		if (!entity.getType().builtInRegistryHolder().getKey().location().getNamespace().equals("minecraft")) {
+			return (Packet) new ExactEntitySpawnPayload(entity, serverEntity, 0).toGameS2C(entity.level());
+		}
+
+		return null;
 	}
 }
