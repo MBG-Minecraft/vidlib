@@ -366,11 +366,7 @@ public class ClientGameEngine {
 				i++;
 			}
 
-			if (i <= 3) {
-				return 2;
-			} else {
-				return (i + 1) / 2;
-			}
+			return Math.max(2, i - 1);
 		}
 
 		return -1;
