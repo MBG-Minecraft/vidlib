@@ -234,6 +234,11 @@ public class BuiltInImGui {
 	public static void handle(ImGraphics graphics) {
 		var infoBar = FlashbackIntegration.isInReplayOrExporting() || !ClientGameEngine.INSTANCE.hasTopInfoBar(graphics.mc) ? 0F : 22F;
 
+		graphics.pushStack();
+		graphics.setWindowBorderSize(0F);
+		// graphics.setWindowPadding(0F, 0F);
+		graphics.setFramePadding(0F, 2F);
+
 		if (graphics.adminPanel || graphics.isReplay) {
 			var menuOpen = mainMenuOpen;
 			mainMenuOpen = true;
@@ -257,6 +262,8 @@ public class BuiltInImGui {
 			ClientGameEngine.INSTANCE.topInfoBar(graphics, infoBar);
 			ImGui.endMainMenuBar();
 		}
+
+		graphics.popStack();
 
 		OPEN_PANELS.values().removeIf(panel -> panel.handle(graphics));
 		NeoForge.EVENT_BUS.post(new ImGuiEvent(graphics));

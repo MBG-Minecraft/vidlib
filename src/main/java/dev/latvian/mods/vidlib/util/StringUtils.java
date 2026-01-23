@@ -1,17 +1,26 @@
 package dev.latvian.mods.vidlib.util;
 
 import dev.latvian.mods.klib.util.Empty;
+import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.TimeZone;
 
 public interface StringUtils {
 	Set<String> ALWAYS_LOWER_CASE = new HashSet<>(Arrays.asList("a", "an", "the", "of", "on", "in", "and", "or", "but", "for"));
+
+	SimpleDateFormat TIMESTAMP_FORMAT = Util.make(() -> {
+		var format = new SimpleDateFormat("HH:mm:ss");
+		format.setTimeZone(TimeZone.getTimeZone("EST"));
+		return format;
+	});
 
 	static String snakeCaseToTitleCase(String string) {
 		StringJoiner joiner = new StringJoiner(" ");
@@ -44,6 +53,10 @@ public interface StringUtils {
 
 	static String timer(long millis) {
 		return "%02d:%02d:%03d".formatted(millis / 60000L, (millis / 1000L) % 60, millis % 1000L);
+	}
+
+	static String clock(long seconds) {
+		return "%02d:%02d:%02d ".formatted(seconds / 3600L, (seconds / 60L) % 60L, seconds % 60L);
 	}
 
 	@Nullable

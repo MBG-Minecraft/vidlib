@@ -81,6 +81,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -239,7 +240,7 @@ public class ClientGameEngine {
 	}
 
 	public boolean hasTopInfoBar(Minecraft mc) {
-		return mc.player != null && mc.player.vl$sessionData().topInfoBarOverride != null;
+		return true;
 	}
 
 	public boolean hasBottomInfoBar(Minecraft mc) {
@@ -247,6 +248,9 @@ public class ClientGameEngine {
 	}
 
 	public void topInfoBar(ImGraphics graphics, float h) {
+		ImGui.text("MrBeast Gaming");
+		ImGui.separator();
+
 		if (graphics.mc.player != null) {
 			var session = graphics.mc.player.vl$sessionData();
 
@@ -261,6 +265,17 @@ public class ClientGameEngine {
 	}
 
 	public void bottomInfoBar(ImGraphics graphics, float h) {
+		var now = new Date();
+
+		graphics.pushStack();
+		graphics.setText(ImColorVariant.BLUE);
+		ImGui.text(ImIcons.WORLD.toString());
+		graphics.popStack();
+		ImGui.text(StringUtils.TIMESTAMP_FORMAT.format(now));
+		ImGui.separator();
+		ImGui.text(graphics.mc.fpsString.split(" ", 2)[0] + " FPS");
+		ImGui.separator();
+
 		if (graphics.mc.player != null) {
 			var session = graphics.mc.player.vl$sessionData();
 
@@ -269,6 +284,7 @@ public class ClientGameEngine {
 					var sink = new FormattedCharSinkPartBuilder();
 					graphics.mc.font.split(session.bottomInfoBarOverride, Integer.MAX_VALUE).getFirst().accept(sink);
 					graphics.text(sink.build());
+					ImGui.separator();
 				}
 
 				return;
@@ -291,18 +307,12 @@ public class ClientGameEngine {
 						graphics.setStyleCol(ImGuiCol.Text, color);
 						ImGui.text(string);
 						graphics.popStack();
+						ImGui.separator();
 						return;
 					}
 				}
 			}
 		}
-
-		graphics.pushStack();
-		graphics.setText(ImColorVariant.BLUE);
-		ImGui.text(ImIcons.CIRCLE.toString());
-		graphics.popStack();
-		var seconds = (System.currentTimeMillis() - CommonGameEngine.START_TIME) / 1000L;
-		ImGui.text("%02d:%02d:%02d ".formatted(seconds / 3600L, (seconds / 60L) % 60L, seconds % 60L));
 	}
 
 	public void addDecals(List<Decal> list) {

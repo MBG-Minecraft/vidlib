@@ -59,7 +59,6 @@ import java.util.UUID;
 
 public class CommonGameEngine {
 	public static CommonGameEngine INSTANCE = new CommonGameEngine();
-	public static final long START_TIME = System.currentTimeMillis();
 
 	public void collectServerFeatures(Reference2IntMap<Feature> map) {
 		map.put(Feature.INFINITE_CHUNK_RENDERING, 1);

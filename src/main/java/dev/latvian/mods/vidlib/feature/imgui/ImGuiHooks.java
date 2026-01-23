@@ -22,7 +22,6 @@ import imgui.flag.ImGuiWindowFlags;
 import imgui.internal.ImGuiContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWWindowContentScaleCallback;
@@ -170,6 +169,10 @@ public class ImGuiHooks {
 		ImNodes.destroyContext();
 	}
 
+	public static float scaleBarHeight(float dpi) {
+		return 26F + 20F * (dpi - 1F);
+	}
+
 	public static void startFrame(Minecraft mc) {
 		if (!initialized) {
 			//if (mc.getOverlay() instanceof LoadingOverlay) {
@@ -222,7 +225,7 @@ public class ImGuiHooks {
 		var centralNodePos = centralNode.getPos();
 		var centralNodeSize = centralNode.getSize();
 
-		float h = FlashbackIntegration.isInReplayOrExporting() || !ClientGameEngine.INSTANCE.hasBottomInfoBar(mc) ? 0F : Mth.ceil(22F * ImGuiHooks.dpiScale);
+		float h = FlashbackIntegration.isInReplayOrExporting() || !ClientGameEngine.INSTANCE.hasBottomInfoBar(mc) ? 0F : scaleBarHeight(ImGuiHooks.dpiScale);
 
 		var prevWidth = window.getWidth();
 		var prevHeight = window.getHeight();
@@ -247,9 +250,9 @@ public class ImGuiHooks {
 			graphics.setWindowRounding(0F);
 			graphics.setWindowPadding(0F, 0F);
 			graphics.setWindowBorderSize(0F);
-			graphics.setFramePadding(2F, 0F);
+			graphics.setFramePadding(2F, 2F);
 			graphics.setWindowMinSize(0F, h);
-			graphics.setItemSpacing(2F, 0F);
+			graphics.setItemSpacing(6F, 0F);
 
 			int flags = ImGuiWindowFlags.NoSavedSettings
 				| ImGuiWindowFlags.MenuBar
