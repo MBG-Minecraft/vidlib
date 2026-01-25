@@ -57,4 +57,10 @@ public interface VLServerPlayer extends VLPlayer {
 		var p = vl$self();
 		callback.accept(new SyncPlayerTagsPayload(p.getUUID(), List.copyOf(p.getTags())).toGameS2C(p.level()));
 	}
+
+	@Override
+	default void heal() {
+		VLPlayer.super.heal();
+		vl$self().getFoodData().eat(20, 20F);
+	}
 }
