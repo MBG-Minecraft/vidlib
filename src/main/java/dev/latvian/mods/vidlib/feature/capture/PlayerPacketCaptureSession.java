@@ -92,6 +92,8 @@ public class PlayerPacketCaptureSession {
 			}
 
 			capture0(time, packet, config);
+		} catch (Exception ex) {
+			VidLib.LOGGER.error("Failed to capture packet " + (packet instanceof ClientboundCustomPayloadPacket p ? p.payload().type().id() : packet.type().id()), ex);
 		} finally {
 			lock.unlock();
 		}
