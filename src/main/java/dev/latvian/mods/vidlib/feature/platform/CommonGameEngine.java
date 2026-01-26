@@ -245,4 +245,8 @@ public class CommonGameEngine {
 
 		return null;
 	}
+
+	public boolean disableJoinMessages() {
+		return false;
+	}
 }

@@ -1,8 +1,12 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.vidlib.core.VLServerConfigPacketListener;
 import dev.latvian.mods.vidlib.core.VLServerPlayPacketListener;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -21,10 +25,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PlayerList.class)
-public class PlayerListMixin {
+public abstract class PlayerListMixin {
 	@Shadow
 	@Final
 	private MinecraftServer server;
+
+	@Shadow
+	public abstract void op(GameProfile profile);
 
 	@Inject(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Connection;setupInboundProtocol(Lnet/minecraft/network/ProtocolInfo;Lnet/minecraft/network/PacketListener;)V"))
 	private void vl$placeNewPlayerHead(Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci, @Local ServerGamePacketListenerImpl packetListener) {
@@ -55,6 +62,13 @@ public class PlayerListMixin {
 
 		if (packetCapture != null) {
 			packetCapture.disconnect(player.getUUID());
+		}
+	}
+
+	@WrapOperation(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Z)V"))
+	private void vl$removeJoinMessage(PlayerList instance, Component message, boolean bypassHiddenChat, Operation<Void> operation) {
+		if (!CommonGameEngine.INSTANCE.disableJoinMessages()) {
+			operation.call(instance, message, bypassHiddenChat);
 		}
 	}
 }

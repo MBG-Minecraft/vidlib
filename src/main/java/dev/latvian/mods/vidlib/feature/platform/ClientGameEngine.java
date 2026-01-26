@@ -380,15 +380,7 @@ public class ClientGameEngine {
 	}
 
 	public boolean shouldShowName(Entity entity, boolean original) {
-		if (BossRendering.active > 0) {
-			return false;
-		} else if (original) {
-			return true;
-		}
-
-		// var mc = Minecraft.getInstance();
-		// return entity instanceof LocalPlayer && mc.isLocalServer() && !mc.options.getCameraType().isFirstPerson() || entity.hasCustomName();
-		return !entity.isInvisible() && (entity instanceof LocalPlayer || entity.hasCustomName());
+		return BossRendering.active <= 0 && original;
 	}
 
 	public float getFarDepth(float renderDistance) {
