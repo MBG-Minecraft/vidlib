@@ -6,6 +6,7 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.resources.PlayerSkin;
@@ -58,21 +59,7 @@ public record VLSkin(
 	public static final DataType<VLSkin> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, VLSkin.class);
 
 	public static Optional<PlayerSkin> getSkinOverride(AbstractClientPlayer player) {
-		VLSkin newSkin = player.getOptional(InternalPlayerData.SKIN);
-
-		if (newSkin != null) {
-			return Optional.of(
-				new PlayerSkin(
-					newSkin.texture,
-					null,
-					newSkin.capeTexture().orElse(null),
-					newSkin.elytraTexture().orElse(null),
-					newSkin.slim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE,
-					false
-				));
-		}
-
-		return Optional.empty();
+		return Optional.ofNullable(ClientGameEngine.INSTANCE.getSkin(player));
 	}
 
 	@Override

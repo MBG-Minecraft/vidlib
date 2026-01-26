@@ -26,6 +26,7 @@ import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.skin.PlayerSkinOverrides;
+import dev.latvian.mods.vidlib.feature.skin.VLSkin;
 import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
 import dev.latvian.mods.vidlib.util.StringUtils;
 import imgui.ImGui;
@@ -51,6 +52,7 @@ import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.client.resources.sounds.BiomeAmbientSoundsHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -169,6 +171,24 @@ public class ClientGameEngine {
 
 	public Clothing getClothing(Player player) {
 		return player.get(InternalPlayerData.CLOTHING);
+	}
+
+	@Nullable
+	public PlayerSkin getSkin(Player player) {
+		@Nullable VLSkin newSkin = player.getOptional(InternalPlayerData.SKIN);
+
+		if (newSkin != null) {
+			return new PlayerSkin(
+				newSkin.texture(),
+				null,
+				newSkin.capeTexture().orElse(null),
+				newSkin.elytraTexture().orElse(null),
+				newSkin.slim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE,
+				false
+			);
+		}
+
+		return null;
 	}
 
 	public ResourceLocation getSkybox(Minecraft mc) {
