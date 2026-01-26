@@ -8,6 +8,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
+import dev.latvian.mods.vidlib.feature.cape.VLCape;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
@@ -189,6 +190,12 @@ public class ClientGameEngine {
 		}
 
 		return null;
+	}
+
+	@Nullable
+	public ResourceLocation getCapeOverride(Player player) {
+		@Nullable VLCape cape = player.getOptional(InternalPlayerData.CAPE);
+		return cape == null ? null : cape.capeTexture();
 	}
 
 	public ResourceLocation getSkybox(Minecraft mc) {

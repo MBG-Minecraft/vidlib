@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.resources.PlayerSkin;
@@ -20,16 +20,15 @@ public record VLCape(ResourceLocation capeTexture) {
 	public static final DataType<VLCape> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, VLCape.class);
 
 	public static PlayerSkin addCapeToSkin(AbstractClientPlayer player, PlayerSkin oldSkin) {
-		VLCape cape = player.getOptional(InternalPlayerData.CAPE);
-
-		if (cape == null) {
+		var capeTexture = ClientGameEngine.INSTANCE.getCapeOverride(player);
+		if (capeTexture == null) {
 			return oldSkin;
 		}
 
 		return new PlayerSkin(
 			oldSkin.texture(),
 			oldSkin.textureUrl(),
-			cape.capeTexture(),
+			capeTexture,
 			oldSkin.elytraTexture(),
 			oldSkin.model(),
 			oldSkin.secure()
