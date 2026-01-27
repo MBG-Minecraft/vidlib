@@ -47,6 +47,7 @@ import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerXpEvent;
 import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
@@ -296,6 +297,13 @@ public class VidLibEventHandler {
 	public static void serverTagsUpdated(TagsUpdatedEvent event) {
 		if (event.getUpdateCause() == TagsUpdatedEvent.UpdateCause.SERVER_DATA_LOAD) {
 			// datapacks loaded?
+		}
+	}
+
+	@SubscribeEvent
+	public static void xpChange(PlayerXpEvent.XpChange event) {
+		if (CommonGameEngine.INSTANCE.disableXP(event.getEntity().level())) {
+			event.setCanceled(true);
 		}
 	}
 }

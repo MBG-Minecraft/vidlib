@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBar;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
@@ -12,13 +13,7 @@ public interface VLLivingEntity extends VLEntity {
 	}
 
 	default void heal() {
-		var entity = vl$self();
-
-		if (entity.getHealth() < entity.getMaxHealth()) {
-			entity.heal(entity.getMaxHealth());
-		}
-
-		entity.extinguishFire();
+		CommonGameEngine.INSTANCE.heal(vl$self());
 	}
 
 	default boolean vl$unpushable() {

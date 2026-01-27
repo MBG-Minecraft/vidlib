@@ -249,4 +249,32 @@ public class CommonGameEngine {
 	public boolean disableJoinMessages() {
 		return false;
 	}
+
+	public void heal(LivingEntity entity) {
+		if (entity.getHealth() < entity.getMaxHealth()) {
+			entity.heal(entity.getMaxHealth());
+		}
+
+		entity.extinguishFire();
+
+		if (entity instanceof ServerPlayer player) {
+			player.getFoodData().eat(20, 20F);
+		}
+	}
+
+	public boolean disableGolems(Level level, BlockPos pos) {
+		return false;
+	}
+
+	public boolean disableXP(Level level) {
+		return false;
+	}
+
+	public boolean disableLeafDecay(BlockState state) {
+		return false;
+	}
+
+	public boolean disablePricklyBerryBushes(Level level, BlockPos pos, BlockState state, Entity entity) {
+		return false;
+	}
 }
