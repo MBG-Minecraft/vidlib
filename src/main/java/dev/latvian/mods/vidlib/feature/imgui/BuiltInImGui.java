@@ -245,6 +245,7 @@ public class BuiltInImGui {
 
 			if (menuOpen && !graphics.isReplay) {
 				if (ImGui.beginMainMenuBar()) {
+					ClientGameEngine.INSTANCE.topInfoBarPre(graphics, infoBar);
 					MAIN_MENU_BAR.buildMenuBar(graphics, true);
 
 					if (infoBar > 0F) {
@@ -259,6 +260,7 @@ public class BuiltInImGui {
 		}
 
 		if (infoBar > 0F && ImGui.beginMainMenuBar()) {
+			ClientGameEngine.INSTANCE.topInfoBarPre(graphics, infoBar);
 			ClientGameEngine.INSTANCE.topInfoBar(graphics, infoBar);
 			ImGui.endMainMenuBar();
 		}

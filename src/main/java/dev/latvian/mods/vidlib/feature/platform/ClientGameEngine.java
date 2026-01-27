@@ -275,10 +275,17 @@ public class ClientGameEngine {
 		return true;
 	}
 
-	public void topInfoBar(ImGraphics graphics, float h) {
-		ImGui.text("MrBeast Gaming");
-		ImGui.separator();
+	public void topInfoBarPre(ImGraphics graphics, float h) {
+		if (graphics.mc.player != null) {
+			ImGui.text(ClientGameEngine.INSTANCE.getPlayerWorldName(graphics.mc.player, graphics.mc.player.getName()).getString());
+		} else {
+			ImGui.text(graphics.mc.getUser().getName());
+		}
 
+		ImGui.separator();
+	}
+
+	public void topInfoBar(ImGraphics graphics, float h) {
 		if (graphics.mc.player != null) {
 			var session = graphics.mc.player.vl$sessionData();
 

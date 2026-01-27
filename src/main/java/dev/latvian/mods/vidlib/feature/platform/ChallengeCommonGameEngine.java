@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.feature.feature.Feature;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.level.BlockGetter;
@@ -105,6 +106,26 @@ public class ChallengeCommonGameEngine extends CommonGameEngine {
 		foodData.setSaturation(20F);
 		foodData.vl$setExhaustionLevel(0F);
 		foodData.vl$setTickTimer(0);
+		return true;
+	}
+
+	@Override
+	public boolean disableGolems(Level level, BlockPos pos) {
+		return true;
+	}
+
+	@Override
+	public boolean disableXP(Level level) {
+		return true;
+	}
+
+	@Override
+	public boolean disableLeafDecay(BlockState state) {
+		return true;
+	}
+
+	@Override
+	public boolean disablePricklyBerryBushes(Level level, BlockPos pos, BlockState state, Entity entity) {
 		return true;
 	}
 }
