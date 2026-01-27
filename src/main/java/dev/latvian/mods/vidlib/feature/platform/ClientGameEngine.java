@@ -79,6 +79,7 @@ import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.ModList;
 import org.jetbrains.annotations.Nullable;
 
@@ -664,7 +665,7 @@ public class ClientGameEngine {
 	}
 
 	@Nullable
-	public Biome.Precipitation overrideGlobalPrecipitation() {
+	public Biome.Precipitation overrideGlobalVisualPrecipitation(ClientLevel level, float partialTick, Vec3 cameraPosition) {
 		var cam = CameraOverride.get(Minecraft.getInstance());
 		return cam == null ? null : cam.getWeatherOverride();
 	}

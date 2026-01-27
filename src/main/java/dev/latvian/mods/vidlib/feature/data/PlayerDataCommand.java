@@ -60,5 +60,7 @@ public interface PlayerDataCommand {
 
 			playerCmd.then(cmd);
 		}
+
+		command.then(playerCmd);
 	});
 }
