@@ -203,10 +203,6 @@ public class ClientGameEngine {
 		return mc.getSkybox();
 	}
 
-	public float getAmbientLight(float fallback) {
-		return fallback;
-	}
-
 	@Nullable
 	public FogParameters getFog() {
 		return FogParameters.NO_FOG;

@@ -277,4 +277,8 @@ public class CommonGameEngine {
 	public boolean disablePricklyBerryBushes(Level level, BlockPos pos, BlockState state, Entity entity) {
 		return false;
 	}
+
+	public float getAmbientLight(float fallback) {
+		return fallback;
+	}
 }
