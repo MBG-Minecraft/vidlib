@@ -201,15 +201,17 @@ public class BuiltInImGui {
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.ShowDropdown(graphics, list));
 	}).remainOpen(true);
 
+	public static final MenuItem WARP_TO_DIMENSIONS = MenuItem.menu(ImIcons.WORLD, "Dimension", (g1, list1) -> {
+		var registry = g1.mc.player.connection.levels();
+
+		for (var dimension : registry) {
+			list1.add(MenuItem.item(dimension.location().toString(), g -> g.mc.runClientCommand("execute in " + dimension.location() + " run tp @s ~ ~ ~")).disabled(g1.isReplay));
+		}
+	});
+
 	public static final MenuItem WARP = MenuItem.menu(ImIcons.LOCATION, "Warp", (graphics, list) -> {
 		if (graphics.inGame && !graphics.isReplay) {
-			list.add(MenuItem.menu(ImIcons.WORLD, "Dimension", (g1, list1) -> {
-				var registry = g1.mc.player.connection.levels();
-
-				for (var dimension : registry) {
-					list1.add(MenuItem.item(dimension.location().toString(), g -> g.mc.runClientCommand("execute in " + dimension.location() + " run tp @s ~ ~ ~")).disabled(g1.isReplay));
-				}
-			}).enabled(graphics.isAdmin));
+			// list.add(WARP_TO_DIMENSIONS.enabled(graphics.isAdmin));
 		}
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.WarpDropdown(graphics, list));
