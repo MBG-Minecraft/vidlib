@@ -153,14 +153,13 @@ public class MiscClientUtils {
 		}
 	}
 
-	public static int drawStackSize(GuiGraphics graphics, Font font, int size, int x, int y, int color, boolean dropShadow) {
-		var str = formatNumber(size);
-		int w = font.width(str);
-		float scale = str.length() >= 4 ? 0.5F : str.length() == 3 ? 0.75F : 1F;
+	public static int drawStackSize(GuiGraphics graphics, Font font, String size, int x, int y, int color, boolean dropShadow) {
+		int w = font.width(size);
+		float scale = size.length() >= 4 ? 0.5F : size.length() == 3 ? 0.75F : 1F;
 		graphics.pose().pushPose();
 		graphics.pose().translate((int) (x + 16F - (w - 1F) * scale), (int) (y + 16F - 7F * scale), 0F);
 		graphics.pose().scale(scale, scale, 1F);
-		int s = graphics.drawString(font, str, 0F, 0F, color, dropShadow);
+		int s = graphics.drawString(font, size, 0F, 0F, color, dropShadow);
 		graphics.pose().popPose();
 		return Mth.ceil(s * scale);
 	}

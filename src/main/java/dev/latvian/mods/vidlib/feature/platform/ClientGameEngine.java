@@ -22,6 +22,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
+import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
@@ -38,6 +39,7 @@ import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
@@ -70,6 +72,7 @@ import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
@@ -671,5 +674,14 @@ public class ClientGameEngine {
 	public Biome.Precipitation overrideGlobalVisualPrecipitation(ClientLevel level, float partialTick, Vec3 cameraPosition) {
 		var cam = CameraOverride.get(Minecraft.getInstance());
 		return cam == null ? null : cam.getWeatherOverride();
+	}
+
+	public int drawItemStackSize(GuiGraphics graphics, ItemStack stack, Font font, String text, int x, int y, int color, boolean dropShadow) {
+		if (stack.getCount() > 1) {
+			var size = MiscClientUtils.formatNumber(stack.getCount());
+			return MiscClientUtils.drawStackSize(graphics, font, size, x, y, color, dropShadow);
+		}
+
+		return -1;
 	}
 }

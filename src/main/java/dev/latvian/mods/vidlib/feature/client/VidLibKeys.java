@@ -33,10 +33,10 @@ public class VidLibKeys {
 	}
 
 	public static void register(RegisterKeyMappingsEvent event) {
-		freezeTickKeyMapping = register(event, "key.vidlib.freeze_tick", KeyModifier.NONE, GLFW.GLFW_KEY_P);
-		clearParticlesKeyMapping = register(event, "key.vidlib.clear_particles", KeyModifier.NONE, GLFW.GLFW_KEY_L);
+		freezeTickKeyMapping = register(event, "key.vidlib.freeze_tick", KeyModifier.NONE, GLFW.GLFW_KEY_ESCAPE);
+		clearParticlesKeyMapping = register(event, "key.vidlib.clear_particles", KeyModifier.NONE, GLFW.GLFW_KEY_ESCAPE);
 		reloadKeyMapping = register(event, "key.vidlib.reload", KeyModifier.NONE, GLFW.GLFW_KEY_R);
-		repeatLastCommandKeyMapping = register(event, "key.vidlib.repeat_last_command", KeyModifier.NONE, GLFW.GLFW_KEY_SEMICOLON);
+		repeatLastCommandKeyMapping = register(event, "key.vidlib.repeat_last_command", KeyModifier.NONE, GLFW.GLFW_KEY_ESCAPE);
 		adminPanelKeyMapping = register(event, "key.vidlib.admin_panel", KeyModifier.NONE, GLFW.GLFW_KEY_MENU, KeyConflictContext.UNIVERSAL);
 		reloadShadersKeyMapping = register(event, "key.vidlib.reload_shaders", KeyModifier.NONE, GLFW.GLFW_KEY_X);
 		playerGlowKeyMapping = register(event, "key.vidlib.player_glow", KeyModifier.NONE, GLFW.GLFW_KEY_GRAVE_ACCENT);
