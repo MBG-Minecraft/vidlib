@@ -2,15 +2,15 @@ package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.vidlib.feature.cape.VLCape;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.session.SessionData;
-import dev.latvian.mods.vidlib.feature.skin.VLSkin;
+import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -76,12 +76,16 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
 		set(InternalPlayerData.CLOTHING, clothing);
 	}
 
-	default void setSkin(@Nullable VLSkin skin) {
-		set(InternalPlayerData.SKIN, skin);
+	default void setSkinOverride(@Nullable SkinTexture skin) {
+		set(InternalPlayerData.SKIN_OVERRIDE, skin);
 	}
 
-	default void setCape(@Nullable VLCape cape) {
-		set(InternalPlayerData.CAPE, cape);
+	default void setCapeOverride(@Nullable ResourceLocation cape) {
+		set(InternalPlayerData.CAPE_OVERRIDE, cape);
+	}
+
+	default void setElytraOverride(@Nullable ResourceLocation cape) {
+		set(InternalPlayerData.ELYTRA_OVERRIDE, cape);
 	}
 
 	default float getFlightSpeedMod() {

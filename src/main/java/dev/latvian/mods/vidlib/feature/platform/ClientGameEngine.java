@@ -8,7 +8,6 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
-import dev.latvian.mods.vidlib.feature.cape.VLCape;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
@@ -28,7 +27,7 @@ import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.skin.PlayerSkinOverrides;
-import dev.latvian.mods.vidlib.feature.skin.VLSkin;
+import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
 import dev.latvian.mods.vidlib.util.StringUtils;
 import imgui.ImGui;
@@ -49,6 +48,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.particle.FireworkParticles;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.FogParameters;
@@ -179,27 +179,37 @@ public class ClientGameEngine {
 	}
 
 	@Nullable
-	public PlayerSkin getSkin(Player player) {
-		@Nullable VLSkin newSkin = player.getOptional(InternalPlayerData.SKIN);
-
-		if (newSkin != null) {
-			return new PlayerSkin(
-				newSkin.texture(),
-				null,
-				newSkin.capeTexture().orElse(null),
-				newSkin.elytraTexture().orElse(null),
-				newSkin.slim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE,
-				false
-			);
-		}
-
-		return null;
+	public SkinTexture overrideSkin(AbstractClientPlayer player) {
+		return player.getOptional(InternalPlayerData.SKIN_OVERRIDE);
 	}
 
 	@Nullable
-	public ResourceLocation getCapeOverride(Player player) {
-		@Nullable VLCape cape = player.getOptional(InternalPlayerData.CAPE);
-		return cape == null ? null : cape.capeTexture();
+	public ResourceLocation overrideCape(Player player) {
+		return player.getOptional(InternalPlayerData.CAPE_OVERRIDE);
+	}
+
+	@Nullable
+	public ResourceLocation overrideElytra(Player player) {
+		return player.getOptional(InternalPlayerData.ELYTRA_OVERRIDE);
+	}
+
+	public PlayerSkin overridePlayerSkin(AbstractClientPlayer player, PlayerSkin original) {
+		var skinOverride = overrideSkin(player);
+		var capeOverride = overrideCape(player);
+		var elytraOverride = overrideElytra(player);
+
+		if (skinOverride == null && capeOverride == null && elytraOverride == null) {
+			return original;
+		}
+
+		return new PlayerSkin(
+			skinOverride == null ? original.texture() : skinOverride.texture(),
+			null,
+			capeOverride == null ? original.capeTexture() : capeOverride,
+			elytraOverride == null ? original.elytraTexture() : elytraOverride,
+			skinOverride == null ? original.model() : skinOverride.slim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE,
+			true
+		);
 	}
 
 	public ResourceLocation getSkybox(Minecraft mc) {
