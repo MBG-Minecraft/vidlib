@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
@@ -130,7 +131,7 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	@Override
 	@Nullable
 	public PacketCapture vl$getPacketCapture(boolean start) {
-		if (vl$packetCapture == null && start) {
+		if (vl$packetCapture == null && start && CommonGameEngine.INSTANCE.disablePacketCapture()) {
 			var directory = VidLibPaths.LOCAL.get().resolve("packet-capture");
 
 			if (Files.notExists(directory)) {

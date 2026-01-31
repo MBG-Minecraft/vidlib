@@ -281,4 +281,8 @@ public class CommonGameEngine {
 	public float getAmbientLight(float fallback) {
 		return fallback;
 	}
+
+	public boolean disablePacketCapture() {
+		return true;
+	}
 }
