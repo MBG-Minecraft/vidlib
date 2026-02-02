@@ -5,16 +5,19 @@ import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBarRenderer;
 import dev.latvian.mods.vidlib.feature.misc.VLFlashbackIntegration;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.numbers.StyledFormat;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.ReadOnlyScoreInfo;
@@ -204,8 +207,8 @@ public interface VidLibHUD {
 
 	static void drawFade(GuiGraphics graphics, DeltaTracker deltaTracker) {
 		var mc = Minecraft.getInstance();
-		int width = mc.getWindow().getGuiScaledWidth();
-		int height = mc.getWindow().getGuiScaledHeight();
+		int width = graphics.guiWidth();
+		int height = graphics.guiHeight();
 
 		if (mc.player != null) {
 			var session = mc.player.vl$sessionData();
@@ -214,5 +217,49 @@ public interface VidLibHUD {
 				session.screenFade.draw(graphics, deltaTracker.getGameTimeDeltaPartialTick(true), width, height);
 			}
 		}
+	}
+
+	static void drawInformationHUD(GuiGraphics graphics, DeltaTracker deltaTracker) {
+		var mc = Minecraft.getInstance();
+
+		if (mc.player == null) {
+			return;
+		}
+
+		var info = ClientGameEngine.INSTANCE.getInformationHUD(mc, mc.player, deltaTracker);
+
+		if (info.isEmpty()) {
+			return;
+		}
+
+		Profiler.get().push("vidlib");
+		Profiler.get().push("information_hud");
+		var font = mc.gui.getFont();
+
+		int maxWidth = 0;
+
+		for (var line : info) {
+			maxWidth = Math.max(maxWidth, font.width(line));
+		}
+
+		int xoff = (graphics.guiWidth() - maxWidth) / 2;
+		int yoff = 8;
+
+		TooltipRenderUtil.renderTooltipBackground(graphics, xoff, yoff, maxWidth, info.size() * 10 - 2, 0, null);
+
+		for (int l = 0; l < info.size(); l++) {
+			var line = info.get(l);
+			boolean center = false;
+
+			if (line.getStyle().isObfuscated()) {
+				line = line.copy().setStyle(line.getStyle().withObfuscated(false));
+				center = true;
+			}
+
+			graphics.drawString(font, line, xoff + (center ? (maxWidth - font.width(line)) / 2 : 0), yoff + l * 10, 0xFFFFFFFF);
+		}
+
+		Profiler.get().pop();
+		Profiler.get().pop();
 	}
 }

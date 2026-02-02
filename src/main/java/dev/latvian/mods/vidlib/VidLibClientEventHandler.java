@@ -194,6 +194,7 @@ public class VidLibClientEventHandler {
 	public static void registerGuiLayers(RegisterGuiLayersEvent event) {
 		event.registerBelowAll(VidLib.id("player_names"), VidLibHUD::drawPlayerNames);
 		event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, VidLib.id("above_boss"), VidLibHUD::drawAboveBossOverlay);
+		event.registerAbove(VanillaGuiLayers.OVERLAY_MESSAGE, VidLib.id("information_hud"), VidLibHUD::drawInformationHUD);
 		event.registerAboveAll(VidLib.id("fade"), VidLibHUD::drawFade);
 		event.registerAboveAll(VidLib.id("player_pins"), Pins::draw);
 		event.registerBelowAll(VidLib.id("waypoints"), ClientWaypoints::draw);

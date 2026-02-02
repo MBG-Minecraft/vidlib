@@ -698,4 +698,8 @@ public class ClientGameEngine {
 
 		return true;
 	}
+
+	public List<Component> getInformationHUD(Minecraft mc, LocalPlayer player, DeltaTracker deltaTracker) {
+		return List.of();
+	}
 }
