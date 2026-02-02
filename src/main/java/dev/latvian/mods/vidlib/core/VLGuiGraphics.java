@@ -19,6 +19,10 @@ public interface VLGuiGraphics {
 	ResourceLocation HEART_BACKGROUND = ID.mc("hud/heart/container");
 	ResourceLocation FULL_HEART = ID.mc("hud/heart/full");
 
+	default GuiGraphics vl$self() {
+		return (GuiGraphics) this;
+	}
+
 	default Minecraft vl$mc() {
 		return Minecraft.getInstance();
 	}
@@ -28,7 +32,7 @@ public interface VLGuiGraphics {
 			return;
 		}
 
-		var graphics = (GuiGraphics) this;
+		var graphics = vl$self();
 		graphics.fill(x, y, x + w, y + h, 0xFFFFFF | (alpha << 24));
 		graphics.fill(x + 1, y + 1, x + w - 1, y + h - 1, (alpha << 24));
 		var barColor = Color.hsb(KMath.lerp(hp, 0F, 0.35F), 0.71F, 1F, alpha);
@@ -36,7 +40,7 @@ public interface VLGuiGraphics {
 	}
 
 	default void healthBarWithText(Font font, int x, int y, int w, int h, List<FormattedCharSequence> lines, float health, int alpha) {
-		var graphics = (GuiGraphics) this;
+		var graphics = vl$self();
 		var nameY = y;
 
 		if (health >= 0F) {
@@ -61,7 +65,7 @@ public interface VLGuiGraphics {
 	}
 
 	default void healthBarWithSideLabel(Font font, LivingEntity entity, int x, int y, int w, int h, boolean leftSide, boolean renderName, boolean renderHealth) {
-		var graphics = (GuiGraphics) this;
+		var graphics = vl$self();
 		var health = entity.getHealth();
 		var maxHealth = entity.getMaxHealth();
 
@@ -93,7 +97,7 @@ public interface VLGuiGraphics {
 	}
 
 	default void heart(int x, int y, float value) {
-		var graphics = (GuiGraphics) this;
+		var graphics = vl$self();
 		graphics.blitSprite(VidLibRenderTypes.GUI, HEART_BACKGROUND, 9, 9, 0, 0, x, y, 9, 9);
 		graphics.blitSprite(VidLibRenderTypes.GUI, FULL_HEART, 9, 9, 0, 0, x, y, Mth.ceil(9F * value), 9);
 	}

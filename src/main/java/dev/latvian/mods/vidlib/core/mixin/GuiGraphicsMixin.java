@@ -1,18 +1,18 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.core.VLGuiGraphics;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GuiGraphics.class)
 public class GuiGraphicsMixin implements VLGuiGraphics {
@@ -25,16 +25,10 @@ public class GuiGraphicsMixin implements VLGuiGraphics {
 		return minecraft;
 	}
 
-	@WrapOperation(method = "renderItemCount(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;drawString(Lnet/minecraft/client/gui/Font;Ljava/lang/String;IIIZ)I"))
-	private int vl$drawSize(GuiGraphics graphics, Font font, String text, int x, int y, int color, boolean dropShadow, Operation<Integer> original, @Local(argsOnly = true) String pText, @Local(argsOnly = true) ItemStack stack, @Local(argsOnly = true, ordinal = 0) int pX, @Local(argsOnly = true, ordinal = 1) int pY) {
-		if (pText == null) {
-			var override = ClientGameEngine.INSTANCE.drawItemStackSize(graphics, stack, font, text, pX, pY, color, dropShadow);
-
-			if (override != -1) {
-				return override;
-			}
+	@Inject(method = "renderItemCount", at = @At("HEAD"), cancellable = true)
+	private void vl$drawSize(Font font, ItemStack stack, int x, int y, @Nullable String text, CallbackInfo ci) {
+		if (ClientGameEngine.INSTANCE.drawItemStackSize(vl$self(), stack, font, text, x, y)) {
+			ci.cancel();
 		}
-
-		return original.call(graphics, font, text, x, y, color, dropShadow);
 	}
 }

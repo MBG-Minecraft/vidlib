@@ -686,12 +686,16 @@ public class ClientGameEngine {
 		return cam == null ? null : cam.getWeatherOverride();
 	}
 
-	public int drawItemStackSize(GuiGraphics graphics, ItemStack stack, Font font, String text, int x, int y, int color, boolean dropShadow) {
-		if (stack.getCount() > 1) {
-			var size = MiscClientUtils.formatNumber(stack.getCount());
-			return MiscClientUtils.drawStackSize(graphics, font, size, x, y, color, dropShadow);
+	public boolean drawItemStackSize(GuiGraphics graphics, ItemStack stack, Font font, @Nullable String text, int x, int y) {
+		if (text != null && text.isEmpty()) {
+			return true;
 		}
 
-		return -1;
+		if (stack.getCount() != 1 || text != null) {
+			var s = text != null ? text : MiscClientUtils.formatNumber(stack.getCount());
+			MiscClientUtils.drawStackSize(graphics, font, s, x, y, 0xFFFFFFFF, true);
+		}
+
+		return true;
 	}
 }
