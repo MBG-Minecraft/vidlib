@@ -543,6 +543,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 		var buf = Unpooled.buffer();
 		toVStruct(buf);
 
+		Files.createDirectories(path.getParent());
 		try (var out = new BufferedOutputStream(new GZIPOutputStream(Files.newOutputStream(path)))) {
 			buf.readBytes(out, buf.readableBytes());
 		}
