@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.vidlib.core.VLCamera;
-import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -56,7 +56,7 @@ public abstract class CameraMixin implements VLCamera {
 	@Inject(method = "setup", at = @At("HEAD"), cancellable = true)
 	private void vl$setupHead(BlockGetter area, Entity entity, boolean detached, boolean inverseView, float delta, CallbackInfo ci) {
 		var mc = Minecraft.getInstance();
-		var override = CameraOverride.get(mc);
+		var override = ClientGameEngine.INSTANCE.overrideCamera(mc);
 
 		if (override != null && override.overrideCamera()) {
 			this.initialized = true;
@@ -92,7 +92,7 @@ public abstract class CameraMixin implements VLCamera {
 	private boolean vl$isDetached(boolean original) {
 		if (!original) {
 			var mc = Minecraft.getInstance();
-			var override = CameraOverride.get(mc);
+			var override = ClientGameEngine.INSTANCE.overrideCamera(mc);
 			return override != null && override.renderPlayer() && !mc.player.getBoundingBox().contains(getPosition());
 		}
 

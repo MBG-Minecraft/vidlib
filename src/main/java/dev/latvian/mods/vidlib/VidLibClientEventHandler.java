@@ -33,7 +33,6 @@ import dev.latvian.mods.vidlib.feature.environment.FluidPlaneRenderer;
 import dev.latvian.mods.vidlib.feature.gradient.ClientGradientLoader;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
-import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.feature.misc.ClientModInfo;
 import dev.latvian.mods.vidlib.feature.misc.ClientModListPayload;
 import dev.latvian.mods.vidlib.feature.misc.DebugTextEvent;
@@ -524,7 +523,7 @@ public class VidLibClientEventHandler {
 	@SubscribeEvent
 	public static void adjustFOV(ViewportEvent.ComputeFov event) {
 		var mc = Minecraft.getInstance();
-		var override = CameraOverride.get(mc);
+		var override = ClientGameEngine.INSTANCE.overrideCamera(mc);
 
 		if (override != null) {
 			event.setFOV((float) (event.getFOV() * override.getFOVModifier(event.getPartialTick())));

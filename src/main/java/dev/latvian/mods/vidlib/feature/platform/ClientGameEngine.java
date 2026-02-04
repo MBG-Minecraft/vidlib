@@ -682,7 +682,7 @@ public class ClientGameEngine {
 
 	@Nullable
 	public Biome.Precipitation overrideGlobalVisualPrecipitation(ClientLevel level, float partialTick, Vec3 cameraPosition) {
-		var cam = CameraOverride.get(Minecraft.getInstance());
+		var cam = overrideCamera(Minecraft.getInstance());
 		return cam == null ? null : cam.getWeatherOverride();
 	}
 
@@ -701,5 +701,16 @@ public class ClientGameEngine {
 
 	public List<Component> getInformationHUD(Minecraft mc, LocalPlayer player, DeltaTracker deltaTracker) {
 		return List.of();
+	}
+
+	@Nullable
+	public CameraOverride overrideCamera(Minecraft mc) {
+		if (mc.screen != null && mc.screen.overrideCamera()) {
+			return mc.screen;
+		} else if (mc.player != null && mc.player.vl$sessionData().cameraOverride != null) {
+			return mc.player.vl$sessionData().cameraOverride;
+		} else {
+			return null;
+		}
 	}
 }

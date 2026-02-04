@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.core.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.core.VLGameRenderer;
-import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.Camera;
@@ -83,7 +82,7 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 
 	@Inject(method = "render", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;setOrtho(FFFFFF)Lorg/joml/Matrix4f;"))
 	private void vl$render(DeltaTracker deltaTracker, boolean renderLevel, CallbackInfo ci) {
-		if (minecraft.isGameLoadFinished() && renderLevel && this.minecraft.level != null && renderHand && CameraOverride.get(minecraft) == null) {
+		if (minecraft.isGameLoadFinished() && renderLevel && this.minecraft.level != null && renderHand && ClientGameEngine.INSTANCE.overrideCamera(minecraft) == null) {
 			var profilerfiller = Profiler.get();
 			profilerfiller.push("hand");
 			renderItemInHand(mainCamera, minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(true), MiscClientUtils.FRUSTUM_MATRIX);
