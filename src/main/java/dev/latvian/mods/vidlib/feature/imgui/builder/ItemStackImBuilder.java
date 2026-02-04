@@ -26,7 +26,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.commands.arguments.item.ItemParser;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -227,11 +226,11 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack> {
 					}
 
 					renderedItems.sort(Comparator.comparingInt(RenderedItem::order));
-					var minecraft = Minecraft.getInstance();
-					var player = minecraft.player;
+					var player = graphics.mc.player;
+
 					if (player != null) {
-						var item = minecraft.player.getMainHandItem();
-						var cachedItem = CachedItemData.create(minecraft, item, new ItemKey(item.getItemHolder(), item.getComponentsPatch()), new CachedItemData.Context(minecraft));
+						var item = player.getMainHandItem();
+						var cachedItem = CachedItemData.create(graphics.mc, item, new ItemKey(item.getItemHolder(), item.getComponentsPatch()), new CachedItemData.Context(graphics.mc));
 						renderedItems.addFirst(new RenderedItem(cachedItem, -9, false, true, true));
 					}
 				}

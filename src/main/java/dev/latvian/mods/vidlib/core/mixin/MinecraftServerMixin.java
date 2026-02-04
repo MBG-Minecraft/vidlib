@@ -131,7 +131,7 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	@Override
 	@Nullable
 	public PacketCapture vl$getPacketCapture(boolean start) {
-		if (vl$packetCapture == null && start && CommonGameEngine.INSTANCE.disablePacketCapture()) {
+		if (vl$packetCapture == null && start && !CommonGameEngine.INSTANCE.disablePacketCapture()) {
 			var directory = VidLibPaths.LOCAL.get().resolve("packet-capture");
 
 			if (Files.notExists(directory)) {

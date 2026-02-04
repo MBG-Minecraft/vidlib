@@ -8,6 +8,7 @@ import dev.latvian.mods.vidlib.VidLibClientEventHandler;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
 import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
+import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
@@ -115,7 +116,7 @@ public class VLFlashbackIntegration {
 								}
 							}
 						}
-						case SyncPlayerTagsPayload p -> dataMapOverrideBuilder.set(now, p.player(), DataMapOverrides.PLAYER_TAGS, Set.copyOf(p.tags()));
+						case SyncPlayerTagsPayload p -> dataMapOverrideBuilder.set(now, p.player(), InternalPlayerData.PLAYER_TAGS, Set.copyOf(p.tags()));
 						case AddPropPayload p -> {
 							var map = new IdentityHashMap<PropData<?, ?>, Object>();
 							try {

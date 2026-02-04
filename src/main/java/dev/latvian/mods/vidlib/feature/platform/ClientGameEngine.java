@@ -121,7 +121,7 @@ public class ClientGameEngine {
 
 	public boolean canSeePlayerInList(LocalPlayer self, PlayerInfo playerInfo) {
 		var sessionData = self.vl$sessionData().getClientSessionData(playerInfo.getProfile().getId());
-		return !isClientStaff(sessionData.getTags(self.level().getGameTime()), playerInfo.getGameMode());
+		return !isClientStaff(sessionData.getTags(), playerInfo.getGameMode());
 	}
 
 	public Component getPlayerListName(Minecraft mc, PlayerInfo playerInfo, Component fallback) {

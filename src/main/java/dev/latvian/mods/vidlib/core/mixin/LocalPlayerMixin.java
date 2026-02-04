@@ -54,7 +54,7 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements V
 
 	@Override
 	public Set<String> getTags() {
-		return vl$sessionData().getTags(vl$level().getGameTime());
+		return vl$sessionData().getTags();
 	}
 
 	@Inject(method = "openItemGui", at = @At("HEAD"), cancellable = true)

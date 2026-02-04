@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib;
 
 import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.vidlib.feature.block.BlockStatePalette;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
@@ -31,9 +32,19 @@ import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import dev.latvian.mods.vidlib.util.ScreenCorner;
 import dev.latvian.mods.vidlib.util.Timestamp;
+import net.minecraft.world.item.ItemStack;
 
-public class VidLibDataTypes {
-	public static void register() {
+import java.util.List;
+import java.util.Set;
+
+public interface VidLibDataTypes {
+	DataType<Set<String>> STRING_SET = DataTypes.STRING.setOf();
+	DataType<List<ItemStack>> ITEM_STACK_LIST = DataTypes.ITEM_STACK.listOf();
+
+	static void register() {
+		DataType.register(VidLib.id("string_set"), STRING_SET);
+		DataType.register(VidLib.id("item_stack_list"), ITEM_STACK_LIST);
+
 		DataType.register(VidLib.id("icon"), Icon.DATA_TYPE);
 		DataType.register(VidLib.id("icon_holder"), IconHolder.DATA_TYPE);
 		DataType.register(VidLib.id("clothing_parts"), ClothingParts.DATA_TYPE);

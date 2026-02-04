@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.data;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.vidlib.VidLibDataTypes;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingImBuilder;
@@ -14,7 +15,10 @@ import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.Set;
+
 public interface InternalPlayerData {
+	DataKey<Set<String>> PLAYER_TAGS = DataKey.PLAYER.createDefault("player_tags", VidLibDataTypes.STRING_SET, Set.of(), null);
 	DataKey<Boolean> SUSPENDED = DataKey.PLAYER.createDefault("suspended", DataTypes.BOOL, false, BooleanImBuilder.TYPE);
 	DataKey<Component> NICKNAME = DataKey.PLAYER.createDefault("nickname", DataTypes.TEXT_COMPONENT, Component.empty(), TextComponentImBuilder.TYPE);
 	DataKey<IconHolder> PLUMBOB = DataKey.PLAYER.createDefault("plumbob", IconHolder.DATA_TYPE, IconHolder.EMPTY, null);

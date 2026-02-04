@@ -11,6 +11,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import java.util.List;
 import java.util.UUID;
 
+@Deprecated
 public record SyncPlayerTagsPayload(UUID player, List<String> tags) implements SimplePacketPayload {
 	@AutoPacket
 	public static final VidLibPacketType<SyncPlayerTagsPayload> TYPE = VidLibPacketType.internal("sync_player_tags", CompositeStreamCodec.of(
@@ -26,6 +27,5 @@ public record SyncPlayerTagsPayload(UUID player, List<String> tags) implements S
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.player().vl$sessionData().updatePlayerTags(ctx.remoteGameTime(), ctx.player(), player, tags);
 	}
 }

@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.session;
 
 import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
+import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.input.PlayerInputChanged;
@@ -18,13 +19,14 @@ import java.util.UUID;
 
 public class ServerSessionData extends SessionData {
 	public final MinecraftServer server;
-	private Set<String> currentTags = Set.of();
+	private Set<String> currentTags;
 	public FeatureSet clientFeatureSet;
 	public Map<String, ClientModInfo> clientMods;
 
 	public ServerSessionData(MinecraftServer server, UUID uuid) {
 		super(uuid);
 		this.server = server;
+		this.currentTags = Set.of();
 		this.clientFeatureSet = FeatureSet.EMPTY;
 		this.clientMods = Map.of();
 	}
@@ -36,7 +38,12 @@ public class ServerSessionData extends SessionData {
 	@Override
 	public void updateOverrides(Player player) {
 		super.updateOverrides(player);
-		currentTags = player.getTags();
+		var newTags = player.getTags();
+
+		if (!currentTags.equals(newTags)) {
+			currentTags = Set.copyOf(newTags);
+			player.set(InternalPlayerData.PLAYER_TAGS, currentTags);
+		}
 	}
 
 	public void vl$postTick(VLS2CPacketConsumer packetsToEveryone, ServerPlayer player) {
@@ -58,7 +65,7 @@ public class ServerSessionData extends SessionData {
 	}
 
 	@Override
-	public Set<String> getTags(long gameTime) {
+	public Set<String> getTags() {
 		return currentTags;
 	}
 

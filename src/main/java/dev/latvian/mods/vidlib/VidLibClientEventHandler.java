@@ -25,6 +25,7 @@ import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
 import dev.latvian.mods.vidlib.feature.clothing.ClientClothingLoader;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingLayer;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingModel;
+import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
@@ -115,6 +116,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
 public class VidLibClientEventHandler {
@@ -140,7 +142,16 @@ public class VidLibClientEventHandler {
 			VLFlashbackIntegration.init();
 		}
 
-		InternalServerData.ANCHOR.addUpdateListener((player, anchor) -> Anchor.client = anchor);
+		InternalServerData.ANCHOR.addUpdateListener(VidLibClientEventHandler::updateAnchor);
+		InternalPlayerData.PLAYER_TAGS.addUpdateListener(VidLibClientEventHandler::updatePlayerTags);
+	}
+
+	private static void updateAnchor(Player player, Anchor anchor) {
+		Anchor.client = anchor;
+	}
+
+	private static void updatePlayerTags(Player player, Set<String> tags) {
+		player.vl$sessionData().refreshListedPlayers();
 	}
 
 	@SubscribeEvent

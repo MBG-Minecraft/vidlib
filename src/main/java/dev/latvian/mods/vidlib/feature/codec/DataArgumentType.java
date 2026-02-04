@@ -50,7 +50,7 @@ public record DataArgumentType<T>(DynamicOps<Tag> ops, TagParser<Tag> parser, Co
 	public static class Info implements ArgumentTypeInfo<DataArgumentType<?>, CodecTemplate> {
 		@Override
 		public void serializeToNetwork(CodecTemplate template, FriendlyByteBuf buf) {
-			buf.writeResourceLocation(template.commandDataType.registeredDataType.get().id());
+			buf.writeResourceLocation(template.commandDataType.getRegisteredDataType().id());
 		}
 
 		@Override
@@ -60,7 +60,7 @@ public record DataArgumentType<T>(DynamicOps<Tag> ops, TagParser<Tag> parser, Co
 
 		@Override
 		public void serializeToJson(CodecTemplate template, JsonObject json) {
-			json.addProperty("codec", template.commandDataType.registeredDataType.get().id().toString());
+			json.addProperty("codec", template.commandDataType.getRegisteredDataType().id().toString());
 		}
 
 		@Override

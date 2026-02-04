@@ -108,9 +108,6 @@ public class SessionData {
 	public void updatePlayerData(long gameTime, Player self, UUID player, List<DataMapValue> update) {
 	}
 
-	public void updatePlayerTags(long gameTime, Player self, UUID player, List<String> tags) {
-	}
-
 	public void removeSessionData(UUID id) {
 	}
 
@@ -174,7 +171,7 @@ public class SessionData {
 		dataMap.syncAll(packets, player, SyncPlayerDataPayload::new);
 
 		for (var s : environment.vl$getAllSessionData()) {
-			packets.s2c(new SyncPlayerTagsPayload(s.uuid, List.copyOf(s.getTags(time))));
+			packets.s2c(new SyncPlayerTagsPayload(s.uuid, List.copyOf(s.getTags())));
 
 			if (!s.uuid.equals(player.getUUID())) {
 				packets.s2c(new SyncPlayerInputToClient(s.uuid, s.input));
@@ -195,7 +192,7 @@ public class SessionData {
 		}
 	}
 
-	public Set<String> getTags(long gameTime) {
+	public Set<String> getTags() {
 		return Set.of();
 	}
 

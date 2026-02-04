@@ -4,8 +4,6 @@ import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
-import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
@@ -18,7 +16,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
@@ -26,29 +23,26 @@ import java.util.function.BiFunction;
 public class DataMap {
 	public final UUID owner;
 	private final DataKeyStorage storage;
-	private Map<DataKey<?>, TrackedDataMapValue> map;
+	private final TrackedDataMapValue[] map;
 	public DataMapOverrides.DataMap overrides;
-	public Map<DataKey<?>, Optional<Object>> superOverrides;
+	private Optional<Object>[] superOverrides;
 
 	public DataMap(UUID owner, DataKeyStorage storage) {
 		this.owner = owner;
 		this.storage = storage;
+		this.map = new TrackedDataMapValue[storage.all.size()];
+		this.overrides = null;
+		this.superOverrides = null;
+
+		for (var type : storage.all.values()) {
+			var value = new TrackedDataMapValue(type);
+			value.data = type.defaultValue();
+			this.map[type.index()] = value;
+		}
 	}
 
 	TrackedDataMapValue init(DataKey<?> type) {
-		if (map == null) {
-			map = new Reference2ObjectOpenHashMap<>();
-		}
-
-		var value = map.get(type);
-
-		if (value == null) {
-			value = new TrackedDataMapValue(type);
-			value.data = type.defaultValue();
-			map.put(type, value);
-		}
-
-		return value;
+		return map[type.index()];
 	}
 
 	@Nullable
@@ -60,7 +54,7 @@ public class DataMap {
 	@Nullable
 	public <T> T get(DataKey<T> type, long gameTime) {
 		if (superOverrides != null) {
-			var v = superOverrides.get(type);
+			var v = superOverrides[type.index()];
 
 			if (v != null) {
 				return Cast.to(v.orElse(null));
@@ -86,24 +80,28 @@ public class DataMap {
 
 	public void setSuperOverride(DataKey<?> type, @Nullable Object value) {
 		if (superOverrides == null) {
-			superOverrides = new Reference2ObjectArrayMap<>();
+			superOverrides = new Optional[map.length];
 		}
 
-		superOverrides.put(type, Optional.ofNullable(value));
+		superOverrides[type.index()] = Optional.ofNullable(value);
 	}
 
 	public void removeSuperOverride(DataKey<?> type) {
 		if (superOverrides != null) {
-			superOverrides.remove(type);
+			superOverrides[type.index()] = null;
 
-			if (superOverrides.isEmpty()) {
-				superOverrides = null;
+			for (var value : superOverrides) {
+				if (value != null) {
+					return;
+				}
 			}
+
+			superOverrides = null;
 		}
 	}
 
 	public boolean hasSuperOverride(DataKey<?> type) {
-		return superOverrides != null && superOverrides.containsKey(type);
+		return superOverrides != null && superOverrides[type.index()] != null;
 	}
 
 	public <T> void reset(DataKey<T> type) {
@@ -111,7 +109,9 @@ public class DataMap {
 	}
 
 	public void load(MinecraftServer server, Path path) {
-		map = null;
+		for (var v : map) {
+			v.data = v.key.defaultValue();
+		}
 
 		if (Files.exists(path)) {
 			try (var in = Files.newInputStream(path)) {
@@ -122,10 +122,10 @@ public class DataMap {
 					var tag = data.get(type.id());
 
 					if (tag != null) {
-						var playerData = type.type().codec().parse(ops, tag).getOrThrow();
+						var dataValue = type.type().codec().parse(ops, tag).getOrThrow();
 
-						if (playerData != null) {
-							init(type).data = playerData;
+						if (dataValue != null) {
+							init(type).data = dataValue;
 						}
 					}
 				}
@@ -138,12 +138,10 @@ public class DataMap {
 	public void save(MinecraftServer server, Path path) {
 		boolean needsSave = false;
 
-		if (map != null) {
-			for (var v : map.values()) {
-				if (v.save != v.changeCount && v.key.type() != null && v.key.save()) {
-					needsSave = true;
-					break;
-				}
+		for (var v : map) {
+			if (v.save != v.changeCount && v.key.type() != null && v.key.save()) {
+				needsSave = true;
+				break;
 			}
 		}
 
@@ -159,7 +157,7 @@ public class DataMap {
 			var data = new CompoundTag();
 			var ops = server.registryAccess().createSerializationContext(NbtOps.INSTANCE);
 
-			for (var v : map.values()) {
+			for (var v : map) {
 				if (v.key.type() != null && v.key.save() && v.data != null && !v.data.equals(v.key.defaultValue())) {
 					data.put(v.key.id(), v.key.type().codec().encodeStart(ops, Cast.to(v.data)).getOrThrow());
 				}
@@ -169,7 +167,7 @@ public class DataMap {
 				NbtIo.writeCompressed(data, out);
 			}
 
-			for (var v : map.values()) {
+			for (var v : map) {
 				v.save = v.changeCount;
 			}
 		} catch (Exception ex) {
@@ -188,11 +186,9 @@ public class DataMap {
 	public void syncAll(VLS2CPacketConsumer target, @Nullable Player selfPlayer, BiFunction<UUID, List<DataMapValue>, SimplePacketPayload> factory) {
 		var list = new ArrayList<DataMapValue>();
 
-		if (map != null) {
-			for (var v : map.values()) {
-				if (v.key.type() != null && v.key.sync()) {
-					list.add(new DataMapValue(v.key, v.data));
-				}
+		for (var v : map) {
+			if (v.key.type() != null && v.key.sync()) {
+				list.add(new DataMapValue(v.key, v.data));
 			}
 		}
 
@@ -202,13 +198,9 @@ public class DataMap {
 	}
 
 	public void sync(VLS2CPacketConsumer packetsToEveryone, @Nullable Player selfPlayer, BiFunction<UUID, List<DataMapValue>, SimplePacketPayload> factory) {
-		if (map == null) {
-			return;
-		}
-
 		List<DataMapValue> syncAll = null;
 
-		for (var v : map.values()) {
+		for (var v : map) {
 			if (v.sync != v.changeCount && v.key.type() != null && v.key.sync()) {
 				v.sync = v.changeCount;
 

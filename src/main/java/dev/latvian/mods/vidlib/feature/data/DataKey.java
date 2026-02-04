@@ -12,6 +12,7 @@ import java.util.function.BiConsumer;
 
 public record DataKey<T>(
 	DataKeyStorage storage,
+	int index,
 	String id,
 	T defaultValue,
 	DataType<T> type,
@@ -73,9 +74,10 @@ public record DataKey<T>(
 			return this;
 		}
 
-		public DataKey<T> buildDummy() {
-			return new DataKey<>(
+		public DataKey<T> build() {
+			var dataType = new DataKey<>(
 				storage,
+				storage.all.size(),
 				id,
 				defaultValue,
 				type,
@@ -87,21 +89,15 @@ public record DataKey<T>(
 				skipLogging,
 				imBuilder
 			);
-		}
 
-		public DataKey<T> build() {
-			var dataType = buildDummy();
+			storage.all.put(id, dataType);
 
-			if (type != null) {
-				storage.all.put(id, dataType);
+			if (save) {
+				storage.saved.put(id, dataType);
+			}
 
-				if (save) {
-					storage.saved.put(id, dataType);
-				}
-
-				if (sync) {
-					storage.synced.put(id, dataType);
-				}
+			if (sync) {
+				storage.synced.put(id, dataType);
 			}
 
 			return dataType;

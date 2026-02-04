@@ -171,7 +171,6 @@ public class LocalClientSessionData extends ClientSessionData {
 	@Override
 	public void updateOverrides(Player player) {
 		super.updateOverrides(player);
-		var now = player.level().getGameTime();
 		var skyboxId = ClientGameEngine.INSTANCE.getSkybox(mc);
 
 		if (skyboxId == null) {
@@ -348,14 +347,6 @@ public class LocalClientSessionData extends ClientSessionData {
 		} else {
 			getRemoteSessionData(player).dataMap.update(self.level().getPlayerByUUID(player), update);
 		}
-	}
-
-	@Override
-	public void updatePlayerTags(long gameTime, Player self, UUID player, List<String> update) {
-		var t = getClientSessionData(player).tags;
-		t.clear();
-		t.addAll(update);
-		refreshListedPlayers();
 	}
 
 	@Override
