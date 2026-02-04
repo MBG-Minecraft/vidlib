@@ -240,7 +240,6 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack> {
 
 				int count = 0;
 
-
 				for (var item : renderedItems) {
 					if (count % 5 != 0) {
 						ImGui.sameLine();
