@@ -348,4 +348,9 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack> {
 	public ItemStack build() {
 		return result == null || result == CachedItemData.AIR ? ItemStack.EMPTY : result.stack().copyWithCount(count.get());
 	}
+
+	@Override
+	public boolean isSmall() {
+		return true;
+	}
 }

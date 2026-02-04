@@ -6,19 +6,21 @@ import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-public class ListImBuilder<T> implements ImBuilder<List<T>> {
+public class SetImBuilder<T> implements ImBuilder<Set<T>> {
 	public final ImBuilderType<T> type;
 	public final List<ImBuilder<T>> items;
 
-	public ListImBuilder(ImBuilderType<T> elementType) {
+	public SetImBuilder(ImBuilderType<T> elementType) {
 		this.type = elementType;
 		this.items = new ArrayList<>();
 	}
 
 	@Override
-	public void set(List<T> value) {
+	public void set(Set<T> value) {
 		items.clear();
 
 		if (value != null && !value.isEmpty()) {
@@ -81,13 +83,13 @@ public class ListImBuilder<T> implements ImBuilder<List<T>> {
 	}
 
 	@Override
-	public List<T> build() {
-		var list = new ArrayList<T>(items.size());
+	public Set<T> build() {
+		var set = new HashSet<T>(items.size());
 
 		for (var builder : items) {
-			list.add(builder.build());
+			set.add(builder.build());
 		}
 
-		return list;
+		return set;
 	}
 }
