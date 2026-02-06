@@ -84,7 +84,8 @@ public class NPCProp extends BaseGeoProp {
 		PropData.create(NPCProp.class, "feet_item", DataTypes.ITEM_STACK, p -> p.feetItem, (p, v) -> p.feetItem = v, ItemStackImBuilder.FEET_EQUIPMENT_TYPE),
 		PropData.create(NPCProp.class, "pose", DataType.of(POSES), p -> p.pose, (p, v) -> p.pose = v, () -> new EnumImBuilder<>(VALID_POSES)),
 		PropData.createBoolean(NPCProp.class, "breathing", p -> p.breathing, (p, v) -> p.breathing = v),
-		PropData.createFloat(NPCProp.class, "running_distance", p -> p.runningDistance, (p, v) -> p.runningDistance = v, 0F, 200F)
+		PropData.createFloat(NPCProp.class, "running_distance", p -> p.runningDistance, (p, v) -> p.runningDistance = v, 0F, 200F),
+		PropData.createFloat(NPCProp.class, "render_distance", p -> p.renderDistance, (p, v) -> p.renderDistance = v, 0F, 1024F)
 	);
 
 	public Component name;
@@ -110,6 +111,7 @@ public class NPCProp extends BaseGeoProp {
 	public Pose pose;
 	public boolean breathing;
 	public float runningDistance;
+	public float renderDistance = 256F;
 	public NPCInstance[] instances;
 
 	public NPCProp(PropContext<?> ctx) {
@@ -143,7 +145,8 @@ public class NPCProp extends BaseGeoProp {
 
 	@Override
 	public double getMaxRenderDistance() {
-		return Math.max(spreadRadius, 256D * height);
+		double distance = renderDistance;
+		return Math.max(spreadRadius, distance * height);
 	}
 
 	@Override
