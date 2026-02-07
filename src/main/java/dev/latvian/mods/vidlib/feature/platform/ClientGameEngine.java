@@ -188,6 +188,10 @@ public class ClientGameEngine {
 		return player.getOptional(InternalPlayerData.CAPE_OVERRIDE);
 	}
 
+	public boolean disableCape(Player player) {
+		return false;
+	}
+
 	@Nullable
 	public ResourceLocation overrideElytra(Player player) {
 		return player.getOptional(InternalPlayerData.ELYTRA_OVERRIDE);
@@ -197,15 +201,18 @@ public class ClientGameEngine {
 		var skinOverride = overrideSkin(player);
 		var capeOverride = overrideCape(player);
 		var elytraOverride = overrideElytra(player);
+		boolean disableCape = disableCape(player);
 
 		if (skinOverride == null && capeOverride == null && elytraOverride == null) {
-			return original;
+			if (!disableCape || original.capeTexture() == null) {
+				return original;
+			}
 		}
 
 		return new PlayerSkin(
 			skinOverride == null ? original.texture() : skinOverride.texture(),
 			null,
-			capeOverride == null ? original.capeTexture() : capeOverride,
+			disableCape ? null : capeOverride == null ? original.capeTexture() : capeOverride,
 			elytraOverride == null ? original.elytraTexture() : elytraOverride,
 			skinOverride == null ? original.model() : skinOverride.slim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE,
 			true
