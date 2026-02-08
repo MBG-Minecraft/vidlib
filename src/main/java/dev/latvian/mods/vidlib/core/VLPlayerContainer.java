@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.core;
 
 import com.mojang.datafixers.util.Pair;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.MessageConsumer;
 import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.bulk.RedrawChunkSectionsPayload;
@@ -14,7 +15,6 @@ import dev.latvian.mods.vidlib.feature.cutscene.PlayCutscenePayload;
 import dev.latvian.mods.vidlib.feature.cutscene.StopCutscenePayload;
 import dev.latvian.mods.vidlib.feature.hud.ToastDisplayPayload;
 import dev.latvian.mods.vidlib.feature.misc.CloseScreenPayload;
-import dev.latvian.mods.vidlib.feature.misc.EventMarkerData;
 import dev.latvian.mods.vidlib.feature.misc.EventMarkerPayload;
 import dev.latvian.mods.vidlib.feature.misc.InfoBarOverridePayload;
 import dev.latvian.mods.vidlib.feature.misc.SetPostEffectPayload;
@@ -50,19 +50,24 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.LongTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsumer, MessageConsumer {
 	default List<? extends Player> vl$getS2CPlayers() {
@@ -331,12 +336,44 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 		}
 	}
 
-	default void marker(EventMarkerData data) {
+	default void marker(EventMarkerPayload payload) {
 		if (isClient()) {
-			getEnvironment().marker(data);
+			getEnvironment().marker(payload);
 		} else {
-			s2c(new EventMarkerPayload(data));
+			s2c(payload);
 		}
+	}
+
+	default void marker(String event, @Nullable Tag tag) {
+		marker(new EventMarkerPayload(event, Optional.ofNullable(tag)));
+	}
+
+	default void marker(String event, String name, Entity entity) {
+		var tag = new CompoundTag();
+		tag.putString("name", name);
+		tag.putInt("id", entity.getId());
+		tag.putLongArray("uuid", new long[]{entity.getUUID().getMostSignificantBits(), entity.getUUID().getLeastSignificantBits()});
+
+		if (entity.level().dimension() != Level.OVERWORLD) {
+			tag.putString("dim", ID.idToString(entity.level().dimension().location()));
+		}
+
+		tag.putDouble("x", entity.getX());
+		tag.putDouble("y", entity.getY());
+		tag.putDouble("z", entity.getZ());
+		marker(event, tag);
+	}
+
+	default void marker(String event, Entity entity) {
+		marker(event, entity.getName().getString(), entity);
+	}
+
+	default void marker(String event) {
+		marker(event, (Tag) null);
+	}
+
+	default void marker(String event, BlockPos at) {
+		marker(event, LongTag.valueOf(at.asLong()));
 	}
 
 	default void setInfoBarText(int bar, Component text) {

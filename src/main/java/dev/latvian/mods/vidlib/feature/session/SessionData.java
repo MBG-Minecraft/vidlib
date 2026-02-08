@@ -17,7 +17,6 @@ import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.registry.SyncRegistryPayload;
 import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
-import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
@@ -129,12 +128,6 @@ public class SessionData {
 	}
 
 	public void setGlowColor(@Nullable UUID uuid, @Nullable Color color) {
-	}
-
-	public void addWaypoints(List<Waypoint> waypoints) {
-	}
-
-	public void removeWaypoints(List<String> ids) {
 	}
 
 	/**

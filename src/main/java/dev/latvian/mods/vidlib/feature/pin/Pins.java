@@ -60,9 +60,9 @@ public interface Pins {
 			return;
 		}
 
-		var worldMouse = mc.getWorldMouse();
+		var projectedCoordinates = mc.getProjectedCoordinates();
 
-		if (worldMouse == null) {
+		if (projectedCoordinates == null) {
 			return;
 		}
 
@@ -92,7 +92,7 @@ public interface Pins {
 		}
 
 		for (var screenPin : list) {
-			var wpos = worldMouse.screen(screenPin.pos());
+			var wpos = projectedCoordinates.screen(screenPin.pos());
 
 			if (wpos != null) {
 				int pinAlpha = PIN_ALPHA.get() << 24;

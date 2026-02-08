@@ -28,6 +28,7 @@ import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.skin.PlayerSkinOverrides;
 import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
+import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
 import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
 import dev.latvian.mods.vidlib.util.StringUtils;
 import imgui.ImGui;
@@ -59,6 +60,7 @@ import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.client.resources.sounds.BiomeAmbientSoundsHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.status.ServerStatus;
@@ -719,5 +721,13 @@ public class ClientGameEngine {
 		} else {
 			return null;
 		}
+	}
+
+	public void handleMarker(String event, @Nullable Tag tag) {
+		// VidLib.LOGGER.info("Marker " + event + "/" + tag);
+	}
+
+	public List<Waypoint> getWaypoints(Minecraft mc) {
+		return mc.getWaypoints();
 	}
 }

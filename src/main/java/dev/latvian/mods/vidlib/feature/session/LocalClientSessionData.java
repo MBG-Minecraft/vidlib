@@ -4,8 +4,8 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.Window;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.Identity;
+import dev.latvian.mods.klib.math.ProjectedCoordinates;
 import dev.latvian.mods.klib.math.VoxelShapeBox;
-import dev.latvian.mods.klib.math.WorldMouse;
 import dev.latvian.mods.klib.util.Side;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
@@ -31,6 +31,7 @@ import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.input.PlayerInputChanged;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToServer;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
+import dev.latvian.mods.vidlib.feature.misc.EventMarkerPayload;
 import dev.latvian.mods.vidlib.feature.npc.NPCParticleOptions;
 import dev.latvian.mods.vidlib.feature.npc.NPCRecording;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
@@ -41,7 +42,6 @@ import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
 import dev.latvian.mods.vidlib.feature.skybox.Skybox;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
-import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
@@ -100,7 +100,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	public CameraOverride cameraOverride;
 	public ClientCutscene currentCutscene;
 	public ScreenFadeInstance screenFade;
-	public WorldMouse worldMouse;
+	public ProjectedCoordinates projectedCoordinates;
 	public NPCRecording npcRecording;
 	public final List<Decal> debugDecals;
 	public final List<ScreenEffectInstance> screenEffects;
@@ -111,8 +111,8 @@ public class LocalClientSessionData extends ClientSessionData {
 	public WorldBorder worldBorderOverride;
 	public WorldBorderOverride worldBorderOverrideStart;
 	public WorldBorderOverride worldBorderOverrideEnd;
-	public Map<String, Waypoint> waypoints;
 	public boolean clientModListSentDuringConfig;
+	public List<EventMarkerPayload> markers;
 
 	public LocalClientSessionData(Minecraft mc, UUID uuid) {
 		super(uuid);
@@ -131,8 +131,8 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.debugDecals = new ArrayList<>();
 		this.screenEffects = new ArrayList<>();
 		this.glowColors = new Object2ObjectOpenHashMap<>();
-		this.waypoints = new Object2ObjectOpenHashMap<>();
 		this.clientModListSentDuringConfig = false;
+		this.markers = new ArrayList<>();
 
 		VidLib.LOGGER.info("Client Session Data Initialized");
 	}
@@ -277,7 +277,7 @@ public class LocalClientSessionData extends ClientSessionData {
 				var instance = shakeIt.next();
 				var vec = instance.shake.type().get(instance.progress);
 				var intensity = instance.shake.intensity();
-				var intensityScale = instance.shake.start().interpolateMirrored(instance.ticks / (float) instance.shake.duration(), instance.shake.end());
+				var intensityScale = instance.shake.interpolation().interpolate(instance.ticks / (float) instance.shake.duration());
 				shakeX += vec.x() * intensity * intensityScale;
 				shakeY += vec.y() * intensity * intensityScale;
 
@@ -393,24 +393,6 @@ public class LocalClientSessionData extends ClientSessionData {
 			glowColors.remove(uuid);
 		} else {
 			glowColors.put(uuid, color);
-		}
-	}
-
-	@Override
-	public void addWaypoints(List<Waypoint> list) {
-		for (var waypoint : list) {
-			waypoints.put(waypoint.id, waypoint);
-		}
-	}
-
-	@Override
-	public void removeWaypoints(List<String> ids) {
-		if (ids.isEmpty()) {
-			waypoints.clear();
-		} else {
-			for (var id : ids) {
-				waypoints.remove(id);
-			}
 		}
 	}
 

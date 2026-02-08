@@ -4,8 +4,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.mojang.datafixers.util.Pair;
 import dev.latvian.mods.klib.math.Identity;
+import dev.latvian.mods.klib.math.ProjectedCoordinates;
 import dev.latvian.mods.klib.math.Rotation;
-import dev.latvian.mods.klib.math.WorldMouse;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
@@ -26,7 +26,7 @@ import dev.latvian.mods.vidlib.feature.data.UpdatePlayerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.data.UpdateServerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
-import dev.latvian.mods.vidlib.feature.misc.EventMarkerData;
+import dev.latvian.mods.vidlib.feature.misc.EventMarkerPayload;
 import dev.latvian.mods.vidlib.feature.particle.FireData;
 import dev.latvian.mods.vidlib.feature.particle.ItemParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.LineParticleOptions;
@@ -38,6 +38,7 @@ import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesIdData;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.Fade;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
@@ -133,8 +134,8 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Nullable
-	default WorldMouse getWorldMouse() {
-		return vl$self().player.vl$sessionData().worldMouse;
+	default ProjectedCoordinates getProjectedCoordinates() {
+		return vl$self().player.vl$sessionData().projectedCoordinates;
 	}
 
 	@ApiStatus.Internal
@@ -148,7 +149,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 		var session = player.vl$sessionData();
 		var frameInfo = new FrameInfo(mc, session, event);
-		session.worldMouse = WorldMouse.of(mc, frameInfo.camera().getPosition());
+		session.projectedCoordinates = ProjectedCoordinates.of(mc, frameInfo.camera().getPosition());
 		FrameInfo.CURRENT = frameInfo;
 
 		var rayLine = vl$self().gameRenderer.getMainCamera().ray(512D);
@@ -575,8 +576,10 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void marker(EventMarkerData data) {
-		// VidLib.LOGGER.info("Marker " + data.event() + "/" + data.name() + " (" + data.uuid() + ") @ ");
+	default void marker(EventMarkerPayload payload) {
+		var session = vl$self().player.vl$sessionData();
+		session.markers.add(payload);
+		ClientGameEngine.INSTANCE.handleMarker(payload.event(), payload.tag().orElse(null));
 	}
 
 	@Override

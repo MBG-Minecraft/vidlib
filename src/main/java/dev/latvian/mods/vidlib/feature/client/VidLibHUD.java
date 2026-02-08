@@ -55,9 +55,9 @@ public interface VidLibHUD {
 			return;
 		}
 
-		var worldMouse = mc.getWorldMouse();
+		var projectedCoordinates = mc.getProjectedCoordinates();
 
-		if (worldMouse == null) {
+		if (projectedCoordinates == null) {
 			return;
 		}
 
@@ -117,7 +117,7 @@ public interface VidLibHUD {
 			}
 
 			if (renderName || renderHealth) {
-				var wpos = worldMouse.screen(pos);
+				var wpos = projectedCoordinates.screen(pos);
 
 				if (wpos != null) {
 					var scale = (float) Math.clamp(KMath.map(dist, minDist, midDist, 1F, minSize), minSize, 1F);
@@ -175,7 +175,7 @@ public interface VidLibHUD {
 						continue;
 					}
 
-					var wpos = worldMouse.screen(pos);
+					var wpos = projectedCoordinates.screen(pos);
 
 					if (wpos != null) {
 						var scale = (float) Math.clamp(KMath.map(dist, minDist, midDist, 1F, minSize), minSize, 1F);

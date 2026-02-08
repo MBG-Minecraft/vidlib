@@ -188,8 +188,14 @@ public class VLFlashbackIntegration {
 		VidLib.LOGGER.info("Flashback Game snapshot");
 
 		var mc = Minecraft.getInstance();
+		var session = mc.player.vl$sessionData();
 		var packets2 = new S2CPacketBundleBuilder(mc.level);
-		mc.player.vl$sessionData().sync(packets2, mc.player, 1);
+		session.sync(packets2, mc.player, 1);
+
+		if (!session.markers.isEmpty()) {
+			session.markers.forEach(packets2::s2c);
+		}
+
 		packets2.sendUnbundled(packets::add);
 	}
 

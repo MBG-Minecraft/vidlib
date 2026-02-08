@@ -40,17 +40,17 @@ public class WaypointCommands {
 	);
 
 	private static int add(CommandSourceStack source, String id, Vec3 position, Component label) {
-		var waypoint = new Waypoint();
+		var waypoint = new Waypoint.Builder();
 		waypoint.id = id;
 		waypoint.position = KVector.of(position);
 		waypoint.label = label;
 		waypoint.tint = Color.hsb(source.getLevel().random.nextFloat(), 1F, 1F, 255);
-		source.getLevel().s2c(new AddWaypointsPayload(List.of(waypoint)));
+		source.getServer().addWaypoints(List.of(waypoint.build()));
 		return 0;
 	}
 
 	public static int remove(CommandSourceStack source, String id) {
-		source.getLevel().s2c(new RemoveWaypointsPayload(List.of(id)));
+		source.getServer().removeWaypoints(List.of(id));
 		return 1;
 	}
 }

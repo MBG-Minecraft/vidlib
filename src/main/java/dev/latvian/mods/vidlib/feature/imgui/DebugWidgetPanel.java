@@ -7,6 +7,7 @@ import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilder;
+import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.gallery.GalleryImageImBuilder;
@@ -453,7 +454,7 @@ public class DebugWidgetPanel extends Panel {
 
 		// ImPlot.fitNextPlotAxes();
 
-		if (ImPlot.beginPlot("Line Plot###line-plot", "X", "Sin", new ImVec2(300F, 300F), ImPlotFlags.CanvasOnly, ImPlotAxisFlags.NoLabel, ImPlotAxisFlags.NoLabel)) {
+		if (ImPlot.beginPlot("Line Plot###line-plot", "X", "Y", new ImVec2(300F, 300F), ImPlotFlags.CanvasOnly, ImPlotAxisFlags.NoLabel, ImPlotAxisFlags.NoLabel)) {
 			var xdata = new Double[100];
 			var ydata = new Double[100];
 
@@ -464,7 +465,7 @@ public class DebugWidgetPanel extends Panel {
 				ydata[i] = (double) KMath.linearizedBezierY(t, bezierP1Data.x, bezierP1Data.y, bezierP2Data.x, bezierP2Data.y) * 100D;
 			}
 
-			ImPlot.plotLine("Sin###1", xdata, ydata);
+			ImPlot.plotLine("Y###1", xdata, ydata);
 			ImPlot.endPlot();
 		}
 
@@ -472,6 +473,23 @@ public class DebugWidgetPanel extends Panel {
 
 		ImGui.text("LV: " + Countries.LV.get().displayName());
 		graphics.combo("###country", new Country[1], Countries.LOADED.get().byCode().values().toArray(new Country[0]), Country::displayName);
+
+		ImGui.separator();
+
+		var screenShakeInterpolation = ScreenShake.DEFAULT.interpolation();
+
+		if (ImPlot.beginPlot("Default Screen Shake Interpolation###default-screen-shake-interpolation-plot", "X", "Y", new ImVec2(300F, 150F), ImPlotFlags.CanvasOnly, ImPlotAxisFlags.NoLabel, ImPlotAxisFlags.NoLabel)) {
+			var xdata = new Double[100];
+			var ydata = new Double[100];
+
+			for (int i = 0; i < 100; i++) {
+				xdata[i] = (double) i;
+				ydata[i] = screenShakeInterpolation.interpolate(i / 100D) * 100D;
+			}
+
+			ImPlot.plotLine("Y###1", xdata, ydata);
+			ImPlot.endPlot();
+		}
 
 		ImGui.separator();
 

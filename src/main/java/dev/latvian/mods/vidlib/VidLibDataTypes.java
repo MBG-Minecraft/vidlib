@@ -24,6 +24,7 @@ import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.stage.Stage;
+import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
@@ -79,5 +80,7 @@ public interface VidLibDataTypes {
 		DataType.register(VidLib.id("entity_snapshot"), EntitySnapshot.DATA_TYPE);
 		DataType.register(VidLib.id("entity_snapshot_list"), EntitySnapshot.LIST_DATA_TYPE);
 		DataType.register(VidLib.id("timestamp"), Timestamp.DATA_TYPE);
+		DataType.register(VidLib.id("waypoint"), Waypoint.DATA_TYPE);
+		DataType.register(VidLib.id("waypoint_list"), Waypoint.LIST_DATA_TYPE);
 	}
 }

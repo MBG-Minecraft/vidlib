@@ -1,12 +1,13 @@
 package dev.latvian.mods.vidlib;
 
-import dev.latvian.mods.vidlib.feature.misc.EventMarkerData;
 import dev.latvian.mods.vidlib.feature.misc.EventMarkerPayload;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 
 public class VidLib {
 	public static final String ID = "vidlib";
@@ -29,7 +30,7 @@ public class VidLib {
 		}
 
 		var packets = new S2CPacketBundleBuilder(player.level());
-		packets.s2c(new EventMarkerPayload(new EventMarkerData("sync", player)));
+		packets.s2c(new EventMarkerPayload("sync", Optional.empty()));
 		player.vl$sessionData().sync(packets, player, syncType);
 		packets.send(player);
 	}

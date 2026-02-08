@@ -79,11 +79,11 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d>, SelectedPosition.
 		data.y = ImGuiUtils.FLOAT.get();
 
 		if (ImGui.button(SelectedPosition.CURSOR.icon + "###cursor-pos")) {
-			var worldMouse = graphics.mc.getWorldMouse();
-			var pos = worldMouse == null ? null : worldMouse.clipOutline();
+			var projectedCoordinates = graphics.mc.getProjectedCoordinates();
+			var pos = projectedCoordinates == null ? null : projectedCoordinates.clipOutline();
 
 			if (pos != null) {
-				data.set(pos.pos().x, pos.pos().y, pos.pos().z);
+				data.set(pos.position().x, pos.position().y, pos.position().z);
 				update = ImUpdate.FULL;
 				selectedPosition[0] = SelectedPosition.CURSOR;
 			}

@@ -4,9 +4,12 @@ import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
+import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.List;
 
 public interface InternalServerData {
 	DataKey<ResourceLocation> SKYBOX = DataKey.SERVER.createDefault("skybox", SkyboxData.ID_DATA_TYPE, Skyboxes.DAY_WITH_CELESTIALS, null);
@@ -21,6 +24,7 @@ public interface InternalServerData {
 	DataKey<Long> GLOBAL_STOPWATCH_START = DataKey.SERVER.createDefault("global_stopwatch_start", DataTypes.VAR_LONG, 0L, null);
 	DataKey<Boolean> ICE_MELTS = DataKey.SERVER.createBoolean("ice_melts", false);
 	DataKey<Boolean> BLOCK_GRAVITY = DataKey.SERVER.createBoolean("block_gravity", false);
+	DataKey<List<Waypoint>> WAYPOINTS = DataKey.SERVER.createDefault("waypoints", Waypoint.LIST_DATA_TYPE, List.of(), null);
 
 	@AutoInit
 	static void bootstrap() {

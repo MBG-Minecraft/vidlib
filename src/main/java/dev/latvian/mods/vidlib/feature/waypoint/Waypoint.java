@@ -1,11 +1,16 @@
 package dev.latvian.mods.vidlib.feature.waypoint;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
+import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
+import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -16,46 +21,107 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
-public class Waypoint {
+import java.util.List;
+
+public record Waypoint(
+	String id,
+	boolean enabled,
+	EntityFilter filter,
+	ResourceKey<Level> dimension,
+	KVector position,
+	ResourceLocation icon,
+	Color tint,
+	double maxDistance,
+	Component label,
+	boolean centered,
+	boolean showDistance
+) {
 	public static final Component DEFAULT_LABEL = Component.empty();
 
+	public static final Codec<Waypoint> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+		Codec.STRING.optionalFieldOf("id", "").forGetter(Waypoint::id),
+		Codec.BOOL.optionalFieldOf("enabled", true).forGetter(Waypoint::enabled),
+		EntityFilter.CODEC.optionalFieldOf("filter", EntityFilter.ANY.instance()).forGetter(Waypoint::filter),
+		MCCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(Waypoint::dimension),
+		KVector.CODEC.optionalFieldOf("position", KVector.ZERO).forGetter(Waypoint::position),
+		ID.CODEC.optionalFieldOf("icon", VidLibTextures.DEFAULT_MARKER).forGetter(Waypoint::icon),
+		Color.CODEC.optionalFieldOf("tint", Color.WHITE).forGetter(Waypoint::tint),
+		Codec.DOUBLE.optionalFieldOf("max_distance", 0D).forGetter(Waypoint::maxDistance),
+		ComponentSerialization.CODEC.optionalFieldOf("label", DEFAULT_LABEL).forGetter(Waypoint::label),
+		Codec.BOOL.optionalFieldOf("centered", true).forGetter(Waypoint::centered),
+		Codec.BOOL.optionalFieldOf("show_distance", true).forGetter(Waypoint::showDistance)
+	).apply(instance, Waypoint::new));
+
 	public static final StreamCodec<RegistryFriendlyByteBuf, Waypoint> STREAM_CODEC = CompositeStreamCodec.of(
-		ByteBufCodecs.STRING_UTF8, m -> m.id,
+		ByteBufCodecs.STRING_UTF8, Waypoint::id,
 		ByteBufCodecs.VAR_INT, Waypoint::getFlags,
-		KLibStreamCodecs.optional(MCStreamCodecs.DIMENSION, Level.OVERWORLD), m -> m.dimension,
-		KVector.STREAM_CODEC, m -> m.position,
-		KLibStreamCodecs.optional(ID.STREAM_CODEC, VidLibTextures.DEFAULT_MARKER), m -> m.icon,
-		Color.STREAM_CODEC, m -> m.tint,
-		KLibStreamCodecs.optional(KLibStreamCodecs.DOUBLE_AS_FLOAT, 0D), m -> m.maxDistance,
-		KLibStreamCodecs.optional(ComponentSerialization.TRUSTED_STREAM_CODEC, DEFAULT_LABEL), m -> m.label,
+		EntityFilter.STREAM_CODEC, Waypoint::filter,
+		KLibStreamCodecs.optional(MCStreamCodecs.DIMENSION, Level.OVERWORLD), Waypoint::dimension,
+		KVector.STREAM_CODEC, Waypoint::position,
+		KLibStreamCodecs.optional(ID.STREAM_CODEC, VidLibTextures.DEFAULT_MARKER), Waypoint::icon,
+		Color.STREAM_CODEC, Waypoint::tint,
+		KLibStreamCodecs.optional(KLibStreamCodecs.DOUBLE32, 0D), Waypoint::maxDistance,
+		KLibStreamCodecs.optional(ComponentSerialization.TRUSTED_STREAM_CODEC, DEFAULT_LABEL), Waypoint::label,
 		Waypoint::new
 	);
 
-	public String id = "";
-	public boolean enabled = true;
-	public ResourceKey<Level> dimension = Level.OVERWORLD;
-	public KVector position = KVector.ZERO;
-	public ResourceLocation icon = VidLibTextures.DEFAULT_MARKER;
-	public Color tint = Color.WHITE;
-	public double maxDistance = 0D;
-	public Component label = DEFAULT_LABEL;
-	public boolean centered = true;
-	public boolean showDistance = true;
+	public static final DataType<Waypoint> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, Waypoint.class);
+	public static final DataType<List<Waypoint>> LIST_DATA_TYPE = DATA_TYPE.listOf();
 
-	public Waypoint() {
+	public static class Builder {
+		public String id = "";
+		public boolean enabled = true;
+		public EntityFilter filter = EntityFilter.ANY.instance();
+		public ResourceKey<Level> dimension = Level.OVERWORLD;
+		public KVector position = KVector.ZERO;
+		public ResourceLocation icon = VidLibTextures.DEFAULT_MARKER;
+		public Color tint = Color.WHITE;
+		public double maxDistance = 0D;
+		public Component label = DEFAULT_LABEL;
+		public boolean centered = true;
+		public boolean showDistance = true;
+
+		public Waypoint build() {
+			return new Waypoint(
+				id,
+				enabled,
+				filter,
+				dimension,
+				position,
+				icon,
+				tint,
+				maxDistance,
+				label,
+				centered,
+				showDistance
+			);
+		}
 	}
 
-	private Waypoint(String id, int flags, ResourceKey<Level> dimension, KVector position, ResourceLocation icon, Color tint, double maxDistance, Component label) {
-		this.id = id;
-		this.enabled = (flags & 1) != 0;
-		this.dimension = dimension;
-		this.position = position;
-		this.icon = icon;
-		this.tint = tint;
-		this.maxDistance = maxDistance;
-		this.label = label;
-		this.centered = (flags & 2) != 0;
-		this.showDistance = (flags & 4) != 0;
+	private Waypoint(
+		String id,
+		int flags,
+		EntityFilter filter,
+		ResourceKey<Level> dimension,
+		KVector position,
+		ResourceLocation icon,
+		Color tint,
+		double maxDistance,
+		Component label
+	) {
+		this(
+			id,
+			(flags & 1) != 0,
+			filter,
+			dimension,
+			position,
+			icon,
+			tint,
+			maxDistance,
+			label,
+			(flags & 2) != 0,
+			(flags & 4) != 0
+		);
 	}
 
 	private int getFlags() {

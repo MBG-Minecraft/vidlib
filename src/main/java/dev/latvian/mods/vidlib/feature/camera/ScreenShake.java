@@ -8,6 +8,7 @@ import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.interpolation.EaseIn;
+import dev.latvian.mods.klib.interpolation.EaseOut;
 import dev.latvian.mods.klib.interpolation.Interpolation;
 import dev.latvian.mods.klib.interpolation.LinearInterpolation;
 import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
@@ -24,8 +25,7 @@ public record ScreenShake(
 	int duration,
 	float speed,
 	float intensity,
-	Interpolation start,
-	Interpolation end,
+	Interpolation interpolation,
 	boolean motionBlur
 ) {
 	public static final ScreenShake NONE = new ScreenShake(
@@ -33,7 +33,6 @@ public record ScreenShake(
 		0,
 		0F,
 		0F,
-		LinearInterpolation.INSTANCE,
 		LinearInterpolation.INSTANCE,
 		false
 	);
@@ -43,8 +42,7 @@ public record ScreenShake(
 		25,
 		4F,
 		0.6F,
-		EaseIn.QUINT,
-		EaseIn.CUBIC,
+		EaseOut.ELASTIC.join(EaseOut.CUBIC.flipX()),
 		false
 	);
 
@@ -53,8 +51,7 @@ public record ScreenShake(
 		KLibCodecs.TICKS.optionalFieldOf("duration", DEFAULT.duration).forGetter(ScreenShake::duration),
 		Codec.FLOAT.optionalFieldOf("speed", DEFAULT.speed).forGetter(ScreenShake::speed),
 		Codec.FLOAT.optionalFieldOf("intensity", DEFAULT.intensity).forGetter(ScreenShake::intensity),
-		Interpolation.CODEC.optionalFieldOf("start", DEFAULT.start).forGetter(ScreenShake::start),
-		Interpolation.CODEC.optionalFieldOf("end", DEFAULT.end).forGetter(ScreenShake::end),
+		Interpolation.CODEC.optionalFieldOf("interpolation", DEFAULT.interpolation).forGetter(ScreenShake::interpolation),
 		Codec.BOOL.optionalFieldOf("motion_blur", DEFAULT.motionBlur).forGetter(ScreenShake::motionBlur)
 	).apply(instance, ScreenShake::new));
 
@@ -65,8 +62,7 @@ public record ScreenShake(
 		ByteBufCodecs.VAR_INT, ScreenShake::duration,
 		ByteBufCodecs.FLOAT, ScreenShake::speed,
 		ByteBufCodecs.FLOAT, ScreenShake::intensity,
-		KLibStreamCodecs.optional(Interpolation.STREAM_CODEC, DEFAULT.start), ScreenShake::start,
-		KLibStreamCodecs.optional(Interpolation.STREAM_CODEC, DEFAULT.end), ScreenShake::end,
+		KLibStreamCodecs.optional(Interpolation.STREAM_CODEC, DEFAULT.interpolation), ScreenShake::interpolation,
 		ByteBufCodecs.BOOL, ScreenShake::motionBlur,
 		ScreenShake::new
 	);
@@ -82,8 +78,7 @@ public record ScreenShake(
 			duration,
 			speed,
 			intensity * intensityMod,
-			start,
-			end,
+			interpolation,
 			motionBlur
 		);
 	}
@@ -94,8 +89,7 @@ public record ScreenShake(
 			duration,
 			speed,
 			intensity,
-			start,
-			end,
+			interpolation,
 			motionBlur
 		);
 	}
@@ -106,8 +100,18 @@ public record ScreenShake(
 			duration,
 			speed,
 			intensity,
-			start,
-			end,
+			interpolation,
+			motionBlur
+		);
+	}
+
+	public ScreenShake withInterpolation(Interpolation interpolation) {
+		return new ScreenShake(
+			type,
+			duration,
+			speed,
+			intensity,
+			interpolation,
 			motionBlur
 		);
 	}

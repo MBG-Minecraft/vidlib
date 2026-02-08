@@ -4,7 +4,7 @@ import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.math.FrustumCheck;
-import dev.latvian.mods.klib.math.Vec2f;
+import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
@@ -28,6 +28,7 @@ import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3f;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 public class NPCProp extends BaseGeoProp {
@@ -231,10 +232,10 @@ public class NPCProp extends BaseGeoProp {
 		var arr = instances;
 
 		if (arr == null) {
-			Vec2f[] spreadPositions;
+			Vector2f[] spreadPositions;
 
 			if (count <= 1) {
-				spreadPositions = new Vec2f[]{Vec2f.ZERO};
+				spreadPositions = new Vector2f[]{Identity.UNSAFE_VEC_2};
 			} else {
 				spreadPositions = spread.spread(Math.clamp(count, 1, 10000));
 			}
