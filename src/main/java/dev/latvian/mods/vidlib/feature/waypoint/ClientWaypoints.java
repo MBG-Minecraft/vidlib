@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.waypoint;
 
-import dev.latvian.mods.klib.math.DistanceComparator;
+import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
@@ -13,6 +14,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public interface ClientWaypoints {
 	ImBoolean ENABLED = new ImBoolean(true);
@@ -47,8 +49,6 @@ public interface ClientWaypoints {
 		WAYPOINT_SIZE.set(36F);
 
 		int wpSize = (int) (WAYPOINT_SIZE.get() * mc.getEffectScale());
-
-
 		var list = new ArrayList<ScreenWaypoint>(waypoints.size());
 
 		for (var waypoint : waypoints) {
@@ -56,7 +56,13 @@ public interface ClientWaypoints {
 				var pos = waypoint.position().get(ctx);
 
 				if (pos != null) {
-					list.add(new ScreenWaypoint(waypoint, pos));
+					double distance = pos.distanceTo(mc.gameRenderer.getMainCamera().getPosition());
+
+					if (waypoint.maxDistance() <= 0D || distance <= waypoint.maxDistance()) {
+						if (waypoint.minDistance() <= 0D || distance >= waypoint.minDistance()) {
+							list.add(new ScreenWaypoint(waypoint, pos, distance));
+						}
+					}
 				}
 			}
 		}
@@ -64,11 +70,24 @@ public interface ClientWaypoints {
 		if (list.isEmpty()) {
 			return;
 		} else if (list.size() >= 2) {
-			list.sort(new DistanceComparator<>(mc.gameRenderer.getMainCamera().getPosition(), ScreenWaypoint::pos));
+			list.sort(Comparator.comparingDouble(ScreenWaypoint::distance).reversed());
 		}
 
 		for (var wp : list) {
-			var color = wp.waypoint().tint().withAlpha(wp.waypoint().tint().alphaf() * (WAYPOINT_ALPHA.get() / 255F)).argb();
+			float alpha = wp.waypoint().tint().alphaf() * (WAYPOINT_ALPHA.get() / 255F);
+			double minDistance = wp.waypoint().minDistance();
+			double midDistance = wp.waypoint().midDistance();
+
+			if (minDistance > 0D && midDistance > 0D) {
+				alpha *= (float) KMath.map(wp.distance(), minDistance, midDistance, 0D, 1D);
+			}
+
+			if (alpha < 0.02F) {
+				continue;
+			}
+
+			alpha = Math.min(alpha, 1F);
+
 			var wpos = projectedCoordinates.screen(wp.pos());
 
 			if (wpos != null) {
@@ -80,21 +99,23 @@ public interface ClientWaypoints {
 					graphics.pose().translate(0F, 8F, 0F);
 				}
 
+				var textColor = Color.WHITE.withAlpha(alpha).argb();
+
 				if (!Empty.isEmpty(wp.waypoint().label())) {
 					var lines = mc.font.split(wp.waypoint().label(), 1000);
 
 					for (int i = 0; i < lines.size(); i++) {
 						var line = lines.get(i);
-						graphics.drawString(mc.font, line, -mc.font.width(line) / 2F, -18 - (lines.size() * 9) + i * 9, 0xFFFFFFFF, true);
+						graphics.drawString(mc.font, line, -mc.font.width(line) / 2F, -18 - (lines.size() * 9) + i * 9, textColor, true);
 					}
 				}
 
 				if (wp.waypoint().showDistance()) {
 					var dist = "%,d m".formatted(Mth.floor(mc.gameRenderer.getMainCamera().getPosition().distanceTo(wp.pos())));
-					graphics.drawString(mc.font, dist, -mc.font.width(dist) / 2F, 2, 0xFFFFFFFF, true);
+					graphics.drawString(mc.font, dist, -mc.font.width(dist) / 2F, 2, textColor, true);
 				}
 
-				graphics.blit(VidLibRenderTypes.GUI_BLUR, wp.waypoint().icon(), -8, -16, 0F, 0F, 16, 16, 16, 16, color);
+				graphics.blit(VidLibRenderTypes.GUI_BLUR, wp.waypoint().icon(), -8, -16, 0F, 0F, 16, 16, 16, 16, wp.waypoint().tint().withAlpha(alpha).argb());
 				graphics.pose().popPose();
 			}
 		}

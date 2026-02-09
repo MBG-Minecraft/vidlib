@@ -31,6 +31,8 @@ public record Waypoint(
 	KVector position,
 	ResourceLocation icon,
 	Color tint,
+	double minDistance,
+	double midDistance,
 	double maxDistance,
 	Component label,
 	boolean centered,
@@ -43,9 +45,11 @@ public record Waypoint(
 		Codec.BOOL.optionalFieldOf("enabled", true).forGetter(Waypoint::enabled),
 		EntityFilter.CODEC.optionalFieldOf("filter", EntityFilter.ANY.instance()).forGetter(Waypoint::filter),
 		MCCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(Waypoint::dimension),
-		KVector.CODEC.optionalFieldOf("position", KVector.ZERO).forGetter(Waypoint::position),
+		KVector.CODEC.fieldOf("position").forGetter(Waypoint::position),
 		ID.CODEC.optionalFieldOf("icon", VidLibTextures.DEFAULT_MARKER).forGetter(Waypoint::icon),
 		Color.CODEC.optionalFieldOf("tint", Color.WHITE).forGetter(Waypoint::tint),
+		Codec.DOUBLE.optionalFieldOf("min_distance", 0D).forGetter(Waypoint::minDistance),
+		Codec.DOUBLE.optionalFieldOf("mid_distance", 0D).forGetter(Waypoint::midDistance),
 		Codec.DOUBLE.optionalFieldOf("max_distance", 0D).forGetter(Waypoint::maxDistance),
 		ComponentSerialization.CODEC.optionalFieldOf("label", DEFAULT_LABEL).forGetter(Waypoint::label),
 		Codec.BOOL.optionalFieldOf("centered", true).forGetter(Waypoint::centered),
@@ -55,11 +59,13 @@ public record Waypoint(
 	public static final StreamCodec<RegistryFriendlyByteBuf, Waypoint> STREAM_CODEC = CompositeStreamCodec.of(
 		ByteBufCodecs.STRING_UTF8, Waypoint::id,
 		ByteBufCodecs.VAR_INT, Waypoint::getFlags,
-		EntityFilter.STREAM_CODEC, Waypoint::filter,
+		KLibStreamCodecs.optional(EntityFilter.STREAM_CODEC, EntityFilter.ANY.instance()), Waypoint::filter,
 		KLibStreamCodecs.optional(MCStreamCodecs.DIMENSION, Level.OVERWORLD), Waypoint::dimension,
 		KVector.STREAM_CODEC, Waypoint::position,
 		KLibStreamCodecs.optional(ID.STREAM_CODEC, VidLibTextures.DEFAULT_MARKER), Waypoint::icon,
 		Color.STREAM_CODEC, Waypoint::tint,
+		KLibStreamCodecs.optional(KLibStreamCodecs.DOUBLE32, 0D), Waypoint::minDistance,
+		KLibStreamCodecs.optional(KLibStreamCodecs.DOUBLE32, 0D), Waypoint::midDistance,
 		KLibStreamCodecs.optional(KLibStreamCodecs.DOUBLE32, 0D), Waypoint::maxDistance,
 		KLibStreamCodecs.optional(ComponentSerialization.TRUSTED_STREAM_CODEC, DEFAULT_LABEL), Waypoint::label,
 		Waypoint::new
@@ -76,6 +82,8 @@ public record Waypoint(
 		public KVector position = KVector.ZERO;
 		public ResourceLocation icon = VidLibTextures.DEFAULT_MARKER;
 		public Color tint = Color.WHITE;
+		public double minDistance = 0D;
+		public double midDistance = 0D;
 		public double maxDistance = 0D;
 		public Component label = DEFAULT_LABEL;
 		public boolean centered = true;
@@ -90,6 +98,8 @@ public record Waypoint(
 				position,
 				icon,
 				tint,
+				minDistance,
+				midDistance,
 				maxDistance,
 				label,
 				centered,
@@ -106,6 +116,8 @@ public record Waypoint(
 		KVector position,
 		ResourceLocation icon,
 		Color tint,
+		double minDistance,
+		double midDistance,
 		double maxDistance,
 		Component label
 	) {
@@ -117,6 +129,8 @@ public record Waypoint(
 			position,
 			icon,
 			tint,
+			minDistance,
+			midDistance,
 			maxDistance,
 			label,
 			(flags & 2) != 0,
