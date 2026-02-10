@@ -1,24 +1,20 @@
 package dev.latvian.mods.vidlib.feature.sound;
 
-import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.BooleanImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.CompoundImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.SelfDeletingImBuilder;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 import imgui.type.ImBoolean;
 
 import java.util.Optional;
 
-public class PositionedSoundDataImBuilder extends CompoundImBuilder<PositionedSoundData> implements SelfDeletingImBuilder {
+public class PositionedSoundDataImBuilder extends CompoundImBuilder<PositionedSoundData> {
 	public final SoundDataImBuilder soundData = new SoundDataImBuilder();
 	public final ImBoolean hasPosition = new ImBoolean();
 	public final ImBuilder<KVector> position = KVectorImBuilder.create();
 	public final BooleanImBuilder looping = new BooleanImBuilder();
 	public final BooleanImBuilder stopImmediately = new BooleanImBuilder();
-	private boolean deleted = false;
 
 	public PositionedSoundDataImBuilder() {
 		add("Sound Data", soundData);
@@ -43,12 +39,6 @@ public class PositionedSoundDataImBuilder extends CompoundImBuilder<PositionedSo
 	}
 
 	@Override
-	public ImUpdate imgui(ImGraphics graphics) {
-		deleted = false;
-		return super.imgui(graphics);
-	}
-
-	@Override
 	public PositionedSoundData build() {
 		return new PositionedSoundData(
 			soundData.build(),
@@ -56,10 +46,5 @@ public class PositionedSoundDataImBuilder extends CompoundImBuilder<PositionedSo
 			looping.build(),
 			stopImmediately.build()
 		);
-	}
-
-	@Override
-	public boolean isDeleted() {
-		return deleted;
 	}
 }

@@ -50,13 +50,14 @@ public interface ClientWaypoints {
 
 		int wpSize = (int) (WAYPOINT_SIZE.get() * mc.getEffectScale());
 		var list = new ArrayList<ScreenWaypoint>(waypoints.size());
+		var cam = mc.gameRenderer.getMainCamera().getPosition();
 
 		for (var waypoint : waypoints) {
 			if (waypoint.enabled() && waypoint.dimension() == level.dimension() && waypoint.filter().test(mc.player)) {
 				var pos = waypoint.position().get(ctx);
 
 				if (pos != null) {
-					double distance = pos.distanceTo(mc.gameRenderer.getMainCamera().getPosition());
+					double distance = pos.distanceTo(cam);
 
 					if (waypoint.maxDistance() <= 0D || distance <= waypoint.maxDistance()) {
 						if (waypoint.minDistance() <= 0D || distance >= waypoint.minDistance()) {
@@ -91,6 +92,9 @@ public interface ClientWaypoints {
 			var wpos = projectedCoordinates.screen(wp.pos());
 
 			if (wpos != null) {
+				wpos.x = Math.clamp(wpos.x, 16F, projectedCoordinates.width() - 16F);
+				wpos.y = Math.clamp(wpos.y, 16F, projectedCoordinates.height() - 16F);
+
 				graphics.pose().pushPose();
 				graphics.pose().translate(wpos.x(), wpos.y(), 0F);
 				graphics.pose().scale(wpSize / 16F, wpSize / 16F, 1F);
@@ -111,7 +115,7 @@ public interface ClientWaypoints {
 				}
 
 				if (wp.waypoint().showDistance()) {
-					var dist = "%,d m".formatted(Mth.floor(mc.gameRenderer.getMainCamera().getPosition().distanceTo(wp.pos())));
+					var dist = "%,d m".formatted(Mth.floor(cam.distanceTo(wp.pos())));
 					graphics.drawString(mc.font, dist, -mc.font.width(dist) / 2F, 2, textColor, true);
 				}
 

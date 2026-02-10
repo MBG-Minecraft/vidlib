@@ -9,13 +9,14 @@ import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 import imgui.flag.ImGuiTableFlags;
 import net.minecraft.client.Minecraft;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public abstract class DataMapConfigPanel extends Panel {
-	private record DataMapBuilderEntry<T>(DataKey<T> key, ImBuilder<T> builder) {
+	private record DataMapBuilderEntry<T>(DataKey<T> key, @Nullable ImBuilder<T> builder) {
 	}
 
 	private final List<DataMapBuilderEntry<?>> entries;
@@ -37,9 +38,7 @@ public abstract class DataMapConfigPanel extends Panel {
 		entries.clear();
 
 		for (var key : getDataKeyStorage().all.values()) {
-			if (key.imBuilder() != null) {
-				entries.add(new DataMapBuilderEntry<>(key, Cast.to(key.imBuilder().get())));
-			}
+			entries.add(new DataMapBuilderEntry<>(key, key.imBuilder() == null ? null : Cast.to(key.imBuilder().get())));
 		}
 
 		entries.sort((a, b) -> a.key.id().compareToIgnoreCase(b.key.id()));
@@ -61,10 +60,12 @@ public abstract class DataMapConfigPanel extends Panel {
 				var currentValue = dataMap.get(entry.key, graphics.mc.level.getGameTime());
 				boolean isDefault = graphics.isReplay ? !dataMap.hasSuperOverride(entry.key) : Objects.equals(defaultValue, currentValue);
 
-				try {
-					entry.builder.set(Cast.to(currentValue));
-				} catch (Throwable ex) {
-					ex.printStackTrace();
+				if (entry.builder != null) {
+					try {
+						entry.builder.set(Cast.to(currentValue));
+					} catch (Throwable ex) {
+						ex.printStackTrace();
+					}
 				}
 
 				ImGui.tableNextRow();
@@ -79,10 +80,16 @@ public abstract class DataMapConfigPanel extends Panel {
 				if (ImGui.smallButton(ImIcons.UNDO + "###reset")) {
 					if (graphics.isReplay) {
 						dataMap.removeSuperOverride(entry.key);
-						entry.builder.set(Cast.to(dataMap.get(entry.key)));
+
+						if (entry.builder != null) {
+							entry.builder.set(Cast.to(dataMap.get(entry.key)));
+						}
 					} else {
 						dataMap.set(entry.key, Cast.to(defaultValue));
-						entry.builder.set(Cast.to(defaultValue));
+
+						if (entry.builder != null) {
+							entry.builder.set(Cast.to(defaultValue));
+						}
 					}
 
 					if (!graphics.isReplay) {
@@ -91,7 +98,15 @@ public abstract class DataMapConfigPanel extends Panel {
 				}
 
 				if (!isDefault && ImGui.isItemHovered()) {
-					ImGui.setTooltip("Reset to " + entry.builder.toString(graphics.mc.level.jsonOps(), Cast.to(defaultValue)));
+					if (entry.builder != null) {
+						ImGui.setTooltip("Reset to " + entry.builder.toString(graphics.mc.level.jsonOps(), Cast.to(defaultValue)));
+					} else {
+						try {
+							ImGui.setTooltip("Reset to " + entry.key.type().codec().encodeStart(graphics.mc.level.jsonOps(), Cast.to(defaultValue)).getOrThrow());
+						} catch (Exception ex) {
+							ImGui.setTooltip("Reset to the default value");
+						}
+					}
 				}
 
 				if (isDefault) {
@@ -116,10 +131,29 @@ public abstract class DataMapConfigPanel extends Panel {
 				ImGui.pushItemWidth(-1F);
 
 				ImGui.pushID("###value");
-				var update = entry.builder.imgui(graphics);
+
+				if (entry.builder == null) {
+					try {
+						var string = entry.key.type().codec().encodeStart(graphics.mc.level.jsonOps(), Cast.to(dataMap.get(entry.key))).getOrThrow().toString();
+
+						if (string.length() <= 50) {
+							ImGui.text(string);
+						} else {
+							ImGui.button("JSON###value-json");
+
+							if (ImGui.isItemHovered()) {
+								ImGui.setTooltip(string);
+							}
+						}
+					} catch (Exception ex) {
+						graphics.redTextIf("Unable to encode JSON", true);
+					}
+				}
+
+				var update = entry.builder == null ? ImUpdate.NONE : entry.builder.imgui(graphics);
 				ImGui.popID();
 
-				if (update.isAny() && entry.builder.isValid()) {
+				if (entry.builder != null && update.isAny() && entry.builder.isValid()) {
 					var value = entry.builder.build();
 
 					if (graphics.isReplay) {

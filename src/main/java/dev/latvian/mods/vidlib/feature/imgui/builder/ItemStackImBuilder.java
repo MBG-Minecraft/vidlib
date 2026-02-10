@@ -44,7 +44,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public class ItemStackImBuilder implements ImBuilder<ItemStack> {
+public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBuilder {
 	public static final ImBuilderType<ItemStack> TYPE = () -> new ItemStackImBuilder(false, stack -> true);
 	public static final ImBuilderType<ItemStack> TYPE_WITH_COUNT = () -> new ItemStackImBuilder(true, stack -> true);
 
@@ -102,23 +102,26 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack> {
 	private record RenderedItem(CachedItemData cachedItem, int order, boolean favorite, boolean filtered, boolean isResult) {
 	}
 
+	public static final ImString SEARCH = ImGuiUtils.resizableString();
 	private static Map<ItemKey, CachedItemData> cachedItems = null;
 
 	public final boolean hasCount;
 	public final Predicate<ItemStack> filter;
 	public final ImInt count;
-	public final ImString search;
 	public final ImString input;
 	private CachedItemData result;
 	private List<RenderedItem> renderedItems;
+	public int enableListItemButtons;
+	public ListItemAction listItemAction;
 
 	public ItemStackImBuilder(boolean hasCount, Predicate<ItemStack> filter) {
 		this.hasCount = hasCount;
 		this.filter = filter;
 		this.count = new ImInt(1);
-		this.search = ImGuiUtils.resizableString();
 		this.input = ImGuiUtils.resizableString();
 		this.result = null;
+		this.enableListItemButtons = -1;
+		this.listItemAction = ListItemAction.NONE;
 	}
 
 	@Override
@@ -144,6 +147,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
+		listItemAction = ListItemAction.NONE;
 		var update = ImUpdate.NONE;
 
 		var currentStackTex = ItemIcons.getTexture(graphics.mc, result.visualKey());
@@ -168,9 +172,41 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack> {
 		}
 
 		if (ImGui.beginPopup("###select-item", ImGuiWindowFlags.AlwaysAutoResize)) {
+			if (enableListItemButtons != -1) {
+				graphics.redTextIf("#" + (enableListItemButtons + 1), !isValid());
+				ImGui.sameLine();
+
+				if (graphics.button(ImIcons.TRASHCAN + "###delete", ImColorVariant.RED)) {
+					listItemAction = ListItemAction.DELETE;
+					update = ImUpdate.FULL;
+					ImGui.closeCurrentPopup();
+				}
+
+				ImGuiUtils.hoveredTooltip("Delete");
+				ImGui.sameLine();
+
+				if (ImGui.button(ImIcons.ARROW_UP + "###move-up")) {
+					listItemAction = ListItemAction.MOVE_UP;
+					update = ImUpdate.FULL;
+					ImGui.closeCurrentPopup();
+				}
+
+				ImGuiUtils.hoveredTooltip("Move Up");
+				ImGui.sameLine();
+
+				if (ImGui.button(ImIcons.ARROW_DOWN + "###move-down")) {
+					listItemAction = ListItemAction.MOVE_DOWN;
+					update = ImUpdate.FULL;
+					ImGui.closeCurrentPopup();
+				}
+
+				ImGuiUtils.hoveredTooltip("Move Down");
+				ImGui.sameLine();
+			}
+
 			ImGui.setNextItemWidth(-1F);
 
-			if (ImGui.inputTextWithHint("###search", "Search...", search)) {
+			if (ImGui.inputTextWithHint("###search", "Search...", SEARCH)) {
 				renderedItems = null;
 			}
 
@@ -209,7 +245,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack> {
 
 				if (renderedItems == null) {
 					renderedItems = new ArrayList<>();
-					var searchText = search.get().replace(" ", "").toLowerCase(Locale.ROOT);
+					var searchText = SEARCH.get().replace(" ", "").toLowerCase(Locale.ROOT);
 
 					renderedItems.add(new RenderedItem(CachedItemData.AIR, -10, false, true, result == null || result.matches(CachedItemData.AIR)));
 
@@ -261,6 +297,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack> {
 							ImGui.popID();
 							update = ImUpdate.FULL;
 							cachedItems = null;
+							SEARCH.set("");
 							break;
 						}
 
@@ -352,5 +389,15 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack> {
 	@Override
 	public boolean isSmall() {
 		return true;
+	}
+
+	@Override
+	public void enableListItemButtons(int index) {
+		enableListItemButtons = index;
+	}
+
+	@Override
+	public ListItemAction getListItemAction() {
+		return listItemAction;
 	}
 }
