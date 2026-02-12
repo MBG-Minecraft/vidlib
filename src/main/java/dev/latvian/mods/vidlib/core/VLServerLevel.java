@@ -11,15 +11,19 @@ import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.Util;
+import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public interface VLServerLevel extends VLLevel {
 	@Override
@@ -150,5 +154,10 @@ public interface VLServerLevel extends VLLevel {
 	@Override
 	default void vl$setDayTime(long time) {
 		vl$level().setDayTime(time);
+	}
+
+	@Override
+	default Stream<LevelChunk> vl$getChunks() {
+		return StreamSupport.stream(vl$level().getChunkSource().chunkMap.getChunks().spliterator(), false).map(ChunkHolder::getTickingChunk).filter(c -> c != null && !c.isEmpty());
 	}
 }

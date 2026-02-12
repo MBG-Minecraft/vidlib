@@ -39,7 +39,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
@@ -54,6 +56,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHolder {
 	@Override
@@ -494,5 +497,13 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		}
 
 		return bpos.getY() + state.getCollisionShape(level, bpos).max(Direction.Axis.Y);
+	}
+
+	default Stream<LevelChunk> vl$getChunks() {
+		return Stream.empty();
+	}
+
+	default Stream<BlockEntity> vl$getAllBlockEntities() {
+		return vl$getChunks().flatMap(c -> c.getBlockEntities().values().stream());
 	}
 }
