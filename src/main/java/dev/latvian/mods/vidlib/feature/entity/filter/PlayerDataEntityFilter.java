@@ -16,17 +16,18 @@ import imgui.ImGui;
 import imgui.type.ImString;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
-public record ServerDataEntityFilter(String key, Supplier<DataKey<?>> dataKey) implements EntityFilter, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<ServerDataEntityFilter> TYPE = SimpleRegistryType.dynamic("server_data", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		Codec.STRING.fieldOf("key").forGetter(ServerDataEntityFilter::key)
-	).apply(instance, ServerDataEntityFilter::new)), ByteBufCodecs.STRING_UTF8.map(ServerDataEntityFilter::new, ServerDataEntityFilter::key));
+public record PlayerDataEntityFilter(String key, Supplier<DataKey<?>> dataKey) implements EntityFilter, ImBuilderWithHolder.Factory {
+	public static final SimpleRegistryType<PlayerDataEntityFilter> TYPE = SimpleRegistryType.dynamic("player_data", RecordCodecBuilder.mapCodec(instance -> instance.group(
+		Codec.STRING.fieldOf("key").forGetter(PlayerDataEntityFilter::key)
+	).apply(instance, PlayerDataEntityFilter::new)), ByteBufCodecs.STRING_UTF8.map(PlayerDataEntityFilter::new, PlayerDataEntityFilter::key));
 
 	public static class Builder implements EntityFilterImBuilder {
-		public static final ImBuilderHolder<EntityFilter> TYPE = ImBuilderHolder.of("Server Data", Builder::new);
+		public static final ImBuilderHolder<EntityFilter> TYPE = ImBuilderHolder.of("Player Data", Builder::new);
 
 		public final ImString key = ImGuiUtils.resizableString();
 
@@ -37,7 +38,7 @@ public record ServerDataEntityFilter(String key, Supplier<DataKey<?>> dataKey) i
 
 		@Override
 		public void set(EntityFilter value) {
-			if (value instanceof ServerDataEntityFilter n) {
+			if (value instanceof PlayerDataEntityFilter n) {
 				key.set(n.key);
 			}
 		}
@@ -52,20 +53,20 @@ public record ServerDataEntityFilter(String key, Supplier<DataKey<?>> dataKey) i
 
 		@Override
 		public boolean isValid() {
-			return key.isNotEmpty() && DataKey.SERVER.all.containsKey(key.get());
+			return key.isNotEmpty() && DataKey.PLAYER.all.containsKey(key.get());
 		}
 
 		@Override
 		public EntityFilter build() {
-			return new ServerDataEntityFilter(key.get());
+			return new PlayerDataEntityFilter(key.get());
 		}
 	}
 
-	public ServerDataEntityFilter(String key) {
-		this(key, Lazy.of(() -> DataKey.SERVER.all.get(key)));
+	public PlayerDataEntityFilter(String key) {
+		this(key, Lazy.of(() -> DataKey.PLAYER.all.get(key)));
 	}
 
-	public ServerDataEntityFilter(DataKey<?> key) {
+	public PlayerDataEntityFilter(DataKey<?> key) {
 		this(key.id(), new UnitSupplier<>(key));
 	}
 
@@ -76,8 +77,12 @@ public record ServerDataEntityFilter(String key, Supplier<DataKey<?>> dataKey) i
 
 	@Override
 	public boolean test(Entity entity) {
+		if (!(entity instanceof Player player)) {
+			return false;
+		}
+
 		var dk = dataKey.get();
-		var data = entity.level().getOptional(dk);
+		var data = player.getOptional(dk);
 
 		if (data == null) {
 			return false;

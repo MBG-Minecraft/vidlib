@@ -105,6 +105,7 @@ public interface EntityFilter extends Predicate<Entity> {
 		REGISTRY.register(MatchEntityFilter.TYPE);
 		REGISTRY.register(HasEffectEntityFilter.TYPE);
 		REGISTRY.register(ServerDataEntityFilter.TYPE);
+		REGISTRY.register(PlayerDataEntityFilter.TYPE);
 		REGISTRY.register(ProfileEntityFilter.TYPE);
 	}
 
