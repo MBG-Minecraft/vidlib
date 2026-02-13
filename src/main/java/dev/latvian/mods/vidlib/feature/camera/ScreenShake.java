@@ -47,7 +47,7 @@ public record ScreenShake(
 	);
 
 	public static final Codec<ScreenShake> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		ScreenShakeType.REGISTRY.valueCodec().optionalFieldOf("type", DEFAULT.type).forGetter(ScreenShake::type),
+		ScreenShakeType.REGISTRY.codec().optionalFieldOf("type", DEFAULT.type).forGetter(ScreenShake::type),
 		KLibCodecs.TICKS.optionalFieldOf("duration", DEFAULT.duration).forGetter(ScreenShake::duration),
 		Codec.FLOAT.optionalFieldOf("speed", DEFAULT.speed).forGetter(ScreenShake::speed),
 		Codec.FLOAT.optionalFieldOf("intensity", DEFAULT.intensity).forGetter(ScreenShake::intensity),
@@ -58,7 +58,7 @@ public record ScreenShake(
 	public static final Codec<ScreenShake> CODEC = Codec.either(Codec.BOOL, DIRECT_CODEC).xmap(either -> either.map(b -> b ? DEFAULT : NONE, Function.identity()), shake -> shake.equals(NONE) ? Either.left(false) : shake.equals(DEFAULT) ? Either.left(true) : Either.right(shake));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ScreenShake> STREAM_CODEC = CompositeStreamCodec.of(
-		KLibStreamCodecs.optional(ScreenShakeType.REGISTRY.valueStreamCodec(), DEFAULT.type), ScreenShake::type,
+		KLibStreamCodecs.optional(ScreenShakeType.REGISTRY.streamCodec(), DEFAULT.type), ScreenShake::type,
 		ByteBufCodecs.VAR_INT, ScreenShake::duration,
 		ByteBufCodecs.FLOAT, ScreenShake::speed,
 		ByteBufCodecs.FLOAT, ScreenShake::intensity,

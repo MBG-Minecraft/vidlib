@@ -1,18 +1,18 @@
 package dev.latvian.mods.vidlib.feature.session;
 
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.vidlib.core.VLGameTimeProvider;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
-import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
-import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToClient;
 import dev.latvian.mods.vidlib.feature.misc.SyncPlayerTagsPayload;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.registry.SyncRegistryPayload;
@@ -24,7 +24,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -43,16 +42,10 @@ public class SessionData {
 	public Set<String> zonesTagsIn;
 
 	public boolean suspended;
-	public double gravityMod;
-	public float speedMod;
-	public float attackDamageMod;
-	public boolean pvp;
-	public boolean unpushable;
-	public float flightSpeedMod;
 
-	public SessionData(UUID uuid) {
+	public SessionData(UUID uuid, VLGameTimeProvider timeProvider) {
 		this.uuid = uuid;
-		this.dataMap = new DataMap(uuid, DataKey.PLAYER);
+		this.dataMap = new DataMap(uuid, DataKey.PLAYER, timeProvider);
 		this.startTime = System.currentTimeMillis();
 		this.prevInput = PlayerInput.NONE;
 		this.input = PlayerInput.NONE;
@@ -60,12 +53,6 @@ public class SessionData {
 		this.zonesTagsIn = Set.of();
 
 		this.suspended = false;
-		this.gravityMod = 1D;
-		this.speedMod = 1F;
-		this.attackDamageMod = 1F;
-		this.pvp = true;
-		this.unpushable = false;
-		this.flightSpeedMod = 1F;
 	}
 
 	public void respawned(Level level, boolean loggedIn) {
@@ -75,21 +62,7 @@ public class SessionData {
 	}
 
 	public void updateOverrides(Player player) {
-		suspended = EntityOverride.SUSPENDED.get(player, null, InternalPlayerData.SUSPENDED);
-		gravityMod = suspended ? 0F : EntityOverride.GRAVITY.get(player, 1D);
-		speedMod = suspended ? 0F : EntityOverride.SPEED.get(player, 1F);
-		attackDamageMod = suspended ? 0F : EntityOverride.ATTACK_DAMAGE.get(player, 1F);
-		pvp = !suspended && EntityOverride.PVP.get(player, true);
-		unpushable = suspended || EntityOverride.UNPUSHABLE.get(player, false);
-		flightSpeedMod = player.get(InternalPlayerData.FLIGHT_SPEED);
-
-		if (gravityMod <= 0D) {
-			player.resetFallDistance();
-		}
-
-		if (suspended) {
-			player.setDeltaMovement(Vec3.ZERO);
-		}
+		suspended = CommonGameEngine.INSTANCE.isSuspended(player);
 	}
 
 	public <V> void syncRegistry(Player player, SyncedRegistry<V> registry, Map<ResourceLocation, V> map) {

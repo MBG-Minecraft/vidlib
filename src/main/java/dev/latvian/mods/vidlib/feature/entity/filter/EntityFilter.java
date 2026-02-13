@@ -3,11 +3,18 @@ package dev.latvian.mods.vidlib.feature.entity.filter;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JavaOps;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.util.IntOrUUID;
+import dev.latvian.mods.klib.util.ParsedEntitySelector;
+import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.core.VLEntity;
-import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.data.DataKey;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
+import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
+import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -22,8 +29,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public interface EntityFilter extends Predicate<Entity> {
-	SimpleRegistry<EntityFilter> REGISTRY = SimpleRegistry.create(EntityFilter::type);
+public interface EntityFilter extends Predicate<Entity>, SimpleRegistryEntry {
+	SimpleRegistry<EntityFilter> REGISTRY = SimpleRegistry.create(VidLib.id("entity_filter"), c -> PlatformHelper.CURRENT.collectEntityFilters(c));
 
 	SimpleRegistryType.Unit<EntityFilter> NONE = SimpleRegistryType.unit("none", new BasicEntityFilter(entity -> false));
 	SimpleRegistryType.Unit<EntityFilter> ANY = SimpleRegistryType.unit("any", new BasicEntityFilter(entity -> true));
@@ -42,7 +49,7 @@ public interface EntityFilter extends Predicate<Entity> {
 	SimpleRegistryType.Unit<EntityFilter> PROJECTILE = SimpleRegistryType.unit("projectile", new BasicEntityFilter(VLEntity::isProjectile));
 	SimpleRegistryType.Unit<EntityFilter> VISIBLE = SimpleRegistryType.unit("visible", new BasicEntityFilter(VLEntity::isVisible));
 	SimpleRegistryType.Unit<EntityFilter> INVISIBLE = SimpleRegistryType.unit("invisible", new BasicEntityFilter(Entity::isInvisible));
-	SimpleRegistryType.Unit<EntityFilter> SUSPENDED = SimpleRegistryType.unit("suspended", new BasicEntityFilter(VLEntity::isSuspended));
+	SimpleRegistryType.Unit<EntityFilter> SUSPENDED = SimpleRegistryType.unit("suspended", new BasicEntityFilter(VLEntity::vl$isSuspended));
 	SimpleRegistryType.Unit<EntityFilter> GLOWING = SimpleRegistryType.unit("glowing", new BasicEntityFilter(Entity::isCurrentlyGlowing));
 	SimpleRegistryType.Unit<EntityFilter> IN_WATER = SimpleRegistryType.unit("in_water", new BasicEntityFilter(Entity::isInWater));
 	SimpleRegistryType.Unit<EntityFilter> IN_WATER_OR_RAIN = SimpleRegistryType.unit("in_water_or_rain", new BasicEntityFilter(Entity::isInWaterOrRain));
@@ -63,52 +70,83 @@ public interface EntityFilter extends Predicate<Entity> {
 		}
 	});
 
-	Codec<EntityFilter> CODEC = KLibCodecs.or(List.of(NONE_OR_ANY_CODEC, ExactEntityFilter.TYPE.codec().codec(), MatchEntityFilter.OPTIONAL_MATCH_CODEC, REGISTRY.valueCodec()));
-	StreamCodec<RegistryFriendlyByteBuf, EntityFilter> STREAM_CODEC = ByteBufCodecs.either(ByteBufCodecs.BOOL, REGISTRY.valueStreamCodec()).map(either -> either.map(EntityFilter::of, Function.identity()), filter -> filter == ANY.instance() ? Either.left(true) : filter == NONE.instance() ? Either.left(false) : Either.right(filter));
+	Codec<EntityFilter> FROM_INT_OR_UUID_CODEC = IntOrUUID.CODEC.flatXmap(input -> DataResult.success(new ExactEntityFilter(input)), filter -> {
+		if (filter instanceof ExactEntityFilter(IntOrUUID id)) {
+			return DataResult.success(id);
+		} else {
+			return DataResult.error(() -> "Filter is not an ExactEntityFilter");
+		}
+	});
+
+	Codec<EntityFilter> FROM_STRING_CODEC = Codec.STRING.flatXmap(input -> {
+		if (input.startsWith("@")) {
+			return ParsedEntitySelector.CODEC.parse(JavaOps.INSTANCE, input).map(MatchEntityFilter::new);
+		} else if (input.startsWith("$$")) {
+			return DataResult.success(new PlayerDataEntityFilter(input.substring(2)));
+		} else if (input.startsWith("$")) {
+			return DataResult.success(new ServerDataEntityFilter(input.substring(1)));
+		} else {
+			return DataResult.error(() -> "String does not start with '@', '$$' or '$'");
+		}
+	}, filter -> switch (filter) {
+		case MatchEntityFilter(ParsedEntitySelector s) -> DataResult.success(s.getInput());
+		case PlayerDataEntityFilter(DataKey<?> dataKey) -> DataResult.success("$$" + dataKey.id());
+		case ServerDataEntityFilter(DataKey<?> dataKey) -> DataResult.success("$" + dataKey.id());
+		case null, default -> DataResult.error(() -> "Filter is not a MatchEntityFilter, PlayerDataEntityFilter or ServerDataEntityFilter");
+	});
+
+	Codec<EntityFilter> CODEC = KLibCodecs.or(List.of(
+		NONE_OR_ANY_CODEC,
+		FROM_INT_OR_UUID_CODEC,
+		FROM_STRING_CODEC,
+		REGISTRY.codec()
+	));
+
+	StreamCodec<RegistryFriendlyByteBuf, EntityFilter> STREAM_CODEC = ByteBufCodecs.either(ByteBufCodecs.BOOL, REGISTRY.streamCodec()).map(either -> either.map(EntityFilter::of, Function.identity()), filter -> filter == ANY.instance() ? Either.left(true) : filter == NONE.instance() ? Either.left(false) : Either.right(filter));
 	DataType<EntityFilter> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, EntityFilter.class);
 
-	@AutoInit
-	static void bootstrap() {
-		REGISTRY.register(NONE);
-		REGISTRY.register(ANY);
+	static void builtinTypes(SimpleRegistryCollector<EntityFilter> registry) {
+		registry.register(NONE);
+		registry.register(ANY);
 
-		REGISTRY.register(EntityNotFilter.TYPE);
-		REGISTRY.register(EntityAndFilter.TYPE);
-		REGISTRY.register(EntityOrFilter.TYPE);
-		REGISTRY.register(EntityXorFilter.TYPE);
+		registry.register(EntityNotFilter.TYPE);
+		registry.register(EntityAndFilter.TYPE);
+		registry.register(EntityOrFilter.TYPE);
+		registry.register(EntityXorFilter.TYPE);
 
-		REGISTRY.register(ALIVE);
-		REGISTRY.register(DEAD);
-		REGISTRY.register(DEAD_OR_DYING);
-		REGISTRY.register(LIVING);
-		REGISTRY.register(PLAYER);
-		REGISTRY.register(SURVIVAL_PLAYER);
-		REGISTRY.register(SURVIVAL_LIKE_PLAYER);
-		REGISTRY.register(SPECTATOR);
-		REGISTRY.register(CREATIVE);
-		REGISTRY.register(SPECTATOR_OR_CREATIVE);
-		REGISTRY.register(ITEM);
-		REGISTRY.register(PROJECTILE);
-		REGISTRY.register(VISIBLE);
-		REGISTRY.register(INVISIBLE);
-		REGISTRY.register(SUSPENDED);
-		REGISTRY.register(GLOWING);
-		REGISTRY.register(IN_WATER);
-		REGISTRY.register(IN_WATER_OR_RAIN);
-		REGISTRY.register(IN_LIQUID);
-		REGISTRY.register(UNDERWATER);
+		registry.register(ALIVE);
+		registry.register(DEAD);
+		registry.register(DEAD_OR_DYING);
+		registry.register(LIVING);
+		registry.register(PLAYER);
+		registry.register(SURVIVAL_PLAYER);
+		registry.register(SURVIVAL_LIKE_PLAYER);
+		registry.register(SPECTATOR);
+		registry.register(CREATIVE);
+		registry.register(SPECTATOR_OR_CREATIVE);
+		registry.register(ITEM);
+		registry.register(PROJECTILE);
+		registry.register(VISIBLE);
+		registry.register(INVISIBLE);
+		registry.register(SUSPENDED);
+		registry.register(GLOWING);
+		registry.register(IN_WATER);
+		registry.register(IN_WATER_OR_RAIN);
+		registry.register(IN_LIQUID);
+		registry.register(UNDERWATER);
 
-		REGISTRY.register(ExactEntityFilter.TYPE);
-		REGISTRY.register(EntityTagFilter.TYPE);
-		REGISTRY.register(EntityTypeFilter.TYPE);
-		REGISTRY.register(EntityTypeTagFilter.TYPE);
-		REGISTRY.register(MatchEntityFilter.TYPE);
-		REGISTRY.register(HasEffectEntityFilter.TYPE);
-		REGISTRY.register(ServerDataEntityFilter.TYPE);
-		REGISTRY.register(PlayerDataEntityFilter.TYPE);
-		REGISTRY.register(ProfileEntityFilter.TYPE);
+		registry.register(ExactEntityFilter.TYPE);
+		registry.register(EntityTagFilter.TYPE);
+		registry.register(EntityTypeFilter.TYPE);
+		registry.register(EntityTypeTagFilter.TYPE);
+		registry.register(MatchEntityFilter.TYPE);
+		registry.register(HasEffectEntityFilter.TYPE);
+		registry.register(ServerDataEntityFilter.TYPE);
+		registry.register(PlayerDataEntityFilter.TYPE);
+		registry.register(ProfileEntityFilter.TYPE);
 	}
 
+	@Override
 	default SimpleRegistryType<?> type() {
 		return REGISTRY.getType(this);
 	}

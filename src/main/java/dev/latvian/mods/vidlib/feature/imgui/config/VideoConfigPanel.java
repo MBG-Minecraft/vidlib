@@ -70,7 +70,7 @@ public class VideoConfigPanel extends Panel {
 				for (var config : all.config()) {
 					ImGui.spacing();
 
-					config.init(mc.level.getServerData());
+					config.init(mc.level.getDataMap());
 					ImGui.pushID(config.id);
 					var update = config.imguiConfig(graphics);
 

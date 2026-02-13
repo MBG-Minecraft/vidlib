@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.entity.ExactEntitySpawnPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
@@ -17,10 +18,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.food.FoodData;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
@@ -48,6 +51,7 @@ import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.VegetationBlock;
 import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.fml.loading.FMLLoader;
@@ -284,5 +288,80 @@ public class CommonGameEngine {
 
 	public boolean disablePacketCapture() {
 		return true;
+	}
+
+	public void livingTick(LivingEntity entity) {
+		if (!entity.level().isClientSide() && entity.getHealth() < entity.getMaxHealth()) {
+			var regen = getRegenerationTicks(entity);
+
+			if (regen >= 0) {
+				if (regen == 0) {
+					entity.heal();
+				} else if (entity.tickCount % regen == 0) {
+					entity.heal(1F);
+				}
+			}
+		}
+
+		if (entity.getGravity() <= 0D) {
+			entity.resetFallDistance();
+		}
+
+		if (entity.vl$isSuspended()) {
+			entity.setDeltaMovement(Vec3.ZERO);
+		}
+	}
+
+	public ItemStack itemInventoryTick(ItemStack stack, Entity entity, @Nullable EquipmentSlot slot) {
+		return stack;
+	}
+
+	public int getRegenerationTicks(LivingEntity entity) {
+		return -1;
+	}
+
+	public boolean isSuspended(Player player) {
+		return player.get(InternalPlayerData.SUSPENDED);
+	}
+
+	public double getGravityModifier(Entity entity) {
+		return entity.vl$isSuspended() ? 0D : 1D;
+	}
+
+	public float getSpeedModifier(LivingEntity entity) {
+		return entity.vl$isSuspended() ? 0F : 1F;
+	}
+
+	public float getFlightSpeedModifier(Player player) {
+		return player.get(InternalPlayerData.FLIGHT_SPEED);
+	}
+
+	public boolean allowPVP(Player from, Player to) {
+		return !from.vl$isSuspended() && !to.vl$isSuspended();
+	}
+
+	public boolean isInvulnerable(Entity entity) {
+		return false;
+	}
+
+	public float getAttackDamage(LivingEntity entity, DamageSource source, float original) {
+		return entity.vl$isSuspended() ? 0F : original;
+	}
+
+	public boolean isUnpushable(LivingEntity entity) {
+		return entity.vl$isSuspended();
+	}
+
+	public boolean isBoss(LivingEntity entity) {
+		if (entity.getTags().contains("main_boss")) {
+			return true;
+		}
+
+		var customName = entity.getCustomName();
+		return customName != null && customName.getString().equals("Boss");
+	}
+
+	public boolean getScaleDamageWithDifficulty(ServerPlayer player) {
+		return false;
 	}
 }

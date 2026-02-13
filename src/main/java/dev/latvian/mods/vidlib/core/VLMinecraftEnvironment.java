@@ -91,7 +91,7 @@ public interface VLMinecraftEnvironment extends VLPlayerContainer, VLMinecraftEn
 
 	@ApiStatus.Internal
 	default void sync(S2CPacketBundleBuilder packets) {
-		getServerData().syncAll(packets, null, (uuid, updates) -> new SyncServerDataPayload(updates));
+		getDataMap().syncAll(packets, null, (uuid, updates) -> new SyncServerDataPayload(updates));
 		packets.s2c(new SyncClocksPayload(vl$getClocks()));
 	}
 

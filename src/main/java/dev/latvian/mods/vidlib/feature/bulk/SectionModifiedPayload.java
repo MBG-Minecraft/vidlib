@@ -14,7 +14,7 @@ public record SectionModifiedPayload(boolean undoable, SectionPos section, BulkL
 	public static final VidLibPacketType<SectionModifiedPayload> TYPE = VidLibPacketType.internal("section_modified", CompositeStreamCodec.of(
 		ByteBufCodecs.BOOL, SectionModifiedPayload::undoable,
 		MCStreamCodecs.SECTION_POS, SectionModifiedPayload::section,
-		BulkLevelModification.REGISTRY.valueStreamCodec(), SectionModifiedPayload::modification,
+		BulkLevelModification.REGISTRY.streamCodec(), SectionModifiedPayload::modification,
 		SectionModifiedPayload::new
 	));
 

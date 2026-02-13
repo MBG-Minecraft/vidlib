@@ -77,8 +77,8 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 	}
 
 	@Override
-	default DataMap getServerData() {
-		return getEnvironment().getServerData();
+	default DataMap getDataMap() {
+		return getEnvironment().getDataMap();
 	}
 
 	@Override

@@ -108,7 +108,6 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 	public final ResourceLocation id;
 	public final ResourceKey<Level> dimension;
 	public final List<ZoneInstance> zones;
-	public boolean hasPlayerOverrides;
 	public final Set<String> tags;
 	public int priority;
 	public final Int2ObjectOpenHashMap<List<ZoneInstance>> entityZones;
@@ -119,7 +118,6 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 		this.id = id;
 		this.dimension = dimension;
 		this.zones = new ArrayList<>();
-		this.hasPlayerOverrides = false;
 		this.tags = new LinkedHashSet<>();
 		this.priority = 0;
 		this.entityZones = new Int2ObjectOpenHashMap<>();
@@ -136,10 +134,6 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 		instance.tags.addAll(zone.tags());
 
 		zones.add(instance);
-
-		if (!zone.playerOverrides().isEmpty()) {
-			hasPlayerOverrides = true;
-		}
 
 		if (parent != null) {
 			parent.solidZones = null;
@@ -227,15 +221,10 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 		}
 
 		zones.remove(index);
-		hasPlayerOverrides = false;
 
 		for (int i = 0; i < zones.size(); i++) {
 			var zone = zones.get(i);
 			zone.index = i;
-
-			if (!zone.zone.playerOverrides().isEmpty()) {
-				hasPlayerOverrides = true;
-			}
 		}
 
 		boundingBox = null;

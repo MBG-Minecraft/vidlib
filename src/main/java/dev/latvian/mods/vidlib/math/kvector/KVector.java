@@ -6,11 +6,14 @@ import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.IntOrUUID;
-import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.ExactEntityFilter;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
+import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
+import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.FixedKNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
@@ -29,15 +32,20 @@ import org.joml.Vector3fc;
 
 import java.util.function.Function;
 
-public interface KVector {
-	SimpleRegistry<KVector> REGISTRY = SimpleRegistry.create(KVector::type);
+public interface KVector extends SimpleRegistryEntry {
+	SimpleRegistry<KVector> REGISTRY = SimpleRegistry.create(VidLib.id("kvector"), c -> PlatformHelper.CURRENT.collectKVectors(c));
+
+	FixedKVector ZERO = new FixedKVector(Vec3.ZERO);
+	FixedKVector ONE = new FixedKVector(KMath.ONE_VEC3);
+	SimpleRegistryType.Unit<FixedKVector> ZERO_TYPE = SimpleRegistryType.unit("zero", ZERO);
+	SimpleRegistryType.Unit<FixedKVector> ONE_TYPE = SimpleRegistryType.unit("one", ONE);
 
 	Codec<KVector> LITERAL_CODEC = Codec.either(Vec3.CODEC, Codec.STRING).xmap(
 		e -> e.map(FixedKVector::new, KVector::named),
 		v -> v instanceof FixedKVector(Vec3 pos) ? Either.left(pos) : Either.right(v.toString())
 	);
 
-	Codec<KVector> VEC3_CODEC = Codec.either(LITERAL_CODEC, REGISTRY.valueCodec()).xmap(
+	Codec<KVector> VEC3_CODEC = Codec.either(LITERAL_CODEC, REGISTRY.codec()).xmap(
 		e -> e.map(Function.identity(), Function.identity()),
 		v -> v.isLiteral() ? Either.left(v) : Either.right(v)
 	);
@@ -52,7 +60,7 @@ public interface KVector {
 		v -> v instanceof FixedKVector(Vec3 pos) ? Either.left(pos) : Either.right(v.toString())
 	);
 
-	StreamCodec<RegistryFriendlyByteBuf, KVector> VEC3_STREAM_CODEC = ByteBufCodecs.either(LITERAL_STREAM_CODEC, REGISTRY.valueStreamCodec()).map(
+	StreamCodec<RegistryFriendlyByteBuf, KVector> VEC3_STREAM_CODEC = ByteBufCodecs.either(LITERAL_STREAM_CODEC, REGISTRY.streamCodec()).map(
 		e -> e.map(Function.identity(), Function.identity()),
 		v -> v.isLiteral() ? Either.left(v) : Either.right(v)
 	);
@@ -63,11 +71,6 @@ public interface KVector {
 	);
 
 	DataType<KVector> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, KVector.class);
-
-	FixedKVector ZERO = new FixedKVector(Vec3.ZERO);
-	FixedKVector ONE = new FixedKVector(KMath.ONE_VEC3);
-	SimpleRegistryType.Unit<FixedKVector> ZERO_TYPE = SimpleRegistryType.unit("zero", ZERO);
-	SimpleRegistryType.Unit<FixedKVector> ONE_TYPE = SimpleRegistryType.unit("one", ONE);
 
 	static FixedKVector of(Vec3 vec) {
 		if (vec.x == 0D && vec.y == 0D && vec.z == 0D) {
@@ -108,28 +111,27 @@ public interface KVector {
 		}
 	}
 
-	@AutoInit
-	static void bootstrap() {
-		REGISTRY.register(ZERO_TYPE);
-		REGISTRY.register(ONE_TYPE);
-		REGISTRY.register(FixedKVector.TYPE);
+	static void builtinTypes(SimpleRegistryCollector<KVector> registry) {
+		registry.register(ZERO_TYPE);
+		registry.register(ONE_TYPE);
+		registry.register(FixedKVector.TYPE);
 
 		for (var literal : LiteralKVector.values()) {
-			REGISTRY.register(literal.type);
+			registry.register(literal.type);
 		}
 
-		REGISTRY.register(InterpolatedKVector.TYPE);
-		REGISTRY.register(DynamicKVector.TYPE);
-		REGISTRY.register(ScalarKVector.TYPE);
-		REGISTRY.register(OffsetKVector.TYPE);
-		REGISTRY.register(ScaledKVector.TYPE);
-		REGISTRY.register(FollowingEntityKVector.TYPE);
-		REGISTRY.register(FollowingPropKVector.TYPE);
-		REGISTRY.register(VariableKVector.TYPE);
-		REGISTRY.register(IfKVector.TYPE);
-		REGISTRY.register(PivotingKVector.TYPE);
-		REGISTRY.register(YRotatedKVector.TYPE);
-		REGISTRY.register(GroundKVector.TYPE);
+		registry.register(InterpolatedKVector.TYPE);
+		registry.register(DynamicKVector.TYPE);
+		registry.register(ScalarKVector.TYPE);
+		registry.register(OffsetKVector.TYPE);
+		registry.register(ScaledKVector.TYPE);
+		registry.register(FollowingEntityKVector.TYPE);
+		registry.register(FollowingPropKVector.TYPE);
+		registry.register(VariableKVector.TYPE);
+		registry.register(IfKVector.TYPE);
+		registry.register(PivotingKVector.TYPE);
+		registry.register(YRotatedKVector.TYPE);
+		registry.register(GroundKVector.TYPE);
 	}
 
 	static KVector ofRotation(double yaw, double pitch) {
@@ -160,6 +162,7 @@ public interface KVector {
 		return new ScalarKVector(number);
 	}
 
+	@Override
 	default SimpleRegistryType<?> type() {
 		return REGISTRY.getType(this);
 	}

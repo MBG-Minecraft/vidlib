@@ -1,69 +1,84 @@
 package dev.latvian.mods.vidlib.feature.registry;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import com.mojang.serialization.MapCodec;
 import dev.latvian.mods.klib.codec.KLibCodecs;
-import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.util.Cast;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
-public record SimpleRegistry<V>(
-	Map<String, SimpleRegistryType<V>> typeMap,
-	Map<V, SimpleRegistryType.Unit<V>> unitTypeMap,
-	Map<String, V> unitValueMap,
-	Codec<SimpleRegistryType<V>> typeCodec,
-	StreamCodec<RegistryFriendlyByteBuf, SimpleRegistryType<V>> typeStreamCodec,
-	Codec<V> valueCodec,
-	MapCodec<V> valueMapCodec,
-	StreamCodec<RegistryFriendlyByteBuf, V> valueStreamCodec
-) {
-	public static <V> SimpleRegistry<V> create(Function<V, SimpleRegistryType<?>> typeGetter) {
-		var typeMap = new HashMap<String, SimpleRegistryType<V>>();
-		var unitTypeMap = new IdentityHashMap<V, SimpleRegistryType.Unit<V>>();
-		var unitValueMap = new LinkedHashMap<String, V>();
+public class SimpleRegistry<V extends SimpleRegistryEntry> {
+	public static final Map<ResourceLocation, SimpleRegistry<?>> ALL = new Object2ObjectOpenHashMap<>();
 
-		var typeCodec = KLibCodecs.map(typeMap, Codec.STRING, SimpleRegistryType::id);
-		var typeStreamCodec = KLibStreamCodecs.map(typeMap, KLibStreamCodecs.REGISTRY_STRING, SimpleRegistryType::id);
+	public static <V extends SimpleRegistryEntry> SimpleRegistry<V> create(ResourceLocation registryId, Consumer<SimpleRegistryCollector<V>> collector) {
+		return new SimpleRegistry<>(registryId, collector);
+	}
+
+	private final ResourceLocation registryId;
+	private Consumer<SimpleRegistryCollector<V>> collector;
+	private final Map<String, SimpleRegistryType<V>> typeMap;
+	private final Map<V, SimpleRegistryType.Unit<V>> unitTypeMap;
+	private final Map<String, V> unitValueMap;
+	public final Codec<SimpleRegistryType<V>> typeCodec;
+	private final Codec<V> codec;
+	private final StreamCodec<RegistryFriendlyByteBuf, V> streamCodec;
+
+	private SimpleRegistry(ResourceLocation registryId, Consumer<SimpleRegistryCollector<V>> collector) {
+		this.registryId = registryId;
+		this.collector = collector;
+		this.typeMap = new Object2ObjectOpenHashMap<>();
+		this.unitTypeMap = new IdentityHashMap<>();
+		this.unitValueMap = new LinkedHashMap<>();
+
+		this.typeCodec = KLibCodecs.map(typeMap, Codec.STRING, SimpleRegistryType::id);
 
 		Codec<V> unitCodec = Codec.STRING.flatXmap(s -> {
 			var value = typeMap.get(s);
-			return value instanceof SimpleRegistryType.Unit<V> unit ? DataResult.success(unit.instance()) : DataResult.error(() -> "Value not found");
+			return value instanceof SimpleRegistryType.Unit<V> unit ? DataResult.success(unit.instance()) : DataResult.error(() -> "Value " + s + " not found");
 		}, o -> {
 			var unit = unitTypeMap.get(o);
-			return unit != null ? DataResult.success(unit.id()) : DataResult.error(() -> "Key not found");
+			return unit != null ? DataResult.success(unit.id()) : DataResult.error(() -> "Key " + o + " not found");
 		});
 
-		Codec<V> dispatchCodec = typeCodec.dispatch("type", Cast.to(typeGetter), SimpleRegistryType::codec);
-		Codec<V> valueCodec = com.mojang.serialization.Codec.either(unitCodec, dispatchCodec).xmap(either -> either.map(Function.identity(), Function.identity()), v -> unitTypeMap.containsKey(v) ? Either.left(v) : Either.right(v));
-		MapCodec<V> valueMapCodec = typeCodec.dispatchMap("type", Cast.to(typeGetter), SimpleRegistryType::codec);
-		StreamCodec<RegistryFriendlyByteBuf, V> valueStreamCodec = typeStreamCodec.dispatch(Cast.to(typeGetter), SimpleRegistryType::streamCodec);
+		Codec<V> dispatchCodec = typeCodec.dispatch("type", v -> Cast.to(v.type()), SimpleRegistryType::codec);
 
-		return new SimpleRegistry<>(
-			typeMap,
-			unitTypeMap,
-			unitValueMap,
-			typeCodec,
-			typeStreamCodec,
-			valueCodec,
-			valueMapCodec,
-			valueStreamCodec
-		);
+		this.codec = KLibCodecs.or(unitCodec, dispatchCodec);
+
+		this.streamCodec = new StreamCodec<>() {
+			@Override
+			public V decode(RegistryFriendlyByteBuf buf) {
+				return streamDecode(buf);
+			}
+
+			@Override
+			public void encode(RegistryFriendlyByteBuf buf, V value) {
+				streamEncode(buf, value);
+			}
+		};
 	}
 
-	public void register(SimpleRegistryType<? extends V> value) {
-		typeMap.put(value.id(), Cast.to(value));
+	public void build() {
+		if (collector == null) {
+			throw new IllegalStateException("Registry " + registryId + " already built");
+		}
 
-		if (value instanceof SimpleRegistryType.Unit unit) {
+		collector.accept(this::register);
+		collector = null;
+		ALL.put(registryId, this);
+	}
+
+	private void register(SimpleRegistryType<? extends V> type) {
+		typeMap.put(type.id(), Cast.to(type));
+
+		if (type instanceof SimpleRegistryType.Unit unit) {
 			V unitValue = Cast.to(unit.instance());
 			unitTypeMap.put(unitValue, unit);
 			unitValueMap.put(unit.id(), unitValue);
@@ -73,5 +88,43 @@ public record SimpleRegistry<V>(
 	@Nullable
 	public SimpleRegistryType.Unit<V> getType(V value) {
 		return unitTypeMap.get(value);
+	}
+
+	public Map<String, V> unitValueMap() {
+		return unitValueMap;
+	}
+
+	public Codec<V> codec() {
+		return codec;
+	}
+
+	public StreamCodec<RegistryFriendlyByteBuf, V> streamCodec() {
+		return streamCodec;
+	}
+
+	public V streamDecode(RegistryFriendlyByteBuf buf) {
+		var typeId = buf.readUtf();
+		var type = typeMap.get(typeId);
+
+		if (type == null) {
+			throw new NullPointerException("Type " + registryId + "/" + typeId + " not found");
+		}
+
+		try {
+			return type.streamCodec().decode(buf);
+		} catch (Throwable ex) {
+			throw new IllegalStateException("Failed to decode " + registryId + "/" + typeId, ex);
+		}
+	}
+
+	public void streamEncode(RegistryFriendlyByteBuf buf, V value) {
+		var type = value.type();
+		buf.writeUtf(type.id());
+
+		try {
+			type.streamCodec().encode(buf, Cast.to(value));
+		} catch (Throwable ex) {
+			throw new IllegalStateException("Failed to encode " + registryId + "/" + type.id(), ex);
+		}
 	}
 }

@@ -1,23 +1,17 @@
 package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.klib.math.Line;
-import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.vidlib.feature.clothing.Clothing;
-import dev.latvian.mods.vidlib.feature.data.DataKey;
-import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
-import dev.latvian.mods.vidlib.feature.icon.Icon;
+import dev.latvian.mods.vidlib.feature.data.DataMap;
+import dev.latvian.mods.vidlib.feature.data.PlayerDataMapHolder;
 import dev.latvian.mods.vidlib.feature.session.SessionData;
-import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;
 
-public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
+public interface VLPlayer extends VLLivingEntity, VLPlayerContainer, PlayerDataMapHolder {
 	@Override
 	default Player vl$self() {
 		return (Player) this;
@@ -27,92 +21,21 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
 		throw new NoMixinException(this);
 	}
 
-	default void vl$sessionData(SessionData data) {
-		throw new NoMixinException(this);
-	}
-
 	@Override
 	default boolean vl$isCreative() {
 		return vl$self().isCreative();
 	}
 
+	@Override
 	@Nullable
-	default <T> T getOptional(DataKey<T> type) {
+	default DataMap getDataMap() {
 		var session = vl$sessionData();
-		return session == null ? null : session.dataMap.get(type, vl$level().getGameTime());
-	}
-
-	default <T> T get(DataKey<T> type) {
-		var value = getOptional(type);
-		return value == null ? type.defaultValue() : value;
-	}
-
-	default <T> void set(DataKey<T> type, T value) {
-		vl$sessionData().dataMap.set(type, value);
-	}
-
-	default <T> void reset(DataKey<T> type) {
-		vl$sessionData().dataMap.reset(type);
+		return session == null ? null : session.dataMap;
 	}
 
 	@Override
-	default boolean isSuspended() {
+	default boolean vl$isSuspended() {
 		return vl$sessionData().suspended;
-	}
-
-	default void setSuspended(boolean value) {
-		set(InternalPlayerData.SUSPENDED, value);
-	}
-
-	default void setNickname(Component nickname) {
-		set(InternalPlayerData.NICKNAME, Empty.isEmpty(nickname) ? Empty.COMPONENT : nickname);
-	}
-
-	default void setPlumbob(Icon icon) {
-		set(InternalPlayerData.PLUMBOB, icon.holder());
-	}
-
-	default void setClothing(Clothing clothing) {
-		set(InternalPlayerData.CLOTHING, clothing);
-	}
-
-	default void setSkinOverride(@Nullable SkinTexture skin) {
-		set(InternalPlayerData.SKIN_OVERRIDE, skin);
-	}
-
-	default void setCapeOverride(@Nullable ResourceLocation cape) {
-		set(InternalPlayerData.CAPE_OVERRIDE, cape);
-	}
-
-	default void setElytraOverride(@Nullable ResourceLocation cape) {
-		set(InternalPlayerData.ELYTRA_OVERRIDE, cape);
-	}
-
-	default float getFlightSpeedMod() {
-		return vl$sessionData().flightSpeedMod;
-	}
-
-	default void setFlightSpeedMod(float value) {
-		set(InternalPlayerData.FLIGHT_SPEED, value);
-	}
-
-	@Override
-	default double vl$gravityMod() {
-		return vl$sessionData().gravityMod;
-	}
-
-	@Override
-	default float vl$speedMod() {
-		return vl$sessionData().speedMod;
-	}
-
-	@Override
-	default float vl$attackDamageMod() {
-		return vl$sessionData().attackDamageMod;
-	}
-
-	default boolean vl$pvp(Player other) {
-		return vl$sessionData().pvp && other.vl$sessionData().pvp;
 	}
 
 	@Override
@@ -131,10 +54,5 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer {
 
 	default boolean isReplayCamera() {
 		return false;
-	}
-
-	@Override
-	default boolean vl$unpushable() {
-		return vl$sessionData().unpushable;
 	}
 }

@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import com.google.gson.JsonElement;
+import com.mojang.serialization.DataResult;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataKeyStorage;
@@ -57,7 +59,7 @@ public abstract class DataMapConfigPanel extends Panel {
 			for (var entry : entries) {
 				ImGui.pushID(entry.key.id());
 				var defaultValue = entry.key.defaultValue();
-				var currentValue = dataMap.get(entry.key, graphics.mc.level.getGameTime());
+				var currentValue = dataMap.get(entry.key);
 				boolean isDefault = graphics.isReplay ? !dataMap.hasSuperOverride(entry.key) : Objects.equals(defaultValue, currentValue);
 
 				if (entry.builder != null) {
@@ -133,8 +135,13 @@ public abstract class DataMapConfigPanel extends Panel {
 				ImGui.pushID("###value");
 
 				if (entry.builder == null) {
+					DataResult<JsonElement> result = null;
+					Object value = null;
+
 					try {
-						var string = entry.key.type().codec().encodeStart(graphics.mc.level.jsonOps(), Cast.to(dataMap.get(entry.key))).getOrThrow().toString();
+						value = dataMap.get(entry.key);
+						result = entry.key.type().codec().encodeStart(graphics.mc.level.jsonOps(), Cast.to(value));
+						var string = result.getOrThrow().toString();
 
 						if (string.length() <= 50) {
 							ImGui.text(string);
@@ -145,8 +152,18 @@ public abstract class DataMapConfigPanel extends Panel {
 								ImGui.setTooltip(string);
 							}
 						}
-					} catch (Exception ex) {
+					} catch (Throwable ex) {
 						graphics.redTextIf("Unable to encode JSON", true);
+
+						if (result instanceof DataResult.Error<JsonElement> error) {
+							graphics.redTextIf(error.message(), true);
+						}
+
+						if (value != null) {
+							graphics.redTextIf("Value: " + value, true);
+						}
+
+						graphics.stackTrace(ex);
 					}
 				}
 

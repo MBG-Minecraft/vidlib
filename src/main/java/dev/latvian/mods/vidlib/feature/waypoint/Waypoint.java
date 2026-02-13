@@ -25,8 +25,7 @@ import java.util.List;
 
 public record Waypoint(
 	String id,
-	boolean enabled,
-	EntityFilter filter,
+	EntityFilter visible,
 	ResourceKey<Level> dimension,
 	KVector position,
 	ResourceLocation icon,
@@ -42,8 +41,7 @@ public record Waypoint(
 
 	public static final Codec<Waypoint> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Codec.STRING.optionalFieldOf("id", "").forGetter(Waypoint::id),
-		Codec.BOOL.optionalFieldOf("enabled", true).forGetter(Waypoint::enabled),
-		EntityFilter.CODEC.optionalFieldOf("filter", EntityFilter.ANY.instance()).forGetter(Waypoint::filter),
+		EntityFilter.CODEC.optionalFieldOf("visible", EntityFilter.ANY.instance()).forGetter(Waypoint::visible),
 		MCCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(Waypoint::dimension),
 		KVector.CODEC.fieldOf("position").forGetter(Waypoint::position),
 		ID.CODEC.optionalFieldOf("icon", VidLibTextures.DEFAULT_MARKER).forGetter(Waypoint::icon),
@@ -59,7 +57,7 @@ public record Waypoint(
 	public static final StreamCodec<RegistryFriendlyByteBuf, Waypoint> STREAM_CODEC = CompositeStreamCodec.of(
 		ByteBufCodecs.STRING_UTF8, Waypoint::id,
 		ByteBufCodecs.VAR_INT, Waypoint::getFlags,
-		KLibStreamCodecs.optional(EntityFilter.STREAM_CODEC, EntityFilter.ANY.instance()), Waypoint::filter,
+		KLibStreamCodecs.optional(EntityFilter.STREAM_CODEC, EntityFilter.ANY.instance()), Waypoint::visible,
 		KLibStreamCodecs.optional(MCStreamCodecs.DIMENSION, Level.OVERWORLD), Waypoint::dimension,
 		KVector.STREAM_CODEC, Waypoint::position,
 		KLibStreamCodecs.optional(ID.STREAM_CODEC, VidLibTextures.DEFAULT_MARKER), Waypoint::icon,
@@ -76,8 +74,7 @@ public record Waypoint(
 
 	public static class Builder {
 		public String id = "";
-		public boolean enabled = true;
-		public EntityFilter filter = EntityFilter.ANY.instance();
+		public EntityFilter visible = EntityFilter.ANY.instance();
 		public ResourceKey<Level> dimension = Level.OVERWORLD;
 		public KVector position = KVector.ZERO;
 		public ResourceLocation icon = VidLibTextures.DEFAULT_MARKER;
@@ -92,8 +89,7 @@ public record Waypoint(
 		public Waypoint build() {
 			return new Waypoint(
 				id,
-				enabled,
-				filter,
+				visible,
 				dimension,
 				position,
 				icon,
@@ -123,7 +119,6 @@ public record Waypoint(
 	) {
 		this(
 			id,
-			(flags & 1) != 0,
 			filter,
 			dimension,
 			position,
@@ -140,7 +135,7 @@ public record Waypoint(
 
 	private int getFlags() {
 		int flags = 0;
-		flags |= enabled ? 1 : 0;
+		// flags |= 1;
 		flags |= centered ? 2 : 0;
 		flags |= showDistance ? 4 : 0;
 		return flags;

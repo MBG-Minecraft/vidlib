@@ -81,7 +81,7 @@ public class KNumberContext {
 		this.level = level;
 
 		if (level != null) {
-			this.serverDataMap = level.getServerData();
+			this.serverDataMap = level.getDataMap();
 			this.gameTime = (double) level.getGameTime();
 			this.gameDay = (double) (level.getGameTime() % 24000L) / 24000D;
 			this.clock = (double) level.getDayTime();
@@ -126,7 +126,7 @@ public class KNumberContext {
 		if (level == null) {
 			return null;
 		} else if (serverDataMap == null) {
-			serverDataMap = level.getServerData();
+			serverDataMap = level.getDataMap();
 		}
 
 		return serverDataMap.get(key);

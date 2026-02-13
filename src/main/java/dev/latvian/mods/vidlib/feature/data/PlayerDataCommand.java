@@ -4,7 +4,7 @@ import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
@@ -15,18 +15,20 @@ public interface PlayerDataCommand {
 		command.requires(source -> source.hasPermission(2));
 		var nbtOps = buildContext.createSerializationContext(NbtOps.INSTANCE);
 
-		var playerCmd = Commands.argument("player", EntityArgument.players());
+		var playerCmd = Commands.argument("player", GameProfileArgument.gameProfile());
 
 		for (var key : DataKey.PLAYER.all.values()) {
 			var cmd = Commands.literal(key.id());
 
 			cmd.then(Commands.literal("get")
 				.executes(ctx -> {
-					for (var player : EntityArgument.getPlayers(ctx, "player")) {
+					for (var player : GameProfileArgument.getGameProfiles(ctx, "player")) {
+						var playerData = ctx.getSource().getServer().vl$getOrLoadServerSession(player.getId());
+
 						ctx.getSource().sendSuccess(() -> {
-							var value = player.getOptional(key);
+							var value = playerData.dataMap.get(key);
 							var nbt = key.type().codec().encodeStart(nbtOps, Cast.to(value)).getOrThrow();
-							return Component.literal(player.getScoreboardName() + ": ").append(NbtUtils.toPrettyComponent(nbt));
+							return Component.literal(player.getName() + ": ").append(NbtUtils.toPrettyComponent(nbt));
 						}, false);
 					}
 
@@ -39,8 +41,9 @@ public interface PlayerDataCommand {
 					.executes(ctx -> {
 						var value = key.command().get(ctx, "value");
 
-						for (var player : EntityArgument.getPlayers(ctx, "player")) {
-							player.set(key, Cast.to(value));
+						for (var player : GameProfileArgument.getGameProfiles(ctx, "player")) {
+							var playerData = ctx.getSource().getServer().vl$getOrLoadServerSession(player.getId());
+							playerData.dataMap.set(key, Cast.to(value));
 						}
 
 						return 1;
@@ -50,8 +53,9 @@ public interface PlayerDataCommand {
 
 			cmd.then(Commands.literal("reset")
 				.executes(ctx -> {
-					for (var player : EntityArgument.getPlayers(ctx, "player")) {
-						player.set(key, Cast.to(key.defaultValue()));
+					for (var player : GameProfileArgument.getGameProfiles(ctx, "player")) {
+						var playerData = ctx.getSource().getServer().vl$getOrLoadServerSession(player.getId());
+						playerData.dataMap.set(key, Cast.to(key.defaultValue()));
 					}
 
 					return 1;

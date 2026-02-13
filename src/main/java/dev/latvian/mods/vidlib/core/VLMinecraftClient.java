@@ -118,7 +118,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default DataMap getServerData() {
+	default DataMap getDataMap() {
 		return vl$self().player.vl$sessionData().serverDataMap;
 	}
 

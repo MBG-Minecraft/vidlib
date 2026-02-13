@@ -349,7 +349,7 @@ public class VidLibClientEventHandler {
 				}
 			}
 
-			if (!session.serverDataMap.get(InternalServerData.HIDE_PLUMBOBS, mc.level.getGameTime())) {
+			if (!session.serverDataMap.get(InternalServerData.HIDE_PLUMBOBS)) {
 				PlumbobRenderer.render(mc, frame);
 			}
 

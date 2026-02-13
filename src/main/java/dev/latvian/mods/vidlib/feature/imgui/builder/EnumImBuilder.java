@@ -11,9 +11,10 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 import java.util.function.Function;
 
 public class EnumImBuilder<E> implements ImBuilder<E> {
@@ -24,11 +25,11 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 
 	public static final ImString SEARCH = ImGuiUtils.resizableString();
 
-	public final List<E> options;
+	public final Collection<E> options;
 	public final Object[] value;
 	public Function<E, String> nameGetter;
 
-	public EnumImBuilder(List<E> options, E defaultValue) {
+	public EnumImBuilder(Collection<E> options, @Nullable E defaultValue) {
 		this.options = options;
 		this.value = new Object[]{defaultValue};
 		this.nameGetter = (Function) KLibCodecs.DEFAULT_NAME_GETTER;
@@ -38,8 +39,8 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 		this(Arrays.asList(options), defaultValue);
 	}
 
-	public EnumImBuilder(List<E> options) {
-		this(options, options.getFirst());
+	public EnumImBuilder(Collection<E> options) {
+		this(options, null);
 	}
 
 	public EnumImBuilder(E[] options) {
@@ -60,6 +61,11 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
 		return graphics.combo("###enum", value, options, nameGetter, SEARCH);
+	}
+
+	@Override
+	public boolean isValid() {
+		return value[0] != null;
 	}
 
 	@Override

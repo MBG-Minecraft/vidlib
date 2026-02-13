@@ -3,7 +3,17 @@ package dev.latvian.mods.vidlib.feature.platform;
 import com.google.gson.JsonObject;
 import dev.latvian.mods.klib.util.Side;
 import dev.latvian.mods.vidlib.feature.auto.AutoCallback;
+import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
+import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
+import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
+import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
+import dev.latvian.mods.vidlib.feature.icon.Icon;
+import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
+import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
+import dev.latvian.mods.vidlib.math.knumber.KNumber;
+import dev.latvian.mods.vidlib.math.kvector.KVector;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -66,5 +76,41 @@ public class PlatformHelper {
 	}
 
 	public void collectDynamicResources(PackType type, Consumer<ResourceLocation> callback) {
+	}
+
+	public void collectKNumbers(SimpleRegistryCollector<KNumber> registry) {
+		KNumber.builtinTypes(registry);
+	}
+
+	public void collectKVectors(SimpleRegistryCollector<KVector> registry) {
+		KVector.builtinTypes(registry);
+	}
+
+	public void collectEntityFilters(SimpleRegistryCollector<EntityFilter> registry) {
+		EntityFilter.builtinTypes(registry);
+	}
+
+	public void collectBlockFilters(SimpleRegistryCollector<BlockFilter> registry) {
+		BlockFilter.builtinTypes(registry);
+	}
+
+	public void collectZoneShapes(SimpleRegistryCollector<ZoneShape> registry) {
+		ZoneShape.builtinTypes(registry);
+	}
+
+	public void collectIcons(SimpleRegistryCollector<Icon> registry) {
+		Icon.builtinTypes(registry);
+	}
+
+	public void collectScreenShakeTypes(SimpleRegistryCollector<ScreenShakeType> registry) {
+		ScreenShakeType.builtinTypes(registry);
+	}
+
+	public void collectBulkLevelModifications(SimpleRegistryCollector<BulkLevelModification> registry) {
+		BulkLevelModification.builtinTypes(registry);
+	}
+
+	public void collectScreenEffects(SimpleRegistryCollector<ScreenEffect> registry) {
+		ScreenEffect.builtinTypes(registry);
 	}
 }

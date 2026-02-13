@@ -7,6 +7,7 @@ import dev.latvian.mods.vidlib.core.VLLocalPlayer;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.item.ItemScreen;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.session.LocalClientSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -37,6 +38,9 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements V
 	protected Minecraft minecraft;
 
 	@Unique
+	private LocalClientSessionData vl$sessionData;
+
+	@Unique
 	private Boolean vl$isReplayCamera;
 
 	public LocalPlayerMixin(ClientLevel clientLevel, GameProfile gameProfile) {
@@ -45,11 +49,11 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements V
 
 	@Override
 	public LocalClientSessionData vl$sessionData() {
-		if (connection instanceof VLClientPlayPacketListener listener) {
-			return listener.vl$sessionData();
+		if (vl$sessionData == null && connection instanceof VLClientPlayPacketListener listener) {
+			vl$sessionData = listener.vl$sessionData();
 		}
 
-		return null;
+		return vl$sessionData;
 	}
 
 	@Override
@@ -78,7 +82,7 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements V
 
 	@ModifyExpressionValue(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Abilities;getFlyingSpeed()F"))
 	private float vl$getFlyingSpeed(float original) {
-		return original * getFlightSpeedMod();
+		return original * CommonGameEngine.INSTANCE.getFlightSpeedModifier(vl$self());
 	}
 
 	@Inject(method = "drop", at = @At("HEAD"), cancellable = true)

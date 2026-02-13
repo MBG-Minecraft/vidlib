@@ -115,7 +115,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	public List<EventMarkerPayload> markers;
 
 	public LocalClientSessionData(Minecraft mc, UUID uuid) {
-		super(uuid);
+		super(uuid, mc);
 		this.mc = mc;
 		this.remoteSessionData = new Object2ObjectOpenHashMap<>();
 
@@ -126,7 +126,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.prevCameraShake = this.cameraShake = Identity.DVEC_2;
 		this.clocks = new Object2ObjectOpenHashMap<>();
 		this.skyboxes = new Object2ObjectOpenHashMap<>();
-		this.serverDataMap = new DataMap(uuid, DataKey.SERVER);
+		this.serverDataMap = new DataMap(uuid, DataKey.SERVER, mc);
 		this.globalVariables = new KNumberVariables();
 		this.debugDecals = new ArrayList<>();
 		this.screenEffects = new ArrayList<>();
@@ -141,7 +141,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		var data = remoteSessionData.get(id);
 
 		if (data == null) {
-			data = new RemoteClientSessionData(id);
+			data = new RemoteClientSessionData(id, dataMap.timeProvider);
 			remoteSessionData.put(id, data);
 		}
 
@@ -154,7 +154,7 @@ public class LocalClientSessionData extends ClientSessionData {
 
 	public ScheduledTask.Handler getScheduledTaskHandler() {
 		if (scheduledTaskHandler == null) {
-			scheduledTaskHandler = new ScheduledTask.Handler(mc::getGameTime);
+			scheduledTaskHandler = new ScheduledTask.Handler(mc);
 		}
 
 		return scheduledTaskHandler;

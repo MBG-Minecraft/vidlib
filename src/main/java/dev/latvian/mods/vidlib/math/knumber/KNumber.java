@@ -2,10 +2,12 @@ package dev.latvian.mods.vidlib.math.knumber;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
+import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
+import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -15,15 +17,20 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
-public interface KNumber {
-	SimpleRegistry<KNumber> REGISTRY = SimpleRegistry.create(KNumber::type);
+public interface KNumber extends SimpleRegistryEntry {
+	SimpleRegistry<KNumber> REGISTRY = SimpleRegistry.create(VidLib.id("knumber"), c -> PlatformHelper.CURRENT.collectKNumbers(c));
+
+	FixedKNumber ZERO = new FixedKNumber(0D);
+	FixedKNumber ONE = new FixedKNumber(1D);
+	SimpleRegistryType.Unit<FixedKNumber> ZERO_TYPE = SimpleRegistryType.unit("zero", ZERO);
+	SimpleRegistryType.Unit<FixedKNumber> ONE_TYPE = SimpleRegistryType.unit("one", ONE);
 
 	Codec<KNumber> LITERAL_CODEC = Codec.either(Codec.DOUBLE, Codec.STRING).xmap(
 		e -> e.map(KNumber::of, KNumber::named),
 		v -> v instanceof FixedKNumber(Double number) ? Either.left(number) : Either.right(v.toString())
 	);
 
-	Codec<KNumber> CODEC = Codec.either(LITERAL_CODEC, REGISTRY.valueCodec()).xmap(
+	Codec<KNumber> CODEC = Codec.either(LITERAL_CODEC, REGISTRY.codec()).xmap(
 		e -> e.map(Function.identity(), Function.identity()),
 		v -> v.isLiteral() ? Either.left(v) : Either.right(v)
 	);
@@ -33,20 +40,12 @@ public interface KNumber {
 		v -> v instanceof FixedKNumber(Double number) ? Either.left(number) : Either.right(v.toString())
 	);
 
-	StreamCodec<RegistryFriendlyByteBuf, KNumber> STREAM_CODEC = ByteBufCodecs.either(LITERAL_STREAM_CODEC, REGISTRY.valueStreamCodec()).map(
+	StreamCodec<RegistryFriendlyByteBuf, KNumber> STREAM_CODEC = ByteBufCodecs.either(LITERAL_STREAM_CODEC, REGISTRY.streamCodec()).map(
 		e -> e.map(Function.identity(), Function.identity()),
 		v -> v.isLiteral() ? Either.left(v) : Either.right(v)
 	);
 
 	DataType<KNumber> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, KNumber.class);
-
-	FixedKNumber ZERO = new FixedKNumber(0D);
-	FixedKNumber ONE = new FixedKNumber(1D);
-	SimpleRegistryType.Unit<FixedKNumber> ZERO_TYPE = SimpleRegistryType.unit("zero", ZERO);
-	SimpleRegistryType.Unit<FixedKNumber> ONE_TYPE = SimpleRegistryType.unit("one", ONE);
-
-	StreamCodec<RegistryFriendlyByteBuf, KNumber> OPTIONAL_ZERO_STREAM_CODEC = KLibStreamCodecs.optional(STREAM_CODEC, ZERO);
-	StreamCodec<RegistryFriendlyByteBuf, KNumber> OPTIONAL_ONE_STREAM_CODEC = KLibStreamCodecs.optional(STREAM_CODEC, ONE);
 
 	static FixedKNumber of(double number) {
 		if (number == 0D) {
@@ -66,29 +65,29 @@ public interface KNumber {
 		}
 	}
 
-	@AutoInit
-	static void bootstrap() {
-		REGISTRY.register(ZERO_TYPE);
-		REGISTRY.register(ONE_TYPE);
-		REGISTRY.register(FixedKNumber.TYPE);
+	static void builtinTypes(SimpleRegistryCollector<KNumber> registry) {
+		registry.register(ZERO_TYPE);
+		registry.register(ONE_TYPE);
+		registry.register(FixedKNumber.TYPE);
 
 		for (var literal : LiteralKNumber.values()) {
-			REGISTRY.register(literal.type);
+			registry.register(literal.type);
 		}
 
-		REGISTRY.register(InterpolatedKNumber.TYPE);
-		REGISTRY.register(OffsetKNumber.TYPE);
-		REGISTRY.register(ScaledKNumber.TYPE);
-		REGISTRY.register(VariableKNumber.TYPE);
-		REGISTRY.register(IfKNumber.TYPE);
-		REGISTRY.register(ServerDataKNumber.TYPE);
-		REGISTRY.register(RandomKNumber.TYPE);
-		REGISTRY.register(SinKNumber.TYPE);
-		REGISTRY.register(CosKNumber.TYPE);
-		REGISTRY.register(Atan2KNumber.TYPE);
-		REGISTRY.register(ClampedKNumber.TYPE);
+		registry.register(InterpolatedKNumber.TYPE);
+		registry.register(OffsetKNumber.TYPE);
+		registry.register(ScaledKNumber.TYPE);
+		registry.register(VariableKNumber.TYPE);
+		registry.register(IfKNumber.TYPE);
+		registry.register(ServerDataKNumber.TYPE);
+		registry.register(RandomKNumber.TYPE);
+		registry.register(SinKNumber.TYPE);
+		registry.register(CosKNumber.TYPE);
+		registry.register(Atan2KNumber.TYPE);
+		registry.register(ClampedKNumber.TYPE);
 	}
 
+	@Override
 	default SimpleRegistryType<?> type() {
 		return REGISTRY.getType(this);
 	}

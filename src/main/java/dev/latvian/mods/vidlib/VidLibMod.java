@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
+import dev.latvian.mods.vidlib.feature.block.VidLibBlocks;
+import dev.latvian.mods.vidlib.feature.item.VidLibItems;
 import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.platform.neoforge.NeoPlatformHelper;
@@ -17,6 +19,8 @@ public class VidLibMod {
 		PlatformHelper.CURRENT = new NeoPlatformHelper(mod);
 		VidLib.VERSION = mod.getModInfo().getVersion().toString();
 		VidLib.init();
+		VidLibBlocks.REGISTRY.register(bus);
+		VidLibItems.REGISTRY.register(bus);
 
 		for (var s : AutoRegister.SCANNED.get()) {
 			if (s.value() instanceof DeferredRegister<?> reg) {
@@ -35,8 +39,6 @@ public class VidLibMod {
 				}
 			}
 		}
-
-		VidLibContent.init(bus);
 
 		var particleRegistry = DeferredRegister.create(Registries.PARTICLE_TYPE, VidLib.ID);
 

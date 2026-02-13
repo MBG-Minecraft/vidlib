@@ -4,7 +4,6 @@ import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.vidlib.feature.entity.C2SEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.entity.EntityData;
-import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.entity.ForceEntityVelocityPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.S2CEntityEventPayload;
@@ -73,25 +72,17 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		return getGameMode() == GameType.SURVIVAL;
 	}
 
+	default boolean isAdventure() {
+		return getGameMode() == GameType.ADVENTURE;
+	}
+
 	default boolean isSurvivalLike() {
 		var type = getGameMode();
 		return type != null && type.isSurvival();
 	}
 
-	default boolean isSuspended() {
-		return EntityOverride.SUSPENDED.get(this, false);
-	}
-
-	default double vl$gravityMod() {
-		return EntityOverride.GRAVITY.get(this, 1D);
-	}
-
-	default float vl$speedMod() {
-		return EntityOverride.SPEED.get(this, 1F);
-	}
-
-	default float vl$attackDamageMod() {
-		return EntityOverride.ATTACK_DAMAGE.get(this, 1F);
+	default boolean vl$isSuspended() {
+		return false;
 	}
 
 	default Line ray(double distance, float delta) {

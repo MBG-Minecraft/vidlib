@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib;
 
+import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
-import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.location.Location;
@@ -250,14 +250,14 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent
 	public static void entityInvulnerabilityCheck(EntityInvulnerabilityCheckEvent event) {
-		if (!event.getOriginalInvulnerability() && !event.isInvulnerable() && EntityOverride.INVULNERABLE.get(event.getEntity(), false)) {
+		if (!event.getOriginalInvulnerability() && !event.isInvulnerable() && CommonGameEngine.INSTANCE.isInvulnerable(event.getEntity())) {
 			event.setInvulnerable(true);
 		}
 	}
 
 	@SubscribeEvent
 	public static void livingFall(LivingFallEvent event) {
-		var mod = Math.pow(event.getEntity().vl$gravityMod(), 2D);
+		var mod = KMath.sq(CommonGameEngine.INSTANCE.getGravityModifier(event.getEntity()));
 
 		if (mod <= 0D) {
 			event.setCanceled(true);
@@ -268,10 +268,11 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent
 	public static void livingDamagePre(LivingDamageEvent.Pre event) {
-		var mod = event.getEntity().vl$attackDamageMod();
+		var dmg = event.getNewDamage();
+		var newDmg = CommonGameEngine.INSTANCE.getAttackDamage(event.getEntity(), event.getSource(), dmg);
 
-		if (mod != 1F) {
-			event.setNewDamage(event.getNewDamage() * mod);
+		if (dmg != newDmg) {
+			event.setNewDamage(newDmg);
 		}
 	}
 

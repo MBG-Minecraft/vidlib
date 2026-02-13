@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.misc;
 
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.latvian.mods.common.CommonPaths;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.util.JsonUtils;
@@ -24,36 +25,48 @@ public class GlobalKeybinds {
 		}
 	});
 
-	private static JsonObject json;
+	private static final Lazy<JsonObject> JSON = Lazy.of(() -> {
+		var json = new JsonObject();
+		var path = PATH.get();
 
-	public static JsonObject getJson() {
-		if (json == null) {
-			json = new JsonObject();
-			var path = PATH.get();
-
-			if (path != null && Files.exists(path)) {
-				try (var reader = Files.newBufferedReader(path)) {
-					json = JsonUtils.read(reader).getAsJsonObject();
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
+		if (path != null && Files.exists(path)) {
+			try (var reader = Files.newBufferedReader(path)) {
+				json = JsonUtils.read(reader).getAsJsonObject();
+			} catch (Exception ex) {
+				ex.printStackTrace();
 			}
 		}
 
 		return json;
-	}
+	});
 
 	@Nullable
 	public static String get(String key) {
-		var json = getJson();
-		return json.has(key) ? json.get(key).getAsString() : null;
+		var json = JSON.get();
+
+		if (json.has(key)) {
+			var k = json.get(key).getAsString();
+			return k.isEmpty() ? "key.keyboard.unknown" : k;
+		}
+
+		return null;
 	}
 
 	public static void saveKeybinds(Options options) {
-		var json = getJson();
+		var json = JSON.get();
 
 		for (var key : options.keyMappings) {
-			json.addProperty(key.getName(), key.saveString() + (key.getKeyModifier() != KeyModifier.NONE ? ":" + key.getKeyModifier() : ""));
+			var k = key.saveString();
+
+			if (key.getKeyModifier() != KeyModifier.NONE) {
+				k += ":" + key.getKeyModifier();
+			}
+
+			if (k.equals("key.keyboard.unknown")) {
+				k = "";
+			}
+
+			json.addProperty(key.getName(), k);
 		}
 
 		var path = PATH.get();
@@ -65,5 +78,22 @@ public class GlobalKeybinds {
 				ex.printStackTrace();
 			}
 		}
+	}
+
+	public static InputConstants.Key modifyDefaultKeys(String name, InputConstants.Key original) {
+		return switch (name) {
+			case "key.saveToolbarActivator",
+				 "key.loadToolbarActivator",
+				 "key.socialInteractions",
+				 "key.atlasviewer.open_viewer",
+				 "key.curios.open.desc",
+				 "key.bridgingmod.toggle_bridging",
+				 "key.voice_chat_group",
+				 "key.advancements" -> InputConstants.UNKNOWN;
+			case "key.jei.bookmark" -> InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_EQUALS);
+			case "key.push_to_talk" -> InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_C);
+			case "key.ok_zoomer.zoom" -> InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_Z);
+			default -> original;
+		};
 	}
 }

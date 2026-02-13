@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.data;
 
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.core.VLGameTimeProvider;
 import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import net.minecraft.nbt.CompoundTag;
@@ -22,14 +23,16 @@ import java.util.function.BiFunction;
 
 public class DataMap {
 	public final UUID owner;
-	private final DataKeyStorage storage;
+	public final DataKeyStorage storage;
+	public final VLGameTimeProvider timeProvider;
 	private final TrackedDataMapValue[] map;
 	public DataMapOverrides.DataMap overrides;
 	private Optional<Object>[] superOverrides;
 
-	public DataMap(UUID owner, DataKeyStorage storage) {
+	public DataMap(UUID owner, DataKeyStorage storage, VLGameTimeProvider timeProvider) {
 		this.owner = owner;
 		this.storage = storage;
+		this.timeProvider = timeProvider;
 		this.map = new TrackedDataMapValue[storage.all.size()];
 		this.overrides = null;
 		this.superOverrides = null;
@@ -45,14 +48,12 @@ public class DataMap {
 		return map[type.index()];
 	}
 
-	@Nullable
 	@SuppressWarnings("unchecked")
-	public <T> T get(DataKey<T> type) {
+	public <T> T getActual(DataKey<T> type) {
 		return (T) init(type).data;
 	}
 
-	@Nullable
-	public <T> T get(DataKey<T> type, long gameTime) {
+	public <T> T get(DataKey<T> type) {
 		if (superOverrides != null) {
 			var v = superOverrides[type.index()];
 
@@ -62,14 +63,14 @@ public class DataMap {
 		}
 
 		if (overrides != null) {
-			var v = overrides.getOverride(type, gameTime);
+			var v = overrides.getOverride(type, timeProvider.vl$getGameTime());
 
 			if (v != null) {
 				return v;
 			}
 		}
 
-		return get(type);
+		return getActual(type);
 	}
 
 	public <T> void set(DataKey<T> type, @Nullable T value) {
@@ -116,7 +117,7 @@ public class DataMap {
 		if (Files.exists(path)) {
 			try (var in = Files.newInputStream(path)) {
 				var data = NbtIo.readCompressed(in, NbtAccounter.unlimitedHeap());
-				var ops = server.registryAccess().createSerializationContext(NbtOps.INSTANCE);
+				var ops = server.nbtOps();
 
 				for (var type : storage.saved.values()) {
 					var tag = data.get(type.id());

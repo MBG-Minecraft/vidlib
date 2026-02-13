@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.feature.item;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.datafixers.util.Pair;
 import dev.latvian.mods.klib.util.Lazy;
-import dev.latvian.mods.vidlib.VidLibContent;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
@@ -19,6 +18,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.ClipContext;
@@ -98,7 +98,7 @@ public interface VidLibTool {
 	}
 
 	default ItemStack createFullItem() {
-		var stack = new ItemStack(VidLibContent.Items.TOOL.get());
+		var stack = new ItemStack(Items.PAPER);
 		var tag = new CompoundTag();
 		tag.putString("vidlib:tool", getId());
 		stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));

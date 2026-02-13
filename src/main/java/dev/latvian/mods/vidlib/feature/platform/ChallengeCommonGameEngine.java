@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
-import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
@@ -70,9 +69,7 @@ public class ChallengeCommonGameEngine extends CommonGameEngine {
 				return Shapes.empty();
 			}
 
-			var v = EntityOverride.PASS_THROUGH_BARRIERS.get(ctx.getEntity());
-
-			if (v == null ? ctx.getEntity().vl$isCreative() : v) {
+			if (ctx.getEntity().vl$isCreative()) {
 				return Shapes.empty();
 			}
 		}

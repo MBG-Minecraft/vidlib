@@ -31,7 +31,7 @@ public class Skybox {
 
 			slist.add(MenuItem.item(tex.getIcon(), skybox.getPath(), skybox.equals(current), g1 -> {
 				if (g1.isReplay || !g1.serverFeatures.has(Feature.SKYBOX)) {
-					g1.mc.getServerData().setSuperOverride(InternalServerData.SKYBOX, skybox);
+					g1.mc.getDataMap().setSuperOverride(InternalServerData.SKYBOX, skybox);
 				} else {
 					g1.mc.runClientCommand("skybox set \"" + skybox + "\"");
 				}
@@ -42,7 +42,7 @@ public class Skybox {
 
 		slist.add(MenuItem.item(ImIcons.INVISIBLE, "Vanilla", Skyboxes.VANILLA.equals(current), g1 -> {
 			if (g1.isReplay || !g1.serverFeatures.has(Feature.SKYBOX)) {
-				g1.mc.getServerData().setSuperOverride(InternalServerData.SKYBOX, Skyboxes.VANILLA);
+				g1.mc.getDataMap().setSuperOverride(InternalServerData.SKYBOX, Skyboxes.VANILLA);
 			} else {
 				g1.mc.runClientCommand("skybox set \"minecraft:vanilla\"");
 			}

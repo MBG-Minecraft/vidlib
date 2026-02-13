@@ -5,10 +5,29 @@ import com.google.gson.JsonObject;
 import dev.latvian.mods.klib.util.Side;
 import dev.latvian.mods.vidlib.feature.auto.AutoCallback;
 import dev.latvian.mods.vidlib.feature.auto.ScannedAnnotation;
+import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
+import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterRegistryEvent;
+import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
+import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModificationRegistryEvent;
+import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
+import dev.latvian.mods.vidlib.feature.camera.ScreenShakeTypeRegistryEvent;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.capture.PacketCaptureEvent;
 import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
+import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
+import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterRegistryEvent;
+import dev.latvian.mods.vidlib.feature.icon.Icon;
+import dev.latvian.mods.vidlib.feature.icon.IconRegistryEvent;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectRegistryEvent;
+import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
+import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShapeRegistryEvent;
+import dev.latvian.mods.vidlib.math.knumber.KNumber;
+import dev.latvian.mods.vidlib.math.knumber.KNumberRegistryEvent;
+import dev.latvian.mods.vidlib.math.kvector.KVector;
+import dev.latvian.mods.vidlib.math.kvector.KVectorRegistryEvent;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -133,5 +152,59 @@ public class NeoPlatformHelper extends PlatformHelper {
 	@Override
 	public void collectDynamicResources(PackType type, Consumer<ResourceLocation> callback) {
 		ModLoader.postEvent(type == PackType.CLIENT_RESOURCES ? new DynamicResourceEvent.Assets(callback) : new DynamicResourceEvent.Data(callback));
+	}
+
+	@Override
+	public void collectKNumbers(SimpleRegistryCollector<KNumber> registry) {
+		super.collectKNumbers(registry);
+		ModLoader.postEvent(new KNumberRegistryEvent(registry));
+	}
+
+	@Override
+	public void collectKVectors(SimpleRegistryCollector<KVector> registry) {
+		super.collectKVectors(registry);
+		ModLoader.postEvent(new KVectorRegistryEvent(registry));
+	}
+
+	@Override
+	public void collectEntityFilters(SimpleRegistryCollector<EntityFilter> registry) {
+		super.collectEntityFilters(registry);
+		ModLoader.postEvent(new EntityFilterRegistryEvent(registry));
+	}
+
+	@Override
+	public void collectBlockFilters(SimpleRegistryCollector<BlockFilter> registry) {
+		super.collectBlockFilters(registry);
+		ModLoader.postEvent(new BlockFilterRegistryEvent(registry));
+	}
+
+	@Override
+	public void collectZoneShapes(SimpleRegistryCollector<ZoneShape> registry) {
+		super.collectZoneShapes(registry);
+		ModLoader.postEvent(new ZoneShapeRegistryEvent(registry));
+	}
+
+	@Override
+	public void collectIcons(SimpleRegistryCollector<Icon> registry) {
+		super.collectIcons(registry);
+		ModLoader.postEvent(new IconRegistryEvent(registry));
+	}
+
+	@Override
+	public void collectScreenShakeTypes(SimpleRegistryCollector<ScreenShakeType> registry) {
+		super.collectScreenShakeTypes(registry);
+		ModLoader.postEvent(new ScreenShakeTypeRegistryEvent(registry));
+	}
+
+	@Override
+	public void collectBulkLevelModifications(SimpleRegistryCollector<BulkLevelModification> registry) {
+		super.collectBulkLevelModifications(registry);
+		ModLoader.postEvent(new BulkLevelModificationRegistryEvent(registry));
+	}
+
+	@Override
+	public void collectScreenEffects(SimpleRegistryCollector<ScreenEffect> registry) {
+		super.collectScreenEffects(registry);
+		ModLoader.postEvent(new ScreenEffectRegistryEvent(registry));
 	}
 }

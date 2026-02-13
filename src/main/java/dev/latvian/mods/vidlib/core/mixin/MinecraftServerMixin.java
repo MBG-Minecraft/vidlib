@@ -7,6 +7,7 @@ import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
@@ -31,6 +32,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.nio.file.Files;
 import java.util.Map;
+import java.util.UUID;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin implements VLMinecraftServer {
@@ -62,6 +64,9 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	@Unique
 	private PacketCapture vl$packetCapture;
 
+	@Unique
+	private final Map<UUID, ServerSessionData> vl$serverSessionData = new Object2ObjectOpenHashMap<>();
+
 	@Override
 	public RandomSource vl$sessionRandom() {
 		return vl$sessionRandom;
@@ -79,16 +84,16 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	@Override
 	public ScheduledTask.Handler vl$getScheduledTaskHandler() {
 		if (vl$scheduledTaskHandler == null) {
-			vl$scheduledTaskHandler = new ScheduledTask.Handler(this::getGameTime);
+			vl$scheduledTaskHandler = new ScheduledTask.Handler(this);
 		}
 
 		return vl$scheduledTaskHandler;
 	}
 
 	@Override
-	public DataMap getServerData() {
+	public DataMap getDataMap() {
 		if (vl$serverDataMap == null) {
-			vl$serverDataMap = new DataMap(Util.NIL_UUID, DataKey.SERVER);
+			vl$serverDataMap = new DataMap(Util.NIL_UUID, DataKey.SERVER, this);
 			vl$serverDataMap.load(vl$self(), vl$self().getWorldPath(LevelResource.ROOT).resolve("vidlib.nbt"));
 		}
 
@@ -146,5 +151,18 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 		}
 
 		return vl$packetCapture;
+	}
+
+	@Override
+	public ServerSessionData vl$getOrLoadServerSession(UUID uuid) {
+		var session = vl$serverSessionData.get(uuid);
+
+		if (session == null) {
+			session = new ServerSessionData(vl$self(), uuid);
+			session.load(vl$self());
+			vl$serverSessionData.put(uuid, session);
+		}
+
+		return session;
 	}
 }

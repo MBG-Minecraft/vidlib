@@ -16,10 +16,6 @@ public interface VLLivingEntity extends VLEntity {
 		CommonGameEngine.INSTANCE.heal(vl$self());
 	}
 
-	default boolean vl$unpushable() {
-		return false;
-	}
-
 	@Override
 	default float getRelativeHealth(float delta) {
 		var e = vl$self();
@@ -27,7 +23,7 @@ public interface VLLivingEntity extends VLEntity {
 	}
 
 	default boolean isBoss() {
-		return vl$self().getTags().contains("main_boss") || vl$self().hasCustomName() && vl$self().getCustomName().getString().equals("Boss");
+		return CommonGameEngine.INSTANCE.isBoss(vl$self());
 	}
 
 	@Nullable

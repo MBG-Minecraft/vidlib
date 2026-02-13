@@ -76,7 +76,7 @@ public abstract class EntityMixin implements VLEntity {
 
 	@ModifyReturnValue(method = "getGravity", at = @At("RETURN"))
 	private double vl$getGravity(double original) {
-		return original * vl$gravityMod();
+		return original * CommonGameEngine.INSTANCE.getGravityModifier(vl$self());
 	}
 
 	@Inject(method = "saveWithoutId", at = @At("HEAD"))

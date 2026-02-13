@@ -53,7 +53,7 @@ public interface ClientWaypoints {
 		var cam = mc.gameRenderer.getMainCamera().getPosition();
 
 		for (var waypoint : waypoints) {
-			if (waypoint.enabled() && waypoint.dimension() == level.dimension() && waypoint.filter().test(mc.player)) {
+			if (waypoint.dimension() == level.dimension() && waypoint.visible().test(mc.player)) {
 				var pos = waypoint.position().get(ctx);
 
 				if (pos != null) {

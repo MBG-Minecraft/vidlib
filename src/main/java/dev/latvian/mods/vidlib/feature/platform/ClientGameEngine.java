@@ -127,7 +127,7 @@ public class ClientGameEngine {
 	}
 
 	public Component getPlayerListName(Minecraft mc, PlayerInfo playerInfo, Component fallback) {
-		var nickname = mc.player.vl$sessionData().getClientSessionData(playerInfo.getProfile().getId()).dataMap.get(InternalPlayerData.NICKNAME, mc.getGameTime());
+		var nickname = mc.player.vl$sessionData().getClientSessionData(playerInfo.getProfile().getId()).dataMap.get(InternalPlayerData.NICKNAME);
 		return Empty.isEmpty(nickname) ? fallback : nickname;
 	}
 
@@ -729,5 +729,9 @@ public class ClientGameEngine {
 
 	public List<Waypoint> getWaypoints(Minecraft mc) {
 		return mc.getWaypoints();
+	}
+
+	public boolean hideDebugCharts() {
+		return Minecraft.getInstance().showOnlyReducedInfo();
 	}
 }

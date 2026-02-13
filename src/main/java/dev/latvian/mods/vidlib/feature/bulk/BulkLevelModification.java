@@ -1,8 +1,11 @@
 package dev.latvian.mods.vidlib.feature.bulk;
 
-import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.registry.BasicRegistryRef;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
+import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
+import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.structure.LazyStructures;
 import net.minecraft.core.BlockPos;
@@ -17,18 +20,18 @@ import net.minecraft.world.level.block.Rotation;
 import java.util.List;
 import java.util.Set;
 
-public interface BulkLevelModification {
-	SimpleRegistry<BulkLevelModification> REGISTRY = SimpleRegistry.create(BulkLevelModification::type);
+public interface BulkLevelModification extends SimpleRegistryEntry {
+	SimpleRegistry<BulkLevelModification> REGISTRY = SimpleRegistry.create(VidLib.id("bulk_level_modification"), c -> PlatformHelper.CURRENT.collectBulkLevelModifications(c));
+
 	BulkLevelModification NONE = new BulkLevelModificationBundle(List.of());
 
-	@AutoInit
-	static void bootstrap() {
-		REGISTRY.register(BulkLevelModificationBundle.TYPE);
-		REGISTRY.register(PositionedBlock.TYPE);
-		REGISTRY.register(ReplaceCuboidBlocks.TYPE);
-		REGISTRY.register(ReplaceSphereBlocks.TYPE);
-		REGISTRY.register(ReplaceSectionBlocks.TYPE);
-		REGISTRY.register(ReplaceAllSectionBlocks.TYPE);
+	static void builtinTypes(SimpleRegistryCollector<BulkLevelModification> registry) {
+		registry.register(BulkLevelModificationBundle.TYPE);
+		registry.register(PositionedBlock.TYPE);
+		registry.register(ReplaceCuboidBlocks.TYPE);
+		registry.register(ReplaceSphereBlocks.TYPE);
+		registry.register(ReplaceSectionBlocks.TYPE);
+		registry.register(ReplaceAllSectionBlocks.TYPE);
 	}
 
 	static BulkLevelModification allOf(List<BulkLevelModification> list) {
@@ -58,6 +61,7 @@ public interface BulkLevelModification {
 		return NONE;
 	}
 
+	@Override
 	default SimpleRegistryType<?> type() {
 		return REGISTRY.getType(this);
 	}

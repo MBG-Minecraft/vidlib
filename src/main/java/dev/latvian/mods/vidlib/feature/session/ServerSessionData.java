@@ -24,7 +24,7 @@ public class ServerSessionData extends SessionData {
 	public Map<String, ClientModInfo> clientMods;
 
 	public ServerSessionData(MinecraftServer server, UUID uuid) {
-		super(uuid);
+		super(uuid, server);
 		this.server = server;
 		this.currentTags = Set.of();
 		this.clientFeatureSet = FeatureSet.EMPTY;

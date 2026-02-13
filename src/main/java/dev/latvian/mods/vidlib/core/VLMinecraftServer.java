@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	default MinecraftServer vl$self() {
@@ -102,7 +103,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 
 		var packetsToEveryone = new S2CPacketBundleBuilder(vl$level());
 
-		getServerData().sync(packetsToEveryone, null, (playerId, update) -> new SyncServerDataPayload(update));
+		getDataMap().sync(packetsToEveryone, null, (playerId, update) -> new SyncServerDataPayload(update));
 
 		for (var player : vl$self().getPlayerList().getPlayers()) {
 			player.vl$sessionData().vl$postTick(packetsToEveryone, player);
@@ -215,12 +216,16 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	}
 
 	default void vl$save() {
-		getServerData().save(vl$self(), vl$self().getWorldPath(LevelResource.ROOT).resolve("vidlib.nbt"));
+		getDataMap().save(vl$self(), vl$self().getWorldPath(LevelResource.ROOT).resolve("vidlib.nbt"));
 
 		var packetCapture = vl$getPacketCapture(false);
 
 		if (packetCapture != null) {
 			packetCapture.saveAll();
 		}
+	}
+
+	default ServerSessionData vl$getOrLoadServerSession(UUID uuid) {
+		throw new NoMixinException(this);
 	}
 }

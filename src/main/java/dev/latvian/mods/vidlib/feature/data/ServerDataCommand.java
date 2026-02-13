@@ -20,7 +20,7 @@ public interface ServerDataCommand {
 			cmd.then(Commands.literal("get")
 				.executes(ctx -> {
 					ctx.getSource().sendSuccess(() -> {
-						var value = ctx.getSource().getServer().getServerData().get(key);
+						var value = ctx.getSource().getServer().getDataMap().get(key);
 						var nbt = key.type().codec().encodeStart(nbtOps, Cast.to(value)).getOrThrow();
 						return Component.literal("Server: ").append(NbtUtils.toPrettyComponent(nbt));
 					}, false);
@@ -32,14 +32,14 @@ public interface ServerDataCommand {
 				.then(Commands.argument("value", key.command().argument(buildContext))
 					.executes(ctx -> {
 						var value = key.command().get(ctx, "value");
-						ctx.getSource().getServer().getServerData().set(key, Cast.to(value));
+						ctx.getSource().getServer().getDataMap().set(key, Cast.to(value));
 						return 1;
 					})
 				)
 			);
 
 			cmd.then(Commands.literal("reset").executes(ctx -> {
-				ctx.getSource().getServer().getServerData().reset(key);
+				ctx.getSource().getServer().getDataMap().reset(key);
 				return 1;
 			}));
 

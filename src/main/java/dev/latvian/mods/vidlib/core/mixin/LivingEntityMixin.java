@@ -4,7 +4,6 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.core.VLLivingEntity;
-import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
@@ -42,28 +41,17 @@ public abstract class LivingEntityMixin implements VLLivingEntity {
 	@Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;aiStep()V"))
 	private void vl$tick(CallbackInfo ci) {
 		var entity = (LivingEntity) (Object) this;
-
-		if (!entity.level().isClientSide() && entity.getHealth() < entity.getMaxHealth()) {
-			var regen = EntityOverride.REGENERATE.get(this);
-
-			if (regen != null && regen >= 0) {
-				if (regen == 0) {
-					entity.heal();
-				} else if (entity.tickCount % regen == 0) {
-					entity.heal(1F);
-				}
-			}
-		}
+		CommonGameEngine.INSTANCE.livingTick(entity);
 	}
 
 	@ModifyReturnValue(method = "getSpeed", at = @At("RETURN"))
 	private float vl$getSpeed(float original) {
-		return original * vl$speedMod();
+		return original * CommonGameEngine.INSTANCE.getSpeedModifier(vl$self());
 	}
 
 	@Inject(method = "isPushable", at = @At("HEAD"), cancellable = true)
 	private void vl$isPushable(CallbackInfoReturnable<Boolean> cir) {
-		if (vl$unpushable()) {
+		if (CommonGameEngine.INSTANCE.isUnpushable(vl$self())) {
 			cir.setReturnValue(false);
 		}
 	}
