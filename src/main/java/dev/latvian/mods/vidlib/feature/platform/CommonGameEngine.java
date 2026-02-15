@@ -364,7 +364,7 @@ public class CommonGameEngine {
 	}
 
 	public boolean getScaleDamageWithDifficulty(ServerPlayer player) {
-		return false;
+		return true;
 	}
 
 	public FluidState overrideFluidState(Level level, BlockPos pos) {
@@ -377,6 +377,10 @@ public class CommonGameEngine {
 		}
 
 		return original;
+	}
+
+	public BlockState overrideFluidStateBlock(Level level, BlockPos pos) {
+		return overrideFluidState(level, pos).createLegacyBlock();
 	}
 
 	public float overrideFluidHeight(Level level, FluidState state, BlockPos pos) {

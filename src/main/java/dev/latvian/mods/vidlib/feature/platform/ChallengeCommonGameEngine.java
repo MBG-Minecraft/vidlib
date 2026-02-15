@@ -125,4 +125,9 @@ public class ChallengeCommonGameEngine extends CommonGameEngine {
 	public boolean disablePricklyBerryBushes(Level level, BlockPos pos, BlockState state, Entity entity) {
 		return true;
 	}
+
+	@Override
+	public boolean getScaleDamageWithDifficulty(ServerPlayer player) {
+		return false;
+	}
 }
