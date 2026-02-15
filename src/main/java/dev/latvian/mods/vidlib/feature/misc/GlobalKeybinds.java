@@ -89,10 +89,12 @@ public class GlobalKeybinds {
 				 "key.curios.open.desc",
 				 "key.bridgingmod.toggle_bridging",
 				 "key.voice_chat_group",
+				 "key.disable_voice_chat",
 				 "key.advancements" -> InputConstants.UNKNOWN;
 			case "key.jei.bookmark" -> InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_EQUALS);
 			case "key.push_to_talk" -> InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_C);
 			case "key.ok_zoomer.zoom" -> InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_Z);
+			case "gui.xaero_open_map" -> InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_F7);
 			default -> original;
 		};
 	}
