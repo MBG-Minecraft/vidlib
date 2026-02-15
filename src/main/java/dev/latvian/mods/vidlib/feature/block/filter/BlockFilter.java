@@ -30,7 +30,7 @@ import java.util.function.Predicate;
 public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntry {
 	SimpleRegistry<BlockFilter> REGISTRY = SimpleRegistry.create(VidLib.id("block_filter"), c -> PlatformHelper.CURRENT.collectBlockFilters(c));
 
-	SimpleRegistryType.Unit<BlockFilter> NONE = SimpleRegistryType.unit("none", new BlockFilter() {
+	SimpleRegistryType.Unit<BlockFilter> NONE = SimpleRegistryType.unitWithType("none", type -> new SimpleBlockFilter(type) {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
 			return false;
@@ -39,11 +39,6 @@ public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntr
 		@Override
 		public boolean test(Level level, BlockPos pos, BlockState state) {
 			return false;
-		}
-
-		@Override
-		public String toString() {
-			return "none";
 		}
 
 		@Override
@@ -52,7 +47,7 @@ public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntr
 		}
 	});
 
-	SimpleRegistryType.Unit<BlockFilter> ANY = SimpleRegistryType.unit("any", new BlockFilter() {
+	SimpleRegistryType.Unit<BlockFilter> ANY = SimpleRegistryType.unitWithType("any", type -> new SimpleBlockFilter(type) {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
 			return true;
@@ -64,17 +59,12 @@ public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntr
 		}
 
 		@Override
-		public String toString() {
-			return "any";
-		}
-
-		@Override
 		public BlockFilter and(BlockFilter filter) {
 			return filter;
 		}
 	});
 
-	SimpleRegistryType.Unit<BlockFilter> VISIBLE = SimpleRegistryType.unit("visible", new BlockFilter() {
+	SimpleRegistryType.Unit<BlockFilter> VISIBLE = SimpleRegistryType.unitWithType("visible", type -> new SimpleBlockFilter(type) {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
 			var state = blockInWorld.getState();
@@ -85,14 +75,9 @@ public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntr
 		public boolean test(Level level, BlockPos pos, BlockState state) {
 			return state.isVisible();
 		}
-
-		@Override
-		public String toString() {
-			return "visible";
-		}
 	});
 
-	SimpleRegistryType.Unit<BlockFilter> PARTIAL = SimpleRegistryType.unit("partial", new BlockFilter() {
+	SimpleRegistryType.Unit<BlockFilter> PARTIAL = SimpleRegistryType.unitWithType("partial", type -> new SimpleBlockFilter(type) {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
 			var state = blockInWorld.getState();
@@ -103,14 +88,9 @@ public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntr
 		public boolean test(Level level, BlockPos pos, BlockState state) {
 			return state.isPartial();
 		}
-
-		@Override
-		public String toString() {
-			return "partial";
-		}
 	});
 
-	SimpleRegistryType.Unit<BlockFilter> EXPOSED = SimpleRegistryType.unit("exposed", new BlockFilter() {
+	SimpleRegistryType.Unit<BlockFilter> EXPOSED = SimpleRegistryType.unitWithType("exposed", type -> new SimpleBlockFilter(type) {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
 			return blockInWorld.getLevel() instanceof Level l && test(l, blockInWorld.getPos(), blockInWorld.getState());
@@ -120,14 +100,9 @@ public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntr
 		public boolean test(Level level, BlockPos pos, BlockState state) {
 			return !state.isAir() && level.isBlockExposed(pos.getX(), pos.getY(), pos.getZ(), new BlockPos.MutableBlockPos());
 		}
-
-		@Override
-		public String toString() {
-			return "exposed";
-		}
 	});
 
-	SimpleRegistryType.Unit<BlockFilter> FLUID = SimpleRegistryType.unit("fluid", new BlockFilter() {
+	SimpleRegistryType.Unit<BlockFilter> FLUID = SimpleRegistryType.unitWithType("fluid", type -> new SimpleBlockFilter(type) {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
 			return blockInWorld.getLevel() instanceof Level l && test(l, blockInWorld.getPos(), blockInWorld.getState());
@@ -136,11 +111,6 @@ public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntr
 		@Override
 		public boolean test(Level level, BlockPos pos, BlockState state) {
 			return !state.isAir() && state.liquid();
-		}
-
-		@Override
-		public String toString() {
-			return "fluid";
 		}
 	});
 
@@ -188,7 +158,9 @@ public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntr
 		registry.register(NONE);
 		registry.register(ANY);
 		registry.register(VISIBLE);
+		registry.register(PARTIAL);
 		registry.register(EXPOSED);
+		registry.register(FLUID);
 
 		registry.register(BlockNotFilter.TYPE);
 		registry.register(BlockAndFilter.TYPE);

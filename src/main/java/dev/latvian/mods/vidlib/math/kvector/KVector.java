@@ -18,6 +18,7 @@ import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.FixedKNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
+import dev.latvian.mods.vidlib.math.knumber.PlayerDataKNumber;
 import dev.latvian.mods.vidlib.math.knumber.ServerDataKNumber;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.Vec3i;
@@ -103,6 +104,9 @@ public interface KVector extends SimpleRegistryEntry {
 
 		if (v != null) {
 			return v;
+		} else if (name.startsWith("$$")) {
+			var n = new PlayerDataKNumber(name.substring(2));
+			return new DynamicKVector(n, n, n);
 		} else if (name.startsWith("$")) {
 			var n = new ServerDataKNumber(name.substring(1));
 			return new DynamicKVector(n, n, n);
@@ -116,7 +120,7 @@ public interface KVector extends SimpleRegistryEntry {
 		registry.register(ONE_TYPE);
 		registry.register(FixedKVector.TYPE);
 
-		for (var literal : LiteralKVector.values()) {
+		for (var literal : LiteralKVector.VALUES) {
 			registry.register(literal.type);
 		}
 

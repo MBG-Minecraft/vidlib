@@ -16,6 +16,8 @@ import dev.latvian.mods.vidlib.feature.capture.PacketCaptureEvent;
 import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterRegistryEvent;
+import dev.latvian.mods.vidlib.feature.entity.number.EntityNumber;
+import dev.latvian.mods.vidlib.feature.entity.number.EntityNumberRegistryEvent;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.icon.IconRegistryEvent;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
@@ -206,5 +208,11 @@ public class NeoPlatformHelper extends PlatformHelper {
 	public void collectScreenEffects(SimpleRegistryCollector<ScreenEffect> registry) {
 		super.collectScreenEffects(registry);
 		ModLoader.postEvent(new ScreenEffectRegistryEvent(registry));
+	}
+
+	@Override
+	public void collectEntityNumbers(SimpleRegistryCollector<EntityNumber> registry) {
+		super.collectEntityNumbers(registry);
+		ModLoader.postEvent(new EntityNumberRegistryEvent(registry));
 	}
 }

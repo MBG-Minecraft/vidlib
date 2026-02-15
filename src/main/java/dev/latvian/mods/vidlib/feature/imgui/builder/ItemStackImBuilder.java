@@ -45,8 +45,10 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBuilder {
-	public static final ImBuilderType<ItemStack> TYPE = () -> new ItemStackImBuilder(false, stack -> true);
-	public static final ImBuilderType<ItemStack> TYPE_WITH_COUNT = () -> new ItemStackImBuilder(true, stack -> true);
+	public static final Predicate<ItemStack> DEFAULT_FILTER = stack -> true;
+
+	public static final ImBuilderType<ItemStack> TYPE = () -> new ItemStackImBuilder(false, DEFAULT_FILTER);
+	public static final ImBuilderType<ItemStack> TYPE_WITH_COUNT = () -> new ItemStackImBuilder(true, DEFAULT_FILTER);
 
 	public static boolean isEquipment(ItemStack stack, EquipmentSlot slot) {
 		if (slot == EquipmentSlot.MAINHAND || slot == EquipmentSlot.OFFHAND) {
@@ -116,7 +118,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBui
 
 	public ItemStackImBuilder(boolean hasCount, Predicate<ItemStack> filter) {
 		this.hasCount = hasCount;
-		this.filter = filter;
+		this.filter = filter == null ? DEFAULT_FILTER : filter;
 		this.count = new ImInt(1);
 		this.input = ImGuiUtils.resizableString();
 		this.result = null;

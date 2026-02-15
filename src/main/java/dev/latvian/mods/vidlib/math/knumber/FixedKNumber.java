@@ -89,7 +89,7 @@ public record FixedKNumber(Double number) implements KNumber, ImBuilderWithHolde
 
 	@Override
 	public SimpleRegistryType<?> type() {
-		return number == 0D ? KNumber.ZERO_TYPE : number == 1D ? KNumber.ONE_TYPE : TYPE;
+		return TYPE;
 	}
 
 	@Override

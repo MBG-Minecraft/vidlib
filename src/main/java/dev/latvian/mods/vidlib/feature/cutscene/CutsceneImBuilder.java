@@ -51,7 +51,6 @@ public class CutsceneImBuilder implements ImBuilder<Cutscene> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		var numberContext = graphics.mc.level.getGlobalContext().fork(variables);
 		var update = ImUpdate.NONE;
 		String previewTooltip;
 

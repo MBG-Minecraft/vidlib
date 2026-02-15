@@ -151,6 +151,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		var frameInfo = new FrameInfo(mc, session, event);
 		session.projectedCoordinates = ProjectedCoordinates.of(mc, frameInfo.camera().getPosition());
 		FrameInfo.CURRENT = frameInfo;
+		var ctx = mc.level.getGlobalContext();
 
 		var rayLine = vl$self().gameRenderer.getMainCamera().ray(512D);
 		var ray = new ClipContext(rayLine.start(), rayLine.end(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player);
@@ -169,7 +170,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 			tool.getSecond().renderSetup(player, tool.getFirst(), mc.hitResult, screenDelta);
 		}
 
-		GhostStructure.preRender(frameInfo, mc.level.getGlobalContext());
+		GhostStructure.preRender(frameInfo, ctx);
 
 		if (session.npcRecording != null) {
 			session.npcRecording.record(System.currentTimeMillis(), screenDelta, mc.player);
@@ -437,7 +438,8 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		var mc = vl$self();
 
 		if (mc.level != null && data.position().isPresent()) {
-			return new VidLibSoundInstance(mc.level, data, mc.level.getGlobalContext().fork(variables));
+			var ctx = mc.level.getGlobalContext().fork(variables);
+			return new VidLibSoundInstance(mc.level, data, ctx);
 		} else {
 			return SimpleSoundInstance.forUI(data.data().sound().value(), data.data().pitch(), data.data().volume());
 		}

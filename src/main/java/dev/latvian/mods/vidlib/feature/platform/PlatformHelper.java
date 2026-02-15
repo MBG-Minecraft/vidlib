@@ -8,6 +8,7 @@ import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
+import dev.latvian.mods.vidlib.feature.entity.number.EntityNumber;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
@@ -112,5 +113,9 @@ public class PlatformHelper {
 
 	public void collectScreenEffects(SimpleRegistryCollector<ScreenEffect> registry) {
 		ScreenEffect.builtinTypes(registry);
+	}
+
+	public void collectEntityNumbers(SimpleRegistryCollector<EntityNumber> registry) {
+		EntityNumber.builtinTypes(registry);
 	}
 }

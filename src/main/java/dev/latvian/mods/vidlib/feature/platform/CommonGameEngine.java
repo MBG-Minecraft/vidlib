@@ -320,8 +320,8 @@ public class CommonGameEngine {
 		return -1;
 	}
 
-	public boolean isSuspended(Player player) {
-		return player.get(InternalPlayerData.SUSPENDED);
+	public boolean isSuspended(Entity entity) {
+		return entity instanceof Player player && player.get(InternalPlayerData.SUSPENDED);
 	}
 
 	public double getGravityModifier(Entity entity) {

@@ -21,9 +21,15 @@ import dev.latvian.mods.vidlib.feature.entity.filter.EntityTypeTagFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityXorFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.ExactEntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.HasEffectEntityFilter;
+import dev.latvian.mods.vidlib.feature.entity.filter.HasItemEntityFilter;
+import dev.latvian.mods.vidlib.feature.entity.filter.IfEntityFilter;
+import dev.latvian.mods.vidlib.feature.entity.filter.InDimensionEntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.MatchEntityFilter;
+import dev.latvian.mods.vidlib.feature.entity.filter.PlayerDataEntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.ProfileEntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.ServerDataEntityFilter;
+import dev.latvian.mods.vidlib.feature.entity.number.EntityNumber;
+import dev.latvian.mods.vidlib.feature.entity.number.EntityNumberImBuilderEvent;
 import dev.latvian.mods.vidlib.feature.imgui.builder.interpolation.InterpolationImBuilderEvent;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.BlockParticleOptionImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ColorParticleOptionImBuilder;
@@ -34,6 +40,7 @@ import dev.latvian.mods.vidlib.feature.particle.WindParticleOptionsImBuilder;
 import dev.latvian.mods.vidlib.math.knumber.Atan2KNumber;
 import dev.latvian.mods.vidlib.math.knumber.ClampedKNumber;
 import dev.latvian.mods.vidlib.math.knumber.CosKNumber;
+import dev.latvian.mods.vidlib.math.knumber.EntityKNumber;
 import dev.latvian.mods.vidlib.math.knumber.FixedKNumber;
 import dev.latvian.mods.vidlib.math.knumber.IfKNumber;
 import dev.latvian.mods.vidlib.math.knumber.InterpolatedKNumber;
@@ -108,6 +115,7 @@ public class ImBuilderRegistryEventHandler {
 		event.add(CosKNumber.Builder.TYPE);
 		event.add(Atan2KNumber.Builder.TYPE);
 		event.add(ClampedKNumber.Builder.TYPE);
+		event.add(EntityKNumber.Builder.TYPE);
 	}
 
 	@SubscribeEvent
@@ -151,7 +159,11 @@ public class ImBuilderRegistryEventHandler {
 		event.add(MatchEntityFilter.Builder.TYPE);
 		event.add(HasEffectEntityFilter.Builder.TYPE);
 		event.add(ServerDataEntityFilter.Builder.TYPE);
+		event.add(PlayerDataEntityFilter.Builder.TYPE);
 		event.add(ProfileEntityFilter.Builder.TYPE);
+		event.add(HasItemEntityFilter.Builder.TYPE);
+		event.add(InDimensionEntityFilter.Builder.TYPE);
+		event.add(IfEntityFilter.Builder.TYPE);
 	}
 
 	@SubscribeEvent
@@ -176,6 +188,13 @@ public class ImBuilderRegistryEventHandler {
 			if (type.unit() != null) {
 				event.addUnit(StringUtils.snakeCaseToTitleCase(type.name()), type.unit());
 			}
+		}
+	}
+
+	@SubscribeEvent
+	public static void entityNumberImBuilders(EntityNumberImBuilderEvent event) {
+		for (var unit : EntityNumber.REGISTRY.unitValueMap().entrySet()) {
+			event.addUnit(StringUtils.snakeCaseToTitleCase(unit.getKey()), unit.getValue());
 		}
 	}
 }

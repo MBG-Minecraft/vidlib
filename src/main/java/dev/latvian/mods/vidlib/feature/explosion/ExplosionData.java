@@ -157,7 +157,7 @@ public class ExplosionData {
 			Codec.INT.optionalFieldOf("floor", -1000).forGetter(v -> v.floor),
 			Codec.INT.optionalFieldOf("ceiling", 1000).forGetter(v -> v.ceiling),
 			BlockFilter.CODEC.optionalFieldOf("blocks", BlockFilter.ANY.instance()).forGetter(v -> v.blocks),
-			EntityFilter.CODEC.optionalFieldOf("ignored", EntityFilter.CREATIVE.instance()).forGetter(v -> v.ignored),
+			EntityFilter.CODEC.optionalFieldOf("ignored", EntityFilter.CREATIVE_MODE.instance()).forGetter(v -> v.ignored),
 			EntityFilter.CODEC.optionalFieldOf("invincible", EntityFilter.NONE.instance()).forGetter(v -> v.invincible),
 			Codec.BOOL.optionalFieldOf("bypass_unbreakable", false).forGetter(v -> v.bypassUnbreakable)
 		).apply(instance, FilterData::new));
@@ -166,7 +166,7 @@ public class ExplosionData {
 			KLibStreamCodecs.optional(ByteBufCodecs.VAR_INT, -1000), v -> v.floor,
 			KLibStreamCodecs.optional(ByteBufCodecs.VAR_INT, 1000), v -> v.ceiling,
 			KLibStreamCodecs.optional(BlockFilter.STREAM_CODEC, BlockFilter.ANY.instance()), v -> v.blocks,
-			KLibStreamCodecs.optional(EntityFilter.STREAM_CODEC, EntityFilter.CREATIVE.instance()), v -> v.ignored,
+			KLibStreamCodecs.optional(EntityFilter.STREAM_CODEC, EntityFilter.CREATIVE_MODE.instance()), v -> v.ignored,
 			KLibStreamCodecs.optional(EntityFilter.STREAM_CODEC, EntityFilter.NONE.instance()), v -> v.invincible,
 			ByteBufCodecs.BOOL, v -> v.bypassUnbreakable,
 			FilterData::new
@@ -183,7 +183,7 @@ public class ExplosionData {
 			this.floor = -1000;
 			this.ceiling = 1000;
 			this.blocks = BlockFilter.ANY.instance();
-			this.ignored = EntityFilter.CREATIVE.instance();
+			this.ignored = EntityFilter.CREATIVE_MODE.instance();
 			this.invincible = EntityFilter.NONE.instance();
 			this.bypassUnbreakable = false;
 		}
@@ -199,7 +199,7 @@ public class ExplosionData {
 			this.floor = -1000;
 			this.ceiling = 1000;
 			this.blocks = BlockFilter.ANY.instance();
-			this.ignored = EntityFilter.CREATIVE.instance();
+			this.ignored = EntityFilter.CREATIVE_MODE.instance();
 			this.invincible = EntityFilter.NONE.instance();
 			this.bypassUnbreakable = false;
 		}

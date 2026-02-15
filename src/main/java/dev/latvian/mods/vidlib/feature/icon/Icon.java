@@ -27,6 +27,7 @@ public interface Icon extends SimpleRegistryEntry {
 
 	static void builtinTypes(SimpleRegistryCollector<Icon> registry) {
 		registry.register(EmptyIcon.TYPE);
+
 		registry.register(ColorIcon.TYPE);
 		registry.register(TextureIcon.TYPE);
 		registry.register(ItemIcon.TYPE);

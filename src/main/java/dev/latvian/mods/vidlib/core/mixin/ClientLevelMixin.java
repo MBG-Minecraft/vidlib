@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 import dev.latvian.mods.vidlib.core.VLClientLevel;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
+import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -25,7 +26,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.UUID;
 
 @Mixin(ClientLevel.class)
-public abstract class ClientLevelMixin implements VLClientLevel {
+public abstract class ClientLevelMixin extends LevelMixin implements VLClientLevel {
 	@Shadow
 	@Final
 	private Minecraft minecraft;
@@ -76,4 +77,10 @@ public abstract class ClientLevelMixin implements VLClientLevel {
 		}
 	}
 
+	@Override
+	public KNumberContext getGlobalContext() {
+		var v = super.getGlobalContext();
+		v.entity = minecraft.player;
+		return v;
+	}
 }

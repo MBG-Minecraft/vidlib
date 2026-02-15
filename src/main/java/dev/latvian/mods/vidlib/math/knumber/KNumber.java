@@ -22,8 +22,6 @@ public interface KNumber extends SimpleRegistryEntry {
 
 	FixedKNumber ZERO = new FixedKNumber(0D);
 	FixedKNumber ONE = new FixedKNumber(1D);
-	SimpleRegistryType.Unit<FixedKNumber> ZERO_TYPE = SimpleRegistryType.unit("zero", ZERO);
-	SimpleRegistryType.Unit<FixedKNumber> ONE_TYPE = SimpleRegistryType.unit("one", ONE);
 
 	Codec<KNumber> LITERAL_CODEC = Codec.either(Codec.DOUBLE, Codec.STRING).xmap(
 		e -> e.map(KNumber::of, KNumber::named),
@@ -58,7 +56,9 @@ public interface KNumber extends SimpleRegistryEntry {
 	}
 
 	static KNumber named(String name) {
-		if (name.startsWith("$")) {
+		if (name.startsWith("$$")) {
+			return new PlayerDataKNumber(name.substring(2));
+		} else if (name.startsWith("$")) {
 			return new ServerDataKNumber(name.substring(1));
 		} else {
 			return new VariableKNumber(name);
@@ -66,11 +66,9 @@ public interface KNumber extends SimpleRegistryEntry {
 	}
 
 	static void builtinTypes(SimpleRegistryCollector<KNumber> registry) {
-		registry.register(ZERO_TYPE);
-		registry.register(ONE_TYPE);
 		registry.register(FixedKNumber.TYPE);
 
-		for (var literal : LiteralKNumber.values()) {
+		for (var literal : LiteralKNumber.VALUES) {
 			registry.register(literal.type);
 		}
 
@@ -79,7 +77,11 @@ public interface KNumber extends SimpleRegistryEntry {
 		registry.register(ScaledKNumber.TYPE);
 		registry.register(VariableKNumber.TYPE);
 		registry.register(IfKNumber.TYPE);
+
 		registry.register(ServerDataKNumber.TYPE);
+		registry.register(PlayerDataKNumber.TYPE);
+		registry.register(EntityKNumber.TYPE);
+
 		registry.register(RandomKNumber.TYPE);
 		registry.register(SinKNumber.TYPE);
 		registry.register(CosKNumber.TYPE);

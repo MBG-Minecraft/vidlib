@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.feature.data.PlayerDataMapHolder;
 import dev.latvian.mods.vidlib.feature.session.SessionData;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -53,6 +54,19 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer, PlayerDataM
 	}
 
 	default boolean isReplayCamera() {
+		return false;
+	}
+
+	@Override
+	default boolean vl$hasItem(Ingredient ingredient) {
+		var player = vl$self();
+
+		for (var item : player.getInventory()) {
+			if (!item.isEmpty() && ingredient.test(item)) {
+				return true;
+			}
+		}
+
 		return false;
 	}
 }

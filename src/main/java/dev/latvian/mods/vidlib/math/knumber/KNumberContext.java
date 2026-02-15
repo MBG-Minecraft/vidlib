@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.math.knumber;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
@@ -16,6 +17,7 @@ public class KNumberContext {
 	public Double tick;
 	public Double maxTick;
 	public Level level;
+	public Entity entity;
 	public DataMap serverDataMap;
 	public Double gameTime;
 	public Double gameDay;
@@ -33,6 +35,7 @@ public class KNumberContext {
 		this.tick = null;
 		this.maxTick = null;
 		this.level = null;
+		this.entity = null;
 		this.serverDataMap = null;
 		this.gameTime = null;
 		this.gameDay = null;
@@ -64,6 +67,7 @@ public class KNumberContext {
 		this.tick = parent.tick;
 		this.maxTick = parent.maxTick;
 		this.level = parent.level;
+		this.entity = parent.entity;
 		this.serverDataMap = parent.serverDataMap;
 		this.gameTime = parent.gameTime;
 		this.gameDay = parent.gameDay;

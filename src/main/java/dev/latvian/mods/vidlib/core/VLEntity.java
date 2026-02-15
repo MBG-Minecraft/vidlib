@@ -11,6 +11,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
@@ -20,9 +21,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.portal.TeleportTransition;
@@ -82,7 +85,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	}
 
 	default boolean vl$isSuspended() {
-		return false;
+		return CommonGameEngine.INSTANCE.isSuspended(vl$self());
 	}
 
 	default Line ray(double distance, float delta) {
@@ -121,7 +124,8 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 
 	default void teleport(Location location) {
 		var entity = vl$self();
-		teleport(entity.getServer().getLevel(location.dimension()), location.random(entity.getRandom()).get(entity.level().getGlobalContext()));
+		var ctx = entity.level().getGlobalContext();
+		teleport(entity.getServer().getLevel(location.dimension()), location.random(entity.getRandom()).get(ctx));
 	}
 
 	default void forceSetVelocity(Vec3 velocity) {
@@ -206,8 +210,16 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		};
 	}
 
-	default float getRelativeHealth(float delta) {
+	default float vl$getHealth(float delta) {
 		return 1F;
+	}
+
+	default float vl$getMaxHealth(float delta) {
+		return 1F;
+	}
+
+	default float getRelativeHealth(float delta) {
+		return Math.clamp(vl$getHealth(delta) / vl$getMaxHealth(delta), 0F, 1F);
 	}
 
 	default boolean preventDismount(Player passenger) {
@@ -261,5 +273,23 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	}
 
 	default void imgui(ImGraphics graphics, float delta) {
+	}
+
+	default boolean vl$hasItem(Ingredient ingredient) {
+		var entity = vl$self();
+
+		if (entity instanceof ItemEntity itemEntity) {
+			var item = itemEntity.getItem();
+			return !item.isEmpty() && ingredient.test(item);
+		} else if (entity instanceof ItemFrame itemFrame) {
+			var item = itemFrame.getItem();
+			return !item.isEmpty() && ingredient.test(item);
+		} else {
+			return false;
+		}
+	}
+
+	default boolean vl$isDeadOrDying() {
+		return !vl$self().isAlive();
 	}
 }

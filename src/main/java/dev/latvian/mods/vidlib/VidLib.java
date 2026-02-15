@@ -4,6 +4,7 @@ import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
+import dev.latvian.mods.vidlib.feature.entity.number.EntityNumber;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.misc.EventMarkerPayload;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
@@ -44,6 +45,7 @@ public class VidLib {
 		ScreenShakeType.REGISTRY.build();
 		BulkLevelModification.REGISTRY.build();
 		ScreenEffect.REGISTRY.build();
+		EntityNumber.REGISTRY.build();
 	}
 
 	public static void sync(ServerPlayer player, int syncType) {
