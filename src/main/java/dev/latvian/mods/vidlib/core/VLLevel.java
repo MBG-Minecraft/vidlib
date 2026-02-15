@@ -42,8 +42,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.material.FlowingFluid;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -316,43 +314,6 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		return null;
 	}
 
-	default FluidState vl$overrideFluidState(BlockPos pos) {
-		var original = vl$level().getFluidState(pos);
-
-		if (original.isEmpty()) {
-			var zones = vl$getActiveZones();
-			var state = zones == null ? null : zones.getZoneFluidState(pos);
-			return state == null ? original : state;
-		}
-
-		return original;
-	}
-
-	default BlockState vl$overrideFluidStateBlock(BlockPos pos) {
-		var original = vl$level().getBlockState(pos);
-
-		if (original.isAir()) {
-			var zones = vl$getActiveZones();
-			var state = zones == null ? null : zones.getZoneFluidState(pos);
-			return state == null ? original : state.createLegacyBlock();
-		}
-
-		return original;
-	}
-
-	default float vl$overrideFluidHeight(FluidState state, BlockPos pos) {
-		if (state.getType() instanceof FlowingFluid flowing) {
-			var zones = vl$getActiveZones();
-			var height = zones == null ? 0F : zones.getZoneFluidHeight(flowing, pos);
-
-			if (height > 0F) {
-				return height;
-			}
-		}
-
-		return state.getHeight(vl$level(), pos);
-	}
-
 	default boolean isBlockPartial(Long2IntOpenHashMap cache, BlockPos pos) {
 		long key = pos.asLong();
 		int exposed = cache.get(key);
@@ -386,7 +347,10 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 	}
 
 	default KNumberContext getGlobalContext() {
-		return new KNumberContext(vl$level());
+		var level = vl$level();
+		var ctx = new KNumberContext(level.getEnvironment().globalVariables());
+		ctx.updateLevelData(level);
+		return ctx;
 	}
 
 	@Override

@@ -124,11 +124,11 @@ public abstract class EntityMixin implements VLEntity {
 
 	@Redirect(method = {"updateFluidOnEyes", "updateFluidHeightAndDoFluidPushing()V"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getFluidState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;"))
 	private FluidState vl$getFluidState(Level level, BlockPos pos) {
-		return level.vl$overrideFluidState(pos);
+		return CommonGameEngine.INSTANCE.overrideFluidState(level, pos);
 	}
 
 	@Redirect(method = {"updateFluidOnEyes", "updateFluidHeightAndDoFluidPushing()V"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/material/FluidState;getHeight(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F"))
 	private float vl$getFluidHeight(FluidState state, BlockGetter blockGetter, BlockPos pos) {
-		return blockGetter instanceof Level l ? l.vl$overrideFluidHeight(state, pos) : state.getHeight(blockGetter, pos);
+		return blockGetter instanceof Level l ? CommonGameEngine.INSTANCE.overrideFluidHeight(l, state, pos) : state.getHeight(blockGetter, pos);
 	}
 }

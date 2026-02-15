@@ -51,6 +51,8 @@ import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.VegetationBlock;
 import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FlowingFluid;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -363,5 +365,30 @@ public class CommonGameEngine {
 
 	public boolean getScaleDamageWithDifficulty(ServerPlayer player) {
 		return false;
+	}
+
+	public FluidState overrideFluidState(Level level, BlockPos pos) {
+		var original = level.getFluidState(pos);
+
+		if (original.isEmpty()) {
+			var zones = level.vl$getActiveZones();
+			var state = zones == null ? null : zones.getZoneFluidState(pos);
+			return state == null ? original : state;
+		}
+
+		return original;
+	}
+
+	public float overrideFluidHeight(Level level, FluidState state, BlockPos pos) {
+		if (state.getType() instanceof FlowingFluid flowing) {
+			var zones = level.vl$getActiveZones();
+			var height = zones == null ? 0F : zones.getZoneFluidHeight(flowing, pos);
+
+			if (height > 0F) {
+				return height;
+			}
+		}
+
+		return state.getHeight(level, pos);
 	}
 }

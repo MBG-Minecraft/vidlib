@@ -58,7 +58,7 @@ public abstract class LivingEntityMixin implements VLLivingEntity {
 
 	@Redirect(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getFluidState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;"))
 	private FluidState vl$getFluidState(Level level, BlockPos pos) {
-		return level.vl$overrideFluidState(pos);
+		return CommonGameEngine.INSTANCE.overrideFluidState(level, pos);
 	}
 
 	@Inject(method = "isBaby", at = @At("HEAD"), cancellable = true)

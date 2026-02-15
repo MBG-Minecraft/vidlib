@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 
 import dev.latvian.mods.vidlib.core.VLClientLevel;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.client.Minecraft;
@@ -62,7 +63,7 @@ public abstract class ClientLevelMixin extends LevelMixin implements VLClientLev
 
 	@Redirect(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getFluidState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;"))
 	private FluidState vl$getFluidState(ClientLevel level, BlockPos pos) {
-		return level.vl$overrideFluidState(pos);
+		return CommonGameEngine.INSTANCE.overrideFluidState(level, pos);
 	}
 
 	@Override

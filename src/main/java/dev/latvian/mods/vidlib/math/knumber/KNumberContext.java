@@ -46,14 +46,13 @@ public class KNumberContext {
 	}
 
 	@ApiStatus.Internal
-	public KNumberContext(Level level) {
+	public KNumberContext(KNumberVariables rootVariables) {
 		this.parent = null;
-		this.variables = level.getEnvironment().globalVariables();
+		this.variables = rootVariables;
 
 		this.progress = null;
 		this.tick = null;
 		this.maxTick = null;
-		this.updateLevelData(level);
 		this.originPos = null;
 		this.sourcePos = null;
 		this.targetPos = null;
