@@ -30,7 +30,6 @@ public interface AnchorCommands {
 		list.removeIf(area -> area.dimension() == source.getLevel().dimension());
 		list.add(new Area(source.getLevel().dimension(), start, end));
 		source.getServer().setAnchor(Anchor.create(list));
-		source.getLevel().vl$updateLoadedChunks();
 		return 1;
 	}
 
@@ -38,7 +37,6 @@ public interface AnchorCommands {
 		var list = new ArrayList<>(source.getServer().getAnchor().areas());
 		list.removeIf(area -> area.dimension() == source.getLevel().dimension());
 		source.getServer().setAnchor(Anchor.create(list));
-		source.getLevel().vl$updateLoadedChunks();
 		return 1;
 	}
 }

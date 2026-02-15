@@ -71,7 +71,9 @@
 		"neo.IBlockExtensionMixin",
 		"neo.IEntityExtensionMixin",
 		"neo.ItemStackHandlerMixin",
-		"neo.ReloadableResourceManagerMixin"
+		"neo.ReloadableResourceManagerMixin",
+		"neo.TicketOwnerMixin",
+		"neo.TicketTrackerMixin"
 	],
 	"client": [
 		"AbstractClientPlayerMixin",

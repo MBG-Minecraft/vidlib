@@ -8,8 +8,8 @@ import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.prop.ServerProps;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
+import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.Util;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ServerLevel;
@@ -17,7 +17,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.TicketStorage;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.neoforged.neoforge.common.world.chunk.TicketHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -80,11 +82,8 @@ public interface VLServerLevel extends VLLevel {
 		throw new NoMixinException(this);
 	}
 
-	default void vl$updateLoadedChunks() {
-	}
-
-	default void vl$updateLoadedChunks(LongSet tickets) {
-		var level = this.vl$level();
+	default LongOpenHashSet vl$getChunksToLoad() {
+		var level = vl$level();
 		var toLoad = new LongOpenHashSet();
 
 		var activeZones = vl$getActiveZones();
@@ -107,12 +106,30 @@ public interface VLServerLevel extends VLLevel {
 			}
 		}
 
-		var toUnload = new LongOpenHashSet(tickets);
+		return toLoad;
+	}
+
+	default void vl$updateLoadedChunks() {
+		var level = vl$level();
+		var ticketStorage = level.getDataStorage().computeIfAbsent(TicketStorage.TYPE);
+		var currentlyLoaded = new LongOpenHashSet();
+
+		for (var entry : ((VLTicketTracker<UUID>) ticketStorage.getEntityForcedChunks()).vl$getTickets().long2ObjectEntrySet()) {
+			for (var ticketOwner : entry.getValue()) {
+				if (ticketOwner.vl$getId().equals(Anchor.TICKET_CONTROLLER.id())) {
+					currentlyLoaded.add(entry.getLongKey());
+					break;
+				}
+			}
+		}
+
+		var toLoad = vl$getChunksToLoad();
+		int toLoadCount = toLoad.size();
+		var toUnload = new LongOpenHashSet(currentlyLoaded);
 		toUnload.removeAll(toLoad);
+		toLoad.removeAll(currentlyLoaded);
 
-		toLoad.removeAll(tickets);
-
-		VidLib.LOGGER.info("Loaded " + toLoad.size() + " chunks, unloaded " + toUnload.size() + " chunks");
+		VidLib.LOGGER.info("Force-loaded " + toLoad.size() + "/" + toLoadCount + " chunks, unloaded " + toUnload.size() + " chunks (previously " + currentlyLoaded.size() + ")");
 
 		for (var pos : toLoad) {
 			Anchor.TICKET_CONTROLLER.forceChunk(level, Util.NIL_UUID, ChunkPos.getX(pos), ChunkPos.getZ(pos), true, false);
@@ -121,6 +138,30 @@ public interface VLServerLevel extends VLLevel {
 		for (var pos : toUnload) {
 			Anchor.TICKET_CONTROLLER.forceChunk(level, Util.NIL_UUID, ChunkPos.getX(pos), ChunkPos.getZ(pos), false, false);
 		}
+	}
+
+	default void vl$validateLoadedChunks(TicketHelper ticketHelper) {
+		var toLoad = vl$getChunksToLoad();
+		int unloaded = 0;
+		int total = 0;
+		var ticketSet = ticketHelper.getEntityTickets().get(Util.NIL_UUID);
+
+		if (ticketSet != null) {
+			var itr = new LongArraySet(ticketSet.normal()).iterator();
+
+			while (itr.hasNext()) {
+				var chunk = itr.nextLong();
+
+				if (!toLoad.contains(chunk)) {
+					ticketHelper.removeTicket(Util.NIL_UUID, chunk, false);
+					unloaded++;
+				}
+
+				total++;
+			}
+		}
+
+		VidLib.LOGGER.info("Unloaded " + unloaded + "/" + total + " expired force-loaded chunks");
 	}
 
 	@Override

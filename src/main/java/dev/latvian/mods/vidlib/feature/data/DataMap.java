@@ -123,10 +123,14 @@ public class DataMap {
 					var tag = data.get(type.id());
 
 					if (tag != null) {
-						var dataValue = type.type().codec().parse(ops, tag).getOrThrow();
+						try {
+							var dataValue = type.type().codec().parse(ops, tag).getOrThrow();
 
-						if (dataValue != null) {
-							init(type).data = dataValue;
+							if (dataValue != null) {
+								init(type).data = dataValue;
+							}
+						} catch (Exception ex) {
+							VidLib.LOGGER.error("Failed to parse '" + type + "' from " + tag, ex);
 						}
 					}
 				}

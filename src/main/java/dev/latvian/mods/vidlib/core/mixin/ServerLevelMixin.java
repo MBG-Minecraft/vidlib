@@ -7,8 +7,6 @@ import dev.latvian.mods.vidlib.feature.misc.CreateFireworksPayload;
 import dev.latvian.mods.vidlib.feature.prop.ServerProps;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
@@ -47,9 +45,6 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 	private ActiveZones vl$activeZones;
 
 	@Unique
-	private final LongSet vl$anchoredChunks = new LongOpenHashSet();
-
-	@Unique
 	private ServerProps vl$props;
 
 	@Unique
@@ -71,11 +66,6 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 			vl$activeZones = zones;
 			vl$updateLoadedChunks();
 		}
-	}
-
-	@Override
-	public void vl$updateLoadedChunks() {
-		vl$updateLoadedChunks(vl$anchoredChunks);
 	}
 
 	@Override

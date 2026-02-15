@@ -106,7 +106,7 @@ public record DataKey<T>(
 
 	@Override
 	public String toString() {
-		return "DataType[storage=" + storage + ", id=" + id + "]";
+		return storage + "/" + id;
 	}
 
 	@Nullable
