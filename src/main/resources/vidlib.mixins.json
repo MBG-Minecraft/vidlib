@@ -75,6 +75,7 @@
 		"neo.EnumArgumentMixin",
 		"neo.IBlockExtensionMixin",
 		"neo.IEntityExtensionMixin",
+		"neo.IPlayerExtensionMixin",
 		"neo.ItemStackHandlerMixin",
 		"neo.ReloadableResourceManagerMixin",
 		"neo.TicketOwnerMixin",

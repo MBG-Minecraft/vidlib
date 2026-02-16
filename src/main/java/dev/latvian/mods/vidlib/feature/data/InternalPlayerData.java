@@ -28,6 +28,7 @@ public interface InternalPlayerData {
 	DataKey<ResourceLocation> ELYTRA_OVERRIDE = DataKey.PLAYER.createDefault("elytra_override", ID.DATA_TYPE, null, null);
 	DataKey<Float> FLIGHT_SPEED = DataKey.PLAYER.createFloat("flight_speed", 1F, 0F, 20F);
 	DataKey<Color> GLOW_COLOR = DataKey.PLAYER.createDefault("glow_color", Color.DATA_TYPE, null, Color4ImBuilder::new);
+	DataKey<Boolean> CAN_FLY = DataKey.PLAYER.createDefault("can_fly", DataTypes.BOOL, false, BooleanImBuilder.TYPE);
 
 	@AutoInit
 	static void bootstrap() {
