@@ -13,6 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
+import java.util.Set;
 
 public class WaypointCommands {
 	@AutoRegister
@@ -50,7 +51,7 @@ public class WaypointCommands {
 	}
 
 	public static int remove(CommandSourceStack source, String id) {
-		source.getServer().removeWaypoints(List.of(id));
+		source.getServer().removeWaypoints(Set.of(id));
 		return 1;
 	}
 }

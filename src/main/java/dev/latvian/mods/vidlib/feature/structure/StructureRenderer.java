@@ -182,8 +182,7 @@ public class StructureRenderer implements WithCache {
 		var blockRenderer = mc.getBlockRenderer();
 		var random = RandomSource.create();
 
-		var biome = VLBiomes.VOID.get();
-		var level = new StructureRendererLevel(structure.blocks(), data.skyLight(), data.blockLight(), biome);
+		var level = new StructureRendererLevel(structure.blocks(), data.skyLight(), data.blockLight(), VLBiomes.VOID);
 
 		var allTypes = RenderType.chunkBufferLayers();
 		var layerMap = new Reference2ObjectOpenHashMap<RenderType, BuildingLayer>(allTypes.size());

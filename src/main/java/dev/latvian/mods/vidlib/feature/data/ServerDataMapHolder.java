@@ -51,7 +51,7 @@ public interface ServerDataMapHolder extends DataMapHolder {
 	default void addWaypoints(List<Waypoint> waypoints) {
 		var list = new ArrayList<>(getWaypoints());
 		list.addAll(waypoints);
-		setWaypoints(List.copyOf(list));
+		setWaypoints(list);
 	}
 
 	default void removeWaypoints(Collection<String> ids) {
@@ -63,6 +63,6 @@ public interface ServerDataMapHolder extends DataMapHolder {
 			}
 		}
 
-		setWaypoints(List.copyOf(list));
+		setWaypoints(list);
 	}
 }
