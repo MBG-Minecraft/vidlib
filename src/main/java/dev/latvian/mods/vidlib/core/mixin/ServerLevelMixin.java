@@ -1,12 +1,15 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.core.VLChunkMap;
 import dev.latvian.mods.vidlib.core.VLServerLevel;
 import dev.latvian.mods.vidlib.core.VLServerPacketListener;
 import dev.latvian.mods.vidlib.feature.misc.CreateFireworksPayload;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ServerProps;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
@@ -106,5 +109,17 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 		var newPlayerSession = new ServerSessionData(server, player.getUUID());
 		((VLServerPacketListener) player.connection).vl$sessionData(newPlayerSession);
 		newPlayerSession.load(server);
+	}
+
+	@Inject(method = "announceSleepStatus", at = @At("HEAD"), cancellable = true)
+	private void vl$announceSleepStatus(CallbackInfo ci) {
+		if (CommonGameEngine.INSTANCE.disableSleepStatusAnnouncement(vl$level())) {
+			ci.cancel();
+		}
+	}
+
+	@Inject(method = "tickPrecipitation", at = @At("RETURN"))
+	private void vl$tickPrecipitation(BlockPos blockPos, CallbackInfo ci, @Local(ordinal = 1) BlockPos motionBlockedPos, @Local(ordinal = 2) BlockPos belowMotionBlockedPos) {
+		CommonGameEngine.INSTANCE.tickPrecipitation(vl$level(), blockPos, motionBlockedPos, belowMotionBlockedPos);
 	}
 }

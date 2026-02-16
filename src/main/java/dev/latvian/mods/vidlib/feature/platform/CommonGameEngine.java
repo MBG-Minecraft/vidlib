@@ -9,6 +9,7 @@ import dev.latvian.mods.vidlib.feature.misc.ClientModInfo;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
@@ -22,6 +23,9 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.NeutralMob;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.food.FoodData;
@@ -56,6 +60,7 @@ import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -412,5 +417,31 @@ public class CommonGameEngine {
 
 	public boolean isBlockAnchor(ServerLevel level, BlockPos pos, BlockState state) {
 		return state.getBlock() instanceof CommandBlock;
+	}
+
+	public boolean allowEmoteCommand(CommandSourceStack source) {
+		return source.hasPermission(2);
+	}
+
+	public boolean allowMsgCommand(CommandSourceStack source) {
+		return true;
+	}
+
+	public void modifyDroppedItem(LivingEntity entity, ItemEntity item) {
+	}
+
+	public boolean disableSleepStatusAnnouncement(ServerLevel level) {
+		return false;
+	}
+
+	public void tickPrecipitation(ServerLevel level, BlockPos blockPos, BlockPos motionBlockedPos, BlockPos belowMotionBlockedPos) {
+	}
+
+	public AABB getAttackBoundingBox(Mob mob, AABB original) {
+		return original;
+	}
+
+	public boolean isAngryByDefault(ServerLevel level, NeutralMob mob) {
+		return false;
 	}
 }

@@ -1,10 +1,15 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityEquipment;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,5 +38,15 @@ public class EntityEquipmentMixin {
 				}
 			}
 		}
+	}
+
+	@Nullable
+	@ModifyExpressionValue(method = "dropAll", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;"))
+	private ItemEntity vl$drop(@Nullable ItemEntity entity, @Local(argsOnly = true) LivingEntity parent) {
+		if (entity != null) {
+			CommonGameEngine.INSTANCE.modifyDroppedItem(parent, entity);
+		}
+
+		return entity;
 	}
 }

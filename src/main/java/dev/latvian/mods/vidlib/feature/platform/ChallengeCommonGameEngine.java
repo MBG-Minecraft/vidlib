@@ -4,8 +4,12 @@ import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.level.BlockGetter;
@@ -129,5 +133,17 @@ public class ChallengeCommonGameEngine extends CommonGameEngine {
 	@Override
 	public boolean getScaleDamageWithDifficulty(ServerPlayer player) {
 		return false;
+	}
+
+	@Override
+	public void modifyDroppedItem(LivingEntity entity, ItemEntity item) {
+		if (entity instanceof Player) {
+			item.setUnlimitedLifetime();
+		}
+	}
+
+	@Override
+	public boolean disableSleepStatusAnnouncement(ServerLevel level) {
+		return true;
 	}
 }

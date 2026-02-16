@@ -56,6 +56,7 @@ import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.item.properties.numeric.CompassAngleState;
 import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.client.resources.sounds.BiomeAmbientSoundsHandler;
 import net.minecraft.core.BlockPos;
@@ -86,6 +87,7 @@ import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.ModList;
+import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -99,6 +101,8 @@ import java.util.UUID;
 
 public class ClientGameEngine {
 	public static ClientGameEngine INSTANCE = new ClientGameEngine();
+
+	public static final boolean DEFAULT_ENABLE_MAIN_MENU_BUTTONS = "true".equals(System.getenv("ENABLE_ADMIN_BUTTONS")) || !FMLLoader.isProduction();
 
 	public void collectClientFeatures(Reference2IntMap<Feature> map) {
 		for (var mod : ModList.get().getMods()) {
@@ -733,5 +737,26 @@ public class ClientGameEngine {
 
 	public boolean hideDebugCharts() {
 		return Minecraft.getInstance().showOnlyReducedInfo();
+	}
+
+	public double overrideCompassAngle(CompassAngleState.CompassTarget type, Entity entity, BlockPos target) {
+		return Double.NaN;
+	}
+
+	@Nullable
+	public List<String> overrideCommandOnlinePlayerNames() {
+		return null;
+	}
+
+	public boolean enableSinglePlayerMainMenuButton() {
+		return DEFAULT_ENABLE_MAIN_MENU_BUTTONS;
+	}
+
+	public boolean enableReplayMainMenuButton() {
+		return DEFAULT_ENABLE_MAIN_MENU_BUTTONS;
+	}
+
+	public boolean isVoiceChatPTTDown() {
+		return false;
 	}
 }
