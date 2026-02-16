@@ -298,8 +298,8 @@ public class ClientGameEngine {
 	}
 
 	public void topInfoBarPre(ImGraphics graphics, float h) {
-		if (graphics.mc.player != null) {
-			ImGui.text(ClientGameEngine.INSTANCE.getPlayerWorldName(graphics.mc.player, graphics.mc.player.getName()).getString());
+		if (graphics.player != null) {
+			ImGui.text(ClientGameEngine.INSTANCE.getPlayerWorldName(graphics.player, graphics.player.getName()).getString());
 		} else {
 			ImGui.text(graphics.mc.getUser().getName());
 		}
@@ -308,13 +308,11 @@ public class ClientGameEngine {
 	}
 
 	public void topInfoBar(ImGraphics graphics, float h) {
-		if (graphics.mc.player != null) {
-			var session = graphics.mc.player.vl$sessionData();
-
-			if (session.topInfoBarOverride != null) {
-				if (!Empty.isEmpty(session.topInfoBarOverride)) {
+		if (graphics.player != null) {
+			if (graphics.session.topInfoBarOverride != null) {
+				if (!Empty.isEmpty(graphics.session.topInfoBarOverride)) {
 					var sink = new FormattedCharSinkPartBuilder();
-					graphics.mc.font.split(session.topInfoBarOverride, Integer.MAX_VALUE).getFirst().accept(sink);
+					graphics.mc.font.split(graphics.session.topInfoBarOverride, Integer.MAX_VALUE).getFirst().accept(sink);
 					graphics.text(sink.build());
 				}
 			}
@@ -333,13 +331,11 @@ public class ClientGameEngine {
 		ImGui.text(graphics.mc.fpsString.split(" ", 2)[0] + " FPS");
 		ImGui.separator();
 
-		if (graphics.mc.player != null) {
-			var session = graphics.mc.player.vl$sessionData();
-
-			if (session.bottomInfoBarOverride != null) {
-				if (!Empty.isEmpty(session.bottomInfoBarOverride)) {
+		if (graphics.player != null) {
+			if (graphics.session.bottomInfoBarOverride != null) {
+				if (!Empty.isEmpty(graphics.session.bottomInfoBarOverride)) {
 					var sink = new FormattedCharSinkPartBuilder();
-					graphics.mc.font.split(session.bottomInfoBarOverride, Integer.MAX_VALUE).getFirst().accept(sink);
+					graphics.mc.font.split(graphics.session.bottomInfoBarOverride, Integer.MAX_VALUE).getFirst().accept(sink);
 					graphics.text(sink.build());
 					ImGui.separator();
 				}
@@ -350,13 +346,13 @@ public class ClientGameEngine {
 			for (var clock : Clock.REGISTRY) {
 				if (clock.screen().isPresent()) {
 					var screen = clock.screen().get();
-					var value = session.clocks.get(clock.id());
+					var value = graphics.session.clocks.get(clock.id());
 
-					if (value != null && screen.visible().test(graphics.mc.player)) {
+					if (value != null && screen.visible().test(graphics.player)) {
 						var string = screen.format().formatted(value.second() / 60, value.second() % 60);
 						var color = screen.color().lerp(switch (value.type()) {
 							case FINISHED -> 1F;
-							case FLASH -> 0.65F + Mth.cos((session.tick) * 0.85F) * 0.35F;
+							case FLASH -> 0.65F + Mth.cos((graphics.session.tick) * 0.85F) * 0.35F;
 							default -> 0F;
 						}, Clock.RED);
 

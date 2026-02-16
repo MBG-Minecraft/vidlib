@@ -22,7 +22,7 @@ public class DecalPanel extends Panel {
 			return;
 		}
 
-		var decals = graphics.mc.player.vl$sessionData().debugDecals;
+		var decals = graphics.session.debugDecals;
 
 		ImGui.text("Decals: %,d".formatted(decals.size()));
 		ImGui.pushItemWidth(-1F);
@@ -58,14 +58,14 @@ public class DecalPanel extends Panel {
 			d.start = 5F;
 			d.end = 6F;
 			d.startColor = d.endColor = Color.RED.withAlpha(100);
-			d.setPosition(graphics.mc.player.getPosition(graphics.mc.getDeltaTracker().getGameTimeDeltaPartialTick(true)).add(0D, 0.5D, 0D), true);
+			d.setPosition(graphics.player.getPosition(graphics.mc.getDeltaTracker().getGameTimeDeltaPartialTick(true)).add(0D, 0.5D, 0D), true);
 			decals.add(d);
 		}
 
 		ImGui.sameLine();
 
 		if (ImGui.button(ImIcons.ADD + " Add Danger###add-danger")) {
-			var pos = graphics.mc.player.getPosition(graphics.mc.getDeltaTracker().getGameTimeDeltaPartialTick(true)).add(0D, -0.0625D, 0D);
+			var pos = graphics.player.getPosition(graphics.mc.getDeltaTracker().getGameTimeDeltaPartialTick(true)).add(0D, -0.0625D, 0D);
 
 			var d = Decal.createDanger(4F);
 			d.setPosition(pos, true);

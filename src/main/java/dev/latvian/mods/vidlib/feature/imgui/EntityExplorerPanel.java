@@ -79,11 +79,9 @@ public class EntityExplorerPanel extends Panel {
 	}
 
 	public static void imgui(ImGraphics graphics, Entity entity, float delta) {
-		if (entity == null || graphics.mc.player == null) {
+		if (entity == null || graphics.player == null) {
 			return;
 		}
-
-		var session = graphics.mc.player.vl$sessionData();
 
 		if (!graphics.isReplay) {
 			if (ImGui.smallButton("Copy UUID")) {
@@ -120,7 +118,7 @@ public class EntityExplorerPanel extends Panel {
 		}
 
 		if (!graphics.isReplay) {
-			if (entity == graphics.mc.player) {
+			if (entity == graphics.player) {
 				ImGui.beginDisabled();
 			}
 
@@ -134,7 +132,7 @@ public class EntityExplorerPanel extends Panel {
 				graphics.mc.runClientCommand("tp " + entity.getUUID() + " @s");
 			}
 
-			if (entity == graphics.mc.player) {
+			if (entity == graphics.player) {
 				ImGui.endDisabled();
 			}
 		}
@@ -233,14 +231,14 @@ public class EntityExplorerPanel extends Panel {
 			Pins.imgui(graphics, entity);
 		}
 
-		var glowColor = session.glowColors.get(entity.getUUID());
+		var glowColor = graphics.session.glowColors.get(entity.getUUID());
 
 		if (ImGui.checkbox("Override Glow Color###override-glow-color", glowColor != null)) {
 			if (glowColor != null) {
-				session.glowColors.remove(entity.getUUID());
+				graphics.session.glowColors.remove(entity.getUUID());
 			} else {
 				glowColor = Color.WHITE;
-				session.glowColors.put(entity.getUUID(), glowColor);
+				graphics.session.glowColors.put(entity.getUUID(), glowColor);
 			}
 		}
 
@@ -250,7 +248,7 @@ public class EntityExplorerPanel extends Panel {
 
 			if (builder.imguiKey(graphics, "Glow Color", "glow-color").isAny()) {
 				glowColor = builder.build();
-				session.glowColors.put(entity.getUUID(), glowColor);
+				graphics.session.glowColors.put(entity.getUUID(), glowColor);
 			}
 		}
 

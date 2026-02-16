@@ -32,6 +32,7 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.environment.FluidPlaneRenderer;
 import dev.latvian.mods.vidlib.feature.gradient.ClientGradientLoader;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
+import dev.latvian.mods.vidlib.feature.item.RainbowItemTint;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.ClientModInfo;
 import dev.latvian.mods.vidlib.feature.misc.ClientModListPayload;
@@ -96,6 +97,7 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
@@ -208,6 +210,11 @@ public class VidLibClientEventHandler {
 		event.registerAboveAll(VidLib.id("fade"), VidLibHUD::drawFade);
 		event.registerAboveAll(VidLib.id("player_pins"), Pins::draw);
 		event.registerBelowAll(VidLib.id("waypoints"), ClientWaypoints::draw);
+	}
+
+	@SubscribeEvent
+	public static void registerItemTintSources(RegisterColorHandlersEvent.ItemTintSources event) {
+		event.register(VidLib.id("rgb"), RainbowItemTint.MAP_CODEC);
 	}
 
 	@SubscribeEvent

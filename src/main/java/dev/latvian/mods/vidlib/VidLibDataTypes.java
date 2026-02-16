@@ -33,7 +33,14 @@ import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import dev.latvian.mods.vidlib.util.ScreenCorner;
 import dev.latvian.mods.vidlib.util.Timestamp;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import java.util.List;
 import java.util.Set;
@@ -42,9 +49,30 @@ public interface VidLibDataTypes {
 	DataType<Set<String>> STRING_SET = DataTypes.STRING.setOf();
 	DataType<List<ItemStack>> ITEM_STACK_LIST = DataTypes.ITEM_STACK.listOf();
 
+	// Necessary for Bukkit, used in Sleeping Player prop, etc.
+	DataType<ItemStack> SAFE_ITEM_STACK = DataType.of(ItemStack.OPTIONAL_CODEC, new StreamCodec<>() {
+		public static final ResourceLocation EMPTY_ID = ResourceLocation.tryBuild("minecraft", "air");
+
+		@Override
+		public ItemStack decode(RegistryFriendlyByteBuf buf) {
+			var item = BuiltInRegistries.ITEM.get(buf.readResourceLocation()).orElse(null);
+			return item == null || item.value() == Items.AIR ? ItemStack.EMPTY : new ItemStack(item, 1, DataComponentPatch.EMPTY);
+		}
+
+		@Override
+		public void encode(RegistryFriendlyByteBuf buf, ItemStack stack) {
+			if (stack.isEmpty()) {
+				buf.writeResourceLocation(EMPTY_ID);
+			} else {
+				buf.writeResourceLocation(stack.getItemHolder().unwrapKey().map(ResourceKey::location).orElse(EMPTY_ID));
+			}
+		}
+	}, ItemStack.class);
+
 	static void register() {
 		DataType.register(VidLib.id("string_set"), STRING_SET);
 		DataType.register(VidLib.id("item_stack_list"), ITEM_STACK_LIST);
+		DataType.register(VidLib.id("safe_item_stack"), SAFE_ITEM_STACK);
 
 		DataType.register(VidLib.id("icon"), Icon.DATA_TYPE);
 		DataType.register(VidLib.id("icon_holder"), IconHolder.DATA_TYPE);

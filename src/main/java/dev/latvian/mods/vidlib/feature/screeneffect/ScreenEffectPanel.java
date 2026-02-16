@@ -40,7 +40,7 @@ public class ScreenEffectPanel extends Panel {
 				ctx.progress = 0D;
 				inst.update(ctx);
 				inst.snap();
-				graphics.mc.player.vl$sessionData().screenEffects.add(inst);
+				graphics.session.screenEffects.add(inst);
 			}
 		}
 
@@ -87,7 +87,7 @@ public class ScreenEffectPanel extends Panel {
 
 		ImGui.separator();
 
-		var effects = graphics.mc.player.vl$sessionData().screenEffects;
+		var effects = graphics.session.screenEffects;
 		var delta = graphics.mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);
 
 		for (int i = 0; i < effects.size(); i++) {

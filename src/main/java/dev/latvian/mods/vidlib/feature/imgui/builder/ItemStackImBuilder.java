@@ -219,7 +219,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBui
 					var map = new LinkedHashMap<ItemKey, CachedItemData>();
 					map.put(CachedItemData.AIR.key(), CachedItemData.AIR);
 
-					CreativeModeTabs.tryRebuildTabContents(graphics.mc.player == null ? FeatureFlagSet.of() : graphics.mc.player.connection.enabledFeatures(), true, graphics.mc.level == null ? MiscUtils.STATIC_REGISTRY_ACCESS : graphics.mc.level.registryAccess());
+					CreativeModeTabs.tryRebuildTabContents(graphics.player == null ? FeatureFlagSet.of() : graphics.mc.player.connection.enabledFeatures(), true, graphics.mc.level == null ? MiscUtils.STATIC_REGISTRY_ACCESS : graphics.mc.level.registryAccess());
 
 					var stacks = CreativeModeTabs.searchTab().getDisplayItems();
 					var ctx = new CachedItemData.Context(graphics.mc);
@@ -264,10 +264,9 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBui
 					}
 
 					renderedItems.sort(Comparator.comparingInt(RenderedItem::order));
-					var player = graphics.mc.player;
 
-					if (player != null) {
-						var item = player.getMainHandItem();
+					if (graphics.player != null) {
+						var item = graphics.player.getMainHandItem();
 						var cachedItem = CachedItemData.create(graphics.mc, item, new ItemKey(item.getItemHolder(), item.getComponentsPatch()), new CachedItemData.Context(graphics.mc));
 						renderedItems.addFirst(new RenderedItem(cachedItem, -9, false, true, true));
 					}

@@ -47,7 +47,7 @@ public class FluidPlanePanel extends Panel {
 		update = update.orItemEdit();
 
 		if (update.isAny()) {
-			graphics.mc.player.vl$sessionData().fluidPlane = enabled.get() ? new FluidPlane(fluid[0], y.get()) : null;
+			graphics.session.fluidPlane = enabled.get() ? new FluidPlane(fluid[0], y.get()) : null;
 		}
 
 		ImGui.popItemWidth();

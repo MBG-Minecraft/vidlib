@@ -25,6 +25,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ARGB;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -49,6 +50,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 
 	public final Minecraft mc;
 	public final boolean inGame;
+	public final Player player;
 	public final LocalClientSessionData session;
 	public final boolean isSinglePlayer;
 	public final boolean isReplay;
@@ -60,6 +62,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 	public ImGraphics(Minecraft mc) {
 		this.mc = mc;
 		this.inGame = mc.player != null && mc.level != null;
+		this.player = inGame ? mc.player : null;
 		this.session = inGame ? mc.player.vl$sessionData() : null;
 		this.isSinglePlayer = inGame && mc.isLocalServer();
 		this.isReplay = inGame && mc.level.isReplayLevel();

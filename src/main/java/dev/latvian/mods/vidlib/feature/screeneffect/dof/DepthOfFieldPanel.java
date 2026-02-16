@@ -27,10 +27,12 @@ public class DepthOfFieldPanel extends Panel {
 		boolean update = false;
 
 		if (ImGui.checkbox("Override", DepthOfField.OVERRIDE_ENABLED) && DepthOfField.OVERRIDE_ENABLED.get()) {
-			var pos = KVector.following(graphics.mc.player, PositionType.EYES);
-			builder.set(DepthOfField.OVERRIDE.withFocus(pos));
-			builder.focus.set(pos);
-			update = true;
+			if (graphics.player != null) {
+				var pos = KVector.following(graphics.player, PositionType.EYES);
+				builder.set(DepthOfField.OVERRIDE.withFocus(pos));
+				builder.focus.set(pos);
+				update = true;
+			}
 		}
 
 		if (DepthOfField.OVERRIDE_ENABLED.get()) {
