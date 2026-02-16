@@ -38,6 +38,7 @@
 		"ItemMixin",
 		"ItemStackMixin",
 		"LeavesBlockMixin",
+		"LevelChunkMixin",
 		"LevelMixin",
 		"LightningBoltMixin",
 		"LivingEntityMixin",

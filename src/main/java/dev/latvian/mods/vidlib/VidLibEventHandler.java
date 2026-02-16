@@ -91,6 +91,7 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void registerTicketControllers(RegisterTicketControllersEvent event) {
 		event.register(Anchor.TICKET_CONTROLLER);
+		event.register(Anchor.BLOCK_TICKET_CONTROLLER);
 	}
 
 	@SubscribeEvent

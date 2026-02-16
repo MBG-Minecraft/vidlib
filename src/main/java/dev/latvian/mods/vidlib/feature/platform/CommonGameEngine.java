@@ -7,6 +7,7 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
 import dev.latvian.mods.vidlib.feature.misc.ClientModInfo;
 import dev.latvian.mods.vidlib.feature.net.Context;
+import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
@@ -14,6 +15,7 @@ import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerEntity;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
@@ -35,6 +37,7 @@ import net.minecraft.world.level.block.BarrierBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.CarpetBlock;
+import net.minecraft.world.level.block.CommandBlock;
 import net.minecraft.world.level.block.CrossCollisionBlock;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.EnchantingTableBlock;
@@ -394,5 +397,20 @@ public class CommonGameEngine {
 		}
 
 		return state.getHeight(level, pos);
+	}
+
+	public void blockChanged(Level level, BlockPos pos, BlockState from, BlockState to) {
+		if (level instanceof ServerLevel serverLevel) {
+			var fromAnchor = isBlockAnchor(serverLevel, pos, from);
+			var toAnchor = isBlockAnchor(serverLevel, pos, to);
+
+			if (fromAnchor != toAnchor) {
+				Anchor.setAnchorBlockActive(serverLevel, pos, toAnchor);
+			}
+		}
+	}
+
+	public boolean isBlockAnchor(ServerLevel level, BlockPos pos, BlockState state) {
+		return state.getBlock() instanceof CommandBlock;
 	}
 }
