@@ -242,7 +242,6 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	}
 
 	default void setPilotInput(Player player, PlayerInput input) {
-		throw new NoMixinException(this);
 	}
 
 	default Rotation rotation(float delta) {
