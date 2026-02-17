@@ -8,10 +8,8 @@ import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VLConfigurationTask;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import net.minecraft.network.codec.StreamCodec;
-import net.neoforged.fml.ModList;
-
-import java.util.ArrayList;
 
 public enum ModListRequestPayload implements SimplePacketPayload {
 	INSTANCE;
@@ -34,13 +32,6 @@ public enum ModListRequestPayload implements SimplePacketPayload {
 	@Override
 	public void handle(Context ctx) {
 		ctx.sessionData().setClientModListSentDuringConfig();
-
-		var list = new ArrayList<ClientModInfo>();
-
-		for (var mod : ModList.get().getMods()) {
-			list.add(new ClientModInfo(mod.getModId(), mod.getDisplayName(), mod.getVersion().toString(), mod.getOwningFile().getFile().getFileName()));
-		}
-
-		ctx.send(new ClientModListPayload(list).toConfigC2S());
+		ctx.send(new ClientModListPayload(PlatformHelper.CURRENT.getModList()).toConfigC2S());
 	}
 }

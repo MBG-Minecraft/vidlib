@@ -26,7 +26,7 @@ public record SyncPlayerInputToServer(PlayerInput input) implements SimplePacket
 		var v = ctx.player().getVehicle();
 
 		if (v != null) {
-			v.vl$setPilotInput(input);
+			v.setPilotInput(ctx.player(), input);
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.core.VLGameRenderer;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
@@ -72,6 +73,11 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 		}
 	}
 
+	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;mul(Lorg/joml/Matrix4fc;)Lorg/joml/Matrix4f;"))
+	private void vl$adjustCamera(DeltaTracker deltaTracker, CallbackInfo ci, @Local Camera camera, @Local(ordinal = 0) Matrix4f matrix) {
+		ClientGameEngine.INSTANCE.transformCamera(minecraft, matrix, camera, deltaTracker);
+	}
+
 	@ModifyExpressionValue(method = "renderLevel", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/GameRenderer;renderHand:Z"))
 	private boolean vl$renderHand(boolean original) {
 		return false;
@@ -82,7 +88,7 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 
 	@Inject(method = "render", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;setOrtho(FFFFFF)Lorg/joml/Matrix4f;"))
 	private void vl$render(DeltaTracker deltaTracker, boolean renderLevel, CallbackInfo ci) {
-		if (minecraft.isGameLoadFinished() && renderLevel && this.minecraft.level != null && renderHand && ClientGameEngine.INSTANCE.overrideCamera(minecraft) == null) {
+		if (minecraft.isGameLoadFinished() && renderLevel && this.minecraft.level != null && renderHand && ClientGameEngine.INSTANCE.shouldRenderHand(minecraft)) {
 			var profilerfiller = Profiler.get();
 			profilerfiller.push("hand");
 			renderItemInHand(mainCamera, minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(true), MiscClientUtils.FRUSTUM_MATRIX);

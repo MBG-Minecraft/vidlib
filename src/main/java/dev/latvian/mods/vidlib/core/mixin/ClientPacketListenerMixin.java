@@ -14,6 +14,7 @@ import net.minecraft.client.multiplayer.CommonListenerCookie;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.network.Connection;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.CommonPlayerSpawnInfo;
 import net.minecraft.world.entity.Entity;
@@ -104,5 +105,11 @@ public abstract class ClientPacketListenerMixin implements VLClientPlayPacketLis
 		if (action == ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED) {
 			vl$sessionData().refreshListedPlayers();
 		}
+	}
+
+	@ModifyExpressionValue(method = "handleSetEntityPassengersPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;"))
+	private MutableComponent vl$setOverlayMessage(MutableComponent original, @Local(ordinal = 0) Entity entity) {
+		var customMessage = entity.getCustomMountMessage();
+		return customMessage == null ? original : (MutableComponent) customMessage;
 	}
 }

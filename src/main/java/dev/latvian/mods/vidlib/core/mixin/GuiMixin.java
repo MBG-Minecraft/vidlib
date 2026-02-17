@@ -42,7 +42,7 @@ public abstract class GuiMixin {
 
 	@Inject(method = "renderCrosshair", at = @At("HEAD"), cancellable = true)
 	private void vl$renderCrosshair(GuiGraphics graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-		if (ClientGameEngine.INSTANCE.hideGui(minecraft)) {
+		if (ClientGameEngine.INSTANCE.hideCrosshair(minecraft)) {
 			ci.cancel();
 		}
 	}

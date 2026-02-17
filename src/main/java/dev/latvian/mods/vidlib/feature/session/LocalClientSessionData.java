@@ -364,13 +364,11 @@ public class LocalClientSessionData extends ClientSessionData {
 		var data = getRemoteSessionData(player);
 		data.prevInput = data.input = input;
 
-		var entity = level.getEntityByUUID(player);
-
-		if (entity != null) {
+		if (level.getEntityByUUID(player) instanceof Player entity) {
 			var vehicle = entity.getVehicle();
 
 			if (vehicle != null) {
-				vehicle.vl$setPilotInput(input);
+				vehicle.setPilotInput(entity, input);
 			}
 		}
 	}

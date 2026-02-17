@@ -34,7 +34,6 @@ import dev.latvian.mods.vidlib.feature.gradient.ClientGradientLoader;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
 import dev.latvian.mods.vidlib.feature.item.RainbowItemTint;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
-import dev.latvian.mods.vidlib.feature.misc.ClientModInfo;
 import dev.latvian.mods.vidlib.feature.misc.ClientModListPayload;
 import dev.latvian.mods.vidlib.feature.misc.DebugTextEvent;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
@@ -47,6 +46,7 @@ import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
@@ -84,7 +84,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
@@ -115,7 +114,6 @@ import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.common.NeoForge;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -668,13 +666,7 @@ public class VidLibClientEventHandler {
 		PlayerProfiles.cache(event.getPlayer().getGameProfile());
 
 		if (!event.getPlayer().vl$sessionData().clientModListSentDuringConfig) {
-			var list = new ArrayList<ClientModInfo>();
-
-			for (var mod : ModList.get().getMods()) {
-				list.add(new ClientModInfo(mod.getModId(), mod.getDisplayName(), mod.getVersion().toString(), mod.getOwningFile().getFile().getFileName()));
-			}
-
-			event.getPlayer().c2s(new ClientModListPayload(list));
+			event.getPlayer().c2s(new ClientModListPayload(PlatformHelper.CURRENT.getModList()));
 		}
 	}
 

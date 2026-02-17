@@ -6,7 +6,7 @@ import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.input.PlayerInputChanged;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToClient;
-import dev.latvian.mods.vidlib.feature.misc.ClientModInfo;
+import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -21,7 +21,7 @@ public class ServerSessionData extends SessionData {
 	public final MinecraftServer server;
 	private Set<String> currentTags;
 	public FeatureSet clientFeatureSet;
-	public Map<String, ClientModInfo> clientMods;
+	public Map<String, PlatformModInfo> clientMods;
 
 	public ServerSessionData(MinecraftServer server, UUID uuid) {
 		super(uuid, server);

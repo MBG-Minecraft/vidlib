@@ -20,6 +20,7 @@ import dev.latvian.mods.vidlib.feature.entity.number.EntityNumber;
 import dev.latvian.mods.vidlib.feature.entity.number.EntityNumberRegistryEvent;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.icon.IconRegistryEvent;
+import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
@@ -48,6 +49,8 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -149,6 +152,17 @@ public class NeoPlatformHelper extends PlatformHelper {
 		}
 
 		return null;
+	}
+
+	@Override
+	public List<PlatformModInfo> getModList() {
+		var list = new ArrayList<PlatformModInfo>();
+
+		for (var mod : ModList.get().getMods()) {
+			list.add(new PlatformModInfo(mod.getModId(), mod.getDisplayName(), mod.getVersion().toString(), mod.getOwningFile().getFile().getFileName()));
+		}
+
+		return list;
 	}
 
 	@Override

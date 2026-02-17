@@ -10,6 +10,7 @@ import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.number.EntityNumber;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
+import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
@@ -25,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -74,6 +76,10 @@ public class PlatformHelper {
 		pathParts[1] = id.getNamespace();
 		System.arraycopy(path, 0, pathParts, 2, path.length);
 		return findFile(pathParts);
+	}
+
+	public List<PlatformModInfo> getModList() {
+		return List.of();
 	}
 
 	public void collectDynamicResources(PackType type, Consumer<ResourceLocation> callback) {

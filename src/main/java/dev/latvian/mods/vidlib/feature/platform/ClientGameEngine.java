@@ -35,6 +35,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.SharedConstants;
+import net.minecraft.client.Camera;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -89,6 +90,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -454,6 +456,16 @@ public class ClientGameEngine {
 		return session.cameraOverride != null && session.cameraOverride.hideGui();
 	}
 
+	public boolean hideCrosshair(Minecraft mc) {
+		var vehicle = mc.player == null ? null : mc.player.getVehicle();
+
+		if (vehicle != null && vehicle.hideCrosshair(mc.player)) {
+			return true;
+		}
+
+		return hideGui(mc);
+	}
+
 	public boolean overrideWaterParticles(Level level, BlockPos pos, FluidState state, RandomSource random) {
 		return true;
 	}
@@ -754,5 +766,21 @@ public class ClientGameEngine {
 
 	public boolean isVoiceChatPTTDown() {
 		return false;
+	}
+
+	public void transformCamera(Minecraft mc, Matrix4f matrix, Camera camera, DeltaTracker deltaTracker) {
+		if (mc.player != null && mc.player.getVehicle() != null) {
+			mc.player.getVehicle().transformPassengerCamera(matrix, camera.getPartialTickTime());
+		}
+
+		// matrix.rotateZ((float) (-camera.getRoll() * Math.PI / 180D));
+	}
+
+	public boolean shouldRenderHand(Minecraft mc) {
+		if (overrideCamera(mc) != null) {
+			return false;
+		}
+
+		return mc.player == null || mc.player.getVehicle() == null || mc.player.getVehicle().shouldRenderPassengerHand(mc.player);
 	}
 }

@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.core.mixin;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.core.VLEntity;
-import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -26,7 +25,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
@@ -35,9 +33,6 @@ import java.util.List;
 public abstract class EntityMixin implements VLEntity {
 	@Shadow
 	public abstract void load(CompoundTag compound);
-
-	@Unique
-	private PlayerInput vl$pilotInput = PlayerInput.NONE;
 
 	@ModifyReturnValue(method = "collectColliders", at = @At("RETURN"))
 	private static List<VoxelShape> vl$collectColliders(List<VoxelShape> parent, @Local(argsOnly = true) Level level, @Local(argsOnly = true) @Nullable Entity entity, @Local(argsOnly = true) AABB collisionBox) {
@@ -105,21 +100,6 @@ public abstract class EntityMixin implements VLEntity {
 			entity.setDeltaMovement(new Vec3(delta.x, 0D, delta.z));
 			entity.resetFallDistance();
 		}
-	}
-
-	@Override
-	public PlayerInput getPilotInput() {
-		return vl$pilotInput;
-	}
-
-	@Override
-	public void vl$setPilotInput(PlayerInput input) {
-		vl$pilotInput = input;
-	}
-
-	@Inject(method = "removePassenger", at = @At("RETURN"))
-	private void vl$removePassenger(Entity passenger, CallbackInfo ci) {
-		vl$pilotInput = PlayerInput.NONE;
 	}
 
 	@Redirect(method = {"updateFluidOnEyes", "updateFluidHeightAndDoFluidPushing()V"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getFluidState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;"))

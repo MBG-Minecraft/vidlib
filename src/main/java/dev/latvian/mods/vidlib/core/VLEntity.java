@@ -18,6 +18,7 @@ import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.math.kvector.PositionType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -31,6 +32,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.util.List;
 
@@ -226,6 +228,11 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		return false;
 	}
 
+	@Nullable
+	default Component getCustomMountMessage() {
+		return null;
+	}
+
 	default float getVehicleCameraDistance(Player passenger, float original) {
 		return original;
 	}
@@ -234,17 +241,8 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		return 1F;
 	}
 
-	default PlayerInput getPilotInput() {
-		return PlayerInput.NONE;
-	}
-
-	default void vl$setPilotInput(PlayerInput input) {
+	default void setPilotInput(Player player, PlayerInput input) {
 		throw new NoMixinException(this);
-	}
-
-	@Nullable
-	default Boolean forceRenderVehicleCrosshair(Player passenger) {
-		return null;
 	}
 
 	default Rotation rotation(float delta) {
@@ -291,5 +289,26 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 
 	default boolean vl$isDeadOrDying() {
 		return !vl$self().isAlive();
+	}
+
+	default boolean hideCrosshair(Player player) {
+		return false;
+	}
+
+	default void transformPassengerCamera(Matrix4f matrix, float delta) {
+	}
+
+	default boolean shouldRenderPassengerHand(Player player) {
+		return true;
+	}
+
+	// WIP
+	default boolean overridePassengerClientLeftClick(Player player) {
+		return false;
+	}
+
+	// WIP
+	default boolean overridePassengerClientRightClick(Player player) {
+		return false;
 	}
 }

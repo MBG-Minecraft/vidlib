@@ -5,7 +5,7 @@ import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.entity.ExactEntitySpawnPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
-import dev.latvian.mods.vidlib.feature.misc.ClientModInfo;
+import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
@@ -164,7 +164,7 @@ public class CommonGameEngine {
 		return ClientGameEngine.INSTANCE.handleClientPacket(ctx);
 	}
 
-	public boolean handleClientModList(Context ctx, Map<String, ClientModInfo> mods) {
+	public boolean handleClientModList(Context ctx, Map<String, PlatformModInfo> mods) {
 		/*
 		if (player.server.isDedicatedServer()) {
 			VidLib.LOGGER.info("Player " + player.getScoreboardName() + " logged in with mods:");
