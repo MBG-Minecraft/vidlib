@@ -12,7 +12,6 @@ import java.util.Arrays;
 
 public interface VidLibClientOptions {
 	OptionInstance<Boolean> ADMIN_PANEL = OptionInstance.createBoolean("options.vidlib.admin_panel", false);
-	OptionInstance<Boolean> SHOW_FPS = OptionInstance.createBoolean("options.vidlib.show_fps", false);
 	OptionInstance<Boolean> SHOW_ANCHOR = OptionInstance.createBoolean("options.vidlib.show_anchor", false);
 	OptionInstance<Boolean> SHOW_ZONES = OptionInstance.createBoolean("options.vidlib.show_zones", false);
 	OptionInstance<Boolean> SHOW_ZONE_OUTER_BOUNDS = OptionInstance.createBoolean("options.vidlib.show_zone_outer_bounds", true);
@@ -76,7 +75,6 @@ public interface VidLibClientOptions {
 
 	OptionInstance<?>[] ACCESSIBILITY_OPTIONS = {
 		SHOW_ANCHOR,
-		SHOW_FPS,
 		SHOW_ZONES,
 		SHOW_ZONE_OUTER_BOUNDS,
 		ZONE_RENDER_TYPE,
@@ -87,15 +85,6 @@ public interface VidLibClientOptions {
 
 	static boolean getAdminPanel() {
 		return ADMIN_PANEL.get();
-	}
-
-	static boolean getShowFPS() {
-		return SHOW_FPS.get();
-	}
-
-	static void setShowFPS(boolean value) {
-		SHOW_FPS.set(value);
-		Minecraft.getInstance().options.save();
 	}
 
 	static boolean getShowAnchor() {
@@ -130,7 +119,6 @@ public interface VidLibClientOptions {
 	static void process(Options.FieldAccess accessor) {
 		accessor.process("vidlib.admin_panel", ADMIN_PANEL);
 
-		accessor.process("vidlib.show_fps", SHOW_FPS);
 		accessor.process("vidlib.show_anchor", SHOW_ANCHOR);
 		accessor.process("vidlib.show_zones", SHOW_ZONES);
 		accessor.process("vidlib.show_zone_outer_bounds", SHOW_ZONE_OUTER_BOUNDS);

@@ -32,7 +32,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 
 import java.util.List;
 
@@ -297,7 +296,8 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		return false;
 	}
 
-	default void transformPassengerCamera(Matrix4f matrix, float delta) {
+	default float getPassengerCameraRoll(Player player, double delta, float roll) {
+		return roll;
 	}
 
 	default boolean shouldRenderPassengerHand(Player player) {

@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.core.mixin;
 import dev.latvian.mods.vidlib.core.VLServerConfigPacketListener;
 import dev.latvian.mods.vidlib.core.VLServerPlayPacketListener;
 import dev.latvian.mods.vidlib.feature.session.LoginData;
-import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import net.minecraft.network.Connection;
 import net.minecraft.network.PacketListener;
 import net.minecraft.server.MinecraftServer;
@@ -27,8 +26,7 @@ public abstract class ServerConfigurationPacketListenerImplMixin implements VLSe
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void vl$init(MinecraftServer server, Connection connection, CommonListenerCookie cookie, CallbackInfo ci) {
-		vl$sessionData(new ServerSessionData(server, cookie.gameProfile().getId()));
-		vl$sessionData().load(server);
+		vl$sessionData(server.vl$getOrLoadServerSession(cookie.gameProfile().getId()));
 	}
 
 	@Override

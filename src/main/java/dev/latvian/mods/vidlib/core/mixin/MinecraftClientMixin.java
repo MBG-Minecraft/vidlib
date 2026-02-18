@@ -1,13 +1,18 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.latvian.mods.vidlib.core.VLMinecraftClient;
+import dev.latvian.mods.vidlib.feature.client.SleepScreen;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.InBedChatScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
@@ -49,6 +54,10 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 		if (!PlayerActionHandler.handle(player, PlayerActionType.SWAP, true)) {
 			instance.send(packet);
 		}
+	}
+
+	@Redirect(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V", ordinal = 0))
+	private void vl$openSocialInteractionsScreen(Minecraft instance, Screen old) {
 	}
 
 	@Inject(method = "startAttack", at = @At("HEAD"), cancellable = true)
@@ -131,5 +140,10 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 		if (ClientGameEngine.INSTANCE.isGlowing(vl$self(), entity)) {
 			cir.setReturnValue(true);
 		}
+	}
+
+	@WrapOperation(method = "tick", at = @At(value = "NEW", target = "()Lnet/minecraft/client/gui/screens/InBedChatScreen;"))
+	private InBedChatScreen vl$sleepScreen(Operation<InBedChatScreen> original) {
+		return ClientGameEngine.INSTANCE.removeChatFromSleepScreen() ? new SleepScreen() : original.call();
 	}
 }

@@ -445,10 +445,6 @@ public class VidLibClientEventHandler {
 
 		boolean primitiveF3Open = mc.gui.getDebugOverlay().showDebugScreen() && ClientGameEngine.INSTANCE.primitiveF3(mc);
 
-		if (primitiveF3Open || VidLibClientOptions.getShowFPS()) {
-			ScreenText.RENDER.topRight.add(mc.fpsString.split(" ", 2)[0] + " FPS");
-		}
-
 		if ((primitiveF3Open || VidLibClientOptions.getShowCoordinates()) && ClientGameEngine.INSTANCE.allowCoordinateDisplay(mc)) {
 			var pos = mc.gameRenderer.getMainCamera().getPosition();
 			var x = Component.literal("%.01f".formatted(pos.x)).withColor(0xFF7070);
@@ -730,6 +726,15 @@ public class VidLibClientEventHandler {
 
 		if (event.getSkin(PlayerSkin.Model.SLIM) instanceof PlayerRenderer r) {
 			r.addLayer(new ClothingLayer(r, event.getContext(), false)); // TODO: Fixme
+		}
+	}
+
+	@SubscribeEvent
+	public static void computeCameraAngles(ViewportEvent.ComputeCameraAngles event) {
+		var mc = Minecraft.getInstance();
+
+		if (mc.player != null && mc.player.getVehicle() != null) {
+			event.setRoll(mc.player.getVehicle().getPassengerCameraRoll(mc.player, event.getPartialTick(), event.getRoll()));
 		}
 	}
 }

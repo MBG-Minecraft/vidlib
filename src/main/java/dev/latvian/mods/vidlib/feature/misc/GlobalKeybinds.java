@@ -90,6 +90,7 @@ public class GlobalKeybinds {
 				 "key.bridgingmod.toggle_bridging",
 				 "key.voice_chat_group",
 				 "key.disable_voice_chat",
+				 "key.hide_icons",
 				 "key.advancements" -> InputConstants.UNKNOWN;
 			case "key.jei.bookmark" -> InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_EQUALS);
 			case "key.push_to_talk" -> InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_C);

@@ -163,7 +163,7 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 		return disabled(!enabled);
 	}
 
-	public void build(ImGraphics graphics) {
+	public void build(ImGraphics graphics, int level) {
 		if (hasFlag(FLAG_SKIP)) {
 			return;
 		} else if (hasFlag(FLAG_SEPARATOR)) {
@@ -194,7 +194,7 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 				if (menuOpen) {
 					for (int i = 0; i < items.size(); i++) {
 						ImGui.pushID(i);
-						items.get(i).build(graphics);
+						items.get(i).build(graphics, level + 1);
 						ImGui.popID();
 					}
 
@@ -206,7 +206,7 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 				if (remainOpen) {
 					graphics.popStack();
 				}
-			} else {
+			} else if (level > 0) {
 				label.push(graphics);
 				ImGui.beginMenu(rIcon.formatLabel(graphics, label.text()), false);
 				label.pop(graphics);
@@ -251,7 +251,7 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 		if (!mainMenu.isEmpty()) {
 			for (int i = 0; i < mainMenu.size(); i++) {
 				ImGui.pushID(i);
-				mainMenu.get(i).build(graphics);
+				mainMenu.get(i).build(graphics, 0);
 				ImGui.popID();
 			}
 		}
@@ -271,7 +271,7 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 		if (graphics.isReplay ? ImGui.beginMenu("VidLib") : mainMenuBar || ImGui.beginMenuBar()) {
 			for (int i = 0; i < mainMenu.size(); i++) {
 				ImGui.pushID(i);
-				mainMenu.get(i).build(graphics);
+				mainMenu.get(i).build(graphics, 0);
 				ImGui.popID();
 			}
 
