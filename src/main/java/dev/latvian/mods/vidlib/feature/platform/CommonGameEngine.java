@@ -352,7 +352,7 @@ public class CommonGameEngine {
 	}
 
 	public boolean canVoicechatBroadcast(Player player) {
-		return isPlayerStaff(List.of("staff"), player.gameMode()) || player.hasPermissions(2);
+		return isPlayerStaff(player.getTags(), player.gameMode()) || player.hasPermissions(2);
 	}
 
 	public boolean isInvulnerable(Entity entity) {
