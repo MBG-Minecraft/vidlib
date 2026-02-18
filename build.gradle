@@ -286,10 +286,12 @@ idea {
 		if (!CI) {
 			downloadSources = true
 			downloadJavadoc = true
+			excludeDirs.add(file(".editorconfig"))
 
 			["client", "server"].each {
 				[
 						".architectury-transformer",
+						"cache",
 						"config",
 						"crash-reports",
 						"debug",

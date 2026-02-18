@@ -25,6 +25,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
@@ -110,5 +111,10 @@ public abstract class EntityMixin implements VLEntity {
 	@Redirect(method = {"updateFluidOnEyes", "updateFluidHeightAndDoFluidPushing()V"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/material/FluidState;getHeight(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F"))
 	private float vl$getFluidHeight(FluidState state, BlockGetter blockGetter, BlockPos pos) {
 		return blockGetter instanceof Level l ? CommonGameEngine.INSTANCE.overrideFluidHeight(l, state, pos) : state.getHeight(blockGetter, pos);
+	}
+
+	@Inject(method = "addPassenger", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/ImmutableList;copyOf(Ljava/util/Collection;)Lcom/google/common/collect/ImmutableList;"))
+	private void vl$addPassenger(Entity passenger, CallbackInfo ci, @Local List<Entity> list) {
+		sortPassengers(list);
 	}
 }

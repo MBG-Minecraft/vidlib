@@ -93,8 +93,9 @@ public class GlobalKeybinds {
 				 "key.advancements" -> InputConstants.UNKNOWN;
 			case "key.jei.bookmark" -> InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_EQUALS);
 			case "key.push_to_talk" -> InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_C);
+			case "key.mute_microphone" -> InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_F7);
 			case "key.ok_zoomer.zoom" -> InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_Z);
-			case "gui.xaero_open_map" -> InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_F7);
+			case "gui.xaero_open_map" -> InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_M);
 			default -> original;
 		};
 	}

@@ -140,16 +140,23 @@ public abstract class DataMapConfigPanel extends Panel {
 
 					try {
 						value = dataMap.get(entry.key);
-						result = entry.key.type().codec().encodeStart(graphics.mc.level.jsonOps(), Cast.to(value));
-						var string = result.getOrThrow().toString();
 
-						if (string.length() <= 50) {
-							ImGui.text(string);
+						if (value == null) {
+							ImGui.text("null");
 						} else {
-							ImGui.button("JSON###value-json");
+							result = entry.key.type().codec().encodeStart(graphics.mc.level.jsonOps(), Cast.to(value));
+							var string = result.getOrThrow().toString();
 
-							if (ImGui.isItemHovered()) {
-								ImGui.setTooltip(string);
+							if (string.length() <= 50) {
+								ImGui.text(string);
+							} else {
+								if (ImGui.button("JSON###value-json")) {
+									ImGui.setClipboardText(string);
+								}
+
+								if (ImGui.isItemHovered()) {
+									ImGui.setTooltip(string);
+								}
 							}
 						}
 					} catch (Throwable ex) {

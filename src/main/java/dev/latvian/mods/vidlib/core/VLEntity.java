@@ -244,6 +244,9 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	default void setPilotInput(Player player, PlayerInput input) {
 	}
 
+	default void sortPassengers(List<Entity> passengers) {
+	}
+
 	default Rotation rotation(float delta) {
 		var e = vl$self();
 		return Rotation.deg(e.getYRot(delta), e.getXRot(delta));

@@ -7,7 +7,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GeoAnimationsImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GeoModelImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.GeoTextureImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.TextureImBuilder;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
@@ -22,7 +22,7 @@ public class GeoDisplayProp extends BaseGeoProp {
 		HEIGHT,
 		YAW,
 		PropData.create(GeoDisplayProp.class, "model", ID.DATA_TYPE, p -> p.model, (p, v) -> p.model = v, GeoModelImBuilder.TYPE),
-		PropData.create(GeoDisplayProp.class, "texture", ID.DATA_TYPE, p -> p.texture, (p, v) -> p.texture = v, GeoTextureImBuilder.TYPE),
+		PropData.create(GeoDisplayProp.class, "texture", ID.DATA_TYPE, p -> p.texture, (p, v) -> p.texture = v, TextureImBuilder.GEO),
 		PropData.create(GeoDisplayProp.class, "animations", ID.DATA_TYPE, p -> p.animations, (p, v) -> p.animations = v, GeoAnimationsImBuilder.TYPE)
 	);
 
