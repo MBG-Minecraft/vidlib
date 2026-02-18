@@ -16,6 +16,7 @@ import dev.latvian.mods.vidlib.feature.environment.FogOverride;
 import dev.latvian.mods.vidlib.feature.explosion.ExplosionData;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
+import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
@@ -110,5 +111,6 @@ public interface VidLibDataTypes {
 		DataType.register(VidLib.id("timestamp"), Timestamp.DATA_TYPE);
 		DataType.register(VidLib.id("waypoint"), Waypoint.DATA_TYPE);
 		DataType.register(VidLib.id("waypoint_list"), Waypoint.LIST_DATA_TYPE);
+		DataType.register(VidLib.id("player_input"), PlayerInput.DATA_TYPE);
 	}
 }

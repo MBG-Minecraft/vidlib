@@ -33,15 +33,7 @@ public interface VLLocalPlayer extends VLClientPlayer {
 		boolean mouseBack = mouse && GLFW.glfwGetMouseButton(windowId, 3) == GLFW.GLFW_PRESS;
 		boolean mouseNext = mouse && GLFW.glfwGetMouseButton(windowId, 4) == GLFW.GLFW_PRESS;
 
-		return new PlayerInput(
-			PlayerInput.getFlags(
-				// Movement
-				in.forward(), in.backward(), in.left(), in.right(), in.jump(), in.shift(), in.sprint(),
-				// Modifiers
-				shift, control, alt, tab,
-				// Mouse
-				mouseLeft, mouseRight, mouseMiddle, mouseBack, mouseNext
-			),
+		return PlayerInput.of(
 			// Movement
 			in.forward(), in.backward(), in.left(), in.right(), in.jump(), in.shift(), in.sprint(),
 			// Modifiers
