@@ -68,6 +68,7 @@ import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -348,6 +349,10 @@ public class CommonGameEngine {
 
 	public boolean allowPVP(Player from, Player to) {
 		return !from.vl$isSuspended() && !to.vl$isSuspended();
+	}
+
+	public boolean canVoicechatBroadcast(Player player) {
+		return isPlayerStaff(List.of("staff"), player.gameMode()) || player.hasPermissions(2);
 	}
 
 	public boolean isInvulnerable(Entity entity) {
