@@ -134,8 +134,8 @@ public class ClientGameEngine {
 	}
 
 	public boolean isGlowing(Minecraft mc, Entity entity) {
-		if (entity instanceof Player player) {
-			return player.getOptional(InternalPlayerData.GLOW_COLOR) != null;
+		if (entity instanceof Player player && player.getOptional(InternalPlayerData.GLOW_COLOR) != null) {
+			return true;
 		}
 
 		return mc.player != null && mc.player.vl$sessionData().glowColors.get(entity.getUUID()) != null;

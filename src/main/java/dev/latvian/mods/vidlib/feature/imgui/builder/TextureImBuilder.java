@@ -21,7 +21,7 @@ public class TextureImBuilder implements ImBuilder<ResourceLocation> {
 	public static final ImBuilderType<ResourceLocation> GEO = of(List.of("textures/entity", "textures/prop"), ID.mc("textures/entity/skeleton/skeleton.png"));
 	public static final ImBuilderType<ResourceLocation> SKIN = of(List.of("textures/entity"), SkinTexture.STEVE);
 
-	public static final ImString SEARCH = ImGuiUtils.resizableString();
+	public final ImString SEARCH = ImGuiUtils.resizableString();
 
 	public final List<String> paths;
 	public final ResourceLocation[] value;
