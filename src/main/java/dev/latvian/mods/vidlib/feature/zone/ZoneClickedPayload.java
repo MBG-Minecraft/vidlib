@@ -34,7 +34,7 @@ public record ZoneClickedPayload(ResourceLocation id, int index, ZoneShape shape
 
 	@Override
 	public void handle(Context ctx) {
-		if (VidLibTool.isHolding(ctx.player(), ZoneToolItem.INSTANCE)) {
+		if (VidLibTool.isHolding(ctx.player(), ZoneTool.INSTANCE)) {
 			var zone = ctx.level().vl$getActiveZones().get(id);
 
 			if (zone != null) {

@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
-public enum ZoneToolItem implements VidLibTool {
+public enum ZoneTool implements VidLibTool {
 	@AutoRegister
 	INSTANCE;
 

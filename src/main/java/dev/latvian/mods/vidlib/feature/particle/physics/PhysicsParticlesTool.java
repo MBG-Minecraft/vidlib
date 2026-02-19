@@ -75,7 +75,7 @@ public enum PhysicsParticlesTool implements VidLibTool, PlayerActionHandler {
 	}
 
 	@Override
-	public boolean onClientPlayerAction(Player player, PlayerActionType action) {
+	public boolean onClientPlayerAction(Player player, ItemStack item, InteractionHand hand, PlayerActionType action) {
 		if (action == PlayerActionType.SWAP) {
 			player.openItemGui(player.getMainHandItem(), InteractionHand.MAIN_HAND);
 			return true;

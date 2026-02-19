@@ -19,6 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -31,7 +32,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
-public enum PositionToolItem implements VidLibTool, PlayerActionHandler {
+public enum PositionTool implements VidLibTool, PlayerActionHandler {
 	@AutoRegister
 	INSTANCE;
 
@@ -185,9 +186,8 @@ public enum PositionToolItem implements VidLibTool, PlayerActionHandler {
 	}
 
 	@Override
-	public void onPlayerAction(ServerPlayer player, PlayerActionType action) {
+	public void onPlayerAction(ServerPlayer player, ItemStack item, InteractionHand hand, PlayerActionType action) {
 		if (action == PlayerActionType.SWAP) {
-			var item = player.getMainHandItem();
 			var tag = item.get(DataComponents.CUSTOM_DATA).copyTag();
 			var mode = Type.VALUES[(tag.getByteOr("position_tool_mode", (byte) 0) + 1) % Type.VALUES.length];
 			tag.putByte("position_tool_mode", (byte) mode.ordinal());

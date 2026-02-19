@@ -100,7 +100,7 @@ public enum ExplosionTestTool implements VidLibTool, PlayerActionHandler {
 	}
 
 	@Override
-	public boolean onClientPlayerAction(Player player, PlayerActionType action) {
+	public boolean onClientPlayerAction(Player player, ItemStack item, InteractionHand hand, PlayerActionType action) {
 		if (action == PlayerActionType.SWAP) {
 			player.openItemGui(player.getMainHandItem(), InteractionHand.MAIN_HAND);
 			return true;
@@ -110,7 +110,7 @@ public enum ExplosionTestTool implements VidLibTool, PlayerActionHandler {
 	}
 
 	@Override
-	public void onPlayerAction(ServerPlayer player, PlayerActionType action) {
+	public void onPlayerAction(ServerPlayer player, ItemStack item, InteractionHand hand, PlayerActionType action) {
 		if (action == PlayerActionType.RELOAD) {
 			player.status("Modified %,d blocks".formatted(player.level().undoLastModification()));
 		}

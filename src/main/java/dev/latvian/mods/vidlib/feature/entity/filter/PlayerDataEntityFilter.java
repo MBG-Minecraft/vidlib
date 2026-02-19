@@ -12,6 +12,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -71,7 +72,7 @@ public record PlayerDataEntityFilter(DataKey<?> dataKey) implements EntityFilter
 
 	@Override
 	public boolean test(Entity entity) {
-		var data = entity.level().getOptional(dataKey);
+		var data = entity instanceof Player player ? player.getOptional(dataKey) : null;
 
 		if (data == null) {
 			return false;
