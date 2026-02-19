@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.core.VLGameRenderer;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
@@ -71,11 +70,6 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 		if (minecraft.getWindow().isInvisible()) {
 			ci.cancel();
 		}
-	}
-
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;mul(Lorg/joml/Matrix4fc;)Lorg/joml/Matrix4f;"))
-	private void vl$adjustCamera(DeltaTracker deltaTracker, CallbackInfo ci, @Local Camera camera, @Local(ordinal = 0) Matrix4f matrix) {
-		ClientGameEngine.INSTANCE.transformCamera(minecraft, matrix, camera, deltaTracker);
 	}
 
 	@ModifyExpressionValue(method = "renderLevel", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/GameRenderer;renderHand:Z"))

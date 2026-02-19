@@ -35,7 +35,6 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.Camera;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -78,7 +77,6 @@ import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
@@ -90,10 +88,8 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -119,17 +115,17 @@ public class ClientGameEngine {
 		map.put(Feature.SKYBOX, 1);
 	}
 
-	public boolean isClientStaff(Collection<String> tags, GameType gameMode) {
-		return CommonGameEngine.INSTANCE.isPlayerStaff(tags, gameMode);
-	}
-
 	public boolean canSeeAllPlayersInList(LocalPlayer self) {
-		return isClientStaff(self.getTags(), self.getGameMode());
+		return CommonGameEngine.INSTANCE.isPlayerStaff(self.getTags(), self.getGameMode());
 	}
 
 	public boolean canSeePlayerInList(LocalPlayer self, PlayerInfo playerInfo) {
+		if (CommonGameEngine.INSTANCE.privacyMode()) {
+			return playerInfo.getProfile().getId().equals(self.getGameProfile().getId());
+		}
+
 		var sessionData = self.vl$sessionData().getClientSessionData(playerInfo.getProfile().getId());
-		return !isClientStaff(sessionData.getTags(), playerInfo.getGameMode());
+		return !CommonGameEngine.INSTANCE.isPlayerStaff(sessionData.getTags(), playerInfo.getGameMode());
 	}
 
 	public Component getPlayerListName(Minecraft mc, PlayerInfo playerInfo, Component fallback) {
@@ -693,7 +689,7 @@ public class ClientGameEngine {
 	}
 
 	public boolean hideServerPingPlayers() {
-		return false;
+		return CommonGameEngine.INSTANCE.privacyMode();
 	}
 
 	@Nullable
@@ -753,7 +749,20 @@ public class ClientGameEngine {
 
 	@Nullable
 	public List<String> overrideCommandOnlinePlayerNames() {
-		return null;
+		if (!CommonGameEngine.INSTANCE.privacyMode()) {
+			return null;
+		}
+
+		var mc = Minecraft.getInstance();
+		var connection = mc.getConnection();
+
+		if (connection == null) {
+			return List.of();
+		} else if (mc.player != null && CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(mc.player.getTags(), mc.player.gameMode())) {
+			return connection.getOnlinePlayers().stream().map(p -> p.getProfile().getName()).toList();
+		} else {
+			return List.of(mc.getUser().getName());
+		}
 	}
 
 	public boolean enableSinglePlayerMainMenuButton() {
@@ -768,19 +777,19 @@ public class ClientGameEngine {
 		return false;
 	}
 
-	public void transformCamera(Minecraft mc, Matrix4f matrix, Camera camera, DeltaTracker deltaTracker) {
-		if (mc.player != null && mc.player.getVehicle() != null) {
-			mc.player.getVehicle().transformPassengerCamera(matrix, camera.getPartialTickTime());
-		}
-
-		// matrix.rotateZ((float) (-camera.getRoll() * Math.PI / 180D));
-	}
-
 	public boolean shouldRenderHand(Minecraft mc) {
 		if (overrideCamera(mc) != null) {
 			return false;
 		}
 
 		return mc.player == null || mc.player.getVehicle() == null || mc.player.getVehicle().shouldRenderPassengerHand(mc.player);
+	}
+
+	public boolean hideVoiceChatPlayerList() {
+		return CommonGameEngine.INSTANCE.privacyMode();
+	}
+
+	public boolean removeChatFromSleepScreen() {
+		return CommonGameEngine.INSTANCE.privacyMode();
 	}
 }

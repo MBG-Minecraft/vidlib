@@ -69,17 +69,22 @@ public class BuiltInImGui {
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.OpenDropdown(graphics, list));
 
 		list.add(MenuItem.SEPARATOR);
-		list.add(MenuItem.item(ImIcons.FRAMED_CUBE, "Debug Widgets", DebugWidgetPanel.INSTANCE));
-		list.add(MenuItem.item(ImIcons.BUG, "Packet Debugger", PacketDebuggerPanel.INSTANCE));
+		list.add(MenuItem.item(ImIcons.FRAMED_CUBE, "Debug Widgets", DebugWidgetPanel.INSTANCE).enabled(graphics.isAdmin));
+		list.add(MenuItem.item(ImIcons.BUG, "Packet Debugger", PacketDebuggerPanel.INSTANCE).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.MEMORY, "ID Stack Tool", SHOW_STACK_TOOL));
 		list.add(MenuItem.item(ImIcons.EDIT, "Style Editor Tool", SHOW_STYLE_EDITOR_TOOL));
 	});
 
 	public static final MenuItem CONFIG = MenuItem.menu(ImIcons.SETTINGS, "Config", (graphics, list) -> {
 		list.add(MenuItem.item(ImIcons.WRENCH, "Server Data", ServerDataConfigPanel.INSTANCE).enabled(graphics.isAdmin));
-		list.add(Skybox.MENU_ITEM.enabled(graphics.inGame));
-		list.add(DepthOfFieldPanel.MENU_ITEM.enabled(graphics.inGame));
-		list.add(ChromaticAberrationPanel.MENU_ITEM.enabled(graphics.inGame));
+
+		if (graphics.player != null) {
+			list.add(MenuItem.item(ImIcons.WRENCH, "Player Data (Self)", g1 -> new PlayerDataConfigPanel(graphics.player.getScoreboardName(), graphics.player.vl$sessionData().dataMap).open()).enabled(graphics.isAdmin));
+		}
+
+		list.add(Skybox.MENU_ITEM.enabled(graphics.isAdmin));
+		list.add(DepthOfFieldPanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
+		list.add(ChromaticAberrationPanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
 		list.add(FluidPlanePanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
 		list.add(WorldBorderPanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
 
@@ -122,7 +127,7 @@ public class BuiltInImGui {
 				.withStyle(ChatFormatting.UNDERLINE)
 				.withStyle(s -> s.withClickEvent(new ClickEvent.OpenFile(textures)))
 			));
-		}));
+		}).enabled(graphics.isAdmin));
 
 		list.add(MenuItem.item(ImIcons.RELOAD, "Clear Skin Cache", g -> {
 			boolean reload = false;
@@ -195,7 +200,6 @@ public class BuiltInImGui {
 
 		list.add(MenuItem.SEPARATOR);
 
-		list.add(MenuItem.item(ImIcons.SPEED, "FPS", VidLibClientOptions.getShowFPS(), g -> VidLibClientOptions.setShowFPS(!VidLibClientOptions.getShowFPS())).enabled(graphics.inGame));
 		list.add(MenuItem.item(ImIcons.LOCATION, "Coordinates", VidLibClientOptions.getShowCoordinates(), g -> VidLibClientOptions.setShowCoordinates(!VidLibClientOptions.getShowCoordinates())).enabled(graphics.isAdmin));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.ShowDropdown(graphics, list));

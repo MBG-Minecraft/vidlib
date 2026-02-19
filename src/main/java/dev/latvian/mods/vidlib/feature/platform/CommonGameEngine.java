@@ -68,12 +68,15 @@ import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public class CommonGameEngine {
 	public static CommonGameEngine INSTANCE = new CommonGameEngine();
+
+	public boolean privacyMode() {
+		return false;
+	}
 
 	public void collectServerFeatures(Reference2IntMap<Feature> map) {
 		map.put(Feature.INFINITE_CHUNK_RENDERING, 1);
@@ -110,10 +113,18 @@ public class CommonGameEngine {
 		rules.getRule(GameRules.RULE_DO_TRADER_SPAWNING).set(false, server);
 		rules.getRule(GameRules.RULE_DO_WARDEN_SPAWNING).set(false, server);
 		rules.getRule(GameRules.RULE_GLOBAL_SOUND_EVENTS).set(false, server);
+
+		if (privacyMode()) {
+			rules.getRule(GameRules.RULE_SHOWDEATHMESSAGES).set(false, server);
+		}
 	}
 
 	public boolean isPlayerStaff(Collection<String> tags, GameType gameMode) {
 		return gameMode == GameType.SPECTATOR || tags.contains("staff");
+	}
+
+	public boolean isPlayerStaffOrTalent(Collection<String> tags, GameType gameMode) {
+		return isPlayerStaff(tags, gameMode) || tags.contains("talent");
 	}
 
 	public boolean tickCoralBlocks(ScheduledTickAccess instance, BlockPos pos, Block block) {
@@ -262,7 +273,7 @@ public class CommonGameEngine {
 	}
 
 	public boolean disableJoinMessages() {
-		return false;
+		return privacyMode();
 	}
 
 	public void heal(LivingEntity entity) {
@@ -428,15 +439,23 @@ public class CommonGameEngine {
 		return source.hasPermission(2);
 	}
 
+	public boolean allowPlayerListCommand(CommandSourceStack source) {
+		return !privacyMode() || source.hasPermission(2);
+	}
+
 	public boolean allowMsgCommand(CommandSourceStack source) {
-		return true;
+		return !privacyMode() || source.hasPermission(2);
+	}
+
+	public boolean allowTeamMsgCommand(CommandSourceStack source) {
+		return !privacyMode() || source.hasPermission(2);
 	}
 
 	public void modifyDroppedItem(LivingEntity entity, ItemEntity item) {
 	}
 
 	public boolean disableSleepStatusAnnouncement(ServerLevel level) {
-		return false;
+		return privacyMode();
 	}
 
 	public void tickPrecipitation(ServerLevel level, BlockPos blockPos, BlockPos motionBlockedPos, BlockPos belowMotionBlockedPos) {

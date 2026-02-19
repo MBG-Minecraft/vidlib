@@ -7,7 +7,6 @@ import dev.latvian.mods.vidlib.core.VLServerPacketListener;
 import dev.latvian.mods.vidlib.feature.misc.CreateFireworksPayload;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ServerProps;
-import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -106,9 +105,8 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 			return;
 		}
 
-		var newPlayerSession = new ServerSessionData(server, player.getUUID());
+		var newPlayerSession = server.vl$getOrLoadServerSession(player.getUUID());
 		((VLServerPacketListener) player.connection).vl$sessionData(newPlayerSession);
-		newPlayerSession.load(server);
 	}
 
 	@Inject(method = "announceSleepStatus", at = @At("HEAD"), cancellable = true)
