@@ -1,10 +1,13 @@
 package dev.latvian.mods.vidlib.core;
 
+import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.clock.SyncClocksPayload;
+import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
+import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
@@ -26,6 +29,7 @@ import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -72,7 +76,14 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 
 	@ApiStatus.Internal
 	default void vl$playerJoined(ServerPlayer player) {
+		PlayerProfiles.cache(player.getGameProfile());
+		player.vl$sessionData().dataMap.set(InternalPlayerData.ONLINE, true);
 		VidLib.sync(player, 2);
+	}
+
+	@ApiStatus.Internal
+	default void vl$playerLeft(ServerPlayer player) {
+		player.vl$sessionData().dataMap.set(InternalPlayerData.ONLINE, false);
 	}
 
 	@Override
@@ -227,5 +238,24 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 
 	default ServerSessionData vl$getOrLoadServerSession(UUID uuid) {
 		throw new NoMixinException(this);
+	}
+
+	default void vl$eraseServerSession(UUID uuid) {
+		throw new NoMixinException(this);
+	}
+
+	default void vl$preloadAllSessions() {
+		try (var stream = Files.list(vl$self().getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("vidlib"))) {
+			for (var path : stream.filter(Files::isRegularFile).toList()) {
+				var name = path.getFileName().toString();
+
+				if (name.endsWith(".nbt")) {
+					var uuid = UndashedUuid.fromStringLenient(name.substring(0, name.length() - 4));
+					vl$getOrLoadServerSession(uuid);
+				}
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 }

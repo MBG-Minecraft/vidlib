@@ -43,6 +43,10 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
+import net.minecraft.client.gui.components.toasts.AdvancementToast;
+import net.minecraft.client.gui.components.toasts.RecipeToast;
+import net.minecraft.client.gui.components.toasts.Toast;
+import net.minecraft.client.gui.components.toasts.TutorialToast;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -791,5 +795,9 @@ public class ClientGameEngine {
 
 	public boolean removeChatFromSleepScreen() {
 		return CommonGameEngine.INSTANCE.privacyMode();
+	}
+
+	public boolean disableToast(Toast toast) {
+		return toast instanceof TutorialToast || toast instanceof AdvancementToast || toast instanceof RecipeToast;
 	}
 }

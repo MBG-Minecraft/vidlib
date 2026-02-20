@@ -5,7 +5,6 @@ import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
-import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
@@ -14,7 +13,6 @@ import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.registry.GenericVLRegistry;
-import dev.latvian.mods.vidlib.feature.session.RemovePlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
@@ -131,7 +129,6 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
 		if (event.getEntity() instanceof ServerPlayer player) {
-			PlayerProfiles.cache(player.getGameProfile());
 			player.server.vl$playerJoined(player);
 		}
 	}
@@ -139,7 +136,7 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void playerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
 		if (event.getEntity() instanceof ServerPlayer player) {
-			player.server.s2c(new RemovePlayerDataPayload(player.getUUID()));
+			player.server.vl$playerLeft(player);
 		}
 	}
 

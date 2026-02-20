@@ -351,7 +351,11 @@ public class LocalClientSessionData extends ClientSessionData {
 
 	@Override
 	public void removeSessionData(UUID id) {
-		// remoteSessionData.remove(id);
+		remoteSessionData.remove(id);
+
+		if (id.equals(uuid)) {
+			mc.getConnection().disconnect(Component.literal("Your player data was reset"));
+		}
 	}
 
 	@Override

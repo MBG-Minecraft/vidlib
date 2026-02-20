@@ -67,10 +67,7 @@ import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.toasts.AdvancementToast;
-import net.minecraft.client.gui.components.toasts.RecipeToast;
 import net.minecraft.client.gui.components.toasts.SystemToast;
-import net.minecraft.client.gui.components.toasts.TutorialToast;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.PlayerSkin;
@@ -602,7 +599,7 @@ public class VidLibClientEventHandler {
 	public static void addToast(ToastAddEvent event) {
 		var toast = event.getToast();
 
-		if (toast instanceof TutorialToast || toast instanceof AdvancementToast || toast instanceof RecipeToast) {
+		if (ClientGameEngine.INSTANCE.disableToast(event.getToast())) {
 			event.setCanceled(true);
 		} else if (toast instanceof SystemToast systemToast) {
 			var t = systemToast.getToken();

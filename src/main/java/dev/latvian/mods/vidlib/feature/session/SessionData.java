@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
+import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
@@ -78,9 +79,6 @@ public class SessionData {
 	}
 
 	public void updatePlayerData(long gameTime, Player self, UUID player, List<DataMapValue> update) {
-	}
-
-	public void removeSessionData(UUID id) {
 	}
 
 	@Override
@@ -167,5 +165,12 @@ public class SessionData {
 	}
 
 	public void setClientModListSentDuringConfig() {
+	}
+
+	public boolean isOnline() {
+		return dataMap.get(InternalPlayerData.ONLINE);
+	}
+
+	public void removeSessionData(UUID player) {
 	}
 }

@@ -291,6 +291,7 @@ idea {
 			["client", "server"].each {
 				[
 						".architectury-transformer",
+						"atlasviewer",
 						"cache",
 						"config",
 						"crash-reports",

@@ -6,13 +6,16 @@ import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
+import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.feature.session.RemovePlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -164,5 +167,24 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 		}
 
 		return session;
+	}
+
+	@Override
+	public void vl$eraseServerSession(UUID uuid) {
+		var player = vl$self().getPlayerList().getPlayer(uuid);
+
+		if (player != null) {
+			player.connection.disconnect(Component.literal("Your player data was reset"));
+		}
+
+		schedule(1, () -> {
+			var data = vl$serverSessionData.remove(uuid);
+
+			if (data != null) {
+				data.dataMap.set(InternalPlayerData.ONLINE, false);
+
+				vl$self().s2c(new RemovePlayerDataPayload(uuid));
+			}
+		});
 	}
 }

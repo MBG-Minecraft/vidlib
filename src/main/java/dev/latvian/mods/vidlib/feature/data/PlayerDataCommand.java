@@ -13,14 +13,32 @@ public interface PlayerDataCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("player-data", (command, buildContext) -> {
 		command.requires(source -> source.hasPermission(2));
+
+		command.then(Commands.literal("preload-all")
+			.executes(ctx -> {
+				ctx.getSource().getServer().vl$preloadAllSessions();
+				return 1;
+			})
+		);
+
 		var nbtOps = buildContext.createSerializationContext(NbtOps.INSTANCE);
 
 		var playerCmd = Commands.argument("player", GameProfileArgument.gameProfile());
 
+		playerCmd.then(Commands.literal("erase")
+			.executes(ctx -> {
+				for (var player : GameProfileArgument.getGameProfiles(ctx, "player")) {
+					ctx.getSource().getServer().vl$eraseServerSession(player.getId());
+				}
+
+				return 1;
+			})
+		);
+
 		for (var key : DataKey.PLAYER.all.values()) {
 			var cmd = Commands.literal(key.id());
 
-			cmd.then(Commands.literal("get")
+			playerCmd.then(Commands.literal("get")
 				.executes(ctx -> {
 					for (var player : GameProfileArgument.getGameProfiles(ctx, "player")) {
 						var playerData = ctx.getSource().getServer().vl$getOrLoadServerSession(player.getId());

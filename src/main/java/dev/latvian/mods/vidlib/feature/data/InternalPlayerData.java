@@ -20,6 +20,7 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.Set;
 
 public interface InternalPlayerData {
+	DataKey<Boolean> ONLINE = DataKey.PLAYER.builder("online", DataTypes.BOOL, false).sync().build();
 	DataKey<Set<String>> PLAYER_TAGS = DataKey.PLAYER.createDefault("player_tags", VidLibDataTypes.STRING_SET, Set.of(), null);
 	DataKey<Boolean> SUSPENDED = DataKey.PLAYER.createDefault("suspended", DataTypes.BOOL, false, BooleanImBuilder.TYPE);
 	DataKey<Component> NICKNAME = DataKey.PLAYER.createDefault("nickname", DataTypes.TEXT_COMPONENT, Component.empty(), TextComponentImBuilder.TYPE);
@@ -30,7 +31,7 @@ public interface InternalPlayerData {
 	DataKey<ResourceLocation> ELYTRA_OVERRIDE = DataKey.PLAYER.createDefault("elytra_override", ID.DATA_TYPE, null, TextureImBuilder.GEO);
 	DataKey<Float> FLIGHT_SPEED = DataKey.PLAYER.createFloat("flight_speed", 1F, 0F, 20F);
 	DataKey<Color> GLOW_COLOR = DataKey.PLAYER.createDefault("glow_color", Color.DATA_TYPE, null, Color4ImBuilder::new);
-	DataKey<Boolean> CAN_FLY = DataKey.PLAYER.createDefault("can_fly", DataTypes.BOOL, false, BooleanImBuilder.TYPE);
+	DataKey<Boolean> CAN_FLY = DataKey.PLAYER.createBoolean("can_fly", false);
 
 	@AutoInit
 	static void bootstrap() {
