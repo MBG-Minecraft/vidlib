@@ -470,4 +470,19 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 	default Stream<BlockEntity> vl$getAllBlockEntities() {
 		return vl$getChunks().flatMap(c -> c.getBlockEntities().values().stream());
 	}
+
+	default <T extends Entity> T summon(EntityType<T> type, EntityType.EntityFactory<T> factory, Consumer<T> callback) {
+		var entity = factory.create(type, vl$level());
+
+		if (entity != null) {
+			callback.accept(entity);
+			vl$level().addFreshEntity(entity);
+		}
+
+		return entity;
+	}
+
+	default <T extends Entity> T summon(EntityType<T> type, Consumer<T> callback) {
+		return summon(type, type.factory, callback);
+	}
 }

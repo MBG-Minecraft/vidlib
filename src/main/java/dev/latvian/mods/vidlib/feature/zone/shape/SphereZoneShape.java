@@ -35,7 +35,7 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 	}
 
 	@Override
-	public AABB getBoundingBox() {
+	public AABB toAABB() {
 		return box;
 	}
 

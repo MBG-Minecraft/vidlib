@@ -12,7 +12,7 @@ public class RotatedBoxZoneRenderer implements ZoneRenderer<RotatedBoxZoneShape>
 		var ms = ctx.frame().poseStack();
 
 		if (ctx.outerBounds()) {
-			var box = shape.getBoundingBox();
+			var box = shape.toAABB();
 			float minX = ctx.frame().x(box.minX);
 			float minY = ctx.frame().y(box.minY);
 			float minZ = ctx.frame().z(box.minZ);

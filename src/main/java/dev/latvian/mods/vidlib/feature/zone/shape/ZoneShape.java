@@ -30,8 +30,8 @@ import java.util.function.Function;
 public interface ZoneShape extends ZoneLike, SimpleRegistryEntry {
 	SimpleRegistry<ZoneShape> REGISTRY = SimpleRegistry.create(VidLib.id("zone_shape"), c -> PlatformHelper.CURRENT.collectZoneShapes(c));
 
-	Codec<ZoneShape> CODEC = Codec.either(AAIBB.CODEC, REGISTRY.codec()).xmap(either -> either.map(box -> new BlockZoneShape(box.min(), box.max()), Function.identity()), shape -> shape instanceof BlockZoneShape b ? Either.left(b.toAAIBB()) : Either.right(shape));
-	StreamCodec<RegistryFriendlyByteBuf, ZoneShape> STREAM_CODEC = ByteBufCodecs.either(AAIBB.STREAM_CODEC, REGISTRY.streamCodec()).map(either -> either.map(box -> new BlockZoneShape(box.min(), box.max()), Function.identity()), shape -> shape instanceof BlockZoneShape b ? Either.left(b.toAAIBB()) : Either.right(shape));
+	Codec<ZoneShape> CODEC = Codec.either(AAIBB.CODEC, REGISTRY.codec()).xmap(either -> either.map(box -> BlockZoneShape.of(box.min(), box.max()), Function.identity()), shape -> shape instanceof BlockZoneShape b ? Either.left(b.intBox()) : Either.right(shape));
+	StreamCodec<RegistryFriendlyByteBuf, ZoneShape> STREAM_CODEC = ByteBufCodecs.either(AAIBB.STREAM_CODEC, REGISTRY.streamCodec()).map(either -> either.map(box -> BlockZoneShape.of(box.min(), box.max()), Function.identity()), shape -> shape instanceof BlockZoneShape b ? Either.left(b.intBox()) : Either.right(shape));
 
 	static void builtinTypes(SimpleRegistryCollector<ZoneShape> registry) {
 		registry.register(UniverseZoneShape.TYPE);
@@ -53,7 +53,7 @@ public interface ZoneShape extends ZoneLike, SimpleRegistryEntry {
 	}
 
 	@Override
-	AABB getBoundingBox();
+	AABB toAABB();
 
 	@Nullable
 	default ZoneClipResult clip(ZoneInstance instance, ClipContext ctx) {
@@ -61,7 +61,7 @@ public interface ZoneShape extends ZoneLike, SimpleRegistryEntry {
 			return null;
 		}
 
-		var result = AABB.clip(List.of(getBoundingBox()), ctx.getFrom(), ctx.getTo(), BlockPos.ZERO);
+		var result = AABB.clip(List.of(toAABB()), ctx.getFrom(), ctx.getTo(), BlockPos.ZERO);
 
 		if (result != null && result.getType() == HitResult.Type.BLOCK) {
 			return ZoneClipResult.of(instance, this, ctx, new BlockHitResult(result.getLocation(), result.getDirection(), BlockPos.containing(result.getLocation()), false));
@@ -71,12 +71,12 @@ public interface ZoneShape extends ZoneLike, SimpleRegistryEntry {
 	}
 
 	default ZoneShape move(double x, double y, double z) {
-		var box = getBoundingBox();
+		var box = toAABB();
 		return new BoxZoneShape(box.move(x, y, z));
 	}
 
 	default ZoneShape scale(double x, double y, double z) {
-		var box = getBoundingBox();
+		var box = toAABB();
 		var c = box.getCenter();
 		var sx = box.getXsize() * x / 2D;
 		var sy = box.getYsize() * y / 2D;

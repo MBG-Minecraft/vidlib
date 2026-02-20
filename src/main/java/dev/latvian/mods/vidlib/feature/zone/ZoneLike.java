@@ -1,9 +1,11 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
+import dev.latvian.mods.klib.math.AAIBB;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -18,15 +20,24 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public interface ZoneLike {
-	AABB getBoundingBox();
+	AABB toAABB();
+
+	default AAIBB toAAIBB() {
+		var box = toAABB();
+		return new AAIBB(Mth.floor(box.minX), Mth.floor(box.minY), Mth.floor(box.minZ), Mth.ceil(box.maxX), Mth.ceil(box.maxY), Mth.ceil(box.maxZ));
+	}
 
 	default Vec3 getCenterPos() {
-		var box = getBoundingBox();
+		var box = toAABB();
 		return new Vec3((box.minX + box.maxX) / 2D, (box.minY + box.maxY) / 2D, (box.minZ + box.maxZ) / 2D);
 	}
 
 	default boolean contains(double x, double y, double z) {
-		return getBoundingBox().contains(x, y, z);
+		return toAABB().contains(x, y, z);
+	}
+
+	default boolean contains(int x, int y, int z) {
+		return toAAIBB().contains(x, y, z);
 	}
 
 	default boolean contains(Vec3 pos) {
@@ -34,7 +45,7 @@ public interface ZoneLike {
 	}
 
 	default boolean contains(Vec3i pos) {
-		return contains(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D);
+		return contains(pos.getX(), pos.getY(), pos.getZ());
 	}
 
 	default boolean contains(Vector3dc pos) {
@@ -42,19 +53,19 @@ public interface ZoneLike {
 	}
 
 	default boolean intersects(AABB box) {
-		return getBoundingBox().intersects(box);
+		return toAABB().intersects(box);
 	}
 
 	default Stream<BlockPos> getBlocks() {
-		return BlockPos.betweenClosedStream(getBoundingBox().inflate(0.5D)).filter(this::contains);
+		return BlockPos.betweenClosedStream(toAABB().inflate(0.5D)).filter(this::contains);
 	}
 
 	default List<Entity> collectEntities(Level level, Predicate<? super Entity> predicate) {
-		return level.getEntities((Entity) null, getBoundingBox(), predicate);
+		return level.getEntities((Entity) null, toAABB(), predicate);
 	}
 
 	default VoxelShape createVoxelShape() {
-		return Shapes.create(getBoundingBox());
+		return Shapes.create(toAABB());
 	}
 
 	default VoxelShape createBlockRenderingShape(Predicate<BlockPos> predicate) {
@@ -72,12 +83,12 @@ public interface ZoneLike {
 	}
 
 	default double closestDistanceTo(Vec3 pos) {
-		var box = getBoundingBox();
+		var box = toAABB();
 		return box.contains(pos) ? 0D : Math.sqrt(box.distanceToSqr(pos));
 	}
 
 	default void collectChunkPositions(LongSet chunks) {
-		var box = getBoundingBox();
+		var box = toAABB();
 		int minX = (int) Math.floor(box.minX) >> 4;
 		int minZ = (int) Math.floor(box.minZ) >> 4;
 		int maxX = (int) Math.floor(box.maxX) >> 4;

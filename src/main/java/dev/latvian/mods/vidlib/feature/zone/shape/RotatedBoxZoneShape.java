@@ -70,7 +70,7 @@ public record RotatedBoxZoneShape(Vec3 pos, Vector3f size, Rotation rotation, Ma
 	}
 
 	@Override
-	public AABB getBoundingBox() {
+	public AABB toAABB() {
 		return box;
 	}
 

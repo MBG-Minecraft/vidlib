@@ -22,7 +22,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -275,17 +274,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	}
 
 	default boolean vl$hasItem(Ingredient ingredient) {
-		var entity = vl$self();
-
-		if (entity instanceof ItemEntity itemEntity) {
-			var item = itemEntity.getItem();
-			return !item.isEmpty() && ingredient.test(item);
-		} else if (entity instanceof ItemFrame itemFrame) {
-			var item = itemFrame.getItem();
-			return !item.isEmpty() && ingredient.test(item);
-		} else {
-			return false;
-		}
+		return false;
 	}
 
 	default boolean vl$isDeadOrDying() {

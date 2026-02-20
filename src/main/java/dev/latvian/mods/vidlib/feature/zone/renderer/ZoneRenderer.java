@@ -74,7 +74,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 
 		if (renderType == ZoneRenderType.COLLISIONS) {
 			for (var sz : session.filteredZones.getSolidZones()) {
-				if (sz.instance().zone.shape().closestDistanceTo(cameraPos) <= 2048D && frame.isVisible(sz.instance().zone.shape().getBoundingBox())) {
+				if (sz.instance().zone.shape().closestDistanceTo(cameraPos) <= 2048D && frame.isVisible(sz.instance().zone.shape().toAABB())) {
 					boolean hovered = clip != null && clip.instance() == sz.instance();
 					var baseColor = sz.instance().zone.color().withAlpha(50);
 					var outlineColor = hovered ? Color.WHITE : sz.instance().entities.isEmpty() ? sz.instance().zone.color() : Color.GREEN;
@@ -86,7 +86,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 
 			for (var container : session.filteredZones) {
 				for (var instance : container.zones) {
-					if (instance.zone.shape().closestDistanceTo(cameraPos) <= 2048D && frame.isVisible(instance.zone.shape().getBoundingBox())) {
+					if (instance.zone.shape().closestDistanceTo(cameraPos) <= 2048D && frame.isVisible(instance.zone.shape().toAABB())) {
 						var renderer = ZoneRenderer.get(instance.zone.shape().type());
 
 						if (renderer != EmptyZoneRenderer.INSTANCE) {
@@ -136,7 +136,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 			var zone = sz.instance().zone;
 			double dist = zone.shape().closestDistanceTo(frame.camera().getPosition());
 
-			if (dist > 2048D || !frame.isVisible(zone.shape().getBoundingBox())) {
+			if (dist > 2048D || !frame.isVisible(zone.shape().toAABB())) {
 				continue;
 			}
 
@@ -151,7 +151,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 			var zone = sz.instance().zone;
 			double dist = zone.shape().closestDistanceTo(frame.camera().getPosition());
 
-			if (dist <= 10D && zone.color().alpha() > 0 && frame.isVisible(zone.shape().getBoundingBox()) && zone.solid().test(frame.mc().player)) {
+			if (dist <= 10D && zone.color().alpha() > 0 && frame.isVisible(zone.shape().toAABB()) && zone.solid().test(frame.mc().player)) {
 				var renderer = ZoneRenderer.get(zone.shape().type());
 
 				if (renderer != null) {

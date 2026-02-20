@@ -11,7 +11,7 @@ public class GroupZoneRenderer implements ZoneRenderer<ZoneShapeGroup> {
 	public void render(ZoneShapeGroup group, Context ctx) {
 		if (ctx.outerBounds()) {
 			var ms = ctx.frame().poseStack();
-			var box = group.getBoundingBox();
+			var box = group.toAABB();
 			float minX = ctx.frame().x(box.minX);
 			float minY = ctx.frame().y(box.minY);
 			float minZ = ctx.frame().z(box.minZ);
@@ -22,7 +22,7 @@ public class GroupZoneRenderer implements ZoneRenderer<ZoneShapeGroup> {
 		}
 
 		for (var shape : group.zoneShapes()) {
-			if (ctx.frame().isVisible(shape.getBoundingBox())) {
+			if (ctx.frame().isVisible(shape.toAABB())) {
 				var renderer = ZoneRenderer.get(shape.type());
 
 				if (renderer != EmptyZoneRenderer.INSTANCE) {

@@ -26,7 +26,7 @@ public record BoxZoneShape(AABB box) implements ZoneShape {
 	}
 
 	@Override
-	public AABB getBoundingBox() {
+	public AABB toAABB() {
 		return box;
 	}
 

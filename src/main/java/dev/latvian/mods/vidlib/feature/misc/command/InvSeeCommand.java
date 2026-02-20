@@ -33,7 +33,7 @@ public interface InvSeeCommand {
 			}
 
 			@Override
-			public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
+			public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player self) {
 				return ChestMenu.sixRows(containerId, playerInventory, new Container() {
 					@Override
 					public int getContainerSize() {

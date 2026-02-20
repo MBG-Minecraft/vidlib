@@ -36,6 +36,8 @@
 		"IceBlockMixin",
 		"IdDispatchCodecMixin",
 		"InventoryMixin",
+		"ItemEntityMixin",
+		"ItemFrameMixin",
 		"ItemMixin",
 		"ItemStackMixin",
 		"LeavesBlockMixin",

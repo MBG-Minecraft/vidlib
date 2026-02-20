@@ -15,7 +15,16 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcut, int flags, @Nullable OnClick onClick, @Nullable Function<ImGraphics, List<MenuItem>> subItems) {
+public record MenuItem(
+	ImIcon icon,
+	ImText label,
+	ImText tooltip,
+	String shortcut,
+	ImColorVariant color,
+	int flags,
+	@Nullable OnClick onClick,
+	@Nullable Function<ImGraphics, List<MenuItem>> subItems
+) {
 	public static final int FLAG_SEPARATOR = 1 << 0;
 	public static final int FLAG_MENU = 1 << 1;
 	public static final int FLAG_CHECKMARK = 1 << 2;
@@ -34,15 +43,15 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 	}
 
 	public static MenuItem text(ImIcon icon, ImText label) {
-		return new MenuItem(icon, label, ImText.EMPTY, null, 0, null, null);
+		return new MenuItem(icon, label, ImText.EMPTY, null, ImColorVariant.DEFAULT, 0, null, null);
 	}
 
 	public static MenuItem text(ImIcon icon, String label) {
-		return new MenuItem(icon, ImText.of(label), ImText.EMPTY, null, 0, null, null);
+		return new MenuItem(icon, ImText.of(label), ImText.EMPTY, null, ImColorVariant.DEFAULT, 0, null, null);
 	}
 
 	public static MenuItem item(ImIcon icon, String label, OnClick onClick) {
-		return new MenuItem(icon, ImText.of(label), ImText.EMPTY, null, 0, onClick, null);
+		return new MenuItem(icon, ImText.of(label), ImText.EMPTY, null, ImColorVariant.DEFAULT, 0, onClick, null);
 	}
 
 	public static MenuItem item(String label, OnClick onClick) {
@@ -50,7 +59,7 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 	}
 
 	public static MenuItem item(ImIcon icon, String label, boolean checkmark, OnClick onClick) {
-		return new MenuItem(icon, ImText.of(label), ImText.EMPTY, null, checkmark ? FLAG_CHECKMARK : 0, onClick, null);
+		return new MenuItem(icon, ImText.of(label), ImText.EMPTY, null, ImColorVariant.DEFAULT, checkmark ? FLAG_CHECKMARK : 0, onClick, null);
 	}
 
 	public static MenuItem item(String label, boolean checkmark, OnClick onClick) {
@@ -82,11 +91,11 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 	}
 
 	public static MenuItem menu(ImIcon icon, String label, Function<ImGraphics, List<MenuItem>> subItems) {
-		return new MenuItem(icon, ImText.of(label), ImText.EMPTY, null, FLAG_MENU, null, subItems);
+		return new MenuItem(icon, ImText.of(label), ImText.EMPTY, null, ImColorVariant.DEFAULT, FLAG_MENU, null, subItems);
 	}
 
 	public static MenuItem menu(ImIcon icon, String label, BiConsumer<ImGraphics, List<MenuItem>> subItems) {
-		return new MenuItem(icon, ImText.of(label), ImText.EMPTY, null, FLAG_MENU, null, graphics -> {
+		return new MenuItem(icon, ImText.of(label), ImText.EMPTY, null, ImColorVariant.DEFAULT, FLAG_MENU, null, graphics -> {
 			var list = new ArrayList<MenuItem>();
 			subItems.accept(graphics, list);
 			return list;
@@ -120,11 +129,11 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 	}
 
 	public static MenuItem custom(OnClick imgui) {
-		return new MenuItem(ImIcon.NONE, ImText.EMPTY, ImText.EMPTY, null, FLAG_CUSTOM_IMGUI, imgui, null);
+		return new MenuItem(ImIcon.NONE, ImText.EMPTY, ImText.EMPTY, null, ImColorVariant.DEFAULT, FLAG_CUSTOM_IMGUI, imgui, null);
 	}
 
 	public MenuItem withFlags(int add) {
-		return new MenuItem(icon, label, tooltip, shortcut, flags | add, onClick, subItems);
+		return new MenuItem(icon, label, tooltip, shortcut, color, flags | add, onClick, subItems);
 	}
 
 	public boolean hasFlag(int flag) {
@@ -136,7 +145,7 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 	}
 
 	public MenuItem withLabel(ImText label) {
-		return new MenuItem(icon, label, tooltip, shortcut, flags, onClick, subItems);
+		return new MenuItem(icon, label, tooltip, shortcut, color, flags, onClick, subItems);
 	}
 
 	public MenuItem withColor(@Nullable Color color) {
@@ -144,15 +153,19 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 	}
 
 	public MenuItem withShortcut(String shortcut) {
-		return new MenuItem(icon, label, tooltip, shortcut, flags, onClick, subItems);
+		return new MenuItem(icon, label, tooltip, shortcut, color, flags, onClick, subItems);
 	}
 
 	public MenuItem withTooltip(@Nullable ImText tooltip) {
-		return new MenuItem(icon, label, tooltip, shortcut, flags, onClick, subItems);
+		return new MenuItem(icon, label, tooltip, shortcut, color, flags, onClick, subItems);
 	}
 
 	public MenuItem withTooltip(String tooltip) {
 		return withTooltip(ImText.of(tooltip));
+	}
+
+	public MenuItem withColor(ImColorVariant color) {
+		return new MenuItem(icon, label, tooltip, shortcut, color, flags, onClick, subItems);
 	}
 
 	public MenuItem disabled(boolean disabled) {
