@@ -618,6 +618,11 @@ public class VidLibClientEventHandler {
 		var mc = Minecraft.getInstance();
 
 		if (mc.player != null && event.isAttack()) {
+			if (mc.player.vl$isSuspended()) {
+				event.setCanceled(true);
+				return;
+			}
+
 			var item = mc.player.getItemInHand(event.getHand());
 			var tool = VidLibTool.of(item);
 

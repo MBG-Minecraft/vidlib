@@ -20,6 +20,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.TriState;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -27,6 +28,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
@@ -45,6 +47,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerXpEvent;
 import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
@@ -211,9 +214,14 @@ public class VidLibEventHandler {
 		}
 	}
 
-	@SubscribeEvent
-	public static void useItemOnBlock(UseItemOnBlockEvent event) {
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public static void preUseItemOnBlock(UseItemOnBlockEvent event) {
 		if (event.getPlayer() != null) {
+			if (event.getPlayer().vl$isSuspended()) {
+				event.cancelWithResult(InteractionResult.FAIL);
+				return;
+			}
+
 			var item = event.getItemStack();
 			var tool = VidLibTool.of(item);
 
@@ -223,8 +231,37 @@ public class VidLibEventHandler {
 		}
 	}
 
-	@SubscribeEvent
-	public static void useItemInAir(PlayerInteractEvent.RightClickItem event) {
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public static void preBlockLeftClick(PlayerInteractEvent.LeftClickBlock event) {
+		if (event.getEntity().vl$isSuspended()) {
+			event.setUseBlock(TriState.FALSE);
+			event.setUseItem(TriState.FALSE);
+			event.setCanceled(true);
+		}
+	}
+
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public static void preBreakBlock(BlockEvent.BreakEvent event) {
+		if (event.getPlayer().vl$isSuspended()) {
+			event.setCanceled(true);
+		}
+	}
+
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public static void prePlaceBlock(BlockEvent.EntityPlaceEvent event) {
+		if (event.getEntity() != null && event.getEntity().vl$isSuspended()) {
+			event.setCanceled(true);
+		}
+	}
+
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public static void preUseItemInAir(PlayerInteractEvent.RightClickItem event) {
+		if (event.getEntity().vl$isSuspended()) {
+			event.setCancellationResult(InteractionResult.FAIL);
+			event.setCanceled(true);
+			return;
+		}
+
 		var item = event.getItemStack();
 		var tool = VidLibTool.of(item);
 
@@ -234,8 +271,8 @@ public class VidLibEventHandler {
 		}
 	}
 
-	@SubscribeEvent
-	public static void useItemOnEntity(PlayerInteractEvent.EntityInteract event) {
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public static void preUseItemOnEntity(PlayerInteractEvent.EntityInteract event) {
 		var item = event.getItemStack();
 		var tool = VidLibTool.of(item);
 

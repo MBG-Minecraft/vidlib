@@ -1,15 +1,21 @@
 package dev.latvian.mods.vidlib.feature.data;
 
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
+import dev.latvian.mods.vidlib.feature.session.SessionData;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 
 public interface PlayerDataCommand {
+	SuggestionProvider<CommandSourceStack> SESSION_NAMES = (ctx, builder) -> SharedSuggestionProvider.suggest(ctx.getSource().getSidedLevel().getEnvironment().vl$getAllSessionData().stream().map(SessionData::getName), builder);
+
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("player-data", (command, buildContext) -> {
 		command.requires(source -> source.hasPermission(2));
@@ -24,6 +30,7 @@ public interface PlayerDataCommand {
 		var nbtOps = buildContext.createSerializationContext(NbtOps.INSTANCE);
 
 		var playerCmd = Commands.argument("player", GameProfileArgument.gameProfile());
+		playerCmd.suggests(SESSION_NAMES);
 
 		playerCmd.then(Commands.literal("erase")
 			.executes(ctx -> {

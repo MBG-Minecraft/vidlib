@@ -9,6 +9,7 @@ import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.session.LocalClientSessionData;
 import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
 import imgui.ImGui;
@@ -67,7 +68,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		this.isSinglePlayer = inGame && mc.isLocalServer();
 		this.isReplay = inGame && mc.level.isReplayLevel();
 		this.serverFeatures = inGame ? mc.level.getServerFeatures() : FeatureSet.EMPTY;
-		this.adminPanel = VidLibClientOptions.getAdminPanel();
+		this.adminPanel = VidLibClientOptions.getAdminPanel() && ClientGameEngine.INSTANCE.allowAdminPanel(mc.player);
 		this.isAdmin = inGame && (isSinglePlayer || mc.player.hasPermissions(2));
 	}
 

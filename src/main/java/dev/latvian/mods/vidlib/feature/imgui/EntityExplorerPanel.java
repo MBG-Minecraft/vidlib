@@ -139,7 +139,7 @@ public class EntityExplorerPanel extends Panel {
 
 		if (entity instanceof Player player) {
 			if (ImGui.button("Edit Player Data###vidlib-edit-player-data", -1F, 0F)) {
-				new PlayerDataConfigPanel(player.getScoreboardName(), player.vl$sessionData().dataMap).open();
+				new PlayerDataConfigPanel(player.getGameProfile(), player.vl$sessionData().dataMap).open();
 			}
 		}
 

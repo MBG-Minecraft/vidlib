@@ -192,6 +192,12 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 			if (data != null) {
 				data.dataMap.set(InternalPlayerData.ONLINE, false);
 				vl$self().s2c(new RemovePlayerDataPayload(uuid));
+
+				try {
+					Files.deleteIfExists(data.dataMapPath);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
 			}
 		});
 	}

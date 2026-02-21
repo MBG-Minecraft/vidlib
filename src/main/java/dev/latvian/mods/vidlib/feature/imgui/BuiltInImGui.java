@@ -79,7 +79,7 @@ public class BuiltInImGui {
 		list.add(MenuItem.item(ImIcons.WRENCH, "Server Data", ServerDataConfigPanel.INSTANCE).enabled(graphics.isAdmin));
 
 		if (graphics.player != null) {
-			list.add(MenuItem.item(ImIcons.WRENCH, "Player Data (Self)", g1 -> new PlayerDataConfigPanel(graphics.player.getScoreboardName(), graphics.player.vl$sessionData().dataMap).open()).enabled(graphics.isAdmin));
+			list.add(MenuItem.item(ImIcons.WRENCH, "Player Data (Self)", g1 -> new PlayerDataConfigPanel(graphics.player.getGameProfile(), graphics.player.vl$sessionData().dataMap).open()).enabled(graphics.isAdmin));
 		}
 
 		list.add(Skybox.MENU_ITEM.enabled(graphics.isAdmin));

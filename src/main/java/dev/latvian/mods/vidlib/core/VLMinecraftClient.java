@@ -85,6 +85,7 @@ import org.joml.Vector4f;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("resource")
@@ -201,7 +202,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	default void updatePlayerData(List<DataMapValue> update) {
-		c2s(new UpdatePlayerDataValuePayload(update));
+		c2s(new UpdatePlayerDataValuePayload(vl$self().player.getUUID(), update));
 	}
 
 	default <T> void updatePlayerData(DataKey<T> type, T value) {
@@ -635,6 +636,10 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	default <T> void updateServerDataValue(DataKey<T> key, T value) {
 		c2s(new UpdateServerDataValuePayload(List.of(new DataMapValue(key, value))));
+	}
+
+	default <T> void updatePlayerDataValue(UUID player, DataKey<T> key, T value) {
+		c2s(new UpdatePlayerDataValuePayload(player, List.of(new DataMapValue(key, value))));
 	}
 
 	default void runClientCommand(String command) {

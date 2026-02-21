@@ -809,4 +809,8 @@ public class ClientGameEngine {
 	public Component blockedScreenText(LocalPlayer player) {
 		return null;
 	}
+
+	public boolean allowAdminPanel(@Nullable LocalPlayer player) {
+		return true;
+	}
 }
