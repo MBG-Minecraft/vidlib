@@ -8,10 +8,10 @@ import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
+import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToClient;
-import dev.latvian.mods.vidlib.feature.misc.SyncPlayerTagsPayload;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
@@ -95,9 +95,6 @@ public class SessionData {
 	public void updateSkyboxes() {
 	}
 
-	public void refreshListedPlayers() {
-	}
-
 	public void setGlowColor(@Nullable UUID uuid, @Nullable Color color) {
 	}
 
@@ -132,14 +129,12 @@ public class SessionData {
 
 		environment.sync(packets);
 
-		dataMap.syncAll(packets, player, SyncPlayerDataPayload::new);
+		dataMap.syncAll(packets, SyncPlayerDataPayload::new);
 
 		for (var s : environment.vl$getAllSessionData()) {
-			packets.s2c(new SyncPlayerTagsPayload(s.uuid, List.copyOf(s.getTags())));
-
 			if (!s.uuid.equals(player.getUUID())) {
 				packets.s2c(new SyncPlayerInputToClient(s.uuid, s.input));
-				s.dataMap.syncAll(packets, null, SyncPlayerDataPayload::new);
+				s.dataMap.syncAll(packets, SyncPlayerDataPayload::new);
 			}
 		}
 
@@ -157,7 +152,13 @@ public class SessionData {
 	}
 
 	public Set<String> getTags() {
-		return Set.of();
+		return dataMap.get(InternalPlayerData.PLAYER_TAGS);
+	}
+
+	public void setTags(Set<String> tags) {
+		if (!getTags().equals(tags)) {
+			dataMap.set(InternalPlayerData.PLAYER_TAGS, tags);
+		}
 	}
 
 	public FeatureSet getClientFeatures() {
@@ -169,6 +170,17 @@ public class SessionData {
 
 	public boolean isOnline() {
 		return dataMap.get(InternalPlayerData.ONLINE);
+	}
+
+	public String getName() {
+		var name = dataMap.get(InternalPlayerData.NAME);
+
+		if (name.isEmpty()) {
+			name = PlayerProfiles.getName(uuid);
+			dataMap.set(InternalPlayerData.NAME, name);
+		}
+
+		return name;
 	}
 
 	public void removeSessionData(UUID player) {

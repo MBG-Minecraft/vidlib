@@ -15,7 +15,6 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.CommonPlayerSpawnInfo;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -98,13 +97,6 @@ public abstract class ClientPacketListenerMixin implements VLClientPlayPacketLis
 	@Inject(method = "close", at = @At("RETURN"))
 	private void vl$close(CallbackInfo ci) {
 		vl$sessionData().closed();
-	}
-
-	@Inject(method = "applyPlayerInfoUpdate", at = @At("RETURN"))
-	private void vl$applyPlayerInfoUpdate(ClientboundPlayerInfoUpdatePacket.Action action, ClientboundPlayerInfoUpdatePacket.Entry entry, PlayerInfo playerInfo, CallbackInfo ci) {
-		if (action == ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED) {
-			vl$sessionData().refreshListedPlayers();
-		}
 	}
 
 	@ModifyExpressionValue(method = "handleSetEntityPassengersPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;"))

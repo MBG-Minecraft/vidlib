@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.clock.SyncClocksPayload;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
+import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
@@ -30,7 +31,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -78,6 +78,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	default void vl$playerJoined(ServerPlayer player) {
 		PlayerProfiles.cache(player.getGameProfile());
 		player.vl$sessionData().dataMap.set(InternalPlayerData.ONLINE, true);
+		player.vl$sessionData().dataMap.set(InternalPlayerData.NAME, player.getScoreboardName());
 		VidLib.sync(player, 2);
 	}
 
@@ -114,10 +115,20 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 
 		var packetsToEveryone = new S2CPacketBundleBuilder(vl$level());
 
-		getDataMap().sync(packetsToEveryone, null, (playerId, update) -> new SyncServerDataPayload(update));
+		if (!vl$isReplayServer()) {
+			getDataMap().sync(packetsToEveryone, (playerId, update) -> new SyncServerDataPayload(update));
+
+			for (var session : vl$self().vl$getAllSessionData()) {
+				session.dataMap.sync(packetsToEveryone, SyncPlayerDataPayload::new);
+			}
+		}
 
 		for (var player : vl$self().getPlayerList().getPlayers()) {
-			player.vl$sessionData().vl$postTick(packetsToEveryone, player);
+			player.vl$sessionData().syncPlayer(player, packetsToEveryone);
+		}
+
+		for (var session : vl$self().vl$getAllSessionData()) {
+			session.tick++;
 		}
 
 		packetsToEveryone.send(this);
@@ -201,18 +212,6 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default List<ServerSessionData> vl$getAllSessionData() {
-		var players = vl$self().getPlayerList().getPlayers();
-		var list = new ArrayList<ServerSessionData>(players.size());
-
-		for (var player : players) {
-			list.add(player.vl$sessionData());
-		}
-
-		return list;
-	}
-
-	@Override
 	default String getServerBrand() {
 		return "neoforge";
 	}
@@ -257,5 +256,9 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+	}
+
+	default boolean vl$isReplayServer() {
+		return false;
 	}
 }

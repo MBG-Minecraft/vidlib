@@ -120,7 +120,7 @@ public class ClientGameEngine {
 	}
 
 	public boolean canSeeAllPlayersInList(LocalPlayer self) {
-		return CommonGameEngine.INSTANCE.isPlayerStaff(self.getTags(), self.getGameMode());
+		return CommonGameEngine.INSTANCE.isPlayerStaff(self);
 	}
 
 	public boolean canSeePlayerInList(LocalPlayer self, PlayerInfo playerInfo) {
@@ -762,11 +762,15 @@ public class ClientGameEngine {
 
 		if (connection == null) {
 			return List.of();
-		} else if (mc.player != null && CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(mc.player.getTags(), mc.player.gameMode())) {
+		} else if (mc.player != null && canViewOnlinePlayerNames(mc.player)) {
 			return connection.getOnlinePlayers().stream().map(p -> p.getProfile().getName()).toList();
 		} else {
 			return List.of(mc.getUser().getName());
 		}
+	}
+
+	public boolean canViewOnlinePlayerNames(LocalPlayer player) {
+		return CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(player);
 	}
 
 	public boolean enableSinglePlayerMainMenuButton() {
@@ -799,5 +803,10 @@ public class ClientGameEngine {
 
 	public boolean disableToast(Toast toast) {
 		return toast instanceof TutorialToast || toast instanceof AdvancementToast || toast instanceof RecipeToast;
+	}
+
+	@Nullable
+	public Component blockedScreenText(LocalPlayer player) {
+		return null;
 	}
 }

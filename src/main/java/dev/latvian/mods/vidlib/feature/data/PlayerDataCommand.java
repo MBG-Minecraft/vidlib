@@ -38,7 +38,7 @@ public interface PlayerDataCommand {
 		for (var key : DataKey.PLAYER.all.values()) {
 			var cmd = Commands.literal(key.id());
 
-			playerCmd.then(Commands.literal("get")
+			cmd.then(Commands.literal("get")
 				.executes(ctx -> {
 					for (var player : GameProfileArgument.getGameProfiles(ctx, "player")) {
 						var playerData = ctx.getSource().getServer().vl$getOrLoadServerSession(player.getId());

@@ -5,8 +5,10 @@ import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBarRenderer;
 import dev.latvian.mods.vidlib.feature.misc.VLFlashbackIntegration;
+import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
+import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import net.minecraft.client.DeltaTracker;
@@ -205,16 +207,39 @@ public interface VidLibHUD {
 		CanvasImpl.drawPreview(mc, graphics);
 	}
 
-	static void drawFade(GuiGraphics graphics, DeltaTracker deltaTracker) {
+	static void drawBelowAll(GuiGraphics graphics, DeltaTracker deltaTracker) {
+		ClientWaypoints.draw(graphics, deltaTracker);
+		drawPlayerNames(graphics, deltaTracker);
+	}
+
+	static void drawAboveAll(GuiGraphics graphics, DeltaTracker deltaTracker) {
 		var mc = Minecraft.getInstance();
 		int width = graphics.guiWidth();
 		int height = graphics.guiHeight();
 
 		if (mc.player != null) {
-			var session = mc.player.vl$sessionData();
+			var text = ClientGameEngine.INSTANCE.blockedScreenText(mc.player);
 
-			if (session.screenFade != null) {
-				session.screenFade.draw(graphics, deltaTracker.getGameTimeDeltaPartialTick(true), width, height);
+			if (text != null) {
+				graphics.fill(0, 0, width, height, 990, 0xFF000000);
+				graphics.pose().pushPose();
+				graphics.pose().translate(width / 2F, height / 3F, 1000F);
+
+				var lines = mc.font.split(text, width * 4 / 5);
+
+				for (int i = 0; i < lines.size(); i++) {
+					graphics.drawString(mc.font, lines.get(i), -mc.font.width(lines.get(i)) / 2, -4 + i * 10, 0xFFFFFFFF);
+				}
+
+				graphics.pose().popPose();
+			} else {
+				Pins.draw(graphics, deltaTracker);
+
+				var session = mc.player.vl$sessionData();
+
+				if (session.screenFade != null) {
+					session.screenFade.draw(graphics, deltaTracker.getGameTimeDeltaPartialTick(true), width, height);
+				}
 			}
 		}
 	}

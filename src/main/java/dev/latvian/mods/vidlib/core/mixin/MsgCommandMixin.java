@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(MsgCommand.class)
 public class MsgCommandMixin {
-	@ModifyExpressionValue(method = "register", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/Commands;literal(Ljava/lang/String;)Lcom/mojang/brigadier/builder/LiteralArgumentBuilder;", ordinal = 0))
+	@ModifyExpressionValue(method = "register", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/Commands;literal(Ljava/lang/String;)Lcom/mojang/brigadier/builder/LiteralArgumentBuilder;"))
 	private static LiteralArgumentBuilder<CommandSourceStack> vl$literal(LiteralArgumentBuilder<CommandSourceStack> original) {
 		return original.requires(src -> CommonGameEngine.INSTANCE.allowMsgCommand(src));
 	}

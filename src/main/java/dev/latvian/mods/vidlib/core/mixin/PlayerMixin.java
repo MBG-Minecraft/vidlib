@@ -12,7 +12,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.damagesource.IScalingFunction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -21,10 +24,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 @Mixin(Player.class)
-public abstract class PlayerMixin implements VLPlayer {
+public abstract class PlayerMixin extends LivingEntity implements VLPlayer {
 	@Shadow
 	private Component displayname;
+
+	protected PlayerMixin(EntityType<? extends LivingEntity> type, Level level) {
+		super(type, level);
+	}
 
 	/**
 	 * @author Lat
@@ -33,11 +44,6 @@ public abstract class PlayerMixin implements VLPlayer {
 	@Overwrite
 	public void refreshDisplayName() {
 		displayname = null;
-		var s = vl$sessionData();
-
-		if (s != null) {
-			s.refreshListedPlayers();
-		}
 	}
 
 	@Inject(method = "getName", at = @At("HEAD"), cancellable = true)
@@ -78,6 +84,92 @@ public abstract class PlayerMixin implements VLPlayer {
 
 		if (v != null && v.preventDismount(self)) {
 			cir.setReturnValue(false);
+		}
+	}
+
+	@Override
+	public Set<String> getTags() {
+		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
+			return get(InternalPlayerData.PLAYER_TAGS);
+		} else {
+			return super.getTags();
+		}
+	}
+
+	@Override
+	public void setTags(Collection<String> tags) {
+		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
+			var newSet = Set.copyOf(tags);
+
+			if (!newSet.equals(getTags())) {
+				set(InternalPlayerData.PLAYER_TAGS, newSet);
+			}
+		} else {
+			super.setTags(tags);
+		}
+	}
+
+	@Override
+	public boolean addTag(String tag) {
+		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
+			var tags = new HashSet<>(getTags());
+
+			if (tags.add(tag)) {
+				setTags(tags);
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return super.addTag(tag);
+		}
+	}
+
+	@Override
+	public boolean removeTag(String tag) {
+		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
+			var tags = new HashSet<>(getTags());
+
+			if (tags.remove(tag)) {
+				setTags(tags);
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return super.removeTag(tag);
+		}
+	}
+
+	@Override
+	public boolean addTags(Collection<String> t) {
+		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
+			var tags = new HashSet<>(getTags());
+
+			if (tags.addAll(t)) {
+				setTags(tags);
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return super.addTags(tags);
+		}
+	}
+
+	@Override
+	public boolean removeTags(Collection<String> t) {
+		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
+			var tags = new HashSet<>(getTags());
+
+			if (tags.removeAll(t)) {
+				setTags(tags);
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return super.removeTags(tags);
 		}
 	}
 }

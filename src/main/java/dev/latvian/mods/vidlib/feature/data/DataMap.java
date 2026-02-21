@@ -188,7 +188,7 @@ public class DataMap {
 		}
 	}
 
-	public void syncAll(VLS2CPacketConsumer target, @Nullable Player selfPlayer, BiFunction<UUID, List<DataMapValue>, SimplePacketPayload> factory) {
+	public void syncAll(VLS2CPacketConsumer target, BiFunction<UUID, List<DataMapValue>, SimplePacketPayload> factory) {
 		var list = new ArrayList<DataMapValue>();
 
 		for (var v : map) {
@@ -202,7 +202,7 @@ public class DataMap {
 		}
 	}
 
-	public void sync(VLS2CPacketConsumer packetsToEveryone, @Nullable Player selfPlayer, BiFunction<UUID, List<DataMapValue>, SimplePacketPayload> factory) {
+	public void sync(VLS2CPacketConsumer packetsToEveryone, BiFunction<UUID, List<DataMapValue>, SimplePacketPayload> factory) {
 		List<DataMapValue> syncAll = null;
 
 		for (var v : map) {

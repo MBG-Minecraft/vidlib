@@ -84,6 +84,7 @@ import java.util.UUID;
 public class LocalClientSessionData extends ClientSessionData {
 	public final Minecraft mc;
 	private final Map<UUID, RemoteClientSessionData> remoteSessionData;
+	private List<ClientSessionData> allClientSessionData;
 	private ScheduledTask.Handler scheduledTaskHandler;
 	public final ActiveZones serverZones;
 	public final ActiveZones filteredZones;
@@ -143,6 +144,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		if (data == null) {
 			data = new RemoteClientSessionData(id, dataMap.timeProvider);
 			remoteSessionData.put(id, data);
+			allClientSessionData = null;
 		}
 
 		return data;
@@ -162,10 +164,14 @@ public class LocalClientSessionData extends ClientSessionData {
 
 	@ApiStatus.Internal
 	public List<ClientSessionData> getAllClientSessionData() {
-		var list = new ArrayList<ClientSessionData>(remoteSessionData.size() + 1);
-		list.add(this);
-		list.addAll(remoteSessionData.values());
-		return list;
+		if (allClientSessionData == null) {
+			allClientSessionData = new ArrayList<>(remoteSessionData.size() + 1);
+			allClientSessionData.add(this);
+			allClientSessionData.addAll(remoteSessionData.values());
+			allClientSessionData = List.copyOf(allClientSessionData);
+		}
+
+		return allClientSessionData;
 	}
 
 	@Override
@@ -352,6 +358,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	@Override
 	public void removeSessionData(UUID id) {
 		remoteSessionData.remove(id);
+		allClientSessionData = null;
 
 		if (id.equals(uuid)) {
 			mc.getConnection().disconnect(Component.literal("Your player data was reset"));
@@ -365,7 +372,7 @@ public class LocalClientSessionData extends ClientSessionData {
 
 	@Override
 	public void updateInput(Level level, UUID player, PlayerInput input) {
-		var data = getRemoteSessionData(player);
+		var data = getClientSessionData(player);
 		data.prevInput = data.input = input;
 
 		if (level.getEntityByUUID(player) instanceof Player entity) {
@@ -380,11 +387,6 @@ public class LocalClientSessionData extends ClientSessionData {
 	@Override
 	public void updateSkyboxes() {
 		skyboxes.clear();
-	}
-
-	@Override
-	public void refreshListedPlayers() {
-		// NOOP
 	}
 
 	@Override

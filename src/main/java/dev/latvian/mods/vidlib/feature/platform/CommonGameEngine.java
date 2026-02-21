@@ -119,12 +119,20 @@ public class CommonGameEngine {
 		}
 	}
 
-	public boolean isPlayerStaff(Collection<String> tags, GameType gameMode) {
-		return gameMode == GameType.SPECTATOR || tags.contains("staff");
+	public boolean isPlayerStaff(Collection<String> tags, @Nullable GameType gameMode) {
+		return tags.contains("staff");
+	}
+
+	public final boolean isPlayerStaff(Entity entity) {
+		return isPlayerStaff(entity.getTags(), entity.getGameMode());
 	}
 
 	public boolean isPlayerStaffOrTalent(Collection<String> tags, GameType gameMode) {
-		return isPlayerStaff(tags, gameMode) || tags.contains("talent");
+		return gameMode == GameType.SPECTATOR || isPlayerStaff(tags, gameMode) || tags.contains("talent");
+	}
+
+	public final boolean isPlayerStaffOrTalent(Entity entity) {
+		return isPlayerStaffOrTalent(entity.getTags(), entity.getGameMode());
 	}
 
 	public boolean tickCoralBlocks(ScheduledTickAccess instance, BlockPos pos, Block block) {
@@ -363,7 +371,7 @@ public class CommonGameEngine {
 	}
 
 	public boolean canVoicechatBroadcast(Player player) {
-		return isPlayerStaff(player.getTags(), player.gameMode()) || player.hasPermissions(2);
+		return isPlayerStaff(player) || player.hasPermissions(2);
 	}
 
 	public boolean isInvulnerable(Entity entity) {
@@ -467,5 +475,13 @@ public class CommonGameEngine {
 
 	public boolean isAngryByDefault(ServerLevel level, NeutralMob mob) {
 		return false;
+	}
+
+	public boolean hasImprovedPlayerTags() {
+		return false;
+	}
+
+	public boolean getReceiveCommandFeedback(MinecraftServer server, ServerPlayer player) {
+		return isPlayerStaff(player)/* || server.getPlayerList().isOp(player.getGameProfile())*/;
 	}
 }

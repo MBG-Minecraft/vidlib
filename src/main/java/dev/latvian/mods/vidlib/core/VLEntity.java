@@ -32,6 +32,7 @@ import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
@@ -301,5 +302,18 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	// WIP
 	default boolean overridePassengerClientRightClick(Player player) {
 		return false;
+	}
+
+	default boolean addTags(Collection<String> tags) {
+		return vl$self().tags.addAll(tags);
+	}
+
+	default boolean removeTags(Collection<String> tags) {
+		return vl$self().tags.removeAll(tags);
+	}
+
+	default void setTags(Collection<String> tags) {
+		vl$self().tags.clear();
+		vl$self().tags.addAll(tags);
 	}
 }

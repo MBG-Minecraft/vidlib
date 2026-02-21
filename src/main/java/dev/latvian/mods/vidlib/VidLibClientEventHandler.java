@@ -25,7 +25,6 @@ import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
 import dev.latvian.mods.vidlib.feature.clothing.ClientClothingLoader;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingLayer;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingModel;
-import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
@@ -44,7 +43,6 @@ import dev.latvian.mods.vidlib.feature.multiverse.VoidSpecialEffects;
 import dev.latvian.mods.vidlib.feature.particle.VidLibClientParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
-import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
@@ -56,7 +54,6 @@ import dev.latvian.mods.vidlib.feature.structure.StructureRenderer;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
 import dev.latvian.mods.vidlib.feature.visual.TexturedCubeRenderer;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
-import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
@@ -112,7 +109,6 @@ import net.neoforged.neoforge.common.NeoForge;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
-import java.util.Set;
 
 @EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
 public class VidLibClientEventHandler {
@@ -139,15 +135,10 @@ public class VidLibClientEventHandler {
 		}
 
 		InternalServerData.ANCHOR.addUpdateListener(VidLibClientEventHandler::updateAnchor);
-		InternalPlayerData.PLAYER_TAGS.addUpdateListener(VidLibClientEventHandler::updatePlayerTags);
 	}
 
 	private static void updateAnchor(Player player, Anchor anchor) {
 		Anchor.client = anchor;
-	}
-
-	private static void updatePlayerTags(Player player, Set<String> tags) {
-		player.vl$sessionData().refreshListedPlayers();
 	}
 
 	@SubscribeEvent
@@ -199,12 +190,10 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void registerGuiLayers(RegisterGuiLayersEvent event) {
-		event.registerBelowAll(VidLib.id("player_names"), VidLibHUD::drawPlayerNames);
+		event.registerBelowAll(VidLib.id("below_all"), VidLibHUD::drawBelowAll);
 		event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, VidLib.id("above_boss"), VidLibHUD::drawAboveBossOverlay);
 		event.registerAbove(VanillaGuiLayers.OVERLAY_MESSAGE, VidLib.id("information_hud"), VidLibHUD::drawInformationHUD);
-		event.registerAboveAll(VidLib.id("fade"), VidLibHUD::drawFade);
-		event.registerAboveAll(VidLib.id("player_pins"), Pins::draw);
-		event.registerBelowAll(VidLib.id("waypoints"), ClientWaypoints::draw);
+		event.registerAboveAll(VidLib.id("above_all"), VidLibHUD::drawAboveAll);
 	}
 
 	@SubscribeEvent

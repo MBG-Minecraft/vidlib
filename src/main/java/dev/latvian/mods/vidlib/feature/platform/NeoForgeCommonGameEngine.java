@@ -49,4 +49,9 @@ public class NeoForgeCommonGameEngine extends CommonGameEngine {
 		foodData.vl$setTickTimer(0);
 		return true;
 	}
+
+	@Override
+	public boolean hasImprovedPlayerTags() {
+		return true;
+	}
 }

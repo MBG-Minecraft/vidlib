@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.nio.file.Files;
+import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
@@ -69,6 +70,9 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 
 	@Unique
 	private final Map<UUID, ServerSessionData> vl$serverSessionData = new Object2ObjectOpenHashMap<>();
+
+	@Unique
+	private Boolean vl$isReplayServer;
 
 	@Override
 	public RandomSource vl$sessionRandom() {
@@ -137,6 +141,11 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	}
 
 	@Override
+	public Collection<ServerSessionData> vl$getAllSessionData() {
+		return vl$serverSessionData.values();
+	}
+
+	@Override
 	@Nullable
 	public PacketCapture vl$getPacketCapture(boolean start) {
 		if (vl$packetCapture == null && start && !CommonGameEngine.INSTANCE.disablePacketCapture()) {
@@ -162,7 +171,7 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 
 		if (session == null) {
 			session = new ServerSessionData(vl$self(), uuid);
-			session.load(vl$self());
+			session.load();
 			vl$serverSessionData.put(uuid, session);
 		}
 
@@ -182,9 +191,17 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 
 			if (data != null) {
 				data.dataMap.set(InternalPlayerData.ONLINE, false);
-
 				vl$self().s2c(new RemovePlayerDataPayload(uuid));
 			}
 		});
+	}
+
+	@Override
+	public boolean vl$isReplayServer() {
+		if (vl$isReplayServer == null) {
+			vl$isReplayServer = getClass().getName().contains("ReplayServer");
+		}
+
+		return vl$isReplayServer;
 	}
 }
