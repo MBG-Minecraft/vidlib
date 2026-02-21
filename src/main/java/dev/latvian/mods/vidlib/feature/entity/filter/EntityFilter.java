@@ -9,7 +9,6 @@ import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.util.IntOrUUID;
 import dev.latvian.mods.klib.util.ParsedEntitySelector;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.core.VLEntity;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
@@ -70,6 +69,8 @@ public interface EntityFilter extends Predicate<Entity>, SimpleRegistryEntry {
 	SimpleRegistryType.Unit<EntityFilter> UNDERWATER = basic("underwater", Entity::isUnderWater);
 	SimpleRegistryType.Unit<EntityFilter> ON_RAILS = basic("on_rails", Entity::isOnRails);
 	SimpleRegistryType.Unit<EntityFilter> ON_FIRE = basic("on_fire", Entity::isOnFire);
+	SimpleRegistryType.Unit<EntityFilter> STAFF = basic("staff", Entity::isStaff);
+	SimpleRegistryType.Unit<EntityFilter> STAFF_OR_TALENT = basic("staff_or_talent", Entity::isStaffOrTalent);
 
 	static EntityFilter of(boolean value) {
 		return value ? ANY.instance() : NONE.instance();
@@ -154,6 +155,8 @@ public interface EntityFilter extends Predicate<Entity>, SimpleRegistryEntry {
 		registry.register(UNDERWATER);
 		registry.register(ON_RAILS);
 		registry.register(ON_FIRE);
+		registry.register(STAFF);
+		registry.register(STAFF_OR_TALENT);
 
 		registry.register(ExactEntityFilter.TYPE);
 		registry.register(EntityTagFilter.TYPE);

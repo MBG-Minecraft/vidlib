@@ -120,7 +120,7 @@ public class ClientGameEngine {
 	}
 
 	public boolean canSeeAllPlayersInList(LocalPlayer self) {
-		return CommonGameEngine.INSTANCE.isPlayerStaff(self);
+		return self.isStaff();
 	}
 
 	public boolean canSeePlayerInList(LocalPlayer self, PlayerInfo playerInfo) {
@@ -770,7 +770,7 @@ public class ClientGameEngine {
 	}
 
 	public boolean canViewOnlinePlayerNames(LocalPlayer player) {
-		return CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(player);
+		return player.isStaffOrTalent();
 	}
 
 	public boolean enableSinglePlayerMainMenuButton() {

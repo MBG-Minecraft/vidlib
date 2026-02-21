@@ -316,4 +316,12 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		vl$self().tags.clear();
 		vl$self().tags.addAll(tags);
 	}
+
+	default boolean isStaff() {
+		return CommonGameEngine.INSTANCE.isPlayerStaff(vl$self().getTags(), getGameMode());
+	}
+
+	default boolean isStaffOrTalent() {
+		return CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(vl$self().getTags(), getGameMode());
+	}
 }

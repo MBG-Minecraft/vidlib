@@ -25,6 +25,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -32,7 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class SessionData {
+public class SessionData implements Comparable<SessionData> {
 	public final UUID uuid;
 	public final DataMap dataMap;
 	public final long startTime;
@@ -184,5 +185,10 @@ public class SessionData {
 	}
 
 	public void removeSessionData(UUID player) {
+	}
+
+	@Override
+	public int compareTo(@NotNull SessionData o) {
+		return getName().compareToIgnoreCase(o.getName());
 	}
 }
