@@ -32,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -73,6 +74,11 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	@Override
 	default List<? extends Player> vl$getS2CPlayers() {
 		return vl$self().getPlayerList().getPlayers();
+	}
+
+	@Override
+	default Collection<ServerSessionData> vl$getAllSessionData() {
+		return List.of();
 	}
 
 	@ApiStatus.Internal

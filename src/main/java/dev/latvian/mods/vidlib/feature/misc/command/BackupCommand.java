@@ -1,67 +1,80 @@
 package dev.latvian.mods.vidlib.feature.misc.command;
 
+import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+
 public interface BackupCommand {
-	// @AutoRegister
+	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("backup", (command, buildContext) -> command
 		.requires(source -> source.hasPermission(2))
 		.executes(ctx -> backup(ctx.getSource()))
 	);
 
-	static String backup(MinecraftServer server) {
+	static CompletableFuture<String> backup(MinecraftServer server) {
 		for (var level : server.getAllLevels()) {
 			if (level != null) {
 				level.noSave = true;
 			}
 		}
 
-		var name = CommonGameEngine.INSTANCE.getBackupInfo(server);
-		var from = server.getWorldPath(LevelResource.ROOT);
-		var fromName = from.getFileName().toString();
-		var to = from.resolveSibling(fromName + "-" + name);
-		var toName = to.getFileName().toString();
-
 		server.saveEverything(true, true, true);
 
-		/*
-		if (Files.exists()) {
-
-		}
-
-		try {
+		return CompletableFuture.supplyAsync(() -> {
 			try {
-				new ProcessBuilder("cp", "-R", fromName, toName)
-					.directory(from.getParent().toFile())
-					.start()
-					.waitFor();
-			} catch (Exception ex) {
+				var name = CommonGameEngine.INSTANCE.getBackupInfo(server);
+				var from = server.getWorldPath(LevelResource.ROOT).toAbsolutePath().toRealPath();
+				var fromName = from.getFileName().toString();
+				var to = from.resolveSibling(fromName + "-" + name);
+				var toName = to.getFileName().toString();
+
+				try {
+					new ProcessBuilder(Util.getPlatform() == Util.OS.WINDOWS ? List.of("xcopy", "/E", fromName, toName) : List.of("cp", "-R", fromName, toName))
+						.directory(from.getParent().toAbsolutePath().toFile())
+						.start()
+						.waitFor(5L, TimeUnit.MINUTES);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+
+				server.execute(() -> {
+					for (var level : server.getAllLevels()) {
+						if (level != null) {
+							level.noSave = false;
+						}
+					}
+				});
+
+				return toName;
+			} catch (Throwable ex) {
 				ex.printStackTrace();
-				IOUtils.copyRecursively(from, to);
 			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		 */
 
-		for (var level : server.getAllLevels()) {
-			if (level != null) {
-				level.noSave = false;
-			}
-		}
+			server.execute(() -> {
+				for (var level : server.getAllLevels()) {
+					if (level != null) {
+						level.noSave = false;
+					}
+				}
+			});
 
-		return toName;
+			throw new IllegalStateException("Failed to create a backup");
+		});
 	}
 
 	static int backup(CommandSourceStack source) {
-		var now = System.currentTimeMillis();
-		var name = backup(source.getServer());
-		source.sendSuccess(() -> Component.literal("Saved a backup of '%s' (%.01f s)".formatted(name, (System.currentTimeMillis() - now) / 1000F)), true);
+		var start = System.currentTimeMillis();
+		source.broadcast("Creating a world backup...");
+		backup(source.getServer()).thenAccept(name -> source.sendSuccess(() -> Component.literal("Saved a backup of '%s' (%.01f s)".formatted(name, (System.currentTimeMillis() - start) / 1000F)), true));
 		return 1;
 	}
 }
