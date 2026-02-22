@@ -477,4 +477,8 @@ public class CommonGameEngine {
 	public boolean getReceiveCommandFeedback(MinecraftServer server, ServerPlayer player) {
 		return player.isStaff()/* || server.getPlayerList().isOp(player.getGameProfile())*/;
 	}
+
+	public String getBackupInfo(MinecraftServer server) {
+		return Long.toUnsignedString(System.currentTimeMillis());
+	}
 }

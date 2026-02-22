@@ -25,6 +25,6 @@ public record EventMarkerPayload(String event, Optional<Tag> tag) implements Sim
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.level().marker(event, tag.orElse(null));
+		ctx.level().marker(this);
 	}
 }

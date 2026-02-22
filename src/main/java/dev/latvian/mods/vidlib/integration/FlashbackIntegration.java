@@ -4,19 +4,17 @@ import com.google.gson.JsonObject;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
+import dev.latvian.mods.vidlib.feature.replay.ReplayMarker;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldData;
 import imgui.ImGuiStyle;
 import it.unimi.dsi.fastutil.chars.CharConsumer;
-import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import it.unimi.dsi.fastutil.longs.LongObjectPair;
-import it.unimi.dsi.fastutil.objects.ObjectIntPair;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.configuration.ClientConfigurationPacketListener;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -77,7 +75,7 @@ public interface FlashbackIntegration {
 	}
 
 	List<BiConsumer<List<Packet<? super ClientConfigurationPacketListener>>, List<LongObjectPair<Packet<? super ClientGamePacketListener>>>>> INITIALIZED = listField("INITIALIZED");
-	List<Supplier<List<IntObjectPair<ObjectIntPair<String>>>>> MARKERS = listField("MARKERS");
+	List<Supplier<List<ReplayMarker>>> MARKERS = listField("MARKERS");
 	List<Runnable> CLEANUP = listField("CLEANUP");
 	List<Prop> MAKE_PROP_KEYFRAMES = listField("MAKE_PROP_KEYFRAMES");
 	List<Consumer<List<Packet<? super ClientConfigurationPacketListener>>>> CONFIG_SNAPSHOT = listField("CONFIG_SNAPSHOT");

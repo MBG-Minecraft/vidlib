@@ -26,6 +26,8 @@ import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
+import dev.latvian.mods.vidlib.feature.replay.ReplayMarkerData;
+import dev.latvian.mods.vidlib.feature.replay.ReplayMarkerType;
 import dev.latvian.mods.vidlib.feature.skin.PlayerSkinOverrides;
 import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
@@ -735,8 +737,13 @@ public class ClientGameEngine {
 		}
 	}
 
-	public void handleMarker(String event, @Nullable Tag tag) {
+	public void handleRuntimeMarker(String event, @Nullable Tag tag) {
 		// VidLib.LOGGER.info("Marker " + event + "/" + tag);
+	}
+
+	@Nullable
+	public ReplayMarkerData handleReplayMarker(String event, @Nullable Tag tag) {
+		return ReplayMarkerType.API.make(Color.WHITE, event);
 	}
 
 	public List<Waypoint> getWaypoints(Minecraft mc) {

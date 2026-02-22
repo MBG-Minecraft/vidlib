@@ -37,7 +37,7 @@ public final class Pin {
 		this.enabled = !json.has("enabled") || json.get("enabled").getAsBoolean();
 		this.gallery = json.has("gallery") ? json.get("gallery").getAsString() : "";
 		this.texture = json.has("texture") ? UUID.fromString(json.get("texture").getAsString()) : Util.NIL_UUID;
-		this.color = json.has("color") ? Color.CODEC_RGB.parse(JsonOps.INSTANCE, json.get("color")).resultOrPartial().orElse(DEFAULT_COLOR) : DEFAULT_COLOR;
+		this.color = json.has("color") ? Color.SOLID_CODEC.parse(JsonOps.INSTANCE, json.get("color")).resultOrPartial().orElse(DEFAULT_COLOR) : DEFAULT_COLOR;
 		this.background = json.has("background") ? Color.CODEC.parse(JsonOps.INSTANCE, json.get("background")).resultOrPartial().orElse(DEFAULT_BACKGROUND) : DEFAULT_BACKGROUND;
 		this.shape = json.has("shape") ? PinShape.VALUES[json.get("shape").getAsInt()] : PinShape.S1;
 	}

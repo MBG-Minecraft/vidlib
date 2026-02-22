@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.misc;
+package dev.latvian.mods.vidlib.feature.replay;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -17,11 +17,14 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiAPI;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.misc.EventMarkerPayload;
+import dev.latvian.mods.vidlib.feature.misc.SyncPlayerTagsPayload;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.pin.Pin;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.AddPropPayload;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
@@ -64,10 +67,12 @@ public class VLFlashbackIntegration {
 	private static PropListType selectedPropList = PropListType.LEVEL;
 	private static boolean openSelectedPropPopup = false;
 	private static int lastWidth = -1, lastHeight = -1;
+	public static final List<ReplayMarker> MARKERS = new ArrayList<>();
 
 	public static void init() {
 		VidLib.LOGGER.info("Flashback integration loaded");
 		FlashbackIntegration.INITIALIZED.add(VLFlashbackIntegration::initialized);
+		FlashbackIntegration.MARKERS.add(() -> MARKERS);
 		FlashbackIntegration.CLEANUP.add(VLFlashbackIntegration::cleanup);
 		FlashbackIntegration.CONFIG_SNAPSHOT.add(VLFlashbackIntegration::configSnapshot);
 		FlashbackIntegration.GAME_SNAPSHOT.add(VLFlashbackIntegration::gameSnapshot);
@@ -95,6 +100,8 @@ public class VLFlashbackIntegration {
 		var dataMapOverrideBuilder = new DataMapOverrides.Builder();
 		var recordedProps = new ArrayList<RecordedProp>();
 		var recordingProps = new Int2ObjectLinkedOpenHashMap<RecordedProp>();
+
+		long startTick = FlashbackIntegration.getStartTick();
 
 		for (var entry : gamePackets) {
 			if (entry.value() instanceof ClientboundCustomPayloadPacket c) {
@@ -147,6 +154,13 @@ public class VLFlashbackIntegration {
 								}
 							}
 						}
+						case EventMarkerPayload p -> {
+							var data = ClientGameEngine.INSTANCE.handleReplayMarker(p.event(), p.tag().orElse(null));
+
+							if (data != null) {
+								MARKERS.add(new ReplayMarker((int) (now - startTick), data));
+							}
+						}
 						case null, default -> {
 						}
 					}
@@ -178,6 +192,7 @@ public class VLFlashbackIntegration {
 		DataMapOverrides.INSTANCE = null;
 		RecordedProp.MAP = null;
 		RecordedProp.LIST = null;
+		MARKERS.clear();
 	}
 
 	private static void configSnapshot(List<Packet<? super ClientConfigurationPacketListener>> packets) {
