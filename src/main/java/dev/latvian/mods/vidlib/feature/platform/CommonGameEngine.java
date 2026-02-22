@@ -9,6 +9,7 @@ import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
@@ -203,8 +204,8 @@ public class CommonGameEngine {
 		return false;
 	}
 
-	public boolean disableAdvancements() {
-		return false;
+	public Collection<AdvancementHolder> overrideAdvancements(Collection<AdvancementHolder> original) {
+		return original;
 	}
 
 	public boolean isLadder(LevelReader level, BlockPos pos, BlockState state, LivingEntity entity) {

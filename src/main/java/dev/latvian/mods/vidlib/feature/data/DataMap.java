@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
 
-public class DataMap {
+public class DataMap implements DataMapHolder {
 	public final UUID owner;
 	public final DataKeyStorage storage;
 	public final VLGameTimeProvider timeProvider;
@@ -53,6 +53,33 @@ public class DataMap {
 		return (T) init(type).data;
 	}
 
+	@Override
+	public DataMap getDataMap() {
+		return this;
+	}
+
+	@Override
+	public <T> T getOptional(DataKey<T> type) {
+		if (superOverrides != null) {
+			var v = superOverrides[type.index()];
+
+			if (v != null) {
+				return Cast.to(v.orElse(null));
+			}
+		}
+
+		if (overrides != null) {
+			var v = overrides.getOverride(type, timeProvider.vl$getGameTime());
+
+			if (v != null) {
+				return v;
+			}
+		}
+
+		return getActual(type);
+	}
+
+	@Override
 	public <T> T get(DataKey<T> type) {
 		if (superOverrides != null) {
 			var v = superOverrides[type.index()];
@@ -73,6 +100,7 @@ public class DataMap {
 		return getActual(type);
 	}
 
+	@Override
 	public <T> void set(DataKey<T> type, @Nullable T value) {
 		var v = init(type);
 		v.data = value;
@@ -103,10 +131,6 @@ public class DataMap {
 
 	public boolean hasSuperOverride(DataKey<?> type) {
 		return superOverrides != null && superOverrides[type.index()] != null;
-	}
-
-	public <T> void reset(DataKey<T> type) {
-		set(type, type.defaultValue());
 	}
 
 	public void load(MinecraftServer server, Path path) {

@@ -31,6 +31,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -243,8 +244,18 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 		throw new NoMixinException(this);
 	}
 
+	default Path vl$getPlayerDataDirectory() {
+		return vl$self().getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("vidlib");
+	}
+
 	default void vl$preloadAllSessions() {
-		try (var stream = Files.list(vl$self().getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("vidlib"))) {
+		var dir = vl$getPlayerDataDirectory();
+
+		if (Files.notExists(dir)) {
+			return;
+		}
+
+		try (var stream = Files.list(dir)) {
 			for (var path : stream.filter(Files::isRegularFile).toList()) {
 				var name = path.getFileName().toString();
 

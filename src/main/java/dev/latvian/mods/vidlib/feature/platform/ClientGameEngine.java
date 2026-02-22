@@ -151,7 +151,7 @@ public class ClientGameEngine {
 	}
 
 	public Component getPlayerWorldName(Player player, Component fallback) {
-		var nickname = player.getOptional(InternalPlayerData.NICKNAME);
+		var nickname = player.get(InternalPlayerData.NICKNAME);
 		return Empty.isEmpty(nickname) ? fallback : nickname;
 	}
 

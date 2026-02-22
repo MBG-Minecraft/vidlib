@@ -9,11 +9,13 @@ public interface DataMapHolder {
 	@Nullable
 	default <T> T getOptional(DataKey<T> type) {
 		var dataMap = getDataMap();
-		return dataMap == null ? null : dataMap.get(type);
+		var value = dataMap == null ? null : dataMap.get(type);
+		return value == null ? type.defaultValue() : value;
 	}
 
 	default <T> T get(DataKey<T> type) {
-		var value = getOptional(type);
+		var dataMap = getDataMap();
+		var value = dataMap == null ? null : dataMap.get(type);
 		return value == null ? type.defaultValue() : value;
 	}
 
@@ -26,10 +28,6 @@ public interface DataMapHolder {
 	}
 
 	default <T> void reset(DataKey<T> type) {
-		var dataMap = getDataMap();
-
-		if (dataMap != null) {
-			dataMap.reset(type);
-		}
+		set(type, type.defaultValue());
 	}
 }

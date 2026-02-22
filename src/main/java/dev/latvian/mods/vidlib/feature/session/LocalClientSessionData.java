@@ -179,11 +179,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		super.updateOverrides(player);
 		var skyboxId = ClientGameEngine.INSTANCE.getSkybox(mc);
 
-		if (skyboxId == null) {
-			skyboxId = player.level().getSkybox();
-		}
-
-		if (skyboxId == null || skyboxId.equals(Skyboxes.VANILLA)) {
+		if (skyboxId.equals(Skyboxes.VANILLA)) {
 			skybox = null;
 		} else {
 			skybox = getSkybox(skyboxId);

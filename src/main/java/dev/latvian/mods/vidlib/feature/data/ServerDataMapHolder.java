@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface ServerDataMapHolder extends DataMapHolder {
 	default ResourceLocation getSkybox() {
-		return getOptional(InternalServerData.SKYBOX);
+		return get(InternalServerData.SKYBOX);
 	}
 
 	default void setSkybox(ResourceLocation skybox) {
@@ -27,7 +27,7 @@ public interface ServerDataMapHolder extends DataMapHolder {
 	}
 
 	default NameDrawType getNameDrawType() {
-		return getOptional(InternalServerData.NAME_DRAW_TYPE);
+		return get(InternalServerData.NAME_DRAW_TYPE);
 	}
 
 	default void setNameDrawType(NameDrawType type) {

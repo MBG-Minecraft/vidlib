@@ -10,7 +10,6 @@ import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.storage.LevelResource;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.nio.file.Path;
@@ -28,7 +27,7 @@ public class ServerSessionData extends SessionData {
 	public ServerSessionData(MinecraftServer server, UUID uuid) {
 		super(uuid, server);
 		this.server = server;
-		this.dataMapPath = server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("vidlib").resolve(uuid + ".nbt");
+		this.dataMapPath = server.vl$getPlayerDataDirectory().resolve(uuid + ".nbt");
 		this.currentTags = Set.of();
 		this.clientFeatureSet = FeatureSet.EMPTY;
 		this.clientMods = Map.of();
@@ -41,11 +40,14 @@ public class ServerSessionData extends SessionData {
 	@Override
 	public void updateOverrides(Player player) {
 		super.updateOverrides(player);
-		var newTags = player.getTags();
 
-		if (!currentTags.equals(newTags)) {
-			currentTags = Set.copyOf(newTags);
-			player.set(InternalPlayerData.PLAYER_TAGS, currentTags);
+		if (!CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
+			var newTags = player.getTags();
+
+			if (!currentTags.equals(newTags)) {
+				currentTags = Set.copyOf(newTags);
+				player.set(InternalPlayerData.PLAYER_TAGS, currentTags);
+			}
 		}
 	}
 

@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
 import dev.latvian.mods.vidlib.feature.feature.Feature;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -13,6 +14,9 @@ import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collection;
+import java.util.List;
 
 public class NeoForgeCommonGameEngine extends CommonGameEngine {
 	@Override
@@ -37,8 +41,8 @@ public class NeoForgeCommonGameEngine extends CommonGameEngine {
 	}
 
 	@Override
-	public boolean disableAdvancements() {
-		return true;
+	public Collection<AdvancementHolder> overrideAdvancements(Collection<AdvancementHolder> original) {
+		return List.of();
 	}
 
 	@Override
