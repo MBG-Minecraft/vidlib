@@ -32,7 +32,6 @@ public class VidLib {
 	public static void init() {
 		VidLib.LOGGER.info("VidLib " + VERSION + " loaded");
 		VidLibDataTypes.register();
-		buildRegistries();
 	}
 
 	public static void buildRegistries() {

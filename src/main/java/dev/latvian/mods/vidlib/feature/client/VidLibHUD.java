@@ -80,7 +80,7 @@ public interface VidLibHUD {
 		var selfDelta = deltaTracker.getGameTimeDeltaPartialTick(true);
 
 		for (var player : level.players()) {
-			if (player.isSpectator()) {
+			if (player.isSpectator() || player.isInvisibleTo(mc.player)) {
 				continue;
 			}
 

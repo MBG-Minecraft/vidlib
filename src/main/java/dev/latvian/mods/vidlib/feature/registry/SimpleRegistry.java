@@ -75,7 +75,7 @@ public class SimpleRegistry<V extends SimpleRegistryEntry> {
 		ALL.put(registryId, this);
 	}
 
-	private void register(SimpleRegistryType<? extends V> type) {
+	public void register(SimpleRegistryType<? extends V> type) {
 		typeMap.put(type.id(), Cast.to(type));
 
 		if (type instanceof SimpleRegistryType.Unit unit) {

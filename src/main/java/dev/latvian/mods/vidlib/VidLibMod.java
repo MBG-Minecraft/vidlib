@@ -11,6 +11,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 @Mod(VidLib.ID)
@@ -47,5 +48,11 @@ public class VidLibMod {
 		}
 
 		particleRegistry.register(bus);
+
+		bus.addListener(this::setup);
+	}
+
+	public void setup(FMLCommonSetupEvent event) {
+		VidLib.buildRegistries();
 	}
 }
