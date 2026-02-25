@@ -9,6 +9,7 @@ import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.util.IntOrUUID;
 import dev.latvian.mods.klib.util.ParsedEntitySelector;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.core.VLEntity;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
@@ -69,8 +70,28 @@ public interface EntityFilter extends Predicate<Entity>, SimpleRegistryEntry {
 	SimpleRegistryType.Unit<EntityFilter> UNDERWATER = basic("underwater", Entity::isUnderWater);
 	SimpleRegistryType.Unit<EntityFilter> ON_RAILS = basic("on_rails", Entity::isOnRails);
 	SimpleRegistryType.Unit<EntityFilter> ON_FIRE = basic("on_fire", Entity::isOnFire);
-	SimpleRegistryType.Unit<EntityFilter> STAFF = basic("staff", Entity::isStaff);
-	SimpleRegistryType.Unit<EntityFilter> STAFF_OR_TALENT = basic("staff_or_talent", Entity::isStaffOrTalent);
+	SimpleRegistryType.Unit<EntityFilter> STAFF = basic("staff", entity -> {
+		List<String> tags = new ArrayList<>();
+		if (entity instanceof VLEntity vlEntity) {
+			tags.addAll(vlEntity.vl$self().getTags());
+		}
+		GameType gameMode = GameType.SURVIVAL;
+		if (entity instanceof Player player) {
+			gameMode = player.gameMode();
+		}
+		return CommonGameEngine.INSTANCE.isPlayerStaff(tags, gameMode);
+	});
+	SimpleRegistryType.Unit<EntityFilter> STAFF_OR_TALENT = basic("staff_or_talent", entity -> {
+		List<String> tags = new ArrayList<>();
+		if (entity instanceof VLEntity vlEntity) {
+			tags.addAll(vlEntity.vl$self().getTags());
+		}
+		GameType gameMode = GameType.SURVIVAL;
+		if (entity instanceof Player player) {
+			gameMode = player.gameMode();
+		}
+		return CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(tags, gameMode);
+	});
 
 	static EntityFilter of(boolean value) {
 		return value ? ANY.instance() : NONE.instance();
