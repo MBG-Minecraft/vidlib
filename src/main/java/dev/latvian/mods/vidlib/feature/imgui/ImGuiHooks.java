@@ -8,18 +8,17 @@ import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
 import imgui.ImFontConfig;
 import imgui.ImFontGlyphRangesBuilder;
 import imgui.ImGui;
+import imgui.ImGuiViewport;
 import imgui.extension.imnodes.ImNodes;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.ImPlotContext;
-import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.flag.ImGuiDockNodeFlags;
-import imgui.flag.ImGuiWindowFlags;
 import imgui.internal.ImGuiContext;
+import imgui.internal.ImGuiDockNode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.ApiStatus;
@@ -51,6 +50,9 @@ public class ImGuiHooks {
 	public static VLImGuiImplGl3 imGuiGl3;
 	private static ImGuiContextStack context;
 	private static boolean active = false;
+	public static ImGuiViewport mainViewport;
+	public static ImGuiDockNode centralDockNode = null;
+	public static float mainMenuBarHeight = 0F;
 
 	private static boolean endingFrame = false;
 
@@ -217,15 +219,17 @@ public class ImGuiHooks {
 		var window = mc.getWindow();
 
 		dockId = ImGui.dockSpaceOverViewport(ImGui.getMainViewport(), ImGuiDockNodeFlags.NoDockingInCentralNode | ImGuiDockNodeFlags.PassthruCentralNode);
-		var centralNode = imgui.internal.ImGui.dockBuilderGetCentralNode(dockId);
+		centralDockNode = imgui.internal.ImGui.dockBuilderGetCentralNode(dockId);
+
+		mainViewport = ImGui.getMainViewport();
 
 		// Get the size and position of the central node
-		var windowPos = ImGui.getMainViewport().getPos();
-		var windowSize = ImGui.getMainViewport().getSize();
-		var centralNodePos = centralNode.getPos();
-		var centralNodeSize = centralNode.getSize();
+		var windowPos = mainViewport.getPos();
+		var windowSize = mainViewport.getSize();
+		var centralNodePos = centralDockNode.getPos();
+		var centralNodeSize = centralDockNode.getSize();
 
-		float h = FlashbackIntegration.isInReplayOrExporting() || !ClientGameEngine.INSTANCE.hasBottomInfoBar(mc) ? 0F : scaleBarHeight(ImGuiHooks.dpiScale);
+		float h = (mc.level != null && mc.level.isReplayLevel()) || !ClientGameEngine.INSTANCE.hasBottomInfoBar(mc) ? 0F : ImGuiHooks.mainMenuBarHeight;
 
 		var prevWidth = window.getWidth();
 		var prevHeight = window.getHeight();
@@ -237,43 +241,12 @@ public class ImGuiHooks {
 			(centralNodeSize.y - h) / windowSize.y
 		);
 
+		// window.vl$setViewportArea(0D, 0D, 1D, 1D);
+
 		if (window.getWidth() != 0 && window.getHeight() != 0) {
 			if (window.getWidth() != prevWidth || window.getHeight() != prevHeight) {
 				mc.resizeDisplay();
 			}
-		}
-
-		if (h > 0F) {
-			var graphics = new ImGraphics(mc);
-			graphics.pushRootStack();
-			graphics.copyStyleColFrom(ImGuiCol.WindowBg, ImGuiCol.MenuBarBg);
-			graphics.setWindowRounding(0F);
-			graphics.setWindowPadding(0F, 0F);
-			graphics.setWindowBorderSize(0F);
-			graphics.setFramePadding(2F, 2F);
-			graphics.setWindowMinSize(0F, h);
-			graphics.setItemSpacing(6F, 0F);
-
-			int flags = ImGuiWindowFlags.NoSavedSettings
-				| ImGuiWindowFlags.MenuBar
-				| ImGuiWindowFlags.NoMove
-				| ImGuiWindowFlags.NoDocking
-				| ImGuiWindowFlags.NoNav
-				| ImGuiWindowFlags.NoDecoration;
-
-			ImGui.setNextWindowPos(centralNodePos.x, centralNodePos.y + centralNodeSize.y - h);
-			ImGui.setNextWindowSize(centralNodeSize.x, h);
-
-			if (ImGui.begin("###bottom-info-bar", flags)) {
-				if (ImGui.beginMenuBar()) {
-					ClientGameEngine.INSTANCE.bottomInfoBar(graphics, h);
-					ImGui.endMenuBar();
-				}
-			}
-
-			ImGui.end();
-
-			graphics.popStack();
 		}
 
 		old.pop();

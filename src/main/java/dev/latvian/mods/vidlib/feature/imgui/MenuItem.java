@@ -281,6 +281,10 @@ public record MenuItem(
 			return false;
 		}
 
+		graphics.pushStack();
+		graphics.setWindowPadding(4F, 4F);
+		graphics.setItemSpacing(4F, 4F);
+
 		if (graphics.isReplay ? ImGui.beginMenu("VidLib") : mainMenuBar || ImGui.beginMenuBar()) {
 			for (int i = 0; i < mainMenu.size(); i++) {
 				ImGui.pushID(i);
@@ -295,6 +299,7 @@ public record MenuItem(
 			}
 		}
 
+		graphics.popStack();
 		return true;
 	}
 }

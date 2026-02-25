@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import com.mojang.blaze3d.platform.TextureUtil;
+import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasPanel;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
@@ -18,6 +19,7 @@ import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueueImGui;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectPanel;
@@ -26,9 +28,10 @@ import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.skybox.Skybox;
 import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
-import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
 import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
@@ -238,12 +241,19 @@ public class BuiltInImGui {
 	});
 
 	public static void handle(ImGraphics graphics) {
-		var infoBar = FlashbackIntegration.isInReplayOrExporting() || !ClientGameEngine.INSTANCE.hasTopInfoBar(graphics.mc) ? 0F : 22F;
-
 		graphics.pushStack();
 		graphics.setWindowBorderSize(0F);
-		// graphics.setWindowPadding(0F, 0F);
+		graphics.setWindowPadding(0F, 0F);
+		graphics.setWindowRounding(0F);
 		graphics.setFramePadding(0F, 2F);
+		graphics.setWindowMinSize(0F, 0F);
+		graphics.setItemSpacing(6F, 0F);
+		graphics.setFrameBorderSize(0F);
+		graphics.setStyleCol(ImGuiCol.WindowBg, Color.BLACK);
+		graphics.setStyleCol(ImGuiCol.MenuBarBg, Color.BLACK);
+
+		ImGuiHooks.mainMenuBarHeight = 0F;
+		boolean topMainMenu = true;
 
 		if (graphics.adminPanel || graphics.isReplay) {
 			var menuOpen = mainMenuOpen;
@@ -251,29 +261,63 @@ public class BuiltInImGui {
 
 			if (menuOpen && !graphics.isReplay) {
 				if (ImGui.beginMainMenuBar()) {
-					ClientGameEngine.INSTANCE.topInfoBarPre(graphics, infoBar);
+					ImGuiHooks.mainMenuBarHeight = ImGui.getWindowSize().y;
+					ClientGameEngine.INSTANCE.topInfoBarPre(graphics, ImGuiHooks.mainMenuBarHeight);
 					MAIN_MENU_BAR.buildMenuBar(graphics, true);
-
-					if (infoBar > 0F) {
-						ImGui.separator();
-						ClientGameEngine.INSTANCE.topInfoBar(graphics, infoBar);
-						infoBar = 0F;
-					}
-
+					ImGui.separator();
+					ClientGameEngine.INSTANCE.topInfoBar(graphics, ImGuiHooks.mainMenuBarHeight);
+					topMainMenu = false;
 					ImGui.endMainMenuBar();
 				}
 			}
 		}
 
-		if (infoBar > 0F && ImGui.beginMainMenuBar()) {
-			ClientGameEngine.INSTANCE.topInfoBarPre(graphics, infoBar);
-			ClientGameEngine.INSTANCE.topInfoBar(graphics, infoBar);
+		if (topMainMenu && ImGui.beginMainMenuBar()) {
+			ImGuiHooks.mainMenuBarHeight = ImGui.getWindowSize().y;
+			ClientGameEngine.INSTANCE.topInfoBarPre(graphics, ImGuiHooks.mainMenuBarHeight);
+			ClientGameEngine.INSTANCE.topInfoBar(graphics, ImGuiHooks.mainMenuBarHeight);
 			ImGui.endMainMenuBar();
+		}
+
+		float h = graphics.isReplay || !ClientGameEngine.INSTANCE.hasBottomInfoBar(graphics.mc) ? 0F : ImGuiHooks.mainMenuBarHeight;
+
+		if (h > 0F && ImGuiHooks.mainViewport != null && ImGuiHooks.centralDockNode != null) {
+			var windowPos = ImGuiHooks.mainViewport.getPos();
+			var windowSize = ImGuiHooks.mainViewport.getSize();
+			var centralNodePos = ImGuiHooks.centralDockNode.getPos();
+			var centralNodeSize = ImGuiHooks.centralDockNode.getSize();
+
+			graphics.pushStack();
+			graphics.copyStyleColFrom(ImGuiCol.WindowBg, ImGuiCol.MenuBarBg);
+
+			int flags = ImGuiWindowFlags.NoSavedSettings
+				| ImGuiWindowFlags.MenuBar
+				| ImGuiWindowFlags.NoMove
+				| ImGuiWindowFlags.NoDocking
+				| ImGuiWindowFlags.NoNav
+				| ImGuiWindowFlags.NoDecoration;
+
+			ImGui.setNextWindowPos(centralNodePos.x, centralNodePos.y + centralNodeSize.y - h);
+			ImGui.setNextWindowSize(centralNodeSize.x, h);
+
+			if (ImGui.begin("###bottom-info-bar", flags)) {
+				if (ImGui.beginMenuBar()) {
+					ClientGameEngine.INSTANCE.bottomInfoBar(graphics, h);
+					ImGui.endMenuBar();
+				}
+			}
+
+			ImGui.end();
+
+			graphics.popStack();
 		}
 
 		graphics.popStack();
 
 		OPEN_PANELS.values().removeIf(panel -> panel.handle(graphics));
+
+		ProgressQueueImGui.handle(graphics);
+
 		NeoForge.EVENT_BUS.post(new ImGuiEvent(graphics));
 
 		if (SHOW_STACK_TOOL.get()) {

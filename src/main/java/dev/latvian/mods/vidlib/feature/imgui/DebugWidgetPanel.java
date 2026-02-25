@@ -23,6 +23,8 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ParticleOptionsImB
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.item.VisualItemKey;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
+import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
+import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundDataImBuilder;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
@@ -57,7 +59,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Vector2f;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class DebugWidgetPanel extends Panel {
 	public static final DebugWidgetPanel INSTANCE = new DebugWidgetPanel();
@@ -473,6 +477,97 @@ public class DebugWidgetPanel extends Panel {
 
 		ImGui.text("LV: " + Countries.LV.get().displayName());
 		graphics.combo("###country", new Country[1], Countries.LOADED.get().byCode().values().toArray(new Country[0]), Country::displayName);
+
+		ImGui.separator();
+
+		if (ImGui.button("Test Progress Single###test-progress-single")) {
+			var item = ProgressQueue.queueSingleItem("Loading Test...");
+			item.queue().bottomText = "Bottom Text";
+
+			Thread.startVirtualThread(() -> {
+				try {
+					Thread.sleep(1000L);
+					item.setSize(200L);
+					item.setStarted();
+
+					for (int i = 0; i < 200; i++) {
+						item.addProgress(1L);
+						Thread.sleep(5L);
+
+						if (i == 170) {
+							item.error("Test Error!");
+						}
+					}
+
+					item.setDone();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			});
+		}
+
+		if (ImGui.button("Test Progress Parallel###test-progress-parallel")) {
+			var queue = new ProgressQueue();
+			queue.topText = "Loading Test...";
+			queue.bottomText = "Please keep the game open!";
+
+			for (int j = 0; j < 5; j++) {
+				var item = queue.addItem();
+
+				Thread.startVirtualThread(() -> {
+					var random = new Random();
+
+					try {
+						item.setSize(500L);
+						item.setStarted();
+
+						for (int i = 0; i < 500; i += 1 + random.nextInt(3)) {
+							item.setProgress(i);
+							Thread.sleep(10L);
+						}
+
+						item.setDone();
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				});
+			}
+
+			queue.display();
+		}
+
+		if (ImGui.button("Test Progress Sequence###test-progress-sequence")) {
+			var queue = new ProgressQueue();
+			queue.topText = "Loading Test...";
+			queue.bottomText = "Please keep the game open!";
+			var items = new ArrayList<ProgressItem>();
+
+			for (int j = 0; j < 5; j++) {
+				items.add(queue.addItem());
+			}
+
+			Thread.startVirtualThread(() -> {
+				var random = new Random();
+
+				try {
+					for (var item : items) {
+						item.setSize(100L);
+						item.setStarted();
+
+						for (int i = 0; i < 100; i += 1 + random.nextInt(3)) {
+							item.setProgress(i);
+							Thread.sleep(10L);
+						}
+
+						item.setDone();
+					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			});
+
+			queue.display();
+		}
 
 		ImGui.separator();
 

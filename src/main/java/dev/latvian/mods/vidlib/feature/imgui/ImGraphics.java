@@ -431,7 +431,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 
 	public boolean collapsingHeader(String label, int imGuiTreeNodeFlags) {
 		pushStack();
-		setStyleCol(ImGuiCol.Header, 0xFF000000);
+		setStyleCol(ImGuiCol.Header, Color.BLACK);
 		boolean open = ImGui.collapsingHeader(label, imGuiTreeNodeFlags);
 		popStack();
 		return open;
@@ -439,7 +439,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 
 	public boolean collapsingHeader(String label, ImBoolean visible, int imGuiTreeNodeFlags) {
 		pushStack();
-		setStyleCol(ImGuiCol.Header, 0xFF000000);
+		setStyleCol(ImGuiCol.Header, Color.BLACK);
 		boolean open = ImGui.collapsingHeader(label, visible, imGuiTreeNodeFlags);
 		popStack();
 		return open;
