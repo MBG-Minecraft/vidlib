@@ -21,6 +21,9 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
@@ -123,5 +126,25 @@ public class PlatformHelper {
 
 	public void collectEntityNumbers(SimpleRegistryCollector<EntityNumber> registry) {
 		EntityNumber.builtinTypes(registry);
+	}
+
+	public boolean isStaff(Entity entity) {
+		var gameMode = GameType.SURVIVAL;
+
+		if (entity instanceof Player player) {
+			gameMode = player.gameMode();
+		}
+
+		return CommonGameEngine.INSTANCE.isPlayerStaff(entity.getTags(), gameMode);
+	}
+
+	public boolean isStaffOrTalent(Entity entity) {
+		var gameMode = GameType.SURVIVAL;
+
+		if (entity instanceof Player player) {
+			gameMode = player.gameMode();
+		}
+
+		return CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(entity.getTags(), gameMode);
 	}
 }

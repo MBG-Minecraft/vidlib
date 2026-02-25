@@ -36,6 +36,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.world.entity.Entity;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoader;
@@ -228,5 +229,15 @@ public class NeoPlatformHelper extends PlatformHelper {
 	public void collectEntityNumbers(SimpleRegistryCollector<EntityNumber> registry) {
 		super.collectEntityNumbers(registry);
 		ModLoader.postEvent(new EntityNumberRegistryEvent(registry));
+	}
+
+	@Override
+	public boolean isStaff(Entity entity) {
+		return entity.isStaff();
+	}
+
+	@Override
+	public boolean isStaffOrTalent(Entity entity) {
+		return entity.isStaffOrTalent();
 	}
 }
