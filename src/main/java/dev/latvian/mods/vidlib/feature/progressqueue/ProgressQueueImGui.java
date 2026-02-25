@@ -25,10 +25,10 @@ public class ProgressQueueImGui {
 				continue;
 			}
 
-			int maxFileCount = queue.files.size();
+			int maxFileCount = queue.items.size();
 			int done = 0;
 
-			for (var fileProgress : queue.files) {
+			for (var fileProgress : queue.items) {
 				if (fileProgress.isDone()) {
 					done++;
 				}
@@ -87,11 +87,14 @@ public class ProgressQueueImGui {
 				ImGui.progressBar((float) done / (float) maxFileCount, -1F, 20F, done + "/" + maxFileCount);
 			}
 
-			for (var item : queue.files) {
+			for (var item : queue.items) {
 				if (item.isVisible()) {
 					long progress = item.progress().get();
 					long size = item.size().get();
-					ImGui.progressBar(Math.clamp((float) ((double) progress / (double) size), 0F, 1F), -1F, 20F, item.nameFunction().getName(progress, size));
+
+					if (size > 0L) {
+						ImGui.progressBar(Math.clamp((float) ((double) progress / (double) size), 0F, 1F), -1F, 20F, item.nameFunction().getName(progress, size));
+					}
 				}
 			}
 

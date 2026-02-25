@@ -24,14 +24,14 @@ public class ProgressQueue {
 		return item;
 	}
 
-	public final Deque<ProgressItem> files;
+	public final Deque<ProgressItem> items;
 	public String topText;
 	public String bottomText;
 	public final Deque<String> errors;
 	public boolean hideInGame;
 
 	public ProgressQueue() {
-		this.files = new ConcurrentLinkedDeque<>();
+		this.items = new ConcurrentLinkedDeque<>();
 		this.topText = "Loading...";
 		this.bottomText = "";
 		this.errors = new ConcurrentLinkedDeque<>();
@@ -40,7 +40,7 @@ public class ProgressQueue {
 
 	public ProgressItem addItem(ProgressItemNameFunction nameFunction) {
 		var item = new ProgressItem(this, new AtomicInteger(0), new AtomicLong(0L), new AtomicLong(1L), nameFunction);
-		files.add(item);
+		items.add(item);
 		return item;
 	}
 
