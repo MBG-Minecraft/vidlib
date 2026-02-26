@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.prop;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.vidlib.feature.imgui.builder.BooleanImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.DoubleImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.FloatImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
 import dev.latvian.mods.vidlib.feature.imgui.builder.IntImBuilder;
@@ -38,6 +39,14 @@ public record PropData<P extends Prop, V>(Class<P> origin, String key, DataType<
 
 	public static <P extends Prop> PropData<P, Float> createFloat(Class<P> origin, String key, Function<P, Float> getter, BiConsumer<P, Float> setter, float min, float max) {
 		return create(origin, key, DataTypes.FLOAT, getter, setter, FloatImBuilder.type(min, max));
+	}
+
+	public static <P extends Prop> PropData<P, Double> createDouble(Class<P> origin, String key, Function<P, Double> getter, BiConsumer<P, Double> setter) {
+		return create(origin, key, DataTypes.DOUBLE, getter, setter, DoubleImBuilder.TYPE);
+	}
+
+	public static <P extends Prop> PropData<P, Double> createDouble(Class<P> origin, String key, Function<P, Double> getter, BiConsumer<P, Double> setter, double min, double max) {
+		return create(origin, key, DataTypes.DOUBLE, getter, setter, DoubleImBuilder.type(min, max));
 	}
 
 	public PropData<P, V> required() {
