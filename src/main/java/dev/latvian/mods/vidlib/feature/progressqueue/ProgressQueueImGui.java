@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.progressqueue;
 
-import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
@@ -14,8 +13,27 @@ public class ProgressQueueImGui {
 			return;
 		}
 
+		ImVec2 windowPos, windowSize;
+
+		if (ImGuiHooks.centralDockNode != null) {
+			windowPos = ImGuiHooks.centralDockNode.getPos();
+			windowSize = ImGuiHooks.centralDockNode.getSize();
+		} else {
+			var window = ImGui.getMainViewport();
+			windowPos = window.getPos();
+			windowSize = window.getSize();
+		}
+
+		var offset = ImGuiHooks.mainMenuBarHeight / 2F;
+
+		float windowX = windowPos.x + windowSize.x - 312F - offset;
+		float windowY = windowPos.y + offset;
+
+		graphics.pushStack();
+		graphics.setWindowRounding(8F);
+		graphics.setWindowPadding(6F, 6F);
+
 		var queueItr = ProgressQueue.ACTIVE.iterator();
-		int windowCreated = 0;
 		int queueCount = 0;
 
 		while (queueItr.hasNext()) {
@@ -39,97 +57,71 @@ public class ProgressQueueImGui {
 				continue;
 			}
 
-			if (windowCreated == 0) {
-				windowCreated = 1;
-				ImVec2 windowPos, windowSize;
+			ImGui.setNextWindowContentSize(300F, 0F);
+			ImGui.setNextWindowPos(windowX, windowY);
 
-				if (ImGuiHooks.centralDockNode != null) {
-					windowPos = ImGuiHooks.centralDockNode.getPos();
-					windowSize = ImGuiHooks.centralDockNode.getSize();
-				} else {
-					var window = ImGui.getMainViewport();
-					windowPos = window.getPos();
-					windowSize = window.getSize();
-				}
+			int flags = ImGuiWindowFlags.NoDocking
+				| ImGuiWindowFlags.NoNav
+				| ImGuiWindowFlags.NoResize
+				| ImGuiWindowFlags.NoScrollbar
+				| ImGuiWindowFlags.NoCollapse
+				| ImGuiWindowFlags.AlwaysAutoResize
+				| ImGuiWindowFlags.NoSavedSettings;
 
-				var barHeight = ImGuiHooks.scaleBarHeight(ImGuiUtils.getDpiScale());
+			ImGuiUtils.BOOLEAN.set(true);
 
-				ImGui.setNextWindowContentSize(300F, 0F);
-				ImGui.setNextWindowPos(windowPos.x + windowSize.x - 300F - barHeight, windowPos.y + barHeight / 1.5F);
+			var windowId = queue.topText + "###progress-queue-" + queueCount;
 
-				int flags = ImGuiWindowFlags.NoDocking
-					| ImGuiWindowFlags.NoNav
-					| ImGuiWindowFlags.NoDecoration
-					| ImGuiWindowFlags.AlwaysAutoResize
-					| ImGuiWindowFlags.NoSavedSettings;
-
-				if (ImGui.begin("###progress-queue", flags)) {
-					windowCreated = 2;
-					ImGui.pushItemWidth(-1F);
-				}
-			}
-
-			if (windowCreated != 2) {
-				continue;
-			}
-
-			if (queueCount > 0) {
-				ImGui.separator();
-			}
-
-			ImGui.pushID(queueCount);
-
-			if (!queue.topText.isEmpty()) {
-				ImGui.textWrapped(queue.topText);
-			}
-
-			if (maxFileCount > 1) {
-				ImGui.progressBar((float) done / (float) maxFileCount, -1F, 20F, done + "/" + maxFileCount);
-			}
-
-			for (var item : queue.items) {
-				if (item.isVisible()) {
-					long progress = item.progress().get();
-					long size = item.size().get();
-
-					if (size > 0L) {
-						ImGui.progressBar(Math.clamp((float) ((double) progress / (double) size), 0F, 1F), -1F, 20F, item.nameFunction().getName(progress, size));
-					}
-				}
-			}
-
-			if (!queue.errors.isEmpty()) {
-				var clear = graphics.button("Clear Errors###clear-errors", ImColorVariant.RED);
-
-				graphics.pushStack();
-				graphics.setErrorText();
-
-				for (var error : queue.errors) {
-					if (queue.errors.size() > 1) {
-						ImGui.bullet();
-					}
-
-					ImGui.textWrapped(error);
-				}
-
-				graphics.popStack();
-
-				if (clear) {
+			if (queue.errors.isEmpty() ? ImGui.begin(windowId, flags) : ImGui.begin(windowId, ImGuiUtils.BOOLEAN, flags)) {
+				if (!ImGuiUtils.BOOLEAN.get()) {
 					queue.errors.clear();
 				}
+
+				ImGui.pushItemWidth(-1F);
+
+				if (maxFileCount > 1) {
+					ImGui.progressBar((float) done / (float) maxFileCount, -1F, 20F, done + "/" + maxFileCount);
+				}
+
+				for (var item : queue.items) {
+					if (item.isVisible()) {
+						long progress = item.progress().get();
+						long size = item.size().get();
+
+						if (size > 0L) {
+							ImGui.progressBar(Math.clamp((float) ((double) progress / (double) size), 0F, 1F), -1F, 20F, item.nameFunction().getName(progress, size));
+						}
+					}
+				}
+
+				if (!queue.errors.isEmpty()) {
+					graphics.pushStack();
+					graphics.setErrorText();
+
+					for (var error : queue.errors) {
+						if (queue.errors.size() > 1) {
+							ImGui.bullet();
+						}
+
+						ImGui.textWrapped(error);
+					}
+
+					graphics.popStack();
+				}
+
+				if (!queue.bottomText.isEmpty()) {
+					ImGui.separator();
+					ImGui.textWrapped(queue.bottomText);
+				}
+
+				ImGui.popItemWidth();
+				windowY += ImGui.getWindowSizeY() + offset;
 			}
 
-			if (!queue.bottomText.isEmpty()) {
-				ImGui.textWrapped(queue.bottomText);
-			}
-
-			ImGui.popID();
+			ImGui.end();
 			queueCount++;
 		}
 
-		if (windowCreated > 0) {
-			ImGui.popItemWidth();
-			ImGui.end();
-		}
+		graphics.popStack();
 	}
 }

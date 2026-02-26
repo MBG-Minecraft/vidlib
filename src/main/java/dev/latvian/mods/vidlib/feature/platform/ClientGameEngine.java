@@ -820,4 +820,16 @@ public class ClientGameEngine {
 	public boolean allowAdminPanel(@Nullable LocalPlayer player) {
 		return true;
 	}
+
+	public boolean shouldRender2DPlayerName(Minecraft mc, LocalPlayer self, Player player) {
+		if (self == player && mc.options.getCameraType().isFirstPerson()) {
+			return false;
+		}
+
+		if (player.isSpectator()) {
+			return false;
+		}
+
+		return !player.isInvisibleTo(self);
+	}
 }

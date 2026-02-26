@@ -34,14 +34,6 @@ public interface VidLibHUD {
 	Mutable<Predicate<Player>> DEFAULT_DRAW_NAME = new MutableObject<>(player -> !player.isBoss());
 	Mutable<Predicate<Player>> DEFAULT_DRAW_HEALTH_BAR = new MutableObject<>(player -> player.isSurvivalLike() && !player.isBoss());
 
-	static boolean shouldDrawName(Minecraft mc, Player self, Player player) {
-		if (self == player && mc.options.getCameraType().isFirstPerson()) {
-			return false;
-		}
-
-		return !player.isInvisibleTo(self);
-	}
-
 	static void drawPlayerNames(GuiGraphics graphics, DeltaTracker deltaTracker) {
 		var mc = Minecraft.getInstance();
 		var level = mc.level;
@@ -80,15 +72,11 @@ public interface VidLibHUD {
 		var selfDelta = deltaTracker.getGameTimeDeltaPartialTick(true);
 
 		for (var player : level.players()) {
-			if (player.isSpectator() || player.isInvisibleTo(mc.player)) {
-				continue;
-			}
-
 			if (replay && FlashbackIntegration.isEntityHidden(player.getUUID())) {
 				continue;
 			}
 
-			if (!shouldDrawName(mc, self, player)) {
+			if (!ClientGameEngine.INSTANCE.shouldRender2DPlayerName(mc, mc.player, player)) {
 				continue;
 			}
 

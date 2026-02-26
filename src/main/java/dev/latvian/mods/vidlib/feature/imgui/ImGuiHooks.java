@@ -171,10 +171,6 @@ public class ImGuiHooks {
 		ImNodes.destroyContext();
 	}
 
-	public static float scaleBarHeight(float dpi) {
-		return 26F + 20F * (dpi - 1F);
-	}
-
 	public static void startFrame(Minecraft mc) {
 		if (!initialized) {
 			//if (mc.getOverlay() instanceof LoadingOverlay) {

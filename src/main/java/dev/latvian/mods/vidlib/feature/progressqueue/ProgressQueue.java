@@ -24,6 +24,19 @@ public class ProgressQueue {
 		return item;
 	}
 
+	public static ProgressItem queueError(String title, String error) {
+		var queue = new ProgressQueue();
+		queue.topText = title;
+		var item = queue.addItem();
+		item.setSize(0L);
+
+		if (!error.isEmpty()) {
+			item.error(error);
+		}
+		queue.display();
+		return item;
+	}
+
 	public final Deque<ProgressItem> items;
 	public String topText;
 	public String bottomText;

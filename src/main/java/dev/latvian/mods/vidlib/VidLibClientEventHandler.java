@@ -679,11 +679,7 @@ public class VidLibClientEventHandler {
 	public static void canRenderNameTag(RenderNameTagEvent.CanRender event) {
 		var mc = Minecraft.getInstance();
 
-		if (mc.player == null || !(event.getEntity() instanceof Player)) {
-			return;
-		}
-
-		if (mc.getNameDrawType() != NameDrawType.VANILLA && VidLibHUD.shouldDrawName(mc, mc.player, (Player) event.getEntity())) {
+		if (mc.getNameDrawType() != NameDrawType.VANILLA) {
 			event.setCanRender(TriState.FALSE);
 		}
 	}
