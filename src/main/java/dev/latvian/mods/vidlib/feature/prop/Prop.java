@@ -637,6 +637,12 @@ public class Prop {
 
 		ImGuiUtils.hoveredTooltip("Copy ID");
 
+		ImGui.sameLine();
+
+		if (graphics.smallButton("TP To", ImColorVariant.DARK_PURPLE)) {
+			graphics.mc.runClientCommand("tp @s " + pos.x + " " + pos.y + " " + pos.z);
+		}
+
 		if (clientSideOnly) {
 			ImGui.sameLine();
 			graphics.button(ImIcons.WARNING + "###client-only", ImColorVariant.ORANGE);
