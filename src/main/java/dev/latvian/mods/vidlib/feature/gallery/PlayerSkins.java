@@ -1,11 +1,11 @@
 package dev.latvian.mods.vidlib.feature.gallery;
 
-import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
+import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
@@ -19,28 +19,32 @@ public interface PlayerSkins {
 	@ClientAutoRegister
 	Gallery<UUID> GALLERY = Gallery.ofUUIDKey("player_skins", () -> VidLibPaths.USER.get().resolve("player-skins"), TriState.TRUE);
 
+	static PlayerSkin of(SkinTexture skin) {
+		return new PlayerSkin(skin.texture(), null, null, null, skin.slim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE, true);
+	}
+
 	PlayerSkin[] DEFAULT_WIDE_SKINS = new PlayerSkin[]{
-		new PlayerSkin(ID.mc("textures/entity/player/wide/steve.png"), null, null, null, PlayerSkin.Model.WIDE, true),
-		new PlayerSkin(ID.mc("textures/entity/player/wide/alex.png"), null, null, null, PlayerSkin.Model.WIDE, true),
-		new PlayerSkin(ID.mc("textures/entity/player/wide/ari.png"), null, null, null, PlayerSkin.Model.WIDE, true),
-		new PlayerSkin(ID.mc("textures/entity/player/wide/efe.png"), null, null, null, PlayerSkin.Model.WIDE, true),
-		new PlayerSkin(ID.mc("textures/entity/player/wide/kai.png"), null, null, null, PlayerSkin.Model.WIDE, true),
-		new PlayerSkin(ID.mc("textures/entity/player/wide/makena.png"), null, null, null, PlayerSkin.Model.WIDE, true),
-		new PlayerSkin(ID.mc("textures/entity/player/wide/noor.png"), null, null, null, PlayerSkin.Model.WIDE, true),
-		new PlayerSkin(ID.mc("textures/entity/player/wide/sunny.png"), null, null, null, PlayerSkin.Model.WIDE, true),
-		new PlayerSkin(ID.mc("textures/entity/player/wide/zuri.png"), null, null, null, PlayerSkin.Model.WIDE, true)
+		of(SkinTexture.WIDE_STEVE),
+		of(SkinTexture.WIDE_ALEX),
+		of(SkinTexture.WIDE_ARI),
+		of(SkinTexture.WIDE_EFE),
+		of(SkinTexture.WIDE_KAI),
+		of(SkinTexture.WIDE_MAKENA),
+		of(SkinTexture.WIDE_NOOR),
+		of(SkinTexture.WIDE_SUNNY),
+		of(SkinTexture.WIDE_ZURI)
 	};
 
 	PlayerSkin[] DEFAULT_SLIM_SKINS = new PlayerSkin[]{
-		new PlayerSkin(ID.mc("textures/entity/player/slim/steve.png"), null, null, null, PlayerSkin.Model.SLIM, true),
-		new PlayerSkin(ID.mc("textures/entity/player/slim/alex.png"), null, null, null, PlayerSkin.Model.SLIM, true),
-		new PlayerSkin(ID.mc("textures/entity/player/slim/ari.png"), null, null, null, PlayerSkin.Model.SLIM, true),
-		new PlayerSkin(ID.mc("textures/entity/player/slim/efe.png"), null, null, null, PlayerSkin.Model.SLIM, true),
-		new PlayerSkin(ID.mc("textures/entity/player/slim/kai.png"), null, null, null, PlayerSkin.Model.SLIM, true),
-		new PlayerSkin(ID.mc("textures/entity/player/slim/makena.png"), null, null, null, PlayerSkin.Model.SLIM, true),
-		new PlayerSkin(ID.mc("textures/entity/player/slim/noor.png"), null, null, null, PlayerSkin.Model.SLIM, true),
-		new PlayerSkin(ID.mc("textures/entity/player/slim/sunny.png"), null, null, null, PlayerSkin.Model.SLIM, true),
-		new PlayerSkin(ID.mc("textures/entity/player/slim/zuri.png"), null, null, null, PlayerSkin.Model.SLIM, true)
+		of(SkinTexture.SLIM_STEVE),
+		of(SkinTexture.SLIM_ALEX),
+		of(SkinTexture.SLIM_ARI),
+		of(SkinTexture.SLIM_EFE),
+		of(SkinTexture.SLIM_KAI),
+		of(SkinTexture.SLIM_MAKENA),
+		of(SkinTexture.SLIM_NOOR),
+		of(SkinTexture.SLIM_SUNNY),
+		of(SkinTexture.SLIM_ZURI)
 	};
 
 	static GalleryImage<UUID> get(Minecraft mc, UUID uuid) {

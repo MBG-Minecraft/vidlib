@@ -282,8 +282,6 @@ public class BuiltInImGui {
 		float h = graphics.isReplay || !ClientGameEngine.INSTANCE.hasBottomInfoBar(graphics.mc) ? 0F : ImGuiHooks.mainMenuBarHeight;
 
 		if (h > 0F && ImGuiHooks.mainViewport != null && ImGuiHooks.centralDockNode != null) {
-			var windowPos = ImGuiHooks.mainViewport.getPos();
-			var windowSize = ImGuiHooks.mainViewport.getSize();
 			var centralNodePos = ImGuiHooks.centralDockNode.getPos();
 			var centralNodeSize = ImGuiHooks.centralDockNode.getSize();
 
