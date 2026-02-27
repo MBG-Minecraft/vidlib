@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.waypoint;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
+import dev.latvian.mods.vidlib.feature.icon.renderer.IconRenderer;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
@@ -12,6 +12,7 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
+import org.joml.Vector2d;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -57,7 +58,7 @@ public interface ClientWaypoints {
 				var pos = waypoint.position().get(ctx);
 
 				if (pos != null) {
-					double distance = pos.distanceTo(cam);
+					double distance = waypoint.ignoreHeight() ? Vector2d.distance(pos.x, pos.z, cam.x, cam.z) : pos.distanceTo(cam);
 
 					if (waypoint.maxDistance() <= 0D || distance <= waypoint.maxDistance()) {
 						if (waypoint.minDistance() <= 0D || distance >= waypoint.minDistance()) {
@@ -119,7 +120,9 @@ public interface ClientWaypoints {
 					graphics.drawString(mc.font, dist, -mc.font.width(dist) / 2F, 2, textColor, true);
 				}
 
-				graphics.blit(VidLibRenderTypes.GUI_BLUR, wp.waypoint().icon(), -8, -16, 0F, 0F, 16, 16, 16, 16, wp.waypoint().tint().withAlpha(alpha).argb());
+				var iconRenderer = IconRenderer.of(wp.waypoint().icon());
+				graphics.pose().translate(0F, -8F, 0F);
+				iconRenderer.render2D(mc, graphics);
 				graphics.pose().popPose();
 			}
 		}

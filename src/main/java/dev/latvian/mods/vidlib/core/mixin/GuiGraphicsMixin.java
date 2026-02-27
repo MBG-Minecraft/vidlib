@@ -5,6 +5,7 @@ import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -20,9 +21,18 @@ public class GuiGraphicsMixin implements VLGuiGraphics {
 	@Final
 	private Minecraft minecraft;
 
+	@Shadow
+	@Final
+	private MultiBufferSource.BufferSource bufferSource;
+
 	@Override
 	public Minecraft vl$mc() {
 		return minecraft;
+	}
+
+	@Override
+	public MultiBufferSource.BufferSource vl$buffers() {
+		return bufferSource;
 	}
 
 	@Inject(method = "renderItemCount", at = @At("HEAD"), cancellable = true)

@@ -7,6 +7,7 @@ import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
@@ -25,6 +26,10 @@ public interface VLGuiGraphics {
 
 	default Minecraft vl$mc() {
 		return Minecraft.getInstance();
+	}
+
+	default MultiBufferSource.BufferSource vl$buffers() {
+		throw new NoMixinException(this);
 	}
 
 	default void healthBar(int x, int y, int w, int h, float hp, int alpha) {

@@ -22,10 +22,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(PauseScreen.class)
-public abstract class PauseScreenMixin {
+public abstract class PauseScreenMixin extends Screen {
 	@Shadow
 	@Final
 	private static Component PLAYER_REPORTING;
+
+	protected PauseScreenMixin(Component title) {
+		super(title);
+	}
 
 	@ModifyReturnValue(method = "openScreenButton", at = @At("RETURN"))
 	private Button vl$openScreenButton(Button original, @Local(argsOnly = true) Component c) {
@@ -53,4 +57,11 @@ public abstract class PauseScreenMixin {
 			button.active = false;
 		}
 	}
+
+	/*
+	@Inject(method = "renderBackground", at = @At("RETURN"))
+	private void vl$renderBackground(GuiGraphics graphics, int mx, int my, float delta, CallbackInfo ci) {
+		graphics.fill(0, 0, width, height, 0xFF000000);
+	}
+	 */
 }

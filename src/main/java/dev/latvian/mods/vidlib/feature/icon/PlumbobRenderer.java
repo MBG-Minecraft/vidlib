@@ -58,11 +58,8 @@ public class PlumbobRenderer {
 		ms.mulPose(mc.gameRenderer.getMainCamera().rotation());
 		ms.scale(0.4F, 0.4F, 0.4F);
 
-		if (icon.renderer == null) {
-			icon.renderer = IconRenderer.create(icon.icon);
-		}
-
-		((IconRenderer) icon.renderer).render3D(mc, ms, delta, buffers, light, OverlayTexture.NO_OVERLAY);
+		var iconRenderer = IconRenderer.of(icon);
+		iconRenderer.render3D(mc, ms, delta, buffers, light, OverlayTexture.NO_OVERLAY);
 		ms.popPose();
 	}
 }

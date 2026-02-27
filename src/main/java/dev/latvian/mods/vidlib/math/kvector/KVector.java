@@ -21,6 +21,7 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.PlayerDataKNumber;
 import dev.latvian.mods.vidlib.math.knumber.ServerDataKNumber;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.core.Position;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -81,6 +82,10 @@ public interface KVector extends SimpleRegistryEntry {
 		} else {
 			return new FixedKVector(vec);
 		}
+	}
+
+	static FixedKVector of(Position position) {
+		return of(position instanceof Vec3 v ? v : new Vec3(position.x(), position.y(), position.z()));
 	}
 
 	static KVector of(double x, double y, double z) {

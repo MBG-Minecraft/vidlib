@@ -41,12 +41,14 @@ public class WaypointCommands {
 	);
 
 	private static int add(CommandSourceStack source, String id, Vec3 position, Component label) {
-		var waypoint = new Waypoint.Builder();
-		waypoint.id = id;
-		waypoint.position = KVector.of(position);
-		waypoint.label = label;
-		waypoint.tint = Color.hsb(source.getLevel().random.nextFloat(), 1F, 1F, 255);
-		source.getServer().addWaypoints(List.of(waypoint.build()));
+		source.getServer().addWaypoints(List.of(new Waypoint.Builder()
+			.id(id)
+			.position(KVector.of(position))
+			.label(label)
+			.tint(Color.hsb(source.getLevel().random.nextFloat(), 1F, 1F, 255))
+			.build()
+		));
+
 		return 0;
 	}
 

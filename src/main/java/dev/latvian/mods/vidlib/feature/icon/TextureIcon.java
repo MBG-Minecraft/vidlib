@@ -24,6 +24,10 @@ public record TextureIcon(ResourceLocation texture, UV uv, boolean translucent, 
 		TextureIcon::new
 	));
 
+	public TextureIcon(ResourceLocation texture) {
+		this(texture, UV.FULL, false, Color.WHITE);
+	}
+
 	@Override
 	public SimpleRegistryType<?> type() {
 		return TYPE;
