@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.npc;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.math.Axis;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.Empty;
@@ -10,6 +11,7 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerSkins;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
+import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import dev.latvian.mods.vidlib.util.client.MultiBufferSourceOverride;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -26,6 +28,9 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
 import org.joml.SimplexNoise;
+
+import java.util.ArrayList;
+import java.util.stream.IntStream;
 
 public class NPCPropRenderer implements PropRenderer<NPCProp> {
 	private static final PlayerSkin[] SINGLE_SKIN = {PlayerSkins.DEFAULT_WIDE_SKINS[0]};
@@ -91,15 +96,32 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 		int light = LightTexture.pack(mc.level.getBrightness(LightLayer.BLOCK, blockpos), mc.level.getBrightness(LightLayer.SKY, blockpos));
 
 		PlayerSkin[] skins;
+		var gp = profile.profile();
 
-		if (!profile.profile().getName().isEmpty() && !profile.profile().getId().equals(Util.NIL_UUID)) {
+		if (!gp.getName().isEmpty() && !gp.getId().equals(Util.NIL_UUID)) {
+			SINGLE_SKIN[0] = mc.getSkinManager().getInsecureSkin(gp);
 			skins = SINGLE_SKIN;
-			skins[0] = mc.getSkinManager().getInsecureSkin(profile.profile());
+		} else if (p.randomSkin && (!p.randomSkinsProfiles.isEmpty() || !p.randomSkins.isEmpty())) {
+			var skinList = new ArrayList<PlayerSkin>();
+			p.randomSkinsProfiles.stream().map(mc.getSkinManager()::getInsecureSkin).forEach(skinList::add);
+			p.randomSkins.stream().map(loc -> PlayerSkins.of(new SkinTexture(loc, false))).forEach(skinList::add);
+			skins = skinList.toArray(PlayerSkin[]::new);
 		} else if (p.randomSkin) {
-			skins = PlayerSkins.DEFAULT_WIDE_SKINS;
+			if (p.justPickTheSkins) {
+				p.justPickTheSkins = false;
+				var profiles = new ArrayList<GameProfile>();
+				skins = PlayerSkins.GALLERY.images.keySet().stream()
+					.limit(p.count)
+					.peek(uuid -> profiles.add(PlayerProfiles.get(uuid).profile()))
+					.map(uuid -> PlayerSkins.getSkin(mc, uuid,  true))
+					.toArray(PlayerSkin[]::new);
+				p.randomSkinsProfiles = profiles;
+			} else {
+				skins = PlayerSkins.DEFAULT_WIDE_SKINS;
+			}
 		} else {
+			SINGLE_SKIN[0] = PlayerSkins.DEFAULT_WIDE_SKINS[0];
 			skins = SINGLE_SKIN;
-			skins[0] = PlayerSkins.DEFAULT_WIDE_SKINS[0];
 		}
 
 		playerRenderState.attackTime = 0;
