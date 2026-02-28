@@ -2,20 +2,24 @@ package dev.latvian.mods.vidlib.feature.location;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.commands.Commands;
-import net.minecraft.server.level.ServerPlayer;
 
 public interface WarpCommand {
 	@AutoRegister
-	ServerCommandHolder COMMAND = new ServerCommandHolder("warp", (command, buildContext) -> command
-		.then(Commands.argument("warp", Location.COMMAND.argument(buildContext))
-			.requires(source -> source.hasPermission(2))
-			.executes(ctx -> warp(ctx.getSource().getPlayerOrException(), Location.COMMAND.get(ctx, "warp")))
-		)
-	);
+	ServerCommandHolder COMMAND = new ServerCommandHolder("warp", (command, buildContext) -> {
+		command.requires(source -> source.hasPermission(2));
 
-	private static int warp(ServerPlayer player, Location location) {
-		player.teleport(location);
-		return 1;
-	}
+		var locations = CommonGameEngine.INSTANCE.getWarpLocations();
+
+		for (var location : locations) {
+			command.then(Commands.literal(location.id())
+				.requires(source -> !location.admin() || source.hasPermission(2))
+				.executes(ctx -> {
+					ctx.getSource().getPlayerOrException().teleport(location.pos().apply(ctx.getSource().getServer()));
+					return 1;
+				})
+			);
+		}
+	});
 }

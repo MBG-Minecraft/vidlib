@@ -822,4 +822,24 @@ public class ClientGameEngine {
 
 		return !player.isInvisibleTo(self);
 	}
+
+	public boolean imGuiOpenMenu(ImGraphics graphics) {
+		return graphics.adminPanel && graphics.isAdmin;
+	}
+
+	public boolean imGuiConfigMenu(ImGraphics graphics) {
+		return graphics.adminPanel && graphics.isAdmin;
+	}
+
+	public boolean imGuiDebugMenu(ImGraphics graphics) {
+		return graphics.adminPanel;
+	}
+
+	public boolean imGuiShowMenu(ImGraphics graphics) {
+		return graphics.adminPanel;
+	}
+
+	public boolean imGuiWarpMenu(ImGraphics graphics) {
+		return true;
+	}
 }

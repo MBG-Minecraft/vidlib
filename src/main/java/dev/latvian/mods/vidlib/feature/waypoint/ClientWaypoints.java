@@ -122,7 +122,7 @@ public interface ClientWaypoints {
 
 				var iconRenderer = IconRenderer.of(wp.waypoint().icon());
 				graphics.pose().translate(0F, -8F, 0F);
-				iconRenderer.render2D(mc, graphics);
+				iconRenderer.render2D(mc, graphics, (int) (alpha * 255));
 				graphics.pose().popPose();
 			}
 		}

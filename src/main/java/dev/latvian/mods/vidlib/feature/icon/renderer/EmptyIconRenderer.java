@@ -9,7 +9,7 @@ public enum EmptyIconRenderer implements IconRenderer {
 	INSTANCE;
 
 	@Override
-	public void render2D(Minecraft mc, GuiGraphics graphics) {
+	public void render2D(Minecraft mc, GuiGraphics graphics, int alpha) {
 	}
 
 	@Override

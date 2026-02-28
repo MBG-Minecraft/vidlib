@@ -425,10 +425,6 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		return combo(label, selected, options, (Function) KLibCodecs.DEFAULT_NAME_GETTER);
 	}
 
-	public void hideMainMenuBar() {
-		BuiltInImGui.mainMenuOpen = false;
-	}
-
 	public boolean collapsingHeader(String label, int imGuiTreeNodeFlags) {
 		pushStack();
 		setStyleCol(ImGuiCol.Header, Color.BLACK);

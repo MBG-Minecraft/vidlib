@@ -45,6 +45,7 @@ public class WaypointCommands {
 			.id(id)
 			.position(KVector.of(position))
 			.label(label)
+			.distance(6D, 20D, 0D)
 			.tint(Color.hsb(source.getLevel().random.nextFloat(), 1F, 1F, 255))
 			.build()
 		));

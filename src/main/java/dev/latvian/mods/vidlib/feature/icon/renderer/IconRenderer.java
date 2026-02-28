@@ -48,7 +48,7 @@ public interface IconRenderer {
 		register(AtlasSpriteIcon.TYPE, AtlasSpriteIconRenderer::new);
 	}
 
-	void render2D(Minecraft mc, GuiGraphics graphics);
+	void render2D(Minecraft mc, GuiGraphics graphics, int alpha);
 
 	void render3D(Minecraft mc, PoseStack ms, float delta, MultiBufferSource source, int light, int overlay);
 }

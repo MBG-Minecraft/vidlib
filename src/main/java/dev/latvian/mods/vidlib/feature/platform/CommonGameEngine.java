@@ -5,6 +5,7 @@ import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.entity.ExactEntitySpawnPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
+import dev.latvian.mods.vidlib.feature.location.WarpLocation;
 import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
@@ -69,6 +70,7 @@ import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -480,5 +482,9 @@ public class CommonGameEngine {
 
 	public String getBackupInfo(MinecraftServer server) {
 		return Long.toUnsignedString(System.currentTimeMillis());
+	}
+
+	public List<WarpLocation> getWarpLocations() {
+		return List.of();
 	}
 }
