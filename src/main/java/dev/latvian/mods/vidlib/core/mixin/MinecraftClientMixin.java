@@ -31,6 +31,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.concurrent.CompletableFuture;
+
 @Mixin(Minecraft.class)
 public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	@Shadow
@@ -153,5 +155,10 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	@Override
 	public int vl$reloadCount() {
 		return vl$reloadCount;
+	}
+
+	@Inject(method = "reloadResourcePacks()Ljava/util/concurrent/CompletableFuture;", at = @At("RETURN"))
+	private void vl$reloadResourcePacks(CallbackInfoReturnable<CompletableFuture<Void>> cir) {
+		vl$reloadCount++;
 	}
 }
