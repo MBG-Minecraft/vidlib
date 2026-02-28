@@ -666,4 +666,8 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	default float getEffectScale() {
 		return vl$self().getWindow().getGuiScaledHeight() / 1080F;
 	}
+
+	default int vl$reloadCount() {
+		return 0;
+	}
 }

@@ -44,6 +44,9 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	@Unique
 	private TextureAtlas vl$blockTextureAtlas = null;
 
+	@Unique
+	private int vl$reloadCount = 0;
+
 	@Override
 	public void vl$clearProfileCache() {
 		vl$blockTextureAtlas = null;
@@ -145,5 +148,10 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	@WrapOperation(method = "tick", at = @At(value = "NEW", target = "()Lnet/minecraft/client/gui/screens/InBedChatScreen;"))
 	private InBedChatScreen vl$sleepScreen(Operation<InBedChatScreen> original) {
 		return ClientGameEngine.INSTANCE.removeChatFromSleepScreen() ? new SleepScreen() : original.call();
+	}
+
+	@Override
+	public int vl$reloadCount() {
+		return vl$reloadCount;
 	}
 }
