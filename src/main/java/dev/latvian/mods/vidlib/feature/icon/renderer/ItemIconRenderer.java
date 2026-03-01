@@ -10,7 +10,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 
 public record ItemIconRenderer(ItemIcon icon) implements IconRenderer {
 	@Override
-	public void render2D(Minecraft mc, GuiGraphics graphics) {
+	public void render2D(Minecraft mc, GuiGraphics graphics, int alpha) {
 		graphics.renderFakeItem(icon.stack(), -8, -8);
 	}
 

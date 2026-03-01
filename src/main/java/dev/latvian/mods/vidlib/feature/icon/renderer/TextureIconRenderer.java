@@ -11,11 +11,11 @@ import org.joml.Vector3f;
 
 public record TextureIconRenderer(TextureIcon icon) implements IconRenderer {
 	@Override
-	public void render2D(Minecraft mc, GuiGraphics graphics) {
+	public void render2D(Minecraft mc, GuiGraphics graphics, int alpha) {
 		var rendertype = VidLibRenderTypes.GUI.apply(icon.texture());
 		var matrix4f = graphics.pose().last().pose();
 		var buffer = graphics.vl$buffers().getBuffer(rendertype);
-		var color = icon.tint().argb();
+		var color = icon.tint().mixAlpha(alpha).argb();
 		var uv = icon.uv();
 		buffer.addVertex(matrix4f, -8F, -8F, 0F).setUv(uv.u0(), uv.v0()).setColor(color);
 		buffer.addVertex(matrix4f, -8F, 8F, 0F).setUv(uv.u0(), uv.v1()).setColor(color);

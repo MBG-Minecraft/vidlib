@@ -10,6 +10,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingImBuilder;
+import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerSkins;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
@@ -24,6 +25,8 @@ import dev.latvian.mods.vidlib.feature.prop.geo.BaseGeoProp;
 import dev.latvian.mods.vidlib.util.SpreadType;
 import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -93,8 +96,13 @@ public class NPCProp extends BaseGeoProp {
 		PropData.createFloat(NPCProp.class, "running_distance", p -> p.runningDistance, (p, v) -> p.runningDistance = v, 0F, 200F),
 		PropData.createFloat(NPCProp.class, "render_distance", p -> p.renderDistance, (p, v) -> p.renderDistance = v, 0F, 1024F),
 		PropData.createBoolean(NPCProp.class, "random_skin", p -> p.randomSkin, (p, v) -> p.randomSkin = v),
-		PropData.create(NPCProp.class, "random_skins", PlayerSkins.DATA_TYPE.listOf(), p -> p.randomSkins, (p, v) -> p.randomSkins = v, () -> new ListImBuilder<>(NpcSkinImBuilder.TYPE))
-		);
+		PropData.create(NPCProp.class, "random_skins", PlayerSkins.DATA_TYPE.listOf(), p -> p.randomSkins, (p, v) -> p.randomSkins = v, () -> new ListImBuilder<>(NpcSkinImBuilder.TYPE)),
+		PropData.createFloat(NPCProp.class, "additional_head_yaw", p -> p.additionalHeadYaw, (p, v) -> p.additionalHeadYaw = v, -90F, 90F)
+	);
+
+	public static NPCProp createCloneFrom(Player player) {
+		return player.level().getProps().add(TYPE, prop -> prop.cloneFrom(player));
+	}
 
 	public Component name;
 	public boolean stone;
@@ -120,6 +128,8 @@ public class NPCProp extends BaseGeoProp {
 	public Pose pose;
 	public boolean breathing;
 	public float runningDistance;
+	public float additionalHeadYaw;
+
 	public float renderDistance = 256F;
 	public NPCInstance[] instances;
 
@@ -150,6 +160,25 @@ public class NPCProp extends BaseGeoProp {
 		this.pose = Pose.STANDING;
 		this.breathing = false;
 		this.runningDistance = 0F;
+		this.additionalHeadYaw = 0F;
+	}
+
+	public void cloneFrom(Player player) {
+		setPos(player.position());
+		name = player.getDisplayName();
+		profile = player.getGameProfile();
+		clothing = player.get(InternalPlayerData.CLOTHING);
+		mainHandItem = player.getMainHandItem();
+		offHandItem = player.getOffhandItem();
+		headItem = player.getItemBySlot(EquipmentSlot.HEAD);
+		chestItem = player.getItemBySlot(EquipmentSlot.CHEST);
+		legsItem = player.getItemBySlot(EquipmentSlot.LEGS);
+		feetItem = player.getItemBySlot(EquipmentSlot.FEET);
+		pose = player.getPose();
+		breathing = true;
+		setYaw(player.yBodyRot);
+		setPitch(player.getXRot());
+		additionalHeadYaw = Mth.wrapDegrees(player.getYRot() - player.yBodyRot);
 	}
 
 	@Override

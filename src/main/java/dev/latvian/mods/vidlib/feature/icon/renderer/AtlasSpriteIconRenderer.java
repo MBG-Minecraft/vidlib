@@ -11,11 +11,11 @@ import org.joml.Vector3f;
 
 public record AtlasSpriteIconRenderer(AtlasSpriteIcon icon) implements IconRenderer {
 	@Override
-	public void render2D(Minecraft mc, GuiGraphics graphics) {
+	public void render2D(Minecraft mc, GuiGraphics graphics, int alpha) {
 		var rendertype = VidLibRenderTypes.GUI.apply(icon.sprite().atlas());
 		var matrix4f = graphics.pose().last().pose();
 		var buffer = graphics.vl$buffers().getBuffer(rendertype);
-		var color = icon.tint().argb();
+		var color = icon.tint().mixAlpha(alpha).argb();
 		var uv = mc.getSprite(icon.sprite());
 		buffer.addVertex(matrix4f, -8F, -8F, 0F).setUv(uv.getU0(), uv.getV0()).setColor(color);
 		buffer.addVertex(matrix4f, -8F, 8F, 0F).setUv(uv.getU0(), uv.getV1()).setColor(color);

@@ -19,6 +19,7 @@ import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueueImGui;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
@@ -45,7 +46,6 @@ import java.util.Map;
 
 public class BuiltInImGui {
 	public static final Map<String, Panel> OPEN_PANELS = new LinkedHashMap<>();
-	public static boolean mainMenuOpen = true;
 	public static final ImBoolean SHOW_STACK_TOOL = new ImBoolean(false);
 	public static final ImBoolean SHOW_STYLE_EDITOR_TOOL = new ImBoolean(false);
 	public static Boolean showSounds = null;
@@ -217,6 +217,17 @@ public class BuiltInImGui {
 	});
 
 	public static final MenuItem WARP = MenuItem.menu(ImIcons.LOCATION, "Warp", (graphics, list) -> {
+		for (var location : CommonGameEngine.INSTANCE.getWarpLocations()) {
+			if (!location.admin() || graphics.isAdmin) {
+				list.add(MenuItem.item(
+					ImIcons.LOCATION,
+					location.displayName(),
+					location.pos().apply(graphics.mc).closerToCenterThan(graphics.player.position(), 100D),
+					g -> g.mc.runClientCommand("warp " + location.id())
+				));
+			}
+		}
+
 		if (graphics.inGame && !graphics.isReplay) {
 			// list.add(WARP_TO_DIMENSIONS.enabled(graphics.isAdmin));
 		}
@@ -224,20 +235,28 @@ public class BuiltInImGui {
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.WarpDropdown(graphics, list));
 	});
 
-	public static final MenuItem TICK_FROZEN = MenuItem.text(ImIcons.FREEZE, ImText.info("Tick Frozen"));
-
 	public static final MenuItem MAIN_MENU_BAR = MenuItem.root((graphics, list) -> {
-		list.add(OPEN);
-		list.add(CONFIG);
-		list.add(DEBUG);
-		list.add(SHOW);
-		list.add(WARP);
+		if (ClientGameEngine.INSTANCE.imGuiOpenMenu(graphics)) {
+			list.add(OPEN);
+		}
+
+		if (ClientGameEngine.INSTANCE.imGuiConfigMenu(graphics)) {
+			list.add(CONFIG);
+		}
+
+		if (ClientGameEngine.INSTANCE.imGuiDebugMenu(graphics)) {
+			list.add(DEBUG);
+		}
+
+		if (ClientGameEngine.INSTANCE.imGuiShowMenu(graphics)) {
+			list.add(SHOW);
+		}
+
+		if (ClientGameEngine.INSTANCE.imGuiWarpMenu(graphics)) {
+			list.add(WARP);
+		}
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.MenuBar(graphics, list));
-
-		if (!graphics.isReplay && graphics.inGame && graphics.mc.level.tickRateManager().isFrozen()) {
-			list.add(TICK_FROZEN);
-		}
 	});
 
 	public static void handle(ImGraphics graphics) {
@@ -255,21 +274,14 @@ public class BuiltInImGui {
 		ImGuiHooks.mainMenuBarHeight = 0F;
 		boolean topMainMenu = true;
 
-		if (graphics.adminPanel || graphics.isReplay) {
-			var menuOpen = mainMenuOpen;
-			mainMenuOpen = true;
-
-			if (menuOpen && !graphics.isReplay) {
-				if (ImGui.beginMainMenuBar()) {
-					ImGuiHooks.mainMenuBarHeight = ImGui.getWindowSize().y;
-					ClientGameEngine.INSTANCE.topInfoBarPre(graphics, ImGuiHooks.mainMenuBarHeight);
-					MAIN_MENU_BAR.buildMenuBar(graphics, true);
-					ImGui.separator();
-					ClientGameEngine.INSTANCE.topInfoBar(graphics, ImGuiHooks.mainMenuBarHeight);
-					topMainMenu = false;
-					ImGui.endMainMenuBar();
-				}
-			}
+		if (!graphics.isReplay && ImGui.beginMainMenuBar()) {
+			ImGuiHooks.mainMenuBarHeight = ImGui.getWindowSize().y;
+			ClientGameEngine.INSTANCE.topInfoBarPre(graphics, ImGuiHooks.mainMenuBarHeight);
+			MAIN_MENU_BAR.buildMenuBar(graphics, true);
+			ImGui.separator();
+			ClientGameEngine.INSTANCE.topInfoBar(graphics, ImGuiHooks.mainMenuBarHeight);
+			topMainMenu = false;
+			ImGui.endMainMenuBar();
 		}
 
 		if (topMainMenu && ImGui.beginMainMenuBar()) {

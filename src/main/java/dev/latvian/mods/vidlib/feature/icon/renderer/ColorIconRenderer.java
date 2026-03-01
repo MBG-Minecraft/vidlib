@@ -10,8 +10,8 @@ import org.joml.Vector3f;
 
 public record ColorIconRenderer(ColorIcon icon) implements IconRenderer {
 	@Override
-	public void render2D(Minecraft mc, GuiGraphics graphics) {
-		graphics.fill(-8, -8, 8, 8, icon.color().argb());
+	public void render2D(Minecraft mc, GuiGraphics graphics, int alpha) {
+		graphics.fill(-8, -8, 8, 8, icon.color().mixAlpha(alpha).argb());
 	}
 
 	@Override

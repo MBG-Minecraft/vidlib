@@ -71,9 +71,9 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 		float yaw = p.getYaw(delta);
 		float roll = p.getRoll(delta);
 
-		fakePlayer.snapTo(p.getPos(delta), yaw, pitch);
-		fakePlayer.setYBodyRot(fakePlayer.getYRot());
-		fakePlayer.setYHeadRot(fakePlayer.getYRot());
+		fakePlayer.snapTo(p.getPos(delta), yaw + p.additionalHeadYaw, pitch);
+		fakePlayer.setYBodyRot(yaw);
+		fakePlayer.setYHeadRot(yaw + p.additionalHeadYaw);
 		fakePlayer.setOldPosAndRot();
 		fakePlayer.yBodyRotO = fakePlayer.yBodyRot;
 		fakePlayer.yHeadRotO = fakePlayer.yHeadRot;
@@ -108,7 +108,7 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 				skins = PlayerSkins.GALLERY.images.keySet().stream()
 					.limit(p.count)
 					.peek(uuid -> profiles.add(PlayerProfiles.get(uuid).profile()))
-					.map(uuid -> PlayerSkins.getSkin(mc, uuid,  true))
+					.map(uuid -> PlayerSkins.getSkin(mc, uuid, true))
 					.toArray(PlayerSkin[]::new);
 				p.randomSkinsProfiles = profiles;
 			}*/
