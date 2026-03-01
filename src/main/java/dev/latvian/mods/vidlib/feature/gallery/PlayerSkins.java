@@ -1,18 +1,28 @@
 package dev.latvian.mods.vidlib.feature.gallery;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
+import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.resources.PlayerSkin;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.TriState;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface PlayerSkins {
@@ -46,6 +56,37 @@ public interface PlayerSkins {
 		of(SkinTexture.SLIM_SUNNY),
 		of(SkinTexture.SLIM_ZURI)
 	};
+
+	Codec<PlayerSkin> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+		SkinTexture.CODEC.fieldOf("skin").forGetter(s -> new SkinTexture(s.texture(), s.model() == PlayerSkin.Model.SLIM)),
+		Codec.STRING.optionalFieldOf("textureUrl", "").forGetter(s -> s.textureUrl() == null ? "" : s.textureUrl()),
+		ID.CODEC.optionalFieldOf("capeTexture").forGetter(s -> Optional.ofNullable(s.capeTexture())),
+		ID.CODEC.optionalFieldOf("elytraTexture").forGetter(s -> Optional.ofNullable(s.elytraTexture()))
+	).apply(instance, (skin, textureUrl, capeTexture, elytraTexture) -> new PlayerSkin(
+		skin.texture(),
+		textureUrl.isEmpty() ? null : textureUrl,
+		capeTexture.orElse(null),
+		elytraTexture.orElse(null),
+		skin.slim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE,
+		true
+	)));
+
+	StreamCodec<ByteBuf, PlayerSkin> STREAM_CODEC = CompositeStreamCodec.of(
+		SkinTexture.STREAM_CODEC, s -> new SkinTexture(s.texture(), s.model() == PlayerSkin.Model.SLIM),
+		ByteBufCodecs.STRING_UTF8, s -> s.textureUrl() == null ? "" : s.textureUrl(),
+		KLibStreamCodecs.optional(ID.STREAM_CODEC, null), PlayerSkin::capeTexture,
+		KLibStreamCodecs.optional(ID.STREAM_CODEC, null), PlayerSkin::elytraTexture,
+		(skin, textureUrl, capeTexture, elytraTexture) -> new PlayerSkin(
+			skin.texture(),
+			textureUrl.isEmpty() ? null : textureUrl,
+			capeTexture,
+			elytraTexture,
+			skin.slim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE,
+			true
+		)
+	);
+
+	DataType<PlayerSkin> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, PlayerSkin.class);
 
 	static GalleryImage<UUID> get(Minecraft mc, UUID uuid) {
 		return GALLERY.getRemote(mc, uuid, PlayerProfiles::getName, (id, n) -> PlayerProfiles.get(id).skinUrl().orElse(null), ImagePreProcessor.NONE);

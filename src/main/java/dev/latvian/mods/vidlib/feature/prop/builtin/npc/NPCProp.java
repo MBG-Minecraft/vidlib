@@ -6,28 +6,24 @@ import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingImBuilder;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
+import dev.latvian.mods.vidlib.feature.gallery.PlayerSkins;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ItemStackImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ListImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TextComponentImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.TextureImBuilder;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.prop.geo.BaseGeoProp;
-import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
-import dev.latvian.mods.vidlib.feature.skin.SkinTextureImBuilder;
 import dev.latvian.mods.vidlib.util.SpreadType;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -97,9 +93,7 @@ public class NPCProp extends BaseGeoProp {
 		PropData.createFloat(NPCProp.class, "running_distance", p -> p.runningDistance, (p, v) -> p.runningDistance = v, 0F, 200F),
 		PropData.createFloat(NPCProp.class, "render_distance", p -> p.renderDistance, (p, v) -> p.renderDistance = v, 0F, 1024F),
 		PropData.createBoolean(NPCProp.class, "random_skin", p -> p.randomSkin, (p, v) -> p.randomSkin = v),
-		PropData.createBoolean(NPCProp.class, "pick_the_skins_once", p -> p.justPickTheSkins, (p, v) -> p.justPickTheSkins = v),
-		PropData.create(NPCProp.class, "random_skins", DataTypes.GAME_PROFILE.listOf(), p -> p.randomSkinsProfiles, (p, v) -> p.randomSkinsProfiles = v, () -> new ListImBuilder<>(GameProfileImBuilder.TYPE)),
-		PropData.create(NPCProp.class, "random_skins_textures", ID.DATA_TYPE.listOf(), p -> p.randomSkins, (p, v) -> p.randomSkins = v, () -> new ListImBuilder<>(TextureImBuilder.SKIN))
+		PropData.create(NPCProp.class, "random_skins", PlayerSkins.DATA_TYPE.listOf(), p -> p.randomSkins, (p, v) -> p.randomSkins = v, () -> new ListImBuilder<>(NpcSkinImBuilder.TYPE))
 		);
 
 	public Component name;
@@ -114,9 +108,7 @@ public class NPCProp extends BaseGeoProp {
 	public float randomPitch;
 	public Clothing clothing;
 	public boolean randomSkin;
-	public boolean justPickTheSkins;
-	public List<GameProfile> randomSkinsProfiles = new ArrayList<>();
-	public List<ResourceLocation> randomSkins = new ArrayList<>();
+	public List<PlayerSkin> randomSkins = new ArrayList<>();
 	public int jumping;
 	public int punching;
 	public ItemStack mainHandItem;

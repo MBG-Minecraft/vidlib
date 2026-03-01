@@ -11,7 +11,6 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerSkins;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
-import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import dev.latvian.mods.vidlib.util.client.MultiBufferSourceOverride;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -30,7 +29,6 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.SimplexNoise;
 
 import java.util.ArrayList;
-import java.util.stream.IntStream;
 
 public class NPCPropRenderer implements PropRenderer<NPCProp> {
 	private static final PlayerSkin[] SINGLE_SKIN = {PlayerSkins.DEFAULT_WIDE_SKINS[0]};
@@ -101,13 +99,10 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 		if (!gp.getName().isEmpty() && !gp.getId().equals(Util.NIL_UUID)) {
 			SINGLE_SKIN[0] = mc.getSkinManager().getInsecureSkin(gp);
 			skins = SINGLE_SKIN;
-		} else if (p.randomSkin && (!p.randomSkinsProfiles.isEmpty() || !p.randomSkins.isEmpty())) {
-			var skinList = new ArrayList<PlayerSkin>();
-			p.randomSkinsProfiles.stream().map(mc.getSkinManager()::getInsecureSkin).forEach(skinList::add);
-			p.randomSkins.stream().map(loc -> PlayerSkins.of(new SkinTexture(loc, false))).forEach(skinList::add);
-			skins = skinList.toArray(PlayerSkin[]::new);
+		} else if (p.randomSkin && !p.randomSkins.isEmpty()) {
+			skins = p.randomSkins.toArray(PlayerSkin[]::new);
 		} else if (p.randomSkin) {
-			if (p.justPickTheSkins) {
+			/*if (p.justPickTheSkins) {
 				p.justPickTheSkins = false;
 				var profiles = new ArrayList<GameProfile>();
 				skins = PlayerSkins.GALLERY.images.keySet().stream()
@@ -116,9 +111,8 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 					.map(uuid -> PlayerSkins.getSkin(mc, uuid,  true))
 					.toArray(PlayerSkin[]::new);
 				p.randomSkinsProfiles = profiles;
-			} else {
-				skins = PlayerSkins.DEFAULT_WIDE_SKINS;
-			}
+			}*/
+			skins = PlayerSkins.DEFAULT_WIDE_SKINS;
 		} else {
 			SINGLE_SKIN[0] = PlayerSkins.DEFAULT_WIDE_SKINS[0];
 			skins = SINGLE_SKIN;
