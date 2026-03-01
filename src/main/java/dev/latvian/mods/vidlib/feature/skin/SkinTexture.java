@@ -10,6 +10,8 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.List;
+
 public record SkinTexture(ResourceLocation texture, boolean slim) {
 	public static final ResourceLocation STEVE = ID.mc("textures/entity/player/wide/steve.png");
 	public static final ResourceLocation ALEX = ID.mc("textures/entity/player/wide/alex.png");
@@ -77,4 +79,5 @@ public record SkinTexture(ResourceLocation texture, boolean slim) {
 	);
 
 	public static final DataType<SkinTexture> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, SkinTexture.class);
+	public static final DataType<List<SkinTexture>> LIST_DATA_TYPE = DATA_TYPE.listOf();
 }

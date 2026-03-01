@@ -150,6 +150,8 @@ public class BuiltInImGui {
 			}
 		}));
 
+		list.add(MenuItem.item(ImIcons.LEAF, "JVM Threads", JVMThreadsPanel.INSTANCE));
+
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.DebugDropdown(graphics, list));
 	});
 

@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.npc;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.math.Axis;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.Empty;
@@ -27,8 +26,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
 import org.joml.SimplexNoise;
-
-import java.util.ArrayList;
 
 public class NPCPropRenderer implements PropRenderer<NPCProp> {
 	private static final PlayerSkin[] SINGLE_SKIN = {PlayerSkins.DEFAULT_WIDE_SKINS[0]};
@@ -100,7 +97,7 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 			SINGLE_SKIN[0] = mc.getSkinManager().getInsecureSkin(gp);
 			skins = SINGLE_SKIN;
 		} else if (p.randomSkin && !p.randomSkins.isEmpty()) {
-			skins = p.randomSkins.toArray(PlayerSkin[]::new);
+			skins = p.randomSkins.stream().map(PlayerSkins::of).toArray(PlayerSkin[]::new);
 		} else if (p.randomSkin) {
 			skins = PlayerSkins.DEFAULT_WIDE_SKINS;
 		} else {

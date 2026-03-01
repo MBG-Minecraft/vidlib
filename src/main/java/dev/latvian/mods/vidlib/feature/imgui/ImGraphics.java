@@ -249,13 +249,15 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 	}
 
 	public void stackTrace(Throwable throwable) {
+		stackTrace(throwable.toString(), throwable.getStackTrace());
+	}
+
+	public void stackTrace(String name, StackTraceElement[] stackTrace) {
 		pushStack();
 		setErrorText();
 		setItemSpacing(0F, 0F);
 
-		var stackTrace = throwable.getStackTrace();
-
-		ImGui.textWrapped(throwable + " [" + stackTrace.length + " lines]");
+		ImGui.textWrapped((name.isEmpty() ? "[" : (name + " [")) + stackTrace.length + " lines]");
 
 		for (var e : stackTrace) {
 			int cni = e.getClassName().lastIndexOf('.');

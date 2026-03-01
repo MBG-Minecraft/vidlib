@@ -12,7 +12,6 @@ import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingImBuilder;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
-import dev.latvian.mods.vidlib.feature.gallery.PlayerSkins;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ItemStackImBuilder;
@@ -22,8 +21,9 @@ import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.prop.geo.BaseGeoProp;
+import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
+import dev.latvian.mods.vidlib.feature.skin.SkinTextureImBuilder;
 import dev.latvian.mods.vidlib.util.SpreadType;
-import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -97,7 +97,7 @@ public class NPCProp extends BaseGeoProp {
 		PropData.createFloat(NPCProp.class, "render_distance", p -> p.renderDistance, (p, v) -> p.renderDistance = v, 0F, 1024F),
 		PropData.createFloat(NPCProp.class, "additional_head_yaw", p -> p.additionalHeadYaw, (p, v) -> p.additionalHeadYaw = v, -90F, 90F),
 		PropData.createBoolean(NPCProp.class, "random_skin", p -> p.randomSkin, (p, v) -> p.randomSkin = v),
-		PropData.create(NPCProp.class, "random_skins", PlayerSkins.DATA_TYPE.listOf(), p -> p.randomSkins, (p, v) -> p.randomSkins = v, NpcSkinImBuilder::new)
+		PropData.create(NPCProp.class, "random_skins", SkinTexture.LIST_DATA_TYPE, p -> p.randomSkins, (p, v) -> p.randomSkins = v, () -> new ListImBuilder<>(SkinTextureImBuilder.TYPE))
 	);
 
 	public static NPCProp createCloneFrom(Player player) {
@@ -116,7 +116,7 @@ public class NPCProp extends BaseGeoProp {
 	public float randomPitch;
 	public Clothing clothing;
 	public boolean randomSkin;
-	public List<PlayerSkin> randomSkins = new ArrayList<>();
+	public List<SkinTexture> randomSkins = new ArrayList<>();
 	public int jumping;
 	public int punching;
 	public ItemStack mainHandItem;
