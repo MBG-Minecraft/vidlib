@@ -95,9 +95,9 @@ public class NPCProp extends BaseGeoProp {
 		PropData.createBoolean(NPCProp.class, "breathing", p -> p.breathing, (p, v) -> p.breathing = v),
 		PropData.createFloat(NPCProp.class, "running_distance", p -> p.runningDistance, (p, v) -> p.runningDistance = v, 0F, 200F),
 		PropData.createFloat(NPCProp.class, "render_distance", p -> p.renderDistance, (p, v) -> p.renderDistance = v, 0F, 1024F),
+		PropData.createFloat(NPCProp.class, "additional_head_yaw", p -> p.additionalHeadYaw, (p, v) -> p.additionalHeadYaw = v, -90F, 90F),
 		PropData.createBoolean(NPCProp.class, "random_skin", p -> p.randomSkin, (p, v) -> p.randomSkin = v),
-		PropData.create(NPCProp.class, "random_skins", PlayerSkins.DATA_TYPE.listOf(), p -> p.randomSkins, (p, v) -> p.randomSkins = v, () -> new ListImBuilder<>(NpcSkinImBuilder.TYPE)),
-		PropData.createFloat(NPCProp.class, "additional_head_yaw", p -> p.additionalHeadYaw, (p, v) -> p.additionalHeadYaw = v, -90F, 90F)
+		PropData.create(NPCProp.class, "random_skins", PlayerSkins.DATA_TYPE.listOf(), p -> p.randomSkins, (p, v) -> p.randomSkins = v, NpcSkinImBuilder::new)
 	);
 
 	public static NPCProp createCloneFrom(Player player) {

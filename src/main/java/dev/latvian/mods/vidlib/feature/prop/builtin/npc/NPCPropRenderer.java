@@ -102,16 +102,6 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 		} else if (p.randomSkin && !p.randomSkins.isEmpty()) {
 			skins = p.randomSkins.toArray(PlayerSkin[]::new);
 		} else if (p.randomSkin) {
-			/*if (p.justPickTheSkins) {
-				p.justPickTheSkins = false;
-				var profiles = new ArrayList<GameProfile>();
-				skins = PlayerSkins.GALLERY.images.keySet().stream()
-					.limit(p.count)
-					.peek(uuid -> profiles.add(PlayerProfiles.get(uuid).profile()))
-					.map(uuid -> PlayerSkins.getSkin(mc, uuid, true))
-					.toArray(PlayerSkin[]::new);
-				p.randomSkinsProfiles = profiles;
-			}*/
 			skins = PlayerSkins.DEFAULT_WIDE_SKINS;
 		} else {
 			SINGLE_SKIN[0] = PlayerSkins.DEFAULT_WIDE_SKINS[0];

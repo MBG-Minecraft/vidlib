@@ -20,14 +20,29 @@ public abstract class CollectionImBuilder<T, C extends Collection<T>> implements
 
 	@Override
 	public void set(C value) {
-		items.clear();
+		if (value == null || value.isEmpty()) {
+			items.clear();
+			return;
+		}
 
-		if (value != null && !value.isEmpty()) {
-			for (var item : value) {
+		int newSize = value.size();
+
+		// Shrink if needed
+		while (items.size() > newSize) {
+			items.removeLast();
+		}
+
+		// Reuse existing builders and add new ones as needed
+		int i = 0;
+		for (var item : value) {
+			if (i < items.size()) {
+				items.get(i).set(item);
+			} else {
 				var builder = type.get();
 				builder.set(item);
 				items.add(builder);
 			}
+			i++;
 		}
 	}
 
@@ -54,6 +69,8 @@ public abstract class CollectionImBuilder<T, C extends Collection<T>> implements
 
 			if (!(item instanceof ListButtonImBuilder)) {
 				graphics.redTextIf("#" + (i + 1), !item.isValid());
+				ImGui.sameLine();
+				ImGui.dummy(1, 0);
 				ImGui.sameLine();
 				graphics.pushStack();
 				graphics.setRedButton();
@@ -88,6 +105,7 @@ public abstract class CollectionImBuilder<T, C extends Collection<T>> implements
 			}
 
 			ImGui.popID();
+			ImGui.spacing();
 		}
 
 		if (delete != -1) {
@@ -102,7 +120,7 @@ public abstract class CollectionImBuilder<T, C extends Collection<T>> implements
 			}
 		}
 
-		if (ImGui.button(ImIcons.ADD + " Add###add-item")) {
+		if (ImGui.button(ImIcons.ADD + " Add ###add-item")) {
 			var builder = type.get();
 			builder.set(builder.build());
 			items.add(builder);
