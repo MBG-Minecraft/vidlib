@@ -32,9 +32,7 @@ public class NpcSkinImBuilder extends ListImBuilder<SkinTexture> {
 		if (ImGui.button("Randomly Grab###randomly-grab")) {
 			items.clear();
 			TextureSet textures = new TextureSet(randomGrabFrom.build());
-			var list = textures.get(graphics.mc);
-			Collections.shuffle(list);
-			list.forEach(item -> {
+			textures.get(graphics.mc).forEach(item -> {
 				var builder = new SkinTextureImBuilder();
 				builder.texture.set(item);
 				items.add(builder);
