@@ -76,6 +76,6 @@ public class ProgressQueue {
 	}
 
 	public boolean isCancelled() {
-		return canCancel && !open.get();
+		return !open.get();
 	}
 }

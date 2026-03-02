@@ -16,6 +16,10 @@ public class ProgressingInputStream extends FilterInputStream {
 
 	@Override
 	public int read() throws IOException {
+		if (progressItem.queue().isCancelled()) {
+			throw new ProgressCancelledException(progressItem);
+		}
+
 		int result = super.read();
 
 		if (result != -1) {
@@ -27,6 +31,10 @@ public class ProgressingInputStream extends FilterInputStream {
 
 	@Override
 	public int read(@NonNull byte[] b) throws IOException {
+		if (progressItem.queue().isCancelled()) {
+			throw new ProgressCancelledException(progressItem);
+		}
+
 		int result = super.read(b);
 		progressItem.addProgress(result);
 		return result;
@@ -34,6 +42,10 @@ public class ProgressingInputStream extends FilterInputStream {
 
 	@Override
 	public int read(@NonNull byte[] b, int off, int len) throws IOException {
+		if (progressItem.queue().isCancelled()) {
+			throw new ProgressCancelledException(progressItem);
+		}
+
 		int result = super.read(b, off, len);
 		progressItem.addProgress(result);
 		return result;
@@ -41,6 +53,10 @@ public class ProgressingInputStream extends FilterInputStream {
 
 	@Override
 	public long skip(long n) throws IOException {
+		if (progressItem.queue().isCancelled()) {
+			throw new ProgressCancelledException(progressItem);
+		}
+
 		long result = super.skip(n);
 		progressItem.addProgress(result);
 		return result;

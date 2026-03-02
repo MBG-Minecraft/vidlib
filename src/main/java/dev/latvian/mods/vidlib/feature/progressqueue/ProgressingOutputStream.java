@@ -16,18 +16,30 @@ public class ProgressingOutputStream extends FilterOutputStream {
 
 	@Override
 	public void write(int b) throws IOException {
+		if (progressItem.queue().isCancelled()) {
+			throw new ProgressCancelledException(progressItem);
+		}
+
 		super.write(b);
 		progressItem.addProgress(1L);
 	}
 
 	@Override
 	public void write(@NotNull byte[] b) throws IOException {
+		if (progressItem.queue().isCancelled()) {
+			throw new ProgressCancelledException(progressItem);
+		}
+
 		super.write(b);
 		progressItem.addProgress(b.length);
 	}
 
 	@Override
 	public void write(@NotNull byte[] b, int off, int len) throws IOException {
+		if (progressItem.queue().isCancelled()) {
+			throw new ProgressCancelledException(progressItem);
+		}
+
 		super.write(b, off, len);
 		progressItem.addProgress(len);
 	}
