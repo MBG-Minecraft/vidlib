@@ -842,4 +842,8 @@ public class ClientGameEngine {
 	public boolean imGuiWarpMenu(ImGraphics graphics) {
 		return true;
 	}
+
+	public boolean uploadReplaysSequentially() {
+		return true;
+	}
 }

@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.progressqueue;
 
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
-import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiWindowFlags;
@@ -68,12 +67,10 @@ public class ProgressQueueImGui {
 				| ImGuiWindowFlags.AlwaysAutoResize
 				| ImGuiWindowFlags.NoSavedSettings;
 
-			ImGuiUtils.BOOLEAN.set(true);
-
 			var windowId = queue.topText + "###progress-queue-" + queueCount;
 
-			if (queue.errors.isEmpty() ? ImGui.begin(windowId, flags) : ImGui.begin(windowId, ImGuiUtils.BOOLEAN, flags)) {
-				if (!ImGuiUtils.BOOLEAN.get()) {
+			if (queue.canCancel || !queue.errors.isEmpty() ? ImGui.begin(windowId, queue.open, flags) : ImGui.begin(windowId, flags)) {
+				if (!queue.open.get()) {
 					queue.errors.clear();
 				}
 

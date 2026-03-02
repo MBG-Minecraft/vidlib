@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.feature.progressqueue;
 
+import imgui.type.ImBoolean;
+
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -42,6 +44,8 @@ public class ProgressQueue {
 	public String bottomText;
 	public final Deque<String> errors;
 	public boolean hideInGame;
+	public boolean canCancel;
+	public final ImBoolean open;
 
 	public ProgressQueue() {
 		this.items = new ConcurrentLinkedDeque<>();
@@ -49,6 +53,8 @@ public class ProgressQueue {
 		this.bottomText = "";
 		this.errors = new ConcurrentLinkedDeque<>();
 		this.hideInGame = false;
+		this.canCancel = false;
+		this.open = new ImBoolean(true);
 	}
 
 	public ProgressItem addItem(ProgressItemNameFunction nameFunction) {
@@ -67,5 +73,9 @@ public class ProgressQueue {
 
 	public void display() {
 		ACTIVE.add(this);
+	}
+
+	public boolean isCancelled() {
+		return canCancel && !open.get();
 	}
 }
