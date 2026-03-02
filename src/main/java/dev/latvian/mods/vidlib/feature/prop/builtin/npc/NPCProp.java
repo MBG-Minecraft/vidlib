@@ -15,14 +15,12 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ItemStackImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ListImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TextComponentImBuilder;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.prop.geo.BaseGeoProp;
 import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
-import dev.latvian.mods.vidlib.feature.skin.SkinTextureImBuilder;
 import dev.latvian.mods.vidlib.util.SpreadType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -82,6 +80,10 @@ public class NPCProp extends BaseGeoProp {
 		PropData.createFloat(NPCProp.class, "random_offset", p -> p.randomOffset, (p, v) -> p.randomOffset = v, 0F, 50F),
 		PropData.createFloat(NPCProp.class, "random_yaw", p -> p.randomYaw, (p, v) -> p.randomYaw = v, 0F, 180F),
 		PropData.createFloat(NPCProp.class, "random_head_pitch", p -> p.randomPitch, (p, v) -> p.randomPitch = v, 0F, 90F),
+		PropData.createFloat(NPCProp.class, "rotation", p -> p.rotation, (p, v) -> {
+			p.rotation = v;
+			p.instances = null;
+		}, 0F, 360F),
 		PropData.create(NPCProp.class, "clothing", Clothing.DATA_TYPE, p -> p.clothing, (p, v) -> p.clothing = v, ClothingImBuilder.TYPE),
 		PropData.createInt(NPCProp.class, "jumping", p -> p.jumping, (p, v) -> p.jumping = v, 0, 100),
 		PropData.createInt(NPCProp.class, "punching", p -> p.punching, (p, v) -> p.punching = v, 0, 100),
@@ -129,6 +131,7 @@ public class NPCProp extends BaseGeoProp {
 	public boolean breathing;
 	public float runningDistance;
 	public float additionalHeadYaw;
+	public float rotation;
 
 	public float renderDistance = 256F;
 	public NPCInstance[] instances;
@@ -274,7 +277,7 @@ public class NPCProp extends BaseGeoProp {
 			if (count <= 1) {
 				spreadPositions = new Vector2f[]{Identity.UNSAFE_VEC_2};
 			} else {
-				spreadPositions = spread.spread(Math.clamp(count, 1, 10000));
+				spreadPositions = spread.spread(Math.clamp(count, 1, 10000), rotation);
 			}
 
 			arr = new NPCInstance[spreadPositions.length];
