@@ -97,7 +97,7 @@ public class NPCProp extends BaseGeoProp {
 		PropData.createFloat(NPCProp.class, "render_distance", p -> p.renderDistance, (p, v) -> p.renderDistance = v, 0F, 1024F),
 		PropData.createFloat(NPCProp.class, "additional_head_yaw", p -> p.additionalHeadYaw, (p, v) -> p.additionalHeadYaw = v, -90F, 90F),
 		PropData.createBoolean(NPCProp.class, "random_skin", p -> p.randomSkin, (p, v) -> p.randomSkin = v),
-		PropData.create(NPCProp.class, "random_skins", SkinTexture.LIST_DATA_TYPE, p -> p.randomSkins, (p, v) -> p.randomSkins = v, () -> new ListImBuilder<>(SkinTextureImBuilder.TYPE))
+		PropData.create(NPCProp.class, "random_skins", SkinTexture.LIST_DATA_TYPE, p -> p.randomSkins, (p, v) -> p.randomSkins = v, NpcSkinImBuilder::new)
 	);
 
 	public static NPCProp createCloneFrom(Player player) {
