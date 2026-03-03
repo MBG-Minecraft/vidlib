@@ -631,7 +631,7 @@ public class Prop {
 
 		ImGui.sameLine();
 
-		if (ImGui.button(ImIcons.COPY + "###copy-id")) {
+		if (ImGui.button(ImIcons.DATABASE + "###copy-id")) {
 			ImGui.setClipboardText(getIdString());
 		}
 
@@ -639,7 +639,15 @@ public class Prop {
 
 		ImGui.sameLine();
 
-		if (graphics.smallButton("TP To", ImColorVariant.DARK_PURPLE)) {
+		if (graphics.button(ImIcons.COPY + "###copy-json", ImColorVariant.LIME)) {
+			ImGui.setClipboardText(getDataJson(level.jsonOps()).toString());
+		}
+
+		ImGuiUtils.hoveredTooltip("Copy JSON");
+
+		ImGui.sameLine();
+
+		if (graphics.smallButton("Teleport", ImColorVariant.DARK_PURPLE)) {
 			graphics.mc.runClientCommand("tp @s " + pos.x + " " + pos.y + " " + pos.z);
 		}
 
