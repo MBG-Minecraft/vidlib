@@ -58,7 +58,7 @@ public interface PlayerBodies {
 			.createCompositeState(false)
 	);
 
-	GalleryImageImBuilder.Uploader<UUID> UPLOADER = new GalleryImageImBuilder.Uploader<>() {
+	GalleryUploader<UUID> UPLOADER = new GalleryUploader<>() {
 		public static final GameProfileImBuilder UNIT = new GameProfileImBuilder();
 
 		@Override

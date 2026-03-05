@@ -2,17 +2,24 @@ package dev.latvian.mods.vidlib.feature.pin;
 
 import dev.latvian.mods.klib.math.DistanceComparator;
 import dev.latvian.mods.klib.texture.UV;
+import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.gallery.Gallery;
+import dev.latvian.mods.vidlib.feature.gallery.GalleryFileUploader;
 import dev.latvian.mods.vidlib.feature.gallery.GalleryImageImBuilder;
+import dev.latvian.mods.vidlib.feature.gallery.GalleryUploader;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerBodies;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerHeads;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color3ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.util.PathIDGenerator;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
@@ -41,12 +48,18 @@ public interface Pins {
 	Gallery<UUID> GALLERY = Gallery.ofUUIDKey("pins", () -> VidLibPaths.USER.get().resolve("pin-gallery"), TriState.TRUE);
 
 	ImagePreProcessor PRE_PROCESSOR = ImagePreProcessor.FIT_SQUARE.andThen(ImagePreProcessor.CLOSEST_4);
-	GalleryImageImBuilder.Uploader<UUID> UPLOADER = new GalleryImageImBuilder.FileUploader<>(GALLERY, UUID::randomUUID, PRE_PROCESSOR);
+	GalleryUploader<UUID> UPLOADER = new GalleryFileUploader<>(GALLERY, PathIDGenerator.RANDOM_UUID, PRE_PROCESSOR);
 
-	GalleryImageImBuilder<UUID> IMAGE_IM_BUILDER = new GalleryImageImBuilder<>(
-		List.of(GALLERY, PlayerBodies.GALLERY, PlayerHeads.GALLERY),
-		List.of(UPLOADER, PlayerBodies.UPLOADER, PlayerHeads.UPLOADER)
-	);
+	List<Gallery<UUID>> PIN_GALLERIES = new ArrayList<>(List.of(GALLERY, PlayerBodies.GALLERY, PlayerHeads.GALLERY));
+	List<GalleryUploader<UUID>> PIN_UPLOADERS = new ArrayList<>(List.of(UPLOADER, PlayerBodies.UPLOADER, PlayerHeads.UPLOADER));
+	Lazy<GalleryImageImBuilder<UUID>> IMAGE_IM_BUILDER = Lazy.of(() -> new GalleryImageImBuilder<>(PIN_GALLERIES, PIN_UPLOADERS));
+
+	MenuItem MENU_ITEM = MenuItem.menu(ImIcons.LOCATION, "Pins", (graphics, items) -> {
+		items.add(MenuItem.item(ImIcon.NONE, "Enabled", ENABLED));
+		items.add(MenuItem.sliderFloat("Size", PIN_SIZE::get, PIN_SIZE::set, 0F, 1024F));
+		items.add(MenuItem.sliderFloat("Offset", PIN_OFFSET::get, PIN_OFFSET::set, 0F, 1F));
+		items.add(MenuItem.sliderInt("Alpha", PIN_ALPHA::get, PIN_ALPHA::set, 1, 255));
+	});
 
 	static void draw(GuiGraphics graphics, DeltaTracker deltaTracker) {
 		if (!ENABLED.get() || PINS.isEmpty()) {
@@ -129,22 +142,24 @@ public interface Pins {
 
 		ImGui.sameLine();
 
-		IMAGE_IM_BUILDER.set(pin == null ? null : pin.getImage());
+		var imageImBuilder = IMAGE_IM_BUILDER.get();
 
-		if (IMAGE_IM_BUILDER.imguiKey(graphics, "", "pin-image").isFull()) {
+		imageImBuilder.set(pin == null ? null : pin.getImage());
+
+		if (imageImBuilder.imguiKey(graphics, "", "pin-image").isFull()) {
 			if (pin == null) {
 				pin = new Pin(entity.getUUID());
 				PINS.put(pin.uuid, pin);
 			}
 
-			pin.setImage(IMAGE_IM_BUILDER.isValid() ? IMAGE_IM_BUILDER.build() : null);
+			pin.setImage(imageImBuilder.isValid() ? imageImBuilder.build() : null);
 
 			if (pin.isSet()) {
 				pin.enabled = true;
 			}
 		}
 
-		IMAGE_IM_BUILDER.set(null);
+		imageImBuilder.set(null);
 
 		if (pin != null && pin.isSet()) {
 			ImGui.sameLine();
@@ -171,10 +186,17 @@ public interface Pins {
 
 			if (ImGui.isItemHovered()) {
 				ImGui.beginTooltip();
-				ImGui.text("Shape: " + (pin.shape.ordinal() + 1));
+				ImGui.text("Shape: " + pin.shape.displayName);
 				ImGui.image(graphics.mc.getTextureManager().getTexture(pin.shape.iconTexture).getTexture().vl$getHandle(), 64F, 64F);
 				ImGui.endTooltip();
 			}
 		}
+	}
+
+	static void fbVisualsMenu(ImGraphics graphics) {
+		ImGui.checkbox("Enabled###pins-enabled", ENABLED);
+		ImGui.sliderFloat("Pin Size###pin-size", PIN_SIZE.getData(), 0F, 1024F);
+		ImGui.sliderFloat("Pin Offset###pin-offset", PIN_OFFSET.getData(), 0F, 1F);
+		ImGui.sliderInt("Pin Alpha###pin-alpha", PIN_ALPHA.getData(), 1, 255);
 	}
 }

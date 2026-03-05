@@ -1,75 +1,25 @@
 package dev.latvian.mods.vidlib.feature.gallery;
 
 import dev.latvian.mods.klib.texture.UV;
-import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
-import dev.latvian.mods.vidlib.feature.imgui.AsyncFileSelector;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import imgui.ImGui;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 public class GalleryImageImBuilder<K> implements ImBuilder<GalleryImage<K>> {
-	public interface Uploader<K> {
-		ResourceLocation getIcon();
-
-		String getTooltip();
-
-		default ImColorVariant getColor() {
-			return ImColorVariant.GREEN;
-		}
-
-		void render(GalleryImageImBuilder<K> builder, ImGraphics graphics, boolean clicked);
-	}
-
-	public record FileUploader<K>(Gallery<K> gallery, Supplier<K> randomId, ImagePreProcessor preProcessor) implements Uploader<K> {
-		@Override
-		public ResourceLocation getIcon() {
-			return VidLibTextures.FOLDER;
-		}
-
-		@Override
-		public String getTooltip() {
-			return "Open";
-		}
-
-		@Override
-		public void render(GalleryImageImBuilder builder, ImGraphics graphics, boolean clicked) {
-			if (clicked) {
-				AsyncFileSelector.openFileDialog(null, "Select Pin Image", "png").thenAccept(pathString -> {
-					var path = pathString == null ? null : Path.of(pathString);
-
-					if (path != null && Files.exists(path) && Files.isRegularFile(path)) {
-						graphics.mc.execute(() -> {
-							try {
-								builder.set(gallery.upload(graphics.mc, randomId.get(), path, preProcessor));
-								builder.fullUpdate = true;
-							} catch (Exception ex) {
-								throw new RuntimeException(ex);
-							}
-						});
-					}
-				});
-			}
-		}
-	}
-
 	public final List<Gallery<K>> galleries;
-	public final List<Uploader<K>> uploaders;
+	public final List<GalleryUploader<K>> uploaders;
 	public GalleryImage<K> selected;
 	public boolean fullUpdate = false;
 
-	public GalleryImageImBuilder(List<Gallery<K>> galleries, List<Uploader<K>> uploaders) {
+	public GalleryImageImBuilder(List<Gallery<K>> galleries, List<GalleryUploader<K>> uploaders) {
 		this.galleries = galleries;
 		this.uploaders = uploaders;
 	}

@@ -4,6 +4,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.resources.ResourceLocation;
 
 public interface VidLibTextures {
+	ResourceLocation SQUARE = ResourceLocation.withDefaultNamespace("textures/misc/white.png");
 	ResourceLocation CIRCLE = VidLib.id("textures/misc/circle.png");
 	ResourceLocation DEFAULT_MARKER = VidLib.id("textures/misc/default_marker.png");
 	ResourceLocation DEFAULT_PLAYER_BODY = VidLib.id("textures/misc/default_player_body.png");
