@@ -15,8 +15,6 @@ import imgui.ImGui;
 import imgui.type.ImInt;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.Collections;
-
 public class NpcSkinImBuilder extends ListImBuilder<SkinTexture> {
 	private final ListImBuilder<String> randomGrabFrom = new ListImBuilder<>(StringImBuilder.TYPE);
 	private final ImInt randomCount = new ImInt(10);
@@ -32,11 +30,13 @@ public class NpcSkinImBuilder extends ListImBuilder<SkinTexture> {
 		if (ImGui.button("Randomly Grab###randomly-grab")) {
 			items.clear();
 			TextureSet textures = new TextureSet(randomGrabFrom.build());
-			textures.get(graphics.mc).forEach(item -> {
-				var builder = new SkinTextureImBuilder();
-				builder.texture.set(item);
-				items.add(builder);
-			});
+			textures.get(graphics.mc).stream()
+				.limit(randomCount.get())
+				.forEach(item -> {
+					var builder = new SkinTextureImBuilder();
+					builder.texture.set(item);
+					items.add(builder);
+				});
 
 			super.imgui(graphics);
 			return ImUpdate.FULL;
