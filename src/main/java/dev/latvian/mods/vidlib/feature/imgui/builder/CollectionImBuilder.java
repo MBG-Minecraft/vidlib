@@ -26,8 +26,6 @@ public abstract class CollectionImBuilder<T, C extends Collection<T>> implements
 		}
 
 		int newSize = value.size();
-
-		// Shrink if needed
 		while (items.size() > newSize) {
 			items.removeLast();
 		}
@@ -53,6 +51,9 @@ public abstract class CollectionImBuilder<T, C extends Collection<T>> implements
 		int delete = -1;
 		int moveUp = -1;
 		int moveDown = -1;
+
+		// This is so that two different ListImBuilders don't interfere with each other
+		ImGui.pushID(System.identityHashCode(this));
 
 		for (int i = 0; i < items.size(); i++) {
 			ImGui.pushID(i);
@@ -120,6 +121,7 @@ public abstract class CollectionImBuilder<T, C extends Collection<T>> implements
 			}
 		}
 
+
 		if (ImGui.button(ImIcons.ADD + " Add ###add-item")) {
 			var builder = type.get();
 			builder.set(builder.build());
@@ -127,6 +129,7 @@ public abstract class CollectionImBuilder<T, C extends Collection<T>> implements
 			update = ImUpdate.FULL;
 		}
 
+		ImGui.popID();
 		return update;
 	}
 

@@ -36,7 +36,9 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class NPCProp extends BaseGeoProp {
 	public static final Pose[] POSES = Pose.values();
@@ -99,7 +101,7 @@ public class NPCProp extends BaseGeoProp {
 		PropData.createFloat(NPCProp.class, "render_distance", p -> p.renderDistance, (p, v) -> p.renderDistance = v, 0F, 1024F),
 		PropData.createFloat(NPCProp.class, "additional_head_yaw", p -> p.additionalHeadYaw, (p, v) -> p.additionalHeadYaw = v, -90F, 90F),
 		PropData.createBoolean(NPCProp.class, "random_skin", p -> p.randomSkin, (p, v) -> p.randomSkin = v),
-		PropData.create(NPCProp.class, "random_skins", SkinTexture.LIST_DATA_TYPE, p -> p.randomSkins, (p, v) -> p.randomSkins = v, NpcSkinImBuilder::new)
+		PropData.create(NPCProp.class, "random_skins", SkinTexture.SET_DATA_TYPE, p -> p.randomSkins, (p, v) -> p.randomSkins = v, NpcSkinImBuilder::new)
 	);
 
 	public static NPCProp createCloneFrom(Player player) {
@@ -118,7 +120,7 @@ public class NPCProp extends BaseGeoProp {
 	public float randomPitch;
 	public Clothing clothing;
 	public boolean randomSkin;
-	public List<SkinTexture> randomSkins = new ArrayList<>();
+	public Set<SkinTexture> randomSkins = new HashSet<>();
 	public int jumping;
 	public int punching;
 	public ItemStack mainHandItem;
@@ -147,7 +149,7 @@ public class NPCProp extends BaseGeoProp {
 		this.count = 1;
 		this.spread = SpreadType.FILLED_SQUARE;
 		this.spreadRadius = 16F;
-		this.randomOffset = 0.65F;
+		this.randomOffset = 0F;
 		this.randomYaw = 0F;
 		this.randomPitch = 0F;
 		this.clothing = Clothing.NONE;

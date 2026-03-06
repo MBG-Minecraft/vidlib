@@ -25,6 +25,7 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import org.joml.SimplexNoise;
 
 public class NPCPropRenderer implements PropRenderer<NPCProp> {
@@ -126,6 +127,21 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 
 		playerRenderState.walkAnimationSpeed = p.runningDistance > 0F ? 1F : 0F;
 
+		// Build a shuffled skin index array so no skin is ever duplicated.
+		// Seeded from the prop position so it's stable across frames.
+		var skinIndices = new int[instances.length];
+		for (int i = 0; i < instances.length; i++) {
+			skinIndices[i] = i % skins.length;
+		}
+		var rng = new XoroshiroRandomSource(Double.doubleToLongBits(p.pos.x), Double.doubleToLongBits(p.pos.z));
+		for (int i = skinIndices.length - 1; i > 0; i--) {
+			int j = (int) (rng.nextLong() % (i + 1));
+			if (j < 0) j += i + 1;
+			int tmp = skinIndices[i];
+			skinIndices[i] = skinIndices[j];
+			skinIndices[j] = tmp;
+		}
+
 		for (int i = 0; i < instances.length; i++) {
 			var npc = instances[i];
 			ms.pushPose();
@@ -142,7 +158,7 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 			playerRenderState.yRot = 0F;
 			playerRenderState.bodyRot = yaw + KMath.lerp(npc.randomYaw, -p.randomYaw, p.randomYaw);
 			playerRenderState.xRot = pitch + KMath.lerp(npc.randomPitch, -p.randomPitch, p.randomPitch);
-			playerRenderState.skin = skins[npc.profile % skins.length];
+			playerRenderState.skin = skins[skinIndices[i]];
 			playerRenderState.attackArm = HumanoidArm.RIGHT;
 			playerRenderState.attackTime = KMath.lerp(delta, npc.prevPunching, npc.punching) / 6F;
 			playerRenderState.ticksUsingItem = 0;

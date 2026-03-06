@@ -11,6 +11,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
+import java.util.Set;
 
 public record SkinTexture(ResourceLocation texture, boolean slim) {
 	public static final ResourceLocation STEVE = ID.mc("textures/entity/player/wide/steve.png");
@@ -80,4 +81,5 @@ public record SkinTexture(ResourceLocation texture, boolean slim) {
 
 	public static final DataType<SkinTexture> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, SkinTexture.class);
 	public static final DataType<List<SkinTexture>> LIST_DATA_TYPE = DATA_TYPE.listOf();
+	public static final DataType<Set<SkinTexture>> SET_DATA_TYPE = DATA_TYPE.setOf();
 }
