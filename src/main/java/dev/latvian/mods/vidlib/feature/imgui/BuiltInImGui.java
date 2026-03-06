@@ -18,6 +18,7 @@ import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
+import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueueImGui;
@@ -100,6 +101,10 @@ public class BuiltInImGui {
 			menuItems.add(MenuItem.menu(ImIcons.SHIELD, "Entity Armor", LevelOfDetailValue.ENTITY_ARMOR));
 			menuItems.add(MenuItem.menu(ImIcons.FIRE, "Block Entities", LevelOfDetailValue.BLOCK_ENTITIES));
 		}));
+
+		if (!graphics.isReplay) {
+			list.add(Pins.MENU_ITEM.enabled(graphics.isAdmin));
+		}
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.ConfigDropdown(graphics, list));
 	});

@@ -58,6 +58,10 @@ public class LevelOfDetailValue {
 		return distance;
 	}
 
+	public final float getDistanceFloat() {
+		return (float) getDistance();
+	}
+
 	public boolean canBeAlways() {
 		return canBeAlways;
 	}

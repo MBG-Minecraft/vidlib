@@ -1,7 +1,9 @@
 package dev.latvian.mods.vidlib.feature.pin;
 
 import com.google.gson.JsonObject;
-import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.feature.gallery.Gallery;
 import dev.latvian.mods.vidlib.feature.gallery.GalleryImage;
@@ -14,6 +16,16 @@ public final class Pin {
 	public static final Color DEFAULT_COLOR = Color.of(0xFFFFFF);
 	public static final Color DEFAULT_BACKGROUND = Color.of(0x5A000000);
 
+	public static final Codec<Pin> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+		KLibCodecs.UUID.fieldOf("uuid").forGetter(p -> p.uuid),
+		Codec.BOOL.optionalFieldOf("enabled", true).forGetter(p -> p.enabled),
+		Codec.STRING.optionalFieldOf("gallery", "").forGetter(p -> p.gallery),
+		KLibCodecs.UUID.optionalFieldOf("texture", Util.NIL_UUID).forGetter(p -> p.texture),
+		Color.SOLID_CODEC.optionalFieldOf("color", DEFAULT_COLOR).forGetter(p -> p.color),
+		Color.CODEC.optionalFieldOf("background", DEFAULT_BACKGROUND).forGetter(p -> p.background),
+		PinShape.CODEC.optionalFieldOf("shape", PinShape.PIN).forGetter(p -> p.shape)
+	).apply(instance, Pin::new));
+
 	public final UUID uuid;
 	public boolean enabled;
 	public String gallery;
@@ -25,21 +37,29 @@ public final class Pin {
 	public Pin(UUID uuid) {
 		this.uuid = uuid;
 		this.enabled = true;
-		this.gallery = "pins";
+		this.gallery = "";
 		this.texture = Util.NIL_UUID;
 		this.color = DEFAULT_COLOR;
 		this.background = DEFAULT_BACKGROUND;
-		this.shape = PinShape.S1;
+		this.shape = PinShape.PIN;
 	}
 
-	public Pin(JsonObject json) {
-		this.uuid = UUID.fromString(json.get("uuid").getAsString());
-		this.enabled = !json.has("enabled") || json.get("enabled").getAsBoolean();
-		this.gallery = json.has("gallery") ? json.get("gallery").getAsString() : "";
-		this.texture = json.has("texture") ? UUID.fromString(json.get("texture").getAsString()) : Util.NIL_UUID;
-		this.color = json.has("color") ? Color.SOLID_CODEC.parse(JsonOps.INSTANCE, json.get("color")).resultOrPartial().orElse(DEFAULT_COLOR) : DEFAULT_COLOR;
-		this.background = json.has("background") ? Color.CODEC.parse(JsonOps.INSTANCE, json.get("background")).resultOrPartial().orElse(DEFAULT_BACKGROUND) : DEFAULT_BACKGROUND;
-		this.shape = json.has("shape") ? PinShape.VALUES[json.get("shape").getAsInt()] : PinShape.S1;
+	public Pin(
+		UUID uuid,
+		boolean enabled,
+		String gallery,
+		UUID texture,
+		Color color,
+		Color background,
+		PinShape shape
+	) {
+		this.uuid = uuid;
+		this.enabled = enabled;
+		this.gallery = gallery;
+		this.texture = texture;
+		this.color = color;
+		this.background = background;
+		this.shape = shape;
 	}
 
 	public JsonObject toJson() {
@@ -50,7 +70,7 @@ public final class Pin {
 		json.addProperty("texture", texture.toString());
 		json.addProperty("color", color.toRGBString());
 		json.addProperty("background", background.toString());
-		json.addProperty("shape", shape.ordinal());
+		json.addProperty("shape", shape.id);
 		return json;
 	}
 

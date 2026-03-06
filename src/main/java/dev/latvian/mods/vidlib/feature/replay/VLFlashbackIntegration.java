@@ -235,17 +235,18 @@ public class VLFlashbackIntegration {
 		ImGuiUtils.separatorWithText("VidLib");
 
 		ImGui.pushID("vidlib");
-		ImGui.checkbox("Props", ClientProps.VISIBLE);
-		ImGui.checkbox("Physics Particles", PhysicsParticleManager.VISIBLE);
-		ImGui.checkbox("Clocks", ClockRenderer.VISIBLE);
-		ImGui.checkbox("Ghost Structures", GhostStructure.VISIBLE_CONFIG);
-		ImGui.checkbox("Bloom", Bloom.VISIBLE);
+		ImGui.pushID("###flags");
+		ImGui.checkbox("Props###props", ClientProps.VISIBLE);
+		ImGui.checkbox("Physics Particles###physics-particles", PhysicsParticleManager.VISIBLE);
+		ImGui.checkbox("Clocks###clocks", ClockRenderer.VISIBLE);
+		ImGui.checkbox("Bloom###bloom", Bloom.VISIBLE);
+		ImGui.checkbox("Ghost Structures###ghost-structures", GhostStructure.VISIBLE_CONFIG);
+		ImGui.popID();
 
 		ImGuiUtils.separatorWithText("Player Pins");
-		ImGui.checkbox("Enabled###pins-enabled", Pins.ENABLED);
-		ImGui.sliderFloat("Pin Size###pin-size", Pins.PIN_SIZE.getData(), 0F, 1024F);
-		ImGui.sliderFloat("Pin Offset###pin-offset", Pins.PIN_OFFSET.getData(), 0F, 1F);
-		ImGui.sliderInt("Pin Alpha###pin-alpha", Pins.PIN_ALPHA.getData(), 1, 255);
+		ImGui.pushID("###pins");
+		Pins.fbVisualsMenu(graphics);
+		ImGui.popID();
 
 		ImGui.popID();
 	}
@@ -281,7 +282,7 @@ public class VLFlashbackIntegration {
 			for (var e : pins) {
 				if (e instanceof JsonObject pinJson) {
 					try {
-						var pin = new Pin(pinJson);
+						var pin = Pin.CODEC.parse(JsonOps.INSTANCE, pinJson).getOrThrow();
 						Pins.PINS.put(pin.uuid, pin);
 					} catch (Throwable t) {
 						VidLib.LOGGER.error("Failed to load player pin from editor state", t);

@@ -4,16 +4,20 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.feature.imgui.config.VideoConfigPanel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.util.FloatSupplier;
 import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
 import imgui.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImBoolean;
+import it.unimi.dsi.fastutil.floats.FloatConsumer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.IntConsumer;
+import java.util.function.IntSupplier;
 
 public record MenuItem(
 	ImIcon icon,
@@ -111,15 +115,7 @@ public record MenuItem(
 			menuItems.add(item(ImIcons.NUMBERS, "Within Distance", lod.getType() == LevelOfDetailValue.Type.WITHIN_DISTANCE, g -> lod.setVisibleWithin()).remainOpen(true));
 
 			if (lod.getType() == LevelOfDetailValue.Type.WITHIN_DISTANCE) {
-				menuItems.add(custom(g -> {
-					ImGuiUtils.FLOAT.set((float) lod.getDistance());
-
-					ImGui.setNextItemWidth(-1F);
-
-					if (ImGui.dragFloat("###distance", ImGuiUtils.FLOAT.getData(), 1F, 0F, 256F)) {
-						lod.setDistance(ImGuiUtils.FLOAT.get());
-					}
-				}));
+				menuItems.add(dragFloat("", lod::getDistanceFloat, lod::setDistance, 1F, 0F, 256F));
 			}
 		});
 	}
@@ -130,6 +126,51 @@ public record MenuItem(
 
 	public static MenuItem custom(OnClick imgui) {
 		return new MenuItem(ImIcon.NONE, ImText.EMPTY, ImText.EMPTY, null, ImColorVariant.DEFAULT, FLAG_CUSTOM_IMGUI, imgui, null);
+	}
+
+	public static MenuItem dragFloat(String label, FloatSupplier getter, FloatConsumer setter, float speed, float min, float max) {
+		return custom(g -> {
+			ImGuiUtils.FLOAT.set(getter.getAsFloat());
+			ImGui.setNextItemWidth(-1F);
+
+			if (!label.isEmpty()) {
+				ImGui.text(label);
+			}
+
+			if (ImGui.dragFloat("###value", ImGuiUtils.FLOAT.getData(), speed, min, max)) {
+				setter.accept(ImGuiUtils.FLOAT.get());
+			}
+		});
+	}
+
+	public static MenuItem sliderFloat(String label, FloatSupplier getter, FloatConsumer setter, float min, float max) {
+		return custom(g -> {
+			ImGuiUtils.FLOAT.set(getter.getAsFloat());
+			ImGui.setNextItemWidth(-1F);
+
+			if (!label.isEmpty()) {
+				ImGui.text(label);
+			}
+
+			if (ImGui.sliderFloat("###value", ImGuiUtils.FLOAT.getData(), min, max)) {
+				setter.accept(ImGuiUtils.FLOAT.get());
+			}
+		});
+	}
+
+	public static MenuItem sliderInt(String label, IntSupplier getter, IntConsumer setter, int min, int max) {
+		return custom(g -> {
+			ImGuiUtils.INT.set(getter.getAsInt());
+			ImGui.setNextItemWidth(-1F);
+
+			if (!label.isEmpty()) {
+				ImGui.text(label);
+			}
+
+			if (ImGui.sliderInt("###value", ImGuiUtils.INT.getData(), min, max)) {
+				setter.accept(ImGuiUtils.INT.get());
+			}
+		});
 	}
 
 	public MenuItem withFlags(int add) {

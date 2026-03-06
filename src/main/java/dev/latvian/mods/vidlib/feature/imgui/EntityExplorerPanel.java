@@ -227,8 +227,10 @@ public class EntityExplorerPanel extends Panel {
 			}
 		}
 
-		if (graphics.isReplay) {
+		if (graphics.isAdmin) {
+			ImGui.pushID("###pins");
 			Pins.imgui(graphics, entity);
+			ImGui.popID();
 		}
 
 		var glowColor = graphics.session.glowColors.get(entity.getUUID());
