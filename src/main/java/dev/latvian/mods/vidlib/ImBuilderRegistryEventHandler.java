@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib;
 
 import dev.latvian.mods.klib.interpolation.InterpolationType;
+import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockAndFilter;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilderEvent;
@@ -67,7 +68,6 @@ import dev.latvian.mods.vidlib.math.kvector.ScalarKVector;
 import dev.latvian.mods.vidlib.math.kvector.ScaledKVector;
 import dev.latvian.mods.vidlib.math.kvector.VariableKVector;
 import dev.latvian.mods.vidlib.math.kvector.YRotatedKVector;
-import dev.latvian.mods.vidlib.util.StringUtils;
 import net.minecraft.core.particles.ParticleTypes;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;

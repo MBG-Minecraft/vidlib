@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.util.StringUtils;
 import imgui.ImGui;
 
 import java.util.Locale;

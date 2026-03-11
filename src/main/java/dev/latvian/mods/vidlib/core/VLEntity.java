@@ -10,7 +10,6 @@ import dev.latvian.mods.vidlib.feature.entity.S2CEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.location.Location;
-import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
@@ -268,7 +267,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		return this instanceof ItemEntity;
 	}
 
-	default void replaySnapshot(S2CPacketBundleBuilder packets) {
+	default void replaySnapshot(VLS2CPacketConsumer packets) {
 	}
 
 	default void imgui(ImGraphics graphics, float delta) {

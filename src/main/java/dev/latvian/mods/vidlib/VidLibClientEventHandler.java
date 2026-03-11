@@ -7,6 +7,8 @@ import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
 import dev.latvian.mods.klib.texture.LightUV;
 import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.klib.util.StringUtils;
+import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.BlockEntityRendererHolder;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
@@ -47,7 +49,6 @@ import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
-import dev.latvian.mods.vidlib.feature.replay.VLFlashbackIntegration;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.structure.StructureCapture;
@@ -58,9 +59,8 @@ import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
-import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
+import dev.latvian.mods.vidlib.integration.replay.VLFlashbackIntegration;
 import dev.latvian.mods.vidlib.util.NameDrawType;
-import dev.latvian.mods.vidlib.util.StringUtils;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.ChatFormatting;
@@ -80,6 +80,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
@@ -132,7 +133,7 @@ public class VidLibClientEventHandler {
 	}
 
 	public static void syncSetup() {
-		if (VLFlashbackIntegration.ENABLED) {
+		if (ModList.get().isLoaded("flashback")) {
 			VLFlashbackIntegration.init();
 		}
 
@@ -417,7 +418,7 @@ public class VidLibClientEventHandler {
 		int renderingStructures = StructureRenderer.getRenderingAll();
 
 		if (renderingStructures != 0) {
-			if (!VLFlashbackIntegration.ENABLED || !FlashbackIntegration.isExporting()) {
+			if (!ReplayAPI.getActive().isExporting()) {
 				var component = Component.empty().append(BATIcons.ERROR).append(BATIcons.SMALL_SPACE).append("Rendering " + renderingStructures + " structures...");
 
 				if (mc.player.isReplayCamera()) {

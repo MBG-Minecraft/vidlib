@@ -2,9 +2,9 @@ package dev.mrbeastgaming.hub.api;
 
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.common.CommonPaths;
+import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.util.JsonUtils;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.neoforged.fml.loading.FMLLoader;
 

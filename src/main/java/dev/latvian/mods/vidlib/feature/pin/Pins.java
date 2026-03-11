@@ -3,10 +3,12 @@ package dev.latvian.mods.vidlib.feature.pin;
 import dev.latvian.mods.klib.math.DistanceComparator;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.Lazy;
+import dev.latvian.mods.klib.util.PathIDGenerator;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
+import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.gallery.Gallery;
 import dev.latvian.mods.vidlib.feature.gallery.GalleryFileUploader;
 import dev.latvian.mods.vidlib.feature.gallery.GalleryImageImBuilder;
@@ -19,7 +21,6 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.Color3ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.util.PathIDGenerator;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
@@ -84,9 +85,11 @@ public interface Pins {
 
 		var list = new ArrayList<ScreenPin>(PINS.size());
 
-		for (var pin : PINS.values()) {
+		for (var entry : PINS.entrySet()) {
+			var pin = entry.getValue();
+
 			if (pin.enabled && pin.isSet()) {
-				var entity = level.getEntity(pin.uuid);
+				var entity = level.getEntity(entry.getKey());
 
 				if (entity != null) {
 					var img = pin.getImage();
@@ -117,15 +120,17 @@ public interface Pins {
 
 				var s = screenPin.pin().shape;
 
+				int color = s.overlayTexture == VidLibTextures.TRANSPARENT ? screenPin.pin().color.argb() : (pinAlpha | screenPin.pin().color.rgb());
+
 				screenPin.image().load(mc, true);
-				graphics.blit(VidLibRenderTypes.GUI, s.maskTexture, s.x, s.y, 0F, 0F, s.w, s.h, s.w, s.h, pinAlpha | screenPin.pin().color.rgb());
+				graphics.blit(VidLibRenderTypes.GUI, s.maskTexture, s.x, s.y, 0F, 0F, s.w, s.h, s.w, s.h, color);
 
 				if (!screenPin.pin().background.isTransparent()) {
 					graphics.blit(VidLibRenderTypes.GUI, s.maskTexture, s.x, s.y, 0F, 0F, s.w, s.h, s.w, s.h, screenPin.pin().background.withAlpha(screenPin.pin().background.alphaf() * (PIN_ALPHA.get() / 255F)).argb());
 				}
 
-				graphics.blit(s.maskedRenderType, screenPin.image().textureId(), s.x, s.y, 0F, 0F, s.w, s.h, s.w, s.h, pinAlpha | 0xFFFFFF);
-				graphics.blit(VidLibRenderTypes.GUI, s.overlayTexture, 0, 0, 0F, 0F, 512, 512, 512, 512, pinAlpha | screenPin.pin().color.rgb());
+				graphics.blit(s.maskedRenderType, screenPin.image().textureId(), s.x, s.y, 1F, 1F, s.w - 2, s.h - 2, s.w, s.h, pinAlpha | 0xFFFFFF);
+				graphics.blit(VidLibRenderTypes.GUI, s.overlayTexture, 0, 0, 0F, 0F, 512, 512, 512, 512, color);
 				graphics.pose().popPose();
 			}
 		}
@@ -148,8 +153,8 @@ public interface Pins {
 
 		if (imageImBuilder.imguiKey(graphics, "", "pin-image").isFull()) {
 			if (pin == null) {
-				pin = new Pin(entity.getUUID());
-				PINS.put(pin.uuid, pin);
+				pin = new Pin();
+				PINS.put(entity.getUUID(), pin);
 			}
 
 			pin.setImage(imageImBuilder.isValid() ? imageImBuilder.build() : null);
@@ -164,10 +169,18 @@ public interface Pins {
 		if (pin != null && pin.isSet()) {
 			ImGui.sameLine();
 
-			Color3ImBuilder.UNIT.set(pin.color);
+			if (pin.shape.overlayTexture == VidLibTextures.TRANSPARENT) {
+				Color4ImBuilder.UNIT.set(pin.color);
 
-			if (Color3ImBuilder.UNIT.imguiKey(graphics, "", "color").isAny()) {
-				pin.color = Color3ImBuilder.UNIT.build();
+				if (Color4ImBuilder.UNIT.imguiKey(graphics, "", "color").isAny()) {
+					pin.color = Color4ImBuilder.UNIT.build();
+				}
+			} else {
+				Color3ImBuilder.UNIT.set(pin.color);
+
+				if (Color3ImBuilder.UNIT.imguiKey(graphics, "", "color").isAny()) {
+					pin.color = Color3ImBuilder.UNIT.build();
+				}
 			}
 
 			ImGui.sameLine();

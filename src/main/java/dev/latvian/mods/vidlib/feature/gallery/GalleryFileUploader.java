@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.gallery;
 
+import dev.latvian.mods.klib.util.PathIDGenerator;
 import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.imgui.AsyncFileSelector;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.util.PathIDGenerator;
 import net.minecraft.resources.ResourceLocation;
 
 import java.nio.file.Files;

@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.item;
 
-import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
+import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.RegistryAccess;
@@ -43,7 +43,7 @@ public record CachedItemData(ItemStack stack, ItemKey key, VisualItemKey visualK
 			}
 		}
 
-		return new CachedItemData(stack, key, VisualItemKey.of(stack, context.registryAccess), stack.getHoverName().getString().replace(" ", "").toLowerCase(Locale.ROOT), List.copyOf(tooltip));
+		return new CachedItemData(stack, key, VisualItemKey.of(stack), stack.getHoverName().getString().replace(" ", "").toLowerCase(Locale.ROOT), List.copyOf(tooltip));
 	}
 
 	public boolean matches(CachedItemData item) {

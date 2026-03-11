@@ -21,7 +21,7 @@ public enum ModListRequestPayload implements SimplePacketPayload {
 	public static final ConfigurationTaskHolder CONFIG_TASK = new ConfigurationTaskHolder(VidLib.id("mod_list"), (channelInfo, registry) -> registry.register(ModListRequestPayload::config));
 
 	private static void config(VLConfigurationTask.Context ctx) {
-		ctx.send(ModListRequestPayload.INSTANCE.toConfigS2C());
+		ctx.send(ModListRequestPayload.INSTANCE.toS2CPacket(0L));
 	}
 
 	@Override
@@ -32,6 +32,6 @@ public enum ModListRequestPayload implements SimplePacketPayload {
 	@Override
 	public void handle(Context ctx) {
 		ctx.sessionData().setClientModListSentDuringConfig();
-		ctx.send(new ClientModListPayload(PlatformHelper.CURRENT.getModList()).toConfigC2S());
+		ctx.send(new ClientModListPayload(PlatformHelper.CURRENT.getModList()).toC2SPacket(0L));
 	}
 }

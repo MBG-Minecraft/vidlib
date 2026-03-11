@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.util.StringUtils;
 import imgui.ImGui;
 
 public class GlobalStopwatchPanel extends Panel {
@@ -24,7 +24,7 @@ public class GlobalStopwatchPanel extends Panel {
 		long stopwatchStart = graphics.mc.get(InternalServerData.GLOBAL_STOPWATCH_START);
 		boolean update = false;
 
-		long now = graphics.mc.vl$getGameTime();
+		long now = graphics.mc.getLevelGameTime();
 		long sw = stopwatch;
 
 		if (stopwatchStart != 0L) {

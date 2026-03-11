@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.capture.task;
 
+import dev.latvian.mods.klib.io.IOUtils;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
-import dev.latvian.mods.vidlib.util.IOUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

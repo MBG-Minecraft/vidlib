@@ -3,6 +3,9 @@ package dev.latvian.mods.vidlib.feature.platform;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.util.Empty;
+import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
+import dev.latvian.mods.klib.util.StringUtils;
+import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
@@ -25,13 +28,9 @@ import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
-import dev.latvian.mods.vidlib.feature.replay.ReplayMarkerData;
-import dev.latvian.mods.vidlib.feature.replay.ReplayMarkerType;
 import dev.latvian.mods.vidlib.feature.skin.PlayerSkinOverrides;
 import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
-import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
-import dev.latvian.mods.vidlib.util.StringUtils;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
@@ -68,6 +67,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.status.ServerStatus;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
@@ -727,13 +727,17 @@ public class ClientGameEngine {
 		}
 	}
 
-	public void handleRuntimeMarker(String event, @Nullable Tag tag) {
+	public void handleRuntimeMarker(ResourceKey<Level> dimension, String event, @Nullable Tag tag) {
 		// VidLib.LOGGER.info("Marker " + event + "/" + tag);
 	}
 
 	@Nullable
-	public ReplayMarkerData handleReplayMarker(String event, @Nullable Tag tag) {
-		return ReplayMarkerType.API.make(Color.WHITE, event);
+	public ReplayMarkerData handleReplayMarker(ResourceKey<Level> dimension, String event, @Nullable Tag tag) {
+		return ReplayMarkerData.builder()
+			.color(Color.MAGENTA)
+			.dimension(dimension)
+			.description(event)
+			.build();
 	}
 
 	public List<Waypoint> getWaypoints(Minecraft mc) {

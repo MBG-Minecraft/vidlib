@@ -5,6 +5,7 @@ import dev.latvian.mods.klib.interpolation.BezierPreset;
 import dev.latvian.mods.klib.interpolation.Interpolation;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.texture.UV;
+import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
@@ -32,8 +33,6 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
 import dev.latvian.mods.vidlib.math.knumber.KNumberNodeImBuilder;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
-import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
-import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.mrbeastgaming.hub.api.Countries;
 import dev.mrbeastgaming.hub.api.Country;
 import imgui.ImGui;
@@ -429,7 +428,7 @@ public class DebugWidgetPanel extends Panel {
 
 		if (mc.screen instanceof AbstractContainerScreen<?> screen && screen.getSlotUnderMouse() != null && !screen.getSlotUnderMouse().getItem().isEmpty()) {
 			currentStack = screen.getSlotUnderMouse().getItem();
-			currentStackKey = VisualItemKey.of(currentStack, mc.level == null ? MiscUtils.STATIC_REGISTRY_ACCESS : mc.level.registryAccess());
+			currentStackKey = VisualItemKey.of(currentStack);
 		}
 
 		if (currentStackKey != VisualItemKey.AIR) {

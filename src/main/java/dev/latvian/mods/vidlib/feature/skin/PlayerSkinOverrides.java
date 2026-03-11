@@ -2,8 +2,8 @@ package dev.latvian.mods.vidlib.feature.skin;
 
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.util.UndashedUuid;
+import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.vidlib.VidLibPaths;
-import dev.latvian.mods.vidlib.util.JsonUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;

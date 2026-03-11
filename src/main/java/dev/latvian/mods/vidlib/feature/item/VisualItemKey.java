@@ -1,31 +1,26 @@
 package dev.latvian.mods.vidlib.feature.item;
 
-import com.mojang.util.UndashedUuid;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.util.Cast;
-import dev.latvian.mods.vidlib.util.IOUtils;
-import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
-import net.minecraft.Util;
 import net.minecraft.core.Holder;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 
-import java.security.MessageDigest;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
-public record VisualItemKey(Holder<Item> item, DataComponentPatch visualPatch, UUID uuid) {
+public record VisualItemKey(Holder<Item> item, DataComponentPatch visualPatch) {
 	public static final Map<ResourceKey<Item>, Map<DataComponentPatch, VisualItemKey>> CACHE = new Reference2ObjectOpenHashMap<>();
 
 	public static final Set<DataComponentType<?>> VISUAL_KEYS = new ReferenceOpenHashSet<>(Set.of(
@@ -60,52 +55,41 @@ public record VisualItemKey(Holder<Item> item, DataComponentPatch visualPatch, U
 		return newPatch == null ? DataComponentPatch.EMPTY : newPatch.build();
 	}
 
-	public static UUID componentUUID(DataComponentPatch visualPatch, RegistryAccess registryAccess) {
-		if (!visualPatch.isEmpty()) {
-			try {
-				var buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), registryAccess);
-				DataComponentPatch.STREAM_CODEC.encode(buf, visualPatch);
-				var md = MessageDigest.getInstance("MD5");
-				md.update(IOUtils.toByteArray(buf, true));
-				return UUID.nameUUIDFromBytes(md.digest());
-			} catch (Exception ignore) {
-			}
-		}
+	public static final VisualItemKey AIR = new VisualItemKey(Items.AIR.builtInRegistryHolder(), DataComponentPatch.EMPTY);
 
-		return Util.NIL_UUID;
-	}
-
-	public static final VisualItemKey AIR = new VisualItemKey(Items.AIR.builtInRegistryHolder(), DataComponentPatch.EMPTY, Util.NIL_UUID);
-
-	public static VisualItemKey of(@Nullable ItemStack stack, RegistryAccess registryAccess) {
-		if (stack == null || stack.isEmpty()) {
+	public static VisualItemKey create(Holder<Item> holder, DataComponentPatch visualPatch) {
+		if (holder.value() == Items.AIR) {
 			return AIR;
 		}
 
-		var holder = stack.getItemHolder();
 		var key = holder.getKey();
 		var patchCache = CACHE.computeIfAbsent(key, k -> new Object2ObjectOpenHashMap<>());
-
-		var visualPatch = visual(stack.getComponentsPatch());
 		var itemKey = patchCache.get(visualPatch);
 
 		if (itemKey == null) {
-			itemKey = new VisualItemKey(holder, visualPatch, componentUUID(visualPatch, registryAccess));
+			itemKey = new VisualItemKey(holder, visualPatch);
 			patchCache.put(visualPatch, itemKey);
 		}
 
 		return itemKey;
 	}
 
-	public String toString() {
-		var key = item.getKey();
-		var str = key.location().getNamespace() + "_" + key.location().getPath().replace('/', '_').replace('.', '_');
-
-		if (!uuid.equals(Util.NIL_UUID)) {
-			str += "_" + UndashedUuid.toString(uuid);
+	public static VisualItemKey of(@Nullable ItemStack stack) {
+		if (stack == null || stack.isEmpty()) {
+			return AIR;
 		}
 
-		return str;
+		return create(stack.getItemHolder(), visual(stack.getComponentsPatch()));
+	}
+
+	public static final Codec<VisualItemKey> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+		BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("id").forGetter(VisualItemKey::item),
+		DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY).forGetter(VisualItemKey::visualPatch)
+	).apply(instance, VisualItemKey::create));
+
+	public String toString() {
+		var key = item.getKey();
+		return key.location().getNamespace() + "_" + key.location().getPath().replace('/', '_').replace('.', '_');
 	}
 
 	public ItemStack toItemStack() {

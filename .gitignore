@@ -84,3 +84,4 @@ hs_err_*.log
 /runs/
 .vscode
 .architectury-transformer/
+src_temp

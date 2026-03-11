@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.core;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.clock.SyncClocksPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
-import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.session.SessionData;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
@@ -90,7 +89,7 @@ public interface VLMinecraftEnvironment extends VLPlayerContainer, VLMinecraftEn
 	}
 
 	@ApiStatus.Internal
-	default void sync(S2CPacketBundleBuilder packets) {
+	default void sync(VLS2CPacketConsumer packets) {
 		getDataMap().syncAll(packets, (uuid, updates) -> new SyncServerDataPayload(updates));
 		packets.s2c(new SyncClocksPayload(vl$getClocks()));
 	}

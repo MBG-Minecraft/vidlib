@@ -18,7 +18,7 @@ public record ServerFeaturesPayload(FeatureSet featureSet) implements SimplePack
 
 	private static void config(VLConfigurationTask.Context ctx) {
 		if (ctx.channelInfo().hasChannel(TYPE)) {
-			ctx.send(new ServerFeaturesPayload(FeatureSet.SERVER_FEATURES.get()).toConfigS2C());
+			ctx.send(new ServerFeaturesPayload(FeatureSet.SERVER_FEATURES.get()).toS2CPacket(0L));
 		}
 	}
 
@@ -34,6 +34,6 @@ public record ServerFeaturesPayload(FeatureSet featureSet) implements SimplePack
 
 	private void handleClient(Context ctx) {
 		FeatureSet.REMOTE_SERVER_FEATURES = featureSet;
-		ctx.send(new ClientFeaturesPayload(FeatureSet.CLIENT_FEATURES.get()).toConfigC2S());
+		ctx.send(new ClientFeaturesPayload(FeatureSet.CLIENT_FEATURES.get()).toC2SPacket(0L));
 	}
 }

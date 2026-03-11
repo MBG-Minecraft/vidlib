@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.util.FloatSupplier;
 import dev.latvian.mods.vidlib.feature.imgui.config.VideoConfigPanel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.util.FloatSupplier;
 import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
 import imgui.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
@@ -322,9 +322,11 @@ public record MenuItem(
 			return false;
 		}
 
-		graphics.pushStack();
-		graphics.setWindowPadding(4F, 4F);
-		graphics.setItemSpacing(4F, 4F);
+		if (!graphics.isReplay) {
+			graphics.pushStack();
+			graphics.setWindowPadding(4F, 4F);
+			graphics.setItemSpacing(4F, 4F);
+		}
 
 		if (graphics.isReplay ? ImGui.beginMenu("VidLib") : mainMenuBar || ImGui.beginMenuBar()) {
 			for (int i = 0; i < mainMenu.size(); i++) {
@@ -340,7 +342,10 @@ public record MenuItem(
 			}
 		}
 
-		graphics.popStack();
+		if (!graphics.isReplay) {
+			graphics.popStack();
+		}
+
 		return true;
 	}
 }

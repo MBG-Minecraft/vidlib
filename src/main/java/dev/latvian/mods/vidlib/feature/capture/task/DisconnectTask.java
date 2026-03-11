@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.capture.task;
 
+import dev.latvian.mods.klib.util.Timestamp;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
-import dev.latvian.mods.vidlib.util.Timestamp;
 
 import java.io.DataInput;
 import java.io.DataOutput;

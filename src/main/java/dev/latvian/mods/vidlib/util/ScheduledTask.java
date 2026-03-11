@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.util;
 
-import dev.latvian.mods.vidlib.core.VLGameTimeProvider;
+import dev.latvian.mods.klib.util.LevelGameTimeProvider;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.util.ArrayList;
@@ -9,18 +9,18 @@ import java.util.List;
 
 public record ScheduledTask(Handler handler, RepeatingTask task, long at, MutableInt currentTick) {
 	public static class Handler {
-		private final VLGameTimeProvider time;
+		private final LevelGameTimeProvider time;
 		private final List<ScheduledTask> tasks;
 		private final List<ScheduledTask> newTasks;
 
-		public Handler(VLGameTimeProvider time) {
+		public Handler(LevelGameTimeProvider time) {
 			this.time = time;
 			this.tasks = new LinkedList<>();
 			this.newTasks = new ArrayList<>();
 		}
 
 		public void run(int delay, RepeatingTask task) {
-			var st = new ScheduledTask(this, task, time.vl$getGameTime() + delay, new MutableInt(0));
+			var st = new ScheduledTask(this, task, time.getLevelGameTime() + delay, new MutableInt(0));
 
 			if (delay > 0 || !st.tick()) {
 				newTasks.add(st);
@@ -38,7 +38,7 @@ public record ScheduledTask(Handler handler, RepeatingTask task, long at, Mutabl
 	}
 
 	public boolean tick() {
-		if (handler.time.vl$getGameTime() >= at) {
+		if (handler.time.getLevelGameTime() >= at) {
 			int tick = currentTick.getAndIncrement();
 			return !task.run(tick);
 		} else {

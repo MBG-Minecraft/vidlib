@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.data;
 
 import dev.latvian.mods.klib.util.Cast;
+import dev.latvian.mods.klib.util.LevelGameTimeProvider;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.core.VLGameTimeProvider;
 import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import net.minecraft.nbt.CompoundTag;
@@ -24,12 +24,12 @@ import java.util.function.BiFunction;
 public class DataMap implements DataMapHolder {
 	public final UUID owner;
 	public final DataKeyStorage storage;
-	public final VLGameTimeProvider timeProvider;
+	public final LevelGameTimeProvider timeProvider;
 	private final TrackedDataMapValue[] map;
 	public DataMapOverrides.DataMap overrides;
 	private Optional<Object>[] superOverrides;
 
-	public DataMap(UUID owner, DataKeyStorage storage, VLGameTimeProvider timeProvider) {
+	public DataMap(UUID owner, DataKeyStorage storage, LevelGameTimeProvider timeProvider) {
 		this.owner = owner;
 		this.storage = storage;
 		this.timeProvider = timeProvider;
@@ -69,7 +69,7 @@ public class DataMap implements DataMapHolder {
 		}
 
 		if (overrides != null) {
-			var v = overrides.getOverride(type, timeProvider.vl$getGameTime());
+			var v = overrides.getOverride(type, timeProvider.getLevelGameTime());
 
 			if (v != null) {
 				return v;
@@ -90,7 +90,7 @@ public class DataMap implements DataMapHolder {
 		}
 
 		if (overrides != null) {
-			var v = overrides.getOverride(type, timeProvider.vl$getGameTime());
+			var v = overrides.getOverride(type, timeProvider.getLevelGameTime());
 
 			if (v != null) {
 				return v;

@@ -6,6 +6,7 @@ import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.util.Empty;
+import dev.latvian.mods.klib.util.SpreadType;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
@@ -21,7 +22,6 @@ import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.prop.geo.BaseGeoProp;
 import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
-import dev.latvian.mods.vidlib.util.SpreadType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -35,9 +35,7 @@ import org.joml.Matrix3f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class NPCProp extends BaseGeoProp {

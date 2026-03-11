@@ -582,7 +582,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	default void marker(EventMarkerPayload payload) {
 		var session = vl$self().player.vl$sessionData();
 		session.markers.add(payload);
-		ClientGameEngine.INSTANCE.handleRuntimeMarker(payload.event(), payload.tag().orElse(null));
+		ClientGameEngine.INSTANCE.handleRuntimeMarker(vl$self().level.dimension(), payload.event(), payload.tag().orElse(null));
 	}
 
 	@Override

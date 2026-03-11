@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.canvas;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.shaders.UniformType;
-import dev.latvian.mods.vidlib.util.FloatSupplier;
+import dev.latvian.mods.klib.util.FloatSupplier;
 import org.joml.Matrix4fc;
 
 import java.util.function.BooleanSupplier;

@@ -1,8 +1,20 @@
-package dev.latvian.mods.vidlib.feature.replay;
+package dev.latvian.mods.vidlib.integration.replay;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
+import dev.latvian.mods.replay.api.ReplayMarkerType;
+import dev.latvian.mods.replay.api.event.RegisterReplaySessionDataEvent;
+import dev.latvian.mods.replay.api.event.ReplayEntityMenuEvent;
+import dev.latvian.mods.replay.api.event.ReplayGetClickTargetEvent;
+import dev.latvian.mods.replay.api.event.ReplayHandleClickTargetEvent;
+import dev.latvian.mods.replay.api.event.ReplayIconsEvent;
+import dev.latvian.mods.replay.api.event.ReplayMenuBarEvent;
+import dev.latvian.mods.replay.api.event.ReplayPopupEvent;
+import dev.latvian.mods.replay.api.event.ReplayRenderFilterMenuEvent;
+import dev.latvian.mods.replay.api.event.ReplaySessionClosedEvent;
+import dev.latvian.mods.replay.api.event.ReplaySessionOpenedEvent;
+import dev.latvian.mods.replay.api.event.ReplayStyleEvent;
+import dev.latvian.mods.replay.api.event.ReplayVisualsMenuEvent;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibClientEventHandler;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
@@ -14,15 +26,12 @@ import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
 import dev.latvian.mods.vidlib.feature.imgui.EntityExplorerPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.imgui.ImGuiAPI;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.misc.EventMarkerPayload;
 import dev.latvian.mods.vidlib.feature.misc.SyncPlayerTagsPayload;
-import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
-import dev.latvian.mods.vidlib.feature.pin.Pin;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.AddPropPayload;
@@ -37,62 +46,30 @@ import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
-import it.unimi.dsi.fastutil.chars.CharConsumer;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.longs.LongObjectPair;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.configuration.ClientConfigurationPacketListener;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
-import net.neoforged.fml.ModList;
-import org.jetbrains.annotations.Nullable;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.IdentityHashMap;
-import java.util.List;
 import java.util.Set;
 
-public class VLFlashbackIntegration {
-	public static final boolean ENABLED = ModList.get().isLoaded("flashback");
+@EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
+public class VLReplayIntegration {
+	public static int selectedProp = 0;
+	public static JsonObject selectedPropData = null;
+	public static PropListType selectedPropList = PropListType.LEVEL;
+	public static boolean openSelectedPropPopup = false;
+	public static int lastWidth = -1, lastHeight = -1;
 
-	private static int selectedProp = 0;
-	private static JsonObject selectedPropData = null;
-	private static PropListType selectedPropList = PropListType.LEVEL;
-	private static boolean openSelectedPropPopup = false;
-	private static int lastWidth = -1, lastHeight = -1;
-	public static final List<ReplayMarker> MARKERS = new ArrayList<>();
-
-	public static void init() {
-		VidLib.LOGGER.info("Flashback integration loaded");
-		FlashbackIntegration.INITIALIZED.add(VLFlashbackIntegration::initialized);
-		FlashbackIntegration.MARKERS.add(() -> MARKERS);
-		FlashbackIntegration.CLEANUP.add(VLFlashbackIntegration::cleanup);
-		FlashbackIntegration.CONFIG_SNAPSHOT.add(VLFlashbackIntegration::configSnapshot);
-		FlashbackIntegration.GAME_SNAPSHOT.add(VLFlashbackIntegration::gameSnapshot);
-		FlashbackIntegration.ENTITY_SNAPSHOT.add(VLFlashbackIntegration::entitySnapshot);
-		FlashbackIntegration.MENU_BAR.add(VLFlashbackIntegration::menuBar);
-		FlashbackIntegration.ENTITY_MENU.add(VLFlashbackIntegration::entityMenu);
-		FlashbackIntegration.VISUALS_MENU.add(VLFlashbackIntegration::visualsMenu);
-		FlashbackIntegration.RENDER_FILTER_MENU.add(VLFlashbackIntegration::renderFilterMenu);
-		FlashbackIntegration.EDITOR_STATE_LOADED.add(VLFlashbackIntegration::editorStateLoaded);
-		FlashbackIntegration.EDITOR_STATE_SAVED.add(VLFlashbackIntegration::editorStateSaved);
-		FlashbackIntegration.CLICK_TARGET.add(VLFlashbackIntegration::clickTarget);
-		FlashbackIntegration.HANDLE_CLICK_TARGET.add(VLFlashbackIntegration::handleClickTarget);
-		FlashbackIntegration.POPUPS.add(VLFlashbackIntegration::popups);
-		FlashbackIntegration.ICONS.add(VLFlashbackIntegration::icons);
-		FlashbackIntegration.STYLE.add(ImGraphics::setFullDefaultStyle);
-
-		ImGuiAPI.HIDE.add(FlashbackIntegration.IN_EXPORTING);
-	}
-
-	private static void initialized(List<Packet<? super ClientConfigurationPacketListener>> configPackets, List<LongObjectPair<Packet<? super ClientGamePacketListener>>> gamePackets) {
+	@SubscribeEvent
+	public static void replaySessionOpened(ReplaySessionOpenedEvent event) {
 		var mc = Minecraft.getInstance();
 		var server = mc.getSingleplayerServer();
 		var registryAccess = server.registryAccess();
@@ -101,10 +78,10 @@ public class VLFlashbackIntegration {
 		var recordedProps = new ArrayList<RecordedProp>();
 		var recordingProps = new Int2ObjectLinkedOpenHashMap<RecordedProp>();
 
-		long startTick = FlashbackIntegration.getStartTick();
+		long startTick = event.getSession().getFileInfo().getStartGameTick();
 
-		for (var entry : gamePackets) {
-			if (entry.value() instanceof ClientboundCustomPayloadPacket c) {
+		for (var entry : event.getGamePackets()) {
+			if (entry.packet() instanceof ClientboundCustomPayloadPacket c) {
 				if (c.payload() instanceof VidLibPacketPayloadContainer w) {
 					long now = w.remoteGameTime();
 
@@ -155,10 +132,10 @@ public class VLFlashbackIntegration {
 							}
 						}
 						case EventMarkerPayload p -> {
-							var data = ClientGameEngine.INSTANCE.handleReplayMarker(p.event(), p.tag().orElse(null));
+							var data = ClientGameEngine.INSTANCE.handleReplayMarker(entry.dimension(), p.event(), p.tag().orElse(null));
 
 							if (data != null) {
-								MARKERS.add(new ReplayMarker((int) (now - startTick), data));
+								event.addMarker((int) (now - startTick), ReplayMarkerType.EVENT_MARKER, data);
 							}
 						}
 						case null, default -> {
@@ -168,7 +145,7 @@ public class VLFlashbackIntegration {
 			}
 		}
 
-		long endTick = FlashbackIntegration.getEndTick();
+		long endTick = event.getSession().getFileInfo().getEndGameTick();
 
 		for (var prop : recordingProps.values()) {
 			prop.remove = endTick;
@@ -188,50 +165,28 @@ public class VLFlashbackIntegration {
 		}
 	}
 
-	private static void cleanup() {
+	@SubscribeEvent
+	public static void replaySessionClosed(ReplaySessionClosedEvent event) {
 		DataMapOverrides.INSTANCE = null;
 		RecordedProp.MAP = null;
 		RecordedProp.LIST = null;
-		MARKERS.clear();
 	}
 
-	private static void configSnapshot(List<Packet<? super ClientConfigurationPacketListener>> packets) {
-		// VidLib.LOGGER.info("Flashback Config snapshot");
-	}
-
-	private static void gameSnapshot(List<Packet<? super ClientGamePacketListener>> packets) {
-		VidLib.LOGGER.info("Flashback Game snapshot");
-
-		var mc = Minecraft.getInstance();
-		var session = mc.player.vl$sessionData();
-		var packets2 = new S2CPacketBundleBuilder(mc.level);
-		session.sync(packets2, mc.player, 1);
-
-		if (!session.markers.isEmpty()) {
-			session.markers.forEach(packets2::s2c);
-		}
-
-		packets2.sendUnbundled(packets::add);
-	}
-
-	private static void entitySnapshot(Entity entity, List<Packet<? super ClientGamePacketListener>> packets) {
-		var packets2 = new S2CPacketBundleBuilder(Minecraft.getInstance().level);
-		entity.replaySnapshot(packets2);
-		packets2.sendUnbundled(packets::add);
-	}
-
-	private static void menuBar(ImGraphics graphics) {
+	@SubscribeEvent
+	public static void menuBar(ReplayMenuBarEvent event) {
 		ImGui.separator();
-		BuiltInImGui.MAIN_MENU_BAR.buildMenuBar(graphics, false);
+		BuiltInImGui.MAIN_MENU_BAR.buildMenuBar(event.getGraphics(), false);
 	}
 
-	private static void entityMenu(ImGraphics graphics, Entity entity) {
+	@SubscribeEvent
+	public static void entityMenu(ReplayEntityMenuEvent event) {
 		ImGuiUtils.separatorWithText("VidLib");
 		var mc = Minecraft.getInstance();
-		EntityExplorerPanel.imgui(graphics, entity, mc.getDeltaTracker().getGameTimeDeltaPartialTick(entity == mc.player));
+		EntityExplorerPanel.imgui(event.getGraphics(), event.getEntity(), mc.getDeltaTracker().getGameTimeDeltaPartialTick(event.getEntity() == mc.player));
 	}
 
-	private static void visualsMenu(ImGraphics graphics) {
+	@SubscribeEvent
+	public static void visualsMenu(ReplayVisualsMenuEvent event) {
 		ImGuiUtils.separatorWithText("VidLib");
 
 		ImGui.pushID("vidlib");
@@ -245,13 +200,14 @@ public class VLFlashbackIntegration {
 
 		ImGuiUtils.separatorWithText("Player Pins");
 		ImGui.pushID("###pins");
-		Pins.fbVisualsMenu(graphics);
+		Pins.fbVisualsMenu(event.getGraphics());
 		ImGui.popID();
 
 		ImGui.popID();
 	}
 
-	private static void renderFilterMenu(ImGraphics graphics) {
+	@SubscribeEvent
+	public static void renderFilterMenu(ReplayRenderFilterMenuEvent event) {
 		if (ImGui.beginTabItem("Props")) {
 			if (ImGui.beginListBox("###props")) {
 				for (var propType : PropType.SORTED.get()) {
@@ -273,62 +229,35 @@ public class VLFlashbackIntegration {
 		}
 	}
 
-	private static void editorStateLoaded(JsonObject customData) {
-		Pins.PINS.clear();
-
-		if (customData.has("vidlib:pins")) {
-			var pins = customData.getAsJsonArray("vidlib:pins");
-
-			for (var e : pins) {
-				if (e instanceof JsonObject pinJson) {
-					try {
-						var pin = Pin.CODEC.parse(JsonOps.INSTANCE, pinJson).getOrThrow();
-						Pins.PINS.put(pin.uuid, pin);
-					} catch (Throwable t) {
-						VidLib.LOGGER.error("Failed to load player pin from editor state", t);
-					}
-				}
-			}
-		}
+	@SubscribeEvent
+	public static void registerReplaySessionData(RegisterReplaySessionDataEvent event) {
+		event.register(new PinReplaySessionData());
 	}
 
-	private static void editorStateSaved(JsonObject customData) {
-		if (!Pins.PINS.isEmpty()) {
-			var pins = new JsonArray();
-
-			for (var pin : Pins.PINS.values()) {
-				pins.add(pin.toJson());
-			}
-
-			customData.add("vidlib:pins", pins);
-		}
-	}
-
-	@Nullable
-	private static HitResult clickTarget(Vec3 from, Vec3 to) {
+	@SubscribeEvent
+	public static void clickTarget(ReplayGetClickTargetEvent event) {
 		var mc = Minecraft.getInstance();
-		var ctx = new ClipContext(from, to, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, mc.player);
-		var result = mc.level.getProps().clip(ctx, true);
-		return result;
+		var ctx = new ClipContext(event.getFrom(), event.getTo(), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, mc.player);
+		event.setHitResult(mc.level.getProps().clip(ctx, true));
 	}
 
-	private static boolean handleClickTarget(HitResult result) {
-		if (result instanceof PropHitResult propResult) {
+	@SubscribeEvent
+	public static void handleClickTarget(ReplayHandleClickTargetEvent event) {
+		if (event.getHitResult() instanceof PropHitResult propResult) {
 			selectedProp = propResult.prop.id;
 			selectedPropData = propResult.prop.getDataJson(JsonOps.INSTANCE);
 			selectedPropList = propResult.prop.spawnType.listType;
 			openSelectedPropPopup = true;
-			return true;
+			event.setCanceled(true);
 		}
-
-		return false;
 	}
 
-	private static void popups(ImGraphics graphics) {
+	@SubscribeEvent
+	public static void popups(ReplayPopupEvent event) {
 		var mc = Minecraft.getInstance();
 
 		if (VidLibClientEventHandler.clientLoaded && mc.level != null && mc.level.isReplayLevel()) {
-			BuiltInImGui.handle(graphics);
+			BuiltInImGui.handle(event.getGraphics());
 		}
 
 		if (openSelectedPropPopup) {
@@ -343,7 +272,7 @@ public class VLFlashbackIntegration {
 			if (prop != null) {
 				ClientProps.OPEN_PROPS.add(prop.id);
 				ImGui.text(prop.toString());
-				prop.imgui(graphics, mc.getDeltaTracker().getGameTimeDeltaPartialTick(false));
+				prop.imgui(event.getGraphics(), mc.getDeltaTracker().getGameTimeDeltaPartialTick(false));
 			}
 
 			ImGui.endPopup();
@@ -374,15 +303,21 @@ public class VLFlashbackIntegration {
 		}
 	}
 
-	private static void icons(CharConsumer chars) {
+	@SubscribeEvent
+	public static void icons(ReplayIconsEvent event) {
 		for (var icon : ImIcons.VALUES) {
 			if (icon.icon != 0) {
-				chars.accept(icon.icon);
+				event.add(icon.icon);
 			}
 		}
 
 		for (var c : ImIcons.EXTRA_ICONS.get()) {
-			chars.accept(c.toChar());
+			event.add(c.toChar());
 		}
+	}
+
+	@SubscribeEvent
+	public static void style(ReplayStyleEvent event) {
+		ImGraphics.setFullDefaultStyle(event.getStyle());
 	}
 }

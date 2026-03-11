@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.util;
 
 import com.google.gson.JsonObject;
+import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.resources.ResourceLocation;

@@ -1,12 +1,12 @@
 package dev.latvian.mods.vidlib.feature.session;
 
-import dev.latvian.mods.vidlib.core.VLGameTimeProvider;
+import dev.latvian.mods.klib.util.LevelGameTimeProvider;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.UUID;
 
 public class ClientSessionData extends SessionData {
-	public ClientSessionData(UUID uuid, VLGameTimeProvider timeProvider) {
+	public ClientSessionData(UUID uuid, LevelGameTimeProvider timeProvider) {
 		super(uuid, timeProvider);
 	}
 

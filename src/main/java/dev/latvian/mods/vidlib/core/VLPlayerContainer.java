@@ -69,7 +69,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsumer, MessageConsumer {
+public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer, VLC2SPacketConsumer, MessageConsumer {
 	default List<? extends Player> vl$getS2CPlayers() {
 		return List.of();
 	}

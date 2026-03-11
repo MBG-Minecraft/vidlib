@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.core;
 
+import dev.latvian.mods.klib.util.LevelGameTimeProvider;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
@@ -9,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public interface VLC2SPacketConsumer extends VLLevelContainer {
+public interface VLC2SPacketConsumer extends LevelGameTimeProvider {
 	void c2s(@Nullable Packet<? super ServerGamePacketListener> packet);
 
 	default void c2s(CustomPacketPayload packet) {
@@ -23,6 +24,6 @@ public interface VLC2SPacketConsumer extends VLLevelContainer {
 	}
 
 	default void c2s(SimplePacketPayload packet) {
-		c2s(packet.toGameC2S(vl$level()));
+		c2s(packet.toC2S(getLevelGameTime()));
 	}
 }

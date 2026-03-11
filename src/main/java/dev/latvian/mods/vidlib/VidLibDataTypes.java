@@ -32,8 +32,6 @@ import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.util.NameDrawType;
-import dev.latvian.mods.vidlib.util.ScreenCorner;
-import dev.latvian.mods.vidlib.util.Timestamp;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -97,7 +95,6 @@ public interface VidLibDataTypes {
 		DataType.register(VidLib.id("positioned_block_list"), PositionedBlock.LIST_DATA_TYPE);
 		DataType.register(VidLib.id("prop_type"), PropType.DATA_TYPE);
 		DataType.register(VidLib.id("explosion_data"), ExplosionData.DATA_TYPE);
-		DataType.register(VidLib.id("screen_corner"), ScreenCorner.DATA_TYPE);
 		DataType.register(VidLib.id("clock_font_ref"), ClockFont.REF_DATA_TYPE);
 		DataType.register(VidLib.id("zone_container"), ZoneContainer.DATA_TYPE, ZoneContainer.REGISTRY, null);
 		DataType.register(VidLib.id("location"), Location.DATA_TYPE, Location.REGISTRY, null);
@@ -109,7 +106,6 @@ public interface VidLibDataTypes {
 		DataType.register(VidLib.id("block_state_palette"), BlockStatePalette.DATA_TYPE);
 		DataType.register(VidLib.id("entity_snapshot"), EntitySnapshot.DATA_TYPE);
 		DataType.register(VidLib.id("entity_snapshot_list"), EntitySnapshot.LIST_DATA_TYPE);
-		DataType.register(VidLib.id("timestamp"), Timestamp.DATA_TYPE);
 		DataType.register(VidLib.id("waypoint"), Waypoint.DATA_TYPE);
 		DataType.register(VidLib.id("waypoint_list"), Waypoint.LIST_DATA_TYPE);
 		DataType.register(VidLib.id("player_input"), PlayerInput.DATA_TYPE);

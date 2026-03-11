@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.session;
 
-import dev.latvian.mods.vidlib.core.VLGameTimeProvider;
+import dev.latvian.mods.klib.util.LevelGameTimeProvider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.RemotePlayer;
@@ -8,7 +8,7 @@ import net.minecraft.client.player.RemotePlayer;
 import java.util.UUID;
 
 public class RemoteClientSessionData extends ClientSessionData {
-	public RemoteClientSessionData(UUID uuid, VLGameTimeProvider timeProvider) {
+	public RemoteClientSessionData(UUID uuid, LevelGameTimeProvider timeProvider) {
 		super(uuid, timeProvider);
 	}
 

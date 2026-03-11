@@ -1,15 +1,14 @@
 package dev.latvian.mods.vidlib.feature.client;
 
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBarRenderer;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
-import dev.latvian.mods.vidlib.feature.replay.VLFlashbackIntegration;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
-import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -55,9 +54,9 @@ public interface VidLibHUD {
 			return;
 		}
 
-		boolean replay = VLFlashbackIntegration.ENABLED && FlashbackIntegration.isInReplayOrExporting();
+		boolean replay = ReplayAPI.getActive().isInReplayOrExporting();
 
-		if (replay && !FlashbackIntegration.getRenderNameTags()) {
+		if (replay && !ReplayAPI.getActive().getRenderNameTags()) {
 			return;
 		}
 
@@ -72,7 +71,7 @@ public interface VidLibHUD {
 		var selfDelta = deltaTracker.getGameTimeDeltaPartialTick(true);
 
 		for (var player : level.players()) {
-			if (replay && FlashbackIntegration.isEntityHidden(player.getUUID())) {
+			if (replay && ReplayAPI.getActive().isEntityHidden(player.getUUID())) {
 				continue;
 			}
 
@@ -98,11 +97,11 @@ public interface VidLibHUD {
 			var renderName = nameDrawType.renderName.resolve(DEFAULT_DRAW_NAME.getValue().test(player));
 			var renderHealth = nameDrawType.renderHealth.resolve(DEFAULT_DRAW_HEALTH_BAR.getValue().test(player));
 
-			if (renderName && replay && FlashbackIntegration.isNameHidden(player.getUUID())) {
+			if (renderName && replay && ReplayAPI.getActive().isNameHidden(player.getUUID())) {
 				renderName = false;
 			}
 
-			if (renderHealth && replay && FlashbackIntegration.isHealthHidden(player.getUUID())) {
+			if (renderHealth && replay && ReplayAPI.getActive().isHealthHidden(player.getUUID())) {
 				renderHealth = false;
 			}
 

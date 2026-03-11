@@ -269,7 +269,7 @@ public class CommonGameEngine {
 	@Nullable
 	public Packet<ClientGamePacketListener> overrideEntitySpawnPacket(Entity entity, ServerEntity serverEntity) {
 		if (!entity.getType().builtInRegistryHolder().getKey().location().getNamespace().equals("minecraft")) {
-			return (Packet) new ExactEntitySpawnPayload(entity, serverEntity, 0).toGameS2C(entity.level());
+			return (Packet) new ExactEntitySpawnPayload(entity, serverEntity, 0).toS2CPacket(entity.level().getGameTime());
 		}
 
 		return null;

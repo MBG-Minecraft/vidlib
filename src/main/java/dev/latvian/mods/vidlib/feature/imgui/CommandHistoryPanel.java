@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
 import imgui.ImGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.CommandSuggestions;

@@ -1,7 +1,8 @@
 package dev.latvian.mods.vidlib.feature.session;
 
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.vidlib.core.VLGameTimeProvider;
+import dev.latvian.mods.klib.util.LevelGameTimeProvider;
+import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
@@ -12,7 +13,6 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToClient;
-import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
@@ -45,7 +45,7 @@ public class SessionData implements Comparable<SessionData> {
 
 	public boolean suspended;
 
-	public SessionData(UUID uuid, VLGameTimeProvider timeProvider) {
+	public SessionData(UUID uuid, LevelGameTimeProvider timeProvider) {
 		this.uuid = uuid;
 		this.dataMap = new DataMap(uuid, DataKey.PLAYER, timeProvider);
 		this.startTime = System.currentTimeMillis();
@@ -104,7 +104,7 @@ public class SessionData implements Comparable<SessionData> {
 	 * syncType 1 = flashback snapshot
 	 * syncType 2 = login
 	 */
-	public void sync(S2CPacketBundleBuilder packets, Player player, int syncType) {
+	public void sync(VLS2CPacketConsumer packets, Player player, int syncType) {
 		var level = player.level();
 		var environment = level.getEnvironment();
 		var time = level.getGameTime();
