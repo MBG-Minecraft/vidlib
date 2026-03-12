@@ -13,5 +13,5 @@ public interface GalleryUploader<K> {
 		return ImColorVariant.GREEN;
 	}
 
-	void render(GalleryImageImBuilder<K> builder, ImGraphics graphics, boolean clicked);
+	void render(Gallery<K> gallery, GalleryImageImBuilder builder, ImGraphics graphics, boolean clicked);
 }

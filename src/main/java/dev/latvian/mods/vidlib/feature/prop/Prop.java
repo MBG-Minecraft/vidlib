@@ -13,6 +13,7 @@ import dev.latvian.mods.klib.math.Vec3f;
 import dev.latvian.mods.klib.shape.ColoredShape;
 import dev.latvian.mods.klib.shape.CuboidShape;
 import dev.latvian.mods.klib.util.Cast;
+import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
@@ -29,7 +30,7 @@ import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
-import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
+import dev.latvian.mods.vidlib.integration.replay.SelectedPropReplaySessionData;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
@@ -785,7 +786,16 @@ public class Prop {
 				ImGui.popItemWidth();
 
 				if (update.isAny() && builder.isValid()) {
-					FlashbackIntegration.MAKE_PROP_KEYFRAMES.add(this);
+					var session = ReplayAPI.getActive().getOpenSession();
+
+					if (session != null) {
+						var selectedPropData = session.getOptionalData(SelectedPropReplaySessionData.TYPE);
+
+						if (selectedPropData != null) {
+							selectedPropData.makePropKeyframes.add(this);
+						}
+					}
+
 					c2sEdit(data, Cast.to(builder.build()), update.isFull());
 				}
 

@@ -40,25 +40,7 @@ import java.util.UUID;
 
 public interface PlayerBodies {
 	@ClientAutoRegister
-	Gallery<UUID> GALLERY = Gallery.ofUUIDKey("player_bodies", () -> VidLibPaths.USER.get().resolve("player-bodies"), TriState.TRUE);
-
-	Lazy<RenderTarget> RENDER_TARGET = Lazy.of(() -> new TextureTarget("PlayerBodiesCanvas", 1024, 1024, true));
-
-	TexturedRenderType RENDER_TYPE = TexturedRenderType.internal(
-		"player_body",
-		1536,
-		true,
-		true,
-		RenderPipelines.ENTITY_CUTOUT_NO_CULL,
-		texture -> RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
-			.setLightmapState(RenderStateShard.LIGHTMAP)
-			.setOverlayState(RenderStateShard.OVERLAY)
-			.setOutputState(new RenderStateShard.OutputStateShard("player_body", RENDER_TARGET))
-			.createCompositeState(false)
-	);
-
-	GalleryUploader<UUID> UPLOADER = new GalleryUploader<>() {
+	Gallery<UUID> GALLERY = Gallery.ofUUIDKey("player_bodies", () -> VidLibPaths.USER.get().resolve("player-bodies"), TriState.TRUE).addUploader(new GalleryUploader<>() {
 		public static final GameProfileImBuilder UNIT = new GameProfileImBuilder();
 
 		@Override
@@ -77,7 +59,7 @@ public interface PlayerBodies {
 		}
 
 		@Override
-		public void render(GalleryImageImBuilder<UUID> builder, ImGraphics graphics, boolean clicked) {
+		public void render(Gallery<UUID> gallery, GalleryImageImBuilder builder, ImGraphics graphics, boolean clicked) {
 			if (clicked) {
 				ImGui.openPopup("###select-profile");
 			}
@@ -100,7 +82,23 @@ public interface PlayerBodies {
 				ImGui.endPopup();
 			}
 		}
-	};
+	});
+
+	Lazy<RenderTarget> RENDER_TARGET = Lazy.of(() -> new TextureTarget("PlayerBodiesCanvas", 1024, 1024, true));
+
+	TexturedRenderType RENDER_TYPE = TexturedRenderType.internal(
+		"player_body",
+		1536,
+		true,
+		true,
+		RenderPipelines.ENTITY_CUTOUT_NO_CULL,
+		texture -> RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
+			.setLightmapState(RenderStateShard.LIGHTMAP)
+			.setOverlayState(RenderStateShard.OVERLAY)
+			.setOutputState(new RenderStateShard.OutputStateShard("player_body", RENDER_TARGET))
+			.createCompositeState(false)
+	);
 
 	static GalleryImage<UUID> get(Minecraft mc, UUID uuid) {
 		return GALLERY.getRender(mc, uuid, PlayerProfiles::getName, PlayerBodies::render, ImagePreProcessor.NONE);

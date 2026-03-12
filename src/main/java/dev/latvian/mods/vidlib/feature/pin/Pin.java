@@ -3,14 +3,12 @@ package dev.latvian.mods.vidlib.feature.pin;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.vidlib.feature.gallery.Gallery;
 import dev.latvian.mods.vidlib.feature.gallery.GalleryImage;
-import net.minecraft.Util;
+import dev.latvian.mods.vidlib.feature.gallery.GalleryImageKey;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.UUID;
+import java.util.Optional;
 
 public final class Pin {
 	public static final Color DEFAULT_COLOR = Color.of(0xFFFFFFFF);
@@ -18,8 +16,7 @@ public final class Pin {
 
 	public static final MapCodec<Pin> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.BOOL.optionalFieldOf("enabled", true).forGetter(p -> p.enabled),
-		Codec.STRING.optionalFieldOf("gallery", "").forGetter(p -> p.gallery),
-		KLibCodecs.UUID.optionalFieldOf("texture", Util.NIL_UUID).forGetter(p -> p.texture),
+		GalleryImageKey.CODEC.optionalFieldOf("icon").forGetter(p -> Optional.ofNullable(p.icon)),
 		Color.CODEC.optionalFieldOf("color", DEFAULT_COLOR).forGetter(p -> p.color),
 		Color.CODEC.optionalFieldOf("background", DEFAULT_BACKGROUND).forGetter(p -> p.background),
 		PinShape.CODEC.optionalFieldOf("shape", PinShape.PIN).forGetter(p -> p.shape)
@@ -28,8 +25,7 @@ public final class Pin {
 	public static final Codec<Pin> CODEC = MAP_CODEC.codec();
 
 	public boolean enabled;
-	public String gallery;
-	public UUID texture;
+	public GalleryImageKey<?> icon;
 	public Color color;
 	public Color background;
 	public PinShape shape;
@@ -37,8 +33,7 @@ public final class Pin {
 
 	public Pin() {
 		this.enabled = true;
-		this.gallery = "";
-		this.texture = Util.NIL_UUID;
+		this.icon = null;
 		this.color = DEFAULT_COLOR;
 		this.background = DEFAULT_BACKGROUND;
 		this.shape = PinShape.PIN;
@@ -46,44 +41,28 @@ public final class Pin {
 
 	private Pin(
 		boolean enabled,
-		String gallery,
-		UUID texture,
+		Optional<GalleryImageKey<?>> icon,
 		Color color,
 		Color background,
 		PinShape shape
 	) {
 		this.enabled = enabled;
-		this.gallery = gallery;
-		this.texture = texture;
+		this.icon = icon.orElse(null);
 		this.color = color;
 		this.background = background;
 		this.shape = shape;
 	}
 
 	public boolean isSet() {
-		return !gallery.isEmpty() && (texture.getMostSignificantBits() != 0L || texture.getLeastSignificantBits() != 0L);
+		return icon != null;
 	}
 
 	@Nullable
-	public GalleryImage<UUID> getImage() {
-		if (isSet()) {
-			var g = (Gallery<UUID>) Gallery.ALL.get().get(gallery);
-
-			if (g != null) {
-				return g.get(texture);
-			}
-		}
-
-		return null;
+	public GalleryImage<?> getImage() {
+		return icon == null ? null : icon.image();
 	}
 
-	public void setImage(@Nullable GalleryImage<UUID> image) {
-		if (image == null) {
-			gallery = "";
-			texture = Util.NIL_UUID;
-		} else {
-			gallery = image.gallery().id;
-			texture = image.id();
-		}
+	public void setImage(@Nullable GalleryImage<?> image) {
+		icon = image == null ? null : image.key();
 	}
 }

@@ -11,7 +11,6 @@ import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.gallery.Gallery;
 import dev.latvian.mods.vidlib.feature.gallery.GalleryFileUploader;
 import dev.latvian.mods.vidlib.feature.gallery.GalleryImageImBuilder;
-import dev.latvian.mods.vidlib.feature.gallery.GalleryUploader;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerBodies;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerHeads;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
@@ -44,15 +43,13 @@ public interface Pins {
 
 	Map<UUID, Pin> PINS = new Object2ObjectOpenHashMap<>();
 
-	@ClientAutoRegister
-	Gallery<UUID> GALLERY = Gallery.ofUUIDKey("pins", () -> VidLibPaths.USER.get().resolve("pin-gallery"), TriState.TRUE);
-
 	ImagePreProcessor PRE_PROCESSOR = ImagePreProcessor.FIT_SQUARE.andThen(ImagePreProcessor.CLOSEST_4);
-	GalleryUploader<UUID> UPLOADER = new GalleryFileUploader<>(GALLERY, PathIDGenerator.RANDOM_UUID, PRE_PROCESSOR);
 
-	List<Gallery<UUID>> PIN_GALLERIES = new ArrayList<>(List.of(GALLERY, PlayerBodies.GALLERY, PlayerHeads.GALLERY));
-	List<GalleryUploader<UUID>> PIN_UPLOADERS = new ArrayList<>(List.of(UPLOADER, PlayerBodies.UPLOADER, PlayerHeads.UPLOADER));
-	Lazy<GalleryImageImBuilder<UUID>> IMAGE_IM_BUILDER = Lazy.of(() -> new GalleryImageImBuilder<>(PIN_GALLERIES, PIN_UPLOADERS));
+	@ClientAutoRegister
+	Gallery<UUID> GALLERY = Gallery.ofUUIDKey("pins", () -> VidLibPaths.USER.get().resolve("pin-gallery"), TriState.TRUE).addUploader(new GalleryFileUploader<>(PathIDGenerator.RANDOM_UUID, PRE_PROCESSOR));
+
+	List<Gallery<?>> PIN_GALLERIES = new ArrayList<>(List.of(GALLERY, PlayerBodies.GALLERY, PlayerHeads.GALLERY));
+	Lazy<GalleryImageImBuilder> IMAGE_IM_BUILDER = Lazy.of(() -> new GalleryImageImBuilder(PIN_GALLERIES));
 
 	MenuItem MENU_ITEM = MenuItem.menu(ImIcons.LOCATION, "Pins", (graphics, items) -> {
 		items.add(MenuItem.item(ImIcon.NONE, "Enabled", ENABLED));

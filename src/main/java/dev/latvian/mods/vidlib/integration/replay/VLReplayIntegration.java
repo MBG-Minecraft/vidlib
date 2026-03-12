@@ -44,7 +44,6 @@ import dev.latvian.mods.vidlib.feature.prop.RecordedProp;
 import dev.latvian.mods.vidlib.feature.prop.RemovePropsPayload;
 import dev.latvian.mods.vidlib.feature.session.LocalClientSessionData;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
-import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
@@ -305,7 +304,7 @@ public class VLReplayIntegration {
 			if (prop != null) {
 				var dataJson = prop.getDataJson(JsonOps.INSTANCE);
 				if (!data.selectedPropData.equals(dataJson)) {
-					FlashbackIntegration.MAKE_PROP_KEYFRAMES.add(prop);
+					data.makePropKeyframes.add(prop);
 				}
 			}
 			data.selectedProp = 0;

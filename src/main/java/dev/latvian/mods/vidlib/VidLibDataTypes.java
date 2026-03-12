@@ -40,6 +40,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.neoforged.neoforge.network.connection.ConnectionType;
 
 import java.util.List;
 import java.util.Set;
@@ -67,6 +68,8 @@ public interface VidLibDataTypes {
 			}
 		}
 	}, ItemStack.class);
+
+	DataType<ConnectionType> CONNECTION_TYPE = DataType.of(ConnectionType.values());
 
 	static void register() {
 		DataType.register(VidLib.id("string_set"), STRING_SET);
@@ -109,5 +112,6 @@ public interface VidLibDataTypes {
 		DataType.register(VidLib.id("waypoint"), Waypoint.DATA_TYPE);
 		DataType.register(VidLib.id("waypoint_list"), Waypoint.LIST_DATA_TYPE);
 		DataType.register(VidLib.id("player_input"), PlayerInput.DATA_TYPE);
+		DataType.register(VidLib.id("connection_type"), CONNECTION_TYPE);
 	}
 }

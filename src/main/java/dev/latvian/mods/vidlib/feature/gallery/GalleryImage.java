@@ -13,8 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public record GalleryImage<K>(
-	Gallery<K> gallery,
-	K id,
+	GalleryImageKey<K> key,
 	String displayName,
 	@Nullable Path path,
 	ResourceLocation textureId
@@ -60,13 +59,15 @@ public record GalleryImage<K>(
 
 				if (blocking) {
 					var texture = new DynamicTexture(textureId::toString, image);
-					texture.setFilter(gallery.blur, false);
+					texture.setClamp(true);
+					texture.setFilter(key.gallery().blur, false);
 					mc.getTextureManager().byPath.put(textureId, texture);
 					return texture;
 				} else {
 					mc.execute(() -> {
 						var texture = new DynamicTexture(textureId::toString, image);
-						texture.setFilter(gallery.blur, false);
+						texture.setClamp(true);
+						texture.setFilter(key.gallery().blur, false);
 						mc.getTextureManager().byPath.put(textureId, texture);
 					});
 				}

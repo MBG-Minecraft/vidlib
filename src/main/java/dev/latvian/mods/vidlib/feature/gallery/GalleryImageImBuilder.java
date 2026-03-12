@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.gallery;
 
 import dev.latvian.mods.klib.texture.UV;
+import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
@@ -11,21 +12,19 @@ import imgui.ImGui;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
-public class GalleryImageImBuilder<K> implements ImBuilder<GalleryImage<K>> {
-	public final List<Gallery<K>> galleries;
-	public final List<GalleryUploader<K>> uploaders;
-	public GalleryImage<K> selected;
+public class GalleryImageImBuilder implements ImBuilder<GalleryImage<?>> {
+	public final Collection<Gallery<?>> galleries;
+	public GalleryImage<?> selected;
 	public boolean fullUpdate = false;
 
-	public GalleryImageImBuilder(List<Gallery<K>> galleries, List<GalleryUploader<K>> uploaders) {
+	public GalleryImageImBuilder(Collection<Gallery<?>> galleries) {
 		this.galleries = galleries;
-		this.uploaders = uploaders;
 	}
 
 	@Override
-	public void set(@Nullable GalleryImage value) {
+	public void set(@Nullable GalleryImage<?> value) {
 		selected = value;
 	}
 
@@ -71,15 +70,17 @@ public class GalleryImageImBuilder<K> implements ImBuilder<GalleryImage<K>> {
 			ImGui.popID();
 
 			ImGui.pushID("###uploaders");
+			int uploaderIndex = 0;
 
-			for (int i = 0; i < uploaders.size(); i++) {
-				ImGui.sameLine();
-				ImGui.pushID(i);
-				var uploader = uploaders.get(i);
-				boolean clicked = graphics.imageButton(uploader.getIcon(), 40F, 40F, UV.FULL, 2, uploader.getColor());
-				uploader.render(this, graphics, clicked);
-				ImGuiUtils.hoveredTooltip(uploader.getTooltip());
-				ImGui.popID();
+			for (var gallery : galleries) {
+				for (var uploader : gallery.uploaders) {
+					ImGui.sameLine();
+					ImGui.pushID(uploaderIndex++);
+					boolean clicked = graphics.imageButton(uploader.getIcon(), 40F, 40F, UV.FULL, 2, uploader.getColor());
+					uploader.render(Cast.to(gallery), this, graphics, clicked);
+					ImGuiUtils.hoveredTooltip(uploader.getTooltip());
+					ImGui.popID();
+				}
 			}
 
 			ImGui.popID();
@@ -90,7 +91,7 @@ public class GalleryImageImBuilder<K> implements ImBuilder<GalleryImage<K>> {
 			graphics.pushStack();
 			graphics.setItemSpacing(4F, 4F);
 
-			var list = new ArrayList<GalleryImage<K>>();
+			var list = new ArrayList<GalleryImage<?>>();
 
 			for (var gallery : galleries) {
 				list.addAll(gallery.images.values());
@@ -141,7 +142,7 @@ public class GalleryImageImBuilder<K> implements ImBuilder<GalleryImage<K>> {
 	}
 
 	@Override
-	public GalleryImage<K> build() {
+	public GalleryImage<?> build() {
 		return selected;
 	}
 }

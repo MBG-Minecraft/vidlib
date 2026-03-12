@@ -11,10 +11,9 @@ import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterImBuilder;
+import dev.latvian.mods.vidlib.feature.gallery.Gallery;
 import dev.latvian.mods.vidlib.feature.gallery.GalleryImageImBuilder;
 import dev.latvian.mods.vidlib.feature.gallery.ItemIcons;
-import dev.latvian.mods.vidlib.feature.gallery.PlayerBodies;
-import dev.latvian.mods.vidlib.feature.gallery.PlayerHeads;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
@@ -23,7 +22,6 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.interpolation.Interpolation
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ParticleOptionsImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.item.VisualItemKey;
-import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundDataImBuilder;
@@ -59,7 +57,6 @@ import net.minecraft.world.item.ItemStack;
 import org.joml.Vector2f;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 public class DebugWidgetPanel extends Panel {
@@ -99,10 +96,7 @@ public class DebugWidgetPanel extends Panel {
 	public final GameProfileImBuilder profileBuilder = new GameProfileImBuilder();
 	public final TransformationListImBuilder transformationListBuilder = new TransformationListImBuilder();
 	public final ImBuilder<KNumber> numberBuilder2 = new KNumberNodeImBuilder();
-	public final GalleryImageImBuilder galleryImageBuilder = new GalleryImageImBuilder(
-		List.of(Pins.GALLERY, PlayerBodies.GALLERY, PlayerHeads.GALLERY),
-		List.of(Pins.UPLOADER, PlayerBodies.UPLOADER, PlayerHeads.UPLOADER)
-	);
+	public final GalleryImageImBuilder galleryImageBuilder = new GalleryImageImBuilder(Gallery.ALL.get().values());
 
 	public ItemStack currentStack = ItemStack.EMPTY;
 	public VisualItemKey currentStackKey = VisualItemKey.AIR;
