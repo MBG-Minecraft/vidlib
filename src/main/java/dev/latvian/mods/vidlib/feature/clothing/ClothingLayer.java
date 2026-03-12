@@ -69,8 +69,6 @@ public class ClothingLayer extends RenderLayer<PlayerRenderState, PlayerModel> {
 			return;
 		}
 
-		var parentModel = getParentModel();
-
 		for (var slot : Clothing.ORDERED_SLOTS) {
 			if (!clothing.parts().visible(slot)) {
 				continue;
@@ -91,7 +89,7 @@ public class ClothingLayer extends RenderLayer<PlayerRenderState, PlayerModel> {
 					buffer = buffers.getBuffer(renderType);
 				}
 
-				parentModel.copyPropertiesTo(model);
+				getParentModel().copyPropertiesTo(model);
 				model.setAllVisible(false);
 
 				switch (slot) {
@@ -113,7 +111,7 @@ public class ClothingLayer extends RenderLayer<PlayerRenderState, PlayerModel> {
 						model.leftLeg.visible = true;
 				}
 
-				model.setupAnim(state);
+				// model.setupAnim(state);
 				model.renderToBuffer(ms, buffer, light, OverlayTexture.NO_OVERLAY);
 				ms.popPose();
 			}
