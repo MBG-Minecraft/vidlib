@@ -1,9 +1,11 @@
 package dev.latvian.mods.vidlib.integration.replay;
 
-import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.replay.api.ReplayMarkerType;
 import dev.latvian.mods.replay.api.event.RegisterReplaySessionDataEvent;
+import dev.latvian.mods.replay.api.event.ReplayCaptureConfigSnapshotEvent;
+import dev.latvian.mods.replay.api.event.ReplayCaptureEntitySnapshotEvent;
+import dev.latvian.mods.replay.api.event.ReplayCaptureGameSnapshotEvent;
 import dev.latvian.mods.replay.api.event.ReplayEntityMenuEvent;
 import dev.latvian.mods.replay.api.event.ReplayGetClickTargetEvent;
 import dev.latvian.mods.replay.api.event.ReplayHandleClickTargetEvent;
@@ -26,7 +28,6 @@ import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
 import dev.latvian.mods.vidlib.feature.imgui.EntityExplorerPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.misc.EventMarkerPayload;
 import dev.latvian.mods.vidlib.feature.misc.SyncPlayerTagsPayload;
@@ -38,10 +39,10 @@ import dev.latvian.mods.vidlib.feature.prop.AddPropPayload;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
-import dev.latvian.mods.vidlib.feature.prop.PropListType;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.prop.RecordedProp;
 import dev.latvian.mods.vidlib.feature.prop.RemovePropsPayload;
+import dev.latvian.mods.vidlib.feature.session.LocalClientSessionData;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
 import imgui.ImGui;
@@ -62,17 +63,9 @@ import java.util.Set;
 
 @EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
 public class VLReplayIntegration {
-	public static int selectedProp = 0;
-	public static JsonObject selectedPropData = null;
-	public static PropListType selectedPropList = PropListType.LEVEL;
-	public static boolean openSelectedPropPopup = false;
-	public static int lastWidth = -1, lastHeight = -1;
-
 	@SubscribeEvent
 	public static void replaySessionOpened(ReplaySessionOpenedEvent event) {
-		var mc = Minecraft.getInstance();
-		var server = mc.getSingleplayerServer();
-		var registryAccess = server.registryAccess();
+		var registryAccess = event.getSession().getRegistryAccess();
 
 		var dataMapOverrideBuilder = new DataMapOverrides.Builder();
 		var recordedProps = new ArrayList<RecordedProp>();
@@ -173,6 +166,28 @@ public class VLReplayIntegration {
 	}
 
 	@SubscribeEvent
+	public static void captureConfigSnapshot(ReplayCaptureConfigSnapshotEvent event) {
+	}
+
+	@SubscribeEvent
+	public static void captureGameSnapshot(ReplayCaptureGameSnapshotEvent event) {
+		VidLib.LOGGER.info("Replay Game snapshot");
+		var packets = event.getPackets();
+		var player = event.getSession().getPlayer();
+		var session = (LocalClientSessionData) player.vl$sessionData();
+		session.sync(packets, player, 1);
+
+		if (!session.markers.isEmpty()) {
+			session.markers.forEach(packets::s2c);
+		}
+	}
+
+	@SubscribeEvent
+	public static void captureEntitySnapshot(ReplayCaptureEntitySnapshotEvent event) {
+		event.getEntity().replaySnapshot(event.getPackets());
+	}
+
+	@SubscribeEvent
 	public static void menuBar(ReplayMenuBarEvent event) {
 		ImGui.separator();
 		BuiltInImGui.MAIN_MENU_BAR.buildMenuBar(event.getGraphics(), false);
@@ -180,35 +195,37 @@ public class VLReplayIntegration {
 
 	@SubscribeEvent
 	public static void entityMenu(ReplayEntityMenuEvent event) {
-		ImGuiUtils.separatorWithText("VidLib");
-		var mc = Minecraft.getInstance();
-		EntityExplorerPanel.imgui(event.getGraphics(), event.getEntity(), mc.getDeltaTracker().getGameTimeDeltaPartialTick(event.getEntity() == mc.player));
+		if (event.beginSection("vidlib", "VidLib")) {
+			var mc = Minecraft.getInstance();
+			EntityExplorerPanel.imgui(event.getGraphics(), event.getEntity(), mc.getDeltaTracker().getGameTimeDeltaPartialTick(event.getEntity() == mc.player));
+			event.endSection();
+		}
 	}
 
 	@SubscribeEvent
 	public static void visualsMenu(ReplayVisualsMenuEvent event) {
-		ImGuiUtils.separatorWithText("VidLib");
+		if (event.beginSection("vidlib", "")) {
+			if (event.beginSection("flags", "VidLib")) {
+				ImGui.checkbox("Props###props", ClientProps.VISIBLE);
+				ImGui.checkbox("Physics Particles###physics-particles", PhysicsParticleManager.VISIBLE);
+				ImGui.checkbox("Clocks###clocks", ClockRenderer.VISIBLE);
+				ImGui.checkbox("Bloom###bloom", Bloom.VISIBLE);
+				ImGui.checkbox("Ghost Structures###ghost-structures", GhostStructure.VISIBLE_CONFIG);
+				event.endSection();
+			}
 
-		ImGui.pushID("vidlib");
-		ImGui.pushID("###flags");
-		ImGui.checkbox("Props###props", ClientProps.VISIBLE);
-		ImGui.checkbox("Physics Particles###physics-particles", PhysicsParticleManager.VISIBLE);
-		ImGui.checkbox("Clocks###clocks", ClockRenderer.VISIBLE);
-		ImGui.checkbox("Bloom###bloom", Bloom.VISIBLE);
-		ImGui.checkbox("Ghost Structures###ghost-structures", GhostStructure.VISIBLE_CONFIG);
-		ImGui.popID();
+			if (event.beginSection("pins", "Player Pins")) {
+				Pins.fbVisualsMenu(event.getGraphics());
+				event.endSection();
+			}
 
-		ImGuiUtils.separatorWithText("Player Pins");
-		ImGui.pushID("###pins");
-		Pins.fbVisualsMenu(event.getGraphics());
-		ImGui.popID();
-
-		ImGui.popID();
+			event.endSection();
+		}
 	}
 
 	@SubscribeEvent
 	public static void renderFilterMenu(ReplayRenderFilterMenuEvent event) {
-		if (ImGui.beginTabItem("Props")) {
+		if (event.beginSection("props", "Props")) {
 			if (ImGui.beginListBox("###props")) {
 				for (var propType : PropType.SORTED.get()) {
 					boolean visible = !ClientProps.HIDDEN_PROP_TYPES.contains(propType);
@@ -225,13 +242,14 @@ public class VLReplayIntegration {
 				ImGui.endListBox();
 			}
 
-			ImGui.endTabItem();
+			event.endSection();
 		}
 	}
 
 	@SubscribeEvent
 	public static void registerReplaySessionData(RegisterReplaySessionDataEvent event) {
 		event.register(new PinReplaySessionData());
+		event.register(new SelectedPropReplaySessionData());
 	}
 
 	@SubscribeEvent
@@ -244,10 +262,11 @@ public class VLReplayIntegration {
 	@SubscribeEvent
 	public static void handleClickTarget(ReplayHandleClickTargetEvent event) {
 		if (event.getHitResult() instanceof PropHitResult propResult) {
-			selectedProp = propResult.prop.id;
-			selectedPropData = propResult.prop.getDataJson(JsonOps.INSTANCE);
-			selectedPropList = propResult.prop.spawnType.listType;
-			openSelectedPropPopup = true;
+			var data = event.getSession().getData(SelectedPropReplaySessionData.TYPE);
+			data.selectedProp = propResult.prop.id;
+			data.selectedPropData = propResult.prop.getDataJson(JsonOps.INSTANCE);
+			data.selectedPropList = propResult.prop.spawnType.listType;
+			data.openSelectedPropPopup = true;
 			event.setCanceled(true);
 		}
 	}
@@ -260,14 +279,16 @@ public class VLReplayIntegration {
 			BuiltInImGui.handle(event.getGraphics());
 		}
 
-		if (openSelectedPropPopup) {
+		var data = event.getSession().getData(SelectedPropReplaySessionData.TYPE);
+
+		if (data.openSelectedPropPopup) {
 			ImGui.openPopup("###vidlib-prop-popup");
-			openSelectedPropPopup = false;
+			data.openSelectedPropPopup = false;
 		}
 
-		if (selectedProp != 0 && ImGui.beginPopup("###vidlib-prop-popup", ImGuiWindowFlags.AlwaysAutoResize)) {
-			var propList = mc.level.getProps().propLists.get(selectedPropList);
-			var prop = propList == null ? null : propList.get(selectedProp);
+		if (data.selectedProp != 0 && ImGui.beginPopup("###vidlib-prop-popup", ImGuiWindowFlags.AlwaysAutoResize)) {
+			var propList = mc.level.getProps().propLists.get(data.selectedPropList);
+			var prop = propList == null ? null : propList.get(data.selectedProp);
 
 			if (prop != null) {
 				ClientProps.OPEN_PROPS.add(prop.id);
@@ -279,27 +300,15 @@ public class VLReplayIntegration {
 		}
 
 		if (!ImGui.isPopupOpen("###vidlib-prop-popup")) {
-			var propList = mc.level.getProps().propLists.get(selectedPropList);
-			var prop = propList == null ? null : propList.get(selectedProp);
+			var propList = mc.level.getProps().propLists.get(data.selectedPropList);
+			var prop = propList == null ? null : propList.get(data.selectedProp);
 			if (prop != null) {
-				var data = prop.getDataJson(JsonOps.INSTANCE);
-				if (!selectedPropData.equals(data)) {
+				var dataJson = prop.getDataJson(JsonOps.INSTANCE);
+				if (!data.selectedPropData.equals(dataJson)) {
 					FlashbackIntegration.MAKE_PROP_KEYFRAMES.add(prop);
 				}
 			}
-			selectedProp = 0;
-		}
-
-		int w = mc.getWindow().getWidth();
-		int h = mc.getWindow().getHeight();
-		int scw = mc.getWindow().getGuiScaledWidth();
-		int sch = mc.getWindow().getGuiScaledHeight();
-
-		// Fix flashback lagging extremely after window is minimized
-		if (scw > w || sch > h || lastWidth != scw || lastHeight != sch) {
-			mc.resizeDisplay();
-			lastWidth = scw;
-			lastHeight = sch;
+			data.selectedProp = 0;
 		}
 	}
 

@@ -16,6 +16,6 @@ public interface VLS2CConfigPacketConsumer {
 	}
 
 	default void s2c(SimplePacketPayload packet) {
-		s2c(packet.toS2C(0L));
+		s2c(packet.toS2CPacket(0L));
 	}
 }

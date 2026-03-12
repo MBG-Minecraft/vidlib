@@ -67,6 +67,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.network.bundle.PacketAndPayloadAcceptor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -486,5 +487,20 @@ public class CommonGameEngine {
 
 	public List<WarpLocation> getWarpLocations() {
 		return List.of();
+	}
+
+	public void initialPlayerSync(ServerPlayer player, PacketAndPayloadAcceptor<ClientGamePacketListener> callback) {
+		// callback.accept(new SyncPlayerTagsPayload(player.getUUID(), List.copyOf(player.getTags())).toS2C(player.level().getGameTime()));
+	}
+
+	public void tickPlayerSync(ServerPlayer player) {
+		/*
+		var tags = player.getTags();
+
+		if (vl$prevTags == null || !vl$prevTags.equals(tags)) {
+			vl$prevTags = Set.copyOf(tags);
+			player.getServer().vl$level().s2c(new SyncPlayerTagsPayload(player.getUUID(), List.copyOf(tags)));
+		}
+		 */
 	}
 }

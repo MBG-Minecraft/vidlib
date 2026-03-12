@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.pin;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.color.Color;
@@ -9,14 +10,13 @@ import dev.latvian.mods.vidlib.feature.gallery.GalleryImage;
 import net.minecraft.Util;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
 import java.util.UUID;
 
 public final class Pin {
 	public static final Color DEFAULT_COLOR = Color.of(0xFFFFFFFF);
 	public static final Color DEFAULT_BACKGROUND = Color.of(0x5A000000);
 
-	public static final Codec<Pin> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final MapCodec<Pin> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.BOOL.optionalFieldOf("enabled", true).forGetter(p -> p.enabled),
 		Codec.STRING.optionalFieldOf("gallery", "").forGetter(p -> p.gallery),
 		KLibCodecs.UUID.optionalFieldOf("texture", Util.NIL_UUID).forGetter(p -> p.texture),
@@ -25,7 +25,7 @@ public final class Pin {
 		PinShape.CODEC.optionalFieldOf("shape", PinShape.PIN).forGetter(p -> p.shape)
 	).apply(instance, Pin::new));
 
-	public static final Codec<Map<UUID, Pin>> UNBOUND_MAP_CODEC = Codec.unboundedMap(KLibCodecs.UUID, CODEC);
+	public static final Codec<Pin> CODEC = MAP_CODEC.codec();
 
 	public boolean enabled;
 	public String gallery;
@@ -33,6 +33,7 @@ public final class Pin {
 	public Color color;
 	public Color background;
 	public PinShape shape;
+	public PinShape shapeOverride = null;
 
 	public Pin() {
 		this.enabled = true;

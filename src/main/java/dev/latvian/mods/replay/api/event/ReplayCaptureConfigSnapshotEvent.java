@@ -1,20 +1,17 @@
 package dev.latvian.mods.replay.api.event;
 
 import dev.latvian.mods.replay.api.ReplayAPI;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.configuration.ClientConfigurationPacketListener;
-
-import java.util.function.Consumer;
+import dev.latvian.mods.vidlib.core.VLS2CConfigPacketConsumer;
 
 public class ReplayCaptureConfigSnapshotEvent extends ReplayCaptureSnapshotEvent {
-	private final Consumer<Packet<? super ClientConfigurationPacketListener>> callback;
+	private final VLS2CConfigPacketConsumer packets;
 
-	public ReplayCaptureConfigSnapshotEvent(ReplayAPI api, ReplayCaptureSession session, Consumer<Packet<? super ClientConfigurationPacketListener>> callback) {
+	public ReplayCaptureConfigSnapshotEvent(ReplayAPI api, ReplayCaptureSession session, VLS2CConfigPacketConsumer packets) {
 		super(api, session);
-		this.callback = callback;
+		this.packets = packets;
 	}
 
-	public void s2c(Packet<? super ClientConfigurationPacketListener> packet) {
-		callback.accept(packet);
+	public VLS2CConfigPacketConsumer getPackets() {
+		return packets;
 	}
 }

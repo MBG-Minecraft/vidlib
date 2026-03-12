@@ -24,6 +24,6 @@ public interface VLC2SPacketConsumer extends LevelGameTimeProvider {
 	}
 
 	default void c2s(SimplePacketPayload packet) {
-		c2s(packet.toC2S(getLevelGameTime()));
+		c2s(packet.toC2SPacket(getLevelGameTime()));
 	}
 }

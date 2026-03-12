@@ -101,7 +101,7 @@ public class SessionData implements Comparable<SessionData> {
 
 	/**
 	 * syncType 0 = reload
-	 * syncType 1 = flashback snapshot
+	 * syncType 1 = replay snapshot
 	 * syncType 2 = login
 	 */
 	public void sync(VLS2CPacketConsumer packets, Player player, int syncType) {

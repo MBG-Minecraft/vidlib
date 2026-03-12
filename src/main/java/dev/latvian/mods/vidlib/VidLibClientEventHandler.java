@@ -59,7 +59,6 @@ import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
-import dev.latvian.mods.vidlib.integration.replay.VLFlashbackIntegration;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
@@ -80,7 +79,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
@@ -133,10 +131,6 @@ public class VidLibClientEventHandler {
 	}
 
 	public static void syncSetup() {
-		if (ModList.get().isLoaded("flashback")) {
-			VLFlashbackIntegration.init();
-		}
-
 		InternalServerData.ANCHOR.addUpdateListener(VidLibClientEventHandler::updateAnchor);
 	}
 

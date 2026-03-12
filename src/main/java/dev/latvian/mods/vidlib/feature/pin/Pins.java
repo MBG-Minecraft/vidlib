@@ -8,7 +8,6 @@ import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
-import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.gallery.Gallery;
 import dev.latvian.mods.vidlib.feature.gallery.GalleryFileUploader;
 import dev.latvian.mods.vidlib.feature.gallery.GalleryImageImBuilder;
@@ -118,19 +117,26 @@ public interface Pins {
 				graphics.pose().translate(-pinSize / 2F, -pinSize * (1F + PIN_OFFSET.get()), 0F);
 				graphics.pose().scale(pinSize / 512F, pinSize / 512F, 1F);
 
-				var s = screenPin.pin().shape;
-
-				int color = s.overlayTexture == VidLibTextures.TRANSPARENT ? screenPin.pin().color.argb() : (pinAlpha | screenPin.pin().color.rgb());
+				var shape = screenPin.pin().shapeOverride == null ? screenPin.pin().shape : screenPin.pin().shapeOverride;
+				int size = shape.size;
+				int color = shape.transparentBackground ? screenPin.pin().color.argb() : (pinAlpha | screenPin.pin().color.rgb());
 
 				screenPin.image().load(mc, true);
-				graphics.blit(VidLibRenderTypes.GUI, s.maskTexture, s.x, s.y, 0F, 0F, s.w, s.h, s.w, s.h, color);
 
-				if (!screenPin.pin().background.isTransparent()) {
-					graphics.blit(VidLibRenderTypes.GUI, s.maskTexture, s.x, s.y, 0F, 0F, s.w, s.h, s.w, s.h, screenPin.pin().background.withAlpha(screenPin.pin().background.alphaf() * (PIN_ALPHA.get() / 255F)).argb());
+				if (!shape.transparentBackground) {
+					graphics.blit(VidLibRenderTypes.GUI, shape.maskTexture, shape.x, shape.y, 0F, 0F, size, size, size, size, color);
 				}
 
-				graphics.blit(s.maskedRenderType, screenPin.image().textureId(), s.x, s.y, 1F, 1F, s.w - 2, s.h - 2, s.w, s.h, pinAlpha | 0xFFFFFF);
-				graphics.blit(VidLibRenderTypes.GUI, s.overlayTexture, 0, 0, 0F, 0F, 512, 512, 512, 512, color);
+				if (!screenPin.pin().background.isTransparent()) {
+					graphics.blit(VidLibRenderTypes.GUI, shape.maskTexture, shape.x, shape.y, 0F, 0F, size, size, size, size, screenPin.pin().background.withAlpha(screenPin.pin().background.alphaf() * (PIN_ALPHA.get() / 255F)).argb());
+				}
+
+				graphics.blit(shape.maskedRenderType, screenPin.image().textureId(), shape.x, shape.y, 1F, 1F, size - 2, size - 2, size, size, pinAlpha | 0xFFFFFF);
+
+				if (shape.overlayTexture != null) {
+					graphics.blit(VidLibRenderTypes.GUI, shape.overlayTexture, 0, 0, 0F, 0F, 512, 512, 512, 512, color);
+				}
+
 				graphics.pose().popPose();
 			}
 		}
@@ -169,7 +175,7 @@ public interface Pins {
 		if (pin != null && pin.isSet()) {
 			ImGui.sameLine();
 
-			if (pin.shape.overlayTexture == VidLibTextures.TRANSPARENT) {
+			if (pin.shape.transparentBackground) {
 				Color4ImBuilder.UNIT.set(pin.color);
 
 				if (Color4ImBuilder.UNIT.imguiKey(graphics, "", "color").isAny()) {
@@ -193,8 +199,11 @@ public interface Pins {
 
 			ImGui.sameLine();
 
+			ImGui.pushID("###pin-shape-button");
+
 			if (graphics.imageButton(pin.shape.iconTexture, ImGui.getFrameHeight() - 4F, ImGui.getFrameHeight() - 4F, UV.FULL, 2, null)) {
-				pin.shape = PinShape.VALUES[(pin.shape.ordinal() + 1) % PinShape.VALUES.length];
+				// pin.shape = PinShape.VALUES[(pin.shape.ordinal() + 1) % PinShape.VALUES.length];
+				ImGui.openPopup("###pin-shape-popup");
 			}
 
 			if (ImGui.isItemHovered()) {
@@ -203,6 +212,36 @@ public interface Pins {
 				ImGui.image(graphics.mc.getTextureManager().getTexture(pin.shape.iconTexture).getTexture().vl$getHandle(), 64F, 64F);
 				ImGui.endTooltip();
 			}
+
+			if (ImGui.beginPopup("###pin-shape-popup")) {
+				for (int i = 0; i < PinShape.VALUES.length; i++) {
+					if (i % 4 != 0) {
+						ImGui.sameLine();
+					}
+
+					var shape = PinShape.VALUES[i];
+
+					ImGui.pushID(i);
+
+					if (graphics.imageButton(shape.iconTexture, 40F, 40F, UV.FULL, 2, null)) {
+						pin.shape = shape;
+						ImGui.closeCurrentPopup();
+					}
+
+					if (ImGui.isItemHovered()) {
+						ImGui.setTooltip(shape.displayName);
+						pin.shapeOverride = shape;
+					}
+
+					ImGui.popID();
+				}
+
+				ImGui.endPopup();
+			} else {
+				pin.shapeOverride = null;
+			}
+
+			ImGui.popID();
 		}
 	}
 
