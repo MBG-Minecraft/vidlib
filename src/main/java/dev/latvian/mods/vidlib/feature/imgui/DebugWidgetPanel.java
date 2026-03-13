@@ -97,6 +97,7 @@ public class DebugWidgetPanel extends Panel {
 	public final TransformationListImBuilder transformationListBuilder = new TransformationListImBuilder();
 	public final ImBuilder<KNumber> numberBuilder2 = new KNumberNodeImBuilder();
 	public final GalleryImageImBuilder galleryImageBuilder = new GalleryImageImBuilder(Gallery.ALL.get().values());
+	public final ProgressQueue errorQueue = new ProgressQueue("Error Test Queue");
 
 	public ItemStack currentStack = ItemStack.EMPTY;
 	public VisualItemKey currentStackKey = VisualItemKey.AIR;
@@ -560,6 +561,11 @@ public class DebugWidgetPanel extends Panel {
 			});
 
 			queue.display();
+		}
+
+		if (ImGui.button("Test Error Queue###test-error-queue")) {
+			errorQueue.error(ImText.warning("Error " + System.currentTimeMillis()));
+			errorQueue.display();
 		}
 
 		ImGui.separator();

@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib.feature.progressqueue;
 
+import dev.latvian.mods.vidlib.feature.imgui.ImText;
 import imgui.type.ImBoolean;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -8,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class ProgressQueue {
+	@ApiStatus.Internal
 	public static final ConcurrentLinkedDeque<ProgressQueue> ACTIVE = new ConcurrentLinkedDeque<>();
 
 	public static ProgressItem queueSingleItem(String title) {
@@ -42,19 +45,25 @@ public class ProgressQueue {
 	public final Deque<ProgressItem> items;
 	public String topText;
 	public String bottomText;
-	public final Deque<String> errors;
+	public final Deque<ImText> errors;
 	public boolean hideInGame;
 	public boolean canCancel;
 	public final ImBoolean open;
+	public boolean active;
 
-	public ProgressQueue() {
+	public ProgressQueue(String topText) {
 		this.items = new ConcurrentLinkedDeque<>();
-		this.topText = "Loading...";
+		this.topText = topText;
 		this.bottomText = "";
 		this.errors = new ConcurrentLinkedDeque<>();
 		this.hideInGame = false;
 		this.canCancel = false;
 		this.open = new ImBoolean(true);
+		this.active = false;
+	}
+
+	public ProgressQueue() {
+		this("Loading...");
 	}
 
 	public ProgressItem addItem(ProgressItemNameFunction nameFunction) {
@@ -72,10 +81,26 @@ public class ProgressQueue {
 	}
 
 	public void display() {
-		ACTIVE.add(this);
+		if (!active) {
+			active = true;
+			open.set(true);
+			ACTIVE.add(this);
+		}
 	}
 
 	public boolean isCancelled() {
 		return !open.get();
+	}
+
+	public void error(ImText error) {
+		errors.add(error);
+	}
+
+	public void error(String error) {
+		error(ImText.of(error));
+	}
+
+	public void warning(String error) {
+		error(ImText.warning(error));
 	}
 }

@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.feature.progressqueue;
 
+import dev.latvian.mods.vidlib.feature.imgui.ImText;
+
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -36,8 +38,16 @@ public record ProgressItem(ProgressQueue queue, AtomicInteger status, AtomicLong
 		return this.progress.addAndGet(progress);
 	}
 
-	public void error(String error) {
-		queue.errors.add(error);
+	public void error(ImText error) {
+		queue.error(error);
 		setDone();
+	}
+
+	public void error(String error) {
+		error(ImText.of(error));
+	}
+
+	public void warning(String error) {
+		error(ImText.warning(error));
 	}
 }

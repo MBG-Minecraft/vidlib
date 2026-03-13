@@ -52,17 +52,17 @@ public class ProgressQueueImGui {
 			}
 
 			if (done >= maxFileCount && queue.errors.isEmpty()) {
+				queue.active = false;
 				queueItr.remove();
 				continue;
 			}
 
-			ImGui.setNextWindowContentSize(300F, 0F);
+			ImGui.setNextWindowSizeConstraints(300F, 20F, 300F, 600F);
 			ImGui.setNextWindowPos(windowX, windowY);
 
 			int flags = ImGuiWindowFlags.NoDocking
 				| ImGuiWindowFlags.NoNav
 				| ImGuiWindowFlags.NoResize
-				| ImGuiWindowFlags.NoScrollbar
 				| ImGuiWindowFlags.NoCollapse
 				| ImGuiWindowFlags.AlwaysAutoResize
 				| ImGuiWindowFlags.NoSavedSettings;
@@ -70,10 +70,6 @@ public class ProgressQueueImGui {
 			var windowId = queue.topText + "###progress-queue-" + queueCount;
 
 			if (queue.canCancel || !queue.errors.isEmpty() ? ImGui.begin(windowId, queue.open, flags) : ImGui.begin(windowId, flags)) {
-				if (!queue.open.get()) {
-					queue.errors.clear();
-				}
-
 				ImGui.pushItemWidth(-1F);
 
 				if (maxFileCount > 1) {
@@ -96,11 +92,14 @@ public class ProgressQueueImGui {
 					graphics.setErrorText();
 
 					for (var error : queue.errors) {
+						error.push(graphics);
+
 						if (queue.errors.size() > 1) {
 							ImGui.bullet();
 						}
 
-						ImGui.textWrapped(error);
+						ImGui.textWrapped(error.text());
+						error.pop(graphics);
 					}
 
 					graphics.popStack();
@@ -113,6 +112,10 @@ public class ProgressQueueImGui {
 
 				ImGui.popItemWidth();
 				windowY += ImGui.getWindowSizeY() + offset;
+
+				if (!queue.open.get()) {
+					queue.errors.clear();
+				}
 			}
 
 			ImGui.end();
