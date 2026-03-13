@@ -91,7 +91,7 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 		return vl$level().getServer().vl$isReplayServer();
 	}
 
-	// Other mods like Motion Capture mod create fake players, so this avoid a null pointer.
+	// Other mods like Motion Capture mod create fake players, so this avoids a null pointer.
 	@Inject(method = "addPlayer", at = @At("HEAD"))
 	private void vl$addPlayer(ServerPlayer player, CallbackInfo ci) {
 		if (player.vl$sessionData() != null) {

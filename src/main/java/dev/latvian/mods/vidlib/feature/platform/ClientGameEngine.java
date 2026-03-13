@@ -854,4 +854,8 @@ public class ClientGameEngine {
 	public boolean uploadReplaysSequentially() {
 		return true;
 	}
+
+	public boolean hideActionBarText(Minecraft mc, Component component) {
+		return false;
+	}
 }

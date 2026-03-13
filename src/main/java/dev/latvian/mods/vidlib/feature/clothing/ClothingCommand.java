@@ -48,28 +48,32 @@ public interface ClothingCommand {
 		)
 		.then(Commands.literal("remove")
 			.then(Commands.argument("player", EntityArgument.players())
-				.executes(ctx -> setClothing(EntityArgument.getPlayers(ctx, "player"), Clothing.NONE))
+				.executes(ctx -> removeClothing(EntityArgument.getPlayers(ctx, "player")))
 			)
 		)
 	);
 
 	private static int setClothing(Collection<ServerPlayer> players, Clothing clothing) {
 		for (var player : players) {
-			player.setClothing(clothing == Clothing.NONE ? List.of() : List.of(clothing));
+			player.setClothing(List.of(clothing));
 		}
 
 		return 1;
 	}
 
 	private static int addClothing(Collection<ServerPlayer> players, Clothing clothing) {
-		if (clothing == Clothing.NONE) {
-			return 0;
-		}
-
 		for (var player : players) {
 			var list = new ArrayList<>(player.get(InternalPlayerData.CLOTHING));
 			list.add(clothing);
 			player.setClothing(list);
+		}
+
+		return 1;
+	}
+
+	private static int removeClothing(Collection<ServerPlayer> players) {
+		for (var player : players) {
+			player.setClothing(List.of());
 		}
 
 		return 1;

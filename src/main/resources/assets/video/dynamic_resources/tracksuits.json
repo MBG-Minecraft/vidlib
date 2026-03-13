@@ -19,10 +19,6 @@
 		{
 			"template": "video:dynamic_resources/tracksuit/equipment.json",
 			"location": "{namespace}:equipment/tracksuit/{path}.json"
-		},
-		{
-			"template": "video:dynamic_resources/tracksuit/equipment_with_x.json",
-			"location": "{namespace}:equipment/tracksuit/{path}/x.json"
 		}
 	],
 	"color_map": "video:dynamic_resources/tracksuit/colors.png",
@@ -34,10 +30,6 @@
 		{
 			"template": "video:dynamic_resources/tracksuit/leggings.png",
 			"location": "{namespace}:textures/entity/equipment/humanoid_leggings/tracksuit/{path}.png"
-		},
-		{
-			"template": "video:dynamic_resources/tracksuit/leggings_with_x.png",
-			"location": "{namespace}:textures/entity/equipment/humanoid_leggings/tracksuit/{path}_with_x.png"
 		}
 	]
 }

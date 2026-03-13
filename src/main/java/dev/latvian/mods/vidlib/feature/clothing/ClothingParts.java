@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.clothing;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
@@ -14,12 +14,15 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-import java.util.function.Function;
+import java.util.Map;
 
 @AutoInit
 public record ClothingParts(boolean head, boolean body, boolean legs, boolean feet, boolean enchanted) {
 	public static final ClothingParts ALL = new ClothingParts(true, true, true, true, false);
 	public static final ClothingParts NONE = new ClothingParts(false, false, false, false, false);
+	public static final ClothingParts NO_HEAD = new ClothingParts(false, true, true, true, false);
+	public static final ClothingParts ONLY_BODY = new ClothingParts(false, true, false, false, false);
+	public static final ClothingParts ONLY_LEGS = new ClothingParts(false, false, true, false, false);
 
 	public static final Codec<ClothingParts> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Codec.BOOL.optionalFieldOf("head", true).forGetter(ClothingParts::head),
@@ -29,7 +32,15 @@ public record ClothingParts(boolean head, boolean body, boolean legs, boolean fe
 		Codec.BOOL.optionalFieldOf("enchanted", false).forGetter(ClothingParts::enchanted)
 	).apply(instance, ClothingParts::new));
 
-	public static final Codec<ClothingParts> CODEC = Codec.either(Codec.BOOL, DIRECT_CODEC).xmap(either -> either.map(b -> b ? ALL : NONE, Function.identity()), p -> p.equals(ALL) ? Either.left(true) : p.equals(NONE) ? Either.left(false) : Either.right(p));
+	public static final Codec<ClothingParts> MAP_CODEC = KLibCodecs.partialMap(Map.of(
+		"all", ALL,
+		"none", NONE,
+		"no_head", NO_HEAD,
+		"only_body", ONLY_BODY,
+		"only_legs", ONLY_LEGS
+	), Codec.STRING, false);
+
+	public static final Codec<ClothingParts> CODEC = KLibCodecs.or(MAP_CODEC, DIRECT_CODEC);
 
 	public static final StreamCodec<ByteBuf, ClothingParts> STREAM_CODEC = new StreamCodec<>() {
 		@Override

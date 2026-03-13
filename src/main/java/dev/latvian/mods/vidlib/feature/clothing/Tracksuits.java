@@ -7,18 +7,22 @@ import java.util.List;
 
 @AutoInit
 public interface Tracksuits {
-	Clothing BLACK = new Clothing(ID.video("tracksuit/black"));
-	Clothing WHITE = new Clothing(ID.video("tracksuit/white"));
-	Clothing RED = new Clothing(ID.video("tracksuit/red"));
-	Clothing PINK = new Clothing(ID.video("tracksuit/pink"));
-	Clothing MAGENTA = new Clothing(ID.video("tracksuit/magenta"));
-	Clothing PURPLE = new Clothing(ID.video("tracksuit/purple"));
-	Clothing BLUE = new Clothing(ID.video("tracksuit/blue"));
-	Clothing CYAN = new Clothing(ID.video("tracksuit/cyan"));
-	Clothing GREEN = new Clothing(ID.video("tracksuit/green"));
-	Clothing LIME = new Clothing(ID.video("tracksuit/lime"));
-	Clothing YELLOW = new Clothing(ID.video("tracksuit/yellow"));
-	Clothing ORANGE = new Clothing(ID.video("tracksuit/orange"));
+	static Clothing tracksuit(String id) {
+		return new Clothing(ID.video("tracksuit/" + id), ClothingParts.NO_HEAD);
+	}
+
+	Clothing BLACK = tracksuit("black");
+	Clothing WHITE = tracksuit("white");
+	Clothing RED = tracksuit("red");
+	Clothing PINK = tracksuit("pink");
+	Clothing MAGENTA = tracksuit("magenta");
+	Clothing PURPLE = tracksuit("purple");
+	Clothing BLUE = tracksuit("blue");
+	Clothing CYAN = tracksuit("cyan");
+	Clothing GREEN = tracksuit("green");
+	Clothing LIME = tracksuit("lime");
+	Clothing YELLOW = tracksuit("yellow");
+	Clothing ORANGE = tracksuit("orange");
 
 	List<Clothing> COLORED = List.of(
 		RED,
@@ -33,5 +37,7 @@ public interface Tracksuits {
 		ORANGE
 	);
 
-	Clothing SQUID = new Clothing(ID.video("tracksuit/squid"));
+	Clothing SQUID = tracksuit("squid");
+
+	Clothing X = new Clothing(ID.video("tracksuit/x"), ClothingParts.ONLY_LEGS);
 }
