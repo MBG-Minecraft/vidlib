@@ -44,6 +44,7 @@ import dev.latvian.mods.vidlib.feature.prop.RecordedProp;
 import dev.latvian.mods.vidlib.feature.prop.RemovePropsPayload;
 import dev.latvian.mods.vidlib.feature.session.LocalClientSessionData;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
+import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
@@ -210,6 +211,7 @@ public class VLReplayIntegration {
 				ImGui.checkbox("Clocks###clocks", ClockRenderer.VISIBLE);
 				ImGui.checkbox("Bloom###bloom", Bloom.VISIBLE);
 				ImGui.checkbox("Ghost Structures###ghost-structures", GhostStructure.VISIBLE_CONFIG);
+				ImGui.checkbox("Waypoints###waypoints", ClientWaypoints.VISIBLE);
 				event.endSection();
 			}
 

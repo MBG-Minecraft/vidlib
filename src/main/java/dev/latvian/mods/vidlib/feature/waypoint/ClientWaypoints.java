@@ -18,12 +18,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 public interface ClientWaypoints {
-	ImBoolean ENABLED = new ImBoolean(true);
+	ImBoolean VISIBLE = new ImBoolean(true);
 	ImFloat WAYPOINT_SIZE = new ImFloat(32F);
 	ImInt WAYPOINT_ALPHA = new ImInt(255);
 
 	static void draw(GuiGraphics graphics, DeltaTracker deltaTracker) {
-		if (!ENABLED.get()) {
+		if (!VISIBLE.get()) {
 			return;
 		}
 

@@ -30,6 +30,7 @@ import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.skybox.ClientSkybox;
 import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
+import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
@@ -207,6 +208,7 @@ public class BuiltInImGui {
 		list.add(MenuItem.item(ImIcons.TIMELAPSE, "Clocks", ClockRenderer.VISIBLE).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.SUN, "Bloom", Bloom.VISIBLE).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.FRAMED_CUBE, "Ghost Structures", GhostStructure.VISIBLE_CONFIG).enabled(graphics.isAdmin));
+		list.add(MenuItem.item(ImIcons.LOCATION, "Waypoints", ClientWaypoints.VISIBLE).enabled(graphics.inGame));
 
 		list.add(MenuItem.SEPARATOR);
 
