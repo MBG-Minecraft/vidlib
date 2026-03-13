@@ -45,6 +45,22 @@ public class PlatformHelper {
 		return "bukkit";
 	}
 
+	public Path getGameDirectory() {
+		return Path.of(".");
+	}
+
+	public Path getConfigDirectory() {
+		return getGameDirectory().resolve("config");
+	}
+
+	public Path getModsDirectory() {
+		return getGameDirectory().resolve("mods");
+	}
+
+	public Path getLocalDirectory() {
+		return getGameDirectory().resolve("local");
+	}
+
 	public RegistryFriendlyByteBuf createBuffer(ByteBuf source, RegistryAccess access) {
 		return new RegistryFriendlyByteBuf(source, access);
 	}

@@ -56,6 +56,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 	public final LocalClientSessionData session;
 	public final boolean isSinglePlayer;
 	public final boolean isReplay;
+	public final boolean isExportingReplay;
 	public final FeatureSet serverFeatures;
 	public final boolean adminPanel;
 	public final boolean isAdmin;
@@ -67,7 +68,8 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		this.player = inGame ? mc.player : null;
 		this.session = inGame ? mc.player.vl$sessionData() : null;
 		this.isSinglePlayer = inGame && mc.isLocalServer();
-		this.isReplay = ReplayAPI.getActive().isInReplayOrExporting();
+		this.isReplay = ReplayAPI.getActive().isInReplay();
+		this.isExportingReplay = ReplayAPI.getActive().isExporting();
 		this.serverFeatures = inGame ? mc.level.getServerFeatures() : FeatureSet.EMPTY;
 		this.adminPanel = isReplay || VidLibClientOptions.getAdminPanel() && ClientGameEngine.INSTANCE.allowAdminPanel(mc.player);
 		this.isAdmin = inGame && (isSinglePlayer || mc.player.hasPermissions(2));

@@ -41,6 +41,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.connection.ConnectionType;
 import org.jetbrains.annotations.Nullable;
@@ -71,6 +72,21 @@ public class NeoPlatformHelper extends PlatformHelper {
 	@Override
 	public String getPlatform() {
 		return "neoforge";
+	}
+
+	@Override
+	public Path getGameDirectory() {
+		return FMLPaths.GAMEDIR.get();
+	}
+
+	@Override
+	public Path getConfigDirectory() {
+		return FMLPaths.CONFIGDIR.get();
+	}
+
+	@Override
+	public Path getModsDirectory() {
+		return FMLPaths.MODSDIR.get();
 	}
 
 	@Override

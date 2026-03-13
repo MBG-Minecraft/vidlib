@@ -2,11 +2,8 @@ package dev.mrbeastgaming.hub.api;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.Util;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.ModList;
-import net.neoforged.fml.i18n.MavenVersionTranslator;
-import net.neoforged.neoforgespi.language.IModInfo;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -24,12 +21,7 @@ public interface API {
 		.build();
 
 	HttpRequest.Builder HTTP_REQUEST_BASE = HttpRequest.newBuilder()
-		.header("User-Agent", "MBG-API-Mod/" + ModList.get().getModContainerById("vidlib")
-			.map(ModContainer::getModInfo)
-			.map(IModInfo::getVersion)
-			.map(MavenVersionTranslator::artifactVersionToString)
-			.orElse("unknown")
-		);
+		.header("User-Agent", "MBG-API-Mod/" + VidLib.VERSION);
 
 	Codec<Integer> HEX_ID_CODEC = Codec.STRING.comapFlatMap(id -> {
 		if (id.length() == 8) {

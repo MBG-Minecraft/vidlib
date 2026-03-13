@@ -5,6 +5,7 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
 import dev.latvian.mods.klib.util.StringUtils;
+import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
@@ -92,11 +93,13 @@ import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.TimeZone;
 import java.util.UUID;
 
 public class ClientGameEngine {
@@ -320,13 +323,42 @@ public class ClientGameEngine {
 	}
 
 	public void bottomInfoBar(ImGraphics graphics, float h) {
-		var now = new Date();
+		Date now = null;
+
+		if (graphics.isReplay) {
+			var current = ReplayAPI.getActive().getOpenSession();
+
+			if (current != null) {
+				long utc = current.getCurrentUTC();
+
+				if (utc != -1L) {
+					now = new Date(utc);
+				}
+			}
+		} else {
+			now = new Date();
+		}
 
 		graphics.pushStack();
+		ImGui.beginGroup();
 		graphics.setText(ImColorVariant.BLUE);
 		ImGui.text(ImIcons.WORLD.toString());
 		graphics.popStack();
-		ImGui.text(StringUtils.TIMESTAMP_FORMAT.format(now));
+		ImGui.text(now == null ? "--:--:--" : StringUtils.TIMESTAMP_FORMAT.format(now));
+		ImGui.endGroup();
+
+		if (ImGui.isItemHovered()) {
+			graphics.pushStack();
+			graphics.setWindowPadding(6F, 6F);
+			graphics.setWindowRounding(4F);
+			var format = new SimpleDateFormat("EEEE, d MMM yyyy, HH:mm:ss.SSS");
+			var localUTC = format.format(now);
+			format.setTimeZone(TimeZone.getTimeZone("EST"));
+			var estUTC = format.format(now);
+			ImGui.setTooltip("EST: " + estUTC + "\nLOC: " + localUTC);
+			graphics.popStack();
+		}
+
 		ImGui.separator();
 		ImGui.text(graphics.mc.fpsString.split(" ", 2)[0] + " FPS");
 		ImGui.separator();

@@ -21,6 +21,7 @@ import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueueImGui;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
@@ -39,7 +40,6 @@ import imgui.type.ImBoolean;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
-import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.LinkedHashMap;
@@ -50,6 +50,7 @@ public class BuiltInImGui {
 	public static final Map<String, Panel> OPEN_PANELS = new LinkedHashMap<>();
 	public static final ImBoolean SHOW_STACK_TOOL = new ImBoolean(false);
 	public static final ImBoolean SHOW_STYLE_EDITOR_TOOL = new ImBoolean(false);
+	public static final ImBoolean SHOW_BOTTOM_INFO_BAR = new ImBoolean(true);
 	public static Boolean showSounds = null;
 
 	public static final MenuItem OPEN = MenuItem.menu(ImIcons.OPEN, "Open", (graphics, list) -> {
@@ -129,7 +130,7 @@ public class BuiltInImGui {
 		list.add(MenuItem.item(ImIcons.STOP, "Stop all Sounds", g -> g.mc.getSoundManager().stop()));
 
 		list.add(MenuItem.item(ImIcons.DATABASE, "Dump Textures", g -> {
-			var gameDir = FMLPaths.GAMEDIR.get().toAbsolutePath();
+			var gameDir = PlatformHelper.CURRENT.getGameDirectory().toAbsolutePath();
 			var textures = TextureUtil.getDebugTexturePath(gameDir);
 			g.mc.getTextureManager().dumpAllSheets(textures);
 			g.mc.tell(Component.translatableEscape("debug.dump_dynamic_textures", Component.literal(gameDir.relativize(textures).toString())
@@ -300,7 +301,7 @@ public class BuiltInImGui {
 			ImGui.endMainMenuBar();
 		}
 
-		float h = graphics.isReplay || !ClientGameEngine.INSTANCE.hasBottomInfoBar(graphics.mc) ? 0F : ImGuiHooks.mainMenuBarHeight;
+		float h = (graphics.isReplay && (graphics.isExportingReplay || !SHOW_BOTTOM_INFO_BAR.get())) || !ClientGameEngine.INSTANCE.hasBottomInfoBar(graphics.mc) ? 0F : ImGuiHooks.mainMenuBarHeight;
 
 		if (h > 0F && ImGuiHooks.mainViewport != null && ImGuiHooks.centralDockNode != null) {
 			var centralNodePos = ImGuiHooks.centralDockNode.getPos();

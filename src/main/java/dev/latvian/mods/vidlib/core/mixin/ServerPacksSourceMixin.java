@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.VanillaPackResources;
@@ -7,7 +8,6 @@ import net.minecraft.server.packs.repository.BuiltInPackSource;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.world.level.validation.DirectoryValidator;
-import net.neoforged.fml.loading.FMLPaths;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.nio.file.Files;
@@ -24,7 +24,7 @@ public abstract class ServerPacksSourceMixin extends BuiltInPackSource {
 	protected void populatePackList(BiConsumer<String, Function<String, Pack>> consumer) {
 		super.populatePackList(consumer);
 
-		var path = FMLPaths.GAMEDIR.get().resolve("datapacks");
+		var path = PlatformHelper.CURRENT.getGameDirectory().resolve("datapacks");
 
 		if (Files.notExists(path)) {
 			try {

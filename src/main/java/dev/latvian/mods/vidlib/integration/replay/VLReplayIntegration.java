@@ -206,6 +206,7 @@ public class VLReplayIntegration {
 	public static void visualsMenu(ReplayVisualsMenuEvent event) {
 		if (event.beginSection("vidlib", "")) {
 			if (event.beginSection("flags", "VidLib")) {
+				ImGui.checkbox("Show Status Bar###show-bottom-info-bar", BuiltInImGui.SHOW_BOTTOM_INFO_BAR);
 				ImGui.checkbox("Props###props", ClientProps.VISIBLE);
 				ImGui.checkbox("Physics Particles###physics-particles", PhysicsParticleManager.VISIBLE);
 				ImGui.checkbox("Clocks###clocks", ClockRenderer.VISIBLE);
