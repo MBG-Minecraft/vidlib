@@ -14,6 +14,8 @@ import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforgespi.language.IModInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +34,36 @@ public class VidLib {
 	public static void init() {
 		VidLib.LOGGER.info("VidLib " + VERSION + " loaded");
 		VidLibDataTypes.register();
+
+		VidLib.LOGGER.info("Mod Tree:");
+
+		for (var mod : ModList.get().getSortedMods()) {
+			printDependencies(mod.getModInfo(), 0);
+		}
+	}
+
+	private static void printDependencies(IModInfo mod, int level) {
+		VidLib.LOGGER.info("\t".repeat(level) + "- " + mod.getModId() + " (" + mod.getDisplayName() + ")");
+
+		if (level >= 5) {
+			return;
+		}
+
+		for (var dep : mod.getDependencies()) {
+			if (dep.getType() == IModInfo.DependencyType.REQUIRED) {
+				var id = dep.getModId();
+
+				if (id.equals("neoforge") || id.equals("minecraft")) {
+					continue;
+				}
+
+				var depMod = ModList.get().getModContainerById(dep.getModId()).orElse(null);
+
+				if (depMod != null) {
+					printDependencies(depMod.getModInfo(), level + 1);
+				}
+			}
+		}
 	}
 
 	public static void buildRegistries() {

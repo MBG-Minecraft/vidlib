@@ -5,6 +5,7 @@ import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
+import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -27,23 +28,48 @@ public interface ClothingCommand {
 			.then(Commands.argument("player", EntityArgument.players())
 				.then(Commands.argument("clothing", ResourceLocationArgument.id())
 					.suggests(SUGGESTION_PROVIDER)
-					.executes(ctx -> clothing(EntityArgument.getPlayers(ctx, "player"), new Clothing(ResourceLocationArgument.getId(ctx, "clothing"), ClothingParts.ALL)))
+					.executes(ctx -> setClothing(EntityArgument.getPlayers(ctx, "player"), new Clothing(ResourceLocationArgument.getId(ctx, "clothing"), ClothingParts.ALL)))
 					.then(Commands.argument("parts", ClothingParts.COMMAND.argument(buildContext))
-						.executes(ctx -> clothing(EntityArgument.getPlayers(ctx, "player"), new Clothing(ResourceLocationArgument.getId(ctx, "clothing"), ClothingParts.COMMAND.get(ctx, "parts"))))
+						.executes(ctx -> setClothing(EntityArgument.getPlayers(ctx, "player"), new Clothing(ResourceLocationArgument.getId(ctx, "clothing"), ClothingParts.COMMAND.get(ctx, "parts"))))
+					)
+				)
+			)
+		)
+		.then(Commands.literal("add")
+			.then(Commands.argument("player", EntityArgument.players())
+				.then(Commands.argument("clothing", ResourceLocationArgument.id())
+					.suggests(SUGGESTION_PROVIDER)
+					.executes(ctx -> addClothing(EntityArgument.getPlayers(ctx, "player"), new Clothing(ResourceLocationArgument.getId(ctx, "clothing"), ClothingParts.ALL)))
+					.then(Commands.argument("parts", ClothingParts.COMMAND.argument(buildContext))
+						.executes(ctx -> addClothing(EntityArgument.getPlayers(ctx, "player"), new Clothing(ResourceLocationArgument.getId(ctx, "clothing"), ClothingParts.COMMAND.get(ctx, "parts"))))
 					)
 				)
 			)
 		)
 		.then(Commands.literal("remove")
 			.then(Commands.argument("player", EntityArgument.players())
-				.executes(ctx -> clothing(EntityArgument.getPlayers(ctx, "player"), Clothing.NONE))
+				.executes(ctx -> setClothing(EntityArgument.getPlayers(ctx, "player"), Clothing.NONE))
 			)
 		)
 	);
 
-	private static int clothing(Collection<ServerPlayer> players, Clothing clothing) {
+	private static int setClothing(Collection<ServerPlayer> players, Clothing clothing) {
 		for (var player : players) {
-			player.setClothing(clothing);
+			player.setClothing(clothing == Clothing.NONE ? List.of() : List.of(clothing));
+		}
+
+		return 1;
+	}
+
+	private static int addClothing(Collection<ServerPlayer> players, Clothing clothing) {
+		if (clothing == Clothing.NONE) {
+			return 0;
+		}
+
+		for (var player : players) {
+			var list = new ArrayList<>(player.get(InternalPlayerData.CLOTHING));
+			list.add(clothing);
+			player.setClothing(list);
 		}
 
 		return 1;

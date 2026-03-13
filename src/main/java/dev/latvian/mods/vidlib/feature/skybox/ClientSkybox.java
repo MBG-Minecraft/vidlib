@@ -15,7 +15,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Skybox {
+public class ClientSkybox {
 	public static final MenuItem MENU_ITEM = MenuItem.menu(ImIcons.SUN, "Skybox", g -> {
 		if (!g.inGame) {
 			return List.of();
@@ -44,7 +44,7 @@ public class Skybox {
 			if (g1.isReplay || !g1.serverFeatures.has(Feature.SKYBOX)) {
 				g1.mc.getDataMap().setSuperOverride(InternalServerData.SKYBOX, Skyboxes.VANILLA);
 			} else {
-				g1.mc.runClientCommand("skybox set \"minecraft:vanilla\"");
+				g1.mc.runClientCommand("skybox remove");
 			}
 		}));
 
@@ -65,7 +65,7 @@ public class Skybox {
 	public final ResourceLocation texture;
 	public SkyboxTexture skyboxTexture;
 
-	public Skybox(SkyboxData data) {
+	public ClientSkybox(SkyboxData data) {
 		this.data = data;
 		this.texture = data.texture().isEmpty() ? data.id().withPath(p -> "textures/vidlib/skybox/" + p + ".png") : data.texture().get();
 	}

@@ -14,7 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.List;
 
 public interface InternalServerData {
-	DataKey<ResourceLocation> SKYBOX = DataKey.SERVER.createDefault("skybox", SkyboxData.ID_DATA_TYPE, Skyboxes.DAY_WITH_CELESTIALS, () -> new EnumImBuilder<>(SkyboxData.SKYBOX_IDS, Skyboxes.DAY_WITH_CELESTIALS).withNameGetter(ID::idToString));
+	DataKey<ResourceLocation> SKYBOX = DataKey.SERVER.createDefault("skybox", SkyboxData.ID_DATA_TYPE, Skyboxes.VANILLA, () -> new EnumImBuilder<>(SkyboxData.SKYBOX_IDS, Skyboxes.VANILLA).withNameGetter(ID::idToString));
 	DataKey<Anchor> ANCHOR = DataKey.SERVER.createDefault("anchor", Anchor.DATA_TYPE, Anchor.NONE, null);
 	DataKey<Boolean> HIDE_PLUMBOBS = DataKey.SERVER.createBoolean("hide_plumbobs", false);
 	DataKey<NameDrawType> NAME_DRAW_TYPE = DataKey.SERVER.createEnum("name_draw_type", NameDrawType.DATA_TYPE, NameDrawType.VANILLA, NameDrawType.VALUES);

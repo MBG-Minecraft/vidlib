@@ -37,10 +37,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.List;
+
 public interface VidLibEntityRenderStates {
 	ContextKey<Boolean> BOSS_FRAMEBUFFER = new ContextKey<>(VidLib.id("boss_framebuffer"));
 	ContextKey<Boolean> CREATIVE = new ContextKey<>(VidLib.id("creative"));
-	ContextKey<Clothing> CLOTHING = new ContextKey<>(VidLib.id("clothing"));
+	ContextKey<List<Clothing>> CLOTHING = new ContextKey<>(VidLib.id("clothing"));
 
 	ItemStack DEFAULT_SHIELD = new ItemStack(Items.SHIELD);
 
@@ -237,8 +239,8 @@ public interface VidLibEntityRenderStates {
 	static void extractPlayer(Minecraft mc, Vec3 camPos, AbstractClientPlayer player, PlayerRenderState state) {
 		state.setRenderData(CREATIVE, player.isCreative() ? Boolean.TRUE : null);
 
-		var clothing = state.isInvisible ? null : ClientGameEngine.INSTANCE.getClothing(player);
-		state.setRenderData(CLOTHING, clothing == Clothing.NONE ? null : clothing);
+		var clothing = state.isInvisible ? List.<Clothing>of() : ClientGameEngine.INSTANCE.getClothing(player);
+		state.setRenderData(CLOTHING, clothing.isEmpty() ? null : clothing);
 
 		if (state.nameTag != null) {
 			state.nameTag = ClientGameEngine.INSTANCE.getFullPlayerWorldName(player, state.nameTag);
@@ -261,8 +263,8 @@ public interface VidLibEntityRenderStates {
 		return v != null && v;
 	}
 
-	static Clothing getClothing(EntityRenderState state) {
+	static List<Clothing> getClothing(EntityRenderState state) {
 		var v = state.getRenderData(CLOTHING);
-		return v == null ? Clothing.NONE : v;
+		return v == null ? List.of() : v;
 	}
 }

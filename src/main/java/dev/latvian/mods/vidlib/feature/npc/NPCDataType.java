@@ -20,6 +20,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -75,7 +76,7 @@ public record NPCDataType<T>(String name, StreamCodec<?, T> streamCodec, T defau
 	public static final NPCDataType<Integer> DEATH_TIME = addInt("death_time", 0, p -> p.deathTime);
 	public static final NPCDataType<Float> WALK_ANIMATION_POS = addFloat("walk_animation_pos", 0F, (p, d) -> p.walkAnimation.position(d));
 	public static final NPCDataType<Float> WALK_ANIMATION_SPEED = addFloat("walk_animation_speed", 0F, (p, d) -> p.walkAnimation.speed(d));
-	public static final NPCDataType<Clothing> CLOTHING = add("clothing", Clothing.STREAM_CODEC, Clothing.NONE, SimilarityCheck.getDefault(), (p, d) -> ClientGameEngine.INSTANCE.getClothing(p));
+	public static final NPCDataType<List<Clothing>> CLOTHING = add("clothing", Clothing.LIST_DATA_TYPE.streamCodec(), List.of(), SimilarityCheck.getDefault(), (p, d) -> ClientGameEngine.INSTANCE.getClothing(p));
 	public static final NPCDataType<IconHolder> PLUMBOB = add("plumbob", IconHolder.STREAM_CODEC, IconHolder.EMPTY, SimilarityCheck.getDefault(), (p, d) -> ClientGameEngine.INSTANCE.getPlumbob(p));
 
 	@Override

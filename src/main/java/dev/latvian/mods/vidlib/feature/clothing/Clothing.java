@@ -13,6 +13,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 
+import java.util.List;
 import java.util.function.Function;
 
 @AutoInit
@@ -35,6 +36,7 @@ public record Clothing(ResourceLocation id, ClothingParts parts) {
 	);
 
 	public static final DataType<Clothing> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, Clothing.class);
+	public static final DataType<List<Clothing>> LIST_DATA_TYPE = DATA_TYPE.listOf();
 
 	public static final EquipmentSlot[] ORDERED_SLOTS = {
 		EquipmentSlot.LEGS,

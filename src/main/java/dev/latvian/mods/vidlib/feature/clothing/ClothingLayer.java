@@ -33,9 +33,6 @@ public class ClothingLayer extends RenderLayer<PlayerRenderState, PlayerModel> {
 	public static final ModelLayerLocation WIDE = new ModelLayerLocation(VidLib.id("player"), "clothing");
 	public static final ModelLayerLocation SLIM = new ModelLayerLocation(VidLib.id("player_slim"), "clothing");
 
-	record LayerTextureKey(EquipmentClientInfo.LayerType layerType, EquipmentClientInfo.Layer layer) {
-	}
-
 	private static final Map<ResourceLocation, ResourceKey<EquipmentAsset>> KEYS = new Object2ObjectOpenHashMap<>();
 
 	public static ResourceKey<EquipmentAsset> getKey(ResourceLocation id) {
@@ -57,63 +54,65 @@ public class ClothingLayer extends RenderLayer<PlayerRenderState, PlayerModel> {
 
 	@Override
 	public void render(PoseStack ms, MultiBufferSource buffers, int light, PlayerRenderState state, float yRot, float xRot) {
-		var clothing = VidLibEntityRenderStates.getClothing(state);
+		var clothingList = VidLibEntityRenderStates.getClothing(state);
 
-		if (clothing == Clothing.NONE || !LevelOfDetailValue.CLOTHING.isVisible(Minecraft.getInstance().gameRenderer.getMainCamera().getPosition(), state.x, state.y, state.z)) {
+		if (clothingList.isEmpty() || !LevelOfDetailValue.CLOTHING.isVisible(Minecraft.getInstance().gameRenderer.getMainCamera().getPosition(), state.x, state.y, state.z)) {
 			return;
 		}
 
-		var assets = equipmentAssets.get(getKey(clothing.id()));
+		for (var clothing : clothingList) {
+			var assets = equipmentAssets.get(getKey(clothing.id()));
 
-		if (assets == EquipmentAssetManager.MISSING) {
-			return;
-		}
-
-		for (var slot : Clothing.ORDERED_SLOTS) {
-			if (!clothing.parts().visible(slot)) {
+			if (assets == EquipmentAssetManager.MISSING) {
 				continue;
 			}
 
-			var layerType = slot == EquipmentSlot.LEGS ? EquipmentClientInfo.LayerType.HUMANOID_LEGGINGS : EquipmentClientInfo.LayerType.HUMANOID;
-			var layers = assets.getLayers(layerType);
-
-			for (var layer : layers) {
-				ms.pushPose();
-
-				var renderType = (slot == EquipmentSlot.LEGS ? humanoidLeggingRenderTypelookup : humanoidRenderTypelookup).apply(layer);
-				VertexConsumer buffer;
-
-				if (clothing.parts().enchanted()) {
-					buffer = VertexMultiConsumer.create(buffers.getBuffer(RenderType.armorEntityGlint()), buffers.getBuffer(renderType));
-				} else {
-					buffer = buffers.getBuffer(renderType);
+			for (var slot : Clothing.ORDERED_SLOTS) {
+				if (!clothing.parts().visible(slot)) {
+					continue;
 				}
 
-				getParentModel().copyPropertiesTo(model);
-				model.setAllVisible(false);
+				var layerType = slot == EquipmentSlot.LEGS ? EquipmentClientInfo.LayerType.HUMANOID_LEGGINGS : EquipmentClientInfo.LayerType.HUMANOID;
+				var layers = assets.getLayers(layerType);
 
-				switch (slot) {
-					case HEAD:
-						model.head.visible = true;
-						break;
-					case CHEST:
-						model.body.visible = true;
-						model.rightArm.visible = true;
-						model.leftArm.visible = true;
-						break;
-					case LEGS:
-						model.body.visible = true;
-						model.rightLeg.visible = true;
-						model.leftLeg.visible = true;
-						break;
-					case FEET:
-						model.rightLeg.visible = true;
-						model.leftLeg.visible = true;
+				for (var layer : layers) {
+					ms.pushPose();
+
+					var renderType = (slot == EquipmentSlot.LEGS ? humanoidLeggingRenderTypelookup : humanoidRenderTypelookup).apply(layer);
+					VertexConsumer buffer;
+
+					if (clothing.parts().enchanted()) {
+						buffer = VertexMultiConsumer.create(buffers.getBuffer(RenderType.armorEntityGlint()), buffers.getBuffer(renderType));
+					} else {
+						buffer = buffers.getBuffer(renderType);
+					}
+
+					getParentModel().copyPropertiesTo(model);
+					model.setAllVisible(false);
+
+					switch (slot) {
+						case HEAD:
+							model.head.visible = true;
+							break;
+						case CHEST:
+							model.body.visible = true;
+							model.rightArm.visible = true;
+							model.leftArm.visible = true;
+							break;
+						case LEGS:
+							model.body.visible = true;
+							model.rightLeg.visible = true;
+							model.leftLeg.visible = true;
+							break;
+						case FEET:
+							model.rightLeg.visible = true;
+							model.leftLeg.visible = true;
+					}
+
+					// model.setupAnim(state);
+					model.renderToBuffer(ms, buffer, light, OverlayTexture.NO_OVERLAY);
+					ms.popPose();
 				}
-
-				// model.setupAnim(state);
-				model.renderToBuffer(ms, buffer, light, OverlayTexture.NO_OVERLAY);
-				ms.popPose();
 			}
 		}
 	}

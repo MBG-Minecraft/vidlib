@@ -16,6 +16,7 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ItemStackImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ListImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TextComponentImBuilder;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
@@ -36,6 +37,7 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class NPCProp extends BaseGeoProp {
@@ -84,7 +86,7 @@ public class NPCProp extends BaseGeoProp {
 			p.rotation = v;
 			p.instances = null;
 		}, 0F, 360F),
-		PropData.create(NPCProp.class, "clothing", Clothing.DATA_TYPE, p -> p.clothing, (p, v) -> p.clothing = v, ClothingImBuilder.TYPE),
+		PropData.create(NPCProp.class, "clothing", Clothing.LIST_DATA_TYPE, p -> p.clothing, (p, v) -> p.clothing = v, () -> new ListImBuilder<>(ClothingImBuilder.TYPE)),
 		PropData.createInt(NPCProp.class, "jumping", p -> p.jumping, (p, v) -> p.jumping = v, 0, 100),
 		PropData.createInt(NPCProp.class, "punching", p -> p.punching, (p, v) -> p.punching = v, 0, 100),
 		PropData.create(NPCProp.class, "main_hand_item", DataTypes.ITEM_STACK, p -> p.mainHandItem, (p, v) -> p.mainHandItem = v, ItemStackImBuilder.MAIN_HAND_EQUIPMENT_TYPE),
@@ -116,7 +118,7 @@ public class NPCProp extends BaseGeoProp {
 	public float randomOffset;
 	public float randomYaw;
 	public float randomPitch;
-	public Clothing clothing;
+	public List<Clothing> clothing;
 	public boolean randomSkin;
 	public Set<SkinTexture> randomSkins = new HashSet<>();
 	public int jumping;
@@ -150,7 +152,7 @@ public class NPCProp extends BaseGeoProp {
 		this.randomOffset = 0F;
 		this.randomYaw = 0F;
 		this.randomPitch = 0F;
-		this.clothing = Clothing.NONE;
+		this.clothing = List.of();
 		this.randomSkin = false;
 		this.jumping = 0; // 60
 		this.punching = 0; // 40

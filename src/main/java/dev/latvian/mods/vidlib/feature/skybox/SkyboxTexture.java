@@ -17,11 +17,11 @@ import java.nio.file.Path;
 import java.util.function.IntUnaryOperator;
 
 public class SkyboxTexture extends ReloadableTexture implements Dumpable {
-	public final Skybox skybox;
+	public final ClientSkybox skybox;
 	public int resolution;
 	private ImIcon icon;
 
-	public SkyboxTexture(Skybox skybox, ResourceLocation id) {
+	public SkyboxTexture(ClientSkybox skybox, ResourceLocation id) {
 		super(id);
 		this.skybox = skybox;
 	}

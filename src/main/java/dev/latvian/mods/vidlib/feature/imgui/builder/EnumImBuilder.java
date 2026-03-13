@@ -7,6 +7,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.type.ImString;
+import net.minecraft.core.Registry;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -22,6 +23,12 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 	public static final ImBuilderType<Rotation> BLOCK_ROTATION_TYPE = () -> new EnumImBuilder<>(Rotation.values(), Rotation.NONE);
 	public static final ImBuilderType<LiquidSettings> LIQUID_SETTINGS_TYPE = () -> new EnumImBuilder<>(LiquidSettings.values(), LiquidSettings.IGNORE_WATERLOGGING);
 	public static final ImBuilderType<InteractionHand> HAND_TYPE = () -> new EnumImBuilder<>(InteractionHand.values(), InteractionHand.MAIN_HAND);
+
+	public static <T> EnumImBuilder<T> ofRegistry(Registry<T> registry, @Nullable T defaultValue, Function<T, String> nameGetter) {
+		var builder = new EnumImBuilder<>(registry.stream().toList(), defaultValue);
+		builder.nameGetter = nameGetter;
+		return builder;
+	}
 
 	public static final ImString SEARCH = ImGuiUtils.resizableString();
 

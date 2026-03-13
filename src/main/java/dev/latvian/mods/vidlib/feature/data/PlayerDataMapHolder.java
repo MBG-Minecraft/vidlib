@@ -8,6 +8,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 public interface PlayerDataMapHolder extends DataMapHolder {
 	default void setSuspended(boolean value) {
 		set(InternalPlayerData.SUSPENDED, value);
@@ -21,8 +23,8 @@ public interface PlayerDataMapHolder extends DataMapHolder {
 		set(InternalPlayerData.PLUMBOB, icon.holder());
 	}
 
-	default void setClothing(Clothing clothing) {
-		set(InternalPlayerData.CLOTHING, clothing);
+	default void setClothing(List<Clothing> clothing) {
+		set(InternalPlayerData.CLOTHING, List.copyOf(clothing));
 	}
 
 	default void setSkinOverride(@Nullable SkinTexture skin) {

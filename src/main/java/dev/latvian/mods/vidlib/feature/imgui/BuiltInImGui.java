@@ -27,7 +27,7 @@ import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectPanel;
 import dev.latvian.mods.vidlib.feature.screeneffect.chromaticaberration.ChromaticAberrationPanel;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
-import dev.latvian.mods.vidlib.feature.skybox.Skybox;
+import dev.latvian.mods.vidlib.feature.skybox.ClientSkybox;
 import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
@@ -86,7 +86,7 @@ public class BuiltInImGui {
 			list.add(MenuItem.item(ImIcons.WRENCH, "Player Data (Self)", g1 -> new PlayerDataConfigPanel(graphics.player.getGameProfile(), graphics.player.vl$sessionData().dataMap).open()).enabled(graphics.isAdmin));
 		}
 
-		list.add(Skybox.MENU_ITEM.enabled(graphics.isAdmin));
+		list.add(ClientSkybox.MENU_ITEM.enabled(graphics.isAdmin));
 		list.add(DepthOfFieldPanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
 		list.add(ChromaticAberrationPanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
 		list.add(FluidPlanePanel.MENU_ITEM.enabled(graphics.isSinglePlayer));

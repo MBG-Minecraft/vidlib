@@ -180,7 +180,7 @@ public class ClientGameEngine {
 		return player.get(InternalPlayerData.PLUMBOB);
 	}
 
-	public Clothing getClothing(Player player) {
+	public List<Clothing> getClothing(Player player) {
 		return player.get(InternalPlayerData.CLOTHING);
 	}
 
@@ -446,6 +446,10 @@ public class ClientGameEngine {
 
 		var session = mc.player.vl$sessionData();
 		return session.cameraOverride != null && session.cameraOverride.hideGui();
+	}
+
+	public boolean renderHardcoreHearts(boolean original) {
+		return original;
 	}
 
 	public boolean hideCrosshair(Minecraft mc) {

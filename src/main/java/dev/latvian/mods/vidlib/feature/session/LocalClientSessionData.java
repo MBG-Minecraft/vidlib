@@ -39,7 +39,7 @@ import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
-import dev.latvian.mods.vidlib.feature.skybox.Skybox;
+import dev.latvian.mods.vidlib.feature.skybox.ClientSkybox;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
@@ -93,10 +93,10 @@ public class LocalClientSessionData extends ClientSessionData {
 	public Vector2dc prevCameraShake;
 	public Vector2dc cameraShake;
 	public Map<ResourceLocation, ClockValue> clocks;
-	public Map<ResourceLocation, Skybox> skyboxes;
+	public Map<ResourceLocation, ClientSkybox> skyboxes;
 	public final DataMap serverDataMap;
 	public final KNumberVariables globalVariables;
-	public Skybox skybox;
+	public ClientSkybox skybox;
 	public Map<ZoneShape, VoxelShapeBox> cachedZoneShapes;
 	public CameraOverride cameraOverride;
 	public ClientCutscene currentCutscene;
@@ -186,7 +186,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		}
 	}
 
-	public Skybox getSkybox(ResourceLocation id) {
+	public ClientSkybox getSkybox(ResourceLocation id) {
 		var skybox = skyboxes.get(id);
 
 		if (skybox == null) {
@@ -196,7 +196,7 @@ public class LocalClientSessionData extends ClientSessionData {
 				skyboxData = new SkyboxData(id, Optional.empty(), 0F, 0F, Color.WHITE, false, true, true, Optional.empty(), Optional.empty());
 			}
 
-			skybox = new Skybox(skyboxData);
+			skybox = new ClientSkybox(skyboxData);
 			skyboxes.put(id, skybox);
 		}
 

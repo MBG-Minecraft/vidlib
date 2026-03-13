@@ -51,4 +51,9 @@ public abstract class GuiMixin {
 	private static boolean vl$hideGui(boolean original, @Local(argsOnly = true) Minecraft mc) {
 		return ClientGameEngine.INSTANCE.hideGui(mc);
 	}
+
+	@ModifyExpressionValue(method = "renderHearts", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelData;isHardcore()Z"))
+	private boolean video$isHardcore(boolean original) {
+		return ClientGameEngine.INSTANCE.renderHardcoreHearts(original);
+	}
 }
