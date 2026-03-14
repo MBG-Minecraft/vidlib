@@ -700,8 +700,8 @@ public class VidLibClientEventHandler {
 	public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
 		event.registerLayerDefinition(ClothingLayer.WIDE, ClothingModel::createWideClothingLayer);
 		event.registerLayerDefinition(ClothingLayer.SLIM, ClothingModel::createSlimClothingLayer);
-
 		event.registerLayerDefinition(ModelLayers.CHICKEN_BABY, BabyChickenModel::createBodyLayer);
+		event.registerLayerDefinition(ModelLayers.COLD_CHICKEN_BABY, BabyChickenModel::createBodyLayer);
 	}
 
 	@SubscribeEvent
