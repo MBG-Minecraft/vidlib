@@ -232,9 +232,13 @@ public class ClientGameEngine {
 		return mc.getSkybox();
 	}
 
+	public boolean disableFog() {
+		return false;
+	}
+
 	@Nullable
 	public FogParameters getFog() {
-		return FogParameters.NO_FOG;
+		return disableFog() ? FogParameters.NO_FOG : null;
 	}
 
 	@Nullable
@@ -242,21 +246,21 @@ public class ClientGameEngine {
 		return null;
 	}
 
-	public FogParameters getShaderFog(FogParameters shaderFog) {
+	public FogParameters getShaderFog(FogParameters original) {
 		var mc = Minecraft.getInstance();
 
 		if (mc.gameRenderer.getMainCamera().getFluidInCamera() != FogType.NONE) {
 			var fg = getFluidFog();
-			return fg == null ? shaderFog : fg;
+			return fg == null ? original : fg;
 		}
 
 		var fg = getFog();
 
 		if (mc.player != null && (mc.player.hasEffect(MobEffects.DARKNESS) || mc.player.hasEffect(MobEffects.BLINDNESS))) {
-			return shaderFog;
+			return original;
 		}
 
-		return fg != null ? fg : shaderFog;
+		return fg != null ? fg : original;
 	}
 
 	public List<ChancedParticle> getEnvironmentEffects(Minecraft mc, ClientLevel level, BlockPos pos) {

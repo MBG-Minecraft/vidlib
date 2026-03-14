@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public interface Countries {
-	Lazy<Path> LOCAL_PATH = CommonPaths.USER.<Path>map(path -> path.resolve("beast-hub/countries.json"));
+	Lazy<Path> LOCAL_PATH = API.DATA_DIRECTORY.<Path>map(path -> path.resolve("countries.json"));
 
 	Lazy<CountryList> REMOTE = Lazy.of(() -> {
 		try {
