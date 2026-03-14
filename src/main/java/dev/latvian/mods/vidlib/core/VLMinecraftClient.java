@@ -596,6 +596,12 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
+	default void setHardcoreHearts(boolean hardcore) {
+		var session = vl$self().player.vl$sessionData();
+		session.hardcoreHearts = hardcore;
+	}
+
+	@Override
 	default KNumberVariables globalVariables() {
 		return vl$self().player.vl$sessionData().globalVariables;
 	}

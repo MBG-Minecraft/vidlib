@@ -485,7 +485,12 @@ public class ClientGameEngine {
 	}
 
 	public boolean renderHardcoreHearts(boolean original) {
-		return original;
+		if (original) {
+			return true;
+		}
+
+		var player = Minecraft.getInstance().player;
+		return player != null && player.vl$sessionData().hardcoreHearts;
 	}
 
 	public boolean hideCrosshair(Minecraft mc) {

@@ -16,6 +16,7 @@ import dev.latvian.mods.vidlib.feature.cutscene.StopCutscenePayload;
 import dev.latvian.mods.vidlib.feature.hud.ToastDisplayPayload;
 import dev.latvian.mods.vidlib.feature.misc.CloseScreenPayload;
 import dev.latvian.mods.vidlib.feature.misc.EventMarkerPayload;
+import dev.latvian.mods.vidlib.feature.misc.HardcoreHeartsPayload;
 import dev.latvian.mods.vidlib.feature.misc.InfoBarOverridePayload;
 import dev.latvian.mods.vidlib.feature.misc.SetPostEffectPayload;
 import dev.latvian.mods.vidlib.feature.particle.FireData;
@@ -381,6 +382,14 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 			getEnvironment().setInfoBarText(bar, text);
 		} else {
 			s2c(new InfoBarOverridePayload(bar, text));
+		}
+	}
+
+	default void setHardcoreHearts(boolean hardcore) {
+		if (isClient()) {
+			getEnvironment().setHardcoreHearts(hardcore);
+		} else {
+			s2c(new HardcoreHeartsPayload(hardcore));
 		}
 	}
 }

@@ -114,6 +114,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	public WorldBorderOverride worldBorderOverrideEnd;
 	public boolean clientModListSentDuringConfig;
 	public List<EventMarkerPayload> markers;
+	public boolean hardcoreHearts;
 
 	public LocalClientSessionData(Minecraft mc, UUID uuid) {
 		super(uuid, mc);
@@ -134,6 +135,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.glowColors = new Object2ObjectOpenHashMap<>();
 		this.clientModListSentDuringConfig = false;
 		this.markers = new ArrayList<>();
+		this.hardcoreHearts = false;
 
 		VidLib.LOGGER.info("Client Session Data Initialized");
 	}
