@@ -225,7 +225,7 @@ public class ImGuiHooks {
 		var centralNodePos = centralDockNode.getPos();
 		var centralNodeSize = centralDockNode.getSize();
 
-		float h = (mc.level != null && mc.level.isReplayLevel()) || !ClientGameEngine.INSTANCE.hasBottomInfoBar(mc) ? 0F : ImGuiHooks.mainMenuBarHeight;
+		float h = ClientGameEngine.DISABLE_IMGUI ? 0F : (mc.level != null && mc.level.isReplayLevel()) || !ClientGameEngine.INSTANCE.hasBottomInfoBar(mc) ? 0F : ImGuiHooks.mainMenuBarHeight;
 
 		var prevWidth = window.getWidth();
 		var prevHeight = window.getHeight();

@@ -106,6 +106,7 @@ public class ClientGameEngine {
 	public static ClientGameEngine INSTANCE = new ClientGameEngine();
 
 	public static final boolean DEFAULT_ENABLE_MAIN_MENU_BUTTONS = "true".equals(System.getenv("ENABLE_ADMIN_BUTTONS")) || !FMLLoader.isProduction();
+	public static final boolean DISABLE_IMGUI = "true".equals(System.getenv("DISABLE_IMGUI"));
 
 	public void collectClientFeatures(Reference2IntMap<Feature> map) {
 		for (var mod : ModList.get().getMods()) {

@@ -53,6 +53,7 @@ public class BuiltInImGui {
 	public static final ImBoolean SHOW_BOTTOM_INFO_BAR = new ImBoolean(true);
 	public static Boolean showSounds = null;
 
+
 	public static final MenuItem OPEN = MenuItem.menu(ImIcons.OPEN, "Open", (graphics, list) -> {
 		list.add(MenuItem.item(ImIcons.MEMORY, "Memory Usage", MemoryUsagePanel.INSTANCE));
 		list.add(MenuItem.item(ImIcons.SLASH, "Command History", CommandHistoryPanel.INSTANCE));
@@ -282,9 +283,9 @@ public class BuiltInImGui {
 		graphics.setStyleCol(ImGuiCol.MenuBarBg, Color.BLACK);
 
 		ImGuiHooks.mainMenuBarHeight = 0F;
-		boolean topMainMenu = true;
+		boolean topMainMenu = !ClientGameEngine.DISABLE_IMGUI && ClientGameEngine.INSTANCE.hasTopInfoBar(graphics.mc);
 
-		if (!graphics.isReplay && ImGui.beginMainMenuBar()) {
+		if (topMainMenu && !graphics.isReplay && ImGui.beginMainMenuBar()) {
 			ImGuiHooks.mainMenuBarHeight = ImGui.getWindowSize().y;
 			ClientGameEngine.INSTANCE.topInfoBarPre(graphics, ImGuiHooks.mainMenuBarHeight);
 			MAIN_MENU_BAR.buildMenuBar(graphics, true);
