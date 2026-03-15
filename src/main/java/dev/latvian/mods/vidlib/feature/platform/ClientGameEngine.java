@@ -351,7 +351,7 @@ public class ClientGameEngine {
 		ImGui.text(now == null ? "--:--:--" : StringUtils.TIMESTAMP_FORMAT.format(now));
 		ImGui.endGroup();
 
-		if (ImGui.isItemHovered()) {
+		if (now != null && ImGui.isItemHovered()) {
 			graphics.pushStack();
 			graphics.setWindowPadding(6F, 6F);
 			graphics.setWindowRounding(4F);
