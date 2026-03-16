@@ -29,7 +29,7 @@ public interface InternalPlayerData {
 	DataKey<Boolean> SUSPENDED = DataKey.PLAYER.createDefault("suspended", DataTypes.BOOL, false, BooleanImBuilder.TYPE);
 	DataKey<Component> NICKNAME = DataKey.PLAYER.createDefault("nickname", DataTypes.TEXT_COMPONENT, Component.empty(), TextComponentImBuilder.TYPE);
 	DataKey<IconHolder> PLUMBOB = DataKey.PLAYER.createDefault("plumbob", IconHolder.DATA_TYPE, IconHolder.EMPTY, null);
-	DataKey<List<Clothing>> CLOTHING = DataKey.PLAYER.createDefault("clothing", Clothing.LIST_DATA_TYPE, List.of(), () -> new ListImBuilder<>(ClothingImBuilder.TYPE));
+	DataKey<List<Clothing>> CLOTHING = DataKey.PLAYER.createDefault("clothing", Clothing.LEGACY_CLOTHING_DATA ? Clothing.LEGACY_LIST_DATA_TYPE : Clothing.LIST_DATA_TYPE, List.of(), () -> new ListImBuilder<>(ClothingImBuilder.TYPE));
 	DataKey<SkinTexture> SKIN_OVERRIDE = DataKey.PLAYER.createDefault("skin_override", SkinTexture.DATA_TYPE, null, SkinTextureImBuilder.TYPE);
 	DataKey<ResourceLocation> CAPE_OVERRIDE = DataKey.PLAYER.createDefault("cape_override", ID.DATA_TYPE, null, TextureImBuilder.GEO);
 	DataKey<ResourceLocation> ELYTRA_OVERRIDE = DataKey.PLAYER.createDefault("elytra_override", ID.DATA_TYPE, null, TextureImBuilder.GEO);

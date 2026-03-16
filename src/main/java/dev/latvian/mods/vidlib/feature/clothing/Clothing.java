@@ -5,9 +5,12 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -39,6 +42,27 @@ public record Clothing(ResourceLocation id, ClothingParts parts) {
 		EquipmentSlot.FEET,
 		EquipmentSlot.HEAD
 	};
+
+	public static final boolean LEGACY_CLOTHING_DATA = "true".equals(System.getenv("LEGACY_CLOTHING_DATA"));
+
+	public static final DataType<List<Clothing>> LEGACY_LIST_DATA_TYPE = DataType.of(CODEC.listOf(), new StreamCodec<>() {
+		private static final Clothing NONE = new Clothing(VidLib.id("none"), ClothingParts.NONE);
+
+		@Override
+		public List<Clothing> decode(RegistryFriendlyByteBuf buf) {
+			var c = STREAM_CODEC.decode(buf);
+			return c.equals(NONE) ? List.of() : List.of(c);
+		}
+
+		@Override
+		public void encode(RegistryFriendlyByteBuf buf, List<Clothing> value) {
+			if (value.isEmpty()) {
+				STREAM_CODEC.encode(buf, NONE);
+			} else {
+				STREAM_CODEC.encode(buf, value.getFirst());
+			}
+		}
+	}, Cast.to(List.class));
 
 	public Clothing(ResourceLocation id) {
 		this(id, ClothingParts.ALL);

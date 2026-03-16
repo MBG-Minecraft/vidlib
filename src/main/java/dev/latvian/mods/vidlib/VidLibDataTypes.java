@@ -80,7 +80,7 @@ public interface VidLibDataTypes {
 		DataType.register(VidLib.id("icon_holder"), IconHolder.DATA_TYPE);
 		DataType.register(VidLib.id("clothing_parts"), ClothingParts.DATA_TYPE);
 		DataType.register(VidLib.id("clothing"), Clothing.DATA_TYPE);
-		DataType.register(VidLib.id("clothing_list"), Clothing.LIST_DATA_TYPE);
+		DataType.register(VidLib.id("clothing_list"), Clothing.LEGACY_CLOTHING_DATA ? Clothing.LEGACY_LIST_DATA_TYPE : Clothing.LIST_DATA_TYPE);
 		DataType.register(VidLib.id("skin_texture"), SkinTexture.DATA_TYPE);
 		DataType.register(VidLib.id("skin_texture_list"), SkinTexture.LIST_DATA_TYPE);
 		DataType.register(VidLib.id("skybox_id"), SkyboxData.ID_DATA_TYPE);
