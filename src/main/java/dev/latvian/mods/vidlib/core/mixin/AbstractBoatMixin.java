@@ -25,6 +25,7 @@ public class AbstractBoatMixin {
 
 	@Redirect(method = "getGroundFriction", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getBlockState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;"))
 	private BlockState vl$getBlockState(Level level, BlockPos blockPos) {
-		return CommonGameEngine.INSTANCE.overrideFluidStateBlock(level, blockPos);
+		var state = CommonGameEngine.INSTANCE.overrideFluidStateBlock(level, blockPos);
+		return state.isAir() ? level.getBlockState(blockPos) : state;
 	}
 }
