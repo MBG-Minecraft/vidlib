@@ -143,6 +143,17 @@ public record PropType<P extends Prop>(
 		return index < 0 || index >= data.size() ? null : data.get(index);
 	}
 
+	@Nullable
+	public PropDataEntry getData(String name) {
+		for (var entry : data) {
+			if (entry.data().key().equals(name)) {
+				return entry;
+			}
+		}
+
+		return null;
+	}
+
 	public int getDataIndex(PropData<?, ?> data) {
 		var r = reverseData.get(data);
 		return r == null ? -1 : r.index();

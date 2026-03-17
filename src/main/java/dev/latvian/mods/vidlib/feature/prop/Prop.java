@@ -887,4 +887,8 @@ public class Prop {
 
 		return DataResult.success(newProp);
 	}
+
+	public int getPackedLight() {
+		return level.vl$getPackedLight(getBlockPos());
+	}
 }

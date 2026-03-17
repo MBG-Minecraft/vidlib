@@ -13,6 +13,9 @@ public class ProgressQueue {
 	@ApiStatus.Internal
 	public static final ConcurrentLinkedDeque<ProgressQueue> ACTIVE = new ConcurrentLinkedDeque<>();
 
+	@ApiStatus.Internal
+	public static final AtomicInteger ACTIVE_COUNT = new AtomicInteger(0);
+
 	public static ProgressItem queueSingleItem(String title) {
 		var queue = new ProgressQueue();
 		queue.topText = title;
@@ -85,6 +88,7 @@ public class ProgressQueue {
 			active = true;
 			open.set(true);
 			ACTIVE.add(this);
+			ACTIVE_COUNT.incrementAndGet();
 		}
 	}
 

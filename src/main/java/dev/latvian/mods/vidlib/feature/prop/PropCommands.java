@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.prop;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import dev.latvian.mods.klib.math.Rotation;
+import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
@@ -10,11 +11,13 @@ import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.CompoundTagArgument;
+import net.minecraft.commands.arguments.NbtTagArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -55,6 +58,20 @@ public interface PropCommands {
 						int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "prop"), 16);
 						return remove(ctx.getSource(), prop -> prop.id == id);
 					})
+				)
+			)
+		)
+		.then(Commands.literal("set")
+			.then(Commands.argument("prop", StringArgumentType.word())
+				.then(Commands.argument("key", StringArgumentType.word())
+					.then(Commands.argument("data", NbtTagArgument.nbtTag())
+						.executes(ctx -> {
+							int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "prop"), 16);
+							var key = StringArgumentType.getString(ctx, "key");
+							var data = NbtTagArgument.getNbtTag(ctx, "data");
+							return set(ctx.getSource(), id, key, data);
+						})
+					)
 				)
 			)
 		)
@@ -190,6 +207,27 @@ public interface PropCommands {
 		if (prop != null) {
 			prop.setPausedAndSync(paused);
 			return 1;
+		}
+
+		return 0;
+	}
+
+	static int set(CommandSourceStack source, int propId, String key, Tag data) {
+		var level = source.getSidedLevel();
+		var props = level.getProps();
+		var prop = props.levelProps.get(propId);
+
+		if (prop != null) {
+			var entry = prop.type.getData(key);
+
+			if (entry != null) {
+				entry.data().type().codec().parse(source.getLevel().nbtOps(), data).ifSuccess(value -> {
+					prop.setData(entry.data(), Cast.to(value));
+					prop.sync(entry.data());
+				});
+
+				return 1;
+			}
 		}
 
 		return 0;

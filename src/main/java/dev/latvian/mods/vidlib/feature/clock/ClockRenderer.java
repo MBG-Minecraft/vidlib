@@ -7,7 +7,6 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.LightLayer;
 
 public class ClockRenderer {
 	public static final ImBoolean VISIBLE = new ImBoolean(true);
@@ -30,7 +29,7 @@ public class ClockRenderer {
 			return;
 		}
 
-		var light = location.fullbright() ? LightTexture.FULL_BRIGHT : LightTexture.pack(mc.level.getBrightness(LightLayer.BLOCK, location.pos()), mc.level.getBrightness(LightLayer.SKY, location.pos()));
+		var light = location.fullBright() ? LightTexture.FULL_BRIGHT : mc.level.vl$getPackedLight(location.pos());
 
 		ms.pushPose();
 		frame.translate(location.pos().getX() + 0.5D, location.pos().getY() + location.offset() + 0.5D, location.pos().getZ() + 0.5D);

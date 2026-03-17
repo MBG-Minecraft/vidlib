@@ -8,7 +8,7 @@ import imgui.flag.ImGuiWindowFlags;
 
 public class ProgressQueueImGui {
 	public static void handle(ImGraphics graphics) {
-		if (ProgressQueue.ACTIVE.isEmpty()) {
+		if (ProgressQueue.ACTIVE_COUNT.get() <= 0) {
 			return;
 		}
 
@@ -54,6 +54,7 @@ public class ProgressQueueImGui {
 			if (done >= maxFileCount && queue.errors.isEmpty()) {
 				queue.active = false;
 				queueItr.remove();
+				ProgressQueue.ACTIVE_COUNT.decrementAndGet();
 				continue;
 			}
 

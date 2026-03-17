@@ -57,7 +57,7 @@ public class TextPropRenderer implements PropRenderer<TextProp> {
 		matrix4f.mul(bbMat);
 
 		int bgColor = prop.backgroundColor.argb();
-		int light = LightTexture.FULL_BRIGHT;
+		int light = prop.fullBright ? LightTexture.FULL_BRIGHT : prop.getPackedLight();
 		float w2 = prop.cachedData.totalWidth / 2F;
 		float off = 0F;
 
