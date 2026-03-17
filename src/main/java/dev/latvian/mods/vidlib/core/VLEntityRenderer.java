@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.AABB;
 
 public interface VLEntityRenderer<T extends Entity, S extends EntityRenderState> {
 	default EntityRenderer<T, S> vl$self() {
@@ -41,5 +42,9 @@ public interface VLEntityRenderer<T extends Entity, S extends EntityRenderState>
 	default void renderBoss(T entity, PoseStack ms, MultiBufferSource buffers, float xOffset, float yOffset, float zOffset, float delta) {
 		Minecraft.getInstance().getEntityRenderDispatcher().setRenderHitBoxes(false);
 		renderModel(entity, ms, BossRenderTypes.override(buffers), xOffset, yOffset, zOffset, delta, LightTexture.FULL_BRIGHT);
+	}
+
+	default AABB vl$getBoundingBoxForCulling(T entity) {
+		return AABB.INFINITE;
 	}
 }
