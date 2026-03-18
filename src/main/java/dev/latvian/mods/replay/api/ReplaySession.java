@@ -50,4 +50,7 @@ public interface ReplaySession {
 
 		return startUTC + Mth.floor(delta * (endUTC - startUTC));
 	}
+
+	default void moveTo(long gameTime) {
+	}
 }

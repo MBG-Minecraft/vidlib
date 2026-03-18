@@ -16,6 +16,7 @@ import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverrides;
 import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverridesReplaySessionData;
 import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import imgui.ImGui;
+import net.minecraft.nbt.TagParser;
 
 public class MapTextureOverridePanel extends Panel {
 	public static final MapTextureOverridePanel INSTANCE = new MapTextureOverridePanel();
@@ -46,6 +47,36 @@ public class MapTextureOverridePanel extends Panel {
 
 		int remove = -1;
 
+		if (ImGui.button(ImIcons.COPY + " Copy###copy-all")) {
+			try {
+				ImGui.setClipboardText(MapTextureOverrides.CODEC.encodeStart(graphics.nbtOps, map).getOrThrow().toString());
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+
+		if (ImGui.isItemHovered()) {
+			try {
+				ImGuiUtils.wrappedTooltip(MapTextureOverrides.CODEC.encodeStart(graphics.nbtOps, map).getOrThrow().toString());
+			} catch (Exception ignore) {
+			}
+		}
+
+		ImGui.sameLine();
+
+		if (ImGui.button(ImIcons.PASTE + " Paste###paste-all")) {
+			try {
+				var newMap = MapTextureOverrides.CODEC.parse(graphics.nbtOps, TagParser.create(graphics.nbtOps).parseFully(ImGui.getClipboardText())).getOrThrow();
+				map.list.clear();
+				map.join(newMap);
+				remove = -2;
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+
+		ImGui.separator();
+
 		for (int i = 0; i < map.list.size(); i++) {
 			var entry = map.list.get(i);
 			var update = ImUpdate.NONE;
@@ -68,7 +99,7 @@ public class MapTextureOverridePanel extends Panel {
 
 			update = update.or(builder.imguiKey(graphics, "", "sprite"));
 
-			if (update.isAny()) {
+			if (update.isAny() && builder.isValid()) {
 				map.list.set(i, new MapTextureOverride(mapId, builder.build()));
 				remove = -2;
 			}

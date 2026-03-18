@@ -1,12 +1,14 @@
 package dev.latvian.mods.vidlib;
 
+import dev.latvian.mods.replay.api.ReplayMarkerData;
+import dev.latvian.mods.replay.api.ReplayMarkerGroup;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.number.EntityNumber;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
-import dev.latvian.mods.vidlib.feature.misc.EventMarkerPayload;
+import dev.latvian.mods.vidlib.feature.misc.ReplayMarkerPayload;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
@@ -18,8 +20,6 @@ import net.neoforged.fml.ModList;
 import net.neoforged.neoforgespi.language.IModInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Optional;
 
 public class VidLib {
 	public static final String ID = "vidlib";
@@ -85,7 +85,7 @@ public class VidLib {
 		}
 
 		var packets = new S2CPacketBundleBuilder(player.level());
-		packets.s2c(new EventMarkerPayload("sync", Optional.empty()));
+		packets.s2c(new ReplayMarkerPayload(ReplayMarkerData.builder().group(ReplayMarkerGroup.DATA_SYNC).build()));
 		player.vl$sessionData().sync(packets, player, syncType);
 		packets.send(player);
 	}

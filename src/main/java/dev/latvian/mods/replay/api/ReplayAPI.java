@@ -1,5 +1,6 @@
 package dev.latvian.mods.replay.api;
 
+import dev.latvian.mods.replay.api.event.ReplayCaptureSession;
 import dev.latvian.mods.vidlib.VidLib;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -53,6 +54,11 @@ public class ReplayAPI {
 
 	@Nullable
 	public ReplaySession getOpenSession() {
+		return null;
+	}
+
+	@Nullable
+	public ReplayCaptureSession getCurrentCaptureSession() {
 		return null;
 	}
 

@@ -42,6 +42,6 @@ public class ReplaySessionOpenedEvent extends ReplaySessionEvent {
 	}
 
 	public void addMarker(int time, ReplayMarkerData data) {
-		addMarker(time, ReplayMarkerType.EVENT_MARKER, data);
+		addMarker(time, ReplayMarkerType.POST_RECORDING, data);
 	}
 }

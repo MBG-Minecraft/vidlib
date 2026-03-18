@@ -241,7 +241,7 @@ public class CutsceneImBuilder implements ImBuilder<Cutscene> {
 			if (isValid()) {
 				try {
 					var c = build();
-					cutsceneJson = JsonUtils.sort(Cutscene.DIRECT_CODEC.encodeStart(graphics.mc.level.jsonOps(), c).getOrThrow());
+					cutsceneJson = JsonUtils.sort(Cutscene.DIRECT_CODEC.encodeStart(graphics.jsonOps, c).getOrThrow());
 					jsonEditor.setText(JsonUtils.prettyString(cutsceneJson));
 					cutscene = c;
 				} catch (Exception ex) {

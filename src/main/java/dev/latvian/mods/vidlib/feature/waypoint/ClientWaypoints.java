@@ -23,7 +23,7 @@ public interface ClientWaypoints {
 	ImInt WAYPOINT_ALPHA = new ImInt(255);
 
 	static void draw(GuiGraphics graphics, DeltaTracker deltaTracker) {
-		if (!VISIBLE.get()) {
+		if (!VISIBLE.get() || graphics.vl$mc().options.hideGui) {
 			return;
 		}
 

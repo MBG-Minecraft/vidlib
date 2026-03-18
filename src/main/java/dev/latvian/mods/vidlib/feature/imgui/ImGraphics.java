@@ -1,7 +1,10 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import com.google.gson.JsonElement;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.Range;
@@ -24,6 +27,8 @@ import imgui.type.ImString;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ARGB;
@@ -31,7 +36,6 @@ import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
@@ -60,6 +64,8 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 	public final FeatureSet serverFeatures;
 	public final boolean adminPanel;
 	public final boolean isAdmin;
+	public final DynamicOps<JsonElement> jsonOps;
+	public final DynamicOps<Tag> nbtOps;
 	private VarStackStack stack;
 
 	public ImGraphics(Minecraft mc) {
@@ -73,6 +79,8 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		this.serverFeatures = inGame ? mc.level.getServerFeatures() : FeatureSet.EMPTY;
 		this.adminPanel = isReplay || VidLibClientOptions.getAdminPanel() && ClientGameEngine.INSTANCE.allowAdminPanel(mc.player);
 		this.isAdmin = inGame && (isSinglePlayer || mc.player.hasPermissions(2));
+		this.jsonOps = inGame ? mc.level.jsonOps() : JsonOps.INSTANCE;
+		this.nbtOps = inGame ? mc.level.nbtOps() : NbtOps.INSTANCE;
 	}
 
 	public void pushStack() {
@@ -385,14 +393,14 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		ImGui.setNextWindowSize(viewport.getWorkSizeX(), viewport.getWorkSizeY());
 	}
 
-	public <E> ImUpdate combo(String label, Object[] selected, Collection<? extends E> options, Function<E, String> nameFunction, @Nullable ImString search) {
+	public <E> ImUpdate combo(String label, Object[] selected, String noneLabel, Iterable<? extends E> options, Function<E, String> nameFunction, @Nullable ImString search) {
 		var result = ImUpdate.NONE;
-		var searchText = search != null && options.size() > 16 ? search.get().toLowerCase(Locale.ROOT) : null;
+		var searchText = search != null ? search.get().toLowerCase(Locale.ROOT) : "";
 
-		if (ImGui.beginCombo(label, selected[0] == null ? "Select..." : nameFunction.apply((E) selected[0]), ImGuiInputTextFlags.None)) {
+		if (ImGui.beginCombo(label, selected[0] == null ? noneLabel.isEmpty() ? "None" : noneLabel : nameFunction.apply((E) selected[0]), ImGuiInputTextFlags.None)) {
 			float y = ImGui.getCursorPos().y;
 
-			if (searchText != null) {
+			if (search != null) {
 				ImGui.setCursorPosY(y);
 				ImGui.setNextItemWidth(-1F);
 				ImGui.inputTextWithHint("###search", "Search...", search);
@@ -400,11 +408,26 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 
 			int i = 0;
 
+			if (!noneLabel.isEmpty()) {
+				boolean isSelected = selected[0] == null;
+
+				if ((isSelected || searchText.isEmpty() || noneLabel.toLowerCase(Locale.ROOT).contains(searchText)) && ImGui.selectable(noneLabel + "###" + i, isSelected)) {
+					selected[0] = null;
+					result = ImUpdate.FULL;
+				}
+
+				if (isSelected) {
+					ImGui.setItemDefaultFocus();
+				}
+
+				i++;
+			}
+
 			for (var option : options) {
 				boolean isSelected = selected[0] == option;
 				var itemLabel = nameFunction.apply(option);
 
-				if ((isSelected || searchText == null || searchText.isEmpty() || itemLabel.toLowerCase(Locale.ROOT).contains(searchText)) && ImGui.selectable(itemLabel + "###" + i, isSelected)) {
+				if ((isSelected || searchText.isEmpty() || itemLabel.toLowerCase(Locale.ROOT).contains(searchText)) && ImGui.selectable(itemLabel + "###" + i, isSelected)) {
 					selected[0] = option;
 					result = ImUpdate.FULL;
 				}
@@ -422,12 +445,12 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		return result;
 	}
 
-	public <E> ImUpdate combo(String label, Object[] selected, E[] options, Function<E, String> nameFunction) {
-		return combo(label, selected, Arrays.asList(options), nameFunction, null);
+	public <E> ImUpdate combo(String label, Object[] selected, String noneLabel, E[] options, Function<E, String> nameFunction) {
+		return combo(label, selected, noneLabel, Arrays.asList(options), nameFunction, null);
 	}
 
-	public <E> ImUpdate combo(String label, Object[] selected, E[] options) {
-		return combo(label, selected, options, (Function) KLibCodecs.DEFAULT_NAME_GETTER);
+	public <E> ImUpdate combo(String label, Object[] selected, String noneLabel, E[] options) {
+		return combo(label, selected, noneLabel, options, (Function) KLibCodecs.DEFAULT_NAME_GETTER);
 	}
 
 	public boolean collapsingHeader(String label, int imGuiTreeNodeFlags) {

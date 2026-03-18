@@ -32,7 +32,7 @@ public class MobEffectImBuilder implements ImBuilder<Holder<MobEffect>> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		return graphics.combo("###mob-effect", effect, MOB_EFFECTS.get(), e -> I18n.get(e.value().getDescriptionId()), SEARCH);
+		return graphics.combo("###mob-effect", effect, "", MOB_EFFECTS.get(), e -> I18n.get(e.value().getDescriptionId()), SEARCH);
 	}
 
 	@Override

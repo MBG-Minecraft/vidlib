@@ -5,9 +5,10 @@ import dev.latvian.mods.klib.codec.KLibCodecs;
 import net.minecraft.util.StringRepresentable;
 
 public enum ReplayMarkerType implements StringRepresentable {
-	USER("user"),
-	PACKET("packet"),
-	EVENT_MARKER("event_marker"),
+	EDITOR("editor"),
+	CLIENT_RECORDING("client_recording"),
+	SERVER_RECORDING("server_recording"),
+	POST_RECORDING("post_recording"),
 	NOTE("note");
 
 	public static final Codec<ReplayMarkerType> CODEC = KLibCodecs.anyEnumCodec(values());

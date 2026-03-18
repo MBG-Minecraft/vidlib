@@ -13,6 +13,7 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToClient;
+import dev.latvian.mods.vidlib.feature.note.Note;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
@@ -190,5 +191,11 @@ public class SessionData implements Comparable<SessionData> {
 	@Override
 	public int compareTo(@NotNull SessionData o) {
 		return getName().compareToIgnoreCase(o.getName());
+	}
+
+	public void createNote(Note note) {
+	}
+
+	public void deleteNote(UUID id) {
 	}
 }

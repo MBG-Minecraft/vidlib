@@ -7,6 +7,7 @@ import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.math.ProjectedCoordinates;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.util.Empty;
+import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.camera.DetachedCamera;
@@ -26,7 +27,6 @@ import dev.latvian.mods.vidlib.feature.data.UpdatePlayerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.data.UpdateServerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
-import dev.latvian.mods.vidlib.feature.misc.EventMarkerPayload;
 import dev.latvian.mods.vidlib.feature.particle.FireData;
 import dev.latvian.mods.vidlib.feature.particle.ItemParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.LineParticleOptions;
@@ -579,10 +579,13 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void marker(EventMarkerPayload payload) {
-		var session = vl$self().player.vl$sessionData();
-		session.markers.add(payload);
-		ClientGameEngine.INSTANCE.handleRuntimeMarker(vl$self().level.dimension(), payload.event(), payload.tag().orElse(null));
+	default void marker(ReplayMarkerData data) {
+		data = ClientGameEngine.INSTANCE.handleRuntimeMarker(data);
+
+		if (data != null) {
+			var session = vl$self().player.vl$sessionData();
+			session.markers.add(data);
+		}
 	}
 
 	@Override

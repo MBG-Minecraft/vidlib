@@ -102,6 +102,14 @@ public interface ImGuiUtils {
 		}
 	}
 
+	static void wrappedTooltip(String string) {
+		float w = ImGui.calcTextSize(string).x;
+		ImGui.setNextWindowSizeConstraints(Math.min(w, 300F), 1F, 600F, Float.MAX_VALUE);
+		ImGui.beginTooltip();
+		ImGui.textWrapped(string);
+		ImGui.endTooltip();
+	}
+
 	final class DragState {
 		public static final Int2ObjectMap<DragState> STATES = new Int2ObjectOpenHashMap<>();
 

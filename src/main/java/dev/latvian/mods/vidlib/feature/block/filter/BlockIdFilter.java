@@ -23,7 +23,7 @@ public record BlockIdFilter(Block block) implements BlockFilter, ImBuilderWithHo
 	public static class Builder implements BlockFilterImBuilder {
 		public static final ImBuilderHolder<BlockFilter> TYPE = ImBuilderHolder.of("ID", Builder::new);
 
-		public final BlockImBuilder block = new BlockImBuilder(null);
+		public final BlockImBuilder block = new BlockImBuilder();
 
 		@Override
 		public ImBuilderHolder<?> holder() {

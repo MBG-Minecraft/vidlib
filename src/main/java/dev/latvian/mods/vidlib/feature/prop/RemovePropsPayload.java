@@ -24,7 +24,7 @@ public record RemovePropsPayload(PropListType type, IntList ids, PropRemoveType 
 
 	@Override
 	public void handle(Context ctx) {
-		if (RecordedProp.LIST != null) {
+		if (ReplayProp.LIST != null) {
 			return;
 		}
 

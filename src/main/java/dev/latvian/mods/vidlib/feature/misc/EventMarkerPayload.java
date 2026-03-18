@@ -10,6 +10,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 
 import java.util.Optional;
 
+@Deprecated
 public record EventMarkerPayload(String event, Optional<Tag> tag) implements SimplePacketPayload {
 	@AutoPacket
 	public static final VidLibPacketType<EventMarkerPayload> TYPE = VidLibPacketType.internal("event_marker", CompositeStreamCodec.of(
@@ -25,6 +26,5 @@ public record EventMarkerPayload(String event, Optional<Tag> tag) implements Sim
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.level().marker(this);
 	}
 }

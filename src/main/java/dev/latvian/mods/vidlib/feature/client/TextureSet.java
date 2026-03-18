@@ -19,13 +19,11 @@ public class TextureSet {
 
 	public final List<String> paths;
 	private List<ResourceLocation> list;
-	private List<ResourceLocation> listWithNull;
 	private int lastReload;
 
 	public TextureSet(List<String> paths) {
 		this.paths = paths;
 		this.list = null;
-		this.listWithNull = null;
 		this.lastReload = 0;
 	}
 
@@ -51,26 +49,11 @@ public class TextureSet {
 		return list;
 	}
 
-	public List<ResourceLocation> getWithNull(Minecraft mc) {
-		int reload = mc.vl$reloadCount();
-
-		if (lastReload != reload) {
-			lastReload = reload;
-			listWithNull = null;
-		}
-
-		if (listWithNull == null) {
-			var list = get(mc);
-			listWithNull = new ArrayList<>(list.size() + 1);
-			listWithNull.add(null);
-			listWithNull.addAll(list);
-		}
-
-		return listWithNull;
+	public ImUpdate imgui(ImGraphics graphics, ResourceLocation[] value, @Nullable ImString search) {
+		return graphics.combo("###texture", value, "", get(graphics.mc), id -> id.getNamespace() + ":" + id.getPath().substring(9, id.getPath().length() - 4), search);
 	}
 
-	public ImUpdate imgui(ImGraphics graphics, ResourceLocation[] value, @Nullable ImString search) {
-		var list = getWithNull(graphics.mc);
-		return graphics.combo("###texture", value, list, id -> id == null ? "None" : (id.getNamespace() + ":" + id.getPath().substring(9, id.getPath().length() - 4)), search);
+	public ImUpdate optionalImgui(ImGraphics graphics, ResourceLocation[] value, @Nullable ImString search) {
+		return graphics.combo("###texture", value, "None", get(graphics.mc), id -> id.getNamespace() + ":" + id.getPath().substring(9, id.getPath().length() - 4), search);
 	}
 }

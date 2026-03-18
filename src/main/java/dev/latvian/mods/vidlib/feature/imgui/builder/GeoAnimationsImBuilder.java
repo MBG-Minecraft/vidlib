@@ -44,7 +44,7 @@ public class GeoAnimationsImBuilder implements ImBuilder<ResourceLocation> {
 			list = List.copyOf(list);
 		}
 
-		return graphics.combo("###animation", value, list, ResourceLocation::toString, SEARCH);
+		return graphics.combo("###animation", value, "", list, ResourceLocation::toString, SEARCH);
 	}
 
 	@Override

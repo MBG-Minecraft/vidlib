@@ -87,7 +87,7 @@ public class ClientProps extends Props<ClientLevel> {
 
 	@Override
 	public void tick(boolean tick) {
-		if (RecordedProp.MAP != null && RecordedProp.LIST != null) {
+		if (ReplayProp.MAP != null && ReplayProp.LIST != null) {
 			var now = level.getGameTime();
 
 			for (var existing : levelProps) {
@@ -95,14 +95,14 @@ public class ClientProps extends Props<ClientLevel> {
 					continue;
 				}
 
-				var p = RecordedProp.MAP.get(existing.id);
+				var p = ReplayProp.MAP.get(existing.id);
 
 				if (p == null || !p.exists(now)) {
 					existing.remove(PropRemoveType.TIME_TRAVEL);
 				}
 			}
 
-			for (var p : RecordedProp.LIST) {
+			for (var p : ReplayProp.LIST) {
 				var existing = levelProps.get(p.id);
 
 				if (p.exists(now)) {
@@ -125,7 +125,7 @@ public class ClientProps extends Props<ClientLevel> {
 
 		super.tick(tick);
 
-		if (RecordedProp.MAP != null && RecordedProp.LIST != null && !tick) {
+		if (ReplayProp.MAP != null && ReplayProp.LIST != null && !tick) {
 			levelProps.map.values().removeIf(prop -> prop.removed == PropRemoveType.TIME_TRAVEL);
 		}
 	}

@@ -6,9 +6,9 @@ import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class RecordedProp {
-	public static Int2ObjectMap<RecordedProp> MAP = null;
-	public static List<RecordedProp> LIST = null;
+public final class ReplayProp {
+	public static Int2ObjectMap<ReplayProp> MAP = null;
+	public static List<ReplayProp> LIST = null;
 
 	public final int id;
 	public final PropType<?> type;
@@ -17,7 +17,7 @@ public final class RecordedProp {
 	public final Map<PropData<?, ?>, Object> data;
 	public boolean manuallyAdded;
 
-	public RecordedProp(int id, PropType<?> type) {
+	public ReplayProp(int id, PropType<?> type) {
 		this.id = id;
 		this.type = type;
 		this.spawn = 0L;
@@ -32,7 +32,7 @@ public final class RecordedProp {
 
 	@Override
 	public String toString() {
-		return "RecordedProp[" +
+		return "ReplayProp[" +
 			"id=" + id + ", " +
 			"type=" + type + ", " +
 			"spawn=" + spawn + ", " +

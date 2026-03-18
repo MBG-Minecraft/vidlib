@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
-import com.google.gson.JsonElement;
 import com.mojang.serialization.DataResult;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
@@ -11,6 +10,7 @@ import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 import imgui.flag.ImGuiTableFlags;
 import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -101,10 +101,10 @@ public abstract class DataMapConfigPanel extends Panel {
 
 				if (!isDefault && ImGui.isItemHovered()) {
 					if (entry.builder != null) {
-						ImGui.setTooltip("Reset to " + entry.builder.toString(graphics.mc.level.jsonOps(), Cast.to(defaultValue)));
+						ImGuiUtils.wrappedTooltip("Reset to " + entry.builder.toString(graphics.nbtOps, Cast.to(defaultValue)));
 					} else {
 						try {
-							ImGui.setTooltip("Reset to " + entry.key.type().codec().encodeStart(graphics.mc.level.jsonOps(), Cast.to(defaultValue)).getOrThrow());
+							ImGuiUtils.wrappedTooltip("Reset to " + entry.key.type().codec().encodeStart(graphics.nbtOps, Cast.to(defaultValue)).getOrThrow());
 						} catch (Exception ex) {
 							ImGui.setTooltip("Reset to the default value");
 						}
@@ -135,7 +135,7 @@ public abstract class DataMapConfigPanel extends Panel {
 				ImGui.pushID("###value");
 
 				if (entry.builder == null) {
-					DataResult<JsonElement> result = null;
+					DataResult<Tag> result = null;
 					Object value = null;
 
 					try {
@@ -144,25 +144,25 @@ public abstract class DataMapConfigPanel extends Panel {
 						if (value == null) {
 							ImGui.text("null");
 						} else {
-							result = entry.key.type().codec().encodeStart(graphics.mc.level.jsonOps(), Cast.to(value));
+							result = entry.key.type().codec().encodeStart(graphics.nbtOps, Cast.to(value));
 							var string = result.getOrThrow().toString();
 
 							if (string.length() <= 50) {
 								ImGui.text(string);
 							} else {
-								if (ImGui.button("JSON###value-json")) {
+								if (ImGui.button("NBT###value-nbt")) {
 									ImGui.setClipboardText(string);
 								}
 
 								if (ImGui.isItemHovered()) {
-									ImGui.setTooltip(string);
+									ImGuiUtils.wrappedTooltip(string);
 								}
 							}
 						}
 					} catch (Throwable ex) {
-						graphics.redTextIf("Unable to encode JSON", true);
+						graphics.redTextIf("Unable to encode NBT", true);
 
-						if (result instanceof DataResult.Error<JsonElement> error) {
+						if (result instanceof DataResult.Error<Tag> error) {
 							graphics.redTextIf(error.message(), true);
 						}
 

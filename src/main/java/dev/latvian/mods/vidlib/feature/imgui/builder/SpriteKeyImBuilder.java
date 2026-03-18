@@ -18,7 +18,6 @@ import java.util.List;
 public class SpriteKeyImBuilder implements ImBuilder<SpriteKey> {
 	public static final List<ResourceLocation> ATLASES = Util.make(() -> {
 		var list = new ArrayList<ResourceLocation>();
-		list.add(SpriteKey.SPECIAL);
 		list.add(SpriteKey.BLOCKS);
 		list.add(SpriteKey.PARTICLES);
 		list.add(SpriteKey.GUI);
@@ -34,46 +33,43 @@ public class SpriteKeyImBuilder implements ImBuilder<SpriteKey> {
 	});
 
 	public static final ImBuilderType<SpriteKey> TYPE = SpriteKeyImBuilder::new;
-	public final ImString SEARCH = ImGuiUtils.resizableString();
+	public static final ImString SEARCH = ImGuiUtils.resizableString();
 
 	public final ResourceLocation[] atlas;
 	public final ResourceLocation[] sprite;
 
 	public SpriteKeyImBuilder() {
-		this.atlas = new ResourceLocation[]{SpriteKey.SPECIAL};
+		this.atlas = new ResourceLocation[1];
 		this.sprite = new ResourceLocation[1];
 	}
 
 	@Override
 	public void set(SpriteKey value) {
 		if (value == null) {
-			atlas[0] = SpriteKey.SPECIAL;
+			atlas[0] = null;
 			sprite[0] = null;
 		} else {
-			atlas[0] = value.atlas();
+			atlas[0] = value.isSpecial() ? null : value.atlas();
 			sprite[0] = value.sprite();
 		}
 	}
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		var update = graphics.combo("###atlas", atlas, ATLASES, ID::idToString, null);
+		var update = graphics.combo("###atlas", atlas, "Texture", ATLASES, ID::idToString, null);
 
 		if (update.isFull()) {
-			if (atlas[0].equals(SpriteKey.SPECIAL)) {
-				sprite[0] = VidLibTextures.SQUARE;
-			} else {
-				sprite[0] = ResourceLocation.withDefaultNamespace("missingno");
-			}
+			sprite[0] = null;
+			SEARCH.set("");
 		}
 
-		if (atlas[0].equals(SpriteKey.SPECIAL)) {
+		if (atlas[0] == null) {
 			update = update.or(TextureSet.ALL.imgui(graphics, sprite, SEARCH));
 		} else {
 			try {
 				var list = new ArrayList<>(graphics.mc.getAtlasFromTexture(atlas[0]).getTextures().keySet());
 				list.sort(ResourceLocation::compareNamespaced);
-				update = update.or(graphics.combo("###sprite", sprite, list, ID::idToString, SEARCH));
+				update = update.or(graphics.combo("###sprite", sprite, "", list, ID::idToString, SEARCH));
 			} catch (Throwable ex) {
 				graphics.stackTrace(ex);
 			}
@@ -83,12 +79,7 @@ public class SpriteKeyImBuilder implements ImBuilder<SpriteKey> {
 	}
 
 	@Override
-	public boolean isValid() {
-		return sprite[0] != null;
-	}
-
-	@Override
 	public SpriteKey build() {
-		return SpriteKey.of(atlas[0], sprite[0]);
+		return atlas[0] == null ? SpriteKey.special(sprite[0] == null ? VidLibTextures.SQUARE : sprite[0]) : SpriteKey.of(atlas[0], sprite[0] == null ? SpriteKey.MISSING_SPRITE : sprite[0]);
 	}
 }

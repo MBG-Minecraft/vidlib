@@ -25,6 +25,8 @@ public final class SpriteKey {
 	public static final ResourceLocation PARTICLES = ResourceLocation.withDefaultNamespace("textures/atlas/particles.png");
 	public static final ResourceLocation GUI = ResourceLocation.withDefaultNamespace("textures/atlas/gui.png");
 
+	public static final ResourceLocation MISSING_SPRITE = ResourceLocation.withDefaultNamespace("missingno");
+
 	public static final SpriteKey EMPTY = new SpriteKey(1, SPECIAL, VidLibTextures.TRANSPARENT);
 	public static final SpriteKey WHITE = special(VidLibTextures.SQUARE);
 	private static final Map<ResourceLocation, ResourceLocation> INTERN_ATLAS = new HashMap<>();

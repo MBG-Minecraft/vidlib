@@ -8,6 +8,7 @@ import dev.latvian.mods.klib.math.ProjectedCoordinates;
 import dev.latvian.mods.klib.math.VoxelShapeBox;
 import dev.latvian.mods.klib.util.Side;
 import dev.latvian.mods.replay.api.ReplayAPI;
+import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.core.VLLocalPlayer;
@@ -34,7 +35,7 @@ import dev.latvian.mods.vidlib.feature.input.PlayerInputChanged;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToServer;
 import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverridesReplaySessionData;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
-import dev.latvian.mods.vidlib.feature.misc.EventMarkerPayload;
+import dev.latvian.mods.vidlib.feature.note.Note;
 import dev.latvian.mods.vidlib.feature.npc.NPCParticleOptions;
 import dev.latvian.mods.vidlib.feature.npc.NPCRecording;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
@@ -56,6 +57,7 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import io.netty.buffer.Unpooled;
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
@@ -117,8 +119,9 @@ public class LocalClientSessionData extends ClientSessionData {
 	public WorldBorderOverride worldBorderOverrideStart;
 	public WorldBorderOverride worldBorderOverrideEnd;
 	public boolean clientModListSentDuringConfig;
-	public List<EventMarkerPayload> markers;
+	public List<ReplayMarkerData> markers;
 	public boolean hardcoreHearts;
+	public Map<UUID, Note> notes;
 
 	public LocalClientSessionData(Minecraft mc, UUID uuid) {
 		super(uuid, mc);
@@ -140,6 +143,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.clientModListSentDuringConfig = false;
 		this.markers = new ArrayList<>();
 		this.hardcoreHearts = false;
+		this.notes = new Object2ObjectLinkedOpenHashMap<>();
 
 		VidLib.LOGGER.info("Client Session Data Initialized");
 	}
@@ -488,5 +492,15 @@ public class LocalClientSessionData extends ClientSessionData {
 
 		var overrides = serverDataMap.getOptional(InternalServerData.MAP_TEXTURE_OVERRIDES);
 		return overrides == null ? null : overrides.get(id);
+	}
+
+	@Override
+	public void createNote(Note note) {
+		notes.put(note.id(), note);
+	}
+
+	@Override
+	public void deleteNote(UUID id) {
+		notes.remove(id);
 	}
 }

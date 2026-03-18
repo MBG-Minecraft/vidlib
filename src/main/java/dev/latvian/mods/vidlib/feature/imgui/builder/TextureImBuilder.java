@@ -19,7 +19,7 @@ public class TextureImBuilder implements ImBuilder<ResourceLocation> {
 	public static final ImBuilderType<ResourceLocation> GEO = of(TextureSet.ENTITIES_AND_PROPS, ID.mc("textures/entity/skeleton/skeleton.png"));
 	public static final ImBuilderType<ResourceLocation> SKIN = of(TextureSet.ENTITIES, SkinTexture.STEVE);
 
-	public final ImString SEARCH = ImGuiUtils.resizableString();
+	public static final ImString SEARCH = ImGuiUtils.resizableString();
 
 	public final TextureSet textureSet;
 	public final ResourceLocation[] value;

@@ -31,6 +31,7 @@ public class MiscClientUtils {
 	public static final Matrix4f PERSPECTIVE_MATRIX = new Matrix4f();
 	public static final ImBoolean PLAYER_HEADWEAR = new ImBoolean(true);
 	private static final char[] POWER = {'K', 'M', 'B', 'T'};
+	public static final ImBoolean SPECTATE_UI = new ImBoolean(false);
 
 	public static void reloadShaders(Minecraft mc) {
 		mc.getShaderManager().reload(CompletableFuture::completedFuture, mc.getResourceManager(), Util.backgroundExecutor(), mc).thenRunAsync(() -> {

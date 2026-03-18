@@ -34,11 +34,13 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 
 	public final Collection<E> options;
 	public final Object[] value;
+	public boolean allowNull;
 	public Function<E, String> nameGetter;
 
 	public EnumImBuilder(Collection<E> options, @Nullable E defaultValue) {
 		this.options = options;
 		this.value = new Object[]{defaultValue};
+		this.allowNull = defaultValue == null;
 		this.nameGetter = (Function) KLibCodecs.DEFAULT_NAME_GETTER;
 	}
 
@@ -67,7 +69,7 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		return graphics.combo("###enum", value, options, nameGetter, SEARCH);
+		return graphics.combo("###enum", value, allowNull ? "Not Set" : "", options, nameGetter, SEARCH);
 	}
 
 	@Override

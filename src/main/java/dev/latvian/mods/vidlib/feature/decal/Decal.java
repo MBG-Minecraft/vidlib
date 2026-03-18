@@ -175,7 +175,7 @@ public class Decal {
 	public void imgui(ImGraphics graphics, Collection<Decal> decals) {
 		ImGui.text("Shape");
 		DecalType.UNIT[0] = type;
-		graphics.combo("###type", DecalType.UNIT, DecalType.VALUES);
+		graphics.combo("###type", DecalType.UNIT, "", DecalType.VALUES);
 		type = DecalType.UNIT[0];
 
 		if (type == DecalType.REGULAR) {
@@ -258,7 +258,7 @@ public class Decal {
 		ImGui.sameLine();
 
 		DecalFillType.UNIT[0] = fillType;
-		graphics.combo("###fill-type", DecalFillType.UNIT, DecalFillType.VALUES);
+		graphics.combo("###fill-type", DecalFillType.UNIT, "", DecalFillType.VALUES);
 		fillType = DecalFillType.UNIT[0];
 
 		if (fillType != DecalFillType.SOLID) {

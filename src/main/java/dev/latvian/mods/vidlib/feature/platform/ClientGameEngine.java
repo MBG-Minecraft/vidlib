@@ -65,11 +65,9 @@ import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.client.resources.sounds.BiomeAmbientSoundsHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.status.ServerStatus;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
@@ -515,6 +513,10 @@ public class ClientGameEngine {
 		return hideGui(mc);
 	}
 
+	public boolean renderSpectatedUI(Minecraft mc) {
+		return MiscClientUtils.SPECTATE_UI.get();
+	}
+
 	public boolean overrideWaterParticles(Level level, BlockPos pos, FluidState state, RandomSource random) {
 		return true;
 	}
@@ -784,17 +786,14 @@ public class ClientGameEngine {
 		}
 	}
 
-	public void handleRuntimeMarker(ResourceKey<Level> dimension, String event, @Nullable Tag tag) {
-		// VidLib.LOGGER.info("Marker " + event + "/" + tag);
+	@Nullable
+	public ReplayMarkerData handleRuntimeMarker(ReplayMarkerData data) {
+		return data;
 	}
 
 	@Nullable
-	public ReplayMarkerData handleReplayMarker(ResourceKey<Level> dimension, String event, @Nullable Tag tag) {
-		return ReplayMarkerData.builder()
-			.color(Color.MAGENTA)
-			.dimension(dimension)
-			.description(event)
-			.build();
+	public ReplayMarkerData handleReplayMarker(ReplayMarkerData data) {
+		return data;
 	}
 
 	public List<Waypoint> getWaypoints(Minecraft mc) {

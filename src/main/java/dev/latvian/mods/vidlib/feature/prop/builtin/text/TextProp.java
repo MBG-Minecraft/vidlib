@@ -35,7 +35,8 @@ public class TextProp extends Prop {
 		PropData.createBoolean(TextProp.class, "centered", p -> p.centered, (p, v) -> p.centered = v),
 		PropData.createBoolean(TextProp.class, "auto_rotate_yaw", p -> p.autoRotateYaw, (p, v) -> p.autoRotateYaw = v),
 		PropData.createBoolean(TextProp.class, "auto_rotate_pitch", p -> p.autoRotatePitch, (p, v) -> p.autoRotatePitch = v),
-		PropData.createFloat(TextProp.class, "line_height", p -> p.lineHeight, (p, v) -> p.lineHeight = v, 0F, 30F)
+		PropData.createFloat(TextProp.class, "line_height", p -> p.lineHeight, (p, v) -> p.lineHeight = v, 0F, 30F),
+		PropData.createFloat(TextProp.class, "shadow_distance", p -> p.shadowDistance, (p, v) -> p.shadowDistance = v, 0F, 1F)
 	);
 
 	private Component text;
@@ -49,6 +50,7 @@ public class TextProp extends Prop {
 	public boolean autoRotateYaw;
 	public boolean autoRotatePitch;
 	public float lineHeight;
+	public float shadowDistance;
 
 	CachedTextData cachedData;
 
@@ -67,6 +69,7 @@ public class TextProp extends Prop {
 		this.autoRotateYaw = false;
 		this.autoRotatePitch = false;
 		this.lineHeight = 9F;
+		this.shadowDistance = 0F;
 	}
 
 	public void setText(Component text) {

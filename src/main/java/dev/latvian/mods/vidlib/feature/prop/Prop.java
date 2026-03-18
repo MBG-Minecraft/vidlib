@@ -603,7 +603,7 @@ public class Prop {
 
 		ImGui.sameLine();
 
-		if (RecordedProp.LIST != null && !clientSideOnly) {
+		if (ReplayProp.LIST != null && !clientSideOnly) {
 			ImGui.beginDisabled();
 		}
 
@@ -613,7 +613,7 @@ public class Prop {
 
 		ImGuiUtils.hoveredTooltip("Clone");
 
-		if (RecordedProp.LIST != null && !clientSideOnly) {
+		if (ReplayProp.LIST != null && !clientSideOnly) {
 			ImGui.endDisabled();
 		}
 
@@ -641,7 +641,7 @@ public class Prop {
 		ImGui.sameLine();
 
 		if (graphics.button(ImIcons.COPY + "###copy-json", ImColorVariant.LIME)) {
-			ImGui.setClipboardText(getDataJson(level.jsonOps()).toString());
+			ImGui.setClipboardText(getDataJson(graphics.jsonOps).toString());
 		}
 
 		ImGuiUtils.hoveredTooltip("Copy JSON");

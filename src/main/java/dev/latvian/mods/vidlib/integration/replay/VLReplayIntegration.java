@@ -1,6 +1,9 @@
 package dev.latvian.mods.vidlib.integration.replay;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.JsonOps;
+import dev.latvian.mods.replay.api.ReplayMarkerData;
+import dev.latvian.mods.replay.api.ReplayMarkerGroup;
 import dev.latvian.mods.replay.api.ReplayMarkerType;
 import dev.latvian.mods.replay.api.event.RegisterReplaySessionDataEvent;
 import dev.latvian.mods.replay.api.event.ReplayCaptureConfigSnapshotEvent;
@@ -31,8 +34,12 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverridesReplaySessionData;
 import dev.latvian.mods.vidlib.feature.misc.EventMarkerPayload;
+import dev.latvian.mods.vidlib.feature.misc.ReplayMarkerPayload;
 import dev.latvian.mods.vidlib.feature.misc.SyncPlayerTagsPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
+import dev.latvian.mods.vidlib.feature.note.CreateNotePayload;
+import dev.latvian.mods.vidlib.feature.note.DeleteNotePayload;
+import dev.latvian.mods.vidlib.feature.note.Note;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
@@ -41,8 +48,8 @@ import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
-import dev.latvian.mods.vidlib.feature.prop.RecordedProp;
 import dev.latvian.mods.vidlib.feature.prop.RemovePropsPayload;
+import dev.latvian.mods.vidlib.feature.prop.ReplayProp;
 import dev.latvian.mods.vidlib.feature.session.LocalClientSessionData;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
@@ -50,9 +57,16 @@ import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -61,6 +75,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.IdentityHashMap;
 import java.util.Set;
+import java.util.UUID;
 
 @EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
 public class VLReplayIntegration {
@@ -69,8 +84,11 @@ public class VLReplayIntegration {
 		var registryAccess = event.getSession().getRegistryAccess();
 
 		var dataMapOverrideBuilder = new DataMapOverrides.Builder();
-		var recordedProps = new ArrayList<RecordedProp>();
-		var recordingProps = new Int2ObjectLinkedOpenHashMap<RecordedProp>();
+		var replayProps = new ArrayList<ReplayProp>();
+		var currentReplayProps = new Int2ObjectLinkedOpenHashMap<ReplayProp>();
+		var uuidToPlayerInfo = new Object2ObjectOpenHashMap<UUID, GameProfile>();
+		var idToPlayerMap = new Int2ObjectLinkedOpenHashMap<GameProfile>();
+		var notes = new Object2ObjectLinkedOpenHashMap<UUID, Note>();
 
 		long startTick = event.getSession().getFileInfo().getStartGameTick();
 
@@ -94,6 +112,8 @@ public class VLReplayIntegration {
 								}
 							}
 						}
+						// Legacy
+						//noinspection deprecation
 						case SyncPlayerTagsPayload p -> dataMapOverrideBuilder.set(now, p.player(), InternalPlayerData.PLAYER_TAGS, Set.copyOf(p.tags()));
 						case AddPropPayload p -> {
 							var map = new IdentityHashMap<PropData<?, ?>, Object>();
@@ -103,67 +123,127 @@ public class VLReplayIntegration {
 								ex.printStackTrace();
 							}
 
-							var old = recordingProps.get(p.id());
+							var old = currentReplayProps.get(p.id());
 
 							if (old != null) {
 								old.data.putAll(map);
 							} else {
-								var rp = new RecordedProp(p.id(), p.type());
+								var rp = new ReplayProp(p.id(), p.type());
 								rp.spawn = p.createdTime();
 								rp.data.putAll(map);
-								recordingProps.put(p.id(), rp);
+								currentReplayProps.put(p.id(), rp);
 							}
 
 						}
 						case RemovePropsPayload p -> {
 							for (var id : p.ids()) {
-								var prop = recordingProps.remove(id.intValue());
+								var prop = currentReplayProps.remove(id.intValue());
 
 								if (prop != null) {
 									prop.remove = now;
-									recordedProps.add(prop);
+									replayProps.add(prop);
 								}
 							}
 						}
+						// Legacy
+						//noinspection deprecation
 						case EventMarkerPayload p -> {
-							var data = ClientGameEngine.INSTANCE.handleReplayMarker(entry.dimension(), p.event(), p.tag().orElse(null));
+							var builder = ReplayMarkerData.builder().description(p.event()).customData(p.tag().orElse(null));
+
+							if (p.event().equals("sync")) {
+								builder.group(ReplayMarkerGroup.DATA_SYNC);
+							}
+
+							var data = ClientGameEngine.INSTANCE.handleReplayMarker(builder.build());
 
 							if (data != null) {
-								event.addMarker((int) (now - startTick), ReplayMarkerType.EVENT_MARKER, data);
+								event.addMarker((int) (now - startTick), ReplayMarkerType.SERVER_RECORDING, data);
 							}
 						}
+						case ReplayMarkerPayload p -> {
+							var data = ClientGameEngine.INSTANCE.handleReplayMarker(p.data());
+
+							if (data != null) {
+								event.addMarker((int) (now - startTick), ReplayMarkerType.SERVER_RECORDING, data);
+							}
+						}
+						case CreateNotePayload p -> notes.put(p.note().id(), p.note());
+						case DeleteNotePayload p -> notes.remove(p.id());
 						case null, default -> {
 						}
+					}
+				}
+			} else if (entry.packet() instanceof ClientboundPlayerInfoUpdatePacket p) {
+				for (var e : p.entries()) {
+					if (e.profile() != null) {
+						uuidToPlayerInfo.put(e.profileId(), e.profile());
+					}
+				}
+			} else if (entry.packet() instanceof ClientboundAddEntityPacket p) {
+				if (p.getType() == EntityType.PLAYER) {
+					var profile = uuidToPlayerInfo.get(p.getUUID());
+
+					if (profile != null) {
+						idToPlayerMap.put(p.getId(), profile);
+
+						event.addMarker(entry.replayTime(), ReplayMarkerData.builder()
+							.group(ReplayMarkerGroup.PLAYER_ADDED)
+							.dimension(entry.dimension())
+							.position(new Vec3(p.getX(), p.getY(), p.getZ()))
+							.description(profile.getName())
+							.build()
+						);
+					}
+				}
+			} else if (entry.packet() instanceof ClientboundRemoveEntitiesPacket p) {
+				for (var id : p.getEntityIds()) {
+					var profile = idToPlayerMap.remove(id.intValue());
+
+					if (profile != null) {
+						event.addMarker(entry.replayTime(), ReplayMarkerData.builder()
+							.group(ReplayMarkerGroup.PLAYER_REMOVED)
+							.dimension(entry.dimension())
+							.description(profile.getName())
+							.build()
+						);
 					}
 				}
 			}
 		}
 
-		long endTick = event.getSession().getFileInfo().getEndGameTick();
+		var replayNotes = new ArrayList<>(notes.values());
+		Note.REPLAY_NOTES = replayNotes;
 
-		for (var prop : recordingProps.values()) {
-			prop.remove = endTick;
-			recordedProps.add(prop);
+		for (var note : replayNotes) {
+			event.addMarker((int) (note.timestamp().tick() - startTick), ReplayMarkerType.NOTE, note.toMarkerData());
 		}
 
-		recordedProps.sort(Comparator.comparingLong(a -> a.spawn));
+		long endTick = event.getSession().getFileInfo().getEndGameTick();
 
-		VidLib.LOGGER.info("Flashback props: " + recordedProps.size());
+		for (var prop : currentReplayProps.values()) {
+			prop.remove = endTick;
+			replayProps.add(prop);
+		}
+
+		replayProps.sort(Comparator.comparingLong(a -> a.spawn));
+
+		VidLib.LOGGER.info("Replay props: " + replayProps.size());
 
 		DataMapOverrides.INSTANCE = dataMapOverrideBuilder.build();
-		RecordedProp.LIST = recordedProps;
-		RecordedProp.MAP = new Int2ObjectOpenHashMap<>();
+		ReplayProp.LIST = replayProps;
+		ReplayProp.MAP = new Int2ObjectOpenHashMap<>();
 
-		for (var prop : recordedProps) {
-			RecordedProp.MAP.put(prop.id, prop);
+		for (var prop : replayProps) {
+			ReplayProp.MAP.put(prop.id, prop);
 		}
 	}
 
 	@SubscribeEvent
 	public static void replaySessionClosed(ReplaySessionClosedEvent event) {
 		DataMapOverrides.INSTANCE = null;
-		RecordedProp.MAP = null;
-		RecordedProp.LIST = null;
+		ReplayProp.MAP = null;
+		ReplayProp.LIST = null;
+		Note.REPLAY_NOTES = null;
 	}
 
 	@SubscribeEvent
@@ -179,7 +259,9 @@ public class VLReplayIntegration {
 		session.sync(packets, player, 1);
 
 		if (!session.markers.isEmpty()) {
-			session.markers.forEach(packets::s2c);
+			for (var data : session.markers) {
+				packets.s2c(new ReplayMarkerPayload(data));
+			}
 		}
 	}
 

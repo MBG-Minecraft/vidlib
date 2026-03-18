@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.phys.AABB;
 import org.joml.Matrix4f;
@@ -21,20 +22,23 @@ public class TextPropRenderer implements PropRenderer<TextProp> {
 
 		var font = ctx.frame().mc().font;
 
-		if (prop.cachedData == null) {
-			prop.cachedData = new CachedTextData(font.split(prop.getText(), prop.wrap).toArray(new FormattedCharSequence[0]));
+		var cachedData = prop.cachedData;
 
-			for (int i = 0; i < prop.cachedData.lines.length; i++) {
-				prop.cachedData.width[i] = font.width(prop.cachedData.lines[i]);
-				prop.cachedData.totalWidth = Math.max(prop.cachedData.totalWidth, prop.cachedData.width[i]);
+		if (cachedData == null) {
+			cachedData = new CachedTextData(font.split(prop.getText(), prop.wrap).toArray(new FormattedCharSequence[0]));
+			prop.cachedData = cachedData;
+
+			for (int i = 0; i < cachedData.lines.length; i++) {
+				cachedData.width[i] = font.width(cachedData.lines[i]);
+				cachedData.totalWidth = Math.max(cachedData.totalWidth, cachedData.width[i]);
 			}
 		}
 
-		if (prop.cachedData.lines.length == 0) {
+		if (cachedData.lines.length == 0) {
 			return;
 		}
 
-		float height = prop.lineHeight * prop.cachedData.lines.length;
+		float height = prop.lineHeight * cachedData.lines.length;
 		float y = -height;
 
 		if (!prop.shadow) {
@@ -42,7 +46,7 @@ public class TextPropRenderer implements PropRenderer<TextProp> {
 		}
 
 		float scale = 1F / -height * (float) prop.height;
-		prop.width = prop.cachedData.totalWidth * scale;
+		prop.width = cachedData.totalWidth * scale;
 
 		var bbMat = new Matrix4f();
 		bbMat.scale(scale, scale, scale);
@@ -58,7 +62,7 @@ public class TextPropRenderer implements PropRenderer<TextProp> {
 
 		int bgColor = prop.backgroundColor.argb();
 		int light = prop.fullBright ? LightTexture.FULL_BRIGHT : prop.getPackedLight();
-		float w2 = prop.cachedData.totalWidth / 2F;
+		float w2 = cachedData.totalWidth / 2F;
 		float off = 0F;
 
 		if (bgColor != 0) {
@@ -70,37 +74,56 @@ public class TextPropRenderer implements PropRenderer<TextProp> {
 			off = 1F;
 		}
 
-		prop.cachedData.va.set(-w2 - off, y - off, 0F).mulPosition(bbMat);
-		prop.cachedData.vb.set(-w2 - off, off, 0F).mulPosition(bbMat);
-		prop.cachedData.vc.set(w2 + off, off, 0F).mulPosition(bbMat);
-		prop.cachedData.vd.set(w2 + off, y - off, 0F).mulPosition(bbMat);
+		cachedData.va.set(-w2 - off, y - off, 0F).mulPosition(bbMat);
+		cachedData.vb.set(-w2 - off, off, 0F).mulPosition(bbMat);
+		cachedData.vc.set(w2 + off, off, 0F).mulPosition(bbMat);
+		cachedData.vd.set(w2 + off, y - off, 0F).mulPosition(bbMat);
 
-		prop.cachedData.box = new AABB(
-			Math.min(Math.min(prop.cachedData.va.x, prop.cachedData.vb.x), Math.min(prop.cachedData.vc.x, prop.cachedData.vd.x)) - 0.05F,
-			Math.min(Math.min(prop.cachedData.va.y, prop.cachedData.vb.y), Math.min(prop.cachedData.vc.y, prop.cachedData.vd.y)) - 0.05F,
-			Math.min(Math.min(prop.cachedData.va.z, prop.cachedData.vb.z), Math.min(prop.cachedData.vc.z, prop.cachedData.vd.z)) - 0.05F,
-			Math.max(Math.max(prop.cachedData.va.x, prop.cachedData.vb.x), Math.max(prop.cachedData.vc.x, prop.cachedData.vd.x)) + 0.05F,
-			Math.max(Math.max(prop.cachedData.va.y, prop.cachedData.vb.y), Math.max(prop.cachedData.vc.y, prop.cachedData.vd.y)) + 0.05F,
-			Math.max(Math.max(prop.cachedData.va.z, prop.cachedData.vb.z), Math.max(prop.cachedData.vc.z, prop.cachedData.vd.z)) + 0.05F
+		cachedData.box = new AABB(
+			Math.min(Math.min(cachedData.va.x, cachedData.vb.x), Math.min(cachedData.vc.x, cachedData.vd.x)) - 0.05F,
+			Math.min(Math.min(cachedData.va.y, cachedData.vb.y), Math.min(cachedData.vc.y, cachedData.vd.y)) - 0.05F,
+			Math.min(Math.min(cachedData.va.z, cachedData.vb.z), Math.min(cachedData.vc.z, cachedData.vd.z)) - 0.05F,
+			Math.max(Math.max(cachedData.va.x, cachedData.vb.x), Math.max(cachedData.vc.x, cachedData.vd.x)) + 0.05F,
+			Math.max(Math.max(cachedData.va.y, cachedData.vb.y), Math.max(cachedData.vc.y, cachedData.vd.y)) + 0.05F,
+			Math.max(Math.max(cachedData.va.z, cachedData.vb.z), Math.max(cachedData.vc.z, cachedData.vd.z)) + 0.05F
 		);
 
 		// new AABB(-width / 2D, 0D, -width / 2D, width / 2D, height, width / 2D)
 
 		int color = prop.color.argb();
 
-		for (int i = 0; i < prop.cachedData.lines.length; i++) {
+		for (int i = 0; i < cachedData.lines.length; i++) {
 			font.drawInBatch(
-				prop.cachedData.lines[i],
-				-prop.cachedData.width[i] / 2F,
+				cachedData.lines[i],
+				-cachedData.width[i] / 2F,
 				y,
 				color,
-				prop.shadow,
+				prop.shadow && prop.shadowDistance == 0F,
 				matrix4f,
 				ctx.frame().buffers(),
 				prop.seeThrough ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.POLYGON_OFFSET,
 				0,
 				light
 			);
+
+			if (prop.shadowDistance != 0F) {
+				matrix4f.translate(0F, 0F, -prop.shadowDistance);
+
+				font.drawInBatch(
+					cachedData.lines[i],
+					(-cachedData.width[i] / 2F) + 1F,
+					y + 1F,
+					ARGB.scaleRGB(color, 0.25F),
+					false,
+					matrix4f,
+					ctx.frame().buffers(),
+					prop.seeThrough ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.POLYGON_OFFSET,
+					0,
+					light
+				);
+
+				matrix4f.translate(0F, 0F, prop.shadowDistance);
+			}
 
 			y += prop.lineHeight;
 		}

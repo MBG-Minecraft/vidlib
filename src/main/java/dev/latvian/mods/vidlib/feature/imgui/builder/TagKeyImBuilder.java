@@ -57,7 +57,7 @@ public class TagKeyImBuilder<T> implements ImBuilder<TagKey<T>> {
 			cachedTags = reg.listTags().map(HolderSet.Named::key).toList();
 		}
 
-		return graphics.combo("###tag", tag, cachedTags, t -> t.location().toString(), SEARCH);
+		return graphics.combo("###tag", tag, "", cachedTags, t -> t.location().toString(), SEARCH);
 	}
 
 	@Override
