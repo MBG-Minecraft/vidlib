@@ -18,7 +18,7 @@ public record FaceTexture(SpriteKey sprite, TerrainRenderLayer layer, boolean cu
 	public static final FaceTexture BLOOM = new FaceTexture(SpriteKey.WHITE, TerrainRenderLayer.BLOOM, true);
 
 	public static final Codec<FaceTexture> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		SpriteKey.CODEC.fieldOf("sprite").forGetter(FaceTexture::sprite),
+		SpriteKey.PREFER_BLOCK_CODEC.fieldOf("sprite").forGetter(FaceTexture::sprite),
 		TerrainRenderLayer.CODEC.optionalFieldOf("layer", TerrainRenderLayer.SOLID).forGetter(FaceTexture::layer),
 		Codec.BOOL.optionalFieldOf("cull", true).forGetter(FaceTexture::cull),
 		Color.CODEC.optionalFieldOf("tint", Color.WHITE).forGetter(FaceTexture::tint),

@@ -129,6 +129,8 @@
 		"LiquidBlockRendererMixin",
 		"LivingEntityRendererMixin",
 		"LocalPlayerMixin",
+		"MapRendererMixin",
+		"MapTextureManagerMixin",
 		"MinecraftClientMixin",
 		"MouseHandlerMixin",
 		"MultiBufferSourceBufferSourceMixin",

@@ -188,7 +188,11 @@ public class DataMap implements DataMapHolder {
 
 			for (var v : map) {
 				if (v.key.type() != null && v.key.save() && v.data != null && !v.data.equals(v.key.defaultValue())) {
-					data.put(v.key.id(), v.key.type().codec().encodeStart(ops, Cast.to(v.data)).getOrThrow());
+					try {
+						data.put(v.key.id(), v.key.type().codec().encodeStart(ops, Cast.to(v.data)).getOrThrow());
+					} catch (Exception ex) {
+						VidLib.LOGGER.error("Failed to save " + v.key + ": " + ex);
+					}
 				}
 			}
 

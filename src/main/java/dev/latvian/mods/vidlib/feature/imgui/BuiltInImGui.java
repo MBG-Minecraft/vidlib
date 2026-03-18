@@ -9,6 +9,7 @@ import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneBuilderPanel;
 import dev.latvian.mods.vidlib.feature.decal.DecalPanel;
 import dev.latvian.mods.vidlib.feature.environment.FluidPlanePanel;
+import dev.latvian.mods.vidlib.feature.environment.MapTextureOverridePanel;
 import dev.latvian.mods.vidlib.feature.environment.WorldBorderPanel;
 import dev.latvian.mods.vidlib.feature.gallery.LowQualityPlayerBodies;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerBodies;
@@ -94,6 +95,7 @@ public class BuiltInImGui {
 		list.add(ChromaticAberrationPanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
 		list.add(FluidPlanePanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
 		list.add(WorldBorderPanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
+		list.add(MapTextureOverridePanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
 
 		list.add(MenuItem.menu(ImIcons.VISIBLE, "Level of Detail", (g1, menuItems) -> {
 			menuItems.add(MenuItem.menu(ImIcons.SHIELD, "Player Armor", LevelOfDetailValue.PLAYER_ARMOR));

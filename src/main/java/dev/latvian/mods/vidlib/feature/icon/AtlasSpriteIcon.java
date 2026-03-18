@@ -11,7 +11,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 
 public record AtlasSpriteIcon(SpriteKey sprite, boolean translucent, Color tint) implements Icon {
 	public static final SimpleRegistryType<AtlasSpriteIcon> TYPE = SimpleRegistryType.dynamic("atlas_sprite", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		SpriteKey.CODEC.fieldOf("sprite").forGetter(AtlasSpriteIcon::sprite),
+		SpriteKey.PREFER_BLOCK_CODEC.fieldOf("sprite").forGetter(AtlasSpriteIcon::sprite),
 		Codec.BOOL.optionalFieldOf("translucent", false).forGetter(AtlasSpriteIcon::translucent),
 		Color.CODEC.optionalFieldOf("tint", Color.WHITE).forGetter(AtlasSpriteIcon::tint)
 	).apply(instance, AtlasSpriteIcon::new)), CompositeStreamCodec.of(

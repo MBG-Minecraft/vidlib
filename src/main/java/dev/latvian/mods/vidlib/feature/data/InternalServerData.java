@@ -4,6 +4,7 @@ import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
+import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverrides;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
@@ -27,6 +28,7 @@ public interface InternalServerData {
 	DataKey<Boolean> ICE_MELTS = DataKey.SERVER.createBoolean("ice_melts", false);
 	DataKey<Boolean> BLOCK_GRAVITY = DataKey.SERVER.createBoolean("block_gravity", false);
 	DataKey<List<Waypoint>> WAYPOINTS = DataKey.SERVER.createDefault("waypoints", Waypoint.LIST_DATA_TYPE, List.of(), null);
+	DataKey<MapTextureOverrides> MAP_TEXTURE_OVERRIDES = DataKey.SERVER.createDefault("map_texture_overrides", MapTextureOverrides.DATA_TYPE, MapTextureOverrides.EMPTY, null);
 
 	@AutoInit
 	static void bootstrap() {

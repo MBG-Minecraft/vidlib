@@ -24,6 +24,17 @@ public class ReplayAPI {
 		VidLib.LOGGER.info("Loaded Replay API " + api);
 	}
 
+	@Nullable
+	public static <T extends ReplaySessionData> T getActiveSessionData(ReplaySessionDataType<T> type) {
+		var session = getActive().getOpenSession();
+
+		if (session != null) {
+			return session.getOptionalData(type);
+		}
+
+		return null;
+	}
+
 	public final String name;
 	public final String version;
 

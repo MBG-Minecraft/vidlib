@@ -18,6 +18,7 @@ import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.icon.IconHolder;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.location.Location;
+import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverrides;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
@@ -75,6 +76,7 @@ public interface VidLibDataTypes {
 		DataType.register(VidLib.id("string_set"), STRING_SET);
 		DataType.register(VidLib.id("item_stack_list"), ITEM_STACK_LIST);
 		DataType.register(VidLib.id("safe_item_stack"), SAFE_ITEM_STACK);
+		DataType.register(VidLib.id("connection_type"), CONNECTION_TYPE);
 
 		DataType.register(VidLib.id("icon"), Icon.DATA_TYPE);
 		DataType.register(VidLib.id("icon_holder"), IconHolder.DATA_TYPE);
@@ -113,6 +115,6 @@ public interface VidLibDataTypes {
 		DataType.register(VidLib.id("waypoint"), Waypoint.DATA_TYPE);
 		DataType.register(VidLib.id("waypoint_list"), Waypoint.LIST_DATA_TYPE);
 		DataType.register(VidLib.id("player_input"), PlayerInput.DATA_TYPE);
-		DataType.register(VidLib.id("connection_type"), CONNECTION_TYPE);
+		DataType.register(VidLib.id("map_texture_overrides"), MapTextureOverrides.DATA_TYPE);
 	}
 }

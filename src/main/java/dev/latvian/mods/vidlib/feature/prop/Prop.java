@@ -786,14 +786,10 @@ public class Prop {
 				ImGui.popItemWidth();
 
 				if (update.isAny() && builder.isValid()) {
-					var session = ReplayAPI.getActive().getOpenSession();
+					var selectedPropData = ReplayAPI.getActiveSessionData(SelectedPropReplaySessionData.TYPE);
 
-					if (session != null) {
-						var selectedPropData = session.getOptionalData(SelectedPropReplaySessionData.TYPE);
-
-						if (selectedPropData != null) {
-							selectedPropData.makePropKeyframes.add(this);
-						}
+					if (selectedPropData != null) {
+						selectedPropData.makePropKeyframes.add(this);
 					}
 
 					c2sEdit(data, Cast.to(builder.build()), update.isFull());

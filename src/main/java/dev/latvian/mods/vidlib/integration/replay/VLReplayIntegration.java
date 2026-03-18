@@ -29,6 +29,7 @@ import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
 import dev.latvian.mods.vidlib.feature.imgui.EntityExplorerPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverridesReplaySessionData;
 import dev.latvian.mods.vidlib.feature.misc.EventMarkerPayload;
 import dev.latvian.mods.vidlib.feature.misc.SyncPlayerTagsPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
@@ -252,6 +253,7 @@ public class VLReplayIntegration {
 	public static void registerReplaySessionData(RegisterReplaySessionDataEvent event) {
 		event.register(new PinReplaySessionData());
 		event.register(new SelectedPropReplaySessionData());
+		event.register(new MapTextureOverridesReplaySessionData());
 	}
 
 	@SubscribeEvent

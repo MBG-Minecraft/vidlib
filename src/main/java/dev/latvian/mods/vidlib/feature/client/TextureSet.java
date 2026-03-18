@@ -1,7 +1,11 @@
 package dev.latvian.mods.vidlib.feature.client;
 
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import imgui.type.ImString;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +15,7 @@ public class TextureSet {
 	public static final TextureSet ENTITIES = new TextureSet(List.of("textures/entity"));
 	public static final TextureSet PROPS = new TextureSet(List.of("textures/entity"));
 	public static final TextureSet ENTITIES_AND_PROPS = new TextureSet(List.of("textures/entity", "textures/prop"));
+	public static final TextureSet ATLAS = new TextureSet(List.of("textures/atlas"));
 
 	public final List<String> paths;
 	private List<ResourceLocation> list;
@@ -62,5 +67,10 @@ public class TextureSet {
 		}
 
 		return listWithNull;
+	}
+
+	public ImUpdate imgui(ImGraphics graphics, ResourceLocation[] value, @Nullable ImString search) {
+		var list = getWithNull(graphics.mc);
+		return graphics.combo("###texture", value, list, id -> id == null ? "None" : (id.getNamespace() + ":" + id.getPath().substring(9, id.getPath().length() - 4)), search);
 	}
 }

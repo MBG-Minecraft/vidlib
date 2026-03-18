@@ -7,6 +7,7 @@ import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.math.ProjectedCoordinates;
 import dev.latvian.mods.klib.math.VoxelShapeBox;
 import dev.latvian.mods.klib.util.Side;
+import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.core.VLLocalPlayer;
@@ -19,6 +20,7 @@ import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
+import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
@@ -30,6 +32,7 @@ import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.input.PlayerInputChanged;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToServer;
+import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverridesReplaySessionData;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.feature.misc.EventMarkerPayload;
 import dev.latvian.mods.vidlib.feature.npc.NPCParticleOptions;
@@ -42,6 +45,7 @@ import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
 import dev.latvian.mods.vidlib.feature.skybox.ClientSkybox;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
+import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
@@ -468,5 +472,21 @@ public class LocalClientSessionData extends ClientSessionData {
 	@Override
 	public void setClientModListSentDuringConfig() {
 		clientModListSentDuringConfig = true;
+	}
+
+	@Nullable
+	public SpriteKey getMapTextureOverride(int id) {
+		var data = ReplayAPI.getActiveSessionData(MapTextureOverridesReplaySessionData.TYPE);
+
+		if (data != null) {
+			var override = data.overrides.get(id);
+
+			if (override != null) {
+				return override;
+			}
+		}
+
+		var overrides = serverDataMap.getOptional(InternalServerData.MAP_TEXTURE_OVERRIDES);
+		return overrides == null ? null : overrides.get(id);
 	}
 }

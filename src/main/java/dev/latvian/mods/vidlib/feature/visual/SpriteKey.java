@@ -1,8 +1,9 @@
 package dev.latvian.mods.vidlib.feature.visual;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
@@ -79,7 +80,11 @@ public final class SpriteKey {
 		ID.CODEC.fieldOf("sprite").forGetter(SpriteKey::sprite)
 	).apply(instance, SpriteKey::of));
 
-	public static final Codec<SpriteKey> CODEC = Codec.either(MAP_CODEC, ID.CODEC).xmap(either -> either.map(Function.identity(), SpriteKey::block), key -> key.atlas == BLOCKS ? Either.left(key) : Either.right(key.sprite));
+	public static final Codec<SpriteKey> SPECIAL_CODEC = ID.CODEC.flatXmap(id -> DataResult.success(SpriteKey.special(id)), key -> key.isSpecial() ? DataResult.success(key.sprite()) : DataResult.error(() -> "Not a special type atlas sprite"));
+	public static final Codec<SpriteKey> BLOCK_CODEC = ID.CODEC.flatXmap(id -> DataResult.success(SpriteKey.block(id)), key -> key.isBlock() ? DataResult.success(key.sprite()) : DataResult.error(() -> "Not a block type atlas sprite"));
+
+	public static final Codec<SpriteKey> PREFER_SPECIAL_CODEC = KLibCodecs.or(SPECIAL_CODEC, MAP_CODEC);
+	public static final Codec<SpriteKey> PREFER_BLOCK_CODEC = KLibCodecs.or(BLOCK_CODEC, MAP_CODEC);
 
 	public static final StreamCodec<ByteBuf, SpriteKey> STREAM_CODEC = new StreamCodec<>() {
 		@Override
@@ -157,4 +162,23 @@ public final class SpriteKey {
 		return Objects.hash(atlas, sprite);
 	}
 
+	public boolean isSpecial() {
+		return atlas == SPECIAL;
+	}
+
+	public boolean isBlock() {
+		return atlas == BLOCKS;
+	}
+
+	public boolean isParticle() {
+		return atlas == PARTICLES;
+	}
+
+	public boolean isGui() {
+		return atlas == GUI;
+	}
+
+	public ResourceLocation getTexture() {
+		return isSpecial() ? sprite : atlas;
+	}
 }

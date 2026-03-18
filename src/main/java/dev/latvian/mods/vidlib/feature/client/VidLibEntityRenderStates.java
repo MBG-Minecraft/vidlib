@@ -1,10 +1,12 @@
 package dev.latvian.mods.vidlib.feature.client;
 
+import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -43,6 +45,8 @@ public interface VidLibEntityRenderStates {
 	ContextKey<Boolean> BOSS_FRAMEBUFFER = new ContextKey<>(VidLib.id("boss_framebuffer"));
 	ContextKey<Boolean> CREATIVE = new ContextKey<>(VidLib.id("creative"));
 	ContextKey<List<Clothing>> CLOTHING = new ContextKey<>(VidLib.id("clothing"));
+	ContextKey<SpriteKey> SPRITE_KEY = new ContextKey<>(VidLib.id("sprite_key"));
+	ContextKey<UV> UV = new ContextKey<>(VidLib.id("uv"));
 
 	ItemStack DEFAULT_SHIELD = new ItemStack(Items.SHIELD);
 

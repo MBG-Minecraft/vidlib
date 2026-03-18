@@ -625,14 +625,26 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	default TextureAtlas getTextureAtlas(SpriteKey sprite) {
-		if (sprite.atlas() == SpriteKey.BLOCKS) {
+		if (sprite.isBlock()) {
 			return getBlockAtlas();
-		} else if (sprite.atlas() == SpriteKey.PARTICLES) {
+		} else if (sprite.isParticle()) {
 			return getParticleAtlas();
-		} else if (sprite.atlas() == SpriteKey.GUI) {
+		} else if (sprite.isGui()) {
 			return getGuiAtlas();
 		} else {
 			return vl$self().getModelManager().getAtlas(sprite.atlas());
+		}
+	}
+
+	default TextureAtlas getAtlasFromTexture(ResourceLocation atlas) {
+		if (atlas.equals(SpriteKey.BLOCKS)) {
+			return getBlockAtlas();
+		} else if (atlas.equals(SpriteKey.PARTICLES)) {
+			return getParticleAtlas();
+		} else if (atlas.equals(SpriteKey.GUI)) {
+			return getGuiAtlas();
+		} else {
+			return vl$self().getModelManager().getAtlas(atlas);
 		}
 	}
 

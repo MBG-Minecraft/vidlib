@@ -36,8 +36,7 @@ public class TextureImBuilder implements ImBuilder<ResourceLocation> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		var list = textureSet.getWithNull(graphics.mc);
-		return graphics.combo("###texture", value, list, id -> id == null ? "None" : (id.getNamespace() + ":" + id.getPath().substring(9, id.getPath().length() - 4)), SEARCH);
+		return textureSet.imgui(graphics, value, SEARCH);
 	}
 
 	@Override
