@@ -283,8 +283,9 @@ public class EntityExplorerPanel extends Panel {
 				ImGui.beginTooltip();
 
 				var sink = new FormattedCharSinkPartBuilder();
+				var lines = itemStack.getTooltipLines(Item.TooltipContext.of(graphics.mc.level), graphics.player, ClientTooltipFlag.of(TooltipFlag.ADVANCED.asCreative()));
 
-				for (var component : itemStack.getTooltipLines(Item.TooltipContext.of(graphics.mc.level), graphics.player, ClientTooltipFlag.of(TooltipFlag.ADVANCED))) {
+				for (var component : lines) {
 					for (var line : graphics.mc.font.split(component, Integer.MAX_VALUE)) {
 						line.accept(sink);
 						graphics.text(sink.build());
