@@ -1,7 +1,5 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import dev.latvian.mods.klib.color.Color;
@@ -640,17 +638,19 @@ public class Prop {
 
 		ImGui.sameLine();
 
-		if (graphics.button(ImIcons.COPY + "###copy-json", ImColorVariant.LIME)) {
-			ImGui.setClipboardText(getDataJson(graphics.jsonOps).toString());
+		if (graphics.button(ImIcons.COPY + "###copy-nbt", ImColorVariant.LIME)) {
+			ImGui.setClipboardText(encode(graphics.nbtOps).toString());
 		}
 
-		ImGuiUtils.hoveredTooltip("Copy JSON");
+		ImGuiUtils.hoveredTooltip("Copy NBT");
 
 		ImGui.sameLine();
 
-		if (graphics.smallButton("Teleport", ImColorVariant.DARK_PURPLE)) {
+		if (graphics.smallButton(ImIcons.LOCATION + "###teleport", ImColorVariant.DARK_PURPLE)) {
 			graphics.mc.runClientCommand("tp @s " + pos.x + " " + pos.y + " " + pos.z);
 		}
+
+		ImGuiUtils.hoveredTooltip("Teleport To");
 
 		if (clientSideOnly) {
 			ImGui.sameLine();
@@ -834,32 +834,47 @@ public class Prop {
 		}
 	}
 
-	public JsonObject getDataJson(DynamicOps<JsonElement> ops) {
-		var json = new JsonObject();
-
+	public <O> O encode(DynamicOps<O> ops, O prefix) {
 		for (var entry : type.data()) {
 			try {
-				json.add(entry.data().key(), entry.data().type().codec().encodeStart(ops, Cast.to(getData(entry.data()))).getOrThrow());
+				var data = getData(entry.data());
+				var result = entry.data().type().codec().encodeStart(ops, Cast.to(data));
+				prefix = ops.set(prefix, entry.data().key(), result.getOrThrow());
 			} catch (Exception ignore) {
 			}
 		}
 
-		return json;
+		return prefix;
 	}
 
-	public void setDataJson(DynamicOps<JsonElement> ops, JsonObject json) {
+	public <O> O encode(DynamicOps<O> ops) {
+		return encode(ops, ops.empty());
+	}
+
+	public <O> DataResult<Prop> merge(DynamicOps<O> ops, O input) {
+		var mapLike = ops.getMap(input).result().orElse(null);
+
+		if (mapLike == null) {
+			return DataResult.error(() -> "Expected a map input");
+		}
+
 		for (var entry : type.data()) {
 			var p = entry.data();
-			var t = json.get(p.key());
+			var t = mapLike.get(p.key());
 
 			if (t != null) {
 				var result = p.type().codec().parse(ops, t);
 
 				if (result.isSuccess()) {
 					setData(p, Cast.to(result.getOrThrow()));
+					sync(p);
+				} else {
+					return DataResult.error(() -> "Failed to parse '" + p.key() + "' from " + t + ": " + result.error().get().message());
 				}
 			}
 		}
+
+		return DataResult.success(this);
 	}
 
 	public void setPausedAndSync(boolean paused) {

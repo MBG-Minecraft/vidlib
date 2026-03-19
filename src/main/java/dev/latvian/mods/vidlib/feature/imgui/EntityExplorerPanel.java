@@ -1,9 +1,13 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.texture.UV;
+import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
 import dev.latvian.mods.vidlib.feature.entity.filter.ProfileEntityFilter;
+import dev.latvian.mods.vidlib.feature.gallery.ItemIcons;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color3ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.item.VisualItemKey;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfField;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
@@ -15,7 +19,13 @@ import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.neoforged.neoforge.client.ClientTooltipFlag;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -254,6 +264,41 @@ public class EntityExplorerPanel extends Panel {
 			}
 		}
 
+		var itemStack = ItemStack.EMPTY;
+
+		if (entity instanceof ItemEntity itemEntity) {
+			itemStack = itemEntity.getItem();
+		} else if (entity instanceof ItemFrame itemFrame) {
+			itemStack = itemFrame.getItem();
+		}
+
+		if (!itemStack.isEmpty()) {
+			ImGui.pushID("###item");
+
+			ImGui.text("Item: ");
+			ImGui.sameLine();
+			graphics.imageButton(ItemIcons.getTexture(graphics.mc, VisualItemKey.of(itemStack)).getTexture(), 16F, 16F, UV.FULL, 3, null);
+
+			if (ImGui.isItemHovered()) {
+				ImGui.beginTooltip();
+
+				var sink = new FormattedCharSinkPartBuilder();
+
+				for (var component : itemStack.getTooltipLines(Item.TooltipContext.of(graphics.mc.level), graphics.player, ClientTooltipFlag.of(TooltipFlag.ADVANCED))) {
+					for (var line : graphics.mc.font.split(component, Integer.MAX_VALUE)) {
+						line.accept(sink);
+						graphics.text(sink.build());
+					}
+				}
+
+				ImGui.endTooltip();
+			}
+
+			ImGui.popID();
+		}
+
+		ImGui.pushID("###extra-data");
 		entity.imgui(graphics, delta);
+		ImGui.popID();
 	}
 }

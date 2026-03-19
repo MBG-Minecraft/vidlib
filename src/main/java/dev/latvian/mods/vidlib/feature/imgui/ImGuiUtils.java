@@ -98,15 +98,15 @@ public interface ImGuiUtils {
 
 	static void hoveredTooltip(String tooltip) {
 		if (!tooltip.isEmpty() && ImGui.isItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) {
-			ImGui.setTooltip(tooltip);
+			wrappedTooltip(tooltip);
 		}
 	}
 
 	static void wrappedTooltip(String string) {
-		float w = ImGui.calcTextSize(string).x;
-		ImGui.setNextWindowSizeConstraints(Math.min(w, 300F), 1F, 600F, Float.MAX_VALUE);
 		ImGui.beginTooltip();
-		ImGui.textWrapped(string);
+		ImGui.pushTextWrapPos(ImGui.getFontSize() * 45F);
+		ImGui.textUnformatted(string);
+		ImGui.popTextWrapPos();
 		ImGui.endTooltip();
 	}
 

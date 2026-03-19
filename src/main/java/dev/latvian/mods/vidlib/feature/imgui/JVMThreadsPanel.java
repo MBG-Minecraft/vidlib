@@ -17,7 +17,7 @@ public class JVMThreadsPanel extends Panel {
 
 	@Override
 	public void content(ImGraphics graphics) {
-		for (var entry : Thread.getAllStackTraces().entrySet().stream().sorted((o1, o2) -> o1.getKey().getName().compareToIgnoreCase(o2.getKey().getName())).toList()) {
+		for (var entry : Thread.getAllStackTraces().entrySet().stream().sorted((o1, o2) -> Long.compareUnsigned(o1.getKey().threadId(), o2.getKey().threadId())).toList()) {
 			var name = entry.getKey().getName();
 			graphics.pushStack();
 

@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.integration.replay;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.replay.api.ReplayMarkerGroup;
 import dev.latvian.mods.replay.api.ReplayMarkerType;
@@ -347,10 +346,12 @@ public class VLReplayIntegration {
 
 	@SubscribeEvent
 	public static void handleClickTarget(ReplayHandleClickTargetEvent event) {
-		if (event.getHitResult() instanceof PropHitResult propResult) {
+		var mc = Minecraft.getInstance();
+
+		if (mc.level != null && event.getHitResult() instanceof PropHitResult propResult) {
 			var data = event.getSession().getData(SelectedPropReplaySessionData.TYPE);
 			data.selectedProp = propResult.prop.id;
-			data.selectedPropData = propResult.prop.getDataJson(JsonOps.INSTANCE);
+			data.selectedPropData = propResult.prop.encode(mc.level.nbtOps());
 			data.selectedPropList = propResult.prop.spawnType.listType;
 			data.openSelectedPropPopup = true;
 			event.setCanceled(true);
@@ -388,12 +389,15 @@ public class VLReplayIntegration {
 		if (!ImGui.isPopupOpen("###vidlib-prop-popup")) {
 			var propList = mc.level.getProps().propLists.get(data.selectedPropList);
 			var prop = propList == null ? null : propList.get(data.selectedProp);
+
 			if (prop != null) {
-				var dataJson = prop.getDataJson(JsonOps.INSTANCE);
-				if (!data.selectedPropData.equals(dataJson)) {
+				var dataNbt = prop.encode(event.getGraphics().nbtOps);
+
+				if (!data.selectedPropData.equals(dataNbt)) {
 					data.makePropKeyframes.add(prop);
 				}
 			}
+
 			data.selectedProp = 0;
 		}
 	}

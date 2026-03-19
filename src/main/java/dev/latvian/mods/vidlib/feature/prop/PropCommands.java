@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.feature.prop;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import dev.latvian.mods.klib.math.Rotation;
-import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
@@ -72,6 +71,17 @@ public interface PropCommands {
 							return set(ctx.getSource(), id, key, data);
 						})
 					)
+				)
+			)
+		)
+		.then(Commands.literal("merge")
+			.then(Commands.argument("prop", StringArgumentType.word())
+				.then(Commands.argument("data", NbtTagArgument.nbtTag())
+					.executes(ctx -> {
+						int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "prop"), 16);
+						var data = NbtTagArgument.getNbtTag(ctx, "data");
+						return merge(ctx.getSource(), id, data);
+					})
 				)
 			)
 		)
@@ -213,19 +223,22 @@ public interface PropCommands {
 	}
 
 	static int set(CommandSourceStack source, int propId, String key, Tag data) {
+		var tag = new CompoundTag();
+		tag.put(key, data);
+		return merge(source, propId, tag);
+	}
+
+	static int merge(CommandSourceStack source, int propId, Tag data) {
 		var level = source.getSidedLevel();
 		var props = level.getProps();
 		var prop = props.levelProps.get(propId);
 
 		if (prop != null) {
-			var entry = prop.type.getData(key);
+			var result = prop.merge(source.getLevel().nbtOps(), data);
 
-			if (entry != null) {
-				entry.data().type().codec().parse(source.getLevel().nbtOps(), data).ifSuccess(value -> {
-					prop.setData(entry.data(), Cast.to(value));
-					prop.sync(entry.data());
-				});
-
+			if (result.isError()) {
+				source.error(result.error().get().message());
+			} else {
 				return 1;
 			}
 		}
