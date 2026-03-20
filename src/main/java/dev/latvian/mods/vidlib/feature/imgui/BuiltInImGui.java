@@ -11,6 +11,7 @@ import dev.latvian.mods.vidlib.feature.decal.DecalPanel;
 import dev.latvian.mods.vidlib.feature.environment.FluidPlanePanel;
 import dev.latvian.mods.vidlib.feature.environment.MapTextureOverridePanel;
 import dev.latvian.mods.vidlib.feature.environment.WorldBorderPanel;
+import dev.latvian.mods.vidlib.feature.font.MSDFFont;
 import dev.latvian.mods.vidlib.feature.gallery.LowQualityPlayerBodies;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerBodies;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerHeads;
@@ -165,6 +166,8 @@ public class BuiltInImGui {
 		}));
 
 		list.add(MenuItem.item(ImIcons.LEAF, "JVM Threads", JVMThreadsPanel.INSTANCE));
+
+		list.add(MenuItem.sliderFloat("MSDF Debug Text", MSDFFont.DEBUG_SIZE::get, MSDFFont.DEBUG_SIZE::set, 0F, 30F));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.DebugDropdown(graphics, list));
 	});

@@ -5,6 +5,7 @@ import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBarRenderer;
+import dev.latvian.mods.vidlib.feature.font.MSDFFont;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
@@ -197,6 +198,7 @@ public interface VidLibHUD {
 	static void drawBelowAll(GuiGraphics graphics, DeltaTracker deltaTracker) {
 		ClientWaypoints.draw(graphics, deltaTracker);
 		drawPlayerNames(graphics, deltaTracker);
+		MSDFFont.drawDebugText(graphics, deltaTracker);
 	}
 
 	static void drawAboveAll(GuiGraphics graphics, DeltaTracker deltaTracker) {

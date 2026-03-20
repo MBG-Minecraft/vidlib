@@ -32,6 +32,7 @@ import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.environment.FluidPlaneRenderer;
+import dev.latvian.mods.vidlib.feature.font.MSDFFont;
 import dev.latvian.mods.vidlib.feature.gradient.ClientGradientLoader;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
 import dev.latvian.mods.vidlib.feature.item.RainbowItemTint;
@@ -154,6 +155,7 @@ public class VidLibClientEventHandler {
 		event.addListener(VidLib.id("clock"), new Clock.Loader());
 		event.addListener(VidLib.id("skybox"), new SkyboxData.Loader());
 		event.addListener(VidLib.id("zone"), new ZoneLoader(ZoneLoader.CLIENT_BY_DIMENSION, false));
+		event.addListener(VidLib.id("msdf"), new MSDFFont.Loader());
 
 		event.addDependency(VidLib.id("structure"), VidLib.id("ghost_structure"));
 		event.addDependency(VidLib.id("clock_font"), VidLib.id("clock"));

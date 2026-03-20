@@ -11,6 +11,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
+import net.neoforged.neoforge.client.ClientTooltipFlag;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public record CachedItemData(ItemStack stack, ItemKey key, VisualItemKey visualK
 				mc.level == null ? MiscUtils.STATIC_REGISTRY_ACCESS : mc.level.registryAccess(),
 				mc.level == null ? Item.TooltipContext.of(MiscUtils.STATIC_REGISTRY_ACCESS) : Item.TooltipContext.of(mc.level),
 				mc.player,
-				mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL
+				ClientTooltipFlag.of((mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL).asCreative())
 			);
 		}
 	}

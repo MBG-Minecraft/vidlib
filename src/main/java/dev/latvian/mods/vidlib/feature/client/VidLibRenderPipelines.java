@@ -35,6 +35,28 @@ public interface VidLibRenderPipelines {
 		.withSampler("Sampler1")
 		.build();
 
+	RenderPipeline MSDF = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)
+		.withLocation(VidLib.id("pipeline/msdf"))
+		.withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
+		.withVertexShader(VidLib.id("core/msdf"))
+		.withFragmentShader(VidLib.id("core/msdf"))
+		.withSampler("Sampler0")
+		.withBlend(BlendFunction.TRANSLUCENT)
+		.withCull(true)
+		.build();
+
+	RenderPipeline MSDF_SEE_THROUGH = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)
+		.withLocation(VidLib.id("pipeline/msdf_see_through"))
+		.withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
+		.withVertexShader(VidLib.id("core/msdf"))
+		.withFragmentShader(VidLib.id("core/msdf"))
+		.withSampler("Sampler0")
+		.withBlend(BlendFunction.TRANSLUCENT)
+		.withCull(true)
+		.withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+		.withDepthWrite(false)
+		.build();
+
 	RenderPipeline SKYBOX = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)
 		.withLocation(VidLib.id("pipeline/skybox"))
 		.withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
@@ -114,6 +136,8 @@ public interface VidLibRenderPipelines {
 	@SubscribeEvent
 	static void registerRenderPipelines(RegisterRenderPipelinesEvent event) {
 		event.registerPipeline(GUI_DEPTH);
+		event.registerPipeline(MASKED_GUI);
+		event.registerPipeline(MSDF);
 		event.registerPipeline(SKYBOX);
 		event.registerPipeline(SOLID_TERRAIN_NO_CULL);
 		event.registerPipeline(CUTOUT_MIPPED_TERRAIN_NO_CULL);

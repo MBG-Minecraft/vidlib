@@ -56,6 +56,24 @@ public interface VidLibRenderTypes {
 			.createCompositeState(false)
 	));
 
+	TexturedRenderType MSDF = TexturedRenderType.internal(
+		"msdf",
+		786432,
+		VidLibRenderPipelines.MSDF,
+		texture -> RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.TRUE, false))
+			.createCompositeState(false)
+	);
+
+	TexturedRenderType MSDF_SEE_THROUGH = TexturedRenderType.internal(
+		"msdf_see_through",
+		786432,
+		VidLibRenderPipelines.MSDF_SEE_THROUGH,
+		texture -> RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.TRUE, false))
+			.createCompositeState(false)
+	);
+
 	TexturedRenderType SKYBOX = TexturedRenderType.internal(
 		"skybox",
 		DefaultVertexFormat.POSITION_TEX_COLOR.getVertexSize() * 6,

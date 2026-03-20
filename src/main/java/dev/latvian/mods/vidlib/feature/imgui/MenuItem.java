@@ -131,7 +131,7 @@ public record MenuItem(
 	public static MenuItem dragFloat(String label, FloatSupplier getter, FloatConsumer setter, float speed, float min, float max) {
 		return custom(g -> {
 			ImGuiUtils.FLOAT.set(getter.getAsFloat());
-			ImGui.setNextItemWidth(-1F);
+			ImGui.setNextItemWidth(230F);
 
 			if (!label.isEmpty()) {
 				ImGui.text(label);
@@ -146,7 +146,7 @@ public record MenuItem(
 	public static MenuItem sliderFloat(String label, FloatSupplier getter, FloatConsumer setter, float min, float max) {
 		return custom(g -> {
 			ImGuiUtils.FLOAT.set(getter.getAsFloat());
-			ImGui.setNextItemWidth(-1F);
+			ImGui.setNextItemWidth(230F);
 
 			if (!label.isEmpty()) {
 				ImGui.text(label);
@@ -161,7 +161,7 @@ public record MenuItem(
 	public static MenuItem sliderInt(String label, IntSupplier getter, IntConsumer setter, int min, int max) {
 		return custom(g -> {
 			ImGuiUtils.INT.set(getter.getAsInt());
-			ImGui.setNextItemWidth(-1F);
+			ImGui.setNextItemWidth(230F);
 
 			if (!label.isEmpty()) {
 				ImGui.text(label);
