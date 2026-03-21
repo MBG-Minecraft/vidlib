@@ -82,6 +82,12 @@ public record MSDFFontData(
 		).apply(instance, Glyph::new));
 	}
 
+	public static final MSDFFontData EMPTY = new MSDFFontData(
+		new Atlas("empty", 0F, 0F, 0F, 0F, 0F, "bottom"),
+		new Metrics(0F, 0F, 0F, 0F, 0F, 0F),
+		List.of()
+	);
+
 	public static final Codec<MSDFFontData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Atlas.CODEC.fieldOf("atlas").forGetter(MSDFFontData::atlas),
 		Metrics.CODEC.fieldOf("metrics").forGetter(MSDFFontData::metrics),

@@ -1,15 +1,19 @@
 package dev.latvian.mods.vidlib.feature.font;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
+import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.util.JsonCodecReloadListener;
 import imgui.type.ImFloat;
 import it.unimi.dsi.fastutil.chars.Char2ObjectMap;
+import it.unimi.dsi.fastutil.chars.Char2ObjectMaps;
 import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.chars.CharArrayList;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -22,6 +26,14 @@ import org.joml.Matrix4f;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+/**
+ * <ol>
+ *   <li>Download latest <a href="https://github.com/Chlumsky/msdf-atlas-gen/releases">MSDF Atlas Gen</a></li>
+ *   <li>Create textures/, json/, ttf/ directories in the same directory as msdf-atlas-gen.exe</li>
+ *   <li>Place your font in ttf/</li>
+ *   <li>Open Terminal in directory and run <code>.\msdf-atlas-gen.exe -outerpxpadding 1 -type mtsdf -imageout "textures/example.png" -json "json/example.json" -font "ttf/example.ttf"</code></li>
+ * </ol>
+ */
 public record MSDFFont(
 	ResourceKey<MSDFFont> key,
 	ResourceLocation texture,
@@ -39,6 +51,16 @@ public record MSDFFont(
 		return ResourceKey.create(ROOT_ID, id);
 	}
 
+	public static final MSDFFont UNKNOWN = new MSDFFont(
+		createKey(VidLib.id("unknown")),
+		VidLibTextures.MISSING,
+		MSDFFontData.EMPTY,
+		Char2ObjectMaps.emptyMap(),
+		"",
+		VidLibRenderTypes.MSDF.apply(VidLibTextures.MISSING),
+		VidLibRenderTypes.MSDF_SEE_THROUGH.apply(VidLibTextures.MISSING)
+	);
+
 	public record GlyphInfo(
 		char unicode,
 		float advance,
@@ -48,6 +70,10 @@ public record MSDFFont(
 	}
 
 	public static Map<ResourceKey<MSDFFont>, MSDFFont> ALL = Map.of();
+
+	public static MSDFFont getFont(ResourceKey<MSDFFont> key) {
+		return ALL.getOrDefault(key, UNKNOWN);
+	}
 
 	public static class Loader extends JsonCodecReloadListener<MSDFFontData> {
 		public Loader() {
@@ -121,12 +147,16 @@ public record MSDFFont(
 
 		graphics.flush();
 		graphics.pose().pushPose();
-		graphics.pose().translate(20F, 20F, 0F);
+		graphics.pose().translate(20F, 0F, 0F);
 		graphics.pose().scale(size, size, 1F);
 
+		var mbgFont = getFont(MSDFFonts.KOMIKA_AXIS);
+
+		mbgFont.drawWithShadow(graphics.pose(), graphics.vl$buffers(), "MrBeast Gaming", 0xFF35D9F3);
+		graphics.pose().translate(0F, mbgFont.data.metrics().lineHeight(), 0F);
+
 		for (var font : ALL.values()) {
-			var buffer = graphics.vl$buffers().getBuffer(font.renderType);
-			font.drawWithShadow(graphics.pose().last().pose(), buffer, font.visibleGlyphs, 0xFFFFFFFF);
+			font.drawWithShadow(graphics.pose(), graphics.vl$buffers(), font.visibleGlyphs, 0xFFFFFFFF);
 			graphics.pose().translate(0F, font.data.metrics().lineHeight(), 0F);
 		}
 
@@ -134,18 +164,30 @@ public record MSDFFont(
 		graphics.flush();
 	}
 
-	public float draw(Matrix4f m, VertexConsumer buffer, String text, int color) {
-		return draw(m, buffer, text, color, color, color, color);
+	public float draw(PoseStack ms, MultiBufferSource buffers, String text, int color) {
+		return draw(ms, buffers, text, color, color, color, color);
 	}
 
-	public float drawWithShadow(Matrix4f m, VertexConsumer buffer, String text, int color) {
-		m.translate(0.075F, 0.075F, 0F);
-		draw(m, buffer, text, ARGB.scaleRGB(color, 0.25F));
-		m.translate(-0.075F, -0.075F, 0F);
-		return draw(m, buffer, text, color);
+	public float draw(PoseStack ms, MultiBufferSource buffers, String text, int tlArgb, int trArgb, int blArgb, int brArgb) {
+		return build(ms.last().pose(), buffers.getBuffer(renderType), text, tlArgb, trArgb, blArgb, brArgb);
 	}
 
-	public float draw(Matrix4f m, VertexConsumer buffer, String text, int tlArgb, int trArgb, int blArgb, int brArgb) {
+	public float drawWithShadow(PoseStack ms, MultiBufferSource buffers, String text, int color) {
+		return drawWithShadow(ms, buffers, text, color, color, color, color);
+	}
+
+	public float drawWithShadow(PoseStack ms, MultiBufferSource buffers, String text, int tlArgb, int trArgb, int blArgb, int brArgb) {
+		return buildWithShadow(ms.last().pose(), buffers.getBuffer(renderType), text, 0.075F, 0F, tlArgb, trArgb, blArgb, brArgb);
+	}
+
+	public float buildWithShadow(Matrix4f m, VertexConsumer buffer, String text, float offset, float depth, int tlArgb, int trArgb, int blArgb, int brArgb) {
+		m.translate(offset, offset, depth);
+		build(m, buffer, text, ARGB.scaleRGB(tlArgb, 0.25F), ARGB.scaleRGB(trArgb, 0.25F), ARGB.scaleRGB(blArgb, 0.25F), ARGB.scaleRGB(brArgb, 0.25F));
+		m.translate(-offset, -offset, depth);
+		return build(m, buffer, text, tlArgb, trArgb, blArgb, brArgb) + offset;
+	}
+
+	public float build(Matrix4f m, VertexConsumer buffer, String text, int tlArgb, int trArgb, int blArgb, int brArgb) {
 		float x = 0F;
 		float y = data.metrics().lineHeight() + data.metrics().descender();
 		int len = text.length();

@@ -79,8 +79,8 @@ public class Prop {
 	public static final PropData<Prop, Float> PITCH = PropData.create(Prop.class, "pitch", DataTypes.FLOAT, p -> p.rotation.x, Prop::setPitch, AngleImBuilder.TYPE_90);
 	public static final PropData<Prop, Float> YAW = PropData.create(Prop.class, "yaw", DataTypes.FLOAT, p -> p.rotation.y, Prop::setYaw, AngleImBuilder.TYPE_180);
 	public static final PropData<Prop, Float> ROLL = PropData.create(Prop.class, "roll", DataTypes.FLOAT, p -> p.rotation.z, Prop::setRoll, AngleImBuilder.TYPE_180);
-	public static final PropData<Prop, Float> WIDTH = PropData.create(Prop.class, "width", DataTypes.FLOAT, p -> (float) p.width, (p, v) -> p.width = v, FloatImBuilder.type(0F, 16F));
-	public static final PropData<Prop, Float> HEIGHT = PropData.create(Prop.class, "height", DataTypes.FLOAT, p -> (float) p.height, (p, v) -> p.height = v, FloatImBuilder.type(0F, 16F));
+	public static final PropData<Prop, Float> WIDTH = PropData.create(Prop.class, "width", DataTypes.FLOAT, p -> (float) p.width, (p, v) -> p.setWidth(v), FloatImBuilder.type(0F, 16F));
+	public static final PropData<Prop, Float> HEIGHT = PropData.create(Prop.class, "height", DataTypes.FLOAT, p -> (float) p.height, (p, v) -> p.setHeight(v), FloatImBuilder.type(0F, 16F));
 	public static final PropData<Prop, Boolean> CAN_COLLIDE = PropData.createBoolean(Prop.class, "can_collide", p -> p.canCollide, (p, v) -> p.canCollide = v);
 	public static final PropData<Prop, Boolean> CAN_INTERACT = PropData.createBoolean(Prop.class, "can_interact", p -> p.canInteract, (p, v) -> p.canInteract = v);
 	public static final PropData<Prop, Boolean> PAUSED = PropData.createBoolean(Prop.class, "paused", p -> p.paused, (p, v) -> p.paused = v);
@@ -221,9 +221,17 @@ public class Prop {
 		}
 	}
 
+	public void setWidth(double width) {
+		this.width = width;
+	}
+
+	public void setHeight(double height) {
+		this.height = height;
+	}
+
 	public final void setSize(double size) {
-		width = size;
-		height = size;
+		setWidth(size);
+		setHeight(size);
 	}
 
 	public void setPos(double x, double y, double z) {

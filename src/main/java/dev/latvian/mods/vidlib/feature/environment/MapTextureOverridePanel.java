@@ -110,7 +110,7 @@ public class MapTextureOverridePanel extends Panel {
 		}
 
 		if (graphics.smallButton("Add###add", ImColorVariant.GREEN)) {
-			map.list.add(new MapTextureOverride(0, SpriteKey.special(VidLibTextures.ID_CARD)));
+			map.list.add(new MapTextureOverride(0, SpriteKey.special(VidLibTextures.LOGO)));
 			remove = -2;
 		}
 
