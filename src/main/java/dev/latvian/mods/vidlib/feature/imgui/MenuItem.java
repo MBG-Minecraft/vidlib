@@ -328,7 +328,7 @@ public record MenuItem(
 			graphics.setItemSpacing(4F, 4F);
 		}
 
-		if (graphics.isReplay ? ImGui.beginMenu("VidLib") : mainMenuBar || ImGui.beginMenuBar()) {
+		if (graphics.isReplay ? ImGui.beginMenu(ImIcons.WRENCH + "VidLib") : mainMenuBar || ImGui.beginMenuBar()) {
 			for (int i = 0; i < mainMenu.size(); i++) {
 				ImGui.pushID(i);
 				mainMenu.get(i).build(graphics, 0);

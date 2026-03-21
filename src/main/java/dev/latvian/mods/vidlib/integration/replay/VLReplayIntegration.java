@@ -271,8 +271,8 @@ public class VLReplayIntegration {
 
 	@SubscribeEvent
 	public static void menuBar(ReplayMenuBarEvent event) {
-		ImGui.separator();
 		BuiltInImGui.MAIN_MENU_BAR.buildMenuBar(event.getGraphics(), false);
+		ImGui.separator();
 	}
 
 	@SubscribeEvent
