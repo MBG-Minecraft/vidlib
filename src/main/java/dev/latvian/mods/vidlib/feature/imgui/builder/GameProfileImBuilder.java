@@ -11,6 +11,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
@@ -18,6 +19,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Locale;
 import java.util.UUID;
 import java.util.function.Predicate;
 
@@ -36,6 +38,8 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 		return new String(chars);
 	});
 
+	public String lastSearch = null;
+	public final ImString search;
 	public final ImString name;
 
 	private final ImBoolean ignoreNPCs = new ImBoolean(false);
@@ -45,6 +49,10 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 		this.name = new ImString(16);
 		this.name.inputData.isResizable = false;
 		this.name.inputData.allowedChars = VALID_NAME_CHARS.get();
+
+		this.search = new ImString(16);
+		this.search.inputData.isResizable = false;
+		this.search.inputData.allowedChars = VALID_NAME_CHARS.get();
 		this.profile = null;
 	}
 
@@ -98,7 +106,10 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 	public ImUpdate profileSelector(ImGraphics graphics, @Nullable Predicate<GameProfile> filter) {
 		var update = ImUpdate.NONE;
 
-		if (ImGui.beginListBox("###existing", -1F, 120F)) {
+		if (ImGui.beginListBox("###existing", -1F, 180F)) {
+			ImGui.setNextItemWidth(-1F);
+			ImGui.inputTextWithHint("###search", "Search...", search);
+
 			if (filter == null || filter.test(PlayerProfile.EMPTY_GAME_PROFILE)) {
 				appendIcon(graphics.mc, Util.NIL_UUID);
 
@@ -115,6 +126,9 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 				}
 
 				if (filter == null || filter.test(p.profile())) {
+					if (search.isNotEmpty() && !p.profile().getName().contains(search.get())) {
+						continue;
+					}
 					appendIcon(graphics.mc, p.profile().getId());
 					ImGui.sameLine();
 
