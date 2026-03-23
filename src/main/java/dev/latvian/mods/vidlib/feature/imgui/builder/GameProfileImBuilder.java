@@ -12,6 +12,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
+import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -36,6 +37,8 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 	});
 
 	public final ImString name;
+
+	private final ImBoolean ignoreNPCs = new ImBoolean(false);
 	private GameProfile profile;
 
 	public GameProfileImBuilder() {
@@ -82,7 +85,6 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 		if (ImGui.beginPopup("Select Profile###select-profile", ImGuiWindowFlags.AlwaysAutoResize)) {
 			var u = profileSelector(graphics, null);
 			update = update.or(u);
-
 			if (u.isFull()) {
 				ImGui.closeCurrentPopup();
 			}
@@ -101,7 +103,6 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 				appendIcon(graphics.mc, Util.NIL_UUID);
 
 				ImGui.sameLine();
-
 				if (ImGui.selectable(ImIcons.CLOSE + " None", profile == null)) {
 					profile = null;
 					update = ImUpdate.FULL;
@@ -109,6 +110,10 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 			}
 
 			for (var p : PlayerProfiles.getAllKnown()) {
+				if (ignoreNPCs.get() && (p.profile().getId().version() == 2 || p.profile().getId().equals(Util.NIL_UUID))) {
+					continue;
+				}
+
 				if (filter == null || filter.test(p.profile())) {
 					appendIcon(graphics.mc, p.profile().getId());
 					ImGui.sameLine();
@@ -137,7 +142,6 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 
 			if (!nameStr.isEmpty()) {
 				var p = PlayerProfiles.get(nameStr);
-
 				if (p.isError()) {
 					profile = null;
 					VidLib.LOGGER.error("Failed to fetch profile '" + nameStr + "'");
@@ -147,6 +151,12 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 			}
 
 			update = ImUpdate.FULL;
+		}
+
+		if (ImGui.collapsingHeader("Options###options")) {
+			if (ImGui.checkbox("Ignore NPCs###ignore-npcs", ignoreNPCs)) {
+				update = ImUpdate.PARTIAL;
+			}
 		}
 
 		return update;
