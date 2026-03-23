@@ -11,7 +11,6 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
-import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
@@ -19,7 +18,6 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Locale;
 import java.util.UUID;
 import java.util.function.Predicate;
 
@@ -38,7 +36,6 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 		return new String(chars);
 	});
 
-	public String lastSearch = null;
 	public final ImString search;
 	public final ImString name;
 
