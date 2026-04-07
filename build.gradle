@@ -188,7 +188,7 @@ dependencies {
 	compileOnly("maven.modrinth:simple-voice-chat:neoforge-1.21.5-2.6.12")
 	compileOnly("software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}")
 
-	implementation "dev.latvian.apps:tiny-java-server:1.0.0-build.33"
+	implementation "dev.latvian.apps:tiny-java-server:1.0.0-build.36"
 }
 
 processResources {

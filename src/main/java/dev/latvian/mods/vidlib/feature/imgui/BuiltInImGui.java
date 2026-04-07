@@ -167,7 +167,7 @@ public class BuiltInImGui {
 
 		list.add(MenuItem.item(ImIcons.LEAF, "JVM Threads", JVMThreadsPanel.INSTANCE));
 
-		list.add(MenuItem.sliderFloat("MSDF Debug Text", MSDFFont.DEBUG_SIZE::get, MSDFFont.DEBUG_SIZE::set, 0F, 30F));
+		list.add(MenuItem.sliderFloat("MSDF Debug Text", MSDFFont.DEBUG_SIZE::get, MSDFFont.DEBUG_SIZE::set, 0F, 200F));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.DebugDropdown(graphics, list));
 	});

@@ -13,21 +13,14 @@ float median(float red, float green, float blue) {
 	return max(min(red, green), min(max(red, green), blue));
 }
 
-float screenPxRange() {
-	vec2 unitRange = vec2(6.0) / vec2(textureSize(Sampler0, 0));
-	vec2 screenTexSize = vec2(1.0) / fwidth(texCoord0);
-	return max(0.5 * dot(unitRange, screenTexSize), 1.0);
-}
-
 void main() {
 	vec4 texel = texture(Sampler0, texCoord0);
-	float distance = median(texel.r, texel.g, texel.b);
-	float pxRange = screenPxRange();
-	float pxDist = pxRange * (distance - 0.5);
-
-	vec3 innerColor = vertexColor.rgb;
-
-	float opacity = clamp(pxDist + 0.5, 0.0, 1.0);
-
-	fragColor = vec4(innerColor * 1.05, opacity);
+	ivec2 sz = textureSize(Sampler0, 0);
+	float dx = dFdx(texCoord0.x) * sz.x;
+	float dy = dFdy(texCoord0.y) * sz.y;
+	float toPixels = 8.0 * inversesqrt(dx * dx + dy * dy);
+	float sigDist = median(texel.r, texel.g, texel.b) - 0.5;
+	float alpha0 = sigDist * toPixels + 0.5;
+	float alpha = clamp(alpha0, 0.0, 1.0);
+	fragColor = vec4(vertexColor.rgb, alpha);
 }

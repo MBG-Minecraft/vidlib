@@ -1,0 +1,5 @@
+[*.json]
+end_of_line = lf
+indent_style = unset
+indent_size = unset
+trim_trailing_whitespace = false

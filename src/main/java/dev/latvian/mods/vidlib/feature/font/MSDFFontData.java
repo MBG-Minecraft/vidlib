@@ -10,7 +10,8 @@ import java.util.Optional;
 public record MSDFFontData(
 	Atlas atlas,
 	Metrics metrics,
-	List<Glyph> glyphs
+	List<Glyph> glyphs,
+	List<Kerning> kerning
 ) {
 	public record Atlas(
 		String type,
@@ -82,15 +83,31 @@ public record MSDFFontData(
 		).apply(instance, Glyph::new));
 	}
 
+	public record Kerning(
+		char unicode1,
+		char unicode2,
+		float advance
+	) {
+		public static final Codec<Character> CHAR_FROM_INT_CODEC = ExtraCodecs.NON_NEGATIVE_INT.xmap(integer -> (char) integer.intValue(), Integer::valueOf);
+
+		public static final Codec<Kerning> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+			CHAR_FROM_INT_CODEC.fieldOf("unicode1").forGetter(Kerning::unicode1),
+			CHAR_FROM_INT_CODEC.fieldOf("unicode2").forGetter(Kerning::unicode2),
+			Codec.FLOAT.fieldOf("advance").forGetter(Kerning::advance)
+		).apply(instance, Kerning::new));
+	}
+
 	public static final MSDFFontData EMPTY = new MSDFFontData(
 		new Atlas("empty", 0F, 0F, 0F, 0F, 0F, "bottom"),
 		new Metrics(0F, 0F, 0F, 0F, 0F, 0F),
+		List.of(),
 		List.of()
 	);
 
 	public static final Codec<MSDFFontData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Atlas.CODEC.fieldOf("atlas").forGetter(MSDFFontData::atlas),
 		Metrics.CODEC.fieldOf("metrics").forGetter(MSDFFontData::metrics),
-		Glyph.CODEC.listOf().fieldOf("glyphs").forGetter(MSDFFontData::glyphs)
+		Glyph.CODEC.listOf().fieldOf("glyphs").forGetter(MSDFFontData::glyphs),
+		Kerning.CODEC.listOf().optionalFieldOf("kerning", List.of()).forGetter(MSDFFontData::kerning)
 	).apply(instance, MSDFFontData::new));
 }
