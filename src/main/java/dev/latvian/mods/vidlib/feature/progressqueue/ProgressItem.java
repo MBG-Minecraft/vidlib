@@ -5,7 +5,23 @@ import dev.latvian.mods.vidlib.feature.imgui.ImText;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-public record ProgressItem(ProgressQueue queue, AtomicInteger status, AtomicLong progress, AtomicLong size, ProgressItemNameFunction nameFunction) {
+public final class ProgressItem {
+	public final ProgressQueue queue;
+	public final AtomicInteger status;
+	public final AtomicLong progress;
+	public final AtomicLong size;
+	public String label;
+	public ProgressItemNameFunction nameFunction;
+
+	public ProgressItem(ProgressQueue queue, String label, ProgressItemNameFunction nameFunction) {
+		this.queue = queue;
+		this.status = new AtomicInteger(0);
+		this.progress = new AtomicLong(0L);
+		this.size = new AtomicLong(1L);
+		this.label = label;
+		this.nameFunction = nameFunction;
+	}
+
 	public void setStarted() {
 		status.set(1);
 	}

@@ -11,7 +11,8 @@ public record MSDFFontData(
 	Atlas atlas,
 	Metrics metrics,
 	List<Glyph> glyphs,
-	List<Kerning> kerning
+	List<Kerning> kerning,
+	float italic
 ) {
 	public record Atlas(
 		String type,
@@ -101,13 +102,15 @@ public record MSDFFontData(
 		new Atlas("empty", 0F, 0F, 0F, 0F, 0F, "bottom"),
 		new Metrics(0F, 0F, 0F, 0F, 0F, 0F),
 		List.of(),
-		List.of()
+		List.of(),
+		0.175F
 	);
 
 	public static final Codec<MSDFFontData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Atlas.CODEC.fieldOf("atlas").forGetter(MSDFFontData::atlas),
 		Metrics.CODEC.fieldOf("metrics").forGetter(MSDFFontData::metrics),
 		Glyph.CODEC.listOf().fieldOf("glyphs").forGetter(MSDFFontData::glyphs),
-		Kerning.CODEC.listOf().optionalFieldOf("kerning", List.of()).forGetter(MSDFFontData::kerning)
+		Kerning.CODEC.listOf().optionalFieldOf("kerning", List.of()).forGetter(MSDFFontData::kerning),
+		Codec.FLOAT.optionalFieldOf("italic", 0.175F).forGetter(MSDFFontData::italic)
 	).apply(instance, MSDFFontData::new));
 }

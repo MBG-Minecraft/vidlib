@@ -16,7 +16,7 @@ public class ProgressingOutputStream extends FilterOutputStream {
 
 	@Override
 	public void write(int b) throws IOException {
-		if (progressItem.queue().isCancelled()) {
+		if (progressItem.queue.isCancelled()) {
 			throw new ProgressCancelledException(progressItem);
 		}
 
@@ -26,7 +26,7 @@ public class ProgressingOutputStream extends FilterOutputStream {
 
 	@Override
 	public void write(@NotNull byte[] b) throws IOException {
-		if (progressItem.queue().isCancelled()) {
+		if (progressItem.queue.isCancelled()) {
 			throw new ProgressCancelledException(progressItem);
 		}
 
@@ -36,7 +36,7 @@ public class ProgressingOutputStream extends FilterOutputStream {
 
 	@Override
 	public void write(@NotNull byte[] b, int off, int len) throws IOException {
-		if (progressItem.queue().isCancelled()) {
+		if (progressItem.queue.isCancelled()) {
 			throw new ProgressCancelledException(progressItem);
 		}
 

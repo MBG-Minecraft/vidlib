@@ -1,8 +1,11 @@
 #version 150
 
+#define SQRT_2 1.4142135623730950488
+
 uniform sampler2D Sampler0;
 
 uniform vec4 ColorModulator;
+uniform vec3 ModelOffset;
 
 in vec2 texCoord0;
 in vec4 vertexColor;

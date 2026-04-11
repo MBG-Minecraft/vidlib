@@ -1,40 +1,32 @@
 package dev.latvian.mods.vidlib.feature.progressqueue;
 
 import dev.latvian.mods.vidlib.feature.imgui.ImText;
-import imgui.type.ImBoolean;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Deque;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public class ProgressQueue {
 	@ApiStatus.Internal
-	public static final ConcurrentLinkedDeque<ProgressQueue> ACTIVE = new ConcurrentLinkedDeque<>();
-
-	@ApiStatus.Internal
-	public static final AtomicInteger ACTIVE_COUNT = new AtomicInteger(0);
+	public static final LinkedList<ProgressQueue> ACTIVE = new LinkedList<>();
 
 	public static ProgressItem queueSingleItem(String title) {
-		var queue = new ProgressQueue();
-		queue.topText = title;
+		var queue = new ProgressQueue(title);
 		var item = queue.addItem();
 		queue.display();
 		return item;
 	}
 
 	public static ProgressItem queueSingleItem(String title, ProgressItemNameFunction name) {
-		var queue = new ProgressQueue();
-		queue.topText = title;
-		var item = queue.addItem(name);
+		var queue = new ProgressQueue(title);
+		var item = queue.addItem("", name);
 		queue.display();
 		return item;
 	}
 
 	public static ProgressItem queueError(String title, String error) {
-		var queue = new ProgressQueue();
-		queue.topText = title;
+		var queue = new ProgressQueue(title);
 		var item = queue.addItem();
 		item.setSize(0L);
 
@@ -45,23 +37,23 @@ public class ProgressQueue {
 		return item;
 	}
 
-	public final Deque<ProgressItem> items;
+	public final List<ProgressItem> items;
 	public String topText;
 	public String bottomText;
-	public final Deque<ImText> errors;
+	public final List<ImText> errors;
 	public boolean hideInGame;
 	public boolean canCancel;
-	public final ImBoolean open;
+	public boolean open;
 	public boolean active;
 
 	public ProgressQueue(String topText) {
-		this.items = new ConcurrentLinkedDeque<>();
+		this.items = new ArrayList<>(1);
 		this.topText = topText;
 		this.bottomText = "";
-		this.errors = new ConcurrentLinkedDeque<>();
+		this.errors = new ArrayList<>(0);
 		this.hideInGame = false;
 		this.canCancel = false;
-		this.open = new ImBoolean(true);
+		this.open = true;
 		this.active = false;
 	}
 
@@ -69,35 +61,48 @@ public class ProgressQueue {
 		this("Loading...");
 	}
 
-	public ProgressItem addItem(ProgressItemNameFunction nameFunction) {
-		var item = new ProgressItem(this, new AtomicInteger(0), new AtomicLong(0L), new AtomicLong(1L), nameFunction);
-		items.add(item);
+	public ProgressItem addItem(String label, ProgressItemNameFunction nameFunction) {
+		var item = new ProgressItem(this, label, nameFunction);
+
+		synchronized (ACTIVE) {
+			items.add(item);
+		}
+
 		return item;
 	}
 
 	public ProgressItem addItem(String name) {
-		return addItem(new ProgressItemNameFunction.OfString(name));
+		return addItem(name, ProgressItemNameFunction.PERCENT);
 	}
 
 	public ProgressItem addItem() {
-		return addItem(ProgressItemNameFunction.PERCENT);
+		return addItem("", ProgressItemNameFunction.PERCENT);
+	}
+
+	public void clear() {
+		synchronized (ACTIVE) {
+			items.clear();
+		}
 	}
 
 	public void display() {
-		if (!active) {
-			active = true;
-			open.set(true);
-			ACTIVE.add(this);
-			ACTIVE_COUNT.incrementAndGet();
+		synchronized (ACTIVE) {
+			if (!active) {
+				active = true;
+				open = true;
+				ACTIVE.add(this);
+			}
 		}
 	}
 
 	public boolean isCancelled() {
-		return !open.get();
+		return !open;
 	}
 
 	public void error(ImText error) {
-		errors.add(error);
+		synchronized (ACTIVE) {
+			errors.add(error);
+		}
 	}
 
 	public void error(String error) {

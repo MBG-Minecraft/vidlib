@@ -28,7 +28,7 @@ public interface MiscUtils {
 	Comparator<GameProfile> PROFILE_COMPARATOR = (a, b) -> a.getName().compareToIgnoreCase(b.getName());
 
 	HttpClient HTTP_CLIENT = HttpClient.newBuilder()
-		.executor(Util.backgroundExecutor())
+		.executor(Util.nonCriticalIoPool())
 		.followRedirects(HttpClient.Redirect.ALWAYS)
 		.connectTimeout(Duration.ofSeconds(10L))
 		.build();

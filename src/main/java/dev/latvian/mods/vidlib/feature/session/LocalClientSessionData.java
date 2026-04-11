@@ -31,7 +31,7 @@ import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
 import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
-import dev.latvian.mods.vidlib.feature.input.PlayerInputChanged;
+import dev.latvian.mods.vidlib.feature.input.PlayerInputChangedEvent;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToServer;
 import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverridesReplaySessionData;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
@@ -236,7 +236,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		input = VLLocalPlayer.fromInput(window.getWindow(), player, mc.screen == null && mc.isWindowActive());
 
 		if (!prevInput.equals(input)) {
-			NeoForge.EVENT_BUS.post(new PlayerInputChanged(player, prevInput, input));
+			NeoForge.EVENT_BUS.post(new PlayerInputChangedEvent(player, prevInput, input));
 			prevInput = input;
 			mc.c2s(new SyncPlayerInputToServer(input));
 		}

@@ -139,8 +139,8 @@ public class PlayerProfiles {
 			return MiscUtils.fetch("https://api.mojang.com/users/profiles/minecraft/" + input).flatMap(bytes -> {
 				JsonObject json = null;
 
-				try {
-					json = JsonUtils.GSON.fromJson(new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8), JsonObject.class);
+				try (var stream = new ByteArrayInputStream(bytes)) {
+					json = JsonUtils.read(stream).getAsJsonObject();
 					var profile = ExtraCodecs.GAME_PROFILE.parse(JsonOps.INSTANCE, json);
 					return profile.flatMap(p -> DataResult.success(p.getId()));
 				} catch (Exception e) {

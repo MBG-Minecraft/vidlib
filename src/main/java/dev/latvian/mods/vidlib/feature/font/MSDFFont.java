@@ -1,27 +1,25 @@
 package dev.latvian.mods.vidlib.feature.font;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.util.JsonCodecReloadListener;
 import imgui.type.ImFloat;
+import it.unimi.dsi.fastutil.chars.Char2FloatMap;
+import it.unimi.dsi.fastutil.chars.Char2FloatMaps;
+import it.unimi.dsi.fastutil.chars.Char2FloatOpenHashMap;
 import it.unimi.dsi.fastutil.chars.Char2ObjectMap;
 import it.unimi.dsi.fastutil.chars.Char2ObjectMaps;
 import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.chars.CharArrayList;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.ARGB;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -39,9 +37,11 @@ public record MSDFFont(
 	ResourceLocation texture,
 	MSDFFontData data,
 	Char2ObjectMap<GlyphInfo> glyphs,
+	GlyphInfo spaceGlyph,
 	String visibleGlyphs,
 	RenderType renderType,
-	RenderType seeThroughRenderType
+	RenderType seeThroughRenderType,
+	int iteration
 ) {
 	public static final ImFloat DEBUG_SIZE = new ImFloat(0F);
 
@@ -56,20 +56,24 @@ public record MSDFFont(
 		VidLibTextures.MISSING,
 		MSDFFontData.EMPTY,
 		Char2ObjectMaps.emptyMap(),
+		new GlyphInfo(' ', 0F, null, null, Char2FloatMaps.EMPTY_MAP),
 		"",
 		VidLibRenderTypes.MSDF.apply(VidLibTextures.MISSING),
-		VidLibRenderTypes.MSDF_SEE_THROUGH.apply(VidLibTextures.MISSING)
+		VidLibRenderTypes.MSDF_SEE_THROUGH.apply(VidLibTextures.MISSING),
+		0
 	);
 
 	public record GlyphInfo(
 		char unicode,
 		float advance,
 		@Nullable MSDFFontData.Bounds plane,
-		@Nullable MSDFFontData.Bounds uv
+		@Nullable MSDFFontData.Bounds uv,
+		Char2FloatMap kerning
 	) {
 	}
 
 	public static Map<ResourceKey<MSDFFont>, MSDFFont> ALL = Map.of();
+	public static int registryIteration = 0;
 
 	public static MSDFFont getFont(ResourceKey<MSDFFont> key) {
 		return ALL.getOrDefault(key, UNKNOWN);
@@ -82,6 +86,7 @@ public record MSDFFont(
 
 		@Override
 		protected void apply(ResourceManager resourceManager, Map<ResourceLocation, MSDFFontData> map) {
+			registryIteration++;
 			var fontMap = new IdentityHashMap<ResourceKey<MSDFFont>, MSDFFont>();
 
 			for (var entry : map.entrySet()) {
@@ -115,8 +120,17 @@ public record MSDFFont(
 						glyph.unicode(),
 						glyph.advance(),
 						plane == null ? MSDFFontData.Bounds.EMPTY : plane,
-						uv
+						uv,
+						new Char2FloatOpenHashMap()
 					));
+				}
+
+				for (var kerning : data.kerning()) {
+					var g = glyphs.get(kerning.unicode2());
+
+					if (g != null) {
+						g.kerning.put(kerning.unicode1(), kerning.advance());
+					}
 				}
 
 				visibleGlyphs.sort(null);
@@ -128,14 +142,20 @@ public record MSDFFont(
 					texture,
 					data,
 					glyphs,
+					glyphs.getOrDefault(' ', UNKNOWN.spaceGlyph),
 					new String(visibleGlyphs.toCharArray()),
 					VidLibRenderTypes.MSDF.apply(texture),
-					VidLibRenderTypes.MSDF_SEE_THROUGH.apply(texture)
+					VidLibRenderTypes.MSDF_SEE_THROUGH.apply(texture),
+					registryIteration
 				));
 			}
 
 			ALL = Map.copyOf(fontMap);
 		}
+	}
+
+	public GlyphInfo getGlyph(char unicode) {
+		return unicode == ' ' ? spaceGlyph : glyphs.getOrDefault(unicode, spaceGlyph);
 	}
 
 	public static void drawDebugText(GuiGraphics graphics, DeltaTracker deltaTracker) {
@@ -147,69 +167,25 @@ public record MSDFFont(
 
 		graphics.flush();
 		graphics.pose().pushPose();
-		graphics.pose().translate(20F, 0F, 0F);
+		graphics.pose().translate(20F, 20F, 0F);
 		graphics.pose().scale(size, size, 1F);
 
-		var mbgFont = getFont(MSDFFonts.KOMIKA_AXIS);
+		var fontRenderer = new MSDFRenderer();
+		fontRenderer.setFont(MSDFFonts.KOMIKA_AXIS);
+		fontRenderer.setCornerColors(0xFFFD418B, 0xFF35D9F3, 0xFF35D9F3, 0xFFFD418B);
 
-		mbgFont.drawWithShadow(graphics.pose(), graphics.vl$buffers(), "MrBeast Gaming", 0xFF35D9F3);
-		graphics.pose().translate(0F, mbgFont.data.metrics().lineHeight(), 0F);
+		fontRenderer.draw(graphics, "MrBeast Gaming");
+		fontRenderer.newLine();
+
+		fontRenderer.setCornerColors(0xFFFF0000, 0xFFFFFF00, 0xFF0000FF, 0xFF00FF00);
 
 		for (var font : ALL.values()) {
-			font.drawWithShadow(graphics.pose(), graphics.vl$buffers(), font.visibleGlyphs, 0xFFFFFFFF);
-			graphics.pose().translate(0F, font.data.metrics().lineHeight(), 0F);
+			fontRenderer.setFont(font);
+			fontRenderer.draw(graphics, font.visibleGlyphs);
+			fontRenderer.newLine();
 		}
 
 		graphics.pose().popPose();
 		graphics.flush();
-	}
-
-	public float draw(PoseStack ms, MultiBufferSource buffers, String text, int color) {
-		return draw(ms, buffers, text, color, color, color, color);
-	}
-
-	public float draw(PoseStack ms, MultiBufferSource buffers, String text, int tlArgb, int trArgb, int blArgb, int brArgb) {
-		return build(ms.last().pose(), buffers.getBuffer(renderType), text, tlArgb, trArgb, blArgb, brArgb);
-	}
-
-	public float drawWithShadow(PoseStack ms, MultiBufferSource buffers, String text, int color) {
-		return drawWithShadow(ms, buffers, text, color, color, color, color);
-	}
-
-	public float drawWithShadow(PoseStack ms, MultiBufferSource buffers, String text, int tlArgb, int trArgb, int blArgb, int brArgb) {
-		return buildWithShadow(ms.last().pose(), buffers.getBuffer(renderType), text, 0.075F, 0F, tlArgb, trArgb, blArgb, brArgb);
-	}
-
-	public float buildWithShadow(Matrix4f m, VertexConsumer buffer, String text, float offset, float depth, int tlArgb, int trArgb, int blArgb, int brArgb) {
-		m.translate(offset, offset, depth);
-		build(m, buffer, text, ARGB.scaleRGB(tlArgb, 0.25F), ARGB.scaleRGB(trArgb, 0.25F), ARGB.scaleRGB(blArgb, 0.25F), ARGB.scaleRGB(brArgb, 0.25F));
-		m.translate(-offset, -offset, depth);
-		return build(m, buffer, text, tlArgb, trArgb, blArgb, brArgb) + offset;
-	}
-
-	public float build(Matrix4f m, VertexConsumer buffer, String text, int tlArgb, int trArgb, int blArgb, int brArgb) {
-		float x = 0F;
-		float y = data.metrics().lineHeight() + data.metrics().descender();
-		int len = text.length();
-
-		for (int i = 0; i < len; i++) {
-			var g = glyphs.get(text.charAt(i));
-
-			if (g != null) {
-				var uv = g.uv;
-				var p = g.plane;
-
-				if (p != null && uv != null) {
-					buffer.addVertex(m, x + p.left(), y - p.bottom(), 0F).setUv(uv.left(), uv.top()).setColor(trArgb);
-					buffer.addVertex(m, x + p.right(), y - p.bottom(), 0F).setUv(uv.right(), uv.top()).setColor(tlArgb);
-					buffer.addVertex(m, x + p.right(), y - p.top(), 0F).setUv(uv.right(), uv.bottom()).setColor(blArgb);
-					buffer.addVertex(m, x + p.left(), y - p.top(), 0F).setUv(uv.left(), uv.bottom()).setColor(brArgb);
-				}
-
-				x += g.advance;
-			}
-		}
-
-		return x;
 	}
 }

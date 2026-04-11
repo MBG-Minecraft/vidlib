@@ -9,18 +9,24 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
+import dev.latvian.mods.vidlib.feature.misc.MainMenuOpenedEvent;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.InBedChatScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.world.entity.Entity;
+import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -160,5 +166,30 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	@Inject(method = "reloadResourcePacks()Ljava/util/concurrent/CompletableFuture;", at = @At("RETURN"))
 	private void vl$reloadResourcePacks(CallbackInfoReturnable<CompletableFuture<Void>> cir) {
 		vl$reloadCount++;
+	}
+
+	@Inject(method = "onGameLoadFinished", at = @At("RETURN"))
+	private void vl$onGameLoadFinished(CallbackInfo ci) {
+		NeoForge.EVENT_BUS.post(new MainMenuOpenedEvent(vl$self(), true));
+	}
+
+	@Inject(method = "stop", at = @At("HEAD"), cancellable = true)
+	private void vl$stop(CallbackInfo ci) {
+		var mc = vl$self();
+
+		if (mc.level != null) {
+			GLFW.glfwSetWindowShouldClose(mc.getWindow().getWindow(), false);
+			mc.level.disconnect();
+
+			if (mc.isLocalServer()) {
+				mc.disconnect(new GenericMessageScreen(Component.translatable("menu.savingLevel")));
+			} else {
+				mc.disconnect();
+			}
+
+			mc.setScreen(new TitleScreen());
+			NeoForge.EVENT_BUS.post(new MainMenuOpenedEvent(mc, false));
+			ci.cancel();
+		}
 	}
 }

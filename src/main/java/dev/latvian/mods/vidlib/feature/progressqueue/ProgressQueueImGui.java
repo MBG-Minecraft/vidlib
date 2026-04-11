@@ -2,13 +2,22 @@ package dev.latvian.mods.vidlib.feature.progressqueue;
 
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
+import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiWindowFlags;
 
+import java.util.List;
+
 public class ProgressQueueImGui {
 	public static void handle(ImGraphics graphics) {
-		if (ProgressQueue.ACTIVE_COUNT.get() <= 0) {
+		synchronized (ProgressQueue.ACTIVE) {
+			handle0(graphics, ProgressQueue.ACTIVE);
+		}
+	}
+
+	private static void handle0(ImGraphics graphics, List<ProgressQueue> queueList) {
+		if (queueList.isEmpty()) {
 			return;
 		}
 
@@ -32,7 +41,7 @@ public class ProgressQueueImGui {
 		graphics.setWindowRounding(8F);
 		graphics.setWindowPadding(6F, 6F);
 
-		var queueItr = ProgressQueue.ACTIVE.iterator();
+		var queueItr = queueList.iterator();
 		int queueCount = 0;
 
 		while (queueItr.hasNext()) {
@@ -42,7 +51,7 @@ public class ProgressQueueImGui {
 				continue;
 			}
 
-			int maxFileCount = queue.items.size();
+			int maxItemCount = queue.items.size();
 			int done = 0;
 
 			for (var fileProgress : queue.items) {
@@ -51,10 +60,9 @@ public class ProgressQueueImGui {
 				}
 			}
 
-			if (done >= maxFileCount && queue.errors.isEmpty()) {
+			if (done >= maxItemCount && queue.errors.isEmpty()) {
 				queue.active = false;
 				queueItr.remove();
-				ProgressQueue.ACTIVE_COUNT.decrementAndGet();
 				continue;
 			}
 
@@ -70,20 +78,32 @@ public class ProgressQueueImGui {
 
 			var windowId = queue.topText + "###progress-queue-" + queueCount;
 
-			if (queue.canCancel || !queue.errors.isEmpty() ? ImGui.begin(windowId, queue.open, flags) : ImGui.begin(windowId, flags)) {
+			ImGuiUtils.BOOLEAN.set(queue.open);
+
+			if (queue.canCancel || !queue.errors.isEmpty() ? ImGui.begin(windowId, ImGuiUtils.BOOLEAN, flags) : ImGui.begin(windowId, flags)) {
+				queue.open = ImGuiUtils.BOOLEAN.get();
+
 				ImGui.pushItemWidth(-1F);
 
-				if (maxFileCount > 1) {
-					ImGui.progressBar((float) done / (float) maxFileCount, -1F, 20F, done + "/" + maxFileCount);
+				if (maxItemCount > 1) {
+					float p = (float) done / (float) maxItemCount;
+					ImGui.progressBar(p, -1F, 20F, done + "/" + maxItemCount);
 				}
 
 				for (var item : queue.items) {
 					if (item.isVisible()) {
-						long progress = item.progress().get();
-						long size = item.size().get();
+						long progress = item.progress.get();
+						long size = item.size.get();
 
 						if (size > 0L) {
-							ImGui.progressBar(Math.clamp((float) ((double) progress / (double) size), 0F, 1F), -1F, 20F, item.nameFunction().getName(progress, size));
+							var l = item.label;
+
+							if (!l.isEmpty()) {
+								ImGui.text(l);
+							}
+
+							float p = Math.clamp((float) ((double) progress / (double) size), 0F, 1F);
+							ImGui.progressBar(p, -1F, 20F, item.nameFunction.getName(progress, size));
 						}
 					}
 				}
@@ -114,7 +134,7 @@ public class ProgressQueueImGui {
 				ImGui.popItemWidth();
 				windowY += ImGui.getWindowSizeY() + offset;
 
-				if (!queue.open.get()) {
+				if (!queue.open) {
 					queue.errors.clear();
 				}
 			}

@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.client;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DepthTestFunction;
+import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.latvian.mods.vidlib.VidLib;
@@ -43,6 +44,7 @@ public interface VidLibRenderPipelines {
 		.withSampler("Sampler0")
 		.withBlend(BlendFunction.TRANSLUCENT)
 		.withCull(true)
+		.withUniform("ModelOffset", UniformType.VEC3) // Used to pass modifiers
 		.build();
 
 	RenderPipeline MSDF_SEE_THROUGH = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)

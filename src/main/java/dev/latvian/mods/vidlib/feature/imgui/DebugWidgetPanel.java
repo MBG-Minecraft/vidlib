@@ -32,8 +32,9 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
 import dev.latvian.mods.vidlib.math.knumber.KNumberNodeImBuilder;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
-import dev.mrbeastgaming.hub.api.Countries;
-import dev.mrbeastgaming.hub.api.Country;
+import dev.mrbeastgaming.mods.hub.ClientHubFileUploads;
+import dev.mrbeastgaming.mods.hub.api.HubCountries;
+import dev.mrbeastgaming.mods.hub.api.HubCountry;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.ImVec4;
@@ -311,7 +312,20 @@ public class DebugWidgetPanel extends Panel {
 		ImGui.separator();
 
 		if (ImGui.button("Open File Dialog")) {
-			stringData.set(AsyncFileSelector.openFileDialog(null, "").join());
+			AsyncFileSelector.openDirectoryDialog(null).thenAcceptAsync(path -> {
+				if (path != null) {
+					ClientHubFileUploads.asyncDirectory(path, p -> p.getFileName().toString().endsWith(".zip"), null, null).thenAcceptAsync(syncFiles -> {
+						var sb = new StringBuilder(path.toAbsolutePath().toString());
+
+						for (var file : syncFiles) {
+							sb.append('\n');
+							sb.append(file.item().checksum().string());
+						}
+
+						multiLineStringData.set(sb.toString());
+					});
+				}
+			});
 		}
 
 		ImGui.separator();
@@ -470,14 +484,14 @@ public class DebugWidgetPanel extends Panel {
 
 		ImGui.separator();
 
-		ImGui.text("LV: " + Countries.LV.get().displayName());
-		graphics.combo("###country", new Country[1], "None", Countries.LOADED.get().byCode().values().toArray(new Country[0]), Country::displayName);
+		ImGui.text("LV: " + HubCountries.LV.get().displayName());
+		graphics.combo("###country", new HubCountry[1], "None", HubCountries.LOADED.get().byCode().values().toArray(new HubCountry[0]), HubCountry::displayName);
 
 		ImGui.separator();
 
 		if (ImGui.button("Test Progress Single###test-progress-single")) {
 			var item = ProgressQueue.queueSingleItem("Loading Test...");
-			item.queue().bottomText = "Bottom Text";
+			item.queue.bottomText = "Bottom Text";
 
 			Thread.startVirtualThread(() -> {
 				try {
@@ -502,8 +516,7 @@ public class DebugWidgetPanel extends Panel {
 		}
 
 		if (ImGui.button("Test Progress Parallel###test-progress-parallel")) {
-			var queue = new ProgressQueue();
-			queue.topText = "Loading Test...";
+			var queue = new ProgressQueue("Loading Test...");
 			queue.bottomText = "Please keep the game open!";
 
 			for (int j = 0; j < 5; j++) {
@@ -532,8 +545,7 @@ public class DebugWidgetPanel extends Panel {
 		}
 
 		if (ImGui.button("Test Progress Sequence###test-progress-sequence")) {
-			var queue = new ProgressQueue();
-			queue.topText = "Loading Test...";
+			var queue = new ProgressQueue("Loading Test...");
 			queue.bottomText = "Please keep the game open!";
 			var items = new ArrayList<ProgressItem>();
 

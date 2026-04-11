@@ -22,7 +22,7 @@ public class TitleScreenMixin {
 	}
 
 	@ModifyExpressionValue(method = "createNormalMenuOptions", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/TitleScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", ordinal = 0))
-	private GuiEventListener vl$perspectiveOn(GuiEventListener original) {
+	private GuiEventListener vl$createNormalMenuOptions(GuiEventListener original) {
 		((AbstractWidget) original).active = ClientGameEngine.INSTANCE.enableSinglePlayerMainMenuButton();
 		return original;
 	}

@@ -36,7 +36,6 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.SharedConstants;
-import net.minecraft.Util;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -92,13 +91,11 @@ import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.TimeZone;
 import java.util.UUID;
 
 public class ClientGameEngine {
@@ -106,20 +103,6 @@ public class ClientGameEngine {
 
 	public static final boolean DEFAULT_ENABLE_MAIN_MENU_BUTTONS = "true".equals(System.getenv("ENABLE_ADMIN_BUTTONS")) || !FMLLoader.isProduction();
 	public static final boolean DISABLE_IMGUI = "true".equals(System.getenv("DISABLE_IMGUI"));
-
-	public static final SimpleDateFormat SHORT_NEW_YORK_TIMESTAMP_FORMAT = Util.make(() -> {
-		var format = new SimpleDateFormat("HH:mm:ss");
-		format.setTimeZone(TimeZone.getTimeZone("America/New_York"));
-		return format;
-	});
-
-	public static final SimpleDateFormat LONG_NEW_YORK_TIMESTAMP_FORMAT = Util.make(() -> {
-		var format = new SimpleDateFormat("EEEE, d MMM yyyy, HH:mm:ss.SSS");
-		format.setTimeZone(TimeZone.getTimeZone("America/New_York"));
-		return format;
-	});
-
-	public static final SimpleDateFormat LONG_LOCAL_TIMESTAMP_FORMAT = new SimpleDateFormat("EEEE, d MMM yyyy, HH:mm:ss.SSS");
 
 	public void collectClientFeatures(Reference2IntMap<Feature> map) {
 		for (var mod : ModList.get().getMods()) {
@@ -362,14 +345,14 @@ public class ClientGameEngine {
 		graphics.setText(ImColorVariant.BLUE);
 		ImGui.text(ImIcons.WORLD.toString());
 		graphics.popStack();
-		ImGui.text(now == null ? "--:--:--" : SHORT_NEW_YORK_TIMESTAMP_FORMAT.format(now));
+		ImGui.text(now == null ? "--:--:--" : StringUtils.SHORT_EST_TIMESTAMP_FORMAT.format(now));
 		ImGui.endGroup();
 
 		if (now != null && ImGui.isItemHovered()) {
 			graphics.pushStack();
 			graphics.setWindowPadding(6F, 6F);
 			graphics.setWindowRounding(4F);
-			ImGui.setTooltip("EST: " + LONG_NEW_YORK_TIMESTAMP_FORMAT.format(now) + "\nLOC: " + LONG_LOCAL_TIMESTAMP_FORMAT.format(now));
+			ImGui.setTooltip("EST: " + StringUtils.LONG_EST_TIMESTAMP_FORMAT.format(now) + "\nLOC: " + StringUtils.LONG_LOCAL_TIMESTAMP_FORMAT.format(now));
 			graphics.popStack();
 		}
 

@@ -1,4 +1,4 @@
-package dev.mrbeastgaming.hub.api;
+package dev.mrbeastgaming.mods.hub.api;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -15,20 +15,20 @@ import net.minecraft.network.codec.StreamCodec;
 import java.util.List;
 import java.util.Map;
 
-public record CountryList(String checksum, Int2ObjectMap<Country> byId, Map<String, Country> byCode, Map<String, Country> byCCA2) {
+public record CountryList(String checksum, Int2ObjectMap<HubCountry> byId, Map<String, HubCountry> byCode, Map<String, HubCountry> byCCA2) {
 	public static final CountryList EMPTY = new CountryList("", Int2ObjectMaps.emptyMap(), Map.of(), Map.of());
 
-	private static CountryList of(String checksum, List<Country> list) {
+	private static CountryList of(String checksum, List<HubCountry> list) {
 		if (checksum.isEmpty() && list.isEmpty()) {
 			return EMPTY;
 		}
 
-		var byId = new Int2ObjectLinkedOpenHashMap<Country>(list.size());
-		var byCode = new Object2ObjectLinkedOpenHashMap<String, Country>(list.size());
-		var byCCA2 = new Object2ObjectLinkedOpenHashMap<String, Country>(list.size());
+		var byId = new Int2ObjectLinkedOpenHashMap<HubCountry>(list.size());
+		var byCode = new Object2ObjectLinkedOpenHashMap<String, HubCountry>(list.size());
+		var byCCA2 = new Object2ObjectLinkedOpenHashMap<String, HubCountry>(list.size());
 
 		for (var country : list) {
-			byId.put(country.id(), country);
+			byId.put(country.id().raw(), country);
 			byCode.put(country.code(), country);
 			byCCA2.put(country.cca2(), country);
 		}
@@ -38,16 +38,16 @@ public record CountryList(String checksum, Int2ObjectMap<Country> byId, Map<Stri
 
 	public static final Codec<CountryList> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Codec.STRING.optionalFieldOf("checksum", "").forGetter(CountryList::checksum),
-		Country.CODEC.listOf().optionalFieldOf("countries", List.of()).forGetter(CountryList::countryList)
+		HubCountry.CODEC.listOf().optionalFieldOf("countries", List.of()).forGetter(CountryList::countryList)
 	).apply(instance, CountryList::of));
 
 	public static final StreamCodec<ByteBuf, CountryList> STREAM_CODEC = CompositeStreamCodec.of(
 		ByteBufCodecs.STRING_UTF8, CountryList::checksum,
-		KLibStreamCodecs.listOf(Country.STREAM_CODEC), CountryList::countryList,
+		KLibStreamCodecs.listOf(HubCountry.STREAM_CODEC), CountryList::countryList,
 		CountryList::of
 	);
 
-	private List<Country> countryList() {
+	private List<HubCountry> countryList() {
 		return List.copyOf(byCode.values());
 	}
 }

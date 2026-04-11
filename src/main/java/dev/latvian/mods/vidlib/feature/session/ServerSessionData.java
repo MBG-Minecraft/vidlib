@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.session;
 import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
-import dev.latvian.mods.vidlib.feature.input.PlayerInputChanged;
+import dev.latvian.mods.vidlib.feature.input.PlayerInputChangedEvent;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToClient;
 import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
@@ -53,7 +53,7 @@ public class ServerSessionData extends SessionData {
 
 	public void syncPlayer(ServerPlayer player, VLS2CPacketConsumer packetsToEveryone) {
 		if (!prevInput.equals(input)) {
-			NeoForge.EVENT_BUS.post(new PlayerInputChanged(player, prevInput, input));
+			NeoForge.EVENT_BUS.post(new PlayerInputChangedEvent(player, prevInput, input));
 			prevInput = input;
 			packetsToEveryone.s2c(new SyncPlayerInputToClient(player.getUUID(), input));
 		}

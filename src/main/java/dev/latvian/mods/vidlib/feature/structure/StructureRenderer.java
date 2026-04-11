@@ -336,7 +336,7 @@ public class StructureRenderer implements WithCache {
 	public void render(PoseStack ms, TerrainRenderLayer renderLayerFilter, StructureRendererData data) {
 		if (layers == null) {
 			var mc = Minecraft.getInstance();
-			preRender(mc, data, mc, Util.backgroundExecutor());
+			preRender(mc, data, mc, Util.nonCriticalIoPool());
 		}
 
 		var layers0 = layers;
