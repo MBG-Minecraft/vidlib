@@ -30,10 +30,7 @@ public interface HubCountries {
 
 					if (countryList != CountryList.EMPTY) {
 						var path = CommonPaths.mkdirs(LOCAL_PATH.get());
-
-						try (var writer = Files.newBufferedWriter(path)) {
-							JsonUtils.write(writer, CountryList.CODEC.encodeStart(JsonOps.INSTANCE, countryList).getOrThrow(), false);
-						}
+						JsonUtils.write(path, CountryList.CODEC.encodeStart(JsonOps.INSTANCE, countryList).getOrThrow(), false);
 					}
 
 					return countryList;
@@ -50,8 +47,8 @@ public interface HubCountries {
 		var countryList = CountryList.EMPTY;
 
 		if (Files.exists(path)) {
-			try (var reader = Files.newBufferedReader(path)) {
-				var json = JsonUtils.read(reader);
+			try {
+				var json = JsonUtils.read(path);
 				countryList = CountryList.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
 			} catch (Exception ignored) {
 			}

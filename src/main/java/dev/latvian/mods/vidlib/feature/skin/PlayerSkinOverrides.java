@@ -24,8 +24,8 @@ public record PlayerSkinOverrides(Map<UUID, Map<MinecraftProfileTexture.Type, Mi
 			var path = VidLibPaths.GAME.get().resolve("skin-overrides.json");
 
 			if (Files.exists(path)) {
-				try (var reader = Files.newBufferedReader(path)) {
-					var json = JsonUtils.read(reader);
+				try {
+					var json = JsonUtils.read(path);
 
 					for (var entry : json.getAsJsonObject().entrySet()) {
 						var id = UndashedUuid.fromStringLenient(entry.getKey());

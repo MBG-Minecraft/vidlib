@@ -2,6 +2,7 @@ package dev.mrbeastgaming.mods.hub;
 
 import dev.latvian.mods.klib.io.IOUtils;
 import dev.latvian.mods.klib.util.MD5;
+import dev.latvian.mods.klib.util.Tristate;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
@@ -229,7 +230,7 @@ public class HubFileUploads {
 			while (true) {
 				int len = input.readNBytes(chunk, 0, (int) Math.min(file.meta.size() - offset, chunk.length));
 
-				var response = HubAPI.HTTP_CLIENT.send(HubAPI.request(item.url(), false)
+				var response = HubAPI.HTTP_CLIENT.send(HubAPI.request(item.url(), Tristate.FALSE)
 					.method("PATCH", HttpRequest.BodyPublishers.ofByteArray(chunk, 0, len))
 					.header("Tus-Resumable", "1.0.0")
 					.header("Content-Type", "application/offset+octet-stream")

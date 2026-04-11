@@ -21,11 +21,11 @@ public record HubProjectConfig(
 	).apply(instance, HubProjectConfig::new));
 
 	public static final Lazy<HubProjectConfig> INSTANCE = Lazy.of(() -> {
-		var file = PlatformHelper.CURRENT.getGameDirectory().resolve("beast-hub-project-config.json");
+		var path = PlatformHelper.CURRENT.getGameDirectory().resolve("beast-hub-project-config.json");
 
-		if (Files.exists(file)) {
-			try (var reader = Files.newBufferedReader(file)) {
-				var json = JsonUtils.read(reader);
+		if (Files.exists(path)) {
+			try {
+				var json = JsonUtils.read(path);
 				return CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
 			} catch (Exception ex) {
 				ex.printStackTrace();

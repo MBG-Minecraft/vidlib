@@ -36,6 +36,7 @@ import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
+import dev.mrbeastgaming.mods.hub.link.LinkHubUserScreen;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiWindowFlags;
@@ -109,6 +110,7 @@ public class BuiltInImGui {
 		}
 
 		list.add(MenuItem.item(ImIcons.CAMERA, "Spectate UI", MiscClientUtils.SPECTATE_UI).remainOpen(true));
+		list.add(MenuItem.item(ImIcons.PERSON, "Link Hub Profile", g -> LinkHubUserScreen.open(g.mc)));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.ConfigDropdown(graphics, list));
 	});

@@ -72,10 +72,10 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBui
 		var path = VidLibPaths.LOCAL.get().resolve("item-favorites.json");
 
 		if (Files.exists(path)) {
-			try (var reader = Files.newBufferedReader(path)) {
+			try {
+				var json = JsonUtils.read(path);
 				var mc = Minecraft.getInstance();
 				var ops = mc.level == null ? JsonOps.INSTANCE : mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
-				var json = JsonUtils.read(reader);
 
 				for (var item : ItemStack.OPTIONAL_CODEC.listOf().parse(ops, json).getOrThrow()) {
 					if (!item.isEmpty()) {
@@ -91,11 +91,12 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBui
 	});
 
 	public static void saveFavorites() {
-		try (var writer = Files.newBufferedWriter(VidLibPaths.LOCAL.get().resolve("item-favorites.json"))) {
+		try {
+			var path = VidLibPaths.LOCAL.get().resolve("item-favorites.json");
 			var mc = Minecraft.getInstance();
 			var ops = mc.level == null ? JsonOps.INSTANCE : mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
 			var json = ItemStack.OPTIONAL_CODEC.listOf().encodeStart(ops, FAVORITES.get().stream().map(ItemKey::toItemStack).toList());
-			JsonUtils.write(writer, json.getOrThrow(), true);
+			JsonUtils.write(path, json.getOrThrow(), true);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}

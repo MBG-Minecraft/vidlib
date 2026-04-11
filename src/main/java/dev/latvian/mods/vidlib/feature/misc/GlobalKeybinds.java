@@ -30,8 +30,8 @@ public class GlobalKeybinds {
 		var path = PATH.get();
 
 		if (path != null && Files.exists(path)) {
-			try (var reader = Files.newBufferedReader(path)) {
-				json = JsonUtils.read(reader).getAsJsonObject();
+			try {
+				json = JsonUtils.read(path).getAsJsonObject();
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
@@ -72,8 +72,8 @@ public class GlobalKeybinds {
 		var path = PATH.get();
 
 		if (path != null) {
-			try (var writer = Files.newBufferedWriter(CommonPaths.mkdirs(path))) {
-				JsonUtils.write(writer, json, true);
+			try {
+				JsonUtils.write(CommonPaths.mkdirs(path), json, true);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}

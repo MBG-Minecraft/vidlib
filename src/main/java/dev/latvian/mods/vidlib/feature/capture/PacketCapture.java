@@ -174,9 +174,7 @@ public class PacketCapture {
 
 			PlatformHelper.CURRENT.packetCaptureMetadata(this, metadata);
 
-			try (var writer = Files.newBufferedWriter(fs.getPath("metadata.json"))) {
-				JsonUtils.write(writer, metadata, false);
-			}
+			JsonUtils.write(fs.getPath("metadata.json"), metadata, false);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}

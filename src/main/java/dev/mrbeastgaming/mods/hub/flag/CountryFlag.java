@@ -1,4 +1,4 @@
-package dev.mrbeastgaming.mods.hub.mod.flag;
+package dev.mrbeastgaming.mods.hub.flag;
 
 import dev.latvian.mods.klib.util.Lazy;
 import dev.mrbeastgaming.mods.hub.api.HubCountry;

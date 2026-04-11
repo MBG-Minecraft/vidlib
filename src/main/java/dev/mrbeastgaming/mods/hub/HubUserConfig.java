@@ -4,8 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.util.JsonUtils;
-import dev.latvian.mods.klib.util.Lazy;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.mrbeastgaming.mods.hub.api.token.UserToken;
 
 import java.nio.file.Files;
@@ -18,18 +16,40 @@ public record HubUserConfig(
 		UserToken.CODEC.optionalFieldOf("token").forGetter(HubUserConfig::token)
 	).apply(instance, HubUserConfig::new));
 
-	public static final Lazy<HubUserConfig> INSTANCE = Lazy.of(() -> {
-		var file = PlatformHelper.CURRENT.getGameDirectory().resolve("beast-hub-user-config.json");
+	private static HubUserConfig instance = null;
 
-		if (Files.exists(file)) {
-			try (var reader = Files.newBufferedReader(file)) {
-				var json = JsonUtils.read(reader);
-				return CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
-			} catch (Exception ex) {
-				ex.printStackTrace();
+	public static synchronized HubUserConfig load() {
+		if (instance == null) {
+			var file = HubPaths.USER_CONFIG.get();
+
+			if (Files.exists(file)) {
+				try {
+					var json = JsonUtils.read(file);
+					instance = CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
+					return instance;
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
 			}
+
+			instance = new HubUserConfig(Optional.empty());
 		}
 
-		return null;
-	});
+		return instance;
+	}
+
+	public static synchronized void save(HubUserConfig config) {
+		instance = config;
+		var file = HubPaths.USER_CONFIG.get();
+
+		try {
+			JsonUtils.write(file, CODEC.encodeStart(JsonOps.INSTANCE, config).getOrThrow(), true);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	public HubUserConfig withToken(UserToken token) {
+		return new HubUserConfig(Optional.of(token));
+	}
 }

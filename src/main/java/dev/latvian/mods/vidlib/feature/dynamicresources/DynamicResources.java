@@ -50,8 +50,8 @@ public record DynamicResources(
 			var path = PlatformHelper.CURRENT.findFile(packType, dynamicResourcesId.withSuffix(".json"));
 
 			if (path != null) {
-				try (var reader = Files.newBufferedReader(path)) {
-					var json = JsonUtils.read(reader);
+				try {
+					var json = JsonUtils.read(path);
 					var dynamicResources = CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
 					load(packType, packResources, dynamicResources);
 				} catch (Exception ex) {

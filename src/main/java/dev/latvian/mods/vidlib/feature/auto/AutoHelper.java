@@ -92,7 +92,7 @@ public class AutoHelper {
 	}
 
 	@Nullable
-	public static Object getStaticFieldValue(Class<?> clazz, ScannedAnnotation ad) throws Exception {
+	public static Object getStaticFieldValue(Class<?> clazz, ScannedAnnotation ad) {
 		var name = ad.memberName();
 
 		try {

@@ -8,6 +8,7 @@ import dev.latvian.mods.klib.util.Hex32;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.klib.util.MD5;
+import dev.latvian.mods.klib.util.Tristate;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.mrbeastgaming.mods.hub.HubUserConfig;
 import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadRequestItem;
@@ -49,13 +50,18 @@ public interface HubAPI {
 		return thread;
 	}));
 
-	static HttpRequest.Builder request(String path, boolean requireAuth) {
+	static HttpRequest.Builder request(String path, Tristate auth) {
 		var builder = HTTP_REQUEST_BASE.get().copy().uri(URI_BASE.resolve(path));
-		var userConfig = HubUserConfig.INSTANCE.get();
 
-		if (userConfig != null && userConfig.token().isPresent()) {
+		if (auth == Tristate.FALSE) {
+			return builder;
+		}
+
+		var userConfig = HubUserConfig.load();
+
+		if (userConfig.token().isPresent()) {
 			builder.header("Authorization", "Bearer " + userConfig.token().get());
-		} else if (requireAuth) {
+		} else if (auth == Tristate.TRUE) {
 			throw new NullPointerException("Hub Auth token not found");
 		}
 
@@ -79,7 +85,7 @@ public interface HubAPI {
 	}
 
 	static HttpRequest apiCountries() {
-		return request("/api/countries", false).build();
+		return request("/api/countries", Tristate.DEFAULT).build();
 	}
 
 	/*
@@ -90,12 +96,16 @@ public interface HubAPI {
 	 */
 
 	static HubFullData apiFullData() throws Exception {
-		var json = sendJsonRequest(request("/api/full-data", false).build());
+		var json = sendJsonRequest(request("/api/full-data", Tristate.DEFAULT).build());
 		return HubFullData.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
 	}
 
+	static HttpRequest apiUsersRequestToken(String token) {
+		return request("/api/users/request-token/" + token, Tristate.FALSE).build();
+	}
+
 	static HttpRequest apiProjectFullData(Hex32 project) {
-		return request("/api/projects/" + project + "/full-data", true).build();
+		return request("/api/projects/" + project + "/full-data", Tristate.DEFAULT).build();
 	}
 
 	static List<ProjectUploadResponseItem> apiProjectUpload(String token, List<ProjectUploadRequestItem> files) throws Exception {
@@ -125,7 +135,7 @@ public interface HubAPI {
 
 		VidLib.LOGGER.info("> " + body);
 
-		var response = sendJsonRequest(request("/api/projects/upload/" + token, false).POST(jsonBody(body)).build()).getAsJsonObject();
+		var response = sendJsonRequest(request("/api/projects/upload/" + token, Tristate.DEFAULT).POST(jsonBody(body)).build()).getAsJsonObject();
 
 		VidLib.LOGGER.info("< " + response);
 
