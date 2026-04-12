@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.imgui;
 
 import com.mojang.blaze3d.platform.TextureUtil;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasPanel;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
@@ -44,6 +45,7 @@ import imgui.type.ImBoolean;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.LinkedHashMap;
@@ -111,6 +113,9 @@ public class BuiltInImGui {
 
 		list.add(MenuItem.item(ImIcons.CAMERA, "Spectate UI", MiscClientUtils.SPECTATE_UI).remainOpen(true));
 		list.add(MenuItem.item(ImIcons.PERSON, "Link Hub Profile", g -> LinkHubUserScreen.open(g.mc)));
+		list.add(MenuItem.item(ImIcons.FULLSCREEN, "Capture Panorama", g -> {
+			g.mc.player.displayClientMessage(g.mc.grabPanoramixScreenshot(VidLibPaths.LOCAL.get().toFile(), 3840, 2160), false);
+		}).enabled(graphics.mc.player != null));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.ConfigDropdown(graphics, list));
 	});
