@@ -48,6 +48,7 @@ import net.minecraft.network.chat.Component;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 
+import java.nio.file.Files;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -113,9 +114,7 @@ public class BuiltInImGui {
 
 		list.add(MenuItem.item(ImIcons.CAMERA, "Spectate UI", MiscClientUtils.SPECTATE_UI).remainOpen(true));
 		list.add(MenuItem.item(ImIcons.PERSON, "Link Hub Profile", g -> LinkHubUserScreen.open(g.mc)));
-		list.add(MenuItem.item(ImIcons.FULLSCREEN, "Capture Panorama", g -> {
-			g.mc.player.displayClientMessage(g.mc.grabPanoramixScreenshot(VidLibPaths.LOCAL.get().toFile(), 3840, 2160), false);
-		}).enabled(graphics.mc.player != null));
+		list.add(MenuItem.item(ImIcons.FULLSCREEN, "Capture Panorama", g -> g.mc.player.displayClientMessage(g.mc.grabPanoramixScreenshot(FMLPaths.GAMEDIR.get().toFile(), 3840, 2160), false)).enabled(graphics.mc.player != null));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.ConfigDropdown(graphics, list));
 	});
