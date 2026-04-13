@@ -105,9 +105,9 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBui
 	private record RenderedItem(CachedItemData cachedItem, int order, boolean favorite, boolean filtered, boolean isResult) {
 	}
 
-	public static final ImString SEARCH = ImGuiUtils.resizableString();
 	private static Map<ItemKey, CachedItemData> cachedItems = null;
 
+	public final ImString SEARCH = ImGuiUtils.resizableString();
 	public final boolean hasCount;
 	public final Predicate<ItemStack> filter;
 	public final ImInt count;
