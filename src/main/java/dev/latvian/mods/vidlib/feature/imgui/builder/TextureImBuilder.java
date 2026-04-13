@@ -15,14 +15,13 @@ public class TextureImBuilder implements ImBuilder<ResourceLocation> {
 		return () -> new TextureImBuilder(textureSet, defaultTexture);
 	}
 
-	public static final ImBuilderType<ResourceLocation> ALL = of(TextureSet.ALL, null);
 	public static final ImBuilderType<ResourceLocation> GEO = of(TextureSet.ENTITIES_AND_PROPS, ID.mc("textures/entity/skeleton/skeleton.png"));
 	public static final ImBuilderType<ResourceLocation> SKIN = of(TextureSet.ENTITIES, SkinTexture.STEVE);
+	public static final ImBuilderType<ResourceLocation> ALL = of(TextureSet.ALL, null);
 
-	public static final ImString SEARCH = ImGuiUtils.resizableString();
-
-	public final TextureSet textureSet;
+	public final ImString SEARCH = ImGuiUtils.resizableString();
 	public final ResourceLocation[] value;
+	public final TextureSet textureSet;
 
 	public TextureImBuilder(TextureSet textureSet, @Nullable ResourceLocation defaultTexture) {
 		this.textureSet = textureSet;
