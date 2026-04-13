@@ -1,13 +1,17 @@
 package dev.latvian.mods.vidlib.feature.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.misc.GlobalKeybinds;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.ArrayListDeque;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.client.settings.KeyModifier;
@@ -21,6 +25,7 @@ public class VidLibKeys {
 	public static KeyMapping adminPanelKeyMapping;
 	public static KeyMapping reloadShadersKeyMapping;
 	public static KeyMapping playerGlowKeyMapping;
+	public static KeyMapping capturePanoramaKeyMapping;
 
 	private static KeyMapping register(RegisterKeyMappingsEvent event, String name, KeyModifier modifier, int defaultKey, KeyConflictContext conflict) {
 		var key = new KeyMapping(name, conflict, modifier, InputConstants.Type.KEYSYM, defaultKey, "key.categories.vidlib");
@@ -33,13 +38,14 @@ public class VidLibKeys {
 	}
 
 	public static void register(RegisterKeyMappingsEvent event) {
-		freezeTickKeyMapping = register(event, "key.vidlib.freeze_tick", KeyModifier.NONE, GLFW.GLFW_KEY_ESCAPE);
-		clearParticlesKeyMapping = register(event, "key.vidlib.clear_particles", KeyModifier.NONE, GLFW.GLFW_KEY_ESCAPE);
+		freezeTickKeyMapping = register(event, "key.vidlib.freeze_tick", KeyModifier.NONE, GLFW.GLFW_KEY_UNKNOWN);
+		clearParticlesKeyMapping = register(event, "key.vidlib.clear_particles", KeyModifier.NONE, GLFW.GLFW_KEY_UNKNOWN);
 		reloadKeyMapping = register(event, "key.vidlib.reload", KeyModifier.NONE, GLFW.GLFW_KEY_R);
-		repeatLastCommandKeyMapping = register(event, "key.vidlib.repeat_last_command", KeyModifier.NONE, GLFW.GLFW_KEY_ESCAPE);
-		adminPanelKeyMapping = register(event, "key.vidlib.admin_panel", KeyModifier.NONE, GLFW.GLFW_KEY_ESCAPE, KeyConflictContext.UNIVERSAL);
-		reloadShadersKeyMapping = register(event, "key.vidlib.reload_shaders", KeyModifier.NONE, GLFW.GLFW_KEY_X);
+		repeatLastCommandKeyMapping = register(event, "key.vidlib.repeat_last_command", KeyModifier.NONE, GLFW.GLFW_KEY_UNKNOWN);
+		adminPanelKeyMapping = register(event, "key.vidlib.admin_panel", KeyModifier.NONE, GLFW.GLFW_KEY_UNKNOWN, KeyConflictContext.UNIVERSAL);
+		reloadShadersKeyMapping = register(event, "key.vidlib.reload_shaders", KeyModifier.NONE, GLFW.GLFW_KEY_UNKNOWN);
 		playerGlowKeyMapping = register(event, "key.vidlib.player_glow", KeyModifier.NONE, GLFW.GLFW_KEY_GRAVE_ACCENT);
+		capturePanoramaKeyMapping = register(event, "key.vidlib.capture_panorama", KeyModifier.NONE, GLFW.GLFW_KEY_UNKNOWN);
 	}
 
 	public static void handle(Minecraft mc) {
@@ -81,6 +87,14 @@ public class VidLibKeys {
 			boolean adminPanel = !VidLibClientOptions.getAdminPanel();
 			VidLibClientOptions.ADMIN_PANEL.set(adminPanel);
 			mc.options.save();
+		}
+
+		while (capturePanoramaKeyMapping.consumeClick()) {
+			if (!ClientGameEngine.DISABLE_IMGUI) {
+				mc.player.displayClientMessage(Component.literal("You must have env DISABLE_IMGUI set to true").withColor(Color.RED.argb()), false);
+			} else {
+				mc.player.displayClientMessage(mc.grabPanoramixScreenshot(FMLPaths.GAMEDIR.get().toFile(), 3840, 3840), false);
+			}
 		}
 	}
 

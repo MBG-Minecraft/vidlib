@@ -7,6 +7,7 @@
 	"key.vidlib.reload": "Reload",
 	"key.vidlib.reload_shaders": "Reload Shaders",
 	"key.vidlib.player_glow": "Player Glow",
+	"key.vidlib.capture_panorama": "Capture Panorama",
 	"options.vidlib.admin_panel": "Admin Panel",
 	"options.vidlib.show_anchor": "Show Anchor",
 	"options.vidlib.show_fps": "Show FPS",
