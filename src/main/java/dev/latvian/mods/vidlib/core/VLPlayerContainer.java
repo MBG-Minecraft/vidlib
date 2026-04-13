@@ -180,19 +180,19 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 		}
 	}
 
-	default void openYesNoVotingScreen(CompoundTag extraData, Component title, Component subtitle, Component yesLabel, Component noLabel) {
+	default void openYesNoVotingScreen(CompoundTag extraData, Component title, Component subtitle, Component yesLabel, Component noLabel, boolean closeOnVote) {
 		if (isClient()) {
-			getEnvironment().openYesNoVotingScreen(extraData, title, subtitle, yesLabel, noLabel);
+			getEnvironment().openYesNoVotingScreen(extraData, title, subtitle, yesLabel, noLabel, closeOnVote);
 		} else {
-			s2c(new StartYesNoVotingPayload(extraData, title, subtitle, yesLabel, noLabel));
+			s2c(new StartYesNoVotingPayload(extraData, title, subtitle, yesLabel, noLabel, closeOnVote));
 		}
 	}
 
-	default void openNumberVotingScreen(CompoundTag extraData, Component title, Component subtitle, int max, IntList unavailable) {
+	default void openNumberVotingScreen(CompoundTag extraData, Component title, Component subtitle, int max, IntList unavailable, boolean closeOnVote) {
 		if (isClient()) {
-			getEnvironment().openNumberVotingScreen(extraData, title, subtitle, max, unavailable);
+			getEnvironment().openNumberVotingScreen(extraData, title, subtitle, max, unavailable, closeOnVote);
 		} else {
-			s2c(new StartNumberVotingPayload(extraData, title, subtitle, max, unavailable));
+			s2c(new StartNumberVotingPayload(extraData, title, subtitle, max, unavailable, closeOnVote));
 		}
 	}
 

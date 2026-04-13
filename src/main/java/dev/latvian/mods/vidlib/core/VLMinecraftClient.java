@@ -379,13 +379,13 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void openYesNoVotingScreen(CompoundTag extraData, Component title, Component subtitle, Component yesLabel, Component noLabel) {
-		vl$self().setScreen(new YesNoVotingScreen(extraData, title, subtitle, yesLabel, noLabel));
+	default void openYesNoVotingScreen(CompoundTag extraData, Component title, Component subtitle, Component yesLabel, Component noLabel, boolean closeOnVote) {
+		vl$self().setScreen(new YesNoVotingScreen(extraData, title, subtitle, yesLabel, noLabel, closeOnVote));
 	}
 
 	@Override
-	default void openNumberVotingScreen(CompoundTag extraData, Component title, Component subtitle, int max, IntList unavailable) {
-		vl$self().setScreen(new NumberVotingScreen(extraData, title, subtitle, max, unavailable));
+	default void openNumberVotingScreen(CompoundTag extraData, Component title, Component subtitle, int max, IntList unavailable, boolean closeOnVote) {
+		vl$self().setScreen(new NumberVotingScreen(extraData, title, subtitle, max, unavailable, closeOnVote));
 	}
 
 	@Override

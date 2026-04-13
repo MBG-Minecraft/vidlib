@@ -37,8 +37,9 @@ public class YesNoVotingScreen extends BaseVotingScreen {
 	public Component yesLabel;
 	public Component noLabel;
 
-	public YesNoVotingScreen(CompoundTag extraData, Component title, Component subtitle, Component yesLabel, Component noLabel) {
+	public YesNoVotingScreen(CompoundTag extraData, Component title, Component subtitle, Component yesLabel, Component noLabel, boolean closeOnVote) {
 		super(extraData, title, subtitle);
+		this.closeOnVote = closeOnVote;
 		this.yesLabel = yesLabel;
 		this.noLabel = noLabel;
 	}
@@ -46,8 +47,8 @@ public class YesNoVotingScreen extends BaseVotingScreen {
 	@Override
 	protected void init() {
 		super.init();
-		addRenderableWidget(new VoteButton(width / 3 - 64, height / 2 - 64 - 14, false));
 		addRenderableWidget(new VoteButton(width * 2 / 3 - 64, height / 2 - 64 - 14, true));
+		addRenderableWidget(new VoteButton(width / 3 - 64, height / 2 - 64 - 14, false));
 	}
 
 	@Override

@@ -26,8 +26,8 @@ public class NumberVotingScreen extends BaseVotingScreen {
 	public final int max;
 	public final IntSet unavailable;
 
-	public NumberVotingScreen(CompoundTag extraData, Component title, Component subtitle, int max, IntList unavailable) {
-		super(extraData, title, subtitle);
+	public NumberVotingScreen(CompoundTag extraData, Component title, Component subtitle, int max, IntList unavailable, boolean closeOnVote) {
+		super(extraData, title, subtitle, closeOnVote);
 		this.max = max;
 		this.unavailable = new IntOpenHashSet(unavailable);
 	}
