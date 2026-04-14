@@ -1,5 +1,6 @@
 package dev.mrbeastgaming.mods.hub.file;
 
+import dev.latvian.mods.klib.io.FileInfo;
 import dev.latvian.mods.klib.io.IOUtils;
 import dev.latvian.mods.klib.util.MD5;
 import dev.mrbeastgaming.mods.hub.HubProjectConfig;

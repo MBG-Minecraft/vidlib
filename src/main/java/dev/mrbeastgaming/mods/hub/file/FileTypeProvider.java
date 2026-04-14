@@ -1,5 +1,6 @@
 package dev.mrbeastgaming.mods.hub.file;
 
+import dev.latvian.mods.klib.io.FileInfo;
 import dev.mrbeastgaming.mods.hub.api.HubFileType;
 
 import java.nio.file.Files;

@@ -1,17 +1,19 @@
 package dev.mrbeastgaming.mods.hub.file;
 
+import dev.latvian.mods.klib.io.FileInfo;
+import dev.latvian.mods.klib.io.FileInfoFilter;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 
 import java.util.UUID;
 
 public class HubFileUploadBuilder {
-	HubFileUploadFilter filter = null;
+	FileInfoFilter filter = null;
 	FileTypeProvider type = null;
 	UniqueIdProvider uniqueIdProvider = null;
 	UUID minecraftId = null;
 	ProgressQueue progressQueue = null;
 
-	public HubFileUploadBuilder filter(HubFileUploadFilter filter) {
+	public HubFileUploadBuilder filter(FileInfoFilter filter) {
 		this.filter = filter;
 		return this;
 	}
@@ -46,7 +48,7 @@ public class HubFileUploadBuilder {
 		}
 
 		try {
-			return filter.upload(fileInfo);
+			return filter.test(fileInfo);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return false;

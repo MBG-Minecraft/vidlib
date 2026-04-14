@@ -4,6 +4,7 @@ import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
+import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
@@ -47,6 +48,7 @@ public interface VidLibEntityRenderStates {
 	ContextKey<List<Clothing>> CLOTHING = new ContextKey<>(VidLib.id("clothing"));
 	ContextKey<SpriteKey> SPRITE_KEY = new ContextKey<>(VidLib.id("sprite_key"));
 	ContextKey<UV> UV = new ContextKey<>(VidLib.id("uv"));
+	ContextKey<Boolean> TRANSLUCENT = new ContextKey<>(VidLib.id("translucent"));
 
 	ItemStack DEFAULT_SHIELD = new ItemStack(Items.SHIELD);
 
@@ -245,6 +247,8 @@ public interface VidLibEntityRenderStates {
 
 		var clothing = state.isInvisible ? List.<Clothing>of() : ClientGameEngine.INSTANCE.getClothing(player);
 		state.setRenderData(CLOTHING, clothing.isEmpty() ? null : clothing);
+
+		state.setRenderData(TRANSLUCENT, player.get(InternalPlayerData.TRANSLUCENT) ? Boolean.TRUE : null);
 
 		if (state.nameTag != null) {
 			state.nameTag = ClientGameEngine.INSTANCE.getFullPlayerWorldName(player, state.nameTag);

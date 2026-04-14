@@ -1,5 +1,7 @@
 package dev.mrbeastgaming.mods.hub.file;
 
+import dev.latvian.mods.klib.io.FileInfo;
+import dev.latvian.mods.klib.io.FileMD5;
 import dev.latvian.mods.klib.io.IOUtils;
 import dev.latvian.mods.klib.util.MD5;
 import dev.latvian.mods.klib.util.Tristate;
@@ -20,13 +22,12 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 public class HubFileUploads {
-	public record SyncedFile(FileInfo fileInfo, HubFileSyncMetadata meta, Mutable<ProgressItem> progressItem, ProjectUploadRequestItem item) {
+	public record SyncedFile(FileInfo fileInfo, FileMD5 meta, Mutable<ProgressItem> progressItem, ProjectUploadRequestItem item) {
 	}
 
 	public static List<SyncedFile> syncDirectory(Path directory, HubFileUploadBuilder upload) {
@@ -94,13 +95,13 @@ public class HubFileUploads {
 						continue;
 					}
 
-					var meta = HubFileSyncMetadata.load(file, progressItem);
+					var meta = FileMD5.loadChanged(file, progressItem);
 
-					if (meta.changed()) {
-						HubFileSyncMetadata.save(file.path(), meta);
-						Files.setLastModifiedTime(file.path(), FileTime.from(meta.lastModified()));
-						VidLib.LOGGER.info("Updated metadata of " + file.name() + ": " + meta);
+					if (meta == null) {
+						continue;
 					}
+
+					VidLib.LOGGER.info("Updated metadata of " + file.name() + ": " + meta);
 
 					var fileType = upload.type == null ? FileTypeProvider.probe(file) : upload.type.getFileType(file);
 

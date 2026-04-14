@@ -3,7 +3,7 @@ package dev.mrbeastgaming.mods.hub.api;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import dev.latvian.apps.tinyserver.content.MimeType;
-import dev.mrbeastgaming.mods.hub.file.FileInfo;
+import dev.latvian.mods.klib.io.FileInfo;
 import dev.mrbeastgaming.mods.hub.file.FileTypeProvider;
 
 public record HubFileType(int type, String contentType) implements FileTypeProvider {

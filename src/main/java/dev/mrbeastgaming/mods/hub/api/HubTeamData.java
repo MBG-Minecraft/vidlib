@@ -13,13 +13,15 @@ public record HubTeamData(
 	String name,
 	Instant created,
 	String code,
-	UInt64 discordRole
+	UInt64 discordRole,
+	HubDataMap customData
 ) {
 	public static final Codec<HubTeamData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Hex32.CODEC.fieldOf("id").forGetter(HubTeamData::id),
 		Codec.STRING.optionalFieldOf("name", "").forGetter(HubTeamData::name),
 		KLibCodecs.ISO_INSTANT.fieldOf("created").forGetter(HubTeamData::created),
 		Codec.STRING.optionalFieldOf("code", "").forGetter(HubTeamData::code),
-		UInt64.CODEC.optionalFieldOf("discord_guild", UInt64.NONE).forGetter(HubTeamData::discordRole)
+		UInt64.CODEC.optionalFieldOf("discord_guild", UInt64.NONE).forGetter(HubTeamData::discordRole),
+		HubDataMap.CODEC.optionalFieldOf("custom_data", HubDataMap.EMPTY).forGetter(HubTeamData::customData)
 	).apply(instance, HubTeamData::new));
 }

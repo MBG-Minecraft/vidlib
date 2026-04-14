@@ -4,8 +4,10 @@ import dev.latvian.mods.vidlib.feature.imgui.ImText;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.IntConsumer;
+import java.util.function.LongConsumer;
 
-public final class ProgressItem {
+public final class ProgressItem implements IntConsumer, LongConsumer {
 	public final ProgressQueue queue;
 	public final AtomicInteger status;
 	public final AtomicLong progress;
@@ -65,5 +67,15 @@ public final class ProgressItem {
 
 	public void warning(String error) {
 		error(ImText.warning(error));
+	}
+
+	@Override
+	public void accept(int value) {
+		addProgress(value);
+	}
+
+	@Override
+	public void accept(long value) {
+		addProgress(value);
 	}
 }
