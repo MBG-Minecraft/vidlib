@@ -1,20 +1,18 @@
-package dev.mrbeastgaming.mods.hub;
+package dev.mrbeastgaming.mods.hub.file;
 
 import dev.mrbeastgaming.mods.hub.api.HubFileType;
 
-import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 
 public interface FileTypeProvider {
-	static HubFileType probe(Path path) throws IOException {
+	static HubFileType probe(FileInfo fileInfo) {
 		try {
-			var type = Files.probeContentType(path);
+			var type = Files.probeContentType(fileInfo.path());
 			return type == null || type.isEmpty() ? HubFileType.UNKNOWN : HubFileType.custom(type);
 		} catch (Exception ignored) {
 			return HubFileType.UNKNOWN;
 		}
 	}
 
-	HubFileType getFileType(Path path) throws Exception;
+	HubFileType getFileType(FileInfo fileInfo) throws Exception;
 }

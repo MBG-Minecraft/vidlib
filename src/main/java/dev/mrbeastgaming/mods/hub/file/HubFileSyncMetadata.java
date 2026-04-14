@@ -1,4 +1,4 @@
-package dev.mrbeastgaming.mods.hub;
+package dev.mrbeastgaming.mods.hub.file;
 
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
@@ -29,9 +29,9 @@ public record HubFileSyncMetadata(MD5 checksum, long size, Instant lastModified,
 	).apply(instance, HubFileSyncMetadata::new));
 
 	@Nullable
-	public static HubFileSyncMetadata loadExisting(Path file) throws IOException {
+	public static HubFileSyncMetadata loadExisting(FileInfo fileInfo) throws IOException {
 		try {
-			var attribute = IOUtils.getAttribute(file, "MBG-Hub-Sync-Metadata");
+			var attribute = IOUtils.getAttribute(fileInfo.path(), "MBG-Hub-Sync-Metadata");
 
 			if (!attribute.isEmpty()) {
 				var attributeJson = JsonUtils.GSON.fromJson(attribute, JsonElement.class);
@@ -43,15 +43,14 @@ public record HubFileSyncMetadata(MD5 checksum, long size, Instant lastModified,
 		return null;
 	}
 
-	public static HubFileSyncMetadata load(Path file, @Nullable ProgressItem progressItem) throws NoSuchAlgorithmException, IOException {
-		var existing = loadExisting(file);
-		var size = Files.size(file);
-		var lastModified = Instant.ofEpochSecond(Files.getLastModifiedTime(file).toInstant().getEpochSecond());
+	public static HubFileSyncMetadata load(FileInfo fileInfo, @Nullable ProgressItem progressItem) throws NoSuchAlgorithmException, IOException {
+		var existing = loadExisting(fileInfo);
+		var lastModified = IOUtils.getLastModifiedTime(fileInfo.path());
 
-		if (existing == null || size != existing.size || lastModified.isAfter(existing.lastModified)) {
+		if (existing == null || fileInfo.size() != existing.size || lastModified == null || lastModified.isAfter(existing.lastModified)) {
 			var md = MessageDigest.getInstance("MD5");
 
-			try (var channel = Files.newByteChannel(file)) {
+			try (var channel = Files.newByteChannel(fileInfo.path())) {
 				var buf = ByteBuffer.allocate(2048);
 				int len;
 
@@ -68,7 +67,7 @@ public record HubFileSyncMetadata(MD5 checksum, long size, Instant lastModified,
 
 			return new HubFileSyncMetadata(
 				MD5.fromBytes(md.digest()),
-				size,
+				fileInfo.size(),
 				lastModified,
 				true
 			);

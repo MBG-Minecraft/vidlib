@@ -39,6 +39,7 @@ import dev.latvian.mods.vidlib.feature.item.RainbowItemTint;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.ClientModListPayload;
 import dev.latvian.mods.vidlib.feature.misc.DebugTextEvent;
+import dev.latvian.mods.vidlib.feature.misc.MainMenuOpenedEvent;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import dev.latvian.mods.vidlib.feature.misc.ScreenTextRenderer;
@@ -63,6 +64,10 @@ import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
+import dev.mrbeastgaming.mods.hub.api.HubFileType;
+import dev.mrbeastgaming.mods.hub.file.ClientHubFileUploads;
+import dev.mrbeastgaming.mods.hub.file.HubFileUploadBuilder;
+import dev.mrbeastgaming.mods.hub.file.UniqueIdProvider;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -723,6 +728,32 @@ public class VidLibClientEventHandler {
 
 		if (mc.player != null && mc.player.getVehicle() != null) {
 			event.setRoll(mc.player.getVehicle().getPassengerCameraRoll(mc.player, event.getPartialTick(), event.getRoll()));
+		}
+	}
+
+	@SubscribeEvent
+	public static void mainMenuOpened(MainMenuOpenedEvent event) {
+		var gameDir = PlatformHelper.CURRENT.getGameDirectory();
+		var defaultIdProvider = UniqueIdProvider.ofUUIDAndFileName(event.getMinecraft().getUser().getProfileId());
+
+		ClientHubFileUploads.asyncDirectory(gameDir.resolve("voicechat_recordings"), new HubFileUploadBuilder()
+			.type(HubFileType.VOICE_CHAT_RECORDING)
+			.filterEndsWith(".mp3")
+			.uniqueId(defaultIdProvider)
+		);
+
+		if (event.isFirstTime()) {
+			ClientHubFileUploads.asyncDirectory(gameDir.resolve("crash-reports"), new HubFileUploadBuilder()
+				.type(HubFileType.CRASH_REPORT)
+				.filterEndsWith("-client.txt")
+				.uniqueId(defaultIdProvider)
+			);
+
+			ClientHubFileUploads.asyncDirectory(gameDir, new HubFileUploadBuilder()
+				.type(HubFileType.JVM_CRASH_REPORT)
+				.filter(fileInfo -> fileInfo.name().startsWith("hr_err_pid_") && fileInfo.name().endsWith(".log"))
+				.uniqueId(defaultIdProvider)
+			);
 		}
 	}
 }

@@ -80,7 +80,7 @@ public class VidLibVoidChatPlugin implements VoicechatPlugin {
 			return;
 		}
 
-		if (!CommonGameEngine.INSTANCE.canVoicechatBroadcast(player) || player.level().isClientSide()) {
+		if (player.level().isClientSide() || !CommonGameEngine.INSTANCE.canVoicechatBroadcast(player)) {
 			return;
 		}
 

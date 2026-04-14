@@ -32,7 +32,6 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
 import dev.latvian.mods.vidlib.math.knumber.KNumberNodeImBuilder;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
-import dev.mrbeastgaming.mods.hub.ClientHubFileUploads;
 import dev.mrbeastgaming.mods.hub.api.HubCountries;
 import dev.mrbeastgaming.mods.hub.api.HubCountry;
 import imgui.ImGui;
@@ -313,18 +312,7 @@ public class DebugWidgetPanel extends Panel {
 
 		if (ImGui.button("Open File Dialog")) {
 			AsyncFileSelector.openDirectoryDialog(null).thenAcceptAsync(path -> {
-				if (path != null) {
-					ClientHubFileUploads.asyncDirectory(path, p -> p.getFileName().toString().endsWith(".zip"), null, null).thenAcceptAsync(syncFiles -> {
-						var sb = new StringBuilder(path.toAbsolutePath().toString());
-
-						for (var file : syncFiles) {
-							sb.append('\n');
-							sb.append(file.item().checksum().string());
-						}
-
-						multiLineStringData.set(sb.toString());
-					});
-				}
+				multiLineStringData.set(String.valueOf(path));
 			});
 		}
 
