@@ -36,6 +36,7 @@ public interface InternalPlayerData {
 	DataKey<Float> FLIGHT_SPEED = DataKey.PLAYER.createFloat("flight_speed", 1F, 0F, 20F);
 	DataKey<Color> GLOW_COLOR = DataKey.PLAYER.createDefault("glow_color", Color.DATA_TYPE, null, Color4ImBuilder::new);
 	DataKey<Boolean> CAN_FLY = DataKey.PLAYER.createBoolean("can_fly", false);
+	DataKey<Boolean> TRANSPARENT = DataKey.PLAYER.createBoolean("transparent", false);
 
 	@AutoInit
 	static void bootstrap() {
