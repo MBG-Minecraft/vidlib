@@ -23,6 +23,7 @@ public interface InternalServerData {
 	DataKey<Double> NAME_DRAW_MID_DIST = DataKey.SERVER.createDouble("name_draw_mid_dist", 170D, 0D, 500D);
 	DataKey<Double> NAME_DRAW_MAX_DIST = DataKey.SERVER.createDouble("name_draw_max_dist", 230D, 0D, 500D);
 	DataKey<Float> NAME_DRAW_MIN_SIZE = DataKey.SERVER.createFloat("name_draw_min_size", 0.5F, 0F, 2F);
+	DataKey<Boolean> NAME_MUST_SEE = DataKey.SERVER.createBoolean("name_must_see", false);
 	DataKey<Long> GLOBAL_STOPWATCH = DataKey.SERVER.createDefault("global_stopwatch", DataTypes.VAR_LONG, 0L, null);
 	DataKey<Long> GLOBAL_STOPWATCH_START = DataKey.SERVER.createDefault("global_stopwatch_start", DataTypes.VAR_LONG, 0L, null);
 	DataKey<Boolean> ICE_MELTS = DataKey.SERVER.createBoolean("ice_melts", false);

@@ -21,6 +21,9 @@ import net.minecraft.network.chat.numbers.StyledFormat;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.ReadOnlyScoreInfo;
 import net.neoforged.neoforge.common.NeoForge;
@@ -66,10 +69,12 @@ public interface VidLibHUD {
 		double midDist = mc.get(InternalServerData.NAME_DRAW_MID_DIST);
 		double maxDist = mc.get(InternalServerData.NAME_DRAW_MAX_DIST);
 		float minSize = mc.get(InternalServerData.NAME_DRAW_MIN_SIZE);
+		boolean mustSee = mc.get(InternalServerData.NAME_MUST_SEE);
 
 		var lines = new ArrayList<FormattedCharSequence>(1);
 		var delta = deltaTracker.getGameTimeDeltaPartialTick(false);
 		var selfDelta = deltaTracker.getGameTimeDeltaPartialTick(true);
+		var local = mc.player;
 
 		for (var player : level.players()) {
 			if (replay && ReplayAPI.getActive().isEntityHidden(player.getUUID())) {
@@ -78,6 +83,16 @@ public interface VidLibHUD {
 
 			if (!ClientGameEngine.INSTANCE.shouldRender2DPlayerName(mc, mc.player, player)) {
 				continue;
+			}
+
+			if (mustSee && local != null && player != local && mc.level != null) {
+				Vec3 start = local.getEyePosition(selfDelta);
+				Vec3 end = player.getEyePosition(player == self ? selfDelta : delta);
+				ClipContext context = new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, local);
+				HitResult result = mc.level.clip(context);
+				if (result.getType() == HitResult.Type.BLOCK) {
+					continue;
+				}
 			}
 
 			var pos = player.getPosition(player == self ? selfDelta : delta).add(0D, player.getBbHeight() * 1.1D, 0D);
