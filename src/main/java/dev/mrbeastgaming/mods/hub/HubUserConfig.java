@@ -3,6 +3,7 @@ package dev.mrbeastgaming.mods.hub;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.common.CommonPaths;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.mrbeastgaming.mods.hub.api.token.UserToken;
 
@@ -43,7 +44,7 @@ public record HubUserConfig(
 		var file = HubPaths.USER_CONFIG.get();
 
 		try {
-			JsonUtils.write(file, CODEC.encodeStart(JsonOps.INSTANCE, config).getOrThrow(), true);
+			JsonUtils.write(CommonPaths.mkdirs(file), CODEC.encodeStart(JsonOps.INSTANCE, config).getOrThrow(), true);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
