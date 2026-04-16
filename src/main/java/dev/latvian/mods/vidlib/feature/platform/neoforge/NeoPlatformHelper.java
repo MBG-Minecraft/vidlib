@@ -65,13 +65,18 @@ public class NeoPlatformHelper extends PlatformHelper {
 	}
 
 	@Override
+	public String getPlatform() {
+		return "neoforge";
+	}
+
+	@Override
 	public Side getSide() {
 		return FMLLoader.getDist().isClient() ? Side.CLIENT : Side.SERVER;
 	}
 
 	@Override
-	public String getPlatform() {
-		return "neoforge";
+	public boolean isDevEnv() {
+		return !FMLLoader.isProduction();
 	}
 
 	@Override

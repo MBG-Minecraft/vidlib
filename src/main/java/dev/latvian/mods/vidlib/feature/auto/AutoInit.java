@@ -72,13 +72,14 @@ public @interface AutoInit {
 
 		AutoHelper.load(AutoInit.class, EnumSet.of(ElementType.TYPE, ElementType.METHOD, ElementType.FIELD), (source, classLoader, ad) -> {
 			var types = AutoHelper.getEnumValues(ad, Type.class, "value", EnumSet.of(Type.DEFAULT));
+			var currentSide = PlatformHelper.CURRENT.getSide();
 
 			for (var type : types) {
 				if (type == Type.DEFAULT) {
 					type = Type.GAME_LOADED;
 				}
 
-				if (type.clientOnly && !PlatformHelper.CURRENT.getSide().isClient()) {
+				if (type.clientOnly && !currentSide.isClient()) {
 					VidLib.LOGGER.info("Skipped @AutoInit class " + ad.clazz().getClassName());
 					return;
 				}

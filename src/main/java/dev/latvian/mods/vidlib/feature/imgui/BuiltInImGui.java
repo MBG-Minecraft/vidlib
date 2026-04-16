@@ -165,7 +165,7 @@ public class BuiltInImGui {
 		list.add(MenuItem.SEPARATOR);
 		list.add(MenuItem.item(ImIcons.LEAF, "JVM Threads", JVMThreadsPanel.INSTANCE));
 
-		if (ClientGameEngine.DEFAULT_ENABLE_MAIN_MENU_BUTTONS) {
+		if (PlatformHelper.CURRENT.isDevEnv()) {
 			list.add(MenuItem.item(ImIcons.FRAMED_CUBE, "Debug Widgets", DebugWidgetPanel.INSTANCE));
 			list.add(MenuItem.item(ImIcons.BUG, "Packet Debugger", PacketDebuggerPanel.INSTANCE).enabled(graphics.isAdmin));
 			list.add(MenuItem.item(ImIcons.MEMORY, "ID Stack Tool", SHOW_STACK_TOOL));

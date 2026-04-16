@@ -11,6 +11,7 @@ import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.RemoveZonePayload;
@@ -31,7 +32,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -250,12 +250,8 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 		throw new NoMixinException(this);
 	}
 
-	default Path vl$getPlayerDataDirectory() {
-		return vl$self().getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("vidlib");
-	}
-
 	default void vl$preloadAllSessions() {
-		var dir = vl$getPlayerDataDirectory();
+		var dir = PlatformHelper.CURRENT.getPlayerDataDirectory(vl$self());
 
 		if (Files.notExists(dir)) {
 			return;

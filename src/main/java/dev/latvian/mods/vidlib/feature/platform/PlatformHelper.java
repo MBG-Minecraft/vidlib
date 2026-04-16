@@ -20,10 +20,12 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
@@ -37,12 +39,16 @@ import java.util.function.Function;
 public class PlatformHelper {
 	public static PlatformHelper CURRENT = new PlatformHelper();
 
+	public String getPlatform() {
+		return "bukkit";
+	}
+
 	public Side getSide() {
 		return Side.SERVER;
 	}
 
-	public String getPlatform() {
-		return "bukkit";
+	public boolean isDevEnv() {
+		return false;
 	}
 
 	public Path getGameDirectory() {
@@ -162,5 +168,9 @@ public class PlatformHelper {
 		}
 
 		return CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(entity.getTags(), gameMode);
+	}
+
+	public Path getPlayerDataDirectory(MinecraftServer server) {
+		return server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("vidlib");
 	}
 }

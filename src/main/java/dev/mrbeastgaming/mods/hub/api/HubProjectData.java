@@ -29,4 +29,8 @@ public record HubProjectData(
 		HubTeamData.CODEC.listOf().optionalFieldOf("teams", List.of()).forGetter(HubProjectData::teams),
 		HubDataMap.CODEC.optionalFieldOf("custom_data", HubDataMap.EMPTY).forGetter(HubProjectData::customData)
 	).apply(instance, HubProjectData::new));
+
+	public String displayName() {
+		return publicName.isEmpty() ? internalName : publicName;
+	}
 }

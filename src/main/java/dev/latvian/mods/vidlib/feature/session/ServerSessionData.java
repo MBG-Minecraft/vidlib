@@ -7,6 +7,7 @@ import dev.latvian.mods.vidlib.feature.input.PlayerInputChangedEvent;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToClient;
 import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -27,7 +28,7 @@ public class ServerSessionData extends SessionData {
 	public ServerSessionData(MinecraftServer server, UUID uuid) {
 		super(uuid, server);
 		this.server = server;
-		this.dataMapPath = server.vl$getPlayerDataDirectory().resolve(uuid + ".nbt");
+		this.dataMapPath = PlatformHelper.CURRENT.getPlayerDataDirectory(server).resolve(uuid + ".nbt");
 		this.currentTags = Set.of();
 		this.clientFeatureSet = FeatureSet.EMPTY;
 		this.clientMods = Map.of();
