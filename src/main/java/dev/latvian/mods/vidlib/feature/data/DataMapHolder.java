@@ -1,5 +1,8 @@
 package dev.latvian.mods.vidlib.feature.data;
 
+import com.mojang.serialization.DynamicOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.Nullable;
 
 public interface DataMapHolder {
@@ -29,5 +32,10 @@ public interface DataMapHolder {
 
 	default <T> void reset(DataKey<T> type) {
 		set(type, type.defaultValue());
+	}
+
+	// Overridden on Bukkit
+	default DynamicOps<Tag> getNbtOps(MinecraftServer server) {
+		return server.nbtOps();
 	}
 }

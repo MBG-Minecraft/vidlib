@@ -141,7 +141,7 @@ public class DataMap implements DataMapHolder {
 		if (Files.exists(path)) {
 			try (var in = Files.newInputStream(path)) {
 				var data = NbtIo.readCompressed(in, NbtAccounter.unlimitedHeap());
-				var ops = server.nbtOps();
+				var ops = getNbtOps(server);
 
 				for (var type : storage.saved.values()) {
 					var tag = data.get(type.id());
