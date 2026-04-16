@@ -1,5 +1,6 @@
 package dev.mrbeastgaming.mods.hub.api.project;
 
+import dev.latvian.mods.klib.util.Hex32;
 import dev.latvian.mods.klib.util.MD5;
 import dev.mrbeastgaming.mods.hub.api.HubFileType;
 import org.jetbrains.annotations.Nullable;
@@ -12,6 +13,7 @@ public record ProjectUploadRequestItem(
 	long size,
 	String name,
 	HubFileType type,
-	@Nullable UUID minecraftId
+	Hex32 assignedTo,
+	@Nullable UUID assignedToMinecraft
 ) {
 }

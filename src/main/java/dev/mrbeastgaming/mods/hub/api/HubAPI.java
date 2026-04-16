@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public interface HubAPI {
 	URI URI_BASE = URI.create(Optional.ofNullable(System.getenv("MBG_HUB_API_BASE")).orElse("https://hub.mrbeastmc.com"));
@@ -42,10 +41,8 @@ public interface HubAPI {
 		return builder;
 	});
 
-	AtomicInteger SEQUENTIAL_EXECUTOR_COUNTER = new AtomicInteger(0);
-
 	Lazy<ExecutorService> SEQUENTIAL_EXECUTOR = Lazy.of(() -> Executors.newSingleThreadExecutor(r -> {
-		var thread = new Thread(r, "Sequential-MBG-Hub-API-Thread-" + SEQUENTIAL_EXECUTOR_COUNTER.incrementAndGet());
+		var thread = new Thread(r, "Sequential-MBG-Hub-API-Thread-%08X".formatted(r.hashCode()));
 		thread.setDaemon(true);
 		return thread;
 	}));
@@ -108,6 +105,10 @@ public interface HubAPI {
 		return request("/api/projects/" + project + "/full-data", Tristate.DEFAULT).build();
 	}
 
+	static HttpRequest apiProjectClientSession(String token) {
+		return request("/api/projects/client-session/" + token, Tristate.TRUE).build();
+	}
+
 	static List<ProjectUploadResponseItem> apiProjectUpload(String token, List<ProjectUploadRequestItem> files) throws Exception {
 		var body = new JsonObject();
 		var filesJson = new JsonArray();
@@ -124,8 +125,12 @@ public interface HubAPI {
 			o.addProperty("name", file.name());
 			o.add("type", file.type().toJson());
 
-			if (file.minecraftId() != null) {
-				o.addProperty("minecraft_id", file.minecraftId().toString());
+			if (file.assignedTo() != Hex32.NONE) {
+				o.addProperty("assigned_to", file.assignedTo().toString());
+			}
+
+			if (file.assignedToMinecraft() != null) {
+				o.addProperty("assigned_to_minecraft", file.assignedToMinecraft().toString());
 			}
 
 			filesJson.add(o);

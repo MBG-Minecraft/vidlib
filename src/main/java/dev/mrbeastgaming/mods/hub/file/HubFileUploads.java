@@ -111,7 +111,8 @@ public class HubFileUploads {
 						meta.size(),
 						file.name(),
 						fileType,
-						upload.minecraftId
+						upload.assignedTo,
+						upload.assignedToMinecraft
 					));
 
 					map.put(syncFile.item.checksum(), syncFile);

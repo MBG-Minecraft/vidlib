@@ -32,6 +32,10 @@ import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.skin.PlayerSkinOverrides;
 import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
+import dev.mrbeastgaming.mods.hub.api.HubClientSessionData;
+import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
+import dev.mrbeastgaming.mods.hub.api.gateway.HubGateway;
+import dev.mrbeastgaming.mods.hub.link.LinkHubUserScreen;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
@@ -88,7 +92,6 @@ import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.ModList;
-import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -101,7 +104,6 @@ import java.util.UUID;
 public class ClientGameEngine {
 	public static ClientGameEngine INSTANCE = new ClientGameEngine();
 
-	public static final boolean DEFAULT_ENABLE_MAIN_MENU_BUTTONS = "true".equals(System.getenv("ENABLE_ADMIN_BUTTONS")) || !FMLLoader.isProduction();
 	public static final boolean DISABLE_IMGUI = "true".equals(System.getenv("DISABLE_IMGUI"));
 
 	public void collectClientFeatures(Reference2IntMap<Feature> map) {
@@ -302,6 +304,45 @@ public class ClientGameEngine {
 	}
 
 	public void topInfoBarPre(ImGraphics graphics, float h) {
+		var hubSession = HubClientSessionData.CURRENT;
+
+		if (hubSession == null) {
+			graphics.pushStack();
+			graphics.setErrorText();
+
+			if (ImGui.menuItem(ImIcons.WARNING + "###link-hub-profile")) {
+				LinkHubUserScreen.open(graphics.mc);
+			}
+
+			if (ImGui.isItemHovered()) {
+				ImGui.setTooltip("MrBeast Gaming Hub profile not linked!\n\nClick here to link your profile!");
+			}
+
+			graphics.popStack();
+		} else {
+			graphics.pushStack();
+			graphics.setText(ImColorVariant.GREEN);
+			ImGui.text(ImIcons.CHECK.toString());
+			graphics.popStack();
+
+			if (ImGui.isItemHovered()) {
+				var list = new ArrayList<String>();
+				list.add("MrBeast Gaming Hub profile linked:");
+				list.add("");
+				list.add("Project: " + hubSession.project().toString());
+				list.add("User: " + hubSession.user().toString());
+				list.add("Roles: " + hubSession.user().flags().getRoles());
+
+				if (HubGateway.client != null && HubGateway.client.webSocket != null) {
+					list.add("Gateway: Active");
+				}
+
+				ImGui.setTooltip(String.join("\n", list));
+			}
+		}
+
+		ImGui.separator();
+
 		if (graphics.player != null) {
 			ImGui.text(ClientGameEngine.INSTANCE.getPlayerWorldName(graphics.player, graphics.player.getName()).getString());
 		} else {
@@ -814,11 +855,15 @@ public class ClientGameEngine {
 	}
 
 	public boolean enableSinglePlayerMainMenuButton() {
-		return DEFAULT_ENABLE_MAIN_MENU_BUTTONS;
+		return HubUserCapabilities.get().singleplayer();
+	}
+
+	public boolean enableMultiPlayerMainMenuButton() {
+		return HubUserCapabilities.get().multiplayer();
 	}
 
 	public boolean enableReplayMainMenuButton() {
-		return DEFAULT_ENABLE_MAIN_MENU_BUTTONS;
+		return HubUserCapabilities.get().viewLocalReplays();
 	}
 
 	public boolean isVoiceChatPTTDown() {

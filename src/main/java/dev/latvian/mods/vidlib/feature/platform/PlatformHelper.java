@@ -16,6 +16,7 @@ import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
+import dev.mrbeastgaming.mods.hub.api.gateway.event.HubGatewayEvent;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -32,6 +33,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -172,5 +174,8 @@ public class PlatformHelper {
 
 	public Path getPlayerDataDirectory(MinecraftServer server) {
 		return server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("vidlib");
+	}
+
+	public void collectGatewayEventHandlers(Map<String, Consumer<HubGatewayEvent>> map) {
 	}
 }

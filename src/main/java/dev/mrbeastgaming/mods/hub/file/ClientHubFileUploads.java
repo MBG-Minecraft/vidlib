@@ -1,7 +1,10 @@
 package dev.mrbeastgaming.mods.hub.file;
 
+import dev.latvian.mods.klib.util.Hex32;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
+import dev.mrbeastgaming.mods.hub.api.HubClientSessionData;
+import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
 import net.minecraft.client.Minecraft;
 
 import java.nio.file.Path;
@@ -21,7 +24,17 @@ public interface ClientHubFileUploads {
 	}
 
 	static List<HubFileUploads.SyncedFile> syncDirectory(Path directory, HubFileUploadBuilder upload) {
-		return HubFileUploads.syncDirectory(directory, upload.minecraftId(Minecraft.getInstance().getUser().getProfileId()).progressQueue(createQueue()));
+		if (!HubUserCapabilities.get().autoUploadFiles()) {
+			return List.of();
+		}
+
+		var client = HubClientSessionData.CURRENT;
+
+		return HubFileUploads.syncDirectory(directory, upload
+			.assignedTo(client != null ? client.user().id() : Hex32.NONE)
+			.assignedToMinecraft(Minecraft.getInstance().getUser().getProfileId())
+			.progressQueue(createQueue())
+		);
 	}
 
 	static CompletableFuture<List<HubFileUploads.SyncedFile>> asyncFile(Path file, HubFileUploadBuilder upload) {
@@ -29,6 +42,16 @@ public interface ClientHubFileUploads {
 	}
 
 	static List<HubFileUploads.SyncedFile> syncFile(Path file, HubFileUploadBuilder upload) {
-		return HubFileUploads.syncFile(file, upload.minecraftId(Minecraft.getInstance().getUser().getProfileId()).progressQueue(createQueue()));
+		if (!HubUserCapabilities.get().autoUploadFiles()) {
+			return List.of();
+		}
+
+		var client = HubClientSessionData.CURRENT;
+
+		return HubFileUploads.syncFile(file, upload
+			.assignedTo(client != null ? client.user().id() : Hex32.NONE)
+			.assignedToMinecraft(Minecraft.getInstance().getUser().getProfileId())
+			.progressQueue(createQueue())
+		);
 	}
 }

@@ -2,6 +2,7 @@ package dev.mrbeastgaming.mods.hub.api;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 
 public record HubUserCapabilities(
 	boolean singleplayer,
@@ -11,16 +12,21 @@ public record HubUserCapabilities(
 	boolean autoUploadFiles,
 	boolean uploadUserFiles
 ) {
+	public static final boolean DEFAULT_ENABLE_ADMIN_BUTTONS = "true".equals(System.getenv("ENABLE_ADMIN_BUTTONS")) || PlatformHelper.CURRENT.isDevEnv();
+
 	public static final HubUserCapabilities DEFAULT = new HubUserCapabilities(
-		false,
+		DEFAULT_ENABLE_ADMIN_BUTTONS,
 		true,
-		false,
+		DEFAULT_ENABLE_ADMIN_BUTTONS,
 		false,
 		true,
 		false
 	);
 
-	public static HubUserCapabilities CURRENT = DEFAULT;
+	public static HubUserCapabilities get() {
+		var c = HubClientSessionData.CURRENT;
+		return c == null ? DEFAULT : c.capabilities();
+	}
 
 	public static final Codec<HubUserCapabilities> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Codec.BOOL.optionalFieldOf("singleplayer", DEFAULT.singleplayer).forGetter(HubUserCapabilities::singleplayer),

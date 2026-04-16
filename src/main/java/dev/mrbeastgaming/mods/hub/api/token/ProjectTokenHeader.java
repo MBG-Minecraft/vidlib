@@ -10,11 +10,12 @@ import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 
-public record ProjectTokenHeader(Hex32 project, long utc, int iteration) {
+public record ProjectTokenHeader(Hex32 project, Instant utc, int iteration) {
 	public static ProjectTokenHeader read(DataInput data) throws IOException {
 		int project = data.readInt();
-		long utc = data.readLong();
+		var utc = IOUtils.readExactTime(data);
 		int iteration = IOUtils.readVarInt(data);
 		return new ProjectTokenHeader(Hex32.of(project), utc, iteration);
 	}

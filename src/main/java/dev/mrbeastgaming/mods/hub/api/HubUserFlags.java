@@ -3,6 +3,9 @@ package dev.mrbeastgaming.mods.hub.api;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public record HubUserFlags(
 	boolean deleted,
 	boolean bot,
@@ -48,5 +51,33 @@ public record HubUserFlags(
 
 	public boolean isTalent() {
 		return externalTalent || internalTalent;
+	}
+
+	public List<String> getRoles() {
+		var list = new ArrayList<String>(0);
+
+		if (admin) {
+			list.add("Admin");
+		} else if (isAnyStaff()) {
+			list.add("Staff");
+		}
+
+		if (isTalent()) {
+			list.add("Talent");
+		}
+
+		if (developer) {
+			list.add("Developer");
+		}
+
+		if (videoEditor) {
+			list.add("Video Editor");
+		}
+
+		if (testerWithNDA) {
+			list.add("Tester with NDA");
+		}
+
+		return list;
 	}
 }

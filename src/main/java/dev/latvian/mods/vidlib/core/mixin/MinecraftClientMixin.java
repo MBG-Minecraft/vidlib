@@ -12,15 +12,12 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
 import dev.latvian.mods.vidlib.feature.misc.MainMenuOpenedEvent;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.InBedChatScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.world.entity.Entity;
@@ -179,16 +176,7 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 
 		if (mc.level != null) {
 			GLFW.glfwSetWindowShouldClose(mc.getWindow().getWindow(), false);
-			mc.level.disconnect();
-
-			if (mc.isLocalServer()) {
-				mc.disconnect(new GenericMessageScreen(Component.translatable("menu.savingLevel")));
-			} else {
-				mc.disconnect();
-			}
-
-			mc.setScreen(new TitleScreen());
-			NeoForge.EVENT_BUS.post(new MainMenuOpenedEvent(mc, false));
+			vl$exitToTitle();
 			ci.cancel();
 		}
 	}

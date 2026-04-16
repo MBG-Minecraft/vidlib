@@ -2,8 +2,9 @@ package dev.latvian.mods.vidlib.feature.misc;
 
 import net.minecraft.client.Minecraft;
 import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.ICancellableEvent;
 
-public class MainMenuOpenedEvent extends Event {
+public class MainMenuOpenedEvent extends Event implements ICancellableEvent {
 	private final Minecraft minecraft;
 	private final boolean firstTime;
 

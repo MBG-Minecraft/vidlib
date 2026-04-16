@@ -27,6 +27,7 @@ import dev.latvian.mods.vidlib.feature.data.UpdatePlayerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.data.UpdateServerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
+import dev.latvian.mods.vidlib.feature.misc.MainMenuOpenedEvent;
 import dev.latvian.mods.vidlib.feature.particle.FireData;
 import dev.latvian.mods.vidlib.feature.particle.ItemParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.LineParticleOptions;
@@ -60,6 +61,8 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.screens.GenericMessageScreen;
+import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -77,6 +80,7 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
@@ -690,5 +694,19 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	default int vl$reloadCount() {
 		return 0;
+	}
+
+	default void vl$exitToTitle() {
+		var mc = vl$self();
+		mc.level.disconnect();
+
+		if (mc.isLocalServer()) {
+			mc.disconnect(new GenericMessageScreen(Component.translatable("menu.savingLevel")));
+		} else {
+			mc.disconnect();
+		}
+
+		mc.setScreen(new TitleScreen());
+		NeoForge.EVENT_BUS.post(new MainMenuOpenedEvent(mc, false));
 	}
 }

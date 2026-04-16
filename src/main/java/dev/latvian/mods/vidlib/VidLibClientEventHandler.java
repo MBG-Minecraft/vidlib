@@ -64,10 +64,12 @@ import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
+import dev.mrbeastgaming.mods.hub.api.HubClientSessionData;
 import dev.mrbeastgaming.mods.hub.api.HubFileType;
 import dev.mrbeastgaming.mods.hub.file.ClientHubFileUploads;
 import dev.mrbeastgaming.mods.hub.file.HubFileUploadBuilder;
 import dev.mrbeastgaming.mods.hub.file.UniqueIdProvider;
+import dev.mrbeastgaming.mods.hub.link.LinkHubUserScreen;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -754,6 +756,10 @@ public class VidLibClientEventHandler {
 				.filter(fileInfo -> fileInfo.name().startsWith("hr_err_pid_") && fileInfo.name().endsWith(".log"))
 				.uniqueId(defaultIdProvider)
 			);
+		}
+
+		if (HubClientSessionData.CURRENT == null) {
+			LinkHubUserScreen.open(event.getMinecraft());
 		}
 	}
 }

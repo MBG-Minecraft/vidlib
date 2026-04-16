@@ -33,4 +33,9 @@ public record HubProjectData(
 	public String displayName() {
 		return publicName.isEmpty() ? internalName : publicName;
 	}
+
+	@Override
+	public String toString() {
+		return displayName() + "#" + id;
+	}
 }

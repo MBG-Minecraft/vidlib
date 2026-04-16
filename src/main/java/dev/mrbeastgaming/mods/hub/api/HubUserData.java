@@ -19,4 +19,13 @@ public record HubUserData(
 		UInt64.CODEC.optionalFieldOf("discord_id", UInt64.NONE).forGetter(HubUserData::discordId),
 		HubUserFlags.CODEC.optionalFieldOf("flags", HubUserFlags.EMPTY).forGetter(HubUserData::flags)
 	).apply(instance, HubUserData::new));
+
+	@Override
+	public String toString() {
+		return name + "#" + id;
+	}
+
+	public HubUserData withFlags(HubUserFlags flags) {
+		return new HubUserData(id, name, avatarUrl, discordId, flags);
+	}
 }
