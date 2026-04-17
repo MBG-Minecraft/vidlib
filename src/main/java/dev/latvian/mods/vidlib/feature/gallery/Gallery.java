@@ -11,6 +11,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
+import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -247,6 +248,11 @@ public class Gallery<K> {
 			);
 		} catch (Exception ex) {
 			VidLib.LOGGER.warn("Failed to download " + id + "/" + key, ex);
+			// Do a default
+			try {
+				var defaultTex = mc.getTextureManager().getTexture(VidLibTextures.DEFAULT_PLAYER_BODY);
+				mc.getTextureManager().byPath.put(img.textureId(), defaultTex);
+			} catch (Throwable ignored) {}
 			return img;
 		}
 	}
