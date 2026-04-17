@@ -30,6 +30,8 @@ public record HubProjectData(
 		HubDataMap.CODEC.optionalFieldOf("custom_data", HubDataMap.EMPTY).forGetter(HubProjectData::customData)
 	).apply(instance, HubProjectData::new));
 
+	public static HubProjectData PACK = null;
+
 	public String displayName() {
 		return publicName.isEmpty() ? internalName : publicName;
 	}

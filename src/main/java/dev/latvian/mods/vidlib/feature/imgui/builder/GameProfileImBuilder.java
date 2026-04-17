@@ -68,13 +68,13 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 	public ImUpdate imgui(ImGraphics graphics) {
 		var update = ImUpdate.NONE;
 
-		appendMainIcon(graphics.mc);
+		appendMainIcon(graphics);
 		ImGui.sameLine();
 
 		boolean select = ImGui.button(profile == null ? "Select..." : profile.getName());
 
 		if (profile != null && ImGui.isItemHovered()) {
-			ImGui.setTooltip(profile.getId().toString());
+			graphics.tooltip(profile.getId().toString());
 		}
 
 		if (select) {
@@ -173,15 +173,14 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 		return update;
 	}
 
-	private void appendMainIcon(Minecraft mc) {
-		var tex = LowQualityPlayerBodies.getTexture(mc, profile == null ? null : profile.getId());
+	private void appendMainIcon(ImGraphics graphics) {
+		var tex = LowQualityPlayerBodies.getTexture(graphics.mc, profile == null ? null : profile.getId());
 		ImGui.image(tex.getTexture().vl$getHandle(), ImGui.getFrameHeight(), ImGui.getFrameHeight());
 
-		if (ImGui.isItemHovered()) {
-			ImGui.beginTooltip();
-			var texHD = PlayerBodies.getTexture(mc, profile == null ? null : profile.getId());
+		if (ImGui.isItemHovered() && graphics.beginTooltip()) {
+			var texHD = PlayerBodies.getTexture(graphics.mc, profile == null ? null : profile.getId());
 			ImGui.image(texHD.getTexture().vl$getHandle(), 128F, 128F);
-			ImGui.endTooltip();
+			graphics.endTooltip();
 		}
 	}
 

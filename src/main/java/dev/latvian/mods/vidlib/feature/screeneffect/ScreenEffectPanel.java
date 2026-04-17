@@ -48,7 +48,7 @@ public class ScreenEffectPanel extends Panel {
 			ImGui.endDisabled();
 		}
 
-		ImGuiUtils.hoveredTooltip(tooltip);
+		graphics.hoveredTooltip(tooltip);
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class ScreenEffectPanel extends Panel {
 		ImGui.text("Add");
 		ImGui.sameLine();
 		ImGui.sliderInt("###duration", duration, 0, 1200, KMath.NumberFormat.VERY_SHORT.format(duration[0] / 20F) + " s");
-		ImGuiUtils.hoveredTooltip("Duration");
+		graphics.hoveredTooltip("Duration");
 
 		add(graphics, ImIcons.BLUR, "blur", "Blur", null);
 		ImGui.sameLine();
@@ -107,14 +107,14 @@ public class ScreenEffectPanel extends Panel {
 				i--;
 			}
 
-			ImGuiUtils.hoveredTooltip("Remove");
+			graphics.hoveredTooltip("Remove");
 			ImGui.sameLine();
 
 			if (graphics.button((effect.paused ? ImIcons.PLAY : ImIcons.PAUSE) + "###pause", ImColorVariant.GRAY)) {
 				effect.paused = !effect.paused;
 			}
 
-			ImGuiUtils.hoveredTooltip(effect.paused ? "Resume" : "Pause");
+			graphics.hoveredTooltip(effect.paused ? "Resume" : "Pause");
 			ImGui.sameLine();
 
 			if (effect.paused) {

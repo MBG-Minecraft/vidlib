@@ -64,11 +64,9 @@ import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
-import dev.mrbeastgaming.mods.hub.api.HubClientSessionData;
 import dev.mrbeastgaming.mods.hub.api.HubFileType;
+import dev.mrbeastgaming.mods.hub.api.HubUserData;
 import dev.mrbeastgaming.mods.hub.file.ClientHubFileUploads;
-import dev.mrbeastgaming.mods.hub.file.HubFileUploadBuilder;
-import dev.mrbeastgaming.mods.hub.file.UniqueIdProvider;
 import dev.mrbeastgaming.mods.hub.link.LinkHubUserScreen;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -115,6 +113,7 @@ import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.GameShuttingDownEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -736,30 +735,31 @@ public class VidLibClientEventHandler {
 	@SubscribeEvent
 	public static void mainMenuOpened(MainMenuOpenedEvent event) {
 		var gameDir = PlatformHelper.CURRENT.getGameDirectory();
-		var defaultIdProvider = UniqueIdProvider.ofUUIDAndFileName(event.getMinecraft().getUser().getProfileId());
 
-		ClientHubFileUploads.asyncDirectory(gameDir.resolve("voicechat_recordings"), new HubFileUploadBuilder()
-			.type(HubFileType.VOICE_CHAT_RECORDING)
-			.filterEndsWith(".mp3")
-			.uniqueId(defaultIdProvider)
-		);
+		ClientHubFileUploads.asyncDirectory(gameDir.resolve("voicechat_recordings"), builder -> {
+			builder.setType(HubFileType.VOICE_CHAT_RECORDING);
+			builder.setFilterEndsWith(".mp3");
+		});
 
 		if (event.isFirstTime()) {
-			ClientHubFileUploads.asyncDirectory(gameDir.resolve("crash-reports"), new HubFileUploadBuilder()
-				.type(HubFileType.CRASH_REPORT)
-				.filterEndsWith("-client.txt")
-				.uniqueId(defaultIdProvider)
-			);
+			ClientHubFileUploads.asyncDirectory(gameDir.resolve("crash-reports"), builder -> {
+				builder.setType(HubFileType.CRASH_REPORT);
+				builder.setFilterEndsWith("-client.txt");
+			});
 
-			ClientHubFileUploads.asyncDirectory(gameDir, new HubFileUploadBuilder()
-				.type(HubFileType.JVM_CRASH_REPORT)
-				.filter(fileInfo -> fileInfo.name().startsWith("hr_err_pid_") && fileInfo.name().endsWith(".log"))
-				.uniqueId(defaultIdProvider)
-			);
+			ClientHubFileUploads.asyncDirectory(gameDir, builder -> {
+				builder.setType(HubFileType.JVM_CRASH_REPORT);
+				builder.setFilter(fileInfo -> fileInfo.name().startsWith("hr_err_pid_") && fileInfo.name().endsWith(".log"));
+			});
 		}
 
-		if (HubClientSessionData.CURRENT == null) {
+		if (HubUserData.SELF == null) {
 			LinkHubUserScreen.open(event.getMinecraft());
 		}
+	}
+
+	@SubscribeEvent
+	public static void gameShuttingDown(GameShuttingDownEvent event) {
+		VidLib.LOGGER.info("Shutting down");
 	}
 }

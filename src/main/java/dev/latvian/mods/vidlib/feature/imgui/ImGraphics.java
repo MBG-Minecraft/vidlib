@@ -21,6 +21,7 @@ import imgui.ImGuiStyle;
 import imgui.extension.imnodes.ImNodes;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiDir;
+import imgui.flag.ImGuiHoveredFlags;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
@@ -39,6 +40,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImNodesStyleVarConsumer, ImNodesStyleColorConsumer {
 	private static class VarStackStack {
@@ -534,7 +536,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 			popStack();
 		}
 
-		ImGuiUtils.hoveredTooltip(tooltip);
+		hoveredTooltip(tooltip);
 		return clicked;
 	}
 
@@ -579,5 +581,39 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 
 	public boolean imageButton(@Nullable ResourceLocation texture, float w, float h, UV uv, int padding, @Nullable ImColorVariant variant) {
 		return imageButton(texture == null ? null : mc.getTextureManager().getTexture(texture).getTexture(), w, h, uv, padding, variant);
+	}
+
+	public boolean beginTooltip() {
+		pushStack();
+		setWindowPadding(6F, 6F);
+		setWindowRounding(4F);
+		ImGui.beginTooltip();
+		ImGui.pushTextWrapPos(ImGui.getFontSize() * 45F);
+		return true;
+	}
+
+	public void endTooltip() {
+		ImGui.popTextWrapPos();
+		ImGui.endTooltip();
+		popStack();
+	}
+
+	public void tooltip(String tooltip) {
+		if (beginTooltip()) {
+			ImGui.textUnformatted(tooltip);
+			endTooltip();
+		}
+	}
+
+	public void hoveredTooltip(String tooltip) {
+		if (!tooltip.isEmpty() && ImGui.isItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) {
+			tooltip(tooltip);
+		}
+	}
+
+	public void hoveredTooltip(Supplier<String> tooltip) {
+		if (ImGui.isItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) {
+			tooltip(tooltip.get());
+		}
 	}
 }

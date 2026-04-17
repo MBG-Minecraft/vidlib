@@ -57,7 +57,7 @@ public class MapTextureOverridePanel extends Panel {
 
 		if (ImGui.isItemHovered()) {
 			try {
-				ImGuiUtils.wrappedTooltip(MapTextureOverrides.CODEC.encodeStart(graphics.nbtOps, map).getOrThrow().toString());
+				graphics.tooltip(MapTextureOverrides.CODEC.encodeStart(graphics.nbtOps, map).getOrThrow().toString());
 			} catch (Exception ignore) {
 			}
 		}

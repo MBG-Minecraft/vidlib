@@ -571,7 +571,7 @@ public class Prop {
 			graphics.mc.runClientCommand((clientSideOnly ? "client-prop remove id " : "prop remove id ") + getIdString());
 		}
 
-		ImGuiUtils.hoveredTooltip("Remove");
+		graphics.hoveredTooltip("Remove");
 
 		if (graphics.isReplay && !clientSideOnly) {
 			ImGui.endDisabled();
@@ -591,7 +591,7 @@ public class Prop {
 			}
 		}
 
-		ImGuiUtils.hoveredTooltip(isHidden ? "Hidden" : "Visible");
+		graphics.hoveredTooltip(isHidden ? "Hidden" : "Visible");
 
 		ImGui.sameLine();
 
@@ -605,7 +605,7 @@ public class Prop {
 			}
 		}
 
-		ImGuiUtils.hoveredTooltip(isTypeHidden ? "Type Hidden" : "Type Visible");
+		graphics.hoveredTooltip(isTypeHidden ? "Type Hidden" : "Type Visible");
 
 		ImGui.sameLine();
 
@@ -617,7 +617,7 @@ public class Prop {
 			graphics.mc.runClientCommand((clientSideOnly ? "client-prop clone " : "prop clone ") + getIdString());
 		}
 
-		ImGuiUtils.hoveredTooltip("Clone");
+		graphics.hoveredTooltip("Clone");
 
 		if (ReplayProp.LIST != null && !clientSideOnly) {
 			ImGui.endDisabled();
@@ -632,7 +632,7 @@ public class Prop {
 					DepthOfFieldPanel.INSTANCE.builder.set(DepthOfField.OVERRIDE);
 				}
 
-				ImGuiUtils.hoveredTooltip("Focus DoF");
+				graphics.hoveredTooltip("Focus DoF");
 			}
 		}
 
@@ -642,7 +642,7 @@ public class Prop {
 			ImGui.setClipboardText(getIdString());
 		}
 
-		ImGuiUtils.hoveredTooltip("Copy ID");
+		graphics.hoveredTooltip("Copy ID");
 
 		ImGui.sameLine();
 
@@ -650,7 +650,7 @@ public class Prop {
 			ImGui.setClipboardText(encode(graphics.nbtOps).toString());
 		}
 
-		ImGuiUtils.hoveredTooltip("Copy NBT");
+		graphics.hoveredTooltip("Copy NBT");
 
 		ImGui.sameLine();
 
@@ -658,12 +658,12 @@ public class Prop {
 			graphics.mc.runClientCommand("tp @s " + pos.x + " " + pos.y + " " + pos.z);
 		}
 
-		ImGuiUtils.hoveredTooltip("Teleport To");
+		graphics.hoveredTooltip("Teleport To");
 
 		if (clientSideOnly) {
 			ImGui.sameLine();
 			graphics.button(ImIcons.WARNING + "###client-only", ImColorVariant.ORANGE);
-			ImGuiUtils.hoveredTooltip("Client-Side Only!");
+			graphics.hoveredTooltip("Client-Side Only!");
 		}
 
 		if (imguiBuilders == null) {
@@ -775,7 +775,7 @@ public class Prop {
 				}
 
 				if (!isDefault && ImGui.isItemHovered()) {
-					ImGui.setTooltip("Reset to " + defaultValue);
+					graphics.tooltip("Reset to " + defaultValue);
 				}
 
 				if (isDefault) {

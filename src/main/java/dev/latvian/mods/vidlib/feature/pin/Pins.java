@@ -203,11 +203,10 @@ public interface Pins {
 				ImGui.openPopup("###pin-shape-popup");
 			}
 
-			if (ImGui.isItemHovered()) {
-				ImGui.beginTooltip();
+			if (ImGui.isItemHovered() && graphics.beginTooltip()) {
 				ImGui.text("Shape: " + pin.shape.displayName);
 				ImGui.image(graphics.mc.getTextureManager().getTexture(pin.shape.iconTexture).getTexture().vl$getHandle(), 64F, 64F);
-				ImGui.endTooltip();
+				graphics.endTooltip();
 			}
 
 			if (ImGui.beginPopup("###pin-shape-popup")) {
@@ -226,7 +225,7 @@ public interface Pins {
 					}
 
 					if (ImGui.isItemHovered()) {
-						ImGui.setTooltip(shape.displayName);
+						graphics.tooltip(shape.displayName);
 						pin.shapeOverride = shape;
 					}
 

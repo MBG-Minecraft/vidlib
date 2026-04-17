@@ -24,4 +24,6 @@ public record HubParticipantData(
 		HubDataMap.CODEC.optionalFieldOf("form_data", HubDataMap.EMPTY).forGetter(HubParticipantData::formData),
 		HubDataMap.CODEC.optionalFieldOf("custom_data", HubDataMap.EMPTY).forGetter(HubParticipantData::customData)
 	).apply(instance, HubParticipantData::new));
+
+	public static HubParticipantData SELF = null;
 }

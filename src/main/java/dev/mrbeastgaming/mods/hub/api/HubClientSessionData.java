@@ -10,42 +10,54 @@ import dev.mrbeastgaming.mods.hub.HubUserConfig;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubGateway;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 
 public record HubClientSessionData(
 	Optional<URI> gateway,
 	HubUserData user,
-	HubProjectData project,
+	Optional<HubProjectData> project,
 	Optional<HubParticipantData> participant,
 	HubUserCapabilities capabilities,
-	Optional<HubMinecraftProfileData> minecraftProfile
+	Optional<HubMinecraftProfileData> minecraftProfile,
+	List<HubGameServerData> servers
 ) {
-	public static HubClientSessionData CURRENT = null;
-
 	public static final Codec<HubClientSessionData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		KLibCodecs.URI.optionalFieldOf("gateway").forGetter(HubClientSessionData::gateway),
 		HubUserData.CODEC.fieldOf("user").forGetter(HubClientSessionData::user),
-		HubProjectData.CODEC.fieldOf("project").forGetter(HubClientSessionData::project),
+		HubProjectData.CODEC.optionalFieldOf("project").forGetter(HubClientSessionData::project),
 		HubParticipantData.CODEC.optionalFieldOf("participant").forGetter(HubClientSessionData::participant),
 		HubUserCapabilities.CODEC.fieldOf("capabilities").forGetter(HubClientSessionData::capabilities),
-		HubMinecraftProfileData.CODEC.optionalFieldOf("minecraft_profile").forGetter(HubClientSessionData::minecraftProfile)
+		HubMinecraftProfileData.CODEC.optionalFieldOf("minecraft_profile").forGetter(HubClientSessionData::minecraftProfile),
+		HubGameServerData.LIST_CODEC.optionalFieldOf("servers", List.of()).forGetter(HubClientSessionData::servers)
 	).apply(instance, HubClientSessionData::new));
 
 	public static void load() {
 		var projectConfig = HubProjectConfig.INSTANCE.get();
 
-		if (projectConfig == null || HubUserConfig.load().token().isEmpty()) {
+		if (HubUserConfig.load().token().isEmpty()) {
 			return;
 		}
 
 		VidLib.LOGGER.info("Loading Hub client session data...");
-		CURRENT = null;
+		HubUserData userData = null;
+		HubProjectData projectData = null;
+		HubParticipantData participantData = null;
+		HubUserCapabilities userCapabilities = HubUserCapabilities.DEFAULT;
+		HubMinecraftProfileData minecraftProfileData = null;
+		List<HubGameServerData> servers = List.of();
 
 		try {
-			var json = HubAPI.sendJsonRequest(HubAPI.apiProjectClientSession(projectConfig.token().encoded()));
+			var json = HubAPI.sendJsonRequest(HubAPI.apiDesktopClientSession(projectConfig == null ? "" : projectConfig.token().encoded()));
 			var data = CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
+			userData = data.user;
+			projectData = data.project.orElse(null);
+			participantData = data.participant.orElse(null);
+			userCapabilities = data.capabilities;
+			minecraftProfileData = data.minecraftProfile.orElse(null);
+			servers = List.copyOf(data.servers);
+
 			VidLib.LOGGER.info("Loaded '" + data.project.toString() + "' as '" + data.user.toString() + "'");
-			CURRENT = data;
 
 			if (HubGateway.client == null && data.gateway.isPresent()) {
 				HubGateway.client = new HubGateway(data.gateway.get());
@@ -54,17 +66,12 @@ public record HubClientSessionData(
 		} catch (Exception ex) {
 			VidLib.LOGGER.error("Failed to load Hub client session data: " + ex);
 		}
-	}
 
-	public static void loadAsync() {
-		Thread.startVirtualThread(HubClientSessionData::load);
-	}
-
-	public HubClientSessionData withUser(HubUserData user) {
-		return new HubClientSessionData(gateway, user, project, participant, capabilities, minecraftProfile);
-	}
-
-	public HubClientSessionData withCapabilities(HubUserCapabilities capabilities) {
-		return new HubClientSessionData(gateway, user, project, participant, capabilities, minecraftProfile);
+		HubUserData.SELF = userData;
+		HubProjectData.PACK = projectData;
+		HubParticipantData.SELF = participantData;
+		HubUserCapabilities.CURRENT = userCapabilities;
+		HubMinecraftProfileData.SELF = minecraftProfileData;
+		HubGameServerData.CURRENT = servers;
 	}
 }

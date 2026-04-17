@@ -16,7 +16,7 @@ import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
-import dev.mrbeastgaming.mods.hub.api.gateway.event.HubGatewayEvent;
+import dev.mrbeastgaming.mods.hub.api.gateway.HubGatewayEvent;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;

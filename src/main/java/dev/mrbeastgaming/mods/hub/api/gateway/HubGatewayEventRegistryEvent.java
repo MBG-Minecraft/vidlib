@@ -1,6 +1,5 @@
 package dev.mrbeastgaming.mods.hub.api.gateway;
 
-import dev.mrbeastgaming.mods.hub.api.gateway.event.HubGatewayEvent;
 import net.neoforged.bus.api.Event;
 
 import java.util.Map;

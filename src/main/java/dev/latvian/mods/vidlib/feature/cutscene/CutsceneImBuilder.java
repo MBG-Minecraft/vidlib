@@ -154,7 +154,7 @@ public class CutsceneImBuilder implements ImBuilder<Cutscene> {
 				ImGui.endDisabled();
 			}
 
-			ImGuiUtils.hoveredTooltip("Copy to Clipboard");
+			graphics.hoveredTooltip("Copy to Clipboard");
 
 			if (ImGui.beginChild("###json", 400F, 400F, false)) {
 				jsonEditor.render("JSON");

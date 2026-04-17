@@ -10,6 +10,10 @@ import net.minecraft.network.chat.Component;
 
 public class LinkHubUserScreen extends Screen {
 	public static void open(Minecraft mc) {
+		if (mc.screen instanceof LinkHubUserScreen || mc.screen instanceof ConfirmScreen) {
+			return;
+		}
+
 		mc.pushGuiLayer(new ConfirmScreen(value -> {
 			mc.popGuiLayer();
 

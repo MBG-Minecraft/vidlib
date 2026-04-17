@@ -8,7 +8,6 @@ import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
 import imgui.ImGui;
@@ -148,7 +147,7 @@ public abstract class ConfigEntry<T> {
 		if (isDefault) {
 			ImGui.endDisabled();
 		} else if (ImGui.isItemHovered()) {
-			ImGuiUtils.wrappedTooltip(getTooltip(graphics.jsonOps, key.defaultValue()));
+			graphics.tooltip(getTooltip(graphics.jsonOps, key.defaultValue()));
 		}
 
 		if (!sameLine) {

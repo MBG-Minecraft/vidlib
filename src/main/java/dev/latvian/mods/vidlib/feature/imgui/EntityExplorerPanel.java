@@ -279,9 +279,7 @@ public class EntityExplorerPanel extends Panel {
 			ImGui.sameLine();
 			graphics.imageButton(ItemIcons.getTexture(graphics.mc, VisualItemKey.of(itemStack)).getTexture(), 16F, 16F, UV.FULL, 3, null);
 
-			if (ImGui.isItemHovered()) {
-				ImGui.beginTooltip();
-
+			if (ImGui.isItemHovered() && graphics.beginTooltip()) {
 				var sink = new FormattedCharSinkPartBuilder();
 				var lines = itemStack.getTooltipLines(Item.TooltipContext.of(graphics.mc.level), graphics.player, ClientTooltipFlag.of(TooltipFlag.ADVANCED.asCreative()));
 
@@ -292,7 +290,7 @@ public class EntityExplorerPanel extends Panel {
 					}
 				}
 
-				ImGui.endTooltip();
+				graphics.endTooltip();
 			}
 
 			ImGui.popID();

@@ -105,8 +105,8 @@ public interface HubAPI {
 		return request("/api/projects/" + project + "/full-data", Tristate.DEFAULT).build();
 	}
 
-	static HttpRequest apiProjectClientSession(String token) {
-		return request("/api/projects/client-session/" + token, Tristate.TRUE).build();
+	static HttpRequest apiDesktopClientSession(String projectToken) {
+		return request("/api/desktop/client-session/" + projectToken, Tristate.TRUE).timeout(Duration.ofSeconds(30L)).build();
 	}
 
 	static List<ProjectUploadResponseItem> apiProjectUpload(String token, List<ProjectUploadRequestItem> files) throws Exception {

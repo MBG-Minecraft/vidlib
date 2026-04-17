@@ -14,39 +14,38 @@ public class HubFileUploadBuilder {
 	Hex32 assignedTo = Hex32.NONE;
 	UUID assignedToMinecraft = null;
 	ProgressQueue progressQueue = null;
+	FileNameProvider fileNameProvider = null;
 
-	public HubFileUploadBuilder filter(FileInfoFilter filter) {
+	public void setFilter(FileInfoFilter filter) {
 		this.filter = filter;
-		return this;
 	}
 
-	public HubFileUploadBuilder filterEndsWith(String suffix) {
-		return filter(fileInfo -> fileInfo.name().endsWith(suffix));
+	public void setFilterEndsWith(String suffix) {
+		setFilter(fileInfo -> fileInfo.name().endsWith(suffix));
 	}
 
-	public HubFileUploadBuilder type(FileTypeProvider fileType) {
-		this.type = fileType;
-		return this;
+	public void setType(FileTypeProvider provider) {
+		this.type = provider;
 	}
 
-	public HubFileUploadBuilder uniqueId(UniqueIdProvider uniqueIdProvider) {
-		this.uniqueIdProvider = uniqueIdProvider;
-		return this;
+	public void setUniqueId(UniqueIdProvider provider) {
+		this.uniqueIdProvider = provider;
 	}
 
-	public HubFileUploadBuilder assignedTo(Hex32 assignedTo) {
+	public void setAssignedTo(Hex32 assignedTo) {
 		this.assignedTo = assignedTo;
-		return this;
 	}
 
-	public HubFileUploadBuilder assignedToMinecraft(UUID id) {
+	public void setAssignedToMinecraft(UUID id) {
 		this.assignedToMinecraft = id;
-		return this;
 	}
 
-	public HubFileUploadBuilder progressQueue(ProgressQueue progressQueue) {
-		this.progressQueue = progressQueue;
-		return this;
+	public void setProgressQueue(ProgressQueue queue) {
+		this.progressQueue = queue;
+	}
+
+	public void setFileNameProvider(FileNameProvider provider) {
+		this.fileNameProvider = provider;
 	}
 
 	boolean testFilter(FileInfo fileInfo) {

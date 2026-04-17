@@ -32,8 +32,9 @@ import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.skin.PlayerSkinOverrides;
 import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
-import dev.mrbeastgaming.mods.hub.api.HubClientSessionData;
+import dev.mrbeastgaming.mods.hub.api.HubProjectData;
 import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
+import dev.mrbeastgaming.mods.hub.api.HubUserData;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubGateway;
 import dev.mrbeastgaming.mods.hub.link.LinkHubUserScreen;
 import imgui.ImGui;
@@ -52,6 +53,7 @@ import net.minecraft.client.gui.components.toasts.AdvancementToast;
 import net.minecraft.client.gui.components.toasts.RecipeToast;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.multiplayer.ServerData;
@@ -304,44 +306,63 @@ public class ClientGameEngine {
 	}
 
 	public void topInfoBarPre(ImGraphics graphics, float h) {
-		var hubSession = HubClientSessionData.CURRENT;
+		if (!graphics.inGame) {
+			var hubUser = HubUserData.SELF;
+			var hubTooltip = new ArrayList<String>();
 
-		if (hubSession == null) {
-			graphics.pushStack();
-			graphics.setErrorText();
+			if (hubUser == null) {
+				graphics.pushStack();
+				graphics.setErrorText();
 
-			if (ImGui.menuItem(ImIcons.WARNING + "###link-hub-profile")) {
-				LinkHubUserScreen.open(graphics.mc);
-			}
-
-			if (ImGui.isItemHovered()) {
-				ImGui.setTooltip("MrBeast Gaming Hub profile not linked!\n\nClick here to link your profile!");
-			}
-
-			graphics.popStack();
-		} else {
-			graphics.pushStack();
-			graphics.setText(ImColorVariant.GREEN);
-			ImGui.text(ImIcons.CHECK.toString());
-			graphics.popStack();
-
-			if (ImGui.isItemHovered()) {
-				var list = new ArrayList<String>();
-				list.add("MrBeast Gaming Hub profile linked:");
-				list.add("");
-				list.add("Project: " + hubSession.project().toString());
-				list.add("User: " + hubSession.user().toString());
-				list.add("Roles: " + hubSession.user().flags().getRoles());
-
-				if (HubGateway.client != null && HubGateway.client.webSocket != null) {
-					list.add("Gateway: Active");
+				if (ImGui.menuItem(ImIcons.WARNING + "###link-hub-profile")) {
+					LinkHubUserScreen.open(graphics.mc);
 				}
 
-				ImGui.setTooltip(String.join("\n", list));
-			}
-		}
+				if (ImGui.isItemHovered()) {
+					hubTooltip.add("MrBeast Gaming Hub profile not linked!");
+					hubTooltip.add("");
+					hubTooltip.add("Click here to link your profile!");
+				}
 
-		ImGui.separator();
+				graphics.popStack();
+			} else {
+				var hubProject = HubProjectData.PACK;
+
+				graphics.pushStack();
+				graphics.setText(hubProject == null ? ImColorVariant.YELLOW : ImColorVariant.GREEN);
+
+				if (ImGui.menuItem(ImIcons.CHECK + "###link-hub-profile")) {
+					if (Screen.hasShiftDown()) {
+						LinkHubUserScreen.open(graphics.mc);
+					}
+				}
+
+				graphics.popStack();
+
+				if (ImGui.isItemHovered()) {
+					hubTooltip.add("MrBeast Gaming Hub: Linked " + ImIcons.CHECK);
+					hubTooltip.add("");
+					hubTooltip.add("User: " + hubUser.toString());
+
+					var roles = hubUser.flags().getRoles();
+					hubTooltip.add(roles.isEmpty() ? "Roles: Contestant" : ("Roles: " + String.join(", ", roles)));
+
+					hubTooltip.add("");
+					hubTooltip.add("Project: " + (hubProject == null ? "Not Configured" : hubProject.toString()));
+
+					if (hubProject != null) {
+						var gateway = HubGateway.client;
+						hubTooltip.add("Gateway: " + (gateway != null && gateway.isConnected() ? "Active" : "Inactive"));
+					}
+				}
+			}
+
+			if (!hubTooltip.isEmpty()) {
+				graphics.tooltip(String.join("\n", hubTooltip));
+			}
+
+			ImGui.separator();
+		}
 
 		if (graphics.player != null) {
 			ImGui.text(ClientGameEngine.INSTANCE.getPlayerWorldName(graphics.player, graphics.player.getName()).getString());
@@ -390,11 +411,7 @@ public class ClientGameEngine {
 		ImGui.endGroup();
 
 		if (now != null && ImGui.isItemHovered()) {
-			graphics.pushStack();
-			graphics.setWindowPadding(6F, 6F);
-			graphics.setWindowRounding(4F);
-			ImGui.setTooltip("EST: " + StringUtils.LONG_EST_TIMESTAMP_FORMAT.format(now) + "\nLOC: " + StringUtils.LONG_LOCAL_TIMESTAMP_FORMAT.format(now));
-			graphics.popStack();
+			graphics.tooltip("EST: " + StringUtils.LONG_EST_TIMESTAMP_FORMAT.format(now) + "\nLOC: " + StringUtils.LONG_LOCAL_TIMESTAMP_FORMAT.format(now));
 		}
 
 		ImGui.separator();
@@ -855,15 +872,15 @@ public class ClientGameEngine {
 	}
 
 	public boolean enableSinglePlayerMainMenuButton() {
-		return HubUserCapabilities.get().singleplayer();
+		return HubUserCapabilities.CURRENT.singleplayer();
 	}
 
 	public boolean enableMultiPlayerMainMenuButton() {
-		return HubUserCapabilities.get().multiplayer();
+		return HubUserCapabilities.CURRENT.multiplayer();
 	}
 
 	public boolean enableReplayMainMenuButton() {
-		return HubUserCapabilities.get().viewLocalReplays();
+		return HubUserCapabilities.CURRENT.viewLocalReplays();
 	}
 
 	public boolean isVoiceChatPTTDown() {

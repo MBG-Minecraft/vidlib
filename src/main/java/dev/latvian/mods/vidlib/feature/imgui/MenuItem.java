@@ -255,7 +255,7 @@ public record MenuItem(
 					ImGui.endMenu();
 				}
 
-				ImGuiUtils.hoveredTooltip(tooltip.text());
+				graphics.hoveredTooltip(tooltip.text());
 
 				if (remainOpen) {
 					graphics.popStack();
@@ -281,7 +281,7 @@ public record MenuItem(
 				onClick.onClick(graphics);
 			}
 
-			ImGuiUtils.hoveredTooltip(tooltip.text());
+			graphics.hoveredTooltip(tooltip.text());
 
 			if (remainOpen) {
 				graphics.popStack();
@@ -291,7 +291,7 @@ public record MenuItem(
 			ImGui.text(rIcon.formatLabel(graphics, label.text()));
 			label.pop(graphics);
 
-			ImGuiUtils.hoveredTooltip(tooltip.text());
+			graphics.hoveredTooltip(tooltip.text());
 		}
 	}
 

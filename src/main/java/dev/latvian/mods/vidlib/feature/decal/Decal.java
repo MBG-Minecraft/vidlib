@@ -182,7 +182,7 @@ public class Decal {
 			ImGuiUtils.FLOAT.set(edges);
 			ImGui.sliderFloat("###edges", ImGuiUtils.FLOAT.getData(), 1F, 16F, "%.01f");
 			edges = ImGuiUtils.FLOAT.get();
-			ImGuiUtils.hoveredTooltip("Edges");
+			graphics.hoveredTooltip("Edges");
 		}
 
 		if (parent != null && !decals.contains(parent)) {
@@ -216,7 +216,7 @@ public class Decal {
 		start = starta[0];
 		end = enda[0];
 
-		ImGuiUtils.hoveredTooltip("Size Range");
+		graphics.hoveredTooltip("Size Range");
 
 		float diff = end - start;
 		if (ImGui.dragFloat("###size", starta, 0.0625F, 0F, 100F, "%f")) {
@@ -224,7 +224,7 @@ public class Decal {
 			end = start + diff;
 		}
 
-		ImGuiUtils.hoveredTooltip("Size");
+		graphics.hoveredTooltip("Size");
 
 		graphics.smallText("Height");
 
@@ -232,7 +232,7 @@ public class Decal {
 		ImGui.sliderFloat("###height-scale", ImGuiUtils.FLOAT.getData(), 0.125F, 8F, "%f", ImGuiSliderFlags.Logarithmic);
 		heightScale = ImGuiUtils.FLOAT.get();
 
-		ImGuiUtils.hoveredTooltip("Height Scale");
+		graphics.hoveredTooltip("Height Scale");
 
 		starta[0] = getHeight();
 
@@ -240,7 +240,7 @@ public class Decal {
 			setHeight(starta[0]);
 		}
 
-		ImGuiUtils.hoveredTooltip("Height");
+		graphics.hoveredTooltip("Height");
 
 		// start = starta[0];
 		// end = start + hdiff;

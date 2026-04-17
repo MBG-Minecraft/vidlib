@@ -101,12 +101,12 @@ public abstract class DataMapConfigPanel extends Panel {
 
 				if (!isDefault && ImGui.isItemHovered()) {
 					if (entry.builder != null) {
-						ImGuiUtils.wrappedTooltip("Reset to " + entry.builder.toString(graphics.nbtOps, Cast.to(defaultValue)));
+						graphics.tooltip("Reset to " + entry.builder.toString(graphics.nbtOps, Cast.to(defaultValue)));
 					} else {
 						try {
-							ImGuiUtils.wrappedTooltip("Reset to " + entry.key.type().codec().encodeStart(graphics.nbtOps, Cast.to(defaultValue)).getOrThrow());
+							graphics.tooltip("Reset to " + entry.key.type().codec().encodeStart(graphics.nbtOps, Cast.to(defaultValue)).getOrThrow());
 						} catch (Exception ex) {
-							ImGui.setTooltip("Reset to the default value");
+							graphics.tooltip("Reset to the default value");
 						}
 					}
 				}
@@ -154,9 +154,7 @@ public abstract class DataMapConfigPanel extends Panel {
 									ImGui.setClipboardText(string);
 								}
 
-								if (ImGui.isItemHovered()) {
-									ImGuiUtils.wrappedTooltip(string);
-								}
+								graphics.hoveredTooltip(string);
 							}
 						}
 					} catch (Throwable ex) {

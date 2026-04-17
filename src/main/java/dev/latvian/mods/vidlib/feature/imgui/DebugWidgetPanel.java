@@ -6,7 +6,6 @@ import dev.latvian.mods.klib.interpolation.Interpolation;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
@@ -172,14 +171,13 @@ public class DebugWidgetPanel extends Panel {
 				ImGui.text(icon.toString());
 				ImGui.sameLine();
 
-				if (ImGui.isItemHovered()) {
-					ImGui.beginTooltip();
+				if (ImGui.isItemHovered() && graphics.beginTooltip()) {
 					graphics.pushStack();
 					graphics.setFontScale(2F);
 					ImGui.text(icon.toString());
 					graphics.popStack();
 					ImGui.text(icon.name());
-					ImGui.endTooltip();
+					graphics.endTooltip();
 				}
 			}
 		}
@@ -344,11 +342,10 @@ public class DebugWidgetPanel extends Panel {
 		ImGui.separator();
 		ImGui.image(ImGuiHooks.imGuiGl3.gFontTexture, 128F, 128F, 0F, 0F, 1F, 1F);
 
-		if (ImGui.isItemHovered()) {
+		if (ImGui.isItemHovered() && graphics.beginTooltip()) {
 			float h = 1024F;
-			ImGui.beginTooltip();
 			ImGui.image(ImGuiHooks.imGuiGl3.gFontTexture, h * ImGuiHooks.imGuiGl3.glFontWidth / (float) ImGuiHooks.imGuiGl3.glFontHeight, h, 0F, 0F, 1F, 1F);
-			ImGui.endTooltip();
+			graphics.endTooltip();
 		}
 
 		ImGui.separator();
@@ -449,7 +446,7 @@ public class DebugWidgetPanel extends Panel {
 		ImGui.separator();
 
 		ImGui.text("Bezier");
-		Bezier.draw("###bezier", bezierP1Data, bezierP2Data, bezierPreset, 128F, 64);
+		Bezier.draw(graphics, "###bezier", bezierP1Data, bezierP2Data, bezierPreset, 128F, 64);
 		ImGui.separator();
 
 		ImGui.text("Line Plot");

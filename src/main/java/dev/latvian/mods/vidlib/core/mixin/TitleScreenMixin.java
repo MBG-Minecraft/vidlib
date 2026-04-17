@@ -21,12 +21,6 @@ public class TitleScreenMixin {
 
 	@Inject(method = "tick", at = @At("RETURN"))
 	private void vl$tick(CallbackInfo ci) {
-		for (var button : ((TitleScreen) (Object) this).renderables) {
-			if (button.getClass().getName().equals("com.moulberry.flashback.screen.FlashbackButton")) {
-				((AbstractWidget) button).active = ClientGameEngine.INSTANCE.enableReplayMainMenuButton();
-			}
-		}
-
 		AbstractWidget vl$replaysButton = null;
 
 		for (var button : ((TitleScreen) (Object) this).renderables) {

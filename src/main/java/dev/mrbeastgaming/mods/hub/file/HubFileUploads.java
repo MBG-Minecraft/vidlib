@@ -25,33 +25,55 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class HubFileUploads {
 	public record SyncedFile(FileInfo fileInfo, FileMD5 meta, Mutable<ProgressItem> progressItem, ProjectUploadRequestItem item) {
 	}
 
-	public static List<SyncedFile> syncDirectory(Path directory, HubFileUploadBuilder upload) {
+	public static List<SyncedFile> syncDirectory(Path directory, Consumer<HubFileUploadBuilder> upload) {
 		var projectConfig = HubProjectConfig.INSTANCE.get();
 
 		if (projectConfig == null || Files.notExists(directory)) {
 			return List.of();
 		}
 
+		var uploadBuilder = new HubFileUploadBuilder();
+		upload.accept(uploadBuilder);
+
 		try (var stream = Files.walk(directory)) {
-			var fileList = stream
+			var fileStream = stream
 				.filter(Files::isRegularFile)
 				.filter(Files::isReadable)
-				.map(path -> new FileInfo(directory, path))
-				.filter(upload::testFilter)
-				.toList();
+				.map(path -> new FileInfo(directory, path));
 
-			return fileList.isEmpty() ? List.of() : syncFiles(projectConfig, fileList, upload);
+			if (uploadBuilder.filter != null) {
+				fileStream = fileStream.filter(uploadBuilder::testFilter);
+			}
+
+			if (uploadBuilder.fileNameProvider != null) {
+				fileStream = fileStream.map(fileInfo -> {
+					try {
+						var name = uploadBuilder.fileNameProvider.getFileName(fileInfo, projectConfig);
+
+						if (name != null) {
+							return new FileInfo(fileInfo.path(), name, fileInfo.size());
+						}
+					} catch (Exception ignored) {
+					}
+
+					return fileInfo;
+				});
+			}
+
+			var fileList = fileStream.toList();
+			return fileList.isEmpty() ? List.of() : syncFiles(projectConfig, fileList, uploadBuilder);
 		} catch (Exception ex) {
 			return List.of();
 		}
 	}
 
-	public static List<SyncedFile> syncFile(Path file, HubFileUploadBuilder upload) {
+	public static List<SyncedFile> syncFile(Path file, Consumer<HubFileUploadBuilder> upload) {
 		var projectConfig = HubProjectConfig.INSTANCE.get();
 
 		if (projectConfig == null || Files.notExists(file)) {
@@ -59,7 +81,25 @@ public class HubFileUploads {
 		}
 
 		var fileInfo = new FileInfo(file);
-		return upload.testFilter(fileInfo) ? syncFiles(projectConfig, List.of(new FileInfo(file)), upload) : List.of();
+		var uploadBuilder = new HubFileUploadBuilder();
+		upload.accept(uploadBuilder);
+
+		if (uploadBuilder.testFilter(fileInfo)) {
+			if (uploadBuilder.fileNameProvider != null) {
+				try {
+					var name = uploadBuilder.fileNameProvider.getFileName(fileInfo, projectConfig);
+
+					if (name != null) {
+						fileInfo = new FileInfo(fileInfo.path(), name, fileInfo.size());
+					}
+				} catch (Exception ignored) {
+				}
+			}
+
+			return syncFiles(projectConfig, List.of(fileInfo), uploadBuilder);
+		}
+
+		return List.of();
 	}
 
 	private static List<SyncedFile> syncFiles(HubProjectConfig projectConfig, List<FileInfo> fileList, HubFileUploadBuilder upload) {

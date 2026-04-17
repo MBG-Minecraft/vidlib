@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.skin;
 
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.BooleanImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.CompoundImBuilder;
@@ -54,7 +53,7 @@ public class SkinTextureImBuilder extends CompoundImBuilder<SkinTexture> impleme
 				return ImUpdate.FULL;
 			}
 
-			ImGuiUtils.hoveredTooltip("Delete");
+			graphics.hoveredTooltip("Delete");
 			ImGui.sameLine();
 
 			if (ImGui.button(ImIcons.ARROW_UP + "")) {
@@ -62,7 +61,7 @@ public class SkinTextureImBuilder extends CompoundImBuilder<SkinTexture> impleme
 				return ImUpdate.FULL;
 			}
 
-			ImGuiUtils.hoveredTooltip("Move Up");
+			graphics.hoveredTooltip("Move Up");
 			ImGui.sameLine();
 
 			if (ImGui.button(ImIcons.ARROW_DOWN + "")) {
@@ -70,7 +69,7 @@ public class SkinTextureImBuilder extends CompoundImBuilder<SkinTexture> impleme
 				return ImUpdate.FULL;
 			}
 
-			ImGuiUtils.hoveredTooltip("Move Down");
+			graphics.hoveredTooltip("Move Down");
 			ImGui.sameLine();
 		}
 		return super.imgui(graphics);

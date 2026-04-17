@@ -38,7 +38,7 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d>, SelectedPosition.
 			selectedPosition[0] = SelectedPosition.CAMERA;
 		}
 
-		ImGuiUtils.hoveredTooltip("Use Camera Position");
+		graphics.hoveredTooltip("Use Camera Position");
 
 		ImGui.sameLine();
 
@@ -64,7 +64,7 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d>, SelectedPosition.
 			}
 		}
 
-		ImGuiUtils.hoveredTooltip("Use Entity Position");
+		graphics.hoveredTooltip("Use Entity Position");
 
 		ImGui.sameLine();
 
@@ -89,7 +89,7 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d>, SelectedPosition.
 			}
 		}
 
-		ImGuiUtils.hoveredTooltip("Use Cursor Position");
+		graphics.hoveredTooltip("Use Cursor Position");
 
 		ImGui.sameLine();
 

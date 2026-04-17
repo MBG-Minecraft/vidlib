@@ -21,6 +21,7 @@
 		"ConnectionMixin",
 		"ContainerMixin",
 		"CoralBlockMixin",
+		"CrashReportMixin",
 		"DataComponentsMixin",
 		"DataResultMixin",
 		"DimensionTypeMixin",

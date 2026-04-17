@@ -47,7 +47,7 @@ public class HubLocalServer {
 			HubUserConfig.save(HubUserConfig.load().withToken(userToken));
 			var name = "%s#%08X".formatted(userToken.header().name(), userToken.header().user());
 			VidLib.LOGGER.info("Logged in as " + name);
-			HubClientSessionData.loadAsync();
+			HubClientSessionData.load();
 
 			var mc = Minecraft.getInstance();
 

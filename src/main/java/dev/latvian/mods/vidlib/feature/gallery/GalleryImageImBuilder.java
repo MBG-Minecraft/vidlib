@@ -5,7 +5,6 @@ import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import imgui.ImGui;
@@ -43,11 +42,10 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage<?>> {
 				ImGui.openPopup("###gallery-popup");
 			}
 
-			if (ImGui.isItemHovered()) {
-				ImGui.beginTooltip();
+			if (ImGui.isItemHovered() && graphics.beginTooltip()) {
 				ImGui.text(img.displayName());
 				ImGui.image(tex.getTexture().vl$getHandle(), 64F, 64F);
-				ImGui.endTooltip();
+				graphics.endTooltip();
 			}
 		}
 
@@ -66,7 +64,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage<?>> {
 				}
 			}
 
-			ImGuiUtils.hoveredTooltip("Remove");
+			graphics.hoveredTooltip("Remove");
 			ImGui.popID();
 
 			ImGui.pushID("###uploaders");
@@ -78,7 +76,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage<?>> {
 					ImGui.pushID(uploaderIndex++);
 					boolean clicked = graphics.imageButton(uploader.getIcon(), 40F, 40F, UV.FULL, 2, uploader.getColor());
 					uploader.render(Cast.to(gallery), this, graphics, clicked);
-					ImGuiUtils.hoveredTooltip(uploader.getTooltip());
+					graphics.hoveredTooltip(uploader.getTooltip());
 					ImGui.popID();
 				}
 			}
@@ -112,7 +110,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage<?>> {
 					close = true;
 				}
 
-				ImGuiUtils.hoveredTooltip(image.displayName());
+				graphics.hoveredTooltip(image.displayName());
 
 				if (++count % 5 != 0) {
 					ImGui.sameLine();

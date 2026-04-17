@@ -23,10 +23,7 @@ public record HubUserCapabilities(
 		false
 	);
 
-	public static HubUserCapabilities get() {
-		var c = HubClientSessionData.CURRENT;
-		return c == null ? DEFAULT : c.capabilities();
-	}
+	public static HubUserCapabilities CURRENT = DEFAULT;
 
 	public static final Codec<HubUserCapabilities> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Codec.BOOL.optionalFieldOf("singleplayer", DEFAULT.singleplayer).forGetter(HubUserCapabilities::singleplayer),

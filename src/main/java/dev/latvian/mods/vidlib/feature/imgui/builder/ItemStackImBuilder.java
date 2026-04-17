@@ -160,9 +160,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBui
 			cachedItems = null;
 		}
 
-		if (ImGui.isItemHovered()) {
-			ImGui.beginTooltip();
-
+		if (ImGui.isItemHovered() && graphics.beginTooltip()) {
 			if (result != null) {
 				for (var line : result.tooltip()) {
 					graphics.text(line);
@@ -171,7 +169,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBui
 				ImGui.text("Select Item...");
 			}
 
-			ImGui.endTooltip();
+			graphics.endTooltip();
 		}
 
 		if (ImGui.beginPopup("###select-item", ImGuiWindowFlags.AlwaysAutoResize)) {
@@ -185,7 +183,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBui
 					ImGui.closeCurrentPopup();
 				}
 
-				ImGuiUtils.hoveredTooltip("Delete");
+				graphics.hoveredTooltip("Delete");
 				ImGui.sameLine();
 
 				if (ImGui.button(ImIcons.ARROW_UP + "###move-up")) {
@@ -194,7 +192,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBui
 					ImGui.closeCurrentPopup();
 				}
 
-				ImGuiUtils.hoveredTooltip("Move Up");
+				graphics.hoveredTooltip("Move Up");
 				ImGui.sameLine();
 
 				if (ImGui.button(ImIcons.ARROW_DOWN + "###move-down")) {
@@ -203,7 +201,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBui
 					ImGui.closeCurrentPopup();
 				}
 
-				ImGuiUtils.hoveredTooltip("Move Down");
+				graphics.hoveredTooltip("Move Down");
 				ImGui.sameLine();
 			}
 
@@ -304,13 +302,13 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBui
 						}
 
 						if (ImGui.isItemHovered()) {
-							ImGui.beginTooltip();
+							if (graphics.beginTooltip()) {
+								for (var line : item.cachedItem.tooltip()) {
+									graphics.text(line);
+								}
 
-							for (var line : item.cachedItem.tooltip()) {
-								graphics.text(line);
+								graphics.endTooltip();
 							}
-
-							ImGui.endTooltip();
 
 							if (ImGui.isMouseClicked(1)) {
 								ImGui.openPopup("###context-menu");

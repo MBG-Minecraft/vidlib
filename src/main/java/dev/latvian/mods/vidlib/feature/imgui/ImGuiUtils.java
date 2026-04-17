@@ -7,7 +7,6 @@ import imgui.ImGuiStyle;
 import imgui.ImVec2;
 import imgui.ImVec4;
 import imgui.flag.ImGuiCol;
-import imgui.flag.ImGuiHoveredFlags;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
@@ -94,20 +93,6 @@ public interface ImGuiUtils {
 
 		ImGui.setCursorScreenPos(textStartX, cursorY);
 		ImGui.textColored(ImGui.getColorU32(ImGuiCol.TextDisabled), text);
-	}
-
-	static void hoveredTooltip(String tooltip) {
-		if (!tooltip.isEmpty() && ImGui.isItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) {
-			wrappedTooltip(tooltip);
-		}
-	}
-
-	static void wrappedTooltip(String string) {
-		ImGui.beginTooltip();
-		ImGui.pushTextWrapPos(ImGui.getFontSize() * 45F);
-		ImGui.textUnformatted(string);
-		ImGui.popTextWrapPos();
-		ImGui.endTooltip();
 	}
 
 	final class DragState {

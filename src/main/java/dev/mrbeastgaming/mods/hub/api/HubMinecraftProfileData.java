@@ -23,4 +23,6 @@ public record HubMinecraftProfileData(
 		Codec.STRING.optionalFieldOf("skin_url", "").forGetter(HubMinecraftProfileData::skinUrl),
 		Codec.STRING.optionalFieldOf("cape_url", "").forGetter(HubMinecraftProfileData::capeUrl)
 	).apply(instance, HubMinecraftProfileData::new));
+
+	public static HubMinecraftProfileData SELF = null;
 }

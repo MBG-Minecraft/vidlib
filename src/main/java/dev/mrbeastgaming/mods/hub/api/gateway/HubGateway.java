@@ -7,7 +7,7 @@ import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
-import dev.mrbeastgaming.mods.hub.api.gateway.event.HubGatewayEvent;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
 import java.net.http.WebSocket;
@@ -19,22 +19,19 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 public class HubGateway implements WebSocket.Listener {
 	public static HubGateway client;
 
 	public final URI uri;
-	private final AtomicLong rpcId;
 	private List<CharSequence> messageParts;
 	private CompletableFuture<?> completedMessageFuture;
-	public WebSocket webSocket;
+	WebSocket webSocket;
 	private Map<String, Consumer<HubGatewayEvent>> eventHandlers;
 
 	public HubGateway(URI uri) {
 		this.uri = URI.create(HubAPI.URI_BASE.resolve(uri).toString().replaceFirst("^http", "ws"));
-		this.rpcId = new AtomicLong(0L);
 		this.webSocket = null;
 		this.messageParts = new ArrayList<>(1);
 		this.completedMessageFuture = new CompletableFuture<>();
@@ -42,7 +39,6 @@ public class HubGateway implements WebSocket.Listener {
 
 	public void start() throws Exception {
 		webSocket = HubAPI.HTTP_CLIENT.newWebSocketBuilder().buildAsync(uri, this).get(10L, TimeUnit.SECONDS);
-		sendRPC("init", null, false);
 	}
 
 	public void stop() {
@@ -54,29 +50,38 @@ public class HubGateway implements WebSocket.Listener {
 		}
 	}
 
-	private long sendRPC(String method, JsonElement params, boolean includeId) {
+	@Nullable
+	public CompletableFuture<?> send(String method) {
+		return send0(method, null);
+	}
+
+	@Nullable
+	public CompletableFuture<?> send(String method, JsonArray params) {
+		return send0(method, params);
+	}
+
+	@Nullable
+	public CompletableFuture<?> send(String method, JsonObject params) {
+		return send0(method, params);
+	}
+
+	@Nullable
+	private CompletableFuture<?> send0(String method, @Nullable JsonElement params) {
 		var ws = webSocket;
 
-		if (ws == null) {
-			return 0L;
+		if (ws != null) {
+			var json = new JsonObject();
+			json.addProperty("jsonrpc", "2.0");
+			json.addProperty("method", method);
+
+			if (params instanceof JsonObject || params instanceof JsonArray) {
+				json.add("params", params);
+			}
+
+			return ws.sendText(json.toString(), true);
+		} else {
+			return null;
 		}
-
-		long id = 0L;
-		var json = new JsonObject();
-		json.addProperty("jsonrpc", "2.0");
-		json.addProperty("method", method);
-
-		if (params instanceof JsonObject || params instanceof JsonArray) {
-			json.add("params", params);
-		}
-
-		if (includeId) {
-			id = rpcId.incrementAndGet();
-			json.addProperty("id", id);
-		}
-
-		ws.sendText(json.toString(), true);
-		return id;
 	}
 
 	private void process(String message) {
@@ -127,5 +132,15 @@ public class HubGateway implements WebSocket.Listener {
 	public CompletionStage<?> onPing(WebSocket webSocket, ByteBuffer message) {
 		webSocket.request(1L);
 		return webSocket.sendPong(message);
+	}
+
+	@Override
+	public CompletionStage<?> onClose(WebSocket ws, int statusCode, String reason) {
+		webSocket = null;
+		return WebSocket.Listener.super.onClose(ws, statusCode, reason);
+	}
+
+	public boolean isConnected() {
+		return webSocket != null;
 	}
 }
