@@ -277,7 +277,7 @@ public class CommonGameEngine {
 	}
 
 	public boolean disableJoinMessages() {
-		return privacyMode();
+		return true;
 	}
 
 	public void heal(LivingEntity entity) {

@@ -32,9 +32,10 @@ public class ProgressQueueImGui {
 			windowSize = window.getSize();
 		}
 
+		float scale = ImGuiUtils.getDpiScale();
 		var offset = ImGuiHooks.mainMenuBarHeight / 2F;
 
-		float windowX = windowPos.x + windowSize.x - 312F - offset;
+		float windowX = windowPos.x + windowSize.x - 300F * scale - 12F - offset;
 		float windowY = windowPos.y + offset;
 
 		graphics.pushStack();
@@ -66,7 +67,7 @@ public class ProgressQueueImGui {
 				continue;
 			}
 
-			ImGui.setNextWindowSizeConstraints(300F, 20F, 300F, 600F);
+			ImGui.setNextWindowSizeConstraints(300F * scale, 20F, 300F * scale, 600F);
 			ImGui.setNextWindowPos(windowX, windowY);
 
 			int flags = ImGuiWindowFlags.NoDocking
@@ -87,7 +88,7 @@ public class ProgressQueueImGui {
 
 				if (maxItemCount > 1) {
 					float p = (float) done / (float) maxItemCount;
-					ImGui.progressBar(p, -1F, 20F, done + "/" + maxItemCount);
+					ImGui.progressBar(p, -1F, 20F * scale, done + "/" + maxItemCount);
 				}
 
 				for (var item : queue.items) {
@@ -103,7 +104,7 @@ public class ProgressQueueImGui {
 							}
 
 							float p = Math.clamp((float) ((double) progress / (double) size), 0F, 1F);
-							ImGui.progressBar(p, -1F, 20F, item.nameFunction.getName(progress, size));
+							ImGui.progressBar(p, -1F, 20F * scale, item.nameFunction.getName(progress, size));
 						}
 					}
 				}
