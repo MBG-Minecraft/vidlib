@@ -6,7 +6,6 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
-import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
@@ -31,7 +30,7 @@ public record Waypoint(
 	ResourceKey<Level> dimension,
 	KVector position,
 	IconHolder icon,
-	Color tint,
+	float alpha,
 	double minDistance,
 	double midDistance,
 	double maxDistance,
@@ -49,7 +48,7 @@ public record Waypoint(
 		MCCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(Waypoint::dimension),
 		KVector.CODEC.fieldOf("position").forGetter(Waypoint::position),
 		IconHolder.CODEC.optionalFieldOf("icon", DEFAULT_ICON).forGetter(Waypoint::icon),
-		Color.CODEC.optionalFieldOf("tint", Color.WHITE).forGetter(Waypoint::tint),
+		Codec.FLOAT.optionalFieldOf("alpha", 255F).forGetter(Waypoint::alpha),
 		Codec.DOUBLE.optionalFieldOf("min_distance", 0D).forGetter(Waypoint::minDistance),
 		Codec.DOUBLE.optionalFieldOf("mid_distance", 0D).forGetter(Waypoint::midDistance),
 		Codec.DOUBLE.optionalFieldOf("max_distance", 0D).forGetter(Waypoint::maxDistance),
@@ -66,7 +65,7 @@ public record Waypoint(
 		KLibStreamCodecs.optional(MCStreamCodecs.DIMENSION, Level.OVERWORLD), Waypoint::dimension,
 		KVector.STREAM_CODEC, Waypoint::position,
 		KLibStreamCodecs.optional(IconHolder.STREAM_CODEC, DEFAULT_ICON), Waypoint::icon,
-		Color.STREAM_CODEC, Waypoint::tint,
+		ByteBufCodecs.FLOAT, Waypoint::alpha,
 		KLibStreamCodecs.optional(KLibStreamCodecs.DOUBLE32, 0D), Waypoint::minDistance,
 		KLibStreamCodecs.optional(KLibStreamCodecs.DOUBLE32, 0D), Waypoint::midDistance,
 		KLibStreamCodecs.optional(KLibStreamCodecs.DOUBLE32, 0D), Waypoint::maxDistance,
@@ -83,7 +82,7 @@ public record Waypoint(
 		private ResourceKey<Level> dimension = Level.OVERWORLD;
 		private KVector position = KVector.ZERO;
 		private IconHolder icon = DEFAULT_ICON;
-		private Color tint = Color.WHITE;
+		private float alpha = 255F;
 		private double minDistance = 0D;
 		private double midDistance = 0D;
 		private double maxDistance = 0D;
@@ -99,7 +98,7 @@ public record Waypoint(
 				dimension,
 				position,
 				icon,
-				tint,
+				alpha,
 				minDistance,
 				midDistance,
 				maxDistance,
@@ -139,8 +138,8 @@ public record Waypoint(
 			return this;
 		}
 
-		public Builder tint(Color value) {
-			tint = value;
+		public Builder alpha(float value) {
+			alpha = value;
 			return this;
 		}
 
@@ -179,7 +178,7 @@ public record Waypoint(
 		ResourceKey<Level> dimension,
 		KVector position,
 		IconHolder icon,
-		Color tint,
+		float alpha,
 		double minDistance,
 		double midDistance,
 		double maxDistance,
@@ -191,7 +190,7 @@ public record Waypoint(
 			dimension,
 			position,
 			icon,
-			tint,
+			alpha,
 			minDistance,
 			midDistance,
 			maxDistance,

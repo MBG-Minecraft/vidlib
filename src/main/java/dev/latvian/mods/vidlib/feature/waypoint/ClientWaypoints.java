@@ -76,7 +76,7 @@ public interface ClientWaypoints {
 		}
 
 		for (var wp : list) {
-			float alpha = wp.waypoint().tint().alphaf() * (WAYPOINT_ALPHA.get() / 255F);
+			float alpha = wp.waypoint().alpha() * (WAYPOINT_ALPHA.get() / 255F);
 			double minDistance = wp.waypoint().minDistance();
 			double midDistance = wp.waypoint().midDistance();
 

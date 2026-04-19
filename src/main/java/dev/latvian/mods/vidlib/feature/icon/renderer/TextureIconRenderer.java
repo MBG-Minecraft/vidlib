@@ -15,7 +15,7 @@ public record TextureIconRenderer(TextureIcon icon) implements IconRenderer {
 		var rendertype = VidLibRenderTypes.GUI.apply(icon.texture());
 		var matrix4f = graphics.pose().last().pose();
 		var buffer = graphics.vl$buffers().getBuffer(rendertype);
-		var color = icon.tint().mixAlpha(alpha).argb();
+		var color = icon.color().mixAlpha(alpha).argb();
 		var uv = icon.uv();
 		buffer.addVertex(matrix4f, -8F, -8F, 0F).setUv(uv.u0(), uv.v0()).setColor(color);
 		buffer.addVertex(matrix4f, -8F, 8F, 0F).setUv(uv.u0(), uv.v1()).setColor(color);
@@ -25,12 +25,12 @@ public record TextureIconRenderer(TextureIcon icon) implements IconRenderer {
 
 	@Override
 	public void render3D(Minecraft mc, PoseStack ms, float delta, MultiBufferSource source, int light, int overlay) {
-		var buffer = source.getBuffer(EntityRenderTypes.textureCull(icon.texture(), icon.tint().alpha() < 255 || icon.translucent()));
+		var buffer = source.getBuffer(EntityRenderTypes.textureCull(icon.texture(), icon.color().alpha() < 255 || icon.translucent()));
 
-		int colR = icon.tint().red();
-		int colG = icon.tint().green();
-		int colB = icon.tint().blue();
-		int colA = icon.tint().alpha();
+		int colR = icon.color().red();
+		int colG = icon.color().green();
+		int colB = icon.color().blue();
+		int colA = icon.color().alpha();
 
 		var m = ms.last().pose();
 		var n = ms.last().transformNormal(0F, 1F, 0F, new Vector3f());
