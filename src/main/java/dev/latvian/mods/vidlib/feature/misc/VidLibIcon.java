@@ -14,6 +14,8 @@ public interface VidLibIcon {
 	}
 
 	Component STAR = icon('*', true);
+	Component LEFT_CLICK = icon('0', true);
+	Component RIGHT_CLICK = icon('1', true);
 	Component ELIMINATED = icon('E', true);
 	Component PVP = icon('V', true);
 }

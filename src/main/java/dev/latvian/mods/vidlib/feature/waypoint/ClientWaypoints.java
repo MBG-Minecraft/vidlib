@@ -120,9 +120,8 @@ public interface ClientWaypoints {
 					graphics.drawString(mc.font, dist, -mc.font.width(dist) / 2F, 2, textColor, true);
 				}
 
-				var iconRenderer = IconRenderer.of(wp.waypoint().icon());
 				graphics.pose().translate(0F, -8F, 0F);
-				iconRenderer.render2D(mc, graphics, (int) (alpha * 255));
+				IconRenderer.draw(wp.waypoint().icon(), mc, graphics, (int) (alpha * 255));
 				graphics.pose().popPose();
 			}
 		}

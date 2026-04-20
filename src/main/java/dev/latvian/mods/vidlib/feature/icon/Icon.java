@@ -28,7 +28,7 @@ public interface Icon extends SimpleRegistryEntry {
 	static void builtinTypes(SimpleRegistryCollector<Icon> registry) {
 		registry.register(EmptyIcon.TYPE);
 
-		registry.register(ColorIcon.TYPE);
+		registry.register(SimpleColorIcon.TYPE);
 		registry.register(TextureIcon.TYPE);
 		registry.register(ItemIcon.TYPE);
 		registry.register(AtlasSpriteIcon.TYPE);
@@ -40,9 +40,5 @@ public interface Icon extends SimpleRegistryEntry {
 	@Override
 	default SimpleRegistryType<?> type() {
 		return REGISTRY.getType(this);
-	}
-
-	default IconHolder holder() {
-		return new IconHolder(this);
 	}
 }

@@ -4,7 +4,8 @@ import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.klib.util.SimilarityCheck;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
-import dev.latvian.mods.vidlib.feature.icon.IconHolder;
+import dev.latvian.mods.vidlib.feature.icon.EmptyIcon;
+import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -77,7 +78,7 @@ public record NPCDataType<T>(String name, StreamCodec<?, T> streamCodec, T defau
 	public static final NPCDataType<Float> WALK_ANIMATION_POS = addFloat("walk_animation_pos", 0F, (p, d) -> p.walkAnimation.position(d));
 	public static final NPCDataType<Float> WALK_ANIMATION_SPEED = addFloat("walk_animation_speed", 0F, (p, d) -> p.walkAnimation.speed(d));
 	public static final NPCDataType<List<Clothing>> CLOTHING = add("clothing", Clothing.LIST_DATA_TYPE.streamCodec(), List.of(), SimilarityCheck.getDefault(), (p, d) -> ClientGameEngine.INSTANCE.getClothing(p));
-	public static final NPCDataType<IconHolder> PLUMBOB = add("plumbob", IconHolder.STREAM_CODEC, IconHolder.EMPTY, SimilarityCheck.getDefault(), (p, d) -> ClientGameEngine.INSTANCE.getPlumbob(p));
+	public static final NPCDataType<Icon> PLUMBOB = add("plumbob", Icon.STREAM_CODEC, EmptyIcon.INSTANCE, SimilarityCheck.getDefault(), (p, d) -> ClientGameEngine.INSTANCE.getPlumbob(p));
 
 	@Override
 	public String getSerializedName() {

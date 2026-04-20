@@ -15,7 +15,6 @@ import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.environment.FogOverride;
 import dev.latvian.mods.vidlib.feature.explosion.ExplosionData;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
-import dev.latvian.mods.vidlib.feature.icon.IconHolder;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverrides;
@@ -79,7 +78,6 @@ public interface VidLibDataTypes {
 		DataType.register(VidLib.id("connection_type"), CONNECTION_TYPE);
 
 		DataType.register(VidLib.id("icon"), Icon.DATA_TYPE);
-		DataType.register(VidLib.id("icon_holder"), IconHolder.DATA_TYPE);
 		DataType.register(VidLib.id("clothing_parts"), ClothingParts.DATA_TYPE);
 		DataType.register(VidLib.id("clothing"), Clothing.DATA_TYPE);
 		DataType.register(VidLib.id("clothing_list"), Clothing.LEGACY_CLOTHING_DATA ? Clothing.LEGACY_LIST_DATA_TYPE : Clothing.LIST_DATA_TYPE);

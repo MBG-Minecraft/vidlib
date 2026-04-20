@@ -10,7 +10,6 @@ import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
-import dev.latvian.mods.vidlib.feature.icon.IconHolder;
 import dev.latvian.mods.vidlib.feature.icon.TextureIcon;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import net.minecraft.core.Position;
@@ -29,7 +28,7 @@ public record Waypoint(
 	EntityFilter visible,
 	ResourceKey<Level> dimension,
 	KVector position,
-	IconHolder icon,
+	Icon icon,
 	float alpha,
 	double minDistance,
 	double midDistance,
@@ -39,7 +38,7 @@ public record Waypoint(
 	boolean showDistance,
 	boolean ignoreHeight
 ) {
-	public static final IconHolder DEFAULT_ICON = new TextureIcon(VidLibTextures.DEFAULT_MARKER).holder();
+	public static final Icon DEFAULT_ICON = new TextureIcon(VidLibTextures.DEFAULT_MARKER);
 	public static final Component DEFAULT_LABEL = Component.empty();
 
 	public static final Codec<Waypoint> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -47,7 +46,7 @@ public record Waypoint(
 		EntityFilter.CODEC.optionalFieldOf("visible", EntityFilter.ANY.instance()).forGetter(Waypoint::visible),
 		MCCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(Waypoint::dimension),
 		KVector.CODEC.fieldOf("position").forGetter(Waypoint::position),
-		IconHolder.CODEC.optionalFieldOf("icon", DEFAULT_ICON).forGetter(Waypoint::icon),
+		Icon.CODEC.optionalFieldOf("icon", DEFAULT_ICON).forGetter(Waypoint::icon),
 		Codec.FLOAT.optionalFieldOf("alpha", 255F).forGetter(Waypoint::alpha),
 		Codec.DOUBLE.optionalFieldOf("min_distance", 0D).forGetter(Waypoint::minDistance),
 		Codec.DOUBLE.optionalFieldOf("mid_distance", 0D).forGetter(Waypoint::midDistance),
@@ -64,7 +63,7 @@ public record Waypoint(
 		KLibStreamCodecs.optional(EntityFilter.STREAM_CODEC, EntityFilter.ANY.instance()), Waypoint::visible,
 		KLibStreamCodecs.optional(MCStreamCodecs.DIMENSION, Level.OVERWORLD), Waypoint::dimension,
 		KVector.STREAM_CODEC, Waypoint::position,
-		KLibStreamCodecs.optional(IconHolder.STREAM_CODEC, DEFAULT_ICON), Waypoint::icon,
+		KLibStreamCodecs.optional(Icon.STREAM_CODEC, DEFAULT_ICON), Waypoint::icon,
 		ByteBufCodecs.FLOAT, Waypoint::alpha,
 		KLibStreamCodecs.optional(KLibStreamCodecs.DOUBLE32, 0D), Waypoint::minDistance,
 		KLibStreamCodecs.optional(KLibStreamCodecs.DOUBLE32, 0D), Waypoint::midDistance,
@@ -81,7 +80,7 @@ public record Waypoint(
 		private EntityFilter visible = EntityFilter.ANY.instance();
 		private ResourceKey<Level> dimension = Level.OVERWORLD;
 		private KVector position = KVector.ZERO;
-		private IconHolder icon = DEFAULT_ICON;
+		private Icon icon = DEFAULT_ICON;
 		private float alpha = 255F;
 		private double minDistance = 0D;
 		private double midDistance = 0D;
@@ -134,7 +133,7 @@ public record Waypoint(
 		}
 
 		public Builder icon(Icon value) {
-			icon = value.holder();
+			icon = value;
 			return this;
 		}
 
@@ -177,7 +176,7 @@ public record Waypoint(
 		EntityFilter filter,
 		ResourceKey<Level> dimension,
 		KVector position,
-		IconHolder icon,
+		Icon icon,
 		float alpha,
 		double minDistance,
 		double midDistance,

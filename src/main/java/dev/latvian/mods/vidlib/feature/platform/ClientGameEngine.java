@@ -19,7 +19,7 @@ import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
-import dev.latvian.mods.vidlib.feature.icon.IconHolder;
+import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
@@ -180,7 +180,7 @@ public class ClientGameEngine {
 		return null;
 	}
 
-	public IconHolder getPlumbob(Player player) {
+	public Icon getPlumbob(Player player) {
 		return player.get(InternalPlayerData.PLUMBOB);
 	}
 

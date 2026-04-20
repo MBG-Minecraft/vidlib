@@ -39,7 +39,7 @@ public class PlumbobRenderer {
 		}
 	}
 
-	public static void render(Minecraft mc, IconHolder icon, Vec3 pos, PoseStack ms, float delta, MultiBufferSource buffers, int light, boolean crouching, boolean scoreText) {
+	public static void render(Minecraft mc, Icon icon, Vec3 pos, PoseStack ms, float delta, MultiBufferSource buffers, int light, boolean crouching, boolean scoreText) {
 		var cam = mc.gameRenderer.getMainCamera().getPosition();
 
 		if (KMath.sq(pos.x - cam.x) + KMath.sq(pos.z - cam.z) <= 0.01D * 0.01D) {
@@ -58,8 +58,7 @@ public class PlumbobRenderer {
 		ms.mulPose(mc.gameRenderer.getMainCamera().rotation());
 		ms.scale(0.4F, 0.4F, 0.4F);
 
-		var iconRenderer = IconRenderer.of(icon);
-		iconRenderer.render3D(mc, ms, delta, buffers, light, OverlayTexture.NO_OVERLAY);
+		IconRenderer.render(icon, mc, ms, delta, buffers, light, OverlayTexture.NO_OVERLAY);
 		ms.popPose();
 	}
 }

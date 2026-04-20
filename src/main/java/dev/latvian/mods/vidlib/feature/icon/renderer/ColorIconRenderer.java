@@ -8,14 +8,12 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 import org.joml.Vector3f;
 
-public record ColorIconRenderer(ColorIcon icon) implements IconRenderer {
-	@Override
-	public void render2D(Minecraft mc, GuiGraphics graphics, int alpha) {
+public interface ColorIconRenderer {
+	static void draw(ColorIcon icon, Minecraft mc, GuiGraphics graphics, int alpha) {
 		graphics.fill(-8, -8, 8, 8, icon.color().mixAlpha(alpha).argb());
 	}
 
-	@Override
-	public void render3D(Minecraft mc, PoseStack ms, float delta, MultiBufferSource source, int light, int overlay) {
+	static void render(ColorIcon icon, Minecraft mc, PoseStack ms, float delta, MultiBufferSource source, int light, int overlay) {
 		var buffer = source.getBuffer(icon.color().alpha() < 255 ? EntityRenderTypes.WHITE_TRANSLUCENT : EntityRenderTypes.WHITE);
 
 		int colR = icon.color().red();

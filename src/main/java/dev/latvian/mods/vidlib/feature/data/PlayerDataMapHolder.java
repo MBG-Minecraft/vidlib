@@ -20,7 +20,7 @@ public interface PlayerDataMapHolder extends DataMapHolder {
 	}
 
 	default void setPlumbob(Icon icon) {
-		set(InternalPlayerData.PLUMBOB, icon.holder());
+		set(InternalPlayerData.PLUMBOB, icon);
 	}
 
 	default void setClothing(List<Clothing> clothing) {

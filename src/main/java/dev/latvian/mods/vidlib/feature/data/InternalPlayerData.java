@@ -7,7 +7,8 @@ import dev.latvian.mods.vidlib.VidLibDataTypes;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingImBuilder;
-import dev.latvian.mods.vidlib.feature.icon.IconHolder;
+import dev.latvian.mods.vidlib.feature.icon.EmptyIcon;
+import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.imgui.builder.BooleanImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ListImBuilder;
@@ -28,7 +29,7 @@ public interface InternalPlayerData {
 	DataKey<Set<String>> PLAYER_TAGS = DataKey.PLAYER.createDefault("player_tags", VidLibDataTypes.STRING_SET, Set.of(), null);
 	DataKey<Boolean> SUSPENDED = DataKey.PLAYER.createDefault("suspended", DataTypes.BOOL, false, BooleanImBuilder.TYPE);
 	DataKey<Component> NICKNAME = DataKey.PLAYER.createDefault("nickname", DataTypes.TEXT_COMPONENT, Component.empty(), TextComponentImBuilder.TYPE);
-	DataKey<IconHolder> PLUMBOB = DataKey.PLAYER.createDefault("plumbob", IconHolder.DATA_TYPE, IconHolder.EMPTY, null);
+	DataKey<Icon> PLUMBOB = DataKey.PLAYER.createDefault("plumbob", Icon.DATA_TYPE, EmptyIcon.INSTANCE, null);
 	DataKey<List<Clothing>> CLOTHING = DataKey.PLAYER.createDefault("clothing", Clothing.LEGACY_CLOTHING_DATA ? Clothing.LEGACY_LIST_DATA_TYPE : Clothing.LIST_DATA_TYPE, List.of(), () -> new ListImBuilder<>(ClothingImBuilder.TYPE));
 	DataKey<SkinTexture> SKIN_OVERRIDE = DataKey.PLAYER.createDefault("skin_override", SkinTexture.DATA_TYPE, null, SkinTextureImBuilder.TYPE);
 	DataKey<ResourceLocation> CAPE_OVERRIDE = DataKey.PLAYER.createDefault("cape_override", ID.DATA_TYPE, null, TextureImBuilder.GEO);

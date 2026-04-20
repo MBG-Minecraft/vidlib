@@ -10,11 +10,12 @@ import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceLocation;
 
-public class TextureIcon extends ColorIcon {
-	private final ResourceLocation texture;
-	private final UV uv;
-	private final boolean translucent;
-
+public record TextureIcon(
+	ResourceLocation texture,
+	UV uv,
+	boolean translucent,
+	Color color
+) implements ColorIcon {
 	public static final SimpleRegistryType<TextureIcon> TYPE = SimpleRegistryType.dynamic("texture", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		ResourceLocation.CODEC.fieldOf("texture").forGetter(TextureIcon::texture),
 		UV.CODEC.optionalFieldOf("uv", UV.FULL).forGetter(TextureIcon::uv),
@@ -28,27 +29,8 @@ public class TextureIcon extends ColorIcon {
 		TextureIcon::new
 	));
 
-	public TextureIcon(ResourceLocation texture, UV uv, boolean translucent, Color tint) {
-		super(tint);
-		this.texture = texture;
-		this.uv = uv;
-		this.translucent = translucent;
-	}
-
 	public TextureIcon(ResourceLocation texture) {
 		this(texture, UV.FULL, false, Color.WHITE);
-	}
-
-	public ResourceLocation texture() {
-		return texture;
-	}
-
-	public UV uv() {
-		return uv;
-	}
-
-	public boolean translucent() {
-		return translucent;
 	}
 
 	@Override
