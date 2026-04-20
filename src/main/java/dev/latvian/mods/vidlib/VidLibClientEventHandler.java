@@ -147,7 +147,7 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void dynamicResources(DynamicResourceEvent.Assets event) {
-		event.register(ID.video("dynamic_resources/tracksuits"));
+		event.register(ID.video("dynamic_resources/clothing"));
 	}
 
 	@SubscribeEvent

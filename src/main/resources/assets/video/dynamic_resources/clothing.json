@@ -1,4 +1,5 @@
 {
+	"color_map": "video:dynamic_resources/colors.png",
 	"resources": {
 		"video:black": {},
 		"video:blue": {},
@@ -13,7 +14,13 @@
 		"video:magenta": {},
 		"video:purple": {},
 		"video:pink": {},
-		"video:white": {}
+		"video:white": {},
+		"video:gray": {},
+		"video:dark_blue": {},
+		"video:dark_green": {},
+		"video:dark_yellow": {},
+		"video:dark_red": {},
+		"video:shiny_green": {}
 	},
 	"files": [
 		{
@@ -21,7 +28,6 @@
 			"location": "{namespace}:equipment/tracksuit/{path}.json"
 		}
 	],
-	"color_map": "video:dynamic_resources/tracksuit/colors.png",
 	"textures": [
 		{
 			"template": "video:dynamic_resources/tracksuit/base.png",
