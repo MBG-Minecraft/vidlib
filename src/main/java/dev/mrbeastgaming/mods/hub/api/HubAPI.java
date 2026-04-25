@@ -125,6 +125,10 @@ public interface HubAPI {
 			o.addProperty("name", file.name());
 			o.add("type", file.type().toJson());
 
+			if (file.created() != null) {
+				o.addProperty("created", file.created().toString());
+			}
+
 			if (file.assignedTo() != Hex32.NONE) {
 				o.addProperty("assigned_to", file.assignedTo().toString());
 			}

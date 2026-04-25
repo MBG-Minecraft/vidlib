@@ -23,15 +23,13 @@ public class CrashReportMixin {
 	private boolean vl$saveToFile(boolean original) {
 		if (saveFile != null) {
 			if (PlatformHelper.CURRENT.getSide().isClient()) {
-				ClientHubFileUploads.syncFile(saveFile, builder -> {
-					builder.setType(HubFileType.CRASH_REPORT);
-					builder.setFilterEndsWith("-client.txt");
-				});
+				if (saveFile.toString().endsWith("-client.txt")) {
+					ClientHubFileUploads.syncFile(saveFile, (fileInfo, builder) -> builder.setType(HubFileType.CRASH_REPORT));
+				}
 			} else {
-				ServerHubFileUploads.syncFile(saveFile, builder -> {
-					builder.setType(HubFileType.CRASH_REPORT);
-					builder.setFilterEndsWith("-server.txt");
-				});
+				if (saveFile.toString().endsWith("-server.txt")) {
+					ServerHubFileUploads.syncFile(saveFile, (fileInfo, builder) -> builder.setType(HubFileType.CRASH_REPORT));
+				}
 			}
 		}
 

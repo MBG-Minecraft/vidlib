@@ -25,20 +25,21 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class HubFileUploads {
 	public record SyncedFile(FileInfo fileInfo, FileMD5 meta, Mutable<ProgressItem> progressItem, ProjectUploadRequestItem item) {
 	}
 
-	public static List<SyncedFile> syncDirectory(Path directory, Consumer<HubFileUploadBuilder> upload) {
+	public static List<SyncedFile> syncDirectory(Path directory, Consumer<HubDirectoryUploadBuilder> upload) {
 		var projectConfig = HubProjectConfig.INSTANCE.get();
 
 		if (projectConfig == null || Files.notExists(directory)) {
 			return List.of();
 		}
 
-		var uploadBuilder = new HubFileUploadBuilder();
+		var uploadBuilder = new HubDirectoryUploadBuilder();
 		upload.accept(uploadBuilder);
 
 		try (var stream = Files.walk(directory)) {
@@ -54,7 +55,7 @@ public class HubFileUploads {
 			if (uploadBuilder.fileNameProvider != null) {
 				fileStream = fileStream.map(fileInfo -> {
 					try {
-						var name = uploadBuilder.fileNameProvider.getFileName(fileInfo, projectConfig);
+						var name = uploadBuilder.fileNameProvider.getFileName(fileInfo);
 
 						if (name != null) {
 							return new FileInfo(fileInfo.path(), name, fileInfo.size());
@@ -73,7 +74,7 @@ public class HubFileUploads {
 		}
 	}
 
-	public static List<SyncedFile> syncFile(Path file, Consumer<HubFileUploadBuilder> upload) {
+	public static List<SyncedFile> syncFile(Path file, BiConsumer<FileInfo, HubFileUploadBuilder> upload) {
 		var projectConfig = HubProjectConfig.INSTANCE.get();
 
 		if (projectConfig == null || Files.notExists(file)) {
@@ -82,27 +83,16 @@ public class HubFileUploads {
 
 		var fileInfo = new FileInfo(file);
 		var uploadBuilder = new HubFileUploadBuilder();
-		upload.accept(uploadBuilder);
+		upload.accept(fileInfo, uploadBuilder);
 
-		if (uploadBuilder.testFilter(fileInfo)) {
-			if (uploadBuilder.fileNameProvider != null) {
-				try {
-					var name = uploadBuilder.fileNameProvider.getFileName(fileInfo, projectConfig);
-
-					if (name != null) {
-						fileInfo = new FileInfo(fileInfo.path(), name, fileInfo.size());
-					}
-				} catch (Exception ignored) {
-				}
-			}
-
-			return syncFiles(projectConfig, List.of(fileInfo), uploadBuilder);
+		if (uploadBuilder.fileName != null) {
+			fileInfo = new FileInfo(fileInfo.path(), uploadBuilder.fileName, fileInfo.size());
 		}
 
-		return List.of();
+		return syncFiles(projectConfig, List.of(fileInfo), uploadBuilder);
 	}
 
-	private static List<SyncedFile> syncFiles(HubProjectConfig projectConfig, List<FileInfo> fileList, HubFileUploadBuilder upload) {
+	private static List<SyncedFile> syncFiles(HubProjectConfig projectConfig, List<FileInfo> fileList, HubUploadBuilderBase upload) {
 		var resultFiles = new ArrayList<SyncedFile>(fileList.size());
 		var progressItems = new ArrayList<ProgressItem>(fileList.size());
 		var map = new LinkedHashMap<MD5, SyncedFile>();
@@ -129,7 +119,7 @@ public class HubFileUploads {
 						progressItem.setStarted();
 					}
 
-					var uniqueId = upload.uniqueIdProvider == null ? MD5.NIL : upload.uniqueIdProvider.getUniqueId(file, projectConfig);
+					var uniqueId = upload.getUniqueId(file, projectConfig);
 
 					if (uniqueId == null) {
 						continue;
@@ -143,7 +133,8 @@ public class HubFileUploads {
 
 					VidLib.LOGGER.info("Updated metadata of " + file.name() + ": " + meta);
 
-					var fileType = upload.type == null ? FileTypeProvider.probe(file) : upload.type.getFileType(file);
+					var fileType = upload.getFileType(file);
+					var created = upload.getFileCreated(file);
 
 					var syncFile = new SyncedFile(file, meta, new MutableObject<>(), new ProjectUploadRequestItem(
 						uniqueId,
@@ -151,6 +142,7 @@ public class HubFileUploads {
 						meta.size(),
 						file.name(),
 						fileType,
+						created,
 						upload.assignedTo,
 						upload.assignedToMinecraft
 					));

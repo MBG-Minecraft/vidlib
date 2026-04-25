@@ -5,8 +5,8 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasUniform;
-import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.Minecraft;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ public class DecalRenderer {
 		builder.addUniform(CanvasUniform.mat4("InverseViewProjectionMat", () -> ClientMatrices.INVERSE_WORLD));
 	});
 
-	private static final List<Decal> TEMP_LIST = new ArrayList<>();
+	private static final List<Decal> TEMP_LIST = new ArrayList<>(1);
 
 	public static void add(Decal decal) {
 		decal.addToList(TEMP_LIST);
@@ -36,7 +36,7 @@ public class DecalRenderer {
 			}
 		}
 
-		ClientGameEngine.INSTANCE.addDecals(TEMP_LIST);
+		NeoForge.EVENT_BUS.post(new DecalEvent(TEMP_LIST));
 
 		if (!TEMP_LIST.isEmpty()) {
 			var texture = DecalTexture.HOLDER.texture().get();

@@ -1,63 +1,57 @@
 package dev.mrbeastgaming.mods.hub.file;
 
 import dev.latvian.mods.klib.io.FileInfo;
-import dev.latvian.mods.klib.io.FileInfoFilter;
-import dev.latvian.mods.klib.util.Hex32;
-import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
+import dev.latvian.mods.klib.util.MD5;
+import dev.mrbeastgaming.mods.hub.HubProjectConfig;
+import dev.mrbeastgaming.mods.hub.api.HubFileType;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.UUID;
+import java.time.Instant;
 
-public class HubFileUploadBuilder {
-	FileInfoFilter filter = null;
-	FileTypeProvider type = null;
-	UniqueIdProvider uniqueIdProvider = null;
-	Hex32 assignedTo = Hex32.NONE;
-	UUID assignedToMinecraft = null;
-	ProgressQueue progressQueue = null;
-	FileNameProvider fileNameProvider = null;
+public class HubFileUploadBuilder extends HubUploadBuilderBase {
+	HubFileType type = null;
+	MD5 uniqueId = null;
+	String fileName = null;
+	Instant creationDate = null;
 
-	public void setFilter(FileInfoFilter filter) {
-		this.filter = filter;
-	}
-
-	public void setFilterEndsWith(String suffix) {
-		setFilter(fileInfo -> fileInfo.name().endsWith(suffix));
-	}
-
-	public void setType(FileTypeProvider provider) {
+	public void setType(HubFileType provider) {
 		this.type = provider;
 	}
 
-	public void setUniqueId(UniqueIdProvider provider) {
-		this.uniqueIdProvider = provider;
+	public void setUniqueId(MD5 id) {
+		this.uniqueId = id;
 	}
 
-	public void setAssignedTo(Hex32 assignedTo) {
-		this.assignedTo = assignedTo;
+	public void setNoUniqueId() {
+		this.uniqueId = MD5.NIL;
 	}
 
-	public void setAssignedToMinecraft(UUID id) {
-		this.assignedToMinecraft = id;
+	public void setFileName(String name) {
+		this.fileName = name;
 	}
 
-	public void setProgressQueue(ProgressQueue queue) {
-		this.progressQueue = queue;
+	public void setCreationDate(Instant instant) {
+		this.creationDate = instant;
 	}
 
-	public void setFileNameProvider(FileNameProvider provider) {
-		this.fileNameProvider = provider;
+	@Override
+	HubFileType getFileType(FileInfo fileInfo) {
+		return type == null ? HubFileType.UNKNOWN : type;
 	}
 
-	boolean testFilter(FileInfo fileInfo) {
-		if (filter == null) {
-			return true;
+	@Override
+	@Nullable
+	MD5 getUniqueId(FileInfo fileInfo, HubProjectConfig projectConfig) throws Exception {
+		if (uniqueId == null && assignedToMinecraft != null) {
+			return UniqueIdProvider.ofUUIDAndFileName(assignedToMinecraft).getUniqueId(fileInfo, projectConfig);
 		}
 
-		try {
-			return filter.test(fileInfo);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			return false;
-		}
+		return uniqueId;
+	}
+
+	@Override
+	@Nullable
+	Instant getFileCreated(FileInfo fileInfo) {
+		return creationDate;
 	}
 }

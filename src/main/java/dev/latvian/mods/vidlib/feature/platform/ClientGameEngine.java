@@ -17,7 +17,6 @@ import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
-import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
@@ -453,9 +452,6 @@ public class ClientGameEngine {
 				}
 			}
 		}
-	}
-
-	public void addDecals(List<Decal> list) {
 	}
 
 	public WorldBorder getRenderedWorldBorder(Minecraft mc, ClientLevel level) {

@@ -13,7 +13,19 @@ import java.security.MessageDigest;
 import java.util.UUID;
 
 public interface UniqueIdProvider {
+	UniqueIdProvider NIL = (fileInfo, projectConfig) -> MD5.NIL;
+
 	interface OfData extends UniqueIdProvider {
+		record OfUUIDAndFileName(UUID id) implements OfData {
+			@Override
+			public boolean write(FileInfo fileInfo, HubProjectConfig projectConfig, DataOutput data) throws Exception {
+				data.writeLong(id.getMostSignificantBits());
+				data.writeLong(id.getLeastSignificantBits());
+				IOUtils.writeUTF(data, fileInfo.name());
+				return true;
+			}
+		}
+
 		boolean write(FileInfo fileInfo, HubProjectConfig projectConfig, DataOutput data) throws Exception;
 
 		@Override
@@ -40,12 +52,7 @@ public interface UniqueIdProvider {
 	}
 
 	static UniqueIdProvider ofUUIDAndFileName(UUID id) {
-		return UniqueIdProvider.ofData((fileInfo, projectConfig, data) -> {
-			data.writeLong(id.getMostSignificantBits());
-			data.writeLong(id.getLeastSignificantBits());
-			IOUtils.writeUTF(data, fileInfo.name());
-			return true;
-		});
+		return new OfData.OfUUIDAndFileName(id);
 	}
 
 	@Nullable
