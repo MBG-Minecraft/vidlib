@@ -85,14 +85,16 @@ public class HubFileUploads {
 		var uploadBuilder = new HubFileUploadBuilder();
 		upload.accept(fileInfo, uploadBuilder);
 
-		try {
-			var fileName = uploadBuilder.fileNameProvider.getFileName(fileInfo);
+		if (uploadBuilder.fileNameProvider != null) {
+			try {
+				var fileName = uploadBuilder.fileNameProvider.getFileName(fileInfo);
 
-			if (fileName != null) {
-				fileInfo = new FileInfo(fileInfo.path(), fileName, fileInfo.size());
+				if (fileName != null) {
+					fileInfo = new FileInfo(fileInfo.path(), fileName, fileInfo.size());
+				}
+			} catch (Exception ex) {
+				VidLib.LOGGER.error("Failed to create a custom file name of " + file, ex);
 			}
-		} catch (Exception ex) {
-			VidLib.LOGGER.error("Failed to create a custom file name of " + file, ex);
 		}
 
 		return syncFiles(projectConfig, List.of(fileInfo), uploadBuilder);
