@@ -738,17 +738,20 @@ public class VidLibClientEventHandler {
 
 		ClientHubFileUploads.asyncDirectory(gameDir.resolve("voicechat_recordings"), builder -> {
 			builder.setType(HubFileType.VOICE_CHAT_RECORDING);
+			builder.setNoUniqueId();
 			builder.setFilterEndsWith(".mp3");
 		});
 
 		if (event.isFirstTime()) {
 			ClientHubFileUploads.asyncDirectory(gameDir.resolve("crash-reports"), builder -> {
-				builder.setType(HubFileType.CRASH_REPORT);
+				builder.setType(HubFileType.CLIENT_CRASH_REPORT);
+				builder.setNoUniqueId();
 				builder.setFilterEndsWith("-client.txt");
 			});
 
 			ClientHubFileUploads.asyncDirectory(gameDir, builder -> {
 				builder.setType(HubFileType.JVM_CRASH_REPORT);
+				builder.setNoUniqueId();
 				builder.setFilter(fileInfo -> fileInfo.name().startsWith("hr_err_pid_") && fileInfo.name().endsWith(".log"));
 			});
 		}
