@@ -23,6 +23,12 @@ public class VidLibBlockStateClientProperties implements WithCache {
 
 	@Override
 	public void clearCache() {
+		if (blockParticleShapes != null) {
+			for (var v : blockParticleShapes.values()) {
+				v.clearCache();
+			}
+		}
+
 		blockParticleShapes = null;
 		manager = null;
 	}

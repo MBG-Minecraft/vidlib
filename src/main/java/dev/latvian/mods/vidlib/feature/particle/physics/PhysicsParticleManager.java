@@ -10,6 +10,7 @@ import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import imgui.type.ImBoolean;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -27,9 +28,11 @@ import java.util.function.Consumer;
 
 @AutoInit(AutoInit.Type.CLIENT_LOADED)
 public class PhysicsParticleManager {
-	public static final PhysicsParticleManager TRANSLUCENT = new PhysicsParticleManager("Translucent", TerrainRenderLayer.TRANSLUCENT, RenderType.translucent(), true);
-	public static final PhysicsParticleManager CUTOUT = new PhysicsParticleManager("Cutout", TerrainRenderLayer.CUTOUT, RenderType.cutout(), false);
 	public static final PhysicsParticleManager SOLID = new PhysicsParticleManager("Solid", TerrainRenderLayer.SOLID, RenderType.solid(), true);
+	public static final PhysicsParticleManager CUTOUT_MIPPED = new PhysicsParticleManager("Cutout Mipped", TerrainRenderLayer.CUTOUT_MIPPED, RenderType.cutoutMipped(), true);
+	public static final PhysicsParticleManager CUTOUT = new PhysicsParticleManager("Cutout", TerrainRenderLayer.CUTOUT, RenderType.cutout(), false);
+	public static final PhysicsParticleManager TRANSLUCENT = new PhysicsParticleManager("Translucent", TerrainRenderLayer.TRANSLUCENT, RenderType.translucent(), true);
+	public static final PhysicsParticleManager TRIPWIRE = new PhysicsParticleManager("Tripwire", TerrainRenderLayer.TRIPWIRE, RenderType.tripwire(), true);
 
 	public static final ImBoolean VISIBLE = new ImBoolean(true);
 	public static final double SQRT_2 = Math.sqrt(2);
@@ -42,8 +45,10 @@ public class PhysicsParticleManager {
 
 	static {
 		register(SOLID);
+		register(CUTOUT_MIPPED);
 		register(CUTOUT);
 		register(TRANSLUCENT);
+		register(TRIPWIRE);
 	}
 
 	public static void debugInfo(Consumer<String> left, Consumer<String> right) {
@@ -53,6 +58,7 @@ public class PhysicsParticleManager {
 
 		int total = 0;
 		int totalRendered = 0;
+
 		for (var manager : ALL.values()) {
 			total += manager.particles.size();
 			totalRendered += manager.rendered;
@@ -64,11 +70,16 @@ public class PhysicsParticleManager {
 
 	public static void render(FrameInfo frame) {
 		var manager = ALL.get(frame.layer());
+
 		if (manager != null) {
-			var mc = Minecraft.getInstance();
-			MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
-			manager.render_i(mc, frame, bufferSource);
-			bufferSource.endBatch();
+			manager.rendered = 0;
+
+			if (!manager.particles.isEmpty() && VISIBLE.get()) {
+				MultiBufferSource.BufferSource bufferSource = frame.mc().renderBuffers().bufferSource();
+				bufferSource.endBatch();
+				manager.render(frame.mc(), frame, bufferSource);
+				bufferSource.endBatch();
+			}
 		}
 	}
 
@@ -98,10 +109,15 @@ public class PhysicsParticleManager {
 		}
 
 		var rl = ItemBlockRenderTypes.getChunkRenderType(state);
-		if (rl == RenderType.translucent() || rl == RenderType.tripwire()) {
-			return TRANSLUCENT;
-		} else if (rl == RenderType.cutout() || rl == RenderType.cutoutMipped()) {
+
+		if (rl == RenderType.cutoutMipped()) {
+			return CUTOUT_MIPPED;
+		} else if (rl == RenderType.cutout()) {
 			return CUTOUT;
+		} else if (rl == RenderType.translucent()) {
+			return TRANSLUCENT;
+		} else if (rl == RenderType.tripwire()) {
+			return TRIPWIRE;
 		} else {
 			return SOLID;
 		}
@@ -125,12 +141,7 @@ public class PhysicsParticleManager {
 		this.mipmaps = mipmaps;
 	}
 
-	private void render_i(Minecraft mc, FrameInfo frame, MultiBufferSource bufferSource) {
-		rendered = 0;
-		if (particles.isEmpty() || !VISIBLE.get()) {
-			return;
-		}
-
+	private void render(Minecraft mc, FrameInfo frame, MultiBufferSource bufferSource) {
 		var level = mc.level;
 		var texture = mc.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS);
 		texture.setFilter(false, mipmaps);
@@ -144,10 +155,11 @@ public class PhysicsParticleManager {
 		double camZ = frame.cameraZ();
 		var frustum = frame.frustum();
 
-		BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+		var mutablePos = new BlockPos.MutableBlockPos();
 
 		for (PhysicsParticle p : particles) {
 			float dScale = KMath.lerp(delta, p.prevScale, p.scale);
+
 			if (dScale < 0.001F) {
 				continue;
 			}
@@ -157,6 +169,7 @@ public class PhysicsParticleManager {
 			double rz = KMath.lerp(delta, p.prevZ, p.z);
 			double ro = dScale * SQRT_2;
 			int cubeInFrustum = frustum.cubeInFrustum(rx - ro, ry - ro, rz - ro, rx + ro, ry + ro, rz + ro);
+
 			if (cubeInFrustum != FrustumIntersection.INSIDE && cubeInFrustum != FrustumIntersection.INTERSECT) {
 				continue;
 			}
@@ -169,6 +182,7 @@ public class PhysicsParticleManager {
 			}
 
 			float dSpin = KMath.lerp(delta, p.prevSpin, p.spin);
+
 			if (dSpin != 0F) {
 				poseStack.mulPose(Axis.XP.rotation(dSpin));
 			}
@@ -181,12 +195,13 @@ public class PhysicsParticleManager {
 				poseStack.scale(dScale, dScale, dScale);
 			}
 
-			int light = 0x00F000F0; // 15
+			int light = LightTexture.FULL_BRIGHT;
+
 			if (level != null) {
 				light = level.vl$getPackedLight(mutablePos.set(rx, ry, rz));
 			}
 
-			p.shape.render(consumer, poseStack.last().pose(), p.red, p.green, p.blue, p.alpha, light);
+			p.shape.render(mc, consumer, poseStack.last().pose(), p.red, p.green, p.blue, p.alpha, light);
 			poseStack.popPose();
 			rendered++;
 		}

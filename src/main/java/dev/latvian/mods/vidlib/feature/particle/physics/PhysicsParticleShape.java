@@ -13,50 +13,33 @@ import org.joml.Matrix4f;
 import org.joml.Vector3fc;
 
 public class PhysicsParticleShape {
-	private static final ResourceLocation GRASS = VidLib.id("block/grass");
-
-	private final float[] vertexData = new float[24 * 8]; // pos.xyz, normal.xyz, u, v
-
-	public PhysicsParticleShape(BlockState state, SplitBox box) {
-		UV baseUv = computeBaseUV(state);
-
-		int idx = 0;
-		for (int face = 0; face < 6; face++) {
-			var faceShape = box.shape().face(face);
-			Vector3fc[] pts = { faceShape.a(), faceShape.b(), faceShape.c(), faceShape.d() };
-			Vector3fc n = faceShape.n();
-
-			UV faceUv = multiplyUV(baseUv, box.uvs()[face]);
-			float u0 = faceUv.u0(), v0 = faceUv.v0(), u1 = faceUv.u1(), v1 = faceUv.v1();
-			float[] us = { u0, u0, u1, u1 };
-			float[] vs = { v0, v1, v1, v0 };
-
-			for (int i = 0; i < 4; i++) {
-				Vector3fc p = pts[i];
-				vertexData[idx++] = p.x();
-				vertexData[idx++] = p.y();
-				vertexData[idx++] = p.z();
-				vertexData[idx++] = n.x();
-				vertexData[idx++] = n.y();
-				vertexData[idx++] = n.z();
-				vertexData[idx++] = us[i];
-				vertexData[idx++] = vs[i];
-			}
-		}
+	private record PhysicsParticleVertex(
+		float x,
+		float y,
+		float z,
+		float nx,
+		float ny,
+		float nz,
+		float u,
+		float v
+	) {
 	}
 
-	private UV computeBaseUV(BlockState state) {
-		Minecraft mc = Minecraft.getInstance();
+	private static final ResourceLocation GRASS = VidLib.id("block/grass");
+
+	private static UV computeBaseUV(Minecraft mc, BlockState state) {
 		TextureAtlasSprite sprite;
+
 		if (state.getBlock() instanceof GrassBlock) {
 			sprite = mc.getBlockAtlas().getSprite(GRASS);
 		} else {
 			sprite = mc.getBlockRenderer().getBlockModel(state).particleIcon();
 		}
+
 		return new UV(sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());
 	}
 
-	private UV multiplyUV(UV a, UV b) {
+	private static UV multiplyUV(UV a, UV b) {
 		float u0 = a.u0() + (a.u1() - a.u0()) * b.u0();
 		float u1 = a.u0() + (a.u1() - a.u0()) * b.u1();
 		float v0 = a.v0() + (a.v1() - a.v0()) * b.v0();
@@ -64,27 +47,68 @@ public class PhysicsParticleShape {
 		return new UV(u0, v0, u1, v1);
 	}
 
-	public void render(VertexConsumer consumer, Matrix4f pose, float r, float g, float b, float a, int light) {
-		int lightV = (light >> 16) & 0xFFFF;
+	private final BlockState state;
+	private final SplitBox box;
+	private PhysicsParticleVertex[] vertices;
+
+	public PhysicsParticleShape(BlockState state, SplitBox box) {
+		this.state = state;
+		this.box = box;
+	}
+
+	public void render(Minecraft mc, VertexConsumer consumer, Matrix4f pose, int r, int g, int b, int a, int light) {
 		int lightU = light & 0xFFFF;
+		int lightV = (light >> 16) & 0xFFFF;
+		var data = vertices;
 
-		float[] data = vertexData;
-		int idx = 0;
-		for (int i = 0; i < 24; i++) {
-			float x = data[idx++];
-			float y = data[idx++];
-			float z = data[idx++];
-			float nx = data[idx++];
-			float ny = data[idx++];
-			float nz = data[idx++];
-			float u = data[idx++];
-			float v = data[idx++];
+		if (data == null) {
+			data = new PhysicsParticleVertex[24];
 
-			consumer.addVertex(pose, x, y, z)
-				.setUv2(lightU, lightV)
-				.setNormal(nx, ny, nz)
-				.setColor(r, g, b, a)
-				.setUv(u, v);
+			var baseUv = computeBaseUV(mc, state);
+
+			for (int face = 0; face < 6; face++) {
+				var faceShape = box.shape().face(face);
+				var pts = new Vector3fc[]{faceShape.a(), faceShape.b(), faceShape.c(), faceShape.d()};
+				var n = faceShape.n();
+
+				var faceUv = multiplyUV(baseUv, box.uvs()[face]);
+				float u0 = faceUv.u0();
+				float v0 = faceUv.v0();
+				float u1 = faceUv.u1();
+				float v1 = faceUv.v1();
+				var us = new float[]{u0, u0, u1, u1};
+				var vs = new float[]{v0, v1, v1, v0};
+
+				for (int i = 0; i < 4; i++) {
+					data[face * 4 + i] = new PhysicsParticleVertex(
+						pts[i].x(),
+						pts[i].y(),
+						pts[i].z(),
+						n.x(),
+						n.y(),
+						n.z(),
+						us[i],
+						vs[i]
+					);
+				}
+			}
+
+			vertices = data;
 		}
+
+		for (int i = 0; i < 24; i++) {
+			var v = data[i];
+
+			consumer.addVertex(pose, v.x, v.y, v.z)
+				.setColor(r, g, b, a)
+				.setUv(v.u, v.v)
+				.setUv2(lightU, lightV)
+				.setNormal(v.nx, v.ny, v.nz)
+			;
+		}
+	}
+
+	public void clearCache() {
+		vertices = null;
 	}
 }

@@ -8,6 +8,7 @@ import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.bloom.BloomRenderTypes;
+import dev.latvian.mods.vidlib.feature.client.RenderLightLayer;
 import dev.latvian.mods.vidlib.feature.client.TerrainRenderTypes;
 import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
@@ -37,7 +38,7 @@ public class ShapePropRenderer implements PropRenderer<ShapeProp> {
 		var lc = prop.canInteract && ctx.frame().mc().hitResult instanceof PropHitResult hit && hit.prop == prop ? Color.WHITE : prop.outlineColor.get(progress);
 
 		if (lc.alpha() > 0) {
-			if (prop.bloom) {
+			if (prop.lightLayer == RenderLightLayer.BLOOM) {
 				Bloom.markActive();
 				prop.shape.buildQuads(0F, 0F, 0F, ms.last().transform(BloomRenderTypes.POS_COL_BUFFER_SUPPLIER.quadsCull(BloomRenderTypes.overridePosCol(buffers))).withColor(lc));
 			} else {
@@ -49,7 +50,7 @@ public class ShapePropRenderer implements PropRenderer<ShapeProp> {
 
 		if (c.alpha() > 0) {
 			if (prop.texture != Empty.TEXTURE) {
-				if (prop.bloom) {
+				if (prop.lightLayer == RenderLightLayer.BLOOM) {
 					Bloom.markActive();
 					prop.shape.buildQuads(0F, 0F, 0F, ms.last().transform(buffers.getBuffer(DebugRenderTypes.QUADS)).withColor(c));
 				} else {
@@ -57,7 +58,7 @@ public class ShapePropRenderer implements PropRenderer<ShapeProp> {
 					prop.shape.buildQuads(0F, 0F, 0F, callback);
 				}
 			} else {
-				if (prop.bloom) {
+				if (prop.lightLayer == RenderLightLayer.BLOOM) {
 					Bloom.markActive();
 					prop.shape.buildQuads(0F, 0F, 0F, ms.last().transform(buffers.getBuffer(DebugRenderTypes.QUADS)).withColor(c));
 				} else {

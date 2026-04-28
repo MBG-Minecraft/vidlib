@@ -286,7 +286,6 @@ public class VidLibClientEventHandler {
 		FrameInfo.CURRENT = frame;
 
 		var ms = frame.poseStack();
-		float delta = frame.worldDelta();
 
 		if (session.fluidPlane != null && frame.layer() != null) {
 			FluidPlaneRenderer.render(frame, session.fluidPlane);
