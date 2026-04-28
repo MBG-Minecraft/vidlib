@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.FrustumIntersection;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -156,6 +157,7 @@ public class PhysicsParticleManager {
 		var frustum = frame.frustum();
 
 		var mutablePos = new BlockPos.MutableBlockPos();
+		var tempNormal = new Vector3f();
 
 		for (PhysicsParticle p : particles) {
 			float dScale = KMath.lerp(delta, p.prevScale, p.scale);
@@ -201,7 +203,10 @@ public class PhysicsParticleManager {
 				light = level.vl$getPackedLight(mutablePos.set(rx, ry, rz));
 			}
 
-			p.shape.render(mc, consumer, poseStack.last().pose(), p.red, p.green, p.blue, p.alpha, light);
+			int lightU = light & 0xFFFF;
+			int lightV = (light >> 16) & 0xFFFF;
+
+			p.shape.render(mc, consumer, poseStack.last(), tempNormal, p.red, p.green, p.blue, p.alpha, lightU, lightV);
 			poseStack.popPose();
 			rendered++;
 		}

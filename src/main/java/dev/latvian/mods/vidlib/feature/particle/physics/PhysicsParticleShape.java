@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.particle.physics;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.klib.math.SplitBox;
 import dev.latvian.mods.klib.texture.UV;
@@ -10,19 +11,40 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.GrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 public class PhysicsParticleShape {
+	private record PhysicsParticleFace(
+		PhysicsParticleVertex a,
+		PhysicsParticleVertex b,
+		PhysicsParticleVertex c,
+		PhysicsParticleVertex d,
+		float nx,
+		float ny,
+		float nz
+	) {
+	}
+
 	private record PhysicsParticleVertex(
 		float x,
 		float y,
 		float z,
-		float nx,
-		float ny,
-		float nz,
 		float u,
 		float v
 	) {
+		public PhysicsParticleVertex(Vector3fc pos, float u, float v) {
+			this(pos.x(), pos.y(), pos.z(), u, v);
+		}
+
+		public void addVertex(VertexConsumer consumer, Matrix4f m, float nx, float ny, float nz, int r, int g, int b, int a, int lightU, int lightV) {
+			consumer.addVertex(m, x, y, z)
+				.setColor(r, g, b, a)
+				.setUv(u, v)
+				.setUv2(lightU, lightV)
+				.setNormal(nx, ny, nz);
+			;
+		}
 	}
 
 	private static final ResourceLocation GRASS = VidLib.id("block/grass");
@@ -49,66 +71,60 @@ public class PhysicsParticleShape {
 
 	private final BlockState state;
 	private final SplitBox box;
-	private PhysicsParticleVertex[] vertices;
+	private PhysicsParticleFace[] faces;
 
 	public PhysicsParticleShape(BlockState state, SplitBox box) {
 		this.state = state;
 		this.box = box;
 	}
 
-	public void render(Minecraft mc, VertexConsumer consumer, Matrix4f pose, int r, int g, int b, int a, int light) {
-		int lightU = light & 0xFFFF;
-		int lightV = (light >> 16) & 0xFFFF;
-		var data = vertices;
+	public void render(Minecraft mc, VertexConsumer consumer, PoseStack.Pose pose, Vector3f tempNormal, int r, int g, int b, int a, int lightU, int lightV) {
+		var data = faces;
 
 		if (data == null) {
-			data = new PhysicsParticleVertex[24];
+			data = new PhysicsParticleFace[6];
 
 			var baseUv = computeBaseUV(mc, state);
 
 			for (int face = 0; face < 6; face++) {
 				var faceShape = box.shape().face(face);
-				var pts = new Vector3fc[]{faceShape.a(), faceShape.b(), faceShape.c(), faceShape.d()};
-				var n = faceShape.n();
 
 				var faceUv = multiplyUV(baseUv, box.uvs()[face]);
 				float u0 = faceUv.u0();
 				float v0 = faceUv.v0();
 				float u1 = faceUv.u1();
 				float v1 = faceUv.v1();
-				var us = new float[]{u0, u0, u1, u1};
-				var vs = new float[]{v0, v1, v1, v0};
 
-				for (int i = 0; i < 4; i++) {
-					data[face * 4 + i] = new PhysicsParticleVertex(
-						pts[i].x(),
-						pts[i].y(),
-						pts[i].z(),
-						n.x(),
-						n.y(),
-						n.z(),
-						us[i],
-						vs[i]
-					);
-				}
+				data[face] = new PhysicsParticleFace(
+					new PhysicsParticleVertex(faceShape.a(), u0, v0),
+					new PhysicsParticleVertex(faceShape.b(), u0, v1),
+					new PhysicsParticleVertex(faceShape.c(), u1, v1),
+					new PhysicsParticleVertex(faceShape.d(), u1, v0),
+					faceShape.n().x(),
+					faceShape.n().y(),
+					faceShape.n().z()
+				);
 			}
 
-			vertices = data;
+			faces = data;
 		}
 
-		for (int i = 0; i < 24; i++) {
-			var v = data[i];
+		var m = pose.pose();
 
-			consumer.addVertex(pose, v.x, v.y, v.z)
-				.setColor(r, g, b, a)
-				.setUv(v.u, v.v)
-				.setUv2(lightU, lightV)
-				.setNormal(v.nx, v.ny, v.nz)
-			;
+		for (int f = 0; f < 6; f++) {
+			var face = data[f];
+			pose.transformNormal(face.nx, face.ny, face.nz, tempNormal);
+			float nx = tempNormal.x;
+			float ny = tempNormal.y;
+			float nz = tempNormal.z;
+			face.a.addVertex(consumer, m, nx, ny, nz, r, g, b, a, lightU, lightV);
+			face.b.addVertex(consumer, m, nx, ny, nz, r, g, b, a, lightU, lightV);
+			face.c.addVertex(consumer, m, nx, ny, nz, r, g, b, a, lightU, lightV);
+			face.d.addVertex(consumer, m, nx, ny, nz, r, g, b, a, lightU, lightV);
 		}
 	}
 
 	public void clearCache() {
-		vertices = null;
+		faces = null;
 	}
 }
