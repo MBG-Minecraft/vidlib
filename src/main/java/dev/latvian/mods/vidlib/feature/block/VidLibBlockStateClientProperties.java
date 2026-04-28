@@ -13,9 +13,9 @@ public class VidLibBlockStateClientProperties implements WithCache {
 		return (VidLibBlockStateClientProperties) state.vl$clientProperties();
 	}
 
-	public final BlockState state;
 	private Int2ObjectMap<PhysicsParticleShape> blockParticleShapes;
 	public PhysicsParticleManager manager;
+	public final BlockState state;
 
 	public VidLibBlockStateClientProperties(BlockState state) {
 		this.state = state;
@@ -23,12 +23,6 @@ public class VidLibBlockStateClientProperties implements WithCache {
 
 	@Override
 	public void clearCache() {
-		if (blockParticleShapes != null) {
-			for (var v : blockParticleShapes.values()) {
-				v.clearCache();
-			}
-		}
-
 		blockParticleShapes = null;
 		manager = null;
 	}
@@ -40,7 +34,6 @@ public class VidLibBlockStateClientProperties implements WithCache {
 
 		var key = box.key();
 		var e = blockParticleShapes.get(key);
-
 		if (e == null) {
 			e = new PhysicsParticleShape(state, box);
 			blockParticleShapes.put(key, e);

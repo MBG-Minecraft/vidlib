@@ -1,21 +1,16 @@
 package dev.latvian.mods.vidlib.feature.particle.physics;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import dev.latvian.mods.klib.math.KMath;
-import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
-import org.joml.FrustumIntersection;
-import org.joml.Matrix4fStack;
 
 import java.util.Comparator;
 
 public class PhysicsParticle implements Comparable<PhysicsParticle> {
-	public static final double SQRT_2 = Math.sqrt(2);
 	public static final Comparator<PhysicsParticle> COMPARATOR = Comparable::compareTo;
 
 	public PhysicsParticleManager manager;
@@ -45,73 +40,6 @@ public class PhysicsParticle implements Comparable<PhysicsParticle> {
 	public int prevBlockStateType = -1;
 	public int blockStateType = -1;
 
-	public void render(Matrix4fStack matrix, FrameInfo frame, PhysicsParticleRenderPass pass) {
-		float delta = frame.worldDelta();
-		float dScale = KMath.lerp(delta, prevScale, scale);
-
-		if (dScale < 0.001F) {
-			return;
-		}
-
-		var frustum = frame.frustum();
-
-		double rx = KMath.lerp(delta, prevX, x);
-		double ry = KMath.lerp(delta, prevY, y);
-		double rz = KMath.lerp(delta, prevZ, z);
-		var ro = dScale * SQRT_2;
-		int cubeInFrustum = frustum.cubeInFrustum(rx - ro, ry - ro, rz - ro, rx + ro, ry + ro, rz + ro);
-
-		if (cubeInFrustum != FrustumIntersection.INSIDE && cubeInFrustum != FrustumIntersection.INTERSECT) {
-			return;
-		}
-
-		float ox = frame.x(rx);
-		float oy = frame.y(ry);
-		float oz = frame.z(rz);
-
-		matrix.pushMatrix();
-		matrix.translate(ox, oy, oz);
-
-		if (rotationAngle != 0F) {
-			matrix.rotateY(rotationAngle);
-		}
-
-		float dSpin = KMath.lerp(delta, prevSpin, spin);
-
-		if (dSpin != 0F) {
-			matrix.rotateX(dSpin);
-		}
-
-		if (rotationRoll != 0F) {
-			matrix.rotateZ(rotationRoll);
-		}
-
-		if (dScale != 1F) {
-			matrix.scale(dScale);
-		}
-
-		RenderSystem.setShaderColor(red, green, blue, alpha);
-
-		var buffers = shape.getBuffers();
-
-		if (pass.lastBuffers != buffers) {
-			pass.lastBuffers = buffers;
-
-			if (buffers != null) {
-				pass.renderPass.setVertexBuffer(0, buffers.vertexBuffer());
-			}
-
-			manager.buffersSwitched++;
-		}
-
-		if (buffers != null) {
-			pass.renderPass.drawIndexed(0, buffers.indexCount());
-		}
-
-		matrix.popMatrix();
-		manager.rendered++;
-	}
-
 	public boolean tick(Level level, long gameTime) {
 		prevX = x;
 		prevY = y;
@@ -122,15 +50,6 @@ public class PhysicsParticle implements Comparable<PhysicsParticle> {
 		if (age >= ttl || gameTimeSpawned > gameTime || gameTimeSpawned + ttl < gameTime) {
 			return true;
 		}
-
-		/*
-		tick += speed;
-
-		while (tick >= 1F) {
-			tick0(level);
-			tick -= 1F;
-		}
-		 */
 
 		tick0(level);
 		age++;
@@ -208,22 +127,18 @@ public class PhysicsParticle implements Comparable<PhysicsParticle> {
 		spin += rotationSpeed;
 
 		scale = 1F;
-
 		if (age > ttl - 10) {
 			scale = 1F - (age - (ttl - 10F)) / 10F;
 		}
-
 		scale *= scaleMul;
 	}
 
 	@Override
 	public int compareTo(@NotNull PhysicsParticle o) {
 		int i = Integer.compare(shape.hashCode(), o.shape.hashCode());
-
 		if (i == 0) {
 			i = Integer.compare(tint, o.tint);
 		}
-
 		return i;
 	}
 }

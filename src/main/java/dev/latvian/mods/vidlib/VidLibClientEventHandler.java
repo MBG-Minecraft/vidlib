@@ -376,7 +376,6 @@ public class VidLibClientEventHandler {
 			GhostStructure.render(frame);
 
 			var tool = VidLibTool.of(mc.player);
-
 			if (tool != null) {
 				tool.getSecond().visuals(mc.player, tool.getFirst(), Visuals.TEMP, frame.screenDelta());
 

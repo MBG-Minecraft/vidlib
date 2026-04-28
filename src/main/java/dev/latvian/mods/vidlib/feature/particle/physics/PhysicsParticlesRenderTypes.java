@@ -6,8 +6,6 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
 
 public interface PhysicsParticlesRenderTypes {
 	VertexFormat FORMAT = VertexFormat.builder()
@@ -38,29 +36,4 @@ public interface PhysicsParticlesRenderTypes {
 		.withShaderDefine("ALPHA_CUTOUT", 0.1F)
 		.withBlend(BlendFunction.TRANSLUCENT)
 		.build();
-
-	RenderType PHYSICS_SOLID = RenderType.create(
-		VidLib.id("physics_particle/solid").toString(),
-		1536,
-		SOLID_PIPELINE,
-		RenderType.CompositeState.builder()
-			.createCompositeState(false)
-	);
-
-	RenderType PHYSICS_CUTOUT = RenderType.create(
-		VidLib.id("physics_particle/cutout").toString(),
-		1536,
-		CUTOUT_PIPELINE,
-		RenderType.CompositeState.builder()
-			.createCompositeState(false)
-	);
-
-	RenderType PHYSICS_TRANSLUCENT = RenderType.create(
-		VidLib.id("physics_particle/translucent").toString(),
-		1536,
-		TRANSLUCENT_PIPELINE,
-		RenderType.CompositeState.builder()
-			.setOutputState(RenderStateShard.TRANSLUCENT_TARGET)
-			.createCompositeState(false)
-	);
 }

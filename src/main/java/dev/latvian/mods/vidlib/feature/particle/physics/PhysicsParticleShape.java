@@ -1,85 +1,89 @@
 package dev.latvian.mods.vidlib.feature.particle.physics;
 
-
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.ByteBufferBuilder;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import dev.latvian.mods.klib.gl.StaticBuffers;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.klib.math.SplitBox;
 import dev.latvian.mods.klib.texture.UV;
-import dev.latvian.mods.klib.util.WithCache;
 import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.client.Minecraft;
-import net.minecraft.commands.arguments.blocks.BlockStateParser;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.GrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
+import org.joml.Vector3fc;
 
-import java.util.Optional;
-import java.util.function.Supplier;
-
-public class PhysicsParticleShape implements WithCache, Supplier<String> {
+public class PhysicsParticleShape {
 	private static final ResourceLocation GRASS = VidLib.id("block/grass");
 
-	public final BlockState state;
-	public final SplitBox box;
-	private StaticBuffers buffers;
+	private final float[] vertexData = new float[24 * 8]; // pos.xyz, normal.xyz, u, v
 
 	public PhysicsParticleShape(BlockState state, SplitBox box) {
-		this.state = state;
-		this.box = box;
-	}
+		UV baseUv = computeBaseUV(state);
 
-	@Override
-	public String toString() {
-		return BlockStateParser.serialize(state) + " " + box.split().id + " " + box.index();
-	}
+		int idx = 0;
+		for (int face = 0; face < 6; face++) {
+			var faceShape = box.shape().face(face);
+			Vector3fc[] pts = { faceShape.a(), faceShape.b(), faceShape.c(), faceShape.d() };
+			Vector3fc n = faceShape.n();
 
-	@Nullable
-	public StaticBuffers getBuffers() {
-		if (buffers == null || !buffers.isEmpty() && buffers.vertexBuffer().isClosed()) {
-			var format = PhysicsParticlesRenderTypes.FORMAT;
-			buffers = StaticBuffers.empty(format);
+			UV faceUv = multiplyUV(baseUv, box.uvs()[face]);
+			float u0 = faceUv.u0(), v0 = faceUv.v0(), u1 = faceUv.u1(), v1 = faceUv.v1();
+			float[] us = { u0, u0, u1, u1 };
+			float[] vs = { v0, v1, v1, v0 };
 
-			var mc = Minecraft.getInstance();
-			var s = state.getBlock() instanceof GrassBlock ? mc.getBlockAtlas().getSprite(GRASS) : mc.getBlockRenderer().getBlockModel(state).particleIcon();
-			var suv = new UV(s.getU0(), s.getV0(), s.getU1(), s.getV1());
-
-			try (var memory = new ByteBufferBuilder(format.getVertexSize() * 4 * 6)) {
-				var buffer = new BufferBuilder(memory, VertexFormat.Mode.QUADS, format);
-
-				for (int i = 0; i < 6; i++) {
-					var f = box.shape().face(i);
-					var uv = suv.mul(box.uvs()[i]);
-
-					buffer.addVertex(f.a().x(), f.a().y(), f.a().z()).setUv(uv.u0(), uv.v0()).setNormal(f.n().x(), f.n().y(), f.n().z());
-					buffer.addVertex(f.b().x(), f.b().y(), f.b().z()).setUv(uv.u0(), uv.v1()).setNormal(f.n().x(), f.n().y(), f.n().z());
-					buffer.addVertex(f.c().x(), f.c().y(), f.c().z()).setUv(uv.u1(), uv.v1()).setNormal(f.n().x(), f.n().y(), f.n().z());
-					buffer.addVertex(f.d().x(), f.d().y(), f.d().z()).setUv(uv.u1(), uv.v0()).setNormal(f.n().x(), f.n().y(), f.n().z());
-				}
-
-				try (var meshData = buffer.build()) {
-					if (meshData != null) {
-						buffers = StaticBuffers.of(meshData, this, Optional.empty());
-					}
-				}
+			for (int i = 0; i < 4; i++) {
+				Vector3fc p = pts[i];
+				vertexData[idx++] = p.x();
+				vertexData[idx++] = p.y();
+				vertexData[idx++] = p.z();
+				vertexData[idx++] = n.x();
+				vertexData[idx++] = n.y();
+				vertexData[idx++] = n.z();
+				vertexData[idx++] = us[i];
+				vertexData[idx++] = vs[i];
 			}
 		}
-
-		return buffers.isEmpty() ? null : buffers;
 	}
 
-	@Override
-	public void clearCache() {
-		if (buffers != null) {
-			buffers.close();
-			buffers = null;
+	private UV computeBaseUV(BlockState state) {
+		Minecraft mc = Minecraft.getInstance();
+		TextureAtlasSprite sprite;
+		if (state.getBlock() instanceof GrassBlock) {
+			sprite = mc.getBlockAtlas().getSprite(GRASS);
+		} else {
+			sprite = mc.getBlockRenderer().getBlockModel(state).particleIcon();
 		}
+		return new UV(sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());
 	}
 
-	@Override
-	public String get() {
-		return state.vl$toString() + ":" + box;
+	private UV multiplyUV(UV a, UV b) {
+		float u0 = a.u0() + (a.u1() - a.u0()) * b.u0();
+		float u1 = a.u0() + (a.u1() - a.u0()) * b.u1();
+		float v0 = a.v0() + (a.v1() - a.v0()) * b.v0();
+		float v1 = a.v0() + (a.v1() - a.v0()) * b.v1();
+		return new UV(u0, v0, u1, v1);
+	}
+
+	public void render(VertexConsumer consumer, Matrix4f pose, float r, float g, float b, float a, int light) {
+		int lightV = (light >> 16) & 0xFFFF;
+		int lightU = light & 0xFFFF;
+
+		int idx = 0;
+		for (int i = 0; i < 24; i++) {
+			float x = vertexData[idx++];
+			float y = vertexData[idx++];
+			float z = vertexData[idx++];
+			float nx = vertexData[idx++];
+			float ny = vertexData[idx++];
+			float nz = vertexData[idx++];
+			float u = vertexData[idx++];
+			float v = vertexData[idx++];
+
+			consumer.addVertex(pose, x, y, z)
+				.setUv2(lightU, lightV)
+				.setNormal(nx, ny, nz)
+				.setColor(r, g, b, a)
+				.setUv(u, v);
+		}
 	}
 }
