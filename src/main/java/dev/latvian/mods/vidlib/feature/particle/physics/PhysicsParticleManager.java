@@ -144,6 +144,8 @@ public class PhysicsParticleManager {
 		double camZ = frame.cameraZ();
 		var frustum = frame.frustum();
 
+		BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+
 		for (PhysicsParticle p : particles) {
 			float dScale = KMath.lerp(delta, p.prevScale, p.scale);
 			if (dScale < 0.001F) {
@@ -179,9 +181,9 @@ public class PhysicsParticleManager {
 				poseStack.scale(dScale, dScale, dScale);
 			}
 
-			int light = 1_000_000;
+			int light = 0x00F000F0; // 15
 			if (level != null) {
-				light = level.vl$getPackedLight(BlockPos.containing(rx, ry, rz));
+				light = level.vl$getPackedLight(mutablePos.set(rx, ry, rz));
 			}
 
 			p.shape.render(consumer, poseStack.last().pose(), p.red, p.green, p.blue, p.alpha, light);

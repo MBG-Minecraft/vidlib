@@ -68,16 +68,17 @@ public class PhysicsParticleShape {
 		int lightV = (light >> 16) & 0xFFFF;
 		int lightU = light & 0xFFFF;
 
+		float[] data = vertexData;
 		int idx = 0;
 		for (int i = 0; i < 24; i++) {
-			float x = vertexData[idx++];
-			float y = vertexData[idx++];
-			float z = vertexData[idx++];
-			float nx = vertexData[idx++];
-			float ny = vertexData[idx++];
-			float nz = vertexData[idx++];
-			float u = vertexData[idx++];
-			float v = vertexData[idx++];
+			float x = data[idx++];
+			float y = data[idx++];
+			float z = data[idx++];
+			float nx = data[idx++];
+			float ny = data[idx++];
+			float nz = data[idx++];
+			float u = data[idx++];
+			float v = data[idx++];
 
 			consumer.addVertex(pose, x, y, z)
 				.setUv2(lightU, lightV)
