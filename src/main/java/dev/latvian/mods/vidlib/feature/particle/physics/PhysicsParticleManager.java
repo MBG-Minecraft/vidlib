@@ -221,6 +221,7 @@ public class PhysicsParticleManager {
 			queue.clear();
 			particles.sort(PhysicsParticle.COMPARATOR);
 		}
+
 		particles.removeIf(p -> p.tick(level, gameTime));
 	}
 
