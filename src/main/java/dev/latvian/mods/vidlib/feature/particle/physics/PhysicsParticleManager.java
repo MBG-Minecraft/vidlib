@@ -98,7 +98,7 @@ public class PhysicsParticleManager {
 		}
 
 		var rl = ItemBlockRenderTypes.getChunkRenderType(state);
-		if (rl == RenderType.translucent()) {
+		if (rl == RenderType.translucent() || rl == RenderType.tripwire()) {
 			return TRANSLUCENT;
 		} else if (rl == RenderType.cutout() || rl == RenderType.cutoutMipped()) {
 			return CUTOUT;
