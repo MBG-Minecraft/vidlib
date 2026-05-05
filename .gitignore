@@ -46,6 +46,7 @@ out/
 
 ### Eclipse ###
 eclipse/
+/.eclipse/
 .apt_generated
 .classpath
 .factorypath

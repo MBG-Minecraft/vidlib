@@ -1,0 +1,45 @@
+{
+	"blend": "translucent",
+	"vertex": "vidlib:core/physics_particle",
+	"fragment": "vidlib:core/physics_particle",
+	"attributes": ["Position", "UV0", "UV2", "Normal"],
+	"samplers": [
+		{
+			"name": "Sampler0"
+		}
+	],
+	"uniforms": [
+		{
+			"name": "ModelViewMat",
+			"type": "matrix4x4",
+			"count": 16,
+			"buffer": "matrix"
+		},
+		{
+			"name": "ProjMat",
+			"type": "matrix4x4",
+			"count": 16,
+			"buffer": "matrix"
+		},
+		{
+			"name": "ColorModulator",
+			"type": "float",
+			"count": 4
+		},
+		{
+			"name": "FogStart",
+			"type": "float",
+			"count": 1
+		},
+		{
+			"name": "FogEnd",
+			"type": "float",
+			"count": 1
+		},
+		{
+			"name": "FogColor",
+			"type": "float",
+			"count": 4
+		}
+	]
+}

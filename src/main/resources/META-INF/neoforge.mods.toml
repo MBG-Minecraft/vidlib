@@ -31,5 +31,12 @@ versionRange = "*"
 ordering = "AFTER"
 side = "BOTH"
 
+[[dependencies.vidlib]]
+modId = "iris"
+type = "optional"
+versionRange = "*"
+ordering = "AFTER"
+side = "BOTH"
+
 [[mixins]]
 config = "vidlib.mixins.json"
