@@ -37,6 +37,10 @@ public class AutoHelper {
 		return initClass(annotation.clazz().getClassName(), classLoader);
 	}
 
+	public static <T> T getValue(ScannedAnnotation ad, String name, T defaultValue) {
+		return (T) ad.annotationData().getOrDefault(name, defaultValue);
+	}
+
 	public static <E extends Enum<E>> E getEnumValue(ScannedAnnotation ad, Class<E> enumClass, String name, E defaultValue) {
 		var typeData = ad.annotationData().get(name);
 

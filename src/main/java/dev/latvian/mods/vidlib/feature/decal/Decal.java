@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.decal;
 
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.vidlib.feature.client.ColorBlendMode;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.SelectedPosition;
@@ -21,13 +22,13 @@ public class Decal {
 	public static Color DANGER_INNER_COLOR = Color.ofRGB(0xFFAA00);
 	public static Color DANGER_OUTER_COLOR = Color.RED;
 
-	public static Decal createDanger(float width) {
-		var d = new Decal();
+	public static Decal createDanger(Vector3d position, float width) {
+		var d = new Decal(position);
 		d.type = DecalType.DANGER;
-		d.start = 0F;
-		d.end = width;
-		d.startColor = DANGER_INNER_COLOR.withAlpha(100);
-		d.endColor = DANGER_OUTER_COLOR.withAlpha(100);
+		d.innerSize = 0F;
+		d.outerSize = width;
+		d.innerColor = DANGER_INNER_COLOR.withAlpha(100);
+		d.outerColor = DANGER_OUTER_COLOR.withAlpha(100);
 		d.setHeight(0.1875F);
 		d.fillSize = 1F;
 		d.terrain = true;
@@ -37,36 +38,36 @@ public class Decal {
 	public Decal parent;
 	public DecalType type;
 	public Vector3d position;
-	public float start;
-	public float end;
+	public float innerSize;
+	public float outerSize;
 	public DecalFillType fillType;
 	public float fillSize;
 	public float fillThickness;
 	public float heightScale;
 	public float rotation;
-	public Color startColor;
-	public Color endColor;
+	public Color innerColor;
+	public Color outerColor;
 	public boolean surface;
 	public boolean terrain;
-	public boolean additive;
+	public ColorBlendMode blendMode;
 	public float edges;
 
-	public Decal() {
+	public Decal(Vector3d position) {
 		this.parent = null;
-		this.type = DecalType.SPHERE;
-		this.position = new Vector3d();
-		this.start = 0F;
-		this.end = 1F;
+		this.type = DecalType.CYLINDER;
+		this.position = position;
+		this.innerSize = 0F;
+		this.outerSize = 1F;
 		this.fillType = DecalFillType.SOLID;
 		this.fillSize = 1F;
 		this.fillThickness = 0.0625F;
 		this.heightScale = 1F;
 		this.rotation = 0F;
-		this.startColor = Color.WHITE;
-		this.endColor = Color.WHITE;
+		this.innerColor = Color.WHITE;
+		this.outerColor = Color.WHITE;
 		this.surface = false;
 		this.terrain = false;
-		this.additive = false;
+		this.blendMode = ColorBlendMode.MULTIPLICATIVE;
 		this.edges = 4F;
 	}
 
@@ -74,18 +75,18 @@ public class Decal {
 		this.parent = other;
 		this.type = other.type;
 		this.position = other.position;
-		this.start = other.start;
-		this.end = other.end;
+		this.innerSize = other.innerSize;
+		this.outerSize = other.outerSize;
 		this.fillType = other.fillType;
 		this.fillSize = other.fillSize;
 		this.fillThickness = other.fillThickness;
 		this.heightScale = other.heightScale;
 		this.rotation = other.rotation;
-		this.startColor = other.startColor;
-		this.endColor = other.endColor;
+		this.innerColor = other.innerColor;
+		this.outerColor = other.outerColor;
 		this.surface = other.surface;
 		this.terrain = other.terrain;
-		this.additive = other.additive;
+		this.blendMode = other.blendMode;
 		this.edges = other.edges;
 	}
 
@@ -108,7 +109,7 @@ public class Decal {
 	}
 
 	public boolean isVisible() {
-		return type != DecalType.NONE && end > 0F && (startColor.alpha() > 0 || endColor.alpha() > 0);
+		return type != DecalType.NONE && outerSize > 0F && (innerColor.alpha() > 0 || outerColor.alpha() > 0);
 	}
 
 	public void addToList(List<Decal> list) {
@@ -116,8 +117,8 @@ public class Decal {
 			if (fillSize > 0F) {
 				var g = new Decal(this);
 				g.type = DecalType.CYLINDER;
-				g.startColor = startColor.withAlpha(0);
-				g.end = end - fillThickness;
+				g.innerColor = innerColor.withAlpha(0);
+				g.outerSize = outerSize - fillThickness;
 				g.fillType = DecalFillType.GRID;
 
 				if (g.isVisible()) {
@@ -127,8 +128,8 @@ public class Decal {
 
 			var e = new Decal(this);
 			e.type = DecalType.CYLINDER;
-			e.start = e.end - fillThickness;
-			e.startColor = endColor;
+			e.innerSize = e.outerSize - fillThickness;
+			e.innerColor = outerColor;
 			e.fillType = DecalFillType.SOLID;
 			e.fillSize = 0F;
 
@@ -153,19 +154,20 @@ public class Decal {
 		arr.add((type.shaderId & 7)
 			| (surface ? 8 : 0)
 			| (terrain ? 16 : 0)
+			| ((blendMode.ordinal() & 3) << 5)
 		);
 
 		arr.add(Float.floatToIntBits((float) (position.x - cameraPos.x))); // 1
 		arr.add(Float.floatToIntBits((float) (position.y - cameraPos.y))); // 2
 		arr.add(Float.floatToIntBits((float) (position.z - cameraPos.z))); // 3
 
-		arr.add(Float.floatToIntBits(start)); // 4
-		arr.add(Float.floatToIntBits(end)); // 5
+		arr.add(Float.floatToIntBits(innerSize)); // 4
+		arr.add(Float.floatToIntBits(outerSize)); // 5
 		arr.add(Float.floatToIntBits(heightScale)); // 6
 		arr.add(Float.floatToIntBits((float) Math.toRadians(rotation < 0F ? (rotation + 360F) : rotation))); // 7
 
-		arr.add(startColor.argb()); // 8
-		arr.add(endColor.argb()); // 9
+		arr.add(innerColor.argb()); // 8
+		arr.add(outerColor.argb()); // 9
 		arr.add(fillType.shaderId & 7); // 10
 		arr.add(Float.floatToIntBits(fillSize)); // 11
 		arr.add(Float.floatToIntBits(fillThickness)); // 12
@@ -206,22 +208,27 @@ public class Decal {
 			terrain = ImGuiUtils.BOOLEAN.get();
 		}
 
+		ImGui.text("Blend Mode");
+		var blendModeArr = new ColorBlendMode[]{blendMode};
+		graphics.combo("###blend-mode", blendModeArr, "", ColorBlendMode.VALUES, c -> c.displayName);
+		blendMode = blendModeArr[0];
+
 		ImGui.text("Size");
 		graphics.smallText("Width");
 
-		float[] starta = {start};
-		float[] enda = {end};
-		ImGuiUtils.FLOAT.set(start);
-		ImGui.dragFloatRange2("###size-range", starta, enda, 0.0625F, 0F, 100F, "%f");
-		start = starta[0];
-		end = enda[0];
+		float[] innerArr = {innerSize};
+		float[] outerArr = {outerSize};
+		ImGuiUtils.FLOAT.set(innerSize);
+		ImGui.dragFloatRange2("###size-range", innerArr, outerArr, 0.0625F, 0F, 100F, "%f");
+		innerSize = innerArr[0];
+		outerSize = outerArr[0];
 
 		graphics.hoveredTooltip("Size Range");
 
-		float diff = end - start;
-		if (ImGui.dragFloat("###size", starta, 0.0625F, 0F, 100F, "%f")) {
-			start = starta[0];
-			end = start + diff;
+		float diff = outerSize - innerSize;
+		if (ImGui.dragFloat("###size", innerArr, 0.0625F, 0F, 100F, "%f")) {
+			innerSize = innerArr[0];
+			outerSize = innerSize + diff;
 		}
 
 		graphics.hoveredTooltip("Size");
@@ -234,10 +241,10 @@ public class Decal {
 
 		graphics.hoveredTooltip("Height Scale");
 
-		starta[0] = getHeight();
+		innerArr[0] = getHeight();
 
-		if (ImGui.dragFloat("###height", starta, 0.0625F, 0F, 100F, "%f")) {
-			setHeight(starta[0]);
+		if (ImGui.dragFloat("###height", innerArr, 0.0625F, 0F, 100F, "%f")) {
+			setHeight(innerArr[0]);
 		}
 
 		graphics.hoveredTooltip("Height");
@@ -245,20 +252,20 @@ public class Decal {
 		// start = starta[0];
 		// end = start + hdiff;
 
-		Color4ImBuilder.UNIT.set(startColor);
-		Color4ImBuilder.UNIT.imguiKey(graphics, "Start Color", "start-color");
-		startColor = Color4ImBuilder.UNIT.build();
+		Color4ImBuilder.UNIT.set(innerColor);
+		Color4ImBuilder.UNIT.imguiKey(graphics, "Inner Color", "inner-color");
+		innerColor = Color4ImBuilder.UNIT.build();
 
-		Color4ImBuilder.UNIT.set(endColor);
-		Color4ImBuilder.UNIT.imguiKey(graphics, "End Color", "end-color");
-		endColor = Color4ImBuilder.UNIT.build();
+		Color4ImBuilder.UNIT.set(outerColor);
+		Color4ImBuilder.UNIT.imguiKey(graphics, "Outer Color", "outer-color");
+		outerColor = Color4ImBuilder.UNIT.build();
 
 		ImGui.alignTextToFramePadding();
 		ImGui.text("Fill");
 		ImGui.sameLine();
 
 		DecalFillType.UNIT[0] = fillType;
-		graphics.combo("###fill-type", DecalFillType.UNIT, "", DecalFillType.VALUES);
+		graphics.combo("###fill-type", DecalFillType.UNIT, "", DecalFillType.VALUES, t -> t.displayName);
 		fillType = DecalFillType.UNIT[0];
 
 		if (fillType != DecalFillType.SOLID) {
@@ -286,11 +293,11 @@ public class Decal {
 	}
 
 	public float getHeight() {
-		return end * heightScale * 2F;
+		return outerSize * heightScale * 2F;
 	}
 
 	public void setHeight(float height) {
-		heightScale = height / (end * 2F);
+		heightScale = height / (outerSize * 2F);
 	}
 
 	public void applyProgress(float progress) {
@@ -299,7 +306,7 @@ public class Decal {
 			return;
 		}
 
-		startColor = startColor.withAlpha(startColor.alphaf() * progress);
-		endColor = endColor.withAlpha(endColor.alphaf() * progress);
+		innerColor = innerColor.withAlpha(innerColor.alphaf() * progress);
+		outerColor = outerColor.withAlpha(outerColor.alphaf() * progress);
 	}
 }

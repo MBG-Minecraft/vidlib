@@ -191,6 +191,11 @@ public class NeoPlatformHelper extends PlatformHelper {
 	}
 
 	@Override
+	public boolean isModLoaded(String modId) {
+		return ModList.get().isLoaded(modId);
+	}
+
+	@Override
 	public void collectDynamicResources(PackType type, Consumer<ResourceLocation> callback) {
 		ModLoader.postEvent(type == PackType.CLIENT_RESOURCES ? new DynamicResourceEvent.Assets(callback) : new DynamicResourceEvent.Data(callback));
 	}

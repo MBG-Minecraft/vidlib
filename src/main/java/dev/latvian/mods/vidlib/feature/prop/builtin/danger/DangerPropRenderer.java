@@ -29,15 +29,14 @@ public class DangerPropRenderer implements PropRenderer<DangerProp> {
 		float progress = (float) (1D - EaseOut.QUINT.interpolate(1D - distance));
 
 		if (progress > 0F) {
-			var decal = Decal.createDanger((float) (prop.width / 2D * Mth.lerp(progress, prop.widthMod, 1D)));
-			decal.setPosition(new Vector3d(pos.x, prop.groundY - 0.0625D, pos.z), true);
+			var decal = Decal.createDanger(new Vector3d(pos.x, prop.groundY - 0.0625D, pos.z), (float) (prop.width / 2D * Mth.lerp(progress, prop.widthMod, 1D)));
 			// decal.grid = Mth.lerp(progress, 4F, 0.25F); // optional
 
 			if (prop.blink) {
 				int blink = distance > 0.95D ? 2 : distance > 0.85D ? 4 : 0;
 
 				if (blink > 0 && prop.tick % (blink * 2) >= blink) {
-					decal.endColor = Color.WHITE.withAlpha(100);
+					decal.outerColor = Color.WHITE.withAlpha(100);
 				}
 			}
 

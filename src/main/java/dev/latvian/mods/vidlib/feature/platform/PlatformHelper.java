@@ -109,6 +109,10 @@ public class PlatformHelper {
 		return List.of();
 	}
 
+	public boolean isModLoaded(String modId) {
+		return false;
+	}
+
 	public void collectDynamicResources(PackType type, Consumer<ResourceLocation> callback) {
 	}
 

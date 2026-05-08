@@ -65,6 +65,8 @@ public @interface AutoInit {
 
 	Type[] value() default Type.DEFAULT;
 
+	String requiresMod() default "";
+
 	@ApiStatus.Internal
 	Lazy<List<AutoMethod>> SCANNED = Lazy.of(() -> {
 		var list = new ArrayList<AutoMethod>();
@@ -80,14 +82,21 @@ public @interface AutoInit {
 				}
 
 				if (type.clientOnly && !currentSide.isClient()) {
-					VidLib.LOGGER.info("Skipped @AutoInit class " + ad.clazz().getClassName());
+					VidLib.LOGGER.info("Skipped @AutoInit class " + ad.clazz().getClassName() + " (Client Only)");
 					return;
 				}
 
 				if (type.methodOnly && ad.targetType() != ElementType.METHOD) {
-					VidLib.LOGGER.info("Skipped @AutoInit class " + ad.clazz().getClassName());
+					VidLib.LOGGER.info("Skipped @AutoInit class " + ad.clazz().getClassName() + " (Method Only)");
 					return;
 				}
+			}
+
+			var requiresMod = AutoHelper.getValue(ad, "requiresMod", "");
+
+			if (!requiresMod.isEmpty() && !PlatformHelper.CURRENT.isModLoaded(requiresMod)) {
+				VidLib.LOGGER.info("Skipped @AutoInit class " + ad.clazz().getClassName() + " (Missing Mod '" + requiresMod + "')");
+				return;
 			}
 
 			var clazz = AutoHelper.initClass(ad, classLoader);

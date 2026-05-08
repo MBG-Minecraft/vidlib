@@ -17,7 +17,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -31,7 +30,7 @@ import java.util.function.Consumer;
 
 @AutoInit(AutoInit.Type.CLIENT_LOADED)
 public class PhysicsParticleManager {
-	public static final PhysicsParticleManager CUTOUT_MIPPED = new PhysicsParticleManager("Cutout Mipped", TerrainRenderLayer.CUTOUT_MIPPED, RenderType.cutoutMipped(), RenderType.cutoutMipped(), true);
+	public static final PhysicsParticleManager CUTOUT_MIPPED = new PhysicsParticleManager("Cutout Mipped", TerrainRenderLayer.CUTOUT_MIPPED, RenderType.cutoutMipped(), PhysicsParticlesRenderTypes.CUTOUT_MIPPED, true);
 	public static final PhysicsParticleManager TRANSLUCENT = new PhysicsParticleManager("Translucent", TerrainRenderLayer.TRANSLUCENT, RenderType.translucent(), PhysicsParticlesRenderTypes.TRANSLUCENT, true);
 	public static final PhysicsParticleManager TRIPWIRE = new PhysicsParticleManager("Tripwire", TerrainRenderLayer.TRIPWIRE, RenderType.tripwire(), RenderType.tripwire(), true);
 	public static final PhysicsParticleManager CUTOUT = new PhysicsParticleManager("Cutout", TerrainRenderLayer.CUTOUT, RenderType.cutout(), PhysicsParticlesRenderTypes.CUTOUT, false);
@@ -152,7 +151,7 @@ public class PhysicsParticleManager {
 		texture.setFilter(false, mipmaps);
 		RenderSystem.setShaderTexture(0, texture.getTexture());
 
-		RenderType currentType = IrisIntegration.INSTANCE.isShaderPackInUse() ? vanillaRenderType : fallbackRenderType;
+		var currentType = IrisIntegration.INSTANCE.isShaderPackInUse() ? vanillaRenderType : fallbackRenderType;
 		var consumer = bufferSource.getBuffer(currentType);
 		var poseStack = frame.poseStack();
 		float delta = frame.worldDelta();
@@ -205,9 +204,9 @@ public class PhysicsParticleManager {
 			int light = LightTexture.FULL_BRIGHT;
 
 			mutablePos.set(p.x, p.y, p.z);
+
 			if (level != null) {
-				//light = level.vl$getPackedLight(mutablePos);
-				light = LightTexture.pack(level.getBrightness(LightLayer.BLOCK, mutablePos), level.getBrightness(LightLayer.SKY, mutablePos));
+				light = level.vl$getPackedLight(mutablePos);
 			}
 
 			int lightU = light & 0xFFFF;
@@ -220,6 +219,7 @@ public class PhysicsParticleManager {
 
 		texture.setFilter(false, false);
 		RenderSystem.setShaderTexture(0, texture.getTexture());
+		mc.renderBuffers().bufferSource().endBatch(currentType);
 	}
 
 	public void tick(Level level, long gameTime) {

@@ -8,12 +8,11 @@ import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.util.TriState;
 
 public interface PhysicsParticlesRenderTypes {
 	VertexFormat FORMAT = VertexFormat.builder()
 		.add("Position", VertexFormatElement.POSITION)
+		.add("Color", VertexFormatElement.COLOR)
 		.add("UV0", VertexFormatElement.UV0)
 		.add("UV2", VertexFormatElement.UV2)
 		.add("Normal", VertexFormatElement.NORMAL)
@@ -24,6 +23,7 @@ public interface PhysicsParticlesRenderTypes {
 		.withVertexShader(VidLib.id("core/physics_particle"))
 		.withFragmentShader(VidLib.id("core/physics_particle"))
 		.withSampler("Sampler0")
+		.withSampler("Sampler2")
 		.withCull(true)
 		.buildSnippet();
 
@@ -38,7 +38,24 @@ public interface PhysicsParticlesRenderTypes {
 		false,
 		SOLID_PIPELINE,
 		RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(TextureAtlas.LOCATION_BLOCKS, TriState.FALSE, true))
+			.setTextureState(RenderStateShard.BLOCK_SHEET_MIPPED)
+			.setLightmapState(RenderStateShard.LIGHTMAP)
+			.createCompositeState(true)
+	);
+
+	RenderPipeline CUTOUT_MIPPED_PIPELINE = RenderPipeline.builder(PIPELINE_BASE)
+		.withLocation(VidLib.id("pipeline/physics_particle/cutout_mipped"))
+		.withShaderDefine("ALPHA_CUTOUT", 0.5F)
+		.build();
+
+	RenderType CUTOUT_MIPPED = RenderType.create(
+		"physics_particle_cutout_mipped",
+		1536,
+		true,
+		false,
+		CUTOUT_MIPPED_PIPELINE,
+		RenderType.CompositeState.builder()
+			.setTextureState(RenderStateShard.BLOCK_SHEET_MIPPED)
 			.setLightmapState(RenderStateShard.LIGHTMAP)
 			.createCompositeState(true)
 	);
@@ -55,7 +72,7 @@ public interface PhysicsParticlesRenderTypes {
 		false,
 		CUTOUT_PIPELINE,
 		RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(TextureAtlas.LOCATION_BLOCKS, TriState.FALSE, false))
+			.setTextureState(RenderStateShard.BLOCK_SHEET)
 			.setLightmapState(RenderStateShard.LIGHTMAP)
 			.createCompositeState(true)
 	);
@@ -73,7 +90,7 @@ public interface PhysicsParticlesRenderTypes {
 		true,
 		TRANSLUCENT_PIPELINE,
 		RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(TextureAtlas.LOCATION_BLOCKS, TriState.FALSE, true))
+			.setTextureState(RenderStateShard.BLOCK_SHEET_MIPPED)
 			.setLightmapState(RenderStateShard.LIGHTMAP)
 			.setOutputState(RenderStateShard.TRANSLUCENT_TARGET)
 			.createCompositeState(true)

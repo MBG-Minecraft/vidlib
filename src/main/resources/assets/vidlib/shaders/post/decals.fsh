@@ -1,5 +1,6 @@
 #version 410 core
 
+uniform sampler2D InSampler;
 uniform sampler2D InDepthSampler;
 uniform sampler2D TerrainInDepthSampler;
 uniform sampler2D DataSampler;
@@ -32,7 +33,7 @@ vec4 decodeColor(int x, int y) {
 	return texelFetch(DataSampler, ivec2(x, y), 0);
 }
 
-float getInside(int type, vec3 pos, float start, float end, float height, float rotation, float edges) {
+float getInside(int type, vec3 pos, float inner, float outer, float height, float rotation, float edges) {
 	if (type == 1) {
 		float degSeg = 6.283185307179586 / edges;
 		float degSegd2 = degSeg / 2.0;
@@ -43,8 +44,8 @@ float getInside(int type, vec3 pos, float start, float end, float height, float 
 		pos.z = sin(angle) * len;
 
 		float m = 1.0 / cos(angle - degSegd2);
-		float hs = start * sqrt3d2;
-		float he = end * sqrt3d2;
+		float hs = inner * sqrt3d2;
+		float he = outer * sqrt3d2;
 		float rhs = hs * m;
 		float rhe = he * m;
 		float h = (len - rhs) / (rhe - rhs);
@@ -54,22 +55,22 @@ float getInside(int type, vec3 pos, float start, float end, float height, float 
 		pos.y /= height;
 		float distSq = dot(pos, pos);
 
-		if (distSq <= end * end && distSq >= start * start) {
-			return (sqrt(distSq) - start) / (end - start);
+		if (distSq <= outer * outer && distSq >= inner * inner) {
+			return (sqrt(distSq) - inner) / (outer - inner);
 		}
 	} else if (type == 3 || type == 5) {
 		pos.y /= height;
 		float y = abs(pos.y);
 
-		if (y <= end) {
+		if (y <= outer) {
 			float distSq = dot(pos.xz, pos.xz);
-			float r = (distSq <= end * end && distSq >= start * start) ? (sqrt(distSq) - start) / (end - start) : -1.0;
+			float r = (distSq <= outer * outer && distSq >= inner * inner) ? (sqrt(distSq) - inner) / (outer - inner) : -1.0;
 
 			if (type == 2) {
 				return r;
 			} else {
-				float v = (y - start) / (end - start);
-				return distSq <= end * end ? max(r, v) : -1.0;
+				float v = (y - inner) / (outer - inner);
+				return distSq <= outer * outer ? max(r, v) : -1.0;
 			}
 		}
 	} else if (type == 6) {
@@ -87,18 +88,29 @@ float getInside(int type, vec3 pos, float start, float end, float height, float 
 			v = max(v, abs(pos.y));
 		}
 
-		if (v >= start && v <= end) {
-			return (v - start) / (end - start);
+		if (v >= inner && v <= outer) {
+			return (v - inner) / (outer - inner);
 		}
 	}
 
 	return -1.0;
 }
 
-vec4 blend(vec4 src, vec4 dst) {
-	vec3 c = src.rgb * src.a + dst.rgb * (1.0 - src.a);
-	float a = src.a + dst.a * (1.0 - src.a);
-	return vec4(c, a);
+vec3 blend(vec3 src, vec3 dst, float amount, int blendMode) {
+	if (blendMode == 1) {
+		// Additive
+		return clamp(src + dst * amount, 0.0, 1.0);
+	} else if (blendMode == 2) {
+		// Subtractive
+		return clamp(src - dst * amount, 0.0, 1.0);
+	} else {
+		// Multiplicative
+		return dst * amount + src * (1.0 - amount);
+	}
+}
+
+vec3 blend(vec3 src, vec4 dst, int blendMode) {
+	return blend(src, dst.rgb, dst.a, blendMode);
 }
 
 vec3 clip(float depth) {
@@ -120,7 +132,7 @@ void main() {
 	vec3 worldPos = clip(depth);
 	vec3 terrainWorldPos = clip(terrainDepth);
 
-	vec4 color = vec4(0.0);
+	vec3 color = texture(InSampler, texCoord).rgb;
 	bool modified = false;
 
 	for (int y = 0; y < 1024; y++) {
@@ -136,20 +148,21 @@ void main() {
 			continue;
 		}
 
+		int blendMode = (head >> 5) & 3;
 		vec3 decalPos = vec3(decodeFloat(1, y), decodeFloat(2, y), decodeFloat(3, y));
-		float start = decodeFloat(4, y);
-		float end = decodeFloat(5, y);
+		float inner = decodeFloat(4, y);
+		float outer = decodeFloat(5, y);
 		float height = decodeFloat(6, y);
 		float rotation = decodeFloat(7, y);
 		float edges = decodeFloat(13, y);
 
 		vec3 pos = (terrain == 0 ? worldPos : terrainWorldPos) - decalPos;
-		float inside = getInside(type, pos, start, end, height, rotation, edges);
+		float inside = getInside(type, pos, inner, outer, height, rotation, edges);
 
 		if (inside >= 0.0 && inside <= 1.0) {
-			vec4 startColor = decodeColor(8, y);
-			vec4 endColor = decodeColor(9, y);
-			vec4 decalColor = mix(startColor, endColor, inside);
+			vec4 innerColor = decodeColor(8, y);
+			vec4 outerColor = decodeColor(9, y);
+			vec4 decalColor = mix(innerColor, outerColor, inside);
 
 			if (decalColor.a > 0.0) {
 				int fillHead = int(decodeUInt(10, y));
@@ -170,7 +183,7 @@ void main() {
 						}
 
 						if (mod(g.x, fillSize) < fillThickness || mod(g.y, fillSize) < fillThickness || mod(g.z, fillSize) < fillThickness) {
-							color = blend(color, decalColor);
+							color = blend(color, decalColor, blendMode);
 							modified = true;
 						}
 
@@ -189,7 +202,7 @@ void main() {
 						float time = (fillType == 3) ? (GameTime * 1200.0 * fillSize) : 0.0;
 
 						if (mod(g.x + g.y + g.z + time, fillSize) < fillThickness) {
-							color = blend(color, decalColor);
+							color = blend(color, decalColor, blendMode);
 							modified = true;
 						}
 
@@ -197,14 +210,14 @@ void main() {
 					}
 				}
 
-				color = blend(color, decalColor);
+				color = blend(color, decalColor, blendMode);
 				modified = true;
 			}
 		}
 	}
 
 	if (modified) {
-		fragColor = color;
+		fragColor = vec4(color, 1.0);
 	} else {
 		discard;
 	}

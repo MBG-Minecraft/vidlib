@@ -144,9 +144,9 @@ public interface VidLibRenderTypes {
 	);
 
 	TexturedRenderType STRONG_OUTLINE = TexturedRenderType.create(texture -> RenderType.create(
-		"strong_outline",
+			"strong_outline",
 			1536,
-		RenderPipelines.OUTLINE_CULL,
+			RenderPipelines.OUTLINE_CULL,
 			RenderType.CompositeState.builder()
 				.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
 				.setOutputState(Canvas.STRONG_OUTLINE.getOutputStateShard())
