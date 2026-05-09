@@ -1,9 +1,9 @@
 package dev.mrbeastgaming.mods.hub.link;
 
-import dev.latvian.apps.tinyserver.HTTPServer;
-import dev.latvian.apps.tinyserver.http.HTTPRequest;
-import dev.latvian.apps.tinyserver.http.response.HTTPResponse;
-import dev.latvian.apps.tinyserver.http.response.error.client.BadRequestError;
+import dev.latvian.apps.tinyhttp.HTTPServer;
+import dev.latvian.apps.tinyhttp.http.HTTPRequest;
+import dev.latvian.apps.tinyhttp.http.response.HTTPResponse;
+import dev.latvian.apps.tinyhttp.http.response.error.client.BadRequestError;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.mrbeastgaming.mods.hub.HubUserConfig;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;

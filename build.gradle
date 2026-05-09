@@ -181,10 +181,10 @@ dependencies {
 		}
 	}
 
-	additionalRuntimeClasspath(jarJar(implementation('dev.latvian.apps:tiny-java-server'))) {
+	additionalRuntimeClasspath(jarJar(implementation('dev.latvian.apps:tiny-http'))) {
 		version {
-			strictly "[$tiny_server_version,)"
-			prefer "$tiny_server_version"
+			strictly "[$tiny_http_version,)"
+			prefer "$tiny_http_version"
 		}
 	}
 

@@ -66,6 +66,7 @@ import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import dev.mrbeastgaming.mods.hub.api.HubFileType;
 import dev.mrbeastgaming.mods.hub.api.HubUserData;
+import dev.mrbeastgaming.mods.hub.api.gateway.HubGateway;
 import dev.mrbeastgaming.mods.hub.file.ClientHubFileUploads;
 import dev.mrbeastgaming.mods.hub.link.LinkHubUserScreen;
 import net.minecraft.ChatFormatting;
@@ -762,5 +763,11 @@ public class VidLibClientEventHandler {
 	@SubscribeEvent
 	public static void gameShuttingDown(GameShuttingDownEvent event) {
 		VidLib.LOGGER.info("Shutting down");
+
+		var c = HubGateway.client;
+
+		if (c != null) {
+			c.stop();
+		}
 	}
 }
