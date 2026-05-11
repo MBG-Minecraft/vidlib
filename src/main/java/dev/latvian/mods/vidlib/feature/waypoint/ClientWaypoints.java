@@ -4,7 +4,10 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.feature.icon.renderer.IconRenderer;
+import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
@@ -19,8 +22,22 @@ import java.util.Comparator;
 
 public interface ClientWaypoints {
 	ImBoolean VISIBLE = new ImBoolean(true);
-	ImFloat WAYPOINT_SIZE = new ImFloat(32F);
-	ImInt WAYPOINT_ALPHA = new ImInt(255);
+	ImBoolean BYPASS_FILTERS = new ImBoolean(false);
+	ImFloat SIZE = new ImFloat(36F);
+	ImInt ALPHA = new ImInt(255);
+
+	static void fbVisualsMenu(ImGraphics graphics) {
+		ImGui.checkbox("Enabled###waypoints-enabled", VISIBLE);
+		ImGui.checkbox("Bypass Filters###bypass-filters", BYPASS_FILTERS);
+
+		if (ImGui.smallButton(ImIcons.UNDO + "###reset-size")) {
+			SIZE.set(36F);
+		}
+
+		ImGui.sameLine();
+		ImGui.sliderFloat("Size###size", SIZE.getData(), 0F, 1024F);
+		ImGui.sliderInt("Alpha###alpha", ALPHA.getData(), 1, 255);
+	}
 
 	static void draw(GuiGraphics graphics, DeltaTracker deltaTracker) {
 		if (!VISIBLE.get() || graphics.vl$mc().options.hideGui) {
@@ -47,14 +64,13 @@ public interface ClientWaypoints {
 		}
 
 		var ctx = level.getGlobalContext();
-		WAYPOINT_SIZE.set(36F);
 
-		int wpSize = (int) (WAYPOINT_SIZE.get() * mc.getEffectScale());
+		int wpSize = (int) (SIZE.get() * mc.getEffectScale());
 		var list = new ArrayList<ScreenWaypoint>(waypoints.size());
 		var cam = mc.gameRenderer.getMainCamera().getPosition();
 
 		for (var waypoint : waypoints) {
-			if (waypoint.dimension() == level.dimension() && waypoint.visible().test(mc.player)) {
+			if (waypoint.dimension() == level.dimension() && (BYPASS_FILTERS.get() || waypoint.visible().test(mc.player))) {
 				var pos = waypoint.position().get(ctx);
 
 				if (pos != null) {
@@ -76,7 +92,7 @@ public interface ClientWaypoints {
 		}
 
 		for (var wp : list) {
-			float alpha = wp.waypoint().alpha() * (WAYPOINT_ALPHA.get() / 255F);
+			float alpha = wp.waypoint().alpha() * (ALPHA.get() / 255F);
 			double minDistance = wp.waypoint().minDistance();
 			double midDistance = wp.waypoint().midDistance();
 

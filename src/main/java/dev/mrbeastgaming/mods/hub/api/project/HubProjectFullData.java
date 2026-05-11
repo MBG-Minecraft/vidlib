@@ -1,4 +1,4 @@
-package dev.mrbeastgaming.mods.hub.api;
+package dev.mrbeastgaming.mods.hub.api.project;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

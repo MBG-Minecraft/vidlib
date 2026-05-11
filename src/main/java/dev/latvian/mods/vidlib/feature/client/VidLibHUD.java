@@ -11,6 +11,7 @@ import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import dev.latvian.mods.vidlib.util.NameDrawType;
+import imgui.type.ImFloat;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -23,7 +24,6 @@ import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.ReadOnlyScoreInfo;
 import net.neoforged.neoforge.common.NeoForge;
@@ -36,6 +36,7 @@ import java.util.function.Predicate;
 public interface VidLibHUD {
 	Mutable<Predicate<Player>> DEFAULT_DRAW_NAME = new MutableObject<>(player -> !player.isBoss());
 	Mutable<Predicate<Player>> DEFAULT_DRAW_HEALTH_BAR = new MutableObject<>(player -> player.isSurvivalLike() && !player.isBoss());
+	ImFloat NAME_SCALE = new ImFloat(1F);
 
 	static void drawPlayerNames(GuiGraphics graphics, DeltaTracker deltaTracker) {
 		var mc = Minecraft.getInstance();
@@ -86,10 +87,11 @@ public interface VidLibHUD {
 			}
 
 			if (mustSee && local != null && player != local && mc.level != null) {
-				Vec3 start = local.getEyePosition(selfDelta);
-				Vec3 end = player.getEyePosition(player == self ? selfDelta : delta);
-				ClipContext context = new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, local);
-				HitResult result = mc.level.clip(context);
+				var start = local.getEyePosition(selfDelta);
+				var end = player.getEyePosition(player == self ? selfDelta : delta);
+				var context = new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, local);
+				var result = mc.level.clip(context);
+
 				if (result.getType() == HitResult.Type.BLOCK) {
 					continue;
 				}
@@ -125,7 +127,7 @@ public interface VidLibHUD {
 				var wpos = projectedCoordinates.screen(pos);
 
 				if (wpos != null) {
-					var scale = (float) Math.clamp(KMath.map(dist, minDist, midDist, 1F, minSize), minSize, 1F);
+					var scale = (float) Math.clamp(KMath.map(dist, minDist, midDist, 1F, minSize), minSize, 1F) * NAME_SCALE.get();
 
 					lines.clear();
 
@@ -183,7 +185,7 @@ public interface VidLibHUD {
 					var wpos = projectedCoordinates.screen(pos);
 
 					if (wpos != null) {
-						var scale = (float) Math.clamp(KMath.map(dist, minDist, midDist, 1F, minSize), minSize, 1F);
+						var scale = (float) Math.clamp(KMath.map(dist, minDist, midDist, 1F, minSize), minSize, 1F) * NAME_SCALE.get();
 
 						lines.clear();
 

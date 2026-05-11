@@ -11,6 +11,8 @@ import dev.latvian.mods.klib.util.MD5;
 import dev.latvian.mods.klib.util.Tristate;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.mrbeastgaming.mods.hub.HubUserConfig;
+import dev.mrbeastgaming.mods.hub.api.project.HubProjectReplaysData;
+import dev.mrbeastgaming.mods.hub.api.project.HubProjectsData;
 import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadRequestItem;
 import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadResponseItem;
 import net.minecraft.Util;
@@ -101,6 +103,10 @@ public interface HubAPI {
 		return request("/api/users/request-token/" + token, Tristate.FALSE).build();
 	}
 
+	static HubProjectsData apiProjects() throws Exception {
+		return HubProjectsData.CODEC.parse(JsonOps.INSTANCE, sendJsonRequest(request("/api/projects", Tristate.DEFAULT).build())).getOrThrow();
+	}
+
 	static HttpRequest apiProjectFullData(Hex32 project) {
 		return request("/api/projects/" + project + "/full-data", Tristate.DEFAULT).build();
 	}
@@ -165,5 +171,10 @@ public interface HubAPI {
 		}
 
 		return result;
+	}
+
+	static HubProjectReplaysData apiProjectReplays(Hex32 project) throws Exception {
+		var response = sendJsonRequest(request("/api/projects/" + project + "/replays", Tristate.TRUE).GET().build()).getAsJsonObject();
+		return HubProjectReplaysData.CODEC.parse(JsonOps.INSTANCE, response).getOrThrow();
 	}
 }

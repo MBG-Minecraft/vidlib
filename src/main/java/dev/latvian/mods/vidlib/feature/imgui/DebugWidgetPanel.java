@@ -6,6 +6,8 @@ import dev.latvian.mods.klib.interpolation.Interpolation;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
+import dev.latvian.mods.klib.util.Hex32;
+import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
@@ -32,6 +34,7 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
 import dev.latvian.mods.vidlib.math.knumber.KNumberNodeImBuilder;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
+import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubCountries;
 import dev.mrbeastgaming.mods.hub.api.HubCountry;
 import imgui.ImGui;
@@ -585,6 +588,14 @@ public class DebugWidgetPanel extends Panel {
 		}
 
 		ImGui.separator();
+
+		if (ImGui.button("Print Replays###print-replays")) {
+			try {
+				VidLib.LOGGER.info(HubAPI.apiProjectReplays(Hex32.of(1)).toString());
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
 
 		ImGui.popItemWidth();
 	}

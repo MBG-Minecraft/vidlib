@@ -8,6 +8,9 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import dev.mrbeastgaming.mods.hub.HubUserConfig;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubGateway;
+import dev.mrbeastgaming.mods.hub.api.project.HubParticipantData;
+import dev.mrbeastgaming.mods.hub.api.project.HubProjectData;
+import dev.mrbeastgaming.mods.hub.api.project.HubProjectsData;
 
 import java.net.URI;
 import java.util.List;
@@ -73,5 +76,7 @@ public record HubClientSessionData(
 		HubUserCapabilities.CURRENT = userCapabilities;
 		HubMinecraftProfileData.SELF = minecraftProfileData;
 		HubGameServerData.CURRENT = servers;
+
+		HubProjectsData.ALL.forget();
 	}
 }

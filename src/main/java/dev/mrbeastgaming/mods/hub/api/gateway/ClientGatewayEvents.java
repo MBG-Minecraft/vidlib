@@ -7,6 +7,8 @@ import dev.mrbeastgaming.mods.hub.api.HubGameServerData;
 import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.api.HubUserData;
 import dev.mrbeastgaming.mods.hub.api.HubUserFlags;
+import dev.mrbeastgaming.mods.hub.api.project.HubProjectData;
+import dev.mrbeastgaming.mods.hub.api.project.HubProjectsData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
@@ -31,6 +33,7 @@ public class ClientGatewayEvents {
 		event.register("flags_updated", ClientGatewayEvents::flagsUpdated);
 		event.register("capabilities_updated", ClientGatewayEvents::capabilitiesUpdated);
 		event.register("server_list_updated", ClientGatewayEvents::serverListUpdated);
+		event.register("project_updated", ClientGatewayEvents::projectUpdated);
 		// TODO: edit options
 		// TODO: save replay
 		// TODO: save voice recording
@@ -83,5 +86,16 @@ public class ClientGatewayEvents {
 
 	private static void serverListUpdated(HubGatewayEvent event) {
 		HubGameServerData.CURRENT = event.params() == null ? List.of() : HubGameServerData.LIST_CODEC.parse(JsonOps.INSTANCE, event.params()).getOrThrow();
+	}
+
+	private static void projectUpdated(HubGatewayEvent event) {
+		var data = HubProjectData.CODEC.parse(JsonOps.INSTANCE, event.params()).getOrThrow();
+		HubProjectsData.ALL.forget();
+
+		var pack = HubProjectData.PACK;
+
+		if (pack != null && pack.id().equals(data.id())) {
+			HubProjectData.PACK = data;
+		}
 	}
 }

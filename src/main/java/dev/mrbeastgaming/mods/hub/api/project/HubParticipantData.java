@@ -1,9 +1,12 @@
-package dev.mrbeastgaming.mods.hub.api;
+package dev.mrbeastgaming.mods.hub.api.project;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.util.Hex32;
+import dev.mrbeastgaming.mods.hub.api.HubDataMap;
+import dev.mrbeastgaming.mods.hub.api.HubMinecraftProfileData;
+import dev.mrbeastgaming.mods.hub.api.HubRobloxProfileData;
 
 import java.time.Instant;
 import java.util.Optional;

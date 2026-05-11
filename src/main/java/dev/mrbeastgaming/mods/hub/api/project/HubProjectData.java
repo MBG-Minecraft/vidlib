@@ -1,9 +1,11 @@
-package dev.mrbeastgaming.mods.hub.api;
+package dev.mrbeastgaming.mods.hub.api.project;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.util.Hex32;
 import dev.latvian.mods.klib.util.UInt64;
+import dev.mrbeastgaming.mods.hub.api.HubDataMap;
+import dev.mrbeastgaming.mods.hub.api.HubGameData;
 
 import java.util.List;
 

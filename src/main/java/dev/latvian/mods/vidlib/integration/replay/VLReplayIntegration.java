@@ -22,6 +22,7 @@ import dev.latvian.mods.replay.api.event.ReplayVisualsMenuEvent;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibClientEventHandler;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
+import dev.latvian.mods.vidlib.feature.client.VidLibHUD;
 import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
 import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
@@ -294,7 +295,12 @@ public class VLReplayIntegration {
 				ImGui.checkbox("Clocks###clocks", ClockRenderer.VISIBLE);
 				ImGui.checkbox("Bloom###bloom", Bloom.VISIBLE);
 				ImGui.checkbox("Ghost Structures###ghost-structures", GhostStructure.VISIBLE_CONFIG);
-				ImGui.checkbox("Waypoints###waypoints", ClientWaypoints.VISIBLE);
+				ImGui.sliderFloat("Name Scale###name-scale", VidLibHUD.NAME_SCALE.getData(), 0F, 4F);
+				event.endSection();
+			}
+
+			if (event.beginSection("waypoints", "Waypoints")) {
+				ClientWaypoints.fbVisualsMenu(event.getGraphics());
 				event.endSection();
 			}
 

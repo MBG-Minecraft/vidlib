@@ -37,9 +37,9 @@ import java.util.UUID;
 
 public interface Pins {
 	ImBoolean ENABLED = new ImBoolean(true);
-	ImFloat PIN_SIZE = new ImFloat(256F);
-	ImFloat PIN_OFFSET = new ImFloat(0F);
-	ImInt PIN_ALPHA = new ImInt(255);
+	ImFloat SIZE = new ImFloat(256F);
+	ImFloat OFFSET = new ImFloat(0F);
+	ImInt ALPHA = new ImInt(255);
 
 	Map<UUID, Pin> PINS = new Object2ObjectOpenHashMap<>();
 
@@ -53,9 +53,9 @@ public interface Pins {
 
 	MenuItem MENU_ITEM = MenuItem.menu(ImIcons.LOCATION, "Pins", (graphics, items) -> {
 		items.add(MenuItem.item(ImIcon.NONE, "Enabled", ENABLED));
-		items.add(MenuItem.sliderFloat("Size", PIN_SIZE::get, PIN_SIZE::set, 0F, 1024F));
-		items.add(MenuItem.sliderFloat("Offset", PIN_OFFSET::get, PIN_OFFSET::set, 0F, 1F));
-		items.add(MenuItem.sliderInt("Alpha", PIN_ALPHA::get, PIN_ALPHA::set, 1, 255));
+		items.add(MenuItem.sliderFloat("Size", SIZE::get, SIZE::set, 0F, 1024F));
+		items.add(MenuItem.sliderFloat("Offset", OFFSET::get, OFFSET::set, 0F, 1F));
+		items.add(MenuItem.sliderInt("Alpha", ALPHA::get, ALPHA::set, 1, 255));
 	});
 
 	static void draw(GuiGraphics graphics, DeltaTracker deltaTracker) {
@@ -77,7 +77,7 @@ public interface Pins {
 		}
 
 		var delta = deltaTracker.getGameTimeDeltaPartialTick(false);
-		int pinSize = (int) (PIN_SIZE.get() * mc.getEffectScale());
+		int pinSize = (int) (SIZE.get() * mc.getEffectScale());
 
 		var list = new ArrayList<ScreenPin>(PINS.size());
 
@@ -107,11 +107,11 @@ public interface Pins {
 			var wpos = projectedCoordinates.screen(screenPin.pos());
 
 			if (wpos != null) {
-				int pinAlpha = PIN_ALPHA.get() << 24;
+				int pinAlpha = ALPHA.get() << 24;
 
 				graphics.pose().pushPose();
 				graphics.pose().translate(wpos.x(), wpos.y() - 2F, 0F);
-				graphics.pose().translate(-pinSize / 2F, -pinSize * (1F + PIN_OFFSET.get()), 0F);
+				graphics.pose().translate(-pinSize / 2F, -pinSize * (1F + OFFSET.get()), 0F);
 				graphics.pose().scale(pinSize / 512F, pinSize / 512F, 1F);
 
 				var shape = screenPin.pin().shapeOverride == null ? screenPin.pin().shape : screenPin.pin().shapeOverride;
@@ -125,7 +125,7 @@ public interface Pins {
 				}
 
 				if (!screenPin.pin().background.isTransparent()) {
-					graphics.blit(VidLibRenderTypes.GUI, shape.maskTexture, shape.x, shape.y, 0F, 0F, size, size, size, size, screenPin.pin().background.withAlpha(screenPin.pin().background.alphaf() * (PIN_ALPHA.get() / 255F)).argb());
+					graphics.blit(VidLibRenderTypes.GUI, shape.maskTexture, shape.x, shape.y, 0F, 0F, size, size, size, size, screenPin.pin().background.withAlpha(screenPin.pin().background.alphaf() * (ALPHA.get() / 255F)).argb());
 				}
 
 				graphics.blit(shape.maskedRenderType, screenPin.image().textureId(), shape.x, shape.y, 1F, 1F, size - 2, size - 2, size, size, pinAlpha | 0xFFFFFF);
@@ -243,8 +243,8 @@ public interface Pins {
 
 	static void fbVisualsMenu(ImGraphics graphics) {
 		ImGui.checkbox("Enabled###pins-enabled", ENABLED);
-		ImGui.sliderFloat("Pin Size###pin-size", PIN_SIZE.getData(), 0F, 1024F);
-		ImGui.sliderFloat("Pin Offset###pin-offset", PIN_OFFSET.getData(), 0F, 1F);
-		ImGui.sliderInt("Pin Alpha###pin-alpha", PIN_ALPHA.getData(), 1, 255);
+		ImGui.sliderFloat("Size###pin-size", SIZE.getData(), 0F, 1024F);
+		ImGui.sliderFloat("Offset###pin-offset", OFFSET.getData(), 0F, 1F);
+		ImGui.sliderInt("Alpha###pin-alpha", ALPHA.getData(), 1, 255);
 	}
 }
