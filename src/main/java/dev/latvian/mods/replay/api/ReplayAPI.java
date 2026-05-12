@@ -6,6 +6,8 @@ import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.file.Path;
+import java.util.List;
 import java.util.UUID;
 
 public class ReplayAPI {
@@ -104,5 +106,14 @@ public class ReplayAPI {
 
 	public boolean isHealthHidden(UUID uuid) {
 		return false;
+	}
+
+	public List<LocalReplayFileInfo> getLocalReplayFiles() {
+		return List.of();
+	}
+
+	@Nullable
+	public LocalReplayFileInfo loadLocalReplayFileInfo(Path path) {
+		return null;
 	}
 }
