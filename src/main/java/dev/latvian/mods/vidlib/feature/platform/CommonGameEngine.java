@@ -11,6 +11,8 @@ import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
@@ -309,6 +311,15 @@ public class CommonGameEngine {
 	}
 
 	public float getAmbientLight(float fallback) {
+		if (FMLLoader.getDist().isClient()) {
+			LocalPlayer player = Minecraft.getInstance().player;
+			if (player != null) {
+				Float value = player.get(InternalPlayerData.BRIGHTNESS_OVERRIDE);
+				if (value >= 0F) {
+					return value;
+				}
+			}
+		}
 		return fallback;
 	}
 

@@ -38,6 +38,7 @@ public interface InternalPlayerData {
 	DataKey<Color> GLOW_COLOR = DataKey.PLAYER.createDefault("glow_color", Color.DATA_TYPE, null, Color4ImBuilder::new);
 	DataKey<Boolean> CAN_FLY = DataKey.PLAYER.createBoolean("can_fly", false);
 	DataKey<Boolean> TRANSLUCENT = DataKey.PLAYER.createBoolean("translucent", false);
+	DataKey<Float> BRIGHTNESS_OVERRIDE = DataKey.PLAYER.createFloat("brightness_override", -1F);
 
 	@AutoInit
 	static void bootstrap() {
