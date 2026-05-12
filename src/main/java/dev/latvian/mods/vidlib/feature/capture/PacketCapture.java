@@ -16,8 +16,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.mutable.MutableInt;
 
-import java.net.URI;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -136,7 +134,7 @@ public class PacketCapture {
 
 		var outputFile = directory.resolve(filename.toString());
 
-		try (var fs = FileSystems.newFileSystem(URI.create("jar:" + outputFile.toUri()), Map.of("create", "true"))) {
+		try (var fs = IOUtils.openAsZip(outputFile, Map.of("create", "true"))) {
 			var metadata = new JsonObject();
 			metadata.addProperty("platform", PlatformHelper.CURRENT.getPlatform());
 			metadata.addProperty("id", "%08x".formatted(sessionId));

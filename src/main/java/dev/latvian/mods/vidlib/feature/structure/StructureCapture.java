@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.io.IOUtils;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.klib.util.MessageConsumer;
 import dev.latvian.mods.vidlib.VidLibPaths;
@@ -15,8 +16,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import org.apache.commons.lang3.mutable.MutableObject;
 
-import java.net.URI;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.util.Map;
 import java.util.UUID;
@@ -76,7 +75,7 @@ public interface StructureCapture {
 
 			Files.deleteIfExists(path);
 
-			try (var jar = FileSystems.newFileSystem(new URI("jar:file", path.toUri().getPath(), null), Map.of("create", "true"))) {
+			try (var jar = IOUtils.openAsZip(path, Map.of("create", "true"))) {
 				Files.writeString(jar.getPath("/pack.mcmeta"), """
 					{
 						"pack": {
