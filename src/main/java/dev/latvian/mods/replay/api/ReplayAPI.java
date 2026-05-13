@@ -116,4 +116,7 @@ public class ReplayAPI {
 	public LocalReplayFileInfo loadLocalReplayFileInfo(Path path) {
 		return null;
 	}
+
+	public void cutRecording() {
+	}
 }

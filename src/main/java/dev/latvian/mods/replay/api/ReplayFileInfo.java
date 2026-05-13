@@ -7,6 +7,7 @@ import net.minecraft.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,6 +45,17 @@ public interface ReplayFileInfo {
 		return -1L;
 	}
 
+	default double getProgress(long gameTime) {
+		var startTick = getStartGameTick();
+		var endTick = getEndGameTick();
+
+		if (startTick == -1L || endTick == 1L || startTick >= endTick) {
+			return -1D;
+		}
+
+		return (double) (gameTime - startTick) / (double) (endTick - startTick);
+	}
+
 	default int getTotalTicks() {
 		long start = getStartGameTick();
 		long end = getEndGameTick();
@@ -55,23 +67,46 @@ public interface ReplayFileInfo {
 		return (int) (end - start);
 	}
 
-	default long getStartUTC() {
-		return -1L;
+	@Nullable
+	default Instant getStartTime() {
+		return null;
 	}
 
-	default long getEndUTC() {
-		return -1L;
+	@Nullable
+	default Instant getEndTime() {
+		return null;
+	}
+
+	@Nullable
+	default Instant getTime(double delta) {
+		var start = getStartTime();
+		var end = getEndTime();
+
+		if (start == null || end == null || !start.isBefore(end)) {
+			return null;
+		} else if (delta <= 0D) {
+			return start;
+		} else if (delta >= 1D) {
+			return end;
+		}
+
+		try {
+			long nanos = Duration.between(start, end).toNanos();
+			return start.plusNanos((long) (nanos * delta));
+		} catch (Exception ex) {
+			return null;
+		}
 	}
 
 	default Duration getTotalDuration() {
-		long start = getStartUTC();
-		long end = getEndUTC();
+		var start = getStartTime();
+		var end = getEndTime();
 
-		if (start == -1L || end == 1L || start >= end) {
+		if (start == null || end == null || end.isAfter(start)) {
 			return Duration.ZERO;
 		}
 
-		return Duration.ofMillis(end - start);
+		return Duration.between(start, end);
 	}
 
 	default PackSyncMeta getPackSyncInfo() {
@@ -80,5 +115,9 @@ public interface ReplayFileInfo {
 
 	default List<PlatformModInfo> getModInfo() {
 		return List.of();
+	}
+
+	default byte @Nullable [] getIconBytes() {
+		return null;
 	}
 }

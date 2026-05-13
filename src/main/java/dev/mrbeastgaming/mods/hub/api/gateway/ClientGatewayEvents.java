@@ -2,6 +2,7 @@ package dev.mrbeastgaming.mods.hub.api.gateway;
 
 import com.google.gson.JsonPrimitive;
 import com.mojang.serialization.JsonOps;
+import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.mrbeastgaming.mods.hub.api.HubGameServerData;
 import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
@@ -34,6 +35,7 @@ public class ClientGatewayEvents {
 		event.register("capabilities_updated", ClientGatewayEvents::capabilitiesUpdated);
 		event.register("server_list_updated", ClientGatewayEvents::serverListUpdated);
 		event.register("project_updated", ClientGatewayEvents::projectUpdated);
+		event.register("cut_recording", ClientGatewayEvents::cutRecording);
 		// TODO: edit options
 		// TODO: save replay
 		// TODO: save voice recording
@@ -97,5 +99,9 @@ public class ClientGatewayEvents {
 		if (pack != null && pack.id().equals(data.id())) {
 			HubProjectData.PACK = data;
 		}
+	}
+
+	private static void cutRecording(HubGatewayEvent hubGatewayEvent) {
+		ReplayAPI.getActive().cutRecording();
 	}
 }

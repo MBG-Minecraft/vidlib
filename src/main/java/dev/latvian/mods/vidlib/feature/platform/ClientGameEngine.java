@@ -95,8 +95,8 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.ModList;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -385,20 +385,20 @@ public class ClientGameEngine {
 	}
 
 	public void bottomInfoBar(ImGraphics graphics, float h) {
-		Date now = null;
+		Instant now = null;
 
 		if (graphics.isReplay) {
 			var current = ReplayAPI.getActive().getOpenSession();
 
 			if (current != null) {
-				long utc = current.getCurrentUTC();
+				var utc = current.getCurrentTime();
 
-				if (utc != -1L) {
-					now = new Date(utc);
+				if (utc != null) {
+					now = utc;
 				}
 			}
 		} else {
-			now = new Date();
+			now = Instant.now();
 		}
 
 		graphics.pushStack();

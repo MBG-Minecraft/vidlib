@@ -1,10 +1,10 @@
 package dev.latvian.mods.replay.api;
 
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
 import java.util.Objects;
 
 public interface ReplaySession {
@@ -23,34 +23,49 @@ public interface ReplaySession {
 		return getLevel().registryAccess();
 	}
 
-	default long getCurrentUTC() {
+	default double getProgress() {
 		var level = getLevel();
 
 		if (level == null) {
-			return -1L;
+			return -1D;
 		}
 
-		var tick = level.getGameTime();
+		var gameTime = level.getGameTime();
+		var fileInfo = getFileInfo();
+		return fileInfo.getProgress(gameTime);
+	}
+
+	@Nullable
+	default Instant getCurrentTime() {
+		var delta = getProgress();
+
+		if (delta < 0D) {
+			return null;
+		}
+
+		var fileInfo = getFileInfo();
+		return fileInfo.getTime(delta);
+	}
+
+	default void moveTo(long gameTime) {
+	}
+
+	default void moveTo(double progress) {
 		var fileInfo = getFileInfo();
 		var startTick = fileInfo.getStartGameTick();
 		var endTick = fileInfo.getEndGameTick();
 
 		if (startTick == -1L || endTick == 1L || startTick >= endTick) {
-			return -1L;
+			return;
 		}
 
-		double delta = (double) (tick - startTick) / (double) (endTick - startTick);
-
-		var startUTC = fileInfo.getStartUTC();
-		var endUTC = fileInfo.getEndUTC();
-
-		if (startUTC == -1L || endUTC == 1L || startUTC >= endUTC) {
-			return -1L;
+		if (progress <= 0D) {
+			moveTo(startTick);
+		} else if (progress >= 1D) {
+			moveTo(endTick);
+		} else {
+			long gameTime = startTick + (long) ((endTick - startTick) * progress);
+			moveTo(gameTime);
 		}
-
-		return startUTC + Mth.floor(delta * (endUTC - startUTC));
-	}
-
-	default void moveTo(long gameTime) {
 	}
 }
