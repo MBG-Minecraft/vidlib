@@ -159,6 +159,10 @@ public record PropType<P extends Prop>(
 		return r == null ? -1 : r.index();
 	}
 
+	public boolean contains(PropData<?, ?> data) {
+		return reverseData.containsKey(data);
+	}
+
 	@Nullable
 	public PropPacketEntry getPacket(int index) {
 		return index < 0 || index >= packets.size() ? null : packets.get(index);

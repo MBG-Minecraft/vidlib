@@ -15,6 +15,7 @@ import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
+import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import org.slf4j.Logger;
@@ -65,5 +66,10 @@ public class VidLib {
 		packets.s2c(new ReplayMarkerPayload(ReplayMarkerData.builder().group(ReplayMarkerGroup.DATA_SYNC).build()));
 		player.vl$sessionData().sync(packets, player, syncType);
 		packets.send(player);
+	}
+
+	public static void errorToHub(String message, Throwable ex) {
+		LOGGER.error(message, ex);
+		HubAPI.log(message, ex);
 	}
 }

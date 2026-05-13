@@ -494,6 +494,8 @@ public class DebugWidgetPanel extends Panel {
 
 						if (i == 170) {
 							item.error("Test Error!");
+
+							HubAPI.log("Test Error", new IllegalStateException("Test Error"));
 						}
 					}
 

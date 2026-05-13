@@ -217,7 +217,7 @@ public class HubFileUploads {
 								progressItem.error(ex.getMessage());
 							}
 
-							VidLib.LOGGER.error("Failed to sync Beast Hub file " + syncFile.fileInfo.name(), ex);
+							VidLib.errorToHub("Failed to sync Beast Hub file " + syncFile.fileInfo.name(), ex);
 						} finally {
 							if (progressItem != null) {
 								progressItem.setDone();

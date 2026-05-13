@@ -10,6 +10,7 @@ import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.klib.util.MD5;
 import dev.latvian.mods.klib.util.Tristate;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import dev.mrbeastgaming.mods.hub.HubUserConfig;
 import dev.mrbeastgaming.mods.hub.api.project.HubProjectReplaysData;
 import dev.mrbeastgaming.mods.hub.api.project.HubProjectsData;
@@ -17,16 +18,21 @@ import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadRequestItem;
 import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadResponseItem;
 import net.minecraft.Util;
 
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 
 public interface HubAPI {
 	URI URI_BASE = URI.create(Optional.ofNullable(System.getenv("MBG_HUB_API_BASE")).orElse("https://hub.mrbeastmc.com"));
@@ -115,7 +121,7 @@ public interface HubAPI {
 		return request("/api/desktop/client-session/" + projectToken, Tristate.TRUE).timeout(Duration.ofSeconds(30L)).build();
 	}
 
-	static List<ProjectUploadResponseItem> apiProjectUpload(String token, List<ProjectUploadRequestItem> files) throws Exception {
+	static List<ProjectUploadResponseItem> apiProjectUpload(String projectToken, List<ProjectUploadRequestItem> files) throws Exception {
 		var body = new JsonObject();
 		var filesJson = new JsonArray();
 
@@ -150,7 +156,7 @@ public interface HubAPI {
 
 		VidLib.LOGGER.info("> " + body);
 
-		var response = sendJsonRequest(request("/api/projects/upload/" + token, Tristate.DEFAULT).POST(jsonBody(body)).build()).getAsJsonObject();
+		var response = sendJsonRequest(request("/api/projects/upload/" + projectToken, Tristate.DEFAULT).POST(jsonBody(body)).build()).getAsJsonObject();
 
 		VidLib.LOGGER.info("< " + response);
 
@@ -176,5 +182,48 @@ public interface HubAPI {
 	static HubProjectReplaysData apiProjectReplays(Hex32 project) throws Exception {
 		var response = sendJsonRequest(request("/api/projects/" + project + "/replays", Tristate.TRUE).GET().build()).getAsJsonObject();
 		return HubProjectReplaysData.CODEC.parse(JsonOps.INSTANCE, response).getOrThrow();
+	}
+
+	static void apiProjectLog(String projectToken, Instant time, String content) throws Exception {
+		var json = new JsonObject();
+		json.addProperty("time", time.toString());
+		json.addProperty("content", content);
+		HTTP_CLIENT.send(request("/api/projects/log/" + projectToken, Tristate.TRUE).POST(jsonBody(json)).build(), HttpResponse.BodyHandlers.discarding());
+	}
+
+	static CompletableFuture<Void> log(Supplier<? extends Iterable<String>> content) {
+		var time = Instant.now();
+
+		return CompletableFuture.runAsync(() -> {
+			try {
+				var projectConfig = HubProjectConfig.INSTANCE.get();
+
+				if (projectConfig != null) {
+					var lines = content.get();
+					apiProjectLog(projectConfig.token().toString(), time, String.join("\n", lines));
+				}
+			} catch (Exception ignored) {
+			}
+		}, SEQUENTIAL_EXECUTOR.get());
+	}
+
+	static CompletableFuture<Void> log(String content) {
+		return log(() -> List.of(content));
+	}
+
+	static CompletableFuture<Void> log(String content, Throwable error) {
+		return log(() -> {
+			var list = new ArrayList<String>();
+			list.add(content);
+
+			error.printStackTrace(new PrintWriter(Writer.nullWriter()) {
+				@Override
+				public void println(Object x) {
+					list.add(String.valueOf(x));
+				}
+			});
+
+			return list;
+		});
 	}
 }

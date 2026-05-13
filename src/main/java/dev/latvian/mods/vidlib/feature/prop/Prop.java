@@ -910,4 +910,46 @@ public class Prop {
 	public int getPackedLight() {
 		return level.vl$getPackedLight(getBlockPos());
 	}
+
+	public void getInterpolationData(Map<PropData<?, ?>, Object> map) {
+		map.put(Prop.POSITION, new Vector3d(pos));
+
+		if (type.contains(Prop.YAW)) {
+			map.put(Prop.YAW, rotation.y);
+		}
+
+		if (type.contains(Prop.PITCH)) {
+			map.put(Prop.PITCH, rotation.x);
+		}
+
+		if (type.contains(Prop.ROLL)) {
+			map.put(Prop.ROLL, rotation.z);
+		}
+	}
+
+	public void applyInterpolationData(PropInterpolationData data) {
+		var pos = data.position(Prop.POSITION);
+
+		if (pos != null) {
+			setPos(pos);
+		}
+
+		var yaw = data.degrees(Prop.YAW);
+
+		if (yaw != null) {
+			setYaw(yaw.floatValue());
+		}
+
+		var pitch = data.degrees(Prop.PITCH);
+
+		if (pitch != null) {
+			setPitch(pitch.floatValue());
+		}
+
+		var roll = data.degrees(Prop.ROLL);
+
+		if (roll != null) {
+			setRoll(roll.floatValue());
+		}
+	}
 }
