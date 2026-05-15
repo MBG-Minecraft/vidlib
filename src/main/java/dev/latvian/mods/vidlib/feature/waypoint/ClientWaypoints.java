@@ -91,6 +91,8 @@ public interface ClientWaypoints {
 			list.sort(Comparator.comparingDouble(ScreenWaypoint::distance).reversed());
 		}
 
+		graphics.vl$pushShift();
+
 		for (var wp : list) {
 			float alpha = wp.waypoint().alpha() * (ALPHA.get() / 255F);
 			double minDistance = wp.waypoint().minDistance();
@@ -141,5 +143,7 @@ public interface ClientWaypoints {
 				graphics.pose().popPose();
 			}
 		}
+
+		graphics.vl$popShift();
 	}
 }

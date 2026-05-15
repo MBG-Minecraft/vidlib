@@ -106,4 +106,10 @@ public interface VLGuiGraphics {
 		graphics.blitSprite(VidLibRenderTypes.GUI, HEART_BACKGROUND, 9, 9, 0, 0, x, y, 9, 9);
 		graphics.blitSprite(VidLibRenderTypes.GUI, FULL_HEART, 9, 9, 0, 0, x, y, Mth.ceil(9F * value), 9);
 	}
+
+	default void vl$pushShift() {
+	}
+
+	default void vl$popShift() {
+	}
 }

@@ -165,4 +165,18 @@ public class MiscClientUtils {
 		ms.popPose();
 		return Mth.ceil(s * scale);
 	}
+
+	public static float adjustScreenX(Minecraft mc, int adjustedWidth) {
+		return (mc.getWindow().getGuiScaledWidth() - adjustedWidth) / 2F;
+	}
+
+	public static int adjustScreenWidth(Minecraft mc, boolean shifted) {
+		if (shifted) {
+			float w = mc.getWindow().getGuiScaledWidth();
+			float h = mc.getWindow().getGuiScaledHeight();
+			// figure out how to shift to 16:9 nicely
+		}
+
+		return mc.getWindow().getGuiScaledWidth();
+	}
 }

@@ -17,6 +17,7 @@ import dev.latvian.mods.vidlib.feature.gallery.PlayerBodies;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerHeads;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerSkins;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.misc.MainMenuOpenedEvent;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.note.NotePanel;
@@ -161,6 +162,10 @@ public class BuiltInImGui {
 		}));
 
 		list.add(MenuItem.sliderFloat("MSDF Debug Text", MSDFFont.DEBUG_SIZE::get, MSDFFont.DEBUG_SIZE::set, 0F, 200F));
+
+		if (PlatformHelper.CURRENT.isDevEnv()) {
+			list.add(MenuItem.item(ImIcons.SCHEDULE, "Post Main Menu Event", g -> NeoForge.EVENT_BUS.post(new MainMenuOpenedEvent(g.mc, true))));
+		}
 
 		list.add(MenuItem.SEPARATOR);
 		list.add(MenuItem.item(ImIcons.LEAF, "JVM Threads", JVMThreadsPanel.INSTANCE));

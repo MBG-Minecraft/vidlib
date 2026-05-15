@@ -3,6 +3,7 @@ package dev.mrbeastgaming.mods.hub.file;
 import dev.latvian.mods.klib.io.FileInfo;
 import dev.latvian.mods.klib.io.FileMD5;
 import dev.latvian.mods.klib.io.IOUtils;
+import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.klib.util.MD5;
 import dev.latvian.mods.klib.util.Tristate;
 import dev.latvian.mods.vidlib.VidLib;
@@ -18,15 +19,16 @@ import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class HubFileUploads {
 	public record SyncedFile(FileInfo fileInfo, FileMD5 meta, Mutable<ProgressItem> progressItem, ProjectUploadRequestItem item) {
@@ -124,6 +126,7 @@ public class HubFileUploads {
 
 				try {
 					if (progressItem != null) {
+						progressItem.label = file.name();
 						progressItem.setStarted();
 					}
 
@@ -133,13 +136,13 @@ public class HubFileUploads {
 						continue;
 					}
 
-					var meta = FileMD5.loadChanged(file, progressItem);
+					var meta = FileMD5.load(file, progressItem);
 
-					if (meta == null) {
-						continue;
+					if (meta.changed()) {
+						FileMD5.save(file.path(), meta);
+						Files.setLastModifiedTime(file.path(), FileTime.from(meta.lastModified()));
+						VidLib.LOGGER.info("Updated metadata of " + file.name() + ": " + meta);
 					}
-
-					VidLib.LOGGER.info("Updated metadata of " + file.name() + ": " + meta);
 
 					var fileType = upload.getFileType(file);
 					var created = upload.getFileCreated(file);
@@ -171,8 +174,11 @@ public class HubFileUploads {
 				upload.progressQueue.topText = "Uploading files...";
 			}
 
+			VidLib.LOGGER.info("Checking Beast Hub uploads " + map.values().stream().map(SyncedFile::fileInfo).map(FileInfo::name).collect(Collectors.joining(", ", "[", "]")));
+
 			if (!map.isEmpty()) {
 				var list = HubAPI.apiProjectUpload(projectConfig.token().toString(), map.values().stream().map(SyncedFile::item).toList());
+				VidLib.LOGGER.info("Uploading " + list.size() + "/" + fileList.size() + " files to Beast Hub");
 
 				if (upload.progressQueue != null) {
 					for (var item : list) {
@@ -197,6 +203,7 @@ public class HubFileUploads {
 						var progressItem = syncFile.progressItem.getValue();
 
 						if (progressItem != null) {
+							progressItem.label = syncFile.fileInfo.name();
 							progressItem.setStarted();
 						}
 
@@ -205,7 +212,7 @@ public class HubFileUploads {
 								long maxSize = 0L;
 
 								for (var item1 : map.values()) {
-									maxSize = item1.meta.size();
+									maxSize = Math.max(maxSize, item1.meta.size());
 								}
 
 								chunk = new byte[(int) Math.min(maxSize, item.maxChunkSize())];
@@ -225,6 +232,8 @@ public class HubFileUploads {
 						}
 					}
 				}
+			} else {
+				VidLib.LOGGER.info("All files are up to date");
 			}
 		} catch (Exception ex) {
 			VidLib.LOGGER.error("Failed to sync Beast Hub files", ex);
@@ -257,18 +266,18 @@ public class HubFileUploads {
 			return file;
 		}
 
-		try (var input = ProgressingInputStream.wrap(Files.newInputStream(file.fileInfo.path()), progressItem)) {
-			input.skipNBytes(offset);
+		try (var fileInputStream = Files.newInputStream(file.fileInfo.path())) {
+			fileInputStream.skipNBytes(offset);
 
 			while (true) {
-				int len = input.readNBytes(chunk, 0, (int) Math.min(file.meta.size() - offset, chunk.length));
+				int len = fileInputStream.readNBytes(chunk, 0, (int) Math.min(file.meta.size() - offset, chunk.length));
 
 				var response = HubAPI.HTTP_CLIENT.send(HubAPI.request(item.url(), Tristate.FALSE)
-					.method("PATCH", HttpRequest.BodyPublishers.ofByteArray(chunk, 0, len))
+					.method("PATCH", ProgressingInputStream.wrapBodyPublisher(chunk, 0, len, progressItem))
 					.header("Tus-Resumable", "1.0.0")
 					.header("Content-Type", "application/offset+octet-stream")
 					.header("Upload-Offset", Long.toUnsignedString(offset))
-					.build(), HttpResponse.BodyHandlers.discarding());
+					.build(), HttpResponse.BodyHandlers.ofString());
 
 				if (response.statusCode() / 100 == 2) {
 					offset += len;
@@ -294,7 +303,15 @@ public class HubFileUploads {
 						return file;
 					}
 				} else {
-					throw new IllegalStateException("Server returned status code " + response.statusCode() + " uploading " + file.fileInfo.name());
+					try {
+						VidLib.LOGGER.info(response.body());
+						var json = JsonUtils.parse(response.body()).getAsJsonObject();
+						var message = json.get("message").getAsString();
+						VidLib.LOGGER.info(message);
+						throw new IllegalStateException("Error " + response.statusCode() + " uploading " + file.fileInfo.name() + ": " + message);
+					} catch (Exception ignored) {
+						throw new IllegalStateException("Error " + response.statusCode() + " uploading " + file.fileInfo.name());
+					}
 				}
 			}
 		}
