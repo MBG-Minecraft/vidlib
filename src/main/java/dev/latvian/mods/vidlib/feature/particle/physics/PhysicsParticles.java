@@ -136,6 +136,7 @@ public class PhysicsParticles {
 		}
 
 		p.flatColorMod = (int) (random.nextFloat() * 8F) / 8F;
+		p.renderDistanceSq = data.renderDistance * data.renderDistance;
 		p.manager.queue.add(p);
 
 		// Minecraft.getInstance().level.addParticle(new LineParticleOptions(Color.WHITE, Color.CYAN, p.ttl), true, true, p.x, p.y, p.z, p.velocityX, p.velocityY, p.velocityZ);

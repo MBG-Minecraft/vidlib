@@ -75,7 +75,7 @@ public class ImageProp extends Prop {
 	}
 
 	@Override
-	public boolean isVisible(double x, double y, double z, FrustumCheck frustum) {
+	public boolean isVisible(double x, double y, double z, FrustumCheck frustum, Vec3 camera, double squaredCenterDistanceToCamera) {
 		return cachedData == null || frustum.isVisible(x, y, z, cachedData.box);
 	}
 

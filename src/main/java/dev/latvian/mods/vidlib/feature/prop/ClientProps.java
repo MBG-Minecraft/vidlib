@@ -160,20 +160,17 @@ public class ClientProps extends Props<ClientLevel> {
 			double x = KMath.lerp(delta, prop.prevPos.x, prop.pos.x);
 			double y = KMath.lerp(delta, prop.prevPos.y, prop.pos.y);
 			double z = KMath.lerp(delta, prop.prevPos.z, prop.pos.z);
-			double r = prop.getMaxRenderDistance();
 			double cd = cam.distanceToSqr(x, y + prop.height / 2D, z);
 
-			if (r >= Double.MAX_VALUE || cd <= r * r) {
-				if (prop.isVisible(x, y, z, frame)) {
-					var ctx = new PropRenderContext(prop, renderer, x, y, z, cd, ms, frame, delta);
+			if (prop.isVisible(x, y, z, frame, cam, cd)) {
+				var ctx = new PropRenderContext(prop, renderer, x, y, z, cd, ms, frame, delta);
 
-					if (renderer.shouldSort(ctx)) {
-						sortedProps.add(ctx);
-					} else {
-						GLDebugLog.pushGroup("[VidLib] " + prop);
-						ctx.render();
-						GLDebugLog.popGroup();
-					}
+				if (renderer.shouldSort(ctx)) {
+					sortedProps.add(ctx);
+				} else {
+					GLDebugLog.pushGroup("[VidLib] " + prop);
+					ctx.render();
+					GLDebugLog.popGroup();
 				}
 			}
 		}
@@ -205,22 +202,20 @@ public class ClientProps extends Props<ClientLevel> {
 				double x = KMath.lerp(delta, prop.prevPos.x, prop.pos.x);
 				double y = KMath.lerp(delta, prop.prevPos.y, prop.pos.y);
 				double z = KMath.lerp(delta, prop.prevPos.z, prop.pos.z);
-				double r = prop.getMaxRenderDistance();
+				double cd = cam.distanceToSqr(x, y + prop.height / 2D, z);
 
-				if (r >= Double.MAX_VALUE || cam.distanceToSqr(x, y + prop.height / 2D, z) <= r * r) {
-					if (prop.isVisible(x, y, z, frame)) {
-						boolean selected = !HIDE_OUTLINE.get() && OPEN_PROPS.contains(prop.id);
+				if (prop.isVisible(x, y, z, frame, cam, cd)) {
+					boolean selected = !HIDE_OUTLINE.get() && OPEN_PROPS.contains(prop.id);
 
-						if (selected || frame.mc().getEntityRenderDispatcher().shouldRenderHitBoxes()) {
-							var progress = prop.getDebugVisualsProgress(delta);
+					if (selected || frame.mc().getEntityRenderDispatcher().shouldRenderHitBoxes()) {
+						var progress = prop.getDebugVisualsProgress(delta);
 
-							if (progress >= 0F && progress <= 1F) {
-								prop.debugVisuals(Visuals.TEMP, x, y, z, delta, selected);
-								MiscClientUtils.renderVisuals(ms, cam, frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Visuals.TEMP, progress);
-								Visuals.TEMP.clear();
-							} else {
-								prop.debugVisuals(DEBUG_VISUALS, x, y, z, delta, selected);
-							}
+						if (progress >= 0F && progress <= 1F) {
+							prop.debugVisuals(Visuals.TEMP, x, y, z, delta, selected);
+							MiscClientUtils.renderVisuals(ms, cam, frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Visuals.TEMP, progress);
+							Visuals.TEMP.clear();
+						} else {
+							prop.debugVisuals(DEBUG_VISUALS, x, y, z, delta, selected);
 						}
 					}
 				}

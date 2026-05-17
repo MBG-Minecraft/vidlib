@@ -193,7 +193,7 @@ public class NPCProp extends BaseGeoProp {
 	}
 
 	@Override
-	public boolean isVisible(double x, double y, double z, FrustumCheck frustum) {
+	public boolean isVisible(double x, double y, double z, FrustumCheck frustum, Vec3 camera, double squaredCenterDistanceToCamera) {
 		if (count > 1) {
 			return true;
 		}

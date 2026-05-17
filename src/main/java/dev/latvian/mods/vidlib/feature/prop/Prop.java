@@ -401,10 +401,16 @@ public class Prop {
 		return 8192D;
 	}
 
-	public boolean isVisible(double x, double y, double z, FrustumCheck frustum) {
-		double w = width / 2D;
-		double d = getDepth() / 2D;
-		return frustum.isVisible(x - w, y, z - d, x + w, y + height, z + d);
+	public boolean isVisible(double x, double y, double z, FrustumCheck frustum, Vec3 camera, double squaredCenterDistanceToCamera) {
+		var r = getMaxRenderDistance();
+
+		if (r >= Double.MAX_VALUE || squaredCenterDistanceToCamera <= r * r) {
+			double w = width / 2D;
+			double d = getDepth() / 2D;
+			return frustum.isVisible(x - w, y, z - d, x + w, y + height, z + d);
+		}
+
+		return false;
 	}
 
 	public void debugVisuals(Visuals visuals, double x, double y, double z, float delta, boolean selected) {

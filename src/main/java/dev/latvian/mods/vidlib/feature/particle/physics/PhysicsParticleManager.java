@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.FrustumIntersection;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -173,6 +174,13 @@ public class PhysicsParticleManager {
 			double rx = KMath.lerp(delta, p.prevX, p.x);
 			double ry = KMath.lerp(delta, p.prevY, p.y);
 			double rz = KMath.lerp(delta, p.prevZ, p.z);
+
+			double dist = Vector3d.distanceSquared(rx, ry, rz, camX, camY, camZ);
+
+			if (dist > p.renderDistanceSq) {
+				continue;
+			}
+
 			double ro = dScale * SQRT_2;
 			int cubeInFrustum = frustum.cubeInFrustum(rx - ro, ry - ro, rz - ro, rx + ro, ry + ro, rz + ro);
 

@@ -14,6 +14,7 @@ import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.prop.geo.BaseGeoProp;
 import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 
 public class GeoDisplayProp extends BaseGeoProp {
 	@AutoRegister
@@ -43,7 +44,7 @@ public class GeoDisplayProp extends BaseGeoProp {
 	}
 
 	@Override
-	public boolean isVisible(double x, double y, double z, FrustumCheck frustum) {
+	public boolean isVisible(double x, double y, double z, FrustumCheck frustum, Vec3 camera, double squaredCenterDistanceToCamera) {
 		return true;
 	}
 }

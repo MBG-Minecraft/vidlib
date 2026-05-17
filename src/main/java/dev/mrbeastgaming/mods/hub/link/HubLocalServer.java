@@ -52,7 +52,10 @@ public class HubLocalServer {
 			var mc = Minecraft.getInstance();
 
 			mc.execute(() -> {
-				mc.popGuiLayer();
+				if (mc.screen instanceof LinkHubUserScreen) {
+					mc.popGuiLayer();
+				}
+
 				mc.toast(Component.literal("Logged In"), Component.literal(name));
 				GLFW.glfwFocusWindow(mc.getWindow().getWindow());
 			});
