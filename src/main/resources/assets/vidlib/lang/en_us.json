@@ -21,6 +21,7 @@
 	"options.vidlib.test_screen_shake.max_distance": "Test Screen Shake Max Distance",
 	"options.vidlib.show_coordinates": "Show Coordinates",
 	"options.vidlib.lock_gui_scale": "Lock GUI Scale",
+	"options.vidlib.lock_imgui_scroll": "Lock ImGUI Scroll",
 	"item.vidlib.tool": "Tool",
 	"prop.vidlib.npc": "NPC",
 	"prop.vidlib.shape": "Shape",

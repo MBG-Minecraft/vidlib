@@ -74,7 +74,7 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements V
 	@Override
 	public boolean isReplayCamera() {
 		if (vl$isReplayCamera == null) {
-			vl$isReplayCamera = ((Object) this).getClass() != LocalPlayer.class || getScoreboardName().equals("Replay Viewer") || getGameProfile().getProperties().containsKey("IsReplayViewer");
+			vl$isReplayCamera = ((Object) this).getClass() != LocalPlayer.class || getScoreboardName().equals("Replay_Viewer") || getGameProfile().getProperties().containsKey("IsReplayViewer");
 		}
 
 		return vl$isReplayCamera;

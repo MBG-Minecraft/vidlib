@@ -68,6 +68,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 	public final boolean isAdmin;
 	public final DynamicOps<JsonElement> jsonOps;
 	public final DynamicOps<Tag> nbtOps;
+	public final float scroll;
 	private VarStackStack stack;
 
 	public ImGraphics(Minecraft mc) {
@@ -83,6 +84,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		this.isAdmin = inGame && (isSinglePlayer || mc.player.hasPermissions(2));
 		this.jsonOps = inGame ? mc.level.jsonOps() : JsonOps.INSTANCE;
 		this.nbtOps = inGame ? mc.level.nbtOps() : NbtOps.INSTANCE;
+		this.scroll = VidLibClientOptions.LOCK_IMGUI_SCROLL.get() ? Math.clamp(ImGui.getIO().getMouseWheel(), -1F, 1F) : ImGui.getIO().getMouseWheel();
 	}
 
 	public void pushStack() {
