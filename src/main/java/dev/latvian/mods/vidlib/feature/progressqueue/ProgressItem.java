@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.progressqueue;
 
-import dev.latvian.mods.vidlib.feature.imgui.ImText;
+import dev.latvian.mods.vidlib.util.ColoredText;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -56,17 +56,17 @@ public final class ProgressItem implements IntConsumer, LongConsumer {
 		return this.progress.addAndGet(progress);
 	}
 
-	public void error(ImText error) {
+	public void error(ColoredText error) {
 		queue.error(error);
 		setDone();
 	}
 
 	public void error(String error) {
-		error(ImText.of(error));
+		error(ColoredText.of(error));
 	}
 
 	public void warning(String error) {
-		error(ImText.warning(error));
+		error(ColoredText.warning(error));
 	}
 
 	@Override

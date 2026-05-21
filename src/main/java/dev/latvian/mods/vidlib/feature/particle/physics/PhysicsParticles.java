@@ -135,7 +135,6 @@ public class PhysicsParticles {
 			p.bounce *= 2F;
 		}
 
-		p.flatColorMod = (int) (random.nextFloat() * 8F) / 8F;
 		p.renderDistanceSq = data.renderDistance * data.renderDistance;
 		p.manager.queue.add(p);
 

@@ -21,7 +21,7 @@ public interface ClientHubFileUploads {
 			return List.of();
 		}
 
-		return HubFileUploads.syncDirectory(directory, VidLibClient.wrapHubDirectoryUploadBuilder(upload));
+		return HubFileUploads.syncFiles(HubFileUploads.prepareDirectory(directory, VidLibClient.wrapHubDirectoryUploadBuilder(upload)), VidLibClient.createUploadQueue());
 	}
 
 	static CompletableFuture<List<HubFileUploads.SyncedFile>> asyncFile(Path file, BiConsumer<FileInfo, HubFileUploadBuilder> upload) {
@@ -33,6 +33,6 @@ public interface ClientHubFileUploads {
 			return List.of();
 		}
 
-		return HubFileUploads.syncFile(file, VidLibClient.wrapHubFileUploadBuilder(upload));
+		return HubFileUploads.syncFiles(HubFileUploads.prepareFile(file, VidLibClient.wrapHubFileUploadBuilder(upload)), VidLibClient.createUploadQueue());
 	}
 }

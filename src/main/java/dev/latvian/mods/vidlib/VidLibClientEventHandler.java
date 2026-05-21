@@ -64,10 +64,13 @@ import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
+import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubFileType;
+import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.api.HubUserData;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubGateway;
-import dev.mrbeastgaming.mods.hub.file.ClientHubFileUploads;
+import dev.mrbeastgaming.mods.hub.event.SyncClientFilesHubEvent;
+import dev.mrbeastgaming.mods.hub.file.HubFileUploads;
 import dev.mrbeastgaming.mods.hub.link.LinkHubUserScreen;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -117,6 +120,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.GameShuttingDownEvent;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
@@ -733,26 +737,13 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void mainMenuOpened(MainMenuOpenedEvent event) {
-		var gameDir = PlatformHelper.CURRENT.getGameDirectory();
+		if (HubUserCapabilities.CURRENT.autoUploadFiles()) {
+			var entries = new ArrayList<HubFileUploads.Entry>();
+			NeoForge.EVENT_BUS.post(new SyncClientFilesHubEvent(entries, event.isFirstTime()));
 
-		ClientHubFileUploads.asyncDirectory(gameDir.resolve("voicechat_recordings"), builder -> {
-			builder.setType(HubFileType.VOICE_CHAT_RECORDING);
-			builder.setNoUniqueId();
-			builder.setFilterEndsWith(".mp3");
-		});
-
-		if (event.isFirstTime()) {
-			ClientHubFileUploads.asyncDirectory(gameDir.resolve("crash-reports"), builder -> {
-				builder.setType(HubFileType.CLIENT_CRASH_REPORT);
-				builder.setNoUniqueId();
-				builder.setFilterEndsWith("-client.txt");
-			});
-
-			ClientHubFileUploads.asyncDirectory(gameDir, builder -> {
-				builder.setType(HubFileType.JVM_CRASH_REPORT);
-				builder.setNoUniqueId();
-				builder.setFilter(fileInfo -> fileInfo.name().startsWith("hr_err_pid_") && fileInfo.name().endsWith(".log"));
-			});
+			if (!entries.isEmpty()) {
+				HubAPI.SEQUENTIAL_EXECUTOR.get().execute(() -> HubFileUploads.syncFiles(entries, VidLibClient.createUploadQueue()));
+			}
 		}
 
 		if (HubUserData.SELF == null) {
@@ -768,6 +759,31 @@ public class VidLibClientEventHandler {
 
 		if (c != null) {
 			c.stop();
+		}
+	}
+
+	@SubscribeEvent
+	public static void syncClientFilesHub(SyncClientFilesHubEvent event) {
+		var gameDir = PlatformHelper.CURRENT.getGameDirectory();
+
+		event.addDirectory(gameDir.resolve("voicechat_recordings"), builder -> {
+			builder.setType(HubFileType.VOICE_CHAT_RECORDING);
+			builder.setNoUniqueId();
+			builder.setFilterEndsWith(".mp3");
+		});
+
+		if (event.isFirstTime()) {
+			event.addDirectory(gameDir.resolve("crash-reports"), builder -> {
+				builder.setType(HubFileType.CLIENT_CRASH_REPORT);
+				builder.setNoUniqueId();
+				builder.setFilterEndsWith("-client.txt");
+			});
+
+			event.addDirectory(gameDir, builder -> {
+				builder.setType(HubFileType.CLIENT_JVM_CRASH_REPORT);
+				builder.setNoUniqueId();
+				builder.setFilter(fileInfo -> fileInfo.name().startsWith("hr_err_pid_") && fileInfo.name().endsWith(".log"));
+			});
 		}
 	}
 }

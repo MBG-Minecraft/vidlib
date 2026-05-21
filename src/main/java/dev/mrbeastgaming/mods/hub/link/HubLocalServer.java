@@ -37,7 +37,12 @@ public class HubLocalServer {
 
 		var response = HubAPI.HTTP_CLIENT.send(HubAPI.apiUsersRequestToken(token), HttpResponse.BodyHandlers.ofString());
 
-		if (response.statusCode() / 100 == 2) {
+		int statusCode = response.statusCode();
+		var error = "";
+
+		var mc = Minecraft.getInstance();
+
+		if (statusCode / 100 == 2) {
 			var userToken = UserToken.parse(response.body().trim());
 
 			if (userToken == null) {
@@ -49,8 +54,6 @@ public class HubLocalServer {
 			VidLib.LOGGER.info("Logged in as " + name);
 			HubClientSessionData.load();
 
-			var mc = Minecraft.getInstance();
-
 			mc.execute(() -> {
 				if (mc.screen instanceof LinkHubUserScreen) {
 					mc.popGuiLayer();
@@ -59,29 +62,35 @@ public class HubLocalServer {
 				mc.toast(Component.literal("Logged In"), Component.literal(name));
 				GLFW.glfwFocusWindow(mc.getWindow().getWindow());
 			});
+		} else {
+			mc.execute(() -> {
+				if (mc.screen instanceof LinkHubUserScreen link) {
+					link.setError(("Error " + statusCode + "\n" + error).trim());
+				}
 
-			return HTTPResponse.ok().html("""
-				<!DOCTYPE html>
-				<html lang="en">
-				<head>
-				  <meta charset="utf-8" />
-				  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-				  <meta name="viewport" content="width=device-width, initial-scale=1" />
-				  <title>MrBeast Gaming Hub Link</title>
-				  <meta name="theme-color" content="#262728" />
-				  <link rel="stylesheet" href="https://mrbeastgaming.dev/style.css" />
-				</head>
-				<body>
-				  <div class="content">
-				    <h1><a href="/">MrBeast Gaming Hub</a></h1>
-				    <p>You may close this page now.</p>
-				  </div>
-				  <script>window.close();</script>
-				</body>
-				</html>
-				""");
+				GLFW.glfwFocusWindow(mc.getWindow().getWindow());
+			});
 		}
 
-		throw new BadRequestError("Error " + response.statusCode() + " occurred, try again later");
+		return HTTPResponse.ok().html("""
+			<!DOCTYPE html>
+			<html lang="en">
+			<head>
+			  <meta charset="utf-8" />
+			  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+			  <meta name="viewport" content="width=device-width, initial-scale=1" />
+			  <title>MrBeast Gaming Hub Link</title>
+			  <meta name="theme-color" content="#262728" />
+			  <link rel="stylesheet" href="https://mrbeastgaming.dev/style.css" />
+			</head>
+			<body>
+			  <div class="content">
+			    <h1><a href="/">MrBeast Gaming Hub</a></h1>
+			    <p>You may close this page now.</p>
+			  </div>
+			  <script>window.close();</script>
+			</body>
+			</html>
+			""");
 	}
 }

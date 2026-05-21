@@ -15,7 +15,7 @@ public interface ServerHubFileUploads {
 	}
 
 	static List<HubFileUploads.SyncedFile> syncDirectory(Path directory, Consumer<HubDirectoryUploadBuilder> upload) {
-		return HubFileUploads.syncDirectory(directory, upload);
+		return HubFileUploads.syncFiles(HubFileUploads.prepareDirectory(directory, upload), null);
 	}
 
 	static CompletableFuture<List<HubFileUploads.SyncedFile>> asyncFile(Path file, BiConsumer<FileInfo, HubFileUploadBuilder> upload) {
@@ -23,6 +23,6 @@ public interface ServerHubFileUploads {
 	}
 
 	static List<HubFileUploads.SyncedFile> syncFile(Path file, BiConsumer<FileInfo, HubFileUploadBuilder> upload) {
-		return HubFileUploads.syncFile(file, upload);
+		return HubFileUploads.syncFiles(HubFileUploads.prepareFile(file, upload), null);
 	}
 }

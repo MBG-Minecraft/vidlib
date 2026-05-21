@@ -9,9 +9,11 @@ import dev.latvian.mods.klib.util.Tristate;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
+import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressingInputStream;
 import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
+import dev.mrbeastgaming.mods.hub.api.HubFileType;
 import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadRequestItem;
 import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadResponseItem;
 import net.minecraft.util.Mth;
@@ -34,10 +36,11 @@ public class HubFileUploads {
 	public record SyncedFile(FileInfo fileInfo, FileMD5 meta, Mutable<ProgressItem> progressItem, ProjectUploadRequestItem item) {
 	}
 
-	public static List<SyncedFile> syncDirectory(Path directory, Consumer<HubDirectoryUploadBuilder> upload) {
-		var projectConfig = HubProjectConfig.INSTANCE.get();
+	public record Entry(FileInfo file, HubUploadBuilderBase upload) {
+	}
 
-		if (projectConfig == null || Files.notExists(directory)) {
+	public static List<Entry> prepareDirectory(Path directory, Consumer<HubDirectoryUploadBuilder> upload) {
+		if (Files.notExists(directory)) {
 			return List.of();
 		}
 
@@ -69,17 +72,15 @@ public class HubFileUploads {
 				});
 			}
 
-			var fileList = fileStream.toList();
-			return fileList.isEmpty() ? List.of() : syncFiles(projectConfig, fileList, uploadBuilder);
+			var fileList = fileStream.map(fileInfo -> new Entry(fileInfo, uploadBuilder)).toList();
+			return fileList.isEmpty() ? List.of() : fileList;
 		} catch (Exception ex) {
 			return List.of();
 		}
 	}
 
-	public static List<SyncedFile> syncFile(Path file, BiConsumer<FileInfo, HubFileUploadBuilder> upload) {
-		var projectConfig = HubProjectConfig.INSTANCE.get();
-
-		if (projectConfig == null || Files.notExists(file)) {
+	public static List<Entry> prepareFile(Path file, BiConsumer<FileInfo, HubFileUploadBuilder> upload) {
+		if (Files.notExists(file)) {
 			return List.of();
 		}
 
@@ -99,30 +100,41 @@ public class HubFileUploads {
 			}
 		}
 
-		return syncFiles(projectConfig, List.of(fileInfo), uploadBuilder);
+		return List.of(new Entry(fileInfo, uploadBuilder));
 	}
 
-	private static List<SyncedFile> syncFiles(HubProjectConfig projectConfig, List<FileInfo> fileList, HubUploadBuilderBase upload) {
+	public static List<SyncedFile> syncFiles(List<Entry> fileList, @Nullable ProgressQueue progressQueue) {
+		var projectConfig = HubProjectConfig.INSTANCE.get();
+
+		if (projectConfig == null) {
+			return List.of();
+		}
+
 		var resultFiles = new ArrayList<SyncedFile>(fileList.size());
 		var progressItems = new ArrayList<ProgressItem>(fileList.size());
 		var map = new LinkedHashMap<MD5, SyncedFile>();
 
 		try {
-			if (upload.progressQueue != null) {
-				upload.progressQueue.topText = "Checking files...";
+			if (progressQueue != null) {
+				progressQueue.topText = "Checking files...";
 
-				for (var file : fileList) {
-					var progressItem = upload.progressQueue.addItem(file.name(), ProgressItemNameFunction.SI_BYTE_SIZE);
+				for (var entry : fileList) {
+					var file = entry.file;
+					var progressItem = progressQueue.addItem(file.name(), ProgressItemNameFunction.SI_BYTE_SIZE);
 					progressItem.setSize(file.size());
 					progressItems.add(progressItem);
 				}
 
-				upload.progressQueue.display();
+				progressQueue.display();
 			}
 
+			HubFileType commonType = HubFileType.UNKNOWN;
+
 			for (int i = 0; i < fileList.size(); i++) {
-				var file = fileList.get(i);
-				var progressItem = upload.progressQueue == null ? null : progressItems.get(i);
+				var entry = fileList.get(i);
+				var file = entry.file;
+				var upload = entry.upload;
+				var progressItem = progressQueue == null ? null : progressItems.get(i);
 
 				try {
 					if (progressItem != null) {
@@ -136,6 +148,14 @@ public class HubFileUploads {
 						continue;
 					}
 
+					var fileType = upload.getFileType(file);
+
+					if (commonType == HubFileType.UNKNOWN) {
+						commonType = fileType;
+					} else if (commonType != null && commonType != fileType) {
+						commonType = null;
+					}
+
 					var meta = FileMD5.load(file, progressItem);
 
 					if (meta.changed()) {
@@ -144,7 +164,6 @@ public class HubFileUploads {
 						VidLib.LOGGER.info("Updated metadata of " + file.name() + ": " + meta);
 					}
 
-					var fileType = upload.getFileType(file);
 					var created = upload.getFileCreated(file);
 
 					var syncFile = new SyncedFile(file, meta, new MutableObject<>(), new ProjectUploadRequestItem(
@@ -168,30 +187,40 @@ public class HubFileUploads {
 				}
 			}
 
-			if (upload.progressQueue != null) {
-				upload.progressQueue.clear();
+			if (progressQueue != null) {
+				progressQueue.clear();
 				progressItems.clear();
-				upload.progressQueue.topText = "Uploading files...";
+				progressQueue.topText = "Uploading files...";
 			}
 
-			VidLib.LOGGER.info("Checking Beast Hub uploads " + map.values().stream().map(SyncedFile::fileInfo).map(FileInfo::name).collect(Collectors.joining(", ", "[", "]")));
+			var customName = commonType != null && commonType != HubFileType.UNKNOWN ? commonType.name() : "";
+
+			if (customName.isEmpty()) {
+				VidLib.LOGGER.info("Checking Beast Hub uploads (" + map.size() + ") " + map.values().stream().map(SyncedFile::fileInfo).map(FileInfo::name).collect(Collectors.joining(", ", "[", "]")));
+			} else {
+				VidLib.LOGGER.info("Checking " + customName + " Beast Hub uploads (" + map.size() + ")");
+			}
 
 			if (!map.isEmpty()) {
 				var list = HubAPI.apiProjectUpload(projectConfig.token().toString(), map.values().stream().map(SyncedFile::item).toList());
-				VidLib.LOGGER.info("Uploading " + list.size() + "/" + fileList.size() + " files to Beast Hub");
+				VidLib.LOGGER.info("Uploading " + list.size() + " files to Beast Hub");
 
-				if (upload.progressQueue != null) {
+				for (var item : list) {
+					VidLib.LOGGER.info("- " + item.toString() + ": " + item.url());
+				}
+
+				if (progressQueue != null) {
 					for (var item : list) {
 						var syncFile = map.get(item.checksum());
 
 						if (syncFile != null) {
-							var progressItem = upload.progressQueue.addItem(syncFile.fileInfo().name(), ProgressItemNameFunction.SI_BYTE_SIZE);
+							var progressItem = progressQueue.addItem(syncFile.fileInfo().name(), ProgressItemNameFunction.SI_BYTE_SIZE);
 							progressItem.setSize(syncFile.meta.size());
 							syncFile.progressItem.setValue(progressItem);
 						}
 					}
 
-					upload.progressQueue.display();
+					progressQueue.display();
 				}
 
 				byte[] chunk = null;
@@ -238,9 +267,9 @@ public class HubFileUploads {
 		} catch (Exception ex) {
 			VidLib.LOGGER.error("Failed to sync Beast Hub files", ex);
 		} finally {
-			if (upload.progressQueue != null) {
-				upload.progressQueue.topText = "Files Uploaded";
-				upload.progressQueue.bottomText = "";
+			if (progressQueue != null) {
+				progressQueue.topText = "Files Uploaded";
+				progressQueue.bottomText = "";
 
 				for (var syncFile : map.values()) {
 					var progressItem = syncFile.progressItem.getValue();

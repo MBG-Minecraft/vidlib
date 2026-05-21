@@ -34,6 +34,7 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
 import dev.latvian.mods.vidlib.math.knumber.KNumberNodeImBuilder;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
+import dev.latvian.mods.vidlib.util.ColoredText;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubCountries;
 import dev.mrbeastgaming.mods.hub.api.HubCountry;
@@ -568,7 +569,7 @@ public class DebugWidgetPanel extends Panel {
 		}
 
 		if (ImGui.button("Test Error Queue###test-error-queue")) {
-			errorQueue.error(ImText.warning("Error " + System.currentTimeMillis()));
+			errorQueue.error(ColoredText.warning("Error " + System.currentTimeMillis()));
 			errorQueue.display();
 		}
 

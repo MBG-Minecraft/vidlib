@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.progressqueue;
 
-import dev.latvian.mods.vidlib.feature.imgui.ImText;
+import dev.latvian.mods.vidlib.util.ColoredText;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ public class ProgressQueue {
 	public final List<ProgressItem> items;
 	public String topText;
 	public String bottomText;
-	public final List<ImText> errors;
+	public final List<ColoredText> errors;
 	public boolean hideInGame;
 	public boolean canCancel;
 	public boolean open;
@@ -99,17 +99,17 @@ public class ProgressQueue {
 		return !open;
 	}
 
-	public void error(ImText error) {
+	public void error(ColoredText error) {
 		synchronized (ACTIVE) {
 			errors.add(error);
 		}
 	}
 
 	public void error(String error) {
-		error(ImText.of(error));
+		error(ColoredText.of(error));
 	}
 
 	public void warning(String error) {
-		error(ImText.warning(error));
+		error(ColoredText.warning(error));
 	}
 }

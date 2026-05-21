@@ -117,8 +117,12 @@ public interface HubAPI {
 		return request("/api/projects/" + project + "/full-data", Tristate.DEFAULT).build();
 	}
 
-	static HttpRequest apiDesktopClientSession(String projectToken) {
-		return request("/api/desktop/client-session/" + projectToken, Tristate.TRUE).timeout(Duration.ofSeconds(30L)).build();
+	static HubClientSessionData apiDesktopClientSession(String projectToken) throws Exception {
+		return HubClientSessionData.CODEC.parse(JsonOps.INSTANCE, sendJsonRequest(request("/api/desktop/client-session/" + projectToken, Tristate.TRUE).timeout(Duration.ofSeconds(30L)).build())).getOrThrow();
+	}
+
+	static HubUserData apiUserSelfData() throws Exception {
+		return HubUserData.CODEC.parse(JsonOps.INSTANCE, sendJsonRequest(request("/api/users/@me", Tristate.TRUE).timeout(Duration.ofSeconds(30L)).build())).getOrThrow();
 	}
 
 	static List<ProjectUploadResponseItem> apiProjectUpload(String projectToken, List<ProjectUploadRequestItem> files) throws Exception {
@@ -154,11 +158,7 @@ public interface HubAPI {
 
 		body.add("files", filesJson);
 
-		VidLib.LOGGER.info("> " + body);
-
 		var response = sendJsonRequest(request("/api/projects/upload/" + projectToken, Tristate.DEFAULT).POST(jsonBody(body)).build()).getAsJsonObject();
-
-		VidLib.LOGGER.info("< " + response);
 
 		var maxChunkSize = response.get("max_chunk_size").getAsInt();
 
@@ -170,6 +170,7 @@ public interface HubAPI {
 			result.add(new ProjectUploadResponseItem(
 				o.has("unique_id") ? MD5.fromString(o.get("unique_id").getAsString()) : MD5.NIL,
 				MD5.fromString(o.get("checksum").getAsString()),
+				o.has("name") ? o.get("name").getAsString() : "",
 				o.get("url").getAsString(),
 				o.get("offset").getAsLong(),
 				maxChunkSize

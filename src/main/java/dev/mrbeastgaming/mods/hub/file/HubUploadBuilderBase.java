@@ -5,7 +5,6 @@ import dev.latvian.mods.klib.io.IOUtils;
 import dev.latvian.mods.klib.util.Hex32;
 import dev.latvian.mods.klib.util.MD5;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import dev.mrbeastgaming.mods.hub.api.HubFileType;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +22,7 @@ public abstract class HubUploadBuilderBase {
 	FileCreationDateProvider creationDateProvider = null;
 	Hex32 assignedTo = Hex32.NONE;
 	UUID assignedToMinecraft = null;
-	ProgressQueue progressQueue = null;
+	String customName = "";
 
 	public void setFileNameProvider(FileNameProvider provider) {
 		this.fileNameProvider = provider;
@@ -31,6 +30,10 @@ public abstract class HubUploadBuilderBase {
 
 	public void setType(FileTypeProvider provider) {
 		this.type = provider;
+
+		if (provider instanceof HubFileType t) {
+			this.customName = t.name();
+		}
 	}
 
 	public void setUniqueId(UniqueIdProvider provider) {
@@ -53,8 +56,8 @@ public abstract class HubUploadBuilderBase {
 		this.assignedToMinecraft = id;
 	}
 
-	public void setProgressQueue(ProgressQueue queue) {
-		this.progressQueue = queue;
+	public void setCustomName(String customName) {
+		this.customName = customName;
 	}
 
 	HubFileType getFileType(FileInfo fileInfo) throws Exception {
@@ -65,7 +68,7 @@ public abstract class HubUploadBuilderBase {
 	MD5 getUniqueId(FileInfo fileInfo, HubProjectConfig projectConfig) throws Exception {
 		if (uniqueIdProvider == null && assignedToMinecraft != null) {
 			try (var bytes = new ByteArrayOutputStream();
-				 var data = new DataOutputStream(bytes)
+			     var data = new DataOutputStream(bytes)
 			) {
 				data.writeLong(assignedToMinecraft.getMostSignificantBits());
 				data.writeLong(assignedToMinecraft.getLeastSignificantBits());

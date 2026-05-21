@@ -26,11 +26,13 @@ public class VidLibClient {
 		}
 
 		builder.setAssignedToMinecraft(userId);
+	}
 
+	public static ProgressQueue createUploadQueue() {
 		var queue = new ProgressQueue("Uploading Files...");
 		queue.bottomText = "Please keep the game open!";
 		queue.hideInGame = true;
-		builder.setProgressQueue(queue);
+		return queue;
 	}
 
 	public static Consumer<HubDirectoryUploadBuilder> wrapHubDirectoryUploadBuilder(Consumer<HubDirectoryUploadBuilder> parent) {

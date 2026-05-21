@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.misc.command;
 
+import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
@@ -38,14 +39,20 @@ public interface BackupCommand {
 				var toName = to.getFileName().toString();
 
 				try {
-					new ProcessBuilder(Util.getPlatform() == Util.OS.WINDOWS ? List.of("xcopy", "/E", fromName, toName) : List.of("cp", "-R", fromName, toName))
+					var process = new ProcessBuilder(Util.getPlatform() == Util.OS.WINDOWS ? List.of("robocopy", fromName, toName, "/E", "/ZB", "/COPYALL", "/MT:16") : List.of("cp", "-R", fromName, toName))
 						.directory(from.getParent().toAbsolutePath().toFile())
-						.start()
-						.waitFor(5L, TimeUnit.MINUTES);
+						.start();
+
+					process.waitFor(1L, TimeUnit.MINUTES);
+					VidLib.LOGGER.info("Backup status: " + process.exitValue());
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
 
+				return toName;
+			} catch (Throwable ex) {
+				ex.printStackTrace();
+			} finally {
 				server.execute(() -> {
 					for (var level : server.getAllLevels()) {
 						if (level != null) {
@@ -53,19 +60,7 @@ public interface BackupCommand {
 						}
 					}
 				});
-
-				return toName;
-			} catch (Throwable ex) {
-				ex.printStackTrace();
 			}
-
-			server.execute(() -> {
-				for (var level : server.getAllLevels()) {
-					if (level != null) {
-						level.noSave = false;
-					}
-				}
-			});
 
 			throw new IllegalStateException("Failed to create a backup");
 		});

@@ -34,7 +34,6 @@ public class PhysicsParticle implements Comparable<PhysicsParticle> {
 	public int red, green, blue, alpha;
 	public double renderDistanceSq;
 
-	public float flatColorMod;
 	public float prevScale;
 	public float prevSpin;
 	public float bounce;
