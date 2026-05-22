@@ -42,7 +42,7 @@ public class GeoModelImBuilder implements ImBuilder<ResourceLocation> {
 			list = List.copyOf(list);
 		}
 
-		return graphics.combo("###model", value, list, ResourceLocation::toString, SEARCH);
+		return graphics.combo("###model", value, "", list, ResourceLocation::toString, SEARCH);
 	}
 
 	@Override

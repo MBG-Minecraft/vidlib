@@ -16,10 +16,10 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.util.UUIDTypeAdapter;
 import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.common.CommonPaths;
+import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.util.JsonUtils;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
@@ -61,14 +61,12 @@ public class PlayerProfiles {
 			var path = VidLibPaths.USER.get().resolve("cached-profiles.json");
 
 			if (Files.exists(path)) {
-				try (var reader = Files.newBufferedReader(path)) {
-					var json = JsonUtils.read(reader);
-					var list = PlayerProfile.LIST_CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
+				var json = JsonUtils.read(path);
+				var list = PlayerProfile.LIST_CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
 
-					for (var entry : list) {
-						BY_UUID.put(entry.profile().getId(), entry);
-						BY_NAME.put(entry.profile().getName().toLowerCase(Locale.ROOT), entry);
-					}
+				for (var entry : list) {
+					BY_UUID.put(entry.profile().getId(), entry);
+					BY_NAME.put(entry.profile().getName().toLowerCase(Locale.ROOT), entry);
 				}
 			}
 		} catch (Exception ex) {
@@ -86,11 +84,12 @@ public class PlayerProfiles {
 
 		shouldSave = false;
 
-		try (var writer = Files.newBufferedWriter(CommonPaths.mkdirs(VidLibPaths.USER.get().resolve("cached-profiles.json")))) {
+		try {
+			var path = CommonPaths.mkdirs(VidLibPaths.USER.get().resolve("cached-profiles.json"));
 			var list = new ArrayList<>(getAllKnown());
 			list.removeIf(PlayerProfile::isError);
 			var json = PlayerProfile.LIST_CODEC.encodeStart(JsonOps.INSTANCE, list).getOrThrow();
-			JsonUtils.write(writer, json, false);
+			JsonUtils.write(path, json, false);
 		} catch (Exception ex) {
 			VidLib.LOGGER.error("Failed to save cached player profiles", ex);
 		}
@@ -139,8 +138,8 @@ public class PlayerProfiles {
 			return MiscUtils.fetch("https://api.mojang.com/users/profiles/minecraft/" + input).flatMap(bytes -> {
 				JsonObject json = null;
 
-				try {
-					json = JsonUtils.GSON.fromJson(new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8), JsonObject.class);
+				try (var stream = new ByteArrayInputStream(bytes)) {
+					json = JsonUtils.read(stream).getAsJsonObject();
 					var profile = ExtraCodecs.GAME_PROFILE.parse(JsonOps.INSTANCE, json);
 					return profile.flatMap(p -> DataResult.success(p.getId()));
 				} catch (Exception e) {

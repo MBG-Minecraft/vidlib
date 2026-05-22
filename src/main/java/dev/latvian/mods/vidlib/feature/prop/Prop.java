@@ -1,7 +1,5 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import dev.latvian.mods.klib.color.Color;
@@ -13,6 +11,7 @@ import dev.latvian.mods.klib.math.Vec3f;
 import dev.latvian.mods.klib.shape.ColoredShape;
 import dev.latvian.mods.klib.shape.CuboidShape;
 import dev.latvian.mods.klib.util.Cast;
+import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
@@ -29,7 +28,7 @@ import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
-import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
+import dev.latvian.mods.vidlib.integration.replay.SelectedPropReplaySessionData;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
@@ -80,8 +79,8 @@ public class Prop {
 	public static final PropData<Prop, Float> PITCH = PropData.create(Prop.class, "pitch", DataTypes.FLOAT, p -> p.rotation.x, Prop::setPitch, AngleImBuilder.TYPE_90);
 	public static final PropData<Prop, Float> YAW = PropData.create(Prop.class, "yaw", DataTypes.FLOAT, p -> p.rotation.y, Prop::setYaw, AngleImBuilder.TYPE_180);
 	public static final PropData<Prop, Float> ROLL = PropData.create(Prop.class, "roll", DataTypes.FLOAT, p -> p.rotation.z, Prop::setRoll, AngleImBuilder.TYPE_180);
-	public static final PropData<Prop, Float> WIDTH = PropData.create(Prop.class, "width", DataTypes.FLOAT, p -> (float) p.width, (p, v) -> p.width = v, FloatImBuilder.type(0F, 16F));
-	public static final PropData<Prop, Float> HEIGHT = PropData.create(Prop.class, "height", DataTypes.FLOAT, p -> (float) p.height, (p, v) -> p.height = v, FloatImBuilder.type(0F, 16F));
+	public static final PropData<Prop, Float> WIDTH = PropData.create(Prop.class, "width", DataTypes.FLOAT, p -> (float) p.width, (p, v) -> p.setWidth(v), FloatImBuilder.type(0F, 16F));
+	public static final PropData<Prop, Float> HEIGHT = PropData.create(Prop.class, "height", DataTypes.FLOAT, p -> (float) p.height, (p, v) -> p.setHeight(v), FloatImBuilder.type(0F, 16F));
 	public static final PropData<Prop, Boolean> CAN_COLLIDE = PropData.createBoolean(Prop.class, "can_collide", p -> p.canCollide, (p, v) -> p.canCollide = v);
 	public static final PropData<Prop, Boolean> CAN_INTERACT = PropData.createBoolean(Prop.class, "can_interact", p -> p.canInteract, (p, v) -> p.canInteract = v);
 	public static final PropData<Prop, Boolean> PAUSED = PropData.createBoolean(Prop.class, "paused", p -> p.paused, (p, v) -> p.paused = v);
@@ -222,9 +221,17 @@ public class Prop {
 		}
 	}
 
+	public void setWidth(double width) {
+		this.width = width;
+	}
+
+	public void setHeight(double height) {
+		this.height = height;
+	}
+
 	public final void setSize(double size) {
-		width = size;
-		height = size;
+		setWidth(size);
+		setHeight(size);
 	}
 
 	public void setPos(double x, double y, double z) {
@@ -394,10 +401,16 @@ public class Prop {
 		return 8192D;
 	}
 
-	public boolean isVisible(double x, double y, double z, FrustumCheck frustum) {
-		double w = width / 2D;
-		double d = getDepth() / 2D;
-		return frustum.isVisible(x - w, y, z - d, x + w, y + height, z + d);
+	public boolean isVisible(double x, double y, double z, FrustumCheck frustum, Vec3 camera, double squaredCenterDistanceToCamera) {
+		var r = getMaxRenderDistance();
+
+		if (r >= Double.MAX_VALUE || squaredCenterDistanceToCamera <= r * r) {
+			double w = width / 2D;
+			double d = getDepth() / 2D;
+			return frustum.isVisible(x - w, y, z - d, x + w, y + height, z + d);
+		}
+
+		return false;
 	}
 
 	public void debugVisuals(Visuals visuals, double x, double y, double z, float delta, boolean selected) {
@@ -564,7 +577,7 @@ public class Prop {
 			graphics.mc.runClientCommand((clientSideOnly ? "client-prop remove id " : "prop remove id ") + getIdString());
 		}
 
-		ImGuiUtils.hoveredTooltip("Remove");
+		graphics.hoveredTooltip("Remove");
 
 		if (graphics.isReplay && !clientSideOnly) {
 			ImGui.endDisabled();
@@ -584,7 +597,7 @@ public class Prop {
 			}
 		}
 
-		ImGuiUtils.hoveredTooltip(isHidden ? "Hidden" : "Visible");
+		graphics.hoveredTooltip(isHidden ? "Hidden" : "Visible");
 
 		ImGui.sameLine();
 
@@ -598,11 +611,11 @@ public class Prop {
 			}
 		}
 
-		ImGuiUtils.hoveredTooltip(isTypeHidden ? "Type Hidden" : "Type Visible");
+		graphics.hoveredTooltip(isTypeHidden ? "Type Hidden" : "Type Visible");
 
 		ImGui.sameLine();
 
-		if (RecordedProp.LIST != null && !clientSideOnly) {
+		if (ReplayProp.LIST != null && !clientSideOnly) {
 			ImGui.beginDisabled();
 		}
 
@@ -610,9 +623,9 @@ public class Prop {
 			graphics.mc.runClientCommand((clientSideOnly ? "client-prop clone " : "prop clone ") + getIdString());
 		}
 
-		ImGuiUtils.hoveredTooltip("Clone");
+		graphics.hoveredTooltip("Clone");
 
-		if (RecordedProp.LIST != null && !clientSideOnly) {
+		if (ReplayProp.LIST != null && !clientSideOnly) {
 			ImGui.endDisabled();
 		}
 
@@ -625,22 +638,38 @@ public class Prop {
 					DepthOfFieldPanel.INSTANCE.builder.set(DepthOfField.OVERRIDE);
 				}
 
-				ImGuiUtils.hoveredTooltip("Focus DoF");
+				graphics.hoveredTooltip("Focus DoF");
 			}
 		}
 
 		ImGui.sameLine();
 
-		if (ImGui.button(ImIcons.COPY + "###copy-id")) {
+		if (ImGui.button(ImIcons.DATABASE + "###copy-id")) {
 			ImGui.setClipboardText(getIdString());
 		}
 
-		ImGuiUtils.hoveredTooltip("Copy ID");
+		graphics.hoveredTooltip("Copy ID");
+
+		ImGui.sameLine();
+
+		if (graphics.button(ImIcons.COPY + "###copy-nbt", ImColorVariant.LIME)) {
+			ImGui.setClipboardText(encode(graphics.nbtOps).toString());
+		}
+
+		graphics.hoveredTooltip("Copy NBT");
+
+		ImGui.sameLine();
+
+		if (graphics.smallButton(ImIcons.LOCATION + "###teleport", ImColorVariant.DARK_PURPLE)) {
+			graphics.mc.runClientCommand("tp @s " + pos.x + " " + pos.y + " " + pos.z);
+		}
+
+		graphics.hoveredTooltip("Teleport To");
 
 		if (clientSideOnly) {
 			ImGui.sameLine();
 			graphics.button(ImIcons.WARNING + "###client-only", ImColorVariant.ORANGE);
-			ImGuiUtils.hoveredTooltip("Client-Side Only!");
+			graphics.hoveredTooltip("Client-Side Only!");
 		}
 
 		if (imguiBuilders == null) {
@@ -752,7 +781,7 @@ public class Prop {
 				}
 
 				if (!isDefault && ImGui.isItemHovered()) {
-					ImGui.setTooltip("Reset to " + defaultValue);
+					graphics.tooltip("Reset to " + defaultValue);
 				}
 
 				if (isDefault) {
@@ -771,7 +800,12 @@ public class Prop {
 				ImGui.popItemWidth();
 
 				if (update.isAny() && builder.isValid()) {
-					FlashbackIntegration.MAKE_PROP_KEYFRAMES.add(this);
+					var selectedPropData = ReplayAPI.getActiveSessionData(SelectedPropReplaySessionData.TYPE);
+
+					if (selectedPropData != null) {
+						selectedPropData.makePropKeyframes.add(this);
+					}
+
 					c2sEdit(data, Cast.to(builder.build()), update.isFull());
 				}
 
@@ -814,32 +848,47 @@ public class Prop {
 		}
 	}
 
-	public JsonObject getDataJson(DynamicOps<JsonElement> ops) {
-		var json = new JsonObject();
-
+	public <O> O encode(DynamicOps<O> ops, O prefix) {
 		for (var entry : type.data()) {
 			try {
-				json.add(entry.data().key(), entry.data().type().codec().encodeStart(ops, Cast.to(getData(entry.data()))).getOrThrow());
+				var data = getData(entry.data());
+				var result = entry.data().type().codec().encodeStart(ops, Cast.to(data));
+				prefix = ops.set(prefix, entry.data().key(), result.getOrThrow());
 			} catch (Exception ignore) {
 			}
 		}
 
-		return json;
+		return prefix;
 	}
 
-	public void setDataJson(DynamicOps<JsonElement> ops, JsonObject json) {
+	public <O> O encode(DynamicOps<O> ops) {
+		return encode(ops, ops.empty());
+	}
+
+	public <O> DataResult<Prop> merge(DynamicOps<O> ops, O input) {
+		var mapLike = ops.getMap(input).result().orElse(null);
+
+		if (mapLike == null) {
+			return DataResult.error(() -> "Expected a map input");
+		}
+
 		for (var entry : type.data()) {
 			var p = entry.data();
-			var t = json.get(p.key());
+			var t = mapLike.get(p.key());
 
 			if (t != null) {
 				var result = p.type().codec().parse(ops, t);
 
 				if (result.isSuccess()) {
 					setData(p, Cast.to(result.getOrThrow()));
+					sync(p);
+				} else {
+					return DataResult.error(() -> "Failed to parse '" + p.key() + "' from " + t + ": " + result.error().get().message());
 				}
 			}
 		}
+
+		return DataResult.success(this);
 	}
 
 	public void setPausedAndSync(boolean paused) {
@@ -862,5 +911,51 @@ public class Prop {
 		}
 
 		return DataResult.success(newProp);
+	}
+
+	public int getPackedLight() {
+		return level.vl$getPackedLight(getBlockPos());
+	}
+
+	public void getInterpolationData(Map<PropData<?, ?>, Object> map) {
+		map.put(Prop.POSITION, new Vector3d(pos));
+
+		if (type.contains(Prop.YAW)) {
+			map.put(Prop.YAW, rotation.y);
+		}
+
+		if (type.contains(Prop.PITCH)) {
+			map.put(Prop.PITCH, rotation.x);
+		}
+
+		if (type.contains(Prop.ROLL)) {
+			map.put(Prop.ROLL, rotation.z);
+		}
+	}
+
+	public void applyInterpolationData(PropInterpolationData data) {
+		var pos = data.position(Prop.POSITION);
+
+		if (pos != null) {
+			setPos(pos);
+		}
+
+		var yaw = data.degrees(Prop.YAW);
+
+		if (yaw != null) {
+			setYaw(yaw.floatValue());
+		}
+
+		var pitch = data.degrees(Prop.PITCH);
+
+		if (pitch != null) {
+			setPitch(pitch.floatValue());
+		}
+
+		var roll = data.degrees(Prop.ROLL);
+
+		if (roll != null) {
+			setRoll(roll.floatValue());
+		}
 	}
 }

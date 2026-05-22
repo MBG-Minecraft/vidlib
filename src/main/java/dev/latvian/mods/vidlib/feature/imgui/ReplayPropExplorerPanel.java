@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
-import dev.latvian.mods.vidlib.feature.prop.RecordedProp;
-import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
+import dev.latvian.mods.vidlib.feature.prop.ReplayProp;
 import imgui.ImGui;
 import imgui.flag.ImGuiTreeNodeFlags;
 
@@ -23,15 +23,21 @@ public class ReplayPropExplorerPanel extends Panel {
 			return;
 		}
 
-		if (RecordedProp.LIST == null) {
+		var session = ReplayAPI.getActive().getOpenSession();
+
+		if (session == null) {
+			return;
+		}
+
+		if (ReplayProp.LIST == null) {
 			return;
 		}
 
 		ImGui.text("WIP!");
 
-		var allProps = new ArrayList<>(RecordedProp.LIST);
-		var replayStart = FlashbackIntegration.getStartTick();
-		var replayEnd = FlashbackIntegration.getEndTick();
+		var allProps = new ArrayList<>(ReplayProp.LIST);
+		var replayStart = session.getFileInfo().getStartGameTick();
+		var replayEnd = session.getFileInfo().getEndGameTick();
 
 		ImGui.text("Replay Props: %,d".formatted(allProps.size()));
 

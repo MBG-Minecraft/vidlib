@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.net;
 
+import dev.latvian.mods.klib.util.LevelGameTimeProvider;
 import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
-import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -13,16 +13,16 @@ import java.util.List;
 public class S2CPacketBundleBuilder implements VLS2CPacketConsumer {
 	private static final int MAX_PER_BUNDLE = 4095;
 
-	public final Level level;
+	public final LevelGameTimeProvider gameTimeProvider;
 	private List<Packet<? super ClientGamePacketListener>> list;
 
-	public S2CPacketBundleBuilder(Level level) {
-		this.level = level;
+	public S2CPacketBundleBuilder(LevelGameTimeProvider gameTimeProvider) {
+		this.gameTimeProvider = gameTimeProvider;
 	}
 
 	@Override
-	public Level vl$level() {
-		return level;
+	public long getLevelGameTime() {
+		return gameTimeProvider.getLevelGameTime();
 	}
 
 	@Override

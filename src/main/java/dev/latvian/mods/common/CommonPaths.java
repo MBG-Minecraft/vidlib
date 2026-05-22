@@ -1,14 +1,14 @@
 package dev.latvian.mods.common;
 
 import dev.latvian.mods.klib.util.Lazy;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import net.minecraft.Util;
-import net.neoforged.fml.loading.FMLPaths;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 public interface CommonPaths {
-	Lazy<Path> LOCAL = Lazy.of(() -> FMLPaths.GAMEDIR.get().resolve("local"));
+	Lazy<Path> LOCAL = Lazy.of(() -> PlatformHelper.CURRENT.getLocalDirectory());
 
 	Lazy<Path> USER = Lazy.of(() -> {
 		var override = System.getenv("LATVIAN_DEV_DATA_DIRECTORY");

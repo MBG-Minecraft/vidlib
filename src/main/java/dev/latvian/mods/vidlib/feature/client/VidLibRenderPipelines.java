@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.client;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DepthTestFunction;
+import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.latvian.mods.vidlib.VidLib;
@@ -33,6 +34,29 @@ public interface VidLibRenderPipelines {
 		.withLocation(VidLib.id("pipeline/masked_gui"))
 		.withFragmentShader(VidLib.id("core/masked_gui"))
 		.withSampler("Sampler1")
+		.build();
+
+	RenderPipeline MSDF = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)
+		.withLocation(VidLib.id("pipeline/msdf"))
+		.withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
+		.withVertexShader(VidLib.id("core/msdf"))
+		.withFragmentShader(VidLib.id("core/msdf"))
+		.withSampler("Sampler0")
+		.withBlend(BlendFunction.TRANSLUCENT)
+		.withCull(true)
+		.withUniform("ModelOffset", UniformType.VEC3) // Used to pass modifiers
+		.build();
+
+	RenderPipeline MSDF_SEE_THROUGH = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)
+		.withLocation(VidLib.id("pipeline/msdf_see_through"))
+		.withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
+		.withVertexShader(VidLib.id("core/msdf"))
+		.withFragmentShader(VidLib.id("core/msdf"))
+		.withSampler("Sampler0")
+		.withBlend(BlendFunction.TRANSLUCENT)
+		.withCull(true)
+		.withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+		.withDepthWrite(false)
 		.build();
 
 	RenderPipeline SKYBOX = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)
@@ -114,6 +138,8 @@ public interface VidLibRenderPipelines {
 	@SubscribeEvent
 	static void registerRenderPipelines(RegisterRenderPipelinesEvent event) {
 		event.registerPipeline(GUI_DEPTH);
+		event.registerPipeline(MASKED_GUI);
+		event.registerPipeline(MSDF);
 		event.registerPipeline(SKYBOX);
 		event.registerPipeline(SOLID_TERRAIN_NO_CULL);
 		event.registerPipeline(CUTOUT_MIPPED_TERRAIN_NO_CULL);

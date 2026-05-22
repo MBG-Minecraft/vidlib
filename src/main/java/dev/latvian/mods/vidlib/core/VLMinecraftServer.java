@@ -1,13 +1,17 @@
 package dev.latvian.mods.vidlib.core;
 
+import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.clock.SyncClocksPayload;
+import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
+import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
+import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
-import dev.latvian.mods.vidlib.feature.misc.EventMarkerData;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.RemoveZonePayload;
@@ -27,9 +31,11 @@ import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
+import java.nio.file.Files;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	default MinecraftServer vl$self() {
@@ -70,10 +76,22 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 		return vl$self().getPlayerList().getPlayers();
 	}
 
+	@Override
+	default Collection<ServerSessionData> vl$getAllSessionData() {
+		return List.of();
+	}
+
 	@ApiStatus.Internal
 	default void vl$playerJoined(ServerPlayer player) {
+		PlayerProfiles.cache(player.getGameProfile());
+		player.vl$sessionData().dataMap.set(InternalPlayerData.ONLINE, true);
+		player.vl$sessionData().dataMap.set(InternalPlayerData.NAME, player.getScoreboardName());
 		VidLib.sync(player, 2);
-		player.server.marker(new EventMarkerData("player/logged_in", player));
+	}
+
+	@ApiStatus.Internal
+	default void vl$playerLeft(ServerPlayer player) {
+		player.vl$sessionData().dataMap.set(InternalPlayerData.ONLINE, false);
 	}
 
 	@Override
@@ -104,10 +122,20 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 
 		var packetsToEveryone = new S2CPacketBundleBuilder(vl$level());
 
-		getServerData().sync(packetsToEveryone, null, (playerId, update) -> new SyncServerDataPayload(update));
+		if (!vl$isReplayServer()) {
+			getDataMap().sync(packetsToEveryone, (playerId, update) -> new SyncServerDataPayload(update));
+
+			for (var session : vl$self().vl$getAllSessionData()) {
+				session.dataMap.sync(packetsToEveryone, SyncPlayerDataPayload::new);
+			}
+		}
 
 		for (var player : vl$self().getPlayerList().getPlayers()) {
-			player.vl$sessionData().vl$postTick(packetsToEveryone, player);
+			player.vl$sessionData().syncPlayer(player, packetsToEveryone);
+		}
+
+		for (var session : vl$self().vl$getAllSessionData()) {
+			session.tick++;
 		}
 
 		packetsToEveryone.send(this);
@@ -191,18 +219,6 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default List<ServerSessionData> vl$getAllSessionData() {
-		var players = vl$self().getPlayerList().getPlayers();
-		var list = new ArrayList<ServerSessionData>(players.size());
-
-		for (var player : players) {
-			list.add(player.vl$sessionData());
-		}
-
-		return list;
-	}
-
-	@Override
 	default String getServerBrand() {
 		return "neoforge";
 	}
@@ -217,12 +233,45 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	}
 
 	default void vl$save() {
-		getServerData().save(vl$self(), vl$self().getWorldPath(LevelResource.ROOT).resolve("vidlib.nbt"));
+		getDataMap().save(vl$self(), vl$self().getWorldPath(LevelResource.ROOT).resolve("vidlib.nbt"));
 
 		var packetCapture = vl$getPacketCapture(false);
 
 		if (packetCapture != null) {
 			packetCapture.saveAll();
 		}
+	}
+
+	default ServerSessionData vl$getOrLoadServerSession(UUID uuid) {
+		throw new NoMixinException(this);
+	}
+
+	default void vl$eraseServerSession(UUID uuid) {
+		throw new NoMixinException(this);
+	}
+
+	default void vl$preloadAllSessions() {
+		var dir = PlatformHelper.CURRENT.getPlayerDataDirectory(vl$self());
+
+		if (Files.notExists(dir)) {
+			return;
+		}
+
+		try (var stream = Files.list(dir)) {
+			for (var path : stream.filter(Files::isRegularFile).toList()) {
+				var name = path.getFileName().toString();
+
+				if (name.endsWith(".nbt")) {
+					var uuid = UndashedUuid.fromStringLenient(name.substring(0, name.length() - 4));
+					vl$getOrLoadServerSession(uuid);
+				}
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	default boolean vl$isReplayServer() {
+		return false;
 	}
 }

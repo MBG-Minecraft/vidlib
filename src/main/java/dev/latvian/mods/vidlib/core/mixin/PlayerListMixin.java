@@ -14,6 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.server.players.ServerOpList;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -70,5 +71,10 @@ public abstract class PlayerListMixin {
 		if (!CommonGameEngine.INSTANCE.disableJoinMessages()) {
 			operation.call(instance, message, bypassHiddenChat);
 		}
+	}
+
+	@WrapOperation(method = "op", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/ServerOpList;canBypassPlayerLimit(Lcom/mojang/authlib/GameProfile;)Z"))
+	private boolean vl$canOpBypassPlayerLimit(ServerOpList instance, GameProfile profile, Operation<Boolean> original) {
+		return true;
 	}
 }

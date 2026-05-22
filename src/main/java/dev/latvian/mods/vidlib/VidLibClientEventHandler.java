@@ -7,6 +7,8 @@ import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
 import dev.latvian.mods.klib.texture.LightUV;
 import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.klib.util.StringUtils;
+import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.BlockEntityRendererHolder;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
@@ -19,6 +21,7 @@ import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.client.VidLibHUD;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
+import dev.latvian.mods.vidlib.feature.client.babymodel.BabyChickenModel;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockFont;
 import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
@@ -29,23 +32,23 @@ import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.environment.FluidPlaneRenderer;
+import dev.latvian.mods.vidlib.feature.font.MSDFFont;
 import dev.latvian.mods.vidlib.feature.gradient.ClientGradientLoader;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
+import dev.latvian.mods.vidlib.feature.item.RainbowItemTint;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
-import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
-import dev.latvian.mods.vidlib.feature.misc.ClientModInfo;
 import dev.latvian.mods.vidlib.feature.misc.ClientModListPayload;
 import dev.latvian.mods.vidlib.feature.misc.DebugTextEvent;
+import dev.latvian.mods.vidlib.feature.misc.MainMenuOpenedEvent;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import dev.latvian.mods.vidlib.feature.misc.ScreenTextRenderer;
-import dev.latvian.mods.vidlib.feature.misc.VLFlashbackIntegration;
 import dev.latvian.mods.vidlib.feature.multiverse.VoidSpecialEffects;
 import dev.latvian.mods.vidlib.feature.particle.VidLibClientParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
-import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
@@ -55,22 +58,27 @@ import dev.latvian.mods.vidlib.feature.structure.StructureRenderer;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
 import dev.latvian.mods.vidlib.feature.visual.TexturedCubeRenderer;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
-import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
-import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
 import dev.latvian.mods.vidlib.util.NameDrawType;
-import dev.latvian.mods.vidlib.util.StringUtils;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
+import dev.mrbeastgaming.mods.hub.api.HubAPI;
+import dev.mrbeastgaming.mods.hub.api.HubFileType;
+import dev.mrbeastgaming.mods.hub.api.HubMinecraftProfileData;
+import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
+import dev.mrbeastgaming.mods.hub.api.HubUserData;
+import dev.mrbeastgaming.mods.hub.api.gateway.HubGateway;
+import dev.mrbeastgaming.mods.hub.event.SyncClientFilesHubEvent;
+import dev.mrbeastgaming.mods.hub.file.HubFileUploads;
+import dev.mrbeastgaming.mods.hub.link.LinkHubUserScreen;
+import dev.mrbeastgaming.mods.hub.link.LinkMinecraftScreen;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.toasts.AdvancementToast;
-import net.minecraft.client.gui.components.toasts.RecipeToast;
 import net.minecraft.client.gui.components.toasts.SystemToast;
-import net.minecraft.client.gui.components.toasts.TutorialToast;
 import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.commands.Commands;
@@ -83,7 +91,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
@@ -96,6 +103,7 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
@@ -111,6 +119,7 @@ import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.GameShuttingDownEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -136,16 +145,16 @@ public class VidLibClientEventHandler {
 	}
 
 	public static void syncSetup() {
-		if (VLFlashbackIntegration.ENABLED) {
-			VLFlashbackIntegration.init();
-		}
+		InternalServerData.ANCHOR.addUpdateListener(VidLibClientEventHandler::updateAnchor);
+	}
 
-		InternalServerData.ANCHOR.addUpdateListener((player, anchor) -> Anchor.client = anchor);
+	private static void updateAnchor(Player player, Anchor anchor) {
+		Anchor.client = anchor;
 	}
 
 	@SubscribeEvent
 	public static void dynamicResources(DynamicResourceEvent.Assets event) {
-		event.register(ID.video("dynamic_resources/tracksuits"));
+		event.register(ID.video("dynamic_resources/clothing"));
 	}
 
 	@SubscribeEvent
@@ -159,6 +168,7 @@ public class VidLibClientEventHandler {
 		event.addListener(VidLib.id("clock"), new Clock.Loader());
 		event.addListener(VidLib.id("skybox"), new SkyboxData.Loader());
 		event.addListener(VidLib.id("zone"), new ZoneLoader(ZoneLoader.CLIENT_BY_DIMENSION, false));
+		event.addListener(VidLib.id("msdf"), new MSDFFont.Loader());
 
 		event.addDependency(VidLib.id("structure"), VidLib.id("ghost_structure"));
 		event.addDependency(VidLib.id("clock_font"), VidLib.id("clock"));
@@ -192,12 +202,15 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void registerGuiLayers(RegisterGuiLayersEvent event) {
-		event.registerBelowAll(VidLib.id("player_names"), VidLibHUD::drawPlayerNames);
+		event.registerBelowAll(VidLib.id("below_all"), VidLibHUD::drawBelowAll);
 		event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, VidLib.id("above_boss"), VidLibHUD::drawAboveBossOverlay);
 		event.registerAbove(VanillaGuiLayers.OVERLAY_MESSAGE, VidLib.id("information_hud"), VidLibHUD::drawInformationHUD);
-		event.registerAboveAll(VidLib.id("fade"), VidLibHUD::drawFade);
-		event.registerAboveAll(VidLib.id("player_pins"), Pins::draw);
-		event.registerBelowAll(VidLib.id("waypoints"), ClientWaypoints::draw);
+		event.registerAboveAll(VidLib.id("above_all"), VidLibHUD::drawAboveAll);
+	}
+
+	@SubscribeEvent
+	public static void registerItemTintSources(RegisterColorHandlersEvent.ItemTintSources event) {
+		event.register(VidLib.id("rgb"), RainbowItemTint.MAP_CODEC);
 	}
 
 	@SubscribeEvent
@@ -280,7 +293,6 @@ public class VidLibClientEventHandler {
 		FrameInfo.CURRENT = frame;
 
 		var ms = frame.poseStack();
-		float delta = frame.worldDelta();
 
 		if (session.fluidPlane != null && frame.layer() != null) {
 			FluidPlaneRenderer.render(frame, session.fluidPlane);
@@ -339,7 +351,7 @@ public class VidLibClientEventHandler {
 				}
 			}
 
-			if (!session.serverDataMap.get(InternalServerData.HIDE_PLUMBOBS, mc.level.getGameTime())) {
+			if (!session.serverDataMap.get(InternalServerData.HIDE_PLUMBOBS)) {
 				PlumbobRenderer.render(mc, frame);
 			}
 
@@ -370,7 +382,6 @@ public class VidLibClientEventHandler {
 			GhostStructure.render(frame);
 
 			var tool = VidLibTool.of(mc.player);
-
 			if (tool != null) {
 				tool.getSecond().visuals(mc.player, tool.getFirst(), Visuals.TEMP, frame.screenDelta());
 
@@ -414,7 +425,7 @@ public class VidLibClientEventHandler {
 		int renderingStructures = StructureRenderer.getRenderingAll();
 
 		if (renderingStructures != 0) {
-			if (!VLFlashbackIntegration.ENABLED || !FlashbackIntegration.isExporting()) {
+			if (!ReplayAPI.getActive().isExporting()) {
 				var component = Component.empty().append(BATIcons.ERROR).append(BATIcons.SMALL_SPACE).append("Rendering " + renderingStructures + " structures...");
 
 				if (mc.player.isReplayCamera()) {
@@ -429,10 +440,6 @@ public class VidLibClientEventHandler {
 		}
 
 		boolean primitiveF3Open = mc.gui.getDebugOverlay().showDebugScreen() && ClientGameEngine.INSTANCE.primitiveF3(mc);
-
-		if (primitiveF3Open || VidLibClientOptions.getShowFPS()) {
-			ScreenText.RENDER.topRight.add(mc.fpsString.split(" ", 2)[0] + " FPS");
-		}
 
 		if ((primitiveF3Open || VidLibClientOptions.getShowCoordinates()) && ClientGameEngine.INSTANCE.allowCoordinateDisplay(mc)) {
 			var pos = mc.gameRenderer.getMainCamera().getPosition();
@@ -513,7 +520,7 @@ public class VidLibClientEventHandler {
 	@SubscribeEvent
 	public static void adjustFOV(ViewportEvent.ComputeFov event) {
 		var mc = Minecraft.getInstance();
-		var override = CameraOverride.get(mc);
+		var override = ClientGameEngine.INSTANCE.overrideCamera(mc);
 
 		if (override != null) {
 			event.setFOV((float) (event.getFOV() * override.getFOVModifier(event.getPartialTick())));
@@ -591,7 +598,7 @@ public class VidLibClientEventHandler {
 	public static void addToast(ToastAddEvent event) {
 		var toast = event.getToast();
 
-		if (toast instanceof TutorialToast || toast instanceof AdvancementToast || toast instanceof RecipeToast) {
+		if (ClientGameEngine.INSTANCE.disableToast(event.getToast())) {
 			event.setCanceled(true);
 		} else if (toast instanceof SystemToast systemToast) {
 			var t = systemToast.getToken();
@@ -621,6 +628,11 @@ public class VidLibClientEventHandler {
 		var mc = Minecraft.getInstance();
 
 		if (mc.player != null && event.isAttack()) {
+			if (mc.player.vl$isSuspended()) {
+				event.setCanceled(true);
+				return;
+			}
+
 			var item = mc.player.getItemInHand(event.getHand());
 			var tool = VidLibTool.of(item);
 
@@ -651,13 +663,7 @@ public class VidLibClientEventHandler {
 		PlayerProfiles.cache(event.getPlayer().getGameProfile());
 
 		if (!event.getPlayer().vl$sessionData().clientModListSentDuringConfig) {
-			var list = new ArrayList<ClientModInfo>();
-
-			for (var mod : ModList.get().getMods()) {
-				list.add(new ClientModInfo(mod.getModId(), mod.getDisplayName(), mod.getVersion().toString(), mod.getOwningFile().getFile().getFileName()));
-			}
-
-			event.getPlayer().c2s(new ClientModListPayload(list));
+			event.getPlayer().c2s(new ClientModListPayload(PlatformHelper.CURRENT.getModList()));
 		}
 	}
 
@@ -683,11 +689,7 @@ public class VidLibClientEventHandler {
 	public static void canRenderNameTag(RenderNameTagEvent.CanRender event) {
 		var mc = Minecraft.getInstance();
 
-		if (mc.player == null || !(event.getEntity() instanceof Player)) {
-			return;
-		}
-
-		if (mc.getNameDrawType() != NameDrawType.VANILLA && VidLibHUD.shouldDrawName(mc, mc.player, (Player) event.getEntity())) {
+		if (mc.getNameDrawType() != NameDrawType.VANILLA) {
 			event.setCanRender(TriState.FALSE);
 		}
 	}
@@ -711,6 +713,8 @@ public class VidLibClientEventHandler {
 	public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
 		event.registerLayerDefinition(ClothingLayer.WIDE, ClothingModel::createWideClothingLayer);
 		event.registerLayerDefinition(ClothingLayer.SLIM, ClothingModel::createSlimClothingLayer);
+		event.registerLayerDefinition(ModelLayers.CHICKEN_BABY, BabyChickenModel::createBodyLayer);
+		event.registerLayerDefinition(ModelLayers.COLD_CHICKEN_BABY, BabyChickenModel::createBodyLayer);
 	}
 
 	@SubscribeEvent
@@ -721,6 +725,71 @@ public class VidLibClientEventHandler {
 
 		if (event.getSkin(PlayerSkin.Model.SLIM) instanceof PlayerRenderer r) {
 			r.addLayer(new ClothingLayer(r, event.getContext(), false)); // TODO: Fixme
+		}
+	}
+
+	@SubscribeEvent
+	public static void computeCameraAngles(ViewportEvent.ComputeCameraAngles event) {
+		var mc = Minecraft.getInstance();
+
+		if (mc.player != null && mc.player.getVehicle() != null) {
+			event.setRoll(mc.player.getVehicle().getPassengerCameraRoll(mc.player, event.getPartialTick(), event.getRoll()));
+		}
+	}
+
+	@SubscribeEvent
+	public static void mainMenuOpened(MainMenuOpenedEvent event) {
+		if (HubUserCapabilities.CURRENT.autoUploadFiles()) {
+			var entries = new ArrayList<HubFileUploads.Entry>();
+			NeoForge.EVENT_BUS.post(new SyncClientFilesHubEvent(entries, event.isFirstTime()));
+
+			if (!entries.isEmpty()) {
+				HubAPI.SEQUENTIAL_EXECUTOR.get().execute(() -> HubFileUploads.syncFiles(entries, VidLibClient.createUploadQueue()));
+			}
+		}
+
+		if (HubUserData.SELF == null) {
+			LinkHubUserScreen.open(event.getMinecraft());
+		} else if (HubMinecraftProfileData.SELF == null) {
+			if (!PlatformHelper.CURRENT.isDevEnv()) {
+				LinkMinecraftScreen.handle(event.getMinecraft(), true);
+			}
+		}
+	}
+
+	@SubscribeEvent
+	public static void gameShuttingDown(GameShuttingDownEvent event) {
+		VidLib.LOGGER.info("Shutting down");
+
+		var c = HubGateway.client;
+
+		if (c != null) {
+			c.stop();
+		}
+	}
+
+	@SubscribeEvent
+	public static void syncClientFilesHub(SyncClientFilesHubEvent event) {
+		var gameDir = PlatformHelper.CURRENT.getGameDirectory();
+
+		event.addDirectory(gameDir.resolve("voicechat_recordings"), builder -> {
+			builder.setType(HubFileType.VOICE_CHAT_RECORDING);
+			builder.setNoUniqueId();
+			builder.setFilterEndsWith(".mp3");
+		});
+
+		if (event.isFirstTime()) {
+			event.addDirectory(gameDir.resolve("crash-reports"), builder -> {
+				builder.setType(HubFileType.CLIENT_CRASH_REPORT);
+				builder.setNoUniqueId();
+				builder.setFilterEndsWith("-client.txt");
+			});
+
+			event.addDirectory(gameDir, builder -> {
+				builder.setType(HubFileType.CLIENT_JVM_CRASH_REPORT);
+				builder.setNoUniqueId();
+				builder.setFilter(fileInfo -> fileInfo.name().startsWith("hr_err_pid_") && fileInfo.name().endsWith(".log"));
+			});
 		}
 	}
 }

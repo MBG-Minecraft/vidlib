@@ -13,6 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
+import java.util.Set;
 
 public class WaypointCommands {
 	@AutoRegister
@@ -40,17 +41,19 @@ public class WaypointCommands {
 	);
 
 	private static int add(CommandSourceStack source, String id, Vec3 position, Component label) {
-		var waypoint = new Waypoint();
-		waypoint.id = id;
-		waypoint.position = KVector.of(position);
-		waypoint.label = label;
-		waypoint.tint = Color.hsb(source.getLevel().random.nextFloat(), 1F, 1F, 255);
-		source.getLevel().s2c(new AddWaypointsPayload(List.of(waypoint)));
+		source.getServer().addWaypoints(List.of(new Waypoint.Builder()
+			.id(id)
+			.position(KVector.of(position))
+			.label(label)
+			.distance(6D, 20D, 0D)
+			.build()
+		));
+
 		return 0;
 	}
 
 	public static int remove(CommandSourceStack source, String id) {
-		source.getLevel().s2c(new RemoveWaypointsPayload(List.of(id)));
+		source.getServer().removeWaypoints(Set.of(id));
 		return 1;
 	}
 }

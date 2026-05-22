@@ -56,6 +56,24 @@ public interface VidLibRenderTypes {
 			.createCompositeState(false)
 	));
 
+	TexturedRenderType MSDF = TexturedRenderType.internal(
+		"msdf",
+		786432,
+		VidLibRenderPipelines.MSDF,
+		texture -> RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.TRUE, false))
+			.createCompositeState(false)
+	);
+
+	TexturedRenderType MSDF_SEE_THROUGH = TexturedRenderType.internal(
+		"msdf_see_through",
+		786432,
+		VidLibRenderPipelines.MSDF_SEE_THROUGH,
+		texture -> RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.TRUE, false))
+			.createCompositeState(false)
+	);
+
 	TexturedRenderType SKYBOX = TexturedRenderType.internal(
 		"skybox",
 		DefaultVertexFormat.POSITION_TEX_COLOR.getVertexSize() * 6,
@@ -126,9 +144,9 @@ public interface VidLibRenderTypes {
 	);
 
 	TexturedRenderType STRONG_OUTLINE = TexturedRenderType.create(texture -> RenderType.create(
-		"strong_outline",
+			"strong_outline",
 			1536,
-		RenderPipelines.OUTLINE_CULL,
+			RenderPipelines.OUTLINE_CULL,
 			RenderType.CompositeState.builder()
 				.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
 				.setOutputState(Canvas.STRONG_OUTLINE.getOutputStateShard())

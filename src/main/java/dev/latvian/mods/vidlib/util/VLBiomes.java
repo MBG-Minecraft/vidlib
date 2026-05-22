@@ -1,25 +1,24 @@
 package dev.latvian.mods.vidlib.util;
 
-import com.mojang.serialization.JsonOps;
-import dev.latvian.mods.klib.util.Lazy;
-import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
-import net.minecraft.server.packs.PackType;
 import net.minecraft.world.level.biome.Biome;
-
-import java.nio.file.Files;
+import net.minecraft.world.level.biome.BiomeGenerationSettings;
+import net.minecraft.world.level.biome.BiomeSpecialEffects;
+import net.minecraft.world.level.biome.MobSpawnSettings;
 
 public interface VLBiomes {
-	Lazy<Biome> VOID = Lazy.of(() -> {
-		try {
-			var file = PlatformHelper.CURRENT.findFile(PackType.SERVER_DATA, VidLib.id("worldgen/biome/void.json"));
-
-			try (var reader = Files.newBufferedReader(file)) {
-				var json = JsonUtils.read(reader);
-				return Biome.DIRECT_CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
-			}
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
-	});
+	Biome VOID = new Biome.BiomeBuilder()
+		.hasPrecipitation(false)
+		.temperature(0.5F)
+		.downfall(0.5F)
+		.specialEffects(new BiomeSpecialEffects.Builder()
+			.fogColor(12638463)
+			.skyColor(7907327)
+			.waterColor(4159204)
+			.waterFogColor(329011)
+			.silenceAllBackgroundMusic()
+			.build()
+		)
+		.mobSpawnSettings(new MobSpawnSettings.Builder().creatureGenerationProbability(0F).build())
+		.generationSettings(new BiomeGenerationSettings.Builder(null, null).build())
+		.build();
 }

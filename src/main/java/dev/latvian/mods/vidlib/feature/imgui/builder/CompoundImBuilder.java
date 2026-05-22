@@ -50,7 +50,7 @@ public abstract class CompoundImBuilder<T> implements ImBuilder<T> {
 			if (builder.optional == null || builder.optional.get()) {
 				ImGui.pushID(i);
 				ImGui.pushItemWidth(-1F);
-				update = builder.builder.imgui(graphics);
+				update = update.or(builder.builder.imgui(graphics));
 				ImGui.popItemWidth();
 				ImGui.popID();
 			}

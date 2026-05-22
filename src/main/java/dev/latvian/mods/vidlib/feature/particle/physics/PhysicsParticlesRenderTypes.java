@@ -12,7 +12,9 @@ import net.minecraft.client.renderer.RenderType;
 public interface PhysicsParticlesRenderTypes {
 	VertexFormat FORMAT = VertexFormat.builder()
 		.add("Position", VertexFormatElement.POSITION)
+		.add("Color", VertexFormatElement.COLOR)
 		.add("UV0", VertexFormatElement.UV0)
+		.add("UV2", VertexFormatElement.UV2)
 		.add("Normal", VertexFormatElement.NORMAL)
 		.build();
 
@@ -21,6 +23,7 @@ public interface PhysicsParticlesRenderTypes {
 		.withVertexShader(VidLib.id("core/physics_particle"))
 		.withFragmentShader(VidLib.id("core/physics_particle"))
 		.withSampler("Sampler0")
+		.withSampler("Sampler2")
 		.withCull(true)
 		.buildSnippet();
 
@@ -28,10 +31,51 @@ public interface PhysicsParticlesRenderTypes {
 		.withLocation(VidLib.id("pipeline/physics_particle/solid"))
 		.build();
 
+	RenderType SOLID = RenderType.create(
+		"physics_particle_solid",
+		1536,
+		false,
+		false,
+		SOLID_PIPELINE,
+		RenderType.CompositeState.builder()
+			.setTextureState(RenderStateShard.BLOCK_SHEET_MIPPED)
+			.setLightmapState(RenderStateShard.LIGHTMAP)
+			.createCompositeState(true)
+	);
+
+	RenderPipeline CUTOUT_MIPPED_PIPELINE = RenderPipeline.builder(PIPELINE_BASE)
+		.withLocation(VidLib.id("pipeline/physics_particle/cutout_mipped"))
+		.withShaderDefine("ALPHA_CUTOUT", 0.5F)
+		.build();
+
+	RenderType CUTOUT_MIPPED = RenderType.create(
+		"physics_particle_cutout_mipped",
+		1536,
+		true,
+		false,
+		CUTOUT_MIPPED_PIPELINE,
+		RenderType.CompositeState.builder()
+			.setTextureState(RenderStateShard.BLOCK_SHEET_MIPPED)
+			.setLightmapState(RenderStateShard.LIGHTMAP)
+			.createCompositeState(true)
+	);
+
 	RenderPipeline CUTOUT_PIPELINE = RenderPipeline.builder(PIPELINE_BASE)
 		.withLocation(VidLib.id("pipeline/physics_particle/cutout"))
 		.withShaderDefine("ALPHA_CUTOUT", 0.1F)
 		.build();
+
+	RenderType CUTOUT = RenderType.create(
+		"physics_particle_cutout",
+		1536,
+		false,
+		false,
+		CUTOUT_PIPELINE,
+		RenderType.CompositeState.builder()
+			.setTextureState(RenderStateShard.BLOCK_SHEET)
+			.setLightmapState(RenderStateShard.LIGHTMAP)
+			.createCompositeState(true)
+	);
 
 	RenderPipeline TRANSLUCENT_PIPELINE = RenderPipeline.builder(PIPELINE_BASE)
 		.withLocation(VidLib.id("pipeline/physics_particle/translucent"))
@@ -39,28 +83,16 @@ public interface PhysicsParticlesRenderTypes {
 		.withBlend(BlendFunction.TRANSLUCENT)
 		.build();
 
-	RenderType PHYSICS_SOLID = RenderType.create(
-		VidLib.id("physics_particle/solid").toString(),
+	RenderType TRANSLUCENT = RenderType.create(
+		"physics_particle_translucent",
 		1536,
-		SOLID_PIPELINE,
-		RenderType.CompositeState.builder()
-			.createCompositeState(false)
-	);
-
-	RenderType PHYSICS_CUTOUT = RenderType.create(
-		VidLib.id("physics_particle/cutout").toString(),
-		1536,
-		CUTOUT_PIPELINE,
-		RenderType.CompositeState.builder()
-			.createCompositeState(false)
-	);
-
-	RenderType PHYSICS_TRANSLUCENT = RenderType.create(
-		VidLib.id("physics_particle/translucent").toString(),
-		1536,
+		false,
+		true,
 		TRANSLUCENT_PIPELINE,
 		RenderType.CompositeState.builder()
+			.setTextureState(RenderStateShard.BLOCK_SHEET_MIPPED)
+			.setLightmapState(RenderStateShard.LIGHTMAP)
 			.setOutputState(RenderStateShard.TRANSLUCENT_TARGET)
-			.createCompositeState(false)
+			.createCompositeState(true)
 	);
 }

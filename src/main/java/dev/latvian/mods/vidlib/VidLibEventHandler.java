@@ -1,21 +1,18 @@
 package dev.latvian.mods.vidlib;
 
+import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
-import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
-import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.location.Location;
-import dev.latvian.mods.vidlib.feature.misc.EventMarkerData;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.registry.GenericVLRegistry;
-import dev.latvian.mods.vidlib.feature.session.RemovePlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
@@ -23,14 +20,15 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.TriState;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
@@ -49,6 +47,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerXpEvent;
 import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
@@ -92,6 +91,7 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void registerTicketControllers(RegisterTicketControllersEvent event) {
 		event.register(Anchor.TICKET_CONTROLLER);
+		event.register(Anchor.BLOCK_TICKET_CONTROLLER);
 	}
 
 	@SubscribeEvent
@@ -131,7 +131,6 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
 		if (event.getEntity() instanceof ServerPlayer player) {
-			PlayerProfiles.cache(player.getGameProfile());
 			player.server.vl$playerJoined(player);
 		}
 	}
@@ -139,8 +138,7 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void playerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
 		if (event.getEntity() instanceof ServerPlayer player) {
-			player.server.marker(new EventMarkerData("player/logged_out", player));
-			player.server.s2c(new RemovePlayerDataPayload(player.getUUID()));
+			player.server.vl$playerLeft(player);
 		}
 	}
 
@@ -165,7 +163,7 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void playerSaved(PlayerEvent.SaveToFile event) {
 		if (event.getEntity() instanceof ServerPlayer player) {
-			player.vl$sessionData().dataMap.save(player.server, player.server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve("vidlib").resolve(player.getUUID() + ".nbt"));
+			player.vl$sessionData().save();
 		}
 	}
 
@@ -216,9 +214,14 @@ public class VidLibEventHandler {
 		}
 	}
 
-	@SubscribeEvent
-	public static void useItemOnBlock(UseItemOnBlockEvent event) {
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public static void preUseItemOnBlock(UseItemOnBlockEvent event) {
 		if (event.getPlayer() != null) {
+			if (event.getPlayer().vl$isSuspended()) {
+				event.cancelWithResult(InteractionResult.FAIL);
+				return;
+			}
+
 			var item = event.getItemStack();
 			var tool = VidLibTool.of(item);
 
@@ -228,8 +231,37 @@ public class VidLibEventHandler {
 		}
 	}
 
-	@SubscribeEvent
-	public static void useItemInAir(PlayerInteractEvent.RightClickItem event) {
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public static void preBlockLeftClick(PlayerInteractEvent.LeftClickBlock event) {
+		if (event.getEntity().vl$isSuspended()) {
+			event.setUseBlock(TriState.FALSE);
+			event.setUseItem(TriState.FALSE);
+			event.setCanceled(true);
+		}
+	}
+
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public static void preBreakBlock(BlockEvent.BreakEvent event) {
+		if (event.getPlayer().vl$isSuspended()) {
+			event.setCanceled(true);
+		}
+	}
+
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public static void prePlaceBlock(BlockEvent.EntityPlaceEvent event) {
+		if (event.getEntity() != null && event.getEntity().vl$isSuspended()) {
+			event.setCanceled(true);
+		}
+	}
+
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public static void preUseItemInAir(PlayerInteractEvent.RightClickItem event) {
+		if (event.getEntity().vl$isSuspended()) {
+			event.setCancellationResult(InteractionResult.FAIL);
+			event.setCanceled(true);
+			return;
+		}
+
 		var item = event.getItemStack();
 		var tool = VidLibTool.of(item);
 
@@ -239,8 +271,8 @@ public class VidLibEventHandler {
 		}
 	}
 
-	@SubscribeEvent
-	public static void useItemOnEntity(PlayerInteractEvent.EntityInteract event) {
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public static void preUseItemOnEntity(PlayerInteractEvent.EntityInteract event) {
 		var item = event.getItemStack();
 		var tool = VidLibTool.of(item);
 
@@ -252,14 +284,14 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent
 	public static void entityInvulnerabilityCheck(EntityInvulnerabilityCheckEvent event) {
-		if (!event.getOriginalInvulnerability() && !event.isInvulnerable() && EntityOverride.INVULNERABLE.get(event.getEntity(), false)) {
+		if (!event.getOriginalInvulnerability() && !event.isInvulnerable() && CommonGameEngine.INSTANCE.isInvulnerable(event.getEntity())) {
 			event.setInvulnerable(true);
 		}
 	}
 
 	@SubscribeEvent
 	public static void livingFall(LivingFallEvent event) {
-		var mod = Math.pow(event.getEntity().vl$gravityMod(), 2D);
+		var mod = KMath.sq(CommonGameEngine.INSTANCE.getGravityModifier(event.getEntity()));
 
 		if (mod <= 0D) {
 			event.setCanceled(true);
@@ -270,10 +302,11 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent
 	public static void livingDamagePre(LivingDamageEvent.Pre event) {
-		var mod = event.getEntity().vl$attackDamageMod();
+		var dmg = event.getNewDamage();
+		var newDmg = CommonGameEngine.INSTANCE.getAttackDamage(event.getEntity(), event.getSource(), dmg);
 
-		if (mod != 1F) {
-			event.setNewDamage(event.getNewDamage() * mod);
+		if (dmg != newDmg) {
+			event.setNewDamage(newDmg);
 		}
 	}
 

@@ -26,7 +26,7 @@ public class UniverseZoneShape implements ZoneShape {
 	}
 
 	@Override
-	public AABB getBoundingBox() {
+	public AABB toAABB() {
 		return AABB.INFINITE;
 	}
 

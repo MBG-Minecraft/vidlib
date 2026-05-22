@@ -147,7 +147,7 @@ public abstract class ConfigEntry<T> {
 		if (isDefault) {
 			ImGui.endDisabled();
 		} else if (ImGui.isItemHovered()) {
-			ImGui.setTooltip(getTooltip(graphics.mc.level.jsonOps(), key.defaultValue()));
+			graphics.tooltip(getTooltip(graphics.jsonOps, key.defaultValue()));
 		}
 
 		if (!sameLine) {
@@ -171,7 +171,7 @@ public abstract class ConfigEntry<T> {
 
 	public void update(ImGraphics graphics, boolean full) {
 		var value = get();
-		graphics.mc.getServerData().set(key, value);
+		graphics.mc.set(key, value);
 
 		if (full && !graphics.isReplay && graphics.serverFeatures.has(Feature.SERVER_DATA)) {
 			graphics.mc.updateServerDataValue(key, value);

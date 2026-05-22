@@ -22,9 +22,9 @@ public interface PropRenderer<P extends Prop> {
 		RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS
 	);
 
-	Set<RenderLevelStageEvent.Stage> SOLID_TERRAIN_STAGES = Set.of(
-		RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS
-	);
+	Set<RenderLevelStageEvent.Stage> SOLID_TERRAIN_STAGES = Set.of(RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS);
+	Set<RenderLevelStageEvent.Stage> CUTOUT_TERRAIN_STAGES = Set.of(RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS);
+	Set<RenderLevelStageEvent.Stage> TRANSLUCENT_TERRAIN_STAGES = Set.of(RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS);
 
 	PropRenderer<?> INVISIBLE = new PropRenderer<>() {
 		@Override

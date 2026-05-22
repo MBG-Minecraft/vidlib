@@ -4,9 +4,11 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.Window;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.Identity;
+import dev.latvian.mods.klib.math.ProjectedCoordinates;
 import dev.latvian.mods.klib.math.VoxelShapeBox;
-import dev.latvian.mods.klib.math.WorldMouse;
 import dev.latvian.mods.klib.util.Side;
+import dev.latvian.mods.replay.api.ReplayAPI;
+import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.core.VLLocalPlayer;
@@ -19,6 +21,7 @@ import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
+import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
@@ -28,9 +31,11 @@ import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
 import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
-import dev.latvian.mods.vidlib.feature.input.PlayerInputChanged;
+import dev.latvian.mods.vidlib.feature.input.PlayerInputChangedEvent;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToServer;
+import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverridesReplaySessionData;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
+import dev.latvian.mods.vidlib.feature.note.Note;
 import dev.latvian.mods.vidlib.feature.npc.NPCParticleOptions;
 import dev.latvian.mods.vidlib.feature.npc.NPCRecording;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
@@ -38,10 +43,10 @@ import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
-import dev.latvian.mods.vidlib.feature.skybox.Skybox;
+import dev.latvian.mods.vidlib.feature.skybox.ClientSkybox;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
-import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
+import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
@@ -52,6 +57,7 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import io.netty.buffer.Unpooled;
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
@@ -84,6 +90,7 @@ import java.util.UUID;
 public class LocalClientSessionData extends ClientSessionData {
 	public final Minecraft mc;
 	private final Map<UUID, RemoteClientSessionData> remoteSessionData;
+	private List<ClientSessionData> allClientSessionData;
 	private ScheduledTask.Handler scheduledTaskHandler;
 	public final ActiveZones serverZones;
 	public final ActiveZones filteredZones;
@@ -92,15 +99,15 @@ public class LocalClientSessionData extends ClientSessionData {
 	public Vector2dc prevCameraShake;
 	public Vector2dc cameraShake;
 	public Map<ResourceLocation, ClockValue> clocks;
-	public Map<ResourceLocation, Skybox> skyboxes;
+	public Map<ResourceLocation, ClientSkybox> skyboxes;
 	public final DataMap serverDataMap;
 	public final KNumberVariables globalVariables;
-	public Skybox skybox;
+	public ClientSkybox skybox;
 	public Map<ZoneShape, VoxelShapeBox> cachedZoneShapes;
 	public CameraOverride cameraOverride;
 	public ClientCutscene currentCutscene;
 	public ScreenFadeInstance screenFade;
-	public WorldMouse worldMouse;
+	public ProjectedCoordinates projectedCoordinates;
 	public NPCRecording npcRecording;
 	public final List<Decal> debugDecals;
 	public final List<ScreenEffectInstance> screenEffects;
@@ -111,11 +118,13 @@ public class LocalClientSessionData extends ClientSessionData {
 	public WorldBorder worldBorderOverride;
 	public WorldBorderOverride worldBorderOverrideStart;
 	public WorldBorderOverride worldBorderOverrideEnd;
-	public Map<String, Waypoint> waypoints;
 	public boolean clientModListSentDuringConfig;
+	public List<ReplayMarkerData> markers;
+	public boolean hardcoreHearts;
+	public Map<UUID, Note> notes;
 
 	public LocalClientSessionData(Minecraft mc, UUID uuid) {
-		super(uuid);
+		super(uuid, mc);
 		this.mc = mc;
 		this.remoteSessionData = new Object2ObjectOpenHashMap<>();
 
@@ -126,13 +135,15 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.prevCameraShake = this.cameraShake = Identity.DVEC_2;
 		this.clocks = new Object2ObjectOpenHashMap<>();
 		this.skyboxes = new Object2ObjectOpenHashMap<>();
-		this.serverDataMap = new DataMap(uuid, DataKey.SERVER);
+		this.serverDataMap = new DataMap(uuid, DataKey.SERVER, mc);
 		this.globalVariables = new KNumberVariables();
 		this.debugDecals = new ArrayList<>();
 		this.screenEffects = new ArrayList<>();
 		this.glowColors = new Object2ObjectOpenHashMap<>();
-		this.waypoints = new Object2ObjectOpenHashMap<>();
 		this.clientModListSentDuringConfig = false;
+		this.markers = new ArrayList<>();
+		this.hardcoreHearts = false;
+		this.notes = new Object2ObjectLinkedOpenHashMap<>();
 
 		VidLib.LOGGER.info("Client Session Data Initialized");
 	}
@@ -141,8 +152,9 @@ public class LocalClientSessionData extends ClientSessionData {
 		var data = remoteSessionData.get(id);
 
 		if (data == null) {
-			data = new RemoteClientSessionData(id);
+			data = new RemoteClientSessionData(id, dataMap.timeProvider);
 			remoteSessionData.put(id, data);
+			allClientSessionData = null;
 		}
 
 		return data;
@@ -154,7 +166,7 @@ public class LocalClientSessionData extends ClientSessionData {
 
 	public ScheduledTask.Handler getScheduledTaskHandler() {
 		if (scheduledTaskHandler == null) {
-			scheduledTaskHandler = new ScheduledTask.Handler(mc::getGameTime);
+			scheduledTaskHandler = new ScheduledTask.Handler(mc);
 		}
 
 		return scheduledTaskHandler;
@@ -162,30 +174,29 @@ public class LocalClientSessionData extends ClientSessionData {
 
 	@ApiStatus.Internal
 	public List<ClientSessionData> getAllClientSessionData() {
-		var list = new ArrayList<ClientSessionData>(remoteSessionData.size() + 1);
-		list.add(this);
-		list.addAll(remoteSessionData.values());
-		return list;
+		if (allClientSessionData == null) {
+			allClientSessionData = new ArrayList<>(remoteSessionData.size() + 1);
+			allClientSessionData.add(this);
+			allClientSessionData.addAll(remoteSessionData.values());
+			allClientSessionData = List.copyOf(allClientSessionData);
+		}
+
+		return allClientSessionData;
 	}
 
 	@Override
 	public void updateOverrides(Player player) {
 		super.updateOverrides(player);
-		var now = player.level().getGameTime();
 		var skyboxId = ClientGameEngine.INSTANCE.getSkybox(mc);
 
-		if (skyboxId == null) {
-			skyboxId = player.level().getSkybox();
-		}
-
-		if (skyboxId == null || skyboxId.equals(Skyboxes.VANILLA)) {
+		if (skyboxId.equals(Skyboxes.VANILLA)) {
 			skybox = null;
 		} else {
 			skybox = getSkybox(skyboxId);
 		}
 	}
 
-	public Skybox getSkybox(ResourceLocation id) {
+	public ClientSkybox getSkybox(ResourceLocation id) {
 		var skybox = skyboxes.get(id);
 
 		if (skybox == null) {
@@ -195,7 +206,7 @@ public class LocalClientSessionData extends ClientSessionData {
 				skyboxData = new SkyboxData(id, Optional.empty(), 0F, 0F, Color.WHITE, false, true, true, Optional.empty(), Optional.empty());
 			}
 
-			skybox = new Skybox(skyboxData);
+			skybox = new ClientSkybox(skyboxData);
 			skyboxes.put(id, skybox);
 		}
 
@@ -225,7 +236,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		input = VLLocalPlayer.fromInput(window.getWindow(), player, mc.screen == null && mc.isWindowActive());
 
 		if (!prevInput.equals(input)) {
-			NeoForge.EVENT_BUS.post(new PlayerInputChanged(player, prevInput, input));
+			NeoForge.EVENT_BUS.post(new PlayerInputChangedEvent(player, prevInput, input));
 			prevInput = input;
 			mc.c2s(new SyncPlayerInputToServer(input));
 		}
@@ -278,7 +289,7 @@ public class LocalClientSessionData extends ClientSessionData {
 				var instance = shakeIt.next();
 				var vec = instance.shake.type().get(instance.progress);
 				var intensity = instance.shake.intensity();
-				var intensityScale = instance.shake.start().interpolateMirrored(instance.ticks / (float) instance.shake.duration(), instance.shake.end());
+				var intensityScale = instance.shake.interpolation().interpolate(instance.ticks / (float) instance.shake.duration());
 				shakeX += vec.x() * intensity * intensityScale;
 				shakeY += vec.y() * intensity * intensityScale;
 
@@ -351,16 +362,13 @@ public class LocalClientSessionData extends ClientSessionData {
 	}
 
 	@Override
-	public void updatePlayerTags(long gameTime, Player self, UUID player, List<String> update) {
-		var t = getClientSessionData(player).tags;
-		t.clear();
-		t.addAll(update);
-		refreshListedPlayers();
-	}
-
-	@Override
 	public void removeSessionData(UUID id) {
-		// remoteSessionData.remove(id);
+		remoteSessionData.remove(id);
+		allClientSessionData = null;
+
+		if (id.equals(uuid)) {
+			mc.getConnection().disconnect(Component.literal("Your player data was reset"));
+		}
 	}
 
 	@Override
@@ -370,16 +378,14 @@ public class LocalClientSessionData extends ClientSessionData {
 
 	@Override
 	public void updateInput(Level level, UUID player, PlayerInput input) {
-		var data = getRemoteSessionData(player);
+		var data = getClientSessionData(player);
 		data.prevInput = data.input = input;
 
-		var entity = level.getEntityByUUID(player);
-
-		if (entity != null) {
+		if (level.getEntityByUUID(player) instanceof Player entity) {
 			var vehicle = entity.getVehicle();
 
 			if (vehicle != null) {
-				vehicle.vl$setPilotInput(input);
+				vehicle.setPilotInput(entity, input);
 			}
 		}
 	}
@@ -390,11 +396,6 @@ public class LocalClientSessionData extends ClientSessionData {
 	}
 
 	@Override
-	public void refreshListedPlayers() {
-		// NOOP
-	}
-
-	@Override
 	public void setGlowColor(@Nullable UUID uuid, @Nullable Color color) {
 		if (uuid == null) {
 			glowColors.clear();
@@ -402,24 +403,6 @@ public class LocalClientSessionData extends ClientSessionData {
 			glowColors.remove(uuid);
 		} else {
 			glowColors.put(uuid, color);
-		}
-	}
-
-	@Override
-	public void addWaypoints(List<Waypoint> list) {
-		for (var waypoint : list) {
-			waypoints.put(waypoint.id, waypoint);
-		}
-	}
-
-	@Override
-	public void removeWaypoints(List<String> ids) {
-		if (ids.isEmpty()) {
-			waypoints.clear();
-		} else {
-			for (var id : ids) {
-				waypoints.remove(id);
-			}
 		}
 	}
 
@@ -493,5 +476,31 @@ public class LocalClientSessionData extends ClientSessionData {
 	@Override
 	public void setClientModListSentDuringConfig() {
 		clientModListSentDuringConfig = true;
+	}
+
+	@Nullable
+	public SpriteKey getMapTextureOverride(int id) {
+		var data = ReplayAPI.getActiveSessionData(MapTextureOverridesReplaySessionData.TYPE);
+
+		if (data != null) {
+			var override = data.overrides.get(id);
+
+			if (override != null) {
+				return override;
+			}
+		}
+
+		var overrides = serverDataMap.getOptional(InternalServerData.MAP_TEXTURE_OVERRIDES);
+		return overrides == null ? null : overrides.get(id);
+	}
+
+	@Override
+	public void createNote(Note note) {
+		notes.put(note.id(), note);
+	}
+
+	@Override
+	public void deleteNote(UUID id) {
+		notes.remove(id);
 	}
 }

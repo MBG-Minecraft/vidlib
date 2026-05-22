@@ -19,7 +19,7 @@ public class ServerDataConfigPanel extends DataMapConfigPanel {
 
 	@Override
 	public DataMap getDataMap(Minecraft mc) {
-		return mc.getServerData();
+		return mc.getDataMap();
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
-import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
@@ -27,13 +26,6 @@ public abstract class DebugScreenOverlayMixin {
 		}
 	}
 
-	@Inject(method = "showDebugScreen", at = @At("RETURN"), cancellable = true)
-	private void showDebugScreen(CallbackInfoReturnable<Boolean> cir) {
-		if (Boolean.TRUE.equals(EntityOverride.DISABLE_DEBUG.get(minecraft.player))) {
-			cir.setReturnValue(false);
-		}
-	}
-
 	@Inject(method = "collectGameInformationText", at = @At("RETURN"), cancellable = true)
 	private void collectGameInformationText(CallbackInfoReturnable<List<String>> cir) {
 		var list = ClientGameEngine.INSTANCE.collectGameInformationText(minecraft, (DebugScreenOverlay) (Object) this);
@@ -45,21 +37,21 @@ public abstract class DebugScreenOverlayMixin {
 
 	@Inject(method = "showNetworkCharts", at = @At("RETURN"), cancellable = true)
 	public void showNetworkCharts(CallbackInfoReturnable<Boolean> cir) {
-		if (Minecraft.getInstance().showOnlyReducedInfo()) {
+		if (ClientGameEngine.INSTANCE.hideDebugCharts()) {
 			cir.setReturnValue(false);
 		}
 	}
 
 	@Inject(method = "showProfilerChart", at = @At("RETURN"), cancellable = true)
 	public void showProfilerChart(CallbackInfoReturnable<Boolean> cir) {
-		if (Minecraft.getInstance().showOnlyReducedInfo()) {
+		if (ClientGameEngine.INSTANCE.hideDebugCharts()) {
 			cir.setReturnValue(false);
 		}
 	}
 
 	@Inject(method = "showFpsCharts", at = @At("RETURN"), cancellable = true)
 	public void showFpsCharts(CallbackInfoReturnable<Boolean> cir) {
-		if (Minecraft.getInstance().showOnlyReducedInfo()) {
+		if (ClientGameEngine.INSTANCE.hideDebugCharts()) {
 			cir.setReturnValue(false);
 		}
 	}

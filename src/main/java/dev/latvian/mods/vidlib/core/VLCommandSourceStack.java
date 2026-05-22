@@ -8,7 +8,7 @@ import net.minecraft.world.level.Level;
 
 public interface VLCommandSourceStack extends MessageConsumer {
 	default Level getSidedLevel() {
-		return ((CommandSourceStack) this).getLevel();
+		return ((CommandSourceStack) this).getUnsidedLevel();
 	}
 
 	@Override

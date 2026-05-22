@@ -5,6 +5,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.texture.UV;
+import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.gallery.ItemIcons;
@@ -15,7 +16,6 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.item.CachedItemData;
 import dev.latvian.mods.vidlib.feature.item.ItemKey;
-import dev.latvian.mods.vidlib.util.JsonUtils;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
@@ -44,9 +44,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public class ItemStackImBuilder implements ImBuilder<ItemStack> {
-	public static final ImBuilderType<ItemStack> TYPE = () -> new ItemStackImBuilder(false, stack -> true);
-	public static final ImBuilderType<ItemStack> TYPE_WITH_COUNT = () -> new ItemStackImBuilder(true, stack -> true);
+public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBuilder {
+	public static final Predicate<ItemStack> DEFAULT_FILTER = stack -> true;
+
+	public static final ImBuilderType<ItemStack> TYPE = () -> new ItemStackImBuilder(false, DEFAULT_FILTER);
+	public static final ImBuilderType<ItemStack> TYPE_WITH_COUNT = () -> new ItemStackImBuilder(true, DEFAULT_FILTER);
 
 	public static boolean isEquipment(ItemStack stack, EquipmentSlot slot) {
 		if (slot == EquipmentSlot.MAINHAND || slot == EquipmentSlot.OFFHAND) {
@@ -70,10 +72,10 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack> {
 		var path = VidLibPaths.LOCAL.get().resolve("item-favorites.json");
 
 		if (Files.exists(path)) {
-			try (var reader = Files.newBufferedReader(path)) {
+			try {
+				var json = JsonUtils.read(path);
 				var mc = Minecraft.getInstance();
 				var ops = mc.level == null ? JsonOps.INSTANCE : mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
-				var json = JsonUtils.read(reader);
 
 				for (var item : ItemStack.OPTIONAL_CODEC.listOf().parse(ops, json).getOrThrow()) {
 					if (!item.isEmpty()) {
@@ -89,11 +91,12 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack> {
 	});
 
 	public static void saveFavorites() {
-		try (var writer = Files.newBufferedWriter(VidLibPaths.LOCAL.get().resolve("item-favorites.json"))) {
+		try {
+			var path = VidLibPaths.LOCAL.get().resolve("item-favorites.json");
 			var mc = Minecraft.getInstance();
 			var ops = mc.level == null ? JsonOps.INSTANCE : mc.level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
 			var json = ItemStack.OPTIONAL_CODEC.listOf().encodeStart(ops, FAVORITES.get().stream().map(ItemKey::toItemStack).toList());
-			JsonUtils.write(writer, json.getOrThrow(), true);
+			JsonUtils.write(path, json.getOrThrow(), true);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -104,21 +107,24 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack> {
 
 	private static Map<ItemKey, CachedItemData> cachedItems = null;
 
+	public final ImString SEARCH = ImGuiUtils.resizableString();
 	public final boolean hasCount;
 	public final Predicate<ItemStack> filter;
 	public final ImInt count;
-	public final ImString search;
 	public final ImString input;
 	private CachedItemData result;
 	private List<RenderedItem> renderedItems;
+	public int enableListItemButtons;
+	public ListItemAction listItemAction;
 
 	public ItemStackImBuilder(boolean hasCount, Predicate<ItemStack> filter) {
 		this.hasCount = hasCount;
-		this.filter = filter;
+		this.filter = filter == null ? DEFAULT_FILTER : filter;
 		this.count = new ImInt(1);
-		this.search = ImGuiUtils.resizableString();
 		this.input = ImGuiUtils.resizableString();
 		this.result = null;
+		this.enableListItemButtons = -1;
+		this.listItemAction = ListItemAction.NONE;
 	}
 
 	@Override
@@ -144,6 +150,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
+		listItemAction = ListItemAction.NONE;
 		var update = ImUpdate.NONE;
 
 		var currentStackTex = ItemIcons.getTexture(graphics.mc, result.visualKey());
@@ -153,9 +160,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack> {
 			cachedItems = null;
 		}
 
-		if (ImGui.isItemHovered()) {
-			ImGui.beginTooltip();
-
+		if (ImGui.isItemHovered() && graphics.beginTooltip()) {
 			if (result != null) {
 				for (var line : result.tooltip()) {
 					graphics.text(line);
@@ -164,13 +169,45 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack> {
 				ImGui.text("Select Item...");
 			}
 
-			ImGui.endTooltip();
+			graphics.endTooltip();
 		}
 
 		if (ImGui.beginPopup("###select-item", ImGuiWindowFlags.AlwaysAutoResize)) {
+			if (enableListItemButtons != -1) {
+				graphics.redTextIf("#" + (enableListItemButtons + 1), !isValid());
+				ImGui.sameLine();
+
+				if (graphics.button(ImIcons.TRASHCAN + "###delete", ImColorVariant.RED)) {
+					listItemAction = ListItemAction.DELETE;
+					update = ImUpdate.FULL;
+					ImGui.closeCurrentPopup();
+				}
+
+				graphics.hoveredTooltip("Delete");
+				ImGui.sameLine();
+
+				if (ImGui.button(ImIcons.ARROW_UP + "###move-up")) {
+					listItemAction = ListItemAction.MOVE_UP;
+					update = ImUpdate.FULL;
+					ImGui.closeCurrentPopup();
+				}
+
+				graphics.hoveredTooltip("Move Up");
+				ImGui.sameLine();
+
+				if (ImGui.button(ImIcons.ARROW_DOWN + "###move-down")) {
+					listItemAction = ListItemAction.MOVE_DOWN;
+					update = ImUpdate.FULL;
+					ImGui.closeCurrentPopup();
+				}
+
+				graphics.hoveredTooltip("Move Down");
+				ImGui.sameLine();
+			}
+
 			ImGui.setNextItemWidth(-1F);
 
-			if (ImGui.inputTextWithHint("###search", "Search...", search)) {
+			if (ImGui.inputTextWithHint("###search", "Search...", SEARCH)) {
 				renderedItems = null;
 			}
 
@@ -181,7 +218,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack> {
 					var map = new LinkedHashMap<ItemKey, CachedItemData>();
 					map.put(CachedItemData.AIR.key(), CachedItemData.AIR);
 
-					CreativeModeTabs.tryRebuildTabContents(graphics.mc.player == null ? FeatureFlagSet.of() : graphics.mc.player.connection.enabledFeatures(), true, graphics.mc.level == null ? MiscUtils.STATIC_REGISTRY_ACCESS : graphics.mc.level.registryAccess());
+					CreativeModeTabs.tryRebuildTabContents(graphics.player == null ? FeatureFlagSet.of() : graphics.mc.player.connection.enabledFeatures(), true, graphics.mc.level == null ? MiscUtils.STATIC_REGISTRY_ACCESS : graphics.mc.level.registryAccess());
 
 					var stacks = CreativeModeTabs.searchTab().getDisplayItems();
 					var ctx = new CachedItemData.Context(graphics.mc);
@@ -209,7 +246,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack> {
 
 				if (renderedItems == null) {
 					renderedItems = new ArrayList<>();
-					var searchText = search.get().replace(" ", "").toLowerCase(Locale.ROOT);
+					var searchText = SEARCH.get().replace(" ", "").toLowerCase(Locale.ROOT);
 
 					renderedItems.add(new RenderedItem(CachedItemData.AIR, -10, false, true, result == null || result.matches(CachedItemData.AIR)));
 
@@ -226,6 +263,12 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack> {
 					}
 
 					renderedItems.sort(Comparator.comparingInt(RenderedItem::order));
+
+					if (graphics.player != null) {
+						var item = graphics.player.getMainHandItem();
+						var cachedItem = CachedItemData.create(graphics.mc, item, new ItemKey(item.getItemHolder(), item.getComponentsPatch()), new CachedItemData.Context(graphics.mc));
+						renderedItems.addFirst(new RenderedItem(cachedItem, -9, false, true, true));
+					}
 				}
 
 				ImGui.pushID("###buttons");
@@ -254,17 +297,18 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack> {
 							ImGui.popID();
 							update = ImUpdate.FULL;
 							cachedItems = null;
+							SEARCH.set("");
 							break;
 						}
 
 						if (ImGui.isItemHovered()) {
-							ImGui.beginTooltip();
+							if (graphics.beginTooltip()) {
+								for (var line : item.cachedItem.tooltip()) {
+									graphics.text(line);
+								}
 
-							for (var line : item.cachedItem.tooltip()) {
-								graphics.text(line);
+								graphics.endTooltip();
 							}
-
-							ImGui.endTooltip();
 
 							if (ImGui.isMouseClicked(1)) {
 								ImGui.openPopup("###context-menu");
@@ -340,5 +384,20 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack> {
 	@Override
 	public ItemStack build() {
 		return result == null || result == CachedItemData.AIR ? ItemStack.EMPTY : result.stack().copyWithCount(count.get());
+	}
+
+	@Override
+	public boolean isSmall() {
+		return true;
+	}
+
+	@Override
+	public void enableListItemButtons(int index) {
+		enableListItemButtons = index;
+	}
+
+	@Override
+	public ListItemAction getListItemAction() {
+		return listItemAction;
 	}
 }

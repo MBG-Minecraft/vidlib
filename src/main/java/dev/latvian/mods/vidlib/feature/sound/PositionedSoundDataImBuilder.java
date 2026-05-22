@@ -1,7 +1,5 @@
 package dev.latvian.mods.vidlib.feature.sound;
 
-import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.BooleanImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.CompoundImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
@@ -17,7 +15,6 @@ public class PositionedSoundDataImBuilder extends CompoundImBuilder<PositionedSo
 	public final ImBuilder<KVector> position = KVectorImBuilder.create();
 	public final BooleanImBuilder looping = new BooleanImBuilder();
 	public final BooleanImBuilder stopImmediately = new BooleanImBuilder();
-	public boolean delete = false;
 
 	public PositionedSoundDataImBuilder() {
 		add("Sound Data", soundData);
@@ -39,13 +36,6 @@ public class PositionedSoundDataImBuilder extends CompoundImBuilder<PositionedSo
 
 		looping.set(value.looping());
 		stopImmediately.set(value.stopImmediately());
-		delete = false;
-	}
-
-	@Override
-	public ImUpdate imgui(ImGraphics graphics) {
-		delete = false;
-		return super.imgui(graphics);
 	}
 
 	@Override

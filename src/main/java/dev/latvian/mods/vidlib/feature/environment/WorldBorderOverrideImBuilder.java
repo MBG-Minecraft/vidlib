@@ -1,11 +1,11 @@
 package dev.latvian.mods.vidlib.feature.environment;
 
+import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.DoubleImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Vec3ImBuilder;
-import dev.latvian.mods.vidlib.integration.FlashbackIntegration;
 import imgui.ImGui;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,7 +39,7 @@ public class WorldBorderOverrideImBuilder implements ImBuilder<WorldBorderOverri
 		update = update.or(size.imguiKey(graphics, "Size", "size"));
 
 		if (graphics.isReplay && hasTime) {
-			long t = time - FlashbackIntegration.getStartTick();
+			long t = time - ReplayAPI.getActive().getOpenSession().getFileInfo().getStartGameTick();
 
 			if (ImGui.smallButton(time == 0L ? "Set Time###set-time" : "Set Time (%.01f s / %,d)###set-time".formatted(t / 20D, t))) {
 				time = graphics.mc.level.getGameTime();

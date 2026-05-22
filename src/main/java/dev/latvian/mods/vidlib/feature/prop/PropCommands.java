@@ -10,11 +10,13 @@ import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.CompoundTagArgument;
+import net.minecraft.commands.arguments.NbtTagArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -54,6 +56,31 @@ public interface PropCommands {
 					.executes(ctx -> {
 						int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "prop"), 16);
 						return remove(ctx.getSource(), prop -> prop.id == id);
+					})
+				)
+			)
+		)
+		.then(Commands.literal("set")
+			.then(Commands.argument("prop", StringArgumentType.word())
+				.then(Commands.argument("key", StringArgumentType.word())
+					.then(Commands.argument("data", NbtTagArgument.nbtTag())
+						.executes(ctx -> {
+							int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "prop"), 16);
+							var key = StringArgumentType.getString(ctx, "key");
+							var data = NbtTagArgument.getNbtTag(ctx, "data");
+							return set(ctx.getSource(), id, key, data);
+						})
+					)
+				)
+			)
+		)
+		.then(Commands.literal("merge")
+			.then(Commands.argument("prop", StringArgumentType.word())
+				.then(Commands.argument("data", NbtTagArgument.nbtTag())
+					.executes(ctx -> {
+						int id = Integer.parseUnsignedInt(StringArgumentType.getString(ctx, "prop"), 16);
+						var data = NbtTagArgument.getNbtTag(ctx, "data");
+						return merge(ctx.getSource(), id, data);
 					})
 				)
 			)
@@ -190,6 +217,30 @@ public interface PropCommands {
 		if (prop != null) {
 			prop.setPausedAndSync(paused);
 			return 1;
+		}
+
+		return 0;
+	}
+
+	static int set(CommandSourceStack source, int propId, String key, Tag data) {
+		var tag = new CompoundTag();
+		tag.put(key, data);
+		return merge(source, propId, tag);
+	}
+
+	static int merge(CommandSourceStack source, int propId, Tag data) {
+		var level = source.getSidedLevel();
+		var props = level.getProps();
+		var prop = props.levelProps.get(propId);
+
+		if (prop != null) {
+			var result = prop.merge(source.getLevel().nbtOps(), data);
+
+			if (result.isError()) {
+				source.error(result.error().get().message());
+			} else {
+				return 1;
+			}
 		}
 
 		return 0;

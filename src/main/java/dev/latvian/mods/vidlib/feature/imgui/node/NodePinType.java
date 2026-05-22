@@ -5,6 +5,8 @@ import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterImBuilder;
+import dev.latvian.mods.vidlib.feature.entity.number.EntityNumber;
+import dev.latvian.mods.vidlib.feature.entity.number.EntityNumberImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
@@ -34,6 +36,8 @@ public class NodePinType<T> {
 		// 	menuItems.add(MenuItem.item(easing.name, g -> editor.accept(new ImBuilder.Unit<>(easing.name, easing).asNode())));
 		// }
 	}), null);
+
+	public static final NodePinType<EntityNumber> ENTITY_NUMBER = new NodePinType<>("Entity Number", EntityNumberImBuilder.IMGUI_BUILDER_FACTORY);
 
 	public final String displayName;
 	public final NodePinShape defaultShape;

@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.core.mixin;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.core.VLEntity;
-import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -35,9 +34,6 @@ import java.util.List;
 public abstract class EntityMixin implements VLEntity {
 	@Shadow
 	public abstract void load(CompoundTag compound);
-
-	@Unique
-	private PlayerInput vl$pilotInput = PlayerInput.NONE;
 
 	@ModifyReturnValue(method = "collectColliders", at = @At("RETURN"))
 	private static List<VoxelShape> vl$collectColliders(List<VoxelShape> parent, @Local(argsOnly = true) Level level, @Local(argsOnly = true) @Nullable Entity entity, @Local(argsOnly = true) AABB collisionBox) {
@@ -76,7 +72,7 @@ public abstract class EntityMixin implements VLEntity {
 
 	@ModifyReturnValue(method = "getGravity", at = @At("RETURN"))
 	private double vl$getGravity(double original) {
-		return original * vl$gravityMod();
+		return original * CommonGameEngine.INSTANCE.getGravityModifier(vl$self());
 	}
 
 	@Inject(method = "saveWithoutId", at = @At("HEAD"))
@@ -107,28 +103,18 @@ public abstract class EntityMixin implements VLEntity {
 		}
 	}
 
-	@Override
-	public PlayerInput getPilotInput() {
-		return vl$pilotInput;
-	}
-
-	@Override
-	public void vl$setPilotInput(PlayerInput input) {
-		vl$pilotInput = input;
-	}
-
-	@Inject(method = "removePassenger", at = @At("RETURN"))
-	private void vl$removePassenger(Entity passenger, CallbackInfo ci) {
-		vl$pilotInput = PlayerInput.NONE;
-	}
-
 	@Redirect(method = {"updateFluidOnEyes", "updateFluidHeightAndDoFluidPushing()V"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getFluidState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;"))
 	private FluidState vl$getFluidState(Level level, BlockPos pos) {
-		return level.vl$overrideFluidState(pos);
+		return CommonGameEngine.INSTANCE.overrideFluidState(level, pos);
 	}
 
 	@Redirect(method = {"updateFluidOnEyes", "updateFluidHeightAndDoFluidPushing()V"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/material/FluidState;getHeight(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F"))
 	private float vl$getFluidHeight(FluidState state, BlockGetter blockGetter, BlockPos pos) {
-		return blockGetter instanceof Level l ? l.vl$overrideFluidHeight(state, pos) : state.getHeight(blockGetter, pos);
+		return blockGetter instanceof Level l ? CommonGameEngine.INSTANCE.overrideFluidHeight(l, state, pos) : state.getHeight(blockGetter, pos);
+	}
+
+	@Inject(method = "addPassenger", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/ImmutableList;copyOf(Ljava/util/Collection;)Lcom/google/common/collect/ImmutableList;"))
+	private void vl$addPassenger(Entity passenger, CallbackInfo ci, @Local List<Entity> list) {
+		sortPassengers(list);
 	}
 }

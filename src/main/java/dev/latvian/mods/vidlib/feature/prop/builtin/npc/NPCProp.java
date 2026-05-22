@@ -4,23 +4,28 @@ import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.math.FrustumCheck;
-import dev.latvian.mods.klib.math.Vec2f;
+import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.util.Empty;
+import dev.latvian.mods.klib.util.SpreadType;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingImBuilder;
+import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ItemStackImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ListImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TextComponentImBuilder;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.prop.geo.BaseGeoProp;
-import dev.latvian.mods.vidlib.util.SpreadType;
+import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -28,7 +33,12 @@ import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3f;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class NPCProp extends BaseGeoProp {
 	public static final Pose[] POSES = Pose.values();
@@ -69,11 +79,14 @@ public class NPCProp extends BaseGeoProp {
 		}, () -> new EnumImBuilder<>(SpreadType.VALUES)),
 		PropData.createFloat(NPCProp.class, "body_pitch", p -> p.bodyPitch, (p, v) -> p.bodyPitch = v, -90F, 90F),
 		PropData.createFloat(NPCProp.class, "spread_radius", p -> p.spreadRadius, (p, v) -> p.spreadRadius = v, 0F, 200F),
-		PropData.createFloat(NPCProp.class, "random_offset", p -> p.randomOffset, (p, v) -> p.randomOffset = v, 0F, 5F),
+		PropData.createFloat(NPCProp.class, "random_offset", p -> p.randomOffset, (p, v) -> p.randomOffset = v, 0F, 50F),
 		PropData.createFloat(NPCProp.class, "random_yaw", p -> p.randomYaw, (p, v) -> p.randomYaw = v, 0F, 180F),
 		PropData.createFloat(NPCProp.class, "random_head_pitch", p -> p.randomPitch, (p, v) -> p.randomPitch = v, 0F, 90F),
-		PropData.create(NPCProp.class, "clothing", Clothing.DATA_TYPE, p -> p.clothing, (p, v) -> p.clothing = v, ClothingImBuilder.TYPE),
-		PropData.createBoolean(NPCProp.class, "random_skin", p -> p.randomSkin, (p, v) -> p.randomSkin = v),
+		PropData.createFloat(NPCProp.class, "rotation", p -> p.rotation, (p, v) -> {
+			p.rotation = v;
+			p.instances = null;
+		}, 0F, 360F),
+		PropData.create(NPCProp.class, "clothing", Clothing.LIST_DATA_TYPE, p -> p.clothing, (p, v) -> p.clothing = v, () -> new ListImBuilder<>(ClothingImBuilder.TYPE)),
 		PropData.createInt(NPCProp.class, "jumping", p -> p.jumping, (p, v) -> p.jumping = v, 0, 100),
 		PropData.createInt(NPCProp.class, "punching", p -> p.punching, (p, v) -> p.punching = v, 0, 100),
 		PropData.create(NPCProp.class, "main_hand_item", DataTypes.ITEM_STACK, p -> p.mainHandItem, (p, v) -> p.mainHandItem = v, ItemStackImBuilder.MAIN_HAND_EQUIPMENT_TYPE),
@@ -84,8 +97,16 @@ public class NPCProp extends BaseGeoProp {
 		PropData.create(NPCProp.class, "feet_item", DataTypes.ITEM_STACK, p -> p.feetItem, (p, v) -> p.feetItem = v, ItemStackImBuilder.FEET_EQUIPMENT_TYPE),
 		PropData.create(NPCProp.class, "pose", DataType.of(POSES), p -> p.pose, (p, v) -> p.pose = v, () -> new EnumImBuilder<>(VALID_POSES)),
 		PropData.createBoolean(NPCProp.class, "breathing", p -> p.breathing, (p, v) -> p.breathing = v),
-		PropData.createFloat(NPCProp.class, "running_distance", p -> p.runningDistance, (p, v) -> p.runningDistance = v, 0F, 200F)
+		PropData.createFloat(NPCProp.class, "running_distance", p -> p.runningDistance, (p, v) -> p.runningDistance = v, 0F, 200F),
+		PropData.createFloat(NPCProp.class, "render_distance", p -> p.renderDistance, (p, v) -> p.renderDistance = v, 0F, 1024F),
+		PropData.createFloat(NPCProp.class, "additional_head_yaw", p -> p.additionalHeadYaw, (p, v) -> p.additionalHeadYaw = v, -90F, 90F),
+		PropData.createBoolean(NPCProp.class, "random_skin", p -> p.randomSkin, (p, v) -> p.randomSkin = v),
+		PropData.create(NPCProp.class, "random_skins", SkinTexture.SET_DATA_TYPE, p -> p.randomSkins, (p, v) -> p.randomSkins = v, NpcSkinImBuilder::new)
 	);
+
+	public static NPCProp createCloneFrom(Player player) {
+		return player.level().getProps().add(TYPE, prop -> prop.cloneFrom(player));
+	}
 
 	public Component name;
 	public boolean stone;
@@ -97,8 +118,9 @@ public class NPCProp extends BaseGeoProp {
 	public float randomOffset;
 	public float randomYaw;
 	public float randomPitch;
-	public Clothing clothing;
+	public List<Clothing> clothing;
 	public boolean randomSkin;
+	public Set<SkinTexture> randomSkins = new HashSet<>();
 	public int jumping;
 	public int punching;
 	public ItemStack mainHandItem;
@@ -110,6 +132,10 @@ public class NPCProp extends BaseGeoProp {
 	public Pose pose;
 	public boolean breathing;
 	public float runningDistance;
+	public float additionalHeadYaw;
+	public float rotation;
+
+	public float renderDistance = 256F;
 	public NPCInstance[] instances;
 
 	public NPCProp(PropContext<?> ctx) {
@@ -123,10 +149,10 @@ public class NPCProp extends BaseGeoProp {
 		this.count = 1;
 		this.spread = SpreadType.FILLED_SQUARE;
 		this.spreadRadius = 16F;
-		this.randomOffset = 0.65F;
+		this.randomOffset = 0F;
 		this.randomYaw = 0F;
 		this.randomPitch = 0F;
-		this.clothing = Clothing.NONE;
+		this.clothing = List.of();
 		this.randomSkin = false;
 		this.jumping = 0; // 60
 		this.punching = 0; // 40
@@ -139,15 +165,35 @@ public class NPCProp extends BaseGeoProp {
 		this.pose = Pose.STANDING;
 		this.breathing = false;
 		this.runningDistance = 0F;
+		this.additionalHeadYaw = 0F;
+	}
+
+	public void cloneFrom(Player player) {
+		setPos(player.position());
+		name = player.getDisplayName();
+		profile = player.getGameProfile();
+		clothing = player.get(InternalPlayerData.CLOTHING);
+		mainHandItem = player.getMainHandItem();
+		offHandItem = player.getOffhandItem();
+		headItem = player.getItemBySlot(EquipmentSlot.HEAD);
+		chestItem = player.getItemBySlot(EquipmentSlot.CHEST);
+		legsItem = player.getItemBySlot(EquipmentSlot.LEGS);
+		feetItem = player.getItemBySlot(EquipmentSlot.FEET);
+		pose = player.getPose();
+		breathing = true;
+		setYaw(player.yBodyRot);
+		setPitch(player.getXRot());
+		additionalHeadYaw = Mth.wrapDegrees(player.getYRot() - player.yBodyRot);
 	}
 
 	@Override
 	public double getMaxRenderDistance() {
-		return Math.max(spreadRadius, 256D * height);
+		double distance = renderDistance;
+		return Math.max(spreadRadius, distance * height);
 	}
 
 	@Override
-	public boolean isVisible(double x, double y, double z, FrustumCheck frustum) {
+	public boolean isVisible(double x, double y, double z, FrustumCheck frustum, Vec3 camera, double squaredCenterDistanceToCamera) {
 		if (count > 1) {
 			return true;
 		}
@@ -228,12 +274,12 @@ public class NPCProp extends BaseGeoProp {
 		var arr = instances;
 
 		if (arr == null) {
-			Vec2f[] spreadPositions;
+			Vector2f[] spreadPositions;
 
 			if (count <= 1) {
-				spreadPositions = new Vec2f[]{Vec2f.ZERO};
+				spreadPositions = new Vector2f[]{Identity.UNSAFE_VEC_2};
 			} else {
-				spreadPositions = spread.spread(Math.clamp(count, 1, 10000));
+				spreadPositions = spread.spread(Math.clamp(count, 1, 10000), rotation);
 			}
 
 			arr = new NPCInstance[spreadPositions.length];

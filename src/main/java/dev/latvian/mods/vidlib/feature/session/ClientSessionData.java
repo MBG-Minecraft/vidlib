@@ -1,29 +1,17 @@
 package dev.latvian.mods.vidlib.feature.session;
 
-import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
+import dev.latvian.mods.klib.util.LevelGameTimeProvider;
+import net.minecraft.world.entity.player.Player;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 public class ClientSessionData extends SessionData {
-	public final Set<String> tags;
-
-	public ClientSessionData(UUID uuid) {
-		super(uuid);
-		this.tags = new HashSet<>(0);
+	public ClientSessionData(UUID uuid, LevelGameTimeProvider timeProvider) {
+		super(uuid, timeProvider);
 	}
 
 	@Override
-	public Set<String> getTags(long gameTime) {
-		if (dataMap.overrides != null) {
-			var v = dataMap.overrides.getOverride(DataMapOverrides.PLAYER_TAGS, gameTime);
-
-			if (v != null) {
-				return v;
-			}
-		}
-
-		return tags;
+	public void updateOverrides(Player player) {
+		super.updateOverrides(player);
 	}
 }

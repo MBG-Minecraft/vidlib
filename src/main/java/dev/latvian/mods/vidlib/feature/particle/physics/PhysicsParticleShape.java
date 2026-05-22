@@ -1,85 +1,130 @@
 package dev.latvian.mods.vidlib.feature.particle.physics;
 
-
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.ByteBufferBuilder;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import dev.latvian.mods.klib.gl.StaticBuffers;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.klib.math.SplitBox;
 import dev.latvian.mods.klib.texture.UV;
-import dev.latvian.mods.klib.util.WithCache;
 import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.client.Minecraft;
-import net.minecraft.commands.arguments.blocks.BlockStateParser;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.GrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
-import java.util.Optional;
-import java.util.function.Supplier;
+public class PhysicsParticleShape {
+	private record PhysicsParticleFace(
+		PhysicsParticleVertex a,
+		PhysicsParticleVertex b,
+		PhysicsParticleVertex c,
+		PhysicsParticleVertex d,
+		float nx,
+		float ny,
+		float nz
+	) {
+	}
 
-public class PhysicsParticleShape implements WithCache, Supplier<String> {
+	private record PhysicsParticleVertex(
+		float x,
+		float y,
+		float z,
+		float u,
+		float v
+	) {
+		public PhysicsParticleVertex(Vector3fc pos, float u, float v) {
+			this(pos.x(), pos.y(), pos.z(), u, v);
+		}
+
+		public void addVertex(VertexConsumer consumer, Matrix4f m, float nx, float ny, float nz, int r, int g, int b, int a, int lightU, int lightV) {
+			consumer.addVertex(m, x, y, z)
+				.setColor(r, g, b, a)
+				.setUv(u, v)
+				.setUv2(lightU, lightV)
+				.setNormal(nx, ny, nz);
+			;
+		}
+	}
+
 	private static final ResourceLocation GRASS = VidLib.id("block/grass");
 
-	public final BlockState state;
-	public final SplitBox box;
-	private StaticBuffers buffers;
+	private static UV computeBaseUV(Minecraft mc, BlockState state) {
+		TextureAtlasSprite sprite;
+
+		if (state.getBlock() instanceof GrassBlock) {
+			sprite = mc.getBlockAtlas().getSprite(GRASS);
+		} else {
+			sprite = mc.getBlockRenderer().getBlockModel(state).particleIcon();
+		}
+
+		return new UV(sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());
+	}
+
+	private static UV multiplyUV(UV a, UV b) {
+		float u0 = a.u0() + (a.u1() - a.u0()) * b.u0();
+		float u1 = a.u0() + (a.u1() - a.u0()) * b.u1();
+		float v0 = a.v0() + (a.v1() - a.v0()) * b.v0();
+		float v1 = a.v0() + (a.v1() - a.v0()) * b.v1();
+		return new UV(u0, v0, u1, v1);
+	}
+
+	private final BlockState state;
+	private final SplitBox box;
+	private PhysicsParticleFace[] faces;
 
 	public PhysicsParticleShape(BlockState state, SplitBox box) {
 		this.state = state;
 		this.box = box;
 	}
 
-	@Override
-	public String toString() {
-		return BlockStateParser.serialize(state) + " " + box.split().id + " " + box.index();
-	}
+	public void render(Minecraft mc, VertexConsumer consumer, PoseStack.Pose pose, Vector3f tempNormal, int r, int g, int b, int a, int lightU, int lightV) {
+		var data = faces;
 
-	@Nullable
-	public StaticBuffers getBuffers() {
-		if (buffers == null || !buffers.isEmpty() && buffers.vertexBuffer().isClosed()) {
-			var format = PhysicsParticlesRenderTypes.FORMAT;
-			buffers = StaticBuffers.empty(format);
+		if (data == null) {
+			data = new PhysicsParticleFace[6];
 
-			var mc = Minecraft.getInstance();
-			var s = state.getBlock() instanceof GrassBlock ? mc.getBlockAtlas().getSprite(GRASS) : mc.getBlockRenderer().getBlockModel(state).particleIcon();
-			var suv = new UV(s.getU0(), s.getV0(), s.getU1(), s.getV1());
+			var baseUv = computeBaseUV(mc, state);
 
-			try (var memory = new ByteBufferBuilder(format.getVertexSize() * 4 * 6)) {
-				var buffer = new BufferBuilder(memory, VertexFormat.Mode.QUADS, format);
+			for (int face = 0; face < 6; face++) {
+				var faceShape = box.shape().face(face);
 
-				for (int i = 0; i < 6; i++) {
-					var f = box.shape().face(i);
-					var uv = suv.mul(box.uvs()[i]);
+				var faceUv = multiplyUV(baseUv, box.uvs()[face]);
+				float u0 = faceUv.u0();
+				float v0 = faceUv.v0();
+				float u1 = faceUv.u1();
+				float v1 = faceUv.v1();
 
-					buffer.addVertex(f.a().x(), f.a().y(), f.a().z()).setUv(uv.u0(), uv.v0()).setNormal(f.n().x(), f.n().y(), f.n().z());
-					buffer.addVertex(f.b().x(), f.b().y(), f.b().z()).setUv(uv.u0(), uv.v1()).setNormal(f.n().x(), f.n().y(), f.n().z());
-					buffer.addVertex(f.c().x(), f.c().y(), f.c().z()).setUv(uv.u1(), uv.v1()).setNormal(f.n().x(), f.n().y(), f.n().z());
-					buffer.addVertex(f.d().x(), f.d().y(), f.d().z()).setUv(uv.u1(), uv.v0()).setNormal(f.n().x(), f.n().y(), f.n().z());
-				}
-
-				try (var meshData = buffer.build()) {
-					if (meshData != null) {
-						buffers = StaticBuffers.of(meshData, this, Optional.empty());
-					}
-				}
+				data[face] = new PhysicsParticleFace(
+					new PhysicsParticleVertex(faceShape.a(), u0, v0),
+					new PhysicsParticleVertex(faceShape.b(), u0, v1),
+					new PhysicsParticleVertex(faceShape.c(), u1, v1),
+					new PhysicsParticleVertex(faceShape.d(), u1, v0),
+					faceShape.n().x(),
+					faceShape.n().y(),
+					faceShape.n().z()
+				);
 			}
+
+			faces = data;
 		}
 
-		return buffers.isEmpty() ? null : buffers;
+		var m = pose.pose();
+
+		for (int f = 0; f < 6; f++) {
+			var face = data[f];
+			pose.transformNormal(face.nx, face.ny, face.nz, tempNormal);
+			float nx = tempNormal.x;
+			float ny = tempNormal.y;
+			float nz = tempNormal.z;
+			face.a.addVertex(consumer, m, nx, ny, nz, r, g, b, a, lightU, lightV);
+			face.b.addVertex(consumer, m, nx, ny, nz, r, g, b, a, lightU, lightV);
+			face.c.addVertex(consumer, m, nx, ny, nz, r, g, b, a, lightU, lightV);
+			face.d.addVertex(consumer, m, nx, ny, nz, r, g, b, a, lightU, lightV);
+		}
 	}
 
-	@Override
 	public void clearCache() {
-		if (buffers != null) {
-			buffers.close();
-			buffers = null;
-		}
-	}
-
-	@Override
-	public String get() {
-		return state.vl$toString() + ":" + box;
+		faces = null;
 	}
 }

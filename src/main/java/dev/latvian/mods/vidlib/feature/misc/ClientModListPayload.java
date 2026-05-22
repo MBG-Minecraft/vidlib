@@ -12,9 +12,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public record ClientModListPayload(List<ClientModInfo> modList) implements SimplePacketPayload {
+public record ClientModListPayload(List<PlatformModInfo> modList) implements SimplePacketPayload {
 	@AutoPacket(stage = AutoPacket.Stage.COMMON, to = AutoPacket.To.SERVER)
-	public static final VidLibPacketType<ClientModListPayload> TYPE = VidLibPacketType.internal("client_mod_list", KLibStreamCodecs.listOf(ClientModInfo.STREAM_CODEC).map(ClientModListPayload::new, ClientModListPayload::modList));
+	public static final VidLibPacketType<ClientModListPayload> TYPE = VidLibPacketType.internal("client_mod_list", KLibStreamCodecs.listOf(PlatformModInfo.STREAM_CODEC).map(ClientModListPayload::new, ClientModListPayload::modList));
 
 	@Override
 	public VidLibPacketType<?> getType() {
@@ -23,7 +23,7 @@ public record ClientModListPayload(List<ClientModInfo> modList) implements Simpl
 
 	@Override
 	public void handle(Context ctx) {
-		var mods = new LinkedHashMap<String, ClientModInfo>();
+		var mods = new LinkedHashMap<String, PlatformModInfo>();
 
 		for (var mod : modList) {
 			mods.put(mod.id(), mod);

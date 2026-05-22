@@ -3,51 +3,74 @@ package dev.latvian.mods.vidlib.feature.entity.filter;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JavaOps;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.vidlib.core.VLEntity;
-import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.klib.util.IntOrUUID;
+import dev.latvian.mods.klib.util.ParsedEntitySelector;
+import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.data.DataKey;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
+import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
+import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public interface EntityFilter extends Predicate<Entity> {
-	SimpleRegistry<EntityFilter> REGISTRY = SimpleRegistry.create(EntityFilter::type);
+public interface EntityFilter extends Predicate<Entity>, SimpleRegistryEntry {
+	SimpleRegistry<EntityFilter> REGISTRY = SimpleRegistry.create(VidLib.id("entity_filter"), c -> PlatformHelper.CURRENT.collectEntityFilters(c));
 
-	SimpleRegistryType.Unit<EntityFilter> NONE = SimpleRegistryType.unit("none", new BasicEntityFilter(entity -> false));
-	SimpleRegistryType.Unit<EntityFilter> ANY = SimpleRegistryType.unit("any", new BasicEntityFilter(entity -> true));
+	static SimpleRegistryType.Unit<EntityFilter> basic(String name, Predicate<Entity> predicate) {
+		return SimpleRegistryType.unitWithType(name, type -> new BasicEntityFilter(type, predicate));
+	}
 
-	SimpleRegistryType.Unit<EntityFilter> ALIVE = SimpleRegistryType.unit("alive", new BasicEntityFilter(Entity::isAlive));
-	SimpleRegistryType.Unit<EntityFilter> DEAD = SimpleRegistryType.unit("dead", new BasicEntityFilter(entity -> !entity.isAlive()));
-	SimpleRegistryType.Unit<EntityFilter> DEAD_OR_DYING = SimpleRegistryType.unit("dead_or_dying", new BasicEntityFilter(entity -> entity instanceof LivingEntity living ? living.isDeadOrDying() : !entity.isAlive()));
-	SimpleRegistryType.Unit<EntityFilter> LIVING = SimpleRegistryType.unit("living", new BasicEntityFilter(entity -> entity instanceof LivingEntity));
-	SimpleRegistryType.Unit<EntityFilter> PLAYER = SimpleRegistryType.unit("player", new BasicEntityFilter(entity -> entity instanceof Player));
-	SimpleRegistryType.Unit<EntityFilter> SURVIVAL_PLAYER = SimpleRegistryType.unit("survival_player", new BasicEntityFilter(VLEntity::isSurvival));
-	SimpleRegistryType.Unit<EntityFilter> SURVIVAL_LIKE_PLAYER = SimpleRegistryType.unit("survival_like_player", new BasicEntityFilter(VLEntity::isSurvivalLike));
-	SimpleRegistryType.Unit<EntityFilter> SPECTATOR = SimpleRegistryType.unit("spectator", new BasicEntityFilter(Entity::isSpectator));
-	SimpleRegistryType.Unit<EntityFilter> CREATIVE = SimpleRegistryType.unit("creative", new BasicEntityFilter(entity -> entity instanceof Player player && player.isCreative()));
-	SimpleRegistryType.Unit<EntityFilter> SPECTATOR_OR_CREATIVE = SimpleRegistryType.unit("spectator_or_creative", new BasicEntityFilter(VLEntity::isSpectatorOrCreative));
-	SimpleRegistryType.Unit<EntityFilter> ITEM = SimpleRegistryType.unit("item", new BasicEntityFilter(VLEntity::isItemEntity));
-	SimpleRegistryType.Unit<EntityFilter> PROJECTILE = SimpleRegistryType.unit("projectile", new BasicEntityFilter(VLEntity::isProjectile));
-	SimpleRegistryType.Unit<EntityFilter> VISIBLE = SimpleRegistryType.unit("visible", new BasicEntityFilter(VLEntity::isVisible));
-	SimpleRegistryType.Unit<EntityFilter> INVISIBLE = SimpleRegistryType.unit("invisible", new BasicEntityFilter(Entity::isInvisible));
-	SimpleRegistryType.Unit<EntityFilter> SUSPENDED = SimpleRegistryType.unit("suspended", new BasicEntityFilter(VLEntity::isSuspended));
-	SimpleRegistryType.Unit<EntityFilter> GLOWING = SimpleRegistryType.unit("glowing", new BasicEntityFilter(Entity::isCurrentlyGlowing));
-	SimpleRegistryType.Unit<EntityFilter> IN_WATER = SimpleRegistryType.unit("in_water", new BasicEntityFilter(Entity::isInWater));
-	SimpleRegistryType.Unit<EntityFilter> IN_WATER_OR_RAIN = SimpleRegistryType.unit("in_water_or_rain", new BasicEntityFilter(Entity::isInWaterOrRain));
-	SimpleRegistryType.Unit<EntityFilter> IN_LIQUID = SimpleRegistryType.unit("in_liquid", new BasicEntityFilter(Entity::isInLiquid));
-	SimpleRegistryType.Unit<EntityFilter> UNDERWATER = SimpleRegistryType.unit("underwater", new BasicEntityFilter(Entity::isUnderWater));
+	SimpleRegistryType.Unit<EntityFilter> NONE = basic("none", entity -> false);
+	SimpleRegistryType.Unit<EntityFilter> ANY = basic("any", entity -> true);
+	SimpleRegistryType.Unit<EntityFilter> ALIVE = basic("alive", Entity::isAlive);
+	SimpleRegistryType.Unit<EntityFilter> DEAD = basic("dead", entity -> !entity.isAlive());
+	SimpleRegistryType.Unit<EntityFilter> DEAD_OR_DYING = basic("dead_or_dying", entity -> !entity.isAlive());
+	SimpleRegistryType.Unit<EntityFilter> LIVING = basic("living", entity -> entity instanceof LivingEntity);
+	SimpleRegistryType.Unit<EntityFilter> MOB = basic("mob", entity -> entity instanceof Mob);
+	SimpleRegistryType.Unit<EntityFilter> ENEMY = basic("enemy", entity -> entity instanceof Enemy);
+	SimpleRegistryType.Unit<EntityFilter> PLAYER = basic("player", entity -> entity instanceof Player);
+	SimpleRegistryType.Unit<EntityFilter> SURVIVAL_MODE = basic("survival_mode", entity -> entity.getGameMode() == GameType.SURVIVAL);
+	SimpleRegistryType.Unit<EntityFilter> ADVENTURE_MODE = basic("adventure_mode", entity -> entity.getGameMode() == GameType.ADVENTURE);
+	SimpleRegistryType.Unit<EntityFilter> SURVIVAL_LIKE_MODE = basic("survival_like_mode", entity -> entity.getGameMode() != null && entity.getGameMode().isSurvival());
+	SimpleRegistryType.Unit<EntityFilter> CREATIVE_MODE = basic("creative_mode", entity -> entity.getGameMode() == GameType.CREATIVE);
+	SimpleRegistryType.Unit<EntityFilter> SPECTATOR_MODE = basic("spectator_mode", Entity::isSpectator);
+	SimpleRegistryType.Unit<EntityFilter> SPECTATOR_OR_CREATIVE_MODE = basic("spectator_or_creative_mode", entity -> entity.getGameMode() == GameType.SPECTATOR || entity.getGameMode() == GameType.CREATIVE);
+	SimpleRegistryType.Unit<EntityFilter> ITEM = basic("item", entity -> entity instanceof ItemEntity);
+	SimpleRegistryType.Unit<EntityFilter> PROJECTILE = basic("projectile", entity -> entity instanceof Projectile);
+	SimpleRegistryType.Unit<EntityFilter> VISIBLE = basic("visible", entity -> !entity.isInvisible());
+	SimpleRegistryType.Unit<EntityFilter> INVISIBLE = basic("invisible", Entity::isInvisible);
+	SimpleRegistryType.Unit<EntityFilter> SUSPENDED = basic("suspended", entity -> CommonGameEngine.INSTANCE.isSuspended(entity));
+	SimpleRegistryType.Unit<EntityFilter> GLOWING = basic("glowing", Entity::isCurrentlyGlowing);
+	SimpleRegistryType.Unit<EntityFilter> IN_WATER = basic("in_water", Entity::isInWater);
+	SimpleRegistryType.Unit<EntityFilter> IN_WATER_OR_RAIN = basic("in_water_or_rain", Entity::isInWaterOrRain);
+	SimpleRegistryType.Unit<EntityFilter> IN_LIQUID = basic("in_liquid", Entity::isInLiquid);
+	SimpleRegistryType.Unit<EntityFilter> UNDERWATER = basic("underwater", Entity::isUnderWater);
+	SimpleRegistryType.Unit<EntityFilter> ON_RAILS = basic("on_rails", Entity::isOnRails);
+	SimpleRegistryType.Unit<EntityFilter> ON_FIRE = basic("on_fire", Entity::isOnFire);
+	SimpleRegistryType.Unit<EntityFilter> STAFF = basic("staff", entity -> PlatformHelper.CURRENT.isStaff(entity));
+	SimpleRegistryType.Unit<EntityFilter> STAFF_OR_TALENT = basic("staff_or_talent", entity -> PlatformHelper.CURRENT.isStaffOrTalent(entity));
 
 	static EntityFilter of(boolean value) {
 		return value ? ANY.instance() : NONE.instance();
@@ -63,51 +86,93 @@ public interface EntityFilter extends Predicate<Entity> {
 		}
 	});
 
-	Codec<EntityFilter> CODEC = KLibCodecs.or(List.of(NONE_OR_ANY_CODEC, ExactEntityFilter.TYPE.codec().codec(), MatchEntityFilter.OPTIONAL_MATCH_CODEC, REGISTRY.valueCodec()));
-	StreamCodec<RegistryFriendlyByteBuf, EntityFilter> STREAM_CODEC = ByteBufCodecs.either(ByteBufCodecs.BOOL, REGISTRY.valueStreamCodec()).map(either -> either.map(EntityFilter::of, Function.identity()), filter -> filter == ANY.instance() ? Either.left(true) : filter == NONE.instance() ? Either.left(false) : Either.right(filter));
+	Codec<EntityFilter> FROM_INT_OR_UUID_CODEC = IntOrUUID.CODEC.flatXmap(input -> DataResult.success(new ExactEntityFilter(input)), filter -> {
+		if (filter instanceof ExactEntityFilter(IntOrUUID id)) {
+			return DataResult.success(id);
+		} else {
+			return DataResult.error(() -> "Filter is not an ExactEntityFilter");
+		}
+	});
+
+	Codec<EntityFilter> FROM_STRING_CODEC = Codec.STRING.flatXmap(input -> {
+		if (input.startsWith("@")) {
+			return ParsedEntitySelector.CODEC.parse(JavaOps.INSTANCE, input).map(MatchEntityFilter::new);
+		} else if (input.startsWith("$$")) {
+			return DataResult.success(new PlayerDataEntityFilter(input.substring(2)));
+		} else if (input.startsWith("$")) {
+			return DataResult.success(new ServerDataEntityFilter(input.substring(1)));
+		} else {
+			return DataResult.error(() -> "String does not start with '@', '$$' or '$'");
+		}
+	}, filter -> switch (filter) {
+		case MatchEntityFilter(ParsedEntitySelector s) -> DataResult.success(s.getInput());
+		case PlayerDataEntityFilter(DataKey<?> dataKey) -> DataResult.success("$$" + dataKey.id());
+		case ServerDataEntityFilter(DataKey<?> dataKey) -> DataResult.success("$" + dataKey.id());
+		case null, default -> DataResult.error(() -> "Filter is not a MatchEntityFilter, PlayerDataEntityFilter or ServerDataEntityFilter");
+	});
+
+	Codec<EntityFilter> CODEC = KLibCodecs.or(List.of(
+		NONE_OR_ANY_CODEC,
+		FROM_INT_OR_UUID_CODEC,
+		FROM_STRING_CODEC,
+		REGISTRY.codec()
+	));
+
+	StreamCodec<RegistryFriendlyByteBuf, EntityFilter> STREAM_CODEC = ByteBufCodecs.either(ByteBufCodecs.BOOL, REGISTRY.streamCodec()).map(either -> either.map(EntityFilter::of, Function.identity()), filter -> filter == ANY.instance() ? Either.left(true) : filter == NONE.instance() ? Either.left(false) : Either.right(filter));
 	DataType<EntityFilter> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, EntityFilter.class);
 
-	@AutoInit
-	static void bootstrap() {
-		REGISTRY.register(NONE);
-		REGISTRY.register(ANY);
+	static void builtinTypes(SimpleRegistryCollector<EntityFilter> registry) {
+		registry.register(NONE);
+		registry.register(ANY);
 
-		REGISTRY.register(EntityNotFilter.TYPE);
-		REGISTRY.register(EntityAndFilter.TYPE);
-		REGISTRY.register(EntityOrFilter.TYPE);
-		REGISTRY.register(EntityXorFilter.TYPE);
+		registry.register(EntityNotFilter.TYPE);
+		registry.register(EntityAndFilter.TYPE);
+		registry.register(EntityOrFilter.TYPE);
+		registry.register(EntityXorFilter.TYPE);
 
-		REGISTRY.register(ALIVE);
-		REGISTRY.register(DEAD);
-		REGISTRY.register(DEAD_OR_DYING);
-		REGISTRY.register(LIVING);
-		REGISTRY.register(PLAYER);
-		REGISTRY.register(SURVIVAL_PLAYER);
-		REGISTRY.register(SURVIVAL_LIKE_PLAYER);
-		REGISTRY.register(SPECTATOR);
-		REGISTRY.register(CREATIVE);
-		REGISTRY.register(SPECTATOR_OR_CREATIVE);
-		REGISTRY.register(ITEM);
-		REGISTRY.register(PROJECTILE);
-		REGISTRY.register(VISIBLE);
-		REGISTRY.register(INVISIBLE);
-		REGISTRY.register(SUSPENDED);
-		REGISTRY.register(GLOWING);
-		REGISTRY.register(IN_WATER);
-		REGISTRY.register(IN_WATER_OR_RAIN);
-		REGISTRY.register(IN_LIQUID);
-		REGISTRY.register(UNDERWATER);
+		registry.register(ALIVE);
+		registry.register(DEAD);
+		registry.register(DEAD_OR_DYING);
+		registry.register(LIVING);
+		registry.register(MOB);
+		registry.register(ENEMY);
+		registry.register(PLAYER);
+		registry.register(SURVIVAL_MODE);
+		registry.register(ADVENTURE_MODE);
+		registry.register(SURVIVAL_LIKE_MODE);
+		registry.register(SPECTATOR_MODE);
+		registry.register(CREATIVE_MODE);
+		registry.register(SPECTATOR_OR_CREATIVE_MODE);
+		registry.register(ITEM);
+		registry.register(PROJECTILE);
+		registry.register(VISIBLE);
+		registry.register(INVISIBLE);
+		registry.register(SUSPENDED);
+		registry.register(GLOWING);
+		registry.register(IN_WATER);
+		registry.register(IN_WATER_OR_RAIN);
+		registry.register(IN_LIQUID);
+		registry.register(UNDERWATER);
+		registry.register(ON_RAILS);
+		registry.register(ON_FIRE);
+		registry.register(STAFF);
+		registry.register(STAFF_OR_TALENT);
 
-		REGISTRY.register(ExactEntityFilter.TYPE);
-		REGISTRY.register(EntityTagFilter.TYPE);
-		REGISTRY.register(EntityTypeFilter.TYPE);
-		REGISTRY.register(EntityTypeTagFilter.TYPE);
-		REGISTRY.register(MatchEntityFilter.TYPE);
-		REGISTRY.register(HasEffectEntityFilter.TYPE);
-		REGISTRY.register(ServerDataEntityFilter.TYPE);
-		REGISTRY.register(ProfileEntityFilter.TYPE);
+		registry.register(ExactEntityFilter.TYPE);
+		registry.register(EntityTagFilter.TYPE);
+		registry.register(EntityTypeFilter.TYPE);
+		registry.register(EntityTypeTagFilter.TYPE);
+		registry.register(MatchEntityFilter.TYPE);
+		registry.register(HasEffectEntityFilter.TYPE);
+		registry.register(ServerDataEntityFilter.TYPE);
+		registry.register(PlayerDataEntityFilter.TYPE);
+		registry.register(ProfileEntityFilter.TYPE);
+		registry.register(HasItemEntityFilter.TYPE);
+		registry.register(InDimensionEntityFilter.TYPE);
+		registry.register(IfEntityFilter.TYPE);
 	}
 
+	@Override
 	default SimpleRegistryType<?> type() {
 		return REGISTRY.getType(this);
 	}
@@ -137,6 +202,24 @@ public interface EntityFilter extends Predicate<Entity> {
 		}
 	}
 
+	default EntityFilter and(EntityFilter... filters) {
+		var list = new ArrayList<EntityFilter>(filters.length + 1);
+
+		if (this != ANY.instance()) {
+			list.add(this);
+		}
+
+		for (var filter : filters) {
+			if (filter == NONE.instance()) {
+				return filter;
+			} else if (filter != ANY.instance()) {
+				list.add(filter);
+			}
+		}
+
+		return new EntityAndFilter(List.copyOf(list));
+	}
+
 	default EntityFilter or(EntityFilter filter) {
 		if (filter == ANY.instance()) {
 			return filter;
@@ -145,5 +228,23 @@ public interface EntityFilter extends Predicate<Entity> {
 		} else {
 			return new EntityOrFilter(List.of(this, filter));
 		}
+	}
+
+	default EntityFilter or(EntityFilter... filters) {
+		var list = new ArrayList<EntityFilter>(filters.length + 1);
+
+		if (this != NONE.instance()) {
+			list.add(this);
+		}
+
+		for (var filter : filters) {
+			if (filter == ANY.instance()) {
+				return filter;
+			} else if (filter != NONE.instance()) {
+				list.add(filter);
+			}
+		}
+
+		return new EntityOrFilter(List.copyOf(list));
 	}
 }

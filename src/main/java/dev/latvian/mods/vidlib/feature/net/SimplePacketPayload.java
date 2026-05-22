@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.net;
 
+import dev.latvian.mods.klib.io.IOUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
-import dev.latvian.mods.vidlib.util.IOUtils;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
@@ -41,20 +41,12 @@ public interface SimplePacketPayload {
 		return new VidLibPacketPayloadContainer(this, C2S.incrementAndGet(), gameTime);
 	}
 
-	default ClientboundCustomPayloadPacket toConfigS2C() {
-		return new ClientboundCustomPayloadPacket(toS2C(0L));
+	default ClientboundCustomPayloadPacket toS2CPacket(long gameTime) {
+		return new ClientboundCustomPayloadPacket(toS2C(gameTime));
 	}
 
-	default ServerboundCustomPayloadPacket toConfigC2S() {
-		return new ServerboundCustomPayloadPacket(toC2S(0L));
-	}
-
-	default ClientboundCustomPayloadPacket toGameS2C(Level level) {
-		return new ClientboundCustomPayloadPacket(toS2C(level.getGameTime()));
-	}
-
-	default ServerboundCustomPayloadPacket toGameC2S(Level level) {
-		return new ServerboundCustomPayloadPacket(toC2S(level.getGameTime()));
+	default ServerboundCustomPayloadPacket toC2SPacket(long gameTime) {
+		return new ServerboundCustomPayloadPacket(toC2S(gameTime));
 	}
 
 	default byte[] toBytes(Level level, long uid) {

@@ -2,14 +2,27 @@ package dev.latvian.mods.vidlib.feature.icon.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.feature.client.EntityRenderTypes;
+import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.icon.AtlasSpriteIcon;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 import org.joml.Vector3f;
 
-public record AtlasSpriteIconRenderer(AtlasSpriteIcon icon) implements IconRenderer {
-	@Override
-	public void render3D(Minecraft mc, PoseStack ms, float delta, MultiBufferSource source, int light, int overlay) {
+public interface AtlasSpriteIconRenderer {
+	static void draw(AtlasSpriteIcon icon, Minecraft mc, GuiGraphics graphics, int alpha) {
+		var rendertype = VidLibRenderTypes.GUI.apply(icon.sprite().atlas());
+		var matrix4f = graphics.pose().last().pose();
+		var buffer = graphics.vl$buffers().getBuffer(rendertype);
+		var color = icon.tint().mixAlpha(alpha).argb();
+		var uv = mc.getSprite(icon.sprite());
+		buffer.addVertex(matrix4f, -8F, -8F, 0F).setUv(uv.getU0(), uv.getV0()).setColor(color);
+		buffer.addVertex(matrix4f, -8F, 8F, 0F).setUv(uv.getU0(), uv.getV1()).setColor(color);
+		buffer.addVertex(matrix4f, 8F, 8F, 0F).setUv(uv.getU1(), uv.getV1()).setColor(color);
+		buffer.addVertex(matrix4f, 8F, -8F, 0F).setUv(uv.getU1(), uv.getV0()).setColor(color);
+	}
+
+	static void render(AtlasSpriteIcon icon, Minecraft mc, PoseStack ms, float delta, MultiBufferSource source, int light, int overlay) {
 		var buffer = source.getBuffer(EntityRenderTypes.textureCull(icon.sprite().atlas(), icon.tint().alpha() < 255 || icon.translucent()));
 
 		int colR = icon.tint().red();

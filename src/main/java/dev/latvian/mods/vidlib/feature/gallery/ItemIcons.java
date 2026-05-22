@@ -39,7 +39,7 @@ import org.lwjgl.opengl.GL11;
 
 public interface ItemIcons {
 	@ClientAutoRegister
-	Gallery<VisualItemKey> GALLERY = new Gallery<>("item_icons", () -> null, TriState.FALSE, VisualItemKey::toString, null);
+	Gallery<VisualItemKey> GALLERY = new Gallery<>("item_icons", VisualItemKey.CODEC, () -> null, TriState.FALSE, VisualItemKey::toString, null);
 
 	Lazy<RenderTarget> RENDER_TARGET = Lazy.of(() -> new TextureTarget("ItemIconsCanvas", 128, 128, true));
 

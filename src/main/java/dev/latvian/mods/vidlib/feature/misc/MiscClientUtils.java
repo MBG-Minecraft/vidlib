@@ -31,6 +31,7 @@ public class MiscClientUtils {
 	public static final Matrix4f PERSPECTIVE_MATRIX = new Matrix4f();
 	public static final ImBoolean PLAYER_HEADWEAR = new ImBoolean(true);
 	private static final char[] POWER = {'K', 'M', 'B', 'T'};
+	public static final ImBoolean SPECTATE_UI = new ImBoolean(false);
 
 	public static void reloadShaders(Minecraft mc) {
 		mc.getShaderManager().reload(CompletableFuture::completedFuture, mc.getResourceManager(), Util.backgroundExecutor(), mc).thenRunAsync(() -> {
@@ -163,5 +164,19 @@ public class MiscClientUtils {
 		int s = graphics.drawString(font, size, 0F, 0F, color, dropShadow);
 		ms.popPose();
 		return Mth.ceil(s * scale);
+	}
+
+	public static float adjustScreenX(Minecraft mc, int adjustedWidth) {
+		return (mc.getWindow().getGuiScaledWidth() - adjustedWidth) / 2F;
+	}
+
+	public static int adjustScreenWidth(Minecraft mc, boolean shifted) {
+		if (shifted) {
+			float w = mc.getWindow().getGuiScaledWidth();
+			float h = mc.getWindow().getGuiScaledHeight();
+			// figure out how to shift to 16:9 nicely
+		}
+
+		return mc.getWindow().getGuiScaledWidth();
 	}
 }

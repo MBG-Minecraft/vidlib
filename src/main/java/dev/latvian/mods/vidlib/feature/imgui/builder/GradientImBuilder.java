@@ -6,7 +6,6 @@ import dev.latvian.mods.klib.color.Gradient;
 import dev.latvian.mods.klib.color.PositionedColor;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
@@ -117,7 +116,7 @@ public class GradientImBuilder implements ImBuilder<Gradient> {
 			update = ImUpdate.FULL;
 		}
 
-		ImGuiUtils.hoveredTooltip("Add");
+		graphics.hoveredTooltip("Add");
 
 		graphics.popStack();
 

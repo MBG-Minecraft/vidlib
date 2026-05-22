@@ -5,10 +5,13 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.core.VLBlockInWorld;
-import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
+import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
+import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
@@ -24,10 +27,10 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public interface BlockFilter extends Predicate<BlockInWorld> {
-	SimpleRegistry<BlockFilter> REGISTRY = SimpleRegistry.create(BlockFilter::type);
+public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntry {
+	SimpleRegistry<BlockFilter> REGISTRY = SimpleRegistry.create(VidLib.id("block_filter"), c -> PlatformHelper.CURRENT.collectBlockFilters(c));
 
-	SimpleRegistryType.Unit<BlockFilter> NONE = SimpleRegistryType.unit("none", new BlockFilter() {
+	SimpleRegistryType.Unit<BlockFilter> NONE = SimpleRegistryType.unitWithType("none", type -> new SimpleBlockFilter(type) {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
 			return false;
@@ -36,11 +39,6 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 		@Override
 		public boolean test(Level level, BlockPos pos, BlockState state) {
 			return false;
-		}
-
-		@Override
-		public String toString() {
-			return "none";
 		}
 
 		@Override
@@ -49,7 +47,7 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 		}
 	});
 
-	SimpleRegistryType.Unit<BlockFilter> ANY = SimpleRegistryType.unit("any", new BlockFilter() {
+	SimpleRegistryType.Unit<BlockFilter> ANY = SimpleRegistryType.unitWithType("any", type -> new SimpleBlockFilter(type) {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
 			return true;
@@ -61,17 +59,12 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 		}
 
 		@Override
-		public String toString() {
-			return "any";
-		}
-
-		@Override
 		public BlockFilter and(BlockFilter filter) {
 			return filter;
 		}
 	});
 
-	SimpleRegistryType.Unit<BlockFilter> VISIBLE = SimpleRegistryType.unit("visible", new BlockFilter() {
+	SimpleRegistryType.Unit<BlockFilter> VISIBLE = SimpleRegistryType.unitWithType("visible", type -> new SimpleBlockFilter(type) {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
 			var state = blockInWorld.getState();
@@ -82,14 +75,9 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 		public boolean test(Level level, BlockPos pos, BlockState state) {
 			return state.isVisible();
 		}
-
-		@Override
-		public String toString() {
-			return "visible";
-		}
 	});
 
-	SimpleRegistryType.Unit<BlockFilter> PARTIAL = SimpleRegistryType.unit("partial", new BlockFilter() {
+	SimpleRegistryType.Unit<BlockFilter> PARTIAL = SimpleRegistryType.unitWithType("partial", type -> new SimpleBlockFilter(type) {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
 			var state = blockInWorld.getState();
@@ -100,14 +88,9 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 		public boolean test(Level level, BlockPos pos, BlockState state) {
 			return state.isPartial();
 		}
-
-		@Override
-		public String toString() {
-			return "partial";
-		}
 	});
 
-	SimpleRegistryType.Unit<BlockFilter> EXPOSED = SimpleRegistryType.unit("exposed", new BlockFilter() {
+	SimpleRegistryType.Unit<BlockFilter> EXPOSED = SimpleRegistryType.unitWithType("exposed", type -> new SimpleBlockFilter(type) {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
 			return blockInWorld.getLevel() instanceof Level l && test(l, blockInWorld.getPos(), blockInWorld.getState());
@@ -117,14 +100,9 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 		public boolean test(Level level, BlockPos pos, BlockState state) {
 			return !state.isAir() && level.isBlockExposed(pos.getX(), pos.getY(), pos.getZ(), new BlockPos.MutableBlockPos());
 		}
-
-		@Override
-		public String toString() {
-			return "exposed";
-		}
 	});
 
-	SimpleRegistryType.Unit<BlockFilter> FLUID = SimpleRegistryType.unit("fluid", new BlockFilter() {
+	SimpleRegistryType.Unit<BlockFilter> FLUID = SimpleRegistryType.unitWithType("fluid", type -> new SimpleBlockFilter(type) {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
 			return blockInWorld.getLevel() instanceof Level l && test(l, blockInWorld.getPos(), blockInWorld.getState());
@@ -133,11 +111,6 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 		@Override
 		public boolean test(Level level, BlockPos pos, BlockState state) {
 			return !state.isAir() && state.liquid();
-		}
-
-		@Override
-		public String toString() {
-			return "fluid";
 		}
 	});
 
@@ -176,28 +149,30 @@ public interface BlockFilter extends Predicate<BlockInWorld> {
 		case null, default -> DataResult.error(() -> "");
 	});
 
-	Codec<BlockFilter> CODEC = KLibCodecs.or(List.of(NONE_OR_ANY_CODEC, LITERAL_CODEC, REGISTRY.valueCodec()));
-	StreamCodec<RegistryFriendlyByteBuf, BlockFilter> STREAM_CODEC = ByteBufCodecs.either(ByteBufCodecs.BOOL, REGISTRY.valueStreamCodec()).map(either -> either.map(BlockFilter::of, Function.identity()), filter -> filter == ANY.instance() ? Either.left(true) : filter == NONE.instance() ? Either.left(false) : Either.right(filter));
+	Codec<BlockFilter> CODEC = KLibCodecs.or(List.of(NONE_OR_ANY_CODEC, LITERAL_CODEC, REGISTRY.codec()));
+	StreamCodec<RegistryFriendlyByteBuf, BlockFilter> STREAM_CODEC = ByteBufCodecs.either(ByteBufCodecs.BOOL, REGISTRY.streamCodec()).map(either -> either.map(BlockFilter::of, Function.identity()), filter -> filter == ANY.instance() ? Either.left(true) : filter == NONE.instance() ? Either.left(false) : Either.right(filter));
 	DataType<BlockFilter> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, BlockFilter.class);
 	CommandDataType<BlockFilter> COMMAND = CommandDataType.of(DATA_TYPE);
 
-	@AutoInit
-	static void bootstrap() {
-		REGISTRY.register(NONE);
-		REGISTRY.register(ANY);
-		REGISTRY.register(VISIBLE);
-		REGISTRY.register(EXPOSED);
+	static void builtinTypes(SimpleRegistryCollector<BlockFilter> registry) {
+		registry.register(NONE);
+		registry.register(ANY);
+		registry.register(VISIBLE);
+		registry.register(PARTIAL);
+		registry.register(EXPOSED);
+		registry.register(FLUID);
 
-		REGISTRY.register(BlockNotFilter.TYPE);
-		REGISTRY.register(BlockAndFilter.TYPE);
-		REGISTRY.register(BlockOrFilter.TYPE);
-		REGISTRY.register(BlockXorFilter.TYPE);
+		registry.register(BlockNotFilter.TYPE);
+		registry.register(BlockAndFilter.TYPE);
+		registry.register(BlockOrFilter.TYPE);
+		registry.register(BlockXorFilter.TYPE);
 
-		REGISTRY.register(BlockIdFilter.TYPE);
-		REGISTRY.register(BlockStateFilter.TYPE);
-		REGISTRY.register(BlockTypeTagFilter.TYPE);
+		registry.register(BlockIdFilter.TYPE);
+		registry.register(BlockStateFilter.TYPE);
+		registry.register(BlockTypeTagFilter.TYPE);
 	}
 
+	@Override
 	default SimpleRegistryType<?> type() {
 		return REGISTRY.getType(this);
 	}

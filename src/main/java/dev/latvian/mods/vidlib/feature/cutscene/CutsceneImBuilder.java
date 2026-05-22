@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.cutscene;
 
 import com.google.gson.JsonElement;
+import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.vidlib.feature.cutscene.step.CutsceneStepImBuilder;
 import dev.latvian.mods.vidlib.feature.cutscene.step.CutsceneStepType;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
@@ -10,7 +11,6 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
-import dev.latvian.mods.vidlib.util.JsonUtils;
 import imgui.ImGui;
 import imgui.extension.texteditor.TextEditor;
 import imgui.flag.ImGuiTreeNodeFlags;
@@ -51,7 +51,6 @@ public class CutsceneImBuilder implements ImBuilder<Cutscene> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		var numberContext = graphics.mc.level.getGlobalContext().fork(variables);
 		var update = ImUpdate.NONE;
 		String previewTooltip;
 
@@ -155,7 +154,7 @@ public class CutsceneImBuilder implements ImBuilder<Cutscene> {
 				ImGui.endDisabled();
 			}
 
-			ImGuiUtils.hoveredTooltip("Copy to Clipboard");
+			graphics.hoveredTooltip("Copy to Clipboard");
 
 			if (ImGui.beginChild("###json", 400F, 400F, false)) {
 				jsonEditor.render("JSON");
@@ -242,7 +241,7 @@ public class CutsceneImBuilder implements ImBuilder<Cutscene> {
 			if (isValid()) {
 				try {
 					var c = build();
-					cutsceneJson = JsonUtils.sort(Cutscene.DIRECT_CODEC.encodeStart(graphics.mc.level.jsonOps(), c).getOrThrow());
+					cutsceneJson = JsonUtils.sort(Cutscene.DIRECT_CODEC.encodeStart(graphics.jsonOps, c).getOrThrow());
 					jsonEditor.setText(JsonUtils.prettyString(cutsceneJson));
 					cutscene = c;
 				} catch (Exception ex) {

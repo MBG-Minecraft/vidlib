@@ -68,7 +68,7 @@ public record RegistryOrDataArgumentType<T>(VLRegistry<T> registry, DataArgument
 	public static class Info implements ArgumentTypeInfo<RegistryOrDataArgumentType<?>, RefHolderTemplate> {
 		@Override
 		public void serializeToNetwork(RefHolderTemplate template, FriendlyByteBuf buf) {
-			buf.writeResourceLocation(template.commandDataType.registeredDataType.get().id());
+			buf.writeResourceLocation(template.commandDataType.getRegisteredDataType().id());
 		}
 
 		@Override
@@ -78,7 +78,7 @@ public record RegistryOrDataArgumentType<T>(VLRegistry<T> registry, DataArgument
 
 		@Override
 		public void serializeToJson(RefHolderTemplate template, JsonObject json) {
-			json.addProperty("codec", template.commandDataType.registeredDataType.get().id().toString());
+			json.addProperty("codec", template.commandDataType.getRegisteredDataType().id().toString());
 		}
 
 		@Override
@@ -92,7 +92,7 @@ public record RegistryOrDataArgumentType<T>(VLRegistry<T> registry, DataArgument
 		public RegistryOrDataArgumentType<?> instantiate(CommandBuildContext ctx) {
 			var ops = ctx.createSerializationContext(NbtOps.INSTANCE);
 			var fallback = new DataArgumentType<>(ops, TagParser.create(ops), commandDataType);
-			return new RegistryOrDataArgumentType<>((VLRegistry) commandDataType.registeredDataType.get().argumentType(), fallback);
+			return new RegistryOrDataArgumentType<>((VLRegistry) commandDataType.getRegistryArgumentType(), fallback);
 		}
 	}
 }

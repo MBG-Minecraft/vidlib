@@ -8,7 +8,6 @@ import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.visual.CubeTextures;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
@@ -17,7 +16,6 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -26,7 +24,6 @@ public record Zone(
 	Color color,
 	EntityFilter entityFilter,
 	CompoundTag data,
-	Map<EntityOverride<?>, Object> playerOverrides,
 	EntityFilter solid,
 	Set<String> tags,
 	boolean forceLoaded,
@@ -39,7 +36,6 @@ public record Zone(
 		Color.CODEC.optionalFieldOf("color", Color.CYAN).forGetter(Zone::color),
 		EntityFilter.CODEC.optionalFieldOf("entity_filter", EntityFilter.PLAYER.instance()).forGetter(Zone::entityFilter),
 		CompoundTag.CODEC.optionalFieldOf("data", Empty.COMPOUND_TAG).forGetter(Zone::data),
-		EntityOverride.OVERRIDE_MAP_CODEC.optionalFieldOf("player_overrides", Map.of()).forGetter(Zone::playerOverrides),
 		EntityFilter.CODEC.optionalFieldOf("solid", EntityFilter.NONE.instance()).forGetter(Zone::solid),
 		KLibCodecs.setOf(Codec.STRING).optionalFieldOf("tags", Set.of()).forGetter(Zone::tags),
 		Codec.BOOL.optionalFieldOf("force_loaded", false).forGetter(Zone::forceLoaded),
@@ -53,7 +49,6 @@ public record Zone(
 		Color.STREAM_CODEC, Zone::color,
 		EntityFilter.STREAM_CODEC, Zone::entityFilter,
 		MCStreamCodecs.COMPOUND_TAG, Zone::data,
-		EntityOverride.OVERRIDE_MAP_STREAM_CODEC, Zone::playerOverrides,
 		EntityFilter.STREAM_CODEC, Zone::solid,
 		KLibStreamCodecs.linkedSetOf(ByteBufCodecs.STRING_UTF8), Zone::tags,
 		ByteBufCodecs.BOOL, Zone::forceLoaded,
@@ -69,7 +64,6 @@ public record Zone(
 			color,
 			entityFilter,
 			data,
-			Map.of(),
 			EntityFilter.NONE.instance(),
 			Set.of(),
 			false,
@@ -89,11 +83,11 @@ public record Zone(
 	}
 
 	public Zone withShape(ZoneShape shape) {
-		return new Zone(shape, color, entityFilter, data, playerOverrides, solid, tags, forceLoaded, fluid, textures, fog);
+		return new Zone(shape, color, entityFilter, data, solid, tags, forceLoaded, fluid, textures, fog);
 	}
 
 	public Zone withColor(Color color) {
-		return new Zone(shape, color, entityFilter, data, playerOverrides, solid, tags, forceLoaded, fluid, textures, fog);
+		return new Zone(shape, color, entityFilter, data, solid, tags, forceLoaded, fluid, textures, fog);
 	}
 
 	public boolean isSolid() {

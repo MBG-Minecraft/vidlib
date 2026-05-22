@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.zone;
 
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.math.AAIBB;
 import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -108,23 +109,23 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 	public final ResourceLocation id;
 	public final ResourceKey<Level> dimension;
 	public final List<ZoneInstance> zones;
-	public boolean hasPlayerOverrides;
 	public final Set<String> tags;
 	public int priority;
 	public final Int2ObjectOpenHashMap<List<ZoneInstance>> entityZones;
 	boolean generated;
 	private AABB boundingBox;
+	private AAIBB intBoundingBox;
 
 	public ZoneContainer(ResourceLocation id, ResourceKey<Level> dimension) {
 		this.id = id;
 		this.dimension = dimension;
 		this.zones = new ArrayList<>();
-		this.hasPlayerOverrides = false;
 		this.tags = new LinkedHashSet<>();
 		this.priority = 0;
 		this.entityZones = new Int2ObjectOpenHashMap<>();
 		this.generated = false;
 		this.boundingBox = null;
+		this.intBoundingBox = null;
 	}
 
 	public ZoneContainer add(Zone zone) {
@@ -137,15 +138,12 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 
 		zones.add(instance);
 
-		if (!zone.playerOverrides().isEmpty()) {
-			hasPlayerOverrides = true;
-		}
-
 		if (parent != null) {
 			parent.solidZones = null;
 		}
 
 		boundingBox = null;
+		intBoundingBox = null;
 		return this;
 	}
 
@@ -227,18 +225,14 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 		}
 
 		zones.remove(index);
-		hasPlayerOverrides = false;
 
 		for (int i = 0; i < zones.size(); i++) {
 			var zone = zones.get(i);
 			zone.index = i;
-
-			if (!zone.zone.playerOverrides().isEmpty()) {
-				hasPlayerOverrides = true;
-			}
 		}
 
 		boundingBox = null;
+		intBoundingBox = null;
 	}
 
 	public void update(int index, Zone zoneData) {
@@ -250,13 +244,8 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 
 	// Helper methods //
 
-
 	@Override
-	public AABB getBoundingBox() {
-		if (zones.size() == 1) {
-			return zones.getFirst().zone.shape().getBoundingBox();
-		}
-
+	public AABB toAABB() {
 		if (boundingBox == null) {
 			double minX = Double.POSITIVE_INFINITY;
 			double minY = Double.POSITIVE_INFINITY;
@@ -266,7 +255,7 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 			double maxZ = Double.NEGATIVE_INFINITY;
 
 			for (var instance : zones) {
-				var box = instance.zone.shape().getBoundingBox();
+				var box = instance.zone.shape().toAABB();
 				minX = Math.min(minX, box.minX);
 				minY = Math.min(minY, box.minY);
 				minZ = Math.min(minZ, box.minZ);
@@ -279,6 +268,32 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 		}
 
 		return boundingBox;
+	}
+
+	@Override
+	public AAIBB toAAIBB() {
+		if (intBoundingBox == null) {
+			int minX = Integer.MAX_VALUE;
+			int minY = Integer.MAX_VALUE;
+			int minZ = Integer.MAX_VALUE;
+			int maxX = Integer.MIN_VALUE;
+			int maxY = Integer.MIN_VALUE;
+			int maxZ = Integer.MIN_VALUE;
+
+			for (var instance : zones) {
+				var box = instance.zone.shape().toAAIBB();
+				minX = Math.min(minX, box.minX());
+				minY = Math.min(minY, box.minY());
+				minZ = Math.min(minZ, box.minZ());
+				maxX = Math.max(maxX, box.maxX());
+				maxY = Math.max(maxY, box.maxY());
+				maxZ = Math.max(maxZ, box.maxZ());
+			}
+
+			intBoundingBox = new AAIBB(minX, minY, minZ, maxX, maxY, maxZ);
+		}
+
+		return intBoundingBox;
 	}
 
 	@Nullable
@@ -311,7 +326,28 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 			return false;
 		}
 
-		if (getBoundingBox().contains(x, y, z)) {
+		if (toAABB().contains(x, y, z)) {
+			if (zones.size() == 1) {
+				return zones.getFirst().zone.shape().contains(x, y, z);
+			}
+
+			for (var instance : zones) {
+				if (instance.zone.shape().contains(x, y, z)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean contains(int x, int y, int z) {
+		if (zones.isEmpty()) {
+			return false;
+		}
+
+		if (toAABB().contains(x, y, z)) {
 			if (zones.size() == 1) {
 				return zones.getFirst().zone.shape().contains(x, y, z);
 			}

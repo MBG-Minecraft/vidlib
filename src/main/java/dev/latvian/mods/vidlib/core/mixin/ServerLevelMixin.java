@@ -1,14 +1,14 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.core.VLChunkMap;
 import dev.latvian.mods.vidlib.core.VLServerLevel;
 import dev.latvian.mods.vidlib.core.VLServerPacketListener;
 import dev.latvian.mods.vidlib.feature.misc.CreateFireworksPayload;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ServerProps;
-import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.longs.LongSet;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
@@ -47,13 +47,7 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 	private ActiveZones vl$activeZones;
 
 	@Unique
-	private final LongSet vl$anchoredChunks = new LongOpenHashSet();
-
-	@Unique
 	private ServerProps vl$props;
-
-	@Unique
-	private Boolean vl$isReplayLevel;
 
 	protected ServerLevelMixin(WritableLevelData levelData, ResourceKey<Level> dimension, RegistryAccess registryAccess, Holder<DimensionType> dimensionTypeRegistration, boolean isClientSide, boolean isDebug, long biomeZoomSeed, int maxChainedNeighborUpdates) {
 		super(levelData, dimension, registryAccess, dimensionTypeRegistration, isClientSide, isDebug, biomeZoomSeed, maxChainedNeighborUpdates);
@@ -71,11 +65,6 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 			vl$activeZones = zones;
 			vl$updateLoadedChunks();
 		}
-	}
-
-	@Override
-	public void vl$updateLoadedChunks() {
-		vl$updateLoadedChunks(vl$anchoredChunks);
 	}
 
 	@Override
@@ -99,22 +88,29 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 
 	@Override
 	public boolean isReplayLevel() {
-		if (vl$isReplayLevel == null) {
-			vl$isReplayLevel = vl$level().getServer().getClass().getName().equals("com.moulberry.flashback.playback.ReplayServer");
-		}
-
-		return vl$isReplayLevel;
+		return vl$level().getServer().vl$isReplayServer();
 	}
 
-	// Other mods like Motion Capture mod create fake players, so this avoid a null pointer.
+	// Other mods like Motion Capture mod create fake players, so this avoids a null pointer.
 	@Inject(method = "addPlayer", at = @At("HEAD"))
 	private void vl$addPlayer(ServerPlayer player, CallbackInfo ci) {
 		if (player.vl$sessionData() != null) {
 			return;
 		}
 
-		var newPlayerSession = new ServerSessionData(server, player.getUUID());
+		var newPlayerSession = server.vl$getOrLoadServerSession(player.getUUID());
 		((VLServerPacketListener) player.connection).vl$sessionData(newPlayerSession);
-		newPlayerSession.load(server);
+	}
+
+	@Inject(method = "announceSleepStatus", at = @At("HEAD"), cancellable = true)
+	private void vl$announceSleepStatus(CallbackInfo ci) {
+		if (CommonGameEngine.INSTANCE.disableSleepStatusAnnouncement(vl$level())) {
+			ci.cancel();
+		}
+	}
+
+	@Inject(method = "tickPrecipitation", at = @At("RETURN"))
+	private void vl$tickPrecipitation(BlockPos blockPos, CallbackInfo ci, @Local(ordinal = 1) BlockPos motionBlockedPos, @Local(ordinal = 2) BlockPos belowMotionBlockedPos) {
+		CommonGameEngine.INSTANCE.tickPrecipitation(vl$level(), blockPos, motionBlockedPos, belowMotionBlockedPos);
 	}
 }

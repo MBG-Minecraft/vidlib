@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.core;
 
 import com.mojang.datafixers.util.Pair;
 import dev.latvian.mods.klib.util.MessageConsumer;
+import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.bulk.RedrawChunkSectionsPayload;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
@@ -14,9 +15,9 @@ import dev.latvian.mods.vidlib.feature.cutscene.PlayCutscenePayload;
 import dev.latvian.mods.vidlib.feature.cutscene.StopCutscenePayload;
 import dev.latvian.mods.vidlib.feature.hud.ToastDisplayPayload;
 import dev.latvian.mods.vidlib.feature.misc.CloseScreenPayload;
-import dev.latvian.mods.vidlib.feature.misc.EventMarkerData;
-import dev.latvian.mods.vidlib.feature.misc.EventMarkerPayload;
+import dev.latvian.mods.vidlib.feature.misc.HardcoreHeartsPayload;
 import dev.latvian.mods.vidlib.feature.misc.InfoBarOverridePayload;
+import dev.latvian.mods.vidlib.feature.misc.ReplayMarkerPayload;
 import dev.latvian.mods.vidlib.feature.misc.SetPostEffectPayload;
 import dev.latvian.mods.vidlib.feature.particle.FireData;
 import dev.latvian.mods.vidlib.feature.particle.ItemParticleOptions;
@@ -64,7 +65,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 
-public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsumer, MessageConsumer {
+public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer, VLC2SPacketConsumer, MessageConsumer {
 	default List<? extends Player> vl$getS2CPlayers() {
 		return List.of();
 	}
@@ -179,19 +180,19 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 		}
 	}
 
-	default void openYesNoVotingScreen(CompoundTag extraData, Component title, Component subtitle, Component yesLabel, Component noLabel) {
+	default void openYesNoVotingScreen(CompoundTag extraData, Component title, Component subtitle, Component yesLabel, Component noLabel, boolean closeOnVote) {
 		if (isClient()) {
-			getEnvironment().openYesNoVotingScreen(extraData, title, subtitle, yesLabel, noLabel);
+			getEnvironment().openYesNoVotingScreen(extraData, title, subtitle, yesLabel, noLabel, closeOnVote);
 		} else {
-			s2c(new StartYesNoVotingPayload(extraData, title, subtitle, yesLabel, noLabel));
+			s2c(new StartYesNoVotingPayload(extraData, title, subtitle, yesLabel, noLabel, closeOnVote));
 		}
 	}
 
-	default void openNumberVotingScreen(CompoundTag extraData, Component title, Component subtitle, int max, IntList unavailable) {
+	default void openNumberVotingScreen(CompoundTag extraData, Component title, Component subtitle, int max, IntList unavailable, boolean closeOnVote) {
 		if (isClient()) {
-			getEnvironment().openNumberVotingScreen(extraData, title, subtitle, max, unavailable);
+			getEnvironment().openNumberVotingScreen(extraData, title, subtitle, max, unavailable, closeOnVote);
 		} else {
-			s2c(new StartNumberVotingPayload(extraData, title, subtitle, max, unavailable));
+			s2c(new StartNumberVotingPayload(extraData, title, subtitle, max, unavailable, closeOnVote));
 		}
 	}
 
@@ -331,11 +332,11 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 		}
 	}
 
-	default void marker(EventMarkerData data) {
+	default void marker(ReplayMarkerData data) {
 		if (isClient()) {
 			getEnvironment().marker(data);
 		} else {
-			s2c(new EventMarkerPayload(data));
+			s2c(new ReplayMarkerPayload(data));
 		}
 	}
 
@@ -344,6 +345,14 @@ public interface VLPlayerContainer extends VLS2CPacketConsumer, VLC2SPacketConsu
 			getEnvironment().setInfoBarText(bar, text);
 		} else {
 			s2c(new InfoBarOverridePayload(bar, text));
+		}
+	}
+
+	default void setHardcoreHearts(boolean hardcore) {
+		if (isClient()) {
+			getEnvironment().setHardcoreHearts(hardcore);
+		} else {
+			s2c(new HardcoreHeartsPayload(hardcore));
 		}
 	}
 }

@@ -29,7 +29,7 @@ public final class Bezier {
 		return ((a * t + b) * t + c) * t;
 	}
 
-	public static boolean draw(String label, Vector2f p1, Vector2f p2, BezierPreset[] preset, float size, int smoothness) {
+	public static boolean draw(ImGraphics graphics, String label, Vector2f p1, Vector2f p2, BezierPreset[] preset, float size, int smoothness) {
 		boolean changed = false;
 		ImGui.pushID(label);
 
@@ -134,7 +134,8 @@ public final class Bezier {
 		if (hoveredCanvas && (selected == 0 ? d1 : d2) < pickR2) {
 			var p = selected == 0 ? p1 : p2;
 
-			ImGui.setTooltip("(%.3f, %.3f)".formatted(p.x, p.y));
+			graphics.tooltip("(%.3f, %.3f)".formatted(p.x, p.y));
+
 			if (ImGui.isMouseClicked(ImGuiMouseButton.Left) || ImGui.isMouseDragging(ImGuiMouseButton.Left)) {
 				float dx = ImGui.getIO().getMouseDeltaX() / canvas.x;
 				float dy = ImGui.getIO().getMouseDeltaY() / canvas.y;

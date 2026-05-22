@@ -8,6 +8,18 @@
 		},
 		{
 			"type": "bitmap",
+			"file": "vidlib:font/icons/left_click.png",
+			"ascent": 7,
+			"chars": ["0"]
+		},
+		{
+			"type": "bitmap",
+			"file": "vidlib:font/icons/right_click.png",
+			"ascent": 7,
+			"chars": ["1"]
+		},
+		{
+			"type": "bitmap",
 			"file": "vidlib:font/icons/eliminated.png",
 			"ascent": 7,
 			"chars": ["E"]

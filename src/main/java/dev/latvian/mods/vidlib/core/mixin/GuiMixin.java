@@ -7,6 +7,8 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.GameType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -16,11 +18,17 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import javax.annotation.Nullable;
+
 @Mixin(Gui.class)
 public abstract class GuiMixin {
 	@Shadow
 	@Final
 	private Minecraft minecraft;
+
+	@Shadow
+	@Nullable
+	private Component overlayMessageString;
 
 	@Redirect(method = "renderTabList", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;isLocalServer()Z"))
 	private boolean vl$renderTabList(Minecraft instance) {
@@ -42,7 +50,14 @@ public abstract class GuiMixin {
 
 	@Inject(method = "renderCrosshair", at = @At("HEAD"), cancellable = true)
 	private void vl$renderCrosshair(GuiGraphics graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-		if (ClientGameEngine.INSTANCE.hideGui(minecraft)) {
+		if (ClientGameEngine.INSTANCE.hideCrosshair(minecraft)) {
+			ci.cancel();
+		}
+	}
+
+	@Inject(method = "renderOverlayMessage", at = @At("HEAD"), cancellable = true)
+	private void vl$renderOverlayMessage(GuiGraphics graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
+		if (overlayMessageString != null && ClientGameEngine.INSTANCE.hideActionBarText(minecraft, overlayMessageString)) {
 			ci.cancel();
 		}
 	}
@@ -50,5 +65,39 @@ public abstract class GuiMixin {
 	@ModifyExpressionValue(method = {"lambda$new$8", "lambda$new$9"}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z"))
 	private static boolean vl$hideGui(boolean original, @Local(argsOnly = true) Minecraft mc) {
 		return ClientGameEngine.INSTANCE.hideGui(mc);
+	}
+
+	@ModifyExpressionValue(method = "renderHearts", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelData;isHardcore()Z"))
+	private boolean vl$isHardcore(boolean original) {
+		return ClientGameEngine.INSTANCE.renderHardcoreHearts(original);
+	}
+
+	@ModifyExpressionValue(method = {
+		"maybeRenderPlayerHealth",
+		"renderSelectedItemName(Lnet/minecraft/client/gui/GuiGraphics;I)V",
+		"lambda$new$4",
+		"lambda$new$3"
+	}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;canHurtPlayer()Z"))
+	private boolean vl$isSurvival(boolean original) {
+		return original || ClientGameEngine.INSTANCE.renderSpectatedUI(minecraft);
+	}
+
+	@ModifyExpressionValue(method = {
+		"renderCrosshair",
+		"renderHotbar",
+		"maybeRenderSelectedItemName",
+		"maybeRenderSpectatorTooltip"
+	}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;getPlayerMode()Lnet/minecraft/world/level/GameType;"))
+	private GameType vl$getGameMode(GameType original) {
+		return ClientGameEngine.INSTANCE.renderSpectatedUI(minecraft) ? GameType.SURVIVAL : original;
+	}
+
+	@ModifyExpressionValue(method = "maybeRenderSpectatorTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isSpectator()Z"))
+	private boolean vl$isSpectator(boolean original) {
+		if (ClientGameEngine.INSTANCE.renderSpectatedUI(minecraft)) {
+			return false;
+		}
+
+		return original;
 	}
 }

@@ -1,37 +1,46 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import com.google.gson.JsonElement;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.klib.texture.UV;
+import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
+import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.session.LocalClientSessionData;
-import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
 import imgui.ImGui;
 import imgui.ImGuiStyle;
 import imgui.extension.imnodes.ImNodes;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiDir;
+import imgui.flag.ImGuiHoveredFlags;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ARGB;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImNodesStyleVarConsumer, ImNodesStyleColorConsumer {
 	private static class VarStackStack {
@@ -49,23 +58,33 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 
 	public final Minecraft mc;
 	public final boolean inGame;
+	public final Player player;
 	public final LocalClientSessionData session;
 	public final boolean isSinglePlayer;
 	public final boolean isReplay;
+	public final boolean isExportingReplay;
 	public final FeatureSet serverFeatures;
 	public final boolean adminPanel;
 	public final boolean isAdmin;
+	public final DynamicOps<JsonElement> jsonOps;
+	public final DynamicOps<Tag> nbtOps;
+	public final float scroll;
 	private VarStackStack stack;
 
 	public ImGraphics(Minecraft mc) {
 		this.mc = mc;
 		this.inGame = mc.player != null && mc.level != null;
+		this.player = inGame ? mc.player : null;
 		this.session = inGame ? mc.player.vl$sessionData() : null;
 		this.isSinglePlayer = inGame && mc.isLocalServer();
-		this.isReplay = inGame && mc.level.isReplayLevel();
+		this.isReplay = ReplayAPI.getActive().isInReplay();
+		this.isExportingReplay = ReplayAPI.getActive().isExporting();
 		this.serverFeatures = inGame ? mc.level.getServerFeatures() : FeatureSet.EMPTY;
-		this.adminPanel = VidLibClientOptions.getAdminPanel();
+		this.adminPanel = isReplay || VidLibClientOptions.getAdminPanel() && ClientGameEngine.INSTANCE.allowAdminPanel(mc.player);
 		this.isAdmin = inGame && (isSinglePlayer || mc.player.hasPermissions(2));
+		this.jsonOps = inGame ? mc.level.jsonOps() : JsonOps.INSTANCE;
+		this.nbtOps = inGame ? mc.level.nbtOps() : NbtOps.INSTANCE;
+		this.scroll = VidLibClientOptions.LOCK_IMGUI_SCROLL.get() ? Math.clamp(ImGui.getIO().getMouseWheel(), -1F, 1F) : ImGui.getIO().getMouseWheel();
 	}
 
 	public void pushStack() {
@@ -245,13 +264,15 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 	}
 
 	public void stackTrace(Throwable throwable) {
+		stackTrace(throwable.toString(), throwable.getStackTrace());
+	}
+
+	public void stackTrace(String name, StackTraceElement[] stackTrace) {
 		pushStack();
 		setErrorText();
 		setItemSpacing(0F, 0F);
 
-		var stackTrace = throwable.getStackTrace();
-
-		ImGui.textWrapped(throwable + " [" + stackTrace.length + " lines]");
+		ImGui.textWrapped((name.isEmpty() ? "[" : (name + " [")) + stackTrace.length + " lines]");
 
 		for (var e : stackTrace) {
 			int cni = e.getClassName().lastIndexOf('.');
@@ -376,14 +397,14 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		ImGui.setNextWindowSize(viewport.getWorkSizeX(), viewport.getWorkSizeY());
 	}
 
-	public <E> ImUpdate combo(String label, Object[] selected, Collection<? extends E> options, Function<E, String> nameFunction, @Nullable ImString search) {
+	public <E> ImUpdate combo(String label, Object[] selected, String noneLabel, Iterable<? extends E> options, Function<E, String> nameFunction, @Nullable ImString search) {
 		var result = ImUpdate.NONE;
-		var searchText = search != null && options.size() > 16 ? search.get().toLowerCase(Locale.ROOT) : null;
+		var searchText = search != null ? search.get().toLowerCase(Locale.ROOT) : "";
 
-		if (ImGui.beginCombo(label, selected[0] == null ? "Select..." : nameFunction.apply((E) selected[0]), ImGuiInputTextFlags.None)) {
+		if (ImGui.beginCombo(label, selected[0] == null ? noneLabel.isEmpty() ? "None" : noneLabel : nameFunction.apply((E) selected[0]), ImGuiInputTextFlags.None)) {
 			float y = ImGui.getCursorPos().y;
 
-			if (searchText != null) {
+			if (search != null) {
 				ImGui.setCursorPosY(y);
 				ImGui.setNextItemWidth(-1F);
 				ImGui.inputTextWithHint("###search", "Search...", search);
@@ -391,11 +412,26 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 
 			int i = 0;
 
+			if (!noneLabel.isEmpty()) {
+				boolean isSelected = selected[0] == null;
+
+				if ((isSelected || searchText.isEmpty() || noneLabel.toLowerCase(Locale.ROOT).contains(searchText)) && ImGui.selectable(noneLabel + "###" + i, isSelected)) {
+					selected[0] = null;
+					result = ImUpdate.FULL;
+				}
+
+				if (isSelected) {
+					ImGui.setItemDefaultFocus();
+				}
+
+				i++;
+			}
+
 			for (var option : options) {
 				boolean isSelected = selected[0] == option;
 				var itemLabel = nameFunction.apply(option);
 
-				if ((isSelected || searchText == null || searchText.isEmpty() || itemLabel.toLowerCase(Locale.ROOT).contains(searchText)) && ImGui.selectable(itemLabel + "###" + i, isSelected)) {
+				if ((isSelected || searchText.isEmpty() || itemLabel.toLowerCase(Locale.ROOT).contains(searchText)) && ImGui.selectable(itemLabel + "###" + i, isSelected)) {
 					selected[0] = option;
 					result = ImUpdate.FULL;
 				}
@@ -413,21 +449,17 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		return result;
 	}
 
-	public <E> ImUpdate combo(String label, Object[] selected, E[] options, Function<E, String> nameFunction) {
-		return combo(label, selected, Arrays.asList(options), nameFunction, null);
+	public <E> ImUpdate combo(String label, Object[] selected, String noneLabel, E[] options, Function<E, String> nameFunction) {
+		return combo(label, selected, noneLabel, Arrays.asList(options), nameFunction, null);
 	}
 
-	public <E> ImUpdate combo(String label, Object[] selected, E[] options) {
-		return combo(label, selected, options, (Function) KLibCodecs.DEFAULT_NAME_GETTER);
-	}
-
-	public void hideMainMenuBar() {
-		BuiltInImGui.mainMenuOpen = false;
+	public <E> ImUpdate combo(String label, Object[] selected, String noneLabel, E[] options) {
+		return combo(label, selected, noneLabel, options, (Function) KLibCodecs.DEFAULT_NAME_GETTER);
 	}
 
 	public boolean collapsingHeader(String label, int imGuiTreeNodeFlags) {
 		pushStack();
-		setStyleCol(ImGuiCol.Header, 0xFF000000);
+		setStyleCol(ImGuiCol.Header, Color.BLACK);
 		boolean open = ImGui.collapsingHeader(label, imGuiTreeNodeFlags);
 		popStack();
 		return open;
@@ -435,7 +467,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 
 	public boolean collapsingHeader(String label, ImBoolean visible, int imGuiTreeNodeFlags) {
 		pushStack();
-		setStyleCol(ImGuiCol.Header, 0xFF000000);
+		setStyleCol(ImGuiCol.Header, Color.BLACK);
 		boolean open = ImGui.collapsingHeader(label, visible, imGuiTreeNodeFlags);
 		popStack();
 		return open;
@@ -506,7 +538,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 			popStack();
 		}
 
-		ImGuiUtils.hoveredTooltip(tooltip);
+		hoveredTooltip(tooltip);
 		return clicked;
 	}
 
@@ -551,5 +583,39 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 
 	public boolean imageButton(@Nullable ResourceLocation texture, float w, float h, UV uv, int padding, @Nullable ImColorVariant variant) {
 		return imageButton(texture == null ? null : mc.getTextureManager().getTexture(texture).getTexture(), w, h, uv, padding, variant);
+	}
+
+	public boolean beginTooltip() {
+		pushStack();
+		setWindowPadding(6F, 6F);
+		setWindowRounding(4F);
+		ImGui.beginTooltip();
+		ImGui.pushTextWrapPos(ImGui.getFontSize() * 45F);
+		return true;
+	}
+
+	public void endTooltip() {
+		ImGui.popTextWrapPos();
+		ImGui.endTooltip();
+		popStack();
+	}
+
+	public void tooltip(String tooltip) {
+		if (beginTooltip()) {
+			ImGui.textUnformatted(tooltip);
+			endTooltip();
+		}
+	}
+
+	public void hoveredTooltip(String tooltip) {
+		if (!tooltip.isEmpty() && ImGui.isItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) {
+			tooltip(tooltip);
+		}
+	}
+
+	public void hoveredTooltip(Supplier<String> tooltip) {
+		if (ImGui.isItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) {
+			tooltip(tooltip.get());
+		}
 	}
 }

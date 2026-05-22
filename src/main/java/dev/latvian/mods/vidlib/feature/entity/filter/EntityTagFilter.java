@@ -14,7 +14,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.entity.Entity;
 
 public record EntityTagFilter(String tag) implements EntityFilter, ImBuilderWithHolder.Factory {
-	public static SimpleRegistryType<EntityTagFilter> TYPE = SimpleRegistryType.dynamic("tags", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static SimpleRegistryType<EntityTagFilter> TYPE = SimpleRegistryType.dynamic("tag", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.STRING.fieldOf("tags").forGetter(EntityTagFilter::tag)
 	).apply(instance, EntityTagFilter::new)), ByteBufCodecs.STRING_UTF8.map(EntityTagFilter::new, EntityTagFilter::tag));
 

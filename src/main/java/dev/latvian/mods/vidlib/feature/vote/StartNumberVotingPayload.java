@@ -13,7 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 
-public record StartNumberVotingPayload(CompoundTag extraData, Component title, Component subtitle, int max, IntList unavailable) implements SimplePacketPayload {
+public record StartNumberVotingPayload(CompoundTag extraData, Component title, Component subtitle, int max, IntList unavailable, boolean closeOnVote) implements SimplePacketPayload {
 	@AutoPacket
 	public static final VidLibPacketType<StartNumberVotingPayload> TYPE = VidLibPacketType.internal("start_number_vote", CompositeStreamCodec.of(
 		MCStreamCodecs.COMPOUND_TAG, StartNumberVotingPayload::extraData,
@@ -21,6 +21,7 @@ public record StartNumberVotingPayload(CompoundTag extraData, Component title, C
 		ComponentSerialization.TRUSTED_STREAM_CODEC, StartNumberVotingPayload::subtitle,
 		ByteBufCodecs.VAR_INT, StartNumberVotingPayload::max,
 		CollectionStreamCodecs.VAR_INT_LIST, StartNumberVotingPayload::unavailable,
+		ByteBufCodecs.BOOL, StartNumberVotingPayload::closeOnVote,
 		StartNumberVotingPayload::new
 	));
 
@@ -35,6 +36,6 @@ public record StartNumberVotingPayload(CompoundTag extraData, Component title, C
 			return;
 		}
 
-		ctx.player().openNumberVotingScreen(extraData, title, subtitle, max, unavailable);
+		ctx.player().openNumberVotingScreen(extraData, title, subtitle, max, unavailable,  closeOnVote);
 	}
 }

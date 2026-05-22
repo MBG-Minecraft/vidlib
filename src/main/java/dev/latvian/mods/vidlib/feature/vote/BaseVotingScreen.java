@@ -11,11 +11,17 @@ public abstract class BaseVotingScreen extends Screen {
 	public final Component subtitle;
 	public final CompoundTag extraData;
 	public Button submitButton;
-	public int selected = -1;
+	public boolean closeOnVote;
 	public boolean waiting;
+	public int selected = -1;
 
 	protected BaseVotingScreen(CompoundTag extraData, Component title, Component subtitle) {
+		this(extraData, title, subtitle, true);
+	}
+
+	protected BaseVotingScreen(CompoundTag extraData, Component title, Component subtitle, boolean closeOnVote) {
 		super(title);
+		this.closeOnVote = closeOnVote;
 		this.extraData = extraData;
 		this.subtitle = subtitle;
 	}
@@ -33,6 +39,10 @@ public abstract class BaseVotingScreen extends Screen {
 			} else {
 				sendPayload();
 				button.setMessage(Component.literal("Submitted!"));
+			}
+			
+			if (closeOnVote) {
+				minecraft.player.vl$closeScreen();
 			}
 		}).bounds((width - 150) / 2, height - 40, 150, 20).build());
 
@@ -77,6 +87,6 @@ public abstract class BaseVotingScreen extends Screen {
 
 	@Override
 	public boolean shouldCloseOnEsc() {
-		return hasShiftDown() && minecraft.isLocalServer();
+		return hasShiftDown();
 	}
 }

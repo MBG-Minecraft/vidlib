@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
 import imgui.ImGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.CommandSuggestions;
@@ -72,8 +72,7 @@ public class CommandHistoryPanel extends Panel {
 				ImGui.text(s);
 			}
 
-			if (ImGui.isItemHovered()) {
-				ImGui.beginTooltip();
+			if (ImGui.isItemHovered() && graphics.beginTooltip()) {
 				ImGui.text("Click to Copy:");
 				ImGui.spacing();
 
@@ -86,7 +85,7 @@ public class CommandHistoryPanel extends Panel {
 					ImGui.text(s);
 				}
 
-				ImGui.endTooltip();
+				graphics.endTooltip();
 			}
 
 			if (ImGui.isItemClicked()) {

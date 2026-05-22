@@ -1,8 +1,14 @@
 #version 150
 
+#moj_import <minecraft:light.glsl>
+
 in vec3 Position;
+in vec4 Color;
 in vec2 UV0;
+in ivec2 UV2;
 in vec3 Normal;
+
+uniform sampler2D Sampler2;
 
 uniform mat4 ModelViewMat;
 uniform mat4 ProjMat;
@@ -10,16 +16,18 @@ uniform mat4 ProjMat;
 out vec4 vertexColor;
 out vec2 texCoord0;
 
-vec4 normal_light(vec3 normal) {
-	float light0 = max(0.0, dot(normalize(vec3(0.3, 1.8, -1.8)), normal));
-	float light1 = max(0.0, dot(normalize(vec3(-0.3, 1.8, 1.8)), normal));
-	float diffuse = min(1.0, (light0 + light1) * 0.4 + 0.7);
-	return vec4(diffuse, diffuse, diffuse, 1.0);
-}
-
 void main() {
 	gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
-	vec4 normal = ProjMat * ModelViewMat * vec4(Normal, 0.0);
-	vertexColor = normal_light(normal.xyz);
+
+	/*
+	vec3 n = normalize(Normal);
+	float brightness = 1.0;
+
+	if (n.y < 0.0) {
+		brightness = min(0.7 + n.y * 0.4, 1.0);
+	}
+	*/
+
+	vertexColor = minecraft_mix_light(vec3(0.2, 1.0, -0.7), vec3(-0.2, 1.0, 0.7), Normal, Color) * minecraft_sample_lightmap(Sampler2, UV2);
 	texCoord0 = UV0;
 }

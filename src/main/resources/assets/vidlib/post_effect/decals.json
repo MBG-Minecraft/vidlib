@@ -8,6 +8,10 @@
 			"fragment_shader": "vidlib:post/decals",
 			"inputs": [
 				{
+					"sampler_name": "In",
+					"target": "minecraft:main"
+				},
+				{
 					"sampler_name": "InDepth",
 					"target": "minecraft:main",
 					"use_depth_buffer": true

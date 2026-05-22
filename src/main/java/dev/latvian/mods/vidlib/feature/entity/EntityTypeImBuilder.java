@@ -31,7 +31,7 @@ public class EntityTypeImBuilder implements ImBuilder<EntityType<?>> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		return graphics.combo("###entity-type", entityType, ENTITY_TYPES.get(), e -> I18n.get(e.getDescriptionId()), SEARCH);
+		return graphics.combo("###entity-type", entityType, "", ENTITY_TYPES.get(), e -> I18n.get(e.getDescriptionId()), SEARCH);
 	}
 
 	@Override

@@ -12,6 +12,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
+import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -35,13 +36,20 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 		return new String(chars);
 	});
 
+	public final ImString search;
 	public final ImString name;
+
+	private final ImBoolean ignoreNPCs = new ImBoolean(false);
 	private GameProfile profile;
 
 	public GameProfileImBuilder() {
 		this.name = new ImString(16);
 		this.name.inputData.isResizable = false;
 		this.name.inputData.allowedChars = VALID_NAME_CHARS.get();
+
+		this.search = new ImString(16);
+		this.search.inputData.isResizable = false;
+		this.search.inputData.allowedChars = VALID_NAME_CHARS.get();
 		this.profile = null;
 	}
 
@@ -60,13 +68,13 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 	public ImUpdate imgui(ImGraphics graphics) {
 		var update = ImUpdate.NONE;
 
-		appendMainIcon(graphics.mc);
+		appendMainIcon(graphics);
 		ImGui.sameLine();
 
 		boolean select = ImGui.button(profile == null ? "Select..." : profile.getName());
 
 		if (profile != null && ImGui.isItemHovered()) {
-			ImGui.setTooltip(profile.getId().toString());
+			graphics.tooltip(profile.getId().toString());
 		}
 
 		if (select) {
@@ -82,7 +90,6 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 		if (ImGui.beginPopup("Select Profile###select-profile", ImGuiWindowFlags.AlwaysAutoResize)) {
 			var u = profileSelector(graphics, null);
 			update = update.or(u);
-
 			if (u.isFull()) {
 				ImGui.closeCurrentPopup();
 			}
@@ -96,12 +103,14 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 	public ImUpdate profileSelector(ImGraphics graphics, @Nullable Predicate<GameProfile> filter) {
 		var update = ImUpdate.NONE;
 
-		if (ImGui.beginListBox("###existing", -1F, 120F)) {
+		if (ImGui.beginListBox("###existing", -1F, 180F)) {
+			ImGui.setNextItemWidth(-1F);
+			ImGui.inputTextWithHint("###search", "Search...", search);
+
 			if (filter == null || filter.test(PlayerProfile.EMPTY_GAME_PROFILE)) {
 				appendIcon(graphics.mc, Util.NIL_UUID);
 
 				ImGui.sameLine();
-
 				if (ImGui.selectable(ImIcons.CLOSE + " None", profile == null)) {
 					profile = null;
 					update = ImUpdate.FULL;
@@ -109,7 +118,14 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 			}
 
 			for (var p : PlayerProfiles.getAllKnown()) {
+				if (ignoreNPCs.get() && (p.profile().getId().version() == 2 || p.profile().getId().equals(Util.NIL_UUID))) {
+					continue;
+				}
+
 				if (filter == null || filter.test(p.profile())) {
+					if (search.isNotEmpty() && !p.profile().getName().contains(search.get())) {
+						continue;
+					}
 					appendIcon(graphics.mc, p.profile().getId());
 					ImGui.sameLine();
 
@@ -137,7 +153,6 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 
 			if (!nameStr.isEmpty()) {
 				var p = PlayerProfiles.get(nameStr);
-
 				if (p.isError()) {
 					profile = null;
 					VidLib.LOGGER.error("Failed to fetch profile '" + nameStr + "'");
@@ -149,18 +164,23 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 			update = ImUpdate.FULL;
 		}
 
+		if (ImGui.collapsingHeader("Options###options")) {
+			if (ImGui.checkbox("Ignore NPCs###ignore-npcs", ignoreNPCs)) {
+				update = ImUpdate.PARTIAL;
+			}
+		}
+
 		return update;
 	}
 
-	private void appendMainIcon(Minecraft mc) {
-		var tex = LowQualityPlayerBodies.getTexture(mc, profile == null ? null : profile.getId());
+	private void appendMainIcon(ImGraphics graphics) {
+		var tex = LowQualityPlayerBodies.getTexture(graphics.mc, profile == null ? null : profile.getId());
 		ImGui.image(tex.getTexture().vl$getHandle(), ImGui.getFrameHeight(), ImGui.getFrameHeight());
 
-		if (ImGui.isItemHovered()) {
-			ImGui.beginTooltip();
-			var texHD = PlayerBodies.getTexture(mc, profile == null ? null : profile.getId());
+		if (ImGui.isItemHovered() && graphics.beginTooltip()) {
+			var texHD = PlayerBodies.getTexture(graphics.mc, profile == null ? null : profile.getId());
 			ImGui.image(texHD.getTexture().vl$getHandle(), 128F, 128F);
-			ImGui.endTooltip();
+			graphics.endTooltip();
 		}
 	}
 

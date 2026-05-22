@@ -2,10 +2,10 @@ package dev.latvian.mods.vidlib.feature.canvas;
 
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
-import dev.latvian.mods.vidlib.feature.imgui.ImText;
 import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
 import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.util.ColoredText;
 import imgui.ImGui;
 
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class CanvasPanel extends Panel {
 				MenuItem.item(ImIcons.PALETTE, "Color", g1 -> new CanvasPanel(canvas, true).open()),
 				MenuItem.item(ImIcons.ANIMATION, "Depth", g1 -> new CanvasPanel(canvas, false).open()),
 				MenuItem.item(ImIcons.BLOCK, "Disable", !canvas.enabled, g1 -> canvas.enabled = !canvas.enabled)
-			)).withColor(canvas.active ? ImText.SUCCESS : ImText.ERROR));
+			)).withColor(canvas.active ? ColoredText.SUCCESS : ColoredText.ERROR));
 		}
 
 		return list;

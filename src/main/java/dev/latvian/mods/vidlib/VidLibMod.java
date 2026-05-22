@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
+import dev.latvian.mods.vidlib.feature.block.VidLibBlocks;
+import dev.latvian.mods.vidlib.feature.item.VidLibItems;
 import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.platform.neoforge.NeoPlatformHelper;
@@ -9,7 +11,9 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforgespi.language.IModInfo;
 
 @Mod(VidLib.ID)
 public class VidLibMod {
@@ -17,6 +21,15 @@ public class VidLibMod {
 		PlatformHelper.CURRENT = new NeoPlatformHelper(mod);
 		VidLib.VERSION = mod.getModInfo().getVersion().toString();
 		VidLib.init();
+
+		VidLib.LOGGER.info("Mod Tree:");
+
+		for (var mod1 : ModList.get().getSortedMods()) {
+			printDependencies(mod1.getModInfo(), 0);
+		}
+
+		VidLibBlocks.REGISTRY.register(bus);
+		VidLibItems.REGISTRY.register(bus);
 
 		for (var s : AutoRegister.SCANNED.get()) {
 			if (s.value() instanceof DeferredRegister<?> reg) {
@@ -36,8 +49,6 @@ public class VidLibMod {
 			}
 		}
 
-		VidLibContent.init(bus);
-
 		var particleRegistry = DeferredRegister.create(Registries.PARTICLE_TYPE, VidLib.ID);
 
 		for (var particle : VidLibParticles.PARTICLES) {
@@ -45,5 +56,35 @@ public class VidLibMod {
 		}
 
 		particleRegistry.register(bus);
+
+		bus.addListener(this::setup);
+	}
+
+	public void setup(FMLCommonSetupEvent event) {
+		VidLib.buildRegistries();
+	}
+
+	private static void printDependencies(IModInfo mod, int level) {
+		VidLib.LOGGER.info("\t".repeat(level) + "- " + mod.getModId() + " (" + mod.getDisplayName() + ")");
+
+		if (level >= 5) {
+			return;
+		}
+
+		for (var dep : mod.getDependencies()) {
+			if (dep.getType() == IModInfo.DependencyType.REQUIRED) {
+				var id = dep.getModId();
+
+				if (id.equals("neoforge") || id.equals("minecraft")) {
+					continue;
+				}
+
+				var depMod = ModList.get().getModContainerById(dep.getModId()).orElse(null);
+
+				if (depMod != null) {
+					printDependencies(depMod.getModInfo(), level + 1);
+				}
+			}
+		}
 	}
 }

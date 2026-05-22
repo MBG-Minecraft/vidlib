@@ -167,7 +167,7 @@ public class TransformationListImBuilder implements ImBuilder<List<Transformatio
 						moveTo = -1;
 					}
 
-					ImGuiUtils.hoveredTooltip("Remove Step");
+					graphics.hoveredTooltip("Remove Step");
 
 					ImGui.sameLine();
 
@@ -179,7 +179,7 @@ public class TransformationListImBuilder implements ImBuilder<List<Transformatio
 						moveTo = i - 1;
 					}
 
-					ImGuiUtils.hoveredTooltip("Move Up");
+					graphics.hoveredTooltip("Move Up");
 
 					if (i == 0) {
 						ImGui.endDisabled();
@@ -195,7 +195,7 @@ public class TransformationListImBuilder implements ImBuilder<List<Transformatio
 						moveTo = i + 1;
 					}
 
-					ImGuiUtils.hoveredTooltip("Move Down");
+					graphics.hoveredTooltip("Move Down");
 
 					if (i == steps.size() - 1) {
 						ImGui.endDisabled();

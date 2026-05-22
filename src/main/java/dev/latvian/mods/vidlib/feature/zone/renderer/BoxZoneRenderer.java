@@ -10,7 +10,7 @@ public class BoxZoneRenderer implements ZoneRenderer<ZoneShape> {
 	@Override
 	public void render(ZoneShape shape, Context ctx) {
 		var ms = ctx.frame().poseStack();
-		var box = shape.getBoundingBox();
+		var box = shape.toAABB();
 
 		float minX = ctx.frame().x(box.minX);
 		float minY = ctx.frame().y(box.minY);

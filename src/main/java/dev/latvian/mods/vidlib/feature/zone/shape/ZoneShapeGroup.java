@@ -2,10 +2,12 @@ package dev.latvian.mods.vidlib.feature.zone.shape;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
+import dev.latvian.mods.klib.math.AAIBB;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -18,7 +20,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box) implements ZoneShape {
+public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box, AAIBB intBox) implements ZoneShape {
 	public static final SimpleRegistryType<ZoneShapeGroup> TYPE = SimpleRegistryType.dynamic("group", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		ZoneShape.CODEC.listOf().fieldOf("zones").forGetter(ZoneShapeGroup::zoneShapes)
 	).apply(instance, ZoneShapeGroup::create)), KLibStreamCodecs.listOf(ZoneShape.STREAM_CODEC).map(ZoneShapeGroup::create, ZoneShapeGroup::zoneShapes));
@@ -30,18 +32,31 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box) implements Zo
 		double maxX = Double.NEGATIVE_INFINITY;
 		double maxY = Double.NEGATIVE_INFINITY;
 		double maxZ = Double.NEGATIVE_INFINITY;
+		int iminX = Integer.MAX_VALUE;
+		int iminY = Integer.MAX_VALUE;
+		int iminZ = Integer.MAX_VALUE;
+		int imaxX = Integer.MIN_VALUE;
+		int imaxY = Integer.MIN_VALUE;
+		int imaxZ = Integer.MIN_VALUE;
 
 		for (var zone : zoneShapes) {
-			var box = zone.getBoundingBox();
+			var box = zone.toAABB();
 			minX = Math.min(minX, box.minX);
 			minY = Math.min(minY, box.minY);
 			minZ = Math.min(minZ, box.minZ);
 			maxX = Math.max(maxX, box.maxX);
 			maxY = Math.max(maxY, box.maxY);
 			maxZ = Math.max(maxZ, box.maxZ);
+			var ibox = zone.toAAIBB();
+			iminX = Math.min(iminX, ibox.minX());
+			iminY = Math.min(iminY, ibox.minY());
+			iminZ = Math.min(iminZ, ibox.minZ());
+			imaxX = Math.max(imaxX, ibox.maxX());
+			imaxY = Math.max(imaxY, ibox.maxY());
+			imaxZ = Math.max(imaxZ, ibox.maxZ());
 		}
 
-		return new ZoneShapeGroup(zoneShapes, new AABB(minX, minY, minZ, maxX, maxY, maxZ));
+		return new ZoneShapeGroup(zoneShapes, new AABB(minX, minY, minZ, maxX, maxY, maxZ), new AAIBB(iminX, iminY, iminZ, imaxX, imaxY, imaxZ));
 	}
 
 	@Override
@@ -50,7 +65,7 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box) implements Zo
 	}
 
 	@Override
-	public AABB getBoundingBox() {
+	public AABB toAABB() {
 		return box;
 	}
 
@@ -75,6 +90,21 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box) implements Zo
 	@Override
 	public boolean contains(double x, double y, double z) {
 		if (box != null && !box.contains(x, y, z)) {
+			return false;
+		}
+
+		for (var zone : zoneShapes) {
+			if (zone.contains(x, y, z)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean contains(int x, int y, int z) {
+		if (intBox != null && !intBox.contains(x, y, z)) {
 			return false;
 		}
 
@@ -166,7 +196,8 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box) implements Zo
 			shapes.add(shape.move(x, y, z));
 		}
 
-		return new ZoneShapeGroup(shapes, box.move(x, y, z));
+		var moved = box.move(x, y, z);
+		return new ZoneShapeGroup(shapes, moved, new AAIBB(Mth.floor(moved.minX), Mth.floor(moved.minY), Mth.floor(moved.minZ), Mth.ceil(moved.maxX), Mth.ceil(moved.maxY), Mth.ceil(moved.maxZ)));
 	}
 
 	@Override

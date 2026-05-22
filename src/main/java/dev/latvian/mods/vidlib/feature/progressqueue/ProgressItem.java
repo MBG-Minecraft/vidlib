@@ -1,0 +1,81 @@
+package dev.latvian.mods.vidlib.feature.progressqueue;
+
+import dev.latvian.mods.vidlib.util.ColoredText;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.IntConsumer;
+import java.util.function.LongConsumer;
+
+public final class ProgressItem implements IntConsumer, LongConsumer {
+	public final ProgressQueue queue;
+	public final AtomicInteger status;
+	public final AtomicLong progress;
+	public final AtomicLong size;
+	public String label;
+	public ProgressItemNameFunction nameFunction;
+
+	public ProgressItem(ProgressQueue queue, String label, ProgressItemNameFunction nameFunction) {
+		this.queue = queue;
+		this.status = new AtomicInteger(0);
+		this.progress = new AtomicLong(0L);
+		this.size = new AtomicLong(1L);
+		this.label = label;
+		this.nameFunction = nameFunction;
+	}
+
+	public void setStarted() {
+		status.set(1);
+	}
+
+	public void setDone() {
+		status.set(2);
+	}
+
+	public boolean isVisible() {
+		return status.get() == 1;
+	}
+
+	public boolean isDone() {
+		return status.get() == 2;
+	}
+
+	public void setSize(long size) {
+		this.size.set(size);
+	}
+
+	public long resetProgress() {
+		return this.progress.getAndSet(0L);
+	}
+
+	public void setProgress(long progress) {
+		this.progress.set(progress);
+	}
+
+	public long addProgress(long progress) {
+		return this.progress.addAndGet(progress);
+	}
+
+	public void error(ColoredText error) {
+		queue.error(error);
+		setDone();
+	}
+
+	public void error(String error) {
+		error(ColoredText.of(error));
+	}
+
+	public void warning(String error) {
+		error(ColoredText.warning(error));
+	}
+
+	@Override
+	public void accept(int value) {
+		addProgress(value);
+	}
+
+	@Override
+	public void accept(long value) {
+		addProgress(value);
+	}
+}

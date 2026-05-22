@@ -4,11 +4,11 @@ import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.io.ByteArrayIoSupplier;
+import dev.latvian.mods.klib.io.StringIoSupplier;
+import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
-import dev.latvian.mods.vidlib.util.ByteArrayIoSupplier;
-import dev.latvian.mods.vidlib.util.JsonUtils;
-import dev.latvian.mods.vidlib.util.StringIoSupplier;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -50,8 +50,8 @@ public record DynamicResources(
 			var path = PlatformHelper.CURRENT.findFile(packType, dynamicResourcesId.withSuffix(".json"));
 
 			if (path != null) {
-				try (var reader = Files.newBufferedReader(path)) {
-					var json = JsonUtils.read(reader);
+				try {
+					var json = JsonUtils.read(path);
 					var dynamicResources = CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
 					load(packType, packResources, dynamicResources);
 				} catch (Exception ex) {

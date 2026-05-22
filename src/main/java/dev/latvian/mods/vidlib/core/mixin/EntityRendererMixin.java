@@ -8,14 +8,15 @@ import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = EntityRenderer.class, priority = 1001) // Load before Sodium
-public class EntityRendererMixin<T extends Entity, S extends EntityRenderState> implements VLEntityRenderer<T, S> {
-
+public abstract class EntityRendererMixin<T extends Entity, S extends EntityRenderState> implements VLEntityRenderer<T, S> {
 	@Inject(method = "shouldRender", at = @At("RETURN"), cancellable = true)
 	private void vl$shouldRender(CallbackInfoReturnable<Boolean> cir) {
 		cir.setReturnValue(true);
@@ -30,4 +31,8 @@ public class EntityRendererMixin<T extends Entity, S extends EntityRenderState> 
 	private void vl$extractRenderState(T entity, float delta, CallbackInfoReturnable<S> cir) {
 		VidLibEntityRenderStates.extract(entity, cir.getReturnValue(), delta);
 	}
+
+	@Override
+	@Invoker("getBoundingBoxForCulling")
+	public abstract AABB vl$getBoundingBoxForCulling(T entity);
 }
