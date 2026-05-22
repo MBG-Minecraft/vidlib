@@ -20,7 +20,7 @@ var localBuildFile = new File(project.rootDir, "build.txt")
 var localBuildNumber = localBuildFile.getText("UTF-8").toInteger() + 1
 var webHookId = ""
 
-version = "$mod_version-build.$localBuildNumber"
+version = "$mod_version-buildspecial.$localBuildNumber"
 group = project.maven_group
 base.archivesName = project.archives_base_name
 
