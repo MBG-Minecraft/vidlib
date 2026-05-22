@@ -11,8 +11,12 @@ import java.util.List;
 
 public class ProgressQueueImGui {
 	public static void handle(ImGraphics graphics) {
-		synchronized (ProgressQueue.ACTIVE) {
+		ProgressQueue.LOCK.lock();
+
+		try {
 			handle0(graphics, ProgressQueue.ACTIVE);
+		} finally {
+			ProgressQueue.LOCK.unlock();
 		}
 	}
 

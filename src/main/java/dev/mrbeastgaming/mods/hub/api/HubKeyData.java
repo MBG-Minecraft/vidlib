@@ -23,4 +23,7 @@ public record HubKeyData(
 		var keyFactory = KeyFactory.getInstance(algorithm);
 		return keyFactory.generatePublic(new X509EncodedKeySpec(publicKey));
 	}
+
+	public static HubKeyData KEYS = null;
+	public static HubKeyData SESSION_KEYS = null;
 }

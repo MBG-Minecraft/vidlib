@@ -3,6 +3,7 @@ package dev.mrbeastgaming.mods.hub.api;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.util.Hex32;
 import dev.latvian.mods.klib.util.JsonUtils;
@@ -89,6 +90,10 @@ public interface HubAPI {
 		return HttpRequest.BodyPublishers.ofString(JsonUtils.string(body));
 	}
 
+	static <T> HttpRequest.BodyPublisher jsonBody(Codec<T> codec, T value) {
+		return jsonBody(codec.encodeStart(JsonOps.INSTANCE, value).getOrThrow());
+	}
+
 	static HttpRequest apiCountries() {
 		return request("/api/countries", Tristate.DEFAULT).build();
 	}
@@ -117,12 +122,12 @@ public interface HubAPI {
 		return request("/api/projects/" + project + "/full-data", Tristate.DEFAULT).build();
 	}
 
-	static HubClientSessionData apiDesktopClientSession(String projectToken) throws Exception {
-		return HubClientSessionData.CODEC.parse(JsonOps.INSTANCE, sendJsonRequest(request("/api/desktop/client-session/" + projectToken, Tristate.TRUE).timeout(Duration.ofSeconds(30L)).build())).getOrThrow();
-	}
-
-	static HubUserData apiUserSelfData() throws Exception {
-		return HubUserData.CODEC.parse(JsonOps.INSTANCE, sendJsonRequest(request("/api/users/@me", Tristate.TRUE).timeout(Duration.ofSeconds(30L)).build())).getOrThrow();
+	static HubClientSessionData apiDesktopClientSession(HubClientSessionDataRequest request) throws Exception {
+		return HubClientSessionData.CODEC.parse(JsonOps.INSTANCE, sendJsonRequest(request("/api/desktop/client-session", Tristate.TRUE)
+			.POST(jsonBody(HubClientSessionDataRequest.CODEC, request))
+			.timeout(Duration.ofSeconds(30L))
+			.build()
+		)).getOrThrow();
 	}
 
 	static List<ProjectUploadResponseItem> apiProjectUpload(String projectToken, List<ProjectUploadRequestItem> files) throws Exception {
@@ -226,5 +231,10 @@ public interface HubAPI {
 
 			return list;
 		});
+	}
+
+	static HubMinecraftProfileData apiMinecraftLink(String name) throws Exception {
+		var response = sendJsonRequest(request("/api/minecraft/link/" + name, Tristate.TRUE).GET().build()).getAsJsonObject();
+		return HubMinecraftProfileData.CODEC.parse(JsonOps.INSTANCE, response).getOrThrow();
 	}
 }

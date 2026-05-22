@@ -31,11 +31,13 @@ import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.skin.PlayerSkinOverrides;
 import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
+import dev.mrbeastgaming.mods.hub.api.HubMinecraftProfileData;
 import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.api.HubUserData;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubGateway;
 import dev.mrbeastgaming.mods.hub.api.project.HubProjectData;
 import dev.mrbeastgaming.mods.hub.link.LinkHubUserScreen;
+import dev.mrbeastgaming.mods.hub.link.LinkMinecraftScreen;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
@@ -325,14 +327,17 @@ public class ClientGameEngine {
 
 				graphics.popStack();
 			} else {
+				var mcProfile = HubMinecraftProfileData.SELF;
 				var hubProject = HubProjectData.PACK;
 
 				graphics.pushStack();
-				graphics.setText(hubProject == null ? ImColorVariant.YELLOW : ImColorVariant.GREEN);
+				graphics.setText(mcProfile == null || hubProject == null ? ImColorVariant.YELLOW : ImColorVariant.GREEN);
 
 				if (ImGui.menuItem(ImIcons.CHECK + "###link-hub-profile")) {
 					if (Screen.hasShiftDown()) {
 						LinkHubUserScreen.open(graphics.mc);
+					} else if (mcProfile == null) {
+						LinkMinecraftScreen.handle(graphics.mc, true);
 					}
 				}
 

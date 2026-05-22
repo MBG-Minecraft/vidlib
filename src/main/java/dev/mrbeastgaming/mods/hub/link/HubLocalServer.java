@@ -5,9 +5,10 @@ import dev.latvian.apps.tinyhttp.http.HTTPRequest;
 import dev.latvian.apps.tinyhttp.http.response.HTTPResponse;
 import dev.latvian.apps.tinyhttp.http.response.error.client.BadRequestError;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.VidLibClient;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.mrbeastgaming.mods.hub.HubUserConfig;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
-import dev.mrbeastgaming.mods.hub.api.HubClientSessionData;
 import dev.mrbeastgaming.mods.hub.api.token.UserToken;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -52,20 +53,25 @@ public class HubLocalServer {
 			HubUserConfig.save(HubUserConfig.load().withToken(userToken));
 			var name = "%s#%08X".formatted(userToken.header().name(), userToken.header().user());
 			VidLib.LOGGER.info("Logged in as " + name);
-			HubClientSessionData.load();
+			VidLibClient.loadHub();
 
 			mc.execute(() -> {
-				if (mc.screen instanceof LinkHubUserScreen) {
+				if (mc.screen instanceof LinkHubUserWaitingScreen) {
 					mc.popGuiLayer();
 				}
 
 				mc.toast(Component.literal("Logged In"), Component.literal(name));
 				GLFW.glfwFocusWindow(mc.getWindow().getWindow());
+
+				if (!PlatformHelper.CURRENT.isDevEnv()) {
+					LinkMinecraftScreen.handle(mc, true);
+				}
 			});
 		} else {
 			mc.execute(() -> {
-				if (mc.screen instanceof LinkHubUserScreen link) {
-					link.setError(("Error " + statusCode + "\n" + error).trim());
+				if (mc.screen instanceof LinkHubUserWaitingScreen link) {
+					link.button.active = true;
+					link.setMessage(Component.literal(("Error " + statusCode + "\n" + error).trim()));
 				}
 
 				GLFW.glfwFocusWindow(mc.getWindow().getWindow());

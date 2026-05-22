@@ -6,8 +6,11 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ProgressQueue {
+	public static final ReentrantLock LOCK = new ReentrantLock();
+
 	@ApiStatus.Internal
 	public static final LinkedList<ProgressQueue> ACTIVE = new LinkedList<>();
 
@@ -64,8 +67,12 @@ public class ProgressQueue {
 	public ProgressItem addItem(String label, ProgressItemNameFunction nameFunction) {
 		var item = new ProgressItem(this, label, nameFunction);
 
-		synchronized (ACTIVE) {
+		LOCK.lock();
+
+		try {
 			items.add(item);
+		} finally {
+			LOCK.unlock();
 		}
 
 		return item;
@@ -80,18 +87,26 @@ public class ProgressQueue {
 	}
 
 	public void clear() {
-		synchronized (ACTIVE) {
+		LOCK.lock();
+
+		try {
 			items.clear();
+		} finally {
+			LOCK.unlock();
 		}
 	}
 
 	public void display() {
-		synchronized (ACTIVE) {
+		LOCK.lock();
+
+		try {
 			if (!active) {
 				active = true;
 				open = true;
 				ACTIVE.add(this);
 			}
+		} finally {
+			LOCK.unlock();
 		}
 	}
 
@@ -100,8 +115,12 @@ public class ProgressQueue {
 	}
 
 	public void error(ColoredText error) {
-		synchronized (ACTIVE) {
+		LOCK.lock();
+
+		try {
 			errors.add(error);
+		} finally {
+			LOCK.unlock();
 		}
 	}
 
