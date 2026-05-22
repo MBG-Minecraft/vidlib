@@ -23,8 +23,12 @@ public abstract class AdminPanelEvent extends Event {
 			this.items = items;
 		}
 
+		public List<MenuItem> getItems() {
+			return items;
+		}
+
 		public void add(MenuItem item) {
-			this.items.add(item);
+			items.add(item);
 		}
 	}
 

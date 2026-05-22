@@ -6,7 +6,7 @@ import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerSkins;
-import dev.latvian.mods.vidlib.feature.icon.IconHolder;
+import dev.latvian.mods.vidlib.feature.icon.EmptyIcon;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
 import dev.latvian.mods.vidlib.feature.particle.CustomParticle;
 import net.minecraft.client.Camera;
@@ -133,7 +133,7 @@ public class NPCParticle extends CustomParticle {
 
 		var plumbob = recording.get(NPCDataType.PLUMBOB, offset);
 
-		if (plumbob != null && plumbob != IconHolder.EMPTY) {
+		if (plumbob != null && plumbob != EmptyIcon.INSTANCE) {
 			PlumbobRenderer.render(mc, plumbob, eyePos, ms, delta, buffers, light, playerRenderState.isCrouching, playerRenderState.scoreText != null);
 		}
 

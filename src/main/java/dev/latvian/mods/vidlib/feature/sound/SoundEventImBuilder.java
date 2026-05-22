@@ -89,19 +89,19 @@ public class SoundEventImBuilder implements ImBuilder<Holder<SoundEvent>> {
 				graphics.mc.getSoundManager().stop();
 			}
 
-			ImGuiUtils.hoveredTooltip("Stop All Sounds");
+			graphics.hoveredTooltip("Stop All Sounds");
 
 			ImGui.sameLine();
 
 			ImGui.setNextItemWidth(-1F);
 			ImGui.sliderFloat("###volume", PREVIEW_VOLUME.getData(), 0F, 1F);
-			ImGuiUtils.hoveredTooltip("Volume");
+			graphics.hoveredTooltip("Volume");
 
 			ImGui.nextColumn();
 
 			ImGui.setNextItemWidth(-1F);
 			ImGui.sliderFloat("###pitch", PREVIEW_PITCH.getData(), 0.5F, 2F);
-			ImGuiUtils.hoveredTooltip("Pitch");
+			graphics.hoveredTooltip("Pitch");
 
 			ImGui.columns();
 

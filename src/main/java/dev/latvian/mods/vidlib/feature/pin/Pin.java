@@ -1,83 +1,68 @@
 package dev.latvian.mods.vidlib.feature.pin;
 
-import com.google.gson.JsonObject;
-import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.vidlib.feature.gallery.Gallery;
 import dev.latvian.mods.vidlib.feature.gallery.GalleryImage;
-import net.minecraft.Util;
+import dev.latvian.mods.vidlib.feature.gallery.GalleryImageKey;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.UUID;
+import java.util.Optional;
 
 public final class Pin {
-	public static final Color DEFAULT_COLOR = Color.of(0xFFFFFF);
+	public static final Color DEFAULT_COLOR = Color.of(0xFFFFFFFF);
 	public static final Color DEFAULT_BACKGROUND = Color.of(0x5A000000);
 
-	public final UUID uuid;
+	public static final MapCodec<Pin> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+		Codec.BOOL.optionalFieldOf("enabled", true).forGetter(p -> p.enabled),
+		GalleryImageKey.CODEC.optionalFieldOf("icon").forGetter(p -> Optional.ofNullable(p.icon)),
+		Color.CODEC.optionalFieldOf("color", DEFAULT_COLOR).forGetter(p -> p.color),
+		Color.CODEC.optionalFieldOf("background", DEFAULT_BACKGROUND).forGetter(p -> p.background),
+		PinShape.CODEC.optionalFieldOf("shape", PinShape.PIN).forGetter(p -> p.shape)
+	).apply(instance, Pin::new));
+
+	public static final Codec<Pin> CODEC = MAP_CODEC.codec();
+
 	public boolean enabled;
-	public String gallery;
-	public UUID texture;
+	public GalleryImageKey<?> icon;
 	public Color color;
 	public Color background;
 	public PinShape shape;
+	public PinShape shapeOverride = null;
 
-	public Pin(UUID uuid) {
-		this.uuid = uuid;
+	public Pin() {
 		this.enabled = true;
-		this.gallery = "pins";
-		this.texture = Util.NIL_UUID;
+		this.icon = null;
 		this.color = DEFAULT_COLOR;
 		this.background = DEFAULT_BACKGROUND;
-		this.shape = PinShape.S1;
+		this.shape = PinShape.PIN;
 	}
 
-	public Pin(JsonObject json) {
-		this.uuid = UUID.fromString(json.get("uuid").getAsString());
-		this.enabled = !json.has("enabled") || json.get("enabled").getAsBoolean();
-		this.gallery = json.has("gallery") ? json.get("gallery").getAsString() : "";
-		this.texture = json.has("texture") ? UUID.fromString(json.get("texture").getAsString()) : Util.NIL_UUID;
-		this.color = json.has("color") ? Color.CODEC_RGB.parse(JsonOps.INSTANCE, json.get("color")).resultOrPartial().orElse(DEFAULT_COLOR) : DEFAULT_COLOR;
-		this.background = json.has("background") ? Color.CODEC.parse(JsonOps.INSTANCE, json.get("background")).resultOrPartial().orElse(DEFAULT_BACKGROUND) : DEFAULT_BACKGROUND;
-		this.shape = json.has("shape") ? PinShape.VALUES[json.get("shape").getAsInt()] : PinShape.S1;
-	}
-
-	public JsonObject toJson() {
-		var json = new JsonObject();
-		json.addProperty("uuid", uuid.toString());
-		json.addProperty("enabled", enabled);
-		json.addProperty("gallery", gallery);
-		json.addProperty("texture", texture.toString());
-		json.addProperty("color", color.toRGBString());
-		json.addProperty("background", background.toString());
-		json.addProperty("shape", shape.ordinal());
-		return json;
+	private Pin(
+		boolean enabled,
+		Optional<GalleryImageKey<?>> icon,
+		Color color,
+		Color background,
+		PinShape shape
+	) {
+		this.enabled = enabled;
+		this.icon = icon.orElse(null);
+		this.color = color;
+		this.background = background;
+		this.shape = shape;
 	}
 
 	public boolean isSet() {
-		return !gallery.isEmpty() && (texture.getMostSignificantBits() != 0L || texture.getLeastSignificantBits() != 0L);
+		return icon != null;
 	}
 
 	@Nullable
-	public GalleryImage<UUID> getImage() {
-		if (isSet()) {
-			var g = (Gallery<UUID>) Gallery.ALL.get().get(gallery);
-
-			if (g != null) {
-				return g.get(texture);
-			}
-		}
-
-		return null;
+	public GalleryImage<?> getImage() {
+		return icon == null ? null : icon.image();
 	}
 
-	public void setImage(@Nullable GalleryImage<UUID> image) {
-		if (image == null) {
-			gallery = "";
-			texture = Util.NIL_UUID;
-		} else {
-			gallery = image.gallery().id;
-			texture = image.id();
-		}
+	public void setImage(@Nullable GalleryImage<?> image) {
+		icon = image == null ? null : image.key();
 	}
 }

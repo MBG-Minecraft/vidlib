@@ -1,21 +1,35 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.util.FloatSupplier;
 import dev.latvian.mods.vidlib.feature.imgui.config.VideoConfigPanel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.util.ColoredText;
 import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
 import imgui.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImBoolean;
+import it.unimi.dsi.fastutil.floats.FloatConsumer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.IntConsumer;
+import java.util.function.IntSupplier;
 
-public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcut, int flags, @Nullable OnClick onClick, @Nullable Function<ImGraphics, List<MenuItem>> subItems) {
+public record MenuItem(
+	ImIcon icon,
+	ColoredText label,
+	ColoredText tooltip,
+	String shortcut,
+	ImColorVariant color,
+	int flags,
+	@Nullable OnClick onClick,
+	@Nullable Function<ImGraphics, List<MenuItem>> subItems
+) {
 	public static final int FLAG_SEPARATOR = 1 << 0;
 	public static final int FLAG_MENU = 1 << 1;
 	public static final int FLAG_CHECKMARK = 1 << 2;
@@ -33,16 +47,16 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 		void onClick(ImGraphics graphics);
 	}
 
-	public static MenuItem text(ImIcon icon, ImText label) {
-		return new MenuItem(icon, label, ImText.EMPTY, null, 0, null, null);
+	public static MenuItem text(ImIcon icon, ColoredText label) {
+		return new MenuItem(icon, label, ColoredText.EMPTY, null, ImColorVariant.DEFAULT, 0, null, null);
 	}
 
 	public static MenuItem text(ImIcon icon, String label) {
-		return new MenuItem(icon, ImText.of(label), ImText.EMPTY, null, 0, null, null);
+		return new MenuItem(icon, ColoredText.of(label), ColoredText.EMPTY, null, ImColorVariant.DEFAULT, 0, null, null);
 	}
 
 	public static MenuItem item(ImIcon icon, String label, OnClick onClick) {
-		return new MenuItem(icon, ImText.of(label), ImText.EMPTY, null, 0, onClick, null);
+		return new MenuItem(icon, ColoredText.of(label), ColoredText.EMPTY, null, ImColorVariant.DEFAULT, 0, onClick, null);
 	}
 
 	public static MenuItem item(String label, OnClick onClick) {
@@ -50,7 +64,7 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 	}
 
 	public static MenuItem item(ImIcon icon, String label, boolean checkmark, OnClick onClick) {
-		return new MenuItem(icon, ImText.of(label), ImText.EMPTY, null, checkmark ? FLAG_CHECKMARK : 0, onClick, null);
+		return new MenuItem(icon, ColoredText.of(label), ColoredText.EMPTY, null, ImColorVariant.DEFAULT, checkmark ? FLAG_CHECKMARK : 0, onClick, null);
 	}
 
 	public static MenuItem item(String label, boolean checkmark, OnClick onClick) {
@@ -82,11 +96,11 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 	}
 
 	public static MenuItem menu(ImIcon icon, String label, Function<ImGraphics, List<MenuItem>> subItems) {
-		return new MenuItem(icon, ImText.of(label), ImText.EMPTY, null, FLAG_MENU, null, subItems);
+		return new MenuItem(icon, ColoredText.of(label), ColoredText.EMPTY, null, ImColorVariant.DEFAULT, FLAG_MENU, null, subItems);
 	}
 
 	public static MenuItem menu(ImIcon icon, String label, BiConsumer<ImGraphics, List<MenuItem>> subItems) {
-		return new MenuItem(icon, ImText.of(label), ImText.EMPTY, null, FLAG_MENU, null, graphics -> {
+		return new MenuItem(icon, ColoredText.of(label), ColoredText.EMPTY, null, ImColorVariant.DEFAULT, FLAG_MENU, null, graphics -> {
 			var list = new ArrayList<MenuItem>();
 			subItems.accept(graphics, list);
 			return list;
@@ -102,15 +116,7 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 			menuItems.add(item(ImIcons.NUMBERS, "Within Distance", lod.getType() == LevelOfDetailValue.Type.WITHIN_DISTANCE, g -> lod.setVisibleWithin()).remainOpen(true));
 
 			if (lod.getType() == LevelOfDetailValue.Type.WITHIN_DISTANCE) {
-				menuItems.add(custom(g -> {
-					ImGuiUtils.FLOAT.set((float) lod.getDistance());
-
-					ImGui.setNextItemWidth(-1F);
-
-					if (ImGui.dragFloat("###distance", ImGuiUtils.FLOAT.getData(), 1F, 0F, 256F)) {
-						lod.setDistance(ImGuiUtils.FLOAT.get());
-					}
-				}));
+				menuItems.add(dragFloat("", lod::getDistanceFloat, lod::setDistance, 1F, 0F, 256F));
 			}
 		});
 	}
@@ -120,11 +126,56 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 	}
 
 	public static MenuItem custom(OnClick imgui) {
-		return new MenuItem(ImIcon.NONE, ImText.EMPTY, ImText.EMPTY, null, FLAG_CUSTOM_IMGUI, imgui, null);
+		return new MenuItem(ImIcon.NONE, ColoredText.EMPTY, ColoredText.EMPTY, null, ImColorVariant.DEFAULT, FLAG_CUSTOM_IMGUI, imgui, null);
+	}
+
+	public static MenuItem dragFloat(String label, FloatSupplier getter, FloatConsumer setter, float speed, float min, float max) {
+		return custom(g -> {
+			ImGuiUtils.FLOAT.set(getter.getAsFloat());
+			ImGui.setNextItemWidth(230F);
+
+			if (!label.isEmpty()) {
+				ImGui.text(label);
+			}
+
+			if (ImGui.dragFloat("###value", ImGuiUtils.FLOAT.getData(), speed, min, max)) {
+				setter.accept(ImGuiUtils.FLOAT.get());
+			}
+		});
+	}
+
+	public static MenuItem sliderFloat(String label, FloatSupplier getter, FloatConsumer setter, float min, float max) {
+		return custom(g -> {
+			ImGuiUtils.FLOAT.set(getter.getAsFloat());
+			ImGui.setNextItemWidth(230F);
+
+			if (!label.isEmpty()) {
+				ImGui.text(label);
+			}
+
+			if (ImGui.sliderFloat("###value", ImGuiUtils.FLOAT.getData(), min, max)) {
+				setter.accept(ImGuiUtils.FLOAT.get());
+			}
+		});
+	}
+
+	public static MenuItem sliderInt(String label, IntSupplier getter, IntConsumer setter, int min, int max) {
+		return custom(g -> {
+			ImGuiUtils.INT.set(getter.getAsInt());
+			ImGui.setNextItemWidth(230F);
+
+			if (!label.isEmpty()) {
+				ImGui.text(label);
+			}
+
+			if (ImGui.sliderInt("###value", ImGuiUtils.INT.getData(), min, max)) {
+				setter.accept(ImGuiUtils.INT.get());
+			}
+		});
 	}
 
 	public MenuItem withFlags(int add) {
-		return new MenuItem(icon, label, tooltip, shortcut, flags | add, onClick, subItems);
+		return new MenuItem(icon, label, tooltip, shortcut, color, flags | add, onClick, subItems);
 	}
 
 	public boolean hasFlag(int flag) {
@@ -135,8 +186,8 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 		return withFlags(FLAG_REMAIN_OPEN_OVERRIDE | (remainOpen ? FLAG_REMAIN_OPEN : 0));
 	}
 
-	public MenuItem withLabel(ImText label) {
-		return new MenuItem(icon, label, tooltip, shortcut, flags, onClick, subItems);
+	public MenuItem withLabel(ColoredText label) {
+		return new MenuItem(icon, label, tooltip, shortcut, color, flags, onClick, subItems);
 	}
 
 	public MenuItem withColor(@Nullable Color color) {
@@ -144,15 +195,19 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 	}
 
 	public MenuItem withShortcut(String shortcut) {
-		return new MenuItem(icon, label, tooltip, shortcut, flags, onClick, subItems);
+		return new MenuItem(icon, label, tooltip, shortcut, color, flags, onClick, subItems);
 	}
 
-	public MenuItem withTooltip(@Nullable ImText tooltip) {
-		return new MenuItem(icon, label, tooltip, shortcut, flags, onClick, subItems);
+	public MenuItem withTooltip(@Nullable ColoredText tooltip) {
+		return new MenuItem(icon, label, tooltip, shortcut, color, flags, onClick, subItems);
 	}
 
 	public MenuItem withTooltip(String tooltip) {
-		return withTooltip(ImText.of(tooltip));
+		return withTooltip(ColoredText.of(tooltip));
+	}
+
+	public MenuItem withColor(ImColorVariant color) {
+		return new MenuItem(icon, label, tooltip, shortcut, color, flags, onClick, subItems);
 	}
 
 	public MenuItem disabled(boolean disabled) {
@@ -163,7 +218,7 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 		return disabled(!enabled);
 	}
 
-	public void build(ImGraphics graphics) {
+	public void build(ImGraphics graphics, int level) {
 		if (hasFlag(FLAG_SKIP)) {
 			return;
 		} else if (hasFlag(FLAG_SEPARATOR)) {
@@ -194,19 +249,19 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 				if (menuOpen) {
 					for (int i = 0; i < items.size(); i++) {
 						ImGui.pushID(i);
-						items.get(i).build(graphics);
+						items.get(i).build(graphics, level + 1);
 						ImGui.popID();
 					}
 
 					ImGui.endMenu();
 				}
 
-				ImGuiUtils.hoveredTooltip(tooltip.text());
+				graphics.hoveredTooltip(tooltip.text());
 
 				if (remainOpen) {
 					graphics.popStack();
 				}
-			} else {
+			} else if (level > 0) {
 				label.push(graphics);
 				ImGui.beginMenu(rIcon.formatLabel(graphics, label.text()), false);
 				label.pop(graphics);
@@ -227,7 +282,7 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 				onClick.onClick(graphics);
 			}
 
-			ImGuiUtils.hoveredTooltip(tooltip.text());
+			graphics.hoveredTooltip(tooltip.text());
 
 			if (remainOpen) {
 				graphics.popStack();
@@ -237,7 +292,7 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 			ImGui.text(rIcon.formatLabel(graphics, label.text()));
 			label.pop(graphics);
 
-			ImGuiUtils.hoveredTooltip(tooltip.text());
+			graphics.hoveredTooltip(tooltip.text());
 		}
 	}
 
@@ -251,7 +306,7 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 		if (!mainMenu.isEmpty()) {
 			for (int i = 0; i < mainMenu.size(); i++) {
 				ImGui.pushID(i);
-				mainMenu.get(i).build(graphics);
+				mainMenu.get(i).build(graphics, 0);
 				ImGui.popID();
 			}
 		}
@@ -268,10 +323,16 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 			return false;
 		}
 
-		if (graphics.isReplay ? ImGui.beginMenu("VidLib") : mainMenuBar || ImGui.beginMenuBar()) {
+		if (!graphics.isReplay) {
+			graphics.pushStack();
+			graphics.setWindowPadding(4F, 4F);
+			graphics.setItemSpacing(4F, 4F);
+		}
+
+		if (graphics.isReplay ? ImGui.beginMenu(ImIcons.WRENCH + " VidLib") : mainMenuBar || ImGui.beginMenuBar()) {
 			for (int i = 0; i < mainMenu.size(); i++) {
 				ImGui.pushID(i);
-				mainMenu.get(i).build(graphics);
+				mainMenu.get(i).build(graphics, 0);
 				ImGui.popID();
 			}
 
@@ -280,6 +341,10 @@ public record MenuItem(ImIcon icon, ImText label, ImText tooltip, String shortcu
 			} else if (!mainMenuBar) {
 				ImGui.endMenuBar();
 			}
+		}
+
+		if (!graphics.isReplay) {
+			graphics.popStack();
 		}
 
 		return true;

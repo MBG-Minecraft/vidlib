@@ -1,19 +1,39 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
+import dev.latvian.mods.vidlib.feature.entity.ExactEntitySpawnPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
-import dev.latvian.mods.vidlib.feature.misc.ClientModInfo;
+import dev.latvian.mods.vidlib.feature.location.WarpLocation;
+import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
 import dev.latvian.mods.vidlib.feature.net.Context;
+import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerEntity;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.NeutralMob;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.food.FoodData;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
@@ -21,20 +41,48 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.block.BarrierBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.world.level.block.CarpetBlock;
+import net.minecraft.world.level.block.CommandBlock;
+import net.minecraft.world.level.block.CrossCollisionBlock;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.EnchantingTableBlock;
+import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.FireBlock;
+import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.HopperBlock;
+import net.minecraft.world.level.block.LadderBlock;
+import net.minecraft.world.level.block.LightBlock;
+import net.minecraft.world.level.block.PressurePlateBlock;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.SnowLayerBlock;
+import net.minecraft.world.level.block.VegetationBlock;
+import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FlowingFluid;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.network.bundle.PacketAndPayloadAcceptor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public class CommonGameEngine {
 	public static CommonGameEngine INSTANCE = new CommonGameEngine();
-	public static final long START_TIME = System.currentTimeMillis();
+
+	public boolean privacyMode() {
+		return false;
+	}
 
 	public void collectServerFeatures(Reference2IntMap<Feature> map) {
 		map.put(Feature.INFINITE_CHUNK_RENDERING, 1);
@@ -71,10 +119,18 @@ public class CommonGameEngine {
 		rules.getRule(GameRules.RULE_DO_TRADER_SPAWNING).set(false, server);
 		rules.getRule(GameRules.RULE_DO_WARDEN_SPAWNING).set(false, server);
 		rules.getRule(GameRules.RULE_GLOBAL_SOUND_EVENTS).set(false, server);
+
+		if (privacyMode()) {
+			rules.getRule(GameRules.RULE_SHOWDEATHMESSAGES).set(false, server);
+		}
 	}
 
-	public boolean isPlayerStaff(Collection<String> tags, GameType gameMode) {
-		return gameMode == GameType.SPECTATOR || tags.contains("staff");
+	public boolean isPlayerStaff(Collection<String> tags, @Nullable GameType gameMode) {
+		return tags.contains("staff");
+	}
+
+	public boolean isPlayerStaffOrTalent(Collection<String> tags, GameType gameMode) {
+		return isPlayerStaff(tags, gameMode) || tags.contains("talent");
 	}
 
 	public boolean tickCoralBlocks(ScheduledTickAccess instance, BlockPos pos, Block block) {
@@ -126,7 +182,7 @@ public class CommonGameEngine {
 		return ClientGameEngine.INSTANCE.handleClientPacket(ctx);
 	}
 
-	public boolean handleClientModList(Context ctx, Map<String, ClientModInfo> mods) {
+	public boolean handleClientModList(Context ctx, Map<String, PlatformModInfo> mods) {
 		/*
 		if (player.server.isDedicatedServer()) {
 			VidLib.LOGGER.info("Player " + player.getScoreboardName() + " logged in with mods:");
@@ -153,8 +209,8 @@ public class CommonGameEngine {
 		return false;
 	}
 
-	public boolean disableAdvancements() {
-		return false;
+	public Collection<AdvancementHolder> overrideAdvancements(Collection<AdvancementHolder> original) {
+		return original;
 	}
 
 	public boolean isLadder(LevelReader level, BlockPos pos, BlockState state, LivingEntity entity) {
@@ -187,5 +243,279 @@ public class CommonGameEngine {
 
 	public boolean nonLethalFalling() {
 		return false;
+	}
+
+	public boolean replaceFoodTick(ServerPlayer player, FoodData foodData) {
+		return false;
+	}
+
+	public float getBlockDensity(BlockState state) {
+		var b = state.getBlock();
+
+		if (state.isAir() || b instanceof LightBlock || b instanceof BarrierBlock || b instanceof FireBlock) {
+			return 0F;
+		} else if (b instanceof CarpetBlock || b instanceof ButtonBlock || b instanceof PressurePlateBlock || b instanceof VineBlock || b instanceof LadderBlock) {
+			return 0.06125F;
+		} else if (b instanceof DoorBlock || b instanceof SnowLayerBlock || b instanceof FlowerPotBlock) {
+			return 0.125F;
+		} else if (b instanceof SlabBlock || b instanceof CrossCollisionBlock || b instanceof FenceGateBlock || b instanceof EnchantingTableBlock) {
+			return 0.5F;
+		} else if (b instanceof VegetationBlock) {
+			return 0.25F;
+		} else if (b instanceof SimpleWaterloggedBlock || b instanceof HopperBlock) {
+			return 0.75F;
+		} else {
+			return 1F;
+		}
+	}
+
+	@Nullable
+	public Packet<ClientGamePacketListener> overrideEntitySpawnPacket(Entity entity, ServerEntity serverEntity) {
+		if (!entity.getType().builtInRegistryHolder().getKey().location().getNamespace().equals("minecraft")) {
+			return (Packet) new ExactEntitySpawnPayload(entity, serverEntity, 0).toS2CPacket(entity.level().getGameTime());
+		}
+
+		return null;
+	}
+
+	public boolean disableJoinMessages() {
+		return true;
+	}
+
+	public void heal(LivingEntity entity) {
+		if (entity.getHealth() < entity.getMaxHealth()) {
+			entity.heal(entity.getMaxHealth());
+		}
+
+		entity.extinguishFire();
+
+		if (entity instanceof ServerPlayer player) {
+			player.getFoodData().eat(20, 20F);
+		}
+	}
+
+	public boolean disableGolems(Level level, BlockPos pos) {
+		return false;
+	}
+
+	public boolean disableXP(Level level) {
+		return false;
+	}
+
+	public boolean disableLeafDecay(BlockState state) {
+		return false;
+	}
+
+	public boolean disablePricklyBerryBushes(Level level, BlockPos pos, BlockState state, Entity entity) {
+		return false;
+	}
+
+	public float getAmbientLight(float fallback) {
+		if (FMLLoader.getDist().isClient()) {
+			LocalPlayer player = Minecraft.getInstance().player;
+			if (player != null) {
+				Float value = player.get(InternalPlayerData.BRIGHTNESS_OVERRIDE);
+				if (value >= 0F) {
+					return value;
+				}
+			}
+		}
+		return fallback;
+	}
+
+	public boolean disablePacketCapture() {
+		return true;
+	}
+
+	public void livingTick(LivingEntity entity) {
+		if (!entity.level().isClientSide() && entity.getHealth() < entity.getMaxHealth()) {
+			var regen = getRegenerationTicks(entity);
+
+			if (regen >= 0) {
+				if (regen == 0) {
+					entity.heal();
+				} else if (entity.tickCount % regen == 0) {
+					entity.heal(1F);
+				}
+			}
+		}
+
+		if (entity.getGravity() <= 0D) {
+			entity.resetFallDistance();
+		}
+
+		if (entity.vl$isSuspended()) {
+			entity.setDeltaMovement(Vec3.ZERO);
+		}
+	}
+
+	public ItemStack itemInventoryTick(ItemStack stack, Entity entity, @Nullable EquipmentSlot slot) {
+		return stack;
+	}
+
+	public int getRegenerationTicks(LivingEntity entity) {
+		return -1;
+	}
+
+	public boolean isSuspended(Entity entity) {
+		return entity instanceof Player player && player.get(InternalPlayerData.SUSPENDED);
+	}
+
+	public double getGravityModifier(Entity entity) {
+		return entity.vl$isSuspended() ? 0D : 1D;
+	}
+
+	public float getSpeedModifier(LivingEntity entity) {
+		return entity.vl$isSuspended() ? 0F : 1F;
+	}
+
+	public float getFlightSpeedModifier(Player player) {
+		return player.get(InternalPlayerData.FLIGHT_SPEED);
+	}
+
+	public boolean allowPVP(Player from, Player to) {
+		return !from.vl$isSuspended() && !to.vl$isSuspended();
+	}
+
+	public boolean canVoicechatBroadcast(Player player) {
+		return player.isStaff() || player.hasPermissions(2);
+	}
+
+	public boolean isInvulnerable(Entity entity) {
+		return false;
+	}
+
+	public float getAttackDamage(LivingEntity entity, DamageSource source, float original) {
+		return entity.vl$isSuspended() ? 0F : original;
+	}
+
+	public boolean isUnpushable(LivingEntity entity) {
+		return entity.vl$isSuspended();
+	}
+
+	public boolean isBoss(LivingEntity entity) {
+		if (entity.getTags().contains("main_boss")) {
+			return true;
+		}
+
+		var customName = entity.getCustomName();
+		return customName != null && customName.getString().equals("Boss");
+	}
+
+	public boolean getScaleDamageWithDifficulty(ServerPlayer player) {
+		return true;
+	}
+
+	public FluidState overrideFluidState(Level level, BlockPos pos) {
+		var original = level.getFluidState(pos);
+
+		if (original.isEmpty()) {
+			var zones = level.vl$getActiveZones();
+			var state = zones == null ? null : zones.getZoneFluidState(pos);
+			return state == null ? original : state;
+		}
+
+		return original;
+	}
+
+	public BlockState overrideFluidStateBlock(Level level, BlockPos pos) {
+		return overrideFluidState(level, pos).createLegacyBlock();
+	}
+
+	public float overrideFluidHeight(Level level, FluidState state, BlockPos pos) {
+		if (state.getType() instanceof FlowingFluid flowing) {
+			var zones = level.vl$getActiveZones();
+			var height = zones == null ? 0F : zones.getZoneFluidHeight(flowing, pos);
+
+			if (height > 0F) {
+				return height;
+			}
+		}
+
+		return state.getHeight(level, pos);
+	}
+
+	public void blockChanged(Level level, BlockPos pos, BlockState from, BlockState to) {
+		if (level instanceof ServerLevel serverLevel) {
+			var fromAnchor = isBlockAnchor(serverLevel, pos, from);
+			var toAnchor = isBlockAnchor(serverLevel, pos, to);
+
+			if (fromAnchor != toAnchor) {
+				Anchor.setAnchorBlockActive(serverLevel, pos, toAnchor);
+			}
+		}
+	}
+
+	public boolean isBlockAnchor(ServerLevel level, BlockPos pos, BlockState state) {
+		return state.getBlock() instanceof CommandBlock;
+	}
+
+	public boolean allowEmoteCommand(CommandSourceStack source) {
+		return source.hasPermission(2);
+	}
+
+	public boolean allowPlayerListCommand(CommandSourceStack source) {
+		return !privacyMode() || source.hasPermission(2);
+	}
+
+	public boolean allowMsgCommand(CommandSourceStack source) {
+		return !privacyMode() || source.hasPermission(2);
+	}
+
+	public boolean allowTeamMsgCommand(CommandSourceStack source) {
+		return !privacyMode() || source.hasPermission(2);
+	}
+
+	public void modifyDroppedItem(LivingEntity entity, ItemEntity item) {
+	}
+
+	public boolean disableSleepStatusAnnouncement(ServerLevel level) {
+		return privacyMode();
+	}
+
+	public void tickPrecipitation(ServerLevel level, BlockPos blockPos, BlockPos motionBlockedPos, BlockPos belowMotionBlockedPos) {
+	}
+
+	public AABB getAttackBoundingBox(Mob mob, AABB original) {
+		return original;
+	}
+
+	public boolean isAngryByDefault(ServerLevel level, NeutralMob mob) {
+		return false;
+	}
+
+	public boolean hasImprovedPlayerTags() {
+		return false;
+	}
+
+	public boolean getReceiveCommandFeedback(MinecraftServer server, ServerPlayer player) {
+		return player.isStaff()/* || server.getPlayerList().isOp(player.getGameProfile())*/;
+	}
+
+	public String getBackupInfo(MinecraftServer server) {
+		return Long.toUnsignedString(System.currentTimeMillis());
+	}
+
+	public List<WarpLocation> getWarpLocations() {
+		return List.of();
+	}
+
+	public void initialPlayerSync(ServerPlayer player, PacketAndPayloadAcceptor<ClientGamePacketListener> callback) {
+		// callback.accept(new SyncPlayerTagsPayload(player.getUUID(), List.copyOf(player.getTags())).toS2C(player.level().getGameTime()));
+	}
+
+	public void tickPlayerSync(ServerPlayer player) {
+		/*
+		var tags = player.getTags();
+
+		if (vl$prevTags == null || !vl$prevTags.equals(tags)) {
+			vl$prevTags = Set.copyOf(tags);
+			player.getServer().vl$level().s2c(new SyncPlayerTagsPayload(player.getUUID(), List.copyOf(tags)));
+		}
+		 */
+	}
+
+	public boolean allowFlight(Player player) {
+		return player.get(InternalPlayerData.CAN_FLY);
 	}
 }

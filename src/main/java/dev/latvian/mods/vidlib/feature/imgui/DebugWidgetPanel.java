@@ -5,14 +5,18 @@ import dev.latvian.mods.klib.interpolation.BezierPreset;
 import dev.latvian.mods.klib.interpolation.Interpolation;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.texture.UV;
+import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
+import dev.latvian.mods.klib.util.Hex32;
+import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilder;
+import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
+import dev.latvian.mods.vidlib.feature.client.AsyncFileSelector;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterImBuilder;
+import dev.latvian.mods.vidlib.feature.gallery.Gallery;
 import dev.latvian.mods.vidlib.feature.gallery.GalleryImageImBuilder;
 import dev.latvian.mods.vidlib.feature.gallery.ItemIcons;
-import dev.latvian.mods.vidlib.feature.gallery.PlayerBodies;
-import dev.latvian.mods.vidlib.feature.gallery.PlayerHeads;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
@@ -21,7 +25,8 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.interpolation.Interpolation
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ParticleOptionsImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.item.VisualItemKey;
-import dev.latvian.mods.vidlib.feature.pin.Pins;
+import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
+import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundDataImBuilder;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
@@ -29,10 +34,10 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
 import dev.latvian.mods.vidlib.math.knumber.KNumberNodeImBuilder;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
-import dev.latvian.mods.vidlib.util.FormattedCharSinkPartBuilder;
-import dev.latvian.mods.vidlib.util.MiscUtils;
-import dev.mrbeastgaming.hub.api.Countries;
-import dev.mrbeastgaming.hub.api.Country;
+import dev.latvian.mods.vidlib.util.ColoredText;
+import dev.mrbeastgaming.mods.hub.api.HubAPI;
+import dev.mrbeastgaming.mods.hub.api.HubCountries;
+import dev.mrbeastgaming.mods.hub.api.HubCountry;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.ImVec4;
@@ -56,7 +61,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Vector2f;
 
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Random;
 
 public class DebugWidgetPanel extends Panel {
 	public static final DebugWidgetPanel INSTANCE = new DebugWidgetPanel();
@@ -95,10 +101,8 @@ public class DebugWidgetPanel extends Panel {
 	public final GameProfileImBuilder profileBuilder = new GameProfileImBuilder();
 	public final TransformationListImBuilder transformationListBuilder = new TransformationListImBuilder();
 	public final ImBuilder<KNumber> numberBuilder2 = new KNumberNodeImBuilder();
-	public final GalleryImageImBuilder galleryImageBuilder = new GalleryImageImBuilder(
-		List.of(Pins.GALLERY, PlayerBodies.GALLERY, PlayerHeads.GALLERY),
-		List.of(Pins.UPLOADER, PlayerBodies.UPLOADER, PlayerHeads.UPLOADER)
-	);
+	public final GalleryImageImBuilder galleryImageBuilder = new GalleryImageImBuilder(Gallery.ALL.get().values());
+	public final ProgressQueue errorQueue = new ProgressQueue("Error Test Queue");
 
 	public ItemStack currentStack = ItemStack.EMPTY;
 	public VisualItemKey currentStackKey = VisualItemKey.AIR;
@@ -171,14 +175,13 @@ public class DebugWidgetPanel extends Panel {
 				ImGui.text(icon.toString());
 				ImGui.sameLine();
 
-				if (ImGui.isItemHovered()) {
-					ImGui.beginTooltip();
+				if (ImGui.isItemHovered() && graphics.beginTooltip()) {
 					graphics.pushStack();
 					graphics.setFontScale(2F);
 					ImGui.text(icon.toString());
 					graphics.popStack();
 					ImGui.text(icon.name());
-					ImGui.endTooltip();
+					graphics.endTooltip();
 				}
 			}
 		}
@@ -311,7 +314,9 @@ public class DebugWidgetPanel extends Panel {
 		ImGui.separator();
 
 		if (ImGui.button("Open File Dialog")) {
-			stringData.set(AsyncFileSelector.openFileDialog(null, "").join());
+			AsyncFileSelector.openDirectoryDialog(null).thenAcceptAsync(path -> {
+				multiLineStringData.set(String.valueOf(path));
+			});
 		}
 
 		ImGui.separator();
@@ -336,16 +341,15 @@ public class DebugWidgetPanel extends Panel {
 		ImGui.separator();
 
 		ImGui.text("Image");
-		var sprite = mc.getBlockAtlas().getSprite(ResourceLocation.withDefaultNamespace("block/campfire_fire"));
+		var sprite = mc.getBlockAtlas().getSprite(ResourceLocation.tryBuild("minecraft", "block/campfire_fire"));
 		ImGui.image(mc.getBlockAtlas().getTexture().vl$getHandle(), 128F, 128F, sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());
 		ImGui.separator();
 		ImGui.image(ImGuiHooks.imGuiGl3.gFontTexture, 128F, 128F, 0F, 0F, 1F, 1F);
 
-		if (ImGui.isItemHovered()) {
+		if (ImGui.isItemHovered() && graphics.beginTooltip()) {
 			float h = 1024F;
-			ImGui.beginTooltip();
 			ImGui.image(ImGuiHooks.imGuiGl3.gFontTexture, h * ImGuiHooks.imGuiGl3.glFontWidth / (float) ImGuiHooks.imGuiGl3.glFontHeight, h, 0F, 0F, 1F, 1F);
-			ImGui.endTooltip();
+			graphics.endTooltip();
 		}
 
 		ImGui.separator();
@@ -424,7 +428,7 @@ public class DebugWidgetPanel extends Panel {
 
 		if (mc.screen instanceof AbstractContainerScreen<?> screen && screen.getSlotUnderMouse() != null && !screen.getSlotUnderMouse().getItem().isEmpty()) {
 			currentStack = screen.getSlotUnderMouse().getItem();
-			currentStackKey = VisualItemKey.of(currentStack, mc.level == null ? MiscUtils.STATIC_REGISTRY_ACCESS : mc.level.registryAccess());
+			currentStackKey = VisualItemKey.of(currentStack);
 		}
 
 		if (currentStackKey != VisualItemKey.AIR) {
@@ -446,14 +450,14 @@ public class DebugWidgetPanel extends Panel {
 		ImGui.separator();
 
 		ImGui.text("Bezier");
-		Bezier.draw("###bezier", bezierP1Data, bezierP2Data, bezierPreset, 128F, 64);
+		Bezier.draw(graphics, "###bezier", bezierP1Data, bezierP2Data, bezierPreset, 128F, 64);
 		ImGui.separator();
 
 		ImGui.text("Line Plot");
 
 		// ImPlot.fitNextPlotAxes();
 
-		if (ImPlot.beginPlot("Line Plot###line-plot", "X", "Sin", new ImVec2(300F, 300F), ImPlotFlags.CanvasOnly, ImPlotAxisFlags.NoLabel, ImPlotAxisFlags.NoLabel)) {
+		if (ImPlot.beginPlot("Line Plot###line-plot", "X", "Y", new ImVec2(300F, 300F), ImPlotFlags.CanvasOnly, ImPlotAxisFlags.NoLabel, ImPlotAxisFlags.NoLabel)) {
 			var xdata = new Double[100];
 			var ydata = new Double[100];
 
@@ -464,16 +468,137 @@ public class DebugWidgetPanel extends Panel {
 				ydata[i] = (double) KMath.linearizedBezierY(t, bezierP1Data.x, bezierP1Data.y, bezierP2Data.x, bezierP2Data.y) * 100D;
 			}
 
-			ImPlot.plotLine("Sin###1", xdata, ydata);
+			ImPlot.plotLine("Y###1", xdata, ydata);
 			ImPlot.endPlot();
 		}
 
 		ImGui.separator();
 
-		ImGui.text("LV: " + Countries.LV.get().displayName());
-		graphics.combo("###country", new Country[1], Countries.LOADED.get().byCode().values().toArray(new Country[0]), Country::displayName);
+		ImGui.text("LV: " + HubCountries.LV.get().displayName());
+		graphics.combo("###country", new HubCountry[1], "None", HubCountries.LOADED.get().byCode().values().toArray(new HubCountry[0]), HubCountry::displayName);
 
 		ImGui.separator();
+
+		if (ImGui.button("Test Progress Single###test-progress-single")) {
+			var item = ProgressQueue.queueSingleItem("Loading Test...");
+			item.queue.bottomText = "Bottom Text";
+
+			Thread.startVirtualThread(() -> {
+				try {
+					Thread.sleep(1000L);
+					item.setSize(200L);
+					item.setStarted();
+
+					for (int i = 0; i < 200; i++) {
+						item.addProgress(1L);
+						Thread.sleep(5L);
+
+						if (i == 170) {
+							item.error("Test Error!");
+
+							HubAPI.log("Test Error", new IllegalStateException("Test Error"));
+						}
+					}
+
+					item.setDone();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			});
+		}
+
+		if (ImGui.button("Test Progress Parallel###test-progress-parallel")) {
+			var queue = new ProgressQueue("Loading Test...");
+			queue.bottomText = "Please keep the game open!";
+
+			for (int j = 0; j < 5; j++) {
+				var item = queue.addItem();
+
+				Thread.startVirtualThread(() -> {
+					var random = new Random();
+
+					try {
+						item.setSize(500L);
+						item.setStarted();
+
+						for (int i = 0; i < 500; i += 1 + random.nextInt(3)) {
+							item.setProgress(i);
+							Thread.sleep(10L);
+						}
+
+						item.setDone();
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				});
+			}
+
+			queue.display();
+		}
+
+		if (ImGui.button("Test Progress Sequence###test-progress-sequence")) {
+			var queue = new ProgressQueue("Loading Test...");
+			queue.bottomText = "Please keep the game open!";
+			var items = new ArrayList<ProgressItem>();
+
+			for (int j = 0; j < 5; j++) {
+				items.add(queue.addItem());
+			}
+
+			Thread.startVirtualThread(() -> {
+				var random = new Random();
+
+				try {
+					for (var item : items) {
+						item.setSize(100L);
+						item.setStarted();
+
+						for (int i = 0; i < 100; i += 1 + random.nextInt(3)) {
+							item.setProgress(i);
+							Thread.sleep(10L);
+						}
+
+						item.setDone();
+					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			});
+
+			queue.display();
+		}
+
+		if (ImGui.button("Test Error Queue###test-error-queue")) {
+			errorQueue.error(ColoredText.warning("Error " + System.currentTimeMillis()));
+			errorQueue.display();
+		}
+
+		ImGui.separator();
+
+		var screenShakeInterpolation = ScreenShake.DEFAULT.interpolation();
+
+		if (ImPlot.beginPlot("Default Screen Shake Interpolation###default-screen-shake-interpolation-plot", "X", "Y", new ImVec2(300F, 150F), ImPlotFlags.CanvasOnly, ImPlotAxisFlags.NoLabel, ImPlotAxisFlags.NoLabel)) {
+			var xdata = new Double[100];
+			var ydata = new Double[100];
+
+			for (int i = 0; i < 100; i++) {
+				xdata[i] = (double) i;
+				ydata[i] = screenShakeInterpolation.interpolate(i / 100D) * 100D;
+			}
+
+			ImPlot.plotLine("Y###1", xdata, ydata);
+			ImPlot.endPlot();
+		}
+
+		ImGui.separator();
+
+		if (ImGui.button("Print Replays###print-replays")) {
+			try {
+				VidLib.LOGGER.info(HubAPI.apiProjectReplays(Hex32.of(1)).toString());
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
 
 		ImGui.popItemWidth();
 	}

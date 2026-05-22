@@ -4,32 +4,34 @@ import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.vidlib.feature.entity.C2SEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.entity.EntityData;
-import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
 import dev.latvian.mods.vidlib.feature.entity.ForceEntityVelocityPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.S2CEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.location.Location;
-import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.math.kvector.PositionType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
@@ -73,25 +75,17 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		return getGameMode() == GameType.SURVIVAL;
 	}
 
+	default boolean isAdventure() {
+		return getGameMode() == GameType.ADVENTURE;
+	}
+
 	default boolean isSurvivalLike() {
 		var type = getGameMode();
 		return type != null && type.isSurvival();
 	}
 
-	default boolean isSuspended() {
-		return EntityOverride.SUSPENDED.get(this, false);
-	}
-
-	default double vl$gravityMod() {
-		return EntityOverride.GRAVITY.get(this, 1D);
-	}
-
-	default float vl$speedMod() {
-		return EntityOverride.SPEED.get(this, 1F);
-	}
-
-	default float vl$attackDamageMod() {
-		return EntityOverride.ATTACK_DAMAGE.get(this, 1F);
+	default boolean vl$isSuspended() {
+		return CommonGameEngine.INSTANCE.isSuspended(vl$self());
 	}
 
 	default Line ray(double distance, float delta) {
@@ -130,7 +124,8 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 
 	default void teleport(Location location) {
 		var entity = vl$self();
-		teleport(entity.getServer().getLevel(location.dimension()), location.random(entity.getRandom()).get(entity.level().getGlobalContext()));
+		var ctx = entity.level().getGlobalContext();
+		teleport(entity.getServer().getLevel(location.dimension()), location.random(entity.getRandom()).get(ctx));
 	}
 
 	default void forceSetVelocity(Vec3 velocity) {
@@ -215,12 +210,25 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		};
 	}
 
-	default float getRelativeHealth(float delta) {
+	default float vl$getHealth(float delta) {
 		return 1F;
+	}
+
+	default float vl$getMaxHealth(float delta) {
+		return 1F;
+	}
+
+	default float getRelativeHealth(float delta) {
+		return Math.clamp(vl$getHealth(delta) / vl$getMaxHealth(delta), 0F, 1F);
 	}
 
 	default boolean preventDismount(Player passenger) {
 		return false;
+	}
+
+	@Nullable
+	default Component getCustomMountMessage() {
+		return null;
 	}
 
 	default float getVehicleCameraDistance(Player passenger, float original) {
@@ -231,17 +239,10 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		return 1F;
 	}
 
-	default PlayerInput getPilotInput() {
-		return PlayerInput.NONE;
+	default void setPilotInput(Player player, PlayerInput input) {
 	}
 
-	default void vl$setPilotInput(PlayerInput input) {
-		throw new NoMixinException(this);
-	}
-
-	@Nullable
-	default Boolean forceRenderVehicleCrosshair(Player passenger) {
-		return null;
+	default void sortPassengers(List<Entity> passengers) {
 	}
 
 	default Rotation rotation(float delta) {
@@ -266,9 +267,60 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		return this instanceof ItemEntity;
 	}
 
-	default void replaySnapshot(S2CPacketBundleBuilder packets) {
+	default void replaySnapshot(VLS2CPacketConsumer packets) {
 	}
 
 	default void imgui(ImGraphics graphics, float delta) {
+	}
+
+	default boolean vl$hasItem(Ingredient ingredient) {
+		return false;
+	}
+
+	default boolean vl$isDeadOrDying() {
+		return !vl$self().isAlive();
+	}
+
+	default boolean hideCrosshair(Player player) {
+		return false;
+	}
+
+	default float getPassengerCameraRoll(Player player, double delta, float roll) {
+		return roll;
+	}
+
+	default boolean shouldRenderPassengerHand(Player player) {
+		return true;
+	}
+
+	// WIP
+	default boolean overridePassengerClientLeftClick(Player player) {
+		return false;
+	}
+
+	// WIP
+	default boolean overridePassengerClientRightClick(Player player) {
+		return false;
+	}
+
+	default boolean addTags(Collection<String> tags) {
+		return vl$self().tags.addAll(tags);
+	}
+
+	default boolean removeTags(Collection<String> tags) {
+		return vl$self().tags.removeAll(tags);
+	}
+
+	default void setTags(Collection<String> tags) {
+		vl$self().tags.clear();
+		vl$self().tags.addAll(tags);
+	}
+
+	default boolean isStaff() {
+		return CommonGameEngine.INSTANCE.isPlayerStaff(vl$self().getTags(), getGameMode());
+	}
+
+	default boolean isStaffOrTalent() {
+		return CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(vl$self().getTags(), getGameMode());
 	}
 }

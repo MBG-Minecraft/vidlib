@@ -7,6 +7,7 @@ import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 import imgui.flag.ImGuiTreeNodeFlags;
+import org.joml.Vector3d;
 
 public class DecalPanel extends Panel {
 	public static final DecalPanel INSTANCE = new DecalPanel();
@@ -22,7 +23,7 @@ public class DecalPanel extends Panel {
 			return;
 		}
 
-		var decals = graphics.mc.player.vl$sessionData().debugDecals;
+		var decals = graphics.session.debugDecals;
 
 		ImGui.text("Decals: %,d".formatted(decals.size()));
 		ImGui.pushItemWidth(-1F);
@@ -53,23 +54,21 @@ public class DecalPanel extends Panel {
 		ImGui.separator();
 
 		if (ImGui.button(ImIcons.ADD + " Add###add")) {
-			var d = new Decal();
+			var d = new Decal(new Vector3d());
 			d.type = DecalType.CYLINDER;
-			d.start = 5F;
-			d.end = 6F;
-			d.startColor = d.endColor = Color.RED.withAlpha(100);
-			d.setPosition(graphics.mc.player.getPosition(graphics.mc.getDeltaTracker().getGameTimeDeltaPartialTick(true)).add(0D, 0.5D, 0D), true);
+			d.innerSize = 10F;
+			d.outerSize = 11F;
+			d.outerColor = Color.RED.withAlpha(150);
+			d.innerColor = Color.RED.withAlpha(0);
+			d.setPosition(graphics.player.getPosition(graphics.mc.getDeltaTracker().getGameTimeDeltaPartialTick(true)).add(0D, 0.5D, 0D), true);
 			decals.add(d);
 		}
 
 		ImGui.sameLine();
 
 		if (ImGui.button(ImIcons.ADD + " Add Danger###add-danger")) {
-			var pos = graphics.mc.player.getPosition(graphics.mc.getDeltaTracker().getGameTimeDeltaPartialTick(true)).add(0D, -0.0625D, 0D);
-
-			var d = Decal.createDanger(4F);
-			d.setPosition(pos, true);
-			decals.add(d);
+			var pos = graphics.player.getPosition(graphics.mc.getDeltaTracker().getGameTimeDeltaPartialTick(true)).add(0D, -0.0625D, 0D);
+			decals.add(Decal.createDanger(new Vector3d(pos.x, pos.y, pos.z), 4F));
 		}
 
 		ImGui.popItemWidth();

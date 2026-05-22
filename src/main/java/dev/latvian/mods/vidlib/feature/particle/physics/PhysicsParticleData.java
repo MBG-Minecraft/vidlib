@@ -2,8 +2,6 @@ package dev.latvian.mods.vidlib.feature.particle.physics;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.klib.codec.CompositeStreamCodec;
-import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.vidlib.feature.config.BooleanConfigValue;
@@ -34,6 +32,7 @@ public class PhysicsParticleData {
 	public static final float DEFAULT_TILT = 0F;
 	public static final Range DEFAULT_SECTION = Range.of(0F, 360F);
 	public static final boolean DEFAULT_IGNORE_BLOCK_DENSITY = false;
+	public static final float DEFAULT_RENDER_DISTANCE = 8192F;
 
 	public static final PhysicsParticleData DEFAULT = new PhysicsParticleData();
 
@@ -49,24 +48,11 @@ public class PhysicsParticleData {
 		Codec.FLOAT.optionalFieldOf("direction", DEFAULT_DIRECTION).forGetter(p -> p.direction),
 		Codec.FLOAT.optionalFieldOf("tilt", DEFAULT_TILT).forGetter(p -> p.tilt),
 		Range.CODEC.optionalFieldOf("section", DEFAULT_SECTION).forGetter(p -> p.section),
-		Codec.BOOL.optionalFieldOf("ignore_block_density", DEFAULT_IGNORE_BLOCK_DENSITY).forGetter(p -> p.ignoreBlockDensity)
+		Codec.BOOL.optionalFieldOf("ignore_block_density", DEFAULT_IGNORE_BLOCK_DENSITY).forGetter(p -> p.ignoreBlockDensity),
+		Codec.FLOAT.optionalFieldOf("render_distance", DEFAULT_RENDER_DISTANCE).forGetter(p -> p.renderDistance)
 	).apply(instance, PhysicsParticleData::new));
 
-	public static final StreamCodec<ByteBuf, PhysicsParticleData> STREAM_CODEC = CompositeStreamCodec.of(
-		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, DEFAULT_DENSITY), p -> p.density,
-		KLibStreamCodecs.optional(Range.STREAM_CODEC, DEFAULT_LIFESPAN), p -> p.lifespan,
-		KLibStreamCodecs.optional(Range.STREAM_CODEC, DEFAULT_SCALE), p -> p.scale,
-		KLibStreamCodecs.optional(Range.STREAM_CODEC, DEFAULT_POWER), p -> p.power,
-		KLibStreamCodecs.optional(Range.STREAM_CODEC, DEFAULT_SPREAD), p -> p.spread,
-		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, DEFAULT_INERTIA), p -> p.inertia,
-		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, DEFAULT_GRAVITY), p -> p.gravity,
-		KLibStreamCodecs.optional(Range.STREAM_CODEC, DEFAULT_SPEED), p -> p.speed,
-		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, DEFAULT_DIRECTION), p -> p.direction,
-		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, DEFAULT_TILT), p -> p.tilt,
-		KLibStreamCodecs.optional(Range.STREAM_CODEC, DEFAULT_SECTION), p -> p.section,
-		ByteBufCodecs.BOOL, p -> p.ignoreBlockDensity,
-		PhysicsParticleData::new
-	);
+	public static final StreamCodec<ByteBuf, PhysicsParticleData> STREAM_CODEC = ByteBufCodecs.fromCodecTrusted(CODEC);
 
 	public static final DataType<PhysicsParticleData> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, PhysicsParticleData.class);
 
@@ -110,6 +96,7 @@ public class PhysicsParticleData {
 	public float tilt = DEFAULT_TILT;
 	public Range section = DEFAULT_SECTION;
 	public boolean ignoreBlockDensity = DEFAULT_IGNORE_BLOCK_DENSITY;
+	public float renderDistance = DEFAULT_RENDER_DISTANCE;
 
 	public PhysicsParticleData() {
 	}
@@ -126,7 +113,8 @@ public class PhysicsParticleData {
 		float direction,
 		float tilt,
 		Range section,
-		boolean ignoreBlockDensity
+		boolean ignoreBlockDensity,
+		float renderDistance
 	) {
 		this.density = density;
 		this.lifespan = lifespan;
@@ -140,6 +128,7 @@ public class PhysicsParticleData {
 		this.tilt = tilt;
 		this.section = section;
 		this.ignoreBlockDensity = ignoreBlockDensity;
+		this.renderDistance = renderDistance;
 	}
 
 	@Override
@@ -157,6 +146,7 @@ public class PhysicsParticleData {
 			", tilt=" + tilt +
 			", section=" + section +
 			", ignoreBlockDensity=" + ignoreBlockDensity +
+			", renderDistance=" + renderDistance +
 			']';
 	}
 }

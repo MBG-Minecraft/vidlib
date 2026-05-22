@@ -3,26 +3,24 @@ package dev.latvian.mods.vidlib.math.knumber;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.util.Cast;
-import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePin;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePinType;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
-import imgui.ImGui;
-import imgui.type.ImString;
 import net.minecraft.network.codec.ByteBufCodecs;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.Objects;
 
-public record ServerDataKNumber(String key, Supplier<DataKey<?>> dataKey) implements KNumber, ImBuilderWithHolder.Factory {
+public record ServerDataKNumber(DataKey<?> dataKey) implements KNumber, ImBuilderWithHolder.Factory {
 	public static final SimpleRegistryType<ServerDataKNumber> TYPE = SimpleRegistryType.dynamic("server_data", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.STRING.fieldOf("key").forGetter(ServerDataKNumber::key)
 	).apply(instance, ServerDataKNumber::new)), ByteBufCodecs.STRING_UTF8.map(ServerDataKNumber::new, ServerDataKNumber::key));
@@ -30,7 +28,7 @@ public record ServerDataKNumber(String key, Supplier<DataKey<?>> dataKey) implem
 	public static class Builder implements KNumberImBuilder {
 		public static final ImBuilderHolder<KNumber> TYPE = ImBuilderHolder.of("Server Data", Builder::new);
 
-		public final ImString key = ImGuiUtils.resizableString();
+		public final EnumImBuilder<DataKey<?>> key = new EnumImBuilder<>(DataKey.SERVER.all.values()).withNameGetter(DataKey::id);
 
 		@Override
 		public ImBuilderHolder<?> holder() {
@@ -40,25 +38,23 @@ public record ServerDataKNumber(String key, Supplier<DataKey<?>> dataKey) implem
 		@Override
 		public void set(KNumber value) {
 			if (value instanceof ServerDataKNumber n) {
-				key.set(n.key);
+				key.set(n.dataKey);
 			}
 		}
 
 		@Override
 		public ImUpdate imgui(ImGraphics graphics) {
-			// TODO: Replace with combo of all server data keys
-			ImGui.inputText("###key", key);
-			return ImUpdate.itemEdit();
+			return key.imguiKey(graphics, "Key", "key");
 		}
 
 		@Override
 		public boolean isValid() {
-			return key.isNotEmpty() && DataKey.SERVER.all.containsKey(key.get());
+			return key.isValid();
 		}
 
 		@Override
 		public KNumber build() {
-			return new ServerDataKNumber(key.get());
+			return new ServerDataKNumber(key.build());
 		}
 
 		@Override
@@ -67,8 +63,9 @@ public record ServerDataKNumber(String key, Supplier<DataKey<?>> dataKey) implem
 		}
 	}
 
+	@ApiStatus.Internal
 	public ServerDataKNumber(String key) {
-		this(key, Lazy.of(() -> DataKey.SERVER.all.get(key)));
+		this(Objects.requireNonNull(DataKey.SERVER.all.get(key), "Server data key " + key + " not found"));
 	}
 
 	@Override
@@ -76,24 +73,27 @@ public record ServerDataKNumber(String key, Supplier<DataKey<?>> dataKey) implem
 		return TYPE;
 	}
 
+	public String key() {
+		return dataKey.id();
+	}
+
 	@Override
 	@Nullable
 	public Double get(KNumberContext ctx) {
-		var dk = dataKey.get();
-		var data = ctx.getServerData(dk);
+		var data = ctx.getServerData(dataKey);
 
 		if (data == null) {
 			return null;
 		}
 
-		var num = dk.type().toNumber(Cast.to(data));
+		var num = dataKey.type().toNumber(Cast.to(data));
 		return num == null ? null : num instanceof Double d ? d : num.doubleValue();
 	}
 
 	@Override
 	@NotNull
 	public String toString() {
-		return "$" + key;
+		return "$" + key();
 	}
 
 	@Override

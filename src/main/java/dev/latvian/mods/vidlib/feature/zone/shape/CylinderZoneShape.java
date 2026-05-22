@@ -35,7 +35,7 @@ public record CylinderZoneShape(Vec3 pos, CylinderShape shape, AABB box) impleme
 	}
 
 	@Override
-	public AABB getBoundingBox() {
+	public AABB toAABB() {
 		return box;
 	}
 

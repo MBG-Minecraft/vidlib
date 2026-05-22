@@ -68,6 +68,10 @@ public class GenericVLRegistry<K, V> implements Iterable<V> {
 		return ref;
 	}
 
+	public boolean isEmpty() {
+		return map.isEmpty();
+	}
+
 	@Nullable
 	public V get(K id) {
 		return map.get(id);

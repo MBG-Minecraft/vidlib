@@ -115,13 +115,13 @@ public class PhysicsParticles {
 		p.scaleMul = split.scale * data.scale.sample(random);
 		p.rotationSpeed = (KMath.lerp(random.nextFloat(), 0.25F, 0.4F)) / p.scaleMul * (float) Math.atan2(spread, power);
 		p.tint = tint;
-		p.red = ARGB.redFloat(tint);
-		p.green = ARGB.greenFloat(tint);
-		p.blue = ARGB.blueFloat(tint);
-		p.alpha = ARGB.alphaFloat(tint);
+		p.red = ARGB.red(tint);
+		p.green = ARGB.green(tint);
+		p.blue = ARGB.blue(tint);
+		p.alpha = ARGB.alpha(tint);
 
 		if (p.alpha < 0.1F) {
-			p.alpha = 1F;
+			p.alpha = 255;
 		}
 
 		p.velocityMultiplier = data.inertia;
@@ -135,7 +135,7 @@ public class PhysicsParticles {
 			p.bounce *= 2F;
 		}
 
-		p.flatColorMod = (int) (random.nextFloat() * 8F) / 8F;
+		p.renderDistanceSq = data.renderDistance * data.renderDistance;
 		p.manager.queue.add(p);
 
 		// Minecraft.getInstance().level.addParticle(new LineParticleOptions(Color.WHITE, Color.CYAN, p.ttl), true, true, p.x, p.y, p.z, p.velocityX, p.velocityY, p.velocityZ);

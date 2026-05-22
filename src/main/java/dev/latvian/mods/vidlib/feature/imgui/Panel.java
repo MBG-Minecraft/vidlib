@@ -72,7 +72,7 @@ public class Panel {
 	}
 
 	public int setup(ImGraphics graphics) {
-		int flags = ImGuiWindowFlags.NoCollapse;
+		int flags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoNav;
 
 		if (isUnsaved()) {
 			flags |= ImGuiWindowFlags.UnsavedDocument;
@@ -94,7 +94,6 @@ public class Panel {
 
 	public final boolean handle(ImGraphics graphics) {
 		int flags = setup(graphics);
-		ImGuiUtils.BOOLEAN.set(true);
 
 		if (style != PanelStyle.NORMAL && windowType != ImWindowType.DOCKED) {
 			flags |= ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize;
@@ -109,12 +108,12 @@ public class Panel {
 		}
 
 		var title = getLabel() + "###" + getId();
+		ImGuiUtils.BOOLEAN.set(true);
 		boolean menuOpen = canBeClosed ? ImGui.begin(title, ImGuiUtils.BOOLEAN, flags) : ImGui.begin(title, flags);
+		boolean shouldClose = !ImGuiUtils.BOOLEAN.get();
 		postSetup(graphics, menuOpen);
 
 		if (menuOpen) {
-			boolean shouldClose = !ImGuiUtils.BOOLEAN.get();
-
 			content(graphics);
 
 			if (shouldClose) {

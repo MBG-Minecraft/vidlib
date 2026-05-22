@@ -1,34 +1,41 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import dev.latvian.mods.vidlib.core.VLFoodData;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.food.FoodData;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(FoodData.class)
-public class FoodDataMixin {
-	@Shadow
-	private int foodLevel;
+public abstract class FoodDataMixin implements VLFoodData {
+	@Override
+	@Accessor("exhaustionLevel")
+	public abstract float vl$getExhaustionLevel();
 
-	@Shadow
-	private float saturationLevel;
+	@Override
+	@Accessor("exhaustionLevel")
+	public abstract void vl$setExhaustionLevel(float value);
 
-	@Shadow
-	private float exhaustionLevel;
+	@Override
+	@Accessor("tickTimer")
+	public abstract int vl$getTickTimer();
 
-	@Shadow
-	private int tickTimer;
+	@Override
+	@Accessor("tickTimer")
+	public abstract void vl$setTickTimer(int value);
 
 	/**
 	 * @author Lat
 	 * @reason Yeet
 	 */
-	@Overwrite
-	public void tick(ServerPlayer player) {
-		foodLevel = 20;
-		saturationLevel = 20F;
-		exhaustionLevel = 0F;
-		tickTimer = 0;
+	@Inject(method = "tick", at = @At("HEAD"), cancellable = true)
+	public void vl$tick(ServerPlayer player, CallbackInfo ci) {
+		if (CommonGameEngine.INSTANCE.replaceFoodTick(player, (FoodData) (Object) this)) {
+			ci.cancel();
+		}
 	}
 }

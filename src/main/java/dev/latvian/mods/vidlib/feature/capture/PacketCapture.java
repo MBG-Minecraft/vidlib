@@ -3,11 +3,11 @@ package dev.latvian.mods.vidlib.feature.capture;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
+import dev.latvian.mods.klib.io.IOUtils;
+import dev.latvian.mods.klib.util.JsonUtils;
+import dev.latvian.mods.klib.util.Timestamp;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
-import dev.latvian.mods.vidlib.util.IOUtils;
-import dev.latvian.mods.vidlib.util.JsonUtils;
-import dev.latvian.mods.vidlib.util.Timestamp;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -16,8 +16,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.mutable.MutableInt;
 
-import java.net.URI;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -136,7 +134,7 @@ public class PacketCapture {
 
 		var outputFile = directory.resolve(filename.toString());
 
-		try (var fs = FileSystems.newFileSystem(URI.create("jar:" + outputFile.toUri()), Map.of("create", "true"))) {
+		try (var fs = IOUtils.openAsZip(outputFile, Map.of("create", "true"))) {
 			var metadata = new JsonObject();
 			metadata.addProperty("platform", PlatformHelper.CURRENT.getPlatform());
 			metadata.addProperty("id", "%08x".formatted(sessionId));
@@ -174,9 +172,7 @@ public class PacketCapture {
 
 			PlatformHelper.CURRENT.packetCaptureMetadata(this, metadata);
 
-			try (var writer = Files.newBufferedWriter(fs.getPath("metadata.json"))) {
-				JsonUtils.write(writer, metadata, false);
-			}
+			JsonUtils.write(fs.getPath("metadata.json"), metadata, false);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}

@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.data;
 
-import dev.latvian.mods.klib.data.DataTypes;
 import it.unimi.dsi.fastutil.Function;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -10,15 +9,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 public class DataMapOverrides {
 	public static DataMapOverrides INSTANCE;
-	public static final DataKey<Set<String>> PLAYER_TAGS = DataKey.PLAYER.builder("player_tags", DataTypes.STRING.setOf(), Set.of()).buildDummy();
 
 	public record DataEntry(long time, Object value) implements Comparable<DataEntry> {
 		@Override
@@ -55,10 +52,17 @@ public class DataMapOverrides {
 	}
 
 	public static class DataMap {
-		private final Map<DataKey<?>, List<DataEntry>> sortedEntries = new Reference2ObjectOpenHashMap<>();
+		private final DataEntry[][] sortedEntries;
+		private boolean hasAny;
+
+		public DataMap(DataKeyStorage storage) {
+			this.sortedEntries = new DataEntry[storage.all.size()][];
+			this.hasAny = false;
+		}
 
 		private void update(Map<DataKey<?>, Long2ObjectMap<DataEntry>> map) {
-			sortedEntries.clear();
+			Arrays.fill(sortedEntries, null);
+			hasAny = false;
 
 			for (var entry : map.entrySet()) {
 				var key = entry.getKey();
@@ -72,25 +76,24 @@ public class DataMapOverrides {
 					}
 				}
 
-				sortedEntries.put(key, List.copyOf(entries.reversed()));
+				if (!entries.isEmpty()) {
+					sortedEntries[key.index()] = entries.reversed().toArray(new DataEntry[0]);
+					hasAny = true;
+				}
 			}
 		}
 
 		@Nullable
 		public <T> T getOverride(DataKey<T> type, long time) {
-			if (sortedEntries.isEmpty()) {
-				return null;
-			}
+			if (hasAny) {
+				var array = sortedEntries[type.index()];
 
-			var list = sortedEntries.get(type);
-
-			if (list == null || list.isEmpty()) {
-				return null;
-			}
-
-			for (var entry : list) {
-				if (time >= entry.time) {
-					return (T) entry.value;
+				if (array != null) {
+					for (var entry : array) {
+						if (time >= entry.time) {
+							return (T) entry.value;
+						}
+					}
 				}
 			}
 
@@ -98,13 +101,13 @@ public class DataMapOverrides {
 		}
 	}
 
-	private static final Function<UUID, DataMap> PLAYERS = k -> new DataMap();
+	private static final Function<UUID, DataMap> PLAYERS = k -> new DataMap(DataKey.PLAYER);
 
 	public final DataMap serverData;
 	public final Map<UUID, DataMap> playerData;
 
 	public DataMapOverrides() {
-		this.serverData = new DataMap();
+		this.serverData = new DataMap(DataKey.SERVER);
 		this.playerData = new Object2ObjectOpenHashMap<>();
 	}
 

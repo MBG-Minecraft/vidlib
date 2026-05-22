@@ -11,12 +11,15 @@ import dev.latvian.mods.klib.shape.Shape;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.Lazy;
+import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
@@ -34,7 +37,7 @@ public class CommandDataType<T> {
 	}
 
 	public final DataType<T> dataType;
-	public final Lazy<RegisteredDataType<T>> registeredDataType;
+	private final Lazy<RegisteredDataType<T>> registeredDataType;
 	public SuggestionProvider suggestionProvider;
 
 	private CommandDataType(DataType<T> dataType) {
@@ -43,9 +46,19 @@ public class CommandDataType<T> {
 			try {
 				return Cast.to(Objects.requireNonNull(RegisteredDataType.BY_TYPE.get(dataType)));
 			} catch (Exception ex) {
-				throw new RuntimeException("DataType for '" + dataType.typeClass() + "' is not registered");
+				VidLib.LOGGER.warn("DataType for '" + dataType.typeClass() + "' is not registered");
+				return null;
 			}
 		});
+	}
+
+	@Nullable
+	public RegisteredDataType<T> getRegisteredDataType() {
+		return registeredDataType.get();
+	}
+
+	public VLRegistry<T> getRegistryArgumentType() {
+		return (VLRegistry) getRegisteredDataType().argumentType();
 	}
 
 	public CommandDataType<T> suggests(SuggestionProvider provider) {
@@ -58,9 +71,9 @@ public class CommandDataType<T> {
 	}
 
 	public ArgumentType<?> argument(CommandBuildContext buildContext) {
-		var type = registeredDataType.get();
+		var type = getRegisteredDataType();
 
-		if (type.argumentType() != null) {
+		if (type != null && type.argumentType() != null) {
 			return type.argumentType().create(type, buildContext);
 		}
 
@@ -69,9 +82,9 @@ public class CommandDataType<T> {
 	}
 
 	public T get(CommandContext<CommandSourceStack> ctx, String name) throws CommandSyntaxException {
-		var type = registeredDataType.get();
+		var type = getRegisteredDataType();
 
-		if (type.argumentGetter() != null) {
+		if (type != null && type.argumentGetter() != null) {
 			return type.argumentGetter().get(ctx, name);
 		}
 

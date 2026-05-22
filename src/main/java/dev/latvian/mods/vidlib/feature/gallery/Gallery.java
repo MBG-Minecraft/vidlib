@@ -1,14 +1,18 @@
 package dev.latvian.mods.vidlib.feature.gallery;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.util.UndashedUuid;
+import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.util.Lazy;
+import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
+import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.util.MiscUtils;
-import dev.latvian.mods.vidlib.util.StringUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -22,6 +26,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -40,6 +46,16 @@ public class Gallery<K> {
 		}
 	});
 
+	public static final Codec<Gallery<?>> CODEC = Codec.STRING.comapFlatMap(id -> {
+		var gallery = ALL.get().get(id);
+
+		if (gallery != null) {
+			return DataResult.success(gallery);
+		} else {
+			return DataResult.error(() -> "Gallery '" + id + "' not found");
+		}
+	}, gallery -> gallery.id);
+
 	@AutoInit(AutoInit.Type.TEXTURES_RELOADED)
 	public static void reload(TextureManager manager, Executor backgroundExecutor, Executor gameExecutor) throws IOException {
 		for (var gallery : ALL.get().values()) {
@@ -48,26 +64,35 @@ public class Gallery<K> {
 	}
 
 	public static Gallery<UUID> ofUUIDKey(String id, Supplier<Path> directory, TriState blur) {
-		return new Gallery<>(id, directory, blur, UndashedUuid::toString, UndashedUuid::fromStringLenient);
+		return new Gallery<>(id, KLibCodecs.UUID, directory, blur, UndashedUuid::toString, UndashedUuid::fromStringLenient);
 	}
 
 	public final String id;
+	public final Codec<K> identifierCodec;
 	public final Supplier<Path> directory;
 	public final TriState blur;
 	public final Function<K, String> keyToString;
 	public final Function<String, K> stringToKey;
 	public final Map<K, GalleryImage<K>> images;
+	public final List<GalleryUploader<K>> uploaders;
 
-	public Gallery(String id, Supplier<Path> directory, TriState blur, Function<K, String> keyToString, @Nullable Function<String, K> stringToKey) {
+	public Gallery(String id, Codec<K> identifierCodec, Supplier<Path> directory, TriState blur, Function<K, String> keyToString, @Nullable Function<String, K> stringToKey) {
 		this.id = id;
+		this.identifierCodec = identifierCodec;
 		this.directory = directory;
 		this.blur = blur;
 		this.keyToString = keyToString;
 		this.stringToKey = stringToKey;
 		this.images = new ConcurrentHashMap<>();
+		this.uploaders = new ArrayList<>(0);
 	}
 
-	public ResourceLocation id(K imageId) {
+	public Gallery<K> addUploader(GalleryUploader<K> uploader) {
+		this.uploaders.add(uploader);
+		return this;
+	}
+
+	public ResourceLocation getTexturePath(K imageId) {
 		return VidLib.id("textures/vidlib/generated/gallery/" + id + "/" + keyToString.apply(imageId) + ".png");
 	}
 
@@ -101,7 +126,7 @@ public class Gallery<K> {
 	}
 
 	public GalleryImage<K> createDummy(K imageId, String displayName) {
-		return new GalleryImage<>(this, imageId, displayName, null, id(imageId));
+		return new GalleryImage<>(new GalleryImageKey<>(this, imageId), displayName, null, getTexturePath(imageId));
 	}
 
 	@Nullable
@@ -130,9 +155,9 @@ public class Gallery<K> {
 						var nameParts = fileName.split("-", 2);
 
 						if (nameParts.length == 2) {
-							var uuid = stringToKey.apply(nameParts[0]);
-							var textureId = id(uuid);
-							images.put(uuid, new GalleryImage<>(this, uuid, nameParts[1], file, textureId));
+							var id = stringToKey.apply(nameParts[0]);
+							var texturePath = getTexturePath(id);
+							images.put(id, new GalleryImage<>(new GalleryImageKey<>(this, id), nameParts[1], file, texturePath));
 						}
 					}
 				}
@@ -161,7 +186,7 @@ public class Gallery<K> {
 		var originalImg = input.call();
 		var img = preProcessor.apply(originalImg);
 
-		var textureId = id(key);
+		var textureId = getTexturePath(key);
 		var dst = newPath(key, displayName);
 
 		if (dst != null) {
@@ -169,10 +194,11 @@ public class Gallery<K> {
 		}
 
 		var texture = new DynamicTexture(textureId::toString, img);
+		texture.setClamp(true);
 		texture.setFilter(blur, false);
 		mc.getTextureManager().register(textureId, texture);
 
-		var galleryImage = new GalleryImage<>(this, key, displayName, dst, textureId);
+		var galleryImage = new GalleryImage<>(new GalleryImageKey<>(this, key), displayName, dst, textureId);
 		images.put(key, galleryImage);
 
 		if (dst != null) {
@@ -222,6 +248,11 @@ public class Gallery<K> {
 			);
 		} catch (Exception ex) {
 			VidLib.LOGGER.warn("Failed to download " + id + "/" + key, ex);
+			// Do a default
+			try {
+				var defaultTex = mc.getTextureManager().getTexture(VidLibTextures.DEFAULT_PLAYER_BODY);
+				mc.getTextureManager().byPath.put(img.textureId(), defaultTex);
+			} catch (Throwable ignored) {}
 			return img;
 		}
 	}

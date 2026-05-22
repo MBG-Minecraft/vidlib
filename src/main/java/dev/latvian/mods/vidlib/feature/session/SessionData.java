@@ -1,23 +1,24 @@
 package dev.latvian.mods.vidlib.feature.session;
 
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.util.LevelGameTimeProvider;
+import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
-import dev.latvian.mods.vidlib.feature.entity.EntityOverride;
+import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToClient;
-import dev.latvian.mods.vidlib.feature.misc.SyncPlayerTagsPayload;
-import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.vidlib.feature.note.Note;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.registry.SyncRegistryPayload;
 import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
-import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
@@ -25,7 +26,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -33,7 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class SessionData {
+public class SessionData implements Comparable<SessionData> {
 	public final UUID uuid;
 	public final DataMap dataMap;
 	public final long startTime;
@@ -44,16 +45,10 @@ public class SessionData {
 	public Set<String> zonesTagsIn;
 
 	public boolean suspended;
-	public double gravityMod;
-	public float speedMod;
-	public float attackDamageMod;
-	public boolean pvp;
-	public boolean unpushable;
-	public float flightSpeedMod;
 
-	public SessionData(UUID uuid) {
+	public SessionData(UUID uuid, LevelGameTimeProvider timeProvider) {
 		this.uuid = uuid;
-		this.dataMap = new DataMap(uuid, DataKey.PLAYER);
+		this.dataMap = new DataMap(uuid, DataKey.PLAYER, timeProvider);
 		this.startTime = System.currentTimeMillis();
 		this.prevInput = PlayerInput.NONE;
 		this.input = PlayerInput.NONE;
@@ -61,12 +56,6 @@ public class SessionData {
 		this.zonesTagsIn = Set.of();
 
 		this.suspended = false;
-		this.gravityMod = 1D;
-		this.speedMod = 1F;
-		this.attackDamageMod = 1F;
-		this.pvp = true;
-		this.unpushable = false;
-		this.flightSpeedMod = 1F;
 	}
 
 	public void respawned(Level level, boolean loggedIn) {
@@ -76,21 +65,7 @@ public class SessionData {
 	}
 
 	public void updateOverrides(Player player) {
-		suspended = EntityOverride.SUSPENDED.get(player, null, InternalPlayerData.SUSPENDED);
-		gravityMod = suspended ? 0F : EntityOverride.GRAVITY.get(player, 1D);
-		speedMod = suspended ? 0F : EntityOverride.SPEED.get(player, 1F);
-		attackDamageMod = suspended ? 0F : EntityOverride.ATTACK_DAMAGE.get(player, 1F);
-		pvp = !suspended && EntityOverride.PVP.get(player, true);
-		unpushable = suspended || EntityOverride.UNPUSHABLE.get(player, false);
-		flightSpeedMod = player.get(InternalPlayerData.FLIGHT_SPEED);
-
-		if (gravityMod <= 0D) {
-			player.resetFallDistance();
-		}
-
-		if (suspended) {
-			player.setDeltaMovement(Vec3.ZERO);
-		}
+		suspended = CommonGameEngine.INSTANCE.isSuspended(player);
 	}
 
 	public <V> void syncRegistry(Player player, SyncedRegistry<V> registry, Map<ResourceLocation, V> map) {
@@ -108,12 +83,6 @@ public class SessionData {
 	public void updatePlayerData(long gameTime, Player self, UUID player, List<DataMapValue> update) {
 	}
 
-	public void updatePlayerTags(long gameTime, Player self, UUID player, List<String> tags) {
-	}
-
-	public void removeSessionData(UUID id) {
-	}
-
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + "[" + uuid + "]";
@@ -128,24 +97,15 @@ public class SessionData {
 	public void updateSkyboxes() {
 	}
 
-	public void refreshListedPlayers() {
-	}
-
 	public void setGlowColor(@Nullable UUID uuid, @Nullable Color color) {
-	}
-
-	public void addWaypoints(List<Waypoint> waypoints) {
-	}
-
-	public void removeWaypoints(List<String> ids) {
 	}
 
 	/**
 	 * syncType 0 = reload
-	 * syncType 1 = flashback snapshot
+	 * syncType 1 = replay snapshot
 	 * syncType 2 = login
 	 */
-	public void sync(S2CPacketBundleBuilder packets, Player player, int syncType) {
+	public void sync(VLS2CPacketConsumer packets, Player player, int syncType) {
 		var level = player.level();
 		var environment = level.getEnvironment();
 		var time = level.getGameTime();
@@ -171,14 +131,12 @@ public class SessionData {
 
 		environment.sync(packets);
 
-		dataMap.syncAll(packets, player, SyncPlayerDataPayload::new);
+		dataMap.syncAll(packets, SyncPlayerDataPayload::new);
 
 		for (var s : environment.vl$getAllSessionData()) {
-			packets.s2c(new SyncPlayerTagsPayload(s.uuid, List.copyOf(s.getTags(time))));
-
 			if (!s.uuid.equals(player.getUUID())) {
 				packets.s2c(new SyncPlayerInputToClient(s.uuid, s.input));
-				s.dataMap.syncAll(packets, null, SyncPlayerDataPayload::new);
+				s.dataMap.syncAll(packets, SyncPlayerDataPayload::new);
 			}
 		}
 
@@ -195,8 +153,14 @@ public class SessionData {
 		}
 	}
 
-	public Set<String> getTags(long gameTime) {
-		return Set.of();
+	public Set<String> getTags() {
+		return dataMap.get(InternalPlayerData.PLAYER_TAGS);
+	}
+
+	public void setTags(Set<String> tags) {
+		if (!getTags().equals(tags)) {
+			dataMap.set(InternalPlayerData.PLAYER_TAGS, tags);
+		}
 	}
 
 	public FeatureSet getClientFeatures() {
@@ -204,5 +168,34 @@ public class SessionData {
 	}
 
 	public void setClientModListSentDuringConfig() {
+	}
+
+	public boolean isOnline() {
+		return dataMap.get(InternalPlayerData.ONLINE);
+	}
+
+	public String getName() {
+		var name = dataMap.get(InternalPlayerData.NAME);
+
+		if (name.isEmpty()) {
+			name = PlayerProfiles.getName(uuid);
+			dataMap.set(InternalPlayerData.NAME, name);
+		}
+
+		return name;
+	}
+
+	public void removeSessionData(UUID player) {
+	}
+
+	@Override
+	public int compareTo(@NotNull SessionData o) {
+		return getName().compareToIgnoreCase(o.getName());
+	}
+
+	public void createNote(Note note) {
+	}
+
+	public void deleteNote(UUID id) {
 	}
 }

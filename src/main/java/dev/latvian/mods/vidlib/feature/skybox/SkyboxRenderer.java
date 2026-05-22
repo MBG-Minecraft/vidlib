@@ -7,7 +7,7 @@ import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import net.minecraft.client.Minecraft;
 
 public class SkyboxRenderer {
-	public static boolean render(Minecraft mc, Skybox skybox, Runnable setupFog) {
+	public static boolean render(Minecraft mc, ClientSkybox skybox, Runnable setupFog) {
 		setupFog.run();
 		float ps = (float) (mc.gameRenderer.getDepthFar() / 2D);
 		float ns = -ps;

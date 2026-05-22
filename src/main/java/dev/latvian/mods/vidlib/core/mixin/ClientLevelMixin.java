@@ -1,7 +1,10 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import dev.latvian.mods.vidlib.core.VLClientLevel;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
+import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -24,7 +27,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.UUID;
 
 @Mixin(ClientLevel.class)
-public abstract class ClientLevelMixin implements VLClientLevel {
+public abstract class ClientLevelMixin extends LevelMixin implements VLClientLevel {
 	@Shadow
 	@Final
 	private Minecraft minecraft;
@@ -55,12 +58,12 @@ public abstract class ClientLevelMixin implements VLClientLevel {
 
 	@Inject(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getBiome(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/core/Holder;"))
 	private void vl$doAnimateTick(int posX, int posY, int posZ, int range, RandomSource random, Block block, BlockPos.MutableBlockPos blockPos, CallbackInfo ci) {
-		environmentEffects(minecraft, blockPos);
+		ClientGameEngine.INSTANCE.handleEnvironmentalEffects(minecraft, vl$level(), blockPos);
 	}
 
 	@Redirect(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getFluidState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;"))
 	private FluidState vl$getFluidState(ClientLevel level, BlockPos pos) {
-		return level.vl$overrideFluidState(pos);
+		return CommonGameEngine.INSTANCE.overrideFluidState(level, pos);
 	}
 
 	@Override
@@ -75,4 +78,10 @@ public abstract class ClientLevelMixin implements VLClientLevel {
 		}
 	}
 
+	@Override
+	public KNumberContext getGlobalContext() {
+		var v = super.getGlobalContext();
+		v.entity = minecraft.player;
+		return v;
+	}
 }

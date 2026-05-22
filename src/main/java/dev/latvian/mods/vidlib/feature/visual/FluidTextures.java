@@ -30,15 +30,15 @@ public record FluidTextures(ResourceLocation still, ResourceLocation flowing, Te
 	);
 
 	public static final FluidTextures WATER = of(
-		ResourceLocation.withDefaultNamespace("block/water_still"),
-		ResourceLocation.withDefaultNamespace("block/water_flow"),
+		ResourceLocation.tryBuild("minecraft", "block/water_still"),
+		ResourceLocation.tryBuild("minecraft", "block/water_flow"),
 		TerrainRenderLayer.TRANSLUCENT,
 		Color.of(0xFF3F76E4)
 	);
 
 	public static final FluidTextures LAVA = of(
-		ResourceLocation.withDefaultNamespace("block/lava_still"),
-		ResourceLocation.withDefaultNamespace("block/lava_flow")
+		ResourceLocation.tryBuild("minecraft", "block/lava_still"),
+		ResourceLocation.tryBuild("minecraft", "block/lava_flow")
 	);
 
 	public static final FluidTextures OPAQUE_WATER = of(

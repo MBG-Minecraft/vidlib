@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.framegraph.FramePass;
@@ -55,9 +57,6 @@ public abstract class LevelRendererMixin {
 	private LevelTargetBundle targets;
 
 	@Shadow
-	public abstract boolean shouldShowEntityOutlines();
-
-	@Shadow
 	@Nullable
 	private ClientLevel level;
 
@@ -68,14 +67,14 @@ public abstract class LevelRendererMixin {
 		}
 	}
 
-	@Redirect(method = "lambda$addSkyPass$13", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/DimensionSpecialEffects;renderSky(Lnet/minecraft/client/multiplayer/ClientLevel;IFLorg/joml/Matrix4f;Lnet/minecraft/client/Camera;Lorg/joml/Matrix4f;Ljava/lang/Runnable;)Z"))
-	private boolean vl$renderSkybox(DimensionSpecialEffects instance, ClientLevel level, int ticks, float partialTick, Matrix4f modelViewMatrix, Camera camera, Matrix4f projectionMatrix, Runnable setupFog) {
+	@WrapOperation(method = "lambda$addSkyPass$13", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/DimensionSpecialEffects;renderSky(Lnet/minecraft/client/multiplayer/ClientLevel;IFLorg/joml/Matrix4f;Lnet/minecraft/client/Camera;Lorg/joml/Matrix4f;Ljava/lang/Runnable;)Z"))
+	private boolean vl$renderSkybox(DimensionSpecialEffects instance, ClientLevel level, int ticks, float partialTick, Matrix4f modelViewMatrix, Camera camera, Matrix4f projectionMatrix, Runnable setupFog, Operation<Boolean> operation) {
 		var skybox = minecraft.player != null ? minecraft.player.vl$sessionData().skybox : null;
 
 		if (skybox != null) {
 			return SkyboxRenderer.render(minecraft, skybox, setupFog);
 		} else {
-			return instance.renderSky(level, ticks, partialTick, modelViewMatrix, camera, projectionMatrix, setupFog);
+			return operation.call(instance, level, ticks, partialTick, modelViewMatrix, camera, projectionMatrix, setupFog);
 		}
 	}
 

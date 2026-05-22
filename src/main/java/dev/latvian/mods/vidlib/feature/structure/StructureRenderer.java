@@ -14,6 +14,7 @@ import dev.latvian.mods.klib.util.WithCache;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
+import dev.latvian.mods.vidlib.feature.registry.RegistryRef;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.VLBiomes;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
@@ -86,6 +87,10 @@ public class StructureRenderer implements WithCache {
 		RUNTIME_RENDERERS.put(id, renderer);
 		renderingAll = null;
 		return renderer;
+	}
+
+	public static StructureRenderer create(RegistryRef<LazyStructures> ref) {
+		return create(ref.id(), StructureHolder.refSupplier(ref));
 	}
 
 	public static StructureRenderer create(ResourceLocation id, ResourceLocation structure) {
@@ -177,8 +182,7 @@ public class StructureRenderer implements WithCache {
 		var blockRenderer = mc.getBlockRenderer();
 		var random = RandomSource.create();
 
-		var biome = VLBiomes.VOID.get();
-		var level = new StructureRendererLevel(structure.blocks(), data.skyLight(), data.blockLight(), biome);
+		var level = new StructureRendererLevel(structure.blocks(), data.skyLight(), data.blockLight(), VLBiomes.VOID);
 
 		var allTypes = RenderType.chunkBufferLayers();
 		var layerMap = new Reference2ObjectOpenHashMap<RenderType, BuildingLayer>(allTypes.size());
@@ -332,7 +336,7 @@ public class StructureRenderer implements WithCache {
 	public void render(PoseStack ms, TerrainRenderLayer renderLayerFilter, StructureRendererData data) {
 		if (layers == null) {
 			var mc = Minecraft.getInstance();
-			preRender(mc, data, mc, Util.backgroundExecutor());
+			preRender(mc, data, mc, Util.nonCriticalIoPool());
 		}
 
 		var layers0 = layers;

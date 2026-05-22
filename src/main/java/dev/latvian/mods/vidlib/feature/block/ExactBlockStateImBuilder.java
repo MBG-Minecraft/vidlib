@@ -13,6 +13,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import imgui.type.ImString;
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
@@ -36,17 +37,18 @@ public class ExactBlockStateImBuilder implements ImBuilder<BlockState> {
 	private BlockState blockState;
 
 	public ExactBlockStateImBuilder() {
-		this.block = new BlockImBuilder(null);
+		this.block = new BlockImBuilder();
 		this.properties = new LinkedHashMap<>();
 		this.blockState = null;
 	}
 
 	@Override
 	public void set(@Nullable BlockState state) {
+		blockState = state;
 		properties.clear();
 
 		if (state == null) {
-			block.set(null);
+			block.set(Blocks.AIR);
 			return;
 		}
 
@@ -125,7 +127,7 @@ public class ExactBlockStateImBuilder implements ImBuilder<BlockState> {
 					ImGui.sliderInt("###" + property.getName(), ((ImInt) value).getData(), min, max);
 					update = update.orItemEdit();
 				} else {
-					update = update.or(graphics.combo("###" + property.getName(), (Object[]) value, property.getPossibleValues(), (Function) KLibCodecs.DEFAULT_NAME_GETTER, SEARCH));
+					update = update.or(graphics.combo("###" + property.getName(), (Object[]) value, "", property.getPossibleValues(), (Function) KLibCodecs.DEFAULT_NAME_GETTER, SEARCH));
 				}
 			}
 

@@ -1,13 +1,15 @@
 package dev.latvian.mods.vidlib.core;
 
-import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.stream.Stream;
 
 public interface VLClientLevel extends VLLevel {
 	@Override
@@ -32,28 +34,6 @@ public interface VLClientLevel extends VLLevel {
 		return player == null ? null : player.vl$sessionData().filteredZones;
 	}
 
-	default void environmentEffects(Minecraft mc, BlockPos pos) {
-		var effects = ClientGameEngine.INSTANCE.getEnvironmentEffects(mc, pos);
-		var level = this.vl$level();
-		var ctx = level.getGlobalContext();
-
-		if (!effects.isEmpty()) {
-			for (var effect : effects) {
-				var chance = effect.chance().getOr(ctx, 0D);
-
-				if (level.random.roll((float) chance)) {
-					level.addParticle(
-						effect.particle(),
-						pos.getX() + level.random.nextFloat(),
-						pos.getY() + level.random.nextFloat(),
-						pos.getZ() + level.random.nextFloat(),
-						0.0, 0.0, 0.0
-					);
-				}
-			}
-		}
-	}
-
 	@Override
 	default boolean isReplayLevel() {
 		var mc = Minecraft.getInstance();
@@ -73,5 +53,22 @@ public interface VLClientLevel extends VLLevel {
 	@Override
 	default void vl$setDayTime(long time) {
 		vl$level().getLevelData().setDayTime(time);
+	}
+
+	@Override
+	default Stream<LevelChunk> vl$getChunks() {
+		var chunks = vl$level().getChunkSource().storage.chunks;
+		int len = chunks.length();
+		var list = new ArrayList<LevelChunk>(len);
+
+		for (int i = 0; i < len; i++) {
+			var chunk = chunks.get(i);
+
+			if (chunk != null && !chunk.isEmpty()) {
+				list.add(chunk);
+			}
+		}
+
+		return list.stream();
 	}
 }

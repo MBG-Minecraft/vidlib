@@ -21,7 +21,7 @@ public record ClockLocation(
 	Direction facing,
 	String format,
 	Color color,
-	boolean fullbright
+	boolean fullBright
 ) {
 	public static final Codec<ClockLocation> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		ClockFont.REF_DATA_TYPE.codec().fieldOf("font").forGetter(ClockLocation::font),
@@ -33,6 +33,6 @@ public record ClockLocation(
 		Direction.CODEC.fieldOf("facing").forGetter(ClockLocation::facing),
 		Codec.STRING.optionalFieldOf("format", "%02d:%02d").forGetter(ClockLocation::format),
 		Color.CODEC.optionalFieldOf("color", Color.WHITE).forGetter(ClockLocation::color),
-		Codec.BOOL.optionalFieldOf("fullbright", true).forGetter(ClockLocation::fullbright)
+		Codec.BOOL.optionalFieldOf("full_bright", true).forGetter(ClockLocation::fullBright)
 	).apply(instance, ClockLocation::new));
 }

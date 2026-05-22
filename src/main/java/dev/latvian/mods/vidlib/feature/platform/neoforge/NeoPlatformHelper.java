@@ -5,19 +5,45 @@ import com.google.gson.JsonObject;
 import dev.latvian.mods.klib.util.Side;
 import dev.latvian.mods.vidlib.feature.auto.AutoCallback;
 import dev.latvian.mods.vidlib.feature.auto.ScannedAnnotation;
+import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
+import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterRegistryEvent;
+import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
+import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModificationRegistryEvent;
+import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
+import dev.latvian.mods.vidlib.feature.camera.ScreenShakeTypeRegistryEvent;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.capture.PacketCaptureEvent;
 import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
+import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
+import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterRegistryEvent;
+import dev.latvian.mods.vidlib.feature.entity.number.EntityNumber;
+import dev.latvian.mods.vidlib.feature.entity.number.EntityNumberRegistryEvent;
+import dev.latvian.mods.vidlib.feature.icon.Icon;
+import dev.latvian.mods.vidlib.feature.icon.IconRegistryEvent;
+import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectRegistryEvent;
+import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
+import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShapeRegistryEvent;
+import dev.latvian.mods.vidlib.math.knumber.KNumber;
+import dev.latvian.mods.vidlib.math.knumber.KNumberRegistryEvent;
+import dev.latvian.mods.vidlib.math.kvector.KVector;
+import dev.latvian.mods.vidlib.math.kvector.KVectorRegistryEvent;
+import dev.mrbeastgaming.mods.hub.api.gateway.HubGatewayEvent;
+import dev.mrbeastgaming.mods.hub.api.gateway.HubGatewayEventRegistryEvent;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.world.entity.Entity;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.connection.ConnectionType;
 import org.jetbrains.annotations.Nullable;
@@ -27,6 +53,9 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -39,13 +68,33 @@ public class NeoPlatformHelper extends PlatformHelper {
 	}
 
 	@Override
+	public String getPlatform() {
+		return "neoforge";
+	}
+
+	@Override
 	public Side getSide() {
 		return FMLLoader.getDist().isClient() ? Side.CLIENT : Side.SERVER;
 	}
 
 	@Override
-	public String getPlatform() {
-		return "neoforge";
+	public boolean isDevEnv() {
+		return !FMLLoader.isProduction();
+	}
+
+	@Override
+	public Path getGameDirectory() {
+		return FMLPaths.GAMEDIR.get();
+	}
+
+	@Override
+	public Path getConfigDirectory() {
+		return FMLPaths.CONFIGDIR.get();
+	}
+
+	@Override
+	public Path getModsDirectory() {
+		return FMLPaths.MODSDIR.get();
 	}
 
 	@Override
@@ -131,7 +180,98 @@ public class NeoPlatformHelper extends PlatformHelper {
 	}
 
 	@Override
+	public List<PlatformModInfo> getModList() {
+		var list = new ArrayList<PlatformModInfo>();
+
+		for (var mod : ModList.get().getMods()) {
+			list.add(new PlatformModInfo(mod.getModId(), mod.getDisplayName(), mod.getVersion().toString(), mod.getOwningFile().getFile().getFileName()));
+		}
+
+		return list;
+	}
+
+	@Override
+	public boolean isModLoaded(String modId) {
+		return ModList.get().isLoaded(modId);
+	}
+
+	@Override
 	public void collectDynamicResources(PackType type, Consumer<ResourceLocation> callback) {
 		ModLoader.postEvent(type == PackType.CLIENT_RESOURCES ? new DynamicResourceEvent.Assets(callback) : new DynamicResourceEvent.Data(callback));
+	}
+
+	@Override
+	public void collectKNumbers(SimpleRegistryCollector<KNumber> registry) {
+		super.collectKNumbers(registry);
+		ModLoader.postEvent(new KNumberRegistryEvent(registry));
+	}
+
+	@Override
+	public void collectKVectors(SimpleRegistryCollector<KVector> registry) {
+		super.collectKVectors(registry);
+		ModLoader.postEvent(new KVectorRegistryEvent(registry));
+	}
+
+	@Override
+	public void collectEntityFilters(SimpleRegistryCollector<EntityFilter> registry) {
+		super.collectEntityFilters(registry);
+		ModLoader.postEvent(new EntityFilterRegistryEvent(registry));
+	}
+
+	@Override
+	public void collectBlockFilters(SimpleRegistryCollector<BlockFilter> registry) {
+		super.collectBlockFilters(registry);
+		ModLoader.postEvent(new BlockFilterRegistryEvent(registry));
+	}
+
+	@Override
+	public void collectZoneShapes(SimpleRegistryCollector<ZoneShape> registry) {
+		super.collectZoneShapes(registry);
+		ModLoader.postEvent(new ZoneShapeRegistryEvent(registry));
+	}
+
+	@Override
+	public void collectIcons(SimpleRegistryCollector<Icon> registry) {
+		super.collectIcons(registry);
+		ModLoader.postEvent(new IconRegistryEvent(registry));
+	}
+
+	@Override
+	public void collectScreenShakeTypes(SimpleRegistryCollector<ScreenShakeType> registry) {
+		super.collectScreenShakeTypes(registry);
+		ModLoader.postEvent(new ScreenShakeTypeRegistryEvent(registry));
+	}
+
+	@Override
+	public void collectBulkLevelModifications(SimpleRegistryCollector<BulkLevelModification> registry) {
+		super.collectBulkLevelModifications(registry);
+		ModLoader.postEvent(new BulkLevelModificationRegistryEvent(registry));
+	}
+
+	@Override
+	public void collectScreenEffects(SimpleRegistryCollector<ScreenEffect> registry) {
+		super.collectScreenEffects(registry);
+		ModLoader.postEvent(new ScreenEffectRegistryEvent(registry));
+	}
+
+	@Override
+	public void collectEntityNumbers(SimpleRegistryCollector<EntityNumber> registry) {
+		super.collectEntityNumbers(registry);
+		ModLoader.postEvent(new EntityNumberRegistryEvent(registry));
+	}
+
+	@Override
+	public boolean isStaff(Entity entity) {
+		return entity.isStaff();
+	}
+
+	@Override
+	public boolean isStaffOrTalent(Entity entity) {
+		return entity.isStaffOrTalent();
+	}
+
+	@Override
+	public void collectGatewayEventHandlers(Map<String, Consumer<HubGatewayEvent>> map) {
+		NeoForge.EVENT_BUS.post(new HubGatewayEventRegistryEvent(map));
 	}
 }

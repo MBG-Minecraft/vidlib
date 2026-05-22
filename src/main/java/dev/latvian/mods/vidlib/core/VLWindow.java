@@ -45,6 +45,6 @@ public interface VLWindow {
 
 	default boolean isInvisible() {
 		var w = (Window) this;
-		return w.isMinimized() || w.getGuiScaledWidth() < 1 || w.getGuiScaledHeight() < 1;
+		return w.isMinimized() || w.getGuiScaledWidth() < 1 || w.getGuiScaledHeight() < 1 || w.getScreenWidth() < 1 || w.getScreenHeight() < 1;
 	}
 }

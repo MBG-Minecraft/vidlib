@@ -16,8 +16,8 @@ import org.jetbrains.annotations.Nullable;
 
 public record ExactEntityFilter(IntOrUUID entityId) implements EntityFilter, ImBuilderWithHolder.Factory {
 	public static SimpleRegistryType<ExactEntityFilter> TYPE = SimpleRegistryType.dynamic("exact", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		IntOrUUID.DATA_TYPE.codec().fieldOf("entity_id").forGetter(ExactEntityFilter::entityId)
-	).apply(instance, ExactEntityFilter::new)), IntOrUUID.DATA_TYPE.streamCodec().map(ExactEntityFilter::new, ExactEntityFilter::entityId));
+		IntOrUUID.CODEC.fieldOf("entity_id").forGetter(ExactEntityFilter::entityId)
+	).apply(instance, ExactEntityFilter::new)), IntOrUUID.STREAM_CODEC.map(ExactEntityFilter::new, ExactEntityFilter::entityId));
 
 	public static class IDBuilder implements EntityFilterImBuilder {
 		public static final ImBuilderHolder<EntityFilter> TYPE = ImBuilderHolder.of("Network ID", IDBuilder::new);

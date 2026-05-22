@@ -29,7 +29,7 @@ public enum ScreenShakeTool implements VidLibTool {
 
 	@Override
 	public ResourceLocation getModel() {
-		return ResourceLocation.withDefaultNamespace("ender_eye");
+		return ResourceLocation.tryBuild("minecraft", "ender_eye");
 	}
 
 	@Override

@@ -13,13 +13,13 @@ public class BlockStateMixin implements VLBlockState {
 	private Object vl$clientProperties;
 
 	@Unique
-	private float vl$density = Float.NaN;
+	private Float vl$density = null;
 
 	@Unique
 	private Boolean vl$visible;
 
 	@Unique
-	private Boolean vl$transparent;
+	private Boolean vl$partial;
 
 	@Override
 	public void vl$clearCache() {
@@ -40,7 +40,7 @@ public class BlockStateMixin implements VLBlockState {
 
 	@Override
 	public float vl$getDensity() {
-		if (Float.isNaN(vl$density)) {
+		if (vl$density == null) {
 			vl$density = VLBlockState.super.vl$getDensity();
 		}
 
@@ -58,10 +58,10 @@ public class BlockStateMixin implements VLBlockState {
 
 	@Override
 	public boolean isPartial() {
-		if (vl$transparent == null) {
-			vl$transparent = VLBlockState.super.isPartial();
+		if (vl$partial == null) {
+			vl$partial = VLBlockState.super.isPartial();
 		}
 
-		return vl$transparent;
+		return vl$partial;
 	}
 }

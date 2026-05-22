@@ -1,10 +1,13 @@
 package dev.latvian.mods.vidlib.feature.client;
 
+import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.clothing.Clothing;
+import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -37,10 +40,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.List;
+
 public interface VidLibEntityRenderStates {
 	ContextKey<Boolean> BOSS_FRAMEBUFFER = new ContextKey<>(VidLib.id("boss_framebuffer"));
 	ContextKey<Boolean> CREATIVE = new ContextKey<>(VidLib.id("creative"));
-	ContextKey<Clothing> CLOTHING = new ContextKey<>(VidLib.id("clothing"));
+	ContextKey<List<Clothing>> CLOTHING = new ContextKey<>(VidLib.id("clothing"));
+	ContextKey<SpriteKey> SPRITE_KEY = new ContextKey<>(VidLib.id("sprite_key"));
+	ContextKey<UV> UV = new ContextKey<>(VidLib.id("uv"));
+	ContextKey<Boolean> TRANSLUCENT = new ContextKey<>(VidLib.id("translucent"));
 
 	ItemStack DEFAULT_SHIELD = new ItemStack(Items.SHIELD);
 
@@ -237,8 +245,10 @@ public interface VidLibEntityRenderStates {
 	static void extractPlayer(Minecraft mc, Vec3 camPos, AbstractClientPlayer player, PlayerRenderState state) {
 		state.setRenderData(CREATIVE, player.isCreative() ? Boolean.TRUE : null);
 
-		var clothing = state.isInvisible ? null : ClientGameEngine.INSTANCE.getClothing(player);
-		state.setRenderData(CLOTHING, clothing == Clothing.NONE ? null : clothing);
+		var clothing = state.isInvisible ? List.<Clothing>of() : ClientGameEngine.INSTANCE.getClothing(player);
+		state.setRenderData(CLOTHING, clothing.isEmpty() ? null : clothing);
+
+		state.setRenderData(TRANSLUCENT, player.get(InternalPlayerData.TRANSLUCENT) ? Boolean.TRUE : null);
 
 		if (state.nameTag != null) {
 			state.nameTag = ClientGameEngine.INSTANCE.getFullPlayerWorldName(player, state.nameTag);
@@ -261,8 +271,8 @@ public interface VidLibEntityRenderStates {
 		return v != null && v;
 	}
 
-	static Clothing getClothing(EntityRenderState state) {
+	static List<Clothing> getClothing(EntityRenderState state) {
 		var v = state.getRenderData(CLOTHING);
-		return v == null ? Clothing.NONE : v;
+		return v == null ? List.of() : v;
 	}
 }

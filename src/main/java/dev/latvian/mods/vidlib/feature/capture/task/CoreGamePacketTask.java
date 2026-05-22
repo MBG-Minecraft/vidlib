@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.feature.capture.task;
 
+import dev.latvian.mods.klib.io.IOUtils;
 import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.klib.util.Timestamp;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
-import dev.latvian.mods.vidlib.util.IOUtils;
-import dev.latvian.mods.vidlib.util.Timestamp;
 import net.minecraft.resources.ResourceLocation;
 
 import java.io.DataInput;

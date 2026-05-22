@@ -18,7 +18,7 @@ public class ClipContextMixin implements VLClipContext {
 
 	@Override
 	@Nullable
-	public Entity getEntity() {
+	public Entity vl$getEntity() {
 		return collisionContext instanceof EntityCollisionContext ctx ? ctx.getEntity() : null;
 	}
 }

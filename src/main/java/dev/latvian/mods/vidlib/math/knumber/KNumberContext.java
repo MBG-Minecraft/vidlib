@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.math.knumber;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
@@ -16,6 +17,7 @@ public class KNumberContext {
 	public Double tick;
 	public Double maxTick;
 	public Level level;
+	public Entity entity;
 	public DataMap serverDataMap;
 	public Double gameTime;
 	public Double gameDay;
@@ -33,6 +35,7 @@ public class KNumberContext {
 		this.tick = null;
 		this.maxTick = null;
 		this.level = null;
+		this.entity = null;
 		this.serverDataMap = null;
 		this.gameTime = null;
 		this.gameDay = null;
@@ -43,14 +46,13 @@ public class KNumberContext {
 	}
 
 	@ApiStatus.Internal
-	public KNumberContext(Level level) {
+	public KNumberContext(KNumberVariables rootVariables) {
 		this.parent = null;
-		this.variables = level.getEnvironment().globalVariables();
+		this.variables = rootVariables;
 
 		this.progress = null;
 		this.tick = null;
 		this.maxTick = null;
-		this.updateLevelData(level);
 		this.originPos = null;
 		this.sourcePos = null;
 		this.targetPos = null;
@@ -64,6 +66,7 @@ public class KNumberContext {
 		this.tick = parent.tick;
 		this.maxTick = parent.maxTick;
 		this.level = parent.level;
+		this.entity = parent.entity;
 		this.serverDataMap = parent.serverDataMap;
 		this.gameTime = parent.gameTime;
 		this.gameDay = parent.gameDay;
@@ -81,7 +84,7 @@ public class KNumberContext {
 		this.level = level;
 
 		if (level != null) {
-			this.serverDataMap = level.getServerData();
+			this.serverDataMap = level.getDataMap();
 			this.gameTime = (double) level.getGameTime();
 			this.gameDay = (double) (level.getGameTime() % 24000L) / 24000D;
 			this.clock = (double) level.getDayTime();
@@ -126,7 +129,7 @@ public class KNumberContext {
 		if (level == null) {
 			return null;
 		} else if (serverDataMap == null) {
-			serverDataMap = level.getServerData();
+			serverDataMap = level.getDataMap();
 		}
 
 		return serverDataMap.get(key);

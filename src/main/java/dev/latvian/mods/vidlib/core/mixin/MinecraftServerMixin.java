@@ -6,11 +6,16 @@ import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
+import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.feature.session.RemovePlayerDataPayload;
+import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -29,7 +34,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.nio.file.Files;
+import java.util.Collection;
 import java.util.Map;
+import java.util.UUID;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin implements VLMinecraftServer {
@@ -61,6 +68,12 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	@Unique
 	private PacketCapture vl$packetCapture;
 
+	@Unique
+	private final Map<UUID, ServerSessionData> vl$serverSessionData = new Object2ObjectOpenHashMap<>();
+
+	@Unique
+	private Boolean vl$isReplayServer;
+
 	@Override
 	public RandomSource vl$sessionRandom() {
 		return vl$sessionRandom;
@@ -78,16 +91,16 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	@Override
 	public ScheduledTask.Handler vl$getScheduledTaskHandler() {
 		if (vl$scheduledTaskHandler == null) {
-			vl$scheduledTaskHandler = new ScheduledTask.Handler(this::getGameTime);
+			vl$scheduledTaskHandler = new ScheduledTask.Handler(this);
 		}
 
 		return vl$scheduledTaskHandler;
 	}
 
 	@Override
-	public DataMap getServerData() {
+	public DataMap getDataMap() {
 		if (vl$serverDataMap == null) {
-			vl$serverDataMap = new DataMap(Util.NIL_UUID, DataKey.SERVER);
+			vl$serverDataMap = new DataMap(Util.NIL_UUID, DataKey.SERVER, this);
 			vl$serverDataMap.load(vl$self(), vl$self().getWorldPath(LevelResource.ROOT).resolve("vidlib.nbt"));
 		}
 
@@ -128,9 +141,14 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	}
 
 	@Override
+	public Collection<ServerSessionData> vl$getAllSessionData() {
+		return vl$serverSessionData.values();
+	}
+
+	@Override
 	@Nullable
 	public PacketCapture vl$getPacketCapture(boolean start) {
-		if (vl$packetCapture == null && start) {
+		if (vl$packetCapture == null && start && !CommonGameEngine.INSTANCE.disablePacketCapture()) {
 			var directory = VidLibPaths.LOCAL.get().resolve("packet-capture");
 
 			if (Files.notExists(directory)) {
@@ -145,5 +163,51 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 		}
 
 		return vl$packetCapture;
+	}
+
+	@Override
+	public ServerSessionData vl$getOrLoadServerSession(UUID uuid) {
+		var session = vl$serverSessionData.get(uuid);
+
+		if (session == null) {
+			session = new ServerSessionData(vl$self(), uuid);
+			session.load();
+			vl$serverSessionData.put(uuid, session);
+		}
+
+		return session;
+	}
+
+	@Override
+	public void vl$eraseServerSession(UUID uuid) {
+		var player = vl$self().getPlayerList().getPlayer(uuid);
+
+		if (player != null) {
+			player.connection.disconnect(Component.literal("Your player data was reset"));
+		}
+
+		schedule(1, () -> {
+			var data = vl$serverSessionData.remove(uuid);
+
+			if (data != null) {
+				data.dataMap.set(InternalPlayerData.ONLINE, false);
+				vl$self().s2c(new RemovePlayerDataPayload(uuid));
+
+				try {
+					Files.deleteIfExists(data.dataMapPath);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		});
+	}
+
+	@Override
+	public boolean vl$isReplayServer() {
+		if (vl$isReplayServer == null) {
+			vl$isReplayServer = getClass().getName().contains("ReplayServer");
+		}
+
+		return vl$isReplayServer;
 	}
 }

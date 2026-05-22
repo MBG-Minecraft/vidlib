@@ -1,13 +1,19 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.latvian.mods.vidlib.core.VLMinecraftClient;
+import dev.latvian.mods.vidlib.feature.client.SleepScreen;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
+import dev.latvian.mods.vidlib.feature.misc.MainMenuOpenedEvent;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.InBedChatScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
@@ -15,7 +21,9 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.world.entity.Entity;
+import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -25,6 +33,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.concurrent.CompletableFuture;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftClientMixin implements VLMinecraftClient {
@@ -39,6 +49,9 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	@Unique
 	private TextureAtlas vl$blockTextureAtlas = null;
 
+	@Unique
+	private int vl$reloadCount = 0;
+
 	@Override
 	public void vl$clearProfileCache() {
 		vl$blockTextureAtlas = null;
@@ -49,6 +62,10 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 		if (!PlayerActionHandler.handle(player, PlayerActionType.SWAP, true)) {
 			instance.send(packet);
 		}
+	}
+
+	@Redirect(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V", ordinal = 0))
+	private void vl$openSocialInteractionsScreen(Minecraft instance, Screen old) {
 	}
 
 	@Inject(method = "startAttack", at = @At("HEAD"), cancellable = true)
@@ -130,6 +147,37 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	private void vl$isCurrentlyGlowing(Entity entity, CallbackInfoReturnable<Boolean> cir) {
 		if (ClientGameEngine.INSTANCE.isGlowing(vl$self(), entity)) {
 			cir.setReturnValue(true);
+		}
+	}
+
+	@WrapOperation(method = "tick", at = @At(value = "NEW", target = "()Lnet/minecraft/client/gui/screens/InBedChatScreen;"))
+	private InBedChatScreen vl$sleepScreen(Operation<InBedChatScreen> original) {
+		return ClientGameEngine.INSTANCE.removeChatFromSleepScreen() ? new SleepScreen() : original.call();
+	}
+
+	@Override
+	public int vl$reloadCount() {
+		return vl$reloadCount;
+	}
+
+	@Inject(method = "reloadResourcePacks()Ljava/util/concurrent/CompletableFuture;", at = @At("RETURN"))
+	private void vl$reloadResourcePacks(CallbackInfoReturnable<CompletableFuture<Void>> cir) {
+		vl$reloadCount++;
+	}
+
+	@Inject(method = "onGameLoadFinished", at = @At("RETURN"))
+	private void vl$onGameLoadFinished(CallbackInfo ci) {
+		NeoForge.EVENT_BUS.post(new MainMenuOpenedEvent(vl$self(), true));
+	}
+
+	@Inject(method = "stop", at = @At("HEAD"), cancellable = true)
+	private void vl$stop(CallbackInfo ci) {
+		var mc = vl$self();
+
+		if (mc.level != null) {
+			GLFW.glfwSetWindowShouldClose(mc.getWindow().getWindow(), false);
+			vl$exitToTitle();
+			ci.cancel();
 		}
 	}
 }

@@ -13,8 +13,12 @@ import imgui.type.ImBoolean;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
@@ -26,6 +30,8 @@ public class MiscClientUtils {
 	public static final Matrix4f FRUSTUM_MATRIX = new Matrix4f();
 	public static final Matrix4f PERSPECTIVE_MATRIX = new Matrix4f();
 	public static final ImBoolean PLAYER_HEADWEAR = new ImBoolean(true);
+	private static final char[] POWER = {'K', 'M', 'B', 'T'};
+	public static final ImBoolean SPECTATE_UI = new ImBoolean(false);
 
 	public static void reloadShaders(Minecraft mc) {
 		mc.getShaderManager().reload(CompletableFuture::completedFuture, mc.getResourceManager(), Util.backgroundExecutor(), mc).thenRunAsync(() -> {
@@ -125,5 +131,52 @@ public class MiscClientUtils {
 				}
 			}
 		}
+	}
+
+	public static String formatNumber(int count) {
+		if (Screen.hasAltDown()) {
+			return String.format("%,d", count);
+		}
+
+		int index = 0;
+
+		if (count > 9999) {
+			while (count / 1000 != 0) {
+				count /= 1000;
+				index++;
+			}
+		}
+
+		if (index > 0) {
+			return count + String.valueOf(POWER[index - 1]);
+		} else {
+			return String.valueOf(count);
+		}
+	}
+
+	public static int drawStackSize(GuiGraphics graphics, Font font, String size, int x, int y, int color, boolean dropShadow) {
+		var ms = graphics.pose();
+		int w = font.width(size);
+		float scale = size.length() >= 4 ? 0.5F : size.length() == 3 ? 0.75F : 1F;
+		ms.pushPose();
+		ms.translate((int) (x + 16F - (w - 1F) * scale), (int) (y + 16F - 7F * scale), 200F);
+		ms.scale(scale, scale, 1F);
+		int s = graphics.drawString(font, size, 0F, 0F, color, dropShadow);
+		ms.popPose();
+		return Mth.ceil(s * scale);
+	}
+
+	public static float adjustScreenX(Minecraft mc, int adjustedWidth) {
+		return (mc.getWindow().getGuiScaledWidth() - adjustedWidth) / 2F;
+	}
+
+	public static int adjustScreenWidth(Minecraft mc, boolean shifted) {
+		if (shifted) {
+			float w = mc.getWindow().getGuiScaledWidth();
+			float h = mc.getWindow().getGuiScaledHeight();
+			// figure out how to shift to 16:9 nicely
+		}
+
+		return mc.getWindow().getGuiScaledWidth();
 	}
 }

@@ -4,9 +4,10 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.mojang.datafixers.util.Pair;
 import dev.latvian.mods.klib.math.Identity;
+import dev.latvian.mods.klib.math.ProjectedCoordinates;
 import dev.latvian.mods.klib.math.Rotation;
-import dev.latvian.mods.klib.math.WorldMouse;
 import dev.latvian.mods.klib.util.Empty;
+import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.camera.DetachedCamera;
@@ -26,7 +27,7 @@ import dev.latvian.mods.vidlib.feature.data.UpdatePlayerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.data.UpdateServerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
-import dev.latvian.mods.vidlib.feature.misc.EventMarkerData;
+import dev.latvian.mods.vidlib.feature.misc.MainMenuOpenedEvent;
 import dev.latvian.mods.vidlib.feature.particle.FireData;
 import dev.latvian.mods.vidlib.feature.particle.ItemParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.LineParticleOptions;
@@ -38,6 +39,7 @@ import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesIdData;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.Fade;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
@@ -59,6 +61,8 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.screens.GenericMessageScreen;
+import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -76,6 +80,7 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
@@ -84,6 +89,7 @@ import org.joml.Vector4f;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("resource")
@@ -117,7 +123,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default DataMap getServerData() {
+	default DataMap getDataMap() {
 		return vl$self().player.vl$sessionData().serverDataMap;
 	}
 
@@ -133,8 +139,8 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Nullable
-	default WorldMouse getWorldMouse() {
-		return vl$self().player.vl$sessionData().worldMouse;
+	default ProjectedCoordinates getProjectedCoordinates() {
+		return vl$self().player.vl$sessionData().projectedCoordinates;
 	}
 
 	@ApiStatus.Internal
@@ -148,8 +154,9 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 		var session = player.vl$sessionData();
 		var frameInfo = new FrameInfo(mc, session, event);
-		session.worldMouse = WorldMouse.of(mc, frameInfo.camera().getPosition());
+		session.projectedCoordinates = ProjectedCoordinates.of(mc, frameInfo.camera().getPosition());
 		FrameInfo.CURRENT = frameInfo;
+		var ctx = mc.level.getGlobalContext();
 
 		var rayLine = vl$self().gameRenderer.getMainCamera().ray(512D);
 		var ray = new ClipContext(rayLine.start(), rayLine.end(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player);
@@ -168,7 +175,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 			tool.getSecond().renderSetup(player, tool.getFirst(), mc.hitResult, screenDelta);
 		}
 
-		GhostStructure.preRender(frameInfo, mc.level.getGlobalContext());
+		GhostStructure.preRender(frameInfo, ctx);
 
 		if (session.npcRecording != null) {
 			session.npcRecording.record(System.currentTimeMillis(), screenDelta, mc.player);
@@ -199,7 +206,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	default void updatePlayerData(List<DataMapValue> update) {
-		c2s(new UpdatePlayerDataValuePayload(update));
+		c2s(new UpdatePlayerDataValuePayload(vl$self().player.getUUID(), update));
 	}
 
 	default <T> void updatePlayerData(DataKey<T> type, T value) {
@@ -376,13 +383,13 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void openYesNoVotingScreen(CompoundTag extraData, Component title, Component subtitle, Component yesLabel, Component noLabel) {
-		vl$self().setScreen(new YesNoVotingScreen(extraData, title, subtitle, yesLabel, noLabel));
+	default void openYesNoVotingScreen(CompoundTag extraData, Component title, Component subtitle, Component yesLabel, Component noLabel, boolean closeOnVote) {
+		vl$self().setScreen(new YesNoVotingScreen(extraData, title, subtitle, yesLabel, noLabel, closeOnVote));
 	}
 
 	@Override
-	default void openNumberVotingScreen(CompoundTag extraData, Component title, Component subtitle, int max, IntList unavailable) {
-		vl$self().setScreen(new NumberVotingScreen(extraData, title, subtitle, max, unavailable));
+	default void openNumberVotingScreen(CompoundTag extraData, Component title, Component subtitle, int max, IntList unavailable, boolean closeOnVote) {
+		vl$self().setScreen(new NumberVotingScreen(extraData, title, subtitle, max, unavailable, closeOnVote));
 	}
 
 	@Override
@@ -436,7 +443,8 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		var mc = vl$self();
 
 		if (mc.level != null && data.position().isPresent()) {
-			return new VidLibSoundInstance(mc.level, data, mc.level.getGlobalContext().fork(variables));
+			var ctx = mc.level.getGlobalContext().fork(variables);
+			return new VidLibSoundInstance(mc.level, data, ctx);
 		} else {
 			return SimpleSoundInstance.forUI(data.data().sound().value(), data.data().pitch(), data.data().volume());
 		}
@@ -575,8 +583,13 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void marker(EventMarkerData data) {
-		// VidLib.LOGGER.info("Marker " + data.event() + "/" + data.name() + " (" + data.uuid() + ") @ ");
+	default void marker(ReplayMarkerData data) {
+		data = ClientGameEngine.INSTANCE.handleRuntimeMarker(data);
+
+		if (data != null) {
+			var session = vl$self().player.vl$sessionData();
+			session.markers.add(data);
+		}
 	}
 
 	@Override
@@ -587,6 +600,12 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 			case 0 -> session.topInfoBarOverride = text;
 			case 1 -> session.bottomInfoBarOverride = text;
 		}
+	}
+
+	@Override
+	default void setHardcoreHearts(boolean hardcore) {
+		var session = vl$self().player.vl$sessionData();
+		session.hardcoreHearts = hardcore;
 	}
 
 	@Override
@@ -613,14 +632,26 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	default TextureAtlas getTextureAtlas(SpriteKey sprite) {
-		if (sprite.atlas() == SpriteKey.BLOCKS) {
+		if (sprite.isBlock()) {
 			return getBlockAtlas();
-		} else if (sprite.atlas() == SpriteKey.PARTICLES) {
+		} else if (sprite.isParticle()) {
 			return getParticleAtlas();
-		} else if (sprite.atlas() == SpriteKey.GUI) {
+		} else if (sprite.isGui()) {
 			return getGuiAtlas();
 		} else {
 			return vl$self().getModelManager().getAtlas(sprite.atlas());
+		}
+	}
+
+	default TextureAtlas getAtlasFromTexture(ResourceLocation atlas) {
+		if (atlas.equals(SpriteKey.BLOCKS)) {
+			return getBlockAtlas();
+		} else if (atlas.equals(SpriteKey.PARTICLES)) {
+			return getParticleAtlas();
+		} else if (atlas.equals(SpriteKey.GUI)) {
+			return getGuiAtlas();
+		} else {
+			return vl$self().getModelManager().getAtlas(atlas);
 		}
 	}
 
@@ -630,6 +661,10 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	default <T> void updateServerDataValue(DataKey<T> key, T value) {
 		c2s(new UpdateServerDataValuePayload(List.of(new DataMapValue(key, value))));
+	}
+
+	default <T> void updatePlayerDataValue(UUID player, DataKey<T> key, T value) {
+		c2s(new UpdatePlayerDataValuePayload(player, List.of(new DataMapValue(key, value))));
 	}
 
 	default void runClientCommand(String command) {
@@ -655,5 +690,23 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	default float getEffectScale() {
 		return vl$self().getWindow().getGuiScaledHeight() / 1080F;
+	}
+
+	default int vl$reloadCount() {
+		return 0;
+	}
+
+	default void vl$exitToTitle() {
+		var mc = vl$self();
+		mc.level.disconnect();
+
+		if (mc.isLocalServer()) {
+			mc.disconnect(new GenericMessageScreen(Component.translatable("menu.savingLevel")));
+		} else {
+			mc.disconnect();
+		}
+
+		mc.setScreen(new TitleScreen());
+		NeoForge.EVENT_BUS.post(new MainMenuOpenedEvent(mc, false));
 	}
 }

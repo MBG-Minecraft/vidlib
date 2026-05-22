@@ -7,12 +7,14 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.type.ImString;
+import net.minecraft.core.Registry;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 import java.util.function.Function;
 
 public class EnumImBuilder<E> implements ImBuilder<E> {
@@ -22,15 +24,23 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 	//public static final ImBuilderType<LiquidSettings> LIQUID_SETTINGS_TYPE = () -> new EnumImBuilder<>(LiquidSettings.values(), LiquidSettings.IGNORE_WATERLOGGING);
 	public static final ImBuilderType<InteractionHand> HAND_TYPE = () -> new EnumImBuilder<>(InteractionHand.values(), InteractionHand.MAIN_HAND);
 
+	public static <T> EnumImBuilder<T> ofRegistry(Registry<T> registry, @Nullable T defaultValue, Function<T, String> nameGetter) {
+		var builder = new EnumImBuilder<>(registry.stream().toList(), defaultValue);
+		builder.nameGetter = nameGetter;
+		return builder;
+	}
+
 	public static final ImString SEARCH = ImGuiUtils.resizableString();
 
-	public final List<E> options;
+	public final Collection<E> options;
 	public final Object[] value;
+	public boolean allowNull;
 	public Function<E, String> nameGetter;
 
-	public EnumImBuilder(List<E> options, E defaultValue) {
+	public EnumImBuilder(Collection<E> options, @Nullable E defaultValue) {
 		this.options = options;
 		this.value = new Object[]{defaultValue};
+		this.allowNull = defaultValue == null;
 		this.nameGetter = (Function) KLibCodecs.DEFAULT_NAME_GETTER;
 	}
 
@@ -38,8 +48,8 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 		this(Arrays.asList(options), defaultValue);
 	}
 
-	public EnumImBuilder(List<E> options) {
-		this(options, options.getFirst());
+	public EnumImBuilder(Collection<E> options) {
+		this(options, null);
 	}
 
 	public EnumImBuilder(E[] options) {
@@ -59,7 +69,12 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		return graphics.combo("###enum", value, options, nameGetter, SEARCH);
+		return graphics.combo("###enum", value, allowNull ? "Not Set" : "", options, nameGetter, SEARCH);
+	}
+
+	@Override
+	public boolean isValid() {
+		return value[0] != null;
 	}
 
 	@Override

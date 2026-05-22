@@ -13,11 +13,6 @@ public enum EmptyIcon implements Icon {
 	}
 
 	@Override
-	public IconHolder holder() {
-		return IconHolder.EMPTY;
-	}
-
-	@Override
 	public String toString() {
 		return "empty";
 	}
