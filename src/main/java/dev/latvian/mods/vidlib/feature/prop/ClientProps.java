@@ -5,6 +5,7 @@ import dev.latvian.mods.klib.gl.GLDebugLog;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.util.Cast;
+import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
@@ -14,7 +15,9 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 import java.util.ArrayList;
@@ -40,32 +43,46 @@ public class ClientProps extends Props<ClientLevel> {
 		level.getProps().reloadAll();
 	}
 
+	@AutoInit(AutoInit.Type.ASSETS_CLOSED)
+	public static void assetsClosed() {
+		for (var holder : PropRenderer.ALL.get().values()) {
+			if (holder.unit() instanceof AutoCloseable c) {
+				try {
+					c.close();
+				} catch (Exception ex) {
+					VidLib.LOGGER.error("Error closing resources of " + holder.type() + " renderer", ex);
+				}
+			}
+		}
+	}
+
 	public final Map<RenderLevelStageEvent.Stage, List<RenderedProp<?>>> stages;
+	public final Set<PropRenderer<?>> unitRenderers;
 	private final List<PropRenderContext<?>> sortedProps;
 
 	public ClientProps(ClientLevel level) {
 		super(level);
 		this.stages = new Reference2ObjectOpenHashMap<>();
 		this.sortedProps = new ArrayList<>();
-	}
-
-	@Override
-	public void add(Prop prop) {
-		super.add(prop);
+		this.unitRenderers = new ReferenceOpenHashSet<>();
 	}
 
 	@Override
 	protected void onAdded(Prop prop) {
-		var rendererFactory = PropRenderer.ALL.get().get(prop.type);
+		var holder = PropRenderer.ALL.get().get(prop.type);
 
-		if (rendererFactory == null) {
+		if (holder == null) {
 			return;
 		}
 
-		var renderer = rendererFactory.apply(prop);
+		var renderer = holder.rendererFactory().apply(prop);
 
 		if (renderer == PropRenderer.INVISIBLE) {
 			return;
+		}
+
+		if (renderer == holder.unit()) {
+			unitRenderers.add(renderer);
 		}
 
 		var renderedProp = new RenderedProp(prop, renderer);
@@ -77,6 +94,7 @@ public class ClientProps extends Props<ClientLevel> {
 
 	public void reloadAll() {
 		stages.clear();
+		unitRenderers.clear();
 
 		for (var list : propLists.values()) {
 			for (var prop : list) {
@@ -127,6 +145,12 @@ public class ClientProps extends Props<ClientLevel> {
 
 		if (ReplayProp.MAP != null && ReplayProp.LIST != null && !tick) {
 			levelProps.map.values().removeIf(prop -> prop.removed == PropRemoveType.TIME_TRAVEL);
+		}
+	}
+
+	public void setupAll(Minecraft mc, FrameGraphSetupEvent event) {
+		for (var renderer : unitRenderers) {
+			renderer.setup(mc, event);
 		}
 	}
 

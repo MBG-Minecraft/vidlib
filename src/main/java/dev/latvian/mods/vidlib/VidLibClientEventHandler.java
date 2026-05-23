@@ -669,6 +669,7 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void loggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
+		AutoInit.Type.ASSETS_CLOSED.invoke();
 	}
 
 	@SubscribeEvent

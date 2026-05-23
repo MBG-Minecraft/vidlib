@@ -183,6 +183,8 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 		CanvasImpl.createHandles(mc, event.getFrameGrapBuilder(), event.getRenderTargetDescriptor());
 		// event.enableOutlineProcessing();
+
+		mc.level.getProps().setupAll(mc, event);
 	}
 
 	default Vector2dc vl$getCameraShakeOffset(float delta) {

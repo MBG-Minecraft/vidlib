@@ -11,7 +11,7 @@ import org.joml.Matrix4f;
 
 public class ImagePropRenderer implements PropRenderer<ImageProp> {
 	@ClientAutoRegister
-	public static final Holder HOLDER = new Holder(ImageProp.TYPE, new ImagePropRenderer());
+	public static final Holder HOLDER = PropRenderer.holder(ImageProp.TYPE, new ImagePropRenderer());
 
 	@Override
 	public void render(PropRenderContext<ImageProp> ctx) {
