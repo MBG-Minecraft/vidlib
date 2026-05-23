@@ -167,19 +167,19 @@ public class VidLibEventHandler {
 		}
 	}
 
-	@SubscribeEvent
+	@SubscribeEvent(priority = EventPriority.HIGH)
 	public static void serverStarting(ServerStartingEvent event) {
 		SimplePacketPayload.S2C.set(0L);
 		gameLoaded();
 	}
 
-	@SubscribeEvent
+	@SubscribeEvent(priority = EventPriority.HIGH)
 	public static void serverStarted(ServerStartedEvent event) {
 		CommonGameEngine.INSTANCE.setupServer(event.getServer());
 		AutoInit.Type.SERVER_STARTED.invoke(event.getServer());
 	}
 
-	@SubscribeEvent
+	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void serverStopped(ServerStoppedEvent event) {
 		GenericVLRegistry.releaseServerHolders();
 
@@ -190,20 +190,17 @@ public class VidLibEventHandler {
 		}
 
 		AutoInit.Type.SAVE_GAME.invoke();
+		AutoInit.Type.DATA_CLOSED.invoke();
 	}
 
-	@SubscribeEvent
+	@SubscribeEvent(priority = EventPriority.HIGH)
 	public static void serverPreTick(ServerTickEvent.Pre event) {
 		event.getServer().vl$preTick(event.getServer().getPauseType());
 	}
 
-	@SubscribeEvent
+	@SubscribeEvent(priority = EventPriority.LOW)
 	public static void serverPostTick(ServerTickEvent.Post event) {
 		event.getServer().vl$postTick(event.getServer().getPauseType());
-	}
-
-	@SubscribeEvent
-	public static void levelLoaded(LevelEvent.Load event) {
 	}
 
 	@SubscribeEvent

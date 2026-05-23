@@ -8,6 +8,7 @@ import dev.latvian.mods.klib.io.ByteArrayIoSupplier;
 import dev.latvian.mods.klib.io.StringIoSupplier;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
@@ -42,6 +43,8 @@ public record DynamicResources(
 	).apply(instance, DynamicResources::new));
 
 	public static List<PackResources> injectPackResources(PackType packType, List<PackResources> packResourcesList) {
+		(packType == PackType.CLIENT_RESOURCES ? AutoInit.Type.ASSETS_CLOSED : AutoInit.Type.DATA_CLOSED).invoke();
+
 		VidLib.LOGGER.info("Loading Dynamic Resources...");
 		var packResources = new Object2ObjectOpenHashMap<ResourceLocation, IoSupplier<InputStream>>();
 

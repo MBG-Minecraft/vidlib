@@ -16,7 +16,7 @@ import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
 
 public class ShapePropRenderer implements PropRenderer<ShapeProp> {
 	@ClientAutoRegister
-	public static final Holder HOLDER = new Holder(ShapeProp.TYPE, new ShapePropRenderer());
+	public static final Holder HOLDER = PropRenderer.holder(ShapeProp.TYPE, new ShapePropRenderer());
 
 	@Override
 	public void render(PropRenderContext<ShapeProp> ctx) {

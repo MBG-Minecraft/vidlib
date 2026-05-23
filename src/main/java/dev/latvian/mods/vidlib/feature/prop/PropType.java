@@ -21,6 +21,7 @@ import net.minecraft.Util;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -227,5 +228,21 @@ public record PropType<P extends Prop>(
 
 	public void readReplayUpdate(long now, int propId, RegistryAccess registryAccess, byte[] update, boolean allData, BiConsumer<PropData<?, ?>, Object> setData) {
 		readUpdate(propId, registryAccess, update, allData, setData);
+	}
+
+	@Override
+	@NotNull
+	public String toString() {
+		return id.toString();
+	}
+
+	@Override
+	public int hashCode() {
+		return id.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj == this;
 	}
 }

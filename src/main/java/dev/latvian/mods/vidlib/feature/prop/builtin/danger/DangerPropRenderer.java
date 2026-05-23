@@ -13,7 +13,7 @@ import org.joml.Vector3d;
 
 public class DangerPropRenderer implements PropRenderer<DangerProp> {
 	@ClientAutoRegister
-	public static final Holder HOLDER = new Holder(DangerProp.TYPE, new DangerPropRenderer());
+	public static final Holder HOLDER = PropRenderer.holder(DangerProp.TYPE, new DangerPropRenderer());
 
 	@Override
 	public void render(PropRenderContext<DangerProp> ctx) {

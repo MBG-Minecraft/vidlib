@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.prop.builtin.geodisplay;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
+import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
 import dev.latvian.mods.vidlib.feature.prop.geo.GeoPropRenderer;
 import dev.latvian.mods.vidlib.integration.VidLibGeoDataTickets;
 import net.minecraft.client.Minecraft;
@@ -10,7 +11,7 @@ import software.bernie.geckolib.renderer.base.GeoRenderState;
 
 public class GeoDisplayPropRenderer extends GeoPropRenderer<GeoDisplayProp> {
 	@ClientAutoRegister
-	public static final Holder HOLDER = new Holder(GeoDisplayProp.TYPE, new GeoDisplayPropRenderer());
+	public static final Holder HOLDER = PropRenderer.holder(GeoDisplayProp.TYPE, new GeoDisplayPropRenderer());
 
 	public GeoDisplayPropRenderer() {
 		super(new GeoDisplayPropModel());

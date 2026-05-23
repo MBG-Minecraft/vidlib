@@ -13,7 +13,7 @@ import org.joml.Matrix4f;
 
 public class TextPropRenderer implements PropRenderer<TextProp> {
 	@ClientAutoRegister
-	public static final Holder HOLDER = new Holder(TextProp.TYPE, new TextPropRenderer());
+	public static final Holder HOLDER = PropRenderer.holder(TextProp.TYPE, new TextPropRenderer());
 
 	@Override
 	public void render(PropRenderContext<TextProp> ctx) {

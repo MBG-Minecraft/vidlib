@@ -24,15 +24,15 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
+import net.minecraft.world.phys.Vec3;
 import org.joml.SimplexNoise;
 
 public class NPCPropRenderer implements PropRenderer<NPCProp> {
 	private static final PlayerSkin[] SINGLE_SKIN = {PlayerSkins.DEFAULT_WIDE_SKINS[0]};
 
 	@ClientAutoRegister
-	public static final Holder HOLDER = new Holder(NPCProp.TYPE, new NPCPropRenderer());
+	public static final Holder HOLDER = PropRenderer.holder(NPCProp.TYPE, new NPCPropRenderer());
 
 	private RemotePlayer fakePlayer;
 
@@ -136,7 +136,9 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 		var rng = new XoroshiroRandomSource(Double.doubleToLongBits(p.pos.x), Double.doubleToLongBits(p.pos.z));
 		for (int i = skinIndices.length - 1; i > 0; i--) {
 			int j = (int) (rng.nextLong() % (i + 1));
-			if (j < 0) j += i + 1;
+			if (j < 0) {
+				j += i + 1;
+			}
 			int tmp = skinIndices[i];
 			skinIndices[i] = skinIndices[j];
 			skinIndices[j] = tmp;

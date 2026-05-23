@@ -2,8 +2,11 @@ package dev.latvian.mods.vidlib.feature.prop;
 
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
+import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Set;
@@ -37,19 +40,27 @@ public interface PropRenderer<P extends Prop> {
 		}
 	};
 
-	record Holder(PropType<?> type, Function<Prop, PropRenderer<?>> rendererFactory) {
-		public Holder(PropType<?> type, PropRenderer<?> renderer) {
-			this(type, prop -> renderer);
-		}
+	static Holder holder(PropType<?> type, PropRenderer<?> unitRenderer) {
+		return new Holder(type, prop -> unitRenderer, unitRenderer);
 	}
 
-	Lazy<Map<PropType<?>, Function<Prop, PropRenderer<?>>>> ALL = Lazy.identityMap(map -> {
+	static Holder holder(PropType<?> type, Function<Prop, PropRenderer<?>> rendererFactory) {
+		return new Holder(type, rendererFactory, null);
+	}
+
+	record Holder(PropType<?> type, Function<Prop, PropRenderer<?>> rendererFactory, @Nullable PropRenderer<?> unit) {
+	}
+
+	Lazy<Map<PropType<?>, Holder>> ALL = Lazy.identityMap(map -> {
 		for (var s : ClientAutoRegister.SCANNED.get()) {
-			if (s.value() instanceof Holder(PropType<?> type, Function<Prop, PropRenderer<?>> rendererFactory)) {
-				map.put(type, rendererFactory);
+			if (s.value() instanceof Holder h) {
+				map.put(h.type, h);
 			}
 		}
 	});
+
+	default void setup(Minecraft mc, FrameGraphSetupEvent event) {
+	}
 
 	void render(PropRenderContext<P> ctx);
 
