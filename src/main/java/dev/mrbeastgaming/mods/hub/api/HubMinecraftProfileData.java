@@ -24,5 +24,9 @@ public record HubMinecraftProfileData(
 		Codec.STRING.optionalFieldOf("cape_url", "").forGetter(HubMinecraftProfileData::capeUrl)
 	).apply(instance, HubMinecraftProfileData::new));
 
+	public record LinkData(HubMinecraftProfileData profile, String token) {
+	}
+
 	public static HubMinecraftProfileData SELF = null;
+	public static String TOKEN = "";
 }

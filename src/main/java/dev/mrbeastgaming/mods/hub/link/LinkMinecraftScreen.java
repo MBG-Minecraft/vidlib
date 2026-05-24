@@ -45,8 +45,8 @@ public class LinkMinecraftScreen extends ConfirmScreen {
 	}
 
 	@Nullable
-	private static HubMinecraftProfileData loadHubMinecraftProfile(Minecraft mc) {
-		HubMinecraftProfileData data = null;
+	private static HubMinecraftProfileData.LinkData loadHubMinecraftProfile(Minecraft mc) {
+		HubMinecraftProfileData.LinkData data = null;
 		var serverId = HubClientSessionData.AUTH_SERVER_ID;
 
 		if (!serverId.isEmpty()) {
@@ -59,7 +59,8 @@ public class LinkMinecraftScreen extends ConfirmScreen {
 			}
 		}
 
-		HubMinecraftProfileData.SELF = data;
+		HubMinecraftProfileData.SELF = data == null ? null : data.profile();
+		HubMinecraftProfileData.TOKEN = data == null ? null : data.token();
 		return data;
 	}
 

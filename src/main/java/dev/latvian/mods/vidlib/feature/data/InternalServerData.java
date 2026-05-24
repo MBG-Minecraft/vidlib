@@ -30,6 +30,8 @@ public interface InternalServerData {
 	DataKey<Boolean> BLOCK_GRAVITY = DataKey.SERVER.createBoolean("block_gravity", false);
 	DataKey<List<Waypoint>> WAYPOINTS = DataKey.SERVER.createDefault("waypoints", Waypoint.LIST_DATA_TYPE, List.of(), null);
 	DataKey<MapTextureOverrides> MAP_TEXTURE_OVERRIDES = DataKey.SERVER.createDefault("map_texture_overrides", MapTextureOverrides.DATA_TYPE, MapTextureOverrides.EMPTY, null);
+	DataKey<Integer> MIN_FAKE_LAG = DataKey.SERVER.createVarInt("min_fake_lag", 0, 0, 1000);
+	DataKey<Integer> MAX_FAKE_LAG = DataKey.SERVER.createVarInt("max_fake_lag", 0, 0, 1000);
 
 	@AutoInit
 	static void bootstrap() {

@@ -4,7 +4,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dev.latvian.mods.klib.util.JsonUtils;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import org.jetbrains.annotations.Nullable;
@@ -85,7 +84,7 @@ public class HubGateway implements WebSocket.Listener {
 	}
 
 	private void process(String message) {
-		VidLib.LOGGER.info(message);
+		// VidLib.LOGGER.info(message);
 
 		try {
 			var json = JsonUtils.parse(message).getAsJsonObject();
