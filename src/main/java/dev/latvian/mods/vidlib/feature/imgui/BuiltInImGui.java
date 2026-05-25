@@ -37,7 +37,7 @@ import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
-import dev.mrbeastgaming.mods.hub.link.LinkHubUserScreen;
+import dev.mrbeastgaming.mods.hub.client.LinkHubUserScreen;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiWindowFlags;

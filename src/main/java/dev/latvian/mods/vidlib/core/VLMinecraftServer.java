@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.clock.SyncClocksPayload;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
+import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
@@ -25,6 +26,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.LevelResource;
@@ -139,6 +141,18 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 		}
 
 		packetsToEveryone.send(this);
+
+		int minFakeLag0 = get(InternalServerData.MIN_FAKE_LAG);
+		int maxFakeLag0 = get(InternalServerData.MAX_FAKE_LAG);
+		int minFakeLag = Math.min(minFakeLag0, maxFakeLag0);
+		int maxFakeLag = Math.max(minFakeLag0, maxFakeLag0);
+
+		if (maxFakeLag > 0 && minFakeLag >= 0) {
+			try {
+				Thread.sleep(Mth.ceil(vl$level().random.nextRange(minFakeLag, maxFakeLag)));
+			} catch (Exception ignore) {
+			}
+		}
 	}
 
 	default void setClock(ResourceLocation id, ClockValue value) {

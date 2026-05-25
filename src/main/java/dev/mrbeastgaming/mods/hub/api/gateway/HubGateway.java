@@ -3,8 +3,8 @@ package dev.mrbeastgaming.mods.hub.api.gateway;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import dev.latvian.mods.klib.util.JsonUtils;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import org.jetbrains.annotations.Nullable;
@@ -70,6 +70,10 @@ public class HubGateway implements WebSocket.Listener {
 		var ws = webSocket;
 
 		if (ws != null) {
+			if (params == null) {
+				return ws.sendText(new JsonPrimitive(method).toString(), true);
+			}
+
 			var json = new JsonObject();
 			json.addProperty("jsonrpc", "2.0");
 			json.addProperty("method", method);
@@ -85,29 +89,48 @@ public class HubGateway implements WebSocket.Listener {
 	}
 
 	private void process(String message) {
-		VidLib.LOGGER.info(message);
+		// VidLib.LOGGER.info(message);
+
+		if (eventHandlers == null) {
+			eventHandlers = new HashMap<>();
+			PlatformHelper.CURRENT.collectGatewayEventHandlers(eventHandlers);
+		}
 
 		try {
-			var json = JsonUtils.parse(message).getAsJsonObject();
-			var method = json.get("method").getAsString();
-			var params = json.get("params");
-			var id = json.has("id") ? json.get("id").getAsLong() : 0L;
-			var event = new HubGatewayEvent(this, id, method, params);
+			var json = JsonUtils.parse(message);
 
-			if (eventHandlers == null) {
-				eventHandlers = new HashMap<>();
-				PlatformHelper.CURRENT.collectGatewayEventHandlers(eventHandlers);
-			}
-
-			var callback = eventHandlers.get(method);
-
-			if (callback != null) {
-				callback.accept(event);
+			if (json.isJsonArray()) {
+				for (var e : json.getAsJsonArray()) {
+					handle0(e);
+				}
 			} else {
-				event.respondWithError(-32601, "Method not found");
+				handle0(json);
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
+		}
+	}
+
+	private void handle0(JsonElement json) {
+		if (json.isJsonObject()) {
+			var obj = json.getAsJsonObject();
+			var method = obj.get("method").getAsString();
+			var params = obj.get("params");
+			var id = obj.has("id") ? obj.get("id").getAsLong() : 0L;
+			handle(method, params, id);
+		} else if (json.isJsonPrimitive()) {
+			handle(json.getAsString(), null, 0L);
+		}
+	}
+
+	private void handle(String method, JsonElement params, long id) {
+		var event = new HubGatewayEvent(this, id, method, params);
+		var callback = eventHandlers.get(method);
+
+		if (callback != null) {
+			callback.accept(event);
+		} else {
+			event.respondWithError(-32601, "Method not found");
 		}
 	}
 

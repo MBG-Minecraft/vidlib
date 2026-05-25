@@ -16,6 +16,8 @@ import dev.latvian.mods.vidlib.feature.registry.GenericVLRegistry;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
+import io.netty.util.NettyRuntime;
+import io.netty.util.internal.SystemPropertyUtil;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
@@ -169,6 +171,7 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent(priority = EventPriority.HIGH)
 	public static void serverStarting(ServerStartingEvent event) {
+		VidLib.LOGGER.info("Netty Threads: " + Math.max(1, SystemPropertyUtil.getInt("io.netty.eventLoopThreads", NettyRuntime.availableProcessors() * 2)));
 		SimplePacketPayload.S2C.set(0L);
 		gameLoaded();
 	}

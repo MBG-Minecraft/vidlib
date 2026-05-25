@@ -233,8 +233,12 @@ public interface HubAPI {
 		});
 	}
 
-	static HubMinecraftProfileData apiMinecraftLink(String name) throws Exception {
+	static HubMinecraftProfileData.LinkData apiMinecraftLink(String name) throws Exception {
 		var response = sendJsonRequest(request("/api/minecraft/link/" + name, Tristate.TRUE).GET().build()).getAsJsonObject();
-		return HubMinecraftProfileData.CODEC.parse(JsonOps.INSTANCE, response).getOrThrow();
+
+		return new HubMinecraftProfileData.LinkData(
+			HubMinecraftProfileData.CODEC.parse(JsonOps.INSTANCE, response).getOrThrow(),
+			response.has("token") ? response.get("token").getAsString() : ""
+		);
 	}
 }

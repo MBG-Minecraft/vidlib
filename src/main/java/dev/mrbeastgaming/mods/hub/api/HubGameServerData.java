@@ -9,12 +9,12 @@ import java.util.Optional;
 
 public record HubGameServerData(
 	String name,
-	String ip,
+	String location,
 	Optional<byte[]> icon
 ) {
 	public static final Codec<HubGameServerData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Codec.STRING.fieldOf("name").forGetter(HubGameServerData::name),
-		Codec.STRING.fieldOf("ip").forGetter(HubGameServerData::ip),
+		Codec.STRING.fieldOf("location").forGetter(HubGameServerData::location),
 		KLibCodecs.B64_BYTE_ARRAY.optionalFieldOf("icon").forGetter(HubGameServerData::icon)
 	).apply(instance, HubGameServerData::new));
 
