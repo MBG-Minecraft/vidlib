@@ -4,6 +4,7 @@ import com.google.gson.JsonPrimitive;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.core.VLJoinMultiplayerScreen;
 import dev.mrbeastgaming.mods.hub.api.HubGameServerData;
 import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.api.HubUserData;
@@ -88,6 +89,14 @@ public class ClientGatewayEvents {
 
 	private static void serverListUpdated(HubGatewayEvent event) {
 		HubGameServerData.CURRENT = event.params() == null ? List.of() : HubGameServerData.LIST_CODEC.parse(JsonOps.INSTANCE, event.params()).getOrThrow();
+
+		var mc = Minecraft.getInstance();
+
+		mc.execute(() -> {
+			if (mc.screen instanceof VLJoinMultiplayerScreen screen) {
+				screen.vl$refresh();
+			}
+		});
 	}
 
 	private static void projectUpdated(HubGatewayEvent event) {

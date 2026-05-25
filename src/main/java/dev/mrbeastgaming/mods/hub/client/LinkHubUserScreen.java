@@ -1,4 +1,4 @@
-package dev.mrbeastgaming.mods.hub.link;
+package dev.mrbeastgaming.mods.hub.client;
 
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import net.minecraft.Util;

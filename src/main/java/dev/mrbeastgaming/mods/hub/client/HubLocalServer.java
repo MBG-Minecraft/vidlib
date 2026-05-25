@@ -1,4 +1,4 @@
-package dev.mrbeastgaming.mods.hub.link;
+package dev.mrbeastgaming.mods.hub.client;
 
 import dev.latvian.apps.tinyhttp.HTTPServer;
 import dev.latvian.apps.tinyhttp.http.HTTPRequest;

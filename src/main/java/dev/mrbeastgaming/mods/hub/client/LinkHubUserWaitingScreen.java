@@ -1,4 +1,4 @@
-package dev.mrbeastgaming.mods.hub.link;
+package dev.mrbeastgaming.mods.hub.client;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;

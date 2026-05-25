@@ -1,4 +1,4 @@
-package dev.mrbeastgaming.mods.hub.link;
+package dev.mrbeastgaming.mods.hub.client;
 
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
