@@ -1,6 +1,12 @@
 package dev.latvian.mods.vidlib.feature.decal;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.JOMLCodecs;
+import dev.latvian.mods.klib.codec.JOMLStreamCodecs;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.vidlib.feature.client.ColorBlendMode;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
@@ -10,8 +16,11 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.Vector3dImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 import imgui.flag.ImGuiSliderFlags;
+import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.core.Position;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 
@@ -35,6 +44,45 @@ public class Decal {
 		return d;
 	}
 
+	public static final Codec<Decal> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+		DecalType.CODEC.optionalFieldOf("type", DecalType.CYLINDER).forGetter(d -> d.type),
+		JOMLCodecs.DVEC3.optionalFieldOf("position", new Vector3d()).forGetter(d -> d.position),
+		Codec.FLOAT.optionalFieldOf("inner_size", 0F).forGetter(d -> d.innerSize),
+		Codec.FLOAT.optionalFieldOf("outer_size", 1F).forGetter(d -> d.outerSize),
+		DecalFillType.CODEC.optionalFieldOf("fill_type", DecalFillType.SOLID).forGetter(d -> d.fillType),
+		Codec.FLOAT.optionalFieldOf("fill_size", 1F).forGetter(d -> d.fillSize),
+		Codec.FLOAT.optionalFieldOf("fill_thickness", 0.0625F).forGetter(d -> d.fillThickness),
+		Codec.FLOAT.optionalFieldOf("height_scale", 1F).forGetter(d -> d.heightScale),
+		Codec.FLOAT.optionalFieldOf("rotation", 0F).forGetter(d -> d.rotation),
+		Color.CODEC.optionalFieldOf("inner_color", Color.WHITE).forGetter(d -> d.innerColor),
+		Color.CODEC.optionalFieldOf("outer_color", Color.WHITE).forGetter(d -> d.outerColor),
+		Codec.BOOL.optionalFieldOf("surface", false).forGetter(d -> d.surface),
+		Codec.BOOL.optionalFieldOf("terrain", false).forGetter(d -> d.terrain),
+		ColorBlendMode.CODEC.optionalFieldOf("blend_mode", ColorBlendMode.MULTIPLICATIVE).forGetter(d -> d.blendMode),
+		Codec.FLOAT.optionalFieldOf("edges", 4F).forGetter(d -> d.edges)
+	).apply(instance, Decal::new));
+
+	public static final StreamCodec<ByteBuf, Decal> STREAM_CODEC = CompositeStreamCodec.of(
+		DecalType.STREAM_CODEC, d -> d.type,
+		JOMLStreamCodecs.DVEC3, d -> d.position,
+		ByteBufCodecs.FLOAT, d -> d.innerSize,
+		ByteBufCodecs.FLOAT, d -> d.outerSize,
+		DecalFillType.STREAM_CODEC, d -> d.fillType,
+		ByteBufCodecs.FLOAT, d -> d.fillSize,
+		ByteBufCodecs.FLOAT, d -> d.fillThickness,
+		ByteBufCodecs.FLOAT, d -> d.heightScale,
+		ByteBufCodecs.FLOAT, d -> d.rotation,
+		Color.STREAM_CODEC, d -> d.innerColor,
+		Color.STREAM_CODEC, d -> d.outerColor,
+		ByteBufCodecs.BOOL, d -> d.surface,
+		ByteBufCodecs.BOOL, d -> d.terrain,
+		ColorBlendMode.STREAM_CODEC, d -> d.blendMode,
+		ByteBufCodecs.FLOAT, d -> d.edges,
+		Decal::new
+	);
+
+	public static final DataType<Decal> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, Decal.class);
+
 	public Decal parent;
 	public DecalType type;
 	public Vector3d position;
@@ -51,6 +99,41 @@ public class Decal {
 	public boolean terrain;
 	public ColorBlendMode blendMode;
 	public float edges;
+
+	private Decal(
+		DecalType type,
+		Vector3d position,
+		float innerSize,
+		float outerSize,
+		DecalFillType fillType,
+		float fillSize,
+		float fillThickness,
+		float heightScale,
+		float rotation,
+		Color innerColor,
+		Color outerColor,
+		boolean surface,
+		boolean terrain,
+		ColorBlendMode blendMode,
+		float edges
+	) {
+		this.parent = null;
+		this.type = type;
+		this.position = position;
+		this.innerSize = innerSize;
+		this.outerSize = outerSize;
+		this.fillType = fillType;
+		this.fillSize = fillSize;
+		this.fillThickness = fillThickness;
+		this.heightScale = heightScale;
+		this.rotation = rotation;
+		this.innerColor = innerColor;
+		this.outerColor = outerColor;
+		this.surface = surface;
+		this.terrain = terrain;
+		this.blendMode = blendMode;
+		this.edges = edges;
+	}
 
 	public Decal(Vector3d position) {
 		this.parent = null;

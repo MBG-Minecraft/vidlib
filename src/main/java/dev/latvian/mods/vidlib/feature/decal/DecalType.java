@@ -1,7 +1,12 @@
 package dev.latvian.mods.vidlib.feature.decal;
 
+import com.mojang.serialization.Codec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
+import org.jetbrains.annotations.NotNull;
 
 public enum DecalType implements StringRepresentable {
 	// Static types
@@ -19,7 +24,9 @@ public enum DecalType implements StringRepresentable {
 
 	public static final DecalType[] VALUES = values();
 	public static final DecalType[] UNIT = {NONE};
-	public static final DataType<DecalType> DATA_TYPE = DataType.of(VALUES);
+	public static final Codec<DecalType> CODEC = StringRepresentable.fromEnum(() -> VALUES);
+	public static final StreamCodec<ByteBuf, DecalType> STREAM_CODEC = KLibStreamCodecs.enumValue(VALUES);
+	public static final DataType<DecalType> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, DecalType.class);
 
 	public final String name;
 	public final int shaderId;
@@ -30,7 +37,7 @@ public enum DecalType implements StringRepresentable {
 	}
 
 	@Override
-	public String getSerializedName() {
+	public @NotNull String getSerializedName() {
 		return name;
 	}
 }
