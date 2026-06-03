@@ -7,6 +7,7 @@ uniform sampler2D DataSampler;
 uniform int Count;
 uniform mat4 InverseViewProjectionMat;
 uniform float GameTime;
+uniform int NoSceneSample;
 
 in vec2 texCoord;
 in vec2 oneTexel;
@@ -122,6 +123,21 @@ vec3 clip(float depth) {
 	return homogenousPos.xyz / homogenousPos.w;
 }
 
+vec3 color;
+vec3 premulAccum;
+float alphaAccum;
+bool modified;
+
+void applyDecal(vec4 decalColor, int blendMode) {
+	if (NoSceneSample == 0) {
+		color = blend(color, decalColor, blendMode);
+	} else {
+		premulAccum = premulAccum * (1.0 - decalColor.a) + decalColor.rgb * decalColor.a;
+		alphaAccum = alphaAccum * (1.0 - decalColor.a) + decalColor.a;
+	}
+	modified = true;
+}
+
 void main() {
 	if (Count == 0) {
 		discard;
@@ -132,8 +148,13 @@ void main() {
 	vec3 worldPos = clip(depth);
 	vec3 terrainWorldPos = clip(terrainDepth);
 
-	vec3 color = texture(InSampler, texCoord).rgb;
-	bool modified = false;
+	premulAccum = vec3(0.0);
+	alphaAccum = 0.0;
+	modified = false;
+
+	if (NoSceneSample == 0) {
+		color = texture(InSampler, texCoord).rgb;
+	}
 
 	for (int y = 0; y < 1024; y++) {
 		if (y >= Count) {
@@ -183,8 +204,7 @@ void main() {
 						}
 
 						if (mod(g.x, fillSize) < fillThickness || mod(g.y, fillSize) < fillThickness || mod(g.z, fillSize) < fillThickness) {
-							color = blend(color, decalColor, blendMode);
-							modified = true;
+							applyDecal(decalColor, blendMode);
 						}
 
 						continue;
@@ -202,22 +222,24 @@ void main() {
 						float time = (fillType == 3) ? (GameTime * 1200.0 * fillSize) : 0.0;
 
 						if (mod(g.x + g.y + g.z + time, fillSize) < fillThickness) {
-							color = blend(color, decalColor, blendMode);
-							modified = true;
+							applyDecal(decalColor, blendMode);
 						}
 
 						continue;
 					}
 				}
 
-				color = blend(color, decalColor, blendMode);
-				modified = true;
+				applyDecal(decalColor, blendMode);
 			}
 		}
 	}
 
 	if (modified) {
-		fragColor = vec4(color, 1.0);
+		if (NoSceneSample == 0) {
+			fragColor = vec4(color, 1.0);
+		} else {
+			fragColor = vec4(premulAccum / alphaAccum, alphaAccum);
+		}
 	} else {
 		discard;
 	}

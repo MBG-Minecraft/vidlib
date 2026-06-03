@@ -38,11 +38,15 @@
 					"name": "InverseViewProjectionMat",
 					"type": "matrix4x4"
 				},
-				{
-					"name": "GameTime",
-					"type": "float"
-				}
-			]
+            {
+                "name": "GameTime",
+                "type": "float"
+            },
+            {
+                "name": "NoSceneSample",
+                "type": "int"
+            }
+        ]
 		},
 		{
 			"vertex_shader": "minecraft:post/blit",
