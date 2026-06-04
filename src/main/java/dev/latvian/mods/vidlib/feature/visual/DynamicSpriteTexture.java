@@ -5,6 +5,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.TextureFormat;
 import dev.latvian.mods.vidlib.core.VLSpriteContents;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.auto.TextureReloadParams;
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.Dumpable;
@@ -14,7 +16,6 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 
 import java.nio.file.Path;
-import java.util.concurrent.Executor;
 import java.util.function.IntUnaryOperator;
 
 public class DynamicSpriteTexture extends AbstractTexture implements Dumpable, EphemeralTexture {
@@ -27,8 +28,8 @@ public class DynamicSpriteTexture extends AbstractTexture implements Dumpable, E
 	}
 
 	@AutoInit(AutoInit.Type.TEXTURES_RELOADED)
-	public static void reload(TextureManager textureManager, Executor backgroundExecutor, Executor gameExecutor) {
-		for (var tex : textureManager.byPath.values()) {
+	public static void reload(TextureReloadParams params) {
+		for (var tex : params.manager().byPath.values()) {
 			if (tex instanceof TextureAtlas atlas) {
 				for (var sprite : atlas.getTextures().values()) {
 					sprite.vl$invalidateDynamicSpriteTexture();

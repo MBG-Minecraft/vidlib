@@ -10,6 +10,7 @@ import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
+import dev.latvian.mods.vidlib.feature.auto.TextureReloadParams;
 import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.util.MiscUtils;
@@ -32,7 +33,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -57,9 +57,9 @@ public class Gallery<K> {
 	}, gallery -> gallery.id);
 
 	@AutoInit(AutoInit.Type.TEXTURES_RELOADED)
-	public static void reload(TextureManager manager, Executor backgroundExecutor, Executor gameExecutor) throws IOException {
+	public static void reload(TextureReloadParams params) throws IOException {
 		for (var gallery : ALL.get().values()) {
-			gallery.load(manager);
+			gallery.load(params.manager());
 		}
 	}
 
@@ -252,7 +252,8 @@ public class Gallery<K> {
 			try {
 				var defaultTex = mc.getTextureManager().getTexture(VidLibTextures.DEFAULT_PLAYER_BODY);
 				mc.getTextureManager().byPath.put(img.textureId(), defaultTex);
-			} catch (Throwable ignored) {}
+			} catch (Throwable ignored) {
+			}
 			return img;
 		}
 	}

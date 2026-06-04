@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.auto.TextureReloadParams;
 import dev.latvian.mods.vidlib.feature.visual.EphemeralTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
@@ -44,6 +45,6 @@ public abstract class TextureManagerMixin {
 			safeClose(entry.getKey(), entry.getValue());
 		}
 
-		AutoInit.Type.TEXTURES_RELOADED.invoke(this, backgroundExecutor, gameExecutor);
+		AutoInit.Type.TEXTURES_RELOADED.invoke(new TextureReloadParams((TextureManager) (Object) this, backgroundExecutor, gameExecutor));
 	}
 }

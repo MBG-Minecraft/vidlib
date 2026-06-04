@@ -64,7 +64,6 @@ import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
-import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubFileType;
 import dev.mrbeastgaming.mods.hub.api.HubMinecraftProfileData;
 import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
@@ -73,7 +72,6 @@ import dev.mrbeastgaming.mods.hub.api.gateway.HubGateway;
 import dev.mrbeastgaming.mods.hub.client.LinkHubUserScreen;
 import dev.mrbeastgaming.mods.hub.client.LinkMinecraftScreen;
 import dev.mrbeastgaming.mods.hub.event.SyncClientFilesHubEvent;
-import dev.mrbeastgaming.mods.hub.file.HubFileUploads;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -740,17 +738,12 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void mainMenuOpened(MainMenuOpenedEvent event) {
-		if (HubUserCapabilities.CURRENT.autoUploadFiles()) {
-			var entries = new ArrayList<HubFileUploads.Entry>();
-			NeoForge.EVENT_BUS.post(new SyncClientFilesHubEvent(entries, event.isFirstTime()));
-
-			if (!entries.isEmpty()) {
-				HubAPI.SEQUENTIAL_EXECUTOR.get().execute(() -> HubFileUploads.syncFiles(entries, VidLibClient.createUploadQueue()));
-			}
-		}
+		VidLibClient.checkFileSync(event.isFirstTime());
 
 		if (HubUserData.SELF == null) {
-			LinkHubUserScreen.open(event.getMinecraft());
+			if (HubUserCapabilities.CURRENT.requireLink()) {
+				LinkHubUserScreen.open(event.getMinecraft());
+			}
 		} else if (HubMinecraftProfileData.SELF == null) {
 			if (!PlatformHelper.CURRENT.isDevEnv()) {
 				LinkMinecraftScreen.handle(event.getMinecraft(), true);

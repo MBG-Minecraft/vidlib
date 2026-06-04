@@ -62,6 +62,7 @@ public class HubLocalServer {
 
 				mc.toast(Component.literal("Logged In"), Component.literal(name));
 				GLFW.glfwFocusWindow(mc.getWindow().getWindow());
+				VidLibClient.checkFileSync(false);
 
 				if (!PlatformHelper.CURRENT.isDevEnv()) {
 					LinkMinecraftScreen.handle(mc, true);
