@@ -19,7 +19,8 @@ public final class Pin {
 		GalleryImageKey.CODEC.optionalFieldOf("icon").forGetter(p -> Optional.ofNullable(p.icon)),
 		Color.CODEC.optionalFieldOf("color", DEFAULT_COLOR).forGetter(p -> p.color),
 		Color.CODEC.optionalFieldOf("background", DEFAULT_BACKGROUND).forGetter(p -> p.background),
-		PinShape.CODEC.optionalFieldOf("shape", PinShape.PIN).forGetter(p -> p.shape)
+		PinShape.CODEC.optionalFieldOf("shape", PinShape.PIN).forGetter(p -> p.shape),
+		Codec.BOOL.optionalFieldOf("always_loaded", false).forGetter(p -> p.alwaysLoaded)
 	).apply(instance, Pin::new));
 
 	public static final Codec<Pin> CODEC = MAP_CODEC.codec();
@@ -29,6 +30,7 @@ public final class Pin {
 	public Color color;
 	public Color background;
 	public PinShape shape;
+	public boolean alwaysLoaded;
 	public PinShape shapeOverride = null;
 
 	public Pin() {
@@ -37,6 +39,7 @@ public final class Pin {
 		this.color = DEFAULT_COLOR;
 		this.background = DEFAULT_BACKGROUND;
 		this.shape = PinShape.PIN;
+		this.alwaysLoaded = false;
 	}
 
 	private Pin(
@@ -44,13 +47,15 @@ public final class Pin {
 		Optional<GalleryImageKey<?>> icon,
 		Color color,
 		Color background,
-		PinShape shape
+		PinShape shape,
+		boolean alwaysLoaded
 	) {
 		this.enabled = enabled;
 		this.icon = icon.orElse(null);
 		this.color = color;
 		this.background = background;
 		this.shape = shape;
+		this.alwaysLoaded = alwaysLoaded;
 	}
 
 	public boolean isSet() {

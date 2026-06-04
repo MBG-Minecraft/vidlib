@@ -29,6 +29,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.TriState;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +43,7 @@ public interface Pins {
 	ImInt ALPHA = new ImInt(255);
 
 	Map<UUID, Pin> PINS = new Object2ObjectOpenHashMap<>();
+	Map<UUID, Vec3> LAST_KNOWN_POSITIONS = new Object2ObjectOpenHashMap<>();
 
 	ImagePreProcessor PRE_PROCESSOR = ImagePreProcessor.FIT_SQUARE.andThen(ImagePreProcessor.CLOSEST_4);
 
@@ -85,13 +87,26 @@ public interface Pins {
 			var pin = entry.getValue();
 
 			if (pin.enabled && pin.isSet()) {
-				var entity = level.getEntity(entry.getKey());
+				var uuid = entry.getKey();
+				var entity = level.getEntity(uuid);
 
 				if (entity != null) {
+					var pos = entity.getPosition(delta).add(0D, entity.getBbHeight() * 1.1D, 0D);
+					LAST_KNOWN_POSITIONS.put(uuid, pos);
 					var img = pin.getImage();
 
 					if (img != null) {
-						list.add(new ScreenPin(entity, pin, img, entity.getPosition(delta).add(0D, entity.getBbHeight() * 1.1D, 0D)));
+						list.add(new ScreenPin(entity, pin, img, pos));
+					}
+				} else if (pin.alwaysLoaded) {
+					var lastPos = LAST_KNOWN_POSITIONS.get(uuid);
+
+					if (lastPos != null) {
+						var img = pin.getImage();
+
+						if (img != null) {
+							list.add(new ScreenPin(null, pin, img, lastPos));
+						}
 					}
 				}
 			}
@@ -170,6 +185,12 @@ public interface Pins {
 		imageImBuilder.set(null);
 
 		if (pin != null && pin.isSet()) {
+			ImGui.sameLine();
+
+			if (ImGui.checkbox("Always Loaded###pin-always-loaded", pin.alwaysLoaded)) {
+				pin.alwaysLoaded = !pin.alwaysLoaded;
+			}
+
 			ImGui.sameLine();
 
 			if (pin.shape.transparentBackground) {
