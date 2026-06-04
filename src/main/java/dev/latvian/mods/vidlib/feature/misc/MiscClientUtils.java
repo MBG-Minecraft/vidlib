@@ -1,5 +1,8 @@
 package dev.latvian.mods.vidlib.feature.misc;
 
+import com.google.common.hash.Hashing;
+import com.mojang.authlib.minecraft.MinecraftProfileTextures;
+import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.latvian.mods.klib.color.Color;
@@ -17,11 +20,16 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -32,6 +40,9 @@ public class MiscClientUtils {
 	public static final ImBoolean PLAYER_HEADWEAR = new ImBoolean(true);
 	private static final char[] POWER = {'K', 'M', 'B', 'T'};
 	public static final ImBoolean SPECTATE_UI = new ImBoolean(false);
+	public static final Map<ResourceLocation, NativeImage> SKIN_IMAGE_MAP = new HashMap<>();
+	public static final Map<UUID, PlayerSkin.Model> UUID_MODEL_MAP = new HashMap<>();
+	public static final Map<String, PlayerSkin.Model> SKIN_MODEL_MAP = new HashMap<>();
 
 	public static void reloadShaders(Minecraft mc) {
 		mc.getShaderManager().reload(CompletableFuture::completedFuture, mc.getResourceManager(), Util.backgroundExecutor(), mc).thenRunAsync(() -> {
@@ -178,5 +189,13 @@ public class MiscClientUtils {
 		}
 
 		return mc.getWindow().getGuiScaledWidth();
+	}
+
+	public static void setModel(UUID uuid, MinecraftProfileTextures textures, PlayerSkin.Model model) {
+		if (textures.skin() != null) {
+			var hash = Hashing.sha1().hashUnencodedChars(textures.skin().getHash()).toString();
+			UUID_MODEL_MAP.put(uuid, model);
+			SKIN_MODEL_MAP.put(hash, model);
+		}
 	}
 }

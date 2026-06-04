@@ -4,8 +4,10 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.DataResult;
 import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.Util;
+import net.minecraft.core.ClientAsset;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -123,5 +125,9 @@ public interface MiscUtils {
 		}
 
 		return lookup;
+	}
+
+	static ClientAsset assetFromPNG(ResourceLocation png) {
+		return new ClientAsset(png.withPath(png.getPath().substring(9, png.getPath().length() - 4)));
 	}
 }
