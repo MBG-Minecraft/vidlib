@@ -1,30 +1,30 @@
 package dev.latvian.mods.vidlib.feature.clothing;
 
-import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.VidLib;
+import net.minecraft.resources.ResourceKey;
 
 import java.util.List;
 
-@AutoInit
 public interface Tracksuits {
-	static Clothing tracksuit(String id) {
-		return new Clothing(ID.video("tracksuit/" + id), ClothingParts.NO_HEAD);
+	static ResourceKey<ClothingSet> create(String id) {
+		return ClothingPresets.createId(VidLib.id("tracksuit/" + id));
 	}
 
-	Clothing BLACK = tracksuit("black");
-	Clothing WHITE = tracksuit("white");
-	Clothing RED = tracksuit("red");
-	Clothing PINK = tracksuit("pink");
-	Clothing MAGENTA = tracksuit("magenta");
-	Clothing PURPLE = tracksuit("purple");
-	Clothing BLUE = tracksuit("blue");
-	Clothing CYAN = tracksuit("cyan");
-	Clothing GREEN = tracksuit("green");
-	Clothing LIME = tracksuit("lime");
-	Clothing YELLOW = tracksuit("yellow");
-	Clothing ORANGE = tracksuit("orange");
+	ResourceKey<ClothingSet> BLACK = create("black");
+	ResourceKey<ClothingSet> GRAY = create("gray");
+	ResourceKey<ClothingSet> WHITE = create("white");
+	ResourceKey<ClothingSet> RED = create("red");
+	ResourceKey<ClothingSet> PINK = create("pink");
+	ResourceKey<ClothingSet> MAGENTA = create("magenta");
+	ResourceKey<ClothingSet> PURPLE = create("purple");
+	ResourceKey<ClothingSet> BLUE = create("blue");
+	ResourceKey<ClothingSet> CYAN = create("cyan");
+	ResourceKey<ClothingSet> GREEN = create("green");
+	ResourceKey<ClothingSet> LIME = create("lime");
+	ResourceKey<ClothingSet> YELLOW = create("yellow");
+	ResourceKey<ClothingSet> ORANGE = create("orange");
 
-	List<Clothing> COLORED = List.of(
+	List<ResourceKey<ClothingSet>> COLORED = List.of(
 		RED,
 		PINK,
 		MAGENTA,
@@ -37,7 +37,10 @@ public interface Tracksuits {
 		ORANGE
 	);
 
-	Clothing SQUID = tracksuit("squid");
+	ResourceKey<ClothingSet> SQUID = create("squid");
 
-	Clothing X = new Clothing(ID.video("tracksuit/x"), ClothingParts.ONLY_LEGS);
+	ResourceKey<ClothingSet> DARK_BLUE = create("dark_blue");
+	ResourceKey<ClothingSet> DARK_GREEN = create("dark_green");
+	ResourceKey<ClothingSet> DARK_YELLOW = create("dark_yellow");
+	ResourceKey<ClothingSet> DARK_RED = create("dark_red");
 }

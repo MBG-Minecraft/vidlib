@@ -8,6 +8,7 @@ import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.core.ClientAsset;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -17,21 +18,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 
 public final class SpriteKey {
-	public static final ResourceLocation SPECIAL = VidLib.id("special");
-	public static final ResourceLocation BLOCKS = ResourceLocation.withDefaultNamespace("textures/atlas/blocks.png");
-	public static final ResourceLocation PARTICLES = ResourceLocation.withDefaultNamespace("textures/atlas/particles.png");
-	public static final ResourceLocation GUI = ResourceLocation.withDefaultNamespace("textures/atlas/gui.png");
+	public static final ClientAsset SPECIAL = new ClientAsset(VidLib.id("special"));
+	public static final ClientAsset BLOCKS = new ClientAsset(ResourceLocation.withDefaultNamespace("atlas/blocks"));
+	public static final ClientAsset PARTICLES = new ClientAsset(ResourceLocation.withDefaultNamespace("atlas/particles"));
+	public static final ClientAsset GUI = new ClientAsset(ResourceLocation.withDefaultNamespace("atlas/gui"));
 
-	public static final ResourceLocation MISSING_SPRITE = ResourceLocation.withDefaultNamespace("missingno");
+	public static final ClientAsset MISSING_SPRITE = new ClientAsset(ResourceLocation.withDefaultNamespace("missingno"));
 
 	public static final SpriteKey EMPTY = new SpriteKey(1, SPECIAL, VidLibTextures.TRANSPARENT);
 	public static final SpriteKey WHITE = special(VidLibTextures.SQUARE);
-	private static final Map<ResourceLocation, ResourceLocation> INTERN_ATLAS = new HashMap<>();
+	private static final Map<ResourceLocation, ClientAsset> INTERN_ATLAS = new HashMap<>();
 
-	public static SpriteKey of(ResourceLocation atlas, ResourceLocation sprite) {
+	public static SpriteKey of(ClientAsset atlas, ClientAsset sprite) {
 		int atlasType = 0;
 
 		if (atlas == SPECIAL) {
@@ -55,35 +55,35 @@ public final class SpriteKey {
 			atlas = GUI;
 			atlasType = 4;
 		} else {
-			atlas = INTERN_ATLAS.computeIfAbsent(atlas, Function.identity());
+			atlas = INTERN_ATLAS.computeIfAbsent(atlas.id(), ClientAsset::new);
 		}
 
 		return atlas == SPECIAL && sprite.equals(VidLibTextures.TRANSPARENT) ? EMPTY : new SpriteKey(atlasType, atlas, sprite);
 	}
 
-	public static SpriteKey special(ResourceLocation sprite) {
+	public static SpriteKey special(ClientAsset sprite) {
 		return of(SPECIAL, sprite);
 	}
 
-	public static SpriteKey block(ResourceLocation sprite) {
+	public static SpriteKey block(ClientAsset sprite) {
 		return of(BLOCKS, sprite);
 	}
 
-	public static SpriteKey particle(ResourceLocation sprite) {
+	public static SpriteKey particle(ClientAsset sprite) {
 		return of(PARTICLES, sprite);
 	}
 
-	public static SpriteKey gui(ResourceLocation sprite) {
+	public static SpriteKey gui(ClientAsset sprite) {
 		return of(GUI, sprite);
 	}
 
 	public static final Codec<SpriteKey> MAP_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		ID.CODEC.optionalFieldOf("atlas", BLOCKS).forGetter(SpriteKey::atlas),
-		ID.CODEC.fieldOf("sprite").forGetter(SpriteKey::sprite)
+		ClientAsset.CODEC.optionalFieldOf("atlas", BLOCKS).forGetter(SpriteKey::atlas),
+		ClientAsset.CODEC.fieldOf("sprite").forGetter(SpriteKey::sprite)
 	).apply(instance, SpriteKey::of));
 
-	public static final Codec<SpriteKey> SPECIAL_CODEC = ID.CODEC.flatXmap(id -> DataResult.success(SpriteKey.special(id)), key -> key.isSpecial() ? DataResult.success(key.sprite()) : DataResult.error(() -> "Not a special type atlas sprite"));
-	public static final Codec<SpriteKey> BLOCK_CODEC = ID.CODEC.flatXmap(id -> DataResult.success(SpriteKey.block(id)), key -> key.isBlock() ? DataResult.success(key.sprite()) : DataResult.error(() -> "Not a block type atlas sprite"));
+	public static final Codec<SpriteKey> SPECIAL_CODEC = ClientAsset.CODEC.flatXmap(id -> DataResult.success(SpriteKey.special(id)), key -> key.isSpecial() ? DataResult.success(key.sprite()) : DataResult.error(() -> "Not a special type atlas sprite"));
+	public static final Codec<SpriteKey> BLOCK_CODEC = ClientAsset.CODEC.flatXmap(id -> DataResult.success(SpriteKey.block(id)), key -> key.isBlock() ? DataResult.success(key.sprite()) : DataResult.error(() -> "Not a block type atlas sprite"));
 
 	public static final Codec<SpriteKey> PREFER_SPECIAL_CODEC = KLibCodecs.or(SPECIAL_CODEC, MAP_CODEC);
 	public static final Codec<SpriteKey> PREFER_BLOCK_CODEC = KLibCodecs.or(BLOCK_CODEC, MAP_CODEC);
@@ -94,15 +94,15 @@ public final class SpriteKey {
 			int atlasType = buf.readByte();
 
 			if (atlasType == 1) {
-				return new SpriteKey(1, SPECIAL, ResourceLocation.STREAM_CODEC.decode(buf));
+				return new SpriteKey(1, SPECIAL, ClientAsset.STREAM_CODEC.decode(buf));
 			} else if (atlasType == 2) {
-				return new SpriteKey(2, BLOCKS, ResourceLocation.STREAM_CODEC.decode(buf));
+				return new SpriteKey(2, BLOCKS, ClientAsset.STREAM_CODEC.decode(buf));
 			} else if (atlasType == 3) {
-				return new SpriteKey(3, PARTICLES, ResourceLocation.STREAM_CODEC.decode(buf));
+				return new SpriteKey(3, PARTICLES, ClientAsset.STREAM_CODEC.decode(buf));
 			} else if (atlasType == 4) {
-				return new SpriteKey(4, GUI, ResourceLocation.STREAM_CODEC.decode(buf));
+				return new SpriteKey(4, GUI, ClientAsset.STREAM_CODEC.decode(buf));
 			} else {
-				return new SpriteKey(atlasType, INTERN_ATLAS.computeIfAbsent(ResourceLocation.STREAM_CODEC.decode(buf), Function.identity()), ResourceLocation.STREAM_CODEC.decode(buf));
+				return new SpriteKey(atlasType, INTERN_ATLAS.computeIfAbsent(ID.STREAM_CODEC.decode(buf), ClientAsset::new), ClientAsset.STREAM_CODEC.decode(buf));
 			}
 		}
 
@@ -111,35 +111,35 @@ public final class SpriteKey {
 			buf.writeByte(value.atlasType);
 
 			if (value.atlasType == 0) {
-				ResourceLocation.STREAM_CODEC.encode(buf, value.atlas);
+				ID.STREAM_CODEC.encode(buf, value.atlas.id());
 			}
 
-			ResourceLocation.STREAM_CODEC.encode(buf, value.sprite);
+			ID.STREAM_CODEC.encode(buf, value.sprite.id());
 		}
 	};
 
 	public static final StreamCodec<ByteBuf, Optional<SpriteKey>> OPTIONAL_STREAM_CODEC = ByteBufCodecs.optional(STREAM_CODEC);
 
 	private final int atlasType;
-	private final ResourceLocation atlas;
-	private final ResourceLocation sprite;
+	private final ClientAsset atlas;
+	private final ClientAsset sprite;
 
-	private SpriteKey(int atlasType, ResourceLocation atlas, ResourceLocation sprite) {
+	private SpriteKey(int atlasType, ClientAsset atlas, ClientAsset sprite) {
 		this.atlasType = atlasType;
 		this.atlas = atlas;
 		this.sprite = sprite;
 	}
 
-	public ResourceLocation atlas() {
+	public ClientAsset atlas() {
 		return atlas;
 	}
 
-	public ResourceLocation sprite() {
+	public ClientAsset sprite() {
 		return sprite;
 	}
 
 	public ResourceLocation dynamic() {
-		return ResourceLocation.fromNamespaceAndPath(sprite.getNamespace(), "textures/vidlib/generated/atlas/" + atlas.getNamespace() + "/" + atlas.getPath() + "/" + sprite.getPath() + ".png");
+		return sprite.id().withPath("textures/vidlib/generated/atlas/" + atlas.id().getNamespace() + "/" + atlas.id().getPath() + "/" + sprite.id().getPath() + ".png");
 	}
 
 	@Override
@@ -161,7 +161,7 @@ public final class SpriteKey {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(atlas, sprite);
+		return Objects.hash(atlas, sprite.id());
 	}
 
 	public boolean isSpecial() {
@@ -180,7 +180,7 @@ public final class SpriteKey {
 		return atlas == GUI;
 	}
 
-	public ResourceLocation getTexture() {
+	public ClientAsset getTexture() {
 		return isSpecial() ? sprite : atlas;
 	}
 }

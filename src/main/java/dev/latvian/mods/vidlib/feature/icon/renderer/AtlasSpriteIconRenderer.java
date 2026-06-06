@@ -11,7 +11,7 @@ import org.joml.Vector3f;
 
 public interface AtlasSpriteIconRenderer {
 	static void draw(AtlasSpriteIcon icon, Minecraft mc, GuiGraphics graphics, int alpha) {
-		var rendertype = VidLibRenderTypes.GUI.apply(icon.sprite().atlas());
+		var rendertype = VidLibRenderTypes.GUI.apply(icon.sprite().atlas().texturePath());
 		var matrix4f = graphics.pose().last().pose();
 		var buffer = graphics.vl$buffers().getBuffer(rendertype);
 		var color = icon.tint().mixAlpha(alpha).argb();
@@ -23,7 +23,7 @@ public interface AtlasSpriteIconRenderer {
 	}
 
 	static void render(AtlasSpriteIcon icon, Minecraft mc, PoseStack ms, float delta, MultiBufferSource source, int light, int overlay) {
-		var buffer = source.getBuffer(EntityRenderTypes.textureCull(icon.sprite().atlas(), icon.tint().alpha() < 255 || icon.translucent()));
+		var buffer = source.getBuffer(EntityRenderTypes.textureCull(icon.sprite().atlas().texturePath(), icon.tint().alpha() < 255 || icon.translucent()));
 
 		int colR = icon.tint().red();
 		int colG = icon.tint().green();

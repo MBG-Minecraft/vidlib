@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.Dumpable;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.core.ClientAsset;
 import net.minecraft.resources.ResourceLocation;
 
 import java.nio.file.Path;
@@ -21,7 +21,7 @@ import java.util.function.IntUnaryOperator;
 public class DynamicSpriteTexture extends AbstractTexture implements Dumpable, EphemeralTexture {
 	public static ResourceLocation get(Minecraft mc, SpriteKey key) {
 		if (key.atlas() == SpriteKey.SPECIAL) {
-			return key.sprite();
+			return key.sprite().texturePath();
 		}
 
 		return mc.getSprite(key).vl$getDynamicSpriteTexture(mc).path;
@@ -45,7 +45,7 @@ public class DynamicSpriteTexture extends AbstractTexture implements Dumpable, E
 
 	public DynamicSpriteTexture(TextureAtlasSprite sprite) {
 		this.sprite = sprite;
-		this.key = SpriteKey.of(sprite.atlasLocation(), sprite.contents().name());
+		this.key = SpriteKey.of(MiscUtils.assetFromPNG(sprite.atlasLocation()), new ClientAsset(sprite.contents().name()));
 		this.path = key.dynamic();
 	}
 

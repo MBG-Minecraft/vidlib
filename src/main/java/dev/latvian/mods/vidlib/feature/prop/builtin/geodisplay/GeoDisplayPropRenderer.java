@@ -21,7 +21,7 @@ public class GeoDisplayPropRenderer extends GeoPropRenderer<GeoDisplayProp> {
 	public void extractRenderState(Minecraft mc, GeoDisplayProp prop, GeoRenderState state, float delta) {
 		super.extractRenderState(mc, prop, state, delta);
 		state.addGeckolibData(VidLibGeoDataTickets.MODEL, prop.model);
-		state.addGeckolibData(VidLibGeoDataTickets.TEXTURE, prop.texture);
+		state.addGeckolibData(VidLibGeoDataTickets.TEXTURE, prop.texture.texturePath());
 	}
 
 	@Override

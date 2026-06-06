@@ -40,5 +40,10 @@ public interface ClientGradients {
 	Gradient DARK_YELLOW = ref("dark_yellow");
 	Gradient DARK_RED = ref("dark_red");
 
+	Gradient SHINY_BLUE = ref("shiny_blue");
 	Gradient SHINY_GREEN = ref("shiny_green");
+	Gradient SHINY_YELLOW = ref("shiny_yellow");
+	Gradient SHINY_RED = ref("shiny_red");
+	Gradient SHINY_PURPLE = ref("shiny_purple");
+	Gradient SHINY_WHITE = ref("shiny_white");
 }

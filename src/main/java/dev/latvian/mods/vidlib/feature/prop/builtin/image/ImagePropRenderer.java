@@ -47,7 +47,7 @@ public class ImagePropRenderer implements PropRenderer<ImageProp> {
 		int tint = prop.tint.argb();
 
 		// var buffer = ctx.frame().buffers().getBuffer(prop.seeThrough ? RenderType.textBackgroundSeeThrough() : RenderType.textBackground());
-		var buffer = ctx.frame().buffers().getBuffer(EntityRenderTypes.texture(prop.texture, prop.translucent));
+		var buffer = ctx.frame().buffers().getBuffer(EntityRenderTypes.texture(prop.texture.texturePath(), prop.translucent));
 		buffer.addVertex(matrix4f, -w2, y, 0F).setUv(1F, 1F).setColor(tint).setLight(light).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0F, 1F, 0F);
 		buffer.addVertex(matrix4f, -w2, 0F, 0F).setUv(1F, 0F).setColor(tint).setLight(light).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0F, 1F, 0F);
 		buffer.addVertex(matrix4f, w2, 0F, 0F).setUv(0F, 0F).setColor(tint).setLight(light).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0F, 1F, 0F);

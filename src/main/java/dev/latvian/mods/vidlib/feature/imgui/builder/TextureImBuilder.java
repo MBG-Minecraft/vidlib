@@ -7,29 +7,29 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import imgui.type.ImString;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.ClientAsset;
 import org.jetbrains.annotations.Nullable;
 
-public class TextureImBuilder implements ImBuilder<ResourceLocation> {
-	public static ImBuilderType<ResourceLocation> of(TextureSet textureSet, ResourceLocation defaultTexture) {
+public class TextureImBuilder implements ImBuilder<ClientAsset> {
+	public static ImBuilderType<ClientAsset> of(TextureSet textureSet, ClientAsset defaultTexture) {
 		return () -> new TextureImBuilder(textureSet, defaultTexture);
 	}
 
-	public static final ImBuilderType<ResourceLocation> GEO = of(TextureSet.ENTITIES_AND_PROPS, ID.mc("textures/entity/skeleton/skeleton.png"));
-	public static final ImBuilderType<ResourceLocation> SKIN = of(TextureSet.ENTITIES, SkinTexture.STEVE);
-	public static final ImBuilderType<ResourceLocation> ALL = of(TextureSet.ALL, null);
+	public static final ImBuilderType<ClientAsset> GEO = of(TextureSet.ENTITIES_AND_PROPS, new ClientAsset(ID.mc("entity/skeleton/skeleton")));
+	public static final ImBuilderType<ClientAsset> SKIN = of(TextureSet.ENTITIES, SkinTexture.WIDE_STEVE.asset());
+	public static final ImBuilderType<ClientAsset> ALL = of(TextureSet.ALL, null);
 
 	public final ImString SEARCH = ImGuiUtils.resizableString();
-	public final ResourceLocation[] value;
+	public final ClientAsset[] value;
 	public final TextureSet textureSet;
 
-	public TextureImBuilder(TextureSet textureSet, @Nullable ResourceLocation defaultTexture) {
+	public TextureImBuilder(TextureSet textureSet, @Nullable ClientAsset defaultTexture) {
 		this.textureSet = textureSet;
-		this.value = new ResourceLocation[]{defaultTexture};
+		this.value = new ClientAsset[]{defaultTexture};
 	}
 
 	@Override
-	public void set(ResourceLocation value) {
+	public void set(ClientAsset value) {
 		this.value[0] = value;
 	}
 
@@ -39,7 +39,7 @@ public class TextureImBuilder implements ImBuilder<ResourceLocation> {
 	}
 
 	@Override
-	public ResourceLocation build() {
+	public ClientAsset build() {
 		return value[0];
 	}
 }

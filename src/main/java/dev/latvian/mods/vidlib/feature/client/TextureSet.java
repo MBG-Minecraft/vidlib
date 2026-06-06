@@ -2,32 +2,39 @@ package dev.latvian.mods.vidlib.feature.client;
 
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import imgui.type.ImString;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.ClientAsset;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TextureSet {
-	public static final TextureSet ALL = new TextureSet(List.of("textures"));
-	public static final TextureSet ENTITIES = new TextureSet(List.of("textures/entity"));
-	public static final TextureSet PROPS = new TextureSet(List.of("textures/entity"));
-	public static final TextureSet ENTITIES_AND_PROPS = new TextureSet(List.of("textures/entity", "textures/prop"));
-	public static final TextureSet ATLAS = new TextureSet(List.of("textures/atlas"));
+	public static final TextureSet ALL = new TextureSet("textures");
+	public static final TextureSet ENTITIES = new TextureSet("textures/entity");
+	public static final TextureSet PROPS = new TextureSet("textures/entity");
+	public static final TextureSet ENTITIES_AND_PROPS = new TextureSet("textures/", List.of("textures/entity", "textures/prop"));
+	public static final TextureSet ATLAS = new TextureSet("textures/atlas");
 
+	public final String prefix;
 	public final List<String> paths;
-	private List<ResourceLocation> list;
+	private List<ClientAsset> list;
 	private int lastReload;
 
-	public TextureSet(List<String> paths) {
+	public TextureSet(String prefix, List<String> paths) {
+		this.prefix = prefix;
 		this.paths = paths;
 		this.list = null;
 		this.lastReload = 0;
 	}
 
-	public List<ResourceLocation> get(Minecraft mc) {
+	public TextureSet(String path) {
+		this(path + "/", List.of(path));
+	}
+
+	public List<ClientAsset> get(Minecraft mc) {
 		int reload = mc.vl$reloadCount();
 
 		if (lastReload != reload) {
@@ -39,21 +46,31 @@ public class TextureSet {
 			list = new ArrayList<>();
 
 			for (var path : paths) {
-				list.addAll(mc.getResourceManager().listResources(path, id -> id.getPath().endsWith(".png")).keySet());
+				for (var tex : mc.getResourceManager().listResources(path, id -> id.getPath().endsWith(".png")).keySet()) {
+					list.add(MiscUtils.assetFromPNG(tex));
+				}
 			}
 
-			list.sort(ResourceLocation::compareNamespaced);
+			list.sort((a, b) -> a.id().compareNamespaced(b.id()));
 			list = List.copyOf(list);
 		}
 
 		return list;
 	}
 
-	public ImUpdate imgui(ImGraphics graphics, ResourceLocation[] value, @Nullable ImString search) {
-		return graphics.combo("###texture", value, "", get(graphics.mc), id -> id.getNamespace() + ":" + id.getPath().substring(9, id.getPath().length() - 4), search);
+	private String format(ClientAsset asset) {
+		if (!prefix.isEmpty() && asset.id().getPath().startsWith(prefix)) {
+			return asset.id().getNamespace() + ":" + asset.id().getPath().substring(prefix.length());
+		}
+
+		return asset.id().toString();
 	}
 
-	public ImUpdate optionalImgui(ImGraphics graphics, ResourceLocation[] value, @Nullable ImString search) {
-		return graphics.combo("###texture", value, "None", get(graphics.mc), id -> id.getNamespace() + ":" + id.getPath().substring(9, id.getPath().length() - 4), search);
+	public ImUpdate imgui(ImGraphics graphics, ClientAsset[] value, @Nullable ImString search) {
+		return graphics.combo("###texture", value, "", get(graphics.mc), this::format, search);
+	}
+
+	public ImUpdate optionalImgui(ImGraphics graphics, ClientAsset[] value, @Nullable ImString search) {
+		return graphics.combo("###texture", value, "None", get(graphics.mc), this::format, search);
 	}
 }

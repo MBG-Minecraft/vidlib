@@ -12,19 +12,19 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ListItemAction;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TextureImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.ClientAsset;
 import org.jetbrains.annotations.Nullable;
 
 public class SkinTextureImBuilder extends CompoundImBuilder<SkinTexture> implements ListButtonImBuilder {
 	public static final ImBuilderType<SkinTexture> TYPE = SkinTextureImBuilder::new;
 
-	public final ImBuilder<ResourceLocation> texture = TextureImBuilder.SKIN.get();
+	public final ImBuilder<ClientAsset> texture = TextureImBuilder.SKIN.get();
 	public final BooleanImBuilder slim = new BooleanImBuilder();
 	public ListItemAction listItemAction = ListItemAction.NONE;
 	public int enableListItemButtons = -1;
 
 	public SkinTextureImBuilder() {
-		texture.set(SkinTexture.STEVE);
+		texture.set(SkinTexture.WIDE_STEVE.asset());
 		slim.set(false);
 		add("Texture", texture);
 		add("Slim", slim);
@@ -36,7 +36,7 @@ public class SkinTextureImBuilder extends CompoundImBuilder<SkinTexture> impleme
 			texture.set(null);
 			slim.set(false);
 		} else {
-			texture.set(value.texture());
+			texture.set(value.asset());
 			slim.set(value.slim());
 		}
 	}

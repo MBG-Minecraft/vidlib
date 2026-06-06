@@ -1,14 +1,12 @@
 package dev.latvian.mods.vidlib.feature.data;
 
 import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.vidlib.feature.clothing.Clothing;
+import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
+import net.minecraft.core.ClientAsset;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public interface PlayerDataMapHolder extends DataMapHolder {
 	default void setSuspended(boolean value) {
@@ -23,19 +21,19 @@ public interface PlayerDataMapHolder extends DataMapHolder {
 		set(InternalPlayerData.PLUMBOB, icon);
 	}
 
-	default void setClothing(List<Clothing> clothing) {
-		set(InternalPlayerData.CLOTHING, List.copyOf(clothing));
+	default void setClothing(PlayerClothing clothing) {
+		set(InternalPlayerData.CLOTHING, clothing);
 	}
 
 	default void setSkinOverride(@Nullable SkinTexture skin) {
 		set(InternalPlayerData.SKIN_OVERRIDE, skin);
 	}
 
-	default void setCapeOverride(@Nullable ResourceLocation cape) {
+	default void setCapeOverride(@Nullable ClientAsset cape) {
 		set(InternalPlayerData.CAPE_OVERRIDE, cape);
 	}
 
-	default void setElytraOverride(@Nullable ResourceLocation cape) {
+	default void setElytraOverride(@Nullable ClientAsset cape) {
 		set(InternalPlayerData.ELYTRA_OVERRIDE, cape);
 	}
 

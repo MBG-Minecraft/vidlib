@@ -53,7 +53,7 @@ public interface LowQualityPlayerBodies {
 
 	static AbstractTexture getTexture(Minecraft mc, @Nullable UUID uuid) {
 		if (uuid == null || uuid.equals(Util.NIL_UUID)) {
-			return mc.getTextureManager().getTexture(VidLibTextures.DEFAULT_PLAYER_BODY);
+			return mc.getTextureManager().getTexture(VidLibTextures.DEFAULT_PLAYER_BODY.texturePath());
 		}
 
 		return get(mc, uuid).load(mc, false);

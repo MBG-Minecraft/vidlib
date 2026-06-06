@@ -5,7 +5,7 @@ import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.EntityRenderTypes;
-import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
+import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerSkins;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
@@ -106,9 +106,11 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 			skins = SINGLE_SKIN;
 		}
 
-		playerRenderState.attackTime = 0;
+		if (skins == SINGLE_SKIN && p.clothing != PlayerClothing.NONE) {
+			// FIXME skins[0] = ClientGameEngine.INSTANCE.overridePlayerSkin(fakePlayer, skins[0]);
+		}
 
-		playerRenderState.setRenderData(VidLibEntityRenderStates.CLOTHING, p.clothing);
+		playerRenderState.attackTime = 0;
 
 		playerRenderState.showHat = true;
 		playerRenderState.showJacket = true;

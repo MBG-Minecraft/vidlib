@@ -20,7 +20,7 @@ public class MapTextureManagerMixin {
 			var override = player.vl$sessionData().getMapTextureOverride(id.id());
 
 			if (override != null) {
-				cir.setReturnValue(override.getTexture());
+				cir.setReturnValue(override.getTexture().texturePath());
 			}
 		}
 	}

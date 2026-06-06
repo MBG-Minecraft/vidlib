@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
-import dev.latvian.mods.vidlib.feature.npc.NPCParticle;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 
 public interface VidLibClientParticles {
@@ -9,7 +8,6 @@ public interface VidLibClientParticles {
 		event.registerSpecial(VidLibParticles.LINE.get(), LineParticle::new);
 		event.registerSpecial(VidLibParticles.TEXT.get(), TextParticle::new);
 		event.registerSpecial(VidLibParticles.ITEM.get(), ItemParticle::new);
-		event.registerSpecial(VidLibParticles.NPC.get(), NPCParticle::new);
 		event.registerSpecial(VidLibParticles.LIGHTNING.get(), LightningParticle::new);
 		event.registerSpriteSet(VidLibParticles.BURN_SMOKE.get(), BurnSmokeParticle::create);
 		event.registerSpriteSet(VidLibParticles.SPARK.get(), SparkParticle::create);

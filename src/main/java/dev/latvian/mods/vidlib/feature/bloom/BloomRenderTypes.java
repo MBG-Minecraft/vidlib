@@ -133,8 +133,8 @@ public interface BloomRenderTypes {
 			.createCompositeState(false)
 	);
 
-	RenderType DEFAULT_BLOCK = BLOCK.apply(SpriteKey.BLOCKS);
-	RenderType DEFAULT_BLOCK_NO_CULL = BLOCK_NO_CULL.apply(SpriteKey.BLOCKS);
+	RenderType DEFAULT_BLOCK = BLOCK.apply(SpriteKey.BLOCKS.texturePath());
+	RenderType DEFAULT_BLOCK_NO_CULL = BLOCK_NO_CULL.apply(SpriteKey.BLOCKS.texturePath());
 
 	RenderType DEFAULT_POS_COL = POS_COL.apply(Empty.TEXTURE);
 	RenderType DEFAULT_POS_COL_NO_CULL = POS_COL_NO_CULL.apply(Empty.TEXTURE);

@@ -6,7 +6,6 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
 import dev.latvian.mods.klib.texture.LightUV;
-import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
@@ -25,9 +24,7 @@ import dev.latvian.mods.vidlib.feature.client.babymodel.BabyChickenModel;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockFont;
 import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
-import dev.latvian.mods.vidlib.feature.clothing.ClientClothingLoader;
-import dev.latvian.mods.vidlib.feature.clothing.ClothingLayer;
-import dev.latvian.mods.vidlib.feature.clothing.ClothingModel;
+import dev.latvian.mods.vidlib.feature.clothing.ClothingPresetLoader;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
@@ -77,8 +74,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
-import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
@@ -120,7 +115,6 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.GameShuttingDownEvent;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
@@ -152,14 +146,14 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void dynamicResources(DynamicResourceEvent.Assets event) {
-		event.register(ID.video("dynamic_resources/clothing"));
+		event.register(VidLib.id("dynamic_resources/clothing"));
 	}
 
 	@SubscribeEvent
 	public static void addReloadListeners(AddClientReloadListenersEvent event) {
 		event.addListener(VidLib.id("structure"), new StructureStorage(StructureStorage.CLIENT));
 		event.addListener(VidLib.id("ghost_structure"), new GhostStructure.Loader());
-		event.addListener(VidLib.id("clothing"), new ClientClothingLoader());
+		event.addListener(VidLib.id("clothing_preset"), new ClothingPresetLoader());
 		event.addListener(VidLib.id("physics_particle_data"), new PhysicsParticleData.Loader());
 		event.addListener(VidLib.id("gradient"), new ClientGradientLoader());
 		event.addListener(VidLib.id("clock_font"), new ClockFont.Loader());
@@ -168,6 +162,7 @@ public class VidLibClientEventHandler {
 		event.addListener(VidLib.id("zone"), new ZoneLoader(ZoneLoader.CLIENT_BY_DIMENSION, false));
 		event.addListener(VidLib.id("msdf"), new MSDFFont.Loader());
 
+		event.addDependency(VidLib.id("gradient"), VidLib.id("clothing_preset"));
 		event.addDependency(VidLib.id("structure"), VidLib.id("ghost_structure"));
 		event.addDependency(VidLib.id("clock_font"), VidLib.id("clock"));
 	}
@@ -710,21 +705,8 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
-		event.registerLayerDefinition(ClothingLayer.WIDE, ClothingModel::createWideClothingLayer);
-		event.registerLayerDefinition(ClothingLayer.SLIM, ClothingModel::createSlimClothingLayer);
 		event.registerLayerDefinition(ModelLayers.CHICKEN_BABY, BabyChickenModel::createBodyLayer);
 		event.registerLayerDefinition(ModelLayers.COLD_CHICKEN_BABY, BabyChickenModel::createBodyLayer);
-	}
-
-	@SubscribeEvent
-	public static void registerLayers(EntityRenderersEvent.AddLayers event) {
-		if (event.getSkin(PlayerSkin.Model.WIDE) instanceof PlayerRenderer r) {
-			r.addLayer(new ClothingLayer(r, event.getContext(), false));
-		}
-
-		if (event.getSkin(PlayerSkin.Model.SLIM) instanceof PlayerRenderer r) {
-			r.addLayer(new ClothingLayer(r, event.getContext(), false)); // TODO: Fixme
-		}
 	}
 
 	@SubscribeEvent

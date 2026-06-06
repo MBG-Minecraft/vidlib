@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.feature.client;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.clothing.Clothing;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
@@ -40,12 +39,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.List;
-
 public interface VidLibEntityRenderStates {
 	ContextKey<Boolean> BOSS_FRAMEBUFFER = new ContextKey<>(VidLib.id("boss_framebuffer"));
 	ContextKey<Boolean> CREATIVE = new ContextKey<>(VidLib.id("creative"));
-	ContextKey<List<Clothing>> CLOTHING = new ContextKey<>(VidLib.id("clothing"));
 	ContextKey<SpriteKey> SPRITE_KEY = new ContextKey<>(VidLib.id("sprite_key"));
 	ContextKey<UV> UV = new ContextKey<>(VidLib.id("uv"));
 	ContextKey<Boolean> TRANSLUCENT = new ContextKey<>(VidLib.id("translucent"));
@@ -244,10 +240,6 @@ public interface VidLibEntityRenderStates {
 
 	static void extractPlayer(Minecraft mc, Vec3 camPos, AbstractClientPlayer player, PlayerRenderState state) {
 		state.setRenderData(CREATIVE, player.isCreative() ? Boolean.TRUE : null);
-
-		var clothing = state.isInvisible ? List.<Clothing>of() : ClientGameEngine.INSTANCE.getClothing(player);
-		state.setRenderData(CLOTHING, clothing.isEmpty() ? null : clothing);
-
 		state.setRenderData(TRANSLUCENT, player.get(InternalPlayerData.TRANSLUCENT) ? Boolean.TRUE : null);
 
 		if (state.nameTag != null) {
@@ -269,10 +261,5 @@ public interface VidLibEntityRenderStates {
 	static boolean isCreative(PlayerRenderState state) {
 		var v = state.getRenderData(CREATIVE);
 		return v != null && v;
-	}
-
-	static List<Clothing> getClothing(EntityRenderState state) {
-		var v = state.getRenderData(CLOTHING);
-		return v == null ? List.of() : v;
 	}
 }

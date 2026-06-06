@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib.feature.camera;
 
 import dev.latvian.mods.klib.math.Rotation;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
@@ -40,12 +42,14 @@ public class FreeCamera implements ControlledCameraOverride {
 		prevPosition = position;
 		prevRotation = rotation;
 		position = position.add(dx, dy, dz);
-		dx *= 0.8D;
-		dy *= 0.8D;
-		dz *= 0.8D;
-		dx += move.x * 0.3D;
-		dy += move.y * 0.3D;
-		dz += move.z * 0.3D;
+		var inertia = 0.8D;
+		dx *= inertia;
+		dy *= inertia;
+		dz *= inertia;
+		var moveSpeed = 0.1D * CommonGameEngine.INSTANCE.getFlightSpeedModifier(Minecraft.getInstance().player);
+		dx += move.x * moveSpeed;
+		dy += move.y * moveSpeed;
+		dz += move.z * moveSpeed;
 		return false;
 	}
 

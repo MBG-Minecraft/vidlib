@@ -250,7 +250,7 @@ public class Gallery<K> {
 			VidLib.LOGGER.warn("Failed to download " + id + "/" + key, ex);
 			// Do a default
 			try {
-				var defaultTex = mc.getTextureManager().getTexture(VidLibTextures.DEFAULT_PLAYER_BODY);
+				var defaultTex = mc.getTextureManager().getTexture(VidLibTextures.DEFAULT_PLAYER_BODY.texturePath());
 				mc.getTextureManager().byPath.put(img.textureId(), defaultTex);
 			} catch (Throwable ignored) {
 			}

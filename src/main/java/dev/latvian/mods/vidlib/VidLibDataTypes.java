@@ -7,8 +7,8 @@ import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
 import dev.latvian.mods.vidlib.feature.clock.ClockFont;
-import dev.latvian.mods.vidlib.feature.clothing.Clothing;
-import dev.latvian.mods.vidlib.feature.clothing.ClothingParts;
+import dev.latvian.mods.vidlib.feature.clothing.ClothingSet;
+import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
 import dev.latvian.mods.vidlib.feature.entity.EntitySnapshot;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
@@ -78,9 +78,8 @@ public interface VidLibDataTypes {
 		DataType.register(VidLib.id("connection_type"), CONNECTION_TYPE);
 
 		DataType.register(VidLib.id("icon"), Icon.DATA_TYPE);
-		DataType.register(VidLib.id("clothing_parts"), ClothingParts.DATA_TYPE);
-		DataType.register(VidLib.id("clothing"), Clothing.DATA_TYPE);
-		DataType.register(VidLib.id("clothing_list"), Clothing.LEGACY_CLOTHING_DATA ? Clothing.LEGACY_LIST_DATA_TYPE : Clothing.LIST_DATA_TYPE);
+		DataType.register(VidLib.id("clothing_set"), ClothingSet.DATA_TYPE);
+		DataType.register(VidLib.id("player_clothing"), PlayerClothing.DATA_TYPE);
 		DataType.register(VidLib.id("skin_texture"), SkinTexture.DATA_TYPE);
 		DataType.register(VidLib.id("skin_texture_list"), SkinTexture.LIST_DATA_TYPE);
 		DataType.register(VidLib.id("skybox_id"), SkyboxData.ID_DATA_TYPE);

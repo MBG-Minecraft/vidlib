@@ -119,8 +119,8 @@ public interface BrightRenderTypes {
 			.createCompositeState(false)
 	);
 
-	RenderType DEFAULT_BLOCK = BLOCK.apply(SpriteKey.BLOCKS);
-	RenderType DEFAULT_BLOCK_NO_CULL = BLOCK_NO_CULL.apply(SpriteKey.BLOCKS);
+	RenderType DEFAULT_BLOCK = BLOCK.apply(SpriteKey.BLOCKS.texturePath());
+	RenderType DEFAULT_BLOCK_NO_CULL = BLOCK_NO_CULL.apply(SpriteKey.BLOCKS.texturePath());
 
 	static MultiBufferSourceOverride overridePos(MultiBufferSource delegate) {
 		return new MultiBufferSourceOverride(delegate, POS, POS_NO_CULL);

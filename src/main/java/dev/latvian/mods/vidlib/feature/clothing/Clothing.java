@@ -1,83 +1,17 @@
 package dev.latvian.mods.vidlib.feature.clothing;
 
-import com.mojang.datafixers.util.Either;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.klib.codec.CompositeStreamCodec;
-import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.klib.util.Cast;
-import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.resources.ResourceKey;
 
-import java.util.List;
-import java.util.function.Function;
-
-@AutoInit
-public record Clothing(ResourceLocation id, ClothingParts parts) {
-	public static final Codec<Clothing> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		ResourceLocation.CODEC.fieldOf("id").forGetter(Clothing::id),
-		ClothingParts.CODEC.optionalFieldOf("parts", ClothingParts.ALL).forGetter(Clothing::parts)
-	).apply(instance, Clothing::new));
-
-	public static final Codec<Clothing> CODEC = Codec.either(ResourceLocation.CODEC, DIRECT_CODEC).xmap(either -> either.map(Clothing::new, Function.identity()), c -> c.parts.equals(ClothingParts.ALL) ? Either.left(c.id) : Either.right(c));
-
-	public static final StreamCodec<ByteBuf, Clothing> STREAM_CODEC = CompositeStreamCodec.of(
-		ID.STREAM_CODEC, Clothing::id,
-		ClothingParts.STREAM_CODEC, Clothing::parts,
-		Clothing::new
-	);
-
-	public static final DataType<Clothing> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, Clothing.class);
-	public static final DataType<List<Clothing>> LIST_DATA_TYPE = DATA_TYPE.listOf();
-
-	public static final EquipmentSlot[] ORDERED_SLOTS = {
-		EquipmentSlot.LEGS,
-		EquipmentSlot.CHEST,
-		EquipmentSlot.FEET,
-		EquipmentSlot.HEAD
-	};
-
-	public static final boolean LEGACY_CLOTHING_DATA = "true".equals(System.getenv("LEGACY_CLOTHING_DATA"));
-
-	public static final DataType<List<Clothing>> LEGACY_LIST_DATA_TYPE = DataType.of(CODEC.listOf(), new StreamCodec<>() {
-		private static final Clothing NONE = new Clothing(VidLib.id("none"), ClothingParts.NONE);
-
-		@Override
-		public List<Clothing> decode(RegistryFriendlyByteBuf buf) {
-			var c = STREAM_CODEC.decode(buf);
-			return c.equals(NONE) ? List.of() : List.of(c);
-		}
-
-		@Override
-		public void encode(RegistryFriendlyByteBuf buf, List<Clothing> value) {
-			if (value.isEmpty()) {
-				STREAM_CODEC.encode(buf, NONE);
-			} else {
-				STREAM_CODEC.encode(buf, value.getFirst());
-			}
-		}
-	}, Cast.to(List.class));
-
-	public Clothing(ResourceLocation id) {
-		this(id, ClothingParts.ALL);
+public interface Clothing {
+	static ResourceKey<ClothingSet> create(String id) {
+		return ClothingPresets.createId(VidLib.id(id));
 	}
 
-	public Clothing withParts(ClothingParts parts) {
-		return new Clothing(id, parts);
-	}
-
-	@Override
-	public String toString() {
-		if (parts.equals(ClothingParts.ALL)) {
-			return "Clothing[" + id + "]";
-		} else {
-			return "Clothing[" + id + "," + parts + "]";
-		}
-	}
+	ResourceKey<ClothingSet> NONE = create("none");
+	ResourceKey<ClothingSet> TEMPLATE = create("template");
+	ResourceKey<ClothingSet> X = create("x");
+	ResourceKey<ClothingSet> OBSCURED = create("obscured");
+	ResourceKey<ClothingSet> BODY_QUESTION_MARK = create("body_question_mark");
+	ResourceKey<ClothingSet> FACE_QUESTION_MARK = create("face_question_mark");
 }

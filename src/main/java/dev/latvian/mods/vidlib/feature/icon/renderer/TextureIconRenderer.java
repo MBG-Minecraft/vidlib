@@ -11,7 +11,7 @@ import org.joml.Vector3f;
 
 public interface TextureIconRenderer {
 	static void draw(TextureIcon icon, Minecraft mc, GuiGraphics graphics, int alpha) {
-		var rendertype = VidLibRenderTypes.GUI.apply(icon.texture());
+		var rendertype = VidLibRenderTypes.GUI.apply(icon.texture().texturePath());
 		var matrix4f = graphics.pose().last().pose();
 		var buffer = graphics.vl$buffers().getBuffer(rendertype);
 		var color = icon.color().mixAlpha(alpha).argb();
@@ -23,7 +23,7 @@ public interface TextureIconRenderer {
 	}
 
 	static void render(TextureIcon icon, Minecraft mc, PoseStack ms, float delta, MultiBufferSource source, int light, int overlay) {
-		var buffer = source.getBuffer(EntityRenderTypes.textureCull(icon.texture(), icon.color().alpha() < 255 || icon.translucent()));
+		var buffer = source.getBuffer(EntityRenderTypes.textureCull(icon.texture().texturePath(), icon.color().alpha() < 255 || icon.translucent()));
 
 		int colR = icon.color().red();
 		int colG = icon.color().green();
