@@ -38,11 +38,11 @@ public record GalleryImage<K>(
 				tex = loadNow(mc, true);
 
 				if (tex == null) {
-					tex = mc.getTextureManager().getTexture(VidLibTextures.LOADING);
+					tex = mc.getTextureManager().getTexture(VidLibTextures.LOADING.texturePath());
 					mc.getTextureManager().byPath.put(textureId, tex);
 				}
 			} else {
-				tex = mc.getTextureManager().getTexture(VidLibTextures.LOADING);
+				tex = mc.getTextureManager().getTexture(VidLibTextures.LOADING.texturePath());
 				mc.getTextureManager().byPath.put(textureId, tex);
 				Util.backgroundExecutor().execute(() -> loadNow(mc, false));
 			}

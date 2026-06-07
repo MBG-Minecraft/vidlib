@@ -1,0 +1,11 @@
+[
+	{
+		"vidlib:smoking/top": "{namespace}:{path}"
+	},
+	{
+		"vidlib:smoking/pants": "{namespace}:{path}"
+	},
+	{
+		"vidlib:shoes": "vidlib:black"
+	}
+]

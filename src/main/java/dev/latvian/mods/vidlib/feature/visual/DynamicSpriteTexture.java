@@ -5,30 +5,31 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.TextureFormat;
 import dev.latvian.mods.vidlib.core.VLSpriteContents;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.auto.TextureReloadParams;
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.Dumpable;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.core.ClientAsset;
 import net.minecraft.resources.ResourceLocation;
 
 import java.nio.file.Path;
-import java.util.concurrent.Executor;
 import java.util.function.IntUnaryOperator;
 
 public class DynamicSpriteTexture extends AbstractTexture implements Dumpable, EphemeralTexture {
 	public static ResourceLocation get(Minecraft mc, SpriteKey key) {
 		if (key.atlas() == SpriteKey.SPECIAL) {
-			return key.sprite();
+			return key.sprite().texturePath();
 		}
 
 		return mc.getSprite(key).vl$getDynamicSpriteTexture(mc).path;
 	}
 
 	@AutoInit(AutoInit.Type.TEXTURES_RELOADED)
-	public static void reload(TextureManager textureManager, Executor backgroundExecutor, Executor gameExecutor) {
-		for (var tex : textureManager.byPath.values()) {
+	public static void reload(TextureReloadParams params) {
+		for (var tex : params.manager().byPath.values()) {
 			if (tex instanceof TextureAtlas atlas) {
 				for (var sprite : atlas.getTextures().values()) {
 					sprite.vl$invalidateDynamicSpriteTexture();
@@ -44,7 +45,7 @@ public class DynamicSpriteTexture extends AbstractTexture implements Dumpable, E
 
 	public DynamicSpriteTexture(TextureAtlasSprite sprite) {
 		this.sprite = sprite;
-		this.key = SpriteKey.of(sprite.atlasLocation(), sprite.contents().name());
+		this.key = SpriteKey.of(MiscUtils.assetFromPNG(sprite.atlasLocation()), new ClientAsset(sprite.contents().name()));
 		this.path = key.dynamic();
 	}
 

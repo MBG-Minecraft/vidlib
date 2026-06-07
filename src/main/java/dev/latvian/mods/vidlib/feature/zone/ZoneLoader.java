@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.util.Side;
 import dev.latvian.mods.vidlib.VidLib;
@@ -33,14 +33,14 @@ public class ZoneLoader extends JsonReloadListener {
 	}
 
 	@Override
-	protected void apply(Map<ResourceLocation, JsonObject> from, ResourceManager resourceManager, ProfilerFiller profiler) {
+	protected void apply(Map<ResourceLocation, JsonElement> from, ResourceManager resourceManager, ProfilerFiller profiler) {
 		var list = new ArrayList<ZoneContainer>();
 
 		for (var entry : from.entrySet()) {
 			var id = entry.getKey();
 
 			try {
-				var json = entry.getValue();
+				var json = entry.getValue().getAsJsonObject();
 				var dimension = json.has("dimension") ? ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(json.get("dimension").getAsString())) : Level.OVERWORLD;
 				var container = new ZoneContainer(id, dimension);
 				int index = 0;

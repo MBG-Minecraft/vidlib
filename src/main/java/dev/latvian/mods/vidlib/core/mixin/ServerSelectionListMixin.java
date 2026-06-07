@@ -34,8 +34,8 @@ public abstract class ServerSelectionListMixin extends ObjectSelectionList<Serve
 	@Unique
 	private final List<ServerSelectionList.OnlineServerEntry> vl$hubServers = new ArrayList<>();
 
-	public ServerSelectionListMixin(Minecraft p_94442_, int p_94443_, int p_94444_, int p_94445_, int p_94446_) {
-		super(p_94442_, p_94443_, p_94444_, p_94445_, p_94446_);
+	public ServerSelectionListMixin(Minecraft mc, int width, int height, int y, int itemHeight) {
+		super(mc, width, height, y, itemHeight);
 	}
 
 	@Inject(method = "refreshEntries", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/screens/multiplayer/ServerSelectionList;onlineServers:Ljava/util/List;", opcode = Opcodes.GETFIELD))

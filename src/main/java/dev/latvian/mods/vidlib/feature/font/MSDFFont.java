@@ -53,13 +53,13 @@ public record MSDFFont(
 
 	public static final MSDFFont UNKNOWN = new MSDFFont(
 		createKey(VidLib.id("unknown")),
-		VidLibTextures.MISSING,
+		VidLibTextures.MISSING.texturePath(),
 		MSDFFontData.EMPTY,
 		Char2ObjectMaps.emptyMap(),
 		new GlyphInfo(' ', 0F, null, null, Char2FloatMaps.EMPTY_MAP),
 		"",
-		VidLibRenderTypes.MSDF.apply(VidLibTextures.MISSING),
-		VidLibRenderTypes.MSDF_SEE_THROUGH.apply(VidLibTextures.MISSING),
+		VidLibRenderTypes.MSDF.apply(VidLibTextures.MISSING.texturePath()),
+		VidLibRenderTypes.MSDF_SEE_THROUGH.apply(VidLibTextures.MISSING.texturePath()),
 		0
 	);
 

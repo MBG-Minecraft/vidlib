@@ -15,7 +15,9 @@ import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
-import dev.latvian.mods.vidlib.feature.clothing.Clothing;
+import dev.latvian.mods.vidlib.feature.clothing.ClothedPlayerSkinTexture;
+import dev.latvian.mods.vidlib.feature.clothing.ClothingPresets;
+import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
@@ -70,6 +72,7 @@ import net.minecraft.client.renderer.item.properties.numeric.CompassAngleState;
 import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.client.resources.sounds.BiomeAmbientSoundsHandler;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.ClientAsset;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -185,7 +188,7 @@ public class ClientGameEngine {
 		return player.get(InternalPlayerData.PLUMBOB);
 	}
 
-	public List<Clothing> getClothing(Player player) {
+	public PlayerClothing getClothing(AbstractClientPlayer player) {
 		return player.get(InternalPlayerData.CLOTHING);
 	}
 
@@ -195,7 +198,7 @@ public class ClientGameEngine {
 	}
 
 	@Nullable
-	public ResourceLocation overrideCape(Player player) {
+	public ClientAsset overrideCape(Player player) {
 		return player.getOptional(InternalPlayerData.CAPE_OVERRIDE);
 	}
 
@@ -204,30 +207,75 @@ public class ClientGameEngine {
 	}
 
 	@Nullable
-	public ResourceLocation overrideElytra(Player player) {
+	public ClientAsset overrideElytra(Player player) {
 		return player.getOptional(InternalPlayerData.ELYTRA_OVERRIDE);
 	}
 
 	public PlayerSkin overridePlayerSkin(AbstractClientPlayer player, PlayerSkin original) {
-		var skinOverride = overrideSkin(player);
-		var capeOverride = overrideCape(player);
-		var elytraOverride = overrideElytra(player);
-		boolean disableCape = disableCape(player);
+		var skinTexture = original.texture();
+		var skinModel = original.model();
+		var capeTexture = original.capeTexture();
+		var elytraTexture = original.elytraTexture();
+		var override = false;
 
-		if (skinOverride == null && capeOverride == null && elytraOverride == null) {
-			if (!disableCape || original.capeTexture() == null) {
-				return original;
+		var skinOverride = overrideSkin(player);
+
+		if (skinOverride != null && (!skinOverride.asset().texturePath().equals(skinTexture) || skinOverride.slim() != (original.model() == PlayerSkin.Model.SLIM))) {
+			skinTexture = skinOverride.asset().texturePath();
+			skinModel = skinOverride.slim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE;
+			override = true;
+		}
+
+		if (disableCape(player)) {
+			if (capeTexture != null) {
+				capeTexture = null;
+				override = true;
+			}
+		} else {
+			var capeOverride = overrideCape(player);
+
+			if (capeOverride != null && !capeOverride.texturePath().equals(capeTexture)) {
+				capeTexture = capeOverride.texturePath();
+				override = true;
 			}
 		}
 
-		return new PlayerSkin(
-			skinOverride == null ? original.texture() : skinOverride.texture(),
-			null,
-			disableCape ? null : capeOverride == null ? original.capeTexture() : capeOverride,
-			elytraOverride == null ? original.elytraTexture() : elytraOverride,
-			skinOverride == null ? original.model() : skinOverride.slim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE,
-			true
-		);
+		var elytraOverride = overrideElytra(player);
+
+		if (elytraOverride != null && !elytraOverride.texturePath().equals(elytraTexture)) {
+			elytraTexture = elytraOverride.texturePath();
+			override = true;
+		}
+
+		if (ClothingPresets.ready) {
+			var skinImage = MiscClientUtils.SKIN_IMAGE_MAP.get(skinTexture);
+
+			if (skinImage == null) {
+				skinImage = MiscClientUtils.BUILTIN_SKIN_IMAGE_MAP.get(skinTexture);
+			}
+
+			if (skinImage != null) {
+				var clothing = getClothing(player).resolve();
+
+				if (!clothing.parts.isEmpty()) {
+					skinTexture = ClothedPlayerSkinTexture.computeClothedPlayerSkin(player.clientLevel.minecraft, skinTexture, skinImage, skinModel, clothing);
+					override = true;
+				}
+			}
+		}
+
+		if (override) {
+			return new PlayerSkin(
+				skinTexture,
+				null,
+				capeTexture,
+				elytraTexture,
+				skinModel,
+				true
+			);
+		} else {
+			return original;
+		}
 	}
 
 	public ResourceLocation getSkybox(Minecraft mc) {

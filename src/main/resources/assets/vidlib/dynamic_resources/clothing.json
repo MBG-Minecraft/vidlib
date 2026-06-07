@@ -1,0 +1,42 @@
+{
+	"resources": {
+		"vidlib:black": {},
+		"vidlib:brown": {},
+		"vidlib:blue": {},
+		"vidlib:cyan": {},
+		"vidlib:squid": {},
+		"vidlib:olive": {},
+		"vidlib:green": {},
+		"vidlib:lime": {},
+		"vidlib:yellow": {},
+		"vidlib:grapefruit": {},
+		"vidlib:orange": {},
+		"vidlib:red": {},
+		"vidlib:magenta": {},
+		"vidlib:purple": {},
+		"vidlib:pink": {},
+		"vidlib:white": {},
+		"vidlib:gray": {},
+		"vidlib:dark_blue": {},
+		"vidlib:dark_green": {},
+		"vidlib:dark_yellow": {},
+		"vidlib:dark_red": {},
+		"vidlib:shiny_black": {},
+		"vidlib:shiny_blue": {},
+		"vidlib:shiny_green": {},
+		"vidlib:shiny_yellow": {},
+		"vidlib:shiny_red": {},
+		"vidlib:shiny_purple": {},
+		"vidlib:shiny_white": {}
+	},
+	"files": [
+		{
+			"template": "vidlib:dynamic_resources/tracksuit.json",
+			"location": "{namespace}:vidlib/clothing_preset/tracksuit/{path}.json"
+		},
+		{
+			"template": "vidlib:dynamic_resources/smoking.json",
+			"location": "{namespace}:vidlib/clothing_preset/smoking/{path}.json"
+		}
+	]
+}

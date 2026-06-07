@@ -5,6 +5,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasUniform;
+import dev.latvian.mods.vidlib.integration.iris.IrisIntegration;
 import net.minecraft.client.Minecraft;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -19,6 +20,7 @@ public class DecalRenderer {
 		builder.setDrawSetupCallback(DecalRenderer::setup);
 		builder.addUniform(CanvasUniform.int1("Count", () -> uCount));
 		builder.addUniform(CanvasUniform.mat4("InverseViewProjectionMat", () -> ClientMatrices.INVERSE_WORLD));
+		builder.addUniform(CanvasUniform.int1("NoSceneSample", () -> IrisIntegration.INSTANCE.isShaderPackInUse() ? 1 : 0));
 	});
 
 	private static final List<Decal> TEMP_LIST = new ArrayList<>(1);

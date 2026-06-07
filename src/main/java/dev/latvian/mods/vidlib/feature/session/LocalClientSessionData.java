@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.session;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.Window;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.Identity;
@@ -10,7 +9,6 @@ import dev.latvian.mods.klib.util.Side;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.core.VLLocalPlayer;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeInstance;
@@ -36,10 +34,7 @@ import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToServer;
 import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverridesReplaySessionData;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.feature.note.Note;
-import dev.latvian.mods.vidlib.feature.npc.NPCParticleOptions;
-import dev.latvian.mods.vidlib.feature.npc.NPCRecording;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
@@ -56,7 +51,6 @@ import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
-import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
@@ -78,11 +72,8 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 import org.joml.Vector2dc;
 
-import java.io.BufferedOutputStream;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -108,7 +99,6 @@ public class LocalClientSessionData extends ClientSessionData {
 	public ClientCutscene currentCutscene;
 	public ScreenFadeInstance screenFade;
 	public ProjectedCoordinates projectedCoordinates;
-	public NPCRecording npcRecording;
 	public final List<Decal> debugDecals;
 	public final List<ScreenEffectInstance> screenEffects;
 	public Component topInfoBarOverride;
@@ -418,54 +408,6 @@ public class LocalClientSessionData extends ClientSessionData {
 		}
 
 		return stream.sorted(PlayerTabOverlay.PLAYER_COMPARATOR).limit(80L).toList();
-	}
-
-	public void startNPCRecording(Minecraft mc, GameProfile profile) {
-		if (npcRecording == null) {
-			npcRecording = new NPCRecording(profile);
-			npcRecording.record(npcRecording.start, mc.getDeltaTracker().getGameTimeDeltaPartialTick(true), mc.player);
-		} else {
-			mc.tell("Already recording NPC '" + profile.getName() + "'!");
-		}
-	}
-
-	public void stopNPCRecording(Minecraft mc) {
-		if (npcRecording != null) {
-			npcRecording.length = System.currentTimeMillis() - npcRecording.start;
-
-			var buf = PlatformHelper.CURRENT.createBuffer(Unpooled.buffer(), mc.level.registryAccess());
-			var path = VidLibPaths.GAME.get().resolve("npc/" + npcRecording.start + "_" + npcRecording.profile.getName().toLowerCase(Locale.ROOT) + ".npcrec");
-
-			if (Files.notExists(path.getParent())) {
-				try {
-					Files.createDirectories(path.getParent());
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-
-			try (var out = new BufferedOutputStream(Files.newOutputStream(path))) {
-				npcRecording.write(buf);
-				buf.readBytes(out, buf.readableBytes());
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-
-			npcRecording = null;
-			NPCRecording.REPLAY = null;
-			mc.tell("NPC recording '" + path.getFileName() + "' saved!");
-		}
-	}
-
-	public void replayNPCRecording(Minecraft mc) {
-		var map = NPCRecording.getReplay(mc.level.registryAccess());
-
-		if (map.isEmpty()) {
-			return;
-		}
-
-		var last = map.lastEntry();
-		mc.level.addParticle(new NPCParticleOptions(last.getKey(), false, 0, Optional.empty()), true, true, mc.player.getX(), mc.player.getY(), mc.player.getZ(), 0D, 0D, 0D);
 	}
 
 	@Override

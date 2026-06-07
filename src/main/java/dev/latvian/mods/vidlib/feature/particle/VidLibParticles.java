@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.particle;
 
 import com.mojang.serialization.MapCodec;
 import dev.latvian.mods.klib.util.Lazy;
-import dev.latvian.mods.vidlib.feature.npc.NPCParticleOptions;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -69,7 +68,6 @@ public interface VidLibParticles {
 	Supplier<ParticleType<LineParticleOptions>> LINE = register("line", () -> LineParticleOptions.CODEC, () -> LineParticleOptions.STREAM_CODEC);
 	Supplier<ParticleType<TextParticleOptions>> TEXT = register("text", () -> TextParticleOptions.CODEC, () -> TextParticleOptions.STREAM_CODEC);
 	Supplier<ParticleType<ItemParticleOptions>> ITEM = register("item", () -> ItemParticleOptions.CODEC, () -> ItemParticleOptions.STREAM_CODEC);
-	Supplier<ParticleType<NPCParticleOptions>> NPC = register("npc", () -> NPCParticleOptions.CODEC, () -> NPCParticleOptions.STREAM_CODEC);
 	Supplier<ParticleType<LightningParticleOptions>> LIGHTNING = register("lightning", () -> LightningParticleOptions.CODEC, () -> LightningParticleOptions.STREAM_CODEC);
 	Supplier<SimpleParticleType> BURN_SMOKE = register("burn_smoke");
 	Supplier<SimpleParticleType> SPARK = register("spark");

@@ -4,6 +4,7 @@ import dev.latvian.mods.klib.io.FileInfo;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import dev.mrbeastgaming.mods.hub.HubUserConfig;
+import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubClientSessionData;
 import dev.mrbeastgaming.mods.hub.api.HubGameServerData;
 import dev.mrbeastgaming.mods.hub.api.HubKeyData;
@@ -11,11 +12,15 @@ import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.api.HubUserData;
 import dev.mrbeastgaming.mods.hub.api.project.HubParticipantData;
 import dev.mrbeastgaming.mods.hub.api.project.HubProjectData;
+import dev.mrbeastgaming.mods.hub.event.SyncClientFilesHubEvent;
 import dev.mrbeastgaming.mods.hub.file.HubDirectoryUploadBuilder;
 import dev.mrbeastgaming.mods.hub.file.HubFileUploadBuilder;
+import dev.mrbeastgaming.mods.hub.file.HubFileUploads;
 import dev.mrbeastgaming.mods.hub.file.HubUploadBuilderBase;
 import net.minecraft.client.Minecraft;
+import net.neoforged.neoforge.common.NeoForge;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -67,5 +72,16 @@ public class VidLibClient {
 			wrapHubUploadBuilder(builder);
 			parent.accept(file, builder);
 		};
+	}
+
+	public static void checkFileSync(boolean isFirstTime) {
+		if (HubUserCapabilities.CURRENT.autoUploadFiles()) {
+			var entries = new ArrayList<HubFileUploads.Entry>();
+			NeoForge.EVENT_BUS.post(new SyncClientFilesHubEvent(entries, isFirstTime));
+
+			if (!entries.isEmpty()) {
+				HubAPI.SEQUENTIAL_EXECUTOR.get().execute(() -> HubFileUploads.syncFiles(entries, VidLibClient.createUploadQueue()));
+			}
+		}
 	}
 }

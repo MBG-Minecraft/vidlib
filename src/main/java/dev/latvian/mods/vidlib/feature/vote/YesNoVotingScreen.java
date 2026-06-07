@@ -21,13 +21,13 @@ public class YesNoVotingScreen extends BaseVotingScreen {
 			boolean isSelected = selected == (isYes ? 1 : 0);
 
 			if (isYes) {
-				graphics.blit(VidLibRenderTypes.GUI, isSelected || isHovered ? VidLibTextures.YES : VidLibTextures.YES_OFF, getX(), getY(), 0F, 0F, width, height, width, height);
+				graphics.blit(VidLibRenderTypes.GUI, isSelected || isHovered ? VidLibTextures.YES.texturePath() : VidLibTextures.YES_OFF.texturePath(), getX(), getY(), 0F, 0F, width, height, width, height);
 			} else {
-				graphics.blit(VidLibRenderTypes.GUI, isSelected || isHovered ? VidLibTextures.NO : VidLibTextures.NO_OFF, getX(), getY(), 0F, 0F, width, height, width, height);
+				graphics.blit(VidLibRenderTypes.GUI, isSelected || isHovered ? VidLibTextures.NO.texturePath() : VidLibTextures.NO_OFF.texturePath(), getX(), getY(), 0F, 0F, width, height, width, height);
 			}
 
 			if (isSelected) {
-				graphics.blit(VidLibRenderTypes.GUI, isYes ? VidLibTextures.YES_OUTLINE : VidLibTextures.NO_OUTLINE, getX(), getY(), 0F, 0F, width, height, width, height);
+				graphics.blit(VidLibRenderTypes.GUI, isYes ? VidLibTextures.YES_OUTLINE.texturePath() : VidLibTextures.NO_OUTLINE.texturePath(), getX(), getY(), 0F, 0F, width, height, width, height);
 			}
 
 			graphics.drawString(font, getMessage(), getX() + (width - font.width(getMessage())) / 2, getY() + height + 6, 0xFFFFFFFF, true);

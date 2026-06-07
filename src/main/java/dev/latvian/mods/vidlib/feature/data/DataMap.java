@@ -58,8 +58,16 @@ public class DataMap implements DataMapHolder {
 		return this;
 	}
 
+	private void checkKey(DataKey<?> type) {
+		if (storage != type.storage()) {
+			throw new IllegalArgumentException("Tried to use " + type.storage() + " key in " + storage + " DataMap");
+		}
+	}
+
 	@Override
 	public <T> T getOptional(DataKey<T> type) {
+		checkKey(type);
+
 		if (superOverrides != null) {
 			var v = superOverrides[type.index()];
 
@@ -81,6 +89,8 @@ public class DataMap implements DataMapHolder {
 
 	@Override
 	public <T> T get(DataKey<T> type) {
+		checkKey(type);
+
 		if (superOverrides != null) {
 			var v = superOverrides[type.index()];
 
@@ -102,12 +112,16 @@ public class DataMap implements DataMapHolder {
 
 	@Override
 	public <T> void set(DataKey<T> type, @Nullable T value) {
+		checkKey(type);
+
 		var v = init(type);
 		v.data = value;
 		v.setChanged();
 	}
 
 	public void setSuperOverride(DataKey<?> type, @Nullable Object value) {
+		checkKey(type);
+
 		if (superOverrides == null) {
 			superOverrides = new Optional[map.length];
 		}
@@ -116,7 +130,7 @@ public class DataMap implements DataMapHolder {
 	}
 
 	public void removeSuperOverride(DataKey<?> type) {
-		if (superOverrides != null) {
+		if (superOverrides != null && storage == type.storage()) {
 			superOverrides[type.index()] = null;
 
 			for (var value : superOverrides) {
@@ -130,7 +144,7 @@ public class DataMap implements DataMapHolder {
 	}
 
 	public boolean hasSuperOverride(DataKey<?> type) {
-		return superOverrides != null && superOverrides[type.index()] != null;
+		return superOverrides != null && storage == type.storage() && superOverrides[type.index()] != null;
 	}
 
 	public void load(MinecraftServer server, Path path) {

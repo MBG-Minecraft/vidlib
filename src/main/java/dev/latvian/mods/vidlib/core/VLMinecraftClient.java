@@ -177,10 +177,6 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 		GhostStructure.preRender(frameInfo, ctx);
 
-		if (session.npcRecording != null) {
-			session.npcRecording.record(System.currentTimeMillis(), screenDelta, mc.player);
-		}
-
 		CanvasImpl.createHandles(mc, event.getFrameGrapBuilder(), event.getRenderTargetDescriptor());
 		// event.enableOutlineProcessing();
 
@@ -622,7 +618,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	default TextureAtlas getBlockAtlas() {
-		return vl$self().getModelManager().getAtlas(SpriteKey.BLOCKS);
+		return vl$self().getModelManager().getAtlas(SpriteKey.BLOCKS.texturePath());
 	}
 
 	default TextureAtlas getParticleAtlas() {
@@ -641,16 +637,16 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		} else if (sprite.isGui()) {
 			return getGuiAtlas();
 		} else {
-			return vl$self().getModelManager().getAtlas(sprite.atlas());
+			return vl$self().getModelManager().getAtlas(sprite.atlas().texturePath());
 		}
 	}
 
 	default TextureAtlas getAtlasFromTexture(ResourceLocation atlas) {
-		if (atlas.equals(SpriteKey.BLOCKS)) {
+		if (atlas.equals(SpriteKey.BLOCKS.texturePath())) {
 			return getBlockAtlas();
-		} else if (atlas.equals(SpriteKey.PARTICLES)) {
+		} else if (atlas.equals(SpriteKey.PARTICLES.texturePath())) {
 			return getParticleAtlas();
-		} else if (atlas.equals(SpriteKey.GUI)) {
+		} else if (atlas.equals(SpriteKey.GUI.texturePath())) {
 			return getGuiAtlas();
 		} else {
 			return vl$self().getModelManager().getAtlas(atlas);
@@ -658,7 +654,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	default TextureAtlasSprite getSprite(SpriteKey sprite) {
-		return getTextureAtlas(sprite).getSprite(sprite.sprite());
+		return getTextureAtlas(sprite).getSprite(sprite.sprite().id());
 	}
 
 	default <T> void updateServerDataValue(DataKey<T> key, T value) {

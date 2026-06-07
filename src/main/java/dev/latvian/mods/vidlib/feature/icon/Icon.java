@@ -5,6 +5,7 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
@@ -17,8 +18,8 @@ import net.minecraft.network.codec.StreamCodec;
 public interface Icon extends SimpleRegistryEntry {
 	SimpleRegistry<Icon> REGISTRY = SimpleRegistry.create(VidLib.id("icon"), c -> PlatformHelper.CURRENT.collectIcons(c));
 
-	SimpleRegistryType.Unit<Icon> YES = SimpleRegistryType.unit("yes", new TextureIcon(VidLib.id("textures/misc/yes.png"), UV.FULL, true, Color.WHITE));
-	SimpleRegistryType.Unit<Icon> NO = SimpleRegistryType.unit("no", new TextureIcon(VidLib.id("textures/misc/no.png"), UV.FULL, true, Color.WHITE));
+	SimpleRegistryType.Unit<Icon> YES = SimpleRegistryType.unit("yes", new TextureIcon(VidLibTextures.YES, UV.FULL, true, Color.WHITE));
+	SimpleRegistryType.Unit<Icon> NO = SimpleRegistryType.unit("no", new TextureIcon(VidLibTextures.NO, UV.FULL, true, Color.WHITE));
 
 	Codec<Icon> CODEC = REGISTRY.codec();
 	StreamCodec<RegistryFriendlyByteBuf, Icon> STREAM_CODEC = REGISTRY.streamCodec();

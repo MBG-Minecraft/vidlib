@@ -33,7 +33,7 @@ public class VidLibParticleRenderTypes {
 		false,
 		VidLibRenderPipelines.ADDITIVE_PARTICLE,
 		RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(SpriteKey.PARTICLES, TriState.FALSE, false))
+			.setTextureState(new RenderStateShard.TextureStateShard(SpriteKey.PARTICLES.texturePath(), TriState.FALSE, false))
 			.setLightmapState(RenderStateShard.LIGHTMAP)
 			.setOutputState(RenderStateShard.PARTICLES_TARGET)
 			.createCompositeState(false)
@@ -46,7 +46,7 @@ public class VidLibParticleRenderTypes {
 		false,
 		VidLibRenderPipelines.ADDITIVE_PARTICLE_ONLY_DEPTH,
 		RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(SpriteKey.PARTICLES, TriState.FALSE, false))
+			.setTextureState(new RenderStateShard.TextureStateShard(SpriteKey.PARTICLES.texturePath(), TriState.FALSE, false))
 			.setLightmapState(RenderStateShard.LIGHTMAP)
 			.setOutputState(RenderStateShard.PARTICLES_TARGET)
 			.createCompositeState(false)

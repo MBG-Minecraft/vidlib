@@ -1,6 +1,10 @@
 package dev.latvian.mods.vidlib.feature.client;
 
+import com.mojang.serialization.Codec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
 
 public enum ColorBlendMode implements StringRepresentable {
@@ -11,7 +15,9 @@ public enum ColorBlendMode implements StringRepresentable {
 	;
 
 	public static final ColorBlendMode[] VALUES = values();
-	public static final DataType<ColorBlendMode> DATA_TYPE = DataType.of(VALUES);
+	public static final Codec<ColorBlendMode> CODEC = StringRepresentable.fromEnum(() -> VALUES);
+	public static final StreamCodec<ByteBuf, ColorBlendMode> STREAM_CODEC = KLibStreamCodecs.enumValue(VALUES);
+	public static final DataType<ColorBlendMode> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, ColorBlendMode.class);
 
 	private final String name;
 	public final String displayName;

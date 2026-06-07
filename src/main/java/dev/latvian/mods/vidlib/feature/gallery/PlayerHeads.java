@@ -45,7 +45,7 @@ public interface PlayerHeads {
 
 		@Override
 		public ResourceLocation getIcon() {
-			return VidLibTextures.DEFAULT_PLAYER_HEAD;
+			return VidLibTextures.DEFAULT_PLAYER_HEAD.texturePath();
 		}
 
 		@Override
@@ -155,7 +155,7 @@ public interface PlayerHeads {
 
 	static AbstractTexture getTexture(Minecraft mc, @Nullable UUID uuid) {
 		if (uuid == null || uuid.equals(Util.NIL_UUID)) {
-			return mc.getTextureManager().getTexture(VidLibTextures.DEFAULT_PLAYER_HEAD);
+			return mc.getTextureManager().getTexture(VidLibTextures.DEFAULT_PLAYER_HEAD.texturePath());
 		}
 
 		return get(mc, uuid).load(mc, false);

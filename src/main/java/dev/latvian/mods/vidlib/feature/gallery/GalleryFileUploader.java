@@ -12,7 +12,7 @@ import java.nio.file.Files;
 public record GalleryFileUploader<K>(PathIDGenerator<K> randomId, ImagePreProcessor preProcessor) implements GalleryUploader<K> {
 	@Override
 	public ResourceLocation getIcon() {
-		return VidLibTextures.FOLDER;
+		return VidLibTextures.FOLDER.texturePath();
 	}
 
 	@Override

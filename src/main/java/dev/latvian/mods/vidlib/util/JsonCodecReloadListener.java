@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.util;
 
-import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.vidlib.VidLib;
@@ -51,7 +51,7 @@ public abstract class JsonCodecReloadListener<T> extends JsonReloadListener {
 	}
 
 	@Override
-	protected void apply(Map<ResourceLocation, JsonObject> from, ResourceManager resourceManager, ProfilerFiller profiler) {
+	protected void apply(Map<ResourceLocation, JsonElement> from, ResourceManager resourceManager, ProfilerFiller profiler) {
 		var map = new HashMap<ResourceLocation, CompletableFuture<T>>();
 
 		for (var entry : from.entrySet()) {
@@ -61,7 +61,7 @@ public abstract class JsonCodecReloadListener<T> extends JsonReloadListener {
 				var json = entry.getValue();
 
 				if (includeId) {
-					json.addProperty("id", id.toString());
+					json.getAsJsonObject().addProperty("id", id.toString());
 				}
 
 				map.put(id, CompletableFuture.supplyAsync(() -> {

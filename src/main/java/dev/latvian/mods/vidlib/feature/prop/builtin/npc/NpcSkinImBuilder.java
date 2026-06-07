@@ -27,7 +27,7 @@ public class NpcSkinImBuilder extends SetImBuilder<SkinTexture> {
 		ImGui.sameLine();
 		if (ImGui.button("Randomly Grab###randomly-grab")) {
 			items.clear();
-			TextureSet textures = new TextureSet(randomGrabFrom.build());
+			TextureSet textures = new TextureSet("", randomGrabFrom.build());
 			textures.get(graphics.mc).stream()
 				.limit(randomCount.get())
 				.filter(Objects::nonNull)

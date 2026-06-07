@@ -7,40 +7,42 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import imgui.type.ImString;
 import net.minecraft.Util;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.core.ClientAsset;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SpriteKeyImBuilder implements ImBuilder<SpriteKey> {
-	public static final List<ResourceLocation> ATLASES = Util.make(() -> {
-		var list = new ArrayList<ResourceLocation>();
+	public static final List<ClientAsset> ATLASES = Util.make(() -> {
+		var list = new ArrayList<ClientAsset>();
 		list.add(SpriteKey.BLOCKS);
 		list.add(SpriteKey.PARTICLES);
 		list.add(SpriteKey.GUI);
-		list.add(Sheets.BANNER_SHEET);
-		list.add(Sheets.BED_SHEET);
-		list.add(Sheets.CHEST_SHEET);
-		list.add(Sheets.SHIELD_SHEET);
-		list.add(Sheets.SIGN_SHEET);
-		list.add(Sheets.SHULKER_SHEET);
-		list.add(Sheets.ARMOR_TRIMS_SHEET);
-		list.add(Sheets.DECORATED_POT_SHEET);
+		list.add(MiscUtils.assetFromPNG(Sheets.BANNER_SHEET));
+		list.add(MiscUtils.assetFromPNG(Sheets.BED_SHEET));
+		list.add(MiscUtils.assetFromPNG(Sheets.CHEST_SHEET));
+		list.add(MiscUtils.assetFromPNG(Sheets.SHIELD_SHEET));
+		list.add(MiscUtils.assetFromPNG(Sheets.SIGN_SHEET));
+		list.add(MiscUtils.assetFromPNG(Sheets.SHULKER_SHEET));
+		list.add(MiscUtils.assetFromPNG(Sheets.ARMOR_TRIMS_SHEET));
+		list.add(MiscUtils.assetFromPNG(Sheets.DECORATED_POT_SHEET));
 		return list;
 	});
 
 	public static final ImBuilderType<SpriteKey> TYPE = SpriteKeyImBuilder::new;
 	public static final ImString SEARCH = ImGuiUtils.resizableString();
 
-	public final ResourceLocation[] atlas;
-	public final ResourceLocation[] sprite;
+	public final ClientAsset[] atlas;
+	public final ClientAsset[] sprite;
 
 	public SpriteKeyImBuilder() {
-		this.atlas = new ResourceLocation[1];
-		this.sprite = new ResourceLocation[1];
+		this.atlas = new ClientAsset[1];
+		this.sprite = new ClientAsset[1];
 	}
 
 	@Override
@@ -56,7 +58,7 @@ public class SpriteKeyImBuilder implements ImBuilder<SpriteKey> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		var update = graphics.combo("###atlas", atlas, "Texture", ATLASES, ID::idToString, null);
+		var update = graphics.combo("###atlas", atlas, "Texture", ATLASES, a -> ID.idToString(a.id()), null);
 
 		if (update.isFull()) {
 			sprite[0] = null;
@@ -67,7 +69,7 @@ public class SpriteKeyImBuilder implements ImBuilder<SpriteKey> {
 			update = update.or(TextureSet.ALL.imgui(graphics, sprite, SEARCH));
 		} else {
 			try {
-				var list = new ArrayList<>(graphics.mc.getAtlasFromTexture(atlas[0]).getTextures().keySet());
+				var list = new ArrayList<>(graphics.mc.getAtlasFromTexture(atlas[0].texturePath()).getTextures().keySet());
 				list.sort(ResourceLocation::compareNamespaced);
 				update = update.or(graphics.combo("###sprite", sprite, "", list, ID::idToString, SEARCH));
 			} catch (Throwable ex) {

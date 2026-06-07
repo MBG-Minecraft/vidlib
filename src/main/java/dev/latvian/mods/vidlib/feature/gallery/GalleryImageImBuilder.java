@@ -56,7 +56,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage<?>> {
 			graphics.setItemSpacing(4F, 4F);
 			ImGui.pushID("###remove");
 
-			if (graphics.imageButton(VidLibTextures.TRASH, 40F, 40F, UV.FULL, 2, selected == null ? ImColorVariant.GRAY : ImColorVariant.RED)) {
+			if (graphics.imageButton(VidLibTextures.TRASH.texturePath(), 40F, 40F, UV.FULL, 2, selected == null ? ImColorVariant.GRAY : ImColorVariant.RED)) {
 				if (selected != null) {
 					set(null);
 					update = ImUpdate.FULL;

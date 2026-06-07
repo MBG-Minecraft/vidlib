@@ -397,9 +397,13 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		ImGui.setNextWindowSize(viewport.getWorkSizeX(), viewport.getWorkSizeY());
 	}
 
-	public <E> ImUpdate combo(String label, Object[] selected, String noneLabel, Iterable<? extends E> options, Function<E, String> nameFunction, @Nullable ImString search) {
+	public <E> ImUpdate combo(String label, Object[] selected, String noneLabel, Iterable<? extends E> options, @Nullable Function<E, String> nameFunction, @Nullable ImString search) {
 		var result = ImUpdate.NONE;
 		var searchText = search != null ? search.get().toLowerCase(Locale.ROOT) : "";
+
+		if (nameFunction == null) {
+			nameFunction = (Function<E, String>) KLibCodecs.DEFAULT_NAME_GETTER;
+		}
 
 		if (ImGui.beginCombo(label, selected[0] == null ? noneLabel.isEmpty() ? "None" : noneLabel : nameFunction.apply((E) selected[0]), ImGuiInputTextFlags.None)) {
 			float y = ImGui.getCursorPos().y;
@@ -449,12 +453,12 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		return result;
 	}
 
-	public <E> ImUpdate combo(String label, Object[] selected, String noneLabel, E[] options, Function<E, String> nameFunction) {
+	public <E> ImUpdate combo(String label, Object[] selected, String noneLabel, E[] options, @Nullable Function<E, String> nameFunction) {
 		return combo(label, selected, noneLabel, Arrays.asList(options), nameFunction, null);
 	}
 
 	public <E> ImUpdate combo(String label, Object[] selected, String noneLabel, E[] options) {
-		return combo(label, selected, noneLabel, options, (Function) KLibCodecs.DEFAULT_NAME_GETTER);
+		return combo(label, selected, noneLabel, options, null);
 	}
 
 	public boolean collapsingHeader(String label, int imGuiTreeNodeFlags) {

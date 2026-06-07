@@ -12,6 +12,7 @@ import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -30,7 +31,7 @@ public interface PlayerSkins {
 	Gallery<UUID> GALLERY = Gallery.ofUUIDKey("player_skins", () -> VidLibPaths.USER.get().resolve("player-skins"), TriState.TRUE);
 
 	static PlayerSkin of(SkinTexture skin) {
-		return new PlayerSkin(skin.texture(), null, null, null, skin.slim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE, true);
+		return new PlayerSkin(skin.asset().texturePath(), null, null, null, skin.slim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE, true);
 	}
 
 	PlayerSkin[] DEFAULT_WIDE_SKINS = new PlayerSkin[]{
@@ -58,12 +59,12 @@ public interface PlayerSkins {
 	};
 
 	Codec<PlayerSkin> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		SkinTexture.CODEC.fieldOf("skin").forGetter(s -> new SkinTexture(s.texture(), s.model() == PlayerSkin.Model.SLIM)),
+		SkinTexture.CODEC.fieldOf("skin").forGetter(s -> new SkinTexture(MiscUtils.assetFromPNG(s.texture()), s.model() == PlayerSkin.Model.SLIM)),
 		Codec.STRING.optionalFieldOf("textureUrl", "").forGetter(s -> s.textureUrl() == null ? "" : s.textureUrl()),
 		ID.CODEC.optionalFieldOf("capeTexture").forGetter(s -> Optional.ofNullable(s.capeTexture())),
 		ID.CODEC.optionalFieldOf("elytraTexture").forGetter(s -> Optional.ofNullable(s.elytraTexture()))
 	).apply(instance, (skin, textureUrl, capeTexture, elytraTexture) -> new PlayerSkin(
-		skin.texture(),
+		skin.asset().texturePath(),
 		textureUrl.isEmpty() ? null : textureUrl,
 		capeTexture.orElse(null),
 		elytraTexture.orElse(null),
@@ -72,12 +73,12 @@ public interface PlayerSkins {
 	)));
 
 	StreamCodec<ByteBuf, PlayerSkin> STREAM_CODEC = CompositeStreamCodec.of(
-		SkinTexture.STREAM_CODEC, s -> new SkinTexture(s.texture(), s.model() == PlayerSkin.Model.SLIM),
+		SkinTexture.STREAM_CODEC, s -> new SkinTexture(MiscUtils.assetFromPNG(s.texture()), s.model() == PlayerSkin.Model.SLIM),
 		ByteBufCodecs.STRING_UTF8, s -> s.textureUrl() == null ? "" : s.textureUrl(),
 		KLibStreamCodecs.optional(ID.STREAM_CODEC, null), PlayerSkin::capeTexture,
 		KLibStreamCodecs.optional(ID.STREAM_CODEC, null), PlayerSkin::elytraTexture,
 		(skin, textureUrl, capeTexture, elytraTexture) -> new PlayerSkin(
-			skin.texture(),
+			skin.asset().texturePath(),
 			textureUrl.isEmpty() ? null : textureUrl,
 			capeTexture,
 			elytraTexture,

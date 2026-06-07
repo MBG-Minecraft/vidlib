@@ -13,7 +13,7 @@ import dev.latvian.mods.vidlib.feature.visual.DynamicSpriteTexture;
 import dev.latvian.mods.vidlib.feature.visual.ResolvedCubeTextures;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.ClientAsset;
 import net.minecraft.util.Mth;
 
 import java.util.Map;
@@ -21,7 +21,7 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 
 public class FluidPlaneRenderer {
-	public static final Map<ResourceLocation, StaticBuffers> BUFFERS = new Object2ObjectOpenHashMap<>();
+	public static final Map<ClientAsset, StaticBuffers> BUFFERS = new Object2ObjectOpenHashMap<>();
 
 	@AutoInit({AutoInit.Type.TEXTURES_RELOADED, AutoInit.Type.CHUNKS_RENDERED})
 	public static void refreshBuffers() {
