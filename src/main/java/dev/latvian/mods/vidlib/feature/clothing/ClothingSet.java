@@ -1,17 +1,12 @@
 package dev.latvian.mods.vidlib.feature.clothing;
 
 import com.mojang.serialization.Codec;
-import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
-import dev.latvian.mods.klib.color.Gradient;
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
-import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
 import io.netty.buffer.ByteBuf;
-import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
@@ -32,22 +27,7 @@ public class ClothingSet {
 		return list.isEmpty() ? EMPTY : new ClothingSet(list);
 	}
 
-	public static final Codec<ClothingSet> LIST_CODEC = ClothingPart.CODEC.listOf().xmap(ClothingSet::of, ClothingSet::parts);
-
-	public static final Codec<ClothingSet> MAP_CODEC = Codec.unboundedMap(ID.CODEC, VLCodecs.TRANSPARENT_OR_GRADIENT_CODEC).xmap(
-		map -> of(map.entrySet().stream().map(ClothingPart::new).toList()),
-		set -> {
-			var map = new Object2ObjectLinkedOpenHashMap<ResourceLocation, Gradient>();
-
-			for (var part : set.parts) {
-				map.put(part.texture(), part.colors());
-			}
-
-			return map;
-		}
-	);
-
-	public static final Codec<ClothingSet> CODEC = KLibCodecs.or(MAP_CODEC, LIST_CODEC);
+	public static final Codec<ClothingSet> CODEC = ClothingPart.CODEC.listOf().xmap(ClothingSet::of, ClothingSet::parts);
 
 	public static final StreamCodec<ByteBuf, ClothingSet> STREAM_CODEC = KLibStreamCodecs.listOf(ClothingPart.STREAM_CODEC).map(ClothingSet::of, ClothingSet::parts);
 	public static final DataType<ClothingSet> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, ClothingSet.class);

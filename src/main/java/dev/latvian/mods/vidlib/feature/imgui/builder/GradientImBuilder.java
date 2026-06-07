@@ -3,24 +3,32 @@ package dev.latvian.mods.vidlib.feature.imgui.builder;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.CompoundGradient;
 import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.color.GradientReference;
 import dev.latvian.mods.klib.color.PositionedColor;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 import imgui.flag.ImGuiColorEditFlags;
+import imgui.type.ImString;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class GradientImBuilder implements ImBuilder<Gradient> {
 	public static final ImBuilderType<Gradient> TYPE = GradientImBuilder::new;
+	public static final ImString SEARCH = ImGuiUtils.resizableString();
 
 	public final List<PositionedColorImBuilder> colors;
+	public final ResourceLocation[] reference;
 
 	public GradientImBuilder() {
 		this.colors = new ArrayList<>();
+		this.reference = new ResourceLocation[1];
 	}
 
 	public GradientImBuilder(List<PositionedColor> colors) {
@@ -32,25 +40,36 @@ public class GradientImBuilder implements ImBuilder<Gradient> {
 			builder.set(col);
 			this.colors.add(builder);
 		}
+
+		this.reference = new ResourceLocation[1];
 	}
 
 	@Override
 	public void set(Gradient value) {
 		colors.clear();
+		reference[0] = null;
 
-		var positionedColors = value.getPositionedColors();
+		if (value instanceof GradientReference ref) {
+			reference[0] = ref.id();
+		} else if (value != null) {
+			var positionedColors = value.getPositionedColors();
 
-		for (int i = 0; i < positionedColors.size(); i++) {
-			var col = positionedColors.get(i);
-			var builder = new PositionedColorImBuilder("Color #" + (i + 1));
-			builder.set(col);
-			colors.add(builder);
+			for (int i = 0; i < positionedColors.size(); i++) {
+				var col = positionedColors.get(i);
+				var builder = new PositionedColorImBuilder("Color #" + (i + 1));
+				builder.set(col);
+				colors.add(builder);
+			}
 		}
 	}
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		var update = ImUpdate.NONE;
+		var update = graphics.combo("###reference", reference, "Custom", GradientReference.MAP.keySet().stream().sorted(ResourceLocation::compareNamespaced).toList(), ID::idToString, SEARCH);
+
+		if (reference[0] != null) {
+			return update;
+		}
 
 		graphics.pushStack();
 		graphics.setItemSpacing(6F, 8F);
@@ -125,8 +144,8 @@ public class GradientImBuilder implements ImBuilder<Gradient> {
 
 	@Override
 	public boolean isValid() {
-		if (colors.isEmpty()) {
-			return false;
+		if (reference[0] != null) {
+			return true;
 		}
 
 		for (var c : colors) {
@@ -140,10 +159,18 @@ public class GradientImBuilder implements ImBuilder<Gradient> {
 
 	@Override
 	public Gradient build() {
+		if (reference[0] != null) {
+			return new GradientReference(reference[0]);
+		}
+
 		var list = new ArrayList<PositionedColor>();
 
 		for (var c : colors) {
 			list.add(c.build());
+		}
+
+		if (list.size() == 1) {
+			return list.getFirst().color();
 		}
 
 		return new CompoundGradient(list).optimize();

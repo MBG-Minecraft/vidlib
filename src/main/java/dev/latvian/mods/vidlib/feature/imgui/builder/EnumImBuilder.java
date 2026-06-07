@@ -41,7 +41,7 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 		this.options = options;
 		this.value = new Object[]{defaultValue};
 		this.allowNull = defaultValue == null;
-		this.nameGetter = (Function) KLibCodecs.DEFAULT_NAME_GETTER;
+		this.nameGetter = null;
 	}
 
 	public EnumImBuilder(E[] options, E defaultValue) {

@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.clothing;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
@@ -15,15 +14,11 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.AbstractMap;
 import java.util.Map;
 
 @AutoInit
 public record ClothingPart(ResourceLocation texture, Gradient colors) {
-	public static final Codec<ClothingPart> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		ID.CODEC.fieldOf("texture").forGetter(ClothingPart::texture),
-		VLCodecs.TRANSPARENT_OR_GRADIENT_CODEC.optionalFieldOf("colors", Color.TRANSPARENT).forGetter(ClothingPart::colors)
-	).apply(instance, ClothingPart::new));
-
 	public static final Codec<ClothingPart> ID_CODEC = ID.CODEC.flatComapMap(texture -> new ClothingPart(texture, Color.TRANSPARENT), part -> {
 		if (part.colors == Color.TRANSPARENT) {
 			return DataResult.success(part.texture);
@@ -32,7 +27,9 @@ public record ClothingPart(ResourceLocation texture, Gradient colors) {
 		}
 	});
 
-	public static final Codec<ClothingPart> CODEC = KLibCodecs.or(ID_CODEC, DIRECT_CODEC);
+	public static final Codec<ClothingPart> ENTRY_CODEC = VLCodecs.mapEntry(ID.CODEC, VLCodecs.TRANSPARENT_OR_GRADIENT_CODEC).xmap(ClothingPart::new, ClothingPart::createEntry);
+
+	public static final Codec<ClothingPart> CODEC = KLibCodecs.or(ID_CODEC, ENTRY_CODEC);
 
 	public static final StreamCodec<ByteBuf, ClothingPart> STREAM_CODEC = CompositeStreamCodec.of(
 		ID.STREAM_CODEC, ClothingPart::texture,
@@ -42,5 +39,9 @@ public record ClothingPart(ResourceLocation texture, Gradient colors) {
 
 	public ClothingPart(Map.Entry<ResourceLocation, Gradient> entry) {
 		this(entry.getKey(), entry.getValue());
+	}
+
+	public Map.Entry<ResourceLocation, Gradient> createEntry() {
+		return new AbstractMap.SimpleEntry<>(texture, colors);
 	}
 }

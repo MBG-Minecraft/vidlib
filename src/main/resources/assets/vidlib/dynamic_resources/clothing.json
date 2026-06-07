@@ -1,9 +1,11 @@
 {
 	"resources": {
 		"vidlib:black": {},
+		"vidlib:brown": {},
 		"vidlib:blue": {},
 		"vidlib:cyan": {},
 		"vidlib:squid": {},
+		"vidlib:olive": {},
 		"vidlib:green": {},
 		"vidlib:lime": {},
 		"vidlib:yellow": {},
@@ -19,6 +21,7 @@
 		"vidlib:dark_green": {},
 		"vidlib:dark_yellow": {},
 		"vidlib:dark_red": {},
+		"vidlib:shiny_black": {},
 		"vidlib:shiny_blue": {},
 		"vidlib:shiny_green": {},
 		"vidlib:shiny_yellow": {},

@@ -241,22 +241,18 @@ public class MiscClientUtils {
 			int srcW = src.getWidth();
 			int srcH = src.getHeight();
 
-			if (srcW == dstW && srcH == dstH) {
-				for (int x = 0; x < dstW; x++) {
-					for (int y = 0; y < dstH; y++) {
-						int srcColorArgb = src.getPixel(x, y);
+			for (int x = 0; x < dstW; x++) {
+				for (int y = 0; y < dstH; y++) {
+					int srcColorArgb = src.getPixel(x * srcW / dstW, y * srcH / dstH);
 
-						if (srcColorArgb == 0x01010101) {
-							dst.setPixel(x, y, keepMeta ? 0x01010101 : 0);
-						} else {
-							var srcColor = Color.of(srcColorArgb);
-							var dstColor = Color.of(dst.getPixel(x, y));
-							dst.setPixel(x, y, srcColor.mix(dstColor).argb());
-						}
+					if (srcColorArgb == 0x01010101) {
+						dst.setPixel(x, y, keepMeta ? 0x01010101 : 0);
+					} else {
+						var srcColor = Color.of(srcColorArgb);
+						var dstColor = Color.of(dst.getPixel(x, y));
+						dst.setPixel(x, y, srcColor.mix(dstColor).argb());
 					}
 				}
-			} else {
-				// FIXME: Mixed size images
 			}
 		}
 

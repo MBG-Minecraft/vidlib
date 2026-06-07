@@ -20,9 +20,11 @@ public interface ClientGradients {
 	Gradient WHITE_BASE = ref("white_base");
 
 	Gradient BLACK = ref("black");
+	Gradient BROWN = ref("brown");
 	Gradient BLUE = ref("blue");
 	Gradient CYAN = ref("cyan");
 	Gradient SQUID = ref("squid");
+	Gradient OLIVE = ref("olive");
 	Gradient GREEN = ref("green");
 	Gradient LIME = ref("lime");
 	Gradient YELLOW = ref("yellow");

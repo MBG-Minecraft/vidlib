@@ -1,0 +1,13 @@
+[
+	"vidlib:shirt",
+	{
+		"vidlib:tie": "vidlib:shiny_red"
+	},
+	{
+		"vidlib:pants": "vidlib:olive"
+	},
+	"vidlib:shoes",
+	{
+		"vidlib:jacket": "vidlib:black"
+	}
+]

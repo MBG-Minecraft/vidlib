@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.block;
 
-import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
@@ -24,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.Function;
 
 public class ExactBlockStateImBuilder implements ImBuilder<BlockState> {
 	public static final ImBuilderType<BlockState> TYPE = ExactBlockStateImBuilder::new;
@@ -127,7 +125,7 @@ public class ExactBlockStateImBuilder implements ImBuilder<BlockState> {
 					ImGui.sliderInt("###" + property.getName(), ((ImInt) value).getData(), min, max);
 					update = update.orItemEdit();
 				} else {
-					update = update.or(graphics.combo("###" + property.getName(), (Object[]) value, "", property.getPossibleValues(), (Function) KLibCodecs.DEFAULT_NAME_GETTER, SEARCH));
+					update = update.or(graphics.combo("###" + property.getName(), (Object[]) value, "", property.getPossibleValues(), null, SEARCH));
 				}
 			}
 

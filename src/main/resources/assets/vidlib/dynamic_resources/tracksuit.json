@@ -1,6 +1,12 @@
-{
-	"vidlib:tracksuit/shirt": "{namespace}:{path}",
-	"vidlib:tracksuit/top": "{namespace}:{path}",
-	"vidlib:tracksuit/bottoms": "{namespace}:{path}",
-	"vidlib:tracksuit/sneakers": ""
-}
+[
+	{
+		"vidlib:tracksuit/shirt": "{namespace}:{path}"
+	},
+	{
+		"vidlib:tracksuit/top": "{namespace}:{path}"
+	},
+	{
+		"vidlib:tracksuit/bottoms": "{namespace}:{path}"
+	},
+	"vidlib:sneakers"
+]

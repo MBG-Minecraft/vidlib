@@ -8,6 +8,7 @@ public interface Smokings {
 		return ClothingPresets.createId(VidLib.id("smoking/" + id));
 	}
 
+	ResourceKey<ClothingSet> SHINY_BLACK = create("shiny_black");
 	ResourceKey<ClothingSet> SHINY_BLUE = create("shiny_blue");
 	ResourceKey<ClothingSet> SHINY_GREEN = create("shiny_green");
 	ResourceKey<ClothingSet> SHINY_YELLOW = create("shiny_yellow");
