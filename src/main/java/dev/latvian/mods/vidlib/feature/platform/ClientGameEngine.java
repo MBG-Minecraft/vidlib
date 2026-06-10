@@ -16,7 +16,6 @@ import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clothing.ClothedPlayerSkinTexture;
-import dev.latvian.mods.vidlib.feature.clothing.ClothingPresets;
 import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
@@ -247,21 +246,11 @@ public class ClientGameEngine {
 			override = true;
 		}
 
-		if (ClothingPresets.ready) {
-			var skinImage = MiscClientUtils.SKIN_IMAGE_MAP.get(skinTexture);
+		var replacement = ClothedPlayerSkinTexture.replace(player.clientLevel.minecraft, skinTexture, skinModel, getClothing(player));
 
-			if (skinImage == null) {
-				skinImage = MiscClientUtils.BUILTIN_SKIN_IMAGE_MAP.get(skinTexture);
-			}
-
-			if (skinImage != null) {
-				var clothing = getClothing(player).resolve();
-
-				if (!clothing.parts.isEmpty()) {
-					skinTexture = ClothedPlayerSkinTexture.computeClothedPlayerSkin(player.clientLevel.minecraft, skinTexture, skinImage, skinModel, clothing);
-					override = true;
-				}
-			}
+		if (replacement != null) {
+			skinTexture = replacement;
+			override = true;
 		}
 
 		if (override) {

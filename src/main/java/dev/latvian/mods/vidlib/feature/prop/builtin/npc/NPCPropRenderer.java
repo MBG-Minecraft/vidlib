@@ -5,6 +5,8 @@ import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.EntityRenderTypes;
+import dev.latvian.mods.vidlib.feature.clothing.ClothedPlayerSkinTexture;
+import dev.latvian.mods.vidlib.feature.clothing.ClothingPresets;
 import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerSkins;
@@ -106,8 +108,21 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 			skins = SINGLE_SKIN;
 		}
 
-		if (skins == SINGLE_SKIN && p.clothing != PlayerClothing.NONE) {
-			// FIXME skins[0] = ClientGameEngine.INSTANCE.overridePlayerSkin(fakePlayer, skins[0]);
+		if (ClothingPresets.ready && p.clothing != PlayerClothing.NONE) {
+			for (int s = 0; s < skins.length; s++) {
+				var replacement = ClothedPlayerSkinTexture.replace(mc, skins[s], p.clothing);
+
+				if (replacement != null) {
+					skins[s] = new PlayerSkin(
+						replacement,
+						null,
+						skins[s].capeTexture(),
+						skins[s].elytraTexture(),
+						skins[s].model(),
+						true
+					);
+				}
+			}
 		}
 
 		playerRenderState.attackTime = 0;

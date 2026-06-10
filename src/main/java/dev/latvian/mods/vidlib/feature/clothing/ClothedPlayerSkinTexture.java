@@ -149,6 +149,32 @@ public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 		return tex.resourceId();
 	}
 
+	@Nullable
+	public static ResourceLocation replace(Minecraft mc, ResourceLocation skinTexture, PlayerSkin.Model model, PlayerClothing playerClothing) {
+		if (ClothingPresets.ready && playerClothing != PlayerClothing.NONE) {
+			var skinImage = MiscClientUtils.SKIN_IMAGE_MAP.get(skinTexture);
+
+			if (skinImage == null) {
+				skinImage = MiscClientUtils.BUILTIN_SKIN_IMAGE_MAP.get(skinTexture);
+			}
+
+			if (skinImage != null) {
+				var clothing = playerClothing.resolve();
+
+				if (!clothing.parts.isEmpty()) {
+					return computeClothedPlayerSkin(mc, skinTexture, skinImage, model, clothing);
+				}
+			}
+		}
+
+		return null;
+	}
+
+	@Nullable
+	public static ResourceLocation replace(Minecraft mc, PlayerSkin playerSkin, PlayerClothing playerClothing) {
+		return replace(mc, playerSkin.texture(), playerSkin.model(), playerClothing);
+	}
+
 	public ClothedPlayerSkinTexture(ResourceLocation location, NativeImage pixels) {
 		super(location);
 		this.pixels = pixels;
