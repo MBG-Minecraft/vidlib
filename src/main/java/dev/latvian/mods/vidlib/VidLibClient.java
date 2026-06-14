@@ -6,12 +6,8 @@ import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import dev.mrbeastgaming.mods.hub.HubUserConfig;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubClientSessionData;
-import dev.mrbeastgaming.mods.hub.api.HubGameServerData;
-import dev.mrbeastgaming.mods.hub.api.HubKeyData;
 import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.api.HubUserData;
-import dev.mrbeastgaming.mods.hub.api.project.HubParticipantData;
-import dev.mrbeastgaming.mods.hub.api.project.HubProjectData;
 import dev.mrbeastgaming.mods.hub.event.SyncClientFilesHubEvent;
 import dev.mrbeastgaming.mods.hub.file.HubDirectoryUploadBuilder;
 import dev.mrbeastgaming.mods.hub.file.HubFileUploadBuilder;
@@ -21,7 +17,6 @@ import net.minecraft.client.Minecraft;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -32,14 +27,7 @@ public class VidLibClient {
 
 	public static void loadHub() {
 		var userConfig = HubUserConfig.load();
-		var data = HubClientSessionData.load(userConfig, HubProjectConfig.INSTANCE.get());
-		HubUserData.SELF = data == null ? null : data.user();
-		HubProjectData.PACK = data == null ? null : data.project().orElse(null);
-		HubParticipantData.SELF = data == null ? null : data.participant().orElse(null);
-		HubUserCapabilities.CURRENT = data == null ? HubUserCapabilities.DEFAULT : data.capabilities();
-		HubGameServerData.CURRENT = data == null ? List.of() : data.servers();
-		HubKeyData.KEYS = data == null ? null : data.keys();
-		HubKeyData.SESSION_KEYS = data == null ? null : data.sessionKeys();
+		HubClientSessionData.load(userConfig, HubProjectConfig.INSTANCE.get());
 	}
 
 	private static void wrapHubUploadBuilder(HubUploadBuilderBase builder) {

@@ -123,7 +123,7 @@ public interface HubAPI {
 	}
 
 	static HubClientSessionData apiDesktopClientSession(HubClientSessionDataRequest request) throws Exception {
-		return HubClientSessionData.CODEC.parse(JsonOps.INSTANCE, sendJsonRequest(request("/api/desktop/client-session", Tristate.TRUE)
+		return HubClientSessionData.CODEC.parse(JsonOps.INSTANCE, sendJsonRequest(request("/api/desktop/client-session", Tristate.DEFAULT)
 			.POST(jsonBody(HubClientSessionDataRequest.CODEC, request))
 			.timeout(Duration.ofSeconds(30L))
 			.build()

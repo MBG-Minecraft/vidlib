@@ -22,7 +22,7 @@ import java.util.Optional;
 
 public record HubClientSessionData(
 	Optional<URI> gateway,
-	HubUserData user,
+	Optional<HubUserData> user,
 	Optional<HubProjectData> project,
 	Optional<HubParticipantData> participant,
 	HubUserCapabilities capabilities,
@@ -33,7 +33,7 @@ public record HubClientSessionData(
 ) {
 	public static final Codec<HubClientSessionData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		KLibCodecs.URI.optionalFieldOf("gateway").forGetter(HubClientSessionData::gateway),
-		HubUserData.CODEC.fieldOf("user").forGetter(HubClientSessionData::user),
+		HubUserData.CODEC.optionalFieldOf("user").forGetter(HubClientSessionData::user),
 		HubProjectData.CODEC.optionalFieldOf("project").forGetter(HubClientSessionData::project),
 		HubParticipantData.CODEC.optionalFieldOf("participant").forGetter(HubClientSessionData::participant),
 		HubUserCapabilities.CODEC.fieldOf("capabilities").forGetter(HubClientSessionData::capabilities),
@@ -45,14 +45,10 @@ public record HubClientSessionData(
 
 	public static String AUTH_SERVER_ID = "";
 
-	@Nullable
-	public static HubClientSessionData load(@Nullable HubUserConfig userConfig, @Nullable HubProjectConfig projectConfig) {
-		if (userConfig == null || userConfig.token().orElse(null) == null) {
-			return null;
-		}
+	public static void load(@Nullable HubUserConfig userConfig, @Nullable HubProjectConfig projectConfig) {
+		boolean hasAuth = userConfig != null && userConfig.token().orElse(null) != null;
 
 		VidLib.LOGGER.info("Loading Hub client session data...");
-		HubClientSessionData data = null;
 		HubUserData userData = null;
 		HubProjectData projectData = null;
 		HubParticipantData participantData = null;
@@ -63,9 +59,9 @@ public record HubClientSessionData(
 		var authServerId = "";
 
 		try {
-			data = HubAPI.apiDesktopClientSession(new HubClientSessionDataRequest(projectConfig == null ? "" : projectConfig.token().encoded(), true));
+			var data = HubAPI.apiDesktopClientSession(new HubClientSessionDataRequest(projectConfig == null ? "" : projectConfig.token().encoded(), true));
 
-			userData = data.user;
+			userData = data.user.orElse(null);
 			projectData = data.project.orElse(null);
 			participantData = data.participant.orElse(null);
 			userCapabilities = data.capabilities;
@@ -73,16 +69,20 @@ public record HubClientSessionData(
 			keys = data.keys;
 			sessionKeys = data.sessionKeys;
 
-			try (var out = new ByteArrayOutputStream()) {
-				out.write(data.sessionSalt());
-				out.write(userConfig.token().get().encoded().getBytes(StandardCharsets.ISO_8859_1));
-				authServerId = StringUtils.toHex(MessageDigest.getInstance("SHA-1").digest(out.toByteArray()));
+			if (hasAuth) {
+				try (var out = new ByteArrayOutputStream()) {
+					out.write(data.sessionSalt());
+					out.write(userConfig.token().get().encoded().getBytes(StandardCharsets.ISO_8859_1));
+					authServerId = StringUtils.toHex(MessageDigest.getInstance("SHA-1").digest(out.toByteArray()));
+				}
 			}
 
+			var userName = userData == null ? "Public User" : userData.toString();
+
 			if (projectData != null) {
-				VidLib.LOGGER.info("Logged in '" + projectData.toString() + "' as '" + userData.toString() + "'");
+				VidLib.LOGGER.info("Logged in '" + projectData.toString() + "' as '" + userName + "'");
 			} else {
-				VidLib.LOGGER.warn("Logged in a misconfigured project as '" + userData.toString() + "'");
+				VidLib.LOGGER.warn("Logged in a misconfigured project as '" + userName + "'");
 			}
 
 			var gateway = HubGateway.client;
@@ -106,6 +106,5 @@ public record HubClientSessionData(
 		AUTH_SERVER_ID = authServerId;
 
 		HubProjectsData.ALL.forget();
-		return data;
 	}
 }
