@@ -36,4 +36,8 @@ public record HubUserCapabilities(
 		Codec.BOOL.optionalFieldOf("upload_user_files", DEFAULT.uploadUserFiles).forGetter(HubUserCapabilities::uploadUserFiles),
 		Codec.BOOL.optionalFieldOf("require_link", DEFAULT.requireLink).forGetter(HubUserCapabilities::requireLink)
 	).apply(instance, HubUserCapabilities::new));
+
+	public boolean resolveRequireLink() {
+		return !DEFAULT_ENABLE_ADMIN_BUTTONS && requireLink;
+	}
 }

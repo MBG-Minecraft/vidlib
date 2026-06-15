@@ -1,10 +1,10 @@
 package dev.mrbeastgaming.mods.hub.client;
 
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubClientSessionData;
 import dev.mrbeastgaming.mods.hub.api.HubMinecraftProfileData;
+import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -37,10 +37,10 @@ public class LinkMinecraftScreen extends ConfirmScreen {
 					});
 				}
 			});
-		} else if (PlatformHelper.CURRENT.isDevEnv()) {
-			mc.popGuiLayer();
-		} else {
+		} else if (HubUserCapabilities.CURRENT.resolveRequireLink()) {
 			mc.stop();
+		} else {
+			mc.popGuiLayer();
 		}
 	}
 
@@ -73,7 +73,7 @@ public class LinkMinecraftScreen extends ConfirmScreen {
 			Component.literal("MrBeast Gaming Hub Profile Linking"),
 			Component.literal("Connecting to API..."),
 			Component.literal("Retry"),
-			Component.literal("Quit")
+			Component.literal(HubUserCapabilities.CURRENT.resolveRequireLink() ? "Quit" : "Skip")
 		);
 
 		this.buttons = new ArrayList<>();

@@ -723,7 +723,7 @@ public class VidLibClientEventHandler {
 		VidLibClient.checkFileSync(event.isFirstTime());
 
 		if (HubUserData.SELF == null) {
-			if (HubUserCapabilities.CURRENT.requireLink()) {
+			if (HubUserCapabilities.CURRENT.resolveRequireLink()) {
 				LinkHubUserScreen.open(event.getMinecraft());
 			}
 		} else if (HubMinecraftProfileData.SELF == null) {

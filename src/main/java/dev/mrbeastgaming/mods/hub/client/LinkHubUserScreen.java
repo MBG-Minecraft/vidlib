@@ -1,6 +1,7 @@
 package dev.mrbeastgaming.mods.hub.client;
 
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
+import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -21,8 +22,10 @@ public class LinkHubUserScreen extends ConfirmScreen {
 			mc.pushGuiLayer(new LinkHubUserWaitingScreen());
 			var port = HubLocalServer.getWebServer();
 			Util.getPlatform().openUri(HubAPI.URI_BASE.resolve("/desktop/link/" + port));
-		} else {
+		} else if (HubUserCapabilities.CURRENT.resolveRequireLink()) {
 			mc.stop();
+		} else {
+			mc.popGuiLayer();
 		}
 	}
 
@@ -32,7 +35,7 @@ public class LinkHubUserScreen extends ConfirmScreen {
 			Component.literal("MrBeast Gaming Hub Profile Linking"),
 			Component.literal("You can only participate MrBeast Gaming events if you've linked your Minecraft profile"),
 			Component.literal("Link"),
-			Component.literal("Quit")
+			Component.literal(HubUserCapabilities.CURRENT.resolveRequireLink() ? "Quit" : "Skip")
 		);
 	}
 }
