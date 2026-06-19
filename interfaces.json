@@ -59,7 +59,7 @@
 	"net/minecraft/commands/arguments/selector/EntitySelector": [
 		"dev/latvian/mods/vidlib/core/VLEntitySelector"
 	],
-	"net/minecraft/client/renderer/RenderType": [
+	"net/minecraft/client/renderer/rendertype/RenderType": [
 		"dev/latvian/mods/vidlib/core/VLRenderType"
 	],
 	"net/minecraft/client/renderer/entity/EntityRenderer": [
@@ -83,7 +83,7 @@
 	"net/minecraft/world/level/ClipContext": [
 		"dev/latvian/mods/vidlib/core/VLClipContext"
 	],
-	"net/minecraft/client/gui/GuiGraphics": [
+	"net/minecraft/client/gui/GuiGraphicsExtractor": [
 		"dev/latvian/mods/vidlib/core/VLGuiGraphics"
 	],
 	"net/minecraft/client/renderer/texture/TextureAtlasSprite": [

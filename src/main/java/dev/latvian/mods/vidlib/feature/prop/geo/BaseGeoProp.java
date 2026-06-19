@@ -3,9 +3,9 @@ package dev.latvian.mods.vidlib.feature.prop.geo;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animatable.manager.AnimatableManager;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.util.GeckoLibUtil;
 
 public class BaseGeoProp extends Prop implements GeoProp {
 	private final Lazy<AnimatableInstanceCache> geoCache = Lazy.of(() -> GeckoLibUtil.createInstanceCache(this, false));

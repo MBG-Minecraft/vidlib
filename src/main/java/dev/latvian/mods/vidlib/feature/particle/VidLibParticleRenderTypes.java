@@ -3,125 +3,106 @@ package dev.latvian.mods.vidlib.feature.particle;
 import dev.latvian.mods.klib.math.DistanceComparator;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderPipelines;
-import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
-import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
-import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
-import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.client.particle.ParticleGroup;
 import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.state.level.ParticleGroupRenderState;
+import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.util.TriState;
-import org.spongepowered.asm.mixin.Unique;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.RegisterParticleGroupsEvent;
 
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
+@EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
 public class VidLibParticleRenderTypes {
-	public static final ParticleRenderType TRUE_TRANSLUCENT = new ParticleRenderType("vidlib:true_translucent", RenderType.translucentParticle(TextureAtlas.LOCATION_PARTICLES), true);
+	public static final ParticleRenderType TRUE_TRANSLUCENT = new ParticleRenderType("vidlib:true_translucent");
+	public static final ParticleRenderType ADDITIVE = new ParticleRenderType("vidlib:additive");
+	public static final ParticleRenderType ADDITIVE_ONLY_DEPTH = new ParticleRenderType("vidlib:additive_only_depth");
+	public static final ParticleRenderType CUSTOM = new ParticleRenderType("vidlib:custom");
 
-	public static final ParticleRenderType ADDITIVE = new ParticleRenderType("vidlib:additive", RenderType.create(
-		VidLib.id("particle/additive").toString(),
-		1536,
-		false,
-		false,
-		VidLibRenderPipelines.ADDITIVE_PARTICLE,
-		RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(SpriteKey.PARTICLES.texturePath(), TriState.FALSE, false))
-			.setLightmapState(RenderStateShard.LIGHTMAP)
-			.setOutputState(RenderStateShard.PARTICLES_TARGET)
-			.createCompositeState(false)
-	), true);
+	public static final SingleQuadParticle.Layer TRUE_TRANSLUCENT_LAYER = new SingleQuadParticle.Layer(true, TextureAtlas.LOCATION_PARTICLES, net.minecraft.client.renderer.RenderPipelines.TRANSLUCENT_PARTICLE);
+	public static final SingleQuadParticle.Layer ADDITIVE_LAYER = new SingleQuadParticle.Layer(true, TextureAtlas.LOCATION_PARTICLES, VidLibRenderPipelines.ADDITIVE_PARTICLE);
+	public static final SingleQuadParticle.Layer ADDITIVE_ONLY_DEPTH_LAYER = new SingleQuadParticle.Layer(true, TextureAtlas.LOCATION_PARTICLES, VidLibRenderPipelines.ADDITIVE_PARTICLE_ONLY_DEPTH);
 
-	public static final ParticleRenderType ADDITIVE_ONLY_DEPTH = new ParticleRenderType("vidlib:additive_only_depth", RenderType.create(
-		VidLib.id("particle/additive_only_depth").toString(),
-		1536,
-		false,
-		false,
-		VidLibRenderPipelines.ADDITIVE_PARTICLE_ONLY_DEPTH,
-		RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(SpriteKey.PARTICLES.texturePath(), TriState.FALSE, false))
-			.setLightmapState(RenderStateShard.LIGHTMAP)
-			.setOutputState(RenderStateShard.PARTICLES_TARGET)
-			.createCompositeState(false)
-	), true);
-
-	private static final Map<ParticleRenderType, List<Particle>> SORTED = new IdentityHashMap<>();
-
-	public static void enableSorting(ParticleRenderType type) {
-		SORTED.put(type, new ArrayList<>());
+	@SubscribeEvent
+	public static void registerParticleGroups(RegisterParticleGroupsEvent event) {
+		event.register(TRUE_TRANSLUCENT, SortedQuadParticleGroup::new);
+		event.register(ADDITIVE, SortedQuadParticleGroup::new);
+		event.register(ADDITIVE_ONLY_DEPTH, SortedQuadParticleGroup::new);
+		event.register(CUSTOM, CustomParticleGroup::new);
 	}
 
-	static {
-		enableSorting(TRUE_TRANSLUCENT);
-		enableSorting(ADDITIVE);
-		enableSorting(ADDITIVE_ONLY_DEPTH);
-	}
-
-	@Unique
-	private static List<Particle> vl$sortedParticleList = null;
-
-	public static void vl$renderParticleTypePre(ParticleRenderType particleType) {
-		vl$sortedParticleList = VidLibParticleRenderTypes.SORTED.get(particleType);
-
-		if (vl$sortedParticleList != null) {
-			vl$sortedParticleList.clear();
+	public static void renderCustomParticles(com.mojang.blaze3d.vertex.PoseStack poseStack, MultiBufferSource buffers, Camera camera, float delta) {
+		if (CustomParticleGroup.instance != null) {
+			CustomParticleGroup.instance.render(poseStack, buffers, camera, delta);
 		}
 	}
 
-	public static boolean addDefaultParticle(Particle particle) {
-		if (vl$sortedParticleList != null) {
-			vl$sortedParticleList.add(particle);
-			return false;
+	private static class SortedQuadParticleGroup extends ParticleGroup<SingleQuadParticle> {
+		private final QuadParticleRenderState renderState;
+		private final ArrayList<SingleQuadParticle> sortedParticles;
+
+		private SortedQuadParticleGroup(ParticleEngine engine) {
+			super(engine);
+			this.renderState = new QuadParticleRenderState();
+			this.sortedParticles = new ArrayList<>();
 		}
 
-		return true;
+		@Override
+		public ParticleGroupRenderState extractRenderState(Frustum frustum, Camera camera, float partialTickTime) {
+			renderState.clear();
+			sortedParticles.clear();
+
+			for (var particle : particles) {
+				var pos = particle.getPos();
+
+				if (frustum.pointInFrustum(pos.x, pos.y, pos.z)) {
+					sortedParticles.add(particle);
+				}
+			}
+
+			if (sortedParticles.size() >= 2) {
+				sortedParticles.sort(new DistanceComparator<>(camera.position(), SingleQuadParticle::getPos));
+			}
+
+			for (var particle : sortedParticles) {
+				particle.extract(renderState, camera, partialTickTime);
+			}
+
+			sortedParticles.clear();
+			return renderState;
+		}
 	}
 
-	public static void vl$renderParticleTypePost(Camera camera, float partialTick, MultiBufferSource.BufferSource bufferSource, ParticleRenderType particleType) {
-		if (vl$sortedParticleList != null && !vl$sortedParticleList.isEmpty()) {
-			if (vl$sortedParticleList.size() >= 2) {
-				vl$sortedParticleList.sort(new DistanceComparator<>(camera.getPosition(), Particle::getPos));
-			}
+	private static class CustomParticleGroup extends ParticleGroup<CustomParticle> {
+		private static CustomParticleGroup instance;
+		private Frustum frustum;
 
-			var buffer = bufferSource.getBuffer(Objects.requireNonNull(particleType.renderType()));
+		private CustomParticleGroup(ParticleEngine engine) {
+			super(engine);
+			instance = this;
+		}
 
-			for (var particle : vl$sortedParticleList) {
-				try {
-					particle.render(buffer, camera, partialTick);
-				} catch (Throwable throwable) {
-					var crashreport = CrashReport.forThrowable(throwable, "Rendering Particle");
-					CrashReportCategory crashreportcategory = crashreport.addCategory("Particle being rendered");
-					crashreportcategory.setDetail("Particle", particle::toString);
-					crashreportcategory.setDetail("Particle Type", particleType::toString);
-					throw new ReportedException(crashreport);
+		@Override
+		public ParticleGroupRenderState extractRenderState(Frustum frustum, Camera camera, float partialTickTime) {
+			this.frustum = frustum;
+			return (submitNodeCollector, cameraRenderState) -> {
+			};
+		}
+
+		private void render(com.mojang.blaze3d.vertex.PoseStack poseStack, MultiBufferSource buffers, Camera camera, float delta) {
+			for (var particle : particles) {
+				if (particle.shouldRender(camera, frustum, delta)) {
+					particle.renderCustom(poseStack, buffers, camera, delta);
 				}
 			}
-
-			if (particleType.renderType() == ADDITIVE.renderType()) {
-				var buffer2 = bufferSource.getBuffer(Objects.requireNonNull(ADDITIVE_ONLY_DEPTH.renderType()));
-
-				for (var particle : vl$sortedParticleList) {
-					try {
-						particle.render(buffer2, camera, partialTick);
-					} catch (Throwable throwable) {
-						var crashreport = CrashReport.forThrowable(throwable, "Rendering Particle");
-						CrashReportCategory crashreportcategory = crashreport.addCategory("Particle being rendered");
-						crashreportcategory.setDetail("Particle", particle::toString);
-						crashreportcategory.setDetail("Particle Type", particleType::toString);
-						throw new ReportedException(crashreport);
-					}
-				}
-			}
-
-			vl$sortedParticleList.clear();
-			vl$sortedParticleList = null;
 		}
 	}
 }

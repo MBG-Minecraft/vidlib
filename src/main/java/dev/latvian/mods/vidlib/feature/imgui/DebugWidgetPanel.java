@@ -57,7 +57,7 @@ import imgui.type.ImString;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Vector2f;
 
@@ -341,7 +341,7 @@ public class DebugWidgetPanel extends Panel {
 		ImGui.separator();
 
 		ImGui.text("Image");
-		var sprite = mc.getBlockAtlas().getSprite(ResourceLocation.withDefaultNamespace("block/campfire_fire"));
+		var sprite = mc.getBlockAtlas().getSprite(Identifier.withDefaultNamespace("block/campfire_fire"));
 		ImGui.image(mc.getBlockAtlas().getTexture().vl$getHandle(), 128F, 128F, sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());
 		ImGui.separator();
 		ImGui.image(ImGuiHooks.imGuiGl3.gFontTexture, 128F, 128F, 0F, 0F, 1F, 1F);

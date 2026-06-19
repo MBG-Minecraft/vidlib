@@ -13,11 +13,12 @@ import it.unimi.dsi.fastutil.chars.Char2ObjectMaps;
 import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.chars.CharArrayList;
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,7 +35,7 @@ import java.util.Map;
  */
 public record MSDFFont(
 	ResourceKey<MSDFFont> key,
-	ResourceLocation texture,
+	Identifier texture,
 	MSDFFontData data,
 	Char2ObjectMap<GlyphInfo> glyphs,
 	GlyphInfo spaceGlyph,
@@ -47,7 +48,7 @@ public record MSDFFont(
 
 	private static final ResourceKey<? extends Registry<MSDFFont>> ROOT_ID = ResourceKey.createRegistryKey(VidLib.id("msdf_font"));
 
-	public static ResourceKey<MSDFFont> createKey(ResourceLocation id) {
+	public static ResourceKey<MSDFFont> createKey(Identifier id) {
 		return ResourceKey.create(ROOT_ID, id);
 	}
 
@@ -85,7 +86,7 @@ public record MSDFFont(
 		}
 
 		@Override
-		protected void apply(ResourceManager resourceManager, Map<ResourceLocation, MSDFFontData> map) {
+		protected void apply(ResourceManager resourceManager, Map<Identifier, MSDFFontData> map) {
 			registryIteration++;
 			var fontMap = new IdentityHashMap<ResourceKey<MSDFFont>, MSDFFont>();
 
@@ -158,17 +159,17 @@ public record MSDFFont(
 		return unicode == ' ' ? spaceGlyph : glyphs.getOrDefault(unicode, spaceGlyph);
 	}
 
-	public static void drawDebugText(GuiGraphics graphics, DeltaTracker deltaTracker) {
+	public static void drawDebugText(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
 		float size = DEBUG_SIZE.get();
 
 		if (size <= 0F) {
 			return;
 		}
 
-		graphics.flush();
-		graphics.pose().pushPose();
-		graphics.pose().translate(20F, 20F, 0F);
-		graphics.pose().scale(size, size, 1F);
+		graphics.nextStratum();
+		graphics.pose().pushMatrix();
+		graphics.pose().translate(20F, 20F);
+		graphics.pose().scale(size, size);
 
 		var fontRenderer = new MSDFRenderer();
 		fontRenderer.setFont(MSDFFonts.KOMIKA_AXIS);
@@ -185,7 +186,7 @@ public record MSDFFont(
 			fontRenderer.newLine();
 		}
 
-		graphics.pose().popPose();
-		graphics.flush();
+		graphics.pose().popMatrix();
+		graphics.nextStratum();
 	}
 }

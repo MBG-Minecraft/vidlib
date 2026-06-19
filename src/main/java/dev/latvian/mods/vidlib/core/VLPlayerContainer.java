@@ -55,7 +55,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
@@ -88,7 +88,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 			getEnvironment().tell(message);
 		} else {
 			for (var player : vl$getS2CPlayers()) {
-				player.displayClientMessage(message, false);
+				player.sendSystemMessage(message);
 			}
 		}
 	}
@@ -99,7 +99,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 			getEnvironment().status(message);
 		} else {
 			for (var player : vl$getS2CPlayers()) {
-				player.displayClientMessage(message, true);
+				player.sendOverlayMessage(message);
 			}
 		}
 	}
@@ -164,7 +164,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 		}
 	}
 
-	default void setPostEffect(ResourceLocation id) {
+	default void setPostEffect(Identifier id) {
 		if (isClient()) {
 			getEnvironment().setPostEffect(id);
 		} else {
@@ -252,16 +252,16 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 		}
 	}
 
-	default void physicsParticles(ResourceLocation id, long seed, List<PositionedBlock> blocks) {
+	default void physicsParticles(Identifier id, long seed, List<PositionedBlock> blocks) {
 		physicsParticles(new PhysicsParticlesIdData(id, seed, blocks), vl$level().getGameTime());
 	}
 
 	default void physicsParticles(PhysicsParticleData data, List<PositionedBlock> blocks) {
-		physicsParticles(data, vl$level().getGameTime(), vl$level().vl$level().random.nextLong(), blocks);
+		physicsParticles(data, vl$level().getGameTime(), vl$level().vl$level().getRandom().nextLong(), blocks);
 	}
 
-	default void physicsParticles(ResourceLocation id, List<PositionedBlock> blocks) {
-		physicsParticles(id, vl$level().vl$level().random.nextLong(), blocks);
+	default void physicsParticles(Identifier id, List<PositionedBlock> blocks) {
+		physicsParticles(id, vl$level().vl$level().getRandom().nextLong(), blocks);
 	}
 
 	default void cubeParticles(Map<ShapeParticleOptions, List<BlockPos>> map) {

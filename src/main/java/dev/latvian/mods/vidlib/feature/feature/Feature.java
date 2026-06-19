@@ -4,15 +4,15 @@ import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Feature {
-	private static final Map<ResourceLocation, Feature> MAP = new HashMap<>();
+	private static final Map<Identifier, Feature> MAP = new HashMap<>();
 
-	public static Feature create(ResourceLocation id) {
+	public static Feature create(Identifier id) {
 		return MAP.computeIfAbsent(id, Feature::new);
 	}
 
@@ -26,9 +26,9 @@ public class Feature {
 	public static final Feature SOFT_BARRIERS = create(VidLib.id("soft_barriers"));
 	public static final Feature SKYBOX = create(VidLib.id("skybox"));
 
-	public final ResourceLocation id;
+	public final Identifier id;
 
-	private Feature(ResourceLocation id) {
+	private Feature(Identifier id) {
 		this.id = id;
 	}
 

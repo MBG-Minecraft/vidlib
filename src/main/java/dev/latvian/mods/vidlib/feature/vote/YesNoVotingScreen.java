@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.feature.vote;
 
-import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 
@@ -17,20 +17,20 @@ public class YesNoVotingScreen extends BaseVotingScreen {
 		}
 
 		@Override
-		public void renderWidget(GuiGraphics graphics, int mx, int my, float delta) {
+		protected void extractContents(GuiGraphicsExtractor graphics, int mx, int my, float delta) {
 			boolean isSelected = selected == (isYes ? 1 : 0);
 
 			if (isYes) {
-				graphics.blit(VidLibRenderTypes.GUI, isSelected || isHovered ? VidLibTextures.YES.texturePath() : VidLibTextures.YES_OFF.texturePath(), getX(), getY(), 0F, 0F, width, height, width, height);
+				graphics.blit(RenderPipelines.GUI_TEXTURED, isSelected || isHovered() ? VidLibTextures.YES.texturePath() : VidLibTextures.YES_OFF.texturePath(), getX(), getY(), 0F, 0F, width, height, width, height);
 			} else {
-				graphics.blit(VidLibRenderTypes.GUI, isSelected || isHovered ? VidLibTextures.NO.texturePath() : VidLibTextures.NO_OFF.texturePath(), getX(), getY(), 0F, 0F, width, height, width, height);
+				graphics.blit(RenderPipelines.GUI_TEXTURED, isSelected || isHovered() ? VidLibTextures.NO.texturePath() : VidLibTextures.NO_OFF.texturePath(), getX(), getY(), 0F, 0F, width, height, width, height);
 			}
 
 			if (isSelected) {
-				graphics.blit(VidLibRenderTypes.GUI, isYes ? VidLibTextures.YES_OUTLINE.texturePath() : VidLibTextures.NO_OUTLINE.texturePath(), getX(), getY(), 0F, 0F, width, height, width, height);
+				graphics.blit(RenderPipelines.GUI_TEXTURED, isYes ? VidLibTextures.YES_OUTLINE.texturePath() : VidLibTextures.NO_OUTLINE.texturePath(), getX(), getY(), 0F, 0F, width, height, width, height);
 			}
 
-			graphics.drawString(font, getMessage(), getX() + (width - font.width(getMessage())) / 2, getY() + height + 6, 0xFFFFFFFF, true);
+			graphics.text(font, getMessage(), getX() + (width - font.width(getMessage())) / 2, getY() + height + 6, 0xFFFFFFFF, true);
 		}
 	}
 

@@ -33,7 +33,7 @@ public record ExactEntitySpawnPayload(
 	int data
 ) implements SimplePacketPayload {
 	public static final StreamCodec<ByteBuf, ExactEntitySpawnPayload> STREAM_CODEC = CompositeStreamCodec.of(
-		ID.STREAM_CODEC.map(BuiltInRegistries.ENTITY_TYPE::getValue, t -> t.builtInRegistryHolder().getKey().location()), ExactEntitySpawnPayload::type,
+		ID.STREAM_CODEC.map(BuiltInRegistries.ENTITY_TYPE::getValue, t -> t.builtInRegistryHolder().getKey().identifier()), ExactEntitySpawnPayload::type,
 		KLibStreamCodecs.UUID, ExactEntitySpawnPayload::uuid,
 		ByteBufCodecs.VAR_INT, ExactEntitySpawnPayload::id,
 		MCStreamCodecs.VEC3, ExactEntitySpawnPayload::pos,

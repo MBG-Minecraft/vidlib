@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 public class SkinTextureImBuilder extends CompoundImBuilder<SkinTexture> implements ListButtonImBuilder {
 	public static final ImBuilderType<SkinTexture> TYPE = SkinTextureImBuilder::new;
 
-	public final ImBuilder<ClientAsset> texture = TextureImBuilder.SKIN.get();
+	public final ImBuilder<ClientAsset.ResourceTexture> texture = TextureImBuilder.SKIN.get();
 	public final BooleanImBuilder slim = new BooleanImBuilder();
 	public ListItemAction listItemAction = ListItemAction.NONE;
 	public int enableListItemButtons = -1;

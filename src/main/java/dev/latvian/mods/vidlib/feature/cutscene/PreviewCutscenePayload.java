@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
+import net.minecraft.server.permissions.Permissions;
 
 public record PreviewCutscenePayload(Cutscene cutscene, KNumberVariables variables) implements SimplePacketPayload {
 	@AutoPacket(to = AutoPacket.To.SERVER)
@@ -22,7 +23,7 @@ public record PreviewCutscenePayload(Cutscene cutscene, KNumberVariables variabl
 
 	@Override
 	public void handle(Context ctx) {
-		if (ctx.player().hasPermissions(2)) {
+		if (ctx.player().permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
 			ctx.level().playCutscene(cutscene, variables);
 		}
 	}

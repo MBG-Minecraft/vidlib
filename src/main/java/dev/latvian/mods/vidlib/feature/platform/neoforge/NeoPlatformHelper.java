@@ -36,13 +36,14 @@ import dev.mrbeastgaming.mods.hub.api.gateway.HubGatewayEventRegistryEvent;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.moddiscovery.ModFile;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.connection.ConnectionType;
@@ -51,7 +52,6 @@ import org.objectweb.asm.Type;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,12 +74,12 @@ public class NeoPlatformHelper extends PlatformHelper {
 
 	@Override
 	public Side getSide() {
-		return FMLLoader.getDist().isClient() ? Side.CLIENT : Side.SERVER;
+		return FMLLoader.getCurrent().getDist().isClient() ? Side.CLIENT : Side.SERVER;
 	}
 
 	@Override
 	public boolean isDevEnv() {
-		return !FMLLoader.isProduction();
+		return !FMLLoader.getCurrent().isProduction();
 	}
 
 	@Override
@@ -129,7 +129,11 @@ public class NeoPlatformHelper extends PlatformHelper {
 						if (elementTypes.contains(ad.targetType()) && ad.annotationType().equals(annotationType)) {
 							try {
 								if (classLoader == null) {
-									classLoader = FMLLoader.getGameLayer().findLoader(owningFile.moduleName());
+									if (file instanceof ModFile modFile) {
+										classLoader = FMLLoader.getCurrent().getGameLayer().findLoader(modFile.getModuleDescriptor().name());
+									} else {
+										classLoader = Thread.currentThread().getContextClassLoader();
+									}
 								}
 
 								callback.accept(mod.getModId(), classLoader, new ScannedAnnotation(ad.annotationType(), ad.targetType(), ad.clazz(), ad.memberName(), ad.annotationData()));
@@ -169,10 +173,13 @@ public class NeoPlatformHelper extends PlatformHelper {
 	@Nullable
 	public Path findFile(String... path) {
 		for (var file : ModList.get().getModFiles()) {
-			var res = file.getFile().findResource(path);
+			var uri = file.getFile().getContents().findFile(String.join("/", path)).orElse(null);
 
-			if (Files.exists(res)) {
-				return res;
+			if (uri != null) {
+				try {
+					return Path.of(uri);
+				} catch (Exception ignored) {
+				}
 			}
 		}
 
@@ -196,7 +203,7 @@ public class NeoPlatformHelper extends PlatformHelper {
 	}
 
 	@Override
-	public void collectDynamicResources(PackType type, Consumer<ResourceLocation> callback) {
+	public void collectDynamicResources(PackType type, Consumer<Identifier> callback) {
 		ModLoader.postEvent(type == PackType.CLIENT_RESOURCES ? new DynamicResourceEvent.Assets(callback) : new DynamicResourceEvent.Data(callback));
 	}
 

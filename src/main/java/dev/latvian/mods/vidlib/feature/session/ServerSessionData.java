@@ -43,7 +43,7 @@ public class ServerSessionData extends SessionData {
 		super.updateOverrides(player);
 
 		if (!CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
-			var newTags = player.getTags();
+			var newTags = player.entityTags();
 
 			if (!currentTags.equals(newTags)) {
 				currentTags = Set.copyOf(newTags);

@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public interface ZoneCommands {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("zones", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.literal("count-blocks")
 			.then(Commands.argument("id", ZoneContainer.COMMAND.argument(buildContext))
 				.executes(ctx -> countBlocks(ctx.getSource(), ZoneContainer.COMMAND.get(ctx, "id"), BlockFilter.NONE.instance()))

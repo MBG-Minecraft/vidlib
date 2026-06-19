@@ -35,8 +35,6 @@ public class BossRendering {
 		CANVAS.markActive();
 
 		var dispatcher = mc.getEntityRenderDispatcher();
-		dispatcher.setRenderShadow(false);
-		boolean hitbox = dispatcher.shouldRenderHitBoxes();
 		active++;
 		frame.poseStack().pushPose();
 
@@ -54,8 +52,6 @@ public class BossRendering {
 		}
 
 		frame.poseStack().popPose();
-		dispatcher.setRenderShadow(true);
-		dispatcher.setRenderHitBoxes(hitbox);
 		active--;
 	}
 }

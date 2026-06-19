@@ -10,7 +10,7 @@ import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.structure.LazyStructures;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
@@ -39,7 +39,7 @@ public interface BulkLevelModification extends SimpleRegistryEntry {
 	}
 
 	static BulkLevelModification structure(
-		BasicRegistryRef<ResourceLocation, LazyStructures> templateRef,
+		BasicRegistryRef<Identifier, LazyStructures> templateRef,
 		BlockPos pos,
 		BlockPos offset,
 		Mirror mirror,

@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.progressqueue;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.FilterInputStream;
@@ -49,7 +49,7 @@ public class ProgressingInputStream extends FilterInputStream {
 	}
 
 	@Override
-	public int read(@NonNull byte[] b) throws IOException {
+	public int read(@NotNull byte[] b) throws IOException {
 		if (progressItem.queue.isCancelled()) {
 			throw new ProgressCancelledException(progressItem);
 		}
@@ -60,7 +60,7 @@ public class ProgressingInputStream extends FilterInputStream {
 	}
 
 	@Override
-	public int read(@NonNull byte[] b, int off, int len) throws IOException {
+	public int read(@NotNull byte[] b, int off, int len) throws IOException {
 		if (progressItem.queue.isCancelled()) {
 			throw new ProgressCancelledException(progressItem);
 		}

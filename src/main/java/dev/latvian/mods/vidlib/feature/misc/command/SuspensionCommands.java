@@ -11,7 +11,7 @@ import java.util.Collection;
 public interface SuspensionCommands {
 	@AutoRegister
 	ServerCommandHolder SUSPEND_COMMAND = new ServerCommandHolder("suspend", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.argument("player", EntityArgument.players())
 			.executes(ctx -> suspend(EntityArgument.getPlayers(ctx, "player"), true))
 		)
@@ -19,7 +19,7 @@ public interface SuspensionCommands {
 
 	@AutoRegister
 	ServerCommandHolder UNSUSPEND_COMMAND = new ServerCommandHolder("unsuspend", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.argument("player", EntityArgument.players())
 			.executes(ctx -> suspend(EntityArgument.getPlayers(ctx, "player"), false))
 		)

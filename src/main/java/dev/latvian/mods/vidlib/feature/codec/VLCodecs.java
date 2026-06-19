@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.codec;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.Gradient;
@@ -11,7 +12,7 @@ import java.util.function.Predicate;
 
 public interface VLCodecs {
 	static <V, T> Codec<T> unit(V unitValue, T resultValue, Predicate<T> isUnit) {
-		return Codec.unit(unitValue).flatXmap(value -> {
+		return MapCodec.unitCodec(unitValue).flatXmap(value -> {
 			if (unitValue.equals(value)) {
 				return DataResult.success(resultValue);
 			} else {

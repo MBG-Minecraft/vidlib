@@ -68,7 +68,7 @@ public class DepthOfField {
 		focusPosition = data.focus().get(mc.level.getGlobalContext());
 
 		if (focusPosition == null) {
-			focusPosition = mc.gameRenderer.getMainCamera().getPosition();
+			focusPosition = mc.gameRenderer.getMainCamera().position();
 		}
 	}
 
@@ -86,7 +86,7 @@ public class DepthOfField {
 		var vec = prevFocusPosition.lerp(focusPosition, mc.getDeltaTracker().getGameTimeDeltaPartialTick(true));
 
 		CANVAS.markActive();
-		var cam = mc.gameRenderer.getMainCamera().getPosition();
+		var cam = mc.gameRenderer.getMainCamera().position();
 
 		uFocusPos = new Vec3f((float) (vec.x - cam.x), (float) (vec.y - cam.y), (float) (vec.z - cam.z));
 		uFocusRange = Math.max(data.focusRange(), 0F);

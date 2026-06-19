@@ -94,7 +94,7 @@ public record RandomKNumber(KNumber min, KNumber max) implements KNumber, ImBuil
 			return null;
 		}
 
-		return ctx.level.random.nextRange(min, max);
+		return ctx.level.getRandom().nextRange(min, max);
 	}
 
 	@Override

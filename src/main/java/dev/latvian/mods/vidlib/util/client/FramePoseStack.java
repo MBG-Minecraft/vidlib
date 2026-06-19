@@ -13,7 +13,7 @@ public interface FramePoseStack {
 	}
 
 	static FramePoseStack of(PoseStack pose) {
-		return of(pose, Minecraft.getInstance().gameRenderer.getMainCamera().getPosition());
+		return of(pose, Minecraft.getInstance().gameRenderer.getMainCamera().position());
 	}
 
 	PoseStack poseStack();

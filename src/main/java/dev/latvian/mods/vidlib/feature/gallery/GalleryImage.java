@@ -1,12 +1,12 @@
 package dev.latvian.mods.vidlib.feature.gallery;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import dev.latvian.mods.vidlib.feature.client.ConfiguredDynamicTexture;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
@@ -16,7 +16,7 @@ public record GalleryImage<K>(
 	GalleryImageKey<K> key,
 	String displayName,
 	@Nullable Path path,
-	ResourceLocation textureId
+	Identifier textureId
 ) {
 	public boolean deleteFile() {
 		try {
@@ -58,16 +58,12 @@ public record GalleryImage<K>(
 				var image = NativeImage.read(in);
 
 				if (blocking) {
-					var texture = new DynamicTexture(textureId::toString, image);
-					texture.setClamp(true);
-					texture.setFilter(key.gallery().blur, false);
+					var texture = new ConfiguredDynamicTexture(textureId::toString, image, true, key.gallery().blur);
 					mc.getTextureManager().byPath.put(textureId, texture);
 					return texture;
 				} else {
 					mc.execute(() -> {
-						var texture = new DynamicTexture(textureId::toString, image);
-						texture.setClamp(true);
-						texture.setFilter(key.gallery().blur, false);
+						var texture = new ConfiguredDynamicTexture(textureId::toString, image, true, key.gallery().blur);
 						mc.getTextureManager().byPath.put(textureId, texture);
 					});
 				}

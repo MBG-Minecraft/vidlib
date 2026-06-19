@@ -1,6 +1,7 @@
 package dev.mrbeastgaming.mods.hub.client;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.TextAlignment;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
@@ -49,14 +50,14 @@ public abstract class UnskippableScreen extends Screen {
 	}
 
 	@Override
-	public void render(GuiGraphics graphics, int mx, int my, float delta) {
-		super.render(graphics, mx, my, delta);
-		graphics.drawCenteredString(this.font, this.title, this.width / 2, 70, 16777215);
+	public void extractRenderState(GuiGraphicsExtractor graphics, int mx, int my, float delta) {
+		super.extractRenderState(graphics, mx, my, delta);
+		graphics.centeredText(this.font, this.title, this.width / 2, 70, 0xFFFFFFFF);
 
 		lock.lock();
 
 		try {
-			this.message.renderCentered(graphics, this.width / 2, 90);
+			this.message.visitLines(TextAlignment.CENTER, this.width / 2, 90, 9, graphics.textRenderer());
 		} finally {
 			lock.unlock();
 		}

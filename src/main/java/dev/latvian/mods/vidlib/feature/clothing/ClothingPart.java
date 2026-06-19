@@ -12,13 +12,13 @@ import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.AbstractMap;
 import java.util.Map;
 
 @AutoInit
-public record ClothingPart(ResourceLocation texture, Gradient colors) {
+public record ClothingPart(Identifier texture, Gradient colors) {
 	public static final Codec<ClothingPart> ID_CODEC = ID.CODEC.flatComapMap(texture -> new ClothingPart(texture, Color.TRANSPARENT), part -> {
 		if (part.colors == Color.TRANSPARENT) {
 			return DataResult.success(part.texture);
@@ -37,11 +37,11 @@ public record ClothingPart(ResourceLocation texture, Gradient colors) {
 		ClothingPart::new
 	);
 
-	public ClothingPart(Map.Entry<ResourceLocation, Gradient> entry) {
+	public ClothingPart(Map.Entry<Identifier, Gradient> entry) {
 		this(entry.getKey(), entry.getValue());
 	}
 
-	public Map.Entry<ResourceLocation, Gradient> createEntry() {
+	public Map.Entry<Identifier, Gradient> createEntry() {
 		return new AbstractMap.SimpleEntry<>(texture, colors);
 	}
 }

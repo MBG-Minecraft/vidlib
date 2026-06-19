@@ -16,7 +16,7 @@ import imgui.type.ImInt;
 import imgui.type.ImString;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,7 +52,7 @@ public interface ImGuiUtils {
 		return resizableString("");
 	}
 
-	static String id(ResourceLocation id) {
+	static String id(Identifier id) {
 		return id.getNamespace() + "-" + id.getPath().replace('/', '-');
 	}
 

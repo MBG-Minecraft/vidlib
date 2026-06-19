@@ -12,6 +12,7 @@ import net.neoforged.neoforge.network.event.RegisterConfigurationTasksEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadHandler;
 import net.neoforged.neoforge.network.registration.NetworkRegistry;
+import net.minecraft.network.protocol.PacketFlow;
 
 @EventBusSubscriber(modid = VidLib.ID)
 public class VidLibNetworkEventHandler {
@@ -44,7 +45,8 @@ public class VidLibNetworkEventHandler {
 			NetworkRegistry.register(
 				s.type().type(),
 				s.type().streamCodec(),
-				ASYNC_HANDLER,
+				s.to().flow.orElse(PacketFlow.SERVERBOUND) == PacketFlow.SERVERBOUND ? ASYNC_HANDLER : null,
+				s.to().flow.orElse(PacketFlow.CLIENTBOUND) == PacketFlow.CLIENTBOUND ? ASYNC_HANDLER : null,
 				s.stage().protocols,
 				s.to().flow,
 				"1",

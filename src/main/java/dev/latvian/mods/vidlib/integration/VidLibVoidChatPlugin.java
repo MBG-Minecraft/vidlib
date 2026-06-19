@@ -17,6 +17,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.UUID;
@@ -89,10 +90,11 @@ public class VidLibVoidChatPlugin implements VoicechatPlugin {
 			return;
 		}
 
-		MinecraftServer server = player.getServer();
-		if (server == null) {
+		if (!(player.level() instanceof ServerLevel level)) {
 			return;
 		}
+
+		MinecraftServer server = level.getServer();
 
 		event.cancel();
 		VoicechatServerApi api = event.getVoicechat();

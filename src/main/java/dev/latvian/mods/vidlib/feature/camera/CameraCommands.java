@@ -15,7 +15,7 @@ import java.util.List;
 public interface CameraCommands {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("camera", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.literal("shake")
 			.then(Commands.literal("add")
 				.then(Commands.literal("basic")

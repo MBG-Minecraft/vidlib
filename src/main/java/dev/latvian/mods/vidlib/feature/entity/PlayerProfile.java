@@ -3,8 +3,8 @@ package dev.latvian.mods.vidlib.feature.entity;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.Util;
-import net.minecraft.util.ExtraCodecs;
+import dev.latvian.mods.klib.data.DataTypes;
+import net.minecraft.util.Util;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,7 +18,7 @@ public record PlayerProfile(GameProfile profile, long lastUpdate, Optional<Strin
 	public static final PlayerProfile ALEX = new PlayerProfile(new GameProfile(UUID.fromString("00000000-0000-0000-0000-000000000002"), "Alex"), 0L, Optional.empty(), true);
 
 	public static final Codec<PlayerProfile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		ExtraCodecs.GAME_PROFILE.fieldOf("profile").forGetter(PlayerProfile::profile),
+		DataTypes.GAME_PROFILE.codec().fieldOf("profile").forGetter(PlayerProfile::profile),
 		Codec.LONG.fieldOf("last_update").forGetter(PlayerProfile::lastUpdate),
 		Codec.STRING.optionalFieldOf("skin_url").forGetter(PlayerProfile::skinUrl),
 		Codec.BOOL.optionalFieldOf("slim_model", false).forGetter(PlayerProfile::slimModel)

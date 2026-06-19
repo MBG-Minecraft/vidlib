@@ -4,11 +4,13 @@ import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.clock.ClockNetworkState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public interface VLClientLevel extends VLLevel {
@@ -52,7 +54,7 @@ public interface VLClientLevel extends VLLevel {
 
 	@Override
 	default void vl$setDayTime(long time) {
-		vl$level().getLevelData().setDayTime(time);
+		vl$level().dimensionType().defaultClock().ifPresent(clock -> vl$level().clockManager().handleUpdates(vl$level().getGameTime(), Map.of(clock, new ClockNetworkState(time, 0F, 1F))));
 	}
 
 	@Override

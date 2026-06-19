@@ -10,7 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 public interface CreateNPCCloneCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("create-npc-clone", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.argument("target", EntityArgument.player())
 			.executes(ctx -> createNPCClone(EntityArgument.getPlayer(ctx, "target")))
 		)

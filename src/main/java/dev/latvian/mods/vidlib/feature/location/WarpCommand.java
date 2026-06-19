@@ -8,13 +8,13 @@ import net.minecraft.commands.Commands;
 public interface WarpCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("warp", (command, buildContext) -> {
-		command.requires(source -> source.hasPermission(2));
+		command.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source));
 
 		var locations = CommonGameEngine.INSTANCE.getWarpLocations();
 
 		for (var location : locations) {
 			command.then(Commands.literal(location.id())
-				.requires(source -> !location.admin() || source.hasPermission(2))
+				.requires(source -> !location.admin() || net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 				.executes(ctx -> {
 					ctx.getSource().getPlayerOrException().teleport(location.pos().apply(ctx.getSource().getServer()));
 					return 1;

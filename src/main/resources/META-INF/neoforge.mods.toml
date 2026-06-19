@@ -13,7 +13,7 @@ logoBlur = false
 [[dependencies.vidlib]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.5.95,)"
+versionRange = "[26.1.2,)"
 ordering = "AFTER"
 side = "BOTH"
 
@@ -28,6 +28,13 @@ side = "BOTH"
 modId = "imguiresources"
 type = "required"
 versionRange = "*"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.vidlib]]
+modId = "geckolib"
+type = "required"
+versionRange = "[${geckolib_version},)"
 ordering = "AFTER"
 side = "BOTH"
 

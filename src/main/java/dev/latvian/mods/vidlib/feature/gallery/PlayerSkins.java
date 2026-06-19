@@ -14,12 +14,15 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.client.resources.PlayerSkin;
+import net.minecraft.core.ClientAsset;
+import net.minecraft.world.entity.player.PlayerSkin;
+import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.TriState;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,7 +34,34 @@ public interface PlayerSkins {
 	Gallery<UUID> GALLERY = Gallery.ofUUIDKey("player_skins", () -> VidLibPaths.USER.get().resolve("player-skins"), TriState.TRUE);
 
 	static PlayerSkin of(SkinTexture skin) {
-		return new PlayerSkin(skin.asset().texturePath(), null, null, null, skin.slim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE, true);
+		return new PlayerSkin(skin.asset(), null, null, skin.slim() ? PlayerModelType.SLIM : PlayerModelType.WIDE, true);
+	}
+
+	static ClientAsset.ResourceTexture resourceTexture(Identifier texturePath) {
+		var path = texturePath.getPath();
+		return path.startsWith("textures/") && path.endsWith(".png") ? MiscUtils.assetFromPNG(texturePath) : new ClientAsset.ResourceTexture(texturePath);
+	}
+
+	@Nullable
+	static ClientAsset.ResourceTexture nullableResourceTexture(@Nullable Identifier texturePath) {
+		return texturePath == null ? null : resourceTexture(texturePath);
+	}
+
+	@Nullable
+	static Identifier texturePath(@Nullable ClientAsset.Texture texture) {
+		return texture == null ? null : texture.texturePath();
+	}
+
+	static SkinTexture skinTexture(PlayerSkin skin) {
+		return new SkinTexture(resourceTexture(skin.body().texturePath()), skin.model() == PlayerModelType.SLIM);
+	}
+
+	static String textureUrl(PlayerSkin skin) {
+		return skin.body() instanceof ClientAsset.DownloadedTexture downloaded ? downloaded.url() : "";
+	}
+
+	static ClientAsset.Texture bodyTexture(SkinTexture skin, String textureUrl) {
+		return textureUrl.isEmpty() ? skin.asset() : new ClientAsset.DownloadedTexture(skin.asset().texturePath(), textureUrl);
 	}
 
 	PlayerSkin[] DEFAULT_WIDE_SKINS = new PlayerSkin[]{
@@ -59,30 +89,28 @@ public interface PlayerSkins {
 	};
 
 	Codec<PlayerSkin> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		SkinTexture.CODEC.fieldOf("skin").forGetter(s -> new SkinTexture(MiscUtils.assetFromPNG(s.texture()), s.model() == PlayerSkin.Model.SLIM)),
-		Codec.STRING.optionalFieldOf("textureUrl", "").forGetter(s -> s.textureUrl() == null ? "" : s.textureUrl()),
-		ID.CODEC.optionalFieldOf("capeTexture").forGetter(s -> Optional.ofNullable(s.capeTexture())),
-		ID.CODEC.optionalFieldOf("elytraTexture").forGetter(s -> Optional.ofNullable(s.elytraTexture()))
+		SkinTexture.CODEC.fieldOf("skin").forGetter(PlayerSkins::skinTexture),
+		Codec.STRING.optionalFieldOf("textureUrl", "").forGetter(PlayerSkins::textureUrl),
+		ID.CODEC.optionalFieldOf("capeTexture").forGetter(s -> Optional.ofNullable(texturePath(s.cape()))),
+		ID.CODEC.optionalFieldOf("elytraTexture").forGetter(s -> Optional.ofNullable(texturePath(s.elytra())))
 	).apply(instance, (skin, textureUrl, capeTexture, elytraTexture) -> new PlayerSkin(
-		skin.asset().texturePath(),
-		textureUrl.isEmpty() ? null : textureUrl,
-		capeTexture.orElse(null),
-		elytraTexture.orElse(null),
-		skin.slim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE,
+		bodyTexture(skin, textureUrl),
+		capeTexture.map(PlayerSkins::resourceTexture).orElse(null),
+		elytraTexture.map(PlayerSkins::resourceTexture).orElse(null),
+		skin.slim() ? PlayerModelType.SLIM : PlayerModelType.WIDE,
 		true
 	)));
 
 	StreamCodec<ByteBuf, PlayerSkin> STREAM_CODEC = CompositeStreamCodec.of(
-		SkinTexture.STREAM_CODEC, s -> new SkinTexture(MiscUtils.assetFromPNG(s.texture()), s.model() == PlayerSkin.Model.SLIM),
-		ByteBufCodecs.STRING_UTF8, s -> s.textureUrl() == null ? "" : s.textureUrl(),
-		KLibStreamCodecs.optional(ID.STREAM_CODEC, null), PlayerSkin::capeTexture,
-		KLibStreamCodecs.optional(ID.STREAM_CODEC, null), PlayerSkin::elytraTexture,
+		SkinTexture.STREAM_CODEC, PlayerSkins::skinTexture,
+		ByteBufCodecs.STRING_UTF8, PlayerSkins::textureUrl,
+		KLibStreamCodecs.optional(ID.STREAM_CODEC, null), s -> texturePath(s.cape()),
+		KLibStreamCodecs.optional(ID.STREAM_CODEC, null), s -> texturePath(s.elytra()),
 		(skin, textureUrl, capeTexture, elytraTexture) -> new PlayerSkin(
-			skin.asset().texturePath(),
-			textureUrl.isEmpty() ? null : textureUrl,
-			capeTexture,
-			elytraTexture,
-			skin.slim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE,
+			bodyTexture(skin, textureUrl),
+			nullableResourceTexture(capeTexture),
+			nullableResourceTexture(elytraTexture),
+			skin.slim() ? PlayerModelType.SLIM : PlayerModelType.WIDE,
 			true
 		)
 	);
@@ -95,31 +123,35 @@ public interface PlayerSkins {
 
 	static AbstractTexture getTexture(Minecraft mc, @Nullable UUID uuid) {
 		if (uuid == null || uuid.equals(Util.NIL_UUID)) {
-			return mc.getTextureManager().getTexture(DEFAULT_WIDE_SKINS[0].texture());
+			return mc.getTextureManager().getTexture(DEFAULT_WIDE_SKINS[0].body().texturePath());
 		}
 
 		return get(mc, uuid).load(mc, false);
 	}
 
-	static PlayerSkin.Model getModelType(@Nullable PlayerProfile profile) {
+	static PlayerModelType getModelType(@Nullable PlayerProfile profile) {
 		if (profile == null || profile.isError()) {
-			return PlayerSkin.Model.WIDE;
+			return PlayerModelType.WIDE;
 		}
 
-		return profile.slimModel() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE;
+		return profile.slimModel() ? PlayerModelType.SLIM : PlayerModelType.WIDE;
 	}
 
 	static PlayerSkin getSkin(Minecraft mc, UUID uuid, boolean blocking) {
-		if (uuid.equals(PlayerProfile.STEVE.profile().getId())) {
+		if (uuid.equals(PlayerProfile.STEVE.profile().id())) {
 			return DEFAULT_WIDE_SKINS[0];
-		} else if (uuid.equals(PlayerProfile.ALEX.profile().getId())) {
+		} else if (uuid.equals(PlayerProfile.ALEX.profile().id())) {
 			return DEFAULT_SLIM_SKINS[1];
 		} else {
 			var profile = PlayerProfiles.get(uuid);
 			var modelType = PlayerSkins.getModelType(profile);
 			var skin = PlayerSkins.get(mc, uuid);
 			skin.load(mc, blocking);
-			return new PlayerSkin(skin.textureId(), null, null, null, modelType, true);
+			ClientAsset.Texture body = profile == null ? resourceTexture(skin.textureId()) : profile.skinUrl()
+				.filter(url -> !url.isBlank())
+				.<ClientAsset.Texture>map(url -> new ClientAsset.DownloadedTexture(skin.textureId(), url))
+				.orElseGet(() -> resourceTexture(skin.textureId()));
+			return new PlayerSkin(body, null, null, modelType, true);
 		}
 	}
 }

@@ -1,12 +1,13 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.world.phys.AABB;
 
 public abstract class CustomParticle extends Particle {
 	public int prevAge;
@@ -21,12 +22,15 @@ public abstract class CustomParticle extends Particle {
 		setSize(1F, 1F);
 	}
 
-	@Override
-	public void render(VertexConsumer buffer, Camera camera, float delta) {
+	public abstract void renderCustom(PoseStack ms, MultiBufferSource buffers, Camera camera, float delta);
+
+	public AABB getRenderBoundingBox(float partialTicks) {
+		return getBoundingBox();
 	}
 
-	@Override
-	public abstract void renderCustom(PoseStack ms, MultiBufferSource buffers, Camera camera, float delta);
+	public boolean shouldRender(Camera camera, Frustum frustum, float partialTicks) {
+		return frustum == null || frustum.isVisible(getRenderBoundingBox(partialTicks));
+	}
 
 	@Override
 	public void tick() {
@@ -35,7 +39,7 @@ public abstract class CustomParticle extends Particle {
 	}
 
 	@Override
-	public ParticleRenderType getRenderType() {
-		return ParticleRenderType.CUSTOM;
+	public ParticleRenderType getGroup() {
+		return VidLibParticleRenderTypes.CUSTOM;
 	}
 }

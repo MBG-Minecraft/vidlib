@@ -22,7 +22,7 @@ import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -68,13 +68,13 @@ public class SessionData implements Comparable<SessionData> {
 		suspended = CommonGameEngine.INSTANCE.isSuspended(player);
 	}
 
-	public <V> void syncRegistry(Player player, SyncedRegistry<V> registry, Map<ResourceLocation, V> map) {
+	public <V> void syncRegistry(Player player, SyncedRegistry<V> registry, Map<Identifier, V> map) {
 	}
 
 	public void updateZones(Level level) {
 	}
 
-	public void updateClocks(Map<ResourceLocation, ClockValue> map) {
+	public void updateClocks(Map<Identifier, ClockValue> map) {
 	}
 
 	public void updateServerData(long gameTime, Player self, List<DataMapValue> update) {
@@ -110,7 +110,9 @@ public class SessionData implements Comparable<SessionData> {
 		var environment = level.getEnvironment();
 		var time = level.getGameTime();
 
-		packets.s2c(new ClientboundSetTimePacket(time, level.getDayTime(), level.vl$getTickDayTime()));
+		if (level.getServer() != null) {
+			packets.s2c(level.getServer().clockManager().createFullSyncPacket());
+		}
 		// packets.s2c(new ServerFeaturesPayload(FeatureSet.SERVER_FEATURES.get()));
 
 		for (var reg : SyncedRegistry.ALL.values()) {

@@ -4,6 +4,7 @@ import dev.latvian.mods.vidlib.core.VLMouseHandler;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.ScrollWheelHandler;
 import net.minecraft.client.player.LocalPlayer;
@@ -30,7 +31,7 @@ public abstract class MouseHandlerMixin implements VLMouseHandler {
 	private boolean isMiddlePressed;
 
 	@Shadow
-	private int activeButton;
+	private MouseButtonInfo activeButton;
 
 	@Shadow
 	private double ypos;
@@ -54,8 +55,8 @@ public abstract class MouseHandlerMixin implements VLMouseHandler {
 		}
 	}
 
-	@Inject(method = "onPress", at = @At("HEAD"), cancellable = true)
-	public void vl$onMouseButton(long window, int button, int action, int mods, CallbackInfo ci) {
+	@Inject(method = "onButton", at = @At("HEAD"), cancellable = true)
+	public void vl$onMouseButton(long window, MouseButtonInfo buttonInfo, int action, CallbackInfo ci) {
 		if (ImGuiHooks.shouldInterceptMouse()) {
 			ci.cancel();
 		}
@@ -81,7 +82,7 @@ public abstract class MouseHandlerMixin implements VLMouseHandler {
 	@Override
 	public void vl$resetMouse() {
 		isLeftPressed = isRightPressed = isMiddlePressed = false;
-		activeButton = -1;
+		activeButton = null;
 		xpos = ypos = -1;
 		// FIXME: scrollWheelHandler.accumulatedScrollX = scrollWheelHandler.accumulatedScrollY = 0;
 	}

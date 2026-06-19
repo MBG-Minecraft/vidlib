@@ -5,7 +5,7 @@ import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubClientSessionData;
 import dev.mrbeastgaming.mods.hub.api.HubMinecraftProfileData;
 import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -52,7 +52,7 @@ public class LinkMinecraftScreen extends ConfirmScreen {
 		if (!serverId.isEmpty()) {
 			try {
 				VidLib.LOGGER.info("Linking Minecraft " + mc.getUser().getName() + " @ " + serverId);
-				mc.getMinecraftSessionService().joinServer(mc.getUser().getProfileId(), mc.getUser().getAccessToken(), serverId);
+				mc.services().sessionService().joinServer(mc.getUser().getProfileId(), mc.getUser().getAccessToken(), serverId);
 				data = HubAPI.apiMinecraftLink(mc.getUser().getName());
 			} catch (Exception ex) {
 				ex.printStackTrace();
@@ -84,13 +84,13 @@ public class LinkMinecraftScreen extends ConfirmScreen {
 	protected void init() {
 		buttons.clear();
 		super.init();
+		if (yesButton != null) {
+			buttons.add(yesButton);
+		}
+		if (noButton != null) {
+			buttons.add(noButton);
+		}
 		setButtonsEnabled(buttonsEnabled);
-	}
-
-	@Override
-	protected void addExitButton(Button exitButton) {
-		buttons.add(exitButton);
-		super.addExitButton(exitButton);
 	}
 
 	public void setButtonsEnabled(boolean value) {

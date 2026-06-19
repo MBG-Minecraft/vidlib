@@ -11,7 +11,7 @@ import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -44,7 +44,7 @@ public class PacketCapture {
 	public final ExecutorService executorService;
 	public final Map<UUID, PlayerPacketCaptureSession> sessions;
 	public final List<PlayerPacketCaptureSession> finishedSessions;
-	private final Object2IntMap<ResourceLocation> identifierMap;
+	private final Object2IntMap<Identifier> identifierMap;
 	private final Lock identifierMapLock;
 	public final Map<UUID, MutableInt> sessionCounts;
 
@@ -192,7 +192,7 @@ public class PacketCapture {
 		return toString;
 	}
 
-	public int getIdentifier(ResourceLocation id) {
+	public int getIdentifier(Identifier id) {
 		identifierMapLock.lock();
 
 		try {

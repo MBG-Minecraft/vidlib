@@ -10,22 +10,21 @@ import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import net.minecraft.Util;
-import net.minecraft.server.level.ChunkHolder;
+import net.minecraft.util.Util;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.TicketStorage;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.neoforge.common.world.chunk.TicketHelper;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public interface VLServerLevel extends VLLevel {
 	@Override
@@ -189,16 +188,18 @@ public interface VLServerLevel extends VLLevel {
 
 	@Override
 	default boolean vl$getTickDayTime() {
-		return vl$level().getGameRules().getBoolean(GameRules.RULE_DAYLIGHT);
+		return vl$level().getGameRules().get(GameRules.ADVANCE_TIME);
 	}
 
 	@Override
 	default void vl$setDayTime(long time) {
-		vl$level().setDayTime(time);
+		vl$level().dimensionType().defaultClock().ifPresent(clock -> vl$level().clockManager().setTotalTicks(clock, time));
 	}
 
 	@Override
 	default Stream<LevelChunk> vl$getChunks() {
-		return StreamSupport.stream(vl$level().getChunkSource().chunkMap.getChunks().spliterator(), false).map(ChunkHolder::getTickingChunk).filter(c -> c != null && !c.isEmpty());
+		var chunks = new ArrayList<LevelChunk>();
+		vl$level().getChunkSource().chunkMap.forEachBlockTickingChunk(chunks::add);
+		return chunks.stream().filter(c -> !c.isEmpty());
 	}
 }

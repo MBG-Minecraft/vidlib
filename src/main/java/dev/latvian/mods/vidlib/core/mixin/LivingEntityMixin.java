@@ -63,7 +63,7 @@ public abstract class LivingEntityMixin implements VLLivingEntity {
 
 	@Inject(method = "isBaby", at = @At("HEAD"), cancellable = true)
 	private void vl$isBaby(CallbackInfoReturnable<Boolean> cir) {
-		if (vl$self().getTags().contains("baby")) {
+		if (vl$self().entityTags().contains("baby")) {
 			cir.setReturnValue(true);
 		}
 	}

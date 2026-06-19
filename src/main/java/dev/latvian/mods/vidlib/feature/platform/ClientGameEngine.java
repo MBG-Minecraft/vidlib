@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
@@ -32,6 +33,7 @@ import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.skin.PlayerSkinOverrides;
 import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.mrbeastgaming.mods.hub.api.HubMinecraftProfileData;
 import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.api.HubUserData;
@@ -49,13 +51,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.client.gui.components.toasts.AdvancementToast;
 import net.minecraft.client.gui.components.toasts.RecipeToast;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.multiplayer.ServerData;
@@ -63,12 +64,12 @@ import net.minecraft.client.particle.FireworkParticles;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.item.properties.numeric.CompassAngleState;
-import net.minecraft.client.resources.PlayerSkin;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.resources.sounds.BiomeAmbientSoundsHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.ClientAsset;
@@ -76,8 +77,10 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.status.ServerStatus;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffects;
@@ -86,6 +89,8 @@ import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.PlayerModelType;
+import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -93,7 +98,6 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.ModList;
@@ -113,7 +117,7 @@ public class ClientGameEngine {
 
 	public void collectClientFeatures(Reference2IntMap<Feature> map) {
 		for (var mod : ModList.get().getMods()) {
-			map.put(Feature.create(ResourceLocation.fromNamespaceAndPath("mod", mod.getModId())), 1);
+			map.put(Feature.create(Identifier.fromNamespaceAndPath("mod", mod.getModId())), 1);
 		}
 
 		map.put(Feature.INFINITE_CHUNK_RENDERING, 1);
@@ -130,15 +134,15 @@ public class ClientGameEngine {
 
 	public boolean canSeePlayerInList(LocalPlayer self, PlayerInfo playerInfo) {
 		if (CommonGameEngine.INSTANCE.privacyMode()) {
-			return playerInfo.getProfile().getId().equals(self.getGameProfile().getId());
+			return playerInfo.getProfile().id().equals(self.getGameProfile().id());
 		}
 
-		var sessionData = self.vl$sessionData().getClientSessionData(playerInfo.getProfile().getId());
+		var sessionData = self.vl$sessionData().getClientSessionData(playerInfo.getProfile().id());
 		return !CommonGameEngine.INSTANCE.isPlayerStaff(sessionData.getTags(), playerInfo.getGameMode());
 	}
 
 	public Component getPlayerListName(Minecraft mc, PlayerInfo playerInfo, Component fallback) {
-		var nickname = mc.player.vl$sessionData().getClientSessionData(playerInfo.getProfile().getId()).dataMap.get(InternalPlayerData.NICKNAME);
+		var nickname = mc.player.vl$sessionData().getClientSessionData(playerInfo.getProfile().id()).dataMap.get(InternalPlayerData.NICKNAME);
 		return Empty.isEmpty(nickname) ? fallback : nickname;
 	}
 
@@ -197,7 +201,7 @@ public class ClientGameEngine {
 	}
 
 	@Nullable
-	public ClientAsset overrideCape(Player player) {
+	public ClientAsset.ResourceTexture overrideCape(Player player) {
 		return player.getOptional(InternalPlayerData.CAPE_OVERRIDE);
 	}
 
@@ -206,22 +210,22 @@ public class ClientGameEngine {
 	}
 
 	@Nullable
-	public ClientAsset overrideElytra(Player player) {
+	public ClientAsset.ResourceTexture overrideElytra(Player player) {
 		return player.getOptional(InternalPlayerData.ELYTRA_OVERRIDE);
 	}
 
 	public PlayerSkin overridePlayerSkin(AbstractClientPlayer player, PlayerSkin original) {
-		var skinTexture = original.texture();
+		ClientAsset.Texture skinTexture = original.body();
 		var skinModel = original.model();
-		var capeTexture = original.capeTexture();
-		var elytraTexture = original.elytraTexture();
+		ClientAsset.Texture capeTexture = original.cape();
+		ClientAsset.Texture elytraTexture = original.elytra();
 		var override = false;
 
 		var skinOverride = overrideSkin(player);
 
-		if (skinOverride != null && (!skinOverride.asset().texturePath().equals(skinTexture) || skinOverride.slim() != (original.model() == PlayerSkin.Model.SLIM))) {
-			skinTexture = skinOverride.asset().texturePath();
-			skinModel = skinOverride.slim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE;
+		if (skinOverride != null && (!skinOverride.asset().texturePath().equals(skinTexture.texturePath()) || skinOverride.slim() != (original.model() == PlayerModelType.SLIM))) {
+			skinTexture = skinOverride.asset();
+			skinModel = skinOverride.slim() ? PlayerModelType.SLIM : PlayerModelType.WIDE;
 			override = true;
 		}
 
@@ -233,30 +237,29 @@ public class ClientGameEngine {
 		} else {
 			var capeOverride = overrideCape(player);
 
-			if (capeOverride != null && !capeOverride.texturePath().equals(capeTexture)) {
-				capeTexture = capeOverride.texturePath();
+			if (capeOverride != null && (capeTexture == null || !capeOverride.texturePath().equals(capeTexture.texturePath()))) {
+				capeTexture = capeOverride;
 				override = true;
 			}
 		}
 
 		var elytraOverride = overrideElytra(player);
 
-		if (elytraOverride != null && !elytraOverride.texturePath().equals(elytraTexture)) {
-			elytraTexture = elytraOverride.texturePath();
+		if (elytraOverride != null && (elytraTexture == null || !elytraOverride.texturePath().equals(elytraTexture.texturePath()))) {
+			elytraTexture = elytraOverride;
 			override = true;
 		}
 
-		var replacement = ClothedPlayerSkinTexture.replace(player.clientLevel.minecraft, skinTexture, skinModel, getClothing(player));
+		var replacement = ClothedPlayerSkinTexture.replace(Minecraft.getInstance(), skinTexture.texturePath(), skinModel, getClothing(player));
 
 		if (replacement != null) {
-			skinTexture = replacement;
+			skinTexture = MiscUtils.assetFromPNG(replacement);
 			override = true;
 		}
 
 		if (override) {
 			return new PlayerSkin(
 				skinTexture,
-				null,
 				capeTexture,
 				elytraTexture,
 				skinModel,
@@ -267,7 +270,7 @@ public class ClientGameEngine {
 		}
 	}
 
-	public ResourceLocation getSkybox(Minecraft mc) {
+	public Identifier getSkybox(Minecraft mc) {
 		return mc.getSkybox();
 	}
 
@@ -275,31 +278,8 @@ public class ClientGameEngine {
 		return false;
 	}
 
-	@Nullable
-	public FogParameters getFog() {
-		return disableFog() ? FogParameters.NO_FOG : null;
-	}
-
-	@Nullable
-	public FogParameters getFluidFog() {
-		return null;
-	}
-
-	public FogParameters getShaderFog(FogParameters original) {
-		var mc = Minecraft.getInstance();
-
-		if (mc.gameRenderer.getMainCamera().getFluidInCamera() != FogType.NONE) {
-			var fg = getFluidFog();
-			return fg == null ? original : fg;
-		}
-
-		var fg = getFog();
-
-		if (mc.player != null && (mc.player.hasEffect(MobEffects.DARKNESS) || mc.player.hasEffect(MobEffects.BLINDNESS))) {
-			return original;
-		}
-
-		return fg != null ? fg : original;
+	public GpuBufferSlice getShaderFog(GpuBufferSlice original) {
+		return original;
 	}
 
 	public List<ChancedParticle> getEnvironmentEffects(Minecraft mc, ClientLevel level, BlockPos pos) {
@@ -314,12 +294,12 @@ public class ClientGameEngine {
 			for (var effect : effects) {
 				var chance = effect.chance().getOr(ctx, 0D);
 
-				if (level.random.roll((float) chance)) {
+				if (level.getRandom().roll((float) chance)) {
 					level.addParticle(
 						effect.particle(),
-						pos.getX() + level.random.nextFloat(),
-						pos.getY() + level.random.nextFloat(),
-						pos.getZ() + level.random.nextFloat(),
+						pos.getX() + level.getRandom().nextFloat(),
+						pos.getY() + level.getRandom().nextFloat(),
+						pos.getZ() + level.getRandom().nextFloat(),
 						0.0, 0.0, 0.0
 					);
 				}
@@ -371,7 +351,7 @@ public class ClientGameEngine {
 				graphics.setText(mcProfile == null || hubProject == null ? ImColorVariant.YELLOW : ImColorVariant.GREEN);
 
 				if (ImGui.menuItem(ImIcons.CHECK + "###link-hub-profile")) {
-					if (Screen.hasShiftDown()) {
+					if (graphics.mc.hasShiftDown()) {
 						LinkHubUserScreen.open(graphics.mc);
 					} else if (mcProfile == null) {
 						LinkMinecraftScreen.handle(graphics.mc, true);
@@ -456,7 +436,7 @@ public class ClientGameEngine {
 		}
 
 		ImGui.separator();
-		ImGui.text(graphics.mc.fpsString.split(" ", 2)[0] + " FPS");
+		ImGui.text(graphics.mc.getFps() + " FPS");
 		ImGui.separator();
 
 		if (graphics.player != null) {
@@ -518,7 +498,7 @@ public class ClientGameEngine {
 				session.worldBorderOverride.setSize(b.size());
 
 				if (moving) {
-					session.worldBorderOverride.lerpSizeBetween(b.size(), b.size() + Math.signum(session.worldBorderOverrideEnd.size() - session.worldBorderOverrideStart.size()), 1L);
+					session.worldBorderOverride.lerpSizeBetween(b.size(), b.size() + Math.signum(session.worldBorderOverrideEnd.size() - session.worldBorderOverrideStart.size()), 1L, level.getGameTime());
 				} else {
 					session.worldBorderOverride.setSize(b.size());
 				}
@@ -557,7 +537,7 @@ public class ClientGameEngine {
 	}
 
 	public boolean allowCoordinateDisplay(Minecraft mc) {
-		return mc.isLocalServer() || mc.player.hasPermissions(2);
+		return mc.isLocalServer() || mc.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
 	}
 
 	public boolean hideGui(Minecraft mc) {
@@ -600,9 +580,9 @@ public class ClientGameEngine {
 		return true;
 	}
 
-	public void renderOverlays(Minecraft mc, Gui gui, GuiGraphics graphics, DeltaTracker deltaTracker) {
+	public void renderOverlays(Minecraft mc, Gui gui, GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
 		if (getRenderSuspendedOverlay() && mc.player.vl$sessionData().suspended) {
-			gui.renderTextureOverlay(graphics, Gui.POWDER_SNOW_OUTLINE_LOCATION, 1F);
+			graphics.blit(RenderPipelines.GUI_TEXTURED, Gui.POWDER_SNOW_OUTLINE_LOCATION, 0, 0, 0F, 0F, graphics.guiWidth(), graphics.guiHeight(), graphics.guiWidth(), graphics.guiHeight(), ARGB.white(1F));
 		}
 	}
 
@@ -634,16 +614,15 @@ public class ClientGameEngine {
 	}
 
 	public void endBatchesBeforeOutline(MultiBufferSource.BufferSource buffers) {
-		buffers.endBatch(RenderType.solid());
-		buffers.endBatch(RenderType.endPortal());
-		buffers.endBatch(RenderType.endGateway());
-		buffers.endBatch(Sheets.solidBlockSheet());
+		buffers.endBatch(RenderTypes.solidMovingBlock());
+		buffers.endBatch(RenderTypes.endPortal());
+		buffers.endBatch(RenderTypes.endGateway());
 		buffers.endBatch(Sheets.cutoutBlockSheet());
-		buffers.endBatch(Sheets.bedSheet());
-		buffers.endBatch(Sheets.shulkerBoxSheet());
-		buffers.endBatch(Sheets.signSheet());
-		buffers.endBatch(Sheets.hangingSignSheet());
-		buffers.endBatch(Sheets.chestSheet());
+		buffers.endBatch(Sheets.translucentBlockSheet());
+		buffers.endBatch(RenderTypes.entityCutout(Sheets.BED_SHEET));
+		buffers.endBatch(RenderTypes.entityCutout(Sheets.SHULKER_SHEET));
+		buffers.endBatch(RenderTypes.entityCutout(Sheets.SIGN_SHEET));
+		buffers.endBatch(RenderTypes.entityCutout(Sheets.CHEST_SHEET));
 	}
 
 	public boolean getEntityOutlineDepth() {
@@ -709,13 +688,13 @@ public class ClientGameEngine {
 		}
 
 		var list = new ArrayList<String>();
-		list.add("Minecraft " + SharedConstants.getCurrentVersion().getName() + " (" + mc.getLaunchedVersion() + "/" + ClientBrandRetriever.getClientModName() + ")");
-		list.add(mc.fpsString);
+		list.add("Minecraft " + SharedConstants.getCurrentVersion().name() + " (" + mc.getLaunchedVersion() + "/" + ClientBrandRetriever.getClientModName() + ")");
+		list.add(mc.getFps() + " fps");
 
 		var blockpos = mc.getCameraEntity().blockPosition();
 		var entity = mc.getCameraEntity();
 		var direction = entity.getDirection();
-		var chunkpos = new ChunkPos(blockpos);
+		var chunkpos = new ChunkPos(SectionPos.blockToSectionCoord(blockpos.getX()), SectionPos.blockToSectionCoord(blockpos.getZ()));
 
 		if (!Objects.equals(overlay.lastPos, chunkpos)) {
 			overlay.lastPos = chunkpos;
@@ -733,7 +712,7 @@ public class ClientGameEngine {
 
 		list.add(String.format(Locale.ROOT, "Facing: %s (%s) (%.1f / %.1f)", direction, s, Mth.wrapDegrees(entity.getYRot()), Mth.wrapDegrees(entity.getXRot())));
 		list.add(String.format(Locale.ROOT, "XYZ: %.3f / %.5f / %.3f", mc.getCameraEntity().getX(), mc.getCameraEntity().getY(), mc.getCameraEntity().getZ()));
-		list.add(String.format(Locale.ROOT, "Chunk: %d %d %d [%d %d in r.%d.%d.mca]", chunkpos.x, SectionPos.blockToSectionCoord(blockpos.getY()), chunkpos.z, chunkpos.getRegionLocalX(), chunkpos.getRegionLocalZ(), chunkpos.getRegionX(), chunkpos.getRegionZ()));
+		list.add(String.format(Locale.ROOT, "Chunk: %d %d %d [%d %d in r.%d.%d.mca]", chunkpos.x(), SectionPos.blockToSectionCoord(blockpos.getY()), chunkpos.z(), chunkpos.getRegionLocalX(), chunkpos.getRegionLocalZ(), chunkpos.getRegionX(), chunkpos.getRegionZ()));
 		list.add(String.format(Locale.ROOT, "Block: %d %d %d [%d %d %d]", blockpos.getX(), blockpos.getY(), blockpos.getZ(), blockpos.getX() & 15, blockpos.getY() & 15, blockpos.getZ() & 15));
 
 		var levelchunk = overlay.getClientChunk();
@@ -748,7 +727,7 @@ public class ClientGameEngine {
 
 			if (mc.level.isInsideBuildHeight(blockpos.getY())) {
 				var biome = mc.level.getBiome(blockpos);
-				list.add("Biome: " + overlay.printBiome(biome));
+				list.add("Biome: " + biome.unwrap().map(key -> key.identifier().toString(), l -> "[unregistered " + l + "]"));
 			}
 		}
 
@@ -802,9 +781,9 @@ public class ClientGameEngine {
 		}
 	}
 
-	public boolean overrideLevelEvent(Level level, int eventId, BlockPos pos, int data) {
+	public boolean overrideLevelEvent(Level level, int eventType, BlockPos pos, int data) {
 		// Cancel sound that plays when you switch dimensions
-		if (eventId == 1032) {
+		if (eventType == 1032) {
 			return true;
 		}
 
@@ -837,7 +816,7 @@ public class ClientGameEngine {
 		return cam == null ? null : cam.getWeatherOverride();
 	}
 
-	public boolean drawItemStackSize(GuiGraphics graphics, ItemStack stack, Font font, @Nullable String text, int x, int y) {
+	public boolean drawItemStackSize(GuiGraphicsExtractor graphics, ItemStack stack, Font font, @Nullable String text, int x, int y) {
 		if (text != null && text.isEmpty()) {
 			return true;
 		}
@@ -899,7 +878,7 @@ public class ClientGameEngine {
 		if (connection == null) {
 			return List.of();
 		} else if (mc.player != null && canViewOnlinePlayerNames(mc.player)) {
-			return connection.getOnlinePlayers().stream().map(p -> p.getProfile().getName()).toList();
+			return connection.getOnlinePlayers().stream().map(p -> p.getProfile().name()).toList();
 		} else {
 			return List.of(mc.getUser().getName());
 		}

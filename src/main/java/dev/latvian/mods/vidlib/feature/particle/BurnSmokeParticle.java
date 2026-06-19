@@ -5,14 +5,14 @@ import dev.latvian.mods.vidlib.feature.gradient.ClientGradients;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.util.Mth;
 import org.joml.SimplexNoise;
 
-public class BurnSmokeParticle extends TextureSheetParticle {
+public class BurnSmokeParticle extends SingleQuadParticle {
 	public static ParticleProvider<VidLibParticles.SimpleParticleType> create(SpriteSet spriteSet) {
-		return (type, level, x, y, z, xd, yd, zd) -> new BurnSmokeParticle(level, x, y, z, xd, yd, zd, spriteSet);
+		return (type, level, x, y, z, xd, yd, zd, random) -> new BurnSmokeParticle(level, x, y, z, xd, yd, zd, spriteSet);
 	}
 
 	private final float random1;
@@ -21,9 +21,9 @@ public class BurnSmokeParticle extends TextureSheetParticle {
 	private float oQuadSize;
 
 	public BurnSmokeParticle(ClientLevel level, double x, double y, double z, double velocityX, double velocityY, double velocityZ, SpriteSet spriteSet) {
-		super(level, x, y, z);
+		super(level, x, y, z, spriteSet.first());
 
-		this.pickSprite(spriteSet);
+		this.setSprite(spriteSet.get(random));
 		// this.sprite = MinecraftClient.getInstance().getSpriteAtlas(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE).apply(TEXTURE);
 		this.friction = 1F;
 		this.random1 = random.nextFloat();
@@ -50,8 +50,13 @@ public class BurnSmokeParticle extends TextureSheetParticle {
 	}
 
 	@Override
-	public ParticleRenderType getRenderType() {
-		return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
+	public ParticleRenderType getGroup() {
+		return ParticleRenderType.SINGLE_QUADS;
+	}
+
+	@Override
+	protected SingleQuadParticle.Layer getLayer() {
+		return SingleQuadParticle.Layer.OPAQUE;
 	}
 
 	@Override
@@ -80,7 +85,7 @@ public class BurnSmokeParticle extends TextureSheetParticle {
 	}
 
 	@Override
-	protected int getLightColor(float tint) {
+	protected int getLightCoords(float tint) {
 		return 15728880;
 	}
 }

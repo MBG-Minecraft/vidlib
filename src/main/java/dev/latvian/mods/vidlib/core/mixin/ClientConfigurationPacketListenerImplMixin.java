@@ -25,7 +25,7 @@ public class ClientConfigurationPacketListenerImplMixin implements VLClientConfi
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void vl$init(Minecraft mc, Connection connection, CommonListenerCookie cookie, CallbackInfo ci) {
-		vl$sessionData(new LocalClientSessionData(mc, cookie.localGameProfile().getId()));
+		vl$sessionData(new LocalClientSessionData(mc, cookie.localGameProfile().id()));
 	}
 
 	@Override

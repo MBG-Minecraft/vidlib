@@ -22,7 +22,7 @@ public class VLImGuiImplGlfw extends ImGuiImplGlfw {
 		io.setGetClipboardTextFn(new ImStrSupplier() {
 			@Override
 			public String get() {
-				if (mc.getWindow().getWindow() == windowId) {
+				if (mc.getWindow().handle() == windowId) {
 					return mc.keyboardHandler.getClipboard();
 				}
 
@@ -34,7 +34,7 @@ public class VLImGuiImplGlfw extends ImGuiImplGlfw {
 		io.setSetClipboardTextFn(new ImStrConsumer() {
 			@Override
 			public void accept(final String text) {
-				if (mc.getWindow().getWindow() == windowId) {
+				if (mc.getWindow().handle() == windowId) {
 					mc.keyboardHandler.setClipboard(text);
 				} else {
 					GLFW.glfwSetClipboardString(windowId, text);

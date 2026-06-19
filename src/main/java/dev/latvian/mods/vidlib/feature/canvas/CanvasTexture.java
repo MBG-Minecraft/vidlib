@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.canvas;
 
 import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.textures.GpuTextureView;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 
 public class CanvasTexture extends AbstractTexture {
@@ -24,11 +25,15 @@ public class CanvasTexture extends AbstractTexture {
 	}
 
 	@Override
-	public void setClamp(boolean clamp) {
-	}
+	public GpuTextureView getTextureView() {
+		var t = canvas.getOutputTarget();
+		var view = t == null ? null : depth ? t.getDepthTextureView() : t.getColorTextureView();
 
-	@Override
-	public void setFilter(boolean blur, boolean mipmap) {
+		if (view == null) {
+			throw new IllegalStateException("Canvas " + canvas.idString + (depth ? " depth texture view does not exist" : " color texture view does not exist"));
+		} else {
+			return view;
+		}
 	}
 
 	@Override

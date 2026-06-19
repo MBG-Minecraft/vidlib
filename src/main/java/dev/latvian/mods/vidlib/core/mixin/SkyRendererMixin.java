@@ -3,27 +3,38 @@ package dev.latvian.mods.vidlib.core.mixin;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.FogParameters;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.SkyRenderer;
+import net.minecraft.world.level.MoonPhase;
 import org.joml.Quaternionfc;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(SkyRenderer.class)
 public abstract class SkyRendererMixin {
 	@Shadow
-	protected abstract void renderStars(FogParameters fog, float starBrightness, PoseStack poseStack);
+	private void renderStars(float starBrightness, PoseStack poseStack) {
+	}
 
 	@Shadow
-	protected abstract void renderMoon(int phase, float alpha, MultiBufferSource bufferSource, PoseStack poseStack);
+	private void renderMoon(MoonPhase moonPhase, float rainBrightness, PoseStack poseStack) {
+	}
 
 	@Shadow
-	protected abstract void renderSun(float alpha, MultiBufferSource bufferSource, PoseStack poseStack);
+	private void renderSun(float rainBrightness, PoseStack poseStack) {
+	}
+
+	/**
+	 * @author Lat
+	 * @reason Yeet
+	 */
+	@Overwrite
+	private boolean shouldRenderDarkDisc(float partialTick, ClientLevel level) {
+		return false;
+	}
 
 	@Redirect(method = "renderSunMoonAndStars", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionfc;)V", ordinal = 1))
 	private void vl$renderSunMoonAndStars(PoseStack ms, Quaternionfc quaternion) {
@@ -38,43 +49,35 @@ public abstract class SkyRendererMixin {
 		}
 	}
 
-	@Redirect(method = "renderSunMoonAndStars", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SkyRenderer;renderSun(FLnet/minecraft/client/renderer/MultiBufferSource;Lcom/mojang/blaze3d/vertex/PoseStack;)V"))
-	private void vl$renderSun(SkyRenderer instance, float alpha, MultiBufferSource bufferSource, PoseStack poseStack) {
+	@Redirect(method = "renderSunMoonAndStars", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SkyRenderer;renderSun(FLcom/mojang/blaze3d/vertex/PoseStack;)V"))
+	private void vl$renderSun(SkyRenderer instance, float rainBrightness, PoseStack poseStack) {
 		var player = Minecraft.getInstance().player;
 		var override = player != null ? player.vl$sessionData().skybox : null;
 
 		if (override == null || override.data.sun()) {
-			renderSun(alpha, bufferSource, poseStack);
+			renderSun(rainBrightness, poseStack);
 		}
 	}
 
-	@Redirect(method = "renderSunMoonAndStars", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SkyRenderer;renderMoon(IFLnet/minecraft/client/renderer/MultiBufferSource;Lcom/mojang/blaze3d/vertex/PoseStack;)V"))
-	private void vl$renderMoon(SkyRenderer instance, int phase, float alpha, MultiBufferSource bufferSource, PoseStack poseStack) {
+	@Redirect(method = "renderSunMoonAndStars", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SkyRenderer;renderMoon(Lnet/minecraft/world/level/MoonPhase;FLcom/mojang/blaze3d/vertex/PoseStack;)V"))
+	private void vl$renderMoon(SkyRenderer instance, MoonPhase moonPhase, float rainBrightness, PoseStack poseStack) {
 		var player = Minecraft.getInstance().player;
 		var override = player != null ? player.vl$sessionData().skybox : null;
 
 		if (override == null || override.data.moon()) {
-			renderMoon(phase, alpha, bufferSource, poseStack);
+			renderMoon(moonPhase, rainBrightness, poseStack);
 		}
 	}
 
-	@Redirect(method = "renderSunMoonAndStars", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SkyRenderer;renderStars(Lnet/minecraft/client/renderer/FogParameters;FLcom/mojang/blaze3d/vertex/PoseStack;)V"))
-	private void vl$renderStarsOriginal(SkyRenderer instance, FogParameters fog, float starBrightness, PoseStack poseStack) {
+	@Redirect(method = "renderSunMoonAndStars", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SkyRenderer;renderStars(FLcom/mojang/blaze3d/vertex/PoseStack;)V"))
+	private void vl$renderStarsOriginal(SkyRenderer instance, float starBrightness, PoseStack poseStack) {
 		var player = Minecraft.getInstance().player;
 		var override = player != null ? player.vl$sessionData().skybox : null;
 
 		if (override == null || override.data.stars().isEmpty()) {
-			renderStars(fog, starBrightness, poseStack);
-		}
-	}
-
-	@Inject(method = "renderSunMoonAndStars", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V", shift = At.Shift.AFTER))
-	private void vl$renderStars(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, float timeOfDay, int moonPhase, float rainLevel, float starBrightness, FogParameters fog, CallbackInfo ci) {
-		var player = Minecraft.getInstance().player;
-		var override = player != null ? player.vl$sessionData().skybox : null;
-
-		if (override != null && override.data.stars().isPresent() && override.data.stars().get() > 0F) {
-			renderStars(fog, override.data.stars().get(), poseStack);
+			renderStars(starBrightness, poseStack);
+		} else if (override.data.stars().get() > 0F) {
+			renderStars(override.data.stars().get(), poseStack);
 		}
 	}
 }

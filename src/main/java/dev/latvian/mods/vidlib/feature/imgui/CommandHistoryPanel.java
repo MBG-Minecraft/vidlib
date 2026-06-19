@@ -33,7 +33,7 @@ public class CommandHistoryPanel extends Panel {
 
 			this.commandSuggestions = new CommandSuggestions(
 				mc,
-				new ChatScreen(""),
+				new ChatScreen("", false),
 				input,
 				mc.font,
 				false,

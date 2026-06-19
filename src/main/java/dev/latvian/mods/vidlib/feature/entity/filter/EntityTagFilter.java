@@ -59,7 +59,7 @@ public record EntityTagFilter(String tag) implements EntityFilter, ImBuilderWith
 
 	@Override
 	public boolean test(Entity entity) {
-		return entity.getTags().contains(tag);
+		return entity.entityTags().contains(tag);
 	}
 
 	@Override

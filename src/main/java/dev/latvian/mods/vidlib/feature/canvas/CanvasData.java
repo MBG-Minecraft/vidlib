@@ -7,7 +7,7 @@ import dev.latvian.mods.klib.codec.KLibClientCodecs;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.util.ID;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Set;
 
@@ -16,7 +16,7 @@ public record CanvasData(
 	boolean autoDraw,
 	boolean autoClear,
 	boolean alwaysActive,
-	Set<ResourceLocation> importTargets,
+	Set<Identifier> importTargets,
 	boolean depth,
 	boolean stencil,
 	float scale,

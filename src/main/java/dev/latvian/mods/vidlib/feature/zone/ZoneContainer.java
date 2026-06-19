@@ -10,7 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -36,7 +36,7 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 	public static final StreamCodec<RegistryFriendlyByteBuf, ZoneContainer> DIRECT_STREAM_CODEC = new StreamCodec<>() {
 		@Override
 		public ZoneContainer decode(RegistryFriendlyByteBuf buf) {
-			var id = ResourceLocation.STREAM_CODEC.decode(buf);
+			var id = Identifier.STREAM_CODEC.decode(buf);
 			int flags = buf.readVarInt();
 
 			var dimension = ((flags & FLAG_NOT_OVERWORLD) != 0) ? MCStreamCodecs.DIMENSION.decode(buf) : Level.OVERWORLD;
@@ -63,7 +63,7 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 
 		@Override
 		public void encode(RegistryFriendlyByteBuf buf, ZoneContainer value) {
-			ResourceLocation.STREAM_CODEC.encode(buf, value.id);
+			Identifier.STREAM_CODEC.encode(buf, value.id);
 
 			int flags = 0;
 
@@ -106,7 +106,7 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 	public static final CommandDataType<ZoneContainer> COMMAND = CommandDataType.of(DATA_TYPE);
 
 	ActiveZones parent;
-	public final ResourceLocation id;
+	public final Identifier id;
 	public final ResourceKey<Level> dimension;
 	public final List<ZoneInstance> zones;
 	public final Set<String> tags;
@@ -116,7 +116,7 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 	private AABB boundingBox;
 	private AAIBB intBoundingBox;
 
-	public ZoneContainer(ResourceLocation id, ResourceKey<Level> dimension) {
+	public ZoneContainer(Identifier id, ResourceKey<Level> dimension) {
 		this.id = id;
 		this.dimension = dimension;
 		this.zones = new ArrayList<>();

@@ -50,12 +50,12 @@ public record DataArgumentType<T>(DynamicOps<Tag> ops, TagParser<Tag> parser, Co
 	public static class Info implements ArgumentTypeInfo<DataArgumentType<?>, CodecTemplate> {
 		@Override
 		public void serializeToNetwork(CodecTemplate template, FriendlyByteBuf buf) {
-			buf.writeResourceLocation(template.commandDataType.getRegisteredDataType().id());
+			buf.writeIdentifier(template.commandDataType.getRegisteredDataType().id());
 		}
 
 		@Override
 		public CodecTemplate deserializeFromNetwork(FriendlyByteBuf buf) {
-			return new CodecTemplate(this, CommandDataType.of(RegisteredDataType.BY_ID.get(buf.readResourceLocation()).type()));
+			return new CodecTemplate(this, CommandDataType.of(RegisteredDataType.BY_ID.get(buf.readIdentifier()).type()));
 		}
 
 		@Override

@@ -43,7 +43,7 @@ public class ExplosionInstance {
 		this.level = level;
 		this.at = at;
 		this.data = data;
-		this.random = level.random;
+		this.random = level.getRandom();
 		this.blocks = List.of();
 		this.entities = List.of();
 		this.debug = DebugColorBlocks.NONE;

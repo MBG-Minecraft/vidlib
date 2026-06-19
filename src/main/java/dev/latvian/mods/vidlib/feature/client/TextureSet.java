@@ -20,7 +20,7 @@ public class TextureSet {
 
 	public final String prefix;
 	public final List<String> paths;
-	private List<ClientAsset> list;
+	private List<ClientAsset.ResourceTexture> list;
 	private int lastReload;
 
 	public TextureSet(String prefix, List<String> paths) {
@@ -34,7 +34,7 @@ public class TextureSet {
 		this(path + "/", List.of(path));
 	}
 
-	public List<ClientAsset> get(Minecraft mc) {
+	public List<ClientAsset.ResourceTexture> get(Minecraft mc) {
 		int reload = mc.vl$reloadCount();
 
 		if (lastReload != reload) {
@@ -58,7 +58,7 @@ public class TextureSet {
 		return list;
 	}
 
-	private String format(ClientAsset asset) {
+	private String format(ClientAsset.ResourceTexture asset) {
 		if (!prefix.isEmpty() && asset.id().getPath().startsWith(prefix)) {
 			return asset.id().getNamespace() + ":" + asset.id().getPath().substring(prefix.length());
 		}
@@ -66,11 +66,11 @@ public class TextureSet {
 		return asset.id().toString();
 	}
 
-	public ImUpdate imgui(ImGraphics graphics, ClientAsset[] value, @Nullable ImString search) {
+	public ImUpdate imgui(ImGraphics graphics, ClientAsset.ResourceTexture[] value, @Nullable ImString search) {
 		return graphics.combo("###texture", value, "", get(graphics.mc), this::format, search);
 	}
 
-	public ImUpdate optionalImgui(ImGraphics graphics, ClientAsset[] value, @Nullable ImString search) {
+	public ImUpdate optionalImgui(ImGraphics graphics, ClientAsset.ResourceTexture[] value, @Nullable ImString search) {
 		return graphics.combo("###texture", value, "None", get(graphics.mc), this::format, search);
 	}
 }

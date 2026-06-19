@@ -16,6 +16,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
@@ -56,7 +57,7 @@ public class ClientProps extends Props<ClientLevel> {
 		}
 	}
 
-	public final Map<RenderLevelStageEvent.Stage, List<RenderedProp<?>>> stages;
+	public final Map<Object, List<RenderedProp<?>>> stages;
 	public final Set<PropRenderer<?>> unitRenderers;
 	private final List<PropRenderContext<?>> sortedProps;
 
@@ -155,7 +156,7 @@ public class ClientProps extends Props<ClientLevel> {
 	}
 
 	public void renderAll(FrameInfo frame, PoseStack ms) {
-		var cam = frame.camera().getPosition();
+		var cam = frame.camera().position();
 		float delta = frame.worldDelta();
 
 		var list = stages.get(frame.stage());
@@ -218,7 +219,7 @@ public class ClientProps extends Props<ClientLevel> {
 
 	public void renderDebug(FrameInfo frame) {
 		var ms = frame.poseStack();
-		var cam = frame.camera().getPosition();
+		var cam = frame.camera().position();
 		var delta = frame.worldDelta();
 
 		for (var list : propLists.values()) {
@@ -231,7 +232,7 @@ public class ClientProps extends Props<ClientLevel> {
 				if (prop.isVisible(x, y, z, frame, cam, cd)) {
 					boolean selected = !HIDE_OUTLINE.get() && OPEN_PROPS.contains(prop.id);
 
-					if (selected || frame.mc().getEntityRenderDispatcher().shouldRenderHitBoxes()) {
+					if (selected || frame.mc().debugEntries.isCurrentlyEnabled(DebugScreenEntries.ENTITY_HITBOXES)) {
 						var progress = prop.getDebugVisualsProgress(delta);
 
 						if (progress >= 0F && progress <= 1F) {

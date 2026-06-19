@@ -8,7 +8,7 @@ import dev.latvian.mods.klib.gl.GLDebugLog;
 import dev.latvian.mods.vidlib.core.VLWithCanvas;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PostChain;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 public class ExternalCanvas extends Canvas {
 	RenderTarget externalTarget;
 
-	protected ExternalCanvas(ResourceLocation id, Consumer<CanvasBuilder> builder) {
+	protected ExternalCanvas(Identifier id, Consumer<CanvasBuilder> builder) {
 		super(id, builder);
 	}
 
@@ -66,7 +66,7 @@ public class ExternalCanvas extends Canvas {
 
 		if (chain != null) {
 			((VLWithCanvas) chain).vl$setCanvas(this);
-			chain.addToFrame(frameGraphBuilder, w, h, targetBundle, this);
+			chain.addToFrame(frameGraphBuilder, w, h, targetBundle);
 		}
 	}
 

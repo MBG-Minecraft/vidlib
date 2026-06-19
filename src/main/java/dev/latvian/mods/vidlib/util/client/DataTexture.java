@@ -3,12 +3,14 @@ package dev.latvian.mods.vidlib.util.client;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.AddressMode;
 import com.mojang.blaze3d.textures.FilterMode;
+import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.TextureFormat;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.Dumpable;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 import java.nio.file.Path;
@@ -27,8 +29,9 @@ public class DataTexture extends AbstractTexture implements Dumpable {
 	public DataTexture(String name, int width, int height) {
 		this.name = name;
 		this.expectedWidth = width;
-		this.texture = RenderSystem.getDevice().createTexture(name, TextureFormat.RGBA8, width, height, 1);
-		texture.setTextureFilter(FilterMode.NEAREST, false);
+		this.texture = RenderSystem.getDevice().createTexture(name, GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_COPY_DST, TextureFormat.RGBA8, width, height, 1, 1);
+		this.textureView = RenderSystem.getDevice().createTextureView(texture);
+		this.sampler = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE, FilterMode.NEAREST, FilterMode.NEAREST, false);
 		this.pixels = new ArrayList<>(height);
 	}
 
@@ -90,12 +93,17 @@ public class DataTexture extends AbstractTexture implements Dumpable {
 
 			image = new NativeImage(width, height, false);
 
+			if (textureView != null) {
+				textureView.close();
+				textureView = null;
+			}
+
 			if (texture != null) {
 				texture.close();
 			}
 
-			texture = RenderSystem.getDevice().createTexture(name, TextureFormat.RGBA8, width, height, 1);
-			texture.setTextureFilter(FilterMode.NEAREST, false);
+			texture = RenderSystem.getDevice().createTexture(name, GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_COPY_DST, TextureFormat.RGBA8, width, height, 1, 1);
+			textureView = RenderSystem.getDevice().createTextureView(texture);
 		}
 
 		for (int y = 0; y < currentRow; y++) {
@@ -106,12 +114,12 @@ public class DataTexture extends AbstractTexture implements Dumpable {
 			}
 		}
 
-		RenderSystem.getDevice().createCommandEncoder().writeToTexture(texture, image, 0, 0, 0, columnCount, currentRow, 0, 0);
+		RenderSystem.getDevice().createCommandEncoder().writeToTexture(texture, image, 0, 0, 0, 0, columnCount, currentRow, 0, 0);
 		return currentRow;
 	}
 
 	@Override
-	public void dumpContents(ResourceLocation id, Path path) {
+	public void dumpContents(Identifier id, Path path) {
 		TextureUtil.writeAsPNG(path, id.toDebugFileName(), getTexture(), 0, IntUnaryOperator.identity());
 	}
 }

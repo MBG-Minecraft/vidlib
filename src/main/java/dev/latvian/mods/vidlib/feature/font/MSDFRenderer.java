@@ -1,15 +1,15 @@
 package dev.latvian.mods.vidlib.feature.font;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.texture.LightUV;
 import dev.latvian.mods.klib.texture.OverlayUV;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.ARGB;
+import org.joml.Matrix3x2fc;
 import org.joml.Vector3f;
 
 public class MSDFRenderer {
@@ -143,12 +143,16 @@ public class MSDFRenderer {
 
 	//
 
-	public void draw(GuiGraphics graphics, String text) {
+	public void draw(GuiGraphicsExtractor graphics, String text) {
 		draw(graphics.pose(), graphics.vl$buffers(), text);
 	}
 
+	public void draw(Matrix3x2fc pose, MultiBufferSource buffers, String text) {
+		var buffer = buffers.getBuffer(seeThrough ? font.seeThroughRenderType() : font.renderType());
+		addVertices(pose, buffer, text, 0xFFFFFFFF);
+	}
+
 	public void draw(PoseStack poseStack, MultiBufferSource buffers, String text) {
-		RenderSystem.setModelOffset(0F, 0F, 0F);
 		var buffer = buffers.getBuffer(seeThrough ? font.seeThroughRenderType() : font.renderType());
 		addVertices(poseStack, buffer, text, 0xFFFFFFFF);
 	}
@@ -156,6 +160,14 @@ public class MSDFRenderer {
 	public void addVertices(PoseStack ms, VertexConsumer buffer, String text, int tint) {
 		var pose = ms.last();
 
+		if (shadow > 0F) {
+			addVertices(pose, buffer, text, tint, true);
+		}
+
+		addVertices(pose, buffer, text, tint, false);
+	}
+
+	public void addVertices(Matrix3x2fc pose, VertexConsumer buffer, String text, int tint) {
 		if (shadow > 0F) {
 			addVertices(pose, buffer, text, tint, true);
 		}
@@ -233,6 +245,59 @@ public class MSDFRenderer {
 					pos.set(x + p.left() + slant, y - p.top(), z);
 					pos.mulPosition(m);
 					buffer.addVertex(pos.x, pos.y, pos.z).setUv(uv.left(), uv.bottom()).setColor(cTopLeft).setUv1(overlayU, overlayV).setUv2(lightU, lightV).setNormal(normal.x, normal.y, normal.z);
+				}
+
+				cursorX += g.advance() + kerning;
+				lineHeight = Math.max(lineHeight, data.metrics().lineHeight());
+				prevChar = c;
+			}
+		}
+	}
+
+	public void addVertices(Matrix3x2fc pose, VertexConsumer buffer, String text, int tint, boolean isShadow) {
+		var data = font.data();
+		int len = text.length();
+
+		int cTopRight0 = ARGB.multiply(topRightColor, tint);
+		int cTopLeft0 = ARGB.multiply(topLeftColor, tint);
+		int cBottomLeft0 = ARGB.multiply(bottomLeftColor, tint);
+		int cBottomRight0 = ARGB.multiply(bottomRightColor, tint);
+		int cTopRight = isShadow ? ARGB.scaleRGB(cTopRight0, shadow) : cTopRight0;
+		int cTopLeft = isShadow ? ARGB.scaleRGB(cTopLeft0, shadow) : cTopLeft0;
+		int cBottomLeft = isShadow ? ARGB.scaleRGB(cBottomLeft0, shadow) : cBottomLeft0;
+		int cBottomRight = isShadow ? ARGB.scaleRGB(cBottomRight0, shadow) : cBottomRight0;
+
+		int lightU = packedLight.u();
+		int lightV = packedLight.v();
+		int overlayU = packedOverlay.u();
+		int overlayV = packedOverlay.v();
+
+		char prevChar = 0;
+
+		for (int i = 0; i < len; i++) {
+			char c = text.charAt(i);
+
+			if (c == '\n') {
+				prevChar = '\n';
+				newLine();
+				continue;
+			}
+
+			var g = font.getGlyph(c);
+
+			if (g != null) {
+				var uv = g.uv();
+				var p = g.plane();
+				var kerning = g.kerning().get(prevChar);
+
+				if (p != null && uv != null) {
+					float x = cursorX + (isShadow ? shadowOffset : 0F);
+					float y = cursorY + (isShadow ? shadowOffset : 0F) + data.metrics().lineHeight() + data.metrics().descender();
+
+					buffer.addVertexWith2DPose(pose, x + p.left(), y - p.bottom()).setUv(uv.left(), uv.top()).setColor(cBottomLeft).setUv1(overlayU, overlayV).setUv2(lightU, lightV).setNormal(normalX, normalY, normalZ);
+					buffer.addVertexWith2DPose(pose, x + p.right(), y - p.bottom()).setUv(uv.right(), uv.top()).setColor(cBottomRight).setUv1(overlayU, overlayV).setUv2(lightU, lightV).setNormal(normalX, normalY, normalZ);
+					buffer.addVertexWith2DPose(pose, x + p.right() + slant, y - p.top()).setUv(uv.right(), uv.bottom()).setColor(cTopRight).setUv1(overlayU, overlayV).setUv2(lightU, lightV).setNormal(normalX, normalY, normalZ);
+					buffer.addVertexWith2DPose(pose, x + p.left() + slant, y - p.top()).setUv(uv.left(), uv.bottom()).setColor(cTopLeft).setUv1(overlayU, overlayV).setUv2(lightU, lightV).setNormal(normalX, normalY, normalZ);
 				}
 
 				cursorX += g.advance() + kerning;

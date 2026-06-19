@@ -2,24 +2,17 @@ package dev.latvian.mods.vidlib.feature.icon.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.feature.client.EntityRenderTypes;
-import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.icon.TextureIcon;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.MultiBufferSource;
 import org.joml.Vector3f;
 
 public interface TextureIconRenderer {
-	static void draw(TextureIcon icon, Minecraft mc, GuiGraphics graphics, int alpha) {
-		var rendertype = VidLibRenderTypes.GUI.apply(icon.texture().texturePath());
-		var matrix4f = graphics.pose().last().pose();
-		var buffer = graphics.vl$buffers().getBuffer(rendertype);
-		var color = icon.color().mixAlpha(alpha).argb();
+	static void draw(TextureIcon icon, Minecraft mc, GuiGraphicsExtractor graphics, int alpha) {
+		var texture = mc.getTextureManager().getTexture(icon.texture().texturePath());
 		var uv = icon.uv();
-		buffer.addVertex(matrix4f, -8F, -8F, 0F).setUv(uv.u0(), uv.v0()).setColor(color);
-		buffer.addVertex(matrix4f, -8F, 8F, 0F).setUv(uv.u0(), uv.v1()).setColor(color);
-		buffer.addVertex(matrix4f, 8F, 8F, 0F).setUv(uv.u1(), uv.v1()).setColor(color);
-		buffer.addVertex(matrix4f, 8F, -8F, 0F).setUv(uv.u1(), uv.v0()).setColor(color);
+		graphics.blit(texture.getTextureView(), texture.getSampler(), -8, -8, 8, 8, uv.u0(), uv.u1(), uv.v0(), uv.v1());
 	}
 
 	static void render(TextureIcon icon, Minecraft mc, PoseStack ms, float delta, MultiBufferSource source, int light, int overlay) {

@@ -30,7 +30,7 @@ public class BlockPosImBuilder implements ImBuilder<BlockPos>, SelectedPosition.
 		var update = ImUpdate.NONE;
 
 		if (ImGui.button(SelectedPosition.CAMERA.icon + "###camera-pos")) {
-			var cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+			var cam = Minecraft.getInstance().gameRenderer.getMainCamera().position();
 			data.set(cam.x, cam.y, cam.z);
 			update = ImUpdate.FULL;
 			selectedPosition[0] = SelectedPosition.CAMERA;

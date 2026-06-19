@@ -31,7 +31,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
@@ -81,7 +82,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		this.isExportingReplay = ReplayAPI.getActive().isExporting();
 		this.serverFeatures = inGame ? mc.level.getServerFeatures() : FeatureSet.EMPTY;
 		this.adminPanel = isReplay || VidLibClientOptions.getAdminPanel() && ClientGameEngine.INSTANCE.allowAdminPanel(mc.player);
-		this.isAdmin = inGame && (isSinglePlayer || mc.player.hasPermissions(2));
+		this.isAdmin = inGame && (isSinglePlayer || mc.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER));
 		this.jsonOps = inGame ? mc.level.jsonOps() : JsonOps.INSTANCE;
 		this.nbtOps = inGame ? mc.level.nbtOps() : NbtOps.INSTANCE;
 		this.scroll = VidLibClientOptions.LOCK_IMGUI_SCROLL.get() ? Math.clamp(ImGui.getIO().getMouseWheel(), -1F, 1F) : ImGui.getIO().getMouseWheel();
@@ -363,19 +364,19 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		popStack();
 	}
 
-	public static int getTextureId(ResourceLocation identifier) {
+	public static int getTextureId(Identifier identifier) {
 		return Minecraft.getInstance().getTextureManager().getTexture(identifier).getTexture().vl$getHandle();
 	}
 
-	public static void texture(ResourceLocation id, float width, float height) {
+	public static void texture(Identifier id, float width, float height) {
 		ImGui.image(getTextureId(id), width, height);
 	}
 
-	public static void texture(ResourceLocation id, float width, float height, float u0, float v0) {
+	public static void texture(Identifier id, float width, float height, float u0, float v0) {
 		ImGui.image(getTextureId(id), width, height, u0, v0);
 	}
 
-	public static void texture(ResourceLocation id, float width, float height, float u0, float v0, float u1, float v1) {
+	public static void texture(Identifier id, float width, float height, float u0, float v0, float u1, float v1) {
 		ImGui.image(getTextureId(id), width, height, u0, v0, u1, v1);
 	}
 
@@ -585,7 +586,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		return imageButton(texture, w, h, uv, padding, variant, Color.TRANSPARENT, Color.WHITE);
 	}
 
-	public boolean imageButton(@Nullable ResourceLocation texture, float w, float h, UV uv, int padding, @Nullable ImColorVariant variant) {
+	public boolean imageButton(@Nullable Identifier texture, float w, float h, UV uv, int padding, @Nullable ImColorVariant variant) {
 		return imageButton(texture == null ? null : mc.getTextureManager().getTexture(texture).getTexture(), w, h, uv, padding, variant);
 	}
 

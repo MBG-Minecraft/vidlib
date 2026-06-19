@@ -4,13 +4,13 @@ import dev.latvian.mods.klib.io.IOUtils;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.Timestamp;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public record CustomGamePacketTask(Timestamp time, ResourceLocation type, byte[] data) implements CaptureTask {
+public record CustomGamePacketTask(Timestamp time, Identifier type, byte[] data) implements CaptureTask {
 	public CustomGamePacketTask(DataInput in) throws IOException {
 		this(Timestamp.read(in), ID.idFromString(IOUtils.readUTF(in)), IOUtils.readBytes(in));
 	}

@@ -8,11 +8,11 @@ import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 
-public record PhysicsParticlesIdData(ResourceLocation id, long seed, List<PositionedBlock> blocks) {
+public record PhysicsParticlesIdData(Identifier id, long seed, List<PositionedBlock> blocks) {
 	public static final Codec<PhysicsParticlesIdData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		ID.CODEC.fieldOf("id").forGetter(PhysicsParticlesIdData::id),
 		Codec.LONG.optionalFieldOf("seed", 0L).forGetter(PhysicsParticlesIdData::seed),

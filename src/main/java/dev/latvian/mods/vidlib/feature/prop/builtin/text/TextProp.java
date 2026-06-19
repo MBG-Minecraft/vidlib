@@ -97,7 +97,7 @@ public class TextProp extends Prop {
 
 	private void clientTick() {
 		if (autoRotateYaw || autoRotatePitch) {
-			var r = Rotation.compute(getPos(1F), Minecraft.getInstance().gameRenderer.getMainCamera().getPosition());
+			var r = Rotation.compute(getPos(1F), Minecraft.getInstance().gameRenderer.getMainCamera().position());
 
 			if (autoRotateYaw) {
 				rotation.y = r.yawDeg();

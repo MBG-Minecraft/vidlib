@@ -11,13 +11,14 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.TextureReloadParams;
+import dev.latvian.mods.vidlib.feature.client.ConfiguredDynamicTexture;
 import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.TriState;
 import org.jetbrains.annotations.Nullable;
 
@@ -92,7 +93,7 @@ public class Gallery<K> {
 		return this;
 	}
 
-	public ResourceLocation getTexturePath(K imageId) {
+	public Identifier getTexturePath(K imageId) {
 		return VidLib.id("textures/vidlib/generated/gallery/" + id + "/" + keyToString.apply(imageId) + ".png");
 	}
 
@@ -136,7 +137,7 @@ public class Gallery<K> {
 
 	public void load(TextureManager manager) throws IOException {
 		for (var image : images.values()) {
-			if (manager.byPath.remove(image.textureId()) instanceof DynamicTexture tex) {
+			if (manager.byPath.remove(image.textureId()) instanceof AbstractTexture tex) {
 				tex.close();
 			}
 		}
@@ -193,9 +194,7 @@ public class Gallery<K> {
 			img.writeToFile(dst);
 		}
 
-		var texture = new DynamicTexture(textureId::toString, img);
-		texture.setClamp(true);
-		texture.setFilter(blur, false);
+		var texture = new ConfiguredDynamicTexture(textureId::toString, img, true, blur);
 		mc.getTextureManager().register(textureId, texture);
 
 		var galleryImage = new GalleryImage<>(new GalleryImageKey<>(this, key), displayName, dst, textureId);

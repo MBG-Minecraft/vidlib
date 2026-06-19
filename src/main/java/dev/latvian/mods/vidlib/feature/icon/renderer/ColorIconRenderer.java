@@ -1,15 +1,17 @@
 package dev.latvian.mods.vidlib.feature.icon.renderer;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.feature.client.EntityRenderTypes;
 import dev.latvian.mods.vidlib.feature.icon.ColorIcon;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.MultiBufferSource;
 import org.joml.Vector3f;
 
 public interface ColorIconRenderer {
-	static void draw(ColorIcon icon, Minecraft mc, GuiGraphics graphics, int alpha) {
+	static void draw(ColorIcon icon, Minecraft mc, GuiGraphicsExtractor graphics, int alpha) {
 		graphics.fill(-8, -8, 8, 8, icon.color().mixAlpha(alpha).argb());
 	}
 

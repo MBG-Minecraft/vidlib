@@ -1,11 +1,11 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.image;
 
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.math.VoxelShapeBox;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.VidLibDataTypes;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
@@ -27,7 +27,7 @@ public class ImageProp extends Prop {
 		PITCH,
 		WIDTH,
 		HEIGHT,
-		PropData.create(ImageProp.class, "texture", DataTypes.RESOURCE_TEXTURE, p -> p.texture, (p, v) -> p.texture = v, TextureImBuilder.ALL),
+		PropData.create(ImageProp.class, "texture", VidLibDataTypes.RESOURCE_TEXTURE, p -> p.texture, (p, v) -> p.texture = v, TextureImBuilder.ALL),
 		PropData.create(ImageProp.class, "tint", Color.DATA_TYPE, p -> p.tint, (p, v) -> p.tint = v, Color4ImBuilder.TYPE),
 		PropData.createBoolean(ImageProp.class, "see_through", p -> p.seeThrough, (p, v) -> p.seeThrough = v),
 		PropData.createBoolean(ImageProp.class, "full_bright", p -> p.fullBright, (p, v) -> p.fullBright = v),
@@ -37,7 +37,7 @@ public class ImageProp extends Prop {
 		PropData.createBoolean(ImageProp.class, "translucent", p -> p.translucent, (p, v) -> p.translucent = v)
 	);
 
-	public ClientAsset texture;
+	public ClientAsset.ResourceTexture texture;
 	public Color tint;
 	public boolean seeThrough;
 	public boolean fullBright;
@@ -90,7 +90,7 @@ public class ImageProp extends Prop {
 
 	private void clientTick() {
 		if (autoRotateYaw || autoRotatePitch) {
-			var r = Rotation.compute(getPos(1F), Minecraft.getInstance().gameRenderer.getMainCamera().getPosition());
+			var r = Rotation.compute(getPos(1F), Minecraft.getInstance().gameRenderer.getMainCamera().position());
 
 			if (autoRotateYaw) {
 				rotation.y = r.yawDeg();

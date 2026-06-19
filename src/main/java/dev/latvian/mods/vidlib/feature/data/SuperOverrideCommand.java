@@ -11,7 +11,7 @@ import net.minecraft.network.chat.Style;
 public interface SuperOverrideCommand {
 	@ClientAutoRegister
 	ClientCommandHolder COMMAND = new ClientCommandHolder("super-override", (command, buildContext) -> {
-		command.requires(source -> source.getSidedLevel().isClientSide);
+		command.requires(source -> source.getSidedLevel().isClientSide());
 
 		{
 			var serverDataCommand = Commands.literal("server-data");

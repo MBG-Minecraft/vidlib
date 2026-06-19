@@ -1,9 +1,12 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.npc;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import com.mojang.math.Axis;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
+import dev.latvian.mods.vidlib.core.VLEntityRenderer;
 import dev.latvian.mods.vidlib.feature.client.EntityRenderTypes;
 import dev.latvian.mods.vidlib.feature.clothing.ClothedPlayerSkinTexture;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingPresets;
@@ -12,14 +15,17 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerSkins;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.latvian.mods.vidlib.util.client.MultiBufferSourceOverride;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.RemotePlayer;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
-import net.minecraft.client.resources.PlayerSkin;
+import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
@@ -52,16 +58,16 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 		}
 
 		var instances = p.getInstances();
-		var profile = PlayerProfiles.get(p.profile.getId());
-		var modelType = PlayerSkins.getModelType(profile);
-		var playerRenderer = (PlayerRenderer) mc.getEntityRenderDispatcher().getSkinMap().get(modelType);
-		var playerRenderState = playerRenderer.createRenderState();
+		var profile = PlayerProfiles.get(p.profile.id());
 
 		if (fakePlayer == null) {
 			fakePlayer = new RemotePlayer((ClientLevel) ctx.prop().level, profile.profile());
 			fakePlayer.setHealth(20F);
 			fakePlayer.getAttribute(Attributes.MAX_HEALTH).setBaseValue(20F);
 		}
+
+		var playerRenderer = (AvatarRenderer<AbstractClientPlayer>) mc.getEntityRenderDispatcher().getPlayerRenderer(fakePlayer);
+		var playerRenderState = playerRenderer.createRenderState();
 
 		fakePlayer.vl$setLevel(ctx.prop().level);
 		fakePlayer.tickCount = 0;
@@ -91,13 +97,13 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 
 		var eyePos = new Vec3(playerRenderState.x, playerRenderState.y + fakePlayer.getEyeHeight(), playerRenderState.z);
 		var blockpos = BlockPos.containing(eyePos);
-		int light = LightTexture.pack(mc.level.getBrightness(LightLayer.BLOCK, blockpos), mc.level.getBrightness(LightLayer.SKY, blockpos));
+		int light = LightCoordsUtil.pack(mc.level.getBrightness(LightLayer.BLOCK, blockpos), mc.level.getBrightness(LightLayer.SKY, blockpos));
 
 		PlayerSkin[] skins;
 		var gp = profile.profile();
 
-		if (!gp.getName().isEmpty() && !gp.getId().equals(Util.NIL_UUID)) {
-			SINGLE_SKIN[0] = mc.getSkinManager().getInsecureSkin(gp);
+		if (!gp.name().isEmpty() && !gp.id().equals(Util.NIL_UUID)) {
+			SINGLE_SKIN[0] = mc.getSkinManager().createLookup(gp, false).get();
 			skins = SINGLE_SKIN;
 		} else if (p.randomSkin && !p.randomSkins.isEmpty()) {
 			skins = p.randomSkins.stream().map(PlayerSkins::of).toArray(PlayerSkin[]::new);
@@ -114,10 +120,9 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 
 				if (replacement != null) {
 					skins[s] = new PlayerSkin(
-						replacement,
-						null,
-						skins[s].capeTexture(),
-						skins[s].elytraTexture(),
+						MiscUtils.assetFromPNG(replacement),
+						skins[s].cape(),
+						skins[s].elytra(),
 						skins[s].model(),
 						true
 					);
@@ -210,7 +215,7 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 			ms.scale(s, s, s);
 
 			fakePlayer.swinging = false;
-			playerRenderer.render(playerRenderState, ms, buffers, light);
+			((VLEntityRenderer<RemotePlayer, AvatarRenderState>) (Object) playerRenderer).renderModel(playerRenderState, ms, buffers, light);
 			ms.popPose();
 		}
 

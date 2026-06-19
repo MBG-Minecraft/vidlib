@@ -3,13 +3,13 @@ package dev.latvian.mods.vidlib.feature.skybox;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import net.minecraft.commands.Commands;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 
 public interface SkyboxCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("skybox", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.literal("set")
 			.then(Commands.argument("skybox", SkyboxData.COMMAND.argument(buildContext))
 				.executes(ctx -> skybox(ctx.getSource().getServer(), SkyboxData.COMMAND.get(ctx, "skybox")))
@@ -20,7 +20,7 @@ public interface SkyboxCommand {
 		)
 	);
 
-	private static int skybox(MinecraftServer server, ResourceLocation skybox) {
+	private static int skybox(MinecraftServer server, Identifier skybox) {
 		server.setSkybox(skybox);
 		return 1;
 	}

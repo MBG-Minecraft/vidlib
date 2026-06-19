@@ -8,7 +8,7 @@ import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -37,8 +37,8 @@ public enum StructureCaptureTool implements VidLibTool, PlayerActionHandler {
 	}
 
 	@Override
-	public ResourceLocation getModel() {
-		return ResourceLocation.withDefaultNamespace("echo_shard");
+	public Identifier getModel() {
+		return Identifier.withDefaultNamespace("echo_shard");
 	}
 
 	@Override
@@ -55,7 +55,7 @@ public enum StructureCaptureTool implements VidLibTool, PlayerActionHandler {
 				var tag = item.get(DataComponents.CUSTOM_DATA);
 
 				if (tag != null) {
-					captureAll = tag.getUnsafe().getBooleanOr("structure_capture_full", false);
+					captureAll = tag.copyTag().getBooleanOr("structure_capture_full", false);
 				}
 
 				level.walkBlocks(ConnectedBlock.WalkType.DIAGONAL, origin, StructureCapture.buildFilter(), !captureAll, 2048, c -> {

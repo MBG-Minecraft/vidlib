@@ -21,7 +21,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImInt;
 import imgui.type.ImString;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.arguments.item.ItemParser;
 import net.minecraft.core.component.DataComponents;
@@ -79,7 +79,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBui
 
 				for (var item : ItemStack.OPTIONAL_CODEC.listOf().parse(ops, json).getOrThrow()) {
 					if (!item.isEmpty()) {
-						set.add(new ItemKey(item.getItemHolder(), item.getComponentsPatch()));
+						set.add(new ItemKey(item.typeHolder(), item.getComponentsPatch()));
 					}
 				}
 			} catch (Exception ex) {
@@ -139,7 +139,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBui
 
 				count.set(Math.max(1, value.getCount()));
 
-				var key = new ItemKey(value.getItemHolder(), value.getComponentsPatch());
+				var key = new ItemKey(value.typeHolder(), value.getComponentsPatch());
 				result = CachedItemData.create(mc, value.getCount() == 1 ? value : value.copyWithCount(1), key, ctx);
 			}
 		} else {
@@ -224,7 +224,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBui
 					var ctx = new CachedItemData.Context(graphics.mc);
 
 					for (var stack : stacks) {
-						var key = new ItemKey(stack.getItemHolder(), stack.getComponentsPatch());
+						var key = new ItemKey(stack.typeHolder(), stack.getComponentsPatch());
 
 						if (!map.containsKey(key)) {
 							map.put(key, CachedItemData.create(graphics.mc, stack, key, ctx));
@@ -266,7 +266,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBui
 
 					if (graphics.player != null) {
 						var item = graphics.player.getMainHandItem();
-						var cachedItem = CachedItemData.create(graphics.mc, item, new ItemKey(item.getItemHolder(), item.getComponentsPatch()), new CachedItemData.Context(graphics.mc));
+						var cachedItem = CachedItemData.create(graphics.mc, item, new ItemKey(item.typeHolder(), item.getComponentsPatch()), new CachedItemData.Context(graphics.mc));
 						renderedItems.addFirst(new RenderedItem(cachedItem, -9, false, true, true));
 					}
 				}

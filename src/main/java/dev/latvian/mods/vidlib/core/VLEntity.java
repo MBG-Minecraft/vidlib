@@ -21,6 +21,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Leashable;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -125,7 +126,14 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	default void teleport(Location location) {
 		var entity = vl$self();
 		var ctx = entity.level().getGlobalContext();
-		teleport(entity.getServer().getLevel(location.dimension()), location.random(entity.getRandom()).get(ctx));
+
+		if (entity.level() instanceof ServerLevel serverLevel) {
+			var to = serverLevel.getServer().getLevel(location.dimension());
+
+			if (to != null) {
+				teleport(to, location.random(entity.getRandom()).get(ctx));
+			}
+		}
 	}
 
 	default void forceSetVelocity(Vec3 velocity) {
@@ -189,7 +197,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 			case CENTER -> new Vec3(e.getX(), e.getY() + e.getBbHeight() / 2D, e.getZ());
 			case TOP -> new Vec3(e.getX(), e.getY() + e.getBbHeight(), e.getZ());
 			case EYES -> e.getEyePosition();
-			case LEASH -> e.position().add(e.getLeashOffset(1F));
+			case LEASH -> e.position().add(vl$leashOffset(e, 1F));
 			case SOUND_SOURCE -> getSoundSource(1F);
 			case LOOK_TARGET -> getLookTarget(1F);
 			default -> e.position();
@@ -203,7 +211,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 			case CENTER -> e.getPosition(delta).add(0D, e.getBbHeight() / 2D, 0D);
 			case TOP -> e.getPosition(delta).add(0D, e.getBbHeight(), 0D);
 			case EYES -> e.getEyePosition(delta);
-			case LEASH -> e.getPosition(delta).add(e.getLeashOffset(delta));
+			case LEASH -> e.getPosition(delta).add(vl$leashOffset(e, delta));
 			case SOUND_SOURCE -> getSoundSource(delta);
 			case LOOK_TARGET -> getLookTarget(delta);
 			default -> delta == 1F ? e.position() : e.getPosition(delta);
@@ -293,6 +301,10 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		return true;
 	}
 
+	private static Vec3 vl$leashOffset(Entity entity, float delta) {
+		return entity instanceof Leashable leashable ? leashable.getLeashOffset(delta) : new Vec3(0D, entity.getEyeHeight(), entity.getBbWidth() * 0.4F);
+	}
+
 	// WIP
 	default boolean overridePassengerClientLeftClick(Player player) {
 		return false;
@@ -317,10 +329,10 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	}
 
 	default boolean isStaff() {
-		return CommonGameEngine.INSTANCE.isPlayerStaff(vl$self().getTags(), getGameMode());
+		return CommonGameEngine.INSTANCE.isPlayerStaff(vl$self().entityTags(), getGameMode());
 	}
 
 	default boolean isStaffOrTalent() {
-		return CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(vl$self().getTags(), getGameMode());
+		return CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(vl$self().entityTags(), getGameMode());
 	}
 }

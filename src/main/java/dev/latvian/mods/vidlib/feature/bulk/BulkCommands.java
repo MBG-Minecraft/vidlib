@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 public class BulkCommands {
 	@AutoRegister
 	public static final ServerCommandHolder COMMAND = new ServerCommandHolder("bulk", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.literal("undo")
 			.then(Commands.literal("last")
 				.executes(ctx -> {

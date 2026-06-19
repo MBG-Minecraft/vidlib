@@ -1,14 +1,14 @@
 package dev.latvian.mods.vidlib.feature.entity.progress;
 
-import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.util.Mth;
 
 public interface ProgressBarRenderer {
-	static void draw(Minecraft mc, GuiGraphics graphics, DeltaTracker deltaTracker) {
+	static void draw(Minecraft mc, GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
 		if (mc.level == null || ClientGameEngine.INSTANCE.hideGui(mc) || mc.level.isReplayLevel()) {
 			return;
 		}
@@ -30,7 +30,7 @@ public interface ProgressBarRenderer {
 				var scaledHeight = (int) (type.height() * scale);
 
 				graphics.blit(
-					VidLibRenderTypes.GUI,
+					RenderPipelines.GUI_TEXTURED,
 					type.textures().background(),
 					x,
 					y,
@@ -46,7 +46,7 @@ public interface ProgressBarRenderer {
 				var scaledWith = Mth.ceil(type.barWidth() * scale * progress);
 
 				graphics.blit(
-					VidLibRenderTypes.GUI,
+					RenderPipelines.GUI_TEXTURED,
 					type.textures().bar(),
 					x + scaledBarStart,
 					y,

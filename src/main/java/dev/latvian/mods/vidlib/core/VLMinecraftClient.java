@@ -64,8 +64,10 @@ import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.data.AtlasIds;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
@@ -74,7 +76,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
@@ -154,7 +156,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 		var session = player.vl$sessionData();
 		var frameInfo = new FrameInfo(mc, session, event);
-		session.projectedCoordinates = ProjectedCoordinates.of(mc, frameInfo.camera().getPosition());
+		session.projectedCoordinates = ProjectedCoordinates.of(mc, frameInfo.camera().position());
 		FrameInfo.CURRENT = frameInfo;
 		var ctx = mc.level.getGlobalContext();
 
@@ -199,7 +201,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 		if (shake != Identity.DVEC_2) {
 			var vec = new Vector4f((float) shake.x(), (float) shake.y(), 0F, 1F).rotate(camera.rotation());
-			camera.vl$setPosition(camera.getPosition().add(vec.x(), vec.y(), vec.z()));
+			camera.vl$setPosition(camera.position().add(vec.x(), vec.y(), vec.z()));
 		}
 	}
 
@@ -239,12 +241,12 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	@Override
 	default void tell(Component message) {
-		vl$self().player.displayClientMessage(message, false);
+		vl$self().player.sendSystemMessage(message);
 	}
 
 	@Override
 	default void status(Component message) {
-		vl$self().player.displayClientMessage(message, true);
+		vl$self().player.sendOverlayMessage(message);
 	}
 
 	@Override
@@ -311,7 +313,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	@Override
 	default void screenShake(ScreenShake shake, Vec3 source, double maxDistance) {
-		screenShake(shake.atDistance(vl$self().gameRenderer.getMainCamera().getPosition(), source, maxDistance));
+		screenShake(shake.atDistance(vl$self().gameRenderer.getMainCamera().position(), source, maxDistance));
 	}
 
 	@Override
@@ -367,7 +369,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void setPostEffect(ResourceLocation id) {
+	default void setPostEffect(Identifier id) {
 		if (id.equals(Empty.ID)) {
 			vl$self().gameRenderer.clearPostEffect();
 		} else {
@@ -397,14 +399,14 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void removeZone(ResourceLocation zone, int index) {
+	default void removeZone(Identifier zone, int index) {
 		var session = vl$self().player.vl$sessionData();
 		session.serverZones.remove(zone, index);
 		session.filteredZones.remove(zone, index);
 	}
 
 	@Override
-	default void updateZone(ResourceLocation zone, int index, Zone zoneData) {
+	default void updateZone(Identifier zone, int index, Zone zoneData) {
 		var session = vl$self().player.vl$sessionData();
 		session.serverZones.update(zone, index, zoneData);
 		session.filteredZones.update(zone, index, zoneData);
@@ -613,20 +615,20 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	default float linearizeDepth(float depth) {
 		float near = 0.05F;
-		float far = vl$self().gameRenderer.getDepthFar();
+		float far = ((VLGameRenderer) vl$self().gameRenderer).getDepthFar();
 		return near * far / (far + depth * (near - far));
 	}
 
 	default TextureAtlas getBlockAtlas() {
-		return vl$self().getModelManager().getAtlas(SpriteKey.BLOCKS.texturePath());
+		return vl$self().getAtlasManager().getAtlasOrThrow(AtlasIds.BLOCKS);
 	}
 
 	default TextureAtlas getParticleAtlas() {
-		return vl$self().particleEngine.getTextureAtlas();
+		return vl$self().getAtlasManager().getAtlasOrThrow(AtlasIds.PARTICLES);
 	}
 
 	default TextureAtlas getGuiAtlas() {
-		return vl$self().getGuiSprites().textureAtlas;
+		return vl$self().getAtlasManager().getAtlasOrThrow(AtlasIds.GUI);
 	}
 
 	default TextureAtlas getTextureAtlas(SpriteKey sprite) {
@@ -637,19 +639,30 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		} else if (sprite.isGui()) {
 			return getGuiAtlas();
 		} else {
-			return vl$self().getModelManager().getAtlas(sprite.atlas().texturePath());
+			return getAtlasFromTexture(sprite.atlas().texturePath());
 		}
 	}
 
-	default TextureAtlas getAtlasFromTexture(ResourceLocation atlas) {
-		if (atlas.equals(SpriteKey.BLOCKS.texturePath())) {
+	default TextureAtlas getAtlasFromTexture(Identifier atlas) {
+		if (atlas.equals(AtlasIds.BLOCKS) || atlas.equals(SpriteKey.BLOCKS.id()) || atlas.equals(SpriteKey.BLOCKS.texturePath()) || atlas.equals(TextureAtlas.LOCATION_BLOCKS)) {
 			return getBlockAtlas();
-		} else if (atlas.equals(SpriteKey.PARTICLES.texturePath())) {
+		} else if (atlas.equals(AtlasIds.PARTICLES) || atlas.equals(SpriteKey.PARTICLES.id()) || atlas.equals(SpriteKey.PARTICLES.texturePath()) || atlas.equals(TextureAtlas.LOCATION_PARTICLES)) {
 			return getParticleAtlas();
-		} else if (atlas.equals(SpriteKey.GUI.texturePath())) {
+		} else if (atlas.equals(AtlasIds.GUI) || atlas.equals(SpriteKey.GUI.id()) || atlas.equals(SpriteKey.GUI.texturePath()) || atlas.equals(Sheets.GUI_SHEET)) {
 			return getGuiAtlas();
 		} else {
-			return vl$self().getModelManager().getAtlas(atlas);
+			TextureAtlas[] result = {null};
+			vl$self().getAtlasManager().forEach((id, textureAtlas) -> {
+				if (result[0] == null && (id.equals(atlas) || textureAtlas.location().equals(atlas))) {
+					result[0] = textureAtlas;
+				}
+			});
+
+			if (result[0] != null) {
+				return result[0];
+			}
+
+			throw new IllegalArgumentException("Invalid atlas id or texture: " + atlas);
 		}
 	}
 
@@ -675,7 +688,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default Map<ResourceLocation, ClockValue> vl$getClocks() {
+	default Map<Identifier, ClockValue> vl$getClocks() {
 		return vl$self().player.vl$sessionData().clocks;
 	}
 
@@ -696,12 +709,12 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	default void vl$exitToTitle() {
 		var mc = vl$self();
-		mc.level.disconnect();
+		mc.level.disconnect(ClientLevel.DEFAULT_QUIT_MESSAGE);
 
 		if (mc.isLocalServer()) {
-			mc.disconnect(new GenericMessageScreen(Component.translatable("menu.savingLevel")));
+			mc.disconnect(new GenericMessageScreen(Component.translatable("menu.savingLevel")), false);
 		} else {
-			mc.disconnect();
+			mc.disconnect(new TitleScreen(), false);
 		}
 
 		mc.setScreen(new TitleScreen());

@@ -1,8 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.latvian.mods.vidlib.core.VLMinecraftClient;
 import dev.latvian.mods.vidlib.feature.client.SleepScreen;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
@@ -12,9 +10,8 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
 import dev.latvian.mods.vidlib.feature.misc.MainMenuOpenedEvent;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.InBedChatScreen;
+import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -30,6 +27,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -58,7 +56,7 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	}
 
 	@Redirect(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientPacketListener;send(Lnet/minecraft/network/protocol/Packet;)V"))
-	private void vl$swap(ClientPacketListener instance, Packet packet) {
+	private void vl$swap(ClientPacketListener instance, Packet<?> packet) {
 		if (!PlayerActionHandler.handle(player, PlayerActionType.SWAP, true)) {
 			instance.send(packet);
 		}
@@ -108,27 +106,23 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 		return vl$blockTextureAtlas;
 	}
 
-	@Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;initRenderer(JIZLjava/util/function/BiFunction;Z)V", shift = At.Shift.AFTER))
-	public void vl$initRenderer(GameConfig gameConfig, CallbackInfo ci) {
-	}
-
 	@Inject(method = "<init>", at = @At("RETURN"))
 	public void vl$onFinishInit(CallbackInfo ci) {
 		TTFFile.find(resourceManager);
 		ImGuiHooks.init(vl$self(), resourceManager);
 	}
 
-	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderFog(Lnet/minecraft/client/renderer/FogParameters;)V"))
+	@Inject(method = "renderFrame", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;update(Lnet/minecraft/client/DeltaTracker;Z)V"))
 	public void vl$onStartFrame(boolean tick, CallbackInfo ci) {
 		ImGuiHooks.startFrame(vl$self());
 	}
 
-	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;isMinimized()Z"))
+	@Inject(method = "renderFrame", at = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/client/ClientHooks;fireRenderFramePost(Lnet/minecraft/client/DeltaTracker;)V", shift = At.Shift.AFTER))
 	public void vl$beforeEndFrame(boolean tick, CallbackInfo ci) {
 		ImGuiHooks.beforeEndFrame(vl$self());
 	}
 
-	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;getNanos()J", ordinal = 1))
+	@Inject(method = "renderFrame", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;flipFrame(Lcom/mojang/blaze3d/TracyFrameCapture;)V"))
 	public void vl$onEndFrame(boolean tick, CallbackInfo ci) {
 		ImGuiHooks.endFrame(vl$self());
 	}
@@ -150,9 +144,9 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 		}
 	}
 
-	@WrapOperation(method = "tick", at = @At(value = "NEW", target = "()Lnet/minecraft/client/gui/screens/InBedChatScreen;"))
-	private InBedChatScreen vl$sleepScreen(Operation<InBedChatScreen> original) {
-		return ClientGameEngine.INSTANCE.removeChatFromSleepScreen() ? new SleepScreen() : original.call();
+	@ModifyArg(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/ChatComponent;openScreen(Lnet/minecraft/client/gui/components/ChatComponent$ChatMethod;Lnet/minecraft/client/gui/screens/ChatScreen$ChatConstructor;)V"), index = 1)
+	private ChatScreen.ChatConstructor<?> vl$sleepScreen(ChatScreen.ChatConstructor<?> original) {
+		return ClientGameEngine.INSTANCE.removeChatFromSleepScreen() ? (initial, isDraft) -> new SleepScreen() : original;
 	}
 
 	@Override
@@ -175,7 +169,7 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 		var mc = vl$self();
 
 		if (mc.level != null) {
-			GLFW.glfwSetWindowShouldClose(mc.getWindow().getWindow(), false);
+			GLFW.glfwSetWindowShouldClose(mc.getWindow().handle(), false);
 			vl$exitToTitle();
 			ci.cancel();
 		}

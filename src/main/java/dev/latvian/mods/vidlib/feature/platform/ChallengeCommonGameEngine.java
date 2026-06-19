@@ -9,8 +9,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
@@ -20,13 +20,13 @@ public class ChallengeCommonGameEngine extends NeoForgeCommonGameEngine {
 	@Override
 	public void setupGameRules(GameRules rules, MinecraftServer server) {
 		super.setupGameRules(rules, server);
-		rules.getRule(GameRules.RULE_KEEPINVENTORY).set(true, server);
-		rules.getRule(GameRules.RULE_DOMOBSPAWNING).set(false, server);
-		rules.getRule(GameRules.RULE_NATURAL_REGENERATION).set(false, server);
-		rules.getRule(GameRules.RULE_DAYLIGHT).set(false, server);
-		rules.getRule(GameRules.RULE_RANDOMTICKING).set(0, server);
-		rules.getRule(GameRules.RULE_WEATHER_CYCLE).set(false, server);
-		rules.getRule(GameRules.RULE_FALL_DAMAGE).set(false, server);
+		rules.set(GameRules.KEEP_INVENTORY, true, server);
+		rules.set(GameRules.SPAWN_MOBS, false, server);
+		rules.set(GameRules.NATURAL_HEALTH_REGENERATION, false, server);
+		rules.set(GameRules.ADVANCE_TIME, false, server);
+		rules.set(GameRules.RANDOM_TICK_SPEED, 0, server);
+		rules.set(GameRules.ADVANCE_WEATHER, false, server);
+		rules.set(GameRules.FALL_DAMAGE, false, server);
 	}
 
 	@Override

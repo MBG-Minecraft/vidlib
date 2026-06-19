@@ -35,7 +35,7 @@ public class SoundEventImBuilder implements ImBuilder<Holder<SoundEvent>> {
 			}
 		}
 
-		list.sort((a, b) -> a.getKey().location().compareNamespaced(b.getKey().location()));
+		list.sort((a, b) -> a.getKey().identifier().compareNamespaced(b.getKey().identifier()));
 		return List.copyOf(list);
 	});
 
@@ -63,7 +63,7 @@ public class SoundEventImBuilder implements ImBuilder<Holder<SoundEvent>> {
 	public ImUpdate imgui(ImGraphics graphics) {
 		var update = ImUpdate.NONE;
 
-		if (ImGui.button((sound[0] == EMPTY_SOUND ? "Select Sound..." : sound[0].getKey().location().getPath()) + "###sound", -1F, 0F)) {
+		if (ImGui.button((sound[0] == EMPTY_SOUND ? "Select Sound..." : sound[0].getKey().identifier().getPath()) + "###sound", -1F, 0F)) {
 			ImGui.openPopup("###sound-modal");
 		}
 
@@ -113,7 +113,7 @@ public class SoundEventImBuilder implements ImBuilder<Holder<SoundEvent>> {
 					boolean isSelected = sound != null && sound[0] == option;
 
 					if (!PREVIEW_SEARCH.get().isEmpty()) {
-						if (!option.getKey().location().getPath().contains(PREVIEW_SEARCH.get())) {
+						if (!option.getKey().identifier().getPath().contains(PREVIEW_SEARCH.get())) {
 							continue;
 						}
 					}
@@ -124,7 +124,7 @@ public class SoundEventImBuilder implements ImBuilder<Holder<SoundEvent>> {
 
 					ImGui.sameLine();
 
-					if (ImGui.selectable(option.getKey().location() + "###" + i, isSelected)) {
+					if (ImGui.selectable(option.getKey().identifier() + "###" + i, isSelected)) {
 						if (sound != null) {
 							sound[0] = option;
 							update = ImUpdate.FULL;

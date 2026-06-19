@@ -68,12 +68,12 @@ public record RegistryOrDataArgumentType<T>(VLRegistry<T> registry, DataArgument
 	public static class Info implements ArgumentTypeInfo<RegistryOrDataArgumentType<?>, RefHolderTemplate> {
 		@Override
 		public void serializeToNetwork(RefHolderTemplate template, FriendlyByteBuf buf) {
-			buf.writeResourceLocation(template.commandDataType.getRegisteredDataType().id());
+			buf.writeIdentifier(template.commandDataType.getRegisteredDataType().id());
 		}
 
 		@Override
 		public RefHolderTemplate deserializeFromNetwork(FriendlyByteBuf buf) {
-			return new RefHolderTemplate(this, CommandDataType.of(RegisteredDataType.BY_ID.get(buf.readResourceLocation()).type()));
+			return new RefHolderTemplate(this, CommandDataType.of(RegisteredDataType.BY_ID.get(buf.readIdentifier()).type()));
 		}
 
 		@Override

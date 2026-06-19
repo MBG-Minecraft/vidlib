@@ -4,27 +4,22 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.core.VLEntity;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -32,9 +27,6 @@ import java.util.List;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin implements VLEntity {
-	@Shadow
-	public abstract void load(CompoundTag compound);
-
 	@ModifyReturnValue(method = "collectColliders", at = @At("RETURN"))
 	private static List<VoxelShape> vl$collectColliders(List<VoxelShape> parent, @Local(argsOnly = true) Level level, @Local(argsOnly = true) @Nullable Entity entity, @Local(argsOnly = true) AABB collisionBox) {
 		var list = level.vl$getShapesIntersecting(entity, collisionBox);
@@ -76,12 +68,12 @@ public abstract class EntityMixin implements VLEntity {
 	}
 
 	@Inject(method = "saveWithoutId", at = @At("HEAD"))
-	private void vl$beforeSave(CompoundTag compound, CallbackInfoReturnable<CompoundTag> cir) {
+	private void vl$beforeSave(ValueOutput output, CallbackInfo ci) {
 		vl$isSaving = true;
 	}
 
 	@Inject(method = "saveWithoutId", at = @At("RETURN"))
-	private void vl$afterSave(CompoundTag compound, CallbackInfoReturnable<CompoundTag> cir) {
+	private void vl$afterSave(ValueOutput output, CallbackInfo ci) {
 		vl$isSaving = false;
 	}
 
@@ -101,16 +93,6 @@ public abstract class EntityMixin implements VLEntity {
 			entity.setDeltaMovement(new Vec3(delta.x, 0D, delta.z));
 			entity.resetFallDistance();
 		}
-	}
-
-	@Redirect(method = {"updateFluidOnEyes", "updateFluidHeightAndDoFluidPushing()V"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getFluidState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;"))
-	private FluidState vl$getFluidState(Level level, BlockPos pos) {
-		return CommonGameEngine.INSTANCE.overrideFluidState(level, pos);
-	}
-
-	@Redirect(method = {"updateFluidOnEyes", "updateFluidHeightAndDoFluidPushing()V"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/material/FluidState;getHeight(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F"))
-	private float vl$getFluidHeight(FluidState state, BlockGetter blockGetter, BlockPos pos) {
-		return blockGetter instanceof Level l ? CommonGameEngine.INSTANCE.overrideFluidHeight(l, state, pos) : state.getHeight(blockGetter, pos);
 	}
 
 	@Inject(method = "addPassenger", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/ImmutableList;copyOf(Ljava/util/Collection;)Lcom/google/common/collect/ImmutableList;"))

@@ -9,7 +9,7 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.RepeatingTask;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -66,11 +66,11 @@ public interface VLMinecraftEnvironment extends VLPlayerContainer, VLMinecraftEn
 		vl$getScheduledTaskHandler().run(delay, task);
 	}
 
-	default void removeZone(ResourceLocation zone, int index) {
+	default void removeZone(Identifier zone, int index) {
 		throw new NoMixinException(this);
 	}
 
-	default void updateZone(ResourceLocation zone, int index, Zone zoneData) {
+	default void updateZone(Identifier zone, int index, Zone zoneData) {
 		throw new NoMixinException(this);
 	}
 
@@ -94,7 +94,7 @@ public interface VLMinecraftEnvironment extends VLPlayerContainer, VLMinecraftEn
 		packets.s2c(new SyncClocksPayload(vl$getClocks()));
 	}
 
-	default Map<ResourceLocation, ClockValue> vl$getClocks() {
+	default Map<Identifier, ClockValue> vl$getClocks() {
 		throw new NoMixinException(this);
 	}
 

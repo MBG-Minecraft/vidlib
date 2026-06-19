@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(SweetBerryBushBlock.class)
 public class SweetBerryBushBlockMixin {
 	@Inject(method = "entityInside", at = @At("HEAD"), cancellable = true)
-	protected void vl$entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier p_405414_, CallbackInfo ci) {
+	protected void vl$entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise, CallbackInfo ci) {
 		if (CommonGameEngine.INSTANCE.disablePricklyBerryBushes(level, pos, state, entity)) {
 			ci.cancel();
 		}

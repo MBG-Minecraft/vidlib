@@ -11,7 +11,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -21,7 +21,7 @@ import java.util.List;
 
 public class ClothingSet {
 	public static final ClothingSet EMPTY = new ClothingSet(List.of());
-	private static final ResourceLocation EMPTY_TEXTURE_ASSET = VidLib.id("empty");
+	private static final Identifier EMPTY_TEXTURE_ASSET = VidLib.id("empty");
 
 	public static ClothingSet of(List<ClothingPart> list) {
 		return list.isEmpty() ? EMPTY : new ClothingSet(list);
@@ -47,7 +47,7 @@ public class ClothingSet {
 	}
 
 	public final List<ClothingPart> parts;
-	private ResourceLocation uniqueId;
+	private Identifier uniqueId;
 
 	private ClothingSet(List<ClothingPart> parts) {
 		this.parts = List.copyOf(parts);
@@ -65,13 +65,13 @@ public class ClothingSet {
 		return o == this || o instanceof ClothingSet set && parts.equals(set.parts);
 	}
 
-	public ResourceLocation getUniqueId() {
+	public Identifier getUniqueId() {
 		if (uniqueId == null) {
 			if (!parts.isEmpty()) {
 				var id = ClothingPresets.INSTANCE.reverseMap.get(this);
 
 				if (id != null) {
-					uniqueId = id.location().withPath("preset/" + id.location().getPath());
+					uniqueId = id.identifier().withPath("preset/" + id.identifier().getPath());
 				} else {
 					try (var out = new ByteArrayOutputStream(); var dataOut = new DataOutputStream(out)) {
 						var tag = CODEC.encodeStart(NbtOps.INSTANCE, this).getOrThrow();

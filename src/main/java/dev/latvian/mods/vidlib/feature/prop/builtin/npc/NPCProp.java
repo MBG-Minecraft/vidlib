@@ -236,11 +236,11 @@ public class NPCProp extends BaseGeoProp {
 					npc.prevPunching = 0;
 				}
 
-				if (jumping > 0 && npc.y <= 0F && level.random.nextInt(jumping) == 0) {
+				if (jumping > 0 && npc.y <= 0F && level.getRandom().nextInt(jumping) == 0) {
 					npc.jump = 0.42F;
 				}
 
-				if (punching > 0 && (npc.punching == 0 || npc.punching >= 4) && level.random.nextInt(punching) == 0) {
+				if (punching > 0 && (npc.punching == 0 || npc.punching >= 4) && level.getRandom().nextInt(punching) == 0) {
 					npc.punching = 1;
 				}
 			}

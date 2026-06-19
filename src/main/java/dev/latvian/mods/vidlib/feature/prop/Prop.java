@@ -833,7 +833,7 @@ public class Prop {
 	}
 
 	public <T> void c2sEdit(PropData<?, T> data, T value, boolean sync) {
-		if (!level.isClientSide) {
+		if (!level.isClientSide()) {
 			return;
 		}
 

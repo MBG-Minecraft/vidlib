@@ -13,7 +13,7 @@ import java.util.List;
 public interface HealCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("heal", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.argument("target", EntityArgument.entities())
 			.executes(ctx -> heal(EntityArgument.getEntities(ctx, "target")))
 		)

@@ -17,7 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -76,8 +76,8 @@ public enum PositionTool implements VidLibTool, PlayerActionHandler {
 	}
 
 	@Override
-	public ResourceLocation getModel() {
-		return ResourceLocation.withDefaultNamespace("breeze_rod");
+	public Identifier getModel() {
+		return Identifier.withDefaultNamespace("breeze_rod");
 	}
 
 	@Override
@@ -139,7 +139,7 @@ public enum PositionTool implements VidLibTool, PlayerActionHandler {
 
 	@Override
 	public void renderSetup(Player player, ItemStack item, @Nullable HitResult hit, float delta) {
-		var tag = item.get(DataComponents.CUSTOM_DATA).getUnsafe();
+		var tag = item.get(DataComponents.CUSTOM_DATA).copyTag();
 		clientMode = Type.VALUES[tag.getByteOr("position_tool_mode", (byte) 0)];
 		var chit = player.ray(500D, delta).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY);
 		clientPos = chit instanceof BlockHitResult blockHit ? clientMode.position(player, blockHit) : clientMode.position(player, null);
@@ -147,7 +147,7 @@ public enum PositionTool implements VidLibTool, PlayerActionHandler {
 
 	@Override
 	public void debugText(Player player, ItemStack item, @Nullable HitResult hit, ScreenText screenText) {
-		var tag = item.get(DataComponents.CUSTOM_DATA).getUnsafe();
+		var tag = item.get(DataComponents.CUSTOM_DATA).copyTag();
 		var mode = Type.VALUES[tag.getByteOr("position_tool_mode", (byte) 0)];
 		screenText.topRight.add("Mode: " + mode.name);
 

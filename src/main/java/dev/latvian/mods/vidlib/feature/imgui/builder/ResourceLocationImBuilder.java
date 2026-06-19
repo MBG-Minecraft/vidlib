@@ -5,11 +5,11 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.ImGui;
 import imgui.type.ImString;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
-public class ResourceLocationImBuilder implements ImBuilder<ResourceLocation> {
-	public static final ImBuilderType<ResourceLocation> IMMEDIATE_TYPE = () -> new ResourceLocationImBuilder(true);
-	public static final ImBuilderType<ResourceLocation> DELAYED_TYPE = () -> new ResourceLocationImBuilder(false);
+public class ResourceLocationImBuilder implements ImBuilder<Identifier> {
+	public static final ImBuilderType<Identifier> IMMEDIATE_TYPE = () -> new ResourceLocationImBuilder(true);
+	public static final ImBuilderType<Identifier> DELAYED_TYPE = () -> new ResourceLocationImBuilder(false);
 
 	public final ImString value;
 	public final boolean immediateUpdates;
@@ -20,7 +20,7 @@ public class ResourceLocationImBuilder implements ImBuilder<ResourceLocation> {
 	}
 
 	@Override
-	public void set(ResourceLocation v) {
+	public void set(Identifier v) {
 		value.set(v.toString());
 	}
 
@@ -38,7 +38,7 @@ public class ResourceLocationImBuilder implements ImBuilder<ResourceLocation> {
 		}
 
 		try {
-			ResourceLocation.parse(value.get());
+			Identifier.parse(value.get());
 			return true;
 		} catch (Exception e) {
 			return false;
@@ -46,7 +46,7 @@ public class ResourceLocationImBuilder implements ImBuilder<ResourceLocation> {
 	}
 
 	@Override
-	public ResourceLocation build() {
-		return ResourceLocation.parse(value.get());
+	public Identifier build() {
+		return Identifier.parse(value.get());
 	}
 }

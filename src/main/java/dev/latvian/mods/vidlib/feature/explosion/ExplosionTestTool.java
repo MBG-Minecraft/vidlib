@@ -10,7 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -41,8 +41,8 @@ public enum ExplosionTestTool implements VidLibTool, PlayerActionHandler {
 	}
 
 	@Override
-	public ResourceLocation getModel() {
-		return ResourceLocation.withDefaultNamespace("tnt");
+	public Identifier getModel() {
+		return Identifier.withDefaultNamespace("tnt");
 	}
 
 	public static ExplosionData getData(ItemStack item, boolean newData) {
@@ -50,7 +50,7 @@ public enum ExplosionTestTool implements VidLibTool, PlayerActionHandler {
 		var tag = item.get(DataComponents.CUSTOM_DATA);
 
 		if (tag != null && tag.contains("explosion_data")) {
-			explosionData = ExplosionData.CODEC.parse(NbtOps.INSTANCE, tag.getUnsafe().get("explosion_data")).result().orElse(null);
+			explosionData = ExplosionData.CODEC.parse(NbtOps.INSTANCE, tag.copyTag().get("explosion_data")).result().orElse(null);
 		}
 
 		return explosionData == null ? newData ? new ExplosionData() : DEFAULT_DATA : explosionData;

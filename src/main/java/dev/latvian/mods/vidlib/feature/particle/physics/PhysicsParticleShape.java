@@ -7,7 +7,7 @@ import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.GrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Matrix4f;
@@ -47,7 +47,7 @@ public class PhysicsParticleShape {
 		}
 	}
 
-	private static final ResourceLocation GRASS = VidLib.id("block/grass");
+	private static final Identifier GRASS = VidLib.id("block/grass");
 
 	private static UV computeBaseUV(Minecraft mc, BlockState state) {
 		TextureAtlasSprite sprite;
@@ -55,7 +55,7 @@ public class PhysicsParticleShape {
 		if (state.getBlock() instanceof GrassBlock) {
 			sprite = mc.getBlockAtlas().getSprite(GRASS);
 		} else {
-			sprite = mc.getBlockRenderer().getBlockModel(state).particleIcon();
+			sprite = mc.getModelManager().getBlockStateModelSet().getParticleMaterial(state).sprite();
 		}
 
 		return new UV(sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());

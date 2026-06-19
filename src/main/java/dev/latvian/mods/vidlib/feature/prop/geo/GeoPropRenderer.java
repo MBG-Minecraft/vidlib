@@ -8,27 +8,31 @@ import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
 import dev.latvian.mods.vidlib.integration.VidLibGeoDataTickets;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.cache.object.BakedGeoModel;
-import software.bernie.geckolib.constant.DataTickets;
-import software.bernie.geckolib.model.GeoModel;
-import software.bernie.geckolib.renderer.GeoObjectRenderer;
-import software.bernie.geckolib.renderer.base.GeoRenderState;
+import com.geckolib.cache.model.BakedGeoModel;
+import com.geckolib.constant.DataTickets;
+import com.geckolib.model.GeoModel;
+import com.geckolib.renderer.GeoObjectRenderer;
+import com.geckolib.renderer.base.GeoRenderState;
+import com.geckolib.renderer.base.RenderPassInfo;
 
-public class GeoPropRenderer<P extends Prop & GeoProp> extends GeoObjectRenderer<P> implements PropRenderer<P> {
+public class GeoPropRenderer<P extends Prop & GeoProp> extends GeoObjectRenderer<P, Void, GeoRenderState> implements PropRenderer<P> {
 	public GeoPropRenderer(GeoModel<P> model) {
 		super(model);
 	}
 
-	public GeoPropRenderer(ResourceLocation id) {
+	public GeoPropRenderer(Identifier id) {
 		super(new DefaultedPropGeoModel<>(id));
 	}
 
 	@Override
 	public void render(PropRenderContext<P> ctx) {
-		int light = getPackedLight(ctx);
-		render(ctx.poseStack(), ctx.prop(), ctx.frame().buffers(), null, null, light, ctx.delta());
+		var submitNodeCollector = ctx.frame().submitNodeCollector();
+
+		if (submitNodeCollector != null) {
+			performRenderPass(ctx.prop(), null, ctx.poseStack(), submitNodeCollector, ctx.frame().cameraState(), getPackedLight(ctx), ctx.delta());
+		}
 	}
 
 	public static float getDelta(GeoRenderState state) {
@@ -37,8 +41,7 @@ public class GeoPropRenderer<P extends Prop & GeoProp> extends GeoObjectRenderer
 	}
 
 	@Override
-	public final void addRenderData(P prop, Void relatedObject, GeoRenderState state) {
-		float delta = getDelta(state);
+	public final void addRenderData(P prop, Void relatedObject, GeoRenderState state, float delta) {
 		extractRenderState(Minecraft.getInstance(), prop, state, delta);
 	}
 
@@ -54,29 +57,29 @@ public class GeoPropRenderer<P extends Prop & GeoProp> extends GeoObjectRenderer
 		state.addGeckolibData(DataTickets.POSITION, pos);
 		state.addGeckolibData(VidLibGeoDataTickets.WIDTH, (float) prop.width);
 		state.addGeckolibData(VidLibGeoDataTickets.HEIGHT, (float) prop.height);
-		state.addGeckolibData(VidLibGeoDataTickets.CAMERA_DISTANCE, pos.distanceTo(mc.gameRenderer.getMainCamera().getPosition()));
+		state.addGeckolibData(VidLibGeoDataTickets.CAMERA_DISTANCE, pos.distanceTo(mc.gameRenderer.getMainCamera().position()));
 	}
 
 	@Override
-	public void adjustPositionForRender(GeoRenderState state, PoseStack ms, BakedGeoModel model, boolean isReRender) {
-		if (!isReRender) {
-			var roll = state.getGeckolibData(VidLibGeoDataTickets.ENTITY_ROLL);
+	public void adjustRenderPose(RenderPassInfo<GeoRenderState> renderPassInfo) {
+		var state = renderPassInfo.renderState();
+		var ms = renderPassInfo.poseStack();
+		var roll = state.getGeckolibData(VidLibGeoDataTickets.ENTITY_ROLL);
 
-			if (roll != null) {
-				ms.mulPose(Axis.ZP.rotationDegrees(roll));
-			}
+		if (roll != null) {
+			ms.mulPose(Axis.ZP.rotationDegrees(roll));
+		}
 
-			var yaw = state.getGeckolibData(DataTickets.ENTITY_YAW);
+		var yaw = state.getGeckolibData(DataTickets.ENTITY_YAW);
 
-			if (yaw != null) {
-				ms.mulPose(Axis.YP.rotationDegrees(yaw));
-			}
+		if (yaw != null) {
+			ms.mulPose(Axis.YP.rotationDegrees(yaw));
+		}
 
-			var pitch = state.getGeckolibData(DataTickets.ENTITY_PITCH);
+		var pitch = state.getGeckolibData(DataTickets.ENTITY_PITCH);
 
-			if (pitch != null) {
-				ms.mulPose(Axis.XP.rotationDegrees(pitch));
-			}
+		if (pitch != null) {
+			ms.mulPose(Axis.XP.rotationDegrees(pitch));
 		}
 	}
 }

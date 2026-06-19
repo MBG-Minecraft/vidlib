@@ -10,26 +10,26 @@ import imgui.type.ImString;
 import net.minecraft.core.ClientAsset;
 import org.jetbrains.annotations.Nullable;
 
-public class TextureImBuilder implements ImBuilder<ClientAsset> {
-	public static ImBuilderType<ClientAsset> of(TextureSet textureSet, ClientAsset defaultTexture) {
+public class TextureImBuilder implements ImBuilder<ClientAsset.ResourceTexture> {
+	public static ImBuilderType<ClientAsset.ResourceTexture> of(TextureSet textureSet, ClientAsset.ResourceTexture defaultTexture) {
 		return () -> new TextureImBuilder(textureSet, defaultTexture);
 	}
 
-	public static final ImBuilderType<ClientAsset> GEO = of(TextureSet.ENTITIES_AND_PROPS, new ClientAsset(ID.mc("entity/skeleton/skeleton")));
-	public static final ImBuilderType<ClientAsset> SKIN = of(TextureSet.ENTITIES, SkinTexture.WIDE_STEVE.asset());
-	public static final ImBuilderType<ClientAsset> ALL = of(TextureSet.ALL, null);
+	public static final ImBuilderType<ClientAsset.ResourceTexture> GEO = of(TextureSet.ENTITIES_AND_PROPS, new ClientAsset.ResourceTexture(ID.mc("entity/skeleton/skeleton")));
+	public static final ImBuilderType<ClientAsset.ResourceTexture> SKIN = of(TextureSet.ENTITIES, SkinTexture.WIDE_STEVE.asset());
+	public static final ImBuilderType<ClientAsset.ResourceTexture> ALL = of(TextureSet.ALL, null);
 
 	public final ImString SEARCH = ImGuiUtils.resizableString();
-	public final ClientAsset[] value;
+	public final ClientAsset.ResourceTexture[] value;
 	public final TextureSet textureSet;
 
-	public TextureImBuilder(TextureSet textureSet, @Nullable ClientAsset defaultTexture) {
+	public TextureImBuilder(TextureSet textureSet, @Nullable ClientAsset.ResourceTexture defaultTexture) {
 		this.textureSet = textureSet;
-		this.value = new ClientAsset[]{defaultTexture};
+		this.value = new ClientAsset.ResourceTexture[]{defaultTexture};
 	}
 
 	@Override
-	public void set(ClientAsset value) {
+	public void set(ClientAsset.ResourceTexture value) {
 		this.value[0] = value;
 	}
 
@@ -39,7 +39,7 @@ public class TextureImBuilder implements ImBuilder<ClientAsset> {
 	}
 
 	@Override
-	public ClientAsset build() {
+	public ClientAsset.ResourceTexture build() {
 		return value[0];
 	}
 }

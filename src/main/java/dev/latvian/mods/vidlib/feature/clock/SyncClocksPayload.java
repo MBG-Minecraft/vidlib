@@ -6,11 +6,11 @@ import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Map;
 
-public record SyncClocksPayload(Map<ResourceLocation, ClockValue> map) implements SimplePacketPayload {
+public record SyncClocksPayload(Map<Identifier, ClockValue> map) implements SimplePacketPayload {
 	@AutoPacket
 	public static final VidLibPacketType<SyncClocksPayload> TYPE = VidLibPacketType.internal("sync_clocks", KLibStreamCodecs.unboundedMap(ID.STREAM_CODEC, ClockValue.STREAM_CODEC).map(SyncClocksPayload::new, SyncClocksPayload::map));
 

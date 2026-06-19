@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.feature.pin;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.codec.KLibCodecs;
@@ -7,7 +9,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.client.TexturedRenderType;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,13 +31,13 @@ public enum PinShape implements StringRepresentable {
 	public final String id;
 	public final String displayName;
 	public final boolean transparentBackground;
-	public final ResourceLocation overlayTexture;
-	public final ResourceLocation maskTexture;
-	public final ResourceLocation iconTexture;
+	public final Identifier overlayTexture;
+	public final Identifier maskTexture;
+	public final Identifier iconTexture;
 	public final TexturedRenderType maskedRenderType;
 	public final int x, y, size;
 
-	PinShape(String id, String displayName, boolean transparentBackground, @Nullable ResourceLocation overlayTexture, ResourceLocation maskTexture, ResourceLocation iconTexture, int x, int y, int size) {
+	PinShape(String id, String displayName, boolean transparentBackground, @Nullable Identifier overlayTexture, Identifier maskTexture, Identifier iconTexture, int x, int y, int size) {
 		this.id = id;
 		this.displayName = displayName;
 		this.transparentBackground = transparentBackground;
@@ -48,7 +50,7 @@ public enum PinShape implements StringRepresentable {
 		this.size = size;
 	}
 
-	PinShape(ResourceLocation id, String displayName, boolean transparentBackground, ResourceLocation maskTexture, int x, int y, int size) {
+	PinShape(Identifier id, String displayName, boolean transparentBackground, Identifier maskTexture, int x, int y, int size) {
 		this(id.getPath(), displayName, transparentBackground, id.withPath(s -> "textures/misc/pin/" + s + ".png"), maskTexture, id.withPath(s -> "textures/misc/pin/icon/" + s + ".png"), x, y, size);
 	}
 

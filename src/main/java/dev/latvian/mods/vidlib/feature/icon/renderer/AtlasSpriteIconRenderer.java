@@ -2,24 +2,18 @@ package dev.latvian.mods.vidlib.feature.icon.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.feature.client.EntityRenderTypes;
-import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.icon.AtlasSpriteIcon;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderPipelines;
 import org.joml.Vector3f;
 
 public interface AtlasSpriteIconRenderer {
-	static void draw(AtlasSpriteIcon icon, Minecraft mc, GuiGraphics graphics, int alpha) {
-		var rendertype = VidLibRenderTypes.GUI.apply(icon.sprite().atlas().texturePath());
-		var matrix4f = graphics.pose().last().pose();
-		var buffer = graphics.vl$buffers().getBuffer(rendertype);
+	static void draw(AtlasSpriteIcon icon, Minecraft mc, GuiGraphicsExtractor graphics, int alpha) {
 		var color = icon.tint().mixAlpha(alpha).argb();
 		var uv = mc.getSprite(icon.sprite());
-		buffer.addVertex(matrix4f, -8F, -8F, 0F).setUv(uv.getU0(), uv.getV0()).setColor(color);
-		buffer.addVertex(matrix4f, -8F, 8F, 0F).setUv(uv.getU0(), uv.getV1()).setColor(color);
-		buffer.addVertex(matrix4f, 8F, 8F, 0F).setUv(uv.getU1(), uv.getV1()).setColor(color);
-		buffer.addVertex(matrix4f, 8F, -8F, 0F).setUv(uv.getU1(), uv.getV0()).setColor(color);
+		graphics.blitSprite(RenderPipelines.GUI_TEXTURED, uv, -8, -8, 16, 16, color);
 	}
 
 	static void render(AtlasSpriteIcon icon, Minecraft mc, PoseStack ms, float delta, MultiBufferSource source, int light, int overlay) {

@@ -17,6 +17,7 @@ public enum TerrainRenderLayer implements StringRepresentable {
 	BLOOM("bloom");
 
 	public static final TerrainRenderLayer[] ALL = values();
+	public static final TerrainRenderLayer[] EMPTY_ARRAY = new TerrainRenderLayer[0];
 	public static final Codec<TerrainRenderLayer> CODEC = StringRepresentable.fromEnum(() -> ALL);
 	public static final StreamCodec<ByteBuf, TerrainRenderLayer> STREAM_CODEC = KLibStreamCodecs.enumValue(ALL);
 

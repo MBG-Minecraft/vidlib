@@ -11,13 +11,13 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.NbtTagArgument;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,15 +28,15 @@ public interface PropCommands {
 
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("prop", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.literal("spawn")
-			.then(Commands.argument("prop", ResourceLocationArgument.id())
+			.then(Commands.argument("prop", IdentifierArgument.id())
 				.suggests(TYPE_SUGGESTION_PROVIDER)
-				.executes(ctx -> spawn(ctx.getSource(), ResourceLocationArgument.getId(ctx, "prop"), ctx.getSource().getPosition(), null))
+				.executes(ctx -> spawn(ctx.getSource(), IdentifierArgument.getId(ctx, "prop"), ctx.getSource().getPosition(), null))
 				.then(Commands.argument("pos", Vec3Argument.vec3())
-					.executes(ctx -> spawn(ctx.getSource(), ResourceLocationArgument.getId(ctx, "prop"), Vec3Argument.getVec3(ctx, "pos"), null))
+					.executes(ctx -> spawn(ctx.getSource(), IdentifierArgument.getId(ctx, "prop"), Vec3Argument.getVec3(ctx, "pos"), null))
 					.then(Commands.argument("data", CompoundTagArgument.compoundTag())
-						.executes(ctx -> spawn(ctx.getSource(), ResourceLocationArgument.getId(ctx, "prop"), Vec3Argument.getVec3(ctx, "pos"), CompoundTagArgument.getCompoundTag(ctx, "data")))
+						.executes(ctx -> spawn(ctx.getSource(), IdentifierArgument.getId(ctx, "prop"), Vec3Argument.getVec3(ctx, "pos"), CompoundTagArgument.getCompoundTag(ctx, "data")))
 					)
 				)
 			)
@@ -46,9 +46,9 @@ public interface PropCommands {
 				.executes(ctx -> remove(ctx.getSource(), prop -> true))
 			)
 			.then(Commands.literal("type")
-				.then(Commands.argument("type", ResourceLocationArgument.id())
+				.then(Commands.argument("type", IdentifierArgument.id())
 					.suggests(TYPE_SUGGESTION_PROVIDER)
-					.executes(ctx -> remove(ctx.getSource(), PropType.ALL.get().get(ResourceLocationArgument.getId(ctx, "type"))))
+					.executes(ctx -> remove(ctx.getSource(), PropType.ALL.get().get(IdentifierArgument.getId(ctx, "type"))))
 				)
 			)
 			.then(Commands.literal("id")
@@ -131,7 +131,7 @@ public interface PropCommands {
 		)
 	);
 
-	static int spawn(CommandSourceStack source, ResourceLocation typeId, Vec3 pos, @Nullable CompoundTag initialData) {
+	static int spawn(CommandSourceStack source, Identifier typeId, Vec3 pos, @Nullable CompoundTag initialData) {
 		var type = PropType.ALL.get().get(typeId);
 
 		if (type == null) {

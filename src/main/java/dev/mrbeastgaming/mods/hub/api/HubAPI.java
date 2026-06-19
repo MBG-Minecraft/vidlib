@@ -17,7 +17,7 @@ import dev.mrbeastgaming.mods.hub.api.project.HubProjectReplaysData;
 import dev.mrbeastgaming.mods.hub.api.project.HubProjectsData;
 import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadRequestItem;
 import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadResponseItem;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 
 import java.io.PrintWriter;
 import java.io.Writer;

@@ -11,7 +11,7 @@ import net.minecraft.world.effect.MobEffects;
 public interface InvisibleCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("invisible", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.argument("player", EntityArgument.player())
 			.executes(ctx -> invisible(EntityArgument.getPlayer(ctx, "player")))
 		)

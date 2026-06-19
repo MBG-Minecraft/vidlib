@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.core;
 
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 public interface VLParticleEngine {
@@ -11,7 +11,7 @@ public interface VLParticleEngine {
 	}
 
 	@Nullable
-	default SpriteSet getSpriteSet(ResourceLocation id) {
+	default SpriteSet getSpriteSet(Identifier id) {
 		return null;
 	}
 }

@@ -57,7 +57,7 @@ public interface HubCountries {
 		if (countryList == CountryList.EMPTY) {
 			countryList = REMOTE.get();
 
-			if (!FMLLoader.isProduction()) {
+			if (!FMLLoader.getCurrent().isProduction()) {
 				VidLib.LOGGER.info("Fetched country list " + countryList.checksum() + ":");
 
 				for (var country : countryList.byCode().values()) {

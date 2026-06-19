@@ -6,7 +6,7 @@ import dev.latvian.mods.klib.color.CompoundGradient;
 import dev.latvian.mods.klib.color.Gradient;
 import dev.latvian.mods.klib.color.GradientReference;
 import dev.latvian.mods.vidlib.VidLib;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -15,10 +15,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ClientGradientLoader extends SimplePreparableReloadListener<Map<ResourceLocation, Gradient>> {
+public class ClientGradientLoader extends SimplePreparableReloadListener<Map<Identifier, Gradient>> {
 	@Override
-	protected Map<ResourceLocation, Gradient> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
-		var map = new HashMap<ResourceLocation, Gradient>();
+	protected Map<Identifier, Gradient> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
+		var map = new HashMap<Identifier, Gradient>();
 
 		for (var entry : resourceManager.listResources("textures/vidlib/gradient", id -> !id.getPath().startsWith("_") && id.getPath().endsWith(".png")).entrySet()) {
 			try (var in = entry.getValue().open()) {
@@ -42,7 +42,7 @@ public class ClientGradientLoader extends SimplePreparableReloadListener<Map<Res
 	}
 
 	@Override
-	protected void apply(Map<ResourceLocation, Gradient> from, ResourceManager resourceManager, ProfilerFiller profiler) {
+	protected void apply(Map<Identifier, Gradient> from, ResourceManager resourceManager, ProfilerFiller profiler) {
 		GradientReference.MAP = Map.copyOf(from);
 	}
 }

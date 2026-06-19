@@ -18,7 +18,7 @@ import java.util.Set;
 public class WaypointCommands {
 	@AutoRegister
 	public static final ServerCommandHolder COMMAND = new ServerCommandHolder("waypoint", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.literal("add")
 			.then(Commands.argument("id", StringArgumentType.word())
 				.then(Commands.argument("position", Vec3Argument.vec3())

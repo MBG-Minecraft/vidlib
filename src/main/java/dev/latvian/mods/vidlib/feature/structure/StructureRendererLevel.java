@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.feature.structure;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.CardinalLighting;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.LightLayer;
@@ -40,13 +40,8 @@ public class StructureRendererLevel implements BlockAndTintGetter, LightChunkGet
 	}
 
 	@Override
-	public float getShade(Direction direction, boolean shade) {
-		return shade ? switch (direction) {
-			case DOWN -> 0.5F;
-			case NORTH, SOUTH -> 0.8F;
-			case WEST, EAST -> 0.6F;
-			default -> 1F;
-		} : 1F;
+	public CardinalLighting cardinalLighting() {
+		return CardinalLighting.DEFAULT;
 	}
 
 	@Override

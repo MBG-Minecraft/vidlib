@@ -3,18 +3,18 @@ package dev.latvian.mods.vidlib.feature.data;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.util.NameDrawType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public interface ServerDataMapHolder extends DataMapHolder {
-	default ResourceLocation getSkybox() {
+	default Identifier getSkybox() {
 		return get(InternalServerData.SKYBOX);
 	}
 
-	default void setSkybox(ResourceLocation skybox) {
+	default void setSkybox(Identifier skybox) {
 		set(InternalServerData.SKYBOX, skybox);
 	}
 

@@ -1,48 +1,49 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.mojang.blaze3d.opengl.GlCommandEncoder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-@Mixin(GlCommandEncoder.class)
+@Mixin(targets = "com.mojang.blaze3d.opengl.GlCommandEncoder")
 public class GlCommandEncoderMixin {
-	@ModifyConstant(method = "presentTexture", constant = {
-		@Constant(intValue = 0, ordinal = 0),
-		// @Constant(intValue = 0, ordinal = 8),
-		@Constant(intValue = 0, ordinal = 12)
-	})
-	private int vl$x(int original) {
+	@ModifyArg(method = "presentTexture", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/opengl/GlStateManager;_viewport(IIII)V"), index = 0)
+	private int vl$viewportX(int original) {
 		return ImGuiHooks.frameX(original);
 	}
 
-	@ModifyConstant(method = "presentTexture", constant = {
-		@Constant(intValue = 0, ordinal = 1),
-		// @Constant(intValue = 0, ordinal = 9),
-		@Constant(intValue = 0, ordinal = 13)
-	})
-	private int vl$y(int original) {
+	@ModifyArg(method = "presentTexture", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/opengl/GlStateManager;_viewport(IIII)V"), index = 1)
+	private int vl$viewportY(int original) {
 		return ImGuiHooks.frameY(original);
 	}
 
-	@ModifyExpressionValue(method = "presentTexture", at = {
-		@At(value = "INVOKE", target = "Lcom/mojang/blaze3d/textures/GpuTexture;getWidth(I)I", ordinal = 0),
-		// @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/textures/GpuTexture;getWidth(I)I", ordinal = 1),
-		@At(value = "INVOKE", target = "Lcom/mojang/blaze3d/textures/GpuTexture;getWidth(I)I", ordinal = 2)
-	})
-	private int vl$width(int original) {
+	@ModifyArg(method = "presentTexture", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/opengl/GlStateManager;_viewport(IIII)V"), index = 2)
+	private int vl$viewportWidth(int original) {
 		return ImGuiHooks.frameW(original);
 	}
 
-	@ModifyExpressionValue(method = "presentTexture", at = {
-		@At(value = "INVOKE", target = "Lcom/mojang/blaze3d/textures/GpuTexture;getHeight(I)I", ordinal = 0),
-		// @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/textures/GpuTexture;getHeight(I)I", ordinal = 1),
-		@At(value = "INVOKE", target = "Lcom/mojang/blaze3d/textures/GpuTexture;getHeight(I)I", ordinal = 2)
-	})
-	private int vl$height(int original) {
+	@ModifyArg(method = "presentTexture", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/opengl/GlStateManager;_viewport(IIII)V"), index = 3)
+	private int vl$viewportHeight(int original) {
+		return ImGuiHooks.frameH(original);
+	}
+
+	@ModifyArg(method = "presentTexture", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/opengl/DirectStateAccess;blitFrameBuffers(IIIIIIIIIIII)V"), index = 6)
+	private int vl$blitDestX(int original) {
+		return ImGuiHooks.frameX(original);
+	}
+
+	@ModifyArg(method = "presentTexture", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/opengl/DirectStateAccess;blitFrameBuffers(IIIIIIIIIIII)V"), index = 7)
+	private int vl$blitDestY(int original) {
+		return ImGuiHooks.frameY(original);
+	}
+
+	@ModifyArg(method = "presentTexture", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/opengl/DirectStateAccess;blitFrameBuffers(IIIIIIIIIIII)V"), index = 8)
+	private int vl$blitDestWidth(int original) {
+		return ImGuiHooks.frameW(original);
+	}
+
+	@ModifyArg(method = "presentTexture", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/opengl/DirectStateAccess;blitFrameBuffers(IIIIIIIIIIII)V"), index = 9)
+	private int vl$blitDestHeight(int original) {
 		return ImGuiHooks.frameH(original);
 	}
 }

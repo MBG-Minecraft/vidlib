@@ -14,7 +14,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,8 +55,8 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 
 	@Override
 	public void set(GameProfile v) {
-		if (v != null && !v.getName().isEmpty() && !v.getId().equals(Util.NIL_UUID)) {
-			name.set(v.getName());
+		if (v != null && !v.name().isEmpty() && !v.id().equals(Util.NIL_UUID)) {
+			name.set(v.name());
 			profile = v;
 		} else {
 			name.set("");
@@ -71,17 +71,17 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 		appendMainIcon(graphics);
 		ImGui.sameLine();
 
-		boolean select = ImGui.button(profile == null ? "Select..." : profile.getName());
+		boolean select = ImGui.button(profile == null ? "Select..." : profile.name());
 
 		if (profile != null && ImGui.isItemHovered()) {
-			graphics.tooltip(profile.getId().toString());
+			graphics.tooltip(profile.id().toString());
 		}
 
 		if (select) {
 			ImGui.openPopup("###select-profile");
 
 			if (profile != null) {
-				name.set(profile.getName());
+				name.set(profile.name());
 			} else {
 				name.set("");
 			}
@@ -118,18 +118,18 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 			}
 
 			for (var p : PlayerProfiles.getAllKnown()) {
-				if (ignoreNPCs.get() && (p.profile().getId().version() == 2 || p.profile().getId().equals(Util.NIL_UUID))) {
+				if (ignoreNPCs.get() && (p.profile().id().version() == 2 || p.profile().id().equals(Util.NIL_UUID))) {
 					continue;
 				}
 
 				if (filter == null || filter.test(p.profile())) {
-					if (search.isNotEmpty() && !p.profile().getName().contains(search.get())) {
+					if (search.isNotEmpty() && !p.profile().name().contains(search.get())) {
 						continue;
 					}
-					appendIcon(graphics.mc, p.profile().getId());
+					appendIcon(graphics.mc, p.profile().id());
 					ImGui.sameLine();
 
-					if (ImGui.selectable(p.profile().getName(), profile != null && p.profile().getId().equals(profile.getId()))) {
+					if (ImGui.selectable(p.profile().name(), profile != null && p.profile().id().equals(profile.id()))) {
 						profile = p.profile();
 						update = ImUpdate.FULL;
 					}
@@ -174,11 +174,11 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 	}
 
 	private void appendMainIcon(ImGraphics graphics) {
-		var tex = LowQualityPlayerBodies.getTexture(graphics.mc, profile == null ? null : profile.getId());
+		var tex = LowQualityPlayerBodies.getTexture(graphics.mc, profile == null ? null : profile.id());
 		ImGui.image(tex.getTexture().vl$getHandle(), ImGui.getFrameHeight(), ImGui.getFrameHeight());
 
 		if (ImGui.isItemHovered() && graphics.beginTooltip()) {
-			var texHD = PlayerBodies.getTexture(graphics.mc, profile == null ? null : profile.getId());
+			var texHD = PlayerBodies.getTexture(graphics.mc, profile == null ? null : profile.id());
 			ImGui.image(texHD.getTexture().vl$getHandle(), 128F, 128F);
 			graphics.endTooltip();
 		}

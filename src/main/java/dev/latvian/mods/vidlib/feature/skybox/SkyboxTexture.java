@@ -6,10 +6,11 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.imgui.icon.DirectImageImIcon;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import net.minecraft.client.renderer.texture.Dumpable;
+import net.minecraft.client.renderer.texture.MipmapStrategy;
 import net.minecraft.client.renderer.texture.ReloadableTexture;
 import net.minecraft.client.renderer.texture.TextureContents;
 import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.io.IOException;
@@ -21,7 +22,7 @@ public class SkyboxTexture extends ReloadableTexture implements Dumpable {
 	public int resolution;
 	private ImIcon icon;
 
-	public SkyboxTexture(ClientSkybox skybox, ResourceLocation id) {
+	public SkyboxTexture(ClientSkybox skybox, Identifier id) {
 		super(id);
 		this.skybox = skybox;
 	}
@@ -47,12 +48,12 @@ public class SkyboxTexture extends ReloadableTexture implements Dumpable {
 			var src = NativeImage.read(in);
 			var image = process(skybox.texture, src, src.getWidth(), src.getHeight());
 			resolution = image.getHeight() / 2;
-			return new TextureContents(image, new TextureMetadataSection(false, false));
+			return new TextureContents(image, new TextureMetadataSection(false, false, MipmapStrategy.AUTO, 0F));
 		}
 	}
 
 	@SuppressWarnings({"ConstantValue", "PointlessArithmeticExpression"})
-	public static NativeImage process(ResourceLocation location, NativeImage src, int srcW, int srcH) {
+	public static NativeImage process(Identifier location, NativeImage src, int srcW, int srcH) {
 		if (srcW == srcH * 2) { // Pre-mapped 4x2
 			return src;
 		} else if (srcW == srcH || srcW * 3 == srcH * 4) { // Cube Map 4x4 or 4x3
@@ -137,7 +138,7 @@ public class SkyboxTexture extends ReloadableTexture implements Dumpable {
 	}
 
 	@Override
-	public void dumpContents(ResourceLocation id, Path path) {
+	public void dumpContents(Identifier id, Path path) {
 		TextureUtil.writeAsPNG(path, id.toDebugFileName(), getTexture(), 0, IntUnaryOperator.identity());
 	}
 }

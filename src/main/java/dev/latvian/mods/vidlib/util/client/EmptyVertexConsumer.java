@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.util.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 
 public enum EmptyVertexConsumer implements VertexConsumer {
 	INSTANCE;
@@ -14,6 +14,11 @@ public enum EmptyVertexConsumer implements VertexConsumer {
 
 	@Override
 	public VertexConsumer setColor(int red, int green, int blue, int alpha) {
+		return this;
+	}
+
+	@Override
+	public VertexConsumer setColor(int color) {
 		return this;
 	}
 
@@ -38,18 +43,20 @@ public enum EmptyVertexConsumer implements VertexConsumer {
 	}
 
 	@Override
+	public VertexConsumer setLineWidth(float width) {
+		return this;
+	}
+
+	@Override
 	public void addVertex(float x, float y, float z, int color, float u, float v, int packedOverlay, int packedLight, float normalX, float normalY, float normalZ) {
 	}
 
-	@Override
 	public void putBulkData(PoseStack.Pose pose, BakedQuad quad, float red, float green, float blue, float alpha, int packedLight, int packedOverlay) {
 	}
 
-	@Override
 	public void putBulkData(PoseStack.Pose pose, BakedQuad bakedQuad, float red, float green, float blue, float alpha, int packedLight, int packedOverlay, boolean readExistingColor) {
 	}
 
-	@Override
 	public void putBulkData(PoseStack.Pose pose, BakedQuad quad, float[] brightness, float red, float green, float blue, float alpha, int[] lightmap, int packedOverlay, boolean readExistingColor) {
 	}
 }

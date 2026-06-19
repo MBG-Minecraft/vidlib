@@ -38,9 +38,6 @@ public abstract class ClientLevelMixin extends LevelMixin implements VLClientLev
 	@Shadow
 	protected abstract LevelEntityGetter<Entity> getEntities();
 
-	@Shadow
-	private boolean tickDayTime;
-
 	@Override
 	public ClientProps getProps() {
 		if (vl$props == null || vl$props.level != vl$level()) {
@@ -56,7 +53,7 @@ public abstract class ClientLevelMixin extends LevelMixin implements VLClientLev
 		return getEntities().get(uuid);
 	}
 
-	@Inject(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getBiome(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/core/Holder;"))
+	@Inject(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/attribute/EnvironmentAttributeSystem;getValue(Lnet/minecraft/world/attribute/EnvironmentAttribute;Lnet/minecraft/core/BlockPos;)Ljava/lang/Object;"))
 	private void vl$doAnimateTick(int posX, int posY, int posZ, int range, RandomSource random, Block block, BlockPos.MutableBlockPos blockPos, CallbackInfo ci) {
 		ClientGameEngine.INSTANCE.handleEnvironmentalEffects(minecraft, vl$level(), blockPos);
 	}
@@ -64,11 +61,6 @@ public abstract class ClientLevelMixin extends LevelMixin implements VLClientLev
 	@Redirect(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getFluidState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;"))
 	private FluidState vl$getFluidState(ClientLevel level, BlockPos pos) {
 		return CommonGameEngine.INSTANCE.overrideFluidState(level, pos);
-	}
-
-	@Override
-	public boolean vl$getTickDayTime() {
-		return tickDayTime;
 	}
 
 	@Inject(method = "gatherChunkSourceStats", at = @At("RETURN"), cancellable = true)

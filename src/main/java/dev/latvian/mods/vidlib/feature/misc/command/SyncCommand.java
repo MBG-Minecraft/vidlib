@@ -14,7 +14,7 @@ public interface SyncCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("sync", (command, buildContext) -> command
 		.then(Commands.argument("player", EntityArgument.players())
-			.requires(source -> source.hasPermission(2))
+			.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 			.executes(ctx -> sync(EntityArgument.getPlayers(ctx, "player")))
 		)
 		.executes(ctx -> sync(List.of(ctx.getSource().getPlayerOrException())))

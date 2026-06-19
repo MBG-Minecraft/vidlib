@@ -127,7 +127,7 @@ public class Panel {
 
 		postContent(graphics);
 
-		windowType = ImWindowType.get(graphics.mc.getWindow().getWindow());
+		windowType = ImWindowType.get(graphics.mc.getWindow().handle());
 		ImGui.end();
 
 		return !isOpen;

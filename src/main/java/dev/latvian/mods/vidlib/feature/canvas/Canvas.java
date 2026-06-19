@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.feature.canvas;
 import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.framegraph.FramePass;
 import com.mojang.blaze3d.opengl.GlConst;
-import com.mojang.blaze3d.opengl.GlDevice;
 import com.mojang.blaze3d.opengl.GlTexture;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderTarget;
@@ -11,16 +10,19 @@ import com.mojang.blaze3d.resource.RenderTargetDescriptor;
 import com.mojang.blaze3d.resource.ResourceHandle;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.latvian.mods.klib.gl.GLDebugLog;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.core.VLDirectStateAccess;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderPipelines;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.rendertype.OutputTarget;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -35,7 +37,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 public class Canvas implements Consumer<RenderPass> {
-	public static final Lazy<Map<ResourceLocation, Canvas>> ALL = Lazy.map(map -> {
+	public static final Lazy<Map<Identifier, Canvas>> ALL = Lazy.map(map -> {
 		for (var s : ClientAutoRegister.SCANNED.get()) {
 			if (s.value() instanceof Canvas canvas) {
 				map.put(canvas.id, canvas);
@@ -43,11 +45,11 @@ public class Canvas implements Consumer<RenderPass> {
 		}
 	});
 
-	public static Canvas createExternal(ResourceLocation id, Consumer<CanvasBuilder> builder) {
+	public static Canvas createExternal(Identifier id, Consumer<CanvasBuilder> builder) {
 		return new ExternalCanvas(id, builder);
 	}
 
-	public static Canvas createInternal(ResourceLocation id, Consumer<CanvasBuilder> builder) {
+	public static Canvas createInternal(Identifier id, Consumer<CanvasBuilder> builder) {
 		return new InternalCanvas(id, builder);
 	}
 
@@ -67,12 +69,12 @@ public class Canvas implements Consumer<RenderPass> {
 	public static final Canvas STRONG_OUTLINE = createExternal(VidLib.id("strong_outline"), builder -> {
 	});
 
-	public final ResourceLocation id;
+	public final Identifier id;
 	public final String idString;
-	public final ResourceLocation colorTexturePath;
-	public final ResourceLocation depthTexturePath;
+	public final Identifier colorTexturePath;
+	public final Identifier depthTexturePath;
 	public final String pathString;
-	public final Set<ResourceLocation> defaultTargets;
+	public final Set<Identifier> defaultTargets;
 	public final Consumer<Minecraft> tickCallback;
 	public final Consumer<Minecraft> drawSetupCallback;
 	public final Consumer<Minecraft> drawCallback;
@@ -88,9 +90,9 @@ public class Canvas implements Consumer<RenderPass> {
 
 	ResourceHandle<RenderTarget> outputTarget;
 	private RenderPipeline renderPipeline;
-	private RenderStateShard.OutputStateShard outputStateShard;
+	private OutputTarget outputTargetBinding;
 
-	protected Canvas(ResourceLocation id, Consumer<CanvasBuilder> builderCallback) {
+	protected Canvas(Identifier id, Consumer<CanvasBuilder> builderCallback) {
 		this.id = id;
 		this.idString = id.toString();
 		this.colorTexturePath = id.withPath(p -> "textures/vidlib/generated/canvas/color/" + p + ".png");
@@ -125,7 +127,7 @@ public class Canvas implements Consumer<RenderPass> {
 		active = true;
 	}
 
-	public boolean draw(Minecraft mc, GpuTexture texture) {
+	public boolean draw(Minecraft mc, GpuTextureView texture) {
 		if (!active) {
 			return false;
 		}
@@ -134,19 +136,18 @@ public class Canvas implements Consumer<RenderPass> {
 			drawCallback.accept(mc);
 		}
 
-		var t = getColorTexture();
+		var target = getTargetOrNull();
+		var t = target == null ? null : target.getColorTextureView();
 
 		if (t != null) {
 			var sequentialBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
 			var ibuf = sequentialBuffer.getBuffer(6);
-			var vbuf = RenderSystem.getQuadVertexBuffer();
 
-			try (var pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(texture, data.clearColor().isTransparent() ? OptionalInt.empty() : OptionalInt.of(data.clearColor().argb()))) {
+			try (var pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Draw canvas " + idString, texture, data.clearColor().isTransparent() ? OptionalInt.empty() : OptionalInt.of(data.clearColor().argb()))) {
 				pass.setPipeline(getRenderPipeline());
-				pass.setVertexBuffer(0, vbuf);
 				pass.setIndexBuffer(ibuf, sequentialBuffer.type());
-				pass.bindSampler("InSampler", t);
-				pass.drawIndexed(0, 6);
+				pass.bindTexture("InSampler", t, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST));
+				pass.draw(0, 3);
 				return true;
 			}
 		}
@@ -285,8 +286,8 @@ public class Canvas implements Consumer<RenderPass> {
 		}
 
 		int prev = GL11.glGetInteger(GL30.GL_READ_FRAMEBUFFER_BINDING);
-		var device = (GlDevice) RenderSystem.getDevice();
-		GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, ((GlTexture) c).getFbo(device.directStateAccess(), null));
+		var device = (VLDirectStateAccess) RenderSystem.getDevice();
+		GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, ((GlTexture) c).getFbo(device.vl$directStateAccess(), null));
 		int[] pixels = new int[1];
 		GL11.glReadPixels(x, y, 1, 1, GlConst.toGlExternalId(c.getFormat()), GlConst.toGlType(c.getFormat()), pixels);
 		GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, prev);
@@ -317,8 +318,8 @@ public class Canvas implements Consumer<RenderPass> {
 		}
 
 		int prev = GL11.glGetInteger(GL30.GL_READ_FRAMEBUFFER_BINDING);
-		var device = (GlDevice) RenderSystem.getDevice();
-		GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, ((GlTexture) c).getFbo(device.directStateAccess(), d));
+		var device = (VLDirectStateAccess) RenderSystem.getDevice();
+		GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, ((GlTexture) c).getFbo(device.vl$directStateAccess(), d));
 		float[] pixels = new float[1];
 		GL11.glReadPixels(x, y, 1, 1, GlConst.toGlExternalId(d.getFormat()), GlConst.toGlType(d.getFormat()), pixels);
 		GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, prev);
@@ -347,12 +348,12 @@ public class Canvas implements Consumer<RenderPass> {
 		return renderPipeline;
 	}
 
-	public RenderStateShard.OutputStateShard getOutputStateShard() {
-		if (outputStateShard == null) {
-			outputStateShard = new RenderStateShard.OutputStateShard(pathString, this::getTargetOrMain);
+	public OutputTarget getOutputTargetBinding() {
+		if (outputTargetBinding == null) {
+			outputTargetBinding = new OutputTarget(pathString, this::getTargetOrMain);
 		}
 
-		return outputStateShard;
+		return outputTargetBinding;
 	}
 
 	@Override

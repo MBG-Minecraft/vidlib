@@ -10,4 +10,9 @@ public abstract class DirectStateAccessMixin implements VLDirectStateAccess {
 	@Override
 	@Invoker("createFrameBufferObject")
 	public abstract int vl$createFrameBufferObject();
+
+	@Override
+	public DirectStateAccess vl$directStateAccess() {
+		return (DirectStateAccess) (Object) this;
+	}
 }

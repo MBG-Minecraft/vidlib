@@ -3,12 +3,12 @@ package dev.latvian.mods.vidlib.core;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -17,11 +17,11 @@ import net.minecraft.world.entity.player.Player;
 import java.util.List;
 
 public interface VLGuiGraphics {
-	ResourceLocation HEART_BACKGROUND = ID.mc("hud/heart/container");
-	ResourceLocation FULL_HEART = ID.mc("hud/heart/full");
+	Identifier HEART_BACKGROUND = ID.mc("hud/heart/container");
+	Identifier FULL_HEART = ID.mc("hud/heart/full");
 
-	default GuiGraphics vl$self() {
-		return (GuiGraphics) this;
+	default GuiGraphicsExtractor vl$self() {
+		return (GuiGraphicsExtractor) this;
 	}
 
 	default Minecraft vl$mc() {
@@ -58,15 +58,15 @@ public interface VLGuiGraphics {
 			return;
 		}
 
-		graphics.pose().pushPose();
-		graphics.pose().translate(x + w / 2F, nameY - 6F, 0F);
+		graphics.pose().pushMatrix();
+		graphics.pose().translate(x + w / 2F, nameY - 6F);
 
 		for (int i = 0; i < lines.size(); i++) {
 			var line = lines.get(i);
-			graphics.drawString(font, line, -font.width(line) / 2F, -3F - (lines.size() - 1) * 9 + i * 9, 0xFFFFFF | (alpha << 24), true);
+			graphics.text(font, line, -font.width(line) / 2, -3 - (lines.size() - 1) * 9 + i * 9, 0xFFFFFF | (alpha << 24), true);
 		}
 
-		graphics.pose().popPose();
+		graphics.pose().popMatrix();
 	}
 
 	default void healthBarWithSideLabel(Font font, LivingEntity entity, int x, int y, int w, int h, boolean leftSide, boolean renderName, boolean renderHealth) {
@@ -92,19 +92,19 @@ public interface VLGuiGraphics {
 		var name = font.split(entity.getDisplayName(), 1000).getFirst();
 
 		var str = KMath.format(health) + " / " + KMath.format(maxHealth);
-		graphics.drawString(font, str, x + (w - font.width(str)) / 2, y + 3, 0xFFFFFFFF, true);
+		graphics.text(font, str, x + (w - font.width(str)) / 2, y + 3, 0xFFFFFFFF, true);
 
 		if (leftSide) {
-			graphics.drawString(font, name, x + w + 4, y + 3, 0xFFFFFFFF, true);
+			graphics.text(font, name, x + w + 4, y + 3, 0xFFFFFFFF, true);
 		} else {
-			graphics.drawString(font, name, x - 4 - font.width(name), y + 3, 0xFFFFFFFF, true);
+			graphics.text(font, name, x - 4 - font.width(name), y + 3, 0xFFFFFFFF, true);
 		}
 	}
 
 	default void heart(int x, int y, float value) {
 		var graphics = vl$self();
-		graphics.blitSprite(VidLibRenderTypes.GUI, HEART_BACKGROUND, 9, 9, 0, 0, x, y, 9, 9);
-		graphics.blitSprite(VidLibRenderTypes.GUI, FULL_HEART, 9, 9, 0, 0, x, y, Mth.ceil(9F * value), 9);
+		graphics.blitSprite(RenderPipelines.GUI_TEXTURED, HEART_BACKGROUND, 9, 9, 0, 0, x, y, 9, 9);
+		graphics.blitSprite(RenderPipelines.GUI_TEXTURED, FULL_HEART, 9, 9, 0, 0, x, y, Mth.ceil(9F * value), 9);
 	}
 
 	default void vl$pushShift() {

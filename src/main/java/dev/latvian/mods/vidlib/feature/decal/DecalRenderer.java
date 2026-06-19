@@ -14,12 +14,14 @@ import java.util.List;
 
 public class DecalRenderer {
 	private static int uCount = 0;
+	private static float uGameTime = 0F;
 
 	@ClientAutoRegister
 	public static final Canvas CANVAS = Canvas.createExternal(VidLib.id("decals"), builder -> {
 		builder.setDrawSetupCallback(DecalRenderer::setup);
 		builder.addUniform(CanvasUniform.int1("Count", () -> uCount));
 		builder.addUniform(CanvasUniform.mat4("InverseViewProjectionMat", () -> ClientMatrices.INVERSE_WORLD));
+		builder.addUniform(CanvasUniform.float1("GameTime", () -> uGameTime));
 		builder.addUniform(CanvasUniform.int1("NoSceneSample", () -> IrisIntegration.INSTANCE.isShaderPackInUse() ? 1 : 0));
 	});
 
@@ -30,6 +32,7 @@ public class DecalRenderer {
 	}
 
 	private static void setup(Minecraft mc) {
+		uGameTime = mc.level == null ? 0F : mc.level.getGameTime() + mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		var debugDecals = mc.player.vl$sessionData().debugDecals;
 
 		if (!debugDecals.isEmpty()) {
@@ -42,7 +45,7 @@ public class DecalRenderer {
 
 		if (!TEMP_LIST.isEmpty()) {
 			var texture = DecalTexture.HOLDER.texture().get();
-			uCount = texture.update(TEMP_LIST, mc.gameRenderer.getMainCamera().getPosition());
+			uCount = texture.update(TEMP_LIST, mc.gameRenderer.getMainCamera().position());
 			CANVAS.markActive();
 			TEMP_LIST.clear();
 		}

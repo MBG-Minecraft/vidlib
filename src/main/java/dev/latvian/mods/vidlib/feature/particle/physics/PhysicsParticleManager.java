@@ -1,24 +1,26 @@
 package dev.latvian.mods.vidlib.feature.particle.physics;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Axis;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.core.VLBlockState;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.integration.iris.IrisIntegration;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import imgui.type.ImBoolean;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GrassBlock;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.FrustumIntersection;
 import org.joml.Vector2d;
@@ -31,11 +33,11 @@ import java.util.function.Consumer;
 
 @AutoInit(AutoInit.Type.CLIENT_LOADED)
 public class PhysicsParticleManager {
-	public static final PhysicsParticleManager CUTOUT_MIPPED = new PhysicsParticleManager("Cutout Mipped", TerrainRenderLayer.CUTOUT_MIPPED, RenderType.cutoutMipped(), PhysicsParticlesRenderTypes.CUTOUT_MIPPED, true);
-	public static final PhysicsParticleManager TRANSLUCENT = new PhysicsParticleManager("Translucent", TerrainRenderLayer.TRANSLUCENT, RenderType.translucent(), PhysicsParticlesRenderTypes.TRANSLUCENT, true);
-	public static final PhysicsParticleManager TRIPWIRE = new PhysicsParticleManager("Tripwire", TerrainRenderLayer.TRIPWIRE, RenderType.tripwire(), RenderType.tripwire(), true);
-	public static final PhysicsParticleManager CUTOUT = new PhysicsParticleManager("Cutout", TerrainRenderLayer.CUTOUT, RenderType.cutout(), PhysicsParticlesRenderTypes.CUTOUT, false);
-	public static final PhysicsParticleManager SOLID = new PhysicsParticleManager("Solid", TerrainRenderLayer.SOLID, RenderType.solid(), PhysicsParticlesRenderTypes.SOLID, true);
+	public static final PhysicsParticleManager CUTOUT_MIPPED = new PhysicsParticleManager("Cutout Mipped", TerrainRenderLayer.CUTOUT_MIPPED, PhysicsParticlesRenderTypes.CUTOUT_MIPPED, true);
+	public static final PhysicsParticleManager TRANSLUCENT = new PhysicsParticleManager("Translucent", TerrainRenderLayer.TRANSLUCENT, PhysicsParticlesRenderTypes.TRANSLUCENT, true);
+	public static final PhysicsParticleManager TRIPWIRE = new PhysicsParticleManager("Tripwire", TerrainRenderLayer.TRIPWIRE, PhysicsParticlesRenderTypes.TRANSLUCENT, true);
+	public static final PhysicsParticleManager CUTOUT = new PhysicsParticleManager("Cutout", TerrainRenderLayer.CUTOUT, PhysicsParticlesRenderTypes.CUTOUT, false);
+	public static final PhysicsParticleManager SOLID = new PhysicsParticleManager("Solid", TerrainRenderLayer.SOLID, PhysicsParticlesRenderTypes.SOLID, true);
 
 	public static final ImBoolean VISIBLE = new ImBoolean(true);
 	public static final double SQRT_2 = Math.sqrt(2);
@@ -111,48 +113,78 @@ public class PhysicsParticleManager {
 			return TRANSLUCENT;
 		}
 
-		var rl = ItemBlockRenderTypes.getChunkRenderType(state);
+		var rl = getChunkRenderType(state);
 
-		if (rl == RenderType.cutoutMipped()) {
-			return CUTOUT_MIPPED;
-		} else if (rl == RenderType.cutout()) {
+		if (rl == ChunkSectionLayer.CUTOUT) {
 			return CUTOUT;
-		} else if (rl == RenderType.translucent()) {
+		} else if (rl == ChunkSectionLayer.TRANSLUCENT) {
 			return TRANSLUCENT;
-		} else if (rl == RenderType.tripwire()) {
-			return TRIPWIRE;
 		} else {
 			return SOLID;
 		}
 	}
 
+	private static ChunkSectionLayer getChunkRenderType(BlockState state) {
+		var fluidState = state.getFluidState();
+
+		if (!fluidState.isEmpty()) {
+			return Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(fluidState).layer();
+		}
+
+		if (state.getRenderShape() != RenderShape.MODEL) {
+			return ChunkSectionLayer.SOLID;
+		}
+
+		var parts = new ArrayList<BlockStateModelPart>();
+		var random = RandomSource.create(state.getSeed(BlockPos.ZERO));
+		Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(state).collectParts(BlockAndTintGetter.EMPTY, BlockPos.ZERO, state, random, parts);
+		var layer = ChunkSectionLayer.SOLID;
+
+		for (var part : parts) {
+			for (var quad : part.getQuads(null)) {
+				if (quad.materialInfo().layer() == ChunkSectionLayer.TRANSLUCENT) {
+					return ChunkSectionLayer.TRANSLUCENT;
+				} else if (quad.materialInfo().layer() == ChunkSectionLayer.CUTOUT) {
+					layer = ChunkSectionLayer.CUTOUT;
+				}
+			}
+
+			for (var direction : Direction.values()) {
+				for (var quad : part.getQuads(direction)) {
+					if (quad.materialInfo().layer() == ChunkSectionLayer.TRANSLUCENT) {
+						return ChunkSectionLayer.TRANSLUCENT;
+					} else if (quad.materialInfo().layer() == ChunkSectionLayer.CUTOUT) {
+						layer = ChunkSectionLayer.CUTOUT;
+					}
+				}
+			}
+		}
+
+		return layer;
+	}
+
 	public final TerrainRenderLayer terrainLayer;
 	public final List<PhysicsParticle> particles;
 	public final List<PhysicsParticle> queue;
-	private final RenderType vanillaRenderType;
 	private final RenderType fallbackRenderType;
 	public final String displayName;
 	public final boolean mipmaps;
 	public int rendered;
 
-	public PhysicsParticleManager(String displayName, TerrainRenderLayer terrainLayer, RenderType vanillaRenderType, RenderType fallbackRenderType, boolean mipmaps) {
+	public PhysicsParticleManager(String displayName, TerrainRenderLayer terrainLayer, RenderType fallbackRenderType, boolean mipmaps) {
 		this.particles = new ArrayList<>();
 		this.queue = new ArrayList<>();
 
 		this.displayName = displayName;
 		this.terrainLayer = terrainLayer;
-		this.vanillaRenderType = vanillaRenderType;
 		this.fallbackRenderType = fallbackRenderType;
 		this.mipmaps = mipmaps;
 	}
 
 	private void render(Minecraft mc, FrameInfo frame, MultiBufferSource bufferSource) {
 		var level = mc.level;
-		var texture = mc.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS);
-		texture.setFilter(false, mipmaps);
-		RenderSystem.setShaderTexture(0, texture.getTexture());
 
-		var currentType = IrisIntegration.INSTANCE.isShaderPackInUse() ? vanillaRenderType : fallbackRenderType;
+		var currentType = fallbackRenderType;
 		var consumer = bufferSource.getBuffer(currentType);
 		var poseStack = frame.poseStack();
 		float delta = frame.worldDelta();
@@ -209,7 +241,7 @@ public class PhysicsParticleManager {
 				poseStack.scale(dScale, dScale, dScale);
 			}
 
-			int light = LightTexture.FULL_BRIGHT;
+			int light = LightCoordsUtil.FULL_BRIGHT;
 
 			mutablePos.set(p.x, p.y, p.z);
 
@@ -225,8 +257,6 @@ public class PhysicsParticleManager {
 			rendered++;
 		}
 
-		texture.setFilter(false, false);
-		RenderSystem.setShaderTexture(0, texture.getTexture());
 		mc.renderBuffers().bufferSource().endBatch(currentType);
 	}
 

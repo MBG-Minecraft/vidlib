@@ -8,7 +8,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.util.JsonReloadListener;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.Level;
@@ -33,7 +33,7 @@ public class ZoneLoader extends JsonReloadListener {
 	}
 
 	@Override
-	protected void apply(Map<ResourceLocation, JsonElement> from, ResourceManager resourceManager, ProfilerFiller profiler) {
+	protected void apply(Map<Identifier, JsonElement> from, ResourceManager resourceManager, ProfilerFiller profiler) {
 		var list = new ArrayList<ZoneContainer>();
 
 		for (var entry : from.entrySet()) {
@@ -41,7 +41,7 @@ public class ZoneLoader extends JsonReloadListener {
 
 			try {
 				var json = entry.getValue().getAsJsonObject();
-				var dimension = json.has("dimension") ? ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(json.get("dimension").getAsString())) : Level.OVERWORLD;
+				var dimension = json.has("dimension") ? ResourceKey.create(Registries.DIMENSION, Identifier.parse(json.get("dimension").getAsString())) : Level.OVERWORLD;
 				var container = new ZoneContainer(id, dimension);
 				int index = 0;
 
@@ -94,7 +94,7 @@ public class ZoneLoader extends JsonReloadListener {
 			zones.containers.put(container.id, container);
 		}
 
-		var map = new HashMap<ResourceLocation, ZoneContainer>();
+		var map = new HashMap<Identifier, ZoneContainer>();
 
 		for (var container : list) {
 			map.put(container.id, container);

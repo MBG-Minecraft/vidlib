@@ -4,16 +4,16 @@ import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public interface CanvasCommands {
 	@ClientAutoRegister
 	ClientCommandHolder COMMAND = new ClientCommandHolder("canvas", (command, buildContext) -> command
 		.then(Commands.literal("preview")
 			.then(Commands.literal("color")
-				.then(Commands.argument("canvas", ResourceLocationArgument.id())
+				.then(Commands.argument("canvas", IdentifierArgument.id())
 					.suggests((ctx, builder) -> {
 						for (var holder : CanvasImpl.ENABLED) {
 							builder.suggest(holder.idString);
@@ -21,11 +21,11 @@ public interface CanvasCommands {
 
 						return builder.buildFuture();
 					})
-					.executes(ctx -> preview(ctx.getSource(), ResourceLocationArgument.getId(ctx, "canvas"), false))
+					.executes(ctx -> preview(ctx.getSource(), IdentifierArgument.getId(ctx, "canvas"), false))
 				)
 			)
 			.then(Commands.literal("depth")
-				.then(Commands.argument("canvas", ResourceLocationArgument.id())
+				.then(Commands.argument("canvas", IdentifierArgument.id())
 					.suggests((ctx, builder) -> {
 						for (var holder : CanvasImpl.ENABLED) {
 							builder.suggest(holder.idString);
@@ -33,13 +33,13 @@ public interface CanvasCommands {
 
 						return builder.buildFuture();
 					})
-					.executes(ctx -> preview(ctx.getSource(), ResourceLocationArgument.getId(ctx, "canvas"), true))
+					.executes(ctx -> preview(ctx.getSource(), IdentifierArgument.getId(ctx, "canvas"), true))
 				)
 			)
 		)
 	);
 
-	static int preview(CommandSourceStack source, ResourceLocation id, boolean depth) {
+	static int preview(CommandSourceStack source, Identifier id, boolean depth) {
 		var c = CanvasImpl.get(id);
 
 		if (c == null) {

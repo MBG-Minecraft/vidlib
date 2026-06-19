@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.structure;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class StructureStorage extends SimplePreparableReloadListener<Map<ResourceLocation, Resource>> {
+public class StructureStorage extends SimplePreparableReloadListener<Map<Identifier, Resource>> {
 	public static final VLRegistry<LazyStructures> SERVER = VLRegistry.createServer("server_structure", LazyStructures.class);
 	public static final VLRegistry<LazyStructures> CLIENT = VLRegistry.createClient("client_structure", LazyStructures.class);
 
@@ -24,14 +24,14 @@ public class StructureStorage extends SimplePreparableReloadListener<Map<Resourc
 	}
 
 	@Nullable
-	public List<StructureHolder> get(ResourceLocation id) {
+	public List<StructureHolder> get(Identifier id) {
 		var lazy = registry.get(id);
 		return lazy != null ? lazy.get() : List.of();
 	}
 
 	@Override
-	protected Map<ResourceLocation, Resource> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
-		var map = new HashMap<ResourceLocation, Resource>();
+	protected Map<Identifier, Resource> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
+		var map = new HashMap<Identifier, Resource>();
 
 		for (var entry : resourceManager.listResources("structure", p -> p.getPath().endsWith(".nbt")).entrySet()) {
 			map.put(entry.getKey().withPath(p -> p.substring(10)), entry.getValue());
@@ -45,8 +45,8 @@ public class StructureStorage extends SimplePreparableReloadListener<Map<Resourc
 	}
 
 	@Override
-	protected void apply(Map<ResourceLocation, Resource> map, ResourceManager resourceManager, ProfilerFiller profiler) {
-		var map2 = new HashMap<ResourceLocation, LazyStructures>();
+	protected void apply(Map<Identifier, Resource> map, ResourceManager resourceManager, ProfilerFiller profiler) {
+		var map2 = new HashMap<Identifier, LazyStructures>();
 
 		for (var entry : map.entrySet()) {
 			map2.put(entry.getKey().withPath(p -> p.substring(0, p.lastIndexOf('.'))), new LazyStructures(entry.getKey(), entry.getValue()));

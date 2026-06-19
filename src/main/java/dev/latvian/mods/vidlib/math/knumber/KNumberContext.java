@@ -87,7 +87,7 @@ public class KNumberContext {
 			this.serverDataMap = level.getDataMap();
 			this.gameTime = (double) level.getGameTime();
 			this.gameDay = (double) (level.getGameTime() % 24000L) / 24000D;
-			this.clock = (double) level.getDayTime();
+			this.clock = (double) level.getDefaultClockTime();
 		} else {
 			this.serverDataMap = null;
 			this.gameTime = null;

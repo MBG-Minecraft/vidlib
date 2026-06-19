@@ -8,9 +8,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(value = DebugScreenOverlay.class, priority = 1337) // Ensure this mixin runs after others
@@ -19,20 +19,15 @@ public abstract class DebugScreenOverlayMixin {
 	@Shadow
 	private Minecraft minecraft;
 
-	@Inject(method = "getSystemInformation", at = @At("RETURN"), cancellable = true)
-	private void getSystemInformation(CallbackInfoReturnable<List<String>> cir) {
-		if (Minecraft.getInstance().showOnlyReducedInfo()) {
-			cir.setReturnValue(new ArrayList<>());
-		}
+	@ModifyArg(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/DebugScreenOverlay;extractLines(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Ljava/util/List;Z)V", ordinal = 0), index = 1)
+	private List<String> collectGameInformationText(List<String> original) {
+		var list = ClientGameEngine.INSTANCE.collectGameInformationText(minecraft, (DebugScreenOverlay) (Object) this);
+		return list == null ? original : list;
 	}
 
-	@Inject(method = "collectGameInformationText", at = @At("RETURN"), cancellable = true)
-	private void collectGameInformationText(CallbackInfoReturnable<List<String>> cir) {
-		var list = ClientGameEngine.INSTANCE.collectGameInformationText(minecraft, (DebugScreenOverlay) (Object) this);
-
-		if (list != null) {
-			cir.setReturnValue(list);
-		}
+	@ModifyArg(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/DebugScreenOverlay;extractLines(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Ljava/util/List;Z)V", ordinal = 1), index = 1)
+	private List<String> getSystemInformation(List<String> original) {
+		return Minecraft.getInstance().showOnlyReducedInfo() ? List.of() : original;
 	}
 
 	@Inject(method = "showNetworkCharts", at = @At("RETURN"), cancellable = true)

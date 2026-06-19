@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.VanillaPackResources;
 import net.minecraft.server.packs.repository.BuiltInPackSource;
@@ -16,7 +16,7 @@ import java.util.function.Function;
 
 @Mixin(ServerPacksSource.class)
 public abstract class ServerPacksSourceMixin extends BuiltInPackSource {
-	public ServerPacksSourceMixin(PackType packType, VanillaPackResources vanillaPack, ResourceLocation packDir, DirectoryValidator validator) {
+	public ServerPacksSourceMixin(PackType packType, VanillaPackResources vanillaPack, Identifier packDir, DirectoryValidator validator) {
 		super(packType, vanillaPack, packDir, validator);
 	}
 

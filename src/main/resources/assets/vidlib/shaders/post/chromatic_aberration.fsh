@@ -1,28 +1,38 @@
-#version 410 core
+#version 330
 
 uniform sampler2D InSampler;
 
-uniform float Strength;
-uniform float Angle;
-uniform vec2 FocusPos;
+layout(std140) uniform Strength {
+	float Value;
+} StrengthUniform;
+
+layout(std140) uniform Angle {
+	float Value;
+} AngleUniform;
+
+layout(std140) uniform FocusPos {
+	vec2 Value;
+} FocusPosUniform;
 
 in vec2 texCoord;
-in vec2 oneTexel;
 
-layout (location = 0) out vec4 fragColor;
+out vec4 fragColor;
 
 void main() {
 	vec2 toCenter;
+	float strength = StrengthUniform.Value;
+	float angle = AngleUniform.Value;
+	vec2 focusPos = FocusPosUniform.Value;
 
-	if (Angle >= 0.0) {
-		toCenter = vec2(cos(Angle), sin(Angle)) * Strength;
+	if (angle >= 0.0) {
+		toCenter = vec2(cos(angle), sin(angle)) * strength;
 	} else {
-		toCenter = (FocusPos - (texCoord * 2.0 - 1.0)) * abs(Strength);
+		toCenter = (focusPos - (texCoord * 2.0 - 1.0)) * abs(strength);
 	}
 
 	vec3 c;
 
-	if (Strength > 0.0) {
+	if (strength > 0.0) {
 		fragColor = vec4(
 		texture(InSampler, texCoord).r,
 		texture(InSampler, texCoord + toCenter).g,

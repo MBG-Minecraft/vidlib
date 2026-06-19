@@ -10,7 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 public interface VLStreamCodecs {
@@ -90,7 +90,7 @@ public interface VLStreamCodecs {
 		} else if (value instanceof String v) {
 			buf.writeVarInt(12);
 			buf.writeUtf(v);
-		} else if (value instanceof ResourceLocation v) {
+		} else if (value instanceof Identifier v) {
 			buf.writeVarInt(13);
 			ID.STREAM_CODEC.encode(buf, v);
 		} else if (value instanceof Component v) {

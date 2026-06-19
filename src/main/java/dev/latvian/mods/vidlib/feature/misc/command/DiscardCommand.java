@@ -13,7 +13,7 @@ import java.util.Collection;
 public interface DiscardCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("discard", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.argument("entity", EntityArgument.entities())
 			.executes(ctx -> discard(ctx.getSource().getLevel(), EntityArgument.getEntities(ctx, "entity")))
 		)

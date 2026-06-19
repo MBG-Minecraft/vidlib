@@ -19,7 +19,7 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
 public interface InvSeeCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("invsee", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.argument("player", EntityArgument.player())
 			.executes(ctx -> invsee(ctx.getSource().getPlayerOrException(), EntityArgument.getPlayer(ctx, "player")))
 		)

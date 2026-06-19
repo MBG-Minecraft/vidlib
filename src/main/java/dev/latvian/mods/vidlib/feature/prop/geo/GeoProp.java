@@ -3,18 +3,18 @@ package dev.latvian.mods.vidlib.feature.prop.geo;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.animatable.GeoAnimatable;
-import software.bernie.geckolib.constant.dataticket.SerializableDataTicket;
+import com.geckolib.animatable.GeoAnimatable;
+import com.geckolib.constant.dataticket.DataTicket;
 
 public interface GeoProp extends GeoAnimatable {
 	@ApiStatus.NonExtendable
 	@Nullable
-	default <D> D getAnimData(SerializableDataTicket<D> dataTicket) {
+	default <D> D getAnimData(DataTicket<D> dataTicket) {
 		return getAnimatableInstanceCache().getManagerForId(((Prop) this).id).getAnimatableData(dataTicket);
 	}
 
 	@ApiStatus.NonExtendable
-	default <D> void setAnimData(SerializableDataTicket<D> dataTicket, D data) {
+	default <D> void setAnimData(DataTicket<D> dataTicket, D data) {
 		var prop = (Prop) this;
 
 		if (prop.level.isClientSide()) {
@@ -67,10 +67,5 @@ public interface GeoProp extends GeoAnimatable {
 			throw new IllegalStateException("Currently not supported on server side");
 			// GeckoLibServices.NETWORK.stopTriggeredEntityAnim(prop, false, controllerName, animName);
 		}
-	}
-
-	@Override
-	default double getTick(@Nullable Object entity) {
-		return ((Prop) this).tick;
 	}
 }

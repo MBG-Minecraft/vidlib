@@ -26,7 +26,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.Utf8String;
 import net.minecraft.network.VarInt;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FastBufferedInputStream;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
@@ -162,7 +162,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 
 		for (int i = 0; i < paletteCount; i++) {
 			var key = VarInt.read(buf);
-			var id = ResourceLocation.parse(Utf8String.read(buf, Short.MAX_VALUE));
+			var id = Identifier.parse(Utf8String.read(buf, Short.MAX_VALUE));
 			var state = BuiltInRegistries.BLOCK.getValue(id).defaultBlockState();
 			var diffCount = VarInt.read(buf);
 
@@ -474,7 +474,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 	public void toVStruct(ByteBuf buf) {
 		VarInt.write(buf, 0); // Binary Indicator
 		VarInt.write(buf, 0); // Format Version
-		VarInt.write(buf, SharedConstants.getCurrentVersion().getDataVersion().getVersion());
+		VarInt.write(buf, SharedConstants.getCurrentVersion().dataVersion().version());
 		VarInt.write(buf, blocks.size());
 
 		if (blocks.isEmpty()) {

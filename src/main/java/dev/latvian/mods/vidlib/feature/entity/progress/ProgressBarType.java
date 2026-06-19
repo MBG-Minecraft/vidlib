@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.entity.progress;
 
 import dev.latvian.mods.vidlib.VidLib;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public record ProgressBarType(
 	ProgressBarTextures textures,
@@ -14,7 +14,7 @@ public record ProgressBarType(
 	int offset,
 	float scale
 ) {
-	public static ProgressBarType vanilla(ResourceLocation id) {
+	public static ProgressBarType vanilla(Identifier id) {
 		return new ProgressBarType(new ProgressBarTextures(id), 256, 8, 91, 3, 0, 182, 12, 1F);
 	}
 

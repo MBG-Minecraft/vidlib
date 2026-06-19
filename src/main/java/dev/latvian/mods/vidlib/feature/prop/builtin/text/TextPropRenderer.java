@@ -4,8 +4,9 @@ import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.phys.AABB;
@@ -61,12 +62,12 @@ public class TextPropRenderer implements PropRenderer<TextProp> {
 		matrix4f.mul(bbMat);
 
 		int bgColor = prop.backgroundColor.argb();
-		int light = prop.fullBright ? LightTexture.FULL_BRIGHT : prop.getPackedLight();
+		int light = prop.fullBright ? LightCoordsUtil.FULL_BRIGHT : prop.getPackedLight();
 		float w2 = cachedData.totalWidth / 2F;
 		float off = 0F;
 
 		if (bgColor != 0) {
-			var buffer = ctx.frame().buffers().getBuffer(prop.seeThrough ? RenderType.textBackgroundSeeThrough() : RenderType.textBackground());
+			var buffer = ctx.frame().buffers().getBuffer(prop.seeThrough ? RenderTypes.textBackgroundSeeThrough() : RenderTypes.textBackground());
 			buffer.addVertex(matrix4f, -w2 - 1F, y - 1F, 0F).setColor(bgColor).setLight(light);
 			buffer.addVertex(matrix4f, -w2 - 1F, 1F, 0F).setColor(bgColor).setLight(light);
 			buffer.addVertex(matrix4f, w2 + 1F, 1F, 0F).setColor(bgColor).setLight(light);

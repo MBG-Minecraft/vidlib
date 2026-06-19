@@ -5,9 +5,9 @@ import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.TextureReloadParams;
 import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
-public record DynamicTextureHolder<T extends AbstractTexture>(ResourceLocation id, Lazy<T> texture) {
+public record DynamicTextureHolder<T extends AbstractTexture>(Identifier id, Lazy<T> texture) {
 	@AutoInit(AutoInit.Type.TEXTURES_RELOADED)
 	public static void init(TextureReloadParams params) {
 		for (var holder : ClientAutoRegister.SCANNED.get()) {

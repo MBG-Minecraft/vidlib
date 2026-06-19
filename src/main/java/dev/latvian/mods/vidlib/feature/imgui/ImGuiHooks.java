@@ -20,6 +20,7 @@ import imgui.flag.ImGuiDockNodeFlags;
 import imgui.internal.ImGuiContext;
 import imgui.internal.ImGuiDockNode;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.Util;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.glfw.GLFW;
@@ -88,10 +89,10 @@ public class ImGuiHooks {
 		io.addConfigFlags(ImGuiConfigFlags.DpiEnableScaleViewports);
 		io.setConfigDockingWithShift(false);
 		io.setConfigWindowsMoveFromTitleBarOnly(true);
-		io.setConfigMacOSXBehaviors(Minecraft.ON_OSX);
+		io.setConfigMacOSXBehaviors(Util.getPlatform() == Util.OS.OSX);
 
 		imGuiGl3.init();
-		imGuiGlfw.init(mc.getWindow().getWindow(), true);
+		imGuiGlfw.init(mc.getWindow().handle(), true);
 		loadFonts(resourceManager);
 		var style = ImGui.getStyle();
 		ImGui.styleColorsDark(style);
@@ -153,14 +154,14 @@ public class ImGuiHooks {
 
 	public static void trackDpiScale(Window window) {
 		var previous = new GLFWWindowContentScaleCallback[1];
-		previous[0] = GLFW.glfwSetWindowContentScaleCallback(window.getWindow(), (handle, xScale, yScale) -> {
+		previous[0] = GLFW.glfwSetWindowContentScaleCallback(window.handle(), (handle, xScale, yScale) -> {
 			dpiScale = xScale;
 			if (previous[0] != null) {
 				previous[0].invoke(handle, xScale, yScale);
 			}
 		});
 		var xScale = new float[1];
-		GLFW.glfwGetWindowContentScale(window.getWindow(), xScale, null);
+		GLFW.glfwGetWindowContentScale(window.handle(), xScale, null);
 		dpiScale = xScale[0];
 	}
 
@@ -241,7 +242,7 @@ public class ImGuiHooks {
 
 		if (window.getWidth() != 0 && window.getHeight() != 0) {
 			if (window.getWidth() != prevWidth || window.getHeight() != prevHeight) {
-				mc.resizeDisplay();
+				mc.resizeGui();
 			}
 		}
 

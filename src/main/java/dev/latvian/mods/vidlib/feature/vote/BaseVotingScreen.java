@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.vote;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
@@ -62,19 +62,19 @@ public abstract class BaseVotingScreen extends Screen {
 	}
 
 	@Override
-	public void render(GuiGraphics graphics, int mx, int my, float delta) {
-		super.render(graphics, mx, my, delta);
+	public void extractRenderState(GuiGraphicsExtractor graphics, int mx, int my, float delta) {
+		super.extractRenderState(graphics, mx, my, delta);
 
-		graphics.pose().pushPose();
-		graphics.pose().translate(width / 2F, 30F, 0F);
-		graphics.pose().scale(2F, 2F, 1F);
-		graphics.drawString(font, title, -font.width(title) / 2, -4, 0xFFFFFFFF, true);
-		graphics.pose().popPose();
+		graphics.pose().pushMatrix();
+		graphics.pose().translate(width / 2F, 30F);
+		graphics.pose().scale(2F, 2F);
+		graphics.text(font, title, -font.width(title) / 2, -4, 0xFFFFFFFF, true);
+		graphics.pose().popMatrix();
 
 		var sub = font.split(subtitle, width - 40);
 
 		for (int i = 0; i < sub.size(); i++) {
-			graphics.drawString(font, sub.get(i), (width - font.width(sub.get(i))) / 2, 45 + i * 9, 0xFFFFFFFF, true);
+			graphics.text(font, sub.get(i), (width - font.width(sub.get(i))) / 2, 45 + i * 9, 0xFFFFFFFF, true);
 		}
 	}
 
@@ -87,6 +87,6 @@ public abstract class BaseVotingScreen extends Screen {
 
 	@Override
 	public boolean shouldCloseOnEsc() {
-		return hasShiftDown();
+		return minecraft.hasShiftDown();
 	}
 }

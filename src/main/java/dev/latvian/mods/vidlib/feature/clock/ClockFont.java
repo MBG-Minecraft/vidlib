@@ -10,22 +10,22 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
 import dev.latvian.mods.vidlib.feature.registry.RegistryRef;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.joml.Vector2i;
 
 import java.util.List;
 
 public record ClockFont(
-	ResourceLocation id,
-	ResourceLocation texture,
+	Identifier id,
+	Identifier texture,
 	Vector2i size,
 	Vector2i textureSize,
 	int separatorWidth,
 	int actualSeparatorWidth,
 	List<UV> uvs
 ) {
-	public static ClockFont create(ResourceLocation id,
-								   ResourceLocation texture,
+	public static ClockFont create(Identifier id,
+								   Identifier texture,
 								   Vector2i size,
 								   Vector2i textureSize,
 								   int separatorWidth
@@ -52,8 +52,8 @@ public record ClockFont(
 	}
 
 	public static final Codec<ClockFont> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		ResourceLocation.CODEC.fieldOf("id").forGetter(ClockFont::id),
-		ResourceLocation.CODEC.fieldOf("texture").forGetter(ClockFont::texture),
+		Identifier.CODEC.fieldOf("id").forGetter(ClockFont::id),
+		Identifier.CODEC.fieldOf("texture").forGetter(ClockFont::texture),
 		JOMLCodecs.IVEC2S.fieldOf("size").forGetter(ClockFont::size),
 		JOMLCodecs.IVEC2S.fieldOf("texture_size").forGetter(ClockFont::textureSize),
 		Codec.INT.optionalFieldOf("separator_width", 0).forGetter(ClockFont::separatorWidth)

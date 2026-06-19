@@ -1,20 +1,31 @@
-#version 410 core
+#version 330
 
 uniform sampler2D InSampler;
 uniform sampler2D InDepthSampler;
 uniform sampler2D TerrainInDepthSampler;
 uniform sampler2D DataSampler;
-uniform int Count;
-uniform mat4 InverseViewProjectionMat;
-uniform float GameTime;
-uniform int NoSceneSample;
+
+layout(std140) uniform Count {
+	int Value;
+} CountUniform;
+
+layout(std140) uniform InverseViewProjectionMat {
+	mat4 Value;
+} InverseViewProjectionMatUniform;
+
+layout(std140) uniform GameTime {
+	float Value;
+} GameTimeUniform;
+
+layout(std140) uniform NoSceneSample {
+	int Value;
+} NoSceneSampleUniform;
 
 in vec2 texCoord;
-in vec2 oneTexel;
 
 const float sqrt3d2 = sqrt(3.0) / 2.0;
 
-layout (location = 0) out vec4 fragColor;
+out vec4 fragColor;
 
 uvec4 fetchRGBA8u(ivec2 tc) {
 	vec4 s = texelFetch(DataSampler, tc, 0) * 255.0;
@@ -119,7 +130,7 @@ vec3 clip(float depth) {
 	clipPos.xy = texCoord * 2.0 - 1.0;
 	clipPos.z = depth * 2.0 - 1.0;
 	clipPos.w = 1.0;
-	vec4 homogenousPos = InverseViewProjectionMat * clipPos;
+	vec4 homogenousPos = InverseViewProjectionMatUniform.Value * clipPos;
 	return homogenousPos.xyz / homogenousPos.w;
 }
 
@@ -129,7 +140,7 @@ float alphaAccum;
 bool modified;
 
 void applyDecal(vec4 decalColor, int blendMode) {
-	if (NoSceneSample == 0) {
+	if (NoSceneSampleUniform.Value == 0) {
 		color = blend(color, decalColor, blendMode);
 	} else {
 		premulAccum = premulAccum * (1.0 - decalColor.a) + decalColor.rgb * decalColor.a;
@@ -139,7 +150,7 @@ void applyDecal(vec4 decalColor, int blendMode) {
 }
 
 void main() {
-	if (Count == 0) {
+	if (CountUniform.Value == 0) {
 		discard;
 	}
 
@@ -152,12 +163,12 @@ void main() {
 	alphaAccum = 0.0;
 	modified = false;
 
-	if (NoSceneSample == 0) {
+	if (NoSceneSampleUniform.Value == 0) {
 		color = texture(InSampler, texCoord).rgb;
 	}
 
 	for (int y = 0; y < 1024; y++) {
-		if (y >= Count) {
+		if (y >= CountUniform.Value) {
 			break;
 		}
 
@@ -219,7 +230,7 @@ void main() {
 							g.z = sin(r) * l;
 						}
 
-						float time = (fillType == 3) ? (GameTime * 1200.0 * fillSize) : 0.0;
+						float time = (fillType == 3) ? (GameTimeUniform.Value * 1200.0 * fillSize) : 0.0;
 
 						if (mod(g.x + g.y + g.z + time, fillSize) < fillThickness) {
 							applyDecal(decalColor, blendMode);
@@ -235,7 +246,7 @@ void main() {
 	}
 
 	if (modified) {
-		if (NoSceneSample == 0) {
+		if (NoSceneSampleUniform.Value == 0) {
 			fragColor = vec4(color, 1.0);
 		} else {
 			fragColor = vec4(premulAccum / alphaAccum, alphaAccum);

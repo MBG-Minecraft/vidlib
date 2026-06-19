@@ -4,13 +4,13 @@ import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.RenderTargetDescriptor;
 import dev.latvian.mods.klib.gl.GLDebugLog;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
 public class InternalCanvas extends Canvas {
-	protected InternalCanvas(ResourceLocation id, Consumer<CanvasBuilder> builder) {
+	protected InternalCanvas(Identifier id, Consumer<CanvasBuilder> builder) {
 		super(id, builder);
 	}
 

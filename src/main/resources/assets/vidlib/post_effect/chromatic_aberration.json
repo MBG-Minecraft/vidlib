@@ -13,23 +13,14 @@
 				}
 			],
 			"output": "swap",
-			"uniforms": [
-				{
-					"name": "Strength",
-					"type": "float"
-				},
-				{
-					"name": "Angle",
-					"type": "float"
-				},
-				{
-					"name": "FocusPos",
-					"type": "vec2"
-				}
-			]
+			"uniforms": {
+				"Strength": [],
+				"Angle": [],
+				"FocusPos": []
+			}
 		},
 		{
-			"vertex_shader": "minecraft:post/blit",
+			"vertex_shader": "minecraft:core/screenquad",
 			"fragment_shader": "minecraft:post/blit",
 			"inputs": [
 				{
@@ -38,13 +29,15 @@
 				}
 			],
 			"output": "vidlib:chromatic_aberration",
-			"uniforms": [
-				{
-					"name": "ColorModulate",
-					"type": "vec4",
-					"values": [1.0, 1.0, 1.0, 1.0]
-				}
-			]
+			"uniforms": {
+				"BlitConfig": [
+					{
+						"name": "ColorModulate",
+						"type": "vec4",
+						"value": [1.0, 1.0, 1.0, 1.0]
+					}
+				]
+			}
 		}
 	]
 }

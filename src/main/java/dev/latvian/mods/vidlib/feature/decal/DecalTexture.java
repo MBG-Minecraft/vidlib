@@ -5,13 +5,13 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.DynamicTextureHolder;
 import dev.latvian.mods.vidlib.util.client.DataTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
 public class DecalTexture extends DataTexture {
-	public static final ResourceLocation ID = VidLib.id("textures/effect/decals.png");
+	public static final Identifier ID = VidLib.id("textures/effect/decals.png");
 
 	@ClientAutoRegister
 	public static final DynamicTextureHolder<DecalTexture> HOLDER = new DynamicTextureHolder<>(ID, Lazy.of(DecalTexture::new));

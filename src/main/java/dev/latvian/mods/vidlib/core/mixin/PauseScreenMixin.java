@@ -60,7 +60,7 @@ public abstract class PauseScreenMixin extends Screen {
 
 	/*
 	@Inject(method = "renderBackground", at = @At("RETURN"))
-	private void vl$renderBackground(GuiGraphics graphics, int mx, int my, float delta, CallbackInfo ci) {
+	private void vl$renderBackground(GuiGraphicsExtractor graphics, int mx, int my, float delta, CallbackInfo ci) {
 		graphics.fill(0, 0, width, height, 0xFF000000);
 	}
 	 */

@@ -9,7 +9,7 @@ import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +27,7 @@ public record SyncRegistryPayload(SyncedRegistry<?> registry, Map<?, ?> values) 
 				return new SyncRegistryPayload(registry, Map.of());
 			}
 
-			var map = new HashMap<ResourceLocation, Object>(size);
+			var map = new HashMap<Identifier, Object>(size);
 
 			for (int i = 0; i < size; i++) {
 				try {

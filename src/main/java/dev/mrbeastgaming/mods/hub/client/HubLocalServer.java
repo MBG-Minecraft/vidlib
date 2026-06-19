@@ -61,7 +61,7 @@ public class HubLocalServer {
 				}
 
 				mc.toast(Component.literal("Logged In"), Component.literal(name));
-				GLFW.glfwFocusWindow(mc.getWindow().getWindow());
+				GLFW.glfwFocusWindow(mc.getWindow().handle());
 				VidLibClient.checkFileSync(false);
 
 				if (!PlatformHelper.CURRENT.isDevEnv()) {
@@ -75,7 +75,7 @@ public class HubLocalServer {
 					link.setMessage(Component.literal(("Error " + statusCode + "\n" + error).trim()));
 				}
 
-				GLFW.glfwFocusWindow(mc.getWindow().getWindow());
+				GLFW.glfwFocusWindow(mc.getWindow().handle());
 			});
 		}
 

@@ -15,7 +15,7 @@ import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.function.Function;
@@ -70,7 +70,7 @@ public record ScreenShake(
 	public static final DataType<ScreenShake> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, ScreenShake.class);
 	public static final CommandDataType<ScreenShake> COMMAND = CommandDataType.of(DATA_TYPE);
 
-	public static final ResourceLocation MOTION_BLUR_EFFECT = ResourceLocation.withDefaultNamespace("shaders/post/phosphor.json");
+	public static final Identifier MOTION_BLUR_EFFECT = Identifier.withDefaultNamespace("shaders/post/phosphor.json");
 
 	public ScreenShake withIntensityMod(float intensityMod) {
 		return new ScreenShake(

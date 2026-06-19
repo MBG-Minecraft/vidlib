@@ -4,7 +4,7 @@ import dev.latvian.mods.vidlib.feature.feature.Feature;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;

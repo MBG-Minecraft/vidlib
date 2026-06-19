@@ -6,7 +6,7 @@ import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.LinkedHashMap;
@@ -17,7 +17,7 @@ public record SyncedRegistry<V>(VLRegistry<V> registry, StreamCodec<? super Regi
 		void run(Player player);
 	}
 
-	public static final Map<ResourceLocation, SyncedRegistry<?>> ALL = new LinkedHashMap<>();
+	public static final Map<Identifier, SyncedRegistry<?>> ALL = new LinkedHashMap<>();
 
 	public static <V> void add(VLRegistry<V> registry, StreamCodec<? super RegistryFriendlyByteBuf, V> value, Callback callback) {
 		ALL.put(registry.id, new SyncedRegistry<>(registry, value, callback));

@@ -7,9 +7,9 @@ import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
-public record UpdateZonePayload(ResourceLocation zone, int index, Zone zoneData) implements SimplePacketPayload {
+public record UpdateZonePayload(Identifier zone, int index, Zone zoneData) implements SimplePacketPayload {
 	@AutoPacket
 	public static final VidLibPacketType<UpdateZonePayload> TYPE = VidLibPacketType.internal("zone/update", CompositeStreamCodec.of(
 		ID.STREAM_CODEC, UpdateZonePayload::zone,

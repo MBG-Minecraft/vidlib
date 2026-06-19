@@ -10,13 +10,13 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.gl.GLDebugLog;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
+import dev.latvian.mods.vidlib.feature.client.VidLibRenderPipelines;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.PostChain;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -102,7 +102,7 @@ public class CanvasImpl {
 	}
 
 	public static void drawAllBeforeOutline(Minecraft mc) {
-		var texture = Objects.requireNonNull(mc.getMainRenderTarget().getColorTexture());
+		var texture = Objects.requireNonNull(mc.getMainRenderTarget().getColorTextureView());
 		GLDebugLog.pushGroup("[VidLib] Canvas Draw All Before Outline");
 
 		for (var canvas : ENABLED) {
@@ -120,7 +120,7 @@ public class CanvasImpl {
 	}
 
 	public static void drawAllAfterOutline(Minecraft mc) {
-		var texture = Objects.requireNonNull(mc.getMainRenderTarget().getColorTexture());
+		var texture = Objects.requireNonNull(mc.getMainRenderTarget().getColorTextureView());
 		GLDebugLog.pushGroup("[VidLib] Canvas Draw All After Outline");
 
 		for (var canvas : ENABLED) {
@@ -152,12 +152,12 @@ public class CanvasImpl {
 	}
 
 	@Nullable
-	public static Canvas get(ResourceLocation id) {
+	public static Canvas get(Identifier id) {
 		var c = Canvas.ALL.get().get(id);
 		return c != null && c.enabled ? c : null;
 	}
 
-	public static boolean replace(ResourceLocation id, ResourceHandle<RenderTarget> target) {
+	public static boolean replace(Identifier id, ResourceHandle<RenderTarget> target) {
 		var canvas = get(id);
 
 		if (canvas != null) {
@@ -218,7 +218,7 @@ public class CanvasImpl {
 		GLDebugLog.popGroup();
 	}
 
-	public static void drawPreview(Minecraft mc, GuiGraphics g) {
+	public static void drawPreview(Minecraft mc, GuiGraphicsExtractor g) {
 		if (mc.level == null || ClientGameEngine.INSTANCE.hideGui(mc) || mc.level.isReplayLevel()) {
 			return;
 		}
@@ -226,7 +226,6 @@ public class CanvasImpl {
 		GLDebugLog.pushGroup("[VidLib] Canvas Preview");
 
 		int y = 5;
-		var buffers = mc.renderBuffers().bufferSource();
 		float scale = 0.5F;
 		int w = (int) (256F * scale);
 		int h = (int) (144F * scale);
@@ -237,10 +236,8 @@ public class CanvasImpl {
 			if (canvas.previewColor || canvas.previewDepth) {
 				GLDebugLog.pushGroup("[VidLib] Canvas " + canvas.idString);
 
-				g.pose().pushPose();
-				g.pose().translate(0F, 0F, 950F);
-				var p = g.pose().last();
-				var m = p.pose();
+				g.pose().pushMatrix();
+				g.pose().translate(0F, 0F);
 
 				if (canvas.previewColor) {
 					GLDebugLog.message("[VidLib] Canvas Color Preview");
@@ -250,24 +247,15 @@ public class CanvasImpl {
 					g.fill(x, y, x + w, y + h, 0xFF232326);
 
 					if (tex != null) {
-						var buffer = buffers.getBuffer(VidLibRenderTypes.GUI.apply(canvas.colorTexturePath));
-						buffer.addVertex(m, x, y, 0F).setUv(0F, 1F).setColor(255, 255, 255, 255);
-						buffer.addVertex(m, x, y + h, 0F).setUv(0F, 0F).setColor(255, 255, 255, 255);
-						buffer.addVertex(m, x + w, y + h, 0F).setUv(1F, 0F).setColor(255, 255, 255, 255);
-						buffer.addVertex(m, x + w, y, 0F).setUv(1F, 1F).setColor(255, 255, 255, 255);
+						g.blit(RenderPipelines.GUI_TEXTURED, canvas.colorTexturePath, x, y, 0F, 0F, w, h, w, h);
 
 						var argb = Color.of(canvas.getCenterARGB());
 						var text = argb.toARGBString();
 						g.fill(x + 1, y + 1, x + 12 + mc.font.width(text), y + 10, 0xA0000000);
 						g.fill(x + 2, y + 2, x + 9, y + 9, argb.argb() | 0xFF000000);
-						g.drawString(mc.font, text, x + 12, y + 2, 0xFFFFFFFF);
+						g.text(mc.font, text, x + 12, y + 2, 0xFFFFFFFF);
 					} else {
-						var buffer = buffers.getBuffer(RenderType.debugLine(1D));
-						buffer.addVertex(m, x, y, 0F).setColor(255, 0, 0, 255).setNormal(p, 0F, 1F, 0F);
-						buffer.addVertex(m, x + w, y + h, 0F).setColor(255, 0, 0, 255).setNormal(p, 0F, 1F, 0F);
-
-						buffer.addVertex(m, x, y + h, 0F).setColor(255, 0, 0, 255).setNormal(p, 0F, 1F, 0F);
-						buffer.addVertex(m, x + w, y, 0F).setColor(255, 0, 0, 255).setNormal(p, 0F, 1F, 0F);
+						g.outline(x, y, w, h, 0xFFFF0000);
 					}
 
 					x += w + 6;
@@ -281,32 +269,23 @@ public class CanvasImpl {
 					g.fill(x, y, x + w, y + h, 0xFF232326);
 
 					if (tex != null) {
-						var buffer = buffers.getBuffer(VidLibRenderTypes.GUI_DEPTH.apply(canvas.depthTexturePath));
-						buffer.addVertex(m, x, y, 0F).setUv(0F, 1F).setColor(255, 255, 255, 255);
-						buffer.addVertex(m, x, y + h, 0F).setUv(0F, 0F).setColor(255, 255, 255, 255);
-						buffer.addVertex(m, x + w, y + h, 0F).setUv(1F, 0F).setColor(255, 255, 255, 255);
-						buffer.addVertex(m, x + w, y, 0F).setUv(1F, 1F).setColor(255, 255, 255, 255);
+						g.blit(VidLibRenderPipelines.GUI_DEPTH, canvas.depthTexturePath, x, y, 0F, 0F, w, h, w, h);
 
 						var depth = canvas.getCenterDepth();
 						var text = String.format("%.05f", depth);
 						g.fill(x + 1, y + 1, x + 2 + mc.font.width(text), y + 10, 0xA0000000);
-						g.drawString(mc.font, text, x + 2, y + 2, 0xFFFFFFFF);
+						g.text(mc.font, text, x + 2, y + 2, 0xFFFFFFFF);
 
 						var ltext = String.format("%.05f", mc.linearizeDepth(depth));
 						g.fill(x + 1, y + h - 10, x + 2 + mc.font.width(ltext), y + h - 1, 0xA0000000);
-						g.drawString(mc.font, ltext, x + 2, y + h - 9, 0xFFFFFFFF);
+						g.text(mc.font, ltext, x + 2, y + h - 9, 0xFFFFFFFF);
 					} else {
-						var buffer = buffers.getBuffer(RenderType.debugLine(1D));
-						buffer.addVertex(m, x, y, 0F).setColor(255, 0, 0, 255).setNormal(p, 0F, 1F, 0F);
-						buffer.addVertex(m, x + w, y + h, 0F).setColor(255, 0, 0, 255).setNormal(p, 0F, 1F, 0F);
-
-						buffer.addVertex(m, x, y + h, 0F).setColor(255, 0, 0, 255).setNormal(p, 0F, 1F, 0F);
-						buffer.addVertex(m, x + w, y, 0F).setColor(255, 0, 0, 255).setNormal(p, 0F, 1F, 0F);
+						g.outline(x, y, w, h, 0xFFFF0000);
 					}
 				}
 
 				y += h + 6;
-				g.pose().popPose();
+				g.pose().popMatrix();
 
 				GLDebugLog.popGroup();
 			}

@@ -1,13 +1,13 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import io.netty.channel.ChannelFutureListener;
 import net.minecraft.network.Connection;
 import net.minecraft.network.PacketListener;
-import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
-import net.minecraft.network.protocol.common.ServerCommonPacketListener;
-import net.minecraft.server.MinecraftServer;
+import dev.latvian.mods.vidlib.core.VLServerPacketListener;
 import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
+import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -28,20 +28,20 @@ public class ConnectionMixin {
 	@Nullable
 	private volatile PacketListener packetListener;
 
-	@Inject(method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;Z)V", at = @At("HEAD"))
-	private void vl$send(Packet<?> packet, PacketSendListener listener, boolean flush, CallbackInfo ci) {
-		if (receiving == PacketFlow.SERVERBOUND && packetListener instanceof ServerCommonPacketListener l && l.getMainThreadEventLoop() instanceof MinecraftServer server && !server.overworld().isReplayLevel()) {
+	@Inject(method = "send(Lnet/minecraft/network/protocol/Packet;Lio/netty/channel/ChannelFutureListener;Z)V", at = @At("HEAD"))
+	private void vl$send(Packet<?> packet, ChannelFutureListener listener, boolean flush, CallbackInfo ci) {
+		if (receiving == PacketFlow.SERVERBOUND && packetListener instanceof ServerCommonPacketListenerImpl l && packetListener instanceof VLServerPacketListener vl && !vl.vl$server().overworld().isReplayLevel()) {
 			if (l instanceof ServerConfigurationPacketListenerImpl lc) {
-				var packetCapture = server.vl$getPacketCapture(true);
+				var packetCapture = vl.vl$server().vl$getPacketCapture(true);
 
 				if (packetCapture != null) {
-					packetCapture.getSession(lc.getOwner().getId()).capture(packet, true);
+					packetCapture.getSession(lc.getOwner().id()).capture(packet, true);
 				}
 			} else if (l instanceof ServerGamePacketListenerImpl lc) {
-				var packetCapture = server.vl$getPacketCapture(true);
+				var packetCapture = vl.vl$server().vl$getPacketCapture(true);
 
 				if (packetCapture != null) {
-					packetCapture.getSession(lc.getOwner().getId()).capture(packet, false);
+					packetCapture.getSession(lc.getOwner().id()).capture(packet, false);
 				}
 			}
 		}

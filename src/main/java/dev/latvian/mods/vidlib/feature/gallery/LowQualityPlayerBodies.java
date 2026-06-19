@@ -11,11 +11,11 @@ import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.feature.client.TexturedRenderType;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.OutputTarget;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.util.TriState;
 import org.jetbrains.annotations.Nullable;
@@ -27,19 +27,16 @@ public interface LowQualityPlayerBodies {
 	Gallery<UUID> GALLERY = Gallery.ofUUIDKey("low_quality_player_bodies", () -> VidLibPaths.USER.get().resolve("low-quality-player-bodies"), TriState.TRUE);
 
 	Lazy<RenderTarget> RENDER_TARGET = Lazy.of(() -> new TextureTarget("LowQualityPlayerBodiesCanvas", 64, 64, true));
+	OutputTarget OUTPUT_TARGET = new OutputTarget("low_quality_player_body", RENDER_TARGET);
 
 	TexturedRenderType RENDER_TYPE = TexturedRenderType.internal(
 		"low_quality_player_body",
 		1536,
 		true,
 		true,
-		RenderPipelines.ENTITY_CUTOUT_NO_CULL,
-		texture -> RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
-			.setLightmapState(RenderStateShard.LIGHTMAP)
-			.setOverlayState(RenderStateShard.OVERLAY)
-			.setOutputState(new RenderStateShard.OutputStateShard("low_quality_player_body", RENDER_TARGET))
-			.createCompositeState(false)
+		texture -> TexturedRenderType.textured(RenderPipelines.ENTITY_CUTOUT, texture, true, true)
+			.setOutputTarget(OUTPUT_TARGET)
+			.setOutline(RenderSetup.OutlineProperty.NONE)
 	);
 
 	static GalleryImage<UUID> get(Minecraft mc, UUID uuid) {

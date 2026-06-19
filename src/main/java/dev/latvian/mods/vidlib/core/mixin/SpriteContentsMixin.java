@@ -36,20 +36,15 @@ public class SpriteContentsMixin implements VLSpriteContents {
 		vl$dynamicSpriteTexture = texture;
 	}
 
-	@Inject(method = "upload", at = @At("RETURN"))
-	private void vl$upload(int x, int y, int sourceX, int sourceY, NativeImage[] images, GpuTexture texture, CallbackInfo ci) {
+	@Inject(method = "uploadFirstFrame", at = @At("RETURN"))
+	private void vl$uploadFirstFrame(GpuTexture texture, int level, CallbackInfo ci) {
 		if (vl$dynamicSpriteTexture != null && vl$dynamicSpriteTexture.initialized) {
 			var target = vl$dynamicSpriteTexture.getTexture();
 
-			for (int i = 0; i < this.byMipLevel.length; i++) {
-				// NeoForge: Skip uploading if the texture would be made invalid by mip level
-				if ((this.width >> i) <= 0 || (this.height >> i) <= 0) {
-					break;
-				}
-
+			if (level < this.byMipLevel.length && (this.width >> level) > 0 && (this.height >> level) > 0) {
 				RenderSystem.getDevice()
 					.createCommandEncoder()
-					.writeToTexture(target, images[i], i, 0, 0, this.width >> i, this.height >> i, sourceX >> i, sourceY >> i);
+					.writeToTexture(target, byMipLevel[level], level, 0, 0, 0, this.width >> level, this.height >> level, 0, 0);
 			}
 		}
 	}

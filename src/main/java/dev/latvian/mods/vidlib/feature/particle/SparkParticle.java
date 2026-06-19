@@ -1,18 +1,20 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import dev.latvian.mods.klib.color.Gradient;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.gradient.ClientGradients;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.particle.TextureSheetParticle;
 import org.joml.Math;
 
-public class SparkParticle extends TextureSheetParticle {
+public class SparkParticle extends SingleQuadParticle {
 	public static ParticleProvider<VidLibParticles.SimpleParticleType> create(SpriteSet spriteSet) {
-		return (type, level, x, y, z, xd, yd, zd) -> new SparkParticle(level, x, y, z, xd, yd, zd, spriteSet);
+		return (type, level, x, y, z, xd, yd, zd, random) -> new SparkParticle(level, x, y, z, xd, yd, zd, spriteSet);
 	}
 
 	private final SpriteSet spriteSet;
@@ -21,10 +23,10 @@ public class SparkParticle extends TextureSheetParticle {
 	private float oQuadSize;
 
 	public SparkParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet spriteSet) {
-		super(level, x, y, z);
+		super(level, x, y, z, spriteSet.first());
 		this.spriteSet = spriteSet;
 		this.gradient = ClientGradients.SPARK.optimize();
-		this.pickSprite(spriteSet);
+		this.setSprite(spriteSet.get(random));
 		this.xd = xd;
 		this.yd = yd;
 		this.zd = zd;
@@ -36,8 +38,13 @@ public class SparkParticle extends TextureSheetParticle {
 	}
 
 	@Override
-	public ParticleRenderType getRenderType() {
+	public ParticleRenderType getGroup() {
 		return VidLibParticleRenderTypes.ADDITIVE;
+	}
+
+	@Override
+	protected SingleQuadParticle.Layer getLayer() {
+		return VidLibParticleRenderTypes.ADDITIVE_LAYER;
 	}
 
 	@Override
@@ -55,7 +62,7 @@ public class SparkParticle extends TextureSheetParticle {
 	}
 
 	@Override
-	protected int getLightColor(float tint) {
+	protected int getLightCoords(float tint) {
 		return 15728880;
 	}
 

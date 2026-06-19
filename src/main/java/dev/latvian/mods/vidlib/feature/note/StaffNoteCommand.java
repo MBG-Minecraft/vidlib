@@ -9,7 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 public interface StaffNoteCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("staff-note", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.argument("text", StringArgumentType.greedyString())
 			.executes(ctx -> note(ctx.getSource().getPlayerOrException(), StringArgumentType.getString(ctx, "text")))
 		)
@@ -18,7 +18,7 @@ public interface StaffNoteCommand {
 	static int note(ServerPlayer player, String text) {
 		var payload = new CreateNotePayload(new Note(player, text, NoteVisibility.STAFF));
 
-		for (var p : player.server.getPlayerList().getPlayers()) {
+		for (var p : player.level().getServer().getPlayerList().getPlayers()) {
 			if (p == player || p.isStaffOrTalent()) {
 				p.s2c(payload);
 			}

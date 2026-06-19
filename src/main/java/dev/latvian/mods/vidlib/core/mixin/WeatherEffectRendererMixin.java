@@ -2,8 +2,8 @@ package dev.latvian.mods.vidlib.core.mixin;
 
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.WeatherEffectRenderer;
+import net.minecraft.client.renderer.state.level.WeatherRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -20,8 +20,8 @@ public class WeatherEffectRendererMixin {
 	@Unique
 	private Biome.Precipitation vl$globalOverride = null;
 
-	@Inject(method = "render(Lnet/minecraft/world/level/Level;Lnet/minecraft/client/renderer/MultiBufferSource;IFLnet/minecraft/world/phys/Vec3;)V", at = @At("HEAD"))
-	private void vl$render(Level level, MultiBufferSource bufferSource, int ticks, float partialTick, Vec3 cameraPosition, CallbackInfo ci) {
+	@Inject(method = "extractRenderState", at = @At("HEAD"))
+	private void vl$extractRenderState(Level level, int ticks, float partialTick, Vec3 cameraPosition, WeatherRenderState renderState, CallbackInfo ci) {
 		vl$globalOverride = ClientGameEngine.INSTANCE.overrideGlobalVisualPrecipitation((ClientLevel) level, partialTick, cameraPosition);
 	}
 

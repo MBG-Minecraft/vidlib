@@ -24,7 +24,7 @@ public class ItemParticle extends CustomParticle {
 			return;
 		}
 
-		var cameraPos = camera.getPosition();
+		var cameraPos = camera.position();
 		var rx = (float) (KMath.lerp(delta, xo, x) - cameraPos.x);
 		var ry = (float) (KMath.lerp(delta, yo, y) - cameraPos.y);
 		var rz = (float) (KMath.lerp(delta, zo, z) - cameraPos.z);

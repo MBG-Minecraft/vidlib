@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.platform.neoforge;
 
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
 import net.minecraft.network.protocol.Packet;
@@ -29,26 +28,11 @@ public record NeoForgePacketContext(VidLibPacketPayloadContainer payload, IPaylo
 
 	@Override
 	public CompletableFuture<Void> enqueueWork(Runnable task) {
-		if (listener().getMainThreadEventLoop().isSameThread()) {
-			task.run();
-			return CompletableFuture.completedFuture(null);
-		}
-
-		return listener().getMainThreadEventLoop().submit(task).exceptionally(ex -> {
-			VidLib.LOGGER.error("Failed to process a synchronized task of the payload: %s".formatted(getClass().getName()), ex);
-			return null;
-		});
+		return parent.enqueueWork(task);
 	}
 
 	@Override
 	public <T> CompletableFuture<T> enqueueWork(Supplier<T> task) {
-		if (listener().getMainThreadEventLoop().isSameThread()) {
-			return CompletableFuture.completedFuture(task.get());
-		}
-
-		return listener().getMainThreadEventLoop().submit(task).exceptionally(ex -> {
-			VidLib.LOGGER.error("Failed to process a synchronized task of the payload: %s".formatted(getClass().getName()), ex);
-			return null;
-		});
+		return parent.enqueueWork(task);
 	}
 }

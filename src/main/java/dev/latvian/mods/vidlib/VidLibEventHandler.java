@@ -50,6 +50,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerXpEvent;
 import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
@@ -81,7 +82,7 @@ public class VidLibEventHandler {
 			}
 
 			for (var item : BuiltInRegistries.ITEM) {
-				var mod = item.builtInRegistryHolder().getKey().location().getNamespace();
+				var mod = item.builtInRegistryHolder().getKey().identifier().getNamespace();
 
 				if (mod.equals("video") || mod.equals(VidLib.ID)) {
 					event.accept(item.getDefaultInstance());
@@ -133,14 +134,14 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
 		if (event.getEntity() instanceof ServerPlayer player) {
-			player.server.vl$playerJoined(player);
+			player.level().getServer().vl$playerJoined(player);
 		}
 	}
 
 	@SubscribeEvent
 	public static void playerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
 		if (event.getEntity() instanceof ServerPlayer player) {
-			player.server.vl$playerLeft(player);
+			player.level().getServer().vl$playerLeft(player);
 		}
 	}
 
@@ -241,7 +242,7 @@ public class VidLibEventHandler {
 	}
 
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
-	public static void preBreakBlock(BlockEvent.BreakEvent event) {
+	public static void preBreakBlock(BreakBlockEvent event) {
 		if (event.getPlayer().vl$isSuspended()) {
 			event.setCanceled(true);
 		}

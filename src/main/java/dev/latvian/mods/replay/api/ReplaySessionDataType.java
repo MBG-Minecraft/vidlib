@@ -1,11 +1,11 @@
 package dev.latvian.mods.replay.api;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
-public record ReplaySessionDataType<T extends ReplaySessionData>(ResourceLocation id, Supplier<T> factory) {
+public record ReplaySessionDataType<T extends ReplaySessionData>(Identifier id, Supplier<T> factory) {
 	@Override
 	public boolean equals(Object obj) {
 		return this == obj || obj instanceof ReplaySessionDataType<?> t && id.equals(t.id);

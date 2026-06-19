@@ -4,7 +4,7 @@
 	},
 	"passes": [
 		{
-			"vertex_shader": "minecraft:post/sobel",
+			"vertex_shader": "vidlib:post/texel",
 			"fragment_shader": "vidlib:post/weak_outline",
 			"inputs": [
 				{
@@ -25,7 +25,7 @@
 			"output": "swap"
 		},
 		{
-			"vertex_shader": "minecraft:post/blit",
+			"vertex_shader": "minecraft:core/screenquad",
 			"fragment_shader": "minecraft:post/blit",
 			"inputs": [
 				{
@@ -34,13 +34,15 @@
 				}
 			],
 			"output": "vidlib:weak_outline",
-			"uniforms": [
-				{
-					"name": "ColorModulate",
-					"type": "vec4",
-					"values": [1.0, 1.0, 1.0, 1.0]
-				}
-			]
+			"uniforms": {
+				"BlitConfig": [
+					{
+						"name": "ColorModulate",
+						"type": "vec4",
+						"value": [1.0, 1.0, 1.0, 1.0]
+					}
+				]
+			}
 		}
 	]
 }

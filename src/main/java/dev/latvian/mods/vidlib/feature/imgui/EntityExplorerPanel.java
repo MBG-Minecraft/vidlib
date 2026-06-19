@@ -68,7 +68,7 @@ public class EntityExplorerPanel extends Panel {
 		ImGui.checkbox("Only Players", onlyPlayers);
 
 		if (sortByClosest.get() && allEntities.size() >= 2) {
-			var cam = graphics.mc.gameRenderer.getMainCamera().getPosition();
+			var cam = graphics.mc.gameRenderer.getMainCamera().position();
 			allEntities.sort(Comparator.comparingDouble(p -> p.getEyePosition(delta).distanceToSqr(cam)));
 		}
 
@@ -192,7 +192,7 @@ public class EntityExplorerPanel extends Panel {
 		if (entity instanceof Player) {
 			ImGui.sameLine();
 
-			var tags = entity.getTags();
+			var tags = entity.entityTags();
 
 			if (ImGui.button(tags.size() + " Tags###vidlib-entity-tags")) {
 				ImGui.openPopup("###vidlib-edit-tags-popup");

@@ -7,7 +7,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.phys.AABB;
 
@@ -34,7 +34,7 @@ public class TextParticle extends CustomParticle {
 			return;
 		}
 
-		var cameraPos = camera.getPosition();
+		var cameraPos = camera.position();
 		var rx = (float) (KMath.lerp(time, xo, x) - cameraPos.x);
 		var ry = (float) (KMath.lerp(time, yo, y) - cameraPos.y);
 		var rz = (float) (KMath.lerp(time, zo, z) - cameraPos.z);
@@ -59,7 +59,7 @@ public class TextParticle extends CustomParticle {
 			buffers,
 			options.seeThrough() ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.POLYGON_OFFSET,
 			0, // Background color
-			LightTexture.FULL_BRIGHT
+			LightCoordsUtil.FULL_BRIGHT
 		);
 
 		ms.popPose();

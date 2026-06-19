@@ -12,14 +12,14 @@ public class WindParticle extends InterpolatedParticle {
 	};
 
 	public static ParticleProvider<WindParticleOptions> create(SpriteSet spriteSet) {
-		return (options, level, x, y, z, xd, yd, zd) -> new WindParticle(options, level, x, y, z, xd, yd, zd, spriteSet);
+		return (options, level, x, y, z, xd, yd, zd, random) -> new WindParticle(options, level, x, y, z, xd, yd, zd, spriteSet);
 	}
 
 	public final WindParticleOptions options;
 	public final SpriteSet spriteSet;
 
 	public WindParticle(WindParticleOptions options, ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet spriteSet) {
-		super(level, x, y, z, xd, yd, zd, options.interpolation());
+		super(level, x, y, z, xd, yd, zd, options.interpolation(), spriteSet);
 		this.hasPhysics = false;
 		this.options = options;
 		this.spriteSet = spriteSet;
@@ -30,12 +30,12 @@ public class WindParticle extends InterpolatedParticle {
 	}
 
 	@Override
-	public FacingCameraMode getFacingCameraMode() {
+	public SingleQuadParticle.FacingCameraMode getFacingCameraMode() {
 		return options.ground() ? GROUND : SingleQuadParticle.FacingCameraMode.LOOKAT_XYZ;
 	}
 
 	@Override
-	protected int getLightColor(float tint) {
+	protected int getLightCoords(float tint) {
 		return 15728880;
 	}
 

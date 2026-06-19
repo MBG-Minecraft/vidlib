@@ -10,7 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 public interface FlyCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("fly", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.argument("target", EntityArgument.player())
 			.executes(ctx -> fly(EntityArgument.getPlayer(ctx, "target")))
 		)

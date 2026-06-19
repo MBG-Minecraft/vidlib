@@ -15,8 +15,9 @@ import dev.latvian.mods.vidlib.util.JsonCodecReloadListener;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import imgui.type.ImBoolean;
+import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
@@ -92,7 +93,7 @@ public record GhostStructure(
 		}
 
 		@Override
-		protected void apply(ResourceManager resourceManager, Map<ResourceLocation, GhostStructure> from) {
+		protected void apply(ResourceManager resourceManager, Map<Identifier, GhostStructure> from) {
 			StructureRenderer.redrawAll();
 			LIST = List.copyOf(from.values());
 		}
@@ -199,7 +200,7 @@ public record GhostStructure(
 			ms.pushPose();
 			frame.translate(str.pos);
 
-			if (str.slice != null && mc.getEntityRenderDispatcher().shouldRenderHitBoxes() && frame.layer() == TerrainRenderLayer.TRANSLUCENT) {
+			if (str.slice != null && mc.debugEntries.isCurrentlyEnabled(DebugScreenEntries.ENTITY_HITBOXES) && frame.layer() == TerrainRenderLayer.TRANSLUCENT) {
 				var b = str.slice;
 				CuboidRenderer.lines(ms, b.minX(), b.minY(), b.minZ(), b.maxX() + 1F, b.maxY() + 1F, b.maxZ() + 1F, frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Color.RED);
 			}

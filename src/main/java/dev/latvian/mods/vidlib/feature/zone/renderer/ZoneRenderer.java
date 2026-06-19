@@ -59,7 +59,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 	static void renderAll(FrameInfo frame) {
 		var mc = frame.mc();
 		var ms = frame.poseStack();
-		var cameraPos = frame.camera().getPosition();
+		var cameraPos = frame.camera().position();
 		var renderType = VidLibClientOptions.getZoneRenderType();
 		var buffers = frame.buffers();
 		var session = frame.session();
@@ -134,7 +134,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 	static void renderVisible(FrameInfo frame) {
 		for (var sz : frame.session().filteredZones.getVisible()) {
 			var zone = sz.instance().zone;
-			double dist = zone.shape().closestDistanceTo(frame.camera().getPosition());
+			double dist = zone.shape().closestDistanceTo(frame.camera().position());
 
 			if (dist > 2048D || !frame.isVisible(zone.shape().toAABB())) {
 				continue;
@@ -149,7 +149,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 	static void renderSolid(FrameInfo frame) {
 		for (var sz : frame.session().filteredZones.getSolidZones()) {
 			var zone = sz.instance().zone;
-			double dist = zone.shape().closestDistanceTo(frame.camera().getPosition());
+			double dist = zone.shape().closestDistanceTo(frame.camera().position());
 
 			if (dist <= 10D && zone.color().alpha() > 0 && frame.isVisible(zone.shape().toAABB()) && zone.solid().test(frame.mc().player)) {
 				var renderer = ZoneRenderer.get(zone.shape().type());

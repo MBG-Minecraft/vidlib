@@ -20,7 +20,7 @@ import dev.mrbeastgaming.mods.hub.api.gateway.HubGatewayEvent;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.Entity;
@@ -96,7 +96,7 @@ public class PlatformHelper {
 	}
 
 	@Nullable
-	public Path findFile(PackType type, ResourceLocation id) {
+	public Path findFile(PackType type, Identifier id) {
 		var path = id.getPath().split("/");
 		var pathParts = new String[path.length + 2];
 		pathParts[0] = type.getDirectory();
@@ -113,7 +113,7 @@ public class PlatformHelper {
 		return false;
 	}
 
-	public void collectDynamicResources(PackType type, Consumer<ResourceLocation> callback) {
+	public void collectDynamicResources(PackType type, Consumer<Identifier> callback) {
 	}
 
 	public void collectKNumbers(SimpleRegistryCollector<KNumber> registry) {
@@ -163,7 +163,7 @@ public class PlatformHelper {
 			gameMode = player.gameMode();
 		}
 
-		return CommonGameEngine.INSTANCE.isPlayerStaff(entity.getTags(), gameMode);
+		return CommonGameEngine.INSTANCE.isPlayerStaff(entity.entityTags(), gameMode);
 	}
 
 	public boolean isStaffOrTalent(Entity entity) {
@@ -173,7 +173,7 @@ public class PlatformHelper {
 			gameMode = player.gameMode();
 		}
 
-		return CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(entity.getTags(), gameMode);
+		return CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(entity.entityTags(), gameMode);
 	}
 
 	public Path getPlayerDataDirectory(MinecraftServer server) {

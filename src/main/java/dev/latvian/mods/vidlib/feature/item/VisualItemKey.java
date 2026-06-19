@@ -79,7 +79,7 @@ public record VisualItemKey(Holder<Item> item, DataComponentPatch visualPatch) {
 			return AIR;
 		}
 
-		return create(stack.getItemHolder(), visual(stack.getComponentsPatch()));
+		return create(stack.typeHolder(), visual(stack.getComponentsPatch()));
 	}
 
 	public static final Codec<VisualItemKey> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -89,7 +89,7 @@ public record VisualItemKey(Holder<Item> item, DataComponentPatch visualPatch) {
 
 	public String toString() {
 		var key = item.getKey();
-		return key.location().getNamespace() + "_" + key.location().getPath().replace('/', '_').replace('.', '_');
+		return key.identifier().getNamespace() + "_" + key.identifier().getPath().replace('/', '_').replace('.', '_');
 	}
 
 	public ItemStack toItemStack() {

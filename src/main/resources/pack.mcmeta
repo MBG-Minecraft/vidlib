@@ -1,7 +1,8 @@
 {
 	"pack": {
-		"pack_format": 42,
-		"supported_formats": [42, 9999],
+		"pack_format": 84,
+		"min_format": 84,
+		"max_format": 84,
 		"description": "VidLib Content"
 	}
 }

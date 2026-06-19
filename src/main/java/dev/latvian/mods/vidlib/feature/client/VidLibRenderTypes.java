@@ -1,167 +1,60 @@
 package dev.latvian.mods.vidlib.feature.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
-import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.TriState;
+import net.minecraft.client.renderer.rendertype.LayeringTransform;
+import net.minecraft.client.renderer.rendertype.OutputTarget;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 
 import java.util.function.Function;
 
 public interface VidLibRenderTypes {
-	TexturedRenderType GUI = TexturedRenderType.internal(
-		"gui",
-		786432,
-		RenderPipelines.GUI_TEXTURED,
-		texture -> RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
-			.createCompositeState(false)
-	);
+	TexturedRenderType GUI = TexturedRenderType.internal("gui", 786432, RenderPipelines.GUI_TEXTURED);
+	TexturedRenderType GUI_BLUR = TexturedRenderType.internal("gui_blur", 786432, RenderPipelines.GUI_TEXTURED);
+	TexturedRenderType GUI_DEPTH = TexturedRenderType.internal("gui_depth", 786432, VidLibRenderPipelines.GUI_DEPTH);
 
-	TexturedRenderType GUI_BLUR = TexturedRenderType.internal(
-		"gui_blur",
-		786432,
-		RenderPipelines.GUI_TEXTURED,
-		texture -> RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.TRUE, false))
-			.createCompositeState(false)
-	);
-
-	TexturedRenderType GUI_DEPTH = TexturedRenderType.internal(
-		"gui_depth",
-		786432,
-		VidLibRenderPipelines.GUI_DEPTH,
-		texture -> RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
-			.createCompositeState(false)
-	);
-
-	Function<ResourceLocation, TexturedRenderType> MASKED_GUI = Util.memoize(maskTexture -> TexturedRenderType.internal(
+	Function<Identifier, TexturedRenderType> MASKED_GUI = Util.memoize(maskTexture -> TexturedRenderType.internal(
 		"masked_gui",
 		786432,
-		VidLibRenderPipelines.MASKED_GUI,
-		texture -> RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.EmptyTextureStateShard(() -> {
-				var manager = Minecraft.getInstance().getTextureManager();
-				var tex = manager.getTexture(texture);
-				var maskTex = manager.getTexture(maskTexture);
-				RenderSystem.setShaderTexture(0, tex.getTexture());
-				RenderSystem.setShaderTexture(1, maskTex.getTexture());
-			}, () -> RenderSystem.setShaderTexture(1, null)))
-			.createCompositeState(false)
+		texture -> TexturedRenderType.textured(VidLibRenderPipelines.MASKED_GUI, texture).withTexture("Sampler1", maskTexture)
 	));
 
-	TexturedRenderType MSDF = TexturedRenderType.internal(
-		"msdf",
-		786432,
-		VidLibRenderPipelines.MSDF,
-		texture -> RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.TRUE, false))
-			.createCompositeState(false)
-	);
-
-	TexturedRenderType MSDF_SEE_THROUGH = TexturedRenderType.internal(
-		"msdf_see_through",
-		786432,
-		VidLibRenderPipelines.MSDF_SEE_THROUGH,
-		texture -> RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.TRUE, false))
-			.createCompositeState(false)
-	);
-
-	TexturedRenderType SKYBOX = TexturedRenderType.internal(
-		"skybox",
-		DefaultVertexFormat.POSITION_TEX_COLOR.getVertexSize() * 6,
-		true,
-		true,
-		VidLibRenderPipelines.SKYBOX,
-		texture -> RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
-			.createCompositeState(false)
-	);
-
-	RenderStateShard.EmptyTextureStateShard THIN_LINE_WIDTH = new RenderStateShard.EmptyTextureStateShard(() -> RenderSystem.lineWidth(Math.max(2.5F, Minecraft.getInstance().getWindow().getWidth() / 1920.0F * 2.5F)), () -> RenderSystem.lineWidth(1F));
+	TexturedRenderType MSDF = TexturedRenderType.internal("msdf", 786432, VidLibRenderPipelines.MSDF);
+	TexturedRenderType MSDF_SEE_THROUGH = TexturedRenderType.internal("msdf_see_through", 786432, VidLibRenderPipelines.MSDF_SEE_THROUGH);
+	TexturedRenderType SKYBOX = TexturedRenderType.internal("skybox", DefaultVertexFormat.POSITION_TEX_COLOR.getVertexSize() * 6, true, true, VidLibRenderPipelines.SKYBOX);
 
 	RenderType LINES = RenderType.create(
 		"vidlib:lines",
-		1536,
-		true,
-		true,
-		RenderPipelines.LINES,
-		RenderType.CompositeState.builder()
-			.setLineState(RenderStateShard.DEFAULT_LINE)
-			.setTextureState(THIN_LINE_WIDTH)
-			.setLayeringState(RenderStateShard.VIEW_OFFSET_Z_LAYERING)
-			.setOutputState(RenderStateShard.ITEM_ENTITY_TARGET)
-			.createCompositeState(false)
+		RenderSetup.builder(RenderPipelines.LINES)
+			.bufferSize(1536)
+			.affectsCrumbling()
+			.sortOnUpload()
+			.setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
+			.setOutputTarget(OutputTarget.ITEM_ENTITY_TARGET)
+			.createRenderSetup()
 	);
 
-	TexturedRenderType OUTLINE = TexturedRenderType.create(texture -> RenderType.create(
-		"outline",
-		1536,
-		RenderPipelines.OUTLINE_CULL,
-		RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
-			.setOutputState(RenderStateShard.OUTLINE_TARGET)
-			.createCompositeState(RenderType.OutlineProperty.IS_OUTLINE)
-	));
+	TexturedRenderType OUTLINE = outline("outline", RenderPipelines.OUTLINE_CULL, OutputTarget.OUTLINE_TARGET);
+	TexturedRenderType OUTLINE_NO_CULL = outline("outline_no_cull", RenderPipelines.OUTLINE_NO_CULL, OutputTarget.OUTLINE_TARGET);
+	TexturedRenderType WEAK_OUTLINE = outline("weak_outline", RenderPipelines.OUTLINE_CULL, Canvas.WEAK_OUTLINE.getOutputTargetBinding());
+	TexturedRenderType WEAK_OUTLINE_NO_CULL = outline("weak_outline_no_cull", RenderPipelines.OUTLINE_NO_CULL, Canvas.WEAK_OUTLINE.getOutputTargetBinding());
+	TexturedRenderType STRONG_OUTLINE = outline("strong_outline", RenderPipelines.OUTLINE_CULL, Canvas.STRONG_OUTLINE.getOutputTargetBinding());
+	TexturedRenderType STRONG_OUTLINE_NO_CULL = outline("strong_outline_no_cull", RenderPipelines.OUTLINE_NO_CULL, Canvas.STRONG_OUTLINE.getOutputTargetBinding());
 
-	TexturedRenderType OUTLINE_NO_CULL = TexturedRenderType.create(texture -> RenderType.create(
-		"outline_no_cull",
-		1536,
-		RenderPipelines.OUTLINE_NO_CULL,
-		RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
-			.setOutputState(RenderStateShard.OUTLINE_TARGET)
-			.createCompositeState(RenderType.OutlineProperty.IS_OUTLINE)
-	));
-
-	TexturedRenderType WEAK_OUTLINE = TexturedRenderType.create(texture -> RenderType.create(
-			"weak_outline",
-			1536,
-			RenderPipelines.OUTLINE_CULL,
-			RenderType.CompositeState.builder()
-				.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
-				.setOutputState(Canvas.WEAK_OUTLINE.getOutputStateShard())
-				.createCompositeState(RenderType.OutlineProperty.IS_OUTLINE)
-		)
-	);
-
-	TexturedRenderType WEAK_OUTLINE_NO_CULL = TexturedRenderType.create(texture -> RenderType.create(
-			"weak_outline",
-			1536,
-			RenderPipelines.OUTLINE_NO_CULL,
-			RenderType.CompositeState.builder()
-				.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
-				.setOutputState(Canvas.WEAK_OUTLINE.getOutputStateShard())
-				.createCompositeState(RenderType.OutlineProperty.IS_OUTLINE)
-		)
-	);
-
-	TexturedRenderType STRONG_OUTLINE = TexturedRenderType.create(texture -> RenderType.create(
-			"strong_outline",
-			1536,
-			RenderPipelines.OUTLINE_CULL,
-			RenderType.CompositeState.builder()
-				.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
-				.setOutputState(Canvas.STRONG_OUTLINE.getOutputStateShard())
-				.createCompositeState(RenderType.OutlineProperty.IS_OUTLINE)
-		)
-	);
-
-	TexturedRenderType STRONG_OUTLINE_NO_CULL = TexturedRenderType.create(texture -> RenderType.create(
-			"strong_outline_no_cull",
-			1536,
-			RenderPipelines.OUTLINE_NO_CULL,
-			RenderType.CompositeState.builder()
-				.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
-				.setOutputState(Canvas.STRONG_OUTLINE.getOutputStateShard())
-				.createCompositeState(RenderType.OutlineProperty.IS_OUTLINE)
-		)
-	);
+	private static TexturedRenderType outline(String name, RenderPipeline pipeline, OutputTarget outputTarget) {
+		return TexturedRenderType.create(texture -> RenderType.create(
+			name,
+			RenderSetup.builder(pipeline)
+				.withTexture("Sampler0", texture)
+				.bufferSize(1536)
+				.setOutputTarget(outputTarget)
+				.setOutline(RenderSetup.OutlineProperty.IS_OUTLINE)
+				.createRenderSetup()
+		));
+	}
 }

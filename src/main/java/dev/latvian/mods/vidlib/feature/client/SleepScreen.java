@@ -1,10 +1,16 @@
 package dev.latvian.mods.vidlib.feature.client;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.gui.screens.InBedChatScreen;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 
 public class SleepScreen extends InBedChatScreen {
+	public SleepScreen() {
+		super("", false);
+	}
+
 	@Override
 	protected void init() {
 		super.init();
@@ -12,18 +18,18 @@ public class SleepScreen extends InBedChatScreen {
 	}
 
 	@Override
-	public void render(GuiGraphics graphics, int x, int y, float delta) {
-		this.leaveBedButton.render(graphics, x, y, delta);
+	public void extractRenderState(GuiGraphicsExtractor graphics, int x, int y, float delta) {
+		this.leaveBedButton.extractRenderState(graphics, x, y, delta);
 	}
 
 	@Override
-	public boolean charTyped(char p_263331_, int p_263427_) {
+	public boolean charTyped(CharacterEvent event) {
 		return true;
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == 256) {
+	public boolean keyPressed(KeyEvent event) {
+		if (event.key() == 256) {
 			this.sendWakeUp();
 		}
 

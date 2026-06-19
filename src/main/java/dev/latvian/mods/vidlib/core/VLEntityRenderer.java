@@ -1,13 +1,14 @@
 package dev.latvian.mods.vidlib.core;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.feature.canvas.BossRenderTypes;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
-import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 
@@ -21,10 +22,6 @@ public interface VLEntityRenderer<T extends Entity, S extends EntityRenderState>
 		state.nameTag = null;
 		state.nameTagAttachment = null;
 
-		if (state instanceof LivingEntityRenderState s) {
-			s.customName = null;
-		}
-
 		var renderOffset = vl$self().getRenderOffset(state);
 		var x = xOffset + renderOffset.x();
 		var y = yOffset + renderOffset.y();
@@ -36,12 +33,16 @@ public interface VLEntityRenderer<T extends Entity, S extends EntityRenderState>
 	}
 
 	default void renderModel(S state, PoseStack ms, MultiBufferSource buffers, int light) {
-		vl$self().render(state, ms, buffers, light);
+		state.lightCoords = light;
+		var mc = Minecraft.getInstance();
+		var featureRenderDispatcher = mc.gameRenderer.getFeatureRenderDispatcher();
+		var cameraRenderState = mc.gameRenderer.getGameRenderState().levelRenderState.cameraRenderState;
+		vl$self().submit(state, ms, featureRenderDispatcher.getSubmitNodeStorage(), cameraRenderState);
+		featureRenderDispatcher.renderAllFeatures();
 	}
 
 	default void renderBoss(T entity, PoseStack ms, MultiBufferSource buffers, float xOffset, float yOffset, float zOffset, float delta) {
-		Minecraft.getInstance().getEntityRenderDispatcher().setRenderHitBoxes(false);
-		renderModel(entity, ms, BossRenderTypes.override(buffers), xOffset, yOffset, zOffset, delta, LightTexture.FULL_BRIGHT);
+		renderModel(entity, ms, BossRenderTypes.override(buffers), xOffset, yOffset, zOffset, delta, LightCoordsUtil.FULL_BRIGHT);
 	}
 
 	default AABB vl$getBoundingBoxForCulling(T entity) {

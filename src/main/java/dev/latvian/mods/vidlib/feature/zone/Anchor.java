@@ -61,7 +61,7 @@ public record Anchor(List<Area> areas, Map<ResourceKey<Level>, List<AAIBB>> shap
 	public static final TicketController BLOCK_TICKET_CONTROLLER = new TicketController(VidLib.id("anchor_blocks"), (level, ticketHelper) -> {
 		for (var pos : ticketHelper.getBlockTickets().keySet()) {
 			if (!CommonGameEngine.INSTANCE.isBlockAnchor(level, pos, level.getBlockState(pos))) {
-				ticketHelper.removeTicket(pos, ChunkPos.asLong(pos), false);
+				ticketHelper.removeTicket(pos, ChunkPos.pack(pos), false);
 			}
 		}
 	});

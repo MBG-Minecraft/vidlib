@@ -14,7 +14,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 public interface CountEntitiesCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("count-entities", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.argument("filter", EntityArgument.entities())
 			.executes(ctx -> countEntities(ctx.getSource(), EntityArgument.getEntities(ctx, "filter")))
 		)

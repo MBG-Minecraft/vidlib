@@ -1,18 +1,26 @@
 package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.klib.util.Empty;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 public interface VLRenderType {
+	RenderSetup vl$getState();
+
 	@Nullable
-	default ResourceLocation vl$getTexture() {
-		return this instanceof RenderType.CompositeRenderType t ? t.state.textureState instanceof RenderStateShard.TextureStateShard s ? s.texture.orElse(null) : null : null;
+	default Identifier vl$getTexture() {
+		var textures = ((VLRenderSetup) (Object) vl$getState()).vl$getTextures();
+
+		for (var binding : textures.values()) {
+			return ((VLRenderSetupTextureBinding) binding).vl$getLocation();
+		}
+
+		return null;
 	}
 
-	default ResourceLocation vl$getTextureSafe() {
+	default Identifier vl$getTextureSafe() {
 		var tex = vl$getTexture();
 		return tex == null ? Empty.TEXTURE : tex;
 	}

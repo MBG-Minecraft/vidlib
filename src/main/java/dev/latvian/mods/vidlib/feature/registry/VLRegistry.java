@@ -17,12 +17,12 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class VLRegistry<V> extends GenericVLRegistry<ResourceLocation, V> implements Supplier<Iterable<ResourceLocation>>, ArgumentTypeProvider<V> {
+public class VLRegistry<V> extends GenericVLRegistry<Identifier, V> implements Supplier<Iterable<Identifier>>, ArgumentTypeProvider<V> {
 	public static <V> VLRegistry<V> createServer(String id, Class<V> valueType) {
 		var holder = new VLRegistry<>(Side.SERVER, id, valueType);
 		DATA_PACK_HOLDERS.add(holder);
@@ -33,7 +33,7 @@ public class VLRegistry<V> extends GenericVLRegistry<ResourceLocation, V> implem
 		return new VLRegistry<>(Side.CLIENT, id, valueType);
 	}
 
-	public final ResourceLocation id;
+	public final Identifier id;
 	public final Class<V> valueType;
 	private DataType<V> dataType;
 	private DataType<RegistryRef<V>> refDataType;
@@ -45,7 +45,7 @@ public class VLRegistry<V> extends GenericVLRegistry<ResourceLocation, V> implem
 	}
 
 	@Override
-	public Iterable<ResourceLocation> get() {
+	public Iterable<Identifier> get() {
 		return map.keySet();
 	}
 
@@ -58,7 +58,7 @@ public class VLRegistry<V> extends GenericVLRegistry<ResourceLocation, V> implem
 	}
 
 	@Override
-	public synchronized RegistryRef<V> ref(ResourceLocation id) {
+	public synchronized RegistryRef<V> ref(Identifier id) {
 		var ref = refMap.get(id);
 
 		if (ref == null) {
@@ -70,7 +70,7 @@ public class VLRegistry<V> extends GenericVLRegistry<ResourceLocation, V> implem
 		return (RegistryRef<V>) ref;
 	}
 
-	public RegistryRef<V> asRef(V value, Function<V, ResourceLocation> idGetter) {
+	public RegistryRef<V> asRef(V value, Function<V, Identifier> idGetter) {
 		var id = idGetter.apply(value);
 		return id == null ? null : ref(id);
 	}

@@ -53,6 +53,7 @@ import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.gui.screens.Screen;
@@ -62,7 +63,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.border.WorldBorder;
@@ -71,6 +72,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 import org.joml.Vector2dc;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,8 +91,8 @@ public class LocalClientSessionData extends ClientSessionData {
 	public final List<ScreenShakeInstance> screenShakeInstances;
 	public Vector2dc prevCameraShake;
 	public Vector2dc cameraShake;
-	public Map<ResourceLocation, ClockValue> clocks;
-	public Map<ResourceLocation, ClientSkybox> skyboxes;
+	public Map<Identifier, ClockValue> clocks;
+	public Map<Identifier, ClientSkybox> skyboxes;
 	public final DataMap serverDataMap;
 	public final KNumberVariables globalVariables;
 	public ClientSkybox skybox;
@@ -186,7 +188,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		}
 	}
 
-	public ClientSkybox getSkybox(ResourceLocation id) {
+	public ClientSkybox getSkybox(Identifier id) {
 		var skybox = skyboxes.get(id);
 
 		if (skybox == null) {
@@ -223,7 +225,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		updateOverrides(player);
 		CanvasImpl.tickAll(mc);
 
-		input = VLLocalPlayer.fromInput(window.getWindow(), player, mc.screen == null && mc.isWindowActive());
+		input = VLLocalPlayer.fromInput(window.handle(), player, mc.screen == null && mc.isWindowActive());
 
 		if (!prevInput.equals(input)) {
 			NeoForge.EVENT_BUS.post(new PlayerInputChangedEvent(player, prevInput, input));
@@ -241,7 +243,7 @@ public class LocalClientSessionData extends ClientSessionData {
 			mc.options.keyJump.release();
 		}
 
-		if (mc.options.keyShift.isDown() && !Screen.hasAltDown() && PlayerActionHandler.handle(player, PlayerActionType.SNEAK, true)) {
+		if (mc.options.keyShift.isDown() && !InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_ALT) && !InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_ALT) && PlayerActionHandler.handle(player, PlayerActionType.SNEAK, true)) {
 			mc.options.keyShift.release();
 		}
 
@@ -317,7 +319,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	}
 
 	@Override
-	public <V> void syncRegistry(Player player, SyncedRegistry<V> registry, Map<ResourceLocation, V> map) {
+	public <V> void syncRegistry(Player player, SyncedRegistry<V> registry, Map<Identifier, V> map) {
 		registry.registry().update(map);
 
 		if (registry.callback() != null) {
@@ -332,7 +334,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	}
 
 	@Override
-	public void updateClocks(Map<ResourceLocation, ClockValue> map) {
+	public void updateClocks(Map<Identifier, ClockValue> map) {
 		clocks.clear();
 		clocks.putAll(map);
 	}

@@ -96,7 +96,7 @@ public interface ZoneLike {
 
 		for (int x = minX; x <= maxX; x++) {
 			for (int z = minZ; z <= maxZ; z++) {
-				chunks.add(ChunkPos.asLong(x, z));
+				chunks.add(ChunkPos.pack(x, z));
 			}
 		}
 	}

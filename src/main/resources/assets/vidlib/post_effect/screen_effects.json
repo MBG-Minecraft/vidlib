@@ -24,19 +24,13 @@
 				}
 			],
 			"output": "swap",
-			"uniforms": [
-				{
-					"name": "Count",
-					"type": "int"
-				},
-				{
-					"name": "InverseViewProjectionMat",
-					"type": "matrix4x4"
-				}
-			]
+			"uniforms": {
+				"Count": [],
+				"InverseViewProjectionMat": []
+			}
 		},
 		{
-			"vertex_shader": "minecraft:post/blit",
+			"vertex_shader": "minecraft:core/screenquad",
 			"fragment_shader": "minecraft:post/blit",
 			"inputs": [
 				{
@@ -45,13 +39,15 @@
 				}
 			],
 			"output": "vidlib:screen_effects",
-			"uniforms": [
-				{
-					"name": "ColorModulate",
-					"type": "vec4",
-					"values": [1.0, 1.0, 1.0, 1.0]
-				}
-			]
+			"uniforms": {
+				"BlitConfig": [
+					{
+						"name": "ColorModulate",
+						"type": "vec4",
+						"value": [1.0, 1.0, 1.0, 1.0]
+					}
+				]
+			}
 		}
 	]
 }

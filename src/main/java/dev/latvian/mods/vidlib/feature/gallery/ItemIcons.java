@@ -8,7 +8,6 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.FramebufferUtils;
@@ -16,15 +15,18 @@ import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.feature.client.TexturedRenderType;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.item.VisualItemKey;
+import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.OutputTarget;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -34,7 +36,6 @@ import net.minecraft.world.item.ItemDisplayContext;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
-import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 
 public interface ItemIcons {
@@ -42,19 +43,16 @@ public interface ItemIcons {
 	Gallery<VisualItemKey> GALLERY = new Gallery<>("item_icons", VisualItemKey.CODEC, () -> null, TriState.FALSE, VisualItemKey::toString, null);
 
 	Lazy<RenderTarget> RENDER_TARGET = Lazy.of(() -> new TextureTarget("ItemIconsCanvas", 128, 128, true));
+	OutputTarget OUTPUT_TARGET = new OutputTarget("item_icon", RENDER_TARGET);
 
 	TexturedRenderType RENDER_TYPE_CUTOUT = TexturedRenderType.internal(
 		"item_icon/cutout",
 		1536,
 		true,
 		true,
-		RenderPipelines.ENTITY_CUTOUT,
-		texture -> RenderType.CompositeState.builder()
-			.setOutputState(new RenderStateShard.OutputStateShard("item_icon", RENDER_TARGET))
-			.setLightmapState(RenderStateShard.LIGHTMAP)
-			.setOverlayState(RenderStateShard.OVERLAY)
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
-			.createCompositeState(true)
+		texture -> TexturedRenderType.textured(RenderPipelines.ENTITY_CUTOUT, texture, true, true)
+			.setOutputTarget(OUTPUT_TARGET)
+			.setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE)
 	);
 
 	TexturedRenderType RENDER_TYPE_TRANSLUCENT = TexturedRenderType.internal(
@@ -62,30 +60,13 @@ public interface ItemIcons {
 		1536,
 		true,
 		true,
-		RenderPipelines.ITEM_ENTITY_TRANSLUCENT_CULL,
-		texture -> RenderType.CompositeState.builder()
-			.setOutputState(new RenderStateShard.OutputStateShard("item_icon", RENDER_TARGET))
-			.setLightmapState(RenderStateShard.LIGHTMAP)
-			.setOverlayState(RenderStateShard.OVERLAY)
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
-			.createCompositeState(true)
+		texture -> TexturedRenderType.textured(RenderPipelines.ENTITY_TRANSLUCENT_CULL, texture, true, true)
+			.setOutputTarget(OUTPUT_TARGET)
+			.setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE)
 	);
 
-	RenderType ORIGINAL_TRANSLUCENT_TYPE = RenderType.itemEntityTranslucentCull(TextureAtlas.LOCATION_BLOCKS);
+	RenderType ORIGINAL_TRANSLUCENT_TYPE = RenderTypes.entityTranslucentCullItemTarget(TextureAtlas.LOCATION_BLOCKS);
 
-	record BufferOverride(MultiBufferSource parent) implements MultiBufferSource {
-		@Override
-		public VertexConsumer getBuffer(RenderType renderType) {
-			if (renderType == ORIGINAL_TRANSLUCENT_TYPE) {
-				return parent.getBuffer(RENDER_TYPE_TRANSLUCENT.apply(renderType.vl$getTextureSafe()));
-			} else {
-				return parent.getBuffer(RENDER_TYPE_CUTOUT.apply(renderType.vl$getTextureSafe()));
-			}
-		}
-	}
-
-	Vector3f DIFFUSE_LIGHT_0 = new Vector3f(0.2F, 1F, 0.7F).normalize();
-	Vector3f DIFFUSE_LIGHT_1 = new Vector3f(-0.2F, 1F, -0.7F).normalize();
 	ImagePreProcessor PRE_PROCESSOR = ImagePreProcessor.reduce(8, 8);
 
 	static GalleryImage<VisualItemKey> get(Minecraft mc, VisualItemKey key) {
@@ -105,36 +86,38 @@ public interface ItemIcons {
 		var stack = key.toItemStack();
 
 		if (!stack.isEmpty()) {
-			var projectionMatrix = new Matrix4f(RenderSystem.getProjectionMatrix());
-			var projectionType = RenderSystem.getProjectionType();
+			RenderSystem.backupProjectionMatrix();
 
 			var camera = new Matrix4f().setOrtho(-0.5F, 0.5F, 0.5F, -0.5F, 10F, -10F);
 			camera.rotateZ((float) Math.PI);
 			// camera.scale(-1F, -1F, 1F);
-			RenderSystem.setProjectionMatrix(camera, ProjectionType.ORTHOGRAPHIC);
+			MiscClientUtils.setProjectionMatrix(camera, ProjectionType.ORTHOGRAPHIC);
 			Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
 			modelViewStack.pushMatrix();
 			modelViewStack.identity();
 
 			try {
-				var buffers = mc.renderBuffers().bufferSource();
 				var scratchItemStackRenderState = new ItemStackRenderState();
 				mc.getItemModelResolver().updateForTopItem(scratchItemStackRenderState, stack, ItemDisplayContext.GUI, null, null, 0);
 
 				var pose = new PoseStack();
 				pose.scale(1F, -1F, -1F);
 				boolean flat = !scratchItemStackRenderState.usesBlockLight();
+				mc.gameRenderer.getLighting().setupFor(flat ? Lighting.Entry.ITEMS_FLAT : Lighting.Entry.ITEMS_3D);
 
-				if (flat) {
-					var mat = new Matrix4f().rotationY((float) (-Math.PI / 8)).rotateY((float) Math.PI).rotateX((float) (Math.PI * 3.0 / 4.0));
-					RenderSystem.setShaderLights(mat.transformDirection(DIFFUSE_LIGHT_0, new Vector3f()), mat.transformDirection(DIFFUSE_LIGHT_1, new Vector3f()));
-				} else {
-					RenderSystem.setupGui3DDiffuseLighting(DIFFUSE_LIGHT_0, DIFFUSE_LIGHT_1);
+				var oldColorOverride = RenderSystem.outputColorTextureOverride;
+				var oldDepthOverride = RenderSystem.outputDepthTextureOverride;
+				RenderSystem.outputColorTextureOverride = renderTarget.getColorTextureView();
+				RenderSystem.outputDepthTextureOverride = renderTarget.getDepthTextureView();
+
+				try {
+					var featureRenderDispatcher = mc.gameRenderer.getFeatureRenderDispatcher();
+					scratchItemStackRenderState.submit(pose, featureRenderDispatcher.getSubmitNodeStorage(), LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
+					featureRenderDispatcher.renderAllFeatures();
+				} finally {
+					RenderSystem.outputColorTextureOverride = oldColorOverride;
+					RenderSystem.outputDepthTextureOverride = oldDepthOverride;
 				}
-
-				scratchItemStackRenderState.render(pose, new BufferOverride(buffers), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
-				RENDER_TYPE_CUTOUT.endBatches(buffers);
-				RENDER_TYPE_TRANSLUCENT.endBatches(buffers);
 			} catch (Throwable throwable) {
 				CrashReport crashreport = CrashReport.forThrowable(throwable, "Rendering item");
 				CrashReportCategory crashreportcategory = crashreport.addCategory("Item being rendered");
@@ -144,9 +127,9 @@ public interface ItemIcons {
 				throw new ReportedException(crashreport);
 			}
 
-			Lighting.setupFor3DItems();
+			mc.gameRenderer.getLighting().setupFor(Lighting.Entry.ITEMS_3D);
 			modelViewStack.popMatrix();
-			RenderSystem.setProjectionMatrix(projectionMatrix, projectionType);
+			RenderSystem.restoreProjectionMatrix();
 		}
 	}
 

@@ -14,16 +14,17 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.client.resources.PlayerSkin;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.PlayerSkin;
+import net.minecraft.world.entity.player.PlayerModelType;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.ARGB;
 
 import java.util.Map;
 
 public class ClothingPartImage {
-	public static NativeImage toModel(NativeImage src, PlayerSkin.Model model) {
-		if (model == PlayerSkin.Model.SLIM) {
+	public static NativeImage toModel(NativeImage src, PlayerModelType model) {
+		if (model == PlayerModelType.SLIM) {
 			var dst = new NativeImage(64, 64, true);
 			dst.copyFrom(src);
 			return dst;
@@ -34,14 +35,14 @@ public class ClothingPartImage {
 
 	public final NativeImage pixels;
 	public final Int2FloatMap gradientValues;
-	public final Map<ResourceLocation, NativeImage> gradientRefCache;
+	public final Map<Identifier, NativeImage> gradientRefCache;
 	public final Int2ObjectMap<NativeImage> colorCache;
 
-	public ClothingPartImage(ResourceManager resourceManager, PlayerSkin.Model model, ResourceLocation asset) throws Exception {
+	public ClothingPartImage(ResourceManager resourceManager, PlayerModelType model, Identifier asset) throws Exception {
 		this.gradientRefCache = new Object2ObjectOpenHashMap<>(4);
 		this.colorCache = new Int2ObjectOpenHashMap<>(0);
 
-		var modelResource = resourceManager.getResource(asset.withPath("textures/vidlib/clothing/" + asset.getPath() + "_" + model.id() + ".png")).orElse(null);
+		var modelResource = resourceManager.getResource(asset.withPath("textures/vidlib/clothing/" + asset.getPath() + "_" + model.getSerializedName() + ".png")).orElse(null);
 		var resource = modelResource != null ? modelResource : resourceManager.getResourceOrThrow(asset.withPath("textures/vidlib/clothing/" + asset.getPath() + ".png"));
 
 		try (var in = resource.open()) {

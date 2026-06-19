@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.core.mixin;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.vidlib.core.VLServerConfigPacketListener;
 import dev.latvian.mods.vidlib.core.VLServerPlayPacketListener;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
@@ -13,6 +12,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.ServerOpList;
 import net.minecraft.world.entity.Entity;
@@ -31,9 +31,6 @@ public abstract class PlayerListMixin {
 	@Final
 	private MinecraftServer server;
 
-	@Shadow
-	public abstract void op(GameProfile profile);
-
 	@Inject(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Connection;setupInboundProtocol(Lnet/minecraft/network/ProtocolInfo;Lnet/minecraft/network/PacketListener;)V"))
 	private void vl$placeNewPlayerHead(Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci, @Local ServerGamePacketListenerImpl packetListener) {
 		if (connection.getPacketListener() instanceof VLServerConfigPacketListener config && packetListener instanceof VLServerPlayPacketListener play) {
@@ -41,7 +38,7 @@ public abstract class PlayerListMixin {
 		}
 	}
 
-	@Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;getName()Lnet/minecraft/network/chat/Component;"))
+	@Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;getDisplayName()Lnet/minecraft/network/chat/Component;"))
 	private Component vl$getName(ServerPlayer instance) {
 		return Component.literal(instance.getScoreboardName());
 	}
@@ -73,8 +70,8 @@ public abstract class PlayerListMixin {
 		}
 	}
 
-	@WrapOperation(method = "op", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/ServerOpList;canBypassPlayerLimit(Lcom/mojang/authlib/GameProfile;)Z"))
-	private boolean vl$canOpBypassPlayerLimit(ServerOpList instance, GameProfile profile, Operation<Boolean> original) {
+	@WrapOperation(method = "op(Lnet/minecraft/server/players/NameAndId;Ljava/util/Optional;Ljava/util/Optional;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/ServerOpList;canBypassPlayerLimit(Lnet/minecraft/server/players/NameAndId;)Z"))
+	private boolean vl$canOpBypassPlayerLimit(ServerOpList instance, NameAndId profile, Operation<Boolean> original) {
 		return true;
 	}
 }

@@ -5,8 +5,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.vidlib.VidLib;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.Util;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Util;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -17,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 
 public abstract class JsonCodecReloadListener<T> extends JsonReloadListener {
 	public static class Dummy<T> extends JsonCodecReloadListener<T> {
-		public final Map<ResourceLocation, T> map;
+		public final Map<Identifier, T> map;
 
 		public Dummy(String rootPath, Codec<T> codec, boolean includeId) {
 			super(rootPath, codec, includeId);
@@ -31,7 +31,7 @@ public abstract class JsonCodecReloadListener<T> extends JsonReloadListener {
 		}
 
 		@Override
-		protected void apply(ResourceManager resourceManager, Map<ResourceLocation, T> map) {
+		protected void apply(ResourceManager resourceManager, Map<Identifier, T> map) {
 			this.map.clear();
 			this.map.putAll(map);
 		}
@@ -51,8 +51,8 @@ public abstract class JsonCodecReloadListener<T> extends JsonReloadListener {
 	}
 
 	@Override
-	protected void apply(Map<ResourceLocation, JsonElement> from, ResourceManager resourceManager, ProfilerFiller profiler) {
-		var map = new HashMap<ResourceLocation, CompletableFuture<T>>();
+	protected void apply(Map<Identifier, JsonElement> from, ResourceManager resourceManager, ProfilerFiller profiler) {
+		var map = new HashMap<Identifier, CompletableFuture<T>>();
 
 		for (var entry : from.entrySet()) {
 			var id = entry.getKey();
@@ -81,7 +81,7 @@ public abstract class JsonCodecReloadListener<T> extends JsonReloadListener {
 
 		CompletableFuture.allOf(map.values().toArray(new CompletableFuture[0])).join();
 
-		var finalMap = new Object2ObjectOpenHashMap<ResourceLocation, T>();
+		var finalMap = new Object2ObjectOpenHashMap<Identifier, T>();
 
 		for (var entry : map.entrySet()) {
 			try {
@@ -98,5 +98,5 @@ public abstract class JsonCodecReloadListener<T> extends JsonReloadListener {
 		apply(resourceManager, finalMap);
 	}
 
-	protected abstract void apply(ResourceManager resourceManager, Map<ResourceLocation, T> map);
+	protected abstract void apply(ResourceManager resourceManager, Map<Identifier, T> map);
 }

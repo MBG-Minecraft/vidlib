@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.canvas;
 
 import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -14,10 +14,10 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 
 public interface CanvasRenderPipelines {
-	RenderPipeline.Snippet SNIPPET = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)
+	RenderPipeline.Snippet SNIPPET = RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET)
 		.withVertexShader("core/position_tex_color")
 		.withFragmentShader("core/position_tex_color")
-		.withBlend(BlendFunction.TRANSLUCENT)
+		.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
 		.withCull(true)
 		.buildSnippet();
 
@@ -25,7 +25,7 @@ public interface CanvasRenderPipelines {
 		.withCull(false)
 		.buildSnippet();
 
-	RenderPipeline.Snippet TEXTURE_SNIPPET = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)
+	RenderPipeline.Snippet TEXTURE_SNIPPET = RenderPipeline.builder()
 		.withSampler("Sampler0")
 		.buildSnippet();
 
@@ -71,14 +71,14 @@ public interface CanvasRenderPipelines {
 		.withLocation(VidLib.id("pipeline/canvas/cull/entity"))
 		.withVertexShader(VidLib.id("core/bright_entity"))
 		.withFragmentShader(VidLib.id("core/bright"))
-		.withVertexFormat(DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS)
+		.withVertexFormat(DefaultVertexFormat.ENTITY, VertexFormat.Mode.QUADS)
 		.build();
 
 	RenderPipeline ENTITY_NO_CULL = RenderPipeline.builder(SNIPPET_NO_CULL, TEXTURE_SNIPPET)
 		.withLocation(VidLib.id("pipeline/canvas/no_cull/entity"))
 		.withVertexShader(VidLib.id("core/bright_entity"))
 		.withFragmentShader(VidLib.id("core/bright"))
-		.withVertexFormat(DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS)
+		.withVertexFormat(DefaultVertexFormat.ENTITY, VertexFormat.Mode.QUADS)
 		.build();
 
 	RenderPipeline BLOCK = RenderPipeline.builder(SNIPPET, TEXTURE_SNIPPET)
@@ -86,7 +86,6 @@ public interface CanvasRenderPipelines {
 		.withVertexShader(VidLib.id("core/bright_block"))
 		.withFragmentShader(VidLib.id("core/bright"))
 		.withVertexFormat(DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS)
-		.withUniform("ModelOffset", UniformType.VEC3)
 		.build();
 
 	RenderPipeline BLOCK_NO_CULL = RenderPipeline.builder(SNIPPET_NO_CULL, TEXTURE_SNIPPET)
@@ -94,7 +93,6 @@ public interface CanvasRenderPipelines {
 		.withVertexShader(VidLib.id("core/bright_block"))
 		.withFragmentShader(VidLib.id("core/bright"))
 		.withVertexFormat(DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS)
-		.withUniform("ModelOffset", UniformType.VEC3)
 		.build();
 
 	static void register(RegisterRenderPipelinesEvent event) {

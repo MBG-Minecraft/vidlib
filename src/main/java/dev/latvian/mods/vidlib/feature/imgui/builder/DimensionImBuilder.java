@@ -24,7 +24,7 @@ public class DimensionImBuilder implements ImBuilder<ResourceKey<Level>> {
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
 		List<ResourceKey<Level>> dimensions = List.copyOf(graphics.mc.player.connection.levels());
-		return graphics.combo("###dimension", dimension, "", dimensions, key -> key.location().toString(), SEARCH);
+		return graphics.combo("###dimension", dimension, "", dimensions, key -> key.identifier().toString(), SEARCH);
 	}
 
 	@Override

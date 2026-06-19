@@ -9,14 +9,14 @@ import net.minecraft.server.level.ServerPlayer;
 public interface PublicNoteCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("public-note", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.argument("text", StringArgumentType.greedyString())
 			.executes(ctx -> note(ctx.getSource().getPlayerOrException(), StringArgumentType.getString(ctx, "text")))
 		)
 	);
 
 	static int note(ServerPlayer player, String text) {
-		player.server.s2c(new CreateNotePayload(new Note(player, text, NoteVisibility.PUBLIC)));
+		player.level().getServer().s2c(new CreateNotePayload(new Note(player, text, NoteVisibility.PUBLIC)));
 		return 1;
 	}
 }

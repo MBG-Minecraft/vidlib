@@ -17,7 +17,7 @@ import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 
 public class ShapeProp extends Prop {
@@ -43,7 +43,7 @@ public class ShapeProp extends Prop {
 	public Gradient color;
 	public Gradient outlineColor;
 	public RenderLightLayer lightLayer;
-	public ResourceLocation texture;
+	public Identifier texture;
 
 	public ShapeProp(PropContext<?> ctx) {
 		super(ctx);

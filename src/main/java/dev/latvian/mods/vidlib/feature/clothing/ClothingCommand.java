@@ -4,7 +4,7 @@ import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,7 +13,7 @@ import java.util.Collection;
 public interface ClothingCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("clothing", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.literal("set")
 			.then(Commands.argument("player", EntityArgument.players())
 				.then(Commands.literal("custom")
@@ -21,9 +21,9 @@ public interface ClothingCommand {
 						.executes(ctx -> setClothing(EntityArgument.getPlayers(ctx, "player"), PlayerClothing.custom(ClothingSet.COMMAND.get(ctx, "clothing"))))
 					)
 				)
-				.then(Commands.argument("clothing", ResourceLocationArgument.id())
+				.then(Commands.argument("clothing", IdentifierArgument.id())
 					.suggests(ClothingPresets.SUGGESTION_PROVIDER)
-					.executes(ctx -> setClothing(EntityArgument.getPlayers(ctx, "player"), PlayerClothing.preset(ClothingPresets.createId(ResourceLocationArgument.getId(ctx, "clothing")))))
+					.executes(ctx -> setClothing(EntityArgument.getPlayers(ctx, "player"), PlayerClothing.preset(ClothingPresets.createId(IdentifierArgument.getId(ctx, "clothing")))))
 				)
 			)
 		)

@@ -1,15 +1,15 @@
 package dev.latvian.mods.vidlib.feature.skybox;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import dev.latvian.mods.vidlib.core.VLGameRenderer;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import net.minecraft.client.Minecraft;
 
 public class SkyboxRenderer {
 	public static boolean render(Minecraft mc, ClientSkybox skybox, Runnable setupFog) {
 		setupFog.run();
-		float ps = (float) (mc.gameRenderer.getDepthFar() / 2D);
+		float ps = (float) (((VLGameRenderer) mc.gameRenderer).getDepthFar() / 2D);
 		float ns = -ps;
 
 		var texture = skybox.loadTexture(mc);
@@ -19,7 +19,8 @@ public class SkyboxRenderer {
 		ms.pushPose();
 
 		if (skybox.data.rotating() != 0F) {
-			ms.mulPose(Axis.YP.rotationDegrees(skybox.data.rotation() + 360F * RenderSystem.getShaderGameTime() * skybox.data.rotating()));
+			float gameTime = mc.level == null ? 0F : (mc.level.getGameTime() % 24000L) / 24000F;
+			ms.mulPose(Axis.YP.rotationDegrees(skybox.data.rotation() + 360F * gameTime * skybox.data.rotating()));
 		}
 
 		var buffer = mc.renderBuffers().bufferSource().getBuffer(VidLibRenderTypes.SKYBOX.apply(texture.resourceId()));

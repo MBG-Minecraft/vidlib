@@ -7,7 +7,7 @@ import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.betteradvancedtooltips.BATIcons;
 import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.klib.util.JsonUtils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -157,13 +157,13 @@ public class ConfigScreen<C> extends Screen {
 	}
 
 	@Override
-	public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-		super.render(graphics, mouseX, mouseY, delta);
+	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+		super.extractRenderState(graphics, mouseX, mouseY, delta);
 
 		for (int i = 0; i < configWidgets.size(); i++) {
 			var n = configWidgets.get(i).config.name;
 			graphics.fill(width / 8, 6 + i * 13, width / 2, 18 + i * 13, 0x80000000);
-			graphics.drawString(font, n, width / 2 - font.width(n) - 4, 8 + i * 13, 0xFFFFFFFF);
+			graphics.text(font, n, width / 2 - font.width(n) - 4, 8 + i * 13, 0xFFFFFFFF);
 		}
 	}
 

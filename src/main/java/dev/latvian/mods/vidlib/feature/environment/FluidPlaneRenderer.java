@@ -1,12 +1,16 @@
 package dev.latvian.mods.vidlib.feature.environment;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.latvian.mods.klib.gl.StaticBuffers;
 import dev.latvian.mods.klib.texture.LightUV;
+import dev.latvian.mods.vidlib.core.VLRenderType;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.client.TerrainRenderTypes;
 import dev.latvian.mods.vidlib.feature.visual.DynamicSpriteTexture;
@@ -15,13 +19,16 @@ import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.util.Mth;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.util.Map;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 
 public class FluidPlaneRenderer {
-	public static final Map<ClientAsset, StaticBuffers> BUFFERS = new Object2ObjectOpenHashMap<>();
+	public static final Map<ClientAsset.ResourceTexture, StaticBuffers> BUFFERS = new Object2ObjectOpenHashMap<>();
 
 	@AutoInit({AutoInit.Type.TEXTURES_RELOADED, AutoInit.Type.CHUNKS_RENDERED})
 	public static void refreshBuffers() {
@@ -111,28 +118,29 @@ public class FluidPlaneRenderer {
 					frame.z(z)
 				);
 
-				renderType.setupRenderState();
-
-				var renderTarget = renderType.getRenderTarget();
+				var renderTarget = renderType.outputTarget().getRenderTarget();
 
 				try (var renderPass = RenderSystem.getDevice()
 					.createCommandEncoder()
 					.createRenderPass(
-						renderTarget.getColorTexture(),
+						() -> "Fluid plane",
+						renderTarget.getColorTextureView(),
 						OptionalInt.empty(),
-						renderTarget.useDepth ? renderTarget.getDepthTexture() : null,
+						renderTarget.useDepth ? renderTarget.getDepthTextureView() : null,
 						OptionalDouble.empty()
 					)
 				) {
-					renderPass.setPipeline(renderType.getRenderPipeline());
-					renderPass.bindSampler("Sampler0", RenderSystem.getShaderTexture(0));
-					renderPass.bindSampler("Sampler2", RenderSystem.getShaderTexture(2));
-					buffers.setIndexBuffer(renderPass, renderType.getRenderPipeline());
+					renderPass.setPipeline(renderType.pipeline());
+					RenderSystem.bindDefaultUniforms(renderPass);
+					renderPass.setUniform("DynamicTransforms", RenderSystem.getDynamicUniforms().writeTransform(RenderSystem.getModelViewMatrix(), new Vector4f(1F, 1F, 1F, 1F), new Vector3f(), new Matrix4f()));
+					var boundTexture = mc.getTextureManager().getTexture(((VLRenderType) renderType).vl$getTextureSafe());
+					renderPass.bindTexture("Sampler0", boundTexture.getTextureView(), boundTexture.getSampler());
+					renderPass.bindTexture("Sampler2", mc.gameRenderer.lightmap(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
+					buffers.setIndexBuffer(renderPass, renderType.pipeline());
 					renderPass.setVertexBuffer(0, buffers.vertexBuffer());
-					renderPass.drawIndexed(0, buffers.indexCount());
+					renderPass.drawIndexed(0, 0, buffers.indexCount(), 1);
 				}
 
-				renderType.clearRenderState();
 				modelViewMatrix.popMatrix();
 			}
 		}

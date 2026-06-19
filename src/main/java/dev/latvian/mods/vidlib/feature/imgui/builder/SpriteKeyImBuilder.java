@@ -9,17 +9,17 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import imgui.type.ImString;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.core.ClientAsset;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SpriteKeyImBuilder implements ImBuilder<SpriteKey> {
-	public static final List<ClientAsset> ATLASES = Util.make(() -> {
-		var list = new ArrayList<ClientAsset>();
+	public static final List<ClientAsset.ResourceTexture> ATLASES = Util.make(() -> {
+		var list = new ArrayList<ClientAsset.ResourceTexture>();
 		list.add(SpriteKey.BLOCKS);
 		list.add(SpriteKey.PARTICLES);
 		list.add(SpriteKey.GUI);
@@ -37,12 +37,12 @@ public class SpriteKeyImBuilder implements ImBuilder<SpriteKey> {
 	public static final ImBuilderType<SpriteKey> TYPE = SpriteKeyImBuilder::new;
 	public static final ImString SEARCH = ImGuiUtils.resizableString();
 
-	public final ClientAsset[] atlas;
-	public final ClientAsset[] sprite;
+	public final ClientAsset.ResourceTexture[] atlas;
+	public final ClientAsset.ResourceTexture[] sprite;
 
 	public SpriteKeyImBuilder() {
-		this.atlas = new ClientAsset[1];
-		this.sprite = new ClientAsset[1];
+		this.atlas = new ClientAsset.ResourceTexture[1];
+		this.sprite = new ClientAsset.ResourceTexture[1];
 	}
 
 	@Override
@@ -69,9 +69,14 @@ public class SpriteKeyImBuilder implements ImBuilder<SpriteKey> {
 			update = update.or(TextureSet.ALL.imgui(graphics, sprite, SEARCH));
 		} else {
 			try {
-				var list = new ArrayList<>(graphics.mc.getAtlasFromTexture(atlas[0].texturePath()).getTextures().keySet());
-				list.sort(ResourceLocation::compareNamespaced);
-				update = update.or(graphics.combo("###sprite", sprite, "", list, ID::idToString, SEARCH));
+				var list = new ArrayList<ClientAsset.ResourceTexture>();
+
+				for (var id : graphics.mc.getAtlasFromTexture(atlas[0].texturePath()).getTextures().keySet()) {
+					list.add(new ClientAsset.ResourceTexture(id));
+				}
+
+				list.sort((a, b) -> a.id().compareNamespaced(b.id()));
+				update = update.or(graphics.combo("###sprite", sprite, "", list, a -> ID.idToString(a.id()), SEARCH));
 			} catch (Throwable ex) {
 				graphics.stackTrace(ex);
 			}

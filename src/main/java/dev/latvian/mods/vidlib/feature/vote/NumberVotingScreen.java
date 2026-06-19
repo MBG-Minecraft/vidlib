@@ -3,8 +3,7 @@ package dev.latvian.mods.vidlib.feature.vote;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -18,8 +17,9 @@ public class NumberVotingScreen extends BaseVotingScreen {
 		}
 
 		@Override
-		public void renderString(GuiGraphics graphics, Font font, int color) {
-			graphics.drawString(font, getMessage(), getX() + (width - font.width(getMessage())) / 2, getY() + (height - 9) / 2, color, true);
+		protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+			extractDefaultSprite(graphics);
+			graphics.text(font, getMessage(), getX() + (width - font.width(getMessage())) / 2, getY() + (height - 9) / 2, getFGColor(), true);
 		}
 	}
 

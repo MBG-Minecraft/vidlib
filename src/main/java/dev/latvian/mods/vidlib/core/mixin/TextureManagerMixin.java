@@ -6,9 +6,8 @@ import dev.latvian.mods.vidlib.feature.visual.EphemeralTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,16 +23,16 @@ import java.util.concurrent.Executor;
 @Mixin(TextureManager.class)
 public abstract class TextureManagerMixin {
 	@Shadow
-	protected abstract void safeClose(ResourceLocation path, AbstractTexture texture);
+	protected abstract void safeClose(Identifier path, AbstractTexture texture);
 
 	@Shadow
 	@Final
-	public Map<ResourceLocation, AbstractTexture> byPath;
+	public Map<Identifier, AbstractTexture> byPath;
 
 	@Inject(method = "reload", at = @At("HEAD"))
-	public void vl$reload(PreparableReloadListener.PreparationBarrier barrier, ResourceManager manager, Executor backgroundExecutor, Executor gameExecutor, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
+	public void vl$reload(PreparableReloadListener.SharedState currentReload, Executor taskExecutor, PreparableReloadListener.PreparationBarrier preparationBarrier, Executor reloadExecutor, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
 		Minecraft.getInstance().vl$clearProfileCache();
-		var list = new ArrayList<Map.Entry<ResourceLocation, AbstractTexture>>();
+		var list = new ArrayList<Map.Entry<Identifier, AbstractTexture>>();
 
 		for (var entry : byPath.entrySet()) {
 			if (entry.getValue() instanceof EphemeralTexture) {
@@ -45,6 +44,6 @@ public abstract class TextureManagerMixin {
 			safeClose(entry.getKey(), entry.getValue());
 		}
 
-		AutoInit.Type.TEXTURES_RELOADED.invoke(new TextureReloadParams((TextureManager) (Object) this, backgroundExecutor, gameExecutor));
+		AutoInit.Type.TEXTURES_RELOADED.invoke(new TextureReloadParams((TextureManager) (Object) this, taskExecutor, reloadExecutor));
 	}
 }

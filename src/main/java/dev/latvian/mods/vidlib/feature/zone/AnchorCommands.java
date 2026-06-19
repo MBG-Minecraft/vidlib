@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public interface AnchorCommands {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("anchor", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.literal("set")
 			.then(Commands.argument("start", BlockPosArgument.blockPos())
 				.then(Commands.argument("end", BlockPosArgument.blockPos())

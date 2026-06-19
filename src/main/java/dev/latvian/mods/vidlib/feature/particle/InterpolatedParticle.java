@@ -1,13 +1,16 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import dev.latvian.mods.klib.interpolation.Interpolation;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleRenderType;
-import net.minecraft.client.particle.TextureSheetParticle;
+import net.minecraft.client.particle.SingleQuadParticle;
+import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
-public class InterpolatedParticle extends TextureSheetParticle {
+public class InterpolatedParticle extends SingleQuadParticle {
 	public final Vec3 origin;
 	public final Interpolation interpolation;
 	public float relativeAge;
@@ -16,8 +19,9 @@ public class InterpolatedParticle extends TextureSheetParticle {
 	public float oQuadSizeMod;
 	public float quadSizeMod;
 
-	public InterpolatedParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, Interpolation interpolation) {
-		super(level, x, y, z);
+	public InterpolatedParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, Interpolation interpolation, SpriteSet spriteSet) {
+		super(level, x, y, z, spriteSet.first());
+		this.setSprite(spriteSet.get(random));
 		this.interpolation = interpolation;
 		this.xd = xd;
 		this.yd = yd;
@@ -35,8 +39,13 @@ public class InterpolatedParticle extends TextureSheetParticle {
 	}
 
 	@Override
-	public ParticleRenderType getRenderType() {
+	public ParticleRenderType getGroup() {
 		return VidLibParticleRenderTypes.TRUE_TRANSLUCENT;
+	}
+
+	@Override
+	protected SingleQuadParticle.Layer getLayer() {
+		return VidLibParticleRenderTypes.TRUE_TRANSLUCENT_LAYER;
 	}
 
 	@Override

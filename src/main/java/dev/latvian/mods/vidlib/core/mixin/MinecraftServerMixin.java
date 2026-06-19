@@ -14,10 +14,10 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -60,7 +60,7 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	private DataMap vl$serverDataMap;
 
 	@Unique
-	private final Map<ResourceLocation, ClockValue> vl$clocks = new Object2ObjectOpenHashMap<>();
+	private final Map<Identifier, ClockValue> vl$clocks = new Object2ObjectOpenHashMap<>();
 
 	@Unique
 	private final KNumberVariables vl$globalVariables = new KNumberVariables();
@@ -131,7 +131,7 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	}
 
 	@Override
-	public Map<ResourceLocation, ClockValue> vl$getClocks() {
+	public Map<Identifier, ClockValue> vl$getClocks() {
 		return vl$clocks;
 	}
 

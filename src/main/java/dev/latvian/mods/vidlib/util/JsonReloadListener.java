@@ -4,14 +4,14 @@ import com.google.gson.JsonElement;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 import java.util.Map;
 
-public abstract class JsonReloadListener extends SimplePreparableReloadListener<Map<ResourceLocation, JsonElement>> {
+public abstract class JsonReloadListener extends SimplePreparableReloadListener<Map<Identifier, JsonElement>> {
 	public final String rootPath;
 	public final int rootPathOffset;
 
@@ -24,7 +24,7 @@ public abstract class JsonReloadListener extends SimplePreparableReloadListener<
 		return false;
 	}
 
-	private boolean filter(ResourceLocation id) {
+	private boolean filter(Identifier id) {
 		var path = id.getPath();
 
 		if (!path.endsWith(".json")) {
@@ -41,8 +41,8 @@ public abstract class JsonReloadListener extends SimplePreparableReloadListener<
 	}
 
 	@Override
-	public Map<ResourceLocation, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
-		var map = new Object2ObjectOpenHashMap<ResourceLocation, JsonElement>();
+	public Map<Identifier, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
+		var map = new Object2ObjectOpenHashMap<Identifier, JsonElement>();
 		var allResources = resourceManager.listResources(rootPath, this::filter);
 
 		for (var entry : allResources.entrySet()) {

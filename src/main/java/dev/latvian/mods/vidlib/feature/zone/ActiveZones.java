@@ -5,7 +5,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -51,7 +51,7 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 		}
 	};
 
-	public final Map<ResourceLocation, ZoneContainer> containers;
+	public final Map<Identifier, ZoneContainer> containers;
 	public final Int2ObjectOpenHashMap<List<ZoneInstance>> entityZones;
 	CachedZoneShape[] visible;
 	CachedZoneShape[] solidZones;
@@ -69,7 +69,7 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 	}
 
 	@Nullable
-	public ZoneContainer get(ResourceLocation id) {
+	public ZoneContainer get(Identifier id) {
 		return containers.get(id);
 	}
 
@@ -232,7 +232,7 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 	}
 
 	@ApiStatus.Internal
-	public void remove(ResourceLocation zone, int index) {
+	public void remove(Identifier zone, int index) {
 		var container = containers.get(zone);
 
 		if (container != null) {
@@ -243,7 +243,7 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 	}
 
 	@ApiStatus.Internal
-	public void update(ResourceLocation zone, int index, Zone zoneData) {
+	public void update(Identifier zone, int index, Zone zoneData) {
 		var container = containers.get(zone);
 
 		if (container != null) {

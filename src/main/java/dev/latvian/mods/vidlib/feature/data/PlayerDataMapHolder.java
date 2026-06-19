@@ -29,11 +29,11 @@ public interface PlayerDataMapHolder extends DataMapHolder {
 		set(InternalPlayerData.SKIN_OVERRIDE, skin);
 	}
 
-	default void setCapeOverride(@Nullable ClientAsset cape) {
+	default void setCapeOverride(@Nullable ClientAsset.ResourceTexture cape) {
 		set(InternalPlayerData.CAPE_OVERRIDE, cape);
 	}
 
-	default void setElytraOverride(@Nullable ClientAsset cape) {
+	default void setElytraOverride(@Nullable ClientAsset.ResourceTexture cape) {
 		set(InternalPlayerData.ELYTRA_OVERRIDE, cape);
 	}
 

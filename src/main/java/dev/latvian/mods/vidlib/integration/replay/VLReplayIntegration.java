@@ -190,7 +190,7 @@ public class VLReplayIntegration {
 							.group(ReplayMarkerGroup.PLAYER_ADDED)
 							.dimension(entry.dimension())
 							.position(new Vec3(p.getX(), p.getY(), p.getZ()))
-							.description(profile.getName())
+							.description(profile.name())
 							.build()
 						);
 					}
@@ -203,7 +203,7 @@ public class VLReplayIntegration {
 						event.addMarker(entry.replayTime(), ReplayMarkerData.builder()
 							.group(ReplayMarkerGroup.PLAYER_REMOVED)
 							.dimension(entry.dimension())
-							.description(profile.getName())
+							.description(profile.name())
 							.build()
 						);
 					}

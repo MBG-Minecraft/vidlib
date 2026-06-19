@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.misc.GlobalKeybinds;
@@ -18,6 +19,7 @@ import net.neoforged.neoforge.client.settings.KeyModifier;
 import org.lwjgl.glfw.GLFW;
 
 public class VidLibKeys {
+	public static final KeyMapping.Category CATEGORY = new KeyMapping.Category(VidLib.id("vidlib"));
 	public static KeyMapping freezeTickKeyMapping;
 	public static KeyMapping clearParticlesKeyMapping;
 	public static KeyMapping reloadKeyMapping;
@@ -28,7 +30,7 @@ public class VidLibKeys {
 	public static KeyMapping capturePanoramaKeyMapping;
 
 	private static KeyMapping register(RegisterKeyMappingsEvent event, String name, KeyModifier modifier, int defaultKey, KeyConflictContext conflict) {
-		var key = new KeyMapping(name, conflict, modifier, InputConstants.Type.KEYSYM, defaultKey, "key.categories.vidlib");
+		var key = new KeyMapping(name, conflict, modifier, InputConstants.Type.KEYSYM, defaultKey, CATEGORY);
 		event.register(key);
 		return key;
 	}
@@ -38,6 +40,7 @@ public class VidLibKeys {
 	}
 
 	public static void register(RegisterKeyMappingsEvent event) {
+		event.registerCategory(CATEGORY);
 		freezeTickKeyMapping = register(event, "key.vidlib.freeze_tick", KeyModifier.NONE, GLFW.GLFW_KEY_UNKNOWN);
 		clearParticlesKeyMapping = register(event, "key.vidlib.clear_particles", KeyModifier.NONE, GLFW.GLFW_KEY_UNKNOWN);
 		reloadKeyMapping = register(event, "key.vidlib.reload", KeyModifier.NONE, GLFW.GLFW_KEY_R);
@@ -54,8 +57,8 @@ public class VidLibKeys {
 		}
 
 		if (adminPanelKeyMapping.getKey() == playerGlowKeyMapping.getKey()) {
-			adminPanelKeyMapping.setKey(InputConstants.getKey(GLFW.GLFW_KEY_MENU, 0));
-			playerGlowKeyMapping.setKey(InputConstants.getKey(GLFW.GLFW_KEY_GRAVE_ACCENT, 0));
+			adminPanelKeyMapping.setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_MENU));
+			playerGlowKeyMapping.setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_GRAVE_ACCENT));
 			GlobalKeybinds.saveKeybinds(mc.options);
 		}
 
@@ -91,9 +94,9 @@ public class VidLibKeys {
 
 		while (capturePanoramaKeyMapping.consumeClick()) {
 			if (!ClientGameEngine.DISABLE_IMGUI) {
-				mc.player.displayClientMessage(Component.literal("You must have env DISABLE_IMGUI set to true").withColor(Color.RED.argb()), false);
+				mc.player.sendSystemMessage(Component.literal("You must have env DISABLE_IMGUI set to true").withColor(Color.RED.argb()));
 			} else {
-				mc.player.displayClientMessage(mc.grabPanoramixScreenshot(FMLPaths.GAMEDIR.get().toFile(), 3840, 3840), false);
+				mc.player.sendSystemMessage(mc.grabPanoramixScreenshot(FMLPaths.GAMEDIR.get().toFile()));
 			}
 		}
 	}

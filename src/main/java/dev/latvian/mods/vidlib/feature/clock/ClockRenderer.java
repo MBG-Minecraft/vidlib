@@ -3,8 +3,9 @@ package dev.latvian.mods.vidlib.feature.clock;
 import com.mojang.math.Axis;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import imgui.type.ImBoolean;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 
@@ -29,7 +30,7 @@ public class ClockRenderer {
 			return;
 		}
 
-		var light = location.fullBright() ? LightTexture.FULL_BRIGHT : mc.level.vl$getPackedLight(location.pos());
+		var light = location.fullBright() ? LightCoordsUtil.FULL_BRIGHT : mc.level.vl$getPackedLight(location.pos());
 
 		ms.pushPose();
 		frame.translate(location.pos().getX() + 0.5D, location.pos().getY() + location.offset() + 0.5D, location.pos().getZ() + 0.5D);
@@ -38,7 +39,7 @@ public class ClockRenderer {
 		ms.scale(location.scale(), -location.scale(), -1F);
 		var m4 = ms.last().pose();
 
-		var buffer = mc.renderBuffers().bufferSource().getBuffer(RenderType.entityCutoutNoCull(font.texture()));
+		var buffer = mc.renderBuffers().bufferSource().getBuffer(RenderTypes.entityCutout(font.texture()));
 		var x = -width / 2F + 1F;
 		var y = -font.size().y() / 2F;
 		var z = 0.4F;

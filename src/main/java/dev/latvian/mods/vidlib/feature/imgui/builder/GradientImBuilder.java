@@ -14,7 +14,7 @@ import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 import imgui.flag.ImGuiColorEditFlags;
 import imgui.type.ImString;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,11 +24,11 @@ public class GradientImBuilder implements ImBuilder<Gradient> {
 	public static final ImString SEARCH = ImGuiUtils.resizableString();
 
 	public final List<PositionedColorImBuilder> colors;
-	public final ResourceLocation[] reference;
+	public final Identifier[] reference;
 
 	public GradientImBuilder() {
 		this.colors = new ArrayList<>();
-		this.reference = new ResourceLocation[1];
+		this.reference = new Identifier[1];
 	}
 
 	public GradientImBuilder(List<PositionedColor> colors) {
@@ -41,7 +41,7 @@ public class GradientImBuilder implements ImBuilder<Gradient> {
 			this.colors.add(builder);
 		}
 
-		this.reference = new ResourceLocation[1];
+		this.reference = new Identifier[1];
 	}
 
 	@Override
@@ -65,7 +65,7 @@ public class GradientImBuilder implements ImBuilder<Gradient> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		var update = graphics.combo("###reference", reference, "Custom", GradientReference.MAP.keySet().stream().sorted(ResourceLocation::compareNamespaced).toList(), ID::idToString, SEARCH);
+		var update = graphics.combo("###reference", reference, "Custom", GradientReference.MAP.keySet().stream().sorted(Identifier::compareNamespaced).toList(), ID::idToString, SEARCH);
 
 		if (reference[0] != null) {
 			return update;

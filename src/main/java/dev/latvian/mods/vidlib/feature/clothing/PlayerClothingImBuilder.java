@@ -11,10 +11,10 @@ import java.util.function.Function;
 
 public class PlayerClothingImBuilder implements ImBuilder<PlayerClothing> {
 	public static final ImBuilderType<PlayerClothing> TYPE = PlayerClothingImBuilder::new;
-	public static final Function<ResourceKey<ClothingSet>, String> PRESET_NAME = key -> key.location().toString();
+	public static final Function<ResourceKey<ClothingSet>, String> PRESET_NAME = key -> key.identifier().toString();
 
 	public final PlayerClothing.Type[] type = {null};
-	public final EnumImBuilder<ResourceKey<ClothingSet>> presetBuilder = new EnumImBuilder<>(ClothingPresets.INSTANCE.map.keySet().stream().sorted((o1, o2) -> o1.location().compareNamespaced(o2.location())).toList(), Tracksuits.BLUE);
+	public final EnumImBuilder<ResourceKey<ClothingSet>> presetBuilder = new EnumImBuilder<>(ClothingPresets.INSTANCE.map.keySet().stream().sorted((o1, o2) -> o1.identifier().compareNamespaced(o2.identifier())).toList(), Tracksuits.BLUE);
 	public final ClothingSetImBuilder customBuilder = new ClothingSetImBuilder();
 
 	public PlayerClothingImBuilder() {

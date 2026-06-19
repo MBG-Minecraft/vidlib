@@ -5,7 +5,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasRenderPipelines;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -13,6 +13,6 @@ import org.spongepowered.asm.mixin.injection.At;
 public class MultiBufferSourceBufferSourceMixin {
 	@ModifyReturnValue(method = "getBuffer", at = @At("RETURN"))
 	private VertexConsumer vl$getBuffer(VertexConsumer buffer, @Local(argsOnly = true) RenderType type) {
-		return CanvasRenderPipelines.wrap(buffer, type.getRenderPipeline());
+		return CanvasRenderPipelines.wrap(buffer, type.pipeline());
 	}
 }

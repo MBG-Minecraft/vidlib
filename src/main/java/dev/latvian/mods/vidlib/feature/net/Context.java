@@ -10,6 +10,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.configuration.ClientConfigurationPacketListener;
 import net.minecraft.network.protocol.configuration.ServerConfigurationPacketListener;
 import net.minecraft.server.network.ConfigurationTask;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -62,7 +63,7 @@ public interface Context {
 	}
 
 	default boolean isAdmin() {
-		return level().getServer().isSingleplayer() || player().hasPermissions(2);
+		return level().getServer().isSingleplayer() || player().permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
 	}
 
 	default boolean isReplay() {

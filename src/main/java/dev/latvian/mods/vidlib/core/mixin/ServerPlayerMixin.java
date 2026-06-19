@@ -27,7 +27,7 @@ public abstract class ServerPlayerMixin implements VLServerPlayer {
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	public void vl$init(MinecraftServer server, ServerLevel level, GameProfile gameProfile, ClientInformation clientInformation, CallbackInfo ci) {
-		vl$sessionData = server.vl$getOrLoadServerSession(gameProfile.getId());
+		vl$sessionData = server.vl$getOrLoadServerSession(gameProfile.id());
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public abstract class ServerPlayerMixin implements VLServerPlayer {
 		return vl$sessionData;
 	}
 
-	@Redirect(method = "startSleepInBed", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;displayClientMessage(Lnet/minecraft/network/chat/Component;Z)V"))
-	private void vl$sleepMessage(ServerPlayer instance, Component text, boolean overlay) {
+	@Redirect(method = "startSleepInBed", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;sendOverlayMessage(Lnet/minecraft/network/chat/Component;)V"))
+	private void vl$sleepMessage(ServerPlayer instance, Component text) {
 	}
 }

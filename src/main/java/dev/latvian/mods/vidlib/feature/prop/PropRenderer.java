@@ -3,9 +3,9 @@ package dev.latvian.mods.vidlib.feature.prop;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.util.LightCoordsUtil;
 import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.SubmitCustomGeometryEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -13,21 +13,21 @@ import java.util.Set;
 import java.util.function.Function;
 
 public interface PropRenderer<P extends Prop> {
-	Set<RenderLevelStageEvent.Stage> DEFAULT_STAGES = Set.of(
-		RenderLevelStageEvent.Stage.AFTER_ENTITIES
+	Set<Object> DEFAULT_STAGES = Set.of(
+		SubmitCustomGeometryEvent.class
 	);
 
-	Set<RenderLevelStageEvent.Stage> TERRAIN_STAGES = Set.of(
-		RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS,
-		RenderLevelStageEvent.Stage.AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS,
-		RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS,
-		RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS,
-		RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS
+	Set<Object> TERRAIN_STAGES = Set.of(
+		dev.latvian.mods.vidlib.util.TerrainRenderLayer.SOLID,
+		dev.latvian.mods.vidlib.util.TerrainRenderLayer.CUTOUT_MIPPED,
+		dev.latvian.mods.vidlib.util.TerrainRenderLayer.CUTOUT,
+		dev.latvian.mods.vidlib.util.TerrainRenderLayer.TRANSLUCENT,
+		dev.latvian.mods.vidlib.util.TerrainRenderLayer.TRIPWIRE
 	);
 
-	Set<RenderLevelStageEvent.Stage> SOLID_TERRAIN_STAGES = Set.of(RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS);
-	Set<RenderLevelStageEvent.Stage> CUTOUT_TERRAIN_STAGES = Set.of(RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS);
-	Set<RenderLevelStageEvent.Stage> TRANSLUCENT_TERRAIN_STAGES = Set.of(RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS);
+	Set<Object> SOLID_TERRAIN_STAGES = Set.of(dev.latvian.mods.vidlib.util.TerrainRenderLayer.SOLID);
+	Set<Object> CUTOUT_TERRAIN_STAGES = Set.of(dev.latvian.mods.vidlib.util.TerrainRenderLayer.CUTOUT);
+	Set<Object> TRANSLUCENT_TERRAIN_STAGES = Set.of(dev.latvian.mods.vidlib.util.TerrainRenderLayer.TRANSLUCENT);
 
 	PropRenderer<?> INVISIBLE = new PropRenderer<>() {
 		@Override
@@ -35,9 +35,9 @@ public interface PropRenderer<P extends Prop> {
 		}
 
 		@Override
-		public Set<RenderLevelStageEvent.Stage> getStages(Prop prop) {
-			return Set.of();
-		}
+	public Set<Object> getStages(Prop prop) {
+		return Set.of();
+	}
 	};
 
 	static Holder holder(PropType<?> type, PropRenderer<?> unitRenderer) {
@@ -64,12 +64,12 @@ public interface PropRenderer<P extends Prop> {
 
 	void render(PropRenderContext<P> ctx);
 
-	default Set<RenderLevelStageEvent.Stage> getStages(P prop) {
+	default Set<Object> getStages(P prop) {
 		return DEFAULT_STAGES;
 	}
 
 	default int getPackedLight(PropRenderContext<P> ctx) {
-		return LightTexture.FULL_BRIGHT;
+		return LightCoordsUtil.FULL_BRIGHT;
 	}
 
 	default boolean shouldSort(PropRenderContext<P> ctx) {

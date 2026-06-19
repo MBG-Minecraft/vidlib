@@ -88,11 +88,11 @@ public abstract class PlayerMixin extends LivingEntity implements VLPlayer {
 	}
 
 	@Override
-	public Set<String> getTags() {
+	public Set<String> entityTags() {
 		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
 			return get(InternalPlayerData.PLAYER_TAGS);
 		} else {
-			return super.getTags();
+			return super.entityTags();
 		}
 	}
 
@@ -101,7 +101,7 @@ public abstract class PlayerMixin extends LivingEntity implements VLPlayer {
 		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
 			var newSet = Set.copyOf(tags);
 
-			if (!newSet.equals(getTags())) {
+			if (!newSet.equals(entityTags())) {
 				set(InternalPlayerData.PLAYER_TAGS, newSet);
 			}
 		} else {
@@ -112,7 +112,7 @@ public abstract class PlayerMixin extends LivingEntity implements VLPlayer {
 	@Override
 	public boolean addTag(String tag) {
 		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
-			var tags = new HashSet<>(getTags());
+			var tags = new HashSet<>(entityTags());
 
 			if (tags.add(tag)) {
 				setTags(tags);
@@ -128,7 +128,7 @@ public abstract class PlayerMixin extends LivingEntity implements VLPlayer {
 	@Override
 	public boolean removeTag(String tag) {
 		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
-			var tags = new HashSet<>(getTags());
+			var tags = new HashSet<>(entityTags());
 
 			if (tags.remove(tag)) {
 				setTags(tags);
@@ -144,7 +144,7 @@ public abstract class PlayerMixin extends LivingEntity implements VLPlayer {
 	@Override
 	public boolean addTags(Collection<String> t) {
 		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
-			var tags = new HashSet<>(getTags());
+			var tags = new HashSet<>(entityTags());
 
 			if (tags.addAll(t)) {
 				setTags(tags);
@@ -160,7 +160,7 @@ public abstract class PlayerMixin extends LivingEntity implements VLPlayer {
 	@Override
 	public boolean removeTags(Collection<String> t) {
 		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
-			var tags = new HashSet<>(getTags());
+			var tags = new HashSet<>(entityTags());
 
 			if (tags.removeAll(t)) {
 				setTags(tags);

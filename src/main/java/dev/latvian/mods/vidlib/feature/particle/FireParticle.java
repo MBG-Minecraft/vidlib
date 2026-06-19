@@ -1,16 +1,19 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.Gradient;
 import dev.latvian.mods.klib.math.KMath;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.particle.SpriteSet;
 
 public class FireParticle extends InterpolatedParticle {
 	public static ParticleProvider<FireParticleOptions> create(SpriteSet spriteSet) {
-		return (options, level, x, y, z, xd, yd, zd) -> new FireParticle(options, level, x, y, z, xd, yd, zd, spriteSet);
+		return (options, level, x, y, z, xd, yd, zd, random) -> new FireParticle(options, level, x, y, z, xd, yd, zd, spriteSet);
 	}
 
 	public final FireParticleOptions options;
@@ -19,12 +22,12 @@ public class FireParticle extends InterpolatedParticle {
 	public final float randomOffset;
 
 	public FireParticle(FireParticleOptions options, ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet spriteSet) {
-		super(level, x, y, z, xd, yd, zd, options.interpolation());
+		super(level, x, y, z, xd, yd, zd, options.interpolation(), spriteSet);
 		this.options = options;
 		this.spriteSet = spriteSet;
 		this.gradient = options.color().optimize();
 		this.lifetime = (int) (options.lifespan() * random.nextRange(0.9F, 1.1F));
-		this.pickSprite(spriteSet);
+		this.setSprite(spriteSet.get(random));
 		this.quadSize *= 6F;
 		this.randomOffset = 0.8F + random.nextFloat() * 0.4F;
 		var color = (gradient == null ? Color.WHITE : gradient).get(0F);
@@ -32,12 +35,17 @@ public class FireParticle extends InterpolatedParticle {
 	}
 
 	@Override
-	public ParticleRenderType getRenderType() {
+	public ParticleRenderType getGroup() {
 		return VidLibParticleRenderTypes.ADDITIVE;
 	}
 
 	@Override
-	protected int getLightColor(float tint) {
+	protected SingleQuadParticle.Layer getLayer() {
+		return VidLibParticleRenderTypes.ADDITIVE_LAYER;
+	}
+
+	@Override
+	protected int getLightCoords(float tint) {
 		return 15728880;
 	}
 
@@ -46,7 +54,7 @@ public class FireParticle extends InterpolatedParticle {
 		super.tick();
 
 		if (age % 3 == 0) {
-			this.pickSprite(spriteSet);
+			this.setSprite(spriteSet.get(random));
 		}
 
 		int decay = lifetime / 3 * 2;

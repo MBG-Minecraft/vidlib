@@ -9,7 +9,7 @@ import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.util.ArrayList;
@@ -18,8 +18,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public record SkyboxData(
-	ResourceLocation id,
-	Optional<ResourceLocation> texture,
+	Identifier id,
+	Optional<Identifier> texture,
 	float rotation,
 	float rotating,
 	Color tint,
@@ -44,9 +44,9 @@ public record SkyboxData(
 
 	public static final VLRegistry<SkyboxData> REGISTRY = VLRegistry.createClient("skybox", SkyboxData.class);
 
-	public static final List<ResourceLocation> SKYBOX_IDS = new ArrayList<>();
-	public static final DataType<ResourceLocation> ID_DATA_TYPE = DataType.of(ID.CODEC, ID.STREAM_CODEC, ResourceLocation.class);
-	public static final CommandDataType<ResourceLocation> COMMAND = CommandDataType.of(ID_DATA_TYPE).suggestsIDs(() -> SKYBOX_IDS);
+	public static final List<Identifier> SKYBOX_IDS = new ArrayList<>();
+	public static final DataType<Identifier> ID_DATA_TYPE = DataType.of(ID.CODEC, ID.STREAM_CODEC, Identifier.class);
+	public static final CommandDataType<Identifier> COMMAND = CommandDataType.of(ID_DATA_TYPE).suggestsIDs(() -> SKYBOX_IDS);
 
 	public static class Loader extends JsonRegistryReloadListener<SkyboxData> {
 		public Loader() {
@@ -54,11 +54,11 @@ public record SkyboxData(
 		}
 
 		@Override
-		protected void apply(ResourceManager resourceManager, Map<ResourceLocation, SkyboxData> map) {
+		protected void apply(ResourceManager resourceManager, Map<Identifier, SkyboxData> map) {
 			super.apply(resourceManager, map);
 			SKYBOX_IDS.clear();
 			SKYBOX_IDS.addAll(map.keySet());
-			SKYBOX_IDS.sort(ResourceLocation::compareNamespaced);
+			SKYBOX_IDS.sort(Identifier::compareNamespaced);
 		}
 	}
 }

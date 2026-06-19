@@ -7,7 +7,7 @@ import dev.latvian.mods.vidlib.feature.icon.renderer.IconRenderer;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
@@ -33,14 +33,14 @@ public class PlumbobRenderer {
 
 			var source = mc.renderBuffers().bufferSource();
 			var blockpos = BlockPos.containing(player.getLightProbePosition(pdelta));
-			int light = LightTexture.pack(mc.level.getBrightness(LightLayer.BLOCK, blockpos), mc.level.getBrightness(LightLayer.SKY, blockpos));
+			int light = LightCoordsUtil.pack(mc.level.getBrightness(LightLayer.BLOCK, blockpos), mc.level.getBrightness(LightLayer.SKY, blockpos));
 
 			render(mc, h, player.getEyePosition(pdelta), ms, frame.worldDelta(), source, light, player.isCrouching(), !Empty.isEmpty(ClientGameEngine.INSTANCE.getScoreText(player)));
 		}
 	}
 
 	public static void render(Minecraft mc, Icon icon, Vec3 pos, PoseStack ms, float delta, MultiBufferSource buffers, int light, boolean crouching, boolean scoreText) {
-		var cam = mc.gameRenderer.getMainCamera().getPosition();
+		var cam = mc.gameRenderer.getMainCamera().position();
 
 		if (KMath.sq(pos.x - cam.x) + KMath.sq(pos.z - cam.z) <= 0.01D * 0.01D) {
 			return;

@@ -1,8 +1,12 @@
 package dev.latvian.mods.vidlib.feature.misc;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import com.google.common.hash.Hashing;
 import com.mojang.authlib.minecraft.MinecraftProfileTextures;
+import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.latvian.mods.klib.color.Color;
@@ -15,15 +19,18 @@ import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.resources.PlayerSkin;
+import net.minecraft.client.renderer.ProjectionMatrixBuffer;
+import net.minecraft.world.entity.player.PlayerSkin;
+import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
@@ -37,23 +44,27 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class MiscClientUtils {
 	public static final ConcurrentLinkedDeque<AutoCloseable> CLIENT_CLOSEABLE = new ConcurrentLinkedDeque<>();
+	private static final ProjectionMatrixBuffer PROJECTION_MATRIX_BUFFER = new ProjectionMatrixBuffer("vidlib");
 	public static final Matrix4f FRUSTUM_MATRIX = new Matrix4f();
 	public static final Matrix4f PERSPECTIVE_MATRIX = new Matrix4f();
 	public static final ImBoolean PLAYER_HEADWEAR = new ImBoolean(true);
 	private static final char[] POWER = {'K', 'M', 'B', 'T'};
 	public static final ImBoolean SPECTATE_UI = new ImBoolean(false);
-	public static final Map<ResourceLocation, NativeImage> BUILTIN_SKIN_IMAGE_MAP = new HashMap<>();
-	public static final Map<ResourceLocation, NativeImage> SKIN_IMAGE_MAP = new HashMap<>();
-	public static final Map<UUID, PlayerSkin.Model> UUID_MODEL_MAP = new HashMap<>();
-	public static final Map<String, PlayerSkin.Model> SKIN_MODEL_MAP = new HashMap<>();
+	public static final Map<Identifier, NativeImage> BUILTIN_SKIN_IMAGE_MAP = new HashMap<>();
+	public static final Map<Identifier, NativeImage> SKIN_IMAGE_MAP = new HashMap<>();
+	public static final Map<UUID, PlayerModelType> UUID_MODEL_MAP = new HashMap<>();
+	public static final Map<String, PlayerModelType> SKIN_MODEL_MAP = new HashMap<>();
+
+	static {
+		CLIENT_CLOSEABLE.add(PROJECTION_MATRIX_BUFFER);
+	}
 
 	public static void reloadShaders(Minecraft mc) {
-		mc.getShaderManager().reload(CompletableFuture::completedFuture, mc.getResourceManager(), Util.backgroundExecutor(), mc).thenRunAsync(() -> {
-			mc.levelRenderer.onResourceManagerReload(mc.getResourceManager());
-			// CompiledShader.Type.FRAGMENT.getPrograms().clear();
-			// CompiledShader.Type.VERTEX.getPrograms().clear();
-			mc.player.displayClientMessage(Component.literal("Shaders reloaded!").withStyle(ChatFormatting.GREEN), true);
-		}, mc);
+		mc.reloadResourcePacks().thenRunAsync(() -> mc.player.sendOverlayMessage(Component.literal("Shaders reloaded!").withStyle(ChatFormatting.GREEN)), mc);
+	}
+
+	public static void setProjectionMatrix(Matrix4f matrix, ProjectionType type) {
+		RenderSystem.setProjectionMatrix(PROJECTION_MATRIX_BUFFER.getBuffer(matrix), type);
 	}
 
 	public static void renderVisuals(PoseStack ms, Vec3 cameraPos, MultiBufferSource buffers, BufferSupplier type, Visuals visuals, float progress) {
@@ -148,7 +159,7 @@ public class MiscClientUtils {
 	}
 
 	public static String formatNumber(int count) {
-		if (Screen.hasAltDown()) {
+		if (Minecraft.getInstance().hasAltDown()) {
 			return String.format("%,d", count);
 		}
 
@@ -168,16 +179,16 @@ public class MiscClientUtils {
 		}
 	}
 
-	public static int drawStackSize(GuiGraphics graphics, Font font, String size, int x, int y, int color, boolean dropShadow) {
+	public static int drawStackSize(GuiGraphicsExtractor graphics, Font font, String size, int x, int y, int color, boolean dropShadow) {
 		var ms = graphics.pose();
 		int w = font.width(size);
 		float scale = size.length() >= 4 ? 0.5F : size.length() == 3 ? 0.75F : 1F;
-		ms.pushPose();
-		ms.translate((int) (x + 16F - (w - 1F) * scale), (int) (y + 16F - 7F * scale), 200F);
-		ms.scale(scale, scale, 1F);
-		int s = graphics.drawString(font, size, 0F, 0F, color, dropShadow);
-		ms.popPose();
-		return Mth.ceil(s * scale);
+		ms.pushMatrix();
+		ms.translate((int) (x + 16F - (w - 1F) * scale), (int) (y + 16F - 7F * scale));
+		ms.scale(scale, scale);
+		graphics.text(font, size, 0, 0, color, dropShadow);
+		ms.popMatrix();
+		return Mth.ceil(w * scale);
 	}
 
 	public static float adjustScreenX(Minecraft mc, int adjustedWidth) {
@@ -194,7 +205,7 @@ public class MiscClientUtils {
 		return mc.getWindow().getGuiScaledWidth();
 	}
 
-	public static void setModel(UUID uuid, MinecraftProfileTextures textures, PlayerSkin.Model model) {
+	public static void setModel(UUID uuid, MinecraftProfileTextures textures, PlayerModelType model) {
 		if (textures.skin() != null) {
 			var hash = Hashing.sha1().hashUnencodedChars(textures.skin().getHash()).toString();
 			UUID_MODEL_MAP.put(uuid, model);
@@ -248,9 +259,7 @@ public class MiscClientUtils {
 					if (srcColorArgb == 0x01010101) {
 						dst.setPixel(x, y, keepMeta ? 0x01010101 : 0);
 					} else {
-						var srcColor = Color.of(srcColorArgb);
-						var dstColor = Color.of(dst.getPixel(x, y));
-						dst.setPixel(x, y, srcColor.mix(dstColor).argb());
+						dst.setPixel(x, y, ARGB.alphaBlend(dst.getPixel(x, y), srcColorArgb));
 					}
 				}
 			}

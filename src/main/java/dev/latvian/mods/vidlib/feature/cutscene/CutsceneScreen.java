@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.cutscene;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.latvian.mods.klib.math.Rotation;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
@@ -30,7 +30,7 @@ public class CutsceneScreen extends Screen {
 		{
 			var x = (double) (this.minecraft.getWindow().getWidth() / 2);
 			var y = (double) (this.minecraft.getWindow().getHeight() / 2);
-			InputConstants.grabOrReleaseMouse(this.minecraft.getWindow().getWindow(), GLFW.GLFW_CURSOR_DISABLED, x, y);
+			InputConstants.grabOrReleaseMouse(this.minecraft.getWindow(), GLFW.GLFW_CURSOR_DISABLED, x, y);
 		}
 	}
 
@@ -38,12 +38,12 @@ public class CutsceneScreen extends Screen {
 	public void removed() {
 		var x = (double) (this.minecraft.getWindow().getWidth() / 2);
 		var y = (double) (this.minecraft.getWindow().getHeight() / 2);
-		InputConstants.grabOrReleaseMouse(this.minecraft.getWindow().getWindow(), GLFW.GLFW_CURSOR_NORMAL, x, y);
+		InputConstants.grabOrReleaseMouse(this.minecraft.getWindow(), GLFW.GLFW_CURSOR_NORMAL, x, y);
 	}
 
 	@Override
 	public boolean shouldCloseOnEsc() {
-		return Screen.hasShiftDown() && minecraft.isLocalServer();
+		return minecraft.hasShiftDown() && minecraft.isLocalServer();
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public class CutsceneScreen extends Screen {
 	}
 
 	@Override
-	public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
 		var barVisibility = Mth.lerp(delta, clientCutscene.state.prevBarVisibility, clientCutscene.state.barVisibility);
 
 		if (barVisibility > 0F) {
@@ -70,7 +70,7 @@ public class CutsceneScreen extends Screen {
 				for (int i = 0; i < tb.size(); i++) {
 					int x = (width - font.width(tb.get(i))) / 2;
 					int y = (barSize - tb.size() * 10) / 2 + i * 10;
-					graphics.drawString(font, tb.get(i), x, y, 0xFFFFFFFF, true);
+					graphics.text(font, tb.get(i), x, y, 0xFFFFFFFF, true);
 				}
 			}
 
@@ -86,7 +86,7 @@ public class CutsceneScreen extends Screen {
 				for (int i = 0; i < bb.size(); i++) {
 					int x = (width - font.width(bb.get(i))) / 2;
 					int y = (barSize - bb.size() * 10) / 2 + i * 10;
-					graphics.drawString(font, bb.get(i), x, height - barSize + y, 0xFFFFFFFF, true);
+					graphics.text(font, bb.get(i), x, height - barSize + y, 0xFFFFFFFF, true);
 				}
 			}
 		}

@@ -14,7 +14,7 @@ import java.util.Locale;
 public interface StructureCommands {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("structure", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.literal("add-blocks")
 			.then(Commands.argument("start", BlockPosArgument.blockPos())
 				.then(Commands.argument("end", BlockPosArgument.blockPos())

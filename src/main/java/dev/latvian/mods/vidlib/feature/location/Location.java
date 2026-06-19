@@ -18,7 +18,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 
@@ -27,7 +27,7 @@ import java.util.function.Supplier;
 
 @AutoInit
 public record Location(
-	ResourceLocation id,
+	Identifier id,
 	ResourceKey<Level> dimension,
 	List<KVector> positions,
 	double range,

@@ -145,7 +145,7 @@ public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntr
 		return DataResult.error(() -> "Invalid blockstate format: " + s);
 	}, filter -> switch (filter) {
 		case BlockStateFilter f -> DataResult.success(f.blockState().vl$toString() + (f.blockState() == f.blockState().getBlock().defaultBlockState() ? "[]" : ""));
-		case BlockIdFilter f -> DataResult.success(f.block().builtInRegistryHolder().getKey().location().toString());
+		case BlockIdFilter f -> DataResult.success(f.block().builtInRegistryHolder().getKey().identifier().toString());
 		case null, default -> DataResult.error(() -> "");
 	});
 

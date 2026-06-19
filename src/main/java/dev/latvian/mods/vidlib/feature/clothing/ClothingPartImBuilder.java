@@ -14,9 +14,9 @@ import net.minecraft.core.ClientAsset;
 public class ClothingPartImBuilder extends CompoundImBuilder<ClothingPart> {
 	public static final ImBuilderType<ClothingPart> TYPE = ClothingPartImBuilder::new;
 	public static final TextureSet TEXTURE_SET = new TextureSet("textures/vidlib/clothing");
-	public static final ClientAsset DEFAULT_TEXTURE = new ClientAsset(VidLib.id("vidlib/clothing/tracksuit/top"));
+	public static final ClientAsset.ResourceTexture DEFAULT_TEXTURE = new ClientAsset.ResourceTexture(VidLib.id("vidlib/clothing/tracksuit/top"));
 
-	public final ImBuilder<ClientAsset> texture = new TextureImBuilder(TEXTURE_SET, DEFAULT_TEXTURE);
+	public final ImBuilder<ClientAsset.ResourceTexture> texture = new TextureImBuilder(TEXTURE_SET, DEFAULT_TEXTURE);
 	public final ImBuilder<Gradient> color = new GradientImBuilder();
 
 	public ClothingPartImBuilder() {
@@ -27,7 +27,7 @@ public class ClothingPartImBuilder extends CompoundImBuilder<ClothingPart> {
 	@Override
 	public void set(ClothingPart value) {
 		if (value != null) {
-			texture.set(new ClientAsset(value.texture().withPrefix("vidlib/clothing/")));
+			texture.set(new ClientAsset.ResourceTexture(value.texture().withPrefix("vidlib/clothing/")));
 			color.set(value.colors());
 		} else {
 			texture.set(null);

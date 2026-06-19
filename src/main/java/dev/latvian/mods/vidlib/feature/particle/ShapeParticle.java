@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.klib.color.Gradient;
 import dev.latvian.mods.klib.math.KMath;
@@ -30,7 +32,7 @@ public class ShapeParticle extends CustomParticle {
 	@Override
 	public void renderCustom(PoseStack ms, MultiBufferSource buffers, Camera camera, float delta) {
 		float time = KMath.lerp(delta, prevAge, age);
-		var cameraPos = camera.getPosition();
+		var cameraPos = camera.position();
 
 		ms.pushPose();
 		ms.translate(

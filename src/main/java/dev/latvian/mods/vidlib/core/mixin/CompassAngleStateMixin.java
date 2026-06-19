@@ -5,7 +5,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.renderer.item.properties.numeric.CompassAngleState;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ItemOwner;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -17,8 +17,14 @@ public class CompassAngleStateMixin {
 	@Final
 	private CompassAngleState.CompassTarget compassTarget;
 
-	@ModifyExpressionValue(method = "getRotationTowardsCompassTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/item/properties/numeric/CompassAngleState;getAngleFromEntityToPos(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/BlockPos;)D"))
-	private double vl$calculate(double original, @Local(argsOnly = true) Entity entity, @Local(argsOnly = true) BlockPos target) {
+	@ModifyExpressionValue(method = "getRotationTowardsCompassTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/item/properties/numeric/CompassAngleState;getAngleFromEntityToPos(Lnet/minecraft/world/entity/ItemOwner;Lnet/minecraft/core/BlockPos;)D"))
+	private double vl$calculate(double original, @Local(argsOnly = true) ItemOwner owner, @Local(argsOnly = true) BlockPos target) {
+		var entity = owner.asLivingEntity();
+
+		if (entity == null) {
+			return original;
+		}
+
 		var angle = ClientGameEngine.INSTANCE.overrideCompassAngle(compassTarget, entity, target);
 		return Double.isNaN(angle) ? original : angle;
 	}

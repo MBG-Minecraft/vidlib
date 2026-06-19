@@ -10,7 +10,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 public interface FadeCommands {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("fade", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.argument("player", EntityArgument.players())
 			.then(Commands.argument("color", CommandDataType.GRADIENT.argument(buildContext))
 				.then(Commands.argument("fade-in", IntegerArgumentType.integer(0))

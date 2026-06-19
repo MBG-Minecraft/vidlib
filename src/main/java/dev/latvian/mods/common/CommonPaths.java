@@ -2,7 +2,7 @@ package dev.latvian.mods.common;
 
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

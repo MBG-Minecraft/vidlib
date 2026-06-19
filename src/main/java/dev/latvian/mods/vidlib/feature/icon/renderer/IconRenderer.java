@@ -10,7 +10,7 @@ import dev.latvian.mods.vidlib.feature.icon.SimpleColorIcon;
 import dev.latvian.mods.vidlib.feature.icon.TextureIcon;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.MultiBufferSource;
 
 public interface IconRenderer {
@@ -35,7 +35,7 @@ public interface IconRenderer {
 		register(AtlasSpriteIcon.TYPE, AtlasSpriteIconRenderer::render);
 	}
 
-	static void draw(Icon icon, Minecraft mc, GuiGraphics graphics, int alpha) {
+	static void draw(Icon icon, Minecraft mc, GuiGraphicsExtractor graphics, int alpha) {
 		var r = IconGuiRenderer.MAP.get(icon.type());
 
 		if (r != null) {

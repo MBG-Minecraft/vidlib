@@ -1,13 +1,12 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.geodisplay;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
 import dev.latvian.mods.vidlib.feature.prop.geo.GeoPropRenderer;
 import dev.latvian.mods.vidlib.integration.VidLibGeoDataTickets;
 import net.minecraft.client.Minecraft;
-import software.bernie.geckolib.cache.object.BakedGeoModel;
-import software.bernie.geckolib.renderer.base.GeoRenderState;
+import com.geckolib.renderer.base.GeoRenderState;
+import com.geckolib.renderer.base.RenderPassInfo;
 
 public class GeoDisplayPropRenderer extends GeoPropRenderer<GeoDisplayProp> {
 	@ClientAutoRegister
@@ -25,20 +24,18 @@ public class GeoDisplayPropRenderer extends GeoPropRenderer<GeoDisplayProp> {
 	}
 
 	@Override
-	public void adjustPositionForRender(GeoRenderState state, PoseStack ms, BakedGeoModel model, boolean isReRender) {
-		super.adjustPositionForRender(state, ms, model, isReRender);
+	public void adjustRenderPose(RenderPassInfo<GeoRenderState> renderPassInfo) {
+		super.adjustRenderPose(renderPassInfo);
 	}
 
 	@Override
-	public void scaleModelForRender(GeoRenderState state, float widthScale, float heightScale, PoseStack poseStack, BakedGeoModel model, boolean isReRender) {
-		super.scaleModelForRender(state, widthScale, heightScale, poseStack, model, isReRender);
+	public void scaleModelForRender(RenderPassInfo<GeoRenderState> renderPassInfo, float widthScale, float heightScale) {
+		super.scaleModelForRender(renderPassInfo, widthScale, heightScale);
 
-		if (!isReRender) {
-			var s = state.getGeckolibData(VidLibGeoDataTickets.HEIGHT);
+		var s = renderPassInfo.getGeckolibData(VidLibGeoDataTickets.HEIGHT);
 
-			if (s != null && s != 1F) {
-				poseStack.scale(s, s, s);
-			}
+		if (s != null && s != 1F) {
+			renderPassInfo.poseStack().scale(s, s, s);
 		}
 	}
 }

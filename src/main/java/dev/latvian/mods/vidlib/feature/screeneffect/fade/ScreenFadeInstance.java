@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.screeneffect.fade;
 
 import dev.latvian.mods.klib.color.Gradient;
 import dev.latvian.mods.klib.interpolation.Interpolation;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.util.Mth;
 
 public class ScreenFadeInstance {
@@ -43,12 +43,12 @@ public class ScreenFadeInstance {
 		return ++tick >= totalTicks;
 	}
 
-	public void draw(GuiGraphics graphics, float delta, int width, int height) {
+	public void draw(GuiGraphicsExtractor graphics, float delta, int width, int height) {
 		float t = Mth.lerp(delta, prevTick, tick) / (float) totalTicks;
 		float a = Math.clamp(Mth.lerp(delta, prevAlpha, alpha), 0F, 1F);
 
 		if (a > 0F) {
-			graphics.fill(0, 0, width, height, 1000, color.get(t).withAlpha(a).argb());
+			graphics.fill(0, 0, width, height, color.get(t).withAlpha(a).argb());
 		}
 	}
 }

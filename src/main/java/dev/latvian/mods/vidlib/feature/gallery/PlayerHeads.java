@@ -21,15 +21,18 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
+import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import imgui.ImGui;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.renderer.rendertype.OutputTarget;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.TriState;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -44,7 +47,7 @@ public interface PlayerHeads {
 		public static final GameProfileImBuilder UNIT = new GameProfileImBuilder();
 
 		@Override
-		public ResourceLocation getIcon() {
+		public Identifier getIcon() {
 			return VidLibTextures.DEFAULT_PLAYER_HEAD.texturePath();
 		}
 
@@ -65,12 +68,12 @@ public interface PlayerHeads {
 			}
 
 			if (ImGui.beginPopup("###select-profile")) {
-				if (UNIT.profileSelector(graphics, profile -> !profile.equals(PlayerProfile.EMPTY_GAME_PROFILE) && !GALLERY.images.containsKey(profile.getId())).isFull() && UNIT.isValid()) {
+				if (UNIT.profileSelector(graphics, profile -> !profile.equals(PlayerProfile.EMPTY_GAME_PROFILE) && !GALLERY.images.containsKey(profile.id())).isFull() && UNIT.isValid()) {
 					var profile = UNIT.build();
 
 					if (profile != null && !PlayerProfile.EMPTY_GAME_PROFILE.equals(profile)) {
 						try {
-							builder.set(get(graphics.mc, profile.getId()));
+							builder.set(get(graphics.mc, profile.id()));
 							builder.fullUpdate = true;
 							ImGui.closeCurrentPopup();
 						} catch (Exception ex) {
@@ -85,19 +88,16 @@ public interface PlayerHeads {
 	});
 
 	Lazy<RenderTarget> RENDER_TARGET = Lazy.of(() -> new TextureTarget("PlayerHeadsCanvas", 1024, 1024, true));
+	OutputTarget OUTPUT_TARGET = new OutputTarget("player_head", RENDER_TARGET);
 
 	TexturedRenderType RENDER_TYPE = TexturedRenderType.internal(
 		"player_head",
 		1536,
 		true,
 		true,
-		RenderPipelines.ENTITY_CUTOUT_NO_CULL,
-		texture -> RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
-			.setLightmapState(RenderStateShard.LIGHTMAP)
-			.setOverlayState(RenderStateShard.OVERLAY)
-			.setOutputState(new RenderStateShard.OutputStateShard("player_head", RENDER_TARGET))
-			.createCompositeState(false)
+		texture -> TexturedRenderType.textured(RenderPipelines.ENTITY_CUTOUT, texture, true, true)
+			.setOutputTarget(OUTPUT_TARGET)
+			.setOutline(RenderSetup.OutlineProperty.NONE)
 	);
 
 	static GalleryImage<UUID> get(Minecraft mc, UUID uuid) {
@@ -112,33 +112,41 @@ public interface PlayerHeads {
 	static void render(Minecraft mc, TexturedRenderType type, UUID uuid, float zoom) {
 		var gpu = RenderSystem.getDevice();
 
-		var projectionMatrix = new Matrix4f(RenderSystem.getProjectionMatrix());
-		var projectionType = RenderSystem.getProjectionType();
-		RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(-zoom, zoom, zoom, -zoom, -10F, 10F), ProjectionType.ORTHOGRAPHIC);
+		RenderSystem.backupProjectionMatrix();
+		MiscClientUtils.setProjectionMatrix(new Matrix4f().setOrtho(-zoom, zoom, zoom, -zoom, -10F, 10F), ProjectionType.ORTHOGRAPHIC);
 		Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
 		modelViewStack.pushMatrix();
 		modelViewStack.identity();
 		// modelViewStack.translate(0F, 0F, 0F);
 		modelViewStack.rotate(new Quaternionf().rotationXYZ((float) Math.toRadians(25D), (float) Math.toRadians(45D), (float) Math.PI));
 		// modelViewStack.scale(1F, 1F, -1F);
-		Lighting.setupForEntityInInventory();
+		mc.gameRenderer.getLighting().setupFor(Lighting.Entry.ENTITY_IN_UI);
 
 		var playerSkin = PlayerSkins.getSkin(mc, uuid, true);
 		var buffers = mc.renderBuffers().bufferSource();
-		var playerRenderer = (PlayerRenderer) mc.getEntityRenderDispatcher().getSkinMap().get(playerSkin.model());
-		var playerRenderState = playerRenderer.createRenderState();
+		var playerRenderState = new AvatarRenderState();
 		playerRenderState.skin = playerSkin;
+		var playerRenderer = (AvatarRenderer<?>) mc.getEntityRenderDispatcher().getRenderer(playerRenderState);
 
 		var renderType = type.apply(playerRenderer.getTextureLocation(playerRenderState));
-		var renderTarget = renderType.getRenderTarget();
+		var renderTarget = renderType.outputTarget().getRenderTarget();
 		gpu.createCommandEncoder().clearColorAndDepthTextures(renderTarget.getColorTexture(), 0, renderTarget.getDepthTexture(), 1D);
 
 		var buffer = buffers.getBuffer(renderType);
 		var model = playerRenderer.getModel();
 
 		playerRenderState.showHat = true;
+		playerRenderState.showJacket = false;
+		playerRenderState.showLeftPants = false;
+		playerRenderState.showRightPants = false;
+		playerRenderState.showLeftSleeve = false;
+		playerRenderState.showRightSleeve = false;
 		model.setupAnim(playerRenderState);
-		model.setAllVisible(false);
+		model.body.visible = false;
+		model.leftArm.visible = false;
+		model.rightArm.visible = false;
+		model.leftLeg.visible = false;
+		model.rightLeg.visible = false;
 		model.head.visible = true;
 		model.hat.visible = true;
 
@@ -146,11 +154,10 @@ public interface PlayerHeads {
 		ms.scale(-1F, 1F, -1F);
 		ms.translate(0F, 0.25F, 0F);
 		model.renderToBuffer(ms, buffer, LightUV.FULLBRIGHT.packed(), OverlayUV.NORMAL.packed());
-		playerRenderer.render(playerRenderState, ms, buffers, LightUV.FULLBRIGHT.packed());
 		buffers.endBatch(renderType);
 
 		modelViewStack.popMatrix();
-		RenderSystem.setProjectionMatrix(projectionMatrix, projectionType);
+		RenderSystem.restoreProjectionMatrix();
 	}
 
 	static AbstractTexture getTexture(Minecraft mc, @Nullable UUID uuid) {

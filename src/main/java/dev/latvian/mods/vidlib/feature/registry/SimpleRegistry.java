@@ -7,7 +7,7 @@ import dev.latvian.mods.klib.util.Cast;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.IdentityHashMap;
@@ -16,13 +16,13 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class SimpleRegistry<V extends SimpleRegistryEntry> {
-	public static final Map<ResourceLocation, SimpleRegistry<?>> ALL = new Object2ObjectOpenHashMap<>();
+	public static final Map<Identifier, SimpleRegistry<?>> ALL = new Object2ObjectOpenHashMap<>();
 
-	public static <V extends SimpleRegistryEntry> SimpleRegistry<V> create(ResourceLocation registryId, Consumer<SimpleRegistryCollector<V>> collector) {
+	public static <V extends SimpleRegistryEntry> SimpleRegistry<V> create(Identifier registryId, Consumer<SimpleRegistryCollector<V>> collector) {
 		return new SimpleRegistry<>(registryId, collector);
 	}
 
-	private final ResourceLocation registryId;
+	private final Identifier registryId;
 	private Consumer<SimpleRegistryCollector<V>> collector;
 	private final Map<String, SimpleRegistryType<V>> typeMap;
 	private final Map<V, SimpleRegistryType.Unit<V>> unitTypeMap;
@@ -31,7 +31,7 @@ public class SimpleRegistry<V extends SimpleRegistryEntry> {
 	private final Codec<V> codec;
 	private final StreamCodec<RegistryFriendlyByteBuf, V> streamCodec;
 
-	private SimpleRegistry(ResourceLocation registryId, Consumer<SimpleRegistryCollector<V>> collector) {
+	private SimpleRegistry(Identifier registryId, Consumer<SimpleRegistryCollector<V>> collector) {
 		this.registryId = registryId;
 		this.collector = collector;
 		this.typeMap = new Object2ObjectOpenHashMap<>();

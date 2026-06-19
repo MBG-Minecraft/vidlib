@@ -11,7 +11,7 @@ import net.minecraft.network.chat.Component;
 public interface ServerDataCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("server-data", (command, buildContext) -> {
-		command.requires(source -> source.hasPermission(2));
+		command.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source));
 		var nbtOps = buildContext.createSerializationContext(NbtOps.INSTANCE);
 
 		for (var key : DataKey.SERVER.all.values()) {

@@ -1,39 +1,34 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.framegraph.FramePass;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.ResourceHandle;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.klib.gl.GLDebugLog;
-import dev.latvian.mods.vidlib.core.VLOutlineBufferSource;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.feature.skybox.SkyboxRenderer;
-import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.DimensionSpecialEffects;
-import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LevelTargetBundle;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.OutlineBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.chunk.ChunkSectionsToRender;
 import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.border.WorldBorder;
-import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -44,7 +39,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 @Mixin(value = LevelRenderer.class, priority = 1001) // Load before Sodium
 public abstract class LevelRendererMixin {
@@ -65,26 +59,6 @@ public abstract class LevelRendererMixin {
 		if (level != null) {
 			AutoInit.Type.CHUNKS_RENDERED.invoke(level);
 		}
-	}
-
-	@WrapOperation(method = "lambda$addSkyPass$13", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/DimensionSpecialEffects;renderSky(Lnet/minecraft/client/multiplayer/ClientLevel;IFLorg/joml/Matrix4f;Lnet/minecraft/client/Camera;Lorg/joml/Matrix4f;Ljava/lang/Runnable;)Z"))
-	private boolean vl$renderSkybox(DimensionSpecialEffects instance, ClientLevel level, int ticks, float partialTick, Matrix4f modelViewMatrix, Camera camera, Matrix4f projectionMatrix, Runnable setupFog, Operation<Boolean> operation) {
-		var skybox = minecraft.player != null ? minecraft.player.vl$sessionData().skybox : null;
-
-		if (skybox != null) {
-			return SkyboxRenderer.render(minecraft, skybox, setupFog);
-		} else {
-			return operation.call(instance, level, ticks, partialTick, modelViewMatrix, camera, projectionMatrix, setupFog);
-		}
-	}
-
-	/**
-	 * @author Lat
-	 * @reason Yeet
-	 */
-	@Overwrite
-	private boolean shouldRenderDarkDisc(float partialTick) {
-		return false;
 	}
 
 	@Inject(method = "doEntityOutline", at = @At("HEAD"))
@@ -112,44 +86,44 @@ public abstract class LevelRendererMixin {
 		CanvasImpl.resizeAll(width, height);
 	}
 
-	@Inject(method = "addWeatherPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lnet/minecraft/world/phys/Vec3;FLnet/minecraft/client/renderer/FogParameters;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lnet/minecraft/client/Camera;)V", at = @At("RETURN"))
-	private void vl$addMainPass(FrameGraphBuilder frameGraphBuilder, Vec3 cameraPosition, float partialTick, FogParameters fog, Matrix4f modelViewMatrix, Matrix4f projectionMatrix, Camera camera, CallbackInfo ci) {
+	@Inject(method = "addWeatherPass(Lcom/mojang/blaze3d/framegraph/FrameGraphBuilder;Lcom/mojang/blaze3d/buffers/GpuBufferSlice;Lorg/joml/Matrix4fc;)V", at = @At("RETURN"))
+	private void vl$addMainPass(FrameGraphBuilder frameGraphBuilder, com.mojang.blaze3d.buffers.GpuBufferSlice fog, Matrix4fc modelViewMatrix, CallbackInfo ci) {
 		CanvasImpl.addAllToFrame(minecraft, frameGraphBuilder, targets, false);
 	}
 
-	@Redirect(method = "addMainPass", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/framegraph/FramePass;readsAndWrites(Lcom/mojang/blaze3d/resource/ResourceHandle;)Lcom/mojang/blaze3d/resource/ResourceHandle;", ordinal = 4))
+	@Redirect(method = "addMainPass", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/framegraph/FramePass;readsAndWrites(Lcom/mojang/blaze3d/resource/ResourceHandle;)Lcom/mojang/blaze3d/resource/ResourceHandle;", ordinal = 5))
 	private ResourceHandle<RenderTarget> vl$cancelOutline(FramePass instance, ResourceHandle<RenderTarget> original) {
 		return original;
 	}
 
 	@Inject(method = "addMainPass", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelTargetBundle;main:Lcom/mojang/blaze3d/resource/ResourceHandle;", ordinal = 2))
-	private void vl$addMainPassReadsAndWrites(FrameGraphBuilder frameGraphBuilder, Frustum frustum, Camera camera, Matrix4f frustumMatrix, Matrix4f projectionMatrix, FogParameters fogParameters, boolean renderBlockOutline, boolean renderEntityOutline, DeltaTracker deltaTracker, ProfilerFiller profiler, CallbackInfo ci, @Local FramePass framePass) {
+	private void vl$addMainPassReadsAndWrites(FrameGraphBuilder frameGraphBuilder, Frustum frustum, Matrix4fc modelViewMatrix, com.mojang.blaze3d.buffers.GpuBufferSlice fog, boolean renderBlockOutline, LevelRenderState levelRenderState, DeltaTracker deltaTracker, ProfilerFiller profiler, net.minecraft.client.renderer.chunk.ChunkSectionsToRender chunkSectionsToRender, CallbackInfo ci, @Local FramePass framePass) {
 		CanvasImpl.allReadsAndWrites(framePass);
 	}
 
-	@Inject(method = "lambda$addMainPass$2", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;shouldShowEntityOutlines()Z"))
-	private void vl$copyMainDepth(FogParameters fogParameters, DeltaTracker deltaTracker, Camera camera, ProfilerFiller profiler, Matrix4f frustumMatrix, Matrix4f projectionMatrix, ResourceHandle<RenderTarget> itemEntity, ResourceHandle<RenderTarget> entityOutline, Frustum frustum, boolean renderBlockOutline, ResourceHandle<RenderTarget> translucent, ResourceHandle<RenderTarget> main, CallbackInfo ci) {
+	@Inject(method = "lambda$addMainPass$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;shouldShowEntityOutlines()Z"))
+	private void vl$copyMainDepth(GpuBufferSlice terrainFog, LevelRenderState levelRenderState, ProfilerFiller profiler, ChunkSectionsToRender chunkSectionsToRender, Matrix4fc modelViewMatrix, ResourceHandle<RenderTarget> mainTarget, ResourceHandle<RenderTarget> translucentTarget, ResourceHandle<RenderTarget> itemEntityTarget, ResourceHandle<RenderTarget> entityOutlineTarget, ResourceHandle<RenderTarget> particleTarget, boolean renderBlockOutline, CallbackInfo ci) {
 		ClientGameEngine.INSTANCE.copyMainDepth(minecraft);
 	}
 
-	@Inject(method = "lambda$addMainPass$2", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;<init>()V"))
-	private void vl$copyOutlineDepth(FogParameters fogParameters, DeltaTracker deltaTracker, Camera camera, ProfilerFiller profiler, Matrix4f frustumMatrix, Matrix4f projectionMatrix, ResourceHandle<RenderTarget> itemEntity, ResourceHandle<RenderTarget> entityOutline, Frustum frustum, boolean renderBlockOutline, ResourceHandle<RenderTarget> translucent, ResourceHandle<RenderTarget> main, CallbackInfo ci) {
+	@Inject(method = "lambda$addMainPass$0", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;<init>()V"))
+	private void vl$copyOutlineDepth(GpuBufferSlice terrainFog, LevelRenderState levelRenderState, ProfilerFiller profiler, ChunkSectionsToRender chunkSectionsToRender, Matrix4fc modelViewMatrix, ResourceHandle<RenderTarget> mainTarget, ResourceHandle<RenderTarget> translucentTarget, ResourceHandle<RenderTarget> itemEntityTarget, ResourceHandle<RenderTarget> entityOutlineTarget, ResourceHandle<RenderTarget> particleTarget, boolean renderBlockOutline, CallbackInfo ci) {
 		ClientGameEngine.INSTANCE.copyOutlineDepth(minecraft);
 	}
 
-	@Inject(method = "renderEntities", at = @At("HEAD"))
-	private void vl$renderEntitiesHead(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, Camera camera, DeltaTracker deltaTracker, List<Entity> entities, CallbackInfo ci) {
+	@Inject(method = "submitEntities", at = @At("HEAD"))
+	private void vl$submitEntitiesHead(PoseStack poseStack, LevelRenderState levelRenderState, SubmitNodeCollector output, CallbackInfo ci) {
 		GLDebugLog.pushGroup("[VidLib] Render Entities");
 	}
 
-	@Inject(method = "renderEntities", at = @At("RETURN"))
-	private void vl$renderEntitiesReturn(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, Camera camera, DeltaTracker deltaTracker, List<Entity> entities, CallbackInfo ci) {
+	@Inject(method = "submitEntities", at = @At("RETURN"))
+	private void vl$submitEntitiesReturn(PoseStack poseStack, LevelRenderState levelRenderState, SubmitNodeCollector output, CallbackInfo ci) {
 		GLDebugLog.popGroup();
 	}
 
-	@Inject(method = "renderEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderEntity(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V"))
-	private void vl$renderEntitiesRender(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, Camera camera, DeltaTracker deltaTracker, List<Entity> entities, CallbackInfo ci, @Local Entity entity) {
-		GLDebugLog.message("[VidLib] " + entity.getScoreboardName() + " [" + entity.getType().getDescription().getString() + "]");
+	@Inject(method = "submitEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderDispatcher;submit(Lnet/minecraft/client/renderer/entity/state/EntityRenderState;Lnet/minecraft/client/renderer/state/level/CameraRenderState;DDDLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;)V"))
+	private void vl$submitEntity(PoseStack poseStack, LevelRenderState levelRenderState, SubmitNodeCollector output, CallbackInfo ci, @Local EntityRenderState state) {
+		GLDebugLog.message("[VidLib] " + state.entityType.getDescription().getString() + " [" + state.getClass().getSimpleName() + "]");
 	}
 
 	@ModifyExpressionValue(method = {
@@ -174,23 +148,18 @@ public abstract class LevelRendererMixin {
 		return Canvas.WEAK_OUTLINE.getTargetOrNull();
 	}
 
-	@Inject(method = "renderEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/OutlineBufferSource;setColor(IIII)V"))
-	private void vl$renderEntitiesSetColor(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, Camera camera, DeltaTracker deltaTracker, List<Entity> entities, CallbackInfo ci, @Local OutlineBufferSource outlineBuffer, @Local Entity entity) {
-		((VLOutlineBufferSource) outlineBuffer).vl$setPlayer(entity instanceof Player);
-	}
-
-	@Redirect(method = "renderEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getTeamColor()I"))
-	private int vl$getTeamColor(Entity instance, @Local Entity entity) {
+	@ModifyExpressionValue(method = "extractVisibleEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;extractEntity(Lnet/minecraft/world/entity/Entity;F)Lnet/minecraft/client/renderer/entity/state/EntityRenderState;"))
+	private EntityRenderState vl$updateEntityOutlineColor(EntityRenderState state, @Local Entity entity) {
 		var color = ClientGameEngine.INSTANCE.getTeamColor(minecraft, entity);
 
-		if (color != null) {
-			return color.rgb();
+		if (color != null && state.outlineColor != EntityRenderState.NO_OUTLINE) {
+			state.outlineColor = ARGB.opaque(color.rgb());
 		}
 
-		return entity.getTeamColor();
+		return state;
 	}
 
-	@Redirect(method = "lambda$addWeatherPass$7", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getWorldBorder()Lnet/minecraft/world/level/border/WorldBorder;"))
+	@Redirect(method = "extractLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getWorldBorder()Lnet/minecraft/world/level/border/WorldBorder;"))
 	private WorldBorder vl$getWorldBorder(ClientLevel level) {
 		return ClientGameEngine.INSTANCE.getRenderedWorldBorder(minecraft, level);
 	}

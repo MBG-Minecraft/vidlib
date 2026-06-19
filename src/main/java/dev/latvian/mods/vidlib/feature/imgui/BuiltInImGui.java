@@ -43,6 +43,7 @@ import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.common.NeoForge;
@@ -121,11 +122,12 @@ public class BuiltInImGui {
 
 		list.add(MenuItem.SEPARATOR);
 
-		list.add(MenuItem.item(ImIcons.APERTURE, "Capture Frustum", graphics.mc.levelRenderer.getCapturedFrustum() != null, g -> {
-			if (g.mc.levelRenderer.getCapturedFrustum() != null) {
-				g.mc.levelRenderer.killFrustum();
+		var camera = graphics.mc.gameRenderer.getMainCamera();
+		list.add(MenuItem.item(ImIcons.APERTURE, "Capture Frustum", camera.getCapturedFrustum() != null, g -> {
+			if (camera.getCapturedFrustum() != null) {
+				camera.killFrustum();
 			} else {
-				g.mc.levelRenderer.captureFrustum();
+				camera.captureFrustum();
 			}
 		}).enabled(graphics.inGame));
 
@@ -181,12 +183,12 @@ public class BuiltInImGui {
 	});
 
 	public static final MenuItem SHOW = MenuItem.menu(ImIcons.VISIBLE, "Show", (graphics, list) -> {
-		list.add(MenuItem.item(ImIcons.SELECT, "Entity Hitboxes", graphics.mc.getEntityRenderDispatcher().shouldRenderHitBoxes(), g -> g.mc.getEntityRenderDispatcher().setRenderHitBoxes(!g.mc.getEntityRenderDispatcher().shouldRenderHitBoxes())).enabled(graphics.inGame));
+		list.add(MenuItem.item(ImIcons.SELECT, "Entity Hitboxes", graphics.mc.debugEntries.isCurrentlyEnabled(DebugScreenEntries.ENTITY_HITBOXES), g -> g.mc.debugEntries.toggleStatus(DebugScreenEntries.ENTITY_HITBOXES)).enabled(graphics.inGame));
 
-		list.add(MenuItem.item(ImIcons.SELECT, "Chunk Borders", graphics.mc.debugRenderer.renderChunkborder, g -> g.mc.debugRenderer.switchRenderChunkborder()).enabled(graphics.inGame));
-		list.add(MenuItem.item(ImIcons.SELECT, "Octree", graphics.mc.debugRenderer.renderOctree, g -> g.mc.debugRenderer.toggleRenderOctree()).enabled(graphics.inGame));
-		list.add(MenuItem.item(ImIcons.SELECT, "Section Path", graphics.mc.sectionPath, g -> g.mc.sectionPath = !g.mc.sectionPath).enabled(graphics.inGame));
-		list.add(MenuItem.item(ImIcons.SELECT, "Section Visibility", graphics.mc.sectionVisibility, g -> g.mc.sectionVisibility = !g.mc.sectionVisibility).enabled(graphics.inGame));
+		list.add(MenuItem.item(ImIcons.SELECT, "Chunk Borders", graphics.mc.debugEntries.isCurrentlyEnabled(DebugScreenEntries.CHUNK_BORDERS), g -> g.mc.debugEntries.toggleStatus(DebugScreenEntries.CHUNK_BORDERS)).enabled(graphics.inGame));
+		list.add(MenuItem.item(ImIcons.SELECT, "Octree", graphics.mc.debugEntries.isCurrentlyEnabled(DebugScreenEntries.CHUNK_SECTION_OCTREE), g -> g.mc.debugEntries.toggleStatus(DebugScreenEntries.CHUNK_SECTION_OCTREE)).enabled(graphics.inGame));
+		list.add(MenuItem.item(ImIcons.SELECT, "Section Path", graphics.mc.debugEntries.isCurrentlyEnabled(DebugScreenEntries.CHUNK_SECTION_PATHS), g -> g.mc.debugEntries.toggleStatus(DebugScreenEntries.CHUNK_SECTION_PATHS)).enabled(graphics.inGame));
+		list.add(MenuItem.item(ImIcons.SELECT, "Section Visibility", graphics.mc.debugEntries.isCurrentlyEnabled(DebugScreenEntries.CHUNK_SECTION_VISIBILITY), g -> g.mc.debugEntries.toggleStatus(DebugScreenEntries.CHUNK_SECTION_VISIBILITY)).enabled(graphics.inGame));
 
 		list.add(MenuItem.SEPARATOR);
 
@@ -240,7 +242,7 @@ public class BuiltInImGui {
 		var registry = g1.mc.player.connection.levels();
 
 		for (var dimension : registry) {
-			list1.add(MenuItem.item(dimension.location().toString(), g -> g.mc.runClientCommand("execute in " + dimension.location() + " run tp @s ~ ~ ~")).disabled(g1.isReplay));
+			list1.add(MenuItem.item(dimension.identifier().toString(), g -> g.mc.runClientCommand("execute in " + dimension.identifier() + " run tp @s ~ ~ ~")).disabled(g1.isReplay));
 		}
 	});
 

@@ -18,7 +18,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.TagParser;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -66,7 +66,7 @@ public class CommandDataType<T> {
 		return this;
 	}
 
-	public CommandDataType<T> suggestsIDs(Supplier<Iterable<ResourceLocation>> allIds) {
+	public CommandDataType<T> suggestsIDs(Supplier<Iterable<Identifier>> allIds) {
 		return suggests((ctx, builder) -> ID.suggest(builder, allIds));
 	}
 

@@ -44,7 +44,7 @@ public class VoteCommands {
 			)
 		)
 		.then(Commands.literal("open-screen")
-			.requires(source -> source.hasPermission(2))
+			.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 			.then(Commands.argument("player", EntityArgument.players())
 				.then(Commands.literal("yes-no")
 					.then(Commands.argument("extra-data", CompoundTagArgument.compoundTag())

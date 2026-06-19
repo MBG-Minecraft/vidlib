@@ -249,7 +249,7 @@ public class PropList implements Iterable<Prop> {
 		int id = 0;
 
 		while (id <= 0 || map.containsKey(id)) {
-			id = props.level.random.nextInt(32768, Integer.MAX_VALUE);
+			id = props.level.getRandom().nextInt(32768, Integer.MAX_VALUE);
 		}
 
 		return id;

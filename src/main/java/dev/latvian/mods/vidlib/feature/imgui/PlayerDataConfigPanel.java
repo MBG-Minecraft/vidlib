@@ -11,7 +11,7 @@ public class PlayerDataConfigPanel extends DataMapConfigPanel {
 	public final DataMap dataMap;
 
 	public PlayerDataConfigPanel(GameProfile profile, DataMap dataMap) {
-		super("Player Data of " + profile.getName());
+		super("Player Data of " + profile.name());
 		this.profile = profile;
 		this.dataMap = dataMap;
 	}
@@ -28,6 +28,6 @@ public class PlayerDataConfigPanel extends DataMapConfigPanel {
 
 	@Override
 	public <T> void sendUpdate(Minecraft mc, DataKey<T> key, T value) {
-		mc.updatePlayerDataValue(profile.getId(), key, value);
+		mc.updatePlayerDataValue(profile.id(), key, value);
 	}
 }

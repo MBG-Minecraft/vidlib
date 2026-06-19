@@ -13,7 +13,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -40,7 +40,7 @@ public interface VidLibTool {
 
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("vidlib-tool", (command, buildContext) -> {
-		command.requires(source -> source.hasPermission(2));
+		command.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source));
 
 		for (var tool : REGISTRY.get().values()) {
 			var cmd = Commands.literal(tool.getId().replace('_', '-'));
@@ -55,7 +55,7 @@ public interface VidLibTool {
 	@Nullable
 	static VidLibTool of(ItemStack stack) {
 		if (stack.has(DataComponents.CUSTOM_DATA)) {
-			var toolType = stack.get(DataComponents.CUSTOM_DATA).getUnsafe().getStringOr("vidlib:tool", "");
+			var toolType = stack.get(DataComponents.CUSTOM_DATA).copyTag().getStringOr("vidlib:tool", "");
 
 			if (!toolType.isEmpty()) {
 				return VidLibTool.REGISTRY.get().get(toolType);
@@ -93,7 +93,7 @@ public interface VidLibTool {
 	Component getName();
 
 	@Nullable
-	default ResourceLocation getModel() {
+	default Identifier getModel() {
 		return null;
 	}
 

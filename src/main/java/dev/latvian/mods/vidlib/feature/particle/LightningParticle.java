@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.latvian.mods.klib.color.Gradient;
@@ -132,7 +134,7 @@ public class LightningParticle extends CustomParticle {
 			return;
 		}
 
-		var cameraPos = camera.getPosition();
+		var cameraPos = camera.position();
 		var rx = (float) (KMath.lerp(delta, xo, x) - cameraPos.x);
 		var ry = (float) (KMath.lerp(delta, yo, y) - cameraPos.y);
 		var rz = (float) (KMath.lerp(delta, zo, z) - cameraPos.z);

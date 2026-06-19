@@ -11,7 +11,7 @@ import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
@@ -71,7 +71,8 @@ public class PhysicsParticles {
 		}
 
 		if (count > 0) {
-			var tint = blockColors.getColor(state, level, at, 0);
+			var tintSource = blockColors.getTintSource(state, 0);
+			var tint = tintSource == null ? -1 : tintSource.colorAsTerrainParticle(state, level, at);
 			var identity = new Matrix4f();
 			identity.rotateY((float) Math.toRadians(data.direction));
 			identity.rotateX((float) Math.toRadians(-data.tilt));

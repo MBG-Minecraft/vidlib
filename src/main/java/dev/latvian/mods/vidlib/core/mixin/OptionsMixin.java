@@ -35,7 +35,7 @@ public abstract class OptionsMixin {
 	@Inject(method = "createSoundSliderOptionInstance", at = @At("HEAD"), cancellable = true)
 	private void vl$createSoundSliderOptionInstance(String text, SoundSource source, CallbackInfoReturnable<OptionInstance<Double>> cir) {
 		if (source == SoundSource.MUSIC) {
-			cir.setReturnValue(new OptionInstance<>(text, OptionInstance.noTooltip(), (prefix, value) -> value == 0.0 ? genericValueLabel(prefix, CommonComponents.OPTION_OFF) : percentValueLabel(prefix, value), OptionInstance.UnitDouble.INSTANCE, 0.0, (value) -> minecraft.getSoundManager().updateSourceVolume(source, value.floatValue())));
+			cir.setReturnValue(new OptionInstance<>(text, OptionInstance.noTooltip(), (prefix, value) -> value == 0.0 ? genericValueLabel(prefix, CommonComponents.OPTION_OFF) : percentValueLabel(prefix, value), OptionInstance.UnitDouble.INSTANCE, 0.0, (value) -> minecraft.getSoundManager().refreshCategoryVolume(source)));
 		}
 	}
 

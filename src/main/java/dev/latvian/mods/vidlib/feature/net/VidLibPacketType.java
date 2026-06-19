@@ -7,12 +7,12 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.VarLong;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 @SuppressWarnings("unused")
 public record VidLibPacketType<T extends SimplePacketPayload>(CustomPacketPayload.Type<VidLibPacketPayloadContainer> type, StreamCodec<ByteBuf, VidLibPacketPayloadContainer> streamCodec) {
-	public static <T extends SimplePacketPayload> VidLibPacketType<T> create(ResourceLocation id, StreamCodec<? extends ByteBuf, T> streamCodec) {
+	public static <T extends SimplePacketPayload> VidLibPacketType<T> create(Identifier id, StreamCodec<? extends ByteBuf, T> streamCodec) {
 		return new VidLibPacketType<>(new CustomPacketPayload.Type<>(id), new StreamCodec<>() {
 			@Override
 			public VidLibPacketPayloadContainer decode(ByteBuf buf) {

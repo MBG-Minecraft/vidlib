@@ -3,18 +3,18 @@ package dev.latvian.mods.vidlib.core.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.core.VLGameRenderer;
-import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.util.profiling.Profiler;
+import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.LivingEntity;
-import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,21 +29,11 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 	@Final
 	private Minecraft minecraft;
 
-	@Shadow
-	private float renderDistance;
-
-	@Shadow
-	@Final
-	private Camera mainCamera;
-
-	@Shadow
-	private boolean renderHand;
-
 	@Unique
 	private boolean bobViewport;
 
-	@Redirect(method = "bobHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getHurtDir()F"))
-	private float vl$bobHurt(LivingEntity entity) {
+	@ModifyExpressionValue(method = "bobHurt", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/state/level/CameraEntityRenderState;hurtDir:F"))
+	private float vl$bobHurt(float original) {
 		return 0F;
 	}
 
@@ -56,13 +46,11 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 		}
 	}
 
-	/**
-	 * @author Lat
-	 * @reason Extend depth
-	 */
-	@Overwrite
+	@Override
 	public float getDepthFar() {
-		return ClientGameEngine.INSTANCE.getFarDepth(renderDistance);
+		var renderDistance = minecraft.options.getEffectiveRenderDistance() * 16F;
+		var vanillaDepthFar = Math.max(renderDistance * 4F, minecraft.options.cloudRange().get() * 16F);
+		return ClientGameEngine.INSTANCE.getFarDepth(vanillaDepthFar);
 	}
 
 	@Inject(method = "renderLevel", at = @At("HEAD"), cancellable = true)
@@ -72,41 +60,30 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 		}
 	}
 
-	@ModifyExpressionValue(method = "renderLevel", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/GameRenderer;renderHand:Z"))
-	private boolean vl$renderHand(boolean original) {
-		return false;
-	}
-
-	@Shadow
-	protected abstract void renderItemInHand(Camera camera, float partialTick, Matrix4f projectionMatrix);
-
-	@Inject(method = "render", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4f;setOrtho(FFFFFF)Lorg/joml/Matrix4f;"))
-	private void vl$render(DeltaTracker deltaTracker, boolean renderLevel, CallbackInfo ci) {
-		if (minecraft.isGameLoadFinished() && renderLevel && this.minecraft.level != null && renderHand && ClientGameEngine.INSTANCE.shouldRenderHand(minecraft)) {
-			var profilerfiller = Profiler.get();
-			profilerfiller.push("hand");
-			renderItemInHand(mainCamera, minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(true), MiscClientUtils.FRUSTUM_MATRIX);
-			profilerfiller.pop();
+	@Redirect(method = "renderItemInHand(Lnet/minecraft/client/renderer/state/level/CameraRenderState;FLorg/joml/Matrix4fc;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;renderHandsWithItems(FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/player/LocalPlayer;I)V"))
+	private void vl$renderHandsWithItems(ItemInHandRenderer itemInHandRenderer, float partialTick, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, LocalPlayer player, int lightCoords) {
+		if (ClientGameEngine.INSTANCE.shouldRenderHand(minecraft)) {
+			itemInHandRenderer.renderHandsWithItems(partialTick, poseStack, submitNodeCollector, player, lightCoords);
 		}
 	}
 
-	@ModifyExpressionValue(method = {"render", "renderItemInHand", "shouldRenderBlockOutline"}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z"))
+	@ModifyExpressionValue(method = {"extractOptions", "shouldRenderBlockOutline"}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z"))
 	private boolean vl$hideGui(boolean original) {
 		return ClientGameEngine.INSTANCE.hideGui(minecraft);
 	}
 
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;bobView(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"))
+	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;bobView(Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;)V"))
 	private void vl$bobViewport(DeltaTracker deltaTracker, CallbackInfo ci) {
 		bobViewport = true;
 	}
 
-	@Inject(method = "renderItemInHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;bobView(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"))
-	private void vl$bobItem(Camera camera, float partialTick, Matrix4f projectionMatrix, CallbackInfo ci) {
+	@Inject(method = "renderItemInHand(Lnet/minecraft/client/renderer/state/level/CameraRenderState;FLorg/joml/Matrix4fc;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;bobView(Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;)V"))
+	private void vl$bobItem(CameraRenderState cameraState, float partialTick, Matrix4fc modelViewMatrix, CallbackInfo ci) {
 		bobViewport = false;
 	}
 
 	@Inject(method = "bobView", at = @At("HEAD"), cancellable = true)
-	private void vl$bobView(PoseStack poseStack, float partialTicks, CallbackInfo ci) {
+	private void vl$bobView(CameraRenderState cameraState, PoseStack poseStack, CallbackInfo ci) {
 		if (bobViewport) {
 			ci.cancel();
 		}

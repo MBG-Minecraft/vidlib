@@ -4,7 +4,6 @@ import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.session.LocalClientSessionData;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import org.lwjgl.glfw.GLFW;
 
@@ -22,9 +21,9 @@ public interface VLLocalPlayer extends VLClientPlayer {
 	static PlayerInput fromInput(long windowId, LocalPlayer player, boolean mouse) {
 		var in = player.input.keyPresses;
 		// Modifiers
-		boolean shift = Screen.hasShiftDown();
-		boolean control = Screen.hasControlDown();
-		boolean alt = Screen.hasAltDown();
+		boolean shift = GLFW.glfwGetKey(windowId, GLFW.GLFW_KEY_LEFT_SHIFT) == GLFW.GLFW_PRESS || GLFW.glfwGetKey(windowId, GLFW.GLFW_KEY_RIGHT_SHIFT) == GLFW.GLFW_PRESS;
+		boolean control = GLFW.glfwGetKey(windowId, GLFW.GLFW_KEY_LEFT_CONTROL) == GLFW.GLFW_PRESS || GLFW.glfwGetKey(windowId, GLFW.GLFW_KEY_RIGHT_CONTROL) == GLFW.GLFW_PRESS;
+		boolean alt = GLFW.glfwGetKey(windowId, GLFW.GLFW_KEY_LEFT_ALT) == GLFW.GLFW_PRESS || GLFW.glfwGetKey(windowId, GLFW.GLFW_KEY_RIGHT_ALT) == GLFW.GLFW_PRESS;
 		boolean tab = GLFW.glfwGetKey(windowId, GLFW.GLFW_KEY_TAB) == GLFW.GLFW_PRESS;
 		// Mouse
 		boolean mouseLeft = mouse && GLFW.glfwGetMouseButton(windowId, 0) == GLFW.GLFW_PRESS;

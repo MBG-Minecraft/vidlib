@@ -3,11 +3,11 @@ package dev.latvian.mods.vidlib.util;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.DataResult;
 import dev.latvian.mods.vidlib.VidLib;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -27,7 +27,7 @@ public interface MiscUtils {
 	Runnable NO_OP = () -> {
 	};
 
-	Comparator<GameProfile> PROFILE_COMPARATOR = (a, b) -> a.getName().compareToIgnoreCase(b.getName());
+	Comparator<GameProfile> PROFILE_COMPARATOR = (a, b) -> a.name().compareToIgnoreCase(b.name());
 
 	HttpClient HTTP_CLIENT = HttpClient.newBuilder()
 		.executor(Util.nonCriticalIoPool())
@@ -127,7 +127,7 @@ public interface MiscUtils {
 		return lookup;
 	}
 
-	static ClientAsset assetFromPNG(ResourceLocation png) {
-		return new ClientAsset(png.withPath(png.getPath().substring(9, png.getPath().length() - 4)));
+	static ClientAsset.ResourceTexture assetFromPNG(Identifier png) {
+		return new ClientAsset.ResourceTexture(png.withPath(png.getPath().substring(9, png.getPath().length() - 4)));
 	}
 }

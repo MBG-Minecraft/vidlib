@@ -22,7 +22,7 @@ import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
 import dev.latvian.mods.vidlib.util.PauseType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -149,13 +149,13 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 
 		if (maxFakeLag > 0 && minFakeLag >= 0) {
 			try {
-				Thread.sleep(Mth.ceil(vl$level().random.nextRange(minFakeLag, maxFakeLag)));
+				Thread.sleep(Mth.ceil(vl$level().getRandom().nextRange(minFakeLag, maxFakeLag)));
 			} catch (Exception ignore) {
 			}
 		}
 	}
 
-	default void setClock(ResourceLocation id, ClockValue value) {
+	default void setClock(Identifier id, ClockValue value) {
 		var map = vl$getClocks();
 
 		if (!Objects.equals(map.put(id, value), value)) {
@@ -163,7 +163,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 		}
 	}
 
-	default void resetClock(ResourceLocation id) {
+	default void resetClock(Identifier id) {
 		var map = vl$getClocks();
 
 		if (map.remove(id) != null) {
@@ -180,16 +180,16 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 		}
 	}
 
-	default void setClock(ResourceLocation id, int second) {
+	default void setClock(Identifier id, int second) {
 		setClock(id, new ClockValue(second, second <= 0 ? ClockValue.Type.FINISHED : second <= 10 ? ClockValue.Type.FLASH : ClockValue.Type.NORMAL));
 	}
 
-	default void setClock(ResourceLocation id, int second, int maxSecond) {
+	default void setClock(Identifier id, int second, int maxSecond) {
 		setClock(id, new ClockValue(second, second >= maxSecond ? ClockValue.Type.FINISHED : second >= (maxSecond - 10) ? ClockValue.Type.FLASH : ClockValue.Type.NORMAL));
 	}
 
 	@Override
-	default void removeZone(ResourceLocation zone, int index) {
+	default void removeZone(Identifier zone, int index) {
 		var container = ZoneContainer.REGISTRY.get(zone);
 
 		if (container != null) {
@@ -204,7 +204,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void updateZone(ResourceLocation zone, int index, Zone zoneData) {
+	default void updateZone(Identifier zone, int index, Zone zoneData) {
 		var container = ZoneContainer.REGISTRY.get(zone);
 
 		if (container != null) {

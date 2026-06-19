@@ -13,7 +13,7 @@ import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.IoSupplier;
@@ -30,15 +30,15 @@ import java.util.Map;
 import java.util.Optional;
 
 public record DynamicResources(
-	Map<ResourceLocation, Map<String, String>> resources,
+	Map<Identifier, Map<String, String>> resources,
 	List<DynamicResourceFile> files,
-	Optional<ResourceLocation> colorMap,
+	Optional<Identifier> colorMap,
 	List<DynamicResourceFile> textures
 ) {
 	public static final Codec<DynamicResources> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		Codec.unboundedMap(ResourceLocation.CODEC, Codec.unboundedMap(Codec.STRING, Codec.STRING)).fieldOf("resources").forGetter(DynamicResources::resources),
+		Codec.unboundedMap(Identifier.CODEC, Codec.unboundedMap(Codec.STRING, Codec.STRING)).fieldOf("resources").forGetter(DynamicResources::resources),
 		DynamicResourceFile.CODEC.listOf().optionalFieldOf("files", List.of()).forGetter(DynamicResources::files),
-		ResourceLocation.CODEC.optionalFieldOf("color_map").forGetter(DynamicResources::colorMap),
+		Identifier.CODEC.optionalFieldOf("color_map").forGetter(DynamicResources::colorMap),
 		DynamicResourceFile.CODEC.listOf().optionalFieldOf("textures", List.of()).forGetter(DynamicResources::textures)
 	).apply(instance, DynamicResources::new));
 
@@ -46,7 +46,7 @@ public record DynamicResources(
 		(packType == PackType.CLIENT_RESOURCES ? AutoInit.Type.ASSETS_CLOSED : AutoInit.Type.DATA_CLOSED).invoke();
 
 		VidLib.LOGGER.info("Loading Dynamic Resources...");
-		var packResources = new Object2ObjectOpenHashMap<ResourceLocation, IoSupplier<InputStream>>();
+		var packResources = new Object2ObjectOpenHashMap<Identifier, IoSupplier<InputStream>>();
 
 		PlatformHelper.CURRENT.collectDynamicResources(packType, dynamicResourcesId -> {
 			VidLib.LOGGER.info("Loading " + dynamicResourcesId);
@@ -72,7 +72,7 @@ public record DynamicResources(
 		return List.copyOf(packResourcesList);
 	}
 
-	public static void load(PackType packType, Map<ResourceLocation, IoSupplier<InputStream>> packResources, DynamicResources dynamicResources) throws IOException {
+	public static void load(PackType packType, Map<Identifier, IoSupplier<InputStream>> packResources, DynamicResources dynamicResources) throws IOException {
 		var resourcesList = List.copyOf(dynamicResources.resources.entrySet());
 
 		if (!dynamicResources.files.isEmpty()) {
@@ -82,7 +82,7 @@ public record DynamicResources(
 
 				for (var resource : resourcesList) {
 					var id = resource.getKey();
-					var outputPath = ResourceLocation.parse(file.location().replace("{namespace}", id.getNamespace()).replace("{path}", id.getPath()));
+					var outputPath = Identifier.parse(file.location().replace("{namespace}", id.getNamespace()).replace("{path}", id.getPath()));
 					var output = template.replace("{namespace}", id.getNamespace()).replace("{path}", id.getPath());
 
 					for (var entry : resource.getValue().entrySet()) {
@@ -146,7 +146,7 @@ public record DynamicResources(
 					for (int i = 0; i < resourcesList.size(); i++) {
 						var resource = resourcesList.get(i);
 						var id = resource.getKey();
-						var outputPath = ResourceLocation.parse(file.location().replace("{namespace}", id.getNamespace()).replace("{path}", id.getPath()));
+						var outputPath = Identifier.parse(file.location().replace("{namespace}", id.getNamespace()).replace("{path}", id.getPath()));
 
 						if (remap[i] != null) {
 							var img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);

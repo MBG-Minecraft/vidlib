@@ -7,6 +7,7 @@ import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
+import net.minecraft.network.chat.Component;
 
 import java.util.Arrays;
 
@@ -16,13 +17,13 @@ public interface VidLibClientOptions {
 	OptionInstance<Boolean> SHOW_ZONES = OptionInstance.createBoolean("options.vidlib.show_zones", false);
 	OptionInstance<Boolean> SHOW_ZONE_OUTER_BOUNDS = OptionInstance.createBoolean("options.vidlib.show_zone_outer_bounds", true);
 	OptionInstance<Boolean> SHOW_COORDINATES = OptionInstance.createBoolean("options.vidlib.show_coordinates", false);
-	OptionInstance<Boolean> LOCK_GUI_SCALE = OptionInstance.createBoolean("options.vidlib.lock_gui_scale", true, v -> Minecraft.getInstance().resizeDisplay());
+	OptionInstance<Boolean> LOCK_GUI_SCALE = OptionInstance.createBoolean("options.vidlib.lock_gui_scale", true, v -> Minecraft.getInstance().resizeGui());
 	OptionInstance<Boolean> LOCK_IMGUI_SCROLL = OptionInstance.createBoolean("options.vidlib.lock_imgui_scroll", false);
 
 	OptionInstance<ZoneRenderType> ZONE_RENDER_TYPE = new OptionInstance<>(
 		"options.vidlib.zone_render_type",
 		OptionInstance.noTooltip(),
-		OptionInstance.forOptionEnum(),
+		(caption, value) -> Options.genericValueLabel(caption, Component.translatable(value.getKey())),
 		new OptionInstance.Enum<>(Arrays.asList(ZoneRenderType.values()), ZoneRenderType.DATA_TYPE.codec()),
 		ZoneRenderType.NORMAL,
 		callback -> {
@@ -63,7 +64,7 @@ public interface VidLibClientOptions {
 		"options.vidlib.test_screen_shake.max_distance",
 		OptionInstance.noTooltip(),
 		(l, v) -> Options.genericValueLabel(l, v.intValue()),
-		new OptionInstance.IntRange(0, 1000).xmap(i -> (double) i, Double::intValue),
+		new OptionInstance.IntRange(0, 1000).xmap(i -> (double) i, Double::intValue, false),
 		Codec.doubleRange(0.0, 1000.0),
 		30.0,
 		callback -> {

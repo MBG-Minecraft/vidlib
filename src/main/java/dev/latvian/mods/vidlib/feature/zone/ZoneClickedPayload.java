@@ -10,13 +10,13 @@ import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.Optional;
 
-public record ZoneClickedPayload(ResourceLocation id, int index, ZoneShape shape, double distanceSq, Optional<Vec3> pos) implements SimplePacketPayload {
+public record ZoneClickedPayload(Identifier id, int index, ZoneShape shape, double distanceSq, Optional<Vec3> pos) implements SimplePacketPayload {
 	@AutoPacket(to = AutoPacket.To.SERVER)
 	public static final VidLibPacketType<ZoneClickedPayload> TYPE = VidLibPacketType.internal("zone/clicked", CompositeStreamCodec.of(
 		ID.STREAM_CODEC, ZoneClickedPayload::id,

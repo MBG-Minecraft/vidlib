@@ -29,8 +29,8 @@ public interface InternalPlayerData {
 	DataKey<Icon> PLUMBOB = DataKey.PLAYER.createDefault("plumbob", Icon.DATA_TYPE, EmptyIcon.INSTANCE, null);
 	DataKey<PlayerClothing> CLOTHING = DataKey.PLAYER.createDefault("clothing", PlayerClothing.DATA_TYPE, PlayerClothing.NONE, PlayerClothingImBuilder.TYPE);
 	DataKey<SkinTexture> SKIN_OVERRIDE = DataKey.PLAYER.createDefault("skin_override", SkinTexture.DATA_TYPE, null, SkinTextureImBuilder.TYPE);
-	DataKey<ClientAsset> CAPE_OVERRIDE = DataKey.PLAYER.createDefault("cape_override", DataTypes.RESOURCE_TEXTURE, null, TextureImBuilder.GEO);
-	DataKey<ClientAsset> ELYTRA_OVERRIDE = DataKey.PLAYER.createDefault("elytra_override", DataTypes.RESOURCE_TEXTURE, null, TextureImBuilder.GEO);
+	DataKey<ClientAsset.ResourceTexture> CAPE_OVERRIDE = DataKey.PLAYER.createDefault("cape_override", VidLibDataTypes.RESOURCE_TEXTURE, null, TextureImBuilder.GEO);
+	DataKey<ClientAsset.ResourceTexture> ELYTRA_OVERRIDE = DataKey.PLAYER.createDefault("elytra_override", VidLibDataTypes.RESOURCE_TEXTURE, null, TextureImBuilder.GEO);
 	DataKey<Float> FLIGHT_SPEED = DataKey.PLAYER.createFloat("flight_speed", 1F, 0F, 20F);
 	DataKey<Color> GLOW_COLOR = DataKey.PLAYER.createDefault("glow_color", Color.DATA_TYPE, null, Color4ImBuilder::new);
 	DataKey<Boolean> CAN_FLY = DataKey.PLAYER.createBoolean("can_fly", false);

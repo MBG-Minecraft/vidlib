@@ -13,7 +13,7 @@ import java.util.Collection;
 public interface NicknameCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("nickname", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.argument("player", EntityArgument.players())
 			.then(Commands.argument("nickname", ComponentArgument.textComponent(buildContext))
 				.executes(ctx -> nickname(EntityArgument.getOptionalPlayers(ctx, "player"), ComponentArgument.getResolvedComponent(ctx, "nickname")))

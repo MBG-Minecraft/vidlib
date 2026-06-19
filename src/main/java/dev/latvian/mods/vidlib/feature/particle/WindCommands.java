@@ -18,7 +18,7 @@ import net.neoforged.neoforge.server.command.EnumArgument;
 public interface WindCommands {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("wind", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.argument("type", EnumArgument.enumArgument(MovementType.class))
 			.then(Commands.argument("position", BlockPosArgument.blockPos())
 				.then(Commands.argument("count", IntegerArgumentType.integer(1))
@@ -45,7 +45,7 @@ public interface WindCommands {
 	);
 
 	static int spawn(CommandSourceStack source, MovementType type, BlockPos position, int count, float radius, float yaw, float pitch, boolean ground) {
-		source.getLevel().windParticles(source.getLevel().random, new WindData(new WindParticleOptions(100, ground, 1F), new ParticleMovementData(type, Vec3.atCenterOf(position), count, radius, 0F, Rotation.deg(yaw, pitch))));
+		source.getLevel().windParticles(source.getLevel().getRandom(), new WindData(new WindParticleOptions(100, ground, 1F), new ParticleMovementData(type, Vec3.atCenterOf(position), count, radius, 0F, Rotation.deg(yaw, pitch))));
 		return 1;
 	}
 }

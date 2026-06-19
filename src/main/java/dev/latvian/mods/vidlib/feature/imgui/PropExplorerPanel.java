@@ -44,7 +44,7 @@ public class PropExplorerPanel extends Panel {
 		ImGui.checkbox("Hide Outline", ClientProps.HIDE_OUTLINE);
 
 		if (sortByClosest.get()) {
-			var cam = graphics.mc.gameRenderer.getMainCamera().getPosition();
+			var cam = graphics.mc.gameRenderer.getMainCamera().position();
 			allProps.sort(Comparator.comparingDouble(p -> p.getPos(delta).distanceToSqr(cam)));
 			clientProps.sort(Comparator.comparingDouble(p -> p.getPos(delta).distanceToSqr(cam)));
 		}
