@@ -18,7 +18,6 @@ var CI = ENV.CI == "true"
 
 var localBuildFile = new File(project.rootDir, "build.txt")
 var localBuildNumber = localBuildFile.getText("UTF-8").toInteger() + 1
-var webHookId = ""
 
 version = "$mod_version-build.$localBuildNumber"
 group = project.maven_group
@@ -193,11 +192,9 @@ dependencies {
 	interfaceInjectionData("dev.latvian.mods:klib:$klib_version")
 
 	compileOnly("dev.latvian.mods:imgui-resources:$imgui_resources_version")
-	localRuntime("dev.latvian.mods:imgui-resources:$imgui_resources_version")
-
 	compileOnly("maven.modrinth:simple-voice-chat:$simple_voice_chat_version")
 	compileOnly("maven.modrinth:iris:$iris_version")
-	implementation("com.geckolib:geckolib-neoforge-26.1.2:$geckolib_version")
+	compileOnly("com.geckolib:geckolib-neoforge-26.1.2:$geckolib_version")
 }
 
 processResources {
