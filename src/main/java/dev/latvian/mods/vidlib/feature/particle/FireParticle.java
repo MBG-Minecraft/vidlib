@@ -1,7 +1,5 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
-import net.minecraft.client.renderer.rendertype.RenderTypes;
-
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.Gradient;
 import dev.latvian.mods.klib.math.KMath;

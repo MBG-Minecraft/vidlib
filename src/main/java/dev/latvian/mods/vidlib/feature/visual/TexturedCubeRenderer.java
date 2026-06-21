@@ -1,7 +1,5 @@
 package dev.latvian.mods.vidlib.feature.visual;
 
-import net.minecraft.client.renderer.rendertype.RenderTypes;
-
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.Directions;
 import dev.latvian.mods.klib.texture.LightUV;

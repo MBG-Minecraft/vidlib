@@ -14,11 +14,10 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.world.entity.player.PlayerSkin;
-import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.ARGB;
+import net.minecraft.world.entity.player.PlayerModelType;
 
 import java.util.Map;
 

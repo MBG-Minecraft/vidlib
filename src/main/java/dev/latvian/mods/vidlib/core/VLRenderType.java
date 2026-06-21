@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.klib.util.Empty;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;

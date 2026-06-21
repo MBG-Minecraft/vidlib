@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.prop.geo;
 
+import com.geckolib.animatable.GeoAnimatable;
+import com.geckolib.constant.dataticket.DataTicket;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import com.geckolib.animatable.GeoAnimatable;
-import com.geckolib.constant.dataticket.DataTicket;
 
 public interface GeoProp extends GeoAnimatable {
 	@ApiStatus.NonExtendable

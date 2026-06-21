@@ -7,10 +7,7 @@ import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.ItemInHandRenderer;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import org.joml.Matrix4fc;
 import org.spongepowered.asm.mixin.Final;
@@ -19,7 +16,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -30,7 +26,7 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 	private Minecraft minecraft;
 
 	@Unique
-	private boolean bobViewport;
+	private boolean vl$cancelViewportBobbing;
 
 	@ModifyExpressionValue(method = "bobHurt", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/state/level/CameraEntityRenderState;hurtDir:F"))
 	private float vl$bobHurt(float original) {
@@ -60,13 +56,6 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 		}
 	}
 
-	@Redirect(method = "renderItemInHand(Lnet/minecraft/client/renderer/state/level/CameraRenderState;FLorg/joml/Matrix4fc;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;renderHandsWithItems(FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/player/LocalPlayer;I)V"))
-	private void vl$renderHandsWithItems(ItemInHandRenderer itemInHandRenderer, float partialTick, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, LocalPlayer player, int lightCoords) {
-		if (ClientGameEngine.INSTANCE.shouldRenderHand(minecraft)) {
-			itemInHandRenderer.renderHandsWithItems(partialTick, poseStack, submitNodeCollector, player, lightCoords);
-		}
-	}
-
 	@ModifyExpressionValue(method = {"extractOptions", "shouldRenderBlockOutline"}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z"))
 	private boolean vl$hideGui(boolean original) {
 		return ClientGameEngine.INSTANCE.hideGui(minecraft);
@@ -74,17 +63,17 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;bobView(Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;)V"))
 	private void vl$bobViewport(DeltaTracker deltaTracker, CallbackInfo ci) {
-		bobViewport = true;
+		vl$cancelViewportBobbing = true;
 	}
 
 	@Inject(method = "renderItemInHand(Lnet/minecraft/client/renderer/state/level/CameraRenderState;FLorg/joml/Matrix4fc;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;bobView(Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;)V"))
 	private void vl$bobItem(CameraRenderState cameraState, float partialTick, Matrix4fc modelViewMatrix, CallbackInfo ci) {
-		bobViewport = false;
+		vl$cancelViewportBobbing = false;
 	}
 
 	@Inject(method = "bobView", at = @At("HEAD"), cancellable = true)
 	private void vl$bobView(CameraRenderState cameraState, PoseStack poseStack, CallbackInfo ci) {
-		if (bobViewport) {
+		if (vl$cancelViewportBobbing) {
 			ci.cancel();
 		}
 	}

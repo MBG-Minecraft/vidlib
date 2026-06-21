@@ -25,7 +25,7 @@ public record ImageImIcon(Identifier texture, float sizeX, float sizeY, float u0
 	@Override
 	public String formatLabel(ImGraphics graphics, String label) {
 		var tex = graphics.mc.getTextureManager().getTexture(texture);
-		ImGui.image(tex.getTexture().vl$getHandle(), sizeX, sizeY, u0, v0, u1, v1);
+		ImGui.image(ImGraphics.getTextureId(tex.getTexture()), sizeX, sizeY, u0, v0, u1, v1);
 		ImGui.sameLine();
 		return label;
 	}

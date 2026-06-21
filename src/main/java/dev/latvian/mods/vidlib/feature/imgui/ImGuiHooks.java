@@ -20,8 +20,8 @@ import imgui.flag.ImGuiDockNodeFlags;
 import imgui.internal.ImGuiContext;
 import imgui.internal.ImGuiDockNode;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.Util;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWWindowContentScaleCallback;
@@ -83,10 +83,8 @@ public class ImGuiHooks {
 		var iniPath = CommonPaths.mkdirs(VidLibPaths.USER.get().resolve("imgui.ini")).toAbsolutePath();
 
 		io.setIniFilename(iniPath.toString());
-		io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
 		io.addConfigFlags(ImGuiConfigFlags.DockingEnable);
 		io.addConfigFlags(ImGuiConfigFlags.DpiEnableScaleFonts);
-		io.addConfigFlags(ImGuiConfigFlags.DpiEnableScaleViewports);
 		io.setConfigDockingWithShift(false);
 		io.setConfigWindowsMoveFromTitleBarOnly(true);
 		io.setConfigMacOSXBehaviors(Util.getPlatform() == Util.OS.OSX);
@@ -194,6 +192,7 @@ public class ImGuiHooks {
 			io.setKeysDown(GLFW.GLFW_KEY_TAB, false);
 		}
 
+		imGuiGl3.newFrame();
 		imGuiGlfw.newFrame();
 		ImGui.newFrame();
 		active = true;
@@ -283,19 +282,10 @@ public class ImGuiHooks {
 		var drawData = ImGui.getDrawData();
 
 		if (drawData != null) {
-			imGuiGl3.renderDrawData(drawData);
+			imGuiGl3.renderDrawData(drawData, mc.getMainRenderTarget());
 		}
 
-		// captureMouse = ImGui.getIO().getWantCaptureMouse() && !mc.mouseHandler.isMouseGrabbed();
-		// captureKeyboard = ImGui.getIO().getWantCaptureKeyboard();
-
-		if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
-			GLFW.glfwWindowHint(GLFW.GLFW_TRANSPARENT_FRAMEBUFFER, GLFW.GLFW_TRUE);
-			var backupWindowPtr = GLFW.glfwGetCurrentContext();
-			ImGui.updatePlatformWindows();
-			ImGui.renderPlatformWindowsDefault();
-			GLFW.glfwMakeContextCurrent(backupWindowPtr);
-		}
+		imGuiGl3.postDraw();
 
 		old.pop();
 	}
@@ -305,9 +295,9 @@ public class ImGuiHooks {
 			return;
 		}
 
+		endingFrame = false;
 		var old = context.push();
 		ImGui.endFrame();
-		ImGui.updatePlatformWindows();
 		old.pop();
 		active = false;
 	}

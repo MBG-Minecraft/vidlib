@@ -7,10 +7,10 @@ import dev.latvian.mods.vidlib.feature.icon.renderer.IconRenderer;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
 

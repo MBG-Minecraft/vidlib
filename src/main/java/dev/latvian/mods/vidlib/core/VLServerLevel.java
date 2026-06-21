@@ -10,14 +10,14 @@ import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import net.minecraft.util.Util;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.TicketStorage;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.neoforged.neoforge.common.world.chunk.TicketHelper;
 import org.jetbrains.annotations.Nullable;
 

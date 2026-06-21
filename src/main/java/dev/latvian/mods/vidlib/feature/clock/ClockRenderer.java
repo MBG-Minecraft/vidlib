@@ -3,10 +3,9 @@ package dev.latvian.mods.vidlib.feature.clock;
 import com.mojang.math.Axis;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import imgui.type.ImBoolean;
-import net.minecraft.util.LightCoordsUtil;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 
 public class ClockRenderer {

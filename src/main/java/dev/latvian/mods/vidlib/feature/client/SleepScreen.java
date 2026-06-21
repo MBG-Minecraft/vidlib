@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.feature.client;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.InBedChatScreen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.gui.screens.InBedChatScreen;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 
 public class SleepScreen extends InBedChatScreen {

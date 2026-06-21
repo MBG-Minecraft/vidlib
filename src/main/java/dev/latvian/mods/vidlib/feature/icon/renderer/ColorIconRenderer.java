@@ -1,7 +1,5 @@
 package dev.latvian.mods.vidlib.feature.icon.renderer;
 
-import net.minecraft.client.renderer.rendertype.RenderTypes;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.feature.client.EntityRenderTypes;
 import dev.latvian.mods.vidlib.feature.icon.ColorIcon;

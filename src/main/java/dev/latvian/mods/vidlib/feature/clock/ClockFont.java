@@ -25,10 +25,10 @@ public record ClockFont(
 	List<UV> uvs
 ) {
 	public static ClockFont create(Identifier id,
-								   Identifier texture,
-								   Vector2i size,
-								   Vector2i textureSize,
-								   int separatorWidth
+	                               Identifier texture,
+	                               Vector2i size,
+	                               Vector2i textureSize,
+	                               int separatorWidth
 	) {
 		var uvs = new UV[11];
 		int actualSeparatorWidth = separatorWidth > 0 ? separatorWidth : size.x();

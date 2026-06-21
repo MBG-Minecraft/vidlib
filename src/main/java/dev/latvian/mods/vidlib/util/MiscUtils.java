@@ -3,11 +3,11 @@ package dev.latvian.mods.vidlib.util;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.DataResult;
 import dev.latvian.mods.vidlib.VidLib;
-import net.minecraft.util.Util;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 
 import java.net.URI;
 import java.net.http.HttpClient;

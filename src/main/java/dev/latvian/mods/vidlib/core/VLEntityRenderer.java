@@ -1,14 +1,12 @@
 package dev.latvian.mods.vidlib.core;
 
-import net.minecraft.client.renderer.rendertype.RenderTypes;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.feature.canvas.BossRenderTypes;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 

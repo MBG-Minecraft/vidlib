@@ -1,7 +1,5 @@
 package dev.latvian.mods.vidlib.feature.environment;
 
-import net.minecraft.client.renderer.rendertype.RenderTypes;
-
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.vertex.BufferBuilder;

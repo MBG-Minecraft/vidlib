@@ -9,10 +9,9 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import imgui.type.ImString;
-import net.minecraft.util.Util;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.core.ClientAsset;
-import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;

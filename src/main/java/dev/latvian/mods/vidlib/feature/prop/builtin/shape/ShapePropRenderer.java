@@ -1,7 +1,5 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.shape;
 
-import net.minecraft.client.renderer.rendertype.RenderTypes;
-
 import com.mojang.math.Axis;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.render.DebugRenderTypes;

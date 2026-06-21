@@ -21,7 +21,6 @@ import dev.latvian.mods.vidlib.feature.registry.SyncRegistryPayload;
 import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
-import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;

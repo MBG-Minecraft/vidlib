@@ -76,11 +76,13 @@ public class ClientSkybox {
 
 			if (mc.getTextureManager().byPath.get(id) instanceof SkyboxTexture tex) {
 				skyboxTexture = tex;
-				return skyboxTexture;
+				return tex;
 			}
 
-			skyboxTexture = new SkyboxTexture(this, id);
-			mc.getTextureManager().registerAndLoad(skyboxTexture.resourceId(), skyboxTexture);
+			var tex = new SkyboxTexture(this, id);
+			mc.getTextureManager().registerAndLoad(tex.resourceId(), tex);
+			skyboxTexture = tex;
+			return tex;
 		}
 
 		return skyboxTexture;

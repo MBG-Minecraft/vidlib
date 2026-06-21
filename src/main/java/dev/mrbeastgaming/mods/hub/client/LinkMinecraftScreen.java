@@ -5,11 +5,11 @@ import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubClientSessionData;
 import dev.mrbeastgaming.mods.hub.api.HubMinecraftProfileData;
 import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
-import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;

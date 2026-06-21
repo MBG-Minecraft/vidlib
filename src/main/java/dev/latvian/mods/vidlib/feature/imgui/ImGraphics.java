@@ -365,7 +365,11 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 	}
 
 	public static int getTextureId(Identifier identifier) {
-		return Minecraft.getInstance().getTextureManager().getTexture(identifier).getTexture().vl$getHandle();
+		return getTextureId(Minecraft.getInstance().getTextureManager().getTexture(identifier).getTexture());
+	}
+
+	public static int getTextureId(@Nullable GpuTexture texture) {
+		return ImGuiHooks.imGuiGl3.getTextureId(texture);
 	}
 
 	public static void texture(Identifier id, float width, float height) {
@@ -389,7 +393,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 	}
 
 	public static void framebuffer(RenderTarget fbo, float width, float height, float u0, float v0, float u1, float v1) {
-		ImGui.image(fbo.getColorTexture().vl$getHandle(), width, height, u0, v0, u1, v1);
+		ImGui.image(ImGuiHooks.imGuiGl3.getTextureId(fbo.getColorTextureView()), width, height, u0, v0, u1, v1);
 	}
 
 	public void setNextWindowOverViewport() {
@@ -567,7 +571,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		}
 
 		var clicked = ImGui.imageButton(
-			texture == null ? 0 : texture.vl$getHandle(),
+			getTextureId(texture),
 			w, h,
 			uv.u0(), uv.v0(), uv.u1(), uv.v1(),
 			padding,

@@ -2,8 +2,8 @@ package dev.latvian.mods.vidlib.core.mixin;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
-import net.minecraft.core.ClientAsset;
 import net.minecraft.client.renderer.texture.SkinTextureDownloader;
+import net.minecraft.core.ClientAsset;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

@@ -1,12 +1,10 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.npc;
 
-import net.minecraft.client.renderer.rendertype.RenderTypes;
-
 import com.mojang.math.Axis;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.core.VLEntityRenderer;
+import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.EntityRenderTypes;
 import dev.latvian.mods.vidlib.feature.clothing.ClothedPlayerSkinTexture;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingPresets;
@@ -17,20 +15,20 @@ import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.latvian.mods.vidlib.util.client.MultiBufferSourceOverride;
-import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.RemotePlayer;
-import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
-import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.phys.Vec3;

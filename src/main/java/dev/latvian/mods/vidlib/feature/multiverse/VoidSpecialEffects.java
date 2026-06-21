@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.feature.multiverse;
 
-import net.neoforged.neoforge.client.CustomSkyboxRenderer;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.client.CustomSkyboxRenderer;
 import org.jetbrains.annotations.NotNull;
 
 public class VoidSpecialEffects implements CustomSkyboxRenderer {

@@ -1,433 +1,559 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.buffers.Std140Builder;
+import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.ColorTargetState;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.pipeline.TextureTarget;
+import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.shaders.UniformType;
+import com.mojang.blaze3d.systems.CommandEncoder;
+import com.mojang.blaze3d.systems.GpuDevice;
+import com.mojang.blaze3d.systems.RenderPass;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.FilterMode;
+import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.blaze3d.textures.TextureFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
+import dev.latvian.mods.vidlib.VidLib;
 import imgui.ImDrawData;
 import imgui.ImFontAtlas;
 import imgui.ImGui;
-import imgui.ImGuiIO;
-import imgui.ImGuiViewport;
-import imgui.ImVec2;
 import imgui.ImVec4;
-import imgui.callback.ImPlatformFuncViewport;
 import imgui.flag.ImGuiBackendFlags;
-import imgui.flag.ImGuiConfigFlags;
-import imgui.flag.ImGuiViewportFlags;
 import imgui.type.ImInt;
+import net.minecraft.client.Minecraft;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
+import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
-
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL13.*;
-import static org.lwjgl.opengl.GL14.*;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.opengl.GL32.glDrawElementsBaseVertex;
+import java.util.ArrayList;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Optional;
+import java.util.OptionalInt;
 
 public class VLImGuiImplGl3 {
-	// OpenGL Data
-	private int glVersion = 0;
-	public int gFontTexture = -1;
+	private static final int FONT_TEXTURE_ID = 1;
+
+	private static final VertexFormat VERTEX_FORMAT;
+
+	static {
+		VertexFormatElement posElement = null;
+
+		for (int i = 7; i < VertexFormatElement.MAX_COUNT; i++) {
+			if (VertexFormatElement.byId(i) == null) {
+				posElement = VertexFormatElement.register(i, 0, VertexFormatElement.Type.FLOAT, false, 2);
+				break;
+			}
+		}
+
+		if (posElement == null) {
+			throw new IllegalStateException("Failed to create ImGui vertex format");
+		}
+
+		VERTEX_FORMAT = VertexFormat.builder()
+			.add("Position", posElement)
+			.add("UV", VertexFormatElement.UV0)
+			.add("Color", VertexFormatElement.COLOR)
+			.build();
+	}
+
+	private static final RenderPipeline PIPELINE = RenderPipeline.builder()
+		.withLocation(VidLib.id("pipeline/imgui"))
+		.withVertexShader(VidLib.id("core/imgui"))
+		.withFragmentShader(VidLib.id("core/imgui"))
+		.withSampler("Texture")
+		.withUniform("Projection", UniformType.UNIFORM_BUFFER)
+		.withColorTargetState(new ColorTargetState(Optional.of(BlendFunction.TRANSLUCENT), ColorTargetState.WRITE_ALL))
+		.withCull(false)
+		.withVertexFormat(VERTEX_FORMAT, VertexFormat.Mode.TRIANGLES)
+		// .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
+		.build();
+
+	public int gFontTexture = FONT_TEXTURE_ID;
 	public int glFontWidth = 0;
 	public int glFontHeight = 0;
-	private int gShaderHandle = 0;
-	private int gVertHandle = 0;
-	private int gFragHandle = 0;
-	private int gAttribLocationTex = 0;
-	private int gAttribLocationProjMtx = 0;
-	private int gAttribLocationVtxPos = 0;
-	private int gAttribLocationVtxUV = 0;
-	private int gAttribLocationVtxColor = 0;
-	private int gVboHandle = 0;
-	private int gElementsHandle = 0;
-	private int gVertexArrayObjectHandle = 0;
 
-	// Used to store tmp renderer data
-	private final ImVec2 displaySize = new ImVec2();
-	private final ImVec2 framebufferScale = new ImVec2();
-	private final ImVec2 displayPos = new ImVec2();
+	private Data data = null;
+	private TextureTarget screenTarget = null;
 	private final ImVec4 clipRect = new ImVec4();
-	private final float[] orthoProjMatrix = new float[4 * 4];
-
-	// Variables used to backup GL state before and after the rendering of Dear ImGui
-	private final int[] lastActiveTexture = new int[1];
-	private final int[] lastProgram = new int[1];
-	private final int[] lastTexture = new int[1];
-	private final int[] lastArrayBuffer = new int[1];
-	private final int[] lastVertexArrayObject = new int[1];
-	private final int[] lastFramebuffer = new int[1];
-	private final int[] lastViewport = new int[4];
-	private final int[] lastScissorBox = new int[4];
-	private final int[] lastBlendSrcRgb = new int[1];
-	private final int[] lastBlendDstRgb = new int[1];
-	private final int[] lastBlendSrcAlpha = new int[1];
-	private final int[] lastBlendDstAlpha = new int[1];
-	private final int[] lastBlendEquationRgb = new int[1];
-	private final int[] lastBlendEquationAlpha = new int[1];
-	private boolean lastEnableBlend = false;
-	private boolean lastEnableCullFace = false;
-	private boolean lastEnableDepthTest = false;
-	private boolean lastEnableStencilTest = false;
-	private boolean lastEnableScissorTest = false;
 
 	public void init() {
-		this.readGlVersion();
-		this.setupBackendCapabilitiesFlags();
+		this.data = new Data();
 
-		this.createDeviceObjects();
+		var io = ImGui.getIO();
+		io.setBackendRendererName("imgui-java_impl_" + RenderSystem.getDevice().getBackendName());
+		io.addBackendFlags(ImGuiBackendFlags.RendererHasVtxOffset);
 
-		if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
-			this.initPlatformInterface();
+		this.updateFontsTexture();
+	}
+
+	public void newFrame() {
+		if (this.data != null && this.data.fontTexture == null) {
+			this.updateFontsTexture();
 		}
 	}
 
-	/**
-	 * Method to render {@link ImDrawData} into current OpenGL context.
-	 *
-	 * @param drawData draw data to render
-	 */
-	public void renderDrawData(final ImDrawData drawData) {
+	public void renderDrawData(ImDrawData drawData) {
+		this.renderDrawData(drawData, Minecraft.getInstance().getMainRenderTarget());
+	}
+
+	public void renderDrawData(ImDrawData drawData, RenderTarget mainRenderTarget) {
+		if (this.data == null) {
+			return;
+		}
+
 		if (drawData.getCmdListsCount() <= 0) {
 			return;
 		}
 
-		// Will project scissor/clipping rectangles into framebuffer space
-		drawData.getDisplaySize(this.displaySize);           // (0,0) unless using multi-viewports
-		drawData.getDisplayPos(this.displayPos);
-		drawData.getFramebufferScale(this.framebufferScale); // (1,1) unless using retina display which are often (2,2)
+		RenderSystem.assertOnRenderThread();
+		var window = Minecraft.getInstance().getWindow();
+		int width = window.vl$getUnscaledFramebufferWidth();
+		int height = window.vl$getUnscaledFramebufferHeight();
 
-		final float clipOffX = this.displayPos.x;
-		final float clipOffY = this.displayPos.y;
-		final float clipScaleX = this.framebufferScale.x;
-		final float clipScaleY = this.framebufferScale.y;
-
-		// Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
-		final int fbWidth = (int) (this.displaySize.x * this.framebufferScale.x);
-		final int fbHeight = (int) (this.displaySize.y * this.framebufferScale.y);
-
-		if (fbWidth <= 0 || fbHeight <= 0) {
+		if (width <= 0 || height <= 0) {
 			return;
 		}
 
-		this.backupGlState();
-		this.bind(fbWidth, fbHeight);
+		var target = this.getScreenTarget(width, height);
+		this.prepareScreenTarget(mainRenderTarget, target);
 
-		// Render command lists
-		for (int cmdListIdx = 0; cmdListIdx < drawData.getCmdListsCount(); cmdListIdx++) {
-			// Upload vertex/index buffers
-			glBufferData(GL_ARRAY_BUFFER, drawData.getCmdListVtxBufferData(cmdListIdx), GL_STREAM_DRAW);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, drawData.getCmdListIdxBufferData(cmdListIdx), GL_STREAM_DRAW);
-
-			for (int cmdBufferIdx = 0; cmdBufferIdx < drawData.getCmdListCmdBufferSize(cmdListIdx); cmdBufferIdx++) {
-				drawData.getCmdListCmdBufferClipRect(cmdListIdx, cmdBufferIdx, this.clipRect);
-
-				final float clipMinX = (this.clipRect.x - clipOffX) * clipScaleX;
-				final float clipMinY = (this.clipRect.y - clipOffY) * clipScaleY;
-				final float clipMaxX = (this.clipRect.z - clipOffX) * clipScaleX;
-				final float clipMaxY = (this.clipRect.w - clipOffY) * clipScaleY;
-
-				if (clipMaxX <= clipMinX || clipMaxY <= clipMinY) {
-					continue;
-				}
-
-				// Apply scissor/clipping rectangle (Y is inverted in OpenGL)
-				glScissor((int) clipMinX, (int) (fbHeight - clipMaxY), (int) (clipMaxX - clipMinX), (int) (clipMaxY - clipMinY));
-
-				// Bind texture, Draw
-				final int textureId = drawData.getCmdListCmdBufferTextureId(cmdListIdx, cmdBufferIdx);
-				final int elemCount = drawData.getCmdListCmdBufferElemCount(cmdListIdx, cmdBufferIdx);
-				final int idxBufferOffset = drawData.getCmdListCmdBufferIdxOffset(cmdListIdx, cmdBufferIdx);
-				final int vtxBufferOffset = drawData.getCmdListCmdBufferVtxOffset(cmdListIdx, cmdBufferIdx);
-				final int indices = idxBufferOffset * ImDrawData.SIZEOF_IM_DRAW_IDX;
-
-				glBindTexture(GL_TEXTURE_2D, textureId);
-
-				if (this.glVersion >= 320) {
-					glDrawElementsBaseVertex(GL_TRIANGLES, elemCount, GL_UNSIGNED_SHORT, indices, vtxBufferOffset);
-				} else {
-					glDrawElements(GL_TRIANGLES, elemCount, GL_UNSIGNED_SHORT, indices);
-				}
-			}
+		if (this.data.mainViewportData == null) {
+			this.data.mainViewportData = new ViewportData();
 		}
 
-		this.unbind();
-		this.restoreModifiedGlState();
+		this.data.mainViewportData.renderTarget = target;
+		this.renderDrawData(drawData, this.data.mainViewportData, OptionalInt.empty());
+		target.blitToScreen();
 	}
 
-	/**
-	 * Call this method in the end of your application cycle to dispose resources used by {@link VLImGuiImplGl3}.
-	 */
+	public void postDraw() {
+		this.clearTextures();
+	}
+
 	public void dispose() {
-		glDeleteBuffers(this.gVboHandle);
-		glDeleteBuffers(this.gElementsHandle);
-		glDetachShader(this.gShaderHandle, this.gVertHandle);
-		glDetachShader(this.gShaderHandle, this.gFragHandle);
-		glDeleteProgram(this.gShaderHandle);
-		glDeleteTextures(this.gFontTexture);
-		this.shutdownPlatformInterface();
-	}
-
-	/**
-	 * Method rebuilds the font atlas for Dear ImGui. Could be used to update application fonts in runtime.
-	 */
-	public void updateFontsTexture() {
-		if (this.gFontTexture != -1) {
-			glDeleteTextures(this.gFontTexture);
+		if (this.data == null) {
+			return;
 		}
 
-		final ImFontAtlas fontAtlas = ImGui.getIO().getFonts();
-		final ImInt width = new ImInt();
-		final ImInt height = new ImInt();
-		final ByteBuffer buffer = fontAtlas.getTexDataAsRGBA32(width, height);
+		var io = ImGui.getIO();
+		io.setBackendRendererName(null);
+		io.removeBackendFlags(ImGuiBackendFlags.RendererHasVtxOffset);
+		this.destroyDeviceObjects();
+		this.data = null;
+	}
+
+	public void updateFontsTexture() {
+		if (this.data == null) {
+			return;
+		}
+
+		this.destroyFontsTexture();
+
+		ImFontAtlas fontAtlas = ImGui.getIO().getFonts();
+		ImInt width = new ImInt();
+		ImInt height = new ImInt();
+		ByteBuffer pixels = fontAtlas.getTexDataAsRGBA32(width, height);
 
 		this.glFontWidth = width.get();
 		this.glFontHeight = height.get();
 
-		this.gFontTexture = glGenTextures();
-
-		glBindTexture(GL_TEXTURE_2D, this.gFontTexture);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-		glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glFontWidth, glFontHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-
-		fontAtlas.setTexID(this.gFontTexture);
+		GpuDevice device = RenderSystem.getDevice();
+		this.data.fontTexture = device.createTexture(
+			"ImGui Font Atlas",
+			GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_TEXTURE_BINDING,
+			TextureFormat.RGBA8,
+			this.glFontWidth,
+			this.glFontHeight,
+			1,
+			1
+		);
+		device.createCommandEncoder().writeToTexture(
+			this.data.fontTexture,
+			pixels,
+			NativeImage.Format.RGBA,
+			0,
+			0,
+			0,
+			0,
+			this.glFontWidth,
+			this.glFontHeight
+		);
+		this.data.fontTextureView = device.createTextureView(this.data.fontTexture);
+		this.gFontTexture = FONT_TEXTURE_ID;
+		fontAtlas.setTexID(FONT_TEXTURE_ID);
 	}
 
-	private void readGlVersion() {
-		final int[] major = new int[1];
-		final int[] minor = new int[1];
-		glGetIntegerv(GL_MAJOR_VERSION, major);
-		glGetIntegerv(GL_MINOR_VERSION, minor);
-		this.glVersion = major[0] * 100 + minor[0] * 10;
-	}
-
-	private void setupBackendCapabilitiesFlags() {
-		final ImGuiIO io = ImGui.getIO();
-		io.setBackendRendererName("imgui_java_impl_opengl3");
-
-		// We can honor the ImDrawCmd::VtxOffset field, allowing for large meshes.
-		if (this.glVersion >= 320) {
-			io.addBackendFlags(ImGuiBackendFlags.RendererHasVtxOffset);
+	public int getTextureId(@Nullable GpuTexture texture) {
+		if (this.data == null || texture == null || texture.isClosed()) {
+			return 0;
 		}
 
-		// We can create multi-viewports on the Renderer side (optional)
-		io.addBackendFlags(ImGuiBackendFlags.RendererHasViewports);
-	}
+		var id = this.data.textureIds.get(texture);
 
-	private void createDeviceObjects() {
-		// Backup GL state
-		final int[] lastTexture = new int[1];
-		final int[] lastArrayBuffer = new int[1];
-		final int[] lastVertexArray = new int[1];
-		glGetIntegerv(GL_TEXTURE_BINDING_2D, lastTexture);
-		glGetIntegerv(GL_ARRAY_BUFFER_BINDING, lastArrayBuffer);
-		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, lastVertexArray);
-
-		this.createShaders();
-
-		this.gAttribLocationTex = glGetUniformLocation(this.gShaderHandle, "Texture");
-		this.gAttribLocationProjMtx = glGetUniformLocation(this.gShaderHandle, "ProjMtx");
-		this.gAttribLocationVtxPos = glGetAttribLocation(this.gShaderHandle, "Position");
-		this.gAttribLocationVtxUV = glGetAttribLocation(this.gShaderHandle, "UV");
-		this.gAttribLocationVtxColor = glGetAttribLocation(this.gShaderHandle, "Color");
-
-		// Create buffers
-		this.gVboHandle = glGenBuffers();
-		this.gElementsHandle = glGenBuffers();
-
-		this.updateFontsTexture();
-
-		// Restore modified GL state
-		glBindTexture(GL_TEXTURE_2D, lastTexture[0]);
-		glBindBuffer(GL_ARRAY_BUFFER, lastArrayBuffer[0]);
-		glBindVertexArray(lastVertexArray[0]);
-	}
-
-	private void createShaders() {
-		var vertShaderSource = this.getVertexShaderGlsl410Core();
-		var fragShaderSource = this.getFragmentShaderGlsl410Core();
-
-		this.gVertHandle = this.createAndCompileShader(GL_VERTEX_SHADER, vertShaderSource);
-		this.gFragHandle = this.createAndCompileShader(GL_FRAGMENT_SHADER, fragShaderSource);
-
-		this.gShaderHandle = glCreateProgram();
-		glAttachShader(this.gShaderHandle, this.gVertHandle);
-		glAttachShader(this.gShaderHandle, this.gFragHandle);
-		glLinkProgram(this.gShaderHandle);
-
-		if (glGetProgrami(this.gShaderHandle, GL_LINK_STATUS) == GL_FALSE) {
-			throw new IllegalStateException("Failed to link shader program:\n" + glGetProgramInfoLog(this.gShaderHandle));
-		}
-	}
-
-	private void backupGlState() {
-		glGetIntegerv(GL_ACTIVE_TEXTURE, this.lastActiveTexture);
-		glActiveTexture(GL_TEXTURE0);
-		glGetIntegerv(GL_CURRENT_PROGRAM, this.lastProgram);
-		glGetIntegerv(GL_TEXTURE_BINDING_2D, this.lastTexture);
-		glGetIntegerv(GL_ARRAY_BUFFER_BINDING, this.lastArrayBuffer);
-		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, this.lastVertexArrayObject);
-		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, this.lastFramebuffer);
-		glGetIntegerv(GL_VIEWPORT, this.lastViewport);
-		glGetIntegerv(GL_SCISSOR_BOX, this.lastScissorBox);
-		glGetIntegerv(GL_BLEND_SRC_RGB, this.lastBlendSrcRgb);
-		glGetIntegerv(GL_BLEND_DST_RGB, this.lastBlendDstRgb);
-		glGetIntegerv(GL_BLEND_SRC_ALPHA, this.lastBlendSrcAlpha);
-		glGetIntegerv(GL_BLEND_DST_ALPHA, this.lastBlendDstAlpha);
-		glGetIntegerv(GL_BLEND_EQUATION_RGB, this.lastBlendEquationRgb);
-		glGetIntegerv(GL_BLEND_EQUATION_ALPHA, this.lastBlendEquationAlpha);
-		this.lastEnableBlend = glIsEnabled(GL_BLEND);
-		this.lastEnableCullFace = glIsEnabled(GL_CULL_FACE);
-		this.lastEnableDepthTest = glIsEnabled(GL_DEPTH_TEST);
-		this.lastEnableStencilTest = glIsEnabled(GL_STENCIL_TEST);
-		this.lastEnableScissorTest = glIsEnabled(GL_SCISSOR_TEST);
-	}
-
-	private void restoreModifiedGlState() {
-		glUseProgram(this.lastProgram[0]);
-		glBindTexture(GL_TEXTURE_2D, this.lastTexture[0]);
-		glActiveTexture(this.lastActiveTexture[0]);
-		glBindVertexArray(this.lastVertexArrayObject[0]);
-		glBindFramebuffer(GL_FRAMEBUFFER, this.lastFramebuffer[0]);
-		glBindBuffer(GL_ARRAY_BUFFER, this.lastArrayBuffer[0]);
-		glBlendEquationSeparate(this.lastBlendEquationRgb[0], this.lastBlendEquationAlpha[0]);
-		glBlendFuncSeparate(this.lastBlendSrcRgb[0], this.lastBlendDstRgb[0], this.lastBlendSrcAlpha[0], this.lastBlendDstAlpha[0]);
-		// @formatter:off CHECKSTYLE:OFF
-		if (this.lastEnableBlend) glEnable(GL_BLEND); else glDisable(GL_BLEND);
-		if (this.lastEnableCullFace) glEnable(GL_CULL_FACE); else glDisable(GL_CULL_FACE);
-		if (this.lastEnableDepthTest) glEnable(GL_DEPTH_TEST); else glDisable(GL_DEPTH_TEST);
-		if (this.lastEnableStencilTest) glEnable(GL_STENCIL_TEST); else glDisable(GL_STENCIL_TEST);
-		if (this.lastEnableScissorTest) glEnable(GL_SCISSOR_TEST); else glDisable(GL_SCISSOR_TEST);
-		// @formatter:on CHECKSTYLE:ON
-		glViewport(this.lastViewport[0], this.lastViewport[1], this.lastViewport[2], this.lastViewport[3]);
-		glScissor(this.lastScissorBox[0], this.lastScissorBox[1], this.lastScissorBox[2], this.lastScissorBox[3]);
-	}
-
-	// Setup desired GL state
-	private void bind(final int fbWidth, final int fbHeight) {
-		// Recreate the VAO every time (this is to easily allow multiple GL contexts to be rendered to. VAO are not shared among GL contexts)
-		// The renderer would actually work without any VAO bound, but then our VertexAttrib calls would overwrite the default one currently bound.
-		this.gVertexArrayObjectHandle = glGenVertexArrays();
-
-		// Setup render state: alpha-blending enabled, no face culling, no depth testing, scissor enabled, polygon fill
-		glEnable(GL_BLEND);
-		glBlendEquation(GL_FUNC_ADD);
-		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-		glDisable(GL_CULL_FACE);
-		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_STENCIL_TEST);
-		glEnable(GL_SCISSOR_TEST);
-
-		// Setup viewport, orthographic projection matrix
-		// Our visible imgui space lies from draw_data->DisplayPos (top left) to draw_data->DisplayPos+data_data->DisplaySize (bottom right).
-		// DisplayPos is (0,0) for single viewport apps.
-		glViewport(0, 0, fbWidth, fbHeight);
-		final float left = this.displayPos.x;
-		final float right = this.displayPos.x + this.displaySize.x;
-		final float top = this.displayPos.y;
-		final float bottom = this.displayPos.y + this.displaySize.y;
-
-		// Orthographic matrix projection
-		this.orthoProjMatrix[0] = 2.0f / (right - left);
-		this.orthoProjMatrix[5] = 2.0f / (top - bottom);
-		this.orthoProjMatrix[10] = -1.0f;
-		this.orthoProjMatrix[12] = (right + left) / (left - right);
-		this.orthoProjMatrix[13] = (top + bottom) / (bottom - top);
-		this.orthoProjMatrix[15] = 1.0f;
-
-		// Bind shader
-		glUseProgram(this.gShaderHandle);
-		glUniform1i(this.gAttribLocationTex, 0);
-		glUniformMatrix4fv(this.gAttribLocationProjMtx, false, this.orthoProjMatrix);
-
-		glBindVertexArray(this.gVertexArrayObjectHandle);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		// Bind vertex/index buffers and setup attributes for ImDrawVert
-		glBindBuffer(GL_ARRAY_BUFFER, this.gVboHandle);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this.gElementsHandle);
-		glEnableVertexAttribArray(this.gAttribLocationVtxPos);
-		glEnableVertexAttribArray(this.gAttribLocationVtxUV);
-		glEnableVertexAttribArray(this.gAttribLocationVtxColor);
-		glVertexAttribPointer(this.gAttribLocationVtxPos, 2, GL_FLOAT, false, ImDrawData.SIZEOF_IM_DRAW_VERT, 0);
-		glVertexAttribPointer(this.gAttribLocationVtxUV, 2, GL_FLOAT, false, ImDrawData.SIZEOF_IM_DRAW_VERT, 8);
-		glVertexAttribPointer(this.gAttribLocationVtxColor, 4, GL_UNSIGNED_BYTE, true, ImDrawData.SIZEOF_IM_DRAW_VERT, 16);
-	}
-
-	private void unbind() {
-		// Destroy the temporary VAO
-		glDeleteVertexArrays(this.gVertexArrayObjectHandle);
-	}
-
-	//--------------------------------------------------------------------------------------------------------
-	// MULTI-VIEWPORT / PLATFORM INTERFACE SUPPORT
-	// This is an _advanced_ and _optional_ feature, allowing the back-end to create and handle multiple viewports simultaneously.
-	// If you are new to dear imgui or creating a new binding for dear imgui, it is recommended that you completely ignore this section first..
-	//--------------------------------------------------------------------------------------------------------
-
-	private void initPlatformInterface() {
-		ImGui.getPlatformIO().setRendererRenderWindow(new ImPlatformFuncViewport() {
-			@Override
-			public void accept(final ImGuiViewport vp) {
-				if (!vp.hasFlags(ImGuiViewportFlags.NoRendererClear)) {
-					glClearColor(0, 0, 0, 0);
-					glClear(GL_COLOR_BUFFER_BIT);
-				}
-				VLImGuiImplGl3.this.renderDrawData(vp.getDrawData());
-			}
-		});
-	}
-
-	private void shutdownPlatformInterface() {
-		ImGui.destroyPlatformWindows();
-	}
-
-	private int createAndCompileShader(final int type, final CharSequence source) {
-		final int id = glCreateShader(type);
-
-		glShaderSource(id, source);
-		glCompileShader(id);
-
-		if (glGetShaderi(id, GL_COMPILE_STATUS) == GL_FALSE) {
-			throw new IllegalStateException("Failed to compile shader:\n" + glGetShaderInfoLog(id));
+		if (id != null) {
+			return id;
 		}
 
+		var view = RenderSystem.getDevice().createTextureView(texture);
+		id = this.registerTexture(view, true);
+		this.data.textureIds.put(texture, id);
 		return id;
 	}
 
-	private String getVertexShaderGlsl410Core() {
-		return """
-			#version 410 core
-			layout (location = 0) in vec2 Position;
-			layout (location = 1) in vec2 UV;
-			layout (location = 2) in vec4 Color;
-			uniform mat4 ProjMtx;
-			out vec2 Frag_UV;
-			out vec4 Frag_Color;
-			void main()
-			{
-			    Frag_UV = UV;
-			    Frag_Color = Color;
-			    gl_Position = ProjMtx * vec4(Position.xy,0,1);
-			}
-			""";
+	public int getTextureId(@Nullable GpuTextureView view) {
+		if (this.data == null || view == null || view.isClosed()) {
+			return 0;
+		}
+
+		var id = this.data.textureViewIds.get(view);
+
+		if (id != null) {
+			return id;
+		}
+
+		id = this.registerTexture(view, false);
+		this.data.textureViewIds.put(view, id);
+		return id;
 	}
 
-	private String getFragmentShaderGlsl410Core() {
-		return """
-			#version 410 core
-			in vec2 Frag_UV;
-			in vec4 Frag_Color;
-			uniform sampler2D Texture;
-			layout (location = 0) out vec4 Out_Color;
-			void main()
-			{
-			    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);
+	private int registerTexture(GpuTextureView view, boolean owned) {
+		this.data.textures.add(new TextureBinding(view, owned));
+		return this.data.textures.size() + 1;
+	}
+
+	private void prepareScreenTarget(RenderTarget mainRenderTarget, TextureTarget target) {
+		GpuTextureView targetView = target.getColorTextureView();
+		GpuTexture targetTexture = target.getColorTexture();
+		GpuTexture mainTexture = mainRenderTarget.getColorTexture();
+
+		if (targetView == null || targetTexture == null) {
+			return;
+		}
+
+		CommandEncoder commandEncoder = RenderSystem.getDevice().createCommandEncoder();
+
+		try (RenderPass ignored = commandEncoder.createRenderPass(() -> "ImGui screen clear", targetView, OptionalInt.of(0))) {
+		}
+
+		if (mainTexture == null) {
+			return;
+		}
+
+		var window = Minecraft.getInstance().getWindow();
+		int dstX = Math.max((int) (window.vl$getXOffset() * window.vl$getUnscaledFramebufferWidth()), 0);
+		int dstY = Math.max((int) (window.vl$getInverseYOffset() * window.vl$getUnscaledFramebufferHeight()), 0);
+		int copyWidth = Math.min(mainRenderTarget.width, target.width - dstX);
+		int copyHeight = Math.min(mainRenderTarget.height, target.height - dstY);
+
+		if (copyWidth > 0 && copyHeight > 0) {
+			commandEncoder.copyTextureToTexture(mainTexture, targetTexture, 0, dstX, dstY, 0, 0, copyWidth, copyHeight);
+		}
+	}
+
+	private TextureTarget getScreenTarget(int width, int height) {
+		if (this.screenTarget == null) {
+			this.screenTarget = new TextureTarget("ImGui Screen Target", width, height, true);
+		} else if (this.screenTarget.width != width || this.screenTarget.height != height) {
+			this.screenTarget.resize(width, height);
+		}
+
+		return this.screenTarget;
+	}
+
+	private void renderDrawData(ImDrawData drawData, ViewportData data, OptionalInt clearColor) {
+		var device = RenderSystem.getDevice();
+		var renderTarget = data.renderTarget;
+
+		int fbWidth = (int) (drawData.getDisplaySizeX() * drawData.getFramebufferScaleX());
+		int fbHeight = (int) (drawData.getDisplaySizeY() * drawData.getFramebufferScaleY());
+
+		if (fbWidth <= 0 || fbHeight <= 0) {
+			data.clearVertexData(0);
+			return;
+		}
+
+		int cmdListsCount = drawData.getCmdListsCount();
+
+		if (cmdListsCount <= 0) {
+			data.clearVertexData(0);
+			return;
+		}
+
+		float left = drawData.getDisplayPosX();
+		float right = drawData.getDisplayPosX() + drawData.getDisplaySizeX();
+		float top = drawData.getDisplayPosY();
+		float bottom = drawData.getDisplayPosY() + drawData.getDisplaySizeY();
+
+		float clipOffX = drawData.getDisplayPosX();
+		float clipOffY = drawData.getDisplayPosY();
+		float clipScaleX = drawData.getFramebufferScaleX();
+		float clipScaleY = drawData.getFramebufferScaleY();
+
+		if (ImDrawData.SIZEOF_IM_DRAW_IDX != data.elementSize) {
+			for (var indexBuffer : data.indexData) {
+				indexBuffer.close();
 			}
-			""";
+
+			data.indexData.clear();
+		}
+
+		data.elementSize = ImDrawData.SIZEOF_IM_DRAW_IDX;
+		data.clearVertexData(cmdListsCount);
+
+		var commandEncoder = device.createCommandEncoder();
+
+		for (int n = 0; n < cmdListsCount; n++) {
+			int vertexBufferSize = drawData.getCmdListVtxBufferSize(n) * ImDrawData.SIZEOF_IM_DRAW_VERT;
+			GpuBuffer vertexBuffer = data.getVertexBuffer(device, n, vertexBufferSize);
+			int indexBufferSize = drawData.getCmdListIdxBufferSize(n) * data.elementSize;
+			GpuBuffer indexBuffer = data.getIndexBuffer(device, n, indexBufferSize);
+
+			commandEncoder.writeToBuffer(vertexBuffer.slice(0, vertexBufferSize), drawData.getCmdListVtxBufferData(n));
+			commandEncoder.writeToBuffer(indexBuffer.slice(0, indexBufferSize), drawData.getCmdListIdxBufferData(n));
+		}
+
+		if (data.projectionMatrixBuffer == null) {
+			data.projectionMatrixBuffer = new CachedImguiOrthoBuffer(-1F, 1F);
+		}
+
+		var projectionMatrixBuffer = data.projectionMatrixBuffer.getBuffer(left, right, bottom, top);
+		var colorTexture = renderTarget.getColorTextureView();
+		// var depthTexture = renderTarget.getDepthTextureView();
+
+		if (colorTexture == null/* || depthTexture == null*/) {
+			return;
+		}
+
+		int width = colorTexture.getWidth(0);
+		int height = colorTexture.getHeight(0);
+		var sampler = RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR);
+
+		try (var renderPass = commandEncoder.createRenderPass(() -> "ImGui", colorTexture, clearColor/*, depthTexture, OptionalDouble.empty()*/)) {
+			renderPass.setPipeline(PIPELINE);
+			renderPass.setUniform("Projection", projectionMatrixBuffer);
+
+			for (int n = 0; n < cmdListsCount; n++) {
+				GpuBuffer vertexBuffer = data.vertexData.get(n);
+				GpuBuffer indexBuffer = data.indexData.get(n);
+				renderPass.setVertexBuffer(0, vertexBuffer);
+				renderPass.setIndexBuffer(indexBuffer, data.elementSize == 2 ? VertexFormat.IndexType.SHORT : VertexFormat.IndexType.INT);
+
+				int cmdBufferSize = drawData.getCmdListCmdBufferSize(n);
+
+				for (int cmdIdx = 0; cmdIdx < cmdBufferSize; cmdIdx++) {
+					drawData.getCmdListCmdBufferClipRect(n, cmdIdx, this.clipRect);
+
+					float clipMinX = (this.clipRect.x - clipOffX) * clipScaleX;
+					float clipMinY = (this.clipRect.y - clipOffY) * clipScaleY;
+					float clipMaxX = (this.clipRect.z - clipOffX) * clipScaleX;
+					float clipMaxY = (this.clipRect.w - clipOffY) * clipScaleY;
+
+					if (clipMaxX <= clipMinX || clipMaxY <= clipMinY) {
+						continue;
+					}
+
+					int minX = Math.max((int) clipMinX, 0);
+					int minY = Math.max((int) (fbHeight - clipMaxY), 0);
+
+					if (width < minX || height < minY) {
+						continue;
+					}
+
+					int scissorWidth = clamp((int) (clipMaxX - clipMinX), 0, width - minX);
+					int scissorHeight = clamp((int) (clipMaxY - clipMinY), 0, height - minY);
+					renderPass.enableScissor(minX, minY, scissorWidth, scissorHeight);
+
+					int textureId = drawData.getCmdListCmdBufferTextureId(n, cmdIdx);
+					int vtxOffset = drawData.getCmdListCmdBufferVtxOffset(n, cmdIdx);
+					int idxOffset = drawData.getCmdListCmdBufferIdxOffset(n, cmdIdx);
+					int elemCount = drawData.getCmdListCmdBufferElemCount(n, cmdIdx);
+
+					renderPass.bindTexture("Texture", this.getTextureView(textureId), sampler);
+					renderPass.drawIndexed(vtxOffset, idxOffset, elemCount, 1);
+				}
+			}
+		}
+	}
+
+	private @Nullable GpuTextureView getTextureView(int textureId) {
+		if (textureId <= FONT_TEXTURE_ID) {
+			return this.data.fontTextureView;
+		}
+
+		int index = textureId - 2;
+		return index >= 0 && index < this.data.textures.size() ? this.data.textures.get(index).view : this.data.fontTextureView;
+	}
+
+	private void clearTextures() {
+		if (this.data == null) {
+			return;
+		}
+
+		for (var binding : this.data.textures) {
+			if (binding.owned && !binding.view.isClosed()) {
+				binding.view.close();
+			}
+		}
+
+		this.data.textures.clear();
+		this.data.textureIds.clear();
+		this.data.textureViewIds.clear();
+	}
+
+	private void destroyFontsTexture() {
+		if (this.data.fontTextureView != null) {
+			this.data.fontTextureView.close();
+			this.data.fontTextureView = null;
+		}
+
+		if (this.data.fontTexture != null) {
+			this.data.fontTexture.close();
+			this.data.fontTexture = null;
+			ImGui.getIO().getFonts().setTexID(0);
+		}
+	}
+
+	private void destroyDeviceObjects() {
+		this.clearTextures();
+
+		if (this.data.mainViewportData != null) {
+			this.data.mainViewportData.free();
+			this.data.mainViewportData = null;
+		}
+
+		this.destroyFontsTexture();
+
+		if (this.screenTarget != null) {
+			this.screenTarget.destroyBuffers();
+			this.screenTarget = null;
+		}
+	}
+
+	private static int clamp(int value, int min, int max) {
+		return Math.max(min, Math.min(value, max));
+	}
+
+	private record TextureBinding(GpuTextureView view, boolean owned) {
+	}
+
+	private static class Data {
+		private GpuTextureView fontTextureView;
+		private GpuTexture fontTexture;
+		private ViewportData mainViewportData;
+		private final List<TextureBinding> textures = new ArrayList<>();
+		private final IdentityHashMap<GpuTexture, Integer> textureIds = new IdentityHashMap<>();
+		private final IdentityHashMap<GpuTextureView, Integer> textureViewIds = new IdentityHashMap<>();
+	}
+
+	private static class ViewportData {
+		private CachedImguiOrthoBuffer projectionMatrixBuffer;
+		private final List<GpuBuffer> vertexData = new ArrayList<>();
+		private final List<GpuBuffer> indexData = new ArrayList<>();
+		private int elementSize;
+		private RenderTarget renderTarget;
+
+		private void clearVertexData(int maxCommands) {
+			for (int i = this.vertexData.size() - 1; i >= maxCommands; i--) {
+				this.vertexData.remove(i).close();
+			}
+
+			for (int i = this.indexData.size() - 1; i >= maxCommands; i--) {
+				this.indexData.remove(i).close();
+			}
+		}
+
+		private GpuBuffer getVertexBuffer(GpuDevice device, int index, int size) {
+			return this.getBuffer(device, this.vertexData, index, size, "ImGui Vertex Buffer ", GpuBuffer.USAGE_COPY_DST | GpuBuffer.USAGE_VERTEX);
+		}
+
+		private GpuBuffer getIndexBuffer(GpuDevice device, int index, int size) {
+			return this.getBuffer(device, this.indexData, index, size, "ImGui Index Buffer ", GpuBuffer.USAGE_COPY_DST | GpuBuffer.USAGE_INDEX);
+		}
+
+		private GpuBuffer getBuffer(GpuDevice device, List<GpuBuffer> buffers, int index, int size, String label, int usage) {
+			if (index >= buffers.size()) {
+				GpuBuffer buffer = device.createBuffer(() -> label + index, usage, size);
+				buffers.add(buffer);
+				return buffer;
+			}
+
+			GpuBuffer buffer = buffers.get(index);
+
+			if (buffer.size() >= size) {
+				return buffer;
+			}
+
+			buffer.close();
+			GpuBuffer newBuffer = device.createBuffer(() -> label + index, usage, size);
+			buffers.set(index, newBuffer);
+			return newBuffer;
+		}
+
+		private void free() {
+			this.clearVertexData(0);
+
+			if (this.projectionMatrixBuffer != null) {
+				this.projectionMatrixBuffer.close();
+				this.projectionMatrixBuffer = null;
+			}
+
+			this.renderTarget = null;
+		}
+	}
+
+	private static class CachedImguiOrthoBuffer implements AutoCloseable {
+		private final GpuBuffer buffer;
+		private final GpuBufferSlice slice;
+		private final float zNear;
+		private final float zFar;
+		private final Matrix4f projectionMatrix = new Matrix4f();
+
+		private float left = Float.NaN;
+		private float right = Float.NaN;
+		private float bottom = Float.NaN;
+		private float top = Float.NaN;
+
+		private CachedImguiOrthoBuffer(float zNear, float zFar) {
+			this.zNear = zNear;
+			this.zFar = zFar;
+			this.buffer = RenderSystem.getDevice().createBuffer(
+				() -> "Projection matrix UBO ImGui",
+				GpuBuffer.USAGE_COPY_DST | GpuBuffer.USAGE_UNIFORM,
+				RenderSystem.PROJECTION_MATRIX_UBO_SIZE
+			);
+			this.slice = this.buffer.slice(0, RenderSystem.PROJECTION_MATRIX_UBO_SIZE);
+		}
+
+		private GpuBufferSlice getBuffer(float left, float right, float bottom, float top) {
+			if (this.left != left || this.right != right || this.bottom != bottom || this.top != top) {
+				Matrix4f matrix = this.projectionMatrix.setOrtho(left, right, bottom, top, this.zNear, this.zFar);
+
+				try (MemoryStack stack = MemoryStack.stackPush()) {
+					ByteBuffer buffer = Std140Builder.onStack(stack, RenderSystem.PROJECTION_MATRIX_UBO_SIZE).putMat4f(matrix).get();
+					RenderSystem.getDevice().createCommandEncoder().writeToBuffer(this.buffer.slice(), buffer);
+				}
+
+				this.left = left;
+				this.right = right;
+				this.bottom = bottom;
+				this.top = top;
+			}
+
+			return this.slice;
+		}
+
+		@Override
+		public void close() {
+			this.buffer.close();
+		}
 	}
 }

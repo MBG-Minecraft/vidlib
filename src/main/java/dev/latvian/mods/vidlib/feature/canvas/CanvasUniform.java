@@ -5,9 +5,9 @@ import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.shaders.UniformType;
+import dev.latvian.mods.klib.util.FloatSupplier;
 import net.minecraft.client.renderer.DynamicUniformStorage;
 import net.minecraft.client.renderer.UniformValue;
-import dev.latvian.mods.klib.util.FloatSupplier;
 import org.joml.Matrix4fc;
 
 import java.util.function.BooleanSupplier;

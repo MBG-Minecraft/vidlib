@@ -1,7 +1,5 @@
 package dev.latvian.mods.vidlib.feature.misc;
 
-import net.minecraft.client.renderer.rendertype.RenderTypes;
-
 import com.google.common.hash.Hashing;
 import com.mojang.authlib.minecraft.MinecraftProfileTextures;
 import com.mojang.blaze3d.ProjectionType;
@@ -19,19 +17,16 @@ import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import net.minecraft.ChatFormatting;
-import net.minecraft.util.ARGB;
-import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.ProjectionMatrixBuffer;
-import net.minecraft.world.entity.player.PlayerSkin;
-import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
@@ -39,7 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class MiscClientUtils {

@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.integration;
 
-import net.minecraft.resources.Identifier;
 import com.geckolib.constant.dataticket.DataTicket;
+import net.minecraft.resources.Identifier;
 
 public interface VidLibGeoDataTickets {
 	DataTicket<Float> ENTITY_ROLL = DataTicket.create("entity_roll", Float.class);

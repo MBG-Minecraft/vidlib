@@ -1,13 +1,11 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.image;
 
-import net.minecraft.client.renderer.rendertype.RenderTypes;
-
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.EntityRenderTypes;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
-import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.phys.AABB;
 import org.joml.Matrix4f;
 

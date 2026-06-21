@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.waypoint;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
-import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.math.kvector.KVector;

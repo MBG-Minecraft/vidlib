@@ -342,7 +342,7 @@ public class DebugWidgetPanel extends Panel {
 
 		ImGui.text("Image");
 		var sprite = mc.getBlockAtlas().getSprite(Identifier.withDefaultNamespace("block/campfire_fire"));
-		ImGui.image(mc.getBlockAtlas().getTexture().vl$getHandle(), 128F, 128F, sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());
+		ImGui.image(ImGraphics.getTextureId(mc.getBlockAtlas().getTexture()), 128F, 128F, sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());
 		ImGui.separator();
 		ImGui.image(ImGuiHooks.imGuiGl3.gFontTexture, 128F, 128F, 0F, 0F, 1F, 1F);
 
@@ -426,8 +426,9 @@ public class DebugWidgetPanel extends Panel {
 
 		ImGui.separator();
 
-		if (mc.screen instanceof AbstractContainerScreen<?> screen && screen.getSlotUnderMouse() != null && !screen.getSlotUnderMouse().getItem().isEmpty()) {
-			currentStack = screen.getSlotUnderMouse().getItem();
+		if (mc.screen instanceof AbstractContainerScreen<?> screen && screen.getHoveredSlot() != null && !screen.getHoveredSlot().getItem().isEmpty()) {
+			currentStack = screen.getHoveredSlot().getItem();
+			currentStack = currentStack.isEmpty() ? ItemStack.EMPTY : new ItemStack(currentStack.getItem(), currentStack.getCount());
 			currentStackKey = VisualItemKey.of(currentStack);
 		}
 

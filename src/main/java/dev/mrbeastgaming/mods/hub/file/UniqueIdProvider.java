@@ -32,7 +32,7 @@ public interface UniqueIdProvider {
 		@Nullable
 		default MD5 getUniqueId(FileInfo fileInfo, HubProjectConfig projectConfig) {
 			try (var bytes = new ByteArrayOutputStream();
-				 var data = new DataOutputStream(bytes)
+			     var data = new DataOutputStream(bytes)
 			) {
 				if (!write(fileInfo, projectConfig, data)) {
 					return null;

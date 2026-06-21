@@ -4,9 +4,9 @@ import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.util.Empty;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.rendertype.OutputTarget;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.resources.Identifier;
 
 public interface EntityRenderTypes {

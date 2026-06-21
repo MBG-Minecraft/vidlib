@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.geodisplay;
 
-import dev.latvian.mods.vidlib.integration.VidLibGeoDataTickets;
-import net.minecraft.resources.Identifier;
 import com.geckolib.model.GeoModel;
 import com.geckolib.renderer.base.GeoRenderState;
+import dev.latvian.mods.vidlib.integration.VidLibGeoDataTickets;
+import net.minecraft.resources.Identifier;
 
 public class GeoDisplayPropModel extends GeoModel<GeoDisplayProp> {
 	@Override

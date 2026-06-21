@@ -44,7 +44,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage<?>> {
 
 			if (ImGui.isItemHovered() && graphics.beginTooltip()) {
 				ImGui.text(img.displayName());
-				ImGui.image(tex.getTexture().vl$getHandle(), 64F, 64F);
+				ImGui.image(ImGraphics.getTextureId(tex.getTexture()), 64F, 64F);
 				graphics.endTooltip();
 			}
 		}

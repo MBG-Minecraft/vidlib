@@ -72,10 +72,9 @@ import dev.mrbeastgaming.mods.hub.client.LinkMinecraftScreen;
 import dev.mrbeastgaming.mods.hub.event.SyncClientFilesHubEvent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.debug.DebugScreenEntries;
+import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
@@ -93,7 +92,6 @@ import net.neoforged.neoforge.client.event.CalculateDetachedCameraDistanceEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientResourceLoadFinishedEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ExtractBlockOutlineRenderStateEvent;
 import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
@@ -350,13 +348,13 @@ public class VidLibClientEventHandler {
 
 	private static TerrainRenderLayer[] renderLayersFor(RenderLevelStageEvent event) {
 		if (event instanceof RenderLevelStageEvent.AfterOpaqueBlocks) {
-			return new TerrainRenderLayer[] {TerrainRenderLayer.SOLID, TerrainRenderLayer.CUTOUT_MIPPED, TerrainRenderLayer.CUTOUT};
+			return new TerrainRenderLayer[]{TerrainRenderLayer.SOLID, TerrainRenderLayer.CUTOUT_MIPPED, TerrainRenderLayer.CUTOUT};
 		} else if (event instanceof RenderLevelStageEvent.AfterTranslucentBlocks) {
-			return new TerrainRenderLayer[] {TerrainRenderLayer.TRANSLUCENT};
+			return new TerrainRenderLayer[]{TerrainRenderLayer.TRANSLUCENT};
 		} else if (event instanceof RenderLevelStageEvent.AfterTranslucentFeatures) {
-			return new TerrainRenderLayer[] {TerrainRenderLayer.TRIPWIRE};
+			return new TerrainRenderLayer[]{TerrainRenderLayer.TRIPWIRE};
 		} else if (event instanceof RenderLevelStageEvent.AfterTranslucentParticles) {
-			return new TerrainRenderLayer[] {TerrainRenderLayer.PARTICLE};
+			return new TerrainRenderLayer[]{TerrainRenderLayer.PARTICLE};
 		}
 
 		return TerrainRenderLayer.EMPTY_ARRAY;

@@ -14,8 +14,8 @@ import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
-import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -175,18 +175,18 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 
 	private void appendMainIcon(ImGraphics graphics) {
 		var tex = LowQualityPlayerBodies.getTexture(graphics.mc, profile == null ? null : profile.id());
-		ImGui.image(tex.getTexture().vl$getHandle(), ImGui.getFrameHeight(), ImGui.getFrameHeight());
+		ImGui.image(ImGraphics.getTextureId(tex.getTexture()), ImGui.getFrameHeight(), ImGui.getFrameHeight());
 
 		if (ImGui.isItemHovered() && graphics.beginTooltip()) {
 			var texHD = PlayerBodies.getTexture(graphics.mc, profile == null ? null : profile.id());
-			ImGui.image(texHD.getTexture().vl$getHandle(), 128F, 128F);
+			ImGui.image(ImGraphics.getTextureId(texHD.getTexture()), 128F, 128F);
 			graphics.endTooltip();
 		}
 	}
 
 	private void appendIcon(Minecraft mc, UUID uuid) {
 		var tex = LowQualityPlayerBodies.getTexture(mc, uuid);
-		ImGui.image(tex.getTexture().vl$getHandle(), ImGui.getFontSize(), ImGui.getFontSize());
+		ImGui.image(ImGraphics.getTextureId(tex.getTexture()), ImGui.getFontSize(), ImGui.getFontSize());
 	}
 
 	@Override

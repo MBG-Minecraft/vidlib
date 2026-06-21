@@ -1,7 +1,5 @@
 package dev.latvian.mods.vidlib.feature.zone.renderer;
 
-import net.minecraft.client.renderer.rendertype.RenderTypes;
-
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;

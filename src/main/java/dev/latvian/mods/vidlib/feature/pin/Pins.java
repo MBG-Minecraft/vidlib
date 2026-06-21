@@ -226,7 +226,7 @@ public interface Pins {
 
 			if (ImGui.isItemHovered() && graphics.beginTooltip()) {
 				ImGui.text("Shape: " + pin.shape.displayName);
-				ImGui.image(graphics.mc.getTextureManager().getTexture(pin.shape.iconTexture).getTexture().vl$getHandle(), 64F, 64F);
+				ImGui.image(ImGraphics.getTextureId(graphics.mc.getTextureManager().getTexture(pin.shape.iconTexture).getTexture()), 64F, 64F);
 				graphics.endTooltip();
 			}
 

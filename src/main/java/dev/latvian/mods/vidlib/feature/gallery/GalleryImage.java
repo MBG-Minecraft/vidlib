@@ -3,10 +3,10 @@ package dev.latvian.mods.vidlib.feature.gallery;
 import com.mojang.blaze3d.platform.NativeImage;
 import dev.latvian.mods.vidlib.feature.client.ConfiguredDynamicTexture;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
-import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;

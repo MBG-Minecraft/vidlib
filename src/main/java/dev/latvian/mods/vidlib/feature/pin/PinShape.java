@@ -1,7 +1,5 @@
 package dev.latvian.mods.vidlib.feature.pin;
 
-import net.minecraft.client.renderer.rendertype.RenderTypes;
-
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.codec.KLibCodecs;

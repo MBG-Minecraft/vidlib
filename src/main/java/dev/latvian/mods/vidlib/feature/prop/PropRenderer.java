@@ -35,9 +35,9 @@ public interface PropRenderer<P extends Prop> {
 		}
 
 		@Override
-	public Set<Object> getStages(Prop prop) {
-		return Set.of();
-	}
+		public Set<Object> getStages(Prop prop) {
+			return Set.of();
+		}
 	};
 
 	static Holder holder(PropType<?> type, PropRenderer<?> unitRenderer) {

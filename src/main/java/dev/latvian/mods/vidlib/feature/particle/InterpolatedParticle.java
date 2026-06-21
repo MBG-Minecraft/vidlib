@@ -1,7 +1,5 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
-import net.minecraft.client.renderer.rendertype.RenderTypes;
-
 import dev.latvian.mods.klib.interpolation.Interpolation;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleRenderType;

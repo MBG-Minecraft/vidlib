@@ -40,7 +40,7 @@ public abstract class BaseVotingScreen extends Screen {
 				sendPayload();
 				button.setMessage(Component.literal("Submitted!"));
 			}
-			
+
 			if (closeOnVote) {
 				minecraft.player.vl$closeScreen();
 			}

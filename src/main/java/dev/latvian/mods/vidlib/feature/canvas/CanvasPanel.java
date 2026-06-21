@@ -67,7 +67,7 @@ public class CanvasPanel extends Panel {
 				float texh = tex.getHeight(0);
 
 				float max = ImGui.getContentRegionAvailX() - 20F;
-				ImGui.image(tex.vl$getHandle(), max, max * texh / texw, 0F, 1F, 1F, 0F);
+				ImGui.image(ImGraphics.getTextureId(tex), max, max * texh / texw, 0F, 1F, 1F, 0F);
 			} else {
 				ImGui.text("No texture available");
 			}

@@ -1,7 +1,5 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
-import net.minecraft.client.renderer.rendertype.RenderTypes;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.latvian.mods.klib.color.Gradient;

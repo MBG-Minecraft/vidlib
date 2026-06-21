@@ -2,10 +2,10 @@ package dev.mrbeastgaming.mods.hub.client;
 
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
-import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Util;
 
 public class LinkHubUserScreen extends ConfirmScreen {
 	public static void open(Minecraft mc) {

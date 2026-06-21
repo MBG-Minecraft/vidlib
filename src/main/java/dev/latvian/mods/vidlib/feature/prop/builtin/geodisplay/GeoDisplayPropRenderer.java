@@ -1,12 +1,12 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.geodisplay;
 
+import com.geckolib.renderer.base.GeoRenderState;
+import com.geckolib.renderer.base.RenderPassInfo;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
 import dev.latvian.mods.vidlib.feature.prop.geo.GeoPropRenderer;
 import dev.latvian.mods.vidlib.integration.VidLibGeoDataTickets;
 import net.minecraft.client.Minecraft;
-import com.geckolib.renderer.base.GeoRenderState;
-import com.geckolib.renderer.base.RenderPassInfo;
 
 public class GeoDisplayPropRenderer extends GeoPropRenderer<GeoDisplayProp> {
 	@ClientAutoRegister

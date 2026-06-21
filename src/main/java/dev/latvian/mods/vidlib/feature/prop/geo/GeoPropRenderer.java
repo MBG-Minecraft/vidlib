@@ -1,6 +1,10 @@
 package dev.latvian.mods.vidlib.feature.prop.geo;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.geckolib.constant.DataTickets;
+import com.geckolib.model.GeoModel;
+import com.geckolib.renderer.GeoObjectRenderer;
+import com.geckolib.renderer.base.GeoRenderState;
+import com.geckolib.renderer.base.RenderPassInfo;
 import com.mojang.math.Axis;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
@@ -10,12 +14,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
-import com.geckolib.cache.model.BakedGeoModel;
-import com.geckolib.constant.DataTickets;
-import com.geckolib.model.GeoModel;
-import com.geckolib.renderer.GeoObjectRenderer;
-import com.geckolib.renderer.base.GeoRenderState;
-import com.geckolib.renderer.base.RenderPassInfo;
 
 public class GeoPropRenderer<P extends Prop & GeoProp> extends GeoObjectRenderer<P, Void, GeoRenderState> implements PropRenderer<P> {
 	public GeoPropRenderer(GeoModel<P> model) {

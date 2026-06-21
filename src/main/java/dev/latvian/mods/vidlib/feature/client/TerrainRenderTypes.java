@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.client;
 
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 
 public interface TerrainRenderTypes {

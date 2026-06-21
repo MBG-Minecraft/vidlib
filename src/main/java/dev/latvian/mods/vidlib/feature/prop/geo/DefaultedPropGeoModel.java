@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.feature.prop.geo;
 
-import net.minecraft.resources.Identifier;
 import com.geckolib.animatable.GeoAnimatable;
 import com.geckolib.model.GeoModel;
 import com.geckolib.renderer.base.GeoRenderState;
+import net.minecraft.resources.Identifier;
 
 public class DefaultedPropGeoModel<T extends GeoAnimatable> extends GeoModel<T> {
 	private Identifier modelPath;

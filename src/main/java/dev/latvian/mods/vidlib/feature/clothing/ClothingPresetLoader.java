@@ -5,8 +5,8 @@ import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.util.JsonReloadListener;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 

@@ -972,4 +972,8 @@ public class ClientGameEngine {
 	public boolean hideActionBarText(Minecraft mc, Component component) {
 		return false;
 	}
+
+	public boolean shouldRenderDarkDisc(float partialTick, ClientLevel level, boolean original) {
+		return false;
+	}
 }

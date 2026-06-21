@@ -1,14 +1,16 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.SkyRenderer;
 import net.minecraft.world.level.MoonPhase;
 import org.joml.Quaternionfc;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -27,13 +29,9 @@ public abstract class SkyRendererMixin {
 	private void renderSun(float rainBrightness, PoseStack poseStack) {
 	}
 
-	/**
-	 * @author Lat
-	 * @reason Yeet
-	 */
-	@Overwrite
-	private boolean shouldRenderDarkDisc(float partialTick, ClientLevel level) {
-		return false;
+	@ModifyReturnValue(method = "shouldRenderDarkDisc", at = @At("RETURN"))
+	private boolean vl$shouldRenderDarkDisc(boolean original, @Local(argsOnly = true, name = "deltaPartialTick") float deltaPartialTick, @Local(argsOnly = true, name = "level") ClientLevel level) {
+		return ClientGameEngine.INSTANCE.shouldRenderDarkDisc(deltaPartialTick, level, original);
 	}
 
 	@Redirect(method = "renderSunMoonAndStars", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionfc;)V", ordinal = 1))

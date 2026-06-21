@@ -66,12 +66,12 @@ public class WindowMixin implements VLWindow {
 		vl$unscaledHeight = height;
 	}
 
-	@ModifyVariable(method = "setWidth", at = @At(value = "HEAD"), ordinal = 0, argsOnly = true)
+	@ModifyVariable(method = "setWidth", at = @At(value = "HEAD"), argsOnly = true, name = "width")
 	public int setFramebufferWidth(int width) {
 		return vl$transformNewFramebufferWidth(width);
 	}
 
-	@ModifyVariable(method = "setHeight", at = @At(value = "HEAD"), ordinal = 0, argsOnly = true)
+	@ModifyVariable(method = "setHeight", at = @At(value = "HEAD"), argsOnly = true, name = "height")
 	public int setFramebufferHeight(int height) {
 		return vl$transformNewFramebufferHeight(height);
 	}
@@ -82,25 +82,25 @@ public class WindowMixin implements VLWindow {
 		framebufferHeight = vl$transformNewFramebufferHeight(framebufferHeight);
 	}
 
-	@ModifyVariable(method = "onFramebufferResize", at = @At(value = "HEAD"), ordinal = 0, argsOnly = true)
-	public int onFramebufferSizeChanged$width(int width) {
-		return vl$transformNewFramebufferWidth(width);
+	@ModifyVariable(method = "onFramebufferResize", at = @At(value = "HEAD"), argsOnly = true, name = "newWidth")
+	public int onFramebufferSizeChanged$width(int newWidth) {
+		return vl$transformNewFramebufferWidth(newWidth);
 	}
 
-	@ModifyVariable(method = "onFramebufferResize", at = @At(value = "HEAD"), ordinal = 1, argsOnly = true)
-	public int onFramebufferSizeChanged$height(int height) {
-		return vl$transformNewFramebufferHeight(height);
+	@ModifyVariable(method = "onFramebufferResize", at = @At(value = "HEAD"), argsOnly = true, name = "newHeight")
+	public int onFramebufferSizeChanged$height(int newHeight) {
+		return vl$transformNewFramebufferHeight(newHeight);
 	}
 
-	@ModifyVariable(method = "onResize", at = @At(value = "HEAD"), ordinal = 0, argsOnly = true)
-	public int onWindowSizeChanged$width(int width) {
-		vl$unscaledWidth = width;
+	@ModifyVariable(method = "onResize", at = @At(value = "HEAD"), argsOnly = true, name = "newWidth")
+	public int onWindowSizeChanged$width(int newWidth) {
+		vl$unscaledWidth = newWidth;
 		return windowedWidth = (int) (vl$unscaledWidth * vl$xScale);
 	}
 
-	@ModifyVariable(method = "onResize", at = @At(value = "HEAD"), ordinal = 1, argsOnly = true)
-	public int onWindowSizeChanged$height(int height) {
-		vl$unscaledHeight = height;
+	@ModifyVariable(method = "onResize", at = @At(value = "HEAD"), argsOnly = true, name = "newHeight")
+	public int onWindowSizeChanged$height(int newHeight) {
+		vl$unscaledHeight = newHeight;
 		return windowedHeight = (int) (vl$unscaledHeight * vl$yScale);
 	}
 
