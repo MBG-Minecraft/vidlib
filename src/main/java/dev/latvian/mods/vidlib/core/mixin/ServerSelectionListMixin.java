@@ -59,7 +59,7 @@ public abstract class ServerSelectionListMixin extends ObjectSelectionList<Serve
 		for (int i = 0; i < list.size(); i++) {
 			var d = list.get(i);
 			var serverData = new ServerData(d.name(), d.location(), ServerData.Type.OTHER);
-			serverData.setIconBytes(d.icon().orElse(null));
+			d.icon().ifPresent(serverData::setIconBytes);
 			var entry = selectionList.new OnlineServerEntry(screen, serverData);
 			vl$hubServers.add(i, entry);
 			hubServers.add(entry);

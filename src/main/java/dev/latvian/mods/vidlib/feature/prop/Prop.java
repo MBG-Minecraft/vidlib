@@ -689,6 +689,7 @@ public class Prop {
 		}
 
 		if (ImGui.beginTable("###data", 3, ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.Borders)) {
+
 			if (hasData(TICK)) {
 				ImGui.tableNextRow();
 				ImGui.pushID("tick");

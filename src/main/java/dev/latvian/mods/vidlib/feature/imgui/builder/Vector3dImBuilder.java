@@ -46,7 +46,7 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d>, SelectedPosition.
 		ImGui.text("X");
 		ImGui.sameLine();
 
-		float dragW = Math.max(ImGui.getContentRegionAvailX(), 100F);
+		float dragW = Math.min(Math.max(ImGui.getContentRegionAvailX(), 60F), 180F);
 
 		ImGuiUtils.FLOAT.set((float) data.x);
 		ImGui.setNextItemWidth(dragW);

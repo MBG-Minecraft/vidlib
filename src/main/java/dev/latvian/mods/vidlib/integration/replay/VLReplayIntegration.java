@@ -379,7 +379,11 @@ public class VLReplayIntegration {
 			data.openSelectedPropPopup = false;
 		}
 
-		if (data.selectedProp != 0 && ImGui.beginPopup("###vidlib-prop-popup", ImGuiWindowFlags.AlwaysAutoResize)) {
+		if (data.selectedProp != 0) {
+			ImGui.setNextWindowSizeConstraints(200F, 100F, 800F, Float.MAX_VALUE);
+		}
+
+		if (data.selectedProp != 0 && ImGui.beginPopup("###vidlib-prop-popup")) {
 			var propList = mc.level.getProps().propLists.get(data.selectedPropList);
 			var prop = propList == null ? null : propList.get(data.selectedProp);
 

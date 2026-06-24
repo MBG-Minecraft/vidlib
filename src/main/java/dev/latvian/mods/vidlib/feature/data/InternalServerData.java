@@ -8,6 +8,7 @@ import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverrides;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
+import dev.latvian.mods.vidlib.feature.waypoint.WaypointImBuilder;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import net.minecraft.resources.ResourceLocation;
@@ -28,7 +29,7 @@ public interface InternalServerData {
 	DataKey<Long> GLOBAL_STOPWATCH_START = DataKey.SERVER.createDefault("global_stopwatch_start", DataTypes.VAR_LONG, 0L, null);
 	DataKey<Boolean> ICE_MELTS = DataKey.SERVER.createBoolean("ice_melts", false);
 	DataKey<Boolean> BLOCK_GRAVITY = DataKey.SERVER.createBoolean("block_gravity", false);
-	DataKey<List<Waypoint>> WAYPOINTS = DataKey.SERVER.createDefault("waypoints", Waypoint.LIST_DATA_TYPE, List.of(), null);
+	DataKey<List<Waypoint>> WAYPOINTS = DataKey.SERVER.createDefault("waypoints", Waypoint.LIST_DATA_TYPE, List.of(), WaypointImBuilder.LIST_TYPE);
 	DataKey<MapTextureOverrides> MAP_TEXTURE_OVERRIDES = DataKey.SERVER.createDefault("map_texture_overrides", MapTextureOverrides.DATA_TYPE, MapTextureOverrides.EMPTY, null);
 	DataKey<Integer> MIN_FAKE_LAG = DataKey.SERVER.createVarInt("min_fake_lag", 0, 0, 1000);
 	DataKey<Integer> MAX_FAKE_LAG = DataKey.SERVER.createVarInt("max_fake_lag", 0, 0, 1000);
