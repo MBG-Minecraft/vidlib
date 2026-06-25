@@ -17,6 +17,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.StringImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TextComponentImBuilder;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -125,10 +126,18 @@ public class WaypointImBuilder extends CompoundImBuilder<Waypoint> {
 
 			return graphics.combo("###icon", selected, "", options.toArray(), nameFunc -> {
 				var i = (Icon) nameFunc;
-				if (i == Waypoint.DEFAULT_ICON) return "Default";
-				if (i instanceof EmptyIcon) return "Empty";
-				if (i == Icon.YES.instance()) return "Yes";
-				if (i == Icon.NO.instance()) return "No";
+				if (i == Waypoint.DEFAULT_ICON) {
+					return "Default";
+				}
+				if (i instanceof EmptyIcon) {
+					return "Empty";
+				}
+				if (i == Icon.YES.instance()) {
+					return "Yes";
+				}
+				if (i == Icon.NO.instance()) {
+					return "No";
+				}
 				return i.type().id();
 			});
 		}

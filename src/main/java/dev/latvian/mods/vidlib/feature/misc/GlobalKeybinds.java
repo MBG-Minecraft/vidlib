@@ -87,16 +87,16 @@ public class GlobalKeybinds {
 	public static InputConstants.Key modifyDefaultKeys(String name, InputConstants.Key original) {
 		return switch (name) {
 			case "key.saveToolbarActivator",
-				 "key.loadToolbarActivator",
-				 "key.socialInteractions",
-				 "key.atlasviewer.open_viewer",
-				 "key.curios.open.desc",
-				 "key.bridgingmod.toggle_bridging",
-				 "key.voice_chat_group",
-				 "key.disable_voice_chat",
-				 "key.hide_icons",
-				 "key.advancements",
-				 "iris.keybind.reload" -> InputConstants.UNKNOWN;
+			     "key.loadToolbarActivator",
+			     "key.socialInteractions",
+			     "key.atlasviewer.open_viewer",
+			     "key.curios.open.desc",
+			     "key.bridgingmod.toggle_bridging",
+			     "key.voice_chat_group",
+			     "key.disable_voice_chat",
+			     "key.hide_icons",
+			     "key.advancements",
+			     "iris.keybind.reload" -> InputConstants.UNKNOWN;
 			case "key.jei.bookmark" -> InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_EQUALS);
 			case "key.push_to_talk" -> InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_C);
 			case "key.mute_microphone" -> InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_F7);

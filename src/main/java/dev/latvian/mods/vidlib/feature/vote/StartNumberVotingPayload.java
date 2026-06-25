@@ -36,6 +36,6 @@ public record StartNumberVotingPayload(CompoundTag extraData, Component title, C
 			return;
 		}
 
-		ctx.player().openNumberVotingScreen(extraData, title, subtitle, max, unavailable,  closeOnVote);
+		ctx.player().openNumberVotingScreen(extraData, title, subtitle, max, unavailable, closeOnVote);
 	}
 }
