@@ -1,31 +1,43 @@
 package dev.latvian.mods.vidlib.feature.bulk;
 
+import com.mojang.serialization.Codec;
+import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.registry.CustomRegistry;
+import dev.latvian.mods.klib.registry.CustomRegistryType;
+import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.registry.RefOptimizer;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
-import dev.latvian.mods.vidlib.feature.registry.BasicRegistryRef;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.structure.LazyStructures;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;
 
-public interface BulkLevelModification extends SimpleRegistryEntry {
-	SimpleRegistry<BulkLevelModification> REGISTRY = SimpleRegistry.create(VidLib.id("bulk_level_modification"), c -> PlatformHelper.CURRENT.collectBulkLevelModifications(c));
+public interface BulkLevelModification extends RefOptimizer<BulkLevelModification> {
+	CustomRegistry<ByteBuf, BulkLevelModification> REGISTRY = CustomRegistry.<ByteBuf, BulkLevelModification>builder()
+		.keys(ID.vidlib("bulk_level_modification"), VidLib.ID)
+		.type(BulkLevelModification::type)
+		.build();
+
+	Codec<Ref<BulkLevelModification>> CODEC = REGISTRY.codec();
+	StreamCodec<ByteBuf, Ref<BulkLevelModification>> STREAM_CODEC = REGISTRY.streamCodec();
+	DataType<Ref<BulkLevelModification>> DATA_TYPE = REGISTRY.dataType();
 
 	BulkLevelModification NONE = new BulkLevelModificationBundle(List.of());
 
-	static void builtinTypes(SimpleRegistryCollector<BulkLevelModification> registry) {
+	static void builtInTypes(CustomRegistryTypeCollector<ByteBuf, BulkLevelModification> registry) {
 		registry.register(BulkLevelModificationBundle.TYPE);
 		registry.register(PositionedBlock.TYPE);
 		registry.register(ReplaceCuboidBlocks.TYPE);
@@ -61,16 +73,12 @@ public interface BulkLevelModification extends SimpleRegistryEntry {
 		return NONE;
 	}
 
-	@Override
-	default SimpleRegistryType<?> type() {
-		return REGISTRY.getType(this);
+	@Nullable
+	default CustomRegistryType<ByteBuf, BulkLevelModification> type() {
+		return null;
 	}
 
 	void collectSections(Level level, Set<SectionPos> sections);
 
 	void apply(BlockModificationConsumer blocks);
-
-	default BulkLevelModification optimize() {
-		return this;
-	}
 }

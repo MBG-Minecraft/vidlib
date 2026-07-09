@@ -6,15 +6,14 @@ import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.IntOrUUID;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.ExactEntityFilter;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryTypeCollector;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.FixedKNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
@@ -35,12 +34,12 @@ import org.joml.Vector3fc;
 import java.util.function.Function;
 
 public interface KVector extends SimpleRegistryEntry {
-	SimpleRegistry<KVector> REGISTRY = SimpleRegistry.create(VidLib.id("kvector"), c -> PlatformHelper.CURRENT.collectKVectors(c));
+	SimpleRegistry<KVector> REGISTRY = SimpleRegistry.create(ID.vidlib("kvector"), c -> VLPlatformHelper.CURRENT.collectKVectors(c));
 
 	FixedKVector ZERO = new FixedKVector(Vec3.ZERO);
 	FixedKVector ONE = new FixedKVector(KMath.ONE_VEC3);
-	SimpleRegistryType.Unit<FixedKVector> ZERO_TYPE = SimpleRegistryType.unit("zero", ZERO);
-	SimpleRegistryType.Unit<FixedKVector> ONE_TYPE = SimpleRegistryType.unit("one", ONE);
+	CustomRegistryType.Unit<FixedKVector> ZERO_TYPE = CustomRegistryType.unit("zero", ZERO);
+	CustomRegistryType.Unit<FixedKVector> ONE_TYPE = CustomRegistryType.unit("one", ONE);
 
 	Codec<KVector> LITERAL_CODEC = Codec.either(Vec3.CODEC, Codec.STRING).xmap(
 		e -> e.map(FixedKVector::new, KVector::named),
@@ -120,7 +119,7 @@ public interface KVector extends SimpleRegistryEntry {
 		}
 	}
 
-	static void builtinTypes(SimpleRegistryCollector<KVector> registry) {
+	static void builtInTypes(CustomRegistryTypeCollector<KVector> registry) {
 		registry.register(ZERO_TYPE);
 		registry.register(ONE_TYPE);
 		registry.register(FixedKVector.TYPE);
@@ -172,7 +171,7 @@ public interface KVector extends SimpleRegistryEntry {
 	}
 
 	@Override
-	default SimpleRegistryType<?> type() {
+	default CustomRegistryType<?> type() {
 		return REGISTRY.getType(this);
 	}
 

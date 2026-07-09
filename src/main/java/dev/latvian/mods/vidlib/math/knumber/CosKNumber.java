@@ -10,13 +10,13 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePin;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePinType;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public record CosKNumber(KNumber angle) implements KNumber, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<CosKNumber> TYPE = SimpleRegistryType.dynamic("cos", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<CosKNumber> TYPE = CustomRegistryType.dynamic("cos", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.optionalFieldOf("angle", KNumber.ONE).forGetter(CosKNumber::angle)
 	).apply(instance, CosKNumber::new)), CompositeStreamCodec.of(
 		KLibStreamCodecs.optional(KNumber.STREAM_CODEC, KNumber.ZERO), CosKNumber::angle,
@@ -72,7 +72,7 @@ public record CosKNumber(KNumber angle) implements KNumber, ImBuilderWithHolder.
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

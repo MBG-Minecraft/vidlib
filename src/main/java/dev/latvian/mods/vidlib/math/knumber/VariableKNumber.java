@@ -9,7 +9,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePin;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePinType;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import imgui.ImGui;
 import imgui.type.ImString;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public record VariableKNumber(String name) implements KNumber, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<VariableKNumber> TYPE = SimpleRegistryType.dynamic("variable", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<VariableKNumber> TYPE = CustomRegistryType.dynamic("variable", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.STRING.fieldOf("name").forGetter(VariableKNumber::name)
 	).apply(instance, VariableKNumber::new)), ByteBufCodecs.STRING_UTF8.map(VariableKNumber::new, VariableKNumber::name));
 
@@ -63,7 +63,7 @@ public record VariableKNumber(String name) implements KNumber, ImBuilderWithHold
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

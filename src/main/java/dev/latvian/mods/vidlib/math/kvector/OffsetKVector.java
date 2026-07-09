@@ -7,13 +7,13 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public record OffsetKVector(KVector a, KVector b) implements KVector, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<OffsetKVector> TYPE = SimpleRegistryType.dynamic("offset", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<OffsetKVector> TYPE = CustomRegistryType.dynamic("offset", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KVector.CODEC.fieldOf("a").forGetter(OffsetKVector::a),
 		KVector.CODEC.fieldOf("b").forGetter(OffsetKVector::b)
 	).apply(instance, OffsetKVector::new)), CompositeStreamCodec.of(
@@ -61,7 +61,7 @@ public record OffsetKVector(KVector a, KVector b) implements KVector, ImBuilderW
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

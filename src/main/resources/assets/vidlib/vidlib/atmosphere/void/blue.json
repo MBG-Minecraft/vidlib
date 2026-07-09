@@ -1,0 +1,6 @@
+{
+	"attributes": {
+		"minecraft:visual/sky_color": "#0000FF",
+		"minecraft:visual/fog_color": "#0000FF"
+	}
+}

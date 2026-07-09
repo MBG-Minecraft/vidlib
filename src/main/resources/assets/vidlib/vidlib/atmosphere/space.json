@@ -1,0 +1,10 @@
+{
+	"sun": false,
+	"moon": false,
+	"attributes": {
+		"minecraft:visual/sky_color": "#00001A",
+		"minecraft:visual/fog_color": "#00001A",
+		"minecraft:visual/ambient_light_color": "#FFFFFF",
+		"minecraft:visual/star_brightness": 0.65
+	}
+}

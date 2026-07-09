@@ -30,68 +30,68 @@ public interface CanvasRenderPipelines {
 		.buildSnippet();
 
 	RenderPipeline POS = RenderPipeline.builder(SNIPPET, RenderPipelines.FOG_SNIPPET)
-		.withLocation(VidLib.id("pipeline/canvas/cull/pos"))
+		.withLocation(ID.vidlib("pipeline/canvas/cull/pos"))
 		.withVertexShader("core/position")
 		.withFragmentShader("core/position")
 		.withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
 		.build();
 
 	RenderPipeline POS_NO_CULL = RenderPipeline.builder(SNIPPET_NO_CULL, RenderPipelines.FOG_SNIPPET)
-		.withLocation(VidLib.id("pipeline/canvas/no_cull/pos"))
+		.withLocation(ID.vidlib("pipeline/canvas/no_cull/pos"))
 		.withVertexShader("core/position")
 		.withFragmentShader("core/position")
 		.withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
 		.build();
 
 	RenderPipeline POS_COL = RenderPipeline.builder(SNIPPET, RenderPipelines.FOG_SNIPPET)
-		.withLocation(VidLib.id("pipeline/canvas/cull/pos_col"))
+		.withLocation(ID.vidlib("pipeline/canvas/cull/pos_col"))
 		.withVertexShader("core/position_color")
 		.withFragmentShader("core/position_color")
 		.withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS)
 		.build();
 
 	RenderPipeline POS_COL_NO_CULL = RenderPipeline.builder(SNIPPET_NO_CULL, RenderPipelines.FOG_SNIPPET)
-		.withLocation(VidLib.id("pipeline/canvas/no_cull/pos_col"))
+		.withLocation(ID.vidlib("pipeline/canvas/no_cull/pos_col"))
 		.withVertexShader("core/position_color")
 		.withFragmentShader("core/position_color")
 		.withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS)
 		.build();
 
 	RenderPipeline POS_TEX_COL = RenderPipeline.builder(SNIPPET, TEXTURE_SNIPPET)
-		.withLocation(VidLib.id("pipeline/canvas/cull/pos_tex_col"))
+		.withLocation(ID.vidlib("pipeline/canvas/cull/pos_tex_col"))
 		.withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
 		.build();
 
 	RenderPipeline POS_TEX_COL_NO_CULL = RenderPipeline.builder(SNIPPET_NO_CULL, TEXTURE_SNIPPET)
-		.withLocation(VidLib.id("pipeline/canvas/no_cull/pos_tex_col"))
+		.withLocation(ID.vidlib("pipeline/canvas/no_cull/pos_tex_col"))
 		.withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
 		.build();
 
 	RenderPipeline ENTITY = RenderPipeline.builder(SNIPPET, TEXTURE_SNIPPET)
-		.withLocation(VidLib.id("pipeline/canvas/cull/entity"))
-		.withVertexShader(VidLib.id("core/bright_entity"))
-		.withFragmentShader(VidLib.id("core/bright"))
+		.withLocation(ID.vidlib("pipeline/canvas/cull/entity"))
+		.withVertexShader(ID.vidlib("core/bright_entity"))
+		.withFragmentShader(ID.vidlib("core/bright"))
 		.withVertexFormat(DefaultVertexFormat.ENTITY, VertexFormat.Mode.QUADS)
 		.build();
 
 	RenderPipeline ENTITY_NO_CULL = RenderPipeline.builder(SNIPPET_NO_CULL, TEXTURE_SNIPPET)
-		.withLocation(VidLib.id("pipeline/canvas/no_cull/entity"))
-		.withVertexShader(VidLib.id("core/bright_entity"))
-		.withFragmentShader(VidLib.id("core/bright"))
+		.withLocation(ID.vidlib("pipeline/canvas/no_cull/entity"))
+		.withVertexShader(ID.vidlib("core/bright_entity"))
+		.withFragmentShader(ID.vidlib("core/bright"))
 		.withVertexFormat(DefaultVertexFormat.ENTITY, VertexFormat.Mode.QUADS)
 		.build();
 
 	RenderPipeline BLOCK = RenderPipeline.builder(SNIPPET, TEXTURE_SNIPPET)
-		.withLocation(VidLib.id("pipeline/canvas/cull/block"))
-		.withVertexShader(VidLib.id("core/bright_block"))
-		.withFragmentShader(VidLib.id("core/bright"))
+		.withLocation(ID.vidlib("pipeline/canvas/cull/block"))
+		.withVertexShader(ID.vidlib("core/bright_block"))
+		.withFragmentShader(ID.vidlib("core/bright"))
 		.withVertexFormat(DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS)
 		.build();
 
 	RenderPipeline BLOCK_NO_CULL = RenderPipeline.builder(SNIPPET_NO_CULL, TEXTURE_SNIPPET)
-		.withLocation(VidLib.id("pipeline/canvas/no_cull/block"))
-		.withVertexShader(VidLib.id("core/bright_block"))
-		.withFragmentShader(VidLib.id("core/bright"))
+		.withLocation(ID.vidlib("pipeline/canvas/no_cull/block"))
+		.withVertexShader(ID.vidlib("core/bright_block"))
+		.withFragmentShader(ID.vidlib("core/bright"))
 		.withVertexFormat(DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS)
 		.build();
 

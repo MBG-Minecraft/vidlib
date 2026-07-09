@@ -11,7 +11,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class DangerProp extends Prop {
 	@AutoRegister
-	public static final PropType<DangerProp> TYPE = PropType.create(VidLib.id("danger"), DangerProp::new,
+	public static final PropType<DangerProp> TYPE = PropType.create(ID.vidlib("danger"), DangerProp::new,
 		POSITION,
 		WIDTH,
 		PropData.createFloat(DangerProp.class, "width_mod", p -> p.widthMod, (p, v) -> p.widthMod = v, 0F, 1F),

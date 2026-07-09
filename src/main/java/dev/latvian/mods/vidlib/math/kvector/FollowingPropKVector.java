@@ -9,14 +9,14 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.prop.PropIdImBuilder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public record FollowingPropKVector(int prop, PositionType positionType) implements KVector, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<FollowingPropKVector> TYPE = SimpleRegistryType.dynamic("following_prop", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<FollowingPropKVector> TYPE = CustomRegistryType.dynamic("following_prop", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.INT.fieldOf("prop").forGetter(FollowingPropKVector::prop),
 		PositionType.CODEC.optionalFieldOf("position_type", PositionType.CENTER).forGetter(FollowingPropKVector::positionType)
 	).apply(instance, FollowingPropKVector::new)), CompositeStreamCodec.of(
@@ -68,7 +68,7 @@ public record FollowingPropKVector(int prop, PositionType positionType) implemen
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

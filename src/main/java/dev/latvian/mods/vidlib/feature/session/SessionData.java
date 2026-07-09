@@ -93,7 +93,7 @@ public class SessionData implements Comparable<SessionData> {
 	public void updateInput(Level level, UUID player, PlayerInput input) {
 	}
 
-	public void updateSkyboxes() {
+	public void updateAtmospheres() {
 	}
 
 	public void setGlowColor(@Nullable UUID uuid, @Nullable Color color) {

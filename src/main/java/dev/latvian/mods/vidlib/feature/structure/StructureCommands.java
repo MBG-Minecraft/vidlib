@@ -35,9 +35,9 @@ public interface StructureCommands {
 			})
 		)
 		.then(Commands.literal("set-ignore-filter")
-			.then(Commands.argument("filter", BlockFilter.COMMAND.argument(buildContext))
+			.then(Commands.argument("filter", BlockFilter.DATA_TYPE.argument(buildContext))
 				.executes(ctx -> {
-					StructureCapture.IGNORE_FILTER.setValue(BlockFilter.COMMAND.get(ctx, "filter"));
+					StructureCapture.IGNORE_FILTER.setValue(BlockFilter.DATA_TYPE.get(ctx, "filter"));
 					return 1;
 				})
 			)

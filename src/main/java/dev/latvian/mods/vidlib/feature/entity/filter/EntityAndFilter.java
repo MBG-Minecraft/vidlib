@@ -1,24 +1,29 @@
 package dev.latvian.mods.vidlib.feature.entity.filter;
 
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
+import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import imgui.ImGui;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public record EntityAndFilter(List<EntityFilter> filters) implements EntityFilter, ImBuilderWithHolder.Factory {
-	public static SimpleRegistryType<EntityAndFilter> TYPE = SimpleRegistryType.dynamic("and", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		EntityFilter.CODEC.listOf().fieldOf("filters").forGetter(EntityAndFilter::filters)
-	).apply(instance, EntityAndFilter::new)), KLibStreamCodecs.listOf(EntityFilter.STREAM_CODEC).map(EntityAndFilter::new, EntityAndFilter::filters));
+	public static DynamicType<RegistryFriendlyByteBuf, EntityFilter> TYPE = DynamicType.create(
+		"and",
+		"filters",
+		EntityFilter.CODEC.listOf(),
+		KLibStreamCodecs.listOf(EntityFilter.STREAM_CODEC),
+		EntityAndFilter::new,
+		EntityAndFilter::filters
+	);
 
 	public static class Builder implements EntityFilterImBuilder {
 		public static final ImBuilderHolder<EntityFilter> TYPE = ImBuilderHolder.of("AND", Builder::new);
@@ -114,7 +119,7 @@ public record EntityAndFilter(List<EntityFilter> filters) implements EntityFilte
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public DynamicType<RegistryFriendlyByteBuf, EntityFilter> type() {
 		return TYPE;
 	}
 
@@ -131,9 +136,9 @@ public record EntityAndFilter(List<EntityFilter> filters) implements EntityFilte
 
 	@Override
 	public EntityFilter and(EntityFilter filter) {
-		if (filter == ANY.instance()) {
+		if (filter == ANY.value()) {
 			return this;
-		} else if (filter == NONE.instance()) {
+		} else if (filter == NONE.value()) {
 			return filter;
 		}
 

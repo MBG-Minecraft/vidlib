@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.decal;
 
 import dev.latvian.mods.klib.math.ClientMatrices;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasUniform;
@@ -17,7 +17,7 @@ public class DecalRenderer {
 	private static float uGameTime = 0F;
 
 	@ClientAutoRegister
-	public static final Canvas CANVAS = Canvas.createExternal(VidLib.id("decals"), builder -> {
+	public static final Canvas CANVAS = Canvas.createExternal(ID.vidlib("decals"), builder -> {
 		builder.setDrawSetupCallback(DecalRenderer::setup);
 		builder.addUniform(CanvasUniform.int1("Count", () -> uCount));
 		builder.addUniform(CanvasUniform.mat4("InverseViewProjectionMat", () -> ClientMatrices.INVERSE_WORLD));

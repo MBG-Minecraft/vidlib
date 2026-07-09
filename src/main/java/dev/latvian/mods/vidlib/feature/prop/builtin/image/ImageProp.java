@@ -1,11 +1,11 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.image;
 
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.math.VoxelShapeBox;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.VidLibDataTypes;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
@@ -21,13 +21,13 @@ import net.minecraft.world.phys.Vec3;
 
 public class ImageProp extends Prop {
 	@AutoRegister
-	public static final PropType<ImageProp> TYPE = PropType.create(VidLib.id("image"), ImageProp::new,
+	public static final PropType<ImageProp> TYPE = PropType.create(ID.vidlib("image"), ImageProp::new,
 		POSITION,
 		YAW,
 		PITCH,
 		WIDTH,
 		HEIGHT,
-		PropData.create(ImageProp.class, "texture", VidLibDataTypes.RESOURCE_TEXTURE, p -> p.texture, (p, v) -> p.texture = v, TextureImBuilder.ALL),
+		PropData.create(ImageProp.class, "texture", DataTypes.RESOURCE_TEXTURE, p -> p.texture, (p, v) -> p.texture = v, TextureImBuilder.ALL),
 		PropData.create(ImageProp.class, "tint", Color.DATA_TYPE, p -> p.tint, (p, v) -> p.tint = v, Color4ImBuilder.TYPE),
 		PropData.createBoolean(ImageProp.class, "see_through", p -> p.seeThrough, (p, v) -> p.seeThrough = v),
 		PropData.createBoolean(ImageProp.class, "full_bright", p -> p.fullBright, (p, v) -> p.fullBright = v),

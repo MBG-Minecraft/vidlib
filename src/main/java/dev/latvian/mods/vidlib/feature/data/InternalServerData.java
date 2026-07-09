@@ -1,21 +1,28 @@
 package dev.latvian.mods.vidlib.feature.data;
 
 import dev.latvian.mods.klib.data.DataTypes;
+import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.RangeImBuilder;
 import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverrides;
-import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
-import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.util.NameDrawType;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 
 import java.util.List;
 
 public interface InternalServerData {
-	DataKey<Identifier> SKYBOX = DataKey.SERVER.createDefault("skybox", SkyboxData.ID_DATA_TYPE, Skyboxes.VANILLA, () -> new EnumImBuilder<>(SkyboxData.SKYBOX_IDS, Skyboxes.VANILLA).withNameGetter(ID::idToString));
+	DataKey<ResourceKey<Atmosphere>> ATMOSPHERE = DataKey.SERVER.createDefault("atmosphere", Atmosphere.ID_DATA_TYPE, null, EnumImBuilder
+		.of(Atmosphere.REGISTRY::getKeys)
+		.nullName("Vanilla")
+		.nameGetter(ID::idToString)
+		.buildType()
+	);
+
 	DataKey<Anchor> ANCHOR = DataKey.SERVER.createDefault("anchor", Anchor.DATA_TYPE, Anchor.NONE, null);
 	DataKey<Boolean> HIDE_PLUMBOBS = DataKey.SERVER.createBoolean("hide_plumbobs", false);
 	DataKey<NameDrawType> NAME_DRAW_TYPE = DataKey.SERVER.createEnum("name_draw_type", NameDrawType.DATA_TYPE, NameDrawType.VANILLA, NameDrawType.VALUES);
@@ -30,8 +37,7 @@ public interface InternalServerData {
 	DataKey<Boolean> BLOCK_GRAVITY = DataKey.SERVER.createBoolean("block_gravity", false);
 	DataKey<List<Waypoint>> WAYPOINTS = DataKey.SERVER.createDefault("waypoints", Waypoint.LIST_DATA_TYPE, List.of(), null);
 	DataKey<MapTextureOverrides> MAP_TEXTURE_OVERRIDES = DataKey.SERVER.createDefault("map_texture_overrides", MapTextureOverrides.DATA_TYPE, MapTextureOverrides.EMPTY, null);
-	DataKey<Integer> MIN_FAKE_LAG = DataKey.SERVER.createVarInt("min_fake_lag", 0, 0, 1000);
-	DataKey<Integer> MAX_FAKE_LAG = DataKey.SERVER.createVarInt("max_fake_lag", 0, 0, 1000);
+	DataKey<Range> FAKE_LAG = DataKey.SERVER.createDefault("fake_lag", Range.DATA_TYPE, Range.ZERO, RangeImBuilder.type(Range.of(0F, 1000F)));
 
 	@AutoInit
 	static void bootstrap() {

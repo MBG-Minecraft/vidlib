@@ -2,10 +2,9 @@ package dev.latvian.mods.vidlib.feature.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
-import dev.latvian.mods.vidlib.feature.misc.GlobalKeybinds;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.KeyMapping;
@@ -19,7 +18,7 @@ import net.neoforged.neoforge.client.settings.KeyModifier;
 import org.lwjgl.glfw.GLFW;
 
 public class VidLibKeys {
-	public static final KeyMapping.Category CATEGORY = new KeyMapping.Category(VidLib.id("vidlib"));
+	public static final KeyMapping.Category CATEGORY = new KeyMapping.Category(ID.vidlib("vidlib"));
 	public static KeyMapping freezeTickKeyMapping;
 	public static KeyMapping clearParticlesKeyMapping;
 	public static KeyMapping reloadKeyMapping;
@@ -59,7 +58,6 @@ public class VidLibKeys {
 		if (adminPanelKeyMapping.getKey() == playerGlowKeyMapping.getKey()) {
 			adminPanelKeyMapping.setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_MENU));
 			playerGlowKeyMapping.setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_GRAVE_ACCENT));
-			GlobalKeybinds.saveKeybinds(mc.options);
 		}
 
 		while (freezeTickKeyMapping.consumeClick()) {

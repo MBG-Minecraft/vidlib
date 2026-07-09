@@ -25,14 +25,14 @@ import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueueImGui;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectPanel;
 import dev.latvian.mods.vidlib.feature.screeneffect.chromaticaberration.ChromaticAberrationPanel;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
-import dev.latvian.mods.vidlib.feature.skybox.ClientSkybox;
+import dev.latvian.mods.vidlib.feature.atmosphere.ClientAtmosphere;
 import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
@@ -89,7 +89,7 @@ public class BuiltInImGui {
 			list.add(MenuItem.item(ImIcons.WRENCH, "Player Data (Self)", g1 -> new PlayerDataConfigPanel(graphics.player.getGameProfile(), graphics.player.vl$sessionData().dataMap).open()).enabled(graphics.isAdmin));
 		}
 
-		list.add(ClientSkybox.MENU_ITEM.enabled(graphics.isAdmin));
+		list.add(ClientAtmosphere.MENU_ITEM.enabled(graphics.isAdmin));
 		list.add(DepthOfFieldPanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
 		list.add(ChromaticAberrationPanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
 		list.add(FluidPlanePanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
@@ -136,7 +136,7 @@ public class BuiltInImGui {
 		list.add(MenuItem.item(ImIcons.STOP, "Stop all Sounds", g -> g.mc.getSoundManager().stop()));
 
 		list.add(MenuItem.item(ImIcons.DATABASE, "Dump Textures", g -> {
-			var gameDir = PlatformHelper.CURRENT.getGameDirectory().toAbsolutePath();
+			var gameDir = VLPlatformHelper.CURRENT.getGameDirectory().toAbsolutePath();
 			var textures = TextureUtil.getDebugTexturePath(gameDir);
 			g.mc.getTextureManager().dumpAllSheets(textures);
 			g.mc.tell(Component.translatableEscape("debug.dump_dynamic_textures", Component.literal(gameDir.relativize(textures).toString())
@@ -165,14 +165,14 @@ public class BuiltInImGui {
 
 		list.add(MenuItem.sliderFloat("MSDF Debug Text", MSDFFont.DEBUG_SIZE::get, MSDFFont.DEBUG_SIZE::set, 0F, 200F));
 
-		if (PlatformHelper.CURRENT.isDevEnv()) {
+		if (VLPlatformHelper.CURRENT.isDevEnv()) {
 			list.add(MenuItem.item(ImIcons.SCHEDULE, "Post Main Menu Event", g -> NeoForge.EVENT_BUS.post(new MainMenuOpenedEvent(g.mc, true))));
 		}
 
 		list.add(MenuItem.SEPARATOR);
 		list.add(MenuItem.item(ImIcons.LEAF, "JVM Threads", JVMThreadsPanel.INSTANCE));
 
-		if (PlatformHelper.CURRENT.isDevEnv()) {
+		if (VLPlatformHelper.CURRENT.isDevEnv()) {
 			list.add(MenuItem.item(ImIcons.FRAMED_CUBE, "Debug Widgets", DebugWidgetPanel.INSTANCE));
 			list.add(MenuItem.item(ImIcons.BUG, "Packet Debugger", PacketDebuggerPanel.INSTANCE).enabled(graphics.isAdmin));
 			list.add(MenuItem.item(ImIcons.MEMORY, "ID Stack Tool", SHOW_STACK_TOOL));

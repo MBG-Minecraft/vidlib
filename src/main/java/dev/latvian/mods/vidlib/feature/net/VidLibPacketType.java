@@ -33,7 +33,7 @@ public record VidLibPacketType<T extends SimplePacketPayload>(CustomPacketPayloa
 
 	@ApiStatus.Internal
 	public static <T extends SimplePacketPayload> VidLibPacketType<T> internal(String path, StreamCodec<? extends ByteBuf, T> streamCodec) {
-		return create(VidLib.id(path), streamCodec);
+		return create(ID.vidlib(path), streamCodec);
 	}
 
 	public static <T extends SimplePacketPayload> VidLibPacketType<T> video(String path, StreamCodec<? extends ByteBuf, T> streamCodec) {

@@ -5,14 +5,14 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
-import dev.latvian.mods.vidlib.feature.registry.RegistryRef;
+import dev.latvian.mods.vidlib.feature.registry.Ref;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
 public record ClockLocation(
-	RegistryRef<ClockFont> font,
+	Ref<ClockFont> font,
 	EntityFilter visible,
 	ResourceKey<Level> dimension,
 	BlockPos pos,

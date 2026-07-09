@@ -81,7 +81,7 @@ public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 	}
 
 	@Nullable
-	public static NativeImage computePart(Minecraft mc, PlayerModelType model, Identifier asset, Gradient gradient) {
+	public static synchronized NativeImage computePart(Minecraft mc, PlayerModelType model, Identifier asset, Gradient gradient) {
 		var map = PART_CACHE.computeIfAbsent(model, m -> new Object2ObjectOpenHashMap<>());
 		var tex = map.get(asset);
 
@@ -103,7 +103,7 @@ public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 		return null;
 	}
 
-	public static NativeImage computeSet(Minecraft mc, PlayerModelType model, ClothingSet set) {
+	public static synchronized NativeImage computeSet(Minecraft mc, PlayerModelType model, ClothingSet set) {
 		var map = SET_CACHE.computeIfAbsent(model, m -> new Object2ObjectOpenHashMap<>());
 		var uniqueId = set.getUniqueId();
 		var img = map.get(uniqueId);
@@ -128,7 +128,7 @@ public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 		return img;
 	}
 
-	public static Identifier computeClothedPlayerSkin(Minecraft mc, Identifier skinId, NativeImage skinImage, PlayerModelType model, ClothingSet clothing) {
+	public static synchronized Identifier computeClothedPlayerSkin(Minecraft mc, Identifier skinId, NativeImage skinImage, PlayerModelType model, ClothingSet clothing) {
 		var map = CLOTHED_PLAYER_SKIN_CACHE.computeIfAbsent(model, m -> new Object2ObjectOpenHashMap<>());
 		var uniqueId = clothing.getUniqueId();
 		var cache = map.get(uniqueId);
@@ -142,8 +142,9 @@ public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 
 		if (tex == null) {
 			var pixels = MiscClientUtils.layeredImage(List.of(skinImage, cache.setImage), false);
-			tex = new ClothedPlayerSkinTexture(uniqueId.withPath("textures/vidlib/generated/clothed_player/" + skinId.getPath() + "/" + uniqueId.getPath() + "/" + model.getSerializedName() + ".png"), pixels);
-			mc.getTextureManager().registerAndLoad(tex.resourceId(), tex);
+			var genTex = new ClothedPlayerSkinTexture(uniqueId.withPath("textures/vidlib/generated/clothed_player/" + skinId.getPath() + "/" + uniqueId.getPath() + "/" + model.getSerializedName() + ".png"), pixels);
+			mc.execute(() -> mc.getTextureManager().registerAndLoad(genTex.resourceId(), genTex));
+			tex = genTex;
 			cache.cache.put(skinId, tex);
 		}
 

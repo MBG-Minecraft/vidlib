@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.auto;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.annotation.ElementType;
@@ -76,7 +76,7 @@ public @interface AutoInit {
 
 		AutoHelper.load(AutoInit.class, EnumSet.of(ElementType.TYPE, ElementType.METHOD, ElementType.FIELD), (source, classLoader, ad) -> {
 			var types = AutoHelper.getEnumValues(ad, Type.class, "value", EnumSet.of(Type.DEFAULT));
-			var currentSide = PlatformHelper.CURRENT.getSide();
+			var currentSide = VLPlatformHelper.CURRENT.getSide();
 
 			for (var type : types) {
 				if (type == Type.DEFAULT) {
@@ -96,7 +96,7 @@ public @interface AutoInit {
 
 			var requiresMod = AutoHelper.getValue(ad, "requiresMod", "");
 
-			if (!requiresMod.isEmpty() && !PlatformHelper.CURRENT.isModLoaded(requiresMod)) {
+			if (!requiresMod.isEmpty() && !VLPlatformHelper.CURRENT.isModLoaded(requiresMod)) {
 				VidLib.LOGGER.info("Skipped @AutoInit class " + ad.clazz().getClassName() + " (Missing Mod '" + requiresMod + "')");
 				return;
 			}

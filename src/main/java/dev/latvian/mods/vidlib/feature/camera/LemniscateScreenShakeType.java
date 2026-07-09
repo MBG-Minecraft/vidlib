@@ -3,18 +3,18 @@ package dev.latvian.mods.vidlib.feature.camera;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import net.minecraft.network.codec.ByteBufCodecs;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 import org.joml.Vector2dc;
 
-public record LemniscateScreenShakeType(@Nullable SimpleRegistryType<?> typeOverride, float xScale, float yScale) implements ScreenShakeType {
-	public static final SimpleRegistryType.Unit<LemniscateScreenShakeType> DEFAULT = SimpleRegistryType.unitWithType("default_lemniscate", type -> new LemniscateScreenShakeType(type, 0.6F, 1F));
-	public static final SimpleRegistryType.Unit<LemniscateScreenShakeType> HORIZONTAL = SimpleRegistryType.unitWithType("horizontal", type -> new LemniscateScreenShakeType(type, 1F, 0F));
-	public static final SimpleRegistryType.Unit<LemniscateScreenShakeType> VERTICAL = SimpleRegistryType.unitWithType("vertical", type -> new LemniscateScreenShakeType(type, 0F, 1F));
+public record LemniscateScreenShakeType(@Nullable CustomRegistryType<?> typeOverride, float xScale, float yScale) implements ScreenShakeType {
+	public static final CustomRegistryType.Unit<LemniscateScreenShakeType> DEFAULT = CustomRegistryType.unitWithType("default_lemniscate", type -> new LemniscateScreenShakeType(type, 0.6F, 1F));
+	public static final CustomRegistryType.Unit<LemniscateScreenShakeType> HORIZONTAL = CustomRegistryType.unitWithType("horizontal", type -> new LemniscateScreenShakeType(type, 1F, 0F));
+	public static final CustomRegistryType.Unit<LemniscateScreenShakeType> VERTICAL = CustomRegistryType.unitWithType("vertical", type -> new LemniscateScreenShakeType(type, 0F, 1F));
 
-	public static final SimpleRegistryType<LemniscateScreenShakeType> TYPE = SimpleRegistryType.dynamic("lemniscate", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<LemniscateScreenShakeType> TYPE = CustomRegistryType.dynamic("lemniscate", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.FLOAT.optionalFieldOf("x_scale", 1F).forGetter(LemniscateScreenShakeType::xScale),
 		Codec.FLOAT.optionalFieldOf("y_scale", 1F).forGetter(LemniscateScreenShakeType::yScale)
 	).apply(instance, LemniscateScreenShakeType::new)), CompositeStreamCodec.of(
@@ -28,7 +28,7 @@ public record LemniscateScreenShakeType(@Nullable SimpleRegistryType<?> typeOver
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return typeOverride == null ? TYPE : typeOverride;
 	}
 

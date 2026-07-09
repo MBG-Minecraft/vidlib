@@ -1,0 +1,11 @@
+{
+	"sun": false,
+	"moon": true,
+	"celestial_rotation": [45, 140],
+	"attributes": {
+		"minecraft:visual/sky_color": "#1C6D9E",
+		"minecraft:visual/fog_color": "#3D91A9",
+		"minecraft:visual/ambient_light_color": "#FFFFFF",
+		"minecraft:visual/star_brightness": 0.5
+	}
+}

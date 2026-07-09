@@ -123,7 +123,7 @@ public class DataKeyStorage {
 	}
 
 	public <E> DataKey<E> createEnum(String id, DataType<E> type, E defaultValue, E[] values) {
-		return createDefault(id, type, defaultValue, () -> new EnumImBuilder<>(values));
+		return createDefault(id, type, defaultValue, EnumImBuilder.typeOf(values, defaultValue));
 	}
 
 	@Override

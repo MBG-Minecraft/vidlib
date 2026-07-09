@@ -11,6 +11,8 @@ import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.core.VLLocalPlayer;
+import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
+import dev.latvian.mods.vidlib.feature.atmosphere.ClientAtmosphere;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeInstance;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
@@ -39,9 +41,6 @@ import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
-import dev.latvian.mods.vidlib.feature.skybox.ClientSkybox;
-import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
-import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
 import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
@@ -76,7 +75,6 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 public class LocalClientSessionData extends ClientSessionData {
@@ -91,10 +89,10 @@ public class LocalClientSessionData extends ClientSessionData {
 	public Vector2dc prevCameraShake;
 	public Vector2dc cameraShake;
 	public Map<Identifier, ClockValue> clocks;
-	public Map<Identifier, ClientSkybox> skyboxes;
+	public Map<Identifier, ClientAtmosphere> atmosphereCache;
 	public final DataMap serverDataMap;
 	public final KNumberVariables globalVariables;
-	public ClientSkybox skybox;
+	public ClientAtmosphere atmosphere;
 	public Map<ZoneShape, VoxelShapeBox> cachedZoneShapes;
 	public CameraOverride cameraOverride;
 	public ClientCutscene currentCutscene;
@@ -125,7 +123,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.screenShakeInstances = new ArrayList<>();
 		this.prevCameraShake = this.cameraShake = Identity.DVEC_2;
 		this.clocks = new Object2ObjectOpenHashMap<>();
-		this.skyboxes = new Object2ObjectOpenHashMap<>();
+		this.atmosphereCache = new Object2ObjectOpenHashMap<>();
 		this.serverDataMap = new DataMap(uuid, DataKey.SERVER, mc);
 		this.globalVariables = new KNumberVariables();
 		this.debugDecals = new ArrayList<>();
@@ -178,30 +176,30 @@ public class LocalClientSessionData extends ClientSessionData {
 	@Override
 	public void updateOverrides(Player player) {
 		super.updateOverrides(player);
-		var skyboxId = ClientGameEngine.INSTANCE.getSkybox(mc);
+		var atmosphereId = ClientGameEngine.INSTANCE.getAtmosphere(mc);
 
-		if (skyboxId.equals(Skyboxes.VANILLA)) {
-			skybox = null;
+		if (atmosphereId == null) {
+			atmosphere = null;
 		} else {
-			skybox = getSkybox(skyboxId);
+			atmosphere = getAtmosphere(atmosphereId);
 		}
 	}
 
-	public ClientSkybox getSkybox(Identifier id) {
-		var skybox = skyboxes.get(id);
+	public ClientAtmosphere getAtmosphere(Identifier id) {
+		var atmosphere = atmosphereCache.get(id);
 
-		if (skybox == null) {
-			var skyboxData = SkyboxData.REGISTRY.get(id);
+		if (atmosphere == null) {
+			var atmosphereData = Atmosphere.REGISTRY.get(id);
 
-			if (skyboxData == null) {
-				skyboxData = new SkyboxData(id, Optional.empty(), 0F, 0F, Color.WHITE, false, true, true, Optional.empty(), Optional.empty());
+			if (atmosphereData == null) {
+				atmosphereData = Atmosphere.empty(id);
 			}
 
-			skybox = new ClientSkybox(skyboxData);
-			skyboxes.put(id, skybox);
+			atmosphere = new ClientAtmosphere(atmosphereData);
+			atmosphereCache.put(id, atmosphere);
 		}
 
-		return skybox;
+		return atmosphere;
 	}
 
 	@Override
@@ -382,8 +380,8 @@ public class LocalClientSessionData extends ClientSessionData {
 	}
 
 	@Override
-	public void updateSkyboxes() {
-		skyboxes.clear();
+	public void updateAtmospheres() {
+		atmosphereCache.clear();
 	}
 
 	@Override

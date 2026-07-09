@@ -1,7 +1,7 @@
 package dev.mrbeastgaming.mods.hub.api;
 
 import com.mojang.serialization.JsonOps;
-import dev.latvian.mods.common.CommonPaths;
+import dev.latvian.mods.klib.CommonPaths;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;

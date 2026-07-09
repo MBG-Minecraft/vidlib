@@ -2,15 +2,18 @@ package dev.latvian.mods.vidlib.feature.block.filter;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
+import dev.latvian.mods.klib.registry.CustomRegistryType;
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import imgui.ImGui;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
@@ -18,10 +21,14 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import java.util.ArrayList;
 import java.util.List;
 
-public record BlockOrFilter(List<BlockFilter> filters) implements BlockFilter, ImBuilderWithHolder.Factory {
-	public static SimpleRegistryType<BlockOrFilter> TYPE = SimpleRegistryType.dynamic("or", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		BlockFilter.CODEC.listOf().fieldOf("filters").forGetter(BlockOrFilter::filters)
-	).apply(instance, BlockOrFilter::new)), KLibStreamCodecs.listOf(BlockFilter.STREAM_CODEC).map(BlockOrFilter::new, BlockOrFilter::filters));
+public record BlockOrFilter(List<Ref<BlockFilter>> filters) implements BlockFilter, ImBuilderWithHolder.Factory {
+	public static CustomRegistryType<RegistryFriendlyByteBuf, BlockFilter> TYPE = REGISTRY.dynamic(
+		ID.vidlib("or"),
+		RecordCodecBuilder.mapCodec(instance -> instance.group(
+			BlockFilter.CODEC.listOf().fieldOf("filters").forGetter(BlockOrFilter::filters)
+		).apply(instance, BlockOrFilter::new)),
+		KLibStreamCodecs.listOf(BlockFilter.STREAM_CODEC).map(BlockOrFilter::new, BlockOrFilter::filters)
+	);
 
 	public static class Builder implements BlockFilterImBuilder {
 		public static final ImBuilderHolder<BlockFilter> TYPE = ImBuilderHolder.of("OR", Builder::new);
@@ -46,7 +53,7 @@ public record BlockOrFilter(List<BlockFilter> filters) implements BlockFilter, I
 
 				for (var filter : f.filters) {
 					var filterBuilder = BlockFilterImBuilder.create();
-					filterBuilder.set(filter);
+					filterBuilder.set(filter.value());
 					filters.add(filterBuilder);
 				}
 			}
@@ -106,10 +113,10 @@ public record BlockOrFilter(List<BlockFilter> filters) implements BlockFilter, I
 
 		@Override
 		public BlockFilter build() {
-			var list = new ArrayList<BlockFilter>(filters.size());
+			var list = new ArrayList<Ref<BlockFilter>>(filters.size());
 
 			for (var filter : filters) {
-				list.add(filter.build());
+				list.add(filter.build().ref());
 			}
 
 			return new BlockOrFilter(list);
@@ -117,14 +124,14 @@ public record BlockOrFilter(List<BlockFilter> filters) implements BlockFilter, I
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<RegistryFriendlyByteBuf, BlockFilter> type() {
 		return TYPE;
 	}
 
 	@Override
 	public boolean test(BlockInWorld block) {
 		for (var filter : filters) {
-			if (filter.test(block)) {
+			if (filter.value().test(block)) {
 				return true;
 			}
 		}
@@ -135,7 +142,7 @@ public record BlockOrFilter(List<BlockFilter> filters) implements BlockFilter, I
 	@Override
 	public boolean test(Level level, BlockPos pos, BlockState state) {
 		for (var filter : filters) {
-			if (filter.test(level, pos, state)) {
+			if (filter.value().test(level, pos, state)) {
 				return true;
 			}
 		}
@@ -145,14 +152,15 @@ public record BlockOrFilter(List<BlockFilter> filters) implements BlockFilter, I
 
 	@Override
 	public BlockFilter or(BlockFilter filter) {
-		if (filter == ANY.instance()) {
+		if (filter == ANY.value()) {
 			return filter;
-		} else if (filter == NONE.instance()) {
+		} else if (filter == NONE.value()) {
 			return this;
 		}
 
-		var list = new ArrayList<>(filters);
-		list.add(filter);
+		var list = new ArrayList<Ref<BlockFilter>>(filters.size() + 1);
+		list.addAll(filters);
+		list.add(filter.ref());
 		return new BlockOrFilter(List.copyOf(list));
 	}
 

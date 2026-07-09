@@ -7,19 +7,17 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
 import net.minecraft.resources.ResourceKey;
 
-import java.util.function.Function;
-
 public class PlayerClothingImBuilder implements ImBuilder<PlayerClothing> {
+	public static final ImBuilderType<ResourceKey<ClothingSet>> PRESET_TYPE = EnumImBuilder.of(() -> ClothingPresets.INSTANCE.sortedKeys)
+		.defaultValue(Tracksuits.BLUE)
+		.nameGetter(key -> key.identifier().toString())
+		.buildType();
+
 	public static final ImBuilderType<PlayerClothing> TYPE = PlayerClothingImBuilder::new;
-	public static final Function<ResourceKey<ClothingSet>, String> PRESET_NAME = key -> key.identifier().toString();
 
 	public final PlayerClothing.Type[] type = {null};
-	public final EnumImBuilder<ResourceKey<ClothingSet>> presetBuilder = new EnumImBuilder<>(ClothingPresets.INSTANCE.map.keySet().stream().sorted((o1, o2) -> o1.identifier().compareNamespaced(o2.identifier())).toList(), Tracksuits.BLUE);
+	public final ImBuilder<ResourceKey<ClothingSet>> presetBuilder = PRESET_TYPE.get();
 	public final ClothingSetImBuilder customBuilder = new ClothingSetImBuilder();
-
-	public PlayerClothingImBuilder() {
-		presetBuilder.nameGetter = PRESET_NAME;
-	}
 
 	@Override
 	public void set(PlayerClothing value) {

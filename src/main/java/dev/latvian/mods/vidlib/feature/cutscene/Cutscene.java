@@ -5,7 +5,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
+import dev.latvian.mods.klib.registry.RegistryKeys;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.cutscene.step.CutsceneStep;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
@@ -42,11 +43,11 @@ public class Cutscene {
 		}
 	);
 
-	public static final DataType<Cutscene> DIRECT_DATA_TYPE = DataType.of(DIRECT_CODEC, DIRECT_STREAM_CODEC, Cutscene.class);
-	public static final VLRegistry<Cutscene> REGISTRY = VLRegistry.createServer("cutscene", Cutscene.class);
+	public static final DataType<Cutscene> DIRECT_DATA_TYPE = DataType.of(DIRECT_CODEC, DIRECT_STREAM_CODEC);
+	public static final RegistryKeys<Cutscene> REGISTRY_KEYS = RegistryKeys.createKeys(ID.vidlib("cutscene"), "video");
+	public static final VLRegistry<Cutscene> REGISTRY = VLRegistry.createServer(REGISTRY_KEYS);
 
 	public static final DataType<Cutscene> DATA_TYPE = REGISTRY.orDirect(DIRECT_DATA_TYPE);
-	public static final CommandDataType<Cutscene> COMMAND = CommandDataType.of(DATA_TYPE);
 
 	public static class Loader extends JsonRegistryReloadListener<Cutscene> {
 		public Loader() {

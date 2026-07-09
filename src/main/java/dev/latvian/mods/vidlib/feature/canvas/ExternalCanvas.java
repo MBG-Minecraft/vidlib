@@ -4,7 +4,6 @@ import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.resource.RenderTargetDescriptor;
-import dev.latvian.mods.klib.gl.GLDebugLog;
 import dev.latvian.mods.vidlib.core.VLWithCanvas;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PostChain;
@@ -52,8 +51,6 @@ public class ExternalCanvas extends Canvas {
 	}
 
 	public void addToFrame(Minecraft mc, FrameGraphBuilder frameGraphBuilder, PostChain.TargetBundle targetBundle, int w, int h) {
-		GLDebugLog.message("[VidLib] " + idString);
-
 		var targets = defaultTargets;
 
 		if (!data.importTargets().isEmpty()) {
@@ -78,7 +75,6 @@ public class ExternalCanvas extends Canvas {
 
 	@Override
 	public void createHandle(FrameGraphBuilder builder, RenderTargetDescriptor targetDescriptor) {
-		GLDebugLog.message("[VidLib] Created external canvas " + idString);
 		outputTarget = builder.importExternal(pathString, externalTarget);
 	}
 }

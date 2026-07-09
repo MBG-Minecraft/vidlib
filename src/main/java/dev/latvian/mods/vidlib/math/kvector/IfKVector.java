@@ -10,7 +10,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
@@ -28,7 +28,7 @@ public record IfKVector(
 	Optional<KVector> thenValue,
 	Optional<KVector> elseValue
 ) implements KVector, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<IfKVector> TYPE = SimpleRegistryType.dynamic("if", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<IfKVector> TYPE = CustomRegistryType.dynamic("if", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.fieldOf("if").forGetter(IfKVector::ifValue),
 		Comparison.DATA_TYPE.codec().optionalFieldOf("comparison", Comparison.NOT_EQUALS).forGetter(IfKVector::comparison),
 		KNumber.CODEC.optionalFieldOf("value", KNumber.ZERO).forGetter(IfKVector::testValue),
@@ -47,7 +47,7 @@ public record IfKVector(
 		public static final ImBuilderHolder<KVector> TYPE = ImBuilderHolder.of("If", Builder::new);
 
 		public final ImBuilder<KNumber> ifValue = KNumberImBuilder.create(1D);
-		public final ImBuilder<Comparison> comparison = new EnumImBuilder<>(Comparison.VALUES, Comparison.NOT_EQUALS);
+		public final ImBuilder<Comparison> comparison = EnumImBuilder.COMPARISON_TYPE.get();
 		public final ImBuilder<KNumber> testValue = KNumberImBuilder.create(0D);
 		public final ImBoolean thenValueEnabled = new ImBoolean(true);
 		public final ImBuilder<KVector> thenValue = KVectorImBuilder.create();
@@ -101,7 +101,7 @@ public record IfKVector(
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

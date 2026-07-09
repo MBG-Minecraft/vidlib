@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.math.kvector;
 
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -21,17 +21,17 @@ public enum LiteralKVector implements KVector {
 	public final String name;
 	public final String displayName;
 	public final Function<KNumberContext, Vec3> factory;
-	public final SimpleRegistryType.Unit<LiteralKVector> type;
+	public final CustomRegistryType.Unit<LiteralKVector> type;
 
 	LiteralKVector(String name, String displayName, Function<KNumberContext, Vec3> factory) {
 		this.name = name;
 		this.displayName = displayName;
 		this.factory = factory;
-		this.type = SimpleRegistryType.unit(name, this);
+		this.type = CustomRegistryType.unit(name, this);
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return type;
 	}
 

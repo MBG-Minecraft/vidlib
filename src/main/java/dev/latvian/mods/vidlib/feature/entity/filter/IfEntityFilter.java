@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.entity.filter;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
+import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.util.Comparison;
 import dev.latvian.mods.vidlib.feature.entity.number.EntityNumber;
 import dev.latvian.mods.vidlib.feature.entity.number.EntityNumberImBuilder;
@@ -15,13 +16,14 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePin;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePinType;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 
 import java.util.List;
 
 public record IfEntityFilter(EntityNumber ifValue, Comparison comparison, EntityNumber testValue) implements EntityFilter, ImBuilderWithHolder.Factory {
-	public static SimpleRegistryType<IfEntityFilter> TYPE = SimpleRegistryType.dynamic("if", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static DynamicType<RegistryFriendlyByteBuf, EntityFilter> TYPE = CustomRegistryType.dynamic("if", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		EntityNumber.CODEC.fieldOf("if").forGetter(IfEntityFilter::ifValue),
 		Comparison.DATA_TYPE.codec().optionalFieldOf("comparison", Comparison.NOT_EQUALS).forGetter(IfEntityFilter::comparison),
 		EntityNumber.CODEC.optionalFieldOf("value", FixedEntityNumber.ZERO).forGetter(IfEntityFilter::testValue)
@@ -42,7 +44,7 @@ public record IfEntityFilter(EntityNumber ifValue, Comparison comparison, Entity
 		);
 
 		public final ImBuilder<EntityNumber> ifValue = EntityNumberImBuilder.create(EntityNumber.of(1D));
-		public final ImBuilder<Comparison> comparison = new EnumImBuilder<>(Comparison.VALUES, Comparison.NOT_EQUALS);
+		public final ImBuilder<Comparison> comparison = EnumImBuilder.COMPARISON_TYPE.get();
 		public final ImBuilder<EntityNumber> testValue = EntityNumberImBuilder.create(EntityNumber.of(0D));
 
 		@Override
@@ -90,7 +92,7 @@ public record IfEntityFilter(EntityNumber ifValue, Comparison comparison, Entity
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public DynamicType<RegistryFriendlyByteBuf, EntityFilter> type() {
 		return TYPE;
 	}
 

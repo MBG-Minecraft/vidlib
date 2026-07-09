@@ -14,7 +14,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadHandler;
 import net.neoforged.neoforge.network.registration.NetworkRegistry;
 
-@EventBusSubscriber(modid = VidLib.ID)
+@EventBusSubscriber(modid = ID.vidlib)
 public class VidLibNetworkEventHandler {
 	public static final IPayloadHandler<VidLibPacketPayloadContainer> ASYNC_HANDLER = (payload, payloadContext) -> {
 		try {

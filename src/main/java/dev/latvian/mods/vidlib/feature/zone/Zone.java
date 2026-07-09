@@ -7,6 +7,7 @@ import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.visual.CubeTextures;
@@ -20,7 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public record Zone(
-	ZoneShape shape,
+	Ref<ZoneShape> shape,
 	Color color,
 	EntityFilter entityFilter,
 	CompoundTag data,

@@ -10,13 +10,13 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePin;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePinType;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public record SinKNumber(KNumber angle) implements KNumber, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<SinKNumber> TYPE = SimpleRegistryType.dynamic("sin", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<SinKNumber> TYPE = CustomRegistryType.dynamic("sin", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.optionalFieldOf("angle", KNumber.ONE).forGetter(SinKNumber::angle)
 	).apply(instance, SinKNumber::new)), CompositeStreamCodec.of(
 		KLibStreamCodecs.optional(KNumber.STREAM_CODEC, KNumber.ZERO), SinKNumber::angle,
@@ -72,7 +72,7 @@ public record SinKNumber(KNumber angle) implements KNumber, ImBuilderWithHolder.
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

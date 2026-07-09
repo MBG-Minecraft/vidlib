@@ -5,7 +5,7 @@ import net.minecraft.resources.ResourceKey;
 
 public interface Clothing {
 	static ResourceKey<ClothingSet> create(String id) {
-		return ClothingPresets.createId(VidLib.id(id));
+		return ClothingPresets.createId(ID.vidlib(id));
 	}
 
 	ResourceKey<ClothingSet> NONE = create("none");

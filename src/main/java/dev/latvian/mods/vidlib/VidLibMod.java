@@ -4,8 +4,8 @@ import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.block.VidLibBlocks;
 import dev.latvian.mods.vidlib.feature.item.VidLibItems;
 import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
-import dev.latvian.mods.vidlib.feature.platform.neoforge.NeoPlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.neoforge.VLNeoPlatformHelper;
 import net.minecraft.core.registries.Registries;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -15,10 +15,10 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforgespi.language.IModInfo;
 
-@Mod(VidLib.ID)
+@Mod(ID.vidlib)
 public class VidLibMod {
 	public VidLibMod(ModContainer mod, IEventBus bus) {
-		PlatformHelper.CURRENT = new NeoPlatformHelper(mod);
+		VLPlatformHelper.CURRENT = new VLNeoPlatformHelper();
 		VidLib.VERSION = mod.getModInfo().getVersion().toString();
 		VidLib.init();
 
@@ -49,7 +49,7 @@ public class VidLibMod {
 			}
 		}
 
-		var particleRegistry = DeferredRegister.create(Registries.PARTICLE_TYPE, VidLib.ID);
+		var particleRegistry = DeferredRegister.create(Registries.PARTICLE_TYPE, ID.vidlib);
 
 		for (var particle : VidLibParticles.PARTICLES) {
 			particleRegistry.register(particle.left(), particle.right());

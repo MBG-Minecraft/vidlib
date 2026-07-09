@@ -3,9 +3,8 @@ package dev.latvian.mods.vidlib.feature.clothing;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.StringUtils;
-import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
@@ -21,7 +20,7 @@ import java.util.List;
 
 public class ClothingSet {
 	public static final ClothingSet EMPTY = new ClothingSet(List.of());
-	private static final Identifier EMPTY_TEXTURE_ASSET = VidLib.id("empty");
+	private static final Identifier EMPTY_TEXTURE_ASSET = ID.vidlib("empty");
 
 	public static ClothingSet of(List<ClothingPart> list) {
 		return list.isEmpty() ? EMPTY : new ClothingSet(list);
@@ -30,8 +29,7 @@ public class ClothingSet {
 	public static final Codec<ClothingSet> CODEC = ClothingPart.CODEC.listOf().xmap(ClothingSet::of, ClothingSet::parts);
 
 	public static final StreamCodec<ByteBuf, ClothingSet> STREAM_CODEC = KLibStreamCodecs.listOf(ClothingPart.STREAM_CODEC).map(ClothingSet::of, ClothingSet::parts);
-	public static final DataType<ClothingSet> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, ClothingSet.class);
-	public static final CommandDataType<ClothingSet> COMMAND = CommandDataType.of(DATA_TYPE);
+	public static final DataType<ClothingSet> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 
 	public static ClothingSet join(ClothingSet a, ClothingSet b) {
 		if (a.parts.isEmpty()) {
@@ -85,7 +83,7 @@ public class ClothingSet {
 						}
 
 						var hash = StringUtils.toHex(MessageDigest.getInstance("SHA-256").digest(out.toByteArray()));
-						uniqueId = VidLib.id("custom/" + hash);
+						uniqueId = ID.vidlib("custom/" + hash);
 					} catch (Exception ex) {
 						ex.printStackTrace();
 					}

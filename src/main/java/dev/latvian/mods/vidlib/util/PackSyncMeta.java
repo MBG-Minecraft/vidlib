@@ -5,7 +5,7 @@ import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,7 +49,7 @@ public record PackSyncMeta(String id, String code, String version, String sessio
 				);
 			} else {
 				try {
-					var configPath = PlatformHelper.CURRENT.getModsDirectory().resolve("pack-sync.json");
+					var configPath = VLPlatformHelper.CURRENT.getModsDirectory().resolve("pack-sync.json");
 					String code = "";
 
 					if (Files.exists(configPath)) {

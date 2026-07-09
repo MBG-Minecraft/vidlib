@@ -5,7 +5,7 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.shape.CylinderShape;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import net.minecraft.world.level.ClipContext;
@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 
 public record CylinderZoneShape(Vec3 pos, CylinderShape shape, AABB box) implements ZoneShape {
-	public static final SimpleRegistryType<CylinderZoneShape> TYPE = SimpleRegistryType.dynamic("cylinder", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<CylinderZoneShape> TYPE = CustomRegistryType.dynamic("cylinder", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		MCCodecs.VEC3.fieldOf("pos").forGetter(CylinderZoneShape::pos),
 		CylinderShape.CODEC.forGetter(CylinderZoneShape::shape)
 	).apply(instance, CylinderZoneShape::new)), CompositeStreamCodec.of(
@@ -30,7 +30,7 @@ public record CylinderZoneShape(Vec3 pos, CylinderShape shape, AABB box) impleme
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

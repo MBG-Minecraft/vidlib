@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import dev.latvian.mods.klib.util.JsonUtils;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import org.jetbrains.annotations.Nullable;
 
@@ -93,7 +93,7 @@ public class HubGateway implements WebSocket.Listener {
 
 		if (eventHandlers == null) {
 			eventHandlers = new HashMap<>();
-			PlatformHelper.CURRENT.collectGatewayEventHandlers(eventHandlers);
+			VLPlatformHelper.CURRENT.collectGatewayEventHandlers(eventHandlers);
 		}
 
 		try {

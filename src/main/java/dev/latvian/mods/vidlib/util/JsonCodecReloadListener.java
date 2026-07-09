@@ -10,6 +10,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Util;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,6 +47,7 @@ public abstract class JsonCodecReloadListener<T> extends JsonReloadListener {
 		this.includeId = includeId;
 	}
 
+	@Nullable
 	protected T finalize(T t) {
 		return t;
 	}

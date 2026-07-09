@@ -26,8 +26,8 @@ public record FluidTextures(ClientAsset.ResourceTexture still, ClientAsset.Resou
 	}
 
 	public static final FluidTextures DEBUG = of(
-		new ClientAsset.ResourceTexture(VidLib.id("block/debug_fluid/still")),
-		new ClientAsset.ResourceTexture(VidLib.id("block/debug_fluid/flow"))
+		new ClientAsset.ResourceTexture(ID.vidlib("block/debug_fluid/still")),
+		new ClientAsset.ResourceTexture(ID.vidlib("block/debug_fluid/flow"))
 	);
 
 	public static final FluidTextures WATER = of(
@@ -43,12 +43,12 @@ public record FluidTextures(ClientAsset.ResourceTexture still, ClientAsset.Resou
 	);
 
 	public static final FluidTextures OPAQUE_WATER = of(
-		new ClientAsset.ResourceTexture(VidLib.id("block/opaque_water/still")),
-		new ClientAsset.ResourceTexture(VidLib.id("block/opaque_water/flow"))
+		new ClientAsset.ResourceTexture(ID.vidlib("block/opaque_water/still")),
+		new ClientAsset.ResourceTexture(ID.vidlib("block/opaque_water/flow"))
 	);
 
 	public static final FluidTextures PALE_OPAQUE_WATER = of(
-		new ClientAsset.ResourceTexture(VidLib.id("block/pale_opaque_water/still")),
-		new ClientAsset.ResourceTexture(VidLib.id("block/pale_opaque_water/flow"))
+		new ClientAsset.ResourceTexture(ID.vidlib("block/pale_opaque_water/still")),
+		new ClientAsset.ResourceTexture(ID.vidlib("block/pale_opaque_water/flow"))
 	);
 }

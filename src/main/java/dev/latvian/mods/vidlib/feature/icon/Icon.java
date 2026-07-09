@@ -3,31 +3,29 @@ package dev.latvian.mods.vidlib.feature.icon;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.registry.CustomRegistry;
+import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
+import dev.latvian.mods.klib.registry.CustomRegistryValue;
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.registry.UnitType;
 import dev.latvian.mods.klib.texture.UV;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
-import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 
-public interface Icon extends SimpleRegistryEntry {
-	SimpleRegistry<Icon> REGISTRY = SimpleRegistry.create(VidLib.id("icon"), c -> PlatformHelper.CURRENT.collectIcons(c));
+public interface Icon extends CustomRegistryValue<RegistryFriendlyByteBuf, Icon> {
+	CustomRegistry<RegistryFriendlyByteBuf, Icon> REGISTRY = CustomRegistry.create("icon");
 
-	SimpleRegistryType.Unit<Icon> YES = SimpleRegistryType.unit("yes", new TextureIcon(VidLibTextures.YES, UV.FULL, true, Color.WHITE));
-	SimpleRegistryType.Unit<Icon> NO = SimpleRegistryType.unit("no", new TextureIcon(VidLibTextures.NO, UV.FULL, true, Color.WHITE));
+	Codec<Ref<Icon>> CODEC = REGISTRY.codec();
+	StreamCodec<RegistryFriendlyByteBuf, Ref<Icon>> STREAM_CODEC = REGISTRY.streamCodec();
+	DataType<Ref<Icon>> DATA_TYPE = REGISTRY.dataType();
 
-	Codec<Icon> CODEC = REGISTRY.codec();
-	StreamCodec<RegistryFriendlyByteBuf, Icon> STREAM_CODEC = REGISTRY.streamCodec();
-	DataType<Icon> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, Icon.class);
-	CommandDataType<Icon> COMMAND = CommandDataType.of(DATA_TYPE);
+	UnitType<RegistryFriendlyByteBuf, Icon> EMPTY = UnitType.create("empty", EmptyIcon.INSTANCE);
+	UnitType<RegistryFriendlyByteBuf, Icon> YES = UnitType.create("yes", new TextureIcon(VidLibTextures.YES, UV.FULL, true, Color.WHITE));
+	UnitType<RegistryFriendlyByteBuf, Icon> NO = UnitType.create("no", new TextureIcon(VidLibTextures.NO, UV.FULL, true, Color.WHITE));
 
-	static void builtinTypes(SimpleRegistryCollector<Icon> registry) {
-		registry.register(EmptyIcon.TYPE);
+	static void builtInTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, Icon> registry) {
+		registry.register(EMPTY);
 
 		registry.register(SimpleColorIcon.TYPE);
 		registry.register(TextureIcon.TYPE);
@@ -39,7 +37,7 @@ public interface Icon extends SimpleRegistryEntry {
 	}
 
 	@Override
-	default SimpleRegistryType<?> type() {
-		return REGISTRY.getType(this);
+	default CustomRegistry<RegistryFriendlyByteBuf, Icon> getRegistry() {
+		return REGISTRY;
 	}
 }

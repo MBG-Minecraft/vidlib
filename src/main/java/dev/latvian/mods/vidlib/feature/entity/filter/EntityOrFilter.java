@@ -1,24 +1,29 @@
 package dev.latvian.mods.vidlib.feature.entity.filter;
 
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
+import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import imgui.ImGui;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public record EntityOrFilter(List<EntityFilter> filters) implements EntityFilter, ImBuilderWithHolder.Factory {
-	public static SimpleRegistryType<EntityOrFilter> TYPE = SimpleRegistryType.dynamic("or", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		EntityFilter.CODEC.listOf().fieldOf("filters").forGetter(EntityOrFilter::filters)
-	).apply(instance, EntityOrFilter::new)), KLibStreamCodecs.listOf(EntityFilter.STREAM_CODEC).map(EntityOrFilter::new, EntityOrFilter::filters));
+	public static DynamicType<RegistryFriendlyByteBuf, EntityFilter> TYPE = DynamicType.create(
+		"or",
+		"filters",
+		EntityFilter.CODEC.listOf(),
+		KLibStreamCodecs.listOf(EntityFilter.STREAM_CODEC),
+		EntityOrFilter::new,
+		EntityOrFilter::filters
+	);
 
 	public static class Builder implements EntityFilterImBuilder {
 		public static final ImBuilderHolder<EntityFilter> TYPE = ImBuilderHolder.of("OR", Builder::new);
@@ -114,7 +119,7 @@ public record EntityOrFilter(List<EntityFilter> filters) implements EntityFilter
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public DynamicType<RegistryFriendlyByteBuf, EntityFilter> type() {
 		return TYPE;
 	}
 

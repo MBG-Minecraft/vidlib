@@ -9,5 +9,5 @@ import net.minecraft.commands.CommandSourceStack;
 
 @AutoInit
 public interface GradientCommand {
-	SuggestionProvider<CommandSourceStack> SUGGESTION_PROVIDER = ID.registerSuggestionProvider(VidLib.id("gradient"), () -> GradientReference.MAP.keySet());
+	SuggestionProvider<CommandSourceStack> SUGGESTION_PROVIDER = ID.registerSuggestionProvider(ID.vidlib("gradient"), () -> GradientReference.MAP.keySet());
 }

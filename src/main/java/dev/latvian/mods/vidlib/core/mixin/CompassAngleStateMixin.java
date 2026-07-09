@@ -18,14 +18,14 @@ public class CompassAngleStateMixin {
 	private CompassAngleState.CompassTarget compassTarget;
 
 	@ModifyExpressionValue(method = "getRotationTowardsCompassTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/item/properties/numeric/CompassAngleState;getAngleFromEntityToPos(Lnet/minecraft/world/entity/ItemOwner;Lnet/minecraft/core/BlockPos;)D"))
-	private double vl$calculate(double original, @Local(argsOnly = true) ItemOwner owner, @Local(argsOnly = true) BlockPos target) {
+	private double vl$calculate(double original, @Local(argsOnly = true, name = "owner") ItemOwner owner, @Local(argsOnly = true, name = "compassTargetPos") BlockPos compassTargetPos) {
 		var entity = owner.asLivingEntity();
 
 		if (entity == null) {
 			return original;
 		}
 
-		var angle = ClientGameEngine.INSTANCE.overrideCompassAngle(compassTarget, entity, target);
+		var angle = ClientGameEngine.INSTANCE.overrideCompassAngle(compassTarget, entity, compassTargetPos);
 		return Double.isNaN(angle) ? original : angle;
 	}
 }

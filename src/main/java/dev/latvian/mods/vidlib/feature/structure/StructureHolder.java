@@ -5,7 +5,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
 import dev.latvian.mods.vidlib.feature.bulk.OptimizedModificationBuilder;
-import dev.latvian.mods.vidlib.feature.registry.RegistryRef;
+import dev.latvian.mods.vidlib.feature.registry.Ref;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceArrayMap;
@@ -139,7 +139,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 		return () -> holder;
 	}
 
-	public static Supplier<StructureHolder> refSupplier(@Nullable RegistryRef<LazyStructures> structureRef) {
+	public static Supplier<StructureHolder> refSupplier(@Nullable Ref<LazyStructures> structureRef) {
 		return () -> structureRef == null ? null : structureRef.get().get().getFirst();
 	}
 

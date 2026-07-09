@@ -7,13 +7,13 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public record GroundKVector(KVector vector) implements KVector, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<GroundKVector> TYPE = SimpleRegistryType.dynamic("ground", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<GroundKVector> TYPE = CustomRegistryType.dynamic("ground", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KVector.CODEC.fieldOf("vector").forGetter(GroundKVector::vector)
 	).apply(instance, GroundKVector::new)), CompositeStreamCodec.of(
 		KVector.STREAM_CODEC, GroundKVector::vector,
@@ -56,7 +56,7 @@ public record GroundKVector(KVector vector) implements KVector, ImBuilderWithHol
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

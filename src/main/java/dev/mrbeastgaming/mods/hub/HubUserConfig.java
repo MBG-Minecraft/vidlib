@@ -3,7 +3,7 @@ package dev.mrbeastgaming.mods.hub;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.common.CommonPaths;
+import dev.latvian.mods.klib.CommonPaths;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.mrbeastgaming.mods.hub.api.token.UserToken;
 

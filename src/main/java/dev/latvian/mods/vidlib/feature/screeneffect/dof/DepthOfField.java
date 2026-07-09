@@ -34,7 +34,7 @@ public class DepthOfField {
 	private static int uBlurMode = 0;
 
 	@ClientAutoRegister
-	public static final Canvas CANVAS = Canvas.createExternal(VidLib.id("depth_of_field"), builder -> {
+	public static final Canvas CANVAS = Canvas.createExternal(ID.vidlib("depth_of_field"), builder -> {
 		builder.setTickCallback(DepthOfField::tick);
 		builder.setDrawSetupCallback(DepthOfField::setup);
 		builder.addUniform(CanvasUniform.mat4("InverseViewProjectionMat", () -> ClientMatrices.INVERSE_WORLD));

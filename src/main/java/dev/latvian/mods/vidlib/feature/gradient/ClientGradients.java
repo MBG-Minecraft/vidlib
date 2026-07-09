@@ -6,7 +6,7 @@ import dev.latvian.mods.vidlib.VidLib;
 
 public interface ClientGradients {
 	static Gradient ref(String path) {
-		return new GradientReference(VidLib.id(path));
+		return new GradientReference(ID.vidlib(path));
 	}
 
 	Gradient TRAIL = ref("trail");

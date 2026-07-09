@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.core.mixin;
 
 import com.mojang.blaze3d.framegraph.FramePass;
 import com.mojang.blaze3d.systems.RenderPass;
-import dev.latvian.mods.klib.gl.GLDebugLog;
 import dev.latvian.mods.vidlib.core.VLWithCanvas;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import net.minecraft.client.renderer.PostPass;
@@ -31,7 +30,6 @@ public class PostPassMixin implements VLWithCanvas {
 	private void vl$executeIfCanvasActive(FramePass pass, Runnable runnable) {
 		pass.executes(() -> {
 			if (vl$canvas == null || vl$canvas.active) {
-				GLDebugLog.message("[VidLib] Drawing post pass " + name);
 				runnable.run();
 			}
 		});

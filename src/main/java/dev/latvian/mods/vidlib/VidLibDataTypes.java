@@ -1,7 +1,8 @@
 package dev.latvian.mods.vidlib;
 
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.klib.data.DataTypes;
+import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
+import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.block.BlockStatePalette;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
@@ -21,7 +22,6 @@ import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
-import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.stage.Stage;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
@@ -31,88 +31,44 @@ import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.util.NameDrawType;
-import net.minecraft.core.ClientAsset;
-import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.network.connection.ConnectionType;
-
-import java.util.List;
-import java.util.Set;
+import io.netty.buffer.ByteBuf;
 
 public interface VidLibDataTypes {
-	DataType<Set<String>> STRING_SET = DataTypes.STRING.setOf();
-	DataType<List<ItemStack>> ITEM_STACK_LIST = DataTypes.ITEM_STACK.listOf();
-	DataType<ClientAsset.ResourceTexture> RESOURCE_TEXTURE = DataType.of(ClientAsset.ResourceTexture.CODEC, ClientAsset.ResourceTexture.STREAM_CODEC, ClientAsset.ResourceTexture.class);
-
-	// Necessary for Bukkit, used in Sleeping Player prop, etc.
-	DataType<ItemStack> SAFE_ITEM_STACK = DataType.of(ItemStack.OPTIONAL_CODEC, new StreamCodec<>() {
-		public static final Identifier EMPTY_ID = Identifier.tryBuild("minecraft", "air");
-
-		@Override
-		public ItemStack decode(RegistryFriendlyByteBuf buf) {
-			var item = BuiltInRegistries.ITEM.get(buf.readIdentifier()).orElse(null);
-			return item == null || item.value() == Items.AIR ? ItemStack.EMPTY : new ItemStack(item, 1, DataComponentPatch.EMPTY);
-		}
-
-		@Override
-		public void encode(RegistryFriendlyByteBuf buf, ItemStack stack) {
-			if (stack.isEmpty()) {
-				buf.writeIdentifier(EMPTY_ID);
-			} else {
-				buf.writeIdentifier(stack.typeHolder().unwrapKey().map(ResourceKey::identifier).orElse(EMPTY_ID));
-			}
-		}
-	}, ItemStack.class);
-
-	DataType<ConnectionType> CONNECTION_TYPE = DataType.of(ConnectionType.values());
-
-	static void register() {
-		DataType.register(VidLib.id("string_set"), STRING_SET);
-		DataType.register(VidLib.id("item_stack_list"), ITEM_STACK_LIST);
-		DataType.register(VidLib.id("resource_texture"), RESOURCE_TEXTURE);
-		DataType.register(VidLib.id("safe_item_stack"), SAFE_ITEM_STACK);
-		DataType.register(VidLib.id("connection_type"), CONNECTION_TYPE);
-
-		DataType.register(VidLib.id("icon"), Icon.DATA_TYPE);
-		DataType.register(VidLib.id("clothing_set"), ClothingSet.DATA_TYPE);
-		DataType.register(VidLib.id("player_clothing"), PlayerClothing.DATA_TYPE);
-		DataType.register(VidLib.id("skin_texture"), SkinTexture.DATA_TYPE);
-		DataType.register(VidLib.id("skin_texture_list"), SkinTexture.LIST_DATA_TYPE);
-		DataType.register(VidLib.id("skybox_id"), SkyboxData.ID_DATA_TYPE);
-		DataType.register(VidLib.id("chanced_particle"), ChancedParticle.DATA_TYPE);
-		DataType.register(VidLib.id("chanced_particle_list"), ChancedParticle.LIST_DATA_TYPE);
-		DataType.register(VidLib.id("block_filter"), BlockFilter.DATA_TYPE);
-		DataType.register(VidLib.id("entity_filter"), EntityFilter.DATA_TYPE);
-		DataType.register(VidLib.id("zone_render_type"), ZoneRenderType.DATA_TYPE);
-		DataType.register(VidLib.id("anchor"), Anchor.DATA_TYPE);
-		DataType.register(VidLib.id("direct_cutscene"), Cutscene.DIRECT_DATA_TYPE);
-		DataType.register(VidLib.id("cutscene"), Cutscene.DATA_TYPE, Cutscene.REGISTRY, null);
-		DataType.register(VidLib.id("screen_shake"), ScreenShake.DATA_TYPE);
-		DataType.register(VidLib.id("physics_particle_data"), PhysicsParticleData.DATA_TYPE);
-		DataType.register(VidLib.id("positioned_block"), PositionedBlock.DATA_TYPE);
-		DataType.register(VidLib.id("positioned_block_list"), PositionedBlock.LIST_DATA_TYPE);
-		DataType.register(VidLib.id("prop_type"), PropType.DATA_TYPE);
-		DataType.register(VidLib.id("explosion_data"), ExplosionData.DATA_TYPE);
-		DataType.register(VidLib.id("clock_font_ref"), ClockFont.REF_DATA_TYPE);
-		DataType.register(VidLib.id("zone_container"), ZoneContainer.DATA_TYPE, ZoneContainer.REGISTRY, null);
-		DataType.register(VidLib.id("location"), Location.DATA_TYPE, Location.REGISTRY, null);
-		DataType.register(VidLib.id("positioned_sound_data"), PositionedSoundData.DATA_TYPE);
-		DataType.register(VidLib.id("knumber"), KNumber.DATA_TYPE);
-		DataType.register(VidLib.id("kvector"), KVector.DATA_TYPE);
-		DataType.register(VidLib.id("stage"), Stage.DATA_TYPE);
-		DataType.register(VidLib.id("name_draw_type"), NameDrawType.DATA_TYPE);
-		DataType.register(VidLib.id("block_state_palette"), BlockStatePalette.DATA_TYPE);
-		DataType.register(VidLib.id("entity_snapshot"), EntitySnapshot.DATA_TYPE);
-		DataType.register(VidLib.id("entity_snapshot_list"), EntitySnapshot.LIST_DATA_TYPE);
-		DataType.register(VidLib.id("waypoint"), Waypoint.DATA_TYPE);
-		DataType.register(VidLib.id("waypoint_list"), Waypoint.LIST_DATA_TYPE);
-		DataType.register(VidLib.id("player_input"), PlayerInput.DATA_TYPE);
-		DataType.register(VidLib.id("map_texture_overrides"), MapTextureOverrides.DATA_TYPE);
+	static void register(CustomRegistryTypeCollector<ByteBuf, DataType<?>> registry) {
+		registry.register("icon", Icon.DATA_TYPE);
+		registry.register("clothing_set", ClothingSet.DATA_TYPE);
+		registry.register("player_clothing", PlayerClothing.DATA_TYPE);
+		registry.register("skin_texture", SkinTexture.DATA_TYPE);
+		registry.register("skin_texture_list", SkinTexture.LIST_DATA_TYPE);
+		registry.register("atmosphere_id", Atmosphere.ID_DATA_TYPE);
+		registry.register("chanced_particle", ChancedParticle.DATA_TYPE);
+		registry.register("chanced_particle_list", ChancedParticle.LIST_DATA_TYPE);
+		registry.register("block_filter", BlockFilter.DATA_TYPE);
+		registry.register("entity_filter", EntityFilter.DATA_TYPE);
+		registry.register("zone_render_type", ZoneRenderType.DATA_TYPE);
+		registry.register("anchor", Anchor.DATA_TYPE);
+		registry.register("direct_cutscene", Cutscene.DIRECT_DATA_TYPE);
+		registry.register("cutscene", Cutscene.DATA_TYPE);
+		registry.register("screen_shake", ScreenShake.DATA_TYPE);
+		registry.register("physics_particle_data", PhysicsParticleData.DATA_TYPE);
+		registry.register("positioned_block", PositionedBlock.DATA_TYPE);
+		registry.register("positioned_block_list", PositionedBlock.LIST_DATA_TYPE);
+		registry.register("prop_type", PropType.DATA_TYPE);
+		registry.register("explosion_data", ExplosionData.DATA_TYPE);
+		registry.register("clock_font_ref", ClockFont.REF_DATA_TYPE);
+		registry.register("zone_container", ZoneContainer.DATA_TYPE);
+		registry.register("location", Location.DATA_TYPE);
+		registry.register("positioned_sound_data", PositionedSoundData.DATA_TYPE);
+		registry.register("knumber", KNumber.DATA_TYPE);
+		registry.register("kvector", KVector.DATA_TYPE);
+		registry.register("stage", Stage.DATA_TYPE);
+		registry.register("name_draw_type", NameDrawType.DATA_TYPE);
+		registry.register("block_state_palette", BlockStatePalette.DATA_TYPE);
+		registry.register("entity_snapshot", EntitySnapshot.DATA_TYPE);
+		registry.register("entity_snapshot_list", EntitySnapshot.LIST_DATA_TYPE);
+		registry.register("waypoint", Waypoint.DATA_TYPE);
+		registry.register("waypoint_list", Waypoint.LIST_DATA_TYPE);
+		registry.register("player_input", PlayerInput.DATA_TYPE);
+		registry.register("map_texture_overrides", MapTextureOverrides.DATA_TYPE);
 	}
 }

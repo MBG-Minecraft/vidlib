@@ -7,7 +7,7 @@ import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 
-@EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = ID.vidlib, value = Dist.CLIENT)
 public class IrisIntegration {
 	public static IrisIntegration INSTANCE = new IrisIntegration();
 

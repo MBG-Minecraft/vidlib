@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -16,7 +16,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements ZoneShape {
-	public static final SimpleRegistryType<SphereZoneShape> TYPE = SimpleRegistryType.dynamic("sphere", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<SphereZoneShape> TYPE = CustomRegistryType.dynamic("sphere", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		MCCodecs.VEC3.fieldOf("pos").forGetter(SphereZoneShape::pos),
 		Codec.doubleRange(0D, Double.POSITIVE_INFINITY).fieldOf("radius").forGetter(SphereZoneShape::radius)
 	).apply(instance, SphereZoneShape::new)), CompositeStreamCodec.of(
@@ -30,7 +30,7 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

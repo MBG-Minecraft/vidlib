@@ -6,16 +6,15 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JavaOps;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.registry.CustomRegistry;
+import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
+import dev.latvian.mods.klib.registry.CustomRegistryValue;
+import dev.latvian.mods.klib.registry.UnitType;
 import dev.latvian.mods.klib.util.IntOrUUID;
 import dev.latvian.mods.klib.util.ParsedEntitySelector;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -35,51 +34,51 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public interface EntityFilter extends Predicate<Entity>, SimpleRegistryEntry {
-	SimpleRegistry<EntityFilter> REGISTRY = SimpleRegistry.create(VidLib.id("entity_filter"), c -> PlatformHelper.CURRENT.collectEntityFilters(c));
-
-	static SimpleRegistryType.Unit<EntityFilter> basic(String name, Predicate<Entity> predicate) {
-		return SimpleRegistryType.unitWithType(name, type -> new BasicEntityFilter(type, predicate));
+public interface EntityFilter extends Predicate<Entity>, CustomRegistryValue<RegistryFriendlyByteBuf, EntityFilter> {
+	static UnitType<RegistryFriendlyByteBuf, EntityFilter> basic(String name, Predicate<Entity> predicate) {
+		return UnitType.create(name, type -> new BasicEntityFilter(type, predicate));
 	}
 
-	SimpleRegistryType.Unit<EntityFilter> NONE = basic("none", entity -> false);
-	SimpleRegistryType.Unit<EntityFilter> ANY = basic("any", entity -> true);
-	SimpleRegistryType.Unit<EntityFilter> ALIVE = basic("alive", Entity::isAlive);
-	SimpleRegistryType.Unit<EntityFilter> DEAD = basic("dead", entity -> !entity.isAlive());
-	SimpleRegistryType.Unit<EntityFilter> DEAD_OR_DYING = basic("dead_or_dying", entity -> !entity.isAlive());
-	SimpleRegistryType.Unit<EntityFilter> LIVING = basic("living", entity -> entity instanceof LivingEntity);
-	SimpleRegistryType.Unit<EntityFilter> MOB = basic("mob", entity -> entity instanceof Mob);
-	SimpleRegistryType.Unit<EntityFilter> ENEMY = basic("enemy", entity -> entity instanceof Enemy);
-	SimpleRegistryType.Unit<EntityFilter> PLAYER = basic("player", entity -> entity instanceof Player);
-	SimpleRegistryType.Unit<EntityFilter> SURVIVAL_MODE = basic("survival_mode", entity -> entity.getGameMode() == GameType.SURVIVAL);
-	SimpleRegistryType.Unit<EntityFilter> ADVENTURE_MODE = basic("adventure_mode", entity -> entity.getGameMode() == GameType.ADVENTURE);
-	SimpleRegistryType.Unit<EntityFilter> SURVIVAL_LIKE_MODE = basic("survival_like_mode", entity -> entity.getGameMode() != null && entity.getGameMode().isSurvival());
-	SimpleRegistryType.Unit<EntityFilter> CREATIVE_MODE = basic("creative_mode", entity -> entity.getGameMode() == GameType.CREATIVE);
-	SimpleRegistryType.Unit<EntityFilter> SPECTATOR_MODE = basic("spectator_mode", Entity::isSpectator);
-	SimpleRegistryType.Unit<EntityFilter> SPECTATOR_OR_CREATIVE_MODE = basic("spectator_or_creative_mode", entity -> entity.getGameMode() == GameType.SPECTATOR || entity.getGameMode() == GameType.CREATIVE);
-	SimpleRegistryType.Unit<EntityFilter> ITEM = basic("item", entity -> entity instanceof ItemEntity);
-	SimpleRegistryType.Unit<EntityFilter> PROJECTILE = basic("projectile", entity -> entity instanceof Projectile);
-	SimpleRegistryType.Unit<EntityFilter> VISIBLE = basic("visible", entity -> !entity.isInvisible());
-	SimpleRegistryType.Unit<EntityFilter> INVISIBLE = basic("invisible", Entity::isInvisible);
-	SimpleRegistryType.Unit<EntityFilter> SUSPENDED = basic("suspended", entity -> CommonGameEngine.INSTANCE.isSuspended(entity));
-	SimpleRegistryType.Unit<EntityFilter> GLOWING = basic("glowing", Entity::isCurrentlyGlowing);
-	SimpleRegistryType.Unit<EntityFilter> IN_WATER = basic("in_water", Entity::isInWater);
-	SimpleRegistryType.Unit<EntityFilter> IN_WATER_OR_RAIN = basic("in_water_or_rain", Entity::isInWaterOrRain);
-	SimpleRegistryType.Unit<EntityFilter> IN_LIQUID = basic("in_liquid", Entity::isInLiquid);
-	SimpleRegistryType.Unit<EntityFilter> UNDERWATER = basic("underwater", Entity::isUnderWater);
-	SimpleRegistryType.Unit<EntityFilter> ON_RAILS = basic("on_rails", Entity::isOnRails);
-	SimpleRegistryType.Unit<EntityFilter> ON_FIRE = basic("on_fire", Entity::isOnFire);
-	SimpleRegistryType.Unit<EntityFilter> STAFF = basic("staff", entity -> PlatformHelper.CURRENT.isStaff(entity));
-	SimpleRegistryType.Unit<EntityFilter> STAFF_OR_TALENT = basic("staff_or_talent", entity -> PlatformHelper.CURRENT.isStaffOrTalent(entity));
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> NONE = basic("none", _ -> false);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> ANY = basic("any", _ -> true);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> ALIVE = basic("alive", Entity::isAlive);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> DEAD = basic("dead", entity -> !entity.isAlive());
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> DEAD_OR_DYING = basic("dead_or_dying", entity -> !entity.isAlive());
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> LIVING = basic("living", entity -> entity instanceof LivingEntity);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> MOB = basic("mob", entity -> entity instanceof Mob);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> ENEMY = basic("enemy", entity -> entity instanceof Enemy);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> PLAYER = basic("player", entity -> entity instanceof Player);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> SURVIVAL_MODE = basic("survival_mode", entity -> entity.getGameMode() == GameType.SURVIVAL);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> ADVENTURE_MODE = basic("adventure_mode", entity -> entity.getGameMode() == GameType.ADVENTURE);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> SURVIVAL_LIKE_MODE = basic("survival_like_mode", entity -> entity.getGameMode() != null && entity.getGameMode().isSurvival());
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> CREATIVE_MODE = basic("creative_mode", entity -> entity.getGameMode() == GameType.CREATIVE);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> SPECTATOR_MODE = basic("spectator_mode", Entity::isSpectator);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> SPECTATOR_OR_CREATIVE_MODE = basic("spectator_or_creative_mode", entity -> entity.getGameMode() == GameType.SPECTATOR || entity.getGameMode() == GameType.CREATIVE);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> ITEM = basic("item", entity -> entity instanceof ItemEntity);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> PROJECTILE = basic("projectile", entity -> entity instanceof Projectile);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> VISIBLE = basic("visible", entity -> !entity.isInvisible());
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> INVISIBLE = basic("invisible", Entity::isInvisible);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> SUSPENDED = basic("suspended", entity -> CommonGameEngine.INSTANCE.isSuspended(entity));
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> GLOWING = basic("glowing", Entity::isCurrentlyGlowing);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> IN_WATER = basic("in_water", Entity::isInWater);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> IN_WATER_OR_RAIN = basic("in_water_or_rain", Entity::isInWaterOrRain);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> IN_LIQUID = basic("in_liquid", Entity::isInLiquid);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> UNDERWATER = basic("underwater", Entity::isUnderWater);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> ON_RAILS = basic("on_rails", Entity::isOnRails);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> ON_FIRE = basic("on_fire", Entity::isOnFire);
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> STAFF = basic("staff", entity -> VLPlatformHelper.CURRENT.isStaff(entity));
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> STAFF_OR_TALENT = basic("staff_or_talent", entity -> VLPlatformHelper.CURRENT.isStaffOrTalent(entity));
 
 	static EntityFilter of(boolean value) {
-		return value ? ANY.instance() : NONE.instance();
+		return value ? ANY.value() : NONE.value();
 	}
 
+	CustomRegistry<RegistryFriendlyByteBuf, EntityFilter> REGISTRY = CustomRegistry.create("entity_filter");
+
 	Codec<EntityFilter> NONE_OR_ANY_CODEC = Codec.BOOL.flatXmap(b -> DataResult.success(of(b)), filter -> {
-		if (filter == ANY.instance()) {
+		if (filter == ANY.value()) {
 			return DataResult.success(true);
-		} else if (filter == NONE.instance()) {
+		} else if (filter == NONE.value()) {
 			return DataResult.success(false);
 		} else {
 			return DataResult.error(() -> "Expected either 'any' or 'none'");
@@ -119,9 +118,9 @@ public interface EntityFilter extends Predicate<Entity>, SimpleRegistryEntry {
 	));
 
 	StreamCodec<RegistryFriendlyByteBuf, EntityFilter> STREAM_CODEC = ByteBufCodecs.either(ByteBufCodecs.BOOL, REGISTRY.streamCodec()).map(either -> either.map(EntityFilter::of, Function.identity()), filter -> filter == ANY.instance() ? Either.left(true) : filter == NONE.instance() ? Either.left(false) : Either.right(filter));
-	DataType<EntityFilter> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, EntityFilter.class);
+	DataType<EntityFilter> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 
-	static void builtinTypes(SimpleRegistryCollector<EntityFilter> registry) {
+	static void builtInTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, EntityFilter> registry) {
 		registry.register(NONE);
 		registry.register(ANY);
 
@@ -173,8 +172,8 @@ public interface EntityFilter extends Predicate<Entity>, SimpleRegistryEntry {
 	}
 
 	@Override
-	default SimpleRegistryType<?> type() {
-		return REGISTRY.getType(this);
+	default CustomRegistry<RegistryFriendlyByteBuf, EntityFilter> getRegistry() {
+		return REGISTRY;
 	}
 
 	@Nullable
@@ -193,9 +192,9 @@ public interface EntityFilter extends Predicate<Entity>, SimpleRegistryEntry {
 	}
 
 	default EntityFilter and(EntityFilter filter) {
-		if (filter == ANY.instance()) {
+		if (filter == ANY.value()) {
 			return this;
-		} else if (filter == NONE.instance()) {
+		} else if (filter == NONE.value()) {
 			return filter;
 		} else {
 			return new EntityAndFilter(List.of(this, filter));
@@ -205,14 +204,14 @@ public interface EntityFilter extends Predicate<Entity>, SimpleRegistryEntry {
 	default EntityFilter and(EntityFilter... filters) {
 		var list = new ArrayList<EntityFilter>(filters.length + 1);
 
-		if (this != ANY.instance()) {
+		if (this != ANY.value()) {
 			list.add(this);
 		}
 
 		for (var filter : filters) {
-			if (filter == NONE.instance()) {
+			if (filter == NONE.value()) {
 				return filter;
-			} else if (filter != ANY.instance()) {
+			} else if (filter != ANY.value()) {
 				list.add(filter);
 			}
 		}
@@ -221,9 +220,9 @@ public interface EntityFilter extends Predicate<Entity>, SimpleRegistryEntry {
 	}
 
 	default EntityFilter or(EntityFilter filter) {
-		if (filter == ANY.instance()) {
+		if (filter == ANY.value()) {
 			return filter;
-		} else if (filter == NONE.instance()) {
+		} else if (filter == NONE.value()) {
 			return this;
 		} else {
 			return new EntityOrFilter(List.of(this, filter));
@@ -233,14 +232,14 @@ public interface EntityFilter extends Predicate<Entity>, SimpleRegistryEntry {
 	default EntityFilter or(EntityFilter... filters) {
 		var list = new ArrayList<EntityFilter>(filters.length + 1);
 
-		if (this != NONE.instance()) {
+		if (this != NONE.value()) {
 			list.add(this);
 		}
 
 		for (var filter : filters) {
-			if (filter == ANY.instance()) {
+			if (filter == ANY.value()) {
 				return filter;
-			} else if (filter != NONE.instance()) {
+			} else if (filter != NONE.value()) {
 				list.add(filter);
 			}
 		}

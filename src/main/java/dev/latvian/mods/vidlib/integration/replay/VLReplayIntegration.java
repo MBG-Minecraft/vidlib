@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.integration.replay;
 
 import com.mojang.authlib.GameProfile;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.replay.api.ReplayMarkerGroup;
 import dev.latvian.mods.replay.api.ReplayMarkerType;
@@ -33,7 +34,6 @@ import dev.latvian.mods.vidlib.feature.imgui.EntityExplorerPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverridesReplaySessionData;
-import dev.latvian.mods.vidlib.feature.misc.EventMarkerPayload;
 import dev.latvian.mods.vidlib.feature.misc.ReplayMarkerPayload;
 import dev.latvian.mods.vidlib.feature.misc.SyncPlayerTagsPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
@@ -77,7 +77,7 @@ import java.util.IdentityHashMap;
 import java.util.Set;
 import java.util.UUID;
 
-@EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = ID.vidlib, value = Dist.CLIENT)
 public class VLReplayIntegration {
 	@SubscribeEvent
 	public static void replaySessionOpened(ReplaySessionOpenedEvent event) {
@@ -143,21 +143,6 @@ public class VLReplayIntegration {
 									prop.remove = now;
 									replayProps.add(prop);
 								}
-							}
-						}
-						// Legacy
-						//noinspection deprecation
-						case EventMarkerPayload p -> {
-							var builder = ReplayMarkerData.builder().description(p.event()).customData(p.tag().orElse(null));
-
-							if (p.event().equals("sync")) {
-								builder.group(ReplayMarkerGroup.DATA_SYNC);
-							}
-
-							var data = ClientGameEngine.INSTANCE.handleReplayMarker(builder.build());
-
-							if (data != null) {
-								event.addMarker((int) (now - startTick), ReplayMarkerType.SERVER_RECORDING, data);
 							}
 						}
 						case ReplayMarkerPayload p -> {

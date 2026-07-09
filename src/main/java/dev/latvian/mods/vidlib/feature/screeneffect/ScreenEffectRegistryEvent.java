@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.screeneffect;
 
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryTypeEvent;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryTypeCollector;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryTypeEvent;
 
-public class ScreenEffectRegistryEvent extends SimpleRegistryTypeEvent<ScreenEffect> {
-	public ScreenEffectRegistryEvent(SimpleRegistryCollector<ScreenEffect> registry) {
+public class ScreenEffectRegistryEvent extends CustomRegistryTypeEvent<ScreenEffect> {
+	public ScreenEffectRegistryEvent(CustomRegistryTypeCollector<ScreenEffect> registry) {
 		super(registry);
 	}
 }

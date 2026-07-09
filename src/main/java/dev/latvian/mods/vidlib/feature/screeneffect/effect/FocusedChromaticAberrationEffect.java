@@ -5,7 +5,7 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.feature.screeneffect.FocusPoint;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
@@ -18,7 +18,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
 
 public record FocusedChromaticAberrationEffect(KNumber strength, FocusPoint focus) implements ScreenEffect {
-	public static final SimpleRegistryType<FocusedChromaticAberrationEffect> TYPE = SimpleRegistryType.dynamic("focused_chromatic_aberration", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<FocusedChromaticAberrationEffect> TYPE = CustomRegistryType.dynamic("focused_chromatic_aberration", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.fieldOf("strength").forGetter(FocusedChromaticAberrationEffect::strength),
 		FocusPoint.CODEC.fieldOf("focus").forGetter(FocusedChromaticAberrationEffect::focus)
 	).apply(instance, FocusedChromaticAberrationEffect::new)), CompositeStreamCodec.of(
@@ -81,7 +81,7 @@ public record FocusedChromaticAberrationEffect(KNumber strength, FocusPoint focu
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

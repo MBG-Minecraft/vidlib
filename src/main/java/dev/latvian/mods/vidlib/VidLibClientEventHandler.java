@@ -6,8 +6,10 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
 import dev.latvian.mods.klib.texture.LightUV;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.replay.api.ReplayAPI;
+import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.BlockEntityRendererHolder;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
@@ -39,17 +41,15 @@ import dev.latvian.mods.vidlib.feature.misc.MainMenuOpenedEvent;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import dev.latvian.mods.vidlib.feature.misc.ScreenTextRenderer;
-import dev.latvian.mods.vidlib.feature.multiverse.VoidSpecialEffects;
 import dev.latvian.mods.vidlib.feature.particle.VidLibClientParticles;
 import dev.latvian.mods.vidlib.feature.particle.VidLibParticleRenderTypes;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
 import dev.latvian.mods.vidlib.feature.session.LocalClientSessionData;
-import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.structure.StructureCapture;
 import dev.latvian.mods.vidlib.feature.structure.StructureRenderer;
@@ -118,7 +118,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 
-@EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = ID.vidlib, value = Dist.CLIENT)
 public class VidLibClientEventHandler {
 	public static boolean clientLoaded = false;
 
@@ -147,25 +147,25 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void dynamicResources(DynamicResourceEvent.Assets event) {
-		event.register(VidLib.id("dynamic_resources/clothing"));
+		event.register(ID.vidlib("dynamic_resources/clothing"));
 	}
 
 	@SubscribeEvent
 	public static void addReloadListeners(AddClientReloadListenersEvent event) {
-		event.addListener(VidLib.id("structure"), new StructureStorage(StructureStorage.CLIENT));
-		event.addListener(VidLib.id("ghost_structure"), new GhostStructure.Loader());
-		event.addListener(VidLib.id("clothing_preset"), new ClothingPresetLoader());
-		event.addListener(VidLib.id("physics_particle_data"), new PhysicsParticleData.Loader());
-		event.addListener(VidLib.id("gradient"), new ClientGradientLoader());
-		event.addListener(VidLib.id("clock_font"), new ClockFont.Loader());
-		event.addListener(VidLib.id("clock"), new Clock.Loader());
-		event.addListener(VidLib.id("skybox"), new SkyboxData.Loader());
-		event.addListener(VidLib.id("zone"), new ZoneLoader(ZoneLoader.CLIENT_BY_DIMENSION, false));
-		event.addListener(VidLib.id("msdf"), new MSDFFont.Loader());
+		event.addListener(ID.vidlib("structure"), new StructureStorage(StructureStorage.CLIENT));
+		event.addListener(ID.vidlib("ghost_structure"), new GhostStructure.Loader());
+		event.addListener(ID.vidlib("clothing_preset"), new ClothingPresetLoader());
+		event.addListener(ID.vidlib("physics_particle_data"), new PhysicsParticleData.Loader());
+		event.addListener(ID.vidlib("gradient"), new ClientGradientLoader());
+		event.addListener(ID.vidlib("clock_font"), new ClockFont.Loader());
+		event.addListener(ID.vidlib("clock"), new Clock.Loader());
+		event.addListener(ID.vidlib("atmosphere"), new Atmosphere.Loader());
+		event.addListener(ID.vidlib("zone"), new ZoneLoader(ZoneLoader.CLIENT_BY_DIMENSION, false));
+		event.addListener(ID.vidlib("msdf"), new MSDFFont.Loader());
 
-		event.addDependency(VidLib.id("gradient"), VidLib.id("clothing_preset"));
-		event.addDependency(VidLib.id("structure"), VidLib.id("ghost_structure"));
-		event.addDependency(VidLib.id("clock_font"), VidLib.id("clock"));
+		event.addDependency(ID.vidlib("gradient"), ID.vidlib("clothing_preset"));
+		event.addDependency(ID.vidlib("structure"), ID.vidlib("ghost_structure"));
+		event.addDependency(ID.vidlib("clock_font"), ID.vidlib("clock"));
 	}
 
 	@SubscribeEvent
@@ -175,7 +175,6 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void registerCustomEnvironmentEffectRenderers(RegisterCustomEnvironmentEffectRendererEvent event) {
-		event.registerSkyboxRenderer(VidLib.id("void"), new VoidSpecialEffects());
 	}
 
 	@SubscribeEvent
@@ -196,15 +195,15 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void registerGuiLayers(RegisterGuiLayersEvent event) {
-		event.registerBelowAll(VidLib.id("below_all"), VidLibHUD::drawBelowAll);
-		event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, VidLib.id("above_boss"), VidLibHUD::drawAboveBossOverlay);
-		event.registerAbove(VanillaGuiLayers.OVERLAY_MESSAGE, VidLib.id("information_hud"), VidLibHUD::drawInformationHUD);
-		event.registerAboveAll(VidLib.id("above_all"), VidLibHUD::drawAboveAll);
+		event.registerBelowAll(ID.vidlib("below_all"), VidLibHUD::drawBelowAll);
+		event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, ID.vidlib("above_boss"), VidLibHUD::drawAboveBossOverlay);
+		event.registerAbove(VanillaGuiLayers.OVERLAY_MESSAGE, ID.vidlib("information_hud"), VidLibHUD::drawInformationHUD);
+		event.registerAboveAll(ID.vidlib("above_all"), VidLibHUD::drawAboveAll);
 	}
 
 	@SubscribeEvent
 	public static void registerItemTintSources(RegisterColorHandlersEvent.ItemTintSources event) {
-		event.register(VidLib.id("rgb"), RainbowItemTint.MAP_CODEC);
+		event.register(ID.vidlib("rgb"), RainbowItemTint.MAP_CODEC);
 	}
 
 	@SubscribeEvent
@@ -705,7 +704,7 @@ public class VidLibClientEventHandler {
 		PlayerProfiles.cache(event.getPlayer().getGameProfile());
 
 		if (!event.getPlayer().vl$sessionData().clientModListSentDuringConfig) {
-			event.getPlayer().c2s(new ClientModListPayload(PlatformHelper.CURRENT.getModList()));
+			event.getPlayer().c2s(new ClientModListPayload(VLPlatformHelper.CURRENT.getModList()));
 		}
 	}
 
@@ -770,7 +769,7 @@ public class VidLibClientEventHandler {
 				LinkHubUserScreen.open(event.getMinecraft());
 			}
 		} else if (HubMinecraftProfileData.SELF == null) {
-			if (!PlatformHelper.CURRENT.isDevEnv()) {
+			if (!VLPlatformHelper.CURRENT.isDevEnv()) {
 				LinkMinecraftScreen.handle(event.getMinecraft(), true);
 			}
 		}
@@ -789,7 +788,7 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void syncClientFilesHub(SyncClientFilesHubEvent event) {
-		var gameDir = PlatformHelper.CURRENT.getGameDirectory();
+		var gameDir = VLPlatformHelper.CURRENT.getGameDirectory();
 
 		event.addDirectory(gameDir.resolve("voicechat_recordings"), builder -> {
 			builder.setType(HubFileType.VOICE_CHAT_RECORDING);

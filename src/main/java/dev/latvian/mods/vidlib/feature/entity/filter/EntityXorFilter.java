@@ -2,24 +2,29 @@ package dev.latvian.mods.vidlib.feature.entity.filter;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import imgui.ImGui;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 
 public record EntityXorFilter(EntityFilter a, EntityFilter b) implements EntityFilter, ImBuilderWithHolder.Factory {
-	public static SimpleRegistryType<EntityXorFilter> TYPE = SimpleRegistryType.dynamic("xor", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		EntityFilter.CODEC.fieldOf("a").forGetter(EntityXorFilter::a),
-		EntityFilter.CODEC.fieldOf("b").forGetter(EntityXorFilter::b)
-	).apply(instance, EntityXorFilter::new)), CompositeStreamCodec.of(
-		EntityFilter.STREAM_CODEC, EntityXorFilter::a,
-		EntityFilter.STREAM_CODEC, EntityXorFilter::b,
-		EntityXorFilter::new
-	));
+	public static DynamicType<RegistryFriendlyByteBuf, EntityFilter> TYPE = DynamicType.create(
+		"xor",
+		RecordCodecBuilder.mapCodec(instance -> instance.group(
+			EntityFilter.CODEC.fieldOf("a").forGetter(EntityXorFilter::a),
+			EntityFilter.CODEC.fieldOf("b").forGetter(EntityXorFilter::b)
+		).apply(instance, EntityXorFilter::new)),
+		CompositeStreamCodec.of(
+			EntityFilter.STREAM_CODEC, EntityXorFilter::a,
+			EntityFilter.STREAM_CODEC, EntityXorFilter::b,
+			EntityXorFilter::new
+		)
+	);
 
 	public static class Builder implements EntityFilterImBuilder {
 		public static final ImBuilderHolder<EntityFilter> TYPE = ImBuilderHolder.of("XOR", Builder::new);
@@ -62,7 +67,7 @@ public record EntityXorFilter(EntityFilter a, EntityFilter b) implements EntityF
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public DynamicType<RegistryFriendlyByteBuf, EntityFilter> type() {
 		return TYPE;
 	}
 

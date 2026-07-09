@@ -8,7 +8,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
@@ -16,7 +16,7 @@ import imgui.ImGui;
 import net.minecraft.world.phys.Vec3;
 
 public record DynamicKVector(KNumber x, KNumber y, KNumber z) implements KVector, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<DynamicKVector> TYPE = SimpleRegistryType.dynamic("dynamic", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<DynamicKVector> TYPE = CustomRegistryType.dynamic("dynamic", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.fieldOf("x").forGetter(DynamicKVector::x),
 		KNumber.CODEC.fieldOf("y").forGetter(DynamicKVector::y),
 		KNumber.CODEC.fieldOf("z").forGetter(DynamicKVector::z)
@@ -71,7 +71,7 @@ public record DynamicKVector(KNumber x, KNumber y, KNumber z) implements KVector
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

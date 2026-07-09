@@ -1,21 +1,22 @@
 package dev.latvian.mods.vidlib.feature.block.filter;
 
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.klib.registry.CustomRegistryType;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 
 public abstract class SimpleBlockFilter implements BlockFilter {
-	private final SimpleRegistryType<BlockFilter> type;
+	private final CustomRegistryType<RegistryFriendlyByteBuf, BlockFilter> type;
 
-	public SimpleBlockFilter(SimpleRegistryType<BlockFilter> type) {
+	public SimpleBlockFilter(CustomRegistryType<RegistryFriendlyByteBuf, BlockFilter> type) {
 		this.type = type;
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<RegistryFriendlyByteBuf, BlockFilter> type() {
 		return type;
 	}
 
 	@Override
 	public String toString() {
-		return type.id();
+		return type.toString();
 	}
 }

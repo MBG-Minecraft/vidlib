@@ -42,13 +42,6 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 		}
 	}
 
-	@Override
-	public float getDepthFar() {
-		var renderDistance = minecraft.options.getEffectiveRenderDistance() * 16F;
-		var vanillaDepthFar = Math.max(renderDistance * 4F, minecraft.options.cloudRange().get() * 16F);
-		return ClientGameEngine.INSTANCE.getFarDepth(vanillaDepthFar);
-	}
-
 	@Inject(method = "renderLevel", at = @At("HEAD"), cancellable = true)
 	private void vl$renderLevelHead(DeltaTracker deltaTracker, CallbackInfo ci) {
 		if (minecraft.getWindow().isInvisible()) {

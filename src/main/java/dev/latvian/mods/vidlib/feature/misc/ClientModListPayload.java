@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.misc;
 
+import dev.latvian.mods.klib.platform.PlatformModInfo;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;

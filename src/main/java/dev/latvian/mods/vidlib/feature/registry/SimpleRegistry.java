@@ -1,10 +1,14 @@
 package dev.latvian.mods.vidlib.feature.registry;
 
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import dev.latvian.mods.klib.codec.KLibCodecs;
+import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
+import dev.latvian.mods.klib.registry.RegistryKeys;
 import dev.latvian.mods.klib.util.Cast;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
@@ -18,37 +22,37 @@ import java.util.function.Consumer;
 public class SimpleRegistry<V extends SimpleRegistryEntry> {
 	public static final Map<Identifier, SimpleRegistry<?>> ALL = new Object2ObjectOpenHashMap<>();
 
-	public static <V extends SimpleRegistryEntry> SimpleRegistry<V> create(Identifier registryId, Consumer<SimpleRegistryCollector<V>> collector) {
-		return new SimpleRegistry<>(registryId, collector);
+	public static <V extends SimpleRegistryEntry> SimpleRegistry<V> create(RegistryKeys<V> registryKeys, Consumer<CustomRegistryTypeCollector<V>> collector) {
+		return new SimpleRegistry<>(registryKeys, collector);
 	}
 
-	private final Identifier registryId;
-	private Consumer<SimpleRegistryCollector<V>> collector;
-	private final Map<String, SimpleRegistryType<V>> typeMap;
-	private final Map<V, SimpleRegistryType.Unit<V>> unitTypeMap;
+	private final RegistryKeys<V> registryKeys;
+	private Consumer<CustomRegistryTypeCollector<V>> collector;
+	private final Map<String, CustomRegistryType<V>> typeMap;
+	private final Map<V, CustomRegistryType.Unit<V>> unitTypeMap;
 	private final Map<String, V> unitValueMap;
-	public final Codec<SimpleRegistryType<V>> typeCodec;
+	public final Codec<CustomRegistryType<V>> typeCodec;
 	private final Codec<V> codec;
 	private final StreamCodec<RegistryFriendlyByteBuf, V> streamCodec;
 
-	private SimpleRegistry(Identifier registryId, Consumer<SimpleRegistryCollector<V>> collector) {
-		this.registryId = registryId;
+	private SimpleRegistry(RegistryKeys<V> registryKeys, Consumer<CustomRegistryTypeCollector<V>> collector) {
+		this.registryKeys = registryKeys;
 		this.collector = collector;
 		this.typeMap = new Object2ObjectOpenHashMap<>();
 		this.unitTypeMap = new IdentityHashMap<>();
 		this.unitValueMap = new LinkedHashMap<>();
 
-		this.typeCodec = KLibCodecs.map(typeMap, Codec.STRING, SimpleRegistryType::id);
+		this.typeCodec = KLibCodecs.map(typeMap, Codec.STRING, CustomRegistryType::id);
 
 		Codec<V> unitCodec = Codec.STRING.flatXmap(s -> {
 			var value = typeMap.get(s);
-			return value instanceof SimpleRegistryType.Unit<V> unit ? DataResult.success(unit.instance()) : DataResult.error(() -> "Value " + s + " not found");
+			return value instanceof CustomRegistryType.Unit<V> unit ? DataResult.success(unit.instance()) : DataResult.error(() -> "Value " + s + " not found");
 		}, o -> {
 			var unit = unitTypeMap.get(o);
 			return unit != null ? DataResult.success(unit.id()) : DataResult.error(() -> "Key " + o + " not found");
 		});
 
-		Codec<V> dispatchCodec = typeCodec.dispatch("type", v -> Cast.to(v.type()), SimpleRegistryType::codec);
+		Codec<V> dispatchCodec = typeCodec.dispatch("type", v -> Cast.to(v.type()), CustomRegistryType::codec);
 
 		this.codec = KLibCodecs.or(unitCodec, dispatchCodec);
 
@@ -67,7 +71,7 @@ public class SimpleRegistry<V extends SimpleRegistryEntry> {
 
 	public void build() {
 		if (collector == null) {
-			throw new IllegalStateException("Registry " + registryId + " already built");
+			throw new IllegalStateException("Registry " + registryKeys.root().identifier() + " already built");
 		}
 
 		collector.accept(this::register);
@@ -75,10 +79,10 @@ public class SimpleRegistry<V extends SimpleRegistryEntry> {
 		ALL.put(registryId, this);
 	}
 
-	public void register(SimpleRegistryType<? extends V> type) {
+	public void register(CustomRegistryType<? extends V> type) {
 		typeMap.put(type.id(), Cast.to(type));
 
-		if (type instanceof SimpleRegistryType.Unit unit) {
+		if (type instanceof CustomRegistryType.Unit unit) {
 			V unitValue = Cast.to(unit.instance());
 			unitTypeMap.put(unitValue, unit);
 			unitValueMap.put(unit.id(), unitValue);
@@ -86,7 +90,7 @@ public class SimpleRegistry<V extends SimpleRegistryEntry> {
 	}
 
 	@Nullable
-	public SimpleRegistryType.Unit<V> getType(V value) {
+	public CustomRegistryType.Unit<V> getType(V value) {
 		return unitTypeMap.get(value);
 	}
 
@@ -126,5 +130,9 @@ public class SimpleRegistry<V extends SimpleRegistryEntry> {
 		} catch (Throwable ex) {
 			throw new IllegalStateException("Failed to encode " + registryId + "/" + type.id(), ex);
 		}
+	}
+
+	public ArgumentType<V> argument(CommandBuildContext ctx) {
+		return;
 	}
 }

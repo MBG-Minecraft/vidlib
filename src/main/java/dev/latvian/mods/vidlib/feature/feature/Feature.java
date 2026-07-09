@@ -18,13 +18,13 @@ public class Feature {
 
 	public static final StreamCodec<ByteBuf, Feature> STREAM_CODEC = ID.STREAM_CODEC.map(Feature::create, f -> f.id);
 
-	public static final Feature INFINITE_CHUNK_RENDERING = create(VidLib.id("infinite_chunk_rendering"));
-	public static final Feature SERVER_DATA = create(VidLib.id("server_data"));
-	public static final Feature PLAYER_DATA = create(VidLib.id("player_data"));
+	public static final Feature INFINITE_CHUNK_RENDERING = create(ID.vidlib("infinite_chunk_rendering"));
+	public static final Feature SERVER_DATA = create(ID.vidlib("server_data"));
+	public static final Feature PLAYER_DATA = create(ID.vidlib("player_data"));
 
-	public static final Feature SMALL_GRASS_HITBOX = create(VidLib.id("small_grass_hitbox"));
-	public static final Feature SOFT_BARRIERS = create(VidLib.id("soft_barriers"));
-	public static final Feature SKYBOX = create(VidLib.id("skybox"));
+	public static final Feature SMALL_GRASS_HITBOX = create(ID.vidlib("small_grass_hitbox"));
+	public static final Feature SOFT_BARRIERS = create(ID.vidlib("soft_barriers"));
+	public static final Feature ATMOSPHERE = create(ID.vidlib("atmosphere"));
 
 	public final Identifier id;
 

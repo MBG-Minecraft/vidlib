@@ -40,11 +40,11 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
 public interface VidLibEntityRenderStates {
-	ContextKey<Boolean> BOSS_FRAMEBUFFER = new ContextKey<>(VidLib.id("boss_framebuffer"));
-	ContextKey<Boolean> CREATIVE = new ContextKey<>(VidLib.id("creative"));
-	ContextKey<SpriteKey> SPRITE_KEY = new ContextKey<>(VidLib.id("sprite_key"));
-	ContextKey<UV> UV = new ContextKey<>(VidLib.id("uv"));
-	ContextKey<Boolean> TRANSLUCENT = new ContextKey<>(VidLib.id("translucent"));
+	ContextKey<Boolean> BOSS_FRAMEBUFFER = new ContextKey<>(ID.vidlib("boss_framebuffer"));
+	ContextKey<Boolean> CREATIVE = new ContextKey<>(ID.vidlib("creative"));
+	ContextKey<SpriteKey> SPRITE_KEY = new ContextKey<>(ID.vidlib("sprite_key"));
+	ContextKey<UV> UV = new ContextKey<>(ID.vidlib("uv"));
+	ContextKey<Boolean> TRANSLUCENT = new ContextKey<>(ID.vidlib("translucent"));
 
 	ItemStack DEFAULT_SHIELD = new ItemStack(Items.SHIELD);
 

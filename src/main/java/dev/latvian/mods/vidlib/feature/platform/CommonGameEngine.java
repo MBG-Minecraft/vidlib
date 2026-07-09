@@ -6,7 +6,7 @@ import dev.latvian.mods.vidlib.feature.entity.ExactEntitySpawnPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
 import dev.latvian.mods.vidlib.feature.location.WarpLocation;
-import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
+import dev.latvian.mods.klib.platform.PlatformModInfo;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
@@ -91,7 +91,7 @@ public class CommonGameEngine {
 		map.put(Feature.SOFT_BARRIERS, 1);
 		map.put(Feature.SERVER_DATA, 1);
 		map.put(Feature.PLAYER_DATA, 1);
-		map.put(Feature.SKYBOX, 1);
+		map.put(Feature.ATMOSPHERE, 1);
 	}
 
 	public void setupServer(MinecraftServer server) {

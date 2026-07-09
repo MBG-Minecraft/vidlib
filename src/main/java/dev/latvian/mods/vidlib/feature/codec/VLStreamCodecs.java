@@ -1,15 +1,19 @@
 package dev.latvian.mods.vidlib.feature.codec;
 
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.data.DataTypes;
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.VidLib;
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
@@ -113,4 +117,7 @@ public interface VLStreamCodecs {
 			}
 		}
 	}
+
+	StreamCodec<ByteBuf, Identifier> VIDLIB_ID = KLibStreamCodecs.commonIdentifier(VidLib.ID);
+	StreamCodec<ByteBuf, Identifier> VIDEO_ID = KLibStreamCodecs.commonIdentifier("video");
 }

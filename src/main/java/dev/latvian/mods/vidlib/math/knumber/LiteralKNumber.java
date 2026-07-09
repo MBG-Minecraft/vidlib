@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.math.knumber;
 
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -24,17 +24,17 @@ public enum LiteralKNumber implements KNumber {
 	public final String name;
 	public final String displayName;
 	public final Function<KNumberContext, Double> factory;
-	public final SimpleRegistryType.Unit<LiteralKNumber> type;
+	public final CustomRegistryType.Unit<LiteralKNumber> type;
 
 	LiteralKNumber(String name, String displayName, Function<KNumberContext, Double> factory) {
 		this.name = name;
 		this.displayName = displayName;
 		this.factory = factory;
-		this.type = SimpleRegistryType.unit(name, this);
+		this.type = CustomRegistryType.unit(name, this);
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return type;
 	}
 

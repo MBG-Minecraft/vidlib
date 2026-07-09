@@ -8,7 +8,9 @@ import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.klib.registry.CustomRegistryType;
+import dev.latvian.mods.klib.util.ID;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -27,7 +29,7 @@ public record PositionedBlock(BlockPos pos, BlockState state) implements BulkLev
 
 	public static final Codec<PositionedBlock> CODEC = MAP_CODEC.codec();
 
-	public static final StreamCodec<RegistryFriendlyByteBuf, PositionedBlock> STREAM_CODEC = CompositeStreamCodec.of(
+	public static final StreamCodec<ByteBuf, PositionedBlock> STREAM_CODEC = CompositeStreamCodec.of(
 		BlockPos.STREAM_CODEC, PositionedBlock::pos,
 		MCStreamCodecs.BLOCK_STATE, PositionedBlock::state,
 		PositionedBlock::new
@@ -35,13 +37,13 @@ public record PositionedBlock(BlockPos pos, BlockState state) implements BulkLev
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, List<PositionedBlock>> LIST_STREAM_CODEC = KLibStreamCodecs.listOf(STREAM_CODEC);
 
-	public static final SimpleRegistryType<PositionedBlock> TYPE = SimpleRegistryType.dynamic("block", MAP_CODEC, STREAM_CODEC);
+	public static final CustomRegistryType<ByteBuf, BulkLevelModification> TYPE = REGISTRY.dynamic(ID.vidlib("block"), MAP_CODEC, STREAM_CODEC);
 
-	public static final DataType<PositionedBlock> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, PositionedBlock.class);
+	public static final DataType<PositionedBlock> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 	public static final DataType<List<PositionedBlock>> LIST_DATA_TYPE = DATA_TYPE.listOf();
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<ByteBuf, BulkLevelModification> type() {
 		return TYPE;
 	}
 

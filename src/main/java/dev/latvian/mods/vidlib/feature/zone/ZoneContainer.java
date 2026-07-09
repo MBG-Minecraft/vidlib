@@ -3,7 +3,8 @@ package dev.latvian.mods.vidlib.feature.zone;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.AAIBB;
-import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
+import dev.latvian.mods.klib.registry.RegistryKeys;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
@@ -29,6 +30,8 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
+	public static final RegistryKeys<ZoneContainer> REGISTRY_KEYS = RegistryKeys.createKeys(ID.vidlib("zone_container"), "video");
+
 	private static final int FLAG_GENERATED = 1;
 	private static final int FLAG_NOT_OVERWORLD = 2;
 	private static final int FLAG_HAS_TAGS = 4;
@@ -101,9 +104,8 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 		}
 	};
 
-	public static final VLRegistry<ZoneContainer> REGISTRY = VLRegistry.createServer("zone_container", ZoneContainer.class);
+	public static final VLRegistry<ZoneContainer> REGISTRY = VLRegistry.createServer(REGISTRY_KEYS);
 	public static final DataType<ZoneContainer> DATA_TYPE = REGISTRY.dataType();
-	public static final CommandDataType<ZoneContainer> COMMAND = CommandDataType.of(DATA_TYPE);
 
 	ActiveZones parent;
 	public final Identifier id;

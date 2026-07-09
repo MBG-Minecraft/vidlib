@@ -14,7 +14,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.interpolation.InterpolationImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePin;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePinType;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import imgui.ImGui;
 import imgui.flag.ImGuiTableFlags;
 import org.jetbrains.annotations.Nullable;
@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public record InterpolatedKNumber(KNumber progress, Interpolation interpolation, KNumber from, KNumber to) implements KNumber, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<InterpolatedKNumber> TYPE = SimpleRegistryType.dynamic("interpolated", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<InterpolatedKNumber> TYPE = CustomRegistryType.dynamic("interpolated", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.optionalFieldOf("progress", LiteralKNumber.PROGRESS).forGetter(InterpolatedKNumber::progress),
 		Interpolation.CODEC.optionalFieldOf("interpolation", LinearInterpolation.INSTANCE).forGetter(InterpolatedKNumber::interpolation),
 		KNumber.CODEC.fieldOf("from").forGetter(InterpolatedKNumber::from),
@@ -110,7 +110,7 @@ public record InterpolatedKNumber(KNumber progress, Interpolation interpolation,
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

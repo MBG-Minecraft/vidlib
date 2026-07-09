@@ -22,7 +22,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class ShapeProp extends Prop {
 	@AutoRegister
-	public static final PropType<ShapeProp> TYPE = PropType.create(VidLib.id("shape"), ShapeProp::new,
+	public static final PropType<ShapeProp> TYPE = PropType.create(ID.vidlib("shape"), ShapeProp::new,
 		TICK,
 		LIFESPAN,
 		POSITION,
@@ -35,7 +35,7 @@ public class ShapeProp extends Prop {
 		PropData.create(ShapeProp.class, "shape", Shape.DATA_TYPE, p -> p.shape, (p, v) -> p.shape = v, null),
 		PropData.create(ShapeProp.class, "color", Gradient.DATA_TYPE, p -> p.color, (p, v) -> p.color = v.optimize(), GradientImBuilder.TYPE),
 		PropData.create(ShapeProp.class, "outline_color", Gradient.DATA_TYPE, p -> p.outlineColor, (p, v) -> p.outlineColor = v.optimize(), GradientImBuilder.TYPE),
-		PropData.create(ShapeProp.class, "light_layer", RenderLightLayer.DATA_TYPE, p -> p.lightLayer, (p, v) -> p.lightLayer = v, () -> new EnumImBuilder<>(RenderLightLayer.VALUES)),
+		PropData.create(ShapeProp.class, "light_layer", RenderLightLayer.DATA_TYPE, p -> p.lightLayer, (p, v) -> p.lightLayer = v, EnumImBuilder.typeOf(RenderLightLayer.VALUES, RenderLightLayer.NORMAL)),
 		PropData.create(ShapeProp.class, "texture", ID.DATA_TYPE, p -> p.texture, (p, v) -> p.texture = v.equals(Empty.TEXTURE) ? Empty.TEXTURE : v, ResourceLocationImBuilder.DELAYED_TYPE)
 	);
 

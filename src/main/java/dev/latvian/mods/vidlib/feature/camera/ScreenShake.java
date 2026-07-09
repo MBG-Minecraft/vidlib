@@ -11,7 +11,7 @@ import dev.latvian.mods.klib.interpolation.EaseIn;
 import dev.latvian.mods.klib.interpolation.EaseOut;
 import dev.latvian.mods.klib.interpolation.Interpolation;
 import dev.latvian.mods.klib.interpolation.LinearInterpolation;
-import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
+import dev.latvian.mods.klib.registry.Ref;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -21,11 +21,11 @@ import net.minecraft.world.phys.Vec3;
 import java.util.function.Function;
 
 public record ScreenShake(
-	ScreenShakeType type,
+	Ref<ScreenShakeType> type,
 	int duration,
 	float speed,
 	float intensity,
-	Interpolation interpolation,
+	Ref<Interpolation> interpolation,
 	boolean motionBlur
 ) {
 	public static final ScreenShake NONE = new ScreenShake(
@@ -67,8 +67,7 @@ public record ScreenShake(
 		ScreenShake::new
 	);
 
-	public static final DataType<ScreenShake> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, ScreenShake.class);
-	public static final CommandDataType<ScreenShake> COMMAND = CommandDataType.of(DATA_TYPE);
+	public static final DataType<ScreenShake> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 
 	public static final Identifier MOTION_BLUR_EFFECT = Identifier.withDefaultNamespace("shaders/post/phosphor.json");
 

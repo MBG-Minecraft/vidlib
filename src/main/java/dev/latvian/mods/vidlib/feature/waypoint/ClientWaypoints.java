@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.waypoint;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.feature.icon.renderer.IconRenderer;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
@@ -139,7 +140,7 @@ public interface ClientWaypoints {
 				}
 
 				graphics.pose().translate(0F, -8F);
-				IconRenderer.draw(wp.waypoint().icon(), mc, graphics, (int) (alpha * 255));
+				IconRenderer.draw(wp.waypoint().icon().map(Ref::value).orElse(Waypoint.DEFAULT_ICON), mc, graphics, (int) (alpha * 255));
 				graphics.pose().popMatrix();
 			}
 		}

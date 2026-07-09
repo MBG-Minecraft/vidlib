@@ -3,12 +3,11 @@ package dev.latvian.mods.vidlib.math.knumber;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
+import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -17,8 +16,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
-public interface KNumber extends SimpleRegistryEntry {
-	SimpleRegistry<KNumber> REGISTRY = SimpleRegistry.create(VidLib.id("knumber"), c -> PlatformHelper.CURRENT.collectKNumbers(c));
+public interface KNumber {
+	SimpleRegistry<KNumber> REGISTRY = SimpleRegistry.create(ID.vidlib("knumber"), c -> VLPlatformHelper.CURRENT.collectKNumbers(c));
 
 	FixedKNumber ZERO = new FixedKNumber(0D);
 	FixedKNumber ONE = new FixedKNumber(1D);
@@ -65,7 +64,7 @@ public interface KNumber extends SimpleRegistryEntry {
 		}
 	}
 
-	static void builtinTypes(SimpleRegistryCollector<KNumber> registry) {
+	static void builtInTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, KNumber> registry) {
 		registry.register(FixedKNumber.TYPE);
 
 		for (var literal : LiteralKNumber.VALUES) {
@@ -90,7 +89,7 @@ public interface KNumber extends SimpleRegistryEntry {
 	}
 
 	@Override
-	default SimpleRegistryType<?> type() {
+	default CustomRegistryType<?> type() {
 		return REGISTRY.getType(this);
 	}
 

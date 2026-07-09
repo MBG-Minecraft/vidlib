@@ -2,27 +2,34 @@ package dev.latvian.mods.vidlib.feature.block.filter;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.registry.CustomRegistryType;
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import imgui.ImGui;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 
-public record BlockXorFilter(BlockFilter a, BlockFilter b) implements BlockFilter, ImBuilderWithHolder.Factory {
-	public static SimpleRegistryType<BlockXorFilter> TYPE = SimpleRegistryType.dynamic("xor", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		BlockFilter.CODEC.fieldOf("a").forGetter(BlockXorFilter::a),
-		BlockFilter.CODEC.fieldOf("b").forGetter(BlockXorFilter::b)
-	).apply(instance, BlockXorFilter::new)), CompositeStreamCodec.of(
-		BlockFilter.STREAM_CODEC, BlockXorFilter::a,
-		BlockFilter.STREAM_CODEC, BlockXorFilter::b,
-		BlockXorFilter::new
-	));
+public record BlockXorFilter(Ref<BlockFilter> a, Ref<BlockFilter> b) implements BlockFilter, ImBuilderWithHolder.Factory {
+	public static CustomRegistryType<RegistryFriendlyByteBuf, BlockFilter> TYPE = REGISTRY.dynamic(
+		ID.vidlib("xor"),
+		RecordCodecBuilder.mapCodec(instance -> instance.group(
+			BlockFilter.CODEC.fieldOf("a").forGetter(BlockXorFilter::a),
+			BlockFilter.CODEC.fieldOf("b").forGetter(BlockXorFilter::b)
+		).apply(instance, BlockXorFilter::new)),
+		CompositeStreamCodec.of(
+			BlockFilter.STREAM_CODEC, BlockXorFilter::a,
+			BlockFilter.STREAM_CODEC, BlockXorFilter::b,
+			BlockXorFilter::new
+		)
+	);
 
 	public static class Builder implements BlockFilterImBuilder {
 		public static final ImBuilderHolder<BlockFilter> TYPE = ImBuilderHolder.of("XOR", Builder::new);
@@ -38,8 +45,8 @@ public record BlockXorFilter(BlockFilter a, BlockFilter b) implements BlockFilte
 		@Override
 		public void set(BlockFilter value) {
 			if (value instanceof BlockXorFilter f) {
-				a.set(f.a);
-				b.set(f.b);
+				a.set(f.a.value());
+				b.set(f.b.value());
 			}
 		}
 
@@ -60,23 +67,23 @@ public record BlockXorFilter(BlockFilter a, BlockFilter b) implements BlockFilte
 
 		@Override
 		public BlockFilter build() {
-			return new BlockXorFilter(a.build(), b.build());
+			return new BlockXorFilter(a.build().optimize().ref(), b.build().optimize().ref());
 		}
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<RegistryFriendlyByteBuf, BlockFilter> type() {
 		return TYPE;
 	}
 
 	@Override
 	public boolean test(BlockInWorld block) {
-		return a.test(block) ^ b.test(block);
+		return a.value().test(block) ^ b.value().test(block);
 	}
 
 	@Override
 	public boolean test(Level level, BlockPos pos, BlockState state) {
-		return a.test(level, pos, state) ^ b.test(level, pos, state);
+		return a.value().test(level, pos, state) ^ b.value().test(level, pos, state);
 	}
 
 	@Override

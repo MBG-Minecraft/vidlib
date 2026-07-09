@@ -16,7 +16,7 @@ import dev.latvian.mods.vidlib.core.VLRenderType;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.client.TerrainRenderTypes;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
-import dev.latvian.mods.vidlib.feature.registry.RegistryRef;
+import dev.latvian.mods.vidlib.feature.registry.Ref;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.VLBiomes;
 import net.minecraft.client.Minecraft;
@@ -87,7 +87,7 @@ public class StructureRenderer implements WithCache {
 		return renderer;
 	}
 
-	public static StructureRenderer create(RegistryRef<LazyStructures> ref) {
+	public static StructureRenderer create(Ref<LazyStructures> ref) {
 		return create(ref.id(), StructureHolder.refSupplier(ref));
 	}
 

@@ -8,17 +8,17 @@ import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.icon.ItemIcon;
 import dev.latvian.mods.vidlib.feature.icon.SimpleColorIcon;
 import dev.latvian.mods.vidlib.feature.icon.TextureIcon;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.MultiBufferSource;
 
 public interface IconRenderer {
-	static <T extends Icon> void register(SimpleRegistryType<T> type, IconGuiRenderer<T> factory) {
+	static <T extends Icon> void register(CustomRegistryType<T> type, IconGuiRenderer<T> factory) {
 		IconGuiRenderer.MAP.put(type, factory);
 	}
 
-	static <T extends Icon> void register(SimpleRegistryType<T> type, IconWorldRenderer<T> factory) {
+	static <T extends Icon> void register(CustomRegistryType<T> type, IconWorldRenderer<T> factory) {
 		IconWorldRenderer.MAP.put(type, factory);
 	}
 

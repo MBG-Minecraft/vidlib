@@ -11,7 +11,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePin;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePinType;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import net.minecraft.network.codec.ByteBufCodecs;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -21,14 +21,14 @@ import java.util.List;
 import java.util.Objects;
 
 public record ServerDataKNumber(DataKey<?> dataKey) implements KNumber, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<ServerDataKNumber> TYPE = SimpleRegistryType.dynamic("server_data", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<ServerDataKNumber> TYPE = CustomRegistryType.dynamic("server_data", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.STRING.fieldOf("key").forGetter(ServerDataKNumber::key)
 	).apply(instance, ServerDataKNumber::new)), ByteBufCodecs.STRING_UTF8.map(ServerDataKNumber::new, ServerDataKNumber::key));
 
 	public static class Builder implements KNumberImBuilder {
 		public static final ImBuilderHolder<KNumber> TYPE = ImBuilderHolder.of("Server Data", Builder::new);
 
-		public final EnumImBuilder<DataKey<?>> key = new EnumImBuilder<>(DataKey.SERVER.all.values()).withNameGetter(DataKey::id);
+		public final EnumImBuilder<DataKey<?>> key = EnumImBuilder.of(DataKey.SERVER.all::values).nameGetter(DataKey::id).build();
 
 		@Override
 		public ImBuilderHolder<?> holder() {
@@ -69,7 +69,7 @@ public record ServerDataKNumber(DataKey<?> dataKey) implements KNumber, ImBuilde
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

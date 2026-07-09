@@ -5,7 +5,7 @@ import net.minecraft.resources.ResourceKey;
 
 public interface Smokings {
 	static ResourceKey<ClothingSet> create(String id) {
-		return ClothingPresets.createId(VidLib.id("smoking/" + id));
+		return ClothingPresets.createId(ID.vidlib("smoking/" + id));
 	}
 
 	ResourceKey<ClothingSet> SHINY_BLACK = create("shiny_black");

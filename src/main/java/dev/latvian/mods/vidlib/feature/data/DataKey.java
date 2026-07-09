@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.data;
 
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
@@ -16,7 +15,6 @@ public record DataKey<T>(
 	String id,
 	T defaultValue,
 	DataType<T> type,
-	CommandDataType<T> command,
 	boolean save,
 	boolean sync,
 	List<BiConsumer<Player, T>> onReceived,
@@ -81,7 +79,6 @@ public record DataKey<T>(
 				id,
 				defaultValue,
 				type,
-				CommandDataType.of(type),
 				save,
 				sync,
 				new ArrayList<>(0),
@@ -107,11 +104,6 @@ public record DataKey<T>(
 	@Override
 	public String toString() {
 		return storage + "/" + id;
-	}
-
-	@Nullable
-	public T[] getEnumConstants() {
-		return type.typeClass().isEnum() ? type.typeClass().getEnumConstants() : null;
 	}
 
 	public void addUpdateListener(BiConsumer<Player, T> onReceived) {

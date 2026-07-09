@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.entity.number;
 
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryTypeEvent;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryTypeCollector;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryTypeEvent;
 
-public class EntityNumberRegistryEvent extends SimpleRegistryTypeEvent<EntityNumber> {
-	public EntityNumberRegistryEvent(SimpleRegistryCollector<EntityNumber> registry) {
+public class EntityNumberRegistryEvent extends CustomRegistryTypeEvent<EntityNumber> {
+	public EntityNumberRegistryEvent(CustomRegistryTypeCollector<EntityNumber> registry) {
 		super(registry);
 	}
 }

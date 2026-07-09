@@ -20,7 +20,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class TextProp extends Prop {
 	@AutoRegister
-	public static final PropType<TextProp> TYPE = PropType.create(VidLib.id("text"), TextProp::new,
+	public static final PropType<TextProp> TYPE = PropType.create(ID.vidlib("text"), TextProp::new,
 		POSITION,
 		YAW,
 		PITCH,

@@ -10,7 +10,6 @@ import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
@@ -55,7 +54,6 @@ public record Location(
 
 	public static final VLRegistry<Location> REGISTRY = VLRegistry.createServer("location", Location.class);
 	public static final DataType<Location> DATA_TYPE = REGISTRY.dataType();
-	public static final CommandDataType<Location> COMMAND = CommandDataType.of(DATA_TYPE);
 
 	public static class Loader extends JsonRegistryReloadListener<Location> {
 		public Loader(VLRegistry<Location> registry) {

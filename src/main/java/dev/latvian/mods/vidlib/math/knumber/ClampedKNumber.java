@@ -10,13 +10,13 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePin;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePinType;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public record ClampedKNumber(KNumber value, KNumber min, KNumber max) implements KNumber, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<ClampedKNumber> TYPE = SimpleRegistryType.dynamic("clamped", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<ClampedKNumber> TYPE = CustomRegistryType.dynamic("clamped", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.fieldOf("value").forGetter(ClampedKNumber::value),
 		KNumber.CODEC.optionalFieldOf("min", KNumber.ZERO).forGetter(ClampedKNumber::min),
 		KNumber.CODEC.optionalFieldOf("max", KNumber.ONE).forGetter(ClampedKNumber::max)
@@ -85,7 +85,7 @@ public record ClampedKNumber(KNumber value, KNumber min, KNumber max) implements
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

@@ -7,13 +7,13 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public record ScaledKVector(KVector a, KVector b) implements KVector, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<ScaledKVector> TYPE = SimpleRegistryType.dynamic("scaled", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<ScaledKVector> TYPE = CustomRegistryType.dynamic("scaled", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KVector.CODEC.fieldOf("a").forGetter(ScaledKVector::a),
 		KVector.CODEC.fieldOf("b").forGetter(ScaledKVector::b)
 	).apply(instance, ScaledKVector::new)), CompositeStreamCodec.of(
@@ -61,7 +61,7 @@ public record ScaledKVector(KVector a, KVector b) implements KVector, ImBuilderW
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

@@ -615,7 +615,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	default float linearizeDepth(float depth) {
 		float near = 0.05F;
-		float far = ((VLGameRenderer) vl$self().gameRenderer).getDepthFar();
+		float far = vl$self().gameRenderer.getGameRenderState().levelRenderState.cameraRenderState.depthFar;
 		return near * far / (far + depth * (near - far));
 	}
 

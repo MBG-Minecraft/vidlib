@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib;
 
+import dev.latvian.mods.klib.data.DataTypeRegistryEvent;
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
@@ -58,7 +60,7 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
-@EventBusSubscriber(modid = VidLib.ID)
+@EventBusSubscriber(modid = ID.vidlib)
 public class VidLibEventHandler {
 	public static boolean gameLoaded = false;
 
@@ -98,6 +100,11 @@ public class VidLibEventHandler {
 	}
 
 	@SubscribeEvent
+	public static void dataTypeRegistry(DataTypeRegistryEvent event) {
+		VidLibDataTypes.register(event.getRegistry());
+	}
+
+	@SubscribeEvent
 	public static void registerCommands(RegisterCommandsEvent event) {
 		for (var s : AutoRegister.SCANNED.get()) {
 			if (s.value() instanceof ServerCommandHolder(String name, ServerCommandHolder.Callback callback)) {
@@ -110,10 +117,10 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent
 	public static void addReloadListeners(AddServerReloadListenersEvent event) {
-		event.addListener(VidLib.id("location"), new Location.Loader(Location.REGISTRY));
-		event.addListener(VidLib.id("zone"), new ZoneLoader(ZoneLoader.SERVER_BY_DIMENSION, true));
-		event.addListener(VidLib.id("structure"), new StructureStorage(StructureStorage.SERVER));
-		event.addListener(VidLib.id("cutscene"), new Cutscene.Loader());
+		event.addListener(ID.vidlib("location"), new Location.Loader(Location.REGISTRY));
+		event.addListener(ID.vidlib("zone"), new ZoneLoader(ZoneLoader.SERVER_BY_DIMENSION, true));
+		event.addListener(ID.vidlib("structure"), new StructureStorage(StructureStorage.SERVER));
+		event.addListener(ID.vidlib("cutscene"), new Cutscene.Loader());
 	}
 
 	@SubscribeEvent
@@ -328,10 +335,8 @@ public class VidLibEventHandler {
 	}
 
 	@SubscribeEvent
-	public static void serverTagsUpdated(TagsUpdatedEvent event) {
-		if (event.getUpdateCause() == TagsUpdatedEvent.UpdateCause.SERVER_DATA_LOAD) {
-			// datapacks loaded?
-		}
+	public static void serverTagsUpdated(TagsUpdatedEvent.ServerDataLoad event) {
+		// datapacks loaded?
 	}
 
 	@SubscribeEvent

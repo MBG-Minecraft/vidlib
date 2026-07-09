@@ -18,7 +18,7 @@ public class ChromaticAberration {
 	private static Vec2 uFocusPos = Vec2.ZERO;
 
 	@ClientAutoRegister
-	public static final Canvas CANVAS = Canvas.createExternal(VidLib.id("chromatic_aberration"), builder -> {
+	public static final Canvas CANVAS = Canvas.createExternal(ID.vidlib("chromatic_aberration"), builder -> {
 		builder.setTickCallback(ChromaticAberration::tick);
 		builder.setDrawSetupCallback(ChromaticAberration::setup);
 		builder.addUniform(CanvasUniform.float1("Strength", () -> strength / 10F));

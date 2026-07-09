@@ -11,7 +11,7 @@ import net.minecraft.world.phys.Vec3;
 import java.util.List;
 
 public class DecalTexture extends DataTexture {
-	public static final Identifier ID = VidLib.id("textures/effect/decals.png");
+	public static final Identifier ID = ID.vidlib("textures/effect/decals.png");
 
 	@ClientAutoRegister
 	public static final DynamicTextureHolder<DecalTexture> HOLDER = new DynamicTextureHolder<>(ID, Lazy.of(DecalTexture::new));

@@ -7,7 +7,6 @@ import com.mojang.blaze3d.resource.RenderTargetDescriptor;
 import com.mojang.blaze3d.resource.ResourceHandle;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.gl.GLDebugLog;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderPipelines;
@@ -91,50 +90,37 @@ public class CanvasImpl {
 	}
 
 	public static void resizeAll(int width, int height) {
-		GLDebugLog.pushGroup("[VidLib] Canvas Resize");
-
 		for (var canvas : ENABLED_EXT) {
-			GLDebugLog.message("[VidLib] " + canvas.idString);
 			canvas.resize(width, height);
 		}
-
-		GLDebugLog.popGroup();
 	}
 
 	public static void drawAllBeforeOutline(Minecraft mc) {
 		var texture = Objects.requireNonNull(mc.getMainRenderTarget().getColorTextureView());
-		GLDebugLog.pushGroup("[VidLib] Canvas Draw All Before Outline");
 
 		for (var canvas : ENABLED) {
 			if (canvas.data.priority() >= 0) {
 				if (canvas.data.autoDraw()) {
-					GLDebugLog.message("[VidLib] " + canvas.idString);
 					canvas.draw(mc, texture);
 				} else if (canvas.drawCallback != null) {
 					canvas.drawCallback.accept(mc);
 				}
 			}
 		}
-
-		GLDebugLog.popGroup();
 	}
 
 	public static void drawAllAfterOutline(Minecraft mc) {
 		var texture = Objects.requireNonNull(mc.getMainRenderTarget().getColorTextureView());
-		GLDebugLog.pushGroup("[VidLib] Canvas Draw All After Outline");
 
 		for (var canvas : ENABLED) {
 			if (canvas.data.priority() < 0) {
 				if (canvas.data.autoDraw()) {
-					GLDebugLog.message("[VidLib] " + canvas.idString);
 					canvas.draw(mc, texture);
 				} else if (canvas.drawCallback != null) {
 					canvas.drawCallback.accept(mc);
 				}
 			}
 		}
-
-		GLDebugLog.popGroup();
 	}
 
 	public static void closeAll() {
@@ -175,8 +161,6 @@ public class CanvasImpl {
 	}
 
 	public static void createHandles(Minecraft mc, FrameGraphBuilder builder, RenderTargetDescriptor targetDescriptor) {
-		GLDebugLog.pushGroup("[VidLib] Canvas Create Handles");
-
 		for (var canvas : ENABLED) {
 			canvas.createHandle(builder, targetDescriptor);
 			canvas.active = canvas.data.alwaysActive();
@@ -189,41 +173,29 @@ public class CanvasImpl {
 				canvas.drawSetupCallback.accept(mc);
 			}
 		}
-
-		GLDebugLog.popGroup();
 	}
 
 	public static void addAllToFrame(Minecraft mc, FrameGraphBuilder frameGraphBuilder, PostChain.TargetBundle targetBundle, boolean gui) {
 		int w = mc.getMainRenderTarget().width;
 		int h = mc.getMainRenderTarget().height;
-		GLDebugLog.pushGroup("[VidLib] Canvas Add to Frame " + w + " x " + h);
 
 		for (var canvas : ENABLED_EXT) {
 			if (canvas.data.gui() == gui) {
 				canvas.addToFrame(mc, frameGraphBuilder, targetBundle, w, h);
 			}
 		}
-
-		GLDebugLog.popGroup();
 	}
 
 	public static void allReadsAndWrites(FramePass pass) {
-		GLDebugLog.pushGroup("[VidLib] Canvas Reads and Writes");
-
 		for (var canvas : ENABLED) {
-			GLDebugLog.message("[VidLib] " + canvas.idString);
 			canvas.readsAndWrites(pass);
 		}
-
-		GLDebugLog.popGroup();
 	}
 
 	public static void drawPreview(Minecraft mc, GuiGraphicsExtractor g) {
 		if (mc.level == null || ClientGameEngine.INSTANCE.hideGui(mc) || mc.level.isReplayLevel()) {
 			return;
 		}
-
-		GLDebugLog.pushGroup("[VidLib] Canvas Preview");
 
 		int y = 5;
 		float scale = 0.5F;
@@ -234,13 +206,10 @@ public class CanvasImpl {
 			int x = 5;
 
 			if (canvas.previewColor || canvas.previewDepth) {
-				GLDebugLog.pushGroup("[VidLib] Canvas " + canvas.idString);
-
 				g.pose().pushMatrix();
 				g.pose().translate(0F, 0F);
 
 				if (canvas.previewColor) {
-					GLDebugLog.message("[VidLib] Canvas Color Preview");
 					var tex = canvas.getColorTexture();
 
 					g.fill(x - 1, y - 1, x + w + 1, y + h + 1, 0xFF000000);
@@ -262,7 +231,6 @@ public class CanvasImpl {
 				}
 
 				if (canvas.previewDepth) {
-					GLDebugLog.message("[VidLib] Canvas Depth Preview");
 					var tex = canvas.getDepthTexture();
 
 					g.fill(x - 1, y - 1, x + w + 1, y + h + 1, 0xFF000000);
@@ -286,11 +254,7 @@ public class CanvasImpl {
 
 				y += h + 6;
 				g.pose().popMatrix();
-
-				GLDebugLog.popGroup();
 			}
 		}
-
-		GLDebugLog.popGroup();
 	}
 }

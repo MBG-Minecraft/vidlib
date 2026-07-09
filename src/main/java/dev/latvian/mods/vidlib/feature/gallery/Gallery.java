@@ -94,7 +94,7 @@ public class Gallery<K> {
 	}
 
 	public Identifier getTexturePath(K imageId) {
-		return VidLib.id("textures/vidlib/generated/gallery/" + id + "/" + keyToString.apply(imageId) + ".png");
+		return ID.vidlib("textures/vidlib/generated/gallery/" + id + "/" + keyToString.apply(imageId) + ".png");
 	}
 
 	@Nullable

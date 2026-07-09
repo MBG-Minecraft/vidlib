@@ -8,14 +8,14 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectShaderType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 
 public record ColorOverlayEffect(Gradient color) implements ScreenEffect {
-	public static final SimpleRegistryType<ColorOverlayEffect> TYPE = SimpleRegistryType.dynamic("color_overlay", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<ColorOverlayEffect> TYPE = CustomRegistryType.dynamic("color_overlay", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Gradient.CODEC.optionalFieldOf("color", Color.BLACK).forGetter(ColorOverlayEffect::color)
 	).apply(instance, ColorOverlayEffect::new)), CompositeStreamCodec.of(
 		Gradient.STREAM_CODEC, ColorOverlayEffect::color,
@@ -78,7 +78,7 @@ public record ColorOverlayEffect(Gradient color) implements ScreenEffect {
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

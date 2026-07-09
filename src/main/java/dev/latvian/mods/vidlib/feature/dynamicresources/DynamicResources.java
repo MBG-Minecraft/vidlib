@@ -9,7 +9,7 @@ import dev.latvian.mods.klib.io.StringIoSupplier;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -48,9 +48,9 @@ public record DynamicResources(
 		VidLib.LOGGER.info("Loading Dynamic Resources...");
 		var packResources = new Object2ObjectOpenHashMap<Identifier, IoSupplier<InputStream>>();
 
-		PlatformHelper.CURRENT.collectDynamicResources(packType, dynamicResourcesId -> {
+		VLPlatformHelper.CURRENT.collectDynamicResources(packType, dynamicResourcesId -> {
 			VidLib.LOGGER.info("Loading " + dynamicResourcesId);
-			var path = PlatformHelper.CURRENT.findFile(packType, dynamicResourcesId.withSuffix(".json"));
+			var path = VLPlatformHelper.CURRENT.findFile(packType, dynamicResourcesId.withSuffix(".json"));
 
 			if (path != null) {
 				try {
@@ -77,7 +77,7 @@ public record DynamicResources(
 
 		if (!dynamicResources.files.isEmpty()) {
 			for (var file : dynamicResources.files) {
-				var inPath = PlatformHelper.CURRENT.findFile(packType, file.template());
+				var inPath = VLPlatformHelper.CURRENT.findFile(packType, file.template());
 				var template = Files.readString(inPath);
 
 				for (var resource : resourcesList) {
@@ -102,7 +102,7 @@ public record DynamicResources(
 			var remap = new Int2IntMap[resourcesList.size()];
 
 			if (dynamicResources.colorMap.isPresent()) {
-				var inPath = PlatformHelper.CURRENT.findFile(packType, dynamicResources.colorMap.get());
+				var inPath = VLPlatformHelper.CURRENT.findFile(packType, dynamicResources.colorMap.get());
 
 				try (var in = Files.newInputStream(inPath)) {
 					var colorMap = ImageIO.read(in);
@@ -136,7 +136,7 @@ public record DynamicResources(
 			}
 
 			for (var file : dynamicResources.textures) {
-				var inPath = PlatformHelper.CURRENT.findFile(packType, file.template());
+				var inPath = VLPlatformHelper.CURRENT.findFile(packType, file.template());
 
 				try (var in = Files.newInputStream(inPath)) {
 					var template = ImageIO.read(in);

@@ -9,13 +9,13 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePin;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePinType;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public record ScaledKNumber(KNumber a, KNumber b) implements KNumber, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<ScaledKNumber> TYPE = SimpleRegistryType.dynamic("scaled", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<ScaledKNumber> TYPE = CustomRegistryType.dynamic("scaled", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.fieldOf("a").forGetter(ScaledKNumber::a),
 		KNumber.CODEC.fieldOf("b").forGetter(ScaledKNumber::b)
 	).apply(instance, ScaledKNumber::new)), CompositeStreamCodec.of(
@@ -79,7 +79,7 @@ public record ScaledKNumber(KNumber a, KNumber b) implements KNumber, ImBuilderW
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

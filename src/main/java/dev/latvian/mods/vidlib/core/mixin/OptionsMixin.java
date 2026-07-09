@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.core.mixin;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
-import dev.latvian.mods.vidlib.feature.misc.GlobalKeybinds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
@@ -13,7 +12,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -39,12 +37,6 @@ public abstract class OptionsMixin {
 		}
 	}
 
-	@Redirect(method = "processOptions", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Options$FieldAccess;process(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;"))
-	private String vl$processOptionsForge(Options.FieldAccess fieldAccess, String key, String fallback) {
-		var override = key.startsWith("key_") ? GlobalKeybinds.get(key.substring(4)) : null;
-		return override == null ? fallback : override;
-	}
-
 	@Inject(method = "processOptions", at = @At("RETURN"))
 	private void vl$addOptions(Options.FieldAccess accessor, CallbackInfo ci) {
 		VidLibClientOptions.process(accessor);
@@ -52,7 +44,6 @@ public abstract class OptionsMixin {
 
 	@Inject(method = "save", at = @At("HEAD"))
 	private void vl$save(CallbackInfo ci) {
-		GlobalKeybinds.saveKeybinds((Options) (Object) this);
 		AutoInit.Type.CLIENT_OPTIONS_SAVED.invoke(this);
 	}
 }

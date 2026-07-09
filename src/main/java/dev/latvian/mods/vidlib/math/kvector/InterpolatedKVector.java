@@ -11,7 +11,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.interpolation.InterpolationImBuilder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
@@ -22,7 +22,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public record InterpolatedKVector(KNumber progress, Interpolation interpolation, KVector from, KVector to) implements KVector, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<InterpolatedKVector> TYPE = SimpleRegistryType.dynamic("interpolated", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<InterpolatedKVector> TYPE = CustomRegistryType.dynamic("interpolated", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.optionalFieldOf("progress", LiteralKNumber.PROGRESS).forGetter(InterpolatedKVector::progress),
 		Interpolation.CODEC.optionalFieldOf("interpolation", LinearInterpolation.INSTANCE).forGetter(InterpolatedKVector::interpolation),
 		KVector.CODEC.fieldOf("from").forGetter(InterpolatedKVector::from),
@@ -92,7 +92,7 @@ public record InterpolatedKVector(KNumber progress, Interpolation interpolation,
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

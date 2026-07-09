@@ -8,7 +8,7 @@ import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.math.Rotation;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import net.minecraft.core.BlockPos;
@@ -53,7 +53,7 @@ public record RotatedBoxZoneShape(Vec3 pos, Vector3f size, Rotation rotation, Ma
 		return new RotatedBoxZoneShape(pos, size, rotation, matrix, imatrix, box, List.of(new AABB(-hsx, -hsy, -hsz, hsx, hsy, hsz)));
 	}
 
-	public static final SimpleRegistryType<RotatedBoxZoneShape> TYPE = SimpleRegistryType.dynamic("rotated_box", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<RotatedBoxZoneShape> TYPE = CustomRegistryType.dynamic("rotated_box", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		MCCodecs.VEC3.fieldOf("pos").forGetter(RotatedBoxZoneShape::pos),
 		JOMLCodecs.VEC3S.fieldOf("size").forGetter(RotatedBoxZoneShape::size),
 		Rotation.CODEC.fieldOf("rotation").forGetter(RotatedBoxZoneShape::rotation)
@@ -65,7 +65,7 @@ public record RotatedBoxZoneShape(Vec3 pos, Vector3f size, Rotation rotation, Ma
 	));
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

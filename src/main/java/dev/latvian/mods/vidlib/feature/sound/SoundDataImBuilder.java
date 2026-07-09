@@ -13,7 +13,7 @@ public class SoundDataImBuilder extends CompoundImBuilder<SoundData> {
 	private static final List<SoundSource> ALL_SOURCES = List.of(SoundSource.values());
 
 	public static final ImBuilderType<SoundData> TYPE = SoundDataImBuilder::new;
-	public static final ImBuilderType<SoundSource> SOURCE_TYPE = () -> new EnumImBuilder<>(ALL_SOURCES, SoundSource.PLAYERS);
+	public static final ImBuilderType<SoundSource> SOURCE_TYPE = EnumImBuilder.typeOf(ALL_SOURCES, SoundSource.PLAYERS);
 
 	public final SoundEventImBuilder sound = new SoundEventImBuilder();
 	public final ImBuilder<SoundSource> source = SOURCE_TYPE.get();

@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.camera;
 
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryTypeEvent;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryTypeCollector;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryTypeEvent;
 
-public class ScreenShakeTypeRegistryEvent extends SimpleRegistryTypeEvent<ScreenShakeType> {
-	public ScreenShakeTypeRegistryEvent(SimpleRegistryCollector<ScreenShakeType> registry) {
+public class ScreenShakeTypeRegistryEvent extends CustomRegistryTypeEvent<ScreenShakeType> {
+	public ScreenShakeTypeRegistryEvent(CustomRegistryTypeCollector<ScreenShakeType> registry) {
 		super(registry);
 	}
 }

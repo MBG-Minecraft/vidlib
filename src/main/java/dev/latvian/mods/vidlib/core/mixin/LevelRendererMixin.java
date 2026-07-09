@@ -7,8 +7,6 @@ import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.framegraph.FramePass;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.ResourceHandle;
-import com.mojang.blaze3d.vertex.PoseStack;
-import dev.latvian.mods.klib.gl.GLDebugLog;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
@@ -18,7 +16,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LevelTargetBundle;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.chunk.ChunkSectionsToRender;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
@@ -109,33 +106,6 @@ public abstract class LevelRendererMixin {
 	@Inject(method = "lambda$addMainPass$0", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;<init>()V"))
 	private void vl$copyOutlineDepth(GpuBufferSlice terrainFog, LevelRenderState levelRenderState, ProfilerFiller profiler, ChunkSectionsToRender chunkSectionsToRender, Matrix4fc modelViewMatrix, ResourceHandle<RenderTarget> mainTarget, ResourceHandle<RenderTarget> translucentTarget, ResourceHandle<RenderTarget> itemEntityTarget, ResourceHandle<RenderTarget> entityOutlineTarget, ResourceHandle<RenderTarget> particleTarget, boolean renderBlockOutline, CallbackInfo ci) {
 		ClientGameEngine.INSTANCE.copyOutlineDepth(minecraft);
-	}
-
-	@Inject(method = "submitEntities", at = @At("HEAD"))
-	private void vl$submitEntitiesHead(PoseStack poseStack, LevelRenderState levelRenderState, SubmitNodeCollector output, CallbackInfo ci) {
-		GLDebugLog.pushGroup("[VidLib] Render Entities");
-	}
-
-	@Inject(method = "submitEntities", at = @At("RETURN"))
-	private void vl$submitEntitiesReturn(PoseStack poseStack, LevelRenderState levelRenderState, SubmitNodeCollector output, CallbackInfo ci) {
-		GLDebugLog.popGroup();
-	}
-
-	@Inject(method = "submitEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderDispatcher;submit(Lnet/minecraft/client/renderer/entity/state/EntityRenderState;Lnet/minecraft/client/renderer/state/level/CameraRenderState;DDDLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;)V"))
-	private void vl$submitEntity(PoseStack poseStack, LevelRenderState levelRenderState, SubmitNodeCollector output, CallbackInfo ci, @Local EntityRenderState state) {
-		GLDebugLog.message("[VidLib] " + state.entityType.getDescription().getString() + " [" + state.getClass().getSimpleName() + "]");
-	}
-
-	@ModifyExpressionValue(method = {
-		"setupRender",
-		"applyFrustum",
-		"renderLevel",
-		"scheduleTranslucentSectionResort",
-		"renderSectionLayer",
-		"compileSections",
-	}, at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/Profiler;get()Lnet/minecraft/util/profiling/ProfilerFiller;"))
-	private ProfilerFiller vl$getProfiler(ProfilerFiller profiler) {
-		return GLDebugLog.PROFILER;
 	}
 
 	/**

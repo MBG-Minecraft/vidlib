@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.zone.shape;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.math.AAIBB;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
@@ -21,7 +21,7 @@ public record BlockZoneShape(BlockPos start, BlockPos end, AABB box, AAIBB intBo
 		return of(pos, pos);
 	}
 
-	public static final SimpleRegistryType<BlockZoneShape> TYPE = SimpleRegistryType.dynamic("block", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<BlockZoneShape> TYPE = CustomRegistryType.dynamic("block", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		BlockPos.CODEC.fieldOf("start").forGetter(BlockZoneShape::start),
 		BlockPos.CODEC.fieldOf("end").forGetter(BlockZoneShape::end)
 	).apply(instance, BlockZoneShape::of)), CompositeStreamCodec.of(
@@ -31,7 +31,7 @@ public record BlockZoneShape(BlockPos start, BlockPos end, AABB box, AAIBB intBo
 	));
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

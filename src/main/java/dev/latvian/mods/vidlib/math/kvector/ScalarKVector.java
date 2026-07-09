@@ -8,7 +8,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
@@ -17,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public record ScalarKVector(KNumber number) implements KVector, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<ScalarKVector> TYPE = SimpleRegistryType.dynamic("scalar", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<ScalarKVector> TYPE = CustomRegistryType.dynamic("scalar", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.fieldOf("number").forGetter(ScalarKVector::number)
 	).apply(instance, ScalarKVector::new)), CompositeStreamCodec.of(
 		KNumber.STREAM_CODEC, ScalarKVector::number,
@@ -64,7 +64,7 @@ public record ScalarKVector(KNumber number) implements KVector, ImBuilderWithHol
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

@@ -16,7 +16,7 @@ public class GeoAnimationsImBuilder implements ImBuilder<Identifier> {
 
 	public static final ImString SEARCH = ImGuiUtils.resizableString();
 
-	public final Identifier[] value = {VidLib.id("prop/skeleton")};
+	public final Identifier[] value = {ID.vidlib("prop/skeleton")};
 	private List<Identifier> list;
 
 	@Override

@@ -125,7 +125,7 @@ public class ClientGameEngine {
 		map.put(Feature.SOFT_BARRIERS, 1);
 		map.put(Feature.SERVER_DATA, 1);
 		map.put(Feature.PLAYER_DATA, 1);
-		map.put(Feature.SKYBOX, 1);
+		map.put(Feature.ATMOSPHERE, 1);
 	}
 
 	public boolean canSeeAllPlayersInList(LocalPlayer self) {
@@ -270,8 +270,8 @@ public class ClientGameEngine {
 		}
 	}
 
-	public Identifier getSkybox(Minecraft mc) {
-		return mc.getSkybox();
+	public Identifier getAtmosphere(Minecraft mc) {
+		return mc.getAtmosphere();
 	}
 
 	public boolean disableFog() {

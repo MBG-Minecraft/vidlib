@@ -1,22 +1,23 @@
 package dev.latvian.mods.vidlib.feature.zone.shape;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.AAIBB;
+import dev.latvian.mods.klib.registry.CustomRegistry;
+import dev.latvian.mods.klib.registry.CustomRegistryType;
+import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.registry.RefOptimizer;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLike;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
@@ -25,15 +26,25 @@ import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.Function;
 
-public interface ZoneShape extends ZoneLike, SimpleRegistryEntry {
-	SimpleRegistry<ZoneShape> REGISTRY = SimpleRegistry.create(VidLib.id("zone_shape"), c -> PlatformHelper.CURRENT.collectZoneShapes(c));
+public interface ZoneShape extends ZoneLike, RefOptimizer<ZoneShape> {
+	CustomRegistry<ByteBuf, ZoneShape> REGISTRY = CustomRegistry.<ByteBuf, ZoneShape>builder()
+		.keys(ID.vidlib("zone_shape"), VidLib.ID)
+		.type(ZoneShape::type)
+		.customCodec(AAIBB.CODEC.flatComapMap(box -> BlockZoneShape.of(box.min(), box.max()), shape -> {
+			if (shape instanceof BlockZoneShape b) {
+				return DataResult.success(b.intBox());
+			} else {
+				return DataResult.error(() -> "Not an AAIBB");
+			}
+		}))
+		.build();
 
-	Codec<ZoneShape> CODEC = Codec.either(AAIBB.CODEC, REGISTRY.codec()).xmap(either -> either.map(box -> BlockZoneShape.of(box.min(), box.max()), Function.identity()), shape -> shape instanceof BlockZoneShape b ? Either.left(b.intBox()) : Either.right(shape));
-	StreamCodec<RegistryFriendlyByteBuf, ZoneShape> STREAM_CODEC = ByteBufCodecs.either(AAIBB.STREAM_CODEC, REGISTRY.streamCodec()).map(either -> either.map(box -> BlockZoneShape.of(box.min(), box.max()), Function.identity()), shape -> shape instanceof BlockZoneShape b ? Either.left(b.intBox()) : Either.right(shape));
+	Codec<Ref<ZoneShape>> CODEC = REGISTRY.codec();
+	StreamCodec<ByteBuf, Ref<ZoneShape>> STREAM_CODEC = REGISTRY.streamCodec();
+	DataType<Ref<ZoneShape>> DATA_TYPE = REGISTRY.dataType();
 
-	static void builtinTypes(SimpleRegistryCollector<ZoneShape> registry) {
+	static void builtInTypes(CustomRegistryTypeCollector<ByteBuf, ZoneShape> registry) {
 		registry.register(UniverseZoneShape.TYPE);
 		registry.register(ZoneShapeGroup.TYPE);
 		registry.register(BlockZoneShape.TYPE);
@@ -43,9 +54,9 @@ public interface ZoneShape extends ZoneLike, SimpleRegistryEntry {
 		registry.register(RotatedBoxZoneShape.TYPE);
 	}
 
-	@Override
-	default SimpleRegistryType<?> type() {
-		return REGISTRY.getType(this);
+	@Nullable
+	default CustomRegistryType<ByteBuf, ZoneShape> type() {
+		return null;
 	}
 
 	default ZoneInstance createInstance(ZoneContainer container, Zone zone) {

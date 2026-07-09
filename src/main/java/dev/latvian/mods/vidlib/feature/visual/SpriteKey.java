@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 public final class SpriteKey {
-	public static final ClientAsset.ResourceTexture SPECIAL = new ClientAsset.ResourceTexture(VidLib.id("special"));
+	public static final ClientAsset.ResourceTexture SPECIAL = new ClientAsset.ResourceTexture(ID.vidlib("special"));
 	public static final ClientAsset.ResourceTexture BLOCKS = new ClientAsset.ResourceTexture(Identifier.withDefaultNamespace("atlas/blocks"));
 	public static final ClientAsset.ResourceTexture PARTICLES = new ClientAsset.ResourceTexture(Identifier.withDefaultNamespace("atlas/particles"));
 	public static final ClientAsset.ResourceTexture GUI = new ClientAsset.ResourceTexture(Identifier.withDefaultNamespace("atlas/gui"));

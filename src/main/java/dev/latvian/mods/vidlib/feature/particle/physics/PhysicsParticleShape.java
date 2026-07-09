@@ -47,7 +47,7 @@ public class PhysicsParticleShape {
 		}
 	}
 
-	private static final Identifier GRASS = VidLib.id("block/grass");
+	private static final Identifier GRASS = ID.vidlib("block/grass");
 
 	private static UV computeBaseUV(Minecraft mc, BlockState state) {
 		TextureAtlasSprite sprite;

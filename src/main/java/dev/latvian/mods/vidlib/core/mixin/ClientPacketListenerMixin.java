@@ -100,8 +100,8 @@ public abstract class ClientPacketListenerMixin implements VLClientPlayPacketLis
 	}
 
 	@ModifyExpressionValue(method = "handleSetEntityPassengersPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;"))
-	private MutableComponent vl$setOverlayMessage(MutableComponent original, @Local(ordinal = 0) Entity entity) {
-		var customMessage = entity.getCustomMountMessage();
+	private MutableComponent vl$setOverlayMessage(MutableComponent original, @Local(ordinal = 0) Entity vehicle) {
+		var customMessage = vehicle.getCustomMountMessage();
 		return customMessage == null ? original : (MutableComponent) customMessage;
 	}
 }

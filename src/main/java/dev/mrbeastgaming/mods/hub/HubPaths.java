@@ -1,7 +1,7 @@
 package dev.mrbeastgaming.mods.hub;
 
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.Lazy;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import net.minecraft.util.Util;
 
 import java.nio.file.Files;

@@ -8,7 +8,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
@@ -16,7 +16,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public record YRotatedKVector(KVector vector, KNumber angle) implements KVector, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<YRotatedKVector> TYPE = SimpleRegistryType.dynamic("y_rotated", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<YRotatedKVector> TYPE = CustomRegistryType.dynamic("y_rotated", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KVector.CODEC.fieldOf("vector").forGetter(YRotatedKVector::vector),
 		KNumber.CODEC.fieldOf("angle").forGetter(YRotatedKVector::angle)
 	).apply(instance, YRotatedKVector::new)), CompositeStreamCodec.of(
@@ -64,7 +64,7 @@ public record YRotatedKVector(KVector vector, KNumber angle) implements KVector,
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

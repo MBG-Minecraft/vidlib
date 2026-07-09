@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.auto;
 
 import dev.latvian.mods.klib.util.Side;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import net.neoforged.fml.loading.modscan.ModAnnotation;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +18,7 @@ import java.util.Set;
 
 public class AutoHelper {
 	public static void load(Class<? extends Annotation> annotation, Set<ElementType> elementTypes, AutoCallback callback) {
-		PlatformHelper.CURRENT.load(annotation, elementTypes, callback);
+		VLPlatformHelper.CURRENT.load(annotation, elementTypes, callback);
 	}
 
 	public static final EnumSet<Side> BOTH_SIDES = EnumSet.of(Side.CLIENT, Side.SERVER);

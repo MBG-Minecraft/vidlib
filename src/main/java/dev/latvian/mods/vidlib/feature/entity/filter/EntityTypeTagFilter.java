@@ -1,21 +1,23 @@
 package dev.latvian.mods.vidlib.feature.entity.filter;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TagKeyImBuilder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 
 public record EntityTypeTagFilter(TagKey<EntityType<?>> tag) implements EntityFilter, ImBuilderWithHolder.Factory {
-	public static SimpleRegistryType<EntityTypeTagFilter> TYPE = SimpleRegistryType.dynamic("type_tag", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static DynamicType<RegistryFriendlyByteBuf, EntityFilter> TYPE = CustomRegistryType.dynamic("type_tag", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		TagKey.codec(Registries.ENTITY_TYPE).fieldOf("tag").forGetter(EntityTypeTagFilter::tag)
 	).apply(instance, EntityTypeTagFilter::new)), ByteBufCodecs.fromCodecWithRegistries(TagKey.codec(Registries.ENTITY_TYPE)).map(EntityTypeTagFilter::new, EntityTypeTagFilter::tag));
 
@@ -53,7 +55,7 @@ public record EntityTypeTagFilter(TagKey<EntityType<?>> tag) implements EntityFi
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public DynamicType<RegistryFriendlyByteBuf, EntityFilter> type() {
 		return TYPE;
 	}
 

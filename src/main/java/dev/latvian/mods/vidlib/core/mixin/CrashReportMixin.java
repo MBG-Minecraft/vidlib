@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.mrbeastgaming.mods.hub.api.HubFileType;
 import dev.mrbeastgaming.mods.hub.file.ClientHubFileUploads;
 import dev.mrbeastgaming.mods.hub.file.ServerHubFileUploads;
@@ -22,7 +22,7 @@ public class CrashReportMixin {
 	@ModifyReturnValue(method = "saveToFile(Ljava/nio/file/Path;Lnet/minecraft/ReportType;Ljava/util/List;)Z", at = @At("RETURN"))
 	private boolean vl$saveToFile(boolean original) {
 		if (saveFile != null) {
-			if (PlatformHelper.CURRENT.getSide().isClient()) {
+			if (VLPlatformHelper.CURRENT.getSide().isClient()) {
 				if (saveFile.toString().endsWith("-client.txt")) {
 					ClientHubFileUploads.syncFile(saveFile, (fileInfo, builder) -> {
 						builder.setType(HubFileType.CLIENT_CRASH_REPORT);

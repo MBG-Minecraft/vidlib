@@ -66,9 +66,9 @@ public class VLImGuiImplGl3 {
 	}
 
 	private static final RenderPipeline PIPELINE = RenderPipeline.builder()
-		.withLocation(VidLib.id("pipeline/imgui"))
-		.withVertexShader(VidLib.id("core/imgui"))
-		.withFragmentShader(VidLib.id("core/imgui"))
+		.withLocation(ID.vidlib("pipeline/imgui"))
+		.withVertexShader(ID.vidlib("core/imgui"))
+		.withFragmentShader(ID.vidlib("core/imgui"))
 		.withSampler("Texture")
 		.withUniform("Projection", UniformType.UNIFORM_BUFFER)
 		.withColorTargetState(new ColorTargetState(Optional.of(BlendFunction.TRANSLUCENT), ColorTargetState.WRITE_ALL))

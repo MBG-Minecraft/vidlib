@@ -1,36 +1,69 @@
 package dev.latvian.mods.vidlib.feature.block.filter;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.registry.CustomRegistry;
+import dev.latvian.mods.klib.registry.CustomRegistryType;
+import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.registry.RefOptimizer;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.core.VLBlockInWorld;
-import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
-public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntry {
-	SimpleRegistry<BlockFilter> REGISTRY = SimpleRegistry.create(VidLib.id("block_filter"), c -> PlatformHelper.CURRENT.collectBlockFilters(c));
+public interface BlockFilter extends Predicate<BlockInWorld>, RefOptimizer<BlockFilter> {
+	CustomRegistry<RegistryFriendlyByteBuf, BlockFilter> REGISTRY = CustomRegistry.<RegistryFriendlyByteBuf, BlockFilter>builder()
+		.keys(ID.vidlib("block_filter"), VidLib.ID)
+		.type(BlockFilter::type)
+		.customCodec(KLibCodecs.or(
+			Codec.BOOL.flatXmap(b -> DataResult.success(of(b)), filter -> {
+				if (filter == of(true)) {
+					return DataResult.success(true);
+				} else if (filter == of(false)) {
+					return DataResult.success(false);
+				} else {
+					return DataResult.error(() -> "Expected either 'any' or 'none'");
+				}
+			}),
+			Codec.STRING.flatXmap(s -> {
+				try {
+					var state = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK, s, false).blockState();
 
-	SimpleRegistryType.Unit<BlockFilter> NONE = SimpleRegistryType.unitWithType("none", type -> new SimpleBlockFilter(type) {
+					if (!state.isAir()) {
+						if (s.indexOf('[') != -1) {
+							return DataResult.success(new BlockStateFilter(state));
+						} else {
+							return DataResult.success(new BlockIdFilter(state.getBlock()));
+						}
+					}
+				} catch (Exception ignore) {
+				}
+
+				return DataResult.error(() -> "Invalid blockstate format: " + s);
+			}, filter -> switch (filter) {
+				case BlockStateFilter f -> DataResult.success(f.blockState().vl$toString() + (f.blockState() == f.blockState().getBlock().defaultBlockState() ? "[]" : ""));
+				case BlockIdFilter f -> DataResult.success(f.block().builtInRegistryHolder().getKey().identifier().toString());
+				case null, default -> DataResult.error(() -> "");
+			})
+		))
+		.build();
+
+	CustomRegistryType.Unit<RegistryFriendlyByteBuf, BlockFilter> NONE = REGISTRY.unitWithType(ID.vidlib("none"), type -> new SimpleBlockFilter(type) {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
 			return false;
@@ -45,9 +78,14 @@ public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntr
 		public BlockFilter and(BlockFilter filter) {
 			return this;
 		}
+
+		@Override
+		public BlockFilter not() {
+			return ANY.value();
+		}
 	});
 
-	SimpleRegistryType.Unit<BlockFilter> ANY = SimpleRegistryType.unitWithType("any", type -> new SimpleBlockFilter(type) {
+	CustomRegistryType.Unit<RegistryFriendlyByteBuf, BlockFilter> ANY = REGISTRY.unitWithType(ID.vidlib("any"), type -> new SimpleBlockFilter(type) {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
 			return true;
@@ -62,9 +100,14 @@ public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntr
 		public BlockFilter and(BlockFilter filter) {
 			return filter;
 		}
+
+		@Override
+		public BlockFilter not() {
+			return NONE.value();
+		}
 	});
 
-	SimpleRegistryType.Unit<BlockFilter> VISIBLE = SimpleRegistryType.unitWithType("visible", type -> new SimpleBlockFilter(type) {
+	CustomRegistryType.Unit<RegistryFriendlyByteBuf, BlockFilter> VISIBLE = REGISTRY.unitWithType(ID.vidlib("visible"), type -> new SimpleBlockFilter(type) {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
 			var state = blockInWorld.getState();
@@ -77,7 +120,7 @@ public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntr
 		}
 	});
 
-	SimpleRegistryType.Unit<BlockFilter> PARTIAL = SimpleRegistryType.unitWithType("partial", type -> new SimpleBlockFilter(type) {
+	CustomRegistryType.Unit<RegistryFriendlyByteBuf, BlockFilter> PARTIAL = REGISTRY.unitWithType(ID.vidlib("partial"), type -> new SimpleBlockFilter(type) {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
 			var state = blockInWorld.getState();
@@ -90,7 +133,7 @@ public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntr
 		}
 	});
 
-	SimpleRegistryType.Unit<BlockFilter> EXPOSED = SimpleRegistryType.unitWithType("exposed", type -> new SimpleBlockFilter(type) {
+	CustomRegistryType.Unit<RegistryFriendlyByteBuf, BlockFilter> EXPOSED = REGISTRY.unitWithType(ID.vidlib("exposed"), type -> new SimpleBlockFilter(type) {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
 			return blockInWorld.getLevel() instanceof Level l && test(l, blockInWorld.getPos(), blockInWorld.getState());
@@ -102,7 +145,7 @@ public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntr
 		}
 	});
 
-	SimpleRegistryType.Unit<BlockFilter> FLUID = SimpleRegistryType.unitWithType("fluid", type -> new SimpleBlockFilter(type) {
+	CustomRegistryType.Unit<RegistryFriendlyByteBuf, BlockFilter> FLUID = REGISTRY.unitWithType(ID.vidlib("fluid"), type -> new SimpleBlockFilter(type) {
 		@Override
 		public boolean test(BlockInWorld blockInWorld) {
 			return blockInWorld.getLevel() instanceof Level l && test(l, blockInWorld.getPos(), blockInWorld.getState());
@@ -115,46 +158,14 @@ public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntr
 	});
 
 	static BlockFilter of(boolean value) {
-		return value ? ANY.instance() : NONE.instance();
+		return value ? ANY.value() : NONE.value();
 	}
 
-	Codec<BlockFilter> NONE_OR_ANY_CODEC = Codec.BOOL.flatXmap(b -> DataResult.success(of(b)), filter -> {
-		if (filter == ANY.instance()) {
-			return DataResult.success(true);
-		} else if (filter == NONE.instance()) {
-			return DataResult.success(false);
-		} else {
-			return DataResult.error(() -> "Expected either 'any' or 'none'");
-		}
-	});
+	Codec<Ref<BlockFilter>> CODEC = REGISTRY.codec();
+	StreamCodec<RegistryFriendlyByteBuf, Ref<BlockFilter>> STREAM_CODEC = REGISTRY.streamCodec();
+	DataType<Ref<BlockFilter>> DATA_TYPE = REGISTRY.dataType();
 
-	Codec<BlockFilter> LITERAL_CODEC = Codec.STRING.flatXmap(s -> {
-		try {
-			var state = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK, s, false).blockState();
-
-			if (!state.isAir()) {
-				if (s.indexOf('[') != -1) {
-					return DataResult.success(new BlockStateFilter(state));
-				} else {
-					return DataResult.success(new BlockIdFilter(state.getBlock()));
-				}
-			}
-		} catch (Exception ignore) {
-		}
-
-		return DataResult.error(() -> "Invalid blockstate format: " + s);
-	}, filter -> switch (filter) {
-		case BlockStateFilter f -> DataResult.success(f.blockState().vl$toString() + (f.blockState() == f.blockState().getBlock().defaultBlockState() ? "[]" : ""));
-		case BlockIdFilter f -> DataResult.success(f.block().builtInRegistryHolder().getKey().identifier().toString());
-		case null, default -> DataResult.error(() -> "");
-	});
-
-	Codec<BlockFilter> CODEC = KLibCodecs.or(List.of(NONE_OR_ANY_CODEC, LITERAL_CODEC, REGISTRY.codec()));
-	StreamCodec<RegistryFriendlyByteBuf, BlockFilter> STREAM_CODEC = ByteBufCodecs.either(ByteBufCodecs.BOOL, REGISTRY.streamCodec()).map(either -> either.map(BlockFilter::of, Function.identity()), filter -> filter == ANY.instance() ? Either.left(true) : filter == NONE.instance() ? Either.left(false) : Either.right(filter));
-	DataType<BlockFilter> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, BlockFilter.class);
-	CommandDataType<BlockFilter> COMMAND = CommandDataType.of(DATA_TYPE);
-
-	static void builtinTypes(SimpleRegistryCollector<BlockFilter> registry) {
+	static void builtInTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, BlockFilter> registry) {
 		registry.register(NONE);
 		registry.register(ANY);
 		registry.register(VISIBLE);
@@ -172,48 +183,40 @@ public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntr
 		registry.register(BlockTypeTagFilter.TYPE);
 	}
 
-	@Override
-	default SimpleRegistryType<?> type() {
-		return REGISTRY.getType(this);
+	@Nullable
+	default CustomRegistryType<RegistryFriendlyByteBuf, BlockFilter> type() {
+		return null;
+	}
+
+	default Ref<BlockFilter> ref() {
+		return REGISTRY.ref(this);
 	}
 
 	default boolean test(Level level, BlockPos pos, BlockState state) {
-		if (this == NONE.instance()) {
-			return false;
-		} else if (this == ANY.instance()) {
-			return true;
-		} else {
-			return test(VLBlockInWorld.of(level, pos, state));
-		}
+		return test(VLBlockInWorld.of(level, pos, state));
 	}
 
 	default BlockFilter not() {
-		if (this == ANY.instance()) {
-			return NONE.instance();
-		} else if (this == NONE.instance()) {
-			return ANY.instance();
-		} else {
-			return new BlockNotFilter(this);
-		}
+		return new BlockNotFilter(ref());
 	}
 
 	default BlockFilter and(BlockFilter filter) {
-		if (filter == ANY.instance()) {
+		if (filter == of(true)) {
 			return this;
-		} else if (filter == NONE.instance()) {
+		} else if (filter == of(false)) {
 			return filter;
 		} else {
-			return new BlockAndFilter(List.of(this, filter));
+			return new BlockAndFilter(List.of(ref(), filter.ref()));
 		}
 	}
 
 	default BlockFilter or(BlockFilter filter) {
-		if (filter == ANY.instance()) {
+		if (filter == of(true)) {
 			return filter;
-		} else if (filter == NONE.instance()) {
+		} else if (filter == of(false)) {
 			return this;
 		} else {
-			return new BlockOrFilter(List.of(this, filter));
+			return new BlockOrFilter(List.of(ref(), filter.ref()));
 		}
 	}
 }

@@ -11,13 +11,13 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePin;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePinType;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public record EntityKNumber(EntityNumber number) implements KNumber, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<EntityKNumber> TYPE = SimpleRegistryType.dynamic("entity_number", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<EntityKNumber> TYPE = CustomRegistryType.dynamic("entity_number", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		EntityNumber.CODEC.fieldOf("number").forGetter(EntityKNumber::number)
 	).apply(instance, EntityKNumber::new)), CompositeStreamCodec.of(
 		EntityNumber.STREAM_CODEC, EntityKNumber::number,
@@ -73,7 +73,7 @@ public record EntityKNumber(EntityNumber number) implements KNumber, ImBuilderWi
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

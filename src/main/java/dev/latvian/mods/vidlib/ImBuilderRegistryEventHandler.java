@@ -74,7 +74,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 
 import java.util.List;
 
-@EventBusSubscriber(modid = VidLib.ID)
+@EventBusSubscriber(modid = ID.vidlib)
 public class ImBuilderRegistryEventHandler {
 	@SubscribeEvent
 	public static void particleImBuilders(ParticleOptionsImBuilderRegistryEvent event) {

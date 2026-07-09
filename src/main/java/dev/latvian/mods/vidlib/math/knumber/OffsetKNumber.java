@@ -9,13 +9,13 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePin;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePinType;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public record OffsetKNumber(KNumber a, KNumber b) implements KNumber, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<OffsetKNumber> TYPE = SimpleRegistryType.dynamic("offset", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<OffsetKNumber> TYPE = CustomRegistryType.dynamic("offset", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.fieldOf("a").forGetter(OffsetKNumber::a),
 		KNumber.CODEC.fieldOf("b").forGetter(OffsetKNumber::b)
 	).apply(instance, OffsetKNumber::new)), CompositeStreamCodec.of(
@@ -79,7 +79,7 @@ public record OffsetKNumber(KNumber a, KNumber b) implements KNumber, ImBuilderW
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

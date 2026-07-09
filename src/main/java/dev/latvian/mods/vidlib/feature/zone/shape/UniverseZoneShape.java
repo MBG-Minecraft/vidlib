@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.zone.shape;
 
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import net.minecraft.core.BlockPos;
@@ -15,13 +15,13 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class UniverseZoneShape implements ZoneShape {
-	public static final SimpleRegistryType<UniverseZoneShape> TYPE = SimpleRegistryType.unit("universe", new UniverseZoneShape());
+	public static final CustomRegistryType<UniverseZoneShape> TYPE = CustomRegistryType.unit("universe", new UniverseZoneShape());
 
 	private UniverseZoneShape() {
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

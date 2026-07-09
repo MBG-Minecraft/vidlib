@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface Tracksuits {
 	static ResourceKey<ClothingSet> create(String id) {
-		return ClothingPresets.createId(VidLib.id("tracksuit/" + id));
+		return ClothingPresets.createId(ID.vidlib("tracksuit/" + id));
 	}
 
 	ResourceKey<ClothingSet> BLACK = create("black");

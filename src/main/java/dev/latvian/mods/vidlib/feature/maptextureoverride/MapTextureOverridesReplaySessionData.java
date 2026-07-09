@@ -9,7 +9,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import org.jetbrains.annotations.Nullable;
 
 public class MapTextureOverridesReplaySessionData implements ReplaySessionData {
-	public static final ReplaySessionDataType<MapTextureOverridesReplaySessionData> TYPE = new ReplaySessionDataType<>(VidLib.id("map_texture_overrides"), MapTextureOverridesReplaySessionData::new);
+	public static final ReplaySessionDataType<MapTextureOverridesReplaySessionData> TYPE = new ReplaySessionDataType<>(ID.vidlib("map_texture_overrides"), MapTextureOverridesReplaySessionData::new);
 
 	public final MapTextureOverrides overrides;
 

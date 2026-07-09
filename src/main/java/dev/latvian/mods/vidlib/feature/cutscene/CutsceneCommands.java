@@ -12,9 +12,9 @@ public interface CutsceneCommands {
 		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.literal("play")
 			.then(Commands.argument("player", EntityArgument.players())
-				.then(Commands.argument("cutscene", Cutscene.COMMAND.argument(buildContext))
+				.then(Commands.argument("cutscene", Cutscene.REGISTRY.argument(buildContext))
 					.executes(ctx -> {
-						var cutscene = Cutscene.COMMAND.get(ctx, "cutscene");
+						var cutscene = Cutscene.REGISTRY.get(ctx, "cutscene");
 
 						for (var player : EntityArgument.getPlayers(ctx, "player")) {
 							player.playCutscene(cutscene, KNumberVariables.EMPTY);

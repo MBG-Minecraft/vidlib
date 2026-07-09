@@ -1,15 +1,14 @@
 package dev.latvian.mods.vidlib.feature.icon;
 
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.klib.registry.CustomRegistryType;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 
 public enum EmptyIcon implements Icon {
 	INSTANCE;
 
-	public static final SimpleRegistryType.Unit<EmptyIcon> TYPE = SimpleRegistryType.unit("empty", INSTANCE);
-
 	@Override
-	public SimpleRegistryType<?> type() {
-		return TYPE;
+	public CustomRegistryType<RegistryFriendlyByteBuf, Icon> type() {
+		return Icon.EMPTY;
 	}
 
 	@Override

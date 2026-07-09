@@ -12,7 +12,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePin;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePinType;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import imgui.type.ImBoolean;
 import net.minecraft.network.codec.ByteBufCodecs;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +27,7 @@ public record IfKNumber(
 	Optional<KNumber> thenValue,
 	Optional<KNumber> elseValue
 ) implements KNumber, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<IfKNumber> TYPE = SimpleRegistryType.dynamic("if", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<IfKNumber> TYPE = CustomRegistryType.dynamic("if", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.fieldOf("if").forGetter(IfKNumber::ifValue),
 		Comparison.DATA_TYPE.codec().optionalFieldOf("comparison", Comparison.NOT_EQUALS).forGetter(IfKNumber::comparison),
 		KNumber.CODEC.optionalFieldOf("value", KNumber.ZERO).forGetter(IfKNumber::testValue),
@@ -54,7 +54,7 @@ public record IfKNumber(
 		);
 
 		public final ImBuilder<KNumber> ifValue = KNumberImBuilder.create(1D);
-		public final ImBuilder<Comparison> comparison = new EnumImBuilder<>(Comparison.VALUES, Comparison.NOT_EQUALS);
+		public final ImBuilder<Comparison> comparison = EnumImBuilder.COMPARISON_TYPE.get();
 		public final ImBuilder<KNumber> testValue = KNumberImBuilder.create(0D);
 		public final ImBoolean thenValueEnabled = new ImBoolean(true);
 		public final ImBuilder<KNumber> thenValue = KNumberImBuilder.create(0D);
@@ -118,7 +118,7 @@ public record IfKNumber(
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

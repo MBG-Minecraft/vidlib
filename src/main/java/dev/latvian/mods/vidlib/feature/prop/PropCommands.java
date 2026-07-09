@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Predicate;
 
 public interface PropCommands {
-	SuggestionProvider<CommandSourceStack> TYPE_SUGGESTION_PROVIDER = ID.registerSuggestionProvider(VidLib.id("prop_type"), () -> PropType.ALL.get().keySet());
+	SuggestionProvider<CommandSourceStack> TYPE_SUGGESTION_PROVIDER = ID.registerSuggestionProvider(ID.vidlib("prop_type"), () -> PropType.ALL.get().keySet());
 
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("prop", (command, buildContext) -> command

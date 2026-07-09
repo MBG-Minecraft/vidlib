@@ -1,21 +1,22 @@
 package dev.latvian.mods.vidlib.feature.entity.filter;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.util.IntOrUUID;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.UUIDImBuilder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import imgui.ImGui;
 import imgui.type.ImInt;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 public record ExactEntityFilter(IntOrUUID entityId) implements EntityFilter, ImBuilderWithHolder.Factory {
-	public static SimpleRegistryType<ExactEntityFilter> TYPE = SimpleRegistryType.dynamic("exact", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static DynamicType<RegistryFriendlyByteBuf, EntityFilter> TYPE = DynamicType.create("exact", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		IntOrUUID.CODEC.fieldOf("entity_id").forGetter(ExactEntityFilter::entityId)
 	).apply(instance, ExactEntityFilter::new)), IntOrUUID.STREAM_CODEC.map(ExactEntityFilter::new, ExactEntityFilter::entityId));
 
@@ -87,7 +88,7 @@ public record ExactEntityFilter(IntOrUUID entityId) implements EntityFilter, ImB
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public DynamicType<RegistryFriendlyByteBuf, EntityFilter> type() {
 		return TYPE;
 	}
 

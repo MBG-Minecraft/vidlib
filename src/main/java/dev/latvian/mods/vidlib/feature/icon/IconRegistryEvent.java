@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.icon;
 
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryTypeEvent;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryTypeCollector;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryTypeEvent;
 
-public class IconRegistryEvent extends SimpleRegistryTypeEvent<Icon> {
-	public IconRegistryEvent(SimpleRegistryCollector<Icon> registry) {
+public class IconRegistryEvent extends CustomRegistryTypeEvent<Icon> {
+	public IconRegistryEvent(CustomRegistryTypeCollector<Icon> registry) {
 		super(registry);
 	}
 }

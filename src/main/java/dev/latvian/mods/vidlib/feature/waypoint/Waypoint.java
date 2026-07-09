@@ -7,6 +7,7 @@ import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
@@ -22,13 +23,14 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import java.util.Optional;
 
 public record Waypoint(
 	String id,
 	EntityFilter visible,
 	ResourceKey<Level> dimension,
 	KVector position,
-	Icon icon,
+	Optional<Ref<Icon>> icon,
 	float alpha,
 	double minDistance,
 	double midDistance,
@@ -43,10 +45,10 @@ public record Waypoint(
 
 	public static final Codec<Waypoint> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Codec.STRING.optionalFieldOf("id", "").forGetter(Waypoint::id),
-		EntityFilter.CODEC.optionalFieldOf("visible", EntityFilter.ANY.instance()).forGetter(Waypoint::visible),
+		EntityFilter.CODEC.optionalFieldOf("visible", EntityFilter.of(true)).forGetter(Waypoint::visible),
 		MCCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(Waypoint::dimension),
 		KVector.CODEC.fieldOf("position").forGetter(Waypoint::position),
-		Icon.CODEC.optionalFieldOf("icon", DEFAULT_ICON).forGetter(Waypoint::icon),
+		Icon.CODEC.optionalFieldOf("icon").forGetter(Waypoint::icon),
 		Codec.FLOAT.optionalFieldOf("alpha", 255F).forGetter(Waypoint::alpha),
 		Codec.DOUBLE.optionalFieldOf("min_distance", 0D).forGetter(Waypoint::minDistance),
 		Codec.DOUBLE.optionalFieldOf("mid_distance", 0D).forGetter(Waypoint::midDistance),
@@ -60,10 +62,10 @@ public record Waypoint(
 	public static final StreamCodec<RegistryFriendlyByteBuf, Waypoint> STREAM_CODEC = CompositeStreamCodec.of(
 		ByteBufCodecs.STRING_UTF8, Waypoint::id,
 		ByteBufCodecs.VAR_INT, Waypoint::getFlags,
-		KLibStreamCodecs.optional(EntityFilter.STREAM_CODEC, EntityFilter.ANY.instance()), Waypoint::visible,
+		KLibStreamCodecs.optional(EntityFilter.STREAM_CODEC, EntityFilter.of(true)), Waypoint::visible,
 		KLibStreamCodecs.optional(MCStreamCodecs.DIMENSION, Level.OVERWORLD), Waypoint::dimension,
 		KVector.STREAM_CODEC, Waypoint::position,
-		KLibStreamCodecs.optional(Icon.STREAM_CODEC, DEFAULT_ICON), Waypoint::icon,
+		ByteBufCodecs.optional(Icon.STREAM_CODEC), Waypoint::icon,
 		ByteBufCodecs.FLOAT, Waypoint::alpha,
 		KLibStreamCodecs.optional(KLibStreamCodecs.DOUBLE32, 0D), Waypoint::minDistance,
 		KLibStreamCodecs.optional(KLibStreamCodecs.DOUBLE32, 0D), Waypoint::midDistance,
@@ -72,15 +74,15 @@ public record Waypoint(
 		Waypoint::new
 	);
 
-	public static final DataType<Waypoint> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, Waypoint.class);
+	public static final DataType<Waypoint> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 	public static final DataType<List<Waypoint>> LIST_DATA_TYPE = DATA_TYPE.listOf();
 
 	public static class Builder {
 		private String id = "";
-		private EntityFilter visible = EntityFilter.ANY.instance();
+		private EntityFilter visible = EntityFilter.of(true);
 		private ResourceKey<Level> dimension = Level.OVERWORLD;
 		private KVector position = KVector.ZERO;
-		private Icon icon = DEFAULT_ICON;
+		private Ref<Icon> icon = null;
 		private float alpha = 255F;
 		private double minDistance = 0D;
 		private double midDistance = 0D;
@@ -96,7 +98,7 @@ public record Waypoint(
 				visible,
 				dimension,
 				position,
-				icon,
+				Optional.ofNullable(icon),
 				alpha,
 				minDistance,
 				midDistance,
@@ -132,7 +134,7 @@ public record Waypoint(
 			return position(KVector.of(position));
 		}
 
-		public Builder icon(Icon value) {
+		public Builder icon(Ref<Icon> value) {
 			icon = value;
 			return this;
 		}
@@ -176,7 +178,7 @@ public record Waypoint(
 		EntityFilter filter,
 		ResourceKey<Level> dimension,
 		KVector position,
-		Icon icon,
+		Optional<Ref<Icon>> icon,
 		float alpha,
 		double minDistance,
 		double midDistance,

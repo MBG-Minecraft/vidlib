@@ -26,7 +26,7 @@ public record TexturedRenderType(Map<Identifier, RenderType> map, Function<Ident
 
 	@ApiStatus.Internal
 	public static TexturedRenderType internal(String name, int bufferSize, boolean affectsCrumbling, boolean sortOnUpload, Function<Identifier, RenderSetup.RenderSetupBuilder> state) {
-		return create(texture -> RenderType.create(VidLib.id(name).toString(), createSetup(bufferSize, affectsCrumbling, sortOnUpload, state.apply(texture))));
+		return create(texture -> RenderType.create(ID.vidlib(name).toString(), createSetup(bufferSize, affectsCrumbling, sortOnUpload, state.apply(texture))));
 	}
 
 	@ApiStatus.Internal

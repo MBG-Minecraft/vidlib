@@ -4,7 +4,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.klib.registry.CustomRegistryType;
+import dev.latvian.mods.klib.util.ID;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.Level;
@@ -13,19 +15,23 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.Set;
 
 public record ReplaceCuboidBlocks(BlockPos start, BlockPos end, BlockState state) implements BulkLevelModification {
-	public static final SimpleRegistryType<ReplaceCuboidBlocks> TYPE = SimpleRegistryType.dynamic("cuboid_blocks", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		BlockPos.CODEC.fieldOf("start").forGetter(ReplaceCuboidBlocks::start),
-		BlockPos.CODEC.fieldOf("end").forGetter(ReplaceCuboidBlocks::end),
-		MCCodecs.BLOCK_STATE.fieldOf("state").forGetter(ReplaceCuboidBlocks::state)
-	).apply(instance, ReplaceCuboidBlocks::new)), CompositeStreamCodec.of(
-		BlockPos.STREAM_CODEC, ReplaceCuboidBlocks::start,
-		BlockPos.STREAM_CODEC, ReplaceCuboidBlocks::end,
-		MCStreamCodecs.BLOCK_STATE, ReplaceCuboidBlocks::state,
-		ReplaceCuboidBlocks::new
-	));
+	public static final CustomRegistryType<ByteBuf, BulkLevelModification> TYPE = REGISTRY.dynamic(
+		ID.vidlib("cuboid_blocks"),
+		RecordCodecBuilder.mapCodec(instance -> instance.group(
+			BlockPos.CODEC.fieldOf("start").forGetter(ReplaceCuboidBlocks::start),
+			BlockPos.CODEC.fieldOf("end").forGetter(ReplaceCuboidBlocks::end),
+			MCCodecs.BLOCK_STATE.fieldOf("state").forGetter(ReplaceCuboidBlocks::state)
+		).apply(instance, ReplaceCuboidBlocks::new)),
+		CompositeStreamCodec.of(
+			BlockPos.STREAM_CODEC, ReplaceCuboidBlocks::start,
+			BlockPos.STREAM_CODEC, ReplaceCuboidBlocks::end,
+			MCStreamCodecs.BLOCK_STATE, ReplaceCuboidBlocks::state,
+			ReplaceCuboidBlocks::new
+		)
+	);
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<ByteBuf, BulkLevelModification> type() {
 		return TYPE;
 	}
 

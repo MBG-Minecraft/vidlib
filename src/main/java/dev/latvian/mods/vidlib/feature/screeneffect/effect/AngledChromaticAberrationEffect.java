@@ -5,7 +5,7 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectShaderType;
@@ -15,7 +15,7 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberFloatInstance;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 public record AngledChromaticAberrationEffect(KNumber strength, KNumber angle) implements ScreenEffect {
-	public static final SimpleRegistryType<AngledChromaticAberrationEffect> TYPE = SimpleRegistryType.dynamic("angled_chromatic_aberration", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<AngledChromaticAberrationEffect> TYPE = CustomRegistryType.dynamic("angled_chromatic_aberration", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.fieldOf("strength").forGetter(AngledChromaticAberrationEffect::strength),
 		KNumber.CODEC.fieldOf("angle").forGetter(AngledChromaticAberrationEffect::angle)
 	).apply(instance, AngledChromaticAberrationEffect::new)), CompositeStreamCodec.of(
@@ -76,7 +76,7 @@ public record AngledChromaticAberrationEffect(KNumber strength, KNumber angle) i
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

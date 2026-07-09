@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.feature.canvas;
 import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.RenderTargetDescriptor;
-import dev.latvian.mods.klib.gl.GLDebugLog;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,7 +25,6 @@ public class InternalCanvas extends Canvas {
 
 	@Override
 	public void createHandle(FrameGraphBuilder builder, RenderTargetDescriptor targetDescriptor) {
-		GLDebugLog.message("[VidLib] Created internal canvas " + idString);
 		outputTarget = builder.createInternal(pathString, targetDescriptor);
 	}
 }

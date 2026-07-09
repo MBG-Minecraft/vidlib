@@ -34,7 +34,7 @@ public record ShapeParticleOptions(int lifespan, Shape shape, Gradient color, Gr
 	);
 
 	public ShapeParticleOptions(int lifespan, Gradient color, Gradient outlineColor) {
-		this(lifespan, CubeShape.UNIT, color, outlineColor, RenderLightLayer.NORMAL);
+		this(lifespan, CubeShape.UNIT_CUBE, color, outlineColor, RenderLightLayer.NORMAL);
 	}
 
 	@Override

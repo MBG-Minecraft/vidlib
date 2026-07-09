@@ -4,18 +4,20 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
+import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.DimensionImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 
 public record InDimensionEntityFilter(ResourceKey<Level> dimension) implements EntityFilter, ImBuilderWithHolder.Factory {
-	public static SimpleRegistryType<InDimensionEntityFilter> TYPE = SimpleRegistryType.dynamic("in_dimension", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static DynamicType<RegistryFriendlyByteBuf, EntityFilter> TYPE = CustomRegistryType.dynamic("in_dimension", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		MCCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(InDimensionEntityFilter::dimension)
 	).apply(instance, InDimensionEntityFilter::new)), KLibStreamCodecs.optional(MCStreamCodecs.DIMENSION, Level.OVERWORLD).map(InDimensionEntityFilter::new, InDimensionEntityFilter::dimension));
 
@@ -53,7 +55,7 @@ public record InDimensionEntityFilter(ResourceKey<Level> dimension) implements E
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public DynamicType<RegistryFriendlyByteBuf, EntityFilter> type() {
 		return TYPE;
 	}
 

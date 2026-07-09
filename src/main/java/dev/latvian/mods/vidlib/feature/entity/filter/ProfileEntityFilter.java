@@ -3,19 +3,21 @@ package dev.latvian.mods.vidlib.feature.entity.filter;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.data.DataTypes;
+import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 public record ProfileEntityFilter(GameProfile profile) implements EntityFilter, ImBuilderWithHolder.Factory {
-	public static SimpleRegistryType<ProfileEntityFilter> TYPE = SimpleRegistryType.dynamic("profile", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static DynamicType<RegistryFriendlyByteBuf, EntityFilter> TYPE = CustomRegistryType.dynamic("profile", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		DataTypes.GAME_PROFILE.codec().fieldOf("profile").forGetter(ProfileEntityFilter::profile)
 	).apply(instance, ProfileEntityFilter::new)), ByteBufCodecs.GAME_PROFILE.map(ProfileEntityFilter::new, ProfileEntityFilter::profile));
 
@@ -53,7 +55,7 @@ public record ProfileEntityFilter(GameProfile profile) implements EntityFilter, 
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public DynamicType<RegistryFriendlyByteBuf, EntityFilter> type() {
 		return TYPE;
 	}
 

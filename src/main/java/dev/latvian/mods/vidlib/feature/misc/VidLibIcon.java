@@ -7,7 +7,7 @@ import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.Style;
 
 public interface VidLibIcon {
-	Style STYLE_RGB = Style.EMPTY.withFont(new FontDescription.Resource(VidLib.id("icons")));
+	Style STYLE_RGB = Style.EMPTY.withFont(new FontDescription.Resource(ID.vidlib("icons")));
 	Style STYLE = STYLE_RGB.withColor(Color.WHITE);
 
 	private static Component icon(char c, boolean rgb) {

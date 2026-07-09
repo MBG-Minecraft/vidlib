@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.math.kvector;
 
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryTypeEvent;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryTypeCollector;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryTypeEvent;
 
-public class KVectorRegistryEvent extends SimpleRegistryTypeEvent<KVector> {
-	public KVectorRegistryEvent(SimpleRegistryCollector<KVector> registry) {
+public class KVectorRegistryEvent extends CustomRegistryTypeEvent<KVector> {
+	public KVectorRegistryEvent(CustomRegistryTypeCollector<KVector> registry) {
 		super(registry);
 	}
 }

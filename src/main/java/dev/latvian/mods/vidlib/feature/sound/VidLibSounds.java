@@ -12,10 +12,10 @@ import java.util.Optional;
 
 public interface VidLibSounds {
 	@AutoRegister
-	DeferredRegister<SoundEvent> REGISTRY = DeferredRegister.create(Registries.SOUND_EVENT, VidLib.ID);
+	DeferredRegister<SoundEvent> REGISTRY = DeferredRegister.create(Registries.SOUND_EVENT, ID.vidlib);
 
 	private static DeferredHolder<SoundEvent, SoundEvent> register(String name, @Nullable Float fixedRange) {
-		return REGISTRY.register(name, () -> new SoundEvent(VidLib.id(name), Optional.ofNullable(fixedRange)));
+		return REGISTRY.register(name, () -> new SoundEvent(ID.vidlib(name), Optional.ofNullable(fixedRange)));
 	}
 
 	DeferredHolder<SoundEvent, SoundEvent> SPLAT = register("splat", null);

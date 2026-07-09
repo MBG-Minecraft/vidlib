@@ -57,7 +57,7 @@ public class NPCProp extends BaseGeoProp {
 	}
 
 	@AutoRegister
-	public static final PropType<NPCProp> TYPE = PropType.create(VidLib.id("npc"), NPCProp::new,
+	public static final PropType<NPCProp> TYPE = PropType.create(ID.vidlib("npc"), NPCProp::new,
 		TICK,
 		POSITION,
 		HEIGHT,
@@ -74,7 +74,7 @@ public class NPCProp extends BaseGeoProp {
 		PropData.create(NPCProp.class, "spread", SpreadType.DATA_TYPE, p -> p.spread, (p, v) -> {
 			p.spread = v;
 			p.instances = null;
-		}, () -> new EnumImBuilder<>(SpreadType.VALUES)),
+		}, EnumImBuilder.typeOf(SpreadType.VALUES, SpreadType.FILLED_SQUARE)),
 		PropData.createFloat(NPCProp.class, "body_pitch", p -> p.bodyPitch, (p, v) -> p.bodyPitch = v, -90F, 90F),
 		PropData.createFloat(NPCProp.class, "spread_radius", p -> p.spreadRadius, (p, v) -> p.spreadRadius = v, 0F, 200F),
 		PropData.createFloat(NPCProp.class, "random_offset", p -> p.randomOffset, (p, v) -> p.randomOffset = v, 0F, 50F),
@@ -93,7 +93,7 @@ public class NPCProp extends BaseGeoProp {
 		PropData.create(NPCProp.class, "chest_item", DataTypes.ITEM_STACK, p -> p.chestItem, (p, v) -> p.chestItem = v, ItemStackImBuilder.CHEST_EQUIPMENT_TYPE),
 		PropData.create(NPCProp.class, "legs_item", DataTypes.ITEM_STACK, p -> p.legsItem, (p, v) -> p.legsItem = v, ItemStackImBuilder.LEGS_EQUIPMENT_TYPE),
 		PropData.create(NPCProp.class, "feet_item", DataTypes.ITEM_STACK, p -> p.feetItem, (p, v) -> p.feetItem = v, ItemStackImBuilder.FEET_EQUIPMENT_TYPE),
-		PropData.create(NPCProp.class, "pose", DataType.of(POSES), p -> p.pose, (p, v) -> p.pose = v, () -> new EnumImBuilder<>(VALID_POSES)),
+		PropData.create(NPCProp.class, "pose", DataType.of(POSES), p -> p.pose, (p, v) -> p.pose = v, EnumImBuilder.typeOf(VALID_POSES, Pose.STANDING)),
 		PropData.createBoolean(NPCProp.class, "breathing", p -> p.breathing, (p, v) -> p.breathing = v),
 		PropData.createFloat(NPCProp.class, "running_distance", p -> p.runningDistance, (p, v) -> p.runningDistance = v, 0F, 200F),
 		PropData.createFloat(NPCProp.class, "render_distance", p -> p.renderDistance, (p, v) -> p.renderDistance = v, 0F, 1024F),

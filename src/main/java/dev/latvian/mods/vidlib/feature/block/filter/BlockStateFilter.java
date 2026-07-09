@@ -3,21 +3,27 @@ package dev.latvian.mods.vidlib.feature.block.filter;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
+import dev.latvian.mods.klib.registry.CustomRegistryType;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.block.ExactBlockStateImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 
 public record BlockStateFilter(BlockState blockState) implements BlockFilter, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<BlockStateFilter> TYPE = SimpleRegistryType.dynamic("block_state", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		MCCodecs.BLOCK_STATE.fieldOf("block_state").forGetter(BlockStateFilter::blockState)
-	).apply(instance, BlockStateFilter::new)), MCStreamCodecs.BLOCK_STATE.map(BlockStateFilter::new, BlockStateFilter::blockState));
+	public static final CustomRegistryType<RegistryFriendlyByteBuf, BlockFilter> TYPE = REGISTRY.dynamic(
+		ID.vidlib("block_state"),
+		RecordCodecBuilder.mapCodec(instance -> instance.group(
+			MCCodecs.BLOCK_STATE.fieldOf("block_state").forGetter(BlockStateFilter::blockState)
+		).apply(instance, BlockStateFilter::new)),
+		MCStreamCodecs.BLOCK_STATE.map(BlockStateFilter::new, BlockStateFilter::blockState)
+	);
 
 	public static class Builder implements BlockFilterImBuilder {
 		public static final ImBuilderHolder<BlockFilter> TYPE = ImBuilderHolder.of("Exact Block State", Builder::new);
@@ -53,7 +59,7 @@ public record BlockStateFilter(BlockState blockState) implements BlockFilter, Im
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<RegistryFriendlyByteBuf, BlockFilter> type() {
 		return TYPE;
 	}
 

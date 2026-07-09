@@ -2,12 +2,14 @@ package dev.latvian.mods.vidlib.feature.entity.number;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.klib.registry.CustomRegistryType;
+import dev.latvian.mods.klib.util.ID;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.entity.Entity;
 
 public record FixedEntityNumber(double number) implements EntityNumber {
-	public static final SimpleRegistryType<FixedEntityNumber> TYPE = SimpleRegistryType.dynamic("fixed", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<RegistryFriendlyByteBuf, EntityNumber> TYPE = REGISTRY.dynamic(ID.vidlib("fixed"), RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.DOUBLE.fieldOf("number").forGetter(FixedEntityNumber::number)
 	).apply(instance, EntityNumber::of)), ByteBufCodecs.DOUBLE.map(EntityNumber::of, FixedEntityNumber::number));
 
@@ -15,7 +17,7 @@ public record FixedEntityNumber(double number) implements EntityNumber {
 	public static final FixedEntityNumber ONE = new FixedEntityNumber(1D);
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<RegistryFriendlyByteBuf, EntityNumber> type() {
 		return TYPE;
 	}
 

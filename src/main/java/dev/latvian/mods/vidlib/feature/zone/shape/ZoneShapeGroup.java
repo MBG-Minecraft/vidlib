@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.zone.shape;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.math.AAIBB;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import net.minecraft.core.BlockPos;
@@ -21,7 +21,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box, AAIBB intBox) implements ZoneShape {
-	public static final SimpleRegistryType<ZoneShapeGroup> TYPE = SimpleRegistryType.dynamic("group", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<ZoneShapeGroup> TYPE = CustomRegistryType.dynamic("group", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		ZoneShape.CODEC.listOf().fieldOf("zones").forGetter(ZoneShapeGroup::zoneShapes)
 	).apply(instance, ZoneShapeGroup::create)), KLibStreamCodecs.listOf(ZoneShape.STREAM_CODEC).map(ZoneShapeGroup::create, ZoneShapeGroup::zoneShapes));
 
@@ -60,7 +60,7 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box, AAIBB intBox)
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

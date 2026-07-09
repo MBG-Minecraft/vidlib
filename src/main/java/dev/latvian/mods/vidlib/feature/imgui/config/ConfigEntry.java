@@ -12,6 +12,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
 import imgui.ImGui;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.IntFunction;
 
@@ -85,7 +86,7 @@ public abstract class ConfigEntry<T> {
 	}
 
 	public static <E> ConfigEntry<E> ofEnum(String label, DataKey<E> key, IntFunction<E[]> arrayConstructor) {
-		return new EnumConfigEntry<>(label, key, arrayConstructor, key.getEnumConstants());
+		return new EnumConfigEntry<>(label, key, arrayConstructor, key.type().enumValues().stream().map(Map.Entry::getValue).toArray(arrayConstructor));
 	}
 
 	public final String label;

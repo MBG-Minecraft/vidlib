@@ -2,15 +2,17 @@ package dev.latvian.mods.vidlib.feature.block.filter;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
+import dev.latvian.mods.klib.registry.CustomRegistryType;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TagKeyImBuilder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -18,9 +20,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 
 public record BlockTypeTagFilter(TagKey<Block> tag) implements BlockFilter, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<BlockTypeTagFilter> TYPE = SimpleRegistryType.dynamic("type_tag", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		TagKey.codec(Registries.BLOCK).fieldOf("tag").forGetter(BlockTypeTagFilter::tag)
-	).apply(instance, BlockTypeTagFilter::new)), KLibStreamCodecs.tagKey(Registries.BLOCK).map(BlockTypeTagFilter::new, BlockTypeTagFilter::tag));
+	public static final CustomRegistryType<RegistryFriendlyByteBuf, BlockFilter> TYPE = REGISTRY.dynamic(
+		ID.vidlib("type_tag"),
+		RecordCodecBuilder.mapCodec(instance -> instance.group(
+			TagKey.codec(Registries.BLOCK).fieldOf("tag").forGetter(BlockTypeTagFilter::tag)
+		).apply(instance, BlockTypeTagFilter::new)),
+		KLibStreamCodecs.tagKey(Registries.BLOCK).map(BlockTypeTagFilter::new, BlockTypeTagFilter::tag)
+	);
 
 	public static class Builder implements BlockFilterImBuilder {
 		public static final ImBuilderHolder<BlockFilter> TYPE = ImBuilderHolder.of("Type Tag", Builder::new);
@@ -56,7 +62,7 @@ public record BlockTypeTagFilter(TagKey<Block> tag) implements BlockFilter, ImBu
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<RegistryFriendlyByteBuf, BlockFilter> type() {
 		return TYPE;
 	}
 

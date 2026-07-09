@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.entity.filter;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
@@ -9,7 +10,8 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -19,14 +21,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public record PlayerDataEntityFilter(DataKey<?> dataKey) implements EntityFilter, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<PlayerDataEntityFilter> TYPE = SimpleRegistryType.dynamic("player_data", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final DynamicType<RegistryFriendlyByteBuf, EntityFilter> TYPE = CustomRegistryType.dynamic("player_data", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.STRING.fieldOf("key").forGetter(PlayerDataEntityFilter::key)
 	).apply(instance, PlayerDataEntityFilter::new)), ByteBufCodecs.STRING_UTF8.map(PlayerDataEntityFilter::new, PlayerDataEntityFilter::key));
 
 	public static class Builder implements EntityFilterImBuilder {
 		public static final ImBuilderHolder<EntityFilter> TYPE = ImBuilderHolder.of("Player Data", Builder::new);
 
-		public final EnumImBuilder<DataKey<?>> key = new EnumImBuilder<>(DataKey.PLAYER.all.values()).withNameGetter(DataKey::id);
+		public final EnumImBuilder<DataKey<?>> key = EnumImBuilder.of(DataKey.PLAYER.all::values).nameGetter(DataKey::id).build();
 
 		@Override
 		public ImBuilderHolder<?> holder() {
@@ -62,7 +64,7 @@ public record PlayerDataEntityFilter(DataKey<?> dataKey) implements EntityFilter
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public DynamicType<RegistryFriendlyByteBuf, EntityFilter> type() {
 		return TYPE;
 	}
 

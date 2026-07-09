@@ -7,7 +7,7 @@ import dev.latvian.mods.klib.io.IOUtils;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.klib.util.Timestamp;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -108,7 +108,7 @@ public class PacketCapture {
 
 		VidLib.LOGGER.info("Saving captured packets... (%,d second session)".formatted(seconds));
 
-		PlatformHelper.CURRENT.finishPacketCapture(this);
+		VLPlatformHelper.CURRENT.finishPacketCapture(this);
 
 		for (var session : sessions.values()) {
 			session.disconnect();
@@ -136,7 +136,7 @@ public class PacketCapture {
 
 		try (var fs = IOUtils.openAsZip(outputFile, Map.of("create", "true"))) {
 			var metadata = new JsonObject();
-			metadata.addProperty("platform", PlatformHelper.CURRENT.getPlatform());
+			metadata.addProperty("platform", VLPlatformHelper.CURRENT.getPlatform());
 			metadata.addProperty("id", "%08x".formatted(sessionId));
 			metadata.add("start", Timestamp.CODEC.encodeStart(JsonOps.INSTANCE, sessionStart).getOrThrow());
 			metadata.add("end", Timestamp.CODEC.encodeStart(JsonOps.INSTANCE, sessionEnd).getOrThrow());
@@ -170,7 +170,7 @@ public class PacketCapture {
 
 			metadata.add("sessions", sessionMeta);
 
-			PlatformHelper.CURRENT.packetCaptureMetadata(this, metadata);
+			VLPlatformHelper.CURRENT.packetCaptureMetadata(this, metadata);
 
 			JsonUtils.write(fs.getPath("metadata.json"), metadata, false);
 		} catch (Exception ex) {

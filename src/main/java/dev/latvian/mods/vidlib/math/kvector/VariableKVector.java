@@ -8,7 +8,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import imgui.ImGui;
 import imgui.type.ImString;
@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public record VariableKVector(String name) implements KVector, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<VariableKVector> TYPE = SimpleRegistryType.dynamic("variable", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<VariableKVector> TYPE = CustomRegistryType.dynamic("variable", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.STRING.fieldOf("name").forGetter(VariableKVector::name)
 	).apply(instance, VariableKVector::new)), ByteBufCodecs.STRING_UTF8.map(VariableKVector::new, VariableKVector::name));
 
@@ -57,7 +57,7 @@ public record VariableKVector(String name) implements KVector, ImBuilderWithHold
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

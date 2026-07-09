@@ -12,7 +12,7 @@ import dev.latvian.mods.vidlib.core.VLBlockInWorld;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.feature.visual.TexturedCubeRenderer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
 import dev.latvian.mods.vidlib.feature.zone.shape.CylinderZoneShape;
@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface ZoneRenderer<T extends ZoneShape> {
-	Map<SimpleRegistryType<?>, ZoneRenderer<?>> RENDERERS = new IdentityHashMap<>();
+	Map<CustomRegistryType<?>, ZoneRenderer<?>> RENDERERS = new IdentityHashMap<>();
 
 	record Context(FrameInfo frame, Color color, Color outlineColor, boolean outerBounds) {
 		public MultiBufferSource buffers() {
@@ -38,7 +38,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 		}
 	}
 
-	static void register(SimpleRegistryType<?> type, ZoneRenderer<?> renderer) {
+	static void register(CustomRegistryType<?> type, ZoneRenderer<?> renderer) {
 		RENDERERS.put(type, renderer);
 	}
 
@@ -51,7 +51,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 		ZoneRenderer.register(RotatedBoxZoneShape.TYPE, new RotatedBoxZoneRenderer());
 	}
 
-	static ZoneRenderer<?> get(SimpleRegistryType<?> type) {
+	static ZoneRenderer<?> get(CustomRegistryType<?> type) {
 		var renderer = RENDERERS.get(type);
 		return renderer == null ? BoxZoneRenderer.INSTANCE : renderer;
 	}

@@ -10,13 +10,13 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePin;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePinType;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public record Atan2KNumber(KNumber x, KNumber y) implements KNumber, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<Atan2KNumber> TYPE = SimpleRegistryType.dynamic("atan2", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<Atan2KNumber> TYPE = CustomRegistryType.dynamic("atan2", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KNumber.CODEC.optionalFieldOf("x", KNumber.ZERO).forGetter(Atan2KNumber::x),
 		KNumber.CODEC.optionalFieldOf("y", KNumber.ONE).forGetter(Atan2KNumber::y)
 	).apply(instance, Atan2KNumber::new)), CompositeStreamCodec.of(
@@ -80,7 +80,7 @@ public record Atan2KNumber(KNumber x, KNumber y) implements KNumber, ImBuilderWi
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

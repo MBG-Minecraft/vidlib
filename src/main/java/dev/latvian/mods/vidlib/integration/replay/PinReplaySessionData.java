@@ -6,10 +6,10 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.KLibCodecs;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.replay.api.ReplaySession;
 import dev.latvian.mods.replay.api.ReplaySessionData;
 import dev.latvian.mods.replay.api.ReplaySessionDataType;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.pin.Pin;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import org.jetbrains.annotations.Nullable;
@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class PinReplaySessionData implements ReplaySessionData {
-	public static final ReplaySessionDataType<PinReplaySessionData> TYPE = new ReplaySessionDataType<>(VidLib.id("pins"), PinReplaySessionData::new);
+	public static final ReplaySessionDataType<PinReplaySessionData> TYPE = new ReplaySessionDataType<>(ID.vidlib("pins"), PinReplaySessionData::new);
 
 	private static final Codec<Pair<UUID, Pin>> OLD_CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		KLibCodecs.UUID.fieldOf("uuid").forGetter(Pair::getFirst),

@@ -8,12 +8,12 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Vec3ImBuilder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.world.phys.Vec3;
 
 public record FixedKVector(Vec3 vec) implements KVector, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<FixedKVector> TYPE = SimpleRegistryType.dynamic("fixed", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<FixedKVector> TYPE = CustomRegistryType.dynamic("fixed", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		MCCodecs.VEC3S.fieldOf("vec").forGetter(FixedKVector::vec)
 	).apply(instance, KVector::of)), MCStreamCodecs.VEC3.map(KVector::of, FixedKVector::vec));
 
@@ -51,7 +51,7 @@ public record FixedKVector(Vec3 vec) implements KVector, ImBuilderWithHolder.Fac
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		if (vec.x == 0D && vec.y == 0D && vec.z == 0D) {
 			return KVector.ZERO_TYPE;
 		} else if (vec.x == 1D && vec.y == 1D && vec.z == 1D) {

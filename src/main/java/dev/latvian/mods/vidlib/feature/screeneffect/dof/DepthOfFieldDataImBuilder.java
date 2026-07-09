@@ -13,8 +13,8 @@ public class DepthOfFieldDataImBuilder implements ImBuilder<DepthOfFieldData> {
 	public final FloatImBuilder focusRange = new FloatImBuilder(0F, 30F);
 	public final FloatImBuilder blurRange = new FloatImBuilder(0F, 30F);
 	public final FloatImBuilder strength = new FloatImBuilder(0F, 30F);
-	public final ImBuilder<DepthOfFieldShape> shape = new EnumImBuilder<>(DepthOfFieldShape.VALUES);
-	public final ImBuilder<DepthOfFieldBlurMode> blurMode = new EnumImBuilder<>(DepthOfFieldBlurMode.VALUES);
+	public final ImBuilder<DepthOfFieldShape> shape = EnumImBuilder.of(DepthOfFieldShape.VALUES).build();
+	public final ImBuilder<DepthOfFieldBlurMode> blurMode = EnumImBuilder.of(DepthOfFieldBlurMode.VALUES).build();
 
 	@Override
 	public void set(DepthOfFieldData value) {

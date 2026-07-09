@@ -9,13 +9,13 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public record FollowingEntityKVector(EntityFilter entity, PositionType positionType) implements KVector, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<FollowingEntityKVector> TYPE = SimpleRegistryType.dynamic("following_entity", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<FollowingEntityKVector> TYPE = CustomRegistryType.dynamic("following_entity", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		EntityFilter.CODEC.fieldOf("entity").forGetter(FollowingEntityKVector::entity),
 		PositionType.CODEC.optionalFieldOf("position_type", PositionType.CENTER).forGetter(FollowingEntityKVector::positionType)
 	).apply(instance, FollowingEntityKVector::new)), CompositeStreamCodec.of(
@@ -67,7 +67,7 @@ public record FollowingEntityKVector(EntityFilter entity, PositionType positionT
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

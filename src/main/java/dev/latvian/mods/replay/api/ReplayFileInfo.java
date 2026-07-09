@@ -1,7 +1,7 @@
 package dev.latvian.mods.replay.api;
 
 import com.mojang.authlib.GameProfile;
-import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
+import dev.latvian.mods.klib.platform.PlatformModInfo;
 import dev.latvian.mods.vidlib.util.PackSyncMeta;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;

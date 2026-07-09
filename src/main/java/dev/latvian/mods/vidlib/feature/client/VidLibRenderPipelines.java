@@ -24,34 +24,34 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
 
-@EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = ID.vidlib, value = Dist.CLIENT)
 public interface VidLibRenderPipelines {
 	RenderPipeline GUI_DEPTH = RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
-		.withLocation(VidLib.id("pipeline/gui_depth"))
-		.withFragmentShader(VidLib.id("core/gui_depth"))
+		.withLocation(ID.vidlib("pipeline/gui_depth"))
+		.withFragmentShader(ID.vidlib("core/gui_depth"))
 		.build();
 
 	RenderPipeline MASKED_GUI = RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
-		.withLocation(VidLib.id("pipeline/masked_gui"))
-		.withFragmentShader(VidLib.id("core/masked_gui"))
+		.withLocation(ID.vidlib("pipeline/masked_gui"))
+		.withFragmentShader(ID.vidlib("core/masked_gui"))
 		.withSampler("Sampler1")
 		.build();
 
 	RenderPipeline MSDF = RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET)
-		.withLocation(VidLib.id("pipeline/msdf"))
+		.withLocation(ID.vidlib("pipeline/msdf"))
 		.withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
-		.withVertexShader(VidLib.id("core/msdf"))
-		.withFragmentShader(VidLib.id("core/msdf"))
+		.withVertexShader(ID.vidlib("core/msdf"))
+		.withFragmentShader(ID.vidlib("core/msdf"))
 		.withSampler("Sampler0")
 		.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
 		.withCull(true)
 		.build();
 
 	RenderPipeline MSDF_SEE_THROUGH = RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET)
-		.withLocation(VidLib.id("pipeline/msdf_see_through"))
+		.withLocation(ID.vidlib("pipeline/msdf_see_through"))
 		.withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
-		.withVertexShader(VidLib.id("core/msdf"))
-		.withFragmentShader(VidLib.id("core/msdf"))
+		.withVertexShader(ID.vidlib("core/msdf"))
+		.withFragmentShader(ID.vidlib("core/msdf"))
 		.withSampler("Sampler0")
 		.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
 		.withCull(true)
@@ -59,7 +59,7 @@ public interface VidLibRenderPipelines {
 		.build();
 
 	RenderPipeline SKYBOX = RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET)
-		.withLocation(VidLib.id("pipeline/skybox"))
+		.withLocation(ID.vidlib("pipeline/skybox"))
 		.withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
 		.withVertexShader("core/position_tex_color")
 		.withFragmentShader("core/position_tex_color")
@@ -68,41 +68,41 @@ public interface VidLibRenderPipelines {
 		.build();
 
 	RenderPipeline SOLID_TERRAIN_NO_CULL = RenderPipeline.builder(RenderPipelines.TERRAIN_SNIPPET)
-		.withLocation(VidLib.id("pipeline/terrain/solid_no_cull"))
+		.withLocation(ID.vidlib("pipeline/terrain/solid_no_cull"))
 		.withCull(false)
 		.build();
 
 	RenderPipeline CUTOUT_MIPPED_TERRAIN_NO_CULL = RenderPipeline.builder(RenderPipelines.TERRAIN_SNIPPET)
-		.withLocation(VidLib.id("pipeline/terrain/cutout_mipped_no_cull"))
+		.withLocation(ID.vidlib("pipeline/terrain/cutout_mipped_no_cull"))
 		.withShaderDefine("ALPHA_CUTOUT", 0.5F)
 		.withCull(false)
 		.build();
 
 	RenderPipeline CUTOUT_TERRAIN_NO_CULL = RenderPipeline.builder(RenderPipelines.TERRAIN_SNIPPET)
-		.withLocation(VidLib.id("pipeline/terrain/cutout_no_cull"))
+		.withLocation(ID.vidlib("pipeline/terrain/cutout_no_cull"))
 		.withShaderDefine("ALPHA_CUTOUT", 0.1F)
 		.withCull(false)
 		.build();
 
 	RenderPipeline TRANSLUCENT_TERRAIN_NO_CULL = RenderPipeline.builder(RenderPipelines.TERRAIN_SNIPPET)
-		.withLocation(VidLib.id("pipeline/terrain/translucent_no_cull"))
+		.withLocation(ID.vidlib("pipeline/terrain/translucent_no_cull"))
 		.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
 		.withCull(false)
 		.build();
 
 	RenderPipeline ADDITIVE_PARTICLE = RenderPipeline.builder(RenderPipelines.PARTICLE_SNIPPET)
-		.withLocation(VidLib.id("pipeline/particle/additive"))
+		.withLocation(ID.vidlib("pipeline/particle/additive"))
 		.withColorTargetState(new ColorTargetState(BlendFunction.ADDITIVE))
 		.withDepthStencilState(new DepthStencilState(CompareOp.LESS_THAN_OR_EQUAL, false))
 		.build();
 
 	RenderPipeline ADDITIVE_PARTICLE_ONLY_DEPTH = RenderPipeline.builder(RenderPipelines.PARTICLE_SNIPPET)
-		.withLocation(VidLib.id("pipeline/particle/additive_only_depth"))
+		.withLocation(ID.vidlib("pipeline/particle/additive_only_depth"))
 		.withColorTargetState(new ColorTargetState(Optional.of(BlendFunction.ADDITIVE), ColorTargetState.WRITE_NONE))
 		.build();
 
 	Function<BlendFunction, RenderPipeline> CANVAS_PIPELINES = Util.memoize(blendFunction -> RenderPipeline.builder()
-		.withLocation(VidLib.id("pipeline/canvas/" + blendFunction.sourceColor().name().toLowerCase(Locale.ROOT) + "/" + blendFunction.destColor().name().toLowerCase(Locale.ROOT) + "/" + blendFunction.sourceAlpha().name().toLowerCase(Locale.ROOT) + "/" + blendFunction.destAlpha().name().toLowerCase(Locale.ROOT) + "/"))
+		.withLocation(ID.vidlib("pipeline/canvas/" + blendFunction.sourceColor().name().toLowerCase(Locale.ROOT) + "/" + blendFunction.destColor().name().toLowerCase(Locale.ROOT) + "/" + blendFunction.sourceAlpha().name().toLowerCase(Locale.ROOT) + "/" + blendFunction.destAlpha().name().toLowerCase(Locale.ROOT) + "/"))
 		.withVertexShader("core/screenquad")
 		.withFragmentShader("core/blit_screen")
 		.withSampler("InSampler")
@@ -124,8 +124,8 @@ public interface VidLibRenderPipelines {
 	RenderPipeline OUTLINE_NO_CULL = RenderPipeline.builder(OUTLINE_SNIPPET).withLocation("pipeline/outline_no_cull").withCull(false).build();
 
 	RenderPipeline STONE_ENTITY_NO_CULL = RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET)
-		.withLocation(VidLib.id("pipeline/canvas/no_cull/stone_entity"))
-		.withFragmentShader(VidLib.id("core/stone_entity"))
+		.withLocation(ID.vidlib("pipeline/canvas/no_cull/stone_entity"))
+		.withFragmentShader(ID.vidlib("core/stone_entity"))
 		.withSampler("Sampler1")
 		.withCull(false)
 		.withVertexFormat(DefaultVertexFormat.ENTITY, VertexFormat.Mode.QUADS)

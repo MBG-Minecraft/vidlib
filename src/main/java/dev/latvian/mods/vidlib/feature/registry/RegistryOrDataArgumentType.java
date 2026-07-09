@@ -23,7 +23,7 @@ import net.minecraft.network.chat.Component;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
-public record RegistryOrDataArgumentType<T>(VLRegistry<T> registry, DataArgumentType<T> fallback) implements ArgumentType<T> {
+public record RegistryOrDataArgumentType<T>(VLRegistry<T> registry, ArgumentType<T> fallback) implements ArgumentType<T> {
 	public static final SimpleCommandExceptionType VALUE_NOT_FOUND = new SimpleCommandExceptionType(Component.literal("Value not found"));
 
 	@Override

@@ -45,14 +45,14 @@ public record MSDFFont(
 ) {
 	public static final ImFloat DEBUG_SIZE = new ImFloat(0F);
 
-	private static final ResourceKey<? extends Registry<MSDFFont>> ROOT_ID = ResourceKey.createRegistryKey(VidLib.id("msdf_font"));
+	private static final ResourceKey<? extends Registry<MSDFFont>> ROOT_ID = ResourceKey.createRegistryKey(ID.vidlib("msdf_font"));
 
 	public static ResourceKey<MSDFFont> createKey(Identifier id) {
 		return ResourceKey.create(ROOT_ID, id);
 	}
 
 	public static final MSDFFont UNKNOWN = new MSDFFont(
-		createKey(VidLib.id("unknown")),
+		createKey(ID.vidlib("unknown")),
 		VidLibTextures.MISSING.texturePath(),
 		MSDFFontData.EMPTY,
 		Char2ObjectMaps.emptyMap(),

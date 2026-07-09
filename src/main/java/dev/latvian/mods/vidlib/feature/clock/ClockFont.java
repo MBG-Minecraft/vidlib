@@ -7,7 +7,7 @@ import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
-import dev.latvian.mods.vidlib.feature.registry.RegistryRef;
+import dev.latvian.mods.vidlib.feature.registry.Ref;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
 import net.minecraft.resources.Identifier;
@@ -61,11 +61,11 @@ public record ClockFont(
 
 	public static final VLRegistry<ClockFont> REGISTRY = VLRegistry.createClient("clock_font", ClockFont.class);
 
-	public static final DataType<RegistryRef<ClockFont>> REF_DATA_TYPE = REGISTRY.refDataType();
+	public static final DataType<Ref<ClockFont>> REF_DATA_TYPE = REGISTRY.refDataType();
 
-	public static final ImBuilderType<RegistryRef<ClockFont>> REGISTRY_REF_IM_BUILDER_SUPPLIER = () -> {
+	public static final ImBuilderType<Ref<ClockFont>> REGISTRY_REF_IM_BUILDER_SUPPLIER = () -> {
 		var allFonts = REGISTRY.getMap().values().stream().map(f -> REGISTRY.asRef(f, ClockFont::id)).toList();
-		return new EnumImBuilder<>(allFonts);
+		return EnumImBuilder.of(allFonts).build();
 	};
 
 	public static class Loader extends JsonRegistryReloadListener<ClockFont> {

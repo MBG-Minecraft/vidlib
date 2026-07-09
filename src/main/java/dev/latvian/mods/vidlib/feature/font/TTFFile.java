@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.font;
 
-import dev.latvian.mods.vidlib.feature.registry.RegistryRef;
+import dev.latvian.mods.vidlib.feature.registry.Ref;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.resources.Identifier;
@@ -10,8 +10,8 @@ import java.io.IOException;
 
 public record TTFFile(Identifier id, Identifier resource) {
 	public static final VLRegistry<TTFFile> REGISTRY = VLRegistry.createClient("ttf", TTFFile.class);
-	public static final RegistryRef<TTFFile> MATERIAL_ICONS_ROUND_REGULAR = REGISTRY.ref(Identifier.fromNamespaceAndPath("imguiresources", "materialiconsround_regular"));
-	public static final RegistryRef<TTFFile> JETBRAINS_MONO_REGULAR = REGISTRY.ref(Identifier.fromNamespaceAndPath("imguiresources", "jetbrainsmono_regular"));
+	public static final Ref<TTFFile> MATERIAL_ICONS_ROUND_REGULAR = REGISTRY.ref(Identifier.fromNamespaceAndPath("imguiresources", "materialiconsround_regular"));
+	public static final Ref<TTFFile> JETBRAINS_MONO_REGULAR = REGISTRY.ref(Identifier.fromNamespaceAndPath("imguiresources", "jetbrainsmono_regular"));
 
 	public static void find(ResourceManager resourceManager) {
 		var map = new Object2ObjectOpenHashMap<Identifier, TTFFile>();

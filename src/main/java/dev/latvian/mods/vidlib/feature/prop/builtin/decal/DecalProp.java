@@ -14,7 +14,7 @@ import org.joml.Vector3d;
 
 public class DecalProp extends Prop {
 	@AutoRegister
-	public static final PropType<DecalProp> TYPE = PropType.create(VidLib.id("decal"), DecalProp::new,
+	public static final PropType<DecalProp> TYPE = PropType.create(ID.vidlib("decal"), DecalProp::new,
 		TICK,
 		LIFESPAN,
 		POSITION,

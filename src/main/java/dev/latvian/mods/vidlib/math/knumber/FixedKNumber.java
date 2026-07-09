@@ -10,7 +10,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePin;
 import dev.latvian.mods.vidlib.feature.imgui.node.NodePinType;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import imgui.ImGui;
 import imgui.type.ImDouble;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -19,7 +19,7 @@ import net.minecraft.util.Mth;
 import java.util.List;
 
 public record FixedKNumber(Double number) implements KNumber, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<FixedKNumber> TYPE = SimpleRegistryType.dynamic("fixed", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<FixedKNumber> TYPE = CustomRegistryType.dynamic("fixed", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.DOUBLE.fieldOf("number").forGetter(FixedKNumber::number)
 	).apply(instance, KNumber::of)), ByteBufCodecs.DOUBLE.map(KNumber::of, FixedKNumber::number));
 
@@ -88,7 +88,7 @@ public record FixedKNumber(Double number) implements KNumber, ImBuilderWithHolde
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 

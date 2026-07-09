@@ -10,7 +10,7 @@ import net.minecraft.resources.Identifier;
 import java.util.List;
 
 public class ScreenEffectTexture extends DataTexture {
-	public static final Identifier ID = VidLib.id("textures/effect/screen.png");
+	public static final Identifier ID = ID.vidlib("textures/effect/screen.png");
 
 	@ClientAutoRegister
 	public static final DynamicTextureHolder<ScreenEffectTexture> HOLDER = new DynamicTextureHolder<>(ID, Lazy.of(ScreenEffectTexture::new));

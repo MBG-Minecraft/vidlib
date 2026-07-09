@@ -9,7 +9,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectShaderType;
@@ -19,7 +19,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.network.codec.ByteBufCodecs;
 
 public record ColorEffect(Gradient color, boolean additive) implements ScreenEffect {
-	public static final SimpleRegistryType<ColorEffect> TYPE = SimpleRegistryType.dynamic("color", RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final CustomRegistryType<ColorEffect> TYPE = CustomRegistryType.dynamic("color", RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Gradient.CODEC.optionalFieldOf("color", Color.BLACK).forGetter(ColorEffect::color),
 		Codec.BOOL.optionalFieldOf("additive", false).forGetter(ColorEffect::additive)
 	).apply(instance, ColorEffect::new)), CompositeStreamCodec.of(
@@ -92,7 +92,7 @@ public record ColorEffect(Gradient color, boolean additive) implements ScreenEff
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<?> type() {
 		return TYPE;
 	}
 
