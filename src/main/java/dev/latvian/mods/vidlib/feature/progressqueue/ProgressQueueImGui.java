@@ -59,8 +59,8 @@ public class ProgressQueueImGui {
 			int maxItemCount = queue.items.size();
 			int done = 0;
 
-			for (var fileProgress : queue.items) {
-				if (fileProgress.isDone()) {
+			for (var item : queue.items) {
+				if (item.isDone()) {
 					done++;
 				}
 			}
@@ -108,7 +108,7 @@ public class ProgressQueueImGui {
 							}
 
 							float p = Math.clamp((float) ((double) progress / (double) size), 0F, 1F);
-							ImGui.progressBar(p, -1F, 20F * scale, item.nameFunction.getName(progress, size));
+							ImGui.progressBar(p, -1F, 20F * scale, item.infoText.getName(progress, size));
 						}
 					}
 				}

@@ -11,7 +11,8 @@ public record HubUserCapabilities(
 	boolean viewRemoteReplays,
 	boolean autoUploadFiles,
 	boolean uploadUserFiles,
-	boolean requireLink
+	boolean requireLink,
+	boolean parallelUploads
 ) {
 	public static final boolean DEFAULT_ENABLE_ADMIN_BUTTONS = "true".equals(System.getenv("ENABLE_ADMIN_BUTTONS")) || PlatformHelper.CURRENT.isDevEnv();
 
@@ -22,7 +23,8 @@ public record HubUserCapabilities(
 		false,
 		true,
 		false,
-		!DEFAULT_ENABLE_ADMIN_BUTTONS
+		!DEFAULT_ENABLE_ADMIN_BUTTONS,
+		false
 	);
 
 	public static HubUserCapabilities CURRENT = DEFAULT;
@@ -34,7 +36,8 @@ public record HubUserCapabilities(
 		Codec.BOOL.optionalFieldOf("view_remote_replays", DEFAULT.viewRemoteReplays).forGetter(HubUserCapabilities::viewRemoteReplays),
 		Codec.BOOL.optionalFieldOf("auto_upload_files", DEFAULT.autoUploadFiles).forGetter(HubUserCapabilities::autoUploadFiles),
 		Codec.BOOL.optionalFieldOf("upload_user_files", DEFAULT.uploadUserFiles).forGetter(HubUserCapabilities::uploadUserFiles),
-		Codec.BOOL.optionalFieldOf("require_link", DEFAULT.requireLink).forGetter(HubUserCapabilities::requireLink)
+		Codec.BOOL.optionalFieldOf("require_link", DEFAULT.requireLink).forGetter(HubUserCapabilities::requireLink),
+		Codec.BOOL.optionalFieldOf("parallel_uploads", DEFAULT.parallelUploads).forGetter(HubUserCapabilities::parallelUploads)
 	).apply(instance, HubUserCapabilities::new));
 
 	public boolean resolveRequireLink() {

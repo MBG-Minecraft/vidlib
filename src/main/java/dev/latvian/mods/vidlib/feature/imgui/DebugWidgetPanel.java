@@ -26,6 +26,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ParticleOptionsImB
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.item.VisualItemKey;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
+import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundDataImBuilder;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
@@ -480,14 +481,45 @@ public class DebugWidgetPanel extends Panel {
 		ImGui.separator();
 
 		if (ImGui.button("Test Progress Single###test-progress-single")) {
-			var item = ProgressQueue.queueSingleItem("Loading Test...");
-			item.queue.bottomText = "Bottom Text";
+			var item = ProgressQueue.queueSingleItem("Test");
+			item.queue.bottomText = "Please keep the game open!";
+			item.label = "example.txt";
+			item.blocksExit = true;
+			item.setInfoText("Connecting...");
+			item.setStarted();
+
+			Thread.startVirtualThread(() -> {
+				try {
+					Thread.sleep(2000L);
+					item.setSize(2000L);
+					item.setInfoText(ProgressItemNameFunction.PERCENT);
+
+					for (int i = 0; i < 2000; i++) {
+						item.addProgress(1L);
+						Thread.sleep(5L);
+					}
+
+					item.setInfoText("Processing...");
+					Thread.sleep(2000L);
+					item.setDone();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			});
+		}
+
+		if (ImGui.button("Test Progress Single (+ Error)###test-progress-single-error")) {
+			var item = ProgressQueue.queueSingleItem("Test");
+			item.queue.bottomText = "Please keep the game open!";
+			item.label = "example.txt";
+			item.setInfoText("Connecting...");
+			item.setStarted();
 
 			Thread.startVirtualThread(() -> {
 				try {
 					Thread.sleep(1000L);
-					item.setSize(200L);
-					item.setStarted();
+					item.setSize(1000L);
+					item.setInfoText(ProgressItemNameFunction.PERCENT);
 
 					for (int i = 0; i < 200; i++) {
 						item.addProgress(1L);

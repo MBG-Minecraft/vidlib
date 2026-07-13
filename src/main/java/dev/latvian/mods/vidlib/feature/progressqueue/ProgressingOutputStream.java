@@ -1,12 +1,17 @@
 package dev.latvian.mods.vidlib.feature.progressqueue;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
 public class ProgressingOutputStream extends FilterOutputStream {
+	public static OutputStream wrap(OutputStream out, @Nullable ProgressItem progressItem) {
+		return out == null || progressItem == null ? out : new ProgressingOutputStream(out, progressItem);
+	}
+
 	public final ProgressItem progressItem;
 
 	public ProgressingOutputStream(OutputStream out, ProgressItem progressItem) {

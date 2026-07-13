@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.Window;
 import dev.latvian.mods.vidlib.core.VLWindow;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.progressqueue.BlockExitScreen;
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -179,6 +180,13 @@ public class WindowMixin implements VLWindow {
 
 		if (s != -1) {
 			cir.setReturnValue(s);
+		}
+	}
+
+	@Inject(method = "lambda$setWindowCloseCallback$0", at = @At("HEAD"), cancellable = true)
+	private static void vl$windowCloseCallback(Runnable callback, long id, CallbackInfo ci) {
+		if (BlockExitScreen.cancelExit(Minecraft.getInstance())) {
+			ci.cancel();
 		}
 	}
 }

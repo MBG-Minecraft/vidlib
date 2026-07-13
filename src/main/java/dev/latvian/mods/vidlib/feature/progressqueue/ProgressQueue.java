@@ -40,6 +40,24 @@ public class ProgressQueue {
 		return item;
 	}
 
+	public static boolean isBlockingExit() {
+		LOCK.lock();
+
+		try {
+			for (var queue : ProgressQueue.ACTIVE) {
+				for (var item : queue.items) {
+					if (item.isBlockingExit()) {
+						return true;
+					}
+				}
+			}
+
+			return false;
+		} finally {
+			LOCK.unlock();
+		}
+	}
+
 	public final List<ProgressItem> items;
 	public String topText;
 	public String bottomText;

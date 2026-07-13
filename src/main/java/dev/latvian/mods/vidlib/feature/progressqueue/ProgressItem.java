@@ -13,15 +13,17 @@ public final class ProgressItem implements IntConsumer, LongConsumer {
 	public final AtomicLong progress;
 	public final AtomicLong size;
 	public String label;
-	public ProgressItemNameFunction nameFunction;
+	public ProgressItemNameFunction infoText;
+	public boolean blocksExit;
 
-	public ProgressItem(ProgressQueue queue, String label, ProgressItemNameFunction nameFunction) {
+	public ProgressItem(ProgressQueue queue, String label, ProgressItemNameFunction infoText) {
 		this.queue = queue;
 		this.status = new AtomicInteger(0);
 		this.progress = new AtomicLong(0L);
 		this.size = new AtomicLong(1L);
 		this.label = label;
-		this.nameFunction = nameFunction;
+		this.infoText = infoText;
+		this.blocksExit = false;
 	}
 
 	public void setStarted() {
@@ -38,6 +40,10 @@ public final class ProgressItem implements IntConsumer, LongConsumer {
 
 	public boolean isDone() {
 		return status.get() == 2;
+	}
+
+	public boolean isBlockingExit() {
+		return blocksExit && !isDone();
 	}
 
 	public void setSize(long size) {
@@ -77,5 +83,17 @@ public final class ProgressItem implements IntConsumer, LongConsumer {
 	@Override
 	public void accept(long value) {
 		addProgress(value);
+	}
+
+	public void setInfoText(ProgressItemNameFunction function) {
+		infoText = function;
+	}
+
+	public void setInfoText(String string) {
+		infoText = new ProgressItemNameFunction.OfString(string);
+	}
+
+	public void setBlocksExit(boolean blocksExit) {
+		this.blocksExit = blocksExit;
 	}
 }

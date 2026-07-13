@@ -10,7 +10,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
-import dev.latvian.mods.vidlib.feature.progressqueue.ProgressingInputStream;
+import dev.latvian.mods.vidlib.feature.progressqueue.ProgressingOutputStream;
 import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubFileType;
@@ -21,13 +21,14 @@ import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 
-import java.net.http.HttpResponse;
+import java.net.HttpURLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -121,6 +122,7 @@ public class HubFileUploads {
 				for (var entry : fileList) {
 					var file = entry.file;
 					var progressItem = progressQueue.addItem(file.name(), ProgressItemNameFunction.SI_BYTE_SIZE);
+					progressItem.blocksExit = true;
 					progressItem.setSize(file.size());
 					progressItems.add(progressItem);
 				}
@@ -215,6 +217,7 @@ public class HubFileUploads {
 
 						if (syncFile != null) {
 							var progressItem = progressQueue.addItem(syncFile.fileInfo().name(), ProgressItemNameFunction.SI_BYTE_SIZE);
+							progressItem.blocksExit = true;
 							progressItem.setSize(syncFile.meta.size());
 							syncFile.progressItem.setValue(progressItem);
 						}
@@ -289,9 +292,10 @@ public class HubFileUploads {
 		VidLib.LOGGER.info("Uploading " + item + " (" + totalParts + " parts)");
 		long offset = item.offset();
 		long start = System.currentTimeMillis();
+		var name = file.fileInfo.name();
 
 		if (offset >= file.meta.size()) {
-			VidLib.LOGGER.info("Done uploading " + file.fileInfo.name() + " in " + (System.currentTimeMillis() - start) / 1000L + " s");
+			VidLib.LOGGER.info("Done uploading " + name + " in " + (System.currentTimeMillis() - start) / 1000L + " s");
 			return file;
 		}
 
@@ -301,47 +305,69 @@ public class HubFileUploads {
 			while (true) {
 				int len = fileInputStream.readNBytes(chunk, 0, (int) Math.min(file.meta.size() - offset, chunk.length));
 
-				var response = HubAPI.HTTP_CLIENT.send(HubAPI.request(item.url(), Tristate.FALSE)
-					.method("PATCH", ProgressingInputStream.wrapBodyPublisher(chunk, 0, len, progressItem))
-					.header("Tus-Resumable", "1.0.0")
-					.header("Content-Type", "application/offset+octet-stream")
-					.header("Upload-Offset", Long.toUnsignedString(offset))
-					.build(), HttpResponse.BodyHandlers.ofString());
+				if (progressItem != null) {
+					progressItem.setInfoText("Connecting...");
+				}
 
-				if (response.statusCode() / 100 == 2) {
+				var request = HubAPI.request(item.url(), Tristate.FALSE).build();
+				var connection = (HttpURLConnection) request.uri().toURL().openConnection();
+				connection.setDoOutput(true);
+				connection.setDoInput(true);
+				connection.setFixedLengthStreamingMode(len);
+				connection.setRequestMethod("PUT");
+				connection.setRequestProperty("Tus-Resumable", "1.0.0");
+				connection.setRequestProperty("Content-Type", "application/offset+octet-stream");
+				connection.setRequestProperty("Upload-Offset", Long.toUnsignedString(offset));
+
+				if (progressItem != null) {
+					progressItem.setInfoText(ProgressItemNameFunction.SI_BYTE_SIZE);
+				}
+
+				try (var out = ProgressingOutputStream.wrap(connection.getOutputStream(), progressItem)) {
+					out.write(chunk, 0, len);
+				}
+
+				if (progressItem != null) {
+					progressItem.setInfoText("Processing...");
+				}
+
+				int responseCode = connection.getResponseCode();
+
+				if (responseCode / 100 == 2) {
 					offset += len;
 
-					var responseOffset = response.headers().firstValueAsLong("Upload-Offset").orElse(-1L);
+					long responseOffset = Optional.ofNullable(connection.getHeaderField("Upload-Offset")).map(Long::parseUnsignedLong).orElse(-1L);
 
 					if (responseOffset != offset) {
 						throw new IllegalStateException("Server reported back incorrect file offset " + responseOffset + ", expected " + offset);
 					}
 
 					if (totalParts > 1) {
-						VidLib.LOGGER.info("Uploaded part " + Mth.ceil((double) offset / (double) chunk.length) + "/" + totalParts + " of " + file.fileInfo.name());
+						VidLib.LOGGER.info("Uploaded part " + Mth.ceil((double) offset / (double) chunk.length) + "/" + totalParts + " of " + name);
 					}
 
 					if (responseOffset >= file.meta.size()) {
-						var fileId = response.headers().firstValue("X-File-ID").orElse("");
+						var fileId = Optional.ofNullable(connection.getHeaderField("X-File-ID")).orElse("");
 
 						if (!fileId.isEmpty()) {
 							IOUtils.setAttribute(file.fileInfo.path(), "MBG-Hub-Sync-ID", fileId);
 						}
 
-						VidLib.LOGGER.info("Done uploading " + file.fileInfo.name() + " (" + fileId + ") in " + (System.currentTimeMillis() - start) / 1000L + " s");
+						VidLib.LOGGER.info("Done uploading " + name + " (" + fileId + ") in " + (System.currentTimeMillis() - start) / 1000L + " s");
 						return file;
 					}
 				} else {
-					try {
-						VidLib.LOGGER.info(response.body());
-						var json = JsonUtils.parse(response.body()).getAsJsonObject();
+					try (var in = connection.getInputStream()) {
+						var json = JsonUtils.read(in).getAsJsonObject();
 						var message = json.get("message").getAsString();
 						VidLib.LOGGER.info(message);
-						throw new IllegalStateException("Error " + response.statusCode() + " uploading " + file.fileInfo.name() + ": " + message);
+						throw new IllegalStateException("Error " + responseCode + " uploading " + name + ": " + message);
 					} catch (Exception ignored) {
-						throw new IllegalStateException("Error " + response.statusCode() + " uploading " + file.fileInfo.name());
+						throw new IllegalStateException("Error " + responseCode + " uploading " + name);
 					}
 				}
+
+				connection.disconnect();
 			}
 		}
 	}

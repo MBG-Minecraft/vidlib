@@ -11,6 +11,7 @@ import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
 import dev.latvian.mods.vidlib.feature.misc.MainMenuOpenedEvent;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.progressqueue.BlockExitScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.InBedChatScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -174,9 +175,8 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	private void vl$stop(CallbackInfo ci) {
 		var mc = vl$self();
 
-		if (mc.level != null) {
+		if (BlockExitScreen.stop(mc)) {
 			GLFW.glfwSetWindowShouldClose(mc.getWindow().getWindow(), false);
-			vl$exitToTitle();
 			ci.cancel();
 		}
 	}
