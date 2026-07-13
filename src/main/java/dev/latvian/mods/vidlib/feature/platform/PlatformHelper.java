@@ -26,6 +26,7 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.Nullable;
 
@@ -181,5 +182,9 @@ public class PlatformHelper {
 	}
 
 	public void collectGatewayEventHandlers(Map<String, Consumer<HubGatewayEvent>> map) {
+	}
+
+	public boolean isReplayLevel(Level level) {
+		return false;
 	}
 }

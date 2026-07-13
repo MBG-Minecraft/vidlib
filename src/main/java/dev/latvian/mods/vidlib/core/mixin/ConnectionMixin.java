@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import net.minecraft.network.Connection;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketSendListener;
@@ -30,7 +31,7 @@ public class ConnectionMixin {
 
 	@Inject(method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;Z)V", at = @At("HEAD"))
 	private void vl$send(Packet<?> packet, PacketSendListener listener, boolean flush, CallbackInfo ci) {
-		if (receiving == PacketFlow.SERVERBOUND && packetListener instanceof ServerCommonPacketListener l && l.getMainThreadEventLoop() instanceof MinecraftServer server && !server.overworld().isReplayLevel()) {
+		if (receiving == PacketFlow.SERVERBOUND && packetListener instanceof ServerCommonPacketListener l && l.getMainThreadEventLoop() instanceof MinecraftServer server && !PlatformHelper.CURRENT.isReplayLevel(server.overworld())) {
 			if (l instanceof ServerConfigurationPacketListenerImpl lc) {
 				var packetCapture = server.vl$getPacketCapture(true);
 

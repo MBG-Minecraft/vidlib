@@ -33,6 +33,14 @@ public class ProgressingInputStream extends FilterInputStream {
 		this.progressItem = progressItem;
 	}
 
+	private void addProgress(long value) {
+		progressItem.setInfoText(ProgressItemNameFunction.SI_BYTE_SIZE);
+
+		if (progressItem.addProgress(value) >= progressItem.size.get()) {
+			progressItem.setInfoText("Processing...");
+		}
+	}
+
 	@Override
 	public int read() throws IOException {
 		if (progressItem.queue.isCancelled()) {
@@ -42,7 +50,7 @@ public class ProgressingInputStream extends FilterInputStream {
 		int result = super.read();
 
 		if (result != -1) {
-			progressItem.addProgress(1L);
+			addProgress(1L);
 		}
 
 		return result;
@@ -55,7 +63,7 @@ public class ProgressingInputStream extends FilterInputStream {
 		}
 
 		int result = super.read(b);
-		progressItem.addProgress(result);
+		addProgress(result);
 		return result;
 	}
 
@@ -66,7 +74,7 @@ public class ProgressingInputStream extends FilterInputStream {
 		}
 
 		int result = super.read(b, off, len);
-		progressItem.addProgress(result);
+		addProgress(result);
 		return result;
 	}
 
@@ -77,7 +85,7 @@ public class ProgressingInputStream extends FilterInputStream {
 		}
 
 		long result = super.skip(n);
-		progressItem.addProgress(result);
+		addProgress(result);
 		return result;
 	}
 }

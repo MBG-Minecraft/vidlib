@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.bulk;
 
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
@@ -92,7 +93,7 @@ public class BulkLevelModificationHolder implements BlockModificationConsumer {
 		var server = !level.isClientSide();
 		var packets = server ? new S2CPacketBundleBuilder(level) : null;
 
-		boolean collectUndoable = (undoable && server) || (!future && !server && level.isReplayLevel());
+		boolean collectUndoable = (undoable && server) || (!future && !server && PlatformHelper.CURRENT.isReplayLevel(level));
 
 		for (var sd : sections.values()) {
 			if (!sd.modified) {

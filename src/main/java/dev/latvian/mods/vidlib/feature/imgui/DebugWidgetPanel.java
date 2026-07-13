@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.imgui;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.interpolation.BezierPreset;
 import dev.latvian.mods.klib.interpolation.Interpolation;
+import dev.latvian.mods.klib.io.IOUtils;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
@@ -25,6 +26,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.interpolation.Interpolation
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ParticleOptionsImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.item.VisualItemKey;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
@@ -39,6 +41,8 @@ import dev.latvian.mods.vidlib.util.ColoredText;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubCountries;
 import dev.mrbeastgaming.mods.hub.api.HubCountry;
+import dev.mrbeastgaming.mods.hub.api.HubFileType;
+import dev.mrbeastgaming.mods.hub.file.ClientHubFileUploads;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.ImVec4;
@@ -59,9 +63,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Vector2f;
 
+import java.io.BufferedOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -527,8 +536,7 @@ public class DebugWidgetPanel extends Panel {
 
 						if (i == 170) {
 							item.error("Test Error!");
-
-							HubAPI.log("Test Error", new IllegalStateException("Test Error"));
+							HubAPI.log(0, mc.player, "Test Error", new IllegalStateException("Test Error"));
 						}
 					}
 
@@ -603,6 +611,29 @@ public class DebugWidgetPanel extends Panel {
 		if (ImGui.button("Test Error Queue###test-error-queue")) {
 			errorQueue.error(ColoredText.warning("Error " + System.currentTimeMillis()));
 			errorQueue.display();
+		}
+
+		if (ImGui.button("Test Real File###test-real-file-upload")) {
+			var path = PlatformHelper.CURRENT.getGameDirectory().resolve("test-upload.txt");
+			var chars = " abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 ".getBytes(StandardCharsets.UTF_8);
+
+			Thread.startVirtualThread(() -> {
+				int bytes = 120 * 1024 * 1024;
+				var random = RandomSource.create();
+
+				try (var out = new BufferedOutputStream(Files.newOutputStream(path, IOUtils.WRITE_OPEN_OPTIONS.toArray(OpenOption[]::new)))) {
+					for (int i = 0; i < bytes; i++) {
+						out.write(chars[random.nextInt(chars.length)]);
+					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+
+				ClientHubFileUploads.syncFile(path, (fileInfo, builder) -> {
+					builder.setType(HubFileType.CLIENT_GAME_LOG);
+					builder.setCustomName("test-upload.txt");
+				});
+			});
 		}
 
 		ImGui.separator();

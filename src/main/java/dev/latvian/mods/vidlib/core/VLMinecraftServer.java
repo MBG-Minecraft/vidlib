@@ -118,7 +118,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	@Override
 	@ApiStatus.Internal
 	default void vl$postTick(PauseType paused) {
-		if (vl$level().isReplayLevel()) {
+		if (PlatformHelper.CURRENT.isReplayLevel(vl$level())) {
 			return;
 		}
 

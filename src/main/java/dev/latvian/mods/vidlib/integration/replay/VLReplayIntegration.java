@@ -43,6 +43,7 @@ import dev.latvian.mods.vidlib.feature.note.Note;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.AddPropPayload;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
@@ -367,7 +368,7 @@ public class VLReplayIntegration {
 	public static void popups(ReplayPopupEvent event) {
 		var mc = Minecraft.getInstance();
 
-		if (VidLibClientEventHandler.clientLoaded && mc.level != null && mc.level.isReplayLevel()) {
+		if (VidLibClientEventHandler.clientLoaded && mc.level != null && PlatformHelper.CURRENT.isReplayLevel(mc.level)) {
 			BuiltInImGui.handle(event.getGraphics());
 		}
 

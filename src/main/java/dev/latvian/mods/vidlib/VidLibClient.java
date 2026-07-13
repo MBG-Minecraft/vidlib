@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib;
 
 import dev.latvian.mods.klib.io.FileInfo;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import dev.mrbeastgaming.mods.hub.HubUserConfig;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
@@ -22,6 +23,7 @@ import java.util.function.Consumer;
 
 public class VidLibClient {
 	public static void init() {
+		MiscUtils.CLIENT_PLAYER.setValue(() -> Minecraft.getInstance().player);
 		loadHub();
 	}
 

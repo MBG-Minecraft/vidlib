@@ -8,6 +8,7 @@ import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import imgui.ImFontConfig;
 import imgui.ImFontGlyphRangesBuilder;
 import imgui.ImGui;
@@ -225,7 +226,7 @@ public class ImGuiHooks {
 		var centralNodePos = centralDockNode.getPos();
 		var centralNodeSize = centralDockNode.getSize();
 
-		float h = ClientGameEngine.DISABLE_IMGUI ? 0F : (mc.level != null && mc.level.isReplayLevel()) || !ClientGameEngine.INSTANCE.hasBottomInfoBar(mc) ? 0F : ImGuiHooks.mainMenuBarHeight;
+		float h = ClientGameEngine.DISABLE_IMGUI ? 0F : (mc.level != null && PlatformHelper.CURRENT.isReplayLevel(mc.level)) || !ClientGameEngine.INSTANCE.hasBottomInfoBar(mc) ? 0F : ImGuiHooks.mainMenuBarHeight;
 
 		var prevWidth = window.getWidth();
 		var prevHeight = window.getHeight();
@@ -254,7 +255,7 @@ public class ImGuiHooks {
 		}
 
 		if (VidLibClientEventHandler.clientLoaded && !ImGuiAPI.getHide()) {
-			if (mc.level == null || !mc.level.isReplayLevel()) {
+			if (mc.level == null || !PlatformHelper.CURRENT.isReplayLevel(mc.level)) {
 				var old = context.push();
 				var graphics = new ImGraphics(mc);
 				graphics.pushRootStack();

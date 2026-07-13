@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.entity.progress;
 
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -9,7 +10,7 @@ import net.minecraft.util.Mth;
 
 public interface ProgressBarRenderer {
 	static void draw(Minecraft mc, GuiGraphics graphics, DeltaTracker deltaTracker) {
-		if (mc.level == null || ClientGameEngine.INSTANCE.hideGui(mc) || mc.level.isReplayLevel()) {
+		if (mc.level == null || ClientGameEngine.INSTANCE.hideGui(mc) || PlatformHelper.CURRENT.isReplayLevel(mc.level)) {
 			return;
 		}
 

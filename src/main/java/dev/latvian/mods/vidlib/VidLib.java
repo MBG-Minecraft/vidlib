@@ -58,7 +58,7 @@ public class VidLib {
 	}
 
 	public static void sync(ServerPlayer player, int syncType) {
-		if (player.level().isReplayLevel()) {
+		if (PlatformHelper.CURRENT.isReplayLevel(player.level())) {
 			return;
 		}
 
@@ -70,6 +70,6 @@ public class VidLib {
 
 	public static void errorToHub(String message, Throwable ex) {
 		LOGGER.error(message, ex);
-		HubAPI.log(message, ex);
+		HubAPI.log(0, null, message, ex);
 	}
 }

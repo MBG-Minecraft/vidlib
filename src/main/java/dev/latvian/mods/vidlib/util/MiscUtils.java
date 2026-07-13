@@ -8,6 +8,9 @@ import net.minecraft.core.ClientAsset;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import org.apache.commons.lang3.mutable.Mutable;
+import org.apache.commons.lang3.mutable.MutableObject;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -21,6 +24,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.SequencedCollection;
 import java.util.function.IntFunction;
+import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 
 public interface MiscUtils {
@@ -36,6 +40,8 @@ public interface MiscUtils {
 		.build();
 
 	RegistryAccess STATIC_REGISTRY_ACCESS = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
+
+	Mutable<Supplier<Player>> CLIENT_PLAYER = new MutableObject<>(() -> null);
 
 	static Path createDir(Path path) {
 		if (Files.notExists(path)) {

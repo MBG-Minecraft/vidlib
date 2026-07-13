@@ -11,6 +11,7 @@ import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.klib.util.MD5;
 import dev.latvian.mods.klib.util.Tristate;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import dev.mrbeastgaming.mods.hub.HubUserConfig;
 import dev.mrbeastgaming.mods.hub.api.project.HubProjectReplaysData;
@@ -18,6 +19,8 @@ import dev.mrbeastgaming.mods.hub.api.project.HubProjectsData;
 import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadRequestItem;
 import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadResponseItem;
 import net.minecraft.Util;
+import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.PrintWriter;
 import java.io.Writer;
@@ -190,35 +193,53 @@ public interface HubAPI {
 		return HubProjectReplaysData.CODEC.parse(JsonOps.INSTANCE, response).getOrThrow();
 	}
 
-	static void apiProjectLog(String projectToken, Instant time, String content) throws Exception {
-		var json = new JsonObject();
-		json.addProperty("time", time.toString());
-		json.addProperty("content", content);
+	static void apiProjectLog(String projectToken, HubLogRequest request) throws Exception {
+		var json = HubLogRequest.CODEC.encodeStart(JsonOps.INSTANCE, request).getOrThrow();
 		HTTP_CLIENT.send(request("/api/projects/log/" + projectToken, Tristate.TRUE).POST(jsonBody(json)).build(), HttpResponse.BodyHandlers.discarding());
 	}
 
-	static CompletableFuture<Void> log(Supplier<? extends Iterable<String>> content) {
-		var time = Instant.now();
-
+	static CompletableFuture<Void> logRequest(Supplier<HubLogRequest> request) {
 		return CompletableFuture.runAsync(() -> {
 			try {
 				var projectConfig = HubProjectConfig.INSTANCE.get();
 
 				if (projectConfig != null) {
-					var lines = content.get();
-					apiProjectLog(projectConfig.token().toString(), time, String.join("\n", lines));
+					apiProjectLog(projectConfig.token().toString(), request.get());
 				}
 			} catch (Exception ignored) {
 			}
 		}, SEQUENTIAL_EXECUTOR.get());
 	}
 
-	static CompletableFuture<Void> log(String content) {
-		return log(() -> List.of(content));
+	static CompletableFuture<Void> log(int type, @Nullable Player player, Supplier<? extends Iterable<String>> content) {
+		var time = Instant.now();
+
+		return logRequest(() -> {
+			var p = player == null ? MiscUtils.CLIENT_PLAYER.getValue().get() : player;
+
+			if (p != null) {
+				return new HubLogRequest(
+					Optional.of(time),
+					type,
+					String.join("\n", content.get()),
+					p
+				);
+			}
+
+			return new HubLogRequest(
+				Optional.of(time),
+				type,
+				String.join("\n", content.get())
+			);
+		});
 	}
 
-	static CompletableFuture<Void> log(String content, Throwable error) {
-		return log(() -> {
+	static CompletableFuture<Void> log(int type, @Nullable Player player, String content) {
+		return log(type, player, () -> List.of(content));
+	}
+
+	static CompletableFuture<Void> log(int type, @Nullable Player player, String content, Throwable error) {
+		return log(type, player, () -> {
 			var list = new ArrayList<String>();
 			list.add(content);
 

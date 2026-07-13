@@ -23,6 +23,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.IntImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Vector3dImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfField;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
@@ -155,7 +156,9 @@ public class Prop {
 
 		snap();
 
-		if (level.isReplayLevel()) {
+		boolean replay = PlatformHelper.CURRENT.isReplayLevel(level);
+
+		if (replay) {
 			tick = Math.max(0, (int) (time - createdTime));
 		}
 
@@ -169,7 +172,7 @@ public class Prop {
 			return true;
 		}
 
-		if (!paused && !level.isReplayLevel()) {
+		if (!paused && !replay) {
 			tick++;
 		}
 
@@ -840,7 +843,7 @@ public class Prop {
 
 		setData(data, value);
 
-		if (sync && !level.isReplayLevel()) {
+		if (sync && !PlatformHelper.CURRENT.isReplayLevel(level)) {
 			var payload = UpdatePropRequestPayload.of(this, List.of(data));
 
 			if (payload != null) {

@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.net;
 
 import dev.latvian.mods.vidlib.core.VLPacketListener;
 import dev.latvian.mods.vidlib.core.VLServerConfigPacketListener;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.session.LoginData;
 import dev.latvian.mods.vidlib.feature.session.SessionData;
 import net.minecraft.client.Minecraft;
@@ -66,7 +67,7 @@ public interface Context {
 	}
 
 	default boolean isReplay() {
-		return level().isReplayLevel();
+		return PlatformHelper.CURRENT.isReplayLevel(level());
 	}
 
 	default UUID uuid() {

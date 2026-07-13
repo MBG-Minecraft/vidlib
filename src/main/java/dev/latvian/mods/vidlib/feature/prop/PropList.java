@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
 import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -86,7 +87,7 @@ public class PropList implements Iterable<Prop> {
 
 	public void tick(@Nullable VLS2CPacketConsumer updates, boolean tick) {
 		if (!tick) {
-			if (!map.isEmpty() && props.level.isReplayLevel()) {
+			if (!map.isEmpty() && PlatformHelper.CURRENT.isReplayLevel(props.level)) {
 				var time = props.level.getGameTime();
 
 				for (var prop : map.values()) {

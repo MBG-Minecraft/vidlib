@@ -5,12 +5,12 @@ import dev.latvian.mods.klib.io.FileMD5;
 import dev.latvian.mods.klib.io.IOUtils;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.klib.util.MD5;
+import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.klib.util.Tristate;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
-import dev.latvian.mods.vidlib.feature.progressqueue.ProgressingOutputStream;
 import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubFileType;
@@ -304,6 +304,7 @@ public class HubFileUploads {
 
 			while (true) {
 				int len = fileInputStream.readNBytes(chunk, 0, (int) Math.min(file.meta.size() - offset, chunk.length));
+				var fullChunkString = StringUtils.siByteSize(offset) + " - " + StringUtils.siByteSize(offset + len) + " | " + Mth.ceil((double) offset / (double) chunk.length) + "/" + totalParts;
 
 				if (progressItem != null) {
 					progressItem.setInfoText("Connecting...");
@@ -313,18 +314,33 @@ public class HubFileUploads {
 				var connection = (HttpURLConnection) request.uri().toURL().openConnection();
 				connection.setDoOutput(true);
 				connection.setDoInput(true);
-				connection.setFixedLengthStreamingMode(len);
+				connection.setChunkedStreamingMode(32768);
 				connection.setRequestMethod("PUT");
 				connection.setRequestProperty("Tus-Resumable", "1.0.0");
 				connection.setRequestProperty("Content-Type", "application/offset+octet-stream");
 				connection.setRequestProperty("Upload-Offset", Long.toUnsignedString(offset));
+				connection.setRequestProperty("X-Content-Length-Hint", Long.toUnsignedString(len));
+				connection.setRequestProperty("Transfer-Encoding", "chunked");
 
 				if (progressItem != null) {
 					progressItem.setInfoText(ProgressItemNameFunction.SI_BYTE_SIZE);
 				}
 
-				try (var out = ProgressingOutputStream.wrap(connection.getOutputStream(), progressItem)) {
-					out.write(chunk, 0, len);
+				try (var out = connection.getOutputStream()) {
+					int remaining = len;
+					int index = 0;
+
+					while (remaining > 0) {
+						int sent = Math.min(remaining, 32768);
+						out.write(chunk, index, sent);
+						remaining -= sent;
+						index += sent;
+						out.flush();
+
+						if (progressItem != null) {
+							progressItem.addProgress(sent);
+						}
+					}
 				}
 
 				if (progressItem != null) {
@@ -343,7 +359,7 @@ public class HubFileUploads {
 					}
 
 					if (totalParts > 1) {
-						VidLib.LOGGER.info("Uploaded part " + Mth.ceil((double) offset / (double) chunk.length) + "/" + totalParts + " of " + name);
+						VidLib.LOGGER.info("Uploaded part " + fullChunkString + " of " + name);
 					}
 
 					if (responseOffset >= file.meta.size()) {
@@ -360,10 +376,9 @@ public class HubFileUploads {
 					try (var in = connection.getInputStream()) {
 						var json = JsonUtils.read(in).getAsJsonObject();
 						var message = json.get("message").getAsString();
-						VidLib.LOGGER.info(message);
-						throw new IllegalStateException("Error " + responseCode + " uploading " + name + ": " + message);
+						throw new IllegalStateException("Error " + responseCode + " uploading " + name + " (" + fullChunkString + ")" + ": " + message);
 					} catch (Exception ignored) {
-						throw new IllegalStateException("Error " + responseCode + " uploading " + name);
+						throw new IllegalStateException("Error " + responseCode + " uploading " + name + " (" + fullChunkString + ")");
 					}
 				}
 

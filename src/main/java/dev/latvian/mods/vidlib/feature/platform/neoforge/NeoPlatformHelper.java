@@ -39,6 +39,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoader;
@@ -273,5 +274,10 @@ public class NeoPlatformHelper extends PlatformHelper {
 	@Override
 	public void collectGatewayEventHandlers(Map<String, Consumer<HubGatewayEvent>> map) {
 		NeoForge.EVENT_BUS.post(new HubGatewayEventRegistryEvent(map));
+	}
+
+	@Override
+	public boolean isReplayLevel(Level level) {
+		return level.isReplayLevel();
 	}
 }
