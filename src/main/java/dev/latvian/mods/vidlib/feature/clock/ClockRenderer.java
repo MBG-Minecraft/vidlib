@@ -45,7 +45,7 @@ public class ClockRenderer {
 
 		var color = location.color().lerp(switch (value.type()) {
 			case FINISHED -> 1F;
-			case FLASH -> 0.65F + Mth.cos((mc.player.vl$sessionData().tick - 1F + delta) * 0.85F) * 0.35F;
+			case FLASHING -> 0.65F + Mth.cos((mc.player.vl$sessionData().tick - 1F + delta) * 0.85F) * 0.35F;
 			default -> 0F;
 		}, Clock.RED);
 

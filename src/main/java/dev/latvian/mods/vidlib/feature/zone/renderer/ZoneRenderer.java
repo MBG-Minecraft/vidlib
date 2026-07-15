@@ -74,10 +74,10 @@ public interface ZoneRenderer<T extends ZoneShape> {
 
 		if (renderType == ZoneRenderType.COLLISIONS) {
 			for (var sz : session.filteredZones.getSolidZones()) {
-				if (sz.instance().zone.shape().closestDistanceTo(cameraPos) <= 2048D && frame.isVisible(sz.instance().zone.shape().toAABB())) {
-					boolean hovered = clip != null && clip.instance() == sz.instance();
-					var baseColor = sz.instance().zone.color().withAlpha(50);
-					var outlineColor = hovered ? Color.WHITE : sz.instance().entities.isEmpty() ? sz.instance().zone.color() : Color.GREEN;
+				if (sz.instance().volume.shape().closestDistanceTo(cameraPos) <= 2048D && frame.isVisible(sz.instance().volume.shape().toAABB())) {
+					boolean hovered = clip != null && clip.zone() == sz.instance();
+					var baseColor = sz.instance().volume.color().withAlpha(50);
+					var outlineColor = hovered ? Color.WHITE : sz.instance().entities.isEmpty() ? sz.instance().volume.color() : Color.GREEN;
 					CuboidRenderer.voxelShapeBox(ms, sz.shapeBox(), cameraPos.reverse(), buffers, BufferSupplier.DEBUG_NO_DEPTH, false, baseColor, outlineColor);
 				}
 			}
@@ -86,31 +86,31 @@ public interface ZoneRenderer<T extends ZoneShape> {
 
 			for (var container : session.filteredZones) {
 				for (var instance : container.zones) {
-					if (instance.zone.shape().closestDistanceTo(cameraPos) <= 2048D && frame.isVisible(instance.zone.shape().toAABB())) {
-						var renderer = ZoneRenderer.get(instance.zone.shape().type());
+					if (instance.volume.shape().closestDistanceTo(cameraPos) <= 2048D && frame.isVisible(instance.volume.shape().toAABB())) {
+						var renderer = ZoneRenderer.get(instance.volume.shape().type());
 
 						if (renderer != EmptyZoneRenderer.INSTANCE) {
-							boolean hovered = clip != null && clip.instance() == instance;
-							var baseColor = instance.zone.color().withAlpha(50);
-							var outlineColor = hovered ? Color.WHITE : instance.entities.isEmpty() ? instance.zone.color() : Color.GREEN;
+							boolean hovered = clip != null && clip.zone() == instance;
+							var baseColor = instance.volume.color().withAlpha(50);
+							var outlineColor = hovered ? Color.WHITE : instance.entities.isEmpty() ? instance.volume.color() : Color.GREEN;
 
 							if (renderType == ZoneRenderType.NORMAL) {
-								renderer.render(Cast.to(instance.zone.shape()), new ZoneRenderer.Context(frame, baseColor, outlineColor, outerBounds));
+								renderer.render(Cast.to(instance.volume.shape()), new ZoneRenderer.Context(frame, baseColor, outlineColor, outerBounds));
 							} else if (renderType == ZoneRenderType.BLOCKS) {
 								if (session.cachedZoneShapes == null) {
 									session.cachedZoneShapes = new IdentityHashMap<>();
 								}
 
-								var voxelShape = session.cachedZoneShapes.get(instance.zone.shape());
+								var voxelShape = session.cachedZoneShapes.get(instance.volume.shape());
 
 								if (voxelShape == null) {
 									voxelShape = VoxelShapeBox.EMPTY;
-									session.cachedZoneShapes.put(instance.zone.shape(), voxelShape);
+									session.cachedZoneShapes.put(instance.volume.shape(), voxelShape);
 
 									Thread.startVirtualThread(() -> {
 										var filter = VidLibClientOptions.getZoneBlockFilter();
 
-										session.cachedZoneShapes.put(instance.zone.shape(), VoxelShapeBox.of(instance.zone.shape().createBlockRenderingShape(pos -> {
+										session.cachedZoneShapes.put(instance.volume.shape(), VoxelShapeBox.of(instance.volume.shape().createBlockRenderingShape(pos -> {
 											var state = mc.level.getBlockState(pos);
 
 											if (state.isAir()) {
@@ -133,7 +133,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 
 	static void renderVisible(FrameInfo frame) {
 		for (var sz : frame.session().filteredZones.getVisible()) {
-			var zone = sz.instance().zone;
+			var zone = sz.instance().volume;
 			double dist = zone.shape().closestDistanceTo(frame.camera().getPosition());
 
 			if (dist > 2048D || !frame.isVisible(zone.shape().toAABB())) {
@@ -148,7 +148,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 
 	static void renderSolid(FrameInfo frame) {
 		for (var sz : frame.session().filteredZones.getSolidZones()) {
-			var zone = sz.instance().zone;
+			var zone = sz.instance().volume;
 			double dist = zone.shape().closestDistanceTo(frame.camera().getPosition());
 
 			if (dist <= 10D && zone.color().alpha() > 0 && frame.isVisible(zone.shape().toAABB()) && zone.solid().test(frame.mc().player)) {

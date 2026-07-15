@@ -20,25 +20,25 @@ import java.util.Map;
 public class CachedZoneShape {
 	public static final CachedZoneShape[] EMPTY_ARRAY = new CachedZoneShape[0];
 
-	private final ZoneInstance instance;
+	private final Zone instance;
 	private final VoxelShape shape;
 	private VoxelShapeBox shapeBox;
 	private Map<TerrainRenderLayer, List<ResolvedTexturedCube>> cachedCubes;
 
-	public CachedZoneShape(ZoneInstance instance, VoxelShape shape) {
+	public CachedZoneShape(Zone instance, VoxelShape shape) {
 		this.instance = instance;
 		this.shape = shape;
 	}
 
-	public static void append(Collection<CachedZoneShape> list, ZoneInstance instance) {
-		var shape = instance.zone.shape().createVoxelShape().optimize();
+	public static void append(Collection<CachedZoneShape> list, Zone instance) {
+		var shape = instance.volume.shape().createVoxelShape().optimize();
 
 		if (!shape.isEmpty()) {
 			list.add(new CachedZoneShape(instance, shape));
 		}
 	}
 
-	public ZoneInstance instance() {
+	public Zone instance() {
 		return instance;
 	}
 
@@ -68,8 +68,8 @@ public class CachedZoneShape {
 
 			double yOff = 0D;
 
-			if (instance.zone.fluid().isPresent()) {
-				yOff = 1D - instance.zone.fluid().get().fluidState().getOwnHeight();
+			if (instance.volume.fluid().isPresent()) {
+				yOff = 1D - instance.volume.fluid().get().fluidState().getOwnHeight();
 				// yOff += Math.clamp(-frame.y(yOff) / 50D, 0D, 0.5D);
 			}
 
@@ -83,12 +83,12 @@ public class CachedZoneShape {
 
 				var textures = ResolvedCubeTextures.EMPTY;
 
-				if (instance.zone.fluid().isPresent()) {
-					textures = textures.merge(ResolvedCubeTextures.resolve(instance.zone.fluid().get().textures().cubeTextures()));
+				if (instance.volume.fluid().isPresent()) {
+					textures = textures.merge(ResolvedCubeTextures.resolve(instance.volume.fluid().get().textures().cubeTextures()));
 				}
 
-				if (instance.zone.textures().isPresent()) {
-					textures = textures.merge(ResolvedCubeTextures.resolve(instance.zone.textures().get()));
+				if (instance.volume.textures().isPresent()) {
+					textures = textures.merge(ResolvedCubeTextures.resolve(instance.volume.textures().get()));
 				}
 
 				if (!textures.isEmpty()) {
@@ -101,7 +101,7 @@ public class CachedZoneShape {
 					}
 				}
 
-				var fog = instance.zone.fog();
+				var fog = instance.volume.fog();
 
 				// directionless fog not supported yet
 				if (!fog.isNone() && fog.direction().isPresent()) {

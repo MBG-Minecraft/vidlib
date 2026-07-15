@@ -13,7 +13,7 @@ import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
-import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
+import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.math.kvector.PositionType;
 import net.minecraft.core.BlockPos;
@@ -52,7 +52,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		return false;
 	}
 
-	default List<ZoneInstance> getZones() {
+	default List<Zone> getZones() {
 		var zones = vl$level().vl$getActiveZones();
 		return zones == null ? List.of() : zones.entityZones.getOrDefault((vl$self()).getId(), List.of());
 	}

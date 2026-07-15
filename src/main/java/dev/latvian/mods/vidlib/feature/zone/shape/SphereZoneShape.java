@@ -6,10 +6,9 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.zone.ZoneClipContext;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
-import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -46,7 +45,7 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 
 	@Override
 	@Nullable
-	public ZoneClipResult clip(ZoneInstance instance, ClipContext ctx) {
+	public ZoneClipResult clip(ZoneClipContext ctx) {
 		double dx = ctx.getTo().x - ctx.getFrom().x;
 		double dy = ctx.getTo().y - ctx.getFrom().y;
 		double dz = ctx.getTo().z - ctx.getFrom().z;
@@ -73,7 +72,7 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 		// Check if either intersection is within the segment range [0, 1]
 		if (t1 >= 0D && t1 <= 1D || t2 >= 0D && t2 <= 1D) {
 			// FIXME: Get actual intersection point
-			return ZoneClipResult.of(instance, this, ctx, pos);
+			return ZoneClipResult.of(ctx, pos);
 		}
 
 		return null;

@@ -58,7 +58,7 @@ public class ZoneLoader extends JsonReloadListener {
 				for (var element : json.getAsJsonArray("zones")) {
 					if (element.isJsonObject()) {
 						var zoneJson = element.getAsJsonObject();
-						var decoded = Zone.CODEC.parse(JsonOps.INSTANCE, zoneJson);
+						var decoded = ZoneVolume.CODEC.parse(JsonOps.INSTANCE, zoneJson);
 
 						if (decoded.error().isPresent()) {
 							VidLib.LOGGER.error("Error while parsing zone " + id + "[" + index + "]: " + decoded.error().get());

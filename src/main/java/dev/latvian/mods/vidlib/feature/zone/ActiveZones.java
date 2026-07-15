@@ -52,7 +52,7 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 	};
 
 	public final Map<ResourceLocation, ZoneContainer> containers;
-	public final Int2ObjectOpenHashMap<List<ZoneInstance>> entityZones;
+	public final Int2ObjectOpenHashMap<List<Zone>> entityZones;
 	CachedZoneShape[] visible;
 	CachedZoneShape[] solidZones;
 	CachedZoneShape[] fluidZones;
@@ -152,7 +152,7 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 
 			for (var container : containers.values()) {
 				for (var zone : container.zones) {
-					if (zone.zone.isVisible()) {
+					if (zone.volume.isVisible()) {
 						CachedZoneShape.append(list, zone);
 					}
 				}
@@ -170,7 +170,7 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 
 			for (var container : containers.values()) {
 				for (var zone : container.zones) {
-					if (zone.zone.isSolid()) {
+					if (zone.volume.isSolid()) {
 						CachedZoneShape.append(list, zone);
 					}
 				}
@@ -188,7 +188,7 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 		}
 
 		for (var sz : getSolidZones()) {
-			if (sz.instance().zone.solid().test(entity)) {
+			if (sz.instance().volume.solid().test(entity)) {
 				for (var box : sz.shapeBox().boxes()) {
 					if (box.intersects(collisionBox)) {
 						return true;
@@ -214,7 +214,7 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 		var shapes = List.<VoxelShape>of();
 
 		for (var sz : solidZones) {
-			if (sz.instance().zone.solid().test(entity)) {
+			if (sz.instance().volume.solid().test(entity)) {
 				for (var box : sz.shapeBox().boxes()) {
 					if (box.intersects(collisionBox)) {
 						if (shapes.isEmpty()) {
@@ -243,11 +243,11 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 	}
 
 	@ApiStatus.Internal
-	public void update(ResourceLocation zone, int index, Zone zoneData) {
+	public void update(ResourceLocation zone, int index, ZoneVolume zoneVolumeData) {
 		var container = containers.get(zone);
 
 		if (container != null) {
-			container.update(index, zoneData);
+			container.update(index, zoneVolumeData);
 		}
 
 		clearCache();
@@ -259,7 +259,7 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 
 			for (var container : containers.values()) {
 				for (var zone : container.zones) {
-					if (zone.zone.fluid().isPresent()) {
+					if (zone.volume.fluid().isPresent()) {
 						CachedZoneShape.append(list, zone);
 					}
 				}
@@ -274,8 +274,8 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 	@Nullable
 	public FluidState getZoneFluidState(Vec3i pos) {
 		for (var c : getFluidZones()) {
-			if (c.instance().zone.fluid().isPresent() && c.instance().zone.shape().contains(pos)) {
-				return c.instance().zone.fluid().get().fluidState();
+			if (c.instance().volume.fluid().isPresent() && c.instance().volume.shape().contains(pos)) {
+				return c.instance().volume.fluid().get().fluidState();
 			}
 		}
 
@@ -297,7 +297,7 @@ public class ActiveZones implements Iterable<ZoneContainer> {
 		ZoneClipResult result = null;
 
 		for (var z : getFluidZones()) {
-			var clip = z.instance().zone.shape().clip(z.instance(), ctx);
+			var clip = z.instance().volume.shape().clip(new ZoneClipContext(z.instance(), ctx));
 
 			if (clip != null) {
 				if (result == null || clip.distanceSq() < result.distanceSq()) {

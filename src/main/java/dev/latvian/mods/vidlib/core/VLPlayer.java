@@ -4,7 +4,7 @@ import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.PlayerDataMapHolder;
 import dev.latvian.mods.vidlib.feature.session.SessionData;
-import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
+import dev.latvian.mods.vidlib.feature.zone.Zone;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.Nullable;
@@ -45,7 +45,7 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer, PlayerDataM
 	}
 
 	@Override
-	default List<ZoneInstance> getZones() {
+	default List<Zone> getZones() {
 		return vl$sessionData().zonesIn;
 	}
 

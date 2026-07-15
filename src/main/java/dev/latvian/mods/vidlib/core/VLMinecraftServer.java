@@ -17,7 +17,7 @@ import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.RemoveZonePayload;
 import dev.latvian.mods.vidlib.feature.zone.UpdateZonePayload;
-import dev.latvian.mods.vidlib.feature.zone.Zone;
+import dev.latvian.mods.vidlib.feature.zone.ZoneVolume;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
@@ -181,11 +181,11 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	}
 
 	default void setClock(ResourceLocation id, int second) {
-		setClock(id, new ClockValue(second, second <= 0 ? ClockValue.Type.FINISHED : second <= 10 ? ClockValue.Type.FLASH : ClockValue.Type.NORMAL));
+		setClock(id, new ClockValue(second, second <= 0 ? ClockValue.Type.FINISHED : second <= 10 ? ClockValue.Type.FLASHING : ClockValue.Type.NORMAL));
 	}
 
 	default void setClock(ResourceLocation id, int second, int maxSecond) {
-		setClock(id, new ClockValue(second, second >= maxSecond ? ClockValue.Type.FINISHED : second >= (maxSecond - 10) ? ClockValue.Type.FLASH : ClockValue.Type.NORMAL));
+		setClock(id, new ClockValue(second, second >= maxSecond ? ClockValue.Type.FINISHED : second >= (maxSecond - 10) ? ClockValue.Type.FLASHING : ClockValue.Type.NORMAL));
 	}
 
 	@Override
@@ -204,18 +204,18 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void updateZone(ResourceLocation zone, int index, Zone zoneData) {
+	default void updateZone(ResourceLocation zone, int index, ZoneVolume zoneVolumeData) {
 		var container = ZoneContainer.REGISTRY.get(zone);
 
 		if (container != null) {
-			container.update(index, zoneData);
+			container.update(index, zoneVolumeData);
 		}
 
 		for (var dim : ZoneLoader.SERVER_BY_DIMENSION.values()) {
-			dim.update(zone, index, zoneData);
+			dim.update(zone, index, zoneVolumeData);
 		}
 
-		s2c(new UpdateZonePayload(zone, index, zoneData));
+		s2c(new UpdateZonePayload(zone, index, zoneVolumeData));
 	}
 
 	@Override

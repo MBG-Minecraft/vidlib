@@ -6,9 +6,8 @@ import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.shape.CylinderShape;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.zone.ZoneClipContext;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
-import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -46,8 +45,8 @@ public record CylinderZoneShape(Vec3 pos, CylinderShape shape, AABB box) impleme
 
 	@Override
 	@Nullable
-	public ZoneClipResult clip(ZoneInstance instance, ClipContext ctx) {
-		return ZoneShape.super.clip(instance, ctx); // FIXME
+	public ZoneClipResult clip(ZoneClipContext ctx) {
+		return ZoneShape.super.clip(ctx); // FIXME
 	}
 
 	@Override

@@ -19,7 +19,7 @@ import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.registry.SyncRegistryPayload;
 import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
-import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
+import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.resources.ResourceLocation;
@@ -41,7 +41,7 @@ public class SessionData implements Comparable<SessionData> {
 	public int tick;
 	public PlayerInput prevInput;
 	public PlayerInput input;
-	public List<ZoneInstance> zonesIn;
+	public List<Zone> zonesIn;
 	public Set<String> zonesTagsIn;
 
 	public boolean suspended;

@@ -10,15 +10,15 @@ import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
+import dev.latvian.mods.vidlib.feature.zone.ZoneClipContext;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
-import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLike;
+import dev.latvian.mods.vidlib.feature.zone.ZoneVolume;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -48,15 +48,15 @@ public interface ZoneShape extends ZoneLike, SimpleRegistryEntry {
 		return REGISTRY.getType(this);
 	}
 
-	default ZoneInstance createInstance(ZoneContainer container, Zone zone) {
-		return new ZoneInstance(container, zone);
+	default Zone createInstance(ZoneContainer container, ZoneVolume zoneVolume) {
+		return new Zone(container, zoneVolume);
 	}
 
 	@Override
 	AABB toAABB();
 
 	@Nullable
-	default ZoneClipResult clip(ZoneInstance instance, ClipContext ctx) {
+	default ZoneClipResult clip(ZoneClipContext ctx) {
 		if (contains(ctx.getFrom())) {
 			return null;
 		}
@@ -64,7 +64,7 @@ public interface ZoneShape extends ZoneLike, SimpleRegistryEntry {
 		var result = AABB.clip(List.of(toAABB()), ctx.getFrom(), ctx.getTo(), BlockPos.ZERO);
 
 		if (result != null && result.getType() == HitResult.Type.BLOCK) {
-			return ZoneClipResult.of(instance, this, ctx, new BlockHitResult(result.getLocation(), result.getDirection(), BlockPos.containing(result.getLocation()), false));
+			return ZoneClipResult.of(ctx, new BlockHitResult(result.getLocation(), result.getDirection(), BlockPos.containing(result.getLocation()), false));
 		}
 
 		return null;

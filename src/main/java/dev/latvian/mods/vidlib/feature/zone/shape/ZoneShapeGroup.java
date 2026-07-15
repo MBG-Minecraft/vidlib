@@ -4,11 +4,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.math.AAIBB;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.zone.ZoneClipContext;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
-import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -71,11 +70,11 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box, AAIBB intBox)
 
 	@Override
 	@Nullable
-	public ZoneClipResult clip(ZoneInstance instance, ClipContext ctx) {
+	public ZoneClipResult clip(ZoneClipContext ctx) {
 		ZoneClipResult result = null;
 
 		for (var zone : zoneShapes) {
-			var clip = zone.clip(instance, ctx);
+			var clip = zone.clip(ctx);
 
 			if (clip != null) {
 				if (result == null || clip.distanceSq() < result.distanceSq()) {

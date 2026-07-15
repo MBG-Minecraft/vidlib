@@ -480,7 +480,7 @@ public class ClientGameEngine {
 						var string = screen.format().formatted(value.second() / 60, value.second() % 60);
 						var color = screen.color().lerp(switch (value.type()) {
 							case FINISHED -> 1F;
-							case FLASH -> 0.65F + Mth.cos((graphics.session.tick) * 0.85F) * 0.35F;
+							case FLASHING -> 0.65F + Mth.cos((graphics.session.tick) * 0.85F) * 0.35F;
 							default -> 0F;
 						}, Clock.RED);
 

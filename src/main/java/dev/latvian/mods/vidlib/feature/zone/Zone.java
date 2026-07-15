@@ -1,100 +1,83 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.klib.codec.CompositeStreamCodec;
-import dev.latvian.mods.klib.codec.KLibCodecs;
-import dev.latvian.mods.klib.codec.KLibStreamCodecs;
-import dev.latvian.mods.klib.codec.MCStreamCodecs;
-import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
-import dev.latvian.mods.vidlib.feature.visual.CubeTextures;
-import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.NeoForge;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
-public record Zone(
-	ZoneShape shape,
-	Color color,
-	EntityFilter entityFilter,
-	CompoundTag data,
-	EntityFilter solid,
-	Set<String> tags,
-	boolean forceLoaded,
-	Optional<ZoneFluid> fluid,
-	Optional<CubeTextures> textures,
-	ZoneFog fog
-) {
-	public static final Codec<Zone> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		ZoneShape.CODEC.fieldOf("shape").forGetter(Zone::shape),
-		Color.CODEC.optionalFieldOf("color", Color.CYAN).forGetter(Zone::color),
-		EntityFilter.CODEC.optionalFieldOf("entity_filter", EntityFilter.PLAYER.instance()).forGetter(Zone::entityFilter),
-		CompoundTag.CODEC.optionalFieldOf("data", Empty.COMPOUND_TAG).forGetter(Zone::data),
-		EntityFilter.CODEC.optionalFieldOf("solid", EntityFilter.NONE.instance()).forGetter(Zone::solid),
-		KLibCodecs.setOf(Codec.STRING).optionalFieldOf("tags", Set.of()).forGetter(Zone::tags),
-		Codec.BOOL.optionalFieldOf("force_loaded", false).forGetter(Zone::forceLoaded),
-		ZoneFluid.CODEC.optionalFieldOf("fluid").forGetter(Zone::fluid),
-		CubeTextures.CODEC.optionalFieldOf("textures").forGetter(Zone::textures),
-		ZoneFog.CODEC.optionalFieldOf("fog", ZoneFog.NONE).forGetter(Zone::fog)
-	).apply(instance, Zone::new));
+public class Zone {
+	public final ZoneContainer container;
+	public int index;
+	public ZoneVolume volume;
+	public final Int2ObjectMap<Entity> entities;
+	public Object renderer;
+	public final Set<String> tags;
 
-	public static final StreamCodec<RegistryFriendlyByteBuf, Zone> STREAM_CODEC = CompositeStreamCodec.of(
-		ZoneShape.STREAM_CODEC, Zone::shape,
-		Color.STREAM_CODEC, Zone::color,
-		EntityFilter.STREAM_CODEC, Zone::entityFilter,
-		MCStreamCodecs.COMPOUND_TAG, Zone::data,
-		EntityFilter.STREAM_CODEC, Zone::solid,
-		KLibStreamCodecs.linkedSetOf(ByteBufCodecs.STRING_UTF8), Zone::tags,
-		ByteBufCodecs.BOOL, Zone::forceLoaded,
-		ByteBufCodecs.optional(ZoneFluid.STREAM_CODEC), Zone::fluid,
-		CubeTextures.OPTIONAL_STREAM_CODEC, Zone::textures,
-		ZoneFog.STREAM_CODEC, Zone::fog,
-		Zone::new
-	);
-
-	public Zone(ZoneShape shape, Color color, EntityFilter entityFilter, CompoundTag data) {
-		this(
-			shape,
-			color,
-			entityFilter,
-			data,
-			EntityFilter.NONE.instance(),
-			Set.of(),
-			false,
-			Optional.empty(),
-			Optional.empty(),
-			ZoneFog.NONE
-		);
+	public Zone(ZoneContainer container, ZoneVolume volume) {
+		this.container = container;
+		this.index = -1;
+		this.volume = volume;
+		this.entities = new Int2ObjectOpenHashMap<>();
+		this.renderer = null;
+		this.tags = new LinkedHashSet<>();
 	}
 
-	public Zone(ZoneShape shape, Color color) {
-		this(
-			shape,
-			color,
-			EntityFilter.PLAYER.instance(),
-			Empty.COMPOUND_TAG
-		);
+	public boolean has(Entity entity) {
+		return entities.containsKey(entity.getId());
 	}
 
-	public Zone withShape(ZoneShape shape) {
-		return new Zone(shape, color, entityFilter, data, solid, tags, forceLoaded, fluid, textures, fog);
+	public boolean hasTag(String tag) {
+		return tags.contains(tag);
 	}
 
-	public Zone withColor(Color color) {
-		return new Zone(shape, color, entityFilter, data, solid, tags, forceLoaded, fluid, textures, fog);
+	public void tick(@Nullable Level level) {
+		var oldEntities = new Int2ObjectOpenHashMap<>(entities);
+		entities.clear();
+
+		if (level != null) {
+			for (var entity : volume.shape().collectEntities(level, volume.entityFilter())) {
+				if (entity.isAlive() && volume.shape().intersects(entity.getBoundingBox())) {
+					entities.put(entity.getId(), entity);
+
+					var list = container.entityZones.get(entity.getId());
+
+					if (list == null) {
+						list = new ArrayList<>(1);
+						container.entityZones.put(entity.getId(), list);
+					}
+
+					list.add(this);
+
+					if (!oldEntities.containsKey(entity.getId())) {
+						entityEntered(level, entity);
+					}
+				}
+			}
+		}
+
+		for (var old : oldEntities.values()) {
+			if (!entities.containsKey(old.getId())) {
+				entityExited(level, old);
+			}
+		}
 	}
 
-	public boolean isSolid() {
-		return solid != EntityFilter.NONE.instance();
+	public void entityEntered(Level level, Entity entity) {
+		NeoForge.EVENT_BUS.post(new ZoneEvent.EntityEntered(this, level, entity));
 	}
 
-	public boolean isVisible() {
-		return isSolid() || !fluid.isEmpty() || textures.isPresent() || !fog.isNone();
+	public void entityExited(Level level, Entity entity) {
+		NeoForge.EVENT_BUS.post(new ZoneEvent.EntityExited(this, level, entity));
+	}
+
+	public void updateZone(ZoneVolume newVolume) {
+		volume = newVolume;
+		renderer = null;
 	}
 }

@@ -460,19 +460,19 @@ public class VidLibClientEventHandler {
 				var zoneClip = session.zoneClip;
 
 				if (zoneClip != null) {
-					var component = Component.literal("Zone: ").append(Component.literal(zoneClip.instance().container.id.toString()).withStyle(ChatFormatting.AQUA));
+					var component = Component.literal("Zone: ").append(Component.literal(zoneClip.zone().container.id.toString()).withStyle(ChatFormatting.AQUA));
 
-					if (zoneClip.instance().container.zones.size() > 1) {
-						component.append(Component.literal("[" + zoneClip.instance().index + "]").withStyle(ChatFormatting.GREEN));
+					if (zoneClip.zone().container.zones.size() > 1) {
+						component.append(Component.literal("[" + zoneClip.zone().index + "]").withStyle(ChatFormatting.GREEN));
 					}
 
-					if (zoneClip.instance().container.isGenerated()) {
+					if (zoneClip.zone().container.isGenerated()) {
 						component.append(Component.literal("*").withStyle(ChatFormatting.LIGHT_PURPLE));
 					}
 
 					ScreenText.RENDER.topLeft.add(component);
 
-					var zoneTag = zoneClip.instance().zone.data();
+					var zoneTag = zoneClip.zone().volume.data();
 
 					if (!zoneTag.isEmpty()) {
 						for (var key : zoneTag.keySet()) {

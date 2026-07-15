@@ -4,7 +4,7 @@ import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.clock.SyncClocksPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.session.SessionData;
-import dev.latvian.mods.vidlib.feature.zone.Zone;
+import dev.latvian.mods.vidlib.feature.zone.ZoneVolume;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.RepeatingTask;
@@ -70,7 +70,7 @@ public interface VLMinecraftEnvironment extends VLPlayerContainer, VLMinecraftEn
 		throw new NoMixinException(this);
 	}
 
-	default void updateZone(ResourceLocation zone, int index, Zone zoneData) {
+	default void updateZone(ResourceLocation zone, int index, ZoneVolume zoneVolumeData) {
 		throw new NoMixinException(this);
 	}
 

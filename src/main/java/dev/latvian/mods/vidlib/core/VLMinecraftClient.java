@@ -49,7 +49,7 @@ import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import dev.latvian.mods.vidlib.feature.vote.NumberVotingScreen;
 import dev.latvian.mods.vidlib.feature.vote.YesNoVotingScreen;
-import dev.latvian.mods.vidlib.feature.zone.Zone;
+import dev.latvian.mods.vidlib.feature.zone.ZoneVolume;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
@@ -404,10 +404,10 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void updateZone(ResourceLocation zone, int index, Zone zoneData) {
+	default void updateZone(ResourceLocation zone, int index, ZoneVolume zoneVolumeData) {
 		var session = vl$self().player.vl$sessionData();
-		session.serverZones.update(zone, index, zoneData);
-		session.filteredZones.update(zone, index, zoneData);
+		session.serverZones.update(zone, index, zoneVolumeData);
+		session.filteredZones.update(zone, index, zoneVolumeData);
 	}
 
 	@Override

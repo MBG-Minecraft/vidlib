@@ -9,10 +9,9 @@ import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.vidlib.feature.zone.ZoneClipContext;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
-import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -81,7 +80,7 @@ public record RotatedBoxZoneShape(Vec3 pos, Vector3f size, Rotation rotation, Ma
 
 	@Override
 	@Nullable
-	public ZoneClipResult clip(ZoneInstance instance, ClipContext ctx) {
+	public ZoneClipResult clip(ZoneClipContext ctx) {
 		if (contains(ctx.getFrom())) {
 			return null;
 		}
@@ -95,7 +94,7 @@ public record RotatedBoxZoneShape(Vec3 pos, Vector3f size, Rotation rotation, Ma
 			var l = result.getLocation();
 			var vec = new Vector3f((float) l.x, (float) l.y, (float) l.z).mul(imatrix);
 			var apos = new Vec3(vec.x + pos.x, vec.y + pos.y, vec.z + pos.z);
-			return ZoneClipResult.of(instance, this, ctx, apos);
+			return ZoneClipResult.of(ctx, apos);
 		}
 
 		return null;

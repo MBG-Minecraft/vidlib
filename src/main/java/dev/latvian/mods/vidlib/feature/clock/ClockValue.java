@@ -9,7 +9,7 @@ import net.minecraft.network.codec.StreamCodec;
 public record ClockValue(int second, Type type) {
 	public enum Type {
 		NORMAL,
-		FLASH,
+		FLASHING,
 		FINISHED;
 
 		public static final StreamCodec<ByteBuf, Type> STREAM_CODEC = KLibStreamCodecs.enumValue(values());
