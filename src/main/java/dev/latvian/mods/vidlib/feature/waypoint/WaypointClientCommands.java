@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 public interface WaypointClientCommands {
 	@ClientAutoRegister
-	ClientCommandHolder COMMAND = new ClientCommandHolder("waypoint", (command, buildContext) -> {
+	ClientCommandHolder COMMAND = new ClientCommandHolder("waypoint-client", (command, buildContext) -> {
 		command.then(Commands.literal("add")
 			.then(Commands.argument("id", StringArgumentType.word())
 				.then(Commands.argument("position", Vec3Argument.vec3())
@@ -41,7 +41,7 @@ public interface WaypointClientCommands {
 								session.serverDataMap.setSuperOverride(InternalServerData.WAYPOINTS, current);
 								return 1;
 							} else {
-								var cmd = ctx.getInput();
+								var cmd = ctx.getInput().replace("waypoint-client", "waypoint");
 								mc.player.connection.sendCommand(cmd.startsWith("/") ? cmd.substring(1) : cmd);
 								return 1;
 							}
@@ -65,7 +65,7 @@ public interface WaypointClientCommands {
 						session.serverDataMap.setSuperOverride(InternalServerData.WAYPOINTS, current);
 						return 1;
 					} else {
-						var cmd = ctx.getInput();
+						var cmd = ctx.getInput().replace("waypoint-client", "waypoint");
 						mc.player.connection.sendCommand(cmd.startsWith("/") ? cmd.substring(1) : cmd);
 						return 1;
 					}
