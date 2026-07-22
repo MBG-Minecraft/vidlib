@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.core.VLEntityRenderer;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.world.entity.Entity;
@@ -17,6 +18,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = EntityRenderer.class, priority = 1001) // Load before Sodium
 public abstract class EntityRendererMixin<T extends Entity, S extends EntityRenderState> implements VLEntityRenderer<T, S> {
+	@Inject(method = "getPackedLightCoords", at = @At("HEAD"), cancellable = true)
+	private void vl$getPackedLightCoords(T entity, float partialTicks, CallbackInfoReturnable<Integer> cir) {
+		var mc = Minecraft.getInstance();
+
+		if (mc.player != null) {
+			var override = mc.player.vl$sessionData().entityBrightnessOverrides.get(entity.getId());
+
+			if (override != -1) {
+				cir.setReturnValue(override);
+			}
+		}
+	}
+
 	@Inject(method = "shouldRender", at = @At("RETURN"), cancellable = true)
 	private void vl$shouldRender(CallbackInfoReturnable<Boolean> cir) {
 		cir.setReturnValue(true);

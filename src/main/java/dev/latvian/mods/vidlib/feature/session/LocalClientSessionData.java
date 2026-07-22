@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.session;
 
 import com.mojang.blaze3d.platform.Window;
+import com.mojang.brigadier.StringReader;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.math.ProjectedCoordinates;
@@ -51,6 +52,8 @@ import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
@@ -60,6 +63,9 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
+import net.minecraft.commands.arguments.ParticleArgument;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -112,6 +118,8 @@ public class LocalClientSessionData extends ClientSessionData {
 	public List<ReplayMarkerData> markers;
 	public boolean hardcoreHearts;
 	public Map<UUID, Note> notes;
+	public final Int2IntMap entityBrightnessOverrides;
+	public final Map<String, ParticleOptions> particleCache;
 
 	public LocalClientSessionData(Minecraft mc, UUID uuid) {
 		super(uuid, mc);
@@ -134,6 +142,9 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.markers = new ArrayList<>();
 		this.hardcoreHearts = false;
 		this.notes = new Object2ObjectLinkedOpenHashMap<>();
+		this.entityBrightnessOverrides = new Int2IntOpenHashMap();
+		this.entityBrightnessOverrides.defaultReturnValue(-1);
+		this.particleCache = new Object2ObjectOpenHashMap<>();
 
 		VidLib.LOGGER.info("Client Session Data Initialized");
 	}
@@ -444,5 +455,26 @@ public class LocalClientSessionData extends ClientSessionData {
 	@Override
 	public void deleteNote(UUID id) {
 		notes.remove(id);
+	}
+
+	@Override
+	public void setEntityBrightnessOverride(int entityId, int override) {
+		if (override == -1) {
+			entityBrightnessOverrides.remove(entityId);
+		} else {
+			entityBrightnessOverrides.put(entityId, override);
+		}
+	}
+
+	@Override
+	public ParticleOptions getParticleOptions(String string) {
+		return particleCache.computeIfAbsent(string, str -> {
+			try {
+				return ParticleArgument.readParticle(new StringReader(string), mc.level.registryAccess());
+			} catch (Exception ex) {
+				VidLib.LOGGER.error("Failed to parse particle from '" + str + "'", ex);
+				return DustParticleOptions.REDSTONE;
+			}
+		});
 	}
 }

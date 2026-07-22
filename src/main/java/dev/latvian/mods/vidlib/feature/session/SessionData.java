@@ -21,6 +21,8 @@ import dev.latvian.mods.vidlib.feature.registry.SyncRegistryPayload;
 import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -197,5 +199,12 @@ public class SessionData implements Comparable<SessionData> {
 	}
 
 	public void deleteNote(UUID id) {
+	}
+
+	public void setEntityBrightnessOverride(int entityId, int override) {
+	}
+
+	public ParticleOptions getParticleOptions(String string) {
+		return DustParticleOptions.REDSTONE;
 	}
 }
