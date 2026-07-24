@@ -3,12 +3,15 @@ package dev.latvian.mods.vidlib.util;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.DataResult;
 import dev.latvian.mods.vidlib.VidLib;
+import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import net.minecraft.Util;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 
@@ -23,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.SequencedCollection;
+import java.util.Set;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
@@ -42,6 +46,11 @@ public interface MiscUtils {
 	RegistryAccess STATIC_REGISTRY_ACCESS = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
 
 	Mutable<Supplier<Player>> CLIENT_PLAYER = new MutableObject<>(() -> null);
+
+	Set<Item> NO_BOB_ITEMS = new ReferenceArraySet<>(Set.of(
+		Items.COMPASS,
+		Items.RECOVERY_COMPASS
+	));
 
 	static Path createDir(Path path) {
 		if (Files.notExists(path)) {
