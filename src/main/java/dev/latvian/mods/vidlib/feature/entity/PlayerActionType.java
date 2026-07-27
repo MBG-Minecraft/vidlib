@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.entity;
 
 import com.mojang.serialization.Codec;
+import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -21,8 +22,8 @@ public enum PlayerActionType implements StringRepresentable {
 	;
 
 	public static final PlayerActionType[] VALUES = values();
-	public static final Codec<PlayerActionType> CODEC = StringRepresentable.fromEnum(() -> VALUES);
-	public static final StreamCodec<ByteBuf, PlayerActionType> STREAM_CODEC = KLibStreamCodecs.enumValue(VALUES);
+	public static final Codec<PlayerActionType> CODEC = KLibCodecs.anyEnum(VALUES);
+	public static final StreamCodec<ByteBuf, PlayerActionType> STREAM_CODEC = KLibStreamCodecs.anyEnum(VALUES);
 
 	public static final Set<PlayerActionType> SWAP_SET = Set.of(SWAP);
 	public static final Set<PlayerActionType> RELOAD_SET = Set.of(RELOAD);

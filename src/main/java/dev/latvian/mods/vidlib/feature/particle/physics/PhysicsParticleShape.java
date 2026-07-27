@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.klib.math.SplitBox;
 import dev.latvian.mods.klib.texture.UV;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.Identifier;

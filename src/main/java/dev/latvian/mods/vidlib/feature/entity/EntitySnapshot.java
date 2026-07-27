@@ -7,6 +7,7 @@ import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.entity.EntityUtils;
 import dev.latvian.mods.klib.math.Rotation;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.entity.Entity;
@@ -24,14 +25,14 @@ public record EntitySnapshot(UUID player, Vec3 position, Rotation rotation, bool
 	).apply(instance, EntitySnapshot::new)), CompositeStreamCodec.of(
 		KLibStreamCodecs.UUID, EntitySnapshot::player,
 		MCStreamCodecs.VEC3, EntitySnapshot::position,
-		Rotation.STREAM_CODEC_NO_ROLL, EntitySnapshot::rotation,
+		Rotation.STREAM_CODEC, EntitySnapshot::rotation,
 		ByteBufCodecs.BOOL, EntitySnapshot::crouching,
 		EntitySnapshot::new
-	), EntitySnapshot.class);
+	));
 
 	public static final DataType<List<EntitySnapshot>> LIST_DATA_TYPE = DATA_TYPE.listOf();
 
 	public EntitySnapshot(Entity entity) {
-		this(entity.getUUID(), entity.position(), entity.viewRotation(1F), entity.isCrouching());
+		this(entity.getUUID(), entity.position(), EntityUtils.viewRotation(entity, 1F), entity.isCrouching());
 	}
 }

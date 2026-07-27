@@ -1,9 +1,11 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.entity.PositionType;
+import dev.latvian.mods.klib.entity.filter.ProfileEntityFilter;
+import dev.latvian.mods.klib.kvector.KVector;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
-import dev.latvian.mods.vidlib.feature.entity.filter.ProfileEntityFilter;
 import dev.latvian.mods.vidlib.feature.gallery.ItemIcons;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color3ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
@@ -11,8 +13,6 @@ import dev.latvian.mods.vidlib.feature.item.VisualItemKey;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfField;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
-import dev.latvian.mods.vidlib.math.kvector.PositionType;
 import imgui.ImGui;
 import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.flag.ImGuiWindowFlags;
@@ -56,7 +56,7 @@ public class EntityExplorerPanel extends Panel {
 		if (onlyPlayers.get()) {
 			allEntities.addAll(graphics.mc.level.players());
 		} else {
-			for (var entity : graphics.mc.level.allEntities()) {
+			for (var entity : graphics.mc.level.klib$allEntities()) {
 				allEntities.add(entity);
 			}
 		}
@@ -155,9 +155,9 @@ public class EntityExplorerPanel extends Panel {
 
 		if (DepthOfField.OVERRIDE_ENABLED.get() && ImGui.button(ImIcons.APERTURE + " Focus DoF###focus-dof")) {
 			if (entity instanceof Player player) {
-				DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(new ProfileEntityFilter(player.getGameProfile()), PositionType.EYES));
+				DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(new ProfileEntityFilter(player.getGameProfile()).ref(), PositionType.EYES).ref());
 			} else {
-				DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(entity, PositionType.EYES));
+				DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(entity, PositionType.EYES).ref());
 			}
 
 			DepthOfFieldPanel.INSTANCE.builder.set(DepthOfField.OVERRIDE);

@@ -5,7 +5,7 @@ import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.client.TexturedRenderType;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.rendertype.RenderSetup;

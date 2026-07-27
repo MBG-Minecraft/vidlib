@@ -79,13 +79,13 @@ public class MiscClientUtils {
 			var quadsBuffer = ms.last().transform(type.quads(buffers, true));
 
 			for (var shape : visuals.shapes()) {
-				var col = shape.shape().quads().get(progress);
+				var col = shape.shape().quads().value().get(progress);
 
 				if (!col.isTransparent()) {
 					float rx = (float) (shape.position().x - cameraPos.x);
 					float ry = (float) (shape.position().y - cameraPos.y);
 					float rz = (float) (shape.position().z - cameraPos.z);
-					shape.shape().shape().buildQuads(rx, ry, rz, quadsBuffer.withColor(col.withAlpha(100)));
+					shape.shape().shape().value().buildQuads(rx, ry, rz, quadsBuffer.withColor(col.withAlpha(100)));
 				}
 			}
 		}
@@ -112,13 +112,13 @@ public class MiscClientUtils {
 			var quadsBuffer = ms.last().transform(buffers.getBuffer(VidLibRenderTypes.OUTLINE.apply(Empty.TEXTURE))).onlyPosColTex().withTex(UV.FULL);
 
 			for (var shape : visuals.outlineShapes()) {
-				var col = shape.shape().quads().get(progress);
+				var col = shape.shape().quads().value().get(progress);
 
 				if (!col.isTransparent()) {
 					float rx = (float) (shape.position().x - cameraPos.x);
 					float ry = (float) (shape.position().y - cameraPos.y);
 					float rz = (float) (shape.position().z - cameraPos.z);
-					shape.shape().shape().buildQuads(rx, ry, rz, quadsBuffer.withColor(col.withAlpha(100)));
+					shape.shape().shape().value().buildQuads(rx, ry, rz, quadsBuffer.withColor(col.withAlpha(100)));
 				}
 			}
 		}
@@ -140,13 +140,13 @@ public class MiscClientUtils {
 			}
 
 			for (var shape : visuals.shapes()) {
-				var col = shape.shape().lines().get(progress);
+				var col = shape.shape().lines().value().get(progress);
 
 				if (!col.isTransparent()) {
 					float rx = (float) (shape.position().x - cameraPos.x);
 					float ry = (float) (shape.position().y - cameraPos.y);
 					float rz = (float) (shape.position().z - cameraPos.z);
-					shape.shape().shape().buildLines(rx, ry, rz, linesBuffer.withColor(col));
+					shape.shape().shape().value().buildLines(rx, ry, rz, linesBuffer.withColor(col));
 				}
 			}
 		}

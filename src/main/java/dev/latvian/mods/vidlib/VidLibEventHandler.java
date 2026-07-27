@@ -1,11 +1,15 @@
 package dev.latvian.mods.vidlib;
 
 import dev.latvian.mods.klib.data.DataTypeRegistryEvent;
+import dev.latvian.mods.klib.entity.filter.EntityFilterTypeRegistryEvent;
+import dev.latvian.mods.klib.knumber.KNumberTypeRegistryEvent;
+import dev.latvian.mods.klib.kvector.KVectorTypeRegistryEvent;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
+import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.location.Location;
@@ -14,10 +18,11 @@ import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
-import dev.latvian.mods.vidlib.feature.registry.GenericVLRegistry;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
-import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
+import dev.latvian.mods.vidlib.feature.zone.ZoneServerLoader;
+import dev.latvian.mods.vidlib.math.knumber.VidLibKNumbers;
+import dev.latvian.mods.vidlib.math.kvector.VidLibKVectors;
 import io.netty.util.NettyRuntime;
 import io.netty.util.internal.SystemPropertyUtil;
 import net.minecraft.commands.Commands;
@@ -60,7 +65,7 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
-@EventBusSubscriber(modid = ID.vidlib)
+@EventBusSubscriber(modid = VidLib.ID)
 public class VidLibEventHandler {
 	public static boolean gameLoaded = false;
 
@@ -101,7 +106,22 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent
 	public static void dataTypeRegistry(DataTypeRegistryEvent event) {
-		VidLibDataTypes.register(event.getRegistry());
+		VidLibDataTypes.register(event.getCollector());
+	}
+
+	@SubscribeEvent
+	public static void knumberTypeRegistry(KNumberTypeRegistryEvent event) {
+		VidLibKNumbers.registerTypes(event.getCollector());
+	}
+
+	@SubscribeEvent
+	public static void kvectorTypeRegistry(KVectorTypeRegistryEvent event) {
+		VidLibKVectors.registerTypes(event.getCollector());
+	}
+
+	@SubscribeEvent
+	public static void entityFilterRegistry(EntityFilterTypeRegistryEvent event) {
+		// VidLibEntityFilters.registerTypes(event.getCollector());
 	}
 
 	@SubscribeEvent
@@ -117,10 +137,11 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent
 	public static void addReloadListeners(AddServerReloadListenersEvent event) {
-		event.addListener(ID.vidlib("location"), new Location.Loader(Location.REGISTRY));
-		event.addListener(ID.vidlib("zone"), new ZoneLoader(ZoneLoader.SERVER_BY_DIMENSION, true));
+		event.addListener(ID.vidlib("location"), new Location.ServerLoader());
+		event.addListener(ID.vidlib("zone"), new ZoneServerLoader());
 		event.addListener(ID.vidlib("structure"), new StructureStorage(StructureStorage.SERVER));
-		event.addListener(ID.vidlib("cutscene"), new Cutscene.Loader());
+		event.addListener(ID.vidlib("cutscene"), new Cutscene.ServerLoader());
+		event.addListener(ID.vidlib("clock"), new Clock.ServerLoader());
 	}
 
 	@SubscribeEvent

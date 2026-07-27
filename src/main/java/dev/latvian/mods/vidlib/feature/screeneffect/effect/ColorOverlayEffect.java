@@ -1,33 +1,35 @@
 package dev.latvian.mods.vidlib.feature.screeneffect.effect;
 
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.gradient.Gradient;
+import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.registry.DynamicType;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectShaderType;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 
-public record ColorOverlayEffect(Gradient color) implements ScreenEffect {
-	public static final CustomRegistryType<ColorOverlayEffect> TYPE = CustomRegistryType.dynamic("color_overlay", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		Gradient.CODEC.optionalFieldOf("color", Color.BLACK).forGetter(ColorOverlayEffect::color)
-	).apply(instance, ColorOverlayEffect::new)), CompositeStreamCodec.of(
-		Gradient.STREAM_CODEC, ColorOverlayEffect::color,
-		ColorOverlayEffect::new
-	));
+public record ColorOverlayEffect(Ref<Gradient> color) implements ScreenEffect {
+	public static final DynamicType<RegistryFriendlyByteBuf, ScreenEffect> TYPE = DynamicType.create(
+		"color_overlay",
+		"color",
+		Gradient.CODEC,
+		Gradient.STREAM_CODEC,
+		ColorOverlayEffect::new,
+		ColorOverlayEffect::color
+	);
 
 	public static class Inst extends ScreenEffectInstance {
-		public Gradient vColor;
+		public Ref<Gradient> vColor;
 
 		private Color color, prevColor;
 
-		public Inst(Gradient vColor) {
+		public Inst(Ref<Gradient> vColor) {
 			this.vColor = vColor;
 		}
 
@@ -45,7 +47,7 @@ public record ColorOverlayEffect(Gradient color) implements ScreenEffect {
 		@Override
 		public void update(KNumberContext ctx) {
 			if (ctx.progress != null) {
-				color = vColor.get(ctx.progress.floatValue());
+				color = vColor.value().get(ctx.progress.floatValue());
 			}
 		}
 
@@ -78,7 +80,7 @@ public record ColorOverlayEffect(Gradient color) implements ScreenEffect {
 	}
 
 	@Override
-	public CustomRegistryType<?> type() {
+	public DynamicType<RegistryFriendlyByteBuf, ScreenEffect> type() {
 		return TYPE;
 	}
 

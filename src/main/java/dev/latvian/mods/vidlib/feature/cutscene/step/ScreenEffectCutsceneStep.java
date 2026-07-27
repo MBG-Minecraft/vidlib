@@ -3,12 +3,13 @@ package dev.latvian.mods.vidlib.feature.cutscene.step;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneState;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.effect.ColorEffect;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import org.jetbrains.annotations.Nullable;
@@ -21,7 +22,7 @@ public class ScreenEffectCutsceneStep extends CutsceneStep {
 		ScreenEffectCutsceneStep::new
 	);
 
-	public final ScreenEffect effect;
+	public final Ref<ScreenEffect> effect;
 
 	public static class Builder extends CutsceneStepImBuilder {
 		@Override
@@ -46,12 +47,12 @@ public class ScreenEffectCutsceneStep extends CutsceneStep {
 		}
 	}
 
-	public ScreenEffectCutsceneStep(ScreenEffect effect) {
+	public ScreenEffectCutsceneStep(Ref<ScreenEffect> effect) {
 		this.effect = effect;
 	}
 
 	public ScreenEffectCutsceneStep() {
-		this.effect = new ColorEffect(Color.BLACK.withAlpha(0).gradient(Color.BLACK), false);
+		this.effect = new ColorEffect(Color.BLACK.withAlpha(0).gradient(Color.BLACK).ref(), false).ref();
 	}
 
 	@Override

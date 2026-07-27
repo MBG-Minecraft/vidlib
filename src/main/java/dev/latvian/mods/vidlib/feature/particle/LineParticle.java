@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.math.Vec3f;
 import dev.latvian.mods.klib.render.DebugRenderTypes;
@@ -17,8 +17,8 @@ public class LineParticle extends CustomParticle {
 
 	protected LineParticle(LineParticleOptions options, ClientLevel level, double x, double y, double z, double vx, double vy, double vz) {
 		super(level, x, y, z);
-		this.startColor = options.startColor().optimize();
-		this.endColor = options.endColor().optimize();
+		this.startColor = options.startColor().value();
+		this.endColor = options.endColor().value();
 		this.endOffset = options.endOffset();
 		setLifetime(options.lifespan());
 		vector = Vec3f.of(vx, vy, vz);

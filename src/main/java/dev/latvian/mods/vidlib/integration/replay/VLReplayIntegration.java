@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.integration.replay;
 
 import com.mojang.authlib.GameProfile;
-import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.replay.api.ReplayMarkerGroup;
 import dev.latvian.mods.replay.api.ReplayMarkerType;
@@ -26,7 +25,6 @@ import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.client.VidLibHUD;
 import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
 import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
-import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
@@ -35,7 +33,6 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverridesReplaySessionData;
 import dev.latvian.mods.vidlib.feature.misc.ReplayMarkerPayload;
-import dev.latvian.mods.vidlib.feature.misc.SyncPlayerTagsPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
 import dev.latvian.mods.vidlib.feature.note.CreateNotePayload;
 import dev.latvian.mods.vidlib.feature.note.DeleteNotePayload;
@@ -74,10 +71,9 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.IdentityHashMap;
-import java.util.Set;
 import java.util.UUID;
 
-@EventBusSubscriber(modid = ID.vidlib, value = Dist.CLIENT)
+@EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
 public class VLReplayIntegration {
 	@SubscribeEvent
 	public static void replaySessionOpened(ReplaySessionOpenedEvent event) {
@@ -112,9 +108,6 @@ public class VLReplayIntegration {
 								}
 							}
 						}
-						// Legacy
-						//noinspection deprecation
-						case SyncPlayerTagsPayload p -> dataMapOverrideBuilder.set(now, p.player(), InternalPlayerData.PLAYER_TAGS, Set.copyOf(p.tags()));
 						case AddPropPayload p -> {
 							var map = new IdentityHashMap<PropData<?, ?>, Object>();
 							try {

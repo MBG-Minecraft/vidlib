@@ -2,13 +2,13 @@ package dev.latvian.mods.vidlib.feature.cutscene.step;
 
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.knumber.KNumber;
+import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneState;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
-import dev.latvian.mods.vidlib.math.knumber.KNumber;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
-import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +27,7 @@ public class FOVModifierCutsceneStep extends CutsceneStep {
 		@Override
 		public void set(@Nullable CutsceneStep value) {
 			if (value instanceof FOVModifierCutsceneStep s) {
-				fov.set(s.fov);
+				fov.set(s.fov.value());
 			}
 		}
 
@@ -43,13 +43,13 @@ public class FOVModifierCutsceneStep extends CutsceneStep {
 
 		@Override
 		public CutsceneStep build() {
-			return new FOVModifierCutsceneStep(fov.build());
+			return new FOVModifierCutsceneStep(fov.build().ref());
 		}
 	}
 
-	public final KNumber fov;
+	public final Ref<KNumber> fov;
 
-	public FOVModifierCutsceneStep(KNumber fov) {
+	public FOVModifierCutsceneStep(Ref<KNumber> fov) {
 		this.fov = fov;
 	}
 
@@ -73,7 +73,7 @@ public class FOVModifierCutsceneStep extends CutsceneStep {
 
 	@Override
 	public void tick(CutsceneState state, KNumberContext ctx) {
-		var v = fov.getOrNaN(ctx);
+		var v = fov.value().getOrNaN(ctx);
 
 		if (!Double.isNaN(v)) {
 			state.fovMod = v;

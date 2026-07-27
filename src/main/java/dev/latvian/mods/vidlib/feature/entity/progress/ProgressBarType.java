@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.entity.progress;
 
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import net.minecraft.resources.Identifier;
 
 public record ProgressBarType(

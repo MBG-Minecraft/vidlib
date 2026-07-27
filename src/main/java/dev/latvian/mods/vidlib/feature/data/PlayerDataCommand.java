@@ -62,9 +62,9 @@ public interface PlayerDataCommand {
 			);
 
 			cmd.then(Commands.literal("set")
-				.then(Commands.argument("value", key.command().argument(buildContext))
+				.then(Commands.argument("value", key.type().argument(buildContext))
 					.executes(ctx -> {
-						var value = key.command().get(ctx, "value");
+						var value = key.type().get(ctx, "value");
 
 						for (var player : GameProfileArgument.getGameProfiles(ctx, "player")) {
 							var playerData = ctx.getSource().getServer().vl$getOrLoadServerSession(player.id());

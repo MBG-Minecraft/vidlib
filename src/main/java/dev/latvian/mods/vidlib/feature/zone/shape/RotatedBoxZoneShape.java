@@ -8,11 +8,11 @@ import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.math.Rotation;
-import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
+import dev.latvian.mods.klib.registry.DynamicType;
+import dev.latvian.mods.vidlib.feature.zone.ZoneClipContext;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
-import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -53,19 +53,23 @@ public record RotatedBoxZoneShape(Vec3 pos, Vector3f size, Rotation rotation, Ma
 		return new RotatedBoxZoneShape(pos, size, rotation, matrix, imatrix, box, List.of(new AABB(-hsx, -hsy, -hsz, hsx, hsy, hsz)));
 	}
 
-	public static final CustomRegistryType<RotatedBoxZoneShape> TYPE = CustomRegistryType.dynamic("rotated_box", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		MCCodecs.VEC3.fieldOf("pos").forGetter(RotatedBoxZoneShape::pos),
-		JOMLCodecs.VEC3S.fieldOf("size").forGetter(RotatedBoxZoneShape::size),
-		Rotation.CODEC.fieldOf("rotation").forGetter(RotatedBoxZoneShape::rotation)
-	).apply(instance, RotatedBoxZoneShape::of)), CompositeStreamCodec.of(
-		MCStreamCodecs.VEC3, RotatedBoxZoneShape::pos,
-		JOMLStreamCodecs.VEC3S, RotatedBoxZoneShape::size,
-		Rotation.STREAM_CODEC, RotatedBoxZoneShape::rotation,
-		RotatedBoxZoneShape::of
-	));
+	public static final DynamicType<ByteBuf, ZoneShape> TYPE = DynamicType.create(
+		"rotated_box",
+		RecordCodecBuilder.mapCodec(instance -> instance.group(
+			MCCodecs.VEC3.fieldOf("pos").forGetter(RotatedBoxZoneShape::pos),
+			JOMLCodecs.VEC3S.fieldOf("size").forGetter(RotatedBoxZoneShape::size),
+			Rotation.CODEC.fieldOf("rotation").forGetter(RotatedBoxZoneShape::rotation)
+		).apply(instance, RotatedBoxZoneShape::of)),
+		CompositeStreamCodec.of(
+			MCStreamCodecs.VEC3, RotatedBoxZoneShape::pos,
+			JOMLStreamCodecs.VEC3S, RotatedBoxZoneShape::size,
+			Rotation.STREAM_CODEC, RotatedBoxZoneShape::rotation,
+			RotatedBoxZoneShape::of
+		)
+	);
 
 	@Override
-	public CustomRegistryType<?> type() {
+	public DynamicType<ByteBuf, ZoneShape> type() {
 		return TYPE;
 	}
 
@@ -81,7 +85,7 @@ public record RotatedBoxZoneShape(Vec3 pos, Vector3f size, Rotation rotation, Ma
 
 	@Override
 	@Nullable
-	public ZoneClipResult clip(ZoneInstance instance, ClipContext ctx) {
+	public ZoneClipResult clip(ZoneClipContext ctx) {
 		if (contains(ctx.getFrom())) {
 			return null;
 		}
@@ -95,7 +99,7 @@ public record RotatedBoxZoneShape(Vec3 pos, Vector3f size, Rotation rotation, Ma
 			var l = result.getLocation();
 			var vec = new Vector3f((float) l.x, (float) l.y, (float) l.z).mul(imatrix);
 			var apos = new Vec3(vec.x + pos.x, vec.y + pos.y, vec.z + pos.z);
-			return ZoneClipResult.of(instance, this, ctx, apos);
+			return ZoneClipResult.of(ctx, apos);
 		}
 
 		return null;

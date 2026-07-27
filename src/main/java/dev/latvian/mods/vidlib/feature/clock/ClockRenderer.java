@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.clock;
 
 import com.mojang.math.Axis;
+import dev.latvian.mods.klib.util.BlockUtils;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import imgui.type.ImBoolean;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
@@ -14,7 +15,7 @@ public class ClockRenderer {
 	public static void render(FrameInfo frame, ClockValue value, ClockLocation location) {
 		var mc = frame.mc();
 		float delta = frame.worldDelta();
-		var font = location.font().get();
+		var font = location.font().value();
 
 		if (font == null) {
 			return;
@@ -29,7 +30,7 @@ public class ClockRenderer {
 			return;
 		}
 
-		var light = location.fullBright() ? LightCoordsUtil.FULL_BRIGHT : mc.level.vl$getPackedLight(location.pos());
+		var light = location.fullBright() ? LightCoordsUtil.FULL_BRIGHT : BlockUtils.getPackedLight(mc.level, location.pos());
 
 		ms.pushPose();
 		frame.translate(location.pos().getX() + 0.5D, location.pos().getY() + location.offset() + 0.5D, location.pos().getZ() + 0.5D);
@@ -38,16 +39,16 @@ public class ClockRenderer {
 		ms.scale(location.scale(), -location.scale(), -1F);
 		var m4 = ms.last().pose();
 
-		var buffer = mc.renderBuffers().bufferSource().getBuffer(RenderTypes.entityCutout(font.texture()));
+		var buffer = mc.renderBuffers().bufferSource().getBuffer(RenderTypes.entityCutout(font.assetId().texturePath()));
 		var x = -width / 2F + 1F;
 		var y = -font.size().y() / 2F;
 		var z = 0.4F;
 
 		var color = location.color().lerp(switch (value.type()) {
 			case FINISHED -> 1F;
-			case FLASH -> 0.65F + Mth.cos((mc.player.vl$sessionData().tick - 1F + delta) * 0.85F) * 0.35F;
+			case FLASHING -> 0.65F + Mth.cos((mc.player.vl$sessionData().tick - 1F + delta) * 0.85F) * 0.35F;
 			default -> 0F;
-		}, Clock.RED);
+		}, location.flashingColor());
 
 		int cr = color.red();
 		int cg = color.green();

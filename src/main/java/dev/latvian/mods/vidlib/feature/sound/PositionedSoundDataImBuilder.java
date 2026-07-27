@@ -1,10 +1,9 @@
 package dev.latvian.mods.vidlib.feature.sound;
 
+import dev.latvian.mods.klib.kvector.KVector;
 import dev.latvian.mods.vidlib.feature.imgui.builder.BooleanImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.CompoundImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
-import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 import imgui.type.ImBoolean;
 
 import java.util.Optional;
@@ -29,7 +28,7 @@ public class PositionedSoundDataImBuilder extends CompoundImBuilder<PositionedSo
 
 		if (value.position().isPresent()) {
 			hasPosition.set(true);
-			position.set(value.position().get());
+			position.set(value.position().get().value());
 		} else {
 			hasPosition.set(false);
 		}
@@ -42,7 +41,7 @@ public class PositionedSoundDataImBuilder extends CompoundImBuilder<PositionedSo
 	public PositionedSoundData build() {
 		return new PositionedSoundData(
 			soundData.build(),
-			hasPosition.get() ? Optional.of(position.build()) : Optional.empty(),
+			hasPosition.get() ? Optional.of(position.build().ref()) : Optional.empty(),
 			looping.build(),
 			stopImmediately.build()
 		);

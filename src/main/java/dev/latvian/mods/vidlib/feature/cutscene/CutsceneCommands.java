@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.cutscene;
 
+import dev.latvian.mods.klib.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 
@@ -12,9 +12,9 @@ public interface CutsceneCommands {
 		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.literal("play")
 			.then(Commands.argument("player", EntityArgument.players())
-				.then(Commands.argument("cutscene", Cutscene.REGISTRY.argument(buildContext))
+				.then(Commands.argument("cutscene", Cutscene.DATA_TYPE.argument(buildContext))
 					.executes(ctx -> {
-						var cutscene = Cutscene.REGISTRY.get(ctx, "cutscene");
+						var cutscene = Cutscene.DATA_TYPE.get(ctx, "cutscene");
 
 						for (var player : EntityArgument.getPlayers(ctx, "player")) {
 							player.playCutscene(cutscene, KNumberVariables.EMPTY);

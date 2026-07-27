@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
-import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import net.minecraft.client.Minecraft;
@@ -39,10 +38,6 @@ public enum ZoneTool implements VidLibTool {
 			clickedOnZone(player);
 		}
 
-		if (player.level().isServerSide() && player.isShiftKeyDown()) {
-			player.level().getEnvironment().removeZone(ID.idFromString("video:leviathan"), 0);
-		}
-
 		return true;
 	}
 
@@ -51,7 +46,7 @@ public enum ZoneTool implements VidLibTool {
 
 		if (clip != null) {
 			NeoForge.EVENT_BUS.post(new ZoneEvent.ClickedOn(clip, player.level(), player));
-			player.c2s(new ZoneClickedPayload(clip.instance().container.id, clip.instance().index, clip.shape(), clip.distanceSq(), Optional.ofNullable(clip.pos())));
+			player.c2s(new ZoneClickedPayload(clip.instance().container.ref, clip.instance().index, clip.distanceSq(), Optional.ofNullable(clip.pos())));
 		}
 	}
 }

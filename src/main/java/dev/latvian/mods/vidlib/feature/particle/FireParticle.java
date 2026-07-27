@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.klib.math.KMath;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleProvider;
@@ -20,15 +20,15 @@ public class FireParticle extends InterpolatedParticle {
 	public final float randomOffset;
 
 	public FireParticle(FireParticleOptions options, ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet spriteSet) {
-		super(level, x, y, z, xd, yd, zd, options.interpolation(), spriteSet);
+		super(level, x, y, z, xd, yd, zd, options.ease(), spriteSet);
 		this.options = options;
 		this.spriteSet = spriteSet;
-		this.gradient = options.color().optimize();
+		this.gradient = options.color().value();
 		this.lifetime = (int) (options.lifespan() * random.nextRange(0.9F, 1.1F));
 		this.setSprite(spriteSet.get(random));
 		this.quadSize *= 6F;
 		this.randomOffset = 0.8F + random.nextFloat() * 0.4F;
-		var color = (gradient == null ? Color.WHITE : gradient).get(0F);
+		var color = gradient == null ? Color.WHITE : gradient.get(0F);
 		setColor(color.redf() * options.brightness(), color.greenf() * options.brightness(), color.bluef() * options.brightness());
 	}
 
@@ -65,7 +65,7 @@ public class FireParticle extends InterpolatedParticle {
 			quadSizeMod = KMath.lerp(relativePos, 0.25F, 1F) * options.scale();
 		}
 
-		var color = (gradient == null ? Color.WHITE : gradient).get(relativeAge * randomOffset);
+		var color = gradient == null ? Color.WHITE : gradient.get(relativeAge * randomOffset);
 		setColor(color.redf() * options.brightness(), color.greenf() * options.brightness(), color.bluef() * options.brightness());
 	}
 }

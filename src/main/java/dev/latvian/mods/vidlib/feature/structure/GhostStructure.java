@@ -4,14 +4,15 @@ import com.mojang.math.Axis;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.entity.filter.EntityFilter;
+import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.kvector.KVector;
 import dev.latvian.mods.klib.math.AAIBB;
 import dev.latvian.mods.klib.math.Vec3f;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
-import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
-import dev.latvian.mods.vidlib.util.JsonCodecReloadListener;
+import dev.latvian.mods.klib.util.JsonCodecReloadListener;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import imgui.type.ImBoolean;
@@ -33,10 +34,10 @@ public record GhostStructure(
 	List<GhostStructurePart> structures,
 	Optional<StructureRendererData> data,
 	double animationTicks,
-	EntityFilter visibleTo,
-	List<KVector> locations,
-	KVector scale,
-	KVector rotation,
+	Ref<EntityFilter> visibleTo,
+	List<Ref<KVector>> locations,
+	Ref<KVector> scale,
+	Ref<KVector> rotation,
 	boolean preload,
 	boolean preloadRenderer
 ) {
@@ -47,7 +48,7 @@ public record GhostStructure(
 		GhostStructurePart.CODEC.listOf().fieldOf("structures").forGetter(GhostStructure::structures),
 		StructureRendererData.CODEC.optionalFieldOf("data").forGetter(GhostStructure::data),
 		Codec.DOUBLE.optionalFieldOf("animation_ticks", 1D).forGetter(GhostStructure::animationTicks),
-		EntityFilter.CODEC.optionalFieldOf("visible_to", EntityFilter.ANY.instance()).forGetter(GhostStructure::visibleTo),
+		EntityFilter.CODEC.optionalFieldOf("visible_to", EntityFilter.ANY).forGetter(GhostStructure::visibleTo),
 		KVector.CODEC.listOf().fieldOf("locations").forGetter(GhostStructure::locations),
 		KVector.CODEC.optionalFieldOf("scale", KVector.ONE).forGetter(GhostStructure::scale),
 		KVector.CODEC.optionalFieldOf("rotation", KVector.ZERO).forGetter(GhostStructure::rotation),
@@ -69,9 +70,9 @@ public record GhostStructure(
 	) {
 	}
 
-	public static class Loader extends JsonCodecReloadListener<GhostStructure> {
-		public Loader() {
-			super("vidlib/ghost_structure", CODEC, true);
+	public static class ClientLoader extends JsonCodecReloadListener<GhostStructure> {
+		public ClientLoader() {
+			super("vidlib/ghost_structure", CODEC);
 		}
 
 		@Override
@@ -80,12 +81,14 @@ public record GhostStructure(
 				var data = s.data.orElse(s.ghostChunks ? StructureRendererData.DEFAULT_GHOST_CHUNKS : StructureRendererData.DEFAULT);
 
 				for (var part : s.structures) {
+					/*
 					var holders = StructureStorage.CLIENT.ref(part.structure().id).get().get();
 
 					if (s.preloadRenderer && !holders.isEmpty()) {
 						// var mc = Minecraft.getInstance();
 						// mc.executeBlocking(() -> part.structure().preRender(mc, data, mc, mc));
 					}
+					 */
 				}
 			}
 
@@ -111,17 +114,17 @@ public record GhostStructure(
 			}
 
 			for (var loc : gs.locations) {
-				var pos = loc.get(ctx);
+				var pos = loc.value().get(ctx);
 
 				if (pos == null) {
 					continue;
 				}
 
-				if (!gs.visibleTo().test(mc.player)) {
+				if (!gs.visibleTo().value().test(mc.player)) {
 					continue;
 				}
 
-				var scale = gs.scale.get(ctx);
+				var scale = gs.scale.value().get(ctx);
 
 				if (scale == null) {
 					continue;
@@ -133,7 +136,7 @@ public record GhostStructure(
 					continue;
 				}
 
-				var rotation = gs.rotation.get(ctx);
+				var rotation = gs.rotation.value().get(ctx);
 
 				var rotation3f = rotation == null ? Vec3f.ZERO : Vec3f.of(rotation);
 

@@ -1,9 +1,11 @@
 package dev.latvian.mods.vidlib.feature.imgui.builder;
 
 import com.mojang.serialization.DynamicOps;
-import dev.latvian.mods.klib.codec.KLibCodecs;
+import dev.latvian.mods.klib.registry.CustomRegistry;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.klib.util.Comparison;
+import dev.latvian.mods.klib.util.NameProvider;
 import dev.latvian.mods.klib.util.UnitSupplier;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
@@ -16,7 +18,6 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSetting
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class EnumImBuilder<E> implements ImBuilder<E> {
@@ -46,10 +47,14 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 		return of(options).defaultValue(defaultValue).buildType();
 	}
 
+	public static <E> Builder<Ref<E>> of(CustomRegistry<?, E> customRegistry) {
+		return of(customRegistry::values).nameGetter(Ref::key);
+	}
+
 	public static class Builder<E> {
 		private final Supplier<? extends Iterable<? extends E>> options;
 		private Supplier<@Nullable E> defaultValue;
-		private Function<E, String> nameGetter;
+		private NameProvider<E> nameGetter;
 		private String nullName;
 
 		private Builder(Supplier<? extends Iterable<? extends E>> options) {
@@ -69,7 +74,7 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 			return this;
 		}
 
-		public Builder<E> nameGetter(Function<E, String> nameGetter) {
+		public Builder<E> nameGetter(NameProvider<E> nameGetter) {
 			this.nameGetter = nameGetter;
 			return this;
 		}
@@ -93,14 +98,14 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 	public final Iterable<? extends E> options;
 	public final Object[] value;
 	public boolean allowNull;
-	public final Function<E, String> nameGetter;
+	public final NameProvider<E> nameGetter;
 	public final String nullName;
 
-	public EnumImBuilder(Iterable<? extends E> options, @Nullable E defaultValue, Function<E, String> nameGetter, String nullName) {
+	public EnumImBuilder(Iterable<? extends E> options, @Nullable E defaultValue, NameProvider<E> nameGetter, String nullName) {
 		this.options = options;
 		this.value = new Object[]{defaultValue};
 		this.allowNull = defaultValue == null;
-		this.nameGetter = nameGetter;
+		this.nameGetter = NameProvider.resolve(nameGetter);
 		this.nullName = nullName;
 	}
 
@@ -126,6 +131,6 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 
 	@Override
 	public <O> String toString(DynamicOps<O> ops, E value) {
-		return KLibCodecs.DEFAULT_NAME_GETTER.apply(Cast.to(value));
+		return nameGetter.provideName(Cast.to(value));
 	}
 }

@@ -7,7 +7,7 @@ import dev.latvian.mods.vidlib.core.VLServerPacketListener;
 import dev.latvian.mods.vidlib.feature.misc.CreateFireworksPayload;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ServerProps;
-import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
+import dev.latvian.mods.vidlib.feature.zone.ZoneCache;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -44,7 +44,7 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 	private MinecraftServer server;
 
 	@Unique
-	private ActiveZones vl$activeZones;
+	private ZoneCache vl$zoneCache;
 
 	@Unique
 	private ServerProps vl$props;
@@ -55,14 +55,14 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 
 	@Override
 	@Nullable
-	public ActiveZones vl$getActiveZones() {
-		return vl$activeZones;
+	public ZoneCache vl$getActiveZones() {
+		return vl$zoneCache;
 	}
 
 	@Override
-	public void vl$setActiveZones(ActiveZones zones) {
-		if (vl$activeZones != zones) {
-			vl$activeZones = zones;
+	public void vl$setActiveZones(ZoneCache zones) {
+		if (vl$zoneCache != zones) {
+			vl$zoneCache = zones;
 			vl$updateLoadedChunks();
 		}
 	}

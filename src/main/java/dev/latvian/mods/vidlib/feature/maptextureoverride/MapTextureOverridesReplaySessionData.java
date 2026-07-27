@@ -2,10 +2,10 @@ package dev.latvian.mods.vidlib.feature.maptextureoverride;
 
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.replay.api.ReplaySession;
 import dev.latvian.mods.replay.api.ReplaySessionData;
 import dev.latvian.mods.replay.api.ReplaySessionDataType;
-import dev.latvian.mods.vidlib.VidLib;
 import org.jetbrains.annotations.Nullable;
 
 public class MapTextureOverridesReplaySessionData implements ReplaySessionData {

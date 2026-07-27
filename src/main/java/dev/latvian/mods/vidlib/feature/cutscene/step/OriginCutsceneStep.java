@@ -2,13 +2,13 @@ package dev.latvian.mods.vidlib.feature.cutscene.step;
 
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.kvector.KVector;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneState;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
-import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +27,7 @@ public class OriginCutsceneStep extends CutsceneStep {
 		@Override
 		public void set(@Nullable CutsceneStep value) {
 			if (value instanceof OriginCutsceneStep s) {
-				position.set(s.position);
+				position.set(s.position.value());
 			}
 		}
 
@@ -43,13 +43,13 @@ public class OriginCutsceneStep extends CutsceneStep {
 
 		@Override
 		public CutsceneStep build() {
-			return new OriginCutsceneStep(position.build());
+			return new OriginCutsceneStep(position.build().ref());
 		}
 	}
 
-	public final KVector position;
+	public final Ref<KVector> position;
 
-	public OriginCutsceneStep(KVector position) {
+	public OriginCutsceneStep(Ref<KVector> position) {
 		this.position = position;
 	}
 
@@ -73,7 +73,7 @@ public class OriginCutsceneStep extends CutsceneStep {
 
 	@Override
 	public void tick(CutsceneState state, KNumberContext ctx) {
-		var v = position.get(ctx);
+		var v = position.value().get(ctx);
 
 		if (v != null) {
 			state.origin = v;

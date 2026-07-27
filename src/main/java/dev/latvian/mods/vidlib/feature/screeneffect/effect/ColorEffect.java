@@ -4,37 +4,43 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.gradient.Gradient;
+import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.registry.DynamicType;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectShaderType;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import imgui.ImGui;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 
-public record ColorEffect(Gradient color, boolean additive) implements ScreenEffect {
-	public static final CustomRegistryType<ColorEffect> TYPE = CustomRegistryType.dynamic("color", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		Gradient.CODEC.optionalFieldOf("color", Color.BLACK).forGetter(ColorEffect::color),
-		Codec.BOOL.optionalFieldOf("additive", false).forGetter(ColorEffect::additive)
-	).apply(instance, ColorEffect::new)), CompositeStreamCodec.of(
-		Gradient.STREAM_CODEC, ColorEffect::color,
-		ByteBufCodecs.BOOL, ColorEffect::additive,
-		ColorEffect::new
-	));
+public record ColorEffect(Ref<Gradient> color, boolean additive) implements ScreenEffect {
+	public static final DynamicType<RegistryFriendlyByteBuf, ScreenEffect> TYPE = DynamicType.create(
+		"color",
+		RecordCodecBuilder.mapCodec(instance -> instance.group(
+			Gradient.CODEC.optionalFieldOf("color", Gradient.BLACK).forGetter(ColorEffect::color),
+			Codec.BOOL.optionalFieldOf("additive", false).forGetter(ColorEffect::additive)
+		).apply(instance, ColorEffect::new)),
+		CompositeStreamCodec.of(
+			Gradient.STREAM_CODEC, ColorEffect::color,
+			ByteBufCodecs.BOOL, ColorEffect::additive,
+			ColorEffect::new
+		)
+	);
 
 	public static class Inst extends ScreenEffectInstance {
-		public Gradient vColor;
+		public Ref<Gradient> vColor;
 		public boolean additive;
 
 		private Color color, prevColor;
 
-		public Inst(Gradient vColor, boolean additive) {
+		public Inst(Ref<Gradient> vColor, boolean additive) {
 			this.vColor = vColor;
 			this.additive = additive;
 		}
@@ -53,7 +59,7 @@ public record ColorEffect(Gradient color, boolean additive) implements ScreenEff
 		@Override
 		public void update(KNumberContext ctx) {
 			if (ctx.progress != null) {
-				color = vColor.get(ctx.progress.floatValue());
+				color = vColor.value().get(ctx.progress.floatValue());
 			}
 		}
 
@@ -92,7 +98,7 @@ public record ColorEffect(Gradient color, boolean additive) implements ScreenEff
 	}
 
 	@Override
-	public CustomRegistryType<?> type() {
+	public DynamicType<RegistryFriendlyByteBuf, ScreenEffect> type() {
 		return TYPE;
 	}
 

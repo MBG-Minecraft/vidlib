@@ -6,12 +6,12 @@ import com.mojang.serialization.DynamicOps;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
@@ -111,7 +111,7 @@ public record PropType<P extends Prop>(
 
 	public static final Codec<PropType<?>> CODEC = KLibCodecs.map(ALL, ID.CODEC, PropType::id);
 	public static final StreamCodec<ByteBuf, PropType<?>> STREAM_CODEC = KLibStreamCodecs.map(ALL, ID.STREAM_CODEC, PropType::id);
-	public static final DataType<PropType<?>> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, Cast.to(PropType.class));
+	public static final DataType<PropType<?>> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 
 	@Override
 	public boolean test(Prop prop) {
@@ -180,7 +180,7 @@ public record PropType<P extends Prop>(
 			return null;
 		}
 
-		var buf = VLPlatformHelper.CURRENT.createBuffer(Unpooled.buffer(), registryAccess);
+		var buf = PlatformHelper.CURRENT.createBuffer(Unpooled.buffer(), registryAccess);
 
 		try {
 			buf.writeVarInt(syncSet.size());
@@ -201,7 +201,7 @@ public record PropType<P extends Prop>(
 	}
 
 	public void readUpdate(int propId, RegistryAccess registryAccess, byte[] update, boolean allData, BiConsumer<PropData<?, ?>, Object> setData) {
-		var buf = VLPlatformHelper.CURRENT.createBuffer(Unpooled.wrappedBuffer(update), registryAccess);
+		var buf = PlatformHelper.CURRENT.createBuffer(Unpooled.wrappedBuffer(update), registryAccess);
 
 		try {
 			int size = buf.readVarInt();

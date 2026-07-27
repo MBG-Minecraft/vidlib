@@ -1,8 +1,10 @@
 package dev.latvian.mods.vidlib.feature.session;
 
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.LevelGameTimeProvider;
 import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
+import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
@@ -17,11 +19,8 @@ import dev.latvian.mods.vidlib.feature.note.Note;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
-import dev.latvian.mods.vidlib.feature.registry.SyncRegistryPayload;
-import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
-import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
+import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -40,7 +39,7 @@ public class SessionData implements Comparable<SessionData> {
 	public int tick;
 	public PlayerInput prevInput;
 	public PlayerInput input;
-	public List<ZoneInstance> zonesIn;
+	public List<Zone> zonesIn;
 	public Set<String> zonesTagsIn;
 
 	public boolean suspended;
@@ -67,13 +66,7 @@ public class SessionData implements Comparable<SessionData> {
 		suspended = CommonGameEngine.INSTANCE.isSuspended(player);
 	}
 
-	public <V> void syncRegistry(Player player, SyncedRegistry<V> registry, Map<Identifier, V> map) {
-	}
-
-	public void updateZones(Level level) {
-	}
-
-	public void updateClocks(Map<Identifier, ClockValue> map) {
+	public void updateClocks(Map<Ref<Clock>, ClockValue> map) {
 	}
 
 	public void updateServerData(long gameTime, Player self, List<DataMapValue> update) {
@@ -112,11 +105,8 @@ public class SessionData implements Comparable<SessionData> {
 		if (level.getServer() != null) {
 			packets.s2c(level.getServer().clockManager().createFullSyncPacket());
 		}
-		// packets.s2c(new ServerFeaturesPayload(FeatureSet.SERVER_FEATURES.get()));
 
-		for (var reg : SyncedRegistry.ALL.values()) {
-			packets.s2c(new SyncRegistryPayload(reg, Map.copyOf(reg.registry().getMap())));
-		}
+		// packets.s2c(new ServerFeaturesPayload(FeatureSet.SERVER_FEATURES.get()));
 
 		packets.s2c(new SyncGlobalNumberVariablesPayload(environment.globalVariables()));
 

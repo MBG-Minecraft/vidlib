@@ -28,7 +28,7 @@ public record ParticleMovementData(
 		Codec.INT.optionalFieldOf("count", 1).forGetter(ParticleMovementData::count),
 		Codec.FLOAT.optionalFieldOf("radius", 20F).forGetter(ParticleMovementData::radius),
 		Codec.FLOAT.optionalFieldOf("deviate", 0F).forGetter(ParticleMovementData::deviate),
-		Rotation.CODEC.optionalFieldOf("yaw", Rotation.NONE).forGetter(ParticleMovementData::rotation)
+		Rotation.CODEC.optionalFieldOf("rotation", Rotation.NONE).forGetter(ParticleMovementData::rotation)
 	).apply(instance, ParticleMovementData::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ParticleMovementData> STREAM_CODEC = CompositeStreamCodec.of(
@@ -37,7 +37,7 @@ public record ParticleMovementData(
 		ByteBufCodecs.VAR_INT, ParticleMovementData::count,
 		ByteBufCodecs.FLOAT, ParticleMovementData::radius,
 		ByteBufCodecs.FLOAT, ParticleMovementData::deviate,
-		KLibStreamCodecs.optional(Rotation.STREAM_CODEC_NO_ROLL, Rotation.NONE), ParticleMovementData::rotation,
+		KLibStreamCodecs.optional(Rotation.STREAM_CODEC, Rotation.NONE), ParticleMovementData::rotation,
 		ParticleMovementData::new
 	);
 

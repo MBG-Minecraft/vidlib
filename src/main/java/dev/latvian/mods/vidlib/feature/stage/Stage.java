@@ -33,7 +33,7 @@ public class Stage {
 
 	public static final StreamCodec<ByteBuf, Stage> STREAM_CODEC = ByteBufCodecs.VAR_INT.map(LIST::get, stage -> stage.index);
 
-	public static final DataType<Stage> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, Stage.class);
+	public static final DataType<Stage> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 
 	public final String id;
 	public String displayName;

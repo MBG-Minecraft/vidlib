@@ -1,7 +1,8 @@
 package dev.latvian.mods.vidlib.feature.client;
 
 import com.mojang.serialization.Codec;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
+import dev.latvian.mods.klib.block.filter.BlockFilter;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
 import net.minecraft.client.Minecraft;
@@ -30,11 +31,11 @@ public interface VidLibClientOptions {
 		}
 	);
 
-	OptionInstance<BlockFilter> ZONE_BLOCK_FILTER = UnconfigurableValueSet.create(
+	OptionInstance<Ref<BlockFilter>> ZONE_BLOCK_FILTER = UnconfigurableValueSet.create(
 		"options.vidlib.zone_block_filter",
-		BlockFilter.DATA_TYPE.codec(),
+		BlockFilter.CODEC,
 		OptionInstance.noTooltip(),
-		BlockFilter.ANY.instance(),
+		BlockFilter.ANY,
 		callback -> {
 			var mc = Minecraft.getInstance();
 
@@ -46,9 +47,9 @@ public interface VidLibClientOptions {
 
 	// OptionInstance<ExplosionData> TEST_EXPLOSION = DataKey.PLAYER.buildDefault("options.vidlib.test_explosion", ExplosionData.DATA_TYPE, ExplosionData.DEFAULT);
 
-	OptionInstance<PhysicsParticleData> TEST_PHYSICS_PARTICLE_DATA = UnconfigurableValueSet.create(
+	OptionInstance<Ref<PhysicsParticleData>> TEST_PHYSICS_PARTICLE_DATA = UnconfigurableValueSet.create(
 		"options.vidlib.test_physics_particles.data",
-		PhysicsParticleData.DATA_TYPE.codec(),
+		PhysicsParticleData.CODEC,
 		OptionInstance.noTooltip(),
 		PhysicsParticleData.DEFAULT,
 		callback -> {
@@ -106,7 +107,7 @@ public interface VidLibClientOptions {
 		return ZONE_RENDER_TYPE.get();
 	}
 
-	static BlockFilter getZoneBlockFilter() {
+	static Ref<BlockFilter> getZoneBlockFilter() {
 		return ZONE_BLOCK_FILTER.get();
 	}
 

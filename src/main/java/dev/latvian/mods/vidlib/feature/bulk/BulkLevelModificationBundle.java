@@ -1,10 +1,9 @@
 package dev.latvian.mods.vidlib.feature.bulk;
 
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.block.PositionedBlock;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
-import dev.latvian.mods.klib.registry.CustomRegistryType;
+import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.registry.Ref;
-import dev.latvian.mods.klib.util.ID;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -16,16 +15,17 @@ import java.util.List;
 import java.util.Set;
 
 public record BulkLevelModificationBundle(List<Ref<BulkLevelModification>> list) implements BulkLevelModification, BlockModificationConsumer {
-	public static final CustomRegistryType<ByteBuf, BulkLevelModification> TYPE = REGISTRY.dynamic(
-		ID.vidlib("bundle"),
-		RecordCodecBuilder.mapCodec(instance -> instance.group(
-			BulkLevelModification.CODEC.listOf().fieldOf("list").forGetter(BulkLevelModificationBundle::list)
-		).apply(instance, BulkLevelModificationBundle::new)),
-		KLibStreamCodecs.listOf(BulkLevelModification.STREAM_CODEC).map(BulkLevelModificationBundle::new, BulkLevelModificationBundle::list)
+	public static final DynamicType<ByteBuf, BulkLevelModification> TYPE = DynamicType.create(
+		"bundle",
+		"list",
+		BulkLevelModification.CODEC.listOf(),
+		KLibStreamCodecs.listOf(BulkLevelModification.STREAM_CODEC),
+		BulkLevelModificationBundle::new,
+		BulkLevelModificationBundle::list
 	);
 
 	@Override
-	public CustomRegistryType<ByteBuf, BulkLevelModification> type() {
+	public DynamicType<ByteBuf, BulkLevelModification> type() {
 		return TYPE;
 	}
 

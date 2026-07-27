@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.feature.cutscene;
 
+import dev.latvian.mods.klib.knumber.KNumberVariables;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
-import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
 

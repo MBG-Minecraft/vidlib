@@ -2,10 +2,9 @@ package dev.latvian.mods.vidlib.feature.platform.neoforge;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
 import dev.latvian.mods.vidlib.feature.auto.AutoCallback;
 import dev.latvian.mods.vidlib.feature.auto.ScannedAnnotation;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterTypeRegistryEvent;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModificationRegistryEvent;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
@@ -13,24 +12,19 @@ import dev.latvian.mods.vidlib.feature.camera.ScreenShakeTypeRegistryEvent;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.capture.PacketCaptureEvent;
 import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
-import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
-import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterRegistryEvent;
-import dev.latvian.mods.vidlib.feature.entity.number.EntityNumber;
-import dev.latvian.mods.vidlib.feature.entity.number.EntityNumberRegistryEvent;
+import dev.latvian.mods.vidlib.feature.font.TTFFile;
+import dev.latvian.mods.vidlib.feature.font.TTFFileRegistryEvent;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
-import dev.latvian.mods.vidlib.feature.icon.IconRegistryEvent;
+import dev.latvian.mods.vidlib.feature.icon.IconTypeRegistryEvent;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
-import dev.latvian.mods.vidlib.feature.registry.CustomRegistryTypeCollector;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectRegistryEvent;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShapeRegistryEvent;
-import dev.latvian.mods.vidlib.math.knumber.KNumber;
-import dev.latvian.mods.vidlib.math.knumber.KNumberRegistryEvent;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
-import dev.latvian.mods.vidlib.math.kvector.KVectorRegistryEvent;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubGatewayEvent;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubGatewayEventRegistryEvent;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.Entity;
@@ -111,63 +105,39 @@ public class VLNeoPlatformHelper extends VLPlatformHelper {
 	}
 
 	@Override
-	public void collectKNumbers(CustomRegistryTypeCollector<KNumber> registry) {
-		super.collectKNumbers(registry);
-		ModLoader.postEvent(new KNumberRegistryEvent(registry));
-	}
-
-	@Override
-	public void collectKVectors(CustomRegistryTypeCollector<KVector> registry) {
-		super.collectKVectors(registry);
-		ModLoader.postEvent(new KVectorRegistryEvent(registry));
-	}
-
-	@Override
-	public void collectEntityFilters(CustomRegistryTypeCollector<EntityFilter> registry) {
-		super.collectEntityFilters(registry);
-		ModLoader.postEvent(new EntityFilterRegistryEvent(registry));
-	}
-
-	@Override
-	public void collectBlockFilters(CustomRegistryTypeCollector<BlockFilter> registry) {
-		super.collectBlockFilters(registry);
-		ModLoader.postEvent(new BlockFilterTypeRegistryEvent(registry));
-	}
-
-	@Override
-	public void collectZoneShapes(CustomRegistryTypeCollector<ZoneShape> registry) {
+	public void collectZoneShapes(CustomRegistryTypeCollector<ByteBuf, ZoneShape> registry) {
 		super.collectZoneShapes(registry);
 		ModLoader.postEvent(new ZoneShapeRegistryEvent(registry));
 	}
 
 	@Override
-	public void collectIcons(CustomRegistryTypeCollector<Icon> registry) {
+	public void collectIcons(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, Icon> registry) {
 		super.collectIcons(registry);
-		ModLoader.postEvent(new IconRegistryEvent(registry));
+		ModLoader.postEvent(new IconTypeRegistryEvent(registry));
 	}
 
 	@Override
-	public void collectScreenShakeTypes(CustomRegistryTypeCollector<ScreenShakeType> registry) {
+	public void collectScreenShakeTypes(CustomRegistryTypeCollector<ByteBuf, ScreenShakeType> registry) {
 		super.collectScreenShakeTypes(registry);
 		ModLoader.postEvent(new ScreenShakeTypeRegistryEvent(registry));
 	}
 
 	@Override
-	public void collectBulkLevelModifications(CustomRegistryTypeCollector<BulkLevelModification> registry) {
+	public void collectBulkLevelModifications(CustomRegistryTypeCollector<ByteBuf, BulkLevelModification> registry) {
 		super.collectBulkLevelModifications(registry);
 		ModLoader.postEvent(new BulkLevelModificationRegistryEvent(registry));
 	}
 
 	@Override
-	public void collectScreenEffects(CustomRegistryTypeCollector<ScreenEffect> registry) {
+	public void collectScreenEffects(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, ScreenEffect> registry) {
 		super.collectScreenEffects(registry);
 		ModLoader.postEvent(new ScreenEffectRegistryEvent(registry));
 	}
 
 	@Override
-	public void collectEntityNumbers(CustomRegistryTypeCollector<EntityNumber> registry) {
-		super.collectEntityNumbers(registry);
-		ModLoader.postEvent(new EntityNumberRegistryEvent(registry));
+	public void collectTTFFiles(CustomRegistryTypeCollector<ByteBuf, TTFFile> registry) {
+		super.collectTTFFiles(registry);
+		ModLoader.postEvent(new TTFFileRegistryEvent(registry));
 	}
 
 	@Override

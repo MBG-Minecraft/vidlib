@@ -306,6 +306,7 @@ public class HubFileUploads {
 					.header("Tus-Resumable", "1.0.0")
 					.header("Content-Type", "application/offset+octet-stream")
 					.header("Upload-Offset", Long.toUnsignedString(offset))
+					.header("X-Content-Length-Hint", Long.toUnsignedString(len))
 					.build(), HttpResponse.BodyHandlers.ofString());
 
 				if (response.statusCode() / 100 == 2) {

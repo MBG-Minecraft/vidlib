@@ -3,17 +3,13 @@ package dev.latvian.mods.vidlib.feature.platform;
 import com.google.gson.JsonObject;
 import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
 import dev.latvian.mods.vidlib.feature.auto.AutoCallback;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
-import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
-import dev.latvian.mods.vidlib.feature.entity.number.EntityNumber;
+import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
-import dev.latvian.mods.vidlib.math.knumber.KNumber;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubGatewayEvent;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -47,22 +43,6 @@ public class VLPlatformHelper {
 	public void collectDynamicResources(PackType type, Consumer<Identifier> callback) {
 	}
 
-	public void collectKNumbers(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, KNumber> registry) {
-		KNumber.builtInTypes(registry);
-	}
-
-	public void collectKVectors(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, KVector> registry) {
-		KVector.builtInTypes(registry);
-	}
-
-	public void collectEntityFilters(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, EntityFilter> registry) {
-		EntityFilter.builtInTypes(registry);
-	}
-
-	public void collectBlockFilters(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, BlockFilter> registry) {
-		BlockFilter.builtInTypes(registry);
-	}
-
 	public void collectZoneShapes(CustomRegistryTypeCollector<ByteBuf, ZoneShape> registry) {
 		ZoneShape.builtInTypes(registry);
 	}
@@ -79,12 +59,12 @@ public class VLPlatformHelper {
 		BulkLevelModification.builtInTypes(registry);
 	}
 
-	public void collectScreenEffects(CustomRegistryTypeCollector<ByteBuf, ScreenEffect> registry) {
+	public void collectScreenEffects(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, ScreenEffect> registry) {
 		ScreenEffect.builtInTypes(registry);
 	}
 
-	public void collectEntityNumbers(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, EntityNumber> registry) {
-		EntityNumber.builtInTypes(registry);
+	public void collectTTFFiles(CustomRegistryTypeCollector<ByteBuf, TTFFile> registry) {
+		TTFFile.builtInTypes(registry);
 	}
 
 	public boolean isStaff(Entity entity) {

@@ -3,7 +3,8 @@ package dev.latvian.mods.vidlib.feature.imgui.config;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.DynamicOps;
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.gradient.Gradient;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
@@ -77,7 +78,7 @@ public abstract class ConfigEntry<T> {
 		return new ColorConfigEntry(label, key);
 	}
 
-	public static ConfigEntry<Gradient> gradient(String label, DataKey<Gradient> key) {
+	public static ConfigEntry<Ref<Gradient>> gradient(String label, DataKey<Ref<Gradient>> key) {
 		return new GradientConfigEntry(label, key);
 	}
 

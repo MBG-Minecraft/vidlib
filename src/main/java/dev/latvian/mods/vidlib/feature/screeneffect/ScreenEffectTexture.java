@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.screeneffect;
 
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.Lazy;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.DynamicTextureHolder;
 import dev.latvian.mods.vidlib.util.client.DataTexture;
@@ -10,10 +10,10 @@ import net.minecraft.resources.Identifier;
 import java.util.List;
 
 public class ScreenEffectTexture extends DataTexture {
-	public static final Identifier ID = ID.vidlib("textures/effect/screen.png");
+	public static final Identifier TEXTURE_ID = ID.vidlib("textures/effect/screen.png");
 
 	@ClientAutoRegister
-	public static final DynamicTextureHolder<ScreenEffectTexture> HOLDER = new DynamicTextureHolder<>(ID, Lazy.of(ScreenEffectTexture::new));
+	public static final DynamicTextureHolder<ScreenEffectTexture> HOLDER = new DynamicTextureHolder<>(TEXTURE_ID, Lazy.of(ScreenEffectTexture::new));
 
 	public ScreenEffectTexture() {
 		super("Screen Effect Texture", 8, 4);

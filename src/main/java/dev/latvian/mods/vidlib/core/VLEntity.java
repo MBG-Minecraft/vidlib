@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core;
 
-import dev.latvian.mods.klib.math.Line;
-import dev.latvian.mods.klib.math.Rotation;
+import dev.latvian.mods.klib.entity.EntityUtils;
+import dev.latvian.mods.klib.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.feature.entity.C2SEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.entity.EntityData;
 import dev.latvian.mods.vidlib.feature.entity.ForceEntityVelocityPayload;
@@ -13,20 +13,13 @@ import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
-import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
-import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
-import dev.latvian.mods.vidlib.math.kvector.PositionType;
+import dev.latvian.mods.vidlib.feature.zone.Zone;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.Leashable;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
@@ -45,58 +38,13 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		return vl$self().level();
 	}
 
-	default void vl$setLevel(Level level) {
-		throw new NoMixinException(this);
-	}
-
-	default boolean vl$isSaving() {
-		return false;
-	}
-
-	default List<ZoneInstance> getZones() {
+	default List<Zone> getZones() {
 		var zones = vl$level().vl$getActiveZones();
 		return zones == null ? List.of() : zones.entityZones.getOrDefault((vl$self()).getId(), List.of());
 	}
 
-	@Nullable
-	default GameType getGameMode() {
-		return null;
-	}
-
-	default boolean isSpectatorOrCreative() {
-		var type = getGameMode();
-		return type == GameType.SPECTATOR || type == GameType.CREATIVE;
-	}
-
-	default boolean vl$isCreative() {
-		return getGameMode() == GameType.CREATIVE;
-	}
-
-	default boolean isSurvival() {
-		return getGameMode() == GameType.SURVIVAL;
-	}
-
-	default boolean isAdventure() {
-		return getGameMode() == GameType.ADVENTURE;
-	}
-
-	default boolean isSurvivalLike() {
-		var type = getGameMode();
-		return type != null && type.isSurvival();
-	}
-
 	default boolean vl$isSuspended() {
 		return CommonGameEngine.INSTANCE.isSuspended(vl$self());
-	}
-
-	default Line ray(double distance, float delta) {
-		var start = vl$self().getEyePosition(delta);
-		var end = start.add(vl$self().getViewVector(delta).scale(distance));
-		return new Line(start, end);
-	}
-
-	default Line ray(float delta) {
-		return ray(4.5D, delta);
 	}
 
 	default void teleport(ServerLevel to, Vec3 pos) {
@@ -131,7 +79,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 			var to = serverLevel.getServer().getLevel(location.dimension());
 
 			if (to != null) {
-				teleport(to, location.random(entity.getRandom()).get(ctx));
+				teleport(to, location.sample(entity.getRandom()).value().get(ctx));
 			}
 		}
 	}
@@ -162,10 +110,6 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		playSound(data, false, true);
 	}
 
-	default Vec3 getSoundSource(float delta) {
-		return vl$self().getEyePosition(delta);
-	}
-
 	default void s2c(EntityData data) {
 		vl$level().s2c(new S2CEntityEventPayload(data));
 	}
@@ -178,56 +122,6 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	}
 
 	default void c2sReceived(EntityData event, ServerPlayer from) {
-	}
-
-	default Vec3 getLookTarget(float delta) {
-		var e = vl$self();
-
-		if (delta == 1F) {
-			return e.position().add(e.getViewVector(1F));
-		} else {
-			return e.getPosition(delta).add(e.getViewVector(delta));
-		}
-	}
-
-	default Vec3 getPosition(PositionType type) {
-		var e = vl$self();
-
-		return switch (type) {
-			case CENTER -> new Vec3(e.getX(), e.getY() + e.getBbHeight() / 2D, e.getZ());
-			case TOP -> new Vec3(e.getX(), e.getY() + e.getBbHeight(), e.getZ());
-			case EYES -> e.getEyePosition();
-			case LEASH -> e.position().add(vl$leashOffset(e, 1F));
-			case SOUND_SOURCE -> getSoundSource(1F);
-			case LOOK_TARGET -> getLookTarget(1F);
-			default -> e.position();
-		};
-	}
-
-	default Vec3 getPosition(PositionType type, float delta) {
-		var e = vl$self();
-
-		return switch (type) {
-			case CENTER -> e.getPosition(delta).add(0D, e.getBbHeight() / 2D, 0D);
-			case TOP -> e.getPosition(delta).add(0D, e.getBbHeight(), 0D);
-			case EYES -> e.getEyePosition(delta);
-			case LEASH -> e.getPosition(delta).add(vl$leashOffset(e, delta));
-			case SOUND_SOURCE -> getSoundSource(delta);
-			case LOOK_TARGET -> getLookTarget(delta);
-			default -> delta == 1F ? e.position() : e.getPosition(delta);
-		};
-	}
-
-	default float vl$getHealth(float delta) {
-		return 1F;
-	}
-
-	default float vl$getMaxHealth(float delta) {
-		return 1F;
-	}
-
-	default float getRelativeHealth(float delta) {
-		return Math.clamp(vl$getHealth(delta) / vl$getMaxHealth(delta), 0F, 1F);
 	}
 
 	default boolean preventDismount(Player passenger) {
@@ -253,40 +147,10 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	default void sortPassengers(List<Entity> passengers) {
 	}
 
-	default Rotation rotation(float delta) {
-		var e = vl$self();
-		return Rotation.deg(e.getYRot(delta), e.getXRot(delta));
-	}
-
-	default Rotation viewRotation(float delta) {
-		var e = vl$self();
-		return Rotation.deg(e.getViewYRot(delta), e.getViewXRot(delta));
-	}
-
-	default boolean isVisible() {
-		return !vl$self().isInvisible();
-	}
-
-	default boolean isProjectile() {
-		return this instanceof Projectile;
-	}
-
-	default boolean isItemEntity() {
-		return this instanceof ItemEntity;
-	}
-
 	default void replaySnapshot(VLS2CPacketConsumer packets) {
 	}
 
 	default void imgui(ImGraphics graphics, float delta) {
-	}
-
-	default boolean vl$hasItem(Ingredient ingredient) {
-		return false;
-	}
-
-	default boolean vl$isDeadOrDying() {
-		return !vl$self().isAlive();
 	}
 
 	default boolean hideCrosshair(Player player) {
@@ -299,10 +163,6 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 
 	default boolean shouldRenderPassengerHand(Player player) {
 		return true;
-	}
-
-	private static Vec3 vl$leashOffset(Entity entity, float delta) {
-		return entity instanceof Leashable leashable ? leashable.getLeashOffset(delta) : new Vec3(0D, entity.getEyeHeight(), entity.getBbWidth() * 0.4F);
 	}
 
 	// WIP
@@ -329,10 +189,10 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	}
 
 	default boolean isStaff() {
-		return CommonGameEngine.INSTANCE.isPlayerStaff(vl$self().entityTags(), getGameMode());
+		return CommonGameEngine.INSTANCE.isPlayerStaff(vl$self().entityTags(), EntityUtils.getGameMode(vl$self()));
 	}
 
 	default boolean isStaffOrTalent() {
-		return CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(vl$self().entityTags(), getGameMode());
+		return CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(vl$self().entityTags(), EntityUtils.getGameMode(vl$self()));
 	}
 }

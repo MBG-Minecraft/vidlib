@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.icon;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.feature.icon.renderer.IconRenderer;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
@@ -39,7 +40,7 @@ public class PlumbobRenderer {
 		}
 	}
 
-	public static void render(Minecraft mc, Icon icon, Vec3 pos, PoseStack ms, float delta, MultiBufferSource buffers, int light, boolean crouching, boolean scoreText) {
+	public static void render(Minecraft mc, Ref<Icon> icon, Vec3 pos, PoseStack ms, float delta, MultiBufferSource buffers, int light, boolean crouching, boolean scoreText) {
 		var cam = mc.gameRenderer.getMainCamera().position();
 
 		if (KMath.sq(pos.x - cam.x) + KMath.sq(pos.z - cam.z) <= 0.01D * 0.01D) {
@@ -58,7 +59,7 @@ public class PlumbobRenderer {
 		ms.mulPose(mc.gameRenderer.getMainCamera().rotation());
 		ms.scale(0.4F, 0.4F, 0.4F);
 
-		IconRenderer.render(icon, mc, ms, delta, buffers, light, OverlayTexture.NO_OVERLAY);
+		IconRenderer.render(icon.value(), mc, ms, delta, buffers, light, OverlayTexture.NO_OVERLAY);
 		ms.popPose();
 	}
 }

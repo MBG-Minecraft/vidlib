@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.klib.codec.KLibCodecs;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.vidlib.VidLib;

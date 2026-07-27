@@ -5,32 +5,36 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
-import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
+import dev.latvian.mods.klib.registry.DynamicType;
+import dev.latvian.mods.vidlib.feature.zone.ZoneClipContext;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
-import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements ZoneShape {
-	public static final CustomRegistryType<SphereZoneShape> TYPE = CustomRegistryType.dynamic("sphere", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		MCCodecs.VEC3.fieldOf("pos").forGetter(SphereZoneShape::pos),
-		Codec.doubleRange(0D, Double.POSITIVE_INFINITY).fieldOf("radius").forGetter(SphereZoneShape::radius)
-	).apply(instance, SphereZoneShape::new)), CompositeStreamCodec.of(
-		MCStreamCodecs.VEC3, SphereZoneShape::pos,
-		ByteBufCodecs.DOUBLE, SphereZoneShape::radius,
-		SphereZoneShape::new
-	));
+	public static final DynamicType<ByteBuf, ZoneShape> TYPE = DynamicType.create(
+		"sphere",
+		RecordCodecBuilder.mapCodec(instance -> instance.group(
+			MCCodecs.VEC3.fieldOf("pos").forGetter(SphereZoneShape::pos),
+			Codec.doubleRange(0D, Double.POSITIVE_INFINITY).fieldOf("radius").forGetter(SphereZoneShape::radius)
+		).apply(instance, SphereZoneShape::new)),
+		CompositeStreamCodec.of(
+			MCStreamCodecs.VEC3, SphereZoneShape::pos,
+			ByteBufCodecs.DOUBLE, SphereZoneShape::radius,
+			SphereZoneShape::new
+		)
+	);
 
 	public SphereZoneShape(Vec3 pos, double radius) {
 		this(pos, radius, new AABB(pos.x() - radius, pos.y() - radius, pos.z() - radius, pos.x() + radius, pos.y() + radius, pos.z() + radius));
 	}
 
 	@Override
-	public CustomRegistryType<?> type() {
+	public DynamicType<ByteBuf, ZoneShape> type() {
 		return TYPE;
 	}
 
@@ -46,7 +50,7 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 
 	@Override
 	@Nullable
-	public ZoneClipResult clip(ZoneInstance instance, ClipContext ctx) {
+	public ZoneClipResult clip(ZoneClipContext ctx) {
 		double dx = ctx.getTo().x - ctx.getFrom().x;
 		double dy = ctx.getTo().y - ctx.getFrom().y;
 		double dz = ctx.getTo().z - ctx.getFrom().z;
@@ -73,7 +77,7 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 		// Check if either intersection is within the segment range [0, 1]
 		if (t1 >= 0D && t1 <= 1D || t2 >= 0D && t2 <= 1D) {
 			// FIXME: Get actual intersection point
-			return ZoneClipResult.of(instance, this, ctx, pos);
+			return ZoneClipResult.of(ctx, pos);
 		}
 
 		return null;

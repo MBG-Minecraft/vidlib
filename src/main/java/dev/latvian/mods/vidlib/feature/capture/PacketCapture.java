@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.io.IOUtils;
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.klib.util.Timestamp;
 import dev.latvian.mods.vidlib.VidLib;
@@ -136,7 +137,7 @@ public class PacketCapture {
 
 		try (var fs = IOUtils.openAsZip(outputFile, Map.of("create", "true"))) {
 			var metadata = new JsonObject();
-			metadata.addProperty("platform", VLPlatformHelper.CURRENT.getPlatform());
+			metadata.addProperty("platform", PlatformHelper.CURRENT.getPlatform().getSerializedName());
 			metadata.addProperty("id", "%08x".formatted(sessionId));
 			metadata.add("start", Timestamp.CODEC.encodeStart(JsonOps.INSTANCE, sessionStart).getOrThrow());
 			metadata.add("end", Timestamp.CODEC.encodeStart(JsonOps.INSTANCE, sessionEnd).getOrThrow());

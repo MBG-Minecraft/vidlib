@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.data;
 
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
@@ -17,7 +18,7 @@ public interface PlayerDataMapHolder extends DataMapHolder {
 		set(InternalPlayerData.NICKNAME, Empty.isEmpty(nickname) ? Empty.COMPONENT : nickname);
 	}
 
-	default void setPlumbob(Icon icon) {
+	default void setPlumbob(Ref<Icon> icon) {
 		set(InternalPlayerData.PLUMBOB, icon);
 	}
 

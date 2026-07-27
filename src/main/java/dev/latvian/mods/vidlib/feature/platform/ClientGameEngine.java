@@ -3,12 +3,14 @@ package dev.latvian.mods.vidlib.feature.platform;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
@@ -187,7 +189,7 @@ public class ClientGameEngine {
 		return null;
 	}
 
-	public Icon getPlumbob(Player player) {
+	public Ref<Icon> getPlumbob(Player player) {
 		return player.get(InternalPlayerData.PLUMBOB);
 	}
 
@@ -270,7 +272,7 @@ public class ClientGameEngine {
 		}
 	}
 
-	public Identifier getAtmosphere(Minecraft mc) {
+	public Ref<Atmosphere> getAtmosphere(Minecraft mc) {
 		return mc.getAtmosphere();
 	}
 
@@ -292,7 +294,7 @@ public class ClientGameEngine {
 
 		if (!effects.isEmpty()) {
 			for (var effect : effects) {
-				var chance = effect.chance().getOr(ctx, 0D);
+				var chance = effect.chance().value().getOr(ctx, 0D);
 
 				if (level.getRandom().roll((float) chance)) {
 					level.addParticle(
@@ -460,7 +462,7 @@ public class ClientGameEngine {
 						var string = screen.format().formatted(value.second() / 60, value.second() % 60);
 						var color = screen.color().lerp(switch (value.type()) {
 							case FINISHED -> 1F;
-							case FLASH -> 0.65F + Mth.cos((graphics.session.tick) * 0.85F) * 0.35F;
+							case FLASHING -> 0.65F + Mth.cos((graphics.session.tick) * 0.85F) * 0.35F;
 							default -> 0F;
 						}, Clock.RED);
 

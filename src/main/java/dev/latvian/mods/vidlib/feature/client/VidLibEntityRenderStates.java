@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.client;
 
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;

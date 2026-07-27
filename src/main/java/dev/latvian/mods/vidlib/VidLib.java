@@ -1,21 +1,24 @@
 package dev.latvian.mods.vidlib;
 
 import dev.latvian.mods.klib.platform.PlatformHelper;
+import dev.latvian.mods.klib.registry.CustomRegistryCollector;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.replay.api.ReplayMarkerGroup;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
+import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
-import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
-import dev.latvian.mods.vidlib.feature.entity.number.EntityNumber;
+import dev.latvian.mods.vidlib.feature.clock.Clock;
+import dev.latvian.mods.vidlib.feature.clock.ClockFont;
+import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
+import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
+import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.misc.ReplayMarkerPayload;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
+import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
-import dev.latvian.mods.vidlib.math.knumber.KNumber;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import net.minecraft.server.level.ServerPlayer;
 import org.slf4j.Logger;
@@ -39,18 +42,20 @@ public class VidLib {
 		VidLibClient.init();
 	}
 
-	public static void buildRegistries() {
+	public static void builtInRegistries(CustomRegistryCollector registry) {
 		var platform = VLPlatformHelper.CURRENT;
-		KNumber.REGISTRY.build();
-		KVector.REGISTRY.build();
-		EntityFilter.REGISTRY.build();
-		BlockFilter.REGISTRY.registerTypes(platform::collectBlockFilters);
-		ZoneShape.REGISTRY.registerTypes(platform::collectZoneShapes);
-		Icon.REGISTRY.registerTypes(platform::collectIcons);
-		ScreenShakeType.REGISTRY.registerTypes(platform::collectScreenShakeTypes);
-		BulkLevelModification.REGISTRY.registerTypes(platform::collectBulkLevelModifications);
-		ScreenEffect.REGISTRY.registerTypes(platform::collectScreenEffects);
-		EntityNumber.REGISTRY.registerTypes(platform::collectEntityNumbers);
+		registry.register(ZoneShape.REGISTRY, platform::collectZoneShapes);
+		registry.register(Icon.REGISTRY, platform::collectIcons);
+		registry.register(ScreenShakeType.REGISTRY, platform::collectScreenShakeTypes);
+		registry.register(BulkLevelModification.REGISTRY, platform::collectBulkLevelModifications);
+		registry.register(ScreenEffect.REGISTRY, platform::collectScreenEffects);
+		registry.register(Atmosphere.REGISTRY, null);
+		registry.register(ZoneContainer.REGISTRY, null);
+		registry.register(Cutscene.REGISTRY, null);
+		registry.register(Location.REGISTRY, null);
+		registry.register(ClockFont.REGISTRY, null);
+		registry.register(Clock.REGISTRY, null);
+		registry.register(TTFFile.REGISTRY, platform::collectTTFFiles);
 	}
 
 	public static void sync(ServerPlayer player, int syncType) {

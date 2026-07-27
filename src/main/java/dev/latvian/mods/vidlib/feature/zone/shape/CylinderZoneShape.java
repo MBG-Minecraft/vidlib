@@ -1,14 +1,17 @@
 package dev.latvian.mods.vidlib.feature.zone.shape;
 
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
+import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.shape.CylinderShape;
-import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
+import dev.latvian.mods.klib.util.Cast;
+import dev.latvian.mods.vidlib.feature.zone.ZoneClipContext;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
-import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
-import net.minecraft.world.level.ClipContext;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -16,21 +19,32 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 
 public record CylinderZoneShape(Vec3 pos, CylinderShape shape, AABB box) implements ZoneShape {
-	public static final CustomRegistryType<CylinderZoneShape> TYPE = CustomRegistryType.dynamic("cylinder", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		MCCodecs.VEC3.fieldOf("pos").forGetter(CylinderZoneShape::pos),
-		CylinderShape.CODEC.forGetter(CylinderZoneShape::shape)
-	).apply(instance, CylinderZoneShape::new)), CompositeStreamCodec.of(
-		MCStreamCodecs.VEC3, CylinderZoneShape::pos,
-		CylinderShape.STREAM_CODEC, CylinderZoneShape::shape,
-		CylinderZoneShape::new
-	));
+	public static final DynamicType<ByteBuf, ZoneShape> TYPE = DynamicType.create(
+		"cylinder",
+		RecordCodecBuilder.mapCodec(instance -> instance.group(
+			MCCodecs.VEC3.fieldOf("pos").forGetter(CylinderZoneShape::pos),
+			((MapCodec<CylinderShape>) Cast.to(CylinderShape.TYPE.codec())).forGetter(CylinderZoneShape::shape)
+		).apply(instance, CylinderZoneShape::new)),
+		CompositeStreamCodec.of(
+			MCStreamCodecs.VEC3, CylinderZoneShape::pos,
+			Cast.to(CylinderShape.TYPE.streamCodec()), CylinderZoneShape::shape,
+			CylinderZoneShape::new
+		)
+	);
 
 	public CylinderZoneShape(Vec3 pos, CylinderShape shape) {
-		this(pos, shape, new AABB(pos.x() - shape.radius(), pos.y() - shape.height() / 2D, pos.z() - shape.radius(), pos.x() + shape.radius(), pos.y() + shape.height() / 2D, pos.z() + shape.radius()));
+		this(pos, shape, new AABB(
+			pos.x() - shape.width() / 2D,
+			pos.y() - shape.height() / 2D,
+			pos.z() - shape.width() / 2D,
+			pos.x() + shape.width() / 2D,
+			pos.y() + shape.height() / 2D,
+			pos.z() + shape.width() / 2D
+		));
 	}
 
 	@Override
-	public CustomRegistryType<?> type() {
+	public DynamicType<ByteBuf, ZoneShape> type() {
 		return TYPE;
 	}
 
@@ -46,13 +60,13 @@ public record CylinderZoneShape(Vec3 pos, CylinderShape shape, AABB box) impleme
 
 	@Override
 	@Nullable
-	public ZoneClipResult clip(ZoneInstance instance, ClipContext ctx) {
-		return ZoneShape.super.clip(instance, ctx); // FIXME
+	public ZoneClipResult clip(ZoneClipContext ctx) {
+		return ZoneShape.super.clip(ctx); // FIXME
 	}
 
 	@Override
 	public boolean contains(double x, double y, double z) {
-		return Math.abs(pos.y - y) <= shape.height() / 2D && Vector2d.distanceSquared(pos.x, pos.z, x, z) <= shape.radius() * shape.radius();
+		return Math.abs(pos.y - y) <= shape.height() / 2D && Vector2d.distanceSquared(pos.x, pos.z, x, z) <= Mth.square(shape.width() / 2D);
 	}
 
 	@Override
@@ -60,7 +74,7 @@ public record CylinderZoneShape(Vec3 pos, CylinderShape shape, AABB box) impleme
 		double dx = pos.x() - Math.clamp(pos.x, box.minX, box.maxX);
 		double dy = pos.y() - Math.clamp(pos.y, box.minY, box.maxY);
 		double dz = pos.z() - Math.clamp(pos.z, box.minZ, box.maxZ);
-		return dx * dx + dz * dz <= shape.radius() * shape.radius() && Math.abs(dy) <= shape.height() / 2D;
+		return dx * dx + dz * dz <= Mth.square(shape.width() / 2D) && Math.abs(dy) <= shape.height() / 2D;
 	}
 
 	@Override
@@ -70,7 +84,7 @@ public record CylinderZoneShape(Vec3 pos, CylinderShape shape, AABB box) impleme
 
 	@Override
 	public double closestDistanceTo(Vec3 pos) {
-		return Math.max(0D, this.pos.distanceTo(pos) - shape.radius());
+		return Math.max(0D, this.pos.distanceTo(pos) - shape.width() / 2D);
 	}
 
 	@Override
@@ -80,6 +94,6 @@ public record CylinderZoneShape(Vec3 pos, CylinderShape shape, AABB box) impleme
 
 	@Override
 	public ZoneShape scale(double x, double y, double z) {
-		return new CylinderZoneShape(pos, new CylinderShape((float) (shape.radius() * x * z), (float) (shape.height() * y)));
+		return new CylinderZoneShape(pos, new CylinderShape((float) (shape.width() / 2D * x * z), (float) (shape.height() * y)));
 	}
 }

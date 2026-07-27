@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.feature.data;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.registry.Ref;
-import dev.latvian.mods.vidlib.VidLibDataTypes;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
 import dev.latvian.mods.vidlib.feature.clothing.PlayerClothingImBuilder;
@@ -23,7 +22,7 @@ import java.util.Set;
 public interface InternalPlayerData {
 	DataKey<Boolean> ONLINE = DataKey.PLAYER.builder("online", DataTypes.BOOL, false).sync().build();
 	DataKey<String> NAME = DataKey.PLAYER.createDefault("name", DataTypes.STRING, "", StringImBuilder.TYPE);
-	DataKey<Set<String>> PLAYER_TAGS = DataKey.PLAYER.createDefault("player_tags", VidLibDataTypes.STRING_SET, Set.of(), null);
+	DataKey<Set<String>> PLAYER_TAGS = DataKey.PLAYER.createDefault("player_tags", DataTypes.STRING_SET, Set.of(), null);
 	DataKey<Boolean> SUSPENDED = DataKey.PLAYER.createDefault("suspended", DataTypes.BOOL, false, BooleanImBuilder.TYPE);
 	DataKey<Component> NICKNAME = DataKey.PLAYER.createDefault("nickname", DataTypes.TEXT_COMPONENT, Component.empty(), TextComponentImBuilder.TYPE);
 	DataKey<Ref<Icon>> PLUMBOB = DataKey.PLAYER.createDefault("plumbob", Icon.DATA_TYPE, Icon.EMPTY, null);

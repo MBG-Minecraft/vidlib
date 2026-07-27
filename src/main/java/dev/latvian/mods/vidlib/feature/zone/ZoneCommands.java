@@ -1,8 +1,9 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
+import dev.latvian.mods.klib.block.filter.BlockFilter;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
@@ -16,15 +17,15 @@ public interface ZoneCommands {
 		.requires(source -> net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.literal("count-blocks")
 			.then(Commands.argument("id", ZoneContainer.DATA_TYPE.argument(buildContext))
-				.executes(ctx -> countBlocks(ctx.getSource(), ZoneContainer.DATA_TYPE.get(ctx, "id"), BlockFilter.NONE.instance()))
-				.then(Commands.argument("ignored-blocks", BlockFilter.REGISTRY.argument(buildContext))
+				.executes(ctx -> countBlocks(ctx.getSource(), ZoneContainer.DATA_TYPE.get(ctx, "id"), BlockFilter.NONE))
+				.then(Commands.argument("ignored-blocks", BlockFilter.DATA_TYPE.argument(buildContext))
 					.executes(ctx -> countBlocks(ctx.getSource(), ZoneContainer.DATA_TYPE.get(ctx, "id"), BlockFilter.DATA_TYPE.get(ctx, "ignored-blocks")))
 				)
 			)
 		)
 		.then(Commands.literal("save-structure")
 			.then(Commands.argument("id", ZoneContainer.DATA_TYPE.argument(buildContext))
-				.executes(ctx -> saveStructure(ctx.getSource(), ZoneContainer.DATA_TYPE.get(ctx, "id"), BlockFilter.NONE.instance()))
+				.executes(ctx -> saveStructure(ctx.getSource(), ZoneContainer.DATA_TYPE.get(ctx, "id"), BlockFilter.NONE))
 				.then(Commands.argument("ignored-blocks", BlockFilter.DATA_TYPE.argument(buildContext))
 					.executes(ctx -> saveStructure(ctx.getSource(), ZoneContainer.DATA_TYPE.get(ctx, "id"), BlockFilter.DATA_TYPE.get(ctx, "ignored-blocks")))
 				)
@@ -92,22 +93,22 @@ public interface ZoneCommands {
 		}
 	}
 
-	private static int countBlocks(CommandSourceStack source, ZoneContainer container, BlockFilter filter) {
-		var processor = new BlockProcessor(source.getServer().getLevel(container.dimension), filter, container);
+	private static int countBlocks(CommandSourceStack source, Ref<ZoneContainer> container, Ref<BlockFilter> filter) {
+		var processor = new BlockProcessor(source.getServer().getLevel(container.value().dimension), filter.value(), container.value());
 
-		for (var zone : container.zones) {
-			zone.zone.shape().getBlocks().forEach(processor::process);
+		for (var zone : container.value().zones) {
+			zone.volume.shape().value().getBlocks().forEach(processor::process);
 		}
 
 		processor.complete(source);
 		return 1;
 	}
 
-	private static int saveStructure(CommandSourceStack source, ZoneContainer container, BlockFilter filter) {
-		var processor = new SaveBlockProcessor(source.getServer().getLevel(container.dimension), filter, container);
+	private static int saveStructure(CommandSourceStack source, Ref<ZoneContainer> container, Ref<BlockFilter> filter) {
+		var processor = new SaveBlockProcessor(source.getServer().getLevel(container.value().dimension), filter.value(), container.value());
 
-		for (var zone : container.zones) {
-			zone.zone.shape().getBlocks().forEach(processor::process);
+		for (var zone : container.value().zones) {
+			zone.volume.shape().value().getBlocks().forEach(processor::process);
 		}
 
 		processor.complete(source);

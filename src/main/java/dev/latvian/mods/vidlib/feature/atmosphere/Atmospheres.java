@@ -1,23 +1,22 @@
 package dev.latvian.mods.vidlib.feature.atmosphere;
 
-import dev.latvian.mods.vidlib.VidLib;
-import net.minecraft.resources.ResourceKey;
+import dev.latvian.mods.klib.registry.Ref;
 
 public interface Atmospheres {
-	static ResourceKey<Atmosphere> create(String id) {
-		return Atmosphere.createId(ID.vidlib(id));
+	static Ref<Atmosphere> ref(String id) {
+		return Atmosphere.REGISTRY.ref(id);
 	}
 
-	ResourceKey<Atmosphere> DAY = create("day");
-	ResourceKey<Atmosphere> DAY_WITH_CELESTIALS = create("day_with_celestials");
-	ResourceKey<Atmosphere> NIGHT = create("night");
-	ResourceKey<Atmosphere> NIGHT_WITH_CELESTIALS = create("night_with_celestials");
-	ResourceKey<Atmosphere> STORM = create("storm");
-	ResourceKey<Atmosphere> DOOM = create("doom");
-	ResourceKey<Atmosphere> BRIGHT_NIGHT = create("bright_night");
+	Ref<Atmosphere> DAY = ref("day");
+	Ref<Atmosphere> DAY_WITH_CELESTIALS = ref("day_with_celestials");
+	Ref<Atmosphere> NIGHT = ref("night");
+	Ref<Atmosphere> NIGHT_WITH_CELESTIALS = ref("night_with_celestials");
+	Ref<Atmosphere> STORM = ref("storm");
+	Ref<Atmosphere> DOOM = ref("doom");
+	Ref<Atmosphere> BRIGHT_NIGHT = ref("bright_night");
 
-	ResourceKey<Atmosphere> BLACK_VOID = create("void/black");
-	ResourceKey<Atmosphere> WHITE_VOID = create("void/white");
-	ResourceKey<Atmosphere> GREEN_VOID = create("void/green");
-	ResourceKey<Atmosphere> BLUE_VOID = create("void/blue");
+	Ref<Atmosphere> BLACK_VOID = ref("void/black");
+	Ref<Atmosphere> WHITE_VOID = ref("void/white");
+	Ref<Atmosphere> GREEN_VOID = ref("void/green");
+	Ref<Atmosphere> BLUE_VOID = ref("void/blue");
 }

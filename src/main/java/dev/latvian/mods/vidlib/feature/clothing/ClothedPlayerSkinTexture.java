@@ -1,7 +1,8 @@
 package dev.latvian.mods.vidlib.feature.clothing;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.gradient.Gradient;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
@@ -81,7 +82,7 @@ public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 	}
 
 	@Nullable
-	public static synchronized NativeImage computePart(Minecraft mc, PlayerModelType model, Identifier asset, Gradient gradient) {
+	public static synchronized NativeImage computePart(Minecraft mc, PlayerModelType model, Identifier asset, Ref<Gradient> gradient) {
 		var map = PART_CACHE.computeIfAbsent(model, m -> new Object2ObjectOpenHashMap<>());
 		var tex = map.get(asset);
 

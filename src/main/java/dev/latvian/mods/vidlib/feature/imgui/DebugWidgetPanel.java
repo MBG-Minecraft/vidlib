@@ -1,19 +1,20 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
+import dev.latvian.mods.klib.block.filter.BlockFilter;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.entity.filter.EntityFilter;
 import dev.latvian.mods.klib.interpolation.BezierPreset;
 import dev.latvian.mods.klib.interpolation.Interpolation;
+import dev.latvian.mods.klib.knumber.KNumber;
+import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.kvector.KVector;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
 import dev.latvian.mods.klib.util.Hex32;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
 import dev.latvian.mods.vidlib.feature.client.AsyncFileSelector;
-import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
-import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.gallery.Gallery;
 import dev.latvian.mods.vidlib.feature.gallery.GalleryImageImBuilder;
 import dev.latvian.mods.vidlib.feature.gallery.ItemIcons;
@@ -28,12 +29,6 @@ import dev.latvian.mods.vidlib.feature.item.VisualItemKey;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundDataImBuilder;
-import dev.latvian.mods.vidlib.math.knumber.KNumber;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
-import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
-import dev.latvian.mods.vidlib.math.knumber.KNumberNodeImBuilder;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
-import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 import dev.latvian.mods.vidlib.util.ColoredText;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubCountries;
@@ -576,7 +571,7 @@ public class DebugWidgetPanel extends Panel {
 
 		ImGui.separator();
 
-		var screenShakeInterpolation = ScreenShake.DEFAULT.interpolation();
+		var screenShakeEase = ScreenShake.DEFAULT.ease();
 
 		if (ImPlot.beginPlot("Default Screen Shake Interpolation###default-screen-shake-interpolation-plot", "X", "Y", new ImVec2(300F, 150F), ImPlotFlags.CanvasOnly, ImPlotAxisFlags.NoLabel, ImPlotAxisFlags.NoLabel)) {
 			var xdata = new Double[100];
@@ -584,7 +579,7 @@ public class DebugWidgetPanel extends Panel {
 
 			for (int i = 0; i < 100; i++) {
 				xdata[i] = (double) i;
-				ydata[i] = screenShakeInterpolation.interpolate(i / 100D) * 100D;
+				ydata[i] = screenShakeEase.apply(i / 100F) * 100D;
 			}
 
 			ImPlot.plotLine("Y###1", xdata, ydata);

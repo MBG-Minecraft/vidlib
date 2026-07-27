@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.render.DebugRenderTypes;
 import dev.latvian.mods.klib.shape.Shape;
@@ -21,9 +21,9 @@ public class ShapeParticle extends CustomParticle {
 	protected ShapeParticle(ShapeParticleOptions options, ClientLevel level, double x, double y, double z, double vx, double vy, double vz) {
 		super(level, x, y, z);
 		this.options = options;
-		this.shape = options.shape();
-		this.color = options.color().optimize();
-		this.outlineColor = options.outlineColor().optimize();
+		this.shape = options.shape().value();
+		this.color = options.color().value();
+		this.outlineColor = options.outlineColor().value();
 		setLifetime(Math.abs(options.lifespan()));
 	}
 

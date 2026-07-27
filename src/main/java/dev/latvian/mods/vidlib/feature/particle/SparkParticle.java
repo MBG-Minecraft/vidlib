@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
-import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.gradient.ClientGradients;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -23,7 +23,7 @@ public class SparkParticle extends SingleQuadParticle {
 	public SparkParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet spriteSet) {
 		super(level, x, y, z, spriteSet.first());
 		this.spriteSet = spriteSet;
-		this.gradient = ClientGradients.SPARK.optimize();
+		this.gradient = ClientGradients.SPARK.value();
 		this.setSprite(spriteSet.get(random));
 		this.xd = xd;
 		this.yd = yd;

@@ -6,7 +6,7 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.AAIBB;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.core.VLServerLevel;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
@@ -50,7 +50,7 @@ public record Anchor(List<Area> areas, Map<ResourceKey<Level>, List<AAIBB>> shap
 		list -> list.isEmpty() ? NONE : create(list)
 	);
 
-	public static final DataType<Anchor> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, Anchor.class);
+	public static final DataType<Anchor> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 	public static final TicketController TICKET_CONTROLLER = new TicketController(ID.vidlib("anchor"), (serverLevel, ticketHelper) -> {
 		// Bukkit
 		if (serverLevel instanceof VLServerLevel vlServerLevel) {

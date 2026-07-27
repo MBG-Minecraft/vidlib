@@ -6,16 +6,18 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.interpolation.EaseIn;
 import dev.latvian.mods.klib.interpolation.EaseOut;
-import dev.latvian.mods.klib.interpolation.Interpolation;
-import dev.latvian.mods.klib.interpolation.LinearInterpolation;
+import dev.latvian.mods.klib.interpolation.FlipXInterpolation;
+import dev.latvian.mods.klib.interpolation.JoinedInterpolation;
 import dev.latvian.mods.klib.registry.Ref;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.EasingType;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.function.Function;
@@ -25,24 +27,24 @@ public record ScreenShake(
 	int duration,
 	float speed,
 	float intensity,
-	Ref<Interpolation> interpolation,
+	EasingType ease,
 	boolean motionBlur
 ) {
 	public static final ScreenShake NONE = new ScreenShake(
-		LemniscateScreenShakeType.DEFAULT.instance(),
+		LemniscateScreenShakeType.DEFAULT,
 		0,
 		0F,
 		0F,
-		LinearInterpolation.INSTANCE,
+		EasingType.LINEAR,
 		false
 	);
 
 	public static final ScreenShake DEFAULT = new ScreenShake(
-		LemniscateScreenShakeType.DEFAULT.instance(),
+		LemniscateScreenShakeType.DEFAULT,
 		25,
 		4F,
 		0.6F,
-		EaseOut.ELASTIC.join(EaseOut.CUBIC.flipX()),
+		new JoinedInterpolation(EaseOut.ELASTIC.type, new FlipXInterpolation(EaseOut.CUBIC.type).ref()).toEasingType(),
 		false
 	);
 
@@ -51,7 +53,7 @@ public record ScreenShake(
 		KLibCodecs.TICKS.optionalFieldOf("duration", DEFAULT.duration).forGetter(ScreenShake::duration),
 		Codec.FLOAT.optionalFieldOf("speed", DEFAULT.speed).forGetter(ScreenShake::speed),
 		Codec.FLOAT.optionalFieldOf("intensity", DEFAULT.intensity).forGetter(ScreenShake::intensity),
-		Interpolation.CODEC.optionalFieldOf("interpolation", DEFAULT.interpolation).forGetter(ScreenShake::interpolation),
+		EasingType.CODEC.optionalFieldOf("ease", DEFAULT.ease).forGetter(ScreenShake::ease),
 		Codec.BOOL.optionalFieldOf("motion_blur", DEFAULT.motionBlur).forGetter(ScreenShake::motionBlur)
 	).apply(instance, ScreenShake::new));
 
@@ -62,7 +64,7 @@ public record ScreenShake(
 		ByteBufCodecs.VAR_INT, ScreenShake::duration,
 		ByteBufCodecs.FLOAT, ScreenShake::speed,
 		ByteBufCodecs.FLOAT, ScreenShake::intensity,
-		KLibStreamCodecs.optional(Interpolation.STREAM_CODEC, DEFAULT.interpolation), ScreenShake::interpolation,
+		KLibStreamCodecs.optional(MCStreamCodecs.EASING_TYPE, DEFAULT.ease), ScreenShake::ease,
 		ByteBufCodecs.BOOL, ScreenShake::motionBlur,
 		ScreenShake::new
 	);
@@ -77,7 +79,7 @@ public record ScreenShake(
 			duration,
 			speed,
 			intensity * intensityMod,
-			interpolation,
+			ease,
 			motionBlur
 		);
 	}
@@ -88,7 +90,7 @@ public record ScreenShake(
 			duration,
 			speed,
 			intensity,
-			interpolation,
+			ease,
 			motionBlur
 		);
 	}
@@ -99,18 +101,18 @@ public record ScreenShake(
 			duration,
 			speed,
 			intensity,
-			interpolation,
+			ease,
 			motionBlur
 		);
 	}
 
-	public ScreenShake withInterpolation(Interpolation interpolation) {
+	public ScreenShake withInterpolation(EasingType ease) {
 		return new ScreenShake(
 			type,
 			duration,
 			speed,
 			intensity,
-			interpolation,
+			ease,
 			motionBlur
 		);
 	}

@@ -2,27 +2,19 @@ package dev.latvian.mods.vidlib.feature.data;
 
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.math.Range;
-import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.RangeImBuilder;
 import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverrides;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.util.NameDrawType;
-import net.minecraft.resources.ResourceKey;
 
 import java.util.List;
 
 public interface InternalServerData {
-	DataKey<ResourceKey<Atmosphere>> ATMOSPHERE = DataKey.SERVER.createDefault("atmosphere", Atmosphere.ID_DATA_TYPE, null, EnumImBuilder
-		.of(Atmosphere.REGISTRY::getKeys)
-		.nullName("Vanilla")
-		.nameGetter(ID::idToString)
-		.buildType()
-	);
-
+	DataKey<Ref<Atmosphere>> ATMOSPHERE = DataKey.SERVER.createDefault("atmosphere", Atmosphere.DATA_TYPE, null, Atmosphere.IM_BUILDER_TYPE);
 	DataKey<Anchor> ANCHOR = DataKey.SERVER.createDefault("anchor", Anchor.DATA_TYPE, Anchor.NONE, null);
 	DataKey<Boolean> HIDE_PLUMBOBS = DataKey.SERVER.createBoolean("hide_plumbobs", false);
 	DataKey<NameDrawType> NAME_DRAW_TYPE = DataKey.SERVER.createEnum("name_draw_type", NameDrawType.DATA_TYPE, NameDrawType.VANILLA, NameDrawType.VALUES);

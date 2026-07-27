@@ -1,26 +1,26 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
-import dev.latvian.mods.klib.interpolation.Interpolation;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.particle.SpriteSet;
+import net.minecraft.util.EasingType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 public class InterpolatedParticle extends SingleQuadParticle {
 	public final Vec3 origin;
-	public final Interpolation interpolation;
+	public final EasingType ease;
 	public float relativeAge;
 	public float relativePos;
 	public float oAlpha;
 	public float oQuadSizeMod;
 	public float quadSizeMod;
 
-	public InterpolatedParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, Interpolation interpolation, SpriteSet spriteSet) {
+	public InterpolatedParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, EasingType ease, SpriteSet spriteSet) {
 		super(level, x, y, z, spriteSet.first());
 		this.setSprite(spriteSet.get(random));
-		this.interpolation = interpolation;
+		this.ease = ease;
 		this.xd = xd;
 		this.yd = yd;
 		this.zd = zd;
@@ -56,7 +56,7 @@ public class InterpolatedParticle extends SingleQuadParticle {
 		zo = z;
 
 		relativeAge = age / (float) lifetime;
-		relativePos = interpolation.interpolateClamped(relativeAge);
+		relativePos = ease.apply(relativeAge);
 
 		setPos(
 			origin.x + xd * relativePos,

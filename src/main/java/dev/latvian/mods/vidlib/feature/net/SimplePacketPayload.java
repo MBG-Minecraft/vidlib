@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.net;
 
 import dev.latvian.mods.klib.io.IOUtils;
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
@@ -50,7 +50,7 @@ public interface SimplePacketPayload {
 	}
 
 	default byte[] toBytes(Level level, long uid) {
-		var buf = VLPlatformHelper.CURRENT.createBuffer(Unpooled.buffer(), level.registryAccess());
+		var buf = PlatformHelper.CURRENT.createBuffer(Unpooled.buffer(), level.registryAccess());
 		var container = new VidLibPacketPayloadContainer(this, uid, level.getGameTime());
 		getType().streamCodec().encode(buf, container);
 		return IOUtils.toByteArray(buf, true);

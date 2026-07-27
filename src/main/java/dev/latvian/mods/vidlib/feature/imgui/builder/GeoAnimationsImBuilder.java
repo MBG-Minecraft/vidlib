@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.imgui.builder;
 
 import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;

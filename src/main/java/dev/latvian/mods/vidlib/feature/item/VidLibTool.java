@@ -124,7 +124,7 @@ public interface VidLibTool {
 	}
 
 	default boolean use(Player player, ItemStack item) {
-		return rightClick(player, item, player.ray(500D, 1F).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY));
+		return rightClick(player, item, player.klib$ray(500D, 1F).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY));
 	}
 
 	default boolean useOnEntity(Player player, ItemStack item, Entity target) {

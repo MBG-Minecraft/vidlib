@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.font;
 
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import net.minecraft.resources.ResourceKey;
 
 public interface MSDFFonts {

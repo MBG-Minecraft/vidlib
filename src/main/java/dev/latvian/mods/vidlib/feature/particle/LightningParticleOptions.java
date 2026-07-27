@@ -7,7 +7,8 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.gradient.Gradient;
+import dev.latvian.mods.klib.registry.Ref;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -15,12 +16,12 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.Mth;
 
-public record LightningParticleOptions(int lifespan, Gradient color, Gradient outlineColor, int segments, float spread, float radius, float endingRadius) implements ParticleOptions {
-	public static final Color DEFAULT_OUTLINE = Color.of(0xFF80BFFF);
+public record LightningParticleOptions(int lifespan, Ref<Gradient> color, Ref<Gradient> outlineColor, int segments, float spread, float radius, float endingRadius) implements ParticleOptions {
+	public static final Ref<Gradient> DEFAULT_OUTLINE = Color.of(0xFF80BFFF).toGradient().ref();
 
 	public static final MapCodec<LightningParticleOptions> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KLibCodecs.TICKS.optionalFieldOf("lifespan", 30).forGetter(LightningParticleOptions::lifespan),
-		Gradient.CODEC.optionalFieldOf("color", Color.WHITE).forGetter(LightningParticleOptions::color),
+		Gradient.CODEC.optionalFieldOf("color", Gradient.WHITE).forGetter(LightningParticleOptions::color),
 		Gradient.CODEC.optionalFieldOf("outline_color", DEFAULT_OUTLINE).forGetter(LightningParticleOptions::outlineColor),
 		Codec.INT.optionalFieldOf("segments", 6).forGetter(LightningParticleOptions::segments),
 		Codec.FLOAT.optionalFieldOf("spread", 2.3F).forGetter(LightningParticleOptions::spread),
@@ -40,7 +41,7 @@ public record LightningParticleOptions(int lifespan, Gradient color, Gradient ou
 	);
 
 	public LightningParticleOptions(int lifespan, int segments, float spread, float radius, float endingRadius) {
-		this(lifespan, Color.WHITE, DEFAULT_OUTLINE, segments, spread, radius, endingRadius);
+		this(lifespan, Gradient.WHITE, DEFAULT_OUTLINE, segments, spread, radius, endingRadius);
 	}
 
 	public LightningParticleOptions(int lifespan, double distance) {

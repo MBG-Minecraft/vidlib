@@ -7,8 +7,6 @@ import dev.latvian.mods.klib.registry.CustomRegistryType;
 import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.registry.RefOptimizer;
-import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.structure.LazyStructures;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
@@ -26,11 +24,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface BulkLevelModification extends RefOptimizer<BulkLevelModification> {
-	CustomRegistry<ByteBuf, BulkLevelModification> REGISTRY = CustomRegistry.<ByteBuf, BulkLevelModification>builder()
-		.keys(ID.vidlib("bulk_level_modification"), VidLib.ID)
-		.type(BulkLevelModification::type)
-		.build();
-
+	CustomRegistry<ByteBuf, BulkLevelModification> REGISTRY = CustomRegistry.create("bulk_level_modification");
 	Codec<Ref<BulkLevelModification>> CODEC = REGISTRY.codec();
 	StreamCodec<ByteBuf, Ref<BulkLevelModification>> STREAM_CODEC = REGISTRY.streamCodec();
 	DataType<Ref<BulkLevelModification>> DATA_TYPE = REGISTRY.dataType();
@@ -39,7 +33,7 @@ public interface BulkLevelModification extends RefOptimizer<BulkLevelModificatio
 
 	static void builtInTypes(CustomRegistryTypeCollector<ByteBuf, BulkLevelModification> registry) {
 		registry.register(BulkLevelModificationBundle.TYPE);
-		registry.register(PositionedBlock.TYPE);
+		registry.register(SingleBlockModification.TYPE);
 		registry.register(ReplaceCuboidBlocks.TYPE);
 		registry.register(ReplaceSphereBlocks.TYPE);
 		registry.register(ReplaceSectionBlocks.TYPE);

@@ -36,6 +36,6 @@ public interface DataMapHolder {
 
 	// Overridden on Bukkit
 	default DynamicOps<Tag> getNbtOps(MinecraftServer server) {
-		return server.nbtOps();
+		return server.overworld().nbtOps();
 	}
 }

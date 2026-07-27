@@ -6,7 +6,7 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class VidLibItems {
-	public static final DeferredRegister.Items REGISTRY = DeferredRegister.createItems(ID.vidlib);
+	public static final DeferredRegister.Items REGISTRY = DeferredRegister.createItems(VidLib.ID);
 
 	public static DeferredItem<Item> TOOL;
 

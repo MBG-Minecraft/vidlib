@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.cutscene;
 
 import com.google.gson.JsonElement;
+import dev.latvian.mods.klib.knumber.KNumberVariables;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.vidlib.feature.cutscene.step.CutsceneStepImBuilder;
 import dev.latvian.mods.vidlib.feature.cutscene.step.CutsceneStepType;
@@ -10,7 +11,6 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import imgui.ImGui;
 import imgui.extension.texteditor.TextEditor;
 import imgui.flag.ImGuiTreeNodeFlags;
@@ -74,9 +74,9 @@ public class CutsceneImBuilder implements ImBuilder<Cutscene> {
 			if (cutscene != null) {
 				try {
 					if (graphics.isAdmin) {
-						graphics.mc.c2s(new PreviewCutscenePayload(cutscene, variables));
+						graphics.mc.c2s(new PreviewCutscenePayload(cutscene.ref(), variables));
 					} else {
-						graphics.mc.playCutscene(cutscene, variables);
+						graphics.mc.playCutscene(cutscene.ref(), variables);
 					}
 				} catch (Exception ex) {
 					ex.printStackTrace();
@@ -241,7 +241,7 @@ public class CutsceneImBuilder implements ImBuilder<Cutscene> {
 			if (isValid()) {
 				try {
 					var c = build();
-					cutsceneJson = JsonUtils.sort(Cutscene.DIRECT_CODEC.encodeStart(graphics.jsonOps, c).getOrThrow());
+					cutsceneJson = JsonUtils.sort(Cutscene.REGISTRY.directCodec().encodeStart(graphics.jsonOps, c).getOrThrow());
 					jsonEditor.setText(JsonUtils.prettyString(cutsceneJson));
 					cutscene = c;
 				} catch (Exception ex) {

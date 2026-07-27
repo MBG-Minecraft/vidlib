@@ -69,7 +69,7 @@ public record SkinTexture(ClientAsset.ResourceTexture asset, boolean slim) {
 		SkinTexture::new
 	);
 
-	public static final DataType<SkinTexture> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, SkinTexture.class);
+	public static final DataType<SkinTexture> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 	public static final DataType<List<SkinTexture>> LIST_DATA_TYPE = DATA_TYPE.listOf();
 	public static final DataType<Set<SkinTexture>> SET_DATA_TYPE = DATA_TYPE.setOf();
 }

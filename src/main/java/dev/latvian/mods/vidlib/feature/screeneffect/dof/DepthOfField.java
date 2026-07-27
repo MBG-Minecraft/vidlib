@@ -1,14 +1,13 @@
 package dev.latvian.mods.vidlib.feature.screeneffect.dof;
 
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.math.ClientMatrices;
+import dev.latvian.mods.klib.kvector.KVector;
 import dev.latvian.mods.klib.math.Vec3f;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasUniform;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
 import imgui.type.ImBoolean;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
@@ -37,7 +36,10 @@ public class DepthOfField {
 	public static final Canvas CANVAS = Canvas.createExternal(ID.vidlib("depth_of_field"), builder -> {
 		builder.setTickCallback(DepthOfField::tick);
 		builder.setDrawSetupCallback(DepthOfField::setup);
-		builder.addUniform(CanvasUniform.mat4("InverseViewProjectionMat", () -> ClientMatrices.INVERSE_WORLD));
+		builder.addUniform(CanvasUniform.mat4("InverseViewProjectionMat", () -> {
+			var mc = Minecraft.getInstance();
+			return mc.getInverseWorldMatrix();
+		}));
 		builder.addUniform(CanvasUniform.vec3("FocusPos", u -> u.set(uFocusPos)));
 		builder.addUniform(CanvasUniform.float1("FocusRange", () -> uFocusRange));
 		builder.addUniform(CanvasUniform.float1("BlurRange", () -> uBlurRange));
@@ -65,7 +67,7 @@ public class DepthOfField {
 			return;
 		}
 
-		focusPosition = data.focus().get(mc.level.getGlobalContext());
+		focusPosition = data.focus().value().get(mc.level.getGlobalContext());
 
 		if (focusPosition == null) {
 			focusPosition = mc.gameRenderer.getMainCamera().position();

@@ -1,63 +1,37 @@
 package dev.latvian.mods.vidlib.core;
 
-import com.google.gson.JsonElement;
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.serialization.JsonOps;
-import dev.latvian.mods.klib.util.IntOrUUID;
-import dev.latvian.mods.vidlib.feature.block.ConnectedBlock;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
+import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.feature.bulk.BlockModificationConsumer;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModificationBundle;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModificationHolder;
 import dev.latvian.mods.vidlib.feature.bulk.OptimizedModificationBuilder;
-import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.bulk.UndoableModification;
 import dev.latvian.mods.vidlib.feature.bulk.UndoableModificationHolder;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
-import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
-import dev.latvian.mods.vidlib.feature.entity.filter.EntityTypeFilter;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.prop.Props;
-import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
+import dev.latvian.mods.vidlib.feature.zone.ZoneCache;
 import dev.latvian.mods.vidlib.util.PauseType;
-import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
-import net.minecraft.nbt.TagParser;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 
-public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHolder {
+public interface VLLevel extends VLLevelReader, VLPlayerContainer, VLMinecraftEnvironmentDataHolder {
 	@Override
 	default Level vl$level() {
 		return (Level) this;
@@ -86,7 +60,7 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 	}
 
 	@Nullable
-	default ActiveZones vl$getActiveZones() {
+	default ZoneCache vl$getActiveZones() {
 		throw new NoMixinException(this);
 	}
 
@@ -154,16 +128,6 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		setBlockFast(pos, block.defaultBlockState());
 	}
 
-	@Nullable
-	default Entity getEntityByUUID(UUID uuid) {
-		throw new NoMixinException(this);
-	}
-
-	@Nullable
-	default Entity getEntity(IntOrUUID id) {
-		return id.getEntity(vl$level());
-	}
-
 	default int bulkModify(boolean undoable, BulkLevelModification modification) {
 		if (modification == BulkLevelModification.NONE) {
 			return 0;
@@ -178,132 +142,8 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		return bulkModify(undoable, m);
 	}
 
-	default void walkBlocks(ConnectedBlock.WalkType walkType, BlockPos start, @Nullable BlockFilter filter, boolean onlyExposed, int maxDistance, Predicate<ConnectedBlock> callback) {
-		if (filter == BlockFilter.ANY.instance()) {
-			filter = null;
-		}
-
-		var traversed = new LongOpenHashSet();
-		var queue = new ArrayDeque<ConnectedBlock>();
-		var partialCache = new Long2IntOpenHashMap();
-		partialCache.defaultReturnValue(-1);
-		var partialMutablePos = new BlockPos.MutableBlockPos();
-
-		queue.add(new ConnectedBlock(new PositionedBlock(start, vl$level().getBlockState(start)), 0));
-		traversed.add(start.asLong());
-		var level = vl$level();
-
-		while (!queue.isEmpty()) {
-			var c = queue.pop();
-
-			if (c.distance() == 0 || (filter == null ? !c.block().state().isAir() : filter.test(level, c.block().pos(), c.block().state()))) {
-				if (onlyExposed && !isBlockExposed(partialCache, c.block().pos().getX(), c.block().pos().getY(), c.block().pos().getZ(), partialMutablePos)) {
-					continue;
-				}
-
-				if (callback.test(c)) {
-					break;
-				}
-
-				if (c.distance() + 1 > maxDistance) {
-					continue;
-				}
-
-				for (var o : walkType.offsets) {
-					var offset = c.block().pos().offset(o);
-					var state = level.getBlockState(offset);
-
-					if (!state.isAir() && traversed.add(offset.asLong())) {
-						queue.add(new ConnectedBlock(new PositionedBlock(offset, state), c.distance() + 1));
-					}
-				}
-			}
-		}
-	}
-
-	default List<ConnectedBlock> walkBlocks(ConnectedBlock.WalkType walkType, BlockPos start, @Nullable BlockFilter filter, boolean onlyExposed, int maxDistance, int maxTotalBlocks) {
-		var result = new Long2ObjectOpenHashMap<ConnectedBlock>();
-
-		walkBlocks(walkType, start, filter, onlyExposed, maxDistance, c -> {
-			result.put(c.block().pos().asLong(), c);
-			return result.size() >= maxTotalBlocks;
-		});
-
-		return List.copyOf(result.values());
-	}
-
-	default void discardAll(EntityFilter filter) {
-	}
-
-	default void discardAll(EntityType<?> type) {
-		discardAll(new EntityTypeFilter(type));
-	}
-
-	default void killAll(EntityFilter filter) {
-	}
-
-	default void killAll(EntityType<?> type) {
-		killAll(new EntityTypeFilter(type));
-	}
-
 	default boolean isReplayLevel() {
 		return false;
-	}
-
-	default Iterable<Entity> allEntities() {
-		return vl$level().getEntities((Entity) null, AABB.INFINITE, Entity::isAlive);
-	}
-
-	default Iterable<LivingEntity> allLivingEntities() {
-		var list = new ArrayList<LivingEntity>();
-
-		for (var entity : allEntities()) {
-			if (entity instanceof LivingEntity livingEntity) {
-				list.add(livingEntity);
-			}
-		}
-
-		return list;
-	}
-
-	default List<Entity> selectEntities(EntitySelector selector) {
-		var list = new ArrayList<Entity>(1);
-
-		for (var entity : allEntities()) {
-			if (selector.test(entity)) {
-				list.add(entity);
-			}
-		}
-
-		return list;
-	}
-
-	default List<Entity> selectEntities(CommandContext<?> ctx, String name) {
-		return selectEntities(ctx.getArgument(name, EntitySelector.class));
-	}
-
-	default List<Player> selectPlayers(EntitySelector selector) {
-		var list = new ArrayList<Player>(1);
-
-		for (var player : vl$level().players()) {
-			if (selector.test(player)) {
-				list.add(player);
-			}
-		}
-
-		return list;
-	}
-
-	default List<Player> selectPlayers(CommandContext<?> ctx, String name) {
-		return selectPlayers(ctx.getArgument(name, EntitySelector.class));
-	}
-
-	default List<LivingEntity> getDamageableEntities(@Nullable Entity ignoredEntity, AABB box) {
-		return (List) vl$level().getEntities(ignoredEntity, box, e -> e instanceof LivingEntity && (!(e instanceof Player) || e.isSurvivalLike()));
-	}
-
-	default float vl$getDelta() {
-		return 1F;
 	}
 
 	default List<LivingEntity> getBosses() {
@@ -315,57 +155,11 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		return null;
 	}
 
-	default boolean isBlockPartial(Long2IntOpenHashMap cache, BlockPos pos) {
-		long key = pos.asLong();
-		int exposed = cache.get(key);
-
-		if (exposed == -1) {
-			exposed = vl$level().getBlockState(pos).isPartial() ? 1 : 0;
-			cache.put(key, exposed);
-		}
-
-		return exposed == 1;
-	}
-
-	default boolean isBlockExposed(Long2IntOpenHashMap cache, int x, int y, int z, BlockPos.MutableBlockPos mutable) {
-		return isBlockPartial(cache, mutable.set(x, y + 1, z))
-			|| isBlockPartial(cache, mutable.set(x, y - 1, z))
-			|| isBlockPartial(cache, mutable.set(x - 1, y, z))
-			|| isBlockPartial(cache, mutable.set(x + 1, y, z))
-			|| isBlockPartial(cache, mutable.set(x, y, z - 1))
-			|| isBlockPartial(cache, mutable.set(x, y, z + 1));
-	}
-
-	default boolean isBlockExposed(int x, int y, int z, BlockPos.MutableBlockPos mutablePos) {
-		var level = vl$level();
-
-		return level.getBlockState(mutablePos.set(x, y + 1, z)).isPartial()
-			|| level.getBlockState(mutablePos.set(x, y - 1, z)).isPartial()
-			|| level.getBlockState(mutablePos.set(x - 1, y, z)).isPartial()
-			|| level.getBlockState(mutablePos.set(x + 1, y, z)).isPartial()
-			|| level.getBlockState(mutablePos.set(x, y, z - 1)).isPartial()
-			|| level.getBlockState(mutablePos.set(x, y, z + 1)).isPartial();
-	}
-
 	default KNumberContext getGlobalContext() {
 		var level = vl$level();
 		var ctx = new KNumberContext(level.getEnvironment().globalVariables());
 		ctx.updateLevelData(level);
 		return ctx;
-	}
-
-	@Override
-	default RegistryOps<Tag> nbtOps() {
-		return vl$level().registryAccess().createSerializationContext(NbtOps.INSTANCE);
-	}
-
-	@Override
-	default RegistryOps<JsonElement> jsonOps() {
-		return vl$level().registryAccess().createSerializationContext(JsonOps.INSTANCE);
-	}
-
-	default TagParser<Tag> nbtParser() {
-		return TagParser.create(nbtOps());
 	}
 
 	default boolean vl$intersectsSolid(@Nullable Entity entity, AABB collisionBox) {
@@ -440,36 +234,8 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		return result;
 	}
 
-	default boolean vl$getTickDayTime() {
-		return true;
-	}
-
 	default void vl$setDayTime(long time) {
 		throw new NoMixinException(this);
-	}
-
-	default double getGroundY(double x, double y, double z) {
-		var level = vl$level();
-		var bpos = new BlockPos.MutableBlockPos(x, y + 0.001D, z);
-		BlockState state;
-
-		while ((state = level.getBlockState(bpos)).isAir()) {
-			bpos.move(0, -1, 0);
-
-			if (level.isOutsideBuildHeight(bpos.getY())) {
-				return Double.NaN;
-			}
-		}
-
-		return bpos.getY() + state.getCollisionShape(level, bpos).max(Direction.Axis.Y);
-	}
-
-	default Stream<LevelChunk> vl$getChunks() {
-		return Stream.empty();
-	}
-
-	default Stream<BlockEntity> vl$getAllBlockEntities() {
-		return vl$getChunks().flatMap(c -> c.getBlockEntities().values().stream());
 	}
 
 	default <T extends Entity> T summon(EntityType<T> type, EntityType.EntityFactory<T> factory, Consumer<T> callback) {
@@ -485,11 +251,5 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 
 	default <T extends Entity> T summon(EntityType<T> type, Consumer<T> callback) {
 		return summon(type, type.factory, callback);
-	}
-
-	default int vl$getPackedLight(BlockPos pos) {
-		int blockLight = vl$level().getBrightness(LightLayer.BLOCK, pos);
-		int skyLight = vl$level().getBrightness(LightLayer.SKY, pos);
-		return blockLight << 4 | skyLight << 20;
 	}
 }

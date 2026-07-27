@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.client;
 
 import com.mojang.serialization.Codec;
+import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import io.netty.buffer.ByteBuf;
@@ -15,9 +16,9 @@ public enum ColorBlendMode implements StringRepresentable {
 	;
 
 	public static final ColorBlendMode[] VALUES = values();
-	public static final Codec<ColorBlendMode> CODEC = StringRepresentable.fromEnum(() -> VALUES);
-	public static final StreamCodec<ByteBuf, ColorBlendMode> STREAM_CODEC = KLibStreamCodecs.enumValue(VALUES);
-	public static final DataType<ColorBlendMode> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, ColorBlendMode.class);
+	public static final Codec<ColorBlendMode> CODEC = KLibCodecs.anyEnum(VALUES);
+	public static final StreamCodec<ByteBuf, ColorBlendMode> STREAM_CODEC = KLibStreamCodecs.anyEnum(VALUES);
+	public static final DataType<ColorBlendMode> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 
 	private final String name;
 	public final String displayName;

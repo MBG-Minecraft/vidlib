@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.data;
 
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.util.NameDrawType;
-import net.minecraft.resources.ResourceKey;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -13,11 +13,11 @@ import java.util.List;
 
 public interface ServerDataMapHolder extends DataMapHolder {
 	@Nullable
-	default ResourceKey<Atmosphere> getAtmosphere() {
+	default Ref<Atmosphere> getAtmosphere() {
 		return get(InternalServerData.ATMOSPHERE);
 	}
 
-	default void setAtmosphere(@Nullable ResourceKey<Atmosphere> atmosphere) {
+	default void setAtmosphere(@Nullable Ref<Atmosphere> atmosphere) {
 		set(InternalServerData.ATMOSPHERE, atmosphere);
 	}
 

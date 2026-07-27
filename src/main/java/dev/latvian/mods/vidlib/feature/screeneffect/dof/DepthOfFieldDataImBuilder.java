@@ -1,12 +1,11 @@
 package dev.latvian.mods.vidlib.feature.screeneffect.dof;
 
+import dev.latvian.mods.klib.kvector.KVector;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.FloatImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
-import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 
 public class DepthOfFieldDataImBuilder implements ImBuilder<DepthOfFieldData> {
 	public final ImBuilder<KVector> focus = KVectorImBuilder.create();
@@ -19,14 +18,14 @@ public class DepthOfFieldDataImBuilder implements ImBuilder<DepthOfFieldData> {
 	@Override
 	public void set(DepthOfFieldData value) {
 		if (value != null) {
-			focus.set(value.focus());
+			focus.set(value.focus().value());
 			focusRange.set(value.focusRange());
 			blurRange.set(value.blurRange());
 			strength.set(value.strength());
 			shape.set(value.shape());
 			blurMode.set(value.blurMode());
 		} else {
-			focus.set(KVector.ZERO);
+			focus.set(KVector.ZERO.value());
 			focusRange.set(1.5F);
 			blurRange.set(8F);
 			strength.set(5F);
@@ -54,6 +53,6 @@ public class DepthOfFieldDataImBuilder implements ImBuilder<DepthOfFieldData> {
 
 	@Override
 	public DepthOfFieldData build() {
-		return new DepthOfFieldData(focus.build(), focusRange.build(), blurRange.build(), strength.build(), shape.build(), blurMode.build());
+		return new DepthOfFieldData(focus.build().ref(), focusRange.build(), blurRange.build(), strength.build(), shape.build(), blurMode.build());
 	}
 }

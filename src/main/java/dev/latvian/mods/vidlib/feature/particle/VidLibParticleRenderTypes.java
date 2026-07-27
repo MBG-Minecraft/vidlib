@@ -20,7 +20,7 @@ import net.neoforged.neoforge.client.event.RegisterParticleGroupsEvent;
 
 import java.util.ArrayList;
 
-@EventBusSubscriber(modid = ID.vidlib, value = Dist.CLIENT)
+@EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
 public class VidLibParticleRenderTypes {
 	public static final ParticleRenderType TRUE_TRANSLUCENT = new ParticleRenderType("vidlib:true_translucent");
 	public static final ParticleRenderType ADDITIVE = new ParticleRenderType("vidlib:additive");

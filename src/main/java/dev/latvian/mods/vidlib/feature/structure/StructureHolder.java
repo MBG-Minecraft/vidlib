@@ -1,11 +1,12 @@
 package dev.latvian.mods.vidlib.feature.structure;
 
+import dev.latvian.mods.klib.block.filter.BlockFilter;
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.util.BlockUtils;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
 import dev.latvian.mods.vidlib.feature.bulk.OptimizedModificationBuilder;
-import dev.latvian.mods.vidlib.feature.registry.Ref;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceArrayMap;
@@ -140,7 +141,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 	}
 
 	public static Supplier<StructureHolder> refSupplier(@Nullable Ref<LazyStructures> structureRef) {
-		return () -> structureRef == null ? null : structureRef.get().get().getFirst();
+		return () -> structureRef == null ? null : structureRef.value().get().getFirst();
 	}
 
 	public static StructureHolder fromVStruct(ByteBuf buf) {
@@ -208,8 +209,8 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 		}
 	}
 
-	public static StructureHolder capture(Level level, BlockPos from, BlockPos to, @Nullable BlockFilter filter, boolean onlyExposed, boolean forRendering) {
-		if (filter == BlockFilter.ANY.instance()) {
+	public static StructureHolder capture(Level level, BlockPos from, BlockPos to, @Nullable Ref<BlockFilter> filter, boolean onlyExposed, boolean forRendering) {
+		if (filter == BlockFilter.ANY) {
 			filter = null;
 		}
 
@@ -229,9 +230,9 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 		for (var pos : BlockPos.betweenClosed(minX, minY, minZ, maxX, maxY, maxZ)) {
 			var state = level.getBlockState(pos);
 
-			if (forRendering ? state.isVisible() : !state.is(Blocks.STRUCTURE_VOID)) {
-				if (filter == null || filter.test(level, pos, state)) {
-					if (onlyExposed && !level.isBlockExposed(partialCache, pos.getX(), pos.getY(), pos.getZ(), partialMutablePos)) {
+			if (forRendering ? BlockUtils.isVisible(state) : !state.is(Blocks.STRUCTURE_VOID)) {
+				if (filter == null || filter.value().test(level, pos, state)) {
+					if (onlyExposed && !BlockUtils.isBlockExposed(level, partialCache, pos.getX(), pos.getY(), pos.getZ(), partialMutablePos)) {
 						continue;
 					}
 
@@ -255,7 +256,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 		for (var entry : blocks.long2ObjectEntrySet()) {
 			var state = entry.getValue();
 
-			if (!state.isVisible()) {
+			if (!BlockUtils.isVisible(state)) {
 				return true;
 			}
 		}
@@ -273,7 +274,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 		for (var entry : blocks.long2ObjectEntrySet()) {
 			var state = entry.getValue();
 
-			if (state.isVisible()) {
+			if (BlockUtils.isVisible(state)) {
 				newBlocks.put(entry.getLongKey(), state);
 			}
 		}
@@ -350,7 +351,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 
 	private boolean isPartial(int x, int y, int z) {
 		var s = blocks.get(BlockPos.asLong(x, y, z));
-		return s == null || s.isPartial();
+		return s == null || BlockUtils.isPartial(s);
 	}
 
 	public StructureHolder shell() {

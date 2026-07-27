@@ -1,8 +1,11 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import dev.latvian.mods.klib.knumber.KNumberVariables;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.core.VLMinecraftServer;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
+import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
@@ -10,12 +13,11 @@ import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.session.RemovePlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
-import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -60,7 +62,7 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	private DataMap vl$serverDataMap;
 
 	@Unique
-	private final Map<Identifier, ClockValue> vl$clocks = new Object2ObjectOpenHashMap<>();
+	private final Map<Ref<Clock>, ClockValue> vl$clocks = new Reference2ObjectOpenHashMap<>();
 
 	@Unique
 	private final KNumberVariables vl$globalVariables = new KNumberVariables();
@@ -131,7 +133,7 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	}
 
 	@Override
-	public Map<Identifier, ClockValue> vl$getClocks() {
+	public Map<Ref<Clock>, ClockValue> vl$getClocks() {
 		return vl$clocks;
 	}
 

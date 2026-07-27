@@ -20,7 +20,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-@EventBusSubscriber(modid = ID.vidlib, value = Dist.CLIENT)
+@EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
 public class ClientGatewayEvents {
 	public static void registerSynced(HubGatewayEventRegistryEvent event, String method, BiConsumer<Minecraft, HubGatewayEvent> callback) {
 		event.register(method, e -> Minecraft.getInstance().execute(() -> callback.accept(Minecraft.getInstance(), e)));

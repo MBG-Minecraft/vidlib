@@ -132,7 +132,7 @@ public record PlayerInput(
 
 	public static final Codec<PlayerInput> CODEC = MAP_CODEC.codec();
 	public static final StreamCodec<ByteBuf, PlayerInput> STREAM_CODEC = ByteBufCodecs.VAR_INT.map(PlayerInput::of, PlayerInput::hashCode);
-	public static final DataType<PlayerInput> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, PlayerInput.class);
+	public static final DataType<PlayerInput> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 
 	private PlayerInput(int flags) {
 		this(

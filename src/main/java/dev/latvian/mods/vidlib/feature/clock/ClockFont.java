@@ -2,30 +2,37 @@ package dev.latvian.mods.vidlib.feature.clock;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.JOMLCodecs;
+import dev.latvian.mods.klib.codec.JOMLStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.registry.CustomRegistry;
+import dev.latvian.mods.klib.registry.CustomRegistryValue;
+import dev.latvian.mods.klib.registry.DynamicType;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.texture.UV;
+import dev.latvian.mods.klib.util.JsonRegistryReloadListener;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
-import dev.latvian.mods.vidlib.feature.registry.Ref;
-import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
-import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
-import net.minecraft.resources.Identifier;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.core.ClientAsset;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import org.joml.Vector2i;
 
 import java.util.List;
 
 public record ClockFont(
-	Identifier id,
-	Identifier texture,
+	Ref<ClockFont> ref,
+	ClientAsset.ResourceTexture assetId,
 	Vector2i size,
 	Vector2i textureSize,
 	int separatorWidth,
 	int actualSeparatorWidth,
 	List<UV> uvs
-) {
-	public static ClockFont create(Identifier id,
-	                               Identifier texture,
+) implements CustomRegistryValue<ByteBuf, ClockFont> {
+	public static ClockFont create(Ref<ClockFont> ref,
+	                               ClientAsset.ResourceTexture assetId,
 	                               Vector2i size,
 	                               Vector2i textureSize,
 	                               int separatorWidth
@@ -48,30 +55,44 @@ public record ClockFont(
 			);
 		}
 
-		return new ClockFont(id, texture, size, textureSize, separatorWidth, actualSeparatorWidth, List.of(uvs));
+		return new ClockFont(ref, assetId, size, textureSize, separatorWidth, actualSeparatorWidth, List.of(uvs));
 	}
 
-	public static final Codec<ClockFont> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		Identifier.CODEC.fieldOf("id").forGetter(ClockFont::id),
-		Identifier.CODEC.fieldOf("texture").forGetter(ClockFont::texture),
-		JOMLCodecs.IVEC2S.fieldOf("size").forGetter(ClockFont::size),
-		JOMLCodecs.IVEC2S.fieldOf("texture_size").forGetter(ClockFont::textureSize),
-		Codec.INT.optionalFieldOf("separator_width", 0).forGetter(ClockFont::separatorWidth)
-	).apply(instance, ClockFont::create));
+	public static final DynamicType<ByteBuf, ClockFont> TYPE = DynamicType.create(
+		"default",
+		RecordCodecBuilder.mapCodec(instance -> instance.group(
+			Ref.<ClockFont>contextRefCodec().forGetter(ClockFont::ref),
+			ClientAsset.ResourceTexture.DEFAULT_FIELD_CODEC.forGetter(ClockFont::assetId),
+			JOMLCodecs.IVEC2S.fieldOf("size").forGetter(ClockFont::size),
+			JOMLCodecs.IVEC2S.fieldOf("texture_size").forGetter(ClockFont::textureSize),
+			Codec.INT.optionalFieldOf("separator_width", 0).forGetter(ClockFont::separatorWidth)
+		).apply(instance, ClockFont::create)),
+		CompositeStreamCodec.of(
+			Ref.contextRefStreamCodec(), ClockFont::ref,
+			ClientAsset.ResourceTexture.STREAM_CODEC, ClockFont::assetId,
+			JOMLStreamCodecs.IVEC2, ClockFont::size,
+			JOMLStreamCodecs.IVEC2, ClockFont::textureSize,
+			ByteBufCodecs.VAR_INT, ClockFont::separatorWidth,
+			ClockFont::create
+		)
+	);
 
-	public static final VLRegistry<ClockFont> REGISTRY = VLRegistry.createClient("clock_font", ClockFont.class);
+	public static final CustomRegistry<ByteBuf, ClockFont> REGISTRY = CustomRegistry.createNoValueSync("clock_font", TYPE);
 
-	public static final DataType<Ref<ClockFont>> REF_DATA_TYPE = REGISTRY.refDataType();
+	public static final Codec<Ref<ClockFont>> CODEC = REGISTRY.codec();
+	public static final StreamCodec<ByteBuf, Ref<ClockFont>> STREAM_CODEC = REGISTRY.streamCodec();
+	public static final DataType<Ref<ClockFont>> DATA_TYPE = REGISTRY.dataType();
+	public static final ImBuilderType<Ref<ClockFont>> IM_TYPE = () -> EnumImBuilder.of(REGISTRY).build();
 
-	public static final ImBuilderType<Ref<ClockFont>> REGISTRY_REF_IM_BUILDER_SUPPLIER = () -> {
-		var allFonts = REGISTRY.getMap().values().stream().map(f -> REGISTRY.asRef(f, ClockFont::id)).toList();
-		return EnumImBuilder.of(allFonts).build();
-	};
-
-	public static class Loader extends JsonRegistryReloadListener<ClockFont> {
-		public Loader() {
-			super("vidlib/clock_font", DIRECT_CODEC, true, REGISTRY);
+	public static class ClientLoader extends JsonRegistryReloadListener<ClockFont> {
+		public ClientLoader() {
+			super("vidlib/clock_font", REGISTRY);
 		}
+	}
+
+	@Override
+	public CustomRegistry<ByteBuf, ClockFont> getRegistry() {
+		return REGISTRY;
 	}
 
 	public int getWidth(char[] string) {

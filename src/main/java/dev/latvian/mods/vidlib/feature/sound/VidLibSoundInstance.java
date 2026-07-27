@@ -1,7 +1,8 @@
 package dev.latvian.mods.vidlib.feature.sound;
 
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
+import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.kvector.KVector;
+import dev.latvian.mods.klib.registry.Ref;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.world.level.Level;
@@ -16,7 +17,7 @@ public class VidLibSoundInstance extends AbstractTickableSoundInstance {
 	public VidLibSoundInstance(Level level, PositionedSoundData data, KNumberContext numberContext) {
 		super(data.data().sound().value(), data.data().source(), SoundInstance.createUnseededRandom());
 		this.level = level;
-		this.position = data.position().orElse(null);
+		this.position = data.position().map(Ref::value).orElse(null);
 		this.numberContext = numberContext;
 		this.looping = data.looping();
 		this.stopImmediately = data.stopImmediately();

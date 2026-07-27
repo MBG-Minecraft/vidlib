@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.client;
 
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.resources.Identifier;
 

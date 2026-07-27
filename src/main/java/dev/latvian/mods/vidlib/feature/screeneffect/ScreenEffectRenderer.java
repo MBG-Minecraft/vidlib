@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.screeneffect;
 
-import dev.latvian.mods.klib.math.ClientMatrices;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasUniform;
@@ -15,7 +14,10 @@ public class ScreenEffectRenderer {
 		builder.setTickCallback(ScreenEffectRenderer::tick);
 		builder.setDrawSetupCallback(ScreenEffectRenderer::setup);
 		builder.addUniform(CanvasUniform.int1("Count", () -> uCount));
-		builder.addUniform(CanvasUniform.mat4("InverseViewProjectionMat", () -> ClientMatrices.INVERSE_WORLD));
+		builder.addUniform(CanvasUniform.mat4("InverseViewProjectionMat", () -> {
+			var mc = Minecraft.getInstance();
+			return mc.getInverseWorldMatrix();
+		}));
 	});
 
 	private static void tick(Minecraft mc) {

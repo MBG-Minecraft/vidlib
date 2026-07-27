@@ -1,9 +1,10 @@
 package dev.latvian.mods.vidlib.feature.clothing;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.color.Gradient;
-import dev.latvian.mods.klib.color.GradientReference;
+import dev.latvian.mods.klib.gradient.ClientGradient;
+import dev.latvian.mods.klib.gradient.FlatColorGradient;
+import dev.latvian.mods.klib.gradient.Gradient;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import it.unimi.dsi.fastutil.ints.Int2FloatArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2FloatMap;
@@ -13,7 +14,7 @@ import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.ARGB;
@@ -34,11 +35,11 @@ public class ClothingPartImage {
 
 	public final NativeImage pixels;
 	public final Int2FloatMap gradientValues;
-	public final Map<Identifier, NativeImage> gradientRefCache;
+	public final Map<ClientGradient.ClientGradientRef, NativeImage> gradientRefCache;
 	public final Int2ObjectMap<NativeImage> colorCache;
 
 	public ClothingPartImage(ResourceManager resourceManager, PlayerModelType model, Identifier asset) throws Exception {
-		this.gradientRefCache = new Object2ObjectOpenHashMap<>(4);
+		this.gradientRefCache = new Reference2ObjectOpenHashMap<>(4);
 		this.colorCache = new Int2ObjectOpenHashMap<>(0);
 
 		var modelResource = resourceManager.getResource(asset.withPath("textures/vidlib/clothing/" + asset.getPath() + "_" + model.getSerializedName() + ".png")).orElse(null);
@@ -102,15 +103,15 @@ public class ClothingPartImage {
 		return MiscClientUtils.remapImage(pixels, remap);
 	}
 
-	public NativeImage withGradient(Gradient gradient) {
-		if (gradient == Color.TRANSPARENT && gradientValues.isEmpty()) {
+	public NativeImage withGradient(Ref<Gradient> gradient) {
+		if (gradient == Gradient.EMPTY && gradientValues.isEmpty()) {
 			return pixels;
-		} else if (gradient instanceof GradientReference ref) {
-			return gradientRefCache.computeIfAbsent(ref.id(), id -> remap(ref));
-		} else if (gradient instanceof Color color) {
-			return colorCache.computeIfAbsent(color.argb(), id -> remap(color));
+		} else if (gradient.value() instanceof ClientGradient gr) {
+			return gradientRefCache.computeIfAbsent(gr.gradient(), _ -> remap(gr));
+		} else if (gradient.value() instanceof FlatColorGradient gr) {
+			return colorCache.computeIfAbsent(gr.color().argb(), _ -> remap(gr));
 		} else {
-			return remap(gradient);
+			return remap(gradient.value());
 		}
 	}
 

@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.item;
 
 import dev.latvian.mods.betteradvancedtooltips.BATIcons;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.klib.shape.ColoredShape;
@@ -141,7 +142,7 @@ public enum PositionTool implements VidLibTool, PlayerActionHandler {
 	public void renderSetup(Player player, ItemStack item, @Nullable HitResult hit, float delta) {
 		var tag = item.get(DataComponents.CUSTOM_DATA).copyTag();
 		clientMode = Type.VALUES[tag.getByteOr("position_tool_mode", (byte) 0)];
-		var chit = player.ray(500D, delta).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY);
+		var chit = player.klib$ray(500D, delta).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY);
 		clientPos = chit instanceof BlockHitResult blockHit ? clientMode.position(player, blockHit) : clientMode.position(player, null);
 	}
 
@@ -172,10 +173,10 @@ public enum PositionTool implements VidLibTool, PlayerActionHandler {
 				visuals.addLine(new Line(clientPos, new Vec3(clientPos.x + 0.5D, clientPos.y, clientPos.z)), Color.WHITE, Color.WHITE.withAlpha(0));
 				visuals.addLine(new Line(clientPos, new Vec3(clientPos.x, clientPos.y + 0.5D, clientPos.z)), Color.WHITE, Color.WHITE.withAlpha(0));
 				visuals.addLine(new Line(clientPos, new Vec3(clientPos.x, clientPos.y, clientPos.z + 0.5D)), Color.WHITE, Color.WHITE.withAlpha(0));
-				visuals.add(new ColoredShape(SphereShape.UNIT, Color.CYAN, Color.TRANSPARENT).at(clientPos));
-				visuals.addOutline(new ColoredShape(SphereShape.UNIT, Color.WHITE, Color.TRANSPARENT).at(clientPos));
+				visuals.add(new ColoredShape(SphereShape.UNIT_SPHERE, Gradient.CYAN, Gradient.EMPTY).at(clientPos));
+				visuals.addOutline(new ColoredShape(SphereShape.UNIT_SPHERE, Gradient.WHITE, Gradient.EMPTY).at(clientPos));
 			} else {
-				visuals.add(new ColoredShape(CubeShape.UNIT, Color.CYAN, Color.WHITE).at(clientPos));
+				visuals.add(new ColoredShape(CubeShape.UNIT_CUBE, Gradient.CYAN, Gradient.WHITE).at(clientPos));
 			}
 		}
 	}

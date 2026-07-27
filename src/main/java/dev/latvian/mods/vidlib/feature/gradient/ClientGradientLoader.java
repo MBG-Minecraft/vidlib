@@ -2,9 +2,9 @@ package dev.latvian.mods.vidlib.feature.gradient;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.color.CompoundGradient;
-import dev.latvian.mods.klib.color.Gradient;
-import dev.latvian.mods.klib.color.GradientReference;
+import dev.latvian.mods.klib.color.PositionedColor;
+import dev.latvian.mods.klib.gradient.CompoundGradient;
+import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -31,7 +31,7 @@ public class ClientGradientLoader extends SimplePreparableReloadListener<Map<Ide
 						pixels.add(Color.of(image.getPixel(x, 0)));
 					}
 
-					map.put(id, CompoundGradient.ofColors(pixels));
+					map.put(id, new CompoundGradient(PositionedColor.fromSimpleList(pixels)));
 				}
 			} catch (Exception ex) {
 				VidLib.LOGGER.error("Error while reading file " + entry.getKey(), ex);

@@ -2,19 +2,20 @@ package dev.latvian.mods.vidlib.feature.explosion;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.block.filter.BlockFilter;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
+import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.klib.interpolation.EaseIn;
-import dev.latvian.mods.klib.interpolation.Interpolation;
+import dev.latvian.mods.klib.entity.filter.EntityFilter;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.math.Range;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.util.BlockUtils;
 import dev.latvian.mods.vidlib.feature.config.BooleanConfigValue;
 import dev.latvian.mods.vidlib.feature.config.ConfigValue;
 import dev.latvian.mods.vidlib.feature.config.FloatConfigValue;
 import dev.latvian.mods.vidlib.feature.config.IntConfigValue;
-import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
@@ -22,6 +23,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.EasingType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -46,7 +48,7 @@ public class ExplosionData {
 		public static final Codec<EntityData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			Codec.FLOAT.optionalFieldOf("min_damage", 0F).forGetter(v -> v.minDamage),
 			Codec.FLOAT.optionalFieldOf("max_damage", 4F).forGetter(v -> v.maxDamage),
-			Interpolation.CODEC.optionalFieldOf("damage_easing", EaseIn.CUBIC).forGetter(v -> v.damageInterpolation),
+			EasingType.CODEC.optionalFieldOf("damage_easing", EasingType.IN_CUBIC).forGetter(v -> v.damageEase),
 			Codec.FLOAT.optionalFieldOf("horizontal_knockback", 1F).forGetter(v -> v.horizontalKnockback),
 			Codec.FLOAT.optionalFieldOf("vertical_knockback", 0F).forGetter(v -> v.verticalKnockback),
 			Codec.BOOL.optionalFieldOf("spherical", false).forGetter(v -> v.spherical),
@@ -56,7 +58,7 @@ public class ExplosionData {
 		public static final StreamCodec<ByteBuf, EntityData> STREAM_CODEC = CompositeStreamCodec.of(
 			KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 0F), v -> v.minDamage,
 			ByteBufCodecs.FLOAT, v -> v.maxDamage,
-			Interpolation.STREAM_CODEC, v -> v.damageInterpolation,
+			MCStreamCodecs.EASING_TYPE, v -> v.damageEase,
 			KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 1F), v -> v.horizontalKnockback,
 			KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 0F), v -> v.verticalKnockback,
 			ByteBufCodecs.BOOL, v -> v.spherical,
@@ -66,7 +68,7 @@ public class ExplosionData {
 
 		public float minDamage;
 		public float maxDamage;
-		public Interpolation damageInterpolation;
+		public EasingType damageEase;
 		public float horizontalKnockback;
 		public float verticalKnockback;
 		public boolean spherical;
@@ -75,7 +77,7 @@ public class ExplosionData {
 		public EntityData() {
 			this.minDamage = 0F;
 			this.maxDamage = 4F;
-			this.damageInterpolation = EaseIn.CUBIC;
+			this.damageEase = EasingType.IN_CUBIC;
 			this.horizontalKnockback = 1F;
 			this.verticalKnockback = 0F;
 			this.spherical = false;
@@ -85,7 +87,7 @@ public class ExplosionData {
 		private EntityData(
 			float minDamage,
 			float maxDamage,
-			Interpolation damageInterpolation,
+			EasingType damageEase,
 			float horizontalKnockback,
 			float verticalKnockback,
 			boolean spherical,
@@ -93,7 +95,7 @@ public class ExplosionData {
 		) {
 			this.minDamage = minDamage;
 			this.maxDamage = maxDamage;
-			this.damageInterpolation = damageInterpolation;
+			this.damageEase = damageEase;
 			this.horizontalKnockback = horizontalKnockback;
 			this.verticalKnockback = verticalKnockback;
 			this.spherical = spherical;
@@ -101,7 +103,7 @@ public class ExplosionData {
 		}
 
 		private EntityData copy() {
-			return new EntityData(minDamage, maxDamage, damageInterpolation, horizontalKnockback, verticalKnockback, spherical, radiusMod);
+			return new EntityData(minDamage, maxDamage, damageEase, horizontalKnockback, verticalKnockback, spherical, radiusMod);
 		}
 
 		@Override
@@ -109,7 +111,7 @@ public class ExplosionData {
 			return "EntityData[" +
 				"minDamage=" + minDamage +
 				", maxDamage=" + maxDamage +
-				", damageEasing=" + damageInterpolation +
+				", damageEase=" + damageEase +
 				", horizontalKnockback=" + horizontalKnockback +
 				", verticalKnockback=" + verticalKnockback +
 				']';
@@ -120,7 +122,7 @@ public class ExplosionData {
 			return Objects.hash(
 				minDamage,
 				maxDamage,
-				damageInterpolation,
+				damageEase,
 				horizontalKnockback,
 				verticalKnockback,
 				spherical,
@@ -135,7 +137,7 @@ public class ExplosionData {
 			} else if (o instanceof EntityData d) {
 				return minDamage == d.minDamage
 					&& maxDamage == d.maxDamage
-					&& damageInterpolation == d.damageInterpolation
+					&& damageEase == d.damageEase
 					&& horizontalKnockback == d.horizontalKnockback
 					&& verticalKnockback == d.verticalKnockback
 					&& spherical == d.spherical
@@ -146,7 +148,7 @@ public class ExplosionData {
 		}
 
 		public float damage(float relativeDistance) {
-			return KMath.lerp(damageInterpolation.interpolateClamped(relativeDistance), maxDamage, minDamage);
+			return KMath.lerp(Math.clamp(damageEase.apply(relativeDistance), 0F, 1F), maxDamage, minDamage);
 		}
 	}
 
@@ -156,52 +158,52 @@ public class ExplosionData {
 		public static final Codec<FilterData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			Codec.INT.optionalFieldOf("floor", -1000).forGetter(v -> v.floor),
 			Codec.INT.optionalFieldOf("ceiling", 1000).forGetter(v -> v.ceiling),
-			BlockFilter.CODEC.optionalFieldOf("blocks", BlockFilter.ANY.instance()).forGetter(v -> v.blocks),
-			EntityFilter.CODEC.optionalFieldOf("ignored", EntityFilter.CREATIVE_MODE.instance()).forGetter(v -> v.ignored),
-			EntityFilter.CODEC.optionalFieldOf("invincible", EntityFilter.NONE.instance()).forGetter(v -> v.invincible),
+			BlockFilter.CODEC.optionalFieldOf("blocks", BlockFilter.NONE).forGetter(v -> v.blocks),
+			EntityFilter.CODEC.optionalFieldOf("ignored", EntityFilter.CREATIVE_MODE).forGetter(v -> v.ignored),
+			EntityFilter.CODEC.optionalFieldOf("invincible", EntityFilter.NONE).forGetter(v -> v.invincible),
 			Codec.BOOL.optionalFieldOf("bypass_unbreakable", false).forGetter(v -> v.bypassUnbreakable)
 		).apply(instance, FilterData::new));
 
 		public static final StreamCodec<RegistryFriendlyByteBuf, FilterData> STREAM_CODEC = CompositeStreamCodec.of(
 			KLibStreamCodecs.optional(ByteBufCodecs.VAR_INT, -1000), v -> v.floor,
 			KLibStreamCodecs.optional(ByteBufCodecs.VAR_INT, 1000), v -> v.ceiling,
-			KLibStreamCodecs.optional(BlockFilter.STREAM_CODEC, BlockFilter.ANY.instance()), v -> v.blocks,
-			KLibStreamCodecs.optional(EntityFilter.STREAM_CODEC, EntityFilter.CREATIVE_MODE.instance()), v -> v.ignored,
-			KLibStreamCodecs.optional(EntityFilter.STREAM_CODEC, EntityFilter.NONE.instance()), v -> v.invincible,
+			KLibStreamCodecs.optional(BlockFilter.STREAM_CODEC, BlockFilter.ANY), v -> v.blocks,
+			KLibStreamCodecs.optional(EntityFilter.STREAM_CODEC, EntityFilter.CREATIVE_MODE), v -> v.ignored,
+			KLibStreamCodecs.optional(EntityFilter.STREAM_CODEC, EntityFilter.NONE), v -> v.invincible,
 			ByteBufCodecs.BOOL, v -> v.bypassUnbreakable,
 			FilterData::new
 		);
 
 		public int floor;
 		public int ceiling;
-		public BlockFilter blocks;
-		public EntityFilter ignored;
-		public EntityFilter invincible;
+		public Ref<BlockFilter> blocks;
+		public Ref<EntityFilter> ignored;
+		public Ref<EntityFilter> invincible;
 		public boolean bypassUnbreakable;
 
 		public FilterData() {
 			this.floor = -1000;
 			this.ceiling = 1000;
-			this.blocks = BlockFilter.ANY.instance();
-			this.ignored = EntityFilter.CREATIVE_MODE.instance();
-			this.invincible = EntityFilter.NONE.instance();
+			this.blocks = BlockFilter.ANY;
+			this.ignored = EntityFilter.CREATIVE_MODE;
+			this.invincible = EntityFilter.NONE;
 			this.bypassUnbreakable = false;
 		}
 
 		private FilterData(
 			int floor,
 			int ceiling,
-			BlockFilter blocks,
-			EntityFilter ignored,
-			EntityFilter invincible,
+			Ref<BlockFilter> blocks,
+			Ref<EntityFilter> ignored,
+			Ref<EntityFilter> invincible,
 			boolean bypassUnbreakable
 		) {
-			this.floor = -1000;
-			this.ceiling = 1000;
-			this.blocks = BlockFilter.ANY.instance();
-			this.ignored = EntityFilter.CREATIVE_MODE.instance();
-			this.invincible = EntityFilter.NONE.instance();
-			this.bypassUnbreakable = false;
+			this.floor = floor;
+			this.ceiling = ceiling;
+			this.blocks = blocks;
+			this.ignored = ignored;
+			this.invincible = invincible;
+			this.bypassUnbreakable = bypassUnbreakable;
 		}
 
 		private FilterData copy() {
@@ -274,7 +276,7 @@ public class ExplosionData {
 		ExplosionData::new
 	);
 
-	public static final DataType<ExplosionData> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, ExplosionData.class);
+	public static final DataType<ExplosionData> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 
 	public static final List<ConfigValue<ExplosionData, ?>> CONFIG = List.of(
 		new FloatConfigValue<>("Radius", Range.of(0F, 500F), false, data -> data.radius, (data, v) -> data.radius = v),
@@ -286,7 +288,7 @@ public class ExplosionData {
 		new BooleanConfigValue<>("Smolder", data -> data.smolder, (data, v) -> data.smolder = v),
 		new FloatConfigValue<>("Max Entity Damage", Range.of(0F, 100F), false, data -> data.entity.maxDamage, (data, v) -> data.entity.maxDamage = v),
 		new FloatConfigValue<>("Min Entity Damage", Range.of(0F, 100F), false, data -> data.entity.minDamage, (data, v) -> data.entity.minDamage = v),
-		new ConfigValue<>("Entity Damage Interpolation", Interpolation.CODEC, data -> data.entity.damageInterpolation, (data, v) -> data.entity.damageInterpolation = v),
+		new ConfigValue<>("Entity Damage Interpolation", EasingType.CODEC, data -> data.entity.damageEase, (data, v) -> data.entity.damageEase = v),
 		new FloatConfigValue<>("Entity Horizontal Knockback", Range.of(0F, 100F), false, data -> data.entity.horizontalKnockback, (data, v) -> data.entity.horizontalKnockback = v),
 		new FloatConfigValue<>("Entity Vertical Knockback", Range.of(0F, 100F), false, data -> data.entity.verticalKnockback, (data, v) -> data.entity.verticalKnockback = v),
 		new IntConfigValue<>("Floor", IntRange.range(-1000, 1000), false, data -> data.filter.floor, (data, v) -> data.filter.floor = v),
@@ -393,8 +395,8 @@ public class ExplosionData {
 						pos.setZ(atz + z);
 						var state = level.getBlockState(pos);
 
-						if (state.vl$getDensity() > 0F && (filter.bypassUnbreakable || state.getDestroySpeed(level, pos) >= 0F) || state.getBlock() instanceof BaseFireBlock) {
-							if (filter.blocks.test(level, pos, state)) {
+						if (BlockUtils.getDensity(state) > 0F && (filter.bypassUnbreakable || state.getDestroySpeed(level, pos) >= 0F) || state.getBlock() instanceof BaseFireBlock) {
+							if (filter.blocks.value().test(level, pos, state)) {
 								blocks.add(new DestroyedBlock(pos.immutable(), state, x, y, z, inside, new MutableBoolean(false)));
 							}
 						}
@@ -408,7 +410,7 @@ public class ExplosionData {
 	}
 
 	public boolean includeEntity(Entity entity) {
-		return entity.isAlive() && !entity.isSpectator() && !filter.ignored.test(entity);
+		return entity.isAlive() && !entity.isSpectator() && !filter.ignored.value().test(entity);
 	}
 
 	public double entityRangeInflation() {
@@ -458,7 +460,7 @@ public class ExplosionData {
 			if (inside <= entity.radiusMod) {
 				var damage = entity.damage((float) inside / entity.radiusMod);
 
-				if (e instanceof LivingEntity l && filter.invincible.test(l)) {
+				if (e instanceof LivingEntity l && filter.invincible.value().test(l)) {
 					var h = l.getHealth();
 					var hp = Math.max(1F, h - damage);
 					float f = h - hp;

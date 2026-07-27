@@ -1,169 +1,209 @@
 package dev.latvian.mods.vidlib.feature.particle.physics;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.klib.codec.CompositeStreamCodec;
-import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.Range;
-import dev.latvian.mods.vidlib.feature.config.BooleanConfigValue;
-import dev.latvian.mods.vidlib.feature.config.ConfigValue;
-import dev.latvian.mods.vidlib.feature.config.FloatConfigValue;
-import dev.latvian.mods.vidlib.feature.config.RangeConfigValue;
-import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
-import dev.latvian.mods.vidlib.util.JsonCodecReloadListener;
+import dev.latvian.mods.klib.registry.CustomRegistry;
+import dev.latvian.mods.klib.registry.CustomRegistryType;
+import dev.latvian.mods.klib.registry.CustomRegistryValue;
+import dev.latvian.mods.klib.registry.DynamicType;
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.registry.UnitType;
+import dev.latvian.mods.klib.util.JsonRegistryReloadListener;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.packs.resources.ResourceManager;
 
-import java.util.List;
-import java.util.Map;
-
-public class PhysicsParticleData {
-	public static final float DEFAULT_DENSITY = 4F;
-	public static final Range DEFAULT_LIFESPAN = Range.of(80F, 120F);
-	public static final Range DEFAULT_SCALE = Range.of(1F, 2F);
-	public static final Range DEFAULT_POWER = Range.of(0.2F, 2F);
-	public static final Range DEFAULT_SPREAD = Range.of(0F, 0.3F);
-	public static final float DEFAULT_INERTIA = 0.96F;
-	public static final float DEFAULT_GRAVITY = 0.036F;
-	public static final Range DEFAULT_SPEED = Range.ONE;
-	public static final float DEFAULT_DIRECTION = 0F;
-	public static final float DEFAULT_TILT = 0F;
-	public static final Range DEFAULT_SECTION = Range.of(0F, 360F);
-	public static final boolean DEFAULT_IGNORE_BLOCK_DENSITY = false;
-	public static final float DEFAULT_RENDER_DISTANCE = 8192F;
-
-	public static final PhysicsParticleData DEFAULT = new PhysicsParticleData();
-
-	public static final Codec<PhysicsParticleData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		Codec.FLOAT.optionalFieldOf("density", DEFAULT_DENSITY).forGetter(p -> p.density),
-		Range.CODEC.optionalFieldOf("lifespan", DEFAULT_LIFESPAN).forGetter(p -> p.lifespan),
-		Range.CODEC.optionalFieldOf("scale", DEFAULT_SCALE).forGetter(p -> p.scale),
-		Range.CODEC.optionalFieldOf("power", DEFAULT_POWER).forGetter(p -> p.power),
-		Range.CODEC.optionalFieldOf("spread", DEFAULT_SPREAD).forGetter(p -> p.spread),
-		Codec.FLOAT.optionalFieldOf("inertia", DEFAULT_INERTIA).forGetter(p -> p.inertia),
-		Codec.FLOAT.optionalFieldOf("gravity", DEFAULT_GRAVITY).forGetter(p -> p.gravity),
-		Range.CODEC.optionalFieldOf("speed", DEFAULT_SPEED).forGetter(p -> p.speed),
-		Codec.FLOAT.optionalFieldOf("direction", DEFAULT_DIRECTION).forGetter(p -> p.direction),
-		Codec.FLOAT.optionalFieldOf("tilt", DEFAULT_TILT).forGetter(p -> p.tilt),
-		Range.CODEC.optionalFieldOf("section", DEFAULT_SECTION).forGetter(p -> p.section),
-		Codec.BOOL.optionalFieldOf("ignore_block_density", DEFAULT_IGNORE_BLOCK_DENSITY).forGetter(p -> p.ignoreBlockDensity),
-		Codec.FLOAT.optionalFieldOf("render_distance", DEFAULT_RENDER_DISTANCE).forGetter(p -> p.renderDistance)
-	).apply(instance, PhysicsParticleData::new));
-
-	public static final StreamCodec<ByteBuf, PhysicsParticleData> STREAM_CODEC = "true".equals(System.getenv("OLD_PHYSICS_PARTICLES")) ? CompositeStreamCodec.of(
-		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, DEFAULT_DENSITY), p -> p.density,
-		KLibStreamCodecs.optional(Range.STREAM_CODEC, DEFAULT_LIFESPAN), p -> p.lifespan,
-		KLibStreamCodecs.optional(Range.STREAM_CODEC, DEFAULT_SCALE), p -> p.scale,
-		KLibStreamCodecs.optional(Range.STREAM_CODEC, DEFAULT_POWER), p -> p.power,
-		KLibStreamCodecs.optional(Range.STREAM_CODEC, DEFAULT_SPREAD), p -> p.spread,
-		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, DEFAULT_INERTIA), p -> p.inertia,
-		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, DEFAULT_GRAVITY), p -> p.gravity,
-		KLibStreamCodecs.optional(Range.STREAM_CODEC, DEFAULT_SPEED), p -> p.speed,
-		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, DEFAULT_DIRECTION), p -> p.direction,
-		KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, DEFAULT_TILT), p -> p.tilt,
-		KLibStreamCodecs.optional(Range.STREAM_CODEC, DEFAULT_SECTION), p -> p.section,
-		ByteBufCodecs.BOOL, p -> p.ignoreBlockDensity,
-		StreamCodec.unit(DEFAULT_RENDER_DISTANCE), p -> p.renderDistance,
-		PhysicsParticleData::new
-	) : ByteBufCodecs.fromCodecTrusted(CODEC);
-
-	public static final DataType<PhysicsParticleData> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, PhysicsParticleData.class);
-
-	public static final List<ConfigValue<PhysicsParticleData, ?>> CONFIG = List.of(
-		new FloatConfigValue<>("Density", Range.of(0F, 1000F), false, data -> data.density, (data, v) -> data.density = v),
-		new RangeConfigValue<>("Lifespan", Range.of(1F, 300F), true, data -> data.lifespan, (data, v) -> data.lifespan = v),
-		new RangeConfigValue<>("Scale", Range.of(0F, 10F), true, data -> data.scale, (data, v) -> data.scale = v),
-		new RangeConfigValue<>("Power", null, false, data -> data.power, (data, v) -> data.power = v),
-		new RangeConfigValue<>("Spread", Range.FULL, true, data -> data.spread, (data, v) -> data.spread = v),
-		new FloatConfigValue<>("Inertia", Range.FULL, true, data -> data.inertia, (data, v) -> data.inertia = v),
-		new FloatConfigValue<>("Gravity", null, false, data -> data.gravity, (data, v) -> data.gravity = v),
-		new RangeConfigValue<>("Speed", Range.of(0.1F, 10F), true, data -> data.speed, (data, v) -> data.speed = v),
-		new FloatConfigValue<>("Direction", Range.of(0F, 360F), true, data -> data.direction, (data, v) -> data.direction = v),
-		new FloatConfigValue<>("Tilt", Range.of(0F, 180F), true, data -> data.tilt, (data, v) -> data.tilt = v),
-		new RangeConfigValue<>("Section", Range.of(-360F, 360F), false, data -> data.section, (data, v) -> data.section = v),
-		new BooleanConfigValue<>("Ignore Block Density", data -> data.ignoreBlockDensity, (data, v) -> data.ignoreBlockDensity = v)
+public record PhysicsParticleData(
+	float density,
+	Range lifespan,
+	Range scale,
+	Range power,
+	Range spread,
+	float inertia,
+	float gravity,
+	Range speed,
+	float direction,
+	float tilt,
+	Range section,
+	boolean ignoreBlockDensity,
+	float renderDistance
+) implements CustomRegistryValue<ByteBuf, PhysicsParticleData> {
+	public static final PhysicsParticleData DEFAULT_VALUE = new PhysicsParticleData(
+		4F,
+		Range.of(80F, 120F),
+		Range.of(1F, 2F),
+		Range.of(0.2F, 2F),
+		Range.of(0F, 0.3F),
+		0.96F,
+		0.036F,
+		Range.ONE,
+		0F,
+		0F,
+		Range.of(0F, 360F),
+		false,
+		8192F
 	);
 
-	public static final VLRegistry<PhysicsParticleData> REGISTRY = VLRegistry.createClient("physics_particle_data", PhysicsParticleData.class);
+	public static final UnitType<ByteBuf, PhysicsParticleData> DEFAULT = UnitType.create("default", DEFAULT_VALUE);
 
-	public static class Loader extends JsonCodecReloadListener<PhysicsParticleData> {
-		public Loader() {
-			super("vidlib/physics_particle_data", CODEC, false);
+	public static class Builder {
+		public float density = DEFAULT_VALUE.density;
+		public Range lifespan = DEFAULT_VALUE.lifespan;
+		public Range scale = DEFAULT_VALUE.scale;
+		public Range power = DEFAULT_VALUE.power;
+		public Range spread = DEFAULT_VALUE.spread;
+		public float inertia = DEFAULT_VALUE.inertia;
+		public float gravity = DEFAULT_VALUE.gravity;
+		public Range speed = DEFAULT_VALUE.speed;
+		public float direction = DEFAULT_VALUE.direction;
+		public float tilt = DEFAULT_VALUE.tilt;
+		public Range section = DEFAULT_VALUE.section;
+		public boolean ignoreBlockDensity = DEFAULT_VALUE.ignoreBlockDensity;
+		public float renderDistance = DEFAULT_VALUE.renderDistance;
+
+		public Builder density(float value) {
+			this.density = value;
+			return this;
 		}
 
-		@Override
-		protected void apply(ResourceManager resourceManager, Map<Identifier, PhysicsParticleData> map) {
-			REGISTRY.update(Map.copyOf(map));
+		public Builder lifespan(Range value) {
+			this.lifespan = value;
+			return this;
+		}
+
+		public Builder scale(Range value) {
+			this.scale = value;
+			return this;
+		}
+
+		public Builder power(Range value) {
+			this.power = value;
+			return this;
+		}
+
+		public Builder spread(Range value) {
+			this.spread = value;
+			return this;
+		}
+
+		public Builder inertia(float value) {
+			this.inertia = value;
+			return this;
+		}
+
+		public Builder gravity(float value) {
+			this.gravity = value;
+			return this;
+		}
+
+		public Builder speed(Range value) {
+			this.speed = value;
+			return this;
+		}
+
+		public Builder direction(float value) {
+			this.direction = value;
+			return this;
+		}
+
+		public Builder tilt(float value) {
+			this.tilt = value;
+			return this;
+		}
+
+		public Builder section(Range value) {
+			this.section = value;
+			return this;
+		}
+
+		public Builder ignoreBlockDensity(boolean value) {
+			this.ignoreBlockDensity = value;
+			return this;
+		}
+
+		public Builder renderDistance(float value) {
+			this.renderDistance = value;
+			return this;
+		}
+
+		public PhysicsParticleData build() {
+			return new PhysicsParticleData(
+				density,
+				lifespan,
+				scale,
+				power,
+				spread,
+				inertia,
+				gravity,
+				speed,
+				direction,
+				tilt,
+				section,
+				ignoreBlockDensity,
+				renderDistance
+			);
 		}
 	}
 
-	public float density = DEFAULT_DENSITY;
-	public Range lifespan = DEFAULT_LIFESPAN;
-	public Range scale = DEFAULT_SCALE;
-	public Range power = DEFAULT_POWER;
-	public Range spread = DEFAULT_SPREAD;
-	public float inertia = DEFAULT_INERTIA;
-	public float gravity = DEFAULT_GRAVITY;
-	public Range speed = DEFAULT_SPEED;
-	public float direction = DEFAULT_DIRECTION;
-	public float tilt = DEFAULT_TILT;
-	public Range section = DEFAULT_SECTION;
-	public boolean ignoreBlockDensity = DEFAULT_IGNORE_BLOCK_DENSITY;
-	public float renderDistance = DEFAULT_RENDER_DISTANCE;
+	public static final MapCodec<PhysicsParticleData> DIRECT_MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+		Codec.FLOAT.optionalFieldOf("density", DEFAULT_VALUE.density).forGetter(PhysicsParticleData::density),
+		Range.CODEC.optionalFieldOf("lifespan", DEFAULT_VALUE.lifespan).forGetter(PhysicsParticleData::lifespan),
+		Range.CODEC.optionalFieldOf("scale", DEFAULT_VALUE.scale).forGetter(PhysicsParticleData::scale),
+		Range.CODEC.optionalFieldOf("power", DEFAULT_VALUE.power).forGetter(PhysicsParticleData::power),
+		Range.CODEC.optionalFieldOf("spread", DEFAULT_VALUE.spread).forGetter(PhysicsParticleData::spread),
+		Codec.FLOAT.optionalFieldOf("inertia", DEFAULT_VALUE.inertia).forGetter(PhysicsParticleData::inertia),
+		Codec.FLOAT.optionalFieldOf("gravity", DEFAULT_VALUE.gravity).forGetter(PhysicsParticleData::gravity),
+		Range.CODEC.optionalFieldOf("speed", DEFAULT_VALUE.speed).forGetter(PhysicsParticleData::speed),
+		Codec.FLOAT.optionalFieldOf("direction", DEFAULT_VALUE.direction).forGetter(PhysicsParticleData::direction),
+		Codec.FLOAT.optionalFieldOf("tilt", DEFAULT_VALUE.tilt).forGetter(PhysicsParticleData::tilt),
+		Range.CODEC.optionalFieldOf("section", DEFAULT_VALUE.section).forGetter(PhysicsParticleData::section),
+		Codec.BOOL.optionalFieldOf("ignore_block_density", DEFAULT_VALUE.ignoreBlockDensity).forGetter(PhysicsParticleData::ignoreBlockDensity),
+		Codec.FLOAT.optionalFieldOf("render_distance", DEFAULT_VALUE.renderDistance).forGetter(PhysicsParticleData::renderDistance)
+	).apply(instance, PhysicsParticleData::new));
 
-	public PhysicsParticleData() {
-	}
+	public static final StreamCodec<ByteBuf, PhysicsParticleData> DIRECT_STREAM_CODEC = ByteBufCodecs.fromCodecTrusted(RecordCodecBuilder.create(instance -> instance.group(
+		Codec.FLOAT.optionalFieldOf("d", DEFAULT_VALUE.density).forGetter(PhysicsParticleData::density),
+		Range.CODEC.optionalFieldOf("l", DEFAULT_VALUE.lifespan).forGetter(PhysicsParticleData::lifespan),
+		Range.CODEC.optionalFieldOf("s", DEFAULT_VALUE.scale).forGetter(PhysicsParticleData::scale),
+		Range.CODEC.optionalFieldOf("p", DEFAULT_VALUE.power).forGetter(PhysicsParticleData::power),
+		Range.CODEC.optionalFieldOf("r", DEFAULT_VALUE.spread).forGetter(PhysicsParticleData::spread),
+		Codec.FLOAT.optionalFieldOf("i", DEFAULT_VALUE.inertia).forGetter(PhysicsParticleData::inertia),
+		Codec.FLOAT.optionalFieldOf("g", DEFAULT_VALUE.gravity).forGetter(PhysicsParticleData::gravity),
+		Range.CODEC.optionalFieldOf("f", DEFAULT_VALUE.speed).forGetter(PhysicsParticleData::speed),
+		Codec.FLOAT.optionalFieldOf("d", DEFAULT_VALUE.direction).forGetter(PhysicsParticleData::direction),
+		Codec.FLOAT.optionalFieldOf("t", DEFAULT_VALUE.tilt).forGetter(PhysicsParticleData::tilt),
+		Range.CODEC.optionalFieldOf("c", DEFAULT_VALUE.section).forGetter(PhysicsParticleData::section),
+		Codec.BOOL.optionalFieldOf("bd", DEFAULT_VALUE.ignoreBlockDensity).forGetter(PhysicsParticleData::ignoreBlockDensity),
+		Codec.FLOAT.optionalFieldOf("rd", DEFAULT_VALUE.renderDistance).forGetter(PhysicsParticleData::renderDistance)
+	).apply(instance, PhysicsParticleData::new)));
 
-	private PhysicsParticleData(
-		float density,
-		Range lifespan,
-		Range scale,
-		Range power,
-		Range spread,
-		float inertia,
-		float gravity,
-		Range speed,
-		float direction,
-		float tilt,
-		Range section,
-		boolean ignoreBlockDensity,
-		float renderDistance
-	) {
-		this.density = density;
-		this.lifespan = lifespan;
-		this.scale = scale;
-		this.power = power;
-		this.spread = spread;
-		this.inertia = inertia;
-		this.gravity = gravity;
-		this.speed = speed;
-		this.direction = direction;
-		this.tilt = tilt;
-		this.section = section;
-		this.ignoreBlockDensity = ignoreBlockDensity;
-		this.renderDistance = renderDistance;
+	public static final DynamicType<ByteBuf, PhysicsParticleData> TYPE = DynamicType.create(
+		"default",
+		DIRECT_MAP_CODEC,
+		DIRECT_STREAM_CODEC
+	);
+
+	public static final CustomRegistry<ByteBuf, PhysicsParticleData> REGISTRY = CustomRegistry.createNoValueSync("physics_particle_data", TYPE);
+	public static final Codec<Ref<PhysicsParticleData>> CODEC = REGISTRY.codec();
+	public static final StreamCodec<ByteBuf, Ref<PhysicsParticleData>> STREAM_CODEC = REGISTRY.streamCodec();
+	public static final DataType<Ref<PhysicsParticleData>> DATA_TYPE = REGISTRY.dataType();
+
+	public static class ClientLoader extends JsonRegistryReloadListener<PhysicsParticleData> {
+		public ClientLoader() {
+			super("vidlib/physics_particle_data", REGISTRY);
+		}
 	}
 
 	@Override
-	public String toString() {
-		return "PhysicsParticleData[" +
-			"density=" + density +
-			", lifespan=" + lifespan +
-			", scale=" + scale +
-			", power=" + power +
-			", spread=" + spread +
-			", inertia=" + inertia +
-			", gravity=" + gravity +
-			", speed=" + speed +
-			", direction=" + direction +
-			", tilt=" + tilt +
-			", section=" + section +
-			", ignoreBlockDensity=" + ignoreBlockDensity +
-			", renderDistance=" + renderDistance +
-			']';
+	public CustomRegistry<ByteBuf, PhysicsParticleData> getRegistry() {
+		return REGISTRY;
+	}
+
+	@Override
+	public CustomRegistryType<ByteBuf, PhysicsParticleData> type() {
+		return TYPE;
 	}
 }

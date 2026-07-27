@@ -1,5 +1,5 @@
 {
-	"texture": "vidlib:textures/misc/clock/4x7.png",
+	"asset_id": "vidlib:misc/clock/4x7",
 	"size": [4, 7],
 	"texture_size": [52, 8],
 	"separator_width": 2

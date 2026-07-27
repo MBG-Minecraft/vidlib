@@ -2,33 +2,38 @@ package dev.latvian.mods.vidlib.feature.screeneffect.effect;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.knumber.KNumber;
+import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.registry.DynamicType;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectShaderType;
-import dev.latvian.mods.vidlib.math.knumber.KNumber;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
-import dev.latvian.mods.vidlib.math.knumber.KNumberFloatInstance;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 
-public record AngledChromaticAberrationEffect(KNumber strength, KNumber angle) implements ScreenEffect {
-	public static final CustomRegistryType<AngledChromaticAberrationEffect> TYPE = CustomRegistryType.dynamic("angled_chromatic_aberration", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		KNumber.CODEC.fieldOf("strength").forGetter(AngledChromaticAberrationEffect::strength),
-		KNumber.CODEC.fieldOf("angle").forGetter(AngledChromaticAberrationEffect::angle)
-	).apply(instance, AngledChromaticAberrationEffect::new)), CompositeStreamCodec.of(
-		KNumber.STREAM_CODEC, AngledChromaticAberrationEffect::strength,
-		KNumber.STREAM_CODEC, AngledChromaticAberrationEffect::angle,
-		AngledChromaticAberrationEffect::new
-	));
+public record AngledChromaticAberrationEffect(Ref<KNumber> strength, Ref<KNumber> angle) implements ScreenEffect {
+	public static final DynamicType<RegistryFriendlyByteBuf, ScreenEffect> TYPE = DynamicType.create(
+		"angled_chromatic_aberration",
+		RecordCodecBuilder.mapCodec(instance -> instance.group(
+			KNumber.CODEC.fieldOf("strength").forGetter(AngledChromaticAberrationEffect::strength),
+			KNumber.CODEC.fieldOf("angle").forGetter(AngledChromaticAberrationEffect::angle)
+		).apply(instance, AngledChromaticAberrationEffect::new)),
+		CompositeStreamCodec.of(
+			KNumber.STREAM_CODEC, AngledChromaticAberrationEffect::strength,
+			KNumber.STREAM_CODEC, AngledChromaticAberrationEffect::angle,
+			AngledChromaticAberrationEffect::new
+		)
+	);
 
 	public static class Inst extends ScreenEffectInstance {
 		public final KNumberFloatInstance strength;
 		public final KNumberFloatInstance angle;
 
-		public Inst(KNumber strength, KNumber angle) {
+		public Inst(Ref<KNumber> strength, Ref<KNumber> angle) {
 			this.strength = new KNumberFloatInstance(strength);
 			this.angle = new KNumberFloatInstance(angle);
 		}
@@ -76,7 +81,7 @@ public record AngledChromaticAberrationEffect(KNumber strength, KNumber angle) i
 	}
 
 	@Override
-	public CustomRegistryType<?> type() {
+	public DynamicType<RegistryFriendlyByteBuf, ScreenEffect> type() {
 		return TYPE;
 	}
 

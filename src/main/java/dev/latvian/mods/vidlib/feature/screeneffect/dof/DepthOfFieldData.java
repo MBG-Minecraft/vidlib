@@ -3,20 +3,21 @@ package dev.latvian.mods.vidlib.feature.screeneffect.dof;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
+import dev.latvian.mods.klib.kvector.KVector;
+import dev.latvian.mods.klib.registry.Ref;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 public record DepthOfFieldData(
-	KVector focus,
+	Ref<KVector> focus,
 	float focusRange,
 	float blurRange,
 	float strength,
 	DepthOfFieldShape shape,
 	DepthOfFieldBlurMode blurMode
 ) {
-	public DepthOfFieldData withFocus(KVector focus) {
+	public DepthOfFieldData withFocus(Ref<KVector> focus) {
 		return new DepthOfFieldData(focus, focusRange, blurRange, strength, shape, blurMode);
 	}
 

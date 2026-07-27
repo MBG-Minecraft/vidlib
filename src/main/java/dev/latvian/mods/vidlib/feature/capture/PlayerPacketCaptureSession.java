@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.capture;
 
 import dev.latvian.mods.klib.io.IOUtils;
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.Timestamp;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.capture.task.CaptureTask;
@@ -12,7 +13,6 @@ import dev.latvian.mods.vidlib.feature.capture.task.CustomGamePacketTask;
 import dev.latvian.mods.vidlib.feature.capture.task.DisconnectTask;
 import dev.latvian.mods.vidlib.feature.capture.task.SessionInfoTask;
 import dev.latvian.mods.vidlib.feature.capture.task.WriteTasks;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
@@ -62,9 +62,9 @@ public class PlayerPacketCaptureSession {
 		this.taskQueue.add(info);
 		this.lock = new ReentrantLock();
 		this.configBuf = new FriendlyByteBuf(Unpooled.buffer());
-		this.gameBuf = VLPlatformHelper.CURRENT.createBuffer(Unpooled.buffer(), packetCapture.server.registryAccess());
+		this.gameBuf = PlatformHelper.CURRENT.createBuffer(Unpooled.buffer(), packetCapture.server.registryAccess());
 		this.configPacketFactory = ConfigurationProtocols.CLIENTBOUND.codec();
-		this.gamePacketFactory = GameProtocols.CLIENTBOUND_TEMPLATE.bind(VLPlatformHelper.CURRENT.createDecorator(packetCapture.server.registryAccess())).codec();
+		this.gamePacketFactory = GameProtocols.CLIENTBOUND_TEMPLATE.bind(PlatformHelper.CURRENT.createDecorator(packetCapture.server.registryAccess())).codec();
 		this.disconnected = Timestamp.NONE;
 	}
 

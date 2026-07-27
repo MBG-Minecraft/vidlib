@@ -189,6 +189,7 @@ dependencies {
 		}
 	}
 
+	accessTransformers("dev.latvian.mods:klib:$klib_version")
 	interfaceInjectionData("dev.latvian.mods:klib:$klib_version")
 
 	compileOnly("dev.latvian.mods:imgui-resources:$imgui_resources_version")

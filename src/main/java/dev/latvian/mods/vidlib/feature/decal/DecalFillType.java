@@ -18,7 +18,7 @@ public enum DecalFillType implements StringRepresentable {
 	public static final DecalFillType[] VALUES = values();
 	public static final DecalFillType[] UNIT = {SOLID};
 	public static final Codec<DecalFillType> CODEC = StringRepresentable.fromEnum(() -> VALUES);
-	public static final StreamCodec<ByteBuf, DecalFillType> STREAM_CODEC = KLibStreamCodecs.enumValue(VALUES);
+	public static final StreamCodec<ByteBuf, DecalFillType> STREAM_CODEC = KLibStreamCodecs.anyEnum(VALUES);
 
 	public final int shaderId;
 	public final String name;

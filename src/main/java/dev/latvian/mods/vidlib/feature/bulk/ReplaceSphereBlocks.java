@@ -6,7 +6,7 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.registry.CustomRegistryType;
-import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.klib.registry.DynamicType;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -18,8 +18,8 @@ import net.minecraft.world.phys.Vec3;
 import java.util.Set;
 
 public record ReplaceSphereBlocks(BlockPos start, BlockPos end, Vec3 center, double radius, BlockState state) implements BulkLevelModification {
-	public static final CustomRegistryType<ByteBuf, BulkLevelModification> TYPE = REGISTRY.dynamic(
-		ID.vidlib("sphere_blocks"),
+	public static final DynamicType<ByteBuf, BulkLevelModification> TYPE = DynamicType.create(
+		"sphere_blocks",
 		RecordCodecBuilder.mapCodec(instance -> instance.group(
 			BlockPos.CODEC.fieldOf("start").forGetter(ReplaceSphereBlocks::start),
 			BlockPos.CODEC.fieldOf("end").forGetter(ReplaceSphereBlocks::end),

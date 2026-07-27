@@ -7,7 +7,6 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -44,10 +43,5 @@ public interface VLServerPlayer extends VLPlayer {
 		if (packet != null) {
 			vl$self().connection.send(packet);
 		}
-	}
-
-	@Override
-	default GameType getGameMode() {
-		return vl$self().gameMode.getGameModeForPlayer();
 	}
 }

@@ -1,20 +1,20 @@
 package dev.latvian.mods.vidlib.feature.imgui.builder;
 
 import dev.latvian.mods.klib.color.PositionedColor;
-import dev.latvian.mods.klib.interpolation.Interpolation;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
-import dev.latvian.mods.vidlib.feature.imgui.builder.interpolation.InterpolationImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.interpolation.EasingTypeImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 import imgui.type.ImFloat;
+import net.minecraft.util.EasingType;
 import org.jetbrains.annotations.NotNull;
 
 public class PositionedColorImBuilder implements Comparable<PositionedColorImBuilder>, ImBuilder<PositionedColor> {
 	public String label;
 	public final ImFloat position = new ImFloat(0F);
 	public final Color4ImBuilder color = new Color4ImBuilder();
-	public final ImBuilder<Interpolation> interpolation = InterpolationImBuilder.create();
+	public final ImBuilder<EasingType> ease = new EasingTypeImBuilder();
 	public boolean delete = false;
 
 	public PositionedColorImBuilder(String label) {
@@ -25,7 +25,7 @@ public class PositionedColorImBuilder implements Comparable<PositionedColorImBui
 	public void set(PositionedColor c) {
 		position.set(c.position());
 		color.set(c.color());
-		interpolation.set(c.interpolation());
+		ease.set(c.ease());
 	}
 
 	@Override
@@ -51,19 +51,19 @@ public class PositionedColorImBuilder implements Comparable<PositionedColorImBui
 		ImGui.sliderFloat("Position###position", position.getData(), 0F, 1F, "%.3f");
 		update = update.orItemEdit();
 		update = update.or(color.imguiKey(graphics, "Color", "color"));
-		update = update.or(interpolation.imguiKey(graphics, "Interpolation", "interpolation"));
+		update = update.or(ease.imguiKey(graphics, "Interpolation", "interpolation"));
 
 		return update;
 	}
 
 	@Override
 	public boolean isValid() {
-		return color.isValid() && interpolation.isValid();
+		return color.isValid() && ease.isValid();
 	}
 
 	@Override
 	public PositionedColor build() {
-		return new PositionedColor(position.get(), color.build(), interpolation.build());
+		return new PositionedColor(position.get(), color.build(), ease.build());
 	}
 
 	@Override

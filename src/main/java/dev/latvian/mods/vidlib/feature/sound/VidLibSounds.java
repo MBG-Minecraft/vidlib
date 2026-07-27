@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.sound;
 
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import net.minecraft.core.registries.Registries;
@@ -12,7 +13,7 @@ import java.util.Optional;
 
 public interface VidLibSounds {
 	@AutoRegister
-	DeferredRegister<SoundEvent> REGISTRY = DeferredRegister.create(Registries.SOUND_EVENT, ID.vidlib);
+	DeferredRegister<SoundEvent> REGISTRY = DeferredRegister.create(Registries.SOUND_EVENT, VidLib.ID);
 
 	private static DeferredHolder<SoundEvent, SoundEvent> register(String name, @Nullable Float fixedRange) {
 		return REGISTRY.register(name, () -> new SoundEvent(ID.vidlib(name), Optional.ofNullable(fixedRange)));

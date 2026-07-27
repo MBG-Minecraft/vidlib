@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.decal;
 
-import dev.latvian.mods.klib.math.ClientMatrices;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
@@ -20,7 +19,10 @@ public class DecalRenderer {
 	public static final Canvas CANVAS = Canvas.createExternal(ID.vidlib("decals"), builder -> {
 		builder.setDrawSetupCallback(DecalRenderer::setup);
 		builder.addUniform(CanvasUniform.int1("Count", () -> uCount));
-		builder.addUniform(CanvasUniform.mat4("InverseViewProjectionMat", () -> ClientMatrices.INVERSE_WORLD));
+		builder.addUniform(CanvasUniform.mat4("InverseViewProjectionMat", () -> {
+			var mc = Minecraft.getInstance();
+			return mc.getInverseWorldMatrix();
+		}));
 		builder.addUniform(CanvasUniform.float1("GameTime", () -> uGameTime));
 		builder.addUniform(CanvasUniform.int1("NoSceneSample", () -> IrisIntegration.INSTANCE.isShaderPackInUse() ? 1 : 0));
 	});

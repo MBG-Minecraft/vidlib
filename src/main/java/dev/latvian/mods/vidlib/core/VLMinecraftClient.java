@@ -3,19 +3,22 @@ package dev.latvian.mods.vidlib.core;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.mojang.datafixers.util.Pair;
+import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.knumber.KNumberVariables;
 import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.math.ProjectedCoordinates;
 import dev.latvian.mods.klib.math.Rotation;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.camera.DetachedCamera;
 import dev.latvian.mods.vidlib.feature.camera.FreeCamera;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeInstance;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
+import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.cutscene.ClientCutscene;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
@@ -34,11 +37,9 @@ import dev.latvian.mods.vidlib.feature.particle.LineParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.TextParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.WindData;
-import dev.latvian.mods.vidlib.feature.particle.physics.PalettePhysicsParticlesData;
-import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticles;
-import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesIdData;
+import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesDisplayData;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.Fade;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
@@ -49,9 +50,9 @@ import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import dev.latvian.mods.vidlib.feature.vote.NumberVotingScreen;
 import dev.latvian.mods.vidlib.feature.vote.YesNoVotingScreen;
-import dev.latvian.mods.vidlib.feature.zone.Zone;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
-import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
+import dev.latvian.mods.vidlib.feature.zone.ZoneCache;
+import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
+import dev.latvian.mods.vidlib.feature.zone.ZoneVolume;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
@@ -85,6 +86,7 @@ import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 import org.joml.Vector2d;
 import org.joml.Vector2dc;
 import org.joml.Vector4f;
@@ -160,7 +162,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		FrameInfo.CURRENT = frameInfo;
 		var ctx = mc.level.getGlobalContext();
 
-		var rayLine = vl$self().gameRenderer.getMainCamera().ray(512D);
+		var rayLine = vl$self().gameRenderer.getMainCamera().klib$ray(512D);
 		var ray = new ClipContext(rayLine.start(), rayLine.end(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player);
 
 		if (vl$self().options.getCameraType() == CameraType.FIRST_PERSON && VidLibClientOptions.getShowZones()) {
@@ -201,7 +203,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 		if (shake != Identity.DVEC_2) {
 			var vec = new Vector4f((float) shake.x(), (float) shake.y(), 0F, 1F).rotate(camera.rotation());
-			camera.vl$setPosition(camera.position().add(vec.x(), vec.y(), vec.z()));
+			camera.klib$setPosition(camera.position().add(vec.x(), vec.y(), vec.z()));
 		}
 	}
 
@@ -267,7 +269,8 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void playCutscene(Cutscene cutscene, KNumberVariables variables) {
+	default void playCutscene(Ref<Cutscene> ref, KNumberVariables variables) {
+		var cutscene = ref.value();
 		var player = vl$self().player;
 
 		if (!cutscene.steps.isEmpty() && player != null) {
@@ -399,17 +402,13 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void removeZone(Identifier zone, int index) {
-		var session = vl$self().player.vl$sessionData();
-		session.serverZones.remove(zone, index);
-		session.filteredZones.remove(zone, index);
+	default void removeZone(Ref<ZoneContainer> zone, int index) {
+		ZoneCache.clearAll();
 	}
 
 	@Override
-	default void updateZone(Identifier zone, int index, Zone zoneData) {
-		var session = vl$self().player.vl$sessionData();
-		session.serverZones.update(zone, index, zoneData);
-		session.filteredZones.update(zone, index, zoneData);
+	default void updateZone(Ref<ZoneContainer> zone, int index, ZoneVolume zoneVolume) {
+		ZoneCache.clearAll();
 	}
 
 	@Override
@@ -451,55 +450,23 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void physicsParticles(PhysicsParticleData data, long spawnTime, long seed, List<PositionedBlock> blocks) {
-		if (blocks.isEmpty()) {
-			return;
-		}
+	default void physicsParticles(PhysicsParticlesDisplayData displayData, long spawnTime) {
+		var level = vl$level();
+		var data = displayData.data().value();
+		var realTime = level.getGameTime();
 
-		var realTime = vl$level().getGameTime();
-
-		if (spawnTime < realTime - 60L || spawnTime > realTime + 60L + (long) data.lifespan.max()) {
+		if (spawnTime < realTime - 60L || spawnTime > realTime + 60L + (long) data.lifespan().max()) {
 			VidLib.LOGGER.info("Discarded physics particles packet @ " + realTime + " from " + spawnTime);
 			return;
 		}
 
-		var particles = new PhysicsParticles(data, vl$level(), spawnTime, seed == 0L ? vl$self().level.getRandom().nextLong() : seed);
+		var particles = new PhysicsParticles(data, level, spawnTime, displayData.seed() == 0L ? level.getRandom().nextLong() : displayData.seed());
 
-		for (var block : blocks) {
-			particles.at = block.pos();
-			particles.state = block.state();
+		displayData.blocks().value().forEach((pos, state) -> {
+			particles.at = pos.immutable();
+			particles.state = state;
 			particles.spawn();
-		}
-	}
-
-	@Override
-	default void physicsParticles(PhysicsParticlesIdData data, long spawnTime) {
-		if (!data.blocks().isEmpty()) {
-			var p = PhysicsParticleData.REGISTRY.get(data.id());
-			physicsParticles(p == null ? PhysicsParticleData.DEFAULT : p, spawnTime, data.seed(), data.blocks());
-		}
-	}
-
-	@Override
-	default void physicsParticles(PalettePhysicsParticlesData palettePhysicsParticlesData, long spawnTime) {
-		var realTime = vl$level().getGameTime();
-		var data = palettePhysicsParticlesData.data();
-
-		if (spawnTime < realTime - 60L || spawnTime > realTime + 60L + (long) data.lifespan.max()) {
-			VidLib.LOGGER.info("Discarded palette physics particles packet @ " + realTime + " from " + spawnTime);
-			return;
-		}
-
-		var random = vl$level().getRandom();
-		var particles = new PhysicsParticles(data, vl$level(), spawnTime, random.nextLong());
-		var positions = palettePhysicsParticlesData.positions();
-
-		var palette = palettePhysicsParticlesData.palette();
-		for (var position : positions) {
-			particles.at = position;
-			particles.state = palette.sample(random);
-			particles.spawn();
-		}
+		}, level.getRandom());
 	}
 
 	@Override
@@ -562,7 +529,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	default void fireParticles(RandomSource random, FireData data) {
 		var particles = vl$self().particleEngine;
 		var pos = data.data().position();
-		var options = data.options().withResolvedGradient();
+		var options = data.options();
 
 		for (int i = 0; i < data.data().count(); i++) {
 			var x = pos.x + random.nextFloat();
@@ -688,7 +655,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default Map<Identifier, ClockValue> vl$getClocks() {
+	default Map<Ref<Clock>, ClockValue> vl$getClocks() {
 		return vl$self().player.vl$sessionData().clocks;
 	}
 
@@ -719,5 +686,13 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 		mc.setScreen(new TitleScreen());
 		NeoForge.EVENT_BUS.post(new MainMenuOpenedEvent(mc, false));
+	}
+
+	default Matrix4f getInverseWorldMatrix() {
+		var state = vl$self().gameRenderer.getGameRenderState().levelRenderState.cameraRenderState;
+		var matrix = new Matrix4f(state.projectionMatrix);
+		matrix.mul(state.viewRotationMatrix);
+		matrix.invert();
+		return matrix;
 	}
 }

@@ -3,12 +3,13 @@ package dev.latvian.mods.vidlib.feature.structure;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.util.UndashedUuid;
+import dev.latvian.mods.klib.block.filter.BlockFilter;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.io.IOUtils;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.klib.util.MessageConsumer;
 import dev.latvian.mods.vidlib.VidLibPaths;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
 import imgui.type.ImBoolean;
 import net.minecraft.core.BlockPos;
@@ -25,16 +26,16 @@ public interface StructureCapture {
 	int CHUNK_OFFSET = (1 << CHUNK_SIZE) - 1;
 
 	MutableObject<CurrentStructureCapture> CURRENT = new MutableObject<>(new CurrentStructureCapture());
-	MutableObject<BlockFilter> IGNORE_FILTER = new MutableObject<>(BlockFilter.NONE.instance());
+	MutableObject<Ref<BlockFilter>> IGNORE_FILTER = new MutableObject<>(BlockFilter.NONE);
 	ShapeParticleOptions PARTICLE = new ShapeParticleOptions(20, Color.CYAN, Color.TRANSPARENT);
 	ImBoolean INCLUDE_FLUIDS = new ImBoolean(true);
 	ImBoolean PARTICLES = new ImBoolean(true);
 
 	static BlockFilter buildFilter() {
-		var filter = StructureCapture.IGNORE_FILTER.getValue().not();
+		var filter = StructureCapture.IGNORE_FILTER.getValue().value().not();
 
 		if (!INCLUDE_FLUIDS.get()) {
-			filter = filter.and(BlockFilter.FLUID.instance().not());
+			filter = filter.and(BlockFilter.FLUID.value().not());
 		}
 
 		return filter;

@@ -1,7 +1,8 @@
 package dev.latvian.mods.vidlib.feature.structure;
 
+import dev.latvian.mods.klib.block.ConnectedBlock;
+import dev.latvian.mods.klib.util.BlockUtils;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
-import dev.latvian.mods.vidlib.feature.block.ConnectedBlock;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
@@ -58,7 +59,7 @@ public enum StructureCaptureTool implements VidLibTool, PlayerActionHandler {
 					captureAll = tag.copyTag().getBooleanOr("structure_capture_full", false);
 				}
 
-				level.walkBlocks(ConnectedBlock.WalkType.DIAGONAL, origin, StructureCapture.buildFilter(), !captureAll, 2048, c -> {
+				BlockUtils.walkBlocks(level, ConnectedBlock.WalkType.DIAGONAL, origin, StructureCapture.buildFilter(), !captureAll, 2048, c -> {
 					blocks.put(c.block().pos().asLong(), c.block().state());
 
 					if (StructureCapture.PARTICLES.get()) {

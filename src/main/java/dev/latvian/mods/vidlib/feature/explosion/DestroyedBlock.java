@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.explosion;
 
-import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
+import dev.latvian.mods.klib.block.PositionedBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableBoolean;

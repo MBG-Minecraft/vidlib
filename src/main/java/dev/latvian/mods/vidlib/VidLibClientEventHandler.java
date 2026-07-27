@@ -3,6 +3,8 @@ package dev.latvian.mods.vidlib;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.latvian.mods.betteradvancedtooltips.BATIcons;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.entity.EntityUtils;
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
 import dev.latvian.mods.klib.texture.LightUV;
@@ -25,7 +27,7 @@ import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockFont;
 import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
-import dev.latvian.mods.vidlib.feature.clothing.ClothingPresetLoader;
+import dev.latvian.mods.vidlib.feature.clothing.ClothingPresetClientLoader;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
@@ -46,7 +48,6 @@ import dev.latvian.mods.vidlib.feature.particle.VidLibParticleRenderTypes;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
 import dev.latvian.mods.vidlib.feature.session.LocalClientSessionData;
@@ -57,7 +58,6 @@ import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
 import dev.latvian.mods.vidlib.feature.visual.TexturedCubeRenderer;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
-import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
@@ -118,7 +118,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 
-@EventBusSubscriber(modid = ID.vidlib, value = Dist.CLIENT)
+@EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
 public class VidLibClientEventHandler {
 	public static boolean clientLoaded = false;
 
@@ -153,19 +153,16 @@ public class VidLibClientEventHandler {
 	@SubscribeEvent
 	public static void addReloadListeners(AddClientReloadListenersEvent event) {
 		event.addListener(ID.vidlib("structure"), new StructureStorage(StructureStorage.CLIENT));
-		event.addListener(ID.vidlib("ghost_structure"), new GhostStructure.Loader());
-		event.addListener(ID.vidlib("clothing_preset"), new ClothingPresetLoader());
-		event.addListener(ID.vidlib("physics_particle_data"), new PhysicsParticleData.Loader());
+		event.addListener(ID.vidlib("ghost_structure"), new GhostStructure.ClientLoader());
+		event.addListener(ID.vidlib("clothing_preset"), new ClothingPresetClientLoader());
+		event.addListener(ID.vidlib("physics_particle_data"), new PhysicsParticleData.ClientLoader());
 		event.addListener(ID.vidlib("gradient"), new ClientGradientLoader());
-		event.addListener(ID.vidlib("clock_font"), new ClockFont.Loader());
-		event.addListener(ID.vidlib("clock"), new Clock.Loader());
-		event.addListener(ID.vidlib("atmosphere"), new Atmosphere.Loader());
-		event.addListener(ID.vidlib("zone"), new ZoneLoader(ZoneLoader.CLIENT_BY_DIMENSION, false));
-		event.addListener(ID.vidlib("msdf"), new MSDFFont.Loader());
+		event.addListener(ID.vidlib("clock_font"), new ClockFont.ClientLoader());
+		event.addListener(ID.vidlib("atmosphere"), new Atmosphere.ClientLoader());
+		event.addListener(ID.vidlib("msdf"), new MSDFFont.ClientLoader());
 
 		event.addDependency(ID.vidlib("gradient"), ID.vidlib("clothing_preset"));
 		event.addDependency(ID.vidlib("structure"), ID.vidlib("ghost_structure"));
-		event.addDependency(ID.vidlib("clock_font"), ID.vidlib("clock"));
 	}
 
 	@SubscribeEvent
@@ -220,7 +217,7 @@ public class VidLibClientEventHandler {
 		var mc = Minecraft.getInstance();
 
 		if (mc.level != null && mc.player != null) {
-			ScreenText.CLIENT_TICK.ops = mc.jsonOps();
+			ScreenText.CLIENT_TICK.ops = mc.level.jsonOps();
 
 			var tool = VidLibTool.of(mc.player);
 
@@ -377,13 +374,15 @@ public class VidLibClientEventHandler {
 
 		if (frame.layer() == TerrainRenderLayer.CUTOUT) {
 			if (ClockRenderer.VISIBLE.get()) {
-				for (var clock : Clock.REGISTRY) {
+				for (var ref : Clock.REGISTRY) {
+					var clock = ref.value();
+
 					if (!clock.locations().isEmpty()) {
-						var value = session.clocks.get(clock.id());
+						var value = session.clocks.get(ref);
 
 						if (value != null) {
 							for (var location : clock.locations()) {
-								if (location.dimension() == mc.level.dimension() && location.visible().test(mc.player)) {
+								if (location.dimension() == mc.level.dimension() && location.visible().value().test(mc.player)) {
 									ClockRenderer.render(frame, value, location);
 								}
 							}
@@ -533,7 +532,7 @@ public class VidLibClientEventHandler {
 
 		if (!ClientGameEngine.INSTANCE.hideGui(mc) && !mc.player.isReplayCamera()) {
 			ScreenText.RENDER.addAll(ScreenText.CLIENT_TICK);
-			ScreenText.RENDER.ops = mc.jsonOps();
+			ScreenText.RENDER.ops = mc.level.jsonOps();
 
 			if (mc.screen == null || mc.screen instanceof ChatScreen) {
 				NeoForge.EVENT_BUS.post(new DebugTextEvent.Render(ScreenText.RENDER));
@@ -541,7 +540,7 @@ public class VidLibClientEventHandler {
 				var zoneClip = session.zoneClip;
 
 				if (zoneClip != null) {
-					var component = Component.literal("Zone: ").append(Component.literal(zoneClip.instance().container.id.toString()).withStyle(ChatFormatting.AQUA));
+					var component = Component.literal("Zone: ").append(Component.literal(zoneClip.instance().container.key()).withStyle(ChatFormatting.AQUA));
 
 					if (zoneClip.instance().container.zones.size() > 1) {
 						component.append(Component.literal("[" + zoneClip.instance().index + "]").withStyle(ChatFormatting.GREEN));
@@ -553,7 +552,7 @@ public class VidLibClientEventHandler {
 
 					ScreenText.RENDER.topLeft.add(component);
 
-					var zoneTag = zoneClip.instance().zone.data();
+					var zoneTag = zoneClip.instance().volume.data();
 
 					if (!zoneTag.isEmpty()) {
 						for (var key : zoneTag.keySet()) {
@@ -605,7 +604,7 @@ public class VidLibClientEventHandler {
 		var mc = Minecraft.getInstance();
 
 		if (mc.player != null && mc.level != null) {
-			if (!mc.player.isSpectatorOrCreative() && event.getBlockState().is(Blocks.BARRIER)) {
+			if (!EntityUtils.isSpectatorOrCreative(mc.player) && event.getBlockState().is(Blocks.BARRIER)) {
 				event.setCanceled(true);
 				return;
 			}
@@ -704,7 +703,7 @@ public class VidLibClientEventHandler {
 		PlayerProfiles.cache(event.getPlayer().getGameProfile());
 
 		if (!event.getPlayer().vl$sessionData().clientModListSentDuringConfig) {
-			event.getPlayer().c2s(new ClientModListPayload(VLPlatformHelper.CURRENT.getModList()));
+			event.getPlayer().c2s(new ClientModListPayload(PlatformHelper.CURRENT.getModList()));
 		}
 	}
 
@@ -769,7 +768,7 @@ public class VidLibClientEventHandler {
 				LinkHubUserScreen.open(event.getMinecraft());
 			}
 		} else if (HubMinecraftProfileData.SELF == null) {
-			if (!VLPlatformHelper.CURRENT.isDevEnv()) {
+			if (!PlatformHelper.CURRENT.isDevEnv()) {
 				LinkMinecraftScreen.handle(event.getMinecraft(), true);
 			}
 		}
@@ -788,7 +787,7 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void syncClientFilesHub(SyncClientFilesHubEvent event) {
-		var gameDir = VLPlatformHelper.CURRENT.getGameDirectory();
+		var gameDir = PlatformHelper.CURRENT.getGameDirectory();
 
 		event.addDirectory(gameDir.resolve("voicechat_recordings"), builder -> {
 			builder.setType(HubFileType.VOICE_CHAT_RECORDING);

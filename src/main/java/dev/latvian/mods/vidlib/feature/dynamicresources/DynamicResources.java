@@ -6,6 +6,7 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.io.ByteArrayIoSupplier;
 import dev.latvian.mods.klib.io.StringIoSupplier;
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
@@ -50,7 +51,7 @@ public record DynamicResources(
 
 		VLPlatformHelper.CURRENT.collectDynamicResources(packType, dynamicResourcesId -> {
 			VidLib.LOGGER.info("Loading " + dynamicResourcesId);
-			var path = VLPlatformHelper.CURRENT.findFile(packType, dynamicResourcesId.withSuffix(".json"));
+			var path = PlatformHelper.CURRENT.findFile(packType, dynamicResourcesId.withSuffix(".json"));
 
 			if (path != null) {
 				try {
@@ -77,7 +78,7 @@ public record DynamicResources(
 
 		if (!dynamicResources.files.isEmpty()) {
 			for (var file : dynamicResources.files) {
-				var inPath = VLPlatformHelper.CURRENT.findFile(packType, file.template());
+				var inPath = PlatformHelper.CURRENT.findFile(packType, file.template());
 				var template = Files.readString(inPath);
 
 				for (var resource : resourcesList) {
@@ -102,7 +103,7 @@ public record DynamicResources(
 			var remap = new Int2IntMap[resourcesList.size()];
 
 			if (dynamicResources.colorMap.isPresent()) {
-				var inPath = VLPlatformHelper.CURRENT.findFile(packType, dynamicResources.colorMap.get());
+				var inPath = PlatformHelper.CURRENT.findFile(packType, dynamicResources.colorMap.get());
 
 				try (var in = Files.newInputStream(inPath)) {
 					var colorMap = ImageIO.read(in);
@@ -136,7 +137,7 @@ public record DynamicResources(
 			}
 
 			for (var file : dynamicResources.textures) {
-				var inPath = VLPlatformHelper.CURRENT.findFile(packType, file.template());
+				var inPath = PlatformHelper.CURRENT.findFile(packType, file.template());
 
 				try (var in = Files.newInputStream(inPath)) {
 					var template = ImageIO.read(in);

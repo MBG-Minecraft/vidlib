@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.zone.shape;
 
-import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
+import dev.latvian.mods.klib.registry.UnitType;
+import dev.latvian.mods.vidlib.feature.zone.ZoneClipContext;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
-import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -14,14 +14,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public class UniverseZoneShape implements ZoneShape {
-	public static final CustomRegistryType<UniverseZoneShape> TYPE = CustomRegistryType.unit("universe", new UniverseZoneShape());
+public enum UniverseZoneShape implements ZoneShape {
+	INSTANCE;
 
-	private UniverseZoneShape() {
-	}
+	public static final UnitType<ByteBuf, ZoneShape> TYPE = UnitType.create("universe", INSTANCE);
 
 	@Override
-	public CustomRegistryType<?> type() {
+	public UnitType<ByteBuf, ZoneShape> type() {
 		return TYPE;
 	}
 
@@ -37,7 +36,7 @@ public class UniverseZoneShape implements ZoneShape {
 
 	@Override
 	@Nullable
-	public ZoneClipResult clip(ZoneInstance instance, ClipContext ctx) {
+	public ZoneClipResult clip(ZoneClipContext ctx) {
 		return null;
 	}
 

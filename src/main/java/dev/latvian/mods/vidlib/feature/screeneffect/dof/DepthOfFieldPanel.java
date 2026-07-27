@@ -1,11 +1,11 @@
 package dev.latvian.mods.vidlib.feature.screeneffect.dof;
 
+import dev.latvian.mods.klib.entity.PositionType;
+import dev.latvian.mods.klib.kvector.KVector;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
 import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
-import dev.latvian.mods.vidlib.math.kvector.PositionType;
 import imgui.ImGui;
 
 public class DepthOfFieldPanel extends Panel {
@@ -28,7 +28,7 @@ public class DepthOfFieldPanel extends Panel {
 		if (ImGui.checkbox("Override", DepthOfField.OVERRIDE_ENABLED) && DepthOfField.OVERRIDE_ENABLED.get()) {
 			if (graphics.player != null) {
 				var pos = KVector.following(graphics.player, PositionType.EYES);
-				builder.set(DepthOfField.OVERRIDE.withFocus(pos));
+				builder.set(DepthOfField.OVERRIDE.withFocus(pos.ref()));
 				builder.focus.set(pos);
 				update = true;
 			}

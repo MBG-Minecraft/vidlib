@@ -4,7 +4,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class VidLibBlocks {
-	public static final DeferredRegister.Blocks REGISTRY = DeferredRegister.createBlocks(ID.vidlib);
+	public static final DeferredRegister.Blocks REGISTRY = DeferredRegister.createBlocks(VidLib.ID);
 
 	public static void register() {
 	}

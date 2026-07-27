@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.feature.waypoint;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ComponentArgument;
@@ -42,7 +41,7 @@ public class WaypointCommands {
 	private static int add(CommandSourceStack source, String id, Vec3 position, Component label) {
 		source.getServer().addWaypoints(List.of(new Waypoint.Builder()
 			.id(id)
-			.position(KVector.of(position))
+			.position(position)
 			.label(label)
 			.distance(6D, 20D, 0D)
 			.build()

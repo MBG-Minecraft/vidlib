@@ -81,7 +81,7 @@ public class Decal {
 		Decal::new
 	);
 
-	public static final DataType<Decal> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, Decal.class);
+	public static final DataType<Decal> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 
 	public Decal parent;
 	public DecalType type;

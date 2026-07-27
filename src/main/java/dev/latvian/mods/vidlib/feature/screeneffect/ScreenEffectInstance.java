@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.screeneffect;
 
+import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
-import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 public abstract class ScreenEffectInstance {

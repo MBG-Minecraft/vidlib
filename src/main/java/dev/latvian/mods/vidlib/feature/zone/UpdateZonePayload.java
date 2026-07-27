@@ -1,20 +1,19 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
-import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.resources.Identifier;
 
-public record UpdateZonePayload(Identifier zone, int index, Zone zoneData) implements SimplePacketPayload {
+public record UpdateZonePayload(Ref<ZoneContainer> zone, int index, ZoneVolume zoneVolume) implements SimplePacketPayload {
 	@AutoPacket
 	public static final VidLibPacketType<UpdateZonePayload> TYPE = VidLibPacketType.internal("zone/update", CompositeStreamCodec.of(
-		ID.STREAM_CODEC, UpdateZonePayload::zone,
+		ZoneContainer.STREAM_CODEC, UpdateZonePayload::zone,
 		ByteBufCodecs.VAR_INT, UpdateZonePayload::index,
-		Zone.STREAM_CODEC, UpdateZonePayload::zoneData,
+		ZoneVolume.STREAM_CODEC, UpdateZonePayload::zoneVolume,
 		UpdateZonePayload::new
 	));
 
@@ -25,6 +24,6 @@ public record UpdateZonePayload(Identifier zone, int index, Zone zoneData) imple
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.level().getEnvironment().updateZone(zone, index, zoneData);
+		ctx.level().getEnvironment().updateZone(zone, index, zoneVolume);
 	}
 }

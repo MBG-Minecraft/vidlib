@@ -3,10 +3,10 @@ package dev.latvian.mods.vidlib.feature.session;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.knumber.KNumberVariables;
 import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.math.ProjectedCoordinates;
-import dev.latvian.mods.klib.math.VoxelShapeBox;
-import dev.latvian.mods.klib.util.Side;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
@@ -16,6 +16,7 @@ import dev.latvian.mods.vidlib.feature.atmosphere.ClientAtmosphere;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeInstance;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
+import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.cutscene.ClientCutscene;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
@@ -38,21 +39,17 @@ import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverridesRep
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.feature.note.Note;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
 import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
-import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
+import dev.latvian.mods.vidlib.feature.zone.ZoneCache;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
-import dev.latvian.mods.vidlib.feature.zone.ZoneEvent;
-import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
-import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
-import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -60,7 +57,6 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -82,18 +78,15 @@ public class LocalClientSessionData extends ClientSessionData {
 	private final Map<UUID, RemoteClientSessionData> remoteSessionData;
 	private List<ClientSessionData> allClientSessionData;
 	private ScheduledTask.Handler scheduledTaskHandler;
-	public final ActiveZones serverZones;
-	public final ActiveZones filteredZones;
 	public ZoneClipResult zoneClip;
 	public final List<ScreenShakeInstance> screenShakeInstances;
 	public Vector2dc prevCameraShake;
 	public Vector2dc cameraShake;
-	public Map<Identifier, ClockValue> clocks;
-	public Map<Identifier, ClientAtmosphere> atmosphereCache;
+	public Map<Ref<Clock>, ClockValue> clocks;
+	public Map<String, ClientAtmosphere> atmosphereCache;
 	public final DataMap serverDataMap;
 	public final KNumberVariables globalVariables;
 	public ClientAtmosphere atmosphere;
-	public Map<ZoneShape, VoxelShapeBox> cachedZoneShapes;
 	public CameraOverride cameraOverride;
 	public ClientCutscene currentCutscene;
 	public ScreenFadeInstance screenFade;
@@ -117,13 +110,11 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.mc = mc;
 		this.remoteSessionData = new Object2ObjectOpenHashMap<>();
 
-		this.serverZones = new ActiveZones();
-		this.filteredZones = new ActiveZones();
 		this.zoneClip = null;
 		this.screenShakeInstances = new ArrayList<>();
 		this.prevCameraShake = this.cameraShake = Identity.DVEC_2;
-		this.clocks = new Object2ObjectOpenHashMap<>();
-		this.atmosphereCache = new Object2ObjectOpenHashMap<>();
+		this.clocks = new Reference2ObjectOpenHashMap<>();
+		this.atmosphereCache = new Reference2ObjectOpenHashMap<>();
 		this.serverDataMap = new DataMap(uuid, DataKey.SERVER, mc);
 		this.globalVariables = new KNumberVariables();
 		this.debugDecals = new ArrayList<>();
@@ -185,18 +176,12 @@ public class LocalClientSessionData extends ClientSessionData {
 		}
 	}
 
-	public ClientAtmosphere getAtmosphere(Identifier id) {
-		var atmosphere = atmosphereCache.get(id);
+	public ClientAtmosphere getAtmosphere(Ref<Atmosphere> ref) {
+		var atmosphere = atmosphereCache.get(ref.key());
 
 		if (atmosphere == null) {
-			var atmosphereData = Atmosphere.REGISTRY.get(id);
-
-			if (atmosphereData == null) {
-				atmosphereData = Atmosphere.empty(id);
-			}
-
-			atmosphere = new ClientAtmosphere(atmosphereData);
-			atmosphereCache.put(id, atmosphere);
+			atmosphere = new ClientAtmosphere(ref);
+			atmosphereCache.put(ref.key(), atmosphere);
 		}
 
 		return atmosphere;
@@ -218,7 +203,15 @@ public class LocalClientSessionData extends ClientSessionData {
 		}
 
 		level.vl$preTick(paused);
-		filteredZones.tick(level);
+
+		for (var ref : ZoneContainer.REGISTRY) {
+			var zoneContainer = ref.value();
+
+			if (zoneContainer.dimension == level.dimension()) {
+				zoneContainer.tick(ZoneCache.of(zoneContainer.dimension, true), level);
+			}
+		}
+
 		updateOverrides(player);
 		CanvasImpl.tickAll(mc);
 
@@ -276,9 +269,9 @@ public class LocalClientSessionData extends ClientSessionData {
 
 			while (shakeIt.hasNext()) {
 				var instance = shakeIt.next();
-				var vec = instance.shake.type().get(instance.progress);
+				var vec = instance.shake.type().value().get(instance.progress);
 				var intensity = instance.shake.intensity();
-				var intensityScale = instance.shake.interpolation().interpolate(instance.ticks / (float) instance.shake.duration());
+				var intensityScale = instance.shake.ease().apply(instance.ticks / (float) instance.shake.duration());
 				shakeX += vec.x() * intensity * intensityScale;
 				shakeY += vec.y() * intensity * intensityScale;
 
@@ -310,28 +303,12 @@ public class LocalClientSessionData extends ClientSessionData {
 	}
 
 	public void refreshZones(ResourceKey<Level> dimension) {
-		filteredZones.filter(dimension, serverZones, ZoneLoader.CLIENT_BY_DIMENSION.get(dimension));
+		ZoneCache.clearAll();
 		cachedZoneShapes = null;
-		NeoForge.EVENT_BUS.post(new ZoneEvent.Updated(dimension, filteredZones, Side.CLIENT));
 	}
 
 	@Override
-	public <V> void syncRegistry(Player player, SyncedRegistry<V> registry, Map<Identifier, V> map) {
-		registry.registry().update(map);
-
-		if (registry.callback() != null) {
-			registry.callback().run(player);
-		}
-	}
-
-	@Override
-	public void updateZones(Level level) {
-		serverZones.update(ZoneContainer.REGISTRY.getMap().values());
-		refreshZones(level.dimension());
-	}
-
-	@Override
-	public void updateClocks(Map<Identifier, ClockValue> map) {
+	public void updateClocks(Map<Ref<Clock>, ClockValue> map) {
 		clocks.clear();
 		clocks.putAll(map);
 	}
@@ -370,7 +347,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		var data = getClientSessionData(player);
 		data.prevInput = data.input = input;
 
-		if (level.getEntityByUUID(player) instanceof Player entity) {
+		if (level.klib$getEntityByUUID(player) instanceof Player entity) {
 			var vehicle = entity.getVehicle();
 
 			if (vehicle != null) {

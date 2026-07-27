@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.feature.font;
 
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.klib.util.JsonCodecReloadListener;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
-import dev.latvian.mods.vidlib.util.JsonCodecReloadListener;
 import imgui.type.ImFloat;
 import it.unimi.dsi.fastutil.chars.Char2FloatMap;
 import it.unimi.dsi.fastutil.chars.Char2FloatMaps;
@@ -79,9 +79,9 @@ public record MSDFFont(
 		return ALL.getOrDefault(key, UNKNOWN);
 	}
 
-	public static class Loader extends JsonCodecReloadListener<MSDFFontData> {
-		public Loader() {
-			super("vidlib/msdf", MSDFFontData.CODEC, false);
+	public static class ClientLoader extends JsonCodecReloadListener<MSDFFontData> {
+		public ClientLoader() {
+			super("vidlib/msdf", MSDFFontData.CODEC);
 		}
 
 		@Override

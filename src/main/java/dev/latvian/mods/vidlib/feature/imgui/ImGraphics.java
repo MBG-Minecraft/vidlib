@@ -5,11 +5,11 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
-import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
+import dev.latvian.mods.klib.util.NameProvider;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
@@ -40,7 +40,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImNodesStyleVarConsumer, ImNodesStyleColorConsumer {
@@ -402,15 +401,12 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		ImGui.setNextWindowSize(viewport.getWorkSizeX(), viewport.getWorkSizeY());
 	}
 
-	public <E> ImUpdate combo(String label, Object[] selected, String noneLabel, Iterable<? extends E> options, @Nullable Function<E, String> nameFunction, @Nullable ImString search) {
+	public <E> ImUpdate combo(String label, Object[] selected, String noneLabel, Iterable<? extends E> options, @Nullable NameProvider<E> nameFunction, @Nullable ImString search) {
 		var result = ImUpdate.NONE;
 		var searchText = search != null ? search.get().toLowerCase(Locale.ROOT) : "";
+		nameFunction = NameProvider.resolve(nameFunction);
 
-		if (nameFunction == null) {
-			nameFunction = (Function<E, String>) KLibCodecs.DEFAULT_NAME_GETTER;
-		}
-
-		if (ImGui.beginCombo(label, selected[0] == null ? noneLabel.isEmpty() ? "None" : noneLabel : nameFunction.apply((E) selected[0]), ImGuiInputTextFlags.None)) {
+		if (ImGui.beginCombo(label, selected[0] == null ? noneLabel.isEmpty() ? "None" : noneLabel : nameFunction.provideName((E) selected[0]), ImGuiInputTextFlags.None)) {
 			float y = ImGui.getCursorPos().y;
 
 			if (search != null) {
@@ -438,7 +434,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 
 			for (var option : options) {
 				boolean isSelected = selected[0] == option;
-				var itemLabel = nameFunction.apply(option);
+				var itemLabel = nameFunction.provideName(option);
 
 				if ((isSelected || searchText.isEmpty() || itemLabel.toLowerCase(Locale.ROOT).contains(searchText)) && ImGui.selectable(itemLabel + "###" + i, isSelected)) {
 					selected[0] = option;
@@ -458,7 +454,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		return result;
 	}
 
-	public <E> ImUpdate combo(String label, Object[] selected, String noneLabel, E[] options, @Nullable Function<E, String> nameFunction) {
+	public <E> ImUpdate combo(String label, Object[] selected, String noneLabel, E[] options, @Nullable NameProvider<E> nameFunction) {
 		return combo(label, selected, noneLabel, Arrays.asList(options), nameFunction, null);
 	}
 

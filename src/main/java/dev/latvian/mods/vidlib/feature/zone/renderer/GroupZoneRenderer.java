@@ -4,11 +4,11 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
 import dev.latvian.mods.klib.util.Cast;
-import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShapeGroup;
+import dev.latvian.mods.vidlib.feature.zone.shape.JoinedZoneShape;
 
-public class GroupZoneRenderer implements ZoneRenderer<ZoneShapeGroup> {
+public class GroupZoneRenderer implements ZoneRenderer<JoinedZoneShape> {
 	@Override
-	public void render(ZoneShapeGroup group, Context ctx) {
+	public void render(JoinedZoneShape group, Context ctx) {
 		if (ctx.outerBounds()) {
 			var ms = ctx.frame().poseStack();
 			var box = group.toAABB();
@@ -22,8 +22,8 @@ public class GroupZoneRenderer implements ZoneRenderer<ZoneShapeGroup> {
 		}
 
 		for (var shape : group.zoneShapes()) {
-			if (ctx.frame().isVisible(shape.toAABB())) {
-				var renderer = ZoneRenderer.get(shape.type());
+			if (ctx.frame().isVisible(shape.value().toAABB())) {
+				var renderer = ZoneRenderer.get(shape.value().type());
 
 				if (renderer != EmptyZoneRenderer.INSTANCE) {
 					renderer.render(Cast.to(shape), ctx);

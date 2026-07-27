@@ -1,9 +1,12 @@
 package dev.latvian.mods.vidlib.core;
 
 import com.mojang.datafixers.util.Pair;
+import dev.latvian.mods.klib.block.PositionedBlock;
+import dev.latvian.mods.klib.knumber.KNumberVariables;
+import dev.latvian.mods.klib.kvector.KVector;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.MessageConsumer;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
-import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.bulk.RedrawChunkSectionsPayload;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeAtPositionPayload;
@@ -32,11 +35,8 @@ import dev.latvian.mods.vidlib.feature.particle.SpawnTextParticlePayload;
 import dev.latvian.mods.vidlib.feature.particle.SpawnWindParticlesPayload;
 import dev.latvian.mods.vidlib.feature.particle.TextParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.WindData;
-import dev.latvian.mods.vidlib.feature.particle.physics.PalettePhysicsParticlesData;
-import dev.latvian.mods.vidlib.feature.particle.physics.PalettePhysicsParticlesPayload;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
-import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesIdData;
-import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesIdPayload;
+import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesDisplayData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesPayload;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.Fade;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadePayload;
@@ -45,8 +45,6 @@ import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundPayload;
 import dev.latvian.mods.vidlib.feature.vote.StartNumberVotingPayload;
 import dev.latvian.mods.vidlib.feature.vote.StartYesNoVotingPayload;
-import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.core.BlockPos;
@@ -116,10 +114,10 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 		toast("", 5000L, title, description);
 	}
 
-	default void playCutscene(Cutscene cutscene, KNumberVariables variables) {
+	default void playCutscene(Ref<Cutscene> cutscene, KNumberVariables variables) {
 		if (isClient()) {
 			getEnvironment().playCutscene(cutscene, variables);
-		} else if (!cutscene.steps.isEmpty()) {
+		} else if (!cutscene.value().steps.isEmpty()) {
 			s2c(new PlayCutscenePayload(cutscene, variables));
 		}
 	}
@@ -221,47 +219,35 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 	}
 
 	default void playGlobalSound(Vec3 pos, SoundData sound) {
-		playGlobalSound(new PositionedSoundData(sound, KVector.of(pos), false, false), KNumberVariables.EMPTY);
+		playGlobalSound(new PositionedSoundData(sound, KVector.of(pos).ref(), false, false), KNumberVariables.EMPTY);
 	}
 
 	default void playGlobalSound(SoundData sound) {
 		playGlobalSound(new PositionedSoundData(sound), KNumberVariables.EMPTY);
 	}
 
-	default void physicsParticles(PhysicsParticleData data, long spawnTime, long seed, List<PositionedBlock> blocks) {
+	default void physicsParticles(PhysicsParticlesDisplayData data, long gameTime) {
 		if (isClient()) {
-			getEnvironment().physicsParticles(data, spawnTime, seed, blocks);
-		} else if (!blocks.isEmpty()) {
-			s2c(new PhysicsParticlesPayload(data, seed, blocks));
+			getEnvironment().physicsParticles(data, gameTime);
+		} else {
+			s2c(new PhysicsParticlesPayload(data, gameTime));
 		}
 	}
 
-	default void physicsParticles(PhysicsParticlesIdData data, long spawnTime) {
-		if (isClient()) {
-			getEnvironment().physicsParticles(data, spawnTime);
-		} else if (!data.blocks().isEmpty()) {
-			s2c(new PhysicsParticlesIdPayload(data));
-		}
+	default void physicsParticles(Ref<PhysicsParticleData> data, long seed, List<PositionedBlock> blocks) {
+		physicsParticles(data, vl$level().getGameTime(), seed, blocks);
 	}
 
-	default void physicsParticles(PalettePhysicsParticlesData data, long spawnTime) {
+	default void physicsParticles(Ref<PhysicsParticleData> data, List<PositionedBlock> blocks) {
+		physicsParticles(data, vl$level().vl$level().getRandom().nextLong(), blocks);
+	}
+
+	default void physicsParticles(Ref<PhysicsParticleData> data) {
 		if (isClient()) {
 			getEnvironment().physicsParticles(data, spawnTime);
 		} else if (!data.positions().isEmpty()) {
 			s2c(new PalettePhysicsParticlesPayload(data));
 		}
-	}
-
-	default void physicsParticles(Identifier id, long seed, List<PositionedBlock> blocks) {
-		physicsParticles(new PhysicsParticlesIdData(id, seed, blocks), vl$level().getGameTime());
-	}
-
-	default void physicsParticles(PhysicsParticleData data, List<PositionedBlock> blocks) {
-		physicsParticles(data, vl$level().getGameTime(), vl$level().vl$level().getRandom().nextLong(), blocks);
-	}
-
-	default void physicsParticles(Identifier id, List<PositionedBlock> blocks) {
-		physicsParticles(id, vl$level().vl$level().getRandom().nextLong(), blocks);
 	}
 
 	default void cubeParticles(Map<ShapeParticleOptions, List<BlockPos>> map) {

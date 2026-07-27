@@ -1,8 +1,10 @@
 package dev.latvian.mods.vidlib.core;
 
 import com.mojang.util.UndashedUuid;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
+import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.clock.SyncClocksPayload;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
@@ -17,12 +19,11 @@ import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.RemoveZonePayload;
 import dev.latvian.mods.vidlib.feature.zone.UpdateZonePayload;
-import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
-import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
+import dev.latvian.mods.vidlib.feature.zone.ZoneServerLoader;
+import dev.latvian.mods.vidlib.feature.zone.ZoneVolume;
 import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
 import dev.latvian.mods.vidlib.util.PauseType;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -102,7 +103,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 		for (var level : vl$self().getAllLevels()) {
 			level.vl$preTick(paused);
 
-			var zones = ZoneLoader.SERVER_BY_DIMENSION.get(level.dimension());
+			var zones = ZoneServerLoader.SERVER_BY_DIMENSION.get(level.dimension());
 			level.vl$setActiveZones(zones);
 
 			if (zones != null) {
@@ -154,18 +155,18 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 		}
 	}
 
-	default void setClock(Identifier id, ClockValue value) {
+	default void setClock(Ref<Clock> ref, ClockValue value) {
 		var map = vl$getClocks();
 
-		if (!Objects.equals(map.put(id, value), value)) {
+		if (!Objects.equals(map.put(ref, value), value)) {
 			s2c(new SyncClocksPayload(map));
 		}
 	}
 
-	default void resetClock(Identifier id) {
+	default void resetClock(Ref<Clock> ref) {
 		var map = vl$getClocks();
 
-		if (map.remove(id) != null) {
+		if (map.remove(ref) != null) {
 			s2c(new SyncClocksPayload(map));
 		}
 	}
@@ -179,23 +180,23 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 		}
 	}
 
-	default void setClock(Identifier id, int second) {
-		setClock(id, new ClockValue(second, second <= 0 ? ClockValue.Type.FINISHED : second <= 10 ? ClockValue.Type.FLASH : ClockValue.Type.NORMAL));
+	default void setClock(Ref<Clock> ref, int second) {
+		setClock(ref, new ClockValue(second, second <= 0 ? ClockValue.Type.FINISHED : second <= 10 ? ClockValue.Type.FLASHING : ClockValue.Type.NORMAL));
 	}
 
-	default void setClock(Identifier id, int second, int maxSecond) {
-		setClock(id, new ClockValue(second, second >= maxSecond ? ClockValue.Type.FINISHED : second >= (maxSecond - 10) ? ClockValue.Type.FLASH : ClockValue.Type.NORMAL));
+	default void setClock(Ref<Clock> ref, int second, int maxSecond) {
+		setClock(ref, new ClockValue(second, second >= maxSecond ? ClockValue.Type.FINISHED : second >= (maxSecond - 10) ? ClockValue.Type.FLASHING : ClockValue.Type.NORMAL));
 	}
 
 	@Override
-	default void removeZone(Identifier zone, int index) {
-		var container = ZoneContainer.REGISTRY.get(zone);
+	default void removeZone(Ref<ZoneContainer> zone, int index) {
+		var container = zone.value();
 
 		if (container != null) {
 			container.remove(index);
 		}
 
-		for (var dim : ZoneLoader.SERVER_BY_DIMENSION.values()) {
+		for (var dim : ZoneServerLoader.SERVER_BY_DIMENSION.values()) {
 			dim.remove(zone, index);
 		}
 
@@ -203,18 +204,18 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void updateZone(Identifier zone, int index, Zone zoneData) {
-		var container = ZoneContainer.REGISTRY.get(zone);
+	default void updateZone(Ref<ZoneContainer> zone, int index, ZoneVolume zoneVolume) {
+		var container = zone.value();
 
 		if (container != null) {
-			container.update(index, zoneData);
+			container.update(index, zoneVolume);
 		}
 
-		for (var dim : ZoneLoader.SERVER_BY_DIMENSION.values()) {
-			dim.update(zone, index, zoneData);
+		for (var dim : ZoneServerLoader.SERVER_BY_DIMENSION.values()) {
+			dim.update(zone, index, zoneVolume);
 		}
 
-		s2c(new UpdateZonePayload(zone, index, zoneData));
+		s2c(new UpdateZonePayload(zone, index, zoneVolume));
 	}
 
 	@Override

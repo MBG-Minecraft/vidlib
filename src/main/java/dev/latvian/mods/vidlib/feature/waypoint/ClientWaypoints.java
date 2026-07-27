@@ -71,8 +71,8 @@ public interface ClientWaypoints {
 		var cam = mc.gameRenderer.getMainCamera().position();
 
 		for (var waypoint : waypoints) {
-			if (waypoint.dimension() == level.dimension() && (BYPASS_FILTERS.get() || waypoint.visible().test(mc.player))) {
-				var pos = waypoint.position().get(ctx);
+			if (waypoint.dimension() == level.dimension() && (BYPASS_FILTERS.get() || waypoint.visible().value().test(mc.player))) {
+				var pos = waypoint.position().value().get(ctx);
 
 				if (pos != null) {
 					double distance = waypoint.ignoreHeight() ? Vector2d.distance(pos.x, pos.z, cam.x, cam.z) : pos.distanceTo(cam);

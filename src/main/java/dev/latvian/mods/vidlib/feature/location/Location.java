@@ -8,15 +8,17 @@ import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.klib.kvector.KVector;
+import dev.latvian.mods.klib.registry.CustomRegistry;
+import dev.latvian.mods.klib.registry.CustomRegistryType;
+import dev.latvian.mods.klib.registry.CustomRegistryValue;
+import dev.latvian.mods.klib.registry.DynamicType;
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.util.JsonRegistryReloadListener;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
-import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
@@ -26,47 +28,61 @@ import java.util.function.Supplier;
 
 @AutoInit
 public record Location(
-	Identifier id,
+	Ref<Location> ref,
 	ResourceKey<Level> dimension,
-	List<KVector> positions,
+	List<Ref<KVector>> positions,
 	double range,
 	boolean warp,
 	boolean warpRequiresAdmin
-) implements Supplier<KVector> {
-	public static final Codec<Location> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		ID.CODEC.fieldOf("id").forGetter(Location::id),
-		MCCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(Location::dimension),
-		KLibCodecs.listOrSelf(KVector.CODEC).fieldOf("position").forGetter(Location::positions),
-		Codec.DOUBLE.optionalFieldOf("range", 0D).forGetter(Location::range),
-		Codec.BOOL.optionalFieldOf("warp", true).forGetter(Location::warp),
-		Codec.BOOL.optionalFieldOf("warp_requires_admin", true).forGetter(Location::warpRequiresAdmin)
-	).apply(instance, Location::new));
-
-	public static final StreamCodec<RegistryFriendlyByteBuf, Location> DIRECT_STREAM_CODEC = CompositeStreamCodec.of(
-		ID.STREAM_CODEC, Location::id,
-		MCStreamCodecs.DIMENSION, Location::dimension,
-		KLibStreamCodecs.listOf(KVector.STREAM_CODEC), Location::positions,
-		ByteBufCodecs.DOUBLE, Location::range,
-		ByteBufCodecs.BOOL, Location::warp,
-		ByteBufCodecs.BOOL, Location::warpRequiresAdmin,
-		Location::new
+) implements CustomRegistryValue<RegistryFriendlyByteBuf, Location>, Supplier<Ref<KVector>> {
+	public static final DynamicType<RegistryFriendlyByteBuf, Location> TYPE = DynamicType.create(
+		"default",
+		RecordCodecBuilder.mapCodec(instance -> instance.group(
+			Ref.<Location>contextRefCodec().forGetter(Location::ref),
+			MCCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(Location::dimension),
+			KLibCodecs.listOrSelf(KVector.CODEC).fieldOf("position").forGetter(Location::positions),
+			Codec.DOUBLE.optionalFieldOf("range", 0D).forGetter(Location::range),
+			Codec.BOOL.optionalFieldOf("warp", true).forGetter(Location::warp),
+			Codec.BOOL.optionalFieldOf("warp_requires_admin", true).forGetter(Location::warpRequiresAdmin)
+		).apply(instance, Location::new)),
+		CompositeStreamCodec.of(
+			Ref.contextRefStreamCodec(), Location::ref,
+			MCStreamCodecs.DIMENSION, Location::dimension,
+			KLibStreamCodecs.listOf(KVector.STREAM_CODEC), Location::positions,
+			ByteBufCodecs.DOUBLE, Location::range,
+			ByteBufCodecs.BOOL, Location::warp,
+			ByteBufCodecs.BOOL, Location::warpRequiresAdmin,
+			Location::new
+		)
 	);
 
-	public static final VLRegistry<Location> REGISTRY = VLRegistry.createServer("location", Location.class);
-	public static final DataType<Location> DATA_TYPE = REGISTRY.dataType();
+	public static final CustomRegistry<RegistryFriendlyByteBuf, Location> REGISTRY = CustomRegistry.create("location", TYPE);
+	public static final Codec<Ref<Location>> CODEC = REGISTRY.codec();
+	public static final StreamCodec<RegistryFriendlyByteBuf, Ref<Location>> STREAM_CODEC = REGISTRY.streamCodec();
+	public static final DataType<Ref<Location>> DATA_TYPE = REGISTRY.dataType();
 
-	public static class Loader extends JsonRegistryReloadListener<Location> {
-		public Loader(VLRegistry<Location> registry) {
-			super("vidlib/location", DIRECT_CODEC, true, registry);
+	public static class ServerLoader extends JsonRegistryReloadListener<Location> {
+		public ServerLoader() {
+			super("vidlib/location", REGISTRY);
 		}
 	}
 
 	@Override
-	public KVector get() {
+	public CustomRegistry<RegistryFriendlyByteBuf, Location> getRegistry() {
+		return REGISTRY;
+	}
+
+	@Override
+	public CustomRegistryType<RegistryFriendlyByteBuf, Location> type() {
+		return TYPE;
+	}
+
+	@Override
+	public Ref<KVector> get() {
 		return positions.getFirst();
 	}
 
-	public KVector random(RandomSource source) {
+	public Ref<KVector> sample(RandomSource source) {
 		return positions.get(source.nextInt(positions.size()));
 	}
 }

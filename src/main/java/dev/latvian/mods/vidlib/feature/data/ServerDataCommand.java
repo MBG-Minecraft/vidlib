@@ -29,9 +29,9 @@ public interface ServerDataCommand {
 			);
 
 			cmd.then(Commands.literal("set")
-				.then(Commands.argument("value", key.command().argument(buildContext))
+				.then(Commands.argument("value", key.type().argument(buildContext))
 					.executes(ctx -> {
-						var value = key.command().get(ctx, "value");
+						var value = key.type().get(ctx, "value");
 						ctx.getSource().getServer().set(key, Cast.to(value));
 						return 1;
 					})

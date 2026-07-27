@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
-import dev.latvian.mods.vidlib.core.VLScoreboard;
 import dev.latvian.mods.vidlib.feature.misc.ServerTeams;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
@@ -19,6 +18,6 @@ public class ServerScoreboardMixin {
 
 	@Inject(method = {"onTeamAdded", "onTeamRemoved"}, at = @At("RETURN"))
 	private void vl$onTeamAddedOrRemoved(CallbackInfo ci) {
-		ServerTeams.update(server, (VLScoreboard) this);
+		ServerTeams.update(server, (ServerScoreboard) (Object) this);
 	}
 }

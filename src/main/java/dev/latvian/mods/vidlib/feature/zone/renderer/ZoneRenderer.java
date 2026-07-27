@@ -1,27 +1,28 @@
 package dev.latvian.mods.vidlib.feature.zone.renderer;
 
+import dev.latvian.mods.klib.block.filter.BlockFilter;
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.math.VoxelShapeBox;
+import dev.latvian.mods.klib.core.KLibBlockInWorld;
+import dev.latvian.mods.klib.registry.CustomRegistryType;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
 import dev.latvian.mods.klib.render.SphereRenderer;
 import dev.latvian.mods.klib.shape.SpherePoints;
+import dev.latvian.mods.klib.shape.VoxelShapeBox;
 import dev.latvian.mods.klib.texture.LightUV;
 import dev.latvian.mods.klib.util.Cast;
-import dev.latvian.mods.vidlib.core.VLBlockInWorld;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
-import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.feature.visual.TexturedCubeRenderer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
 import dev.latvian.mods.vidlib.feature.zone.shape.CylinderZoneShape;
+import dev.latvian.mods.vidlib.feature.zone.shape.JoinedZoneShape;
 import dev.latvian.mods.vidlib.feature.zone.shape.RotatedBoxZoneShape;
 import dev.latvian.mods.vidlib.feature.zone.shape.SphereZoneShape;
 import dev.latvian.mods.vidlib.feature.zone.shape.UniverseZoneShape;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
-import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShapeGroup;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.util.Mth;
 
@@ -30,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface ZoneRenderer<T extends ZoneShape> {
-	Map<CustomRegistryType<?>, ZoneRenderer<?>> RENDERERS = new IdentityHashMap<>();
+	Map<CustomRegistryType<ByteBuf, ZoneShape>, ZoneRenderer<?>> RENDERERS = new IdentityHashMap<>();
 
 	record Context(FrameInfo frame, Color color, Color outlineColor, boolean outerBounds) {
 		public MultiBufferSource buffers() {
@@ -38,20 +39,20 @@ public interface ZoneRenderer<T extends ZoneShape> {
 		}
 	}
 
-	static void register(CustomRegistryType<?> type, ZoneRenderer<?> renderer) {
+	static void register(CustomRegistryType<ByteBuf, ZoneShape> type, ZoneRenderer<?> renderer) {
 		RENDERERS.put(type, renderer);
 	}
 
 	@AutoInit(AutoInit.Type.CLIENT_LOADED)
 	static void bootstrap() {
 		ZoneRenderer.register(UniverseZoneShape.TYPE, EmptyZoneRenderer.INSTANCE);
-		ZoneRenderer.register(ZoneShapeGroup.TYPE, new GroupZoneRenderer());
+		ZoneRenderer.register(JoinedZoneShape.TYPE, new GroupZoneRenderer());
 		ZoneRenderer.register(SphereZoneShape.TYPE, new SphereZoneRenderer());
 		ZoneRenderer.register(CylinderZoneShape.TYPE, new CylinderZoneRenderer());
 		ZoneRenderer.register(RotatedBoxZoneShape.TYPE, new RotatedBoxZoneRenderer());
 	}
 
-	static ZoneRenderer<?> get(CustomRegistryType<?> type) {
+	static ZoneRenderer<?> get(CustomRegistryType<ByteBuf, ZoneShape> type) {
 		var renderer = RENDERERS.get(type);
 		return renderer == null ? BoxZoneRenderer.INSTANCE : renderer;
 	}
@@ -117,7 +118,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 												return false;
 											}
 
-											return filter == BlockFilter.ANY.instance() || filter.test(VLBlockInWorld.of(mc.level, pos, state));
+											return filter == BlockFilter.ANY || filter.value().test(KLibBlockInWorld.of(mc.level, pos, state));
 										}).optimize()));
 									});
 								}

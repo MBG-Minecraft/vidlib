@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.screeneffect.fade;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import net.minecraft.commands.Commands;

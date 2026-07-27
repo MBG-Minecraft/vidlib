@@ -7,6 +7,7 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.bloom.BloomRenderTypes;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasRenderPipelines;
@@ -24,7 +25,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
 
-@EventBusSubscriber(modid = ID.vidlib, value = Dist.CLIENT)
+@EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
 public interface VidLibRenderPipelines {
 	RenderPipeline GUI_DEPTH = RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
 		.withLocation(ID.vidlib("pipeline/gui_depth"))

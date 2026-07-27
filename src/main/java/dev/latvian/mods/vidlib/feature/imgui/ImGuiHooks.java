@@ -109,14 +109,14 @@ public class ImGuiHooks {
 		config.setGlyphOffset(0, 0);
 
 		try {
-			var bytes = TTFFile.JETBRAINS_MONO_REGULAR.get().load(resourceManager);
+			var bytes = TTFFile.JETBRAINS_MONO_REGULAR.value().load(resourceManager);
 			fonts.addFontFromMemoryTTF(bytes, 20F, config);
 		} catch (Exception e) {
 			fonts.addFontDefault();
 		}
 
 		try {
-			var bytes = TTFFile.MATERIAL_ICONS_ROUND_REGULAR.get().load(resourceManager);
+			var bytes = TTFFile.MATERIAL_ICONS_ROUND_REGULAR.value().load(resourceManager);
 			config.setMergeMode(true);
 			config.setGlyphOffset(0, 3);
 			fonts.addFontFromMemoryTTF(bytes, 22F, config, buildMaterialIconRanges());

@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.imgui.builder;
 
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.color.CompoundGradient;
-import dev.latvian.mods.klib.color.Gradient;
-import dev.latvian.mods.klib.color.GradientReference;
 import dev.latvian.mods.klib.color.PositionedColor;
+import dev.latvian.mods.klib.gradient.CompoundGradient;
+import dev.latvian.mods.klib.gradient.Gradient;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
@@ -19,8 +19,8 @@ import net.minecraft.resources.Identifier;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GradientImBuilder implements ImBuilder<Gradient> {
-	public static final ImBuilderType<Gradient> TYPE = GradientImBuilder::new;
+public class GradientImBuilder implements ImBuilder<Ref<Gradient>> {
+	public static final ImBuilderType<Ref<Gradient>> TYPE = GradientImBuilder::new;
 	public static final ImString SEARCH = ImGuiUtils.resizableString();
 
 	public final List<PositionedColorImBuilder> colors;
@@ -45,7 +45,7 @@ public class GradientImBuilder implements ImBuilder<Gradient> {
 	}
 
 	@Override
-	public void set(Gradient value) {
+	public void set(Ref<Gradient> value) {
 		colors.clear();
 		reference[0] = null;
 
@@ -158,7 +158,7 @@ public class GradientImBuilder implements ImBuilder<Gradient> {
 	}
 
 	@Override
-	public Gradient build() {
+	public Ref<Gradient> build() {
 		if (reference[0] != null) {
 			return new GradientReference(reference[0]);
 		}

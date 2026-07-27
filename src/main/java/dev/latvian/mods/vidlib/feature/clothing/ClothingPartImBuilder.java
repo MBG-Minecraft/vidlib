@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.clothing;
 
-import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.color.Gradient;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.gradient.Gradient;
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.client.TextureSet;
 import dev.latvian.mods.vidlib.feature.imgui.builder.CompoundImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
@@ -17,7 +17,7 @@ public class ClothingPartImBuilder extends CompoundImBuilder<ClothingPart> {
 	public static final ClientAsset.ResourceTexture DEFAULT_TEXTURE = new ClientAsset.ResourceTexture(ID.vidlib("vidlib/clothing/tracksuit/top"));
 
 	public final ImBuilder<ClientAsset.ResourceTexture> texture = new TextureImBuilder(TEXTURE_SET, DEFAULT_TEXTURE);
-	public final ImBuilder<Gradient> color = new GradientImBuilder();
+	public final ImBuilder<Ref<Gradient>> color = new GradientImBuilder();
 
 	public ClothingPartImBuilder() {
 		add("Texture", texture);
@@ -31,7 +31,7 @@ public class ClothingPartImBuilder extends CompoundImBuilder<ClothingPart> {
 			color.set(value.colors());
 		} else {
 			texture.set(null);
-			color.set(Color.TRANSPARENT);
+			color.set(Gradient.EMPTY);
 		}
 	}
 

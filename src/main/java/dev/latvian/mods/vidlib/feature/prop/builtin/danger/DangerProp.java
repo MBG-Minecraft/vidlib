@@ -1,7 +1,8 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.danger;
 
 import dev.latvian.mods.klib.math.FrustumCheck;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.BlockUtils;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
@@ -32,7 +33,7 @@ public class DangerProp extends Prop {
 	@Override
 	public void tick() {
 		super.tick();
-		groundY = level.getGroundY(pos.x, pos.y, pos.z);
+		groundY = BlockUtils.getGroundY(level, pos.x, pos.y, pos.z);
 	}
 
 	@Override

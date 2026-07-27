@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib;
 
+import dev.latvian.mods.klib.command.CustomRegistryRegistryEvent;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.block.VidLibBlocks;
 import dev.latvian.mods.vidlib.feature.item.VidLibItems;
@@ -15,7 +16,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforgespi.language.IModInfo;
 
-@Mod(ID.vidlib)
+@Mod(VidLib.ID)
 public class VidLibMod {
 	public VidLibMod(ModContainer mod, IEventBus bus) {
 		VLPlatformHelper.CURRENT = new VLNeoPlatformHelper();
@@ -49,7 +50,7 @@ public class VidLibMod {
 			}
 		}
 
-		var particleRegistry = DeferredRegister.create(Registries.PARTICLE_TYPE, ID.vidlib);
+		var particleRegistry = DeferredRegister.create(Registries.PARTICLE_TYPE, VidLib.ID);
 
 		for (var particle : VidLibParticles.PARTICLES) {
 			particleRegistry.register(particle.left(), particle.right());
@@ -61,7 +62,10 @@ public class VidLibMod {
 	}
 
 	public void setup(FMLCommonSetupEvent event) {
-		VidLib.buildRegistries();
+	}
+
+	public void customRegistries(CustomRegistryRegistryEvent event) {
+		VidLib.builtInRegistries(event.getRegistry());
 	}
 
 	private static void printDependencies(IModInfo mod, int level) {

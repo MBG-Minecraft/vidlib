@@ -6,18 +6,19 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.gradient.Gradient;
+import dev.latvian.mods.klib.registry.Ref;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
-public record LineParticleOptions(int lifespan, Gradient startColor, Gradient endColor, int endOffset) implements ParticleOptions {
+public record LineParticleOptions(int lifespan, Ref<Gradient> startColor, Ref<Gradient> endColor, int endOffset) implements ParticleOptions {
 	public static final MapCodec<LineParticleOptions> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KLibCodecs.TICKS.optionalFieldOf("lifespan", 40).forGetter(LineParticleOptions::lifespan),
-		Gradient.CODEC.optionalFieldOf("start_color", Color.WHITE).forGetter(LineParticleOptions::startColor),
-		Gradient.CODEC.optionalFieldOf("end_color", Color.CYAN).forGetter(LineParticleOptions::endColor),
+		Gradient.CODEC.optionalFieldOf("start_color", Gradient.WHITE).forGetter(LineParticleOptions::startColor),
+		Gradient.CODEC.optionalFieldOf("end_color", Color.CYAN.toGradient().ref()).forGetter(LineParticleOptions::endColor),
 		Codec.INT.optionalFieldOf("end_offset", 0).forGetter(LineParticleOptions::endOffset)
 	).apply(instance, LineParticleOptions::new));
 
@@ -29,11 +30,11 @@ public record LineParticleOptions(int lifespan, Gradient startColor, Gradient en
 		LineParticleOptions::new
 	);
 
-	public LineParticleOptions(int lifespan, Gradient startColor, Gradient endColor) {
+	public LineParticleOptions(int lifespan, Ref<Gradient> startColor, Ref<Gradient> endColor) {
 		this(lifespan, startColor, endColor, 0);
 	}
 
-	public LineParticleOptions(int lifespan, Gradient color) {
+	public LineParticleOptions(int lifespan, Ref<Gradient> color) {
 		this(lifespan, color, color);
 	}
 

@@ -9,15 +9,12 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -41,18 +38,6 @@ public abstract class EntityMixin implements VLEntity {
 		}
 	}
 
-	@Unique
-	private boolean vl$isSaving = false;
-
-	@Override
-	@Invoker("setLevel")
-	public abstract void vl$setLevel(Level level);
-
-	@Override
-	public boolean vl$isSaving() {
-		return vl$isSaving;
-	}
-
 	@Inject(method = "getAddEntityPacket", at = @At("HEAD"), cancellable = true)
 	private void vl$getAddEntityPacket(ServerEntity serverEntity, CallbackInfoReturnable<Packet<ClientGamePacketListener>> cir) {
 		var override = CommonGameEngine.INSTANCE.overrideEntitySpawnPacket(vl$self(), serverEntity);
@@ -65,16 +50,6 @@ public abstract class EntityMixin implements VLEntity {
 	@ModifyReturnValue(method = "getGravity", at = @At("RETURN"))
 	private double vl$getGravity(double original) {
 		return original * CommonGameEngine.INSTANCE.getGravityModifier(vl$self());
-	}
-
-	@Inject(method = "saveWithoutId", at = @At("HEAD"))
-	private void vl$beforeSave(ValueOutput output, CallbackInfo ci) {
-		vl$isSaving = true;
-	}
-
-	@Inject(method = "saveWithoutId", at = @At("RETURN"))
-	private void vl$afterSave(ValueOutput output, CallbackInfo ci) {
-		vl$isSaving = false;
 	}
 
 	/**

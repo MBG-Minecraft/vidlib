@@ -5,21 +5,18 @@ import com.mojang.serialization.DataResult;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.AAIBB;
 import dev.latvian.mods.klib.registry.CustomRegistry;
-import dev.latvian.mods.klib.registry.CustomRegistryType;
 import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
+import dev.latvian.mods.klib.registry.CustomRegistryValue;
 import dev.latvian.mods.klib.registry.Ref;
-import dev.latvian.mods.klib.registry.RefOptimizer;
-import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
+import dev.latvian.mods.vidlib.feature.zone.ZoneClipContext;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
-import dev.latvian.mods.vidlib.feature.zone.ZoneInstance;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLike;
+import dev.latvian.mods.vidlib.feature.zone.ZoneVolume;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -27,11 +24,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public interface ZoneShape extends ZoneLike, RefOptimizer<ZoneShape> {
-	CustomRegistry<ByteBuf, ZoneShape> REGISTRY = CustomRegistry.<ByteBuf, ZoneShape>builder()
-		.keys(ID.vidlib("zone_shape"), VidLib.ID)
-		.type(ZoneShape::type)
-		.customCodec(AAIBB.CODEC.flatComapMap(box -> BlockZoneShape.of(box.min(), box.max()), shape -> {
+public interface ZoneShape extends ZoneLike, CustomRegistryValue<ByteBuf, ZoneShape> {
+	CustomRegistry<ByteBuf, ZoneShape> REGISTRY = CustomRegistry.<ByteBuf, ZoneShape>builder("zone_shape")
+		.customCodec(AAIBB.CODEC.flatComapMap(BlockZoneShape::of, shape -> {
 			if (shape instanceof BlockZoneShape b) {
 				return DataResult.success(b.intBox());
 			} else {
@@ -46,7 +41,7 @@ public interface ZoneShape extends ZoneLike, RefOptimizer<ZoneShape> {
 
 	static void builtInTypes(CustomRegistryTypeCollector<ByteBuf, ZoneShape> registry) {
 		registry.register(UniverseZoneShape.TYPE);
-		registry.register(ZoneShapeGroup.TYPE);
+		registry.register(JoinedZoneShape.TYPE);
 		registry.register(BlockZoneShape.TYPE);
 		registry.register(BoxZoneShape.TYPE);
 		registry.register(SphereZoneShape.TYPE);
@@ -54,20 +49,20 @@ public interface ZoneShape extends ZoneLike, RefOptimizer<ZoneShape> {
 		registry.register(RotatedBoxZoneShape.TYPE);
 	}
 
-	@Nullable
-	default CustomRegistryType<ByteBuf, ZoneShape> type() {
-		return null;
+	@Override
+	default CustomRegistry<ByteBuf, ZoneShape> getRegistry() {
+		return REGISTRY;
 	}
 
-	default ZoneInstance createInstance(ZoneContainer container, Zone zone) {
-		return new ZoneInstance(container, zone);
+	default Zone createInstance(ZoneContainer container, ZoneVolume zone) {
+		return new Zone(container, zone);
 	}
 
 	@Override
 	AABB toAABB();
 
 	@Nullable
-	default ZoneClipResult clip(ZoneInstance instance, ClipContext ctx) {
+	default ZoneClipResult clip(ZoneClipContext ctx) {
 		if (contains(ctx.getFrom())) {
 			return null;
 		}
@@ -75,7 +70,7 @@ public interface ZoneShape extends ZoneLike, RefOptimizer<ZoneShape> {
 		var result = AABB.clip(List.of(toAABB()), ctx.getFrom(), ctx.getTo(), BlockPos.ZERO);
 
 		if (result != null && result.getType() == HitResult.Type.BLOCK) {
-			return ZoneClipResult.of(instance, this, ctx, new BlockHitResult(result.getLocation(), result.getDirection(), BlockPos.containing(result.getLocation()), false));
+			return ZoneClipResult.of(ctx, new BlockHitResult(result.getLocation(), result.getDirection(), BlockPos.containing(result.getLocation()), false));
 		}
 
 		return null;

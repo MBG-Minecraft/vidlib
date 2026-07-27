@@ -67,7 +67,7 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 		var playerRenderer = (AvatarRenderer<AbstractClientPlayer>) mc.getEntityRenderDispatcher().getPlayerRenderer(fakePlayer);
 		var playerRenderState = playerRenderer.createRenderState();
 
-		fakePlayer.vl$setLevel(ctx.prop().level);
+		fakePlayer.klib$setLevel(ctx.prop().level);
 		fakePlayer.tickCount = 0;
 		fakePlayer.noPhysics = true;
 
@@ -217,6 +217,6 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 			ms.popPose();
 		}
 
-		fakePlayer.vl$setLevel(null);
+		fakePlayer.klib$setLevel(null);
 	}
 }

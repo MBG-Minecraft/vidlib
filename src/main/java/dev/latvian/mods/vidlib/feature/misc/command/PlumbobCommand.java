@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.misc.command;
 
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import dev.latvian.mods.vidlib.feature.icon.EmptyIcon;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.icon.ItemIcon;
 import net.minecraft.commands.Commands;
@@ -27,7 +27,7 @@ public interface PlumbobCommand {
 		.then(Commands.literal("item")
 			.then(Commands.argument("player", EntityArgument.players())
 				.then(Commands.argument("item", ItemArgument.item(buildContext))
-					.executes(ctx -> plumbob(EntityArgument.getPlayers(ctx, "player"), Optional.of(new ItemIcon(ItemArgument.getItem(ctx, "item").createItemStack(1).copyWithCount(1)))))
+					.executes(ctx -> plumbob(EntityArgument.getPlayers(ctx, "player"), Optional.of(new ItemIcon(ItemArgument.getItem(ctx, "item").createItemStack(1).copyWithCount(1)).ref())))
 				)
 			)
 		)
@@ -38,9 +38,9 @@ public interface PlumbobCommand {
 		)
 	);
 
-	private static int plumbob(Collection<ServerPlayer> players, Optional<Icon> icon) {
+	private static int plumbob(Collection<ServerPlayer> players, Optional<Ref<Icon>> icon) {
 		for (var player : players) {
-			player.setPlumbob(icon.orElse(EmptyIcon.INSTANCE));
+			player.setPlumbob(icon.orElse(Icon.EMPTY));
 		}
 
 		return 1;

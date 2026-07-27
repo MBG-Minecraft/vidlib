@@ -1,0 +1,105 @@
+package dev.latvian.mods.vidlib.feature.zone;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.mojang.serialization.JsonOps;
+import dev.latvian.mods.klib.util.JsonReloadListener;
+import dev.latvian.mods.klib.util.Side;
+import dev.latvian.mods.vidlib.VidLib;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.NeoForge;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Map;
+
+public class ZoneServerLoader extends JsonReloadListener {
+	public static final Map<ResourceKey<Level>, ZoneCache> SERVER_BY_DIMENSION = new IdentityHashMap<>();
+
+	public final Map<ResourceKey<Level>, ZoneCache> byDimension;
+
+	public ZoneServerLoader() {
+		super("vidlib/zone");
+		this.byDimension = SERVER_BY_DIMENSION;
+	}
+
+	@Override
+	protected void apply(Map<Identifier, JsonElement> from, ResourceManager resourceManager, ProfilerFiller profiler) {
+		var list = new ArrayList<ZoneContainer>();
+
+		for (var entry : from.entrySet()) {
+			var id = entry.getKey();
+
+			try {
+				var json = entry.getValue().getAsJsonObject();
+				var dimension = json.has("dimension") ? ResourceKey.create(Registries.DIMENSION, Identifier.parse(json.get("dimension").getAsString())) : Level.OVERWORLD;
+				var container = new ZoneContainer(ZoneContainer.REGISTRY.ref(id.getPath()), dimension);
+				int index = 0;
+
+				if (json.get("tags") instanceof JsonArray array) {
+					for (var element : array) {
+						container.tags.add(element.getAsString());
+					}
+				}
+
+				if (json.has("priority")) {
+					container.priority = json.get("priority").getAsInt();
+				}
+
+				for (var element : json.getAsJsonArray("zones")) {
+					if (element.isJsonObject()) {
+						var zoneJson = element.getAsJsonObject();
+						var decoded = ZoneVolume.CODEC.parse(JsonOps.INSTANCE, zoneJson);
+
+						if (decoded.error().isPresent()) {
+							VidLib.LOGGER.error("Error while parsing zone " + id + "[" + index + "]: " + decoded.error().get());
+						} else {
+							var zone = decoded.result().orElseThrow();
+							container.add(zone);
+						}
+					}
+
+					index++;
+				}
+
+				list.add(container);
+			} catch (Exception ex) {
+				VidLib.LOGGER.error("Error while parsing zone container " + id, ex);
+			}
+		}
+
+		NeoForge.EVENT_BUS.post(new ZoneEvent.Generate(list));
+
+		list.sort(null);
+		byDimension.clear();
+
+		for (var container : list) {
+			var zones = byDimension.get(container.dimension);
+
+			if (zones == null) {
+				zones = new ZoneCache();
+				byDimension.put(container.dimension, zones);
+			}
+
+			zones.containers.put(container.id, container);
+		}
+
+		var map = new HashMap<Identifier, ZoneContainer>();
+
+		for (var container : list) {
+			map.put(container.id, container);
+		}
+
+		ZoneContainer.REGISTRY.updateValues(map);
+
+		for (var entry : byDimension.entrySet()) {
+			NeoForge.EVENT_BUS.post(new ZoneEvent.Updated(entry.getKey(), entry.getValue(), Side.SERVER));
+		}
+	}
+}

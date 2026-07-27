@@ -11,7 +11,7 @@ public enum ReplayMarkerType implements StringRepresentable {
 	POST_RECORDING("post_recording"),
 	NOTE("note");
 
-	public static final Codec<ReplayMarkerType> CODEC = KLibCodecs.anyEnumCodec(values());
+	public static final Codec<ReplayMarkerType> CODEC = KLibCodecs.anyEnum(values());
 
 	private final String name;
 

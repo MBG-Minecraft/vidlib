@@ -115,7 +115,7 @@ public interface PlayerSkins {
 		)
 	);
 
-	DataType<PlayerSkin> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, PlayerSkin.class);
+	DataType<PlayerSkin> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 
 	static GalleryImage<UUID> get(Minecraft mc, UUID uuid) {
 		return GALLERY.getRemote(mc, uuid, PlayerProfiles::getName, (id, n) -> PlayerProfiles.get(id).skinUrl().orElse(null), ImagePreProcessor.NONE);

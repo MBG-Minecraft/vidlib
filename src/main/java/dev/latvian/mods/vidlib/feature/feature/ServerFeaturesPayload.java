@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.feature;
 
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.net.ConfigurationTaskHolder;

@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.client;
 
+import dev.latvian.mods.klib.entity.EntityUtils;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
@@ -35,7 +36,7 @@ import java.util.function.Predicate;
 
 public interface VidLibHUD {
 	Mutable<Predicate<Player>> DEFAULT_DRAW_NAME = new MutableObject<>(player -> !player.isBoss());
-	Mutable<Predicate<Player>> DEFAULT_DRAW_HEALTH_BAR = new MutableObject<>(player -> player.isSurvivalLike() && !player.isBoss());
+	Mutable<Predicate<Player>> DEFAULT_DRAW_HEALTH_BAR = new MutableObject<>(player -> EntityUtils.isSurvivalLike(player) && !player.isBoss());
 	ImFloat NAME_SCALE = new ImFloat(1F);
 
 	static void drawPlayerNames(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
@@ -146,7 +147,7 @@ public interface VidLibHUD {
 						NeoForge.EVENT_BUS.post(new HUDNameEvent(player, mc.font, lines));
 					}
 
-					float health = renderHealth ? player.getRelativeHealth(player == self ? selfDelta : delta) : -1F;
+					float health = renderHealth ? EntityUtils.getRelativeHealth(player) : -1F;
 
 					graphics.pose().pushMatrix();
 					graphics.pose().translate(wpos.x(), wpos.y() - 2F);

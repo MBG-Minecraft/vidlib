@@ -2,30 +2,35 @@ package dev.latvian.mods.vidlib.feature.screeneffect.effect;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.knumber.KNumber;
+import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.registry.DynamicType;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.feature.registry.CustomRegistryType;
 import dev.latvian.mods.vidlib.feature.screeneffect.FocusPoint;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectShaderType;
-import dev.latvian.mods.vidlib.math.knumber.KNumber;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
-import dev.latvian.mods.vidlib.math.knumber.KNumberFloatInstance;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
 
-public record FocusedChromaticAberrationEffect(KNumber strength, FocusPoint focus) implements ScreenEffect {
-	public static final CustomRegistryType<FocusedChromaticAberrationEffect> TYPE = CustomRegistryType.dynamic("focused_chromatic_aberration", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		KNumber.CODEC.fieldOf("strength").forGetter(FocusedChromaticAberrationEffect::strength),
-		FocusPoint.CODEC.fieldOf("focus").forGetter(FocusedChromaticAberrationEffect::focus)
-	).apply(instance, FocusedChromaticAberrationEffect::new)), CompositeStreamCodec.of(
-		KNumber.STREAM_CODEC, FocusedChromaticAberrationEffect::strength,
-		FocusPoint.STREAM_CODEC, FocusedChromaticAberrationEffect::focus,
-		FocusedChromaticAberrationEffect::new
-	));
+public record FocusedChromaticAberrationEffect(Ref<KNumber> strength, FocusPoint focus) implements ScreenEffect {
+	public static final DynamicType<RegistryFriendlyByteBuf, ScreenEffect> TYPE = DynamicType.create(
+		"focused_chromatic_aberration",
+		RecordCodecBuilder.mapCodec(instance -> instance.group(
+			KNumber.CODEC.fieldOf("strength").forGetter(FocusedChromaticAberrationEffect::strength),
+			FocusPoint.CODEC.fieldOf("focus").forGetter(FocusedChromaticAberrationEffect::focus)
+		).apply(instance, FocusedChromaticAberrationEffect::new)),
+		CompositeStreamCodec.of(
+			KNumber.STREAM_CODEC, FocusedChromaticAberrationEffect::strength,
+			FocusPoint.STREAM_CODEC, FocusedChromaticAberrationEffect::focus,
+			FocusedChromaticAberrationEffect::new
+		)
+	);
 
 	public static class Inst extends ScreenEffectInstance {
 		public final KNumberFloatInstance strength;
@@ -33,7 +38,7 @@ public record FocusedChromaticAberrationEffect(KNumber strength, FocusPoint focu
 
 		private Vec2 focus, prevFocus;
 
-		public Inst(KNumber strength, FocusPoint vFocus) {
+		public Inst(Ref<KNumber> strength, FocusPoint vFocus) {
 			this.strength = new KNumberFloatInstance(strength);
 			this.vFocus = vFocus;
 		}
@@ -81,7 +86,7 @@ public record FocusedChromaticAberrationEffect(KNumber strength, FocusPoint focu
 	}
 
 	@Override
-	public CustomRegistryType<?> type() {
+	public DynamicType<RegistryFriendlyByteBuf, ScreenEffect> type() {
 		return TYPE;
 	}
 

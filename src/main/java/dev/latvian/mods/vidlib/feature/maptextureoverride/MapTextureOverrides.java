@@ -26,7 +26,7 @@ public class MapTextureOverrides {
 		return obj;
 	}, obj -> List.copyOf(obj.list));
 
-	public static final DataType<MapTextureOverrides> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, MapTextureOverrides.class);
+	public static final DataType<MapTextureOverrides> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 	public static final MapTextureOverrides EMPTY = new MapTextureOverrides();
 
 	public final List<MapTextureOverride> list = new ArrayList<>();

@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.particle.physics;
 
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.math.Split;
+import dev.latvian.mods.klib.util.BlockUtils;
 import dev.latvian.mods.klib.vertex.function.AdditiveRandomVertexFunction;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
@@ -61,7 +62,7 @@ public class PhysicsParticles {
 	public void spawn() {
 		var clientProperties = VidLibBlockStateClientProperties.of(state);
 		var manager = clientProperties.getManager();
-		float density1 = data.ignoreBlockDensity ? data.density : (data.density * state.vl$getDensity());
+		float density1 = data.ignoreBlockDensity() ? data.density() : (data.density() * BlockUtils.getDensity(state));
 		int count = (int) density1;
 
 		if (density1 - count > 0) {
@@ -74,8 +75,8 @@ public class PhysicsParticles {
 			var tintSource = blockColors.getTintSource(state, 0);
 			var tint = tintSource == null ? -1 : tintSource.colorAsTerrainParticle(state, level, at);
 			var identity = new Matrix4f();
-			identity.rotateY((float) Math.toRadians(data.direction));
-			identity.rotateX((float) Math.toRadians(-data.tilt));
+			identity.rotateY((float) Math.toRadians(data.direction()));
+			identity.rotateX((float) Math.toRadians(-data.tilt()));
 			var matrix = new Matrix4f();
 
 			for (int i = 0; i < count; i++) {
@@ -90,17 +91,17 @@ public class PhysicsParticles {
 		p.random = new XoroshiroRandomSource(random.nextLong());
 		p.shape = clientProperties.getPhysicsBlockParticleShape(split.boxes[random.nextInt(split.count)]);
 		p.gameTimeSpawned = gameTime;
-		p.speed = data.speed.sample(random);
+		p.speed = data.speed().sample(random);
 		p.prevX = p.x = at.getX() + random.nextFloat();
 		p.prevY = p.y = at.getY() + random.nextFloat();
 		p.prevZ = p.z = at.getZ() + random.nextFloat();
 
 		var power3 = random.nextFloat();
-		var power = data.power.get(power3 * power3 * power3 * random.nextFloat());
+		var power = data.power().get(power3 * power3 * power3 * random.nextFloat());
 		var spreadInput = random.nextFloat();
-		var spread = data.spread.get(spreadInput * spreadInput);
+		var spread = data.spread().get(spreadInput * spreadInput);
 
-		var angle = data.section.sample(random);
+		var angle = data.section().sample(random);
 
 		matrix.set(identity);
 		matrix.rotateY((float) Math.toRadians(angle));
@@ -112,8 +113,8 @@ public class PhysicsParticles {
 		p.velocityZ = velocityVector.z;
 		p.rotationRoll = KMath.lerp(random.nextFloat(), -1.3F, 1.3F);
 		p.rotationAngle = -(float) Math.toRadians(angle) + p.rotationRoll;
-		p.ttl = (int) data.lifespan.sample(random);
-		p.scaleMul = split.scale * data.scale.sample(random);
+		p.ttl = (int) data.lifespan().sample(random);
+		p.scaleMul = split.scale * data.scale().sample(random);
 		p.rotationSpeed = (KMath.lerp(random.nextFloat(), 0.25F, 0.4F)) / p.scaleMul * (float) Math.atan2(spread, power);
 		p.tint = tint;
 		p.red = ARGB.red(tint);
@@ -125,8 +126,8 @@ public class PhysicsParticles {
 			p.alpha = 255;
 		}
 
-		p.velocityMultiplier = data.inertia;
-		p.gravityStrength = data.gravity;
+		p.velocityMultiplier = data.inertia();
+		p.gravityStrength = data.gravity();
 		p.spin = p.prevSpin = random.nextFloat() * (float) (Math.PI * 2D);
 
 		p.scale = p.prevScale = p.scaleMul;
@@ -136,7 +137,7 @@ public class PhysicsParticles {
 			p.bounce *= 2F;
 		}
 
-		p.renderDistanceSq = data.renderDistance * data.renderDistance;
+		p.renderDistanceSq = data.renderDistance() * data.renderDistance();
 		p.manager.queue.add(p);
 
 		// Minecraft.getInstance().level.addParticle(new LineParticleOptions(Color.WHITE, Color.CYAN, p.ttl), true, true, p.x, p.y, p.z, p.velocityX, p.velocityY, p.velocityZ);

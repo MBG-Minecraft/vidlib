@@ -1,11 +1,12 @@
 package dev.latvian.mods.vidlib.feature.bulk;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.block.PositionedBlock;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.registry.CustomRegistryType;
-import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.klib.registry.DynamicType;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -15,8 +16,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.Set;
 
 public record ReplaceCuboidBlocks(BlockPos start, BlockPos end, BlockState state) implements BulkLevelModification {
-	public static final CustomRegistryType<ByteBuf, BulkLevelModification> TYPE = REGISTRY.dynamic(
-		ID.vidlib("cuboid_blocks"),
+	public static final DynamicType<ByteBuf, BulkLevelModification> TYPE = DynamicType.create(
+		"cuboid_blocks",
 		RecordCodecBuilder.mapCodec(instance -> instance.group(
 			BlockPos.CODEC.fieldOf("start").forGetter(ReplaceCuboidBlocks::start),
 			BlockPos.CODEC.fieldOf("end").forGetter(ReplaceCuboidBlocks::end),
@@ -61,7 +62,7 @@ public record ReplaceCuboidBlocks(BlockPos start, BlockPos end, BlockState state
 	@Override
 	public BulkLevelModification optimize() {
 		if (start.equals(end)) {
-			return new PositionedBlock(start, state);
+			return new SingleBlockModification(new PositionedBlock(start, state));
 		}
 
 		return this;

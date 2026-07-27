@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.cutscene;
 
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
+import dev.latvian.mods.klib.knumber.KNumberContext;
 import net.neoforged.bus.api.Event;
 
 public abstract class CustomCutsceneEvent extends Event {

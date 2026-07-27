@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.render.DebugRenderTypes;
@@ -54,8 +54,8 @@ public class LightningParticle extends CustomParticle {
 			dist[i] = random.nextFloat() * options.spread();
 		}
 
-		this.color = options.color().optimize();
-		this.outlineColor = options.outlineColor().optimize();
+		this.color = options.color().value();
+		this.outlineColor = options.outlineColor().value();
 		this.target = new Vector3d();
 		this.matrix = new Matrix3d();
 		this.prevRadiusMod = radiusMod = 0F;

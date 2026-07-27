@@ -1,8 +1,5 @@
 package dev.latvian.mods.vidlib.feature.imgui.builder;
 
-import dev.latvian.mods.vidlib.feature.imgui.node.Node;
-import org.jetbrains.annotations.Nullable;
-
 public record ImBuilderHolder<T>(String name, ImBuilderType<T> type, boolean isDefault) {
 	public static <T> ImBuilderHolder<T> ofDefault(String name, ImBuilderType<T> factory) {
 		return new ImBuilderHolder<>(name, factory, true);
@@ -20,10 +17,5 @@ public record ImBuilderHolder<T>(String name, ImBuilderType<T> type, boolean isD
 		} else {
 			return false;
 		}
-	}
-
-	@Nullable
-	public Node asNode() {
-		return type.get().asNode();
 	}
 }

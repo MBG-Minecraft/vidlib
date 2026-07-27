@@ -5,7 +5,6 @@ import dev.latvian.mods.vidlib.core.VLMinecraftClient;
 import dev.latvian.mods.vidlib.feature.client.SleepScreen;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
-import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
 import dev.latvian.mods.vidlib.feature.misc.MainMenuOpenedEvent;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
@@ -108,7 +107,6 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	public void vl$onFinishInit(CallbackInfo ci) {
-		TTFFile.find(resourceManager);
 		ImGuiHooks.init(vl$self(), resourceManager);
 	}
 

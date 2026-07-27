@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.screeneffect;
 
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.knumber.KNumber;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
@@ -12,7 +13,6 @@ import dev.latvian.mods.vidlib.feature.screeneffect.effect.AngledChromaticAberra
 import dev.latvian.mods.vidlib.feature.screeneffect.effect.ColorEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.effect.ColorOverlayEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.effect.FocusedChromaticAberrationEffect;
-import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import imgui.ImGui;
 
 import java.util.function.Supplier;
@@ -73,13 +73,13 @@ public class ScreenEffectPanel extends Panel {
 		ImGui.sameLine();
 		add(graphics, ImIcons.ANIMATION, "screen-shake", "Screen Shake", null);
 
-		add(graphics, ImIcons.PALETTE, "color", "Color", () -> new ColorEffect.Inst(Color.BLACK.withAlpha(0).gradient(Color.BLACK), false));
+		add(graphics, ImIcons.PALETTE, "color", "Color", () -> new ColorEffect.Inst(Color.BLACK.withAlpha(0).gradient(Color.BLACK).ref(), false));
 		ImGui.sameLine();
-		add(graphics, ImIcons.PALETTE, "overlay-color", "Overlay Color", () -> new ColorOverlayEffect.Inst(Color.BLACK.withAlpha(0).gradient(Color.BLACK)));
+		add(graphics, ImIcons.PALETTE, "overlay-color", "Overlay Color", () -> new ColorOverlayEffect.Inst(Color.BLACK.withAlpha(0).gradient(Color.BLACK).ref()));
 		ImGui.sameLine();
-		add(graphics, ImIcons.STACKS, "f-ca", "Focused Chromatic Aberration", () -> new FocusedChromaticAberrationEffect.Inst(KNumber.of(0.1D), FocusPoint.Screen.CENTER));
+		add(graphics, ImIcons.STACKS, "f-ca", "Focused Chromatic Aberration", () -> new FocusedChromaticAberrationEffect.Inst(KNumber.of(0.1D).ref(), FocusPoint.Screen.CENTER));
 		ImGui.sameLine();
-		add(graphics, ImIcons.STACKS, "a-ca", "Angled Chromatic Aberration", () -> new AngledChromaticAberrationEffect.Inst(KNumber.of(0.1D), KNumber.ZERO));
+		add(graphics, ImIcons.STACKS, "a-ca", "Angled Chromatic Aberration", () -> new AngledChromaticAberrationEffect.Inst(KNumber.of(0.1D).ref(), KNumber.ZERO));
 		ImGui.sameLine();
 		add(graphics, ImIcons.FIRE, "color-burn", "Color Burn", null);
 		ImGui.sameLine();

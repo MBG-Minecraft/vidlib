@@ -1,10 +1,11 @@
 package dev.latvian.mods.vidlib.feature.screeneffect.chromaticaberration;
 
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.kvector.KVector;
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasUniform;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
@@ -13,7 +14,7 @@ public class ChromaticAberration {
 	public static float strength = 0F;
 	public static boolean isAngled = false;
 	public static float angle = 0F;
-	public static KVector focus = null;
+	public static Ref<KVector> focus = null;
 	public static Vec2 screenFocus = Vec2.ZERO;
 	private static Vec2 uFocusPos = Vec2.ZERO;
 

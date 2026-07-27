@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
+import dev.latvian.mods.klib.entity.EntityUtils;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
@@ -27,7 +28,7 @@ public class NeoForgeCommonGameEngine extends CommonGameEngine {
 				return Shapes.empty();
 			}
 
-			if (ctx.getEntity().vl$isCreative()) {
+			if (EntityUtils.isCreative(ctx.getEntity())) {
 				return Shapes.empty();
 			}
 		}
@@ -49,8 +50,8 @@ public class NeoForgeCommonGameEngine extends CommonGameEngine {
 	public boolean replaceFoodTick(ServerPlayer player, FoodData foodData) {
 		foodData.setFoodLevel(20);
 		foodData.setSaturation(20F);
-		foodData.vl$setExhaustionLevel(0F);
-		foodData.vl$setTickTimer(0);
+		foodData.exhaustionLevel = 0F;
+		foodData.tickTimer = 0;
 		return true;
 	}
 

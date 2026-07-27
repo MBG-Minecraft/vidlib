@@ -1,11 +1,11 @@
 package dev.latvian.mods.vidlib.feature.explosion;
 
+import dev.latvian.mods.klib.block.PositionedBlock;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.DebugColorBlocks;
 import dev.latvian.mods.vidlib.feature.bulk.BlockModificationConsumer;
 import dev.latvian.mods.vidlib.feature.bulk.OptimizedModificationBuilder;
-import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.TextParticleOptions;
 import net.minecraft.core.BlockPos;

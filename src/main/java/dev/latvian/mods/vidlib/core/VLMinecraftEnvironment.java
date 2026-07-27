@@ -1,11 +1,14 @@
 package dev.latvian.mods.vidlib.core;
 
+import dev.latvian.mods.klib.knumber.KNumberVariables;
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.clock.SyncClocksPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.session.SessionData;
-import dev.latvian.mods.vidlib.feature.zone.Zone;
-import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
+import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
+import dev.latvian.mods.vidlib.feature.zone.ZoneVolume;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.RepeatingTask;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
@@ -66,11 +69,11 @@ public interface VLMinecraftEnvironment extends VLPlayerContainer, VLMinecraftEn
 		vl$getScheduledTaskHandler().run(delay, task);
 	}
 
-	default void removeZone(Identifier zone, int index) {
+	default void removeZone(Ref<ZoneContainer> zone, int index) {
 		throw new NoMixinException(this);
 	}
 
-	default void updateZone(Identifier zone, int index, Zone zoneData) {
+	default void updateZone(Ref<ZoneContainer> zone, int index, ZoneVolume zoneVolume) {
 		throw new NoMixinException(this);
 	}
 
@@ -94,7 +97,7 @@ public interface VLMinecraftEnvironment extends VLPlayerContainer, VLMinecraftEn
 		packets.s2c(new SyncClocksPayload(vl$getClocks()));
 	}
 
-	default Map<Identifier, ClockValue> vl$getClocks() {
+	default Map<Ref<Clock>, ClockValue> vl$getClocks() {
 		throw new NoMixinException(this);
 	}
 

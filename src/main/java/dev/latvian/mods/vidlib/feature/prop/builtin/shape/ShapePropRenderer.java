@@ -35,35 +35,35 @@ public class ShapePropRenderer implements PropRenderer<ShapeProp> {
 			ms.scale(sw, sh, sw);
 		}
 
-		var lc = prop.canInteract && ctx.frame().mc().hitResult instanceof PropHitResult hit && hit.prop == prop ? Color.WHITE : prop.outlineColor.get(progress);
+		var lc = prop.canInteract && ctx.frame().mc().hitResult instanceof PropHitResult hit && hit.prop == prop ? Color.WHITE : prop.outlineColor.value().get(progress);
 
 		if (lc.alpha() > 0) {
 			if (prop.lightLayer == RenderLightLayer.BLOOM) {
 				Bloom.markActive();
-				prop.shape.buildQuads(0F, 0F, 0F, ms.last().transform(BloomRenderTypes.POS_COL_BUFFER_SUPPLIER.quadsCull(BloomRenderTypes.overridePosCol(buffers))).withColor(lc));
+				prop.shape.value().buildQuads(0F, 0F, 0F, ms.last().transform(BloomRenderTypes.POS_COL_BUFFER_SUPPLIER.quadsCull(BloomRenderTypes.overridePosCol(buffers))).withColor(lc));
 			} else {
-				prop.shape.buildLines(0F, 0F, 0F, ms.last().transform(buffers.getBuffer(DebugRenderTypes.LINES)).withColor(lc));
+				prop.shape.value().buildLines(0F, 0F, 0F, ms.last().transform(buffers.getBuffer(DebugRenderTypes.LINES)).withColor(lc));
 			}
 		}
 
-		var c = prop.color.get(progress);
+		var c = prop.color.value().get(progress);
 
 		if (c.alpha() > 0) {
 			if (prop.texture != Empty.TEXTURE) {
 				if (prop.lightLayer == RenderLightLayer.BLOOM) {
 					Bloom.markActive();
-					prop.shape.buildQuads(0F, 0F, 0F, ms.last().transform(buffers.getBuffer(DebugRenderTypes.QUADS)).withColor(c));
+					prop.shape.value().buildQuads(0F, 0F, 0F, ms.last().transform(buffers.getBuffer(DebugRenderTypes.QUADS)).withColor(c));
 				} else {
 					var callback = ms.last().transform(buffers.getBuffer(TerrainRenderTypes.TRANSLUCENT_NO_CULL.apply(prop.texture))).withColor(c).withLight(LightUV.FULLBRIGHT);
-					prop.shape.buildQuads(0F, 0F, 0F, callback);
+					prop.shape.value().buildQuads(0F, 0F, 0F, callback);
 				}
 			} else {
 				if (prop.lightLayer == RenderLightLayer.BLOOM) {
 					Bloom.markActive();
-					prop.shape.buildQuads(0F, 0F, 0F, ms.last().transform(buffers.getBuffer(DebugRenderTypes.QUADS)).withColor(c));
+					prop.shape.value().buildQuads(0F, 0F, 0F, ms.last().transform(buffers.getBuffer(DebugRenderTypes.QUADS)).withColor(c));
 				} else {
 					var callback = ms.last().transform(buffers.getBuffer(DebugRenderTypes.QUADS_NO_CULL_NO_DEPTH)).withColor(c);
-					prop.shape.buildQuads(0F, 0F, 0F, callback);
+					prop.shape.value().buildQuads(0F, 0F, 0F, callback);
 				}
 			}
 		}

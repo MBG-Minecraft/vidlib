@@ -1,9 +1,10 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.google.gson.JsonElement;
+import dev.latvian.mods.klib.core.KLibLevel;
+import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.core.VLLevel;
 import dev.latvian.mods.vidlib.feature.bulk.UndoableModificationHolder;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.util.PauseType;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
@@ -53,7 +54,7 @@ public abstract class LevelMixin implements VLLevel {
 		vl$bosses = new ArrayList<>(1);
 		vl$mainBoss = null;
 
-		for (var entity : allEntities()) {
+		for (var entity : ((KLibLevel) this).klib$allEntities()) {
 			if (entity instanceof LivingEntity l && l.isBoss() && l.isAlive()) {
 				vl$bosses.add(l);
 				vl$mainBoss = l;

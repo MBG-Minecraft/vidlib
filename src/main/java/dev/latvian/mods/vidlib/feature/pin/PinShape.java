@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.pin;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.codec.KLibCodecs;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.client.TexturedRenderType;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
@@ -24,7 +24,7 @@ public enum PinShape implements StringRepresentable {
 	;
 
 	public static final PinShape[] VALUES = values();
-	public static final Codec<PinShape> CODEC = Codec.either(KLibCodecs.anyEnumCodec(VALUES), Codec.INT).xmap(e -> e.map(Function.identity(), i -> VALUES[i]), Either::left);
+	public static final Codec<PinShape> CODEC = Codec.either(KLibCodecs.anyEnum(VALUES), Codec.INT).xmap(e -> e.map(Function.identity(), i -> VALUES[i]), Either::left);
 
 	public final String id;
 	public final String displayName;

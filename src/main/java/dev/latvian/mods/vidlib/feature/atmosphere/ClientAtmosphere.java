@@ -3,6 +3,8 @@ package dev.latvian.mods.vidlib.feature.atmosphere;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.latvian.mods.klib.math.Rotation;
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
@@ -11,7 +13,6 @@ import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.client.renderer.state.level.SkyRenderState;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.attribute.EnvironmentAttributeMap;
 import net.neoforged.neoforge.client.CustomSkyboxRenderer;
 import org.joml.Matrix4fc;
@@ -30,14 +31,18 @@ public class ClientAtmosphere implements CustomSkyboxRenderer {
 		var current = g.mc.level.getAtmosphere();
 		var session = g.mc.player.vl$sessionData();
 
-		for (var atmosphere : Atmosphere.REGISTRY.getIds()) {
-			var tex = session.getAtmosphere(atmosphere).loadTexture(g.mc);
+		for (var ref : Atmosphere.REGISTRY) {
+			if (ref.optionalValue() == null) {
+				continue;
+			}
 
-			slist.add(MenuItem.item(tex.getIcon(), atmosphere.getPath(), atmosphere.equals(current), g1 -> {
+			var tex = session.getAtmosphere(ref).loadTexture(g.mc);
+
+			slist.add(MenuItem.item(tex.getIcon(), ref.key(), current != null && current.key() == ref.key(), g1 -> {
 				if (g1.isReplay || !g1.serverFeatures.has(Feature.ATMOSPHERE)) {
-					g1.mc.getDataMap().setSuperOverride(InternalServerData.ATMOSPHERE, atmosphere);
+					g1.mc.getDataMap().setSuperOverride(InternalServerData.ATMOSPHERE, ref);
 				} else {
-					g1.mc.runClientCommand("atmosphere set \"" + atmosphere + "\"");
+					g1.mc.runClientCommand("atmosphere set \"" + ref.key() + "\"");
 				}
 			}));
 		}
@@ -55,7 +60,7 @@ public class ClientAtmosphere implements CustomSkyboxRenderer {
 		return slist;
 	}).remainOpen(true);
 
-	public final Identifier id;
+	public final String id;
 	public final SkyboxTextureData skybox;
 	public SkyboxTexture skyboxTexture;
 	public final EnvironmentAttributeMap attributes;
@@ -63,8 +68,9 @@ public class ClientAtmosphere implements CustomSkyboxRenderer {
 	public final boolean moon;
 	public final Rotation celestialRotation;
 
-	public ClientAtmosphere(Atmosphere data) {
-		this.id = data.id();
+	public ClientAtmosphere(Ref<Atmosphere> ref) {
+		this.id = ref.key();
+		var data = ref.value();
 		this.skybox = data.skybox().orElse(null);
 		this.skyboxTexture = null;
 		this.attributes = data.attributes();
@@ -75,14 +81,14 @@ public class ClientAtmosphere implements CustomSkyboxRenderer {
 
 	public SkyboxTexture loadTexture(Minecraft mc) {
 		if (skyboxTexture == null) {
-			var id = this.id.withPath(p -> "textures/vidlib/generated/skybox/" + p + ".png");
+			var texId = ID.vidlib("textures/vidlib/generated/skybox/" + id + ".png");
 
-			if (mc.getTextureManager().byPath.get(id) instanceof SkyboxTexture tex) {
+			if (mc.getTextureManager().byPath.get(texId) instanceof SkyboxTexture tex) {
 				skyboxTexture = tex;
 				return tex;
 			}
 
-			var tex = new SkyboxTexture(id, this);
+			var tex = new SkyboxTexture(texId, this);
 			mc.getTextureManager().registerAndLoad(tex.resourceId(), tex);
 			skyboxTexture = tex;
 			return tex;
