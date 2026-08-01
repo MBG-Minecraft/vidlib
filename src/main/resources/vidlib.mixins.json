@@ -141,6 +141,7 @@
 		"ParticleEngineMixin",
 		"ParticleMixin",
 		"PauseScreenMixin",
+		"PistonHeadRendererMixin",
 		"PlayerTabOverlayMixin",
 		"PostChainConfigFixedSizeTargetMixin",
 		"PostChainMixin",

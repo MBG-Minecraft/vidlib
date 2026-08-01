@@ -14,6 +14,7 @@ public record HubProjectData(
 	String internalName,
 	String publicName,
 	String description,
+	String productionCode,
 	HubGameData game,
 	UInt64 discordGuild,
 	boolean visible,
@@ -26,6 +27,7 @@ public record HubProjectData(
 		Codec.STRING.optionalFieldOf("internal_name", "").forGetter(HubProjectData::internalName),
 		Codec.STRING.optionalFieldOf("public_name", "").forGetter(HubProjectData::publicName),
 		Codec.STRING.optionalFieldOf("description", "").forGetter(HubProjectData::description),
+		Codec.STRING.optionalFieldOf("production_code", "").forGetter(HubProjectData::productionCode),
 		HubGameData.CODEC.fieldOf("game").forGetter(HubProjectData::game),
 		UInt64.CODEC.optionalFieldOf("discord_guild", UInt64.NONE).forGetter(HubProjectData::discordGuild),
 		Codec.BOOL.optionalFieldOf("visible", false).forGetter(HubProjectData::visible),
@@ -37,7 +39,15 @@ public record HubProjectData(
 	public static HubProjectData PACK = null;
 
 	public String displayName() {
-		return publicName.isEmpty() ? internalName : publicName;
+		if (!internalName.isEmpty()) {
+			return internalName;
+		} else if (!publicName.isEmpty()) {
+			return publicName;
+		} else if (!productionCode.isEmpty()) {
+			return productionCode;
+		} else {
+			return id.toString();
+		}
 	}
 
 	@Override

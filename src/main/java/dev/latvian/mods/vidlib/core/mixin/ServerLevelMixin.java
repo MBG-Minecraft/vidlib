@@ -27,7 +27,9 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
@@ -112,5 +114,10 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 	@Inject(method = "tickPrecipitation", at = @At("RETURN"))
 	private void vl$tickPrecipitation(BlockPos blockPos, CallbackInfo ci, @Local(ordinal = 1) BlockPos motionBlockedPos, @Local(ordinal = 2) BlockPos belowMotionBlockedPos) {
 		CommonGameEngine.INSTANCE.tickPrecipitation(vl$level(), blockPos, motionBlockedPos, belowMotionBlockedPos);
+	}
+
+	@ModifyConstant(method = {"runBlockEvents", "levelEvent"}, constant = @Constant(doubleValue = 64D))
+	private double vl$eventDistance(double constant) {
+		return Math.max(constant, 512D);
 	}
 }
