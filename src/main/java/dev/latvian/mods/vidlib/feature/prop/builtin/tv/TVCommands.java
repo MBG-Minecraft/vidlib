@@ -48,19 +48,19 @@ public interface TVCommands {
 				)
 			)
 			.executes(ctx -> {
-				broadcast(ctx, new TVControlPacket(0));
+				broadcast(ctx, new TVControlPayload(0));
 				return 1;
 			})
 		)
 		.then(Commands.literal("pause")
 			.executes(ctx -> {
-				broadcast(ctx, new TVControlPacket(1));
+				broadcast(ctx, new TVControlPayload(1));
 				return 1;
 			})
 		)
 		.then(Commands.literal("stop")
 			.executes(ctx -> {
-				broadcast(ctx, new TVControlPacket(3));
+				broadcast(ctx, new TVControlPayload(3));
 				return 1;
 			})
 		)

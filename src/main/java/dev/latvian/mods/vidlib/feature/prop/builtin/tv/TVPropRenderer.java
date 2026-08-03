@@ -79,13 +79,15 @@ public class TVPropRenderer implements PropRenderer<TVProp> {
 	}
 
 	private static void renderTVImage(PropRenderContext<TVProp> ctx, Matrix4f m, float videoW, float videoH, float videoS, float px, Vector3f n, int tint, int light) {
+		float offset = Math.clamp((float) ((ctx.distanceToCamera() - 1000D) / 1000D), 0.01F, 0.5F);
+
 		if (TVPlayer.hasVideo()) {
 			var video = ctx.frame().buffers().getBuffer(EntityRenderTypes.texture(TVPlayer.TEXTURE, false));
-			cq(video, m, 0F, 0F, 0.01F, videoW * videoS - px * 2F, videoH * videoS - px * 2F, n, tint, light);
+			cq(video, m, 0F, 0F, offset, videoW * videoS - px * 2F, videoH * videoS - px * 2F, n, tint, light);
 		} else {
 			var video = ctx.frame().buffers().getBuffer(EntityRenderTypes.texture(TEXTURE_NO_VIDEO, false));
 			float s = Math.min(videoW * videoS - px * 2F, videoH * videoS - px * 2F);
-			cq(video, m, 0F, 0F, 0.01F, s, s, n, tint, light);
+			cq(video, m, 0F, 0F, offset, s, s, n, tint, light);
 		}
 	}
 }

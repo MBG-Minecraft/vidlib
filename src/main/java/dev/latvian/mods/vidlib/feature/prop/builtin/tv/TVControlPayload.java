@@ -6,7 +6,7 @@ import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 import net.minecraft.network.codec.ByteBufCodecs;
 
-public record TVControlPacket(int control) implements SimplePacketPayload {
+public record TVControlPayload(int control) implements SimplePacketPayload {
 	public static final int STOP = 0;
 	public static final int PLAY = 1;
 	public static final int PAUSE = 2;
@@ -15,7 +15,7 @@ public record TVControlPacket(int control) implements SimplePacketPayload {
 	public static final int UNMUTE = 5;
 
 	@AutoPacket
-	public static final VidLibPacketType<TVControlPacket> TYPE = VidLibPacketType.internal("tv/control", ByteBufCodecs.VAR_INT.map(TVControlPacket::new, TVControlPacket::control));
+	public static final VidLibPacketType<TVControlPayload> TYPE = VidLibPacketType.internal("tv/control", ByteBufCodecs.VAR_INT.map(TVControlPayload::new, TVControlPayload::control));
 
 	@Override
 	public VidLibPacketType<?> getType() {
