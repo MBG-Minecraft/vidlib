@@ -22,6 +22,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class VidLibClient {
+	public static int levelTick = 0;
+
 	public static void init() {
 		MiscUtils.CLIENT_PLAYER.setValue(() -> Minecraft.getInstance().player);
 		loadHub();

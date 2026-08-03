@@ -30,7 +30,7 @@ public record PropData<P extends Prop, V>(Class<P> origin, String key, DataType<
 	}
 
 	public static <P extends Prop> PropData<P, Integer> createInt(Class<P> origin, String key, Function<P, Integer> getter, BiConsumer<P, Integer> setter, int min, int max) {
-		return create(origin, key, DataTypes.VAR_INT, getter, setter, () -> new IntImBuilder(min, max));
+		return create(origin, key, DataTypes.VAR_INT, getter, setter, IntImBuilder.type(min, max));
 	}
 
 	public static <P extends Prop> PropData<P, Float> createFloat(Class<P> origin, String key, Function<P, Float> getter, BiConsumer<P, Float> setter) {

@@ -1,15 +1,11 @@
-package dev.latvian.mods.vidlib.feature.prop.builtin.image;
+package dev.latvian.mods.vidlib.feature.prop.builtin.tv;
 
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.math.VoxelShapeBox;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
-import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
-import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.TextureImBuilder;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
@@ -17,64 +13,56 @@ import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.util.RotatedQuadData;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.ClientAsset;
 import net.minecraft.world.phys.Vec3;
 
-public class ImageProp extends Prop {
+public class TVProp extends Prop {
 	@AutoRegister
-	public static final PropType<ImageProp> TYPE = PropType.create(VidLib.id("image"), ImageProp::new,
+	public static final PropType<TVProp> TYPE = PropType.create(VidLib.id("tv"), TVProp::new,
 		POSITION,
 		YAW,
 		PITCH,
-		WIDTH,
 		HEIGHT,
-		PropData.create(ImageProp.class, "texture", DataTypes.RESOURCE_TEXTURE, p -> p.texture, (p, v) -> p.texture = v, TextureImBuilder.ALL),
-		PropData.create(ImageProp.class, "tint", Color.DATA_TYPE, p -> p.tint, (p, v) -> p.tint = v, Color4ImBuilder.TYPE),
-		PropData.createBoolean(ImageProp.class, "see_through", p -> p.seeThrough, (p, v) -> p.seeThrough = v),
-		PropData.createBoolean(ImageProp.class, "full_bright", p -> p.fullBright, (p, v) -> p.fullBright = v),
-		PropData.createBoolean(ImageProp.class, "centered", p -> p.centered, (p, v) -> p.centered = v),
-		PropData.createBoolean(ImageProp.class, "auto_rotate_yaw", p -> p.autoRotateYaw, (p, v) -> p.autoRotateYaw = v),
-		PropData.createBoolean(ImageProp.class, "auto_rotate_pitch", p -> p.autoRotatePitch, (p, v) -> p.autoRotatePitch = v),
-		PropData.createBoolean(ImageProp.class, "translucent", p -> p.translucent, (p, v) -> p.translucent = v)
+		PropData.createInt(TVProp.class, "video_width", p -> p.videoWidth, (p, v) -> p.videoWidth = v, 1, 1920),
+		PropData.createInt(TVProp.class, "video_height", p -> p.videoHeight, (p, v) -> p.videoHeight = v, 1, 1080),
+		PropData.createBoolean(TVProp.class, "centered", p -> p.centered, (p, v) -> p.centered = v),
+		PropData.createBoolean(TVProp.class, "auto_rotate_yaw", p -> p.autoRotateYaw, (p, v) -> p.autoRotateYaw = v),
+		PropData.createBoolean(TVProp.class, "auto_rotate_pitch", p -> p.autoRotatePitch, (p, v) -> p.autoRotatePitch = v),
+		PropData.createBoolean(TVProp.class, "full_bright", p -> p.fullBright, (p, v) -> p.fullBright = v)
 	);
 
-	public ClientAsset texture;
-	public Color tint;
-	public boolean seeThrough;
-	public boolean fullBright;
+	public int videoWidth;
+	public int videoHeight;
 	public boolean centered;
 	public boolean autoRotateYaw;
 	public boolean autoRotatePitch;
-	public boolean translucent;
+	public boolean fullBright;
 
 	public RotatedQuadData rotatedQuadData;
 
-	public ImageProp(PropContext<?> ctx) {
+	public TVProp(PropContext<?> ctx) {
 		super(ctx);
-		this.width = 1F;
-		this.height = 1F;
-		this.texture = VidLibTextures.LOGO;
-		this.tint = Color.WHITE;
-		this.seeThrough = false;
-		this.fullBright = true;
+		this.height = 4D;
+		this.videoWidth = 16;
+		this.videoHeight = 9;
 		this.centered = true;
 		this.autoRotateYaw = false;
 		this.autoRotatePitch = false;
-		this.translucent = true;
+		this.fullBright = false;
 
 		this.rotatedQuadData = new RotatedQuadData();
 	}
 
 	@Override
-	public void setWidth(double width) {
-		super.setWidth(width);
-		rotatedQuadData = new RotatedQuadData();
+	public void onAdded() {
+		super.onAdded();
+		width = height * (double) videoWidth / (double) videoHeight;
 	}
 
 	@Override
 	public void setHeight(double height) {
 		super.setHeight(height);
-		rotatedQuadData = new RotatedQuadData();
+		setWidth(height * (double) videoWidth / (double) videoHeight);
+		this.rotatedQuadData = new RotatedQuadData();
 	}
 
 	@Override
@@ -89,6 +77,8 @@ public class ImageProp extends Prop {
 		if (level.isClientSide()) {
 			clientTick();
 		}
+
+		width = height * (double) videoWidth / (double) videoHeight;
 	}
 
 	private void clientTick() {

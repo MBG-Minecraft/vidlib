@@ -213,6 +213,12 @@ public class VidLibClientEventHandler {
 		var mc = Minecraft.getInstance();
 
 		if (mc.level != null && mc.player != null) {
+			if (VidLibClient.levelTick == Integer.MAX_VALUE) {
+				VidLibClient.levelTick = 0;
+			} else {
+				VidLibClient.levelTick++;
+			}
+
 			ScreenText.CLIENT_TICK.ops = mc.jsonOps();
 
 			var tool = VidLibTool.of(mc.player);
