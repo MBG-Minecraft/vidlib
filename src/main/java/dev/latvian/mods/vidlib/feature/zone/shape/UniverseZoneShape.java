@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.zone.shape;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipContext;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -26,7 +27,7 @@ public class UniverseZoneShape implements ZoneShape {
 
 	@Override
 	public AABB toAABB() {
-		return AABB.INFINITE;
+		return MiscUtils.INFINITE;
 	}
 
 	@Override

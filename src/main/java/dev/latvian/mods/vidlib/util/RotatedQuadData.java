@@ -13,7 +13,7 @@ public class RotatedQuadData {
 		this.bl = new Vector3f();
 		this.br = new Vector3f();
 		this.tr = new Vector3f();
-		this.clipBox = AABB.INFINITE;
+		this.clipBox = MiscUtils.INFINITE;
 	}
 
 	public void update(Matrix4f bbMat, float width, float height) {
@@ -24,11 +24,11 @@ public class RotatedQuadData {
 		bl.set(-w2, -h2, 0F).mulPosition(bbMat);
 		br.set(w2, -h2, 0F).mulPosition(bbMat);
 		tr.set(w2, h2, 0F).mulPosition(bbMat);
-		clipBox = AABB.INFINITE;
+		clipBox = MiscUtils.INFINITE;
 	}
 
 	public AABB getClipBox() {
-		if (clipBox == AABB.INFINITE) {
+		if (clipBox == MiscUtils.INFINITE) {
 			clipBox = new AABB(
 				Math.min(Math.min(tl.x, bl.x), Math.min(br.x, tr.x)) - 0.05F,
 				Math.min(Math.min(tl.y, bl.y), Math.min(br.y, tr.y)) - 0.05F,

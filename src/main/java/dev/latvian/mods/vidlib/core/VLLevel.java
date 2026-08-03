@@ -21,6 +21,7 @@ import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.prop.Props;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.latvian.mods.vidlib.util.PauseType;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -251,7 +252,7 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 	}
 
 	default Iterable<Entity> allEntities() {
-		return vl$level().getEntities((Entity) null, AABB.INFINITE, Entity::isAlive);
+		return vl$level().getEntities((Entity) null, MiscUtils.INFINITE, Entity::isAlive);
 	}
 
 	default Iterable<LivingEntity> allLivingEntities() {

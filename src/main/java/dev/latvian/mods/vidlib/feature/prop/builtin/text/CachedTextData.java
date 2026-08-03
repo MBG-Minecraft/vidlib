@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.text;
 
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.phys.AABB;
 import org.joml.Vector3f;
@@ -19,6 +20,6 @@ public class CachedTextData {
 		this.vb = new Vector3f();
 		this.vc = new Vector3f();
 		this.vd = new Vector3f();
-		this.box = AABB.INFINITE;
+		this.box = MiscUtils.INFINITE;
 	}
 }

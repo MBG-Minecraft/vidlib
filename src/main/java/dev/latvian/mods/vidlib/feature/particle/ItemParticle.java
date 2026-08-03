@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -37,6 +38,6 @@ public class ItemParticle extends CustomParticle {
 
 	@Override
 	public AABB getRenderBoundingBox(float partialTicks) {
-		return AABB.INFINITE;
+		return MiscUtils.INFINITE;
 	}
 }

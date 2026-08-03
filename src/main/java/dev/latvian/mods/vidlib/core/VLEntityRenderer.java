@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.core;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.feature.canvas.BossRenderTypes;
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -45,6 +46,6 @@ public interface VLEntityRenderer<T extends Entity, S extends EntityRenderState>
 	}
 
 	default AABB vl$getBoundingBoxForCulling(T entity) {
-		return AABB.INFINITE;
+		return MiscUtils.INFINITE;
 	}
 }
