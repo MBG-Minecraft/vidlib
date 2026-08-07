@@ -1,0 +1,54 @@
+package dev.mrbeastgaming.mods.hub.api.gateway;
+
+import net.minecraft.client.Minecraft;
+import net.neoforged.neoforge.common.NeoForge;
+
+import javax.annotation.Nullable;
+import java.net.URI;
+
+public class HubClientGateway extends HubCommonGateway<Minecraft> {
+	public static HubClientGateway instance;
+
+	@Nullable
+	public static HubClientGateway startGateway(Minecraft mc, @Nullable URI uri) {
+		stopGateway();
+		var gateway = instance;
+
+		if (gateway == null && uri != null) {
+			gateway = new HubClientGateway(mc, uri);
+			gateway.start();
+			instance = gateway;
+		}
+
+		return gateway;
+	}
+
+	public static void stopGateway() {
+		var gateway = instance;
+
+		if (gateway != null) {
+			gateway.stop();
+			instance = null;
+		}
+	}
+
+	public static void tickGateway() {
+		var gateway = instance;
+
+		if (gateway != null) {
+			gateway.tick();
+		}
+	}
+
+	public final Minecraft mc;
+
+	public HubClientGateway(Minecraft mc, URI uri) {
+		super(mc, uri);
+		this.mc = mc;
+	}
+
+	@Override
+	public void collectEventHandlers(HubGatewayEventRegistry<Minecraft> registry) {
+		NeoForge.EVENT_BUS.post(new HubClientGatewayEventRegistryEvent(registry));
+	}
+}

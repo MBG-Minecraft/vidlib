@@ -35,7 +35,7 @@ import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
 import dev.mrbeastgaming.mods.hub.api.HubMinecraftProfileData;
 import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.api.HubUserData;
-import dev.mrbeastgaming.mods.hub.api.gateway.HubGateway;
+import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
 import dev.mrbeastgaming.mods.hub.api.project.HubProjectData;
 import dev.mrbeastgaming.mods.hub.client.LinkHubUserScreen;
 import dev.mrbeastgaming.mods.hub.client.LinkMinecraftScreen;
@@ -344,66 +344,68 @@ public class ClientGameEngine {
 	}
 
 	public void topInfoBarPre(ImGraphics graphics, float h) {
-		if (!graphics.inGame) {
-			var hubUser = HubUserData.SELF;
-			var hubTooltip = new ArrayList<String>();
+		var hubUser = HubUserData.SELF;
+		var hubTooltip = new ArrayList<String>();
 
-			if (hubUser == null) {
-				graphics.pushStack();
-				graphics.setErrorText();
+		if (hubUser == null) {
+			graphics.pushStack();
+			graphics.setErrorText();
 
-				if (ImGui.menuItem(ImIcons.WARNING + "###link-hub-profile")) {
+			if (ImGui.menuItem(ImIcons.WARNING + "###link-hub-profile")) {
+				if (!graphics.inGame) {
 					LinkHubUserScreen.open(graphics.mc);
 				}
+			}
 
-				if (ImGui.isItemHovered()) {
-					hubTooltip.add("MrBeast Gaming Hub profile not linked!");
-					hubTooltip.add("");
-					hubTooltip.add("Click here to link your profile!");
-				}
+			if (ImGui.isItemHovered()) {
+				hubTooltip.add("MrBeast Gaming Hub profile not linked!");
+				hubTooltip.add("");
+				hubTooltip.add("Click here to link your profile!");
+			}
 
-				graphics.popStack();
-			} else {
-				var mcProfile = HubMinecraftProfileData.SELF;
-				var hubProject = HubProjectData.PACK;
+			graphics.popStack();
+		} else {
+			var mcProfile = HubMinecraftProfileData.SELF;
+			var hubProject = HubProjectData.PACK;
 
-				graphics.pushStack();
-				graphics.setText(mcProfile == null || hubProject == null ? ImColorVariant.YELLOW : ImColorVariant.GREEN);
+			graphics.pushStack();
+			graphics.setText(mcProfile == null || hubProject == null ? ImColorVariant.YELLOW : ImColorVariant.GREEN);
 
-				if (ImGui.menuItem(ImIcons.CHECK + "###link-hub-profile")) {
+			if (ImGui.menuItem(ImIcons.CHECK + "###link-hub-profile")) {
+				if (!graphics.inGame) {
 					if (Screen.hasShiftDown()) {
 						LinkHubUserScreen.open(graphics.mc);
 					} else if (mcProfile == null) {
 						LinkMinecraftScreen.handle(graphics.mc, true);
 					}
 				}
+			}
 
-				graphics.popStack();
+			graphics.popStack();
 
-				if (ImGui.isItemHovered()) {
-					hubTooltip.add("MrBeast Gaming Hub: Linked " + ImIcons.CHECK);
-					hubTooltip.add("");
-					hubTooltip.add("User: " + hubUser.toString());
+			if (ImGui.isItemHovered()) {
+				hubTooltip.add("MrBeast Gaming Hub: Linked " + ImIcons.CHECK);
+				hubTooltip.add("");
+				hubTooltip.add("User: " + hubUser.toString());
 
-					var roles = hubUser.flags().getRoles();
-					hubTooltip.add(roles.isEmpty() ? "Roles: Contestant" : ("Roles: " + String.join(", ", roles)));
+				var roles = hubUser.flags().getRoles();
+				hubTooltip.add(roles.isEmpty() ? "Roles: Contestant" : ("Roles: " + String.join(", ", roles)));
 
-					hubTooltip.add("");
-					hubTooltip.add("Project: " + (hubProject == null ? "Not Configured" : hubProject.toString()));
+				hubTooltip.add("");
+				hubTooltip.add("Project: " + (hubProject == null ? "Not Configured" : hubProject.toString()));
 
-					if (hubProject != null) {
-						var gateway = HubGateway.client;
-						hubTooltip.add("Gateway: " + (gateway != null && gateway.isConnected() ? "Active" : "Inactive"));
-					}
+				if (hubProject != null) {
+					var gateway = HubClientGateway.instance;
+					hubTooltip.add("Gateway: " + (gateway != null ? gateway.status : "Inactive"));
 				}
 			}
-
-			if (!hubTooltip.isEmpty()) {
-				graphics.tooltip(String.join("\n", hubTooltip));
-			}
-
-			ImGui.separator();
 		}
+
+		if (!hubTooltip.isEmpty()) {
+			graphics.tooltip(String.join("\n", hubTooltip));
+		}
+
+		ImGui.separator();
 
 		if (graphics.player != null) {
 			ImGui.text(ClientGameEngine.INSTANCE.getPlayerWorldName(graphics.player, graphics.player.getName()).getString());

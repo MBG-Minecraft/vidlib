@@ -31,12 +31,13 @@ import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.knumber.KNumberRegistryEvent;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorRegistryEvent;
-import dev.mrbeastgaming.mods.hub.api.gateway.HubGatewayEvent;
-import dev.mrbeastgaming.mods.hub.api.gateway.HubGatewayEventRegistryEvent;
+import dev.mrbeastgaming.mods.hub.api.gateway.HubGatewayEventRegistry;
+import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGatewayEventRegistryEvent;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -56,7 +57,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -272,8 +272,9 @@ public class NeoPlatformHelper extends PlatformHelper {
 	}
 
 	@Override
-	public void collectGatewayEventHandlers(Map<String, Consumer<HubGatewayEvent>> map) {
-		NeoForge.EVENT_BUS.post(new HubGatewayEventRegistryEvent(map));
+	public void collectServerGatewayEventHandlers(HubGatewayEventRegistry<MinecraftServer> registry) {
+		super.collectServerGatewayEventHandlers(registry);
+		NeoForge.EVENT_BUS.post(new HubServerGatewayEventRegistryEvent(registry));
 	}
 
 	@Override

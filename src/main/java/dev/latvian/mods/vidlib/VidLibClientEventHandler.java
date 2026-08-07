@@ -64,7 +64,7 @@ import dev.mrbeastgaming.mods.hub.api.HubFileType;
 import dev.mrbeastgaming.mods.hub.api.HubMinecraftProfileData;
 import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.api.HubUserData;
-import dev.mrbeastgaming.mods.hub.api.gateway.HubGateway;
+import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
 import dev.mrbeastgaming.mods.hub.client.LinkHubUserScreen;
 import dev.mrbeastgaming.mods.hub.client.LinkMinecraftScreen;
 import dev.mrbeastgaming.mods.hub.event.SyncClientFilesHubEvent;
@@ -255,6 +255,8 @@ public class VidLibClientEventHandler {
 
 			MiscClientUtils.CLIENT_CLOSEABLE.clear();
 		}
+
+		HubClientGateway.tickGateway();
 	}
 
 	@SubscribeEvent
@@ -735,12 +737,7 @@ public class VidLibClientEventHandler {
 	@SubscribeEvent
 	public static void gameShuttingDown(GameShuttingDownEvent event) {
 		VidLib.LOGGER.info("Shutting down");
-
-		var c = HubGateway.client;
-
-		if (c != null) {
-			c.stop();
-		}
+		HubClientGateway.stopGateway();
 	}
 
 	@SubscribeEvent

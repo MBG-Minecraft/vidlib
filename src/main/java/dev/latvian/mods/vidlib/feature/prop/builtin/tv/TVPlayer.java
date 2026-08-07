@@ -12,8 +12,8 @@ import java.net.URI;
 public class TVPlayer {
 	public static final ResourceLocation TEXTURE = VidLib.id("textures/prop/tv/video.png");
 
-	private static URI playingUri;
-	private static VideoPlayer videoPlayer;
+	private static URI current;
+	private static VideoPlayer player;
 	private static TextureWrapper textureWrapper;
 
 	public static void start(URI uri) {
@@ -21,79 +21,79 @@ public class TVPlayer {
 	}
 
 	public static void start(URI uri, boolean paused, boolean looping, boolean muted) {
-		if (!uri.equals(playingUri)) {
-			playingUri = uri;
+		if (!uri.equals(current)) {
+			current = uri;
 
-			if (videoPlayer == null) {
-				videoPlayer = new VideoPlayer(PlayerAPI.getFactory(), task -> Minecraft.getInstance().execute(() -> {
+			if (player == null) {
+				player = new VideoPlayer(PlayerAPI.getFactory(), task -> Minecraft.getInstance().execute(() -> {
 					task.run();
 					GlStateManager._bindTexture(0);
 				}));
 
-				textureWrapper = new TextureWrapper(videoPlayer.texture(), videoPlayer.width(), videoPlayer.height());
+				textureWrapper = new TextureWrapper(player);
 				Minecraft.getInstance().getTextureManager().register(TEXTURE, textureWrapper);
 			}
 
-			videoPlayer.setMuteMode(muted);
-			videoPlayer.setRepeatMode(looping);
+			player.setMuteMode(muted);
+			player.setRepeatMode(looping);
 
 			if (paused) {
-				videoPlayer.startPaused(uri);
+				player.startPaused(uri);
 			} else {
-				videoPlayer.start(uri);
+				player.start(uri);
 			}
 		} else {
 			if (paused) {
-				videoPlayer.pause();
-				videoPlayer.seekTo(0L);
+				player.pause();
+				player.seekTo(0L);
 			} else {
-				videoPlayer.seekTo(0L);
-				videoPlayer.play();
+				player.seekTo(0L);
+				player.play();
 			}
 		}
 	}
 
 	public static void play() {
-		if (videoPlayer != null) {
-			videoPlayer.play();
+		if (player != null) {
+			player.play();
 		}
 	}
 
 	public static void pause() {
-		if (videoPlayer != null) {
-			videoPlayer.pause();
+		if (player != null) {
+			player.pause();
 		}
 	}
 
 	public static void stop() {
-		if (videoPlayer != null) {
-			videoPlayer.stop();
-			videoPlayer.release();
-			videoPlayer = null;
-			playingUri = null;
+		if (player != null) {
+			player.stop();
+			player.release();
+			player = null;
+			current = null;
 			textureWrapper = null;
 		}
 	}
 
 	public static void reset() {
-		if (videoPlayer != null) {
-			videoPlayer.seekTo(0L);
+		if (player != null) {
+			player.seekTo(0L);
 		}
 	}
 
 	public static void mute() {
-		if (videoPlayer != null) {
-			videoPlayer.mute();
+		if (player != null) {
+			player.mute();
 		}
 	}
 
 	public static void unmute() {
-		if (videoPlayer != null) {
-			videoPlayer.unmute();
+		if (player != null) {
+			player.unmute();
 		}
 	}
 
 	public static boolean hasVideo() {
-		return videoPlayer != null && !videoPlayer.isStopped();
+		return player != null && !player.isStopped();
 	}
 }

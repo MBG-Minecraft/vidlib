@@ -41,6 +41,10 @@ import java.util.function.Supplier;
 public interface HubAPI {
 	URI URI_BASE = URI.create(Optional.ofNullable(System.getenv("MBG_HUB_API_BASE")).orElse("https://hub.mrbeastmc.com"));
 
+	static URI toWebSocketURI(@Nullable URI uri) {
+		return uri == null ? null : URI.create(URI_BASE.resolve(uri).toString().replaceFirst("^http", "ws"));
+	}
+
 	HttpClient HTTP_CLIENT = HttpClient.newBuilder()
 		.executor(Util.nonCriticalIoPool())
 		.followRedirects(HttpClient.Redirect.ALWAYS)
@@ -98,7 +102,7 @@ public interface HubAPI {
 	}
 
 	static HttpRequest apiCountries() {
-		return request("/api/countries", Tristate.DEFAULT).build();
+		return request("api/countries", Tristate.DEFAULT).build();
 	}
 
 	/*
@@ -109,25 +113,33 @@ public interface HubAPI {
 	 */
 
 	static HubFullData apiFullData() throws Exception {
-		var json = sendJsonRequest(request("/api/full-data", Tristate.DEFAULT).build());
+		var json = sendJsonRequest(request("api/full-data", Tristate.DEFAULT).build());
 		return HubFullData.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
 	}
 
 	static HttpRequest apiUsersRequestToken(String token) {
-		return request("/api/users/request-token/" + token, Tristate.FALSE).build();
+		return request("api/users/request-token/" + token, Tristate.FALSE).build();
 	}
 
 	static HubProjectsData apiProjects() throws Exception {
-		return HubProjectsData.CODEC.parse(JsonOps.INSTANCE, sendJsonRequest(request("/api/projects", Tristate.DEFAULT).build())).getOrThrow();
+		return HubProjectsData.CODEC.parse(JsonOps.INSTANCE, sendJsonRequest(request("api/projects", Tristate.DEFAULT).build())).getOrThrow();
 	}
 
 	static HttpRequest apiProjectFullData(Hex32 project) {
-		return request("/api/projects/" + project + "/full-data", Tristate.DEFAULT).build();
+		return request("api/projects/" + project + "/full-data", Tristate.DEFAULT).build();
 	}
 
-	static HubClientSessionData apiDesktopClientSession(HubClientSessionDataRequest request) throws Exception {
-		return HubClientSessionData.CODEC.parse(JsonOps.INSTANCE, sendJsonRequest(request("/api/desktop/client-session", Tristate.DEFAULT)
+	static HubClientSessionData apiClientSession(HubClientSessionDataRequest request) throws Exception {
+		return HubClientSessionData.CODEC.parse(JsonOps.INSTANCE, sendJsonRequest(request("api/minecraft/client-session", Tristate.DEFAULT)
 			.POST(jsonBody(HubClientSessionDataRequest.CODEC, request))
+			.timeout(Duration.ofSeconds(30L))
+			.build()
+		)).getOrThrow();
+	}
+
+	static HubServerSessionData apiServerSession(HubServerSessionDataRequest request) throws Exception {
+		return HubServerSessionData.CODEC.parse(JsonOps.INSTANCE, sendJsonRequest(request("api/minecraft/server-session", Tristate.TRUE)
+			.POST(jsonBody(HubServerSessionDataRequest.CODEC, request))
 			.timeout(Duration.ofSeconds(30L))
 			.build()
 		)).getOrThrow();
@@ -166,7 +178,7 @@ public interface HubAPI {
 
 		body.add("files", filesJson);
 
-		var response = sendJsonRequest(request("/api/projects/upload/" + projectToken, Tristate.DEFAULT).POST(jsonBody(body)).build()).getAsJsonObject();
+		var response = sendJsonRequest(request("api/projects/upload/" + projectToken, Tristate.DEFAULT).POST(jsonBody(body)).build()).getAsJsonObject();
 
 		var maxChunkSize = response.get("max_chunk_size").getAsInt();
 
@@ -189,13 +201,13 @@ public interface HubAPI {
 	}
 
 	static HubProjectReplaysData apiProjectReplays(Hex32 project) throws Exception {
-		var response = sendJsonRequest(request("/api/projects/" + project + "/replays", Tristate.TRUE).GET().build()).getAsJsonObject();
+		var response = sendJsonRequest(request("api/projects/" + project + "/replays", Tristate.TRUE).GET().build()).getAsJsonObject();
 		return HubProjectReplaysData.CODEC.parse(JsonOps.INSTANCE, response).getOrThrow();
 	}
 
 	static void apiProjectLog(String projectToken, HubLogRequest request) throws Exception {
 		var json = HubLogRequest.CODEC.encodeStart(JsonOps.INSTANCE, request).getOrThrow();
-		HTTP_CLIENT.send(request("/api/projects/log/" + projectToken, Tristate.TRUE).POST(jsonBody(json)).build(), HttpResponse.BodyHandlers.discarding());
+		HTTP_CLIENT.send(request("api/projects/log/" + projectToken, Tristate.TRUE).POST(jsonBody(json)).build(), HttpResponse.BodyHandlers.discarding());
 	}
 
 	static CompletableFuture<Void> logRequest(Supplier<HubLogRequest> request) {
@@ -255,7 +267,7 @@ public interface HubAPI {
 	}
 
 	static HubMinecraftProfileData.LinkData apiMinecraftLink(String name) throws Exception {
-		var response = sendJsonRequest(request("/api/minecraft/link/" + name, Tristate.TRUE).GET().build()).getAsJsonObject();
+		var response = sendJsonRequest(request("api/minecraft/link/" + name, Tristate.TRUE).GET().build()).getAsJsonObject();
 
 		return new HubMinecraftProfileData.LinkData(
 			HubMinecraftProfileData.CODEC.parse(JsonOps.INSTANCE, response).getOrThrow(),

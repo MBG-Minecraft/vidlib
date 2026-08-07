@@ -16,6 +16,7 @@ import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
+import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import org.slf4j.Logger;
@@ -38,6 +39,8 @@ public class VidLib {
 		if (PlatformHelper.CURRENT.getSide().isClient()) {
 			initClient();
 		}
+
+		Runtime.getRuntime().addShutdownHook(new Thread(HubServerGateway::stopGateway, "Stop-Server-Hub-Gateway"));
 	}
 
 	private static void initClient() {

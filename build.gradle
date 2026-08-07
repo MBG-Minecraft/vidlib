@@ -203,7 +203,7 @@ dependencies {
 	compileOnly("maven.modrinth:iris:1.8.11+1.21.5-neoforge")
 	compileOnly("software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}")
 	compileOnly("curse.maven:watermedia-869524:7281929") // 2.1.37
-	// compileOnly("curse.maven:watermedia-869524:8519098") // 3.0.0.23
+	// compileOnly("curse.maven:watermedia-869524:8519098") // 3.0.0.23 // Fixes linux and mac but conflicts with flashback
 }
 
 processResources {

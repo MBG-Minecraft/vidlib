@@ -16,6 +16,8 @@ import dev.latvian.mods.vidlib.feature.registry.GenericVLRegistry;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
+import dev.mrbeastgaming.mods.hub.api.HubServerSessionData;
+import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
 import io.netty.util.NettyRuntime;
 import io.netty.util.internal.SystemPropertyUtil;
 import net.minecraft.commands.Commands;
@@ -134,6 +136,7 @@ public class VidLibEventHandler {
 	public static void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
 		if (event.getEntity() instanceof ServerPlayer player) {
 			player.server.vl$playerJoined(player);
+			HubServerGateway.playerLoggedIn(player);
 		}
 	}
 
@@ -141,6 +144,7 @@ public class VidLibEventHandler {
 	public static void playerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
 		if (event.getEntity() instanceof ServerPlayer player) {
 			player.server.vl$playerLeft(player);
+			HubServerGateway.playerLoggedOut(player);
 		}
 	}
 
@@ -159,6 +163,7 @@ public class VidLibEventHandler {
 			}
 
 			packets.send(player);
+			HubServerGateway.playerChangedDimension(player, event.getFrom(), event.getTo());
 		}
 	}
 
@@ -174,6 +179,7 @@ public class VidLibEventHandler {
 		VidLib.LOGGER.info("Netty Threads: " + Math.max(1, SystemPropertyUtil.getInt("io.netty.eventLoopThreads", NettyRuntime.availableProcessors() * 2)));
 		SimplePacketPayload.S2C.set(0L);
 		gameLoaded();
+		HubServerSessionData.loadAsync(event.getServer());
 	}
 
 	@SubscribeEvent(priority = EventPriority.HIGH)
@@ -194,6 +200,7 @@ public class VidLibEventHandler {
 
 		AutoInit.Type.SAVE_GAME.invoke();
 		AutoInit.Type.DATA_CLOSED.invoke();
+		HubServerGateway.stopGateway();
 	}
 
 	@SubscribeEvent(priority = EventPriority.HIGH)
@@ -204,6 +211,7 @@ public class VidLibEventHandler {
 	@SubscribeEvent(priority = EventPriority.LOW)
 	public static void serverPostTick(ServerTickEvent.Post event) {
 		event.getServer().vl$postTick(event.getServer().getPauseType());
+		HubServerGateway.tickGateway();
 	}
 
 	@SubscribeEvent

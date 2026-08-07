@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import java.net.http.WebSocket;
 import java.util.concurrent.CompletableFuture;
 
-public record HubGatewayEvent(HubGateway gateway, long id, String method, JsonElement params) {
+public record HubGatewayEvent(HubCommonGateway gateway, long id, String method, JsonElement params) {
 	public JsonObject paramsObject() {
 		return params == null ? null : params.getAsJsonObject();
 	}

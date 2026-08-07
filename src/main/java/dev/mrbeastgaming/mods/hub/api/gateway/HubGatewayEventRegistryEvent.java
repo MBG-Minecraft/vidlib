@@ -1,18 +1,16 @@
 package dev.mrbeastgaming.mods.hub.api.gateway;
 
+import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.neoforged.bus.api.Event;
 
-import java.util.Map;
-import java.util.function.Consumer;
+public abstract class HubGatewayEventRegistryEvent<M extends ReentrantBlockableEventLoop<?>> extends Event {
+	private final HubGatewayEventRegistry<M> registry;
 
-public class HubGatewayEventRegistryEvent extends Event {
-	private final Map<String, Consumer<HubGatewayEvent>> map;
-
-	public HubGatewayEventRegistryEvent(Map<String, Consumer<HubGatewayEvent>> map) {
-		this.map = map;
+	public HubGatewayEventRegistryEvent(HubGatewayEventRegistry<M> registry) {
+		this.registry = registry;
 	}
 
-	public void register(String method, Consumer<HubGatewayEvent> callback) {
-		map.put(method, callback);
+	public HubGatewayEventRegistry<M> getRegistry() {
+		return registry;
 	}
 }

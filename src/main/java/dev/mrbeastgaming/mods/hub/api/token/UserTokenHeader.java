@@ -11,7 +11,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
-public record UserTokenHeader(UserTokenType type, int user, int session, Instant utc, int iteration, String name) {
+public record UserTokenHeader(
+	UserTokenType type,
+	int user,
+	int session,
+	Instant utc,
+	int iteration,
+	String name
+) {
 	public static UserTokenHeader read(DataInput data) throws IOException {
 		var type = UserTokenType.get(data.readByte() & 0xFF);
 		int id = data.readInt();

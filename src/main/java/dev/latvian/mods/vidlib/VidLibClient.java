@@ -9,6 +9,7 @@ import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubClientSessionData;
 import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.api.HubUserData;
+import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
 import dev.mrbeastgaming.mods.hub.event.SyncClientFilesHubEvent;
 import dev.mrbeastgaming.mods.hub.file.HubDirectoryUploadBuilder;
 import dev.mrbeastgaming.mods.hub.file.HubFileUploadBuilder;
@@ -27,11 +28,12 @@ public class VidLibClient {
 	public static void init() {
 		MiscUtils.CLIENT_PLAYER.setValue(() -> Minecraft.getInstance().player);
 		loadHub();
+		Runtime.getRuntime().addShutdownHook(new Thread(HubClientGateway::stopGateway, "Stop-Client-Hub-Gateway"));
 	}
 
 	public static void loadHub() {
 		var userConfig = HubUserConfig.load();
-		HubClientSessionData.load(userConfig, HubProjectConfig.INSTANCE.get());
+		HubClientSessionData.load(Minecraft.getInstance(), userConfig, HubProjectConfig.INSTANCE.get());
 	}
 
 	private static void wrapHubUploadBuilder(HubUploadBuilderBase builder) {
