@@ -40,6 +40,11 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 		}
 	}
 
+	public static void updateInfo(Minecraft mc, HubClientGateway gateway) {
+		gateway.sendName(mc.getUser().getName());
+		gateway.sendStatus("Online");
+	}
+
 	public final Minecraft mc;
 
 	public HubClientGateway(Minecraft mc, URI uri) {
@@ -50,5 +55,10 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 	@Override
 	public void collectEventHandlers(HubGatewayEventRegistry<Minecraft> registry) {
 		NeoForge.EVENT_BUS.post(new HubClientGatewayEventRegistryEvent(registry));
+	}
+
+	@Override
+	public void onConnected() {
+		updateInfo(main, this);
 	}
 }

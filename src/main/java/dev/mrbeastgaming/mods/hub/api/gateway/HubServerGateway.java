@@ -3,6 +3,8 @@ package dev.mrbeastgaming.mods.hub.api.gateway;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.mrbeastgaming.mods.hub.api.HubServerSessionData;
+import net.minecraft.ChatFormatting;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -46,6 +48,16 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 		}
 	}
 
+	public static void updateInfo(MinecraftServer server, HubServerGateway gateway) {
+		if (server.isDedicatedServer()) {
+			gateway.sendName("Port " + server.getPort() + "\n" + ChatFormatting.stripFormatting(server.getMotd().replace("\\n", "\n")));
+		} else {
+			gateway.sendName(ChatFormatting.stripFormatting(server.getMotd().replace("\\n", "\n")));
+		}
+
+		gateway.sendStatus(server.getPlayerCount() + " Online");
+	}
+
 	public static JsonObject entityToJson(Entity entity) {
 		var json = new JsonObject();
 		json.addProperty("uuid", entity.getUUID().toString());
@@ -61,9 +73,9 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 			var json = new JsonObject();
 			json.add("player", entityToJson(player));
 			gateway.send("player_logged_in", json);
-		}
 
-		updateStatus(player.server.getPlayerCount() + " Online");
+			updateInfo(player.server, gateway);
+		}
 	}
 
 	public static void playerLoggedOut(ServerPlayer player) {
@@ -73,9 +85,9 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 			var json = new JsonObject();
 			json.add("player", entityToJson(player));
 			gateway.send("player_logged_out", json);
-		}
 
-		updateStatus((player.server.getPlayerCount() - 1) + " Online");
+			Thread.startVirtualThread(() -> player.server.execute(() -> updateInfo(player.server, gateway)));
+		}
 	}
 
 	public static void playerChangedDimension(ServerPlayer player, ResourceKey<Level> fromDim, ResourceKey<Level> toDim) {
@@ -109,6 +121,8 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 	public static void registerBuiltIn(HubGatewayEventRegistry<MinecraftServer> registry) {
 		registry.register("ping", HubServerGateway::ping);
 		registry.registerSynced("request_restart", HubServerGateway::requestRestart);
+		registry.registerSynced("run_command", HubServerGateway::runCommand);
+		registry.registerSynced("update_ops", HubServerGateway::updateOps);
 	}
 
 	public static void ping(HubGatewayEvent event) {
@@ -117,6 +131,15 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 
 	private static void requestRestart(MinecraftServer server, HubGatewayEvent event) {
 		server.halt(false);
+	}
+
+	private static void runCommand(MinecraftServer server, HubGatewayEvent event) {
+		var command = event.paramsObject().get("command").getAsString();
+		server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), command);
+	}
+
+	private static void updateOps(MinecraftServer server, HubGatewayEvent event) {
+		HubServerSessionData.updateOps(server, event.paramsArray());
 	}
 
 	public final MinecraftServer server;
@@ -129,5 +152,10 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 	@Override
 	public void collectEventHandlers(HubGatewayEventRegistry<MinecraftServer> registry) {
 		PlatformHelper.CURRENT.collectServerGatewayEventHandlers(registry);
+	}
+
+	@Override
+	public void onConnected() {
+		updateInfo(main, this);
 	}
 }

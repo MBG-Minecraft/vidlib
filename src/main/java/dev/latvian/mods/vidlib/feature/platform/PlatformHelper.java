@@ -188,4 +188,8 @@ public class PlatformHelper {
 	public boolean isReplayLevel(Level level) {
 		return false;
 	}
+
+	public boolean isReplayServer(MinecraftServer server) {
+		return false;
+	}
 }

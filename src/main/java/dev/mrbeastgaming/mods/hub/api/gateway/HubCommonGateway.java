@@ -52,6 +52,7 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 			try {
 				webSocket = HubAPI.HTTP_CLIENT.newWebSocketBuilder().buildAsync(uri, this).get(10L, TimeUnit.SECONDS);
 				status = "Active";
+				onConnected();
 			} catch (Exception ex) {
 				reconnect = System.currentTimeMillis() + 5000L;
 				VidLib.LOGGER.error(reconnecting ? "Failed to reconnect to Gateway" : "Failed to connect to Gateway", ex);
@@ -80,6 +81,9 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 		if (reconnect != 0L && System.currentTimeMillis() >= reconnect && !isConnected()) {
 			start();
 		}
+	}
+
+	public void onConnected() {
 	}
 
 	public CompletableFuture<Void> send(String method) {

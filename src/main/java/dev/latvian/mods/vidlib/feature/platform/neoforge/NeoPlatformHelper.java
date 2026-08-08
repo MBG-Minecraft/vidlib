@@ -281,4 +281,9 @@ public class NeoPlatformHelper extends PlatformHelper {
 	public boolean isReplayLevel(Level level) {
 		return level.isReplayLevel();
 	}
+
+	@Override
+	public boolean isReplayServer(MinecraftServer server) {
+		return server.vl$isReplayServer();
+	}
 }

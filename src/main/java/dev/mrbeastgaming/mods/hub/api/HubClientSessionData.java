@@ -92,8 +92,7 @@ public record HubClientSessionData(
 			var gateway = HubClientGateway.startGateway(mc, HubAPI.toWebSocketURI(data.gateway.orElse(null)));
 
 			if (gateway != null) {
-				gateway.sendName(mc.getUser().getName());
-				gateway.sendStatus("Online");
+				HubClientGateway.updateInfo(mc, gateway);
 			}
 		} catch (Exception ex) {
 			VidLib.LOGGER.error("Failed to load Hub client session data: " + ex);
