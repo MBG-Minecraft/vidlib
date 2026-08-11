@@ -14,12 +14,15 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import dev.mrbeastgaming.mods.hub.HubUserConfig;
+import dev.mrbeastgaming.mods.hub.api.gateway.HubCommonGateway;
+import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
 import dev.mrbeastgaming.mods.hub.api.project.HubProjectReplaysData;
 import dev.mrbeastgaming.mods.hub.api.project.HubProjectsData;
 import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadRequestItem;
 import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadResponseItem;
 import net.minecraft.Util;
 import net.minecraft.world.entity.player.Player;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.PrintWriter;
@@ -40,6 +43,7 @@ import java.util.function.Supplier;
 
 public interface HubAPI {
 	URI URI_BASE = URI.create(Optional.ofNullable(System.getenv("MBG_HUB_API_BASE")).orElse("https://hub.mrbeastmc.com"));
+	MutableObject<Supplier<HubCommonGateway<?>>> CLIENT_GATEWAY = new MutableObject<>(() -> null);
 
 	static URI toWebSocketURI(@Nullable URI uri) {
 		return uri == null ? null : URI.create(URI_BASE.resolve(uri).toString().replaceFirst("^http", "ws"));
@@ -59,6 +63,12 @@ public interface HubAPI {
 
 	Lazy<ExecutorService> SEQUENTIAL_EXECUTOR = Lazy.of(() -> Executors.newSingleThreadExecutor(r -> {
 		var thread = new Thread(r, "Sequential-MBG-Hub-API-Thread-%08X".formatted(r.hashCode()));
+		thread.setDaemon(true);
+		return thread;
+	}));
+
+	Lazy<ExecutorService> WEBSOCKET_EXECUTOR = Lazy.of(() -> Executors.newSingleThreadExecutor(r -> {
+		var thread = new Thread(r, "Websocket-MBG-Hub-API-Thread-%08X".formatted(r.hashCode()));
 		thread.setDaemon(true);
 		return thread;
 	}));
@@ -99,6 +109,11 @@ public interface HubAPI {
 
 	static <T> HttpRequest.BodyPublisher jsonBody(Codec<T> codec, T value) {
 		return jsonBody(codec.encodeStart(JsonOps.INSTANCE, value).getOrThrow());
+	}
+
+	@Nullable
+	static HubCommonGateway<?> getClientGateway() {
+		return CLIENT_GATEWAY.getValue().get();
 	}
 
 	static HttpRequest apiCountries() {
@@ -210,7 +225,19 @@ public interface HubAPI {
 		HTTP_CLIENT.send(request("api/projects/log/" + projectToken, Tristate.TRUE).POST(jsonBody(json)).build(), HttpResponse.BodyHandlers.discarding());
 	}
 
-	static CompletableFuture<Void> logRequest(Supplier<HubLogRequest> request) {
+	static CompletableFuture<Void> log(Supplier<HubLogRequest> request) {
+		var gateway = getClientGateway();
+
+		if (gateway != null) {
+			return gateway.log(request);
+		}
+
+		var serverGateway = HubServerGateway.instance;
+
+		if (serverGateway != null) {
+			return serverGateway.log(request);
+		}
+
 		return CompletableFuture.runAsync(() -> {
 			try {
 				var projectConfig = HubProjectConfig.INSTANCE.get();
@@ -220,13 +247,13 @@ public interface HubAPI {
 				}
 			} catch (Exception ignored) {
 			}
-		}, SEQUENTIAL_EXECUTOR.get());
+		}, WEBSOCKET_EXECUTOR.get());
 	}
 
 	static CompletableFuture<Void> log(int type, @Nullable Player player, Supplier<? extends Iterable<String>> content) {
 		var time = Instant.now();
 
-		return logRequest(() -> {
+		return log(() -> {
 			var p = player == null ? MiscUtils.CLIENT_PLAYER.getValue().get() : player;
 
 			if (p != null) {

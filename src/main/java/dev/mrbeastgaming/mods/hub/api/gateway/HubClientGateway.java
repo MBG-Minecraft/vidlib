@@ -42,7 +42,18 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 
 	public static void updateInfo(Minecraft mc, HubClientGateway gateway) {
 		gateway.sendName(mc.getUser().getName());
-		gateway.sendStatus("Online");
+
+		var server = mc.getCurrentServer();
+
+		if (server != null) {
+			gateway.sendStatus("Server - " + server.name);
+		} else if (mc.level != null && mc.level.isReplayLevel()) {
+			gateway.sendStatus("Replay Editor");
+		} else if (mc.level != null) {
+			gateway.sendStatus("Singleplayer");
+		} else {
+			gateway.sendStatus("Main Menu");
+		}
 	}
 
 	public final Minecraft mc;

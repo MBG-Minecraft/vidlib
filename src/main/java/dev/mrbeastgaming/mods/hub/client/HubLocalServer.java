@@ -26,6 +26,7 @@ public class HubLocalServer {
 			webServer.setDaemon(true);
 			webServer.setAddress("127.0.0.1");
 			webServer.get("/desktop/finish-link/{token}", HubLocalServer::getFinishLink);
+			webServer.setHashPrefix("mbg-hub-");
 			webServer.start();
 		}
 

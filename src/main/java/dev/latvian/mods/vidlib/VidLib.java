@@ -35,15 +35,10 @@ public class VidLib {
 	public static void init() {
 		VidLib.LOGGER.info("VidLib " + VERSION + " loaded");
 		VidLibDataTypes.register();
-
-		if (PlatformHelper.CURRENT.getSide().isClient()) {
-			initClient();
-		}
-
 		Runtime.getRuntime().addShutdownHook(new Thread(HubServerGateway::stopGateway, "Stop-Server-Hub-Gateway"));
 	}
 
-	private static void initClient() {
+	public static void initClient() {
 		VidLibClient.init();
 	}
 

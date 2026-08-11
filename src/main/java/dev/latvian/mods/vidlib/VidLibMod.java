@@ -61,6 +61,10 @@ public class VidLibMod {
 	}
 
 	public void setup(FMLCommonSetupEvent event) {
+		if (PlatformHelper.CURRENT.getSide().isClient()) {
+			VidLib.initClient();
+		}
+
 		VidLib.buildRegistries();
 	}
 

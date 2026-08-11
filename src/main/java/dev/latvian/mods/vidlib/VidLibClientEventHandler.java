@@ -200,6 +200,25 @@ public class VidLibClientEventHandler {
 	}
 
 	@SubscribeEvent
+	public static void loggedIn(ClientPlayerNetworkEvent.LoggingIn event) {
+		var gateway = HubClientGateway.instance;
+
+		if (gateway != null) {
+			HubClientGateway.updateInfo(Minecraft.getInstance(), gateway);
+		}
+	}
+
+	@SubscribeEvent
+	public static void loggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
+		var gateway = HubClientGateway.instance;
+
+		if (gateway != null) {
+			var mc = Minecraft.getInstance();
+			MiscClientUtils.delayedExecute(mc, () -> HubClientGateway.updateInfo(mc, gateway));
+		}
+	}
+
+	@SubscribeEvent
 	public static void clientPreTick(ClientTickEvent.Pre event) {
 		VidLibEventHandler.gameLoaded();
 

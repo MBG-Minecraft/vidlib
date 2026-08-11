@@ -11,8 +11,7 @@ import java.util.List;
 
 public record HubProjectData(
 	Hex32 id,
-	String internalName,
-	String publicName,
+	String name,
 	String description,
 	String productionCode,
 	HubGameData game,
@@ -24,8 +23,7 @@ public record HubProjectData(
 ) {
 	public static final Codec<HubProjectData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Hex32.CODEC.fieldOf("id").forGetter(HubProjectData::id),
-		Codec.STRING.optionalFieldOf("internal_name", "").forGetter(HubProjectData::internalName),
-		Codec.STRING.optionalFieldOf("public_name", "").forGetter(HubProjectData::publicName),
+		Codec.STRING.optionalFieldOf("name", "").forGetter(HubProjectData::name),
 		Codec.STRING.optionalFieldOf("description", "").forGetter(HubProjectData::description),
 		Codec.STRING.optionalFieldOf("production_code", "").forGetter(HubProjectData::productionCode),
 		HubGameData.CODEC.fieldOf("game").forGetter(HubProjectData::game),
@@ -38,20 +36,8 @@ public record HubProjectData(
 
 	public static HubProjectData PACK = null;
 
-	public String displayName() {
-		if (!internalName.isEmpty()) {
-			return internalName;
-		} else if (!publicName.isEmpty()) {
-			return publicName;
-		} else if (!productionCode.isEmpty()) {
-			return productionCode;
-		} else {
-			return id.toString();
-		}
-	}
-
 	@Override
 	public String toString() {
-		return displayName() + "#" + id;
+		return name + "#" + id;
 	}
 }

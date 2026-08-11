@@ -33,6 +33,7 @@ public class VidLibClient {
 
 	public static void loadHub() {
 		var userConfig = HubUserConfig.load();
+		HubAPI.CLIENT_GATEWAY.setValue(() -> HubClientGateway.instance);
 		HubClientSessionData.load(Minecraft.getInstance(), userConfig, HubProjectConfig.INSTANCE.get());
 	}
 

@@ -258,4 +258,8 @@ public class MiscClientUtils {
 
 		return dst;
 	}
+
+	public static void delayedExecute(Minecraft mc, Runnable task) {
+		Thread.startVirtualThread(() -> mc.execute(task));
+	}
 }

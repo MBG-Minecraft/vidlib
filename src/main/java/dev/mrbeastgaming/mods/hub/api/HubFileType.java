@@ -17,6 +17,7 @@ public record HubFileType(int type, String contentType, String name) implements 
 	public static final HubFileType SERVER_CRASH_REPORT = new HubFileType(7, MimeType.TEXT, "Server Game Crash Reports");
 	public static final HubFileType SERVER_JVM_CRASH_REPORT = new HubFileType(8, MimeType.TEXT, "Server JVM Crash Reports");
 	public static final HubFileType SERVER_GAME_LOG = new HubFileType(9, MimeType.TEXT, "Server Game Logs");
+	public static final HubFileType IMAGE = new HubFileType(10, MimeType.PNG, "Images");
 
 	public static HubFileType custom(String contentType) {
 		return new HubFileType(0, contentType, "");

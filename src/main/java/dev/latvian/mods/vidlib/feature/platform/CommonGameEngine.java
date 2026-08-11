@@ -518,4 +518,8 @@ public class CommonGameEngine {
 	public boolean allowFlight(Player player) {
 		return player.get(InternalPlayerData.CAN_FLY);
 	}
+
+	public String getServerGatewayStatus(MinecraftServer server) {
+		return "%size% Online";
+	}
 }

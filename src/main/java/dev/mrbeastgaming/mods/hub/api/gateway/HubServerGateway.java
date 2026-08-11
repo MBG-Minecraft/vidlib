@@ -2,6 +2,7 @@ package dev.mrbeastgaming.mods.hub.api.gateway;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.mrbeastgaming.mods.hub.api.HubServerSessionData;
 import net.minecraft.ChatFormatting;
@@ -55,7 +56,8 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 			gateway.sendName(ChatFormatting.stripFormatting(server.getMotd().replace("\\n", "\n")));
 		}
 
-		gateway.sendStatus(server.getPlayerCount() + " Online");
+		gateway.sendSize(server.getPlayerCount());
+		gateway.sendStatus(CommonGameEngine.INSTANCE.getServerGatewayStatus(server));
 	}
 
 	public static JsonObject entityToJson(Entity entity) {
@@ -73,8 +75,7 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 			var json = new JsonObject();
 			json.add("player", entityToJson(player));
 			gateway.send("player_logged_in", json);
-
-			updateInfo(player.server, gateway);
+			gateway.sendSize(player.server.getPlayerCount());
 		}
 	}
 
@@ -85,8 +86,7 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 			var json = new JsonObject();
 			json.add("player", entityToJson(player));
 			gateway.send("player_logged_out", json);
-
-			Thread.startVirtualThread(() -> player.server.execute(() -> updateInfo(player.server, gateway)));
+			gateway.sendSize(player.server.getPlayerCount() - 1);
 		}
 	}
 

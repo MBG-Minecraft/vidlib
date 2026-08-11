@@ -4,24 +4,33 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
+import dev.mrbeastgaming.mods.hub.api.HubLogRequest;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.URI;
 import java.net.http.WebSocket;
 import java.nio.ByteBuffer;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implements WebSocket.Listener {
 	public final M main;
@@ -48,7 +57,7 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 		reconnect = 0L;
 		status = reconnecting ? "Reconnecting..." : "Connecting...";
 
-		HubAPI.SEQUENTIAL_EXECUTOR.get().execute(() -> {
+		HubAPI.WEBSOCKET_EXECUTOR.get().execute(() -> {
 			try {
 				webSocket = HubAPI.HTTP_CLIENT.newWebSocketBuilder().buildAsync(uri, this).get(10L, TimeUnit.SECONDS);
 				status = "Active";
@@ -56,7 +65,7 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 			} catch (Exception ex) {
 				reconnect = System.currentTimeMillis() + 5000L;
 				VidLib.LOGGER.error(reconnecting ? "Failed to reconnect to Gateway" : "Failed to connect to Gateway", ex);
-				status = "Error - Reconnecting...";
+				status = "Early Error - Reconnecting...";
 			}
 		});
 	}
@@ -121,7 +130,7 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 			if (ws != null) {
 				ws.sendText(result, true).join();
 			}
-		}, HubAPI.SEQUENTIAL_EXECUTOR.get());
+		}, HubAPI.WEBSOCKET_EXECUTOR.get());
 	}
 
 	public void collectEventHandlers(HubGatewayEventRegistry<M> registry) {
@@ -220,7 +229,7 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 	@Override
 	public void onError(WebSocket ws, Throwable error) {
 		reconnect = System.currentTimeMillis() + 5000L;
-		status = "Error - Reconnecting...";
+		status = "Late Error - Reconnecting...";
 		webSocket = null;
 	}
 
@@ -238,5 +247,60 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 		var json = new JsonObject();
 		json.addProperty("status", status);
 		return send("status", json);
+	}
+
+	public CompletableFuture<Void> sendSize(long size) {
+		var json = new JsonObject();
+		json.addProperty("size", size);
+		return send("size", json);
+	}
+
+	public CompletableFuture<Void> log(Supplier<HubLogRequest> request) {
+		var data = request.get();
+		var json = HubLogRequest.CODEC.encodeStart(JsonOps.INSTANCE, data).getOrThrow().getAsJsonObject();
+		return send("log", json);
+	}
+
+	public CompletableFuture<Void> log(int type, @Nullable Player player, Supplier<? extends Iterable<String>> content) {
+		var time = Instant.now();
+
+		return log(() -> {
+			var p = player == null ? MiscUtils.CLIENT_PLAYER.getValue().get() : player;
+
+			if (p != null) {
+				return new HubLogRequest(
+					Optional.of(time),
+					type,
+					String.join("\n", content.get()),
+					p
+				);
+			}
+
+			return new HubLogRequest(
+				Optional.of(time),
+				type,
+				String.join("\n", content.get())
+			);
+		});
+	}
+
+	public CompletableFuture<Void> log(int type, @Nullable Player player, String content) {
+		return log(type, player, () -> List.of(content));
+	}
+
+	public CompletableFuture<Void> log(int type, @Nullable Player player, String content, Throwable error) {
+		return log(type, player, () -> {
+			var list = new ArrayList<String>();
+			list.add(content);
+
+			error.printStackTrace(new PrintWriter(Writer.nullWriter()) {
+				@Override
+				public void println(Object x) {
+					list.add(String.valueOf(x));
+				}
+			});
+
+			return list;
+		});
 	}
 }
