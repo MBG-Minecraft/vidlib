@@ -119,6 +119,7 @@
 		"GpuTextureMixin",
 		"GuiGraphicsMixin",
 		"GuiMixin",
+		"IntegratedServerMixin",
 		"ItemInHandRendererMixin",
 		"JoinMultiplayerScreenMixin",
 		"KeyboardHandlerMixin",

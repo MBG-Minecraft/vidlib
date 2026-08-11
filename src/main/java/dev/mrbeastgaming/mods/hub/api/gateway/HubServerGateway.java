@@ -5,6 +5,7 @@ import com.google.gson.JsonPrimitive;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.mrbeastgaming.mods.hub.api.HubServerSessionData;
+import dev.mrbeastgaming.mods.hub.api.UsedPort;
 import net.minecraft.ChatFormatting;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -14,6 +15,7 @@ import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.net.URI;
+import java.util.ArrayList;
 
 public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 	public static HubServerGateway instance;
@@ -50,14 +52,12 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 	}
 
 	public static void updateInfo(MinecraftServer server, HubServerGateway gateway) {
-		if (server.isDedicatedServer()) {
-			gateway.sendName("Port " + server.getPort() + "\n" + ChatFormatting.stripFormatting(server.getMotd().replace("\\n", "\n")));
-		} else {
-			gateway.sendName(ChatFormatting.stripFormatting(server.getMotd().replace("\\n", "\n")));
-		}
-
+		gateway.sendName(ChatFormatting.stripFormatting(server.getMotd().replace("\\n", "\n")));
 		gateway.sendSize(server.getPlayerCount());
 		gateway.sendStatus(CommonGameEngine.INSTANCE.getServerGatewayStatus(server));
+		var usedPorts = new ArrayList<UsedPort>(3);
+		CommonGameEngine.INSTANCE.getUsedPorts(server, usedPorts);
+		gateway.sendUsedPorts(usedPorts);
 	}
 
 	public static JsonObject entityToJson(Entity entity) {
@@ -79,14 +79,14 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 		}
 	}
 
-	public static void playerLoggedOut(ServerPlayer player) {
+	public static void playerLoggedOut(ServerPlayer player, boolean offset) {
 		var gateway = HubServerGateway.instance;
 
 		if (gateway != null) {
 			var json = new JsonObject();
 			json.add("player", entityToJson(player));
 			gateway.send("player_logged_out", json);
-			gateway.sendSize(player.server.getPlayerCount() - 1);
+			gateway.sendSize(player.server.getPlayerCount() - (offset ? 1 : 0));
 		}
 	}
 

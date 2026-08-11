@@ -10,6 +10,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubLogRequest;
+import dev.mrbeastgaming.mods.hub.api.UsedPort;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
@@ -253,6 +254,16 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 		var json = new JsonObject();
 		json.addProperty("size", size);
 		return send("size", json);
+	}
+
+	public CompletableFuture<Void> sendUsedPorts(List<UsedPort> usedPorts) {
+		var json = new JsonArray();
+
+		for (var port : usedPorts) {
+			json.add(port.toJson());
+		}
+
+		return send("used_ports", json);
 	}
 
 	public CompletableFuture<Void> log(Supplier<HubLogRequest> request) {

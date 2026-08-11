@@ -9,6 +9,7 @@ import dev.latvian.mods.vidlib.feature.location.WarpLocation;
 import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
+import dev.mrbeastgaming.mods.hub.api.UsedPort;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.client.Minecraft;
@@ -19,6 +20,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -516,10 +518,26 @@ public class CommonGameEngine {
 	}
 
 	public boolean allowFlight(Player player) {
-		return player.get(InternalPlayerData.CAN_FLY);
+		return false;
 	}
 
 	public String getServerGatewayStatus(MinecraftServer server) {
 		return "%size% Online";
+	}
+
+	public void getUsedPorts(MinecraftServer server, List<UsedPort> list) {
+		if (server.isPublished()) {
+			list.add(UsedPort.tcp("Game", server.getPort()));
+		}
+
+		if (server instanceof DedicatedServer dedicatedServer) {
+			if (dedicatedServer.getProperties().enableRcon) {
+				list.add(UsedPort.tcp("RCON", dedicatedServer.getProperties().rconPort));
+			}
+
+			if (dedicatedServer.getProperties().enableQuery) {
+				list.add(UsedPort.udp("Query", dedicatedServer.getProperties().queryPort));
+			}
+		}
 	}
 }

@@ -144,7 +144,7 @@ public class VidLibEventHandler {
 	public static void playerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
 		if (event.getEntity() instanceof ServerPlayer player) {
 			player.server.vl$playerLeft(player);
-			HubServerGateway.playerLoggedOut(player);
+			HubServerGateway.playerLoggedOut(player, true);
 		}
 	}
 

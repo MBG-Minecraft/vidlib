@@ -4,6 +4,8 @@ import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.block.VidLibBlocks;
 import dev.latvian.mods.vidlib.feature.item.VidLibItems;
 import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.feature.platform.NeoForgeCommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.platform.neoforge.NeoPlatformHelper;
 import net.minecraft.core.registries.Registries;
@@ -18,8 +20,9 @@ import net.neoforged.neoforgespi.language.IModInfo;
 @Mod(VidLib.ID)
 public class VidLibMod {
 	public VidLibMod(ModContainer mod, IEventBus bus) {
-		PlatformHelper.CURRENT = new NeoPlatformHelper(mod);
 		VidLib.VERSION = mod.getModInfo().getVersion().toString();
+		PlatformHelper.CURRENT = new NeoPlatformHelper(mod);
+		CommonGameEngine.INSTANCE = new NeoForgeCommonGameEngine();
 		VidLib.init();
 
 		VidLib.LOGGER.info("Mod Tree:");

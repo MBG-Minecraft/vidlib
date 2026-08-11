@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -10,11 +11,15 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.food.FoodData;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.Collection;
+import java.util.List;
 
 public class ChallengeCommonGameEngine extends NeoForgeCommonGameEngine {
 	@Override
@@ -27,6 +32,25 @@ public class ChallengeCommonGameEngine extends NeoForgeCommonGameEngine {
 		rules.getRule(GameRules.RULE_RANDOMTICKING).set(0, server);
 		rules.getRule(GameRules.RULE_WEATHER_CYCLE).set(false, server);
 		rules.getRule(GameRules.RULE_FALL_DAMAGE).set(false, server);
+	}
+
+	@Override
+	public boolean disablePOI() {
+		return true;
+	}
+
+	@Override
+	public Collection<AdvancementHolder> overrideAdvancements(Collection<AdvancementHolder> original) {
+		return List.of();
+	}
+
+	@Override
+	public boolean replaceFoodTick(ServerPlayer player, FoodData foodData) {
+		foodData.setFoodLevel(20);
+		foodData.setSaturation(20F);
+		foodData.vl$setExhaustionLevel(0F);
+		foodData.vl$setTickTimer(0);
+		return true;
 	}
 
 	@Override
