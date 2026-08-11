@@ -64,8 +64,8 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 				status = "Active";
 				onConnected();
 			} catch (Exception ex) {
-				reconnect = System.currentTimeMillis() + 5000L;
-				VidLib.LOGGER.error(reconnecting ? "Failed to reconnect to Gateway" : "Failed to connect to Gateway", ex);
+				reconnect = System.currentTimeMillis() + 10000L;
+				VidLib.LOGGER.error("Failed to " + (reconnecting ? "reconnect" : "connect") + " to Gateway, trying again in 10 seconds");
 				status = "Early Error - Reconnecting...";
 			}
 		});
@@ -221,7 +221,7 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 
 	@Override
 	public CompletionStage<?> onClose(WebSocket ws, int statusCode, String reason) {
-		reconnect = System.currentTimeMillis() + 5000L;
+		reconnect = System.currentTimeMillis() + 10000L;
 		status = "Closed - Reconnecting...";
 		webSocket = null;
 		return null;
@@ -229,7 +229,7 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 
 	@Override
 	public void onError(WebSocket ws, Throwable error) {
-		reconnect = System.currentTimeMillis() + 5000L;
+		reconnect = System.currentTimeMillis() + 10000L;
 		status = "Late Error - Reconnecting...";
 		webSocket = null;
 	}

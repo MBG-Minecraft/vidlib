@@ -12,7 +12,6 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
 import dev.mrbeastgaming.mods.hub.api.project.HubProjectData;
-import net.minecraft.ChatFormatting;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.ExtraCodecs;
