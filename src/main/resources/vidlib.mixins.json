@@ -137,7 +137,6 @@
 		"MouseHandlerMixin",
 		"MultiBufferSourceBufferSourceMixin",
 		"OptionsMixin",
-		"OutlineBufferSourceMixin",
 		"ParticleEngineMixin",
 		"ParticleMixin",
 		"PauseScreenMixin",

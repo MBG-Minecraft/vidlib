@@ -59,14 +59,6 @@ public class Canvas implements Consumer<RenderPass> {
 	public static final Canvas MAIN_AFTER_PARTICLES = createExternal(VidLib.id("main_after_particles"), builder -> {
 	});
 
-	@ClientAutoRegister
-	public static final Canvas WEAK_OUTLINE = createExternal(VidLib.id("weak_outline"), builder -> {
-	});
-
-	@ClientAutoRegister
-	public static final Canvas STRONG_OUTLINE = createExternal(VidLib.id("strong_outline"), builder -> {
-	});
-
 	public final ResourceLocation id;
 	public final String idString;
 	public final ResourceLocation colorTexturePath;

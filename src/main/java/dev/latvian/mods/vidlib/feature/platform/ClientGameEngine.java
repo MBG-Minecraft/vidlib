@@ -10,10 +10,8 @@ import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
-import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
-import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clothing.ClothedPlayerSkinTexture;
 import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
@@ -64,9 +62,6 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.FogParameters;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.item.properties.numeric.CompassAngleState;
 import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.client.resources.sounds.BiomeAmbientSoundsHandler;
@@ -620,54 +615,6 @@ public class ClientGameEngine {
 	}
 
 	public void copyOutlineDepth(Minecraft mc) {
-		if (getEntityOutlineDepth() && mc.levelRenderer.shouldShowEntityOutlines()) {
-			if (getEndBatchesBeforeOutline()) {
-				var buffers = mc.renderBuffers().bufferSource();
-				buffers.endLastBatch();
-				endBatchesBeforeOutline(buffers);
-			}
-
-			Canvas.WEAK_OUTLINE.copyDepthFrom(mc.getMainRenderTarget());
-		}
-	}
-
-	public boolean getEndBatchesBeforeOutline() {
-		return false;
-	}
-
-	public void endBatchesBeforeOutline(MultiBufferSource.BufferSource buffers) {
-		buffers.endBatch(RenderType.solid());
-		buffers.endBatch(RenderType.endPortal());
-		buffers.endBatch(RenderType.endGateway());
-		buffers.endBatch(Sheets.solidBlockSheet());
-		buffers.endBatch(Sheets.cutoutBlockSheet());
-		buffers.endBatch(Sheets.bedSheet());
-		buffers.endBatch(Sheets.shulkerBoxSheet());
-		buffers.endBatch(Sheets.signSheet());
-		buffers.endBatch(Sheets.hangingSignSheet());
-		buffers.endBatch(Sheets.chestSheet());
-	}
-
-	public boolean getEntityOutlineDepth() {
-		return true;
-	}
-
-	@Nullable
-	public RenderType overrideRenderType(RenderType renderType, boolean isPlayer) {
-		if (isPlayer || getStrongEntityOutline()) {
-			var tex = renderType.vl$getTexture();
-
-			if (tex != null) {
-				Canvas.STRONG_OUTLINE.markActive();
-				return VidLibRenderTypes.STRONG_OUTLINE_NO_CULL.apply(tex);
-			}
-		}
-
-		return null;
-	}
-
-	public boolean getStrongEntityOutline() {
-		return false;
 	}
 
 	public boolean handleClientPacket(Context ctx) {

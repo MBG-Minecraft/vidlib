@@ -24,7 +24,7 @@
 				},
 				{
 					"sampler_name": "TerrainInDepth",
-					"target": "vidlib:weak_outline",
+					"target": "vidlib:main_before_particles",
 					"use_depth_buffer": true
 				}
 			],
@@ -38,15 +38,15 @@
 					"name": "InverseViewProjectionMat",
 					"type": "matrix4x4"
 				},
-            {
-                "name": "GameTime",
-                "type": "float"
-            },
-            {
-                "name": "NoSceneSample",
-                "type": "int"
-            }
-        ]
+				{
+					"name": "GameTime",
+					"type": "float"
+				},
+				{
+					"name": "NoSceneSample",
+					"type": "int"
+				}
+			]
 		},
 		{
 			"vertex_shader": "minecraft:post/blit",

@@ -2,6 +2,6 @@
 	"priority": -20,
 	"import": [
 		"minecraft:main",
-		"vidlib:weak_outline"
+		"vidlib:main_before_particles"
 	]
 }

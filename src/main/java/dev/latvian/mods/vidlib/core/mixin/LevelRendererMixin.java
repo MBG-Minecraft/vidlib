@@ -10,9 +10,7 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.ResourceHandle;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.klib.gl.GLDebugLog;
-import dev.latvian.mods.vidlib.core.VLOutlineBufferSource;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxRenderer;
@@ -25,12 +23,10 @@ import net.minecraft.client.renderer.FogParameters;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LevelTargetBundle;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.OutlineBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
@@ -162,21 +158,6 @@ public abstract class LevelRendererMixin {
 	}, at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/Profiler;get()Lnet/minecraft/util/profiling/ProfilerFiller;"))
 	private ProfilerFiller vl$getProfiler(ProfilerFiller profiler) {
 		return GLDebugLog.PROFILER;
-	}
-
-	/**
-	 * @author Lat
-	 * @reason Yeet
-	 */
-	@Overwrite
-	@Nullable
-	public RenderTarget entityOutlineTarget() {
-		return Canvas.WEAK_OUTLINE.getTargetOrNull();
-	}
-
-	@Inject(method = "renderEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/OutlineBufferSource;setColor(IIII)V"))
-	private void vl$renderEntitiesSetColor(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, Camera camera, DeltaTracker deltaTracker, List<Entity> entities, CallbackInfo ci, @Local OutlineBufferSource outlineBuffer, @Local Entity entity) {
-		((VLOutlineBufferSource) outlineBuffer).vl$setPlayer(entity instanceof Player);
 	}
 
 	@Redirect(method = "renderEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getTeamColor()I"))

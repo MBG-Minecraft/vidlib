@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -120,48 +119,4 @@ public interface VidLibRenderTypes {
 			.setOutputState(RenderStateShard.OUTLINE_TARGET)
 			.createCompositeState(RenderType.OutlineProperty.IS_OUTLINE)
 	));
-
-	TexturedRenderType WEAK_OUTLINE = TexturedRenderType.create(texture -> RenderType.create(
-			"weak_outline",
-			1536,
-			RenderPipelines.OUTLINE_CULL,
-			RenderType.CompositeState.builder()
-				.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
-				.setOutputState(Canvas.WEAK_OUTLINE.getOutputStateShard())
-				.createCompositeState(RenderType.OutlineProperty.IS_OUTLINE)
-		)
-	);
-
-	TexturedRenderType WEAK_OUTLINE_NO_CULL = TexturedRenderType.create(texture -> RenderType.create(
-			"weak_outline",
-			1536,
-			RenderPipelines.OUTLINE_NO_CULL,
-			RenderType.CompositeState.builder()
-				.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
-				.setOutputState(Canvas.WEAK_OUTLINE.getOutputStateShard())
-				.createCompositeState(RenderType.OutlineProperty.IS_OUTLINE)
-		)
-	);
-
-	TexturedRenderType STRONG_OUTLINE = TexturedRenderType.create(texture -> RenderType.create(
-			"strong_outline",
-			1536,
-			RenderPipelines.OUTLINE_CULL,
-			RenderType.CompositeState.builder()
-				.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
-				.setOutputState(Canvas.STRONG_OUTLINE.getOutputStateShard())
-				.createCompositeState(RenderType.OutlineProperty.IS_OUTLINE)
-		)
-	);
-
-	TexturedRenderType STRONG_OUTLINE_NO_CULL = TexturedRenderType.create(texture -> RenderType.create(
-			"strong_outline_no_cull",
-			1536,
-			RenderPipelines.OUTLINE_NO_CULL,
-			RenderType.CompositeState.builder()
-				.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
-				.setOutputState(Canvas.STRONG_OUTLINE.getOutputStateShard())
-				.createCompositeState(RenderType.OutlineProperty.IS_OUTLINE)
-		)
-	);
 }
