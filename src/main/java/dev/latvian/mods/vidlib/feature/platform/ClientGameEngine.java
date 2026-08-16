@@ -12,6 +12,7 @@ import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
+import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clothing.ClothedPlayerSkinTexture;
 import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
@@ -229,7 +230,7 @@ public class ClientGameEngine {
 			var capeOverride = overrideCape(player);
 
 			if (capeOverride != null && !capeOverride.texturePath().equals(capeTexture)) {
-				capeTexture = capeOverride.texturePath();
+				capeTexture = capeOverride.equals(VidLibTextures.MISSING) ? null : capeOverride.texturePath();
 				override = true;
 			}
 		}

@@ -1,11 +1,13 @@
 package dev.latvian.mods.vidlib.feature.misc.command;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
@@ -18,10 +20,13 @@ public interface BackupCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("backup", (command, buildContext) -> command
 		.requires(source -> source.hasPermission(2))
-		.executes(ctx -> backup(ctx.getSource()))
+		.then(Commands.argument("custom-name", StringArgumentType.greedyString())
+			.executes(ctx -> backup(ctx.getSource(), StringArgumentType.getString(ctx, "custom-name")))
+		)
+		.executes(ctx -> backup(ctx.getSource(), ""))
 	);
 
-	static CompletableFuture<String> backup(MinecraftServer server) {
+	static CompletableFuture<String> backup(MinecraftServer server, String customName) {
 		for (var level : server.getAllLevels()) {
 			if (level != null) {
 				level.noSave = true;
@@ -32,7 +37,7 @@ public interface BackupCommand {
 
 		return CompletableFuture.supplyAsync(() -> {
 			try {
-				var name = CommonGameEngine.INSTANCE.getBackupInfo(server);
+				var name = CommonGameEngine.INSTANCE.getFullBackupInfo(server, customName);
 				var from = server.getWorldPath(LevelResource.ROOT).toAbsolutePath().toRealPath();
 				var fromName = from.getFileName().toString();
 				var to = from.resolveSibling(fromName + "-" + name);
@@ -66,10 +71,10 @@ public interface BackupCommand {
 		});
 	}
 
-	static int backup(CommandSourceStack source) {
+	static int backup(CommandSourceStack source, String customName) {
 		var start = System.currentTimeMillis();
 		source.broadcast("Creating a world backup...");
-		backup(source.getServer()).thenAccept(name -> source.sendSuccess(() -> Component.literal("Saved a backup of '%s' (%.01f s)".formatted(name, (System.currentTimeMillis() - start) / 1000F)), true));
+		backup(source.getServer(), customName).thenAccept(name -> source.sendSuccess(() -> Component.literal("Saved a backup of '%s' (%.01f s)".formatted(name, (System.currentTimeMillis() - start) / 1000F)), true));
 		return 1;
 	}
 }

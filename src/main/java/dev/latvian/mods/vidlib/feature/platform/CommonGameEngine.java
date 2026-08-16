@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
+import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.entity.ExactEntitySpawnPayload;
@@ -74,6 +75,7 @@ import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.network.bundle.PacketAndPayloadAcceptor;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -495,7 +497,29 @@ public class CommonGameEngine {
 	}
 
 	public String getBackupInfo(MinecraftServer server) {
-		return Long.toUnsignedString(System.currentTimeMillis());
+		return StringUtils.FILE_TIMESTAMP_FORMAT.format(Instant.now());
+	}
+
+	public String getFullBackupInfo(MinecraftServer server, String customName) {
+		var name = getBackupInfo(server);
+
+		if (!customName.isEmpty()) {
+			name += "-" + customName.replaceAll("[^\\w-+]", "").replaceAll("-{2,}", "-");
+		}
+
+		while (name.startsWith("-")) {
+			name = name.substring(1);
+		}
+
+		while (name.endsWith("-")) {
+			name = name.substring(0, name.length() - 1);
+		}
+
+		if (name.isEmpty()) {
+			name = StringUtils.FILE_TIMESTAMP_FORMAT.format(Instant.now());
+		}
+
+		return name;
 	}
 
 	public List<WarpLocation> getWarpLocations() {

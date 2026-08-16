@@ -1,12 +1,12 @@
 package dev.latvian.mods.vidlib.feature.client;
 
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.core.ClientAsset;
-import net.minecraft.resources.ResourceLocation;
 
 public interface VidLibTextures {
 	ClientAsset LOGO = new ClientAsset(VidLib.id("misc/logo"));
-	ClientAsset SQUARE = new ClientAsset(ResourceLocation.withDefaultNamespace("misc/white"));
+	ClientAsset SQUARE = new ClientAsset(ID.mc("misc/white"));
 	ClientAsset CIRCLE = new ClientAsset(VidLib.id("misc/circle"));
 	ClientAsset DEFAULT_MARKER = new ClientAsset(VidLib.id("misc/default_marker"));
 	ClientAsset DEFAULT_PLAYER_BODY = new ClientAsset(VidLib.id("misc/default_player_body"));
