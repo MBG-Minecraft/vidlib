@@ -19,6 +19,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -50,7 +52,7 @@ public interface ZipCommand {
 		}
 	}
 
-	static CompletableFuture<String> zip(MinecraftServer server, String customName) {
+	static CompletableFuture<String> zip(MinecraftServer server, Instant now, String customName) {
 		for (var level : server.getAllLevels()) {
 			if (level != null) {
 				level.noSave = true;
@@ -61,7 +63,7 @@ public interface ZipCommand {
 
 		return CompletableFuture.supplyAsync(() -> {
 			try {
-				var name = CommonGameEngine.INSTANCE.getFullBackupInfo(server, customName);
+				var name = CommonGameEngine.INSTANCE.getFullBackupInfo(server, now, customName);
 				var from = server.getWorldPath(LevelResource.ROOT).toAbsolutePath().toRealPath();
 				var fromName = from.getFileName().toString();
 				var to = from.resolveSibling(fromName + "-" + name);
@@ -100,9 +102,9 @@ public interface ZipCommand {
 	}
 
 	static int zip(CommandSourceStack source, String customName) {
-		var start = System.currentTimeMillis();
+		var now = Instant.now();
 		source.broadcast("Creating a world backup...");
-		zip(source.getServer(), customName).thenAccept(name -> source.sendSuccess(() -> Component.literal("Saved a backup of '%s' (%.01f s)".formatted(name, (System.currentTimeMillis() - start) / 1000F)), true));
+		zip(source.getServer(), now, customName).thenAccept(name -> source.sendSuccess(() -> Component.literal("Saved a backup of '%s' (%.01f s)".formatted(name, Duration.between(now, Instant.now()).toMillis() / 1000F)), true));
 		return 1;
 	}
 }

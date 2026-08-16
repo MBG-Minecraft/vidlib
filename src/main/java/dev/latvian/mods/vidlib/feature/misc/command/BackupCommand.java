@@ -12,6 +12,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +28,7 @@ public interface BackupCommand {
 		.executes(ctx -> backup(ctx.getSource(), ""))
 	);
 
-	static CompletableFuture<String> backup(MinecraftServer server, String customName) {
+	static CompletableFuture<String> backup(MinecraftServer server, Instant now, String customName) {
 		for (var level : server.getAllLevels()) {
 			if (level != null) {
 				level.noSave = true;
@@ -37,7 +39,7 @@ public interface BackupCommand {
 
 		return CompletableFuture.supplyAsync(() -> {
 			try {
-				var name = CommonGameEngine.INSTANCE.getFullBackupInfo(server, customName);
+				var name = CommonGameEngine.INSTANCE.getFullBackupInfo(server, now, customName);
 				var from = server.getWorldPath(LevelResource.ROOT).toAbsolutePath().toRealPath();
 				var fromName = from.getFileName().toString();
 				var to = from.resolveSibling(fromName + "-" + name);
@@ -72,9 +74,9 @@ public interface BackupCommand {
 	}
 
 	static int backup(CommandSourceStack source, String customName) {
-		var start = System.currentTimeMillis();
+		var now = Instant.now();
 		source.broadcast("Creating a world backup...");
-		backup(source.getServer(), customName).thenAccept(name -> source.sendSuccess(() -> Component.literal("Saved a backup of '%s' (%.01f s)".formatted(name, (System.currentTimeMillis() - start) / 1000F)), true));
+		backup(source.getServer(), now, customName).thenAccept(name -> source.sendSuccess(() -> Component.literal("Saved a backup of '%s' (%.01f s)".formatted(name, Duration.between(now, Instant.now()).toMillis() / 1000F)), true));
 		return 1;
 	}
 }

@@ -496,12 +496,12 @@ public class CommonGameEngine {
 		return player.isStaff()/* || server.getPlayerList().isOp(player.getGameProfile())*/;
 	}
 
-	public String getBackupInfo(MinecraftServer server) {
-		return StringUtils.FILE_TIMESTAMP_FORMAT.format(Instant.now());
+	public String getBackupInfo(MinecraftServer server, Instant now) {
+		return StringUtils.FILE_TIMESTAMP_FORMAT.format(now);
 	}
 
-	public String getFullBackupInfo(MinecraftServer server, String customName) {
-		var name = getBackupInfo(server);
+	public String getFullBackupInfo(MinecraftServer server, Instant now, String customName) {
+		var name = getBackupInfo(server, now);
 
 		if (!customName.isEmpty()) {
 			name += "-" + customName.replaceAll("[^\\w-+]", "").replaceAll("-{2,}", "-");
@@ -516,7 +516,7 @@ public class CommonGameEngine {
 		}
 
 		if (name.isEmpty()) {
-			name = StringUtils.FILE_TIMESTAMP_FORMAT.format(Instant.now());
+			name = StringUtils.FILE_TIMESTAMP_FORMAT.format(now);
 		}
 
 		return name;
