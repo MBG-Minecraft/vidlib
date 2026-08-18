@@ -181,13 +181,6 @@ dependencies {
 		}
 	}
 
-	jarJar(implementation('dev.latvian.mods:better-advanced-tooltips')) {
-		version {
-			strictly "[$bat_version,)"
-			prefer "$bat_version"
-		}
-	}
-
 	additionalRuntimeClasspath(jarJar(implementation('dev.latvian.apps:tiny-http'))) {
 		version {
 			strictly "[$tiny_http_version,)"
@@ -197,6 +190,7 @@ dependencies {
 
 	interfaceInjectionData("dev.latvian.mods:klib:$klib_version")
 
+	compileOnly("dev.latvian.mods:better-advanced-tooltips:$bat_version")
 	compileOnly("dev.latvian.mods:imgui-resources:$imgui_resources_version")
 
 	compileOnly("maven.modrinth:simple-voice-chat:neoforge-1.21.5-2.6.12")
