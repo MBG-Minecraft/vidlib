@@ -1,5 +1,6 @@
 package dev.mrbeastgaming.mods.hub.api.gateway;
 
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import net.minecraft.client.Minecraft;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -47,7 +48,7 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 
 		if (server != null) {
 			gateway.sendStatus("Server - " + server.name);
-		} else if (mc.level != null && mc.level.isReplayLevel()) {
+		} else if (mc.level != null && PlatformHelper.CURRENT.isReplayLevel(mc.level)) {
 			gateway.sendStatus("Replay Editor");
 		} else if (mc.level != null) {
 			gateway.sendStatus("Singleplayer");

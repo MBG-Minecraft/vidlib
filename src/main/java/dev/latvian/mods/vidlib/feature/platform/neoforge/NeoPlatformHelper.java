@@ -22,6 +22,7 @@ import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.icon.IconRegistryEvent;
 import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.prop.Props;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectRegistryEvent;
@@ -34,6 +35,7 @@ import dev.latvian.mods.vidlib.math.kvector.KVectorRegistryEvent;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubGatewayEventRegistry;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGatewayEventRegistryEvent;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -279,11 +281,26 @@ public class NeoPlatformHelper extends PlatformHelper {
 
 	@Override
 	public boolean isReplayLevel(Level level) {
-		return level.isReplayLevel();
+		return level.vl$isReplayLevel();
+	}
+
+	@Override
+	public boolean isLocalServer(Level level) {
+		return level.vl$isLocalServer();
 	}
 
 	@Override
 	public boolean isReplayServer(MinecraftServer server) {
 		return server.vl$isReplayServer();
+	}
+
+	@Override
+	public Level getLevel(CommandSourceStack source) {
+		return source.getUnsidedLevel();
+	}
+
+	@Override
+	public Props<?> getProps(Level level) {
+		return level.getProps();
 	}
 }

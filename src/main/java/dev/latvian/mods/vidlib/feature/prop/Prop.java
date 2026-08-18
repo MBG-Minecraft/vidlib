@@ -906,7 +906,8 @@ public class Prop {
 	}
 
 	public DataResult<Prop> copy() {
-		var ctx = level.getProps().context(type, PropSpawnType.GAME, level.getGameTime());
+		var props = PlatformHelper.CURRENT.getProps(level);
+		var ctx = props.context(type, PropSpawnType.GAME, level.getGameTime());
 		var newProp = type.factory().create(ctx);
 
 		for (var entry : type.data()) {

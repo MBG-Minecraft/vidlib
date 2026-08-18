@@ -17,6 +17,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ItemStackImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TextComponentImBuilder;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
@@ -103,7 +104,8 @@ public class NPCProp extends BaseGeoProp {
 	);
 
 	public static NPCProp createCloneFrom(Player player) {
-		return player.level().getProps().add(TYPE, prop -> prop.cloneFrom(player));
+		var props = PlatformHelper.CURRENT.getProps(player.level());
+		return props.add(TYPE, prop -> prop.cloneFrom(player));
 	}
 
 	public Component name;

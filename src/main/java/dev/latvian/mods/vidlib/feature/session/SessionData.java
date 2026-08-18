@@ -15,6 +15,7 @@ import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToClient;
 import dev.latvian.mods.vidlib.feature.note.Note;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.registry.SyncRegistryPayload;
@@ -143,7 +144,9 @@ public class SessionData implements Comparable<SessionData> {
 		}
 
 		if (syncType > 0) {
-			for (var list : level.getProps().propLists.values()) {
+			var props = PlatformHelper.CURRENT.getProps(level);
+
+			for (var list : props.propLists.values()) {
 				if (syncType == 1) {
 					packets.s2c(new RemoveAllPropsPayload(list.type, PropRemoveType.REPLAY));
 				}

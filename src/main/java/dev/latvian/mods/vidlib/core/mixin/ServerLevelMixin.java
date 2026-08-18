@@ -89,7 +89,7 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 	}
 
 	@Override
-	public boolean isReplayLevel() {
+	public boolean vl$isReplayLevel() {
 		return vl$level().getServer().vl$isReplayServer();
 	}
 

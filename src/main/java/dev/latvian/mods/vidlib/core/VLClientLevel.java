@@ -35,9 +35,15 @@ public interface VLClientLevel extends VLLevel {
 	}
 
 	@Override
-	default boolean isReplayLevel() {
+	default boolean vl$isReplayLevel() {
 		var mc = Minecraft.getInstance();
 		return mc.player != null && mc.player.isReplayCamera();
+	}
+
+	@Override
+	default boolean vl$isLocalServer() {
+		var mc = Minecraft.getInstance();
+		return mc.isLocalServer();
 	}
 
 	@Override

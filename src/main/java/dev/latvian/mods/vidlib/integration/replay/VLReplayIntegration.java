@@ -347,7 +347,8 @@ public class VLReplayIntegration {
 	public static void clickTarget(ReplayGetClickTargetEvent event) {
 		var mc = Minecraft.getInstance();
 		var ctx = new ClipContext(event.getFrom(), event.getTo(), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, mc.player);
-		event.setHitResult(mc.level.getProps().clip(ctx, true));
+		var props = PlatformHelper.CURRENT.getProps(mc.level);
+		event.setHitResult(props.clip(ctx, true));
 	}
 
 	@SubscribeEvent
@@ -384,7 +385,8 @@ public class VLReplayIntegration {
 		}
 
 		if (data.selectedProp != 0 && ImGui.beginPopup("###vidlib-prop-popup")) {
-			var propList = mc.level.getProps().propLists.get(data.selectedPropList);
+			var props = PlatformHelper.CURRENT.getProps(mc.level);
+			var propList = props.propLists.get(data.selectedPropList);
 			var prop = propList == null ? null : propList.get(data.selectedProp);
 
 			if (prop != null) {
@@ -397,7 +399,8 @@ public class VLReplayIntegration {
 		}
 
 		if (!ImGui.isPopupOpen("###vidlib-prop-popup")) {
-			var propList = mc.level.getProps().propLists.get(data.selectedPropList);
+			var props = PlatformHelper.CURRENT.getProps(mc.level);
+			var propList = props.propLists.get(data.selectedPropList);
 			var prop = propList == null ? null : propList.get(data.selectedProp);
 
 			if (prop != null) {

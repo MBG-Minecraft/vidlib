@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 import com.google.gson.JsonElement;
 import dev.latvian.mods.vidlib.core.VLLevel;
 import dev.latvian.mods.vidlib.feature.bulk.UndoableModificationHolder;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.util.PauseType;
 import net.minecraft.nbt.Tag;
@@ -45,7 +46,8 @@ public abstract class LevelMixin implements VLLevel {
 
 	@Inject(method = "tickBlockEntities", at = @At("RETURN"))
 	private void vl$tickProps(CallbackInfo ci) {
-		getProps().tick(getEnvironment().getPauseType().tick());
+		var props = PlatformHelper.CURRENT.getProps(vl$level());
+		props.tick(getEnvironment().getPauseType().tick());
 	}
 
 	@Override

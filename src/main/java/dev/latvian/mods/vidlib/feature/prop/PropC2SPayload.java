@@ -5,6 +5,7 @@ import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import net.minecraft.network.codec.ByteBufCodecs;
 
 public record PropC2SPayload(int prop, int packet, byte[] data) implements SimplePacketPayload {
@@ -23,7 +24,8 @@ public record PropC2SPayload(int prop, int packet, byte[] data) implements Simpl
 
 	@Override
 	public void handle(Context ctx) {
-		var prop = ctx.level().getProps().levelProps.get(prop());
+		var props = PlatformHelper.CURRENT.getProps(ctx.level());
+		var prop = props.levelProps.get(prop());
 
 		if (prop != null) {
 			var packet = prop.type.getPacket(packet());

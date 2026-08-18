@@ -18,6 +18,7 @@ import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityTypeFilter;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.Props;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
@@ -247,7 +248,11 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		killAll(new EntityTypeFilter(type));
 	}
 
-	default boolean isReplayLevel() {
+	default boolean vl$isReplayLevel() {
+		return false;
+	}
+
+	default boolean vl$isLocalServer() {
 		return false;
 	}
 
@@ -370,7 +375,7 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 	}
 
 	default boolean vl$intersectsSolid(@Nullable Entity entity, AABB collisionBox) {
-		var props = getProps();
+		var props = PlatformHelper.CURRENT.getProps(vl$level());
 
 		if (props.levelProps.intersectsSolid(entity, collisionBox) || props.dataProps.intersectsSolid(entity, collisionBox)) {
 			return true;
@@ -382,7 +387,7 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 	}
 
 	default List<VoxelShape> vl$getShapesIntersecting(@Nullable Entity entity, AABB collisionBox) {
-		var props = getProps();
+		var props = PlatformHelper.CURRENT.getProps(vl$level());
 		var shapes = List.<VoxelShape>of();
 
 		for (var propList : props.propLists.values()) {
@@ -415,7 +420,7 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 	}
 
 	default BlockHitResult vl$clip(BlockHitResult result, ClipContext ctx) {
-		var props = getProps();
+		var props = PlatformHelper.CURRENT.getProps(vl$level());
 		var propClip = props.clip(ctx, false);
 
 		if (propClip != null) {

@@ -11,6 +11,7 @@ import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.number.EntityNumber;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
+import dev.latvian.mods.vidlib.feature.prop.Props;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
@@ -19,6 +20,7 @@ import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubGatewayEventRegistry;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -189,7 +191,19 @@ public class PlatformHelper {
 		return false;
 	}
 
+	public boolean isLocalServer(Level level) {
+		return false;
+	}
+
 	public boolean isReplayServer(MinecraftServer server) {
 		return false;
+	}
+
+	public Level getLevel(CommandSourceStack source) {
+		return source.getLevel();
+	}
+
+	public Props<?> getProps(Level level) {
+		throw new UnsupportedOperationException("Not supported on this platform");
 	}
 }

@@ -16,6 +16,8 @@ import java.util.ArrayList;
 public interface WaypointClientCommands {
 	@ClientAutoRegister
 	ClientCommandHolder COMMAND = new ClientCommandHolder("waypoint-client", (command, buildContext) -> {
+		command.requires(ClientCommandHolder.isClientSingleplayer());
+
 		command.then(Commands.literal("add")
 			.then(Commands.argument("id", StringArgumentType.word())
 				.then(Commands.argument("position", Vec3Argument.vec3())

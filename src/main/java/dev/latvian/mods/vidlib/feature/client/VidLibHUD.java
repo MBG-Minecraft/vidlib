@@ -8,6 +8,7 @@ import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBarRenderer;
 import dev.latvian.mods.vidlib.feature.font.MSDFFont;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import dev.latvian.mods.vidlib.util.NameDrawType;
@@ -157,7 +158,9 @@ public interface VidLibHUD {
 			}
 		}
 
-		for (var propList : level.getProps().propLists.values()) {
+		var props = PlatformHelper.CURRENT.getProps(level);
+
+		for (var propList : props.propLists.values()) {
 			for (var prop : propList) {
 				boolean renderName = prop.shouldRenderDisplayName(self);
 				boolean renderHealth = prop.shouldRenderHealth(self);
