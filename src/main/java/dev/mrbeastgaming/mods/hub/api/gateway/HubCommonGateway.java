@@ -11,6 +11,7 @@ import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubLogRequest;
 import dev.mrbeastgaming.mods.hub.api.UsedPort;
+import dev.mrbeastgaming.mods.hub.api.gateway.tv.TVUpdateData;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
@@ -313,5 +314,16 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 
 			return list;
 		});
+	}
+
+	public CompletableFuture<Void> updateTV(int tv, TVUpdateData data) {
+		var json = new JsonObject();
+		json.addProperty("tv", tv);
+		json.add("data", TVUpdateData.CODEC.encodeStart(JsonOps.INSTANCE, data).getOrThrow().getAsJsonObject());
+		return send("update_tv", json);
+	}
+
+	public CompletableFuture<Void> updateTV(int tv, String text) {
+		return updateTV(tv, new TVUpdateData.Text(text));
 	}
 }

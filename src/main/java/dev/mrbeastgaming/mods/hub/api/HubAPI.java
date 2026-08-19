@@ -11,8 +11,6 @@ import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.klib.util.MD5;
 import dev.latvian.mods.klib.util.Tristate;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.util.MiscUtils;
-import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import dev.mrbeastgaming.mods.hub.HubUserConfig;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubCommonGateway;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
@@ -21,22 +19,17 @@ import dev.mrbeastgaming.mods.hub.api.project.HubProjectsData;
 import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadRequestItem;
 import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadResponseItem;
 import net.minecraft.Util;
-import net.minecraft.world.entity.player.Player;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.PrintWriter;
-import java.io.Writer;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
@@ -114,6 +107,12 @@ public interface HubAPI {
 	@Nullable
 	static HubCommonGateway<?> getClientGateway() {
 		return CLIENT_GATEWAY.getValue().get();
+	}
+
+	@Nullable
+	static HubCommonGateway<?> getClientOrServerGateway() {
+		var gateway = getClientGateway();
+		return gateway == null ? HubServerGateway.instance : gateway;
 	}
 
 	static HttpRequest apiCountries() {
@@ -223,74 +222,6 @@ public interface HubAPI {
 	static void apiProjectLog(String projectToken, HubLogRequest request) throws Exception {
 		var json = HubLogRequest.CODEC.encodeStart(JsonOps.INSTANCE, request).getOrThrow();
 		HTTP_CLIENT.send(request("api/projects/log/" + projectToken, Tristate.TRUE).POST(jsonBody(json)).build(), HttpResponse.BodyHandlers.discarding());
-	}
-
-	static CompletableFuture<Void> log(Supplier<HubLogRequest> request) {
-		var gateway = getClientGateway();
-
-		if (gateway != null) {
-			return gateway.log(request);
-		}
-
-		var serverGateway = HubServerGateway.instance;
-
-		if (serverGateway != null) {
-			return serverGateway.log(request);
-		}
-
-		return CompletableFuture.runAsync(() -> {
-			try {
-				var projectConfig = HubProjectConfig.INSTANCE.get();
-
-				if (projectConfig != null) {
-					apiProjectLog(projectConfig.token().toString(), request.get());
-				}
-			} catch (Exception ignored) {
-			}
-		}, WEBSOCKET_EXECUTOR.get());
-	}
-
-	static CompletableFuture<Void> log(int type, @Nullable Player player, Supplier<? extends Iterable<String>> content) {
-		var time = Instant.now();
-
-		return log(() -> {
-			var p = player == null ? MiscUtils.CLIENT_PLAYER.getValue().get() : player;
-
-			if (p != null) {
-				return new HubLogRequest(
-					Optional.of(time),
-					type,
-					String.join("\n", content.get()),
-					p
-				);
-			}
-
-			return new HubLogRequest(
-				Optional.of(time),
-				type,
-				String.join("\n", content.get())
-			);
-		});
-	}
-
-	static CompletableFuture<Void> log(int type, @Nullable Player player, String content) {
-		return log(type, player, () -> List.of(content));
-	}
-
-	static CompletableFuture<Void> log(int type, @Nullable Player player, String content, Throwable error) {
-		return log(type, player, () -> {
-			var list = new ArrayList<String>();
-			list.add(content);
-
-			error.printStackTrace(new PrintWriter(Writer.nullWriter()) {
-				@Override
-				public void println(Object x) {
-					list.add(String.valueOf(x));
-				}
-			});
-
-			return list;
-		});
 	}
 
 	static HubMinecraftProfileData.LinkData apiMinecraftLink(String name) throws Exception {
