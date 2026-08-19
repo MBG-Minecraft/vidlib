@@ -7,6 +7,7 @@ import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.number.EntityNumber;
+import dev.latvian.mods.vidlib.feature.ffmpeg.FFMPEGBinaries;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.misc.ReplayMarkerPayload;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
@@ -36,6 +37,10 @@ public class VidLib {
 		VidLib.LOGGER.info("VidLib " + VERSION + " loaded");
 		VidLibDataTypes.register();
 		Runtime.getRuntime().addShutdownHook(new Thread(HubServerGateway::stopGateway, "Stop-Server-Hub-Gateway"));
+
+		if (PlatformHelper.CURRENT.isDevEnv()) {
+			FFMPEGBinaries.initialize();
+		}
 	}
 
 	public static void initClient() {
@@ -68,6 +73,11 @@ public class VidLib {
 
 	public static void errorToHub(String message, Throwable ex) {
 		LOGGER.error(message, ex);
-		HubAPI.log(0, null, message, ex);
+
+		var gateway = HubAPI.getClientOrServerGateway();
+
+		if (gateway != null) {
+			gateway.log(0, null, message, ex);
+		}
 	}
 }
