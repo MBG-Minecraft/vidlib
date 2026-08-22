@@ -26,6 +26,8 @@ public class VidLibKeys {
 	public static KeyMapping reloadShadersKeyMapping;
 	public static KeyMapping playerGlowKeyMapping;
 	public static KeyMapping capturePanoramaKeyMapping;
+	public static KeyMapping increaseKeyMapping;
+	public static KeyMapping decreaseKeyMapping;
 
 	private static KeyMapping register(RegisterKeyMappingsEvent event, String name, KeyModifier modifier, int defaultKey, KeyConflictContext conflict) {
 		var key = new KeyMapping(name, conflict, modifier, InputConstants.Type.KEYSYM, defaultKey, "key.categories.vidlib");
@@ -46,6 +48,8 @@ public class VidLibKeys {
 		reloadShadersKeyMapping = register(event, "key.vidlib.reload_shaders", KeyModifier.NONE, GLFW.GLFW_KEY_UNKNOWN);
 		playerGlowKeyMapping = register(event, "key.vidlib.player_glow", KeyModifier.NONE, GLFW.GLFW_KEY_GRAVE_ACCENT);
 		capturePanoramaKeyMapping = register(event, "key.vidlib.capture_panorama", KeyModifier.NONE, GLFW.GLFW_KEY_UNKNOWN);
+		increaseKeyMapping = register(event, "key.vidlib.increase", KeyModifier.NONE, GLFW.GLFW_KEY_EQUAL);
+		decreaseKeyMapping = register(event, "key.vidlib.decrease", KeyModifier.NONE, GLFW.GLFW_KEY_MINUS);
 	}
 
 	public static void handle(Minecraft mc) {
@@ -95,6 +99,20 @@ public class VidLibKeys {
 			} else {
 				mc.player.displayClientMessage(mc.grabPanoramixScreenshot(FMLPaths.GAMEDIR.get().toFile(), 3840, 3840), false);
 			}
+		}
+
+		while (increaseKeyMapping.consumeClick()) {
+			mc.options.renderDistance().values().validateValue(mc.options.renderDistance().get() + 1).ifPresent(v -> {
+				mc.options.renderDistance().set(v);
+				mc.status(String.valueOf(v));
+			});
+		}
+
+		while (decreaseKeyMapping.consumeClick()) {
+			mc.options.renderDistance().values().validateValue(mc.options.renderDistance().get() - 1).ifPresent(v -> {
+				mc.options.renderDistance().set(v);
+				mc.status(String.valueOf(v));
+			});
 		}
 	}
 
