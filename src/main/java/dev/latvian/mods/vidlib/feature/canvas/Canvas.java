@@ -77,6 +77,7 @@ public class Canvas implements Consumer<RenderPass> {
 	public boolean previewColor;
 	public boolean previewDepth;
 	public CanvasData data;
+	public List<Canvas> dependencies = List.of();
 
 	ResourceHandle<RenderTarget> outputTarget;
 	private RenderPipeline renderPipeline;
@@ -112,6 +113,10 @@ public class Canvas implements Consumer<RenderPass> {
 	public void markActive() {
 		if (!active) {
 			GLDebugLog.message("[VidLib] Activated canvas " + idString);
+
+			for (var parent : dependencies) {
+				parent.markActive();
+			}
 		}
 
 		active = true;
@@ -160,6 +165,10 @@ public class Canvas implements Consumer<RenderPass> {
 	}
 
 	public void copyColorFrom(@Nullable RenderTarget source) {
+		if (!active) {
+			return;
+		}
+
 		var target = getColorTexture();
 
 		if (target == null) {
@@ -181,6 +190,10 @@ public class Canvas implements Consumer<RenderPass> {
 	}
 
 	public void copyDepthFrom(@Nullable RenderTarget source) {
+		if (!active) {
+			return;
+		}
+
 		var target = getDepthTexture();
 
 		if (target == null) {

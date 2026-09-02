@@ -1,6 +1,0 @@
-{
-	"auto_draw": false,
-	"import": [
-		"vidlib:main_before_particles"
-	]
-}

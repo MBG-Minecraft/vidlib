@@ -9,7 +9,6 @@ import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
-import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
@@ -95,6 +94,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.ModList;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -529,7 +529,7 @@ public class ClientGameEngine {
 	}
 
 	public boolean shouldShowName(Entity entity, boolean original) {
-		return BossRendering.active <= 0 && original;
+		return original;
 	}
 
 	public float getFarDepth(float renderDistance) {
@@ -938,5 +938,13 @@ public class ClientGameEngine {
 
 	public boolean hideActionBarText(Minecraft mc, Component component) {
 		return false;
+	}
+
+	public boolean defaultDrawName(Player player) {
+		return !CommonGameEngine.INSTANCE.isBoss(player);
+	}
+
+	public boolean defaultDrawHealthBar(Player player) {
+		return player.isSurvivalLike() && !CommonGameEngine.INSTANCE.isBoss(player);
 	}
 }

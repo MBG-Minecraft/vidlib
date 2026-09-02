@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.canvas;
 
+import com.google.gson.JsonObject;
 import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.framegraph.FramePass;
 import com.mojang.blaze3d.pipeline.RenderTarget;
@@ -44,20 +45,33 @@ public class CanvasImpl {
 		for (var canvas : all.values()) {
 			canvas.enabled = false;
 			canvas.data = CanvasData.DEFAULT;
+			canvas.dependencies = List.of();
 		}
 
-		for (var entry : manager.listResources("vidlib/canvas", p -> p.getPath().endsWith(".json")).entrySet()) {
-			var id = entry.getKey().withPath(p -> p.substring(14, p.length() - 5));
+		for (var entry : manager.listResources("post_effect", p -> p.getPath().endsWith(".json")).entrySet()) {
+			var id = entry.getKey().withPath(p -> p.substring(12, p.length() - 5));
 
 			try (var in = entry.getValue().open()) {
-				var json = JsonUtils.read(in).getAsJsonObject();
-				var canvas = all.get(id);
+				if (JsonUtils.read(in) instanceof JsonObject rootJson && rootJson.get("vidlib:canvas") instanceof JsonObject json) {
+					var canvas = all.get(id);
 
-				if (canvas != null) {
-					canvas.enabled = !json.has("enabled") || json.get("enabled").getAsBoolean();
-					canvas.data = CanvasData.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
-				} else {
-					VidLib.LOGGER.error("Uninitialized canvas " + id);
+					if (canvas != null) {
+						canvas.enabled = !json.has("enabled") || json.get("enabled").getAsBoolean();
+						canvas.data = CanvasData.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
+						canvas.dependencies = new ArrayList<>();
+
+						for (var c : canvas.data.importTargets()) {
+							var cv = all.get(c);
+
+							if (cv != null) {
+								canvas.dependencies.add(cv);
+							}
+						}
+
+						canvas.dependencies = List.copyOf(canvas.dependencies);
+					} else {
+						VidLib.LOGGER.error("Uninitialized canvas " + id);
+					}
 				}
 			} catch (Exception ex) {
 				ex.printStackTrace();
@@ -180,11 +194,12 @@ public class CanvasImpl {
 
 		for (var canvas : ENABLED) {
 			canvas.createHandle(builder, targetDescriptor);
-			canvas.active = canvas.data.alwaysActive();
 
-			if (canvas.data.autoClear()) {
+			if (canvas.active && canvas.data.autoClear()) {
 				canvas.clear();
 			}
+
+			canvas.active = canvas.data.alwaysActive();
 
 			if (canvas.drawSetupCallback != null) {
 				canvas.drawSetupCallback.accept(mc);

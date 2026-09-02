@@ -1,10 +1,7 @@
 package dev.latvian.mods.vidlib.core;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.latvian.mods.vidlib.feature.canvas.BossRenderTypes;
 import dev.latvian.mods.vidlib.util.MiscUtils;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
@@ -38,11 +35,6 @@ public interface VLEntityRenderer<T extends Entity, S extends EntityRenderState>
 
 	default void renderModel(S state, PoseStack ms, MultiBufferSource buffers, int light) {
 		vl$self().render(state, ms, buffers, light);
-	}
-
-	default void renderBoss(T entity, PoseStack ms, MultiBufferSource buffers, float xOffset, float yOffset, float zOffset, float delta) {
-		Minecraft.getInstance().getEntityRenderDispatcher().setRenderHitBoxes(false);
-		renderModel(entity, ms, BossRenderTypes.override(buffers), xOffset, yOffset, zOffset, delta, LightTexture.FULL_BRIGHT);
 	}
 
 	default AABB vl$getBoundingBoxForCulling(T entity) {

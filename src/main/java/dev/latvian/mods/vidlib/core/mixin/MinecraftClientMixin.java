@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.core.VLMinecraftClient;
 import dev.latvian.mods.vidlib.feature.client.SleepScreen;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
@@ -171,13 +172,12 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 		NeoForge.EVENT_BUS.post(new MainMenuOpenedEvent(vl$self(), true));
 	}
 
-	@Inject(method = "stop", at = @At("HEAD"), cancellable = true)
-	private void vl$stop(CallbackInfo ci) {
-		var mc = vl$self();
-
-		if (BlockExitScreen.stop(mc)) {
+	@WrapOperation(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;stop()V"))
+	private void vl$stop(Minecraft mc, Operation<Void> original, @Local(argsOnly = true) boolean renderLevel) {
+		if (BlockExitScreen.preventExit(mc, renderLevel)) {
 			GLFW.glfwSetWindowShouldClose(mc.getWindow().getWindow(), false);
-			ci.cancel();
+		} else {
+			original.call(mc);
 		}
 	}
 }

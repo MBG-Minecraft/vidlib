@@ -398,12 +398,7 @@ public class CommonGameEngine {
 	}
 
 	public boolean isBoss(LivingEntity entity) {
-		if (entity.getTags().contains("main_boss")) {
-			return true;
-		}
-
-		var customName = entity.getCustomName();
-		return customName != null && customName.getString().equals("Boss");
+		return entity.getTags().contains("main_boss");
 	}
 
 	public boolean getScaleDamageWithDifficulty(ServerPlayer player) {

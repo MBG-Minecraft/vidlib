@@ -1,4 +1,10 @@
 {
+	"vidlib:canvas": {
+		"priority": -200,
+		"import": [
+			"minecraft:main"
+		]
+	},
 	"targets": {
 		"swap": {}
 	},

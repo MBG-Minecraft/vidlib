@@ -171,10 +171,10 @@ public class BuiltInImGui {
 		list.add(MenuItem.item(ImIcons.LEAF, "JVM Threads", JVMThreadsPanel.INSTANCE));
 
 		if (PlatformHelper.CURRENT.isDevEnv()) {
-			list.add(MenuItem.item(ImIcons.FRAMED_CUBE, "Debug Widgets", DebugWidgetPanel.INSTANCE));
 			list.add(MenuItem.item(ImIcons.BUG, "Packet Debugger", PacketDebuggerPanel.INSTANCE).enabled(graphics.isAdmin));
 			list.add(MenuItem.item(ImIcons.MEMORY, "ID Stack Tool", SHOW_STACK_TOOL));
 			list.add(MenuItem.item(ImIcons.EDIT, "Style Editor Tool", SHOW_STYLE_EDITOR_TOOL));
+			list.add(MenuItem.item(ImIcons.FRAMED_CUBE, "Debug Widgets", DebugWidgetPanel.INSTANCE));
 		}
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.DebugDropdown(graphics, list));

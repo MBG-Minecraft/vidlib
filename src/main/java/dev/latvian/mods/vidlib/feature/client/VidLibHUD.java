@@ -22,21 +22,15 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.numbers.StyledFormat;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.profiling.Profiler;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.ReadOnlyScoreInfo;
 import net.neoforged.neoforge.common.NeoForge;
-import org.apache.commons.lang3.mutable.Mutable;
-import org.apache.commons.lang3.mutable.MutableObject;
 
 import java.util.ArrayList;
-import java.util.function.Predicate;
 
 public interface VidLibHUD {
-	Mutable<Predicate<Player>> DEFAULT_DRAW_NAME = new MutableObject<>(player -> !player.isBoss());
-	Mutable<Predicate<Player>> DEFAULT_DRAW_HEALTH_BAR = new MutableObject<>(player -> player.isSurvivalLike() && !player.isBoss());
 	ImFloat NAME_SCALE = new ImFloat(1F);
 
 	static void drawPlayerNames(GuiGraphics graphics, DeltaTracker deltaTracker) {
@@ -113,8 +107,8 @@ public interface VidLibHUD {
 				continue;
 			}
 
-			var renderName = nameDrawType.renderName.resolve(DEFAULT_DRAW_NAME.getValue().test(player));
-			var renderHealth = nameDrawType.renderHealth.resolve(DEFAULT_DRAW_HEALTH_BAR.getValue().test(player));
+			var renderName = nameDrawType.renderName.resolve(ClientGameEngine.INSTANCE.defaultDrawName(player));
+			var renderHealth = nameDrawType.renderHealth.resolve(ClientGameEngine.INSTANCE.defaultDrawHealthBar(player));
 
 			if (renderName && replay && ReplayAPI.getActive().isNameHidden(player.getUUID())) {
 				renderName = false;

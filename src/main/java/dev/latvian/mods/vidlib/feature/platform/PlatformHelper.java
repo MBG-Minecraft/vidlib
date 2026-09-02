@@ -57,7 +57,7 @@ public class PlatformHelper {
 	}
 
 	public Path getGameDirectory() {
-		return Path.of(".");
+		return Path.of("");
 	}
 
 	public Path getConfigDirectory() {
@@ -205,5 +205,23 @@ public class PlatformHelper {
 
 	public Props<?> getProps(Level level) {
 		throw new UnsupportedOperationException("Not supported on this platform");
+	}
+
+	public void pauseSaving(MinecraftServer server) {
+		for (var level : server.getAllLevels()) {
+			if (level != null) {
+				level.noSave = true;
+			}
+		}
+
+		server.saveEverything(true, true, true);
+	}
+
+	public void resumeSaving(MinecraftServer server) {
+		for (var level : server.getAllLevels()) {
+			if (level != null) {
+				level.noSave = false;
+			}
+		}
 	}
 }

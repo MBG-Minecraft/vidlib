@@ -1,4 +1,7 @@
 {
+	"vidlib:canvas": {
+		"auto_draw": false
+	},
 	"targets": {
 	},
 	"passes": [

@@ -14,7 +14,6 @@ import dev.latvian.mods.vidlib.feature.camera.DetachedCamera;
 import dev.latvian.mods.vidlib.feature.camera.FreeCamera;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeInstance;
-import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.cutscene.ClientCutscene;
@@ -177,10 +176,9 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 		GhostStructure.preRender(frameInfo, ctx);
 
-		CanvasImpl.createHandles(mc, event.getFrameGrapBuilder(), event.getRenderTargetDescriptor());
-		// event.enableOutlineProcessing();
-
 		mc.level.getProps().setupAll(mc, event);
+
+		// event.enableOutlineProcessing();
 	}
 
 	default Vector2dc vl$getCameraShakeOffset(float delta) {
@@ -696,12 +694,15 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	default void vl$exitToTitle() {
 		var mc = vl$self();
-		mc.level.disconnect();
 
-		if (mc.isLocalServer()) {
-			mc.disconnect(new GenericMessageScreen(Component.translatable("menu.savingLevel")));
-		} else {
-			mc.disconnect();
+		if (mc.level != null) {
+			mc.level.disconnect();
+
+			if (mc.isLocalServer()) {
+				mc.disconnect(new GenericMessageScreen(Component.translatable("menu.savingLevel")));
+			} else {
+				mc.disconnect();
+			}
 		}
 
 		mc.setScreen(new TitleScreen());

@@ -14,8 +14,8 @@ import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
 import dev.latvian.mods.vidlib.feature.auto.EntityRendererHolder;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
-import dev.latvian.mods.vidlib.feature.canvas.BossRendering;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
+import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.client.VidLibHUD;
@@ -287,8 +287,13 @@ public class VidLibClientEventHandler {
 	}
 
 	@SubscribeEvent(priority = EventPriority.HIGH)
-	public static void frameGraphSetup(FrameGraphSetupEvent event) {
+	public static void preFrameGraphSetup(FrameGraphSetupEvent event) {
 		Minecraft.getInstance().vl$renderSetup(event);
+	}
+
+	@SubscribeEvent(priority = EventPriority.LOW)
+	public static void postFrameGraphSetup(FrameGraphSetupEvent event) {
+		CanvasImpl.createHandles(Minecraft.getInstance(), event.getFrameGrapBuilder(), event.getRenderTargetDescriptor());
 	}
 
 	@SubscribeEvent(priority = EventPriority.HIGH)
@@ -312,7 +317,6 @@ public class VidLibClientEventHandler {
 		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
 			Canvas.MAIN_BEFORE_PARTICLES.copyColorFrom(mc.getMainRenderTarget());
 			Canvas.MAIN_BEFORE_PARTICLES.copyDepthFrom(mc.getMainRenderTarget());
-			BossRendering.render(frame);
 		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
 			Canvas.MAIN_AFTER_PARTICLES.copyColorFrom(mc.getMainRenderTarget());
 			Canvas.MAIN_AFTER_PARTICLES.copyDepthFrom(mc.getMainRenderTarget());
@@ -688,13 +692,6 @@ public class VidLibClientEventHandler {
 		var mc = Minecraft.getInstance();
 		mc.vl$clearProfileCache();
 		AutoInit.Type.ASSETS_LOADED.invoke(mc.getResourceManager());
-	}
-
-	@SubscribeEvent
-	public static void renderNameTag(RenderNameTagEvent.DoRender event) {
-		if (BossRendering.active > 0) {
-			event.setCanceled(true);
-		}
 	}
 
 	@SubscribeEvent

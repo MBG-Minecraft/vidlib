@@ -1,4 +1,11 @@
 {
+	"vidlib:canvas": {
+		"priority": -20,
+		"import": [
+			"minecraft:main",
+			"vidlib:main_after_particles"
+		]
+	},
 	"targets": {
 		"swap": {}
 	},
@@ -24,7 +31,7 @@
 				},
 				{
 					"sampler_name": "TerrainInDepth",
-					"target": "vidlib:main_before_particles",
+					"target": "vidlib:main_after_particles",
 					"use_depth_buffer": true
 				}
 			],

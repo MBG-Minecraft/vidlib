@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 public class BlockExitScreen extends ConfirmScreen {
 	public static boolean bypass = false;
 
-	public static boolean stop(Minecraft mc) {
+	public static boolean preventExit(Minecraft mc, boolean act) {
 		if (bypass) {
 			return false;
 		} else if (mc.screen instanceof BlockExitScreen) {
@@ -16,10 +16,16 @@ public class BlockExitScreen extends ConfirmScreen {
 		}
 
 		if (mc.level != null) {
-			mc.vl$exitToTitle();
+			if (act) {
+				mc.execute(mc::vl$exitToTitle);
+			}
+
 			return true;
 		} else if (ProgressQueue.isBlockingExit()) {
-			mc.pushGuiLayer(new BlockExitScreen());
+			if (act) {
+				mc.pushGuiLayer(new BlockExitScreen());
+			}
+
 			return true;
 		}
 

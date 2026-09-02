@@ -1,7 +1,11 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.progressqueue.BlockExitScreen;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.TitleScreen;
@@ -52,5 +56,12 @@ public class TitleScreenMixin {
 	private GuiEventListener vl$createMultiPlayerButton(GuiEventListener original) {
 		vl$mpButton = (AbstractWidget) original;
 		return original;
+	}
+
+	@WrapOperation(method = "lambda$init$4", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;stop()V"))
+	private void vl$stop(Minecraft mc, Operation<Void> original) {
+		if (!BlockExitScreen.preventExit(mc, true)) {
+			original.call(mc);
+		}
 	}
 }
