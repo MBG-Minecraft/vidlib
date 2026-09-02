@@ -722,12 +722,6 @@ public class VidLibClientEventHandler {
 	}
 
 	@SubscribeEvent
-	public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
-		// event.registerLayerDefinition(ModelLayers.CHICKEN_BABY, BabyChickenModel::createBodyLayer);
-		// event.registerLayerDefinition(ModelLayers.COLD_CHICKEN_BABY, BabyChickenModel::createBodyLayer);
-	}
-
-	@SubscribeEvent
 	public static void computeCameraAngles(ViewportEvent.ComputeCameraAngles event) {
 		var mc = Minecraft.getInstance();
 

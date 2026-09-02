@@ -95,7 +95,6 @@
 		"BlockEntityRendererMixin",
 		"BlockEntityWithBoundingBoxRendererMixin",
 		"CameraMixin",
-		"ChickenRendererMixin",
 		"ClientCommonPacketListenerImplMixin",
 		"ClientConfigurationPacketListenerImplMixin",
 		"ClientLevelMixin",
