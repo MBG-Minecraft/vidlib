@@ -52,7 +52,8 @@ public class HubFileUploads {
 			var fileStream = stream
 				.filter(Files::isRegularFile)
 				.filter(Files::isReadable)
-				.map(path -> new FileInfo(directory, path));
+				.map(path -> new FileInfo(directory, path))
+				.filter(fileInfo -> fileInfo.size() > 0L);
 
 			if (uploadBuilder.filter != null) {
 				fileStream = fileStream.filter(uploadBuilder::testFilter);
