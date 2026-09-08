@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
 import net.minecraft.client.Minecraft;
@@ -71,14 +72,15 @@ public interface VidLibEntityRenderStates {
 			extractPlayer(mc, camPos, e, s);
 		}
 
-		lod(state, camPos);
+		lod(mc, state, camPos);
 	}
 
-	static void lod(EntityRenderState state, Vec3 camPos) {
-		boolean hideDetails = !LevelOfDetailValue.ENTITY_DETAILS.isVisible(camPos, state.x, state.y, state.z);
-		boolean hideArmor = !(state instanceof PlayerRenderState ? LevelOfDetailValue.PLAYER_ARMOR : LevelOfDetailValue.ENTITY_ARMOR).isVisible(camPos, state.x, state.y, state.z);
-		boolean hideHandItems = !LevelOfDetailValue.HELD_ITEM.isVisible(camPos, state.x, state.y, state.z);
-		boolean hideClothing = !LevelOfDetailValue.CLOTHING.isVisible(camPos, state.x, state.y, state.z);
+	static void lod(Minecraft mc, EntityRenderState state, Vec3 camPos) {
+		var replay = mc.level != null && PlatformHelper.CURRENT.isReplayLevel(mc.level);
+		boolean hideDetails = !(replay || LevelOfDetailValue.ENTITY_DETAILS.isVisible(camPos, state.x, state.y, state.z));
+		boolean hideArmor = !(replay || (state instanceof PlayerRenderState ? LevelOfDetailValue.PLAYER_ARMOR : LevelOfDetailValue.ENTITY_ARMOR).isVisible(camPos, state.x, state.y, state.z));
+		boolean hideHandItems = !(replay || LevelOfDetailValue.HELD_ITEM.isVisible(camPos, state.x, state.y, state.z));
+		boolean hideClothing = !(replay || LevelOfDetailValue.CLOTHING.isVisible(camPos, state.x, state.y, state.z));
 		lod(state, hideDetails, hideArmor, hideHandItems, hideClothing);
 	}
 
