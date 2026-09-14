@@ -67,11 +67,13 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 		fakePlayer.tickCount = 0;
 		fakePlayer.noPhysics = true;
 
+		var pos = p.getPos(delta);
 		float pitch = p.getPitch(delta);
 		float yaw = p.getYaw(delta);
 		float roll = p.getRoll(delta);
+		var pPose = p.pose;
 
-		fakePlayer.snapTo(p.getPos(delta), yaw + p.additionalHeadYaw, pitch);
+		fakePlayer.snapTo(pos, yaw + p.additionalHeadYaw, pitch);
 		fakePlayer.setYBodyRot(yaw);
 		fakePlayer.setYHeadRot(yaw + p.additionalHeadYaw);
 		fakePlayer.setOldPosAndRot();
@@ -84,8 +86,8 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 		fakePlayer.setItemSlot(EquipmentSlot.CHEST, p.chestItem);
 		fakePlayer.setItemSlot(EquipmentSlot.LEGS, p.legsItem);
 		fakePlayer.setItemSlot(EquipmentSlot.FEET, p.feetItem);
-		fakePlayer.setPose(p.pose);
-		fakePlayer.setSwimming(p.pose == Pose.SWIMMING);
+		fakePlayer.setPose(pPose);
+		fakePlayer.setSwimming(pPose == Pose.SWIMMING);
 
 		playerRenderer.extractRenderState(fakePlayer, playerRenderState, delta);
 
@@ -96,21 +98,26 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 		PlayerSkin[] skins;
 		var gp = profile.profile();
 
+		var pRandomSkin = p.randomSkin;
+		var pRandomSkins = p.randomSkins;
+
 		if (!gp.getName().isEmpty() && !gp.getId().equals(Util.NIL_UUID)) {
 			SINGLE_SKIN[0] = mc.getSkinManager().getInsecureSkin(gp);
 			skins = SINGLE_SKIN;
-		} else if (p.randomSkin && !p.randomSkins.isEmpty()) {
-			skins = p.randomSkins.stream().map(PlayerSkins::of).toArray(PlayerSkin[]::new);
-		} else if (p.randomSkin) {
+		} else if (pRandomSkin && !pRandomSkins.isEmpty()) {
+			skins = pRandomSkins.stream().map(PlayerSkins::of).toArray(PlayerSkin[]::new);
+		} else if (pRandomSkin) {
 			skins = PlayerSkins.DEFAULT_WIDE_SKINS;
 		} else {
 			SINGLE_SKIN[0] = PlayerSkins.DEFAULT_WIDE_SKINS[0];
 			skins = SINGLE_SKIN;
 		}
 
-		if (ClothingPresets.ready && p.clothing != PlayerClothing.NONE) {
+		var pClothing = p.clothing;
+
+		if (ClothingPresets.ready && pClothing != PlayerClothing.NONE) {
 			for (int s = 0; s < skins.length; s++) {
-				var replacement = ClothedPlayerSkinTexture.replace(mc, skins[s], p.clothing);
+				var replacement = ClothedPlayerSkinTexture.replace(mc, skins[s], pClothing);
 
 				if (replacement != null) {
 					skins[s] = new PlayerSkin(
@@ -137,9 +144,10 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 		playerRenderState.capeFlap = 0F;
 		playerRenderState.capeLean = 0F;
 		playerRenderState.capeLean2 = 0F;
-		playerRenderState.nameTag = Empty.isEmpty(p.name) ? null : p.name;
-		playerRenderState.swimAmount = p.pose == Pose.SWIMMING ? 1F : 0F;
-		playerRenderState.isPassenger = p.pose == Pose.SITTING;
+		var pName = p.name;
+		playerRenderState.nameTag = Empty.isEmpty(pName) ? null : pName;
+		playerRenderState.swimAmount = pPose == Pose.SWIMMING ? 1F : 0F;
+		playerRenderState.isPassenger = pPose == Pose.SITTING;
 		playerRenderState.ageInTicks = p.breathing ? tick : 0F;
 
 		playerRenderState.walkAnimationSpeed = p.runningDistance > 0F ? 1F : 0F;
@@ -147,15 +155,20 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 		// Build a shuffled skin index array so no skin is ever duplicated.
 		// Seeded from the prop position so it's stable across frames.
 		var skinIndices = new int[instances.length];
+
 		for (int i = 0; i < instances.length; i++) {
 			skinIndices[i] = i % skins.length;
 		}
-		var rng = new XoroshiroRandomSource(Double.doubleToLongBits(p.pos.x), Double.doubleToLongBits(p.pos.z));
+
+		var rng = new XoroshiroRandomSource(Double.doubleToLongBits(pos.x), Double.doubleToLongBits(pos.z));
+
 		for (int i = skinIndices.length - 1; i > 0; i--) {
 			int j = (int) (rng.nextLong() % (i + 1));
+
 			if (j < 0) {
 				j += i + 1;
 			}
+
 			int tmp = skinIndices[i];
 			skinIndices[i] = skinIndices[j];
 			skinIndices[j] = tmp;
