@@ -5,7 +5,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.util.Hex32;
 import dev.latvian.mods.klib.util.UInt64;
 import dev.mrbeastgaming.mods.hub.api.HubDataMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public record HubProjectData(
@@ -20,6 +23,16 @@ public record HubProjectData(
 		HubTeamData.CODEC.listOf().optionalFieldOf("teams", List.of()).forGetter(HubProjectData::teams),
 		HubDataMap.CODEC.optionalFieldOf("custom_data", HubDataMap.EMPTY).forGetter(HubProjectData::customData)
 	).apply(instance, HubProjectData::new));
+
+	public static final Codec<Int2ObjectMap<HubProjectData>> INT_MAP_CODEC = CODEC.listOf().xmap(list -> {
+		var map = new Int2ObjectLinkedOpenHashMap<HubProjectData>();
+
+		for (var project : list) {
+			map.put(project.id().raw(), project);
+		}
+
+		return map;
+	}, map -> new ArrayList<>(map.values()));
 
 	public static HubProjectData PACK = null;
 
