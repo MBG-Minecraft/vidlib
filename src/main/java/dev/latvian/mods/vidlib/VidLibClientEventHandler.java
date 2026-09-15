@@ -67,6 +67,7 @@ import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
 import dev.mrbeastgaming.mods.hub.client.LinkHubUserScreen;
 import dev.mrbeastgaming.mods.hub.client.LinkMinecraftScreen;
 import dev.mrbeastgaming.mods.hub.event.SyncClientFilesHubEvent;
+import dev.mrbeastgaming.mods.hub.file.UniqueIdProvider;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -111,7 +112,9 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.GameShuttingDownEvent;
 import org.lwjgl.glfw.GLFW;
 
+import java.nio.file.Files;
 import java.util.List;
+import java.util.UUID;
 
 @EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
 public class VidLibClientEventHandler {
@@ -769,6 +772,15 @@ public class VidLibClientEventHandler {
 				builder.setType(HubFileType.CLIENT_JVM_CRASH_REPORT);
 				builder.setNoUniqueId();
 				builder.setFilter(fileInfo -> fileInfo.name().startsWith("hr_err_pid_") && fileInfo.name().endsWith(".log"));
+			});
+		}
+
+		var debugFile = gameDir.resolve("debug-replay.zip");
+
+		if (Files.exists(debugFile)) {
+			event.addFile(debugFile, (file, builder) -> {
+				builder.setType(HubFileType.FLASHBACK_REPLAY_RECORDING);
+				builder.setUniqueId(UniqueIdProvider.ofUUIDAndFileName(new UUID(1L, 1L)));
 			});
 		}
 	}

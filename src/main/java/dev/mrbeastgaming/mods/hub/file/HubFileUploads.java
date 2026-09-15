@@ -7,16 +7,17 @@ import dev.latvian.mods.klib.io.checksum.FileChecksum;
 import dev.latvian.mods.klib.io.checksum.MD5;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.klib.util.StringUtils;
-import dev.latvian.mods.klib.util.Tristate;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.mrbeastgaming.mods.hub.HubProjectConfig;
+import dev.mrbeastgaming.mods.hub.api.Auth;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubFileType;
 import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadRequestItem;
 import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadResponseItem;
+import net.minecraft.util.FastBufferedInputStream;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -181,7 +182,9 @@ public class HubFileUploads {
 						upload.assignedToMinecraft
 					));
 
-					map.put(syncFile.item.checksum(), syncFile);
+					if (!syncFile.item.checksum().isNil()) {
+						map.put(syncFile.item.checksum(), syncFile);
+					}
 				} catch (Exception ex) {
 					VidLib.LOGGER.error("Failed to sync Beast Hub file " + file.name(), ex);
 				} finally {
@@ -206,7 +209,7 @@ public class HubFileUploads {
 			}
 
 			if (!map.isEmpty()) {
-				var list = HubAPI.apiProjectUpload(projectConfig.token(), map.values().stream().map(SyncedFile::item).toList());
+				var list = HubAPI.ProjectAPI.postUpload(projectConfig.token().toString(), map.values().stream().map(SyncedFile::item).toList());
 				VidLib.LOGGER.info("Uploading " + list.size() + " files to Beast Hub");
 
 				for (var item : list) {
@@ -290,8 +293,6 @@ public class HubFileUploads {
 	}
 
 	private static SyncedFile syncFile1(SyncedFile file, ProjectUploadResponseItem item, byte[] chunk, @Nullable ProgressItem progressItem) throws Exception {
-		int totalParts = Mth.ceil((double) file.meta.size() / (double) chunk.length);
-		VidLib.LOGGER.info("Uploading " + item + " (" + totalParts + " parts)");
 		long offset = item.offset();
 		long start = System.currentTimeMillis();
 		var name = file.fileInfo.name();
@@ -301,18 +302,28 @@ public class HubFileUploads {
 			return file;
 		}
 
-		try (var fileInputStream = Files.newInputStream(file.fileInfo.path())) {
+		if (progressItem != null) {
+			progressItem.setInfoText("Compressing...");
+		}
+
+		long size = file.meta.size();
+
+		int totalParts = Mth.ceil((double) size / (double) chunk.length);
+		VidLib.LOGGER.info("Uploading " + item + " (" + totalParts + " parts)");
+
+		try (var fileInputStream = new FastBufferedInputStream(Files.newInputStream(file.fileInfo.path()))) {
 			fileInputStream.skipNBytes(offset);
 
 			while (true) {
-				int len = fileInputStream.readNBytes(chunk, 0, (int) Math.min(file.meta.size() - offset, chunk.length));
+				int len = fileInputStream.readNBytes(chunk, 0, (int) Math.min(size - offset, chunk.length));
+
 				var fullChunkString = StringUtils.siByteSize(offset) + " - " + StringUtils.siByteSize(offset + len) + " | " + Mth.ceil((double) offset / (double) chunk.length) + "/" + totalParts;
 
 				if (progressItem != null) {
 					progressItem.setInfoText("Connecting...");
 				}
 
-				var request = HubAPI.request(item.url(), Tristate.FALSE).build();
+				var request = HubAPI.request(item.url(), Auth.EXCLUDED).build();
 				var connection = (HttpURLConnection) request.uri().toURL().openConnection();
 				connection.setDoOutput(true);
 				connection.setDoInput(true);
@@ -323,6 +334,7 @@ public class HubFileUploads {
 				connection.setRequestProperty("Upload-Offset", Long.toUnsignedString(offset));
 				connection.setRequestProperty("X-Content-Length-Hint", Long.toUnsignedString(len));
 				connection.setRequestProperty("Transfer-Encoding", "chunked");
+				// connection.setRequestProperty("X-MBG-Hub-Compression-Method", compressionMethod.name);
 
 				if (progressItem != null) {
 					progressItem.setInfoText(ProgressItemNameFunction.SI_BYTE_SIZE);
@@ -334,14 +346,15 @@ public class HubFileUploads {
 
 					while (remaining > 0) {
 						int sent = Math.min(remaining, 32768);
-						out.write(chunk, index, sent);
-						remaining -= sent;
-						index += sent;
-						out.flush();
 
 						if (progressItem != null) {
 							progressItem.addProgress(sent);
 						}
+
+						out.write(chunk, index, sent);
+						remaining -= sent;
+						index += sent;
+						out.flush();
 					}
 				}
 
@@ -364,8 +377,8 @@ public class HubFileUploads {
 						VidLib.LOGGER.info("Uploaded part " + fullChunkString + " of " + name);
 					}
 
-					if (responseOffset >= file.meta.size()) {
-						var fileId = Optional.ofNullable(connection.getHeaderField("X-File-ID")).orElse("");
+					if (responseOffset >= size) {
+						var fileId = Optional.ofNullable(connection.getHeaderField("X-MBG-Hub-File-ID")).orElse("");
 
 						if (!fileId.isEmpty()) {
 							IOUtils.setAttribute(file.fileInfo.path(), "MBG-Hub-Sync-ID", fileId);
@@ -385,6 +398,12 @@ public class HubFileUploads {
 				}
 
 				connection.disconnect();
+			}
+		} finally {
+			try {
+				// Files.deleteIfExists(tempFile);
+			} catch (Exception ex) {
+				ex.printStackTrace();
 			}
 		}
 	}

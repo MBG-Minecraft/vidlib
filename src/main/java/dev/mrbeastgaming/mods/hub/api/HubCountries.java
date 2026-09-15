@@ -20,11 +20,11 @@ public interface HubCountries {
 
 	Lazy<CountryList> REMOTE = Lazy.of(() -> {
 		try {
-			var request = HubAPI.HTTP_CLIENT.send(HubAPI.apiCountries(), HttpResponse.BodyHandlers.ofInputStream());
-			var checksum = request.headers().firstValue("X-Checksum").orElse("");
+			var response = HubAPI.send(HubAPI.CoreAPI.getCountries(), HttpResponse.BodyHandlers.ofInputStream());
+			var checksum = response.headers().firstValue("X-Checksum").orElse("");
 
 			if (!checksum.isEmpty()) {
-				try (var in = request.body()) {
+				try (var in = response.body()) {
 					var json = JsonUtils.read(in);
 					var countryList = CountryList.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
 

@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import dev.latvian.mods.vidlib.core.VLJoinMultiplayerScreen;
-import dev.mrbeastgaming.mods.hub.api.HubGameServerData;
+import dev.mrbeastgaming.mods.hub.api.project.HubGameServerData;
 import dev.mrbeastgaming.mods.hub.client.OtherServerHeader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ObjectSelectionList;

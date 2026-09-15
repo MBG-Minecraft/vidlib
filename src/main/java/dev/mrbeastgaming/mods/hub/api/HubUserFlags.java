@@ -9,15 +9,17 @@ import java.util.List;
 public record HubUserFlags(
 	boolean deleted,
 	boolean bot,
-	boolean admin,
-	boolean miscStaff,
+	boolean hubAdmin,
+	boolean hubStaff,
 	boolean externalTalent,
 	boolean internalTalent,
 	boolean developer,
 	boolean videoEditor,
-	boolean testerWithNDA
+	boolean tester,
+	boolean nda
 ) {
 	public static final HubUserFlags EMPTY = new HubUserFlags(
+		false,
 		false,
 		false,
 		false,
@@ -32,33 +34,40 @@ public record HubUserFlags(
 	public static final Codec<HubUserFlags> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Codec.BOOL.optionalFieldOf("deleted", false).forGetter(HubUserFlags::deleted),
 		Codec.BOOL.optionalFieldOf("bot", false).forGetter(HubUserFlags::bot),
-		Codec.BOOL.optionalFieldOf("admin", false).forGetter(HubUserFlags::admin),
-		Codec.BOOL.optionalFieldOf("misc_staff", false).forGetter(HubUserFlags::miscStaff),
+		Codec.BOOL.optionalFieldOf("hub_admin", false).forGetter(HubUserFlags::hubAdmin),
+		Codec.BOOL.optionalFieldOf("hub_staff", false).forGetter(HubUserFlags::hubStaff),
 		Codec.BOOL.optionalFieldOf("external_talent", false).forGetter(HubUserFlags::externalTalent),
 		Codec.BOOL.optionalFieldOf("internal_talent", false).forGetter(HubUserFlags::internalTalent),
 		Codec.BOOL.optionalFieldOf("developer", false).forGetter(HubUserFlags::developer),
 		Codec.BOOL.optionalFieldOf("video_editor", false).forGetter(HubUserFlags::videoEditor),
-		Codec.BOOL.optionalFieldOf("tester_with_nda", false).forGetter(HubUserFlags::testerWithNDA)
+		Codec.BOOL.optionalFieldOf("tester", false).forGetter(HubUserFlags::tester),
+		Codec.BOOL.optionalFieldOf("nda", false).forGetter(HubUserFlags::nda)
 	).apply(instance, HubUserFlags::new));
 
-	public boolean isStaff() {
-		return admin || miscStaff;
+	public boolean isHubStaff() {
+		return hubAdmin || hubStaff;
 	}
 
-	public boolean isAnyStaff() {
-		return isStaff() || developer || videoEditor;
+	public boolean isStaff() {
+		return isHubStaff() || developer || videoEditor;
 	}
 
 	public boolean isTalent() {
 		return externalTalent || internalTalent;
 	}
 
-	public List<String> getRoles() {
-		var list = new ArrayList<String>(0);
+	public boolean isTesterWithNDA() {
+		return tester && nda;
+	}
 
-		if (admin) {
-			list.add("Admin");
-		} else if (isAnyStaff()) {
+	public List<String> getRoles() {
+		var list = new ArrayList<String>(1);
+
+		if (hubAdmin) {
+			list.add("Hub Admin");
+		} else if (hubStaff) {
+			list.add("Hub Staff");
+		} else if (isStaff()) {
 			list.add("Staff");
 		}
 
@@ -74,8 +83,16 @@ public record HubUserFlags(
 			list.add("Video Editor");
 		}
 
-		if (testerWithNDA) {
-			list.add("Tester with NDA");
+		if (tester) {
+			list.add("Tester");
+		}
+
+		if (nda) {
+			list.add("NDA");
+		}
+
+		if (list.isEmpty()) {
+			list.add("Contestant");
 		}
 
 		return list;

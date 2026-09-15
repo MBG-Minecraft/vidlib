@@ -384,15 +384,21 @@ public class ClientGameEngine {
 				hubTooltip.add("");
 				hubTooltip.add("User: " + hubUser.toString());
 
-				var roles = hubUser.flags().getRoles();
-				hubTooltip.add(roles.isEmpty() ? "Roles: Contestant" : ("Roles: " + String.join(", ", roles)));
+				hubTooltip.add("- Roles: " + String.join(", ", hubUser.flags().getRoles()));
 
 				hubTooltip.add("");
 				hubTooltip.add("Project: " + (hubProject == null ? "Not Configured" : hubProject.toString()));
 
-				if (hubProject != null) {
-					var gateway = HubClientGateway.instance;
-					hubTooltip.add("Gateway: " + (gateway != null ? gateway.status : "Inactive"));
+				var gateway = HubClientGateway.instance;
+
+				hubTooltip.add("");
+				hubTooltip.add("Gateway: " + (gateway != null ? gateway.status : "Inactive"));
+
+				if (gateway != null) {
+					var now = Instant.now();
+					hubTooltip.add("- Connected for: " + StringUtils.clock(Duration.between(gateway.connected, now).getSeconds()));
+					hubTooltip.add("- Last Pinged: " + StringUtils.clock(Duration.between(gateway.lastPing.time(), now).getSeconds()) + " (" + gateway.lastPing.type() + ")");
+					hubTooltip.add("- Last Ponged: " + StringUtils.clock(Duration.between(gateway.lastPong.time(), now).getSeconds()) + " (" + gateway.lastPong.type() + ")");
 				}
 			}
 		}

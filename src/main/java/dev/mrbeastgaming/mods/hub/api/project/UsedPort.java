@@ -1,4 +1,4 @@
-package dev.mrbeastgaming.mods.hub.api;
+package dev.mrbeastgaming.mods.hub.api.project;
 
 import com.google.gson.JsonObject;
 

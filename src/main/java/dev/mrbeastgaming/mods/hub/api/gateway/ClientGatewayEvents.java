@@ -1,14 +1,13 @@
 package dev.mrbeastgaming.mods.hub.api.gateway;
 
-import com.google.gson.JsonPrimitive;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.core.VLJoinMultiplayerScreen;
-import dev.mrbeastgaming.mods.hub.api.HubGameServerData;
 import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.api.HubUserData;
 import dev.mrbeastgaming.mods.hub.api.HubUserFlags;
+import dev.mrbeastgaming.mods.hub.api.project.HubGameServerData;
 import dev.mrbeastgaming.mods.hub.api.project.HubProjectData;
 import dev.mrbeastgaming.mods.hub.api.project.HubProjectsData;
 import net.minecraft.client.Minecraft;
@@ -24,7 +23,6 @@ public class ClientGatewayEvents {
 	@SubscribeEvent
 	public static void hubGatewayEventRegistry(HubClientGatewayEventRegistryEvent event) {
 		var registry = event.getRegistry();
-		registry.register("ping", ClientGatewayEvents::ping);
 		registry.registerSynced("request_restart", ClientGatewayEvents::requestRestart);
 		registry.registerSynced("display_toast", ClientGatewayEvents::displayToast);
 		registry.register("user_updated", ClientGatewayEvents::userUpdated);
@@ -37,10 +35,6 @@ public class ClientGatewayEvents {
 		// TODO: save replay
 		// TODO: save voice recording
 		// TODO: open url
-	}
-
-	private static void ping(HubGatewayEvent event) {
-		event.respond(new JsonPrimitive("pong"));
 	}
 
 	private static void requestRestart(Minecraft mc, HubGatewayEvent event) {
@@ -59,7 +53,7 @@ public class ClientGatewayEvents {
 		mc.toast(Component.literal(title), subtitle.isEmpty() ? Component.empty() : Component.literal(subtitle));
 	}
 
-	private static void userUpdated(HubGatewayEvent event) {
+	private static void userUpdated(Minecraft mc, HubGatewayEvent event) {
 		var user = HubUserData.CODEC.parse(JsonOps.INSTANCE, event.params()).getOrThrow();
 		HubUserData.KNOWN_USERS.put(user.id().raw(), user); // sync?
 
@@ -70,7 +64,7 @@ public class ClientGatewayEvents {
 		}
 	}
 
-	private static void flagsUpdated(HubGatewayEvent event) {
+	private static void flagsUpdated(Minecraft mc, HubGatewayEvent event) {
 		var self = HubUserData.SELF;
 
 		if (self != null) {
@@ -79,14 +73,12 @@ public class ClientGatewayEvents {
 		}
 	}
 
-	private static void capabilitiesUpdated(HubGatewayEvent event) {
+	private static void capabilitiesUpdated(Minecraft mc, HubGatewayEvent event) {
 		HubUserCapabilities.CURRENT = event.params() == null ? HubUserCapabilities.DEFAULT : HubUserCapabilities.CODEC.parse(JsonOps.INSTANCE, event.params()).getOrThrow();
 	}
 
-	private static void serverListUpdated(HubGatewayEvent event) {
+	private static void serverListUpdated(Minecraft mc, HubGatewayEvent event) {
 		HubGameServerData.CURRENT = event.params() == null ? List.of() : HubGameServerData.LIST_CODEC.parse(JsonOps.INSTANCE, event.params()).getOrThrow();
-
-		var mc = Minecraft.getInstance();
 
 		mc.execute(() -> {
 			if (mc.screen instanceof VLJoinMultiplayerScreen screen) {
@@ -95,7 +87,7 @@ public class ClientGatewayEvents {
 		});
 	}
 
-	private static void projectUpdated(HubGatewayEvent event) {
+	private static void projectUpdated(Minecraft mc, HubGatewayEvent event) {
 		var data = HubProjectData.CODEC.parse(JsonOps.INSTANCE, event.params()).getOrThrow();
 		HubProjectsData.ALL.forget();
 
@@ -106,7 +98,7 @@ public class ClientGatewayEvents {
 		}
 	}
 
-	private static void cutRecording(HubGatewayEvent hubGatewayEvent) {
+	private static void cutRecording(Minecraft mc, HubGatewayEvent hubGatewayEvent) {
 		ReplayAPI.getActive().cutRecording();
 	}
 }

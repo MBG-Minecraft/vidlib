@@ -3,12 +3,15 @@ package dev.latvian.mods.vidlib.feature.imgui;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.interpolation.BezierPreset;
 import dev.latvian.mods.klib.interpolation.Interpolation;
+import dev.latvian.mods.klib.io.CompressionMethod;
 import dev.latvian.mods.klib.io.IOUtils;
+import dev.latvian.mods.klib.io.checksum.SHA256;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
 import dev.latvian.mods.klib.util.Hex32;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
@@ -26,7 +29,6 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.interpolation.Interpolation
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ParticleOptionsImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.item.VisualItemKey;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
@@ -44,6 +46,7 @@ import dev.mrbeastgaming.mods.hub.api.HubCountry;
 import dev.mrbeastgaming.mods.hub.api.HubFileType;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
 import dev.mrbeastgaming.mods.hub.file.ClientHubFileUploads;
+import dev.mrbeastgaming.mods.hub.file.UploadRequestFile;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.ImVec4;
@@ -69,11 +72,18 @@ import net.minecraft.world.item.ItemStack;
 import org.joml.Vector2f;
 
 import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 public class DebugWidgetPanel extends Panel {
 	public static final DebugWidgetPanel INSTANCE = new DebugWidgetPanel();
@@ -618,8 +628,8 @@ public class DebugWidgetPanel extends Panel {
 			errorQueue.display();
 		}
 
-		if (ImGui.button("Test Real File###test-real-file-upload")) {
-			var path = PlatformHelper.CURRENT.getGameDirectory().resolve("test-upload.txt");
+		if (ImGui.button(ImIcons.RELOAD + "###regen-test-upload")) {
+			var path = VidLibPaths.LOCAL.get().resolve("debug-text.txt");
 			var chars = " abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 ".getBytes(StandardCharsets.UTF_8);
 
 			Thread.startVirtualThread(() -> {
@@ -633,12 +643,146 @@ public class DebugWidgetPanel extends Panel {
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
+			});
+		}
+
+		ImGui.sameLine();
+
+		if (ImGui.button("Test Real File###test-real-file-upload")) {
+			Thread.startVirtualThread(() -> {
+				var path = VidLibPaths.LOCAL.get().resolve("debug-replay.zip");
+
+				var start = Instant.now();
 
 				ClientHubFileUploads.syncFile(path, (fileInfo, builder) -> {
-					builder.setType(HubFileType.CLIENT_GAME_LOG);
-					builder.setCustomName("test-upload.txt");
+					builder.setType(HubFileType.DEBUG);
+					builder.setCustomName("debug-replay.zip");
 				});
+
+				var end = Instant.now();
+				ProgressQueue.queueError("Old Upload Finished", "%02f s".formatted(Duration.between(start, end).toMillis() / 1000F));
 			});
+		}
+
+		ImGui.sameLine();
+
+		if (ImGui.button("Test Real File 2###test-real-file-upload-2")) {
+			var thread = new Thread(() -> {
+				var root = VidLibPaths.LOCAL.get().toAbsolutePath();
+				var path = root.resolve("debug-replay.zip");
+
+				try {
+					var progressItem = ProgressQueue.queueSingleItem("Uploading Files... (Gateway)");
+					progressItem.label = "Processing files...";
+					progressItem.queue.canCancel = true;
+					progressItem.setStarted();
+
+					var start = Instant.now();
+
+					var files = new ArrayList<UploadRequestFile>();
+
+					try (var fs = IOUtils.openAsZip(path)) {
+						var zipRoot = fs.getPath("/");
+
+						List<Path> filesToProcess;
+
+						try (var stream = Files.walk(zipRoot)) {
+							filesToProcess = stream.filter(Files::isRegularFile).filter(Files::isReadable).toList();
+						}
+
+						progressItem.setSize(filesToProcess.size());
+
+						for (var file : filesToProcess) {
+							progressItem.label = file.toString().substring(1);
+							progressItem.addProgress(1L);
+
+							var checksumItem = progressItem.queue.addItem();
+							checksumItem.setSize(Files.size(file));
+
+							try {
+								files.add(UploadRequestFile.load("/" + zipRoot.relativize(file).toString(), file, checksumItem));
+							} finally {
+								checksumItem.setDone();
+							}
+						}
+					}
+
+					progressItem.label = "";
+					progressItem.setSize(1L);
+					VidLib.LOGGER.info("Uploading " + files);
+
+					/*
+					entries.add(new UploadRequestEntry(
+						HubFileType.DEBUG,
+						MD5.NIL,
+						UploadRequestFile.load(root, path, UnaryOperator.identity(), UnaryOperator.identity()),
+						files,
+						Optional.empty()
+					));
+					 */
+
+					// entries.add(new UploadRequestEntry(SHA256.TYPE.digest(path, null), files));
+
+					var gateway = HubClientGateway.instance;
+
+					progressItem.label = "Sending request...";
+
+					var response = gateway.sendUploadRequest(files).join();
+					var responseEntries = response.files();
+
+					for (var entry : responseEntries) {
+						progressItem.label = "Uploading to the Gateway...";
+						progressItem.addProgress(1L);
+
+						try (var fs = IOUtils.openAsZip(path)) {
+							var filePath = fs.getPath(entry.id());
+
+							if (Files.notExists(filePath)) {
+								VidLib.LOGGER.warn("Tried to upload file " + entry.id() + " that does not exist");
+								continue;
+							}
+
+							long offset = entry.offset();
+
+							if (offset > 0L) {
+								var partialChecksum = SHA256.TYPE.digest(filePath, 0L, entry.offset(), null);
+
+								if (!partialChecksum.equals(entry.offsetChecksum())) {
+									VidLib.LOGGER.info("Partial checksum of " + entry.id() + " didn't match, restarting upload");
+									offset = 0L;
+								}
+							}
+
+							var fileItem = progressItem.queue.addItem(entry.id());
+
+							if (response.httpBodyLimit() > 0L && !HubAPI.CoreAPI.postFileStorage(
+								entry.token(),
+								filePath,
+								offset,
+								response.httpBodyLimit(),
+								fileItem
+							)) {
+								gateway.uploadFile(
+									entry.token(),
+									filePath,
+									offset,
+									fileItem
+								);
+							}
+						}
+					}
+
+					var end = Instant.now();
+
+					progressItem.label = "Upload Finished";
+					progressItem.error("%02f s".formatted(Duration.between(start, end).toMillis() / 1000F));
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}, "Upload-Thread");
+
+			thread.setDaemon(true);
+			thread.start();
 		}
 
 		ImGui.separator();
@@ -662,13 +806,28 @@ public class DebugWidgetPanel extends Panel {
 
 		if (ImGui.button("Print Replays###print-replays")) {
 			try {
-				VidLib.LOGGER.info(HubAPI.apiProjectReplays(Hex32.of(1)).toString());
+				VidLib.LOGGER.info(HubAPI.ProjectAPI.getReplays(Hex32.of(1)).toString());
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 		}
 
 		ImGui.popItemWidth();
+
+		ImGui.separator();
+
+		if (ImGui.button("Test Gateway Binary Packet###test-gateway-binary-packet")) {
+			try {
+				var bodyBuf = ByteBuffer.allocate(16);
+				var uuid = UUID.randomUUID();
+				bodyBuf.putLong(uuid.getMostSignificantBits());
+				bodyBuf.putLong(uuid.getLeastSignificantBits());
+				bodyBuf.flip();
+				HubClientGateway.instance.sendDebug(CompressionMethod.ZSTD, bodyBuf);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 
 	@Override

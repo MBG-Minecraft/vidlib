@@ -2,9 +2,13 @@ package dev.mrbeastgaming.mods.hub.api;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
 import dev.latvian.apps.tinyhttp.content.MimeType;
 import dev.latvian.mods.klib.io.FileInfo;
 import dev.mrbeastgaming.mods.hub.file.FileTypeProvider;
+
+import java.util.List;
 
 public record HubFileType(int type, String contentType, String name) implements FileTypeProvider {
 	public static final HubFileType UNKNOWN = new HubFileType(0, "", "");
@@ -18,10 +22,37 @@ public record HubFileType(int type, String contentType, String name) implements 
 	public static final HubFileType SERVER_JVM_CRASH_REPORT = new HubFileType(8, MimeType.TEXT, "Server JVM Crash Reports");
 	public static final HubFileType SERVER_GAME_LOG = new HubFileType(9, MimeType.TEXT, "Server Game Logs");
 	public static final HubFileType IMAGE = new HubFileType(10, MimeType.PNG, "Images");
+	public static final HubFileType DEBUG = new HubFileType(11, "", "Debug");
+
+	public static final List<HubFileType> TYPES = List.of(
+		DEBUG,
+		FLASHBACK_REPLAY_RECORDING,
+		FLASHBACK_REPLAY_EDITOR_STATE,
+		VOICE_CHAT_RECORDING,
+		CLIENT_CRASH_REPORT,
+		CLIENT_JVM_CRASH_REPORT,
+		CLIENT_GAME_LOG,
+		SERVER_CRASH_REPORT,
+		SERVER_JVM_CRASH_REPORT,
+		SERVER_GAME_LOG,
+		IMAGE
+	);
 
 	public static HubFileType custom(String contentType) {
 		return new HubFileType(0, contentType, "");
 	}
+
+	public static HubFileType of(int type) {
+		for (var t : TYPES) {
+			if (t.type == type) {
+				return t;
+			}
+		}
+
+		return new HubFileType(type, "", "");
+	}
+
+	public static final Codec<HubFileType> CODEC = Codec.either(Codec.INT, Codec.STRING).xmap(either -> either.map(HubFileType::of, HubFileType::custom), type -> type.type == 0 ? Either.right(type.contentType) : Either.left(type.type));
 
 	public JsonElement toJson() {
 		return type == 0 ? new JsonPrimitive(contentType) : new JsonPrimitive(type);

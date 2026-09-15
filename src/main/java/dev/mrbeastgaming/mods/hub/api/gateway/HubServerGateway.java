@@ -1,11 +1,12 @@
 package dev.mrbeastgaming.mods.hub.api.gateway;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.mojang.serialization.JsonOps;
+import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.mrbeastgaming.mods.hub.api.HubServerSessionData;
-import dev.mrbeastgaming.mods.hub.api.UsedPort;
+import dev.mrbeastgaming.mods.hub.api.project.UsedPort;
 import net.minecraft.ChatFormatting;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -21,12 +22,12 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 	public static HubServerGateway instance;
 
 	@Nullable
-	public static HubServerGateway startGateway(MinecraftServer server, @Nullable URI uri) {
+	public static HubServerGateway startGateway(MinecraftServer server, @Nullable URI uri, String token) {
 		stopGateway();
 		var gateway = instance;
 
 		if (gateway == null && uri != null) {
-			gateway = new HubServerGateway(server, uri);
+			gateway = new HubServerGateway(server, uri, token);
 			gateway.start();
 			instance = gateway;
 		}
@@ -52,12 +53,24 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 	}
 
 	public static void updateInfo(MinecraftServer server, HubServerGateway gateway) {
+		Thread.startVirtualThread(() -> updateInfoSync(server, gateway));
+	}
+
+	public static void updateInfoSync(MinecraftServer server, HubServerGateway gateway) {
 		gateway.sendName(ChatFormatting.stripFormatting(server.getMotd().replace("\\n", "\n")));
 		gateway.sendSize(server.getPlayerCount());
 		gateway.sendStatus(CommonGameEngine.INSTANCE.getServerGatewayStatus(server));
 		var usedPorts = new ArrayList<UsedPort>(3);
 		CommonGameEngine.INSTANCE.getUsedPorts(server, usedPorts);
 		gateway.sendUsedPorts(usedPorts);
+
+		try {
+			var availableWorlds = new ArrayList<HubWorldDirectory>(1);
+			CommonGameEngine.INSTANCE.getAvailableWorlds(server, availableWorlds);
+			gateway.sendAvailableWorlds(availableWorlds);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 
 	public static JsonObject entityToJson(Entity entity) {
@@ -119,14 +132,10 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 	}
 
 	public static void registerBuiltIn(HubGatewayEventRegistry<MinecraftServer> registry) {
-		registry.register("ping", HubServerGateway::ping);
 		registry.registerSynced("request_restart", HubServerGateway::requestRestart);
 		registry.registerSynced("run_command", HubServerGateway::runCommand);
 		registry.registerSynced("update_ops", HubServerGateway::updateOps);
-	}
-
-	public static void ping(HubGatewayEvent event) {
-		event.respond(new JsonPrimitive("pong"));
+		registry.registerSynced("request_world_upload", HubServerGateway::requestWorldUpload);
 	}
 
 	private static void requestRestart(MinecraftServer server, HubGatewayEvent event) {
@@ -142,10 +151,25 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 		HubServerSessionData.updateOps(server, event.paramsArray());
 	}
 
+	private static void requestWorldUpload(MinecraftServer server, HubGatewayEvent event) {
+		var data = HubWorldUploadRequestData.CODEC.parse(JsonOps.INSTANCE, event.params()).getOrThrow();
+
+		var worlds = new ArrayList<HubWorldDirectory>(1);
+		CommonGameEngine.INSTANCE.getAvailableWorlds(server, worlds);
+
+		for (var world : worlds) {
+			if (world.id().equals(data.worldId()) && world.path().equals(data.path())) {
+				VidLib.LOGGER.warn(data.sendingTo().name() + " requested world " + data.path() + " upload");
+				// HubAPI.apiUpload();
+				return;
+			}
+		}
+	}
+
 	public final MinecraftServer server;
 
-	public HubServerGateway(MinecraftServer server, URI uri) {
-		super(server, uri);
+	public HubServerGateway(MinecraftServer server, URI gatewayURI, String gatewayToken) {
+		super(server, gatewayURI, gatewayToken);
 		this.server = server;
 	}
 
@@ -156,6 +180,7 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 
 	@Override
 	public void onConnected() {
-		updateInfo(main, this);
+		super.onConnected();
+		updateInfoSync(main, this);
 	}
 }

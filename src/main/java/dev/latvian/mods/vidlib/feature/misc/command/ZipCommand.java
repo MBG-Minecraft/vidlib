@@ -1,11 +1,12 @@
 package dev.latvian.mods.vidlib.feature.misc.command;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
+import dev.latvian.mods.klib.io.IOUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
-import net.minecraft.Util;
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -21,7 +22,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
@@ -53,13 +53,7 @@ public interface ZipCommand {
 	}
 
 	static CompletableFuture<String> zip(MinecraftServer server, Instant now, String customName) {
-		for (var level : server.getAllLevels()) {
-			if (level != null) {
-				level.noSave = true;
-			}
-		}
-
-		server.saveEverything(true, true, true);
+		PlatformHelper.CURRENT.pauseSaving(server);
 
 		return CompletableFuture.supplyAsync(() -> {
 			try {
@@ -71,7 +65,7 @@ public interface ZipCommand {
 				var zipFile = from.resolveSibling(toName + ".zip");
 
 				try {
-					var process = new ProcessBuilder(Util.getPlatform() == Util.OS.WINDOWS ? List.of("robocopy", fromName, toName, "/E", "/ZB", "/COPYALL", "/MT:16") : List.of("cp", "-R", fromName, toName))
+					var process = new ProcessBuilder(IOUtils.platformCopy(fromName, toName))
 						.directory(from.getParent().toAbsolutePath().toFile())
 						.start();
 
@@ -88,13 +82,7 @@ public interface ZipCommand {
 			} catch (Throwable ex) {
 				ex.printStackTrace();
 			} finally {
-				server.execute(() -> {
-					for (var level : server.getAllLevels()) {
-						if (level != null) {
-							level.noSave = false;
-						}
-					}
-				});
+				server.execute(() -> PlatformHelper.CURRENT.resumeSaving(server));
 			}
 
 			throw new IllegalStateException("Failed to create a backup");

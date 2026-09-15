@@ -72,7 +72,9 @@ public class VidLibClient {
 	public static void checkFileSync(boolean isFirstTime) {
 		if (HubUserCapabilities.CURRENT.autoUploadFiles()) {
 			var entries = new ArrayList<HubFileUploads.Entry>();
-			NeoForge.EVENT_BUS.post(new SyncClientFilesHubEvent(entries, isFirstTime));
+			var event = new SyncClientFilesHubEvent(entries, isFirstTime);
+			NeoForge.EVENT_BUS.post(event);
+
 
 			if (!entries.isEmpty()) {
 				HubAPI.SEQUENTIAL_EXECUTOR.get().execute(() -> HubFileUploads.syncFiles(entries, VidLibClient.createUploadQueue()));

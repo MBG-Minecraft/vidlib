@@ -10,7 +10,8 @@ import dev.latvian.mods.vidlib.feature.location.WarpLocation;
 import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
-import dev.mrbeastgaming.mods.hub.api.UsedPort;
+import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldDirectory;
+import dev.mrbeastgaming.mods.hub.api.project.UsedPort;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.client.Minecraft;
@@ -67,6 +68,7 @@ import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -557,6 +559,14 @@ public class CommonGameEngine {
 			if (dedicatedServer.getProperties().enableQuery) {
 				list.add(UsedPort.udp("Query", dedicatedServer.getProperties().queryPort));
 			}
+		}
+	}
+
+	public void getAvailableWorlds(MinecraftServer server, List<HubWorldDirectory> list) {
+		try {
+			list.add(HubWorldDirectory.of(server.getWorldData().getLevelName(), server.getWorldPath(LevelResource.ROOT)));
+		} catch (Exception ex) {
+			VidLib.LOGGER.error("Failed to list available world", ex);
 		}
 	}
 }

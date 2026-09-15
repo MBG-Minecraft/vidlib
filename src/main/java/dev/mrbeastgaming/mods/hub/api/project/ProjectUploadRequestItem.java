@@ -18,4 +18,7 @@ public record ProjectUploadRequestItem(
 	Hex32 assignedTo,
 	@Nullable UUID assignedToMinecraft
 ) {
+	public String ref() {
+		return uniqueId.isNil() ? ("c-" + checksum) : ("u-" + uniqueId);
+	}
 }

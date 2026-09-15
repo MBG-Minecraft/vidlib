@@ -8,6 +8,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import dev.mrbeastgaming.mods.hub.HubUserConfig;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
+import dev.mrbeastgaming.mods.hub.api.project.HubGameServerData;
 import dev.mrbeastgaming.mods.hub.api.project.HubParticipantData;
 import dev.mrbeastgaming.mods.hub.api.project.HubProjectData;
 import dev.mrbeastgaming.mods.hub.api.project.HubProjectsData;
@@ -25,6 +26,7 @@ import java.util.UUID;
 public record HubClientSessionData(
 	UUID sessionId,
 	Optional<URI> gateway,
+	Optional<String> gatewayToken,
 	Optional<HubUserData> user,
 	Optional<HubProjectData> project,
 	Optional<HubParticipantData> participant,
@@ -37,6 +39,7 @@ public record HubClientSessionData(
 	public static final Codec<HubClientSessionData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		KLibCodecs.UUID.fieldOf("session_id").forGetter(HubClientSessionData::sessionId),
 		HubAPI.URI_BASE_CODEC.optionalFieldOf("gateway").forGetter(HubClientSessionData::gateway),
+		Codec.STRING.optionalFieldOf("gateway_token").forGetter(HubClientSessionData::gatewayToken),
 		HubUserData.CODEC.optionalFieldOf("user").forGetter(HubClientSessionData::user),
 		HubProjectData.CODEC.optionalFieldOf("project").forGetter(HubClientSessionData::project),
 		HubParticipantData.CODEC.optionalFieldOf("participant").forGetter(HubClientSessionData::participant),
@@ -63,7 +66,7 @@ public record HubClientSessionData(
 		var authServerId = "";
 
 		try {
-			var data = HubAPI.apiClientSession(new HubClientSessionDataRequest(projectConfig == null ? "" : projectConfig.token(), true));
+			var data = HubAPI.MinecraftAPI.postClientSession(new HubClientSessionDataRequest(projectConfig == null ? "" : projectConfig.token(), true));
 
 			userData = data.user.orElse(null);
 			projectData = data.project.orElse(null);
@@ -89,7 +92,7 @@ public record HubClientSessionData(
 				VidLib.LOGGER.warn("Logged in a misconfigured project as '" + userName + "'");
 			}
 
-			var gateway = HubClientGateway.startGateway(mc, HubAPI.toWebSocketURI(data.gateway.orElse(null)));
+			var gateway = HubClientGateway.startGateway(mc, HubAPI.toWebSocketURI(data.gateway.orElse(null)), data.gatewayToken.orElse(""));
 
 			if (gateway != null) {
 				HubClientGateway.updateInfo(mc, gateway);

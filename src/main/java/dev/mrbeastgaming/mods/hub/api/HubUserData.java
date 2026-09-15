@@ -8,16 +8,12 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
 public record HubUserData(
-	Hex32 id,
-	String name,
-	String avatarUrl,
+	HubUserDisplayData display,
 	UInt64 discordId,
 	HubUserFlags flags
 ) {
 	public static final Codec<HubUserData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		Hex32.CODEC.fieldOf("id").forGetter(HubUserData::id),
-		Codec.STRING.optionalFieldOf("name", "").forGetter(HubUserData::name),
-		Codec.STRING.optionalFieldOf("avatar_url", "").forGetter(HubUserData::avatarUrl),
+		HubUserDisplayData.MAP_CODEC.forGetter(HubUserData::display),
 		UInt64.CODEC.optionalFieldOf("discord_id", UInt64.NONE).forGetter(HubUserData::discordId),
 		HubUserFlags.CODEC.optionalFieldOf("flags", HubUserFlags.EMPTY).forGetter(HubUserData::flags)
 	).apply(instance, HubUserData::new));
@@ -25,12 +21,16 @@ public record HubUserData(
 	public static HubUserData SELF = null;
 	public static final Int2ObjectMap<HubUserData> KNOWN_USERS = new Int2ObjectOpenHashMap<>();
 
+	public Hex32 id() {
+		return display.id();
+	}
+
 	@Override
 	public String toString() {
-		return name + "#" + id;
+		return display.toString();
 	}
 
 	public HubUserData withFlags(HubUserFlags flags) {
-		return new HubUserData(id, name, avatarUrl, discordId, flags);
+		return new HubUserData(display, discordId, flags);
 	}
 }

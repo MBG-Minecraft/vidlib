@@ -1,15 +1,13 @@
 package dev.mrbeastgaming.mods.hub.file;
 
 import dev.latvian.mods.klib.io.FileInfo;
+import dev.latvian.mods.klib.io.bytes.ByteOutput;
 import dev.latvian.mods.klib.io.checksum.Checksum;
 import dev.latvian.mods.klib.io.checksum.MD5;
 import dev.latvian.mods.klib.io.checksum.NoChecksum;
 import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.util.UUID;
 
 public interface UniqueIdProvider {
@@ -18,28 +16,27 @@ public interface UniqueIdProvider {
 	interface OfData extends UniqueIdProvider {
 		record OfUUIDAndFileName(UUID id) implements OfData {
 			@Override
-			public boolean write(FileInfo fileInfo, HubProjectConfig projectConfig, DataOutput data) throws Exception {
-				data.writeLong(id.getMostSignificantBits());
-				data.writeLong(id.getLeastSignificantBits());
+			public boolean write(FileInfo fileInfo, HubProjectConfig projectConfig, ByteOutput data) throws Exception {
+				data.writeUUID(id);
 				data.writeUTF(fileInfo.name());
 				return true;
 			}
 		}
 
-		boolean write(FileInfo fileInfo, HubProjectConfig projectConfig, DataOutput data) throws Exception;
+		boolean write(FileInfo fileInfo, HubProjectConfig projectConfig, ByteOutput data) throws Exception;
 
 		@Override
 		@Nullable
 		default Checksum getUniqueId(FileInfo fileInfo, HubProjectConfig projectConfig) {
-			try (var bytes = new ByteArrayOutputStream();
-			     var data = new DataOutputStream(bytes)
-			) {
+			try {
+				var data = ByteOutput.ofByteBuilder(16);
+
 				if (!write(fileInfo, projectConfig, data)) {
 					return null;
 				}
 
 				data.writeInt(projectConfig.projectId().raw());
-				return MD5.TYPE.digest(bytes.toByteArray());
+				return MD5.TYPE.digest(data.toByteArray());
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				return null;

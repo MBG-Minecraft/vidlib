@@ -53,7 +53,7 @@ public class LinkMinecraftScreen extends ConfirmScreen {
 			try {
 				VidLib.LOGGER.info("Linking Minecraft " + mc.getUser().getName() + " @ " + serverId);
 				mc.getMinecraftSessionService().joinServer(mc.getUser().getProfileId(), mc.getUser().getAccessToken(), serverId);
-				data = HubAPI.apiMinecraftLink(mc.getUser().getName());
+				data = HubAPI.MinecraftAPI.getLink(mc.getUser().getName());
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}

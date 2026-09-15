@@ -37,7 +37,7 @@ public class HubLocalServer {
 		var token = req.variable("token").asString();
 		var name = req.query("name").asString("Unknown");
 
-		var response = HubAPI.HTTP_CLIENT.send(HubAPI.apiUsersRequestToken(token), HttpResponse.BodyHandlers.ofString());
+		var response = HubAPI.send(HubAPI.UserAPI.postRequestToken(token), HttpResponse.BodyHandlers.ofString());
 
 		int statusCode = response.statusCode();
 		var error = "";

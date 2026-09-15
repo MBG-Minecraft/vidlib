@@ -11,12 +11,12 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 	public static HubClientGateway instance;
 
 	@Nullable
-	public static HubClientGateway startGateway(Minecraft mc, @Nullable URI uri) {
+	public static HubClientGateway startGateway(Minecraft mc, @Nullable URI uri, String token) {
 		stopGateway();
 		var gateway = instance;
 
 		if (gateway == null && uri != null) {
-			gateway = new HubClientGateway(mc, uri);
+			gateway = new HubClientGateway(mc, uri, token);
 			gateway.start();
 			instance = gateway;
 		}
@@ -59,8 +59,8 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 
 	public final Minecraft mc;
 
-	public HubClientGateway(Minecraft mc, URI uri) {
-		super(mc, uri);
+	public HubClientGateway(Minecraft mc, URI gatewayURI, String gatewayToken) {
+		super(mc, gatewayURI, gatewayToken);
 		this.mc = mc;
 	}
 
@@ -71,6 +71,7 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 
 	@Override
 	public void onConnected() {
+		super.onConnected();
 		updateInfo(main, this);
 	}
 }

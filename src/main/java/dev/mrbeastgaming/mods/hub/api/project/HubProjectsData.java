@@ -26,7 +26,7 @@ public record HubProjectsData(
 		}
 
 		try {
-			var list = HubAPI.apiProjects().projects();
+			var list = HubAPI.ProjectAPI.getAll().projects();
 
 			for (var project : list) {
 				if (pack == null || !pack.id().equals(project.id())) {

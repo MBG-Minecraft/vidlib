@@ -25,6 +25,7 @@ import java.util.UUID;
 public record HubServerSessionData(
 	UUID sessionId,
 	Optional<URI> gateway,
+	Optional<String> gatewayToken,
 	HubUserData user,
 	HubProjectData project,
 	HubKeyData keys,
@@ -35,6 +36,7 @@ public record HubServerSessionData(
 	public static final Codec<HubServerSessionData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		KLibCodecs.UUID.fieldOf("session_id").forGetter(HubServerSessionData::sessionId),
 		HubAPI.URI_BASE_CODEC.optionalFieldOf("gateway").forGetter(HubServerSessionData::gateway),
+		Codec.STRING.optionalFieldOf("gateway_token").forGetter(HubServerSessionData::gatewayToken),
 		HubUserData.CODEC.fieldOf("user").forGetter(HubServerSessionData::user),
 		HubProjectData.CODEC.fieldOf("project").forGetter(HubServerSessionData::project),
 		HubKeyData.CODEC.fieldOf("keys").forGetter(HubServerSessionData::keys),
@@ -56,7 +58,7 @@ public record HubServerSessionData(
 		try {
 			var projectConfig = HubProjectConfig.INSTANCE.get();
 
-			data = HubAPI.apiServerSession(new HubServerSessionDataRequest(
+			data = HubAPI.MinecraftAPI.postServerSession(new HubServerSessionDataRequest(
 				server.isDedicatedServer(),
 				projectConfig == null ? "" : projectConfig.token(),
 				new HubKeyData(
@@ -71,10 +73,10 @@ public record HubServerSessionData(
 				updateOps(server, data.ops.get().getAsJsonArray());
 			}
 
-			var gateway = HubServerGateway.startGateway(server, HubAPI.toWebSocketURI(data.gateway.orElse(null)));
+			var gateway = HubServerGateway.startGateway(server, HubAPI.toWebSocketURI(data.gateway.orElse(null)), data.gatewayToken.orElse(""));
 
 			if (gateway != null) {
-				HubServerGateway.updateInfo(server, gateway);
+				HubServerGateway.updateInfoSync(server, gateway);
 			}
 		} catch (Exception ex) {
 			VidLib.LOGGER.error("Failed to load Hub server session data", ex);
