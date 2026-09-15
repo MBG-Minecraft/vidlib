@@ -564,7 +564,8 @@ public class CommonGameEngine {
 
 	public void getAvailableWorlds(MinecraftServer server, List<HubWorldDirectory> list) {
 		try {
-			list.add(HubWorldDirectory.of(server.getWorldData().getLevelName(), server.getWorldPath(LevelResource.ROOT)));
+			var root = PlatformHelper.CURRENT.getGameDirectory().toRealPath().toAbsolutePath();
+			list.add(HubWorldDirectory.of(root, server.getWorldData().getLevelName(), server.getWorldPath(LevelResource.ROOT)));
 		} catch (Exception ex) {
 			VidLib.LOGGER.error("Failed to list available world", ex);
 		}

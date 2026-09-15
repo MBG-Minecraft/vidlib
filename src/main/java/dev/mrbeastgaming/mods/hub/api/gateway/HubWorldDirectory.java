@@ -1,10 +1,12 @@
 package dev.mrbeastgaming.mods.hub.api.gateway;
 
 import dev.latvian.mods.klib.io.IOUtils;
+import dev.latvian.mods.klib.io.bytes.ByteInput;
+import dev.latvian.mods.klib.io.bytes.ByteOutput;
 import dev.latvian.mods.klib.io.checksum.Checksum;
 import dev.latvian.mods.klib.io.checksum.NoChecksum;
 import dev.latvian.mods.klib.io.checksum.SHA256;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.VidLib;
 
 import javax.imageio.ImageIO;
 import java.io.ByteArrayOutputStream;
@@ -13,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,22 +30,29 @@ public record HubWorldDirectory(
 	Checksum icon,
 	Optional<byte[]> iconBytes
 ) {
-	public static HubWorldDirectory of(String name, Path directory) throws IOException, NoSuchAlgorithmException {
-		var root = PlatformHelper.CURRENT.getGameDirectory().toRealPath().toAbsolutePath();
+	public static HubWorldDirectory of(Path root, String name, Path directory) throws IOException {
+		var fileId = directory.resolve("uid.dat");
+
+		if (Files.exists(fileId)) {
+			try (var file = Files.newInputStream(fileId)) {
+				return of(root, name, ByteInput.of(file).readUUID().toString(), directory);
+			} catch (Exception ex) {
+				VidLib.LOGGER.warn("Failed to read {}, generating new random UUID", fileId, ex);
+			}
+		}
+
+		var id = UUID.randomUUID();
+		var bytes = ByteOutput.ofByteBuilder(16);
+		bytes.writeUUID(id);
+		Files.write(fileId, bytes.toByteArray());
+		return of(root, name, id.toString(), directory);
+	}
+
+	public static HubWorldDirectory of(Path root, String name, String id, Path directory) throws IOException {
 		directory = directory.toRealPath().toAbsolutePath();
 
 		if (!directory.startsWith(root)) {
 			throw new IOException("Directory " + directory + " does not start with root path " + root);
-		}
-
-		String id;
-		var idPath = directory.resolve("beast-hub-world-id.txt");
-
-		if (Files.notExists(idPath)) {
-			id = UUID.randomUUID().toString();
-			Files.writeString(idPath, id);
-		} else {
-			id = Files.readString(idPath).trim();
 		}
 
 		var path = root.relativize(directory).toString().replace('\\', '/');
