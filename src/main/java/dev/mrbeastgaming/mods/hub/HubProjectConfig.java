@@ -7,17 +7,16 @@ import dev.latvian.mods.klib.util.Hex32;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
-import dev.mrbeastgaming.mods.hub.api.token.ProjectToken;
 
 import java.nio.file.Files;
 
 public record HubProjectConfig(
 	Hex32 projectId,
-	ProjectToken token
+	String token
 ) {
 	public static final Codec<HubProjectConfig> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Hex32.CODEC.fieldOf("project_id").forGetter(HubProjectConfig::projectId),
-		ProjectToken.CODEC.fieldOf("token").forGetter(HubProjectConfig::token)
+		Codec.STRING.fieldOf("token").forGetter(HubProjectConfig::token)
 	).apply(instance, HubProjectConfig::new));
 
 	public static final Lazy<HubProjectConfig> INSTANCE = Lazy.of(() -> {

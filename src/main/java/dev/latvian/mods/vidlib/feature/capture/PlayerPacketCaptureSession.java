@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib.feature.capture;
 
+import dev.latvian.mods.klib.io.CompressionMethod;
 import dev.latvian.mods.klib.io.IOUtils;
+import dev.latvian.mods.klib.io.bytes.ByteOutput;
 import dev.latvian.mods.klib.util.Timestamp;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.capture.task.CaptureTask;
@@ -121,8 +123,8 @@ public class PlayerPacketCaptureSession {
 				gameBuf.resetReaderIndex();
 				gameBuf.resetWriterIndex();
 
-				if (bytes.length >= 1024) {
-					taskQueue.add(new CompressedTask(new CustomGamePacketTask(time, type, bytes)));
+				if (bytes.length >= 128) {
+					taskQueue.add(new CompressedTask(CompressionMethod.ZSTD, new CustomGamePacketTask(time, type, bytes)));
 				} else {
 					taskQueue.add(new CustomGamePacketTask(time, type, bytes));
 				}
@@ -144,8 +146,8 @@ public class PlayerPacketCaptureSession {
 				gameBuf.resetReaderIndex();
 				gameBuf.resetWriterIndex();
 
-				if (bytes.length >= 1024) {
-					taskQueue.add(new CompressedTask(new CoreGamePacketTask(time, type, bytes)));
+				if (bytes.length >= 128) {
+					taskQueue.add(new CompressedTask(CompressionMethod.ZSTD, new CoreGamePacketTask(time, type, bytes)));
 				} else {
 					taskQueue.add(new CoreGamePacketTask(time, type, bytes));
 				}
@@ -194,11 +196,12 @@ public class PlayerPacketCaptureSession {
 				Files.createFile(writePath);
 
 				try (var out = new DataOutputStream(new BufferedOutputStream(Files.newOutputStream(writePath)))) {
-					out.writeByte(0); // Binary marker
-					out.writeByte(1); // Version
+					var data = ByteOutput.of(out);
+					data.writeUByte(0); // Binary marker
+					data.writeUByte(1); // Version
 
 					for (var task : tasks) {
-						task.writeFully(packetCapture, out);
+						task.writeFully(packetCapture, data);
 					}
 				}
 			} catch (Exception ex) {
@@ -209,8 +212,10 @@ public class PlayerPacketCaptureSession {
 		}
 
 		try (var out = new DataOutputStream(new BufferedOutputStream(Files.newOutputStream(writePath, IOUtils.APPEND_OPEN_OPTIONS.toArray(new OpenOption[0]))))) {
+			var data = ByteOutput.of(out);
+
 			for (var task : tasks) {
-				task.writeFully(packetCapture, out);
+				task.writeFully(packetCapture, data);
 			}
 		} catch (Exception ex) {
 			VidLib.LOGGER.error("Failed to write packets of %s capture session %08X".formatted(info.player(), info.id()), ex);

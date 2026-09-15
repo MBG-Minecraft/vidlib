@@ -1,7 +1,7 @@
 package dev.mrbeastgaming.mods.hub.api.project;
 
+import dev.latvian.mods.klib.io.checksum.Checksum;
 import dev.latvian.mods.klib.util.Hex32;
-import dev.latvian.mods.klib.util.MD5;
 import dev.mrbeastgaming.mods.hub.api.HubFileType;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,8 +9,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record ProjectUploadRequestItem(
-	MD5 uniqueId,
-	MD5 checksum,
+	Checksum uniqueId,
+	Checksum checksum,
 	long size,
 	String name,
 	HubFileType type,

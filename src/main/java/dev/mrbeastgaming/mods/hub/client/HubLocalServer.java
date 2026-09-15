@@ -9,7 +9,6 @@ import dev.latvian.mods.vidlib.VidLibClient;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.mrbeastgaming.mods.hub.HubUserConfig;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
-import dev.mrbeastgaming.mods.hub.api.token.UserToken;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
@@ -36,6 +35,7 @@ public class HubLocalServer {
 	private static HTTPResponse getFinishLink(HTTPRequest req) throws Exception {
 		VidLib.LOGGER.info("Linking Hub Profile...");
 		var token = req.variable("token").asString();
+		var name = req.query("name").asString("Unknown");
 
 		var response = HubAPI.HTTP_CLIENT.send(HubAPI.apiUsersRequestToken(token), HttpResponse.BodyHandlers.ofString());
 
@@ -45,14 +45,13 @@ public class HubLocalServer {
 		var mc = Minecraft.getInstance();
 
 		if (statusCode / 100 == 2) {
-			var userToken = UserToken.parse(response.body().trim());
+			var userToken = response.body().trim();
 
-			if (userToken == null) {
+			if (userToken.isEmpty()) {
 				throw new BadRequestError("Invalid response token, try again");
 			}
 
 			HubUserConfig.save(HubUserConfig.load().withToken(userToken));
-			var name = "%s#%08X".formatted(userToken.header().name(), userToken.header().user());
 			VidLib.LOGGER.info("Logged in as " + name);
 			VidLibClient.loadHub();
 

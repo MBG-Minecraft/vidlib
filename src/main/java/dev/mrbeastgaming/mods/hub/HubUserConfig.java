@@ -5,16 +5,14 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.common.CommonPaths;
 import dev.latvian.mods.klib.util.JsonUtils;
-import dev.mrbeastgaming.mods.hub.api.token.UserToken;
 
 import java.nio.file.Files;
-import java.util.Optional;
 
 public record HubUserConfig(
-	Optional<UserToken> token
+	String token
 ) {
 	public static final Codec<HubUserConfig> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		UserToken.CODEC.optionalFieldOf("token").forGetter(HubUserConfig::token)
+		Codec.STRING.optionalFieldOf("token", "").forGetter(HubUserConfig::token)
 	).apply(instance, HubUserConfig::new));
 
 	private static HubUserConfig instance = null;
@@ -33,7 +31,7 @@ public record HubUserConfig(
 				}
 			}
 
-			instance = new HubUserConfig(Optional.empty());
+			instance = new HubUserConfig("");
 		}
 
 		return instance;
@@ -50,7 +48,7 @@ public record HubUserConfig(
 		}
 	}
 
-	public HubUserConfig withToken(UserToken token) {
-		return new HubUserConfig(Optional.of(token));
+	public HubUserConfig withToken(String token) {
+		return new HubUserConfig(token);
 	}
 }

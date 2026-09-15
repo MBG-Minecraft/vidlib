@@ -1,10 +1,10 @@
 package dev.mrbeastgaming.mods.hub.api.project;
 
-import dev.latvian.mods.klib.util.MD5;
+import dev.latvian.mods.klib.io.checksum.Checksum;
 
 public record ProjectUploadResponseItem(
-	MD5 uniqueId,
-	MD5 checksum,
+	Checksum uniqueId,
+	Checksum checksum,
 	String name,
 	String url,
 	long offset,
@@ -12,6 +12,6 @@ public record ProjectUploadResponseItem(
 ) {
 	@Override
 	public String toString() {
-		return uniqueId.isEmpty() ? (name + " (c/" + checksum + ")") : (name + "(u/" + uniqueId + ")");
+		return uniqueId.isNil() ? (name + " (c/" + checksum + ")") : (name + "(u/" + uniqueId + ")");
 	}
 }

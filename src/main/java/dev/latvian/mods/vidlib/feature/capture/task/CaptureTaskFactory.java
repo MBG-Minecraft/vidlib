@@ -1,9 +1,10 @@
 package dev.latvian.mods.vidlib.feature.capture.task;
 
-import java.io.DataInput;
+import dev.latvian.mods.klib.io.bytes.ByteInput;
+
 import java.io.IOException;
 
 @FunctionalInterface
 public interface CaptureTaskFactory {
-	CaptureTask create(DataInput in) throws IOException;
+	CaptureTask create(ByteInput in) throws IOException;
 }

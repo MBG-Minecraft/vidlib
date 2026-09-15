@@ -34,7 +34,7 @@ public record HubServerSessionData(
 ) {
 	public static final Codec<HubServerSessionData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		KLibCodecs.UUID.fieldOf("session_id").forGetter(HubServerSessionData::sessionId),
-		KLibCodecs.URI.optionalFieldOf("gateway").forGetter(HubServerSessionData::gateway),
+		HubAPI.URI_BASE_CODEC.optionalFieldOf("gateway").forGetter(HubServerSessionData::gateway),
 		HubUserData.CODEC.fieldOf("user").forGetter(HubServerSessionData::user),
 		HubProjectData.CODEC.fieldOf("project").forGetter(HubServerSessionData::project),
 		HubKeyData.CODEC.fieldOf("keys").forGetter(HubServerSessionData::keys),
@@ -58,7 +58,7 @@ public record HubServerSessionData(
 
 			data = HubAPI.apiServerSession(new HubServerSessionDataRequest(
 				server.isDedicatedServer(),
-				projectConfig == null ? "" : projectConfig.token().encoded(),
+				projectConfig == null ? "" : projectConfig.token(),
 				new HubKeyData(
 					"RSA",
 					server.getKeyPair().getPublic().getEncoded()

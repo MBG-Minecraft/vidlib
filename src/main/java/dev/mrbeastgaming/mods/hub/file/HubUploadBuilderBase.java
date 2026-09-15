@@ -1,9 +1,10 @@
 package dev.mrbeastgaming.mods.hub.file;
 
 import dev.latvian.mods.klib.io.FileInfo;
-import dev.latvian.mods.klib.io.IOUtils;
+import dev.latvian.mods.klib.io.checksum.Checksum;
+import dev.latvian.mods.klib.io.checksum.MD5;
+import dev.latvian.mods.klib.io.checksum.NoChecksum;
 import dev.latvian.mods.klib.util.Hex32;
-import dev.latvian.mods.klib.util.MD5;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import dev.mrbeastgaming.mods.hub.api.HubFileType;
@@ -11,7 +12,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -65,23 +65,23 @@ public abstract class HubUploadBuilderBase {
 	}
 
 	@Nullable
-	MD5 getUniqueId(FileInfo fileInfo, HubProjectConfig projectConfig) throws Exception {
+	Checksum getUniqueId(FileInfo fileInfo, HubProjectConfig projectConfig) throws Exception {
 		if (uniqueIdProvider == null && assignedToMinecraft != null) {
 			try (var bytes = new ByteArrayOutputStream();
 			     var data = new DataOutputStream(bytes)
 			) {
 				data.writeLong(assignedToMinecraft.getMostSignificantBits());
 				data.writeLong(assignedToMinecraft.getLeastSignificantBits());
-				IOUtils.writeUTF(data, fileInfo.name());
+				data.writeUTF(fileInfo.name());
 				data.writeInt(projectConfig.projectId().raw());
-				return MD5.fromBytes(MessageDigest.getInstance("MD5").digest(bytes.toByteArray()));
+				return MD5.TYPE.digest(bytes.toByteArray());
 			} catch (Exception ex) {
 				VidLib.LOGGER.error("Failed to create a unique ID of " + fileInfo.path(), ex);
 				return null;
 			}
 		}
 
-		return uniqueIdProvider == null ? MD5.NIL : uniqueIdProvider.getUniqueId(fileInfo, projectConfig);
+		return uniqueIdProvider == null ? NoChecksum.INSTANCE : uniqueIdProvider.getUniqueId(fileInfo, projectConfig);
 	}
 
 	@Nullable

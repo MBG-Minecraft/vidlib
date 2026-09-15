@@ -1,17 +1,16 @@
 package dev.latvian.mods.vidlib.feature.capture.task;
 
-import dev.latvian.mods.klib.io.IOUtils;
+import dev.latvian.mods.klib.io.bytes.ByteInput;
+import dev.latvian.mods.klib.io.bytes.ByteOutput;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import net.minecraft.resources.ResourceLocation;
 
-import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
 
 public record CustomConfigPacketTask(ResourceLocation type, byte[] data) implements CaptureTask {
-	public CustomConfigPacketTask(DataInput in) throws IOException {
-		this(ID.idFromString(IOUtils.readUTF(in)), IOUtils.readBytes(in));
+	public CustomConfigPacketTask(ByteInput in) throws IOException {
+		this(ID.idFromString(in.readUTF()), in.readByteArray());
 	}
 
 	@Override
@@ -20,8 +19,8 @@ public record CustomConfigPacketTask(ResourceLocation type, byte[] data) impleme
 	}
 
 	@Override
-	public void write(PacketCapture packetCapture, DataOutput out) throws IOException {
-		IOUtils.writeVarInt(out, packetCapture.getIdentifier(type));
-		IOUtils.writeBytes(out, data);
+	public void write(PacketCapture packetCapture, ByteOutput out) throws IOException {
+		out.writeVarInt(packetCapture.getIdentifier(type));
+		out.writeByteArray(data);
 	}
 }

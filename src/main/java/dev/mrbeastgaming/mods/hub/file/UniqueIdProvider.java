@@ -1,19 +1,19 @@
 package dev.mrbeastgaming.mods.hub.file;
 
 import dev.latvian.mods.klib.io.FileInfo;
-import dev.latvian.mods.klib.io.IOUtils;
-import dev.latvian.mods.klib.util.MD5;
+import dev.latvian.mods.klib.io.checksum.Checksum;
+import dev.latvian.mods.klib.io.checksum.MD5;
+import dev.latvian.mods.klib.io.checksum.NoChecksum;
 import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
-import java.security.MessageDigest;
 import java.util.UUID;
 
 public interface UniqueIdProvider {
-	UniqueIdProvider NIL = (fileInfo, projectConfig) -> MD5.NIL;
+	UniqueIdProvider NIL = (fileInfo, projectConfig) -> NoChecksum.INSTANCE;
 
 	interface OfData extends UniqueIdProvider {
 		record OfUUIDAndFileName(UUID id) implements OfData {
@@ -21,7 +21,7 @@ public interface UniqueIdProvider {
 			public boolean write(FileInfo fileInfo, HubProjectConfig projectConfig, DataOutput data) throws Exception {
 				data.writeLong(id.getMostSignificantBits());
 				data.writeLong(id.getLeastSignificantBits());
-				IOUtils.writeUTF(data, fileInfo.name());
+				data.writeUTF(fileInfo.name());
 				return true;
 			}
 		}
@@ -30,16 +30,16 @@ public interface UniqueIdProvider {
 
 		@Override
 		@Nullable
-		default MD5 getUniqueId(FileInfo fileInfo, HubProjectConfig projectConfig) {
+		default Checksum getUniqueId(FileInfo fileInfo, HubProjectConfig projectConfig) {
 			try (var bytes = new ByteArrayOutputStream();
-				 var data = new DataOutputStream(bytes)
+			     var data = new DataOutputStream(bytes)
 			) {
 				if (!write(fileInfo, projectConfig, data)) {
 					return null;
 				}
 
 				data.writeInt(projectConfig.projectId().raw());
-				return MD5.fromBytes(MessageDigest.getInstance("MD5").digest(bytes.toByteArray()));
+				return MD5.TYPE.digest(bytes.toByteArray());
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				return null;
@@ -56,5 +56,5 @@ public interface UniqueIdProvider {
 	}
 
 	@Nullable
-	MD5 getUniqueId(FileInfo fileInfo, HubProjectConfig projectConfig) throws Exception;
+	Checksum getUniqueId(FileInfo fileInfo, HubProjectConfig projectConfig) throws Exception;
 }

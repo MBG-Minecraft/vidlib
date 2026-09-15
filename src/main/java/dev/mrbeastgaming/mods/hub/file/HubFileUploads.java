@@ -1,10 +1,11 @@
 package dev.mrbeastgaming.mods.hub.file;
 
 import dev.latvian.mods.klib.io.FileInfo;
-import dev.latvian.mods.klib.io.FileMD5;
 import dev.latvian.mods.klib.io.IOUtils;
+import dev.latvian.mods.klib.io.checksum.Checksum;
+import dev.latvian.mods.klib.io.checksum.FileChecksum;
+import dev.latvian.mods.klib.io.checksum.MD5;
 import dev.latvian.mods.klib.util.JsonUtils;
-import dev.latvian.mods.klib.util.MD5;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.klib.util.Tristate;
 import dev.latvian.mods.vidlib.VidLib;
@@ -34,7 +35,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class HubFileUploads {
-	public record SyncedFile(FileInfo fileInfo, FileMD5 meta, Mutable<ProgressItem> progressItem, ProjectUploadRequestItem item) {
+	public record SyncedFile(FileInfo fileInfo, FileChecksum meta, Mutable<ProgressItem> progressItem, ProjectUploadRequestItem item) {
 	}
 
 	public record Entry(FileInfo file, HubUploadBuilderBase upload) {
@@ -114,7 +115,7 @@ public class HubFileUploads {
 
 		var resultFiles = new ArrayList<SyncedFile>(fileList.size());
 		var progressItems = new ArrayList<ProgressItem>(fileList.size());
-		var map = new LinkedHashMap<MD5, SyncedFile>();
+		var map = new LinkedHashMap<Checksum, SyncedFile>();
 
 		try {
 			if (progressQueue != null) {
@@ -159,10 +160,10 @@ public class HubFileUploads {
 						commonType = null;
 					}
 
-					var meta = FileMD5.load(file, progressItem);
+					var meta = FileChecksum.load(MD5.TYPE, file, progressItem);
 
 					if (meta.changed()) {
-						FileMD5.save(file.path(), meta);
+						FileChecksum.save(MD5.TYPE, file.path(), meta);
 						Files.setLastModifiedTime(file.path(), FileTime.from(meta.lastModified()));
 						VidLib.LOGGER.info("Updated metadata of " + file.name() + ": " + meta);
 					}
@@ -205,7 +206,7 @@ public class HubFileUploads {
 			}
 
 			if (!map.isEmpty()) {
-				var list = HubAPI.apiProjectUpload(projectConfig.token().toString(), map.values().stream().map(SyncedFile::item).toList());
+				var list = HubAPI.apiProjectUpload(projectConfig.token(), map.values().stream().map(SyncedFile::item).toList());
 				VidLib.LOGGER.info("Uploading " + list.size() + " files to Beast Hub");
 
 				for (var item : list) {

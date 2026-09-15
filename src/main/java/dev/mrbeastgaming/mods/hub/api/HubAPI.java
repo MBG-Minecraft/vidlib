@@ -5,10 +5,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import dev.latvian.mods.klib.codec.KLibCodecs;
+import dev.latvian.mods.klib.io.checksum.Checksum;
+import dev.latvian.mods.klib.io.checksum.NoChecksum;
 import dev.latvian.mods.klib.util.Hex32;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.klib.util.Lazy;
-import dev.latvian.mods.klib.util.MD5;
 import dev.latvian.mods.klib.util.Tristate;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.mrbeastgaming.mods.hub.HubUserConfig;
@@ -36,10 +38,12 @@ import java.util.function.Supplier;
 
 public interface HubAPI {
 	URI URI_BASE = URI.create(Optional.ofNullable(System.getenv("MBG_HUB_API_BASE")).orElse("https://hub.mrbeastmc.com"));
+	Codec<URI> URI_BASE_CODEC = KLibCodecs.relativeURI(URI_BASE);
+
 	MutableObject<Supplier<HubCommonGateway<?>>> CLIENT_GATEWAY = new MutableObject<>(() -> null);
 
 	static URI toWebSocketURI(@Nullable URI uri) {
-		return uri == null ? null : URI.create(URI_BASE.resolve(uri).toString().replaceFirst("^http", "ws"));
+		return uri == null ? null : URI.create(uri.toString().replaceFirst("^http", "ws"));
 	}
 
 	HttpClient HTTP_CLIENT = HttpClient.newBuilder()
@@ -75,8 +79,8 @@ public interface HubAPI {
 
 		var userConfig = HubUserConfig.load();
 
-		if (userConfig.token().isPresent()) {
-			builder.header("Authorization", "Bearer " + userConfig.token().get());
+		if (!userConfig.token().isEmpty()) {
+			builder.header("Authorization", "Bearer " + userConfig.token());
 		} else if (auth == Tristate.TRUE) {
 			throw new NullPointerException("Hub Auth token not found");
 		}
@@ -166,11 +170,11 @@ public interface HubAPI {
 		for (var file : files) {
 			var o = new JsonObject();
 
-			if (!file.uniqueId().isEmpty()) {
-				o.addProperty("unique_id", file.uniqueId().string());
+			if (!file.uniqueId().isNil()) {
+				o.addProperty("unique_id", file.uniqueId().toString());
 			}
 
-			o.addProperty("checksum", file.checksum().string());
+			o.addProperty("checksum", file.checksum().toString());
 			o.addProperty("size", file.size());
 			o.addProperty("name", file.name());
 			o.add("type", file.type().toJson());
@@ -202,8 +206,8 @@ public interface HubAPI {
 			var o = fileJson.getAsJsonObject();
 
 			result.add(new ProjectUploadResponseItem(
-				o.has("unique_id") ? MD5.fromString(o.get("unique_id").getAsString()) : MD5.NIL,
-				MD5.fromString(o.get("checksum").getAsString()),
+				o.has("unique_id") ? Checksum.of(o.get("unique_id").getAsString()) : NoChecksum.INSTANCE,
+				Checksum.of(o.get("checksum").getAsString()),
 				o.has("name") ? o.get("name").getAsString() : "",
 				o.get("url").getAsString(),
 				o.get("offset").getAsLong(),

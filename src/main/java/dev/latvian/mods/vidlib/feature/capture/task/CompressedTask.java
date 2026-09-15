@@ -1,29 +1,18 @@
 package dev.latvian.mods.vidlib.feature.capture.task;
 
-import dev.latvian.mods.klib.io.IOUtils;
+import dev.latvian.mods.klib.io.CompressionMethod;
+import dev.latvian.mods.klib.io.bytes.ByteInput;
+import dev.latvian.mods.klib.io.bytes.ByteOutput;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInput;
-import java.io.DataInputStream;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
-public record CompressedTask(CaptureTask task) implements CaptureTask {
-	private static CaptureTask readCompressed(DataInput in) throws IOException {
-		var bytes = IOUtils.readBytes(in);
-
-		try (var cin = new DataInputStream(new GZIPInputStream(new ByteArrayInputStream(bytes)))) {
-			return CaptureTask.readFully(cin);
-		}
-	}
-
-	public CompressedTask(DataInput in) throws IOException {
-		this(readCompressed(in));
+public record CompressedTask(CompressionMethod compression, CaptureTask task) implements CaptureTask {
+	public static CompressedTask read(ByteInput in) throws IOException {
+		var compression = CompressionMethod.of(in.readUByte());
+		var bytes = in.readByteArray();
+		var task = CaptureTask.readFully(ByteInput.of(compression.decompress(bytes)));
+		return new CompressedTask(compression, task);
 	}
 
 	@Override
@@ -32,13 +21,10 @@ public record CompressedTask(CaptureTask task) implements CaptureTask {
 	}
 
 	@Override
-	public void write(PacketCapture packetCapture, DataOutput out) throws IOException {
-		var bytes = new ByteArrayOutputStream();
-
-		try (var cout = new DataOutputStream(new GZIPOutputStream(bytes))) {
-			task.writeFully(packetCapture, cout);
-		}
-
-		IOUtils.writeBytes(out, bytes.toByteArray());
+	public void write(PacketCapture packetCapture, ByteOutput out) throws IOException {
+		out.writeUByte(compression.id);
+		var bytes = ByteOutput.ofByteBuilder(8192);
+		task.writeFully(packetCapture, bytes);
+		out.writeByteArray(bytes.toByteArray());
 	}
 }

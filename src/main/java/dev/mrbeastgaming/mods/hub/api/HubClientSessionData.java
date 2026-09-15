@@ -36,7 +36,7 @@ public record HubClientSessionData(
 ) {
 	public static final Codec<HubClientSessionData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		KLibCodecs.UUID.fieldOf("session_id").forGetter(HubClientSessionData::sessionId),
-		KLibCodecs.URI.optionalFieldOf("gateway").forGetter(HubClientSessionData::gateway),
+		HubAPI.URI_BASE_CODEC.optionalFieldOf("gateway").forGetter(HubClientSessionData::gateway),
 		HubUserData.CODEC.optionalFieldOf("user").forGetter(HubClientSessionData::user),
 		HubProjectData.CODEC.optionalFieldOf("project").forGetter(HubClientSessionData::project),
 		HubParticipantData.CODEC.optionalFieldOf("participant").forGetter(HubClientSessionData::participant),
@@ -50,7 +50,7 @@ public record HubClientSessionData(
 	public static String AUTH_SERVER_ID = "";
 
 	public static void load(Minecraft mc, @Nullable HubUserConfig userConfig, @Nullable HubProjectConfig projectConfig) {
-		boolean hasAuth = userConfig != null && userConfig.token().orElse(null) != null;
+		boolean hasAuth = userConfig != null && !userConfig.token().isEmpty();
 
 		VidLib.LOGGER.info("Loading Hub client session data...");
 		HubUserData userData = null;
@@ -63,7 +63,7 @@ public record HubClientSessionData(
 		var authServerId = "";
 
 		try {
-			var data = HubAPI.apiClientSession(new HubClientSessionDataRequest(projectConfig == null ? "" : projectConfig.token().encoded(), true));
+			var data = HubAPI.apiClientSession(new HubClientSessionDataRequest(projectConfig == null ? "" : projectConfig.token(), true));
 
 			userData = data.user.orElse(null);
 			projectData = data.project.orElse(null);
@@ -76,7 +76,7 @@ public record HubClientSessionData(
 			if (hasAuth) {
 				try (var out = new ByteArrayOutputStream()) {
 					out.write(data.sessionSalt());
-					out.write(userConfig.token().get().encoded().getBytes(StandardCharsets.ISO_8859_1));
+					out.write(userConfig.token().getBytes(StandardCharsets.ISO_8859_1));
 					authServerId = StringUtils.toHex(MessageDigest.getInstance("SHA-1").digest(out.toByteArray()));
 				}
 			}

@@ -192,6 +192,7 @@ dependencies {
 
 	compileOnly("dev.latvian.mods:better-advanced-tooltips:$bat_version")
 	compileOnly("dev.latvian.mods:imgui-resources:$imgui_resources_version")
+	compileOnly('com.github.luben:zstd-jni:1.5.7-7')
 
 	compileOnly("maven.modrinth:simple-voice-chat:neoforge-1.21.5-2.6.12")
 	compileOnly("maven.modrinth:iris:1.8.11+1.21.5-neoforge")

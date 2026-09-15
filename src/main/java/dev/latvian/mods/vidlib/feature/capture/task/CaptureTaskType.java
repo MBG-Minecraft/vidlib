@@ -4,7 +4,7 @@ import dev.latvian.mods.vidlib.util.MiscUtils;
 
 public enum CaptureTaskType {
 	SESSION_INFO(0, SessionInfoTask::new),
-	COMPRESSED(1, CompressedTask::new),
+	COMPRESSED(1, CompressedTask::read),
 	DISCONNECT(2, DisconnectTask::new),
 	CORE_CONFIG_PACKET(3, CoreConfigPacketTask::new),
 	CUSTOM_CONFIG_PACKET(4, CustomConfigPacketTask::new),
