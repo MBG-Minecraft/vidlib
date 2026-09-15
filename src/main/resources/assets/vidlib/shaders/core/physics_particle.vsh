@@ -1,6 +1,8 @@
 #version 150
 
-#moj_import < minecraft:light.glsl >
+// @formatter:off
+#moj_import <minecraft:light.glsl>
+// @formatter:on
 
 in vec3 Position;
 in vec4 Color;
