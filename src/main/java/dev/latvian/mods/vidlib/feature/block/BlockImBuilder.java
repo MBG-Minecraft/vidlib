@@ -5,7 +5,6 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.gallery.ItemIcons;
-import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;

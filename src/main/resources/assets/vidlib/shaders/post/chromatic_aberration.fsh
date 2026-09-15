@@ -24,15 +24,15 @@ void main() {
 
 	if (Strength > 0.0) {
 		fragColor = vec4(
-		texture(InSampler, texCoord).r,
-		texture(InSampler, texCoord + toCenter).g,
-		texture(InSampler, texCoord + toCenter * 2.0).b,
-		1.0);
+				texture(InSampler, texCoord).r,
+				texture(InSampler, texCoord + toCenter).g,
+				texture(InSampler, texCoord + toCenter * 2.0).b,
+				1.0);
 	} else {
 		fragColor = vec4(
-		texture(InSampler, texCoord + toCenter * 2.0).r,
-		texture(InSampler, texCoord + toCenter).g,
-		texture(InSampler, texCoord).b,
-		1.0);
+				texture(InSampler, texCoord + toCenter * 2.0).r,
+				texture(InSampler, texCoord + toCenter).g,
+				texture(InSampler, texCoord).b,
+				1.0);
 	}
 }

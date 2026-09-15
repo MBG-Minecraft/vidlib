@@ -76,12 +76,12 @@ public record FFMPEGBinaries(String ffmpeg, String ffprobe, String ffplay) {
 				zipUrls.add("https://www.osxexperts.net/ffplay9arm.zip");
 			} else {
 				version = "9.0.1";
-				zipUrls.add("https://evermeet.cx/ffmpeg/ffmpeg-" + version + ".zip");
-				zipUrls.add("https://evermeet.cx/ffmpeg/ffprobe-" + version + ".zip");
-				zipUrls.add("https://evermeet.cx/ffmpeg/ffplay-" + version + ".zip");
+				zipUrls.add("https://evermeet.cx/ffmpeg/ffmpeg-9.0.1.zip");
+				zipUrls.add("https://evermeet.cx/ffmpeg/ffprobe-9.0.1.zip");
+				zipUrls.add("https://evermeet.cx/ffmpeg/ffplay-9.0.1.zip");
 			}
 		} else if (SystemUtils.IS_OS_LINUX) {
-			version = "8.1.2";
+			version = "9.0.1";
 
 			if (arm) {
 				zipUrls.add("https://github.com/Tyrrrz/FFmpegBin/releases/download/" + version + "/ffmpeg-linux-arm64.zip");
