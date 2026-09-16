@@ -56,7 +56,7 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 	public static final int PACKET_DEBUG = 0;
 	public static final int PACKET_UPLOAD_CHUNK = 1;
 	public static final int PACKET_UPLOAD_END = 2;
-	public static final int PACKET_WORLD_ICON = 3;
+	public static final int PACKET_WORLDS = 3;
 	public static final int PACKET_SIZE = 4;
 	public static final int PACKET_PROGRESS = 5;
 	public static final int PACKET_PING = 6;
@@ -189,6 +189,10 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 
 	public CompletableFuture<Void> send(ByteBuffer buffer) {
 		return send(buffer, true);
+	}
+
+	public CompletableFuture<Void> send(ByteOutput bytes) throws IOException {
+		return send(ByteBuffer.wrap(bytes.toByteArray()));
 	}
 
 	public void collectEventHandlers(HubGatewayEventRegistry<M> registry) {
@@ -364,10 +368,10 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 
 	public CompletableFuture<Void> sendSize(long value) {
 		try {
-			var buf = ByteOutput.ofByteBuilder(9);
-			buf.writeVarInt(PACKET_SIZE);
-			buf.writeVarLong(value);
-			return send(ByteBuffer.wrap(buf.toByteArray()));
+			var data = ByteOutput.ofByteBuilder(9);
+			data.writeVarInt(PACKET_SIZE);
+			data.writeVarLong(value);
+			return send(data);
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
@@ -375,10 +379,10 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 
 	public CompletableFuture<Void> sendProgress(long value) {
 		try {
-			var buf = ByteOutput.ofByteBuilder(9);
-			buf.writeVarInt(PACKET_PROGRESS);
-			buf.writeVarLong(value);
-			return send(ByteBuffer.wrap(buf.toByteArray()));
+			var data = ByteOutput.ofByteBuilder(9);
+			data.writeVarInt(PACKET_PROGRESS);
+			data.writeVarLong(value);
+			return send(data);
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
@@ -488,14 +492,14 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 		meta.writeVarInt(compression.id);
 		var metaBuf = ByteBuffer.wrap(meta.toByteArray());
 
-		var buf = ByteBuffer.allocateDirect(metaBuf.remaining() + compressedBuf.remaining());
-		buf.put(metaBuf);
-		buf.put(compressedBuf);
-		buf.flip();
+		var data = ByteBuffer.allocateDirect(metaBuf.remaining() + compressedBuf.remaining());
+		data.put(metaBuf);
+		data.put(compressedBuf);
+		data.flip();
 
-		VidLib.LOGGER.info("Final Buffer: " + buf);
+		VidLib.LOGGER.info("Final Buffer: " + data);
 
-		var future = send(buf);
+		var future = send(data);
 
 		var sb = new StringBuilder("Body Sent:");
 
@@ -507,8 +511,8 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 
 		var sbf = new StringBuilder("Final Sent:");
 
-		for (int i = 0; i < buf.limit(); i++) {
-			sbf.append(" %02X".formatted(buf.get(i) & 0xFF));
+		for (int i = 0; i < data.limit(); i++) {
+			sbf.append(" %02X".formatted(data.get(i) & 0xFF));
 		}
 
 		VidLib.LOGGER.info(sbf.toString());
@@ -601,10 +605,10 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 				}
 			}
 
-			var data = ByteOutput.ofByteBuilder(16);
+			var data = ByteOutput.ofByteBuilder(3 + token.length());
 			data.writeVarInt(PACKET_UPLOAD_END);
 			data.writeUTF(token);
-			send(ByteBuffer.wrap(data.toByteArray())).join();
+			send(data).join();
 		} finally {
 			if (progressItem != null) {
 				progressItem.setDone();
@@ -638,14 +642,26 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 	}
 
 	public CompletableFuture<Void> sendAvailableWorldList(List<HubWorld> list) {
-		return send("available_worlds", HubWorld.LIST_CODEC.encodeStart(JsonOps.INSTANCE, list).getOrThrow());
+		try {
+			var data = ByteOutput.ofByteBuilder();
+			data.writeVarInt(PACKET_WORLDS);
+			data.writeVarInt(list.size());
+
+			for (var value : list) {
+				value.write(data);
+			}
+
+			return send(data);
+		} catch (Exception ex) {
+			return CompletableFuture.completedFuture(null);
+		}
 	}
 
 	public void sendPing() {
 		try {
 			var data = ByteOutput.ofByteBuilder(1);
 			data.writeVarInt(PACKET_PING);
-			send(ByteBuffer.wrap(data.toByteArray()));
+			send(data);
 		} catch (Exception ignored) {
 		}
 	}
@@ -656,7 +672,7 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 		try {
 			var data = ByteOutput.ofByteBuilder(1);
 			data.writeVarInt(PACKET_PONG);
-			send(ByteBuffer.wrap(data.toByteArray()));
+			send(data);
 		} catch (Exception ignored) {
 		}
 	}

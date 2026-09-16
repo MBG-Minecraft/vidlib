@@ -38,7 +38,7 @@ public record HubClientSessionData(
 ) {
 	public static final Codec<HubClientSessionData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		KLibCodecs.UUID.fieldOf("session_id").forGetter(HubClientSessionData::sessionId),
-		HubAPI.URI_BASE_CODEC.optionalFieldOf("gateway").forGetter(HubClientSessionData::gateway),
+		HubAPI.WS_URI_BASE_CODEC.optionalFieldOf("gateway").forGetter(HubClientSessionData::gateway),
 		Codec.STRING.optionalFieldOf("gateway_token").forGetter(HubClientSessionData::gatewayToken),
 		HubUserData.CODEC.optionalFieldOf("user").forGetter(HubClientSessionData::user),
 		HubProjectData.CODEC.optionalFieldOf("project").forGetter(HubClientSessionData::project),
@@ -92,7 +92,7 @@ public record HubClientSessionData(
 				VidLib.LOGGER.warn("Logged in a misconfigured project as '" + userName + "'");
 			}
 
-			var gateway = HubClientGateway.startGateway(mc, HubAPI.toWebSocketURI(data.gateway.orElse(null)), data.gatewayToken.orElse(""));
+			var gateway = HubClientGateway.startGateway(mc, data.gateway.orElse(null), data.gatewayToken.orElse(""));
 
 			if (gateway != null) {
 				HubClientGateway.updateInfo(mc, gateway);

@@ -52,12 +52,9 @@ import java.util.function.Supplier;
 public interface HubAPI {
 	URI URI_BASE = URI.create(Optional.ofNullable(System.getenv("MBG_HUB_API_BASE")).orElse("https://hub.mrbeastmc.com"));
 	Codec<URI> URI_BASE_CODEC = KLibCodecs.relativeURI(URI_BASE);
+	Codec<URI> WS_URI_BASE_CODEC = KLibCodecs.webSocketURI(URI_BASE_CODEC);
 
 	MutableObject<Supplier<HubCommonGateway<?>>> CLIENT_GATEWAY = new MutableObject<>(() -> null);
-
-	static URI toWebSocketURI(@Nullable URI uri) {
-		return uri == null ? null : URI.create(uri.toString().replaceFirst("^http", "ws"));
-	}
 
 	HttpClient HTTP_CLIENT = HttpClient.newBuilder()
 		.executor(Util.nonCriticalIoPool())

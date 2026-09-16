@@ -3,9 +3,11 @@ package dev.mrbeastgaming.mods.hub.api.gateway;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.KLibCodecs;
+import dev.latvian.mods.klib.io.bytes.DataByteOutput;
 import dev.latvian.mods.klib.io.checksum.Checksum;
 import dev.latvian.mods.klib.io.checksum.NoChecksum;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 
@@ -29,4 +31,14 @@ public record HubWorld(
 	).apply(i, HubWorld::new));
 
 	public static final Codec<List<HubWorld>> LIST_CODEC = CODEC.listOf();
+
+	public void write(DataByteOutput bytes) throws IOException {
+		bytes.writeUTF(id);
+		bytes.writeUTF(name);
+		bytes.writeUTF(path);
+		bytes.writeVarLong(size);
+		bytes.writeExactTime(created);
+		bytes.writeExactTime(lastModified);
+		icon.writeFully(bytes);
+	}
 }
