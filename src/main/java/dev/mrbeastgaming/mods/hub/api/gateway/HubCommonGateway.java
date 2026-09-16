@@ -472,7 +472,7 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 
 		result.add(sendAvailableWorldList(value.stream().map(HubWorldDirectory::toData).toList()));
 
-		return CompletableFuture.allOf(result.toArray(new CompletableFuture[0]));
+		return result.size() == 1 ? result.getFirst() : CompletableFuture.allOf(result.toArray(new CompletableFuture[0]));
 	}
 
 	public CompletableFuture<Void> sendDebug(CompressionMethod compression, ByteBuffer bodyBuf) throws IOException {
@@ -624,13 +624,13 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 	}
 
 	public CompletableFuture<Void> upload(List<UploadRequestFile> files, IOFunction<String, Path> paths) {
-		return sendUploadRequest(files).thenComposeAsync(response -> {
+		return sendUploadRequest(files).thenCompose(response -> {
 			var list = new ArrayList<CompletableFuture<Void>>();
 
 			// FIXME
 
 			return CompletableFuture.allOf(list.toArray(new CompletableFuture[0]));
-		}, HubAPI.WEBSOCKET_EXECUTOR.get());
+		});
 	}
 
 	public CompletableFuture<Void> sendFinishUpload(List<HubFileAction> actions) {

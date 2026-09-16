@@ -5,6 +5,7 @@ import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubServerSessionData;
 import dev.mrbeastgaming.mods.hub.api.project.UsedPort;
 import net.minecraft.ChatFormatting;
@@ -17,6 +18,7 @@ import net.minecraft.world.level.Level;
 import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 
 public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 	public static HubServerGateway instance;
@@ -53,24 +55,17 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 	}
 
 	public static void updateInfo(MinecraftServer server, HubServerGateway gateway) {
-		Thread.startVirtualThread(() -> updateInfoSync(server, gateway));
+		HubAPI.SEQUENTIAL_EXECUTOR.get().execute(() -> updateInfoFuture(server, gateway).join());
 	}
 
-	public static void updateInfoSync(MinecraftServer server, HubServerGateway gateway) {
-		gateway.sendName(ChatFormatting.stripFormatting(server.getMotd().replace("\\n", "\n")));
-		gateway.sendSize(server.getPlayerCount());
-		gateway.sendStatus(CommonGameEngine.INSTANCE.getServerGatewayStatus(server));
-		var usedPorts = new ArrayList<UsedPort>(3);
-		CommonGameEngine.INSTANCE.getUsedPorts(server, usedPorts);
-		gateway.sendUsedPorts(usedPorts);
-
-		try {
-			var availableWorlds = new ArrayList<HubWorldDirectory>(1);
-			CommonGameEngine.INSTANCE.getAvailableWorlds(server, availableWorlds);
-			gateway.sendAvailableWorlds(availableWorlds);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
+	public static CompletableFuture<Void> updateInfoFuture(MinecraftServer server, HubServerGateway gateway) {
+		var list = new ArrayList<CompletableFuture<Void>>();
+		list.add(gateway.sendName(ChatFormatting.stripFormatting(server.getMotd().replace("\\n", "\n"))));
+		list.add(gateway.sendSize(server.getPlayerCount()));
+		list.add(gateway.sendStatus(CommonGameEngine.INSTANCE.getServerGatewayStatus(server)));
+		list.add(gateway.sendUsedPorts());
+		list.add(gateway.sendAvailableWorlds());
+		return CompletableFuture.allOf(list.toArray(new CompletableFuture[0]));
 	}
 
 	public static JsonObject entityToJson(Entity entity) {
@@ -181,6 +176,18 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 	@Override
 	public void onConnected() {
 		super.onConnected();
-		updateInfoSync(main, this);
+		updateInfoFuture(main, this);
+	}
+
+	public CompletableFuture<Void> sendUsedPorts() {
+		var usedPorts = new ArrayList<UsedPort>(3);
+		CommonGameEngine.INSTANCE.getUsedPorts(server, usedPorts);
+		return sendUsedPorts(usedPorts);
+	}
+
+	public CompletableFuture<Void> sendAvailableWorlds() {
+		var availableWorlds = new ArrayList<HubWorldDirectory>(1);
+		CommonGameEngine.INSTANCE.getAvailableWorlds(server, availableWorlds);
+		return sendAvailableWorlds(availableWorlds);
 	}
 }

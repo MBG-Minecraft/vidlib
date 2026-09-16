@@ -76,7 +76,7 @@ public record HubServerSessionData(
 			var gateway = HubServerGateway.startGateway(server, HubAPI.toWebSocketURI(data.gateway.orElse(null)), data.gatewayToken.orElse(""));
 
 			if (gateway != null) {
-				HubServerGateway.updateInfoSync(server, gateway);
+				HubServerGateway.updateInfoFuture(server, gateway);
 			}
 		} catch (Exception ex) {
 			VidLib.LOGGER.error("Failed to load Hub server session data", ex);
