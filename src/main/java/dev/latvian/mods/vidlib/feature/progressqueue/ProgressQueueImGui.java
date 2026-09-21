@@ -73,9 +73,11 @@ public class ProgressQueueImGui {
 
 			ImGui.setNextWindowSizeConstraints(300F * scale, 20F, 300F * scale, 600F);
 			ImGui.setNextWindowPos(windowX, windowY);
+			// ImGui.setNextWindowFocus();
 
 			int flags = ImGuiWindowFlags.NoDocking
 				| ImGuiWindowFlags.NoNav
+				// | ImGuiWindowFlags.NoInputs
 				| ImGuiWindowFlags.NoResize
 				| ImGuiWindowFlags.NoCollapse
 				| ImGuiWindowFlags.AlwaysAutoResize

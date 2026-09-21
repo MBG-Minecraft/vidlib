@@ -9,7 +9,6 @@ import dev.latvian.mods.klib.io.checksum.SHA256;
 import dev.latvian.mods.vidlib.VidLib;
 
 import javax.imageio.ImageIO;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,7 +27,7 @@ public record HubWorldDirectory(
 	Instant created,
 	Instant lastModified,
 	Checksum icon,
-	Optional<byte[]> iconBytes
+	Optional<Path> iconPath
 ) {
 	public static HubWorldDirectory of(Path root, String name, Path directory) throws IOException {
 		var fileId = directory.resolve("uid.dat");
@@ -79,21 +78,20 @@ public record HubWorldDirectory(
 		}
 
 		Checksum icon = NoChecksum.INSTANCE;
-		var iconBytes = Optional.<byte[]>empty();
+		var iconPathOpt = Optional.<Path>empty();
 
 		var iconPath = directory.resolve("icon.png");
 
 		if (Files.exists(iconPath)) {
-			try (var in = Files.newInputStream(iconPath)) {
-				var img = IOUtils.resize(ImageIO.read(in), 64, 64);
-				var imageBytes = new ByteArrayOutputStream();
-				ImageIO.write(img, "png", imageBytes);
-				var bytes = imageBytes.toByteArray();
-				icon = SHA256.TYPE.digest(bytes);
-				iconBytes = Optional.of(bytes);
-			} catch (Exception ex) {
-				ex.printStackTrace();
+			var img = ImageIO.read(iconPath.toFile());
+
+			if (img.getWidth() != 64 || img.getHeight() != 64) {
+				img = IOUtils.resize(img, 64, 64);
+				ImageIO.write(img, "png", iconPath.toFile());
 			}
+
+			icon = SHA256.TYPE.digest(iconPath, null);
+			iconPathOpt = Optional.of(iconPath);
 		}
 
 		return new HubWorldDirectory(
@@ -105,7 +103,7 @@ public record HubWorldDirectory(
 			created,
 			lastModified,
 			icon,
-			iconBytes
+			iconPathOpt
 		);
 	}
 

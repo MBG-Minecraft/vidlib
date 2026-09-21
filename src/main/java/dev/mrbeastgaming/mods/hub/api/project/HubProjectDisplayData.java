@@ -4,15 +4,19 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.util.Hex32;
+import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubGameData;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 
+import java.net.URI;
 import java.util.ArrayList;
 
 public record HubProjectDisplayData(
 	Hex32 id,
 	String name,
+	URI iconUrl,
+	URI smallIconUrl,
 	String description,
 	String productionCode,
 	HubGameData game,
@@ -20,7 +24,9 @@ public record HubProjectDisplayData(
 ) {
 	public static final MapCodec<HubProjectDisplayData> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Hex32.CODEC.fieldOf("id").forGetter(HubProjectDisplayData::id),
-		Codec.STRING.optionalFieldOf("name", "").forGetter(HubProjectDisplayData::name),
+		Codec.STRING.fieldOf("name").forGetter(HubProjectDisplayData::name),
+		HubAPI.URI_BASE_CODEC.fieldOf("icon_url").forGetter(HubProjectDisplayData::iconUrl),
+		HubAPI.URI_BASE_CODEC.fieldOf("small_icon_url").forGetter(HubProjectDisplayData::smallIconUrl),
 		Codec.STRING.optionalFieldOf("description", "").forGetter(HubProjectDisplayData::description),
 		Codec.STRING.optionalFieldOf("production_code", "").forGetter(HubProjectDisplayData::productionCode),
 		HubGameData.CODEC.fieldOf("game").forGetter(HubProjectDisplayData::game),

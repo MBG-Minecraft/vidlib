@@ -50,6 +50,10 @@ public final class ProgressItem implements IntConsumer, LongConsumer {
 		this.size.set(size);
 	}
 
+	public void addSize(long size) {
+		this.size.addAndGet(size);
+	}
+
 	public long resetProgress() {
 		return this.progress.getAndSet(0L);
 	}
@@ -93,7 +97,21 @@ public final class ProgressItem implements IntConsumer, LongConsumer {
 		infoText = new ProgressItemNameFunction.OfString(string);
 	}
 
+	public void parseInfoText(String string) {
+		switch (string) {
+			case "%" -> setInfoText(ProgressItemNameFunction.PERCENT);
+			case "N" -> setInfoText(ProgressItemNameFunction.COUNT);
+			case "iB" -> setInfoText(ProgressItemNameFunction.BINARY_BYTE_SIZE);
+			case "B" -> setInfoText(ProgressItemNameFunction.SI_BYTE_SIZE);
+			default -> setInfoText(string);
+		}
+	}
+
 	public void setBlocksExit(boolean blocksExit) {
 		this.blocksExit = blocksExit;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
 	}
 }

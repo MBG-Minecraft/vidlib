@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.util.UndashedUuid;
-import dev.latvian.apps.tinyhttp.http.response.HTTPPayload;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.io.CompressionMethod;
 import dev.latvian.mods.klib.io.CountingOutputStream;
@@ -17,6 +16,7 @@ import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
+import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.mrbeastgaming.mods.hub.HubUserConfig;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubCommonGateway;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
@@ -25,6 +25,8 @@ import dev.mrbeastgaming.mods.hub.api.project.HubProjectReplaysData;
 import dev.mrbeastgaming.mods.hub.api.project.HubProjectsData;
 import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadRequestItem;
 import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadResponseItem;
+import dev.mrbeastgaming.mods.hub.file.ChecksumPath;
+import dev.mrbeastgaming.mods.hub.file.HubProjectFileLink;
 import dev.mrbeastgaming.mods.hub.file.UploadRequest;
 import dev.mrbeastgaming.mods.hub.file.UploadResponse;
 import net.minecraft.Util;
@@ -36,15 +38,15 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
@@ -57,55 +59,32 @@ public interface HubAPI {
 	MutableObject<Supplier<HubCommonGateway<?>>> CLIENT_GATEWAY = new MutableObject<>(() -> null);
 
 	HttpClient HTTP_CLIENT = HttpClient.newBuilder()
-		.executor(Util.nonCriticalIoPool())
+		.executor(Util.backgroundExecutor())
 		.followRedirects(HttpClient.Redirect.ALWAYS)
 		.connectTimeout(Duration.ofSeconds(30L))
 		.build();
 
-	static <T> HttpResponse<T> send(HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) throws IOException, InterruptedException {
-		var response = HTTP_CLIENT.send(request, bodyHandler);
-		int retries = 0;
+	static HubAPIResponse send(HttpRequest request, boolean responseBody) throws IOException, InterruptedException {
+		if (responseBody) {
+			var response = MiscUtils.sendRetrying(HTTP_CLIENT, request, HttpResponse.BodyHandlers.ofInputStream());
+			var encoding = response.headers().firstValue("Content-Encoding").orElse("");
 
-		while (retries < 10 && response.statusCode() != 500 && response.headers().firstValue("Retry-After").orElse(response.statusCode() / 100 == 5 ? "10" : null) instanceof String h) {
-			try {
-				long seconds = Long.parseLong(h);
-
-				if (seconds > 0L) {
-					Thread.sleep(seconds * 1000L);
-				}
-			} catch (Exception ignored) {
-				try {
-					var duration = Duration.between(Instant.now(), Instant.from(HTTPPayload.DATE_TIME_FORMATTER.parse(h)));
-
-					if (duration.isPositive()) {
-						Thread.sleep(duration.toMillis());
-					}
-				} catch (Exception ignored2) {
-				}
+			try (var in = CompressionMethod.of(encoding).in(response.body())) {
+				return new HubAPIResponse(response, response.statusCode(), in.readAllBytes());
 			}
-
-			response = HTTP_CLIENT.send(request, bodyHandler);
-			retries++;
-		}
-
-		/*
-		@Nullable
-	public Instant retry() {
-		var h = header("Retry-After").asString();
-
-		if (h.isEmpty()) {
-			return null;
-		}
-
-		try {
-			return startTime.plusSeconds(Long.parseLong(h));
-		} catch (Exception ex) {
-			return Instant.from(HTTPPayload.DATE_TIME_FORMATTER.parse(h));
+		} else {
+			var response = MiscUtils.sendRetrying(HTTP_CLIENT, request, HttpResponse.BodyHandlers.discarding());
+			return new HubAPIResponse(response, response.statusCode(), HubAPIResponse.NO_DATA);
 		}
 	}
-		 */
 
-		return HTTP_CLIENT.send(request, bodyHandler);
+	static void download(HttpRequest request, Path to) throws IOException, InterruptedException {
+		var response = MiscUtils.sendRetrying(HTTP_CLIENT, request, HttpResponse.BodyHandlers.ofInputStream());
+		var encoding = response.headers().firstValue("Content-Encoding").orElse("");
+
+		try (var in = CompressionMethod.of(encoding).in(response.body()); var out = Files.newOutputStream(to)) {
+			in.transferTo(out);
+		}
 	}
 
 	Lazy<HttpRequest.Builder> HTTP_REQUEST_BASE = Lazy.of(() -> {
@@ -128,6 +107,7 @@ public interface HubAPI {
 
 	static HttpRequest.Builder request(String path, Auth auth) {
 		var builder = HTTP_REQUEST_BASE.get().copy().uri(URI_BASE.resolve(path));
+		builder.header("Accept-Encoding", "zstd, gzip, deflate, br");
 
 		if (auth == Auth.EXCLUDED) {
 			return builder;
@@ -142,28 +122,6 @@ public interface HubAPI {
 		}
 
 		return builder;
-	}
-
-	static JsonElement sendJsonRequest(HttpRequest request) throws Exception {
-		var response = send(request, HttpResponse.BodyHandlers.ofInputStream());
-		int code = response.statusCode();
-
-		if (code / 100 == 2) {
-			try (var in = response.body()) {
-				return JsonUtils.read(in);
-			}
-		}
-
-		var error = "HTTP Error " + code;
-
-		if (code == 500 || code / 100 == 4) {
-			try (var in = response.body()) {
-				error += ": " + new String(in.readAllBytes(), StandardCharsets.UTF_8);
-			} catch (Exception ignored) {
-			}
-		}
-
-		throw new IllegalStateException(error);
 	}
 
 	static HttpRequest.BodyPublisher jsonBody(JsonElement body) {
@@ -187,17 +145,27 @@ public interface HubAPI {
 
 	interface CoreAPI {
 		static HubFullData getFullData() throws Exception {
-			var json = sendJsonRequest(request("api/full-data", Auth.NOT_REQUIRED).build());
-			return HubFullData.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
+			return send(request("api/full-data", Auth.NOT_REQUIRED).build(), true).json(HubFullData.CODEC);
 		}
 
-		static UploadResponse postUpload(UploadRequest request) throws Exception {
-			var json = UploadRequest.CODEC.encodeStart(JsonOps.INSTANCE, request).getOrThrow();
-			var response = sendJsonRequest(request("api/upload", Auth.EXCLUDED).POST(jsonBody(json)).build()).getAsJsonObject();
-			return UploadResponse.CODEC.parse(JsonOps.INSTANCE, response).getOrThrow();
+		static CompletableFuture<UploadResponse> postUpload(UploadRequest request) {
+			return CompletableFuture.supplyAsync(() -> {
+				try {
+					var json = UploadRequest.CODEC.encodeStart(JsonOps.INSTANCE, request).getOrThrow();
+					return send(request("api/upload", Auth.EXCLUDED).POST(jsonBody(json)).build(), true).json(UploadResponse.CODEC);
+				} catch (Exception ex) {
+					VidLib.LOGGER.error("Failed to request file upload", ex);
+					return new UploadResponse(List.of(), 0L);
+				}
+			}, Util.nonCriticalIoPool());
 		}
 
-		static boolean postFileStorage(String token, Path path, long offset, long limit, @Nullable ProgressItem progressItem) throws Exception {
+		@Nullable
+		static CompletableFuture<Void> postFileStorage(String token, Path path, long offset, long limit, @Nullable ProgressItem progressItem, Executor executor) {
+			if (limit <= 0L) {
+				return null;
+			}
+
 			var compressedSize = new CountingOutputStream();
 
 			if (progressItem != null) {
@@ -210,7 +178,7 @@ public interface HubAPI {
 				in.skipNBytes(offset);
 				in.transferTo(out);
 			} catch (Exception ex) {
-				return false;
+				return null;
 			} finally {
 				if (progressItem != null) {
 					progressItem.setDone();
@@ -218,30 +186,57 @@ public interface HubAPI {
 			}
 
 			if (compressedSize.getCount() > Math.min(limit, 104857600L)) {
-				return false;
+				return null;
 			}
 
-			byte[] compressed;
+			return CompletableFuture.runAsync(() -> {
+				try {
+					byte[] compressed;
 
-			try (var in = Files.newInputStream(path)) {
-				in.skipNBytes(offset);
-				compressed = CompressionMethod.ZSTD.compress(in.readAllBytes());
-			} finally {
-				if (progressItem != null) {
-					progressItem.setDone();
+					try (var in = Files.newInputStream(path)) {
+						in.skipNBytes(offset);
+						compressed = CompressionMethod.ZSTD.compress(in.readAllBytes());
+					} finally {
+						if (progressItem != null) {
+							progressItem.setDone();
+						}
+					}
+
+					var response = send(request("api/file-storage", Auth.EXCLUDED)
+						.header("X-MBG-Hub-File-Storage-Token", token)
+						.header("X-MBG-Hub-Compression-Method", CompressionMethod.ZSTD.name)
+						.header("X-MBG-Hub-Offset", Long.toUnsignedString(offset))
+						.header("X-Content-Length-Hint", Long.toUnsignedString(compressed.length))
+						.POST(HttpRequest.BodyPublishers.ofByteArray(compressed))
+						.build(), false
+					);
+
+					if (response.code() / 100 != 2) {
+						throw new IOException("HTTP Error " + response.code() + " uploading " + path);
+					}
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
 				}
-			}
+			}, executor);
+		}
 
-			var response = send(request("api/file-storage", Auth.EXCLUDED)
-				.header("X-MBG-Hub-File-Storage-Token", token)
-				.header("X-MBG-Hub-Compression-Method", CompressionMethod.ZSTD.name)
-				.header("X-MBG-Hub-Offset", Long.toUnsignedString(offset))
-				.header("X-Content-Length-Hint", Long.toUnsignedString(compressed.length))
-				.POST(HttpRequest.BodyPublishers.ofByteArray(compressed))
-				.build(), HttpResponse.BodyHandlers.discarding()
-			);
+		static CompletableFuture<Integer> postFileStorageSweep(List<Checksum> files) {
+			return CompletableFuture.supplyAsync(() -> {
+				try {
+					var json = new JsonArray();
 
-			return response.statusCode() / 100 != 2;
+					for (var file : files) {
+						json.add(file.toString());
+					}
+
+					return send(request("api/file-storage/sweep", files.isEmpty() ? Auth.REQUIRED : Auth.NOT_REQUIRED)
+						.POST(HttpRequest.BodyPublishers.ofString(json.toString()))
+						.build(), true
+					).json().getAsJsonObject().get("removed").getAsInt();
+				} catch (Exception ignored) {
+					return 0;
+				}
+			}, Util.nonCriticalIoPool());
 		}
 
 		static HttpRequest getCountries() {
@@ -257,7 +252,7 @@ public interface HubAPI {
 
 	interface ProjectAPI {
 		static HubProjectsData getAll() throws Exception {
-			return HubProjectsData.CODEC.parse(JsonOps.INSTANCE, sendJsonRequest(request("api/projects", Auth.NOT_REQUIRED).build())).getOrThrow();
+			return send(request("api/projects", Auth.NOT_REQUIRED).build(), true).json(HubProjectsData.CODEC);
 		}
 
 		static HttpRequest getFullData(Hex32 project) {
@@ -297,7 +292,7 @@ public interface HubAPI {
 
 			body.add("files", filesJson);
 
-			var response = sendJsonRequest(request("api/projects/upload/" + projectToken, Auth.NOT_REQUIRED).POST(jsonBody(body)).build()).getAsJsonObject();
+			var response = send(request("api/projects/upload/" + projectToken, Auth.NOT_REQUIRED).POST(jsonBody(body)).build(), true).json().getAsJsonObject();
 
 			var maxChunkSize = response.get("max_chunk_size").getAsInt();
 
@@ -320,7 +315,7 @@ public interface HubAPI {
 		}
 
 		static HubProjectReplaysData getReplays(Hex32 project) throws Exception {
-			var response = sendJsonRequest(request("api/projects/" + project + "/replays", Auth.REQUIRED).GET().build()).getAsJsonObject();
+			var response = send(request("api/projects/" + project + "/replays", Auth.REQUIRED).GET().build(), true).json().getAsJsonObject();
 			return HubProjectReplaysData.CODEC.parse(JsonOps.INSTANCE, response).getOrThrow();
 		}
 
@@ -328,27 +323,32 @@ public interface HubAPI {
 			var json = HubLogRequest.CODEC.encodeStart(JsonOps.INSTANCE, request).getOrThrow();
 			HTTP_CLIENT.send(request("api/projects/log/" + projectToken, Auth.REQUIRED).POST(jsonBody(json)).build(), HttpResponse.BodyHandlers.discarding());
 		}
+
+		static void postLinkFiles(Hex32 project, List<HubProjectFileLink> files) throws Exception {
+			var json = HubProjectFileLink.LIST_CODEC.encodeStart(JsonOps.INSTANCE, files).getOrThrow();
+			HTTP_CLIENT.send(request("api/projects/" + project + "/link-files", Auth.NOT_REQUIRED).POST(jsonBody(json)).build(), HttpResponse.BodyHandlers.discarding());
+		}
 	}
 
 	interface MinecraftAPI {
 		static HubClientSessionData postClientSession(HubClientSessionDataRequest request) throws Exception {
-			return HubClientSessionData.CODEC.parse(JsonOps.INSTANCE, sendJsonRequest(request("api/minecraft/client-session?v=1", Auth.NOT_REQUIRED)
+			return send(request("api/minecraft/client-session?v=1", Auth.NOT_REQUIRED)
 				.POST(jsonBody(HubClientSessionDataRequest.CODEC, request))
 				.timeout(Duration.ofSeconds(30L))
-				.build()
-			)).getOrThrow();
+				.build(), true
+			).json(HubClientSessionData.CODEC);
 		}
 
 		static HubServerSessionData postServerSession(HubServerSessionDataRequest request) throws Exception {
-			return HubServerSessionData.CODEC.parse(JsonOps.INSTANCE, sendJsonRequest(request("api/minecraft/server-session?v=1", Auth.REQUIRED)
+			return send(request("api/minecraft/server-session?v=1", Auth.REQUIRED)
 				.POST(jsonBody(HubServerSessionDataRequest.CODEC, request))
 				.timeout(Duration.ofSeconds(30L))
-				.build()
-			)).getOrThrow();
+				.build(), true
+			).json(HubServerSessionData.CODEC);
 		}
 
 		static HubMinecraftProfileData.LinkData getLink(String name) throws Exception {
-			var response = sendJsonRequest(request("api/minecraft/link/" + name, Auth.REQUIRED).GET().build()).getAsJsonObject();
+			var response = send(request("api/minecraft/link/" + name, Auth.REQUIRED).GET().build(), true).json().getAsJsonObject();
 
 			return new HubMinecraftProfileData.LinkData(
 				HubMinecraftProfileData.CODEC.parse(JsonOps.INSTANCE, response).getOrThrow(),
@@ -357,17 +357,34 @@ public interface HubAPI {
 		}
 
 		static HubWorldsData getWorlds() throws Exception {
-			var response = sendJsonRequest(request("api/minecraft/worlds", Auth.REQUIRED).GET().build()).getAsJsonObject();
-			return HubWorldsData.CODEC.parse(JsonOps.INSTANCE, response).getOrThrow();
+			return send(request("api/minecraft/worlds", Auth.REQUIRED).GET().build(), true).json(HubWorldsData.CODEC);
 		}
 
-		static void postWorldRequest(UUID requestId, UUID sessionId, String worldId, String path) throws Exception {
+		static boolean postWorldRequest(UUID requestId, String worldId, UUID sessionId, boolean updateExisting) throws Exception {
 			var json = new JsonObject();
 			json.addProperty("request_id", UndashedUuid.toString(requestId));
-			json.addProperty("session_id", UndashedUuid.toString(sessionId));
 			json.addProperty("world_id", worldId);
-			json.addProperty("path", path);
-			sendJsonRequest(request("api/minecraft/worlds/request", Auth.REQUIRED).POST(HttpRequest.BodyPublishers.ofString(json.toString())).build()).getAsJsonObject();
+			json.addProperty("session_id", UndashedUuid.toString(sessionId));
+			json.addProperty("update_existing", updateExisting);
+			return send(request("api/minecraft/worlds/request", Auth.REQUIRED).POST(HttpRequest.BodyPublishers.ofString(json.toString())).build(), false).isOk();
+		}
+
+		static boolean postCompleteWorldRequest(String token, List<ChecksumPath> files) throws Exception {
+			var json = new JsonObject();
+			json.addProperty("token", token);
+
+			var filesArr = new JsonArray();
+
+			for (var file : files) {
+				var obj = new JsonObject();
+				obj.addProperty("checksum", file.checksum().toString());
+				obj.addProperty("path", file.path());
+				filesArr.add(obj);
+			}
+
+			json.add("files", filesArr);
+
+			return send(request("api/minecraft/worlds/complete-request", Auth.REQUIRED).POST(HttpRequest.BodyPublishers.ofString(json.toString())).build(), false).isOk();
 		}
 	}
 }

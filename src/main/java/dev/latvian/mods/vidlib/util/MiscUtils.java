@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.util;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.DataResult;
+import dev.latvian.apps.tinyhttp.http.response.HTTPPayload;
 import dev.latvian.mods.vidlib.VidLib;
 import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import net.minecraft.Util;
@@ -16,6 +17,7 @@ import net.minecraft.world.phys.AABB;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -23,6 +25,7 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -41,7 +44,7 @@ public interface MiscUtils {
 	Comparator<GameProfile> PROFILE_COMPARATOR = (a, b) -> a.getName().compareToIgnoreCase(b.getName());
 
 	HttpClient HTTP_CLIENT = HttpClient.newBuilder()
-		.executor(Util.nonCriticalIoPool())
+		.executor(Util.backgroundExecutor())
 		.followRedirects(HttpClient.Redirect.ALWAYS)
 		.connectTimeout(Duration.ofSeconds(10L))
 		.build();
@@ -147,5 +150,34 @@ public interface MiscUtils {
 
 	static ClientAsset assetFromPNG(ResourceLocation png) {
 		return new ClientAsset(png.withPath(png.getPath().substring(9, png.getPath().length() - 4)));
+	}
+
+	static <T> HttpResponse<T> sendRetrying(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> bodyHandler) throws IOException, InterruptedException {
+		var response = client.send(request, bodyHandler);
+		int retries = 0;
+
+		while (retries < 10 && response.statusCode() != 500 && response.headers().firstValue("Retry-After").orElse(response.statusCode() / 100 == 5 ? "10" : null) instanceof String h) {
+			try {
+				long seconds = Long.parseLong(h);
+
+				if (seconds > 0L) {
+					Thread.sleep(seconds * 1000L);
+				}
+			} catch (Exception ignored) {
+				try {
+					var duration = Duration.between(Instant.now(), Instant.from(HTTPPayload.DATE_TIME_FORMATTER.parse(h)));
+
+					if (duration.isPositive()) {
+						Thread.sleep(duration.toMillis());
+					}
+				} catch (Exception ignored2) {
+				}
+			}
+
+			response = client.send(request, bodyHandler);
+			retries++;
+		}
+
+		return response;
 	}
 }

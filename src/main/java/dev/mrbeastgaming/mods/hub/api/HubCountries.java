@@ -9,7 +9,6 @@ import dev.mrbeastgaming.mods.hub.HubPaths;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.neoforged.fml.loading.FMLLoader;
 
-import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -20,21 +19,18 @@ public interface HubCountries {
 
 	Lazy<CountryList> REMOTE = Lazy.of(() -> {
 		try {
-			var response = HubAPI.send(HubAPI.CoreAPI.getCountries(), HttpResponse.BodyHandlers.ofInputStream());
-			var checksum = response.headers().firstValue("X-Checksum").orElse("");
+			var response = HubAPI.send(HubAPI.CoreAPI.getCountries(), true);
+			var checksum = response.response().headers().firstValue("X-Checksum").orElse("");
 
 			if (!checksum.isEmpty()) {
-				try (var in = response.body()) {
-					var json = JsonUtils.read(in);
-					var countryList = CountryList.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
+				var countryList = response.json(CountryList.CODEC);
 
-					if (countryList != CountryList.EMPTY) {
-						var path = CommonPaths.mkdirs(LOCAL_PATH.get());
-						JsonUtils.write(path, CountryList.CODEC.encodeStart(JsonOps.INSTANCE, countryList).getOrThrow(), false);
-					}
-
-					return countryList;
+				if (countryList != CountryList.EMPTY) {
+					var path = CommonPaths.mkdirs(LOCAL_PATH.get());
+					JsonUtils.write(path, CountryList.CODEC.encodeStart(JsonOps.INSTANCE, countryList).getOrThrow(), false);
 				}
+
+				return countryList;
 			}
 		} catch (Exception ignored) {
 		}

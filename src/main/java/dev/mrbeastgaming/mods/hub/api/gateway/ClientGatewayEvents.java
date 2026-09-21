@@ -30,7 +30,6 @@ public class ClientGatewayEvents {
 		registry.register("capabilities_updated", ClientGatewayEvents::capabilitiesUpdated);
 		registry.register("server_list_updated", ClientGatewayEvents::serverListUpdated);
 		registry.register("project_updated", ClientGatewayEvents::projectUpdated);
-		registry.register("cut_recording", ClientGatewayEvents::cutRecording);
 		// TODO: edit options
 		// TODO: save replay
 		// TODO: save voice recording
@@ -98,7 +97,7 @@ public class ClientGatewayEvents {
 		}
 	}
 
-	private static void cutRecording(Minecraft mc, HubGatewayEvent hubGatewayEvent) {
+	private static void cutRecording(Minecraft mc, HubGatewayEvent event) {
 		ReplayAPI.getActive().cutRecording();
 	}
 }

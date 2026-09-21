@@ -55,8 +55,12 @@ public record MenuItem(
 		return new MenuItem(icon, ColoredText.of(label), ColoredText.EMPTY, null, ImColorVariant.DEFAULT, 0, null, null);
 	}
 
+	public static MenuItem item(ImIcon icon, ColoredText label, OnClick onClick) {
+		return new MenuItem(icon, label, ColoredText.EMPTY, null, ImColorVariant.DEFAULT, 0, onClick, null);
+	}
+
 	public static MenuItem item(ImIcon icon, String label, OnClick onClick) {
-		return new MenuItem(icon, ColoredText.of(label), ColoredText.EMPTY, null, ImColorVariant.DEFAULT, 0, onClick, null);
+		return item(icon, ColoredText.of(label), onClick);
 	}
 
 	public static MenuItem item(String label, OnClick onClick) {

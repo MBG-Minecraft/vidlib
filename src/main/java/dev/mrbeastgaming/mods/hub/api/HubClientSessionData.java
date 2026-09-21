@@ -12,6 +12,7 @@ import dev.mrbeastgaming.mods.hub.api.project.HubGameServerData;
 import dev.mrbeastgaming.mods.hub.api.project.HubParticipantData;
 import dev.mrbeastgaming.mods.hub.api.project.HubProjectData;
 import dev.mrbeastgaming.mods.hub.api.project.HubProjectsData;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,12 +51,14 @@ public record HubClientSessionData(
 		HubGameServerData.LIST_CODEC.optionalFieldOf("servers", List.of()).forGetter(HubClientSessionData::servers)
 	).apply(instance, HubClientSessionData::new));
 
+	public static UUID ID = Util.NIL_UUID;
 	public static String AUTH_SERVER_ID = "";
 
 	public static void load(Minecraft mc, @Nullable HubUserConfig userConfig, @Nullable HubProjectConfig projectConfig) {
 		boolean hasAuth = userConfig != null && !userConfig.token().isEmpty();
 
 		VidLib.LOGGER.info("Loading Hub client session data...");
+		UUID id = Util.NIL_UUID;
 		HubUserData userData = null;
 		HubProjectData projectData = null;
 		HubParticipantData participantData = null;
@@ -68,6 +71,7 @@ public record HubClientSessionData(
 		try {
 			var data = HubAPI.MinecraftAPI.postClientSession(new HubClientSessionDataRequest(projectConfig == null ? "" : projectConfig.token(), true));
 
+			id = data.sessionId;
 			userData = data.user.orElse(null);
 			projectData = data.project.orElse(null);
 			participantData = data.participant.orElse(null);
@@ -101,6 +105,7 @@ public record HubClientSessionData(
 			VidLib.LOGGER.error("Failed to load Hub client session data: " + ex);
 		}
 
+		ID = id;
 		HubUserData.SELF = userData;
 		HubProjectData.PACK = projectData;
 		HubParticipantData.SELF = participantData;

@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.progressqueue;
 
+import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.util.ColoredText;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -64,8 +65,8 @@ public class ProgressQueue {
 	public final List<ColoredText> errors;
 	public boolean hideInGame;
 	public boolean canCancel;
-	public boolean open;
-	public boolean active;
+	boolean open;
+	boolean active;
 
 	public ProgressQueue(String topText) {
 		this.items = new ArrayList<>(1);
@@ -121,7 +122,7 @@ public class ProgressQueue {
 			if (!active) {
 				active = true;
 				open = true;
-				ACTIVE.add(this);
+				PlatformHelper.CURRENT.displayProgressQueue(this);
 			}
 		} finally {
 			LOCK.unlock();

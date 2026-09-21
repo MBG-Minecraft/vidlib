@@ -22,6 +22,7 @@ import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.icon.IconRegistryEvent;
 import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.latvian.mods.vidlib.feature.prop.Props;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
@@ -302,5 +303,12 @@ public class NeoPlatformHelper extends PlatformHelper {
 	@Override
 	public Props<?> getProps(Level level) {
 		return level.getProps();
+	}
+
+	@Override
+	public void displayProgressQueue(ProgressQueue queue) {
+		if (FMLLoader.getDist().isClient()) {
+			ProgressQueue.ACTIVE.add(queue);
+		}
 	}
 }

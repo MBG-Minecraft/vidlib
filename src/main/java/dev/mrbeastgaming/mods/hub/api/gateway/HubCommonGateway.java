@@ -9,7 +9,6 @@ import com.google.gson.JsonPrimitive;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.apps.tinyhttp.util.ByteBufferUtils;
 import dev.latvian.mods.klib.io.CompressionMethod;
-import dev.latvian.mods.klib.io.IOFunction;
 import dev.latvian.mods.klib.io.bytes.ByteInput;
 import dev.latvian.mods.klib.io.bytes.ByteOutput;
 import dev.latvian.mods.klib.util.JsonUtils;
@@ -21,10 +20,10 @@ import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubLogRequest;
 import dev.mrbeastgaming.mods.hub.api.gateway.tv.TVUpdateData;
 import dev.mrbeastgaming.mods.hub.api.project.UsedPort;
-import dev.mrbeastgaming.mods.hub.file.HubFileAction;
 import dev.mrbeastgaming.mods.hub.file.UploadRequest;
 import dev.mrbeastgaming.mods.hub.file.UploadRequestFile;
 import dev.mrbeastgaming.mods.hub.file.UploadResponse;
+import net.minecraft.Util;
 import net.minecraft.util.Mth;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.entity.player.Player;
@@ -48,9 +47,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implements WebSocket.Listener {
 	public static final int PACKET_DEBUG = 0;
@@ -61,6 +63,11 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 	public static final int PACKET_PROGRESS = 5;
 	public static final int PACKET_PING = 6;
 	public static final int PACKET_PONG = 7;
+	public static final int PACKET_DISPLAY_PROGRESS_BAR = 8;
+	public static final int PACKET_PROGRESS_BAR_STYLE = 9;
+	public static final int PACKET_PROGRESS_BAR = 10;
+	public static final int PACKET_REMOVE_PROGRESS_BAR = 11;
+	public static final int PACKET_DOWNLOAD_WORLD = 12;
 
 	public final M main;
 	public Instant connected;
@@ -152,12 +159,20 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 		connected = Instant.now();
 	}
 
+	public static CompletableFuture<Void> runAsync(Runnable runnable) {
+		return CompletableFuture.runAsync(runnable, HubAPI.WEBSOCKET_EXECUTOR.get());
+	}
+
+	public static <T> CompletableFuture<T> supplyAsync(Supplier<T> supplier) {
+		return CompletableFuture.supplyAsync(supplier, HubAPI.WEBSOCKET_EXECUTOR.get());
+	}
+
 	public CompletableFuture<Void> send(String method) {
 		return send(method, null);
 	}
 
 	public CompletableFuture<Void> send(String method, @Nullable JsonElement params) {
-		return CompletableFuture.runAsync(() -> {
+		return runAsync(() -> {
 			String result;
 
 			if (params == null || params.isJsonNull()) {
@@ -174,17 +189,17 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 			if (ws != null) {
 				ws.sendText(result, true).join();
 			}
-		}, HubAPI.WEBSOCKET_EXECUTOR.get());
+		});
 	}
 
 	public CompletableFuture<Void> send(ByteBuffer buffer, boolean last) {
-		return CompletableFuture.runAsync(() -> {
+		return runAsync(() -> {
 			var ws = webSocket;
 
 			if (ws != null) {
 				ws.sendBinary(buffer, last).join();
 			}
-		}, HubAPI.WEBSOCKET_EXECUTOR.get());
+		});
 	}
 
 	public CompletableFuture<Void> send(ByteBuffer buffer) {
@@ -198,7 +213,7 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 	public void collectEventHandlers(HubGatewayEventRegistry<M> registry) {
 	}
 
-	private void process(String message) {
+	private void handle(String message) {
 		try {
 			var json = JsonUtils.parse(message);
 
@@ -214,7 +229,7 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 		}
 	}
 
-	private void process(ByteBuffer buffer) {
+	private void handle(ByteBuffer buffer) {
 		var data = ByteInput.of(buffer);
 
 		try {
@@ -223,11 +238,31 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 			switch (packetId) {
 				case PACKET_PING -> sendPong("Binary");
 				case PACKET_PONG -> lastPong = new Ping(Instant.now(), "Binary");
+				case PACKET_DISPLAY_PROGRESS_BAR -> handleDisplayProgressBar(buffer);
+				case PACKET_PROGRESS_BAR_STYLE -> handleProgressBarStyle(buffer);
+				case PACKET_PROGRESS_BAR -> handleProgressBar(buffer);
+				case PACKET_REMOVE_PROGRESS_BAR -> handleRemoveProgressBar(buffer);
+				case PACKET_DOWNLOAD_WORLD -> handleDownloadWorld(buffer);
 				default -> VidLib.LOGGER.error("Unknown packet id " + packetId);
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+	}
+
+	protected void handleDisplayProgressBar(ByteBuffer buffer) throws Exception {
+	}
+
+	protected void handleProgressBarStyle(ByteBuffer buffer) throws Exception {
+	}
+
+	protected void handleProgressBar(ByteBuffer buffer) throws Exception {
+	}
+
+	protected void handleRemoveProgressBar(ByteBuffer buffer) throws Exception {
+	}
+
+	protected void handleDownloadWorld(ByteBuffer buffer) throws Exception {
 	}
 
 	private void handle0(JsonElement json) {
@@ -287,7 +322,7 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 			return completedMessageFuture;
 		}
 
-		process(String.join("", messageParts));
+		handle(String.join("", messageParts));
 		completedMessageFuture.complete(null);
 		var returnValue = completedMessageFuture;
 		messageParts = new ArrayList<>(1);
@@ -320,7 +355,7 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 
 		finalBuf.flip();
 
-		process(finalBuf);
+		handle(finalBuf);
 		completedBinaryFuture.complete(null);
 		var returnValue = completedBinaryFuture;
 		binaryParts = new ArrayList<>(1);
@@ -459,24 +494,25 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 	}
 
 	public CompletableFuture<Void> sendAvailableWorlds(List<HubWorldDirectory> value) {
-		var result = new ArrayList<CompletableFuture<Void>>();
-
-		var iconsToUpload = new ArrayList<UploadRequestFile>();
-		var now = Instant.now();
+		var iconsToUpload = new ArrayList<UploadRequestFile.WithPath>();
+		var data = new HashMap<String, HubWorld>();
 
 		for (var world : value) {
-			if (!world.icon().isNil() && world.iconBytes().isPresent()) {
-				iconsToUpload.add(UploadRequestFile.virtual(world.id() + "/icon.png", world.iconBytes().get(), world.icon(), now));
+			if (data.put(world.id(), world.toData()) == null) {
+				if (!world.icon().isNil() && world.iconPath().isPresent()) {
+					try {
+						iconsToUpload.add(UploadRequestFile.load(world.id(), world.iconPath().get(), null));
+					} catch (Exception ignored) {
+					}
+				}
 			}
 		}
 
-		if (!iconsToUpload.isEmpty()) {
-			// FIXME result.add(upload(iconsToUpload, p -> null));
+		if (iconsToUpload.isEmpty()) {
+			return sendAvailableWorldList(List.copyOf(data.values()));
 		}
 
-		result.add(sendAvailableWorldList(value.stream().map(HubWorldDirectory::toData).toList()));
-
-		return result.size() == 1 ? result.getFirst() : CompletableFuture.allOf(result.toArray(new CompletableFuture[0]));
+		return upload(iconsToUpload, null).thenComposeAsync(ignored -> sendAvailableWorldList(List.copyOf(data.values())));
 	}
 
 	public CompletableFuture<Void> sendDebug(CompressionMethod compression, ByteBuffer bodyBuf) throws IOException {
@@ -520,7 +556,7 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 		return future;
 	}
 
-	public void uploadFile(
+	public void uploadFileBlocking(
 		String token,
 		Path file,
 		long offset,
@@ -528,7 +564,7 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 	) throws IOException {
 		long size = Files.size(file);
 
-		int maxChunkSize = (int) Math.min(size, 4_194_304); // 4 MB chunk
+		int maxChunkSize = (int) Math.min(size, 4_194_304); // 4 MiB chunk
 		long remaining = size - offset;
 		int totalChunks = Mth.ceil(remaining / (float) maxChunkSize);
 
@@ -617,28 +653,80 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 	}
 
 	public CompletableFuture<UploadResponse> sendUploadRequest(List<UploadRequestFile> files) {
-		return CompletableFuture.supplyAsync(() -> {
-			try {
-				return HubAPI.CoreAPI.postUpload(new UploadRequest(gatewayToken, files));
-			} catch (Exception ex) {
-				VidLib.LOGGER.error("Failed to request file upload", ex);
-				return new UploadResponse(List.of(), 0L);
+		return HubAPI.CoreAPI.postUpload(new UploadRequest(gatewayToken, files));
+	}
+
+	public CompletableFuture<Void> upload(List<UploadRequestFile.WithPath> files, @Nullable ProgressItem progressItem) {
+		if (files.isEmpty()) {
+			return CompletableFuture.completedFuture(null);
+		}
+
+		return sendUploadRequest(files.stream().map(UploadRequestFile.WithPath::file).toList()).thenAcceptAsync(response -> {
+			var map = files.stream().collect(Collectors.toMap(v -> v.file().id(), Function.identity()));
+
+			try (var executor = Executors.newFixedThreadPool(5)) {
+				var list = new ArrayList<CompletableFuture<Void>>();
+
+				for (var entry : response.files()) {
+					if (entry.offset() == entry.size()) {
+						continue;
+					}
+
+					var f = map.get(entry.id());
+
+					if (f == null || Files.notExists(f.path())) {
+						throw new NullPointerException("Path of " + entry.id() + " not found");
+					}
+
+					long offset = entry.offset();
+
+					if (offset > 0L) {
+						try {
+							var partialChecksum = entry.offsetChecksum().type().digest(f.path(), 0L, entry.offset(), null);
+
+							if (!partialChecksum.equals(entry.offsetChecksum())) {
+								VidLib.LOGGER.info("Partial checksum of " + entry.id() + " didn't match, restarting upload");
+								offset = 0L;
+							}
+						} catch (Exception ex) {
+							throw new RuntimeException("Error generating checksum of " + entry.id(), ex);
+						}
+					}
+
+					var fileItem = progressItem == null ? null : progressItem.queue.addItem(entry.id());
+
+					var httpUpload = HubAPI.CoreAPI.postFileStorage(
+						entry.token(),
+						f.path(),
+						offset,
+						response.httpBodyLimit(),
+						fileItem,
+						executor
+					);
+
+					if (httpUpload != null) {
+						list.add(httpUpload);
+					} else {
+						var offset1 = offset;
+
+						list.add(CompletableFuture.runAsync(() -> {
+							try {
+								uploadFileBlocking(
+									entry.token(),
+									f.path(),
+									offset1,
+									fileItem
+								);
+							} catch (Exception ex) {
+								VidLib.LOGGER.error("Failed to get path of file " + entry.id(), ex);
+							}
+						}, executor));
+					}
+				}
+
+				CompletableFuture.allOf(list.toArray(new CompletableFuture[0])).join();
 			}
-		}, HubAPI.WEBSOCKET_EXECUTOR.get());
-	}
-
-	public CompletableFuture<Void> upload(List<UploadRequestFile> files, IOFunction<String, Path> paths) {
-		return sendUploadRequest(files).thenCompose(response -> {
-			var list = new ArrayList<CompletableFuture<Void>>();
-
-			// FIXME
-
-			return CompletableFuture.allOf(list.toArray(new CompletableFuture[0]));
-		});
-	}
-
-	public CompletableFuture<Void> sendFinishUpload(List<HubFileAction> actions) {
-		return send("finish_upload", HubFileAction.LIST_CODEC.encodeStart(JsonOps.INSTANCE, actions).getOrThrow());
+		}, Util.nonCriticalIoPool());
 	}
 
 	public CompletableFuture<Void> sendAvailableWorldList(List<HubWorld> list) {

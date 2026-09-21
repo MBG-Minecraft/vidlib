@@ -9,6 +9,7 @@ public record HubUserCapabilities(
 	boolean multiplayer,
 	boolean viewLocalReplays,
 	boolean viewRemoteReplays,
+	boolean viewRemoteWorlds,
 	boolean autoUploadFiles,
 	boolean uploadUserFiles,
 	boolean requireLink,
@@ -19,6 +20,7 @@ public record HubUserCapabilities(
 	public static final HubUserCapabilities DEFAULT = new HubUserCapabilities(
 		DEFAULT_ENABLE_ADMIN_BUTTONS,
 		true,
+		DEFAULT_ENABLE_ADMIN_BUTTONS,
 		DEFAULT_ENABLE_ADMIN_BUTTONS,
 		false,
 		true,
@@ -34,6 +36,7 @@ public record HubUserCapabilities(
 		Codec.BOOL.optionalFieldOf("multiplayer", DEFAULT.multiplayer).forGetter(HubUserCapabilities::multiplayer),
 		Codec.BOOL.optionalFieldOf("view_local_replays", DEFAULT.viewLocalReplays).forGetter(HubUserCapabilities::viewLocalReplays),
 		Codec.BOOL.optionalFieldOf("view_remote_replays", DEFAULT.viewRemoteReplays).forGetter(HubUserCapabilities::viewRemoteReplays),
+		Codec.BOOL.optionalFieldOf("view_remote_worlds", DEFAULT.viewRemoteWorlds).forGetter(HubUserCapabilities::viewRemoteWorlds),
 		Codec.BOOL.optionalFieldOf("auto_upload_files", DEFAULT.autoUploadFiles).forGetter(HubUserCapabilities::autoUploadFiles),
 		Codec.BOOL.optionalFieldOf("upload_user_files", DEFAULT.uploadUserFiles).forGetter(HubUserCapabilities::uploadUserFiles),
 		Codec.BOOL.optionalFieldOf("require_link", DEFAULT.requireLink).forGetter(HubUserCapabilities::requireLink),

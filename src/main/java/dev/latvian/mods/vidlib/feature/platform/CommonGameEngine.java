@@ -10,6 +10,7 @@ import dev.latvian.mods.vidlib.feature.location.WarpLocation;
 import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
+import dev.latvian.mods.vidlib.util.RuntimeDebugger;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldDirectory;
 import dev.mrbeastgaming.mods.hub.api.project.UsedPort;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
@@ -551,6 +552,12 @@ public class CommonGameEngine {
 			list.add(UsedPort.tcp("Game", server.getPort()));
 		}
 
+		int port = RuntimeDebugger.getJdwpListenerPort();
+
+		if (port != -1) {
+			list.add(UsedPort.tcp("JDWP", port));
+		}
+
 		if (server instanceof DedicatedServer dedicatedServer) {
 			if (dedicatedServer.getProperties().enableRcon) {
 				list.add(UsedPort.tcp("RCON", dedicatedServer.getProperties().rconPort));
@@ -565,7 +572,8 @@ public class CommonGameEngine {
 	public void getAvailableWorlds(MinecraftServer server, List<HubWorldDirectory> list) {
 		try {
 			var root = PlatformHelper.CURRENT.getGameDirectory().toRealPath().toAbsolutePath();
-			list.add(HubWorldDirectory.of(root, server.getWorldData().getLevelName(), server.getWorldPath(LevelResource.ROOT)));
+			var path = server.getWorldPath(LevelResource.ROOT).toRealPath();
+			list.add(HubWorldDirectory.of(root, server.getWorldData().getLevelName(), path.getFileName().toString(), path));
 		} catch (Exception ex) {
 			VidLib.LOGGER.error("Failed to list available world", ex);
 		}

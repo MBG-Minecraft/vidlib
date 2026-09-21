@@ -2,13 +2,19 @@ package dev.mrbeastgaming.mods.hub.api.gateway;
 
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
+import dev.latvian.mods.klib.io.IOUtils;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.misc.command.BackupCommand;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubServerSessionData;
 import dev.mrbeastgaming.mods.hub.api.project.UsedPort;
+import dev.mrbeastgaming.mods.hub.file.ChecksumPath;
+import dev.mrbeastgaming.mods.hub.file.UploadRequestFile;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -17,6 +23,7 @@ import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.net.URI;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 
@@ -155,7 +162,28 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 		for (var world : worlds) {
 			if (world.id().equals(data.worldId()) && world.path().equals(data.path())) {
 				VidLib.LOGGER.warn(data.sendingTo().name() + " requested world " + data.path() + " upload");
-				// HubAPI.apiUpload();
+
+				BackupCommand.backup(server, world.directory(), Instant.now(), "hub-upload").thenAcceptAsync(path -> {
+					var progressItem = ProgressQueue.queueSingleItem("Uploading world...");
+
+					try {
+						VidLib.LOGGER.info("Uploading " + path + "...");
+						var files = UploadRequestFile.loadDirectory("", path, null);
+						event.gateway().upload(files, progressItem).join();
+						HubAPI.MinecraftAPI.postCompleteWorldRequest(data.token(), files.stream().map(f -> new ChecksumPath(f.file().checksum(), f.file().id())).toList());
+						VidLib.LOGGER.info("Cleaning up...");
+					} catch (Exception ex) {
+						VidLib.LOGGER.error("Error uploading world " + path + " to Hub", ex);
+					} finally {
+						try {
+							IOUtils.deleteRecursively(path);
+						} catch (Exception ex) {
+							VidLib.LOGGER.error("Error deleting temp world " + path, ex);
+						}
+
+						progressItem.setDone();
+					}
+				}, Util.nonCriticalIoPool());
 				return;
 			}
 		}

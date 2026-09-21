@@ -7,17 +7,19 @@ import dev.latvian.mods.klib.util.Hex32;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.Optional;
 
 public record HubUserDisplayData(
 	Hex32 id,
 	String name,
-	String avatarUrl
+	Optional<URI> avatarUrl
 ) {
 	public static final MapCodec<HubUserDisplayData> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Hex32.CODEC.fieldOf("id").forGetter(HubUserDisplayData::id),
 		Codec.STRING.optionalFieldOf("name", "").forGetter(HubUserDisplayData::name),
-		Codec.STRING.optionalFieldOf("avatar_url", "").forGetter(HubUserDisplayData::avatarUrl)
+		HubAPI.URI_BASE_CODEC.optionalFieldOf("avatar_url").forGetter(HubUserDisplayData::avatarUrl)
 	).apply(instance, HubUserDisplayData::new));
 
 	public static final Codec<HubUserDisplayData> CODEC = MAP_CODEC.codec();

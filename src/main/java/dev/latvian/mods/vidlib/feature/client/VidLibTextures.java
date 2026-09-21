@@ -15,6 +15,7 @@ public interface VidLibTextures {
 	ClientAsset FOLDER = new ClientAsset(VidLib.id("misc/folder"));
 	ClientAsset ID_CARD = new ClientAsset(VidLib.id("misc/id_card"));
 	ClientAsset LOADING = new ClientAsset(VidLib.id("misc/loading"));
+	ClientAsset LOADING_SMALL = new ClientAsset(VidLib.id("misc/loading_small"));
 	ClientAsset MISSING = new ClientAsset(VidLib.id("misc/missing"));
 	ClientAsset NO = new ClientAsset(VidLib.id("misc/no"));
 	ClientAsset NO_OFF = new ClientAsset(VidLib.id("misc/no_off"));
@@ -24,4 +25,6 @@ public interface VidLibTextures {
 	ClientAsset YES = new ClientAsset(VidLib.id("misc/yes"));
 	ClientAsset YES_OFF = new ClientAsset(VidLib.id("misc/yes_off"));
 	ClientAsset YES_OUTLINE = new ClientAsset(VidLib.id("misc/yes_outline"));
+	ClientAsset PACK = new ClientAsset(VidLib.id("misc/pack"));
+	ClientAsset UNKNOWN_PACK = new ClientAsset(VidLib.id("misc/unknown_pack"));
 }

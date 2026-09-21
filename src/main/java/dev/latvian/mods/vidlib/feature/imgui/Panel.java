@@ -95,6 +95,10 @@ public class Panel {
 	public final boolean handle(ImGraphics graphics) {
 		int flags = setup(graphics);
 
+		if (flags == -1) {
+			return false;
+		}
+
 		if (style != PanelStyle.NORMAL && windowType != ImWindowType.DOCKED) {
 			flags |= ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize;
 
@@ -114,6 +118,10 @@ public class Panel {
 		postSetup(graphics, menuOpen);
 
 		if (menuOpen) {
+			if (menuBar != null) {
+				menuBar.buildMenuBar(graphics, false);
+			}
+
 			content(graphics);
 
 			if (shouldClose) {

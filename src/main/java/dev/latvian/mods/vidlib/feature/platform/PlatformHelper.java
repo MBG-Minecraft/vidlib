@@ -11,6 +11,7 @@ import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.number.EntityNumber;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
+import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.latvian.mods.vidlib.feature.prop.Props;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
@@ -223,5 +224,8 @@ public class PlatformHelper {
 				level.noSave = false;
 			}
 		}
+	}
+
+	public void displayProgressQueue(ProgressQueue queue) {
 	}
 }

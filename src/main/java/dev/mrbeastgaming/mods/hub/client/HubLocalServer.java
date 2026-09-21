@@ -13,8 +13,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
-import java.net.http.HttpResponse;
-
 public class HubLocalServer {
 	public static HTTPServer<HTTPRequest> webServer;
 
@@ -37,15 +35,15 @@ public class HubLocalServer {
 		var token = req.variable("token").asString();
 		var name = req.query("name").asString("Unknown");
 
-		var response = HubAPI.send(HubAPI.UserAPI.postRequestToken(token), HttpResponse.BodyHandlers.ofString());
+		var response = HubAPI.send(HubAPI.UserAPI.postRequestToken(token), true);
 
-		int statusCode = response.statusCode();
+		int statusCode = response.code();
 		var error = "";
 
 		var mc = Minecraft.getInstance();
 
 		if (statusCode / 100 == 2) {
-			var userToken = response.body().trim();
+			var userToken = response.string().trim();
 
 			if (userToken.isEmpty()) {
 				throw new BadRequestError("Invalid response token, try again");

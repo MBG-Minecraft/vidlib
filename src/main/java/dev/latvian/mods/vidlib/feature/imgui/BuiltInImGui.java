@@ -36,7 +36,10 @@ import dev.latvian.mods.vidlib.feature.skybox.ClientSkybox;
 import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
+import dev.latvian.mods.vidlib.util.ColoredText;
 import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
+import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
+import dev.mrbeastgaming.mods.hub.client.HubWorldsPanel;
 import dev.mrbeastgaming.mods.hub.client.LinkHubUserScreen;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
@@ -57,6 +60,15 @@ public class BuiltInImGui {
 	public static final ImBoolean SHOW_STYLE_EDITOR_TOOL = new ImBoolean(false);
 	public static final ImBoolean SHOW_BOTTOM_INFO_BAR = new ImBoolean(true);
 	public static Boolean showSounds = null;
+
+	public static final MenuItem HUB = MenuItem.menu(ImIcons.ACCOUNT, "Hub", (graphics, list) -> {
+		list.add(MenuItem.item(ImIcons.WORLD, "Worlds", HubWorldsPanel.INSTANCE).enabled(HubUserCapabilities.CURRENT.viewRemoteWorlds()));
+
+		list.add(MenuItem.SEPARATOR);
+
+		list.add(MenuItem.item(ImIcons.ACCOUNT, ColoredText.error("Log Out"), g -> {
+		}).enabled(HubUserCapabilities.CURRENT.viewRemoteReplays()));
+	});
 
 	public static final MenuItem OPEN = MenuItem.menu(ImIcons.OPEN, "Open", (graphics, list) -> {
 		list.add(MenuItem.item(ImIcons.MEMORY, "Memory Usage", MemoryUsagePanel.INSTANCE));
@@ -264,6 +276,8 @@ public class BuiltInImGui {
 	});
 
 	public static final MenuItem MAIN_MENU_BAR = MenuItem.root((graphics, list) -> {
+		list.add(HUB);
+
 		if (ClientGameEngine.INSTANCE.imGuiOpenMenu(graphics)) {
 			list.add(OPEN);
 		}
@@ -354,8 +368,6 @@ public class BuiltInImGui {
 
 		OPEN_PANELS.values().removeIf(panel -> panel.handle(graphics));
 
-		ProgressQueueImGui.handle(graphics);
-
 		NeoForge.EVENT_BUS.post(new ImGuiEvent(graphics));
 
 		if (SHOW_STACK_TOOL.get()) {
@@ -376,5 +388,7 @@ public class BuiltInImGui {
 				showSounds = null;
 			}
 		}
+
+		ProgressQueueImGui.handle(graphics);
 	}
 }
