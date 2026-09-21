@@ -30,9 +30,11 @@ import dev.mrbeastgaming.mods.hub.file.HubProjectFileLink;
 import dev.mrbeastgaming.mods.hub.file.UploadRequest;
 import dev.mrbeastgaming.mods.hub.file.UploadResponse;
 import net.minecraft.Util;
+import net.minecraft.util.FastBufferedInputStream;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -69,7 +71,7 @@ public interface HubAPI {
 			var response = MiscUtils.sendRetrying(HTTP_CLIENT, request, HttpResponse.BodyHandlers.ofInputStream());
 			var encoding = response.headers().firstValue("Content-Encoding").orElse("");
 
-			try (var in = CompressionMethod.of(encoding).in(response.body())) {
+			try (var in = CompressionMethod.of(encoding).in(new FastBufferedInputStream(response.body()))) {
 				return new HubAPIResponse(response, response.statusCode(), in.readAllBytes());
 			}
 		} else {
@@ -82,7 +84,7 @@ public interface HubAPI {
 		var response = MiscUtils.sendRetrying(HTTP_CLIENT, request, HttpResponse.BodyHandlers.ofInputStream());
 		var encoding = response.headers().firstValue("Content-Encoding").orElse("");
 
-		try (var in = CompressionMethod.of(encoding).in(response.body()); var out = Files.newOutputStream(to)) {
+		try (var in = CompressionMethod.of(encoding).in(new FastBufferedInputStream(response.body())); var out = new BufferedOutputStream(Files.newOutputStream(to))) {
 			in.transferTo(out);
 		}
 	}
@@ -360,12 +362,11 @@ public interface HubAPI {
 			return send(request("api/minecraft/worlds", Auth.REQUIRED).GET().build(), true).json(HubWorldsData.CODEC);
 		}
 
-		static boolean postWorldRequest(UUID requestId, String worldId, UUID sessionId, boolean updateExisting) throws Exception {
+		static boolean postWorldRequest(UUID requestId, String worldId, UUID sessionId) throws Exception {
 			var json = new JsonObject();
 			json.addProperty("request_id", UndashedUuid.toString(requestId));
 			json.addProperty("world_id", worldId);
 			json.addProperty("session_id", UndashedUuid.toString(sessionId));
-			json.addProperty("update_existing", updateExisting);
 			return send(request("api/minecraft/worlds/request", Auth.REQUIRED).POST(HttpRequest.BodyPublishers.ofString(json.toString())).build(), false).isOk();
 		}
 

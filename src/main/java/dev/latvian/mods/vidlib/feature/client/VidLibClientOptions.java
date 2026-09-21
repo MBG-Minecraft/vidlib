@@ -11,7 +11,6 @@ import net.minecraft.client.Options;
 import java.util.Arrays;
 
 public interface VidLibClientOptions {
-	OptionInstance<Boolean> ADMIN_PANEL = OptionInstance.createBoolean("options.vidlib.admin_panel", false);
 	OptionInstance<Boolean> SHOW_ANCHOR = OptionInstance.createBoolean("options.vidlib.show_anchor", false);
 	OptionInstance<Boolean> SHOW_ZONES = OptionInstance.createBoolean("options.vidlib.show_zones", false);
 	OptionInstance<Boolean> SHOW_ZONE_OUTER_BOUNDS = OptionInstance.createBoolean("options.vidlib.show_zone_outer_bounds", true);
@@ -71,7 +70,6 @@ public interface VidLibClientOptions {
 	);
 
 	OptionInstance<?>[] CONTROLS_OPTIONS = {
-		ADMIN_PANEL,
 	};
 
 	OptionInstance<?>[] ACCESSIBILITY_OPTIONS = {
@@ -84,10 +82,6 @@ public interface VidLibClientOptions {
 		LOCK_GUI_SCALE,
 		LOCK_IMGUI_SCROLL,
 	};
-
-	static boolean getAdminPanel() {
-		return ADMIN_PANEL.get();
-	}
 
 	static boolean getShowAnchor() {
 		return SHOW_ANCHOR.get();
@@ -119,8 +113,6 @@ public interface VidLibClientOptions {
 	}
 
 	static void process(Options.FieldAccess accessor) {
-		accessor.process("vidlib.admin_panel", ADMIN_PANEL);
-
 		accessor.process("vidlib.show_anchor", SHOW_ANCHOR);
 		accessor.process("vidlib.show_zones", SHOW_ZONES);
 		accessor.process("vidlib.show_zone_outer_bounds", SHOW_ZONE_OUTER_BOUNDS);

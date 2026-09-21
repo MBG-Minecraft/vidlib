@@ -1,6 +1,5 @@
 package dev.mrbeastgaming.mods.hub.api.gateway;
 
-import dev.latvian.mods.klib.io.IOUtils;
 import dev.latvian.mods.klib.io.bytes.ByteInput;
 import dev.latvian.mods.klib.io.checksum.Checksum;
 import dev.latvian.mods.vidlib.VidLib;
@@ -10,6 +9,7 @@ import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.mrbeastgaming.mods.hub.api.Auth;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
+import dev.mrbeastgaming.mods.hub.client.HubWorldsPanel;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.neoforged.neoforge.common.NeoForge;
@@ -19,6 +19,7 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -161,64 +162,69 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 
 	@Override
 	protected void handleDownloadWorld(ByteBuffer buffer) throws Exception {
-		VidLib.LOGGER.info("Downloading world...");
-
 		var data = ByteInput.of(buffer);
 		int flags = data.readVarInt();
-		var updateExisting = (flags & 1) != 0;
 		var requestId = data.readUUID();
 		var uniqueId = data.readUTF();
 		var count = data.readVarInt();
 
-		var fileDownloads = new ArrayList<FileDownload>(count);
+		var fileDownloads = new HashMap<String, FileDownload>(count);
 
-		var saves = PlatformHelper.CURRENT.getGameDirectory().resolve("saves");
-		var directory = saves.resolve(uniqueId);
-
-		if (!updateExisting) {
-			int rCount = 2;
-
-			while (Files.exists(directory)) {
-				directory = saves.resolve(uniqueId + " (" + rCount + ")");
-				rCount++;
-			}
-		}
+		var templateDir = PlatformHelper.CURRENT.getGameDirectory().resolve("saves-templates");
+		var directory = templateDir.resolve(uniqueId);
 
 		if (Files.notExists(directory)) {
 			Files.createDirectories(directory);
 		}
-
-		long totalSize = 0L;
 
 		for (int i = 0; i < count; i++) {
 			var checksum = Checksum.read(data);
 			var size = data.readVarLong();
 			var path = data.readUTF();
 			var url = data.readUTF();
-			fileDownloads.add(new FileDownload(checksum, size, path, url, directory.resolve(path)));
-			totalSize += size;
+			var filePath = directory.resolve(path);
+			fileDownloads.put(path, new FileDownload(checksum, size, path, url, filePath));
 		}
-
-		var progressItem = PROGRESS_BARS.get(requestId);
-
-		if (progressItem != null) {
-			progressItem.setLabel("Downloading...");
-			progressItem.setInfoText(ProgressItemNameFunction.BINARY_BYTE_SIZE);
-			progressItem.resetProgress();
-			progressItem.setSize(totalSize);
-			progressItem.setStarted();
-		}
-
-		var directory1 = directory;
 
 		Util.ioPool().execute(() -> {
-			try (var executor = Executors.newFixedThreadPool(10)) {
-				if (updateExisting) {
-					// TODO: Lazily replace files instead
-					IOUtils.deleteRecursively(directory1);
-				}
+			long totalSize = 0L;
 
-				for (var file : fileDownloads) {
+			try {
+				for (var entry : fileDownloads.entrySet()) {
+					var file = entry.getValue();
+
+					if (Files.exists(file.filePath()) && file.checksum().type().digest(file.filePath(), 0L, file.size(), null).equals(file.checksum())) {
+						entry.setValue(new FileDownload(file.checksum(), 0L, file.path(), file.url(), file.filePath()));
+					} else {
+						totalSize += file.size();
+					}
+				}
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+
+			var progressItem = PROGRESS_BARS.get(requestId);
+
+			if (progressItem != null) {
+				progressItem.setLabel("Downloading Template...");
+				progressItem.setInfoText(ProgressItemNameFunction.BINARY_BYTE_SIZE);
+				progressItem.resetProgress();
+				progressItem.setSize(totalSize);
+				progressItem.setStarted();
+			}
+
+			try (var stream = Files.walk(directory)) {
+				for (var file : stream.filter(Files::isRegularFile).toList()) {
+					if (!fileDownloads.containsKey(directory.relativize(file).toString())) {
+						Files.delete(file);
+					}
+				}
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+
+			try (var executor = Executors.newFixedThreadPool(20)) {
+				for (var file : fileDownloads.values()) {
 					var dir = file.filePath().getParent();
 
 					if (Files.notExists(dir)) {
@@ -228,7 +234,11 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 
 				var list = new ArrayList<CompletableFuture<Void>>();
 
-				for (var file : fileDownloads) {
+				for (var file : fileDownloads.values()) {
+					if (file.size() == 0L) {
+						continue;
+					}
+
 					list.add(CompletableFuture.runAsync(() -> {
 						var item = progressItem == null ? null : progressItem.queue.addItem();
 
@@ -236,21 +246,11 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 							item.setInfoText(file.path());
 							item.setSize(file.size());
 							item.setStarted();
+							progressItem.queue.display();
 						}
 
 						try {
 							HubAPI.download(HubAPI.request(file.url(), Auth.NOT_REQUIRED).build(), file.filePath());
-							var size = Files.size(file.filePath());
-
-							if (size != file.size()) {
-								VidLib.LOGGER.error("File size " + size + " of " + file.path() + " doesn't match " + file.size());
-							}
-
-							var checksum = file.checksum().type().digest(file.filePath(), 0L, size, null);
-
-							if (!checksum.equals(file.checksum())) {
-								VidLib.LOGGER.error("File checksum " + checksum + " of " + file.path() + " doesn't match " + file.checksum());
-							}
 
 							if (progressItem != null) {
 								progressItem.addProgress(file.size());
@@ -278,6 +278,8 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 				if (progressItem != null) {
 					progressItem.setDone();
 				}
+
+				HubWorldsPanel.INSTANCE.reload = true;
 			}
 		});
 	}

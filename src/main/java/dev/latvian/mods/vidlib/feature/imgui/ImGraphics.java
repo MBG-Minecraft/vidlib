@@ -80,7 +80,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		this.isReplay = ReplayAPI.getActive().isInReplay();
 		this.isExportingReplay = ReplayAPI.getActive().isExporting();
 		this.serverFeatures = inGame ? mc.level.getServerFeatures() : FeatureSet.EMPTY;
-		this.adminPanel = isReplay || VidLibClientOptions.getAdminPanel() && ClientGameEngine.INSTANCE.allowAdminPanel(mc.player);
+		this.adminPanel = isReplay || ClientGameEngine.INSTANCE.allowAdminPanel(mc.player);
 		this.isAdmin = inGame && (isSinglePlayer || mc.player.hasPermissions(2));
 		this.jsonOps = inGame ? mc.level.jsonOps() : JsonOps.INSTANCE;
 		this.nbtOps = inGame ? mc.level.nbtOps() : NbtOps.INSTANCE;

@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.misc.command;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.latvian.mods.klib.io.CompressionMethod;
+import dev.latvian.mods.klib.io.IOUtils;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
@@ -10,7 +11,6 @@ import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
-import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -19,14 +19,8 @@ import net.minecraft.world.level.storage.LevelResource;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.BasicFileAttributeView;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 public interface BackupCommand {
@@ -52,57 +46,18 @@ public interface BackupCommand {
 			var to = from.resolveSibling(fromName + "-" + name);
 			var toName = to.getFileName().toString();
 
-			List<Path> allPaths;
-
-			try (var stream = Files.walk(from)) {
-				allPaths = new ArrayList<>(stream.filter(p -> {
-					var n = p.getFileName().toString().toLowerCase(Locale.ROOT);
-					return !(n.endsWith(".lock") || n.equals("lock"));
-				}).sorted().toList());
-			}
-
 			return CompletableFuture.supplyAsync(() -> {
 				var item = ProgressQueue.queueSingleItem("Copying...");
 				item.setSize(0L);
-				item.setInfoText(ProgressItemNameFunction.COUNT);
+				item.setInfoText(ProgressItemNameFunction.BINARY_BYTE_SIZE);
+				item.setStarted();
 
-				for (var src : allPaths) {
-					if (Files.isDirectory(src)) {
-						var dst = to.resolve(from.relativize(src).toString());
-
-						try {
-							var attributes = Files.readAttributes(src, BasicFileAttributes.class);
-							Files.createDirectory(dst);
-							Files.getFileAttributeView(dst, BasicFileAttributeView.class).setTimes(attributes.lastModifiedTime(), attributes.lastAccessTime(), attributes.creationTime());
-						} catch (Exception ex) {
-							throw new RuntimeException("Error creating directory " + dst, ex);
-						}
-					} else {
-						item.addSize(1L);
-					}
+				try {
+					IOUtils.copyDirectory(from, to, true, item::setSize, item::addProgress);
+				} catch (Exception ex) {
+					VidLib.LOGGER.error("Error copying " + from, ex);
 				}
 
-				VidLib.LOGGER.info("Directories of " + toName + " created");
-
-				var list = new ArrayList<CompletableFuture<Void>>();
-
-				for (var src : allPaths) {
-					if (Files.isRegularFile(src)) {
-						var relativePath = from.relativize(src);
-						var dst = to.resolve(relativePath);
-
-						list.add(CompletableFuture.runAsync(() -> {
-							try {
-								Files.copy(src, dst, StandardCopyOption.COPY_ATTRIBUTES);
-								item.addProgress(1L);
-							} catch (Exception ex) {
-								VidLib.LOGGER.error("Error copying " + relativePath, ex);
-							}
-						}, Util.ioPool()));
-					}
-				}
-
-				CompletableFuture.allOf(list.toArray(new CompletableFuture[0])).join();
 				item.setDone();
 				VidLib.LOGGER.info("Files of " + toName + " created");
 				server.execute(() -> PlatformHelper.CURRENT.resumeSaving(server));

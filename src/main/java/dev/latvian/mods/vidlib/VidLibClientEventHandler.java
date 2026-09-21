@@ -107,10 +107,8 @@ import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.client.event.ToastAddEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
-import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.GameShuttingDownEvent;
-import org.lwjgl.glfw.GLFW;
 
 import java.nio.file.Files;
 import java.util.List;
@@ -281,12 +279,6 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void keyInput(InputEvent.Key event) {
-		if (event.getAction() == GLFW.GLFW_PRESS && VidLibKeys.adminPanelKeyMapping.matches(event.getKey(), event.getScanCode()) && VidLibKeys.adminPanelKeyMapping.getKeyModifier().isActive(KeyConflictContext.UNIVERSAL)) {
-			// var mc = Minecraft.getInstance();
-			// boolean adminPanel = !VidLibClientOptions.getAdminPanel();
-			// VidLibClientOptions.ADMIN_PANEL.set(adminPanel);
-			// mc.options.save();
-		}
 	}
 
 	@SubscribeEvent(priority = EventPriority.HIGH)

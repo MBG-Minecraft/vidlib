@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
-import dev.latvian.mods.vidlib.feature.misc.GlobalKeybinds;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.KeyMapping;
@@ -22,7 +21,6 @@ public class VidLibKeys {
 	public static KeyMapping clearParticlesKeyMapping;
 	public static KeyMapping reloadKeyMapping;
 	public static KeyMapping repeatLastCommandKeyMapping;
-	public static KeyMapping adminPanelKeyMapping;
 	public static KeyMapping reloadShadersKeyMapping;
 	public static KeyMapping playerGlowKeyMapping;
 	public static KeyMapping capturePanoramaKeyMapping;
@@ -44,7 +42,6 @@ public class VidLibKeys {
 		clearParticlesKeyMapping = register(event, "key.vidlib.clear_particles", KeyModifier.NONE, GLFW.GLFW_KEY_UNKNOWN);
 		reloadKeyMapping = register(event, "key.vidlib.reload", KeyModifier.NONE, GLFW.GLFW_KEY_R);
 		repeatLastCommandKeyMapping = register(event, "key.vidlib.repeat_last_command", KeyModifier.NONE, GLFW.GLFW_KEY_UNKNOWN);
-		adminPanelKeyMapping = register(event, "key.vidlib.admin_panel", KeyModifier.NONE, GLFW.GLFW_KEY_UNKNOWN, KeyConflictContext.UNIVERSAL);
 		reloadShadersKeyMapping = register(event, "key.vidlib.reload_shaders", KeyModifier.NONE, GLFW.GLFW_KEY_UNKNOWN);
 		playerGlowKeyMapping = register(event, "key.vidlib.player_glow", KeyModifier.NONE, GLFW.GLFW_KEY_GRAVE_ACCENT);
 		capturePanoramaKeyMapping = register(event, "key.vidlib.capture_panorama", KeyModifier.NONE, GLFW.GLFW_KEY_UNKNOWN);
@@ -55,12 +52,6 @@ public class VidLibKeys {
 	public static void handle(Minecraft mc) {
 		if (mc.player == null || mc.level == null) {
 			return;
-		}
-
-		if (adminPanelKeyMapping.getKey() == playerGlowKeyMapping.getKey()) {
-			adminPanelKeyMapping.setKey(InputConstants.getKey(GLFW.GLFW_KEY_MENU, 0));
-			playerGlowKeyMapping.setKey(InputConstants.getKey(GLFW.GLFW_KEY_GRAVE_ACCENT, 0));
-			GlobalKeybinds.saveKeybinds(mc.options);
 		}
 
 		while (freezeTickKeyMapping.consumeClick()) {
@@ -85,12 +76,6 @@ public class VidLibKeys {
 			if (!mc.commandHistory().history().isEmpty()) {
 				mc.runClientCommand(((ArrayListDeque<String>) mc.commandHistory().history()).getLast());
 			}
-		}
-
-		while (adminPanelKeyMapping.consumeClick()) {
-			boolean adminPanel = !VidLibClientOptions.getAdminPanel();
-			VidLibClientOptions.ADMIN_PANEL.set(adminPanel);
-			mc.options.save();
 		}
 
 		while (capturePanoramaKeyMapping.consumeClick()) {

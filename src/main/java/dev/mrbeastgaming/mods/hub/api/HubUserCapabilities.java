@@ -7,8 +7,10 @@ import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 public record HubUserCapabilities(
 	boolean singleplayer,
 	boolean multiplayer,
+	boolean adminPanel,
 	boolean viewLocalReplays,
 	boolean viewRemoteReplays,
+	boolean viewDrive,
 	boolean viewRemoteWorlds,
 	boolean autoUploadFiles,
 	boolean uploadUserFiles,
@@ -20,6 +22,8 @@ public record HubUserCapabilities(
 	public static final HubUserCapabilities DEFAULT = new HubUserCapabilities(
 		DEFAULT_ENABLE_ADMIN_BUTTONS,
 		true,
+		DEFAULT_ENABLE_ADMIN_BUTTONS,
+		DEFAULT_ENABLE_ADMIN_BUTTONS,
 		DEFAULT_ENABLE_ADMIN_BUTTONS,
 		DEFAULT_ENABLE_ADMIN_BUTTONS,
 		false,
@@ -34,8 +38,10 @@ public record HubUserCapabilities(
 	public static final Codec<HubUserCapabilities> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Codec.BOOL.optionalFieldOf("singleplayer", DEFAULT.singleplayer).forGetter(HubUserCapabilities::singleplayer),
 		Codec.BOOL.optionalFieldOf("multiplayer", DEFAULT.multiplayer).forGetter(HubUserCapabilities::multiplayer),
+		Codec.BOOL.optionalFieldOf("admin_panel", DEFAULT.adminPanel).forGetter(HubUserCapabilities::adminPanel),
 		Codec.BOOL.optionalFieldOf("view_local_replays", DEFAULT.viewLocalReplays).forGetter(HubUserCapabilities::viewLocalReplays),
 		Codec.BOOL.optionalFieldOf("view_remote_replays", DEFAULT.viewRemoteReplays).forGetter(HubUserCapabilities::viewRemoteReplays),
+		Codec.BOOL.optionalFieldOf("view_drive", DEFAULT.viewDrive).forGetter(HubUserCapabilities::viewDrive),
 		Codec.BOOL.optionalFieldOf("view_remote_worlds", DEFAULT.viewRemoteWorlds).forGetter(HubUserCapabilities::viewRemoteWorlds),
 		Codec.BOOL.optionalFieldOf("auto_upload_files", DEFAULT.autoUploadFiles).forGetter(HubUserCapabilities::autoUploadFiles),
 		Codec.BOOL.optionalFieldOf("upload_user_files", DEFAULT.uploadUserFiles).forGetter(HubUserCapabilities::uploadUserFiles),

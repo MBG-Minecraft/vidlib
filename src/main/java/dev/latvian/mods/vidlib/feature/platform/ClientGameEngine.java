@@ -35,8 +35,6 @@ import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.api.HubUserData;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
 import dev.mrbeastgaming.mods.hub.api.project.HubProjectData;
-import dev.mrbeastgaming.mods.hub.client.LinkHubUserScreen;
-import dev.mrbeastgaming.mods.hub.client.LinkMinecraftScreen;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
@@ -53,7 +51,6 @@ import net.minecraft.client.gui.components.toasts.AdvancementToast;
 import net.minecraft.client.gui.components.toasts.RecipeToast;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.multiplayer.ServerData;
@@ -346,17 +343,12 @@ public class ClientGameEngine {
 		if (hubUser == null) {
 			graphics.pushStack();
 			graphics.setErrorText();
-
-			if (ImGui.menuItem(ImIcons.WARNING + "###link-hub-profile")) {
-				if (!graphics.inGame) {
-					LinkHubUserScreen.open(graphics.mc);
-				}
-			}
+			ImGui.text(ImIcons.WARNING.toString());
 
 			if (ImGui.isItemHovered()) {
 				hubTooltip.add("MrBeast Gaming Hub profile not linked!");
 				hubTooltip.add("");
-				hubTooltip.add("Click here to link your profile!");
+				hubTooltip.add("Click Hub -> Link Profile!");
 			}
 
 			graphics.popStack();
@@ -366,17 +358,7 @@ public class ClientGameEngine {
 
 			graphics.pushStack();
 			graphics.setText(mcProfile == null || hubProject == null ? ImColorVariant.YELLOW : ImColorVariant.GREEN);
-
-			if (ImGui.menuItem(ImIcons.CHECK + "###link-hub-profile")) {
-				if (!graphics.inGame) {
-					if (Screen.hasShiftDown()) {
-						LinkHubUserScreen.open(graphics.mc);
-					} else if (mcProfile == null) {
-						LinkMinecraftScreen.handle(graphics.mc, true);
-					}
-				}
-			}
-
+			ImGui.text(ImIcons.CHECK.toString());
 			graphics.popStack();
 
 			if (ImGui.isItemHovered()) {
@@ -907,7 +889,7 @@ public class ClientGameEngine {
 	}
 
 	public boolean allowAdminPanel(@Nullable LocalPlayer player) {
-		return true;
+		return HubUserCapabilities.CURRENT.adminPanel();
 	}
 
 	public boolean shouldRender2DPlayerName(Minecraft mc, LocalPlayer self, Player player) {
@@ -923,11 +905,11 @@ public class ClientGameEngine {
 	}
 
 	public boolean imGuiOpenMenu(ImGraphics graphics) {
-		return graphics.adminPanel && graphics.isAdmin;
+		return graphics.adminPanel;
 	}
 
 	public boolean imGuiConfigMenu(ImGraphics graphics) {
-		return graphics.adminPanel && graphics.isAdmin;
+		return graphics.adminPanel;
 	}
 
 	public boolean imGuiDebugMenu(ImGraphics graphics) {
@@ -939,7 +921,7 @@ public class ClientGameEngine {
 	}
 
 	public boolean imGuiWarpMenu(ImGraphics graphics) {
-		return true;
+		return graphics.adminPanel;
 	}
 
 	public boolean hideActionBarText(Minecraft mc, Component component) {

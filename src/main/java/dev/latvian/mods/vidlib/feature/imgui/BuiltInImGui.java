@@ -38,14 +38,19 @@ import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import dev.latvian.mods.vidlib.util.ColoredText;
 import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
+import dev.mrbeastgaming.mods.hub.api.HubMinecraftProfileData;
 import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
+import dev.mrbeastgaming.mods.hub.api.HubUserData;
+import dev.mrbeastgaming.mods.hub.client.HubDrivePanel;
 import dev.mrbeastgaming.mods.hub.client.HubWorldsPanel;
 import dev.mrbeastgaming.mods.hub.client.LinkHubUserScreen;
+import dev.mrbeastgaming.mods.hub.client.LinkMinecraftScreen;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.common.NeoForge;
@@ -62,12 +67,26 @@ public class BuiltInImGui {
 	public static Boolean showSounds = null;
 
 	public static final MenuItem HUB = MenuItem.menu(ImIcons.ACCOUNT, "Hub", (graphics, list) -> {
+		list.add(MenuItem.item(ImIcons.STORAGE, "Drive", HubDrivePanel.INSTANCE).enabled(HubUserCapabilities.CURRENT.viewDrive()));
 		list.add(MenuItem.item(ImIcons.WORLD, "Worlds", HubWorldsPanel.INSTANCE).enabled(HubUserCapabilities.CURRENT.viewRemoteWorlds()));
 
-		list.add(MenuItem.SEPARATOR);
+		if (!graphics.inGame) {
+			list.add(MenuItem.SEPARATOR);
 
-		list.add(MenuItem.item(ImIcons.ACCOUNT, ColoredText.error("Log Out"), g -> {
-		}).enabled(HubUserCapabilities.CURRENT.viewRemoteReplays()));
+			list.add(MenuItem.item(ImIcons.ACCOUNT, ColoredText.error("Link Profile"), g -> {
+				var hubUser = HubUserData.SELF;
+
+				if (hubUser == null) {
+					LinkHubUserScreen.open(graphics.mc);
+				} else {
+					if (Screen.hasShiftDown()) {
+						LinkHubUserScreen.open(graphics.mc);
+					} else if (HubMinecraftProfileData.SELF == null) {
+						LinkMinecraftScreen.handle(graphics.mc, true);
+					}
+				}
+			}).enabled(HubUserCapabilities.CURRENT.viewRemoteReplays()));
+		}
 	});
 
 	public static final MenuItem OPEN = MenuItem.menu(ImIcons.OPEN, "Open", (graphics, list) -> {

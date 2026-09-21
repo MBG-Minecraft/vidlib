@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public record HubWorldsData(
 	int fetching,
@@ -69,8 +70,8 @@ public record HubWorldsData(
 
 	public static HubWorldsData CURRENT = new HubWorldsData(TYPE_NOT_STARTED, Int2ObjectMaps.emptyMap(), Int2ObjectMaps.emptyMap(), List.of());
 
-	public static void update() {
-		CURRENT = new HubWorldsData(TYPE_FETCHING, Int2ObjectMaps.emptyMap(), Int2ObjectMaps.emptyMap(), List.of());
+	public static void update(Consumer<HubWorldsData> callback) {
+		CURRENT = new HubWorldsData(TYPE_FETCHING, CURRENT.relevantProjects, CURRENT.relevantUsers, CURRENT.worlds);
 
 		CompletableFuture.runAsync(() -> {
 			try {
@@ -79,6 +80,8 @@ public record HubWorldsData(
 				ex.printStackTrace();
 				CURRENT = new HubWorldsData(TYPE_ERROR, Int2ObjectMaps.emptyMap(), Int2ObjectMaps.emptyMap(), List.of());
 			}
+
+			callback.accept(CURRENT);
 		}, Util.nonCriticalIoPool());
 	}
 }

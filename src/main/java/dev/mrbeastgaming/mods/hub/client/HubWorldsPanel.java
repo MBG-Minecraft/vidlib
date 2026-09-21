@@ -1,19 +1,25 @@
 package dev.mrbeastgaming.mods.hub.client;
 
+import dev.latvian.mods.klib.io.IOUtils;
 import dev.latvian.mods.klib.util.StringUtils;
+import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.client.URITextures;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
+import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
 import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubClientSessionData;
+import dev.mrbeastgaming.mods.hub.api.HubUserDisplayData;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldsData;
+import dev.mrbeastgaming.mods.hub.api.project.HubProjectDisplayData;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiWindowFlags;
@@ -33,10 +39,13 @@ import java.util.UUID;
 public class HubWorldsPanel extends Panel {
 	public static final HubWorldsPanel INSTANCE = new HubWorldsPanel();
 	public static final Map<String, UUID> PROGRESS = new HashMap<>();
-	public static Set<String> downloadedWorlds = Set.of();
+	public static Set<String> templates = Set.of();
+	public static Set<String> saves = Set.of();
 	public static final ImString SEARCH = ImGuiUtils.resizableString();
+	public static final HubProjectDisplayData[] PROJECT_FILTER = new HubProjectDisplayData[1];
+	public static final HubUserDisplayData[] USER_FILTER = new HubUserDisplayData[1];
 
-	private boolean update = true;
+	public boolean reload = true;
 
 	public HubWorldsPanel() {
 		super("hub-worlds", "Worlds");
@@ -44,11 +53,24 @@ public class HubWorldsPanel extends Panel {
 	}
 
 	private void menuBar(List<MenuItem> items) {
-		items.add(MenuItem.item(ImIcons.RELOAD, "Update", g -> update = true));
+		items.add(MenuItem.item(ImIcons.RELOAD, "Reload", g -> reload = true));
+		items.add(MenuItem.SEPARATOR);
+
+		items.add(MenuItem.custom(graphics -> {
+			ImGui.setNextItemWidth(300F);
+			ImGui.inputTextWithHint("###search", ImIcons.SEARCH + " Search...", SEARCH);
+		}));
+
+		items.add(MenuItem.SEPARATOR);
 
 		items.add(MenuItem.custom(graphics -> {
 			ImGui.setNextItemWidth(200F);
-			ImGui.inputTextWithHint("###search", ImIcons.SEARCH + " Search...", SEARCH);
+			graphics.combo("###project-filter", PROJECT_FILTER, "Any Project", HubWorldsData.CURRENT.relevantProjects().values().toArray(HubProjectDisplayData[]::new), HubProjectDisplayData::name);
+		}));
+
+		items.add(MenuItem.custom(graphics -> {
+			ImGui.setNextItemWidth(200F);
+			graphics.combo("###user-filter", USER_FILTER, "Any User", HubWorldsData.CURRENT.relevantUsers().values().toArray(HubUserDisplayData[]::new), HubUserDisplayData::name);
 		}));
 	}
 
@@ -70,17 +92,39 @@ public class HubWorldsPanel extends Panel {
 
 	@Override
 	public void content(ImGraphics graphics) {
-		if (update) {
-			HubWorldsData.update();
-			downloadedWorlds = Set.of();
-			update = false;
+		if (reload) {
+			HubWorldsData.update(data -> {
+				var savesDir = PlatformHelper.CURRENT.getGameDirectory().resolve("saves");
+				var templatesDir = PlatformHelper.CURRENT.getGameDirectory().resolve("saves-templates");
 
-			Util.ioPool().execute(() -> {
-				try (var stream = Files.list(PlatformHelper.CURRENT.getGameDirectory().resolve("saves"))) {
-					downloadedWorlds = Set.copyOf(stream.filter(Files::isDirectory).map(Path::getFileName).map(Path::toString).toList());
-				} catch (Exception ignored) {
+				try {
+					if (Files.notExists(savesDir)) {
+						Files.createDirectories(savesDir);
+					}
+
+					if (Files.notExists(templatesDir)) {
+						Files.createDirectories(templatesDir);
+					}
+				} catch (Exception ex) {
 				}
+
+				try (var stream = Files.list(savesDir)) {
+					saves = Set.copyOf(stream.filter(Files::isDirectory).map(Path::getFileName).map(Path::toString).toList());
+				} catch (Exception ignored) {
+					saves = Set.of();
+				}
+
+				try (var stream = Files.list(templatesDir)) {
+					templates = Set.copyOf(stream.filter(Files::isDirectory).map(Path::getFileName).map(Path::toString).toList());
+				} catch (Exception ignored) {
+					templates = Set.of();
+				}
+
+				PROJECT_FILTER[0] = PROJECT_FILTER[0] == null ? null : data.relevantProjects().get(PROJECT_FILTER[0].id().raw());
+				USER_FILTER[0] = USER_FILTER[0] == null ? null : data.relevantUsers().get(USER_FILTER[0].id().raw());
 			});
+
+			reload = false;
 		}
 
 		var data = HubWorldsData.CURRENT;
@@ -90,7 +134,7 @@ public class HubWorldsPanel extends Panel {
 		} else if (data.fetching() == HubWorldsData.TYPE_ERROR) {
 			ImGui.text("Error!");
 		} else if (data.fetching() == HubWorldsData.TYPE_DONE) {
-			ImGui.text(data.worlds().size() + " Worlds:");
+			ImGui.text(data.worlds().size() + " Worlds");
 		}
 
 		float textSize = ImGui.getFontSize();
@@ -101,12 +145,22 @@ public class HubWorldsPanel extends Panel {
 			var project = data.relevantProjects().get(world.project().raw());
 			var user = data.relevantUsers().get(world.user().raw());
 
+			if (PROJECT_FILTER[0] != null && !PROJECT_FILTER[0].id().equals(project.id())) {
+				continue;
+			}
+
+			if (USER_FILTER[0] != null && !USER_FILTER[0].id().equals(user.id())) {
+				continue;
+			}
+
 			if (!world.search(search, project, user)) {
 				continue;
 			}
 
 			ImGui.separator();
 			ImGui.pushID(world.uniqueId());
+
+			ImGui.beginGroup();
 
 			ImGui.text(world.world().name());
 			graphics.pushStack();
@@ -121,7 +175,8 @@ public class HubWorldsPanel extends Panel {
 			ImGui.sameLine();
 			ImGui.beginGroup();
 
-			boolean isDownloaded = downloadedWorlds.contains(world.uniqueId());
+			boolean hasTemplate = templates.contains(world.uniqueId());
+			boolean hasSave = hasTemplate && saves.contains(world.uniqueId());
 
 			var progressUuid = PROGRESS.get(world.uniqueId());
 			var progressItem = progressUuid == null ? null : HubClientGateway.PROGRESS_BARS.get(progressUuid);
@@ -130,9 +185,9 @@ public class HubWorldsPanel extends Panel {
 				ImGui.beginDisabled();
 			}
 
-			if (ImGui.button(ImIcons.DOWNLOAD + " Download###download")) {
+			if (ImGui.button(ImIcons.DOWNLOAD + (hasTemplate ? " Update Template###update-template" : " Download Template###update-template"))) {
 				if (progressItem == null) {
-					requestDownload(graphics.mc, world, false);
+					requestDownload(graphics.mc, world);
 				}
 			}
 
@@ -140,37 +195,53 @@ public class HubWorldsPanel extends Panel {
 				ImGui.endDisabled();
 			}
 
-			if (!isDownloaded) {
+			if (!hasTemplate || progressItem != null) {
 				ImGui.beginDisabled();
 			}
 
-			if (ImGui.button(ImIcons.RELOAD + " Update Existing###update-existing")) {
-				if (isDownloaded) {
-					requestDownload(graphics.mc, world, true);
+			if (graphics.button(hasSave ? (ImIcons.RELOAD + " Re-create from Template###create-from-template") : (ImIcons.ADD + " Create from Template###create-from-template"), ImColorVariant.GREEN)) {
+				if (hasTemplate && progressItem == null) {
+					Util.ioPool().execute(() -> {
+						var uuid = UUID.randomUUID();
+						var item = ProgressQueue.queueSingleItem("Copying...");
+						item.setSize(0L);
+						item.setInfoText(ProgressItemNameFunction.BINARY_BYTE_SIZE);
+						item.setStarted();
+						HubClientGateway.PROGRESS_BARS.put(uuid, item);
+						PROGRESS.put(world.uniqueId(), uuid);
+
+						var src = PlatformHelper.CURRENT.getGameDirectory().resolve("saves-templates").resolve(world.uniqueId());
+						var dst = PlatformHelper.CURRENT.getGameDirectory().resolve("saves").resolve(world.uniqueId());
+
+						try {
+							if (Files.exists(dst)) {
+								IOUtils.deleteRecursively(dst);
+							}
+
+							IOUtils.copyDirectory(src, dst, true, item::setSize, item::addProgress);
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+
+						item.setDone();
+						HubClientGateway.PROGRESS_BARS.remove(uuid);
+						PROGRESS.remove(world.uniqueId());
+						VidLib.LOGGER.info("Created " + dst);
+						reload = true;
+					});
 				}
 			}
 
-			if (!isDownloaded) {
+			if (!hasTemplate || progressItem != null) {
 				ImGui.endDisabled();
 			}
 
-			ImGui.spacing();
+			ImGui.beginDisabled();
 
-			var defaultBar = true;
-
-			if (progressItem != null) {
-				var p = progressItem.progress.get();
-				var s = progressItem.size.get();
-
-				if (s > 0L) {
-					defaultBar = false;
-					ImGui.progressBar(Math.clamp((float) ((double) p / (double) s), 0F, 1F), 300F, 24F * scale, progressItem.infoText.getName(p, s));
-				}
+			if (graphics.button(ImIcons.STAR + " Favorite###favorite", ImColorVariant.YELLOW)) {
 			}
 
-			if (defaultBar) {
-				ImGui.progressBar(downloadedWorlds.contains(world.uniqueId()) ? 1F : 0F, 300F, 24F * scale, "");
-			}
+			ImGui.endDisabled();
 
 			ImGui.endGroup();
 
@@ -194,18 +265,35 @@ public class HubWorldsPanel extends Panel {
 			}
 
 			ImGui.endGroup();
+			ImGui.endGroup();
+			ImGui.sameLine();
+			ImGui.dummy(4F, 0F);
+			ImGui.sameLine();
+
+			ImGui.beginGroup();
 			ImGui.spacing();
+
+			if (progressItem != null) {
+				var p = progressItem.progress.get();
+				var s = progressItem.size.get();
+
+				if (s > 0L) {
+					ImGui.progressBar(Math.clamp((float) ((double) p / (double) s), 0F, 1F), 300F, 24F * scale, progressItem.infoText.getName(p, s));
+				}
+			}
+
+			ImGui.endGroup();
 
 			ImGui.popID();
 		}
 	}
 
-	private void requestDownload(Minecraft mc, HubWorldsData.AvailableWorld world, boolean updateExisting) {
+	private void requestDownload(Minecraft mc, HubWorldsData.AvailableWorld world) {
 		Util.nonCriticalIoPool().execute(() -> {
 			try {
 				var requestId = UUID.randomUUID();
 
-				if (!HubAPI.MinecraftAPI.postWorldRequest(requestId, world.uniqueId(), HubClientSessionData.ID, updateExisting)) {
+				if (!HubAPI.MinecraftAPI.postWorldRequest(requestId, world.uniqueId(), HubClientSessionData.ID)) {
 					return;
 				}
 
