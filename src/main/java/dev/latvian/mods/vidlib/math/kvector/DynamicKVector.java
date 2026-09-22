@@ -14,6 +14,7 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
 import imgui.ImGui;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 public record DynamicKVector(KNumber x, KNumber y, KNumber z) implements KVector, ImBuilderWithHolder.Factory {
 	public static final SimpleRegistryType<DynamicKVector> TYPE = SimpleRegistryType.dynamic("dynamic", RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -76,6 +77,7 @@ public record DynamicKVector(KNumber x, KNumber y, KNumber z) implements KVector
 	}
 
 	@Override
+	@Nullable
 	public Vec3 get(KNumberContext ctx) {
 		var px = x.get(ctx);
 		var py = y.get(ctx);
