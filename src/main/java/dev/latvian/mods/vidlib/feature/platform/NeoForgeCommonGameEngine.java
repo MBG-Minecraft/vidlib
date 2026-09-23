@@ -7,7 +7,7 @@ import dev.latvian.mods.vidlib.feature.integration.voicechat.VoiceChatIntegratio
 import dev.mrbeastgaming.mods.hub.api.gateway.AvailableWorldsEvent;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldDirectory;
 import dev.mrbeastgaming.mods.hub.api.gateway.UsedPortsEvent;
-import dev.mrbeastgaming.mods.hub.api.project.UsedPort;
+import dev.mrbeastgaming.mods.hub.api.data.HubUsedPort;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
@@ -52,7 +52,7 @@ public class NeoForgeCommonGameEngine extends CommonGameEngine {
 	}
 
 	@Override
-	public void getUsedPorts(MinecraftServer server, List<UsedPort> list) {
+	public void getUsedPorts(MinecraftServer server, List<HubUsedPort> list) {
 		super.getUsedPorts(server, list);
 		NeoForge.EVENT_BUS.post(new UsedPortsEvent(server, list));
 
@@ -67,7 +67,7 @@ public class NeoForgeCommonGameEngine extends CommonGameEngine {
 		NeoForge.EVENT_BUS.post(new AvailableWorldsEvent(server, list));
 	}
 
-	private void voiceChatIntegration(List<UsedPort> list) {
+	private void voiceChatIntegration(List<HubUsedPort> list) {
 		VoiceChatIntegration.addUsedPorts(list);
 	}
 }

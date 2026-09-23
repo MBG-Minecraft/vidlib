@@ -10,7 +10,6 @@ import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.io.CompressionMethod;
 import dev.latvian.mods.klib.io.CountingOutputStream;
 import dev.latvian.mods.klib.io.checksum.Checksum;
-import dev.latvian.mods.klib.io.checksum.NoChecksum;
 import dev.latvian.mods.klib.util.Hex32;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.klib.util.Lazy;
@@ -18,15 +17,13 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.mrbeastgaming.mods.hub.HubUserConfig;
+import dev.mrbeastgaming.mods.hub.api.data.HubChecksumPath;
+import dev.mrbeastgaming.mods.hub.api.data.HubMinecraftProfile;
+import dev.mrbeastgaming.mods.hub.api.data.HubProjectFileLink;
+import dev.mrbeastgaming.mods.hub.api.data.ProjectUploadResponseItem;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubCommonGateway;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
-import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldsData;
-import dev.mrbeastgaming.mods.hub.api.project.HubProjectReplaysData;
-import dev.mrbeastgaming.mods.hub.api.project.HubProjectsData;
-import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadRequestItem;
-import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadResponseItem;
-import dev.mrbeastgaming.mods.hub.file.ChecksumPath;
-import dev.mrbeastgaming.mods.hub.file.HubProjectFileLink;
+import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldsResponse;
 import dev.mrbeastgaming.mods.hub.file.UploadRequest;
 import dev.mrbeastgaming.mods.hub.file.UploadResponse;
 import net.minecraft.Util;
@@ -43,7 +40,6 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -107,8 +103,8 @@ public interface HubAPI {
 		return thread;
 	}));
 
-	static HttpRequest.Builder request(String path, Auth auth) {
-		var builder = HTTP_REQUEST_BASE.get().copy().uri(URI_BASE.resolve(path));
+	static HttpRequest.Builder request(URI uri, Auth auth) {
+		var builder = HTTP_REQUEST_BASE.get().copy().uri(uri);
 		builder.header("Accept-Encoding", "zstd, gzip, deflate, br");
 
 		if (auth == Auth.EXCLUDED) {
@@ -124,6 +120,10 @@ public interface HubAPI {
 		}
 
 		return builder;
+	}
+
+	static HttpRequest.Builder request(String path, Auth auth) {
+		return request(URI_BASE.resolve(path), auth);
 	}
 
 	static HttpRequest.BodyPublisher jsonBody(JsonElement body) {
@@ -142,12 +142,12 @@ public interface HubAPI {
 	@Nullable
 	static HubCommonGateway<?> getClientOrServerGateway() {
 		var gateway = getClientGateway();
-		return gateway == null ? HubServerGateway.instance : gateway;
+		return gateway == null ? HubServerGateway.get() : gateway;
 	}
 
 	interface CoreAPI {
-		static HubFullData getFullData() throws Exception {
-			return send(request("api/full-data", Auth.NOT_REQUIRED).build(), true).json(HubFullData.CODEC);
+		static HubFullDataResponse getFullData() throws Exception {
+			return send(request("api/full-data", Auth.NOT_REQUIRED).build(), true).json(HubFullDataResponse.CODEC);
 		}
 
 		static CompletableFuture<UploadResponse> postUpload(UploadRequest request) {
@@ -232,7 +232,7 @@ public interface HubAPI {
 					}
 
 					return send(request("api/file-storage/sweep", files.isEmpty() ? Auth.REQUIRED : Auth.NOT_REQUIRED)
-						.POST(HttpRequest.BodyPublishers.ofString(json.toString()))
+						.POST(jsonBody(json))
 						.build(), true
 					).json().getAsJsonObject().get("removed").getAsInt();
 				} catch (Exception ignored) {
@@ -253,113 +253,54 @@ public interface HubAPI {
 	}
 
 	interface ProjectAPI {
-		static HubProjectsData getAll() throws Exception {
-			return send(request("api/projects", Auth.NOT_REQUIRED).build(), true).json(HubProjectsData.CODEC);
+		static HubProjectsResponse getAll() throws Exception {
+			return send(request("api/projects", Auth.NOT_REQUIRED).build(), true).json(HubProjectsResponse.CODEC);
 		}
 
-		static HttpRequest getFullData(Hex32 project) {
-			return request("api/projects/" + project + "/full-data", Auth.NOT_REQUIRED).build();
+		static HubProjectFullDataResponse getFullData(Hex32 project) throws Exception {
+			return send(request("api/projects/" + project + "/full-data", Auth.NOT_REQUIRED).build(), true).json(HubProjectFullDataResponse.CODEC);
 		}
 
-		static List<ProjectUploadResponseItem> postUpload(String projectToken, List<ProjectUploadRequestItem> files) throws Exception {
-			var body = new JsonObject();
-			var filesJson = new JsonArray();
-
-			for (var file : files) {
-				var o = new JsonObject();
-
-				if (!file.uniqueId().isNil()) {
-					o.addProperty("unique_id", file.uniqueId().toString());
-				}
-
-				o.addProperty("checksum", file.checksum().toString());
-				o.addProperty("size", file.size());
-				o.addProperty("name", file.name());
-				o.add("type", file.type().toJson());
-
-				if (file.created() != null) {
-					o.addProperty("created", file.created().toString());
-				}
-
-				if (file.assignedTo() != Hex32.NONE) {
-					o.addProperty("assigned_to", file.assignedTo().toString());
-				}
-
-				if (file.assignedToMinecraft() != null) {
-					o.addProperty("assigned_to_minecraft", file.assignedToMinecraft().toString());
-				}
-
-				filesJson.add(o);
-			}
-
-			body.add("files", filesJson);
-
-			var response = send(request("api/projects/upload/" + projectToken, Auth.NOT_REQUIRED).POST(jsonBody(body)).build(), true).json().getAsJsonObject();
-
-			var maxChunkSize = response.get("max_chunk_size").getAsInt();
-
-			var result = new ArrayList<ProjectUploadResponseItem>();
-
-			for (var fileJson : response.getAsJsonArray("files")) {
-				var o = fileJson.getAsJsonObject();
-
-				result.add(new ProjectUploadResponseItem(
-					o.has("unique_id") ? Checksum.of(o.get("unique_id").getAsString()) : NoChecksum.INSTANCE,
-					Checksum.of(o.get("checksum").getAsString()),
-					o.has("name") ? o.get("name").getAsString() : "",
-					o.get("url").getAsString(),
-					o.get("offset").getAsLong(),
-					maxChunkSize
-				));
-			}
-
-			return result;
+		static List<ProjectUploadResponseItem> postUpload(ProjectUploadRequest data) throws Exception {
+			return send(request("api/projects/upload", Auth.NOT_REQUIRED).POST(jsonBody(ProjectUploadRequest.CODEC, data)).build(), true).json(ProjectUploadResponse.CODEC).files();
 		}
 
-		static HubProjectReplaysData getReplays(Hex32 project) throws Exception {
-			var response = send(request("api/projects/" + project + "/replays", Auth.REQUIRED).GET().build(), true).json().getAsJsonObject();
-			return HubProjectReplaysData.CODEC.parse(JsonOps.INSTANCE, response).getOrThrow();
+		static HubProjectReplaysResponse getReplays(Hex32 project) throws Exception {
+			return send(request("api/projects/" + project + "/replays", Auth.REQUIRED).GET().build(), true).json(HubProjectReplaysResponse.CODEC);
 		}
 
 		static void postLog(String projectToken, HubLogRequest request) throws Exception {
-			var json = HubLogRequest.CODEC.encodeStart(JsonOps.INSTANCE, request).getOrThrow();
-			HTTP_CLIENT.send(request("api/projects/log/" + projectToken, Auth.REQUIRED).POST(jsonBody(json)).build(), HttpResponse.BodyHandlers.discarding());
+			send(request("api/projects/log/" + projectToken, Auth.REQUIRED).POST(jsonBody(HubLogRequest.CODEC, request)).build(), false);
 		}
 
 		static void postLinkFiles(Hex32 project, List<HubProjectFileLink> files) throws Exception {
-			var json = HubProjectFileLink.LIST_CODEC.encodeStart(JsonOps.INSTANCE, files).getOrThrow();
-			HTTP_CLIENT.send(request("api/projects/" + project + "/link-files", Auth.NOT_REQUIRED).POST(jsonBody(json)).build(), HttpResponse.BodyHandlers.discarding());
+			send(request("api/projects/" + project + "/link-files", Auth.NOT_REQUIRED).POST(jsonBody(HubProjectFileLink.LIST_CODEC, files)).build(), false);
 		}
 	}
 
 	interface MinecraftAPI {
-		static HubClientSessionData postClientSession(HubClientSessionDataRequest request) throws Exception {
+		static HubClientSessionResponse postClientSession(HubClientSessionRequest request) throws Exception {
 			return send(request("api/minecraft/client-session?v=1", Auth.NOT_REQUIRED)
-				.POST(jsonBody(HubClientSessionDataRequest.CODEC, request))
+				.POST(jsonBody(HubClientSessionRequest.CODEC, request))
 				.timeout(Duration.ofSeconds(30L))
 				.build(), true
-			).json(HubClientSessionData.CODEC);
+			).json(HubClientSessionResponse.CODEC);
 		}
 
-		static HubServerSessionData postServerSession(HubServerSessionDataRequest request) throws Exception {
+		static HubServerSessionResponse postServerSession(HubServerSessionRequest request) throws Exception {
 			return send(request("api/minecraft/server-session?v=1", Auth.REQUIRED)
-				.POST(jsonBody(HubServerSessionDataRequest.CODEC, request))
+				.POST(jsonBody(HubServerSessionRequest.CODEC, request))
 				.timeout(Duration.ofSeconds(30L))
 				.build(), true
-			).json(HubServerSessionData.CODEC);
+			).json(HubServerSessionResponse.CODEC);
 		}
 
-		static HubMinecraftProfileData.LinkData getLink(String name) throws Exception {
-			var response = send(request("api/minecraft/link/" + name, Auth.REQUIRED).GET().build(), true).json().getAsJsonObject();
-
-			return new HubMinecraftProfileData.LinkData(
-				HubMinecraftProfileData.CODEC.parse(JsonOps.INSTANCE, response).getOrThrow(),
-				response.has("token") ? response.get("token").getAsString() : ""
-			);
+		static HubMinecraftProfile.LinkData getLink(String name) throws Exception {
+			return send(request("api/minecraft/link/" + name, Auth.REQUIRED).GET().build(), true).json(HubMinecraftProfile.LinkData.CODEC);
 		}
 
-		static HubWorldsData getWorlds() throws Exception {
-			return send(request("api/minecraft/worlds", Auth.REQUIRED).GET().build(), true).json(HubWorldsData.CODEC);
+		static HubWorldsResponse getWorlds() throws Exception {
+			return send(request("api/minecraft/worlds", Auth.REQUIRED).GET().build(), true).json(HubWorldsResponse.CODEC);
 		}
 
 		static boolean postWorldRequest(UUID requestId, String worldId, UUID sessionId) throws Exception {
@@ -367,10 +308,10 @@ public interface HubAPI {
 			json.addProperty("request_id", UndashedUuid.toString(requestId));
 			json.addProperty("world_id", worldId);
 			json.addProperty("session_id", UndashedUuid.toString(sessionId));
-			return send(request("api/minecraft/worlds/request", Auth.REQUIRED).POST(HttpRequest.BodyPublishers.ofString(json.toString())).build(), false).isOk();
+			return send(request("api/minecraft/worlds/request", Auth.REQUIRED).POST(jsonBody(json)).build(), false).isOk();
 		}
 
-		static boolean postCompleteWorldRequest(String token, List<ChecksumPath> files) throws Exception {
+		static boolean postCompleteWorldRequest(String token, List<HubChecksumPath> files) throws Exception {
 			var json = new JsonObject();
 			json.addProperty("token", token);
 
@@ -385,7 +326,7 @@ public interface HubAPI {
 
 			json.add("files", filesArr);
 
-			return send(request("api/minecraft/worlds/complete-request", Auth.REQUIRED).POST(HttpRequest.BodyPublishers.ofString(json.toString())).build(), false).isOk();
+			return send(request("api/minecraft/worlds/complete-request", Auth.REQUIRED).POST(jsonBody(json)).build(), false).isOk();
 		}
 	}
 }

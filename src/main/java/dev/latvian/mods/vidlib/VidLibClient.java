@@ -6,9 +6,9 @@ import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import dev.mrbeastgaming.mods.hub.HubUserConfig;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
-import dev.mrbeastgaming.mods.hub.api.HubClientSessionData;
-import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
-import dev.mrbeastgaming.mods.hub.api.HubUserData;
+import dev.mrbeastgaming.mods.hub.api.HubClientSession;
+import dev.mrbeastgaming.mods.hub.api.data.HubPossibleUser;
+import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
 import dev.mrbeastgaming.mods.hub.event.SyncClientFilesHubEvent;
 import dev.mrbeastgaming.mods.hub.file.HubDirectoryUploadBuilder;
@@ -33,16 +33,16 @@ public class VidLibClient {
 
 	public static void loadHub() {
 		var userConfig = HubUserConfig.load();
-		HubAPI.CLIENT_GATEWAY.setValue(() -> HubClientGateway.instance);
-		HubClientSessionData.load(Minecraft.getInstance(), userConfig, HubProjectConfig.INSTANCE.get());
+		HubAPI.CLIENT_GATEWAY.setValue(HubClientGateway::get);
+		HubClientSession.load(Minecraft.getInstance(), userConfig, HubProjectConfig.INSTANCE.get());
 	}
 
 	private static void wrapHubUploadBuilder(HubUploadBuilderBase builder) {
-		var user = HubUserData.SELF;
+		var user = HubClientSession.CURRENT.user;
 		var userId = Minecraft.getInstance().getUser().getProfileId();
 
 		if (user != null) {
-			builder.setAssignedTo(user.id());
+			builder.setAssignedTo(HubPossibleUser.of(user.id()));
 		}
 
 		builder.setAssignedToMinecraft(userId);
@@ -70,14 +70,13 @@ public class VidLibClient {
 	}
 
 	public static void checkFileSync(boolean isFirstTime) {
-		if (HubUserCapabilities.CURRENT.autoUploadFiles()) {
+		if (HubUserCapabilities.get().autoUploadFiles()) {
 			var entries = new ArrayList<HubFileUploads.Entry>();
 			var event = new SyncClientFilesHubEvent(entries, isFirstTime);
 			NeoForge.EVENT_BUS.post(event);
 
-
 			if (!entries.isEmpty()) {
-				HubAPI.SEQUENTIAL_EXECUTOR.get().execute(() -> HubFileUploads.syncFiles(entries, VidLibClient.createUploadQueue()));
+				HubAPI.SEQUENTIAL_EXECUTOR.get().execute(() -> HubFileUploads.syncFiles(HubClientSession.CURRENT.uploadContext, entries, createUploadQueue()));
 			}
 		}
 	}

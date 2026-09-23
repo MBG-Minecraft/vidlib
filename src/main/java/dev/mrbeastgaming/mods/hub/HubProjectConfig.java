@@ -3,7 +3,6 @@ package dev.mrbeastgaming.mods.hub;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.klib.util.Hex32;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
@@ -11,11 +10,9 @@ import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import java.nio.file.Files;
 
 public record HubProjectConfig(
-	Hex32 projectId,
 	String token
 ) {
 	public static final Codec<HubProjectConfig> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		Hex32.CODEC.fieldOf("project_id").forGetter(HubProjectConfig::projectId),
 		Codec.STRING.fieldOf("token").forGetter(HubProjectConfig::token)
 	).apply(instance, HubProjectConfig::new));
 

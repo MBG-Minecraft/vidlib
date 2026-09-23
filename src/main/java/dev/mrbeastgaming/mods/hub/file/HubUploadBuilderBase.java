@@ -1,14 +1,10 @@
 package dev.mrbeastgaming.mods.hub.file;
 
 import dev.latvian.mods.klib.io.FileInfo;
-import dev.latvian.mods.klib.io.bytes.ByteOutput;
 import dev.latvian.mods.klib.io.checksum.Checksum;
-import dev.latvian.mods.klib.io.checksum.MD5;
 import dev.latvian.mods.klib.io.checksum.NoChecksum;
-import dev.latvian.mods.klib.util.Hex32;
-import dev.latvian.mods.vidlib.VidLib;
-import dev.mrbeastgaming.mods.hub.HubProjectConfig;
-import dev.mrbeastgaming.mods.hub.api.HubFileType;
+import dev.mrbeastgaming.mods.hub.api.data.HubFileType;
+import dev.mrbeastgaming.mods.hub.api.data.HubPossibleUser;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
@@ -19,8 +15,7 @@ public abstract class HubUploadBuilderBase {
 	FileTypeProvider type = null;
 	UniqueIdProvider uniqueIdProvider = null;
 	FileCreationDateProvider creationDateProvider = null;
-	Hex32 assignedTo = Hex32.NONE;
-	UUID assignedToMinecraft = null;
+	HubPossibleUser assignedTo = HubPossibleUser.NONE;
 	String customName = "";
 
 	public void setFileNameProvider(FileNameProvider provider) {
@@ -47,12 +42,12 @@ public abstract class HubUploadBuilderBase {
 		this.creationDateProvider = provider;
 	}
 
-	public void setAssignedTo(Hex32 assignedTo) {
+	public void setAssignedTo(HubPossibleUser assignedTo) {
 		this.assignedTo = assignedTo;
 	}
 
 	public void setAssignedToMinecraft(UUID id) {
-		this.assignedToMinecraft = id;
+		setAssignedTo(HubPossibleUser.of(id));
 	}
 
 	public void setCustomName(String customName) {
@@ -64,22 +59,8 @@ public abstract class HubUploadBuilderBase {
 	}
 
 	@Nullable
-	Checksum getUniqueId(FileInfo fileInfo, HubProjectConfig projectConfig) throws Exception {
-		if (uniqueIdProvider == null && assignedToMinecraft != null) {
-			try {
-				var data = ByteOutput.ofByteBuilder(20 + fileInfo.name().length());
-				data.writeLong(assignedToMinecraft.getMostSignificantBits());
-				data.writeLong(assignedToMinecraft.getLeastSignificantBits());
-				data.writeUTF(fileInfo.name());
-				data.writeInt(projectConfig.projectId().raw());
-				return MD5.TYPE.digest(data.toByteArray());
-			} catch (Exception ex) {
-				VidLib.LOGGER.error("Failed to create a unique ID of " + fileInfo.path(), ex);
-				return null;
-			}
-		}
-
-		return uniqueIdProvider == null ? NoChecksum.INSTANCE : uniqueIdProvider.getUniqueId(fileInfo, projectConfig);
+	Checksum getUniqueId(FileInfo fileInfo, UploadContext ctx) throws Exception {
+		return uniqueIdProvider == null ? NoChecksum.INSTANCE : uniqueIdProvider.getUniqueId(fileInfo, ctx);
 	}
 
 	@Nullable

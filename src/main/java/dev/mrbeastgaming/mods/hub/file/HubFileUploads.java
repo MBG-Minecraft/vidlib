@@ -1,5 +1,6 @@
 package dev.mrbeastgaming.mods.hub.file;
 
+import dev.latvian.mods.klib.io.CompressionMethod;
 import dev.latvian.mods.klib.io.FileInfo;
 import dev.latvian.mods.klib.io.IOUtils;
 import dev.latvian.mods.klib.io.checksum.Checksum;
@@ -11,12 +12,12 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
-import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import dev.mrbeastgaming.mods.hub.api.Auth;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
-import dev.mrbeastgaming.mods.hub.api.HubFileType;
-import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadRequestItem;
-import dev.mrbeastgaming.mods.hub.api.project.ProjectUploadResponseItem;
+import dev.mrbeastgaming.mods.hub.api.ProjectUploadRequest;
+import dev.mrbeastgaming.mods.hub.api.data.HubFileType;
+import dev.mrbeastgaming.mods.hub.api.data.ProjectUploadRequestItem;
+import dev.mrbeastgaming.mods.hub.api.data.ProjectUploadResponseItem;
 import net.minecraft.util.FastBufferedInputStream;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.mutable.Mutable;
@@ -27,6 +28,7 @@ import java.net.HttpURLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -107,10 +109,8 @@ public class HubFileUploads {
 		return List.of(new Entry(fileInfo, uploadBuilder));
 	}
 
-	public static List<SyncedFile> syncFiles(List<Entry> fileList, @Nullable ProgressQueue progressQueue) {
-		var projectConfig = HubProjectConfig.INSTANCE.get();
-
-		if (projectConfig == null) {
+	public static List<SyncedFile> syncFiles(@Nullable UploadContext ctx, List<Entry> fileList, @Nullable ProgressQueue progressQueue) {
+		if (ctx == null) {
 			return List.of();
 		}
 
@@ -147,7 +147,7 @@ public class HubFileUploads {
 						progressItem.setStarted();
 					}
 
-					var uniqueId = upload.getUniqueId(file, projectConfig);
+					var uniqueId = upload.getUniqueId(file, ctx);
 
 					if (uniqueId == null) {
 						continue;
@@ -177,9 +177,8 @@ public class HubFileUploads {
 						meta.size(),
 						file.name(),
 						fileType,
-						created,
-						upload.assignedTo,
-						upload.assignedToMinecraft
+						created == null ? Instant.EPOCH : created,
+						upload.assignedTo
 					));
 
 					if (!syncFile.item.checksum().isNil()) {
@@ -209,7 +208,7 @@ public class HubFileUploads {
 			}
 
 			if (!map.isEmpty()) {
-				var list = HubAPI.ProjectAPI.postUpload(projectConfig.token().toString(), map.values().stream().map(SyncedFile::item).toList());
+				var list = HubAPI.ProjectAPI.postUpload(new ProjectUploadRequest(ctx.projectToken(), map.values().stream().map(SyncedFile::item).toList()));
 				VidLib.LOGGER.info("Uploading " + list.size() + " files to Beast Hub");
 
 				for (var item : list) {
@@ -307,6 +306,7 @@ public class HubFileUploads {
 		}
 
 		long size = file.meta.size();
+		var compressionMethod = CompressionMethod.ZSTD;
 
 		int totalParts = Mth.ceil((double) size / (double) chunk.length);
 		VidLib.LOGGER.info("Uploading " + item + " (" + totalParts + " parts)");
@@ -316,6 +316,7 @@ public class HubFileUploads {
 
 			while (true) {
 				int len = fileInputStream.readNBytes(chunk, 0, (int) Math.min(size - offset, chunk.length));
+				var compressed = compressionMethod.compress(chunk, 0, len);
 
 				var fullChunkString = StringUtils.siByteSize(offset) + " - " + StringUtils.siByteSize(offset + len) + " | " + Mth.ceil((double) offset / (double) chunk.length) + "/" + totalParts;
 
@@ -332,16 +333,16 @@ public class HubFileUploads {
 				connection.setRequestProperty("Tus-Resumable", "1.0.0");
 				connection.setRequestProperty("Content-Type", "application/offset+octet-stream");
 				connection.setRequestProperty("Upload-Offset", Long.toUnsignedString(offset));
-				connection.setRequestProperty("X-Content-Length-Hint", Long.toUnsignedString(len));
+				connection.setRequestProperty("X-Content-Length-Hint", Long.toUnsignedString(compressed.length));
 				connection.setRequestProperty("Transfer-Encoding", "chunked");
-				// connection.setRequestProperty("X-MBG-Hub-Compression-Method", compressionMethod.name);
+				connection.setRequestProperty("X-MBG-Hub-Compression-Method", compressionMethod.name);
 
 				if (progressItem != null) {
 					progressItem.setInfoText(ProgressItemNameFunction.SI_BYTE_SIZE);
 				}
 
 				try (var out = connection.getOutputStream()) {
-					int remaining = len;
+					int remaining = compressed.length;
 					int index = 0;
 
 					while (remaining > 0) {
@@ -351,7 +352,7 @@ public class HubFileUploads {
 							progressItem.addProgress(sent);
 						}
 
-						out.write(chunk, index, sent);
+						out.write(compressed, index, sent);
 						remaining -= sent;
 						index += sent;
 						out.flush();

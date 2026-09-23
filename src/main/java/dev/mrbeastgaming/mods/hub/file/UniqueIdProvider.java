@@ -5,7 +5,6 @@ import dev.latvian.mods.klib.io.bytes.ByteOutput;
 import dev.latvian.mods.klib.io.checksum.Checksum;
 import dev.latvian.mods.klib.io.checksum.MD5;
 import dev.latvian.mods.klib.io.checksum.NoChecksum;
-import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -16,26 +15,26 @@ public interface UniqueIdProvider {
 	interface OfData extends UniqueIdProvider {
 		record OfUUIDAndFileName(UUID id) implements OfData {
 			@Override
-			public boolean write(FileInfo fileInfo, HubProjectConfig projectConfig, ByteOutput data) throws Exception {
+			public boolean write(FileInfo fileInfo, UploadContext ctx, ByteOutput data) throws Exception {
 				data.writeUUID(id);
 				data.writeUTF(fileInfo.name());
 				return true;
 			}
 		}
 
-		boolean write(FileInfo fileInfo, HubProjectConfig projectConfig, ByteOutput data) throws Exception;
+		boolean write(FileInfo fileInfo, UploadContext ctx, ByteOutput data) throws Exception;
 
 		@Override
 		@Nullable
-		default Checksum getUniqueId(FileInfo fileInfo, HubProjectConfig projectConfig) {
+		default Checksum getUniqueId(FileInfo fileInfo, UploadContext ctx) {
 			try {
 				var data = ByteOutput.ofByteBuilder(16);
 
-				if (!write(fileInfo, projectConfig, data)) {
+				if (!write(fileInfo, ctx, data)) {
 					return null;
 				}
 
-				data.writeInt(projectConfig.projectId().raw());
+				data.writeInt(ctx.project().id().raw());
 				return MD5.TYPE.digest(data.toByteArray());
 			} catch (Exception ex) {
 				ex.printStackTrace();
@@ -53,5 +52,5 @@ public interface UniqueIdProvider {
 	}
 
 	@Nullable
-	Checksum getUniqueId(FileInfo fileInfo, HubProjectConfig projectConfig) throws Exception;
+	Checksum getUniqueId(FileInfo fileInfo, UploadContext ctx) throws Exception;
 }

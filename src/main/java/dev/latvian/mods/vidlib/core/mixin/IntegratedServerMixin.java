@@ -12,10 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class IntegratedServerMixin {
 	@Inject(method = "publishServer", at = @At("RETURN"))
 	private void vl$publishServer(GameType gameMode, boolean cheats, int port, CallbackInfoReturnable<Boolean> cir) {
-		var gateway = HubServerGateway.instance;
-
-		if (gateway != null) {
-			HubServerGateway.updateInfo((IntegratedServer) (Object) this, gateway);
-		}
+		HubServerGateway.ifPresent(HubServerGateway::updateInfo);
 	}
 }

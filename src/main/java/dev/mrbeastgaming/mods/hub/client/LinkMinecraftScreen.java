@@ -2,9 +2,9 @@ package dev.mrbeastgaming.mods.hub.client;
 
 import dev.latvian.mods.vidlib.VidLib;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
-import dev.mrbeastgaming.mods.hub.api.HubClientSessionData;
-import dev.mrbeastgaming.mods.hub.api.HubMinecraftProfileData;
-import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
+import dev.mrbeastgaming.mods.hub.api.HubClientSession;
+import dev.mrbeastgaming.mods.hub.api.data.HubMinecraftProfile;
+import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -37,7 +37,7 @@ public class LinkMinecraftScreen extends ConfirmScreen {
 					});
 				}
 			});
-		} else if (HubUserCapabilities.CURRENT.resolveRequireLink()) {
+		} else if (HubUserCapabilities.get().resolveRequireLink()) {
 			mc.stop();
 		} else {
 			mc.popGuiLayer();
@@ -45,23 +45,23 @@ public class LinkMinecraftScreen extends ConfirmScreen {
 	}
 
 	@Nullable
-	private static HubMinecraftProfileData.LinkData loadHubMinecraftProfile(Minecraft mc) {
-		HubMinecraftProfileData.LinkData data = null;
-		var serverId = HubClientSessionData.AUTH_SERVER_ID;
+	private static HubMinecraftProfile.LinkData loadHubMinecraftProfile(Minecraft mc) {
+		var authServerId = HubClientSession.CURRENT.authServerId;
 
-		if (!serverId.isEmpty()) {
+		HubMinecraftProfile.LinkData minecraftLink = null;
+
+		if (!authServerId.isEmpty()) {
 			try {
-				VidLib.LOGGER.info("Linking Minecraft " + mc.getUser().getName() + " @ " + serverId);
-				mc.getMinecraftSessionService().joinServer(mc.getUser().getProfileId(), mc.getUser().getAccessToken(), serverId);
-				data = HubAPI.MinecraftAPI.getLink(mc.getUser().getName());
+				VidLib.LOGGER.info("Linking Minecraft " + mc.getUser().getName() + " @ " + authServerId);
+				mc.getMinecraftSessionService().joinServer(mc.getUser().getProfileId(), mc.getUser().getAccessToken(), authServerId);
+				minecraftLink = HubAPI.MinecraftAPI.getLink(mc.getUser().getName());
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 		}
 
-		HubMinecraftProfileData.SELF = data == null ? null : data.profile();
-		HubMinecraftProfileData.TOKEN = data == null ? null : data.token();
-		return data;
+		HubClientSession.CURRENT.minecraftLink = minecraftLink;
+		return minecraftLink;
 	}
 
 	public boolean buttonsEnabled;
@@ -73,7 +73,7 @@ public class LinkMinecraftScreen extends ConfirmScreen {
 			Component.literal("MrBeast Gaming Hub Profile Linking"),
 			Component.literal("Connecting to API..."),
 			Component.literal("Retry"),
-			Component.literal(HubUserCapabilities.CURRENT.resolveRequireLink() ? "Quit" : "Skip")
+			Component.literal(HubUserCapabilities.get().resolveRequireLink() ? "Quit" : "Skip")
 		);
 
 		this.buttons = new ArrayList<>();

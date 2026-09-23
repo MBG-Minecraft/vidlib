@@ -18,10 +18,12 @@ import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubLogRequest;
-import dev.mrbeastgaming.mods.hub.api.gateway.tv.TVUpdateData;
-import dev.mrbeastgaming.mods.hub.api.project.UsedPort;
+import dev.mrbeastgaming.mods.hub.api.data.HubTVUpdateData;
+import dev.mrbeastgaming.mods.hub.api.data.HubUploadRequestFile;
+import dev.mrbeastgaming.mods.hub.api.data.HubUsedPort;
+import dev.mrbeastgaming.mods.hub.api.data.HubWorld;
+import dev.mrbeastgaming.mods.hub.file.HubUploadRequestFileWithPath;
 import dev.mrbeastgaming.mods.hub.file.UploadRequest;
-import dev.mrbeastgaming.mods.hub.file.UploadRequestFile;
 import dev.mrbeastgaming.mods.hub.file.UploadResponse;
 import net.minecraft.Util;
 import net.minecraft.util.Mth;
@@ -423,7 +425,7 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 		}
 	}
 
-	public CompletableFuture<Void> sendUsedPorts(List<UsedPort> value) {
+	public CompletableFuture<Void> sendUsedPorts(List<HubUsedPort> value) {
 		var json = new JsonArray();
 
 		for (var port : value) {
@@ -482,26 +484,26 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 		});
 	}
 
-	public CompletableFuture<Void> updateTV(int tv, TVUpdateData data) {
+	public CompletableFuture<Void> updateTV(int tv, HubTVUpdateData data) {
 		var json = new JsonObject();
 		json.addProperty("tv", tv);
-		json.add("data", TVUpdateData.CODEC.encodeStart(JsonOps.INSTANCE, data).getOrThrow().getAsJsonObject());
+		json.add("data", HubTVUpdateData.CODEC.encodeStart(JsonOps.INSTANCE, data).getOrThrow().getAsJsonObject());
 		return send("update_tv", json);
 	}
 
 	public CompletableFuture<Void> updateTV(int tv, String text) {
-		return updateTV(tv, new TVUpdateData.Text(text));
+		return updateTV(tv, new HubTVUpdateData.Text(text));
 	}
 
 	public CompletableFuture<Void> sendAvailableWorlds(List<HubWorldDirectory> value) {
-		var iconsToUpload = new ArrayList<UploadRequestFile.WithPath>();
+		var iconsToUpload = new ArrayList<HubUploadRequestFileWithPath>();
 		var data = new HashMap<String, HubWorld>();
 
 		for (var world : value) {
 			if (data.put(world.id(), world.toData()) == null) {
 				if (!world.icon().isNil() && world.iconPath().isPresent()) {
 					try {
-						iconsToUpload.add(UploadRequestFile.load(world.id(), world.iconPath().get(), null));
+						iconsToUpload.add(HubUploadRequestFileWithPath.load(world.id(), world.iconPath().get(), null));
 					} catch (Exception ignored) {
 					}
 				}
@@ -652,16 +654,16 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 		}
 	}
 
-	public CompletableFuture<UploadResponse> sendUploadRequest(List<UploadRequestFile> files) {
+	public CompletableFuture<UploadResponse> sendUploadRequest(List<HubUploadRequestFile> files) {
 		return HubAPI.CoreAPI.postUpload(new UploadRequest(gatewayToken, files));
 	}
 
-	public CompletableFuture<Void> upload(List<UploadRequestFile.WithPath> files, @Nullable ProgressItem progressItem) {
+	public CompletableFuture<Void> upload(List<HubUploadRequestFileWithPath> files, @Nullable ProgressItem progressItem) {
 		if (files.isEmpty()) {
 			return CompletableFuture.completedFuture(null);
 		}
 
-		return sendUploadRequest(files.stream().map(UploadRequestFile.WithPath::file).toList()).thenAcceptAsync(response -> {
+		return sendUploadRequest(files.stream().map(HubUploadRequestFileWithPath::file).toList()).thenAcceptAsync(response -> {
 			var map = files.stream().collect(Collectors.toMap(v -> v.file().id(), Function.identity()));
 
 			try (var executor = Executors.newFixedThreadPool(5)) {

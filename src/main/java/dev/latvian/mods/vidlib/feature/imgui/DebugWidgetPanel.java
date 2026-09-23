@@ -41,9 +41,9 @@ import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 import dev.latvian.mods.vidlib.util.ColoredText;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
-import dev.mrbeastgaming.mods.hub.api.HubCountries;
-import dev.mrbeastgaming.mods.hub.api.HubCountry;
-import dev.mrbeastgaming.mods.hub.api.HubFileType;
+import dev.mrbeastgaming.mods.hub.api.data.HubCountries;
+import dev.mrbeastgaming.mods.hub.api.data.HubCountry;
+import dev.mrbeastgaming.mods.hub.api.data.HubFileType;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
 import dev.mrbeastgaming.mods.hub.file.ClientHubFileUploads;
 import imgui.ImGui;
@@ -547,7 +547,7 @@ public class DebugWidgetPanel extends Panel {
 
 						if (i == 170) {
 							item.error("Test Error!");
-							var gateway = HubClientGateway.instance;
+							var gateway = HubClientGateway.get();
 
 							if (gateway != null) {
 								gateway.log(0, mc.player, "Test Error", new IllegalStateException("Test Error"));
@@ -702,7 +702,12 @@ public class DebugWidgetPanel extends Panel {
 				bodyBuf.putLong(uuid.getMostSignificantBits());
 				bodyBuf.putLong(uuid.getLeastSignificantBits());
 				bodyBuf.flip();
-				HubClientGateway.instance.sendDebug(CompressionMethod.ZSTD, bodyBuf);
+
+				var gateway = HubClientGateway.get();
+
+				if (gateway != null) {
+					gateway.sendDebug(CompressionMethod.ZSTD, bodyBuf);
+				}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}

@@ -17,7 +17,7 @@ import dev.latvian.mods.vidlib.feature.registry.GenericVLRegistry;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
-import dev.mrbeastgaming.mods.hub.api.HubServerSessionData;
+import dev.mrbeastgaming.mods.hub.api.HubServerSession;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
 import io.netty.util.NettyRuntime;
 import io.netty.util.internal.SystemPropertyUtil;
@@ -181,7 +181,7 @@ public class VidLibEventHandler {
 		VidLib.LOGGER.info("Netty Threads: " + Math.max(1, SystemPropertyUtil.getInt("io.netty.eventLoopThreads", NettyRuntime.availableProcessors() * 2)));
 		SimplePacketPayload.S2C.set(0L);
 		gameLoaded();
-		HubServerSessionData.loadAsync(event.getServer());
+		HubServerSession.loadAsync(event.getServer());
 	}
 
 	@SubscribeEvent(priority = EventPriority.HIGH)

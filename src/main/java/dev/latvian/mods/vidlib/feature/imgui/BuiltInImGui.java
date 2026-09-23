@@ -38,9 +38,8 @@ import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import dev.latvian.mods.vidlib.util.ColoredText;
 import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
-import dev.mrbeastgaming.mods.hub.api.HubMinecraftProfileData;
-import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
-import dev.mrbeastgaming.mods.hub.api.HubUserData;
+import dev.mrbeastgaming.mods.hub.api.HubClientSession;
+import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.client.HubDrivePanel;
 import dev.mrbeastgaming.mods.hub.client.HubWorldsPanel;
 import dev.mrbeastgaming.mods.hub.client.LinkHubUserScreen;
@@ -67,25 +66,29 @@ public class BuiltInImGui {
 	public static Boolean showSounds = null;
 
 	public static final MenuItem HUB = MenuItem.menu(ImIcons.ACCOUNT, "Hub", (graphics, list) -> {
-		list.add(MenuItem.item(ImIcons.STORAGE, "Drive", HubDrivePanel.INSTANCE).enabled(HubUserCapabilities.CURRENT.viewDrive()));
-		list.add(MenuItem.item(ImIcons.WORLD, "Worlds", HubWorldsPanel.INSTANCE).enabled(HubUserCapabilities.CURRENT.viewRemoteWorlds()));
+		list.add(MenuItem.item(ImIcons.STORAGE, "Drive", HubDrivePanel.INSTANCE).enabled(HubUserCapabilities.get().viewDrive()));
+		list.add(MenuItem.item(ImIcons.WORLD, "Worlds", HubWorldsPanel.INSTANCE).enabled(HubUserCapabilities.get().viewRemoteWorlds()));
 
 		if (!graphics.inGame) {
 			list.add(MenuItem.SEPARATOR);
 
 			list.add(MenuItem.item(ImIcons.ACCOUNT, ColoredText.error("Link Profile"), g -> {
-				var hubUser = HubUserData.SELF;
+				var session = HubClientSession.CURRENT;
 
-				if (hubUser == null) {
+				if (session.user == null) {
 					LinkHubUserScreen.open(graphics.mc);
 				} else {
 					if (Screen.hasShiftDown()) {
 						LinkHubUserScreen.open(graphics.mc);
-					} else if (HubMinecraftProfileData.SELF == null) {
+					} else if (session.minecraftLink == null) {
 						LinkMinecraftScreen.handle(graphics.mc, true);
 					}
 				}
-			}).enabled(HubUserCapabilities.CURRENT.viewRemoteReplays()));
+			}).enabled(HubUserCapabilities.get().viewRemoteReplays()));
+
+			if (PlatformHelper.CURRENT.isDevEnv()) {
+				list.add(MenuItem.item(ImIcons.PERSON, "Force Link Profile", g -> LinkHubUserScreen.open(g.mc)));
+			}
 		}
 	});
 
@@ -141,7 +144,6 @@ public class BuiltInImGui {
 		}
 
 		list.add(MenuItem.item(ImIcons.CAMERA, "Spectate UI", MiscClientUtils.SPECTATE_UI).remainOpen(true));
-		list.add(MenuItem.item(ImIcons.PERSON, "Link Hub Profile", g -> LinkHubUserScreen.open(g.mc)));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.ConfigDropdown(graphics, list));
 	});

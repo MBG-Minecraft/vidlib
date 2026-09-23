@@ -5,9 +5,9 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
 import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.mrbeastgaming.mods.hub.api.HubUserDisplayData;
-import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldsData;
-import dev.mrbeastgaming.mods.hub.api.project.HubProjectDisplayData;
+import dev.mrbeastgaming.mods.hub.api.data.HubUser;
+import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldsResponse;
+import dev.mrbeastgaming.mods.hub.api.data.HubProject;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImString;
@@ -17,8 +17,8 @@ import java.util.List;
 public class HubDrivePanel extends Panel {
 	public static final HubDrivePanel INSTANCE = new HubDrivePanel();
 	public static final ImString SEARCH = ImGuiUtils.resizableString();
-	public static final HubProjectDisplayData[] PROJECT_FILTER = new HubProjectDisplayData[1];
-	public static final HubUserDisplayData[] USER_FILTER = new HubUserDisplayData[1];
+	public static final HubProject[] PROJECT_FILTER = new HubProject[1];
+	public static final HubUser[] USER_FILTER = new HubUser[1];
 
 	public boolean reload = true;
 
@@ -40,12 +40,12 @@ public class HubDrivePanel extends Panel {
 
 		items.add(MenuItem.custom(graphics -> {
 			ImGui.setNextItemWidth(200F);
-			graphics.combo("###project-filter", PROJECT_FILTER, "Any Project", HubWorldsData.CURRENT.relevantProjects().values().toArray(HubProjectDisplayData[]::new), HubProjectDisplayData::name);
+			graphics.combo("###project-filter", PROJECT_FILTER, "Any Project", HubWorldsResponse.CURRENT.ctx().relevantProjects().values().toArray(HubProject[]::new), HubProject::name);
 		}));
 
 		items.add(MenuItem.custom(graphics -> {
 			ImGui.setNextItemWidth(200F);
-			graphics.combo("###user-filter", USER_FILTER, "Any User", HubWorldsData.CURRENT.relevantUsers().values().toArray(HubUserDisplayData[]::new), HubUserDisplayData::name);
+			graphics.combo("###user-filter", USER_FILTER, "Any User", HubWorldsResponse.CURRENT.ctx().relevantUsers().values().toArray(HubUser[]::new), HubUser::name);
 		}));
 	}
 

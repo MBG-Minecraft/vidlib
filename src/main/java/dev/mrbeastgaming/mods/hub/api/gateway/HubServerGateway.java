@@ -9,11 +9,10 @@ import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
-import dev.mrbeastgaming.mods.hub.api.HubServerSessionData;
-import dev.mrbeastgaming.mods.hub.api.project.UsedPort;
-import dev.mrbeastgaming.mods.hub.file.ChecksumPath;
-import dev.mrbeastgaming.mods.hub.file.UploadRequestFile;
-import net.minecraft.ChatFormatting;
+import dev.mrbeastgaming.mods.hub.api.HubServerSession;
+import dev.mrbeastgaming.mods.hub.api.data.HubChecksumPath;
+import dev.mrbeastgaming.mods.hub.api.data.HubUsedPort;
+import dev.mrbeastgaming.mods.hub.file.HubUploadRequestFileWithPath;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -26,9 +25,23 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
-	public static HubServerGateway instance;
+	private static HubServerGateway instance;
+
+	@Nullable
+	public static HubServerGateway get() {
+		return instance;
+	}
+
+	public static void ifPresent(Consumer<HubServerGateway> consumer) {
+		var gateway = get();
+
+		if (gateway != null) {
+			consumer.accept(gateway);
+		}
+	}
 
 	@Nullable
 	public static HubServerGateway startGateway(MinecraftServer server, @Nullable URI uri, String token) {
@@ -61,20 +74,6 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 		}
 	}
 
-	public static void updateInfo(MinecraftServer server, HubServerGateway gateway) {
-		HubAPI.SEQUENTIAL_EXECUTOR.get().execute(() -> updateInfoFuture(server, gateway).join());
-	}
-
-	public static CompletableFuture<Void> updateInfoFuture(MinecraftServer server, HubServerGateway gateway) {
-		var list = new ArrayList<CompletableFuture<Void>>();
-		list.add(gateway.sendName(ChatFormatting.stripFormatting(server.getMotd().replace("\\n", "\n"))));
-		list.add(gateway.sendSize(server.getPlayerCount()));
-		list.add(gateway.sendStatus(CommonGameEngine.INSTANCE.getServerGatewayStatus(server)));
-		list.add(gateway.sendUsedPorts());
-		list.add(gateway.sendAvailableWorlds());
-		return CompletableFuture.allOf(list.toArray(new CompletableFuture[0]));
-	}
-
 	public static JsonObject entityToJson(Entity entity) {
 		var json = new JsonObject();
 		json.addProperty("uuid", entity.getUUID().toString());
@@ -90,7 +89,7 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 			var json = new JsonObject();
 			json.add("player", entityToJson(player));
 			gateway.send("player_logged_in", json);
-			gateway.sendSize(player.server.getPlayerCount());
+			gateway.sendSize();
 		}
 	}
 
@@ -117,22 +116,6 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 		}
 	}
 
-	public static void updateName(String name) {
-		var gateway = HubServerGateway.instance;
-
-		if (gateway != null) {
-			gateway.sendName(name);
-		}
-	}
-
-	public static void updateStatus(String status) {
-		var gateway = HubServerGateway.instance;
-
-		if (gateway != null) {
-			gateway.sendStatus(status);
-		}
-	}
-
 	public static void registerBuiltIn(HubGatewayEventRegistry<MinecraftServer> registry) {
 		registry.registerSynced("request_restart", HubServerGateway::requestRestart);
 		registry.registerSynced("run_command", HubServerGateway::runCommand);
@@ -150,27 +133,27 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 	}
 
 	private static void updateOps(MinecraftServer server, HubGatewayEvent event) {
-		HubServerSessionData.updateOps(server, event.paramsArray());
+		HubServerSession.updateOps(server, event.paramsArray());
 	}
 
 	private static void requestWorldUpload(MinecraftServer server, HubGatewayEvent event) {
-		var data = HubWorldUploadRequestData.CODEC.parse(JsonOps.INSTANCE, event.params()).getOrThrow();
+		var data = HubWorldUploadRequest.CODEC.parse(JsonOps.INSTANCE, event.params()).getOrThrow();
 
 		var worlds = new ArrayList<HubWorldDirectory>(1);
 		CommonGameEngine.INSTANCE.getAvailableWorlds(server, worlds);
 
 		for (var world : worlds) {
 			if (world.id().equals(data.worldId()) && world.path().equals(data.path())) {
-				VidLib.LOGGER.warn(data.sendingTo().name() + " requested world " + data.path() + " upload");
+				VidLib.LOGGER.warn(data.ctx().user(data.sendingTo()).name() + " requested world " + data.path() + " upload");
 
 				BackupCommand.backup(server, world.directory(), Instant.now(), "hub-upload").thenAcceptAsync(path -> {
 					var progressItem = ProgressQueue.queueSingleItem("Uploading world...");
 
 					try {
 						VidLib.LOGGER.info("Uploading " + path + "...");
-						var files = UploadRequestFile.loadDirectory("", path, null);
+						var files = HubUploadRequestFileWithPath.loadDirectory("", path, null);
 						event.gateway().upload(files, progressItem).join();
-						HubAPI.MinecraftAPI.postCompleteWorldRequest(data.token(), files.stream().map(f -> new ChecksumPath(f.file().checksum(), f.file().id())).toList());
+						HubAPI.MinecraftAPI.postCompleteWorldRequest(data.token(), files.stream().map(f -> new HubChecksumPath(f.file().checksum(), f.file().id())).toList());
 						VidLib.LOGGER.info("Cleaning up...");
 					} catch (Exception ex) {
 						VidLib.LOGGER.error("Error uploading world " + path + " to Hub", ex);
@@ -204,11 +187,37 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 	@Override
 	public void onConnected() {
 		super.onConnected();
-		updateInfoFuture(main, this);
+		updateInfo();
+	}
+
+	public void updateInfo() {
+		HubAPI.SEQUENTIAL_EXECUTOR.get().execute(() -> updateInfoFuture().join());
+	}
+
+	public CompletableFuture<Void> updateInfoFuture() {
+		var list = new ArrayList<CompletableFuture<Void>>();
+		list.add(sendName());
+		list.add(sendStatus());
+		list.add(sendSize());
+		list.add(sendUsedPorts());
+		list.add(sendAvailableWorlds());
+		return CompletableFuture.allOf(list.toArray(new CompletableFuture[0]));
+	}
+
+	public CompletableFuture<Void> sendName() {
+		return sendName(CommonGameEngine.INSTANCE.getServerGatewayName(main));
+	}
+
+	public CompletableFuture<Void> sendStatus() {
+		return sendStatus(CommonGameEngine.INSTANCE.getServerGatewayStatus(main));
+	}
+
+	public CompletableFuture<Void> sendSize() {
+		return sendSize(main.getPlayerCount());
 	}
 
 	public CompletableFuture<Void> sendUsedPorts() {
-		var usedPorts = new ArrayList<UsedPort>(3);
+		var usedPorts = new ArrayList<HubUsedPort>(3);
 		CommonGameEngine.INSTANCE.getUsedPorts(server, usedPorts);
 		return sendUsedPorts(usedPorts);
 	}

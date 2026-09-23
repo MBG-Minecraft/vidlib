@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import dev.latvian.mods.vidlib.core.VLJoinMultiplayerScreen;
-import dev.mrbeastgaming.mods.hub.api.project.HubGameServerData;
+import dev.mrbeastgaming.mods.hub.api.HubClientSession;
 import dev.mrbeastgaming.mods.hub.client.OtherServerHeader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -53,7 +53,7 @@ public abstract class ServerSelectionListMixin extends ObjectSelectionList<Serve
 		var hubServers = ((VLJoinMultiplayerScreen) screen).vl$hubServers();
 		hubServers.clear();
 
-		var list = HubGameServerData.CURRENT;
+		var list = HubClientSession.CURRENT.servers;
 		vl$hubServers.clear();
 
 		for (int i = 0; i < list.size(); i++) {

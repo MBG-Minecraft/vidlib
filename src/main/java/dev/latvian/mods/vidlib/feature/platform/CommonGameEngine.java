@@ -11,9 +11,10 @@ import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.util.RuntimeDebugger;
+import dev.mrbeastgaming.mods.hub.api.data.HubUsedPort;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldDirectory;
-import dev.mrbeastgaming.mods.hub.api.project.UsedPort;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
+import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -543,28 +544,32 @@ public class CommonGameEngine {
 		return false;
 	}
 
-	public String getServerGatewayStatus(MinecraftServer server) {
-		return "%size% Online";
+	public String getServerGatewayName(MinecraftServer server) {
+		return ChatFormatting.stripFormatting(server.getMotd().replace("\\n", "\n"));
 	}
 
-	public void getUsedPorts(MinecraftServer server, List<UsedPort> list) {
+	public String getServerGatewayStatus(MinecraftServer server) {
+		return "";
+	}
+
+	public void getUsedPorts(MinecraftServer server, List<HubUsedPort> list) {
 		if (server.isPublished()) {
-			list.add(UsedPort.tcp("Game", server.getPort()));
+			list.add(HubUsedPort.tcp("Game", server.getPort()));
 		}
 
 		int port = RuntimeDebugger.getJdwpListenerPort();
 
 		if (port != -1) {
-			list.add(UsedPort.tcp("JDWP", port));
+			list.add(HubUsedPort.tcp("JDWP", port));
 		}
 
 		if (server instanceof DedicatedServer dedicatedServer) {
 			if (dedicatedServer.getProperties().enableRcon) {
-				list.add(UsedPort.tcp("RCON", dedicatedServer.getProperties().rconPort));
+				list.add(HubUsedPort.tcp("RCON", dedicatedServer.getProperties().rconPort));
 			}
 
 			if (dedicatedServer.getProperties().enableQuery) {
-				list.add(UsedPort.udp("Query", dedicatedServer.getProperties().queryPort));
+				list.add(HubUsedPort.udp("Query", dedicatedServer.getProperties().queryPort));
 			}
 		}
 	}

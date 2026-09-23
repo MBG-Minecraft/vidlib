@@ -3,6 +3,7 @@ package dev.mrbeastgaming.mods.hub.api.gateway;
 import dev.latvian.mods.klib.io.bytes.ByteInput;
 import dev.latvian.mods.klib.io.checksum.Checksum;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
@@ -25,11 +26,25 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 public class HubClientGateway extends HubCommonGateway<Minecraft> {
-	public static HubClientGateway instance;
+	private static HubClientGateway instance;
 
 	public static final Map<UUID, ProgressItem> PROGRESS_BARS = new ConcurrentHashMap<>();
+
+	@Nullable
+	public static HubClientGateway get() {
+		return instance;
+	}
+
+	public static void ifPresent(Consumer<HubClientGateway> consumer) {
+		var gateway = get();
+
+		if (gateway != null) {
+			consumer.accept(gateway);
+		}
+	}
 
 	@Nullable
 	public static HubClientGateway startGateway(Minecraft mc, @Nullable URI uri, String token) {
@@ -62,22 +77,6 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 		}
 	}
 
-	public static void updateInfo(Minecraft mc, HubClientGateway gateway) {
-		gateway.sendName(mc.getUser().getName());
-
-		var server = mc.getCurrentServer();
-
-		if (server != null) {
-			gateway.sendStatus("Server - " + server.name);
-		} else if (mc.level != null && PlatformHelper.CURRENT.isReplayLevel(mc.level)) {
-			gateway.sendStatus("Replay Editor");
-		} else if (mc.level != null) {
-			gateway.sendStatus("Singleplayer");
-		} else {
-			gateway.sendStatus("Main Menu");
-		}
-	}
-
 	public final Minecraft mc;
 
 	public HubClientGateway(Minecraft mc, URI gatewayURI, String gatewayToken) {
@@ -93,7 +92,7 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 	@Override
 	public void onConnected() {
 		super.onConnected();
-		updateInfo(main, this);
+		updateInfo();
 	}
 
 	@Override
@@ -282,5 +281,24 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 				HubWorldsPanel.INSTANCE.reload = true;
 			}
 		});
+	}
+
+	public void updateInfo() {
+		HubAPI.SEQUENTIAL_EXECUTOR.get().execute(() -> updateInfoFuture().join());
+	}
+
+	public CompletableFuture<Void> updateInfoFuture() {
+		var list = new ArrayList<CompletableFuture<Void>>();
+		list.add(sendName());
+		list.add(sendStatus());
+		return CompletableFuture.allOf(list.toArray(new CompletableFuture[0]));
+	}
+
+	public CompletableFuture<Void> sendName() {
+		return sendName(ClientGameEngine.INSTANCE.getClientGatewayName(main));
+	}
+
+	public CompletableFuture<Void> sendStatus() {
+		return sendStatus(ClientGameEngine.INSTANCE.getClientGatewayStatus(main));
 	}
 }

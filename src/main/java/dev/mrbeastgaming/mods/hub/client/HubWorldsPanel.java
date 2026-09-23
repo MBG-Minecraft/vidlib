@@ -15,11 +15,11 @@ import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
-import dev.mrbeastgaming.mods.hub.api.HubClientSessionData;
-import dev.mrbeastgaming.mods.hub.api.HubUserDisplayData;
+import dev.mrbeastgaming.mods.hub.api.HubClientSession;
+import dev.mrbeastgaming.mods.hub.api.data.HubProject;
+import dev.mrbeastgaming.mods.hub.api.data.HubUser;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
-import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldsData;
-import dev.mrbeastgaming.mods.hub.api.project.HubProjectDisplayData;
+import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldsResponse;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiWindowFlags;
@@ -42,8 +42,8 @@ public class HubWorldsPanel extends Panel {
 	public static Set<String> templates = Set.of();
 	public static Set<String> saves = Set.of();
 	public static final ImString SEARCH = ImGuiUtils.resizableString();
-	public static final HubProjectDisplayData[] PROJECT_FILTER = new HubProjectDisplayData[1];
-	public static final HubUserDisplayData[] USER_FILTER = new HubUserDisplayData[1];
+	public static final HubProject[] PROJECT_FILTER = new HubProject[1];
+	public static final HubUser[] USER_FILTER = new HubUser[1];
 
 	public boolean reload = true;
 
@@ -65,12 +65,12 @@ public class HubWorldsPanel extends Panel {
 
 		items.add(MenuItem.custom(graphics -> {
 			ImGui.setNextItemWidth(200F);
-			graphics.combo("###project-filter", PROJECT_FILTER, "Any Project", HubWorldsData.CURRENT.relevantProjects().values().toArray(HubProjectDisplayData[]::new), HubProjectDisplayData::name);
+			graphics.combo("###project-filter", PROJECT_FILTER, "Any Project", HubWorldsResponse.CURRENT.ctx().relevantProjects().values().toArray(HubProject[]::new), HubProject::name);
 		}));
 
 		items.add(MenuItem.custom(graphics -> {
 			ImGui.setNextItemWidth(200F);
-			graphics.combo("###user-filter", USER_FILTER, "Any User", HubWorldsData.CURRENT.relevantUsers().values().toArray(HubUserDisplayData[]::new), HubUserDisplayData::name);
+			graphics.combo("###user-filter", USER_FILTER, "Any User", HubWorldsResponse.CURRENT.ctx().relevantUsers().values().toArray(HubUser[]::new), HubUser::name);
 		}));
 	}
 
@@ -93,7 +93,7 @@ public class HubWorldsPanel extends Panel {
 	@Override
 	public void content(ImGraphics graphics) {
 		if (reload) {
-			HubWorldsData.update(data -> {
+			HubWorldsResponse.update(data -> {
 				var savesDir = PlatformHelper.CURRENT.getGameDirectory().resolve("saves");
 				var templatesDir = PlatformHelper.CURRENT.getGameDirectory().resolve("saves-templates");
 
@@ -120,20 +120,20 @@ public class HubWorldsPanel extends Panel {
 					templates = Set.of();
 				}
 
-				PROJECT_FILTER[0] = PROJECT_FILTER[0] == null ? null : data.relevantProjects().get(PROJECT_FILTER[0].id().raw());
-				USER_FILTER[0] = USER_FILTER[0] == null ? null : data.relevantUsers().get(USER_FILTER[0].id().raw());
+				PROJECT_FILTER[0] = PROJECT_FILTER[0] == null ? null : data.ctx().relevantProjects().get(PROJECT_FILTER[0].id().raw());
+				USER_FILTER[0] = USER_FILTER[0] == null ? null : data.ctx().relevantUsers().get(USER_FILTER[0].id().raw());
 			});
 
 			reload = false;
 		}
 
-		var data = HubWorldsData.CURRENT;
+		var data = HubWorldsResponse.CURRENT;
 
-		if (data.fetching() == HubWorldsData.TYPE_FETCHING) {
+		if (data.fetching() == HubWorldsResponse.TYPE_FETCHING) {
 			ImGui.text("Fetching...");
-		} else if (data.fetching() == HubWorldsData.TYPE_ERROR) {
+		} else if (data.fetching() == HubWorldsResponse.TYPE_ERROR) {
 			ImGui.text("Error!");
-		} else if (data.fetching() == HubWorldsData.TYPE_DONE) {
+		} else if (data.fetching() == HubWorldsResponse.TYPE_DONE) {
 			ImGui.text(data.worlds().size() + " Worlds");
 		}
 
@@ -142,8 +142,8 @@ public class HubWorldsPanel extends Panel {
 		var search = SEARCH.get().toLowerCase(Locale.ROOT);
 
 		for (var world : data.worlds()) {
-			var project = data.relevantProjects().get(world.project().raw());
-			var user = data.relevantUsers().get(world.user().raw());
+			var project = data.ctx().project(world.project());
+			var user = data.ctx().user(world.user());
 
 			if (PROJECT_FILTER[0] != null && !PROJECT_FILTER[0].id().equals(project.id())) {
 				continue;
@@ -168,7 +168,7 @@ public class HubWorldsPanel extends Panel {
 			ImGui.text(world.uniqueId());
 			graphics.popStack();
 
-			ImGui.image(ImGui.isRectVisible(80F, 80F) ? URITextures.gl(graphics.mc, world.iconUrl().orElse(project != null ? project.smallIconUrl() : null), VidLibTextures.PACK.texturePath()) : 0, 80F, 80F);
+			ImGui.image(ImGui.isRectVisible(80F, 80F) ? URITextures.gl(graphics.mc, world.iconUrl().orElse(project != null ? project.smallIconUrl().orElse(null) : null), VidLibTextures.DEFAULT_PROJECT_ICON.texturePath()) : 0, 80F, 80F);
 
 			ImGui.sameLine();
 			ImGui.dummy(4F, 0F);
@@ -253,7 +253,7 @@ public class HubWorldsPanel extends Panel {
 			ImGui.text(StringUtils.binaryByteSize(world.world().size()));
 
 			if (project != null) {
-				ImGui.image(ImGui.isRectVisible(textSize, textSize) ? URITextures.gl(graphics.mc, project.smallIconUrl(), VidLibTextures.PACK.texturePath()) : 0, textSize, textSize);
+				ImGui.image(ImGui.isRectVisible(textSize, textSize) ? URITextures.gl(graphics.mc, project.smallIconUrl().orElse(null), VidLibTextures.DEFAULT_PROJECT_ICON.texturePath()) : 0, textSize, textSize);
 				ImGui.sameLine();
 				ImGui.text(project.name());
 			}
@@ -288,12 +288,12 @@ public class HubWorldsPanel extends Panel {
 		}
 	}
 
-	private void requestDownload(Minecraft mc, HubWorldsData.AvailableWorld world) {
+	private void requestDownload(Minecraft mc, HubWorldsResponse.AvailableWorld world) {
 		Util.nonCriticalIoPool().execute(() -> {
 			try {
 				var requestId = UUID.randomUUID();
 
-				if (!HubAPI.MinecraftAPI.postWorldRequest(requestId, world.uniqueId(), HubClientSessionData.ID)) {
+				if (!HubAPI.MinecraftAPI.postWorldRequest(requestId, world.uniqueId(), HubClientSession.CURRENT.id)) {
 					return;
 				}
 

@@ -30,11 +30,9 @@ import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.skin.PlayerSkinOverrides;
 import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
-import dev.mrbeastgaming.mods.hub.api.HubMinecraftProfileData;
-import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
-import dev.mrbeastgaming.mods.hub.api.HubUserData;
+import dev.mrbeastgaming.mods.hub.api.HubClientSession;
+import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
-import dev.mrbeastgaming.mods.hub.api.project.HubProjectData;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
@@ -337,7 +335,8 @@ public class ClientGameEngine {
 	}
 
 	public void topInfoBarPre(ImGraphics graphics, float h) {
-		var hubUser = HubUserData.SELF;
+		var session = HubClientSession.CURRENT;
+		var hubUser = session.user;
 		var hubTooltip = new ArrayList<String>();
 
 		if (hubUser == null) {
@@ -353,8 +352,8 @@ public class ClientGameEngine {
 
 			graphics.popStack();
 		} else {
-			var mcProfile = HubMinecraftProfileData.SELF;
-			var hubProject = HubProjectData.PACK;
+			var mcProfile = session.minecraftLink;
+			var hubProject = session.project;
 
 			graphics.pushStack();
 			graphics.setText(mcProfile == null || hubProject == null ? ImColorVariant.YELLOW : ImColorVariant.GREEN);
@@ -371,7 +370,7 @@ public class ClientGameEngine {
 				hubTooltip.add("");
 				hubTooltip.add("Project: " + (hubProject == null ? "Not Configured" : hubProject.toString()));
 
-				var gateway = HubClientGateway.instance;
+				var gateway = HubClientGateway.get();
 
 				hubTooltip.add("");
 				hubTooltip.add("Gateway: " + (gateway != null ? gateway.status : "Inactive"));
@@ -848,15 +847,15 @@ public class ClientGameEngine {
 	}
 
 	public boolean enableSinglePlayerMainMenuButton() {
-		return HubUserCapabilities.CURRENT.singleplayer();
+		return HubUserCapabilities.get().singleplayer();
 	}
 
 	public boolean enableMultiPlayerMainMenuButton() {
-		return HubUserCapabilities.CURRENT.multiplayer();
+		return HubUserCapabilities.get().multiplayer();
 	}
 
 	public boolean enableReplayMainMenuButton() {
-		return HubUserCapabilities.CURRENT.viewLocalReplays();
+		return HubUserCapabilities.get().viewLocalReplays();
 	}
 
 	public boolean isVoiceChatPTTDown() {
@@ -889,7 +888,7 @@ public class ClientGameEngine {
 	}
 
 	public boolean allowAdminPanel(@Nullable LocalPlayer player) {
-		return HubUserCapabilities.CURRENT.adminPanel();
+		return HubUserCapabilities.get().adminPanel();
 	}
 
 	public boolean shouldRender2DPlayerName(Minecraft mc, LocalPlayer self, Player player) {
@@ -934,5 +933,23 @@ public class ClientGameEngine {
 
 	public boolean defaultDrawHealthBar(Player player) {
 		return player.isSurvivalLike() && !CommonGameEngine.INSTANCE.isBoss(player);
+	}
+
+	public String getClientGatewayName(Minecraft mc) {
+		return mc.getUser().getName();
+	}
+
+	public String getClientGatewayStatus(Minecraft mc) {
+		var server = mc.getCurrentServer();
+
+		if (server != null) {
+			return "Server - " + server.name;
+		} else if (mc.level != null && PlatformHelper.CURRENT.isReplayLevel(mc.level)) {
+			return "Replay Editor";
+		} else if (mc.level != null) {
+			return "Singleplayer";
+		} else {
+			return "Main Menu";
+		}
 	}
 }

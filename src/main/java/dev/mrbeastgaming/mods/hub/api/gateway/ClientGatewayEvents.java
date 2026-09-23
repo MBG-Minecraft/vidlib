@@ -4,12 +4,13 @@ import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.core.VLJoinMultiplayerScreen;
-import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
-import dev.mrbeastgaming.mods.hub.api.HubUserData;
-import dev.mrbeastgaming.mods.hub.api.HubUserFlags;
-import dev.mrbeastgaming.mods.hub.api.project.HubGameServerData;
-import dev.mrbeastgaming.mods.hub.api.project.HubProjectData;
-import dev.mrbeastgaming.mods.hub.api.project.HubProjectsData;
+import dev.mrbeastgaming.mods.hub.api.HubClientSession;
+import dev.mrbeastgaming.mods.hub.api.HubProjectsResponse;
+import dev.mrbeastgaming.mods.hub.api.data.HubGameServer;
+import dev.mrbeastgaming.mods.hub.api.data.HubProject;
+import dev.mrbeastgaming.mods.hub.api.data.HubUser;
+import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
+import dev.mrbeastgaming.mods.hub.api.data.HubUserFlags;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
@@ -53,31 +54,29 @@ public class ClientGatewayEvents {
 	}
 
 	private static void userUpdated(Minecraft mc, HubGatewayEvent event) {
-		var user = HubUserData.CODEC.parse(JsonOps.INSTANCE, event.params()).getOrThrow();
-		HubUserData.KNOWN_USERS.put(user.id().raw(), user); // sync?
-
-		var self = HubUserData.SELF;
+		var user = HubUser.CODEC.parse(JsonOps.INSTANCE, event.params()).getOrThrow();
+		var self = HubClientSession.CURRENT.user;
 
 		if (self != null && self.id().equals(user.id())) {
-			HubUserData.SELF = user;
+			HubClientSession.CURRENT.user = user;
 		}
 	}
 
 	private static void flagsUpdated(Minecraft mc, HubGatewayEvent event) {
-		var self = HubUserData.SELF;
+		var self = HubClientSession.CURRENT.user;
 
 		if (self != null) {
 			var flags = HubUserFlags.CODEC.parse(JsonOps.INSTANCE, event.params()).getOrThrow();
-			HubUserData.SELF = self.withFlags(flags);
+			HubClientSession.CURRENT.user = self.withFlags(flags);
 		}
 	}
 
 	private static void capabilitiesUpdated(Minecraft mc, HubGatewayEvent event) {
-		HubUserCapabilities.CURRENT = event.params() == null ? HubUserCapabilities.DEFAULT : HubUserCapabilities.CODEC.parse(JsonOps.INSTANCE, event.params()).getOrThrow();
+		HubClientSession.CURRENT.capabilities = event.params() == null ? HubUserCapabilities.DEFAULT : HubUserCapabilities.CODEC.parse(JsonOps.INSTANCE, event.params()).getOrThrow();
 	}
 
 	private static void serverListUpdated(Minecraft mc, HubGatewayEvent event) {
-		HubGameServerData.CURRENT = event.params() == null ? List.of() : HubGameServerData.LIST_CODEC.parse(JsonOps.INSTANCE, event.params()).getOrThrow();
+		HubClientSession.CURRENT.servers = event.params() == null ? List.of() : HubGameServer.LIST_CODEC.parse(JsonOps.INSTANCE, event.params()).getOrThrow();
 
 		mc.execute(() -> {
 			if (mc.screen instanceof VLJoinMultiplayerScreen screen) {
@@ -87,13 +86,13 @@ public class ClientGatewayEvents {
 	}
 
 	private static void projectUpdated(Minecraft mc, HubGatewayEvent event) {
-		var data = HubProjectData.CODEC.parse(JsonOps.INSTANCE, event.params()).getOrThrow();
-		HubProjectsData.ALL.forget();
+		var data = HubProject.CODEC.parse(JsonOps.INSTANCE, event.params()).getOrThrow();
+		HubProjectsResponse.ALL.forget();
 
-		var pack = HubProjectData.PACK;
+		var project = HubClientSession.CURRENT.project;
 
-		if (pack != null && pack.id().equals(data.id())) {
-			HubProjectData.PACK = data;
+		if (project != null && project.id().equals(data.id())) {
+			HubClientSession.CURRENT.project = data;
 		}
 	}
 

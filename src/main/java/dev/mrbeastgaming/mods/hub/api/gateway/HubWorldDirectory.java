@@ -7,6 +7,7 @@ import dev.latvian.mods.klib.io.checksum.Checksum;
 import dev.latvian.mods.klib.io.checksum.NoChecksum;
 import dev.latvian.mods.klib.io.checksum.SHA256;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.mrbeastgaming.mods.hub.api.data.HubWorld;
 
 import javax.imageio.ImageIO;
 import java.io.IOException;

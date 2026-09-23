@@ -11,6 +11,7 @@ public interface VidLibTextures {
 	ClientAsset DEFAULT_MARKER = new ClientAsset(VidLib.id("misc/default_marker"));
 	ClientAsset DEFAULT_PLAYER_BODY = new ClientAsset(VidLib.id("misc/default_player_body"));
 	ClientAsset DEFAULT_PLAYER_HEAD = new ClientAsset(VidLib.id("misc/default_player_head"));
+	ClientAsset DEFAULT_PROJECT_ICON = new ClientAsset(VidLib.id("misc/default_project_icon"));
 	ClientAsset DITHER = new ClientAsset(VidLib.id("misc/dither"));
 	ClientAsset FOLDER = new ClientAsset(VidLib.id("misc/folder"));
 	ClientAsset ID_CARD = new ClientAsset(VidLib.id("misc/id_card"));
@@ -20,11 +21,11 @@ public interface VidLibTextures {
 	ClientAsset NO = new ClientAsset(VidLib.id("misc/no"));
 	ClientAsset NO_OFF = new ClientAsset(VidLib.id("misc/no_off"));
 	ClientAsset NO_OUTLINE = new ClientAsset(VidLib.id("misc/no_outline"));
+	ClientAsset PACK = new ClientAsset(VidLib.id("misc/pack"));
 	ClientAsset TRANSPARENT = new ClientAsset(VidLib.id("misc/transparent"));
 	ClientAsset TRASH = new ClientAsset(VidLib.id("misc/trash"));
+	ClientAsset UNKNOWN_PACK = new ClientAsset(VidLib.id("misc/unknown_pack"));
 	ClientAsset YES = new ClientAsset(VidLib.id("misc/yes"));
 	ClientAsset YES_OFF = new ClientAsset(VidLib.id("misc/yes_off"));
 	ClientAsset YES_OUTLINE = new ClientAsset(VidLib.id("misc/yes_outline"));
-	ClientAsset PACK = new ClientAsset(VidLib.id("misc/pack"));
-	ClientAsset UNKNOWN_PACK = new ClientAsset(VidLib.id("misc/unknown_pack"));
 }

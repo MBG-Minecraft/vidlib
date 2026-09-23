@@ -59,10 +59,9 @@ import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
-import dev.mrbeastgaming.mods.hub.api.HubFileType;
-import dev.mrbeastgaming.mods.hub.api.HubMinecraftProfileData;
-import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
-import dev.mrbeastgaming.mods.hub.api.HubUserData;
+import dev.mrbeastgaming.mods.hub.api.HubClientSession;
+import dev.mrbeastgaming.mods.hub.api.data.HubFileType;
+import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
 import dev.mrbeastgaming.mods.hub.client.LinkHubUserScreen;
 import dev.mrbeastgaming.mods.hub.client.LinkMinecraftScreen;
@@ -200,21 +199,12 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void loggedIn(ClientPlayerNetworkEvent.LoggingIn event) {
-		var gateway = HubClientGateway.instance;
-
-		if (gateway != null) {
-			HubClientGateway.updateInfo(Minecraft.getInstance(), gateway);
-		}
+		HubClientGateway.ifPresent(HubClientGateway::updateInfo);
 	}
 
 	@SubscribeEvent
 	public static void loggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
-		var gateway = HubClientGateway.instance;
-
-		if (gateway != null) {
-			var mc = Minecraft.getInstance();
-			MiscClientUtils.delayedExecute(mc, () -> HubClientGateway.updateInfo(mc, gateway));
-		}
+		HubClientGateway.ifPresent(gateway -> MiscClientUtils.delayedExecute(gateway.mc, gateway::updateInfo));
 	}
 
 	@SubscribeEvent
@@ -725,12 +715,13 @@ public class VidLibClientEventHandler {
 	@SubscribeEvent
 	public static void mainMenuOpened(MainMenuOpenedEvent event) {
 		VidLibClient.checkFileSync(event.isFirstTime());
+		var session = HubClientSession.CURRENT;
 
-		if (HubUserData.SELF == null) {
-			if (HubUserCapabilities.CURRENT.resolveRequireLink()) {
+		if (session.user == null) {
+			if (HubUserCapabilities.get().resolveRequireLink()) {
 				LinkHubUserScreen.open(event.getMinecraft());
 			}
-		} else if (HubMinecraftProfileData.SELF == null) {
+		} else if (session.minecraftLink == null) {
 			if (!PlatformHelper.CURRENT.isDevEnv()) {
 				LinkMinecraftScreen.handle(event.getMinecraft(), true);
 			}

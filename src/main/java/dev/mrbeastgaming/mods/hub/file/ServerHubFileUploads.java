@@ -2,6 +2,7 @@ package dev.mrbeastgaming.mods.hub.file;
 
 import dev.latvian.mods.klib.io.FileInfo;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
+import dev.mrbeastgaming.mods.hub.api.HubServerSession;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -15,7 +16,7 @@ public interface ServerHubFileUploads {
 	}
 
 	static List<HubFileUploads.SyncedFile> syncDirectory(Path directory, Consumer<HubDirectoryUploadBuilder> upload) {
-		return HubFileUploads.syncFiles(HubFileUploads.prepareDirectory(directory, upload), null);
+		return HubFileUploads.syncFiles(HubServerSession.CURRENT.uploadContext, HubFileUploads.prepareDirectory(directory, upload), null);
 	}
 
 	static CompletableFuture<List<HubFileUploads.SyncedFile>> asyncFile(Path file, BiConsumer<FileInfo, HubFileUploadBuilder> upload) {
@@ -23,6 +24,6 @@ public interface ServerHubFileUploads {
 	}
 
 	static List<HubFileUploads.SyncedFile> syncFile(Path file, BiConsumer<FileInfo, HubFileUploadBuilder> upload) {
-		return HubFileUploads.syncFiles(HubFileUploads.prepareFile(file, upload), null);
+		return HubFileUploads.syncFiles(HubServerSession.CURRENT.uploadContext, HubFileUploads.prepareFile(file, upload), null);
 	}
 }

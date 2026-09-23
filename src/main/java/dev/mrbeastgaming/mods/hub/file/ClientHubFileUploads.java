@@ -3,7 +3,8 @@ package dev.mrbeastgaming.mods.hub.file;
 import dev.latvian.mods.klib.io.FileInfo;
 import dev.latvian.mods.vidlib.VidLibClient;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
-import dev.mrbeastgaming.mods.hub.api.HubUserCapabilities;
+import dev.mrbeastgaming.mods.hub.api.HubClientSession;
+import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -17,11 +18,11 @@ public interface ClientHubFileUploads {
 	}
 
 	static List<HubFileUploads.SyncedFile> syncDirectory(Path directory, Consumer<HubDirectoryUploadBuilder> upload) {
-		if (!HubUserCapabilities.CURRENT.autoUploadFiles()) {
+		if (!HubUserCapabilities.get().autoUploadFiles()) {
 			return List.of();
 		}
 
-		return HubFileUploads.syncFiles(HubFileUploads.prepareDirectory(directory, VidLibClient.wrapHubDirectoryUploadBuilder(upload)), VidLibClient.createUploadQueue());
+		return HubFileUploads.syncFiles(HubClientSession.CURRENT.uploadContext, HubFileUploads.prepareDirectory(directory, VidLibClient.wrapHubDirectoryUploadBuilder(upload)), VidLibClient.createUploadQueue());
 	}
 
 	static CompletableFuture<List<HubFileUploads.SyncedFile>> asyncFile(Path file, BiConsumer<FileInfo, HubFileUploadBuilder> upload) {
@@ -29,10 +30,10 @@ public interface ClientHubFileUploads {
 	}
 
 	static List<HubFileUploads.SyncedFile> syncFile(Path file, BiConsumer<FileInfo, HubFileUploadBuilder> upload) {
-		if (!HubUserCapabilities.CURRENT.autoUploadFiles()) {
+		if (!HubUserCapabilities.get().autoUploadFiles()) {
 			return List.of();
 		}
 
-		return HubFileUploads.syncFiles(HubFileUploads.prepareFile(file, VidLibClient.wrapHubFileUploadBuilder(upload)), VidLibClient.createUploadQueue());
+		return HubFileUploads.syncFiles(HubClientSession.CURRENT.uploadContext, HubFileUploads.prepareFile(file, VidLibClient.wrapHubFileUploadBuilder(upload)), VidLibClient.createUploadQueue());
 	}
 }
