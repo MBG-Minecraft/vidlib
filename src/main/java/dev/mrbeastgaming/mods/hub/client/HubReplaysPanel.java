@@ -14,16 +14,16 @@ import imgui.type.ImString;
 
 import java.util.List;
 
-public class HubDrivePanel extends Panel {
-	public static final HubDrivePanel INSTANCE = new HubDrivePanel();
+public class HubReplaysPanel extends Panel {
+	public static final HubReplaysPanel INSTANCE = new HubReplaysPanel();
 	public static final ImString SEARCH = ImGuiUtils.resizableString();
 	public static final HubProject[] PROJECT_FILTER = new HubProject[1];
 	public static final HubUser[] USER_FILTER = new HubUser[1];
 
 	public boolean reload = true;
 
-	public HubDrivePanel() {
-		super("hub-drive", "Drive");
+	public HubReplaysPanel() {
+		super("hub-replays", "Replays");
 		style = PanelStyle.FULLSCREEN;
 		menuBar = MenuItem.root((graphics, items) -> menuBar(items));
 	}
@@ -53,30 +53,9 @@ public class HubDrivePanel extends Panel {
 	@Override
 	public void content(ImGraphics graphics) {
 		if (reload) {
-			/*
-			HubWorldsData.update(data -> {
-				var savesDir = PlatformHelper.CURRENT.getGameDirectory().resolve("saves");
-				var templatesDir = PlatformHelper.CURRENT.getGameDirectory().resolve("saves-templates");
-
-				try {
-					if (Files.notExists(savesDir)) {
-						Files.createDirectories(savesDir);
-					}
-
-					if (Files.notExists(templatesDir)) {
-						Files.createDirectories(templatesDir);
-					}
-				} catch (Exception ex) {
-				}
-
-				PROJECT_FILTER[0] = PROJECT_FILTER[0] == null ? null : data.relevantProjects().get(PROJECT_FILTER[0].id().raw());
-				USER_FILTER[0] = USER_FILTER[0] == null ? null : data.relevantUsers().get(USER_FILTER[0].id().raw());
-			});
-			 */
-
 			reload = false;
 		}
 
-		ImGui.text("WIP");
+		ImGui.text("WIP, Use Replays -> Super Sorter 9000 for now");
 	}
 }

@@ -1,6 +1,7 @@
 package dev.mrbeastgaming.mods.hub.api.data;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.util.Hex32;
@@ -20,9 +21,19 @@ public record HubCountry(
 	String displayName,
 	String flagEmoji
 ) implements HubDBObject {
-	public static final Codec<HubCountry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final Codec<String> CODE_CODEC = Codec.STRING.validate(s -> {
+		if (s.isEmpty()) {
+			return DataResult.success("xx");
+		} else if (s.length() == 2 && Character.isLowerCase(s.charAt(0)) && Character.isUpperCase(s.charAt(1))) {
+			return DataResult.success(s);
+		} else {
+			return DataResult.error(() -> "Invalid country code: " + s);
+		}
+	});
+
+	public static final Codec<HubCountry> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		HubDBObject.ID_FIELD.forGetter(HubCountry::id),
-		Codec.STRING.optionalFieldOf("code", "xx").forGetter(HubCountry::code),
+		CODE_CODEC.optionalFieldOf("code", "xx").forGetter(HubCountry::code),
 		Codec.BOOL.optionalFieldOf("hidden", false).forGetter(HubCountry::hidden),
 		Codec.STRING.optionalFieldOf("cca2", "XX").forGetter(HubCountry::cca2),
 		Codec.STRING.optionalFieldOf("cca3", "XXX").forGetter(HubCountry::cca3),
@@ -46,6 +57,8 @@ public record HubCountry(
 		ByteBufCodecs.STRING_UTF8, HubCountry::flagEmoji,
 		HubCountry::new
 	);
+
+	public static final Codec<HubCountry> CODEC = HubResponseContext.resolvingCodec(DIRECT_CODEC, CODE_CODEC, HubCountry::code, HubResponseContext::country);
 
 	@Override
 	public String displayName() {

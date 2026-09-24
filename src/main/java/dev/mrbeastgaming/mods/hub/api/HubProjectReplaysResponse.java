@@ -3,7 +3,7 @@ package dev.mrbeastgaming.mods.hub.api;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.util.Hex32;
-import dev.mrbeastgaming.mods.hub.api.data.HubDisplayContext;
+import dev.mrbeastgaming.mods.hub.api.data.HubResponseContext;
 import dev.mrbeastgaming.mods.hub.api.data.HubReplay;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
@@ -13,11 +13,11 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public record HubProjectReplaysResponse(
-	HubDisplayContext ctx,
+	HubResponseContext ctx,
 	List<HubReplay> replays
 ) {
 	public static final Codec<HubProjectReplaysResponse> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		HubDisplayContext.MAP_CODEC.forGetter(HubProjectReplaysResponse::ctx),
+		HubResponseContext.MAP_CODEC.forGetter(HubProjectReplaysResponse::ctx),
 		HubReplay.CODEC.listOf().optionalFieldOf("replays", List.of()).forGetter(HubProjectReplaysResponse::replays)
 	).apply(instance, HubProjectReplaysResponse::new));
 
@@ -32,7 +32,7 @@ public record HubProjectReplaysResponse(
 			try {
 				return HubAPI.ProjectAPI.getReplays(id);
 			} catch (Exception ex) {
-				return new HubProjectReplaysResponse(HubDisplayContext.EMPTY, List.of());
+				return new HubProjectReplaysResponse(HubResponseContext.EMPTY, List.of());
 			}
 		}, Util.nonCriticalIoPool()));
 	}

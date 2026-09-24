@@ -41,6 +41,7 @@ import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
 import dev.mrbeastgaming.mods.hub.api.HubClientSession;
 import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.client.HubDrivePanel;
+import dev.mrbeastgaming.mods.hub.client.HubReplaysPanel;
 import dev.mrbeastgaming.mods.hub.client.HubWorldsPanel;
 import dev.mrbeastgaming.mods.hub.client.LinkHubUserScreen;
 import dev.mrbeastgaming.mods.hub.client.LinkMinecraftScreen;
@@ -68,6 +69,7 @@ public class BuiltInImGui {
 	public static final MenuItem HUB = MenuItem.menu(ImIcons.ACCOUNT, "Hub", (graphics, list) -> {
 		list.add(MenuItem.item(ImIcons.STORAGE, "Drive", HubDrivePanel.INSTANCE).enabled(HubUserCapabilities.get().viewDrive()));
 		list.add(MenuItem.item(ImIcons.WORLD, "Worlds", HubWorldsPanel.INSTANCE).enabled(HubUserCapabilities.get().viewRemoteWorlds()));
+		list.add(MenuItem.item(ImIcons.APERTURE, "Replays", HubReplaysPanel.INSTANCE).enabled(HubUserCapabilities.get().viewRemoteReplays()));
 
 		if (!graphics.inGame) {
 			list.add(MenuItem.SEPARATOR);
@@ -410,6 +412,8 @@ public class BuiltInImGui {
 			}
 		}
 
-		ProgressQueueImGui.handle(graphics);
+		if (!FullscreenPanel.INSTANCE.isOpen()) {
+			ProgressQueueImGui.handle(graphics);
+		}
 	}
 }

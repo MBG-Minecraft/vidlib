@@ -3,12 +3,12 @@ package dev.mrbeastgaming.mods.hub.api;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.KLibCodecs;
-import dev.latvian.mods.klib.util.Hex32;
-import dev.mrbeastgaming.mods.hub.api.data.HubDBObject;
-import dev.mrbeastgaming.mods.hub.api.data.HubDisplayContext;
 import dev.mrbeastgaming.mods.hub.api.data.HubGameServer;
 import dev.mrbeastgaming.mods.hub.api.data.HubKeys;
 import dev.mrbeastgaming.mods.hub.api.data.HubParticipant;
+import dev.mrbeastgaming.mods.hub.api.data.HubProject;
+import dev.mrbeastgaming.mods.hub.api.data.HubResponseContext;
+import dev.mrbeastgaming.mods.hub.api.data.HubUser;
 import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
 import net.minecraft.Util;
 
@@ -18,12 +18,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 public record HubClientSessionResponse(
-	HubDisplayContext ctx,
+	HubResponseContext ctx,
 	UUID id,
 	Optional<URI> gateway,
 	Optional<String> gatewayToken,
-	Hex32 user,
-	Hex32 project,
+	Optional<HubUser> user,
+	Optional<HubProject> project,
 	Optional<HubParticipant> participant,
 	HubUserCapabilities capabilities,
 	Optional<HubKeys> keys,
@@ -32,12 +32,12 @@ public record HubClientSessionResponse(
 	List<HubGameServer> servers
 ) {
 	public static final Codec<HubClientSessionResponse> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		HubDisplayContext.MAP_CODEC.forGetter(HubClientSessionResponse::ctx),
+		HubResponseContext.MAP_CODEC.forGetter(HubClientSessionResponse::ctx),
 		KLibCodecs.UUID.optionalFieldOf("id", Util.NIL_UUID).forGetter(HubClientSessionResponse::id),
 		HubAPI.WS_URI_BASE_CODEC.optionalFieldOf("gateway").forGetter(HubClientSessionResponse::gateway),
 		Codec.STRING.optionalFieldOf("gateway_token").forGetter(HubClientSessionResponse::gatewayToken),
-		HubDBObject.idCodec("user").forGetter(HubClientSessionResponse::user),
-		HubDBObject.idCodec("project").forGetter(HubClientSessionResponse::project),
+		HubUser.CODEC.optionalFieldOf("user").forGetter(HubClientSessionResponse::user),
+		HubProject.CODEC.optionalFieldOf("project").forGetter(HubClientSessionResponse::project),
 		HubParticipant.CODEC.optionalFieldOf("participant").forGetter(HubClientSessionResponse::participant),
 		HubUserCapabilities.CODEC.optionalFieldOf("capabilities", HubUserCapabilities.DEFAULT).forGetter(HubClientSessionResponse::capabilities),
 		HubKeys.CODEC.optionalFieldOf("keys").forGetter(HubClientSessionResponse::keys),

@@ -42,7 +42,7 @@ public class VidLibClient {
 		var userId = Minecraft.getInstance().getUser().getProfileId();
 
 		if (user != null) {
-			builder.setAssignedTo(HubPossibleUser.of(user.id()));
+			builder.setAssignedTo(HubPossibleUser.of(user));
 		}
 
 		builder.setAssignedToMinecraft(userId);

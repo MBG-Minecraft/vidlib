@@ -36,13 +36,25 @@ public class Panel {
 		if (!isOpen) {
 			isOpen = true;
 
-			for (var p : BuiltInImGui.OPEN_PANELS.values()) {
-				if (p != this && p.id.equals(id)) {
-					p.close();
+			if (style == PanelStyle.FULLSCREEN) {
+				for (var p : FullscreenPanel.INSTANCE.tabs) {
+					if (p != this && p.id.equals(id)) {
+						p.close();
+					}
 				}
+
+				FullscreenPanel.INSTANCE.tabs.add(this);
+				FullscreenPanel.INSTANCE.open();
+			} else {
+				for (var p : BuiltInImGui.OPEN_PANELS.values()) {
+					if (p != this && p.id.equals(id)) {
+						p.close();
+					}
+				}
+
+				BuiltInImGui.OPEN_PANELS.put(id, this);
 			}
 
-			BuiltInImGui.OPEN_PANELS.put(id, this);
 			onOpened();
 		}
 	}
@@ -86,6 +98,10 @@ public class Panel {
 			flags |= ImGuiWindowFlags.MenuBar;
 		}
 
+		if (style == PanelStyle.FULLSCREEN) {
+			flags |= ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoDocking;
+		}
+
 		return flags;
 	}
 
@@ -96,10 +112,15 @@ public class Panel {
 		int flags = setup(graphics);
 
 		if (flags == -1) {
+			postSetup(graphics, false);
 			return false;
 		}
 
-		if (style != PanelStyle.NORMAL && windowType != ImWindowType.DOCKED) {
+		boolean fullscreen = style == PanelStyle.FULLSCREEN;
+
+		if (fullscreen) {
+			// No-op
+		} else if (style != PanelStyle.NORMAL && windowType != ImWindowType.DOCKED) {
 			flags |= ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize;
 
 			if (windowType == ImWindowType.ATTACHED && style == PanelStyle.GLASS) {
@@ -113,7 +134,10 @@ public class Panel {
 
 		var title = getLabel() + "###" + getId();
 		ImGuiUtils.BOOLEAN.set(true);
-		boolean menuOpen = canBeClosed ? ImGui.begin(title, ImGuiUtils.BOOLEAN, flags) : ImGui.begin(title, flags);
+
+		boolean tabOpen = fullscreen && (canBeClosed ? ImGui.beginTabItem(title, ImGuiUtils.BOOLEAN, 0) : ImGui.beginTabItem(title, 0));
+		boolean menuOpen = fullscreen ? (tabOpen && ImGui.beginChild(title, 0F, 0F, false, flags)) : canBeClosed ? ImGui.begin(title, ImGuiUtils.BOOLEAN, flags) : ImGui.begin(title, flags);
+
 		boolean shouldClose = !ImGuiUtils.BOOLEAN.get();
 		postSetup(graphics, menuOpen);
 
@@ -135,8 +159,17 @@ public class Panel {
 
 		postContent(graphics);
 
-		windowType = ImWindowType.get(graphics.mc.getWindow().getWindow());
-		ImGui.end();
+		if (fullscreen) {
+			windowType = ImWindowType.TAB;
+
+			if (tabOpen) {
+				ImGui.endChild();
+				ImGui.endTabItem();
+			}
+		} else {
+			windowType = ImWindowType.get(graphics.mc.getWindow().getWindow());
+			ImGui.end();
+		}
 
 		return !isOpen;
 	}

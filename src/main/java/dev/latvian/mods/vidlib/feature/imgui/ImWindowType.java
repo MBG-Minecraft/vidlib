@@ -5,7 +5,8 @@ import imgui.ImGui;
 public enum ImWindowType {
 	DOCKED,
 	ATTACHED,
-	FLOATING;
+	FLOATING,
+	TAB;
 
 	public static ImWindowType get(long windowId) {
 		if (ImGui.getWindowViewport() == null) {

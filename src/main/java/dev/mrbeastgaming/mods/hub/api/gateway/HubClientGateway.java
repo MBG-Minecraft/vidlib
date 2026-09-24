@@ -2,7 +2,9 @@ package dev.mrbeastgaming.mods.hub.api.gateway;
 
 import dev.latvian.mods.klib.io.bytes.ByteInput;
 import dev.latvian.mods.klib.io.checksum.Checksum;
+import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.core.VLJoinMultiplayerScreen;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
@@ -10,9 +12,14 @@ import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.mrbeastgaming.mods.hub.api.Auth;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
+import dev.mrbeastgaming.mods.hub.api.HubClientSession;
+import dev.mrbeastgaming.mods.hub.api.data.HubGameServer;
+import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
+import dev.mrbeastgaming.mods.hub.api.data.HubUserFlags;
 import dev.mrbeastgaming.mods.hub.client.HubWorldsPanel;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.common.NeoForge;
 
 import javax.annotation.Nullable;
@@ -21,6 +28,7 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -77,6 +85,52 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 		}
 	}
 
+	public static void registerBuiltIn(HubGatewayEventRegistry<Minecraft> registry) {
+		registerCommonBuiltIn(registry);
+		registry.registerSynced("display_toast", HubClientGateway::displayToast);
+		registry.register("flags_updated", HubClientGateway::flagsUpdated);
+		registry.register("capabilities_updated", HubClientGateway::capabilitiesUpdated);
+		registry.register("server_list_updated", HubClientGateway::serverListUpdated);
+		// TODO: edit options
+		// TODO: save replay
+		// TODO: save voice recording
+		// TODO: open url
+	}
+
+	private static void displayToast(Minecraft mc, HubGatewayEvent event) {
+		var params = event.paramsObject();
+		var title = params.get("title").getAsString();
+		var subtitle = params.has("subtitle") ? params.get("subtitle").getAsString() : "";
+		mc.toast(Component.literal(title), subtitle.isEmpty() ? Component.empty() : Component.literal(subtitle));
+	}
+
+	private static void flagsUpdated(Minecraft mc, HubGatewayEvent event) {
+		var self = HubClientSession.CURRENT.user;
+
+		if (self != null) {
+			var flags = HubUserFlags.CODEC.parse(HubAPI.jsonOps(), event.params()).getOrThrow();
+			HubClientSession.CURRENT.user = self.withFlags(flags);
+		}
+	}
+
+	private static void capabilitiesUpdated(Minecraft mc, HubGatewayEvent event) {
+		HubClientSession.CURRENT.capabilities = event.params() == null ? HubUserCapabilities.DEFAULT : HubUserCapabilities.CODEC.parse(HubAPI.jsonOps(), event.params()).getOrThrow();
+	}
+
+	private static void serverListUpdated(Minecraft mc, HubGatewayEvent event) {
+		HubClientSession.CURRENT.servers = event.params() == null ? List.of() : HubGameServer.LIST_CODEC.parse(HubAPI.jsonOps(), event.params()).getOrThrow();
+
+		mc.execute(() -> {
+			if (mc.screen instanceof VLJoinMultiplayerScreen screen) {
+				screen.vl$refresh();
+			}
+		});
+	}
+
+	private static void cutRecording(Minecraft mc, HubGatewayEvent event) {
+		ReplayAPI.getActive().cutRecording();
+	}
+
 	public final Minecraft mc;
 
 	public HubClientGateway(Minecraft mc, URI gatewayURI, String gatewayToken) {
@@ -85,7 +139,23 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 	}
 
 	@Override
+	public HubClientSession getHubSession() {
+		return HubClientSession.CURRENT;
+	}
+
+	@Override
+	public void requestRestart() {
+		if (mc.level != null) {
+			mc.vl$exitToTitle();
+		}
+
+		// Display GUI
+		mc.stop();
+	}
+
+	@Override
 	public void collectEventHandlers(HubGatewayEventRegistry<Minecraft> registry) {
+		registerBuiltIn(registry);
 		NeoForge.EVENT_BUS.post(new HubClientGatewayEventRegistryEvent(registry));
 	}
 

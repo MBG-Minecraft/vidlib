@@ -5,36 +5,24 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import dev.mrbeastgaming.mods.hub.HubUserConfig;
 import dev.mrbeastgaming.mods.hub.api.data.HubGameServer;
-import dev.mrbeastgaming.mods.hub.api.data.HubKeys;
 import dev.mrbeastgaming.mods.hub.api.data.HubMinecraftProfile;
 import dev.mrbeastgaming.mods.hub.api.data.HubParticipant;
-import dev.mrbeastgaming.mods.hub.api.data.HubProject;
-import dev.mrbeastgaming.mods.hub.api.data.HubUser;
 import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
 import dev.mrbeastgaming.mods.hub.file.UploadContext;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.UUID;
 
-public class HubClientSession {
-	public UUID id = Util.NIL_UUID;
-	public HubUser user = null;
-	public HubProject project = null;
+public class HubClientSession extends HubCommonSession {
 	public HubUserCapabilities capabilities = HubUserCapabilities.DEFAULT;
 	public HubParticipant participant = null;
 	public HubMinecraftProfile.LinkData minecraftLink = null;
-	public HubKeys keys = null;
-	public HubKeys sessionKeys = null;
-	public byte[] sessionSalt = new byte[0];
 	public String authServerId = "";
 	public List<HubGameServer> servers = List.of();
-	public UploadContext uploadContext = null;
 
 	public static HubClientSession CURRENT = new HubClientSession();
 
@@ -58,8 +46,8 @@ public class HubClientSession {
 			}
 
 			session.id = data.id();
-			session.user = data.ctx().user(data.user());
-			session.project = data.ctx().project(data.project());
+			session.user = data.user().orElse(null);
+			session.project = data.project().orElse(null);
 			session.capabilities = data.capabilities();
 			session.participant = data.participant().orElse(null);
 			session.minecraftLink = oldMinecraftLink;

@@ -3,11 +3,9 @@ package dev.mrbeastgaming.mods.hub.api.gateway;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.klib.util.Hex32;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
-import dev.mrbeastgaming.mods.hub.api.data.HubDBObject;
-import dev.mrbeastgaming.mods.hub.api.data.HubDisplayContext;
 import dev.mrbeastgaming.mods.hub.api.data.HubProject;
+import dev.mrbeastgaming.mods.hub.api.data.HubResponseContext;
 import dev.mrbeastgaming.mods.hub.api.data.HubUser;
 import dev.mrbeastgaming.mods.hub.api.data.HubWorld;
 import net.minecraft.Util;
@@ -21,7 +19,7 @@ import java.util.function.Consumer;
 
 public record HubWorldsResponse(
 	int fetching,
-	HubDisplayContext ctx,
+	HubResponseContext ctx,
 	List<AvailableWorld> worlds
 ) {
 	public static final int TYPE_DONE = 0;
@@ -32,16 +30,16 @@ public record HubWorldsResponse(
 	public record AvailableWorld(
 		String uniqueId,
 		String sessionType,
-		Hex32 project,
-		Hex32 user,
+		HubProject project,
+		HubUser user,
 		HubWorld world,
 		Optional<URI> iconUrl
 	) {
 		public static final Codec<AvailableWorld> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.STRING.fieldOf("unique_id").forGetter(AvailableWorld::uniqueId),
 			Codec.STRING.fieldOf("session_type").forGetter(AvailableWorld::sessionType),
-			HubDBObject.idCodec("project").forGetter(AvailableWorld::project),
-			HubDBObject.idCodec("user").forGetter(AvailableWorld::user),
+			HubProject.CODEC.fieldOf("project").forGetter(AvailableWorld::project),
+			HubUser.CODEC.fieldOf("user").forGetter(AvailableWorld::user),
 			HubWorld.CODEC.fieldOf("world").forGetter(AvailableWorld::world),
 			HubAPI.URI_BASE_CODEC.optionalFieldOf("icon_url").forGetter(AvailableWorld::iconUrl)
 		).apply(i, AvailableWorld::new));
@@ -63,11 +61,11 @@ public record HubWorldsResponse(
 
 	public static final Codec<HubWorldsResponse> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		MapCodec.unit(TYPE_DONE).forGetter(HubWorldsResponse::fetching),
-		HubDisplayContext.MAP_CODEC.forGetter(HubWorldsResponse::ctx),
+		HubResponseContext.MAP_CODEC.forGetter(HubWorldsResponse::ctx),
 		AvailableWorld.CODEC.listOf().fieldOf("worlds").forGetter(HubWorldsResponse::worlds)
 	).apply(instance, HubWorldsResponse::new));
 
-	public static HubWorldsResponse CURRENT = new HubWorldsResponse(TYPE_NOT_STARTED, HubDisplayContext.EMPTY, List.of());
+	public static HubWorldsResponse CURRENT = new HubWorldsResponse(TYPE_NOT_STARTED, HubResponseContext.EMPTY, List.of());
 
 	public static void update(Consumer<HubWorldsResponse> callback) {
 		CURRENT = new HubWorldsResponse(TYPE_FETCHING, CURRENT.ctx, CURRENT.worlds);
@@ -77,7 +75,7 @@ public record HubWorldsResponse(
 				CURRENT = HubAPI.MinecraftAPI.getWorlds();
 			} catch (Exception ex) {
 				ex.printStackTrace();
-				CURRENT = new HubWorldsResponse(TYPE_ERROR, HubDisplayContext.EMPTY, List.of());
+				CURRENT = new HubWorldsResponse(TYPE_ERROR, HubResponseContext.EMPTY, List.of());
 			}
 
 			callback.accept(CURRENT);

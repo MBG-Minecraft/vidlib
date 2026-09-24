@@ -6,7 +6,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import com.mojang.serialization.JsonOps;
 import dev.latvian.apps.tinyhttp.util.ByteBufferUtils;
 import dev.latvian.mods.klib.io.CompressionMethod;
 import dev.latvian.mods.klib.io.bytes.ByteInput;
@@ -17,10 +16,14 @@ import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
+import dev.mrbeastgaming.mods.hub.api.HubCommonSession;
 import dev.mrbeastgaming.mods.hub.api.HubLogRequest;
+import dev.mrbeastgaming.mods.hub.api.HubProjectsResponse;
+import dev.mrbeastgaming.mods.hub.api.data.HubProject;
 import dev.mrbeastgaming.mods.hub.api.data.HubTVUpdateData;
 import dev.mrbeastgaming.mods.hub.api.data.HubUploadRequestFile;
 import dev.mrbeastgaming.mods.hub.api.data.HubUsedPort;
+import dev.mrbeastgaming.mods.hub.api.data.HubUser;
 import dev.mrbeastgaming.mods.hub.api.data.HubWorld;
 import dev.mrbeastgaming.mods.hub.file.HubUploadRequestFileWithPath;
 import dev.mrbeastgaming.mods.hub.file.UploadRequest;
@@ -56,7 +59,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implements WebSocket.Listener {
+public abstract class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implements WebSocket.Listener {
 	public static final int PACKET_DEBUG = 0;
 	public static final int PACKET_UPLOAD_CHUNK = 1;
 	public static final int PACKET_UPLOAD_END = 2;
@@ -70,6 +73,38 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 	public static final int PACKET_PROGRESS_BAR = 10;
 	public static final int PACKET_REMOVE_PROGRESS_BAR = 11;
 	public static final int PACKET_DOWNLOAD_WORLD = 12;
+
+	public static void registerCommonBuiltIn(HubGatewayEventRegistry<?> registry) {
+		registry.registerSynced("request_restart", HubCommonGateway::requestRestart);
+		registry.register("user_updated", HubCommonGateway::userUpdated);
+		registry.register("project_updated", HubCommonGateway::projectUpdated);
+	}
+
+	private static void requestRestart(ReentrantBlockableEventLoop<?> main, HubGatewayEvent event) {
+		event.gateway().requestRestart();
+	}
+
+	private static void userUpdated(ReentrantBlockableEventLoop<?> main, HubGatewayEvent event) {
+		var session = event.gateway().getHubSession();
+		var user = HubUser.CODEC.parse(HubAPI.jsonOps(), event.params()).getOrThrow();
+		var self = session.user;
+
+		if (self != null && self.id().equals(user.id())) {
+			session.user = user;
+		}
+	}
+
+	private static void projectUpdated(ReentrantBlockableEventLoop<?> main, HubGatewayEvent event) {
+		var session = event.gateway().getHubSession();
+		var data = HubProject.DIRECT_CODEC.parse(HubAPI.jsonOps(), event.params()).getOrThrow();
+		HubProjectsResponse.ALL.forget();
+
+		var project = session.project;
+
+		if (project != null && project.id().equals(data.id())) {
+			session.project = data;
+		}
+	}
 
 	public final M main;
 	public Instant connected;
@@ -103,6 +138,10 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 		this.lastPong = new Ping(connected, "None");
 		this.lastSentPing = 0L;
 	}
+
+	public abstract HubCommonSession getHubSession();
+
+	public abstract void requestRestart();
 
 	public void start() {
 		boolean reconnecting = reconnect != 0L;
@@ -437,7 +476,7 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 
 	public CompletableFuture<Void> log(Supplier<HubLogRequest> request) {
 		var data = request.get();
-		var json = HubLogRequest.CODEC.encodeStart(JsonOps.INSTANCE, data).getOrThrow().getAsJsonObject();
+		var json = HubLogRequest.CODEC.encodeStart(HubAPI.jsonOps(), data).getOrThrow().getAsJsonObject();
 		return send("log", json);
 	}
 
@@ -487,7 +526,7 @@ public class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>> implemen
 	public CompletableFuture<Void> updateTV(int tv, HubTVUpdateData data) {
 		var json = new JsonObject();
 		json.addProperty("tv", tv);
-		json.add("data", HubTVUpdateData.CODEC.encodeStart(JsonOps.INSTANCE, data).getOrThrow().getAsJsonObject());
+		json.add("data", HubTVUpdateData.CODEC.encodeStart(HubAPI.jsonOps(), data).getOrThrow().getAsJsonObject());
 		return send("update_tv", json);
 	}
 

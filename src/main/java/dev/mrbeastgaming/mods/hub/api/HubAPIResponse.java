@@ -2,7 +2,6 @@ package dev.mrbeastgaming.mods.hub.api;
 
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.util.JsonUtils;
 
 import java.net.http.HttpResponse;
@@ -34,6 +33,6 @@ public record HubAPIResponse(HttpResponse<?> response, int code, byte[] data) {
 	}
 
 	public <T> T json(Codec<T> codec) {
-		return codec.parse(JsonOps.INSTANCE, json()).getOrThrow();
+		return codec.parse(HubAPI.jsonOps(), json()).getOrThrow();
 	}
 }

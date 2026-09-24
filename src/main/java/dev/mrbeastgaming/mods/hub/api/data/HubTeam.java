@@ -16,7 +16,7 @@ public record HubTeam(
 	UInt64 discordRole,
 	HubDataMap customData
 ) implements HubDBObject {
-	public static final Codec<HubTeam> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final Codec<HubTeam> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		HubDBObject.ID_FIELD.forGetter(HubTeam::id),
 		Codec.STRING.optionalFieldOf("name", "").forGetter(HubTeam::name),
 		KLibCodecs.INSTANT.optionalFieldOf("created", Instant.EPOCH).forGetter(HubTeam::created),
@@ -24,4 +24,6 @@ public record HubTeam(
 		UInt64.CODEC.optionalFieldOf("discord_guild", UInt64.NONE).forGetter(HubTeam::discordRole),
 		HubDataMap.CODEC.optionalFieldOf("custom_data", HubDataMap.EMPTY).forGetter(HubTeam::customData)
 	).apply(instance, HubTeam::new));
+
+	public static final Codec<HubTeam> CODEC = HubResponseContext.resolvingCodec(DIRECT_CODEC, HubResponseContext::team);
 }

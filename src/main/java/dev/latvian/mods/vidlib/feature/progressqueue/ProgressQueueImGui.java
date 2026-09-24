@@ -87,7 +87,11 @@ public class ProgressQueueImGui {
 
 			ImGuiUtils.BOOLEAN.set(queue.open);
 
-			if (queue.canCancel || !queue.errors.isEmpty() ? ImGui.begin(windowId, ImGuiUtils.BOOLEAN, flags) : ImGui.begin(windowId, flags)) {
+			boolean canClose = queue.canCancel || !queue.errors.isEmpty();
+
+			if (canClose ? ImGui.begin(windowId, ImGuiUtils.BOOLEAN, flags) : ImGui.begin(windowId, flags)) {
+				// ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());
+
 				queue.open = ImGuiUtils.BOOLEAN.get();
 
 				ImGui.pushItemWidth(-1F);

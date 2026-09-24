@@ -44,7 +44,7 @@ public record HubCountryList(
 
 	public static final Codec<HubCountryList> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Checksum.CODEC.optionalFieldOf("checksum", NoChecksum.INSTANCE).forGetter(HubCountryList::checksum),
-		HubCountry.CODEC.listOf().optionalFieldOf("countries", List.of()).forGetter(HubCountryList::countryList)
+		HubCountry.DIRECT_CODEC.listOf().optionalFieldOf("countries", List.of()).forGetter(HubCountryList::countryList)
 	).apply(instance, HubCountryList::of));
 
 	public static final StreamCodec<ByteBuf, HubCountryList> STREAM_CODEC = CompositeStreamCodec.of(

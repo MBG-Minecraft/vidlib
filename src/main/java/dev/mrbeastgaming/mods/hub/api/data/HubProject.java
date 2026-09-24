@@ -20,10 +20,10 @@ public record HubProject(
 	String productionCode,
 	HubGame game,
 	UInt64 discordGuild,
-	List<Hex32> teams,
+	List<HubTeam> teams,
 	HubDataMap customData
 ) implements HubDBObject {
-	public static final Codec<HubProject> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final Codec<HubProject> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		HubDBObject.ID_FIELD.forGetter(HubProject::id),
 		HubProjectFlags.CODEC.optionalFieldOf("flags", HubProjectFlags.NONE).forGetter(HubProject::flags),
 		Codec.STRING.optionalFieldOf("name", "").forGetter(HubProject::name),
@@ -33,9 +33,11 @@ public record HubProject(
 		Codec.STRING.optionalFieldOf("production_code", "").forGetter(HubProject::productionCode),
 		HubGame.CODEC.fieldOf("game").forGetter(HubProject::game),
 		UInt64.CODEC.optionalFieldOf("discord_guild", UInt64.NONE).forGetter(HubProject::discordGuild),
-		HubDBObject.idListCodec("teams").forGetter(HubProject::teams),
+		HubTeam.CODEC.listOf().optionalFieldOf("teams", List.of()).forGetter(HubProject::teams),
 		HubDataMap.CODEC.optionalFieldOf("custom_data", HubDataMap.EMPTY).forGetter(HubProject::customData)
 	).apply(instance, HubProject::new));
+
+	public static final Codec<HubProject> CODEC = HubResponseContext.resolvingCodec(DIRECT_CODEC, HubResponseContext::project);
 
 	@Override
 	public String toString() {

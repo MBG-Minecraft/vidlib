@@ -10,6 +10,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
 import dev.latvian.mods.vidlib.feature.imgui.Panel;
+import dev.latvian.mods.vidlib.feature.imgui.PanelStyle;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
@@ -22,7 +23,6 @@ import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldsResponse;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
-import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImString;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -49,6 +49,7 @@ public class HubWorldsPanel extends Panel {
 
 	public HubWorldsPanel() {
 		super("hub-worlds", "Worlds");
+		style = PanelStyle.FULLSCREEN;
 		menuBar = MenuItem.root((graphics, items) -> menuBar(items));
 	}
 
@@ -72,22 +73,6 @@ public class HubWorldsPanel extends Panel {
 			ImGui.setNextItemWidth(200F);
 			graphics.combo("###user-filter", USER_FILTER, "Any User", HubWorldsResponse.CURRENT.ctx().relevantUsers().values().toArray(HubUser[]::new), HubUser::name);
 		}));
-	}
-
-	@Override
-	public int setup(ImGraphics graphics) {
-		var viewport = ImGui.getMainViewport();
-		float yOff = viewport.getWorkPosY() - viewport.getPosY();
-		float popupWidth = viewport.getWorkSizeX();
-		float popupHeight = viewport.getWorkSizeY() - yOff;
-
-		if (popupWidth <= 0F || popupHeight <= 0F) {
-			return -1;
-		}
-
-		ImGui.setNextWindowPos(viewport.getWorkPos().x, viewport.getWorkPosY());
-		ImGui.setNextWindowSize(popupWidth, popupHeight);
-		return super.setup(graphics) | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoDocking;
 	}
 
 	@Override
@@ -142,8 +127,8 @@ public class HubWorldsPanel extends Panel {
 		var search = SEARCH.get().toLowerCase(Locale.ROOT);
 
 		for (var world : data.worlds()) {
-			var project = data.ctx().project(world.project());
-			var user = data.ctx().user(world.user());
+			var project = world.project();
+			var user = world.user();
 
 			if (PROJECT_FILTER[0] != null && !PROJECT_FILTER[0].id().equals(project.id())) {
 				continue;

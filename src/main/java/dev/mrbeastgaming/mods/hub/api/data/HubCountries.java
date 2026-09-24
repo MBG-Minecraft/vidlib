@@ -1,6 +1,5 @@
 package dev.mrbeastgaming.mods.hub.api.data;
 
-import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.common.CommonPaths;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.klib.util.Lazy;
@@ -28,7 +27,7 @@ public interface HubCountries {
 
 				if (countryList != HubCountryList.EMPTY) {
 					var path = CommonPaths.mkdirs(LOCAL_PATH.get());
-					JsonUtils.write(path, HubCountryList.CODEC.encodeStart(JsonOps.INSTANCE, countryList).getOrThrow(), false);
+					JsonUtils.write(path, HubCountryList.CODEC.encodeStart(HubAPI.jsonOps(), countryList).getOrThrow(), false);
 				}
 
 				return countryList;
@@ -46,7 +45,7 @@ public interface HubCountries {
 		if (Files.exists(path)) {
 			try {
 				var json = JsonUtils.read(path);
-				countryList = HubCountryList.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
+				countryList = HubCountryList.CODEC.parse(HubAPI.jsonOps(), json).getOrThrow();
 			} catch (Exception ignored) {
 			}
 		}

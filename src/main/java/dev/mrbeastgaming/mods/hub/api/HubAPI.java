@@ -62,6 +62,10 @@ public interface HubAPI {
 		.connectTimeout(Duration.ofSeconds(30L))
 		.build();
 
+	static HubOps<JsonElement> jsonOps() {
+		return new HubOps<>(JsonOps.INSTANCE);
+	}
+
 	static HubAPIResponse send(HttpRequest request, boolean responseBody) throws IOException, InterruptedException {
 		if (responseBody) {
 			var response = MiscUtils.sendRetrying(HTTP_CLIENT, request, HttpResponse.BodyHandlers.ofInputStream());
@@ -131,7 +135,7 @@ public interface HubAPI {
 	}
 
 	static <T> HttpRequest.BodyPublisher jsonBody(Codec<T> codec, T value) {
-		return jsonBody(codec.encodeStart(JsonOps.INSTANCE, value).getOrThrow());
+		return jsonBody(codec.encodeStart(HubAPI.jsonOps(), value).getOrThrow());
 	}
 
 	@Nullable
@@ -153,7 +157,7 @@ public interface HubAPI {
 		static CompletableFuture<UploadResponse> postUpload(UploadRequest request) {
 			return CompletableFuture.supplyAsync(() -> {
 				try {
-					var json = UploadRequest.CODEC.encodeStart(JsonOps.INSTANCE, request).getOrThrow();
+					var json = UploadRequest.CODEC.encodeStart(HubAPI.jsonOps(), request).getOrThrow();
 					return send(request("api/upload", Auth.EXCLUDED).POST(jsonBody(json)).build(), true).json(UploadResponse.CODEC);
 				} catch (Exception ex) {
 					VidLib.LOGGER.error("Failed to request file upload", ex);

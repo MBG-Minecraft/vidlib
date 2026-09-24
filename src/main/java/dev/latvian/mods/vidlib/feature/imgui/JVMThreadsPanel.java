@@ -7,12 +7,7 @@ public class JVMThreadsPanel extends Panel {
 
 	private JVMThreadsPanel() {
 		super("jvm-threads", "JVM Threads");
-	}
-
-	@Override
-	public int setup(ImGraphics graphics) {
-		ImGui.setNextWindowSizeConstraints(0F, 0F, Float.MAX_VALUE, 1000F);
-		return super.setup(graphics);
+		style = PanelStyle.FULLSCREEN;
 	}
 
 	@Override

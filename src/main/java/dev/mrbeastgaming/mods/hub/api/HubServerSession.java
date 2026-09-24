@@ -7,11 +7,8 @@ import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.mrbeastgaming.mods.hub.HubProjectConfig;
 import dev.mrbeastgaming.mods.hub.api.data.HubKeys;
-import dev.mrbeastgaming.mods.hub.api.data.HubProject;
-import dev.mrbeastgaming.mods.hub.api.data.HubUser;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
 import dev.mrbeastgaming.mods.hub.file.UploadContext;
-import net.minecraft.Util;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.PlayerList;
 
@@ -19,15 +16,7 @@ import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.UUID;
 
-public class HubServerSession {
-	public UUID id = Util.NIL_UUID;
-	public HubUser user = null;
-	public HubProject project = null;
-	public HubKeys keys = null;
-	public HubKeys sessionKeys = null;
-	public byte[] sessionSalt = new byte[0];
-	public UploadContext uploadContext = null;
-
+public class HubServerSession extends HubCommonSession {
 	public static HubServerSession CURRENT = null;
 
 	public static void loadAsync(MinecraftServer server) {
@@ -53,8 +42,8 @@ public class HubServerSession {
 			));
 
 			session.id = data.id();
-			session.user = data.ctx().user(data.user());
-			session.project = data.ctx().project(data.project());
+			session.user = data.user().orElse(null);
+			session.project = data.project().orElse(null);
 			session.keys = data.keys().orElse(null);
 			session.sessionKeys = data.sessionKeys().orElse(null);
 			session.sessionSalt = data.sessionSalt();
@@ -82,6 +71,8 @@ public class HubServerSession {
 		} catch (Exception ex) {
 			VidLib.LOGGER.error("Failed to load Hub server session data", ex);
 		}
+
+		HubProjectsResponse.ALL.forget();
 	}
 
 	public static void updateOps(MinecraftServer server, JsonArray json) {

@@ -16,13 +16,15 @@ public record HubUser(
 	Optional<URI> avatarUrl,
 	UInt64 discordId
 ) implements HubDBObject {
-	public static final Codec<HubUser> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final Codec<HubUser> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		HubDBObject.ID_FIELD.forGetter(HubUser::id),
 		HubUserFlags.CODEC.optionalFieldOf("flags", HubUserFlags.NONE).forGetter(HubUser::flags),
 		Codec.STRING.optionalFieldOf("name", "").forGetter(HubUser::name),
 		HubAPI.URI_BASE_CODEC.optionalFieldOf("avatar_url").forGetter(HubUser::avatarUrl),
 		UInt64.CODEC.optionalFieldOf("discord_id", UInt64.NONE).forGetter(HubUser::discordId)
 	).apply(instance, HubUser::new));
+
+	public static final Codec<HubUser> CODEC = HubResponseContext.resolvingCodec(DIRECT_CODEC, HubResponseContext::user);
 
 	@Override
 	public String toString() {

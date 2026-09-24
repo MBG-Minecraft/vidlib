@@ -1,7 +1,6 @@
 package dev.mrbeastgaming.mods.hub.api.gateway;
 
 import com.google.gson.JsonObject;
-import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.io.IOUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.misc.command.BackupCommand;
@@ -117,14 +116,10 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 	}
 
 	public static void registerBuiltIn(HubGatewayEventRegistry<MinecraftServer> registry) {
-		registry.registerSynced("request_restart", HubServerGateway::requestRestart);
+		registerCommonBuiltIn(registry);
 		registry.registerSynced("run_command", HubServerGateway::runCommand);
 		registry.registerSynced("update_ops", HubServerGateway::updateOps);
 		registry.registerSynced("request_world_upload", HubServerGateway::requestWorldUpload);
-	}
-
-	private static void requestRestart(MinecraftServer server, HubGatewayEvent event) {
-		server.halt(false);
 	}
 
 	private static void runCommand(MinecraftServer server, HubGatewayEvent event) {
@@ -137,14 +132,14 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 	}
 
 	private static void requestWorldUpload(MinecraftServer server, HubGatewayEvent event) {
-		var data = HubWorldUploadRequest.CODEC.parse(JsonOps.INSTANCE, event.params()).getOrThrow();
+		var data = HubWorldUploadRequest.CODEC.parse(HubAPI.jsonOps(), event.params()).getOrThrow();
 
 		var worlds = new ArrayList<HubWorldDirectory>(1);
 		CommonGameEngine.INSTANCE.getAvailableWorlds(server, worlds);
 
 		for (var world : worlds) {
 			if (world.id().equals(data.worldId()) && world.path().equals(data.path())) {
-				VidLib.LOGGER.warn(data.ctx().user(data.sendingTo()).name() + " requested world " + data.path() + " upload");
+				VidLib.LOGGER.warn(data.sendingTo().name() + " requested world " + data.path() + " upload");
 
 				BackupCommand.backup(server, world.directory(), Instant.now(), "hub-upload").thenAcceptAsync(path -> {
 					var progressItem = ProgressQueue.queueSingleItem("Uploading world...");
@@ -177,6 +172,16 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 	public HubServerGateway(MinecraftServer server, URI gatewayURI, String gatewayToken) {
 		super(server, gatewayURI, gatewayToken);
 		this.server = server;
+	}
+
+	@Override
+	public HubServerSession getHubSession() {
+		return HubServerSession.CURRENT;
+	}
+
+	@Override
+	public void requestRestart() {
+		server.halt(false);
 	}
 
 	@Override
