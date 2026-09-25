@@ -3,8 +3,9 @@ package dev.mrbeastgaming.mods.hub.api;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.util.Hex32;
-import dev.mrbeastgaming.mods.hub.api.data.HubResponseContext;
+import dev.latvian.mods.vidlib.VidLib;
 import dev.mrbeastgaming.mods.hub.api.data.HubReplay;
+import dev.mrbeastgaming.mods.hub.api.data.HubResponseContext;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
 
@@ -32,6 +33,7 @@ public record HubProjectReplaysResponse(
 			try {
 				return HubAPI.ProjectAPI.getReplays(id);
 			} catch (Exception ex) {
+				VidLib.LOGGER.error("Failed to fetch replays for " + projectId, ex);
 				return new HubProjectReplaysResponse(HubResponseContext.EMPTY, List.of());
 			}
 		}, Util.nonCriticalIoPool()));

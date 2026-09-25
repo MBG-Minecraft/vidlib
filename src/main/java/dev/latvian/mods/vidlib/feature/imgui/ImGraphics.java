@@ -35,6 +35,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.Arrays;
 import java.util.List;
@@ -69,6 +70,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 	public final DynamicOps<JsonElement> jsonOps;
 	public final DynamicOps<Tag> nbtOps;
 	public final float scroll;
+	private boolean escapePressed;
 	private VarStackStack stack;
 
 	public ImGraphics(Minecraft mc) {
@@ -85,6 +87,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		this.jsonOps = inGame ? mc.level.jsonOps() : JsonOps.INSTANCE;
 		this.nbtOps = inGame ? mc.level.nbtOps() : NbtOps.INSTANCE;
 		this.scroll = VidLibClientOptions.LOCK_IMGUI_SCROLL.get() ? Math.clamp(ImGui.getIO().getMouseWheel(), -1F, 1F) : ImGui.getIO().getMouseWheel();
+		this.escapePressed = ImGui.isKeyReleased(GLFW.GLFW_KEY_ESCAPE);
 	}
 
 	public void pushStack() {
@@ -212,6 +215,12 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 	@Nullable
 	public Range getNumberRange() {
 		return stack.numberRange;
+	}
+
+	public boolean wasEscapePressed() {
+		boolean b = escapePressed;
+		escapePressed = false;
+		return b;
 	}
 
 	public static void setFullDefaultStyle(ImGuiStyle style) {

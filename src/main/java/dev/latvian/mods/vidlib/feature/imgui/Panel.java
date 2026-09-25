@@ -139,6 +139,11 @@ public class Panel {
 		boolean menuOpen = fullscreen ? (tabOpen && ImGui.beginChild(title, 0F, 0F, false, flags)) : canBeClosed ? ImGui.begin(title, ImGuiUtils.BOOLEAN, flags) : ImGui.begin(title, flags);
 
 		boolean shouldClose = !ImGuiUtils.BOOLEAN.get();
+
+		if (!(this instanceof FullscreenPanel) && graphics.wasEscapePressed()) {
+			shouldClose = true;
+		}
+
 		postSetup(graphics, menuOpen);
 
 		if (menuOpen) {
@@ -147,14 +152,14 @@ public class Panel {
 			}
 
 			content(graphics);
+		}
 
-			if (shouldClose) {
-				close();
-			}
+		if (shouldClose) {
+			close();
+		}
 
-			if (!isOpen) {
-				onClosed();
-			}
+		if (!isOpen) {
+			onClosed();
 		}
 
 		postContent(graphics);

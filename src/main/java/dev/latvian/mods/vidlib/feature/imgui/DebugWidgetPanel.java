@@ -40,7 +40,7 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberNodeImBuilder;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 import dev.latvian.mods.vidlib.util.ColoredText;
-import dev.mrbeastgaming.mods.hub.api.HubAPI;
+import dev.mrbeastgaming.mods.hub.api.HubProjectReplaysResponse;
 import dev.mrbeastgaming.mods.hub.api.data.HubCountries;
 import dev.mrbeastgaming.mods.hub.api.data.HubCountry;
 import dev.mrbeastgaming.mods.hub.api.data.HubFileType;
@@ -685,7 +685,8 @@ public class DebugWidgetPanel extends Panel {
 
 		if (ImGui.button("Print Replays###print-replays")) {
 			try {
-				VidLib.LOGGER.info(HubAPI.ProjectAPI.getReplays(Hex32.of(1)).toString());
+				HubProjectReplaysResponse.clearCache();
+				VidLib.LOGGER.info(HubProjectReplaysResponse.get(Hex32.of(1)).join().toString());
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
