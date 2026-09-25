@@ -18,6 +18,7 @@ public record HubReplay(
 	Optional<URI> iconUrl,
 	Optional<URI> previewUrl,
 	float previewAspectRatio,
+	Optional<URI> userIconUrl,
 	JsonElement partialMetadata,
 	Map<Codec<?>, Optional<Object>> parsedPartialMetadata
 ) {
@@ -26,6 +27,7 @@ public record HubReplay(
 		HubAPI.URI_BASE_CODEC.optionalFieldOf("icon_url").forGetter(HubReplay::iconUrl),
 		HubAPI.URI_BASE_CODEC.optionalFieldOf("preview_url").forGetter(HubReplay::previewUrl),
 		Codec.FLOAT.optionalFieldOf("preview_aspect_ratio", 16F / 9F).forGetter(HubReplay::previewAspectRatio),
+		HubAPI.URI_BASE_CODEC.optionalFieldOf("user_icon_url").forGetter(HubReplay::userIconUrl),
 		ExtraCodecs.JSON.optionalFieldOf("partial_metadata", new JsonObject()).forGetter(HubReplay::partialMetadata)
 	).apply(instance, HubReplay::new));
 
@@ -34,6 +36,7 @@ public record HubReplay(
 		Optional<URI> iconUrl,
 		Optional<URI> previewUrl,
 		float previewAspectRatio,
+		Optional<URI> userIconUrl,
 		JsonElement partialMetadata
 	) {
 		this(
@@ -41,6 +44,7 @@ public record HubReplay(
 			iconUrl,
 			previewUrl,
 			previewAspectRatio,
+			userIconUrl,
 			partialMetadata,
 			new Reference2ObjectOpenHashMap<>(1)
 		);
