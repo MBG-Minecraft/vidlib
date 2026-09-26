@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.imageio.ImageIO;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -24,9 +25,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 import java.util.function.Supplier;
 
 public class URITextures {
+	public static final Semaphore SEMAPHORE = new Semaphore(100);
+
 	public static class Entry implements Supplier<String> {
 		public final URI uri;
 		public final ClientAsset asset;
@@ -61,7 +65,16 @@ public class URITextures {
 		} catch (Exception ignored) {
 		}
 
-		var response = MiscUtils.sendRetrying(MiscUtils.HTTP_CLIENT, HttpRequest.newBuilder(uri).header("Accept-Encoding", "zstd, gzip, deflate, br").GET().build(), HttpResponse.BodyHandlers.ofInputStream());
+		HttpResponse<InputStream> response;
+
+		SEMAPHORE.acquire();
+
+		try {
+			response = MiscUtils.sendRetrying(MiscUtils.HTTP_CLIENT, HttpRequest.newBuilder(uri).header("Accept-Encoding", "zstd, gzip, deflate, br").GET().build(), HttpResponse.BodyHandlers.ofInputStream());
+		} finally {
+			SEMAPHORE.release();
+		}
+
 		int code = response.statusCode();
 
 		if (code == 404) {
