@@ -11,14 +11,17 @@ import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.platform.neoforge.VLNeoPlatformHelper;
 import net.minecraft.core.registries.Registries;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforgespi.language.IModInfo;
 
 @Mod(VidLib.ID)
+@EventBusSubscriber(modid = VidLib.ID)
 public class VidLibMod {
 	public VidLibMod(ModContainer mod, IEventBus bus) {
 		VidLib.VERSION = mod.getModInfo().getVersion().toString();
@@ -60,11 +63,10 @@ public class VidLibMod {
 		}
 
 		particleRegistry.register(bus);
-
-		bus.addListener(this::setup);
 	}
 
-	public void setup(FMLCommonSetupEvent event) {
+	@SubscribeEvent
+	public static void setup(FMLCommonSetupEvent event) {
 		if (PlatformHelper.CURRENT.getSide().isClient()) {
 			VidLib.initClient();
 		}

@@ -5,7 +5,7 @@ import dev.latvian.mods.klib.util.Empty;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.ClientAsset;
 import net.minecraft.util.TriState;
 
 public interface EntityRenderTypes {
@@ -82,11 +82,11 @@ public interface EntityRenderTypes {
 			.createCompositeState(true)
 	);
 
-	static RenderType textureCull(ResourceLocation texture, boolean translucent) {
-		return translucent ? TRANSLUCENT.apply(texture) : CUTOUT.apply(texture);
+	static RenderType textureCull(ClientAsset asset, boolean translucent) {
+		return translucent ? TRANSLUCENT.apply(asset.texturePath()) : CUTOUT.apply(asset.texturePath());
 	}
 
-	static RenderType texture(ResourceLocation texture, boolean translucent) {
-		return translucent ? TRANSLUCENT_NO_CULL.apply(texture) : CUTOUT_NO_CULL.apply(texture);
+	static RenderType texture(ClientAsset asset, boolean translucent) {
+		return translucent ? TRANSLUCENT_NO_CULL.apply(asset.texturePath()) : CUTOUT_NO_CULL.apply(asset.texturePath());
 	}
 }

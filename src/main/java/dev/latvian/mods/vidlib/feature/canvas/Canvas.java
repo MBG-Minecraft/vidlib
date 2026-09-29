@@ -20,6 +20,7 @@ import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderPipelines;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.core.ClientAsset;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ARGB;
 import org.jetbrains.annotations.ApiStatus;
@@ -61,8 +62,8 @@ public class Canvas implements Consumer<RenderPass> {
 
 	public final ResourceLocation id;
 	public final String idString;
-	public final ResourceLocation colorTexturePath;
-	public final ResourceLocation depthTexturePath;
+	public final ClientAsset colorAsset;
+	public final ClientAsset depthAsset;
 	public final String pathString;
 	public final Set<ResourceLocation> defaultTargets;
 	public final Consumer<Minecraft> tickCallback;
@@ -86,8 +87,8 @@ public class Canvas implements Consumer<RenderPass> {
 	protected Canvas(ResourceLocation id, Consumer<CanvasBuilder> builderCallback) {
 		this.id = id;
 		this.idString = id.toString();
-		this.colorTexturePath = id.withPath(p -> "textures/vidlib/generated/canvas/color/" + p + ".png");
-		this.depthTexturePath = id.withPath(p -> "textures/vidlib/generated/canvas/depth/" + p + ".png");
+		this.colorAsset = new ClientAsset(id.withPath(p -> "vidlib/generated/canvas/color/" + p));
+		this.depthAsset = new ClientAsset(id.withPath(p -> "vidlib/generated/canvas/depth/" + p));
 		this.pathString = "vidlib_framebuffer/" + id;
 		this.defaultTargets = Set.of(id);
 

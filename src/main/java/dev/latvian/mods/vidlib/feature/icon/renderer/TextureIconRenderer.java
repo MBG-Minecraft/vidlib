@@ -23,7 +23,7 @@ public interface TextureIconRenderer {
 	}
 
 	static void render(TextureIcon icon, Minecraft mc, PoseStack ms, float delta, MultiBufferSource source, int light, int overlay) {
-		var buffer = source.getBuffer(EntityRenderTypes.textureCull(icon.texture().texturePath(), icon.color().alpha() < 255 || icon.translucent()));
+		var buffer = source.getBuffer(EntityRenderTypes.textureCull(icon.texture(), icon.color().alpha() < 255 || icon.translucent()));
 
 		int colR = icon.color().red();
 		int colG = icon.color().green();

@@ -23,7 +23,7 @@ public interface AtlasSpriteIconRenderer {
 	}
 
 	static void render(AtlasSpriteIcon icon, Minecraft mc, PoseStack ms, float delta, MultiBufferSource source, int light, int overlay) {
-		var buffer = source.getBuffer(EntityRenderTypes.textureCull(icon.sprite().atlas().texturePath(), icon.tint().alpha() < 255 || icon.translucent()));
+		var buffer = source.getBuffer(EntityRenderTypes.textureCull(icon.sprite().atlas(), icon.tint().alpha() < 255 || icon.translucent()));
 
 		int colR = icon.tint().red();
 		int colG = icon.tint().green();

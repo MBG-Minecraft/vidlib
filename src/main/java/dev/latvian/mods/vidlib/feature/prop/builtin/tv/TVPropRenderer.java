@@ -8,7 +8,7 @@ import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.ClientAsset;
 import net.minecraft.util.ARGB;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -17,9 +17,9 @@ public class TVPropRenderer implements PropRenderer<TVProp> {
 	@ClientAutoRegister
 	public static final Holder HOLDER = PropRenderer.holder(TVProp.TYPE, new TVPropRenderer());
 
-	public static final ResourceLocation TEXTURE_BG = ID.vidlib("textures/prop/tv/bg.png");
-	public static final ResourceLocation TEXTURE_FG = ID.vidlib("textures/prop/tv/fg.png");
-	public static final ResourceLocation TEXTURE_NO_VIDEO = ID.vidlib("textures/prop/tv/no_video.png");
+	public static final ClientAsset TEXTURE_BG = new ClientAsset(ID.vidlib("prop/tv/bg"));
+	public static final ClientAsset TEXTURE_FG = new ClientAsset(ID.vidlib("prop/tv/fg"));
+	public static final ClientAsset TEXTURE_NO_VIDEO = new ClientAsset(ID.vidlib("prop/tv/no_video"));
 
 	@Override
 	public void render(PropRenderContext<TVProp> ctx) {

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import dev.latvian.mods.klib.util.ID;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.ClientAsset;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -49,6 +50,10 @@ public record TexturedRenderType(Map<ResourceLocation, RenderType> map, Function
 	@Override
 	public RenderType apply(ResourceLocation resourceLocation) {
 		return map.computeIfAbsent(resourceLocation, factory);
+	}
+
+	public RenderType apply(ClientAsset asset) {
+		return apply(asset.texturePath());
 	}
 
 	public void endBatches(MultiBufferSource.BufferSource buffers) {

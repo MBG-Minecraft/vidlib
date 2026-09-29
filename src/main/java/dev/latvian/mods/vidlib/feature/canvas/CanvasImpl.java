@@ -87,8 +87,8 @@ public class CanvasImpl {
 					ext.init(w, h);
 				}
 
-				mc.getTextureManager().register(canvas.colorTexturePath, new CanvasTexture(canvas, false));
-				mc.getTextureManager().register(canvas.depthTexturePath, new CanvasTexture(canvas, true));
+				mc.getTextureManager().register(canvas.colorAsset.texturePath(), new CanvasTexture(canvas, false));
+				mc.getTextureManager().register(canvas.depthAsset.texturePath(), new CanvasTexture(canvas, true));
 
 				ENABLED.add(canvas);
 			}
@@ -266,7 +266,7 @@ public class CanvasImpl {
 					g.fill(x, y, x + w, y + h, 0xFF232326);
 
 					if (tex != null) {
-						var buffer = buffers.getBuffer(VidLibRenderTypes.GUI.apply(canvas.colorTexturePath));
+						var buffer = buffers.getBuffer(VidLibRenderTypes.GUI.apply(canvas.colorAsset));
 						buffer.addVertex(m, x, y, 0F).setUv(0F, 1F).setColor(255, 255, 255, 255);
 						buffer.addVertex(m, x, y + h, 0F).setUv(0F, 0F).setColor(255, 255, 255, 255);
 						buffer.addVertex(m, x + w, y + h, 0F).setUv(1F, 0F).setColor(255, 255, 255, 255);
@@ -297,7 +297,7 @@ public class CanvasImpl {
 					g.fill(x, y, x + w, y + h, 0xFF232326);
 
 					if (tex != null) {
-						var buffer = buffers.getBuffer(VidLibRenderTypes.GUI_DEPTH.apply(canvas.depthTexturePath));
+						var buffer = buffers.getBuffer(VidLibRenderTypes.GUI_DEPTH.apply(canvas.depthAsset));
 						buffer.addVertex(m, x, y, 0F).setUv(0F, 1F).setColor(255, 255, 255, 255);
 						buffer.addVertex(m, x, y + h, 0F).setUv(0F, 0F).setColor(255, 255, 255, 255);
 						buffer.addVertex(m, x + w, y + h, 0F).setUv(1F, 0F).setColor(255, 255, 255, 255);
