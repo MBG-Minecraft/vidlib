@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
 import dev.latvian.mods.klib.math.DistanceComparator;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderPipelines;
 import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import net.minecraft.CrashReport;
@@ -27,7 +27,7 @@ public class VidLibParticleRenderTypes {
 	public static final ParticleRenderType TRUE_TRANSLUCENT = new ParticleRenderType("vidlib:true_translucent", RenderType.translucentParticle(TextureAtlas.LOCATION_PARTICLES), true);
 
 	public static final ParticleRenderType ADDITIVE = new ParticleRenderType("vidlib:additive", RenderType.create(
-		VidLib.id("particle/additive").toString(),
+		ID.vidlib("particle/additive").toString(),
 		1536,
 		false,
 		false,
@@ -40,7 +40,7 @@ public class VidLibParticleRenderTypes {
 	), true);
 
 	public static final ParticleRenderType ADDITIVE_ONLY_DEPTH = new ParticleRenderType("vidlib:additive_only_depth", RenderType.create(
-		VidLib.id("particle/additive_only_depth").toString(),
+		ID.vidlib("particle/additive_only_depth").toString(),
 		1536,
 		false,
 		false,

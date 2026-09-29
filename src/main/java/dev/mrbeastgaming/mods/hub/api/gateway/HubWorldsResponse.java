@@ -3,12 +3,12 @@ package dev.mrbeastgaming.mods.hub.api.gateway;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.util.Async;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.data.HubProject;
 import dev.mrbeastgaming.mods.hub.api.data.HubResponseContext;
 import dev.mrbeastgaming.mods.hub.api.data.HubUser;
 import dev.mrbeastgaming.mods.hub.api.data.HubWorld;
-import net.minecraft.Util;
 
 import java.net.URI;
 import java.util.List;
@@ -79,6 +79,6 @@ public record HubWorldsResponse(
 			}
 
 			callback.accept(CURRENT);
-		}, Util.nonCriticalIoPool());
+		}, Async.EXECUTOR);
 	}
 }

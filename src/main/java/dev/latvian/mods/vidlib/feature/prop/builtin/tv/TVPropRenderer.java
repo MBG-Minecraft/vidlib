@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.tv;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.EntityRenderTypes;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
@@ -17,9 +17,9 @@ public class TVPropRenderer implements PropRenderer<TVProp> {
 	@ClientAutoRegister
 	public static final Holder HOLDER = PropRenderer.holder(TVProp.TYPE, new TVPropRenderer());
 
-	public static final ResourceLocation TEXTURE_BG = VidLib.id("textures/prop/tv/bg.png");
-	public static final ResourceLocation TEXTURE_FG = VidLib.id("textures/prop/tv/fg.png");
-	public static final ResourceLocation TEXTURE_NO_VIDEO = VidLib.id("textures/prop/tv/no_video.png");
+	public static final ResourceLocation TEXTURE_BG = ID.vidlib("textures/prop/tv/bg.png");
+	public static final ResourceLocation TEXTURE_FG = ID.vidlib("textures/prop/tv/fg.png");
+	public static final ResourceLocation TEXTURE_NO_VIDEO = ID.vidlib("textures/prop/tv/no_video.png");
 
 	@Override
 	public void render(PropRenderContext<TVProp> ctx) {

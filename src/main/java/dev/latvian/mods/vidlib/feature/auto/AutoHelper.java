@@ -1,8 +1,10 @@
 package dev.latvian.mods.vidlib.feature.auto;
 
+import dev.latvian.mods.klib.platform.PlatformHelper;
+import dev.latvian.mods.klib.platform.ScannedAnnotation;
+import dev.latvian.mods.klib.platform.ScannedAnnotationCallback;
 import dev.latvian.mods.klib.util.Side;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import net.neoforged.fml.loading.modscan.ModAnnotation;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +19,7 @@ import java.util.Locale;
 import java.util.Set;
 
 public class AutoHelper {
-	public static void load(Class<? extends Annotation> annotation, Set<ElementType> elementTypes, AutoCallback callback) {
+	public static void load(Class<? extends Annotation> annotation, Set<ElementType> elementTypes, ScannedAnnotationCallback callback) {
 		PlatformHelper.CURRENT.load(annotation, elementTypes, callback);
 	}
 

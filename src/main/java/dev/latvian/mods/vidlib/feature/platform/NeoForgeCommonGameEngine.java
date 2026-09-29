@@ -1,13 +1,15 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
 import de.maxhenkel.voicechat.Voicechat;
+import dev.latvian.mods.klib.entity.EntityUtils;
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
 import dev.latvian.mods.vidlib.feature.integration.voicechat.VoiceChatIntegration;
+import dev.mrbeastgaming.mods.hub.api.data.HubUsedPort;
 import dev.mrbeastgaming.mods.hub.api.gateway.AvailableWorldsEvent;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldDirectory;
 import dev.mrbeastgaming.mods.hub.api.gateway.UsedPortsEvent;
-import dev.mrbeastgaming.mods.hub.api.data.HubUsedPort;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
@@ -33,7 +35,7 @@ public class NeoForgeCommonGameEngine extends CommonGameEngine {
 				return Shapes.empty();
 			}
 
-			if (ctx.getEntity().vl$isCreative()) {
+			if (EntityUtils.isCreative(ctx.getEntity())) {
 				return Shapes.empty();
 			}
 		}

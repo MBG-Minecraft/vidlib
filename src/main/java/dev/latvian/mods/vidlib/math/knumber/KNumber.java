@@ -3,8 +3,8 @@ package dev.latvian.mods.vidlib.math.knumber;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Function;
 
 public interface KNumber extends SimpleRegistryEntry {
-	SimpleRegistry<KNumber> REGISTRY = SimpleRegistry.create(VidLib.id("knumber"), c -> PlatformHelper.CURRENT.collectKNumbers(c));
+	SimpleRegistry<KNumber> REGISTRY = SimpleRegistry.create(ID.vidlib("knumber"), c -> VLPlatformHelper.CURRENT.collectKNumbers(c));
 
 	FixedKNumber ZERO = new FixedKNumber(0D);
 	FixedKNumber ONE = new FixedKNumber(1D);

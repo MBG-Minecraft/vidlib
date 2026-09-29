@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
+import dev.latvian.mods.klib.platform.PlatformHelper;
+import dev.latvian.mods.klib.platform.PlatformModInfo;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
@@ -7,7 +9,6 @@ import dev.latvian.mods.vidlib.feature.entity.ExactEntitySpawnPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
 import dev.latvian.mods.vidlib.feature.location.WarpLocation;
-import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.util.RuntimeDebugger;
@@ -47,26 +48,8 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
-import net.minecraft.world.level.block.BarrierBlock;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.ButtonBlock;
-import net.minecraft.world.level.block.CarpetBlock;
 import net.minecraft.world.level.block.CommandBlock;
-import net.minecraft.world.level.block.CrossCollisionBlock;
-import net.minecraft.world.level.block.DoorBlock;
-import net.minecraft.world.level.block.EnchantingTableBlock;
-import net.minecraft.world.level.block.FenceGateBlock;
-import net.minecraft.world.level.block.FireBlock;
-import net.minecraft.world.level.block.FlowerPotBlock;
-import net.minecraft.world.level.block.HopperBlock;
-import net.minecraft.world.level.block.LadderBlock;
-import net.minecraft.world.level.block.LightBlock;
-import net.minecraft.world.level.block.PressurePlateBlock;
-import net.minecraft.world.level.block.SimpleWaterloggedBlock;
-import net.minecraft.world.level.block.SlabBlock;
-import net.minecraft.world.level.block.SnowLayerBlock;
-import net.minecraft.world.level.block.VegetationBlock;
-import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.FluidState;
@@ -257,26 +240,6 @@ public class CommonGameEngine {
 		return false;
 	}
 
-	public float getBlockDensity(BlockState state) {
-		var b = state.getBlock();
-
-		if (state.isAir() || b instanceof LightBlock || b instanceof BarrierBlock || b instanceof FireBlock) {
-			return 0F;
-		} else if (b instanceof CarpetBlock || b instanceof ButtonBlock || b instanceof PressurePlateBlock || b instanceof VineBlock || b instanceof LadderBlock) {
-			return 0.06125F;
-		} else if (b instanceof DoorBlock || b instanceof SnowLayerBlock || b instanceof FlowerPotBlock) {
-			return 0.125F;
-		} else if (b instanceof SlabBlock || b instanceof CrossCollisionBlock || b instanceof FenceGateBlock || b instanceof EnchantingTableBlock) {
-			return 0.5F;
-		} else if (b instanceof VegetationBlock) {
-			return 0.25F;
-		} else if (b instanceof SimpleWaterloggedBlock || b instanceof HopperBlock) {
-			return 0.75F;
-		} else {
-			return 1F;
-		}
-	}
-
 	@Nullable
 	public Packet<ClientGamePacketListener> overrideEntitySpawnPacket(Entity entity, ServerEntity serverEntity) {
 		if (!entity.getType().builtInRegistryHolder().getKey().location().getNamespace().equals("minecraft")) {
@@ -366,7 +329,7 @@ public class CommonGameEngine {
 	}
 
 	public boolean isSuspended(Entity entity) {
-		return entity instanceof Player player && player.get(InternalPlayerData.SUSPENDED);
+		return entity instanceof Player player && player.vl$sessionData().suspended;
 	}
 
 	public double getGravityModifier(Entity entity) {
@@ -399,10 +362,6 @@ public class CommonGameEngine {
 
 	public boolean isUnpushable(LivingEntity entity) {
 		return entity.vl$isSuspended();
-	}
-
-	public boolean isBoss(LivingEntity entity) {
-		return entity.getTags().contains("main_boss");
 	}
 
 	public boolean getScaleDamageWithDifficulty(ServerPlayer player) {

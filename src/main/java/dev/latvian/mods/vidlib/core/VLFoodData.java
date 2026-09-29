@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.core;
 
+import dev.latvian.mods.klib.core.NoMixinException;
+
 public interface VLFoodData {
 	default float vl$getExhaustionLevel() {
 		throw new NoMixinException(this);

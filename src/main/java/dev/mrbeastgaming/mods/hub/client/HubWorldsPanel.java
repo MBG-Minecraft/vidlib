@@ -1,6 +1,8 @@
 package dev.mrbeastgaming.mods.hub.client;
 
 import dev.latvian.mods.klib.io.IOUtils;
+import dev.latvian.mods.klib.platform.PlatformHelper;
+import dev.latvian.mods.klib.util.Async;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.client.URITextures;
@@ -12,7 +14,6 @@ import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
 import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import dev.latvian.mods.vidlib.feature.imgui.PanelStyle;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
@@ -274,7 +275,7 @@ public class HubWorldsPanel extends Panel {
 	}
 
 	private void requestDownload(Minecraft mc, HubWorldsResponse.AvailableWorld world) {
-		Util.nonCriticalIoPool().execute(() -> {
+		Async.EXECUTOR.execute(() -> {
 			try {
 				var requestId = UUID.randomUUID();
 

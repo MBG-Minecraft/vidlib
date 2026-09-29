@@ -6,10 +6,11 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.io.ByteArrayIoSupplier;
 import dev.latvian.mods.klib.io.StringIoSupplier;
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -48,7 +49,7 @@ public record DynamicResources(
 		VidLib.LOGGER.info("Loading Dynamic Resources...");
 		var packResources = new Object2ObjectOpenHashMap<ResourceLocation, IoSupplier<InputStream>>();
 
-		PlatformHelper.CURRENT.collectDynamicResources(packType, dynamicResourcesId -> {
+		VLPlatformHelper.CURRENT.collectDynamicResources(packType, dynamicResourcesId -> {
 			VidLib.LOGGER.info("Loading " + dynamicResourcesId);
 			var path = PlatformHelper.CURRENT.findFile(packType, dynamicResourcesId.withSuffix(".json"));
 

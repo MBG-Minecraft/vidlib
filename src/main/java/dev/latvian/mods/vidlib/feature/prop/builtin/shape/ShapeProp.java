@@ -7,7 +7,6 @@ import dev.latvian.mods.klib.shape.CubeShape;
 import dev.latvian.mods.klib.shape.Shape;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.client.RenderLightLayer;
 import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
@@ -22,7 +21,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class ShapeProp extends Prop {
 	@AutoRegister
-	public static final PropType<ShapeProp> TYPE = PropType.create(VidLib.id("shape"), ShapeProp::new,
+	public static final PropType<ShapeProp> TYPE = PropType.create(ID.vidlib("shape"), ShapeProp::new,
 		TICK,
 		LIFESPAN,
 		POSITION,

@@ -13,7 +13,7 @@ public enum NoteVisibility implements StringRepresentable {
 
 	public static final NoteVisibility[] VALUES = values();
 	public static final DataType<NoteVisibility> DATA_TYPE = DataType.of(VALUES);
-	public static final StreamCodec<ByteBuf, NoteVisibility> STREAM_CODEC = KLibStreamCodecs.enumValue(VALUES);
+	public static final StreamCodec<ByteBuf, NoteVisibility> STREAM_CODEC = KLibStreamCodecs.anyEnum(VALUES);
 
 	private final String name;
 

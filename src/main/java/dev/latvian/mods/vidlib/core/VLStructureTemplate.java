@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.core;
 
+import dev.latvian.mods.klib.core.NoMixinException;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;

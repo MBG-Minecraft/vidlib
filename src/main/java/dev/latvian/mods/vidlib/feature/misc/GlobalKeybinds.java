@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.misc;
 
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.latvian.mods.common.CommonPaths;
+import dev.latvian.mods.klib.CommonPaths;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.klib.util.Lazy;
 import net.minecraft.Util;

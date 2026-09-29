@@ -1,8 +1,8 @@
 package dev.mrbeastgaming.mods.hub.api.data;
 
 import com.mojang.serialization.Codec;
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.Hex64;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.mrbeastgaming.mods.hub.api.HubClientSession;
 
 public record HubUserCapabilities(

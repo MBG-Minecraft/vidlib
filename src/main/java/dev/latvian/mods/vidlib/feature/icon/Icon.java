@@ -4,10 +4,10 @@ import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.texture.UV;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
@@ -16,7 +16,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 
 public interface Icon extends SimpleRegistryEntry {
-	SimpleRegistry<Icon> REGISTRY = SimpleRegistry.create(VidLib.id("icon"), c -> PlatformHelper.CURRENT.collectIcons(c));
+	SimpleRegistry<Icon> REGISTRY = SimpleRegistry.create(ID.vidlib("icon"), c -> VLPlatformHelper.CURRENT.collectIcons(c));
 
 	SimpleRegistryType.Unit<Icon> YES = SimpleRegistryType.unit("yes", new TextureIcon(VidLibTextures.YES, UV.FULL, true, Color.WHITE));
 	SimpleRegistryType.Unit<Icon> NO = SimpleRegistryType.unit("no", new TextureIcon(VidLibTextures.NO, UV.FULL, true, Color.WHITE));

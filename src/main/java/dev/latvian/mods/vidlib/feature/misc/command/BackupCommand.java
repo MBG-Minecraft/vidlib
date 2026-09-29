@@ -8,7 +8,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import net.minecraft.commands.CommandSourceStack;
@@ -37,7 +37,7 @@ public interface BackupCommand {
 	);
 
 	static CompletableFuture<Path> backup(MinecraftServer server, Path worldPath, Instant now, String customName) {
-		PlatformHelper.CURRENT.pauseSaving(server);
+		VLPlatformHelper.CURRENT.pauseSaving(server);
 		var name = CommonGameEngine.INSTANCE.getFullBackupInfo(server, now, customName);
 
 		try {
@@ -60,19 +60,19 @@ public interface BackupCommand {
 
 				item.setDone();
 				VidLib.LOGGER.info("Files of " + toName + " created");
-				server.execute(() -> PlatformHelper.CURRENT.resumeSaving(server));
+				server.execute(() -> VLPlatformHelper.CURRENT.resumeSaving(server));
 				return to;
 			});
 		} catch (Throwable ex) {
 			VidLib.LOGGER.error("Error creating a world backup '" + name + "'", ex);
-			server.execute(() -> PlatformHelper.CURRENT.resumeSaving(server));
+			server.execute(() -> VLPlatformHelper.CURRENT.resumeSaving(server));
 			return CompletableFuture.failedFuture(ex);
 		}
 	}
 
 	static int testCompression(CommandSourceStack source) {
 		var server = source.getServer();
-		PlatformHelper.CURRENT.pauseSaving(server);
+		VLPlatformHelper.CURRENT.pauseSaving(server);
 		source.tell("Calculating...");
 
 		Thread.startVirtualThread(() -> {
@@ -128,7 +128,7 @@ public interface BackupCommand {
 			}
 
 			server.execute(() -> {
-				PlatformHelper.CURRENT.resumeSaving(server);
+				VLPlatformHelper.CURRENT.resumeSaving(server);
 				source.tell("Done! Results:");
 
 				for (var method : methods) {

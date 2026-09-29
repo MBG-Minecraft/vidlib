@@ -15,18 +15,18 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import com.mojang.util.UUIDTypeAdapter;
 import com.mojang.util.UndashedUuid;
-import dev.latvian.mods.common.CommonPaths;
+import dev.latvian.mods.klib.CommonPaths;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.Util;
 import net.minecraft.util.ExtraCodecs;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -40,6 +40,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerProfiles {
 	public static final Gson AUTH_GSON = new GsonBuilder().registerTypeAdapter(UUID.class, new UUIDTypeAdapter()).create();
+	public static final URI BASE_PROFILE_RESOLVE_URI = URI.create("https://api.mojang.com/users/profiles/minecraft/");
+	public static final URI BASE_PROFILE_INFO_URI = URI.create("https://sessionserver.mojang.com/session/minecraft/profile/");
 
 	public static final Map<UUID, PlayerProfile> BY_UUID = new ConcurrentHashMap<>();
 	public static final Map<String, PlayerProfile> BY_NAME = new ConcurrentHashMap<>();
@@ -135,7 +137,7 @@ public class PlayerProfiles {
 		}
 
 		try {
-			return MiscUtils.fetch("https://api.mojang.com/users/profiles/minecraft/" + input).flatMap(bytes -> {
+			return MiscUtils.fetch(BASE_PROFILE_RESOLVE_URI.resolve(input)).flatMap(bytes -> {
 				JsonObject json = null;
 
 				try (var stream = new ByteArrayInputStream(bytes)) {
@@ -153,7 +155,7 @@ public class PlayerProfiles {
 	}
 
 	public static DataResult<PlayerProfile> fetch(UUID uuid) {
-		return MiscUtils.fetch("https://sessionserver.mojang.com/session/minecraft/profile/" + UndashedUuid.toString(uuid)).flatMap(bytes -> {
+		return MiscUtils.fetch(BASE_PROFILE_INFO_URI.resolve(UndashedUuid.toString(uuid))).flatMap(bytes -> {
 			JsonObject json = null;
 
 			try {
@@ -289,7 +291,7 @@ public class PlayerProfiles {
 					shouldSave = true;
 					allKnown = null;
 				} else {
-					Util.backgroundExecutor().execute(() -> get(id));
+					Thread.startVirtualThread(() -> get(id));
 				}
 			}
 		}

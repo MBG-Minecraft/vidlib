@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.particle.physics;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Axis;
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.util.BlockUtils;
 import dev.latvian.mods.vidlib.core.VLBlockState;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.integration.iris.IrisIntegration;
@@ -214,7 +215,7 @@ public class PhysicsParticleManager {
 			mutablePos.set(p.x, p.y, p.z);
 
 			if (level != null) {
-				light = level.vl$getPackedLight(mutablePos);
+				light = BlockUtils.getPackedLight(level, mutablePos);
 			}
 
 			int lightU = light & 0xFFFF;

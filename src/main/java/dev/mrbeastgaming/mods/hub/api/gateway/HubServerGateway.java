@@ -2,17 +2,17 @@ package dev.mrbeastgaming.mods.hub.api.gateway;
 
 import com.google.gson.JsonObject;
 import dev.latvian.mods.klib.io.IOUtils;
+import dev.latvian.mods.klib.util.Async;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.misc.command.BackupCommand;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubServerSession;
 import dev.mrbeastgaming.mods.hub.api.data.HubChecksumPath;
 import dev.mrbeastgaming.mods.hub.api.data.HubUsedPort;
 import dev.mrbeastgaming.mods.hub.file.HubUploadRequestFileWithPath;
-import net.minecraft.Util;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -161,7 +161,7 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 
 						progressItem.setDone();
 					}
-				}, Util.nonCriticalIoPool());
+				}, Async.EXECUTOR);
 				return;
 			}
 		}
@@ -186,7 +186,7 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 
 	@Override
 	public void collectEventHandlers(HubGatewayEventRegistry<MinecraftServer> registry) {
-		PlatformHelper.CURRENT.collectServerGatewayEventHandlers(registry);
+		VLPlatformHelper.CURRENT.collectServerGatewayEventHandlers(registry);
 	}
 
 	@Override

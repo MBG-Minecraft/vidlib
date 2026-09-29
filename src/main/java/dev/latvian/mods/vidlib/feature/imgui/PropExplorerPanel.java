@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import imgui.ImGui;
@@ -31,7 +31,7 @@ public class PropExplorerPanel extends Panel {
 		var allProps = new ArrayList<Prop>();
 		var clientProps = new ArrayList<Prop>();
 
-		var props = PlatformHelper.CURRENT.getProps(graphics.mc.level);
+		var props = VLPlatformHelper.CURRENT.getProps(graphics.mc.level);
 
 		for (var propList : props.propLists.values()) {
 			for (var prop : propList) {

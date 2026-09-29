@@ -5,16 +5,21 @@ import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.TextureReloadParams;
 import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.core.ClientAsset;
 import net.minecraft.resources.ResourceLocation;
 
-public record DynamicTextureHolder<T extends AbstractTexture>(ResourceLocation id, Lazy<T> texture) {
+public record DynamicTextureHolder<T extends AbstractTexture>(ClientAsset asset, Lazy<T> texture) {
 	@AutoInit(AutoInit.Type.TEXTURES_RELOADED)
 	public static void init(TextureReloadParams params) {
 		for (var holder : ClientAutoRegister.SCANNED.get()) {
 			if (holder.value() instanceof DynamicTextureHolder<?> h) {
 				h.texture.forget();
-				params.manager().register(h.id, h.texture.get());
+				params.manager().register(h.asset.texturePath(), h.texture.get());
 			}
 		}
+	}
+
+	public DynamicTextureHolder(ResourceLocation id, Lazy<T> texture) {
+		this(new ClientAsset(id), texture);
 	}
 }

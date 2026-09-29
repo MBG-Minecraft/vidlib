@@ -4,7 +4,7 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.math.VoxelShapeBox;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
@@ -17,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class TVProp extends Prop {
 	@AutoRegister
-	public static final PropType<TVProp> TYPE = PropType.create(VidLib.id("tv"), TVProp::new,
+	public static final PropType<TVProp> TYPE = PropType.create(ID.vidlib("tv"), TVProp::new,
 		POSITION,
 		YAW,
 		PITCH,

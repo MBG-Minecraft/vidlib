@@ -2,9 +2,7 @@ package dev.latvian.mods.vidlib.feature.prop.builtin.geodisplay;
 
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.math.FrustumCheck;
-import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GeoAnimationsImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GeoModelImBuilder;
@@ -20,7 +18,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class GeoDisplayProp extends BaseGeoProp {
 	@AutoRegister
-	public static final PropType<GeoDisplayProp> TYPE = PropType.create(VidLib.id("geo_display"), GeoDisplayProp::new,
+	public static final PropType<GeoDisplayProp> TYPE = PropType.create(ID.vidlib("geo_display"), GeoDisplayProp::new,
 		TICK,
 		POSITION,
 		HEIGHT,
@@ -30,9 +28,9 @@ public class GeoDisplayProp extends BaseGeoProp {
 		PropData.create(GeoDisplayProp.class, "animations", ID.DATA_TYPE, p -> p.animations, (p, v) -> p.animations = v, GeoAnimationsImBuilder.TYPE)
 	);
 
-	public ResourceLocation model = VidLib.id("prop/player");
+	public ResourceLocation model = ID.vidlib("prop/player");
 	public ClientAsset texture = SkinTexture.WIDE_STEVE.asset();
-	public ResourceLocation animations = Empty.ID;
+	public ResourceLocation animations = ID.EMPTY;
 
 	public GeoDisplayProp(PropContext<?> ctx) {
 		super(ctx);

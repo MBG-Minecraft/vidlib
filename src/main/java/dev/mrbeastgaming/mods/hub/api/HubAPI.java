@@ -10,12 +10,13 @@ import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.io.CompressionMethod;
 import dev.latvian.mods.klib.io.CountingOutputStream;
 import dev.latvian.mods.klib.io.checksum.Checksum;
+import dev.latvian.mods.klib.util.Async;
 import dev.latvian.mods.klib.util.Hex32;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.klib.util.Lazy;
+import dev.latvian.mods.klib.util.net.NetUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
-import dev.latvian.mods.vidlib.util.MiscUtils;
 import dev.mrbeastgaming.mods.hub.HubUserConfig;
 import dev.mrbeastgaming.mods.hub.api.data.HubChecksumPath;
 import dev.mrbeastgaming.mods.hub.api.data.HubMinecraftProfile;
@@ -26,7 +27,6 @@ import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldsResponse;
 import dev.mrbeastgaming.mods.hub.file.UploadRequest;
 import dev.mrbeastgaming.mods.hub.file.UploadResponse;
-import net.minecraft.Util;
 import net.minecraft.util.FastBufferedInputStream;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
@@ -34,7 +34,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
@@ -56,44 +55,22 @@ public interface HubAPI {
 
 	MutableObject<Supplier<HubCommonGateway<?>>> CLIENT_GATEWAY = new MutableObject<>(() -> null);
 
-	HttpClient HTTP_CLIENT = HttpClient.newBuilder()
-		.executor(Util.backgroundExecutor())
-		.followRedirects(HttpClient.Redirect.ALWAYS)
-		.connectTimeout(Duration.ofSeconds(30L))
-		.build();
-
 	static HubOps<JsonElement> jsonOps() {
 		return new HubOps<>(JsonOps.INSTANCE);
 	}
 
 	static HubAPIResponse send(HttpRequest request, boolean responseBody) throws IOException, InterruptedException {
-		if (responseBody) {
-			var response = MiscUtils.sendRetrying(HTTP_CLIENT, request, HttpResponse.BodyHandlers.ofInputStream());
-			var encoding = response.headers().firstValue("Content-Encoding").orElse("");
-
-			try (var in = CompressionMethod.of(encoding).in(new FastBufferedInputStream(response.body()))) {
-				return new HubAPIResponse(response, response.statusCode(), in.readAllBytes());
-			}
-		} else {
-			var response = MiscUtils.sendRetrying(HTTP_CLIENT, request, HttpResponse.BodyHandlers.discarding());
-			return new HubAPIResponse(response, response.statusCode(), HubAPIResponse.NO_DATA);
-		}
+		return new HubAPIResponse(NetUtils.send(request, responseBody));
 	}
 
 	static void download(HttpRequest request, Path to) throws IOException, InterruptedException {
-		var response = MiscUtils.sendRetrying(HTTP_CLIENT, request, HttpResponse.BodyHandlers.ofInputStream());
+		var response = NetUtils.send(request, HttpResponse.BodyHandlers.ofInputStream());
 		var encoding = response.headers().firstValue("Content-Encoding").orElse("");
 
 		try (var in = CompressionMethod.of(encoding).in(new FastBufferedInputStream(response.body())); var out = new BufferedOutputStream(Files.newOutputStream(to))) {
 			in.transferTo(out);
 		}
 	}
-
-	Lazy<HttpRequest.Builder> HTTP_REQUEST_BASE = Lazy.of(() -> {
-		var builder = HttpRequest.newBuilder();
-		builder.header("User-Agent", "MBG-Hub-API-Minecraft-Mod/" + VidLib.VERSION);
-		return builder;
-	});
 
 	Lazy<ExecutorService> SEQUENTIAL_EXECUTOR = Lazy.of(() -> Executors.newSingleThreadExecutor(r -> {
 		var thread = new Thread(r, "Sequential-MBG-Hub-API-Thread-%08X".formatted(r.hashCode()));
@@ -108,8 +85,7 @@ public interface HubAPI {
 	}));
 
 	static HttpRequest.Builder request(URI uri, Auth auth) {
-		var builder = HTTP_REQUEST_BASE.get().copy().uri(uri);
-		builder.header("Accept-Encoding", "zstd, gzip, deflate, br");
+		var builder = NetUtils.newRequest().uri(uri);
 
 		if (auth == Auth.EXCLUDED) {
 			return builder;
@@ -163,7 +139,7 @@ public interface HubAPI {
 					VidLib.LOGGER.error("Failed to request file upload", ex);
 					return new UploadResponse(List.of(), 0L);
 				}
-			}, Util.nonCriticalIoPool());
+			}, Async.EXECUTOR);
 		}
 
 		@Nullable
@@ -217,8 +193,8 @@ public interface HubAPI {
 						.build(), false
 					);
 
-					if (response.code() / 100 != 2) {
-						throw new IOException("HTTP Error " + response.code() + " uploading " + path);
+					if (response.code / 100 != 2) {
+						throw new IOException("HTTP Error " + response.code + " uploading " + path);
 					}
 				} catch (Exception ex) {
 					throw new RuntimeException(ex);
@@ -242,7 +218,7 @@ public interface HubAPI {
 				} catch (Exception ignored) {
 					return 0;
 				}
-			}, Util.nonCriticalIoPool());
+			}, Async.EXECUTOR);
 		}
 
 		static HttpRequest getCountries() {

@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.latvian.mods.vidlib.util.MiscUtils;
+import dev.latvian.mods.klib.math.KMath;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
@@ -38,6 +38,6 @@ public interface VLEntityRenderer<T extends Entity, S extends EntityRenderState>
 	}
 
 	default AABB vl$getBoundingBoxForCulling(T entity) {
-		return MiscUtils.INFINITE;
+		return KMath.infiniteAABB();
 	}
 }

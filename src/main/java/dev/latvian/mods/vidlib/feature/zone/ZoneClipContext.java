@@ -6,7 +6,7 @@ public class ZoneClipContext extends ClipContext {
 	public final Zone zone;
 
 	public ZoneClipContext(Zone zone, ClipContext ctx) {
-		super(ctx.getFrom(), ctx.getTo(), ctx.vl$getBlock(), ctx.vl$getFluid(), ctx.vl$getCollisionContext());
+		super(ctx.getFrom(), ctx.getTo(), ctx.block, ctx.fluid, ctx.collisionContext);
 		this.zone = zone;
 	}
 }

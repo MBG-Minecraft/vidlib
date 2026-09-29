@@ -1,13 +1,13 @@
 package dev.latvian.mods.vidlib.feature.bloom;
 
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import imgui.type.ImBoolean;
 
 public interface Bloom {
 	@ClientAutoRegister
-	Canvas CANVAS = Canvas.createExternal(VidLib.id("bloom"), builder -> {
+	Canvas CANVAS = Canvas.createExternal(ID.vidlib("bloom"), builder -> {
 	});
 
 	ImBoolean VISIBLE = new ImBoolean(true);

@@ -13,7 +13,7 @@ import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.PostChain;
@@ -235,7 +235,7 @@ public class CanvasImpl {
 	}
 
 	public static void drawPreview(Minecraft mc, GuiGraphics g) {
-		if (mc.level == null || ClientGameEngine.INSTANCE.hideGui(mc) || PlatformHelper.CURRENT.isReplayLevel(mc.level)) {
+		if (mc.level == null || ClientGameEngine.INSTANCE.hideGui(mc) || VLPlatformHelper.CURRENT.isReplayLevel(mc.level)) {
 			return;
 		}
 

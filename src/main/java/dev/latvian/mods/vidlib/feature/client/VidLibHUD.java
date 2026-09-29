@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.client;
 
+import dev.latvian.mods.klib.entity.EntityUtils;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
@@ -8,7 +9,7 @@ import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBarRenderer;
 import dev.latvian.mods.vidlib.feature.font.MSDFFont;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import dev.latvian.mods.vidlib.util.NameDrawType;
@@ -141,18 +142,20 @@ public interface VidLibHUD {
 						NeoForge.EVENT_BUS.post(new HUDNameEvent(player, mc.font, lines));
 					}
 
-					float health = renderHealth ? player.getRelativeHealth(player == self ? selfDelta : delta) : -1F;
+					float health = renderHealth ? EntityUtils.getRelativeHealth(player) : -1F;
 
-					graphics.pose().pushPose();
-					graphics.pose().translate(wpos.x(), wpos.y() - 2F, 0F);
-					graphics.pose().scale(scale, scale, 1F);
-					graphics.healthBarWithText(mc.font, -20, -3, 40, 6, lines, health, alpha);
-					graphics.pose().popPose();
+					if (health != -1F) {
+						graphics.pose().pushPose();
+						graphics.pose().translate(wpos.x(), wpos.y() - 2F, 0F);
+						graphics.pose().scale(scale, scale, 1F);
+						graphics.healthBarWithText(mc.font, -20, -3, 40, 6, lines, health, alpha);
+						graphics.pose().popPose();
+					}
 				}
 			}
 		}
 
-		var props = PlatformHelper.CURRENT.getProps(level);
+		var props = VLPlatformHelper.CURRENT.getProps(level);
 
 		for (var propList : props.propLists.values()) {
 			for (var prop : propList) {

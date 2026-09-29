@@ -65,13 +65,13 @@ public record ProfileEntityFilter(GameProfile profile) implements EntityFilter, 
 	@Override
 	@Nullable
 	public Entity getFirst(Level level) {
-		var entity = level.getEntityByUUID(profile.getId());
+		var entity = level.getEntity(profile.getId());
 
 		if (entity != null) {
 			return entity;
 		}
 
-		for (var e : level.allEntities()) {
+		for (var e : level.klib$allEntities()) {
 			if (e.getScoreboardName().equalsIgnoreCase(profile.getName())) {
 				return e;
 			}

@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.util;
 
+import dev.latvian.mods.klib.math.KMath;
 import net.minecraft.world.phys.AABB;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -13,7 +14,7 @@ public class RotatedQuadData {
 		this.bl = new Vector3f();
 		this.br = new Vector3f();
 		this.tr = new Vector3f();
-		this.clipBox = MiscUtils.INFINITE;
+		this.clipBox = KMath.infiniteAABB();
 	}
 
 	public void update(Matrix4f bbMat, float width, float height) {
@@ -24,11 +25,11 @@ public class RotatedQuadData {
 		bl.set(-w2, -h2, 0F).mulPosition(bbMat);
 		br.set(w2, -h2, 0F).mulPosition(bbMat);
 		tr.set(w2, h2, 0F).mulPosition(bbMat);
-		clipBox = MiscUtils.INFINITE;
+		clipBox = KMath.infiniteAABB();
 	}
 
 	public AABB getClipBox() {
-		if (clipBox == MiscUtils.INFINITE) {
+		if (clipBox == KMath.infiniteAABB()) {
 			clipBox = new AABB(
 				Math.min(Math.min(tl.x, bl.x), Math.min(br.x, tr.x)) - 0.05F,
 				Math.min(Math.min(tl.y, bl.y), Math.min(br.y, tr.y)) - 0.05F,

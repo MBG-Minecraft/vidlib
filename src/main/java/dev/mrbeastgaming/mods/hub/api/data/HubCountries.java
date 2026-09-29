@@ -1,6 +1,6 @@
 package dev.mrbeastgaming.mods.hub.api.data;
 
-import dev.latvian.mods.common.CommonPaths;
+import dev.latvian.mods.klib.CommonPaths;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
@@ -20,7 +20,7 @@ public interface HubCountries {
 	Lazy<HubCountryList> REMOTE = Lazy.of(() -> {
 		try {
 			var response = HubAPI.send(HubAPI.CoreAPI.getCountries(), true);
-			var checksum = response.response().headers().firstValue("X-Checksum").orElse("");
+			var checksum = response.response.headers().firstValue("X-Checksum").orElse("");
 
 			if (!checksum.isEmpty()) {
 				var countryList = response.json(HubCountryList.CODEC);

@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.clock;
 
 import com.mojang.math.Axis;
+import dev.latvian.mods.klib.util.BlockUtils;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import imgui.type.ImBoolean;
 import net.minecraft.client.renderer.LightTexture;
@@ -29,7 +30,7 @@ public class ClockRenderer {
 			return;
 		}
 
-		var light = location.fullBright() ? LightTexture.FULL_BRIGHT : mc.level.vl$getPackedLight(location.pos());
+		var light = location.fullBright() ? LightTexture.FULL_BRIGHT : BlockUtils.getPackedLight(mc.level, location.pos());
 
 		ms.pushPose();
 		frame.translate(location.pos().getX() + 0.5D, location.pos().getY() + location.offset() + 0.5D, location.pos().getZ() + 0.5D);

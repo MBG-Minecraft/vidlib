@@ -6,8 +6,8 @@ import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.util.Empty;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.SpreadType;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
 import dev.latvian.mods.vidlib.feature.clothing.PlayerClothingImBuilder;
@@ -17,7 +17,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ItemStackImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TextComponentImBuilder;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
@@ -58,7 +58,7 @@ public class NPCProp extends BaseGeoProp {
 	}
 
 	@AutoRegister
-	public static final PropType<NPCProp> TYPE = PropType.create(VidLib.id("npc"), NPCProp::new,
+	public static final PropType<NPCProp> TYPE = PropType.create(ID.vidlib("npc"), NPCProp::new,
 		TICK,
 		POSITION,
 		HEIGHT,
@@ -104,7 +104,7 @@ public class NPCProp extends BaseGeoProp {
 	);
 
 	public static NPCProp createCloneFrom(Player player) {
-		var props = PlatformHelper.CURRENT.getProps(player.level());
+		var props = VLPlatformHelper.CURRENT.getProps(player.level());
 		return props.add(TYPE, prop -> prop.cloneFrom(player));
 	}
 

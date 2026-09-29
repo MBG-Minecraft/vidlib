@@ -3,6 +3,8 @@ package dev.latvian.mods.vidlib.feature.session;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.brigadier.StringReader;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.core.KLibLocalPlayer;
+import dev.latvian.mods.klib.entity.PlayerInput;
 import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.math.ProjectedCoordinates;
 import dev.latvian.mods.klib.math.VoxelShapeBox;
@@ -10,7 +12,6 @@ import dev.latvian.mods.klib.util.Side;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.core.VLLocalPlayer;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeInstance;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
@@ -29,7 +30,6 @@ import dev.latvian.mods.vidlib.feature.environment.WorldBorderOverride;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
 import dev.latvian.mods.vidlib.feature.imgui.Panel;
-import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.input.PlayerInputChangedEvent;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToServer;
 import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverridesReplaySessionData;
@@ -234,7 +234,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		updateOverrides(player);
 		CanvasImpl.tickAll(mc);
 
-		input = VLLocalPlayer.fromInput(window.getWindow(), player, mc.screen == null && mc.isWindowActive());
+		input = KLibLocalPlayer.fromInput(window.getWindow(), player, mc.screen == null && mc.isWindowActive());
 
 		if (!prevInput.equals(input)) {
 			NeoForge.EVENT_BUS.post(new PlayerInputChangedEvent(player, prevInput, input));
@@ -382,7 +382,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		var data = getClientSessionData(player);
 		data.prevInput = data.input = input;
 
-		if (level.getEntityByUUID(player) instanceof Player entity) {
+		if (level.getEntity(player) instanceof Player entity) {
 			var vehicle = entity.getVehicle();
 
 			if (vehicle != null) {

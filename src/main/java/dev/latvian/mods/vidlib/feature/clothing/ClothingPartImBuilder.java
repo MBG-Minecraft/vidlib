@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.clothing;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.color.Gradient;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.client.TextureSet;
 import dev.latvian.mods.vidlib.feature.imgui.builder.CompoundImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
@@ -14,7 +14,7 @@ import net.minecraft.core.ClientAsset;
 public class ClothingPartImBuilder extends CompoundImBuilder<ClothingPart> {
 	public static final ImBuilderType<ClothingPart> TYPE = ClothingPartImBuilder::new;
 	public static final TextureSet TEXTURE_SET = new TextureSet("textures/vidlib/clothing");
-	public static final ClientAsset DEFAULT_TEXTURE = new ClientAsset(VidLib.id("vidlib/clothing/tracksuit/top"));
+	public static final ClientAsset DEFAULT_TEXTURE = new ClientAsset(ID.vidlib("vidlib/clothing/tracksuit/top"));
 
 	public final ImBuilder<ClientAsset> texture = new TextureImBuilder(TEXTURE_SET, DEFAULT_TEXTURE);
 	public final ImBuilder<Gradient> color = new GradientImBuilder();

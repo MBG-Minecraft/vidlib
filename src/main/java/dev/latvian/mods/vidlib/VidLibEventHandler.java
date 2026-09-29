@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib;
 
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
@@ -10,7 +11,7 @@ import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.registry.GenericVLRegistry;
@@ -112,10 +113,10 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent
 	public static void addReloadListeners(AddServerReloadListenersEvent event) {
-		event.addListener(VidLib.id("location"), new Location.Loader(Location.REGISTRY));
-		event.addListener(VidLib.id("zone"), new ZoneLoader(ZoneLoader.SERVER_BY_DIMENSION, true));
-		event.addListener(VidLib.id("structure"), new StructureStorage(StructureStorage.SERVER));
-		event.addListener(VidLib.id("cutscene"), new Cutscene.Loader());
+		event.addListener(ID.vidlib("location"), new Location.Loader(Location.REGISTRY));
+		event.addListener(ID.vidlib("zone"), new ZoneLoader(ZoneLoader.SERVER_BY_DIMENSION, true));
+		event.addListener(ID.vidlib("structure"), new StructureStorage(StructureStorage.SERVER));
+		event.addListener(ID.vidlib("cutscene"), new Cutscene.Loader());
 	}
 
 	@SubscribeEvent
@@ -154,7 +155,7 @@ public class VidLibEventHandler {
 		if (event.getEntity() instanceof ServerPlayer player) {
 			var level = event.getEntity().level();
 			var packets = new S2CPacketBundleBuilder(level);
-			var props = PlatformHelper.CURRENT.getProps(level);
+			var props = VLPlatformHelper.CURRENT.getProps(level);
 
 			for (var list : props.propLists.values()) {
 				packets.s2c(new RemoveAllPropsPayload(list.type, PropRemoveType.DIMENSION_CHANGE));

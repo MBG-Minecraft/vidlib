@@ -41,9 +41,6 @@
 	"net/minecraft/client/renderer/GameRenderer": [
 		"dev/latvian/mods/vidlib/core/VLGameRenderer"
 	],
-	"net/minecraft/client/Camera": [
-		"dev/latvian/mods/vidlib/core/VLCamera"
-	],
 	"net/minecraft/world/item/Item": [
 		"dev/latvian/mods/vidlib/core/VLItem"
 	],
@@ -55,9 +52,6 @@
 	],
 	"net/minecraft/network/chat/Component": [
 		"dev/latvian/mods/vidlib/core/VLComponent"
-	],
-	"net/minecraft/commands/arguments/selector/EntitySelector": [
-		"dev/latvian/mods/vidlib/core/VLEntitySelector"
 	],
 	"net/minecraft/client/renderer/RenderType": [
 		"dev/latvian/mods/vidlib/core/VLRenderType"
@@ -79,9 +73,6 @@
 	],
 	"com/mojang/blaze3d/platform/Window": [
 		"dev/latvian/mods/vidlib/core/VLWindow"
-	],
-	"net/minecraft/world/level/ClipContext": [
-		"dev/latvian/mods/vidlib/core/VLClipContext"
 	],
 	"net/minecraft/client/gui/GuiGraphics": [
 		"dev/latvian/mods/vidlib/core/VLGuiGraphics"

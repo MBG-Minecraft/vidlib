@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.math.kvector;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.util.BlockUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
@@ -69,7 +70,7 @@ public record GroundKVector(KVector vector) implements KVector, ImBuilderWithHol
 			return null;
 		}
 
-		var groundY = ctx.level.getGroundY(pos.x, pos.y, pos.z);
+		var groundY = BlockUtils.getGroundY(ctx.level, pos.x, pos.y, pos.z);
 
 		if (Double.isNaN(groundY)) {
 			return null;

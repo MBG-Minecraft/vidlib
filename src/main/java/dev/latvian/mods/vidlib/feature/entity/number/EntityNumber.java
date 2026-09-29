@@ -1,8 +1,9 @@
 package dev.latvian.mods.vidlib.feature.entity.number;
 
 import com.mojang.serialization.Codec;
-import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.klib.entity.EntityUtils;
+import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
@@ -15,7 +16,7 @@ import net.minecraft.world.entity.LivingEntity;
 import java.util.function.ToDoubleFunction;
 
 public interface EntityNumber extends SimpleRegistryEntry, ToDoubleFunction<Entity> {
-	SimpleRegistry<EntityNumber> REGISTRY = SimpleRegistry.create(VidLib.id("entity_number"), c -> PlatformHelper.CURRENT.collectEntityNumbers(c));
+	SimpleRegistry<EntityNumber> REGISTRY = SimpleRegistry.create(ID.vidlib("entity_number"), c -> VLPlatformHelper.CURRENT.collectEntityNumbers(c));
 
 	static SimpleRegistryType.Unit<EntityNumber> basic(String name, ToDoubleFunction<Entity> function) {
 		return SimpleRegistryType.unitWithType(name, t -> new BasicEntityNumber(t, function));
@@ -36,9 +37,9 @@ public interface EntityNumber extends SimpleRegistryEntry, ToDoubleFunction<Enti
 	SimpleRegistryType.Unit<EntityNumber> BLOCK_Z = basic("block_z", Entity::getBlockZ);
 	SimpleRegistryType.Unit<EntityNumber> AIR_SUPPLY = basic("air_supply", Entity::getAirSupply);
 	SimpleRegistryType.Unit<EntityNumber> MAX_AIR_SUPPLY = basic("max_air_supply", Entity::getMaxAirSupply);
-	SimpleRegistryType.Unit<EntityNumber> HEALTH = basic("health", e -> e.vl$getHealth(1F));
-	SimpleRegistryType.Unit<EntityNumber> MAX_HEALTH = basic("max_health", e -> e.vl$getMaxHealth(1F));
-	SimpleRegistryType.Unit<EntityNumber> RELATIVE_HEALTH = basic("relative_health", e -> e.getRelativeHealth(1F));
+	SimpleRegistryType.Unit<EntityNumber> HEALTH = basic("health", EntityUtils::getHealth);
+	SimpleRegistryType.Unit<EntityNumber> MAX_HEALTH = basic("max_health", EntityUtils::getMaxHealth);
+	SimpleRegistryType.Unit<EntityNumber> RELATIVE_HEALTH = basic("relative_health", EntityUtils::getRelativeHealth);
 
 	static FixedEntityNumber of(double value) {
 		return value == 0D ? FixedEntityNumber.ZERO : value == 1D ? FixedEntityNumber.ONE : new FixedEntityNumber(value);

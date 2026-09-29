@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Transformation;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.gl.StaticBuffers;
+import dev.latvian.mods.klib.util.Async;
 import dev.latvian.mods.klib.util.WithCache;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
@@ -20,7 +21,6 @@ import dev.latvian.mods.vidlib.util.VLBiomes;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -336,7 +336,7 @@ public class StructureRenderer implements WithCache {
 	public void render(PoseStack ms, TerrainRenderLayer renderLayerFilter, StructureRendererData data) {
 		if (layers == null) {
 			var mc = Minecraft.getInstance();
-			preRender(mc, data, mc, Util.nonCriticalIoPool());
+			preRender(mc, data, mc, Async.EXECUTOR);
 		}
 
 		var layers0 = layers;

@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib;
 
-import dev.latvian.mods.common.CommonPaths;
+import dev.latvian.mods.klib.CommonPaths;
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.Lazy;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 
 import java.nio.file.Path;
 

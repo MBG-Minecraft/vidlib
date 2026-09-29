@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.client;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
@@ -19,7 +18,7 @@ public record TexturedRenderType(Map<ResourceLocation, RenderType> map, Function
 
 	@ApiStatus.Internal
 	public static TexturedRenderType internal(String name, int bufferSize, boolean affectsCrumbling, boolean sortOnUpload, RenderPipeline renderPipeline, Function<ResourceLocation, RenderType.CompositeState> state) {
-		return create(texture -> RenderType.create(VidLib.id(name).toString(),
+		return create(texture -> RenderType.create(ID.vidlib(name).toString(),
 			bufferSize,
 			affectsCrumbling,
 			sortOnUpload,

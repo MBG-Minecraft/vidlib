@@ -3,9 +3,9 @@ package dev.latvian.mods.vidlib.util;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import dev.latvian.mods.klib.util.Async;
 import dev.latvian.mods.vidlib.VidLib;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.Profiler;
@@ -73,7 +73,7 @@ public abstract class JsonCodecReloadListener<T> extends JsonReloadListener {
 					} else {
 						return finalize(decoded.result().orElseThrow());
 					}
-				}, Util.backgroundExecutor()));
+				}, Async.EXECUTOR));
 			} catch (Exception ex) {
 				VidLib.LOGGER.error("Error while parsing " + id.withPath(p -> rootPath + "/" + p), ex);
 			}

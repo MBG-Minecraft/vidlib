@@ -3,12 +3,14 @@ package dev.latvian.mods.vidlib.feature.block.filter;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import dev.latvian.mods.klib.block.filter.BlockPredicate;
 import dev.latvian.mods.klib.codec.KLibCodecs;
+import dev.latvian.mods.klib.core.KLibBlockInWorld;
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.core.VLBlockInWorld;
+import dev.latvian.mods.klib.util.BlockUtils;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
@@ -25,10 +27,9 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
-public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntry {
-	SimpleRegistry<BlockFilter> REGISTRY = SimpleRegistry.create(VidLib.id("block_filter"), c -> PlatformHelper.CURRENT.collectBlockFilters(c));
+public interface BlockFilter extends BlockPredicate, SimpleRegistryEntry {
+	SimpleRegistry<BlockFilter> REGISTRY = SimpleRegistry.create(ID.vidlib("block_filter"), c -> VLPlatformHelper.CURRENT.collectBlockFilters(c));
 
 	SimpleRegistryType.Unit<BlockFilter> NONE = SimpleRegistryType.unitWithType("none", type -> new SimpleBlockFilter(type) {
 		@Override
@@ -64,31 +65,8 @@ public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntr
 		}
 	});
 
-	SimpleRegistryType.Unit<BlockFilter> VISIBLE = SimpleRegistryType.unitWithType("visible", type -> new SimpleBlockFilter(type) {
-		@Override
-		public boolean test(BlockInWorld blockInWorld) {
-			var state = blockInWorld.getState();
-			return state != null && state.isVisible();
-		}
-
-		@Override
-		public boolean test(Level level, BlockPos pos, BlockState state) {
-			return state.isVisible();
-		}
-	});
-
-	SimpleRegistryType.Unit<BlockFilter> PARTIAL = SimpleRegistryType.unitWithType("partial", type -> new SimpleBlockFilter(type) {
-		@Override
-		public boolean test(BlockInWorld blockInWorld) {
-			var state = blockInWorld.getState();
-			return state != null && state.isPartial();
-		}
-
-		@Override
-		public boolean test(Level level, BlockPos pos, BlockState state) {
-			return state.isPartial();
-		}
-	});
+	SimpleRegistryType.Unit<BlockFilter> VISIBLE = SimpleRegistryType.unitWithType("visible", type -> SimpleBlockFilter.simple(type, BlockUtils::isVisible));
+	SimpleRegistryType.Unit<BlockFilter> PARTIAL = SimpleRegistryType.unitWithType("partial", type -> SimpleBlockFilter.simple(type, BlockUtils::isPartial));
 
 	SimpleRegistryType.Unit<BlockFilter> EXPOSED = SimpleRegistryType.unitWithType("exposed", type -> new SimpleBlockFilter(type) {
 		@Override
@@ -98,7 +76,7 @@ public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntr
 
 		@Override
 		public boolean test(Level level, BlockPos pos, BlockState state) {
-			return !state.isAir() && level.isBlockExposed(pos.getX(), pos.getY(), pos.getZ(), new BlockPos.MutableBlockPos());
+			return !state.isAir() && BlockUtils.isBlockExposed(level, pos.getX(), pos.getY(), pos.getZ(), new BlockPos.MutableBlockPos());
 		}
 	});
 
@@ -144,7 +122,7 @@ public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntr
 
 		return DataResult.error(() -> "Invalid blockstate format: " + s);
 	}, filter -> switch (filter) {
-		case BlockStateFilter f -> DataResult.success(f.blockState().vl$toString() + (f.blockState() == f.blockState().getBlock().defaultBlockState() ? "[]" : ""));
+		case BlockStateFilter f -> DataResult.success(BlockUtils.toString(f.blockState()) + (f.blockState() == f.blockState().getBlock().defaultBlockState() ? "[]" : ""));
 		case BlockIdFilter f -> DataResult.success(f.block().builtInRegistryHolder().getKey().location().toString());
 		case null, default -> DataResult.error(() -> "");
 	});
@@ -183,7 +161,7 @@ public interface BlockFilter extends Predicate<BlockInWorld>, SimpleRegistryEntr
 		} else if (this == ANY.instance()) {
 			return true;
 		} else {
-			return test(VLBlockInWorld.of(level, pos, state));
+			return test(KLibBlockInWorld.of(level, pos, state));
 		}
 	}
 

@@ -5,7 +5,6 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.ClientAsset;
@@ -20,7 +19,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 public final class SpriteKey {
-	public static final ClientAsset SPECIAL = new ClientAsset(VidLib.id("special"));
+	public static final ClientAsset SPECIAL = new ClientAsset(ID.vidlib("special"));
 	public static final ClientAsset BLOCKS = new ClientAsset(ResourceLocation.withDefaultNamespace("atlas/blocks"));
 	public static final ClientAsset PARTICLES = new ClientAsset(ResourceLocation.withDefaultNamespace("atlas/particles"));
 	public static final ClientAsset GUI = new ClientAsset(ResourceLocation.withDefaultNamespace("atlas/gui"));

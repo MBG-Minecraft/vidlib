@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.feature;
 
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.net.ConfigurationTaskHolder;
@@ -14,7 +14,7 @@ public record ServerFeaturesPayload(FeatureSet featureSet) implements SimplePack
 	public static final VidLibPacketType<ServerFeaturesPayload> TYPE = VidLibPacketType.internal("server_features", FeatureSet.STREAM_CODEC.map(ServerFeaturesPayload::new, ServerFeaturesPayload::featureSet));
 
 	@AutoRegister
-	public static final ConfigurationTaskHolder CONFIG_TASK = new ConfigurationTaskHolder(VidLib.id("features"), (channelInfo, registry) -> registry.register(ServerFeaturesPayload::config));
+	public static final ConfigurationTaskHolder CONFIG_TASK = new ConfigurationTaskHolder(ID.vidlib("features"), (channelInfo, registry) -> registry.register(ServerFeaturesPayload::config));
 
 	private static void config(VLConfigurationTask.Context ctx) {
 		if (ctx.channelInfo().hasChannel(TYPE)) {

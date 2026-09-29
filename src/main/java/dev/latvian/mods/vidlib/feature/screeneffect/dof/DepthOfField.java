@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.screeneffect.dof;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.ClientMatrices;
 import dev.latvian.mods.klib.math.Vec3f;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasUniform;
@@ -34,7 +34,7 @@ public class DepthOfField {
 	private static int uBlurMode = 0;
 
 	@ClientAutoRegister
-	public static final Canvas CANVAS = Canvas.createExternal(VidLib.id("depth_of_field"), builder -> {
+	public static final Canvas CANVAS = Canvas.createExternal(ID.vidlib("depth_of_field"), builder -> {
 		builder.setTickCallback(DepthOfField::tick);
 		builder.setDrawSetupCallback(DepthOfField::setup);
 		builder.addUniform(CanvasUniform.mat4("InverseViewProjectionMat", () -> ClientMatrices.INVERSE_WORLD));

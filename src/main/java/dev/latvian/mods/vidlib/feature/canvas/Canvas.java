@@ -14,8 +14,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.latvian.mods.klib.gl.GLDebugLog;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.Lazy;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderPipelines;
 import net.minecraft.client.Minecraft;
@@ -52,11 +52,11 @@ public class Canvas implements Consumer<RenderPass> {
 	}
 
 	@ClientAutoRegister
-	public static final Canvas MAIN_BEFORE_PARTICLES = createExternal(VidLib.id("main_before_particles"), builder -> {
+	public static final Canvas MAIN_BEFORE_PARTICLES = createExternal(ID.vidlib("main_before_particles"), builder -> {
 	});
 
 	@ClientAutoRegister
-	public static final Canvas MAIN_AFTER_PARTICLES = createExternal(VidLib.id("main_after_particles"), builder -> {
+	public static final Canvas MAIN_AFTER_PARTICLES = createExternal(ID.vidlib("main_after_particles"), builder -> {
 	});
 
 	public final ResourceLocation id;

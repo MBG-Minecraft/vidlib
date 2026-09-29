@@ -4,7 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.Commands;
@@ -25,7 +25,7 @@ public interface WaypointClientCommands {
 						.executes(ctx -> {
 							var mc = Minecraft.getInstance();
 
-							if (mc.level != null && PlatformHelper.CURRENT.isReplayLevel(mc.level)) {
+							if (mc.level != null && VLPlatformHelper.CURRENT.isReplayLevel(mc.level)) {
 								var id = StringArgumentType.getString(ctx, "id");
 								var position = Vec3Argument.getVec3(ctx, "position");
 								var label = ComponentArgument.getResolvedComponent(ctx, "label");
@@ -58,7 +58,7 @@ public interface WaypointClientCommands {
 				.executes(ctx -> {
 					var mc = Minecraft.getInstance();
 
-					if (mc.level != null && PlatformHelper.CURRENT.isReplayLevel(mc.level)) {
+					if (mc.level != null && VLPlatformHelper.CURRENT.isReplayLevel(mc.level)) {
 						var id = StringArgumentType.getString(ctx, "id");
 
 						var session = mc.player.vl$sessionData();

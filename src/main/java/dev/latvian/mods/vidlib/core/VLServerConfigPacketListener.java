@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.core;
 
+import dev.latvian.mods.klib.core.NoMixinException;
 import net.minecraft.network.PacketListener;
 import net.minecraft.server.network.ConfigurationTask;
 

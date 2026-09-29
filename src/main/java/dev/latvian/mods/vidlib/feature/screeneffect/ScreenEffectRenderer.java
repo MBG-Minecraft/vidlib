@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.screeneffect;
 
 import dev.latvian.mods.klib.math.ClientMatrices;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.canvas.CanvasUniform;
@@ -11,7 +11,7 @@ public class ScreenEffectRenderer {
 	private static int uCount = 0;
 
 	@ClientAutoRegister
-	public static final Canvas CANVAS = Canvas.createExternal(VidLib.id("screen_effects"), builder -> {
+	public static final Canvas CANVAS = Canvas.createExternal(ID.vidlib("screen_effects"), builder -> {
 		builder.setTickCallback(ScreenEffectRenderer::tick);
 		builder.setDrawSetupCallback(ScreenEffectRenderer::setup);
 		builder.addUniform(CanvasUniform.int1("Count", () -> uCount));

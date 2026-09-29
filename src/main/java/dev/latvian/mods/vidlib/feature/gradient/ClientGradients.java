@@ -2,11 +2,11 @@ package dev.latvian.mods.vidlib.feature.gradient;
 
 import dev.latvian.mods.klib.color.Gradient;
 import dev.latvian.mods.klib.color.GradientReference;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 
 public interface ClientGradients {
 	static Gradient ref(String path) {
-		return new GradientReference(VidLib.id(path));
+		return new GradientReference(ID.vidlib(path));
 	}
 
 	Gradient TRAIL = ref("trail");

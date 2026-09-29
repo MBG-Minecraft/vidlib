@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.bulk;
 
-import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.registry.BasicRegistryRef;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface BulkLevelModification extends SimpleRegistryEntry {
-	SimpleRegistry<BulkLevelModification> REGISTRY = SimpleRegistry.create(VidLib.id("bulk_level_modification"), c -> PlatformHelper.CURRENT.collectBulkLevelModifications(c));
+	SimpleRegistry<BulkLevelModification> REGISTRY = SimpleRegistry.create(ID.vidlib("bulk_level_modification"), c -> VLPlatformHelper.CURRENT.collectBulkLevelModifications(c));
 
 	BulkLevelModification NONE = new BulkLevelModificationBundle(List.of());
 

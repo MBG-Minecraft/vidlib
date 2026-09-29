@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.core.NoMixinException;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;

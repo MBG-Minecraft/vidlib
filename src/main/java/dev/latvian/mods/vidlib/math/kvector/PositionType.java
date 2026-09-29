@@ -21,7 +21,7 @@ public enum PositionType implements StringRepresentable {
 
 	public static final PositionType[] VALUES = values();
 	public static final Codec<PositionType> CODEC = StringRepresentable.fromEnum(() -> VALUES);
-	public static final StreamCodec<ByteBuf, PositionType> STREAM_CODEC = KLibStreamCodecs.enumValue(VALUES);
+	public static final StreamCodec<ByteBuf, PositionType> STREAM_CODEC = KLibStreamCodecs.anyEnum(VALUES);
 	public static final ImBuilderType<PositionType> BUILDER_TYPE = () -> new EnumImBuilder<>(PositionType.VALUES);
 
 	private final String name;

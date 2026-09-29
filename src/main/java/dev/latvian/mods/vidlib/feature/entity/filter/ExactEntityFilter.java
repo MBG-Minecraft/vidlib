@@ -99,7 +99,7 @@ public record ExactEntityFilter(IntOrUUID entityId) implements EntityFilter, ImB
 	@Override
 	@Nullable
 	public Entity getFirst(Level level) {
-		return level.getEntity(entityId);
+		return entityId.getEntity(level);
 	}
 
 	@Override

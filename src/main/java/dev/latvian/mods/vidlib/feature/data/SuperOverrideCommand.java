@@ -58,7 +58,7 @@ public interface SuperOverrideCommand {
 							var session = Minecraft.getInstance().player.vl$sessionData();
 							var value = key.command().get(ctx, "value");
 
-							for (var player : Minecraft.getInstance().level.selectPlayers(ctx, "player")) {
+							for (var player : Minecraft.getInstance().level.klib$selectPlayers(ctx, "player")) {
 								var psession = session.getClientSessionData(player.getUUID());
 								psession.dataMap.setSuperOverride(key, value);
 							}
@@ -72,7 +72,7 @@ public interface SuperOverrideCommand {
 					.executes(ctx -> {
 						var session = Minecraft.getInstance().player.vl$sessionData();
 
-						for (var player : Minecraft.getInstance().level.selectPlayers(ctx, "player")) {
+						for (var player : Minecraft.getInstance().level.klib$selectPlayers(ctx, "player")) {
 							var psession = session.getClientSessionData(player.getUUID());
 							psession.dataMap.removeSuperOverride(key);
 						}

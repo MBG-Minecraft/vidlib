@@ -72,7 +72,7 @@ public class PhysicsParticle implements Comparable<PhysicsParticle> {
 
 				if (state.getBlock() == Blocks.WATER) {
 					blockStateType = 2;
-				} else if (state.vl$getDensity() > 0F) {
+				} else if (state.klib$getDensity() > 0F) {
 					blockStateType = 1;
 				} else {
 					blockStateType = 0;

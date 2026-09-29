@@ -5,7 +5,7 @@ import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.math.VoxelShapeBox;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
@@ -22,7 +22,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class ImageProp extends Prop {
 	@AutoRegister
-	public static final PropType<ImageProp> TYPE = PropType.create(VidLib.id("image"), ImageProp::new,
+	public static final PropType<ImageProp> TYPE = PropType.create(ID.vidlib("image"), ImageProp::new,
 		POSITION,
 		YAW,
 		PITCH,

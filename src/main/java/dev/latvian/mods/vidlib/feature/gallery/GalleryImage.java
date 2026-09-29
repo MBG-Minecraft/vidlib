@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.gallery;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -44,7 +43,7 @@ public record GalleryImage<K>(
 			} else {
 				tex = mc.getTextureManager().getTexture(VidLibTextures.LOADING.texturePath());
 				mc.getTextureManager().byPath.put(textureId, tex);
-				Util.backgroundExecutor().execute(() -> loadNow(mc, false));
+				Thread.startVirtualThread(() -> loadNow(mc, false));
 			}
 		}
 

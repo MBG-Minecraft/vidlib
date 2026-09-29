@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.visual;
 
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.resources.ResourceLocation;
@@ -26,8 +26,8 @@ public record FluidTextures(ClientAsset still, ClientAsset flowing, TerrainRende
 	}
 
 	public static final FluidTextures DEBUG = of(
-		new ClientAsset(VidLib.id("block/debug_fluid/still")),
-		new ClientAsset(VidLib.id("block/debug_fluid/flow"))
+		new ClientAsset(ID.vidlib("block/debug_fluid/still")),
+		new ClientAsset(ID.vidlib("block/debug_fluid/flow"))
 	);
 
 	public static final FluidTextures WATER = of(
@@ -43,12 +43,12 @@ public record FluidTextures(ClientAsset still, ClientAsset flowing, TerrainRende
 	);
 
 	public static final FluidTextures OPAQUE_WATER = of(
-		new ClientAsset(VidLib.id("block/opaque_water/still")),
-		new ClientAsset(VidLib.id("block/opaque_water/flow"))
+		new ClientAsset(ID.vidlib("block/opaque_water/still")),
+		new ClientAsset(ID.vidlib("block/opaque_water/flow"))
 	);
 
 	public static final FluidTextures PALE_OPAQUE_WATER = of(
-		new ClientAsset(VidLib.id("block/pale_opaque_water/still")),
-		new ClientAsset(VidLib.id("block/pale_opaque_water/flow"))
+		new ClientAsset(ID.vidlib("block/pale_opaque_water/still")),
+		new ClientAsset(ID.vidlib("block/pale_opaque_water/flow"))
 	);
 }

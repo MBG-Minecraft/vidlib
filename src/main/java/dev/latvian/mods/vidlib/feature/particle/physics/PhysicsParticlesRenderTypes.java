@@ -4,7 +4,7 @@ import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
@@ -20,15 +20,15 @@ public interface PhysicsParticlesRenderTypes {
 
 	RenderPipeline.Snippet PIPELINE_BASE = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)
 		.withVertexFormat(FORMAT, VertexFormat.Mode.QUADS)
-		.withVertexShader(VidLib.id("core/physics_particle"))
-		.withFragmentShader(VidLib.id("core/physics_particle"))
+		.withVertexShader(ID.vidlib("core/physics_particle"))
+		.withFragmentShader(ID.vidlib("core/physics_particle"))
 		.withSampler("Sampler0")
 		.withSampler("Sampler2")
 		.withCull(true)
 		.buildSnippet();
 
 	RenderPipeline SOLID_PIPELINE = RenderPipeline.builder(PIPELINE_BASE)
-		.withLocation(VidLib.id("pipeline/physics_particle/solid"))
+		.withLocation(ID.vidlib("pipeline/physics_particle/solid"))
 		.build();
 
 	RenderType SOLID = RenderType.create(
@@ -44,7 +44,7 @@ public interface PhysicsParticlesRenderTypes {
 	);
 
 	RenderPipeline CUTOUT_MIPPED_PIPELINE = RenderPipeline.builder(PIPELINE_BASE)
-		.withLocation(VidLib.id("pipeline/physics_particle/cutout_mipped"))
+		.withLocation(ID.vidlib("pipeline/physics_particle/cutout_mipped"))
 		.withShaderDefine("ALPHA_CUTOUT", 0.5F)
 		.build();
 
@@ -61,7 +61,7 @@ public interface PhysicsParticlesRenderTypes {
 	);
 
 	RenderPipeline CUTOUT_PIPELINE = RenderPipeline.builder(PIPELINE_BASE)
-		.withLocation(VidLib.id("pipeline/physics_particle/cutout"))
+		.withLocation(ID.vidlib("pipeline/physics_particle/cutout"))
 		.withShaderDefine("ALPHA_CUTOUT", 0.1F)
 		.build();
 
@@ -78,7 +78,7 @@ public interface PhysicsParticlesRenderTypes {
 	);
 
 	RenderPipeline TRANSLUCENT_PIPELINE = RenderPipeline.builder(PIPELINE_BASE)
-		.withLocation(VidLib.id("pipeline/physics_particle/translucent"))
+		.withLocation(ID.vidlib("pipeline/physics_particle/translucent"))
 		.withShaderDefine("ALPHA_CUTOUT", 0.1F)
 		.withBlend(BlendFunction.TRANSLUCENT)
 		.build();

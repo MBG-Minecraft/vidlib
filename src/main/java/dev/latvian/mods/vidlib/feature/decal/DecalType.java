@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.decal;
 
 import com.mojang.serialization.Codec;
+import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import io.netty.buffer.ByteBuf;
@@ -24,8 +25,8 @@ public enum DecalType implements StringRepresentable {
 
 	public static final DecalType[] VALUES = values();
 	public static final DecalType[] UNIT = {NONE};
-	public static final Codec<DecalType> CODEC = StringRepresentable.fromEnum(() -> VALUES);
-	public static final StreamCodec<ByteBuf, DecalType> STREAM_CODEC = KLibStreamCodecs.enumValue(VALUES);
+	public static final Codec<DecalType> CODEC = KLibCodecs.anyEnum(VALUES);
+	public static final StreamCodec<ByteBuf, DecalType> STREAM_CODEC = KLibStreamCodecs.anyEnum(VALUES);
 	public static final DataType<DecalType> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, DecalType.class);
 
 	public final String name;

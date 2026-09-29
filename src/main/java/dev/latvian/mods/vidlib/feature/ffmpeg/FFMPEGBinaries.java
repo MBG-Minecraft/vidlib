@@ -1,16 +1,16 @@
 package dev.latvian.mods.vidlib.feature.ffmpeg;
 
-import dev.latvian.mods.common.CommonPaths;
+import dev.latvian.mods.klib.CommonPaths;
 import dev.latvian.mods.klib.io.IOUtils;
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.Lazy;
+import dev.latvian.mods.klib.util.net.NetUtils;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import org.apache.commons.lang3.SystemUtils;
 
 import java.io.File;
 import java.net.URI;
 import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -120,10 +120,11 @@ public record FFMPEGBinaries(String ffmpeg, String ffprobe, String ffplay) {
 			for (var zipUrl : zipUrls) {
 				VidLib.LOGGER.info("Downloading " + zipUrl + "...");
 
-				try (var stream = client.send(HttpRequest.newBuilder(URI.create(zipUrl))
+				try (var stream = NetUtils.decode(NetUtils.send(NetUtils.newRequest()
+					.uri(URI.create(zipUrl))
 					.GET()
 					.timeout(Duration.ofMinutes(5L))
-					.build(), HttpResponse.BodyHandlers.ofInputStream()).body()
+					.build(), HttpResponse.BodyHandlers.ofInputStream()))
 				) {
 					Files.copy(stream, zipFile, StandardCopyOption.REPLACE_EXISTING);
 				}

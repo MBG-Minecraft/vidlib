@@ -1,13 +1,14 @@
 package dev.latvian.mods.vidlib;
 
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.block.VidLibBlocks;
 import dev.latvian.mods.vidlib.feature.item.VidLibItems;
 import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.NeoForgeCommonGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
-import dev.latvian.mods.vidlib.feature.platform.neoforge.NeoPlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.neoforge.VLNeoPlatformHelper;
 import net.minecraft.core.registries.Registries;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -21,7 +22,7 @@ import net.neoforged.neoforgespi.language.IModInfo;
 public class VidLibMod {
 	public VidLibMod(ModContainer mod, IEventBus bus) {
 		VidLib.VERSION = mod.getModInfo().getVersion().toString();
-		PlatformHelper.CURRENT = new NeoPlatformHelper(mod);
+		VLPlatformHelper.CURRENT = new VLNeoPlatformHelper(mod);
 		CommonGameEngine.INSTANCE = new NeoForgeCommonGameEngine();
 		VidLib.init();
 

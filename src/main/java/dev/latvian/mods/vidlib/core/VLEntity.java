@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.core;
 
-import dev.latvian.mods.klib.math.Line;
+import dev.latvian.mods.klib.entity.EntityUtils;
+import dev.latvian.mods.klib.entity.PlayerInput;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.vidlib.feature.entity.C2SEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.entity.EntityData;
@@ -8,7 +9,6 @@ import dev.latvian.mods.vidlib.feature.entity.ForceEntityVelocityPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.S2CEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
@@ -24,7 +24,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.portal.TeleportTransition;
@@ -44,14 +43,6 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		return vl$self().level();
 	}
 
-	default void vl$setLevel(Level level) {
-		throw new NoMixinException(this);
-	}
-
-	default boolean vl$isSaving() {
-		return false;
-	}
-
 	default List<Zone> getZones() {
 		var zones = vl$level().vl$getActiveZones();
 		return zones == null ? List.of() : zones.entityZones.getOrDefault((vl$self()).getId(), List.of());
@@ -62,40 +53,8 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		return null;
 	}
 
-	default boolean isSpectatorOrCreative() {
-		var type = getGameMode();
-		return type == GameType.SPECTATOR || type == GameType.CREATIVE;
-	}
-
-	default boolean vl$isCreative() {
-		return getGameMode() == GameType.CREATIVE;
-	}
-
-	default boolean isSurvival() {
-		return getGameMode() == GameType.SURVIVAL;
-	}
-
-	default boolean isAdventure() {
-		return getGameMode() == GameType.ADVENTURE;
-	}
-
-	default boolean isSurvivalLike() {
-		var type = getGameMode();
-		return type != null && type.isSurvival();
-	}
-
 	default boolean vl$isSuspended() {
 		return CommonGameEngine.INSTANCE.isSuspended(vl$self());
-	}
-
-	default Line ray(double distance, float delta) {
-		var start = vl$self().getEyePosition(delta);
-		var end = start.add(vl$self().getViewVector(delta).scale(distance));
-		return new Line(start, end);
-	}
-
-	default Line ray(float delta) {
-		return ray(4.5D, delta);
 	}
 
 	default void teleport(ServerLevel to, Vec3 pos) {
@@ -210,18 +169,6 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		};
 	}
 
-	default float vl$getHealth(float delta) {
-		return 1F;
-	}
-
-	default float vl$getMaxHealth(float delta) {
-		return 1F;
-	}
-
-	default float getRelativeHealth(float delta) {
-		return Math.clamp(vl$getHealth(delta) / vl$getMaxHealth(delta), 0F, 1F);
-	}
-
 	default boolean preventDismount(Player passenger) {
 		return false;
 	}
@@ -273,14 +220,6 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	default void imgui(ImGraphics graphics, float delta) {
 	}
 
-	default boolean vl$hasItem(Ingredient ingredient) {
-		return false;
-	}
-
-	default boolean vl$isDeadOrDying() {
-		return !vl$self().isAlive();
-	}
-
 	default boolean hideCrosshair(Player player) {
 		return false;
 	}
@@ -317,10 +256,10 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	}
 
 	default boolean isStaff() {
-		return CommonGameEngine.INSTANCE.isPlayerStaff(vl$self().getTags(), getGameMode());
+		return CommonGameEngine.INSTANCE.isPlayerStaff(vl$self().getTags(), EntityUtils.getGameMode(vl$self()));
 	}
 
 	default boolean isStaffOrTalent() {
-		return CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(vl$self().getTags(), getGameMode());
+		return CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(vl$self().getTags(), EntityUtils.getGameMode(vl$self()));
 	}
 }

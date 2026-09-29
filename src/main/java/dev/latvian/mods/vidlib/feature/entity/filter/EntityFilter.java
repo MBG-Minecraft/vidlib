@@ -6,12 +6,13 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JavaOps;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.entity.EntityUtils;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.IntOrUUID;
 import dev.latvian.mods.klib.util.ParsedEntitySelector;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
@@ -26,7 +27,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,7 +36,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public interface EntityFilter extends Predicate<Entity>, SimpleRegistryEntry {
-	SimpleRegistry<EntityFilter> REGISTRY = SimpleRegistry.create(VidLib.id("entity_filter"), c -> PlatformHelper.CURRENT.collectEntityFilters(c));
+	SimpleRegistry<EntityFilter> REGISTRY = SimpleRegistry.create(ID.vidlib("entity_filter"), c -> VLPlatformHelper.CURRENT.collectEntityFilters(c));
 
 	static SimpleRegistryType.Unit<EntityFilter> basic(String name, Predicate<Entity> predicate) {
 		return SimpleRegistryType.unitWithType(name, type -> new BasicEntityFilter(type, predicate));
@@ -46,17 +46,17 @@ public interface EntityFilter extends Predicate<Entity>, SimpleRegistryEntry {
 	SimpleRegistryType.Unit<EntityFilter> ANY = basic("any", entity -> true);
 	SimpleRegistryType.Unit<EntityFilter> ALIVE = basic("alive", Entity::isAlive);
 	SimpleRegistryType.Unit<EntityFilter> DEAD = basic("dead", entity -> !entity.isAlive());
-	SimpleRegistryType.Unit<EntityFilter> DEAD_OR_DYING = basic("dead_or_dying", entity -> !entity.isAlive());
+	SimpleRegistryType.Unit<EntityFilter> DEAD_OR_DYING = basic("dead_or_dying", EntityUtils::isDeadOrDying);
 	SimpleRegistryType.Unit<EntityFilter> LIVING = basic("living", entity -> entity instanceof LivingEntity);
 	SimpleRegistryType.Unit<EntityFilter> MOB = basic("mob", entity -> entity instanceof Mob);
 	SimpleRegistryType.Unit<EntityFilter> ENEMY = basic("enemy", entity -> entity instanceof Enemy);
 	SimpleRegistryType.Unit<EntityFilter> PLAYER = basic("player", entity -> entity instanceof Player);
-	SimpleRegistryType.Unit<EntityFilter> SURVIVAL_MODE = basic("survival_mode", entity -> entity.getGameMode() == GameType.SURVIVAL);
-	SimpleRegistryType.Unit<EntityFilter> ADVENTURE_MODE = basic("adventure_mode", entity -> entity.getGameMode() == GameType.ADVENTURE);
-	SimpleRegistryType.Unit<EntityFilter> SURVIVAL_LIKE_MODE = basic("survival_like_mode", entity -> entity.getGameMode() != null && entity.getGameMode().isSurvival());
-	SimpleRegistryType.Unit<EntityFilter> CREATIVE_MODE = basic("creative_mode", entity -> entity.getGameMode() == GameType.CREATIVE);
+	SimpleRegistryType.Unit<EntityFilter> SURVIVAL_MODE = basic("survival_mode", EntityUtils::isSurvival);
+	SimpleRegistryType.Unit<EntityFilter> ADVENTURE_MODE = basic("adventure_mode", EntityUtils::isAdventure);
+	SimpleRegistryType.Unit<EntityFilter> SURVIVAL_LIKE_MODE = basic("survival_like_mode", EntityUtils::isSurvivalLike);
+	SimpleRegistryType.Unit<EntityFilter> CREATIVE_MODE = basic("creative_mode", EntityUtils::isCreative);
 	SimpleRegistryType.Unit<EntityFilter> SPECTATOR_MODE = basic("spectator_mode", Entity::isSpectator);
-	SimpleRegistryType.Unit<EntityFilter> SPECTATOR_OR_CREATIVE_MODE = basic("spectator_or_creative_mode", entity -> entity.getGameMode() == GameType.SPECTATOR || entity.getGameMode() == GameType.CREATIVE);
+	SimpleRegistryType.Unit<EntityFilter> SPECTATOR_OR_CREATIVE_MODE = basic("spectator_or_creative_mode", EntityUtils::isSpectatorOrCreative);
 	SimpleRegistryType.Unit<EntityFilter> ITEM = basic("item", entity -> entity instanceof ItemEntity);
 	SimpleRegistryType.Unit<EntityFilter> PROJECTILE = basic("projectile", entity -> entity instanceof Projectile);
 	SimpleRegistryType.Unit<EntityFilter> VISIBLE = basic("visible", entity -> !entity.isInvisible());
@@ -69,8 +69,8 @@ public interface EntityFilter extends Predicate<Entity>, SimpleRegistryEntry {
 	SimpleRegistryType.Unit<EntityFilter> UNDERWATER = basic("underwater", Entity::isUnderWater);
 	SimpleRegistryType.Unit<EntityFilter> ON_RAILS = basic("on_rails", Entity::isOnRails);
 	SimpleRegistryType.Unit<EntityFilter> ON_FIRE = basic("on_fire", Entity::isOnFire);
-	SimpleRegistryType.Unit<EntityFilter> STAFF = basic("staff", entity -> PlatformHelper.CURRENT.isStaff(entity));
-	SimpleRegistryType.Unit<EntityFilter> STAFF_OR_TALENT = basic("staff_or_talent", entity -> PlatformHelper.CURRENT.isStaffOrTalent(entity));
+	SimpleRegistryType.Unit<EntityFilter> STAFF = basic("staff", entity -> VLPlatformHelper.CURRENT.isStaff(entity));
+	SimpleRegistryType.Unit<EntityFilter> STAFF_OR_TALENT = basic("staff_or_talent", entity -> VLPlatformHelper.CURRENT.isStaffOrTalent(entity));
 
 	static EntityFilter of(boolean value) {
 		return value ? ANY.instance() : NONE.instance();
@@ -179,7 +179,7 @@ public interface EntityFilter extends Predicate<Entity>, SimpleRegistryEntry {
 
 	@Nullable
 	default Entity getFirst(Level level) {
-		for (var entity : level.allEntities()) {
+		for (var entity : level.klib$allEntities()) {
 			if (test(entity)) {
 				return entity;
 			}

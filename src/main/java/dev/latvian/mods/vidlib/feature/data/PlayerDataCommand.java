@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.data;
 
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.session.SessionData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;

@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.core;
 
 import com.mojang.util.UndashedUuid;
+import dev.latvian.mods.klib.core.NoMixinException;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
@@ -12,7 +13,7 @@ import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.RemoveZonePayload;
@@ -118,7 +119,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	@Override
 	@ApiStatus.Internal
 	default void vl$postTick(PauseType paused) {
-		if (PlatformHelper.CURRENT.isReplayLevel(vl$level())) {
+		if (VLPlatformHelper.CURRENT.isReplayLevel(vl$level())) {
 			return;
 		}
 
@@ -265,7 +266,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	}
 
 	default void vl$preloadAllSessions() {
-		var dir = PlatformHelper.CURRENT.getPlayerDataDirectory(vl$self());
+		var dir = VLPlatformHelper.CURRENT.getPlayerDataDirectory(vl$self());
 
 		if (Files.notExists(dir)) {
 			return;

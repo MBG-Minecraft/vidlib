@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.zone.renderer;
 
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.core.KLibBlockInWorld;
 import dev.latvian.mods.klib.math.VoxelShapeBox;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
@@ -8,7 +9,6 @@ import dev.latvian.mods.klib.render.SphereRenderer;
 import dev.latvian.mods.klib.shape.SpherePoints;
 import dev.latvian.mods.klib.texture.LightUV;
 import dev.latvian.mods.klib.util.Cast;
-import dev.latvian.mods.vidlib.core.VLBlockInWorld;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
@@ -117,7 +117,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 												return false;
 											}
 
-											return filter == BlockFilter.ANY.instance() || filter.test(VLBlockInWorld.of(mc.level, pos, state));
+											return filter == BlockFilter.ANY.instance() || filter.test(KLibBlockInWorld.of(mc.level, pos, state));
 										}).optimize()));
 									});
 								}

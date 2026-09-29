@@ -4,9 +4,9 @@ import dev.latvian.apps.tinyhttp.HTTPServer;
 import dev.latvian.apps.tinyhttp.http.HTTPRequest;
 import dev.latvian.apps.tinyhttp.http.response.HTTPResponse;
 import dev.latvian.apps.tinyhttp.http.response.error.client.BadRequestError;
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibClient;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.mrbeastgaming.mods.hub.HubUserConfig;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import net.minecraft.client.Minecraft;
@@ -37,12 +37,11 @@ public class HubLocalServer {
 
 		var response = HubAPI.send(HubAPI.UserAPI.postRequestToken(token), true);
 
-		int statusCode = response.code();
 		var error = "";
 
 		var mc = Minecraft.getInstance();
 
-		if (statusCode / 100 == 2) {
+		if (response.isOk()) {
 			var userToken = response.string().trim();
 
 			if (userToken.isEmpty()) {
@@ -70,7 +69,7 @@ public class HubLocalServer {
 			mc.execute(() -> {
 				if (mc.screen instanceof LinkHubUserWaitingScreen link) {
 					link.button.active = true;
-					link.setMessage(Component.literal(("Error " + statusCode + "\n" + error).trim()));
+					link.setMessage(Component.literal(("Error " + response.code + "\n" + error).trim()));
 				}
 
 				GLFW.glfwFocusWindow(mc.getWindow().getWindow());

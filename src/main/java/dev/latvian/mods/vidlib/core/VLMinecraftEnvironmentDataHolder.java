@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.core;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
+import dev.latvian.mods.klib.core.NoMixinException;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.ServerDataMapHolder;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;

@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.feature.particle;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.latvian.mods.klib.math.KMath;
-import dev.latvian.mods.vidlib.util.MiscUtils;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -68,6 +67,6 @@ public class TextParticle extends CustomParticle {
 
 	@Override
 	public AABB getRenderBoundingBox(float partialTicks) {
-		return MiscUtils.INFINITE;
+		return KMath.infiniteAABB();
 	}
 }

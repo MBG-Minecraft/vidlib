@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.platform;
 
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.entity.EntityUtils;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
 import dev.latvian.mods.klib.util.StringUtils;
@@ -318,12 +319,8 @@ public class ClientGameEngine {
 		}
 	}
 
-	public boolean renderOnBossFramebuffer(LivingEntity entity) {
-		return entity.level().getMainBoss() == entity;
-	}
-
-	public boolean hideRenderedName(LivingEntity entity, boolean bossFramebuffer) {
-		return bossFramebuffer && !(entity instanceof Player);
+	public boolean hideRenderedName(LivingEntity entity) {
+		return false;
 	}
 
 	public boolean hasTopInfoBar(Minecraft mc) {
@@ -928,11 +925,11 @@ public class ClientGameEngine {
 	}
 
 	public boolean defaultDrawName(Player player) {
-		return !CommonGameEngine.INSTANCE.isBoss(player);
+		return true;
 	}
 
 	public boolean defaultDrawHealthBar(Player player) {
-		return player.isSurvivalLike() && !CommonGameEngine.INSTANCE.isBoss(player);
+		return EntityUtils.isSurvivalLike(player);
 	}
 
 	public String getClientGatewayName(Minecraft mc) {
@@ -944,7 +941,7 @@ public class ClientGameEngine {
 
 		if (server != null) {
 			return "Server - " + server.name;
-		} else if (mc.level != null && PlatformHelper.CURRENT.isReplayLevel(mc.level)) {
+		} else if (mc.level != null && VLPlatformHelper.CURRENT.isReplayLevel(mc.level)) {
 			return "Replay Editor";
 		} else if (mc.level != null) {
 			return "Singleplayer";

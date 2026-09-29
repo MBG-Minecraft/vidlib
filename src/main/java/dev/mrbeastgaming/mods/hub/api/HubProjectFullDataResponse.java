@@ -2,9 +2,9 @@ package dev.mrbeastgaming.mods.hub.api;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.mrbeastgaming.mods.hub.api.data.HubResponseContext;
 import dev.mrbeastgaming.mods.hub.api.data.HubParticipant;
 import dev.mrbeastgaming.mods.hub.api.data.HubProject;
+import dev.mrbeastgaming.mods.hub.api.data.HubResponseContext;
 
 import java.util.List;
 

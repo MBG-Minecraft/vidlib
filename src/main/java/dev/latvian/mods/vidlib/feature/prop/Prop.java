@@ -10,6 +10,7 @@ import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.math.Vec3f;
 import dev.latvian.mods.klib.shape.ColoredShape;
 import dev.latvian.mods.klib.shape.CuboidShape;
+import dev.latvian.mods.klib.util.BlockUtils;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
@@ -23,7 +24,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.IntImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Vector3dImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfField;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
@@ -156,7 +157,7 @@ public class Prop {
 
 		snap();
 
-		boolean replay = PlatformHelper.CURRENT.isReplayLevel(level);
+		boolean replay = VLPlatformHelper.CURRENT.isReplayLevel(level);
 
 		if (replay) {
 			tick = Math.max(0, (int) (time - createdTime));
@@ -472,7 +473,7 @@ public class Prop {
 	}
 
 	public <T> void s2c(PropPacketType<?, T> type, T payload) {
-		if (level.isServerSide()) {
+		if (!level.isClientSide()) {
 			var packet = type.createPayload(this, payload);
 
 			if (packet != null) {
@@ -534,7 +535,7 @@ public class Prop {
 
 	@Nullable
 	public PropHitResult clip(ClipContext ctx) {
-		var entity = ctx.vl$getEntity();
+		var entity = ctx.klib$getEntity();
 
 		if (canInteract(entity)) {
 			var hit = AABB.clip(getClipBoxes(entity), ctx.getFrom(), ctx.getTo(), BlockPos.ZERO);
@@ -843,7 +844,7 @@ public class Prop {
 
 		setData(data, value);
 
-		if (sync && !PlatformHelper.CURRENT.isReplayLevel(level)) {
+		if (sync && !VLPlatformHelper.CURRENT.isReplayLevel(level)) {
 			var payload = UpdatePropRequestPayload.of(this, List.of(data));
 
 			if (payload != null) {
@@ -906,7 +907,7 @@ public class Prop {
 	}
 
 	public DataResult<Prop> copy() {
-		var props = PlatformHelper.CURRENT.getProps(level);
+		var props = VLPlatformHelper.CURRENT.getProps(level);
 		var ctx = props.context(type, PropSpawnType.GAME, level.getGameTime());
 		var newProp = type.factory().create(ctx);
 
@@ -919,7 +920,7 @@ public class Prop {
 	}
 
 	public int getPackedLight() {
-		return level.vl$getPackedLight(getBlockPos());
+		return BlockUtils.getPackedLight(level, getBlockPos());
 	}
 
 	public void getInterpolationData(Map<PropData<?, ?>, Object> map) {

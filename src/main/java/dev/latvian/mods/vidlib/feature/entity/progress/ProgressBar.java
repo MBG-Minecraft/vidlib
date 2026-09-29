@@ -13,24 +13,10 @@ public record ProgressBar(ProgressBarType type, ProgressGetter progressGetter) {
 
 	@FunctionalInterface
 	public interface ValueSupplier {
-		ValueSupplier BOSS_ENTITY_BARS = (level, delta) -> {
-			var list = new ArrayList<Value>(0);
-
-			for (var entity : level.getBosses()) {
-				var bar = entity.getBossBar();
-
-				if (bar != null) {
-					list.add(new Value(bar, bar.progressGetter.getProgress(entity, delta)));
-				}
-			}
-
-			return list;
-		};
-
 		List<Value> getValues(Level level, float delta);
 	}
 
-	public static final List<ValueSupplier> SUPPLIERS = new ArrayList<>(List.of(ValueSupplier.BOSS_ENTITY_BARS));
+	public static final List<ValueSupplier> SUPPLIERS = new ArrayList<>(0);
 
 	public static ProgressBar entity(ProgressBarType type) {
 		return new ProgressBar(type, ProgressGetter.ENTITY_HEALTH);

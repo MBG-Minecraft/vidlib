@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.auto;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 

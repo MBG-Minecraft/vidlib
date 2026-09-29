@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.net;
 
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.VidLib;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.VarLong;
 import net.minecraft.network.codec.StreamCodec;
@@ -33,7 +32,7 @@ public record VidLibPacketType<T extends SimplePacketPayload>(CustomPacketPayloa
 
 	@ApiStatus.Internal
 	public static <T extends SimplePacketPayload> VidLibPacketType<T> internal(String path, StreamCodec<? extends ByteBuf, T> streamCodec) {
-		return create(VidLib.id(path), streamCodec);
+		return create(ID.vidlib(path), streamCodec);
 	}
 
 	public static <T extends SimplePacketPayload> VidLibPacketType<T> video(String path, StreamCodec<? extends ByteBuf, T> streamCodec) {

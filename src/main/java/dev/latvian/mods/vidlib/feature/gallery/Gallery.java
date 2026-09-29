@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.klib.codec.KLibCodecs;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.vidlib.VidLib;
@@ -12,8 +13,8 @@ import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.TextureReloadParams;
 import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
+import dev.latvian.mods.vidlib.feature.client.URITextures;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
-import dev.latvian.mods.vidlib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -23,8 +24,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -93,7 +92,7 @@ public class Gallery<K> {
 	}
 
 	public ResourceLocation getTexturePath(K imageId) {
-		return VidLib.id("textures/vidlib/generated/gallery/" + id + "/" + keyToString.apply(imageId) + ".png");
+		return ID.vidlib("textures/vidlib/generated/gallery/" + id + "/" + keyToString.apply(imageId) + ".png");
 	}
 
 	@Nullable
@@ -228,20 +227,7 @@ public class Gallery<K> {
 			return upload(
 				mc,
 				key,
-				() -> {
-					var req = MiscUtils.HTTP_CLIENT.send(HttpRequest.newBuilder(URI.create(url))
-						.GET()
-						.header("User-Agent", "VidLib/" + VidLib.VERSION)
-						.build(), HttpResponse.BodyHandlers.ofInputStream());
-
-					if (req.statusCode() / 100 != 2) {
-						throw new IllegalStateException("Request " + url + " returned " + req.statusCode());
-					}
-
-					try (var in = req.body()) {
-						return NativeImage.read(in);
-					}
-				},
+				() -> URITextures.load(URI.create(url)),
 				name,
 				() -> url,
 				preProcessor

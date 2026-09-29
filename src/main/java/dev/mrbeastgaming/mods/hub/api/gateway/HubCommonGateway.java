@@ -10,7 +10,9 @@ import dev.latvian.apps.tinyhttp.util.ByteBufferUtils;
 import dev.latvian.mods.klib.io.CompressionMethod;
 import dev.latvian.mods.klib.io.bytes.ByteInput;
 import dev.latvian.mods.klib.io.bytes.ByteOutput;
+import dev.latvian.mods.klib.util.Async;
 import dev.latvian.mods.klib.util.JsonUtils;
+import dev.latvian.mods.klib.util.net.NetUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
@@ -28,7 +30,6 @@ import dev.mrbeastgaming.mods.hub.api.data.HubWorld;
 import dev.mrbeastgaming.mods.hub.file.HubUploadRequestFileWithPath;
 import dev.mrbeastgaming.mods.hub.file.UploadRequest;
 import dev.mrbeastgaming.mods.hub.file.UploadResponse;
-import net.minecraft.Util;
 import net.minecraft.util.Mth;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.entity.player.Player;
@@ -150,7 +151,7 @@ public abstract class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>>
 
 		HubAPI.WEBSOCKET_EXECUTOR.get().execute(() -> {
 			try {
-				var builder = HubAPI.HTTP_CLIENT.newWebSocketBuilder();
+				var builder = NetUtils.CLIENT.newWebSocketBuilder();
 
 				if (!gatewayToken.isEmpty()) {
 					builder.header("X-MBG-Hub-Gateway-Token", gatewayToken);
@@ -767,7 +768,7 @@ public abstract class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>>
 
 				CompletableFuture.allOf(list.toArray(new CompletableFuture[0])).join();
 			}
-		}, Util.nonCriticalIoPool());
+		}, Async.EXECUTOR);
 	}
 
 	public CompletableFuture<Void> sendAvailableWorldList(List<HubWorld> list) {

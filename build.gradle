@@ -189,6 +189,7 @@ dependencies {
 	}
 
 	interfaceInjectionData("dev.latvian.mods:klib:$klib_version")
+	accessTransformers("dev.latvian.mods:klib:$klib_version")
 
 	compileOnly("dev.latvian.mods:better-advanced-tooltips:$bat_version")
 	compileOnly("dev.latvian.mods:imgui-resources:$imgui_resources_version")
@@ -301,20 +302,30 @@ idea {
 			["client", "server"].each {
 				[
 						".architectury-transformer",
+						".fobby",
+						".voxy",
 						"atlasviewer",
 						"cache",
 						"config",
 						"crash-reports",
+						// "datapacks",
 						"debug",
 						"downloads",
 						"dumps",
 						"flashback",
 						"local",
 						"logs",
+						"mocap",
+						"modflared",
 						"mods",
 						"profilekeys",
+						// "resourcepacks",
 						"saves",
+						"saves-templates",
+						"screenshots",
+						"shaderpacks",
 						"voicechat_recordings",
+						"xaero",
 						"command_history.txt",
 						"options.txt",
 						"server.properties",

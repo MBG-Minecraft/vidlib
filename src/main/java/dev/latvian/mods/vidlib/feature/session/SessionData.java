@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.session;
 
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.entity.PlayerInput;
 import dev.latvian.mods.klib.util.LevelGameTimeProvider;
 import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
 import dev.latvian.mods.vidlib.feature.clock.ClockValue;
@@ -11,11 +12,9 @@ import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
-import dev.latvian.mods.vidlib.feature.input.PlayerInput;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToClient;
 import dev.latvian.mods.vidlib.feature.note.Note;
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.registry.SyncRegistryPayload;
@@ -68,7 +67,7 @@ public class SessionData implements Comparable<SessionData> {
 	}
 
 	public void updateOverrides(Player player) {
-		suspended = CommonGameEngine.INSTANCE.isSuspended(player);
+		suspended = player.get(InternalPlayerData.SUSPENDED);
 	}
 
 	public <V> void syncRegistry(Player player, SyncedRegistry<V> registry, Map<ResourceLocation, V> map) {
@@ -113,7 +112,7 @@ public class SessionData implements Comparable<SessionData> {
 		var environment = level.getEnvironment();
 		var time = level.getGameTime();
 
-		packets.s2c(new ClientboundSetTimePacket(time, level.getDayTime(), level.vl$getTickDayTime()));
+		packets.s2c(new ClientboundSetTimePacket(time, level.getDayTime(), level.klib$getTickDayTime()));
 		// packets.s2c(new ServerFeaturesPayload(FeatureSet.SERVER_FEATURES.get()));
 
 		for (var reg : SyncedRegistry.ALL.values()) {
@@ -144,7 +143,7 @@ public class SessionData implements Comparable<SessionData> {
 		}
 
 		if (syncType > 0) {
-			var props = PlatformHelper.CURRENT.getProps(level);
+			var props = VLPlatformHelper.CURRENT.getProps(level);
 
 			for (var list : props.propLists.values()) {
 				if (syncType == 1) {

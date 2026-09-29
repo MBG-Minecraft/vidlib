@@ -1,11 +1,11 @@
 package dev.mrbeastgaming.mods.hub.client;
 
+import dev.latvian.mods.klib.util.Async;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubClientSession;
 import dev.mrbeastgaming.mods.hub.api.data.HubMinecraftProfile;
 import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -25,7 +25,7 @@ public class LinkMinecraftScreen extends ConfirmScreen {
 			var screen = new LinkMinecraftScreen();
 			mc.pushGuiLayer(screen);
 
-			Util.ioPool().execute(() -> {
+			Async.EXECUTOR.execute(() -> {
 				var data = loadHubMinecraftProfile(mc);
 
 				if (data != null) {

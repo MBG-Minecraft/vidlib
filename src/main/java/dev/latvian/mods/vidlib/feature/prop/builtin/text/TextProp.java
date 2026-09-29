@@ -5,7 +5,7 @@ import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.math.VoxelShapeBox;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TextComponentImBuilder;
@@ -20,7 +20,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class TextProp extends Prop {
 	@AutoRegister
-	public static final PropType<TextProp> TYPE = PropType.create(VidLib.id("text"), TextProp::new,
+	public static final PropType<TextProp> TYPE = PropType.create(ID.vidlib("text"), TextProp::new,
 		POSITION,
 		YAW,
 		PITCH,

@@ -56,7 +56,7 @@ public class EntityExplorerPanel extends Panel {
 		if (onlyPlayers.get()) {
 			allEntities.addAll(graphics.mc.level.players());
 		} else {
-			for (var entity : graphics.mc.level.allEntities()) {
+			for (var entity : graphics.mc.level.klib$allEntities()) {
 				allEntities.add(entity);
 			}
 		}

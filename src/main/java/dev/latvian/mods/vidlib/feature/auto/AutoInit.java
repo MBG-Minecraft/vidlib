@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.feature.auto;
 
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.annotation.ElementType;

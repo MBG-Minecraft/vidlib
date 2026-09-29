@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.entity.filter;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.entity.EntityUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
@@ -61,7 +62,7 @@ public record HasItemEntityFilter(Ingredient item) implements EntityFilter, ImBu
 
 	@Override
 	public boolean test(Entity entity) {
-		return entity.vl$hasItem(item);
+		return EntityUtils.hasItem(entity, item);
 	}
 
 	@Override

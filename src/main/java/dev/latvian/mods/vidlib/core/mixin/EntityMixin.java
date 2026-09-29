@@ -5,7 +5,6 @@ import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.core.VLEntity;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.server.level.ServerEntity;
@@ -19,9 +18,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -32,9 +28,6 @@ import java.util.List;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin implements VLEntity {
-	@Shadow
-	public abstract void load(CompoundTag compound);
-
 	@ModifyReturnValue(method = "collectColliders", at = @At("RETURN"))
 	private static List<VoxelShape> vl$collectColliders(List<VoxelShape> parent, @Local(argsOnly = true) Level level, @Local(argsOnly = true) @Nullable Entity entity, @Local(argsOnly = true) AABB collisionBox) {
 		var list = level.vl$getShapesIntersecting(entity, collisionBox);
@@ -49,18 +42,6 @@ public abstract class EntityMixin implements VLEntity {
 		}
 	}
 
-	@Unique
-	private boolean vl$isSaving = false;
-
-	@Override
-	@Invoker("setLevel")
-	public abstract void vl$setLevel(Level level);
-
-	@Override
-	public boolean vl$isSaving() {
-		return vl$isSaving;
-	}
-
 	@Inject(method = "getAddEntityPacket", at = @At("HEAD"), cancellable = true)
 	private void vl$getAddEntityPacket(ServerEntity serverEntity, CallbackInfoReturnable<Packet<ClientGamePacketListener>> cir) {
 		var override = CommonGameEngine.INSTANCE.overrideEntitySpawnPacket(vl$self(), serverEntity);
@@ -73,16 +54,6 @@ public abstract class EntityMixin implements VLEntity {
 	@ModifyReturnValue(method = "getGravity", at = @At("RETURN"))
 	private double vl$getGravity(double original) {
 		return original * CommonGameEngine.INSTANCE.getGravityModifier(vl$self());
-	}
-
-	@Inject(method = "saveWithoutId", at = @At("HEAD"))
-	private void vl$beforeSave(CompoundTag compound, CallbackInfoReturnable<CompoundTag> cir) {
-		vl$isSaving = true;
-	}
-
-	@Inject(method = "saveWithoutId", at = @At("RETURN"))
-	private void vl$afterSave(CompoundTag compound, CallbackInfoReturnable<CompoundTag> cir) {
-		vl$isSaving = false;
 	}
 
 	/**

@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.imgui.builder;
 
-import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
@@ -16,7 +15,7 @@ public class GeoAnimationsImBuilder implements ImBuilder<ResourceLocation> {
 
 	public static final ImString SEARCH = ImGuiUtils.resizableString();
 
-	public final ResourceLocation[] value = {VidLib.id("prop/skeleton")};
+	public final ResourceLocation[] value = {ID.vidlib("prop/skeleton")};
 	private List<ResourceLocation> list;
 
 	@Override
@@ -40,7 +39,7 @@ public class GeoAnimationsImBuilder implements ImBuilder<ResourceLocation> {
 			}
 
 			list.sort(ResourceLocation::compareNamespaced);
-			list.addFirst(Empty.ID);
+			list.addFirst(ID.EMPTY);
 			list = List.copyOf(list);
 		}
 

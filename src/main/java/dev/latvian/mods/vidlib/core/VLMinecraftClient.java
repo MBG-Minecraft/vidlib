@@ -6,7 +6,7 @@ import com.mojang.datafixers.util.Pair;
 import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.math.ProjectedCoordinates;
 import dev.latvian.mods.klib.math.Rotation;
-import dev.latvian.mods.klib.util.Empty;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
@@ -157,7 +157,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		FrameInfo.CURRENT = frameInfo;
 		var ctx = mc.level.getGlobalContext();
 
-		var rayLine = vl$self().gameRenderer.getMainCamera().ray(512D);
+		var rayLine = vl$self().gameRenderer.getMainCamera().klib$ray(512D);
 		var ray = new ClipContext(rayLine.start(), rayLine.end(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player);
 
 		if (vl$self().options.getCameraType() == CameraType.FIRST_PERSON && VidLibClientOptions.getShowZones()) {
@@ -197,7 +197,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 		if (shake != Identity.DVEC_2) {
 			var vec = new Vector4f((float) shake.x(), (float) shake.y(), 0F, 1F).rotate(camera.rotation());
-			camera.vl$setPosition(camera.getPosition().add(vec.x(), vec.y(), vec.z()));
+			camera.klib$setPosition(camera.getPosition().add(vec.x(), vec.y(), vec.z()));
 		}
 	}
 
@@ -366,7 +366,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	@Override
 	default void setPostEffect(ResourceLocation id) {
-		if (id.equals(Empty.ID)) {
+		if (id.equals(ID.EMPTY)) {
 			vl$self().gameRenderer.clearPostEffect();
 		} else {
 			vl$self().gameRenderer.setPostEffect(id);

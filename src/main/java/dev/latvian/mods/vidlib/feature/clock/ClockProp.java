@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.clock;
 
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
@@ -12,7 +12,7 @@ public class ClockProp extends Prop {
 	public static final PropData<ClockProp, RegistryRef<ClockFont>> FONT = PropData.create(ClockProp.class, "font", ClockFont.REF_DATA_TYPE, p -> p.font, (p, v) -> p.font = v, ClockFont.REGISTRY_REF_IM_BUILDER_SUPPLIER).required();
 
 	@AutoRegister
-	public static final PropType<ClockProp> TYPE = PropType.create(VidLib.id("clock"), ClockProp::new,
+	public static final PropType<ClockProp> TYPE = PropType.create(ID.vidlib("clock"), ClockProp::new,
 		TICK,
 		POSITION,
 		YAW,

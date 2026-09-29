@@ -5,11 +5,11 @@ import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.IntOrUUID;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.entity.filter.ExactEntityFilter;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
@@ -35,7 +35,7 @@ import org.joml.Vector3fc;
 import java.util.function.Function;
 
 public interface KVector extends SimpleRegistryEntry {
-	SimpleRegistry<KVector> REGISTRY = SimpleRegistry.create(VidLib.id("kvector"), c -> PlatformHelper.CURRENT.collectKVectors(c));
+	SimpleRegistry<KVector> REGISTRY = SimpleRegistry.create(ID.vidlib("kvector"), c -> VLPlatformHelper.CURRENT.collectKVectors(c));
 
 	FixedKVector ZERO = new FixedKVector(Vec3.ZERO);
 	FixedKVector ONE = new FixedKVector(KMath.ONE_VEC3);

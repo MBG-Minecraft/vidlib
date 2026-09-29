@@ -6,7 +6,7 @@ import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.level.ServerPlayer;
@@ -30,7 +30,7 @@ public record PropInteractionPayload(PropListType type, int id, int button, Vec3
 
 	@Override
 	public void handle(Context ctx) {
-		var props = PlatformHelper.CURRENT.getProps(ctx.level());
+		var props = VLPlatformHelper.CURRENT.getProps(ctx.level());
 		var prop = props.propLists.get(type).get(id);
 
 		if (prop != null) {

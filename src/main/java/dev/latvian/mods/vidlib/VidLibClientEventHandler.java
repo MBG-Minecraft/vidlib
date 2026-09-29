@@ -3,9 +3,12 @@ package dev.latvian.mods.vidlib;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.latvian.mods.betteradvancedtooltips.BATIcons;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.entity.EntityUtils;
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.render.CuboidRenderer;
 import dev.latvian.mods.klib.texture.LightUV;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
@@ -43,7 +46,6 @@ import dev.latvian.mods.vidlib.feature.particle.VidLibClientParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
 import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
@@ -142,25 +144,25 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void dynamicResources(DynamicResourceEvent.Assets event) {
-		event.register(VidLib.id("dynamic_resources/clothing"));
+		event.register(ID.vidlib("dynamic_resources/clothing"));
 	}
 
 	@SubscribeEvent
 	public static void addReloadListeners(AddClientReloadListenersEvent event) {
-		event.addListener(VidLib.id("structure"), new StructureStorage(StructureStorage.CLIENT));
-		event.addListener(VidLib.id("ghost_structure"), new GhostStructure.Loader());
-		event.addListener(VidLib.id("clothing_preset"), new ClothingPresetLoader());
-		event.addListener(VidLib.id("physics_particle_data"), new PhysicsParticleData.Loader());
-		event.addListener(VidLib.id("gradient"), new ClientGradientLoader());
-		event.addListener(VidLib.id("clock_font"), new ClockFont.Loader());
-		event.addListener(VidLib.id("clock"), new Clock.Loader());
-		event.addListener(VidLib.id("skybox"), new SkyboxData.Loader());
-		event.addListener(VidLib.id("zone"), new ZoneLoader(ZoneLoader.CLIENT_BY_DIMENSION, false));
-		event.addListener(VidLib.id("msdf"), new MSDFFont.Loader());
+		event.addListener(ID.vidlib("structure"), new StructureStorage(StructureStorage.CLIENT));
+		event.addListener(ID.vidlib("ghost_structure"), new GhostStructure.Loader());
+		event.addListener(ID.vidlib("clothing_preset"), new ClothingPresetLoader());
+		event.addListener(ID.vidlib("physics_particle_data"), new PhysicsParticleData.Loader());
+		event.addListener(ID.vidlib("gradient"), new ClientGradientLoader());
+		event.addListener(ID.vidlib("clock_font"), new ClockFont.Loader());
+		event.addListener(ID.vidlib("clock"), new Clock.Loader());
+		event.addListener(ID.vidlib("skybox"), new SkyboxData.Loader());
+		event.addListener(ID.vidlib("zone"), new ZoneLoader(ZoneLoader.CLIENT_BY_DIMENSION, false));
+		event.addListener(ID.vidlib("msdf"), new MSDFFont.Loader());
 
-		event.addDependency(VidLib.id("gradient"), VidLib.id("clothing_preset"));
-		event.addDependency(VidLib.id("structure"), VidLib.id("ghost_structure"));
-		event.addDependency(VidLib.id("clock_font"), VidLib.id("clock"));
+		event.addDependency(ID.vidlib("gradient"), ID.vidlib("clothing_preset"));
+		event.addDependency(ID.vidlib("structure"), ID.vidlib("ghost_structure"));
+		event.addDependency(ID.vidlib("clock_font"), ID.vidlib("clock"));
 	}
 
 	@SubscribeEvent
@@ -186,15 +188,15 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void registerGuiLayers(RegisterGuiLayersEvent event) {
-		event.registerBelowAll(VidLib.id("below_all"), VidLibHUD::drawBelowAll);
-		event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, VidLib.id("above_boss"), VidLibHUD::drawAboveBossOverlay);
-		event.registerAbove(VanillaGuiLayers.OVERLAY_MESSAGE, VidLib.id("information_hud"), VidLibHUD::drawInformationHUD);
-		event.registerAboveAll(VidLib.id("above_all"), VidLibHUD::drawAboveAll);
+		event.registerBelowAll(ID.vidlib("below_all"), VidLibHUD::drawBelowAll);
+		event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, ID.vidlib("above_boss"), VidLibHUD::drawAboveBossOverlay);
+		event.registerAbove(VanillaGuiLayers.OVERLAY_MESSAGE, ID.vidlib("information_hud"), VidLibHUD::drawInformationHUD);
+		event.registerAboveAll(ID.vidlib("above_all"), VidLibHUD::drawAboveAll);
 	}
 
 	@SubscribeEvent
 	public static void registerItemTintSources(RegisterColorHandlersEvent.ItemTintSources event) {
-		event.register(VidLib.id("rgb"), RainbowItemTint.MAP_CODEC);
+		event.register(ID.vidlib("rgb"), RainbowItemTint.MAP_CODEC);
 	}
 
 	@SubscribeEvent
@@ -538,7 +540,7 @@ public class VidLibClientEventHandler {
 		var mc = Minecraft.getInstance();
 
 		if (mc.player != null && mc.level != null) {
-			if (!mc.player.isSpectatorOrCreative() && mc.level.getBlockState(event.getTarget().getBlockPos()).is(Blocks.BARRIER)) {
+			if (!EntityUtils.isSpectatorOrCreative(mc.player) && mc.level.getBlockState(event.getTarget().getBlockPos()).is(Blocks.BARRIER)) {
 				event.setCanceled(true);
 				return;
 			}

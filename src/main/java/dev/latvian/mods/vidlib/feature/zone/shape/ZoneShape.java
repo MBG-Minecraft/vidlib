@@ -3,8 +3,8 @@ package dev.latvian.mods.vidlib.feature.zone.shape;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.math.AAIBB;
-import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.function.Function;
 
 public interface ZoneShape extends ZoneLike, SimpleRegistryEntry {
-	SimpleRegistry<ZoneShape> REGISTRY = SimpleRegistry.create(VidLib.id("zone_shape"), c -> PlatformHelper.CURRENT.collectZoneShapes(c));
+	SimpleRegistry<ZoneShape> REGISTRY = SimpleRegistry.create(ID.vidlib("zone_shape"), c -> VLPlatformHelper.CURRENT.collectZoneShapes(c));
 
 	Codec<ZoneShape> CODEC = Codec.either(AAIBB.CODEC, REGISTRY.codec()).xmap(either -> either.map(box -> BlockZoneShape.of(box.min(), box.max()), Function.identity()), shape -> shape instanceof BlockZoneShape b ? Either.left(b.intBox()) : Either.right(shape));
 	StreamCodec<RegistryFriendlyByteBuf, ZoneShape> STREAM_CODEC = ByteBufCodecs.either(AAIBB.STREAM_CODEC, REGISTRY.streamCodec()).map(either -> either.map(box -> BlockZoneShape.of(box.min(), box.max()), Function.identity()), shape -> shape instanceof BlockZoneShape b ? Either.left(b.intBox()) : Either.right(shape));

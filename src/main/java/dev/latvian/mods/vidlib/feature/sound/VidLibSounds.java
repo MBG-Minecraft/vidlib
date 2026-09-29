@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.sound;
 
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import net.minecraft.core.registries.Registries;
@@ -15,7 +16,7 @@ public interface VidLibSounds {
 	DeferredRegister<SoundEvent> REGISTRY = DeferredRegister.create(Registries.SOUND_EVENT, VidLib.ID);
 
 	private static DeferredHolder<SoundEvent, SoundEvent> register(String name, @Nullable Float fixedRange) {
-		return REGISTRY.register(name, () -> new SoundEvent(VidLib.id(name), Optional.ofNullable(fixedRange)));
+		return REGISTRY.register(name, () -> new SoundEvent(ID.vidlib(name), Optional.ofNullable(fixedRange)));
 	}
 
 	DeferredHolder<SoundEvent, SoundEvent> SPLAT = register("splat", null);

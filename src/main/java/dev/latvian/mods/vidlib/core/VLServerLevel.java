@@ -1,31 +1,24 @@
 package dev.latvian.mods.vidlib.core;
 
+import dev.latvian.mods.klib.core.NoMixinException;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModificationBundle;
 import dev.latvian.mods.vidlib.feature.bulk.OptimizedModificationBuilder;
-import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.prop.ServerProps;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.Util;
-import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.TicketStorage;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.neoforge.common.world.chunk.TicketHelper;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public interface VLServerLevel extends VLLevel {
 	@Override
@@ -49,12 +42,6 @@ public interface VLServerLevel extends VLLevel {
 	}
 
 	default void vl$setActiveZones(ActiveZones zones) {
-	}
-
-	@Override
-	@Nullable
-	default Entity getEntityByUUID(UUID uuid) {
-		return this.vl$level().getEntity(uuid);
 	}
 
 	@Override
@@ -162,43 +149,5 @@ public interface VLServerLevel extends VLLevel {
 		}
 
 		VidLib.LOGGER.info("Unloaded " + unloaded + "/" + total + " expired force-loaded chunks");
-	}
-
-	@Override
-	default void discardAll(EntityFilter filter) {
-		for (var entity : this.vl$level().getAllEntities()) {
-			if (filter.test(entity)) {
-				entity.discard();
-			}
-		}
-	}
-
-	@Override
-	default void killAll(EntityFilter filter) {
-		for (var entity : this.vl$level().getAllEntities()) {
-			if (filter.test(entity)) {
-				entity.kill(this.vl$level());
-			}
-		}
-	}
-
-	@Override
-	default Iterable<Entity> allEntities() {
-		return vl$level().getEntities().getAll();
-	}
-
-	@Override
-	default boolean vl$getTickDayTime() {
-		return vl$level().getGameRules().getBoolean(GameRules.RULE_DAYLIGHT);
-	}
-
-	@Override
-	default void vl$setDayTime(long time) {
-		vl$level().setDayTime(time);
-	}
-
-	@Override
-	default Stream<LevelChunk> vl$getChunks() {
-		return StreamSupport.stream(vl$level().getChunkSource().chunkMap.getChunks().spliterator(), false).map(ChunkHolder::getTickingChunk).filter(c -> c != null && !c.isEmpty());
 	}
 }

@@ -2,13 +2,13 @@ package dev.latvian.mods.vidlib.feature.imgui;
 
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
-import dev.latvian.mods.common.CommonPaths;
+import dev.latvian.mods.klib.CommonPaths;
 import dev.latvian.mods.vidlib.VidLibClientEventHandler;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import imgui.ImFontConfig;
 import imgui.ImFontGlyphRangesBuilder;
 import imgui.ImGui;
@@ -226,7 +226,7 @@ public class ImGuiHooks {
 		var centralNodePos = centralDockNode.getPos();
 		var centralNodeSize = centralDockNode.getSize();
 
-		float h = ClientGameEngine.DISABLE_IMGUI ? 0F : (mc.level != null && PlatformHelper.CURRENT.isReplayLevel(mc.level)) || !ClientGameEngine.INSTANCE.hasBottomInfoBar(mc) ? 0F : ImGuiHooks.mainMenuBarHeight;
+		float h = ClientGameEngine.DISABLE_IMGUI ? 0F : (mc.level != null && VLPlatformHelper.CURRENT.isReplayLevel(mc.level)) || !ClientGameEngine.INSTANCE.hasBottomInfoBar(mc) ? 0F : ImGuiHooks.mainMenuBarHeight;
 
 		var prevWidth = window.getWidth();
 		var prevHeight = window.getHeight();
@@ -255,7 +255,7 @@ public class ImGuiHooks {
 		}
 
 		if (VidLibClientEventHandler.clientLoaded && !ImGuiAPI.getHide()) {
-			if (mc.level == null || !PlatformHelper.CURRENT.isReplayLevel(mc.level)) {
+			if (mc.level == null || !VLPlatformHelper.CURRENT.isReplayLevel(mc.level)) {
 				var old = context.push();
 				var graphics = new ImGraphics(mc);
 				graphics.pushRootStack();

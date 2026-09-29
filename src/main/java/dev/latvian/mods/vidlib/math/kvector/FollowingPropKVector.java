@@ -8,7 +8,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.PropIdImBuilder;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
@@ -76,7 +76,7 @@ public record FollowingPropKVector(int prop, PositionType positionType) implemen
 	@Override
 	@Nullable
 	public Vec3 get(KNumberContext ctx) {
-		var props = PlatformHelper.CURRENT.getProps(ctx.level);
+		var props = VLPlatformHelper.CURRENT.getProps(ctx.level);
 		var p = props.levelProps.get(prop);
 		return p == null ? null : p.getPos(positionType);
 	}

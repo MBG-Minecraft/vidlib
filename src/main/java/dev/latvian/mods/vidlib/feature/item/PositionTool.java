@@ -141,7 +141,7 @@ public enum PositionTool implements VidLibTool, PlayerActionHandler {
 	public void renderSetup(Player player, ItemStack item, @Nullable HitResult hit, float delta) {
 		var tag = item.get(DataComponents.CUSTOM_DATA).getUnsafe();
 		clientMode = Type.VALUES[tag.getByteOr("position_tool_mode", (byte) 0)];
-		var chit = player.ray(500D, delta).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY);
+		var chit = player.klib$ray(500D, delta).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY);
 		clientPos = chit instanceof BlockHitResult blockHit ? clientMode.position(player, blockHit) : clientMode.position(player, null);
 	}
 

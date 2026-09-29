@@ -1,12 +1,13 @@
 package dev.latvian.mods.vidlib.feature.client;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import dev.latvian.mods.klib.io.CompressionMethod;
 import dev.latvian.mods.klib.io.checksum.MD5;
+import dev.latvian.mods.klib.util.Async;
+import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.klib.util.net.HttpResponseData;
+import dev.latvian.mods.klib.util.net.NetUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.util.MiscUtils;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.core.ClientAsset;
@@ -16,21 +17,17 @@ import org.jetbrains.annotations.Nullable;
 import javax.imageio.ImageIO;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public class URITextures {
-	public static final Semaphore SEMAPHORE = new Semaphore(100);
-
 	public static class Entry implements Supplier<String> {
 		public final URI uri;
 		public final ClientAsset asset;
@@ -48,10 +45,17 @@ public class URITextures {
 	}
 
 	private static final Map<URI, Entry> CACHE = new HashMap<>();
+	private static final Map<URI, NativeImage> REDIRECT_CACHE = new ConcurrentHashMap<>();
 
 	@AutoInit(AutoInit.Type.TEXTURES_RELOADED)
 	public static void reload() {
 		CACHE.clear();
+
+		for (var image : REDIRECT_CACHE.values()) {
+			image.close();
+		}
+
+		REDIRECT_CACHE.clear();
 	}
 
 	@Nullable
@@ -65,29 +69,39 @@ public class URITextures {
 		} catch (Exception ignored) {
 		}
 
-		HttpResponse<InputStream> response;
+		var response = NetUtils.send(NetUtils.newRequest().uri(uri).GET().build(), true);
 
-		SEMAPHORE.acquire();
+		int code = response.code;
 
-		try {
-			response = MiscUtils.sendRetrying(MiscUtils.HTTP_CLIENT, HttpRequest.newBuilder(uri).header("Accept-Encoding", "zstd, gzip, deflate, br").GET().build(), HttpResponse.BodyHandlers.ofInputStream());
-		} finally {
-			SEMAPHORE.release();
-		}
-
-		int code = response.statusCode();
-
-		if (code == 404) {
+		if (code / 100 != 2) {
 			return null;
 		}
 
-		var bytes = new byte[0];
+		var responseUri = response.response.uri();
 
-		var encoding = response.headers().firstValue("Content-Encoding").orElse("");
+		if (!responseUri.equals(uri)) {
+			var image = REDIRECT_CACHE.computeIfAbsent(responseUri, u -> {
+				try {
+					return readImage(response);
+				} catch (IOException ex) {
+					return null;
+				}
+			});
 
-		try (var in = CompressionMethod.of(encoding).in(response.body())) {
-			bytes = in.readAllBytes();
+			if (image != null) {
+				var copy = new NativeImage(image.format(), image.getWidth(), image.getHeight(), false);
+				copy.copyFrom(image);
+				return copy;
+			} else {
+				return null;
+			}
 		}
+
+		return readImage(response);
+	}
+
+	public static NativeImage readImage(HttpResponseData response) throws IOException {
+		var bytes = response.data;
 
 		boolean binary = bytes.length == 0;
 
@@ -99,7 +113,7 @@ public class URITextures {
 		}
 
 		try {
-			if (code / 100 == 2) {
+			if (response.code / 100 == 2) {
 				try {
 					return NativeImage.read(bytes);
 				} catch (IOException ex) {
@@ -121,23 +135,23 @@ public class URITextures {
 			}
 		} catch (Exception ex) {
 			var message = binary ? (bytes.length + "bytes of binary data") : new String(bytes, StandardCharsets.UTF_8);
-			throw new IOException("HTTP error " + code + ": " + message, ex);
+			throw new IOException("HTTP error " + response.code + ": " + message, ex);
 		}
 
 		var message = binary ? (bytes.length + "bytes of binary data") : new String(bytes, StandardCharsets.UTF_8);
-		throw new IOException("HTTP error " + code + ": " + message);
+		throw new IOException("HTTP error " + response.code + ": " + message);
 	}
 
 	public static Entry get(Minecraft mc, URI uri) {
 		return CACHE.computeIfAbsent(uri, key -> {
 			var hash = MD5.TYPE.digest(key.toString().getBytes(StandardCharsets.UTF_8)).toString();
-			var entry = new Entry(key, new ClientAsset(VidLib.id("uri/" + hash)));
+			var entry = new Entry(key, new ClientAsset(ID.vidlib("uri/" + hash)));
 			entry.texture = new DynamicTexture(entry, BuiltInImages.loading());
 
 			mc.getTextureManager().register(entry.asset.texturePath(), entry.texture);
 
 			if (key.isAbsolute()) {
-				Util.backgroundExecutor().execute(() -> {
+				CompletableFuture.runAsync(() -> {
 					try {
 						var image = load(entry.uri);
 
@@ -150,7 +164,7 @@ public class URITextures {
 					} catch (Exception ex) {
 						VidLib.LOGGER.warn("Failed to fetch texture from " + entry.uri, ex);
 					}
-				});
+				}, Async.EXECUTOR);
 			}
 
 			return entry;

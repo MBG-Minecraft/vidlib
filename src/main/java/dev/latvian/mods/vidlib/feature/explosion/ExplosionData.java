@@ -393,7 +393,7 @@ public class ExplosionData {
 						pos.setZ(atz + z);
 						var state = level.getBlockState(pos);
 
-						if (state.vl$getDensity() > 0F && (filter.bypassUnbreakable || state.getDestroySpeed(level, pos) >= 0F) || state.getBlock() instanceof BaseFireBlock) {
+						if (state.klib$getDensity() > 0F && (filter.bypassUnbreakable || state.getDestroySpeed(level, pos) >= 0F) || state.getBlock() instanceof BaseFireBlock) {
 							if (filter.blocks.test(level, pos, state)) {
 								blocks.add(new DestroyedBlock(pos.immutable(), state, x, y, z, inside, new MutableBoolean(false)));
 							}

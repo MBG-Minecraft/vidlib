@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.tv;
 
 import com.mojang.blaze3d.opengl.GlStateManager;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import org.watermedia.api.player.PlayerAPI;
@@ -10,7 +10,7 @@ import org.watermedia.api.player.videolan.VideoPlayer;
 import java.net.URI;
 
 public class TVPlayer {
-	public static final ResourceLocation TEXTURE = VidLib.id("textures/prop/tv/video.png");
+	public static final ResourceLocation TEXTURE = ID.vidlib("textures/prop/tv/video.png");
 
 	private static URI current;
 	private static VideoPlayer player;

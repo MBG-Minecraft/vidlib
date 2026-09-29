@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.input;
 
+import dev.latvian.mods.klib.entity.PlayerInput;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 

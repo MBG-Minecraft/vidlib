@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.input;
 
+import dev.latvian.mods.klib.entity.PlayerInput;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;

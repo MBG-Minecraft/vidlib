@@ -39,7 +39,7 @@ public enum ZoneTool implements VidLibTool {
 			clickedOnZone(player);
 		}
 
-		if (player.level().isServerSide() && player.isShiftKeyDown()) {
+		if (!player.level().isClientSide() && player.isShiftKeyDown()) {
 			player.level().getEnvironment().removeZone(ID.idFromString("video:leviathan"), 0);
 		}
 

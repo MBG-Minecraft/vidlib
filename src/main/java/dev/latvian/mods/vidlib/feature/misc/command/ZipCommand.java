@@ -6,7 +6,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -53,7 +53,7 @@ public interface ZipCommand {
 	}
 
 	static CompletableFuture<String> zip(MinecraftServer server, Instant now, String customName) {
-		PlatformHelper.CURRENT.pauseSaving(server);
+		VLPlatformHelper.CURRENT.pauseSaving(server);
 
 		return CompletableFuture.supplyAsync(() -> {
 			try {
@@ -82,7 +82,7 @@ public interface ZipCommand {
 			} catch (Throwable ex) {
 				ex.printStackTrace();
 			} finally {
-				server.execute(() -> PlatformHelper.CURRENT.resumeSaving(server));
+				server.execute(() -> VLPlatformHelper.CURRENT.resumeSaving(server));
 			}
 
 			throw new IllegalStateException("Failed to create a backup");

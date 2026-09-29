@@ -2,9 +2,7 @@ package dev.latvian.mods.vidlib.feature.platform.neoforge;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import dev.latvian.mods.klib.util.Side;
-import dev.latvian.mods.vidlib.feature.auto.AutoCallback;
-import dev.latvian.mods.vidlib.feature.auto.ScannedAnnotation;
+import dev.latvian.mods.klib.platform.PlatformType;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterRegistryEvent;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
@@ -20,8 +18,7 @@ import dev.latvian.mods.vidlib.feature.entity.number.EntityNumber;
 import dev.latvian.mods.vidlib.feature.entity.number.EntityNumberRegistryEvent;
 import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.icon.IconRegistryEvent;
-import dev.latvian.mods.vidlib.feature.misc.PlatformModInfo;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.latvian.mods.vidlib.feature.prop.Props;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
@@ -35,10 +32,6 @@ import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorRegistryEvent;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubGatewayEventRegistry;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGatewayEventRegistryEvent;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
@@ -48,103 +41,20 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.loading.FMLLoader;
-import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.network.connection.ConnectionType;
-import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.Type;
 
-import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
-public class NeoPlatformHelper extends PlatformHelper {
+public class VLNeoPlatformHelper extends VLPlatformHelper {
 	public final ModContainer mod;
 
-	public NeoPlatformHelper(ModContainer mod) {
+	public VLNeoPlatformHelper(ModContainer mod) {
 		this.mod = mod;
 	}
 
 	@Override
-	public String getPlatform() {
-		return "neoforge";
-	}
-
-	@Override
-	public Side getSide() {
-		return FMLLoader.getDist().isClient() ? Side.CLIENT : Side.SERVER;
-	}
-
-	@Override
-	public boolean isDevEnv() {
-		return !FMLLoader.isProduction();
-	}
-
-	@Override
-	public Path getGameDirectory() {
-		return FMLPaths.GAMEDIR.get();
-	}
-
-	@Override
-	public Path getConfigDirectory() {
-		return FMLPaths.CONFIGDIR.get();
-	}
-
-	@Override
-	public Path getModsDirectory() {
-		return FMLPaths.MODSDIR.get();
-	}
-
-	@Override
-	public RegistryFriendlyByteBuf createBuffer(ByteBuf source, RegistryAccess access) {
-		return new RegistryFriendlyByteBuf(source, access, ConnectionType.NEOFORGE);
-	}
-
-	@Override
-	public RegistryFriendlyByteBuf createBuffer(ByteBuf source, RegistryFriendlyByteBuf parent) {
-		return new RegistryFriendlyByteBuf(source, parent.registryAccess(), parent.getConnectionType());
-	}
-
-	@Override
-	public Function<ByteBuf, RegistryFriendlyByteBuf> createDecorator(RegistryAccess access) {
-		return RegistryFriendlyByteBuf.decorator(access, ConnectionType.NEOFORGE);
-	}
-
-	@Override
-	public void load(Class<? extends Annotation> annotation, Set<ElementType> elementTypes, AutoCallback callback) {
-		var annotationType = Type.getType(annotation);
-
-		for (var mod : ModList.get().getMods()) {
-			var owningFile = mod.getOwningFile();
-
-			if (owningFile != null) {
-				var file = owningFile.getFile();
-
-				if (file != null) {
-					ClassLoader classLoader = null;
-
-					for (var ad : file.getScanResult().getAnnotations()) {
-						if (elementTypes.contains(ad.targetType()) && ad.annotationType().equals(annotationType)) {
-							try {
-								if (classLoader == null) {
-									classLoader = FMLLoader.getGameLayer().findLoader(owningFile.moduleName());
-								}
-
-								callback.accept(mod.getModId(), classLoader, new ScannedAnnotation(ad.annotationType(), ad.targetType(), ad.clazz(), ad.memberName(), ad.annotationData()));
-							} catch (Throwable ex) {
-								throw new RuntimeException("Failed to process @" + annotation.getSimpleName() + " on " + ad.clazz().getClassName() + " in '" + mod.getDisplayName() + "' mod", ex);
-							}
-						}
-					}
-				}
-			}
-		}
+	public PlatformType getPlatform() {
+		return PlatformType.NEOFORGE;
 	}
 
 	@Override
@@ -167,36 +77,6 @@ public class NeoPlatformHelper extends PlatformHelper {
 		}
 
 		metadata.add("mod_list", ml);
-	}
-
-	@Override
-	@Nullable
-	public Path findFile(String... path) {
-		for (var file : ModList.get().getModFiles()) {
-			var res = file.getFile().findResource(path);
-
-			if (Files.exists(res)) {
-				return res;
-			}
-		}
-
-		return null;
-	}
-
-	@Override
-	public List<PlatformModInfo> getModList() {
-		var list = new ArrayList<PlatformModInfo>();
-
-		for (var mod : ModList.get().getMods()) {
-			list.add(new PlatformModInfo(mod.getModId(), mod.getDisplayName(), mod.getVersion().toString(), mod.getOwningFile().getFile().getFileName()));
-		}
-
-		return list;
-	}
-
-	@Override
-	public boolean isModLoaded(String modId) {
-		return ModList.get().isLoaded(modId);
 	}
 
 	@Override
@@ -286,18 +166,8 @@ public class NeoPlatformHelper extends PlatformHelper {
 	}
 
 	@Override
-	public boolean isLocalServer(Level level) {
-		return level.vl$isLocalServer();
-	}
-
-	@Override
 	public boolean isReplayServer(MinecraftServer server) {
 		return server.vl$isReplayServer();
-	}
-
-	@Override
-	public Level getLevel(CommandSourceStack source) {
-		return source.getUnsidedLevel();
 	}
 
 	@Override

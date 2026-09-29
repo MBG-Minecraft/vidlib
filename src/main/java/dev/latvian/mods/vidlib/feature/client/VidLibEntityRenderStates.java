@@ -2,11 +2,11 @@ package dev.latvian.mods.vidlib.feature.client;
 
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
 import net.minecraft.client.Minecraft;
@@ -41,11 +41,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
 public interface VidLibEntityRenderStates {
-	ContextKey<Boolean> BOSS_FRAMEBUFFER = new ContextKey<>(VidLib.id("boss_framebuffer"));
-	ContextKey<Boolean> CREATIVE = new ContextKey<>(VidLib.id("creative"));
-	ContextKey<SpriteKey> SPRITE_KEY = new ContextKey<>(VidLib.id("sprite_key"));
-	ContextKey<UV> UV = new ContextKey<>(VidLib.id("uv"));
-	ContextKey<Boolean> TRANSLUCENT = new ContextKey<>(VidLib.id("translucent"));
+	ContextKey<Boolean> CREATIVE = new ContextKey<>(ID.vidlib("creative"));
+	ContextKey<SpriteKey> SPRITE_KEY = new ContextKey<>(ID.vidlib("sprite_key"));
+	ContextKey<UV> UV = new ContextKey<>(ID.vidlib("uv"));
+	ContextKey<Boolean> TRANSLUCENT = new ContextKey<>(ID.vidlib("translucent"));
 
 	ItemStack DEFAULT_SHIELD = new ItemStack(Items.SHIELD);
 
@@ -76,7 +75,7 @@ public interface VidLibEntityRenderStates {
 	}
 
 	static void lod(Minecraft mc, EntityRenderState state, Vec3 camPos) {
-		var replay = mc.level != null && PlatformHelper.CURRENT.isReplayLevel(mc.level);
+		var replay = mc.level != null && VLPlatformHelper.CURRENT.isReplayLevel(mc.level);
 		boolean hideDetails = !(replay || LevelOfDetailValue.ENTITY_DETAILS.isVisible(camPos, state.x, state.y, state.z));
 		boolean hideArmor = !(replay || (state instanceof PlayerRenderState ? LevelOfDetailValue.PLAYER_ARMOR : LevelOfDetailValue.ENTITY_ARMOR).isVisible(camPos, state.x, state.y, state.z));
 		boolean hideHandItems = !(replay || LevelOfDetailValue.HELD_ITEM.isVisible(camPos, state.x, state.y, state.z));
@@ -231,10 +230,7 @@ public interface VidLibEntityRenderStates {
 	}
 
 	static void extractLiving(Minecraft mc, Vec3 camPos, LivingEntity entity, LivingEntityRenderState state) {
-		boolean bossFramebuffer = ClientGameEngine.INSTANCE.renderOnBossFramebuffer(entity);
-		state.setRenderData(BOSS_FRAMEBUFFER, bossFramebuffer ? Boolean.TRUE : null);
-
-		if (ClientGameEngine.INSTANCE.hideRenderedName(entity, bossFramebuffer)) {
+		if (ClientGameEngine.INSTANCE.hideRenderedName(entity)) {
 			state.nameTag = null;
 			state.customName = null;
 		}
@@ -253,11 +249,6 @@ public interface VidLibEntityRenderStates {
 		if (scoreText != null) {
 			state.scoreText = Empty.isEmpty(scoreText) ? null : scoreText;
 		}
-	}
-
-	static boolean isMainBoss(EntityRenderState state) {
-		var v = state.getRenderData(BOSS_FRAMEBUFFER);
-		return v != null && v;
 	}
 
 	static boolean isCreative(PlayerRenderState state) {

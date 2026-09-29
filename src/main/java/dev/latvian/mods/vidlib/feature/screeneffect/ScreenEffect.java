@@ -2,9 +2,9 @@ package dev.latvian.mods.vidlib.feature.screeneffect;
 
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
@@ -17,7 +17,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 
 public interface ScreenEffect extends SimpleRegistryEntry {
-	SimpleRegistry<ScreenEffect> REGISTRY = SimpleRegistry.create(VidLib.id("screen_effect"), c -> PlatformHelper.CURRENT.collectScreenEffects(c));
+	SimpleRegistry<ScreenEffect> REGISTRY = SimpleRegistry.create(ID.vidlib("screen_effect"), c -> VLPlatformHelper.CURRENT.collectScreenEffects(c));
 
 	Codec<ScreenEffect> CODEC = REGISTRY.codec();
 	StreamCodec<RegistryFriendlyByteBuf, ScreenEffect> STREAM_CODEC = REGISTRY.streamCodec();

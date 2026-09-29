@@ -10,7 +10,6 @@ import dev.latvian.mods.klib.data.RegisteredDataType;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.Side;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import dev.latvian.mods.vidlib.feature.codec.DataArgumentType;
 import net.minecraft.commands.CommandBuildContext;
@@ -40,7 +39,7 @@ public class VLRegistry<V> extends GenericVLRegistry<ResourceLocation, V> implem
 
 	private VLRegistry(Side side, String id, Class<V> valueType) {
 		super(side);
-		this.id = VidLib.id(id);
+		this.id = ID.vidlib(id);
 		this.valueType = valueType;
 	}
 

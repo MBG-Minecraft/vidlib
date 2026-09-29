@@ -43,7 +43,7 @@ import dev.latvian.mods.vidlib.feature.note.Note;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.AddPropPayload;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
@@ -347,7 +347,7 @@ public class VLReplayIntegration {
 	public static void clickTarget(ReplayGetClickTargetEvent event) {
 		var mc = Minecraft.getInstance();
 		var ctx = new ClipContext(event.getFrom(), event.getTo(), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, mc.player);
-		var props = PlatformHelper.CURRENT.getProps(mc.level);
+		var props = VLPlatformHelper.CURRENT.getProps(mc.level);
 		event.setHitResult(props.clip(ctx, true));
 	}
 
@@ -369,7 +369,7 @@ public class VLReplayIntegration {
 	public static void popups(ReplayPopupEvent event) {
 		var mc = Minecraft.getInstance();
 
-		if (VidLibClientEventHandler.clientLoaded && mc.level != null && PlatformHelper.CURRENT.isReplayLevel(mc.level)) {
+		if (VidLibClientEventHandler.clientLoaded && mc.level != null && VLPlatformHelper.CURRENT.isReplayLevel(mc.level)) {
 			BuiltInImGui.handle(event.getGraphics());
 		}
 
@@ -385,7 +385,7 @@ public class VLReplayIntegration {
 		}
 
 		if (data.selectedProp != 0 && ImGui.beginPopup("###vidlib-prop-popup")) {
-			var props = PlatformHelper.CURRENT.getProps(mc.level);
+			var props = VLPlatformHelper.CURRENT.getProps(mc.level);
 			var propList = props.propLists.get(data.selectedPropList);
 			var prop = propList == null ? null : propList.get(data.selectedProp);
 
@@ -399,7 +399,7 @@ public class VLReplayIntegration {
 		}
 
 		if (!ImGui.isPopupOpen("###vidlib-prop-popup")) {
-			var props = PlatformHelper.CURRENT.getProps(mc.level);
+			var props = VLPlatformHelper.CURRENT.getProps(mc.level);
 			var propList = props.propLists.get(data.selectedPropList);
 			var prop = propList == null ? null : propList.get(data.selectedProp);
 

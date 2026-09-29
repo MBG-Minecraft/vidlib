@@ -1,13 +1,13 @@
 package dev.latvian.mods.vidlib.feature.clothing;
 
-import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.klib.util.ID;
 import net.minecraft.resources.ResourceKey;
 
 import java.util.List;
 
 public interface Tracksuits {
 	static ResourceKey<ClothingSet> create(String id) {
-		return ClothingPresets.createId(VidLib.id("tracksuit/" + id));
+		return ClothingPresets.createId(ID.vidlib("tracksuit/" + id));
 	}
 
 	ResourceKey<ClothingSet> BLACK = create("black");
