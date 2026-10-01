@@ -17,11 +17,14 @@ public record HubUploadRequestFileWithPath(HubUploadRequestFile file, Path path)
 	public static HubUploadRequestFileWithPath load(String id, Path path, @Nullable ProgressItem progressItem) throws IOException {
 		var attributes = Files.readAttributes(path, BasicFileAttributes.class);
 		long size = attributes.size();
+		var fileName = path.getFileName().toString();
+		var index = fileName.lastIndexOf('.');
 
 		return new HubUploadRequestFileWithPath(new HubUploadRequestFile(
 			id,
 			SHA256.TYPE.digest(new FileInfo(path, "", size), progressItem),
 			size,
+			index == -1 ? "" : fileName.substring(index + 1),
 			attributes.creationTime().toInstant(),
 			attributes.lastModifiedTime().toInstant()
 		), path);
