@@ -54,8 +54,8 @@ public record HubReplay(
 		);
 	}
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public <T> Optional<T> getPartialMetadata(DynamicOps<JsonElement> jsonOps, Codec<T> codec) {
-		//noinspection unchecked,rawtypes
 		return (Optional<T>) parsedPartialMetadata.computeIfAbsent(codec, c -> (Optional) c.parse(jsonOps, partialMetadata).resultOrPartial());
 	}
 }

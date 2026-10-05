@@ -68,7 +68,6 @@ import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
 import dev.mrbeastgaming.mods.hub.client.LinkHubUserScreen;
 import dev.mrbeastgaming.mods.hub.client.LinkMinecraftScreen;
 import dev.mrbeastgaming.mods.hub.event.SyncClientFilesHubEvent;
-import dev.mrbeastgaming.mods.hub.file.UniqueIdProvider;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -113,7 +112,6 @@ import net.neoforged.neoforge.event.GameShuttingDownEvent;
 
 import java.nio.file.Files;
 import java.util.List;
-import java.util.UUID;
 
 @EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
 public class VidLibClientEventHandler {
@@ -716,7 +714,10 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void mainMenuOpened(MainMenuOpenedEvent event) {
-		VidLibClient.checkFileSync(event.isFirstTime());
+		if (HubUserCapabilities.get().autoUploadFiles()) {
+			VidLibClient.checkFileSync(event.isFirstTime());
+		}
+
 		var session = HubClientSession.CURRENT;
 
 		if (session.user == null) {
@@ -738,35 +739,22 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void syncClientFilesHub(SyncClientFilesHubEvent event) {
-		var gameDir = PlatformHelper.CURRENT.getGameDirectory();
+		event.add(uploads -> {
+			var gameDir = uploads.getGameDirectory();
+			uploads.addDirectory(gameDir.resolve("voicechat_recordings"), ".mp3", HubFileType.VOICE_CHAT_RECORDING);
+			uploads.addDirectory(gameDir.resolve("crash-reports"), "-client.txt", HubFileType.CLIENT_CRASH_REPORT);
+			uploads.addDirectory(gameDir.resolve("crash-reports"), "-server.txt", HubFileType.SERVER_CRASH_REPORT);
+			uploads.addDirectory(gameDir.resolve("crash-reports"), "-fml.txt", HubFileType.MOD_LOADER_CRASH_REPORT);
 
-		event.addDirectory(gameDir.resolve("voicechat_recordings"), builder -> {
-			builder.setType(HubFileType.VOICE_CHAT_RECORDING);
-			builder.setNoUniqueId();
-			builder.setFilterEndsWith(".mp3");
+			try (var stream = Files.list(gameDir)) {
+				for (var file : stream.toList()) {
+					var name = file.getFileName().toString();
+
+					if (name.startsWith("hr_err_pid_") && name.endsWith(".log")) {
+						uploads.addFile(file, HubFileType.CLIENT_JVM_CRASH_REPORT);
+					}
+				}
+			}
 		});
-
-		if (event.isFirstTime()) {
-			event.addDirectory(gameDir.resolve("crash-reports"), builder -> {
-				builder.setType(HubFileType.CLIENT_CRASH_REPORT);
-				builder.setNoUniqueId();
-				builder.setFilterEndsWith("-client.txt");
-			});
-
-			event.addDirectory(gameDir, builder -> {
-				builder.setType(HubFileType.CLIENT_JVM_CRASH_REPORT);
-				builder.setNoUniqueId();
-				builder.setFilter(fileInfo -> fileInfo.name().startsWith("hr_err_pid_") && fileInfo.name().endsWith(".log"));
-			});
-		}
-
-		var debugFile = gameDir.resolve("debug-replay.zip");
-
-		if (Files.exists(debugFile)) {
-			event.addFile(debugFile, (file, builder) -> {
-				builder.setType(HubFileType.FLASHBACK_REPLAY_RECORDING);
-				builder.setUniqueId(UniqueIdProvider.ofUUIDAndFileName(new UUID(1L, 1L)));
-			});
-		}
 	}
 }

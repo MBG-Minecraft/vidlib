@@ -14,6 +14,7 @@ import dev.mrbeastgaming.mods.hub.api.Auth;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubClientSession;
 import dev.mrbeastgaming.mods.hub.api.data.HubGameServer;
+import dev.mrbeastgaming.mods.hub.api.data.HubGatewayInfo;
 import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.api.data.HubUserFlags;
 import dev.mrbeastgaming.mods.hub.client.HubWorldsPanel;
@@ -23,7 +24,6 @@ import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.common.NeoForge;
 
 import javax.annotation.Nullable;
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -55,12 +55,12 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 	}
 
 	@Nullable
-	public static HubClientGateway startGateway(Minecraft mc, @Nullable URI uri, String token) {
+	public static HubClientGateway startGateway(Minecraft mc, @Nullable HubGatewayInfo info) {
 		stopGateway();
-		var gateway = instance;
+		var gateway = get();
 
-		if (gateway == null && uri != null) {
-			gateway = new HubClientGateway(mc, uri, token);
+		if (gateway == null && info != null) {
+			gateway = new HubClientGateway(mc, info);
 			gateway.start();
 			instance = gateway;
 		}
@@ -69,7 +69,7 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 	}
 
 	public static void stopGateway() {
-		var gateway = instance;
+		var gateway = get();
 
 		if (gateway != null) {
 			gateway.stop();
@@ -78,7 +78,7 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 	}
 
 	public static void tickGateway() {
-		var gateway = instance;
+		var gateway = get();
 
 		if (gateway != null) {
 			gateway.tick();
@@ -133,8 +133,8 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 
 	public final Minecraft mc;
 
-	public HubClientGateway(Minecraft mc, URI gatewayURI, String gatewayToken) {
-		super(mc, gatewayURI, gatewayToken);
+	public HubClientGateway(Minecraft mc, HubGatewayInfo info) {
+		super(mc, info);
 		this.mc = mc;
 	}
 
@@ -226,7 +226,7 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 			progressItem.error(data.readUTF());
 		}
 
-		progressItem.setDone();
+		progressItem.remove();
 	}
 
 	@Override
@@ -279,7 +279,7 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 				progressItem.setInfoText(ProgressItemNameFunction.BINARY_BYTE_SIZE);
 				progressItem.resetProgress();
 				progressItem.setSize(totalSize);
-				progressItem.setStarted();
+				progressItem.display();
 			}
 
 			try (var stream = Files.walk(directory)) {
@@ -314,7 +314,7 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 						if (item != null) {
 							item.setInfoText(file.path());
 							item.setSize(file.size());
-							item.setStarted();
+							item.display();
 							progressItem.queue.display();
 						}
 
@@ -328,7 +328,7 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 							VidLib.LOGGER.error("Failed to download " + file.path(), ex);
 						} finally {
 							if (item != null) {
-								item.setDone();
+								item.remove();
 							}
 						}
 					}, executor));
@@ -345,7 +345,7 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 				PROGRESS_BARS.remove(requestId);
 
 				if (progressItem != null) {
-					progressItem.setDone();
+					progressItem.remove();
 				}
 
 				HubWorldsPanel.INSTANCE.reload = true;
@@ -359,6 +359,7 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 
 	public CompletableFuture<Void> updateInfoFuture() {
 		var list = new ArrayList<CompletableFuture<Void>>();
+		list.add(sendVersion());
 		list.add(sendName());
 		list.add(sendStatus());
 		return CompletableFuture.allOf(list.toArray(new CompletableFuture[0]));

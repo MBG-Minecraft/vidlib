@@ -192,7 +192,7 @@ public class HubWorldsPanel extends Panel {
 						var item = ProgressQueue.queueSingleItem("Copying...");
 						item.setSize(0L);
 						item.setInfoText(ProgressItemNameFunction.BINARY_BYTE_SIZE);
-						item.setStarted();
+						item.display();
 						HubClientGateway.PROGRESS_BARS.put(uuid, item);
 						PROGRESS.put(world.uniqueId(), uuid);
 
@@ -209,7 +209,7 @@ public class HubWorldsPanel extends Panel {
 							ex.printStackTrace();
 						}
 
-						item.setDone();
+						item.remove();
 						HubClientGateway.PROGRESS_BARS.remove(uuid);
 						PROGRESS.remove(world.uniqueId());
 						VidLib.LOGGER.info("Created " + dst);
@@ -286,7 +286,7 @@ public class HubWorldsPanel extends Panel {
 				var progressItem = ProgressQueue.queueSingleItem(world.world().name());
 				progressItem.setInfoText("Requesting Upload...");
 				progressItem.setSize(1L);
-				progressItem.setStarted();
+				progressItem.display();
 				HubClientGateway.PROGRESS_BARS.put(requestId, progressItem);
 				mc.execute(() -> PROGRESS.put(world.uniqueId(), requestId));
 			} catch (Exception ex) {

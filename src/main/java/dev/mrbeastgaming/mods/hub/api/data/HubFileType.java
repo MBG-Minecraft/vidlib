@@ -5,12 +5,14 @@ import com.google.gson.JsonPrimitive;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import dev.latvian.apps.tinyhttp.content.MimeType;
-import dev.latvian.mods.klib.io.FileInfo;
-import dev.mrbeastgaming.mods.hub.file.FileTypeProvider;
+import dev.mrbeastgaming.mods.hub.file.HubUploadBuilder;
+import dev.mrbeastgaming.mods.hub.file.HubUploadBuilderCallback;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
-public record HubFileType(int type, String contentType, String name) implements FileTypeProvider {
+public record HubFileType(int type, String contentType, String name) implements HubUploadBuilderCallback {
 	public static final HubFileType UNKNOWN = new HubFileType(0, "", "");
 	public static final HubFileType FLASHBACK_REPLAY_RECORDING = new HubFileType(1, MimeType.ZIP, "Flashback Replay Recordings");
 	public static final HubFileType FLASHBACK_REPLAY_EDITOR_STATE = new HubFileType(2, MimeType.JSON, "Flashback Replay Editor States");
@@ -24,6 +26,7 @@ public record HubFileType(int type, String contentType, String name) implements 
 	public static final HubFileType IMAGE = new HubFileType(10, MimeType.PNG, "Images");
 	public static final HubFileType DEBUG = new HubFileType(11, "", "Debug");
 	public static final HubFileType DIRECTORY = new HubFileType(12, "", "Directory");
+	public static final HubFileType MOD_LOADER_CRASH_REPORT = new HubFileType(13, MimeType.TEXT, "Mod Loader Crash Reports");
 
 	public static final List<HubFileType> TYPES = List.of(
 		DEBUG,
@@ -37,7 +40,8 @@ public record HubFileType(int type, String contentType, String name) implements 
 		SERVER_JVM_CRASH_REPORT,
 		SERVER_GAME_LOG,
 		IMAGE,
-		DIRECTORY
+		DIRECTORY,
+		MOD_LOADER_CRASH_REPORT
 	);
 
 	public static HubFileType custom(String contentType) {
@@ -56,12 +60,21 @@ public record HubFileType(int type, String contentType, String name) implements 
 
 	public static final Codec<HubFileType> CODEC = Codec.either(Codec.INT, Codec.STRING).xmap(either -> either.map(HubFileType::of, HubFileType::custom), type -> type.type == 0 ? Either.right(type.contentType) : Either.left(type.type));
 
+	public static HubFileType probe(Path path) {
+		try {
+			var type = Files.probeContentType(path);
+			return type == null || type.isEmpty() ? HubFileType.UNKNOWN : HubFileType.custom(type);
+		} catch (Exception ignored) {
+			return HubFileType.UNKNOWN;
+		}
+	}
+
 	public JsonElement toJson() {
 		return type == 0 ? new JsonPrimitive(contentType) : new JsonPrimitive(type);
 	}
 
 	@Override
-	public HubFileType getFileType(FileInfo fileInfo) {
-		return this;
+	public void build(HubUploadBuilder builder) {
+		builder.setType(this);
 	}
 }

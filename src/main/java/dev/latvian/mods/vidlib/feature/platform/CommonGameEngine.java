@@ -12,8 +12,10 @@ import dev.latvian.mods.vidlib.feature.location.WarpLocation;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.util.RuntimeDebugger;
+import dev.mrbeastgaming.mods.hub.api.data.HubFileType;
 import dev.mrbeastgaming.mods.hub.api.data.HubUsedPort;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldDirectory;
+import dev.mrbeastgaming.mods.hub.file.HubFileUploads;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.AdvancementHolder;
@@ -540,6 +542,14 @@ public class CommonGameEngine {
 			list.add(HubWorldDirectory.of(root, server.getWorldData().getLevelName(), path.getFileName().toString(), path));
 		} catch (Exception ex) {
 			VidLib.LOGGER.error("Failed to list available world", ex);
+		}
+	}
+
+	public void collectServerUploads(MinecraftServer server, HubFileUploads uploads) {
+		if (server.isDedicatedServer()) {
+			var gameDir = uploads.getGameDirectory();
+			uploads.addDirectory(gameDir.resolve("crash-reports"), "-server.txt", HubFileType.SERVER_CRASH_REPORT);
+			uploads.addDirectory(gameDir.resolve("crash-reports"), "-fml.txt", HubFileType.MOD_LOADER_CRASH_REPORT);
 		}
 	}
 }

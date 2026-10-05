@@ -56,16 +56,9 @@ public class ProgressQueueImGui {
 				continue;
 			}
 
-			int maxItemCount = queue.items.size();
-			int done = 0;
+			queue.items.removeIf(ProgressItem::isRemoved);
 
-			for (var item : queue.items) {
-				if (item.isDone()) {
-					done++;
-				}
-			}
-
-			if (done >= maxItemCount && queue.errors.isEmpty()) {
+			if (queue.items.isEmpty() && queue.errors.isEmpty()) {
 				queue.active = false;
 				queueItr.remove();
 				continue;
@@ -95,11 +88,6 @@ public class ProgressQueueImGui {
 				queue.open = ImGuiUtils.BOOLEAN.get();
 
 				ImGui.pushItemWidth(-1F);
-
-				if (maxItemCount > 1) {
-					float p = (float) done / (float) maxItemCount;
-					ImGui.progressBar(p, -1F, 20F * scale, done + "/" + maxItemCount);
-				}
 
 				for (var item : queue.items) {
 					if (item.isVisible()) {

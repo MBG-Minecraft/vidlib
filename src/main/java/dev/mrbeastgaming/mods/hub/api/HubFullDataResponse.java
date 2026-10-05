@@ -15,7 +15,7 @@ public record HubFullDataResponse(
 ) {
 	public static final Codec<HubFullDataResponse> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		HubResponseContext.MAP_CODEC.forGetter(HubFullDataResponse::ctx),
-		HubKeys.CODEC.fieldOf("keys").forGetter(HubFullDataResponse::keys),
+		HubKeys.CODEC.optionalFieldOf("keys", HubKeys.NONE).forGetter(HubFullDataResponse::keys),
 		HubCountry.CODEC.listOf().fieldOf("countries").forGetter(HubFullDataResponse::countries)
 	).apply(instance, HubFullDataResponse::new));
 }

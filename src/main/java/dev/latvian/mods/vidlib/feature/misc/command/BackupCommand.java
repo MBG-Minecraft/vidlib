@@ -50,7 +50,7 @@ public interface BackupCommand {
 				var item = ProgressQueue.queueSingleItem("Copying...");
 				item.setSize(0L);
 				item.setInfoText(ProgressItemNameFunction.BINARY_BYTE_SIZE);
-				item.setStarted();
+				item.display();
 
 				try {
 					IOUtils.copyDirectory(from, to, true, item::setSize, item::addProgress);
@@ -58,7 +58,7 @@ public interface BackupCommand {
 					VidLib.LOGGER.error("Error copying " + from, ex);
 				}
 
-				item.setDone();
+				item.remove();
 				VidLib.LOGGER.info("Files of " + toName + " created");
 				server.execute(() -> VLPlatformHelper.CURRENT.resumeSaving(server));
 				return to;

@@ -7,6 +7,7 @@ import dev.latvian.mods.klib.io.CompressionMethod;
 import dev.latvian.mods.klib.io.IOUtils;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.texture.UV;
+import dev.latvian.mods.klib.util.Async;
 import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
 import dev.latvian.mods.klib.util.Hex32;
 import dev.latvian.mods.vidlib.VidLib;
@@ -40,12 +41,11 @@ import dev.latvian.mods.vidlib.math.knumber.KNumberNodeImBuilder;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 import dev.latvian.mods.vidlib.util.ColoredText;
+import dev.mrbeastgaming.mods.hub.api.HubClientSession;
 import dev.mrbeastgaming.mods.hub.api.HubProjectReplaysResponse;
-import dev.mrbeastgaming.mods.hub.api.data.HubCountries;
 import dev.mrbeastgaming.mods.hub.api.data.HubCountry;
 import dev.mrbeastgaming.mods.hub.api.data.HubFileType;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
-import dev.mrbeastgaming.mods.hub.file.ClientHubFileUploads;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.ImVec4;
@@ -77,8 +77,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.UUID;
@@ -495,10 +493,13 @@ public class DebugWidgetPanel extends Panel {
 
 		ImGui.separator();
 
-		ImGui.text("LV: " + HubCountries.LV.get().displayName());
-		graphics.combo("###country", new HubCountry[1], "None", HubCountries.LOADED.get().byCode().values().toArray(new HubCountry[0]), HubCountry::displayName);
+		var clientSession = HubClientSession.CURRENT;
 
-		ImGui.separator();
+		if (clientSession != null) {
+			ImGui.text("LV: " + clientSession.countries.getLV().displayName());
+			graphics.combo("###country", new HubCountry[1], "None", clientSession.countries.all().toArray(new HubCountry[0]), HubCountry::displayName);
+			ImGui.separator();
+		}
 
 		if (ImGui.button("Test Progress Single###test-progress-single")) {
 			var item = ProgressQueue.queueSingleItem("Test");
@@ -506,7 +507,7 @@ public class DebugWidgetPanel extends Panel {
 			item.label = "example.txt";
 			item.blocksExit = true;
 			item.setInfoText("Connecting...");
-			item.setStarted();
+			item.display();
 
 			Thread.startVirtualThread(() -> {
 				try {
@@ -521,7 +522,7 @@ public class DebugWidgetPanel extends Panel {
 
 					item.setInfoText("Processing...");
 					Thread.sleep(2000L);
-					item.setDone();
+					item.remove();
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -533,7 +534,7 @@ public class DebugWidgetPanel extends Panel {
 			item.queue.bottomText = "Please keep the game open!";
 			item.label = "example.txt";
 			item.setInfoText("Connecting...");
-			item.setStarted();
+			item.display();
 
 			Thread.startVirtualThread(() -> {
 				try {
@@ -555,7 +556,7 @@ public class DebugWidgetPanel extends Panel {
 						}
 					}
 
-					item.setDone();
+					item.remove();
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -574,14 +575,14 @@ public class DebugWidgetPanel extends Panel {
 
 					try {
 						item.setSize(500L);
-						item.setStarted();
+						item.display();
 
 						for (int i = 0; i < 500; i += 1 + random.nextInt(3)) {
 							item.setProgress(i);
 							Thread.sleep(10L);
 						}
 
-						item.setDone();
+						item.remove();
 					} catch (Exception ex) {
 						ex.printStackTrace();
 					}
@@ -606,14 +607,14 @@ public class DebugWidgetPanel extends Panel {
 				try {
 					for (var item : items) {
 						item.setSize(100L);
-						item.setStarted();
+						item.display();
 
 						for (int i = 0; i < 100; i += 1 + random.nextInt(3)) {
 							item.setProgress(i);
 							Thread.sleep(10L);
 						}
 
-						item.setDone();
+						item.remove();
 					}
 				} catch (Exception ex) {
 					ex.printStackTrace();
@@ -632,7 +633,7 @@ public class DebugWidgetPanel extends Panel {
 			var path = VidLibPaths.LOCAL.get().resolve("debug-text.txt");
 			var chars = " abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 ".getBytes(StandardCharsets.UTF_8);
 
-			Thread.startVirtualThread(() -> {
+			Async.run(() -> {
 				int bytes = 120 * 1024 * 1024;
 				var random = RandomSource.create();
 
@@ -649,19 +650,15 @@ public class DebugWidgetPanel extends Panel {
 		ImGui.sameLine();
 
 		if (ImGui.button("Test Real File###test-real-file-upload")) {
-			Thread.startVirtualThread(() -> {
-				var path = VidLibPaths.LOCAL.get().resolve("debug-replay.zip");
+			var path = VidLibPaths.LOCAL.get().resolve("debug-text.txt");
 
-				var start = Instant.now();
-
-				ClientHubFileUploads.syncFile(path, (fileInfo, builder) -> {
+			if (Files.exists(path)) {
+				HubClientSession.CURRENT.upload("Debug", uploads -> uploads.addFile(path, builder -> {
 					builder.setType(HubFileType.DEBUG);
-					builder.setCustomName("debug-replay.zip");
-				});
-
-				var end = Instant.now();
-				ProgressQueue.queueError("Old Upload Finished", "%02f s".formatted(Duration.between(start, end).toMillis() / 1000F));
-			});
+					builder.setUniqueId(data -> data.writeUTF("debug text"));
+					builder.setPath("debug/text.txt");
+				}));
+			}
 		}
 
 		ImGui.separator();

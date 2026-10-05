@@ -7,8 +7,9 @@ import dev.latvian.apps.tinyhttp.http.response.error.client.BadRequestError;
 import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibClient;
-import dev.mrbeastgaming.mods.hub.HubUserConfig;
+import dev.mrbeastgaming.mods.hub.HubConfig;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
+import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
@@ -48,7 +49,8 @@ public class HubLocalServer {
 				throw new BadRequestError("Invalid response token, try again");
 			}
 
-			HubUserConfig.save(HubUserConfig.load().withToken(userToken));
+			HubConfig.userToken = userToken;
+			HubConfig.saveUser();
 			VidLib.LOGGER.info("Logged in as " + name);
 			VidLibClient.loadHub();
 
@@ -59,7 +61,10 @@ public class HubLocalServer {
 
 				mc.toast(Component.literal("Logged In"), Component.literal(name));
 				GLFW.glfwFocusWindow(mc.getWindow().getWindow());
-				VidLibClient.checkFileSync(false);
+
+				if (HubUserCapabilities.get().autoUploadFiles()) {
+					VidLibClient.checkFileSync(false);
+				}
 
 				if (!PlatformHelper.CURRENT.isDevEnv()) {
 					LinkMinecraftScreen.handle(mc, true);

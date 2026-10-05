@@ -7,11 +7,13 @@ import dev.mrbeastgaming.mods.hub.api.data.HubKeys;
 public record HubServerSessionRequest(
 	boolean dedicatedServer,
 	String projectToken,
-	HubKeys keys
+	HubKeys keys,
+	String identity
 ) {
 	public static final Codec<HubServerSessionRequest> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		Codec.BOOL.fieldOf("dedicated_server").forGetter(HubServerSessionRequest::dedicatedServer),
-		Codec.STRING.fieldOf("project_token").forGetter(HubServerSessionRequest::projectToken),
-		HubKeys.CODEC.fieldOf("keys").forGetter(HubServerSessionRequest::keys)
+		Codec.BOOL.optionalFieldOf("dedicated_server", false).forGetter(HubServerSessionRequest::dedicatedServer),
+		Codec.STRING.optionalFieldOf("project_token", "").forGetter(HubServerSessionRequest::projectToken),
+		HubKeys.CODEC.optionalFieldOf("keys", HubKeys.NONE).forGetter(HubServerSessionRequest::keys),
+		Codec.STRING.optionalFieldOf("identity", "").forGetter(HubServerSessionRequest::identity)
 	).apply(instance, HubServerSessionRequest::new));
 }

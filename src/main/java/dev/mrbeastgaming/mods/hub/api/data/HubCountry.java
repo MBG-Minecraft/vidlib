@@ -21,10 +21,24 @@ public record HubCountry(
 	String displayName,
 	String flagEmoji
 ) implements HubDBObject {
+	@SuppressWarnings("UnnecessaryUnicodeEscape")
+	public static final HubCountry UNKNOWN = new HubCountry(
+		Hex32.NONE,
+		"xx",
+		true,
+		"XX",
+		"XXX",
+		0,
+		"Unknown",
+		"Unknown",
+		"Unknown",
+		""
+	);
+
 	public static final Codec<String> CODE_CODEC = Codec.STRING.validate(s -> {
 		if (s.isEmpty()) {
 			return DataResult.success("xx");
-		} else if (s.length() == 2 && Character.isLowerCase(s.charAt(0)) && Character.isUpperCase(s.charAt(1))) {
+		} else if (s.length() == 2 && Character.isLowerCase(s.charAt(0)) && Character.isLowerCase(s.charAt(1))) {
 			return DataResult.success(s);
 		} else {
 			return DataResult.error(() -> "Invalid country code: " + s);
@@ -67,5 +81,9 @@ public record HubCountry(
 		}
 
 		return nativeName.isEmpty() ? name : (name + " (" + nativeName + ")");
+	}
+
+	public boolean isUnknown() {
+		return this == UNKNOWN || id.raw() == 0;
 	}
 }

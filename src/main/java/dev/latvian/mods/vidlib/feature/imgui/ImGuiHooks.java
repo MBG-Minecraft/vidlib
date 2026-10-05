@@ -61,6 +61,7 @@ public class ImGuiHooks {
 	static float dpiScale = 1.0f;
 
 	public static boolean initialized = false;
+	public static boolean ready = false;
 
 	public static void init(Minecraft mc, ResourceManager resourceManager) {
 		if (initialized) {
@@ -240,10 +241,8 @@ public class ImGuiHooks {
 
 		// window.vl$setViewportArea(0D, 0D, 1D, 1D);
 
-		if (window.getWidth() != 0 && window.getHeight() != 0) {
-			if (window.getWidth() != prevWidth || window.getHeight() != prevHeight) {
-				mc.resizeDisplay();
-			}
+		if (window.getWidth() != 0 && window.getHeight() != 0 && (window.getWidth() != prevWidth || window.getHeight() != prevHeight)) {
+			mc.resizeDisplay();
 		}
 
 		old.pop();
@@ -254,7 +253,7 @@ public class ImGuiHooks {
 			return;
 		}
 
-		if (VidLibClientEventHandler.clientLoaded && !ImGuiAPI.getHide()) {
+		if (ready && VidLibClientEventHandler.clientLoaded && !ImGuiAPI.getHide()) {
 			if (mc.level == null || !VLPlatformHelper.CURRENT.isReplayLevel(mc.level)) {
 				var old = context.push();
 				var graphics = new ImGraphics(mc);
@@ -298,6 +297,7 @@ public class ImGuiHooks {
 		}
 
 		old.pop();
+		ready = true;
 	}
 
 	public static void ensureEndFrame() {
@@ -310,6 +310,7 @@ public class ImGuiHooks {
 		ImGui.updatePlatformWindows();
 		old.pop();
 		active = false;
+		ready = false;
 	}
 
 	public static boolean shouldInterceptMouse() {

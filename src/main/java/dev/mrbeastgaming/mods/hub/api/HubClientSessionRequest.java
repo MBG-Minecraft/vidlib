@@ -5,10 +5,12 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 public record HubClientSessionRequest(
 	String projectToken,
-	boolean minecraftProfile
+	boolean minecraftProfile,
+	String identity
 ) {
 	public static final Codec<HubClientSessionRequest> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		Codec.STRING.fieldOf("project_token").forGetter(HubClientSessionRequest::projectToken),
-		Codec.BOOL.optionalFieldOf("minecraft_profile", false).forGetter(HubClientSessionRequest::minecraftProfile)
+		Codec.STRING.optionalFieldOf("project_token", "").forGetter(HubClientSessionRequest::projectToken),
+		Codec.BOOL.optionalFieldOf("minecraft_profile", false).forGetter(HubClientSessionRequest::minecraftProfile),
+		Codec.STRING.optionalFieldOf("identity", "").forGetter(HubClientSessionRequest::identity)
 	).apply(instance, HubClientSessionRequest::new));
 }

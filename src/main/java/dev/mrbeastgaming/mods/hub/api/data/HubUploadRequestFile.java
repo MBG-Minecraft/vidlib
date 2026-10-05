@@ -11,7 +11,7 @@ public record HubUploadRequestFile(
 	String id,
 	Checksum checksum,
 	long size,
-	String ext,
+	String name,
 	Instant created,
 	Instant lastModified
 ) {
@@ -19,7 +19,7 @@ public record HubUploadRequestFile(
 		Codec.STRING.optionalFieldOf("id", "").forGetter(HubUploadRequestFile::id),
 		Checksum.CODEC.fieldOf("checksum").forGetter(HubUploadRequestFile::checksum),
 		Codec.LONG.fieldOf("size").forGetter(HubUploadRequestFile::size),
-		Codec.STRING.optionalFieldOf("ext", "").forGetter(HubUploadRequestFile::ext),
+		Codec.STRING.optionalFieldOf("name", "").forGetter(HubUploadRequestFile::name),
 		KLibCodecs.INSTANT.fieldOf("created").forGetter(HubUploadRequestFile::created),
 		KLibCodecs.INSTANT.fieldOf("last_modified").forGetter(HubUploadRequestFile::lastModified)
 	).apply(i, HubUploadRequestFile::new));
