@@ -25,6 +25,7 @@ public class HubUploadBuilder {
 	Instant creationTime;
 	HubPossibleUser assignedTo;
 	boolean unlinked;
+	boolean skip;
 
 	public HubUploadBuilder(HubFileInfo info) {
 		this.info = info;
@@ -35,6 +36,7 @@ public class HubUploadBuilder {
 		this.creationTime = Instant.now();
 		this.assignedTo = HubPossibleUser.NONE;
 		this.unlinked = false;
+		this.skip = false;
 	}
 
 	public void setId(String value) {
@@ -77,17 +79,15 @@ public class HubUploadBuilder {
 		setUnlinked(true);
 	}
 
-	@Nullable
-	private HubProjectFileLinkInfo buildLinkInfo(HubFileInfo info) {
-		return unlinked ? null : new HubProjectFileLinkInfo(
-			uniqueId,
-			info.path(),
-			type != null ? type : HubFileType.probe(info.file()),
-			assignedTo
-		);
+	public void skip() {
+		skip = true;
 	}
 
 	public void build(HubFileInfo info, Consumer<HubUploadRequestItem> items) throws IOException {
+		if (skip) {
+			return;
+		}
+
 		items.accept(new HubUploadRequestItem(info, new HubUploadRequestFile(
 			id.isEmpty() ? MD5.TYPE.digest(info.fullPath().getBytes(StandardCharsets.UTF_8)).toString() : id,
 			info.checksum(),
@@ -95,6 +95,11 @@ public class HubUploadBuilder {
 			info.name(),
 			creationTime == null ? info.created() : creationTime,
 			info.lastModified()
-		), buildLinkInfo(info)));
+		), unlinked ? null : new HubProjectFileLinkInfo(
+			uniqueId,
+			info.path(),
+			type != null ? type : HubFileType.probe(info.file()),
+			assignedTo
+		)));
 	}
 }
