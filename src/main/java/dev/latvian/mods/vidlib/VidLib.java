@@ -17,6 +17,7 @@ import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import dev.latvian.mods.vidlib.math.knumber.KNumber;
 import dev.latvian.mods.vidlib.math.kvector.KVector;
+import dev.mrbeastgaming.mods.hub.HubConfig;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,6 +38,8 @@ public class VidLib {
 		if (PlatformHelper.CURRENT.isDevEnv()) {
 			FFMPEGBinaries.initialize();
 		}
+
+		HubConfig.load();
 	}
 
 	public static void initClient() {

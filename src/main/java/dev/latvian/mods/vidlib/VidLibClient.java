@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib;
 
 import dev.latvian.mods.vidlib.util.MiscUtils;
-import dev.mrbeastgaming.mods.hub.HubConfig;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubClientSession;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
@@ -19,7 +18,6 @@ public class VidLibClient {
 	}
 
 	public static void loadHub() {
-		HubConfig.load();
 		HubAPI.CLIENT_GATEWAY.setValue(HubClientGateway::get);
 		HubClientSession.load(Minecraft.getInstance());
 	}
