@@ -518,7 +518,7 @@ public abstract class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>>
 		var data = new HashMap<String, HubWorld>();
 		var uniqueIcons = new HashSet<Checksum>();
 
-		var uploadFuture = getHubSession().upload("Available World Icons", uploads -> {
+		return getHubSession().upload("Available World Icons", uploads -> {
 			for (var world : value) {
 				if (data.put(world.id(), world.toData()) == null) {
 					if (!world.icon().isNil() && world.iconPath().isPresent() && uniqueIcons.add(world.icon())) {
@@ -526,13 +526,7 @@ public abstract class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>>
 					}
 				}
 			}
-		});
-
-		if (uniqueIcons.isEmpty()) {
-			return sendAvailableWorldList(List.copyOf(data.values()));
-		}
-
-		return uploadFuture.thenComposeAsync(ignored -> sendAvailableWorldList(List.copyOf(data.values())));
+		}).thenComposeAsync(ignored -> sendAvailableWorldList(List.copyOf(data.values())));
 	}
 
 	public CompletableFuture<Void> sendDebug(CompressionMethod compression, ByteBuffer bodyBuf) throws IOException {
