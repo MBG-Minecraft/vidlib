@@ -10,12 +10,14 @@ public record HubProjectFileLinkInfo(
 	Checksum uniqueId,
 	String path,
 	HubFileType fileType,
-	HubPossibleUser assignedTo
+	HubPossibleUser assignedTo,
+	boolean manual
 ) {
 	public static final MapCodec<HubProjectFileLinkInfo> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
 		Checksum.CODEC.optionalFieldOf("unique_id", NoChecksum.INSTANCE).forGetter(HubProjectFileLinkInfo::uniqueId),
 		Codec.STRING.fieldOf("path").forGetter(HubProjectFileLinkInfo::path),
 		HubFileType.CODEC.optionalFieldOf("file_type", HubFileType.UNKNOWN).forGetter(HubProjectFileLinkInfo::fileType),
-		HubPossibleUser.CODEC.optionalFieldOf("assigned_to", HubPossibleUser.NONE).forGetter(HubProjectFileLinkInfo::assignedTo)
+		HubPossibleUser.CODEC.optionalFieldOf("assigned_to", HubPossibleUser.NONE).forGetter(HubProjectFileLinkInfo::assignedTo),
+		Codec.BOOL.fieldOf("manual").forGetter(HubProjectFileLinkInfo::manual)
 	).apply(i, HubProjectFileLinkInfo::new));
 }

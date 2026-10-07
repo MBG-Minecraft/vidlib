@@ -26,6 +26,7 @@ public class HubUploadBuilder {
 	HubPossibleUser assignedTo;
 	boolean unlinked;
 	boolean skip;
+	boolean manual;
 
 	public HubUploadBuilder(HubFileInfo info) {
 		this.info = info;
@@ -37,6 +38,7 @@ public class HubUploadBuilder {
 		this.assignedTo = HubPossibleUser.NONE;
 		this.unlinked = false;
 		this.skip = false;
+		this.manual = false;
 	}
 
 	public void setId(String value) {
@@ -79,8 +81,20 @@ public class HubUploadBuilder {
 		setUnlinked(true);
 	}
 
+	public void setSkip(boolean value) {
+		skip = value;
+	}
+
 	public void skip() {
-		skip = true;
+		setSkip(true);
+	}
+
+	public void setManual(boolean value) {
+		manual = true;
+	}
+
+	public void manual() {
+		setManual(true);
 	}
 
 	public void build(HubFileInfo info, Consumer<HubUploadRequestItem> items) throws IOException {
@@ -99,7 +113,8 @@ public class HubUploadBuilder {
 			uniqueId,
 			info.path(),
 			type != null ? type : HubFileType.probe(info.file()),
-			assignedTo
+			assignedTo,
+			manual
 		)));
 	}
 }
