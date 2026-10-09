@@ -39,7 +39,7 @@ public class NPCParticle extends CustomParticle {
 		super(level, x, y, z);
 		var mc = Minecraft.getInstance();
 		var recordingMap = NPCRecording.getReplay(level.registryAccess());
-		var recordingLazy = recordingMap.isEmpty() ? null : options.npc().equals("latest") ? recordingMap.lastEntry().getValue() : recordingMap.get(options.npc());
+		var recordingLazy = recordingMap.isEmpty() ? null : recordingMap.get(options.npc());
 		this.recording = recordingLazy == null ? null : recordingLazy.get();
 		this.profile = recording == null ? PlayerProfile.ERROR : PlayerProfiles.get(options.profile().orElse(recording.profile).getId());
 		var modelType = PlayerSkins.getModelType(profile);

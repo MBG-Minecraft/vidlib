@@ -320,6 +320,8 @@ public class BuiltInImGui {
 	});
 
 	public static void handle(ImGraphics graphics) {
+		ImGuiIni.tick(graphics.inGame);
+
 		graphics.pushStack();
 		graphics.setWindowBorderSize(0F);
 		graphics.setWindowPadding(0F, 0F);
@@ -410,5 +412,7 @@ public class BuiltInImGui {
 		if (!FullscreenPanel.INSTANCE.isOpen()) {
 			ProgressQueueImGui.handle(graphics);
 		}
+
+		ImGuiIni.tick(graphics.inGame);
 	}
 }

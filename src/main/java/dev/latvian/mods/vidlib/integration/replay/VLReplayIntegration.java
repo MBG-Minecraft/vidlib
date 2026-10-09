@@ -284,11 +284,8 @@ public class VLReplayIntegration {
 
 	@SubscribeEvent
 	public static void entityMenu(ReplayEntityMenuEvent event) {
-		if (event.beginSection("vidlib", "VidLib")) {
-			var mc = Minecraft.getInstance();
-			EntityExplorerPanel.imgui(event.getGraphics(), event.getEntity(), mc.getDeltaTracker().getGameTimeDeltaPartialTick(event.getEntity() == mc.player));
-			event.endSection();
-		}
+		var mc = event.getGraphics().mc;
+		EntityExplorerPanel.imgui(event.getGraphics(), event.getEntity(), mc.getDeltaTracker().getGameTimeDeltaPartialTick(event.getEntity() == mc.player));
 	}
 
 	@SubscribeEvent
@@ -307,11 +304,6 @@ public class VLReplayIntegration {
 
 			if (event.beginSection("waypoints", "Waypoints")) {
 				ClientWaypoints.fbVisualsMenu(event.getGraphics());
-				event.endSection();
-			}
-
-			if (event.beginSection("pins", "Player Pins")) {
-				Pins.fbVisualsMenu(event.getGraphics());
 				event.endSection();
 			}
 

@@ -147,153 +147,154 @@ public class EntityExplorerPanel extends Panel {
 			}
 		}
 
-		if (entity instanceof Player player) {
-			if (ImGui.button("Edit Player Data###vidlib-edit-player-data", -1F, 0F)) {
-				new PlayerDataConfigPanel(player.getGameProfile(), player.vl$sessionData().dataMap).open();
-			}
-		}
-
-		if (DepthOfField.OVERRIDE_ENABLED.get() && ImGui.button(ImIcons.APERTURE + " Focus DoF###focus-dof")) {
-			if (entity instanceof Player player) {
-				DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(new ProfileEntityFilter(player.getGameProfile()), PositionType.EYES));
-			} else {
-				DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(entity, PositionType.EYES));
-			}
-
-			DepthOfFieldPanel.INSTANCE.builder.set(DepthOfField.OVERRIDE);
-		}
-
-		var team = entity.getTeam();
-
-		if (ImGui.button("Team: " + (team == null ? "None" : team.getName()) + "###vidlib-entity-team")) {
-			ImGui.openPopup("###vidlib-edit-team-popup");
-		}
-
-		if (ImGui.beginPopup("Edit Team###vidlib-edit-team-popup", ImGuiWindowFlags.AlwaysAutoResize)) {
-			if (ImGui.beginListBox("###teams", 200F, 120F)) {
-				if (ImGui.selectable(ImIcons.CLOSE + " None", team == null)) {
-					graphics.mc.runClientCommand("team leave " + entity.getUUID());
-					ImGui.closeCurrentPopup();
-				}
-
-				for (var teamName : graphics.mc.level.getScoreboard().getTeamNames()) {
-					if (ImGui.selectable(teamName, team != null && team.getName().equals(teamName))) {
-						graphics.mc.runClientCommand("team join " + teamName + " " + entity.getUUID());
-						ImGui.closeCurrentPopup();
-					}
-				}
-
-				ImGui.endListBox();
-			}
-
-			ImGui.endPopup();
-		}
-
-		if (entity instanceof Player) {
-			ImGui.sameLine();
-
-			var tags = entity.getTags();
-
-			if (ImGui.button(tags.size() + " Tags###vidlib-entity-tags")) {
-				ImGui.openPopup("###vidlib-edit-tags-popup");
-			}
-
-			if (!tags.isEmpty()) {
-				ImGui.sameLine();
-				ImGui.alignTextToFramePadding();
-				ImGui.text(String.join(", ", tags));
-			}
-
-			if (ImGui.beginPopup("Edit Team###vidlib-edit-tags-popup", ImGuiWindowFlags.AlwaysAutoResize)) {
-				if (tags.isEmpty()) {
-					ImGui.text("No tags");
-				}
-
-				for (var tag : tags) {
-					ImGui.text(tag);
-					ImGui.sameLine();
-					graphics.pushStack();
-					graphics.setRedButton();
-
-					if (ImGui.smallButton("-###remove-tag-" + tag)) {
-						graphics.mc.runClientCommand("tag " + entity.getUUID() + " remove " + tag);
-					}
-
-					graphics.popStack();
-				}
-
-				ImGui.inputText("###add-tag-input", EntityExplorerPanel.INSTANCE.tagInput);
-				boolean finished = ImGui.isItemDeactivatedAfterEdit();
-
-				ImGui.sameLine();
-
-				if (ImGui.button("+###add-tag") || finished) {
-					var tag = EntityExplorerPanel.INSTANCE.tagInput.get();
-					EntityExplorerPanel.INSTANCE.tagInput.set("");
-					graphics.mc.runClientCommand("tag " + entity.getUUID() + " add " + tag);
-				}
-
-				ImGui.endPopup();
-			}
-		}
-
 		if (graphics.isAdmin) {
 			ImGui.pushID("###pins");
 			Pins.imgui(graphics, entity);
 			ImGui.popID();
 		}
+		if (ImGui.collapsingHeader("Vidlib")) {
 
-		var glowColor = graphics.session.glowColors.get(entity.getUUID());
-
-		if (ImGui.checkbox("Override Glow Color###override-glow-color", glowColor != null)) {
-			if (glowColor != null) {
-				graphics.session.glowColors.remove(entity.getUUID());
-			} else {
-				glowColor = Color.WHITE;
-				graphics.session.glowColors.put(entity.getUUID(), glowColor);
+			if (entity instanceof Player player) {
+				if (ImGui.button("Edit Player Data###vidlib-edit-player-data", -1F, 0F)) {
+					new PlayerDataConfigPanel(player.getGameProfile(), player.vl$sessionData().dataMap).open();
+				}
 			}
-		}
 
-		if (glowColor != null) {
-			var builder = new Color3ImBuilder();
-			builder.set(glowColor);
-
-			if (builder.imguiKey(graphics, "Glow Color", "glow-color").isAny()) {
-				glowColor = builder.build();
-				graphics.session.glowColors.put(entity.getUUID(), glowColor);
-			}
-		}
-
-		var itemStack = ItemStack.EMPTY;
-
-		if (entity instanceof ItemEntity itemEntity) {
-			itemStack = itemEntity.getItem();
-		} else if (entity instanceof ItemFrame itemFrame) {
-			itemStack = itemFrame.getItem();
-		}
-
-		if (!itemStack.isEmpty()) {
-			ImGui.pushID("###item");
-
-			ImGui.text("Item: ");
-			ImGui.sameLine();
-			graphics.imageButton(ItemIcons.getTexture(graphics.mc, VisualItemKey.of(itemStack)).getTexture(), 16F, 16F, UV.FULL, 3, null);
-
-			if (ImGui.isItemHovered() && graphics.beginTooltip()) {
-				var sink = new FormattedCharSinkPartBuilder();
-				var lines = itemStack.getTooltipLines(Item.TooltipContext.of(graphics.mc.level), graphics.player, ClientTooltipFlag.of(TooltipFlag.ADVANCED.asCreative()));
-
-				for (var component : lines) {
-					for (var line : graphics.mc.font.split(component, Integer.MAX_VALUE)) {
-						line.accept(sink);
-						graphics.text(sink.build());
-					}
+			if (DepthOfField.OVERRIDE_ENABLED.get() && ImGui.button(ImIcons.APERTURE + " Focus DoF###focus-dof")) {
+				if (entity instanceof Player player) {
+					DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(new ProfileEntityFilter(player.getGameProfile()), PositionType.EYES));
+				} else {
+					DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(entity, PositionType.EYES));
 				}
 
-				graphics.endTooltip();
+				DepthOfFieldPanel.INSTANCE.builder.set(DepthOfField.OVERRIDE);
 			}
 
-			ImGui.popID();
+			var team = entity.getTeam();
+
+			if (ImGui.button("Team: " + (team == null ? "None" : team.getName()) + "###vidlib-entity-team")) {
+				ImGui.openPopup("###vidlib-edit-team-popup");
+			}
+
+			if (ImGui.beginPopup("Edit Team###vidlib-edit-team-popup", ImGuiWindowFlags.AlwaysAutoResize)) {
+				if (ImGui.beginListBox("###teams", 200F, 120F)) {
+					if (ImGui.selectable(ImIcons.CLOSE + " None", team == null)) {
+						graphics.mc.runClientCommand("team leave " + entity.getUUID());
+						ImGui.closeCurrentPopup();
+					}
+
+					for (var teamName : graphics.mc.level.getScoreboard().getTeamNames()) {
+						if (ImGui.selectable(teamName, team != null && team.getName().equals(teamName))) {
+							graphics.mc.runClientCommand("team join " + teamName + " " + entity.getUUID());
+							ImGui.closeCurrentPopup();
+						}
+					}
+
+					ImGui.endListBox();
+				}
+
+				ImGui.endPopup();
+			}
+
+			if (entity instanceof Player) {
+				ImGui.sameLine();
+
+				var tags = entity.getTags();
+
+				if (ImGui.button(tags.size() + " Tags###vidlib-entity-tags")) {
+					ImGui.openPopup("###vidlib-edit-tags-popup");
+				}
+
+				if (!tags.isEmpty()) {
+					ImGui.sameLine();
+					ImGui.alignTextToFramePadding();
+					ImGui.text(String.join(", ", tags));
+				}
+
+				if (ImGui.beginPopup("Edit Team###vidlib-edit-tags-popup", ImGuiWindowFlags.AlwaysAutoResize)) {
+					if (tags.isEmpty()) {
+						ImGui.text("No tags");
+					}
+
+					for (var tag : tags) {
+						ImGui.text(tag);
+						ImGui.sameLine();
+						graphics.pushStack();
+						graphics.setRedButton();
+
+						if (ImGui.smallButton("-###remove-tag-" + tag)) {
+							graphics.mc.runClientCommand("tag " + entity.getUUID() + " remove " + tag);
+						}
+
+						graphics.popStack();
+					}
+
+					ImGui.inputText("###add-tag-input", EntityExplorerPanel.INSTANCE.tagInput);
+					boolean finished = ImGui.isItemDeactivatedAfterEdit();
+
+					ImGui.sameLine();
+
+					if (ImGui.button("+###add-tag") || finished) {
+						var tag = EntityExplorerPanel.INSTANCE.tagInput.get();
+						EntityExplorerPanel.INSTANCE.tagInput.set("");
+						graphics.mc.runClientCommand("tag " + entity.getUUID() + " add " + tag);
+					}
+
+					ImGui.endPopup();
+				}
+			}
+
+			var glowColor = graphics.session.glowColors.get(entity.getUUID());
+			if (ImGui.checkbox("Override Glow Color###override-glow-color", glowColor != null)) {
+				if (glowColor != null) {
+					graphics.session.glowColors.remove(entity.getUUID());
+				} else {
+					glowColor = Color.WHITE;
+					graphics.session.glowColors.put(entity.getUUID(), glowColor);
+				}
+			}
+
+			if (glowColor != null) {
+				var builder = new Color3ImBuilder();
+				builder.set(glowColor);
+
+				if (builder.imguiKey(graphics, "Glow Color", "glow-color").isAny()) {
+					glowColor = builder.build();
+					graphics.session.glowColors.put(entity.getUUID(), glowColor);
+				}
+			}
+
+			var itemStack = ItemStack.EMPTY;
+
+			if (entity instanceof ItemEntity itemEntity) {
+				itemStack = itemEntity.getItem();
+			} else if (entity instanceof ItemFrame itemFrame) {
+				itemStack = itemFrame.getItem();
+			}
+
+			if (!itemStack.isEmpty()) {
+				ImGui.pushID("###item");
+
+				ImGui.text("Item: ");
+				ImGui.sameLine();
+				graphics.imageButton(ItemIcons.getTexture(graphics.mc, VisualItemKey.of(itemStack)).getTexture(), 16F, 16F, UV.FULL, 3, null);
+
+				if (ImGui.isItemHovered() && graphics.beginTooltip()) {
+					var sink = new FormattedCharSinkPartBuilder();
+					var lines = itemStack.getTooltipLines(Item.TooltipContext.of(graphics.mc.level), graphics.player, ClientTooltipFlag.of(TooltipFlag.ADVANCED.asCreative()));
+
+					for (var component : lines) {
+						for (var line : graphics.mc.font.split(component, Integer.MAX_VALUE)) {
+							line.accept(sink);
+							graphics.text(sink.build());
+						}
+					}
+
+					graphics.endTooltip();
+				}
+
+				ImGui.popID();
+			}
 		}
 
 		ImGui.pushID("###extra-data");

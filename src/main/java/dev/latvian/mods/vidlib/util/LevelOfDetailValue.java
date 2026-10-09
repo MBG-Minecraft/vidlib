@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.util;
 
+import dev.latvian.mods.replay.api.ReplayAPI;
 import net.minecraft.core.Position;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
@@ -71,10 +72,10 @@ public class LevelOfDetailValue {
 	}
 
 	public boolean isVisible(Position camera, double x, double y, double z) {
-		if (type == Type.NEVER) {
-			return false;
-		} else if (type == Type.ALWAYS) {
+		if (type == Type.ALWAYS || ReplayAPI.getActive().isInReplayOrExporting()) {
 			return true;
+		} else if (type == Type.NEVER) {
+			return false;
 		} else if (is2D) {
 			double dx = camera.x() - x;
 			double dz = camera.z() - z;

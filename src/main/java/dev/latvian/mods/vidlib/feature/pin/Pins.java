@@ -14,15 +14,13 @@ import dev.latvian.mods.vidlib.feature.gallery.GalleryImageImBuilder;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerBodies;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerHeads;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
+import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color3ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import imgui.type.ImFloat;
-import imgui.type.ImInt;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -30,6 +28,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.TriState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,9 +37,6 @@ import java.util.UUID;
 
 public interface Pins {
 	ImBoolean ENABLED = new ImBoolean(true);
-	ImFloat SIZE = new ImFloat(256F);
-	ImFloat OFFSET = new ImFloat(0F);
-	ImInt ALPHA = new ImInt(255);
 
 	Map<UUID, Pin> PINS = new Object2ObjectOpenHashMap<>();
 	Map<UUID, Vec3> LAST_KNOWN_POSITIONS = new Object2ObjectOpenHashMap<>();
@@ -53,12 +49,7 @@ public interface Pins {
 	List<Gallery<?>> PIN_GALLERIES = new ArrayList<>(List.of(GALLERY, PlayerBodies.GALLERY, PlayerHeads.GALLERY));
 	Lazy<GalleryImageImBuilder> IMAGE_IM_BUILDER = Lazy.of(() -> new GalleryImageImBuilder(PIN_GALLERIES));
 
-	MenuItem MENU_ITEM = MenuItem.menu(ImIcons.LOCATION, "Pins", (graphics, items) -> {
-		items.add(MenuItem.item(ImIcon.NONE, "Enabled", ENABLED));
-		items.add(MenuItem.sliderFloat("Size", SIZE::get, SIZE::set, 0F, 1024F));
-		items.add(MenuItem.sliderFloat("Offset", OFFSET::get, OFFSET::set, 0F, 1F));
-		items.add(MenuItem.sliderInt("Alpha", ALPHA::get, ALPHA::set, 1, 255));
-	});
+	MenuItem MENU_ITEM = MenuItem.item(ImIcons.LOCATION, "Pins", PinsPanel.INSTANCE);
 
 	static void draw(GuiGraphics graphics, DeltaTracker deltaTracker) {
 		if (!ENABLED.get() || PINS.isEmpty()) {
@@ -79,7 +70,6 @@ public interface Pins {
 		}
 
 		var delta = deltaTracker.getGameTimeDeltaPartialTick(false);
-		int pinSize = (int) (SIZE.get() * mc.getEffectScale());
 
 		var list = new ArrayList<ScreenPin>(PINS.size());
 
@@ -122,16 +112,18 @@ public interface Pins {
 			var wpos = projectedCoordinates.screen(screenPin.pos());
 
 			if (wpos != null) {
-				int pinAlpha = ALPHA.get() << 24;
+				var pin = screenPin.pin();
+				int pinAlpha = pin.alpha << 24;
+				int pinSize = (int) (pin.size * mc.getEffectScale());
 
 				graphics.pose().pushPose();
 				graphics.pose().translate(wpos.x(), wpos.y() - 2F, 0F);
-				graphics.pose().translate(-pinSize / 2F, -pinSize * (1F + OFFSET.get()), 0F);
+				graphics.pose().translate(-pinSize / 2F, -pinSize * (1F + pin.offset), 0F);
 				graphics.pose().scale(pinSize / 512F, pinSize / 512F, 1F);
 
-				var shape = screenPin.pin().shapeOverride == null ? screenPin.pin().shape : screenPin.pin().shapeOverride;
+				var shape = pin.shapeOverride == null ? pin.shape : pin.shapeOverride;
 				int size = shape.size;
-				int color = shape.transparentBackground ? screenPin.pin().color.argb() : (pinAlpha | screenPin.pin().color.rgb());
+				int color = shape.transparentBackground ? pin.color.argb() : (pinAlpha | pin.color.rgb());
 
 				screenPin.image().load(mc, true);
 
@@ -139,8 +131,8 @@ public interface Pins {
 					graphics.blit(VidLibRenderTypes.GUI, shape.maskTexture, shape.x, shape.y, 0F, 0F, size, size, size, size, color);
 				}
 
-				if (!screenPin.pin().background.isTransparent()) {
-					graphics.blit(VidLibRenderTypes.GUI, shape.maskTexture, shape.x, shape.y, 0F, 0F, size, size, size, size, screenPin.pin().background.withAlpha(screenPin.pin().background.alphaf() * (ALPHA.get() / 255F)).argb());
+				if (!pin.background.isTransparent()) {
+					graphics.blit(VidLibRenderTypes.GUI, shape.maskTexture, shape.x, shape.y, 0F, 0F, size, size, size, size, pin.background.withAlpha(pin.background.alphaf() * (pin.alpha / 255F)).argb());
 				}
 
 				graphics.blit(shape.maskedRenderType, screenPin.image().textureId(), shape.x, shape.y, 1F, 1F, size - 2, size - 2, size, size, pinAlpha | 0xFFFFFF);
@@ -154,25 +146,44 @@ public interface Pins {
 		}
 	}
 
-	static void imgui(ImGraphics graphics, Entity entity) {
-		var pin = PINS.get(entity.getUUID());
+	static void appearanceSliders(Pin pin) {
+		ImGuiUtils.FLOAT.set(pin.size);
 
-		if (ImGui.checkbox("Pin###pin-visible", pin != null && pin.enabled)) {
-			if (pin != null) {
-				pin.enabled = !pin.enabled;
-			}
+		if (ImGui.sliderFloat("Size###pin-size", ImGuiUtils.FLOAT.getData(), 0F, 1024F)) {
+			pin.size = ImGuiUtils.FLOAT.get();
 		}
 
-		ImGui.sameLine();
+		ImGuiUtils.FLOAT.set(pin.offset);
 
+		if (ImGui.sliderFloat("Offset###pin-offset", ImGuiUtils.FLOAT.getData(), 0F, 1F)) {
+			pin.offset = ImGuiUtils.FLOAT.get();
+		}
+
+		ImGuiUtils.INT.set(pin.alpha);
+
+		if (ImGui.sliderInt("Alpha###pin-alpha", ImGuiUtils.INT.getData(), 1, 255)) {
+			pin.alpha = ImGuiUtils.INT.get();
+		}
+	}
+
+	static void imgui(ImGraphics graphics, Entity entity) {
+		if (!ImGui.collapsingHeader("Pin")) {
+			return;
+		}
+
+		settings(graphics, entity.getUUID(), PINS.get(entity.getUUID()), entity);
+	}
+
+	static void settings(ImGraphics graphics, UUID uuid, Pin pin, @Nullable Entity entity) {
 		var imageImBuilder = IMAGE_IM_BUILDER.get();
-
+		imageImBuilder.contextId = uuid;
+		imageImBuilder.contextEntity = entity;
 		imageImBuilder.set(pin == null ? null : pin.getImage());
 
 		if (imageImBuilder.imguiKey(graphics, "", "pin-image").isFull()) {
 			if (pin == null) {
 				pin = new Pin();
-				PINS.put(entity.getUUID(), pin);
+				PINS.put(uuid, pin);
 			}
 
 			pin.setImage(imageImBuilder.isValid() ? imageImBuilder.build() : null);
@@ -184,88 +195,89 @@ public interface Pins {
 
 		imageImBuilder.set(null);
 
-		if (pin != null && pin.isSet()) {
-			ImGui.sameLine();
-
-			if (ImGui.checkbox("Always Loaded###pin-always-loaded", pin.alwaysLoaded)) {
-				pin.alwaysLoaded = !pin.alwaysLoaded;
-			}
-
-			ImGui.sameLine();
-
-			if (pin.shape.transparentBackground) {
-				Color4ImBuilder.UNIT.set(pin.color);
-
-				if (Color4ImBuilder.UNIT.imguiKey(graphics, "", "color").isAny()) {
-					pin.color = Color4ImBuilder.UNIT.build();
-				}
-			} else {
-				Color3ImBuilder.UNIT.set(pin.color);
-
-				if (Color3ImBuilder.UNIT.imguiKey(graphics, "", "color").isAny()) {
-					pin.color = Color3ImBuilder.UNIT.build();
-				}
-			}
-
-			ImGui.sameLine();
-
-			Color4ImBuilder.UNIT.set(pin.background);
-
-			if (Color4ImBuilder.UNIT.imguiKey(graphics, "", "background").isAny()) {
-				pin.background = Color4ImBuilder.UNIT.build();
-			}
-
-			ImGui.sameLine();
-
-			ImGui.pushID("###pin-shape-button");
-
-			if (graphics.imageButton(pin.shape.iconTexture, ImGui.getFrameHeight() - 4F, ImGui.getFrameHeight() - 4F, UV.FULL, 2, null)) {
-				// pin.shape = PinShape.VALUES[(pin.shape.ordinal() + 1) % PinShape.VALUES.length];
-				ImGui.openPopup("###pin-shape-popup");
-			}
-
-			if (ImGui.isItemHovered() && graphics.beginTooltip()) {
-				ImGui.text("Shape: " + pin.shape.displayName);
-				ImGui.image(graphics.mc.getTextureManager().getTexture(pin.shape.iconTexture).getTexture().vl$getHandle(), 64F, 64F);
-				graphics.endTooltip();
-			}
-
-			if (ImGui.beginPopup("###pin-shape-popup")) {
-				for (int i = 0; i < PinShape.VALUES.length; i++) {
-					if (i % 4 != 0) {
-						ImGui.sameLine();
-					}
-
-					var shape = PinShape.VALUES[i];
-
-					ImGui.pushID(i);
-
-					if (graphics.imageButton(shape.iconTexture, 40F, 40F, UV.FULL, 2, null)) {
-						pin.shape = shape;
-						ImGui.closeCurrentPopup();
-					}
-
-					if (ImGui.isItemHovered()) {
-						graphics.tooltip(shape.displayName);
-						pin.shapeOverride = shape;
-					}
-
-					ImGui.popID();
-				}
-
-				ImGui.endPopup();
-			} else {
-				pin.shapeOverride = null;
-			}
-
-			ImGui.popID();
+		if (pin == null || !pin.isSet()) {
+			return;
 		}
+
+		ImGui.sameLine();
+
+		if (pin.shape.transparentBackground) {
+			Color4ImBuilder.UNIT.set(pin.color);
+
+			if (Color4ImBuilder.UNIT.imguiKey(graphics, "", "color").isAny()) {
+				pin.color = Color4ImBuilder.UNIT.build();
+			}
+		} else {
+			Color3ImBuilder.UNIT.set(pin.color);
+
+			if (Color3ImBuilder.UNIT.imguiKey(graphics, "", "color").isAny()) {
+				pin.color = Color3ImBuilder.UNIT.build();
+			}
+		}
+
+		ImGui.sameLine();
+
+		Color4ImBuilder.UNIT.set(pin.background);
+
+		if (Color4ImBuilder.UNIT.imguiKey(graphics, "", "background").isAny()) {
+			pin.background = Color4ImBuilder.UNIT.build();
+		}
+
+		ImGui.sameLine();
+
+		ImGui.pushID("###pin-shape-button");
+
+		if (graphics.imageButton(pin.shape.iconTexture, ImGui.getFrameHeight() - 4F, ImGui.getFrameHeight() - 4F, UV.FULL, 2, null)) {
+			// pin.shape = PinShape.VALUES[(pin.shape.ordinal() + 1) % PinShape.VALUES.length];
+			ImGui.openPopup("###pin-shape-popup");
+		}
+
+		if (ImGui.isItemHovered() && graphics.beginTooltip()) {
+			ImGui.text("Shape: " + pin.shape.displayName);
+			ImGui.image(graphics.mc.getTextureManager().getTexture(pin.shape.iconTexture).getTexture().vl$getHandle(), 64F, 64F);
+			graphics.endTooltip();
+		}
+
+		if (ImGui.beginPopup("###pin-shape-popup")) {
+			for (int i = 0; i < PinShape.VALUES.length; i++) {
+				if (i % 4 != 0) {
+					ImGui.sameLine();
+				}
+
+				var shape = PinShape.VALUES[i];
+
+				ImGui.pushID(i);
+
+				if (graphics.imageButton(shape.iconTexture, 40F, 40F, UV.FULL, 2, null)) {
+					pin.shape = shape;
+					ImGui.closeCurrentPopup();
+				}
+
+				if (ImGui.isItemHovered()) {
+					graphics.tooltip(shape.displayName);
+					pin.shapeOverride = shape;
+				}
+
+				ImGui.popID();
+			}
+
+			ImGui.endPopup();
+		} else {
+			pin.shapeOverride = null;
+		}
+
+		if (ImGui.checkbox("Enabled###pin-visible", pin.enabled)) {
+			pin.enabled = !pin.enabled;
+		}
+
+		ImGui.sameLine();
+		if (ImGui.checkbox("Always Loaded###pin-always-loaded", pin.alwaysLoaded)) {
+			pin.alwaysLoaded = !pin.alwaysLoaded;
+		}
+
+		ImGui.popID();
+
+		appearanceSliders(pin);
 	}
 
-	static void fbVisualsMenu(ImGraphics graphics) {
-		ImGui.checkbox("Enabled###pins-enabled", ENABLED);
-		ImGui.sliderFloat("Size###pin-size", SIZE.getData(), 0F, 1024F);
-		ImGui.sliderFloat("Offset###pin-offset", OFFSET.getData(), 0F, 1F);
-		ImGui.sliderInt("Alpha###pin-alpha", ALPHA.getData(), 1, 255);
-	}
 }

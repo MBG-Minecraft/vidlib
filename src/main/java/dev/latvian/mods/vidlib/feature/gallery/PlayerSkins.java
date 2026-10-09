@@ -11,11 +11,14 @@ import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -110,7 +113,11 @@ public interface PlayerSkins {
 	}
 
 	static PlayerSkin getSkin(Minecraft mc, UUID uuid, boolean blocking) {
-		if (uuid.equals(PlayerProfile.STEVE.profile().getId())) {
+		var applied = getAppliedSkin(mc, uuid);
+
+		if (applied != null) {
+			return of(applied);
+		} else if (uuid.equals(PlayerProfile.STEVE.profile().getId())) {
 			return DEFAULT_WIDE_SKINS[0];
 		} else if (uuid.equals(PlayerProfile.ALEX.profile().getId())) {
 			return DEFAULT_SLIM_SKINS[1];
@@ -121,5 +128,29 @@ public interface PlayerSkins {
 			skin.load(mc, blocking);
 			return new PlayerSkin(skin.textureId(), null, null, null, modelType, true);
 		}
+	}
+
+	@Nullable
+	static SkinTexture getAppliedSkin(Minecraft mc, UUID uuid) {
+		var level = mc.level;
+
+		if (level != null) {
+			var player = level.getPlayerByUUID(uuid);
+
+			if (player instanceof AbstractClientPlayer clientPlayer) {
+				return ClientGameEngine.INSTANCE.overrideSkin(clientPlayer);
+			}
+		}
+
+		return null;
+	}
+
+	@Nullable
+	static PlayerSkin getLiveSkin(@Nullable Entity entity) {
+		if (entity instanceof AbstractClientPlayer player) {
+			return player.getSkin();
+		}
+
+		return null;
 	}
 }

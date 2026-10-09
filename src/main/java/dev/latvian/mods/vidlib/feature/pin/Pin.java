@@ -13,6 +13,9 @@ import java.util.Optional;
 public final class Pin {
 	public static final Color DEFAULT_COLOR = Color.of(0xFFFFFFFF);
 	public static final Color DEFAULT_BACKGROUND = Color.of(0x5A000000);
+	public static final float DEFAULT_SIZE = 256F;
+	public static final float DEFAULT_OFFSET = 0F;
+	public static final int DEFAULT_ALPHA = 255;
 
 	public static final MapCodec<Pin> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.BOOL.optionalFieldOf("enabled", true).forGetter(p -> p.enabled),
@@ -20,7 +23,10 @@ public final class Pin {
 		Color.CODEC.optionalFieldOf("color", DEFAULT_COLOR).forGetter(p -> p.color),
 		Color.CODEC.optionalFieldOf("background", DEFAULT_BACKGROUND).forGetter(p -> p.background),
 		PinShape.CODEC.optionalFieldOf("shape", PinShape.PIN).forGetter(p -> p.shape),
-		Codec.BOOL.optionalFieldOf("always_loaded", false).forGetter(p -> p.alwaysLoaded)
+		Codec.BOOL.optionalFieldOf("always_loaded", false).forGetter(p -> p.alwaysLoaded),
+		Codec.FLOAT.optionalFieldOf("size", DEFAULT_SIZE).forGetter(p -> p.size),
+		Codec.FLOAT.optionalFieldOf("offset", DEFAULT_OFFSET).forGetter(p -> p.offset),
+		Codec.INT.optionalFieldOf("alpha", DEFAULT_ALPHA).forGetter(p -> p.alpha)
 	).apply(instance, Pin::new));
 
 	public static final Codec<Pin> CODEC = MAP_CODEC.codec();
@@ -31,6 +37,9 @@ public final class Pin {
 	public Color background;
 	public PinShape shape;
 	public boolean alwaysLoaded;
+	public float size;
+	public float offset;
+	public int alpha;
 	public PinShape shapeOverride = null;
 
 	public Pin() {
@@ -40,6 +49,9 @@ public final class Pin {
 		this.background = DEFAULT_BACKGROUND;
 		this.shape = PinShape.PIN;
 		this.alwaysLoaded = false;
+		this.size = DEFAULT_SIZE;
+		this.offset = DEFAULT_OFFSET;
+		this.alpha = DEFAULT_ALPHA;
 	}
 
 	private Pin(
@@ -48,7 +60,10 @@ public final class Pin {
 		Color color,
 		Color background,
 		PinShape shape,
-		boolean alwaysLoaded
+		boolean alwaysLoaded,
+		float size,
+		float offset,
+		int alpha
 	) {
 		this.enabled = enabled;
 		this.icon = icon.orElse(null);
@@ -56,6 +71,9 @@ public final class Pin {
 		this.background = background;
 		this.shape = shape;
 		this.alwaysLoaded = alwaysLoaded;
+		this.size = size;
+		this.offset = offset;
+		this.alpha = alpha;
 	}
 
 	public boolean isSet() {

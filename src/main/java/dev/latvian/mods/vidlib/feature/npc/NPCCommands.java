@@ -56,6 +56,14 @@ public interface NPCCommands {
 		);
 
 		command.then(Commands.literal("replay")
+			.then(Commands.argument("recording", StringArgumentType.string())
+				.suggests(SUGGESTION_PROVIDER)
+				.executes(ctx -> {
+					var mc = Minecraft.getInstance();
+					mc.player.vl$sessionData().replayNPCRecording(mc, StringArgumentType.getString(ctx, "recording"));
+					return 1;
+				})
+			)
 			.executes(ctx -> {
 				var mc = Minecraft.getInstance();
 				mc.player.vl$sessionData().replayNPCRecording(mc);

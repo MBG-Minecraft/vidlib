@@ -3,20 +3,28 @@ package dev.latvian.mods.vidlib.feature.gallery;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
+import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import imgui.ImGui;
+import net.minecraft.Util;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.UUID;
 
 public class GalleryImageImBuilder implements ImBuilder<GalleryImage<?>> {
 	public final Collection<Gallery<?>> galleries;
 	public GalleryImage<?> selected;
 	public boolean fullUpdate = false;
+	@Nullable
+	public UUID contextId = null;
+	@Nullable
+	public Entity contextEntity = null;
 
 	public GalleryImageImBuilder(Collection<Gallery<?>> galleries) {
 		this.galleries = galleries;
@@ -69,6 +77,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage<?>> {
 
 			ImGui.pushID("###uploaders");
 			int uploaderIndex = 0;
+			boolean firstGallery = true;
 
 			for (var gallery : galleries) {
 				for (var uploader : gallery.uploaders) {
@@ -78,6 +87,71 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage<?>> {
 					uploader.render(Cast.to(gallery), this, graphics, clicked);
 					graphics.hoveredTooltip(uploader.getTooltip());
 					ImGui.popID();
+				}
+
+				if (firstGallery) {
+					firstGallery = false;
+
+					if (contextId != null && !contextId.equals(Util.NIL_UUID)) {
+						ImGui.sameLine();
+						ImGui.pushID("###pin-player");
+						boolean playerClicked = graphics.imageButton(PlayerHeads.getTexture(graphics.mc, contextId).getTexture(), 40F, 40F, UV.FULL, 2, ImColorVariant.BLUE);
+
+						if (playerClicked) {
+							var live = PlayerSkins.getLiveSkin(contextEntity);
+
+							if (live != null) {
+								// Render with the skin actually shown on the entity
+								PlayerHeads.refresh(graphics.mc, contextId, live);
+								PlayerBodies.refresh(graphics.mc, contextId, live);
+							} else {
+								// If the player has an applied skin override, drop stale cached renders
+								if (PlayerSkins.getAppliedSkin(graphics.mc, contextId) != null) {
+									PlayerHeads.GALLERY.images.remove(contextId);
+									PlayerBodies.GALLERY.images.remove(contextId);
+								}
+
+								PlayerHeads.get(graphics.mc, contextId);
+								PlayerBodies.get(graphics.mc, contextId);
+							}
+
+							ImGui.openPopup("###pin-player-images");
+						}
+
+						graphics.hoveredTooltip(() -> PlayerProfiles.getName(contextId) + "'s Images");
+
+						if (ImGui.beginPopup("###pin-player-images")) {
+							var head = PlayerHeads.get(graphics.mc, contextId);
+							var body = PlayerBodies.get(graphics.mc, contextId);
+
+							var options = new GalleryImage<?>[]{head, body};
+							var labels = new String[]{"Head", "Body"};
+
+							for (int i = 0; i < options.length; i++) {
+								if (i > 0) {
+									ImGui.sameLine();
+								}
+
+								ImGui.pushID(i);
+								var option = options[i];
+								var optionTex = option.load(graphics.mc, false);
+
+								if (graphics.imageButton(optionTex.getTexture(), 50F, 50F, UV.FULL, 2, null)) {
+									set(option);
+									update = ImUpdate.FULL;
+									close = true;
+									ImGui.closeCurrentPopup();
+								}
+
+								graphics.hoveredTooltip(labels[i] + ": " + option.displayName());
+								ImGui.popID();
+							}
+
+							ImGui.endPopup();
+						}
+
+						ImGui.popID();
+					}
 				}
 			}
 

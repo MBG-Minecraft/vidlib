@@ -469,14 +469,18 @@ public class LocalClientSessionData extends ClientSessionData {
 	}
 
 	public void replayNPCRecording(Minecraft mc) {
+		replayNPCRecording(mc, "latest");
+	}
+
+	public void replayNPCRecording(Minecraft mc, String name) {
 		var map = NPCRecording.getReplay(mc.level.registryAccess());
 
-		if (map.isEmpty()) {
+		if (!map.containsKey(name)) {
+			mc.tell(Component.literal("NPC recording '" + name + "' not found!"));
 			return;
 		}
 
-		var last = map.lastEntry();
-		mc.level.addParticle(new NPCParticleOptions(last.getKey(), false, 0, Optional.empty()), true, true, mc.player.getX(), mc.player.getY(), mc.player.getZ(), 0D, 0D, 0D);
+		mc.level.addParticle(new NPCParticleOptions(name, false, 0, Optional.empty()), true, true, mc.player.getX(), mc.player.getY(), mc.player.getZ(), 0D, 0D, 0D);
 	}
 
 	@Override

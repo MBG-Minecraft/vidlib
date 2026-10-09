@@ -30,11 +30,13 @@ public class NPCRecording {
 
 			if (Files.exists(rootPath)) {
 				try (var stream = Files.walk(rootPath)) {
+					Lazy<NPCRecording> latest = null;
+
 					for (var path : stream.filter(Files::isRegularFile).filter(path -> path.getFileName().toString().endsWith(".npcrec")).sorted().toList()) {
 						var fname = rootPath.relativize(path).toString();
 						var name = fname.substring(0, fname.length() - 7);
 
-						REPLAY.put(name, Lazy.of(() -> {
+						latest = Lazy.of(() -> {
 							try (var in = new BufferedInputStream(Files.newInputStream(path))) {
 								var buf = new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(in.readAllBytes()), registryAccess);
 								var recording = new NPCRecording(buf);
@@ -44,15 +46,17 @@ public class NPCRecording {
 								VidLib.LOGGER.error("Failed to load NPC recording '" + name + "'", ex);
 								return null;
 							}
-						}));
+						});
+
+						REPLAY.put(name, latest);
+					}
+
+					if (latest != null) {
+						REPLAY.put("latest", latest);
 					}
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
-			}
-
-			if (!REPLAY.isEmpty()) {
-				REPLAY.put("latest", REPLAY.lastEntry().getValue());
 			}
 		}
 

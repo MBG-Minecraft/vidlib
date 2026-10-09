@@ -29,6 +29,8 @@ import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.TriState;
 import org.jetbrains.annotations.Nullable;
@@ -104,12 +106,30 @@ public interface PlayerHeads {
 		return GALLERY.getRender(mc, uuid, PlayerProfiles::getName, PlayerHeads::render, ImagePreProcessor.NONE);
 	}
 
+	static GalleryImage<UUID> refresh(Minecraft mc, UUID uuid, PlayerSkin skin) {
+		var old = GALLERY.images.remove(uuid);
+
+		if (old != null && mc.getTextureManager().byPath.remove(old.textureId()) instanceof DynamicTexture tex) {
+			tex.close();
+		}
+
+		return GALLERY.getRender(mc, uuid, PlayerProfiles::getName, (m, u, n) -> render(m, u, n, skin), ImagePreProcessor.NONE);
+	}
+
 	private static NativeImage render(Minecraft mc, UUID uuid, String name) {
-		render(mc, RENDER_TYPE, uuid, 0.45F);
+		return render(mc, uuid, name, PlayerSkins.getSkin(mc, uuid, true));
+	}
+
+	private static NativeImage render(Minecraft mc, UUID uuid, String name, PlayerSkin skin) {
+		render(mc, RENDER_TYPE, skin, 0.45F);
 		return FramebufferUtils.capture(RENDER_TARGET.get());
 	}
 
 	static void render(Minecraft mc, TexturedRenderType type, UUID uuid, float zoom) {
+		render(mc, type, PlayerSkins.getSkin(mc, uuid, true), zoom);
+	}
+
+	static void render(Minecraft mc, TexturedRenderType type, PlayerSkin playerSkin, float zoom) {
 		var gpu = RenderSystem.getDevice();
 
 		var projectionMatrix = new Matrix4f(RenderSystem.getProjectionMatrix());
@@ -123,7 +143,6 @@ public interface PlayerHeads {
 		// modelViewStack.scale(1F, 1F, -1F);
 		Lighting.setupForEntityInInventory();
 
-		var playerSkin = PlayerSkins.getSkin(mc, uuid, true);
 		var buffers = mc.renderBuffers().bufferSource();
 		var playerRenderer = (PlayerRenderer) mc.getEntityRenderDispatcher().getSkinMap().get(playerSkin.model());
 		var playerRenderState = playerRenderer.createRenderState();

@@ -3,11 +3,19 @@ package dev.latvian.mods.vidlib.feature.imgui;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+
 public class Panel {
+	public static final Map<String, Panel> REGISTRY = new LinkedHashMap<>();
+
 	public final String id;
 	public String label;
 	public boolean canBeClosed;
 	public boolean ephemeral;
+	public boolean rememberOpen;
 	public MenuItem menuBar;
 	boolean isOpen;
 	private ImWindowType windowType;
@@ -18,10 +26,12 @@ public class Panel {
 		this.label = label;
 		this.canBeClosed = true;
 		this.ephemeral = false;
+		this.rememberOpen = false;
 		this.menuBar = null;
 		this.isOpen = false;
 		this.windowType = ImWindowType.FLOATING;
 		this.style = PanelStyle.NORMAL;
+		REGISTRY.put(id, this);
 	}
 
 	public String getId() {
@@ -30,6 +40,18 @@ public class Panel {
 
 	public String getLabel() {
 		return label;
+	}
+
+	public String windowName() {
+		return getLabel() + "###" + getId();
+	}
+
+	public Set<String> iniSectionNames() {
+		Set<String> names = new LinkedHashSet<>();
+		names.add("###" + getId());
+		names.add(getLabel() + "###" + getId());
+		names.add(getId());
+		return names;
 	}
 
 	public final void open() {
@@ -132,7 +154,7 @@ public class Panel {
 			ImGui.setNextWindowSizeConstraints(160F, 90F, Float.MAX_VALUE, Float.MAX_VALUE);
 		}
 
-		var title = getLabel() + "###" + getId();
+		var title = windowName();
 		ImGuiUtils.BOOLEAN.set(true);
 
 		boolean tabOpen = fullscreen && (canBeClosed ? ImGui.beginTabItem(title, ImGuiUtils.BOOLEAN, 0) : ImGui.beginTabItem(title, 0));
@@ -140,7 +162,7 @@ public class Panel {
 
 		boolean shouldClose = !ImGuiUtils.BOOLEAN.get();
 
-		if (!(this instanceof FullscreenPanel) && graphics.wasEscapePressed()) {
+		if (!(this instanceof FullscreenPanel) && graphics.wasEscapePressed() && !rememberOpen) {
 			shouldClose = true;
 		}
 
