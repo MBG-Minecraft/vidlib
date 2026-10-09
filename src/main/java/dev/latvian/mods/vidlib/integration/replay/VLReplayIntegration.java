@@ -19,6 +19,7 @@ import dev.latvian.mods.replay.api.event.ReplaySessionClosedEvent;
 import dev.latvian.mods.replay.api.event.ReplaySessionOpenedEvent;
 import dev.latvian.mods.replay.api.event.ReplayStyleEvent;
 import dev.latvian.mods.replay.api.event.ReplayVisualsMenuEvent;
+import dev.latvian.mods.replay.api.event.ReplayWindowsMenuBarEvent;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibClientEventHandler;
 import dev.latvian.mods.vidlib.feature.bloom.Bloom;
@@ -274,6 +275,11 @@ public class VLReplayIntegration {
 	public static void menuBar(ReplayMenuBarEvent event) {
 		BuiltInImGui.MAIN_MENU_BAR.buildMenuBar(event.getGraphics(), false);
 		ImGui.separator();
+	}
+
+	@SubscribeEvent
+	public static void windowsBar(ReplayWindowsMenuBarEvent event) {
+		event.getItems().add(Pins.MENU_ITEM.enabled(event.getGraphics().isAdmin));
 	}
 
 	@SubscribeEvent

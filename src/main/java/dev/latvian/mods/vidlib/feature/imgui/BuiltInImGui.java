@@ -106,11 +106,6 @@ public class BuiltInImGui {
 		list.add(MenuItem.item(ImIcons.CAMERA, "Cutscene Builder", CutsceneBuilderPanel.INSTANCE).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.PAW, "Entity Explorer", EntityExplorerPanel.INSTANCE).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.SEARCH, "Prop Explorer", PropExplorerPanel.INSTANCE).enabled(graphics.isAdmin));
-
-		if (graphics.isReplay) {
-			list.add(MenuItem.item(ImIcons.SEARCH, "Replay Prop Explorer", ReplayPropExplorerPanel.INSTANCE));
-		}
-
 		list.add(MenuItem.item(ImIcons.LAYERS, "Decals", DecalPanel.INSTANCE).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.BLUR, "Screen Effects", ScreenEffectPanel.INSTANCE).enabled(graphics.isAdmin));
 
