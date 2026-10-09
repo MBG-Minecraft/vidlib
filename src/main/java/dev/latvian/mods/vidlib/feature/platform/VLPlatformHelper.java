@@ -1,7 +1,9 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
 import com.google.gson.JsonObject;
+import dev.latvian.mods.klib.KLib;
 import dev.latvian.mods.klib.platform.PlatformType;
+import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
@@ -145,5 +147,9 @@ public class VLPlatformHelper {
 	}
 
 	public void displayProgressQueue(ProgressQueue queue) {
+	}
+
+	public String getVersionString() {
+		return "KLib:" + KLib.VERSION + "\nVidLib:" + VidLib.VERSION;
 	}
 }

@@ -15,18 +15,21 @@ public class ProgressQueue {
 	@ApiStatus.Internal
 	public static final LinkedList<ProgressQueue> ACTIVE = new LinkedList<>();
 
+	public static ProgressQueue createBlocking(String name) {
+		var queue = new ProgressQueue(name);
+		queue.bottomText = "Please keep the game open!";
+		queue.hideInGame = true;
+		return queue;
+	}
+
 	public static ProgressItem queueSingleItem(String title) {
 		var queue = new ProgressQueue(title);
-		var item = queue.addItem();
-		queue.display();
-		return item;
+		return queue.addItem();
 	}
 
 	public static ProgressItem queueSingleItem(String title, ProgressItemNameFunction name) {
 		var queue = new ProgressQueue(title);
-		var item = queue.addItem("", name);
-		queue.display();
-		return item;
+		return queue.addItem("", name);
 	}
 
 	public static ProgressItem queueError(String title, String error) {
@@ -37,6 +40,7 @@ public class ProgressQueue {
 		if (!error.isEmpty()) {
 			item.error(error);
 		}
+
 		queue.display();
 		return item;
 	}

@@ -17,7 +17,7 @@ public record HubUserCapabilities(
 	boolean autoUploadFiles,
 	boolean uploadUserFiles,
 	boolean requireLink,
-	boolean parallelUploads
+	int parallelUploads
 ) {
 	public static final long SINGLEPLAYER = 1L << 0L;
 	public static final long MULTIPLAYER = 1L << 1L;
@@ -45,7 +45,7 @@ public record HubUserCapabilities(
 		true,
 		false,
 		!DEFAULT_ENABLE_ADMIN_BUTTONS,
-		false
+		1
 	);
 
 	public static HubUserCapabilities get() {
@@ -67,7 +67,7 @@ public record HubUserCapabilities(
 			capabilities.is(AUTO_UPLOAD_FILES),
 			capabilities.is(UPLOAD_USER_FILES),
 			capabilities.is(REQUIRE_LINK),
-			capabilities.is(PARALLEL_UPLOADS)
+			capabilities.is(PARALLEL_UPLOADS) ? 5 : 1
 		);
 	}
 

@@ -8,25 +8,17 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.io.CompressionMethod;
-import dev.latvian.mods.klib.io.CountingOutputStream;
-import dev.latvian.mods.klib.io.checksum.Checksum;
-import dev.latvian.mods.klib.util.Async;
 import dev.latvian.mods.klib.util.Hex32;
 import dev.latvian.mods.klib.util.JsonUtils;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.klib.util.net.NetUtils;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
-import dev.mrbeastgaming.mods.hub.HubUserConfig;
+import dev.mrbeastgaming.mods.hub.HubConfig;
 import dev.mrbeastgaming.mods.hub.api.data.HubChecksumPath;
 import dev.mrbeastgaming.mods.hub.api.data.HubMinecraftProfile;
-import dev.mrbeastgaming.mods.hub.api.data.HubProjectFileLink;
-import dev.mrbeastgaming.mods.hub.api.data.ProjectUploadResponseItem;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubCommonGateway;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldsResponse;
-import dev.mrbeastgaming.mods.hub.file.UploadRequest;
-import dev.mrbeastgaming.mods.hub.file.UploadResponse;
 import net.minecraft.util.FastBufferedInputStream;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
@@ -42,8 +34,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
@@ -73,13 +63,13 @@ public interface HubAPI {
 	}
 
 	Lazy<ExecutorService> SEQUENTIAL_EXECUTOR = Lazy.of(() -> Executors.newSingleThreadExecutor(r -> {
-		var thread = new Thread(r, "Sequential-MBG-Hub-API-Thread-%08X".formatted(r.hashCode()));
+		var thread = new Thread(r, "MBG-Hub-API-Sequential-Thread-%08X".formatted(r.hashCode()));
 		thread.setDaemon(true);
 		return thread;
 	}));
 
 	Lazy<ExecutorService> WEBSOCKET_EXECUTOR = Lazy.of(() -> Executors.newSingleThreadExecutor(r -> {
-		var thread = new Thread(r, "Websocket-MBG-Hub-API-Thread-%08X".formatted(r.hashCode()));
+		var thread = new Thread(r, "MBG-Hub-API-Websocket-Thread-%08X".formatted(r.hashCode()));
 		thread.setDaemon(true);
 		return thread;
 	}));
@@ -91,10 +81,10 @@ public interface HubAPI {
 			return builder;
 		}
 
-		var userConfig = HubUserConfig.load();
+		var userToken = HubConfig.userToken;
 
-		if (!userConfig.token().isEmpty()) {
-			builder.header("Authorization", "Bearer " + userConfig.token());
+		if (!userToken.isEmpty()) {
+			builder.setHeader("Authorization", "Bearer " + userToken);
 		} else if (auth == Auth.REQUIRED) {
 			throw new NullPointerException("Hub Auth token not found");
 		}
@@ -130,95 +120,14 @@ public interface HubAPI {
 			return send(request("api/full-data", Auth.NOT_REQUIRED).build(), true).json(HubFullDataResponse.CODEC);
 		}
 
-		static CompletableFuture<UploadResponse> postUpload(UploadRequest request) {
-			return CompletableFuture.supplyAsync(() -> {
-				try {
-					var json = UploadRequest.CODEC.encodeStart(HubAPI.jsonOps(), request).getOrThrow();
-					return send(request("api/upload", Auth.EXCLUDED).POST(jsonBody(json)).build(), true).json(UploadResponse.CODEC);
-				} catch (Exception ex) {
-					VidLib.LOGGER.error("Failed to request file upload", ex);
-					return new UploadResponse(List.of(), 0L);
-				}
-			}, Async.EXECUTOR);
-		}
-
-		@Nullable
-		static CompletableFuture<Void> postFileStorage(String token, Path path, long offset, long limit, @Nullable ProgressItem progressItem, Executor executor) {
-			if (limit <= 0L) {
-				return null;
-			}
-
-			var compressedSize = new CountingOutputStream();
-
-			if (progressItem != null) {
-				progressItem.setInfoText("Compressing...");
-				progressItem.setSize(1L);
-				progressItem.addProgress(1L);
-			}
-
-			try (var out = CompressionMethod.ZSTD.out(compressedSize); var in = Files.newInputStream(path)) {
-				in.skipNBytes(offset);
-				in.transferTo(out);
+		static HubUploadResponse postUpload(HubUploadRequest request) {
+			try {
+				var json = HubUploadRequest.CODEC.encodeStart(HubAPI.jsonOps(), request).getOrThrow();
+				return send(request("api/upload", request.gatewayToken().isEmpty() ? Auth.REQUIRED : Auth.EXCLUDED).POST(jsonBody(json)).build(), true).json(HubUploadResponse.CODEC);
 			} catch (Exception ex) {
-				return null;
-			} finally {
-				if (progressItem != null) {
-					progressItem.setDone();
-				}
+				VidLib.LOGGER.error("Failed to request file upload", ex);
+				return new HubUploadResponse(List.of(), 0L);
 			}
-
-			if (compressedSize.getCount() > Math.min(limit, 104857600L)) {
-				return null;
-			}
-
-			return CompletableFuture.runAsync(() -> {
-				try {
-					byte[] compressed;
-
-					try (var in = Files.newInputStream(path)) {
-						in.skipNBytes(offset);
-						compressed = CompressionMethod.ZSTD.compress(in.readAllBytes());
-					} finally {
-						if (progressItem != null) {
-							progressItem.setDone();
-						}
-					}
-
-					var response = send(request("api/file-storage", Auth.EXCLUDED)
-						.header("X-MBG-Hub-File-Storage-Token", token)
-						.header("X-MBG-Hub-Compression-Method", CompressionMethod.ZSTD.name)
-						.header("X-MBG-Hub-Offset", Long.toUnsignedString(offset))
-						.header("X-Content-Length-Hint", Long.toUnsignedString(compressed.length))
-						.POST(HttpRequest.BodyPublishers.ofByteArray(compressed))
-						.build(), false
-					);
-
-					if (response.code / 100 != 2) {
-						throw new IOException("HTTP Error " + response.code + " uploading " + path);
-					}
-				} catch (Exception ex) {
-					throw new RuntimeException(ex);
-				}
-			}, executor);
-		}
-
-		static CompletableFuture<Integer> postFileStorageSweep(List<Checksum> files) {
-			return CompletableFuture.supplyAsync(() -> {
-				try {
-					var json = new JsonArray();
-
-					for (var file : files) {
-						json.add(file.toString());
-					}
-
-					return send(request("api/file-storage/sweep", files.isEmpty() ? Auth.REQUIRED : Auth.NOT_REQUIRED)
-						.POST(jsonBody(json))
-						.build(), true
-					).json().getAsJsonObject().get("removed").getAsInt();
-				} catch (Exception ignored) {
-					return 0;
-				}
-			}, Async.EXECUTOR);
 		}
 
 		static HttpRequest getCountries() {
@@ -228,7 +137,7 @@ public interface HubAPI {
 
 	interface UserAPI {
 		static HttpRequest postRequestToken(String token) {
-			return request("api/users/request-token", Auth.EXCLUDED).header("Authorization", "Bearer " + token).POST(HttpRequest.BodyPublishers.noBody()).build();
+			return request("api/users/request-token", Auth.EXCLUDED).setHeader("Authorization", "Bearer " + token).POST(HttpRequest.BodyPublishers.noBody()).build();
 		}
 	}
 
@@ -241,10 +150,6 @@ public interface HubAPI {
 			return send(request("api/projects/" + project + "/full-data", Auth.NOT_REQUIRED).build(), true).json(HubProjectFullDataResponse.CODEC);
 		}
 
-		static List<ProjectUploadResponseItem> postUpload(ProjectUploadRequest data) throws Exception {
-			return send(request("api/projects/upload", Auth.NOT_REQUIRED).POST(jsonBody(ProjectUploadRequest.CODEC, data)).build(), true).json(ProjectUploadResponse.CODEC).files();
-		}
-
 		static HubProjectReplaysResponse getReplays(Hex32 project) throws Exception {
 			return send(request("api/projects/" + project + "/replays", Auth.REQUIRED).GET().build(), true).json(HubProjectReplaysResponse.CODEC);
 		}
@@ -253,8 +158,8 @@ public interface HubAPI {
 			send(request("api/projects/log/" + projectToken, Auth.REQUIRED).POST(jsonBody(HubLogRequest.CODEC, request)).build(), false);
 		}
 
-		static void postLinkFiles(Hex32 project, List<HubProjectFileLink> files) throws Exception {
-			send(request("api/projects/" + project + "/link-files", Auth.NOT_REQUIRED).POST(jsonBody(HubProjectFileLink.LIST_CODEC, files)).build(), false);
+		static HubProjectFileLinkResponse postLinkFiles(Hex32 project, HubProjectFileLinkRequest request) throws Exception {
+			return send(request("api/projects/" + project + "/link-files", Auth.NOT_REQUIRED).POST(jsonBody(HubProjectFileLinkRequest.CODEC, request)).build(), true).json(HubProjectFileLinkResponse.CODEC);
 		}
 	}
 

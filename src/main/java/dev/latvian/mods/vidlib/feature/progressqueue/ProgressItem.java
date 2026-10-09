@@ -26,11 +26,12 @@ public final class ProgressItem implements IntConsumer, LongConsumer {
 		this.blocksExit = false;
 	}
 
-	public void setStarted() {
+	public void display() {
 		status.set(1);
+		queue.display();
 	}
 
-	public void setDone() {
+	public void remove() {
 		status.set(2);
 	}
 
@@ -38,12 +39,12 @@ public final class ProgressItem implements IntConsumer, LongConsumer {
 		return status.get() == 1;
 	}
 
-	public boolean isDone() {
-		return status.get() == 2;
+	public boolean isRemoved() {
+		return status.get() >= 2;
 	}
 
 	public boolean isBlockingExit() {
-		return blocksExit && !isDone();
+		return blocksExit && !isRemoved();
 	}
 
 	public void setSize(long size) {
@@ -68,11 +69,15 @@ public final class ProgressItem implements IntConsumer, LongConsumer {
 
 	public void error(ColoredText error) {
 		queue.error(error);
-		setDone();
+		remove();
 	}
 
 	public void error(String error) {
 		error(ColoredText.of(error));
+	}
+
+	public void error(Throwable error) {
+		error(error.toString());
 	}
 
 	public void warning(String error) {

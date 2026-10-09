@@ -15,18 +15,18 @@ public interface UniqueIdProvider {
 	interface OfData extends UniqueIdProvider {
 		record OfUUIDAndFileName(UUID id) implements OfData {
 			@Override
-			public boolean write(FileInfo fileInfo, UploadContext ctx, ByteOutput data) throws Exception {
+			public boolean write(FileInfo fileInfo, HubUploadContext ctx, ByteOutput data) throws Exception {
 				data.writeUUID(id);
 				data.writeUTF(fileInfo.name());
 				return true;
 			}
 		}
 
-		boolean write(FileInfo fileInfo, UploadContext ctx, ByteOutput data) throws Exception;
+		boolean write(FileInfo fileInfo, HubUploadContext ctx, ByteOutput data) throws Exception;
 
 		@Override
 		@Nullable
-		default Checksum getUniqueId(FileInfo fileInfo, UploadContext ctx) {
+		default Checksum getUniqueId(FileInfo fileInfo, HubUploadContext ctx) {
 			try {
 				var data = ByteOutput.ofByteBuilder(16);
 
@@ -52,5 +52,5 @@ public interface UniqueIdProvider {
 	}
 
 	@Nullable
-	Checksum getUniqueId(FileInfo fileInfo, UploadContext ctx) throws Exception;
+	Checksum getUniqueId(FileInfo fileInfo, HubUploadContext ctx) throws Exception;
 }

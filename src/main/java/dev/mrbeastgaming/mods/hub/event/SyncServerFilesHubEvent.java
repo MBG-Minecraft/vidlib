@@ -1,11 +1,17 @@
 package dev.mrbeastgaming.mods.hub.event;
 
 import dev.mrbeastgaming.mods.hub.file.HubFileUploads;
+import net.minecraft.server.MinecraftServer;
 
-import java.util.List;
+public class SyncServerFilesHubEvent extends SyncFilesHubEvent {
+	private final MinecraftServer server;
 
-public abstract class SyncServerFilesHubEvent extends SyncFilesHubEvent {
-	public SyncServerFilesHubEvent(List<HubFileUploads.Entry> entries) {
-		super(entries);
+	public SyncServerFilesHubEvent(HubFileUploads uploads, MinecraftServer server) {
+		super(uploads);
+		this.server = server;
+	}
+
+	public MinecraftServer getServer() {
+		return server;
 	}
 }

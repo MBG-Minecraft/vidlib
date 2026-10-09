@@ -8,15 +8,15 @@ import dev.latvian.mods.klib.io.checksum.NoChecksum;
 public record HubStoredFile(
 	Checksum checksum,
 	long size,
-	HubFileAttribute created,
-	HubFileAttribute modified
+	HubUserAction created,
+	HubUserAction modified
 ) {
-	public static final HubStoredFile UNKNOWN = new HubStoredFile(NoChecksum.INSTANCE, 0L, HubFileAttribute.DEFAULT, HubFileAttribute.DEFAULT);
+	public static final HubStoredFile UNKNOWN = new HubStoredFile(NoChecksum.INSTANCE, 0L, HubUserAction.UNKNOWN, HubUserAction.UNKNOWN);
 
 	public static final Codec<HubStoredFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Checksum.CODEC.optionalFieldOf("checksum", NoChecksum.INSTANCE).forGetter(HubStoredFile::checksum),
 		Codec.LONG.optionalFieldOf("size", 0L).forGetter(HubStoredFile::size),
-		HubFileAttribute.CODEC.optionalFieldOf("created", HubFileAttribute.DEFAULT).forGetter(HubStoredFile::created),
-		HubFileAttribute.CODEC.optionalFieldOf("modified", HubFileAttribute.DEFAULT).forGetter(HubStoredFile::modified)
+		HubUserAction.CODEC.optionalFieldOf("created", HubUserAction.UNKNOWN).forGetter(HubStoredFile::created),
+		HubUserAction.CODEC.optionalFieldOf("modified", HubUserAction.UNKNOWN).forGetter(HubStoredFile::modified)
 	).apply(instance, HubStoredFile::new));
 }

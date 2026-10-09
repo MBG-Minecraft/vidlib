@@ -86,7 +86,7 @@ public class BuiltInImGui {
 						LinkMinecraftScreen.handle(graphics.mc, true);
 					}
 				}
-			}).enabled(HubUserCapabilities.get().viewRemoteReplays()));
+			}));
 
 			if (PlatformHelper.CURRENT.isDevEnv()) {
 				list.add(MenuItem.item(ImIcons.PERSON, "Force Link Profile", g -> LinkHubUserScreen.open(g.mc)));

@@ -16,7 +16,7 @@ public record HubProjectUpload(
 	String path,
 	URI url,
 	HubFileType type,
-	HubFileAttribute added,
+	HubUserAction uploaded,
 	Optional<HubUser> assignedTo,
 	boolean manual
 ) implements HubDBObject {
@@ -28,7 +28,7 @@ public record HubProjectUpload(
 		Codec.STRING.optionalFieldOf("path", "").forGetter(HubProjectUpload::path),
 		HubAPI.URI_BASE_CODEC.fieldOf("url").forGetter(HubProjectUpload::url),
 		HubFileType.CODEC.optionalFieldOf("type", HubFileType.UNKNOWN).forGetter(HubProjectUpload::type),
-		HubFileAttribute.CODEC.optionalFieldOf("added", HubFileAttribute.DEFAULT).forGetter(HubProjectUpload::added),
+		HubUserAction.CODEC.optionalFieldOf("uploaded", HubUserAction.UNKNOWN).forGetter(HubProjectUpload::uploaded),
 		HubUser.CODEC.optionalFieldOf("assigned_to").forGetter(HubProjectUpload::assignedTo),
 		Codec.BOOL.optionalFieldOf("manual", false).forGetter(HubProjectUpload::manual)
 	).apply(instance, HubProjectUpload::new));

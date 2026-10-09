@@ -7,12 +7,12 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.misc.command.BackupCommand;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
-import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubServerSession;
-import dev.mrbeastgaming.mods.hub.api.data.HubChecksumPath;
+import dev.mrbeastgaming.mods.hub.api.data.HubGatewayInfo;
 import dev.mrbeastgaming.mods.hub.api.data.HubUsedPort;
-import dev.mrbeastgaming.mods.hub.file.HubUploadRequestFileWithPath;
+import dev.mrbeastgaming.mods.hub.file.HubUploadBuilder;
+import dev.mrbeastgaming.mods.hub.file.HubUploadResponseItem;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -20,7 +20,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
-import java.net.URI;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
@@ -43,12 +42,12 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 	}
 
 	@Nullable
-	public static HubServerGateway startGateway(MinecraftServer server, @Nullable URI uri, String token) {
+	public static HubServerGateway startGateway(MinecraftServer server, @Nullable HubGatewayInfo info) {
 		stopGateway();
 		var gateway = instance;
 
-		if (gateway == null && uri != null) {
-			gateway = new HubServerGateway(server, uri, token);
+		if (gateway == null && info != null) {
+			gateway = new HubServerGateway(server, info);
 			gateway.start();
 			instance = gateway;
 		}
@@ -139,16 +138,28 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 
 		for (var world : worlds) {
 			if (world.id().equals(data.worldId()) && world.path().equals(data.path())) {
+				var ctx = HubServerSession.CURRENT.uploadContext;
+				var progressItem = ctx == null ? null : ctx.createCheckItem(data.path());
+
+				if (progressItem != null) {
+					progressItem.display();
+				}
+
 				VidLib.LOGGER.warn(data.sendingTo().name() + " requested world " + data.path() + " upload");
 
-				BackupCommand.backup(server, world.directory(), Instant.now(), "hub-upload").thenAcceptAsync(path -> {
-					var progressItem = ProgressQueue.queueSingleItem("Uploading world...");
+				BackupCommand.backup(server, world.directory(), Instant.now(), "hub-upload").whenCompleteAsync((path, error) -> {
+					if (error != null) {
+						if (progressItem != null) {
+							progressItem.error(error);
+						}
+
+						return;
+					}
 
 					try {
 						VidLib.LOGGER.info("Uploading " + path + "...");
-						var files = HubUploadRequestFileWithPath.loadDirectory("", path, null);
-						event.gateway().upload(files, progressItem).join();
-						HubAPI.MinecraftAPI.postCompleteWorldRequest(data.token(), files.stream().map(f -> new HubChecksumPath(f.file().checksum(), f.file().id())).toList());
+						var files = HubServerSession.CURRENT.uploadBlocking("World Upload", uploads -> uploads.addDirectory(path, HubUploadBuilder::unlinked));
+						HubAPI.MinecraftAPI.postCompleteWorldRequest(data.token(), files.stream().map(HubUploadResponseItem::toChecksumPath).toList());
 						VidLib.LOGGER.info("Cleaning up...");
 					} catch (Exception ex) {
 						VidLib.LOGGER.error("Error uploading world " + path + " to Hub", ex);
@@ -159,7 +170,7 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 							VidLib.LOGGER.error("Error deleting temp world " + path, ex);
 						}
 
-						progressItem.setDone();
+						progressItem.remove();
 					}
 				}, Async.EXECUTOR);
 				return;
@@ -169,8 +180,8 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 
 	public final MinecraftServer server;
 
-	public HubServerGateway(MinecraftServer server, URI gatewayURI, String gatewayToken) {
-		super(server, gatewayURI, gatewayToken);
+	public HubServerGateway(MinecraftServer server, HubGatewayInfo info) {
+		super(server, info);
 		this.server = server;
 	}
 
@@ -201,6 +212,7 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 
 	public CompletableFuture<Void> updateInfoFuture() {
 		var list = new ArrayList<CompletableFuture<Void>>();
+		list.add(sendVersion());
 		list.add(sendName());
 		list.add(sendStatus());
 		list.add(sendSize());

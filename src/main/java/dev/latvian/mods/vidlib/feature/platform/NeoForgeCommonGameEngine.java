@@ -10,6 +10,8 @@ import dev.mrbeastgaming.mods.hub.api.data.HubUsedPort;
 import dev.mrbeastgaming.mods.hub.api.gateway.AvailableWorldsEvent;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldDirectory;
 import dev.mrbeastgaming.mods.hub.api.gateway.UsedPortsEvent;
+import dev.mrbeastgaming.mods.hub.event.SyncServerFilesHubEvent;
+import dev.mrbeastgaming.mods.hub.file.HubFileUploads;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
@@ -71,5 +73,11 @@ public class NeoForgeCommonGameEngine extends CommonGameEngine {
 
 	private void voiceChatIntegration(List<HubUsedPort> list) {
 		VoiceChatIntegration.addUsedPorts(list);
+	}
+
+	@Override
+	public void collectServerUploads(MinecraftServer server, HubFileUploads uploads) {
+		super.collectServerUploads(server, uploads);
+		NeoForge.EVENT_BUS.post(new SyncServerFilesHubEvent(uploads, server));
 	}
 }

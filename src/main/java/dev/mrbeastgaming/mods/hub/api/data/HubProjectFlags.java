@@ -9,7 +9,8 @@ public record HubProjectFlags(
 	boolean archived,
 	boolean shortForm,
 	boolean basePack,
-	boolean drive
+	boolean drive,
+	boolean deleted
 ) {
 	public static final HubProjectFlags NONE = new HubProjectFlags(Hex64.NONE);
 
@@ -18,6 +19,7 @@ public record HubProjectFlags(
 	public static final long SHORT_FORM = 1L << 9L;
 	public static final long BASE_PACK = 1L << 10L;
 	public static final long DRIVE = 1L << 11L;
+	public static final long DELETED = 1L << 13L;
 
 	public static final Codec<HubProjectFlags> CODEC = Hex64.LENIENT_CODEC.xmap(HubProjectFlags::new, HubProjectFlags::flags);
 
@@ -28,7 +30,8 @@ public record HubProjectFlags(
 			flags.is(ARCHIVED),
 			flags.is(SHORT_FORM),
 			flags.is(BASE_PACK),
-			flags.is(DRIVE)
+			flags.is(DRIVE),
+			flags.is(DELETED)
 		);
 	}
 }

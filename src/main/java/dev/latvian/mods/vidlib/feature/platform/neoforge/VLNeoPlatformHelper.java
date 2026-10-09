@@ -181,4 +181,10 @@ public class VLNeoPlatformHelper extends VLPlatformHelper {
 			ProgressQueue.ACTIVE.add(queue);
 		}
 	}
+
+	@Override
+	public String getVersionString() {
+		return super.getVersionString()
+			+ "\nNeoForge:" + FMLLoader.versionInfo().neoForgeVersion();
+	}
 }

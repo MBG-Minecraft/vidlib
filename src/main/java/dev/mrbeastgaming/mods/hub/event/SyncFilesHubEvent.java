@@ -1,27 +1,21 @@
 package dev.mrbeastgaming.mods.hub.event;
 
-import dev.latvian.mods.klib.io.FileInfo;
-import dev.mrbeastgaming.mods.hub.file.HubDirectoryUploadBuilder;
-import dev.mrbeastgaming.mods.hub.file.HubFileUploadBuilder;
+import dev.latvian.mods.klib.io.IOConsumer;
+import dev.latvian.mods.vidlib.VidLib;
 import dev.mrbeastgaming.mods.hub.file.HubFileUploads;
 
-import java.nio.file.Path;
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-
 public abstract class SyncFilesHubEvent extends HubEvent {
-	private final List<HubFileUploads.Entry> entries;
+	private final HubFileUploads uploads;
 
-	public SyncFilesHubEvent(List<HubFileUploads.Entry> entries) {
-		this.entries = entries;
+	public SyncFilesHubEvent(HubFileUploads uploads) {
+		this.uploads = uploads;
 	}
 
-	public void addDirectory(Path directory, Consumer<HubDirectoryUploadBuilder> upload) {
-		this.entries.addAll(HubFileUploads.prepareDirectory(directory, upload));
-	}
-
-	public void addFile(Path file, BiConsumer<FileInfo, HubFileUploadBuilder> upload) {
-		this.entries.addAll(HubFileUploads.prepareFile(file, upload));
+	public void add(IOConsumer<HubFileUploads> uploads) {
+		try {
+			uploads.accept(this.uploads);
+		} catch (Exception ex) {
+			VidLib.LOGGER.error("Failed to add upload files", ex);
+		}
 	}
 }
