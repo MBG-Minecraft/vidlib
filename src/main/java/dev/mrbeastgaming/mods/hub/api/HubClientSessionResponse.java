@@ -3,8 +3,6 @@ package dev.mrbeastgaming.mods.hub.api;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.KLibCodecs;
-import dev.latvian.mods.klib.io.checksum.Checksum;
-import dev.latvian.mods.klib.io.checksum.NoChecksum;
 import dev.mrbeastgaming.mods.hub.api.data.HubCountry;
 import dev.mrbeastgaming.mods.hub.api.data.HubGameServer;
 import dev.mrbeastgaming.mods.hub.api.data.HubGatewayInfo;

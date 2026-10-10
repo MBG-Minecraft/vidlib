@@ -29,7 +29,7 @@ public class FFMPEGProcess implements AutoCloseable {
 		var list = new ArrayList<String>();
 
 		try (var process = new FFMPEGProcess(command).waitFor();
-		     var reader = new BufferedReader(new InputStreamReader(process.inputStream))
+			 var reader = new BufferedReader(new InputStreamReader(process.inputStream))
 		) {
 			String line;
 
