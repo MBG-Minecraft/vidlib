@@ -46,7 +46,7 @@ public interface Pins {
 	@ClientAutoRegister
 	Gallery<UUID> GALLERY = Gallery.ofUUIDKey("pins", () -> VidLibPaths.USER.get().resolve("pin-gallery"), TriState.TRUE).addUploader(new GalleryFileUploader<>(PathIDGenerator.RANDOM_UUID, PRE_PROCESSOR));
 
-	List<Gallery<?>> PIN_GALLERIES = new ArrayList<>(List.of(GALLERY, PlayerBodies.GALLERY, PlayerHeads.GALLERY));
+	List<Gallery<?>> PIN_GALLERIES = new ArrayList<>(List.of(GALLERY, PlayerBodies.GALLERY, PlayerHeads.GALLERY, PlayerBodies.GALLERY_NO_LAYERS, PlayerHeads.GALLERY_NO_LAYERS));
 	Lazy<GalleryImageImBuilder> IMAGE_IM_BUILDER = Lazy.of(() -> new GalleryImageImBuilder(PIN_GALLERIES));
 
 	MenuItem MENU_ITEM = MenuItem.item(ImIcons.LOCATION, "Pins", PinsPanel.INSTANCE);

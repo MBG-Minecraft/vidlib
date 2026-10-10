@@ -42,6 +42,9 @@ import java.util.UUID;
 
 public interface PlayerHeads {
 	@ClientAutoRegister
+	Gallery<UUID> GALLERY_NO_LAYERS = Gallery.ofUUIDKey("player_heads_no_layers", () -> VidLibPaths.USER.get().resolve("player-heads-no-layers"), TriState.TRUE);
+
+	@ClientAutoRegister
 	Gallery<UUID> GALLERY = Gallery.ofUUIDKey("player_heads", () -> VidLibPaths.USER.get().resolve("player-heads"), TriState.TRUE).addUploader(new GalleryUploader<>() {
 		public static final GameProfileImBuilder UNIT = new GameProfileImBuilder();
 
@@ -103,33 +106,51 @@ public interface PlayerHeads {
 	);
 
 	static GalleryImage<UUID> get(Minecraft mc, UUID uuid) {
-		return GALLERY.getRender(mc, uuid, PlayerProfiles::getName, PlayerHeads::render, ImagePreProcessor.NONE);
+		return get(GALLERY, mc, uuid, true, null);
+	}
+
+	static GalleryImage<UUID> getNoLayers(Minecraft mc, UUID uuid) {
+		return get(GALLERY_NO_LAYERS, mc, uuid, false, null);
 	}
 
 	static GalleryImage<UUID> refresh(Minecraft mc, UUID uuid, PlayerSkin skin) {
-		var old = GALLERY.images.remove(uuid);
+		return get(GALLERY, mc, uuid, true, skin);
+	}
 
-		if (old != null && mc.getTextureManager().byPath.remove(old.textureId()) instanceof DynamicTexture tex) {
-			tex.close();
+	static GalleryImage<UUID> refreshNoLayers(Minecraft mc, UUID uuid, PlayerSkin skin) {
+		return get(GALLERY_NO_LAYERS, mc, uuid, false, skin);
+	}
+
+	private static GalleryImage<UUID> get(Gallery<UUID> gallery, Minecraft mc, UUID uuid, boolean layers, @Nullable PlayerSkin skinOrNull) {
+		if (skinOrNull != null) {
+			var old = gallery.images.remove(uuid);
+
+			if (old != null && mc.getTextureManager().byPath.remove(old.textureId()) instanceof DynamicTexture tex) {
+				tex.close();
+			}
 		}
 
-		return GALLERY.getRender(mc, uuid, PlayerProfiles::getName, (m, u, n) -> render(m, u, n, skin), ImagePreProcessor.NONE);
+		return gallery.getRender(mc, uuid, PlayerProfiles::getName, (m, u, n) -> render(m, u, n, layers, skinOrNull != null ? skinOrNull : PlayerSkins.getSkin(m, u, true)), ImagePreProcessor.NONE);
 	}
 
-	private static NativeImage render(Minecraft mc, UUID uuid, String name) {
-		return render(mc, uuid, name, PlayerSkins.getSkin(mc, uuid, true));
-	}
-
-	private static NativeImage render(Minecraft mc, UUID uuid, String name, PlayerSkin skin) {
-		render(mc, RENDER_TYPE, skin, 0.45F);
+	private static NativeImage render(Minecraft mc, UUID uuid, String name, boolean layers, PlayerSkin skin) {
+		render(mc, RENDER_TYPE, skin, 0.45F, layers);
 		return FramebufferUtils.capture(RENDER_TARGET.get());
 	}
 
 	static void render(Minecraft mc, TexturedRenderType type, UUID uuid, float zoom) {
-		render(mc, type, PlayerSkins.getSkin(mc, uuid, true), zoom);
+		render(mc, type, uuid, zoom, true);
+	}
+
+	static void render(Minecraft mc, TexturedRenderType type, UUID uuid, float zoom, boolean layers) {
+		render(mc, type, PlayerSkins.getSkin(mc, uuid, true), zoom, layers);
 	}
 
 	static void render(Minecraft mc, TexturedRenderType type, PlayerSkin playerSkin, float zoom) {
+		render(mc, type, playerSkin, zoom, true);
+	}
+
+	static void render(Minecraft mc, TexturedRenderType type, PlayerSkin playerSkin, float zoom, boolean layers) {
 		var gpu = RenderSystem.getDevice();
 
 		var projectionMatrix = new Matrix4f(RenderSystem.getProjectionMatrix());
@@ -155,11 +176,11 @@ public interface PlayerHeads {
 		var buffer = buffers.getBuffer(renderType);
 		var model = playerRenderer.getModel();
 
-		playerRenderState.showHat = true;
+		playerRenderState.showHat = layers;
 		model.setupAnim(playerRenderState);
 		model.setAllVisible(false);
 		model.head.visible = true;
-		model.hat.visible = true;
+		model.hat.visible = layers;
 
 		var ms = new PoseStack();
 		ms.scale(-1F, 1F, -1F);

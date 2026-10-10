@@ -104,15 +104,21 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage<?>> {
 								// Render with the skin actually shown on the entity
 								PlayerHeads.refresh(graphics.mc, contextId, live);
 								PlayerBodies.refresh(graphics.mc, contextId, live);
+								PlayerHeads.refreshNoLayers(graphics.mc, contextId, live);
+								PlayerBodies.refreshNoLayers(graphics.mc, contextId, live);
 							} else {
 								// If the player has an applied skin override, drop stale cached renders
 								if (PlayerSkins.getAppliedSkin(graphics.mc, contextId) != null) {
 									PlayerHeads.GALLERY.images.remove(contextId);
 									PlayerBodies.GALLERY.images.remove(contextId);
+									PlayerHeads.GALLERY_NO_LAYERS.images.remove(contextId);
+									PlayerBodies.GALLERY_NO_LAYERS.images.remove(contextId);
 								}
 
 								PlayerHeads.get(graphics.mc, contextId);
 								PlayerBodies.get(graphics.mc, contextId);
+								PlayerHeads.getNoLayers(graphics.mc, contextId);
+								PlayerBodies.getNoLayers(graphics.mc, contextId);
 							}
 
 							ImGui.openPopup("###pin-player-images");
@@ -123,9 +129,11 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage<?>> {
 						if (ImGui.beginPopup("###pin-player-images")) {
 							var head = PlayerHeads.get(graphics.mc, contextId);
 							var body = PlayerBodies.get(graphics.mc, contextId);
+							var headNoLayers = PlayerHeads.getNoLayers(graphics.mc, contextId);
+							var bodyNoLayers = PlayerBodies.getNoLayers(graphics.mc, contextId);
 
-							var options = new GalleryImage<?>[]{head, body};
-							var labels = new String[]{"Head", "Body"};
+							var options = new GalleryImage<?>[]{head, body, headNoLayers, bodyNoLayers};
+							var labels = new String[]{"Head", "Body", "Head (No Layers)", "Body (No Layers)"};
 
 							for (int i = 0; i < options.length; i++) {
 								if (i > 0) {
