@@ -114,6 +114,10 @@ public class WindowMixin implements VLWindow {
 
 	@Override
 	public void vl$setViewportArea(double xOffset, double yOffset, double xScale, double yScale) {
+		if (xScale <= 0D || yScale <= 0D) {
+			return;
+		}
+
 		vl$xOffset = xOffset;
 		vl$yOffset = yOffset;
 		vl$xScale = xScale;

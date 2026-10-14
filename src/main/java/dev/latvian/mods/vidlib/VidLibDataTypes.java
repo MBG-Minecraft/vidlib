@@ -4,7 +4,6 @@ import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.entity.PlayerInput;
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.feature.block.BlockStatePalette;
 import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
@@ -107,7 +106,6 @@ public interface VidLibDataTypes {
 		DataType.register(ID.vidlib("kvector"), KVector.DATA_TYPE);
 		DataType.register(ID.vidlib("stage"), Stage.DATA_TYPE);
 		DataType.register(ID.vidlib("name_draw_type"), NameDrawType.DATA_TYPE);
-		DataType.register(ID.vidlib("block_state_palette"), BlockStatePalette.DATA_TYPE);
 		DataType.register(ID.vidlib("entity_snapshot"), EntitySnapshot.DATA_TYPE);
 		DataType.register(ID.vidlib("entity_snapshot_list"), EntitySnapshot.LIST_DATA_TYPE);
 		DataType.register(ID.vidlib("waypoint"), Waypoint.DATA_TYPE);

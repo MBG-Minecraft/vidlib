@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.imgui;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
 import dev.latvian.mods.klib.CommonPaths;
+import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibClientEventHandler;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.font.TTFFile;
@@ -232,17 +233,21 @@ public class ImGuiHooks {
 		var prevWidth = window.getWidth();
 		var prevHeight = window.getHeight();
 
-		window.vl$setViewportArea(
-			(centralNodePos.x - windowPos.x) / windowSize.x,
-			(centralNodePos.y - windowPos.y) / windowSize.y,
-			centralNodeSize.x / windowSize.x,
-			(centralNodeSize.y - h) / windowSize.y
-		);
+		if (windowSize.x > 0F && windowSize.y > 0F) {
+			window.vl$setViewportArea(
+				(centralNodePos.x - windowPos.x) / windowSize.x,
+				(centralNodePos.y - windowPos.y) / windowSize.y,
+				centralNodeSize.x / windowSize.x,
+				(centralNodeSize.y - h) / windowSize.y
+			);
 
-		// window.vl$setViewportArea(0D, 0D, 1D, 1D);
-
-		if (window.getWidth() != 0 && window.getHeight() != 0 && (window.getWidth() != prevWidth || window.getHeight() != prevHeight)) {
-			mc.resizeDisplay();
+			if (ready && window.getWidth() > 0 && window.getHeight() > 0 && (window.getWidth() != prevWidth || window.getHeight() != prevHeight)) {
+				try {
+					mc.resizeDisplay();
+				} catch (Exception ex) {
+					VidLib.LOGGER.error("Error resizing display", ex);
+				}
+			}
 		}
 
 		old.pop();
